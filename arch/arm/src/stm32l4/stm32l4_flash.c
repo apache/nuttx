@@ -176,7 +176,20 @@ static inline void flash_erase(size_t page)
   finfo("erase page %u\n", page);
 
   modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_PAGE_ERASE);
-  modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PNB_MASK, FLASH_CR_PNB(page));
+  modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PNB_MASK, FLASH_CR_PNB(page & 0xFF));
+
+#if defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6) || \
+    defined(CONFIG_STM32L4_STM32L4XR)
+  if (page <= 0xFF)
+    {
+      modifyreg32(STM32L4_FLASH_CR, FLASH_CR_BKER, 0);
+    }
+  else
+    {
+      modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_BKER);
+    }
+#endif
+
   modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_START);
 
   while (getreg32(STM32L4_FLASH_SR) & FLASH_SR_BSY)
