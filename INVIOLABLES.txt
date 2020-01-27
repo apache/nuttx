@@ -39,7 +39,7 @@ Strict POSIX compliance
 Modular Architecture
 --------------------
 
-  o The internal modular architecture of the OS must maintained.
+  o The internal modular architecture of the OS must be maintained.
   o This means formalizing and documenting all internal interfaces (in the
     porting guide), minimal use of global variables at the interface, and
     only well defined functional interfaces.
