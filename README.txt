@@ -964,7 +964,7 @@ Make Sure that You are on the Right Platform
 
   For a Linux host or for a Windows/Cygwin host:
 
-    tools/configure.sh -h board:configuration
+    tools/configure.sh -c board:configuration
 
   Other options are available from the help option built into the
   script.  You can see all options with:
