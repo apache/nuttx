@@ -13,7 +13,7 @@ more like on multi-threaded program that all runs in kernel-mode.
 
 But if the CONFIG_BUILD_PROTECTED option is selected, NuttX will be built
 into distinct user-mode and kernel-mode sections.  In that case, most of the
-code in the nuttx/ directory will run in kernel-mode with with exceptions
+code in the nuttx/ directory will run in kernel-mode with exceptions
 of (1) the user-mode "proxies" found in syscall/proxies, and (2) the
 standard C library functions found in this directory.  In this build model,
 it is critical to separate the user-mode OS interfaces in this way.

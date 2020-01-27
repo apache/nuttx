@@ -177,7 +177,7 @@ static void rwb_wrtimeout(FAR void *arg)
 
   finfo("Timeout!\n");
 
-  /* If a timeout elapses with with write buffer activity, this watchdog
+  /* If a timeout elapses with write buffer activity, this watchdog
    * handler function will be evoked on the thread of execution of the
    * worker thread.
    */
