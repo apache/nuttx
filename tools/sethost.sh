@@ -244,9 +244,9 @@ echo "  Refreshing..."
 cd $nuttx || { echo "ERROR: failed to cd to $nuttx"; exit 1; }
 make clean_context 1>/dev/null 2>&1
 if [ "X${debug}" = "Xy" ]; then
-  make olddefconfig V=1
+  make olddefconfig V=1 || { echo "ERROR: failed to refresh"; exit 1; }
 else
-  make olddefconfig 1>/dev/null 2>&1
+  make olddefconfig 1>/dev/null || { echo "ERROR: failed to refresh"; exit 1; }
 fi
 
 # Move config file to correct location and restore any previous .config
