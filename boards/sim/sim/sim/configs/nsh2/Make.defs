@@ -108,9 +108,7 @@ CCLINKFLAGS		= $(ARCHSCRIPT)	# Link flags used with $(CC)
 LDFLAGS			= $(ARCHSCRIPT)	# For backward compatibility, same as CCLINKFLAGS
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDLINKFLAGS		+= -g
   CCLINKFLAGS		+= -g
-  LDFLAGS			+= -g
 endif
 
 ifeq ($(CONFIG_SIM_M32),y)

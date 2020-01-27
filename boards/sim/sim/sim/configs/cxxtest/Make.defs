@@ -116,9 +116,7 @@ EXTRA_LIBPATHS = -L "${shell dirname "$(LIBSUPXX)"}"
 EXTRA_LIBS = -lsupc++
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDLINKFLAGS += -g
   CCLINKFLAGS += -g
-  LDFLAGS += -g
 endif
 
 ifeq ($(CONFIG_SIM_M32),y)
