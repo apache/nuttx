@@ -2147,7 +2147,7 @@ Configuration Sub-directories
      +CONFIG_EXAMPLES_NXLINES_BPP=1
      +CONFIG_EXAMPLES_NXLINES_EXTERNINIT=y
 
-     There are some issues with with the presentation... some tuning of the
+     There are some issues with the presentation... some tuning of the
      configuration could fix that.  Lower resolution displays are also more
      subject to the "fat, flat line bug" that I need to fix someday.  See
      http://www.nuttx.org/doku.php?id=wiki:graphics:nxgraphics for a description

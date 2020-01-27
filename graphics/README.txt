@@ -138,7 +138,7 @@ CONFIG_NX_XYINPUT
 CONFIG_NX_KBD
   Build in support of keypad/keyboard input.
 CONFIG_NXTK_BORDERWIDTH
-  Specifies with with of the border (in pixels) used with framed windows.
+  Specifies the width of the border (in pixels) used with framed windows.
   The default is 4.
 CONFIG_NXTK_BORDERCOLOR1, CONFIG_NXTK_BORDERCOLOR2, CONFIG_NXTK_BORDERCOLOR3
   Specify the colors of the border used with framed windows.

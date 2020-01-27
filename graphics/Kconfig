@@ -299,7 +299,7 @@ config NXTK_BORDERWIDTH
 	int "Border Width"
 	default 4
 	---help---
-		Specifies with with of the border (in pixels) used with framed windows.
+		Specifies the width of the border (in pixels) used with framed windows.
 		The default is 4.
 
 config NXTK_DEFAULT_BORDERCOLORS
