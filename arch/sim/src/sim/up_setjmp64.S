@@ -81,7 +81,11 @@
 //# define SYMBOL(s) _##s
 # define SYMBOL(s) s
 #else
+#ifdef __ELF__
 # define SYMBOL(s) s
+#else
+# define SYMBOL(s) _##s
+#endif
 #endif
 
 /**************************************************************************
