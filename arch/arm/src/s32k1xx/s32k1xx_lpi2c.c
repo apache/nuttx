@@ -893,7 +893,7 @@ static void s32k1xx_lpi2c_tracedump(FAR struct s32k1xx_lpi2c_priv_s *priv)
 }
 #endif /* CONFIG_I2C_TRACE */
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_lpi2c_pckfreq
  *
  * Description:
@@ -905,7 +905,7 @@ static void s32k1xx_lpi2c_tracedump(FAR struct s32k1xx_lpi2c_priv_s *priv)
  * Returned Value:
  *   The frequency of the LPI2C functional input frequency (or zero on a failure)
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint32_t s32k1xx_lpi2c_pckfreq(uintptr_t base)
 {

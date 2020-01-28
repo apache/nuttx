@@ -73,8 +73,8 @@
  * Public Data
  ****************************************************************************/
 
-/* Each S32K1XX board must provide the following initialized structure.  This is
- * needed to establish the initial peripheral clocking.
+/* Each S32K1XX board must provide the following initialized structure.
+ * This is needed to establish the initial peripheral clocking.
  */
 
 const struct peripheral_clock_config_s g_peripheral_clockconfig0[] =

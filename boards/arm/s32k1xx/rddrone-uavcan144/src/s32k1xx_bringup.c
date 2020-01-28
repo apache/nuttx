@@ -120,27 +120,27 @@ int s32k1xx_bringup(void)
 #endif
 
 #if defined(CONFIG_S32K1XX_LPI2C0)
-  s32k1xx_pinconfig(GPIO_HIGHDRIVE | GPIO_OUTPUT_ONE  | PIN_PORTA | PIN10); // Set A71CH IF0 HIGH
-  s32k1xx_pinconfig(GPIO_HIGHDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTA | PIN7);  // Set A71CH IF1 LOW
-  
-  #if defined(CONFIG_I2C_DRIVER)
-    FAR struct i2c_master_s *i2c;
-    i2c = s32k1xx_i2cbus_initialize(0);
+  s32k1xx_pinconfig(GPIO_HIGHDRIVE | GPIO_OUTPUT_ONE  | PIN_PORTA | PIN10); /* Set A71CH IF0 HIGH */
+  s32k1xx_pinconfig(GPIO_HIGHDRIVE | GPIO_OUTPUT_ZERO | PIN_PORTA | PIN7);  /* Set A71CH IF1 LOW  */
 
-    if (i2c == NULL)
-      {
-        serr("ERROR: Failed to get I2C%d interface\n", bus);
-      }
-    else
-      {
-        ret = i2c_register(i2c, 0);
-        if (ret < 0)
-          {
-            serr("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
-            s32k1xx_i2cbus_uninitialize(i2c);
-          }
-      }
-  #endif
+#if defined(CONFIG_I2C_DRIVER)
+  FAR struct i2c_master_s *i2c;
+  i2c = s32k1xx_i2cbus_initialize(0);
+
+  if (i2c == NULL)
+    {
+      serr("ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, 0);
+      if (ret < 0)
+        {
+          serr("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          s32k1xx_i2cbus_uninitialize(i2c);
+        }
+    }
+#endif
 #endif
 
   return ret;

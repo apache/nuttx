@@ -546,13 +546,13 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
   buf = (uint8_t *)s32k1xx_swap32((uint32_t)priv->dev.d_buf);
   if (priv->rxdesc[priv->rxtail].data == buf)
     {
-       struct enet_desc_s *rxdesc = &priv->rxdesc[priv->rxtail];
+      struct enet_desc_s *rxdesc = &priv->rxdesc[priv->rxtail];
 
-       /* Data was written into the RX buffer, so swap the TX and RX buffers */
+      /* Data was written into the RX buffer, so swap the TX and RX buffers */
 
-       DEBUGASSERT((rxdesc->status1 & RXDESC_E) == 0);
-       rxdesc->data = txdesc->data;
-       txdesc->data = buf;
+      DEBUGASSERT((rxdesc->status1 & RXDESC_E) == 0);
+      rxdesc->data = txdesc->data;
+      txdesc->data = buf;
     }
   else
     {
@@ -656,7 +656,7 @@ static int s32k1xx_txpoll(struct net_driver_s *dev)
             {
               return -EBUSY;
             }
-       }
+        }
     }
 
   /* If zero is returned, the polling will continue until all connections have
@@ -693,7 +693,7 @@ static inline void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv)
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the packet tap */
 
-   pkt_input(&priv->dev);
+  pkt_input(&priv->dev);
 #endif
 
 #ifdef CONFIG_NET_IPv4
@@ -1564,6 +1564,7 @@ static int s32k1xx_txavail(struct net_driver_s *dev)
 
   return OK;
 }
+
 /****************************************************************************
  * Function: s32k1xx_calcethcrc
  *
@@ -1611,7 +1612,7 @@ static uint32_t s32k1xx_calcethcrc(const uint8_t *data, size_t length)
     }
 
   return crc;
- }
+}
 #endif
 
 /****************************************************************************
@@ -2158,15 +2159,15 @@ static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv, bool renogphy)
 
 #elif defined (CONFIG_ETH0_PHY_LAN8720)
 
-        /* Make sure that PHY comes up in correct mode when it's reset */
+      /* Make sure that PHY comes up in correct mode when it's reset */
 
-        s32k1xx_writemii(priv, phyaddr, MII_LAN8720_MODES,
-               MII_LAN8720_MODES_RESV | MII_LAN8720_MODES_ALL |
-               MII_LAN8720_MODES_PHYAD(BOARD_PHY_ADDR));
+      s32k1xx_writemii(priv, phyaddr, MII_LAN8720_MODES,
+             MII_LAN8720_MODES_RESV | MII_LAN8720_MODES_ALL |
+             MII_LAN8720_MODES_PHYAD(BOARD_PHY_ADDR));
 
-        /* ...and reset PHY */
+      /* ...and reset PHY */
 
-        s32k1xx_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
+      s32k1xx_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
 #endif
 
       /* Start auto negotiation */
@@ -2240,17 +2241,17 @@ static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv, bool renogphy)
     {
       if (renogphy == false)
         {
-           /* Give things one more chance with renegociation turned on */
+          /* Give things one more chance with renegociation turned on */
 
           return s32k1xx_initphy(priv, true);
         }
       else
         {
-           /* That didn't end well, just give up */
+          /* That didn't end well, just give up */
 
-           nerr("ERROR: Failed to read %s BOARD_PHY_STATUS[%02x]: %d\n",
-                BOARD_PHY_NAME, BOARD_PHY_STATUS, ret);
-           return ret;
+          nerr("ERROR: Failed to read %s BOARD_PHY_STATUS[%02x]: %d\n",
+               BOARD_PHY_NAME, BOARD_PHY_STATUS, ret);
+          return ret;
         }
     }
 
@@ -2580,7 +2581,6 @@ int s32k1xx_netinitialize(int intf)
       return -EAGAIN;
     }
 
-
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct s32k1xx_driver_s));
@@ -2611,7 +2611,7 @@ int s32k1xx_netinitialize(int intf)
   /* hardcoded offset: todo: need proper header file */
 
   uidl   = getreg32(S32K1XX_SIM_BASE + 0x60);
-  uidml  = getreg32(S32K1XX_SIM_BASE + 0x5C);
+  uidml  = getreg32(S32K1XX_SIM_BASE + 0x5c);
   mac    = priv->dev.d_mac.ether.ether_addr_octet;
 
   uidml |= 0x00000200;

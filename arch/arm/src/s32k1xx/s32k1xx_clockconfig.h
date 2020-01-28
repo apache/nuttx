@@ -479,7 +479,7 @@ extern "C"
  *   Zero (OK) is returned a success;  A negated errno value is returned on
  *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int s32k1xx_clockconfig(FAR const struct clock_configuration_s *clkcfg);
 
@@ -496,7 +496,7 @@ int s32k1xx_clockconfig(FAR const struct clock_configuration_s *clkcfg);
  *   The current value of the CORE clock frequency.  Zero is returned on any
  *   failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint32_t s32k1xx_get_coreclk(void);
 
@@ -511,10 +511,10 @@ uint32_t s32k1xx_get_coreclk(void);
  *   type - Identifies the system clock of interest
  *
  * Returned Values:
- *   The current value of the system clock frequency.  Zero is returned on any
- *   failure.
+ *   The current value of the system clock frequency.  Zero is returned on
+ *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint32_t s32k1xx_get_sysclk(enum scg_system_clock_type_e type);
 

@@ -223,8 +223,9 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* The kinetis_driver_s encapsulates all state information for a single hardware
- * interface
+
+/* The kinetis_driver_s encapsulates all state information for a single
+ * hardware interface.
  */
 
 struct kinetis_driver_s
@@ -664,7 +665,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
           ipv4_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, the field d_len will set to a value > 0.
            */
 
           if (priv->dev.d_len > 0)
@@ -702,7 +703,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
           ipv6_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, the field d_len will set to a value > 0.
            */
 
           if (priv->dev.d_len > 0)
@@ -736,7 +737,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
           arp_arpin(&priv->dev);
 
           /* If the above function invocation resulted in data that should
-           * be sent out on the network, the field  d_len will set to a
+           * be sent out on the network, the field d_len will set to a
            * value > 0.
            */
 
@@ -1343,8 +1344,8 @@ static void kinetis_txavail_work(FAR void *arg)
 
       if (!kinetis_txringfull(priv))
         {
-          /* No, there is space for another transfer.  Poll the network for new
-           * XMIT data.
+          /* No, there is space for another transfer.  Poll the network for
+           * new XMIT data.
            */
 
           devif_poll(&priv->dev, kinetis_txpoll);
@@ -1497,7 +1498,8 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret = kinetis_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
+          ret = kinetis_readmii(priv, req->phy_id, req->reg_num,
+                                &req->val_out);
         }
         break;
 
@@ -1505,7 +1507,8 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret = kinetis_writemii(priv, req->phy_id, req->reg_num, req->val_in);
+          ret = kinetis_writemii(priv, req->phy_id, req->reg_num,
+                                 req->val_in);
         }
         break;
 #endif /* ifdef CONFIG_NETDEV_PHY_IOCTL */

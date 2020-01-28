@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -53,6 +54,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* This file holds the static, device-independ portion of the generica SPI-
  * bit-bang driver.  The full driver consists of 5 files:
  *
@@ -79,7 +81,6 @@
  *    See include/nuttx/spi/spi_bitband.c for more detailed usage
  *    information.
  */
-
 
 /****************************************************************************
  * Private Function Prototypes
@@ -138,7 +139,7 @@ static const struct spi_ops_s g_spiops =
   spi_sndblock,       /* sndblock */
   spi_recvblock,      /* recvblock */
 #endif
-   0                  /* registercallback */
+  0                   /* registercallback */
 };
 
 /****************************************************************************
@@ -225,7 +226,8 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency)
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
   uint32_t actual;
@@ -367,14 +369,14 @@ static void spi_exchange(FAR struct spi_dev_s *dev,
 
 #ifdef CONFIG_SPI_BITBANG_VARWIDTH
           if (priv->nbits > 8)
-           {
+            {
 #ifdef CONFIG_ENDIAN_BIG
-             dataout <<= 8;
-             dataout |= *src++;
+              dataout <<= 8;
+              dataout |= *src++;
 #else
-             dataout |= (uint16_t)(*src++) << 8;
+              dataout |= (uint16_t)(*src++) << 8;
 #endif
-           }
+            }
 #endif
         }
 
@@ -416,7 +418,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev,
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
@@ -424,7 +427,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+                         size_t nwords)
 {
   /* spi_exchange can do this. */
 
@@ -442,9 +446,10 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            of words.  The wordsize is determined by the number of
+ *            bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *            the data is packed into uint8_t's; if nbits >8, the data is
+ *            packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -452,7 +457,8 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                          size_t nwords)
 {
   /* spi_exchange can do this. */
 
@@ -504,7 +510,7 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
                        bool cmd)
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
-  DEBUGASSERTcmddata(priv && priv->low && priv->low->status);
+  DEBUGASSERT(priv && priv->low && priv->low->status);
 
   return priv->low->cmddata(priv, devid, cmd);
 }

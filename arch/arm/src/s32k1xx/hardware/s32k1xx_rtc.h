@@ -5,7 +5,7 @@
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
+ * modification, are permitted provided tha`t the following conditions
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
@@ -72,12 +72,14 @@
 /* RTC Register Bitfield Definitions ****************************************************************/
 
 /* TSR Bit Fields */
-#define RTC_TSR_TSR_MASK                         0xFFFFFFFFu
+
+#define RTC_TSR_TSR_MASK                         0xffffffffu
 #define RTC_TSR_TSR_SHIFT                        0u
 #define RTC_TSR_TSR_WIDTH                        32u
 #define RTC_TSR_TSR(x)                           (((uint32_t)(((uint32_t)(x))<<RTC_TSR_TSR_SHIFT))&RTC_TSR_TSR_MASK)
 
 /* CR Bit Fields */
+
 #define RTC_CR_SWR_MASK                          0x1u
 #define RTC_CR_SWR_SHIFT                         0u
 #define RTC_CR_SWR_WIDTH                         1u
@@ -103,8 +105,8 @@
 #define RTC_CR_CPE_WIDTH                         1u
 #define RTC_CR_CPE(x)                            (((uint32_t)(((uint32_t)(x))<<RTC_CR_CPE_SHIFT))&RTC_CR_CPE_MASK)
 
-
 /* SR Bit Fields */
+
 #define RTC_SR_TIF_MASK                          0x1u
 #define RTC_SR_TIF_SHIFT                         0u
 #define RTC_SR_TIF_WIDTH                         1u
@@ -121,6 +123,5 @@
 #define RTC_SR_TCE_SHIFT                         4u
 #define RTC_SR_TCE_WIDTH                         1u
 #define RTC_SR_TCE(x)                            (((uint32_t)(((uint32_t)(x))<<RTC_SR_TCE_SHIFT))&RTC_SR_TCE_MASK)
-
 
 #endif /* __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_RTC_H */

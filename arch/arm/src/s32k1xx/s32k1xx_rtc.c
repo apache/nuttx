@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/s32k1xx/s32k1xx_rtc.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -60,9 +60,9 @@
 
 #ifdef CONFIG_S32K1XX_RTC
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Variable determines the state of the RTC module.
  *
@@ -73,11 +73,11 @@
 
 volatile bool g_rtc_enabled = false;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_rtc_enable
  *
  * Description:
@@ -89,7 +89,7 @@ volatile bool g_rtc_enabled = false;
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void s32k1xx_rtc_enable(void)
 {
@@ -103,7 +103,7 @@ static void s32k1xx_rtc_enable(void)
   putreg32(regval, S32K1XX_RTC_SR);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_rtc_disable
  *
  * Description:
@@ -115,7 +115,7 @@ static void s32k1xx_rtc_enable(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void s32k1xx_rtc_disable(void)
 {
@@ -129,15 +129,15 @@ static void s32k1xx_rtc_disable(void)
   putreg32(regval, S32K1XX_RTC_SR);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_initialize
  *
  * Description:
- *   Initialize the rtc per the selected configuration. 
+ *   Initialize the rtc per the selected configuration.
  *
  * Input Parameters:
  *   None
@@ -145,13 +145,14 @@ static void s32k1xx_rtc_disable(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_initialize(void)
 {
   uint32_t regval;
 
   /* Disable the clock out pin */
+
   regval  = getreg32(S32K1XX_RTC_CR);
 
   regval &= ~RTC_CR_CPE_MASK;
@@ -159,6 +160,7 @@ int up_rtc_initialize(void)
   putreg32(regval, S32K1XX_RTC_CR);
 
   /* Set LPO_1KHZ clock source */
+
   regval  = getreg32(S32K1XX_RTC_CR);
 
   regval &= ~(RTC_CR_LPOS_MASK);
@@ -167,6 +169,7 @@ int up_rtc_initialize(void)
   putreg32(regval, S32K1XX_RTC_CR);
 
   /* Set Update mode */
+
   regval  = getreg32(S32K1XX_RTC_CR);
 
   regval &= ~(RTC_CR_UM_MASK);
@@ -175,13 +178,14 @@ int up_rtc_initialize(void)
   putreg32(regval, S32K1XX_RTC_CR);
 
   /* Set Non-Supervisor access mode */
+
   regval  = getreg32(S32K1XX_RTC_CR);
 
   regval &= ~(RTC_CR_SUP_MASK);
   regval |= RTC_CR_SUP(0UL);
 
   putreg32(regval, S32K1XX_RTC_CR);
- 
+
   /* Enable the rtc */
 
   s32k1xx_rtc_enable();
@@ -191,15 +195,15 @@ int up_rtc_initialize(void)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_time
  *
  * Description:
  *   Get the current time in seconds.  This is similar to the standard time()
- *   function.  This interface is only required if the low-resolution RTC/counter
- *   hardware implementation selected.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC is set but neither
- *   CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
+ *   function.  This interface is only required if the low-resolution
+ *   RTC/counter hardware implementation selected.  It is only used by the
+ *   RTOS during initialization to set up the system time when CONFIG_RTC is
+ *   set but neither CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
  *
  * Input Parameters:
  *   None
@@ -207,7 +211,7 @@ int up_rtc_initialize(void)
  * Returned Value:
  *   The current time in seconds
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 time_t up_rtc_time(void)
 {
@@ -215,16 +219,16 @@ time_t up_rtc_time(void)
 
   regval = getreg32(S32K1XX_RTC_TSR);
   regval = (regval & RTC_TSR_TSR_MASK) >> RTC_TSR_TSR_SHIFT;
-  
+
   return (uint32_t) (regval);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
- *   Set the RTC to the provided time.  All RTC implementations must be able to
- *   set their time based on a standard timespec.
+ *   Set the RTC to the provided time.  All RTC implementations must be able
+ *   to set their time based on a standard timespec.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -232,16 +236,16 @@ time_t up_rtc_time(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_settime(FAR const struct timespec *ts)
 {
   DEBUGASSERT(ts != NULL);
-  
+
   s32k1xx_rtc_disable();
 
   putreg32((uint32_t)ts->tv_sec, S32K1XX_RTC_TSR);
-  
+
   s32k1xx_rtc_enable();
 
   return OK;
@@ -263,6 +267,6 @@ int up_rtc_settime(FAR const struct timespec *ts)
 
 bool s32k1xx_rtc_havesettime(void)
 {
-  return 1; //TODO
+  return 1; /* TODO */
 }
 #endif /* CONFIG_s32k1xx_SNVS_rtc */

@@ -89,9 +89,8 @@
 #define BOARD_LED_B_BIT   (1 << BOARD_LED_B)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LEDs on board
- * the RDDRONE-UAVCAN144.  The following definitions describe how NuttX controls the
- * LEDs:
- *
+ * the RDDRONE-UAVCAN144.  The following definitions describe how NuttX
+ * controls the LEDs:
  *
  *   SYMBOL                Meaning                      LED state
  *                                                      RED   GREEN  BLUE
@@ -139,19 +138,16 @@
 #define PIN_LPUART1_RX    PIN_LPUART1_RX_1  /* PTC6 */
 #define PIN_LPUART1_TX    PIN_LPUART1_TX_1  /* PTC7 */
 
-/* SPI selections ****************************************/
+/* SPI selections ***********************************************************/
 
 #define PIN_LPSPI0_SCK   PIN_LPSPI0_SCK_2   /* PTB2 */
 #define PIN_LPSPI0_MISO  PIN_LPSPI0_SIN_2   /* PTB3 */
 #define PIN_LPSPI0_MOSI  PIN_LPSPI0_SOUT_3  /* PTB4 */
 #define PIN_LPSPI0_PCS   PIN_LPSPI0_PCS0_2  /* PTB5 */
 
-/* I2C selections ****************************************/
+/* I2C selections ***********************************************************/
 
-#define PIN_LPI2C0_SCL   PIN_LPI2C0_SCL_2   /* PTA3  */
-#define PIN_LPI2C0_SDA	 PIN_LPI2C0_SDA_2   /* PTA2  */
-
-/* DMA Channel/Stream Selections ********************************************/
-
+#define PIN_LPI2C0_SCL   PIN_LPI2C0_SCL_2   /* PTA3 */
+#define PIN_LPI2C0_SDA	 PIN_LPI2C0_SDA_2   /* PTA2 */
 
 #endif  /* __BOARDS_ARM_RDDRONE_UAVCAN144_INCLUDE_BOARD_H */

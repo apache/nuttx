@@ -69,8 +69,8 @@
  * Public Data
  ****************************************************************************/
 
-/* Each S32K1XX board must provide the following initialized structure.  This is
- * needed to establish the initial board clocking.
+/* Each S32K1XX board must provide the following initialized structure.
+ * This is needed to establish the initial board clocking.
  */
 
 const struct clock_configuration_s g_initial_clkconfig =
@@ -156,7 +156,9 @@ const struct clock_configuration_s g_initial_clkconfig =
         .divbus         = 2,           /* DIVBUS, range 1..16 */
         .divcore        = 2            /* DIVCORE, range 1..16 */
       },
+
       /* .altclk */
+
       .initialize       = true,        /* Initialize */
     },
   },

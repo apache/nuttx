@@ -634,7 +634,7 @@
 #  define MII_PHYCTRL1_MODE_10FDX    (5 << MII_PHYCTRL1_MODE_SHIFT) /* 10Base-T full-duplex */
 #  define MII_PHYCTRL1_MODE_100FDX   (6 << MII_PHYCTRL1_MODE_SHIFT) /* 100Base-T full-duplex */
 
-/* TJA110X register bit settings *************************************************************/
+/* TJA110X register bit settings ********************************************/
 
 /* TJA110X MII ID1/2 register bits */
 
@@ -732,7 +732,7 @@
 #  define MII_CONFIG2_WLIM_F              (6 << MII_CONFIG2_WLIM_SHIFT)  /* Class F SNR warning limit */
 #  define MII_CONFIG2_WLIM_G              (7 << MII_CONFIG2_WLIM_SHIFT)  /* Class G SNR warning limit */
 #define MII_CONFIG2_SNR_F_SHIFT           (3)  /* signal to noise ratio fail limit */
-#define MII_CONFIG2_SNR_F_MASK            (7 << MII_CONFIG2_SNR_F_SHIFT))
+#define MII_CONFIG2_SNR_F_MASK            (7 << MII_CONFIG2_SNR_F_SHIFT)
 #  define MII_CONFIG2_SNR_F_NL            (0 << MII_CONFIG2_SNR_F_SHIFT)  /* no limit */
 #  define MII_CONFIG2_SNR_F_CLA           (1 << MII_CONFIG2_SNR_F_SHIFT)  /* Class A */
 #  define MII_CONFIG2_SNR_F_CLB           (2 << MII_CONFIG2_SNR_F_SHIFT)  /* Class B */

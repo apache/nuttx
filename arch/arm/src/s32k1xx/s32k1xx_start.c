@@ -33,6 +33,10 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <stdint.h>
@@ -334,7 +338,9 @@ void __start(void)
   showprogress('C');
 
 #if defined(CONFIG_ARCH_USE_MPU) && defined(CONFIG_S32K1XX_ENET)
+
   /* Enable all MPU bus masters */
+
   s32k1xx_mpu_config();
   showprogress('D');
 #endif

@@ -86,6 +86,7 @@ struct s32k1xx_pinirq_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Per pin port interrupt vectors.  NOTE:  Not all pins in each port
  * correspond to externally available GPIOs.  However, I believe that the
  * Kinesis will support interrupts even if the pin is not available as
@@ -187,24 +188,28 @@ static int s32k1xx_portainterrupt(int irq, FAR void *context, FAR void *arg)
   return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTA_ISFR, g_portaisrs);
 }
 #endif
+
 #ifdef CONFIG_S32K1XX_PORTBINTS
 static int s32k1xx_portbinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTB_ISFR, g_portbisrs);
 }
 #endif
+
 #ifdef CONFIG_S32K1XX_PORTCINTS
 static int s32k1xx_portcinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTC_ISFR, g_portcisrs);
 }
 #endif
+
 #ifdef CONFIG_S32K1XX_PORTDINTS
 static int s32k1xx_portdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
   return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTD_ISFR, g_portdisrs);
 }
 #endif
+
 #ifdef CONFIG_S32K1XX_PORTEINTS
 static int s32k1xx_porteinterrupt(int irq, FAR void *context, FAR void *arg)
 {
@@ -276,7 +281,7 @@ void s32k1xx_pinirq_initialize(void)
  *   Zero (OK) is returned on success; a negated errno value is returned on
  *   any failure to indicate the nature of the failure.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 int s32k1xx_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
 {
@@ -334,27 +339,27 @@ int s32k1xx_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
         return -EINVAL;
     }
 
-   /* Get the old PIN ISR and set the new PIN ISR */
+  /* Get the old PIN ISR and set the new PIN ISR */
 
-   isrtab[pin].handler = pinisr;
-   isrtab[pin].arg     = arg;
+  isrtab[pin].handler = pinisr;
+  isrtab[pin].arg     = arg;
 
-   /* And return the old PIN isr address */
+  /* And return the old PIN isr address */
 
-   leave_critical_section(flags);
-   return OK;
+  leave_critical_section(flags);
+  return OK;
 #else
-   return -ENOSYS;
+  return -ENOSYS;
 #endif /* HAVE_PORTINTS */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_pinirqenable
  *
  * Description:
  *   Enable the interrupt for specified pin IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void s32k1xx_pinirqenable(uint32_t pinset)
 {
@@ -426,13 +431,13 @@ void s32k1xx_pinirqenable(uint32_t pinset)
 #endif /* HAVE_PORTINTS */
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_pinirqdisable
  *
  * Description:
  *   Disable the interrupt for specified pin
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void s32k1xx_pinirqdisable(uint32_t pinset)
 {
