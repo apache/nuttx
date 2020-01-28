@@ -4,7 +4,7 @@
  * Generic Driver interface for the Single Chip LCD driver connected
  * via spi driver
  *
- *   Copyright (C) 2019 Greg Nutt. All rights reserved.
+ *   Copyright (C) 2020 Gregory Nutt. All rights reserved.
  *   Author: Dave Marples <dave@marples.net>
  *           Based on work from Marco Krahl <ocram.lhark@gmail.com>
  *
@@ -57,16 +57,12 @@
 #include <nuttx/lcd/lcddrv_spiif.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Type Definition
  ****************************************************************************/
 
 struct lcddrv_spiif_lcd_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcddrv_lcd_s dev;
 
@@ -74,18 +70,6 @@ struct lcddrv_spiif_lcd_s
 
   struct spi_dev_s *spi;
 };
-
-/****************************************************************************
- * Private Function Protototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -106,7 +90,7 @@ struct lcddrv_spiif_lcd_s
  *
  ****************************************************************************/
 
-static int lcddrv_spiif_backlight(struct lcddrv_lcd_s *lcd, int level)
+static int lcddrv_spiif_backlight(FAR struct lcddrv_lcd_s *lcd, int level)
 {
   return spiif_backlight(lcd, level);
 }
@@ -203,7 +187,7 @@ static int lcddrv_spiif_sendmulti(FAR struct lcddrv_lcd_s *lcd,
  ****************************************************************************/
 
 static int lcddrv_spiif_recv(FAR struct lcddrv_lcd_s *lcd,
-                             uint8_t *param)
+                             FAR uint8_t *param)
 {
   FAR struct lcddrv_spiif_lcd_s *priv = (FAR struct lcddrv_spiif_lcd_s *)lcd;
 
@@ -309,10 +293,10 @@ static int lcddrv_spiif_recvmulti(FAR struct lcddrv_lcd_s *lcd,
  *
  ****************************************************************************/
 
-FAR struct lcddrv_lcd_s *lcddrv_spiif_initialize(struct spi_dev_s *spi)
+FAR struct lcddrv_lcd_s *lcddrv_spiif_initialize(FAR struct spi_dev_s *spi)
 {
-  FAR struct lcddrv_spiif_lcd_s *priv =
-  (struct lcddrv_spiif_lcd_s *)kmm_zalloc(sizeof(struct lcddrv_spiif_lcd_s));
+  FAR struct lcddrv_spiif_lcd_s *priv = (FAR struct lcddrv_spiif_lcd_s *)
+    kmm_zalloc(sizeof(struct lcddrv_spiif_lcd_s));
 
   if (!priv)
     {
