@@ -972,9 +972,9 @@ retry:
   if (WR_RESP_NOK == res[1])
     {
       wlwarn("*** warning: WR_RESP_NOK received.. retrying. (n=%d) \n", n);
-      nxsig_usleep(100 * 1000);
+      nxsig_usleep(10 * 1000);
 
-      if (100 < n)
+      if (9 < n)
         {
           return SPI_TIMEOUT;
         }
@@ -1862,6 +1862,15 @@ static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
   /* Send the bulk data */
 
   s = gs2200m_hal_write(dev, (char *)dev->tx_buff, msg->len + bulk_hdr_size);
+
+  if (s == SPI_TIMEOUT)
+    {
+      /* In case of SPI_TIMEOUT, return OK with 0 bytes sent */
+
+      s = SPI_OK;
+      msg->len = 0;
+    }
+
   r = _spi_err_to_pkt_type(s);
 
   return r;
