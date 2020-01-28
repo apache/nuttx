@@ -1,7 +1,7 @@
-/*****************************************************************************
+/****************************************************************************
  * include/nuttx/lcd/lcddrv_spiif.h
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2020 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Dave Marples <dave@marples.net>
  *
@@ -45,10 +45,6 @@
 #include <nuttx/spi/spi.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -56,7 +52,7 @@ struct lcddrv_lcd_s
 {
   /* Interface to control the ILI9341 lcd driver
    *
-   *  - select      Select the device (as neccessary) before performing
+   *  - select      Select the device (as necessary) before performing
    *                any operations.
    *  - deselect    Deselect the device (as necessary).
    *  - send        Send specific parameter to the LCD driver.
@@ -72,21 +68,21 @@ struct lcddrv_lcd_s
 
   CODE void (*select)(FAR struct lcddrv_lcd_s *lcd);
   CODE void (*deselect)(FAR struct lcddrv_lcd_s *lcd);
-  CODE int (*sendcmd)(FAR struct lcddrv_lcd_s *lcd, const uint8_t cmd);
-  CODE int (*sendparam)(FAR struct lcddrv_lcd_s *lcd, const uint8_t param);
-  CODE int (*recvparam)(FAR struct lcddrv_lcd_s *lcd, uint8_t *param);
-  CODE int (*recvgram)(FAR struct lcddrv_lcd_s *lcd,
-                       uint16_t *wd, uint32_t nwords);
-  CODE int (*sendgram)(FAR struct lcddrv_lcd_s *lcd,
-                       const uint16_t *wd, uint32_t nwords);
-  CODE int (*backlight)(FAR struct lcddrv_lcd_s *lcd, int level);
+  CODE int  (*sendcmd)(FAR struct lcddrv_lcd_s *lcd, const uint8_t cmd);
+  CODE int  (*sendparam)(FAR struct lcddrv_lcd_s *lcd, const uint8_t param);
+  CODE int  (*recvparam)(FAR struct lcddrv_lcd_s *lcd, FAR uint8_t *param);
+  CODE int  (*recvgram)(FAR struct lcddrv_lcd_s *lcd,
+                        FAR uint16_t *wd, uint32_t nwords);
+  CODE int  (*sendgram)(FAR struct lcddrv_lcd_s *lcd,
+                        FAR const uint16_t *wd, uint32_t nwords);
+  CODE int  (*backlight)(FAR struct lcddrv_lcd_s *lcd, int level);
 
-  /* mcu interface specific data following */
+  /* MCU interface specific data following */
 };
 
-/*****************************************************************************
+/****************************************************************************
  * Public Data
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -96,11 +92,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: spiif_backlight
  *       (Provided by integrating platform)
  *
@@ -116,7 +112,7 @@ extern "C"
  *
  ****************************************************************************/
 
-extern int spiif_backlight(struct lcddrv_lcd_s *lcd, int level);
+extern int spiif_backlight(FAR struct lcddrv_lcd_s *lcd, int level);
 
 /****************************************************************************
  * Name:  FAR struct lcddrv_lcd_s *lcddrv_spiif_initialize
@@ -125,7 +121,7 @@ extern int spiif_backlight(struct lcddrv_lcd_s *lcd, int level);
  *   Initialize the device structure to control the LCD Single chip driver.
  *
  * Input Parameters:
- *   path : path to spi device to use
+ *   path : path to SPI device to use
  *
  * Returned Value:
  *   On success, this function returns a reference to the LCD control object
@@ -134,7 +130,7 @@ extern int spiif_backlight(struct lcddrv_lcd_s *lcd, int level);
  *
  ****************************************************************************/
 
-FAR struct lcddrv_lcd_s *lcddrv_spiif_initialize(struct spi_dev_s *spi);
+FAR struct lcddrv_lcd_s *lcddrv_spiif_initialize(FAR struct spi_dev_s *spi);
 
 #undef EXTERN
 #ifdef __cplusplus
