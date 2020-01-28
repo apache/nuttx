@@ -56,7 +56,7 @@
  * protection to simply disable pre-emption when accessing this list.
  */
 
-FAR struct binfmt_s *g_binfmts;
+FAR struct binfmt_s *g_binfmts = NULL;
 
 /****************************************************************************
  * Private Functions
