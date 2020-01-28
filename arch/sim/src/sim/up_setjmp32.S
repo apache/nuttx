@@ -46,7 +46,11 @@
 #ifdef __CYGWIN__
 # define SYMBOL(s) _##s
 #else
+#ifdef __ELF__
+# define SYMBOL(s) _##s
+#else
 # define SYMBOL(s) s
+#endif
 #endif
 
 /**************************************************************************
