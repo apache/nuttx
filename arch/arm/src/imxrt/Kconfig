@@ -848,14 +848,14 @@ endmenu # IMXRT_ENET
 menu "Memory Configuration"
 
 config IMXRT_DTCM
-	bool "Enable DTCM"
-	default n
-	depends on !IMXRT_OCRAM_PRIMARY && EXPERIMENTAL
+	int "FLEXRAM DTCM Size in K"
+	default 128
+	depends on ARMV7M_HAVE_DTCM
 
 config IMXRT_ITCM
-	bool "Enable ITCM"
-	default n
-	depends on !IMXRT_OCRAM_PRIMARY && EXPERIMENTAL
+	int "FLEXRAM ITCM Size in K"
+	default 128
+	depends on ARMV7M_HAVE_ITCM
 
 config IMXRT_SEMC_SDRAM
 	bool "External SDRAM installed"
@@ -957,6 +957,12 @@ config IMXRT_OCRAM_HEAP
 	depends on !IMXRT_OCRAM_PRIMARY
 	---help---
 		Select to add the entire OCRAM to the heap
+
+config IMXRT_DTCM_HEAP
+	bool "Add DTCM to heap"
+	depends on IMXRT_DTCM > 0
+	---help---
+		Select to add the entire DTCM to the heap
 
 config IMXRT_SDRAM_HEAP
 	bool "Add SDRAM to heap"
