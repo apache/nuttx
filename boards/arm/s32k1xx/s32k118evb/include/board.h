@@ -92,7 +92,6 @@
  * the S32K118EVB.  The following definitions describe how NuttX controls the
  * LEDs:
  *
- *
  *   SYMBOL                Meaning                      LED state
  *                                                      RED   GREEN  BLUE
  *   -------------------  ----------------------------  -----------------
@@ -133,8 +132,5 @@
 
 #define PIN_LPUART0_RX    PIN_LPUART0_RX_1  /* PTB0 */
 #define PIN_LPUART0_TX    PIN_LPUART0_TX_1  /* PTB1 */
-
-/* DMA Channel/Stream Selections ********************************************/
-
 
 #endif  /* __BOARDS_ARM_S32K118EVB_INCLUDE_BOARD_H */

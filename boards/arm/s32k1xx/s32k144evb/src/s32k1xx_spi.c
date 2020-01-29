@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/s32k1xx/s32k144evb/src/s32k1xx_spi.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -58,52 +58,64 @@
 #if defined(CONFIG_S32K1XX_LPSPI0) || defined(CONFIG_S32K1XX_LPSPI1) || \
     defined(CONFIG_S32K1XX_LPSPI2)
 
-/*****************************************************************************
+/****************************************************************************
  * Public Functions
- *****************************************************************************/
+ ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: s32k1xx_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the S32K144EVB board.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void weak_function s32k1xx_spidev_initialize(void)
 {
 #ifdef CONFIG_S32K1XX_LPSPI0
   s32k1xx_pinconfig(PIN_LPSPI0_PCS);
+
 #ifdef CONFIG_SPI_DRIVER
   struct spi_dev_s *g_lpspi0;
   g_lpspi0 = s32k1xx_lpspibus_initialize(0);
-  if (!g_lpspi0) {
+
+  if (!g_lpspi0)
+    {
       spierr("ERROR: [boot] FAILED to initialize LPSPI0\n");
-  }
+    }
+
   spi_register(g_lpspi0, 0);
 #endif
 #endif
 
 #ifdef CONFIG_S32K1XX_LPSPI1
   s32k1xx_pinconfig(PIN_LPSPI1_PCS);
+
 #ifdef CONFIG_SPI_DRIVER
   struct spi_dev_s *g_lpspi1;
   g_lpspi1 = s32k1xx_lpspibus_initialize(1);
-  if (!g_lpspi1) {
+
+  if (!g_lpspi1)
+    {
       spierr("ERROR: [boot] FAILED to initialize LPSPI1\n");
-  }
+    }
+
   spi_register(g_lpspi1, 1);
 #endif
 #endif
 
 #ifdef CONFIG_S32K1XX_LPSPI2
   s32k1xx_pinconfig(PIN_LPSPI2_PCS);
+
 #ifdef CONFIG_SPI_DRIVER
   struct spi_dev_s *g_lpspi2;
   g_lpspi2 = s32k1xx_lpspibus_initialize(2);
-  if (!g_lpspi2) {
+
+  if (!g_lpspi2)
+    {
       spierr("ERROR: [boot] FAILED to initialize LPSPI2\n");
-  }
+    }
+
   spi_register(g_lpspi2, 2);
 #endif
 #endif
@@ -113,15 +125,15 @@ void weak_function s32k1xx_spidev_initialize(void)
  * Name:  s32k1xx_lpspi0/1/2select and s32k1xx_lpspi0/1/2status
  *
  * Description:
- *   The external functions, s32k1xx_lpspi0/1/2select and s32k1xx_lpspi0/1/2status
- *   must be provided by board-specific logic.  They are implementations of
- *   the select and status methods of the SPI interface defined by
- *   struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   (including s32k1xx_lpspibus_initialize()) are provided by common
- *   logic.  To use this common SPI logic on your board:
+ *   The external functions, s32k1xx_lpspi0/1/2select and
+ *   s32k1xx_lpspi0/1/2status must be provided by board-specific logic.
+ *   They are implementations of the select and status methods of the SPI
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
+ *   All other methods (including s32k1xx_lpspibus_initialize()) are provided
+ *   by common logic.  To use this common SPI logic on your board:
  *
- *   1. Provide logic in s32k1xx_boardinitialize() to configure SPI chip select
- *      pins.
+ *   1. Provide logic in s32k1xx_boardinitialize() to configure SPI chip
+ *      select pins.
  *   2. Provide s32k1xx_lpspi0/1/2select() and s32k1xx_lpspi0/1/2status()
  *      functions in your board-specific logic.  These functions will perform
  *      chip selection and status operations using GPIOs in the way your

@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* The S32K148EVB has one RGB LED:
  *
  *   RedLED   PTE21

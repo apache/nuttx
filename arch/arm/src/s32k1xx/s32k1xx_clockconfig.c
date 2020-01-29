@@ -113,8 +113,8 @@
 #define SOSC_STABILIZATION_TIMEOUT 3205000
 #define SPLL_STABILIZATION_TIMEOUT 1000
 
-/* System PLL reference clock after SCG_SPLLCFG[PREDIV] should be in the range
- * of SCG_SPLL_REF_MIN to SCG_SPLL_REF_MAX.
+/* System PLL reference clock after SCG_SPLLCFG[PREDIV] should be in the
+ * range of SCG_SPLL_REF_MIN to SCG_SPLL_REF_MAX.
  */
 
 #define SCG_SPLL_REF_MIN 8000000
@@ -1300,7 +1300,8 @@ static int s32k1xx_configure_scgmodules(const struct scg_config_s *scgcfg)
             {
               /* Configure the remaining clock source (FIRC). */
 
-              ret = s32k1xx_firc_config(scgcfg->firc.initialize, &scgcfg->firc);
+              ret = s32k1xx_firc_config(scgcfg->firc.initialize,
+                                        &scgcfg->firc);
               if (ret == OK)
                 {
                   /* Transition to the next system clock source. */
@@ -1327,7 +1328,8 @@ static int s32k1xx_configure_scgmodules(const struct scg_config_s *scgcfg)
             {
               /* Configure the remaining clock source (FIRC) */
 
-              ret = s32k1xx_firc_config(scgcfg->firc.initialize, &scgcfg->firc);
+              ret = s32k1xx_firc_config(scgcfg->firc.initialize,
+                                        &scgcfg->firc);
             }
         }
     }
@@ -1769,8 +1771,8 @@ uint32_t s32k1xx_get_coreclk(void)
  *   type - Identifies the system clock of interest
  *
  * Returned Values:
- *   The current value of the system clock frequency.  Zero is returned on any
- *   failure.
+ *   The current value of the system clock frequency.  Zero is returned on
+ *   any failure.
  *
  ****************************************************************************/
 

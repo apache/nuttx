@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* The S32K118EVB has one RGB LED:
  *
  *   RedLED   PTD16 (FTM0CH1)

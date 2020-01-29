@@ -112,7 +112,7 @@ uint32_t board_buttons(void)
  *   interrupt handlers.
  *
  *   After board_button_initialize() has been called, board_buttons() may be
- *   called to collect the state of all buttons.  board_buttons() returns an
+ *   called to collect the state of all buttons.  board_buttons() returns a
  *   32-bit bit set with each bit associated with a button.  See the
  *   BUTTON_*_BIT definitions in board.h for the meaning of each bit.
  *

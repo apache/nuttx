@@ -903,7 +903,8 @@ static void s32k1xx_lpi2c_tracedump(FAR struct s32k1xx_lpi2c_priv_s *priv)
  *   base - The base address of the LPI2C peripheral registers
  *
  * Returned Value:
- *   The frequency of the LPI2C functional input frequency (or zero on a failure)
+ *   The frequency of the LPI2C functional input frequency (or zero on a
+ *   failure)
  *
  ****************************************************************************/
 
@@ -1062,7 +1063,8 @@ static void s32k1xx_lpi2c_setclock(FAR struct s32k1xx_lpi2c_priv_s *priv,
                 }
             }
 
-          s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MCFGR1_OFFSET, LPI2C_MCFGR1_PRESCALE_MASK,
+          s32k1xx_lpi2c_modifyreg(priv, S32K1XX_LPI2C_MCFGR1_OFFSET,
+                                LPI2C_MCFGR1_PRESCALE_MASK,
                                 LPI2C_MCFGR1_PRESCALE(best_prescale));
 
           /* Re-enable LPI2C if it was enabled previously */
@@ -1248,7 +1250,8 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
 
           if ((priv->msgv->flags & I2C_M_NOSTART) == 0)
             {
-              s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STARTRESTART, priv->msgc);
+              s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STARTRESTART,
+                                     priv->msgc);
               s32k1xx_lpi2c_sendstart(priv, priv->msgv->addr);
             }
           else
@@ -1291,7 +1294,8 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
       else if (priv->msgv && ((status & LPI2C_MSR_SDF) != 0))
         {
           s32k1xx_lpi2c_traceevent(priv, I2CEVENT_STOP, 0);
-          s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET, LPI2C_MSR_SDF);
+          s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MSR_OFFSET,
+                             LPI2C_MSR_SDF);
 
           /* Check is there thread waiting for this event (there should be) */
 
@@ -1401,8 +1405,8 @@ static int s32k1xx_lpi2c_init(FAR struct s32k1xx_lpi2c_priv_s *priv)
 {
   /* Power-up and configure GPIOs .
    *
-   * NOTE: Clocking to the LPSPI peripheral must be provided by board-specific logic
-   * as part of the clock configuration logic.
+   * NOTE: Clocking to the LPSPI peripheral must be provided by
+   * board-specific logic as part of the clock configuration logic.
    */
 
   /* Configure pins */

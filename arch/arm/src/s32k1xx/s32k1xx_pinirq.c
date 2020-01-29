@@ -124,7 +124,8 @@ static struct s32k1xx_pinirq_s g_porteisrs[32];
 
 #ifdef HAVE_PORTINTS
 static int s32k1xx_portinterrupt(int irq, FAR void *context,
-                                uintptr_t addr, struct s32k1xx_pinirq_s *isrtab)
+                                 uintptr_t addr,
+                                 struct s32k1xx_pinirq_s *isrtab)
 {
   uint32_t isfr = getreg32(addr);
   int i;
@@ -185,35 +186,40 @@ static int s32k1xx_portinterrupt(int irq, FAR void *context,
 #ifdef CONFIG_S32K1XX_PORTAINTS
 static int s32k1xx_portainterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTA_ISFR, g_portaisrs);
+  return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTA_ISFR,
+                               g_portaisrs);
 }
 #endif
 
 #ifdef CONFIG_S32K1XX_PORTBINTS
 static int s32k1xx_portbinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTB_ISFR, g_portbisrs);
+  return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTB_ISFR,
+                               g_portbisrs);
 }
 #endif
 
 #ifdef CONFIG_S32K1XX_PORTCINTS
 static int s32k1xx_portcinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTC_ISFR, g_portcisrs);
+  return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTC_ISFR,
+                               g_portcisrs);
 }
 #endif
 
 #ifdef CONFIG_S32K1XX_PORTDINTS
 static int s32k1xx_portdinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTD_ISFR, g_portdisrs);
+  return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTD_ISFR,
+                               g_portdisrs);
 }
 #endif
 
 #ifdef CONFIG_S32K1XX_PORTEINTS
 static int s32k1xx_porteinterrupt(int irq, FAR void *context, FAR void *arg)
 {
-  return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTE_ISFR, g_porteisrs);
+  return s32k1xx_portinterrupt(irq, context, S32K1XX_PORTE_ISFR,
+                               g_porteisrs);
 }
 #endif
 
@@ -291,8 +297,8 @@ int s32k1xx_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
   unsigned int port;
   unsigned int pin;
 
-  /* It only makes sense to call this function for input pins that are configured
-   * as interrupts.
+  /* It only makes sense to call this function for input pins that are
+   * configured as interrupts.
    */
 
   DEBUGASSERT((pinset & _PIN_INTDMA_MASK) == _PIN_INTERRUPT);

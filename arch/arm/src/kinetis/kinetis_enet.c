@@ -601,8 +601,8 @@ static int kinetis_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -665,7 +665,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
           ipv4_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field d_len will set to a value > 0.
+           * sent out on the network, the field d_len will set to a value > 0
            */
 
           if (priv->dev.d_len > 0)
@@ -703,7 +703,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
           ipv6_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field d_len will set to a value > 0.
+           * sent out on the network, the field d_len will set to a value > 0
            */
 
           if (priv->dev.d_len > 0)
@@ -752,10 +752,11 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
           NETDEV_RXDROPPED(&priv->dev);
         }
 
-      /* Point the packet buffer back to the next TX buffer, which will be used
-       * during the next write.  If the write queue is full, then this will
-       * point at an active buffer, which must not be written to.  This is OK
-       * because devif_poll won't be called unless the queue is not full.
+      /* Point the packet buffer back to the next TX buffer, which will be
+       * used during the next write.  If the write queue is full, then this
+       * will point at an active buffer, which must not be written to.
+       * This is OK because devif_poll won't be called unless the queue is
+       * not full.
        */
 
       priv->dev.d_buf =
@@ -1072,16 +1073,17 @@ static void kinetis_poll_work(FAR void *arg)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 
-  /* Check if there is there is a transmission in progress.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
+  /* Check if there is there is a transmission in progress.  We cannot
+   * perform the TX poll if he are unable to accept another packet for
+   * transmission.
    */
 
   net_lock();
   if (!kinetis_txringfull(priv))
     {
       /* If so, update TCP timing states and poll the network for new XMIT
-       * data. Hmmm..might be bug here.  Does this mean if there is a transmit
-       * in progress, we will missing TCP time state updates?
+       * data. Hmmm..might be bug here.  Does this mean if there is a
+       * transmit in progress, we will missing TCP time state updates?
        */
 
       devif_timer(&priv->dev, KINETIS_WDDELAY, kinetis_txpoll);
@@ -1474,7 +1476,8 @@ static int kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int kinetis_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
+static int kinetis_ioctl(struct net_driver_s *dev, int cmd,
+                         unsigned long arg)
 {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
   FAR struct kinetis_driver_s *priv =
@@ -2220,8 +2223,8 @@ int kinetis_netinitialize(int intf)
 #ifdef CONFIG_NET_ETHERNET
   /* Determine a semi-unique MAC address from MCU UID
    * We use UID Low and Mid Low registers to get 64 bits, from which we keep
-   * 48 bits.  We then force unicast and locally administered bits (b0 and b1,
-   * 1st octet)
+   * 48 bits.  We then force unicast and locally administered bits (b0 and
+   * b1, 1st octet)
    */
 
   uidl   = getreg32(KINETIS_SIM_UIDL);
@@ -2233,10 +2236,10 @@ int kinetis_netinitialize(int intf)
 
   mac[0] = (uidml & 0x0000ff00) >> 8;
   mac[1] = (uidml & 0x000000ff);
-  mac[2] = (uidl &  0xff000000) >> 24;
-  mac[3] = (uidl &  0x00ff0000) >> 16;
-  mac[4] = (uidl &  0x0000ff00) >> 8;
-  mac[5] = (uidl &  0x000000ff);
+  mac[2] = (uidl  & 0xff000000) >> 24;
+  mac[3] = (uidl  & 0x00ff0000) >> 16;
+  mac[4] = (uidl  & 0x0000ff00) >> 8;
+  mac[5] = (uidl  & 0x000000ff);
 #endif
 
   /* Put the interface in the down state.  This usually amounts to resetting

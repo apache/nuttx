@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /* The RDDRONE-UAVCAN146 has one RGB LED:
  *
  *   RedLED   PTD15 (FTM0 CH0)

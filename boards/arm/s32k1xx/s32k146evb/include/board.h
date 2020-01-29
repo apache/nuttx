@@ -92,7 +92,6 @@
  * the S32K146EVB.  The following definitions describe how NuttX controls the
  * LEDs:
  *
- *
  *   SYMBOL                Meaning                      LED state
  *                                                      RED   GREEN  BLUE
  *   -------------------  ----------------------------  -----------------
@@ -140,7 +139,7 @@
 #define PIN_LPUART2_RX    PIN_LPUART2_RX_1  /* PTA8 */
 #define PIN_LPUART2_TX    PIN_LPUART2_TX_1  /* PTA9 */
 
-/* SPI selections ****************************************/
+/* SPI selections ***********************************************************/
 
 #define PIN_LPSPI0_SCK   PIN_LPSPI0_SCK_2   /* PTB2 */
 #define PIN_LPSPI0_MISO  PIN_LPSPI0_SIN_2   /* PTB3 */
@@ -157,12 +156,9 @@
 #define PIN_LPSPI2_MOSI  PIN_LPSPI2_SOUT_1  /* PTA8  */
 #define PIN_LPSPI2_PCS   PIN_LPSPI2_PCS0_2	/* PTA9  */
 
-/* I2C selections ****************************************/
+/* I2C selections ***********************************************************/
 
-#define PIN_LPI2C0_SCL   PIN_LPI2C0_SCL_2   /* PTA3  */				
-#define PIN_LPI2C0_SDA	 PIN_LPI2C0_SDA_2   /* PTA2  */
-
-/* DMA Channel/Stream Selections ********************************************/
-
+#define PIN_LPI2C0_SCL   PIN_LPI2C0_SCL_2   /* PTA3 */				
+#define PIN_LPI2C0_SDA	 PIN_LPI2C0_SDA_2   /* PTA2 */
 
 #endif  /* __BOARDS_ARM_S32K146EVB_INCLUDE_BOARD_H */

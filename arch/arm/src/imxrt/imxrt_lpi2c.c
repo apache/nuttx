@@ -1305,7 +1305,8 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
 
           if ((priv->msgv->flags & I2C_M_NOSTART) == 0)
             {
-              imxrt_lpi2c_traceevent(priv, I2CEVENT_STARTRESTART, priv->msgc);
+              imxrt_lpi2c_traceevent(priv, I2CEVENT_STARTRESTART,
+                                     priv->msgc);
               imxrt_lpi2c_sendstart(priv, priv->msgv->addr);
             }
           else

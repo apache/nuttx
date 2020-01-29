@@ -260,8 +260,8 @@
  * Private Types
  ****************************************************************************/
 
-/* The s32k1xx_driver_s encapsulates all state information for a single hardware
- * interface
+/* The s32k1xx_driver_s encapsulates all state information for a single
+ * hardware interface
  */
 
 struct s32k1xx_driver_s
@@ -337,7 +337,8 @@ static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv);
 static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv);
 
 static void s32k1xx_enet_interrupt_work(FAR void *arg);
-static int  s32k1xx_enet_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  s32k1xx_enet_interrupt(int irq, FAR void *context,
+                                   FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -659,8 +660,8 @@ static int s32k1xx_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -851,7 +852,8 @@ static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv)
            */
 
           priv->dev.d_len = s32k1xx_swap16(rxdesc->length);
-          priv->dev.d_buf = (uint8_t *)s32k1xx_swap32((uint32_t)rxdesc->data);
+          priv->dev.d_buf =
+            (uint8_t *)s32k1xx_swap32((uint32_t)rxdesc->data);
 
           /* Invalidate the buffer so that the correct packet will be re-read
            * from memory when the packet content is accessed.
@@ -1230,8 +1232,9 @@ static void s32k1xx_poll_work(FAR void *arg)
 {
   FAR struct s32k1xx_driver_s *priv = (FAR struct s32k1xx_driver_s *)arg;
 
-  /* Check if there is there is a transmission in progress.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
+  /* Check if there is there is a transmission in progress.  We cannot
+   * perform the TX poll if he are unable to accept another packet for
+   * transmission.
    */
 
   net_lock();
@@ -1384,7 +1387,8 @@ static int s32k1xx_ifup_action(struct net_driver_s *dev, bool resetphy)
 
   /* Clear all pending ENET interrupt */
 
-  putreg32(RX_INTERRUPTS | ERROR_INTERRUPTS | TX_INTERRUPTS, S32K1XX_ENET_EIR);
+  putreg32(RX_INTERRUPTS | ERROR_INTERRUPTS | TX_INTERRUPTS,
+           S32K1XX_ENET_EIR);
 
   /* Enable RX and error interrupts at the controller (TX interrupts are
    * still disabled).
@@ -1762,7 +1766,8 @@ static int s32k1xx_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int s32k1xx_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
+static int s32k1xx_ioctl(struct net_driver_s *dev, int cmd,
+                         unsigned long arg)
 {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
   FAR struct s32k1xx_driver_s *priv =
@@ -1803,7 +1808,8 @@ static int s32k1xx_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret = s32k1xx_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
+          ret =
+            s32k1xx_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
         }
         break;
 
@@ -1811,7 +1817,8 @@ static int s32k1xx_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret = s32k1xx_writemii(priv, req->phy_id, req->reg_num, req->val_in);
+          ret =
+            s32k1xx_writemii(priv, req->phy_id, req->reg_num, req->val_in);
         }
         break;
 #endif /* CONFIG_NETDEV_PHY_IOCTL */
@@ -2039,7 +2046,8 @@ static int s32k1xx_readmii(struct s32k1xx_driver_s *priv, uint8_t phyaddr,
  *
  ****************************************************************************/
 
-static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv, bool renogphy)
+static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv,
+                                  bool renogphy)
 {
   uint32_t rcr;
   uint32_t tcr;
@@ -2051,9 +2059,10 @@ static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv, bool renogphy)
 
   if (renogphy)
     {
-      /* Loop (potentially infinitely?) until we successfully communicate with
-       * the PHY. This is 'standard stuff' that should work for any PHY - we
-       * are not communicating with it's 'special' registers at this point.
+      /* Loop (potentially infinitely?) until we successfully communicate
+       * with the PHY. This is 'standard stuff' that should work for any PHY
+       * - we are not communicating with it's 'special' registers at this
+       * point.
        */
 
       ninfo("%s: Try phyaddr: %u\n", BOARD_PHY_NAME, phyaddr);
@@ -2075,7 +2084,8 @@ static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv, bool renogphy)
 
       if (retries >= 3)
         {
-          nerr("ERROR: Failed to read %s PHYID1 at address %d\n", BOARD_PHY_NAME, phyaddr);
+          nerr("ERROR: Failed to read %s PHYID1 at address %d\n",
+               BOARD_PHY_NAME, phyaddr);
           return -ENOENT;
         }
 
@@ -2604,8 +2614,8 @@ int s32k1xx_netinitialize(int intf)
 #ifdef CONFIG_NET_ETHERNET
   /* Determine a semi-unique MAC address from MCU UID
    * We use UID Low and Mid Low registers to get 64 bits, from which we keep
-   * 48 bits.  We then force unicast and locally administered bits (b0 and b1,
-   * 1st octet)
+   * 48 bits.  We then force unicast and locally administered bits (b0 and
+   * b1, 1st octet)
    */
 
   /* hardcoded offset: todo: need proper header file */
