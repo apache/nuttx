@@ -153,12 +153,12 @@ The simulation build is a two pass build:
     created called nuttx.rel.  This includes all of the files that are part
     of the NuttX "domain."
 
-  2. On the second pass, the files which are in the host OS domain are build
+  2. On the second pass, the files are are in the host OS domain are build
      and then linked with nuttx.rel to generate the simulation program.
 
 NuttX is a POSIX compliant RTOS and is normally build on a POSIX compliant
 host environment (like Linux or Cygwin).  As a result, the same symbols are
-exported by both the NuttX domain and the host domain.  How can we keep them
+exported by both the NuttX doman and the host domain.  How can we keep them
 separate?
 
 This is done using the special file nuttx-name.dat.  This file just contains
