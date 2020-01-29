@@ -66,5 +66,8 @@ if [ $TEST_M32 -ne 0 ]; then
 	echo CONFIG_SIM_M32=y >> .config
 	${MAKE} oldconfig
 fi
+echo ===== .config START =====
+cat .config
+echo ===== .config END =====
 ${MAKE}
 ./nuttx
