@@ -55,7 +55,7 @@
 
 	.text
 	.globl	SYMBOL(up_setjmp)
-#ifdef __ELF__
+#ifndef __CYGWIN__
 	.type	SYMBOL(up_setjmp), @function
 #endif
 SYMBOL(up_setjmp):
@@ -86,11 +86,11 @@ SYMBOL(up_setjmp):
 
 	xorl	%eax, %eax
 	ret
-#ifdef __ELF__
+#ifndef __CYGWIN__
 	.size	SYMBOL(up_setjmp), . - SYMBOL(up_setjmp)
 #endif
 	.globl	SYMBOL(up_longjmp)
-#ifdef __ELF__
+#ifndef __CYGWIN__
 	.type	SYMBOL(up_longjmp), @function
 #endif
 SYMBOL(up_longjmp):
@@ -112,7 +112,7 @@ SYMBOL(up_longjmp):
 	/* Jump to saved PC.  */
 
 	jmp		*%edx
-#ifdef __ELF__
+#ifndef __CYGWIN__
 	.size SYMBOL(up_longjmp), . - SYMBOL(up_longjmp)
 #endif
 
