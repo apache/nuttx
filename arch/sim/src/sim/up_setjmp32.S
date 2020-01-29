@@ -47,9 +47,9 @@
 # define SYMBOL(s) _##s
 #else
 #ifdef __ELF__
-# define SYMBOL(s) _##s
-#else
 # define SYMBOL(s) s
+#else
+# define SYMBOL(s) _##s
 #endif
 #endif
 
