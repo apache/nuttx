@@ -124,7 +124,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   /* Reset the initial state */
 
-  tcb->xcp.regs[JB_SP] = (xcpt_reg_t)tcb->adj_stack_ptr - sizeof(xcpt_reg_t);
+  tcb->xcp.regs[JB_SP] = (xcpt_reg_t)tcb->adj_stack_ptr;
 
   /* And return a pointer to the allocated memory */
 
