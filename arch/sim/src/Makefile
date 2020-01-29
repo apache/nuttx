@@ -195,15 +195,8 @@ endif
 
 # Override in Make.defs if linker is not 'ld'
 
-ifeq ($(HOSTOS),Darwin)
-  LDSTARTGROUP ?=
-  LDENDGROUP ?=
-  LDUNEXPORTSYMBOLS ?= -unexported_symbols_list $(HOSTOS)-names.dat
-else
-  LDSTARTGROUP ?= --start-group
-  LDENDGROUP ?= --end-group
-  LDUNEXPORTSYMBOLS ?=
-endif
+LDSTARTGROUP ?= --start-group
+LDENDGROUP ?= --end-group
 
 EXTRA_LIBS ?=
 EXTRA_LIBPATHS ?=
@@ -299,15 +292,10 @@ else
 	$(Q) cp nuttx-names.dat $@
 endif
 
-Darwin-names.dat: nuttx-names.dat
-	$(Q) cat $^ | sed -e "s/^\([^[:space:]][^[:space:]]*\)[[:space:]].*/_\1/g" >$@
-
 nuttx.rel : libarch$(LIBEXT) board/libboard$(LIBEXT) $(HOSTOS)-names.dat $(LINKOBJS)
 	$(Q) echo "LD:  nuttx.rel"
-	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o $@ $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP) $(LDUNEXPORTSYMBOLS)
-ifneq ($(HOSTOS),Darwin)
+	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o $@ $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 	$(Q) $(OBJCOPY) --redefine-syms=$(HOSTOS)-names.dat $@
-endif
 
 # Generate the final NuttX binary by linking the host-specific objects with the NuttX
 # specific objects (with munged names)
@@ -339,7 +327,7 @@ export_startup: board/libboard$(LIBEXT) up_head.o $(HOSTOBJS)
 depend: .depend
 
 cleanrel:
-	$(Q) rm -f nuttx.rel $(HOSTOS)-names.dat
+	$(Q) rm -f nuttx.rel GNU/Linux-names.dat Cygwin-names.dat
 
 clean: cleanrel
 	$(Q) if [ -e board/Makefile ]; then \
