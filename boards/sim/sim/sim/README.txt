@@ -181,6 +181,10 @@ which version of strlen() you call.  Other times, it can cause subtle,
 mysterious errors.  Usually, however, callng the wrong function in the wrong
 OS results in a fatal crash.
 
+On macOS, instead of objcopy, -unexported_symbols_list linker option is
+used to hide symbols in the NuttX domain, using the same list of symbols
+from nuttx-name.dat.
+
 Networking Issues
 -----------------
 I never did get networking to work on the sim target.  It tries to use the
@@ -485,6 +489,17 @@ Common Configuration Information
         CONFIG_HOST_X86_64=y
         CONFIG_SIM_X8664_MICROSOFT=y
         CONFIG_SIM_X8664_SYSTEMV=n
+        CONFIG_SIM_M32=n
+
+     g. macOS, 64-bit, 64-bit build
+
+        CONFIG_HOST_LINUX=n
+        CONFIG_HOST_MACOS=y
+        CONFIG_HOST_WINDOWS=n
+        CONFIG_HOST_X86=n
+        CONFIG_HOST_X86_64=y
+        CONFIG_SIM_X8664_MICROSOFT=n
+        CONFIG_SIM_X8664_SYSTEMV=y
         CONFIG_SIM_M32=n
 
 Configuration Sub-Directories
