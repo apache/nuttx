@@ -35,10 +35,8 @@
 
 include $(TOPDIR)/Make.defs
 
-# Add dummy.c to ensure that we have at least one object.
-# On some platforms like macOS, we can't create an empty archive.
 ASRCS =
-CSRCS = dummy.c
+CSRCS =
 
 ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
   CSRCS += sim_boot.c
