@@ -26,6 +26,9 @@ case $HOSTOS in
 	Linux)
 		sudo apt-get update -q
 		sudo apt-get install -y gperf
+		if [ $TEST_M32 -ne 0 ]; then
+			sudo apt-get install -y gcc-multilib
+		fi
 		MAKE=make
 		CONFIGURE_HOSTOS=-l
 		;;
@@ -59,5 +62,9 @@ cd ${ORIG_DIR}
 mv .git .git.bak
 cp tools/travis/version .version
 ./tools/configure.sh ${CONFIGURE_HOSTOS} sim:ostest
+if [ $TEST_M32 -ne 0 ]; then
+	echo CONFIG_SIM_M32=y >> .config
+	${MAKE} oldconfig
+fi
 ${MAKE}
 ./nuttx

@@ -17,15 +17,19 @@
 
 sudo: required
 
-os:
-- linux
-- osx
-
-dist:
-- bionic
-
 language:
 - c
+
+jobs:
+  include:
+    - os: linux
+      dist: bionic
+      env: TEST_M32=0
+    - os: linux
+      dist: bionic
+      env: TEST_M32=1
+    - os: osx
+      env: TEST_M32=0
 
 install:
 - true
