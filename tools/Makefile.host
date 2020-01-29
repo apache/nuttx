@@ -43,7 +43,7 @@ include ${TOPDIR}/tools/Config.mk
 # Define HOSTCC on the make command line if it differs from these defaults
 # Define HOSTCFLAGS with -g on the make command line to build debug versions
 
-HOSTOS = ${shell uname -o 2>/dev/null || uname -s 2>/dev/null || echo "Other"}
+HOSTOS = ${shell uname -o || echo "Other"}
 
 ifeq ($(HOSTOS),MinGW)
 
