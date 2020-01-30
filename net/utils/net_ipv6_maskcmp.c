@@ -41,8 +41,6 @@
 
 #include <nuttx/net/ip.h>
 
-#include "utils/utils.h"
-
 #ifdef CONFIG_NET_IPv6
 
 /****************************************************************************
