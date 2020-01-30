@@ -40,10 +40,6 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <stdint.h>
-#include <debug.h>
-
-#include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/icmp.h>
 
@@ -55,7 +51,6 @@
 
 #define IPv4BUF     ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 #define ICMPBUF(hl) ((FAR struct icmp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + (hl)])
-#define ICMPv6BUF   ((struct icmp_ipv6hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Public Functions

@@ -40,10 +40,8 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <assert.h>
 
-#include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 

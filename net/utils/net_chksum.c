@@ -41,22 +41,7 @@
 #include <nuttx/config.h>
 #ifdef CONFIG_NET
 
-#include <stdint.h>
-#include <debug.h>
-
-#include <nuttx/net/netconfig.h>
-#include <nuttx/net/netdev.h>
-#include <nuttx/net/ip.h>
-#include <nuttx/net/icmp.h>
-
 #include "utils/utils.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define IPv4BUF   ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define IPv6BUF   ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Public Functions
