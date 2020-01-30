@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 #include <nuttx/clock.h>
 
+#include "utils/utils.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -58,7 +60,7 @@
  *
  ****************************************************************************/
 
-int net_dsec2tick(int dsec)
+unsigned int net_dsec2tick(int dsec)
 {
   /* Convert the deci-second comparison value to clock ticks.  The CLK_TCK
    * value is the number of clock ticks per second; decisecs argument is the

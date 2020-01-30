@@ -39,10 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <sys/socket.h>
 #include <sys/time.h>
-#include <stdint.h>
-#include <errno.h>
 
 #include <nuttx/clock.h>
 
