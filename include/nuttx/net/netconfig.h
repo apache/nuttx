@@ -76,7 +76,7 @@
  */
 
 #define __IPv4_HDRLEN 20  /* Must match IPv4_HDRLEN in include/nuttx/net/ip.h */
-#define __IPv6_HDRLEN 40  /* Must match IPv4_HDRLEN in include/nuttx/net/ip.h */
+#define __IPv6_HDRLEN 40  /* Must match IPv6_HDRLEN in include/nuttx/net/ip.h */
 #define __UDP_HDRLEN  8   /* Must match UDP_HDRLEN in include/nuttx/net/udp.h */
 #define __TCP_HDRLEN  20  /* Must match TCP_HDRLEN in include/nuttx/net/tcp.h */
                           /* REVISIT: Not really a constant */
@@ -150,8 +150,8 @@
 #endif
 
 #ifdef CONFIG_NET_LOOPBACK
-#  define _MIN_LO_PKTSIZE      MIN(_MIN_ETH_PKTSIZE,  1518)
-#  define _MAX_LO_PKTSIZE      MAX(_MAX_ETH_PKTSIZE, 574)
+#  define _MIN_LO_PKTSIZE      MIN(_MIN_ETH_PKTSIZE, 574)
+#  define _MAX_LO_PKTSIZE      MAX(_MAX_ETH_PKTSIZE, 1518)
 #else
 #  define _MIN_LO_PKTSIZE      _MIN_ETH_PKTSIZE
 #  define _MAX_LO_PKTSIZE      _MAX_ETH_PKTSIZE
@@ -344,6 +344,9 @@
 #  undef  MIN_UDP_MSS
 #  define MIN_IPv6_UDP_MSS      __MIN_UDP_MSS(__IPv6_HDRLEN)
 #  define MIN_UDP_MSS           __MIN_UDP_MSS(__IPv6_HDRLEN)
+#  ifndef MAX_UDP_MSS
+#    define MAX_UDP_MSS         __MAX_UDP_MSS(__IPv6_HDRLEN)
+#  endif
 #endif
 
 /* TCP configuration options */
