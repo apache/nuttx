@@ -119,6 +119,7 @@
 "rewinddir","dirent.h","","void","FAR DIR*"
 "rmdir","unistd.h","!defined(CONFIG_DISABLE_MOUNTPOINT)","int","FAR const char*"
 "rmmod","nuttx/module.h","defined(CONFIG_MODULE)","int","FAR void *"
+"sched_getcpu","sched.h","defined(CONFIG_SMP)","int"
 "sched_getparam","sched.h","","int","pid_t","struct sched_param*"
 "sched_getscheduler","sched.h","","int","pid_t"
 "sched_getstreams","nuttx/sched.h","CONFIG_NFILE_STREAMS > 0","FAR struct streamlist*"

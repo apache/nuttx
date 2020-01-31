@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_lookup.h
  *
- *   Copyright (C) 2011, 2013-2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2019, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@ SYSCALL_LOOKUP1(_exit,                     1, STUB__exit)
 SYSCALL_LOOKUP(exit,                       1, STUB_exit)
 SYSCALL_LOOKUP(get_errno,                  0, STUB_get_errno)
 SYSCALL_LOOKUP(getpid,                     0, STUB_getpid)
+
 SYSCALL_LOOKUP(sched_getparam,             2, STUB_sched_getparam)
 SYSCALL_LOOKUP(sched_getscheduler,         1, STUB_sched_getscheduler)
 SYSCALL_LOOKUP(sched_lock,                 0, STUB_sched_lock)
@@ -56,6 +57,10 @@ SYSCALL_LOOKUP(sched_setparam,             2, STUB_sched_setparam)
 SYSCALL_LOOKUP(sched_setscheduler,         3, STUB_sched_setscheduler)
 SYSCALL_LOOKUP(sched_unlock,               0, STUB_sched_unlock)
 SYSCALL_LOOKUP(sched_yield,                0, STUB_sched_yield)
+#ifdef CONFIG_SMP
+SYSCALL_LOOKUP(sched_getcpu,               0, STUB_sched_getcpu)
+#endif
+
 SYSCALL_LOOKUP(set_errno,                  1, STUB_set_errno)
 SYSCALL_LOOKUP(uname,                      1, STUB_uname)
 
