@@ -58,6 +58,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_PIC32MZ_MVEC
@@ -65,6 +66,7 @@
 #endif
 
 /* Interrupt controller definitions *****************************************/
+
 /* Number of interrupt enable/interrupt status registers */
 
 #define INT_NREGS ((NR_IRQS + 31) >> 5)

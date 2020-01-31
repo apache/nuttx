@@ -131,7 +131,6 @@ extern volatile uint32_t *g_current_regs[1];
 
 #endif
 
-
 /* This is the beginning of heap as provided from up_head.S. This is the
  * first address in DRAM after the loaded program+bss+idle stack.  The end
  * of the heap is CONFIG_RAM_END
@@ -180,11 +179,12 @@ extern uint32_t _bmxdupba_address;  /* BMX register setting */
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 /* Common Functions *********************************************************/
+
 /* Common functions define in arch/mips/src/common.  These may be replaced
  * with chip-specific functions of the same name if needed.  See also
  * functions prototyped in include/nuttx/arch.h.
@@ -216,6 +216,7 @@ void up_dumpstate(void);
 #endif
 
 /* Common MIPS32 functions defined in arch/mips/src/MIPS32 */
+
 /* IRQs */
 
 uint32_t *up_doirq(int irq, uint32_t *regs);
@@ -229,7 +230,9 @@ int up_swint0(int irq, FAR void *context, FAR void *arg);
 void up_sigdeliver(void);
 
 /* Chip-specific functions **************************************************/
+
 /* Chip specific functions defined in arch/mips/src/<chip> */
+
 /* IRQs */
 
 void up_irqinitialize(void);
