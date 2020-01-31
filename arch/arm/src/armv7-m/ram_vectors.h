@@ -115,4 +115,4 @@ void exception_common(void);
 int up_ramvec_attach(int irq, up_vector_t vector);
 
 #endif /* CONFIG_ARCH_RAMVECTORS */
-#endif  /* __ARCH_ARM_SRC_COMMON_ARMV7_M_RAM_VECTORS_H */
+#endif /* __ARCH_ARM_SRC_COMMON_ARMV7_M_RAM_VECTORS_H */

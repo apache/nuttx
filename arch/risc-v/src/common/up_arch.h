@@ -85,4 +85,4 @@ void modifyreg32(uintptr_t addr, uint32_t clearbits, uint32_t setbits);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* ___ARCH_ARM_SRC_COMMON_UP_ARCH_H */
+#endif /* ___ARCH_ARM_SRC_COMMON_UP_ARCH_H */

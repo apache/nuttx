@@ -2309,4 +2309,4 @@ int altmdm_spi_clearreceiverready(FAR struct altmdm_dev_s *priv)
 }
 #endif
 
-#endif  /* CONFIG_MODEM_ALTMDM */
+#endif /* CONFIG_MODEM_ALTMDM */

@@ -323,7 +323,7 @@ uint32_t stm32_dma_intget(unsigned int chndx);
 uint8_t  stm32_dma_intget(unsigned int controller, uint8_t stream);
 #endif
 
-#endif  /* CONFIG_ARCH_HIPRI_INTERRUPT */
+#endif /* CONFIG_ARCH_HIPRI_INTERRUPT */
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -162,4 +162,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_CRASHDUMP_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_CRASHDUMP_H */

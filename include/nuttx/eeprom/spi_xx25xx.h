@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_EEPROM_M25XX_H
-#define __INCLUDE_NUTTX_EEPROM_M25XX_H 1
+#define __INCLUDE_NUTTX_EEPROM_M25XX_H
 
 /****************************************************************************
  * Public Types

@@ -69,4 +69,4 @@
 #define UART_IP_TXWM   (1 << 0)  /* TX wartermark pending (in IP) */
 #define UART_IP_RXWM   (1 << 1)  /* RX wartermark pending (in IP) */
 
-#endif  /* _ARCH_RISCV_SRC_K210_CHIP_K210_UART_H */
+#endif /* _ARCH_RISCV_SRC_K210_CHIP_K210_UART_H */

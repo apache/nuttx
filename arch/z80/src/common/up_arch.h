@@ -49,4 +49,4 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#endif  /* __ARCH_Z80_SRC_COMMON_UP_ARCH_H */
+#endif /* __ARCH_Z80_SRC_COMMON_UP_ARCH_H */

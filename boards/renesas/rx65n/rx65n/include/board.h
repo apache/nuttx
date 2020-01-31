@@ -147,4 +147,4 @@ extern "C"
 #endif
 #endif
 
-#endif  /* __BOARDS_RENESAS_RX65N_RX65N_INCLUDE_BOARD_H */
+#endif /* __BOARDS_RENESAS_RX65N_RX65N_INCLUDE_BOARD_H */

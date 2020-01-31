@@ -2708,7 +2708,7 @@ static int pic32mx_interrupt(int irq, void *context, FAR void *arg)
       priv->devstate = DEVSTATE_POWERED;
     }
 
-#ifdef  CONFIG_USBOTG
+#ifdef CONFIG_USBOTG
   /* Check if the ID Pin Changed State */
 
   if (otgir & USBOTG_INT_ID) != 0)
@@ -2780,7 +2780,7 @@ static int pic32mx_interrupt(int irq, void *context, FAR void *arg)
     {
       usbtrace(TRACE_INTDECODE(PIC32MX_TRACEINTID_IDLE), usbir);
 
-#ifdef  CONFIG_USBOTG
+#ifdef CONFIG_USBOTG
       /* If Suspended, Try to switch to Host */
 #warning "Missing logic"
 #else

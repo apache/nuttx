@@ -498,4 +498,4 @@ extern "C"
 #endif
 #endif
 
-#endif  /* __ARCH_Z80_SRC_EZ80_EZ80F91_H */
+#endif /* __ARCH_Z80_SRC_EZ80_EZ80F91_H */

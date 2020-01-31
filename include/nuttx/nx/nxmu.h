@@ -624,4 +624,4 @@ int nxmu_sendwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
 }
 #endif
 
-#endif  /* __INCLUDE_NUTTX_NX_NXMU_H */
+#endif /* __INCLUDE_NUTTX_NX_NXMU_H */

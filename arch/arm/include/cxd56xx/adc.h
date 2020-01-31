@@ -93,4 +93,4 @@
 
 int cxd56_adcinitialize(void);
 
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_ADC_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_ADC_H */

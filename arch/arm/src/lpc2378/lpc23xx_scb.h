@@ -131,4 +131,4 @@
  * Public Function Prototypes
  ****************************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_LPC2378_LPC23XX_SCB_H */
+#endif /* __ARCH_ARM_SRC_LPC2378_LPC23XX_SCB_H */

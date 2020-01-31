@@ -336,4 +336,4 @@
  * There are no alternative pin selections for TWI0 and TWI1.
  */
 
-#endif  /* __BOARDS_ARM_SAM34_FLIPNCLICK_SAM3X_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_SAM34_FLIPNCLICK_SAM3X_INCLUDE_BOARD_H */

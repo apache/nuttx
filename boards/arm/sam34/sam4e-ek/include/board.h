@@ -326,4 +326,4 @@ void sam_lcdclear(uint32_t color);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_SAM34_SAM4E_EK_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_SAM34_SAM4E_EK_INCLUDE_BOARD_H */

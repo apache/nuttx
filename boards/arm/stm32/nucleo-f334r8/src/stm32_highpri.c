@@ -412,7 +412,7 @@ int highpri_main(int argc, char *argv[])
   /* Set Timer A Period */
 
   HRTIM_PER_SET(hrtim, HRTIM_TIMER_TIMA, 0xFFD0);
-#endif  /* HIGHPRI_HAVE_HRTIM */
+#endif /* HIGHPRI_HAVE_HRTIM */
 
 #ifdef HIGHPRI_HAVE_TIM1
   /* Initialize TIM1 */
@@ -453,7 +453,7 @@ int highpri_main(int argc, char *argv[])
   PWM_DUMP_REGS(pwm1);
 #endif
 
-#endif  /* HIGHPRI_HAVE_TIM1 */
+#endif /* HIGHPRI_HAVE_TIM1 */
 
 #if !defined(CONFIG_STM32_ADC1_DMA) || defined(HIGHPRI_HAVE_INJECTED)
   /* Attach ADC12 ram vector if no DMA or injected channels support */

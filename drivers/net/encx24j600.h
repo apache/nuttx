@@ -425,4 +425,4 @@
 
 #define RXSTAT_OK       (1 << 7)
 
-#endif  /* __DRIVERS_NET_ENCX24J600_H */
+#endif /* __DRIVERS_NET_ENCX24J600_H */

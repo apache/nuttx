@@ -107,7 +107,7 @@ const unsigned long __ofs1reg OFS_REG = 0xffffffff; /* OFS1 register */
 
 void r_undefined_exception(void)
 {
-#ifdef  __USE_DEBUG_NOP_FOR_BREAKPOINTS
+#ifdef __USE_DEBUG_NOP_FOR_BREAKPOINTS
   __asm("nop");
 #endif
 }
@@ -121,7 +121,7 @@ void r_undefined_exception(void)
 
 void r_reserved_exception(void)
 {
-#ifdef  __USE_DEBUG_NOP_FOR_BREAKPOINTS
+#ifdef __USE_DEBUG_NOP_FOR_BREAKPOINTS
   __asm("nop");
 #endif
 }
@@ -135,7 +135,7 @@ void r_reserved_exception(void)
 
 void r_nmi_exception(void)
 {
-#ifdef  __USE_DEBUG_NOP_FOR_BREAKPOINTS
+#ifdef __USE_DEBUG_NOP_FOR_BREAKPOINTS
   __asm("nop");
 #endif
 }
@@ -149,7 +149,7 @@ void r_nmi_exception(void)
 
 void r_brk_exception(void)
 {
-#ifdef  __USE_DEBUG_NOP_FOR_BREAKPOINTS
+#ifdef __USE_DEBUG_NOP_FOR_BREAKPOINTS
   __asm("nop");
 #endif
 }
@@ -163,7 +163,7 @@ void r_brk_exception(void)
 
 void r_privileged_exception(void)
 {
-#ifdef  __USE_DEBUG_NOP_FOR_BREAKPOINTS
+#ifdef __USE_DEBUG_NOP_FOR_BREAKPOINTS
   __asm("nop");
 #endif
 }
@@ -177,7 +177,7 @@ void r_privileged_exception(void)
 
 void r_access_exception(void)
 {
-#ifdef  __USE_DEBUG_NOP_FOR_BREAKPOINTS
+#ifdef __USE_DEBUG_NOP_FOR_BREAKPOINTS
   __asm("nop");
 #endif
 }
@@ -190,7 +190,7 @@ void r_access_exception(void)
 
 void r_floatingpoint_exception(void)
 {
-#ifdef  __USE_DEBUG_NOP_FOR_BREAKPOINTS
+#ifdef __USE_DEBUG_NOP_FOR_BREAKPOINTS
   __asm("nop");
 #endif
 }

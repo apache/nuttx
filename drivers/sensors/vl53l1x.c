@@ -1193,4 +1193,4 @@ int vl53l1x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   return 1;
 }
 
-#endif  /* CONFIG_I2C && CONFIG_SENSORS_VL53L1X */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_VL53L1X */

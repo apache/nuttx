@@ -387,7 +387,7 @@ int sdio_probe(FAR struct sdio_dev_s *dev)
       return ret;
     }
 
-  /*  Configure 4 bits bus width */
+  /* Configure 4 bits bus width */
 
   ret = sdio_set_wide_bus(dev);
   if (ret != OK)

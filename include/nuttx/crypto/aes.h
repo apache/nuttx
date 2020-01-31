@@ -63,7 +63,7 @@ struct aes_state_s
  * Public Data
  ****************************************************************************/
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C"
 {
 #endif
@@ -164,7 +164,7 @@ void aes_encipher(FAR struct aes_state_s *state, FAR uint8_t *blocks,
 void aes_decipher(FAR struct aes_state_s *state, FAR uint8_t *blocks,
                   int nblk);
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif /* __cplusplus */
 

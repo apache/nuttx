@@ -56,4 +56,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_DM320_DM320_AHB_H */
+#endif /* __ARCH_ARM_SRC_DM320_DM320_AHB_H */

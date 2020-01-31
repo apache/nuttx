@@ -510,4 +510,4 @@ void stm3240g_lcdclear(uint16_t color);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARD_ARM_STM32_STM3240G_EVAL_INCLUDE_BOARD_H */
+#endif /* __BOARD_ARM_STM32_STM3240G_EVAL_INCLUDE_BOARD_H */

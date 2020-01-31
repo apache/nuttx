@@ -84,4 +84,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif  /* __BOARDS_ARM_LPC2348_OLIMEX_LPC2378_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_LPC2348_OLIMEX_LPC2378_INCLUDE_BOARD_H */

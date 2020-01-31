@@ -245,4 +245,4 @@ void tzset(void);
 }
 #endif
 
-#endif  /* __INCLUDE_TIME_H */
+#endif /* __INCLUDE_TIME_H */

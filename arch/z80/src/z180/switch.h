@@ -234,4 +234,4 @@ void z180_registerdump(void);
 #endif
 #endif
 
-#endif  /* __ARCH_Z80_SRC_Z180_SWITCH_H */
+#endif /* __ARCH_Z80_SRC_Z180_SWITCH_H */

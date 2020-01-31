@@ -65,4 +65,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif  /* __BOARDS_ARM_LPC214X_ZP214XPA_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_LPC214X_ZP214XPA_INCLUDE_BOARD_H */

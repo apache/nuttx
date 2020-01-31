@@ -481,4 +481,4 @@ void stm3220g_lcdclear(uint16_t color);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32_STM3220G_EVAL_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_STM3220G_EVAL_INCLUDE_BOARD_H */

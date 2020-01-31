@@ -214,4 +214,4 @@ void up_usbuninitialize(void);
 
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __UP_INTERNAL_H */
+#endif /* __UP_INTERNAL_H */

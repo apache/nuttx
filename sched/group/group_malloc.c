@@ -95,4 +95,4 @@ FAR void *group_malloc(FAR struct task_group_s *group, size_t nbytes)
     }
 }
 
-#endif  /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) && CONFIG_MM_KERNEL_HEAP */
+#endif /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) && CONFIG_MM_KERNEL_HEAP */

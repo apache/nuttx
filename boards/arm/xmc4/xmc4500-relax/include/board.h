@@ -377,4 +377,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_XMC4_XMC4500_RELAX_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_XMC4_XMC4500_RELAX_INCLUDE_BOARD_H */

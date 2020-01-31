@@ -173,4 +173,4 @@ struct spi_dev_s; /* Forward reference */
 
 FAR struct spi_dev_s *lpc214x_spibus_initialize(int port);
 
-#endif  /* __ARCH_ARM_SRC_LPC214X_LPC214X_SPI_H */
+#endif /* __ARCH_ARM_SRC_LPC214X_LPC214X_SPI_H */

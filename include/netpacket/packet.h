@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #ifndef __INCLUDE_NETPACKET_PACKET_H
-#define __INCLUDE_NETPACKET_PACKET_H  1
+#define __INCLUDE_NETPACKET_PACKET_H
 
 /****************************************************************************
  * Included Files
@@ -58,4 +58,4 @@ struct sockaddr_ll
   int16_t  sll_ifindex;
 };
 
-#endif  /* __INCLUDE_NETPACKET_PACKET_H */
+#endif /* __INCLUDE_NETPACKET_PACKET_H */

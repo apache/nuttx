@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef  __INCLUDE_NET_ETHERNET_H
-#define  __INCLUDE_NET_ETHERNET_H
+#ifndef __INCLUDE_NET_ETHERNET_H
+#define __INCLUDE_NET_ETHERNET_H
 
 /****************************************************************************
  * Included Files
@@ -68,4 +68,4 @@ struct ether_header
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /*  __INCLUDE_NET_ETHERNET_H */
+#endif /* __INCLUDE_NET_ETHERNET_H */

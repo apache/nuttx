@@ -417,7 +417,7 @@ int highpri_main(int argc, char *argv[])
   PWM_DUMP_REGS(pwm1);
 #endif
 
-#endif  /* HIGHPRI_HAVE_TIM1 */
+#endif /* HIGHPRI_HAVE_TIM1 */
 
 #if !defined(CONFIG_STM32_ADC1_DMA) || defined(HIGHPRI_HAVE_INJECTED)
   /* Attach ADC12 ram vector if no DMA or injected channels support */

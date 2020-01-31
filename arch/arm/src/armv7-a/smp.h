@@ -140,6 +140,6 @@ void __cpu3_start(void);
 
 void arm_cpu_boot(int cpu);
 
-#endif  /* __ASSEMBLY__ */
-#endif  /* CONFIG_SMP */
-#endif  /* __ARCH_ARM_SRC_ARMV7_A_SMP_H */
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_SMP */
+#endif /* __ARCH_ARM_SRC_ARMV7_A_SMP_H */

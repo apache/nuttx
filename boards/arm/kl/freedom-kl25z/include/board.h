@@ -276,4 +276,4 @@ void kl_tsi_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_KL_FREEDOM_KL25Z_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_KL_FREEDOM_KL25Z_INCLUDE_BOARD_H */

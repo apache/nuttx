@@ -982,7 +982,7 @@ int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
   entry->flags = (uint16_t) (SMARTFS_DIRENT_EMPTY | type |
         (mode & SMARTFS_DIRENT_MODE));
 #endif
-#endif  /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
+#endif /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
 
   if (sectorno == 0xffff)
     {
@@ -1198,7 +1198,7 @@ int smartfs_deleteentry(struct smartfs_mountpt_s *fs,
 #else
   direntry->flags |= SMARTFS_DIRENT_ACTIVE;
 #endif
-#endif  /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
+#endif /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
 
   /* Write the updated flags back to the sector */
 
@@ -1513,7 +1513,7 @@ int smartfs_sync_internal(FAR struct smartfs_mountpt_s *fs,
 
       sf->byteswritten = 0;
     }
-#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
 
 errout:
   return ret;
@@ -1983,7 +1983,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
               goto errout_with_buffer;
             }
         }
-#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
 
       /* Update our control variables */
 

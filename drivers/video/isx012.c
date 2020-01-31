@@ -1093,7 +1093,7 @@ static int isx012_change_device_state(isx012_dev_t *priv,
               return ret;
             }
         }
-#endif  /* ISX012_FRAME_SKIP_EN */
+#endif /* ISX012_FRAME_SKIP_EN */
     }
 
   priv->mode = REGVAL_MODESEL_MON;

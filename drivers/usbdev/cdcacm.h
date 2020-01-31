@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __DRIVERS_USBDEV_CDCACM_H
-#define __DRIVERS_USBDEV_CDCACM_H 1
+#define __DRIVERS_USBDEV_CDCACM_H
 
 /****************************************************************************
  * Included Files

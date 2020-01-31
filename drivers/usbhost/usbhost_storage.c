@@ -2303,4 +2303,4 @@ int usbhost_msc_initialize(void)
   return usbhost_registerclass(&g_storage);
 }
 
-#endif  /* CONFIG_USBHOST && !CONFIG_USBHOST_BULK_DISABLE && !CONFIG_DISABLE_MOUNTPOINT */
+#endif /* CONFIG_USBHOST && !CONFIG_USBHOST_BULK_DISABLE && !CONFIG_DISABLE_MOUNTPOINT */

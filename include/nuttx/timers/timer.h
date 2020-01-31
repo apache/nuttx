@@ -308,4 +308,4 @@ int timer_setcallback(FAR void *handle, tccb_t callback, FAR void *arg);
 #endif
 
 #endif /* CONFIG_TIMER */
-#endif  /* __INCLUDE_NUTTX_TIMERS_TIMER_H */
+#endif /* __INCLUDE_NUTTX_TIMERS_TIMER_H */

@@ -471,11 +471,11 @@
 
 #define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T1CC1
 
-#endif  /* CONFIG_STM32_TIM1_PWM */
-#endif  /* CONFIG_STM32F429I_DISCO_HIGHPRI */
+#endif /* CONFIG_STM32_TIM1_PWM */
+#endif /* CONFIG_STM32F429I_DISCO_HIGHPRI */
 
 /* DMA ******************************************************************************/
 
 #define ADC1_DMA_CHAN DMAMAP_ADC1_1
 
-#endif  /* __BOARDS_ARM_STM32_STM32F429I_DISCO_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_STM32F429I_DISCO_INCLUDE_BOARD_H */

@@ -137,4 +137,4 @@
 /* DMA Channel/Stream Selections ********************************************/
 
 
-#endif  /* __BOARDS_ARM_STM32F4DISCOVERY_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32F4DISCOVERY_INCLUDE_BOARD_H */

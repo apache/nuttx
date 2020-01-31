@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef  __INCLUDE_NETPACKET_NETLINK_H
-#define  __INCLUDE_NETPACKET_NETLINK_H
+#ifndef __INCLUDE_NETPACKET_NETLINK_H
+#define __INCLUDE_NETPACKET_NETLINK_H
 
 /****************************************************************************
  * Included Files
@@ -469,4 +469,4 @@ struct rtmsg
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /*  __INCLUDE_NETPACKET_NETLINK_H */
+#endif /* __INCLUDE_NETPACKET_NETLINK_H */

@@ -36,7 +36,7 @@
  ****************************************************************************/
 
 #ifndef __DRIVERS_CONTACTLESS_PN532_H
-#define __DRIVERS_CONTACTLESS_PN532_H 1
+#define __DRIVERS_CONTACTLESS_PN532_H
 
 /****************************************************************************
  * Included Files

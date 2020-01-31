@@ -284,4 +284,4 @@ void up_usbuninitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_MIPS_SRC_COMMON_UP_INTERNAL_H */
+#endif /* __ARCH_MIPS_SRC_COMMON_UP_INTERNAL_H */

@@ -251,7 +251,7 @@ int sixlowpan_destaddrfromip(FAR struct radio_driver_s *radio,
   struct radiodev_properties_s properties;
   int ret;
 
-#ifdef  CONFIG_NET_STARPOINT
+#ifdef CONFIG_NET_STARPOINT
   /* Only the radio driver knows the correct address of the hub.  For IEEE
    * 802.15.4 this will be the address of the PAN coordinator.  For other
    * radios, this may be some configured, "well-known" address.

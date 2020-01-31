@@ -803,7 +803,7 @@ static const struct file_operations hrtim_fops =
   , NULL              /* unlink */
 #endif
 };
-#endif  /* CONFIG_STM32_HRTIM_DISABLE_CHARDRV */
+#endif /* CONFIG_STM32_HRTIM_DISABLE_CHARDRV */
 
 /* Master Timer data */
 
@@ -3517,7 +3517,7 @@ static int hrtim_dma_cfg(FAR struct stm32_hrtim_s *priv)
 
   return OK;
 }
-#endif  /* CONFIG_STM32_HRTIM_DAM */
+#endif /* CONFIG_STM32_HRTIM_DAM */
 
 #ifdef CONFIG_STM32_HRTIM_DEADTIME
 /****************************************************************************
@@ -3755,7 +3755,7 @@ static int hrtim_deadtime_config(FAR struct stm32_hrtim_s *priv)
 
   return OK;
 }
-#endif  /* CONFIG_STM32_HRTIM_DEADTIME */
+#endif /* CONFIG_STM32_HRTIM_DEADTIME */
 
 #ifdef CONFIG_STM32_HRTIM_CHOPPER
 /****************************************************************************
@@ -4608,7 +4608,7 @@ static int hrtim_events_config(FAR struct stm32_hrtim_s *priv)
 
   return OK;
 }
-#endif  /* CONFIG_STM32_HRTIM_FAULTS */
+#endif /* CONFIG_STM32_HRTIM_FAULTS */
 
 #ifdef CONFIG_STM32_HRTIM_INTERRUPTS
 
@@ -4727,7 +4727,7 @@ static uint16_t hrtim_irq_get(FAR struct hrtim_dev_s *dev, uint8_t timer)
 
   return (uint16_t)regval;
 }
-#endif  /* CONFIG_STM32_HRTIM_INTERRUPTS */
+#endif /* CONFIG_STM32_HRTIM_INTERRUPTS */
 
 /****************************************************************************
  * Name: hrtim_tim_mode_set
@@ -5783,7 +5783,7 @@ static int stm32_hrtimconfig(FAR struct stm32_hrtim_s *priv)
   regval |= HRTIM_MCR_TECEN;
 #  endif
 
-#endif  /* CONFIG_STM32_HRTIM_NO_ENABLE_TIMERS */
+#endif /* CONFIG_STM32_HRTIM_NO_ENABLE_TIMERS */
 
   /* Write enable bits at once */
 
@@ -5904,7 +5904,7 @@ int hrtim_register(FAR const char *path, FAR struct hrtim_dev_s *dev)
 
   return ret;
 }
-#endif  /* CONFIG_STM32_HRTIM_DISABLE_CHARDRV */
+#endif /* CONFIG_STM32_HRTIM_DISABLE_CHARDRV */
 
-#endif  /* CONFIG_STM32_STM32F33XX */
-#endif  /* CONFIG_STM32_HRTIM1 */
+#endif /* CONFIG_STM32_STM32F33XX */
+#endif /* CONFIG_STM32_HRTIM1 */

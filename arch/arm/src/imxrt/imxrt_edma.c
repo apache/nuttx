@@ -745,10 +745,10 @@ void weak_function up_dma_initialize(void)
   regval |= EDMA_CR_HOE;    /* Halt On Error */
 #endif
 #ifdef CONFIG_IMXRT_EDMA_CLM
-  regval |= EDMA_CR_CLM;    /*  Continuous Link Mode */
+  regval |= EDMA_CR_CLM;    /* Continuous Link Mode */
 #endif
 #ifdef CONFIG_IMXRT_EDMA_EMLIM
-  regval |= EDMA_CR_EMLM;   /*  Enable Minor Loop Mapping */
+  regval |= EDMA_CR_EMLM;   /* Enable Minor Loop Mapping */
 #endif
 
   putreg32(regval, IMXRT_EDMA_CR);

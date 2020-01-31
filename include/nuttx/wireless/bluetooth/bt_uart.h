@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_UART_H
-#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_UART_H 1
+#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_UART_H
 
 /****************************************************************************
  * Included Files

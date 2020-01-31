@@ -1303,7 +1303,7 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
           irq = SX127X_LRM_IRQ_TXDONE;
           break;
         }
-#endif  /* CONFIG_LPWAN_SX127X_TXSUPPORT */
+#endif /* CONFIG_LPWAN_SX127X_TXSUPPORT */
 
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
       /* RX DONE */
@@ -1360,7 +1360,7 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
                  SX127X_LRM_IRQ_VALIDHDR);
           break;
         }
-#endif  /* CONFIG_LPWAN_SX127X_RXSUPPORT */
+#endif /* CONFIG_LPWAN_SX127X_RXSUPPORT */
 
       /* Only LORA - CAD DONE */
 
@@ -1393,7 +1393,7 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
 
   return ret;
 }
-#endif  /* CONFIG_LPWAN_SX127X_LORA */
+#endif /* CONFIG_LPWAN_SX127X_LORA */
 
 /****************************************************************************
  * Name: sx127x_fskook_isr0_process
@@ -1437,7 +1437,7 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
           nxsem_post(&dev->tx_sem);
           break;
         }
-#endif  /* CONFIG_LPWAN_SX127X_TXSUPPORT */
+#endif /* CONFIG_LPWAN_SX127X_TXSUPPORT */
 
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
       /* RX DONE */
@@ -1484,7 +1484,7 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
 
           break;
         }
-#endif  /* CONFIG_LPWAN_SX127X_RXSUPPORT */
+#endif /* CONFIG_LPWAN_SX127X_RXSUPPORT */
 
       default:
         {
@@ -1507,7 +1507,7 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
 
   return ret;
 }
-#endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK */
 
 /****************************************************************************
  * Name: sx127x_isr0_process
@@ -1638,7 +1638,7 @@ errout:
 
   return len;
 }
-#endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK */
 
 /****************************************************************************
  * Name: sx127x_lora_rxhandle
@@ -1718,7 +1718,7 @@ errout:
 
   return len;
 }
-#endif  /* CONFIG_LPWAN_SX127X_LORA */
+#endif /* CONFIG_LPWAN_SX127X_LORA */
 
 /****************************************************************************
  * Name: sx127x_rxfifo_get
@@ -1907,7 +1907,7 @@ static int sx127x_fskook_send(FAR struct sx127x_dev_s *dev,
 errout:
   return ret;
 }
-#endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK */
 
 /****************************************************************************
  * Name: sx127x_lora_send
@@ -1953,8 +1953,8 @@ static int sx127x_lora_send(FAR struct sx127x_dev_s *dev,
 errout:
   return ret;
 }
-#endif  /* CONFIG_LPWAN_SX127X_LORA */
-#endif  /* CONFIG_LPWAN_SX127X_TXSUPPORT */
+#endif /* CONFIG_LPWAN_SX127X_LORA */
+#endif /* CONFIG_LPWAN_SX127X_TXSUPPORT */
 
 /****************************************************************************
  * Name: sx127x_opmode_init
@@ -2806,7 +2806,7 @@ static int sx127x_fskook_preamble_get(FAR struct sx127x_dev_s *dev)
   return 0;
 }
 
-#endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK */
 
 #ifdef CONFIG_LPWAN_SX127X_LORA
 
@@ -3492,7 +3492,7 @@ static int sx127x_lora_preamble_get(FAR struct sx127x_dev_s *dev)
   return 0;
 }
 
-#endif  /* CONFIG_LPWAN_SX127X_LORA */
+#endif /* CONFIG_LPWAN_SX127X_LORA */
 
 /****************************************************************************
  * Name: sx127x_syncword_get
@@ -3576,7 +3576,7 @@ static void sx127x_ops_set(FAR struct sx127x_dev_s *dev, uint8_t modulation)
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
       dev->ops.dumpregs     = sx127x_fskook_dumpregs;
 #endif
-#endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK */
     }
 
 #ifdef CONFIG_LPWAN_SX127X_LORA
@@ -3598,7 +3598,7 @@ static void sx127x_ops_set(FAR struct sx127x_dev_s *dev, uint8_t modulation)
       dev->ops.dumpregs     = sx127x_lora_dumpregs;
 #endif
     }
-#endif  /* CONFIG_LPWAN_SX127X_LORA */
+#endif /* CONFIG_LPWAN_SX127X_LORA */
 }
 
 /****************************************************************************
@@ -4413,7 +4413,7 @@ static void sx127x_lora_dumpregs(FAR struct sx127x_dev_s *dev)
          sx127x_readregbyte(dev, SX127X_CMN_PLL));
   sx127x_unlock(dev->spi);
 }
-#endif  /* CONFIG_LPWAN_SX127X_LORA */
+#endif /* CONFIG_LPWAN_SX127X_LORA */
 
 /****************************************************************************
  * Name: sx127x_fskook_dumpregs
@@ -4608,7 +4608,7 @@ static void sx127x_dumpregs(FAR struct sx127x_dev_s *dev)
         }
     }
 }
-#endif  /* CONFIG_DEBUG_WIRELESS_INFO */
+#endif /* CONFIG_DEBUG_WIRELESS_INFO */
 
 /****************************************************************************
  * Name: sx127x_unregister

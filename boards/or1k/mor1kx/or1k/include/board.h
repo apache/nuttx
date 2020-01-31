@@ -57,4 +57,4 @@
  * Public Functions
  ****************************************************************************/
 
-#endif  /* __BOARDS_OR1K_MOR1KX_OR1K_INCLUDE_BOARD_H */
+#endif /* __BOARDS_OR1K_MOR1KX_OR1K_INCLUDE_BOARD_H */

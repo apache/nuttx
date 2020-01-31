@@ -101,5 +101,5 @@ int tun_initialize(void);
 }
 #endif
 
-#endif /*  CONFIG_NET_TUN */
+#endif /* CONFIG_NET_TUN */
 #endif /* __INCLUDE_NUTTX_NET_TUN_H */

@@ -2833,7 +2833,7 @@ static int khci_interrupt(int irq, void *context, FAR void *arg)
       goto interrupt_exit;
     }
 
-#ifdef  CONFIG_KINETIS_USBOTG
+#ifdef CONFIG_KINETIS_USBOTG
   /* Check if the ID Pin Changed State */
 
   if ((otgir & USB_OTGISTAT_IDCHG) != 0)
@@ -2965,7 +2965,7 @@ static int khci_interrupt(int irq, void *context, FAR void *arg)
 
 interrupt_exit:
   kinetis_clrpend(KINETIS_IRQ_USBOTG);
-#ifdef  CONFIG_KINETIS_USBOTG
+#ifdef CONFIG_KINETIS_USBOTG
   usbtrace(TRACE_INTEXIT(KHCI_TRACEINTID_INTERRUPT), usbir | otgir);
 #else
   usbtrace(TRACE_INTEXIT(KHCI_TRACEINTID_INTERRUPT), usbir);

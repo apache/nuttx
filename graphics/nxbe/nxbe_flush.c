@@ -108,4 +108,4 @@ void nxbe_flush(FAR struct nxbe_window_s *wnd,
     }
 }
 
-#endif  /* CONFIG_NX_RAMBACKED */
+#endif /* CONFIG_NX_RAMBACKED */

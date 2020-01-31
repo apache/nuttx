@@ -101,4 +101,4 @@
 #define BUTTON1           1 /* Bit 0: SW1 button is depressed */
 #define BUTTON2           2 /* Bit 1: SW2 button is depressed */
 
-#endif  /* __BOARDS_HC_MCS92S12NE64_NE64BADGE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_HC_MCS92S12NE64_NE64BADGE_INCLUDE_BOARD_H */

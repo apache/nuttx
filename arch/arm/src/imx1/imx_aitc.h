@@ -116,4 +116,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_IMX_AITC_H */
+#endif /* __ARCH_ARM_IMX_AITC_H */

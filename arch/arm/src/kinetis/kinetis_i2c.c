@@ -1348,7 +1348,7 @@ out:
   kinetis_i2c_sem_post(priv);
   return ret;
 }
-#endif  /* CONFIG_I2C_RESET */
+#endif /* CONFIG_I2C_RESET */
 
 /****************************************************************************
  * Public Functions

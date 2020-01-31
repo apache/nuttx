@@ -62,4 +62,4 @@
  * Public Types
  ****************************************************************************/
 
-#endif  /* __INCLUDE_NUTTX_POWER_RELAY_H */
+#endif /* __INCLUDE_NUTTX_POWER_RELAY_H */

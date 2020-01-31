@@ -87,4 +87,4 @@ int dsxxxx_rtc_initialize(FAR struct i2c_master_s *i2c);
 #endif
 
 #endif /* CONFIG_RTC_DSXXXX */
-#endif  /* __INCLUDE_NUTTX_TIMERS_DS3231_H */
+#endif /* __INCLUDE_NUTTX_TIMERS_DS3231_H */

@@ -94,4 +94,4 @@ int mcp794xx_rtc_initialize(FAR struct i2c_master_s *i2c, uint8_t addr);
 #endif
 
 #endif /* CONFIG_RTC_MCP794XX */
-#endif  /* __INCLUDE_NUTTX_TIMERS_MCP794XX_H */
+#endif /* __INCLUDE_NUTTX_TIMERS_MCP794XX_H */

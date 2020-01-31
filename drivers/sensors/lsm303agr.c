@@ -1273,4 +1273,4 @@ int lsm303agr_sensor_register(FAR const char *devpath,
                             LSM303AGR_OUTX_L_A_SHIFT, sensor_data);
 }
 
-#endif  /* CONFIG_I2C && CONFIG_SENSORS_LSM303AGR */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_LSM303AGR */

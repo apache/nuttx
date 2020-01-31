@@ -106,4 +106,4 @@ int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo)
   return OK;
 }
 
-#endif  /* CONFIG_BINFMT_LOADABLE */
+#endif /* CONFIG_BINFMT_LOADABLE */

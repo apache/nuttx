@@ -402,4 +402,4 @@ void fire_lcdclear(uint16_t color);
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32_FIRE_STM32V2_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_FIRE_STM32V2_INCLUDE_BOARD_H */
