@@ -1308,7 +1308,7 @@ struct pollfd; /* Forward reference -- see poll.h */
 int net_poll(int sockfd, struct pollfd *fds, bool setup);
 
 /****************************************************************************
- * Name: psock_dupsd
+ * Name: psock_dup
  *
  * Description:
  *   Clone a socket descriptor to an arbitray descriptor number.  If file
@@ -1322,10 +1322,10 @@ int net_poll(int sockfd, struct pollfd *fds, bool setup);
  *
  ****************************************************************************/
 
-int psock_dupsd(FAR struct socket *psock, int minsd);
+int psock_dup(FAR struct socket *psock, int minsd);
 
 /****************************************************************************
- * Name: net_dupsd
+ * Name: net_dup
  *
  * Description:
  *   Clone a socket descriptor to an arbitray descriptor number.  If file
@@ -1339,10 +1339,20 @@ int psock_dupsd(FAR struct socket *psock, int minsd);
  *
  ****************************************************************************/
 
-int net_dupsd(int sockfd, int minsd);
+int net_dup(int sockfd, int minsd);
 
 /****************************************************************************
- * Name: net_dupsd2
+ * Name: psock_dup2
+ *
+ * Description:
+ *   Performs the low level, common portion of net_dup() and net_dup2()
+ *
+ ****************************************************************************/
+
+int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2);
+
+/****************************************************************************
+ * Name: net_dup2
  *
  * Description:
  *   Clone a socket descriptor to an arbitray descriptor number.  If file
@@ -1356,7 +1366,7 @@ int net_dupsd(int sockfd, int minsd);
  *
  ****************************************************************************/
 
-int net_dupsd2(int sockfd1, int sockfd2);
+int net_dup2(int sockfd1, int sockfd2);
 
 /****************************************************************************
  * Name: net_fstat
@@ -1377,16 +1387,6 @@ int net_dupsd2(int sockfd1, int sockfd2);
 struct stat;  /* Forward reference.  See sys/stat.h */
 
 int net_fstat(int sockfd, FAR struct stat *buf);
-
-/****************************************************************************
- * Name: net_clone
- *
- * Description:
- *   Performs the low level, common portion of net_dupsd() and net_dupsd2()
- *
- ****************************************************************************/
-
-int net_clone(FAR struct socket *psock1, FAR struct socket *psock2);
 
 /****************************************************************************
  * Name: net_sendfile

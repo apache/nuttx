@@ -1086,10 +1086,10 @@ static int telnet_session(FAR struct telnet_session_s *session)
       goto errout_with_dev;
     }
 
-  ret = net_clone(psock, &priv->td_psock);
+  ret = psock_dup2(psock, &priv->td_psock);
   if (ret < 0)
     {
-      nerr("ERROR: net_clone failed: %d\n", ret);
+      nerr("ERROR: psock_dup2 failed: %d\n", ret);
       goto errout_with_dev;
     }
 

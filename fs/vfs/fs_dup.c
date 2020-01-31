@@ -84,7 +84,7 @@ int dup(int fd)
         {
           /* Yes.. dup the socket descriptor.  The errno value is not set. */
 
-          ret = net_dupsd(fd, CONFIG_NFILE_DESCRIPTORS);
+          ret = net_dup(fd, CONFIG_NFILE_DESCRIPTORS);
         }
       else
 #endif

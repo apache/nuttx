@@ -82,7 +82,7 @@ int dup2(int fd1, int fd2)
         {
           /* Yes.. dup the socket descriptor. The errno value is not set. */
 
-          ret = net_dupsd2(fd1, fd2);
+          ret = net_dup2(fd1, fd2);
         }
       else
         {

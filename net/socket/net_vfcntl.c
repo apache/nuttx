@@ -105,7 +105,7 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
         {
           /* Does not set the errno value on failure */
 
-          ret = psock_dupsd(psock, va_arg(ap, int));
+          ret = psock_dup(psock, va_arg(ap, int));
         }
         break;
 

@@ -336,24 +336,5 @@ int net_timeo(clock_t start_time, socktimeo_t timeo);
 ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                    int flags);
 
-/****************************************************************************
- * Name: net_clone
- *
- * Description:
- *   Performs the low level, common portion of net_dupsd() and net_dupsd2()
- *
- * Input Parameters:
- *   psock1 - The existing socket that is being cloned.
- *   psock2 - A reference to an uninitialized socket structure alloated by
- *            the caller.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-int net_clone(FAR struct socket *psock1, FAR struct socket *psock2);
-
 #endif /* CONFIG_NET */
 #endif /* _NET_SOCKET_SOCKET_H */
