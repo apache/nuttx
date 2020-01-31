@@ -489,7 +489,6 @@ static int net_rpmsg_drv_sockioctl_task(int argc, FAR char *argv[])
       protocol = IPPROTO_ICMP6;
     }
 
-  sock.s_crefs = 1; /* Initialize reference count manually */
   msg->header.result = psock_socket(domain, type, protocol, &sock);
   if (msg->header.result >= 0)
     {

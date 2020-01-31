@@ -119,9 +119,7 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
   /* [Re-]initialize the session. */
 
   memset(&session->connect, 0, sizeof(struct socket));
-  session->connect.s_crefs = 1;
   memset(&session->listen, 0, sizeof(struct socket));
-  session->listen.s_crefs = 1;
 
   /* Put all of the pre-allocated update structures into the freelist */
 

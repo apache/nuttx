@@ -408,8 +408,7 @@ int rpcclnt_connect(struct rpcclnt *rpc)
       return errval;
     }
 
-  so->s_crefs     = 1;
-  rpc->rc_so      = so;
+  rpc->rc_so = so;
 
   /* Always set receive timeout to detect server crash and reconnect.
    * Otherwise, we can get stuck in psock_receive forever.

@@ -1370,8 +1370,6 @@ static int userfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       goto errout_with_alloc;
     }
 
-  priv->psock.s_crefs = 1;
-
   /* Bind the socket to the client address */
 
   client.sin_family      = AF_INET;
@@ -1385,8 +1383,6 @@ static int userfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       ferr("ERROR: bind() failed: %d\n", ret);
       goto errout_with_psock;
     }
-
-  priv->psock.s_crefs = 1;
 
   /* Mounted! */
 
