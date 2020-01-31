@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <net/if.h>
+#include <netinet/if.h>
 
 #include <nuttx/fs/ioctl.h>
 
@@ -83,7 +83,7 @@ struct arpreq
   struct sockaddr arp_ha;          /* Hardware address */
   struct sockaddr arp_netmask;     /* Netmask of protocol address */
   uint8_t         arp_flags;       /* Flags */
-  uint8_t         arp_dev[IFNAMSIZ+1]; /* Device name (zero terminated)*/
+  uint8_t         arp_dev[IFNAMSIZ + 1]; /* Device name (zero terminated) */
 };
 
 /****************************************************************************
