@@ -275,7 +275,7 @@ static int ieee802154_connect(FAR struct socket *psock,
 {
   FAR struct ieee802154_conn_s *conn;
   FAR struct sockaddr_ieee802154_s *ieeeaddr;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(psock != NULL || addr != NULL);
   conn = (FAR struct ieee802154_conn_s *)psock->s_conn;
@@ -290,11 +290,6 @@ static int ieee802154_connect(FAR struct socket *psock,
       ieeeaddr = (FAR struct sockaddr_ieee802154_s *)addr;
       memcpy(&conn->raddr, &ieeeaddr->sa_addr,
              sizeof(struct ieee802154_saddr_s));
-
-      /* Mark the socket as connected. */
-
-      psock->s_flags |= _SF_CONNECTED;
-      ret = OK;
     }
   else
     {
@@ -444,9 +439,6 @@ static int ieee802154_bind(FAR struct socket *psock,
 
   memcpy(&conn->laddr, &iaddr->sa_addr, sizeof(struct ieee802154_saddr_s));
 
-  /* Mark the socket bound */
-
-  psock->s_flags |= _SF_BOUND;
   return OK;
 }
 

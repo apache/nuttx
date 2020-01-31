@@ -271,7 +271,7 @@ static int bluetooth_connect(FAR struct socket *psock,
 {
   FAR struct bluetooth_conn_s *conn;
   FAR struct sockaddr_bt_s *btaddr;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(psock != NULL || addr != NULL);
   conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
@@ -286,11 +286,6 @@ static int bluetooth_connect(FAR struct socket *psock,
       btaddr = (FAR struct sockaddr_bt_s *)addr;
       memcpy(&conn->bc_raddr, &btaddr->bt_bdaddr, sizeof(bt_addr_t));
       conn->bc_channel = btaddr->bt_channel;
-
-      /* Mark the socket as connected. */
-
-      psock->s_flags |= _SF_CONNECTED;
-      ret = OK;
     }
   else
     {
@@ -437,9 +432,6 @@ static int bluetooth_bind(FAR struct socket *psock,
 
   memcpy(&conn->bc_laddr, &iaddr->bt_bdaddr, sizeof(bt_addr_t));
 
-  /* Mark the socket bound */
-
-  psock->s_flags |= _SF_BOUND;
   return OK;
 }
 

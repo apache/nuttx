@@ -287,7 +287,6 @@ static int netlink_bind(FAR struct socket *psock,
   conn->pid       = nladdr->nl_pid;
   conn->groups    = nladdr->nl_groups;
 
-  psock->s_flags |= _SF_BOUND;
   return OK;
 }
 

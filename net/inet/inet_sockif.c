@@ -409,13 +409,6 @@ static int inet_bind(FAR struct socket *psock,
           /* Bind a TCP/IP stream socket. */
 
           ret = tcp_bind(psock->s_conn, addr);
-
-          /* Mark the socket bound */
-
-          if (ret >= 0)
-            {
-              psock->s_flags |= _SF_BOUND;
-            }
 #else
           nwarn("WARNING: TCP/IP stack is not available in this configuration\n");
           return -ENOSYS;
@@ -431,13 +424,6 @@ static int inet_bind(FAR struct socket *psock,
           /* Bind a UDP/IP datagram socket */
 
           ret = udp_bind(psock->s_conn, addr);
-
-          /* Mark the socket bound */
-
-          if (ret >= 0)
-            {
-              psock->s_flags |= _SF_BOUND;
-            }
 #else
           nwarn("WARNING: UDP stack is not available in this configuration\n");
           ret = -ENOSYS;
@@ -757,15 +743,13 @@ static int inet_connect(FAR struct socket *psock,
             {
               /* Failed to connect or explicitly disconnected */
 
-              psock->s_flags &= ~_SF_CONNECTED;
-              conn->flags    &= ~_UDP_FLAG_CONNECTMODE;
+              conn->flags &= ~_UDP_FLAG_CONNECTMODE;
             }
           else
             {
               /* Successfully connected */
 
-              psock->s_flags |= _SF_CONNECTED;
-              conn->flags    |= _UDP_FLAG_CONNECTMODE;
+              conn->flags |= _UDP_FLAG_CONNECTMODE;
             }
 
           return ret;
