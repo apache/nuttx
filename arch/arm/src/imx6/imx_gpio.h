@@ -298,4 +298,4 @@ int imx_dump_gpio(uint32_t pinset, const char *msg);
 #if defined(__cplusplus)
 }
 #endif
-#endif  /* __ARCH_ARM_SRC_IMX6_IMX_GPIO_H */
+#endif /* __ARCH_ARM_SRC_IMX6_IMX_GPIO_H */

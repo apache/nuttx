@@ -429,5 +429,5 @@ int stm32_automount_initialize(void);
 void stm32_automount_event(int slotno, bool inserted);
 #endif
 
-#endif  /* __ASSEMBLY__ */
+#endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_CLICKER2_STM32_SRC_CLICKER2_H */

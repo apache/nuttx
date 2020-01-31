@@ -34,7 +34,7 @@
  ************************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_INPUT_IOCTL_H
-#define __INCLUDE_NUTTX_INPUT_IOCTL_H 1
+#define __INCLUDE_NUTTX_INPUT_IOCTL_H
 
 /****************************************************************************
  * Included Files

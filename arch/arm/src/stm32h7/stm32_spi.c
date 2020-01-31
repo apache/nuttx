@@ -156,7 +156,7 @@
 #  if SPI123_KERNEL_CLOCK_FREQ > 200000000
 #    error Not supported SPI123 frequency
 #  endif
-#endif  /* SPI123 */
+#endif /* SPI123 */
 
 #if defined(CONFIG_STM32H7_SPI4) || defined(CONFIG_STM32H7_SPI5)
 #  if STM32_RCC_D2CCIP1R_SPI45SRC == RCC_D2CCIP1R_SPI45SEL_APB
@@ -169,7 +169,7 @@
 #  if SPI45_KERNEL_CLOCK_FREQ > 100000000
 #    error Not supported SPI45 frequency
 #  endif
-#endif  /* SPI45 */
+#endif /* SPI45 */
 
 #if defined(CONFIG_STM32H7_SPI6)
 #  if STM32_RCC_D3CCIPR_SPI6SRC == RCC_D3CCIPR_SPI6SEL_PCLK4
@@ -182,7 +182,7 @@
 #  if SPI6_KERNEL_CLOCK_FREQ > 100000000
 #    error Not supported SPI6 frequency
 #  endif
-#endif  /* SPI6 */
+#endif /* SPI6 */
 
 /************************************************************************************
  * Private Types
@@ -349,7 +349,7 @@ static struct stm32_spidev_s g_spi1dev =
   .pm_cb.prepare = spi_pm_prepare,
 #endif
 };
-#endif  /* CONFIG_STM32H7_SPI1 */
+#endif /* CONFIG_STM32H7_SPI1 */
 
 #ifdef CONFIG_STM32H7_SPI2
 static const struct spi_ops_s g_sp2iops =
@@ -402,7 +402,7 @@ static struct stm32_spidev_s g_spi2dev =
   .pm_cb.prepare = spi_pm_prepare,
 #endif
 };
-#endif  /* CONFIG_STM32H7_SPI2 */
+#endif /* CONFIG_STM32H7_SPI2 */
 
 #ifdef CONFIG_STM32H7_SPI3
 static const struct spi_ops_s g_sp3iops =
@@ -455,7 +455,7 @@ static struct stm32_spidev_s g_spi3dev =
   .pm_cb.prepare = spi_pm_prepare,
 #endif
 };
-#endif  /* CONFIG_STM32H7_SPI3 */
+#endif /* CONFIG_STM32H7_SPI3 */
 
 #ifdef CONFIG_STM32H7_SPI4
 static const struct spi_ops_s g_sp4iops =
@@ -508,7 +508,7 @@ static struct stm32_spidev_s g_spi4dev =
   .pm_cb.prepare = spi_pm_prepare,
 #endif
 };
-#endif  /* CONFIG_STM32H7_SPI4 */
+#endif /* CONFIG_STM32H7_SPI4 */
 
 #ifdef CONFIG_STM32H7_SPI5
 static const struct spi_ops_s g_sp5iops =
@@ -561,7 +561,7 @@ static struct stm32_spidev_s g_spi5dev =
   .pm_cb.prepare = spi_pm_prepare,
 #endif
 };
-#endif  /* CONFIG_STM32H7_SPI5 */
+#endif /* CONFIG_STM32H7_SPI5 */
 
 #ifdef CONFIG_STM32H7_SPI6
 static const struct spi_ops_s g_sp6iops =
@@ -614,7 +614,7 @@ static struct stm32_spidev_s g_spi6dev =
   .pm_cb.prepare = spi_pm_prepare,
 #endif
 };
-#endif  /* CONFIG_STM32H7_SPI6 */
+#endif /* CONFIG_STM32H7_SPI6 */
 
 /************************************************************************************
  * Private Functions

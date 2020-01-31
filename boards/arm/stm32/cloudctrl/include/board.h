@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 #ifndef __BOARDS_ARM_STM32_CLOUDCTRL_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32_CLOUDCTRL_INCLUDE_BOARD_H 1
+#define __BOARDS_ARM_STM32_CLOUDCTRL_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files

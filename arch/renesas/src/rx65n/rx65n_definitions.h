@@ -499,6 +499,6 @@ enum   E_RX_SCI
   RX_SCI_RDRHL_OFFSET,
   RX_SCI_MDDR_OFFSET
 };
-#endif  /* __ASSEMBLER__ */
+#endif /* __ASSEMBLER__ */
 
 #endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_DEFINITIONS_H */

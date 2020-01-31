@@ -154,4 +154,4 @@ int ez80_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif /* __cplusplus */
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_Z80_SRC_EZ80_EZ80F91_SPI_H */
+#endif /* __ARCH_Z80_SRC_EZ80_EZ80F91_SPI_H */

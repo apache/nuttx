@@ -828,5 +828,5 @@ static inline void mpu_user_intsram_wb(uintptr_t base, size_t size)
 }
 #endif
 
-#endif  /* __ASSEMBLY__ */
-#endif  /* __ARCH_ARM_SRC_ARMV7R_MPU_H */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_ARMV7R_MPU_H */

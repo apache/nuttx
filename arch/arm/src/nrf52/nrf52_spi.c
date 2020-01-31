@@ -924,7 +924,7 @@ static void nrf52_spi_recvblock(FAR struct spi_dev_s *dev,
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
   return nrf52_spi_exchange(dev, txbuffer, NULL, nwords);
 }
-#endif  /* CONFIG_SPI_EXCHANGE */
+#endif /* CONFIG_SPI_EXCHANGE */
 
 /****************************************************************************
  * Public Functions

@@ -368,4 +368,4 @@ int imxrt_dump_gpio(uint32_t pinset, const char *msg);
 #if defined(__cplusplus)
 }
 #endif
-#endif  /* __ARCH_ARM_SRC_IMXRT_IMXRT_GPIO_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_GPIO_H */

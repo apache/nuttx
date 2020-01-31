@@ -5356,9 +5356,9 @@ static void stm32_hwinitialize(FAR struct stm32_usbdev_s *priv)
 
   up_udelay(2000);
 
-#      endif  /* CONFIG_STM32F7_INTERNAL_ULPI */
-#    endif    /* CONFIG_STM32F7_NO_ULPI */
-#  endif      /* CONFIG_STM32F7_OTGFSHS */
+#      endif /* CONFIG_STM32F7_INTERNAL_ULPI */
+#    endif   /* CONFIG_STM32F7_NO_ULPI */
+#  endif     /* CONFIG_STM32F7_OTGFSHS */
 
   /* Common USB OTG core initialization */
   /* Reset after a PHY select and set Host mode.  First, wait for AHB master

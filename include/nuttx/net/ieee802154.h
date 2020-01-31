@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef  __INCLUDE_NUTTX_NET_IEEE802154_H
-#define  __INCLUDE_NUTTX_NET_IEEE802154_H
+#ifndef __INCLUDE_NUTTX_NET_IEEE802154_H
+#define __INCLUDE_NUTTX_NET_IEEE802154_H
 
 /****************************************************************************
  * Public Function Prototypes
@@ -90,4 +90,4 @@ int ieee802154_input(FAR struct radio_driver_s *radio,
                      FAR struct iob_s *framelist,
                      FAR struct ieee802154_data_ind_s *meta);
 
-#endif /*  __INCLUDE_NUTTX_NET_IEEE802154_H */
+#endif /* __INCLUDE_NUTTX_NET_IEEE802154_H */

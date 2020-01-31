@@ -1510,4 +1510,4 @@ int usbhost_hub_initialize(void)
   return usbhost_registerclass(&g_hub);
 }
 
-#endif  /* CONFIG_USBHOST_HUB */
+#endif /* CONFIG_USBHOST_HUB */

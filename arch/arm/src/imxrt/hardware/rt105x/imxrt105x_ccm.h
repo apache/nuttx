@@ -359,7 +359,7 @@
 #  define CCM_CSCDR1_TRACE_PODF(n)               ((uint32_t)(n) << CCM_CSCDR1_TRACE_PODF_SHIFT)
                                                            /* Bits 28-31: Reserved */
 
-/*  Clock Divider Register 1 */
+/* Clock Divider Register 1 */
 
 #define CCM_CS1CDR_SAI1_CLK_PODF_SHIFT           (0)       /* Bits 0-5:   Divider for sai1 clock podf */
 #define CCM_CS1CDR_SAI1_CLK_PODF_MASK            (0x3f << CCM_CS1CDR_SAI1_CLK_PODF_SHIFT)
@@ -382,7 +382,7 @@
 #  define CCM_CS1CDR_FLEXIO2_CLK_PODF(n)         ((uint32_t)(n) << CCM_CS1CDR_FLEXIO2_CLK_PODF_SHIFT)
                                                            /* Bits 28-31: Reserved */
 
-/*  Clock Divider Register 2 */
+/* Clock Divider Register 2 */
 
 #define CCM_CS2CDR_SAI2_CLK_PODF_SHIFT           (0)       /* Bits 0-5:   Divider for sai2 clock podf */
 #define CCM_CS2CDR_SAI2_CLK_PODF_MASK            (0x3f << CCM_CS2CDR_SAI2_CLK_PODF_SHIFT)
@@ -537,7 +537,7 @@
 #define CCM_CIMR_MASK_ARM_PODF_LOADED            (1 << 26) /* Bit 26:     mask interrupt generation due to frequency change of arm_podf */
                                                            /* Bits 27-31: Reserved */
 
-/*  Clock Output Source Register */
+/* Clock Output Source Register */
 
 #define CCM_CCOSR_CLKO1_SEL_SHIFT                (0)       /* Bits 0-3:   Selection of the clock to be generated on CCM_CLKO1 */
 #define CCM_CCOSR_CLKO1_SEL_MASK                 (0xF << CCM_CCOSR_CLKO1_SEL_SHIFT)

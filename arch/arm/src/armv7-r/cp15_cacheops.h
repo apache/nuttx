@@ -1088,4 +1088,4 @@ void cp15_flush_dcache(uintptr_t start, uintptr_t end);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_R_CP15_CACHEOPS_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_R_CP15_CACHEOPS_H */

@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #ifndef __WIRELESS_BLUETOOTH_BT_ATTR_H
-#define __WIRELESS_BLUETOOTH_BT_ATTR_H 1
+#define __WIRELESS_BLUETOOTH_BT_ATTR_H
 
 /****************************************************************************
  * Included Files

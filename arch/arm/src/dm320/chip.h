@@ -58,4 +58,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_DM320_CHIP_H */
+#endif /* __ARCH_ARM_SRC_DM320_CHIP_H */

@@ -167,4 +167,4 @@ void arm_data_initialize(void);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_R_CPSR_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_R_CPSR_H */

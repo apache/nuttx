@@ -287,4 +287,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_IMX6_HARDWARE_ECSPI_H */
+#endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_ECSPI_H */

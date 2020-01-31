@@ -196,7 +196,7 @@ _up_num_irq:
 _up_vector:
   SETPSW I               /* Re-enable interrupts. */
   PUSHREGS
-#ifdef  RX65N_INTERRUPT_IPL
+#ifdef RX65N_INTERRUPT_IPL
 
   /* Ensure the interrupt mask is set to the syscall priority while the kernel
    * structures are being accessed.
@@ -220,7 +220,7 @@ _up_vector:
   SMOVF      /* while(R3 > 0) {*R1++ = *R2++; R3--; } */
   NOP
 .lint_contextswitch:
-#ifdef  RX65N_INTERRUPT_IPL
+#ifdef RX65N_INTERRUPT_IPL
 
   /* Reset the interrupt mask as no more data structure access is required. */
 
@@ -597,7 +597,7 @@ _uprx65_groupal1_handler:
 
     RTE
     NOP
-#endif  /* CONFIG_RX65N_IRQ_GROUP */
+#endif /* CONFIG_RX65N_IRQ_GROUP */
 
 #ifdef CONFIG_RX65N_SCI11
   trampoline RX65N_RXI11_IRQ, _uprx65_rxi11_handler

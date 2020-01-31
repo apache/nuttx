@@ -489,7 +489,7 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
   up_mdelay(10);
   bcmf_core_reset(sbus, WLAN_ARMCM3_CORE_ID);
 
-  /*  Check ARMCM3 core is running */
+  /* Check ARMCM3 core is running */
 
   up_mdelay(10);
   if (!bcmf_core_isup(sbus, WLAN_ARMCM3_CORE_ID))

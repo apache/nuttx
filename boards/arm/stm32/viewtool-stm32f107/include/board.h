@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_INCLUDE_BOARD_H 1
+#define __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files

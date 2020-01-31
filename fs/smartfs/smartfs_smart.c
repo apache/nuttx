@@ -225,7 +225,7 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
     }
 
   sf->bflags = 0;
-#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
 
   sf->entry.name = NULL;
   ret = smartfs_finddirentry(fs, &sf->entry, relpath, &parentdirsector,
@@ -385,7 +385,7 @@ errout_with_buffer:
 
 #ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
   kmm_free(sf->buffer);
-#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
   kmm_free(sf);
 
 errout_with_semaphore:
@@ -816,7 +816,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
             }
         }
 
-#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
 
       /* Update our control variables */
 
@@ -926,7 +926,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
               sf->curroffset = sizeof(struct smartfs_chain_header_s);
             }
         }
-#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
     }
 
   ret = byteswritten;

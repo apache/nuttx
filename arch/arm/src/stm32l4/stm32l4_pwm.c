@@ -518,7 +518,7 @@ static struct stm32l4_pwmtimer_s g_pwm1dev =
   .base        = STM32L4_TIM1_BASE,
   .pclk        = STM32L4_APB2_TIM1_CLKIN,
 };
-#endif  /* CONFIG_STM32L4_TIM1_PWM */
+#endif /* CONFIG_STM32L4_TIM1_PWM */
 
 #ifdef CONFIG_STM32L4_TIM2_PWM
 
@@ -618,7 +618,7 @@ static struct stm32l4_pwmtimer_s g_pwm2dev =
   .pclk        = STM32L4_APB1_TIM2_CLKIN,
 };
 
-#endif  /* CONFIG_STM32L4_TIM2_PWM */
+#endif /* CONFIG_STM32L4_TIM2_PWM */
 
 #ifdef CONFIG_STM32L4_TIM3_PWM
 
@@ -717,7 +717,7 @@ static struct stm32l4_pwmtimer_s g_pwm3dev =
   .base        = STM32L4_TIM3_BASE,
   .pclk        = STM32L4_APB1_TIM3_CLKIN,
 };
-#endif  /* CONFIG_STM32L4_TIM3_PWM */
+#endif /* CONFIG_STM32L4_TIM3_PWM */
 
 #ifdef CONFIG_STM32L4_TIM4_PWM
 
@@ -816,7 +816,7 @@ static struct stm32l4_pwmtimer_s g_pwm4dev =
   .base        = STM32L4_TIM4_BASE,
   .pclk        = STM32L4_APB1_TIM4_CLKIN,
 };
-#endif  /* CONFIG_STM32L4_TIM4_PWM */
+#endif /* CONFIG_STM32L4_TIM4_PWM */
 
 #ifdef CONFIG_STM32L4_TIM5_PWM
 
@@ -913,7 +913,7 @@ static struct stm32l4_pwmtimer_s g_pwm5dev =
   .base        = STM32L4_TIM5_BASE,
   .pclk        = STM32L4_APB1_TIM5_CLKIN,
 };
-#endif  /* CONFIG_STM32L4_TIM5_PWM */
+#endif /* CONFIG_STM32L4_TIM5_PWM */
 
 #ifdef CONFIG_STM32L4_TIM8_PWM
 
@@ -1079,7 +1079,7 @@ static struct stm32l4_pwmtimer_s g_pwm8dev =
   .base        = STM32L4_TIM8_BASE,
   .pclk        = STM32L4_APB2_TIM8_CLKIN,
 };
-#endif  /* CONFIG_STM32L4_TIM8_PWM */
+#endif /* CONFIG_STM32L4_TIM8_PWM */
 
 #ifdef CONFIG_STM32L4_TIM15_PWM
 
@@ -1164,7 +1164,7 @@ static struct stm32l4_pwmtimer_s g_pwm15dev =
   .base        = STM32L4_TIM15_BASE,
   .pclk        = STM32L4_APB2_TIM15_CLKIN,
 };
-#endif  /* CONFIG_STM32L4_TIM15_PWM */
+#endif /* CONFIG_STM32L4_TIM15_PWM */
 
 #ifdef CONFIG_STM32L4_TIM16_PWM
 
@@ -1233,7 +1233,7 @@ static struct stm32l4_pwmtimer_s g_pwm16dev =
   .base        = STM32L4_TIM16_BASE,
   .pclk        = STM32L4_APB2_TIM16_CLKIN,
 };
-#endif  /* CONFIG_STM32L4_TIM16_PWM */
+#endif /* CONFIG_STM32L4_TIM16_PWM */
 
 #ifdef CONFIG_STM32L4_TIM17_PWM
 
@@ -1302,7 +1302,7 @@ static struct stm32l4_pwmtimer_s g_pwm17dev =
   .base        = STM32L4_TIM17_BASE,
   .pclk        = STM32L4_APB2_TIM17_CLKIN,
 };
-#endif  /* CONFIG_STM32L4_TIM17_PWM */
+#endif /* CONFIG_STM32L4_TIM17_PWM */
 
 #ifdef CONFIG_STM32L4_LPTIM1_PWM
 
@@ -1361,7 +1361,7 @@ static struct stm32l4_pwmtimer_s g_pwmlp1dev =
   .pclk        = STM32L4_HSI_FREQUENCY,
 #endif
 };
-#endif  /* CONFIG_STM32L4_LPTIM1_PWM */
+#endif /* CONFIG_STM32L4_LPTIM1_PWM */
 
 #ifdef CONFIG_STM32L4_LPTIM2_PWM
 
@@ -1420,7 +1420,7 @@ static struct stm32l4_pwmtimer_s g_pwmlp2dev =
   .pclk        = STM32L4_HSI_FREQUENCY,
 #endif
 };
-#endif  /* CONFIG_STM32L4_LPTIM2_PWM */
+#endif /* CONFIG_STM32L4_LPTIM2_PWM */
 
 /****************************************************************************
  * Private Functions
@@ -1748,7 +1748,7 @@ static uint32_t pwm_ccr_get(FAR struct pwm_lowerhalf_s *dev, uint8_t index)
 
   return pwm_getreg(priv, offset);
 }
-#endif  /* CONFIG_STM32L4_PWM_LL_OPS */
+#endif /* CONFIG_STM32L4_PWM_LL_OPS */
 
 /****************************************************************************
  * Name: pwm_arr_update
@@ -2484,7 +2484,7 @@ static int pwm_output_configure(FAR struct stm32l4_pwmtimer_s *priv,
         {
           ccer &= ~(ATIM_CCER_CC1NP << ((channel - 1) * 4));
         }
-#endif  /* HAVE_PWM_COMPLEMENTARY */
+#endif /* HAVE_PWM_COMPLEMENTARY */
 
       /* TODO: OIS5 and OIS6 */
 
@@ -2496,8 +2496,8 @@ static int pwm_output_configure(FAR struct stm32l4_pwmtimer_s *priv,
     }
 #ifdef HAVE_GTIM_CCXNP
   else
-#endif  /* HAVE_GTIM_CCXNP */
-#endif  /* HAVE_ADVTIM */
+#endif /* HAVE_GTIM_CCXNP */
+#endif /* HAVE_ADVTIM */
 #ifdef HAVE_GTIM_CCXNP
     {
       /* CCxNP must be cleared if not ADVANCED timer.
@@ -2508,7 +2508,7 @@ static int pwm_output_configure(FAR struct stm32l4_pwmtimer_s *priv,
 
       ccer &= ~(GTIM_CCER_CC1NP << ((channel - 1) * 4));
     }
-#endif  /* HAVE_GTIM_CCXNP */
+#endif /* HAVE_GTIM_CCXNP */
 
   /* Write registers */
 
@@ -2777,7 +2777,7 @@ static int pwm_break_dt_configure(FAR struct stm32l4_pwmtimer_s *priv)
       bdtr |= (priv->brk.flt2 << ATIM_BDTR_BK2F_SHIFT);
     }
 
-#endif  /* HAVE_BREAK */
+#endif /* HAVE_BREAK */
 
   /* Clear the OSSI and OSSR bits in the BDTR register.
    *
@@ -3330,7 +3330,7 @@ errout:
 }
 #endif /* HAVE_LPTIM */
 
-#endif  /* CONFIG_PWM_PULSECOUNT */
+#endif /* CONFIG_PWM_PULSECOUNT */
 
 #ifdef HAVE_PWM_INTERRUPT
 

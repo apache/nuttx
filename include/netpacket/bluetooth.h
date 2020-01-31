@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef  __INCLUDE_NETPACKET_BLUETOOTH_H
-#define  __INCLUDE_NETPACKET_BLUETOOTH_H
+#ifndef __INCLUDE_NETPACKET_BLUETOOTH_H
+#define __INCLUDE_NETPACKET_BLUETOOTH_H
 
 /****************************************************************************
  * Included Files
@@ -290,4 +290,4 @@ struct sockaddr_bt_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /*  __INCLUDE_NETPACKET_BLUETOOTH_H */
+#endif /* __INCLUDE_NETPACKET_BLUETOOTH_H */

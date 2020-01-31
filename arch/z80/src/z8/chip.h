@@ -236,4 +236,4 @@ extern "C"
 #endif
 #endif
 
-#endif  /* __ARCH_Z80_SRC_Z8_CHIP_H */
+#endif /* __ARCH_Z80_SRC_Z8_CHIP_H */

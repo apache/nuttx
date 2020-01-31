@@ -193,4 +193,4 @@ int lpc31_setup_overcurrent(xcpt_t handler, void *arg);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_LPC31XX_OLIMEX_LPC_H3131_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_LPC31XX_OLIMEX_LPC_H3131_INCLUDE_BOARD_H */

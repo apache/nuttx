@@ -2833,4 +2833,4 @@ int usbhost_cdcacm_initialize(void)
   return usbhost_registerclass(&g_cdcacm);
 }
 
-#endif  /* CONFIG_USBHOST_CDCACM */
+#endif /* CONFIG_USBHOST_CDCACM */

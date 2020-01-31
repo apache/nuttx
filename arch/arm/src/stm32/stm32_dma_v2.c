@@ -1105,4 +1105,4 @@ uint8_t stm32_dma_intget(unsigned int controller, uint8_t stream)
 
   return (uint8_t)regval;
 }
-#endif  /* CONFIG_ARCH_HIPRI_INTERRUPT */
+#endif /* CONFIG_ARCH_HIPRI_INTERRUPT */

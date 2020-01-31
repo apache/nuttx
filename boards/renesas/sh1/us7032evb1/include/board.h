@@ -93,4 +93,4 @@ extern "C"
 #endif
 #endif
 
-#endif  /* __BOARDS_RENESAS_SH7032_US7032EVB1_BOARD_H */
+#endif /* __BOARDS_RENESAS_SH7032_US7032EVB1_BOARD_H */

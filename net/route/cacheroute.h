@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __NET_ROUTE_CACHEROUTE_H
-#define __NET_ROUTE_CACHEROUTE_H 1
+#define __NET_ROUTE_CACHEROUTE_H
 
 /****************************************************************************
  * Included Files

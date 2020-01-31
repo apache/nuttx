@@ -230,7 +230,7 @@ struct adc_sample_time_s
                                           * same value of the sample time */
   uint8_t        all_ch_sample_time:3;   /* Sample time for all channels */
 };
-#endif  /* CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME */
+#endif /* CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME */
 
 /* This structure provides the publicly visable representation of the
  * "lower-half" ADC driver structure.
@@ -291,7 +291,7 @@ struct stm32_adc_ops_s
   void (*dump_regs)(FAR struct stm32_adc_dev_s *dev);
 };
 
-#endif  /* CONFIG_STM32F0L0G0_ADC_LL_OPS */
+#endif /* CONFIG_STM32F0L0G0_ADC_LL_OPS */
 
 /************************************************************************************
  * Public Function Prototypes

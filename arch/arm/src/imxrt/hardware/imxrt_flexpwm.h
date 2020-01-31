@@ -1678,10 +1678,10 @@
 #define MCTRL_CLDOK_SHIFT                    (4)        /* Bits: 4-7  Clear Load Okay */
 #define MCTRL_CLDOK_MASK                     (15 << MCTRL_CLDOK_SHIFT)
 #  define MCTRL_CLDOK(n)                     ((uint32_t)(n) << MCTRL_CLDOK_SHIFT)
-#  define MCTRL_CLDOK_SM0                    (1 << MCTRL_CLDOK_SHIFT)  /*  Clear Load Okay of submodule 0 */
-#  define MCTRL_CLDOK_SM1                    (2 << MCTRL_CLDOK_SHIFT)  /*  Clear Load Okay of submodule 1 */
-#  define MCTRL_CLDOK_SM2                    (4 << MCTRL_CLDOK_SHIFT)  /*  Clear Load Okay of submodule 2 */
-#  define MCTRL_CLDOK_SM3                    (8 << MCTRL_CLDOK_SHIFT)  /*  Clear Load Okay of submodule 3 */
+#  define MCTRL_CLDOK_SM0                    (1 << MCTRL_CLDOK_SHIFT)  /* Clear Load Okay of submodule 0 */
+#  define MCTRL_CLDOK_SM1                    (2 << MCTRL_CLDOK_SHIFT)  /* Clear Load Okay of submodule 1 */
+#  define MCTRL_CLDOK_SM2                    (4 << MCTRL_CLDOK_SHIFT)  /* Clear Load Okay of submodule 2 */
+#  define MCTRL_CLDOK_SM3                    (8 << MCTRL_CLDOK_SHIFT)  /* Clear Load Okay of submodule 3 */
 #define MCTRL_RUN_SHIFT                      (8)        /* Bits: 8-11  Run */
 #define MCTRL_RUN_MASK                       (15 << MCTRL_RUN_SHIFT)
 #  define MCTRL_RUN(n)                       ((uint32_t)(n) << MCTRL_RUN_SHIFT)

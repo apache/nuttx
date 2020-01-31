@@ -159,4 +159,4 @@ int lc823450_dmaremain(DMA_HANDLE handle);
 }
 #endif
 
-#endif /*  __ARCH_ARM_SRC_LC823450_LC823450_DMA_H */
+#endif /* __ARCH_ARM_SRC_LC823450_LC823450_DMA_H */

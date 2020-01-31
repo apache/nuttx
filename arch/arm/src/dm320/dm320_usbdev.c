@@ -67,7 +67,7 @@
 
 /* Configuration ************************************************************/
 
-#ifndef  CONFIG_USBDEV_MAXPOWER
+#ifndef CONFIG_USBDEV_MAXPOWER
 #  define CONFIG_USBDEV_MAXPOWER 100  /* mA */
 #endif
 

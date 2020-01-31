@@ -143,7 +143,7 @@ int photon_watchdog_initialize(void)
 # error "No watchdog configured"
 #endif
 
-  /*  Close watchdog as it is not needed here anymore */
+  /* Close watchdog as it is not needed here anymore */
 
   file_close(&filestruct);
 

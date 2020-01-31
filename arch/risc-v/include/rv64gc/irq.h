@@ -339,7 +339,7 @@ struct xcptcontext
   uint64_t regs[XCPTCONTEXT_REGS];
 };
 
-#endif  /* __ASSEMBLY__ */
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Public Variables

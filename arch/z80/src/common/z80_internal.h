@@ -217,4 +217,4 @@ void up_stackdump(void);
 #endif
 #endif
 
-#endif  /* __ARCH_Z80_SRC_COMMON_Z80_INTERNAL_H */
+#endif /* __ARCH_Z80_SRC_COMMON_Z80_INTERNAL_H */

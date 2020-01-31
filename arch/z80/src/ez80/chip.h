@@ -95,4 +95,4 @@ EXTERN uint32_t ez80_systemclock;
 #endif
 #endif
 
-#endif  /* __ARCH_Z80_SRC_EZ80_CHIP_H */
+#endif /* __ARCH_Z80_SRC_EZ80_CHIP_H */

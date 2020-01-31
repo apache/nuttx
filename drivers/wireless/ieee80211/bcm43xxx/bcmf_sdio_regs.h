@@ -15,8 +15,8 @@
  *
  ****************************************************************************/
 
-#ifndef    __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_REGS_H
-#define    __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_REGS_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_REGS_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_REGS_H
 
 #define SDIO_FUNC_0        0
 #define SDIO_FUNC_1        1

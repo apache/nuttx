@@ -293,4 +293,4 @@ void cxd56_boardinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_H */

@@ -337,4 +337,4 @@ int pthread_spin_unlock(pthread_spinlock_t *lock)
   return OK;
 }
 
-#endif  /* CONFIG_PTHREAD_SPINLOCKS */
+#endif /* CONFIG_PTHREAD_SPINLOCKS */

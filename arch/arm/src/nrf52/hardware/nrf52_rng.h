@@ -82,4 +82,4 @@
 
 #define RNG_CONFIG_DERCEN              (1 << 0) /* Bit 0: Bias correction */
 
-#endif  /* __ARCH_ARM_SRC_NRF52_HARDWARE_STM32_RNG_H */
+#endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_STM32_RNG_H */

@@ -231,4 +231,4 @@ inline void ftintc010_set_trig_level(int irq, int level);
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_MOXART_MOXA_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_MOXART_MOXA_INCLUDE_BOARD_H */

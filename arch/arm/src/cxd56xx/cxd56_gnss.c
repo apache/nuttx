@@ -95,7 +95,7 @@ extern int PM_SleepCpu(int cpuid, int mode);
 #endif
 
 #define CXD56_GNSS_GPS_CPUID                  1
-#ifdef  CONFIG_CXD56_GNSS_FW_RTK
+#ifdef CONFIG_CXD56_GNSS_FW_RTK
 #  define CXD56_GNSS_FWNAME                   "gnssfwrtk"
 #else
 #  define CXD56_GNSS_FWNAME                   "gnssfw"

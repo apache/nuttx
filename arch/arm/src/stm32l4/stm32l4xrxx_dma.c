@@ -873,7 +873,7 @@ static void stm32l4_dma12_dump(DMA_HANDLE handle,
 }
 #endif
 
-#endif  /* CONFIG_STM32L4_DMA1 || CONFIG_STM32L4_DMA2 */
+#endif /* CONFIG_STM32L4_DMA1 || CONFIG_STM32L4_DMA2 */
 
 /****************************************************************************
  * Name: stm32l4_dmamux_sample

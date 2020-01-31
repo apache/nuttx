@@ -248,8 +248,8 @@
 
 #define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T1CC1
 
-#endif  /* CONFIG_STM32_TIM1_PWM */
-#endif  /* CONFIG_NUCLEOF302R8_HIGHPRI */
+#endif /* CONFIG_STM32_TIM1_PWM */
+#endif /* CONFIG_NUCLEOF302R8_HIGHPRI */
 
 /* DMA channels *************************************************************/
 /* ADC */

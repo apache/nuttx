@@ -130,7 +130,7 @@
 #    error
 #  endif
 
-#endif  /* CONFIG_NUCLEOF334R8_SPWM_USE_TIM1 */
+#endif /* CONFIG_NUCLEOF334R8_SPWM_USE_TIM1 */
 
 /* Check the configuration for HRTIM */
 
@@ -179,7 +179,7 @@
 #    endif
 #  endif
 
-#endif  /* CONFIG_NUCLEOF334R8_SPWM_USE_HRTIM1 */
+#endif /* CONFIG_NUCLEOF334R8_SPWM_USE_HRTIM1 */
 
 /* Configuration ************************************************************/
 
@@ -255,7 +255,7 @@ static void hrtim_master_handler(void);
 static int spwm_hrtim_setup(FAR struct spwm_s *spwm);
 static int spwm_hrtim_start(FAR struct spwm_s *spwm);
 static int spwm_hrtim_stop(FAR struct spwm_s *spwm);
-#endif  /* CONFIG_NUCLEOF334R8_SPWM_USE_HRTIM1 */
+#endif /* CONFIG_NUCLEOF334R8_SPWM_USE_HRTIM1 */
 #ifdef CONFIG_NUCLEOF334R8_SPWM_USE_TIM1
 static int spwm_tim1_setup(FAR struct spwm_s *spwm);
 static int spwm_tim6_setup(FAR struct spwm_s *spwm);
@@ -263,7 +263,7 @@ static int spwm_tim1_start(FAR struct spwm_s *spwm);
 static int spwm_tim6_start(FAR struct spwm_s *spwm);
 static int spwm_tim1_stop(FAR struct spwm_s *spwm);
 static int spwm_tim6_stop(FAR struct spwm_s *spwm);
-#endif  /* CONFIG_NUCLEOF334R8_SPWM_USE_TIM1 */
+#endif /* CONFIG_NUCLEOF334R8_SPWM_USE_TIM1 */
 static int spwm_setup(FAR struct spwm_s *spwm);
 
 /****************************************************************************
@@ -697,7 +697,7 @@ static int spwm_hrtim_stop(FAR struct spwm_s *spwm)
   return OK;
 }
 
-#endif  /* CONFIG_NUCLEOF334R8_SPWM_USE_HRTIM1 */
+#endif /* CONFIG_NUCLEOF334R8_SPWM_USE_HRTIM1 */
 
 #ifdef CONFIG_NUCLEOF334R8_SPWM_USE_TIM1
 
@@ -940,7 +940,7 @@ static int spwm_tim1_stop(FAR struct spwm_s *spwm)
   return OK;
 }
 
-#endif  /* CONFIG_NUCLEOF334R8_SPWM_USE_TIM1 */
+#endif /* CONFIG_NUCLEOF334R8_SPWM_USE_TIM1 */
 
 /****************************************************************************
  * Name: spwm_setup
@@ -1056,4 +1056,4 @@ errout:
   return 0;
 }
 
-#endif  /* CONFIG_NUCLEOF334R8_SPWM */
+#endif /* CONFIG_NUCLEOF334R8_SPWM */

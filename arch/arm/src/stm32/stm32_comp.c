@@ -1075,8 +1075,8 @@ FAR struct comp_dev_s* stm32_compinitialize(int intf)
   return dev;
 }
 
-#endif  /* CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F33XX ||
-         * CONFIG_STM32_STM32F37XX*/
+#endif /* CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F33XX ||
+        * CONFIG_STM32_STM32F37XX*/
 
-#endif  /* CONFIG_STM32_COMP2 || CONFIG_STM32_COMP4 ||
-         * CONFIG_STM32_COMP6 */
+#endif /* CONFIG_STM32_COMP2 || CONFIG_STM32_COMP4 ||
+        * CONFIG_STM32_COMP6 */

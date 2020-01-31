@@ -499,5 +499,5 @@ static inline void mpu_user_peripheral(uintptr_t base, size_t size)
 }
 #endif
 
-#endif  /* __ASSEMBLY__ */
-#endif  /* __ARCH_ARM_SRC_ARMV7M_MPU_H */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_ARMV7M_MPU_H */

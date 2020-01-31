@@ -1038,7 +1038,7 @@ static void stm32_mdma_dump(DMA_HANDLE handle, const char *msg)
 }
 #endif
 
-#endif  /* CONFIG_STM32H7_MDMA */
+#endif /* CONFIG_STM32H7_MDMA */
 
 /****************************************************************************
  * Standard DMA functions
@@ -1662,7 +1662,7 @@ static void stm32_sdma_dump(DMA_HANDLE handle, const char *msg)
 }
 #endif
 
-#endif  /* CONFIG_STM32H7_DMA1 || CONFIG_STM32H7_DMA2 */
+#endif /* CONFIG_STM32H7_DMA1 || CONFIG_STM32H7_DMA2 */
 
 /****************************************************************************
  * Basic DMA functions
@@ -1903,7 +1903,7 @@ static void stm32_bdma_dump(DMA_HANDLE handle, const char *msg)
 }
 #endif
 
-#endif  /* CONFIG_STM32H7_BDMA */
+#endif /* CONFIG_STM32H7_BDMA */
 
 /****************************************************************************
  * Name: stm32_dmamux_dump
@@ -1998,7 +1998,7 @@ void weak_function up_dma_initialize(void)
               up_prioritize_irq(dmachan->irq, CONFIG_DMA_PRI);
               break;
             }
-#endif  /* CONFIG_STM32H7_DMA1 && CONFIG_STM32H7_DMA2 */
+#endif /* CONFIG_STM32H7_DMA1 && CONFIG_STM32H7_DMA2 */
 
 #ifdef CONFIG_STM32H7_MDMA
           case MDMA:
@@ -2014,7 +2014,7 @@ void weak_function up_dma_initialize(void)
               up_prioritize_irq(dmachan->irq, CONFIG_BDMA_PRI);
               break;
             }
-#endif  /* CONFIG_STM32H7_BDMA */
+#endif /* CONFIG_STM32H7_BDMA */
 
           default:
             {

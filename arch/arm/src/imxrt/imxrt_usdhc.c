@@ -3168,4 +3168,4 @@ FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
   return &g_sdhcdev[slotno].dev;
 }
 
-#endif  /* CONFIG_IMXRT_USDHC */
+#endif /* CONFIG_IMXRT_USDHC */

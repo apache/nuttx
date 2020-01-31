@@ -465,7 +465,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
         }
         break;
-#endif  /* CONFIG_AUDIO_EXCLUDE_STOP */
+#endif /* CONFIG_AUDIO_EXCLUDE_STOP */
 
       /* AUDIOIOC_PAUSE - Pause the audio stream.
        *
@@ -513,7 +513,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-#endif  /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
 
       /* AUDIOIOC_ALLOCBUFFER - Allocate an audio buffer
        *

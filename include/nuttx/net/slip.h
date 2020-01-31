@@ -119,5 +119,5 @@ int slip_initialize(int intf, FAR const char *devname);
 }
 #endif
 
-#endif /*  CONFIG_NET_SLIP */
+#endif /* CONFIG_NET_SLIP */
 #endif /* __INCLUDE_NUTTX_NET_SLIP_H */

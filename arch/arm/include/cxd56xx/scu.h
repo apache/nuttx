@@ -557,4 +557,4 @@ void scu_initialize(void);
 
 void scu_uninitialize(void);
 
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_SCU_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_SCU_H */

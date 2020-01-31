@@ -162,4 +162,4 @@ int imx_spi5cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif /* __cplusplus */
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_IMX6_ECSPI_H */
+#endif /* __ARCH_ARM_IMX6_ECSPI_H */

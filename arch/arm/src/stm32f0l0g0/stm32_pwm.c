@@ -228,7 +228,7 @@ static int stm32pwm_tim1interrupt(int irq, void *context, FAR void *arg);
 static int stm32pwm_tim8interrupt(int irq, void *context, FAR void *arg);
 #  endif
 static uint8_t stm32pwm_pulsecount(uint32_t count);
-#endif  /* CONFIG_PWM_PULSECOUNT && CONFIG_STM32F0L0G0_TIM{1,8}_PWM */
+#endif /* CONFIG_PWM_PULSECOUNT && CONFIG_STM32F0L0G0_TIM{1,8}_PWM */
 
 /* PWM driver methods */
 
@@ -821,8 +821,8 @@ static int stm32pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
 
       ccer &= ~(ATIM_CCER_CC1NP << ((channel - 1) * 4));
     }
-#endif  /* HAVE_PWM_COMPLEMENTARY */
-#endif  /* HAVE_ADVTIM */
+#endif /* HAVE_PWM_COMPLEMENTARY */
+#endif /* HAVE_ADVTIM */
 
   stm32pwm_modifyreg(priv, STM32_GTIM_CR2_OFFSET, 0, cr2);
   stm32pwm_modifyreg(priv, STM32_GTIM_CCER_OFFSET, 0, ccer);

@@ -1273,7 +1273,7 @@ static int smart_setsectorsize(FAR struct smart_struct_s *dev, uint16_t size)
   dev->freecount = dev->releasecount + dev->neraseblocks;
 #endif
 
-#endif  /* CONFIG_MTD_SMART_MINIMIZE_RAM */
+#endif /* CONFIG_MTD_SMART_MINIMIZE_RAM */
 
 #ifdef CONFIG_MTD_SMART_SECTOR_ERASE_DEBUG
   /* Allocate a buffer to hold the erase counts */
@@ -2390,7 +2390,7 @@ static int smart_scan(FAR struct smart_struct_s *dev)
 
               finfo("Duplicate Sector winner=%d, loser=%d\n", winner, loser);
             }
-#endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
+#endif /* CONFIG_MTD_SMART_ENABLE_CRC */
 
           /* Now release the loser sector */
 
@@ -2511,8 +2511,8 @@ static int smart_scan(FAR struct smart_struct_s *dev)
         }
     }
 
-#endif  /* CONFIG_MTD_SMART_CONVERT_WEAR_FORMAT */
-#endif  /* CONFIG_MTD_SMART_WEAR_LEVEL && SMART_STATUS_VERSION == 1 */
+#endif /* CONFIG_MTD_SMART_CONVERT_WEAR_FORMAT */
+#endif /* CONFIG_MTD_SMART_WEAR_LEVEL && SMART_STATUS_VERSION == 1 */
 
 #ifdef CONFIG_MTD_SMART_FSCK
   smart_fsck(dev);
@@ -2934,7 +2934,7 @@ static int smart_relocate_static_data(FAR struct smart_struct_s *dev, uint16_t b
           smart_add_count(dev, dev->freecount, block, -1);
 #else
           dev->freecount[block]--;
-#endif  /* CONFIG_MTD_SMART_PACK_COUNTS */
+#endif /* CONFIG_MTD_SMART_PACK_COUNTS */
         }
 
 #ifdef CONFIG_SMART_LOCAL_CHECKFREE
@@ -3026,7 +3026,7 @@ static crc_t smart_calc_sector_crc(FAR struct smart_struct_s *dev)
 
   return crc;
 }
-#endif  /* CONFIG_MTD_SMART_ENABLE_CRC  */
+#endif /* CONFIG_MTD_SMART_ENABLE_CRC  */
 
 /****************************************************************************
  * Name: smart_llformat
@@ -3109,7 +3109,7 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long a
 #endif
 #else   /* SMART_STATUS_VERSION == 1 */
   sectorheader->seq = 0;
-#endif  /* SMART_STATUS_VERSION == 1 */
+#endif /* SMART_STATUS_VERSION == 1 */
 
   /* Set the sector size of this sector */
 
@@ -3126,7 +3126,7 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long a
           sectsize;
 #ifdef CONFIG_MTD_SMART_ENABLE_CRC
   sectorheader->status &= ~SMART_STATUS_CRC;
-#endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
+#endif /* CONFIG_MTD_SMART_ENABLE_CRC */
 
 #else   /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
   *((FAR uint16_t *) sectorheader->logicalsector) = 0xffff;
@@ -3134,8 +3134,8 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long a
           sectsize);
 #ifdef CONFIG_MTD_SMART_ENABLE_CRC
   sectorheader->status |= SMART_STATUS_CRC;
-#endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
-#endif  /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
+#endif /* CONFIG_MTD_SMART_ENABLE_CRC */
+#endif /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
 
   /* Now add the format signature to the sector */
 
@@ -3363,7 +3363,7 @@ static int smart_relocate_sector(FAR struct smart_struct_s *dev,
       ferr("ERROR: Error %d committing new sector %d\n" -ret, newsector);
       goto errout;
     }
-#endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
+#endif /* CONFIG_MTD_SMART_ENABLE_CRC */
 
   /* Release the old physical sector */
 
@@ -4340,7 +4340,7 @@ static int smart_write_alloc_sector(FAR struct smart_struct_s *dev,
   header->seq = 0;
 #else
   *((FAR uint16_t *) &header->seq) = 0;
-#endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
+#endif /* CONFIG_MTD_SMART_ENABLE_CRC */
 #else
   header->seq = 0;
 #endif
@@ -4365,12 +4365,12 @@ static int smart_write_alloc_sector(FAR struct smart_struct_s *dev,
           SMART_STATUS_VERBITS) | SMART_STATUS_VERSION | sectsize;
 #ifdef CONFIG_MTD_SMART_ENABLE_CRC
   header->status &= ~SMART_STATUS_CRC;
-#endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
+#endif /* CONFIG_MTD_SMART_ENABLE_CRC */
 #else
   header->status = SMART_STATUS_COMMITTED | SMART_STATUS_VERSION | sectsize;
 #ifdef CONFIG_MTD_SMART_ENABLE_CRC
   header->status |= SMART_STATUS_CRC;
-#endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
+#endif /* CONFIG_MTD_SMART_ENABLE_CRC */
 #endif
 
   /* Write the header to the physical sector location */
@@ -4390,7 +4390,7 @@ static int smart_write_alloc_sector(FAR struct smart_struct_s *dev,
 
       return -EIO;
     }
-#endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
+#endif /* CONFIG_MTD_SMART_ENABLE_CRC */
 
   return ret;
 }
@@ -4596,7 +4596,7 @@ static int smart_writesector(FAR struct smart_struct_s *dev,
         }
 #endif
     }
-#endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
+#endif /* CONFIG_MTD_SMART_ENABLE_CRC */
 
   /* If we are not using CRC and on a device that supports re-writing
    * bits from 1 to 0 without needing a block erase, such as NOR
@@ -4721,7 +4721,7 @@ static int smart_writesector(FAR struct smart_struct_s *dev,
   memcpy(&dev->rwbuffer[sizeof(struct smart_sect_header_s) + req->offset],
           req->buffer, req->count);
 
-#endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
+#endif /* CONFIG_MTD_SMART_ENABLE_CRC */
 
   /* Now write the sector buffer to the device. */
 
@@ -5229,7 +5229,7 @@ static inline int smart_allocsector(FAR struct smart_struct_s *dev,
 
       return ret;
     }
-#endif  /* CONFIG_MTD_SMART_ENABLE_CRC */
+#endif /* CONFIG_MTD_SMART_ENABLE_CRC */
 
   /* Map the sector and update the free sector counts */
 

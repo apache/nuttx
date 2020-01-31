@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef  __INCLUDE_NETPACKET_IEEE802154_H
-#define  __INCLUDE_NETPACKET_IEEE802154_H
+#ifndef __INCLUDE_NETPACKET_IEEE802154_H
+#define __INCLUDE_NETPACKET_IEEE802154_H
 
 /****************************************************************************
  * Included Files
@@ -98,4 +98,4 @@ struct sockaddr_ieee802154_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /*  __INCLUDE_NETPACKET_IEEE802154_H */
+#endif /* __INCLUDE_NETPACKET_IEEE802154_H */

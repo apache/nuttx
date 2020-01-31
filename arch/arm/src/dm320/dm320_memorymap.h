@@ -261,4 +261,4 @@
 
 #endif
 
-#endif  /* __ARCH_ARM_SRC_DM320_DM320_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_DM320_DM320_MEMORYMAP_H */

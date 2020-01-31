@@ -39,7 +39,7 @@
  ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_CRYPTO_TEA_H
-#define __INCLUDE_NUTTX_CRYPTO_TEA_H 1
+#define __INCLUDE_NUTTX_CRYPTO_TEA_H
 
 /****************************************************************************
  * Included Files
