@@ -1,8 +1,8 @@
 /********************************************************************************
  * include/sched.h
  *
- *   Copyright (C) 2007-2009, 2011, 2013, 2015-2016 Gregory Nutt. All rights
- *     reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013, 2015-2016, 2020 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <nuttx/sched.h>
 
 /********************************************************************************
@@ -265,6 +266,7 @@ int    sched_setaffinity(pid_t pid, size_t cpusetsize,
                          FAR const cpu_set_t *mask);
 int    sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
 int    sched_cpu_count(FAR const cpu_set_t *set);
+int    sched_getcpu(void);
 #endif /* CONFIG_SMP */
 
 /* Task Switching Interfaces (non-standard) */
