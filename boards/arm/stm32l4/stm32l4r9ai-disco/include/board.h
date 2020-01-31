@@ -303,4 +303,4 @@ void stm32l4_board_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32L4R9AI_DISCO_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32L4R9AI_DISCO_INCLUDE_BOARD_H */

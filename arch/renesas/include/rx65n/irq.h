@@ -1071,6 +1071,6 @@ static inline void up_irq_restore(irqstate_t flags)
   }
 }
 
-#endif  /* __ASSEMBLY__ */
+#endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_RENESAS_INCLUDE_RX65N_IRQ_H */
+#endif /* __ARCH_RENESAS_INCLUDE_RX65N_IRQ_H */

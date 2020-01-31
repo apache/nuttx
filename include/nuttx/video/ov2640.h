@@ -85,4 +85,4 @@ int ov2640_initialize(FAR struct i2c_master_s *i2c);
 }
 #endif
 
-#endif  /* __INCLUDE_NUTTX_VIDEO_OV2640_H */
+#endif /* __INCLUDE_NUTTX_VIDEO_OV2640_H */

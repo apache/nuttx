@@ -132,7 +132,7 @@
 #define PORT_CAN1_TX_1               (PORT_FUNCH | PORTB | PORT_PIN12)
 #define PORT_CAN1_TX_2               (PORT_FUNCH | PORTB | PORT_PIN14)
 
-/*  Configurable Custom Logic (CCL) */
+/* Configurable Custom Logic (CCL) */
 
 #define PORT_CCL_IN0_1               (PORT_FUNCN | PORTA | PORT_PIN16)
 #define PORT_CCL_IN0_2               (PORT_FUNCN | PORTA | PORT_PIN4)

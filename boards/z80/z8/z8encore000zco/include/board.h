@@ -74,4 +74,4 @@ extern "C"
 }
 #endif
 
-#endif  /* __BOARDS_Z80_Z8_Z8ENCORE000ZCO__BOARD_H */
+#endif /* __BOARDS_Z80_Z8_Z8ENCORE000ZCO__BOARD_H */

@@ -142,7 +142,7 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize wireless driver: %d\n", ret);
     }
-#endif  /* CONFIG_WL_NRF24L01 */
+#endif /* CONFIG_WL_NRF24L01 */
 
 #ifdef CONFIG_LPWAN_SX127X
   ret = stm32_lpwaninitialize();
@@ -150,7 +150,7 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize wireless driver: %d\n", ret);
     }
-#endif  /* CONFIG_LPWAN_SX127X */
+#endif /* CONFIG_LPWAN_SX127X */
 
 #ifdef CONFIG_CL_MFRC522
   ret = stm32_mfrc522initialize("/dev/rfid0");
@@ -158,7 +158,7 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: stm32_mfrc522initialize() failed: %d\n", ret);
     }
-#endif  /* CONFIG_CL_MFRC522 */
+#endif /* CONFIG_CL_MFRC522 */
 
   UNUSED(ret);
   return OK;

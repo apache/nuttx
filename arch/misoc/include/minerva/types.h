@@ -90,5 +90,5 @@ typedef unsigned int irqstate_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif  /* __ASSEMBLY__ */
-#endif  /* __ARCH_MISOC_INCLUDE_MINERVA_TYPES_H */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_MISOC_INCLUDE_MINERVA_TYPES_H */

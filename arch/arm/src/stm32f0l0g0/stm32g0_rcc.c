@@ -269,7 +269,7 @@ static inline void rcc_enableapb1(void)
 #endif
 #endif
 #ifdef CONFIG_STM32F0L0G0_PWR
-  /*  Power interface clock enable */
+  /* Power interface clock enable */
 
   regval |= RCC_APB1ENR_PWREN;
 #endif

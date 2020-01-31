@@ -171,4 +171,4 @@ int spiffs_dump(FAR struct spiffs_s *fs);
 }
 #endif
 
-#endif  /* __FS_SPIFFS_SRC_SPIFFS_CHECK_H */
+#endif /* __FS_SPIFFS_SRC_SPIFFS_CHECK_H */

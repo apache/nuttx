@@ -314,4 +314,4 @@ gpio_pinset_t am335x_periph_gpio(gpio_pinset_t pinset);
 #if defined(__cplusplus)
 }
 #endif
-#endif  /* __ARCH_ARM_SRC_AM335X_AM335X_GPIO_H */
+#endif /* __ARCH_ARM_SRC_AM335X_AM335X_GPIO_H */

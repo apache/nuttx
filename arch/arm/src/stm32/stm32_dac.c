@@ -664,7 +664,7 @@ static struct dac_dev_s g_dac1ch1dev =
   .ad_ops  = &g_dacops,
   .ad_priv = &g_dac1ch1priv,
 };
-#endif  /* CONFIG_STM32_DAC1CH1 */
+#endif /* CONFIG_STM32_DAC1CH1 */
 
 #ifdef CONFIG_STM32_DAC1CH2
 /* Channel 2: DAC1 channel 2 */
@@ -705,9 +705,9 @@ static struct dac_dev_s g_dac1ch2dev =
   .ad_ops  = &g_dacops,
   .ad_priv = &g_dac1ch2priv,
 };
-#endif  /* CONFIG_STM32_DAC1CH2 */
+#endif /* CONFIG_STM32_DAC1CH2 */
 
-#endif  /* CONFIG_STM32_DAC1 */
+#endif /* CONFIG_STM32_DAC1 */
 
 #ifdef CONFIG_STM32_DAC2
 #ifdef CONFIG_STM32_DAC2CH1
@@ -749,8 +749,8 @@ static struct dac_dev_s g_dac2ch1dev =
   .ad_ops  = &g_dacops,
   .ad_priv = &g_dac2ch1priv,
 };
-#endif  /* CONFIG_STM32_DAC2CH1 */
-#endif  /* CONFIG_STM32_DAC2 */
+#endif /* CONFIG_STM32_DAC2CH1 */
+#endif /* CONFIG_STM32_DAC2 */
 
 static struct stm32_dac_s g_dacblock;
 
@@ -857,7 +857,7 @@ static void tim_modifyreg(FAR struct stm32_chan_s *chan, int offset,
 {
   modifyreg32(chan->tbase + offset, clearbits, setbits);
 }
-#endif  /* HAVE_TIMER */
+#endif /* HAVE_TIMER */
 
 /****************************************************************************
  * Name: dac_interrupt
@@ -1370,7 +1370,7 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
   return OK;
 }
 #endif
-#endif  /* HAVE_DMA */
+#endif /* HAVE_DMA */
 
 /****************************************************************************
  * Name: dac_chaninit
@@ -1576,7 +1576,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
       dev = &g_dac1ch1dev;
     }
   else
-#endif  /* CONFIG_STM32_DAC1CH1 */
+#endif /* CONFIG_STM32_DAC1CH1 */
 #ifdef CONFIG_STM32_DAC1CH2
   if (intf == 2)
     {
@@ -1584,7 +1584,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
       dev = &g_dac1ch2dev;
     }
   else
-#endif  /* CONFIG_STM32_DAC1CH2 */
+#endif /* CONFIG_STM32_DAC1CH2 */
 #ifdef CONFIG_STM32_DAC2CH1
   if (intf == 3)
     {
@@ -1592,7 +1592,7 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf)
       dev = &g_dac2ch1dev;
     }
   else
-#endif  /* CONFIG_STM32_DAC2CH1 */
+#endif /* CONFIG_STM32_DAC2CH1 */
     {
       aerr("ERROR: No such DAC interface: %d\n", intf);
       return NULL;

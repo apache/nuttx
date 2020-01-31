@@ -204,5 +204,5 @@ uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
 }
 #endif
 
-#endif  /* __ASSEMBLY__ */
-#endif  /* __ARCH_MISOC_INCLUDE_MINERVA_SYSCALL_H */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_MISOC_INCLUDE_MINERVA_SYSCALL_H */

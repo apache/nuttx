@@ -44,7 +44,7 @@
  */
 
 #ifndef __INCLUDE_NUTTX_INPUT_NUNCHUCK_H
-#define __INCLUDE_NUTTX_INPUT_NUNCHUCK_H 1
+#define __INCLUDE_NUTTX_INPUT_NUNCHUCK_H
 
 /****************************************************************************
  * Included Files

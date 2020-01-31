@@ -167,4 +167,4 @@ void ez80_registerdump(void);
 #endif
 #endif
 
-#endif  /* __ARCH_Z80_SRC_EZ80_SWITCH_H */
+#endif /* __ARCH_Z80_SRC_EZ80_SWITCH_H */

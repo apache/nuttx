@@ -1395,4 +1395,4 @@ void r_sci12_start(void);
 
 void r_sci12_stop(void);
 
-#endif  /* __ARCH_RENESAS_SRC_RX65N_SCI_H */
+#endif /* __ARCH_RENESAS_SRC_RX65N_SCI_H */

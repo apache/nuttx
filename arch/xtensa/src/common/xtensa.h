@@ -357,4 +357,4 @@ void up_usbuninitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_XTENSA_SRC_COMMON_XTENSA_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_H */

@@ -200,4 +200,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32L4_B_L475E_IOT01A_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32L4_B_L475E_IOT01A_INCLUDE_BOARD_H */

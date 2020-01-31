@@ -67,4 +67,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_LPC214X_LPC214X_VIC_H */
+#endif /* __ARCH_ARM_SRC_LPC214X_LPC214X_VIC_H */

@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_ADDRENV_H
-#define __INCLUDE_NUTTX_ADDRENV_H 1
+#define __INCLUDE_NUTTX_ADDRENV_H
 
 /****************************************************************************
  * Included Files

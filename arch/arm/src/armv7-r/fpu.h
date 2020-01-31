@@ -90,4 +90,4 @@ void arm_fpuconfig(void);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_R_FPU_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_R_FPU_H */

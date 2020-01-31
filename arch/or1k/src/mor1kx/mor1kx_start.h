@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __ARCH_OR1K_SRC_MOR1KX_MOR1KX_START_H
-#define __ARCH_OR1K_SRC_MOR1KX_MOR1KX_START_H 1
+#define __ARCH_OR1K_SRC_MOR1KX_MOR1KX_START_H
 
 /****************************************************************************
  * Included Files

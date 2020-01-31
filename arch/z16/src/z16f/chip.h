@@ -704,4 +704,4 @@ int z16f_espi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_Z16_SRC_Z16F_CHIP_H */
+#endif /* __ARCH_Z16_SRC_Z16F_CHIP_H */

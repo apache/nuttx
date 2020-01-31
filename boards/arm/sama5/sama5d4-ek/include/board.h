@@ -291,4 +291,4 @@
   .endm
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __BOARDS_ARM_SAMA5_SAMA5D4_EK_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_SAMA5_SAMA5D4_EK_INCLUDE_BOARD_H */

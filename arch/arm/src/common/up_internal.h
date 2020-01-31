@@ -540,4 +540,4 @@ void up_stack_color(FAR void *stackbase, size_t nbytes);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_COMMON_UP_INTERNAL_H */
+#endif /* __ARCH_ARM_SRC_COMMON_UP_INTERNAL_H */

@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __NET_ROUTE_FILEROUTE_H
-#define __NET_ROUTE_FILEROUTE_H 1
+#define __NET_ROUTE_FILEROUTE_H
 
 /****************************************************************************
  * Included Files

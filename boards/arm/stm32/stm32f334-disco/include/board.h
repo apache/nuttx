@@ -255,7 +255,7 @@
 
 #define DAC1CH1_DMA_CHAN     DMACHAN_HRTIM1_C
 
-#endif  /* CONFIG_EXAMPLES_POWERLED */
+#endif /* CONFIG_EXAMPLES_POWERLED */
 
 /* Board configuration for SMPS example:
  *   PA8  - HRTIM_CHA1
@@ -314,6 +314,6 @@
 
 /* DMA channels *************************************************************/
 
-#endif  /* CONFIG_EXAMPLES_SMPS */
+#endif /* CONFIG_EXAMPLES_SMPS */
 
 #endif /* __BOARDS_ARM_STM32_STM32F334_DISCO_INCLUDE_BOARD_H */

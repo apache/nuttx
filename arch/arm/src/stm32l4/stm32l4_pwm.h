@@ -1015,7 +1015,7 @@ struct stm32l4_pwm_ops_s
 #endif
 };
 
-#endif  /* CONFIG_STM32L4_PWM_LL_OPS */
+#endif /* CONFIG_STM32L4_PWM_LL_OPS */
 
 /****************************************************************************
  * Public Data

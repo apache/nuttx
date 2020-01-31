@@ -421,7 +421,7 @@ static int wm8776_configure(FAR struct audio_lowerhalf_s *dev,
               }
            }
           break;
-#endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
         default:
           auderr("    ERROR: Unrecognized feature unit\n");

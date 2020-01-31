@@ -1003,4 +1003,4 @@ are for LPC24xx only. */
  * Public Function Prototypes
  ****************************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_LPC2378_CHIP_H */
+#endif /* __ARCH_ARM_SRC_LPC2378_CHIP_H */

@@ -416,4 +416,4 @@ extern "C"
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_A_SCTLR_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_A_SCTLR_H */

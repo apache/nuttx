@@ -317,4 +317,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_IMX_USBD_H */
+#endif /* __ARCH_ARM_IMX_USBD_H */

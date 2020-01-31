@@ -2025,4 +2025,4 @@ typedef struct
 
 #endif
 
-#endif  /* __ARCH_RISC_V_SRC_GAP8_GAP8_H */
+#endif /* __ARCH_RISC_V_SRC_GAP8_GAP8_H */

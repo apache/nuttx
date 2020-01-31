@@ -298,4 +298,4 @@ int stm32_lm75attach(xcpt_t irqhandler, void *arg);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32_STM3210E_EVAL_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_STM3210E_EVAL_INCLUDE_BOARD_H */

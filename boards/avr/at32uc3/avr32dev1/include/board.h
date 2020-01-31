@@ -163,4 +163,4 @@
 #define BUTTON1               1 /* Bit 0: Button 1 */
 #define BUTTON2               2 /* Bit 1: Button 2 */
 
-#endif  /* __BOARDS_AVR_AT32UC3_AVR32DEV1_INCLUDE_BOARD_H */
+#endif /* __BOARDS_AVR_AT32UC3_AVR32DEV1_INCLUDE_BOARD_H */

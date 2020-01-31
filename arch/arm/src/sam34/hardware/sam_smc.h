@@ -568,7 +568,7 @@
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4E)
-#  define SMC_OCMS_CSSE(n)             (1 << ((n)+16)) /*  Chip Select (n=0-3) Scrambling Enable */
+#  define SMC_OCMS_CSSE(n)             (1 << ((n)+16)) /* Chip Select (n=0-3) Scrambling Enable */
 #  define SMC_OCMS_CS0SE               (1 << 16) /* Bit 16: Chip Select 0 Scrambling Enable */
 #  define SMC_OCMS_CS1SE               (1 << 17) /* Bit 17: Chip Select 1 Scrambling Enable */
 #  define SMC_OCMS_CS2SE               (1 << 18) /* Bit 18: Chip Select 2 Scrambling Enable */

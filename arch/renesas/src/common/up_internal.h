@@ -227,4 +227,4 @@ void up_dumpstate(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* ___ARCH_RENESAS_SRC_COMMON_UP_INTERNAL_H */
+#endif /* ___ARCH_RENESAS_SRC_COMMON_UP_INTERNAL_H */

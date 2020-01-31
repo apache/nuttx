@@ -184,7 +184,7 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_IMX1_IMX_GPIO_H */
+#endif /* __ARCH_ARM_SRC_IMX1_IMX_GPIO_H */
 
 #ifndef __ASSEMBLY__
 
@@ -558,4 +558,4 @@ void imxgpio_configpfinput(int port, int bit);
 
 #endif
 
-#endif  /* __ARCH_ARM_IMX_GPIOHELPERS_H */
+#endif /* __ARCH_ARM_IMX_GPIOHELPERS_H */

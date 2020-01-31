@@ -2245,7 +2245,7 @@ static int pic32mx_ifup(struct net_driver_s *dev)
 
   pic32mx_putreg(CONFIG_NET_ETH_PKTSIZE, PIC32MX_EMAC1_MAXF);
 
-  /*  Configure the MAC station address in the EMAC1SA0, EMAC1SA1 and
+  /* Configure the MAC station address in the EMAC1SA0, EMAC1SA1 and
    * EMAC1SA2 registers (these registers are loaded at reset from the
    * factory preprogrammed station address).
    */

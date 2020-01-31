@@ -173,7 +173,7 @@
 #define KL_FMC_PFB0CR              (KL_FMC_BASE+KL_FMC_PFB0CR_OFFSET)
 #define KL_FMC_PFB1CR              (KL_FMC_BASE+KL_FMC_PFB1CR_OFFSET)
 
-/*  Cache Directory Storage for way=w and set=s, w=0..3, s=0..7 */
+/* Cache Directory Storage for way=w and set=s, w=0..3, s=0..7 */
 
 #define KL_FMC_TAGVD(w,s)          (KL_FMC_BASE+KL_FMC_TAGVD_OFFSET(w,s))
 

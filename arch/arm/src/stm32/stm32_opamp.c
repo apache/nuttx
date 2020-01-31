@@ -1408,10 +1408,10 @@ FAR struct opamp_dev_s* stm32_opampinitialize(int intf)
   return dev;
 }
 
-#endif  /* CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F33XX*/
+#endif /* CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F33XX*/
 
-#endif  /* CONFIG_STM32_OPAMP1 || CONFIG_STM32_OPAMP2 ||
-         * CONFIG_STM32_OPAMP3 || CONFIG_STM32_OPAMP4
-         */
+#endif /* CONFIG_STM32_OPAMP1 || CONFIG_STM32_OPAMP2 ||
+        * CONFIG_STM32_OPAMP3 || CONFIG_STM32_OPAMP4
+        */
 
 #endif /* CONFIG_STM32_OPAMP */

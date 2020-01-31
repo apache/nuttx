@@ -214,4 +214,4 @@ void stm32l4_board_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32L_STM32L476_MDK_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32L_STM32L476_MDK_INCLUDE_BOARD_H */

@@ -258,4 +258,4 @@ void watchdog_unregister(FAR void *handle);
 #endif
 
 #endif /* CONFIG_WATCHDOG */
-#endif  /* __INCLUDE_NUTTX_TIMERS_WATCHDOG_H */
+#endif /* __INCLUDE_NUTTX_TIMERS_WATCHDOG_H */

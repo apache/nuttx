@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #ifndef __WIRELESS_BLUETOOTH_BT_L2CAP_H
-#define __WIRELESS_BLUETOOTH_BT_L2CAP_H 1
+#define __WIRELESS_BLUETOOTH_BT_L2CAP_H
 
 /****************************************************************************
  * Included Files

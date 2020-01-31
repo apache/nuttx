@@ -129,7 +129,7 @@
 #    error
 #  endif
 
-#endif  /* CONFIG_NUCLEOL432KC_SPWM_USE_TIM1 */
+#endif /* CONFIG_NUCLEOL432KC_SPWM_USE_TIM1 */
 
 /* Configuration ************************************************************/
 
@@ -193,7 +193,7 @@ static int spwm_tim1_start(FAR struct spwm_s *spwm);
 static int spwm_tim6_start(FAR struct spwm_s *spwm);
 static int spwm_tim1_stop(FAR struct spwm_s *spwm);
 static int spwm_tim6_stop(FAR struct spwm_s *spwm);
-#endif  /* CONFIG_NUCLEOL432KC_SPWM_USE_TIM1 */
+#endif /* CONFIG_NUCLEOL432KC_SPWM_USE_TIM1 */
 static int spwm_setup(FAR struct spwm_s *spwm);
 
 /****************************************************************************
@@ -558,7 +558,7 @@ static int spwm_tim1_stop(FAR struct spwm_s *spwm)
   return OK;
 }
 
-#endif  /* CONFIG_NUCLEOL432KC_SPWM_USE_TIM1 */
+#endif /* CONFIG_NUCLEOL432KC_SPWM_USE_TIM1 */
 
 /****************************************************************************
  * Name: spwm_setup
@@ -661,4 +661,4 @@ errout:
   return 0;
 }
 
-#endif  /* CONFIG_NUCLEOL432KC_SPWM */
+#endif /* CONFIG_NUCLEOL432KC_SPWM */

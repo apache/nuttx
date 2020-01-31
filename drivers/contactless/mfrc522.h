@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __DRIVERS_CONTACTLESS_MFRC522_H
-#define __DRIVERS_CONTACTLESS_MFRC522_H 1
+#define __DRIVERS_CONTACTLESS_MFRC522_H
 
 /****************************************************************************
  * Included Files

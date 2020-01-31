@@ -242,5 +242,5 @@ int cs2100_dump(FAR const struct cs2100_config_s *config);
 }
 #endif
 
-#endif  /* CONFIG_TIMERS_CS2100CP */
-#endif  /* __INCLUDE_NUTTX_TIMERS_CS2100_CP_H */
+#endif /* CONFIG_TIMERS_CS2100CP */
+#endif /* __INCLUDE_NUTTX_TIMERS_CS2100_CP_H */

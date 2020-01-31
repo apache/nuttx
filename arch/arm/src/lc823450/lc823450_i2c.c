@@ -492,7 +492,7 @@ static int lc823450_i2c_reset(FAR struct i2c_master_s *dev)
   modifyreg32(priv->config->base + I2CCTL, I2C_CTL_FMODE, I2C_CTL_FMODE);
   return OK;
 }
-#endif  /* CONFIG_I2C_RESET */
+#endif /* CONFIG_I2C_RESET */
 
 /****************************************************************************
  * Name: lc823450_i2c_enableirq
