@@ -139,13 +139,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (to == NULL || tolen <= 0)
     {
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM) || \
-    defined(CONFIG_NET_USRSOCK)
       return psock_send(psock, buf, len, flags);
-#else
-      nerr("ERROR: No 'to' address\n");
-      return -EINVAL;
-#endif
     }
 
   /* Verify that the psock corresponds to valid, allocated socket */
