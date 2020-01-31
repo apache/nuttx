@@ -1,6 +1,6 @@
 /****************************************************************************
  * include/nuttx/net/ipv6ext.h
- * IPv4 Extension Header Definitions
+ * IPv6 Extension Header Definitions
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -107,9 +107,13 @@
  */
 
 #define NEXT_HOPBYBOT_EH       0     /*   0  Hop-by-Hop Options Header */
+                                     /*   1  See IP_PROTO_ICMP in
+                                      *   include/nuttx/net/ip.h. */
+                                     /*   2  See IP_PROTO_IGMP in
+                                      *   include/nuttx/net/ip.h. */
                                      /*   6  See IP_PROTO_TCP in
                                       *   include/nuttx/net/ip.h. */
-                                     /*  17  See IP_PROTO_TCP in
+                                     /*  17  See IP_PROTO_UDP in
                                       *      include/nuttx/net/ip.h. */
 #define NEXT_ENCAP_EH          41    /*  41  Encapsulated IPv6 Header */
 #define NEXT_ROUTING_EH        43    /*  43  Routing Header */

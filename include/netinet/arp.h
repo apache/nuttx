@@ -43,16 +43,14 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <net/if.h>
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Three ioctls are available on all PF_INET sockets, but only if the NuttX
- * configuration CONFIG_NET_ARPIOCTLS is defined. Each ioctl takes a pointer
- * to a 'struct arpreq' as its parameter.
+/* Three ioctls are available on all PF_INET sockets. Each ioctl takes a
+ * pointer to a 'struct arpreq' as its parameter.
  */
 
 #define SIOCSARP        _ARPIOC(1) /* Set a ARP mapping */
@@ -102,15 +100,9 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* If CONFIG_NET_ARPIOCTLS is defined then the semi-standard ioctl commands
- * described above are supported.  If not, you can call the network ARP
- * interfaces directly in a very non-standard way.  See
- * include/nuttx/net/arp.h for prototypes.
- */
-
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*   __INCLUDE_NETINET_ARP_H */
+#endif /* __INCLUDE_NETINET_ARP_H */

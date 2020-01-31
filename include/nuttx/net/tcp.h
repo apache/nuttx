@@ -56,7 +56,7 @@
 #include <stdint.h>
 
 #include <nuttx/net/netconfig.h>
-#include <nuttx/net/arp.h>
+#include <nuttx/net/ethernet.h>
 #include <nuttx/net/ip.h>
 
 /****************************************************************************

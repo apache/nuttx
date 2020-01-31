@@ -40,14 +40,13 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
-#include <semaphore.h>
+#include <sched.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 #include <time.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
@@ -66,8 +65,8 @@
  ****************************************************************************/
 
 static sem_t        g_netlock;
-static pid_t        g_holder  = NO_HOLDER;
-static unsigned int g_count   = 0;
+static pid_t        g_holder = NO_HOLDER;
+static unsigned int g_count  = 0;
 
 /****************************************************************************
  * Private Functions

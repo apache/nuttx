@@ -310,7 +310,7 @@
 #define _CAIOCVALID(c)    (_IOC_TYPE(c)==_CAIOCBASE)
 #define _CAIOC(nr)        _IOC(_CAIOCBASE,nr)
 
-/* NuttX USB CDC/ACM serial driver ioctl definitions ************************/
+/* NuttX battery driver ioctl definitions ***********************************/
 
 /* (see nuttx/power/battery.h) */
 
@@ -368,7 +368,7 @@
 
 /* Discrete Joystick (see nuttx/include/input/djoystick.h */
 
-#define _JOYIOCVALID(c)   (_IOC_SMASK(c)==_JOYBASE)
+#define _JOYIOCVALID(c)   (_IOC_TYPE(c)==_JOYBASE)
 #define _JOYIOC(nr)       _IOC(_JOYBASE,nr)
 
 /* FIFOs and pipe driver ioctl definitions **********************************/
