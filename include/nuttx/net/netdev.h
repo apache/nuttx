@@ -51,10 +51,7 @@
 
 #include <sys/ioctl.h>
 #include <stdint.h>
-
-#ifdef CONFIG_NET_MCASTGROUP
-#  include <queue.h>
-#endif
+#include <queue.h>
 
 #include <net/if.h>
 #include <net/ethernet.h>
@@ -308,14 +305,14 @@ struct net_driver_s
    * or written to in the packet buffer.
    */
 
-  uint8_t *d_appdata;
+  FAR uint8_t *d_appdata;
 
 #ifdef CONFIG_NET_TCPURGDATA
   /* This pointer points to any urgent TCP data that has been received. Only
    * present if compiled with support for urgent data (CONFIG_NET_TCPURGDATA).
    */
 
-  uint8_t *d_urgdata;
+  FAR uint8_t *d_urgdata;
 
   /* Length of the (received) urgent data */
 
@@ -400,7 +397,7 @@ struct net_driver_s
 
   /* Drivers may attached device-specific, private information */
 
-  void *d_private;
+  FAR void *d_private;
 };
 
 typedef CODE int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);

@@ -261,12 +261,12 @@ extern "C"
 
 #ifdef CONFIG_ENDIAN_BIG
 #  define net_ip4addr_conv32(addr) \
-    (((in_addr_t)((uint16_t*)addr)[0] << 16) | \
-     (in_addr_t)((uint16_t*)addr)[1])
+    (((in_addr_t)((FAR uint16_t *)addr)[0] << 16) | \
+     (in_addr_t)((FAR uint16_t *)addr)[1])
 #else
 #  define net_ip4addr_conv32(addr) \
-    (((in_addr_t)((uint16_t*)addr)[1] << 16) | \
-     (in_addr_t)((uint16_t*)addr)[0])
+    (((in_addr_t)((FAR uint16_t *)addr)[1] << 16) | \
+     (in_addr_t)((FAR uint16_t *)addr)[0])
 #endif
 
 /****************************************************************************
@@ -304,14 +304,14 @@ extern "C"
 
 #define ip6_addr(addr, addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7) \
   do { \
-    ((uint16_t*)(addr))[0] = HTONS((addr0)); \
-    ((uint16_t*)(addr))[1] = HTONS((addr1)); \
-    ((uint16_t*)(addr))[2] = HTONS((addr2)); \
-    ((uint16_t*)(addr))[3] = HTONS((addr3)); \
-    ((uint16_t*)(addr))[4] = HTONS((addr4)); \
-    ((uint16_t*)(addr))[5] = HTONS((addr5)); \
-    ((uint16_t*)(addr))[6] = HTONS((addr6)); \
-    ((uint16_t*)(addr))[7] = HTONS((addr7)); \
+    ((FAR uint16_t *)(addr))[0] = HTONS((addr0)); \
+    ((FAR uint16_t *)(addr))[1] = HTONS((addr1)); \
+    ((FAR uint16_t *)(addr))[2] = HTONS((addr2)); \
+    ((FAR uint16_t *)(addr))[3] = HTONS((addr3)); \
+    ((FAR uint16_t *)(addr))[4] = HTONS((addr4)); \
+    ((FAR uint16_t *)(addr))[5] = HTONS((addr5)); \
+    ((FAR uint16_t *)(addr))[6] = HTONS((addr6)); \
+    ((FAR uint16_t *)(addr))[7] = HTONS((addr7)); \
   } while (0)
 
 /****************************************************************************
@@ -415,8 +415,8 @@ extern "C"
    } while (0)
 #  define net_ipv4addr_hdrcopy(dest, src) \
    do { \
-     ((uint16_t*)(dest))[0] = ((uint16_t*)(src))[0]; \
-     ((uint16_t*)(dest))[1] = ((uint16_t*)(src))[1]; \
+     ((FAR uint16_t *)(dest))[0] = ((FAR uint16_t *)(src))[0]; \
+     ((FAR uint16_t *)(dest))[1] = ((FAR uint16_t *)(src))[1]; \
    } while (0)
 #endif
 
