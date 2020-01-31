@@ -96,13 +96,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       return -EINVAL;
     }
 
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (psock == NULL || psock->s_crefs <= 0)
-    {
-      return -EBADF;
-    }
-
 #ifdef CONFIG_NET_USRSOCK
   if (psock->s_type == SOCK_USRSOCK_TYPE)
     {
@@ -362,6 +355,13 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
 {
   int ret;
 
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (psock == NULL || psock->s_crefs <= 0)
+    {
+      return -EBADF;
+    }
+
   /* Handle setting of the socket option according to the level at which
    * option should be applied.
    */
@@ -383,10 +383,6 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
         ret = udp_setsockopt(psock, option, value, value_len);
         break;
 #endif
-
-      /* These levels are defined in sys/socket.h, but are not yet
-       * implemented.
-       */
 
 #ifdef CONFIG_NET_IPv4
       case SOL_IP:     /* TCP protocol socket options (see include/netinet/in.h) */
@@ -474,7 +470,7 @@ int setsockopt(int sockfd, int level, int option, const void *value,
   ret = psock_setsockopt(psock, level, option, value, value_len);
   if (ret < 0)
     {
-      set_errno(-ret);
+      _SO_SETERRNO(psock, -ret);
       return ERROR;
     }
 
