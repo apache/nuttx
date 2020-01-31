@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <netinet/if.h>
+#include <net/if.h>
 
 #include <nuttx/fs/ioctl.h>
 
