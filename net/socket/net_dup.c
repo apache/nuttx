@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/net_dupsd.c
+ * net/socket/net_dup.c
  *
  *   Copyright (C) 2009, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psock_dupsd
+ * Name: psock_dup
  *
  * Description:
  *   Clone a socket descriptor to an arbitrary descriptor number.  If file
@@ -65,7 +65,7 @@
  *
  ****************************************************************************/
 
-int psock_dupsd(FAR struct socket *psock, int minsd)
+int psock_dup(FAR struct socket *psock, int minsd)
 {
   FAR struct socket *psock2;
   int sockfd2;
@@ -117,7 +117,7 @@ int psock_dupsd(FAR struct socket *psock, int minsd)
 
   /* Duplicate the socket state */
 
-  ret = net_clone(psock, psock2);
+  ret = psock_dup2(psock, psock2);
   if (ret < 0)
     {
       goto errout_with_sockfd;
@@ -135,7 +135,7 @@ errout:
 }
 
 /****************************************************************************
- * Name: net_dupsd
+ * Name: net_dup
  *
  * Description:
  *   Clone a socket descriptor to an arbitrary descriptor number.  If file
@@ -149,7 +149,7 @@ errout:
  *
  ****************************************************************************/
 
-int net_dupsd(int sockfd, int minsd)
+int net_dup(int sockfd, int minsd)
 {
-  return psock_dupsd(sockfd_socket(sockfd), minsd);
+  return psock_dup(sockfd_socket(sockfd), minsd);
 }

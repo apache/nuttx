@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/net_clone.c
+ * net/socket/net_dup2.c
  *
  *   Copyright (C) 2009, 2011-2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,28 +41,25 @@
 
 #include <sys/socket.h>
 #include <string.h>
+#include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/net/net.h>
-#include <nuttx/net/udp.h>
 
 #include "inet/inet.h"
 #include "tcp/tcp.h"
 #include "socket/socket.h"
-
-#ifdef CONFIG_NET
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: net_clone
+ * Name: psock_dup2
  *
  * Description:
- *   Performs the low level, common portion of net_dupsd() and net_dupsd2()
+ *   Performs the low level, common portion of net_dup() and net_dup2()
  *
  * Input Parameters:
  *   psock1 - The existing socket that is being cloned.
@@ -75,7 +72,7 @@
  *
  ****************************************************************************/
 
-int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
+int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2)
 {
   int ret = OK;
 
@@ -155,4 +152,60 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
   return ret;
 }
 
-#endif /* CONFIG_NET */
+/****************************************************************************
+ * Name: net_dup2
+ *
+ * Description:
+ *   Clone a socket descriptor to an arbitray descriptor number.  If file
+ *   descriptors are implemented, then this is called by dup2() for the case
+ *   of socket file descriptors.  If file descriptors are not implemented,
+ *   then this function IS dup2().
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On any error,
+ *   a negated errno value is returned:.
+ *
+ ****************************************************************************/
+
+int net_dup2(int sockfd1, int sockfd2)
+{
+  FAR struct socket *psock1;
+  FAR struct socket *psock2;
+  int ret;
+
+  /* Lock the scheduler throughout the following */
+
+  sched_lock();
+
+  /* Get the socket structures underly both descriptors */
+
+  psock1 = sockfd_socket(sockfd1);
+  psock2 = sockfd_socket(sockfd2);
+
+  /* Verify that the sockfd1 and sockfd2 both refer to valid socket
+   * descriptors and that sockfd2 corresponds to an allocated socket
+   */
+
+  if (psock1 == NULL || psock2 == NULL || psock1->s_crefs <= 0)
+    {
+      ret = -EBADF;
+      goto errout;
+    }
+
+  /* If sockfd2 also valid, allocated socket, then we will have to
+   * close it!
+   */
+
+  if (psock2->s_crefs > 0)
+    {
+      net_close(sockfd2);
+    }
+
+  /* Duplicate the socket state */
+
+  ret = psock_dup2(psock1, psock2);
+
+errout:
+  sched_unlock();
+  return ret;
+}
