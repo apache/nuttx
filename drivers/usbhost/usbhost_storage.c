@@ -2304,4 +2304,3 @@ int usbhost_msc_initialize(void)
 }
 
 #endif  /* CONFIG_USBHOST && !CONFIG_USBHOST_BULK_DISABLE && !CONFIG_DISABLE_MOUNTPOINT */
-

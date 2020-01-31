@@ -257,4 +257,3 @@ int lpcxpresso_adc_setup(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_LPC17XX_40XX_LPCXPRESSO_LPC1768_SRC_LPCXPRESSO_LPC1768_H */
-

@@ -89,4 +89,3 @@ define __PHAF_INIT_PARAM   = $0300
 define __PKAF_INIT_PARAM   = $0f
 
 /* arch/z16/src/Makefile will append target, object and library paths below */
-

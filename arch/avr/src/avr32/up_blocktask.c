@@ -177,4 +177,3 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
         }
     }
 }
-

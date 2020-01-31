@@ -85,4 +85,3 @@ int mkfifo(FAR const char *pathname, mode_t mode)
 }
 
 #endif /* CONFIG_PIPES && CONFIG_DEV_FIFO_SIZE > 0 */
-

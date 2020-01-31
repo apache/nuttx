@@ -591,4 +591,3 @@ config USBHOST_TRACE_VERBOSE
 		information would also be included.
 
 endif
-

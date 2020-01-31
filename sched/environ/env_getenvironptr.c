@@ -95,4 +95,3 @@ FAR char **get_environ_ptr(void)
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
-

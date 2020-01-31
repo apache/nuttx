@@ -344,4 +344,3 @@ int kbd_decode(FAR struct lib_instream_s *stream,
 
 #endif /* CONFIG_LIB_KBDCODEC */
 #endif /* __INCLUDE_NUTTX_INPUT_KBD_CODEC_H */
-

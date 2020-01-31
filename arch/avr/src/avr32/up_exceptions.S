@@ -370,4 +370,3 @@ up_interruptstack:
 	.size	up_interruptstack, .-up_interruptstack
 #endif
 	.end
-

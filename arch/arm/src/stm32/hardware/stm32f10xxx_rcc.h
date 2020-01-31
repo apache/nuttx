@@ -476,4 +476,3 @@
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F10XXX_RCC_H */
-

@@ -62,4 +62,3 @@ void nxgl_rectcopy(FAR struct nxgl_rect_s *dest,
   dest->pt2.x = src->pt2.x;
   dest->pt2.y = src->pt2.y;
 }
-

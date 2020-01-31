@@ -92,4 +92,3 @@ typedef unsigned int       irqstate_t;
  ****************************************************************************/
 
 #endif /* __ARCH_AVR_INCLUDE_AVR32_TYPES_H */
-

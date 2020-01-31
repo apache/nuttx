@@ -183,4 +183,3 @@ void __start(void)
 
   for (; ; );
 }
-

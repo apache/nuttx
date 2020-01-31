@@ -999,4 +999,3 @@ FAR struct lcd_dev_s *pcd8544_initialize(FAR struct spi_dev_s *spi, unsigned int
   up_clear(priv);
   return &priv->dev;
 }
-

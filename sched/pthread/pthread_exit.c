@@ -141,4 +141,3 @@ void pthread_exit(FAR void *exit_value)
 
   _exit(EXIT_SUCCESS);
 }
-

@@ -115,4 +115,3 @@ int stm32_phy_boardinitialize(int intf);
 #endif /* __ASSEMBLY__ */
 #endif /* STM32F7_NETHERNET > 0 */
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_ETHERNET_H */
-

@@ -92,4 +92,3 @@ void inode_release(FAR struct inode *node)
         }
     }
 }
-

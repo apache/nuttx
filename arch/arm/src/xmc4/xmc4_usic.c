@@ -467,4 +467,3 @@ int xmc4_usic_baudrate(enum usic_channel_e channel, uint32_t baud,
 
   return ret;
 }
-

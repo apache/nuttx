@@ -130,4 +130,3 @@ int stm32_sdinitialize(int minor)
 }
 
 #endif /* CONFIG_ARCH_CHIP_STM32F103VC */
-

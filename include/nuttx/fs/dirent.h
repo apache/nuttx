@@ -332,4 +332,3 @@ extern "C"
 #endif
 
 #endif /* __INCLUDE_NUTTX_FS_DIRENT_H */
-

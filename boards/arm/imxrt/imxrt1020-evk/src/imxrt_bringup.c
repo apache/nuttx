@@ -246,4 +246,3 @@ int imxrt_bringup(void)
 
   return ret;
 }
-

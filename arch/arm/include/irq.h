@@ -70,4 +70,3 @@
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_IRQ_H */
-

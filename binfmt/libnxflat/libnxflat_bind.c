@@ -619,4 +619,3 @@ int nxflat_bind(FAR struct nxflat_loadinfo_s *loadinfo,
 
   return ret;
 }
-

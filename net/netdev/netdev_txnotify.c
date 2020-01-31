@@ -145,4 +145,3 @@ void netdev_txnotify_dev(FAR struct net_driver_s *dev)
       dev->d_txavail(dev);
     }
 }
-

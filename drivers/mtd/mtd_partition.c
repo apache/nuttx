@@ -893,4 +893,3 @@ int mtd_setpartitionname(FAR struct mtd_dev_s *mtd, FAR const char *name)
   return OK;
 }
 #endif
-

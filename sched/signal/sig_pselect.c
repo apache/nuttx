@@ -150,4 +150,3 @@ int pselect(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
   return ret;
 }
-

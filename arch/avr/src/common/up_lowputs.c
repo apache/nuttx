@@ -72,4 +72,3 @@ void up_lowputs(const char *str)
       up_lowputc(*str++);
     }
 }
-

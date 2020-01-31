@@ -94,4 +94,3 @@ int bchlib_teardown(FAR void *handle)
   kmm_free(bch);
   return OK;
 }
-

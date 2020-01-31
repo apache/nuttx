@@ -123,4 +123,3 @@ static inline void nrf52_interrupt_disable(uint32_t reg_intenclr,
 }
 
 #endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_UTILS_H */
-

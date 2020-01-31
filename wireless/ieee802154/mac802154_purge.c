@@ -82,4 +82,3 @@ int mac802154_req_purge(MACHANDLE mac, uint8_t msdu_handle)
 #endif
   return -ENOTTY;
 }
-

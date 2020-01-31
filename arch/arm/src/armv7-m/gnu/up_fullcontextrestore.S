@@ -92,4 +92,3 @@ up_fullcontextrestore:
 	bx		lr							/* Unnecessary ... will not return */
 	.size	up_fullcontextrestore, .-up_fullcontextrestore
 	.end
-

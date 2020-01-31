@@ -266,4 +266,3 @@ Configurations
 
     Configures the NuttShell (nsh) located at examples/nsh.  This
     configuration is focused on low level, command-line driver testing.
-

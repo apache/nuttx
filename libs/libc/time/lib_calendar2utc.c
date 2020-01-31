@@ -192,4 +192,3 @@ time_t clock_calendar2utc(int year, int month, int day)
   return days;
 }
 #endif /* CONFIG_GREGORIAN_TIME */
-

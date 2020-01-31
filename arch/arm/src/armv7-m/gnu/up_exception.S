@@ -329,4 +329,3 @@ g_intstackbase:
 #endif
 
 	.end
-

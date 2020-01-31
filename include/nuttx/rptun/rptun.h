@@ -308,4 +308,3 @@ int rptun_boot(FAR const char *cpuname);
 
 #endif /* CONFIG_RPTUN */
 #endif /* __INCLUDE_NUTTX_RPTUN_RPTUN_H */
-

@@ -153,4 +153,3 @@ void arm_timer_initialize(void)
   irq_attach(IMX_IRQ_SYSTIMER, (xcpt_t)imx_timerisr, NULL);
   up_enable_irq(IMX_IRQ_SYSTIMER);
 }
-

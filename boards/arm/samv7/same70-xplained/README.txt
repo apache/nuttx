@@ -1693,4 +1693,3 @@ Configuration sub-directories
          most of the issues.  Things look good on real, local hardware
          (see boards/lpcxpresso-lpc54628/twm4nx).  VNC is just not mature
          enough for this kind of usage at this time.
-

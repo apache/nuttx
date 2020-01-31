@@ -135,4 +135,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_SIM_INCLUDE_IRQ_H */
-

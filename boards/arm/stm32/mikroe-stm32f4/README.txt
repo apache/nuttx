@@ -698,4 +698,3 @@ Where <subdir> is one of the following:
       CONFIG_CDCACM_CONSOLE=y       : The CDC/ACM serial device is NOT the console
       CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
       CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
-

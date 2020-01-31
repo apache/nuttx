@@ -132,4 +132,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_DM320_IRQ_H */
-

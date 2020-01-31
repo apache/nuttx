@@ -261,4 +261,3 @@ uint16_t stmpe811_adcread(STMPE811_HANDLE handle, int pin)
 }
 
 #endif /* CONFIG_INPUT && CONFIG_INPUT_STMPE811 && !CONFIG_STMPE811_ADC_DISABLE */
-

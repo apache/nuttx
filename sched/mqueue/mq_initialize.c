@@ -232,4 +232,3 @@ void nxmq_alloc_desblock(void)
         }
     }
 }
-

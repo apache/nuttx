@@ -490,4 +490,3 @@ Configuration Sub-Directories
 
     This configuration directory, performs a simple OS test using
     examples/ostest.
-

@@ -482,4 +482,3 @@ FAR struct ieee802154_radio_s *
   dev->lower->enable(dev->lower, true);
   return &dev->radio;
 }
-

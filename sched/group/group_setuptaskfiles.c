@@ -239,4 +239,3 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
   return OK;
 #endif
 }
-

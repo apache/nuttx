@@ -1848,4 +1848,3 @@ void stm3210e_lcdclear(uint16_t color)
       LCD->value = color;
     }
 }
-

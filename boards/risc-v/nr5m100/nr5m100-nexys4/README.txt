@@ -240,4 +240,3 @@ Where <subdir> is one of the following:
   ---
   This is an NSH example that uses UART1 as the console.  UART1 is connected
   to the USB UART bridge on the FPGA board.
-

@@ -265,4 +265,3 @@ extern "C"
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_INCLUDE_ARM_SYSCALL_H */
-

@@ -144,4 +144,3 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
   sinfo("Returning %d\n", ret);
   return ret;
 }
-

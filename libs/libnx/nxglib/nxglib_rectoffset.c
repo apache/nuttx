@@ -62,4 +62,3 @@ void nxgl_rectoffset(FAR struct nxgl_rect_s *dest,
   dest->pt2.x = src->pt2.x + dx;
   dest->pt2.y = src->pt2.y + dy;
 }
-

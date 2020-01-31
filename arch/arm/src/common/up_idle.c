@@ -76,4 +76,3 @@ void up_idle(void)
 #endif
 #endif
 }
-

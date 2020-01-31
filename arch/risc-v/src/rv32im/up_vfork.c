@@ -266,4 +266,3 @@ pid_t up_vfork(const struct vfork_s *context)
 }
 
 #endif /* CONFIG_ARCH_HAVE_VFORK */
-

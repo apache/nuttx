@@ -137,4 +137,3 @@ void *k210_dispatch_irq(uint64_t vector, uint64_t *regs)
 
   return regs;
 }
-

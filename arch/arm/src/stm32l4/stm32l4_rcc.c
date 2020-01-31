@@ -261,4 +261,3 @@ void stm32l4_clockenable(void)
 #endif
 }
 #endif
-

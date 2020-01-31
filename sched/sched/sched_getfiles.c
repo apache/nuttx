@@ -85,4 +85,3 @@ FAR struct filelist *sched_getfiles(void)
 
   return NULL;
 }
-

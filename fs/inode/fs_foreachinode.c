@@ -226,4 +226,3 @@ int foreach_inode(foreach_inode_t handler, FAR void *arg)
 
 #endif
 }
-

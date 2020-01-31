@@ -179,4 +179,3 @@ void nxmq_recover(FAR struct tcb_s *tcb);
 
 #endif /* CONFIG_MQ_MAXMSGSIZE > 0 */
 #endif /* __SCHED_MQUEUE_MQUEUE_H */
-

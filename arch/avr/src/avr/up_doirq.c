@@ -115,4 +115,3 @@ uint8_t *up_doirq(uint8_t irq, uint8_t *regs)
   board_autoled_off(LED_INIRQ);
   return regs;
 }
-

@@ -179,4 +179,3 @@ void _exit(int status)
 
   RESTORE_USERCONTEXT(tcb);
 }
-

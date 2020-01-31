@@ -119,4 +119,3 @@ Configurations
 
     This configuration provides a basic NuttShell configuration (NSH)
     for the board.  The default console is the VCOM on USART1.
-

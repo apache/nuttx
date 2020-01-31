@@ -3007,4 +3007,3 @@ int stm32l4_i2cbus_uninitialize(FAR struct i2c_master_s * dev)
 }
 
 #endif /* CONFIG_STM32L4_I2C1 || CONFIG_STM32L4_I2C2 || CONFIG_STM32L4_I2C3 || CONFIG_STM32L4_I2C4 */
-

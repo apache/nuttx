@@ -67,4 +67,3 @@ bool nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
          (rect1->pt1.y <= rect2->pt2.y) &&  /* false: rect1 is wholly below rect2 */
          (rect2->pt1.y <= rect1->pt2.y);    /* false: rect2 is wholly below rect1 */
 }
-

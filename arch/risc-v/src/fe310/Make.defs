@@ -59,4 +59,3 @@ CHIP_CSRCS  = fe310_allocateheap.c fe310_clockconfig.c fe310_gpio.c
 CHIP_CSRCS += fe310_idle.c fe310_irq.c fe310_irq_dispatch.c
 CHIP_CSRCS += fe310_lowputc.c fe310_serial.c
 CHIP_CSRCS += fe310_start.c fe310_timerisr.c
-

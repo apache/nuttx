@@ -194,4 +194,3 @@ Configurations
 
    If you execute the command "ifconfig", you will be able to see the info of the WPAN0 interface
    and see the assigned IP. This interface can be use with an UDP or TCP server/client application.
-

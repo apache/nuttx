@@ -201,4 +201,3 @@ int fat_setattrib(const char *path, fat_attrib_t setbits, fat_attrib_t clearbits
 {
   return fat_attrib(path, NULL, setbits, clearbits);
 }
-

@@ -176,4 +176,3 @@ uint16_t stmpe811_tempread(STMPE811_HANDLE handle)
 /* Not implemented */
 
 #endif /* CONFIG_INPUT && CONFIG_INPUT_STMPE811 && !CONFIG_STMPE811_TEMP_DISABLE */
-

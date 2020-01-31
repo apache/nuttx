@@ -111,4 +111,3 @@ int ee25xx_initialize(FAR struct spi_dev_s *dev, FAR char *devname,
                       int devtype, int readonly);
 
 #endif /* __INCLUDE__NUTTX_EEPROM_M25XX_H */
-

@@ -217,4 +217,3 @@ int stm32_bringup(void)
 
   return OK;
 }
-

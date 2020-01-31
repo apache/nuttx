@@ -73,4 +73,3 @@ int pipe(int fd[2])
 }
 
 #endif /* CONFIG_PIPES && CONFIG_DEV_PIPE_SIZE > 0 */
-

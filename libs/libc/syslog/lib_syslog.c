@@ -116,4 +116,3 @@ void syslog(int priority, FAR const IPTR char *fmt, ...)
   vsyslog(priority, fmt, ap);
   va_end(ap);
 }
-

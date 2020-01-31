@@ -275,4 +275,3 @@ void envpath_release(ENVPATH_HANDLE handle)
 }
 
 #endif /* CONFIG_LIBC_ENVPATH */
-

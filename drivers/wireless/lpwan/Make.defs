@@ -40,4 +40,3 @@ ifeq ($(CONFIG_DRIVERS_LPWAN),y)
 include wireless$(DELIM)lpwan$(DELIM)sx127x$(DELIM)Make.defs
 
 endif # CONFIG_DRIVERS_LPWAN
-

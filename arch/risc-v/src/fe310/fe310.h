@@ -51,4 +51,3 @@
 #include "fe310_lowputc.h"
 
 #endif /* __ARCH_RISCV_SRC_FE310_FE310_H */
-

@@ -446,4 +446,3 @@ up_interruptstack_base:
 	.size	up_interruptstack, .-up_interruptstack
 #endif
 	.end
-

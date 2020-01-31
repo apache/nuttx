@@ -1136,5 +1136,3 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 int nxffs_unlink(FAR struct inode *mountpt, FAR const char *relpath);
 
 #endif /* __FS_NXFFS_NXFFS_H */
-
-

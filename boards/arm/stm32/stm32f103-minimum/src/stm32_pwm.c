@@ -137,4 +137,3 @@ int stm32_pwm_setup(void)
   return -ENODEV;
 #endif
 }
-

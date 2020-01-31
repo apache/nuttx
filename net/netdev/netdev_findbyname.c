@@ -87,4 +87,3 @@ FAR struct net_driver_s *netdev_findbyname(FAR const char *ifname)
 
   return NULL;
 }
-

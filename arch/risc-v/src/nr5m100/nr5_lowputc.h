@@ -76,4 +76,3 @@ EXTERN void nr5_lowsetup(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_NR5M100_NR5_LOWPUTC_H */
-

@@ -168,4 +168,3 @@ extern "C" {
 #endif
 
 #endif /* __DRIVERS_INPUT_ADS7843E_H */
-

@@ -73,5 +73,3 @@ int up_cpu_index(void)
 }
 
 #endif /* CONFIG_SMP */
-
-

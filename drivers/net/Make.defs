@@ -88,4 +88,3 @@ endif
 DEPPATH += --dep-path net
 VPATH += :net
 endif
-

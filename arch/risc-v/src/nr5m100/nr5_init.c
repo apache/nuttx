@@ -72,5 +72,3 @@ void __nr5_init(void)
 
   for (;;);
 }
-
-

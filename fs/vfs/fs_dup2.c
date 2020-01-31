@@ -112,4 +112,3 @@ int dup2(int fd1, int fd2)
 }
 
 #endif /* CONFIG_NET */
-

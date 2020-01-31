@@ -220,4 +220,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_A1X_A10_IRQ_H */
-

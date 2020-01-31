@@ -1797,4 +1797,3 @@ void netdev_ifdown(FAR struct net_driver_s *dev)
 #endif
     }
 }
-

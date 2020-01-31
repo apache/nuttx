@@ -97,4 +97,3 @@ typedef unsigned char      irqstate_t;
  ****************************************************************************/
 
 #endif /* __ARCH_AVR_INCLUDE_AVR_TYPES_H */
-

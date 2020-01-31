@@ -84,5 +84,3 @@ int pthread_attr_getstack(FAR pthread_attr_t *attr,
   linfo("Returning %d\n", ret);
   return ret;
 }
-
-

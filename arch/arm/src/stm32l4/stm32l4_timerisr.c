@@ -159,4 +159,3 @@ void arm_timer_initialize(void)
 
   up_enable_irq(STM32L4_IRQ_SYSTICK);
 }
-

@@ -294,4 +294,3 @@ gsinit_next:
 	.area	_CODE
 _g_heapbase::
 	.dw		#s__HEAP
-

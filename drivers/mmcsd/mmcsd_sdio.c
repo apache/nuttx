@@ -3736,4 +3736,3 @@ errout_with_alloc:
 }
 
 #endif /* defined (CONFIG_MMCSD) && defined (CONFIG_MMCSD_SDIO) */
-

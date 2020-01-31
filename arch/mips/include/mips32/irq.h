@@ -583,4 +583,3 @@ void up_irq_enable(void);
 
 #endif /* __ASSEMBLY */
 #endif /* __ARCH_MIPS_INCLUDE_MIPS32_IRQ_H */
-

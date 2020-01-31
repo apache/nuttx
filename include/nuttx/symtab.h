@@ -156,4 +156,3 @@ void symtab_sortbyname(FAR struct symtab_s *symtab, int nsyms);
 #endif
 
 #endif /* __INCLUDE_NUTTX_SYMTAB_H */
-

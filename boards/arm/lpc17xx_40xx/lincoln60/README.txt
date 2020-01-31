@@ -355,4 +355,3 @@ Where <subdir> is one of the following:
       output that they generate does not appear in the browser window.
       I am suspecting that the redirected output is not working correctly
       with the BINFS applications.
-

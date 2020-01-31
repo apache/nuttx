@@ -108,4 +108,3 @@ int netdev_carrier_off(FAR struct net_driver_s *dev)
 
   return -EINVAL;
 }
-

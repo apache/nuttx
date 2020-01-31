@@ -83,4 +83,3 @@ void k210_boardinitialize(void);
 #endif
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_RISC-V_K210_MAIX_BIT_INCLUDE_BOARD_H */
-

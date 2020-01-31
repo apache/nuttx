@@ -283,4 +283,3 @@ extern "C"
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_INCLUDE_ARMV6_M_SYSCALL_H */
-

@@ -134,4 +134,3 @@ FAR struct mtd_dev_s *lpc43_spifi_initialize(void);
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_LPC43_SPIFI */
 #endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_SPIFI_H */
-

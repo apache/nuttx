@@ -1439,4 +1439,3 @@ FAR struct audio_lowerhalf_s *
 }
 
 #endif /* CONFIG_AUDIO && CONFIG_AUDIO_FORMAT_PCM */
-

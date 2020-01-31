@@ -111,4 +111,3 @@ int register_blockdriver(FAR const char *path,
 }
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT */
-

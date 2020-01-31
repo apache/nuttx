@@ -297,4 +297,3 @@ extern "C"
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_X86_INCLUDE_I486_IRQ_H */
-

@@ -198,4 +198,3 @@ errout:
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
-

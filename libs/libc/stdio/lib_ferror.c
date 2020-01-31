@@ -73,4 +73,3 @@ int ferror(FILE *stream)
 }
 
 #endif /* CONFIG_NFILE_STREAMS */
-

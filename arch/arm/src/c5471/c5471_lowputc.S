@@ -126,4 +126,3 @@ up_lowputc:
 	/* And return */
 
 	mov     pc, lr
-

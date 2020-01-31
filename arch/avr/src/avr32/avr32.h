@@ -136,4 +136,3 @@ uint32_t *up_doirq(int irq, uint32_t *regs);
 
 #endif /* __ASSEMBLY__ */
 #endif  /* __ARCH_AVR_SRC_AVR32_AVR32_H */
-

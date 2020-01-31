@@ -94,4 +94,3 @@ Where <subdir> is one of the following:
     void board_userled_initialize(void);
     void board_userled(int led, bool ledon);
     void board_userled_all(uint8_t ledset);
-

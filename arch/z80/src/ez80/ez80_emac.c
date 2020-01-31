@@ -2674,4 +2674,3 @@ void up_netuninitialize(void)
 }
 
 #endif /* CONFIG_NET && CONFIG_EZ80_EMAC */
-

@@ -136,4 +136,3 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
   board_autoled_off(LED_INIRQ);
   return regs;
 }
-

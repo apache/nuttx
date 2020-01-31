@@ -109,4 +109,3 @@ You can also test overlay hardware acceleration functionality by executing the
 follwing command (shows a commandline help):
 
   nsh> fboverlay
-

@@ -122,4 +122,3 @@ FAR const char *gai_strerror(int errnum)
 #endif
   return "Unknown error";
 }
-

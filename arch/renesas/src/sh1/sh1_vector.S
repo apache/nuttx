@@ -523,4 +523,3 @@ _g_intstackbase:
 	.size	_g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 #endif
 	.end
-

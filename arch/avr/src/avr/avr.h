@@ -191,4 +191,3 @@ int avr_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 
 #endif /* __ASSEMBLY__ */
 #endif  /* __ARCH_AVR_SRC_AVR_AVR_H */
-

@@ -109,4 +109,3 @@ int a1x_bringup(void)
 
   return ret;
 }
-

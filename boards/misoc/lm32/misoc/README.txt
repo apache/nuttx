@@ -75,4 +75,3 @@ boards/misoc/lm32/misoc/include/generated
     $ ln -s boards/misoc/lm32/misoc/include/generated-sample boards/misoc/lm32/misoc/include/generated
 
   That should permit a test build.
-

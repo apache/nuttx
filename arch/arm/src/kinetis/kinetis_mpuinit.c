@@ -141,4 +141,3 @@ void kinetis_mpudisable(void)
 }
 
 #endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARM_MPU */
-

@@ -456,4 +456,3 @@ void stmpe811_gpioworker(FAR struct stmpe811_dev_s *priv)
 #endif
 
 #endif /* CONFIG_INPUT && CONFIG_INPUT_STMPE811 && !CONFIG_STMPE811_GPIO_DISABLE */
-

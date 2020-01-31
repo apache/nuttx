@@ -83,4 +83,3 @@ int net_timeo(clock_t start_time, socktimeo_t timeo)
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS */
-

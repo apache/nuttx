@@ -80,4 +80,3 @@ FAR struct task_group_s *task_getgroup(pid_t pid)
 
   return NULL;
 }
-

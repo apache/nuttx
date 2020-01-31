@@ -61,4 +61,3 @@ void up_copystate(FAR chipreg_t *dest, FAR const chipreg_t *src)
       *dest++ = *src++;
     }
 }
-

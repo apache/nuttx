@@ -8,4 +8,3 @@ if ARCH_BOARD_STM32VL_DISCOVERY
 comment "STM32VL-Discovery Hardware Configuration"
 
 endif
-

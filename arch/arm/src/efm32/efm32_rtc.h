@@ -93,4 +93,3 @@ int efm32_rtc_cancelalarm(void);
 #endif
 
 #endif /* __ARCH_ARM_SRC_EFM32_EFM32_RTC_H */
-

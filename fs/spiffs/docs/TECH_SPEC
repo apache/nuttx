@@ -236,4 +236,3 @@ where the asterisk means the msb of the object id is set.
 This is another way to speed up the searches when looking for object indices.
 By looking on the object id's msb in the object lookup, it is also possible 
 to find out whether the page is an object index page or a data page.
-

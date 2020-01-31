@@ -1069,4 +1069,3 @@ int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd, uint8_t flags,
 #endif
 
 #endif /* _INCLUDE_NUTTX_NX_NX_H */
-

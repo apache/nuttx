@@ -60,4 +60,3 @@ endif # NETLINK_ROUTE
 endmenu # Netlink Protocols
 endif # NET_NETLINK
 endmenu # Netlink Socket Support
-

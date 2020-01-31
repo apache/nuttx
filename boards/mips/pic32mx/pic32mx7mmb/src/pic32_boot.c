@@ -123,4 +123,3 @@ void board_late_initialize(void)
   pic32mx_bringup();
 }
 #endif
-

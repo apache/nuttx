@@ -125,4 +125,3 @@ EXTERN irqstate_t up_irq_enable(void);
 #endif
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_INCLUDE_K210_IRQ_H */
-

@@ -134,4 +134,3 @@ FAR char *strcasestr(FAR const char *str, FAR const char *substr)
 
   return NULL;
 }
-

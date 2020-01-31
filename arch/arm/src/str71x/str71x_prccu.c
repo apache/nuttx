@@ -473,4 +473,3 @@ void str71x_prccuinit(void)
   putreg16(reg16, STR71X_PCU_PLL2CR);
 #endif
 }
-

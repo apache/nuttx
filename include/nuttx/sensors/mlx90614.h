@@ -185,4 +185,3 @@ int mlx90614_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 #endif /* CONFIG_I2C && CONFIG_SENSORS_MLX90614 */
 
 #endif /* __INCLUDE_NUTTX_SENSORS_MLX90614_H */
-

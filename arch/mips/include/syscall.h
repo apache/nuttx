@@ -86,4 +86,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_MIPS_INCLUDE_SYSCALL_H */
-

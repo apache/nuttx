@@ -186,4 +186,3 @@ int stm32_bringup(void)
   UNUSED(ret);
   return OK;
 }
-

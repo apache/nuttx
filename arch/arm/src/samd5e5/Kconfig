@@ -824,4 +824,3 @@ config SAMD5E5_GMAC_USE_MII
 
 endmenu # GMAC device driver options
 endif # SAMD5E5_GMAC
-

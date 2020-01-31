@@ -2928,4 +2928,3 @@ void usbdev_rndis_get_composite_devdesc(struct composite_devdesc_s *dev)
   dev->devinfo.epno[RNDIS_EP_BULKOUT_IDX] = USB_EPNO(RNDIS_EPBULKOUT_ADDR);
 }
 #endif
-

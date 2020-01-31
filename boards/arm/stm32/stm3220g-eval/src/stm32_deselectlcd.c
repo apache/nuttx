@@ -92,6 +92,3 @@ void stm32_deselectlcd(void)
 }
 
 #endif /* CONFIG_STM32_FSMC */
-
-
-

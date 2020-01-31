@@ -113,4 +113,3 @@ int elf_unload(struct elf_loadinfo_s *loadinfo)
 
   return OK;
 }
-

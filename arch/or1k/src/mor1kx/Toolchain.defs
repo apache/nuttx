@@ -69,4 +69,3 @@ ARCHPICFLAGS = -fpic -membedded-pic
 LDFLAGS += -nostartfiles -nodefaultlibs
 LDSCRIPT = or1k-elf-debug.ld
 #endif
-

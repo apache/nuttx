@@ -213,4 +213,3 @@ int nxcursor_get_position(NXHANDLE hnd, FAR struct nxgl_point_s *pos);
 
 #endif /* CONFIG_NX_SWCURSOR || CONFIG_NX_HWCURSOR */
 #endif /* __INCLUDE_NUTTX_NX_NXCURSOR_H */
-

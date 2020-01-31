@@ -146,4 +146,3 @@ int sam_phy_boardinitialize(int intf);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_SAMD5E5_SAM_ETHERNET_H */
-

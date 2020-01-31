@@ -1997,4 +1997,3 @@ int dm9x_initialize(void)
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_DM90x0 */
-

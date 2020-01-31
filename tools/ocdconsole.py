@@ -316,4 +316,3 @@ if __name__ == "__main__":
             continue
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-

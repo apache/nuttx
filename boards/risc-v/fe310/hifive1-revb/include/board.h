@@ -93,4 +93,3 @@ void fe310_boardinitialize(void);
 #endif
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_RISC-V_FE310_HIFIVE-REVB_INCLUDE_BOARD_H */
-

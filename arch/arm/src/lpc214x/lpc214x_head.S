@@ -631,4 +631,3 @@ g_idle_topstack:
 	.size	g_idle_topstack, .-g_idle_topstack
 
 	.end
-

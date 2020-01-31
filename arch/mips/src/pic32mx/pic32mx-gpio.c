@@ -336,4 +336,3 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg)
     }
 }
 #endif
-

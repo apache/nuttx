@@ -1955,4 +1955,3 @@ uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
 
   return freq;
 }
-

@@ -92,4 +92,3 @@ void board_late_initialize(void)
   stm32_bringup();
 }
 #endif
-

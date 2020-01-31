@@ -342,4 +342,3 @@ int binfmt_exit(FAR struct binary_s *bin);
 #endif
 
 #endif /* __INCLUDE_NUTTX_BINFMT_BINFMT_H */
-

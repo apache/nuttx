@@ -98,4 +98,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_HC_INCLUDE_IRQ_H */
-

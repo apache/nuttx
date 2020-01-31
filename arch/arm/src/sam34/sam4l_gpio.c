@@ -562,4 +562,3 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
   return OK;
 }
 #endif
-

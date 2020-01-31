@@ -182,4 +182,3 @@ int netdev_unregister(FAR struct net_driver_s *dev)
 
   return -EINVAL;
 }
-

@@ -80,4 +80,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_RENESAS_INCLUDE_SYSCALL_H */
-

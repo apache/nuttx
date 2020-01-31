@@ -91,4 +91,3 @@ int group_setupstreams(FAR struct task_tcb_s *tcb)
 }
 
 #endif /* CONFIG_NFILE_STREAMS > 0 */
-

@@ -133,4 +133,3 @@ void *fe310_dispatch_irq(uint32_t vector, uint32_t *regs)
 
   return regs;
 }
-

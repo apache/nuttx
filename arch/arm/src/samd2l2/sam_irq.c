@@ -334,4 +334,3 @@ void sam_dumpnvic(const char *msg, int irq)
 #else
 #  define sam_dumpnvic(msg, irq)
 #endif
-

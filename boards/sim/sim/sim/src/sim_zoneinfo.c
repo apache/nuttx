@@ -150,4 +150,3 @@ int sim_zoneinfo(int minor)
 }
 
 #endif /* CONFIG_LIB_ZONEINFO_ROMFS */
-

@@ -88,4 +88,3 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_AVR_SRC_COMMON_UP_ARCH_H */
-

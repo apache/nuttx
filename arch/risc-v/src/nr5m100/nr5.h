@@ -65,4 +65,3 @@
 #include "nr5_uart.h"
 
 #endif /* __ARCH_RISCV_SRC_NR5_NR5_H */
-

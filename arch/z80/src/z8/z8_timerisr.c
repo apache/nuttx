@@ -140,4 +140,3 @@ void z80_timer_initialize(void)
   irq_attach(Z8_IRQ_SYSTIMER, (xcpt_t)z8_timerisr, NULL);
   up_enable_irq(Z8_IRQ_SYSTIMER);
 }
-

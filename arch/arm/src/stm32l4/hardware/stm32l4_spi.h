@@ -174,4 +174,3 @@
 #  define SPI_SR_FTLVL_FULL      (3 << SPI_SR_FTLVL_SHIFT) /* FIFO full */
 
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_SPI_H */
-

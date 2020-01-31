@@ -279,4 +279,3 @@ FAR struct socket *sockfd_socket(int sockfd)
 
   return NULL;
 }
-

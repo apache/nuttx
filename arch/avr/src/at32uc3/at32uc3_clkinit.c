@@ -500,6 +500,3 @@ void up_clkinitialize(void)
   void up_usbclock();
 #endif
 }
-
-
-

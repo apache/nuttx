@@ -140,4 +140,3 @@ int stm32_qeinitialize(FAR const char *devpath, int tim);
 
 #endif /* CONFIG_SENSORS_QENCODER */
 #endif /* __ARCH_ARM_SRC_STM32H7_STM32_QENCODER_H */
-

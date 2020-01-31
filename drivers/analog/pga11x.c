@@ -748,4 +748,3 @@ int pga11x_uenable(PGA11X_HANDLE handle, int pos)
 #endif
 
 #endif /* CONFIG_ADC && CONFIG_ADC_PGA11X */
-

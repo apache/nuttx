@@ -462,4 +462,3 @@
 #define RCC_CSR_LPWRRSTF            (1 << 31) /* Bit 31: Low-Power reset flag */
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32L15XXX_RCC_H */
-

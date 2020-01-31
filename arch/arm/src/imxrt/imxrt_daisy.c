@@ -110,4 +110,3 @@ void imxrt_daisy_select(unsigned int index, unsigned int alt)
       putreg32(alt, address);
     }
 }
-

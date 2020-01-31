@@ -707,4 +707,3 @@ g_nestlevel:
 g_idle_topstack:
 	.long	PIC32MX_HEAP_BASE
 	.size	g_idle_topstack, .-g_idle_topstack
-
