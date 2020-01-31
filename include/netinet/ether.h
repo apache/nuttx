@@ -76,4 +76,4 @@ int ether_line(FAR const char *line, FAR struct ether_addr *addr,
 }
 #endif
 
-#endif /*   __INCLUDE_NETINET_ETHER_H */
+#endif /* __INCLUDE_NETINET_ETHER_H */

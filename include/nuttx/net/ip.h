@@ -52,7 +52,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <queue.h>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -564,7 +563,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  * Name: net_is_addr_loopback
  *
  * Description:
- *   Is Ithe Pv6 address a the loopback address?  See RFC 4291 (replaces
+ *   Is the IPv6 address a the loopback address?  See RFC 4291 (replaces
  *   3513).
  *
  ****************************************************************************/

@@ -98,7 +98,7 @@ void net_lockinitialize(void);
 int net_breaklock(FAR unsigned int *count);
 
 /****************************************************************************
- * Name: net_breaklock
+ * Name: net_restorelock
  *
  * Description:
  *   Restore the locked state

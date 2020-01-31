@@ -118,13 +118,13 @@ in_addr_t   inet_lnaof(struct in_addr in);
 in_addr_t   inet_netof(struct in_addr in);
 #else
 FAR char   *_inet_ntoa(in_addr_t in);
-# define inet_ntoa(in) _inet_ntoa(in.s_addr);
+# define inet_ntoa(in) _inet_ntoa(in.s_addr)
 
 in_addr_t   _inet_lnaof(in_addr_t in);
-# define inet_lnaof(in) _inet_lnaof(in.s_addr);
+# define inet_lnaof(in) _inet_lnaof(in.s_addr)
 
 in_addr_t   _inet_netof(in_addr_t in);
-# define inet_netof(in) _inet_netof(in.s_addr);
+# define inet_netof(in) _inet_netof(in.s_addr)
 #endif
 struct in_addr inet_makeaddr(in_addr_t net, in_addr_t host);
 

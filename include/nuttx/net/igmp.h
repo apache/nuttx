@@ -50,12 +50,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
-
-#include <netinet/in.h>
 
 #include <nuttx/net/netconfig.h>
-#include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 
 #ifdef CONFIG_NET_IGMP

@@ -110,8 +110,8 @@ int addroute(int sockfd, FAR struct sockaddr_storage *target,
  * Name: net_delroute
  *
  * Description:
- *   Add a new route to the routing table.  This is just a convenience
- *   wrapper for the SIOCADDRT ioctl call.
+ *   Delete a route from the routing table.  This is just a convenience
+ *   wrapper for the SIOCDELRT ioctl call.
  *
  * Input Parameters:
  *   sockfd   - Any socket descriptor
