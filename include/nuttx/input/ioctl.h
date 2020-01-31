@@ -73,4 +73,3 @@
 #define _NUNCHUCKIOC(nr)     _IOC(_NUNCKIOCBASE,nr)
 
 #endif /* __INCLUDE_NUTTX_INPUT_IOCTL_H */
-

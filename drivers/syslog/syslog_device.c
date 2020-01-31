@@ -699,4 +699,3 @@ int syslog_dev_flush(void)
 
   return OK;
 }
-

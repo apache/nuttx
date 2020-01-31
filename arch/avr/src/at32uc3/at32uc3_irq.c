@@ -328,6 +328,3 @@ unsigned int avr32_intirqno(unsigned int level)
   _err("ERROR: Bad group: %d\n", group);
   return AVR32_IRQ_BADVECTOR;
 }
-
-
-

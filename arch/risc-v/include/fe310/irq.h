@@ -154,4 +154,3 @@ EXTERN irqstate_t up_irq_enable(void);
 #endif
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_INCLUDE_FE310_IRQ_H */
-

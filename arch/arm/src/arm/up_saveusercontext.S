@@ -116,4 +116,3 @@ up_saveusercontext:
 	mov	r0, #0		/* Return value == 0 */
 	mov	pc, lr		/* Return */
 	.size	up_saveusercontext, . - up_saveusercontext
-

@@ -24,7 +24,7 @@ z180_rom.asm
 
 	A board specific version in the boards/z80/z180/<board-name>/src
 	directory can be used by:
-	
+
 	1. Define CONFIG_ARCH_HAVEHEAD
 	2. Add the board-specific head file, say <filename>.asm, to
 	   boards/z80/z180/<board-name>/src
@@ -46,4 +46,3 @@ z180_saveusercontext.asm, switch
 
 z180_schedulesigaction.c and  z180_sigdeliver.c
 	These files implement Z180 signal handling.
-

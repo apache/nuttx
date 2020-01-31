@@ -47,4 +47,3 @@ DEPPATH += --dep-path mqueue
 VPATH += :mqueue
 
 endif
-

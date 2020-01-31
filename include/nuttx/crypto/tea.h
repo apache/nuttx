@@ -74,4 +74,3 @@ void tea_encrypt(FAR uint32_t *value, FAR const uint32_t *key);
 void tea_decrypt(FAR uint32_t *value, FAR const uint32_t *key);
 
 #endif /* __INCLUDE_NUTTX_CRYPTO_TEA_H */
-

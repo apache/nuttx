@@ -101,4 +101,3 @@ CSRCS += stm32_mrf24j40.c
 endif
 
 include $(TOPDIR)/boards/Board.mk
-

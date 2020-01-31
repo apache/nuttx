@@ -150,4 +150,3 @@ void arm_timer_initialize(void)
   irq_attach(DM320_IRQ_SYSTIMER, (xcpt_t)dm320_timerisr, NULL);
   up_enable_irq(DM320_IRQ_SYSTIMER);
 }
-

@@ -3087,4 +3087,3 @@ bool nand_checkreg(bool wr, uintptr_t regaddr, uint32_t regval)
   return true;
 }
 #endif
-

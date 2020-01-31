@@ -444,4 +444,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_ARMV7_M_IRQ_H */
-

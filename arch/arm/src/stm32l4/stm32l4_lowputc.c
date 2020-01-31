@@ -385,4 +385,3 @@ void stm32l4_lowsetup(void)
 #endif /* HAVE_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
 #endif /* HAVE_UART */
 }
-

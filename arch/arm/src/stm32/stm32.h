@@ -83,4 +83,3 @@
 #include "stm32_eth.h"
 
 #endif /* __ARCH_ARM_SRC_STM32_STM32_H */
-

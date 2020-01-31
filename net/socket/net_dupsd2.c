@@ -109,4 +109,3 @@ errout:
   sched_unlock();
   return ret;
 }
-

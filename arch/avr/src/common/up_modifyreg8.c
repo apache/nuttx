@@ -83,4 +83,3 @@ void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits)
   putreg8(regval, addr);
   leave_critical_section(flags);
 }
-

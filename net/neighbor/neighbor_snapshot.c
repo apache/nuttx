@@ -103,4 +103,3 @@ unsigned int neighbor_snapshot(FAR struct neighbor_entry_s *snapshot,
 }
 
 #endif  /* CONFIG_NETLINK_ROUTE */
-

@@ -860,4 +860,3 @@ int up_putc(int ch)
   up_restoreuartint(priv, ier);
   return ch;
 }
-

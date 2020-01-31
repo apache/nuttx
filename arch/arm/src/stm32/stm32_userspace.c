@@ -116,4 +116,3 @@ void stm32_userspace(void)
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */
-

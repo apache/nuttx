@@ -42,4 +42,3 @@ CSRCS += fs_fileopen.c fs_filedetach.c fs_fileclose.c
 
 DEPPATH += --dep-path inode
 VPATH += :inode
-

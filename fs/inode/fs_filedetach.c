@@ -152,4 +152,3 @@ int file_detach(int fd, FAR struct file *filep)
   _files_semgive(list);
   return OK;
 }
-

@@ -311,4 +311,3 @@ int sx127x_register(FAR struct spi_dev_s *spi,
                     FAR const struct sx127x_lower_s *lower);
 
 #endif /* __INCLUDE_NUTTX_SX127X_H */
-

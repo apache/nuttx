@@ -192,4 +192,3 @@ void builtin_uninitialize(void)
 }
 
 #endif /* HAVE_BUILTIN_CONTEXT */
-

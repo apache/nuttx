@@ -394,5 +394,3 @@ void board_lcd_uninitialize(void)
 }
 
 #endif /* CONFIG_LCD_SSD1289 */
-
-

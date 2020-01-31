@@ -96,4 +96,3 @@ int netdev_foreach(netdev_callback_t callback, FAR void *arg)
 
   return ret;
 }
-

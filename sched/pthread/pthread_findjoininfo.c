@@ -83,4 +83,3 @@ FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
 
   return pjoin;
 }
-

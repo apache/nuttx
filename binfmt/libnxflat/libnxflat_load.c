@@ -220,4 +220,3 @@ errout:
   nxflat_unload(loadinfo);
   return ret;
 }
-

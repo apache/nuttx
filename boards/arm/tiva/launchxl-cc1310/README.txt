@@ -101,4 +101,3 @@ Using J-Link
 
   The RXD/TXD pins. PA0/U0RX and PA1/U0TX, can then support a Serial console
   using the appropriate TTL adapter (TTL to RS-232 or TTL to USB serial).
-

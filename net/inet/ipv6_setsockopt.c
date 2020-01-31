@@ -153,4 +153,3 @@ int ipv6_setsockopt(FAR struct socket *psock, int option,
 }
 
 #endif /* CONFIG_NET_IPv6 */
-

@@ -611,4 +611,3 @@ Where <subdir> is one of the following:
     2. The PHY link negotiation is done at boot time only. If no link is then
        available, a fallback mode is used at 10Mbs/half-duplex. Please make sure
        your ethernet cable and switches are on before booting.
-

@@ -49,5 +49,3 @@ lpchdr: $(OBJS)
 
 clean:
 	@rm -f $(BIN) *.o *~
-
-

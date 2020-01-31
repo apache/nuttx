@@ -153,4 +153,3 @@ SECTIONS
     .debug_pubnames 0 : { *(.debug_pubnames) }
     .debug_aranges 0 : { *(.debug_aranges) }
 }
-

@@ -146,4 +146,3 @@ void riscv_timer_initialize(void)
   up_enable_irq(K210_IRQ_MTIMER);
 #endif
 }
-

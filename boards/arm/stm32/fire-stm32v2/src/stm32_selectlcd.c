@@ -186,5 +186,3 @@ void stm32_selectlcd(void)
 }
 
 #endif /* CONFIG_STM32_FSMC */
-
-

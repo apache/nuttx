@@ -384,4 +384,3 @@ int group_initialize(FAR struct task_tcb_s *tcb)
   group->tg_nmembers = 1;
   return OK;
 }
-

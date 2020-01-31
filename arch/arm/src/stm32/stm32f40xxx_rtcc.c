@@ -1635,4 +1635,3 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
 #endif
 
 #endif /* CONFIG_STM32_RTC */
-

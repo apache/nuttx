@@ -400,5 +400,3 @@ Issues
                with an LCD.
   Status:      Open
   Priority:    Medium (high if you need to use the framebuffer driver)
-
-

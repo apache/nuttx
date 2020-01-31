@@ -680,4 +680,3 @@ Where <subdir> is one of the following:
 
     3. Jumpers: J55 must be set to provide chip select PIO1_11 signal as
        the SD slot chip select.
-

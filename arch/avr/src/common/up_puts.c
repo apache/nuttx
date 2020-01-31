@@ -73,4 +73,3 @@ void up_puts(const char *str)
       up_putc(*str++);
     }
 }
-

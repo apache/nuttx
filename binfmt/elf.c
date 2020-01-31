@@ -358,4 +358,3 @@ void elf_uninitialize(void)
 }
 
 #endif /* CONFIG_ELF */
-

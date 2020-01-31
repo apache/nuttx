@@ -42,4 +42,3 @@
 #include "fe310_memorymap.h"
 
 #endif /* __ARCH_RISCV_SRC_FE310_CHIP_H */
-

@@ -52,4 +52,3 @@ __reset_vec:
 __trap_vec:
   j    exception_common
   nop
-

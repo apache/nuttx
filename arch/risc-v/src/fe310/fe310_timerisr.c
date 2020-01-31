@@ -142,4 +142,3 @@ void riscv_timer_initialize(void)
 
   up_enable_irq(FE310_IRQ_MTIMER);
 }
-

@@ -488,4 +488,3 @@ Configurations
        beginning of FLASH, trashing the FLASH images.
 
        Bottom line:  Still untested.
-

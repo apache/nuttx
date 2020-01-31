@@ -94,4 +94,3 @@ int puts(FAR const char *s)
   lib_give_semaphore(stdout);
   return nput;
 }
-

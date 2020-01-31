@@ -379,4 +379,3 @@ int netdriver_setmacaddr(unsigned char *macaddr)
 }
 
 #endif /* CONFIG_NET_ETHERNET */
-

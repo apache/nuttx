@@ -84,4 +84,3 @@ void sam_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_SAMV7_SAM_USBDEV_H */
-

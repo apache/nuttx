@@ -139,4 +139,3 @@ extern "C"
 #endif
 
 #endif /* __INCLUDE_NUTTX_LCD_SLCD_IOCTL_H */
-

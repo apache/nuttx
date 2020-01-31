@@ -34,7 +34,7 @@ Serial Console
 
   The EVK default console is on LPUART1, which is multiplexed onto
   the debug port (either OpenSDA or SEGGER JLink).
-  
+
   It runs at 115200,n,8,1.
 
 LEDs and Buttons
@@ -79,7 +79,7 @@ Configurations
 
   Information Common to All Configurations
   ----------------------------------------
-  
+
   Each i.MX RT 1020 configuration is maintained in a sub-directory and
   can be selected as follow:
 
@@ -113,7 +113,7 @@ Configurations
 
   2. Unless stated otherwise, all configurations generate console
      output on UART1 (i.e. the multiplexed OpenSDA/JLink serial port).
-     
+
   3. All of these configurations are set up to build under Windows using the
      "GNU Tools for ARM Embedded Processors" that is maintained by ARM
      (unless stated otherwise in the description of the configuration).

@@ -46,4 +46,3 @@ int  nr5_uart_test_tx_empty(void);
 void nr5_uart_put_tx(uint8_t ch);
 
 #endif  /* _ARCH_RISCV_SRC_NR5_NR5_UART_H */
-

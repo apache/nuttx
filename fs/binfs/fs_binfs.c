@@ -466,4 +466,3 @@ static int binfs_stat(struct inode *mountpt, const char *relpath, struct stat *b
  ****************************************************************************/
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_BINFS */
-

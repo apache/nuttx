@@ -264,4 +264,3 @@ void lpc31_hp1pllconfig(void)
 
   lpc31_pllconfig(&cfg);
 }
-

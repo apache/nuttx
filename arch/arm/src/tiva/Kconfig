@@ -1684,4 +1684,3 @@ config TIVA_FLASH_STARTPAGE
 
 endmenu
 endif
-

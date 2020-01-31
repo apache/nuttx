@@ -188,4 +188,3 @@ void _exit(int status)
 
   up_fullcontextrestore(tcb->xcp.regs);
 }
-

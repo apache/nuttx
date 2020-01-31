@@ -96,7 +96,7 @@ up_fullcontextrestore:
 	/*                               ^r12                                   */
 
 	ldm 	r12++, r0-r7
-	
+
     /* Now, r12 points to the SP (r13) save area.  Recover the value of     */
 	/* the stack pointer (r13).  We will need to save some temporaries on   */
 	/* the final stack.                                                     */
@@ -108,7 +108,7 @@ up_fullcontextrestore:
 	/* Now r12 points to the SR save area.  Skip over the SR for now.       */
 	/* regs: 07 06 05 04 03 02 01 00 SP xx xx xx xx xx xx xx xx             */
 	/*                                     ^r12                             */
-	
+
     sub		r12, -1*4
 
 	/* Get the pc, lr, and r12 (in r10, r9, and r8) and move them to the    */
@@ -131,17 +131,17 @@ up_fullcontextrestore:
 	/* Now r12 now points to the r11 save area.  Restore r8-r11.            */
 	/* regs: 07 06 05 04 03 02 01 00 SP xx PC LR 12 11 10 09 08             */
 	/*                                                          ^r12        */
-	
+
 	ldm		r12++, r8-r11
-	
+
 	/* r12 now points +4 beyond the end of the register save area. Restore  */
 	/* SR.  NOTE:  This may enable interrupts!                              */
 	/* regs: 07 06 05 04 03 02 01 00 SP SR PC LR 12 11 10 09 08             */
 	/*                                  ^r12-4*8                ^r12        */
-	
+
 	ld.w	lr, r12[-4*8]
 	mtsr	AVR32_SR, lr
-	
+
 	/* Restore PC, LR and r12.  Hmmm.. I need to study the behaviour of ldm */
 	/* when r12,lr, and pc on in ldm reglist16.  I'm not sure that I want   */
 	/* that behavior.                                                       */

@@ -1220,4 +1220,3 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
   *lastc = c;
   return (count || !conv) ? assigncount : EOF;
 }
-

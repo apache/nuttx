@@ -77,4 +77,3 @@ define _WRITE_NVDS_GET_STATUS=$10B3
 define __user_frequency = 18432000
 
 /* arch/z80/src/Makefile.zdsii will append target, object and library paths below */
-

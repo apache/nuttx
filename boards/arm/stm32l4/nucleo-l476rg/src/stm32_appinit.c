@@ -430,7 +430,7 @@ int board_app_initialize(uintptr_t arg)
     {
       serr("ERROR: Failed to initialize LSM303AGR driver: %d\n", ret);
     }
-#endif    
+#endif
 
 #ifdef CONFIG_DEV_GPIO
   ret = stm32l4_gpio_initialize();

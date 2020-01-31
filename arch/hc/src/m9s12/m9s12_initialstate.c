@@ -122,4 +122,3 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_CCR]      = HCS12_CCR_S;
 # endif
 }
-

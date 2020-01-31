@@ -1400,4 +1400,3 @@ endmenu # USB host controller driver (HCD) options
 endif # IMXRT_USBOTG && USBHOST
 
 endif # ARCH_CHIP_IMXRT
-

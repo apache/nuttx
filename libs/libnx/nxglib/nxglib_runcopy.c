@@ -60,4 +60,3 @@ void nxgl_runcopy(FAR struct nxgl_run_s *dest, FAR const struct nxgl_run_s *src)
   dest->x2 = src->x2;
   dest->y  = src->y;
 }
-

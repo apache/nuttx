@@ -49,4 +49,3 @@
 #endif
 
 #endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_MEMORYMAP_H */
-

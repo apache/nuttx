@@ -130,4 +130,3 @@ int sem_close(FAR sem_t *sem)
 }
 
 #endif /* CONFIG_FS_NAMED_SEMAPHORES */
-

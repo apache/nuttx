@@ -70,4 +70,3 @@ void board_late_initialize(void)
   lc823450_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */
-

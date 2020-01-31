@@ -897,4 +897,3 @@ Configuration sub-directories
         * The OLED is monochrome so the only "colors" are black and white.
           The default "colors" will give you while text on a black background.
           You can override the faults it you want black text on a while background.
-

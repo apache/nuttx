@@ -1569,4 +1569,3 @@ int netdev_unregister(FAR struct net_driver_s *dev);
 
 #endif /* CONFIG_NET */
 #endif /* __INCLUDE_NUTTX_NET_NET_H */
-

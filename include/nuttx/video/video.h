@@ -191,7 +191,7 @@ extern "C"
 
 /* RGB565 */
 
-#define V4L2_PIX_FMT_RGB565 v4l2_fourcc('R', 'G', 'B', 'P') 
+#define V4L2_PIX_FMT_RGB565 v4l2_fourcc('R', 'G', 'B', 'P')
 
 /* JFIF JPEG */
 

@@ -1003,4 +1003,3 @@ errout:
 }
 
 #endif /* CONFIG_PIC32MX_SPI */
-

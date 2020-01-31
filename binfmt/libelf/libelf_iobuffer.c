@@ -133,4 +133,3 @@ int elf_reallocbuffer(FAR struct elf_loadinfo_s *loadinfo, size_t increment)
   loadinfo->buflen   = newsize;
   return OK;
 }
-

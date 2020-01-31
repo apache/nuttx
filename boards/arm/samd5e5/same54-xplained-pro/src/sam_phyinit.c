@@ -66,4 +66,3 @@ int sam_phy_boardinitialize(int intf)
   return 0;
 }
 #endif
-

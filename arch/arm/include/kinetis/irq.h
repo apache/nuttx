@@ -128,4 +128,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_KINETIS_IRQ_H */
-

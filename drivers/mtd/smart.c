@@ -6436,4 +6436,3 @@ static int smart_loop_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 #endif /* CONFIG_SMART_DEV_LOOP */
-

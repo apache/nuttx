@@ -65,4 +65,3 @@ CSRCS += lpc43_spifilib_init.c
 endif
 
 include $(TOPDIR)/boards/Board.mk
-

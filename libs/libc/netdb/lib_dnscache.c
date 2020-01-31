@@ -296,4 +296,3 @@ int dns_find_answer(FAR const char *hostname, FAR union dns_addr_u *addr,
 }
 
 #endif /* CONFIG_NETDB_DNSCLIENT_ENTRIES > 0 */
-

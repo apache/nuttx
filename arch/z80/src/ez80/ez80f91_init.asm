@@ -218,7 +218,7 @@ _ez80_initsysclk:
 	out0	(PLL_DIV_L), a
 	ld		a, (_ez80_oscfreqmult+1)
 	out0	(PLL_DIV_H), a
-	
+
 	; Set charge pump and lock criteria
 
 	ld		a, __PLL_CTL0_INIT_PARAM

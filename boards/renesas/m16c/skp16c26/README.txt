@@ -108,5 +108,3 @@ Cygwin GCC BUILD NOTES
    the initial GCC build (see above) and once for the final GCC build. For the final GCC
    build, the workaround is the same except that the directory will be
    toolchain_build_m32c/gcc-4.2.4-final/gcc.
-
-

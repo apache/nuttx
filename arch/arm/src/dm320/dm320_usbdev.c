@@ -2624,5 +2624,3 @@ int usbdev_unregister(FAR struct usbdevclass_driver_s *driver)
   g_usbdev.driver = NULL;
   return OK;
 }
-
-

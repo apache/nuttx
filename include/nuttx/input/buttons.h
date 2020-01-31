@@ -221,4 +221,3 @@ int btn_lower_initialize(FAR const char *devname);
 #endif
 
 #endif /* __INCLUDE_NUTTX_INPUT_BUTTONS_H */
-

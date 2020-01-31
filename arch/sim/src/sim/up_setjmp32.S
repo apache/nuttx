@@ -119,4 +119,3 @@ SYMBOL(up_longjmp):
 #ifdef __ELF__
 	.size SYMBOL(up_longjmp), . - SYMBOL(up_longjmp)
 #endif
-

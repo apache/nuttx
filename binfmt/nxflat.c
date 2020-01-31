@@ -322,4 +322,3 @@ void nxflat_uninitialize(void)
 }
 
 #endif /* CONFIG_NXFLAT */
-

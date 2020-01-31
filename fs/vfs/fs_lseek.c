@@ -191,4 +191,3 @@ errout:
   set_errno(errcode);
   return (off_t)ERROR;
 }
-

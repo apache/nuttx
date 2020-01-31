@@ -407,4 +407,3 @@ int nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group);
 
 #endif /* CONFIG_MQ_MAXMSGSIZE > 0 */
 #endif /* ___INCLUDE_NUTTX_MQUEUE_H */
-

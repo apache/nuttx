@@ -116,4 +116,3 @@ void lpc17_40_userspace(void)
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */
-

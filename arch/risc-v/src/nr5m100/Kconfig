@@ -118,4 +118,3 @@ config NR5_UART_TX_BUF_SIZE
 	depends on NR5_UART
 	---help---
 		Size of TX buffers for NR5 UARTs
-

@@ -553,4 +553,3 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector,
 
   return 1;
 }
-

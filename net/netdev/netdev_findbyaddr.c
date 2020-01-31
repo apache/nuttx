@@ -343,4 +343,3 @@ FAR struct net_driver_s *netdev_findby_ripv6addr(const net_ipv6addr_t lipaddr,
   return netdev_default();
 }
 #endif /* CONFIG_NET_IPv6 */
-

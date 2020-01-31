@@ -751,4 +751,3 @@ void icmpv6_linkipaddr(FAR struct net_driver_s *dev, net_ipv6addr_t ipaddr);
 
 #endif /* CONFIG_NET_ICMPv6 && !CONFIG_NET_ICMPv6_NO_STACK */
 #endif /* __NET_ICMPv6_ICMPv6_H */
-

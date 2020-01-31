@@ -153,4 +153,3 @@ int net_dupsd(int sockfd, int minsd)
 {
   return psock_dupsd(sockfd_socket(sockfd), minsd);
 }
-

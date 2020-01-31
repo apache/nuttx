@@ -313,7 +313,7 @@ static int audio_i2s_stop(FAR struct audio_lowerhalf_s *dev)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int audio_i2s_pause(FAR struct audio_lowerhalf_s *dev, 
+static int audio_i2s_pause(FAR struct audio_lowerhalf_s *dev,
                            FAR void *session)
 #else
 static int audio_i2s_pause(FAR struct audio_lowerhalf_s *dev)

@@ -451,4 +451,3 @@ void idt_flush(uint32_t idt_addr);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_X86_INCLUDE_I486_ARCH_H */
-

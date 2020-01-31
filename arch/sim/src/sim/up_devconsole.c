@@ -176,4 +176,3 @@ int up_putc(int ch)
 
   return simuart_putc(ch);
 }
-

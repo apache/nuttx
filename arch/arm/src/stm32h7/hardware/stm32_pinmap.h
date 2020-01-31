@@ -52,4 +52,3 @@
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_PINMAP_H */
-

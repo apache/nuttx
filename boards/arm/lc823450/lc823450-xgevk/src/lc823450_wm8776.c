@@ -130,4 +130,3 @@ int lc823450_wm8776initialize(int minor)
 
   return 0;
 }
-

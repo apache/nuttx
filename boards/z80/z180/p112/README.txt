@@ -166,4 +166,3 @@ Known compilation problems:
     stdlib/lib_strtof.c:76: error 122: dividing by ZERO
 
   Workaround: Remove lib_strtof.c from libs/libc/stdlib/Make.defs
-

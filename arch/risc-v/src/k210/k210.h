@@ -51,4 +51,3 @@
 #include "k210_lowputc.h"
 
 #endif /* __ARCH_RISCV_SRC_K210_K210_H */
-

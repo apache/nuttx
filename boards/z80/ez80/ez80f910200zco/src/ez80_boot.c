@@ -63,4 +63,3 @@ void ez80_board_initialize(void)
 {
   ez80_gpioinit();
 }
-

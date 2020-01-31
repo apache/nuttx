@@ -305,4 +305,3 @@ errout:
   _SO_SETERRNO(psock, errcode);
   return ERROR;
 }
-

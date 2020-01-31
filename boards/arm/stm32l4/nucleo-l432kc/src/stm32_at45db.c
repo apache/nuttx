@@ -99,7 +99,7 @@ int stm32_at45dbinitialize(int minor)
           ferr("ERROR: Failed to initialize SPI port %d\n", AT45DB_SPI_PORT);
           return -ENODEV;
         }
-      
+
       mtd = at45db_initialize(spi);
       if (mtd == NULL)
         {
@@ -131,7 +131,7 @@ int stm32_at45dbinitialize(int minor)
 
       /* Now we are initialized */
 
-      initialized = true;    
+      initialized = true;
     }
 
   return OK;

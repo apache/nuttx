@@ -245,7 +245,7 @@ _halt1:								/* _nx_start() should not return */
 
 _sysexc_isr:
 	pushmlo	<r0-r7>					/* Save r0-r7 on the stack */
-	
+
 	/* Calculate the value of the SP BEFORE the interrupt occurred and
 	 * push that as the saved value of r15=sp
 	 */

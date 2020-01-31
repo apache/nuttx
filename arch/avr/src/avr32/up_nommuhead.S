@@ -154,4 +154,3 @@ g_idle_topstack:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 	.size	g_idle_topstack, .-g_idle_topstack
 	.end
-

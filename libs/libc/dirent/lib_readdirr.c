@@ -119,4 +119,3 @@ int readdir_r(FAR DIR *dirp, FAR struct dirent *entry,
     }
   return 0;
 }
-

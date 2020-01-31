@@ -313,7 +313,7 @@ nxstyle.c
   standard.  This program is completely ignorant of C syntax; it simply
   performs crude pattern matching to check the file.
 
-  Prints formatted messages that are classified as info, warn, error, 
+  Prints formatted messages that are classified as info, warn, error,
   fatal. In a parsable format that can be used by editors and IDEs.
 
   Usage: nxstyle [-m <excess>] [-v <level>] [-r <start,count>] <filename>

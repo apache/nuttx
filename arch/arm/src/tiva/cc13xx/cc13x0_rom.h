@@ -792,4 +792,3 @@ inline static void rom_hapi_auxadiselect(fptr_void_uint8_t fptr, uint8_t signal)
 }
 
 #endif /* __ARCH_ARM_SRC_TIVA_CC13XX_CC13X0_ROM_H */
-

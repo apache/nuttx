@@ -123,4 +123,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_AVR_INCLUDE_XMEGA_XMEGAC_IRQ_H */
-

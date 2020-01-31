@@ -435,7 +435,7 @@ endif # BQ2429X
 config BATTERY_GAUGE
 	bool "Battery Fuel Gauge support"
 	default n
-	
+
 config MAX1704X
 	bool "MAX1704X Battery fuel gauge support"
 	default n

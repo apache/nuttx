@@ -91,4 +91,3 @@ void up_enableints(void);
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_RISCV_SRC_NR5_NR5_CSR_H */
-

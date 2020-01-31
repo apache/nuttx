@@ -83,4 +83,3 @@ int nxflat_uninit(struct nxflat_loadinfo_s *loadinfo)
 
   return OK;
 }
-

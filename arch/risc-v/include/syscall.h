@@ -92,4 +92,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_RISCV_INCLUDE_SYSCALL_H */
-

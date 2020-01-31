@@ -86,4 +86,3 @@ int register_binfmt(FAR struct binfmt_s *binfmt)
 }
 
 #endif /* CONFIG_BINFMT_DISABLE */
-

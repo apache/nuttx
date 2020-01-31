@@ -734,4 +734,3 @@ STATUS
      Thus all technical details should be taken with a grain of salt.  GPIO
      definitions may actually are remnants of the LPC4330-Xplorer that still
      need clean-up.
-

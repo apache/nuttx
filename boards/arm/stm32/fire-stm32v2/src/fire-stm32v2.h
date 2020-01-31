@@ -336,4 +336,3 @@ int stm32_w25initialize(int minor);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_FIRE_STM32V2_SRC_FIRE_H */
-

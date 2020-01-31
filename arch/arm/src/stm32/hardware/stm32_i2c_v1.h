@@ -212,4 +212,3 @@
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_I2C_V1_H */
-

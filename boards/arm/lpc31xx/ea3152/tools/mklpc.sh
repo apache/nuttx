@@ -57,4 +57,3 @@ echo "COMMAND: $LPCHDR -o $TOPDIR/nuttx.lpc $NUTTXPATH"
 "$LPCHDR" -o "$TOPDIR/nuttx.lpc" "$NUTTXPATH" || \
 	{ echo "$LPCHDR failed" ; exit 1 ; }
 echo "Successfully created binary"
-

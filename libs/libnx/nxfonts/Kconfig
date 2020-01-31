@@ -404,4 +404,3 @@ config NXFONTS_PACKEDMSFIRST
 		pixels pack from the MS to LS or from LS to MS
 
 endmenu
-

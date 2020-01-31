@@ -244,4 +244,3 @@ config AUDIO_I2S
 	bool "Audio I2S"
 	depends on AUDIO
 	depends on I2S
-

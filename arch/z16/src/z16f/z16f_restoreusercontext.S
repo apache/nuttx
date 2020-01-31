@@ -99,5 +99,3 @@ _up_restoreusercontext:
 	iret2						/* Return from interrupt */
 
 	end
-
-

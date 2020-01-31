@@ -128,4 +128,3 @@ endif
 ifeq ($(CONFIG_NRF52_I2C_MASTER),y)
 CHIP_CSRCS += nrf52_i2c.c
 endif
-

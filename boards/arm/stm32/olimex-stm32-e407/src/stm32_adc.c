@@ -169,4 +169,3 @@ int stm32_adc_setup(void)
 
 #endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
 #endif /* CONFIG_ADC */
-

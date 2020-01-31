@@ -194,7 +194,7 @@ struct stm32l4_pwmtimer_s
   FAR const struct pwm_ops_s *ops;      /* PWM operations */
 #ifdef CONFIG_STM32L4_PWM_LL_OPS
   FAR const struct stm32l4_pwm_ops_s *llops; /* Low-level PWM ops */
-#endif  
+#endif
   FAR struct stm32l4_pwmchan_s *channels; /* Channels configuration */
   uint8_t  timid:5;                     /* Timer ID {1,...,17} */
   uint8_t  chan_num:3;                  /* Number of configured channels */
@@ -210,7 +210,7 @@ struct stm32l4_pwmtimer_s
   uint8_t  trgo;                        /* TRGO configuration:
                                          * 4 LSB = TRGO, 4 MSB = TRGO2
                                          */
-#endif  
+#endif
 #ifdef CONFIG_PWM_PULSECOUNT
   uint8_t irq;                         /* Timer update IRQ */
   uint8_t prev;                        /* The previous value of the RCR (pre-loaded) */

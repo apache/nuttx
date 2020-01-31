@@ -402,4 +402,3 @@
 #define UART_EFR_AUTOCTSEN           (1 << 7)  /* Bit 7: Enable Auto-CTS */
 
 #endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_UART_H */
-

@@ -133,4 +133,3 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
   return OK;
 #endif
 }
-

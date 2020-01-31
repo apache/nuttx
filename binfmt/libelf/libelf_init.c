@@ -203,4 +203,3 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
 
   return OK;
 }
-

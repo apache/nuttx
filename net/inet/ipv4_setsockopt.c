@@ -225,4 +225,3 @@ int ipv4_setsockopt(FAR struct socket *psock, int option,
 }
 
 #endif /* CONFIG_NET_IPv4 */
-

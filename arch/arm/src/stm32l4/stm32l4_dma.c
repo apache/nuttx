@@ -55,4 +55,3 @@
 #else
 #  error "Unsupported STM32L4 chip"
 #endif
-

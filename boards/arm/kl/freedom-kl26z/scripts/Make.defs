@@ -122,4 +122,3 @@ else
   # Linux/Cygwin-native host tools
   MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 endif
-

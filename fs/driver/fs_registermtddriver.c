@@ -111,4 +111,3 @@ int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
 }
 
 #endif /* CONFIG_MTD && !CONFIG_DISABLE_MOUNTPOINT */
-

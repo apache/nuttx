@@ -168,4 +168,3 @@ int udp_setsockopt(FAR struct socket *psock, int option,
 }
 
 #endif /* CONFIG_NET_UDPPROTO_OPTIONS */
-

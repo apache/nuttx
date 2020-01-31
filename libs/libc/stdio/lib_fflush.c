@@ -101,4 +101,3 @@ int fflush(FAR FILE *stream)
 
   return OK;
 }
-

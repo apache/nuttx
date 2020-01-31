@@ -251,4 +251,3 @@
 #define I2C_TXDR_MASK             (0xff)
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_I2C_V2_H */
-

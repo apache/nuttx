@@ -232,4 +232,3 @@ int epoll_wait(int epfd, FAR struct epoll_event *evs, int maxevents,
 
   return i;
 }
-

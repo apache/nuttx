@@ -724,5 +724,3 @@ Where <subdir> is one of the following:
 
       Now the hex file can be loaded using a debugger, and the code will execute from
       flash.
-
-

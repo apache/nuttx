@@ -75,4 +75,3 @@ FAR dq_entry_t *dq_remlast(dq_queue_t *queue)
 
   return ret;
 }
-

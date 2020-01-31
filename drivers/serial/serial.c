@@ -1798,4 +1798,3 @@ void uart_reset_sem(FAR uart_dev_t *dev)
   nxsem_reset(&dev->recv.sem, 1);
   nxsem_reset(&dev->pollsem,  1);
 }
-

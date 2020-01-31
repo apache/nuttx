@@ -205,4 +205,3 @@ int stm32_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_SPI_H */
-

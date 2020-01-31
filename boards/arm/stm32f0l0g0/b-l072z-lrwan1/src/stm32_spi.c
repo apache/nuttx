@@ -193,4 +193,3 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif  /* CONFIG_STM32F0L0G0_SPI2 */
 
 #endif  /* CONFIG_STM32F0L0G0_SPI */
-

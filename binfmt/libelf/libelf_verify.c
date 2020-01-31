@@ -121,4 +121,3 @@ int elf_verifyheader(FAR const Elf32_Ehdr *ehdr)
 
   return OK;
 }
-

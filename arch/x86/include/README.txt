@@ -26,6 +26,3 @@ specific directories.
 
 qemu
   This is the implementation of NuttX on the QEMU x86 simulation.
-
-
-

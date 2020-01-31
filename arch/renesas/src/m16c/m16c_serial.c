@@ -1158,4 +1158,3 @@ int up_putc(int ch)
 #elif defined(CONFIG_UART0_SERIAL_CONSOLE) || defined(CONFIG_UART1_SERIAL_CONSOLE)|| defined(CONFIG_UART2_SERIAL_CONSOLE)
 #    error "A serial console selected, but corresponding UART not enabled"
 #endif /* CONFIG_M16C_UART0 || CONFIG_M16C_UART1 || CONFIG_M16C_UART2 */
-

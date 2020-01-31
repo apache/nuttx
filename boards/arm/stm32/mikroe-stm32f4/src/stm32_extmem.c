@@ -146,4 +146,3 @@ void stm32_extmemdata(int ndata)
 {
   stm32_extmemgpios(g_dataconfig, ndata);
 }
-

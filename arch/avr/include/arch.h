@@ -80,4 +80,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_AVR_INCLUDE_ARCH_H */
-

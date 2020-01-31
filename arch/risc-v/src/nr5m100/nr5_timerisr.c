@@ -157,4 +157,3 @@ void riscv_timer_initialize(void)
 
   up_enable_irq(NR5_IRQ_SYSTICK);
 }
-

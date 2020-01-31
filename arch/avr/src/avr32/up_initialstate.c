@@ -127,4 +127,3 @@ void up_initial_state(struct tcb_s *tcb)
   xcp->regs[REG_SR]    = avr32_sr() & ~AVR32_SR_GM_MASK;
 #endif
 }
-

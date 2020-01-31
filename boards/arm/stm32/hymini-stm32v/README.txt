@@ -517,4 +517,3 @@ Where <subdir> is one of the following:
 
       -CONFIG_CDCACM=n
       +CONFIG_CDCACM=y
-

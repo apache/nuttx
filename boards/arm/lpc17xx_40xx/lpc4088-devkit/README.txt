@@ -381,4 +381,3 @@ Configuration Directories
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables both the serial NSH interface as well as the
     telnet interface over ethernet, with an IP address assigned via DHCP.
-

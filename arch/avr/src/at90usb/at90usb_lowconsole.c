@@ -281,4 +281,3 @@ void up_lowputc(char ch)
   UDR1 = ch;
 #endif
 }
-

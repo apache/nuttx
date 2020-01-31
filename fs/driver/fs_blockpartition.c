@@ -363,4 +363,3 @@ errout_free:
   kmm_free(dev);
   return ret;
 }
-

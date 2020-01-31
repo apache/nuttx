@@ -127,4 +127,3 @@ void up_udelay(useconds_t microseconds)
       microseconds--;
     }
 }
-

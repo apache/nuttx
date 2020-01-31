@@ -198,4 +198,3 @@ int bchlib_readsector(FAR struct bchlib_s *bch, size_t sector)
 
   return (int)ret;
 }
-

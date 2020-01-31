@@ -285,4 +285,3 @@ void stm32l4_serial_dma_poll(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_STC_STM32L4_STM32L4_UART_H */
-

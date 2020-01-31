@@ -139,4 +139,3 @@ vfork:
 	bx		lr
 	.size	vfork, .-vfork
 	.end
-

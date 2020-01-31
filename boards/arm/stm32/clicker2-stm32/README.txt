@@ -778,4 +778,3 @@ Configurations
       CONFIG_CDCACM_CONSOLE=n       : The CDC/ACM serial device is NOT the console
       CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
       CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
-

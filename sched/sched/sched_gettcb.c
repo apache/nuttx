@@ -103,4 +103,3 @@ FAR struct tcb_s *sched_gettcb(pid_t pid)
 
   return ret;
 }
-

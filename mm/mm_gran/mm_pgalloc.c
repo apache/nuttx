@@ -223,4 +223,3 @@ void mm_pginfo(FAR struct pginfo_s *info)
 }
 
 #endif /* CONFIG_MM_PGALLOC */
-

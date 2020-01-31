@@ -171,4 +171,3 @@ void builtin_uninitialize(void);
 #endif
 
 #endif /* __BINFMT_BINFMT_H */
-

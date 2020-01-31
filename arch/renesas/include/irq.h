@@ -83,4 +83,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_RENESAS_INCLUDE_IRQ_H */
-

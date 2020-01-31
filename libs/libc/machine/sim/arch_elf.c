@@ -139,4 +139,3 @@ int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
   berr("ERROR: Not supported\n");
   return -ENOSYS;
 }
-

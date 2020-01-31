@@ -68,4 +68,3 @@ void am335x_wdog_disable_all(void)
     {
     }
 }
-

@@ -127,4 +127,3 @@ up_lowputc:
 
 	mov     pc, lr
 	.end
-

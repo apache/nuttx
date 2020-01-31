@@ -1696,4 +1696,3 @@
 #define UART_ID_S                       0
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_UART_H */
-

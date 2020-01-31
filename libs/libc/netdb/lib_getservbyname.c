@@ -63,4 +63,3 @@ FAR struct servent *getservbyname(FAR const char *name, FAR const char *proto)
 }
 
 #endif /* CONFIG_LIBC_NETDB */
-

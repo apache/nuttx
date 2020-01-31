@@ -91,4 +91,3 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
 }
 
 #endif /* CONFIG_NET_IPv6 */
-

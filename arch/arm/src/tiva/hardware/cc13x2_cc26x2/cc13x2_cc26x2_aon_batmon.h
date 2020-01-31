@@ -193,13 +193,13 @@
 
 /* AON_BATMON_EVENTMASK */
 
-#define AON_BATMON_EVENTMASK_BATT_OVER_UL               (1 << 0)  /* Bit 0:  EVENT.BATT_OVER_UL does not 
+#define AON_BATMON_EVENTMASK_BATT_OVER_UL               (1 << 0)  /* Bit 0:  EVENT.BATT_OVER_UL does not
                                                                    * contribute to combined event from
                                                                    * BATMON */
-#define AON_BATMON_EVENTMASK_BATT_BELOW_LL              (1 << 1)  /* Bit 1:  EVENT.BATT_BELOW_LL does not 
+#define AON_BATMON_EVENTMASK_BATT_BELOW_LL              (1 << 1)  /* Bit 1:  EVENT.BATT_BELOW_LL does not
                                                                    * contribute to combined event from
                                                                    * BATMON */
-#define AON_BATMON_EVENTMASK_TEMP_OVER_UL               (1 << 2)  /* Bit 2:  EVENT.TEMP_OVER_UL does not 
+#define AON_BATMON_EVENTMASK_TEMP_OVER_UL               (1 << 2)  /* Bit 2:  EVENT.TEMP_OVER_UL does not
                                                                    * contribute to combined event from
                                                                    * BATMON */
 #define AON_BATMON_EVENTMASK_TEMP_BELOW_LL              (1 << 3)  /* Bit 3:  EVENT.TEMP_BELOW_LL does not

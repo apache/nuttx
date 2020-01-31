@@ -71,4 +71,3 @@ int syslog_rpmsg_server_init(void);
 #endif
 
 #endif /* __INCLUDE_NUTTX_SYSLOG_SYSLOG_RPMSG_H */
-

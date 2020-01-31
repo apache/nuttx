@@ -57,4 +57,3 @@ CHIP_CSRCS  = moxart_16550.c moxart_irq.c moxart_timer.c moxart_systemreset.c
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += moxart_idle.c
 endif
-

@@ -321,4 +321,3 @@ Configuration sub-directories
     NOTES:
 
     1. The CMCC (Cortex M Cache Controller) is enabled.
-

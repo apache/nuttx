@@ -313,4 +313,3 @@ bool simuart_checkc(void)
 {
   return g_uarthead != g_uarttail;
 }
-

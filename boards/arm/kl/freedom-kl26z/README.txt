@@ -337,4 +337,3 @@ Where <subdir> is one of the following:
 
     5. This configurations has support for NSH built-in applications.  However,
        in the default configuration no built-in applications are enabled.
-

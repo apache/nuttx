@@ -330,6 +330,3 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
   putreg8(regval, uart_base + KL_UART_C2_OFFSET);
 }
 #endif
-
-
-

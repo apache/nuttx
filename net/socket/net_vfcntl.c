@@ -321,4 +321,3 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
 {
   return psock_vfcntl(sockfd_socket(sockfd), cmd, ap);
 }
-

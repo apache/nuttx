@@ -225,4 +225,3 @@ int stm32_adc_setup(void)
 
 #endif /* CONFIG_STM32H7_ADC1 || CONFIG_STM32H7_ADC2 || CONFIG_STM32H7_ADC3 */
 #endif /* CONFIG_ADC */
-

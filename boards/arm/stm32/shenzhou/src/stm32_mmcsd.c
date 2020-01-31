@@ -124,4 +124,3 @@ int stm32_sdinitialize(int minor)
 #endif
   return OK;
 }
-

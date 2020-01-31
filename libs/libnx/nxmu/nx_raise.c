@@ -76,4 +76,3 @@ int nx_raise(NXWINDOW hwnd)
 
   return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_raise_s));
 }
-

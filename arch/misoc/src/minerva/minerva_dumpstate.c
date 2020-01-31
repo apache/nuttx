@@ -229,4 +229,3 @@ void minerva_dumpstate(void)
 }
 
 #endif  /* CONFIG_ARCH_STACKDUMP */
-

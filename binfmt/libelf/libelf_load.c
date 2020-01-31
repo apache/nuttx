@@ -377,4 +377,3 @@ errout_with_buffers:
   elf_unload(loadinfo);
   return ret;
 }
-

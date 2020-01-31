@@ -24,5 +24,3 @@ Currently SMP freature works on the board but is not stable.
 1. "nsh> sleep 1 &" works without crash.
 2. "nsh> smp " sometimes works but some assertions might happen.
 3. "nsh> ostest " causes deadlocks during the test.
-
-

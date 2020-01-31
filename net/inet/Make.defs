@@ -57,4 +57,3 @@ endif
 
 DEPPATH += --dep-path inet
 VPATH += :inet
-

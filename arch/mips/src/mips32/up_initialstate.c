@@ -133,4 +133,3 @@ void up_initial_state(struct tcb_s *tcb)
 #endif
   xcp->regs[REG_STATUS] = regval;
 }
-

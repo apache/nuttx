@@ -103,5 +103,3 @@ void up_lowinit(void)
 
   at32uc3_boardinitialize();
 }
-
-

@@ -566,4 +566,3 @@ Configuration Sub-Directories
     much SRAM for the system to behave sanely.  A lower memory footprint
     version of the mass storage driver will be required before this can
     be debugged.
-

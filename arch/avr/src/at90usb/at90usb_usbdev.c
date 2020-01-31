@@ -2992,4 +2992,3 @@ void avr_pollvbus(void)
   leave_critical_section(flags);
 }
 #endif
-

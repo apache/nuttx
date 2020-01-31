@@ -603,4 +603,3 @@ FAR struct iob_userstats_s * iob_getuserstats(enum iob_user_e userid);
 
 #endif /* CONFIG_MM_IOB */
 #endif /* _INCLUDE_NUTTX_MM_IOB_H */
-

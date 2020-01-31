@@ -83,4 +83,3 @@ void up_copystate(uint8_t *dest, uint8_t *src)
         }
     }
 }
-

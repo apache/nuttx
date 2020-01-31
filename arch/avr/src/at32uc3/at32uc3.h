@@ -342,4 +342,3 @@ void gpio_irqdisable(int irq);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_AVR_SRC_AT32UC3_AT32UC3_H */
-

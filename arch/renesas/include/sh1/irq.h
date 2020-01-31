@@ -569,4 +569,3 @@ static inline void up_irq_restore(irqstate_t flags)
 #endif
 
 #endif /* __ARCH_RENESAS_INCLUDE_SH1_IRQ_H */
-

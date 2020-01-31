@@ -297,4 +297,3 @@ bool kl_gpioread(uint32_t pinset)
     }
   return ret;
 }
-

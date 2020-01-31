@@ -70,4 +70,3 @@ endif
 
 DEPPATH += --dep-path serial
 VPATH += :serial
-

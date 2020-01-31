@@ -128,4 +128,3 @@ void up_detach_vector(int vector);
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_LPC214X_IRQ_H */
-
