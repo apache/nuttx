@@ -304,7 +304,7 @@ _up_vector:
 	mov	r15, r5		/* R5 = current SP */
 	add	#(12*4), r5	/* Account for sr, pc, r0-r7, mach, and macl */
 	mov.l	r5, @-r15	/* Save the SP before the interrupt */
-	
+
 	/* Save the remaining registers on the stack:
 	 *
 	 * SP -> r8		(REG_R8=0) See irq.h

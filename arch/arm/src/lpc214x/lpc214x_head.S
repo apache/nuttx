@@ -541,7 +541,7 @@ __start:
 	configmemmap	r0, r1
 
 	/* Configure the DAC and ADC */
-	
+
 	configdac	r0, r1
 
 	/* Configure Fast GPIO Port */

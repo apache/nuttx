@@ -384,7 +384,7 @@ time_t up_rtc_time(void)
   while (verify != sec);
 
   /* Round */
- 
+
   if (ssec > 128)
     {
       sec++;

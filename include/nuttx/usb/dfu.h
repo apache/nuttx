@@ -70,9 +70,9 @@ extern "C"
  *   None
  *
  ****************************************************************************/
-  
+
 void usbdev_dfu_get_composite_devdesc(struct composite_devdesc_s *dev);
- 
+
 /****************************************************************************
  * Name: usbdev_dfu_activate_bootloader
  *

@@ -543,7 +543,7 @@ __start:
 	b		.Lbsscheck
 	nop
 
-.Lbssloop:	
+.Lbssloop:
 	sw		zero, 0x0(t0)
 	sw		zero, 0x4(t0)
 	sw		zero, 0x8(t0)
@@ -564,7 +564,7 @@ __start:
 	b		.Ldatacheck
 	nop
 
-.Ldataloop:	
+.Ldataloop:
 	lw		t3, (t0)
 	sw		t3, (t1)
 	addu	t0, 4

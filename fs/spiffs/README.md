@@ -1,4 +1,4 @@
-# SPIFFS (SPI Flash File System) 
+# SPIFFS (SPI Flash File System)
 **V0.3.7**
 
 [![Build Status](https://travis-ci.org/pellepl/spiffs.svg?branch=master)](https://travis-ci.org/pellepl/spiffs)
@@ -38,12 +38,12 @@ What spiffs does:
  - Posix-like api: open, close, read, write, seek, stat, etc
  - It can run on any NOR flash, not only SPI flash - theoretically also on embedded flash of a microprocessor
  - Multiple spiffs configurations can run on same target - and even on same SPI flash device
- - Implements static wear leveling 
+ - Implements static wear leveling
  - Built in file system consistency checks
  - Highly configurable
- 
+
 What spiffs does not:
- - Presently, spiffs does not support directories. It produces a flat structure. Creating a file with path *tmp/myfile.txt* will create a file called *tmp/myfile.txt* instead of a *myfile.txt* under directory *tmp*. 
+ - Presently, spiffs does not support directories. It produces a flat structure. Creating a file with path *tmp/myfile.txt* will create a file called *tmp/myfile.txt* instead of a *myfile.txt* under directory *tmp*.
  - It is not a realtime stack. One write operation might last much longer than another.
  - Poor scalability. Spiffs is intended for small memory devices - the normal sizes for SPI flashes. Going beyond ~128Mbyte is probably a bad idea. This is a side effect of the design goal to use as little ram as possible.
  - Presently, it does not detect or handle bad blocks.
@@ -52,11 +52,11 @@ What spiffs does not:
 ## NOTICE
 
 0.4.0 is under construction. This is a full rewrite and will change the underlying structure. Hence, it will not be compatible with earlier versions of the filesystem. The API is the same, with minor modifications. Some config flags will be removed (as they are mandatory in 0.4.0) and some features might fall away until 0.4.1. If you have any worries or questions, it can be discussed in issue [#179](https://github.com/pellepl/spiffs/issues/179)
- 
-## MORE INFO 
- 
+
+## MORE INFO
+
 See the [wiki](https://github.com/pellepl/spiffs/wiki) for [configuring](https://github.com/pellepl/spiffs/wiki/Configure-spiffs), [integrating](https://github.com/pellepl/spiffs/wiki/Integrate-spiffs), [using](https://github.com/pellepl/spiffs/wiki/Using-spiffs), and [optimizing](https://github.com/pellepl/spiffs/wiki/Performance-and-Optimizing) spiffs.
- 
+
 For design, see [docs/TECH_SPEC](https://github.com/pellepl/spiffs/blob/master/docs/TECH_SPEC).
 
 For a generic spi flash driver, see [this](https://github.com/pellepl/spiflash_driver).
@@ -69,7 +69,7 @@ For a generic spi flash driver, see [this](https://github.com/pellepl/spiflash_d
 - fixed cache page not closed for removed files #156
 - fixed a lseek bug when seeking exactly to end of a fully indexed first level LUT #148
 - fixed wear leveling issue #145
-- fixed attempt to write out of bounds in flash #130, 
+- fixed attempt to write out of bounds in flash #130,
 - set file offset when seeking over end #121 (thanks @sensslen)
 - fixed seeking in virgin files #120 (thanks @sensslen)
 - Optional file metadata #128 (thanks @cesanta)
@@ -101,9 +101,9 @@ New API functions:
 - `SPIFFS_ix_remap` - changes file offset for index metadata map
 - `SPIFFS_bytes_to_ix_map_entries` - utility, get length of needed vector for given amount of bytes
 - `SPIFFS_ix_map_entries_to_bytes` - utility, get number of bytes a vector can represent given length
- 
+
 New config defines:
-- `SPIFFS_IX_MAP` - enable possibility to map index meta data to memory for reading faster 
+- `SPIFFS_IX_MAP` - enable possibility to map index meta data to memory for reading faster
 - `SPIFFS_TEMPORAL_FD_CACHE` - enable temporal cache for opening files faster
 - `SPIFFS_TEMPORAL_CACHE_HIT_SCORE` - for tuning the temporal cache
 
@@ -116,7 +116,7 @@ New config defines:
 - Problem with long filenames #79 (thanks @psjg)
 - Duplicate file name bug fix #74 (thanks @igrr)
 - SPIFFS_eof and SPIFFS_tell return wrong value #72 (thanks @ArtemPisarenko)
-- Bunch of testframe updates #77 #78 #86 (thanks @dpreussner, @psjg a.o)  
+- Bunch of testframe updates #77 #78 #86 (thanks @dpreussner, @psjg a.o)
 
 ### 0.3.4
 - Added user callback file func.
@@ -155,8 +155,8 @@ New config defines:
 - Moar comments for SPIFFS_lseek (thanks @igrr)
 - Fixed padding in spiffs_page_object_ix #40 (thanks @jmattsson @lishen2)
 - Fixed gc_quick test (thanks @jmattsson)
-- Add SPIFFS_EXCL flag #36 
-- SPIFFS_close may fail silently if cache is enabled #37 
+- Add SPIFFS_EXCL flag #36
+- SPIFFS_close may fail silently if cache is enabled #37
 - User data in callbacks #34
 - Ignoring SINGLETON build in cache setup (thanks Luca)
 - Compilation error fixed #32 (thanks @chotasanjiv)
@@ -182,7 +182,7 @@ New config defines:
 - Test sigsevs when having too many sectors #13  (thanks alonewolfx2)
 - GC might be suboptimal #11
 - Fix eternal readdir when objheader at last block, last entry
-  
+
 New API functions:
 - `SPIFFS_gc_quick` - call a nonintrusive gc
 - `SPIFFS_gc` - call a full-scale intrusive gc

@@ -2,7 +2,7 @@
 set -x
 
 # This script can be used to set up the USB Ethernet Gadget interfaces
-# on Linux. Tested on Ubuntu 19.10, kernel 5.3.0-24-generic 
+# on Linux. Tested on Ubuntu 19.10, kernel 5.3.0-24-generic
 
 # USB Ethernet Gadget interface
 IF_USB=ens35u2

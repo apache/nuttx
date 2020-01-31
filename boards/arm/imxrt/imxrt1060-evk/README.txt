@@ -110,7 +110,7 @@ LEDs and buttons
     - SW2: ON/OFF Button
     - SW3: Power-on Reset button state forces to reset the system power except
            SNVS domain
-    - SW9: Reset button 
+    - SW9: Reset button
     - SW8: User button GPIO5-00
 
   Only the user button is available to the software.  It is sensed on the

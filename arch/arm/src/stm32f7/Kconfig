@@ -1124,7 +1124,7 @@ config STM32F7_PROGMEM
 	bool "Flash progmem support"
 	default n
 	---help---
-		Add progmem support, start block and end block options are provided to 
+		Add progmem support, start block and end block options are provided to
 		obtain an uniform flash memory mapping.
 
 if STM32F7_PROGMEM

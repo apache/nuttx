@@ -486,7 +486,7 @@
 	/* Write the value into the L1 table at the correct offset.
 	 * (and increment the L1 table address by 4)
 	 */
-	
+
 	str	\tmp, [\l1], #4
 
 	/* Update the L2 page table address for the next L1 table entry. */

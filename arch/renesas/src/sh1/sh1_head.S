@@ -343,7 +343,7 @@ __vector_table:
 __start:
 	/* Initialize stack pointer to the preallocated stack */
 	mov.l	.Lstack, r15
-	
+
 	/* set up the bus controller for the EVB */
 
 	mov.l	.Lwcr1, r0
@@ -356,7 +356,7 @@ __start:
 	mov.w	.Lbas, r1
 	bra		__start0
 	mov.w	r1, @r0
-	
+
 	.align 2
 .Lstack:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4

@@ -36,12 +36,12 @@
 -include $(TOPDIR)/Make.defs
 
 ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-CFLAGS += -I=$(ARCH_SRCDIR)/chip -I=$(ARCH_SRCDIR)/common -I=$(TOPDIR)/sched 
+CFLAGS += -I=$(ARCH_SRCDIR)/chip -I=$(ARCH_SRCDIR)/common -I=$(TOPDIR)/sched
 CFLAGS += -I=$(ARCH_SRCDIR)/chip
 
-ASRCS = 
+ASRCS =
 AOBJS = $(ASRCS:.asm=$(OBJEXT))
-CSRCS =  rx65n_main.c 
+CSRCS =  rx65n_main.c
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)

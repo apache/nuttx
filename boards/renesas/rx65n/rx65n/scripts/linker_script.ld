@@ -19,7 +19,7 @@ SECTIONS
 		_exvectors_start = .;
 		KEEP(*(.exvectors))
 		_exvectors_end = .;
-	} > ROM 
+	} > ROM
 	.fvectors 0xFFFFFFFC: AT(0xFFFFFFFC)
 	{
 		KEEP(*(.fvectors))
@@ -44,7 +44,7 @@ SECTIONS
 		KEEP(*(.rvectors))
 		_rvectors_end = .;
 	} > ROM
-	/*.exvectors : 
+	/*.exvectors :
 	{
 		_exvectors_start = .;
 		KEEP(*(.exvectors))

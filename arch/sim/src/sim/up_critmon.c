@@ -48,7 +48,7 @@
 #define USE_CLOCK_GETTIME 1                        /* Better */
 
 /* From nuttx/clock.h */
- 
+
 #define NSEC_PER_SEC  1000000000
 
 /* From fixedmath.h */

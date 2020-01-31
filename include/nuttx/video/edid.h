@@ -63,7 +63,7 @@
 
 #define EDID_HEADER_MAGIC_OFFSET        0     /* Fixed header pattern: 00 FF FF FF FF FF FF 00 */
 #define EDID_HEADER_MAGIC_SIZE          8
- 
+
 /* Bytes 8-17:  Vendor Information */
 
 #define EDID_VENDOR_MANUFACTURER_OFFSET 8     /* Encoded 3-character manufacture ID */

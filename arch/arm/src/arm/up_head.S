@@ -387,7 +387,7 @@ __start:
 	 */
 
 	orr		r0, r0, #(CR_M|CR_P|CR_D)
-	
+
 	/* In most architectures, vectors are relocated to 0xffff0000.
 	 * -- but not all
 	 *
@@ -437,7 +437,7 @@ __start:
  ****************************************************************************/
 
 	/* Most addresses are all virtual address */
-	
+
 	.type	.LCvstart, %object
 .LCvstart:
 	.long	.Lvstart
@@ -583,7 +583,7 @@ __start:
 
 	mov		fp, #0
 
-.Lbssinit:	
+.Lbssinit:
 	cmp		r0, r1					/* Clear up to _bss_end_ */
 	strcc	fp, [r0],#4
 	bcc		.Lbssinit
