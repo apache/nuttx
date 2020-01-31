@@ -101,13 +101,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       return -EINVAL;
     }
 
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (psock == NULL || psock->s_crefs <= 0)
-    {
-      return -EBADF;
-    }
-
 #ifdef CONFIG_NET_USRSOCK
   if (psock->s_type == SOCK_USRSOCK_TYPE)
     {
@@ -342,6 +335,13 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
 {
   int ret;
 
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (psock == NULL || psock->s_crefs <= 0)
+    {
+      return -EBADF;
+    }
+
   /* Handle retrieval of the socket option according to the level at which
    * option should be applied.
    */
@@ -436,7 +436,7 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
   ret = psock_getsockopt(psock, level, option, value, value_len);
   if (ret < 0)
     {
-      set_errno(-ret);
+      _SO_SETERRNO(psock, -ret);
       return ERROR;
     }
 
