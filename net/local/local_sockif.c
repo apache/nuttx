@@ -309,13 +309,6 @@ static int local_bind(FAR struct socket *psock,
           /* Bind the Unix domain connection structure */
 
           ret = psock_local_bind(psock, addr, addrlen);
-
-          /* Mark the socket bound */
-
-          if (ret >= 0)
-            {
-              psock->s_flags |= _SF_BOUND;
-            }
         }
         break;
 #endif /* CONFIG_NET_LOCAL_STREAM || CONFIG_NET_LOCAL_DGRAM */

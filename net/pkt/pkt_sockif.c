@@ -387,9 +387,6 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
       conn->ifindex = ifindex;
       memcpy(conn->lmac, dev->d_mac.ether.ether_addr_octet, 6);
 
-      /* Mark the socket bound */
-
-      psock->s_flags |= _SF_BOUND;
       return OK;
     }
   else

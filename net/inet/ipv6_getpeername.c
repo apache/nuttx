@@ -101,7 +101,7 @@ int ipv6_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Verify that the socket has been connected */
 
-  if ((psock->s_flags & _SF_CONNECTED) == 0)
+  if (_SS_ISCONNECTED(psock->s_flags) == 0)
     {
       return -ENOTCONN;
     }
