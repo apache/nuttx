@@ -125,11 +125,12 @@ void up_initial_state(struct tcb_s *tcb)
 
   regval  = cp0_getstatus();
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  regval &= ~(CP0_STATUS_IM_ALL | CP0_STATUS_BEV | CP0_STATUS_UM);
-  regval |=  (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_IM_SWINTS);
+  regval &= ~(CP0_STATUS_INT_MASK | CP0_STATUS_BEV | CP0_STATUS_UM);
+  regval |=  (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_INT_SW0);
 #else
   regval &= ~(CP0_STATUS_BEV | CP0_STATUS_UM);
-  regval |=  (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_IM_ALL);
+  regval &= ~CP0_STATUS_INT_MASK;
+  regval |=  (CP0_STATUS_IE | CP0_STATUS_EXL);
 #endif
   xcp->regs[REG_STATUS] = regval;
 }
