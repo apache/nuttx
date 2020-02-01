@@ -52,6 +52,7 @@
 #include <stdbool.h>
 
 #include <nuttx/net/netconfig.h>
+#include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 
 #ifdef CONFIG_NET_IGMP
