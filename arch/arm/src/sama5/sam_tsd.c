@@ -54,7 +54,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <semaphore.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <errno.h>

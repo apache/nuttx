@@ -62,7 +62,6 @@
 #include <debug.h>
 
 #include <nuttx/kthread.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/video/vnc.h>
 

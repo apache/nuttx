@@ -45,10 +45,10 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/smart.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions

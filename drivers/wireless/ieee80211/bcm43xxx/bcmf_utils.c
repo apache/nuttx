@@ -40,12 +40,9 @@
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
-#include <semaphore.h>
 #include <debug.h>
 #include <stdio.h>
 #include <queue.h>
-
-#include <nuttx/semaphore.h>
 
 #include "bcmf_utils.h"
 

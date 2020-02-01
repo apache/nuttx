@@ -45,7 +45,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <mqueue.h>
-#include <semaphore.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>

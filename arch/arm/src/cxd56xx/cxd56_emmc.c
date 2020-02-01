@@ -36,7 +36,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <semaphore.h>
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
@@ -45,6 +44,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 
 #include <arch/board/board.h>
 

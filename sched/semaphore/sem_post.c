@@ -41,7 +41,6 @@
 #include <nuttx/config.h>
 
 #include <limits.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <sched.h>
 

@@ -44,7 +44,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
@@ -56,6 +55,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/touchscreen.h>
+#include <nuttx/semaphore.h>
 
 #include <arch/board/board.h>
 #include "up_arch.h"

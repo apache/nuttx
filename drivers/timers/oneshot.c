@@ -43,13 +43,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/timers/oneshot.h>
 
 #ifdef CONFIG_ONESHOT

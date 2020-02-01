@@ -50,7 +50,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mtd/nand_raw.h>

@@ -55,7 +55,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <string.h>
 #include <poll.h>
 #include <errno.h>

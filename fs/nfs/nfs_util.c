@@ -52,7 +52,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/dirent.h>
 
 #include "rpc.h"

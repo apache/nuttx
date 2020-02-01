@@ -40,12 +40,12 @@
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 

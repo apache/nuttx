@@ -49,6 +49,7 @@
  ****************************************************************************/
 
 #include <sys/socket.h>
+#include <nuttx/semaphore.h>
 
 #include "rpc.h"
 

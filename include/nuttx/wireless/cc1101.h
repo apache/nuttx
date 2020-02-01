@@ -45,9 +45,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <poll.h>
-#include <semaphore.h>
 
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 /****************************************************************************

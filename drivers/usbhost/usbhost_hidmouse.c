@@ -44,7 +44,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <poll.h>
-#include <semaphore.h>
 #include <signal.h>
 #include <fcntl.h>
 #include <assert.h>

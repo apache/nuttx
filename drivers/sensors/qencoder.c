@@ -45,7 +45,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
@@ -54,6 +53,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/sensors/qencoder.h>
 
 #include <arch/irq.h>

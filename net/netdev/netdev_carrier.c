@@ -41,7 +41,6 @@
 
 #include <sys/socket.h>
 #include <stdio.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <string.h>
 #include <errno.h>

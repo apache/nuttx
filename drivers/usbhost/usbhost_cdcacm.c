@@ -44,7 +44,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -55,6 +54,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/serial/serial.h>
 
 #include <nuttx/usb/usb.h>

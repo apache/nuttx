@@ -48,11 +48,11 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
-#include <semaphore.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/semaphore.h>
 #include <arch/board/board.h>
 
 #include "lc823450_mtd.h"

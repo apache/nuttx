@@ -39,11 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <fcntl.h>
 #include <spawn.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 #include <nuttx/spawn.h>
 #include <nuttx/fs/fs.h>

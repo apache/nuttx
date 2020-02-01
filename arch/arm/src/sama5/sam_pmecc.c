@@ -52,13 +52,13 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/mtd/nand_model.h>
 #include <nuttx/mtd/nand_scheme.h>
+#include <nuttx/semaphore.h>
 
 #include "sam_pmecc.h"
 #include "sam_nand.h"

@@ -52,7 +52,6 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/semaphore.h>
 
 #include <nuttx/mm/iob.h>
 

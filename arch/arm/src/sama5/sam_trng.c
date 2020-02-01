@@ -52,9 +52,9 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
+#include <nuttx/semaphore.h>
 
 #include "up_arch.h"
 #include "up_internal.h"

@@ -43,7 +43,6 @@
 #include <sys/stat.h>
 
 #include <stdio.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -51,6 +50,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/semaphore.h>
 
 #include "driver/driver.h"
 

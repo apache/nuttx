@@ -42,12 +42,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/iob.h>
+#include <nuttx/semaphore.h>
 
 #include <nuttx/wireless/pktradio.h>
 

@@ -41,7 +41,6 @@
 #include <nuttx/config.h>
 
 #include <sys/wait.h>
-#include <semaphore.h>
 #include <signal.h>
 #include <errno.h>
 

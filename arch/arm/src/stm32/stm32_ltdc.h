@@ -44,7 +44,6 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <semaphore.h>
 
 #include <nuttx/video/fb.h>
 #include <nuttx/nx/nxglib.h>

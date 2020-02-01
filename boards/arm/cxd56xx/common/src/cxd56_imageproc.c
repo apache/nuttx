@@ -43,11 +43,11 @@
 #include <string.h>
 #include <fcntl.h>
 #include <time.h>
-#include <semaphore.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/semaphore.h>
 
 #include <debug.h>
 

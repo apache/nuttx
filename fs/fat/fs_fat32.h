@@ -46,11 +46,11 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <time.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/dirent.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -42,7 +42,6 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 

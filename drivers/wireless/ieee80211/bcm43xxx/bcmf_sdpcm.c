@@ -45,10 +45,10 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+
 #include <stddef.h>
 #include <string.h>
 #include <queue.h>
-#include <semaphore.h>
 
 #include "bcmf_sdio.h"
 #include "bcmf_core.h"

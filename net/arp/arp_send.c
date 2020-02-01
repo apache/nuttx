@@ -41,13 +41,11 @@
 
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <debug.h>
 
 #include <netinet/in.h>
 #include <net/if.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>

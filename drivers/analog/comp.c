@@ -42,14 +42,12 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <debug.h>
 #include <poll.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/analog/comp.h>
 

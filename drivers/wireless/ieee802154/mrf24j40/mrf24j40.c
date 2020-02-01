@@ -47,14 +47,11 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
-#include <semaphore.h>
 
 #include <sys/types.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/semaphore.h>
-
 #include <nuttx/mm/iob.h>
 
 #include <nuttx/wireless/ieee802154/mrf24j40.h>

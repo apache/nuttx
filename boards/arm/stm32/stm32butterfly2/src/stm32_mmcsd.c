@@ -40,13 +40,13 @@
 
 #include <pthread.h>
 #include <sched.h>
-#include <semaphore.h>
 #include <time.h>
 #include <unistd.h>
 #include <debug.h>
 
 #include <nuttx/mmcsd.h>
 #include <nuttx/signal.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include "stm32.h"

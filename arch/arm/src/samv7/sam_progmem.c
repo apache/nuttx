@@ -40,10 +40,10 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <arch/samv7/chip.h>
 
 #include "up_arch.h"

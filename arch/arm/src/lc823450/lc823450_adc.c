@@ -47,7 +47,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -61,6 +60,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
+#include <nuttx/semaphore.h>
 
 #include "up_arch.h"
 #include "lc823450_adc.h"

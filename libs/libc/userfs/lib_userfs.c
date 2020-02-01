@@ -47,7 +47,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -55,6 +54,7 @@
 #include <netinet/in.h>
 
 #include <nuttx/fs/userfs.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Private Types
@@ -97,7 +97,7 @@ static inline uint16_t userfs_server_portno(void)
 {
   int ret;
 
-  ret = nxsem_wait(&g_userfs_exclsem);
+  ret = _SEM_WAIT(&g_userfs_exclsem);
   if (ret >= 0)
     {
       /* Get the next instance number.
@@ -108,7 +108,7 @@ static inline uint16_t userfs_server_portno(void)
        */
 
       ret = USERFS_SERVER_PORTBASE | g_userfs_next_instance++;
-      nxsem_post(&g_userfs_exclsem);
+      _SEM_POST(&g_userfs_exclsem);
     }
 
   return ret;

@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
-#include <semaphore.h>
 
 #include <nuttx/streams.h>
 

@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -47,7 +46,6 @@
 #include <netinet/in.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
 #include "arp/arp.h"

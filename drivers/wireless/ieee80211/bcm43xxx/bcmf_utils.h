@@ -41,8 +41,9 @@
  ****************************************************************************/
 
 #include <stdint.h>
-#include <semaphore.h>
 #include <queue.h>
+
+#include <nuttx/semaphore.h>
 
 #define container_of(ptr, type, member) \
         (type *)((uint8_t *)(ptr) - offsetof(type, member))

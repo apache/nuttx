@@ -44,7 +44,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 
 #include <nuttx/wqueue.h>
 #include <nuttx/spi/spi.h>

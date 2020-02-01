@@ -45,13 +45,12 @@
 #include <errno.h>
 #include <debug.h>
 #include <string.h>
-#include <semaphore.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
-
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/sensors/lis3dsh.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_LIS3DSH)

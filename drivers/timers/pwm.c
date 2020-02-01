@@ -45,7 +45,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>

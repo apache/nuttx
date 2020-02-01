@@ -44,7 +44,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
@@ -59,6 +58,7 @@
 #include <nuttx/mmcsd.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 
 #include <arch/board/board.h>
 

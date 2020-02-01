@@ -48,7 +48,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -58,6 +57,7 @@
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
 #include <nuttx/analog/ltc1867l.h>
+#include <nuttx/semaphore.h>
 
 #if defined(CONFIG_ADC_LTC1867L)
 

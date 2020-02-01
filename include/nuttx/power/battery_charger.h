@@ -43,9 +43,9 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/semaphore.h>
 
 #include <stdbool.h>
-#include <semaphore.h>
 
 #ifdef CONFIG_BATTERY_CHARGER
 

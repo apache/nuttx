@@ -582,7 +582,7 @@ errout_datacb:
 
 errout_locked:
 
-  nxsem_destroy(&state. snd_sem);
+  nxsem_destroy(&state.snd_sem);
   net_unlock();
 
   if (ret < 0)

@@ -41,13 +41,13 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <semaphore.h>
 #include <sched.h>
 #include <queue.h>
 #include <errno.h>
 #include <assert.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 
 #include "inode/inode.h"
 #include "semaphore/semaphore.h"

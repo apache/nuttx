@@ -47,11 +47,11 @@
 #include <string.h>
 #include <time.h>
 #include <assert.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/drivers/rwbuffer.h>
 

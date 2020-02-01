@@ -42,7 +42,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -50,6 +49,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/slave.h>
 
 #include "up_arch.h"

@@ -45,9 +45,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <queue.h>
-#include <semaphore.h>
 
 #include <nuttx/sdio.h>
+#include <nuttx/semaphore.h>
 
 #include "bcmf_driver.h"
 #include "bcmf_sdio_core.h"

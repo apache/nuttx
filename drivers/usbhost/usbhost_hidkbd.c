@@ -46,7 +46,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <poll.h>
-#include <semaphore.h>
 #include <signal.h>
 #include <time.h>
 #include <fcntl.h>

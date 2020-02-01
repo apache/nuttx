@@ -45,7 +45,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <semaphore.h>
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_FS_RAMMAP
 

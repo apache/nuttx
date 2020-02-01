@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <errno.h>
 
 #include "semaphore/semaphore.h"

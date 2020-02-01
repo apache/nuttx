@@ -43,7 +43,6 @@
 
 #include <errno.h>
 #include <stdlib.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -51,6 +50,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/sensors/kxtj9.h>
 #include <nuttx/random.h>
 

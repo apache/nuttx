@@ -44,13 +44,13 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <semaphore.h>
 #include <queue.h>
 #include <assert.h>
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/semaphore.h>
 
 #if defined(CONFIG_NET_ICMPv6) && !defined(CONFIG_NET_ICMPv6_NO_STACK)
 
