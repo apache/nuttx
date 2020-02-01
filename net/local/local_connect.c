@@ -46,7 +46,6 @@
 #include <queue.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
 #include <arch/irq.h>

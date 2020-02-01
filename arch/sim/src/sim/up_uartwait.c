@@ -37,8 +37,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <semaphore.h>
-
 #include <nuttx/semaphore.h>
 
 #include "up_internal.h"

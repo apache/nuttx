@@ -42,10 +42,10 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <debug.h>
 
 #include <nuttx/mm/iob.h>
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_MM_IOB
 

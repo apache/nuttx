@@ -43,7 +43,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <queue.h>
@@ -56,6 +55,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
+#include <nuttx/semaphore.h>
 
 #include "stm32l4_dma.h"
 #include "stm32l4_gpio.h"

@@ -57,9 +57,10 @@
 #include <nuttx/compiler.h>
 
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
+
 #include <queue.h>
-#include <semaphore.h>
 
 #ifdef CONFIG_AUDIO
 

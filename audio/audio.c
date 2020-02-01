@@ -46,7 +46,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
+#include <mqueue.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
@@ -57,7 +57,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/audio/audio.h>
-#include <mqueue.h>
+#include <nuttx/semaphore.h>
 
 #include <arch/irq.h>
 

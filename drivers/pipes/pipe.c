@@ -43,12 +43,12 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <fcntl.h>
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
+#include <nuttx/semaphore.h>
 
 #include "pipe_common.h"
 

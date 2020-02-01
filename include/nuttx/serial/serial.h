@@ -45,13 +45,13 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #ifdef CONFIG_SERIAL_TERMIOS
 #  include <termios.h>
 #endif
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 
 /************************************************************************************
  * Pre-processor Definitions

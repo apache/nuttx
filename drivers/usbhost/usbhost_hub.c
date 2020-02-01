@@ -43,7 +43,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -54,6 +53,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>

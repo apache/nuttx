@@ -44,7 +44,8 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <semaphore.h>
+
+#include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 
 #if defined(CONFIG_DRVR_WRITEBUFFER) || defined(CONFIG_DRVR_READAHEAD)

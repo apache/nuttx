@@ -48,10 +48,10 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -59,6 +59,7 @@
 #include <nuttx/compiler.h>
 
 #include <nuttx/power/power_ioctl.h>
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_DRIVERS_MOTOR
 

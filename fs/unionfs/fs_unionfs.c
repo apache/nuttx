@@ -49,7 +49,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <fixedmath.h>
@@ -60,6 +59,7 @@
 #include <nuttx/fs/unionfs.h>
 #include <nuttx/fs/dirent.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/semaphore.h>
 
 #include "inode/inode.h"
 

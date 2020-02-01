@@ -52,7 +52,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <poll.h>
 #include <errno.h>
 #include <assert.h>

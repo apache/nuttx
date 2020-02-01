@@ -40,11 +40,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <semaphore.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 
 #include "cxd56_dmac.h"
 

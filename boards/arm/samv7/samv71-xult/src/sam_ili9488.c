@@ -124,7 +124,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -135,6 +134,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ili9488.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/video/rgbcolors.h>
 
 #include <nuttx/irq.h>

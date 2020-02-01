@@ -42,8 +42,6 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/semaphore.h>
-
 #include "semaphore/semaphore.h"
 
 #ifdef CONFIG_PRIORITY_INHERITANCE

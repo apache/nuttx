@@ -41,7 +41,6 @@
 
 #include <sys/types.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -755,7 +754,7 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
 
       /* Initialize the mutual exclusion semaphore */
 
-      nxsem_init(&priv->fsem, 0, 1);
+      _SEM_INIT(&priv->fsem, 0, 1);
 
       /* Add the new font cache to the list of font caches */
 

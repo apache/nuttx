@@ -43,8 +43,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
-
 #include "bch.h"
 
 /****************************************************************************

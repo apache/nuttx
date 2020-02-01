@@ -47,7 +47,6 @@
 #include <errno.h>
 #include <debug.h>
 #include <poll.h>
-#include <semaphore.h>
 
 #include <nuttx/ascii.h>
 #include <nuttx/arch.h>

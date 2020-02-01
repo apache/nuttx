@@ -55,7 +55,6 @@
 #include <nuttx/clock.h>
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>

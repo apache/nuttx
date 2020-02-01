@@ -41,7 +41,6 @@
 
 #include <errno.h>
 #include <debug.h>
-#include <semaphore.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>

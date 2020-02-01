@@ -49,7 +49,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>

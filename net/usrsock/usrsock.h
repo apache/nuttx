@@ -47,7 +47,8 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <queue.h>
-#include <semaphore.h>
+
+#include <nuttx/semaphore.h>
 
 #include "devif/devif.h"
 #include "socket/socket.h"

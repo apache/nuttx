@@ -51,7 +51,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <poll.h>
 #include <errno.h>
 #include <assert.h>
@@ -66,7 +65,6 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/random.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/max11802.h>
 

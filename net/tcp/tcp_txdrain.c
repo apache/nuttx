@@ -40,10 +40,11 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <semaphore.h>
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
+
+#include <nuttx/semaphore.h>
 
 #include "tcp/tcp.h"
 

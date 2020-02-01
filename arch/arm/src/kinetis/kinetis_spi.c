@@ -68,7 +68,6 @@
 #include <stdint.h>
 #include <limits.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 

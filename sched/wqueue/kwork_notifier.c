@@ -197,7 +197,7 @@ static void work_notifier_worker(FAR void *arg)
 
   /* Put the notification to the free list */
 
-  while (nxsem_wait(&g_notifier_sem) < 0);
+  nxsem_wait_uninterruptible(&g_notifier_sem);
   dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
   nxsem_post(&g_notifier_sem);
 }

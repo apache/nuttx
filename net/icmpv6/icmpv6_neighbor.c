@@ -41,7 +41,6 @@
 
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <debug.h>
 
 #include <netinet/in.h>

@@ -39,12 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/ioexpander/skeleton.h>
 

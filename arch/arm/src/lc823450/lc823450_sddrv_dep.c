@@ -42,7 +42,6 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -51,6 +50,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 
 #include "up_arch.h"
@@ -62,7 +62,6 @@
 #include "lc823450_timer.h"
 
 #ifdef CONFIG_LC823450_SDC_DMA
-#  include <semaphore.h>
 #  include "lc823450_dma.h"
 #endif /* CONFIG_LC823450_SDC_DMA */
 

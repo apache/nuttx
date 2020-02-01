@@ -56,7 +56,6 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/kthread.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_core.h>

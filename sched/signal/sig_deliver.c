@@ -50,7 +50,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include "semaphore/semaphore.h"
 #include "signal/signal.h"
 
 /****************************************************************************

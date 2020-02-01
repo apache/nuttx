@@ -42,13 +42,13 @@
 
 #include <sys/types.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <sched.h>
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 
 #include "inode/inode.h"
 

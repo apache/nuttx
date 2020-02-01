@@ -50,7 +50,8 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <semaphore.h>
+
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -46,7 +46,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 

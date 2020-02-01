@@ -45,11 +45,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/usb/audio.h>
 
@@ -135,7 +133,7 @@ int apb_alloc(FAR struct audio_buf_desc_s *bufdesc)
       apb->session    = bufdesc->session;
 #endif
 
-      nxsem_init(&apb->sem, 0, 1);
+      _SEM_INIT(&apb->sem, 0, 1);
       ret = sizeof(struct audio_buf_desc_s);
     }
 
@@ -162,7 +160,7 @@ void apb_free(FAR struct ap_buffer_s *apb)
   if (refcount <= 1)
     {
       audinfo("Freeing %p\n", apb);
-      nxsem_destroy(&apb->sem);
+      _SEM_DESTROY(&apb->sem);
       lib_ufree(apb);
     }
 }

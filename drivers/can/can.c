@@ -48,7 +48,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <poll.h>
@@ -57,7 +56,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/can/can.h>
 #include <nuttx/kmalloc.h>

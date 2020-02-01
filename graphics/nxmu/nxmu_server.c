@@ -42,7 +42,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <semaphore.h>
 #include <mqueue.h>
 #include <fcntl.h>
 #include <assert.h>

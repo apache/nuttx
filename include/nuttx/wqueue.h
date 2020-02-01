@@ -45,7 +45,6 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <semaphore.h>
 #include <queue.h>
 
 #include <nuttx/clock.h>

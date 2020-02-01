@@ -58,7 +58,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <poll.h>
 #include <errno.h>
 #include <assert.h>
@@ -73,7 +72,6 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/ads7843e.h>
 

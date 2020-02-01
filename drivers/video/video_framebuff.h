@@ -37,7 +37,7 @@
 #define __VIDEO_VIDEO_FRAMEBUFF_H__
 
 #include <nuttx/video/video.h>
-#include <semaphore.h>
+#include <nuttx/semaphore.h>
 
 struct vbuf_container_s
 {

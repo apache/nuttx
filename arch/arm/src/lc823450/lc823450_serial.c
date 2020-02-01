@@ -44,7 +44,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -53,6 +52,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/serial/serial.h>
 
 #include <arch/board/board.h>

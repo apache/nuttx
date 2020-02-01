@@ -41,7 +41,6 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <semaphore.h>
 #include <string.h>
 #include <queue.h>
 #include <assert.h>
@@ -68,7 +67,6 @@
 #include <netinet/in.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
 #include "vnc_server.h"

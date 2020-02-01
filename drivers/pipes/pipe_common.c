@@ -48,7 +48,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sched.h>
-#include <semaphore.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <assert.h>

@@ -44,13 +44,13 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <poll.h>
 #include <debug.h>
 #include <time.h>
 #include <fcntl.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
 

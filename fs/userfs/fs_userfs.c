@@ -48,7 +48,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -62,6 +61,7 @@
 #include <nuttx/fs/dirent.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/net/net.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -53,13 +53,13 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <semaphore.h>
 #include <queue.h>
 #include <errno.h>
 
 #include <netinet/in.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions

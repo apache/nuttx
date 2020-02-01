@@ -49,7 +49,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <poll.h>
-#include <semaphore.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>

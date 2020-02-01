@@ -42,7 +42,6 @@
 #include <stdbool.h>
 #include <poll.h>
 #include <time.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 

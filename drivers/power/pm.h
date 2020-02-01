@@ -43,7 +43,6 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <queue.h>
 
 #include <nuttx/semaphore.h>

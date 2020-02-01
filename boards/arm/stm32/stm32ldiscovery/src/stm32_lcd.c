@@ -51,7 +51,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <poll.h>
 #include <errno.h>
 #include <debug.h>
@@ -61,6 +60,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/lcd/slcd_ioctl.h>
 #include <nuttx/lcd/slcd_codec.h>
+#include <nuttx/semaphore.h>
 
 #include "up_arch.h"
 #include "stm32_gpio.h"

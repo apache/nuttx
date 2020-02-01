@@ -44,7 +44,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/power/battery_charger.h>
 #include <nuttx/power/battery_ioctl.h>

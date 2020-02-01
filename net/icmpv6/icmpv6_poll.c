@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET_ICMPv6_SOCKET) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 
-#include <semaphore.h>
 #include <debug.h>
 
 #include <nuttx/net/netconfig.h>

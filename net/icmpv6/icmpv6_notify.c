@@ -40,14 +40,12 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <netinet/in.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
 #include "icmpv6/icmpv6.h"

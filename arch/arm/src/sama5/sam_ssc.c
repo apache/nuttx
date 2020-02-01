@@ -44,7 +44,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <queue.h>
@@ -59,6 +58,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
+#include <nuttx/semaphore.h>
 
 #include "up_internal.h"
 #include "up_arch.h"

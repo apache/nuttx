@@ -46,7 +46,6 @@
 #include <nuttx/arch.h>
 #include <stddef.h>
 #include <string.h>
-#include <semaphore.h>
 
 #include "bcmf_driver.h"
 #include "bcmf_ioctl.h"

@@ -40,7 +40,6 @@
 #include <errno.h>
 #include <debug.h>
 #include <nuttx/irq.h>
-#include <nuttx/semaphore.h>
 #include <signal.h>
 
 #include "altmdm_dev.h"

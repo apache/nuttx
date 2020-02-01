@@ -43,7 +43,6 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <semaphore.h>
 #include <pthread.h>
 #include <queue.h>
 
@@ -53,6 +52,7 @@
 #include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/net/net.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions

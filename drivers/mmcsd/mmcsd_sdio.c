@@ -54,7 +54,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -66,6 +65,7 @@
 #include <nuttx/drivers/rwbuffer.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/semaphore.h>
 
 #include "mmcsd.h"
 #include "mmcsd_sdio.h"

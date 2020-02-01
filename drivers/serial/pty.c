@@ -88,7 +88,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <sched.h>
-#include <semaphore.h>
 #include <termios.h>
 #include <stdio.h>
 #include <string.h>

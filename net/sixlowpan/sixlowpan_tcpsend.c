@@ -44,10 +44,10 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "nuttx/semaphore.h"
-#include "nuttx/net/netdev.h"
-#include "nuttx/net/radiodev.h"
-#include "nuttx/net/netstats.h"
+#include <nuttx/semaphore.h>
+#include <nuttx/net/netdev.h>
+#include <nuttx/net/radiodev.h>
+#include <nuttx/net/netstats.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
