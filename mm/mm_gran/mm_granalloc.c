@@ -159,6 +159,15 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
                   break;
                 }
 
+#if CONFIG_HAVE_BUILTIN_CTZ
+
+              else if ((curr & 1) == 1)
+                {
+                  shift = __builtin_ctz(~curr);
+                }
+
+#else /* CONFIG_HAVE_BUILTIN_CTZ */
+
               /* Check for the first zero bit in the lower or upper 16-bits.
                * From the test above, we know that at least one of the 32-
                * bits in 'curr' is zero.
@@ -212,6 +221,8 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
                   shift = 2;
                 }
 
+#endif /* CONFIG_HAVE_BUILTIN_CTZ */
+
               /* We know that the first free bit is now within the lower 4 bits
                * of 'curr'.  Check if we have the allocation at this bit position.
                */
@@ -232,7 +243,11 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
 
               else
                 {
+#if CONFIG_HAVE_BUILTIN_CTZ
+                  shift = __builtin_ctz(curr) + 1;
+#else /* CONFIG_HAVE_BUILTIN_CTZ */
                   shift = 1;
+#endif /* CONFIG_HAVE_BUILTIN_CTZ */
                 }
 
               /* Set up for the next time through the loop.  Perform a 64
