@@ -172,11 +172,11 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then enable all interrupt levels */
 
-  up_irq_restore(CP0_STATUS_IM_ALL);
+  up_irq_restore(CP0_STATUS_INT_ENALL);
 #else
   /* Enable only software interrupts */
 
-  up_irq_restore(CP0_STATUS_IM_SWINTS);
+  up_irq_restore(CP0_STATUS_INT_SW0);
 #endif
 }
 

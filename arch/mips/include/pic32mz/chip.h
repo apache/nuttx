@@ -198,6 +198,14 @@
 #  error "Unrecognized PIC32MZ device"
 #endif
 
+/* IPL priority levels *****************************************************/
+/* These priorities will be used by the core to properly disable/mask
+ * interrupts.
+ */
+
+#define CHIP_MIN_PRIORITY    1 /* Minimum priority. */
+#define CHIP_MAX_PRIORITY    7 /* Maximum priority. */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
