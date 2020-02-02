@@ -134,11 +134,13 @@ struct tun_device_s
 {
   bool              bifup;     /* true:ifup false:ifdown */
   bool              read_wait;
+  bool              write_wait;
   WDOG_ID           txpoll;    /* TX poll timer */
   struct work_s     work;      /* For deferring poll work to the work queue */
   FAR struct pollfd *poll_fds;
   sem_t             waitsem;
   sem_t             read_wait_sem;
+  sem_t             write_wait_sem;
   size_t            read_d_len;
   size_t            write_d_len;
 
@@ -169,7 +171,7 @@ static void tun_unlock(FAR struct tun_device_s *priv);
 
 /* Common TX logic */
 
-static int  tun_fd_transmit(FAR struct tun_device_s *priv);
+static void tun_fd_transmit(FAR struct tun_device_s *priv);
 static int  tun_txpoll(FAR struct net_driver_s *dev);
 #ifdef CONFIG_NET_ETHERNET
 static int  tun_txpoll_tap(FAR struct net_driver_s *dev);
@@ -206,7 +208,7 @@ static void tun_ipv6multicast(FAR struct tun_device_s *priv);
 
 static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
                         FAR const char *devfmt, bool tun);
-static int tun_dev_uninit(FAR struct tun_device_s *priv);
+static void tun_dev_uninit(FAR struct tun_device_s *priv);
 
 /* File interface */
 
@@ -290,6 +292,18 @@ static void tun_pollnotify(FAR struct tun_device_s *priv,
 {
   FAR struct pollfd *fds = priv->poll_fds;
 
+  if (priv->read_wait && (eventset & POLLIN))
+    {
+      priv->read_wait = false;
+      nxsem_post(&priv->read_wait_sem);
+    }
+
+  if (priv->write_wait && (eventset & POLLOUT))
+    {
+      priv->write_wait = false;
+      nxsem_post(&priv->write_wait_sem);
+    }
+
   if (fds == NULL)
     {
       return;
@@ -315,7 +329,7 @@ static void tun_pollnotify(FAR struct tun_device_s *priv,
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
- *   OK on success; a negated errno on failure
+ *   None
  *
  * Assumptions:
  *   May or may not be called from an interrupt handler.  In either case,
@@ -324,23 +338,10 @@ static void tun_pollnotify(FAR struct tun_device_s *priv,
  *
  ****************************************************************************/
 
-static int tun_fd_transmit(FAR struct tun_device_s *priv)
+static void tun_fd_transmit(FAR struct tun_device_s *priv)
 {
   NETDEV_TXPACKETS(&priv->dev);
-
-  /* Verify that the hardware is ready to send another packet.  If we get
-   * here, then we are committed to sending a packet; Higher level logic
-   * must have assured that there is no transmission in progress.
-   */
-
-  if (priv->read_wait)
-    {
-      priv->read_wait = false;
-      nxsem_post(&priv->read_wait_sem);
-    }
-
   tun_pollnotify(priv, POLLIN);
-  return OK;
 }
 
 /****************************************************************************
@@ -1110,12 +1111,14 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
 
   nxsem_init(&priv->waitsem, 0, 1);
   nxsem_init(&priv->read_wait_sem, 0, 0);
+  nxsem_init(&priv->write_wait_sem, 0, 0);
 
   /* The wait semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
    */
 
   nxsem_setprotocol(&priv->read_wait_sem, SEM_PRIO_NONE);
+  nxsem_setprotocol(&priv->write_wait_sem, SEM_PRIO_NONE);
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 
@@ -1135,6 +1138,7 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
     {
       nxsem_destroy(&priv->waitsem);
       nxsem_destroy(&priv->read_wait_sem);
+      nxsem_destroy(&priv->write_wait_sem);
       return ret;
     }
 
@@ -1146,7 +1150,7 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
  * Name: tun_dev_uninit
  ****************************************************************************/
 
-static int tun_dev_uninit(FAR struct tun_device_s *priv)
+static void tun_dev_uninit(FAR struct tun_device_s *priv)
 {
   /* Put the interface in the down state */
 
@@ -1158,8 +1162,7 @@ static int tun_dev_uninit(FAR struct tun_device_s *priv)
 
   nxsem_destroy(&priv->waitsem);
   nxsem_destroy(&priv->read_wait_sem);
-
-  return OK;
+  nxsem_destroy(&priv->write_wait_sem);
 }
 
 /****************************************************************************
@@ -1208,40 +1211,47 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct tun_device_s *priv = filep->f_priv;
   ssize_t ret;
 
-  if (priv == NULL)
+  if (priv == NULL || buflen > CONFIG_NET_TUN_PKTSIZE)
     {
       return -EINVAL;
     }
 
   tun_lock(priv);
 
-  if (priv->write_d_len > 0)
+  for (; ; )
     {
+      /* Check if there are free space to write */
+
+      if (priv->write_d_len == 0)
+        {
+          memcpy(priv->write_buf, buffer, buflen);
+
+          net_lock();
+          priv->dev.d_buf = priv->write_buf;
+          priv->dev.d_len = buflen;
+
+          tun_net_receive(priv);
+          net_unlock();
+
+          ret = buflen;
+          break;
+        }
+
+      /* Wait if there are no free space to write */
+
+      if ((filep->f_oflags & O_NONBLOCK) != 0)
+        {
+          ret = -EAGAIN;
+          break;
+        }
+
+      priv->write_wait = true;
       tun_unlock(priv);
-      return -EBUSY;
+      nxsem_wait(&priv->write_wait_sem);
+      tun_lock(priv);
     }
 
-  net_lock();
-
-  if (buflen > CONFIG_NET_TUN_PKTSIZE)
-    {
-      ret = -EINVAL;
-    }
-  else
-    {
-      memcpy(priv->write_buf, buffer, buflen);
-
-      priv->dev.d_buf = priv->write_buf;
-      priv->dev.d_len = buflen;
-
-      tun_net_receive(priv);
-
-      ret = (ssize_t)buflen;
-    }
-
-  net_unlock();
   tun_unlock(priv);
-
   return ret;
 }
 
