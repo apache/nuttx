@@ -16312,7 +16312,7 @@ detailed bugfix information):
       - sockgetname() files need to include udp/udp.h and tcp/tcp.h or
         otherwise NET_UDP_HAVE_STACK and NET_TCP_HAVE_STACK are undefined
         and the logic is never compiled.  Noted by Anthony Merlino.
-      - dup()/dup2():  There was a reference counting problem in the TPC
+      - dup()/dup2():  There was a reference counting problem in the TCP
         logic of net_clone().  net_clone() which is the common logic
         underlying dup() and dup2() for sockets.  When net_clone() calls
         net_start_monitor() and net_start_monitor() returns a failure
@@ -20236,7 +20236,7 @@ detailed bugfix information):
         multicast address.  Exiting logic only supported UDP multicast.  But
         MLD and certain other ICMPv6 packets also require acceptance of
         multicast packets.  From Gregory Nutt.
-      - TCP:  In TPC recv window calculations, in order to receive data we
+      - TCP:  In TCP recv window calculations, in order to receive data we
         must not only have IOBs available, but we must also have at least one
         IOB chain qentry available.  Otherwise, we will advertise that we an
         buffer a lot of data when, in fact, we cannot.  This is an

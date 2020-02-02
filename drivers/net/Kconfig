@@ -94,10 +94,6 @@ config TELNET_DUMPBUFFER
 
 endif # NETDEV_TELNET
 
-config ARCH_HAVE_NETDEV_STATISTICS
-	bool
-	default n
-
 config NETDEV_STATISTICS
 	bool "Network device driver statistics"
 	depends on NET_STATISTICS && ARCH_HAVE_NETDEV_STATISTICS
@@ -306,35 +302,6 @@ config ENCX24J600_REGDEBUG
 		CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_NET.
 
 endif # ENCX24J600
-
-menuconfig NET_SLIP
-	bool "SLIP (serial line) support"
-	default n
-	select ARCH_HAVE_NETDEV_STATISTICS
-	---help---
-		Reference: RFC 1055
-
-if NET_SLIP
-
-config NET_SLIP_STACKSIZE
-	int "Daemon stack size"
-	default 2048
-	---help---
-		Provides the stack size for SLIP RX and TX.
-
-config NET_SLIP_DEFPRIO
-	int "Daemon priority"
-	default 128
-	---help---
-		Provides the priority for SLIP RX and TX threads.
-
-config NET_SLIP_NINTERFACES
-	int "Number of SLIP interfaces"
-	default 1
-	---help---
-		Determines the number of physical interfaces that will be supported.
-
-endif
 
 menuconfig NET_FTMAC100
 	bool "Faraday 10/100 Ethernet"

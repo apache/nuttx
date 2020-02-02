@@ -15767,7 +15767,7 @@
 	  Other TCP-specific issues also fixed.  There remains a major
 	  outstanding issue with ACK handling.  Handle case where the local
 	  address is zero (listen socket).  Major re-architecting of TCP logic
-	  to properly handle TCP stuf like ACKs and TPC windowing which were
+	  to properly handle TCP stuf like ACKs and TCP windowing which were
 	  not properly covered in the initial design.  Still does not work;
 	  hangs waiting of ACKs.Various fixes for a clean build if either TCP
 	  or UDP are disabled.  Given the current state of TCP, it is
@@ -17528,7 +17528,7 @@
 	  use file-system in between.  NOTE that this provides the opposite
 	  capability of FTL which will let you use an MTD interface directly as a
 	  block device.  From Jussi Kivilinna (2017-10-19).
-	* There was a reference counting problem in the TPC logic of
+	* There was a reference counting problem in the TCP logic of
 	  net_clone().  net_clone() which is the common logic underlying dup() and
 	  dup2() for sockets.  When net_clone() calls net_start_monitor() and
 	  net_start_monitor() returns a failure (because the underlying TCP

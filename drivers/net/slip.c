@@ -87,7 +87,7 @@
 #endif
 
 /* The Linux slip module hard-codes its MTU size to 296 (40 bytes for the
- * IP+TPC headers plus 256 bytes of data).  So you might as well set
+ * IP+TCP headers plus 256 bytes of data).  So you might as well set
  * CONFIG_NET_SLIP_PKTSIZE to 296 as well.
  *
  * There may be an issue with this setting, however.  I see that Linux uses
