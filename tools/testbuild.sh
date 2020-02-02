@@ -154,7 +154,7 @@ cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 function distclean {
   if [ -f .config ]; then
     echo "  Cleaning..."
-    ${MAKE} ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null || fail=1
+    ${MAKE} ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null || fail=$?
   fi
 }
 
@@ -183,7 +183,7 @@ function configure {
     echo "$toolchain=y" >> $nuttx/.config
 
     echo "  Refreshing..."
-    ${MAKE} ${MAKE_FLAGS} olddefconfig 1>/dev/null || fail=1
+    ${MAKE} ${MAKE_FLAGS} olddefconfig 1>/dev/null || fail=$?
   fi
 }
 
@@ -192,7 +192,7 @@ function configure {
 function build {
   echo "  Building NuttX..."
   echo "------------------------------------------------------------------------------------"
-  ${MAKE} ${JOPTION} ${MAKE_FLAGS} 1>/dev/null || fail=1
+  ${MAKE} ${JOPTION} ${MAKE_FLAGS} 1>/dev/null || fail=$?
 }
 
 # Coordinate the steps for the next build test
