@@ -59,6 +59,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
@@ -139,7 +140,7 @@ struct slip_driver_s
 {
   volatile bool bifup;      /* true:ifup false:ifdown */
   bool          txnodelay;  /* True: nxsig_usleep() not needed */
-  int16_t       fd;         /* TTY file descriptor */
+  struct file   file;       /* TTY file descriptor */
   uint16_t      rxlen;      /* The number of bytes in rxbuf */
   pid_t         rxpid;      /* Receiver thread ID */
   pid_t         txpid;      /* Transmitter thread ID */
@@ -173,9 +174,9 @@ static void slip_semtake(FAR struct slip_driver_s *priv);
 static void slip_write(FAR struct slip_driver_s *priv,
                        FAR const uint8_t *buffer, int len);
 static void slip_putc(FAR struct slip_driver_s *priv, int ch);
-static int slip_transmit(FAR struct slip_driver_s *priv);
+static void slip_transmit(FAR struct slip_driver_s *priv);
 static int slip_txpoll(FAR struct net_driver_s *dev);
-static void slip_txtask(int argc, FAR char *argv[]);
+static int slip_txtask(int argc, FAR char *argv[]);
 
 /* Packet receiver task */
 
@@ -226,9 +227,8 @@ static inline void slip_write(FAR struct slip_driver_s *priv,
 {
   /* Handle the case where the write is awakened by a signal */
 
-  while (write(priv->fd, buffer, len) < 0)
+  while (file_write(&priv->file, buffer, len) < 0)
     {
-      DEBUGASSERT(errno == EINTR);
     }
 }
 
@@ -265,7 +265,7 @@ static inline void slip_putc(FAR struct slip_driver_s *priv, int ch)
  *
  ****************************************************************************/
 
-static int slip_transmit(FAR struct slip_driver_s *priv)
+static void slip_transmit(FAR struct slip_driver_s *priv)
 {
   uint8_t *src;
   uint8_t *start;
@@ -359,7 +359,6 @@ static int slip_transmit(FAR struct slip_driver_s *priv)
   slip_putc(priv, SLIP_END);
   NETDEV_TXDONE(&priv->dev);
   priv->txnodelay = true;
-  return OK;
 }
 
 /****************************************************************************
@@ -420,7 +419,7 @@ static int slip_txpoll(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void slip_txtask(int argc, FAR char *argv[])
+static int slip_txtask(int argc, FAR char *argv[])
 {
   FAR struct slip_driver_s *priv;
   unsigned int index = *(argv[1]) - '0';
@@ -443,7 +442,7 @@ static void slip_txtask(int argc, FAR char *argv[])
   start_ticks = clock_systimer();
   for (;  ; )
     {
-      /* Wait for the timeout to expire (or until we are signaled by by  */
+      /* Wait for the timeout to expire (or until we are signaled by  */
 
       slip_semtake(priv);
       if (!priv->txnodelay)
@@ -494,6 +493,8 @@ static void slip_txtask(int argc, FAR char *argv[])
           slip_semgive(priv);
         }
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -514,12 +515,11 @@ static inline int slip_getc(FAR struct slip_driver_s *priv)
 {
   uint8_t ch;
 
-  while (read(priv->fd, &ch, 1) < 0)
+  while (file_read(&priv->file, &ch, 1) < 0)
     {
-      DEBUGASSERT(errno == EINTR);
     }
 
-  return (int)ch;
+  return ch;
 }
 
 /****************************************************************************
@@ -952,6 +952,7 @@ int slip_initialize(int intf, FAR const char *devname)
   FAR struct slip_driver_s *priv;
   char buffer[8];
   FAR char *argv[2];
+  int ret;
 
   /* Get the interface structure associated with this interface number. */
 
@@ -972,11 +973,11 @@ int slip_initialize(int intf, FAR const char *devname)
 
   /* Open the device */
 
-  priv->fd            = nx_open(devname, O_RDWR, 0666);
-  if (priv->fd < 0)
+  ret = file_open(&priv->file, devname, O_RDWR, 0666);
+  if (ret < 0)
     {
-      nerr("ERROR: Failed to open %s: %d\n", devname, priv->fd);
-      return priv->fd;
+      nerr("ERROR: Failed to open %s: %d\n", devname, ret);
+      return ret;
     }
 
   /* Initialize the wait semaphore */
@@ -991,7 +992,7 @@ int slip_initialize(int intf, FAR const char *devname)
   argv[1] = NULL;
 
   priv->rxpid = kthread_create("rxslip", CONFIG_NET_SLIP_DEFPRIO,
-                               CONFIG_NET_SLIP_STACKSIZE, (main_t)slip_rxtask,
+                               CONFIG_NET_SLIP_STACKSIZE, slip_rxtask,
                                (FAR char * const *)argv);
   if (priv->rxpid < 0)
     {
@@ -1006,7 +1007,7 @@ int slip_initialize(int intf, FAR const char *devname)
   /* Start the SLIP transmitter kernel thread */
 
   priv->txpid = kthread_create("txslip", CONFIG_NET_SLIP_DEFPRIO,
-                               CONFIG_NET_SLIP_STACKSIZE, (main_t)slip_txtask,
+                               CONFIG_NET_SLIP_STACKSIZE, slip_txtask,
                                (FAR char * const *)argv);
   if (priv->txpid < 0)
     {
@@ -1025,13 +1026,6 @@ int slip_initialize(int intf, FAR const char *devname)
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
   netdev_register(&priv->dev, NET_LL_SLIP);
-
-  /* When the RX and TX tasks were created, the TTY file descriptor was
-   * dup'ed for each task.  This task no longer needs the file descriptor
-   * and we can safely close it.
-   */
-
-  close(priv->fd);
   return OK;
 }
 
