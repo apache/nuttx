@@ -202,9 +202,6 @@ static int tun_txavail(FAR struct net_driver_s *dev);
 static int tun_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 static int tun_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac);
 #endif
-#ifdef CONFIG_NET_ICMPv6
-static void tun_ipv6multicast(FAR struct tun_device_s *priv);
-#endif
 
 static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
                         FAR const char *devfmt, bool tun);
@@ -864,16 +861,6 @@ static int tun_ifup(FAR struct net_driver_s *dev)
         dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
         dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
         dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
-#endif
-
-  /* Initialize PHYs, the Ethernet interface, and setup up Ethernet interrupts */
-
-  /* Instantiate the MAC address from priv->dev.d_mac.ether.ether_addr_octet */
-
-#ifdef CONFIG_NET_ICMPv6
-  /* Set up IPv6 multicast address filtering */
-
-  tun_ipv6multicast(priv);
 #endif
 
   /* Set and activate a timer process */
