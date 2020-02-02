@@ -460,12 +460,6 @@ static int slip_txtask(int argc, FAR char *argv[])
 
       if (priv->bifup)
         {
-          /* Get exclusive access to the network (if it it is already being
-           * used slip_rxtask, then we have to wait).
-           */
-
-          slip_semtake(priv);
-
           /* Poll the networking layer for new XMIT data. */
 
           net_lock();
@@ -490,7 +484,6 @@ static int slip_txtask(int argc, FAR char *argv[])
             }
 
           net_unlock();
-          slip_semgive(priv);
         }
     }
 
@@ -705,11 +698,10 @@ static int slip_rxtask(int argc, FAR char *argv[])
 
       /* Handle the IP input.  Get exclusive access to the network. */
 
-      slip_semtake(priv);
+      net_lock();
       priv->dev.d_buf = priv->rxbuf;
       priv->dev.d_len = priv->rxlen;
 
-      net_lock();
       NETDEV_RXPACKETS(&priv->dev);
 
       /* All packets are assumed to be IP packets (we don't have a choice..
@@ -759,7 +751,6 @@ static int slip_rxtask(int argc, FAR char *argv[])
         }
 
       net_unlock();
-      slip_semgive(priv);
     }
 
   /* We won't get here */
