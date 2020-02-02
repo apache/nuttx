@@ -99,9 +99,7 @@ EXTERN const net_ipv6addr_t g_lo_ipv6mask;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETDEV_LOOPBACK
 int localhost_initialize(void);
-#endif /* CONFIG_NETDEV_LOOPBACK */
 
 #undef EXTERN
 #ifdef __cplusplus

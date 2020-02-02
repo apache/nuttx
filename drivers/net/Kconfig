@@ -5,17 +5,6 @@
 
 comment "General Ethernet MAC Driver Options"
 
-config NETDEV_LOOPBACK
-	bool
-	default n if !NET_LOOPBACK
-	default y if NET_LOOPBACK
-	select ARCH_HAVE_NETDEV_STATISTICS
-	---help---
-		Add support for the local network loopback device, lo.
-
-if NETDEV_LOOPBACK
-endif # NETDEV_LOOPBACK
-
 config NET_RPMSG_DRV
 	bool "RPMSG net driver"
 	depends on NET && OPENAMP

@@ -6,7 +6,7 @@
 config FS_USERFS
 	bool "User file system"
 	default n
-	depends on NET_IPv4 && NET_UDP && NETDEV_LOOPBACK
+	depends on NET_IPv4 && NET_UDP && NET_LOOPBACK
 	---help---
 		Enable support for user file system.  See include/nuttx/fs/userfs.h
 

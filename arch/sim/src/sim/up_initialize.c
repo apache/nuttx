@@ -274,7 +274,7 @@ void up_initialize(void)
   netdriver_init();         /* Our "real" network driver */
 #endif
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
   /* Initialize the local loopback device */
 
   localhost_initialize();

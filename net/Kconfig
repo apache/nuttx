@@ -123,6 +123,7 @@ config NET_ETHERNET
 
 config NET_LOOPBACK
 	bool "Local loopback"
+	select ARCH_HAVE_NETDEV_STATISTICS
 	default n
 	---help---
 		Add support for the local network loopback device, lo.
