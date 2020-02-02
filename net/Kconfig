@@ -11,6 +11,10 @@ config ARCH_HAVE_PHY
 	bool
 	default n
 
+config ARCH_HAVE_NETDEV_STATISTICS
+	bool
+	default n
+
 config NET_WRITE_BUFFERS
 	bool
 	default n
@@ -84,7 +88,7 @@ config NET_SLIP_PKTSIZE
 		296 are not recommended.
 
 		The Linux slip module hard-codes its MTU size to 296 (40 bytes for
-		the IP+TPC headers plus 256 bytes of data).  So you might as well
+		the IP+TCP headers plus 256 bytes of data).  So you might as well
 		set CONFIG_NET_SLIP_PKTSIZE to 296 as well.
 
 		There may be an issue with this setting, however.  I see that Linux
@@ -125,6 +129,7 @@ config NET_LOOPBACK
 
 menuconfig NET_SLIP
 	bool "SLIP support"
+	select ARCH_HAVE_NETDEV_STATISTICS
 	default n
 	---help---
 		Enables building of the SLIP driver. SLIP requires
