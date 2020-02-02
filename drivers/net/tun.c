@@ -136,7 +136,6 @@ struct tun_device_s
   bool              read_wait;
   WDOG_ID           txpoll;    /* TX poll timer */
   struct work_s     work;      /* For deferring poll work to the work queue */
-  FAR struct file  *filep;
   FAR struct pollfd *poll_fds;
   sem_t             waitsem;
   sem_t             read_wait_sem;
@@ -589,33 +588,6 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
 
       arp_ipin(&priv->dev);
       ipv4_input(&priv->dev);
-
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field d_len will set to a value > 0.
-       */
-
-      if (priv->dev.d_len > 0)
-        {
-          /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv6
-          if (IFF_IS_IPv4(priv->dev.d_flags))
-#endif
-            {
-              arp_out(&priv->dev);
-            }
-#ifdef CONFIG_NET_IPv6
-          else
-            {
-              neighbor_out(&priv->dev);
-            }
-#endif
-
-          /* And send the packet */
-
-          priv->write_d_len = priv->dev.d_len;
-          tun_fd_transmit(priv);
-        }
     }
   else
 #endif
@@ -628,31 +600,6 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
       /* Give the IPv6 packet to the network layer. */
 
       ipv6_input(&priv->dev);
-
-      /* If the above function invocation resulted in data that should be
-       * sent out on the network, the field d_len will set to a value > 0.
-       */
-
-      if (priv->dev.d_len > 0)
-        {
-          /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-          if (IFF_IS_IPv4(priv->dev.d_flags))
-            {
-              arp_out(&priv->dev);
-            }
-          else
-#endif
-#ifdef CONFIG_NET_IPv6
-            {
-              neighbor_out(&priv->dev);
-            }
-#endif
-
-          priv->write_d_len = priv->dev.d_len;
-          tun_fd_transmit(priv);
-        }
     }
   else
 #endif
@@ -670,12 +617,41 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
         {
           priv->write_d_len = priv->dev.d_len;
           tun_fd_transmit(priv);
+          priv->dev.d_len = 0;
         }
     }
   else
 #endif
     {
       NETDEV_RXDROPPED(&priv->dev);
+      priv->dev.d_len = 0;
+    }
+
+  /* If the above function invocation resulted in data that should be
+   * sent out on the network, the field d_len will set to a value > 0.
+   */
+
+  if (priv->dev.d_len > 0)
+    {
+      /* Update the Ethernet header with the correct MAC address */
+
+#ifdef CONFIG_NET_IPv6
+      if (IFF_IS_IPv4(priv->dev.d_flags))
+#endif
+        {
+          arp_out(&priv->dev);
+        }
+#ifdef CONFIG_NET_IPv6
+      else
+        {
+          neighbor_out(&priv->dev);
+        }
+#endif
+
+      /* And send the packet */
+
+      priv->write_d_len = priv->dev.d_len;
+      tun_fd_transmit(priv);
     }
 }
 #endif
@@ -1143,7 +1119,7 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
 
   /* Create a watchdog for timing polling for and timing of transmissions */
 
-  priv->txpoll        = wd_create();  /* Create periodic poll timer */
+  priv->txpoll = wd_create(); /* Create periodic poll timer */
 
   /* Assign d_ifname if specified. */
 
@@ -1162,9 +1138,7 @@ static int tun_dev_init(FAR struct tun_device_s *priv, FAR struct file *filep,
       return ret;
     }
 
-  priv->filep         = filep;        /* Set link to file */
-  filep->f_priv       = priv;         /* Set link to TUN device */
-
+  filep->f_priv = priv; /* Set link to TUN device */
   return ret;
 }
 
@@ -1195,7 +1169,6 @@ static int tun_dev_uninit(FAR struct tun_device_s *priv)
 static int tun_open(FAR struct file *filep)
 {
   filep->f_priv = 0;
-
   return OK;
 }
 
@@ -1222,7 +1195,6 @@ static int tun_close(FAR struct file *filep)
   tun_dev_uninit(priv);
 
   tundev_unlock(tun);
-
   return OK;
 }
 
@@ -1410,7 +1382,6 @@ int tun_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
 errout:
   tun_unlock(priv);
-
   return ret;
 }
 
