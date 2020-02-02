@@ -1264,8 +1264,6 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct tun_device_s *priv = filep->f_priv;
   ssize_t ret;
-  size_t write_d_len;
-  size_t read_d_len;
 
   if (priv == NULL)
     {
@@ -1274,33 +1272,53 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
 
   tun_lock(priv);
 
-  /* Check if there are data to read in write buffer */
-
-  write_d_len = priv->write_d_len;
-  if (write_d_len > 0)
+  for (; ; )
     {
-      if (buflen < write_d_len)
+      /* Check if there are data to read in write buffer */
+
+      if (priv->write_d_len > 0)
         {
-          ret = -EINVAL;
-          goto out;
+          if (buflen < priv->write_d_len)
+            {
+              ret = -EINVAL;
+              break;
+            }
+
+          memcpy(buffer, priv->write_buf, priv->write_d_len);
+          ret = priv->write_d_len;
+          priv->write_d_len = 0;
+
+          NETDEV_TXDONE(&priv->dev);
+          tun_pollnotify(priv, POLLOUT);
+          break;
         }
 
-      memcpy(buffer, priv->write_buf, write_d_len);
-      ret = (ssize_t)write_d_len;
+      /* Check if there are data to read in read buffer */
 
-      priv->write_d_len = 0;
-      NETDEV_TXDONE(&priv->dev);
-      tun_pollnotify(priv, POLLOUT);
+      if (priv->read_d_len > 0)
+        {
+          if (buflen < priv->read_d_len)
+            {
+              ret = -EINVAL;
+              break;
+            }
 
-      goto out;
-    }
+          memcpy(buffer, priv->read_buf, priv->read_d_len);
+          ret = priv->read_d_len;
+          priv->read_d_len = 0;
 
-  if (priv->read_d_len == 0)
-    {
+          net_lock();
+          tun_txdone(priv);
+          net_unlock();
+          break;
+        }
+
+      /* Wait if there are no data to read */
+
       if ((filep->f_oflags & O_NONBLOCK) != 0)
         {
           ret = -EAGAIN;
-          goto out;
+          break;
         }
 
       priv->read_wait = true;
@@ -1309,27 +1327,7 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
       tun_lock(priv);
     }
 
-  net_lock();
-
-  read_d_len = priv->read_d_len;
-  if (buflen < read_d_len)
-    {
-      ret = -EINVAL;
-    }
-  else
-    {
-      memcpy(buffer, priv->read_buf, read_d_len);
-      ret = (ssize_t)read_d_len;
-    }
-
-  priv->read_d_len = 0;
-  tun_txdone(priv);
-
-  net_unlock();
-
-out:
   tun_unlock(priv);
-
   return ret;
 }
 
