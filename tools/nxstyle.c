@@ -1265,27 +1265,38 @@ int main(int argc, char **argv, char **envp)
 
               if (have_upper && have_lower)
                 {
+                  /* REVISIT:  Although pre-processor definitions are
+                   * supposed to be all upper-case, there are exceptions
+                   * such as using 'p' for a decimal point or 'MHz'.
+                   * Those will be reported here, but probably should be
+                   * considered false alarms.
+                   */
+
+                  /* Ignore inttype.h strings beginning with PRIx */
+
+                  if (ident_index >= 4 &&
+                     (strncmp(&line[ident_index], "PRIx", 4) == 0))
+                    {
+                      /* No error */
+                    }
+
                   /* Special case hex constants.  These will look like
                    * identifiers starting with 'x' or 'X' but preceded
                    * with '0'
                    */
 
-                  if (ident_index < 1 ||
-                      (line[ident_index] != 'x' && line[ident_index] != 'X') ||
-                      line[ident_index - 1] != '0')
+                  else if (ident_index < 1 ||
+                           (line[ident_index] != 'x' &&
+                            line[ident_index] != 'X') ||
+                           line[ident_index - 1] != '0')
                     {
-                      /* REVISIT:  Although pre-processor definitions are
-                       * supposed to be all upper-case, there are exceptions
-                       * such as using 'p' for a decimal point or 'MHz'.
-                       * Those will be reported here, but probably should be
-                       * considered false alarms.
-                       */
-
-                       ERROR("Mixed case identifier found", lineno, ident_index);
+                       ERROR("Mixed case identifier found",
+                             lineno, ident_index);
                     }
                   else if (have_upper)
                     {
-                       ERROR("Upper case hex constant found", lineno, ident_index);
+                       ERROR("Upper case hex constant found",
+                             lineno, ident_index);
                     }
                 }
 
