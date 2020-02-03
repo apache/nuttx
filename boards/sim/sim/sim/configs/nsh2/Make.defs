@@ -57,6 +57,11 @@ ARCHINCLUDES		= -I. -isystem $(TOPDIR)/include
 ARCHINCLUDESXX		= -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
 ARCHSCRIPT		=
 
+# Add -fno-common because macOS "ld -r" doesn't seem to pick objects
+# for common symbols.
+ARCHCPUFLAGS += -fno-common
+ARCHCPUFLAGSXX += -fno-common
+
 ifeq ($(CONFIG_SIM_M32),y)
   ARCHCPUFLAGS		+= -m32
   ARCHCPUFLAGSXX	+= -m32
