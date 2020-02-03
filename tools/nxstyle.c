@@ -1274,8 +1274,7 @@ int main(int argc, char **argv, char **envp)
 
                   /* Ignore inttype.h strings beginning with PRIx */
 
-                  if (ident_index >= 4 &&
-                     (strncmp(&line[ident_index], "PRIx", 4) == 0))
+                  if ((strncmp(&line[ident_index], "PRIx", 4) == 0))
                     {
                       /* No error */
                     }
