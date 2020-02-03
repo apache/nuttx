@@ -110,21 +110,43 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
         break;
 
       case F_GETFD:
-        /* Get the file descriptor flags defined in <fcntl.h> that are associated
-         * with the file descriptor fd.  File descriptor flags are associated
-         * with a single file descriptor and do not affect other file descriptors
-         * that refer to the same file.
+        /* Get the file descriptor flags defined in <fcntl.h> that are
+         * associated with the file descriptor fd.  File descriptor flags
+         * are associated with a single file descriptor and do not affect
+         * other file descriptors that refer to the same file.
          */
+
+        {
+          ret = _SS_ISCLOEXEC(psock->s_flags) ? FD_CLOEXEC : 0;
+        }
+        break;
 
       case F_SETFD:
-        /* Set the file descriptor flags defined in <fcntl.h>, that are associated
-         * with fd, to the third argument, arg, taken as type int. If the
-         * FD_CLOEXEC flag in the third argument is 0, the file shall remain open
-         * across the exec functions; otherwise, the file shall be closed upon
-         * successful execution of one  of  the  exec  functions.
+        /* Set the file descriptor flags defined in <fcntl.h>, that are
+         * associated with fd, to the third argument, arg, taken as type int.
+         * If the FD_CLOEXEC flag in the third argument is 0, the file shall
+         * remain open across the exec functions; otherwise, the file shall
+         * be closed upon successful execution of one of the exec functions.
          */
 
-         ret = -ENOSYS; /* F_GETFD and F_SETFD not implemented */
+        {
+          int oflags = va_arg(ap, int);
+
+          if (oflags & ~FD_CLOEXEC)
+            {
+              ret = -ENOSYS;
+              break;
+            }
+
+          if (oflags & FD_CLOEXEC)
+            {
+              psock->s_flags |= _SF_CLOEXEC;
+            }
+          else
+            {
+              psock->s_flags &= ~_SF_CLOEXEC;
+            }
+         }
          break;
 
       case F_GETFL:

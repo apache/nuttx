@@ -57,6 +57,7 @@
 
 /* Definitions of 8-bit socket flags */
 
+#define _SF_CLOEXEC         0x04  /* Bit 2: Close on execute */
 #define _SF_NONBLOCK        0x08  /* Bit 3: Don't block if no data (TCP/READ only) */
 #define _SF_LISTENING       0x10  /* Bit 4: SOCK_STREAM is listening */
 #define _SF_BOUND           0x20  /* Bit 5: SOCK_STREAM is bound to an address */
@@ -73,6 +74,7 @@
 
 /* Macro to manage the socket state and flags */
 
+#define _SS_ISCLOEXEC(s)    (((s) & _SF_CLOEXEC)   != 0)
 #define _SS_ISNONBLOCK(s)   (((s) & _SF_NONBLOCK)  != 0)
 #define _SS_ISLISTENING(s)  (((s) & _SF_LISTENING) != 0)
 #define _SS_ISBOUND(s)      (((s) & _SF_BOUND)     != 0)

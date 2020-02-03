@@ -41,11 +41,13 @@
 
 #include <sched.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 
 #include "sched/sched.h"
+#include "socket/socket.h"
 #include "group/group.h"
 
 /****************************************************************************
@@ -114,7 +116,8 @@ static inline void sched_dupfiles(FAR struct task_tcb_s *tcb)
        * i-node structure.
        */
 
-      if (parent[i].f_inode)
+      if (parent[i].f_inode &&
+          (parent[i].f_oflags & O_CLOEXEC) == 0)
         {
           /* Yes... duplicate it for the child */
 
@@ -170,7 +173,8 @@ static inline void sched_dupsockets(FAR struct task_tcb_s *tcb)
        * reference count.
        */
 
-      if (parent[i].s_crefs > 0)
+      if (parent[i].s_crefs > 0 &&
+          !_SS_ISCLOEXEC(parent[i].s_flags))
         {
           /* Yes... duplicate it for the child */
 
