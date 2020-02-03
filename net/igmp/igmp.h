@@ -77,6 +77,7 @@
 
 #include <sys/types.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/ip.h>
 
