@@ -89,7 +89,7 @@
 #define PWR_CR1_DBP               (1 << 8)   /* Bit 8: Disable backup domain write protection */
 #define PWR_CR1_FLPS              (1 << 9)   /* Bit 9: */
                                              /* Bits 10-13: Reserved */
-#define PWR_CR1_SVOS_SHIFT        (1 << 14)  /* Bits 14-15: */
+#define PWR_CR1_SVOS_SHIFT        (14)       /* Bits 14-15: */
 #define PWR_CR1_SVOS_MASK         (3 << PWR_CR1_SVOS_SHIFT)
                                                             /* 00: Reserved */
 #  define PWR_CR1_SVOS_S5         (1 << PWR_CR1_SVOS_SHIFT) /* 01:  */
@@ -161,11 +161,52 @@
 #  define PWR_D3CR_VOS_SCALE_0     (3 << STM32_PWR_D3CR_VOS_SHIFT) /* Fmax = 480MHz with ODN */
                                              /* Bits 15-31: Reserved */
 
-
 /* Power wakeup clear register (WKUPCR) */
+
+#define STM32_PWR_WKUPC1           (1 << 0)  /* Bit 0: Clear wakeup pin flag for WKUP1 */
+#define STM32_PWR_WKUPC2           (1 << 1)  /* Bit 1: Clear wakeup pin flag for WKUP2 */
+#define STM32_PWR_WKUPC3           (1 << 2)  /* Bit 2: Clear wakeup pin flag for WKUP3 */
+#define STM32_PWR_WKUPC4           (1 << 3)  /* Bit 3: Clear wakeup pin flag for WKUP4 */
+#define STM32_PWR_WKUPC5           (1 << 4)  /* Bit 4: Clear wakeup pin flag for WKUP5 */
+#define STM32_PWR_WKUPC6           (1 << 5)  /* Bit 5: Clear wakeup pin flag for WKUP6 */
+                                             /* Bits 6-31: Reserved */
 
 /* Power wakeup flag register (WKUPFR) */
 
+#define STM32_PWR_WKUPF1           (1 << 0)  /* Bit 0: Wakeup pin flag for WKUP1 */
+#define STM32_PWR_WKUPF2           (1 << 1)  /* Bit 1: Wakeup pin flag for WKUP2 */
+#define STM32_PWR_WKUPF3           (1 << 2)  /* Bit 2: Wakeup pin flag for WKUP3 */
+#define STM32_PWR_WKUPF4           (1 << 3)  /* Bit 3: Wakeup pin flag for WKUP4 */
+#define STM32_PWR_WKUPF5           (1 << 4)  /* Bit 4: Wakeup pin flag for WKUP5 */
+#define STM32_PWR_WKUPF6           (1 << 5)  /* Bit 5: Wakeup pin flag for WKUP6 */
+                                             /* Bits 6-31: Reserved */
+
 /* Power wakeup enable and polarity register (WKUPEPR) */
+
+#define STM32_PWR_WKUPEN1          (1 << 0)  /* Bit 0: Enable wakeup pin WKUP1 */
+#define STM32_PWR_WKUPEN2          (1 << 1)  /* Bit 1: Enable wakeup pin WKUP2 */
+#define STM32_PWR_WKUPEN3          (1 << 2)  /* Bit 2: Enable wakeup pin WKUP3 */
+#define STM32_PWR_WKUPEN4          (1 << 3)  /* Bit 3: Enable wakeup pin WKUP4 */
+#define STM32_PWR_WKUPEN5          (1 << 4)  /* Bit 4: Enable wakeup pin WKUP5 */
+#define STM32_PWR_WKUPEN6          (1 << 5)  /* Bit 5: Enable wakeup pin WKUP6 */
+                                             /* Bits 6-7: Reserved */
+#define STM32_PWR_WKUPP1           (1 << 8)  /* Bit 8: Wakeup pin polarity for WKUP1 */
+#define STM32_PWR_WKUPP2           (1 << 9)  /* Bit 9: Wakeup pin polarity for WKUP2 */
+#define STM32_PWR_WKUPP3           (1 << 10) /* Bit 10: Wakeup pin polarity for WKUP3 */
+#define STM32_PWR_WKUPP4           (1 << 11) /* Bit 11: Wakeup pin polarity for WKUP4 */
+#define STM32_PWR_WKUPP5           (1 << 12) /* Bit 12: Wakeup pin polarity for WKUP5 */
+#define STM32_PWR_WKUPP6           (1 << 13) /* Bit 13: Wakeup pin polarity for WKUP6 */
+                                             /* Bits 14-15: Reserved */
+#define STM32_PWR_WKUPPUPD1_SHIFT  (16)      /* Bits 16-17: Wakeup pin pull config for WKUP1 */
+#define STM32_PWR_WKUPPUPD2_SHIFT  (18)      /* Bits 18-19: Wakeup pin pull config for WKUP2 */
+#define STM32_PWR_WKUPPUPD3_SHIFT  (20)      /* Bits 20-21: Wakeup pin pull config for WKUP3 */
+#define STM32_PWR_WKUPPUPD4_SHIFT  (22)      /* Bits 22-23: Wakeup pin pull config for WKUP4 */
+#define STM32_PWR_WKUPPUPD5_SHIFT  (24)      /* Bits 24-25: Wakeup pin pull config for WKUP5 */
+#define STM32_PWR_WKUPPUPD6_SHIFT  (26)      /* Bits 26-27: Wakeup pin pull config for WKUP6 */
+# define STM32_PWR_WKUPPUPD_NONE    (0)      /* No pull-up */
+# define STM32_PWR_WKUPPUPD_PULLUP  (1)      /* Pull-up enabled */
+# define STM32_PWR_WKUPPUPD_PULLDN  (2)      /* Pull-down enabled */
+                                             /* 3 is reserved */
+                                             /* Bits 28-31: Reserved */
 
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_PWR_H */
