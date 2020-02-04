@@ -93,8 +93,10 @@ endif
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  DEFINE = "$(TOPDIR)\tools\define.bat"
   INCDIR = "$(TOPDIR)\tools\incdir.bat"
 else
+  DEFINE = "$(TOPDIR)/tools/define.sh"
   INCDIR = "$(TOPDIR)/tools/incdir.sh"
 endif
 
