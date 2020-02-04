@@ -84,6 +84,7 @@ ifeq ($(CONFIG_SMP),y)
   CSRCS += up_smpsignal.c up_smphook.c up_cpuidlestack.c
   HOSTCFLAGS += -DCONFIG_SMP=1 -DCONFIG_SMP_NCPUS=$(CONFIG_SMP_NCPUS)
   HOSTSRCS += up_simsmp.c
+  STDLIBS += -lpthread
 endif
 
 ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
@@ -94,7 +95,7 @@ endif
 
 ifeq ($(CONFIG_DEV_CONSOLE),y)
 ifneq ($(CONFIG_SYSLOG_RPMSG),y)
-  CSRCS += up_devconsole.c up_uartwait.c
+  CSRCS += up_devconsole.c
   HOSTSRCS += up_simuart.c
 endif
 endif
@@ -135,6 +136,7 @@ endif
 
 ifeq ($(CONFIG_FS_FAT),y)
   CSRCS += up_blockdevice.c up_deviceimage.c
+  STDLIBS += -lz
 endif
 
 ifeq ($(CONFIG_ARCH_ROMGETC),y)
@@ -208,13 +210,6 @@ endif
 EXTRA_LIBS ?=
 EXTRA_LIBPATHS ?=
 
-ifeq ($(CONFIG_FS_FAT),y)
-STDLIBS += -lz
-endif
-
-STDLIBS += -lc
-STDLIBS += -lpthread
-
 # Determine which objects are required in the link.  The
 # up_head object normally draws in all that is needed, but
 # there are a fews that must be included because they
@@ -222,12 +217,6 @@ STDLIBS += -lpthread
 
 LINKOBJS = up_head$(OBJEXT)
 REQUIREDOBJS = $(LINKOBJS)
-
-ifeq ($(CONFIG_DEV_CONSOLE),y)
-ifneq ($(CONFIG_SYSLOG_RPMSG),y)
-  REQUIREDOBJS += up_uartwait$(OBJEXT)
-endif
-endif
 
 ifeq ($(CONFIG_SIM_X11FB),y)
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)

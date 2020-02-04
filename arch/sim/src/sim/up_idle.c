@@ -44,10 +44,6 @@
 
 #include <nuttx/arch.h>
 
-#ifdef CONFIG_PM
-#  include <nuttx/power/pm.h>
-#endif
-
 #ifdef CONFIG_SMP
 #  include <nuttx/spinlock.h>
 #endif
@@ -132,14 +128,7 @@ void up_idle(void)
 #ifdef USE_DEVCONSOLE
   /* Handle UART data availability */
 
-  if (g_uart_data_available)
-    {
-#ifdef CONFIG_PM
-      pm_activity(PM_IDLE_DOMAIN, 100);  /* Report important activity to PM */
-#endif
-      g_uart_data_available = 0;
-      simuart_post();
-    }
+  up_devconloop();
 #endif
 
 #if defined(CONFIG_NET_ETHERNET) && defined(CONFIG_SIM_NETDEV)

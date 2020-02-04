@@ -204,10 +204,6 @@ extern volatile int g_eventloop;
 #endif
 #endif
 
-#ifdef USE_DEVCONSOLE
-extern volatile int g_uart_data_available;
-#endif
-
 #ifdef CONFIG_SMP
 /* These spinlocks are used in the SMP configuration in order to implement
  * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
@@ -277,24 +273,19 @@ void rpmsg_serialinit(void);
 /* up_devconsole.c ********************************************************/
 
 void up_devconsole(void);
-void up_registerblockdevice(void);
+void up_devconloop(void);
 
 /* up_simuart.c ***********************************************************/
 
 void simuart_start(void);
 int  simuart_putc(int ch);
-int  simuart_getc(bool block);
+int  simuart_getc(void);
 bool simuart_checkc(void);
-
-/* up_uartwait.c **********************************************************/
-
-void simuart_initialize(void);
-void simuart_post(void);
-void simuart_wait(void);
 
 /* up_deviceimage.c *******************************************************/
 
 char *up_deviceimage(void);
+void up_registerblockdevice(void);
 
 /* up_netdev.c ************************************************************/
 
