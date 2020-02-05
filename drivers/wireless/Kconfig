@@ -40,6 +40,10 @@ config WL_GS2200M_DISABLE_DHCPC
 	bool "Disable the internal dhcp client"
 	default n
 
+config WL_GS2200M_CHECK_VERSION
+	bool "Check the version of GS2200M"
+	default n
+
 config WL_GS2200M_LOGLEVEL
 	int "Log level"
 	default 0

@@ -1986,7 +1986,7 @@ static enum pkt_type_e gs2200m_set_loglevel(FAR struct gs2200m_dev_s *dev,
  * Name: gs2200m_get_version
  ****************************************************************************/
 
-#ifdef CHECK_VERSION
+#ifdef CONFIG_WL_GS2200M_CHECK_VERSION
 static enum pkt_type_e gs2200m_get_version(FAR struct gs2200m_dev_s *dev)
 {
   char cmd[16];
@@ -2897,7 +2897,7 @@ static int gs2200m_start(FAR struct gs2200m_dev_s *dev)
   ASSERT(TYPE_OK == t);
 #endif
 
-#ifdef CHECK_VERSION
+#ifdef CONFIG_WL_GS2200M_CHECK_VERSION
   /* Version */
 
   t = gs2200m_get_version(dev);
