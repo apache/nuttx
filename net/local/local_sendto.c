@@ -138,7 +138,8 @@ ssize_t psock_local_sendto(FAR struct socket *psock, FAR const void *buf,
   /* Open the sending side of the transfer */
 
   ret = local_open_sender(conn, unaddr->sun_path,
-                          _SS_ISNONBLOCK(psock->s_flags));
+                          _SS_ISNONBLOCK(psock->s_flags) ||
+                          (flags & MSG_DONTWAIT) != 0);
   if (ret < 0)
     {
       nerr("ERROR: Failed to open FIFO for %s: %d\n",

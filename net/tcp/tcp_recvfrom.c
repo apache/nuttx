@@ -628,10 +628,12 @@ static ssize_t tcp_recvfrom_result(int result, struct tcp_recvfrom_s *pstate)
  *   Perform the recvfrom operation for a TCP/IP SOCK_STREAM
  *
  * Input Parameters:
- *   psock  Pointer to the socket structure for the SOCK_DRAM socket
- *   buf    Buffer to receive data
- *   len    Length of buffer
- *   from   INET address of source (may be NULL)
+ *   psock    Pointer to the socket structure for the SOCK_DRAM socket
+ *   buf      Buffer to receive data
+ *   len      Length of buffer
+ *   flags    Receive flags
+ *   from     INET address of source (may be NULL)
+ *   fromlen  The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters received.  On  error,
@@ -642,7 +644,7 @@ static ssize_t tcp_recvfrom_result(int result, struct tcp_recvfrom_s *pstate)
  ****************************************************************************/
 
 ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
-                           size_t len, FAR struct sockaddr *from,
+                           size_t len, int flags, FAR struct sockaddr *from,
                            FAR socklen_t *fromlen)
 {
   struct tcp_recvfrom_s state;
@@ -702,7 +704,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
    * if no data was obtained from the read-ahead buffers.
    */
 
-  else if (_SS_ISNONBLOCK(psock->s_flags))
+  else if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
     {
       /* Return the number of bytes read from the read-ahead buffer if
        * something was received (already in 'ret'); EAGAIN if not.
