@@ -65,7 +65,7 @@ AR = $(ARCROSSDEV)ar rcs
 NM = $(ARCROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
-STRIP = $(CROSSDEV)strip
+STRIP = $(CROSSDEV)strip --strip-unneeded
 
 MKNXFLAT = mknxflat
 LDNXFLAT = ldnxflat
