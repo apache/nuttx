@@ -215,6 +215,8 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
                  size_t len);
 static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
                  size_t len);
+static int     telnet_ioctl(FAR struct file *filep, int cmd,
+                 unsigned long arg);
 static int     telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
                  bool setup);
 
@@ -228,7 +230,7 @@ static ssize_t factory_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 static ssize_t factory_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
-static int     common_ioctl(FAR struct file *filep, int cmd,
+static int     factory_ioctl(FAR struct file *filep, int cmd,
                  unsigned long arg);
 
 /****************************************************************************
@@ -242,7 +244,7 @@ static const struct file_operations g_telnet_fops =
   telnet_read,   /* read */
   telnet_write,  /* write */
   NULL,          /* seek */
-  common_ioctl,  /* ioctl */
+  telnet_ioctl,  /* ioctl */
   telnet_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
@@ -256,8 +258,8 @@ static const struct file_operations g_factory_fops =
   factory_read,  /* read */
   factory_write, /* write */
   NULL,          /* seek */
-  common_ioctl,  /* ioctl */
-  telnet_poll    /* poll */
+  factory_ioctl, /* ioctl */
+  NULL           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif
@@ -1215,6 +1217,58 @@ static ssize_t factory_write(FAR struct file *filep, FAR const char *buffer,
 }
 
 /****************************************************************************
+ * Name: telnet_ioctl
+ ****************************************************************************/
+
+static int telnet_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct telnet_dev_s *priv = inode->i_private;
+  int ret = OK;
+
+  switch (cmd)
+    {
+#ifdef HAVE_SIGNALS
+      /* Make the given terminal the controlling terminal of the calling process */
+
+    case TIOCSCTTY:
+      {
+        /* Check if the ISIG flag is set in the termios c_lflag to enable
+         * this feature.  This flag is set automatically for a serial console
+         * device.
+         */
+
+        /* Save the PID of the recipient of the SIGINT signal. */
+
+        priv->td_pid = (pid_t)arg;
+        DEBUGASSERT((unsigned long)(priv->td_pid) == arg);
+      }
+      break;
+#endif
+
+#ifdef CONFIG_TELNET_SUPPORT_NAWS
+      case TIOCGWINSZ:
+        {
+          FAR struct winsize *pw = (FAR struct winsize *)((uintptr_t)arg);
+
+          /* Get row/col from the private data */
+
+          pw->ws_row = priv->td_rows;
+          pw->ws_col = priv->td_cols;
+        }
+      break;
+#endif
+
+    default:
+      ret = -ENOTTY;
+      break;
+    }
+
+  UNUSED(priv);  /* Avoid warning if not used */
+  return ret;
+}
+
+/****************************************************************************
  * Name: telnet_poll
  *
  * Description:
@@ -1383,15 +1437,12 @@ static int telnet_io_main(int argc, FAR char** argv)
 }
 
 /****************************************************************************
- * Name: common_ioctl
+ * Name: factory_ioctl
  ****************************************************************************/
 
-static int common_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int factory_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct telnet_dev_s *priv = inode->i_private;
-
-  int ret;
+  int ret = OK;
 
   switch (cmd)
     {
@@ -1405,7 +1456,7 @@ static int common_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     case SIOCTELNET:
       {
         FAR struct telnet_session_s *session =
-            (FAR struct telnet_session_s *)((uintptr_t) arg);
+            (FAR struct telnet_session_s *)((uintptr_t)arg);
 
         if (session == NULL)
           {
@@ -1418,47 +1469,11 @@ static int common_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
-#ifdef HAVE_SIGNALS
-      /* Make the given terminal the controlling terminal of the calling process */
-
-    case TIOCSCTTY:
-      {
-        /* Check if the ISIG flag is set in the termios c_lflag to enable
-         * this feature.  This flag is set automatically for a serial console
-         * device.
-         */
-
-        /* Save the PID of the recipient of the SIGINT signal. */
-
-        priv->pid = (pid_t)arg;
-        DEBUGASSERT((unsigned long)(priv->pid) == arg);
-
-        ret = OK;
-      }
-      break;
-#endif
-
-#ifdef CONFIG_TELNET_SUPPORT_NAWS
-      case TIOCGWINSZ:
-        {
-          FAR struct winsize *pw = (FAR struct winsize *)((uintptr_t)arg);
-
-          /* Get row/col from the private data */
-
-          pw->ws_row = priv->td_rows;
-          pw->ws_col = priv->td_cols;
-
-          ret = OK;
-        }
-      break;
-#endif
-
     default:
       ret = -ENOTTY;
       break;
     }
 
-  UNUSED(priv);  /* Avoid warning if not used */
   return ret;
 }
 
