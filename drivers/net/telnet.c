@@ -466,19 +466,9 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
 
           case STATE_DO:
 #ifdef CONFIG_TELNET_CHARACTER_MODE
-            if (ch == TELNET_SGA)
+            if (ch == TELNET_SGA || ch == TELNET_ECHO)
               {
-                /* If it received 'Suppress Go Ahead', reply with a WILL */
-
-                telnet_sendopt(priv, TELNET_WILL, ch);
-
-                /* Also, send 'WILL ECHO' */
-
-                telnet_sendopt(priv, TELNET_WILL, TELNET_ECHO);
-              }
-            else if (ch == TELNET_ECHO)
-              {
-                /* If it received 'ECHO', then do nothing */
+                /* If it received 'ECHO' or 'Suppress Go Ahead', then do nothing */
               }
             else
               {
@@ -1106,6 +1096,11 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
   telnet_sendopt(priv, TELNET_DO, TELNET_NAWS);
+#endif
+
+#ifdef CONFIG_TELNET_CHARACTER_MODE
+  telnet_sendopt(priv, TELNET_WILL, TELNET_SGA);
+  telnet_sendopt(priv, TELNET_WILL, TELNET_ECHO);
 #endif
 
   /* Has the I/O thread been started? */
