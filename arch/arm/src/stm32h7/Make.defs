@@ -212,3 +212,11 @@ ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 CHIP_CSRCS += stm32_pminitialize.c
 endif
 endif
+
+ifeq ($(CONFIG_STM32H7_IWDG),y)
+CHIP_CSRCS += stm32_iwdg.c
+endif
+
+ifeq ($(CONFIG_STM32H7_WWDG),y)
+CHIP_CSRCS += stm32_wwdg.c
+endif
