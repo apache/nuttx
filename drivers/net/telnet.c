@@ -692,14 +692,6 @@ static int telnet_open(FAR struct file *filep)
 
   ninfo("td_crefs: %d\n", priv->td_crefs);
 
-  /* O_NONBLOCK is not supported */
-
-  if (filep->f_oflags & O_NONBLOCK)
-    {
-      ret = -ENOSYS;
-      goto errout;
-    }
-
   /* Get exclusive access to the device structures */
 
   ret = nxsem_wait(&priv->td_exclsem);
@@ -871,7 +863,7 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct telnet_dev_s *priv = inode->i_private;
-  ssize_t ret;
+  ssize_t ret = 0;
 
   ninfo("len: %d\n", len);
 
@@ -888,21 +880,22 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
 
       if (priv->td_pending == 0)
         {
-          if (filep->f_oflags & O_NONBLOCK)
-            {
-              return 0;
-            }
-
-          /* Wait for new data (or error) */
-
-          nxsem_wait_uninterruptible(&priv->td_iosem);
-
           /* poll fds.revents contains last poll status in case of error */
 
           if ((priv->fds.revents & (POLLHUP | POLLERR)) != 0)
             {
               return -EPIPE;
             }
+
+          if (filep->f_oflags & O_NONBLOCK)
+            {
+              return -EAGAIN;
+            }
+
+          /* Wait for new data (or error) */
+
+          nxsem_wait_uninterruptible(&priv->td_iosem);
+          continue;
         }
 
       /* Take exclusive access to data buffer */
@@ -1304,7 +1297,10 @@ static int telnet_poll(FAR struct file *filep, FAR struct pollfd *fds,
       /* Yes.. then signal the poll logic */
 
       fds->revents |= (POLLRDNORM & fds->events);
-      nxsem_post(fds->sem);
+      if (fds->revents)
+        {
+          nxsem_post(fds->sem);
+        }
     }
 
   /* Then let psock_poll() do the heavy lifting */
