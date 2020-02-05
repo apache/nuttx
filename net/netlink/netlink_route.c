@@ -1058,7 +1058,7 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
        * select Netlink non-blocking sockets.
        */
 
-      if (_SS_ISNONBLOCK(psock->s_flags))
+      if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
         {
           return -EAGAIN;
         }

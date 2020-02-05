@@ -294,7 +294,7 @@ ssize_t usrsock_sendto(FAR struct socket *psock, FAR const void *buf,
 
       if (!(conn->flags & USRSOCK_EVENT_SENDTO_READY))
         {
-          if (_SS_ISNONBLOCK(psock->s_flags))
+          if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
             {
               /* Send busy at daemon side. */
 

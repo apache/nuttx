@@ -1076,11 +1076,11 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
             {
               /* TCP/IP packet send */
 
-              ret = psock_tcp_send(psock, buf, len);
+              ret = psock_tcp_send(psock, buf, len, flags);
             }
 #endif /* NET_TCP_HAVE_STACK */
 #elif defined(NET_TCP_HAVE_STACK)
-          ret = psock_tcp_send(psock, buf, len);
+          ret = psock_tcp_send(psock, buf, len, flags);
 #else
           ret = -ENOSYS;
 #endif /* CONFIG_NET_6LOWPAN */
@@ -1348,7 +1348,7 @@ static ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf,
     case SOCK_STREAM:
       {
 #ifdef NET_TCP_HAVE_STACK
-        ret = psock_tcp_recvfrom(psock, buf, len, from, fromlen);
+        ret = psock_tcp_recvfrom(psock, buf, len, flags, from, fromlen);
 #else
         ret = -ENOSYS;
 #endif
@@ -1360,7 +1360,7 @@ static ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf,
     case SOCK_DGRAM:
       {
 #ifdef NET_UDP_HAVE_STACK
-        ret = psock_udp_recvfrom(psock, buf, len, from, fromlen);
+        ret = psock_udp_recvfrom(psock, buf, len, flags, from, fromlen);
 #else
         ret = -ENOSYS;
 #endif
