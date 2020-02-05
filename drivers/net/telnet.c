@@ -159,7 +159,7 @@ struct telnet_dev_s
   uint8_t           td_pending;   /* Number of valid, pending bytes in the rxbuffer */
   uint8_t           td_offset;    /* Offset to the valid, pending bytes in the rxbuffer */
   uint8_t           td_crefs;     /* The number of open references to the session */
-  int               td_minor;     /* Minor device number */
+  uint8_t           td_minor;     /* Minor device number */
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
   uint16_t          td_rows;      /* Number of NAWS rows */
   uint16_t          td_cols;      /* Number of NAWS cols */
@@ -172,16 +172,6 @@ struct telnet_dev_s
   FAR struct socket td_psock;     /* A clone of the internal socket structure */
   char td_rxbuffer[CONFIG_TELNET_RXBUFFER_SIZE];
   char td_txbuffer[CONFIG_TELNET_TXBUFFER_SIZE];
-};
-
-/* This structure  contains global information visible to all telnet driver
- * instances.
- */
-
-struct telnet_common_s
-{
-  sem_t             tc_exclsem;   /* Enforces exclusive access to 'minor' */
-  uint16_t          tc_minor;     /* The next minor number to use */
 };
 
 /****************************************************************************
@@ -263,14 +253,6 @@ static const struct file_operations g_factory_fops =
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif
-};
-
-/* Global information shared amongst telnet driver instances. */
-
-static struct telnet_common_s g_telnet_common =
-{
-  SEM_INITIALIZER(1),
-  0
 };
 
 /* This is an global data set of all of all active Telnet drivers.  This
@@ -1017,10 +999,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
 {
   FAR struct telnet_dev_s *priv;
   FAR struct socket *psock;
-  struct stat statbuf;
-  uint16_t start;
   int ret;
-  int i;
 
   /* Allocate instance data for this driver */
 
@@ -1044,6 +1023,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
   priv->td_state     = STATE_NORMAL;
   priv->td_crefs     = 0;
+  priv->td_minor     = 0;
   priv->td_pending   = 0;
   priv->td_offset    = 0;
 #ifdef HAVE_SIGNALS
@@ -1083,7 +1063,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
    * Get exclusive access to the minor counter.
    */
 
-  ret = nxsem_wait_uninterruptible(&g_telnet_common.tc_exclsem);
+  ret = nxsem_wait_uninterruptible(&g_clients_sem);
   if (ret < 0)
     {
       nerr("ERROR: nxsem_wait failed: %d\n", ret);
@@ -1092,23 +1072,18 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
   /* Loop until the device name is verified to be unique. */
 
-  start = g_telnet_common.tc_minor;
-  do
+  while (priv->td_minor < CONFIG_TELNET_MAXLCLIENTS)
     {
-      /* Get the next candiate minor number */
-
-      priv->td_minor = g_telnet_common.tc_minor;
-      g_telnet_common.tc_minor++;
-
-      snprintf(session->ts_devpath, TELNET_DEVPATH_MAX, TELNETD_DEVFMT,
-               priv->td_minor);
-
-      ret = stat(session->ts_devpath, &statbuf);
-      DEBUGASSERT(ret >= 0 || get_errno() == ENOENT);
+      if (g_telnet_clients[priv->td_minor] == NULL)
+        {
+          snprintf(session->ts_devpath, TELNET_DEVPATH_MAX,
+                   TELNETD_DEVFMT, priv->td_minor);
+          break;
+        }
+      priv->td_minor++;
     }
-  while (ret >= 0 && start != g_telnet_common.tc_minor);
 
-  if (ret >= 0)
+  if (priv->td_minor >= CONFIG_TELNET_MAXLCLIENTS)
     {
       nerr("ERROR: Too many sessions\n");
       ret = -ENFILE;
@@ -1152,26 +1127,14 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
   /* Save ourself in the list of Telnet client threads */
 
-  nxsem_wait(&g_clients_sem);
-  for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
-    {
-      if (g_telnet_clients[i] == NULL)
-        {
-          g_telnet_clients[i] = priv;
-          break;
-        }
-    }
-
+  g_telnet_clients[priv->td_minor] = priv;
   nxsem_post(&g_clients_sem);
   nxsem_post(&g_iosem);
 
-  /* Return the path to the new telnet driver */
-
-  nxsem_post(&g_telnet_common.tc_exclsem);
   return OK;
 
 errout_with_semaphore:
-  nxsem_post(&g_telnet_common.tc_exclsem);
+  nxsem_post(&g_clients_sem);
 
 errout_with_clone:
   psock_close(&priv->td_psock);
@@ -1328,9 +1291,9 @@ static int telnet_io_main(int argc, FAR char** argv)
       nxsem_wait(&g_clients_sem);
       for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
         {
-          if (g_telnet_clients[i] != 0)
+          priv = g_telnet_clients[i];
+          if (priv != NULL && !(priv->fds.revents & (POLLHUP | POLLERR)))
             {
-              priv              = g_telnet_clients[i];
               priv->fds.sem     = &g_iosem;
               priv->fds.events  = POLLIN | POLLHUP | POLLERR;
               priv->fds.revents = 0;
@@ -1352,11 +1315,14 @@ static int telnet_io_main(int argc, FAR char** argv)
       nxsem_wait(&g_clients_sem);
       for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
         {
-          if (g_telnet_clients[i] != 0)
+          priv = g_telnet_clients[i];
+
+          /* If poll was setup previously (events != 0) */
+
+          if (priv != NULL && priv->fds.events)
             {
               /* Check for a pending poll() */
 
-              priv = g_telnet_clients[i];
               if (priv->fds.revents & POLLIN)
                 {
                   if (priv->td_pending < CONFIG_TELNET_RXBUFFER_SIZE)
@@ -1389,13 +1355,10 @@ static int telnet_io_main(int argc, FAR char** argv)
                     }
                 }
 
-              /* If poll was setup previously (events != 0), tear it down */
+              /* Tear it down */
 
-              if (priv->fds.events)
-                {
-                  psock_poll(&priv->td_psock, &priv->fds, FALSE);
-                  priv->fds.events = 0;
-                }
+              psock_poll(&priv->td_psock, &priv->fds, FALSE);
+              priv->fds.events = 0;
 
               /* POLLHUP (or POLLERR) indicates that this session has
                * terminated.
@@ -1403,8 +1366,6 @@ static int telnet_io_main(int argc, FAR char** argv)
 
               if (priv->fds.revents & (POLLHUP | POLLERR))
                 {
-                  g_telnet_clients[i] = 0;
-
                   /* notify the client thread */
 
                   nxsem_post(&priv->td_iosem);
