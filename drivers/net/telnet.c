@@ -645,7 +645,6 @@ static bool telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
           /* Now add the carriage return */
 
           priv->td_txbuffer[index++] = ISO_cr;
-          priv->td_txbuffer[index++] = '\0';
 
           /* End of line */
 
@@ -669,17 +668,16 @@ static bool telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
 static void telnet_sendopt(FAR struct telnet_dev_s *priv, uint8_t option,
                            uint8_t value)
 {
-  uint8_t optbuf[4];
+  uint8_t optbuf[3];
   int ret;
 
   optbuf[0] = TELNET_IAC;
   optbuf[1] = option;
   optbuf[2] = value;
-  optbuf[3] = 0;
 
-  telnet_dumpbuffer("Send optbuf", optbuf, 4);
+  telnet_dumpbuffer("Send optbuf", optbuf, 3);
 
-  ret = psock_send(&priv->td_psock, optbuf, 4, 0);
+  ret = psock_send(&priv->td_psock, optbuf, 3, 0);
   if (ret < 0)
     {
       nerr("ERROR: Failed to send TELNET_IAC: %d\n", ret);
@@ -968,10 +966,10 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
       eol = telnet_putchar(priv, ch, &ncopied);
 
       /* Was that the end of a line? Or is the buffer too full to hold the
-       * next largest character sequence ("\r\n\0")?
+       * next largest character sequence ("\r\n")?
        */
 
-      if (eol || ncopied > CONFIG_TELNET_TXBUFFER_SIZE - 3)
+      if (eol || ncopied > CONFIG_TELNET_TXBUFFER_SIZE - 2)
         {
           /* Yes... send the data now */
 
@@ -1003,9 +1001,8 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Notice that we don't actually return the number of bytes sent, but
    * rather, the number of bytes that the caller asked us to send.  We may
-   * have sent more bytes (because of CR-LF expansion and because of NULL
-   * termination). But it confuses some logic if you report that you sent
-   * more than you were requested to.
+   * have sent more bytes (because of CR-LF expansion). But it confuses
+   * some logic if you report that you sent more than you were requested to.
    */
 
   return len;
