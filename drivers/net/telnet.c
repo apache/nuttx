@@ -45,22 +45,16 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-
-#include <stdint.h>
-#include <stdbool.h>
+#include <assert.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include <fcntl.h>
-#include <string.h>
 #include <poll.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
@@ -101,8 +95,8 @@
 
 /* Telnet protocol stuff ****************************************************/
 
-#define ISO_nl                0x0a
-#define ISO_cr                0x0d
+#define TELNET_NL             0x0a
+#define TELNET_CR             0x0d
 
 /* Telnet commands */
 
@@ -120,15 +114,9 @@
 #define TELNET_SB             250
 #define TELNET_SE             240
 
-/* Linemode sub options */
-
-#define TELNET_LM_MODE        1
-#define TELNET_LM_FORWARDMASK 2
-#define TELNET_LM_SLC         3
-
 /* Device stuff *************************************************************/
 
-#define TELNETD_DEVFMT "/dev/telnet%d"
+#define TELNET_DEVFMT         "/dev/telnet%d"
 
 /****************************************************************************
  * Private Types
@@ -166,9 +154,9 @@ struct telnet_dev_s
   int               td_sb_count;  /* Count of TELNET_SB bytes received */
 #endif
 #ifdef HAVE_SIGNALS
-  pid_t             pid;
+  pid_t             td_pid;
 #endif
-  struct pollfd     fds;
+  struct pollfd     td_fds;
   FAR struct socket td_psock;     /* A clone of the internal socket structure */
   char td_rxbuffer[CONFIG_TELNET_RXBUFFER_SIZE];
   char td_txbuffer[CONFIG_TELNET_TXBUFFER_SIZE];
@@ -195,7 +183,7 @@ static bool    telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
                  int *nwritten);
 static void    telnet_sendopt(FAR struct telnet_dev_s *priv, uint8_t option,
                  uint8_t value);
-static int     telnet_io_main(int argc, char** argv);
+static int     telnet_io_main(int argc, FAR char** argv);
 
 /* Telnet character driver methods */
 
@@ -304,7 +292,7 @@ static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
 {
   int signo = 0;
 
-  for (; priv->pid >= 0 && len > 0; buffer++, len--)
+  for (; priv->td_pid >= 0 && len > 0; buffer++, len--)
     {
 #ifdef CONFIG_TTY_SIGINT
       /* Is this the special character that will generate the SIGINT signal? */
@@ -338,7 +326,7 @@ static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
 
   if (signo != 0)
     {
-      kill(priv->pid, signo);
+      nxsig_kill(priv->td_pid, signo);
     }
 }
 #endif
@@ -359,7 +347,7 @@ static void telnet_getchar(FAR struct telnet_dev_s *priv, uint8_t ch,
 #ifndef CONFIG_TELNET_CHARACTER_MODE
   /* Ignore carriage returns */
 
-  if (ch != ISO_cr)
+  if (ch != TELNET_CR)
 #endif
     {
       /* Add all other characters to the destination buffer */
@@ -598,7 +586,7 @@ static bool telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
 
   /* Ignore carriage returns (we will put these in automatically as necessary) */
 
-  if (ch != ISO_cr)
+  if (ch != TELNET_CR)
     {
       /* Add all other characters to the destination buffer */
 
@@ -607,11 +595,11 @@ static bool telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
 
       /* Check for line feeds */
 
-      if (ch == ISO_nl)
+      if (ch == TELNET_NL)
         {
           /* Now add the carriage return */
 
-          priv->td_txbuffer[index++] = ISO_cr;
+          priv->td_txbuffer[index++] = TELNET_CR;
 
           /* End of line */
 
@@ -737,8 +725,7 @@ static int telnet_close(FAR struct file *filep)
     {
       /* Re-create the path to the driver. */
 
-      sched_lock();
-      ret = asprintf(&devpath, TELNETD_DEVFMT, priv->td_minor);
+      ret = asprintf(&devpath, TELNET_DEVFMT, priv->td_minor);
       if (ret < 0)
         {
           nerr("ERROR: Failed to allocate the driver path\n");
@@ -762,9 +749,13 @@ static int telnet_close(FAR struct file *filep)
                   nerr("ERROR: Failed to unregister the driver %s: %d\n",
                        devpath, ret);
                 }
+              else
+                {
+                  ret = OK;
+                }
             }
 
-          free(devpath);
+          kmm_free(devpath);
         }
 
       /* Remove ourself from the clients list */
@@ -774,19 +765,19 @@ static int telnet_close(FAR struct file *filep)
         {
           if (g_telnet_clients[i] == priv)
             {
-              g_telnet_clients[i] = 0;
+              g_telnet_clients[i] = NULL;
               break;
             }
         }
 
       /* If the socket is still polling */
 
-      if (priv->fds.events)
+      if (priv->td_fds.events)
         {
           /* Tear down the poll */
 
-          psock_poll(&priv->td_psock, &priv->fds, FALSE);
-          priv->fds.events = 0;
+          psock_poll(&priv->td_psock, &priv->td_fds, FALSE);
+          priv->td_fds.events = 0;
         }
 
       nxsem_post(&g_clients_sem);
@@ -799,13 +790,6 @@ static int telnet_close(FAR struct file *filep)
 
       psock_close(&priv->td_psock);
 
-#ifdef CONFIG_TERMCURSES
-      if (priv->tcurs != NULL)
-        {
-          free(priv->tcurs);
-        }
-#endif
-
       /* Release the driver memory.  What if there are threads waiting on
        * td_exclsem?  They will never be awakened!  How could this happen?
        * crefs == 1 so there are no other open references to the driver.
@@ -816,11 +800,8 @@ static int telnet_close(FAR struct file *filep)
 
       DEBUGASSERT(priv->td_exclsem.semcount == 0);
       nxsem_destroy(&priv->td_exclsem);
-      free(priv);
-      sched_unlock();
+      kmm_free(priv);
     }
-
-  ret = OK;
 
 errout:
   return ret;
@@ -854,7 +835,7 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
         {
           /* poll fds.revents contains last poll status in case of error */
 
-          if ((priv->fds.revents & (POLLHUP | POLLERR)) != 0)
+          if ((priv->td_fds.revents & (POLLHUP | POLLERR)) != 0)
             {
               return -EPIPE;
             }
@@ -882,8 +863,6 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
       nxsem_post(&priv->td_exclsem);
     }
   while (ret == 0);
-
-  return ret;
 
   /* Returned Value:
    *
@@ -993,7 +972,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
   /* Allocate instance data for this driver */
 
-  priv = (FAR struct telnet_dev_s *)zalloc(sizeof(struct telnet_dev_s));
+  priv = (FAR struct telnet_dev_s *)kmm_zalloc(sizeof(struct telnet_dev_s));
   if (!priv)
     {
       nerr("ERROR: Failed to allocate the driver data structure\n");
@@ -1017,15 +996,12 @@ static int telnet_session(FAR struct telnet_session_s *session)
   priv->td_pending   = 0;
   priv->td_offset    = 0;
 #ifdef HAVE_SIGNALS
-  priv->pid          = -1;
+  priv->td_pid       = -1;
 #endif
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
   priv->td_rows      = 25;
   priv->td_cols      = 80;
   priv->td_sb_count  = 0;
-#endif
-#ifdef CONFIG_TERMCURSES
-  priv->tcurs        = NULL;
 #endif
 
   /* Clone the internal socket structure.  We do this so that it will be
@@ -1067,7 +1043,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
       if (g_telnet_clients[priv->td_minor] == NULL)
         {
           snprintf(session->ts_devpath, TELNET_DEVPATH_MAX,
-                   TELNETD_DEVFMT, priv->td_minor);
+                   TELNET_DEVFMT, priv->td_minor);
           break;
         }
       priv->td_minor++;
@@ -1117,7 +1093,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
       g_telnet_io_kthread =
         kthread_create("telnet_io", CONFIG_TELNET_IOTHREAD_PRIORITY,
-                       CONFIG_TELNET_IOTHREAD_STACKSIZE, telnet_io_main, 0);
+                       CONFIG_TELNET_IOTHREAD_STACKSIZE, telnet_io_main, NULL);
     }
 
   /* Save ourself in the list of Telnet client threads */
@@ -1287,19 +1263,19 @@ static int telnet_io_main(int argc, FAR char** argv)
       for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
         {
           priv = g_telnet_clients[i];
-          if (priv != NULL && !(priv->fds.revents & (POLLHUP | POLLERR)))
+          if (priv != NULL && !(priv->td_fds.revents & (POLLHUP | POLLERR)))
             {
-              priv->fds.sem     = &g_iosem;
-              priv->fds.events  = POLLIN | POLLHUP | POLLERR;
-              priv->fds.revents = 0;
+              priv->td_fds.sem     = &g_iosem;
+              priv->td_fds.events  = POLLIN | POLLHUP | POLLERR;
+              priv->td_fds.revents = 0;
 
-              psock_poll(&priv->td_psock, &priv->fds, TRUE);
+              psock_poll(&priv->td_psock, &priv->td_fds, TRUE);
             }
         }
 
       nxsem_post(&g_clients_sem);
 
-      /* Wait for any Telnet connect/disconnect events to
+      /* Wait for any Telnet connect/disconnect events
        * to include/remove client sockets from polling
        */
 
@@ -1314,11 +1290,11 @@ static int telnet_io_main(int argc, FAR char** argv)
 
           /* If poll was setup previously (events != 0) */
 
-          if (priv != NULL && priv->fds.events)
+          if (priv != NULL && priv->td_fds.events)
             {
               /* Check for a pending poll() */
 
-              if (priv->fds.revents & POLLIN)
+              if (priv->td_fds.revents & POLLIN)
                 {
                   if (priv->td_pending < CONFIG_TELNET_RXBUFFER_SIZE)
                     {
@@ -1352,14 +1328,14 @@ static int telnet_io_main(int argc, FAR char** argv)
 
               /* Tear it down */
 
-              psock_poll(&priv->td_psock, &priv->fds, FALSE);
-              priv->fds.events = 0;
+              psock_poll(&priv->td_psock, &priv->td_fds, FALSE);
+              priv->td_fds.events = 0;
 
               /* POLLHUP (or POLLERR) indicates that this session has
                * terminated.
                */
 
-              if (priv->fds.revents & (POLLHUP | POLLERR))
+              if (priv->td_fds.revents & (POLLHUP | POLLERR))
                 {
                   /* notify the client thread */
 
