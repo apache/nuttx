@@ -309,7 +309,7 @@ static inline void telnet_dumpbuffer(FAR const char *msg,
 #endif
 
 /****************************************************************************
- * Name: telnet_check_ctrl_char
+ * Name: telnet_check_ctrlchar
  *
  * Description:
  *   Check if an incoming control character should generate a signal.
@@ -317,34 +317,31 @@ static inline void telnet_dumpbuffer(FAR const char *msg,
  ****************************************************************************/
 
 #ifdef HAVE_SIGNALS
-static void telnet_check_ctrl_char (FAR struct telnet_dev_s *priv,
-                                    uint8_t ch)
+static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
+                                  FAR char *buffer, size_t len)
 {
   int signo = 0;
 
-#ifdef CONFIG_TTY_SIGINT
-  /* Is this the special character that will generate the SIGINT signal? */
-
-  if (priv->pid >= 0 && ch == CONFIG_TTY_SIGINT_CHAR)
+  for (; priv->pid >= 0 && len > 0; buffer++, len--)
     {
-      /* Yes.. note that the kill is needed and do not put the character
-       * into the Rx buffer.  It should not be read as normal data.
-       */
+#ifdef CONFIG_TTY_SIGINT
+      /* Is this the special character that will generate the SIGINT signal? */
 
-      signo = SIGINT;
-    }
-  else
+      if (*buffer == CONFIG_TTY_SIGINT_CHAR)
+        {
+          /* Yes.. note that the kill is needed and do not put the character
+           * into the Rx buffer.  It should not be read as normal data.
+           */
+
+          signo = SIGINT;
+          break;
+        }
+      else
 #endif
 #ifdef CONFIG_TTY_SIGSTP
-  /* Is this the special character that will generate the SIGSTP signal? */
+      /* Is this the special character that will generate the SIGSTP signal? */
 
-  if (priv->pid >= 0 && ch == CONFIG_TTY_SIGSTP_CHAR)
-    {
-#ifdef CONFIG_TTY_SIGINT
-      /* Give precedence to SIGINT */
-
-      if (signo == 0)
-#endif
+      if (*buffer == CONFIG_TTY_SIGSTP_CHAR)
         {
           /* Note that the kill is needed and do not put the character
            * into the Rx buffer.  It should not be read as normal data.
@@ -352,17 +349,15 @@ static void telnet_check_ctrl_char (FAR struct telnet_dev_s *priv,
 
           signo = SIGSTP;
         }
-    }
 #endif
+    }
 
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
   /* Send the signal if necessary */
 
   if (signo != 0)
     {
       kill(priv->pid, signo);
     }
-#endif
 }
 #endif
 
@@ -1326,9 +1321,6 @@ static int telnet_io_main(int argc, FAR char** argv)
   FAR struct telnet_dev_s *priv;
   FAR char *buffer;
   int i;
-#ifdef HAVE_SIGNALS
-  int c;
-#endif
   int ret;
 
   while (1)
@@ -1396,10 +1388,7 @@ static int telnet_io_main(int argc, FAR char** argv)
                        * control that should generate a signal.
                        */
 
-                      for (c = 0; c < ret; c++)
-                        {
-                          telnet_check_ctrl_char(priv, buffer[c]);
-                        }
+                      telnet_check_ctrlchar(priv, buffer, ret);
 #endif
                     }
                 }
