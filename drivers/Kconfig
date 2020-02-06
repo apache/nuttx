@@ -15,9 +15,6 @@ config DEV_ZERO
 	bool "Enable /dev/zero"
 	default n
 
-source drivers/crypto/Kconfig
-source drivers/loop/Kconfig
-
 config DRVR_MKRD
 	bool "RAM disk wrapper (mkrd)"
 	default n
@@ -77,6 +74,9 @@ endif # DRVR_WRITEBUFFER || DRVR_READAHEAD
 
 endmenu # Buffering
 
+source drivers/crypto/Kconfig
+source drivers/loop/Kconfig
+
 menuconfig CAN
 	bool "CAN Driver Support"
 	default n
@@ -87,18 +87,6 @@ menuconfig CAN
 if CAN
 source drivers/can/Kconfig
 endif
-
-config ARCH_HAVE_PWM_PULSECOUNT
-	bool
-	default n
-
-config ARCH_HAVE_PWM_MULTICHAN
-	bool
-	default n
-
-config ARCH_HAVE_I2CRESET
-	bool
-	default n
 
 menuconfig I2C
 	bool "I2C Driver Support"
@@ -155,20 +143,6 @@ if DRIVERS_AUDIO
 source drivers/audio/Kconfig
 endif # DRIVERS_AUDIO
 
-config FB_CMAP
-	bool
-	default n
-	---help---
-		Set by driver-specific configuration to indicate support for color
-		mapping.  Not directly user selectable.
-
-config FB_TRANSPARENCY
-	bool
-	default n
-	---help---
-		Set by driver-specific configuration to indicate support for color
-		transparency.  Not directly user selectable.
-
 menuconfig DRIVERS_VIDEO
 	bool "Video Device Support"
 	default n
@@ -209,22 +183,6 @@ source drivers/lcd/Kconfig
 source drivers/leds/Kconfig
 
 # MMC/SD-related platform capabilities
-
-config ARCH_HAVE_SDIO
-	bool
-	default n
-
-config ARCH_HAVE_SDIOWAIT_WRCOMPLETE
-	bool
-	default n
-
-config ARCH_HAVE_SDIO_PREFLIGHT
-	bool
-	default n
-
-config ARCH_HAVE_SDIO_DELAYED_INVLDT
-	bool
-	default n
 
 menuconfig MMCSD
 	bool "MMC/SD Driver Support"
@@ -395,7 +353,9 @@ menuconfig DRIVERS_WIRELESS
 	---help---
 		Drivers for various wireless devices.
 
+if DRIVERS_WIRELESS
 source drivers/wireless/Kconfig
+endif # DRIVERS_WIRELESS
 
 menuconfig DRIVERS_CONTACTLESS
 	bool "Contactless Device Support"
@@ -403,7 +363,9 @@ menuconfig DRIVERS_CONTACTLESS
 	---help---
 		Drivers for various contactless devices.
 
+if DRIVERS_CONTACTLESS
 source drivers/contactless/Kconfig
+endif # DRIVERS_CONTACTLESS
 
 menuconfig 1WIRE
 	bool "1wire Device Support"
@@ -411,7 +373,9 @@ menuconfig 1WIRE
 	---help---
 		Drivers for various 1wire devices.
 
+if 1WIRE
 source drivers/1wire/Kconfig
+endif # 1WIRE
 
 source drivers/syslog/Kconfig
 

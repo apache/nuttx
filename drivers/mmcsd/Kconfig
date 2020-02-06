@@ -3,6 +3,22 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config ARCH_HAVE_SDIO
+	bool
+	default n
+
+config ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+	bool
+	default n
+
+config ARCH_HAVE_SDIO_PREFLIGHT
+	bool
+	default n
+
+config ARCH_HAVE_SDIO_DELAYED_INVLDT
+	bool
+	default n
+
 config MMCSD_NSLOTS
 	int "Number of MMC/SD slots"
 	default 1

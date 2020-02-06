@@ -3,8 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if DRIVERS_CONTACTLESS
-
 config CL_MFRC522
 	bool "NXP MFRC522 ISO14443/Mifare Transceiver"
 	default n
@@ -56,4 +54,3 @@ config CL_PN532_DEBUG_RX
 	depends on DEBUG_CONTACTLESS
 
 endif # CL_PN532
-endif # DRIVERS_CONTACTLESS
