@@ -296,16 +296,3 @@ void up_initialize(void)
   up_init_smartfs();
 #endif
 }
-
-/****************************************************************************
- * Function:  up_timer_initialize
- *
- * Description:
- *   This function is called during start-up to initialize
- *   the timer hardware.
- *
- ****************************************************************************/
-
-void up_timer_initialize(void)
-{
-}

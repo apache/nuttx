@@ -72,16 +72,21 @@
 
 void up_idle(void)
 {
-#ifdef CONFIG_SCHED_TICKLESS
-  /* Driver the simulated interval timer */
+#ifdef CONFIG_PM
+  static enum pm_state_e state = PM_NORMAL;
+  enum pm_state_e newstate;
 
-  up_timer_update();
-#else
-  /* If the system is idle, then process "fake" timer interrupts.
-   * Hopefully, something will wake up.
-   */
+  /* Fake some power management stuff for testing purposes */
 
-  nxsched_process_timer();
+  newstate = pm_checkstate(PM_IDLE_DOMAIN);
+  if (newstate != state)
+    {
+      if (pm_changestate(PM_IDLE_DOMAIN, newstate) == OK)
+        {
+          state = newstate;
+          pwrinfo("IDLE: switching to new state %i\n", state);
+        }
+    }
 #endif
 
 #ifdef USE_DEVCONSOLE
@@ -106,30 +111,9 @@ void up_idle(void)
   up_rptun_loop();
 #endif
 
-#ifdef CONFIG_PM
-  /* Fake some power management stuff for testing purposes */
+#ifdef CONFIG_ONESHOT
+  /* Driver the simulated interval timer */
 
-  {
-    static enum pm_state_e state = PM_NORMAL;
-    enum pm_state_e newstate;
-
-    newstate = pm_checkstate(PM_IDLE_DOMAIN);
-    if (newstate != state)
-      {
-        if (pm_changestate(PM_IDLE_DOMAIN, newstate) == OK)
-          {
-            state = newstate;
-            pwrinfo("IDLE: switching to new state %i\n", state);
-          }
-      }
-  }
-#endif
-
-#ifdef CONFIG_SIM_WALLTIME
-  /* Wait a bit so that the nxsched_process_timer() is called close to the
-   * correct rate.
-   */
-
-  up_hostusleep(1000000 / CLK_TCK);
+  up_timer_update();
 #endif
 }
