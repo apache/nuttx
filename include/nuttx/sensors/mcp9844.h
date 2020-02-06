@@ -58,6 +58,10 @@
 #define MCP9844_TEMP_REG      (0x05)     /* Sensor Temperature Register */
 #define MCP9844_RESO_REG      (0x09)     /* Register to control the resolution of the temperature sensor */
 
+/* Configuration Register Bit definitions */
+
+#define MCP9844_CONF_REG_SHDN   (1<<8)
+
 /* Resolution Register Bit definitions */
 
 #define MCP9844_RESO_REG_BIT_0  (1<<0)
