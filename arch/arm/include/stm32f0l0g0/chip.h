@@ -50,7 +50,7 @@
 
 /* Get customizations for each supported chip */
 
-#if defined(CONFIG_ARCH_CHIP_STM32F030RC)
+#if defined(CONFIG_ARCH_CHIP_STM32F030RC || CONFIG_ARCH_CHIP_STM32F030CC)
 
 #  define STM32_FLASH_SIZE      (256*1024) /* 256Kb */
 #  define STM32_SRAM_SIZE       (32*1024)  /*  32Kb */
