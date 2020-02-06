@@ -26,6 +26,10 @@ Configuration sub-directories
 
     This is a configuration to test apps/examples/elf.
 
+  module
+
+    This is a configuration to test apps/examples/module.
+
   posix_spawn
 
     This is a configuration to test apps/examples/posix_spawn.
