@@ -74,14 +74,10 @@ CSRCS += up_allocateheap.c
 VPATH = sim
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
-HOSTSRCS = up_hostusleep.c
+HOSTSRCS = up_hosttime.c
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += up_checkstack.c
-endif
-
-ifeq ($(CONFIG_SCHED_TICKLESS),y)
-  CSRCS += up_tickless.c
 endif
 
 ifeq ($(CONFIG_SPINLOCK),y)
@@ -111,10 +107,6 @@ endif
 
 ifeq ($(CONFIG_ONESHOT),y)
   CSRCS += up_oneshot.c
-endif
-
-ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
-  HOSTSRCS += up_critmon.c
 endif
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
