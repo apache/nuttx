@@ -80,6 +80,10 @@
 
 /* SPI chip selects */
 
+/* SE050 Enable */
+
+#define GPIO_SE050_EN  (PIN_PTA6 | GPIO_LOWDRIVE)
+
 /* Count of peripheral clock user configurations */
 
 #define NUM_OF_PERIPHERAL_CLOCKS_0 15
