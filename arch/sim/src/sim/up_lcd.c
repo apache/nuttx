@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/board_lcd.c
+ * arch/sim/src/sim/up_lcd.c
  *
  *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
