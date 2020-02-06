@@ -3,7 +3,9 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if I2C
+config ARCH_HAVE_I2CRESET
+	bool
+	default n
 
 config I2C_SLAVE
 	bool "I2C Slave"
@@ -48,5 +50,3 @@ config I2CMULTIPLEXER_PCA9540BDP
 # put more i2c mux devices here
 
 endmenu # I2C Multiplexer Support
-
-endif # I2C

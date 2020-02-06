@@ -3,8 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if DRIVERS_WIRELESS
-
 config WL_CC1101
 	bool "CC1101 RF transceiver support"
 	default n
@@ -134,5 +132,3 @@ config WL_NRF24L01_RXFIFO_LEN
 
 endif # WL_NRF24L01_RXSUPPORT
 endif # WL_NRF24L01
-
-endif # DRIVERS_WIRELESS
