@@ -92,7 +92,7 @@ static int ez80_timerisr(int irq, chipreg_t *regs, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  z80_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -100,7 +100,7 @@ static int ez80_timerisr(int irq, chipreg_t *regs, void *arg)
  *
  ****************************************************************************/
 
-void z80_timer_initialize(void)
+void up_timer_initialize(void)
 {
   uint16_t reload;
 

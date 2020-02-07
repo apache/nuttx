@@ -333,10 +333,6 @@ void xtensa_serial_initialize(void);
 
 void rpmsg_serialinit(void);
 
-/* System timer */
-
-void xtensa_timer_initialize(void);
-
 /* Network */
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)

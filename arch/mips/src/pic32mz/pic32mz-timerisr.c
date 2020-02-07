@@ -153,7 +153,7 @@ static int pc32mz_timerisr(int irq, uint32_t *regs, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  mips_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -161,7 +161,7 @@ static int pc32mz_timerisr(int irq, uint32_t *regs, void *arg)
  *
  ****************************************************************************/
 
-void mips_timer_initialize(void)
+void up_timer_initialize(void)
 {
   /* Configure and enable TIMER1.  Used the computed TCKPS divider and timer
    * match value.  The source will be either the internal PBCLOCK (TCS=0) or

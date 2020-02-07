@@ -160,7 +160,7 @@ static int cxd56_timerisr(int irq, uint32_t *regs, FAR void *arg)
  *
  ****************************************************************************/
 
-void arm_timer_initialize(void)
+void up_timer_initialize(void)
 {
   uint32_t regval;
 

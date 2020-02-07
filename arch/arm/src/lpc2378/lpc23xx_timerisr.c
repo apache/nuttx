@@ -134,7 +134,7 @@ static int lpc23xx_timerisr(int irq, uint32_t * regs, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  arm_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -142,7 +142,7 @@ static int lpc23xx_timerisr(int irq, uint32_t * regs, FAR void *arg)
  *
  ****************************************************************************/
 
-void arm_timer_initialize(void)
+void up_timer_initialize(void)
 {
   uint16_t mcr;
 

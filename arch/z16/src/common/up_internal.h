@@ -167,10 +167,6 @@ void rpmsg_serialinit(void);
 void lowconsole_init(void);
 #endif
 
-/* Defined in xyz_timerisr.c */
-
-void z16_timer_initialize(void);
-
 /* Defined in xyz_irq.c */
 
 void up_ack_irq(int irq);

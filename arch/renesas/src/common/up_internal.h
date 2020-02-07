@@ -185,10 +185,6 @@ void lowconsole_init(void);
 
 void up_wdtinit(void);
 
-/* Defined in xyz_timerisr.c */
-
-void renesas_timer_initialize(void);
-
 /* Defined in board/xyz_lcd.c */
 
 #ifdef CONFIG_SLCD_CONSOLE

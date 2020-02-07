@@ -1417,6 +1417,17 @@ int up_prioritize_irq(int irq, int priority);
 #endif
 
 /****************************************************************************
+ * Function:  up_timer_initialize
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer hardware.
+ *
+ ****************************************************************************/
+
+void up_timer_initialize(void);
+
+/****************************************************************************
  * Tickless OS Support.
  *
  * When CONFIG_SCHED_TICKLESS is enabled, all support for timer interrupts

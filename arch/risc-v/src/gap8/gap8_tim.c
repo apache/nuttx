@@ -93,7 +93,7 @@ static int gap8_timisr(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: riscv_timer_initialize
+ * Name: up_timer_initialize
  *
  * Description:
  *   Initialize the timer based on the frequency of source clock and ticks
@@ -101,7 +101,7 @@ static int gap8_timisr(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void riscv_timer_initialize(void)
+void up_timer_initialize(void)
 {
   /* Set input clock to 1MHz. FC won't exceed 250MHz */
 
