@@ -86,14 +86,14 @@ static int or1k_timer_isr(int irq, uint32_t *regs, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: or1k_timer_initialize
+ * Name: up_timer_initialize
  *
  * Description:
  *   Initialize the OpenRISC Tick Timer unit
  *
  ****************************************************************************/
 
-void or1k_timer_initialize(void)
+void up_timer_initialize(void)
 {
   uint32_t ttmr = TTMR_LOAD;
 

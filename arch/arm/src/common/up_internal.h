@@ -429,10 +429,6 @@ void up_restorefpu(const uint32_t *regs);
 #  define up_restorefpu(regs)
 #endif
 
-/* System timer *************************************************************/
-
-void arm_timer_initialize(void);
-
 /* Low level serial output **************************************************/
 
 void up_lowputc(char ch);

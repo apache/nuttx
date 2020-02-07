@@ -120,7 +120,7 @@ static int fe310_timerisr(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: riscv_timer_initialize
+ * Name: up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -128,7 +128,7 @@ static int fe310_timerisr(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void riscv_timer_initialize(void)
+void up_timer_initialize(void)
 {
   /* Attach timer interrupt handler */
 

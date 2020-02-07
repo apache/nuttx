@@ -167,10 +167,6 @@ void lowconsole_init(void);
 # define lowconsole_init()
 #endif
 
-/* Defined in chip/xxx_timerisr.c */
-
-void avr_timer_initialize(void);
-
 /* Defined in chip/xxx_ethernet.c */
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)

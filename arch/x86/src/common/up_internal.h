@@ -222,10 +222,6 @@ void lowconsole_init(void);
 
 void up_wdtinit(void);
 
-/* Defined in xyz_timerisr.c */
-
-void x86_timer_initialize(void);
-
 /* Defined in board/up_network.c */
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)

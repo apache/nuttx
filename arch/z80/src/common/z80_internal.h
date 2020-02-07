@@ -164,10 +164,6 @@ void ramlog_consoleinit(void);
 
 void up_puts(const char *str);
 
-/* Defined in xyz_timerisr.c */
-
-void z80_timer_initialize(void);
-
 /* Architecture specific hook into the timer interrupt handler */
 
 #ifdef CONFIG_ARCH_TIMERHOOK

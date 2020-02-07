@@ -75,10 +75,6 @@ void up_initialize(void)
   rpmsg_serialinit();
 #endif
 
-  /* Initialize the system timer */
-
-  misoc_timer_initialize();
-
 #ifdef CONFIG_MM_IOB
   /* Initialize IO buffering */
 

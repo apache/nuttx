@@ -188,10 +188,6 @@ void up_sigdeliver(void);
 int up_swint(int irq, FAR void *context, FAR void *arg);
 uint32_t up_get_newintctx(void);
 
-/* System timer *************************************************************/
-
-void riscv_timer_initialize(void);
-
 /* Low level serial output **************************************************/
 
 void up_lowputc(char ch);

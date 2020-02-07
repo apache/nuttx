@@ -260,10 +260,6 @@ void up_serialinit(void);
 
 void rpmsg_serialinit(void);
 
-/* System timer */
-
-void mips_timer_initialize(void);
-
 /* Network */
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)

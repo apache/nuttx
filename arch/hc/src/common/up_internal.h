@@ -156,10 +156,6 @@ uint8_t *up_doirq(int irq, uint8_t *regs);
 
 void up_sigdeliver(void);
 
-/* System timer initialization */
-
-void hc_timer_initialize(void);
-
 /* Debug output */
 
 void up_earlyserialinit(void);
