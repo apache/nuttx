@@ -86,6 +86,7 @@
 #define RTC_CR_CPE                              (1 << 24)
 
 /* SR Bit Fields */
+
 #define RTC_SR_TIF                              (1 << 0)
 #define RTC_SR_TOF                              (1 << 1)
 #define RTC_SR_TAF                              (1 << 2)
