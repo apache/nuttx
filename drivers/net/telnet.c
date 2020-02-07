@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/telnet.c
  *
- *   Copyright (C) 2007, 2009, 2011-2013, 2017, 2019 Gregory Nutt. All
+ *   Copyright (C) 2007, 2009, 2011-2013, 2017, 2019, 2020 Gregory Nutt. All
  *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -270,8 +270,8 @@ static inline void telnet_dumpbuffer(FAR const char *msg,
                                      FAR const char *buffer,
                                      unsigned int nbytes)
 {
-  /* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_NET have to be
-   * defined or the following does nothing.
+  /* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_NET have to
+   * be defined or the following does nothing.
    */
 
   ninfodumpbuffer(msg, (FAR const uint8_t *)buffer, nbytes);
@@ -933,7 +933,8 @@ static ssize_t telnet_write(FAR struct file *filep, FAR const char *buffer,
       ret = psock_send(&priv->td_psock, priv->td_txbuffer, ncopied, 0);
       if (ret < 0)
         {
-          nerr("ERROR: psock_send failed '%s': %d\n", priv->td_txbuffer, ret);
+          nerr("ERROR: psock_send failed '%s': %d\n",
+               priv->td_txbuffer, ret);
           return ret;
         }
     }
@@ -1046,6 +1047,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
                    TELNET_DEVFMT, priv->td_minor);
           break;
         }
+
       priv->td_minor++;
     }
 
@@ -1093,7 +1095,8 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
       g_telnet_io_kthread =
         kthread_create("telnet_io", CONFIG_TELNET_IOTHREAD_PRIORITY,
-                       CONFIG_TELNET_IOTHREAD_STACKSIZE, telnet_io_main, NULL);
+                       CONFIG_TELNET_IOTHREAD_STACKSIZE, telnet_io_main,
+                       NULL);
     }
 
   /* Save ourself in the list of Telnet client threads */
