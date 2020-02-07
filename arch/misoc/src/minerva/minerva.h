@@ -128,10 +128,6 @@ void minerva_add_region(void);
 
 void minerva_copystate(uint32_t * dest, uint32_t * src);
 
-/* IRQ initialization *******************************************************/
-
-void minerva_irq_initialize(void);
-
 /* Interrupt decode *********************************************************/
 
 uint32_t *minerva_decodeirq(uint32_t intstat, uint32_t * regs);

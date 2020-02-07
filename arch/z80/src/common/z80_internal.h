@@ -104,14 +104,6 @@ extern "C"
 {
 #endif
 
-/* Supplied by chip- or board-specific logic */
-
-void z80_irq_initialize(void);
-
-#ifdef CONFIG_RTC_ALARM
-void z80_rtc_irqinitialize(void);
-#endif
-
 #ifdef USE_LOWSERIALINIT
 void z80_lowserial_initialize(void);
 #endif

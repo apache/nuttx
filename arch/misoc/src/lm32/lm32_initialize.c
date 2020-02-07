@@ -67,10 +67,6 @@
 
 void up_initialize(void)
 {
-  /* Initialize the System Timer */
-
-  lm32_irq_initialize();
-
   /* Initialize the serial driver */
 
   misoc_serial_initialize();

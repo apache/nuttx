@@ -132,7 +132,7 @@ void riscv_timer_initialize(void)
 {
   /* Attach timer interrupt handler */
 
-  (void)irq_attach(FE310_IRQ_MTIMER, fe310_timerisr, NULL);
+  irq_attach(FE310_IRQ_MTIMER, fe310_timerisr, NULL);
 
   /* Reload CLINT mtimecmp */
 

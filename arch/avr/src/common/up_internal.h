@@ -123,7 +123,6 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 
 /* Defined in files with the same name as the function */
 
-void up_irqinitialize(void);
 #ifdef CONFIG_ARCH_DMA
 void weak_function up_dma_initialize(void);
 #endif

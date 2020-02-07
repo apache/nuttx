@@ -176,7 +176,6 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size);
 
 /* IRQ initialization *******************************************************/
 
-void up_irqinitialize(void);
 void up_ack_irq(int irq);
 
 #ifdef CONFIG_ARCH_RV64GC

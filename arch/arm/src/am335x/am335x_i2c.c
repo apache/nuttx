@@ -544,7 +544,7 @@ static inline int am335x_i2c_sem_waitdone(FAR struct am335x_i2c_priv_s *priv)
     {
       /* Get the current time */
 
-      (void)clock_gettime(CLOCK_REALTIME, &abstime);
+      clock_gettime(CLOCK_REALTIME, &abstime);
 
       /* Calculate a time in the future */
 
@@ -1294,8 +1294,8 @@ static int am335x_i2c_init(FAR struct am335x_i2c_priv_s *priv)
 
   /* Configure pins */
 
-  (void)am335x_gpio_config(priv->config->scl_pin);
-  (void)am335x_gpio_config(priv->config->sda_pin);
+  am335x_gpio_config(priv->config->scl_pin);
+  am335x_gpio_config(priv->config->sda_pin);
 
   /* Disable I2C module */
 

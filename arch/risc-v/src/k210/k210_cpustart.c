@@ -139,11 +139,11 @@ void k210_cpu_boot(int cpu)
   sched_note_cpu_started(this_task());
 #endif
 
-  (void)up_irq_enable();
+  up_irq_enable();
 
   /* Then transfer control to the IDLE task */
 
-  (void)nx_idle_task(0, NULL);
+  nx_idle_task(0, NULL);
 }
 
 /****************************************************************************

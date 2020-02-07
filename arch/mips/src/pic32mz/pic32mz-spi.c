@@ -753,7 +753,7 @@ static inline void spi_flush(FAR struct pic32mz_dev_s *priv)
 
   while ((spi_getreg(priv, PIC32MZ_SPI_STAT_OFFSET) & SPI_STAT_SPIRBF) != 0)
     {
-      (void)spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
+      spi_getreg(priv, PIC32MZ_SPI_BUF_OFFSET);
     }
 }
 
@@ -889,7 +889,7 @@ static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->dmadog);
+  wd_cancel(priv->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -944,7 +944,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->dmadog);
+  wd_cancel(priv->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
@@ -1785,7 +1785,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* Cancel the watchdog timeout */
 
-      (void)wd_cancel(priv->dmadog);
+      wd_cancel(priv->dmadog);
 
       /* Check if we were awakened by an error of some kind. EINTR is not a
        * failure. It simply means that the wait was awakened by a signal.

@@ -135,7 +135,7 @@ void riscv_timer_initialize(void)
 #if 1
   /* Attach timer interrupt handler */
 
-  (void)irq_attach(K210_IRQ_MTIMER, k210_timerisr, NULL);
+  irq_attach(K210_IRQ_MTIMER, k210_timerisr, NULL);
 
   /* Reload CLINT mtimecmp */
 

@@ -106,4 +106,6 @@ void irq_initialize(void)
 
   irqchain_initialize();
 #endif
+
+  up_irqinitialize();
 }

@@ -446,32 +446,14 @@ int up_rtc_initialize(void)
 
   outp(EZ80_RTC_CTRL, regval);
 
+#ifdef CONFIG_RTC_ALARM
+  irq_attach(EZ80_RTC_IRQ, ez80_alarm_interrupt, NULL);
+#endif
+
   rtc_dumpregs("After Initialization");
   g_rtc_enabled = true;
   return OK;
 }
-
-/****************************************************************************
- * Name: z80_rtc_irqinitialize
- *
- * Description:
- *   Initialize IRQs for RTC, not possible during up_rtc_initialize because
- *   z80_irq_initialize is called later.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RTC_ALARM
-int z80_rtc_irqinitialize(void)
-{
-  return irq_attach(EZ80_RTC_IRQ, ez80_alarm_interrupt, NULL);
-}
-#endif
 
 /****************************************************************************
  * Name: up_rtc_getdatetime

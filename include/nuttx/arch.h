@@ -1332,6 +1332,12 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
 /* See prototype in include/nuttx/elf.h */
 
 /****************************************************************************
+ * Name: up_irqinitialize
+ ****************************************************************************/
+
+void up_irqinitialize(void);
+
+/****************************************************************************
  * Name: up_interrupt_context
  *
  * Description:
