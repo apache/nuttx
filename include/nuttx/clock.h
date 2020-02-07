@@ -271,6 +271,19 @@ EXTERN volatile clock_t g_system_timer;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: clock_timespec_compare
+ *
+ * Description:
+ *    Return < 0 if time ts1 is before time ts2
+ *    Return > 0 if time ts2 is before time ts1
+ *    Return 0 if time ts1 is the same as time ts2
+ *
+ ****************************************************************************/
+
+int clock_timespec_compare(FAR const struct timespec *ts1,
+                           FAR const struct timespec *ts2);
+
+/****************************************************************************
  * Name:  clock_timespec_add
  *
  * Description:
