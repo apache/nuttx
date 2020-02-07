@@ -84,19 +84,6 @@ static inline void timespec_from_usec(FAR struct timespec *ts,
   ts->tv_nsec   = microseconds * NSEC_PER_USEC;
 }
 
-static inline int timespec_compare(FAR const struct timespec *ts1,
-                                   FAR const struct timespec *ts2)
-{
-  if (ts1->tv_sec != ts2->tv_sec)
-    {
-      return ts1->tv_sec - ts2->tv_sec;
-    }
-  else
-    {
-      return ts1->tv_nsec - ts2->tv_nsec;
-    }
-}
-
 static void udelay_accurate(useconds_t microseconds)
 {
   struct timespec now;
@@ -107,7 +94,7 @@ static void udelay_accurate(useconds_t microseconds)
   timespec_from_usec(&delta, microseconds);
   clock_timespec_add(&now, &delta, &end);
 
-  while (timespec_compare(&now, &end) < 0)
+  while (clock_timespec_compare(&now, &end) < 0)
     {
       ONESHOT_CURRENT(g_oneshot_lower, &now);
     }
