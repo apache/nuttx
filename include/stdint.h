@@ -134,7 +134,7 @@
 /* Limits of integer types capable of holding object pointers */
 
 #define INTPTR_MIN          PTR_MIN
-#define INTPTR_MAX          PTR_MIN
+#define INTPTR_MAX          PTR_MAX
 #define UINTPTR_MAX         UPTR_MAX
 
 /* Limits of greatest-width integer types */
