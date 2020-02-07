@@ -78,7 +78,7 @@ int z80sim_timerisr(int irq, FAR chipreg_t *regs, void *arg)
 
 void z80_timer_initialize(void)
 {
-  /* The timer interrupt was attached in z80_irq_initialize -- see comments
+  /* The timer interrupt was attached in up_irqinitialize -- see comments
    * there.
    */
 }

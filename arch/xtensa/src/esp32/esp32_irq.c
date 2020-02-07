@@ -132,10 +132,10 @@ static inline void xtensa_attach_fromcpu1_interrupt(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_irq_initialize
+ * Name: up_irqinitialize
  ****************************************************************************/
 
-void xtensa_irq_initialize(void)
+void up_irqinitialize(void)
 {
   /* Initialize CPU interrupts */
 

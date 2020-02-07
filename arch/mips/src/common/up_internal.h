@@ -235,7 +235,6 @@ void up_sigdeliver(void);
 
 /* IRQs */
 
-void up_irqinitialize(void);
 bool up_pending_irq(int irq);
 void up_clrpend_irq(int irq);
 

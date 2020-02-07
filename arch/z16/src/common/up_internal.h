@@ -135,7 +135,6 @@ extern volatile FAR chipreg_t *g_current_regs;
 void up_copystate(FAR chipreg_t *dest, FAR chipreg_t *src);
 FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs);
 void up_restoreusercontext(FAR chipreg_t *regs);
-void up_irqinitialize(void);
 int  up_saveusercontext(FAR chipreg_t *regs);
 void up_sigdeliver(void);
 

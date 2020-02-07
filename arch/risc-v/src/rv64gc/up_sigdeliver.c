@@ -155,9 +155,9 @@ void up_sigdeliver(void)
    */
 
 #ifdef CONFIG_SMP
-  (void)enter_critical_section();
+  enter_critical_section();
 #else
-  (void)up_irq_save();
+  up_irq_save();
 #endif
 
   /* Restore the saved errno value */

@@ -65,7 +65,7 @@ void up_irqinitialize(void)
 {
   /* Disable Machine interrupts */
 
-  (void)up_irq_save();
+ up_irq_save();
 
   /* Disable all global interrupts */
 
@@ -105,7 +105,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
-  (void)up_irq_enable();
+  up_irq_enable();
 #endif
 }
 

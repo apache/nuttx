@@ -86,10 +86,6 @@ void up_initialize(void)
 
   g_current_regs = NULL;
 
-  /* Initialize the interrupt subsystem */
-
-  up_irqinitialize();
-
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
   /* Initialize the system timer interrupt */
 
