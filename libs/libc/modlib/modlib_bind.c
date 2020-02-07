@@ -110,6 +110,45 @@ static inline int modlib_readrels(FAR struct mod_loadinfo_s *loadinfo,
 }
 
 /****************************************************************************
+ * Name: modlib_readrelas
+ *
+ * Description:
+ *   Read the (ELF_Rela structure * buffer count) into memory.
+ *
+ ****************************************************************************/
+
+static inline int modlib_readrelas(FAR struct mod_loadinfo_s *loadinfo,
+                                   FAR const Elf_Shdr *relsec,
+                                   int index, FAR Elf_Rela *relas,
+                                   int count)
+{
+  off_t offset;
+  int size;
+
+  /* Verify that the symbol table index lies within symbol table */
+
+  if (index < 0 || index > (relsec->sh_size / sizeof(Elf_Rela)))
+    {
+      berr("ERROR: Bad relocation symbol index: %d\n", index);
+      return -EINVAL;
+    }
+
+  /* Get the file offset to the symbol table entry */
+
+  offset = sizeof(Elf_Rela) * index;
+  size   = sizeof(Elf_Rela) * count;
+  if (offset + size > relsec->sh_size)
+    {
+      size = relsec->sh_size - offset;
+    }
+
+  /* And, finally, read the symbol table entry into memory */
+
+  return modlib_read(loadinfo, (FAR uint8_t *)relas, size,
+                     relsec->sh_offset + offset);
+}
+
+/****************************************************************************
  * Name: modlib_relocate and modlib_relocateadd
  *
  * Description:
@@ -301,8 +340,177 @@ static int modlib_relocate(FAR struct module_s *modp,
 static int modlib_relocateadd(FAR struct module_s *modp,
                            FAR struct mod_loadinfo_s *loadinfo, int relidx)
 {
-  berr("ERROR: Not implemented\n");
-  return -ENOSYS;
+  FAR Elf_Shdr *relsec = &loadinfo->shdr[relidx];
+  FAR Elf_Shdr *dstsec = &loadinfo->shdr[relsec->sh_info];
+  FAR Elf_Rela *relas;
+  FAR Elf_Rela *rela;
+  FAR Elf_SymCache *cache;
+  FAR Elf_Sym  *sym;
+  FAR dq_entry_t *e;
+  dq_queue_t      q;
+  uintptr_t       addr;
+  int             symidx;
+  int             ret;
+  int             i;
+  int             j;
+
+  relas = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT * sizeof(Elf_Rela));
+  if (!relas)
+    {
+      berr("Failed to allocate memory for elf relocation relas\n");
+      return -ENOMEM;
+    }
+
+  dq_init(&q);
+
+  /* Examine each relocation in the section.  'relsec' is the section
+   * containing the relations.  'dstsec' is the section containing the data
+   * to be relocated.
+   */
+
+  ret = OK;
+
+  for (i = j = 0; i < relsec->sh_size / sizeof(Elf_Rela); i++)
+    {
+      /* Read the relocation entry into memory */
+
+      rela = &relas[i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT];
+
+      if (!(i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT))
+        {
+          ret = modlib_readrelas(loadinfo, relsec, i, relas, CONFIG_MODLIB_RELOCATION_BUFFERCOUNT);
+          if (ret < 0)
+          {
+              berr("ERROR: Section %d reloc %d: Failed to read relocation entry: %d\n",
+                   relidx, i, ret);
+              break;
+          }
+        }
+
+      /* Get the symbol table index for the relocation.  This is contained
+       * in a bit-field within the r_info element.
+       */
+
+      symidx = ELF_R_SYM(rela->r_info);
+
+      /* First try the cache */
+
+      sym = NULL;
+      for (e = dq_peek(&q); e; e = dq_next(e))
+        {
+          cache = (FAR Elf_SymCache *)e;
+          if (cache->idx == symidx)
+            {
+              dq_rem(&cache->entry, &q);
+              dq_addfirst(&cache->entry, &q);
+              sym = &cache->sym;
+              break;
+            }
+        }
+
+      /* If the symbol was not found in the cache, we will need to read the
+       * symbol from the file.
+       */
+
+      if (sym == NULL)
+        {
+          if (j < CONFIG_MODLIB_SYMBOL_CACHECOUNT)
+            {
+              cache = lib_malloc(sizeof(Elf_SymCache));
+              if (!cache)
+                {
+                  berr("Failed to allocate memory for elf symbols\n");
+                  ret = -ENOMEM;
+                  break;
+                }
+              j++;
+            }
+          else
+            {
+              cache = (FAR Elf_SymCache *)dq_remlast(&q);
+            }
+
+          sym = &cache->sym;
+
+          /* Read the symbol table entry into memory */
+
+          ret = modlib_readsym(loadinfo, symidx, sym);
+          if (ret < 0)
+            {
+              berr("ERROR: Section %d reloc %d: Failed to read symbol[%d]: %d\n",
+                   relidx, i, symidx, ret);
+              lib_free(cache);
+              break;
+            }
+
+          /* Get the value of the symbol (in sym.st_value) */
+
+          ret = modlib_symvalue(modp, loadinfo, sym);
+          if (ret < 0)
+            {
+              /* The special error -ESRCH is returned only in one condition:  The
+               * symbol has no name.
+               *
+               * There are a few relocations for a few architectures that do
+               * no depend upon a named symbol.  We don't know if that is the
+               * case here, but we will use a NULL symbol pointer to indicate
+               * that case to up_relocate().  That function can then do what
+               * is best.
+               */
+
+              if (ret == -ESRCH)
+                {
+                  berr("ERROR: Section %d reloc %d: Undefined symbol[%d] has no name: %d\n",
+                      relidx, i, symidx, ret);
+                }
+              else
+                {
+                  berr("ERROR: Section %d reloc %d: Failed to get value of symbol[%d]: %d\n",
+                      relidx, i, symidx, ret);
+                  lib_free(cache);
+                  break;
+                }
+            }
+
+          cache->idx = symidx;
+          dq_addfirst(&cache->entry, &q);
+        }
+
+      if (sym->st_shndx == SHN_UNDEF && sym->st_name == 0)
+        {
+          sym = NULL;
+        }
+
+      /* Calculate the relocation address. */
+
+      if (rela->r_offset < 0 || rela->r_offset > dstsec->sh_size - sizeof(uint32_t))
+        {
+          berr("ERROR: Section %d reloc %d: Relocation address out of range, offset %d size %d\n",
+               relidx, i, rela->r_offset, dstsec->sh_size);
+          ret = -EINVAL;
+          break;
+        }
+
+      addr = dstsec->sh_addr + rela->r_offset;
+
+      /* Now perform the architecture-specific relocation */
+
+      ret = up_relocateadd(rela, sym, addr);
+      if (ret < 0)
+        {
+          berr("ERROR: Section %d reloc %d: Relocation failed: %d\n", relidx, i, ret);
+          break;
+        }
+    }
+
+  lib_free(relas);
+  while ((e = dq_peek(&q)))
+    {
+      dq_rem(e, &q);
+      lib_free(e);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
