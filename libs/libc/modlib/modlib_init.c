@@ -170,7 +170,7 @@ int modlib_initialize(FAR const char *filename,
   /* Read the ELF ehdr from offset 0 */
 
   ret = modlib_read(loadinfo, (FAR uint8_t *)&loadinfo->ehdr,
-                    sizeof(Elf32_Ehdr), 0);
+                    sizeof(Elf_Ehdr), 0);
   if (ret < 0)
     {
       berr("ERROR: Failed to read ELF header: %d\n", ret);
@@ -178,7 +178,7 @@ int modlib_initialize(FAR const char *filename,
     }
 
   modlib_dumpbuffer("ELF header", (FAR const uint8_t *)&loadinfo->ehdr,
-                    sizeof(Elf32_Ehdr));
+                    sizeof(Elf_Ehdr));
 
   /* Verify the ELF header */
 

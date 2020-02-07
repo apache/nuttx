@@ -106,7 +106,7 @@ static void elf_elfsize(struct elf_loadinfo_s *loadinfo)
 
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {
-      FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
+      FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
 
       /* SHF_ALLOC indicates that the section requires memory during
        * execution.
@@ -164,7 +164,7 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {
-      FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
+      FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
 
       /* SHF_ALLOC indicates that the section requires memory during
        * execution.
@@ -286,7 +286,8 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 
   /* Allocate (and zero) memory for the ELF file. */
 
-  ret = elf_addrenv_alloc(loadinfo, loadinfo->textsize, loadinfo->datasize, heapsize);
+  ret = elf_addrenv_alloc(loadinfo, loadinfo->textsize, loadinfo->datasize,
+                          heapsize);
   if (ret < 0)
     {
       berr("ERROR: elf_addrenv_alloc() failed: %d\n", ret);

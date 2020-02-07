@@ -99,7 +99,7 @@ static void modlib_elfsize(struct mod_loadinfo_s *loadinfo)
 
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {
-      FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
+      FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
 
       /* SHF_ALLOC indicates that the section requires memory during
        * execution.
@@ -157,7 +157,7 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
 
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {
-      FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
+      FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
 
       /* SHF_ALLOC indicates that the section requires memory during
        * execution */
