@@ -36,21 +36,25 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS  =
-CSRCS  = s32k146_boot.c s32k146_bringup.c s32k146_clockconfig.c
-CSRCS += s32k146_periphclocks.c
+CSRCS  = s32k1xx_boot.c s32k1xx_bringup.c s32k1xx_clockconfig.c
+CSRCS += s32k1xx_periphclocks.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += s32k146_autoleds.c
+CSRCS += s32k1xx_autoleds.c
 else
-CSRCS += s32k146_userleds.c
+CSRCS += s32k1xx_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS +=  s32k146_buttons.c
+CSRCS +=  s32k1xx_buttons.c
 endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += s32k146_appinit.c
+CSRCS += s32k1xx_appinit.c
+endif
+
+ifeq ($(CONFIG_S32K1XX_LPSPI),y)
+CSRCS += s32k1xx_spi.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

@@ -76,9 +76,9 @@
 
 /* Nomial frequencies of internal clocks */
 
-#define SCG_SIRQ_LOWRANGE_FREQUENCY   2000000  /* 2MHz */
-#define SCG_SIRQ_HIGHRANGE_FREQUENCY  8000000  /* 8MHz */
-#define SCG_FIRQ_FREQUENCY0          48000000  /* 48MHz */
+#define SCG_SIRC_LOWRANGE_FREQUENCY   2000000  /* 2MHz */
+#define SCG_SIRC_HIGHRANGE_FREQUENCY  8000000  /* 8MHz */
+#define SCG_FIRC_FREQUENCY0          48000000  /* 48MHz */
 
 #define NUMBER_OF_TCLK_INPUTS        3
 
@@ -479,7 +479,7 @@ extern "C"
  *   Zero (OK) is returned a success;  A negated errno value is returned on
  *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int s32k1xx_clockconfig(FAR const struct clock_configuration_s *clkcfg);
 
@@ -496,7 +496,7 @@ int s32k1xx_clockconfig(FAR const struct clock_configuration_s *clkcfg);
  *   The current value of the CORE clock frequency.  Zero is returned on any
  *   failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint32_t s32k1xx_get_coreclk(void);
 
@@ -511,10 +511,10 @@ uint32_t s32k1xx_get_coreclk(void);
  *   type - Identifies the system clock of interest
  *
  * Returned Values:
- *   The current value of the system clock frequency.  Zero is returned on any
- *   failure.
+ *   The current value of the system clock frequency.  Zero is returned on
+ *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint32_t s32k1xx_get_sysclk(enum scg_system_clock_type_e type);
 
