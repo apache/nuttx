@@ -98,8 +98,7 @@ static void s32k1xx_rtc_enable(void)
   /* Enable the rtc */
 
   regval  = getreg32(S32K1XX_RTC_SR);
-  regval &= ~(RTC_SR_TCE_MASK);
-  regval |= RTC_SR_TCE(1);
+  regval |= RTC_SR_TCE;
   putreg32(regval, S32K1XX_RTC_SR);
 }
 
@@ -124,8 +123,7 @@ static void s32k1xx_rtc_disable(void)
   /* Enable the rtc */
 
   regval  = getreg32(S32K1XX_RTC_SR);
-  regval &= ~(RTC_SR_TCE_MASK);
-  regval |= RTC_SR_TCE(0);
+  regval &= ~RTC_SR_TCE;
   putreg32(regval, S32K1XX_RTC_SR);
 }
 
@@ -155,7 +153,7 @@ int up_rtc_initialize(void)
 
   regval  = getreg32(S32K1XX_RTC_CR);
 
-  regval &= ~RTC_CR_CPE_MASK;
+  regval &= ~RTC_CR_CPE;
 
   putreg32(regval, S32K1XX_RTC_CR);
 
@@ -163,8 +161,7 @@ int up_rtc_initialize(void)
 
   regval  = getreg32(S32K1XX_RTC_CR);
 
-  regval &= ~(RTC_CR_LPOS_MASK);
-  regval |= RTC_CR_LPOS(1u);
+  regval |= RTC_CR_LPOS;
 
   putreg32(regval, S32K1XX_RTC_CR);
 
@@ -172,8 +169,7 @@ int up_rtc_initialize(void)
 
   regval  = getreg32(S32K1XX_RTC_CR);
 
-  regval &= ~(RTC_CR_UM_MASK);
-  regval |= RTC_CR_UM(0UL);
+  regval &= ~(RTC_CR_UM);
 
   putreg32(regval, S32K1XX_RTC_CR);
 
@@ -181,8 +177,7 @@ int up_rtc_initialize(void)
 
   regval  = getreg32(S32K1XX_RTC_CR);
 
-  regval &= ~(RTC_CR_SUP_MASK);
-  regval |= RTC_CR_SUP(0UL);
+  regval &= ~(RTC_CR_SUP);
 
   putreg32(regval, S32K1XX_RTC_CR);
 
@@ -217,8 +212,8 @@ time_t up_rtc_time(void)
 {
   uint32_t regval;
 
-  regval = getreg32(S32K1XX_RTC_TSR);
-  regval = (regval & RTC_TSR_TSR_MASK) >> RTC_TSR_TSR_SHIFT;
+  regval  = getreg32(S32K1XX_RTC_TSR);
+  regval &= RTC_TSR_MASK;
 
   return (uint32_t) (regval);
 }

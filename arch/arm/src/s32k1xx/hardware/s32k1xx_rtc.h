@@ -1,5 +1,5 @@
 /****************************************************************************************************
- * arch/arm/src/s32k1xx/chip/s32k1xx_sim.h
+ * arch/arm/src/s32k1xx/chip/s32k1xx_rtc.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -73,55 +73,21 @@
 
 /* TSR Bit Fields */
 
-#define RTC_TSR_TSR_MASK                         0xffffffffu
-#define RTC_TSR_TSR_SHIFT                        0u
-#define RTC_TSR_TSR_WIDTH                        32u
-#define RTC_TSR_TSR(x)                           (((uint32_t)(((uint32_t)(x))<<RTC_TSR_TSR_SHIFT))&RTC_TSR_TSR_MASK)
+#define RTC_TSR_SHIFT                           (0)
+#define RTC_TSR_MASK                            (0xffffffff << RTC_TSR_SHIFT)
 
 /* CR Bit Fields */
 
-#define RTC_CR_SWR_MASK                          0x1u
-#define RTC_CR_SWR_SHIFT                         0u
-#define RTC_CR_SWR_WIDTH                         1u
-#define RTC_CR_SWR(x)                            (((uint32_t)(((uint32_t)(x))<<RTC_CR_SWR_SHIFT))&RTC_CR_SWR_MASK)
-#define RTC_CR_SUP_MASK                          0x4u
-#define RTC_CR_SUP_SHIFT                         2u
-#define RTC_CR_SUP_WIDTH                         1u
-#define RTC_CR_SUP(x)                            (((uint32_t)(((uint32_t)(x))<<RTC_CR_SUP_SHIFT))&RTC_CR_SUP_MASK)
-#define RTC_CR_UM_MASK                           0x8u
-#define RTC_CR_UM_SHIFT                          3u
-#define RTC_CR_UM_WIDTH                          1u
-#define RTC_CR_UM(x)                             (((uint32_t)(((uint32_t)(x))<<RTC_CR_UM_SHIFT))&RTC_CR_UM_MASK)
-#define RTC_CR_CPS_MASK                          0x20u
-#define RTC_CR_CPS_SHIFT                         5u
-#define RTC_CR_CPS_WIDTH                         1u
-#define RTC_CR_CPS(x)                            (((uint32_t)(((uint32_t)(x))<<RTC_CR_CPS_SHIFT))&RTC_CR_CPS_MASK)
-#define RTC_CR_LPOS_MASK                         0x80u
-#define RTC_CR_LPOS_SHIFT                        7u
-#define RTC_CR_LPOS_WIDTH                        1u
-#define RTC_CR_LPOS(x)                           (((uint32_t)(((uint32_t)(x))<<RTC_CR_LPOS_SHIFT))&RTC_CR_LPOS_MASK)
-#define RTC_CR_CPE_MASK                          0x1000000u
-#define RTC_CR_CPE_SHIFT                         24u
-#define RTC_CR_CPE_WIDTH                         1u
-#define RTC_CR_CPE(x)                            (((uint32_t)(((uint32_t)(x))<<RTC_CR_CPE_SHIFT))&RTC_CR_CPE_MASK)
+#define RTC_CR_SWR                              (1 << 0)
+#define RTC_CR_SUP                              (1 << 2)
+#define RTC_CR_UM                               (1 << 3)
+#define RTC_CR_CPS                              (1 << 5)
+#define RTC_CR_LPOS                             (1 << 7)
+#define RTC_CR_CPE                              (1 << 24)
 
 /* SR Bit Fields */
-
-#define RTC_SR_TIF_MASK                          0x1u
-#define RTC_SR_TIF_SHIFT                         0u
-#define RTC_SR_TIF_WIDTH                         1u
-#define RTC_SR_TIF(x)                            (((uint32_t)(((uint32_t)(x))<<RTC_SR_TIF_SHIFT))&RTC_SR_TIF_MASK)
-#define RTC_SR_TOF_MASK                          0x2u
-#define RTC_SR_TOF_SHIFT                         1u
-#define RTC_SR_TOF_WIDTH                         1u
-#define RTC_SR_TOF(x)                            (((uint32_t)(((uint32_t)(x))<<RTC_SR_TOF_SHIFT))&RTC_SR_TOF_MASK)
-#define RTC_SR_TAF_MASK                          0x4u
-#define RTC_SR_TAF_SHIFT                         2u
-#define RTC_SR_TAF_WIDTH                         1u
-#define RTC_SR_TAF(x)                            (((uint32_t)(((uint32_t)(x))<<RTC_SR_TAF_SHIFT))&RTC_SR_TAF_MASK)
-#define RTC_SR_TCE_MASK                          0x10u
-#define RTC_SR_TCE_SHIFT                         4u
-#define RTC_SR_TCE_WIDTH                         1u
-#define RTC_SR_TCE(x)                            (((uint32_t)(((uint32_t)(x))<<RTC_SR_TCE_SHIFT))&RTC_SR_TCE_MASK)
-
+#define RTC_SR_TIF                              (1 << 0)
+#define RTC_SR_TOF                              (1 << 1)
+#define RTC_SR_TAF                              (1 << 2)
+#define RTC_SR_TCE                              (1 << 4)
 #endif /* __ARCH_ARM_SRC_S32K1XX_HARDWARE_S32K1XX_RTC_H */
