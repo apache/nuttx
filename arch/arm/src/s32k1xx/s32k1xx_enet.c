@@ -231,7 +231,7 @@
  *             = 23
  */
 
-#define S32K1XX_MII_SPEED  0x0F /* 100Mbs. Revisit and remove hardcoded value */
+#define S32K1XX_MII_SPEED  0x0f /* 100Mbs. Revisit and remove hardcoded value */
 #if S32K1XX_MII_SPEED > 63
 #  error "S32K1XX_MII_SPEED is out-of-range"
 #endif
