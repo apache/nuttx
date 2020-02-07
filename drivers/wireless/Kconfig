@@ -3,8 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if DRIVERS_WIRELESS
-
 config WL_CC1101
 	bool "CC1101 RF transceiver support"
 	default n
@@ -39,6 +37,17 @@ config WL_GS2200M_SPI_FREQUENCY
 config WL_GS2200M_DISABLE_DHCPC
 	bool "Disable the internal dhcp client"
 	default n
+
+config WL_GS2200M_CHECK_VERSION
+	bool "Check the version of GS2200M"
+	default n
+
+config WL_GS2200M_LOGLEVEL
+	int "Log level"
+	default 0
+	range 0 2
+	---help---
+		The debug level of GS2200M. (AT+LOGLVL)
 
 endif
 
@@ -123,5 +132,3 @@ config WL_NRF24L01_RXFIFO_LEN
 
 endif # WL_NRF24L01_RXSUPPORT
 endif # WL_NRF24L01
-
-endif # DRIVERS_WIRELESS

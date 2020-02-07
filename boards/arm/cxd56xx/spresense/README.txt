@@ -22,6 +22,18 @@ about this board.
 Configuration sub-directories
 -----------------------------
 
+  elf
+
+    This is a configuration to test apps/examples/elf.
+
+  module
+
+    This is a configuration to test apps/examples/module.
+
+  posix_spawn
+
+    This is a configuration to test apps/examples/posix_spawn.
+
   smp
 
     This is a configuration to run Spresense in SMP mode. To use this

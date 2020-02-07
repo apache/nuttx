@@ -34,8 +34,8 @@
 
 progname=$0
 debug=n
-host=linux
-wenv=cygwin
+host=
+wenv=
 unset configfile
 
 function showusage {
@@ -93,6 +93,32 @@ while [ ! -z "$1" ]; do
   esac
   shift
 done
+
+# If the host was not explicitly given, try to guess.
+# Examples of "uname -s" outputs:
+#   macOS: Darwin
+#   Cygwin: CYGWIN_NT-10.0-WOW
+#   Linux: Linux
+#   MSYS: MINGW32_NT-6.2
+if [ -z "$host" ]; then
+  case $(uname -s) in
+    Darwin)
+      host=macos
+      ;;
+    CYGWIN*)
+      host=windows
+      wenv=cygwin
+      ;;
+    MINGW32*)
+      host=windows
+      wenv=msys
+      ;;
+    *)
+      # Assume linux as a fallback
+      host=linux
+      ;;
+  esac
+fi
 
 if [ ! -z "$1" ]; then
   echo "ERROR: Garbage at the end of line"

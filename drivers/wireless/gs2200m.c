@@ -34,6 +34,14 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * gs2200m driver.
+ *
+ * See "GS2200MS2W Adapter Command Reference Guide" for the explanation
+ * of AT commands. You can find the document at:
+ * https://www.telit.com/m2m-iot-products/wifi-bluetooth-modules/wi-fi-gs2200m/
+ ****************************************************************************/
+
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -1959,10 +1967,26 @@ static enum pkt_type_e gs2200m_set_gpio(FAR struct gs2200m_dev_s *dev,
 #endif
 
 /****************************************************************************
+ * Name: gs2200m_set_loglevel
+ * NOTE: See 11.3.1 Log Level
+ ****************************************************************************/
+
+#if CONFIG_WL_GS2200M_LOGLEVEL > 0
+static enum pkt_type_e gs2200m_set_loglevel(FAR struct gs2200m_dev_s *dev,
+                                            int level)
+{
+  char cmd[16];
+
+  snprintf(cmd, sizeof(cmd), "AT+LOGLVL=%d\r\n", level);
+  return gs2200m_send_cmd(dev, cmd, NULL);
+}
+#endif
+
+/****************************************************************************
  * Name: gs2200m_get_version
  ****************************************************************************/
 
-#ifdef CHECK_VERSION
+#ifdef CONFIG_WL_GS2200M_CHECK_VERSION
 static enum pkt_type_e gs2200m_get_version(FAR struct gs2200m_dev_s *dev)
 {
   char cmd[16];
@@ -2867,7 +2891,13 @@ static int gs2200m_start(FAR struct gs2200m_dev_s *dev)
   t = gs2200m_enable_echo(dev, 0);
   ASSERT(TYPE_OK == t);
 
-#ifdef CHECK_VERSION
+#if CONFIG_WL_GS2200M_LOGLEVEL > 0
+  /* Set log level */
+  t = gs2200m_set_loglevel(dev, CONFIG_WL_GS2200M_LOGLEVEL);
+  ASSERT(TYPE_OK == t);
+#endif
+
+#ifdef CONFIG_WL_GS2200M_CHECK_VERSION
   /* Version */
 
   t = gs2200m_get_version(dev);

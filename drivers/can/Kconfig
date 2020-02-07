@@ -3,8 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if CAN
-
 config CAN_EXTID
 	bool "CAN extended IDs"
 	default n
@@ -179,4 +177,3 @@ config MCP2515_SPI_SCK_FREQUENCY
 	range 100000 10000000
 
 endif # CAN_MCP2515
-endif # CAN
