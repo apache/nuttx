@@ -106,7 +106,7 @@ static bool             g_binitialized = false;
  *
  * Returned Value:
  *   If an option was successfully found, then getopt() returns the option
- *   haracter. If all command-line options have been parsed, then getopt()
+ *   character. If all command-line options have been parsed, then getopt()
  *   returns -1.  If getopt() encounters an option character that was not
  *   in optstring, then '?' is returned. If getopt() encounters an option
  *   with a missing argument, then the return value depends on the first

@@ -1118,7 +1118,8 @@ static void imxrt_lpi2c_setclock(FAR struct imxrt_lpi2c_priv_s *priv,
                 }
             }
 
-          imxrt_lpi2c_modifyreg(priv, IMXRT_LPI2C_MCFGR1_OFFSET, 0,
+          imxrt_lpi2c_modifyreg(priv, IMXRT_LPI2C_MCFGR1_OFFSET,
+                                LPI2C_MCFGR1_PRESCALE_MASK,
                                 LPI2C_MCFGR1_PRESCALE(best_prescale));
 
           /* Re-enable LPI2C if it was enabled previously */
@@ -1304,7 +1305,8 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
 
           if ((priv->msgv->flags & I2C_M_NOSTART) == 0)
             {
-              imxrt_lpi2c_traceevent(priv, I2CEVENT_STARTRESTART, priv->msgc);
+              imxrt_lpi2c_traceevent(priv, I2CEVENT_STARTRESTART,
+                                     priv->msgc);
               imxrt_lpi2c_sendstart(priv, priv->msgv->addr);
             }
           else
