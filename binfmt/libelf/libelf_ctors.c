@@ -88,7 +88,7 @@
 
 int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
 {
-  FAR Elf32_Shdr *shdr;
+  FAR Elf_Shdr *shdr;
   size_t ctorsize;
   int ctoridx;
   int ret;

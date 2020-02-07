@@ -3,6 +3,12 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config ELF_64BIT
+	bool "64bit ELF support"
+	default n
+	---help---
+		This option is used to load 64bit ELF files
+
 config ELF_ALIGN_LOG2
 	int "Log2 Section Alignment"
 	default 2

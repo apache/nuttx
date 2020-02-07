@@ -153,6 +153,9 @@ config LIBM_ARCH_TRUNCF
 if ARCH_ARM
 source libs/libc/machine/arm/Kconfig
 endif
+if ARCH_RISCV
+source libs/libc/machine/risc-v/Kconfig
+endif
 if ARCH_SIM
 source libs/libc/machine/sim/Kconfig
 endif

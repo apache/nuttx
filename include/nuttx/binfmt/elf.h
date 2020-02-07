@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/binfmt/elf.h
  *
- *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <elf32.h>
+#include <elf.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/binfmt/binfmt.h>
@@ -54,6 +54,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_ELF_ALIGN_LOG2
@@ -110,8 +111,9 @@ struct elf_loadinfo_s
   size_t            textsize;    /* Size of the ELF .text memory allocation */
   size_t            datasize;    /* Size of the ELF .bss/.data memory allocation */
   off_t             filelen;     /* Length of the entire ELF file */
-  Elf32_Ehdr        ehdr;        /* Buffered ELF file header */
-  FAR Elf32_Shdr    *shdr;       /* Buffered ELF section headers */
+
+  Elf_Ehdr          ehdr;        /* Buffered ELF file header */
+  FAR Elf_Shdr      *shdr;       /* Buffered ELF section headers */
   uint8_t           *iobuffer;   /* File I/O buffer */
 
   /* Constructors and destructors */
@@ -145,7 +147,7 @@ struct elf_loadinfo_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN
