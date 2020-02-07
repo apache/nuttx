@@ -149,12 +149,19 @@ blacklist=`grep "^-" $testfile`
 
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
+function makefunc {
+  ${MAKE} $@
+  if [ $? != 0 ]; then
+    fail=$?
+  fi
+}
+
 # Clean up after the last build
 
 function distclean {
   if [ -f .config ]; then
     echo "  Cleaning..."
-    ${MAKE} ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null || fail=$?
+    makefunc ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null
   fi
 }
 
@@ -183,7 +190,7 @@ function configure {
     echo "$toolchain=y" >> $nuttx/.config
 
     echo "  Refreshing..."
-    ${MAKE} ${MAKE_FLAGS} olddefconfig 1>/dev/null || fail=$?
+    makefunc ${MAKE_FLAGS} olddefconfig 1>/dev/null
   fi
 }
 
@@ -192,7 +199,7 @@ function configure {
 function build {
   echo "  Building NuttX..."
   echo "------------------------------------------------------------------------------------"
-  ${MAKE} ${JOPTION} ${MAKE_FLAGS} 1>/dev/null || fail=$?
+  makefunc ${JOPTION} ${MAKE_FLAGS} 1>/dev/null
 }
 
 # Coordinate the steps for the next build test
