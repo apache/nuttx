@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-int elf_verifyheader(FAR const Elf32_Ehdr *header);
+int elf_verifyheader(FAR const Elf_Ehdr *header);
 
 /****************************************************************************
  * Name: elf_read
@@ -150,7 +150,7 @@ int elf_findsymtab(FAR struct elf_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 int elf_readsym(FAR struct elf_loadinfo_s *loadinfo, int index,
-                FAR Elf32_Sym *sym);
+                FAR Elf_Sym *sym);
 
 /****************************************************************************
  * Name: elf_symvalue
@@ -177,7 +177,7 @@ int elf_readsym(FAR struct elf_loadinfo_s *loadinfo, int index,
  *
  ****************************************************************************/
 
-int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf32_Sym *sym,
+int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
                  FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************

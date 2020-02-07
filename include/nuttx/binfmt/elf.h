@@ -46,7 +46,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <elf32.h>
+#include <elf.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/binfmt/binfmt.h>
@@ -110,8 +110,9 @@ struct elf_loadinfo_s
   size_t            textsize;    /* Size of the ELF .text memory allocation */
   size_t            datasize;    /* Size of the ELF .bss/.data memory allocation */
   off_t             filelen;     /* Length of the entire ELF file */
-  Elf32_Ehdr        ehdr;        /* Buffered ELF file header */
-  FAR Elf32_Shdr    *shdr;       /* Buffered ELF section headers */
+
+  Elf_Ehdr          ehdr;        /* Buffered ELF file header */
+  FAR Elf_Shdr      *shdr;       /* Buffered ELF section headers */
   uint8_t           *iobuffer;   /* File I/O buffer */
 
   /* Constructors and destructors */

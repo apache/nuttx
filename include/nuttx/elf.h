@@ -40,7 +40,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <elf32.h>
+#include <elf.h>
 
 /****************************************************************************
  * Public Function Prototypes
@@ -68,7 +68,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_ARCH_ELF
-bool up_checkarch(FAR const Elf32_Ehdr *hdr);
+bool up_checkarch(FAR const Elf_Ehdr *hdr);
 #endif
 
 /****************************************************************************
@@ -94,10 +94,10 @@ bool up_checkarch(FAR const Elf32_Ehdr *hdr);
  ****************************************************************************/
 
 #ifdef CONFIG_LIBC_ARCH_ELF
-int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
+int up_relocate(FAR const Elf_Rel *rel, FAR const Elf_Sym *sym,
                 uintptr_t addr);
-int up_relocateadd(FAR const Elf32_Rela *rel,
-                   FAR const Elf32_Sym *sym, uintptr_t addr);
+int up_relocateadd(FAR const Elf_Rela *rel,
+                   FAR const Elf_Sym *sym, uintptr_t addr);
 #endif
 
 /****************************************************************************
@@ -117,7 +117,7 @@ int up_relocateadd(FAR const Elf32_Rela *rel,
  ****************************************************************************/
 
 #ifdef CONFIG_CXX_EXCEPTION
-int up_init_exidx(Elf32_Addr address, Elf32_Word size);
+int up_init_exidx(Elf_Addr address, Elf_Word size);
 #endif
 
 #if defined(__cplusplus)

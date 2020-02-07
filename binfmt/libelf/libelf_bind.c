@@ -74,14 +74,14 @@
  * Private Types
  ****************************************************************************/
 
-struct elf32_symcache_s
+struct elf_symcache_s
 {
   dq_entry_t    entry;
-  Elf32_Sym     sym;
+  Elf_Sym       sym;
   int           idx;
 };
 
-typedef struct elf32_symcache_s elf32_symcache_t;
+typedef struct elf_symcache_s elf_symcache_t;
 
 /****************************************************************************
  * Private Data
@@ -95,13 +95,13 @@ typedef struct elf32_symcache_s elf32_symcache_t;
  * Name: elf_readrels
  *
  * Description:
- *   Read the (ELF32_Rel structure * buffer count) into memory.
+ *   Read the (ELF_Rel structure * buffer count) into memory.
  *
  ****************************************************************************/
 
 static inline int elf_readrels(FAR struct elf_loadinfo_s *loadinfo,
-                               FAR const Elf32_Shdr *relsec,
-                               int index, FAR Elf32_Rel *rels,
+                               FAR const Elf_Shdr *relsec,
+                               int index, FAR Elf_Rel *rels,
                                int count)
 {
   off_t offset;
@@ -109,7 +109,7 @@ static inline int elf_readrels(FAR struct elf_loadinfo_s *loadinfo,
 
   /* Verify that the symbol table index lies within symbol table */
 
-  if (index < 0 || index > (relsec->sh_size / sizeof(Elf32_Rel)))
+  if (index < 0 || index > (relsec->sh_size / sizeof(Elf_Rel)))
     {
       berr("Bad relocation symbol index: %d\n", index);
       return -EINVAL;
@@ -117,8 +117,9 @@ static inline int elf_readrels(FAR struct elf_loadinfo_s *loadinfo,
 
   /* Get the file offset to the symbol table entry */
 
-  offset = sizeof(Elf32_Rel) * index;
-  size   = sizeof(Elf32_Rel) * count;
+  offset = sizeof(Elf_Rel) * index;
+  size   = sizeof(Elf_Rel) * count;
+
   if (offset + size > relsec->sh_size)
     {
       size = relsec->sh_size - offset;
@@ -146,12 +147,12 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
                         FAR const struct symtab_s *exports, int nexports)
 
 {
-  FAR Elf32_Shdr       *relsec = &loadinfo->shdr[relidx];
-  FAR Elf32_Shdr       *dstsec = &loadinfo->shdr[relsec->sh_info];
-  FAR Elf32_Rel        *rels;
-  FAR Elf32_Rel        *rel;
-  FAR elf32_symcache_t *cache;
-  FAR Elf32_Sym        *sym;
+  FAR Elf_Shdr         *relsec = &loadinfo->shdr[relidx];
+  FAR Elf_Shdr         *dstsec = &loadinfo->shdr[relsec->sh_info];
+  FAR Elf_Rel          *rels;
+  FAR Elf_Rel          *rel;
+  FAR elf_symcache_t   *cache;
+  FAR Elf_Sym          *sym;
   FAR dq_entry_t       *e;
   dq_queue_t            q;
   uintptr_t             addr;
@@ -160,7 +161,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
   int                   i;
   int                   j;
 
-  rels = kmm_malloc(CONFIG_ELF_RELOCATION_BUFFERCOUNT * sizeof(Elf32_Rel));
+  rels = kmm_malloc(CONFIG_ELF_RELOCATION_BUFFERCOUNT * sizeof(Elf_Rel));
   if (rels == NULL)
     {
       berr("Failed to allocate memory for elf relocation\n");
@@ -176,7 +177,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
 
   ret = OK;
 
-  for (i = j = 0; i < relsec->sh_size / sizeof(Elf32_Rel); i++)
+  for (i = j = 0; i < relsec->sh_size / sizeof(Elf_Rel); i++)
     {
       /* Read the relocation entry into memory */
 
@@ -198,14 +199,14 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
        * in a bit-field within the r_info element.
        */
 
-      symidx = ELF32_R_SYM(rel->r_info);
+      symidx = ELF_R_SYM(rel->r_info);
 
       /* First try the cache */
 
       sym = NULL;
       for (e = dq_peek(&q); e; e = dq_next(e))
         {
-          cache = (FAR elf32_symcache_t *)e;
+          cache = (FAR elf_symcache_t *)e;
           if (cache->idx == symidx)
             {
               dq_rem(&cache->entry, &q);
@@ -223,7 +224,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
         {
           if (j < CONFIG_ELF_SYMBOL_CACHECOUNT)
             {
-              cache = kmm_malloc(sizeof(elf32_symcache_t));
+              cache = kmm_malloc(sizeof(elf_symcache_t));
               if (!cache)
                 {
                   berr("Failed to allocate memory for elf symbols\n");
@@ -235,7 +236,7 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
             }
           else
             {
-              cache = (FAR elf32_symcache_t *)dq_remlast(&q);
+              cache = (FAR elf_symcache_t *)dq_remlast(&q);
             }
 
           sym = &cache->sym;

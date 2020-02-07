@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <elf32.h>
+#include <elf.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/symtab.h>
@@ -206,8 +206,8 @@ struct mod_loadinfo_s
   size_t            textsize;    /* Size of the module .text memory allocation */
   size_t            datasize;    /* Size of the module .bss/.data memory allocation */
   off_t             filelen;     /* Length of the entire module file */
-  Elf32_Ehdr        ehdr;        /* Buffered module file header */
-  FAR Elf32_Shdr   *shdr;        /* Buffered module section headers */
+  Elf_Ehdr          ehdr;        /* Buffered module file header */
+  FAR Elf_Shdr     *shdr;        /* Buffered module section headers */
   uint8_t          *iobuffer;    /* File I/O buffer */
 
   uint16_t          symtabidx;   /* Symbol table section index */

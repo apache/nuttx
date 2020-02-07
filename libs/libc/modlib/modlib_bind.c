@@ -56,15 +56,15 @@
  ****************************************************************************/
 
 /* REVISIT:  This naming breaks the NuttX coding standard, but is consistent
- * with legacy naming of other ELF32 types.
+ * with legacy naming of other ELF types.
  */
 
 typedef struct
 {
   dq_entry_t      entry;
-  Elf32_Sym       sym;
+  Elf_Sym         sym;
   int             idx;
-} Elf32_SymCache;
+} Elf_SymCache;
 
 /****************************************************************************
  * Private Functions
@@ -74,13 +74,13 @@ typedef struct
  * Name: modlib_readrels
  *
  * Description:
- *   Read the (ELF32_Rel structure * buffer count) into memory.
+ *   Read the (ELF_Rel structure * buffer count) into memory.
  *
  ****************************************************************************/
 
 static inline int modlib_readrels(FAR struct mod_loadinfo_s *loadinfo,
-                                  FAR const Elf32_Shdr *relsec,
-                                  int index, FAR Elf32_Rel *rels,
+                                  FAR const Elf_Shdr *relsec,
+                                  int index, FAR Elf_Rel *rels,
                                   int count)
 {
   off_t offset;
@@ -88,7 +88,7 @@ static inline int modlib_readrels(FAR struct mod_loadinfo_s *loadinfo,
 
   /* Verify that the symbol table index lies within symbol table */
 
-  if (index < 0 || index > (relsec->sh_size / sizeof(Elf32_Rel)))
+  if (index < 0 || index > (relsec->sh_size / sizeof(Elf_Rel)))
     {
       berr("ERROR: Bad relocation symbol index: %d\n", index);
       return -EINVAL;
@@ -96,8 +96,8 @@ static inline int modlib_readrels(FAR struct mod_loadinfo_s *loadinfo,
 
   /* Get the file offset to the symbol table entry */
 
-  offset = sizeof(Elf32_Rel) * index;
-  size   = sizeof(Elf32_Rel) * count;
+  offset = sizeof(Elf_Rel) * index;
+  size   = sizeof(Elf_Rel) * count;
   if (offset + size > relsec->sh_size)
     {
       size = relsec->sh_size - offset;
@@ -125,12 +125,12 @@ static int modlib_relocate(FAR struct module_s *modp,
                            FAR struct mod_loadinfo_s *loadinfo, int relidx)
 
 {
-  FAR Elf32_Shdr *relsec = &loadinfo->shdr[relidx];
-  FAR Elf32_Shdr *dstsec = &loadinfo->shdr[relsec->sh_info];
-  FAR Elf32_Rel  *rels;
-  FAR Elf32_Rel  *rel;
-  FAR Elf32_SymCache *cache;
-  FAR Elf32_Sym  *sym;
+  FAR Elf_Shdr *relsec = &loadinfo->shdr[relidx];
+  FAR Elf_Shdr *dstsec = &loadinfo->shdr[relsec->sh_info];
+  FAR Elf_Rel  *rels;
+  FAR Elf_Rel  *rel;
+  FAR Elf_SymCache *cache;
+  FAR Elf_Sym  *sym;
   FAR dq_entry_t *e;
   dq_queue_t      q;
   uintptr_t       addr;
@@ -139,7 +139,7 @@ static int modlib_relocate(FAR struct module_s *modp,
   int             i;
   int             j;
 
-  rels = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT * sizeof(Elf32_Rel));
+  rels = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT * sizeof(Elf_Rel));
   if (!rels)
     {
       berr("Failed to allocate memory for elf relocation rels\n");
@@ -155,7 +155,7 @@ static int modlib_relocate(FAR struct module_s *modp,
 
   ret = OK;
 
-  for (i = j = 0; i < relsec->sh_size / sizeof(Elf32_Rel); i++)
+  for (i = j = 0; i < relsec->sh_size / sizeof(Elf_Rel); i++)
     {
       /* Read the relocation entry into memory */
 
@@ -176,14 +176,14 @@ static int modlib_relocate(FAR struct module_s *modp,
        * in a bit-field within the r_info element.
        */
 
-      symidx = ELF32_R_SYM(rel->r_info);
+      symidx = ELF_R_SYM(rel->r_info);
 
       /* First try the cache */
 
       sym = NULL;
       for (e = dq_peek(&q); e; e = dq_next(e))
         {
-          cache = (FAR Elf32_SymCache *)e;
+          cache = (FAR Elf_SymCache *)e;
           if (cache->idx == symidx)
             {
               dq_rem(&cache->entry, &q);
@@ -201,7 +201,7 @@ static int modlib_relocate(FAR struct module_s *modp,
         {
           if (j < CONFIG_MODLIB_SYMBOL_CACHECOUNT)
             {
-              cache = lib_malloc(sizeof(Elf32_SymCache));
+              cache = lib_malloc(sizeof(Elf_SymCache));
               if (!cache)
                 {
                   berr("Failed to allocate memory for elf symbols\n");
@@ -212,7 +212,7 @@ static int modlib_relocate(FAR struct module_s *modp,
             }
           else
             {
-              cache = (FAR Elf32_SymCache *)dq_remlast(&q);
+              cache = (FAR Elf_SymCache *)dq_remlast(&q);
             }
 
           sym = &cache->sym;
