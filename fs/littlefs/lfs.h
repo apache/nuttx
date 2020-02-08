@@ -283,7 +283,7 @@ struct lfs_info_s
 
   /* Name of the file stored as a null-terminated string */
 
-  char name[LFS_NAME_MAX+1];
+  char name[LFS_NAME_MAX + 1];
 };
 
 
