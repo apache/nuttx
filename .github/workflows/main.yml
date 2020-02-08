@@ -11,14 +11,13 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v1
     - name: Check patch
       run: |
         echo "Check patch"
-        git show
         prcommit=`git show --format=format:%H | head -1`
         echo $prcommit
-        git show $prcommit
+        git log -5
     - name: Install tools
       run: |
         echo "Install tools"
