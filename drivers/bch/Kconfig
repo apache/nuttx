@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if BCH
+
 config BCH_ENCRYPTION
 	bool "Enable BCH encryption"
 	default n
@@ -12,3 +14,5 @@ config BCH_ENCRYPTION_KEY_SIZE
 	int "AES key size"
 	default 16
 	depends on BCH_ENCRYPTION
+
+endif # BCH

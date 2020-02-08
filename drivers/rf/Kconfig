@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if DRIVERS_RF
+
 config RF_DAT31R5SP
 	bool "Mini-Circuits DAT-31R5-SP digital attenuator support"
 	default n
@@ -10,3 +12,5 @@ config RF_DAT31R5SP
 	---help---
 		Enable driver support for the Mini-Circuits DAT-31R5-SP digital
 		attenuator.
+
+endif # DRIVERS_RF

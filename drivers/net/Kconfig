@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if NETDEVICES
+
 comment "General Ethernet MAC Driver Options"
 
 config NET_RPMSG_DRV
@@ -483,3 +485,5 @@ config NETDEV_PHY_DEBUG
 		the NSH network initialization logic.
 
 endif # ARCH_HAVE_PHY
+
+endif # NETDEVICES

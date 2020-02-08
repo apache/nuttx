@@ -3,6 +3,12 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config ARCH_HAVE_SERIAL_TERMIOS
+	bool
+	default n
+
+if SERIAL
+
 config DEV_LOWCONSOLE
 	bool "Low-level console support"
 	default n
@@ -158,10 +164,6 @@ config SERIAL_TIOCSERGSTRUCT
 		IOCTL is not supported in order to reduce footprint.  But if (1) the driver
 		supports the TIOCSERGSTRUCT ioctl, and (2) this option is selected, then
 		support for the TIOCSERGSTRUCT will be enabled.
-
-config ARCH_HAVE_SERIAL_TERMIOS
-	bool
-	default n
 
 config SERIAL_TERMIOS
 	bool "Serial TERMIOS support"
@@ -617,3 +619,5 @@ config PSEUDOTERM_TXBUFSIZE
 		Slave-to-master pipe buffer size.  Default: 256
 
 endif # PSEUDOTERM
+
+endif # SERIAL

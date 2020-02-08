@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if INPUT
+
 config MOUSE
 	bool "Enable mouse support"
 	default n
@@ -510,3 +512,5 @@ config NUNCHUCK_NPOLLWAITERS
 	default 2
 
 endif # INPUT_NUNCHUCK
+
+endif # INPUT

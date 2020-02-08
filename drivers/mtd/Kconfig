@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if MTD
+
 comment "MTD Configuration"
 
 config MTD_PARTITION
@@ -1087,3 +1089,5 @@ config GD5F_SPIFREQUENCY
 	default 20000000
 
 endif # MTD_GD5F
+
+endif # MTD

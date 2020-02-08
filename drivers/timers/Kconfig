@@ -5,6 +5,14 @@
 
 menu "Timer Driver Support"
 
+config ARCH_HAVE_PWM_PULSECOUNT
+	bool
+	default n
+
+config ARCH_HAVE_PWM_MULTICHAN
+	bool
+	default n
+
 config PWM
 	bool "PWM Driver Support"
 	default n
@@ -13,14 +21,6 @@ config PWM
 		See include/nuttx/timers/pwm.h for further PWM driver information.
 
 if PWM
-
-config ARCH_HAVE_PWM_PULSECOUNT
-	bool
-	default n
-
-config ARCH_HAVE_PWM_MULTICHAN
-	bool
-	default n
 
 config PWM_PULSECOUNT
 	bool "PWM Pulse Count Support"

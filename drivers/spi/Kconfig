@@ -3,6 +3,18 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config ARCH_HAVE_SPI_CRCGENERATION
+	bool
+	default n
+
+config ARCH_HAVE_SPI_CS_CONTROL
+	bool
+	default n
+
+config ARCH_HAVE_SPI_BITORDER
+	bool
+	default n
+
 menuconfig SPI
 	bool "SPI Driver Support"
 	default n
@@ -12,18 +24,6 @@ menuconfig SPI
 		See include/nuttx/spi/spi.h for further SPI driver information.
 
 if SPI
-
-config ARCH_HAVE_SPI_CRCGENERATION
-bool
-default n
-
-config ARCH_HAVE_SPI_CS_CONTROL
-bool
-default n
-
-config ARCH_HAVE_SPI_BITORDER
-bool
-default n
 
 config SPI_SLAVE
 	bool "SPI slave"

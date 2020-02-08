@@ -3,16 +3,18 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config ARCH_HAVE_CAN_ERRORS
+	bool
+	default n
+
+if CAN
+
 config CAN_EXTID
 	bool "CAN extended IDs"
 	default n
 	---help---
 		Enables support for the 29-bit extended ID.  Default Standard 11-bit
 		IDs.
-
-config ARCH_HAVE_CAN_ERRORS
-	bool
-	default n
 
 config CAN_ERRORS
 	bool "CAN error reporting"
@@ -177,3 +179,5 @@ config MCP2515_SPI_SCK_FREQUENCY
 	range 100000 10000000
 
 endif # CAN_MCP2515
+
+endif

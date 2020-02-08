@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if I2S
+
 config AUDIO_I2SCHAR
 	bool "I2S character driver (for testing only)"
 	default n
@@ -33,3 +35,5 @@ config AUDIO_I2SCHAR_TXTIMEOUT
 		The special value of zero disables RX timeouts.  Default: 0
 
 endif # AUDIO_I2SCHAR
+
+endif # I2S

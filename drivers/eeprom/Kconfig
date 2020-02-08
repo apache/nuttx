@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if EEPROM
+
 config SPI_EE_25XX
 	bool "Microchip 25xxNNN / Atmel AT25NNN / ST M95NNN SPI EEPROM devices"
 	default n
@@ -50,3 +52,5 @@ config AT24CS_UUID
 		This option registers a char device driver with the ".uuid" suffix.
 
 endif # I2C_EE_24XX
+
+endif
