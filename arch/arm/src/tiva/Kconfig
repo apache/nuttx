@@ -1599,7 +1599,7 @@ endif # !TIVA_PHY_INTERNAL
 
 config TIVA_PHY_INTERRUPTS
 	bool "PHY interrupt support"
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 	select NETDEV_PHY_IOCTL
 	default n
 	---help---
