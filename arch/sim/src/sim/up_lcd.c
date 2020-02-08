@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/sim/src/sim/board_lcd.c
+ * arch/sim/src/sim/up_lcd.c
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* Check contrast selection */
 
 #if !defined(CONFIG_LCD_MAXCONTRAST)
@@ -123,8 +124,8 @@ struct sim_dev_s
 
 /* LCD Data Transfer Methods */
 
-static int sim_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                      size_t npixels);
+static int sim_putrun(fb_coord_t row, fb_coord_t col,
+                      FAR const uint8_t *buffer, size_t npixels);
 static int sim_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
                       size_t npixels);
 
@@ -204,6 +205,7 @@ static struct sim_dev_s g_lcddev =
     .getplaneinfo = sim_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
+
     /* Cursor Controls -- Not supported */
 
     /* LCD Specific Controls */
@@ -233,8 +235,8 @@ static struct sim_dev_s g_lcddev =
  *
  ****************************************************************************/
 
-static int sim_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                       size_t npixels)
+static int sim_putrun(fb_coord_t row, fb_coord_t col,
+                      FAR const uint8_t *buffer, size_t npixels)
 {
   lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   return OK;
@@ -255,7 +257,7 @@ static int sim_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
  ****************************************************************************/
 
 static int sim_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                       size_t npixels)
+                      size_t npixels)
 {
   lcdinfo("row: %d col: %d npixels: %d\n", row, col, npixels);
   return -ENOSYS;
@@ -270,11 +272,13 @@ static int sim_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
  ****************************************************************************/
 
 static int sim_getvideoinfo(FAR struct lcd_dev_s *dev,
-                              FAR struct fb_videoinfo_s *vinfo)
+                            FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
   ginfo("fmt: %d xres: %d yres: %d nplanes: %d\n",
-         g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres, g_videoinfo.nplanes);
+         g_videoinfo.fmt, g_videoinfo.xres, g_videoinfo.yres,
+         g_videoinfo.nplanes);
+
   memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
   return OK;
 }
@@ -301,7 +305,8 @@ static int sim_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
  *
  * Description:
  *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER:
- *   full on). On backlit LCDs, this setting may correspond to the backlight setting.
+ *   full on). On backlit LCDs, this setting may correspond to the backlight
+ *   setting.
  *
  ****************************************************************************/
 
