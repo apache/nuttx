@@ -3,6 +3,8 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+if USBMISC
+
 comment "USB Miscellaneous drivers"
 
 config FUSB301
@@ -60,3 +62,5 @@ config FUSB303_NPOLLWAITERS
 		Maximum number of threads that can be waiting on poll()
 
 endif
+
+endif # USBMISC

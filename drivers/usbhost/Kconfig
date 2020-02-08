@@ -3,6 +3,12 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config USBHOST_HAVE_ASYNCH
+	bool
+	default n
+
+if USBHOST
+
 config USBHOST_NPREALLOC
 	int "Number of pre-allocated class instances"
 	default 4
@@ -29,10 +35,6 @@ config USBHOST_ISOC_DISABLE
 	---help---
 		On some architectures, selecting this setting will reduce driver size
 		by disabling isochronous endpoint support
-
-config USBHOST_HAVE_ASYNCH
-	bool
-	default n
 
 config USBHOST_ASYNCH
 	bool "Asynchronous transfer support"
@@ -591,3 +593,5 @@ config USBHOST_TRACE_VERBOSE
 		information would also be included.
 
 endif
+
+endif # USBHOST

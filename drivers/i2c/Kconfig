@@ -7,6 +7,8 @@ config ARCH_HAVE_I2CRESET
 	bool
 	default n
 
+if I2C
+
 config I2C_SLAVE
 	bool "I2C Slave"
 	default n
@@ -50,3 +52,5 @@ config I2CMULTIPLEXER_PCA9540BDP
 # put more i2c mux devices here
 
 endmenu # I2C Multiplexer Support
+
+endif

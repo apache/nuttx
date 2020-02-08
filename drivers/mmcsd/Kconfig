@@ -19,6 +19,8 @@ config ARCH_HAVE_SDIO_DELAYED_INVLDT
 	bool
 	default n
 
+if MMCSD
+
 config MMCSD_NSLOTS
 	int "Number of MMC/SD slots"
 	default 1
@@ -134,3 +136,5 @@ config SDIO_BLOCKSETUP
 		enables the block setup method in the SDIO vtable.
 
 endif
+
+endif # MMCSD

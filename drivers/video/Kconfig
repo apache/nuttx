@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if DRIVERS_VIDEO
+
 config VIDEO_FB
 	bool "Framebuffer character driver"
 	default n
@@ -163,3 +165,5 @@ config OV2640_REGDEBUG
 		Enable details, register level debug output.
 
 endif
+
+endif # DRIVERS_VIDEO

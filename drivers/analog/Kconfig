@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if ANALOG
+
 config ADC
 	bool "Analog-to-Digital Conversion"
 	default n
@@ -185,3 +187,5 @@ config LMP92001_I2C_FREQUENCY
 	int "LMP92001 I2C frequency"
 	default 400000
 	depends on LMP92001
+
+endif # ANALOG

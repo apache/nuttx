@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if SENSORS
+
 config SENSORS_APDS9960
 	bool "Avago APDS-9960 Gesture Sensor support"
 	default n
@@ -843,3 +845,5 @@ config SENSORS_ADT7320
 	select SPI
 	---help---
 		Enables support for the ADT7320 Driver
+
+endif # SENSORS
