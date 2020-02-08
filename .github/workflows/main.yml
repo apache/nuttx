@@ -15,7 +15,9 @@ jobs:
     - name: Check patch
       run: |
         echo "Check patch"
-        git log -5
+        git log --oneline -10
+        prcommit=`git log --no-merges --format=format:%H | head -1`
+        ./tools/checkpatch.sh -c $prcommit
     - name: Install tools
       run: |
         echo "Install tools"
@@ -25,5 +27,5 @@ jobs:
         
     - name: Run builds
       run: |
-        echo "Run nightly build"
+        echo "Run PR check build"
 
