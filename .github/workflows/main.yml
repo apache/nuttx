@@ -15,8 +15,6 @@ jobs:
     - name: Check patch
       run: |
         echo "Check patch"
-        prcommit=`git show --format=format:%H | head -1`
-        echo $prcommit
         git log -5
     - name: Install tools
       run: |
