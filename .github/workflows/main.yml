@@ -1,0 +1,31 @@
+name: PR Check CI
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Check patch
+      run: |
+        echo "Check patch"
+        prcommit=`git show --format=format:%H | head -1`
+        echo $prcommit
+        ./tools/checkpatch.sh -c $prcommit
+    - name: Install tools
+      run: |
+        echo "Install tools"
+    - name: Setup repos
+      run: |
+        echo "Setup repos"
+        
+    - name: Run builds
+      run: |
+        echo "Run nightly build"
+
