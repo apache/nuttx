@@ -15,9 +15,10 @@ jobs:
     - name: Check patch
       run: |
         echo "Check patch"
+        git show
         prcommit=`git show --format=format:%H | head -1`
         echo $prcommit
-        ./tools/checkpatch.sh -c $prcommit
+        git show $prcommit
     - name: Install tools
       run: |
         echo "Install tools"
