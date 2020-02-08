@@ -190,7 +190,7 @@ config IMXRT_ENET
 	bool "Ethernet"
 	default n
 	select ARCH_HAVE_PHY
-	select ARCH_PHY_INTERRUPT
+	select ARCH_PHY_INTERRUPT if NETDEVICES
 	select ARCH_HAVE_NETDEV_STATISTICS
 
 config IMXRT_LCD
