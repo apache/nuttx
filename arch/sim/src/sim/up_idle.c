@@ -107,6 +107,12 @@ void up_idle(void)
   up_devconloop();
 #endif
 
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
+  /* Drive the X11 event loop */
+
+  up_x11events();
+#endif
+
 #if defined(CONFIG_NET_ETHERNET) && defined(CONFIG_SIM_NETDEV)
   /* Run the network if enabled */
 
@@ -148,15 +154,6 @@ void up_idle(void)
 #ifdef CONFIG_SIM_X11FB
   if (g_x11initialized)
     {
-#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
-      /* Drive the X11 event loop */
-
-      if (g_eventloop)
-        {
-          up_x11events();
-        }
-#endif
-
       /* Update the display periodically */
 
       g_x11refresh += 1000000 / CLK_TCK;

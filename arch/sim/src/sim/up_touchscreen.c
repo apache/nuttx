@@ -108,6 +108,7 @@ struct up_sample_s
 
 struct up_dev_s
 {
+  int eventloop;
   volatile uint8_t nwaiters;           /* Number of threads waiting for touchscreen data */
   uint8_t id;                          /* Current touch point ID */
   uint8_t minor;                       /* Minor device number */
@@ -650,7 +651,7 @@ int sim_tsc_initialize(int minor)
 
   /* Enable X11 event processing from the IDLE loop */
 
-  g_eventloop = 1;
+  priv->eventloop = 1;
 
   /* And return success */
 
@@ -691,7 +692,7 @@ void sim_tsc_uninitialize(void)
    * done in close() using a reference count).
    */
 
-  g_eventloop = 0;
+  priv->eventloop = 0;
 
   /* Un-register the device */
 
@@ -714,10 +715,15 @@ void sim_tsc_uninitialize(void)
  * Name: up_buttonevent
  ****************************************************************************/
 
-int up_buttonevent(int x, int y, int buttons)
+void up_buttonevent(int x, int y, int buttons)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
   bool                 pendown;  /* true: pen is down */
+
+  if (priv->eventloop == 0)
+    {
+      return;
+    }
 
   iinfo("x=%d y=%d buttons=%02x\n", x, y, buttons);
   iinfo("contact=%d nwaiters=%d\n", priv->sample.contact, priv->nwaiters);
@@ -736,7 +742,7 @@ int up_buttonevent(int x, int y, int buttons)
 
       if (priv->sample.contact == CONTACT_NONE)
         {
-          return OK;
+          return;
         }
 
       /* Not yet reported */
@@ -772,5 +778,4 @@ int up_buttonevent(int x, int y, int buttons)
   /* Notify any waiters that new touchscreen data is available */
 
   up_notify(priv);
-  return OK;
 }
