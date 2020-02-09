@@ -265,7 +265,7 @@ int    sched_rr_get_interval(pid_t pid, FAR struct timespec *interval);
 int    sched_setaffinity(pid_t pid, size_t cpusetsize,
                          FAR const cpu_set_t *mask);
 int    sched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
-int    sched_cpu_count(FAR const cpu_set_t *set);
+int    sched_cpucount(FAR const cpu_set_t *set);
 int    sched_getcpu(void);
 #endif /* CONFIG_SMP */
 
