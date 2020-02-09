@@ -89,8 +89,8 @@ ifeq ($(CONFIG_SPINLOCK),y)
 endif
 
 ifeq ($(CONFIG_SMP),y)
-  CSRCS += up_smpsignal.c up_smphook.c up_cpuidlestack.c
-  REQUIREDOBJS += up_smpsignal$(OBJEXT) up_smphook$(OBJEXT)
+  CSRCS += up_smpsignal.c up_cpuidlestack.c
+  REQUIREDOBJS += up_smpsignal$(OBJEXT)
   HOSTCFLAGS += -DCONFIG_SMP=1 -DCONFIG_SMP_NCPUS=$(CONFIG_SMP_NCPUS)
   HOSTSRCS += up_simsmp.c
   STDLIBS += -lpthread

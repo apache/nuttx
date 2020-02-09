@@ -61,10 +61,6 @@
 
 typedef unsigned char spinlock_t;
 
-/* Task entry point type */
-
-typedef int (*main_t)(int argc, char **argv);
-
 struct sim_cpuinfo_s
 {
   int cpu;                /* CPU number */
@@ -99,9 +95,9 @@ volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
  * NuttX domain function prototypes
  ****************************************************************************/
 
-void nx_start(void) __attribute__ ((noreturn));
-void up_cpu_paused(int cpu);
-void sim_smp_hook(void);
+void nx_start(void);
+void up_cpu_started(void);
+int up_cpu_paused(int cpu);
 
 /****************************************************************************
  * Private Functions
@@ -156,14 +152,20 @@ static void *sim_idle_trampoline(void *arg)
 
   pthread_mutex_unlock(&cpuinfo->mutex);
 
-  /* Give control to the IDLE task via the nasty little sim_smp_hook().
-   * sim_smp_hook() is logically a part of this function but needs to be
+  /* up_cpu_started() is logically a part of this function but needs to be
    * inserted in the path because in needs to access NuttX domain definitions.
    */
 
-  sim_smp_hook();
+  up_cpu_started();
 
-  /* The IDLE task will not return.  This is just to keep the compiler happy */
+  /* The idle Loop */
+
+  for (; ; )
+    {
+      /* Give other pthreads/CPUs a shot */
+
+      pthread_yield();
+    }
 
   return NULL;
 }
