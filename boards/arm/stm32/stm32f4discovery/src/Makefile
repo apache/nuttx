@@ -81,6 +81,10 @@ ifeq ($(CONFIG_LCD_ST7567),y)
 CSRCS += stm32_st7567.c
 endif
 
+ifeq ($(CONFIG_ENC28J60),y)
+CSRCS += stm32_enc28j60.c
+endif
+
 ifeq ($(CONFIG_LPWAN_SX127X),y)
 CSRCS += stm32_sx127x.c
 endif
