@@ -239,7 +239,6 @@ int up_hostusleep(unsigned int usec);
 /* up_simsmp.c **************************************************************/
 
 #ifdef CONFIG_SMP
-int  sim_cpu0_initialize(void);
 void sim_cpu0_start(void);
 #endif
 

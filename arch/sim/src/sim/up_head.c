@@ -81,13 +81,7 @@ int main(int argc, char **argv, char **envp)
   syslog_rpmsg_init_early("server", g_logbuffer, sizeof(g_logbuffer));
 #endif
 
-#ifdef CONFIG_SMP
-  /* In the SMP case, configure the main thread as CPU 0 */
-
-  sim_cpu0_initialize();
-#endif
-
-  /* Then start NuttX */
+  /* Start NuttX */
 
   if (setjmp(g_simabort) == 0)
     {

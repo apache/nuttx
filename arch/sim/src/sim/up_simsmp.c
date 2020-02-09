@@ -108,54 +108,6 @@ void sim_smp_hook(void);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_cpu0_trampoline
- *
- * Description:
- *   This is a pthread task entry point.  This (host) pthread is used to
- *   simulate a CPU0.  It simply calls OS start.
- *
- * Input Parameters:
- *   arg - Standard pthread argument
- *
- * Returned Value:
- *   This function does not return
- *
- ****************************************************************************/
-
-static void *sim_cpu0_trampoline(void *arg)
-{
-  sigset_t set;
-  int ret;
-
-  /* Set the CPU number zero for the CPU thread */
-
-  ret = pthread_setspecific(g_cpukey, (const void *)0);
-  if (ret != 0)
-    {
-      return NULL;
-    }
-
-  /* Make sure the SIGUSR1 is not masked */
-
-  sigemptyset(&set);
-  sigaddset(&set, SIGUSR1);
-
-  ret = pthread_sigmask(SIG_UNBLOCK, &set, NULL);
-  if (ret < 0)
-    {
-      return NULL;
-    }
-
-  /* Give control to nx_start() */
-
-  nx_start();
-
-  /* nx_start() should not return */
-
-  return NULL;
-}
-
-/****************************************************************************
  * Name: sim_idle_trampoline
  *
  * Description:
@@ -243,66 +195,11 @@ static void sim_handle_signal(int signo, siginfo_t *info, void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_cpu0_initialize
+ * Name: sim_cpu0_start
  *
  * Description:
  *   Create the pthread-specific data key and set the indication of CPU0
  *   the main thread.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- ****************************************************************************/
-
-int sim_cpu0_initialize(void)
-{
-  struct sigaction act;
-  sigset_t set;
-  int ret;
-
-  /* Create the pthread key */
-
-  ret = pthread_key_create(&g_cpukey, NULL);
-  if (ret != 0)
-    {
-      return -ret;
-    }
-
-  /* Register the common signal handler for all threads */
-
-  act.sa_sigaction = sim_handle_signal;
-  act.sa_flags     = SA_SIGINFO;
-  sigemptyset(&act.sa_mask);
-
-  ret = sigaction(SIGUSR1, &act, NULL);
-  if (ret < 0)
-    {
-      return -errno;
-    }
-
-  /* Make sure the SIGUSR1 is not masked */
-
-  sigemptyset(&set);
-  sigaddset(&set, SIGUSR1);
-
-  ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
-  if (ret < 0)
-    {
-      return -errno;
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: sim_cpu0_start
- *
- * Description:
- *   Start CPU0 and initialize the operating system.
  *
  * Input Parameters:
  *   None
@@ -314,22 +211,54 @@ int sim_cpu0_initialize(void)
 
 void sim_cpu0_start(void)
 {
-  void *value;
+  struct sigaction act;
+  sigset_t set;
   int ret;
 
-  /* Start the CPU0 emulation thread.  This is analogous to power-up reset
-   * of CPU0  in a multi-CPU hardware model.
-   */
+  g_sim_cputhread[0] = pthread_self();
 
-  ret = pthread_create(&g_sim_cputhread[0], NULL, sim_cpu0_trampoline, NULL);
-  if (ret == 0)
+  /* Create the pthread key */
+
+  ret = pthread_key_create(&g_cpukey, NULL);
+  if (ret != 0)
     {
-      /* The CPU0 emulation thread should never return, the main thread will
-       * wait just in case.
-       */
-
-      pthread_join(g_sim_cputhread[0], &value);
+      return;
     }
+
+  /* Set the CPU number zero for the CPU thread */
+
+  ret = pthread_setspecific(g_cpukey, (const void *)0);
+  if (ret != 0)
+    {
+      return;
+    }
+
+  /* Register the common signal handler for all threads */
+
+  act.sa_sigaction = sim_handle_signal;
+  act.sa_flags     = SA_SIGINFO;
+  sigemptyset(&act.sa_mask);
+
+  ret = sigaction(SIGUSR1, &act, NULL);
+  if (ret < 0)
+    {
+      return;
+    }
+
+  /* Make sure the SIGUSR1 is not masked */
+
+  sigemptyset(&set);
+  sigaddset(&set, SIGUSR1);
+
+  ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
+  if (ret < 0)
+    {
+      return;
+    }
+
+  /* Give control to nx_start() */
+
+  nx_start();
 }
 
 /****************************************************************************
