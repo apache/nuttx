@@ -57,8 +57,11 @@ SYSCALL_LOOKUP(sched_setparam,             2, STUB_sched_setparam)
 SYSCALL_LOOKUP(sched_setscheduler,         3, STUB_sched_setscheduler)
 SYSCALL_LOOKUP(sched_unlock,               0, STUB_sched_unlock)
 SYSCALL_LOOKUP(sched_yield,                0, STUB_sched_yield)
+
 #ifdef CONFIG_SMP
+SYSCALL_LOOKUP(sched_getaffinity,          3, STUB_sched_getaffinity)
 SYSCALL_LOOKUP(sched_getcpu,               0, STUB_sched_getcpu)
+SYSCALL_LOOKUP(sched_setaffinity,          3, STUB_sched_setaffinity)
 #endif
 
 SYSCALL_LOOKUP(set_errno,                  1, STUB_set_errno)
