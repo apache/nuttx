@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sched_cpu_count
+ * Name:  sched_cpucount
  *
  * Description:
  *   Return the number of bits set in the 'set'.  This could be improved by
@@ -62,7 +62,7 @@
  *
  ****************************************************************************/
 
-int sched_cpu_count(FAR const cpu_set_t *set)
+int sched_cpucount(FAR const cpu_set_t *set)
 {
   int count;
   int cpu;
