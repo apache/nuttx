@@ -60,10 +60,10 @@ volatile chipreg_t *g_current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z80_irq_initialize
+ * Name: up_irqinitialize
  ****************************************************************************/
 
-void z80_irq_initialize(void)
+void up_irqinitialize(void)
 {
   g_current_regs = NULL;
 

@@ -143,7 +143,6 @@ void up_dataabort(uint32_t *regs);
 void up_decodeirq(uint32_t *regs);
 uint32_t *up_doirq(int irq, uint32_t *regs);
 void up_fullcontextrestore(uint32_t *regs) noreturn_function;
-void up_irqinitialize(void);
 void up_prefetchabort(uint32_t *regs);
 int  up_saveusercontext(uint32_t *regs);
 void up_sigdeliver(void);
@@ -185,10 +184,6 @@ void lowconsole_init(void);
 /* Defined in xyz_watchdog.c */
 
 void up_wdtinit(void);
-
-/* Defined in xyz_timerisr.c */
-
-void renesas_timer_initialize(void);
 
 /* Defined in board/xyz_lcd.c */
 

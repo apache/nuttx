@@ -1320,7 +1320,7 @@ config ARCH_BOARD_SAMA5D3X_EK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAMA5D3x-EK development board (where x=1,3,4, or 5).
 
@@ -1330,7 +1330,7 @@ config ARCH_BOARD_SAMA5D3_XPLAINED
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-    select ARCH_PHY_INTERRUPT if NETDEVICES && (SAMA5_EMACA || SAMA5_EMAC0 || SAMA5_EMAC1 || SAMA5_GMAC)
+	select ARCH_PHY_INTERRUPT if SAMA5_EMACA || SAMA5_EMAC0 || SAMA5_EMAC1 || SAMA5_GMAC
 	---help---
 		The port of NuttX to the Atmel SAMA5D3 Xplained development board.
 
@@ -1340,7 +1340,7 @@ config ARCH_BOARD_SAMA5D4_EK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAMA5D4-EK development board
 
@@ -1407,7 +1407,7 @@ config ARCH_BOARD_SAM4EEK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAM4E-EK development board.  This
 		board features the SAM4E16 MCU running at up to 120MHz.
@@ -1445,7 +1445,7 @@ config ARCH_BOARD_SAME70_XPLAINED
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAME70 Xplained evaluation board.
 
@@ -1455,7 +1455,7 @@ config ARCH_BOARD_SAMV71_XULT
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAMV71 Xplained Ultra evaluation board.
 
@@ -2030,7 +2030,7 @@ config BOARD_CUSTOM_INTERRUPT
 	bool "Custom board PHY interrupts"
 	default n
 	depends on NETDEVICES
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 
 endmenu # Custom Board Configuration
 endif #ARCH_BOARD_CUSTOM

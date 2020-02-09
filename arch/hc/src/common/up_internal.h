@@ -144,7 +144,6 @@ extern uint32_t g_intstackbase;
 
 void up_copystate(uint8_t *dest, uint8_t *src);
 void up_decodeirq(uint8_t *regs);
-void up_irqinitialize(void);
 int  up_saveusercontext(uint8_t *saveregs);
 void up_fullcontextrestore(uint8_t *restoreregs) noreturn_function;
 void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
@@ -156,10 +155,6 @@ uint8_t *up_doirq(int irq, uint8_t *regs);
 /* Signal handling */
 
 void up_sigdeliver(void);
-
-/* System timer initialization */
-
-void hc_timer_initialize(void);
 
 /* Debug output */
 

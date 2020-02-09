@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if DRIVERS_AUDIO
+
 config AUDIO_TONE
 	bool "Audio Tone Generator using PWM"
 	default n
@@ -244,3 +246,5 @@ config AUDIO_I2S
 	bool "Audio I2S"
 	depends on AUDIO
 	depends on I2S
+
+endif # DRIVERS_AUDIO

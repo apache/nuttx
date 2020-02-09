@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if PIPES
+
 config DEV_PIPE_MAXSIZE
 	int "Maximum pipe/FIFO size"
 	default 1024 if !DEFAULT_SMALL
@@ -25,3 +27,5 @@ config DEV_FIFO_SIZE
 	---help---
 		Sets the default size of the FIFO ringbuffer in bytes.  A value of
 		zero disables FIFO support.
+
+endif # PIPES

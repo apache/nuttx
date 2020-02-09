@@ -127,17 +127,6 @@ void up_initialize(void)
 
   up_addregion();
 
-  /* Initialize the interrupt subsystem */
-
-  up_irqinitialize();
-
-  /* Initialize the system timer interrupt */
-
-#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS) && \
-    !defined(CONFIG_SYSTEMTICK_EXTCLK)
-  arm_timer_initialize();
-#endif
-
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
    * must be called *very* early in the initialization sequence *before* any

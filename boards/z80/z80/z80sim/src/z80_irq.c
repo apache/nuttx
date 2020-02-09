@@ -55,10 +55,10 @@ int z80sim_timerisr(int irq, FAR chipreg_t *regs);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z80_irq_initialize
+ * Name: up_irqinitialize
  ****************************************************************************/
 
-void z80_irq_initialize(void)
+void up_irqinitialize(void)
 {
   /* Attach the timer interrupt -- There is not special timer interrupt
    * enable in the simulation so it must be enabled here before interrupts
@@ -67,7 +67,7 @@ void z80_irq_initialize(void)
    * NOTE:  Normally, there are separate enables for "global" interrupts
    * and specific device interrupts.  In such a "normal" case, the timer
    * interrupt should be attached and enabled in the function
-   * z80_timer_initialize()
+   * up_timer_initialize()
    */
 
   irq_attach(Z80_IRQ_SYSTIMER, (xcpt_t)z80sim_timerisr, NULL);

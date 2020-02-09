@@ -67,10 +67,6 @@
 
 void up_initialize(void)
 {
-  /* Initialize the System Timer */
-
-  lm32_irq_initialize();
-
   /* Initialize the serial driver */
 
   misoc_serial_initialize();
@@ -78,10 +74,6 @@ void up_initialize(void)
 #ifdef CONFIG_RPMSG_UART
   rpmsg_serialinit();
 #endif
-
-  /* Initialize the system timer */
-
-  misoc_timer_initialize();
 
 #ifdef CONFIG_MM_IOB
   /* Initialize IO buffering */

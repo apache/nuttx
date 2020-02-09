@@ -41,6 +41,14 @@ CPPFLAGS += -I$(ARCH_SRCDIR)/chip -I$(TOPDIR)/sched $(EXTRADEFINES)
 CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(TOPDIR)/sched $(EXTRADEFINES)
 CXXFLAGS += -I$(ARCH_SRCDIR)/chip -I$(TOPDIR)/sched $(EXTRADEFINES)
 
+# Determine which objects are required in the link.The
+# up_head object normally draws in all that is needed, but
+# there are a fews that must be included because they
+# are called only from the host OS-specific logic(HOSTOBJS)
+
+LINKOBJS = up_head$(OBJEXT)
+REQUIREDOBJS = $(LINKOBJS)
+
 ASRCS =
 
 ifeq ($(CONFIG_HOST_X86_64),y)
@@ -60,8 +68,8 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_initialstate.c
 CSRCS += up_createstack.c up_usestack.c up_releasestack.c up_stackframe.c
 CSRCS += up_unblocktask.c up_blocktask.c up_releasepending.c
-CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c up_spiflash.c
-CSRCS += up_allocateheap.c up_qspiflash.c
+CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c
+CSRCS += up_allocateheap.c
 
 VPATH = sim
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
@@ -82,8 +90,10 @@ endif
 
 ifeq ($(CONFIG_SMP),y)
   CSRCS += up_smpsignal.c up_smphook.c up_cpuidlestack.c
+  REQUIREDOBJS += up_smpsignal$(OBJEXT) up_smphook$(OBJEXT)
   HOSTCFLAGS += -DCONFIG_SMP=1 -DCONFIG_SMP_NCPUS=$(CONFIG_SMP_NCPUS)
   HOSTSRCS += up_simsmp.c
+  STDLIBS += -lpthread
 endif
 
 ifeq ($(CONFIG_SCHED_INSTRUMENTATION),y)
@@ -94,7 +104,7 @@ endif
 
 ifeq ($(CONFIG_DEV_CONSOLE),y)
 ifneq ($(CONFIG_SYSLOG_RPMSG),y)
-  CSRCS += up_devconsole.c up_uartwait.c
+  CSRCS += up_devconsole.c
   HOSTSRCS += up_simuart.c
 endif
 endif
@@ -112,13 +122,15 @@ ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
 endif
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
-  CSRCS += board_lcd.c
+  CSRCS += up_lcd.c
 else
   CSRCS += up_framebuffer.c
 ifeq ($(CONFIG_SIM_X11FB),y)
   HOSTSRCS += up_x11framebuffer.c
+  STDLIBS += -lX11 -lXext
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   CSRCS += up_touchscreen.c
+  REQUIREDOBJS += up_touchscreen$(OBJEXT)
   HOSTSRCS += up_x11eventloop.c
 else
 ifeq ($(CONFIG_SIM_AJOYSTICK),y)
@@ -133,8 +145,17 @@ ifeq ($(CONFIG_SIM_IOEXPANDER),y)
   CSRCS += up_ioexpander.c
 endif
 
+ifeq ($(CONFIG_SIM_SPIFLASH),y)
+  CSRCS += up_spiflash.c
+endif
+
+ifeq ($(CONFIG_SIM_QSPIFLASH),y)
+  CSRCS += up_qspiflash.c
+endif
+
 ifeq ($(CONFIG_FS_FAT),y)
   CSRCS += up_blockdevice.c up_deviceimage.c
+  STDLIBS += -lz
 endif
 
 ifeq ($(CONFIG_ARCH_ROMGETC),y)
@@ -187,12 +208,6 @@ HOSTOBJS = $(HOSTSRCS:.c=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS)
 OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
-# Determine which standard libraries will need to be linked in
-
-ifeq ($(CONFIG_SIM_X11FB),y)
-  STDLIBS += -lX11 -lXext
-endif
-
 # Override in Make.defs if linker is not 'ld'
 
 ifeq ($(HOSTOS),Darwin)
@@ -207,37 +222,6 @@ endif
 
 EXTRA_LIBS ?=
 EXTRA_LIBPATHS ?=
-
-ifeq ($(CONFIG_FS_FAT),y)
-STDLIBS += -lz
-endif
-
-STDLIBS += -lc
-STDLIBS += -lpthread
-
-# Determine which objects are required in the link.  The
-# up_head object normally draws in all that is needed, but
-# there are a fews that must be included because they
-# are called only from the host OS-specific logic (HOSTOBJS)
-
-LINKOBJS = up_head$(OBJEXT)
-REQUIREDOBJS = $(LINKOBJS)
-
-ifeq ($(CONFIG_DEV_CONSOLE),y)
-ifneq ($(CONFIG_SYSLOG_RPMSG),y)
-  REQUIREDOBJS += up_uartwait$(OBJEXT)
-endif
-endif
-
-ifeq ($(CONFIG_SIM_X11FB),y)
-ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
-  REQUIREDOBJS += up_touchscreen$(OBJEXT)
-endif
-endif
-
-ifeq ($(CONFIG_SMP),y)
-  REQUIREDOBJS += up_smpsignal$(OBJEXT) up_smphook$(OBJEXT)
-endif
 
 # Determine which NuttX libraries will need to be linked in
 # Most are provided by LINKLIBS on the MAKE command line

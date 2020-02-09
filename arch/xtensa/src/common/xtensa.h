@@ -308,7 +308,6 @@ void xtensa_sig_deliver(void);
 /* Chip specific functions defined in arch/xtensa/src/<chip> */
 /* IRQs */
 
-void xtensa_irq_initialize(void);
 bool xtensa_pending_irq(int irq);
 void xtensa_clrpend_irq(int irq);
 
@@ -333,10 +332,6 @@ void xtensa_early_serial_initialize(void);
 void xtensa_serial_initialize(void);
 
 void rpmsg_serialinit(void);
-
-/* System timer */
-
-void xtensa_timer_initialize(void);
 
 /* Network */
 

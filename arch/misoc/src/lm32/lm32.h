@@ -128,10 +128,6 @@ void lm32_add_region(void);
 
 void lm32_copystate(uint32_t *dest, uint32_t *src);
 
-/* IRQ initialization *******************************************************/
-
-void lm32_irq_initialize(void);
-
 /* Interrupt decode *********************************************************/
 
 uint32_t *lm32_decodeirq(uint32_t intstat, uint32_t *regs);

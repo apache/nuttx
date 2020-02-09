@@ -151,8 +151,9 @@ cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
 function makefunc {
   ${MAKE} $@
-  if [ $? != 0 ]; then
-    fail=$?
+  ret=$?
+  if [ $ret != 0 ]; then
+    fail=$ret
   fi
 }
 

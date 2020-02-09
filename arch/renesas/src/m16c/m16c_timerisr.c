@@ -132,7 +132,7 @@ static int m16c_timerisr(int irq, uint32_t *regs, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  renesas_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -140,7 +140,7 @@ static int m16c_timerisr(int irq, uint32_t *regs, void *arg)
  *
  ****************************************************************************/
 
-void renesas_timer_initialize(void)
+void up_timer_initialize(void)
 {
   /* Make sure that no timers are running and that all timer interrupts are
    * disabled.

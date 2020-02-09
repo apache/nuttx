@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+if USBDEV
+
 comment "USB Device Controller Driver Options"
 
 config USBDEV_ISOCHRONOUS
@@ -995,3 +997,5 @@ config CDCECM_PRODUCTSTR
 
 endif # !CDCECM_COMPOSITE
 endif # CDCECM
+
+endif # USBDEV

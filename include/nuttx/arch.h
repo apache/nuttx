@@ -1332,6 +1332,12 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
 /* See prototype in include/nuttx/elf.h */
 
 /****************************************************************************
+ * Name: up_irqinitialize
+ ****************************************************************************/
+
+void up_irqinitialize(void);
+
+/****************************************************************************
  * Name: up_interrupt_context
  *
  * Description:
@@ -1409,6 +1415,17 @@ void up_trigger_irq(int irq);
 #ifdef CONFIG_ARCH_IRQPRIO
 int up_prioritize_irq(int irq, int priority);
 #endif
+
+/****************************************************************************
+ * Function:  up_timer_initialize
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer hardware.
+ *
+ ****************************************************************************/
+
+void up_timer_initialize(void);
 
 /****************************************************************************
  * Tickless OS Support.

@@ -96,22 +96,6 @@ void up_initialize(void)
   up_addregion();
 #endif
 
-  /* Initialize the interrupt subsystem */
-
-  z80_irq_initialize();
-
-#ifdef CONFIG_RTC_ALARM
-  /* Enable RTC alarm interrupts */
-
-  z80_rtc_irqinitialize();
-#endif
-
-#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* Initialize the system timer interrupt */
-
-  z80_timer_initialize();
-#endif
-
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
    * must be called *very* early in the initialization sequence *before* any

@@ -122,7 +122,7 @@ static int k210_timerisr(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: riscv_timer_initialize
+ * Name: up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -130,12 +130,12 @@ static int k210_timerisr(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void riscv_timer_initialize(void)
+void up_timer_initialize(void)
 {
 #if 1
   /* Attach timer interrupt handler */
 
-  (void)irq_attach(K210_IRQ_MTIMER, k210_timerisr, NULL);
+  irq_attach(K210_IRQ_MTIMER, k210_timerisr, NULL);
 
   /* Reload CLINT mtimecmp */
 

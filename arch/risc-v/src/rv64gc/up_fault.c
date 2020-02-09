@@ -119,5 +119,5 @@ void up_fault(int irq, uint64_t *regs)
          CURRENT_REGS[REG_TP], CURRENT_REGS[REG_RA]);
 #endif
 
-  (void)up_irq_save();
+  up_irq_save();
 }
