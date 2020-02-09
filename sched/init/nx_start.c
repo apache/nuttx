@@ -389,11 +389,7 @@ static FAR char *g_idleargv[1][2];
 
 void nx_start(void)
 {
-#ifdef CONFIG_SMP
-  int cpu;
-#else
-# define cpu 0
-#endif
+  int cpu = 0;
   int i;
 
   sinfo("Entry\n");
