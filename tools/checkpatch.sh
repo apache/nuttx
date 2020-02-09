@@ -36,13 +36,15 @@ check_file() {
 
 check_ranges() {
   local fail=0
+  local ret=0
 
   while read; do
     if [[ $REPLY =~ \+\+\+\ (b/)?([^[:blank:]]+).* ]]; then
       if [ "$ranges" != "" ]; then
         check_file $ranges $path 2>&1
-        if [ $? != 0 ]; then
-          fail=1
+        ret=$?
+        if [ $ret != 0 ]; then
+          fail=$ret
         fi
       fi
       path=${BASH_REMATCH[2]}
@@ -53,13 +55,12 @@ check_ranges() {
   done
   if [ "$ranges" != "" ]; then
     check_file $ranges $path 2>&1
-    if [ $? != 0 ]; then
-      fail=1
+    ret=$?
+    if [ $ret != 0 ]; then
+      fail=$ret
     fi
   fi
-  if [ $fail = 1 ]; then
-    exit 1
-  fi
+  exit $fail
 }
 
 check_patch() {
