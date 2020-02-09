@@ -408,16 +408,13 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
 #endif
 
 /* The following is defined only if entropy pool random number generator
- * is enabled. */
+ * is enabled.
+ */
 
 #ifdef CONFIG_CRYPTO_RANDOM_POOL
   SYSCALL_LOOKUP(getrandom,               2, STUB_getrandom)
 #endif
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/

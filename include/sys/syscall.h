@@ -2,7 +2,7 @@
  * include/sys/syscall.h
  * This file contains the system call numbers.
  *
- *   Copyright (C) 2011-2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2019, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -636,7 +636,7 @@ EXTERN const uintptr_t g_stublookup[SYS_nsyscalls];
 EXTERN const uint8_t g_funcnparms[SYS_nsyscalls];
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN

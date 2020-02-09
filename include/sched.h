@@ -52,6 +52,7 @@
 /********************************************************************************
  * Pre-processor Definitions
  ********************************************************************************/
+
 /* Task Management Definitions **************************************************/
 
 /* POSIX-like scheduling policies */
@@ -81,7 +82,8 @@
 
 #define PTHREAD_KEYS_MAX          CONFIG_NPTHREAD_KEYS
 
-/* CPU affinity mask helpers ***************************************************/
+/* CPU affinity mask helpers ****************************************************/
+
 /* These are not standard but are defined for Linux compatibility */
 
 #ifdef CONFIG_SMP
@@ -129,6 +131,7 @@
 #  define CPU_EQUAL(s1,s2) (*(s2) == *(s2))
 
 /* REVISIT: Variably sized CPU sets are not supported */
+
 /* FAR cpu_set_t *CPU_ALLOC(int num_cpus); */
 
 #  define CPU_ALLOC(n) (FAR cpu_set_t *)malloc(sizeof(cpu_set_t));
