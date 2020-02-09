@@ -72,7 +72,12 @@ uintptr_t STUB_sched_setscheduler(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 uintptr_t STUB_sched_unlock(int nbr);
 uintptr_t STUB_sched_yield(int nbr);
+
+uintptr_t STUB_sched_getaffinity(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
 uintptr_t STUB_sched_getcpu(int nbr);
+uintptr_t STUB_sched_setaffinity(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
 
 uintptr_t STUB_set_errno(int nbr, uintptr_t parm1);
 uintptr_t STUB_uname(int nbr, uintptr_t parm1);

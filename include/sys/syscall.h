@@ -81,9 +81,12 @@
 #define SYS_sched_setscheduler         (CONFIG_SYS_RESERVED + 10)
 #define SYS_sched_unlock               (CONFIG_SYS_RESERVED + 11)
 #define SYS_sched_yield                (CONFIG_SYS_RESERVED + 12)
+
 #ifdef CONFIG_SMP
-#  define SYS_sched_getcpu             (CONFIG_SYS_RESERVED + 13)
-#  define __SYS_set_errno              (CONFIG_SYS_RESERVED + 14)
+#  define SYS_sched_getaffinity        (CONFIG_SYS_RESERVED + 13)
+#  define SYS_sched_getcpu             (CONFIG_SYS_RESERVED + 14)
+#  define SYS_sched_setaffinity        (CONFIG_SYS_RESERVED + 15)
+#  define __SYS_set_errno              (CONFIG_SYS_RESERVED + 16)
 #else
 #  define __SYS_set_errno              (CONFIG_SYS_RESERVED + 13)
 #endif
