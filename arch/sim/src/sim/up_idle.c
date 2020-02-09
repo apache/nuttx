@@ -40,9 +40,8 @@
 
 #include <nuttx/config.h>
 
-#include <time.h>
-
 #include <nuttx/arch.h>
+#include <nuttx/power/pm.h>
 
 #include "up_internal.h"
 
@@ -51,22 +50,6 @@
  ****************************************************************************/
 
 #define PM_IDLE_DOMAIN 0 /* Revisit */
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#ifdef CONFIG_SIM_X11FB
-static int g_x11refresh = 0;
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef CONFIG_SIM_X11FB
-extern void up_x11update(void);
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -142,26 +125,11 @@ void up_idle(void)
   }
 #endif
 
-#if defined(CONFIG_SIM_WALLTIME) || defined(CONFIG_SIM_X11FB)
+#ifdef CONFIG_SIM_WALLTIME
   /* Wait a bit so that the nxsched_process_timer() is called close to the
    * correct rate.
    */
 
   up_hostusleep(1000000 / CLK_TCK);
-
-  /* Handle X11-related events */
-
-#ifdef CONFIG_SIM_X11FB
-  if (g_x11initialized)
-    {
-      /* Update the display periodically */
-
-      g_x11refresh += 1000000 / CLK_TCK;
-      if (g_x11refresh > 500000)
-        {
-          up_x11update();
-        }
-    }
-#endif
 #endif
 }
