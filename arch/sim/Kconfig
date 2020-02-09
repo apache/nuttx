@@ -177,6 +177,8 @@ if SIM_FRAMEBUFFER
 config SIM_X11FB
 	bool "Use X11 window"
 	default n
+	select SCHED_LPWORK
+	select SIM_WALLTIME
 	---help---
 		Use an X11 graphics window to simulate the graphics device"
 

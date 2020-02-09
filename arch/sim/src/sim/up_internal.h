@@ -197,10 +197,6 @@
 
 #ifndef __ASSEMBLY__
 
-#ifdef CONFIG_SIM_X11FB
-extern int g_x11initialized;
-#endif
-
 #ifdef CONFIG_SMP
 /* These spinlocks are used in the SMP configuration in order to implement
  * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
@@ -288,6 +284,7 @@ unsigned long up_getwalltime(void);
 int up_x11initialize(unsigned short width, unsigned short height,
                      void **fbmem, size_t *fblen, unsigned char *bpp,
                      unsigned short *stride);
+void up_x11update(void);
 #ifdef CONFIG_FB_CMAP
 int up_x11cmap(unsigned short first, unsigned short len,
                unsigned char *red, unsigned char *green,

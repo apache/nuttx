@@ -56,7 +56,6 @@
 /* Also used in up_x11eventloop */
 
 Display *g_display;
-int g_x11initialized;
 
 /****************************************************************************
  * Private Data
@@ -191,37 +190,33 @@ static int up_x11untraperrors(void)
 
 static void up_x11uninitX(void)
 {
-  if (g_x11initialized)
-    {
 #ifndef CONFIG_SIM_X11NOSHM
-      if (g_shmcheckpoint > 4)
-        {
-          XShmDetach(g_display, &g_xshminfo);
-        }
+  if (g_shmcheckpoint > 4)
+    {
+      XShmDetach(g_display, &g_xshminfo);
+    }
 
-      if (g_shmcheckpoint > 3)
-        {
-          shmdt(g_xshminfo.shmaddr);
-        }
+  if (g_shmcheckpoint > 3)
+    {
+      shmdt(g_xshminfo.shmaddr);
+    }
 
-      if (g_shmcheckpoint > 2)
-        {
-          shmctl(g_xshminfo.shmid, IPC_RMID, 0);
-        }
+  if (g_shmcheckpoint > 2)
+    {
+      shmctl(g_xshminfo.shmid, IPC_RMID, 0);
+    }
 #endif
 
-      if (g_shmcheckpoint > 1)
-        {
-          XDestroyImage(g_image);
-        }
+  if (g_shmcheckpoint > 1)
+    {
+      XDestroyImage(g_image);
+    }
 
-      /* Un-grab the mouse buttons */
+  /* Un-grab the mouse buttons */
 
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
-      XUngrabButton(g_display, Button1, AnyModifier, g_window);
+  XUngrabButton(g_display, Button1, AnyModifier, g_window);
 #endif
-      g_x11initialized = 0;
-    }
 
   XCloseDisplay(g_display);
 }
@@ -364,46 +359,40 @@ int up_x11initialize(unsigned short width, unsigned short height,
   int depth;
   int ret;
 
-  /* Check if we are already initialized */
+  /* Save inputs */
 
-  if (!g_x11initialized)
+  g_fbpixelwidth  = width;
+  g_fbpixelheight = height;
+
+  /* Create the X11 window */
+
+  ret = up_x11createframe();
+  if (ret < 0)
     {
-      /* Save inputs */
-
-      g_fbpixelwidth  = width;
-      g_fbpixelheight = height;
-
-      /* Create the X11 window */
-
-      ret = up_x11createframe();
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      /* Determine the supported pixel bpp of the current window */
-
-      XGetWindowAttributes(g_display, DefaultRootWindow(g_display), &windowAttributes);
-
-      /* Get the pixel depth.  If the depth is 24-bits, use 32 because X expects
-       * 32-bit aligment anyway.
-       */
-
-      depth =  windowAttributes.depth;
-      if (depth == 24)
-        {
-          depth = 32;
-        }
-
-      *bpp    = depth;
-      *stride = (depth * width / 8);
-      *fblen  = (*stride * height);
-
-      /* Map the window to shared memory */
-
-      up_x11mapsharedmem(windowAttributes.depth, *fblen);
-      g_x11initialized = 1;
+      return ret;
     }
+
+  /* Determine the supported pixel bpp of the current window */
+
+  XGetWindowAttributes(g_display, DefaultRootWindow(g_display), &windowAttributes);
+
+  /* Get the pixel depth.  If the depth is 24-bits, use 32 because X expects
+   * 32-bit aligment anyway.
+   */
+
+  depth = windowAttributes.depth;
+  if (depth == 24)
+    {
+      depth = 32;
+    }
+
+  *bpp    = depth;
+  *stride = (depth * width / 8);
+  *fblen  = (*stride * height);
+
+  /* Map the window to shared memory */
+
+  up_x11mapsharedmem(windowAttributes.depth, *fblen);
 
   *fbmem  = (void *)g_framebuffer;
   return 0;

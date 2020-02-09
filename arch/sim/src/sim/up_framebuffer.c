@@ -44,6 +44,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/clock.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxglib.h>
 #include <nuttx/video/fb.h>
@@ -144,6 +146,8 @@ static const struct fb_planeinfo_s g_planeinfo =
   .bpp      = CONFIG_SIM_FBBPP,
 };
 #else
+static struct work_s g_updatework;
+
 /* This structure describes the single, X11 color plane */
 
 static struct fb_planeinfo_s g_planeinfo;
@@ -178,10 +182,6 @@ struct fb_vtable_s g_fbobject =
   .setcursor     = up_setcursor,
 #endif
 };
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -347,6 +347,18 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
 #endif
 
 /****************************************************************************
+ * Name: up_updatework
+ ****************************************************************************/
+
+#ifdef CONFIG_SIM_X11FB
+static void up_updatework(FAR void *arg)
+{
+  work_queue(LPWORK, &g_updatework, up_updatework, NULL, MSEC2TICK(33));
+  up_x11update();
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -368,13 +380,19 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
 
 int up_fbinitialize(int display)
 {
+  int ret = OK;
+
 #ifdef CONFIG_SIM_X11FB
-  return up_x11initialize(CONFIG_SIM_FBWIDTH, CONFIG_SIM_FBHEIGHT,
-                          &g_planeinfo.fbmem, &g_planeinfo.fblen,
-                          &g_planeinfo.bpp, &g_planeinfo.stride);
-#else
-  return OK;
+  ret = up_x11initialize(CONFIG_SIM_FBWIDTH, CONFIG_SIM_FBHEIGHT,
+                         &g_planeinfo.fbmem, &g_planeinfo.fblen,
+                         &g_planeinfo.bpp, &g_planeinfo.stride);
+  if (ret == OK)
+    {
+      work_queue(LPWORK, &g_updatework, up_updatework, NULL, MSEC2TICK(33));
+    }
 #endif
+
+  return ret;
 }
 
 /****************************************************************************
