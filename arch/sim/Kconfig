@@ -116,6 +116,7 @@ config SIM_NETDEV
 	depends on NET_ETHERNET
 	select ARCH_HAVE_NETDEV_STATISTICS
 	select SCHED_LPWORK
+	select SIM_WALLTIME
 	---help---
 		Build in support for a simulated network device using a TAP device on Linux or
 		WPCAP on Windows.

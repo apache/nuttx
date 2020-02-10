@@ -272,12 +272,6 @@ bool simuart_checkc(void);
 char *up_deviceimage(void);
 void up_registerblockdevice(void);
 
-/* up_netdev.c **************************************************************/
-
-#ifdef CONFIG_NET
-unsigned long up_getwalltime(void);
-#endif
-
 /* up_x11framebuffer.c ******************************************************/
 
 #ifdef CONFIG_SIM_X11FB
@@ -324,12 +318,14 @@ FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void);
 
 #if defined(CONFIG_SIM_NETDEV) && !defined(__CYGWIN__)
 void tapdev_init(void);
+int tapdev_avail(void);
 unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
 void tapdev_send(unsigned char *buf, unsigned int buflen);
 void tapdev_ifup(in_addr_t ifaddr);
 void tapdev_ifdown(void);
 
 #  define netdev_init()           tapdev_init()
+#  define netdev_avail()          tapdev_avail()
 #  define netdev_read(buf,buflen) tapdev_read(buf,buflen)
 #  define netdev_send(buf,buflen) tapdev_send(buf,buflen)
 #  define netdev_ifup(ifaddr)     tapdev_ifup(ifaddr)
@@ -344,6 +340,7 @@ unsigned int wpcap_read(unsigned char *buf, unsigned int buflen);
 void wpcap_send(unsigned char *buf, unsigned int buflen);
 
 #  define netdev_init()           wpcap_init()
+#  define netdev_avail()          1
 #  define netdev_read(buf,buflen) wpcap_read(buf,buflen)
 #  define netdev_send(buf,buflen) wpcap_send(buf,buflen)
 #  define netdev_ifup(ifaddr)     {}
