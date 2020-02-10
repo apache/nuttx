@@ -318,6 +318,9 @@ static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
            */
 
           signo = SIGSTP;
+#ifndef CONFIG_TTY_SIGINT
+          break;
+#endif
         }
 #endif
     }
