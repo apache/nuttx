@@ -14,7 +14,7 @@ config ARCH_CHIP_PIC32MZ2048ECH
 	bool "PIC32MZ2048ECH"
 	select ARCH_CHIP_PIC32MZEC
 	---help---
-		Microchip PIC32MZ2048ECH (MIPS32 M14K) such as the
+		Microchip PIC32MZ2048ECH (MIPS32 microAptiv) such as the
 		PIC32MZ2048ECH144-I/PH used with the PIC32MZ EC STARTER KIT
 		DM320006 (no longer available)
 
@@ -22,7 +22,7 @@ config ARCH_CHIP_PIC32MZ2048ECM
 	bool "PIC32MZ2048ECM"
 	select ARCH_CHIP_PIC32MZEC
 	---help---
-		Microchip PIC32MZ2048ECM with Crypto Engine (MIPS32 M14K) such as
+		Microchip PIC32MZ2048ECM with Crypto Engine (MIPS32 microAptiv) such as
 		the ARCH_CHIP_PIC32MZ2048ECM144-I/PH used with the PIC32MZ EC
 		STARTER KIT DM320006-C (no longer available)
 
@@ -30,7 +30,7 @@ config ARCH_CHIP_PIC32MZ2048EFH
 	bool "PIC32MZ2048EFH"
 	select ARCH_CHIP_PIC32MZEF
 	---help---
-		Microchip PIC32MZ2048EFH (MIPS32 M14K) such as the
+		Microchip PIC32MZ2048EFH (MIPS32 M5150) such as the
 		PIC32MZ2048EFH144-I/PH used in the PIC32MZ EF STARTER KIT or as the
 		PIC32MZ2048EFH100 used with the Mikroe Flip&Click for PIC32MZ.
 
@@ -38,7 +38,7 @@ config ARCH_CHIP_PIC32MZ2048EFM
 	bool "PIC32MZ2048EFM"
 	select ARCH_CHIP_PIC32MZEF
 	---help---
-		Microchip PIC32MZ2048EFH with Crypto Engine (MIPS32 M14K) such as
+		Microchip PIC32MZ2048EFH with Crypto Engine (MIPS32 M5150) such as
 		the PIC32MZ2048EFM144-I/PH used in the PIC32MZ EF STARTER KIT
 
 endchoice
@@ -46,14 +46,14 @@ endchoice
 config ARCH_CHIP_PIC32MZEC
 	bool
 	default n
-	select ARCH_MIPS_M14K
+	select ARCH_MIPS_MICROAPTIV
 	select MIPS32_HAVE_ICACHE
 	select MIPS32_HAVE_DCACHE
 
 config ARCH_CHIP_PIC32MZEF
 	bool
 	default n
-	select ARCH_MIPS_M14K
+	select ARCH_MIPS_M5150
 	select MIPS32_HAVE_ICACHE
 	select MIPS32_HAVE_DCACHE
 
