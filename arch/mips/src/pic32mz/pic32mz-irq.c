@@ -400,6 +400,19 @@ void up_clrpend_irq(int irq)
 }
 
 /****************************************************************************
+ * Name: up_clrpend_sw0
+ *
+ * Description:
+ *   Clear a pending Software Interrupt.
+ *
+ ****************************************************************************/
+
+void up_clrpend_sw0(void)
+{
+  up_clrpend_irq(PIC32MZ_IRQ_CS0);
+}
+
+/****************************************************************************
  * Name: up_prioritize_irq
  *
  * Description:

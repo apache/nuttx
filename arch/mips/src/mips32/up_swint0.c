@@ -299,15 +299,9 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
     }
 #endif
 
-  /* Clear the pending software interrupt 0 in the PIC32 interrupt block.
-   * REVISIT:  Does this PIC32 logic really have to be in the MIPS32 code?
-   */
+  /* Clear the pending software interrupt 0 */
 
-#if defined(CONFIG_ARCH_CHIP_PIC32MX)
-  up_clrpend_irq(PIC32MX_IRQSRC_CS0);
-#elif defined(CONFIG_ARCH_CHIP_PIC32MZ)
-  up_clrpend_irq(PIC32MZ_IRQ_CS0);
-#endif
+  up_clrpend_sw0();
 
   /* And reset the software interrupt bit in the MIPS CAUSE register */
 

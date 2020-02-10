@@ -237,6 +237,7 @@ void up_sigdeliver(void);
 
 bool up_pending_irq(int irq);
 void up_clrpend_irq(int irq);
+void up_clrpend_sw0(void);
 
 /* DMA */
 
