@@ -301,6 +301,10 @@ typedef CODE int (*main_t)(int argc, FAR char *argv[]);
 
 #endif /* __ASSEMBLY__ */
 
+/* Defines `fd_set' and the FD_* macros for `select'. */
+
+#include <sys/select.h>
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
