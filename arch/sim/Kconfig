@@ -113,7 +113,7 @@ config SIM_WALLTIME
 config SIM_NETDEV
 	bool "Simulated Network Device"
 	default y
-	depends on NET
+	depends on NET_ETHERNET
 	select ARCH_HAVE_NETDEV_STATISTICS
 	select SCHED_LPWORK
 	---help---
