@@ -370,8 +370,7 @@ int netdriver_init(void)
   return OK;
 }
 
-int netdriver_setmacaddr(unsigned char *macaddr)
+void netdriver_setmacaddr(unsigned char *macaddr)
 {
   memcpy(g_sim_dev.d_mac.ether.ether_addr_octet, macaddr, IFHWADDRLEN);
-  return 0;
 }

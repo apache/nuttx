@@ -354,7 +354,7 @@ void wpcap_send(unsigned char *buf, unsigned int buflen);
 
 #ifdef CONFIG_NET_ETHERNET
 int netdriver_init(void);
-int netdriver_setmacaddr(unsigned char *macaddr);
+void netdriver_setmacaddr(unsigned char *macaddr);
 void netdriver_loop(void);
 #endif
 
