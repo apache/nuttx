@@ -1104,6 +1104,21 @@ spiffs
   This is a test of the SPIFFS file system using the apps/testing/fstest test
   with an MTD RAM driver to simulate the FLASH part.
 
+tcploop
+
+  This configuration performs a TCP "performance" test using
+  apps/examples/tcpblaster and the IPv6 local loopback device.  Performance
+  is in quotes because, while that is the intent of the tcpblaster example,
+  this is not an appropriate configuration for TCP performance testing.
+  Rather, this configurat is useful only for verifying TCP transfers over
+  the loopback device.
+
+  To use IPv4, modify these settings in the defconfig file:
+
+    -# CONFIG_NET_IPv4 is not set
+    -CONFIG_NET_IPv6=y
+    -CONFIG_NET_IPv6_NCONF_ENTRIES=4
+
 touchscreen
 
   This configuration uses the simple touchscreen test at
