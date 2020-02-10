@@ -163,6 +163,7 @@
 /* Helper Macros *********************************************************************************/
 
 #define CCM_PODF_FROM_DIVISOR(n)                   ((n)-1)  /* PODF Values are divisor-1 */
+#define CCM_PRED_FROM_DIVISOR(n)                   ((n)-1)  /* PRED Values are divisor-1 */
 
 /* Register bit definitions *********************************************************************************/
 
