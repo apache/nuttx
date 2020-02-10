@@ -288,6 +288,9 @@ SMP
   result is undefined:
   http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1318.htm
 
+  Update: The dead lock is due to up_testset call pthread API for synchronization
+  inside the signal handler. After swiching to atomic API, the problem get resolved.
+
   You can enable SMP for ostest configuration by enabling:
 
     +CONFIG_SPINLOCK=y
@@ -321,6 +324,19 @@ SMP
   arch/sim/src/up_idle.c so that the IDLE loop only runs for CPU0. Otherwise,
   often simuart_post() will be called from CPU1 and it will try to restart NSH
   on CPU0 and, again, the same quirkiness occurs.
+
+  Update: Only CPU0 call up_idle now, other CPUs have a simple idle loop:
+
+    /* The idle Loop */
+
+    for (; ; )
+      {
+        /* Give other pthreads/CPUs a shot */
+
+        pthread_yield();
+      }
+
+  So it isn't a problem any more.
 
   But for example, this command:
 

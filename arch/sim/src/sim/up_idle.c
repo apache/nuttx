@@ -40,14 +40,9 @@
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
 #include <time.h>
 
 #include <nuttx/arch.h>
-
-#ifdef CONFIG_SMP
-#  include <nuttx/spinlock.h>
-#endif
 
 #include "up_internal.h"
 
@@ -94,26 +89,6 @@ extern void up_x11update(void);
 
 void up_idle(void)
 {
-#ifdef CONFIG_SMP
-  /* In the SMP configuration, only one CPU should do these operations.  It
-   * should not matter which, however.
-   */
-
-  static volatile spinlock_t lock SP_SECTION = SP_UNLOCKED;
-
-  /* The one that gets the lock is the one that executes the IDLE operations */
-
-  if (up_testset(&lock) != SP_UNLOCKED)
-    {
-      /* We didn't get it... Give other pthreads/CPUs a shot and try again
-       * later.
-       */
-
-      pthread_yield();
-      return;
-    }
-#endif
-
 #ifdef CONFIG_SCHED_TICKLESS
   /* Driver the simulated interval timer */
 
@@ -191,15 +166,5 @@ void up_idle(void)
         }
     }
 #endif
-#endif
-
-#ifdef CONFIG_SMP
-  /* Release the spinlock */
-
-  lock = SP_UNLOCKED;
-
-  /* Give other pthreads/CPUs a shot */
-
-  pthread_yield();
 #endif
 }

@@ -62,7 +62,6 @@ function showusage {
   echo "  -x exit on build failures"
   echo "  -j <ncpus> passed on to make.  Default:  No -j make option."
   echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
-  echo "  -u<l|i>"
   echo "  -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx"
   echo "  -h will show this help test and terminate"
   echo "  <testlist-file> selects the list of configurations to test.  No default"

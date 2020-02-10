@@ -18,6 +18,8 @@
 
 TOOLDIR=$(dirname $0)
 
+fail=0
+
 usage() {
   echo "USAGE: ${0} [options] [list|-]"
   echo ""
@@ -31,19 +33,18 @@ usage() {
 }
 
 check_file() {
-  $TOOLDIR/nxstyle $@ 2>&1
+  $TOOLDIR/nxstyle $@
+  ret=$?
+  if [ $ret != 0 ]; then
+    fail=$ret
+  fi
 }
 
 check_ranges() {
-  local fail=0
-
   while read; do
     if [[ $REPLY =~ \+\+\+\ (b/)?([^[:blank:]]+).* ]]; then
       if [ "$ranges" != "" ]; then
         check_file $ranges $path 2>&1
-        if [ $? != 0 ]; then
-          fail=1
-        fi
       fi
       path=${BASH_REMATCH[2]}
       ranges=""
@@ -53,12 +54,6 @@ check_ranges() {
   done
   if [ "$ranges" != "" ]; then
     check_file $ranges $path 2>&1
-    if [ $? != 0 ]; then
-      fail=1
-    fi
-  fi
-  if [ $fail = 1 ]; then
-    exit 1
   fi
 }
 
@@ -68,12 +63,14 @@ check_patch() {
     exit 1
   fi
   git apply $1
-  cat $1 | check_ranges
+  diffs=`cat $1`
+  check_ranges <<< "$diffs"
   git apply -R $1
 }
 
 check_commit() {
-  git show $1 | check_ranges
+  diffs=`git show $1`
+  check_ranges <<< "$diffs"
 }
 
 make -C $TOOLDIR -f Makefile.host nxstyle 1>/dev/null
@@ -124,5 +121,7 @@ for commit in $commits; do
 done
 
 for file in $files; do
-  check_file $file
+  check_file $file 2>&1
 done
+
+exit $fail

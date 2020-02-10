@@ -239,21 +239,13 @@ int up_hostusleep(unsigned int usec);
 /* up_simsmp.c **************************************************************/
 
 #ifdef CONFIG_SMP
-int  sim_cpu0_initialize(void);
 void sim_cpu0_start(void);
 #endif
 
 /* up_smpsignal.c ***********************************************************/
 
 #ifdef CONFIG_SMP
-void sim_cpu_pause(int cpu, FAR volatile spinlock_t *wait,
-                   FAR volatile unsigned char *paused);
-#endif
-
-/* up_smphook.c *************************************************************/
-
-#ifdef CONFIG_SMP
-void sim_smp_hook(void);
+void up_cpu_started(void);
 #endif
 
 /* up_tickless.c ************************************************************/
