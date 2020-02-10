@@ -317,8 +317,8 @@ static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
           goto shmerror;
         }
 
+      g_framebuffer = (unsigned char *)g_image->data;
       g_shmcheckpoint++;
-
     }
   else
 #endif
