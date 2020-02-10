@@ -56,6 +56,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 
 /* Define the FLASH SIZE in bytes */
@@ -144,7 +145,9 @@
 #define QSPIFLASH_STATE_FREAD_WAIT   17
 
 /* Instructions */
+
 /*      Command            Value      N Description             Addr Dummy Data   */
+
 #define QSPIFLASH_WREN      0x06    /* 1 Write Enable              0   0     0     */
 #define QSPIFLASH_WRDI      0x04    /* 1 Write Disable             0   0     0     */
 #define QSPIFLASH_RDID      0x9f    /* 1 Read Identification       0   0     1-3   */
@@ -222,7 +225,10 @@ static const struct qspi_ops_s g_qspiops =
 
 struct sim_qspiflashdev_s g_qspidev =
 {
-  .spidev   = { &g_qspiops },
+  .spidev =
+  {
+    &g_qspiops
+  }
 };
 
 /************************************************************************************
@@ -428,7 +434,7 @@ static void qspiflash_sectorerase(FAR struct sim_qspiflashdev_s *priv)
 
       /* Now perform the erase */
 
-      memset(&priv->data[address], 0xFF, len);
+      memset(&priv->data[address], 0xff, len);
     }
 }
 
@@ -495,7 +501,7 @@ static void qspiflash_writeword(FAR struct sim_qspiflashdev_s *priv, uint16_t da
 
       default:
         priv->state = QSPIFLASH_STATE_IDLE;
-        priv->read_data = 0xFF;
+        priv->read_data = 0xff;
         break;
     }
 }
@@ -593,9 +599,9 @@ FAR struct qspi_dev_s *up_qspiflashinitialize()
   priv->wren = 0;
   priv->address = 0;
   priv->state = QSPIFLASH_STATE_IDLE;
-  priv->read_data = 0xFF;
-  priv->last_cmd = 0xFF;
-  memset(&priv->data[0], 0xFF, sizeof(priv->data));
+  priv->read_data = 0xff;
+  priv->last_cmd = 0xff;
+  memset(&priv->data[0], 0xff, sizeof(priv->data));
 
   leave_critical_section(flags);
   return (FAR struct qspi_dev_s *)priv;

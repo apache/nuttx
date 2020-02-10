@@ -187,8 +187,8 @@ static void netdriver_work(FAR void *arg)
     {
       NETDEV_RXPACKETS(&g_sim_dev);
 
-      /* Data received event.  Check for valid Ethernet header with destination == our
-       * MAC address
+      /* Data received event.  Check for valid Ethernet header with
+       * destination == our MAC address
        */
 
       eth = BUF;
