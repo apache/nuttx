@@ -37,11 +37,16 @@ config ARCH_MIPS32
 	default n
 	select ARCH_HAVE_VFORK
 
-config ARCH_MIPS_24KC
+config ARCH_MIPS_M4K
 	bool
 	default n
 
-config ARCH_MIPS_M14K
+config ARCH_MIPS_MICROAPTIV
+	bool
+	default n
+	select ARCH_HAVE_MICROMIPS
+
+config ARCH_MIPS_M5150
 	bool
 	default n
 	select ARCH_HAVE_MICROMIPS
