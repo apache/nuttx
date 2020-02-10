@@ -322,7 +322,7 @@ FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void);
 
 /* up_tapdev.c **************************************************************/
 
-#if defined(CONFIG_NET_ETHERNET) && !defined(__CYGWIN__)
+#if defined(CONFIG_SIM_NETDEV) && !defined(__CYGWIN__)
 void tapdev_init(void);
 unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
 void tapdev_send(unsigned char *buf, unsigned int buflen);
@@ -338,7 +338,7 @@ void tapdev_ifdown(void);
 
 /* up_wpcap.c ***************************************************************/
 
-#if defined(CONFIG_NET_ETHERNET) && defined(__CYGWIN__)
+#if defined(CONFIG_SIM_NETDEV) && defined(__CYGWIN__)
 void wpcap_init(void);
 unsigned int wpcap_read(unsigned char *buf, unsigned int buflen);
 void wpcap_send(unsigned char *buf, unsigned int buflen);
@@ -352,7 +352,7 @@ void wpcap_send(unsigned char *buf, unsigned int buflen);
 
 /* up_netdriver.c ***********************************************************/
 
-#ifdef CONFIG_NET_ETHERNET
+#ifdef CONFIG_SIM_NETDEV
 int netdriver_init(void);
 void netdriver_setmacaddr(unsigned char *macaddr);
 void netdriver_loop(void);

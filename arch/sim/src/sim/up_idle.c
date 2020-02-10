@@ -96,7 +96,7 @@ void up_idle(void)
   up_x11events();
 #endif
 
-#if defined(CONFIG_NET_ETHERNET) && defined(CONFIG_SIM_NETDEV)
+#ifdef CONFIG_SIM_NETDEV
   /* Run the network if enabled */
 
   netdriver_loop();
