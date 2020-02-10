@@ -88,10 +88,10 @@ struct sel_arg_struct
 };
 
 /****************************************************************************
- * NuttX Domain Public Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
-int netdriver_setmacaddr(unsigned char *macaddr);
+void netdriver_setmacaddr(unsigned char *macaddr);
 
 /****************************************************************************
  * Private Data
@@ -131,10 +131,9 @@ static inline void dump_ethhdr(const char *msg, unsigned char *buf,
 #  define dump_ethhdr(m,b,l)
 #endif
 
-static int up_setmacaddr(void)
+static void set_macaddr(void)
 {
   unsigned char mac[7];
-  int ret = -1;
 
   /* Assign a random locally-created MAC address.
    *
@@ -158,8 +157,7 @@ static int up_setmacaddr(void)
   mac[5] = rand() % 256;
   mac[6] = 0;
 
-  ret = netdriver_setmacaddr(mac);
-  return ret;
+  netdriver_setmacaddr(mac);
 }
 
 /****************************************************************************
@@ -230,7 +228,7 @@ void tapdev_init(void)
 
   /* Set the MAC address */
 
-  up_setmacaddr();
+  set_macaddr();
 }
 
 unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)

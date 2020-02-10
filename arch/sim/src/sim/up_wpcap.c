@@ -69,8 +69,6 @@
  * Private Types
  ****************************************************************************/
 
-__attribute__ ((dllimport)) extern char **__argv[];
-
 struct pcap;
 
 struct pcap_if
@@ -111,20 +109,16 @@ typedef int (*pcap_sendpacket_t)(struct pcap *, unsigned char *, int);
 HMODULE wpcap;
 static struct pcap *pcap;
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-extern int netdriver_setmacaddr(unsigned char *macaddr);
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
 static pcap_findalldevs_t pcap_findalldevs;
 static pcap_open_live_t   pcap_open_live;
 static pcap_next_ex_t     pcap_next_ex;
 static pcap_sendpacket_t  pcap_sendpacket;
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+void netdriver_setmacaddr(unsigned char *macaddr);
 
 /****************************************************************************
  * Private Functions
