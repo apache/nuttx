@@ -167,7 +167,7 @@ ifeq ($(CONFIG_SIM_NETDEV),y)
   CSRCS += up_netdriver.c
   HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_PKTSIZE)
 ifneq ($(HOSTOS),Cygwin)
-  HOSTSRCS += up_tapdev.c up_netdev.c
+  HOSTSRCS += up_tapdev.c
 ifeq ($(CONFIG_SIM_NET_BRIDGE),y)
   HOSTCFLAGS += -DCONFIG_SIM_NET_BRIDGE
   HOSTCFLAGS += -DCONFIG_SIM_NET_BRIDGE_DEVICE=\"$(CONFIG_SIM_NET_BRIDGE_DEVICE)\"
@@ -176,7 +176,7 @@ ifeq ($(CONFIG_SIM_NET_HOST_ROUTE),y)
   HOSTCFLAGS += -DCONFIG_SIM_NET_HOST_ROUTE
 endif
 else # HOSTOS != Cygwin
-  HOSTSRCS += up_wpcap.c up_netdev.c
+  HOSTSRCS += up_wpcap.c
   DRVLIB = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
 endif # HOSTOS != Cygwin
 endif # CONFIG_SIM_NETDEV

@@ -231,11 +231,10 @@ void tapdev_init(void)
   set_macaddr();
 }
 
-unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
+int tapdev_avail(void)
 {
-  fd_set                fdset;
-  struct timeval        tv;
-  int                   ret;
+  struct timeval tv;
+  fd_set fdset;
 
   /* We can't do anything if we failed to open the tap device */
 
@@ -247,13 +246,19 @@ unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
   /* Wait for data on the tap device (or a timeout) */
 
   tv.tv_sec  = 0;
-  tv.tv_usec = 1000;
+  tv.tv_usec = 0;
 
   FD_ZERO(&fdset);
   FD_SET(gtapdevfd, &fdset);
 
-  ret = select(gtapdevfd + 1, &fdset, NULL, NULL, &tv);
-  if (ret == 0)
+  return select(gtapdevfd + 1, &fdset, NULL, NULL, &tv) > 0;
+}
+
+unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
+{
+  int ret;
+
+  if (!tapdev_avail())
     {
       return 0;
     }
