@@ -41,8 +41,6 @@
 
 #include <nuttx/arch.h>
 
-#ifdef CONFIG_ARCH_ROMGETC
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -86,4 +84,3 @@ char up_romgetc(FAR const char *ptr)
 
   return *ptr;
 }
-#endif

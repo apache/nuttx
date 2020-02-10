@@ -53,8 +53,6 @@
 
 #include "up_internal.h"
 
-#if defined(CONFIG_SIM_QSPIFLASH)
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -602,5 +600,3 @@ FAR struct qspi_dev_s *up_qspiflashinitialize()
   leave_critical_section(flags);
   return (FAR struct qspi_dev_s *)priv;
 }
-
-#endif /* CONFIG_SIM_QSPIFLASH */

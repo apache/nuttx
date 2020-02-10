@@ -46,8 +46,6 @@
 #include "sched/sched.h"
 #include "up_internal.h"
 
-#ifdef CONFIG_SMP
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -177,5 +175,3 @@ void up_cpu_started(void)
   sched_note_start(tcb);
 #endif
 }
-
-#endif /* CONFIG_SMP */

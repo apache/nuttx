@@ -50,8 +50,6 @@
 
 #include "up_internal.h"
 
-#ifdef CONFIG_SIM_IOEXPANDER
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -861,5 +859,3 @@ FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void)
 
   return &priv->dev;
 }
-
-#endif /* CONFIG_SIM_IOEXPANDER */
