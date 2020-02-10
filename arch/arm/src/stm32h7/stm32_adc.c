@@ -1438,10 +1438,12 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
   setbits = 0;
   clrbits = ADC_PCSEL_PCSEL_ALL;
-  for (i = 0; i < priv->cchannels && priv->chanlist[i]; i++)
+  for (i = 0; i < priv->cchannels; i++)
     {
       setbits |= 1 << priv->chanlist[i];
     }
+
+  setbits &= ADC_PCSEL_PCSEL_ALL;
 
   adc_modifyreg(priv, STM32_ADC_PCSEL_OFFSET, clrbits, setbits);
 
