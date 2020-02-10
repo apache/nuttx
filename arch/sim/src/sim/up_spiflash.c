@@ -52,8 +52,6 @@
 
 #include "up_internal.h"
 
-#if defined(CONFIG_SIM_SPIFLASH)
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -953,5 +951,3 @@ FAR struct spi_dev_s *up_spiflashinitialize(FAR const char *name)
   leave_critical_section(flags);
   return (FAR struct spi_dev_s *)priv;
 }
-
-#endif /* CONFIG_SIM_SPIFLASH */

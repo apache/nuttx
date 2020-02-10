@@ -42,9 +42,6 @@
 #include <syslog.h>
 #include <nuttx/sched.h>
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION) && \
-   !defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -207,5 +204,3 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 #endif
 }
 #endif
-
-#endif /* CONFIG_SCHED_INSTRUMENTATION && !CONFIG_SCHED_INSTRUMENTATION_BUFFER */

@@ -46,8 +46,6 @@
 
 #include "up_internal.h"
 
-#ifdef CONFIG_SMP
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -104,5 +102,3 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
   tcb->adj_stack_ptr   = NULL;
   return OK;
 }
-
-#endif /* CONFIG_SMP */

@@ -50,8 +50,6 @@
 
 #include "up_internal.h"
 
-#ifdef CONFIG_AJOYSTICK
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -253,5 +251,3 @@ int up_buttonevent(int x, int y, int buttons)
 
   return OK;
 }
-
-#endif /* CONFIG_AJOYSTICK */

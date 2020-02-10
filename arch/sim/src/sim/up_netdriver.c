@@ -44,8 +44,6 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_NET_ETHERNET
-
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -377,5 +375,3 @@ int netdriver_setmacaddr(unsigned char *macaddr)
   memcpy(g_sim_dev.d_mac.ether.ether_addr_octet, macaddr, IFHWADDRLEN);
   return 0;
 }
-
-#endif /* CONFIG_NET_ETHERNET */
