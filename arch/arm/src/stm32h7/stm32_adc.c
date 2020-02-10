@@ -1329,13 +1329,15 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 
   /* Make sure that the ADC device is in the powered up, reset state.
    * Since reset is shared between ADC1 and ADC2, don't reset one if the
-   * other has already been reset.
+   * other has already been reset. (We only need to worry about this if both
+   * ADC1 and ADC2 are enabled.)
    */
-
+#if defined(CONFIG_STM32H7_ADC1) && defined(CONFIG_STM32H7_ADC2)
   if ((dev == &g_adcdev1 &&
       !((FAR struct stm32_dev_s *)g_adcdev2.ad_priv)->initialized) ||
      (dev == &g_adcdev2 &&
       !((FAR struct stm32_dev_s *)g_adcdev1.ad_priv)->initialized))
+#endif
   {
      adc_reset(dev);
   }
