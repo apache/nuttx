@@ -189,7 +189,7 @@ void up_initialize(void)
    * with the power management subsystem).
    */
 
-  up_pminitialize();
+  pm_initialize();
 #endif
 
 #ifdef CONFIG_MM_IOB
