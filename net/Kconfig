@@ -132,6 +132,24 @@ config NET_LOOPBACK
 	---help---
 		Add support for the local network loopback device, lo.
 
+config NET_LOOPBACK_PKTSIZE
+	int "Loopback packet buffer size"
+	default 0
+	depends on NET_LOOPBACK
+	range 0 65535
+	---help---
+		The loopback driver packet buffer should be quite large.  The larger
+		the loopback packet buffer, the better will be TCP performance of
+		the loopback transfers.  The Linux loopback device historically used
+		packet buffers of size 16Kb, but that was increased in recent Linux
+		versions to 64Kb.  Those sizes may be excessive for resource
+		constrained MCUs, however.
+
+		The network enforces a lower limit that is the maximum packet size
+		of all enabled link layer protocols.  The default value of
+		CONFIG_NET_LOOPBACK_PKTSIZE is zero, meaning that this maximum
+		packet size will be used by loopback driver.
+
 menuconfig NET_SLIP
 	bool "SLIP support"
 	select ARCH_HAVE_NETDEV_STATISTICS

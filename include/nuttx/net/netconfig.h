@@ -184,9 +184,21 @@
 #define MIN_NETDEV_PKTSIZE      _MIN_6LOWPAN_PKTSIZE
 #define MAX_NETDEV_PKTSIZE      _MAX_6LOWPAN_PKTSIZE
 
-/* For the loopback device, we will use the largest MTU */
+/* The loopback driver packet buffer should be quite large.  The larger the
+ * loopback packet buffer, the better will be TCP performance of the loopback
+ * transfers.  The Linux loopback device historically used packet buffers of
+ * size 16Kb, but that was increased in recent Linux versions to 64Kb.  Those
+ * sizes may be excessive for resource constrained MCUs, however.
+ *
+ * For the loopback driver, we enforce a lower limit that is the maximum
+ * packet size of all enabled link layer protocols.
+ */
 
+#if CONFIG_NET_LOOPBACK_PKTSIZE < MAX_NETDEV_PKTSIZE
 #  define NET_LO_PKTSIZE        MAX_NETDEV_PKTSIZE
+#else
+#  define NET_LO_PKTSIZE        CONFIG_NET_LOOPBACK_PKTSIZE
+#endif
 
 /* Layer 3/4 Configuration Options ******************************************/
 
@@ -206,7 +218,7 @@
    * of the timer is 8-bits.
    */
 
-#    define CONFIG_NET_TCP_REASS_MAXAGE (20*10) /* 20 seconds */
+#    define CONFIG_NET_TCP_REASS_MAXAGE (20 * 10) /* 20 seconds */
 #  endif
 #endif
 
