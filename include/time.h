@@ -240,6 +240,8 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp);
 void tzset(void);
 #endif
 
+#include <sys/time.h>
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
