@@ -186,17 +186,17 @@ static void up_notify(FAR struct up_dev_s *priv)
   iinfo("contact=%d nwaiters=%d\n", priv->sample.contact, priv->nwaiters);
   if (priv->nwaiters > 0)
     {
-      /* After posting this semaphore, we need to exit because the touchscreen
-       * is no longer avaialable.
+      /* After posting this semaphore, we need to exit because
+       * the touchscreen is no longer avaialable.
        */
 
       nxsem_post(&priv->waitsem);
     }
 
-  /* If there are threads waiting on poll() for touchscreen data to become available,
-   * then wake them up now.  NOTE: we wake up all waiting threads because we
-   * do not know what they are going to do.  If they all try to read the data,
-   * then some make end up blocking after all.
+  /* If there are threads waiting on poll() for touchscreen data to become
+   * available, then wake them up now.  NOTE: we wake up all waiting threads
+   * because we do not know what they are going to do.  If they all try to
+   * read the data then some make end up blocking after all.
    */
 
   for (i = 0; i < CONFIG_SIM_TCNWAITERS; i++)
@@ -243,11 +243,11 @@ static int up_sample(FAR struct up_dev_s *priv,
           priv->id++;
         }
       else if (sample->contact == CONTACT_DOWN)
-       {
+        {
           /* First report -- next report will be a movement */
 
-         priv->sample.contact = CONTACT_MOVE;
-       }
+          priv->sample.contact = CONTACT_MOVE;
+        }
 
       priv->penchange = false;
       iinfo("penchange=%d contact=%d id=%d\n",
@@ -307,8 +307,8 @@ static int up_waitsample(FAR struct up_dev_s *priv,
         }
     }
 
-  /* Re-acquire the semaphore that manages mutually exclusive access to
-   * the device structure.  We may have to wait here.  But we have our sample.
+  /* Re-acquire the semaphore that manages mutually exclusive access to the
+   * device structure.  We may have to wait here.  But we have our sample.
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
 
@@ -407,7 +407,7 @@ static ssize_t up_read(FAR struct file *filep, FAR char *buffer, size_t len)
         {
           ret = -EAGAIN;
           goto errout;
-       }
+        }
 
       /* Wait for sample data */
 
@@ -446,13 +446,15 @@ static ssize_t up_read(FAR struct file *filep, FAR char *buffer, size_t len)
     {
       /* First contact */
 
-      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID | TOUCH_PRESSURE_VALID;
+      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID |
+                                TOUCH_POS_VALID | TOUCH_PRESSURE_VALID;
     }
   else /* if (sample->contact == CONTACT_MOVE) */
     {
       /* Movement of the same contact */
 
-      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID | TOUCH_PRESSURE_VALID;
+      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID |
+                                TOUCH_POS_VALID | TOUCH_PRESSURE_VALID;
     }
 
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
@@ -736,8 +738,9 @@ void up_buttonevent(int x, int y, int buttons)
 
   if (!pendown)
     {
-      /* Ignore the pend up if the pen was already up (CONTACT_NONE == pen up and
-       * already reported.  CONTACT_UP == pen up, but not reported)
+      /* Ignore the pend up if the pen was already up
+       * (CONTACT_NONE == pen up and  already reported.
+       *  CONTACT_UP == pen up, but not reported)
        */
 
       if (priv->sample.contact == CONTACT_NONE)
@@ -756,8 +759,8 @@ void up_buttonevent(int x, int y, int buttons)
       priv->sample.x = x;
       priv->sample.y = y;
 
-      /* Note the availability of new measurements */
-      /* If this is the first (acknowledged) pen down report, then report
+      /* Note the availability of new measurements:
+       * If this is the first (acknowledged) pen down report, then report
        * this as the first contact.  If contact == CONTACT_DOWN, it will be
        * set to set to CONTACT_MOVE after the contact is first sampled.
        */

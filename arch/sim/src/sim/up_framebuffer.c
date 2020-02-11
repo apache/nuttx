@@ -94,24 +94,34 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-  /* Get information about the video controller configuration and the configuration
-   * of each color plane.
-   */
+/* Get information about the video controller configuration and the
+ * configuration of each color plane.
+ */
 
-static int up_getvideoinfo(FAR struct fb_vtable_s *vtable, FAR struct fb_videoinfo_s *vinfo);
-static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno, FAR struct fb_planeinfo_s *pinfo);
+static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
+                           FAR struct fb_videoinfo_s *vinfo);
+static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
+                           FAR struct fb_planeinfo_s *pinfo);
 
-  /* The following is provided only if the video hardware supports RGB color mapping */
+/* The following is provided only if the video hardware supports
+ * RGB color mapping.
+ */
 
 #ifdef CONFIG_FB_CMAP
-static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap);
-static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s *cmap);
+static int up_getcmap(FAR struct fb_vtable_s *vtable,
+                      FAR struct fb_cmap_s *cmap);
+static int up_putcmap(FAR struct fb_vtable_s *vtable,
+                      FAR const struct fb_cmap_s *cmap);
 #endif
-  /* The following is provided only if the video hardware supports a hardware cursor */
+  /* The following is provided only if the video hardware supports
+   * a hardware cursor
+   */
 
 #ifdef CONFIG_FB_HWCURSOR
-static int up_getcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_cursorattrib_s *attrib);
-static int up_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcursor_s *setttings);
+static int up_getcursor(FAR struct fb_vtable_s *vtable,
+                        FAR struct fb_cursorattrib_s *attrib);
+static int up_setcursor(FAR struct fb_vtable_s *vtable,
+                        FAR struct fb_setcursor_s *setttings);
 #endif
 
 /****************************************************************************
@@ -165,8 +175,8 @@ static struct fb_cursorsize_s g_csize;
 #endif
 #endif
 
-/* The framebuffer object -- There is no private state information in this simple
- * framebuffer simulation.
+/* The framebuffer object -- There is no private state information
+ * in this simple framebuffer simulation.
  */
 
 struct fb_vtable_s g_fbobject =
@@ -228,7 +238,8 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap)
+static int up_getcmap(FAR struct fb_vtable_s *vtable,
+                      FAR struct fb_cmap_s *cmap)
 {
   int len;
   int i;
@@ -260,10 +271,12 @@ static int up_getcmap(FAR struct fb_vtable_s *vtable, FAR struct fb_cmap_s *cmap
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int up_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cmap_s *cmap)
+static int up_putcmap(FAR struct fb_vtable_s *vtable,
+                      FAR const struct fb_cmap_s *cmap)
 {
 #ifdef CONFIG_SIM_X11FB
-  return up_x11cmap(cmap->first, cmap->len, cmap->red, cmap->green, cmap->blue, NULL);
+  return up_x11cmap(cmap->first, cmap->len, cmap->red, cmap->green,
+                    cmap->blue, NULL);
 #else
   ginfo("vtable=%p cmap=%p len=%d\n", vtable, cmap, cmap->len);
   if (vtable && cmap)
@@ -324,6 +337,7 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
           g_cpos = settings->pos;
           ginfo("pos:     (h:%d, w:%d)\n", g_cpos.x, g_cpos.y);
         }
+
 #ifdef CONFIG_FB_HWCURSORSIZE
       if ((flags & FB_CUR_SETSIZE) != 0)
         {
@@ -331,12 +345,15 @@ static int up_setcursor(FAR struct fb_vtable_s *vtable,
           ginfo("size:    (h:%d, w:%d)\n", g_csize.h, g_csize.w);
         }
 #endif
+
 #ifdef CONFIG_FB_HWCURSORIMAGE
       if ((flags & FB_CUR_SETIMAGE) != 0)
         {
           ginfo("image:   (h:%d, w:%d) @ %p\n",
-               settings->img.height, settings->img.width, settings->img.image);
+               settings->img.height, settings->img.width,
+               settings->img.image);
         }
+
 #endif
       return OK;
     }
@@ -400,7 +417,8 @@ int up_fbinitialize(int display)
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
- *   plane of the specified plane.  Many OSDs support multiple planes of video.
+ *   plane of the specified plane.  Many OSDs support multiple planes of
+ *   video.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this

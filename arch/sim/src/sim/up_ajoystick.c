@@ -61,10 +61,12 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower);
+static ajoy_buttonset_t ajoy_supported(
+  FAR const struct ajoy_lowerhalf_s *lower);
 static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
                        FAR struct ajoy_sample_s *sample);
-static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower);
+static ajoy_buttonset_t ajoy_buttons(
+  FAR const struct ajoy_lowerhalf_s *lower);
 static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
                          ajoy_buttonset_t press, ajoy_buttonset_t release,
                          ajoy_handler_t handler, FAR void *arg);
@@ -107,7 +109,8 @@ static ajoy_buttonset_t g_ajoy_rset;       /* Set of releases waited for */
  *
  ****************************************************************************/
 
-static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower)
+static ajoy_buttonset_t ajoy_supported(
+  FAR const struct ajoy_lowerhalf_s *lower)
 {
   return (ajoy_buttonset_t)AJOY_SUPPORTED;
 }
@@ -137,7 +140,8 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
+static ajoy_buttonset_t ajoy_buttons(
+  FAR const struct ajoy_lowerhalf_s *lower)
 {
   g_ajoy_valid   = false;
   g_ajoy_buttons = g_ajoy_sample.as_buttons;
