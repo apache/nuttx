@@ -199,6 +199,16 @@ REVISIT: This may not long be an issue even with NSH because of the recent
 redesign of how the stdio devices are handled in the simulation (they should
 no longer freeze the simulation).
 
+Update: Please issue these commands to setup the reliable network on Ubuntu:
+
+  sudo apt-get -y install net-tools
+  sudo nuttx/tools/simbridge.sh eth0 on
+
+Here is some tips you may need:
+  1.Must launch the exectuable with the root permission
+  2.Have to use virtual machine if host is in corporation network
+  3.Configure the network adpater in NAT mode if virtual machine is used
+
 X11 Issues
 ----------
 There is an X11-based framebuffer driver that you can use to exercise the
