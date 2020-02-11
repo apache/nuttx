@@ -145,6 +145,10 @@ config IMXRT_USDHC
 	bool
 	default n
 
+config IMXRT_FLEXIO
+	bool
+	default n
+
 config IMXRT_HAVE_LPUART
 	bool
 	default n
@@ -199,6 +203,128 @@ config IMXRT_LCD
 	depends on IMXRT_HAVE_LCD
 
 menu "FlexIO Peripherals"
+
+config IMXRT_FLEXIO1
+	bool "FLEXIO1"
+	default n
+	select IMXRT_FLEXIO
+
+if IMXRT_FLEXIO1
+
+choice
+	prompt "FLEXIO1 Clock Source"
+	default FLEXIO1_CLK_PLL3_SW
+	---help---
+		The clock source that drives the FLEXIO.
+		Used to set FLEXIO1_CLK_SEL.
+
+config FLEXIO1_CLK_PLL4
+	bool "PLL4"
+
+config FLEXIO1_CLK_PLL3_PFD2
+	bool "PLL3_PFD2"
+
+if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+
+config FLEXIO1_CLK_PLL5
+	bool "PLL5"
+
+endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+
+config FLEXIO1_CLK_PLL3_SW
+	bool "PLL3_SW_CLK"
+
+endchoice # FLEXIO1 Clock Source
+
+config FLEXIO1_CLK
+	int
+	default 0 if FLEXIO1_CLK_PLL4
+	default 1 if FLEXIO1_CLK_PLL3_PFD2
+	default 2 if FLEXIO1_CLK_PLL5
+	default 3 if FLEXIO1_CLK_PLL3_SW
+
+config FLEXIO1_PRED_DIVIDER
+	int "FLEXIO1 Predivider"
+	range 1 8
+	default 2
+	---help---
+		The clock source predivider value (FLEXIO1_PRED). [1-8]
+
+config FLEXIO1_PODF_DIVIDER
+	int "FLEXIO1 Divider"
+	range 1 8
+	default 8
+	---help---
+		The clock source divider value (FLEXIO1_PODF). [1-8]
+
+endif # IMXRT_FLEXIO1
+
+if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+
+config IMXRT_FLEXIO2
+	bool "FLEXIO2"
+	default n
+	select IMXRT_FLEXIO
+
+if IMXRT_FLEXIO2 || IMXRT_FLEXIO3
+
+choice
+	prompt "FLEXIO2 Clock Source"
+	default FLEXIO2_CLK_PLL3_SW
+	---help---
+		The clock source that drives the FLEXIO.
+		Used to set FLEXIO2_CLK_SEL.
+
+config FLEXIO2_CLK_PLL4
+	bool "PLL4"
+
+config FLEXIO2_CLK_PLL3_PFD2
+	bool "PLL3_PFD2"
+
+config FLEXIO2_CLK_PLL5
+	bool "PLL5"
+
+config FLEXIO2_CLK_PLL3_SW
+	bool "PLL3_SW_CLK"
+
+endchoice # FLEXIO2 Clock Source
+
+config FLEXIO2_CLK
+	int
+	default 0 if FLEXIO2_CLK_PLL4
+	default 1 if FLEXIO2_CLK_PLL3_PFD2
+	default 2 if FLEXIO2_CLK_PLL5
+	default 3 if FLEXIO2_CLK_PLL3_SW
+
+config FLEXIO2_PRED_DIVIDER
+	int
+	prompt "FLEXIO2 Predivider"
+	range 1 8
+	default 2
+	---help---
+		The clock source predivider value (FLEXIO2_PRED). [1-8]
+
+config FLEXIO2_PODF_DIVIDER
+	int
+	prompt "FLEXIO2 Divider"
+	range 1 8
+	default 8
+	---help---
+		The clock source divider value (FLEXIO2_PODF). [1-8]
+
+endif # IMXRT_FLEXIO2 || IMXRT_FLEXIO3
+
+if ARCH_FAMILY_IMXRT106x
+
+config IMXRT_FLEXIO3
+	bool "FLEXIO3"
+	default n
+	select IMXRT_FLEXIO
+    ---help---
+		FLEXIO3 uses the FLEXIO2 clock settings.
+
+endif # ARCH_FAMILY_IMXRT106x
+endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
 
 endmenu # FlexIO Peripherals
 
@@ -369,17 +495,17 @@ menuconfig IMXRT_LPSPI1
 	default n
 	select IMXRT_LPSPI
 
-config IMXRT_LPSPI2
+menuconfig IMXRT_LPSPI2
 	bool "LPSPI2"
 	default n
 	select IMXRT_LPSPI
 
-config IMXRT_LPSPI3
+menuconfig IMXRT_LPSPI3
 	bool "LPSPI3"
 	default n
 	select IMXRT_LPSPI
 
-config IMXRT_LPSPI4
+menuconfig IMXRT_LPSPI4
 	bool "LPSPI4"
 	default n
 	select IMXRT_LPSPI
@@ -719,7 +845,7 @@ endif # DEBUG_SENSORS
 
 endif # IMXRT_ENC4
 
-endif # ARCH_FAMILY_IMXRT105x | ARCH_FAMILY_IMXRT106x
+endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
 
 endmenu # ENC Peripherals
 
