@@ -220,6 +220,10 @@ it, XOpenDisplay() aborted the program.  UPDATE:  This was caused by the small
 stack size and can be fixed by increasing the size of the NuttX stack that
 calls into X11.  See the discussion "Stack Size Issues" above.
 
+Update: You may need issue this command with the latest Ubuntu before launch:
+
+  sudo xhost +
+
 Cygwin64 Issues
 ---------------
 There are some additional issues using the simulator with Cygwin64.  Below is
