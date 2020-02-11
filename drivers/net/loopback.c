@@ -54,6 +54,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/loopback.h>
@@ -108,7 +109,7 @@ struct lo_driver_s
  ****************************************************************************/
 
 static struct lo_driver_s g_loopback;
-static uint8_t g_iobuffer[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
+static uint8_t g_iobuffer[NET_LO_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /****************************************************************************
  * Private Function Prototypes
