@@ -32,7 +32,7 @@ config STM32_ROMFS_MOUNTPOINT
 config STM32_ROMFS_IMAGEFILE
 	string "ROMFS image file to include into build"
 	depends on STM32_ROMFS
-	default "../../../rom.img"
+	default "../../../../../rom.img"
 
 config STM32F4DISCO_USBHOST_STACKSIZE
 	int "USB host waiter stack size"
