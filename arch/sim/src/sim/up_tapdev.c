@@ -38,8 +38,6 @@
  *
  ****************************************************************************/
 
-#ifndef __CYGWIN__
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -71,8 +69,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-//#define TAPDEV_DEBUG  1
 
 #define DEVTAP        "/dev/net/tun"
 
@@ -122,18 +118,21 @@ static struct rtentry ghostroute;
  ****************************************************************************/
 
 #ifdef TAPDEV_DEBUG
-static inline void dump_ethhdr(const char *msg, unsigned char *buf, int buflen)
+static inline void dump_ethhdr(const char *msg, unsigned char *buf,
+                               int buflen)
 {
   syslog(LOG_INFO, "TAPDEV: %s %d bytes\n", msg, buflen);
   syslog(LOG_INFO,
-         "        %02x:%02x:%02x:%02x:%02x:%02x %02x:%02x:%02x:%02x:%02x:%02x %02x%02x\n",
+         "        %02x:%02x:%02x:%02x:%02x:%02x "
+         "%02x:%02x:%02x:%02x:%02x:%02x %02x%02x\n",
          buf[0], buf[1], buf[2], buf[3], buf[4],  buf[5],
          buf[6], buf[7], buf[8], buf[9], buf[10], buf[11],
 #ifdef CONFIG_ENDIAN_BIG
-         buf[13], buf[12]);
+         buf[13], buf[12]
 #else
-         buf[12], buf[13]);
+         buf[12], buf[13]
 #endif
+        );
 }
 #else
 #  define dump_ethhdr(m,b,l)
@@ -201,7 +200,7 @@ void tapdev_init(void)
     {
       syslog(LOG_ERR, "TAPDEV: ioctl failed: %d\n", -ret);
       return;
-   }
+    }
 
   /* Save the tap device name */
 
@@ -228,7 +227,8 @@ void tapdev_init(void)
   ret = ioctl(sockfd, SIOCBRADDIF, &ifr);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't add interface %s to bridge %s): %d\n",
+      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't add interface %s to "
+                      "bridge %s): %d\n",
              gdevname, CONFIG_SIM_NET_BRIDGE_DEVICE, -ret);
     }
 
@@ -328,7 +328,8 @@ void tapdev_ifup(in_addr_t ifaddr)
   ret = ioctl(sockfd, SIOCGIFFLAGS, (unsigned long)&ifr);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't get interface flags): %d\n", -ret);
+      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't get interface flags): %d\n",
+             -ret);
       close(sockfd);
       return;
     }
@@ -337,7 +338,8 @@ void tapdev_ifup(in_addr_t ifaddr)
   ret = ioctl(sockfd, SIOCSIFFLAGS, (unsigned long)&ifr);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't set interface flags): %d\n", -ret);
+      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't set interface flags): %d\n",
+             -ret);
       close(sockfd);
       return;
     }
@@ -387,12 +389,11 @@ void tapdev_ifdown(void)
       ret = ioctl(sockfd, SIOCDELRT, (unsigned long)&ghostroute);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "TAPDEV: ioctl failed (can't delete host route): %d\n", -ret);
+          syslog(LOG_ERR, "TAPDEV: ioctl failed (can't delete host route): %d\n",
+                 -ret);
         }
 
       close(sockfd);
     }
 #endif
 }
-
-#endif /* !__CYGWIN__ */

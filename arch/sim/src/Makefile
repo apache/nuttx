@@ -113,10 +113,6 @@ ifeq ($(CONFIG_ONESHOT),y)
   CSRCS += up_oneshot.c
 endif
 
-ifeq ($(CONFIG_PM),y)
-  CSRCS += up_pminitialize.c
-endif
-
 ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
   HOSTSRCS += up_critmon.c
 endif
@@ -126,15 +122,20 @@ ifeq ($(CONFIG_NX_LCDDRIVER),y)
 else
   CSRCS += up_framebuffer.c
 ifeq ($(CONFIG_SIM_X11FB),y)
+ifeq ($(CONFIG_SIM_X11NOSHM),y)
+  HOSTCFLAGS += -DCONFIG_SIM_X11NOSHM=1
+endif
   HOSTSRCS += up_x11framebuffer.c
   STDLIBS += -lX11 -lXext
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   CSRCS += up_touchscreen.c
   REQUIREDOBJS += up_touchscreen$(OBJEXT)
+  HOSTCFLAGS += -DCONFIG_SIM_TOUCHSCREEN=1
   HOSTSRCS += up_x11eventloop.c
 else
 ifeq ($(CONFIG_SIM_AJOYSTICK),y)
   CSRCS += up_ajoystick.c
+  HOSTCFLAGS += -DCONFIG_SIM_AJOYSTICK=1
   HOSTSRCS += up_x11eventloop.c
 endif
 endif

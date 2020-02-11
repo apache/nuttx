@@ -37,8 +37,6 @@
  * Included Files
  ****************************************************************************/
 
-#define CONFIG_SIM_X11NOSHM 1
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -317,8 +315,8 @@ static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
           goto shmerror;
         }
 
+      g_framebuffer = (unsigned char *)g_image->data;
       g_shmcheckpoint++;
-
     }
   else
 #endif

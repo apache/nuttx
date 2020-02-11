@@ -172,11 +172,11 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then enable all interrupt levels */
 
-  up_irq_restore(CP0_STATUS_IM_ALL);
+  up_irq_restore(CP0_STATUS_INT_ENALL);
 #else
   /* Enable only software interrupts */
 
-  up_irq_restore(CP0_STATUS_IM_SWINTS);
+  up_irq_restore(CP0_STATUS_INT_SW0);
 #endif
 }
 
@@ -410,6 +410,19 @@ void up_clrpend_irq(int irq)
 
       putreg32((1 << bitno), regaddr);
     }
+}
+
+/****************************************************************************
+ * Name: up_clrpend_sw0
+ *
+ * Description:
+ *   Clear a pending Software Interrupt.
+ *
+ ****************************************************************************/
+
+void up_clrpend_sw0(void)
+{
+  up_clrpend_irq(PIC32MX_IRQSRC_CS0);
 }
 
 /****************************************************************************

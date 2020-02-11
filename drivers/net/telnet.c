@@ -306,8 +306,8 @@ static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
           signo = SIGINT;
           break;
         }
-      else
 #endif
+
 #ifdef CONFIG_TTY_SIGSTP
       /* Is this the special character that will generate the SIGSTP signal? */
 
@@ -318,6 +318,9 @@ static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
            */
 
           signo = SIGSTP;
+#ifndef CONFIG_TTY_SIGINT
+          break;
+#endif
         }
 #endif
     }

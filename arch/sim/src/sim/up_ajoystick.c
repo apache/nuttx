@@ -50,8 +50,6 @@
 
 #include "up_internal.h"
 
-#ifdef CONFIG_AJOYSTICK
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -237,21 +235,19 @@ int up_buttonevent(int x, int y, int buttons)
     {
       /* Check button presses */
 
-       changed  = g_ajoy_buttons ^ g_ajoy_sample.as_buttons;
-       if (changed != 0)
-         {
-           pressed  = changed & (AJOY_SUPPORTED & g_ajoy_pset);
-           released = changed & (AJOY_SUPPORTED & ~g_ajoy_rset);
-           if ((pressed & g_ajoy_pset) != 0 || (released & g_ajoy_rset) != 0)
-             {
-               /* Call the interrupt handler */
+      changed  = g_ajoy_buttons ^ g_ajoy_sample.as_buttons;
+      if (changed != 0)
+        {
+          pressed  = changed & (AJOY_SUPPORTED & g_ajoy_pset);
+          released = changed & (AJOY_SUPPORTED & ~g_ajoy_rset);
+          if ((pressed & g_ajoy_pset) != 0 || (released & g_ajoy_rset) != 0)
+            {
+              /* Call the interrupt handler */
 
-               g_ajoy_handler(&g_ajoylower, g_ajoy_arg);
-             }
-         }
+              g_ajoy_handler(&g_ajoylower, g_ajoy_arg);
+            }
+        }
     }
 
   return OK;
 }
-
-#endif /* CONFIG_AJOYSTICK */

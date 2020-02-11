@@ -38,8 +38,6 @@
  *
  ****************************************************************************/
 
-#ifdef __CYGWIN__
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -56,9 +54,6 @@
 #include <malloc.h>
 
 #include <netinet/in.h>
-
-
-extern int netdriver_setmacaddr(unsigned char *macaddr);
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -117,6 +112,12 @@ HMODULE wpcap;
 static struct pcap *pcap;
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+extern int netdriver_setmacaddr(unsigned char *macaddr);
+
+/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -153,7 +154,6 @@ static void init_pcap(struct in_addr addr)
           interfaces->addresses->addr != NULL &&
           interfaces->addresses->addr->sa_family == AF_INET)
         {
-
           struct in_addr interface_addr;
           interface_addr =
             ((struct sockaddr_in *)interfaces->addresses->addr)->sin_addr;
@@ -164,6 +164,7 @@ static void init_pcap(struct in_addr addr)
               break;
             }
         }
+
       interfaces = interfaces->next;
     }
 
@@ -191,7 +192,9 @@ static void set_ethaddr(struct in_addr addr)
     {
       error_exit("error on access to adapter list size\n");
     }
+
   adapters = alloca(size);
+
   if (GetAdaptersAddresses(AF_INET, GAA_FLAG_SKIP_ANYCAST |
                            GAA_FLAG_SKIP_MULTICAST |
                            GAA_FLAG_SKIP_DNS_SERVER,
@@ -202,7 +205,6 @@ static void set_ethaddr(struct in_addr addr)
 
   while (adapters != NULL)
     {
-
       char buffer[256];
       WideCharToMultiByte(CP_ACP, 0, adapters->Description, -1,
                           buffer, sizeof(buffer), NULL, NULL);
@@ -213,7 +215,6 @@ static void set_ethaddr(struct in_addr addr)
           adapters->FirstUnicastAddress->Address.lpSockaddr->sa_family ==
           AF_INET)
         {
-
           struct in_addr adapter_addr;
           adapter_addr =
             ((struct sockaddr_in *)adapters->FirstUnicastAddress->Address.
@@ -227,6 +228,7 @@ static void set_ethaddr(struct in_addr addr)
                   error_exit
                     ("ip addr specified does not belong to an ethernet card\n");
                 }
+
               printf
                 ("set_ethaddr:  ethernetaddr: %02X-%02X-%02X-%02X-%02X-%02X\n",
                  adapters->PhysicalAddress[0], adapters->PhysicalAddress[1],
@@ -237,6 +239,7 @@ static void set_ethaddr(struct in_addr addr)
               break;
             }
         }
+
       adapters = adapters->Next;
     }
 
@@ -310,5 +313,3 @@ void wpcap_send(unsigned char *buf, unsigned int buflen)
       error_exit("error on send\n");
     }
 }
-
-#endif /* __CYGWIN__ */

@@ -32,13 +32,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-WD=$PWD
+WD=$(cd $(dirname $0) && cd .. && pwd)
 nuttx=$WD/../nuttx
 
 progname=$0
 fail=0
 sizet=default
-APPSDIR=../apps
+APPSDIR=$WD/../apps
 MAKE_FLAGS=-k
 MAKE=make
 unset testfile

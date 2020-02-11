@@ -44,8 +44,6 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_NET_ETHERNET
-
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -189,8 +187,8 @@ static void netdriver_work(FAR void *arg)
     {
       NETDEV_RXPACKETS(&g_sim_dev);
 
-      /* Data received event.  Check for valid Ethernet header with destination == our
-       * MAC address
+      /* Data received event.  Check for valid Ethernet header with
+       * destination == our MAC address
        */
 
       eth = BUF;
@@ -377,5 +375,3 @@ int netdriver_setmacaddr(unsigned char *macaddr)
   memcpy(g_sim_dev.d_mac.ether.ether_addr_octet, macaddr, IFHWADDRLEN);
   return 0;
 }
-
-#endif /* CONFIG_NET_ETHERNET */

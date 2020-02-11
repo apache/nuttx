@@ -52,11 +52,10 @@
 
 #include "up_internal.h"
 
-#if defined(CONFIG_SIM_SPIFLASH)
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 
 /* Define the FLASH SIZE in bytes */
@@ -73,7 +72,7 @@
 
 #ifdef CONFIG_SIM_SPIFLASH_8M
 #  define CONFIG_SPIFLASH_SIZE            (1024 * 1024)
-#  define CONFIG_SPIFLASH_CAPACITY_SST26  0x3F
+#  define CONFIG_SPIFLASH_CAPACITY_SST26  0x3f
 #  define CONFIG_SPIFLASH_CAPACITY        0x14
 #endif
 
@@ -149,7 +148,9 @@
 #define SPIFLASH_STATE_FREAD_WAIT   17
 
 /* Instructions */
+
 /*      Command            Value      N Description             Addr Dummy Data   */
+
 #define SPIFLASH_WREN      0x06    /* 1 Write Enable              0   0     0     */
 #define SPIFLASH_WRDI      0x04    /* 1 Write Disable             0   0     0     */
 #define SPIFLASH_RDID      0x9f    /* 1 Read Identification       0   0     1-3   */
@@ -246,7 +247,10 @@ static const struct spi_ops_s g_spiops =
 #ifdef CONFIG_SIM_SPIFLASH_M25P
 struct sim_spiflashdev_s g_spidev_m25p =
 {
-  .spidev   = { &g_spiops },
+  .spidev   =
+  {
+    &g_spiops
+  },
   .name     = "m25p",
   .manuf    = 0x20,
   .type     = 0x20,
@@ -257,9 +261,12 @@ struct sim_spiflashdev_s g_spidev_m25p =
 #ifdef CONFIG_SIM_SPIFLASH_SST26
 struct sim_spiflashdev_s g_spidev_sst26 =
 {
-  .spidev   = { &g_spiops },
+  .spidev   =
+  {
+    &g_spiops
+  },
   .name     = "sst26",
-  .manuf    = 0xBF,
+  .manuf    = 0xbf,
 #ifdef CONFIG_SST26_MEMORY_TYPE
   .type     = CONFIG_SST26_MEMORY_TYPE,
 #else
@@ -272,7 +279,10 @@ struct sim_spiflashdev_s g_spidev_sst26 =
 #ifdef CONFIG_SIM_SPIFLASH_W25
 struct sim_spiflashdev_s g_spidev_w25 =
 {
-  .spidev   = { &g_spiops },
+  .spidev   =
+  {
+    &g_spiops
+  },
   .name     = "w25",
   .manuf    = 0xef,
   .type     = 0x30,
@@ -283,7 +293,10 @@ struct sim_spiflashdev_s g_spidev_w25 =
 #ifdef CONFIG_SIM_SPIFLASH_CUSTOM
 struct sim_spiflashdev_s g_spidev_custom =
 {
-  .spidev   = { &g_spiops },
+  .spidev   =
+  {
+    &g_spiops
+  },
   .name     = "custom",
   .manuf    = CONFIG_SIM_SPIFLASH_MANUFACTURER,
   .type     = CONFIG_SIM_SPIFLASH_MEMORY_TYPE,
@@ -584,7 +597,8 @@ static void spiflash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffe
  ************************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spiflash_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, size_t nwords)
+static void spiflash_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                              size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
   return spiflash_exchange(dev, txbuffer, NULL, nwords);
@@ -657,7 +671,7 @@ static void spiflash_sectorerase(FAR struct sim_spiflashdev_s *priv)
 
       /* Now perform the erase */
 
-      memset(&priv->data[address], 0xFF, len);
+      memset(&priv->data[address], 0xff, len);
     }
 }
 
@@ -799,6 +813,7 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
         break;
 
       case SPIFLASH_STATE_PP4:
+
         /* In this state we actually write data (if WREN enabled) */
 
         if (priv->wren)
@@ -851,6 +866,7 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
         break;
 
       case SPIFLASH_STATE_READ4:
+
         /* In this state perform data reads until de-selected. */
 
         priv->read_data = priv->data[priv->address++];
@@ -862,7 +878,7 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
 
       default:
         priv->state = SPIFLASH_STATE_IDLE;
-        priv->read_data = 0xFF;
+        priv->read_data = 0xff;
         break;
     }
 }
@@ -946,12 +962,10 @@ FAR struct spi_dev_s *up_spiflashinitialize(FAR const char *name)
   priv->wren = 0;
   priv->address = 0;
   priv->state = SPIFLASH_STATE_IDLE;
-  priv->read_data = 0xFF;
-  priv->last_cmd = 0xFF;
-  memset(&priv->data[0], 0xFF, sizeof(priv->data));
+  priv->read_data = 0xff;
+  priv->last_cmd = 0xff;
+  memset(&priv->data[0], 0xff, sizeof(priv->data));
 
   leave_critical_section(flags);
   return (FAR struct spi_dev_s *)priv;
 }
-
-#endif /* CONFIG_SIM_SPIFLASH */
