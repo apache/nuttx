@@ -1114,7 +1114,13 @@ config NAME_MAX
 	int "Maximum size of a file name"
 	default 32
 	---help---
-	The maximum size of a file name.
+		The maximum size of a file name.
+
+config PATH_MAX
+	int "Maximum size of path name"
+	default 256
+	---help---
+		The maximum size of path name.
 
 endmenu # Files and I/O
 
