@@ -253,7 +253,7 @@ static int ee24xx_waitwritecomplete(FAR struct ee24xx_dev_s *eedev,
 {
   struct i2c_msg_s msgs[1];
   int ret;
-  int retries = 100;
+  int retries = 500;
   uint8_t adr;
   uint32_t addr_hi = (memaddr >> (eedev->addrlen << 3));
 
