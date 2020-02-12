@@ -22,7 +22,7 @@ config MM_KERNEL_HEAP
 		has a more appropriate heap allocation strategy.
 
 config MM_KERNEL_HEAPSIZE
-	int "Kernal heap size"
+	int "Kernel heap size"
 	default 8192
 	depends on MM_KERNEL_HEAP
 	---help---
