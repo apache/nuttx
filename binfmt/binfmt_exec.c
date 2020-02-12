@@ -75,7 +75,7 @@
  *
  *   This non-standard interface is included as a official NuttX API only
  *   because it is needed in certain build modes: exec() is probably the
- *   only want to load programs in the PROTECTED mode. Other file execution
+ *   only way to load programs in the PROTECTED mode. Other file execution
  *   APIs rely on a symbol table provided by the OS. In the PROTECTED build
  *   mode, the OS cannot provide any meaningful symbolic information for
  *   execution of code in the user-space blob so that is the exec() function
@@ -84,12 +84,12 @@
  *   The interface is available in the FLAT build mode although it is not
  *   really necessary in that case. It is currently used by some example
  *   code under the apps/ that that generate their own symbol tables for
- *   linking test programs. So althought it is not necessary, it can still
+ *   linking test programs. So although it is not necessary, it can still
  *   be useful.
  *
  *   The interface would be completely useless and will not be supported in
  *   in the KERNEL build mode where the contrary is true: An application
- *   process cannot provide any meaning symbolic information for use in
+ *   process cannot provide any meaningful symbolic information for use in
  *   linking a different process.
  *
  *   NOTE: This function is flawed and useless without CONFIG_BINFMT_LOADABLE
