@@ -96,7 +96,7 @@ static dq_queue_t g_active_pkt_connections;
  *
  ****************************************************************************/
 
-static inline void _pkt_semtake(sem_t *sem)
+static inline void _pkt_semtake(FAR sem_t *sem)
 {
   net_lockedwait_uninterruptible(sem);
 }
