@@ -109,6 +109,10 @@ ifeq ($(CONFIG_ONESHOT),y)
   CSRCS += up_oneshot.c
 endif
 
+ifeq ($(CONFIG_RTC_DRIVER),y)
+  CSRCS += up_rtc.c
+endif
+
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
   CSRCS += up_lcd.c
 else
@@ -124,12 +128,10 @@ ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   REQUIREDOBJS += up_touchscreen$(OBJEXT)
   HOSTCFLAGS += -DCONFIG_SIM_TOUCHSCREEN=1
   HOSTSRCS += up_x11eventloop.c
-else
-ifeq ($(CONFIG_SIM_AJOYSTICK),y)
+else ifeq ($(CONFIG_SIM_AJOYSTICK),y)
   CSRCS += up_ajoystick.c
   HOSTCFLAGS += -DCONFIG_SIM_AJOYSTICK=1
   HOSTSRCS += up_x11eventloop.c
-endif
 endif
 endif
 endif
