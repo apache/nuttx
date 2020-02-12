@@ -8,6 +8,7 @@ chdir          NXchdir
 clearenv       NXclearenv
 clock          NXclock
 clock_gettime  NXclock_gettime
+clock_settime  NXclock_settime
 close          NXclose
 closedir       NXclosedir
 connect        NXconnect
