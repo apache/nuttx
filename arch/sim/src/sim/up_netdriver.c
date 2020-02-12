@@ -276,6 +276,7 @@ static void netdriver_timer_work(FAR void *arg)
       work_queue(LPWORK, &g_timer_work, netdriver_timer_work, dev, CLK_TCK);
       devif_timer(dev, CLK_TCK, netdriver_txpoll);
     }
+
   net_unlock();
 }
 
@@ -302,6 +303,7 @@ static void netdriver_txavail_work(FAR void *arg)
     {
       devif_poll(dev, netdriver_txpoll);
     }
+
   net_unlock();
 }
 
@@ -311,6 +313,7 @@ static int netdriver_txavail(FAR struct net_driver_s *dev)
     {
       work_queue(LPWORK, &g_avail_work, netdriver_txavail_work, dev, 0);
     }
+
   return OK;
 }
 
