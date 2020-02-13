@@ -88,8 +88,9 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
            node < heap->mm_heapend[region];
            node = (FAR struct mm_allocnode_s *)((FAR char *)node + node->size))
         {
-          minfo("region=%d node=%p size=%p preceding=%p (%c)\n",
-                region, node, node->size, (node->preceding & ~MM_ALLOC_BIT),
+          minfo("region=%d node=%p size=%u preceding=%u (%c)\n",
+                region, node, (unsigned int)node->size,
+                (unsigned int)(node->preceding & ~MM_ALLOC_BIT),
                 (node->preceding & MM_ALLOC_BIT) ? 'A' : 'F');
 
           /* Check if the node corresponds to an allocated memory chunk */
