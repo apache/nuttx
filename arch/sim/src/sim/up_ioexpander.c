@@ -818,7 +818,7 @@ static void sim_interrupt(int argc, wdparm_t arg1, ...)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_ioexpander_initialize
+ * Name: up_ioexpander_initialize
  *
  * Description:
  *   Instantiate and configure the I/O Expander device driver to use the provided
@@ -834,7 +834,7 @@ static void sim_interrupt(int argc, wdparm_t arg1, ...)
  *
  ****************************************************************************/
 
-FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void)
+FAR struct ioexpander_dev_s *up_ioexpander_initialize(void)
 {
   FAR struct sim_dev_s *priv = &g_ioexpander;
   int ret;

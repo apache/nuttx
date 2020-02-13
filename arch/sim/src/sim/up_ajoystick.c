@@ -173,14 +173,14 @@ static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_ajoy_initialize
+ * Name: up_ajoy_initialize
  *
  * Description:
  *   Initialize and register the button joystick driver
  *
  ****************************************************************************/
 
-int sim_ajoy_initialize(void)
+int up_ajoy_initialize(void)
 {
   int ret;
 

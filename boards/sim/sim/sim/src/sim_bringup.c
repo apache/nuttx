@@ -245,7 +245,7 @@ int sim_bringup(void)
 #ifdef CONFIG_AJOYSTICK
   /* Initialize the simulated analog joystick input device */
 
-  sim_ajoy_initialize();
+  up_ajoy_initialize();
 #endif
 
 #if defined(CONFIG_NX) && defined(CONFIG_SIM_TOUCHSCREEN)
@@ -271,10 +271,10 @@ int sim_bringup(void)
 #  ifdef CONFIG_SIM_TOUCHSCREEN
   /* Initialize the touchscreen */
 
-  ret = sim_tsc_initialize(0);
+  ret = up_tsc_initialize(0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: sim_tsc_initialize failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: up_tsc_initialize failed: %d\n", ret);
     }
 #  endif
 

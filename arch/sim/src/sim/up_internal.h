@@ -233,7 +233,7 @@ void host_sleepuntil(uint64_t nsec);
 /* up_simsmp.c **************************************************************/
 
 #ifdef CONFIG_SMP
-void sim_cpu0_start(void);
+void up_cpu0_start(void);
 #endif
 
 /* up_smpsignal.c ***********************************************************/
@@ -290,8 +290,8 @@ int up_x11cmap(unsigned short first, unsigned short len,
 /* up_touchscreen.c *********************************************************/
 
 #ifdef CONFIG_SIM_TOUCHSCREEN
-int  sim_tsc_initialize(int minor);
-void sim_tsc_uninitialize(void);
+int  up_tsc_initialize(int minor);
+void up_tsc_uninitialize(void);
 #endif
 
 /* up_eventloop.c ***********************************************************/
@@ -305,14 +305,14 @@ void up_buttonevent(int x, int y, int buttons);
 /* up_ajoystick.c ***********************************************************/
 
 #ifdef CONFIG_SIM_AJOYSTICK
-int sim_ajoy_initialize(void);
+int up_ajoy_initialize(void);
 #endif
 
 /* up_ioexpander.c **********************************************************/
 
 #ifdef CONFIG_SIM_IOEXPANDER
 struct ioexpander_dev_s;
-FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void);
+FAR struct ioexpander_dev_s *up_ioexpander_initialize(void);
 #endif
 
 /* up_tapdev.c **************************************************************/

@@ -256,10 +256,10 @@ int sim_tsc_setup(int minor)
 
   /* Finally, initialize the touchscreen simulation on the X window */
 
-  ret = sim_tsc_initialize(minor);
+  ret = up_tsc_initialize(minor);
   if (ret < 0)
     {
-      ierr("ERROR: sim_tsc_initialize failed: %d\n", ret);
+      ierr("ERROR: up_tsc_initialize failed: %d\n", ret);
       goto errout_with_nx;
     }
 

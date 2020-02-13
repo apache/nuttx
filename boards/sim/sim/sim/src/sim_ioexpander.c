@@ -66,10 +66,10 @@ int sim_gpio_initialize(void)
 {
   /* Get an instance of the simulated I/O expander */
 
-  FAR struct ioexpander_dev_s *ioe = sim_ioexpander_initialize();
+  FAR struct ioexpander_dev_s *ioe = up_ioexpander_initialize();
   if (ioe == NULL)
     {
-      gpioerr("ERROR: sim_ioexpander_initialize failed\n");
+      gpioerr("ERROR: up_ioexpander_initialize failed\n");
       return -ENOMEM;
     }
 

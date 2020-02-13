@@ -197,7 +197,7 @@ static void sim_handle_signal(int signo, siginfo_t *info, void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_cpu0_start
+ * Name: up_cpu0_start
  *
  * Description:
  *   Create the pthread-specific data key and set the indication of CPU0
@@ -211,7 +211,7 @@ static void sim_handle_signal(int signo, siginfo_t *info, void *context)
  *
  ****************************************************************************/
 
-void sim_cpu0_start(void)
+void up_cpu0_start(void)
 {
   struct sigaction act;
   sigset_t set;

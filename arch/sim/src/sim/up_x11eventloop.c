@@ -45,7 +45,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-extern void up_buttonevent(int x, int y, int buttons);
+void up_buttonevent(int x, int y, int buttons);
 
 /****************************************************************************
  * Public Data

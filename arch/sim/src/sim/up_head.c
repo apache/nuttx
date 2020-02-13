@@ -88,7 +88,7 @@ int main(int argc, char **argv, char **envp)
 #ifdef CONFIG_SMP
       /* Start the CPU0 emulation.  This should not return. */
 
-      sim_cpu0_start();
+      up_cpu0_start();
 #else
       /* Start the Nuttx emulation.  This should not return. */
 
