@@ -97,8 +97,9 @@ static void restoremode(void)
 int simuart_putraw(int ch)
 {
   ssize_t nwritten;
+  unsigned char buf = ch;
 
-  nwritten = write(1, &ch, 1);
+  nwritten = write(1, &buf, 1);
   if (nwritten != 1)
     {
       return -1;
@@ -154,7 +155,7 @@ int simuart_putc(int ch)
 int simuart_getc(void)
 {
   int ret;
-  int ch;
+  unsigned char ch;
 
   ret = read(0, &ch, 1);
   return ret < 0 ? ret : ch;
