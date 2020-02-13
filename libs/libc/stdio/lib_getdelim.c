@@ -53,7 +53,7 @@
  */
 
 #undef HAVE_GETLINE
-#if defined(CONFIG_EOL_IS_CR)
+#if defined(CONFIG_EOL_IS_CR) || defined(CONFIG_EOL_IS_EITHER_CRLF)
 #  define HAVE_GETLINE 1
 #  define EOLCH        '/r'
 #elif defined(CONFIG_EOL_IS_LF)
