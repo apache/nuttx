@@ -250,5 +250,6 @@ int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
                   unsigned int len, unsigned int offset, bool throttled,
                   enum iob_user_e consumerid)
 {
-  return iob_copyin_internal(iob, src, len, offset, throttled, false, consumerid);
+  return iob_copyin_internal(iob, src, len, offset, throttled, false,
+                             consumerid);
 }

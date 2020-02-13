@@ -213,7 +213,8 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
                 }
 
               /* We know that the first free bit is now within the lower 4 bits
-               * of 'curr'.  Check if we have the allocation at this bit position.
+               * of 'curr'.  Check if we have the allocation at this bit
+               * position.
                */
 
               else if ((curr & mask) == 0)
