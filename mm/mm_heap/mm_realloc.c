@@ -266,8 +266,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           oldnode = newnode;
           oldsize = newnode->size;
 
-          /* Now we have to move the user contents 'down' in memory.  memcpy should
-           * should be save for this.
+          /* Now we have to move the user contents 'down' in memory.  memcpy
+           * should be safe for this.
            */
 
           newmem = (FAR void *)((FAR char *)newnode + SIZEOF_MM_ALLOCNODE);
