@@ -113,6 +113,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   /* We need to hold the MM semaphore while we muck with the nodelist. */
 
   mm_takesemaphore(heap);
+  DEBUGASSERT(oldnode->preceding & MM_ALLOC_BIT);
+  DEBUGASSERT(mm_heapmember(heap, oldmem));
 
   /* Check if this is a request to reduce the size of the allocation. */
 
@@ -244,6 +246,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                */
 
               prev->size        -= takeprev;
+              DEBUGASSERT(prev->size >= SIZEOF_MM_FREENODE);
               newnode->size      = oldsize + takeprev;
               newnode->preceding = prev->size | MM_ALLOC_BIT;
               next->preceding    = newnode->size | (next->preceding & MM_ALLOC_BIT);
@@ -312,6 +315,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                */
 
               newnode->size        = nextsize - takenext;
+              DEBUGASSERT(newnode->size >= SIZEOF_MM_FREENODE);
               newnode->preceding   = oldnode->size;
               andbeyond->preceding = newnode->size | (andbeyond->preceding & MM_ALLOC_BIT);
 

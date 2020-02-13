@@ -168,6 +168,8 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
   CHECK_ALLOCNODE_SIZE;
   CHECK_FREENODE_SIZE;
 #endif
+  DEBUGASSERT(MM_MIN_CHUNK >= SIZEOF_MM_FREENODE);
+  DEBUGASSERT(MM_MIN_CHUNK >= SIZEOF_MM_ALLOCNODE);
 
   /* Set up global variables */
 
