@@ -1,0 +1,26 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "SocketCAN Support"
+
+config NET_CAN
+	bool "SocketCAN support"
+	default n
+	---help---
+		Enable support for SocketCAN sockets that will permit.
+
+		This logic is a WIP.  Currently only fragmentary support is
+		available, not enough to actually do anything of consequence.
+
+if NET_CAN
+
+config CAN_CONNS
+	int "Number of CAN connections"
+	default 4
+	---help---
+		Maximum number of CAN connections (all tasks).
+
+endif # NET_CAN
+endmenu # CAN Socket Support
