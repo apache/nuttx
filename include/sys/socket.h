@@ -62,6 +62,7 @@
 #define PF_NETLINK    16         /* Netlink IPC socket */
 #define PF_ROUTE      PF_NETLINK /* 4.4BSD Compatibility*/
 #define PF_PACKET     17         /* Low level packet interface */
+#define PF_CAN        29         /* Controller Area Network (SocketCAN) */
 #define PF_BLUETOOTH  31         /* Bluetooth sockets */
 #define PF_IEEE802154 36         /* Low level IEEE 802.15.4 radio frame interface */
 #define PF_PKTRADIO   64         /* Low level packet radio interface */
@@ -78,6 +79,7 @@
 #define AF_NETLINK     PF_NETLINK
 #define AF_ROUTE       PF_ROUTE
 #define AF_PACKET      PF_PACKET
+#define AF_CAN         PF_CAN
 #define AF_BLUETOOTH   PF_BLUETOOTH
 #define AF_IEEE802154  PF_IEEE802154
 #define AF_PKTRADIO    PF_PKTRADIO
