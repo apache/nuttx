@@ -193,10 +193,10 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
 
       ret = _SEM_TRYWAIT(&heap->mm_semaphore);
       if (ret < 0)
-       {
-         _SEM_GETERROR(ret);
-         goto errout;
-       }
+        {
+          _SEM_GETERROR(ret);
+          goto errout;
+        }
 
       /* We have it.  Claim the heap for the current task and return */
 

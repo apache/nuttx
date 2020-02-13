@@ -107,7 +107,6 @@ void iob_stats_onfree(enum iob_user_e producerid)
   /* Increment the global statistic as well */
 
   g_iobuserstats[IOBUSER_GLOBAL].totalproduced++;
-
 }
 
 /****************************************************************************

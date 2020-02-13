@@ -124,11 +124,11 @@ static const struct nibble_info_s g_4bit_info[16] =
 
 static const struct nibble_info_s *g_info_table[5] =
 {
-   g_0bit_info,
-   g_1bit_info,
-   g_2bit_info,
-   g_3bit_info,
-   g_4bit_info
+  g_0bit_info,
+  g_1bit_info,
+  g_2bit_info,
+  g_3bit_info,
+  g_4bit_info
 };
 
 /****************************************************************************
@@ -312,7 +312,7 @@ static void gran_byte_info(uint8_t value, FAR struct valinfo_s *info,
 
   /* Handle special cases */
 
-   if (value == 0)
+  if (value == 0)
     {
       /* All free */
 
@@ -379,7 +379,7 @@ static void gran_hword_info(uint16_t value, FAR struct valinfo_s *info,
 
   /* Handle special cases */
 
-   if (value == 0)
+  if (value == 0)
     {
       /* All free */
 

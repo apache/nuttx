@@ -78,6 +78,7 @@ int iob_navail(bool throttled)
           ret -= CONFIG_IOB_THROTTLE;
         }
 #endif
+
       if (ret < 0)
         {
           ret = 0;

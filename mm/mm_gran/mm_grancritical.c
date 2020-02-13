@@ -86,5 +86,4 @@ void gran_leave_critical(FAR struct gran_s *priv)
 #endif
 }
 
-
 #endif /* CONFIG_GRAN */

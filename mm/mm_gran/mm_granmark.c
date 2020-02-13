@@ -101,9 +101,9 @@ void gran_mark_allocated(FAR struct gran_s *priv, uintptr_t alloc,
       /* Mark bits in the second GAT entry */
 
       gatmask = 0xffffffff >> (32 - ngranules);
-      DEBUGASSERT((priv->gat[gatidx+1] & gatmask) == 0);
+      DEBUGASSERT((priv->gat[gatidx + 1] & gatmask) == 0);
 
-      priv->gat[gatidx+1] |= gatmask;
+      priv->gat[gatidx + 1] |= gatmask;
     }
 
   /* Handle the case where where all of the granules come from one entry */
