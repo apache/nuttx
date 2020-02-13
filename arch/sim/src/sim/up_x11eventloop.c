@@ -45,7 +45,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-extern int up_buttonevent(int x, int y, int buttons);
+extern void up_buttonevent(int x, int y, int buttons);
 
 /****************************************************************************
  * Public Data
@@ -54,8 +54,6 @@ extern int up_buttonevent(int x, int y, int buttons);
 /* Defined in up_x11framebuffer.c */
 
 extern Display *g_display;
-
-volatile int g_eventloop;
 
 /****************************************************************************
  * Private Functions
@@ -107,7 +105,7 @@ void up_x11events(void)
 
   /* Check if there are any pending, queue X11 events. */
 
-  if (XPending(g_display) > 0)
+  if (g_display && XPending(g_display) > 0)
     {
       /* Yes, get the event (this should not block since we know there are
        * pending events)

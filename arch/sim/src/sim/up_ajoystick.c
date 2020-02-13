@@ -61,10 +61,12 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower);
+static ajoy_buttonset_t ajoy_supported(
+  FAR const struct ajoy_lowerhalf_s *lower);
 static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
                        FAR struct ajoy_sample_s *sample);
-static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower);
+static ajoy_buttonset_t ajoy_buttons(
+  FAR const struct ajoy_lowerhalf_s *lower);
 static void ajoy_enable(FAR const struct ajoy_lowerhalf_s *lower,
                          ajoy_buttonset_t press, ajoy_buttonset_t release,
                          ajoy_handler_t handler, FAR void *arg);
@@ -85,6 +87,7 @@ static const struct ajoy_lowerhalf_s g_ajoylower =
 
 /* Driver state data */
 
+static int g_eventloop;
 static bool g_ajoy_valid;                  /* True: Sample data is valid */
 static struct ajoy_sample_s g_ajoy_sample; /* Last sample data */
 static ajoy_buttonset_t g_ajoy_buttons;    /* Last buttons set */
@@ -106,7 +109,8 @@ static ajoy_buttonset_t g_ajoy_rset;       /* Set of releases waited for */
  *
  ****************************************************************************/
 
-static ajoy_buttonset_t ajoy_supported(FAR const struct ajoy_lowerhalf_s *lower)
+static ajoy_buttonset_t ajoy_supported(
+  FAR const struct ajoy_lowerhalf_s *lower)
 {
   return (ajoy_buttonset_t)AJOY_SUPPORTED;
 }
@@ -136,7 +140,8 @@ static int ajoy_sample(FAR const struct ajoy_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static ajoy_buttonset_t ajoy_buttons(FAR const struct ajoy_lowerhalf_s *lower)
+static ajoy_buttonset_t ajoy_buttons(
+  FAR const struct ajoy_lowerhalf_s *lower)
 {
   g_ajoy_valid   = false;
   g_ajoy_buttons = g_ajoy_sample.as_buttons;
@@ -196,11 +201,16 @@ int sim_ajoy_initialize(void)
  * Name: up_buttonevent
  ****************************************************************************/
 
-int up_buttonevent(int x, int y, int buttons)
+void up_buttonevent(int x, int y, int buttons)
 {
   ajoy_buttonset_t changed;
   ajoy_buttonset_t pressed;
   ajoy_buttonset_t released;
+
+  if (g_eventloop == 0)
+    {
+      return;
+    }
 
   /* Same the positional data */
 
@@ -248,6 +258,4 @@ int up_buttonevent(int x, int y, int buttons)
             }
         }
     }
-
-  return OK;
 }

@@ -168,8 +168,12 @@
 
 #define OLED_I2C_PORT   2
 
+/* PWM */
+
+#define NUCLEOH743ZI_PWMTIMER 1
+
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -238,7 +242,7 @@ int stm32_gpio_initialize(void);
 void stm32_usbinitialize(void);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_lsm6dsl_initialize
  *
  * Description:
@@ -250,7 +254,7 @@ void stm32_usbinitialize(void);
 int stm32_lsm6dsl_initialize(char *devpath);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_lsm303agr_initialize
  *
  * Description:
@@ -262,7 +266,7 @@ int stm32_lsm6dsl_initialize(char *devpath);
 int stm32_lsm303agr_initialize(char *devpath);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_wlinitialize
  *
  * Description:
@@ -273,7 +277,7 @@ int stm32_lsm303agr_initialize(char *devpath);
 int stm32_wlinitialize(void);
 #endif
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32_lsm9ds1_initialize
  *
  * Description:
@@ -293,6 +297,18 @@ int stm32_lsm9ds1_initialize(char *devpath);
 
 #ifdef CONFIG_PCA9635PW
 int stm32_pca9635_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PWM
+int stm32_pwm_setup(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_NUCLEO_H743ZI_SRC_NUCLEO_H743ZI_H */

@@ -72,11 +72,6 @@
 
 #define DEVTAP        "/dev/net/tun"
 
-/* Syslog priority (must match definitions in nuttx/include/syslog.h) */
-
-#define LOG_INFO      1  /* Informational message */
-#define LOG_ERR       4  /* Error conditions */
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -93,11 +88,10 @@ struct sel_arg_struct
 };
 
 /****************************************************************************
- * NuttX Domain Public Function Prototypes
+ * Public Function Prototypes
  ****************************************************************************/
 
-int syslog(int priority, const char *format, ...);
-int netdriver_setmacaddr(unsigned char *macaddr);
+void netdriver_setmacaddr(unsigned char *macaddr);
 
 /****************************************************************************
  * Private Data
@@ -121,9 +115,8 @@ static struct rtentry ghostroute;
 static inline void dump_ethhdr(const char *msg, unsigned char *buf,
                                int buflen)
 {
-  syslog(LOG_INFO, "TAPDEV: %s %d bytes\n", msg, buflen);
-  syslog(LOG_INFO,
-         "        %02x:%02x:%02x:%02x:%02x:%02x "
+  printf("TAPDEV: %s %d bytes\n", msg, buflen);
+  printf("        %02x:%02x:%02x:%02x:%02x:%02x "
          "%02x:%02x:%02x:%02x:%02x:%02x %02x%02x\n",
          buf[0], buf[1], buf[2], buf[3], buf[4],  buf[5],
          buf[6], buf[7], buf[8], buf[9], buf[10], buf[11],
@@ -138,10 +131,9 @@ static inline void dump_ethhdr(const char *msg, unsigned char *buf,
 #  define dump_ethhdr(m,b,l)
 #endif
 
-static int up_setmacaddr(void)
+static void set_macaddr(void)
 {
   unsigned char mac[7];
-  int ret = -1;
 
   /* Assign a random locally-created MAC address.
    *
@@ -165,8 +157,7 @@ static int up_setmacaddr(void)
   mac[5] = rand() % 256;
   mac[6] = 0;
 
-  ret = netdriver_setmacaddr(mac);
-  return ret;
+  netdriver_setmacaddr(mac);
 }
 
 /****************************************************************************
@@ -187,7 +178,7 @@ void tapdev_init(void)
   gtapdevfd = open(DEVTAP, O_RDWR, 0644);
   if (gtapdevfd < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: open failed: %d\n", -gtapdevfd);
+      printf("TAPDEV: open failed: %d\n", -gtapdevfd);
       return;
     }
 
@@ -198,7 +189,7 @@ void tapdev_init(void)
   ret = ioctl(gtapdevfd, TUNSETIFF, (unsigned long) &ifr);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: ioctl failed: %d\n", -ret);
+      printf("TAPDEV: ioctl failed: %d\n", -ret);
       return;
     }
 
@@ -214,7 +205,7 @@ void tapdev_init(void)
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if (sockfd < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: Can't open socket: %d\n", -sockfd);
+      printf("TAPDEV: Can't open socket: %d\n", -sockfd);
       return;
     }
 
@@ -227,8 +218,8 @@ void tapdev_init(void)
   ret = ioctl(sockfd, SIOCBRADDIF, &ifr);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't add interface %s to "
-                      "bridge %s): %d\n",
+      printf("TAPDEV: ioctl failed (can't add interface %s to "
+             "bridge %s): %d\n",
              gdevname, CONFIG_SIM_NET_BRIDGE_DEVICE, -ret);
     }
 
@@ -237,14 +228,13 @@ void tapdev_init(void)
 
   /* Set the MAC address */
 
-  up_setmacaddr();
+  set_macaddr();
 }
 
-unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
+int tapdev_avail(void)
 {
-  fd_set                fdset;
-  struct timeval        tv;
-  int                   ret;
+  struct timeval tv;
+  fd_set fdset;
 
   /* We can't do anything if we failed to open the tap device */
 
@@ -256,13 +246,19 @@ unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
   /* Wait for data on the tap device (or a timeout) */
 
   tv.tv_sec  = 0;
-  tv.tv_usec = 1000;
+  tv.tv_usec = 0;
 
   FD_ZERO(&fdset);
   FD_SET(gtapdevfd, &fdset);
 
-  ret = select(gtapdevfd + 1, &fdset, NULL, NULL, &tv);
-  if (ret == 0)
+  return select(gtapdevfd + 1, &fdset, NULL, NULL, &tv) > 0;
+}
+
+unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
+{
+  int ret;
+
+  if (!tapdev_avail())
     {
       return 0;
     }
@@ -270,7 +266,7 @@ unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
   ret = read(gtapdevfd, buf, buflen);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: read failed: %d\n", -ret);
+      printf("TAPDEV: read failed: %d\n", -ret);
       return 0;
     }
 
@@ -282,12 +278,12 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
 {
   int ret;
 #ifdef TAPDEV_DEBUG
-  syslog(LOG_INFO, "tapdev_send: sending %d bytes\n", buflen);
+  printf("tapdev_send: sending %d bytes\n", buflen);
 
   gdrop++;
   if (gdrop % 8 == 7)
     {
-      syslog(LOG_ERR, "TAPDEV: Dropped a packet!\n");
+      printf("TAPDEV: Dropped a packet!\n");
       return;
     }
 #endif
@@ -295,7 +291,7 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
   ret = write(gtapdevfd, buf, buflen);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: write failed: %d", -ret);
+      printf("TAPDEV: write failed: %d", -ret);
       exit(1);
     }
 
@@ -317,7 +313,7 @@ void tapdev_ifup(in_addr_t ifaddr)
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
   if (sockfd < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: Can't open socket: %d\n", -sockfd);
+      printf("TAPDEV: Can't open socket: %d\n", -sockfd);
       return;
     }
 
@@ -328,8 +324,7 @@ void tapdev_ifup(in_addr_t ifaddr)
   ret = ioctl(sockfd, SIOCGIFFLAGS, (unsigned long)&ifr);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't get interface flags): %d\n",
-             -ret);
+      printf("TAPDEV: ioctl failed (can't get interface flags): %d\n", -ret);
       close(sockfd);
       return;
     }
@@ -338,8 +333,7 @@ void tapdev_ifup(in_addr_t ifaddr)
   ret = ioctl(sockfd, SIOCSIFFLAGS, (unsigned long)&ifr);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't set interface flags): %d\n",
-             -ret);
+      printf("TAPDEV: ioctl failed (can't set interface flags): %d\n", -ret);
       close(sockfd);
       return;
     }
@@ -360,7 +354,7 @@ void tapdev_ifup(in_addr_t ifaddr)
   ret = ioctl(sockfd, SIOCADDRT, (unsigned long)&ghostroute);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "TAPDEV: ioctl failed (can't add host route): %d\n", -ret);
+      printf("TAPDEV: ioctl failed (can't add host route): %d\n", -ret);
       close(sockfd);
       return;
     }
@@ -382,15 +376,14 @@ void tapdev_ifdown(void)
       sockfd = socket(AF_INET, SOCK_DGRAM, 0);
       if (sockfd < 0)
         {
-          syslog(LOG_ERR, "TAPDEV: Can't open socket: %d\n", -sockfd);
+          printf("TAPDEV: Can't open socket: %d\n", -sockfd);
           return;
         }
 
       ret = ioctl(sockfd, SIOCDELRT, (unsigned long)&ghostroute);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "TAPDEV: ioctl failed (can't delete host route): %d\n",
-                 -ret);
+          printf("TAPDEV: ioctl failed (can't delete host route): %d\n", -ret);
         }
 
       close(sockfd);
