@@ -68,9 +68,9 @@ ifeq ($(CONFIG_SIM_M32),y)
 endif
 
 CROSSDEV		=
-CC			= $(CROSSDEV)gcc
-CXX			= $(CROSSDEV)g++
-CPP			= $(CROSSDEV)gcc -E
+CC			= $(CROSSDEV)cc
+CXX			= $(CROSSDEV)c++
+CPP			= $(CROSSDEV)cc -E
 LD			= $(CROSSDEV)ld
 AR			= $(CROSSDEV)ar rcs
 NM			= $(CROSSDEV)nm
@@ -126,7 +126,7 @@ endif
 
 MKDEP			= $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
 
-HOSTCC			= gcc
+HOSTCC			= cc
 HOSTINCLUDES		= -I.
 HOSTCFLAGS		= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
