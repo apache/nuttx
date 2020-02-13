@@ -294,7 +294,6 @@ Configurations
          CONFIG_ARCH_IRQBUTTONS=y
 
          CONFIG_BUILTIN=y
-         CONFIG_BUILTIN_PROXY_STACKSIZE=1024
 
          CONFIG_FS_PROCFS=y
          CONFIG_NSH_PROC_MOUNTPOINT="/proc"
