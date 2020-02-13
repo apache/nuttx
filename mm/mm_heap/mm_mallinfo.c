@@ -60,6 +60,7 @@
 int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 {
   FAR struct mm_allocnode_s *node;
+  FAR struct mm_allocnode_s *prev;
   size_t mxordblk = 0;
   int    ordblks  = 0;  /* Number of non-inuse chunks */
   size_t uordblks = 0;  /* Total allocated space */
@@ -84,22 +85,36 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 
       mm_takesemaphore(heap);
 
-      for (node = heap->mm_heapstart[region];
+      for (prev = NULL, node = heap->mm_heapstart[region];
            node < heap->mm_heapend[region];
-           node = (FAR struct mm_allocnode_s *)((FAR char *)node + node->size))
+           prev = node,
+           node = (FAR struct mm_allocnode_s *)
+                  ((FAR char *)node + node->size))
         {
-          minfo("region=%d node=%p size=%p preceding=%p (%c)\n",
-                region, node, node->size, (node->preceding & ~MM_ALLOC_BIT),
+          minfo("region=%d node=%p size=%u preceding=%u (%c)\n",
+                region, node, (unsigned int)node->size,
+                (unsigned int)(node->preceding & ~MM_ALLOC_BIT),
                 (node->preceding & MM_ALLOC_BIT) ? 'A' : 'F');
 
           /* Check if the node corresponds to an allocated memory chunk */
 
           if ((node->preceding & MM_ALLOC_BIT) != 0)
             {
+              DEBUGASSERT(node->size >= SIZEOF_MM_ALLOCNODE);
               uordblks += node->size;
             }
           else
             {
+              FAR struct mm_freenode_s *fnode;
+              DEBUGASSERT(node->size >= SIZEOF_MM_FREENODE);
+              fnode = (FAR void *)node;
+              DEBUGASSERT(fnode->blink->flink == fnode);
+              DEBUGASSERT(fnode->blink->size <= fnode->size);
+              DEBUGASSERT(fnode->flink == NULL ||
+                          fnode->flink->blink == fnode);
+              DEBUGASSERT(fnode->flink == NULL ||
+                          fnode->flink->size == 0 ||
+                          fnode->flink->size >= fnode->size);
               ordblks++;
               fordblks += node->size;
               if (node->size > mxordblk)
@@ -107,6 +122,9 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
                   mxordblk = node->size;
                 }
             }
+
+          DEBUGASSERT(prev == NULL ||
+                      prev->size == (node->preceding & ~MM_ALLOC_BIT));
         }
 
       minfo("region=%d node=%p heapend=%p\n",

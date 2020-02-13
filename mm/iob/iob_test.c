@@ -115,6 +115,7 @@ int main(int argc, char **argv)
     {
       buffer1[i] = (uint8_t)(i & 0xff);
     }
+
   memset(buffer2, 0xff, 4096);
 
   iob_copyin(iob, buffer2, 47, 0, false, IOBUSER_UNITTEST);
