@@ -77,6 +77,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
    */
 
   mm_takesemaphore(heap);
+  DEBUGASSERT(mm_heapmember(heap, mem));
 
   /* Map the memory chunk into a free node */
 
