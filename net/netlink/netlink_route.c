@@ -419,7 +419,7 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
   resp->iface.ifi_pid    = devinfo->req->hdr.nlmsg_pid;
   resp->iface.ifi_type   = devinfo->req->hdr.nlmsg_type;
 #ifdef CONFIG_NETDEV_IFINDEX
-  resp->iface.ifi_index  = dev->dd_ifindex;
+  resp->iface.ifi_index  = dev->d_ifindex;
 #else
   resp->iface.ifi_index  = 0;
 #endif
