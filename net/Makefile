@@ -66,6 +66,7 @@ include igmp/Make.defs
 include pkt/Make.defs
 include local/Make.defs
 include mld/Make.defs
+include can/Make.defs
 include netlink/Make.defs
 include tcp/Make.defs
 include udp/Make.defs
