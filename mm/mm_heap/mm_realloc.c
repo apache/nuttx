@@ -113,6 +113,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   /* We need to hold the MM semaphore while we muck with the nodelist. */
 
   mm_takesemaphore(heap);
+  DEBUGASSERT(oldnode->preceding & MM_ALLOC_BIT);
+  DEBUGASSERT(mm_heapmember(heap, oldmem));
 
   /* Check if this is a request to reduce the size of the allocation. */
 
@@ -213,6 +215,28 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
             }
         }
 
+      /* Note that a free node can't be smaller than SIZEOF_MM_FREENODE.
+       * We have to either take the whole node, or leave at least
+       * SIZEOF_MM_FREENODE bytes.
+       * When we can't leave SIZEOF_MM_FREENODE bytes, just take the whole
+       * node. It might end up with returning a larger chunk than the
+       * caller requested. It should be ok.
+       */
+      DEBUGASSERT(prevsize >= takeprev);
+      DEBUGASSERT(nextsize >= takenext);
+      if (prevsize - takeprev < SIZEOF_MM_FREENODE)
+        {
+          takeprev = prevsize;
+        }
+      if (nextsize - takenext < SIZEOF_MM_FREENODE)
+        {
+          takenext = nextsize;
+        }
+      DEBUGASSERT(prevsize == takeprev ||
+                  prevsize >= takeprev + SIZEOF_MM_FREENODE);
+      DEBUGASSERT(nextsize == takenext ||
+                  nextsize >= takenext + SIZEOF_MM_FREENODE);
+
       /* Extend into the previous free chunk */
 
       newmem = oldmem;
@@ -244,6 +268,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                */
 
               prev->size        -= takeprev;
+              DEBUGASSERT(prev->size >= SIZEOF_MM_FREENODE);
               newnode->size      = oldsize + takeprev;
               newnode->preceding = prev->size | MM_ALLOC_BIT;
               next->preceding    = newnode->size | (next->preceding & MM_ALLOC_BIT);
@@ -312,6 +337,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                */
 
               newnode->size        = nextsize - takenext;
+              DEBUGASSERT(newnode->size >= SIZEOF_MM_FREENODE);
               newnode->preceding   = oldnode->size;
               andbeyond->preceding = newnode->size | (andbeyond->preceding & MM_ALLOC_BIT);
 
