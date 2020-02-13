@@ -275,6 +275,24 @@ FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi,
 FAR struct adc_dev_s *lmp92001_adc_initialize(FAR struct i2c_master_s *i2c,
                                               uint8_t addr);
 
+/****************************************************************************
+ * Name: ads7828_initialize
+ *
+ * Description:
+ *   Initialize ADC
+ *
+ * Input Parameters:
+ *   i2c - Pointer to a valid I2C master struct.
+ *   addr - I2C device address.
+ *
+ * Returned Value:
+ *   Valid ADS7828 device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct adc_dev_s *ads7828_initialize(FAR struct i2c_master_s *i2c,
+                                               uint8_t addr);
+
 #if defined(__cplusplus)
 }
 #endif

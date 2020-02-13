@@ -137,6 +137,26 @@ config PGA11X_MULTIPLE
 
 endif # if ADC_PGA11X
 
+config ADC_ADS7828
+	bool "TI ADS7828 support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the ADS7828 12-Bit I2C powered ADC.
+
+		This driver supports reading single or multiple ADC conversion result
+		as well as onfiguring the ADC, via ioctl calls.
+
+if ADC_ADS7828
+
+config ADS7828_FREQUENCY
+	int "TI ADS7828 I2C frequency"
+	default 100000
+	---help---
+		ADS7828 supports standard, fast, and high-speed I2C modes.
+
+endif # ADC_ADS7828
+
 endif # ADC
 
 config COMP
