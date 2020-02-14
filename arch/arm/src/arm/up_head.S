@@ -635,7 +635,7 @@ __start:
 	/* Text-section constants:
 	 *
 	 *   _sbss is the start of the BSS region (see ld.script)
-	 *   _ebss is the end of the BSS regsion (see ld.script)
+	 *   _ebss is the end of the BSS region (see ld.script)
 	 *
 	 * The idle task stack starts at the end of BSS and is of size
 	 * CONFIG_IDLETHREAD_STACKSIZE.  The heap continues from there until the

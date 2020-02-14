@@ -98,7 +98,7 @@ struct nxgl_rect_s
   struct nxgl_point_s pt2; /* Lower, right-hand corner */
 };
 
-/* Describes a vector starting at pt1 and extending throug pt2 */
+/* Describes a vector starting at pt1 and extending through pt2 */
 
 struct nxgl_vector_s
 {
@@ -108,7 +108,7 @@ struct nxgl_vector_s
 
 /* Describes a run, i.e., a horizontal line.  Note that the start/end positions
  * have fractional precision.  This is necessary for good joining of trapezoids
- * when a more complex shape is decomposed into trapezoids
+ * when a more complex shape is decomposed into trapezoids.
  */
 
 struct nxgl_run_s
@@ -119,7 +119,7 @@ struct nxgl_run_s
 };
 
 /* Describes a horizontal trapezoid on the display in terms the run at the
- * top of the trapezoid and the run at the bottom
+ * top of the trapezoid and the run at the bottom.
  */
 
 struct nxgl_trapezoid_s

@@ -890,7 +890,7 @@ static inline int up_set_rs485_mode(struct up_dev_s *priv,
 #ifdef BOARD_LPC43_UART1_DTRDIR
       if (priv->dtrdir)
         {
-          /* If we ar using DTR for direction then ensure the H/W is
+          /* If we are using DTR for direction then ensure the H/W is
            * configured correctly.
            */
 

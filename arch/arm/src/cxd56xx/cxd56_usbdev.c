@@ -77,7 +77,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* TOPREG VBUS regsiter */
+/* TOPREG VBUS register */
 
 #define CLR_EDGE (1 << 9)
 #define CLR_EN   (1 << 8)

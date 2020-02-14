@@ -79,7 +79,7 @@
 #define LPC17_40_LCD_CRSR_PAL1_OFFSET       (0x0c0c) /* Cursor Palette register 1 */
 #define LPC17_40_LCD_CRSR_XY_OFFSET         (0x0c10) /* Cursor XY Position register */
 #define LPC17_40_LCD_CRSR_CLIP_OFFSET       (0x0c14) /* Cursor Clip Position register */
-#define LPC17_40_LCD_CRSR_INTMSK_OFFSET     (0x0c20) /* Cursor Interrupt Mask regsiter */
+#define LPC17_40_LCD_CRSR_INTMSK_OFFSET     (0x0c20) /* Cursor Interrupt Mask register */
 #define LPC17_40_LCD_CRSR_INTCLR_OFFSET     (0x0c24) /* Cursor Interrupt Clear register */
 #define LPC17_40_LCD_CRSR_INTRAW_OFFSET     (0x0c28) /* Cursor Raw Interrupt Status register */
 #define LPC17_40_LCD_CRSR_INTSTAT_OFFSET    (0x0c2c) /* Cursor Masked Interrupt Status register */

@@ -420,7 +420,7 @@ errout:
  *
  * Input Parameters:
  *   priv - The touchscreen private data structure
- *   tsav - The new (shifted) value of the TSAV field of the ADC TSMR regsiter.
+ *   tsav - The new (shifted) value of the TSAV field of the ADC TSMR register.
  *
  * Returned Value:
  *   None

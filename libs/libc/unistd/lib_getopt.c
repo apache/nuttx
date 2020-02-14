@@ -118,7 +118,7 @@ static bool             g_binitialized = false;
 int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
 {
   /* Were new argc or argv passed in?  This detects misuse of getopt() by
-   * applictions that break out of the getopt() loop before getop() returns
+   * applications that break out of the getopt() loop before getop() returns
    * -1.
    */
 
