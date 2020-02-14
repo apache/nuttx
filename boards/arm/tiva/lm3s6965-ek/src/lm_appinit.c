@@ -54,14 +54,7 @@
 
 /* Configuration ************************************************************/
 
-#undef NSH_HAVEUSBDEV
 #define NSH_HAVEMMCSD  1
-
-/* Can't support USB features if USB is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef NSH_HAVEUSBDEV
-#endif
 
 /* Can't support MMC/SD features if mountpoints or MMC/SPI are disabled */
 
