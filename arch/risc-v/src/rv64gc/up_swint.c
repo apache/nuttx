@@ -41,15 +41,19 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <syscall.h>
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/sched.h>
-
 #include <arch/irq.h>
+#include <nuttx/sched.h>
+#include <nuttx/userspace.h>
+
+#ifdef CONFIG_LIB_SYSCALL
+#  include <syscall.h>
+#endif
 
 #include "signal/signal.h"
+#include "svcall.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -93,15 +97,38 @@ static void up_registerdump(const uint64_t *regs)
  * Name: dispatch_syscall
  *
  * Description:
- *   Call the stub function corresponding to the system call.
+ *   Call the stub function corresponding to the system call.  NOTE the non-
+ *   standard parameter passing:
+ *
+ *     A0 = SYS_ call number
+ *     A1 = parm0
+ *     A2 = parm1
+ *     A3 = parm2
+ *     A4 = parm3
+ *     A5 = parm4
+ *     A6 = parm5
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
 static void dispatch_syscall(void) naked_function;
 static void dispatch_syscall(void)
 {
-#  error "Missing logic"
+  asm volatile
+    (
+     " addi sp, sp, -8\n"         /* Create a stack frame to hold ra */
+     " sd   ra, 0(sp)\n"          /* Save ra in the stack frame */
+     " la   t0, g_stublookup\n"   /* t0=The base of the stub lookup table */
+     " slli a0, a0, 3\n"          /* a0=Offset for the stub lookup table */
+     " add  t0, t0, a0\n"         /* t0=The address in the table */
+     " ld   t0, 0(t0)\n"          /* t0=The address of the stub for this syscall */
+     " jalr ra, t0\n"             /* Call the stub (modifies ra) */
+     " ld   ra, 0(sp)\n"          /* Restore ra */
+     " addi sp, sp, 8\n"          /* Destroy the stack frame */
+     " mv   a2, a0\n"             /* a2=Save return value in a0 */
+     " li   a0, 3\n"              /* a0=SYS_syscall_return (3) */
+     " ecall"                     /* Return from the syscall */
+  );
 }
 #endif
 
@@ -184,7 +211,7 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
         }
         break;
 
-      /* A0=SYS_syscall_return: This a switch context command:
+      /* A0=SYS_syscall_return: This is a SYSCALL return command:
        *
        *   void up_sycall_return(void);
        *
@@ -196,7 +223,7 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
        * unprivileged thread mode.
        */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
       case SYS_syscall_return:
         {
           struct tcb_s *rtcb = sched_self();
@@ -210,16 +237,158 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
            * the original mode.
            */
 
-          CURRENT_REGS[REG_EPC] = rtcb->xcp.syscall[index].sysreturn;
-#error "Missing logic -- need to restore the original mode"
-          rtcb->xcp.nsyscalls     = index;
+          regs[REG_EPC]         = rtcb->xcp.syscall[index].sysreturn;
+#ifdef CONFIG_BUILD_PROTECTED
+          regs[REG_INT_CTX]      = rtcb->xcp.syscall[index].int_ctx;
+#endif
+
+          /* The return value must be in A0-A1.
+           * dispatch_syscall() temporarily moved the value for R0 into A2.
+           */
+
+          regs[REG_A0]         = regs[REG_A2];
+
+          /* Save the new SYSCALL nesting level */
+
+          rtcb->xcp.nsyscalls  = index;
 
           /* Handle any signal actions that were deferred while processing
            * the system call.
            */
 
-          rtcb->flags            &= ~TCB_FLAG_SYSCALL;
+          rtcb->flags          &= ~TCB_FLAG_SYSCALL;
           (void)nxsig_unmask_pendingsignal();
+        }
+        break;
+#endif
+
+      /* R0=SYS_task_start:  This a user task start
+       *
+       *   void up_task_start(main_t taskentry, int argc,
+       *                      FAR char *argv[]) noreturn_function;
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A0 = SYS_task_start
+       *   A1 = taskentry
+       *   A2 = argc
+       *   A3 = argv
+       */
+
+#ifdef CONFIG_BUILD_PROTECTED
+      case SYS_task_start:
+        {
+          /* Set up to return to the user-space task start-up function in
+           * unprivileged mode.
+           */
+
+          regs[REG_EPC]      = (uintptr_t)USERSPACE->task_startup & ~1;
+
+          regs[REG_A0]       = regs[REG_A1]; /* Task entry */
+          regs[REG_A1]       = regs[REG_A2]; /* argc */
+          regs[REG_A2]       = regs[REG_A3]; /* argv */
+
+          regs[REG_INT_CTX] &= ~MSTATUS_MPPM; /* User mode */
+        }
+        break;
+#endif
+
+      /* R0=SYS_pthread_start:  This a user pthread start
+       *
+       *   void up_pthread_start(pthread_startroutine_t entrypt,
+       *                         pthread_addr_t arg) noreturn_function;
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_pthread_start
+       *   R1 = entrypt
+       *   R2 = arg
+       */
+
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_DISABLE_PTHREAD)
+      case SYS_pthread_start:
+        {
+          /* Set up to return to the user-space pthread start-up function in
+           * unprivileged mode.
+           */
+
+          regs[REG_EPC]      = (uintptr_t)USERSPACE->pthread_startup & ~1;
+
+          /* Change the parameter ordering to match the expectation of struct
+           * userpace_s pthread_startup:
+           */
+
+          regs[REG_A0]       = regs[REG_A1];  /* pthread entry */
+          regs[REG_A1]       = regs[REG_A2];  /* arg */
+          regs[REG_INT_CTX] &= ~MSTATUS_MPPM; /* User mode */
+        }
+        break;
+#endif
+
+      /* R0=SYS_signal_handler:  This a user signal handler callback
+       *
+       * void signal_handler(_sa_sigaction_t sighand, int signo,
+       *                     FAR siginfo_t *info, FAR void *ucontext);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_signal_handler
+       *   R1 = sighand
+       *   R2 = signo
+       *   R3 = info
+       *   R4 = ucontext
+       */
+
+#ifdef CONFIG_BUILD_PROTECTED
+      case SYS_signal_handler:
+        {
+          struct tcb_s *rtcb   = sched_self();
+
+          /* Remember the caller's return address */
+
+          DEBUGASSERT(rtcb->xcp.sigreturn == 0);
+          rtcb->xcp.sigreturn  = regs[REG_EPC];
+
+          /* Set up to return to the user-space pthread start-up function in
+           * unprivileged mode.
+           */
+
+          regs[REG_EPC]      = (uintptr_t)USERSPACE->signal_handler & ~1;
+          regs[REG_INT_CTX] &= ~MSTATUS_MPPM; /* User mode */
+
+          /* Change the parameter ordering to match the expectation of struct
+           * userpace_s signal_handler.
+           */
+
+          regs[REG_A0]       = regs[REG_A1]; /* sighand */
+          regs[REG_A1]       = regs[REG_A2]; /* signal */
+          regs[REG_A2]       = regs[REG_A3]; /* info */
+          regs[REG_A3]       = regs[REG_A4]; /* ucontext */
+        }
+        break;
+#endif
+
+      /* R0=SYS_signal_handler_return:  This a user signal handler callback
+       *
+       *   void signal_handler_return(void);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_signal_handler_return
+       */
+
+#ifdef CONFIG_BUILD_PROTECTED
+      case SYS_signal_handler_return:
+        {
+          struct tcb_s *rtcb   = sched_self();
+
+          /* Set up to return to the kernel-mode signal dispatching logic. */
+
+          DEBUGASSERT(rtcb->xcp.sigreturn != 0);
+          regs[REG_EPC]        = rtcb->xcp.sigreturn & ~1;
+          regs[REG_INT_CTX]   |= MSTATUS_MPPM; /* Machine mode */
+
+          rtcb->xcp.sigreturn  = 0;
         }
         break;
 #endif
@@ -231,7 +400,7 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
 
       default:
         {
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
           FAR struct tcb_s *rtcb = sched_self();
           int index = rtcb->xcp.nsyscalls;
 
@@ -247,20 +416,26 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
 
           /* Setup to return to dispatch_syscall in privileged mode. */
 
-          rtcb->xcpsyscall[index].sysreturn = regs[REG_EPC];
-#error "Missing logic -- Need to save mode"
+          rtcb->xcp.syscall[index].sysreturn  = regs[REG_EPC];
+#ifdef CONFIG_BUILD_PROTECTED
+          rtcb->xcp.syscall[index].int_ctx     = regs[REG_INT_CTX];
+#endif
+
           rtcb->xcp.nsyscalls  = index + 1;
 
-          regs[REG_EPC]        = (uint32_t)dispatch_syscall;
-#error "Missing logic -- Need to set privileged mode"
+          regs[REG_EPC]        = (uintptr_t)dispatch_syscall & ~1;
 
-          /* Offset R0 to account for the reserved values */
+#ifdef CONFIG_BUILD_PROTECTED
+          regs[REG_INT_CTX]   |= MSTATUS_MPPM; /* Machine mode */
+#endif
 
-          CURRENT_REGS[REG_A0] -= CONFIG_SYS_RESERVED;
+          /* Offset A0 to account for the reserved values */
+
+          regs[REG_A0]        -= CONFIG_SYS_RESERVED;
 
           /* Indicate that we are in a syscall handler. */
 
-          rtcb->flags            |= TCB_FLAG_SYSCALL;
+          rtcb->flags         |= TCB_FLAG_SYSCALL;
 #else
           svcerr("ERROR: Bad SYS call: %d\n", regs[REG_A0]);
 #endif
