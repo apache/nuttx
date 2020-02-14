@@ -152,13 +152,17 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
               tcb->xcp.saved_int_ctx    = CURRENT_REGS[REG_INT_CTX];
 
               /* Then set up to vector to the trampoline with interrupts
-               * disabled
+               * disabled.  The kernel-space trampoline must run in
+               * privileged thread mode.
                */
 
               CURRENT_REGS[REG_EPC]     = (uintptr_t)up_sigdeliver;
 
               int_ctx                     = CURRENT_REGS[REG_INT_CTX];
               int_ctx                    &= ~MSTATUS_MIE;
+#ifdef CONFIG_BUILD_PROTECTED
+              int_ctx                    |= MSTATUS_MPPM;
+#endif
 
               CURRENT_REGS[REG_INT_CTX] = int_ctx;
 
@@ -192,7 +196,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
           tcb->xcp.saved_int_ctx    = tcb->xcp.regs[REG_INT_CTX];
 
           /* Then set up to vector to the trampoline with interrupts
-           * disabled
+           * disabled.  We must already be in privileged thread mode to be
+           * here.
            */
 
           tcb->xcp.regs[REG_EPC]      = (uintptr_t)up_sigdeliver;
@@ -324,6 +329,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
                   int_ctx                   = CURRENT_REGS[REG_INT_CTX];
                   int_ctx                   &= ~MSTATUS_MIE;
+#ifdef CONFIG_BUILD_PROTECTED
+                  int_ctx                   |= MSTATUS_MPPM;
+#endif
 
                   CURRENT_REGS[REG_INT_CTX] = int_ctx;
 
