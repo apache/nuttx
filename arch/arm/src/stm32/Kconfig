@@ -1218,6 +1218,28 @@ config STM32_FLASH_CONFIG_I
 
 endchoice
 
+config STM32_PROGMEM
+	bool "Flash progmem support"
+	depends on STM32_STM32F20XX || STM32_STM32F4XXX
+	default n
+	---help---
+		Add progmem support, start block and end block options are provided to 
+		obtain an uniform flash memory mapping.
+
+if STM32_PROGMEM
+
+config STM32_PROGMEM_STARTBLOCK
+	int "First mapped progmem block"
+	default 0
+	range 0 64
+
+config STM32_PROGMEM_LASTBLOCK
+	int "Last mapped progmem block"
+	default -1
+	range -1 64
+
+endif # STM32_PROGMEM
+
 # This is really 15XX/16XX, but we treat the two the same.
 config STM32_STM32L15XX
 	bool
