@@ -64,11 +64,7 @@
 
 /* Can't support MMC/SD features if mountpoints or MMC/SPI are disabled */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef NSH_HAVEMMCSD
-#endif
-
-#ifndef CONFIG_CONFIG_MMCSD_SPI
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_MMCSD_SPI)
 #  undef NSH_HAVEMMCSD
 #endif
 
