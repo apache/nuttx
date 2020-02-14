@@ -19,12 +19,14 @@
 TOOLDIR=$(dirname $0)
 
 fail=0
+range=0
 
 usage() {
   echo "USAGE: ${0} [options] [list|-]"
   echo ""
   echo "Options:"
   echo "-h"
+  echo "-r range check only (used with -p and -c)"
   echo "-p <patch list> (default)"
   echo "-c <commit list>"
   echo "-f <file list>"
@@ -44,7 +46,11 @@ check_ranges() {
   while read; do
     if [[ $REPLY =~ \+\+\+\ (b/)?([^[:blank:]]+).* ]]; then
       if [ "$ranges" != "" ]; then
-        check_file $ranges $path 2>&1
+        if [ $range != 0 ]; then
+          check_file $ranges $path 2>&1
+        else
+          check_file $path 2>&1
+        fi
       fi
       path=${BASH_REMATCH[2]}
       ranges=""
@@ -53,19 +59,25 @@ check_ranges() {
     fi
   done
   if [ "$ranges" != "" ]; then
-    check_file $ranges $path 2>&1
+    if [ $range != 0 ]; then
+      check_file $ranges $path 2>&1
+    else
+      check_file $path 2>&1
+    fi
   fi
 }
 
 check_patch() {
   git apply --check $1
-  if [ $? != 0 ]; then
-    exit 1
+  ret=$?
+  if [ $ret != 0 ]; then
+    fail=$ret
+  else
+    git apply $1
+    diffs=`cat $1`
+    check_ranges <<< "$diffs"
+    git apply -R $1
   fi
-  git apply $1
-  diffs=`cat $1`
-  check_ranges <<< "$diffs"
-  git apply -R $1
 }
 
 check_commit() {
@@ -86,6 +98,9 @@ while [ ! -z "$1" ]; do
     usage
     exit 0
     ;;
+  -r )
+    range=1
+    ;;
   -p )
     shift
     patches=$@
@@ -103,13 +118,14 @@ while [ ! -z "$1" ]; do
     ;;
   - )
     check_ranges
-    exit 0
+    break
     ;;
   * )
     patches=$@
     break
     ;;
   esac
+  shift
 done
 
 for patch in $patches; do
