@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
@@ -128,36 +129,33 @@ int board_app_initialize(uintptr_t arg)
 
   /* Get the SPI port */
 
-  syslog(LOG_INFO, "Initializing SPI port %d\n",
-         CONFIG_NSH_MMCSDSPIPORTNO);
+  mcinfo("Initializing SPI port %d\n", CONFIG_NSH_MMCSDSPIPORTNO);
 
   spi = tiva_ssibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
   if (!spi)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
+      mcerr("ERROR: Failed to initialize SPI port %d\n",
              CONFIG_NSH_MMCSDSPIPORTNO);
       return -ENODEV;
     }
 
-  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
-         CONFIG_NSH_MMCSDSPIPORTNO);
+  mcinfo("Successfully initialized SPI port %d\n", CONFIG_NSH_MMCSDSPIPORTNO);
 
   /* Bind the SPI port to the slot */
 
-  syslog(LOG_INFO, "Binding SPI port %d to MMC/SD slot %d\n",
+  mcinfo("Binding SPI port %d to MMC/SD slot %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 
   ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
                                 CONFIG_NSH_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      syslog(LOG_ERR,
-             "ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
+      mcerr("ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
              CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
       return ret;
     }
 
-  syslog(LOG_INFO, "Successfully bound SPI port %d to MMC/SD slot %d\n",
+  mcinfo("Successfully bound SPI port %d to MMC/SD slot %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 #endif
   return OK;
