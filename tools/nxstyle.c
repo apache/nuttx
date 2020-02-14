@@ -1272,9 +1272,12 @@ int main(int argc, char **argv, char **envp)
                    * considered false alarms.
                    */
 
-                  /* Ignore inttype.h strings beginning with PRIx */
+                  /* Ignore inttype.h strings beginning with PRIx and
+                   * system calls beginning with SYS_
+                   */
 
-                  if ((strncmp(&line[ident_index], "PRIx", 4) == 0))
+                  if ((strncmp(&line[ident_index], "PRIx", 4) == 0) ||
+                      (strncmp(&line[ident_index], "SYS_", 4) == 0))
                     {
                       /* No error */
                     }
