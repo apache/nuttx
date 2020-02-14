@@ -46,4 +46,10 @@ ifeq ($(CONFIG_NX_LCDDRIVER),y)
 CSRCS += lm_oled.c
 endif
 
+ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
+  CSRCS += lm_bringup.c
+else ifeq ($(CONFIG_LIB_BOARDCTL),y)
+  CSRCS += lm_bringup.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

@@ -48,6 +48,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "lm3s6965-ek.h"
 #include "tiva_ssi.h"
 
 /****************************************************************************
@@ -152,6 +153,9 @@ int board_app_initialize(uintptr_t arg)
 
   mcinfo("Successfully bound SPI port %d to MMC/SD slot %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
+#endif
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
+  lm_bringup();
 #endif
   return OK;
 }
