@@ -379,6 +379,7 @@ void up_timer_update(void)
     .tv_sec  = 0,
     .tv_nsec = NSEC_PER_TICK,
   };
+
   FAR sq_entry_t *entry;
 
   clock_timespec_add(&g_current, &tick, &g_current);

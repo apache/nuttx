@@ -85,6 +85,7 @@ void host_sleepuntil(uint64_t nsec)
     {
       base = now;
     }
+
   now -= base;
 
   if (nsec > now + 1000)

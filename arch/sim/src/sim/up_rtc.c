@@ -66,7 +66,6 @@ static int sim_rtc_rdtime(FAR struct rtc_lowerhalf_s *lower,
   uint64_t nsec;
   time_t sec;
 
-
   nsec = host_gettime(true);
   sec  = nsec / NSEC_PER_SEC;
   nsec -= sec * NSEC_PER_SEC;
