@@ -122,6 +122,10 @@ void up_irqinitialize(void)
 
   irq_attach(K210_IRQ_ECALLM, up_swint, NULL);
 
+#ifdef CONFIG_BUILD_PROTECTED
+  irq_attach(K210_IRQ_ECALLU, up_swint, NULL);
+#endif
+
 #ifdef CONFIG_SMP
   /* Clear MSOFT for CPU0 */
 
@@ -237,8 +241,12 @@ void up_enable_irq(int irq)
 
 uint32_t up_get_newintctx(void)
 {
-  /* Set machine previous privilege mode to machine mode.
-   * Also set machine previous interrupt enable
+  /* Set machine previous privilege mode to machine mode. Reegardless of
+   * how NuttX is configured and of what kind of thread is being started.
+   * That is because all threads, even user-mode threads will start in
+   * kernel trampoline at nxtask_start() or pthread_start().
+   * The thread's privileges will be dropped before transitioning to
+   * user code. Also set machine previous interrupt enable.
    */
 
   return (MSTATUS_MPPM | MSTATUS_MPIE);

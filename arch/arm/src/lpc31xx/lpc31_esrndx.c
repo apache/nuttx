@@ -48,18 +48,6 @@
 #include "lpc31_cgudrvr.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -71,8 +59,7 @@
  *   register (or ESRNDX_INVALID if there is no ESR associated with
  *   this clock ID).  Indexing of ESRs differs slightly from the clock
  *   ID:  There are 92 clock IDs but only 89 ESR regisers. There are no
- *  ESR registers for :
- *
+ *   ESR registers for:
  *
  *  CLKID_I2SRXBCK0         Clock ID 87: I2SRX_BCK0
  *  CLKID_I2SRXBCK1,        Clock ID 88: I2SRX_BCK1
@@ -87,10 +74,9 @@ int lpc31_esrndx(enum lpc31_clockid_e clkid)
 {
   int esrndx = (int)clkid;
 
-  /* There ar 89 Enable Select Registers (ESR).  Indexing for these
+  /* There are 89 Enable Select Registers (ESR).  Indexing for these
    * registers is identical to indexing to other registers (like PCR),
    * except that there are no ESR registers for
-   *
    *
    *  CLKID_I2SRXBCK0         Clock ID 87: I2SRX_BCK0
    *  CLKID_I2SRXBCK1,        Clock ID 88: I2SRX_BCK1

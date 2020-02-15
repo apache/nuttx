@@ -691,7 +691,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       spi_putreg8(priv, data, Z16F_ESPI_DATA);
 
-      /* Wait for the read data to be available in the data regsiter */
+      /* Wait for the read data to be available in the data register. */
 
       while ((spi_getreg8(priv, Z16F_ESPI_STAT) & Z16F_ESPI_STAT_RDRF) == 0);
 

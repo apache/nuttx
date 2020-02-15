@@ -247,7 +247,7 @@
  *   mikroBUS2 Interrupt: PE14-MB2_INT
  *
  * I assume that the interrupt lines are active low.  No pull-ups are provided on
- * board so pull-ups ar provided in the pin configurations.
+ * board so pull-ups are provided in the pin configurations.
  */
 
 #define GPIO_MB1_INT     (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTE|GPIO_PIN10)

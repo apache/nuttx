@@ -13146,7 +13146,7 @@ Additional new features and extended functionality:
       - Fonts: Add support for Tom Thumb small mono-space font. From Alan
         Carvalho de Assis.
       - Graphics:  Separated of font cache from graphics/nxterm.  Now in
-        libnx/nxfronts where it can be shared with other grapics
+        libnx/nxfronts where it can be shared with other graphics
         applications.
 
     * Networking/Network Drivers:

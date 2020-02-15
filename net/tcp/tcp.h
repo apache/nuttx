@@ -442,7 +442,7 @@ int tcp_local_ipv4_device(FAR struct tcp_conn_s *conn);
  *   on the remotely connected IPv4 address
  *
  * Input Parameters:
- *   conn - TCP connection structure.  The remotely conected address, raddr,
+ *   conn - TCP connection structure.  The remotely connected address, raddr,
  *     should be set to a non-zero value in this structure.
  *
  * Returned Value:

@@ -5243,7 +5243,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   lpc31_putreg(regval, &HCOR->usbcmd);
 
-  /* Start the host controller by setting the RUN bit in the USBCMD regsiter. */
+  /* Start the host controller by setting the RUN bit in the USBCMD register. */
 
   regval  = lpc31_getreg(&HCOR->usbcmd);
   regval |= EHCI_USBCMD_RUN;

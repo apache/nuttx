@@ -62,7 +62,7 @@
 #  undef CONFIG_TIVA_SSI1
 #endif
 
-/* LM3S6965 Eval Kit ***************************************************************/
+/* LM3S6965 Eval Kit ********************************************************/
 
 /* GPIO Usage
  *
@@ -112,11 +112,31 @@
 #define OLEDEN_GPIO (GPIO_FUNC_OUTPUT | GPIO_PADTYPE_STD | GPIO_STRENGTH_8MA | \
                      GPIO_VALUE_ONE | GPIO_PORTC | 6)
 
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define LM_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define LM_PROCFS_MOUNTPOINT "/proc"
+#  endif
+#endif
+
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Name: lm_bringup
+ *
+ * Description:
+ *   Bring up board features
+ *
+ ****************************************************************************/
+
+int lm_bringup(void);
 
 /****************************************************************************
  * Name: lm_ssidev_initialize

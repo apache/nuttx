@@ -81,11 +81,7 @@
  * WARNING: May change TCIOC_SETTIMEOUT to pass pointer to 64bit nanoseconds
  * or timespec structure.
  *
- * NOTE: The TCIOC_SETHANDLER ioctl cannot be supported in the kernel build
- * mode. In that case direct callbacks from kernel space into user space is
- * forbidden.
- *
- * NOTE: _TCIOC(0x0001) througn _TCIOC(0x001f) are reserved for use by the
+ * NOTE: _TCIOC(0x0001) through _TCIOC(0x001f) are reserved for use by the
  * timer driver to assure that the values are unique.  Other timer drivers,
  * such as the oneshot timer, must not use IOCTL commands in this numeric
  * range.
@@ -278,7 +274,7 @@ void timer_unregister(FAR void *handle);
  * Description:
  *   This function can be called to add a callback into driver-related code
  *   to handle timer expirations.  This is a strictly OS internal interface
- *   and may NOT be used by appliction code.
+ *   and may NOT be used by application code.
  *
  * Input Parameters:
  *   handle   - This is the handle that was returned by timer_register()
@@ -286,7 +282,8 @@ void timer_unregister(FAR void *handle);
  *   arg      - Argument provided when the callback is called.
  *
  * Returned Value:
- *   None
+ *   Zero (OK), if the callback was successfully set, or -ENOSYS if the lower
+ *   half driver does not support the operation.
  *
  ****************************************************************************/
 

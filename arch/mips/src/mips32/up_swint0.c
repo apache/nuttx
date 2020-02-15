@@ -113,7 +113,7 @@ static void dispatch_syscall(void)
     Get the offset of the stub for this syscall
     Load the entry of the stub for this syscall
     Call the stub
-    Restore regsisters
+    Restore registers
     Return from the syscall
   );
 #  endif

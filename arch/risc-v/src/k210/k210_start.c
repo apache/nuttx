@@ -41,6 +41,7 @@
 
 #include "up_arch.h"
 #include "k210_clockconfig.h"
+#include "k210_userspace.h"
 #include "k210.h"
 #include "chip.h"
 
@@ -136,6 +137,17 @@ void __k210_start(uint32_t mhartid)
   k210_boardinitialize();
 
   showprogress('C');
+
+  /* For the case of the separate user-/kernel-space build, perform whatever
+   * platform specific initialization of the user memory is required.
+   * Normally this just means initializing the user space .data and .bss
+   * segments.
+   */
+
+#ifdef CONFIG_BUILD_PROTECTED
+  k210_userspace();
+  showprogress('D');
+#endif
 
   /* Call nx_start() */
 

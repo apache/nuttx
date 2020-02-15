@@ -434,7 +434,7 @@ void ieee802154_container_initialize(void);
  * Name: ieee802154_container_allocate
  *
  * Description:
- *   The ieee802154_container_allocate function will get a free continer
+ *   The ieee802154_container_allocate function will get a free container
  *   for use by the recvfrom() logic.
  *
  *   This function will first attempt to allocate from the g_free_container

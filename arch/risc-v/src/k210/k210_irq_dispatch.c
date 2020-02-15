@@ -70,7 +70,7 @@ void *k210_dispatch_irq(uint64_t vector, uint64_t *regs)
 
   /* Check if fault happened */
 
-  if (vector < 11)
+  if (vector < K210_IRQ_ECALLU)
     {
       up_fault((int)irq, regs);
     }
@@ -88,7 +88,7 @@ void *k210_dispatch_irq(uint64_t vector, uint64_t *regs)
 
   /* NOTE: In case of ecall, we need to adjust mepc in the context */
 
-  if (K210_IRQ_ECALLM == irq)
+  if (K210_IRQ_ECALLM == irq || K210_IRQ_ECALLU == irq)
     {
       *mepc += 4;
     }
