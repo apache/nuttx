@@ -288,8 +288,10 @@ static int sim_cancel(FAR struct oneshot_lowerhalf_s *lower,
 static int sim_current(FAR struct oneshot_lowerhalf_s *lower,
                        FAR struct timespec *ts)
 {
+#ifdef CONFIG_DEBUG_ASSERTIONS
   FAR struct sim_oneshot_lowerhalf_s *priv =
     (FAR struct sim_oneshot_lowerhalf_s *)lower;
+#endif
 
   DEBUGASSERT(priv != NULL && ts != NULL);
 
