@@ -37,7 +37,6 @@ nuttx=$WD/../nuttx
 
 progname=$0
 fail=0
-sizet=default
 APPSDIR=$WD/../apps
 MAKE_FLAGS=-k
 MAKE=make
@@ -53,11 +52,6 @@ function showusage {
   echo "Where:"
   echo "  -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),"
   echo "     Ubuntu under Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Linux"
-  echo "  -si|-sl selected the type of size_t used within the compiler.  This necessary because"
-  echo "     the compiler will generate calls to new and delete operators using its internal"
-  echo "     understanding which must match the usage in libs/libxx.  -si indicates that the"
-  echo "     underlying size_t is 'unsigned int'; -sl indicates unsigned long.  Default:  Use"
-  echo "     the setting from the defconfig file."
   echo "  -d enables script debug output"
   echo "  -x exit on build failures"
   echo "  -j <ncpus> passed on to make.  Default:  No -j make option."
@@ -93,12 +87,6 @@ while [ ! -z "$1" ]; do
   -j )
     shift
     JOPTION="-j $1"
-    ;;
-  -si )
-    sizet=uint
-    ;;
-  -sl )
-    sizet=ulong
     ;;
   -t )
     shift
@@ -179,15 +167,17 @@ function configure {
       sed -i -e "/$varname/d" $nuttx/.config
     fi
 
-    if [ "X$sizet" != "Xdefault" ]; then
-      sed -i -e "/CONFIG_ARCH_SIZET_LONG/d" $nuttx/.config
-      if [ "X$sizet" == "Xulong" ]; then
-        sed -i -e "\$aCONFIG_ARCH_SIZET_LONG=y" $nuttx/.config
-      fi
-    fi
-
     echo "  Enabling $toolchain"
     echo "$toolchain=y" >> $nuttx/.config
+
+    if [ "X$sizet" == "Xuint" ]; then
+      echo "  Disabling CONFIG_ARCH_SIZET_LONG"
+      sed -i -e "/CONFIG_ARCH_SIZET_LONG/d" $nuttx/.config
+    elif [ "X$sizet" == "Xulong" ]; then
+      echo "  Enabling CONFIG_ARCH_SIZET_LONG"
+      sed -i -e "\$aCONFIG_ARCH_SIZET_LONG=y" $nuttx/.config
+    fi
+
 
     echo "  Refreshing..."
     makefunc ${MAKE_FLAGS} olddefconfig 1>/dev/null
@@ -234,11 +224,18 @@ function dotest {
       showusage
     fi
 
-    unset toolchain;
+    unset toolchain
+    unset sizet
     if [ "X$config" != "X$1" ]; then
       toolchain=`echo $1 | cut -d',' -f2`
       if [ -z "$toolchain" ]; then
         echo "  Warning: no tool configuration"
+      fi
+      archsizet=`echo $line | cut -d',' -f3`
+      if [ "X$archsizet" == "XCONFIG_ARCH_SIZET_LONG" ]; then
+        sizet=ulong
+      elif [ "X$archsizet" == "X-CONFIG_ARCH_SIZET_LONG" ]; then
+        sizet=uint
       fi
     fi
 
