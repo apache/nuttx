@@ -7,6 +7,12 @@ config USBHOST_HAVE_ASYNCH
 	bool
 	default n
 
+menuconfig USBHOST
+	bool "USB Host Driver Support"
+	default n
+	---help---
+		USB host drivers.  See also include/nuttx/usb/usbhost.h
+
 if USBHOST
 
 config USBHOST_NPREALLOC

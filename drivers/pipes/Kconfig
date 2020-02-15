@@ -3,6 +3,13 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menuconfig PIPES
+	bool "FIFO and named pipe drivers"
+	default n
+	---help---
+		FIFO and named pipe drivers.  Standard interfaces are declared
+		in include/unistd.h
+
 if PIPES
 
 config DEV_PIPE_MAXSIZE
