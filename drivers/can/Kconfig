@@ -7,6 +7,13 @@ config ARCH_HAVE_CAN_ERRORS
 	bool
 	default n
 
+menuconfig CAN
+	bool "CAN Driver Support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" CAN driver.
+		See include/nuttx/can/can.h for further CAN driver information.
+
 if CAN
 
 config CAN_EXTID

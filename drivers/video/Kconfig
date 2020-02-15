@@ -3,6 +3,12 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menuconfig DRIVERS_VIDEO
+	bool "Video Device Support"
+	default n
+	---help---
+		Enable support for video device drivers.
+
 if DRIVERS_VIDEO
 
 config VIDEO_FB

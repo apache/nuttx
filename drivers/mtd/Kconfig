@@ -3,9 +3,20 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-if MTD
+menuconfig MTD
+	bool "Memory Technology Device (MTD) Support"
+	default n
+	---help---
+		Memory Technology Device (MTD) drivers.  Some simple drivers for
+		memory technologies like FLASH, EEPROM, NVRAM, etc.  See
+		include/nuttx/mtd/mtd.h
 
-comment "MTD Configuration"
+		(Note: This is a simple memory interface and should not be
+		confused with the "real" MTD developed at infradead.org.  This
+		logic is unrelated; I just used the name MTD because I am not
+		aware of any other common way to refer to this class of devices).
+
+if MTD
 
 config MTD_PARTITION
 	bool "Support MTD partitions"
