@@ -108,6 +108,22 @@
 #endif
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* Global RPC statistics */
+
+#ifdef CONFIG_NFS_STATISTICS
+struct rpcstats
+{
+  int rpcretries;
+  int rpcrequests;
+  int rpctimeouts;
+  int rpcinvalid;
+};
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -116,11 +132,6 @@
 static uint32_t rpc_reply;
 static uint32_t rpc_call;
 static uint32_t rpc_vers;
-static uint32_t rpc_msgdenied;
-static uint32_t rpc_mismatch;
-static uint32_t rpc_auth_unix;
-static uint32_t rpc_msgaccepted;
-static uint32_t rpc_autherr;
 static uint32_t rpc_auth_null;
 
 /* Global statics for all client instances.  Cleared by NuttX on boot-up. */
@@ -342,11 +353,6 @@ void rpcclnt_init(void)
   rpc_reply = txdr_unsigned(RPC_REPLY);
   rpc_vers = txdr_unsigned(RPC_VER2);
   rpc_call = txdr_unsigned(RPC_CALL);
-  rpc_msgdenied = txdr_unsigned(RPC_MSGDENIED);
-  rpc_msgaccepted = txdr_unsigned(RPC_MSGACCEPTED);
-  rpc_mismatch = txdr_unsigned(RPC_MISMATCH);
-  rpc_autherr = txdr_unsigned(RPC_AUTHERR);
-  rpc_auth_unix = txdr_unsigned(RPCAUTH_UNIX);
   rpc_auth_null = txdr_unsigned(RPCAUTH_NULL);
 
   finfo("RPC initialized\n");
@@ -475,7 +481,7 @@ int rpcclnt_connect(struct rpcclnt *rpc)
 
   request.sdata.pmap.prog = txdr_unsigned(RPCPROG_MNT);
   request.sdata.pmap.vers = txdr_unsigned(RPCMNT_VER3);
-  request.sdata.pmap.proc = txdr_unsigned(IPPROTO_UDP);
+  request.sdata.pmap.prot = txdr_unsigned(IPPROTO_UDP);
   request.sdata.pmap.port = 0;
 
   error = rpcclnt_request(rpc, PMAPPROC_GETPORT, PMAPPROG, PMAPVERS,
@@ -540,7 +546,7 @@ int rpcclnt_connect(struct rpcclnt *rpc)
 
   request.sdata.pmap.prog = txdr_unsigned(NFS_PROG);
   request.sdata.pmap.vers = txdr_unsigned(NFS_VER3);
-  request.sdata.pmap.proc = txdr_unsigned(IPPROTO_UDP);
+  request.sdata.pmap.prot = txdr_unsigned(IPPROTO_UDP);
   request.sdata.pmap.port = 0;
 
   error = rpcclnt_request(rpc, PMAPPROC_GETPORT, PMAPPROG, PMAPVERS,
@@ -635,7 +641,7 @@ int rpcclnt_umount(struct rpcclnt *rpc)
 
   request.sdata.pmap.prog = txdr_unsigned(RPCPROG_MNT);
   request.sdata.pmap.vers = txdr_unsigned(RPCMNT_VER3);
-  request.sdata.pmap.proc = txdr_unsigned(IPPROTO_UDP);
+  request.sdata.pmap.prot = txdr_unsigned(IPPROTO_UDP);
   request.sdata.pmap.port = 0;
 
   error = rpcclnt_request(rpc, PMAPPROC_GETPORT, PMAPPROG, PMAPVERS,

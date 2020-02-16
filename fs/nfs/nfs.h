@@ -65,7 +65,6 @@
 #define NFS_WSIZE          8192           /* Def. write data size <= 8192 */
 #define NFS_RSIZE          8192           /* Def. read data size <= 8192 */
 #define NFS_READDIRSIZE    8192           /* Def. readdir size */
-#define NFS_NPROCS         23
 
 /* Ideally, NFS_DIRBLKSIZ should be bigger, but I've seen servers with
  * broken NFS/ethernet drivers that won't work with anything bigger (Linux..)
@@ -85,9 +84,6 @@
  *  Public Data
  ****************************************************************************/
 
-extern uint32_t nfs_true;
-extern uint32_t nfs_false;
-extern uint32_t nfs_xdrneg1;
 #ifdef CONFIG_NFS_STATISTICS
 extern struct nfsstats nfsstats;
 #endif
@@ -115,9 +111,6 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN void nfs_semtake(FAR struct nfsmount *nmp);
-EXTERN void nfs_semgive(FAR struct nfsmount *nmp);
-EXTERN int  nfs_fsinfo(FAR struct nfsmount *nmp);
 EXTERN int nfs_request(struct nfsmount *nmp, int procnum,
                 FAR void *request, size_t reqlen,
                 FAR void *response, size_t resplen);

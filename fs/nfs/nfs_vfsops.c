@@ -55,7 +55,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <queue.h>
 #include <string.h>
 #include <fcntl.h>
 #include <time.h>
@@ -119,20 +118,19 @@ struct nfs_statinfo_s
 };
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
-uint32_t nfs_true;
-uint32_t nfs_false;
-uint32_t nfs_xdrneg1;
-
-#ifdef CONFIG_NFS_STATISTICS
-struct nfsstats nfsstats;
-#endif
+static uint32_t nfs_true;
+static uint32_t nfs_false;
+static uint32_t nfs_xdrneg1;
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+static void    nfs_semtake(FAR struct nfsmount *nmp);
+static void    nfs_semgive(FAR struct nfsmount *nmp);
 
 static int     nfs_filecreate(FAR struct nfsmount *nmp,
                    FAR struct nfsnode *np, FAR const char *relpath,
@@ -150,6 +148,7 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen);
 static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
                    size_t buflen);
 static int     nfs_dup(FAR const struct file *oldp, FAR struct file *newp);
+static int     nfs_fsinfo(FAR struct nfsmount *nmp);
 static int     nfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
 static int     nfs_truncate(FAR struct file *filep, off_t length);
 static int     nfs_opendir(struct inode *mountpt, const char *relpath,
@@ -181,6 +180,10 @@ static int     nfs_stat(struct inode *mountpt, FAR const char *relpath,
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+#ifdef CONFIG_NFS_STATISTICS
+struct nfsstats nfsstats;
+#endif
 
 /* nfs vfs operations. */
 
@@ -215,8 +218,26 @@ const struct mountpt_operations nfs_operations =
 };
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nfs_semtake
+ ****************************************************************************/
+
+static void nfs_semtake(FAR struct nfsmount *nmp)
+{
+  nxsem_wait_uninterruptible(&nmp->nm_sem);
+}
+
+/****************************************************************************
+ * Name: nfs_semgive
+ ****************************************************************************/
+
+static void nfs_semgive(FAR struct nfsmount *nmp)
+{
+  nxsem_post(&nmp->nm_sem);
+}
 
 /****************************************************************************
  * Name: nfs_filecreate
@@ -262,7 +283,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
   reqlen += sizeof(uint32_t);
 
   memcpy(ptr, &fhandle.handle, fhandle.length);
-  reqlen += (int)fhandle.length;
+  reqlen += uint32_alignup(fhandle.length);
   ptr    += uint32_increment(fhandle.length);
 
   /* Copy the variable-length file name */
@@ -435,7 +456,7 @@ static int nfs_filetruncate(FAR struct nfsmount *nmp,
   reqlen += sizeof(uint32_t);
 
   memcpy(ptr, &np->n_fhandle, np->n_fhsize);
-  reqlen += (int)np->n_fhsize;
+  reqlen += uint32_alignup(np->n_fhsize);
   ptr    += uint32_increment(np->n_fhsize);
 
   /* Copy the variable-length attributes */
@@ -853,8 +874,8 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen)
       reqlen += sizeof(uint32_t);
 
       memcpy(ptr, &np->n_fhandle, np->n_fhsize);
-      reqlen += (int)np->n_fhsize;
-      ptr    += uint32_increment((int)np->n_fhsize);
+      reqlen += uint32_alignup(np->n_fhsize);
+      ptr    += uint32_increment(np->n_fhsize);
 
       /* Copy the file offset */
 
@@ -1027,8 +1048,8 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
       reqlen += sizeof(uint32_t);
 
       memcpy(ptr, &np->n_fhandle, np->n_fhsize);
-      reqlen += (int)np->n_fhsize;
-      ptr    += uint32_increment((int)np->n_fhsize);
+      reqlen += uint32_alignup(np->n_fhsize);
+      ptr    += uint32_increment(np->n_fhsize);
 
       /* Copy the file offset */
 
@@ -1397,8 +1418,8 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   reqlen += sizeof(uint32_t);
 
   memcpy(ptr, dir->u.nfs.nfs_fhandle, dir->u.nfs.nfs_fhsize);
-  reqlen += (int)dir->u.nfs.nfs_fhsize;
-  ptr    += uint32_increment((int)dir->u.nfs.nfs_fhsize);
+  reqlen += uint32_alignup(dir->u.nfs.nfs_fhsize);
+  ptr    += uint32_increment(dir->u.nfs.nfs_fhsize);
 
   /* Cookie and cookie verifier */
 
@@ -2037,7 +2058,7 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-int nfs_fsinfo(FAR struct nfsmount *nmp)
+static int nfs_fsinfo(FAR struct nfsmount *nmp)
 {
   struct rpc_call_fs fsinfo;
   struct rpc_reply_fsinfo fsp;
@@ -2234,7 +2255,7 @@ static int nfs_remove(struct inode *mountpt, const char *relpath)
   reqlen += sizeof(uint32_t);
 
   memcpy(ptr, &fhandle.handle, fhandle.length);
-  reqlen += (int)fhandle.length;
+  reqlen += uint32_alignup(fhandle.length);
   ptr    += uint32_increment(fhandle.length);
 
   /* Copy the variable-length file name */
@@ -2313,7 +2334,7 @@ static int nfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
 
   memcpy(ptr, &fhandle.handle, fhandle.length);
   ptr    += uint32_increment(fhandle.length);
-  reqlen += (int)fhandle.length;
+  reqlen += uint32_alignup(fhandle.length);
 
   /* Copy the variable-length directory name */
 
@@ -2430,7 +2451,7 @@ static int nfs_rmdir(struct inode *mountpt, const char *relpath)
   reqlen += sizeof(uint32_t);
 
   memcpy(ptr, &fhandle.handle, fhandle.length);
-  reqlen += (int)fhandle.length;
+  reqlen += uint32_alignup(fhandle.length);
   ptr    += uint32_increment(fhandle.length);
 
   /* Copy the variable-length directory name */
@@ -2519,7 +2540,7 @@ static int nfs_rename(struct inode *mountpt, const char *oldrelpath,
   reqlen += sizeof(uint32_t);
 
   memcpy(ptr, &from_handle.handle, from_handle.length);
-  reqlen += (int)from_handle.length;
+  reqlen += uint32_alignup(from_handle.length);
   ptr    += uint32_increment(from_handle.length);
 
   /* Copy the variable-length 'from' object name */
@@ -2540,7 +2561,7 @@ static int nfs_rename(struct inode *mountpt, const char *oldrelpath,
 
   memcpy(ptr, &to_handle.handle, to_handle.length);
   ptr    += uint32_increment(to_handle.length);
-  reqlen += (int)to_handle.length;
+  reqlen += uint32_alignup(to_handle.length);
 
   /* Copy the variable-length 'to' object name */
 

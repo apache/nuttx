@@ -42,17 +42,13 @@
 #include <sys/time.h>
 
 #include <stdint.h>
-#include <queue.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <assert.h>
 #include <debug.h>
-
-#include <nuttx/fs/dirent.h>
 
 #include "rpc.h"
 #include "nfs.h"
@@ -122,24 +118,6 @@ static inline int nfs_pathsegment(FAR const char **path, FAR char *buffer,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nfs_semtake
- ****************************************************************************/
-
-void nfs_semtake(struct nfsmount *nmp)
-{
-  nxsem_wait_uninterruptible(&nmp->nm_sem);
-}
-
-/****************************************************************************
- * Name: nfs_semgive
- ****************************************************************************/
-
-void nfs_semgive(struct nfsmount *nmp)
-{
-  nxsem_post(&nmp->nm_sem);
-}
-
-/****************************************************************************
  * Name: nfs_request
  *
  * Description:
@@ -186,9 +164,9 @@ tryagain:
       return error;
     }
 
-  if (replyh.rpc_verfi.authtype != 0)
+  if (replyh.rh.rpc_verfi.authtype != 0)
     {
-      error = fxdr_unsigned(int, replyh.rpc_verfi.authtype);
+      error = fxdr_unsigned(int, replyh.rh.rpc_verfi.authtype);
 
       if (error == EAGAIN)
         {
@@ -251,7 +229,7 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
   reqlen += sizeof(uint32_t);
 
   memcpy(ptr, &fhandle->handle, fhandle->length);
-  reqlen += fhandle->length;
+  reqlen += uint32_alignup(fhandle->length);
   ptr    += uint32_increment(fhandle->length);
 
   /* Copy the variable-length file name */

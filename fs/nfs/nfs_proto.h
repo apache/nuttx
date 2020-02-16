@@ -118,13 +118,13 @@
 
 /* Specific to NFS Version 3 */
 
-#define NFSX_V3FH               (sizeof (fhandle_t))  /* size this server uses */
+#define NFSX_V3FH               (sizeof(struct fhandle))  /* size this server uses */
 #define NFSX_V3FHMAX            64    /* max. allowed by protocol */
 #define NFSX_V3FATTR            84
 #define NFSX_V3SATTR            60    /* max. all fields filled in */
 #define NFSX_V3SRVSATTR         (sizeof (struct nfsv3_sattr))
 #define NFSX_V3POSTOPATTR       (NFSX_V3FATTR + NFSX_UNSIGNED)
-#define NFSX_V3WCCDATA          (NFSX_V3POSTOPATTR + 8 * NFSX_UNSIGNED)
+#define NFSX_V3WCCDATA          (NFSX_V3POSTOPATTR + 7 * NFSX_UNSIGNED)
 #define NFSX_V3COOKIEVERF       8
 #define NFSX_V3WRITEVERF        8
 #define NFSX_V3CREATEVERF       8
@@ -185,13 +185,6 @@
 #define NFSV3FSINFO_HOMOGENEOUS  0x08
 #define NFSV3FSINFO_CANSETTIME   0x10
 
-/* Conversion macros */
-
-#define vtonfsv3_mode(m)         txdr_unsigned((m) & 07777)
-#define nfstov_mode(a)           (fxdr_unsigned(u_int16_t, (a))&07777)
-#define vtonfsv3_type(a)         txdr_unsigned(nfsv3_type[((int32_t)(a))])
-#define nfsv3tov_type(a)         nv3tov_type[fxdr_unsigned(uint32_t,(a))&0x7]
-
 /* Mode bit values */
 
 #define NFSMODE_IXOTH            (1 << 0)      /* Execute permission for others on a file */
@@ -230,7 +223,7 @@ typedef enum
 } nfstype;
 
 /* File Handle variable is up to 64 bytes for version 3. This structures a
- * ariable sized and are provided only for setting aside maximum memory
+ * variable sized and are provided only for setting aside maximum memory
  * allocations for a file handle.
  */
 
@@ -305,7 +298,7 @@ struct nfsv3_sattr
   uint32_t           sa_gidfollows;    /* TRUE: Mode value follows */
   uint32_t           sa_gid;           /* Mode value */
   uint32_t           sa_sizefollows;   /* TRUE: Size value follows */
-  uint32_t           sa_size;          /* Size value */
+  nfsuint64          sa_size;          /* Size value */
   uint32_t           sa_atimetype;     /* Don't change, use server timer, or use client time  */
   nfstime3           sa_atime;         /* Client time */
   uint32_t           sa_mtimetype;     /* Don't change, use server timer, or use client time  */
@@ -314,6 +307,7 @@ struct nfsv3_sattr
 
 struct nfs_statfs
 {
+  uint32_t           obj_attributes_follow;
   struct nfs_fattr   obj_attributes;
   nfsuint64          sf_tbytes;
   nfsuint64          sf_fbytes;
@@ -324,16 +318,10 @@ struct nfs_statfs
   uint32_t           sf_invarsec;
 };
 
-struct post_attr
-{
-  uint32_t           obj_attributesfalse;
-  struct nfs_fattr   attributes;
-};
-
 struct nfsv3_fsinfo
 {
-//struct post_attr   obj_attributes;
-  uint32_t           obj_attributesfalse;
+  uint32_t           obj_attributes_follow;
+  struct nfs_fattr   obj_attributes;
   uint32_t           fs_rtmax;
   uint32_t           fs_rtpref;
   uint32_t           fs_rtmult;
@@ -393,6 +381,18 @@ struct CREATE3resok
   struct wcc_data    dir_wcc;
 };
 
+struct SETATTR3args
+{
+  struct file_handle     fhandle;              /* Variable length */
+  struct nfsv3_sattr     new_attributes;       /* Variable length */
+  uint32_t               guard;                /* Guard value */
+};
+
+struct SETATTR3resok
+{
+  struct wcc_data         wcc_data;
+};
+
 /* The actual size of the lookup argument is variable.  These structures are, therefore,
  * only useful in setting aside maximum memory usage for the LOOKUP arguments.
  */
@@ -407,18 +407,6 @@ struct LOOKUP3args
 {
   struct file_handle     dirhandle;            /* Variable length */
   struct LOOKUP3filename name;                 /* Variable length  */
-};
-
-struct SETATTR3args
-{
-  struct file_handle     fhandle;              /* Variable length */
-  struct nfsv3_sattr     new_attributes;       /* Variable length */
-  uint32_t               guard;                /* Guard value */
-};
-
-struct SETATTR3resok
-{
-  struct wcc_data         wcc_data;
 };
 
 /* Actual size of LOOKUP3args */
@@ -464,6 +452,7 @@ struct nfs_wrhdr_s
   uint64_t           offset;
   uint32_t           count;
   uint32_t           stable;
+  uint32_t           length;
 };
 
 struct WRITE3args
@@ -527,10 +516,6 @@ struct RMDIR3resok
 {
   struct wcc_data    dir_wcc;
 };
-
-/* The actual size of the lookup argument is variable.  This structures is, therefore,
- * only useful in setting aside maximum memory usage for the LOOKUP arguments.
- */
 
 struct READDIR3args
 {
