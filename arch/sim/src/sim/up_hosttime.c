@@ -59,19 +59,6 @@ uint64_t host_gettime(bool rtc)
 }
 
 /****************************************************************************
- * Name: host_settime
- ****************************************************************************/
-
-void host_settime(bool rtc, uint64_t nsec)
-{
-  struct timespec tp;
-
-  tp.tv_sec  = nsec / 1000000000;
-  tp.tv_nsec = nsec - 1000000000 * tp.tv_sec;
-  clock_settime(rtc ? CLOCK_REALTIME : CLOCK_MONOTONIC, &tp);
-}
-
-/****************************************************************************
  * Name: host_sleepuntil
  ****************************************************************************/
 
