@@ -60,7 +60,9 @@
 int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 {
   FAR struct mm_allocnode_s *node;
-  FAR struct mm_allocnode_s *prev;
+#ifdef CONFIG_DEBUG_ASSERTIONS
+  FAR struct mm_allocnode_s *prev = NULL;
+#endif
   size_t mxordblk = 0;
   int    ordblks  = 0;  /* Number of non-inuse chunks */
   size_t uordblks = 0;  /* Total allocated space */
@@ -85,9 +87,8 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 
       mm_takesemaphore(heap);
 
-      for (prev = NULL, node = heap->mm_heapstart[region];
+      for (node = heap->mm_heapstart[region];
            node < heap->mm_heapend[region];
-           prev = node,
            node = (FAR struct mm_allocnode_s *)
                   ((FAR char *)node + node->size))
         {
@@ -105,9 +106,10 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
             }
           else
             {
-              FAR struct mm_freenode_s *fnode;
+#ifdef CONFIG_DEBUG_ASSERTIONS
+              FAR struct mm_freenode_s *fnode = (FAR void *)node;
+#endif
               DEBUGASSERT(node->size >= SIZEOF_MM_FREENODE);
-              fnode = (FAR void *)node;
               DEBUGASSERT(fnode->blink->flink == fnode);
               DEBUGASSERT(fnode->blink->size <= fnode->size);
               DEBUGASSERT(fnode->flink == NULL ||
@@ -122,7 +124,9 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
                   mxordblk = node->size;
                 }
             }
-
+#ifdef CONFIG_DEBUG_ASSERTIONS
+          prev = node;
+#endif
           DEBUGASSERT(prev == NULL ||
                       prev->size == (node->preceding & ~MM_ALLOC_BIT));
         }

@@ -118,7 +118,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   for (node = heap->mm_nodelist[ndx].flink;
        node && node->size < alignsize;
-       node = node->flink);
+       node = node->flink)
     {
       DEBUGASSERT(node->blink->flink == node);
     }

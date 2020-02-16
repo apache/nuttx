@@ -74,14 +74,10 @@ CSRCS += up_allocateheap.c
 VPATH = sim
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
-HOSTSRCS = up_hostusleep.c
+HOSTSRCS = up_hosttime.c
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += up_checkstack.c
-endif
-
-ifeq ($(CONFIG_SCHED_TICKLESS),y)
-  CSRCS += up_tickless.c
 endif
 
 ifeq ($(CONFIG_SPINLOCK),y)
@@ -113,8 +109,8 @@ ifeq ($(CONFIG_ONESHOT),y)
   CSRCS += up_oneshot.c
 endif
 
-ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
-  HOSTSRCS += up_critmon.c
+ifeq ($(CONFIG_RTC_DRIVER),y)
+  CSRCS += up_rtc.c
 endif
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
@@ -132,12 +128,10 @@ ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   REQUIREDOBJS += up_touchscreen$(OBJEXT)
   HOSTCFLAGS += -DCONFIG_SIM_TOUCHSCREEN=1
   HOSTSRCS += up_x11eventloop.c
-else
-ifeq ($(CONFIG_SIM_AJOYSTICK),y)
+else ifeq ($(CONFIG_SIM_AJOYSTICK),y)
   CSRCS += up_ajoystick.c
   HOSTCFLAGS += -DCONFIG_SIM_AJOYSTICK=1
   HOSTSRCS += up_x11eventloop.c
-endif
 endif
 endif
 endif
