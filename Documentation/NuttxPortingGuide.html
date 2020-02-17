@@ -6931,10 +6931,6 @@ int syslog_file_channel(FAR const char *devpath);
   </li>
   <li>
     <p>
-      <code>CONFIG_RAMLOG_CONSOLE</code>: Use the RAM logging device as a system console. If this feature is enabled (along with <code>CONFIG_DEV_CONSOLE</code>), then all console output will be re-directed to a circular buffer in RAM.  This might be useful, for example, if the only console is a Telnet console.  Then in that case, console output from non-Telnet threads will go to the circular buffer and can be viewed using the NSH <code>dmesg</code> command.  This optional is not useful in other scenarios.
-  </li>
-  <li>
-    <p>
       <code>CONFIG_RAMLOG_SYSLOG</code>: Use the RAM logging device for the SYSLOG interface.  If this feature is enabled, then all debug output will be re-directed to the circular  buffer in RAM.  This RAM log can be viewed from NSH using the <code>dmesg</code>  command.  NOTE:  Unlike the limited, generic character driver SYSLOG device, the RAMLOG <i>can</i> be used to capture debug output from
       interrupt level handlers.
   </li>
@@ -6943,9 +6939,6 @@ int syslog_file_channel(FAR const char *devpath);
       <code>CONFIG_RAMLOG_NPOLLWAITERS</code>: The number of threads than can be waiting for this driver on <code>poll()</code>.  Default: 4
   </li>
 </ul>
-<p>
-  If <code>CONFIG_RAMLOG_CONSOLE</code> or <code>CONFIG_RAMLOG_SYSLOG</code> is selected, then the following must also be provided:
-</p>
 <ul>
   <li>
     <p>

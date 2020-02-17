@@ -152,7 +152,7 @@ static const struct file_operations g_ramlogfops =
  * for the syslogging function.
  */
 
-#if defined(CONFIG_RAMLOG_CONSOLE) || defined(CONFIG_RAMLOG_SYSLOG)
+#ifdef CONFIG_RAMLOG_SYSLOG
 static char g_sysbuffer[CONFIG_RAMLOG_BUFSIZE];
 
 /* This is the device structure for the console or syslogging function.  It
@@ -677,7 +677,6 @@ errout:
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_RAMLOG_CONSOLE) && !defined(CONFIG_RAMLOG_SYSLOG)
 int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
 {
   FAR struct ramlog_dev_s *priv;
@@ -719,26 +718,6 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
 
   return ret;
 }
-#endif
-
-/****************************************************************************
- * Name: ramlog_consoleinit
- *
- * Description:
- *   Use a pre-allocated RAM logging device and register it at /dev/console
- *
- ****************************************************************************/
-
-#ifdef CONFIG_RAMLOG_CONSOLE
-int ramlog_consoleinit(void)
-{
-  FAR struct ramlog_dev_s *priv = &g_sysdev;
-
-  /* Register the console character driver */
-
-  return register_driver("/dev/console", &g_ramlogfops, 0666, priv);
-}
-#endif
 
 /****************************************************************************
  * Name: ramlog_syslog_channel
@@ -746,9 +725,6 @@ int ramlog_consoleinit(void)
  * Description:
  *   Use a pre-allocated RAM logging device and register it at the path
  *   specified by CONFIG_RAMLOG_SYSLOG
- *
- *   If CONFIG_RAMLOG_CONSOLE is also defined, then this functionality is
- *   performed when ramlog_consoleinit() is called.
  *
  ****************************************************************************/
 
@@ -779,7 +755,7 @@ int ramlog_syslog_channel(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_RAMLOG_CONSOLE) || defined(CONFIG_RAMLOG_SYSLOG)
+#ifdef CONFIG_RAMLOG_SYSLOG
 int ramlog_putc(int ch)
 {
   FAR struct ramlog_dev_s *priv = &g_sysdev;

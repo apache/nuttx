@@ -59,15 +59,9 @@
 #ifndef CONFIG_DEV_CONSOLE
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
-#  undef  CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  USE_EARLYSERIALINIT
-#  else
-#    define USE_SERIALDRIVER 1
-#    define USE_EARLYSERIALINIT 1
-#  endif
+#  define USE_SERIALDRIVER 1
+#  define USE_EARLYSERIALINIT 1
 #endif
 
 /* If some other device is used as the console, then the serial driver may
@@ -83,7 +77,7 @@
 /* Check if an interrupt stack size is configured */
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
-# define CONFIG_ARCH_INTERRUPTSTACK 0
+#  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
 /* Macros to handle saving and restore interrupt state.  In the current

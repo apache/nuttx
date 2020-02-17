@@ -469,13 +469,6 @@ RAM Logging Device
   ----------------------------
 
     * CONFIG_RAMLOG - Enables the RAM logging feature
-    * CONFIG_RAMLOG_CONSOLE - Use the RAM logging device as a system
-      console. If this feature is enabled (along with CONFIG_DEV_CONSOLE),
-      then all console output will be re-directed to a circular buffer in
-      RAM.  This might be useful, for example, if the only console is a
-      Telnet console.  Then in that case, console output from non-Telnet
-      threads will go to the circular buffer and can be viewed using the NSH
-      dmesg command.  This optional is not useful in other scenarios.
     * CONFIG_RAMLOG_SYSLOG - Use the RAM logging device for the syslogging
       interface.  If this feature is enabled, then all debug output (only)
       will be re-directed to the circular buffer in RAM.  This RAM log can
@@ -485,8 +478,8 @@ RAM Logging Device
     * CONFIG_RAMLOG_NPOLLWAITERS - The number of threads than can be waiting
       for this driver on poll().  Default: 4
 
-  If CONFIG_RAMLOG_CONSOLE or CONFIG_RAMLOG_SYSLOG is selected, then the
-  following must also be provided:
+  If CONFIG_RAMLOG_SYSLOG is selected, then the following must also be
+  provided:
 
     * CONFIG_RAMLOG_BUFSIZE - The size of the circular buffer to use.
       Default: 1024 bytes.

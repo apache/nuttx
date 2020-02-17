@@ -146,8 +146,6 @@ void up_initialize(void)
 
 #if defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
-#elif defined(CONFIG_RAMLOG_CONSOLE)
-  ramlog_consoleinit();
 #endif
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1
@@ -162,10 +160,6 @@ void up_initialize(void)
    */
 
   syslog_initialize(SYSLOG_INIT_EARLY);
-
-#ifdef CONFIG_RAMLOG_SYSLOG
-  ramlog_sysloginit();
-#endif
 
   board_autoled_on(LED_IRQSENABLED);
 }

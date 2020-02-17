@@ -2116,13 +2116,6 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Medium-Low
 
-  Title:       CONFIG_RAMLOG_CONSOLE DOES NOT WORK
-  Description: When I enable CONFIG_RAMLOG_CONSOLE, the system does not come up
-               properly (using configuration stm3240g-eval/nsh2).  The problem
-               may be an assertion that is occurring before we have a console.
-  Status:      Open
-  Priority:    Medium
-
   Title:       UNIFIED DESCRIPTOR REPRESENTATION
   Description: There are two separate ranges of descriptors for file and
                socket descriptors: if a descriptor is in one range then it is

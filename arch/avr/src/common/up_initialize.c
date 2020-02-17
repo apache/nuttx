@@ -77,15 +77,9 @@
 #ifndef CONFIG_DEV_CONSOLE
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
-#  undef  CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  USE_EARLYSERIALINIT
-#  else
-#    define USE_SERIALDRIVER 1
-#    define USE_EARLYSERIALINIT 1
-#  endif
+#  define USE_SERIALDRIVER 1
+#  define USE_EARLYSERIALINIT 1
 #endif
 
 /* If some other device is used as the console, then the serial driver may
@@ -235,8 +229,6 @@ void up_initialize(void)
 
 #if defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
-#elif defined(CONFIG_RAMLOG_CONSOLE)
-  ramlog_consoleinit();
 #endif
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1

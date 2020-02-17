@@ -1111,7 +1111,6 @@ Where <subdir> is one of the following:
     3. The RAM log is enabled"
 
       CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
-      CONFIG_RAMLOG_CONSOLE=n     : (there is no default console device)
       CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the
                                     system logger.
 
