@@ -215,7 +215,7 @@
 #  define TIVA_NI2C            6  /* Six I2C modules */
 #  define TIVA_NADC            2  /* Two ADC modules */
 #  define TIVA_NPWM            2  /* Two PWM generator modules */
-#  define TIVA_NQEI            1  /* One quadrature encoders */
+#  define TIVA_NQEI            1  /* One quadrature encoder */
 #  define TIVA_NPORTS          15 /* Fifteen Ports (GPIOA-H, J-N, P-Q) */
 #  define TIVA_NCANCONTROLLER  2  /* Two CAN controllers */
 #  define TIVA_NUSBOTGFS       1  /* One USB 2.0 OTG FS */
@@ -287,7 +287,7 @@
 #  define TIVA_NI2C            10 /* Ten I2C modules */
 #  define TIVA_NADC            2  /* Two ADC modules */
 #  define TIVA_NPWM            4  /* Four PWM generator modules */
-#  define TIVA_NQEI            1  /* One quadrature encoders */
+#  define TIVA_NQEI            1  /* One quadrature encoder */
 #  define TIVA_NPORTS          15 /* Fifteen Ports (GPIOA-H, J-N, P-Q) */
 #  define TIVA_NCANCONTROLLER  2  /* Two CAN controllers */
 #  define TIVA_NUSBOTGFS       0  /* No USB 2.0 OTG FS */
@@ -311,7 +311,7 @@
 #  define TIVA_NI2C            10 /* Ten I2C modules */
 #  define TIVA_NADC            2  /* Two ADC modules */
 #  define TIVA_NPWM            4  /* Four PWM generator modules */
-#  define TIVA_NQEI            1  /* One quadrature encoders */
+#  define TIVA_NQEI            1  /* One quadrature encoder */
 #  define TIVA_NPORTS          15 /* Fifteen Ports (GPIOA-H, J-N, P-Q) */
 #  define TIVA_NCANCONTROLLER  2  /* Two CAN controllers */
 #  define TIVA_NUSBOTGFS       0  /* No USB 2.0 OTG FS */
@@ -351,7 +351,7 @@
 #  define SIMPLELINK           1  /* SimpleLink family */
 #  define TIVA_NTIMERS         4  /* Eight 16- or four 32-bit GPTM timers */
 #  define TIVA_NWIDETIMERS     0  /* No 32/64-bit timers */
-#  define TIVA_NWDT            1  /* One watchdog timers */
+#  define TIVA_NWDT            1  /* One watchdog timer */
                                   /* One RF timer */
 #  define TIVA_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define TIVA_NLCD            0  /* No LCD controller */
@@ -383,7 +383,7 @@
 #  define SIMPLELINK           1  /* SimpleLink family */
 #  define TIVA_NTIMERS         4  /* Eight 16- or four 32-bit GPTM timers */
 #  define TIVA_NWIDETIMERS     0  /* No 32/64-bit timers */
-#  define TIVA_NWDT            1  /* One watchdog timers */
+#  define TIVA_NWDT            1  /* One watchdog timer */
 #  define TIVA_NETHCONTROLLERS 0  /* No Ethernet controller */
 #  define TIVA_NLCD            0  /* No LCD controller */
 #  define TIVA_NSSI            2  /* Two SSI modules */
