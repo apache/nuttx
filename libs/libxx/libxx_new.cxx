@@ -61,12 +61,7 @@
 //
 //***************************************************************************
 
-//void *operator new(size_t nbytes)
-#ifdef CONFIG_CXX_NEWLONG
-void *operator new(unsigned long nbytes)
-#else
-void *operator new(unsigned int nbytes)
-#endif
+FAR void *operator new(std::size_t nbytes)
 {
   // We have to allocate something
 
@@ -77,7 +72,7 @@ void *operator new(unsigned int nbytes)
 
   // Perform the allocation
 
-  void *alloc = lib_malloc(nbytes);
+  FAR void *alloc = lib_malloc(nbytes);
 
 #ifdef CONFIG_DEBUG_ERROR
   if (alloc == 0)

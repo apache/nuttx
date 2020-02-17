@@ -1164,11 +1164,12 @@ o C++ Support
                that size_t is of a different type resulting in compilation errors
                in the operator.  Using the underlying integer type Instead of
                size_t seems to resolve the compilation issues.
-  Status:      Kind of open.  There is a workaround.  Setting CONFIG_CXX_NEWLONG=y
-               will define the operators with argument of type unsigned long;
-               Setting CONFIG_CXX_NEWLONG=n will define the operators with argument
-               of type unsigned int.  But this is pretty ugly!  A better solution
-               would be to get a hold of the compilers definition of size_t.
+  Status:      Kind of open. There is a workaround. Setting CONFIG_ARCH_SIZET_LONG
+               =y will define the operators with argument of type unsigned long;
+               Setting CONFIG_ARCH_SIZET_LONG=n will define the operators with
+               argument of type unsigned int. But this is pretty ugly!  A better
+               solution would be to get a hold of the compilers definition of
+               size_t.
   Priority:    Low.
 
   Title:       STATIC CONSTRUCTORS AND MULTITASKING
