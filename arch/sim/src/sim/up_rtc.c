@@ -56,6 +56,8 @@ static struct rtc_lowerhalf_s g_sim_rtc =
   .ops         = &g_sim_rtc_ops,
 };
 
+static int64_t g_sim_delta;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -66,8 +68,9 @@ static int sim_rtc_rdtime(FAR struct rtc_lowerhalf_s *lower,
   uint64_t nsec;
   time_t sec;
 
-  nsec = host_gettime(true);
-  sec  = nsec / NSEC_PER_SEC;
+  nsec  = host_gettime(true);
+  nsec += g_sim_delta;
+  sec   = nsec / NSEC_PER_SEC;
   nsec -= sec * NSEC_PER_SEC;
 
   gmtime_r(&sec, (FAR struct tm *)rtctime);
@@ -79,12 +82,10 @@ static int sim_rtc_rdtime(FAR struct rtc_lowerhalf_s *lower,
 static int sim_rtc_settime(FAR struct rtc_lowerhalf_s *lower,
                            FAR const struct rtc_time *rtctime)
 {
-  uint64_t nsec;
-
-  nsec = mktime((FAR struct tm *)rtctime);
-  nsec *= NSEC_PER_SEC;
-  nsec += rtctime->tm_nsec;
-  host_settime(true, nsec);
+  g_sim_delta = mktime((FAR struct tm *)rtctime);
+  g_sim_delta *= NSEC_PER_SEC;
+  g_sim_delta += rtctime->tm_nsec;
+  g_sim_delta -= host_gettime(true);
 
   return OK;
 }
