@@ -76,9 +76,6 @@ struct nfsmount
   FAR struct socket        *nm_so;            /* RPC socket */
   struct sockaddr           nm_nam;           /* Addr of server */
   uint8_t                   nm_fhsize;        /* Size of root file handle (host order) */
-  uint8_t                   nm_sotype;        /* Type of socket */
-  uint8_t                   nm_retry;         /* Max retries */
-  uint16_t                  nm_timeo;         /* Timeout value (in system clock ticks) */
   uint16_t                  nm_rsize;         /* Max size of read RPC */
   uint16_t                  nm_wsize;         /* Max size of write RPC */
   uint16_t                  nm_readdirsize;   /* Size of a readdir RPC */

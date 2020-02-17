@@ -1655,17 +1655,18 @@ static void nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
 
   if ((argp->flags & NFSMNT_TIMEO) != 0 && argp->timeo > 0)
     {
-      uint32_t tmp = ((uint32_t)argp->timeo * NFS_HZ + 5) / 10;
-      if (tmp < NFS_MINTIMEO)
+      if (argp->timeo < NFS_MINTIMEO)
         {
-          tmp = NFS_MINTIMEO;
+          nprmt->timeo = NFS_MINTIMEO;
         }
-      else if (tmp > NFS_MAXTIMEO)
+      else if (argp->timeo > NFS_MAXTIMEO)
         {
-          tmp = NFS_MAXTIMEO;
+          nprmt->timeo = NFS_MAXTIMEO;
         }
-
-      nprmt->timeo = tmp;
+      else
+        {
+          nprmt->timeo = argp->timeo;
+        }
     }
 
   /* Get the selected retransmission count */
@@ -1874,8 +1875,6 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Set initial values of other fields */
 
-  nmp->nm_timeo       = nprmt.timeo;
-  nmp->nm_retry       = nprmt.retry;
   nmp->nm_wsize       = nprmt.wsize;
   nmp->nm_rsize       = nprmt.rsize;
   nmp->nm_readdirsize = nprmt.readdirsize;
@@ -1886,9 +1885,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Set up the sockets and per-host congestion */
 
-  nmp->nm_sotype  = argp->sotype;
-
-  if (nmp->nm_sotype == SOCK_DGRAM)
+  if (argp->sotype == SOCK_DGRAM)
     {
       /* Connection-less... connect now */
 
@@ -1907,8 +1904,9 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
       rpc->rc_path       = nmp->nm_path;
       rpc->rc_name       = &nmp->nm_nam;
-      rpc->rc_sotype     = nmp->nm_sotype;
-      rpc->rc_retry      = nmp->nm_retry;
+      rpc->rc_sotype     = argp->sotype;
+      rpc->rc_timeo      = nprmt.timeo;
+      rpc->rc_retry      = nprmt.retry;
 
       nmp->nm_rpcclnt    = rpc;
 

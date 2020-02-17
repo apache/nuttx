@@ -451,8 +451,8 @@ struct rpcclnt
   FAR struct sockaddr *rc_name;
   FAR struct socket *rc_so;   /* RPC socket */
 
-  bool      rc_timeout;       /* Receipt of reply timed out */
   uint8_t   rc_sotype;        /* Type of socket */
+  uint8_t   rc_timeo;         /* Timeout value (in deciseconds) */
   uint8_t   rc_retry;         /* Max retries */
 };
 

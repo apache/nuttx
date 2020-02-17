@@ -237,15 +237,6 @@ static int rpcclnt_reply(FAR struct rpcclnt *rpc,
   if (error != 0)
     {
       ferr("ERROR: rpcclnt_receive returned: %d\n", error);
-
-      /* If we failed because of a timeout, then try sending the CALL
-       * message again.
-       */
-
-      if (error == -EAGAIN || error == -ETIMEDOUT)
-        {
-          rpc->rc_timeout = true;
-        }
     }
 
   /* Get the xid and check that it is an RPC replysvr */
@@ -279,9 +270,9 @@ static uint32_t rpcclnt_newxid(void)
   static uint32_t rpcclnt_xid = 0;
   static uint32_t rpcclnt_xid_touched = 0;
 
-  srand(time(NULL));
   if ((rpcclnt_xid == 0) && (rpcclnt_xid_touched == 0))
     {
+      srand(time(NULL));
       rpcclnt_xid = rand();
       rpcclnt_xid_touched = 1;
     }
@@ -415,8 +406,8 @@ int rpcclnt_connect(FAR struct rpcclnt *rpc)
    * Otherwise, we can get stuck in psock_receive forever.
    */
 
-  tv.tv_sec  = 1;
-  tv.tv_usec = 0;
+  tv.tv_sec  = rpc->rc_timeo / 10;
+  tv.tv_usec = (rpc->rc_timeo % 10) * 100000;
 
   error = psock_setsockopt(rpc->rc_so, SOL_SOCKET, SO_RCVTIMEO,
                           (FAR const void *)&tv, sizeof(tv));
@@ -696,7 +687,7 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
   FAR struct rpc_reply_header *replymsg;
   uint32_t tmp;
   uint32_t xid;
-  int retries;
+  int retries = 0;
   int error = 0;
 
   /* Get a new (non-zero) xid */
@@ -719,13 +710,11 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
    * timeouts.
    */
 
-  retries = 0;
-  do
+  for (; ; )
     {
       /* Do the client side RPC. */
 
       rpc_statistics(rpcrequests);
-      rpc->rc_timeout = false;
 
       /* Send the RPC CALL message */
 
@@ -746,9 +735,22 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
             }
         }
 
-      retries++;
+      /* If we failed because of a timeout, then try sending the CALL
+       * message again.
+       */
+
+      if (error != -EAGAIN && error != -ETIMEDOUT)
+        {
+          break;
+        }
+
+      rpc_statistics(rpctimeouts);
+      if (++retries >= rpc->rc_retry)
+        {
+          break;
+        }
+      rpc_statistics(rpcretries);
     }
-  while (rpc->rc_timeout && retries <= rpc->rc_retry);
 
   if (error != OK)
     {
