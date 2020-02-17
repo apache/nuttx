@@ -43,7 +43,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/mm/iob.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/drivers/drivers.h>
@@ -113,12 +112,6 @@ void up_initialize(void)
   /* Add any extra memory fragments to the memory manager */
 
   up_addregion();
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
-#endif
 
   /* Register devices */
 
