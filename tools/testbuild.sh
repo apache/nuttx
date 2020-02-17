@@ -180,9 +180,9 @@ function configure {
     fi
 
     if [ "X$sizet" != "Xdefault" ]; then
-      sed -i -e "/CONFIG_CXX_NEWLONG/d" $nuttx/.config
+      sed -i -e "/CONFIG_ARCH_SIZET_LONG/d" $nuttx/.config
       if [ "X$sizet" == "Xulong" ]; then
-        sed -i -e "\$aCONFIG_CXX_NEWLONG=y" $nuttx/.config
+        sed -i -e "\$aCONFIG_ARCH_SIZET_LONG=y" $nuttx/.config
       fi
     fi
 

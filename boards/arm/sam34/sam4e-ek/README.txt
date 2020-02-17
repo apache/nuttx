@@ -1074,7 +1074,7 @@ Configurations
        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
 
      Library Routines ->
-       CONFIG_CXX_NEWLONG=n                : size_t is an unsigned int, not long
+       CONFIG_ARCH_SIZET_LONG=n            : size_t is an unsigned int, not long
 
      This re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building
