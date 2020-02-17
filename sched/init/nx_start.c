@@ -51,6 +51,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/mm/shm.h>
 #include <nuttx/kmalloc.h>
@@ -608,6 +609,12 @@ void nx_start(void)
     mm_pginitialize(heap_start, heap_size);
 #endif
   }
+#endif
+
+#ifdef CONFIG_MM_IOB
+  /* Initialize IO buffering */
+
+  iob_initialize();
 #endif
 
   /* The memory manager is available */

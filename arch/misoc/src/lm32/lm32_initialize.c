@@ -44,7 +44,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
@@ -73,12 +72,6 @@ void up_initialize(void)
 
 #ifdef CONFIG_RPMSG_UART
   rpmsg_serialinit();
-#endif
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
 #endif
 
 #if 0 /* REVISIT */
