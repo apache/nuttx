@@ -67,22 +67,22 @@
 
 struct nfsmount
 {
-  struct nfsnode  *nm_head;                   /* A list of all files opened on this mountpoint */
-  sem_t            nm_sem;                    /* Used to assure thread-safe access */
-  nfsfh_t          nm_fh;                     /* File handle of root dir */
-  char             nm_path[90];               /* server's path of the directory being mounted */
-  struct nfs_fattr nm_fattr;                  /* nfs file attribute cache */
-  struct rpcclnt  *nm_rpcclnt;                /* RPC state */
-  struct socket   *nm_so;                     /* RPC socket */
-  struct sockaddr  nm_nam;                    /* Addr of server */
-  uint8_t          nm_fhsize;                 /* Size of root file handle (host order) */
-  uint8_t          nm_sotype;                 /* Type of socket */
-  uint8_t          nm_retry;                  /* Max retries */
-  uint16_t         nm_timeo;                  /* Timeout value (in system clock ticks) */
-  uint16_t         nm_rsize;                  /* Max size of read RPC */
-  uint16_t         nm_wsize;                  /* Max size of write RPC */
-  uint16_t         nm_readdirsize;            /* Size of a readdir RPC */
-  uint16_t         nm_buflen;                 /* Size of I/O buffer */
+  FAR struct nfsnode       *nm_head;          /* A list of all files opened on this mountpoint */
+  sem_t                     nm_sem;           /* Used to assure thread-safe access */
+  nfsfh_t                   nm_fh;            /* File handle of root dir */
+  char                      nm_path[90];      /* server's path of the directory being mounted */
+  struct nfs_fattr          nm_fattr;         /* nfs file attribute cache */
+  FAR struct rpcclnt       *nm_rpcclnt;       /* RPC state */
+  FAR struct socket        *nm_so;            /* RPC socket */
+  struct sockaddr           nm_nam;           /* Addr of server */
+  uint8_t                   nm_fhsize;        /* Size of root file handle (host order) */
+  uint8_t                   nm_sotype;        /* Type of socket */
+  uint8_t                   nm_retry;         /* Max retries */
+  uint16_t                  nm_timeo;         /* Timeout value (in system clock ticks) */
+  uint16_t                  nm_rsize;         /* Max size of read RPC */
+  uint16_t                  nm_wsize;         /* Max size of write RPC */
+  uint16_t                  nm_readdirsize;   /* Size of a readdir RPC */
+  uint16_t                  nm_buflen;        /* Size of I/O buffer */
 
   /* Set aside memory on the stack to hold the largest call message.  NOTE
    * that for the case of the write call message, it is the reply message that
@@ -115,10 +115,10 @@ struct nfsmount
    * possible WRITE call message or READ response message.
    */
 
-  uint32_t         nm_iobuffer[1];            /* Actual size is given by nm_buflen */
+  uint32_t                  nm_iobuffer[1];   /* Actual size is given by nm_buflen */
 };
 
-/* The size of the nfsmount structure will debug on the size of the allocated I/O
+/* The size of the nfsmount structure will depend on the size of the allocated I/O
  * buffer.
  */
 

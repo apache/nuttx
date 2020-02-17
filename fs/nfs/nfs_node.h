@@ -60,15 +60,15 @@
 
 struct nfsnode
 {
-  struct nfsnode    *n_next;        /* Retained in a singly linked list. */
-  uint8_t            n_crefs;       /* Reference count (for nfs_dup) */
-  uint8_t            n_type;        /* File type */
-  uint8_t            n_fhsize;      /* Size in bytes of the file handle */
-  uint16_t           n_mode;        /* File mode for fstat() */
-  time_t             n_mtime;       /* File modification time */
-  time_t             n_ctime;       /* File creation time */
-  nfsfh_t            n_fhandle;     /* NFS File Handle */
-  uint64_t           n_size;        /* Current size of file */
+  FAR struct nfsnode *n_next;       /* Retained in a singly linked list. */
+  uint8_t             n_crefs;      /* Reference count (for nfs_dup) */
+  uint8_t             n_type;       /* File type */
+  uint8_t             n_fhsize;     /* Size in bytes of the file handle */
+  uint16_t            n_mode;       /* File mode for fstat() */
+  time_t              n_mtime;      /* File modification time */
+  time_t              n_ctime;      /* File creation time */
+  nfsfh_t             n_fhandle;    /* NFS File Handle */
+  uint64_t            n_size;       /* Current size of file */
 };
 
 #endif /* __FS_NFS_NFS_NODE_H */

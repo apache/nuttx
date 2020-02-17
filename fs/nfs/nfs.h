@@ -111,7 +111,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN int nfs_request(struct nfsmount *nmp, int procnum,
+EXTERN int nfs_request(FAR struct nfsmount *nmp, int procnum,
                 FAR void *request, size_t reqlen,
                 FAR void *response, size_t resplen);
 EXTERN int  nfs_lookup(FAR struct nfsmount *nmp, FAR const char *filename,

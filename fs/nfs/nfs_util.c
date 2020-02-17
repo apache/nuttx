@@ -101,7 +101,7 @@ static inline int nfs_pathsegment(FAR const char **path, FAR char *buffer,
       else if (nbytes >= NAME_MAX)
         {
           ferr("ERROR: File name segment is too long: %d\n", *path);
-          return EFBIG;
+          return -EFBIG;
         }
       else
         {
@@ -121,23 +121,22 @@ static inline int nfs_pathsegment(FAR const char **path, FAR char *buffer,
  * Name: nfs_request
  *
  * Description:
- *   Perform the NFS request. On successful receipt, it verifies the NFS level of the
- *   returned values.
+ *   Perform the NFS request. On successful receipt, it verifies the NFS level
+ *   of the returned values.
  *
  * Returned Value:
- *   Zero on success; a positive errno value on failure.
+ *   Zero on success; a negative errno value on failure.
  *
  ****************************************************************************/
 
-int nfs_request(struct nfsmount *nmp, int procnum,
+int nfs_request(FAR struct nfsmount *nmp, int procnum,
                 FAR void *request, size_t reqlen,
                 FAR void *response, size_t resplen)
 {
-  struct rpcclnt *clnt = nmp->nm_rpcclnt;
+  FAR struct rpcclnt *clnt = nmp->nm_rpcclnt;
   struct nfs_reply_header replyh;
   int error;
 
-tryagain:
   error = rpcclnt_request(clnt, procnum, NFS_PROG, NFS_VER3,
                           request, reqlen, response, resplen);
   if (error != 0)
@@ -152,13 +151,13 @@ tryagain:
     {
       if (fxdr_unsigned(uint32_t, replyh.nfs_status) > 32)
         {
-          error = EOPNOTSUPP;
+          error = -EOPNOTSUPP;
         }
       else
         {
           /* NFS_ERRORS are the same as NuttX errno values */
 
-          error = fxdr_unsigned(uint32_t, replyh.nfs_status);
+          error = -fxdr_unsigned(uint32_t, replyh.nfs_status);
         }
 
       return error;
@@ -166,15 +165,9 @@ tryagain:
 
   if (replyh.rh.rpc_verfi.authtype != 0)
     {
-      error = fxdr_unsigned(int, replyh.rh.rpc_verfi.authtype);
-
-      if (error == EAGAIN)
-        {
-          error = 0;
-          goto tryagain;
-        }
-
-      ferr("ERROR: NFS error %d from server\n", error);
+      error = -EOPNOTSUPP;
+      ferr("ERROR: NFS authtype %d from server\n",
+           fxdr_unsigned(int, replyh.rpc_verfi.authtype));
       return error;
     }
 
@@ -196,7 +189,7 @@ tryagain:
  *
  ****************************************************************************/
 
-int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
+int nfs_lookup(FAR struct nfsmount *nmp, FAR const char *filename,
                FAR struct file_handle *fhandle,
                FAR struct nfs_fattr *obj_attributes,
                FAR struct nfs_fattr *dir_attributes)
@@ -215,7 +208,7 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
   if (namelen > NAME_MAX)
     {
       ferr("ERROR: Length of the string is too long: %d\n", namelen);
-      return E2BIG;
+      return -E2BIG;
     }
 
   /* Initialize the request */
@@ -267,7 +260,7 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
   if (value > NFSX_V3FHMAX)
     {
       ferr("ERROR: Bad file handle length: %d\n", value);
-      return EIO;
+      return -EIO;
     }
 
   /* Return the file handle */
@@ -312,11 +305,11 @@ int nfs_lookup(struct nfsmount *nmp, FAR const char *filename,
  *   return the handle of the directory entry of the requested object.
  *
  * Returned Value:
- *   Zero on success; a positive errno value on failure.
+ *   Zero on success; a negative errno value on failure.
  *
  ****************************************************************************/
 
-int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
+int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
                  FAR struct file_handle *fhandle,
                  FAR struct nfs_fattr *obj_attributes,
                  FAR struct nfs_fattr *dir_attributes)
@@ -336,7 +329,7 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
    * the caller is looking for.
    */
 
-  if (*path == '\0' || strlen(path) == 0)
+  if (*path == '\0')
     {
       /* Return the root directory attributes */
 
@@ -406,8 +399,8 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
           /* Ooops.. we found something else */
 
           ferr("ERROR: Intermediate segment \"%s\" of \'%s\" is not a directory\n",
-               buffer, path);
-          return ENOTDIR;
+               buffer, relpath);
+          return -ENOTDIR;
         }
     }
 }
@@ -421,11 +414,11 @@ int nfs_findnode(struct nfsmount *nmp, FAR const char *relpath,
  *   object.
  *
  * Returned Value:
- *   Zero on success; a positive errno value on failure.
+ *   Zero on success; a negative errno value on failure.
  *
  ****************************************************************************/
 
-int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
+int nfs_finddir(FAR struct nfsmount *nmp, FAR const char *relpath,
                 FAR struct file_handle *fhandle,
                 FAR struct nfs_fattr *attributes, FAR char *filename)
 {
@@ -436,11 +429,9 @@ int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
 
   /* Verify that a path was provided */
 
-  if (*path == '\0' || strlen(path) == 0)
+  if (*path == '\0')
     {
-      /* Return the root directory attributes */
-
-      return ENOENT;
+      return -ENOENT;
     }
 
   /* Start with the file handle of the root directory.  */
@@ -497,8 +488,8 @@ int nfs_finddir(struct nfsmount *nmp, FAR const char *relpath,
           /* Ooops.. we found something else */
 
           ferr("ERROR: Intermediate segment \"%s\" of \'%s\" is not a directory\n",
-               filename, path);
-          return ENOTDIR;
+               filename, relpath);
+          return -ENOTDIR;
         }
     }
 }

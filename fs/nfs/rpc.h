@@ -442,18 +442,18 @@ struct rpc_reply_setattr
   struct SETATTR3resok setattr;
 };
 
-struct  rpcclnt
+struct rpcclnt
 {
-  nfsfh_t  rc_fh;             /* File handle of the root directory */
-  uint8_t  rc_fhsize;         /* File size of the root directory */
-  char    *rc_path;           /* Server's path of the mounted directory */
+  nfsfh_t   rc_fh;            /* File handle of the root directory */
+  uint8_t   rc_fhsize;        /* File size of the root directory */
+  FAR char *rc_path;          /* Server's path of the mounted directory */
 
-  struct  sockaddr *rc_name;
-  struct  socket *rc_so;      /* RPC socket */
+  FAR struct sockaddr *rc_name;
+  FAR struct socket *rc_so;   /* RPC socket */
 
-  bool     rc_timeout;        /* Receipt of reply timed out */
-  uint8_t  rc_sotype;         /* Type of socket */
-  uint8_t  rc_retry;          /* Max retries */
+  bool      rc_timeout;       /* Receipt of reply timed out */
+  uint8_t   rc_sotype;        /* Type of socket */
+  uint8_t   rc_retry;         /* Max retries */
 };
 
 /****************************************************************************
@@ -464,8 +464,8 @@ void rpcclnt_init(void);
 int  rpcclnt_connect(FAR struct rpcclnt *rpc);
 void rpcclnt_disconnect(FAR struct rpcclnt *rpc);
 int  rpcclnt_umount(FAR struct rpcclnt *rpc);
-int  rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog, int version,
-                     FAR void *request, size_t reqlen,
+int  rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
+                     int version, FAR void *request, size_t reqlen,
                      FAR void *response, size_t resplen);
 
 #endif /* __FS_NFS_RPC_H */
