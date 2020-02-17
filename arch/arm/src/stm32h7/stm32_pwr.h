@@ -125,6 +125,29 @@ void stm32_pwr_enablebkp(bool writable);
 
 void stm32_pwr_enablebreg(bool regon);
 
+/************************************************************************************
+ * Name: stm32_pwr_configurewkup
+ *
+ * Description:
+ *   Configures the external wakeup (WKUP) signals for wakeup from standby mode.
+ *   Sets rising/falling edge sensitivity and pull state.
+ *
+ *
+ * Input Parameters:
+ *   pin    - WKUP pin number (0-5) to work on
+ *   en     - Enables the specified WKUP pin if true
+ *   rising - If true, wakeup is triggered on rising edge, otherwise,
+ *            it is triggered on the falling edge.
+ *   pull   - Specifies the WKUP pin pull resistor configuration
+ *            (GPIO_FLOAT, GPIO_PULLUP, or GPIO_PULLDOWN)
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void stm32_pwr_configurewkup(uint32_t pin, bool en, bool rising, uint32_t pull);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
