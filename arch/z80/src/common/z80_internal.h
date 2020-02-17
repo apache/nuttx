@@ -59,11 +59,8 @@
 
 #if !defined(CONFIG_DEV_CONSOLE)
 #  undef  USE_SERIALDRIVER
-#  undef  CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#  elif defined(CONFIG_CONSOLE_SYSLOG)
+#  if defined(CONFIG_CONSOLE_SYSLOG)
 #    undef  USE_SERIALDRIVER
 #  else
 #    define USE_SERIALDRIVER 1
@@ -124,14 +121,6 @@ void rpmsg_serialinit(void);
 void syslog_console_init();
 #else
 # define syslog_console_init()
-#endif
-
-/* Defined in drivers/ramlog.c */
-
-#ifdef CONFIG_RAMLOG_CONSOLE
-void ramlog_consoleinit(void);
-#else
-# define ramlog_consoleinit()
 #endif
 
 /* Low level string output */

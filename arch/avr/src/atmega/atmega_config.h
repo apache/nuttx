@@ -77,12 +77,8 @@
 #ifndef CONFIG_DEV_CONSOLE
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
-#  undef  CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  USE_EARLYSERIALINIT
-#  elif defined(HAVE_USART_DEVICE)
+#  if defined(HAVE_USART_DEVICE)
 #    define USE_SERIALDRIVER 1
 #    define USE_EARLYSERIALINIT 1
 #  else

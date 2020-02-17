@@ -232,8 +232,6 @@ void up_initialize(void)
   up_devconsole();          /* Our private /dev/console */
 #elif defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
-#elif defined(CONFIG_RAMLOG_CONSOLE)
-  ramlog_consoleinit();
 #endif
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1
