@@ -59,18 +59,11 @@
 
 #if defined(CONFIG_DEV_LOWCONSOLE)
 #  undef USE_SERIALDRIVER
-#  ifdef CONFIG_HAVE_LOWSERIALINIT
-#    define USE_LOWSERIALINIT 1
-#  else
-#    undef USE_LOWSERIALINIT
-#  endif
 #elif !defined(CONFIG_DEV_CONSOLE)
 #  undef  USE_SERIALDRIVER
-#  undef  USE_LOWSERIALINIT
 #  undef  CONFIG_DEV_LOWCONSOLE
 #  undef  CONFIG_RAMLOG_CONSOLE
 #else
-#  undef  USE_LOWSERIALINIT
 #  if defined(CONFIG_RAMLOG_CONSOLE)
 #    undef  USE_SERIALDRIVER
 #    undef  CONFIG_DEV_LOWCONSOLE
@@ -102,10 +95,6 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
-
-#ifdef USE_LOWSERIALINIT
-void z80_lowserial_initialize(void);
 #endif
 
 /* Defined in xyz_doirq.c */
