@@ -240,7 +240,9 @@ static void tiva_ethreset(struct tiva_driver_s *priv);
 #if 0 /* Not used */
 static void tiva_phywrite(struct tiva_driver_s *priv, int regaddr, uint16_t value);
 #endif
+#ifndef CONFIG_TIVA_WITH_QEMU
 static uint16_t tiva_phyread(struct tiva_driver_s *priv, int regaddr);
+#endif
 
 /* Common TX logic */
 
@@ -466,6 +468,7 @@ static void tiva_phywrite(struct tiva_driver_s *priv, int regaddr, uint16_t valu
  *
  ****************************************************************************/
 
+#ifndef CONFIG_TIVA_WITH_QEMU
 static uint16_t tiva_phyread(struct tiva_driver_s *priv, int regaddr)
 {
   /* Wait for any MII transactions in progress to complete */
@@ -486,6 +489,7 @@ static uint16_t tiva_phyread(struct tiva_driver_s *priv, int regaddr)
 
   return (uint16_t)(tiva_ethin(priv, TIVA_MAC_MRXD_OFFSET) & MAC_MTRD_MASK);
 }
+#endif
 
 /****************************************************************************
  * Function: tiva_transmit
@@ -1279,7 +1283,9 @@ static int tiva_ifup(struct net_driver_s *dev)
   irqstate_t flags;
   uint32_t regval;
   uint32_t div;
+#ifndef CONFIG_TIVA_WITH_QEMU
   uint16_t phyreg;
+#endif
 
   ninfo("Bringing up: %d.%d.%d.%d\n",
         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
