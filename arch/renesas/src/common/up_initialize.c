@@ -139,9 +139,7 @@ void up_initialize(void)
    * Architecture-specific logic will have to detect that case.
    */
 
-#if defined(CONFIG_DEV_LOWCONSOLE)
-  lowconsole_init();
-#elif defined(CONFIG_CONSOLE_SYSLOG)
+#if defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
 #elif defined(CONFIG_RAMLOG_CONSOLE)
   ramlog_consoleinit();

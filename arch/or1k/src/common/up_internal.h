@@ -60,14 +60,9 @@
 #ifndef CONFIG_DEV_CONSOLE
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
-#  undef  CONFIG_DEV_LOWCONSOLE
 #  undef  CONFIG_RAMLOG_CONSOLE
 #else
 #  if defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  USE_EARLYSERIALINIT
-#    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_DEV_LOWCONSOLE)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #  else
@@ -305,14 +300,6 @@ void up_earlyserialinit(void);
 void rpmsg_serialinit(void);
 #else
 #  define rpmsg_serialinit()
-#endif
-
-/* Defined in drivers/lowconsole.c */
-
-#ifdef CONFIG_DEV_LOWCONSOLE
-void lowconsole_init(void);
-#else
-# define lowconsole_init()
 #endif
 
 /* DMA **********************************************************************/

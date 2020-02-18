@@ -57,20 +57,13 @@
  * assumed.
  */
 
-#if defined(CONFIG_DEV_LOWCONSOLE)
-#  undef USE_SERIALDRIVER
-#elif !defined(CONFIG_DEV_CONSOLE)
+#if !defined(CONFIG_DEV_CONSOLE)
 #  undef  USE_SERIALDRIVER
-#  undef  CONFIG_DEV_LOWCONSOLE
 #  undef  CONFIG_RAMLOG_CONSOLE
 #else
 #  if defined(CONFIG_RAMLOG_CONSOLE)
 #    undef  USE_SERIALDRIVER
-#    undef  CONFIG_DEV_LOWCONSOLE
 #  elif defined(CONFIG_CONSOLE_SYSLOG)
-#    undef  USE_SERIALDRIVER
-#    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_DEV_LOWCONSOLE)
 #    undef  USE_SERIALDRIVER
 #  else
 #    define USE_SERIALDRIVER 1
@@ -123,14 +116,6 @@ void z80_serial_initialize(void);
 void rpmsg_serialinit(void);
 #else
 #  define rpmsg_serialinit()
-#endif
-
-/* Defined in drivers/lowconsole.c */
-
-#ifdef CONFIG_DEV_LOWCONSOLE
-void lowconsole_init(void);
-#else
-# define lowconsole_init()
 #endif
 
 /* Defined in drivers/syslog_console.c */

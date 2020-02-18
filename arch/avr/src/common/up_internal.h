@@ -159,14 +159,6 @@ void rpmsg_serialinit(void);
 #  define rpmsg_serialinit()
 #endif
 
-/* Defined in drivers/lowconsole.c */
-
-#ifdef CONFIG_DEV_LOWCONSOLE
-void lowconsole_init(void);
-#else
-# define lowconsole_init()
-#endif
-
 /* Defined in chip/xxx_ethernet.c */
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
