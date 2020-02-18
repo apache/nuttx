@@ -130,7 +130,7 @@ extern "C"
 int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen);
 
 /****************************************************************************
- * Name: ramlog_syslog_channel
+ * Name: ramlog_syslog_register
  *
  * Description:
  *   Create the RAM logging device and register it at the specified path.
@@ -139,7 +139,7 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen);
  ****************************************************************************/
 
 #ifdef CONFIG_RAMLOG_SYSLOG
-int ramlog_syslog_channel(void);
+void ramlog_syslog_register(void);
 #endif
 
 /****************************************************************************

@@ -178,8 +178,7 @@ int syslog_file_channel(FAR const char *devpath)
     {
       /* We should still be able to back-up and re-initialized everything */
 
-      syslog_initialize(SYSLOG_INIT_EARLY);
-      syslog_initialize(SYSLOG_INIT_LATE);
+      syslog_channel(saved_channel);
       goto errout_with_lock;
     }
 

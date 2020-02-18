@@ -93,12 +93,6 @@ struct ramlog_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Syslog channel methods */
-
-#ifdef CONFIG_RAMLOG_SYSLOG
-static int ramlog_flush(void);
-#endif
-
 /* Helper functions */
 
 #ifndef CONFIG_RAMLOG_NONBLOCKING
@@ -116,19 +110,6 @@ static ssize_t ramlog_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
 static int     ramlog_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#ifdef CONFIG_RAMLOG_SYSLOG
-static const struct syslog_channel_s g_ramlog_syslog_channel =
-{
-  ramlog_putc,
-  ramlog_putc,
-  ramlog_flush
-};
-#endif
 
 /****************************************************************************
  * Private Data
@@ -179,17 +160,6 @@ static struct ramlog_dev_s g_sysdev =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: ramlog_flush
- ****************************************************************************/
-
-#ifdef CONFIG_RAMLOG_SYSLOG
-static int ramlog_flush(void)
-{
-  return OK;
-}
-#endif
 
 /****************************************************************************
  * Name: ramlog_readnotify
@@ -720,7 +690,7 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
 }
 
 /****************************************************************************
- * Name: ramlog_syslog_channel
+ * Name: ramlog_syslog_register
  *
  * Description:
  *   Use a pre-allocated RAM logging device and register it at the path
@@ -729,21 +699,11 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
  ****************************************************************************/
 
 #ifdef CONFIG_RAMLOG_SYSLOG
-int ramlog_syslog_channel(void)
+void ramlog_syslog_register(void)
 {
-  int ret;
-
   /* Register the syslog character driver */
 
-  ret = register_driver(CONFIG_SYSLOG_DEVPATH, &g_ramlogfops, 0666, &g_sysdev);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Use the RAMLOG as the SYSLOG channel */
-
-  return syslog_channel(&g_ramlog_syslog_channel);
+  register_driver(CONFIG_SYSLOG_DEVPATH, &g_ramlogfops, 0666, &g_sysdev);
 }
 #endif
 
