@@ -85,6 +85,12 @@
 #define AN_LMP92001_FIRST (AN_FIRST + AN_NCMDS + AN_ADS2142_NCMDS)
 #define AN_LMP92001_NCMDS 7
 
+/* See include/nuttx/analog/ads7828.h */
+
+#define AN_ADS7828_FIRST (AN_FIRST + AN_NCMDS + AN_ADS2142_NCMDS + \
+                          AN_LMP92001_NCMDS)
+#define AN_ADS7828_NCMDS 6
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
