@@ -115,14 +115,6 @@ void rpmsg_serialinit(void);
 #  define rpmsg_serialinit()
 #endif
 
-/* Defined in drivers/syslog_console.c */
-
-#ifdef CONFIG_CONSOLE_SYSLOG
-void syslog_console_init();
-#else
-# define syslog_console_init()
-#endif
-
 /* Low level string output */
 
 void up_puts(const char *str);

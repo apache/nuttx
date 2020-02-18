@@ -44,6 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/serial/pty.h>
+#include <nuttx/syslog/syslog_console.h>
 #include <nuttx/drivers/drivers.h>
 
 #include <arch/board/board.h>
