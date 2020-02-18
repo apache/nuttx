@@ -61,21 +61,14 @@
  * assumed.
  */
 
-#if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC) || \
-    defined(CONFIG_DEV_LOWCONSOLE)
-#  define USE_LOWCONSOLE 1
+#if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC)
 #  define USE_LOWUARTINIT 1
 #elif !defined(CONFIG_DEV_CONSOLE)
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
-#  undef  CONFIG_DEV_LOWCONSOLE
 #  undef  CONFIG_RAMLOG_CONSOLE
 #else
 #  if defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  USE_EARLYSERIALINIT
-#    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_DEV_LOWCONSOLE)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #  else
@@ -161,10 +154,6 @@ void up_serialinit(void);
 void rpmsg_serialinit(void);
 #else
 #  define rpmsg_serialinit()
-#endif
-
-#ifdef USE_LOWCONSOLE
-void lowconsole_init(void);
 #endif
 
 /* Defined in xyz_irq.c */
