@@ -97,15 +97,6 @@
  * Public Types
  ****************************************************************************/
 
-/* Initialization phases */
-
-enum syslog_init_e
-{
-  SYSLOG_INIT_RESET = 0, /* Power on SYSLOG initialization phase */
-  SYSLOG_INIT_EARLY,     /* Early initialization in up_initialize() */
-  SYSLOG_INIT_LATE       /* Late initialization in nx_start(). */
-};
-
 /* This structure provides the interface to a SYSLOG device */
 
 typedef CODE ssize_t (*syslog_write_t)(FAR const char *buf, size_t buflen);
@@ -181,7 +172,7 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
  *   as a minimum a call to syslog_channel() to use the device.
  *
  * Input Parameters:
- *   phase - One of {SYSLOG_INIT_EARLY, SYSLOG_INIT_LATE}
+ *   None
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -190,9 +181,9 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_SYSLOG
-int syslog_initialize(enum syslog_init_e phase);
+int syslog_initialize(void);
 #else
-#  define syslog_initialize(phase)
+#  define syslog_initialize()
 #endif
 
 /****************************************************************************

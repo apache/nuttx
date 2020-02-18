@@ -44,7 +44,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/serial/pty.h>
-#include <nuttx/syslog/syslog.h>
 #include <nuttx/drivers/drivers.h>
 
 #include <arch/board/board.h>
@@ -146,13 +145,6 @@ void up_initialize(void)
 
   ptmx_register();
 #endif
-
-  /* Early initialization of the system logging device.  Some SYSLOG channel
-   * can be initialized early in the initialization sequence because they
-   * depend on only minimal OS initialization.
-   */
-
-  syslog_initialize(SYSLOG_INIT_EARLY);
 
   board_autoled_on(LED_IRQSENABLED);
 }

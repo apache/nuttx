@@ -189,9 +189,9 @@ SYSLOG Channels
   Prototype:
 
     #ifndef CONFIG_ARCH_SYSLOG
-    int syslog_initialize(enum syslog_init_e phase);
+    int syslog_initialize(void);
     #else
-    #  define syslog_initialize(phase)
+    #  define syslog_initialize()
     #endif
 
   Description:
@@ -209,10 +209,6 @@ SYSLOG Channels
       logic will provide its own SYSLOG device initialize which must include
       as a minimum a call to syslog_channel() to use the device.
 
-  Input Parameters:
-
-    * phase - One of {SYSLOG_INIT_EARLY, SYSLOG_INIT_LATE}
-
   Returned Value:
     Zero (OK) is returned on success; a negated errno value is returned on
     any failure.
@@ -220,17 +216,7 @@ SYSLOG Channels
   Different types of SYSLOG devices have different OS initialization
   requirements.  Some are available immediately at reset, some are available
   after some basic OS initialization, and some only after OS is fully
-  initialized.  In order to satisfy these different initialization
-  requirements, syslog_initialize() is called twice from the boot-up logic:
-
-    * syslog_initialize() is called from the architecture-specific
-      up_initialize() function as some as basic hardware resources have been
-      initialized: Timers, interrupts, etc.  In this case,
-      syslog_initialize() is called with the argument SYSLOG_INIT_EARLY.
-    * syslog_initialize() is called again from nx_start() when the full OS
-      initialization has completed, just before the application main entry
-      point is spawned.  In this case, syslog_initialize() is called with
-      the argument SYSLOG_INIT_LATE.
+  initialized.
 
   There are other types of SYSLOG channel devices that may require even
   further initialization.  For example, the file SYSLOG channel (described

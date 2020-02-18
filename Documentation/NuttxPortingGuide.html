@@ -6668,9 +6668,9 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
 <ul><pre>
 #include &lt;nuttx/syslog/syslog.h&gt;
 #ifndef CONFIG_ARCH_SYSLOG
-int syslog_initialize(enum syslog_init_e phase);
+int syslog_initialize(void);
 #else
-#  define syslog_initialize(phase)
+#  define syslog_initialize()
 #endif
 </ul></pre>
 <p><b>Description:</b>
@@ -6693,13 +6693,6 @@ int syslog_initialize(enum syslog_init_e phase);
       If <code>CONFIG_ARCH_SYSLOG</code> is selected, then the architecture-specific logic will provide its own SYSLOG device initialize which must include as a minimum a call to <code>syslog_channel()</code> to use the device.
   </li>
 </ul>
-<p><b>Input Parameters:</b>
-<ul>
-  <li>
-    <p>
-      <code>phase</code>: One of {<code>SYSLOG_INIT_EARLY</code>, <code>SYSLOG_INIT_LATE</code>}
-  </li>
-</ul>
 <p><b>Returned Value:</b>
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on any failure.
 </p>
@@ -6707,19 +6700,8 @@ int syslog_initialize(enum syslog_init_e phase);
   Different types of SYSLOG devices have different OS initialization
   requirements.  Some are available immediately at reset, some are available
   after some basic OS initialization, and some only after OS is fully
-  initialized.  In order to satisfy these different initialization
-  requirements, <code>syslog_initialize()</code> is called twice from the boot-up logic:
+  initialized.
 </p>
-<ul>
-  <li>
-    <p>
-      <code>syslog_initialize()</code> is called from the architecture-specific <code>up_initialize()</code> function as some as basic hardware resources have been initialized: Timers, interrupts, etc.  In this case, <code>syslog_initialize()</code> is called with the argument <code>SYSLOG_INIT_EARLY</code>.
-  </li>
-  <li>
-    <p>
-      <code>syslog_initialize()</code> is called again from <code>nx_start()</code> when the full OS initialization has completed, just before the application main entry point is spawned.  In this case, <code>syslog_initialize()</code> is called with the argument <code>SYSLOG_INIT_LATE</code>.
-  </li>
-</ul>
 <p>
   There are other types of SYSLOG channel devices that may require even further initialization.  For example, the file SYSLOG channel (described below) cannot be initialized until the necessary file systems have been mounted.
 </p>

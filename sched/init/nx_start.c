@@ -801,7 +801,7 @@ void nx_start(void)
    * depend on having IDLE task file structures setup.
    */
 
-  syslog_initialize(SYSLOG_INIT_LATE);
+  syslog_initialize();
 
 #ifdef CONFIG_SMP
   /* Start all CPUs *********************************************************/
