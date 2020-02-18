@@ -50,8 +50,6 @@
 #include "common/z80_internal.h"
 #include "z180_config.h"
 
-#if defined(USE_LOWSERIALINIT) && defined(HAVE_SCC)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -95,24 +93,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z180_scc_lowinit
- *
- * Description:
- *   Called early in the boot sequence to initialize the [E]SCC console
- *   channel (only).
- *
- ****************************************************************************/
-
-#ifdef USE_LOWSERIALINIT
-void z180_scc_lowinit(void)
-{
-#ifdef HAVE_SCC_CONSOLE
-#warning "Missing logic"
-#endif
-}
-#endif
-
-/****************************************************************************
  * Name: z180_putc
  *
  * Description:
@@ -135,5 +115,3 @@ txbe:
   __endasm;
 }
 #endif
-
-#endif /* USE_LOWSERIALINIT && HAVE_SCC*/
