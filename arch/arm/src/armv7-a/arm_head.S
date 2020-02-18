@@ -784,6 +784,7 @@ arm_data_initialize:
  * Data section variables
  ***************************************************************************/
 
+#ifndef CONFIG_SMP
 	/* This global variable is unsigned long g_idle_topstack and is
 	 * exported from here only because of its coupling to .Linitparms
 	 * above.
@@ -804,3 +805,4 @@ g_idle_topstack:
 	.size	g_idle_topstack, .-g_idle_topstack
 #endif
 	.end
+#endif
