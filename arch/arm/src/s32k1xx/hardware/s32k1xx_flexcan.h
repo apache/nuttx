@@ -66,6 +66,9 @@
 #define S32K1XX_CAN_CRCR_OFFSET       0x0044  /* CRC Register */
 #define S32K1XX_CAN_RXFGMASK_OFFSET   0x0048  /* Rx FIFO Global Mask Register */
 #define S32K1XX_CAN_RXFIR_OFFSET      0x004c  /* Rx FIFO Information Register */
+#define S32K1XX_CAN_CBT_OFFSET        0x0050  /* CAN Bit Timing register */
+
+#define S32K1XX_CAN_MB_OFFSET         0x0080  /* CAN MB register */
 
 #define S32K1XX_CAN_RXIMR_OFFSET(n)   (0x0880 + ((n) << 2)) /* Rn Individual Mask Registers */
 #  define S32K1XX_CAN_RXIMR0_OFFSET   0x0880  /* R0 Individual Mask Registers */
@@ -162,6 +165,11 @@
 #define S32K1XX_CAN0_CRCR             (S32K1XX_FLEXCAN0_BASE + S32K1XX_CAN_CRCR_OFFSET)
 #define S32K1XX_CAN0_RXFGMASK         (S32K1XX_FLEXCAN0_BASE + S32K1XX_CAN_RXFGMASK_OFFSET)
 #define S32K1XX_CAN0_RXFIR            (S32K1XX_FLEXCAN0_BASE + S32K1XX_CAN_RXFIR_OFFSET)
+#define S32K1XX_CAN0_CBT              (S32K1XX_FLEXCAN0_BASE + S32K1XX_CAN_CBT_OFFSET)
+#define S32K1XX_CAN0_MB               (S32K1XX_FLEXCAN0_BASE + S32K1XX_CAN_MB_OFFSET)
+#define S32K1XX_CAN0_FDCTRL           (S32K1XX_FLEXCAN0_BASE + S32K1XX_CAN_FDCTRL_OFFSET)
+#define S32K1XX_CAN0_FDCBT            (S32K1XX_FLEXCAN0_BASE + S32K1XX_CAN_FDCBT_OFFSET)
+#define S32K1XX_CAN0_FDCRC            (S32K1XX_FLEXCAN0_BASE + S32K1XX_CAN_FDCRC_OFFSET)
 
 #define S32K1XX_CAN0_RXIMR(n)         (S32K1XX_FLEXCAN0_BASE + S32K1XX_CAN_RXIMR_OFFSET(n))
 #  define S32K1XX_CAN0_RXIMR0         (S32K1XX_FLEXCAN0_BASE + S32K1XX_CAN_RXIMR0_OFFSET)
@@ -340,7 +348,8 @@
 #  define CAN_MCR_IDAM_FMTB           (1 << CAN_MCR_IDAM_SHIFT) /* Format B: Two full (or partial) IDs */
 #  define CAN_MCR_IDAM_FMTC           (2 << CAN_MCR_IDAM_SHIFT) /* Format C: Four partial IDs */
 #  define CAN_MCR_IDAM_FMTD           (3 << CAN_MCR_IDAM_SHIFT) /* Format D: All frames rejected */
-                                                /* Bits 10-11: Reserved */
+                                                /* Bit 10: Reserved */
+#define CAN_MCR_FDEN                  (1 << 11) /* Bit 11: CAN FD operation enable */
 #define CAN_MCR_AEN                   (1 << 12) /* Bit 12: Abort Enable */
 #define CAN_MCR_LPRIOEN               (1 << 13) /* Bit 13: Local Priority Enable */
                                                 /* Bits 14-15: Reserved */
@@ -454,7 +463,12 @@
 #define CAN_IFLAG1(n)                 (1 << (n)) /* Bit n: Buffer MBn Interrupt, n=0..4,8..31 */
 
 /* Control 2 Register */
-                                                /* Bits 0-15: Reserved */
+                                                /* Bits 0-10: Reserved */
+#define CAN_CTRL2_EDFLTDIS            (1 << 11) /* Bit 11:  Edge Filter Disable */
+#define CAN_CTRL2_ISOCANFDEN          (1 << 12) /* Bit 12:  ISO CAN FD Enable */
+                                                /* Bit 13:  Reserved */
+#define CAN_CTRL2_PREXCEN             (1 << 14) /* Bit 14:  Protocol Exception Enable */
+#define CAN_CTRL2_TIMER_SRC           (1 << 15) /* Bit 15:  Timer Source */
 #define CAN_CTRL2_EACEN               (1 << 16) /* Bit 16:  Entire Frame Arbitration Field Comparison Enable (Rx) */
 #define CAN_CTRL2_RRS                 (1 << 17) /* Bit 17:  Remote Request Storing */
 #define CAN_CTRL2_MRP                 (1 << 18) /* Bit 18:  Mailboxes Reception Priority */
@@ -505,6 +519,45 @@
                                                 /* Bits 9-31: Reserved */
 #define CAN_RXFIR_IDHIT_SHIFT         (0)       /* Bits 0-8: Identifier Acceptance Filter Hit Indicator */
 #define CAN_RXFIR_IDHIT_MASK          (0x1ff << CAN_RXFIR_IDHIT_SHIFT)
+
+/* CAN Bit Timing register (CBT) */
+
+/* CBT Bit Fields */
+#define CAN_CBT_EPSEG2(x)             (((uint32_t)(((uint32_t)(x)) << 0))  & 0x1F)
+#define CAN_CBT_EPSEG1(x)             (((uint32_t)(((uint32_t)(x)) << 5))  & 0x3E0)
+#define CAN_CBT_EPROPSEG(x)           (((uint32_t)(((uint32_t)(x)) << 10)) & 0xFC00)
+#define CAN_CBT_ERJW(x)               (((uint32_t)(((uint32_t)(x)) << 16)) & 0x1F0000)
+#define CAN_CBT_EPRESDIV(x)           (((uint32_t)(((uint32_t)(x)) << 21)) & 0x7FE00000)
+#define CAN_CBT_BTF                   (1 << 31) /* Bit 31: Bit Timing Format Enable */
+
+/* CAN MB TX codes */
+#define CAN_TXMB_INACTIVE             0x8       /* MB is not active.*/
+#define CAN_TXMB_ABORT                0x9       /* MB is aborted.*/
+#define CAN_TXMB_DATAORREMOTE         0xC       /* MB is a TX Data Frame(when MB RTR = 0) or */
+                                                /* MB is a TX Remote Request Frame (when MB RTR = 1).*/
+#define CAN_TXMB_TANSWER              0xE       /* MB is a TX Response Request Frame from */
+                                                /* an incoming Remote Request Frame.*/
+#define CAN_TXMB_NOTUSED              0xF       /* Not used.*/
+
+/* CAN FD Control register (FDCTRL) */
+#define CAN_FDCTRL_TDCVAL(x)          (((uint32_t)(((uint32_t)(x)) << 0))  & 0x3F)
+#define CAN_FDCTRL_TDCOFF(x)          (((uint32_t)(((uint32_t)(x)) << 8))  & 0x1F00)
+#define CAN_FDCTRL_TDCEN              (1 << 14) /* Bit 14: TDC fail */
+#define CAN_FDCTRL_TDCEN              (1 << 15) /* Bit 15: TDC enable */
+#define CAN_FDCTRL_MBDSR0(x)          (((uint32_t)(((uint32_t)(x)) << 16)) & 0x30000)
+#define CAN_FDCTRL_FDRATE             (1 << 31) /* Bit 31: FD rate */
+
+/* FDCBT Bit Fields */
+#define CAN_FDCBT_FPSEG2(x)           (((uint32_t)(((uint32_t)(x)) << 0))  & 0x7)
+#define CAN_FDCBT_FPSEG1(x)           (((uint32_t)(((uint32_t)(x)) << 5))  & 0xE0)
+#define CAN_FDCBT_FPROPSEG(x)         (((uint32_t)(((uint32_t)(x)) << 10)) & 0x7C00)
+#define CAN_FDCBT_FRJW(x)             (((uint32_t)(((uint32_t)(x)) << 16)) & 0x70000)
+#define CAN_FDCBT_FPRESDIV(x)         (((uint32_t)(((uint32_t)(x)) << 20)) & 0x3FF00000)
+
+/* FDCRC Bit Fields */
+#define CAN_FDCRC_FD_TXCRC(x)         (((uint32_t)(((uint32_t)(x)) << 0))  & 0x1FFFFF)
+#define CAN_FDCRC_FD_MBCRC(x)         (((uint32_t)(((uint32_t)(x)) << 24)) & 0x7F000000)
+
 
 /* Rn Individual Mask Registers */
 

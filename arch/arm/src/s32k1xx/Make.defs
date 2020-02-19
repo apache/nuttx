@@ -90,6 +90,10 @@ ifeq ($(CONFIG_S32K1XX_ENET),y)
 CHIP_CSRCS += s32k1xx_enet.c
 endif
 
+ifeq ($(CONFIG_S32K1XX_FLEXCAN),y)
+CHIP_CSRCS += s32k1xx_flexcan.c
+endif
+
 ifeq ($(CONFIG_S32K1XX_RTC),y)
 CHIP_CSRCS += s32k1xx_rtc.c
 endif

@@ -150,6 +150,10 @@ config S32K1XX_ENET
 	default n
 	depends on S32K1XX_HAVE_ENET
 
+config S32K1XX_FLEXCAN
+	bool "FLEXCAN"
+	default n
+
 menuconfig S32K1XX_LPI2C0
 	bool "LPI2C0"
 	default n

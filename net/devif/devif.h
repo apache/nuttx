@@ -168,6 +168,7 @@
 #define BLUETOOTH_NEWDATA  TCP_NEWDATA
 #define IEEE802154_NEWDATA TCP_NEWDATA
 #define PKT_NEWDATA        TCP_NEWDATA
+#define CAN_NEWDATA        TCP_NEWDATA
 #define WPAN_NEWDATA       TCP_NEWDATA
 #define IPFWD_NEWDATA      TCP_NEWDATA
 #define TCP_SNDACK         (1 << 2)
@@ -175,6 +176,7 @@
 #define TCP_POLL           (1 << 4)
 #define UDP_POLL           TCP_POLL
 #define PKT_POLL           TCP_POLL
+#define CAN_POLL           TCP_POLL
 #define BLUETOOTH_POLL     TCP_POLL
 #define IEEE802154_POLL    TCP_POLL
 #define WPAN_POLL          TCP_POLL
@@ -492,7 +494,7 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *buf,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_PKT
+#if defined(CONFIG_NET_PKT) || defined(CONFIG_NET_CAN)
 void devif_pkt_send(FAR struct net_driver_s *dev, FAR const void *buf,
                     unsigned int len);
 #endif

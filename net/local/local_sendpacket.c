@@ -47,6 +47,7 @@
 #include <debug.h>
 
 #include <nuttx/fs/fs.h>
+#include "devif/devif.h"
 
 #include "local/local.h"
 

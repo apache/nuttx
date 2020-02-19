@@ -32,11 +32,23 @@
 
 #include <netpacket/can.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/net/netdev.h>
 
 #include "devif/devif.h"
 #include "socket/socket.h"
 
 #ifdef CONFIG_NET_CAN
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Allocate a new packet socket data callback */
+
+#define can_callback_alloc(dev,conn) \
+  devif_callback_alloc(dev, &conn->list)
+#define can_callback_free(dev,conn,cb) \
+  devif_conn_callback_free(dev, cb, &conn->list)
 
 /****************************************************************************
  * Public Type Definitions
@@ -56,6 +68,8 @@ struct can_conn_s
    */
 
   FAR struct devif_callback_s *list; /* NetLink callbacks */
+
+  FAR struct net_driver_s *dev;      /* Reference to CAN device */
 
   /* CAN-specific content follows */
 
@@ -135,6 +149,43 @@ void can_free(FAR struct can_conn_s *conn);
 FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn);
 
 /****************************************************************************
+ * Name: can_callback
+ *
+ * Description:
+ *   Inform the application holding the packet socket of a change in state.
+ *
+ * Returned Value:
+ *   OK if packet has been processed, otherwise ERROR.
+ *
+ * Assumptions:
+ *   This function is called from network logic at with the network locked.
+ *
+ ****************************************************************************/
+
+uint16_t can_callback(FAR struct net_driver_s *dev,
+                      FAR struct can_conn_s *conn, uint16_t flags);
+
+/****************************************************************************
+ * Name: can_poll
+ *
+ * Description:
+ *   Poll a CAN connection structure for availability of TX data
+ *
+ * Input Parameters:
+ *   dev - The device driver structure to use in the send operation
+ *   conn - The CAN "connection" to poll for TX data
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called from network stack logic with the network stack locked
+ *
+ ****************************************************************************/
+
+void can_poll(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn);
+
+/****************************************************************************
  * Name: can_active()
  *
  * Description:
@@ -144,6 +195,30 @@ FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn);
  ****************************************************************************/
 
 FAR struct can_conn_s *can_active(FAR struct sockaddr_can *addr);
+
+/****************************************************************************
+ * Name: psock_can_send
+ *
+ * Description:
+ *   The psock_can_send() call may be used only when the packet socket is in
+ *   a connected state (so that the intended recipient is known).
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *   buf      Data to send
+ *   len      Length of data to send
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   a negated errno value is returned.  See send() for the complete list
+ *   of return values.
+ *
+ ****************************************************************************/
+
+struct socket;
+ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
+                       size_t len);
+
 
 #undef EXTERN
 #ifdef __cplusplus
