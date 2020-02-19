@@ -74,8 +74,8 @@ _ez80_handlers:
 	irqhandler	 6		; EZ80_TIMER1_IRQ   6    6   0x058
 	irqhandler	 7		; EZ80_TIMER2_IRQ   7    7   0x05c
 	irqhandler	 8		; EZ80_TIMER3_IRQ   8    8   0x060
-	irqhandler	EZ80_UNUSED			;            9   0x064
-	irqhandler	EZ80_UNUSED + 1		;           10   0x068
+	irqhandler	EZ80_UNUSED		;                9   0x064
+	irqhandler	EZ80_UNUSED+1	;               10   0x068
 	irqhandler	 9		; EZ80_RTC_IRQ      9   11   0x06C
 	irqhandler	10		; EZ80_UART0_IRQ   10   12   0x070
 	irqhandler	11		; EZ80_UART1_IRQ   11   13   0x074
@@ -113,20 +113,20 @@ _ez80_handlers:
 	irqhandler	43		; EZ80_PORTD5_IRQ  43   45   0x0f4
 	irqhandler	44		; EZ80_PORTD6_IRQ  44   46   0x0f8
 	irqhandler	45		; EZ80_PORTD7_IRQ  45   47   0x0fc
-	irqhandler	EZ80_UNUSED + 2		;           48   0x100
-	irqhandler	EZ80_UNUSED + 3		;           49   0x104
-	irqhandler	EZ80_UNUSED + 4		;           50   0x108
-	irqhandler	EZ80_UNUSED + 5		;           51   0x10c
-	irqhandler	EZ80_UNUSED + 6		;           52   0x110
-	irqhandler	EZ80_UNUSED + 7		;           53   0x114
-	irqhandler	EZ80_UNUSED + 8		;           54   0x118
-	irqhandler	EZ80_UNUSED + 9		;           55   0x11c
-	irqhandler	EZ80_UNUSED + 10	;           56   0x120
-	irqhandler	EZ80_UNUSED + 11	;           57   0x124
-	irqhandler	EZ80_UNUSED + 12	;           58   0x128
-	irqhandler	EZ80_UNUSED + 13	;           59   0x12c
-	irqhandler	EZ80_UNUSED + 14	;           60   0x130
-	irqhandler	EZ80_UNUSED + 15	;           61   0x134
-	irqhandler	EZ80_UNUSED + 16	;           62   0x138
-	irqhandler	EZ80_UNUSED + 17	;           63   0x13c
+	irqhandler	EZ80_UNUSED+2	;               48   0x100
+	irqhandler	EZ80_UNUSED+3	;               49   0x104
+	irqhandler	EZ80_UNUSED+4	;               50   0x108
+	irqhandler	EZ80_UNUSED+5	;               51   0x10c
+	irqhandler	EZ80_UNUSED+6	;               52   0x110
+	irqhandler	EZ80_UNUSED+7	;               53   0x114
+	irqhandler	EZ80_UNUSED+8	;               54   0x118
+	irqhandler	EZ80_UNUSED+9	;               55   0x11c
+	irqhandler	EZ80_UNUSED+10	;               56   0x120
+	irqhandler	EZ80_UNUSED+11	;               57   0x124
+	irqhandler	EZ80_UNUSED+12	;               58   0x128
+	irqhandler	EZ80_UNUSED+13	;               59   0x12c
+	irqhandler	EZ80_UNUSED+14	;               60   0x130
+	irqhandler	EZ80_UNUSED+15	;               61   0x134
+	irqhandler	EZ80_UNUSED+16	;               62   0x138
+	irqhandler	EZ80_UNUSED+17	;               63   0x13c
 	end
