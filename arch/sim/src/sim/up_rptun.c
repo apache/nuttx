@@ -41,7 +41,6 @@
 #include <nuttx/fs/hostfs_rpmsg.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/serial/uart_rpmsg.h>
-#include <nuttx/syslog/syslog_rpmsg.h>
 
 #include "up_internal.h"
 
@@ -244,10 +243,6 @@ int up_rptun_init(void)
       shmem_close(g_dev.shmem);
       return ret;
     }
-
-#ifdef CONFIG_SYSLOG_RPMSG
-  syslog_rpmsg_init();
-#endif
 
 #ifdef CONFIG_SYSLOG_RPMSG_SERVER
   syslog_rpmsg_server_init();

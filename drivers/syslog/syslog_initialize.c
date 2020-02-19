@@ -43,6 +43,7 @@
 
 #include <nuttx/syslog/ramlog.h>
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/syslog/syslog_rpmsg.h>
 
 #include "syslog.h"
 
@@ -99,6 +100,10 @@ int syslog_initialize(void)
 
 #ifdef CONFIG_SYSLOG_CHARDEV
   syslog_register();
+#endif
+
+#ifdef CONFIG_SYSLOG_CHARDEV
+  syslog_rpmsg_init();
 #endif
 
   return ret;
