@@ -1111,7 +1111,7 @@ int cxd56_pmic_getrechargevol(FAR int *mv)
       return ret;
     }
 
-  /* Convert regsiter value to voltage */
+  /* Convert register value to voltage */
 
   switch (val)
     {

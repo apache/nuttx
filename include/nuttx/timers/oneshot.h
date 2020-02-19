@@ -74,7 +74,7 @@
  *                    Argument: A reference to a struct timespec in which
  *                    the current time will be returned.
  *
- * NOTE: _TCIOC(0x0020) througn _TCIOC(0x003f) are reserved for use by the
+ * NOTE: _TCIOC(0x0020) through _TCIOC(0x003f) are reserved for use by the
  * oneshot driver to assure that the values are unique.  Other timer drivers
  * must not use IOCTL commands in this numeric range.
  */

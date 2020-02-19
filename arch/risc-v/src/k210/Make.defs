@@ -35,7 +35,7 @@
 HEAD_ASRC = k210_vectors.S
 
 # Specify our general Assembly files
-CHIP_ASRCS = k210_head.S up_syscall.S
+CHIP_ASRCS = k210_head.S
 
 CMN_ASRCS  += up_testset.S
 
@@ -65,4 +65,12 @@ CHIP_CSRCS += k210_start.c k210_timerisr.c
 ifeq ($(CONFIG_SMP), y)
 CHIP_CSRCS += k210_cpuidlestack.c k210_cpuindex.c
 CHIP_CSRCS += k210_cpupause.c k210_cpustart.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CMN_CSRCS  += up_task_start.c up_pthread_start.c
+CMN_CSRCS  += up_signal_dispatch.c
+CMN_UASRCS += up_signal_handler.S
+
+CHIP_CSRCS += k210_userspace.c
 endif

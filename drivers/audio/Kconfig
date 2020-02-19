@@ -3,6 +3,17 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menuconfig DRIVERS_AUDIO
+	bool "Audio Device Support"
+	default n
+	---help---
+		Enable support for audio device drivers.  This includes drivers for
+		MP3, WMA and Ogg Vorbis encoding, decoding, as well as drivers for
+		interfacing with external DSP chips to perform custom audio functions.
+
+		NOTE: All of these drivers depend on support from the audio subsystem
+		enabled with the AUDIO selection.
+
 if DRIVERS_AUDIO
 
 config AUDIO_TONE

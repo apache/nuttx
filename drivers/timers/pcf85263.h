@@ -335,7 +335,7 @@
 
 /* Offset register */
 
-#define PCF85263_CTL_OFFSET                0x24      /* Offset regsiter */
+#define PCF85263_CTL_OFFSET                0x24      /* Offset register */
                                                      /* Bits 0-7: Offset value */
 
 /* Control registers */

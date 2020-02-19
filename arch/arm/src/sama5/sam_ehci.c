@@ -5063,7 +5063,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   sam_putreg(regval, &HCOR->usbcmd);
 
-  /* Start the host controller by setting the RUN bit in the USBCMD regsiter. */
+  /* Start the host controller by setting the RUN bit in the USBCMD register. */
 
   regval  = sam_getreg(&HCOR->usbcmd);
   regval |= EHCI_USBCMD_RUN;

@@ -568,7 +568,7 @@ static inline void spi_flush(struct sam_spidev_s *spi)
  *   Map the chip select number to the bit-set PCS field used in the SPI
  *   registers.  A chip select number is used for indexing and identifying
  *   chip selects.  However, the chip select information is represented by
- *   a bit set in the SPI regsisters.  This function maps those chip select
+ *   a bit set in the SPI registers.  This function maps those chip select
  *   numbers to the correct bit set:
  *
  *    CS  Returned   Spec    Effective

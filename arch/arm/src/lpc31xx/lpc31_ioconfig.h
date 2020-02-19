@@ -68,7 +68,7 @@
 #define LPC31_IOCONFIG_PWM_OFFSET           0x2c0 /* PWM function block */
 #define LPC31_IOCONFIG_UART_OFFSET          0x300 /* UART function block */
 
-/* IOCONFIG register offsets (with respect to any funcion block base address) *******************/
+/* IOCONFIG register offsets (with respect to any function block base address) ******************/
 
 #define LPC31_IOCONFIG_PINS_OFFSET          0x000 /* WR:           RD: Input pin state */
                                                     /* 0x004-0x00c: Reserved */

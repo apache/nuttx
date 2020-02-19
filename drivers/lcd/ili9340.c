@@ -65,7 +65,7 @@
 /* This is the generic lcd driver interface for the ili9340 Single Chip LCD
  * driver. The driver supports multiple displays, each connected with an own
  * ili9340 Single Chip LCD driver. The communication with the LCD single chip
- * driver must be provide by a subdriver accessable trough the ili9340_dev_s
+ * driver must be provide by a subdriver accessable through the ili9340_dev_s
  * structure which is platform and MCU interface specific.
  *
  * Supported MCU interfaces (planed to support)
@@ -89,7 +89,7 @@
  * 4-wire 8-bit data serial Interface
  *
  * Note! RGB interface will not supported by the lcd driver.
- * It should be use with the platform specific RGB grapic controller and the
+ * It should be use with the platform specific RGB graphic controller and the
  * nuttx framebuffer interface.
  *
  */

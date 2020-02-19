@@ -1964,7 +1964,7 @@ int altmdm_spi_uninit(FAR struct altmdm_dev_s *priv)
 
   destroy_rxbufffifo(priv);
 
-  /* Uninitalize modem power management driver */
+  /* Uninitialize modem power management driver */
 
   altmdm_pm_uninit(priv);
 

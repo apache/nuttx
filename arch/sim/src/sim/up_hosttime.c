@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_hostusleep.c
+ * arch/sim/src/sim/up_hosttime.c
  *
  *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,6 +37,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <time.h>
 #include <unistd.h>
 
 /****************************************************************************
@@ -44,10 +47,49 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_hostusleep
+ * Name: host_gettime
  ****************************************************************************/
 
-int up_hostusleep(unsigned int usec)
+uint64_t host_gettime(bool rtc)
 {
-  return usleep(usec);
+  struct timespec tp;
+
+  clock_gettime(rtc ? CLOCK_REALTIME : CLOCK_MONOTONIC, &tp);
+  return 1000000000ull * tp.tv_sec + tp.tv_nsec;
+}
+
+/****************************************************************************
+ * Name: host_settime
+ ****************************************************************************/
+
+void host_settime(bool rtc, uint64_t nsec)
+{
+  struct timespec tp;
+
+  tp.tv_sec  = nsec / 1000000000;
+  tp.tv_nsec = nsec - 1000000000 * tp.tv_sec;
+  clock_settime(rtc ? CLOCK_REALTIME : CLOCK_MONOTONIC, &tp);
+}
+
+/****************************************************************************
+ * Name: host_sleepuntil
+ ****************************************************************************/
+
+void host_sleepuntil(uint64_t nsec)
+{
+  static uint64_t base;
+  uint64_t now;
+
+  now = host_gettime(false);
+  if (base == 0)
+    {
+      base = now;
+    }
+
+  now -= base;
+
+  if (nsec > now + 1000)
+    {
+      usleep((nsec - now) / 1000);
+    }
 }

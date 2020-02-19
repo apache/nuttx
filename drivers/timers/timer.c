@@ -587,7 +587,7 @@ void timer_unregister(FAR void *handle)
  * Description:
  *   This function can be called to add a callback into driver-related code
  *   to handle timer expirations.  This is a strictly OS internal interface
- *   and may NOT be used by appliction code.
+ *   and may NOT be used by application code.
  *
  * Input Parameters:
  *   handle   - This is the handle that was returned by timer_register()
@@ -595,7 +595,8 @@ void timer_unregister(FAR void *handle)
  *   arg      - Argument to be provided with the callback
  *
  * Returned Value:
- *   None
+ *   Zero (OK), if the callback was successfully set, or -ENOSYS if the lower
+ *   half driver does not support the operation.
  *
  ****************************************************************************/
 

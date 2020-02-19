@@ -4831,7 +4831,7 @@ static void hrtim_mode_config(FAR struct stm32_hrtim_s *priv)
  *
  * Description:
  *   This function returns not significant bits in counter/capture
- *   regsiters for given HRTIM Timer index.
+ *   registers for given HRTIM Timer index.
  *
  * Input Parameters:
  *   priv   - A reference to the HRTIM structure

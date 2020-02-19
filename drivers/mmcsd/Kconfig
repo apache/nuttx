@@ -3,6 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+# MMC/SD-related platform capabilities
+
 config ARCH_HAVE_SDIO
 	bool
 	default n
@@ -18,6 +20,14 @@ config ARCH_HAVE_SDIO_PREFLIGHT
 config ARCH_HAVE_SDIO_DELAYED_INVLDT
 	bool
 	default n
+
+menuconfig MMCSD
+	bool "MMC/SD Driver Support"
+	default n
+	---help---
+		Support for MMC/SD block drivers.  MMC/SD block drivers based on
+		SPI and SDIO/MCI interfaces are supported.  See include/nuttx/mmcsd.h
+		and include/nuttx/sdio.h for further information.
 
 if MMCSD
 

@@ -225,9 +225,11 @@ volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
 int  up_setjmp(xcpt_reg_t *jb);
 void up_longjmp(xcpt_reg_t *jb, int val) noreturn_function;
 
-/* up_hostusleep.c **********************************************************/
+/* up_hosttime.c ************************************************************/
 
-int up_hostusleep(unsigned int usec);
+uint64_t host_gettime(bool rtc);
+void host_settime(bool rtc, uint64_t nsec);
+void host_sleepuntil(uint64_t nsec);
 
 /* up_simsmp.c **************************************************************/
 
@@ -241,9 +243,9 @@ void sim_cpu0_start(void);
 void up_cpu_started(void);
 #endif
 
-/* up_tickless.c ************************************************************/
+/* up_oneshot.c *************************************************************/
 
-#ifdef CONFIG_SCHED_TICKLESS
+#ifdef CONFIG_ONESHOT
 void up_timer_update(void);
 #endif
 

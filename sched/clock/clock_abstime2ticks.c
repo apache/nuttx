@@ -45,11 +45,11 @@
 #include "clock/clock.h"
 
 /****************************************************************************
- * Private Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: compare_timespec
+ * Name: clock_timespec_compare
  *
  * Description:
  *    Return < 0 if time a is before time b
@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-static long compare_timespec(FAR const struct timespec *a,
-                             FAR const struct timespec *b)
+int clock_timespec_compare(FAR const struct timespec *a,
+                           FAR const struct timespec *b)
 {
   if (a->tv_sec < b->tv_sec)
     {
@@ -71,12 +71,8 @@ static long compare_timespec(FAR const struct timespec *a,
       return 1;
     }
 
-  return (long)a->tv_nsec - (long)b->tv_nsec;
+  return a->tv_nsec - b->tv_nsec;
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: clock_abstime2ticks
@@ -86,11 +82,11 @@ static long compare_timespec(FAR const struct timespec *a,
  *
  * Input Parameters:
  *   clockid - The timing source to use in the conversion
- *   reltime - Convert this absolue time to system clock ticks.
+ *   reltime - Convert this absolute time to system clock ticks.
  *   ticks - Return the converted number of ticks here.
  *
  * Returned Value:
- *   OK on success; A non-zero error number on failure;
+ *   OK on success; A non-zero error number on failure
  *
  * Assumptions:
  *   Interrupts should be disabled so that the time is not changing during
@@ -115,7 +111,7 @@ int clock_abstime2ticks(clockid_t clockid, FAR const struct timespec *abstime,
       return EINVAL;
     }
 
-  if (compare_timespec(abstime, &currtime) < 0)
+  if (clock_timespec_compare(abstime, &currtime) < 0)
     {
       /* Every caller of clock_abstime2ticks check 'ticks < 0' to see if
        * absolute time is in the past. So lets just return negative tick
@@ -131,9 +127,7 @@ int clock_abstime2ticks(clockid_t clockid, FAR const struct timespec *abstime,
   reltime.tv_nsec = (abstime->tv_nsec - currtime.tv_nsec);
   reltime.tv_sec  = (abstime->tv_sec  - currtime.tv_sec);
 
-  /* Check if we were supposed to borrow from the seconds to borrow from the
-   * seconds
-   */
+  /* Check if we were supposed to borrow from the seconds. */
 
   if (reltime.tv_nsec < 0)
     {
