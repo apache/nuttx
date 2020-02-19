@@ -644,10 +644,12 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
  *   Perform the recvfrom operation for a UDP SOCK_DGRAM
  *
  * Input Parameters:
- *   psock  Pointer to the socket structure for the SOCK_DRAM socket
- *   buf    Buffer to receive data
- *   len    Length of buffer
- *   from   INET address of source (may be NULL)
+ *   psock    Pointer to the socket structure for the SOCK_DRAM socket
+ *   buf      Buffer to receive data
+ *   len      Length of buffer
+ *   flags    Receive flags
+ *   from     INET address of source (may be NULL)
+ *   fromlen  The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters received.  On  error,
@@ -658,7 +660,7 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR void *buf,
-                           size_t len, FAR struct sockaddr *from,
+                           size_t len, int flags, FAR struct sockaddr *from,
                            FAR socklen_t *fromlen);
 
 /****************************************************************************

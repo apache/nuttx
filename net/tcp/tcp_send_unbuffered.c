@@ -537,6 +537,7 @@ static inline void send_txnotify(FAR struct socket *psock,
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
+ *   flags    Send flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -582,7 +583,7 @@ static inline void send_txnotify(FAR struct socket *psock,
  ****************************************************************************/
 
 ssize_t psock_tcp_send(FAR struct socket *psock,
-                       FAR const void *buf, size_t len)
+                       FAR const void *buf, size_t len, int flags)
 {
   FAR struct tcp_conn_s *conn;
   struct send_s state;

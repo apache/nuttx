@@ -504,6 +504,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 {
   FAR struct udp_conn_s *conn;
   FAR struct udp_wrbuffer_s *wrb;
+  bool nonblock;
   bool empty;
   int ret = OK;
 
@@ -628,6 +629,8 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 
+  nonblock = _SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0;
+
   /* Dump the incoming buffer */
 
   BUF_DUMP("psock_udp_sendto", buf, len);
@@ -640,7 +643,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
        * unlocked here.
        */
 
-      if (_SS_ISNONBLOCK(psock->s_flags))
+      if (nonblock)
         {
           wrb = udp_wrbuffer_tryalloc();
         }
@@ -654,7 +657,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
           /* A buffer allocation error occurred */
 
           nerr("ERROR: Failed to allocate write buffer\n");
-          ret = _SS_ISNONBLOCK(psock->s_flags) ? -EAGAIN : -ENOMEM;
+          ret = nonblock ? -EAGAIN : -ENOMEM;
           goto errout_with_lock;
         }
 
@@ -707,7 +710,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
        * buffer space if the socket was opened non-blocking.
        */
 
-      if (_SS_ISNONBLOCK(psock->s_flags))
+      if (nonblock)
         {
           ret = iob_trycopyin(wrb->wb_iob, (FAR uint8_t *)buf, len, 0, false,
                               IOBUSER_NET_SOCK_UDP);

@@ -87,8 +87,9 @@ static ssize_t    inet_sendto(FAR struct socket *psock, FAR const void *buf,
                     size_t len, int flags, FAR const struct sockaddr *to,
                     socklen_t tolen);
 #ifdef CONFIG_NET_SENDFILE
-static ssize_t    inet_sendfile(FAR struct socket *psock, FAR struct file *infile,
-                    FAR off_t *offset, size_t count);
+static ssize_t    inet_sendfile(FAR struct socket *psock,
+                    FAR struct file *infile, FAR off_t *offset,
+                    size_t count);
 #endif
 static ssize_t    inet_recvfrom(FAR struct socket *psock, FAR void *buf,
                     size_t len, int flags, FAR struct sockaddr *from,
@@ -410,7 +411,9 @@ static int inet_bind(FAR struct socket *psock,
 
           ret = tcp_bind(psock->s_conn, addr);
 #else
-          nwarn("WARNING: TCP/IP stack is not available in this configuration\n");
+          nwarn("WARNING: TCP/IP stack is not available in this "
+                "configuration\n");
+
           return -ENOSYS;
 #endif
         }
@@ -1076,11 +1079,12 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
             {
               /* TCP/IP packet send */
 
-              ret = psock_tcp_send(psock, buf, len);
+              ret = psock_tcp_send(psock, buf, len, flags);
             }
 #endif /* NET_TCP_HAVE_STACK */
+
 #elif defined(NET_TCP_HAVE_STACK)
-          ret = psock_tcp_send(psock, buf, len);
+          ret = psock_tcp_send(psock, buf, len, flags);
 #else
           ret = -ENOSYS;
 #endif /* CONFIG_NET_6LOWPAN */
@@ -1105,6 +1109,7 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
                 psock_udp_sendto(psock, buf, len, 0, NULL, 0) : -ENOTCONN;
             }
 #endif /* NET_UDP_HAVE_STACK */
+
 #elif defined(NET_UDP_HAVE_STACK)
           /* Only UDP/IP packet send */
 
@@ -1212,6 +1217,7 @@ static ssize_t inet_sendto(FAR struct socket *psock, FAR const void *buf,
       nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
     }
 #endif /* NET_UDP_HAVE_STACK */
+
 #elif defined(NET_UDP_HAVE_STACK)
   nsent = psock_udp_sendto(psock, buf, len, flags, to, tolen);
 #else
@@ -1348,7 +1354,7 @@ static ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf,
     case SOCK_STREAM:
       {
 #ifdef NET_TCP_HAVE_STACK
-        ret = psock_tcp_recvfrom(psock, buf, len, from, fromlen);
+        ret = psock_tcp_recvfrom(psock, buf, len, flags, from, fromlen);
 #else
         ret = -ENOSYS;
 #endif
@@ -1360,7 +1366,7 @@ static ssize_t inet_recvfrom(FAR struct socket *psock, FAR void *buf,
     case SOCK_DGRAM:
       {
 #ifdef NET_UDP_HAVE_STACK
-        ret = psock_udp_recvfrom(psock, buf, len, from, fromlen);
+        ret = psock_udp_recvfrom(psock, buf, len, flags, from, fromlen);
 #else
         ret = -ENOSYS;
 #endif
