@@ -67,12 +67,13 @@
 #define SPI_CTL_MASTEREN (1 << 4) /* Bit 4: 1=SPI operates as a master */
 #define SPI_CTL_CPOL     (1 << 3) /* Bit 3: 1=Master SCK pin idles in a high (1) state */
 #define SPI_CTL_CPHA     (1 << 2) /* Bit 2: 1=SS remains Low to transfer any number of data bytes */
+                                  /* Bits 0-1: Reserved */
 
 /* SR Register Definitions */
 
-#define SPI_SR_SPIF      (1 << 7) /* Bit x: 1=SPI data transfer is finished */
-#define SPI_SR_WCOL      (1 << 6) /* Bit x: 1=SPI write collision is detected*/
-#define SPI_SR_MODF      (1 << 4) /* Bit x: 1=Mode fault (multimaster conflict) is detected */
+#define SPI_SR_SPIF      (1 << 7) /* Bit 7: 1=SPI data transfer is finished */
+#define SPI_SR_WCOL      (1 << 6) /* Bit 6: 1=SPI write collision is detected*/
+#define SPI_SR_MODF      (1 << 4) /* Bit 4: 1=Mode fault (multimaster conflict) is detected */
 
 /* RBR/TSR Register Definitions */
 
