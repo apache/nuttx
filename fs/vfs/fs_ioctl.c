@@ -43,6 +43,7 @@
 #include <sys/ioctl.h>
 #include <sched.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <assert.h>
 
 #include <net/if.h>
@@ -136,7 +137,6 @@ int fs_ioctl(int fd, int req, unsigned long arg)
 int ioctl(int fd, int req, unsigned long arg)
 #endif
 {
-  int errcode;
   FAR struct file *filep;
   int ret;
 
@@ -147,50 +147,69 @@ int ioctl(int fd, int req, unsigned long arg)
       /* Perform the socket ioctl */
 
 #ifdef CONFIG_NET
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
+      if ((unsigned int)fd <
+          (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           ret = netdev_ioctl(fd, req, arg);
-          if (ret < 0)
-            {
-              errcode = -ret;
-              goto errout;
-            }
-
-          return ret;
         }
       else
 #endif
         {
-          errcode = EBADF;
+          ret = -EBADF;
           goto errout;
         }
     }
-
-  /* Get the file structure corresponding to the file descriptor. */
-
-  ret = fs_getfilep(fd, &filep);
-  if (ret < 0)
+  else
     {
-      errcode = -ret;
-      goto errout;
+      /* Get the file structure corresponding to the file descriptor. */
+
+      ret = fs_getfilep(fd, &filep);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      DEBUGASSERT(filep != NULL);
+
+      /* Perform the file ioctl. */
+
+      ret = file_ioctl(filep, req, arg);
     }
 
-  DEBUGASSERT(filep != NULL);
-
-  /* Perform the file ioctl.  If file_ioctl() fails, it will set the errno
-   * value appropriately.
+  /* Check for File system IOCTL commands that can be implemented via
+   * fcntl()
    */
 
-  ret = file_ioctl(filep, req, arg);
+  if (ret == -ENOTTY)
+    {
+      switch (req)
+        {
+          case FIONBIO:
+            {
+              DEBUGASSERT(arg != 0);
+
+              if (*(FAR int *)((uintptr_t)arg))
+                {
+                  return fcntl(fd, F_SETFL,
+                               fcntl(fd, F_GETFL) | O_NONBLOCK);
+                }
+              else
+                {
+                  return fcntl(fd, F_SETFL,
+                               fcntl(fd, F_GETFL) & ~O_NONBLOCK);
+                }
+            }
+            break;
+        }
+    }
+
+errout:
+
   if (ret < 0)
     {
-      errcode = -ret;
-      goto errout;
+      set_errno(-ret);
+      ret = ERROR;
     }
 
   return ret;
-
-errout:
-  set_errno(errcode);
-  return ERROR;
 }
