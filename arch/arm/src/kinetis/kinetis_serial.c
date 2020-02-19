@@ -136,7 +136,7 @@
 #  endif
 #elif defined(CONFIG_UART5_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart5port /* UART5 is console */
-#    define TTYS5_DEV           g_uart5port /* UART5 is ttyS0 */
+#    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
 #    define UART5_ASSIGNED      1
 #  if defined(CONFIG_KINETIS_UART5_RXDMA)
 #    define SERIAL_HAVE_CONSOLE_DMA 1
