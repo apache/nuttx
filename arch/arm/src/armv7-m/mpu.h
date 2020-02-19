@@ -282,6 +282,23 @@ static inline void mpu_configure_region(uintptr_t base, size_t size,
   uint32_t     regval;
   uint8_t      l2size;
   uint8_t      subregions;
+  uintptr_t    alignedbase;
+
+  /* Ensure the base address alignment
+   *
+   * ARMv7-M Architecture Reference Manual
+   * B3.5.8 MPU Region Base Address Register, MPU_RBAR
+   * "Software must ensure that the value written to the ADDR field
+   * aligns with the size of the selected region."
+   */
+  alignedbase = base & MPU_RBAR_ADDR_MASK;
+  l2size = mpu_log2regionceil(size + base - alignedbase);
+  alignedbase &= ~((1 << l2size) - 1);
+  l2size = mpu_log2regionceil(size + base - alignedbase);
+  DEBUGASSERT(alignedbase + (1 << l2size) >= base + size);
+  DEBUGASSERT(l2size == 5 || alignedbase + (1 << (l2size - 1)) < base + size);
+  DEBUGASSERT((alignedbase & MPU_RBAR_ADDR_MASK) == alignedbase);
+  DEBUGASSERT((alignedbase & ((1 << l2size) - 1)) == 0);
 
   /* Select the region */
 
@@ -289,11 +306,10 @@ static inline void mpu_configure_region(uintptr_t base, size_t size,
 
   /* Select the region base address */
 
-  putreg32((base & MPU_RBAR_ADDR_MASK) | region | MPU_RBAR_VALID, MPU_RBAR);
+  putreg32(alignedbase | region | MPU_RBAR_VALID, MPU_RBAR);
 
   /* Select the region size and the sub-region map */
 
-  l2size     = mpu_log2regionceil(size);
   subregions = mpu_subregion(base, size, l2size);
 
   /* The configure the region */
