@@ -93,7 +93,8 @@ static const char *sim_rptun_get_firmware(struct rptun_dev_s *dev)
   return NULL;
 }
 
-static const struct rptun_addrenv_s *sim_rptun_get_addrenv(struct rptun_dev_s *dev)
+static const struct rptun_addrenv_s *
+  sim_rptun_get_addrenv(struct rptun_dev_s *dev)
 {
   return NULL;
 }
