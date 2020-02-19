@@ -6716,7 +6716,7 @@ int syslog_initialize(void);
 <ol>
   <li>
     <p><b>Low-Level Serial Output</b>.
-      If you are using a SYSLOG console channel (<code>CONFIG_SYSLOG_CONSOLE</code>) with a serial console (<code>CONFIG_SYSLOG_SERIAL_CONSOLE</code>) and if the underlying architecture supports the low-level <code>up_putc()</code> interface(<code>CONFIG_ARCH_LOWPUTC</code>), then the SYLOG logic will direct the output to <code>up_putc()</code> which is capable of generating the serial output within the context of an interrupt handler.
+      If you are using a SYSLOG console channel (<code>CONFIG_SYSLOG_CONSOLE</code>) and if the underlying architecture supports the low-level <code>up_putc()</code> interface(<code>CONFIG_ARCH_LOWPUTC</code>), then the SYLOG logic will direct the output to <code>up_putc()</code> which is capable of generating the serial output within the context of an interrupt handler.
     </p>
     <p>
       There are a few issues in doing this however:
@@ -6781,15 +6781,11 @@ int syslog_initialize(void);
   </li>
   <li>
     <p>
-      <code>CONFIG_SYSLOG_CONSOLE</code>.  This configuration option is manually selected from the SYSLOG menu.  This is the option that actually enables the SYSLOG console device.  It depends on <code>CONFIG_DEV_CONSOLE</code> and it will automatically select <code>CONFIG_SYSLOG_SERIAL_CONSOLE</code> if <code>CONFIG_SERIAL_CONSOLE</code> is selected.
+      <code>CONFIG_SYSLOG_CONSOLE</code>.  This configuration option is manually selected from the SYSLOG menu.  This is the option that actually enables the SYSLOG console device.  It depends on <code>CONFIG_DEV_CONSOLE</code>.
   </li>
   <li>
     <p>
       <code>CONFIG_ARCH_LOWPUTC</code>.  This is an indication from the architecture configuration that the platform supports the <code>up_putc()</code> interface.  <code>up_putc()</code> is a very low level UART interface that can even be used from interrupt handling.
-  </li>
-  <li>
-    <p>
-      <code>CONFIG_SYSLOG_SERIAL_CONSOLE</code>.  This enables certain features of the SYSLOG operation that depend on a serial console.  If <code>CONFIG_ARCH_LOWPUTC</code> is also selected, for example, then <code>up_putc()</code> will be used for the forced SYSLOG output.
   </li>
 </ul>
 <p>

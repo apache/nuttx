@@ -235,9 +235,8 @@ SYSLOG Channels
 
   1. Low-Level Serial Output
   --------------------------
-  If you are using a SYSLOG console channel (CONFIG_SYSLOG_CONSOLE) with a
-  serial console (CONFIG_SYSLOG_SERIAL_CONSOLE) and if the underlying
-  architecture supports the low-level up_putc() interface
+  If you are using a SYSLOG console channel (CONFIG_SYSLOG_CONSOLE) and if
+  the underlying architecture supports the low-level up_putc() interface
   (CONFIG_ARCH_LOWPUTC), then the SYSLOG logic will direct the output to
   up_putc() which is capable of generating the serial output within the
   context of an interrupt handler.
@@ -301,17 +300,11 @@ SYSLOG Channel Options
       There is no user selection.
     * CONFIG_SYSLOG_CONSOLE.  This configuration option is manually selected
       from the SYSLOG menu.  This is the option that acutally enables the
-      SYSLOG console device.  It depends on CONFIG_DEV_CONSOLE and it will
-      automatically select CONFIG_SYSLOG_SERIAL_CONSOLE if
-      CONFIG_SERIAL_CONSOLE is selected.
+      SYSLOG console device.  It depends on CONFIG_DEV_CONSOLE.
     * CONFIG_ARCH_LOWPUTC.  This is an indication from the architecture
       configuration that the platform supports the up_putc() interface.
       up_putc() is a very low level UART interface that can even be used from
       interrupt handling.
-    * CONFIG_SYSLOG_SERIAL_CONSOLE.  This enables certain features of the
-      SYSLOG operation that depend on a serial console.  If
-      CONFIG_ARCH_LOWPUTC is also selected, for example, then up_putc() will
-      be used for the forced SYSLOG output.
 
   Interrupt level SYSLOG output will be lost unless:  (1) the interrupt buffer
   is enabled to support serialization, or (2) a serial console is used and
