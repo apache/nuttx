@@ -137,10 +137,6 @@ config SYSLOG_PREFIX_STRING
 	---help---
 		The prefix string to be prepend.
 
-config SYSLOG_SERIAL_CONSOLE
-	bool
-	default n
-
 choice
 	prompt "System log device"
 	default SYSLOG_CONSOLE if DEV_CONSOLE
@@ -167,7 +163,6 @@ config RAMLOG_SYSLOG
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"
 	depends on DEV_CONSOLE
-	select SYSLOG_SERIAL_CONSOLE if SERIAL_CONSOLE
 	select SYSLOG_WRITE
 	---help---
 		Use the system console as a SYSLOG output device.

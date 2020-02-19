@@ -1903,7 +1903,6 @@ Configuration sub-directories
        following in the .config file:
 
          CONFIG_SYSLOG_CONSOLE=y
-         CONFIG_SYSLOG_SERIAL_CONSOLE=y
 
     7. Telnet:  The clicker2-stm32 star point configuration supports the
        Telnet daemon, but not the Telnet client; the star hub configuration
