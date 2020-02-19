@@ -168,7 +168,7 @@
 #define FLASH_CR_START                 (1 << 7)   /* Bit 7: Erase start */
 #define FLASH_CR_SNB_SHIFT             (8)        /* Bits 8-10: Sector number */
 #define FLASH_CR_SNB_MASK              (15 << FLASH_CR_SNB_SHIFT)  /* Used to clear FLASH_CR_SNB bits */
-#  define FLASH_CR_SNB(n)              ((uint32_t)(n & 0x7) << FLASH_CR_SNB_SHIFT) /* Sector n, n=0..7 */
+#  define FLASH_CR_SNB(n)              ((uint32_t)((n) & 0x7) << FLASH_CR_SNB_SHIFT) /* Sector n, n=0..7 */
                                                   /* Bits 11-13: Reserved */
 #define FLASH_CR_SPSS2                 (1 << 14)  /* Bit 14: Bank1 Reserved, Bank 2 special sector selection bit */
 #define FLASH_CR_CRCEN                 (1 << 15)  /* Bit 15: CRC control enable */

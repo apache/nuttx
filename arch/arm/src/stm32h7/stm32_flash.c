@@ -193,7 +193,7 @@ static struct stm32h7_flash_priv_s stm32h7_flash_bank2_priv =
  *****************************************************************************/
 
 static inline uint32_t stm32h7_flash_getreg32(FAR struct stm32h7_flash_priv_s
-                                            *priv, uint8_t offset)
+                                            *priv, uint32_t offset)
 {
   return getreg32(priv->ifbase + offset);
 }
@@ -207,7 +207,7 @@ static inline uint32_t stm32h7_flash_getreg32(FAR struct stm32h7_flash_priv_s
  ****************************************************************************/
 
 static inline void stm32h7_flash_putreg32(FAR struct stm32h7_flash_priv_s
-                                          *priv, uint8_t offset,
+                                          *priv, uint32_t offset,
                                           uint32_t value)
 {
   putreg32(value, priv->ifbase + offset);
@@ -222,7 +222,7 @@ static inline void stm32h7_flash_putreg32(FAR struct stm32h7_flash_priv_s
  *****************************************************************************/
 
 static inline void stm32h7_flash_modifyreg32(FAR struct stm32h7_flash_priv_s
-                                             *priv, uint8_t offset,
+                                             *priv, uint32_t offset,
                                              uint32_t clearbits,
                                              uint32_t setbits)
 {
@@ -330,6 +330,73 @@ FAR struct stm32h7_flash_priv_s * stm32h7_flash_bank(size_t address)
   return priv;
 }
 
+/*****************************************************************************
+ * Name: stm32h7_unlock_flashopt
+ *
+ * Description:
+ *   Unlock the flash option bytes
+ *
+ *****************************************************************************/
+
+static void stm32h7_unlock_flashopt(FAR struct stm32h7_flash_priv_s *priv)
+{
+  while (stm32h7_flash_getreg32(priv, STM32_FLASH_SR1_OFFSET) & FLASH_SR_BSY)
+    {
+    }
+
+  if (stm32h7_flash_getreg32(priv, STM32_FLASH_OPTCR_OFFSET) & FLASH_OPTCR_OPTLOCK)
+    {
+      /* Unlock sequence */
+
+      stm32h7_flash_putreg32(priv, STM32_FLASH_OPTKEYR_OFFSET, FLASH_OPTKEY1);
+      stm32h7_flash_putreg32(priv, STM32_FLASH_OPTKEYR_OFFSET, FLASH_OPTKEY2);
+    }
+}
+
+/*****************************************************************************
+ * Name: stm32h7_lock_flashopt
+ *
+ * Description:
+ *   Lock the flash option bytes
+ *
+ *****************************************************************************/
+
+static void stm32h7_lock_flashopt(FAR struct stm32h7_flash_priv_s *priv)
+{
+  stm32h7_flash_modifyreg32(priv, STM32_FLASH_OPTCR_OFFSET, 0, FLASH_OPTCR_OPTLOCK);
+}
+
+/*****************************************************************************
+ * Name: stm32h7_save_flashopt
+ *
+ * Description:
+ *   Save the flash option bytes to non-volatile storage.
+ *
+ *****************************************************************************/
+
+static void stm32h7_save_flashopt(FAR struct stm32h7_flash_priv_s *priv)
+{
+  while (stm32h7_flash_getreg32(priv, STM32_FLASH_SR1_OFFSET) &
+        (FLASH_SR_BSY | FLASH_SR_CRCBUSY))
+    {
+    }
+  while (stm32h7_flash_getreg32(priv, STM32_FLASH_SR2_OFFSET) &
+        (FLASH_SR_BSY | FLASH_SR_CRCBUSY))
+    {
+    }
+
+  /* Can only write flash options if the option control reg is unlocked */
+  if (!(stm32h7_flash_getreg32(priv, STM32_FLASH_OPTCR_OFFSET) & FLASH_OPTCR_OPTLOCK))
+    {
+      stm32h7_flash_modifyreg32(priv, STM32_FLASH_OPTCR_OFFSET, 0, FLASH_OPTCR_OPTSTRT);
+    }
+
+  /* Wait for the update to complete */
+  while (stm32h7_flash_getreg32(priv, STM32_FLASH_OPTSR_CUR_OFFSET) & FLASH_OPTSR_BUSYV)
+    {
+    }
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -423,6 +490,67 @@ int stm32h7_flash_writeprotect(size_t block, bool enabled)
   return rv;
 }
 
+/****************************************************************************
+ * Name: stm32h7_flash_getopt
+ *
+ * Description:
+ *   Returns the current flash option bytes from the FLASH_OPTSR_CR register.
+ *
+ ****************************************************************************/
+
+uint32_t stm32h7_flash_getopt(void)
+{
+  struct stm32h7_flash_priv_s *priv;
+  priv = stm32h7_flash_bank(STM32_FLASH_BANK1);
+  if (priv)
+    {
+      return stm32h7_flash_getreg32(priv, STM32_FLASH_OPTSR_CUR_OFFSET);
+    }
+  return 0;
+}
+
+/****************************************************************************
+ * Name: stm32h7_flash_optmodify
+ *
+ * Description:
+ *   Modifies the current flash option bytes, given bits to set and clear.
+ *
+ ****************************************************************************/
+
+void stm32h7_flash_optmodify(uint32_t clear, uint32_t set)
+{
+  struct stm32h7_flash_priv_s *priv;
+  priv = stm32h7_flash_bank(STM32_FLASH_BANK1);
+  if (priv)
+    {
+    stm32h7_unlock_flashopt(priv);
+    stm32h7_flash_modifyreg32(priv, STM32_FLASH_OPTSR_PRG_OFFSET, clear, set);
+    stm32h7_save_flashopt(priv);
+  }
+}
+
+/****************************************************************************
+ * Name: stm32h7_flash_swapbanks
+ *
+ * Description:
+ *   Swaps banks 1 and 2 in the processor's memory map.  Takes effect
+ *   the next time the system is reset.
+ *
+ ****************************************************************************/
+
+void stm32h7_flash_swapbanks(void)
+{
+  uint32_t opts = stm32h7_flash_getopt();
+  if (opts & FLASH_OPTCR_SWAPBANK)
+    {
+      stm32h7_flash_optmodify(FLASH_OPTCR_SWAPBANK, 0);
+    }
+  else
+    {
+      stm32h7_flash_optmodify(0, FLASH_OPTCR_SWAPBANK);
+    }
+}
+
 size_t up_progmem_pagesize(size_t page)
 {
   return FLASH_SECTOR_SIZE;
@@ -508,11 +636,12 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET, 0, FLASH_CR_SER);
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET, FLASH_CR_SNB_MASK,
-                            FLASH_CR_SNB(block));
+                            FLASH_CR_SNB(block - priv->stblock));
 
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET, 0, FLASH_CR_START);
 
-  while (stm32h7_flash_getreg32(priv, STM32_FLASH_CR1_OFFSET) & FLASH_SR_BSY)
+  while (stm32h7_flash_getreg32(priv, STM32_FLASH_SR1_OFFSET) &
+        (FLASH_SR_BSY | FLASH_SR_QW))
     {
     }
 
@@ -600,7 +729,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
       ARM_ISB();
 
       while (stm32h7_flash_getreg32(priv, STM32_FLASH_SR1_OFFSET) &
-             FLASH_SR_BSY)
+             (FLASH_SR_BSY | FLASH_SR_QW))
         {
         }
 
