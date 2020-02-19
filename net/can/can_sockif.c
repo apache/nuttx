@@ -40,6 +40,7 @@
 #include <nuttx/net/net.h>
 
 #include "can/can.h"
+#include "netdev/netdev.h"
 
 #ifdef CONFIG_NET_CAN
 
@@ -61,7 +62,7 @@ static int  can_connect(FAR struct socket *psock,
               FAR const struct sockaddr *addr, socklen_t addrlen);
 static int  can_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
               FAR socklen_t *addrlen, FAR struct socket *newsock);
-static int  can_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+static int  can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
               bool setup);
 static ssize_t can_send(FAR struct socket *psock,
               FAR const void *buf, size_t len, int flags);
@@ -88,7 +89,7 @@ const struct sock_intf_s g_can_sockif =
   can_listen,       /* si_listen */
   can_connect,      /* si_connect */
   can_accept,       /* si_accept */
-  can_poll,         /* si_poll */
+  can_poll_local,         /* si_poll */
   can_send,         /* si_send */
   can_sendto,       /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
@@ -272,7 +273,15 @@ static int can_bind(FAR struct socket *psock,
 
   canaddr         = (FAR struct sockaddr_can *)addr;
   conn            = (FAR struct can_conn_s *)psock->s_conn;
-#warning Missing logic
+
+  /* Bind CAN device to socket */
+
+  //TODO better support for CONFIG_NETDEV_IFINDEX
+  char netdev_name[6];
+
+  sprintf(netdev_name, "can%i", canaddr->can_ifindex);
+
+  conn->dev = netdev_findbyname(&netdev_name);
 
   return OK;
 }
@@ -473,7 +482,7 @@ static int can_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 }
 
 /****************************************************************************
- * Name: can_poll
+ * Name: can_poll_local
  *
  * Description:
  *   The standard poll() operation redirects operations on socket descriptors
@@ -495,7 +504,7 @@ static int can_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-static int can_poll(FAR struct socket *psock, FAR struct pollfd *fds,
+static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
                         bool setup)
 {
   FAR struct can_conn_s *conn;
@@ -621,36 +630,25 @@ static int can_poll(FAR struct socket *psock, FAR struct pollfd *fds,
 static ssize_t can_send(FAR struct socket *psock, FAR const void *buf,
                             size_t len, int flags)
 {
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
+	  ssize_t ret;
 
-  /* The socket must be connected in order to use send */
+	  /* Only SOCK_RAW is supported */
 
-  if (_SS_ISBOUND(psock->s_flags))
-    {
-      FAR struct can_conn_s *conn;
-      struct sockaddr_can canaddr;
+	  if (psock->s_type == SOCK_RAW)
+	    {
+	      /* Raw packet send */
+	      ret = psock_can_send(psock, buf, len);
+	    }
+	  else
+	    {
+	      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
+	       * no peer address is set.
+	       */
 
-      /* Get the underlying connection structure */
+	      ret = -EDESTADDRREQ;
+	    }
 
-      conn               = (FAR struct can_conn_s *)psock->s_conn;
-
-      /* Format the address */
-
-      canaddr.can_family = AF_CAN;
-#warning Missing logic
-
-      /* Then let sendto() perform the actual send operation */
-
-      return can_sendto(psock, buf, len, flags,
-                            (FAR const struct sockaddr *)&canaddr,
-                            sizeof(struct sockaddr_can));
-    }
-
-  /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and no
-   * peer address is set.
-   */
-
-  return -EDESTADDRREQ;
+	  return ret;
 }
 
 /****************************************************************************
@@ -681,25 +679,8 @@ static ssize_t can_sendto(FAR struct socket *psock, FAR const void *buf,
                               size_t len, int flags,
                               FAR const struct sockaddr *to, socklen_t tolen)
 {
-  FAR struct can_conn_s *conn;
-  int ret;
-
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL &&
-              to != NULL && tolen >= sizeof(struct sockaddr_can));
-
-  conn = (FAR struct can_conn_s *)psock->s_conn;
-#warning Missing logic
-
-  switch (conn->protocol)
-    {
-#warning Missing logic
-
-      default:
-       ret = -EOPNOTSUPP;
-       break;
-    }
-
-  return ret;
+   nerr("ERROR: sendto() not supported for raw packet sockets\n");
+   return -EAFNOSUPPORT;
 }
 
 /****************************************************************************

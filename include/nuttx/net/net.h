@@ -126,7 +126,8 @@ enum net_lltype_e
   NET_LL_BLUETOOTH,    /* Bluetooth */
   NET_LL_IEEE80211,    /* IEEE 802.11 */
   NET_LL_IEEE802154,   /* IEEE 802.15.4 MAC */
-  NET_LL_PKTRADIO      /* Non-standard packet radio */
+  NET_LL_PKTRADIO,     /* Non-standard packet radio */
+  NET_LL_CAN           /* CAN bus */
 };
 
 /* This defines a bitmap big enough for one bit for each socket option */

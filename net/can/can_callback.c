@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/devif/devif_pktsend.c
+ * net/pkt/pkt_callback.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,76 +38,48 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#if defined(CONFIG_NET) && defined(CONFIG_NET_CAN)
 
-#include <string.h>
-#include <assert.h>
+#include <stdint.h>
 #include <debug.h>
 
+#include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 
-#if defined(CONFIG_NET_PKT) || defined(CONFIG_NET_CAN)
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Public Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#include "devif/devif.h"
+#include "can/can.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devif_pkt_send
+ * Name: can_callback
  *
  * Description:
- *   Called from socket logic in order to send a raw packet in response to
- *   an xmit or poll request from the network interface driver.
+ *   Inform the application holding the packet socket of a change in state.
  *
- *   This is almost identical to calling devif_send() except that the data to
- *   be sent is copied into dev->d_buf (vs. dev->d_appdata), since there is
- *   no header on the data.
+ * Returned Value:
+ *   OK if packet has been processed, otherwise ERROR.
  *
  * Assumptions:
- *   Called with the network locked.
+ *   This function is called with the network locked.
  *
  ****************************************************************************/
 
-void devif_pkt_send(FAR struct net_driver_s *dev, FAR const void *buf,
-                    unsigned int len)
+uint16_t can_callback(FAR struct net_driver_s *dev,
+                      FAR struct can_conn_s *conn, uint16_t flags)
 {
-  DEBUGASSERT(dev && len > 0 && len < NETDEV_PKTSIZE(dev));
+  /* Some sanity checking */
 
-  /* Copy the data into the device packet buffer */
+  if (conn)
+    {
+      /* Perform the callback */
 
-  memcpy(dev->d_buf, buf, len);
+      flags = devif_conn_event(dev, conn, flags, conn->list);
+    }
 
-  /* Set the number of bytes to send */
-
-  dev->d_len    = len;
-  dev->d_sndlen = len;
+  return flags;
 }
 
-#endif /* CONFIG_NET_PKT */
+#endif /* CONFIG_NET && CONFIG_NET_CAN */

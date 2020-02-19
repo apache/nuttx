@@ -22,8 +22,14 @@
 
 ifeq ($(CONFIG_NET_CAN),y)
 
+# Socket layer
+
 SOCK_CSRCS += can_sockif.c
+SOCK_CSRCS += can_send.c
+
 NET_CSRCS += can_conn.c
+NET_CSRCS += can_poll.c
+NET_CSRCS += can_callback.c
 
 # Include can build support
 

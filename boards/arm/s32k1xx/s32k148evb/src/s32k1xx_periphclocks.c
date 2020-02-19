@@ -129,6 +129,13 @@ const struct peripheral_clock_config_s g_peripheral_clockconfig0[] =
     .divider    = 1,
   },
   {
+    .clkname    = FlexCAN0_CLK,
+    .clkgate    = true,
+    .clksrc     = CLK_SRC_SOSC,
+    .frac       = MULTIPLY_BY_ONE,
+    .divider    = 1,
+  },
+  {
     .clkname    = RTC0_CLK,
     .clkgate    = true,
     .clksrc     = CLK_SRC_OFF,

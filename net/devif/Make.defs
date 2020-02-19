@@ -62,7 +62,7 @@ endif
 
 # Raw packet socket support
 
-ifeq ($(CONFIG_NET_PKT),y)
+ifeq ($(filter y,$(CONFIG_NET_PKT) $(CONFIG_NET_CAN)),)
 NET_CSRCS += devif_pktsend.c
 endif
 

@@ -53,6 +53,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ethernet.h>
 #include <nuttx/net/bluetooth.h>
+#include <nuttx/net/can.h>
 
 #include "utils/utils.h"
 #include "igmp/igmp.h"
@@ -71,6 +72,7 @@
 #define NETDEV_PAN_FORMAT   "pan%d"
 #define NETDEV_WLAN_FORMAT  "wlan%d"
 #define NETDEV_WPAN_FORMAT  "wpan%d"
+#define NETDEV_CAN_FORMAT   "can%d"
 
 #if defined(CONFIG_DRIVERS_IEEE80211) /* Usually also has CONFIG_NET_ETHERNET */
 #  define NETDEV_DEFAULT_FORMAT NETDEV_WLAN_FORMAT
@@ -82,6 +84,8 @@
 #  define NETDEV_DEFAULT_FORMAT NETDEV_SLIP_FORMAT
 #elif defined(CONFIG_NET_TUN)
 #  define NETDEV_DEFAULT_FORMAT NETDEV_TUN_FORMAT
+#elif defined(CONFIG_NET_CAN)
+#  define NETDEV_DEFAULT_FORMAT NETDEV_CAN_FORMAT
 #else /* if defined(CONFIG_NET_LOOPBACK) */
 #  define NETDEV_DEFAULT_FORMAT NETDEV_LO_FORMAT
 #endif
@@ -287,6 +291,14 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
             dev->d_llhdrlen = ETH_HDRLEN;
             dev->d_pktsize  = CONFIG_NET_ETH_PKTSIZE;
             devfmt          = NETDEV_WLAN_FORMAT;
+            break;
+#endif
+
+#ifdef CONFIG_NET_CAN
+          case NET_LL_CAN:  /* CAN bus */
+            dev->d_llhdrlen = 0;
+            dev->d_pktsize  = NET_CAN_PKTSIZE;
+            devfmt          = NETDEV_CAN_FORMAT;
             break;
 #endif
 
