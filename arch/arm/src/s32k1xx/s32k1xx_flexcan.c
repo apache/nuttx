@@ -115,20 +115,19 @@
 #  error "Need at least one RX buffer"
 #endif*/
 
-#define S32K1XX_FLEXCAN_FIRST_TX_MB 10
-
 #define MaskStdID                   0x000007FF;
 #define MaskExtID                   0x1FFFFFFF;
 
 //Fixme nice variables/constants
-#define NumMBinFiFoAndFilters       10 //FIXME
-#define NumTxMesgBuffers            6
-#define HWMaxMB                     16
-#define TXMBMask                    (0b111111 << NumMBinFiFoAndFilters)
+#define RxMBCount                   10
+#define TxMBCount                   6
+#define TotalMBcount                RxMBCount + TxMBCount
+#define TXMBMask                    (((1 << TxMBCount)-1) << RxMBCount)
 
 #define CAN_FIFO_NE                 (1 << 5)
 #define CAN_FIFO_OV                 (1 << 6)
 #define CAN_FIFO_WARN               (1 << 7)
+#define FIFO_IFLAG1                 CAN_FIFO_NE | CAN_FIFO_WARN | CAN_FIFO_OV
 
 static int peak_tx_mailbox_index_ = 0;
 
@@ -449,12 +448,12 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
   struct can_frame *frame = (struct can_frame*)priv->dev.d_buf;
 
-  /*printf("CAN id: %i dlc: %i", frame->can_id, frame->can_dlc);
+  /*ninfo("CAN id: %i dlc: %i", frame->can_id, frame->can_dlc);
 
   for(int i = 0; i < frame->can_dlc; i++){
-	  printf(" %02X", frame->data[i]);
+	  ninfo(" %02X", frame->data[i]);
   }
-  printf("\r\n");*/
+  ninfo("\r\n");*/
 
   /* Attempt to write frame */
   uint32_t mbi = 0;
@@ -463,9 +462,9 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 	  mbi = (getreg32(S32K1XX_CAN0_ESR2) & CAN_ESR2_LPTM_MASK) >> CAN_ESR2_LPTM_SHIFT;
   }
 
-  uint32_t mb_bit = 1 << (NumMBinFiFoAndFilters + mbi);
+  uint32_t mb_bit = 1 << (RxMBCount + mbi);
 
-  while (mbi < NumTxMesgBuffers)
+  while (mbi < TxMBCount)
   {
 
 	  if (priv->tx[mbi].CS.code != CAN_TXMB_DATAORREMOTE)
@@ -477,7 +476,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 	  mbi++;
   }
 
-  if (mbi == NumTxMesgBuffers)
+  if (mbi == TxMBCount)
   {
 	  return 0;       // No transmission for you!
   }
@@ -502,7 +501,8 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
   //cs.rtr = frame.isRemoteTransmissionRequest();
 
   cs.dlc = frame->can_dlc;
-  //FIXME endian swap instruction or somekind
+
+  //FIXME endian swap instruction or somekind takes 1.5us right now
   mb->data.b0 = frame->data[0];
   mb->data.b1 = frame->data[1];
   mb->data.b2 = frame->data[2];
@@ -521,6 +521,9 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
   txi.loopback       = (flags & uavcan::CanIOFlagLoopback) != 0;
   txi.abort_on_error = (flags & uavcan::CanIOFlagAbortOnError) != 0;
   txi.pending        = TxItem::busy;*/
+
+
+  s32k1xx_gpiowrite(PIN_PORTD | PIN31, 0);
 
   mb->CS = cs; // Go.
 
@@ -641,7 +644,7 @@ static inline void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv)
 static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv)
 {
   #warning Missing logic
-	printf("FLEXCAN: receive\r\n");
+	ninfo("FLEXCAN: receive\r\n");
 }
 
 /****************************************************************************
@@ -673,14 +676,14 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv)
 
   /* Process TX completions */
 
-  uint32_t mb_bit = 1 << NumMBinFiFoAndFilters;
-  for(uint32_t mbi = 0; tx_iflags && mbi < NumTxMesgBuffers; mbi++)
+  uint32_t mb_bit = 1 << RxMBCount;
+  for(uint32_t mbi = 0; tx_iflags && mbi < TxMBCount; mbi++)
   {
       if (tx_iflags & mb_bit)
       {
     	  putreg32(mb_bit, S32K1XX_CAN0_IFLAG1);
           tx_iflags &= ~mb_bit;
-          const bool txok = priv->tx[mbi].CS.code != CAN_TXMB_ABORT;
+          //const bool txok = priv->tx[mbi].CS.code != CAN_TXMB_ABORT;
           //handleTxMailboxInterrupt(mbi, txok, utc_usec);
       }
       mb_bit <<= 1;
@@ -734,8 +737,9 @@ static int s32k1xx_flexcan_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   #warning Missing logic
 
+	ninfo("FLEXCAN INT %i\r\n", irq);
+
 	FAR struct s32k1xx_driver_s *priv = &g_flexcan[0];
-	uint32_t FIFO_IFLAG1 = CAN_FIFO_NE | CAN_FIFO_WARN | CAN_FIFO_OV;
 	uint32_t flags;
 	flags  = getreg32(S32K1XX_CAN0_IFLAG1);
 	flags &= FIFO_IFLAG1;
@@ -773,7 +777,7 @@ static int s32k1xx_flexcan_interrupt(int irq, FAR void *context, FAR void *arg)
 static void s32k1xx_txtimeout_work(FAR void *arg)
 {
   #warning Missing logic
-	  printf("FLEXCAN: tx timeout work\r\n");
+	  ninfo("FLEXCAN: tx timeout work\r\n");
 }
 
 /****************************************************************************
@@ -798,7 +802,7 @@ static void s32k1xx_txtimeout_work(FAR void *arg)
 static void s32k1xx_txtimeout_expiry(int argc, uint32_t arg, ...)
 {
   #warning Missing logic
-	  printf("FLEXCAN: tx timeout expiry\r\n");
+	  ninfo("FLEXCAN: tx timeout expiry\r\n");
 }
 
 /****************************************************************************
@@ -821,7 +825,7 @@ static void s32k1xx_txtimeout_expiry(int argc, uint32_t arg, ...)
 static void s32k1xx_poll_work(FAR void *arg)
 {
   #warning Missing logic
-	  //printf("FLEXCAN: poll work\r\n");
+	  //ninfo("FLEXCAN: poll work\r\n");
 
 	  FAR struct s32k1xx_driver_s *priv = (FAR struct s32k1xx_driver_s *)arg;
 
@@ -941,10 +945,13 @@ static int s32k1xx_ifup(struct net_driver_s *dev)
   uint32_t regval;
 
   #warning Missing logic
-  printf("FLEXCAN: test ifup\r\n");
+  ninfo("FLEXCAN: test ifup\r\n");
 
   /* initialize CAN device */
   //FIXME we only support a single can device for now
+
+  //TEST GPIO tming
+  s32k1xx_pinconfig(PIN_PORTD | PIN31 | GPIO_OUTPUT);
 
 
   regval  = getreg32(S32K1XX_CAN0_MCR);
@@ -964,7 +971,7 @@ static int s32k1xx_ifup(struct net_driver_s *dev)
   regval  = getreg32(S32K1XX_CAN0_MCR);
   regval |= CAN_MCR_RFEN | CAN_MCR_SLFWAK | CAN_MCR_WRNEN | CAN_MCR_SRXDIS
 		  | CAN_MCR_IRMQ | CAN_MCR_AEN |
-		  (((HWMaxMB - 1) << CAN_MCR_MAXMB_SHIFT) & CAN_MCR_MAXMB_MASK);
+		  (((TotalMBcount - 1) << CAN_MCR_MAXMB_SHIFT) & CAN_MCR_MAXMB_MASK);
   putreg32(regval, S32K1XX_CAN0_MCR);
 
   regval  = CAN_CTRL2_RRS | CAN_CTRL2_EACEN | CAN_CTRL2_RFFN_16MB; //FIXME TASD
@@ -974,7 +981,7 @@ static int s32k1xx_ifup(struct net_driver_s *dev)
   s32k1xx_setfreeze(1);
   if(!s32k1xx_waitfreezeack_change(1))
   {
-	  printf("FLEXCAN: freeze fail\r\n");
+	  ninfo("FLEXCAN: freeze fail\r\n");
 	  return -1;
   }
 
@@ -1035,50 +1042,35 @@ static int s32k1xx_ifup(struct net_driver_s *dev)
 #endif
 
 
-  /* Filtering catchall */
-  putreg32(0, S32K1XX_CAN0_RXFGMASK);
 
   /* Iniatilize all MB rx and tx */
-  /*for(int i = 0; i < HWMaxMB; i++)
+  for(int i = 0; i < TotalMBcount; i++)
   {
+	  ninfo("MB %i %p\r\n", i, &priv->rx[i]);
+	  ninfo("MB %i %p\r\n", i, &priv->rx[i].ID.w);
 	  priv->rx[i].CS.cs = 0x0;
 	  priv->rx[i].ID.w = 0x0;
 	  priv->rx[i].data.l = 0x0;
 	  priv->rx[i].data.h = 0x0;
-  }*/
+  }
 
-  //FIXME max mb
-  for(int i = 0; i < HWMaxMB; i++)
+  /* Filtering catchall */
+  putreg32(0x0, S32K1XX_CAN0_RXFGMASK);
+
+  for(int i = 0; i < TotalMBcount; i++)
   {
 	  putreg32(0,S32K1XX_CAN0_RXIMR(i));
   }
 
-  putreg32(0,S32K1XX_CAN0_RXIMR0);
-  putreg32(0,S32K1XX_CAN0_RXIMR1);
-  putreg32(0,S32K1XX_CAN0_RXIMR2);
-  putreg32(0,S32K1XX_CAN0_RXIMR3);
-  putreg32(0,S32K1XX_CAN0_RXIMR4);
-  putreg32(0,S32K1XX_CAN0_RXIMR5);
-  putreg32(0,S32K1XX_CAN0_RXIMR6);
-  putreg32(0,S32K1XX_CAN0_RXIMR7);
-  putreg32(0,S32K1XX_CAN0_RXIMR8);
-  putreg32(0,S32K1XX_CAN0_RXIMR9);
-  putreg32(0,S32K1XX_CAN0_RXIMR10);
-  putreg32(0,S32K1XX_CAN0_RXIMR11);
-  putreg32(0,S32K1XX_CAN0_RXIMR12);
-  putreg32(0,S32K1XX_CAN0_RXIMR13);
-  putreg32(0,S32K1XX_CAN0_RXIMR14);
-  putreg32(0,S32K1XX_CAN0_RXIMR15);
-
-  putreg32(CAN_IFLAG1(1) | TXMBMask, S32K1XX_CAN0_IFLAG1); //FIXME dynamic MXMB
-  putreg32(CAN_IFLAG1(1), S32K1XX_CAN0_IMASK1);
+  putreg32(FIFO_IFLAG1 | TXMBMask, S32K1XX_CAN0_IFLAG1);
+  putreg32(FIFO_IFLAG1, S32K1XX_CAN0_IMASK1);
 
 
   /* Exit freeze mode */
   s32k1xx_setfreeze(0);
   if(!s32k1xx_waitfreezeack_change(0))
   {
-	  printf("FLEXCAN: unfreeze fail\r\n");
+	  ninfo("FLEXCAN: unfreeze fail\r\n");
 	  return -1;
   }
 
@@ -1381,7 +1373,7 @@ int s32k1xx_netinitialize(int intf)
   priv->txtimeout     = wd_create();      /* Create TX timeout timer */
   priv->rx            = (struct MbRx *)(S32K1XX_CAN0_MB);
   priv->tx            = (struct MbTx *)(S32K1XX_CAN0_MB + (sizeof(struct MbRx)
-		                                * S32K1XX_FLEXCAN_FIRST_TX_MB) );
+		                                * RxMBCount) );
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling s32k1xx_ifdown().
