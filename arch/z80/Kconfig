@@ -352,6 +352,7 @@ config ARCH_CHIP_Z8F6423
 config ARCH_CHIP_EZ80F91
 	bool "EZ80F91"
 	select ARCH_CHIP_EZ80
+	select ARCH_CHIP_EZ80_HAVE_PLL
 	---help---
 		ZiLOG EZ80F91 (ez80 Acclaim)
 
@@ -411,6 +412,10 @@ config ARCH_CHIP_EZ80
 	bool
 	select MM_SMALL if EZ80_Z80MODE
 	select ARCH_HAVE_PHY
+
+config ARCH_CHIP_EZ80_HAVE_PLL
+	bool
+	default n
 
 config ARCH_CHIP
 	string
