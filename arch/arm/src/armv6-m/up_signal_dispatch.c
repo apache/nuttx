@@ -60,9 +60,9 @@
  *   This kernel-mode stub will then be called transfer control to the user
  *   mode signal handler by calling this function.
  *
- *   Normally the a user-mode signalling handling stub will also execute
+ *   Normally the user-mode signalling handling stub will also execute
  *   before the ultimate signal handler is called.  See
- *   arch/arm/src/armv[6\7]/up_signal_handler.  This function is the
+ *   arch/arm/src/armv6-m/up_signal_handler.S.  This function is the
  *   user-space, signal handler trampoline function.  It is called from
  *   up_signal_dispatch() in user-mode.
  *
