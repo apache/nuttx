@@ -349,7 +349,7 @@ int up_swint(int irq, FAR void *context, FAR void *arg)
           DEBUGASSERT(rtcb->xcp.sigreturn == 0);
           rtcb->xcp.sigreturn  = regs[REG_EPC];
 
-          /* Set up to return to the user-space pthread start-up function in
+          /* Set up to return to the user-space trampoline function in
            * unprivileged mode.
            */
 

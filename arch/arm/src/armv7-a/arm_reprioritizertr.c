@@ -92,21 +92,8 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
     }
   else
     {
-      struct tcb_s *rtcb;
+      struct tcb_s *rtcb = this_task();
       bool switch_needed;
-#ifdef CONFIG_SMP
-      int cpu;
-
-      /* Get the TCB of the currently executing task on this CPU (avoid
-       * using this_task() because the TCBs may be in an inappropriate
-       * state right now).
-       */
-
-      cpu  = this_cpu();
-      rtcb = current_task(cpu);
-#else
-      rtcb = this_task();
-#endif
 
       sinfo("TCB=%p PRI=%d\n", tcb, priority);
 
@@ -163,11 +150,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * of the ready-to-run task list.
                */
 
-#ifdef CONFIG_SMP
-              rtcb = current_task(cpu);
-#else
               rtcb = this_task();
-#endif
 
               /* Update scheduler parameters */
 
@@ -191,11 +174,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * of the ready-to-run task list.
                */
 
-#ifdef CONFIG_SMP
-              rtcb = current_task(cpu);
-#else
               rtcb = this_task();
-#endif
 
 #ifdef CONFIG_ARCH_ADDRENV
               /* Make sure that the address environment for the previously

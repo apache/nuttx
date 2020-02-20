@@ -4016,7 +4016,7 @@ Configurations
        - CONFIG_NSH_IPv6NETMASK_8=0xff80
 
   knsh:
-    An NSH configuration used to test the SAMA5D kenel build configuration.
+    An NSH configuration used to test the SAMA5D kernel build configuration.
 
     NOTES:
 
@@ -4108,8 +4108,7 @@ Configurations
        Then you will need to follow some special build instructions below
        in order to build and install the ROMFS file system image.
 
-    5. Board initialization is performed performed before the application
-       is started:
+    5. Board initialization is performed before the application is started:
 
        RTOS Features -> RTOS Hooks
          CONFIG_BOARD_INITITIALIZE=y

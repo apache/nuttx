@@ -46,7 +46,7 @@ include $(TOPDIR)/tools/Config.mk
 #
 # Your PC may be configured differently.
 #
-# Version 5.3.0, the default install location is C:\ZiLOG
+# Version 5.3.0 and 5.3.3, the default install location is C:\ZiLOG
 
 ifeq ($(CONFIG_EZ80_ZDSII_V511),y)
 INSTALLROOT = C:/PROGRA~2/ZiLOG
@@ -57,6 +57,9 @@ ZDSVERSION := 5.2.1
 else ifeq ($(CONFIG_EZ80_ZDSII_V530),y)
 INSTALLROOT = C:/ZiLOG
 ZDSVERSION := 5.3.0
+else ifeq ($(CONFIG_EZ80_ZDSII_V533),y)
+INSTALLROOT = C:/ZiLOG
+ZDSVERSION := 5.3.3
 endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
@@ -68,7 +71,7 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ZDSSTDLIBDIR := $(INSTALLDIR)\lib\std
   ZDSZILOGLIBDIR := $(INSTALLDIR)\lib\zilog
 
-  # CFLAGs
+  # CFLAGS
 
   ARCHASMINCLUDES = -include:$(TOPDIR)\include;$(ZDSSTDINCDIR);$(ZDSZILOGINCDIR)
   EARCHASMINCLUDES = -include:$(TOPDIR)\include;$(ZDSSTDINCDIR);$(ZDSZILOGINCDIR)
@@ -213,8 +216,7 @@ define MOVEOBJ
 endef
 
 define ARCHIVE
-	@echo AR: $2
-	$(Q) for %%G in ($(2)) do ( $(AR) $(ARFLAGS) $1=-+%%G )
+	for %%G in ($(2)) do ( $(AR) $(ARFLAGS) $1=-+%%G )
 endef
 
 define CLEAN
@@ -248,8 +250,7 @@ define MOVEOBJ
 endef
 
 define ARCHIVE
-	$(Q) for __obj in $(2) ; do \
-		echo "AR: $$__obj"; \
+	for __obj in $(2) ; do \
 		$(AR) $(ARFLAGS) $1=-+$$__obj || { echo "$(AR) $1=-+$$__obj FAILED!" ; exit 1 ; } \
 	done
 endef

@@ -45,6 +45,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "sam_uid.h"
 #include "samv71-xult.h"
 
 #ifdef CONFIG_LIB_BOARDCTL
@@ -111,6 +112,7 @@ int board_uniqueid(uint8_t *uniqueid)
       return -EINVAL;
     }
 
+  sam_get_uniqueid(uniqueid);
   return OK;
 }
 #endif

@@ -37,6 +37,7 @@ EZ80_UNUSED		EQU	40h
 ;**************************************************************************
 
 	xdef	_ez80_handlers
+	xdef	_handlersize
 
 ;**************************************************************************
 ; Macros
@@ -65,7 +66,7 @@ irqhandler: macro vectno
 						;----------------- --- ----- -----
 _ez80_handlers:
 	irqhandler	EZ80_UNUSED		;                0   0x040
-	handlersize equ $-_ez80_handlers
+	_handlersize equ $-_ez80_handlers
 	irqhandler	EZ80_UNUSED+1	;                1   0x044
 	irqhandler	EZ80_UNUSED+2	;                2   0x045
 	irqhandler	EZ80_UNUSED+3	;                3   0x04c

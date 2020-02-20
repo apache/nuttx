@@ -12,9 +12,13 @@ ZDSVERSION (if present) and ZDSINSTALLDIR.
 NOTE:  Different versions of the ZDS-II compiler may also require
 different versions of .linkcmd and .zdsproj files as well.
 
+Version 5.3.3
+
+  As of this writing, this is the latest version available.
+
 Version 4.11.0
 
-  The 5.1.1 version of the ZDS-II tools are currently configured for
+  The 5.3.3 version of the ZDS-II tools is the default configured for
   all ez80 boards.  However, it is the older version 4.11.0 that this code
   has been verified against.
 
