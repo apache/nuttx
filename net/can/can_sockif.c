@@ -69,9 +69,6 @@ static ssize_t can_send(FAR struct socket *psock,
 static ssize_t can_sendto(FAR struct socket *psock, FAR const void *buf,
               size_t len, int flags, FAR const struct sockaddr *to,
               socklen_t tolen);
-static ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf,
-              size_t len, int flags, FAR struct sockaddr *from,
-              FAR socklen_t *fromlen);
 static int can_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -99,12 +96,13 @@ const struct sock_intf_s g_can_sockif =
   can_close         /* si_close */
 };
 
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inet_setup
+ * Name: can_setup
  *
  * Description:
  *   Called for socket() to verify that the provided socket type and
@@ -681,55 +679,6 @@ static ssize_t can_sendto(FAR struct socket *psock, FAR const void *buf,
 {
    nerr("ERROR: sendto() not supported for raw packet sockets\n");
    return -EAFNOSUPPORT;
-}
-
-/****************************************************************************
- * Name: can_recvfrom
- *
- * Description:
- *   recvfrom() receives messages from a socket, and may be used to receive
- *   data on a socket whether or not it is connection-oriented.
- *
- *   If from is not NULL, and the underlying protocol provides the source
- *   address, this source address is filled in. The argument 'fromlen'
- *   initialized to the size of the buffer associated with from, and modified
- *   on return to indicate the actual size of the address stored there.
- *
- * Input Parameters:
- *   psock    A pointer to a NuttX-specific, internal socket structure
- *   buf      Buffer to receive data
- *   len      Length of buffer
- *   flags    Receive flags (ignored)
- *   from     Address of source (may be NULL)
- *   fromlen  The length of the address structure
- *
- ****************************************************************************/
-
-static ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf,
-                                size_t len, int flags,
-                                FAR struct sockaddr *from,
-                                FAR socklen_t *fromlen)
-{
-  FAR struct can_conn_s *conn;
-  int ret;
-
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
-  DEBUGASSERT(from == NULL ||
-              (fromlen != NULL && *fromlen >= sizeof(struct sockaddr_can)));
-
-  conn = (FAR struct can_conn_s *)psock->s_conn;
-#warning Missing logic
-
-  switch (conn->protocol)
-    {
-#warning Missing logic
-
-      default:
-       ret = -EOPNOTSUPP;
-       break;
-    }
-
-  return ret;
 }
 
 /****************************************************************************

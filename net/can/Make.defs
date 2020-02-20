@@ -26,13 +26,15 @@ ifeq ($(CONFIG_NET_CAN),y)
 
 SOCK_CSRCS += can_sockif.c
 SOCK_CSRCS += can_send.c
+SOCK_CSRCS += can_recvfrom.c
 
 NET_CSRCS += can_conn.c
-NET_CSRCS += can_poll.c
+NET_CSRCS += can_input.c
 NET_CSRCS += can_callback.c
+NET_CSRCS += can_poll.c
 
 # Include can build support
 
 DEPPATH += --dep-path can
 VPATH += :can
-endif
+endif # CONFIG_NET_CAN

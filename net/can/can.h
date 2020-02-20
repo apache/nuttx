@@ -166,6 +166,34 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
                       FAR struct can_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
+ * Name: can_recvfrom
+ *
+ * Description:
+ *   Implements the socket recvfrom interface pkt_recvfrom() receives messages from
+ *   a socket, and may be used to receive data on a socket whether or not it
+ *   is connection-oriented.
+ *
+ * Input Parameters:
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   buf      Buffer to receive data
+ *   len      Length of buffer
+ *   flags    Receive flags
+ *   from     Address of source (may be NULL)
+ *   fromlen  The length of the address structure
+ *
+ * Returned Value:
+ *   On success, returns the number of characters received.  If no data is
+ *   available to be received and the peer has performed an orderly shutdown,
+ *   recv() will return 0.  Otherwise, on errors, a negated errno value is
+ *   returned (see recvfrom() for the list of appropriate error values).
+ *
+ ****************************************************************************/
+
+ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
+                     int flags, FAR struct sockaddr *from,
+                     FAR socklen_t *fromlen);
+
+/****************************************************************************
  * Name: can_poll
  *
  * Description:

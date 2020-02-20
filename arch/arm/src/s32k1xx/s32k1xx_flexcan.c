@@ -115,19 +115,23 @@
 #  error "Need at least one RX buffer"
 #endif*/
 
-#define MaskStdID                   0x000007FF;
-#define MaskExtID                   0x1FFFFFFF;
+#define MaskStdID                   0x000007FF
+#define MaskExtID                   0x1FFFFFFF
+#define FlagEFF                     (1 << 31) /* Extended frame format */
+#define FlagRTR                     (1 << 30) /* Remote transmission request */
 
 //Fixme nice variables/constants
-#define RxMBCount                   10
-#define TxMBCount                   6
-#define TotalMBcount                RxMBCount + TxMBCount
-#define TXMBMask                    (((1 << TxMBCount)-1) << RxMBCount)
+#define RxMBCount                   6
+#define FilterCount                 0
+#define RxandFilterMBCount          (RxMBCount + FilterCount)
+#define TxMBCount                   12 //???????????? why 12 idk it works
+#define TotalMBcount                RxandFilterMBCount + TxMBCount
+#define TXMBMask                    (((1 << TxMBCount)-1) << RxandFilterMBCount)
 
 #define CAN_FIFO_NE                 (1 << 5)
 #define CAN_FIFO_OV                 (1 << 6)
 #define CAN_FIFO_WARN               (1 << 7)
-#define FIFO_IFLAG1                 CAN_FIFO_NE | CAN_FIFO_WARN | CAN_FIFO_OV
+#define FIFO_IFLAG1                 (CAN_FIFO_NE | CAN_FIFO_WARN | CAN_FIFO_OV)
 
 static int peak_tx_mailbox_index_ = 0;
 
@@ -345,6 +349,12 @@ static bool s32k1xx_txringfull(FAR struct s32k1xx_driver_s *priv);
 static int  s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv);
 static int  s32k1xx_txpoll(struct net_driver_s *dev);
 
+/* Helper functions */
+static void s32k1xx_setenable(uint32_t enable);
+static void s32k1xx_setfreeze(uint32_t freeze);
+static uint32_t s32k1xx_waitmcr_change(uint32_t mask,
+		                             uint32_t target_state);
+
 /* Interrupt handling */
 
 static void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv);
@@ -385,6 +395,7 @@ static int  s32k1xx_ioctl(struct net_driver_s *dev, int cmd,
 /* Initialization */
 
 static void s32k1xx_initbuffers(struct s32k1xx_driver_s *priv);
+static int  s32k1xx_initialize(struct s32k1xx_driver_s *priv);
 static void s32k1xx_reset(struct s32k1xx_driver_s *priv);
 
 /****************************************************************************
@@ -462,7 +473,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 	  mbi = (getreg32(S32K1XX_CAN0_ESR2) & CAN_ESR2_LPTM_MASK) >> CAN_ESR2_LPTM_SHIFT;
   }
 
-  uint32_t mb_bit = 1 << (RxMBCount + mbi);
+  uint32_t mb_bit = 1 << (RxandFilterMBCount + mbi);
 
   while (mbi < TxMBCount)
   {
@@ -476,8 +487,9 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 	  mbi++;
   }
 
-  if (mbi == TxMBCount)
+  if ((mbi-RxandFilterMBCount) == TxMBCount)
   {
+	  nwarn("No TX MB available mbi %i\r\n", mbi);
 	  return 0;       // No transmission for you!
   }
 
@@ -644,7 +656,96 @@ static inline void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv)
 static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv)
 {
   #warning Missing logic
-	ninfo("FLEXCAN: receive\r\n");
+	//ninfo("FLEXCAN: receive\r\n");
+
+	s32k1xx_gpiowrite(PIN_PORTD | PIN31, 1);
+
+	struct can_frame frame;
+	uint32_t flags = getreg32(S32K1XX_CAN0_IFLAG1);
+
+	if ((flags & FIFO_IFLAG1) == 0)
+	{
+		// Weird, IRQ is here but no data to read
+		return;
+	}
+
+	if (flags & CAN_FIFO_OV)
+	{
+		//error_cnt_++;
+		putreg32(CAN_FIFO_OV, S32K1XX_CAN0_IFLAG1);
+	}
+
+	if (flags & CAN_FIFO_WARN)
+	{
+		//fifo_warn_cnt_++;
+		putreg32(CAN_FIFO_WARN, S32K1XX_CAN0_IFLAG1);
+	}
+
+	if (flags & CAN_FIFO_NE)
+	{
+		struct MbRx *rf = priv->rx;
+
+		/*
+		 * Read the frame contents
+		 */
+
+		if (rf->CS.ide)
+		{
+			frame.can_id = MaskExtID & rf->ID.ext;
+			frame.can_id |= FlagEFF;
+		}
+		else
+		{
+			frame.can_id = MaskStdID & rf->ID.std;
+		}
+
+		if (rf->CS.rtr)
+		{
+			frame.can_id |= FlagRTR;
+		}
+
+		frame.can_dlc = rf->CS.dlc;
+
+		frame.data[0] = rf->data.b0;
+		frame.data[1] = rf->data.b1;
+		frame.data[2] = rf->data.b2;
+		frame.data[3] = rf->data.b3;
+		frame.data[4] = rf->data.b4;
+		frame.data[5] = rf->data.b5;
+		frame.data[6] = rf->data.b6;
+		frame.data[7] = rf->data.b7;
+
+
+		putreg32(CAN_FIFO_NE, S32K1XX_CAN0_IFLAG1);
+
+		/* Copy the buffer pointer to priv->dev.d_buf.  Set amount of data
+		 * in priv->dev.d_len
+		 */
+
+		priv->dev.d_len = sizeof(struct can_frame);
+		priv->dev.d_buf =
+				(uint8_t *)s32k1xx_swap32((uint32_t)&frame); //FIXME
+
+		/* Invalidate the buffer so that the correct packet will be re-read
+		 * from memory when the packet content is accessed.
+		 */
+
+		up_invalidate_dcache((uintptr_t)priv->dev.d_buf,
+				(uintptr_t)priv->dev.d_buf + priv->dev.d_len);
+
+		/* Send to socket interface */
+		NETDEV_RXPACKETS(&priv->dev);
+
+		can_input(&priv->dev);
+
+
+
+
+		/*
+		 * Store with timeout into the FIFO buffer and signal update event
+		 */
+
+	}
 }
 
 /****************************************************************************
@@ -736,9 +837,6 @@ static void s32k1xx_flexcan_interrupt_work(FAR void *arg)
 static int s32k1xx_flexcan_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   #warning Missing logic
-
-	ninfo("FLEXCAN INT %i\r\n", irq);
-
 	FAR struct s32k1xx_driver_s *priv = &g_flexcan[0];
 	uint32_t flags;
 	flags  = getreg32(S32K1XX_CAN0_IFLAG1);
@@ -881,6 +979,24 @@ static void s32k1xx_polltimer_expiry(int argc, uint32_t arg, ...)
   work_queue(ETHWORK, &priv->pollwork, s32k1xx_poll_work, priv, 0);
 }
 
+static void s32k1xx_setenable(uint32_t enable)
+{
+	uint32_t regval;
+	if(enable)
+	{
+		regval  = getreg32(S32K1XX_CAN0_MCR);
+		regval &= ~(CAN_MCR_MDIS);
+		putreg32(regval, S32K1XX_CAN0_MCR);
+	}
+	else
+	{
+		regval  = getreg32(S32K1XX_CAN0_MCR);
+		regval |= CAN_MCR_MDIS;
+		putreg32(regval, S32K1XX_CAN0_MCR);
+	}
+	s32k1xx_waitmcr_change(CAN_MCR_LPMACK,1);
+}
+
 static void s32k1xx_setfreeze(uint32_t freeze)
 {
 	uint32_t regval;
@@ -945,135 +1061,12 @@ static int s32k1xx_ifup(struct net_driver_s *dev)
   uint32_t regval;
 
   #warning Missing logic
-  ninfo("FLEXCAN: test ifup\r\n");
 
-  /* initialize CAN device */
-  //FIXME we only support a single can device for now
-
-  //TEST GPIO tming
-  s32k1xx_pinconfig(PIN_PORTD | PIN31 | GPIO_OUTPUT);
-
-
-  regval  = getreg32(S32K1XX_CAN0_MCR);
-  regval |= CAN_MCR_MDIS;
-  putreg32(regval, S32K1XX_CAN0_MCR);
-
-  /* Set SYS_CLOCK src */
-  regval  = getreg32(S32K1XX_CAN0_CTRL1);
-  regval |= CAN_CTRL1_CLKSRC;
-  putreg32(regval, S32K1XX_CAN0_CTRL1);
-
-  regval  = getreg32(S32K1XX_CAN0_MCR);
-  regval &= ~(CAN_MCR_MDIS);
-  putreg32(regval, S32K1XX_CAN0_MCR);
-
-
-  regval  = getreg32(S32K1XX_CAN0_MCR);
-  regval |= CAN_MCR_RFEN | CAN_MCR_SLFWAK | CAN_MCR_WRNEN | CAN_MCR_SRXDIS
-		  | CAN_MCR_IRMQ | CAN_MCR_AEN |
-		  (((TotalMBcount - 1) << CAN_MCR_MAXMB_SHIFT) & CAN_MCR_MAXMB_MASK);
-  putreg32(regval, S32K1XX_CAN0_MCR);
-
-  regval  = CAN_CTRL2_RRS | CAN_CTRL2_EACEN | CAN_CTRL2_RFFN_16MB; //FIXME TASD
-  putreg32(regval, S32K1XX_CAN0_CTRL2);
-
-  /* Enter freeze mode */
-  s32k1xx_setfreeze(1);
-  if(!s32k1xx_waitfreezeack_change(1))
+  if(!s32k1xx_initialize(priv))
   {
-	  ninfo("FLEXCAN: freeze fail\r\n");
+	  nerr("initialize failed");
 	  return -1;
   }
-
-  /*regval  = getreg32(S32K1XX_CAN0_CTRL1);
-  regval |= ((0  << CAN_CTRL1_PRESDIV_SHIFT) & CAN_CTRL1_PRESDIV_MASK)
-		  | ((46 << CAN_CTRL1_ROPSEG_SHIFT) & CAN_CTRL1_ROPSEG_MASK)
-	      | ((18 << CAN_CTRL1_PSEG1_SHIFT) & CAN_CTRL1_PSEG1_MASK)
-		  | ((12 << CAN_CTRL1_PSEG2_SHIFT) & CAN_CTRL1_PSEG2_MASK)
-		  | ((12 << CAN_CTRL1_RJW_SHIFT) & CAN_CTRL1_RJW_MASK)
-		  | CAN_CTRL1_ERRMSK
-		  | CAN_CTRL1_TWRNMSK
-		  | CAN_CTRL1_RWRNMSK;
-
-  putreg32(regval, S32K1XX_CAN0_CTRL1);*/
-
-  /* CAN Bit Timing (CBT) configuration for a nominal phase of 1 Mbit/s
-   * with 80 time quantas,in accordance with Bosch 2012 specification,
-   * sample point at 83.75% */
-  regval  = getreg32(S32K1XX_CAN0_CBT);
-  regval |= CAN_CBT_BTF |     /* Enable extended bit timing configurations for CAN-FD
-                                      for setting up separetely nominal and data phase */
-            CAN_CBT_EPRESDIV(0) |  /* Prescaler divisor factor of 1 */
-            CAN_CBT_EPROPSEG(46) | /* Propagation segment of 47 time quantas */
-            CAN_CBT_EPSEG1(18) |   /* Phase buffer segment 1 of 19 time quantas */
-            CAN_CBT_EPSEG2(12) |   /* Phase buffer segment 2 of 13 time quantas */
-            CAN_CBT_ERJW(12);      /* Resynchronization jump width same as PSEG2 */
-  putreg32(regval, S32K1XX_CAN0_CBT);
-
-#ifdef CAN_FD
-
-  /* Enable CAN FD feature */
-  regval  = getreg32(S32K1XX_CAN0_MCR);
-  regval |= CAN_MCR_FDEN;
-  putreg32(regval, S32K1XX_CAN0_MCR);
-
-  /* CAN-FD Bit Timing (FDCBT) for a data phase of 4 Mbit/s with 20 time quantas,
-                 in accordance with Bosch 2012 specification, sample point at 75% */
-  regval  = getreg32(S32K1XX_CAN0_FDCBT);
-  regval |= CAN_FDCBT_FPRESDIV(0) | /* Prescaler divisor factor of 1 */
-		  CAN_FDCBT_FPROPSEG(7) | /* Propagation semgment of 7 time quantas
-                                                              (only register that doesn't add 1) */
-		  CAN_FDCBT_FPSEG1(6) |   /* Phase buffer segment 1 of 7 time quantas */
-		  CAN_FDCBT_FPSEG2(4) |   /* Phase buffer segment 2 of 5 time quantas */
-		  CAN_FDCBT_FRJW(4);      /* Resynchorinzation jump width same as PSEG2 */
-  putreg32(regval, S32K1XX_CAN0_FDCBT);
-
-  /* Additional CAN-FD configurations */
-  regval  = getreg32(S32K1XX_CAN0_FDCTRL);
-  regval |= CAN_FDCTRL_FDRATE | /* Enable bit rate switch in data phase of frame */
-		  CAN_FDCTRL_TDCEN |  /* Enable transceiver delay compensation */
-		  CAN_FDCTRL_TDCOFF(5) |   /* Setup 5 cycles for data phase sampling delay */
-		  CAN_FDCTRL_MBDSR0(3);    /* Setup 64 bytes per message buffer (7 MB's) */
-  putreg32(regval, S32K1XX_CAN0_FDCTRL);
-
-  regval  = getreg32(S32K1XX_CAN0_CTRL2);
-  regval |= CAN_CTRL2_ISOCANFDEN;
-  putreg32(regval, S32K1XX_CAN0_CTRL2);
-#endif
-
-
-
-  /* Iniatilize all MB rx and tx */
-  for(int i = 0; i < TotalMBcount; i++)
-  {
-	  ninfo("MB %i %p\r\n", i, &priv->rx[i]);
-	  ninfo("MB %i %p\r\n", i, &priv->rx[i].ID.w);
-	  priv->rx[i].CS.cs = 0x0;
-	  priv->rx[i].ID.w = 0x0;
-	  priv->rx[i].data.l = 0x0;
-	  priv->rx[i].data.h = 0x0;
-  }
-
-  /* Filtering catchall */
-  putreg32(0x0, S32K1XX_CAN0_RXFGMASK);
-
-  for(int i = 0; i < TotalMBcount; i++)
-  {
-	  putreg32(0,S32K1XX_CAN0_RXIMR(i));
-  }
-
-  putreg32(FIFO_IFLAG1 | TXMBMask, S32K1XX_CAN0_IFLAG1);
-  putreg32(FIFO_IFLAG1, S32K1XX_CAN0_IMASK1);
-
-
-  /* Exit freeze mode */
-  s32k1xx_setfreeze(0);
-  if(!s32k1xx_waitfreezeack_change(0))
-  {
-	  ninfo("FLEXCAN: unfreeze fail\r\n");
-	  return -1;
-  }
-
 
   /* Set and activate a timer process */
 
@@ -1190,8 +1183,11 @@ static int s32k1xx_txavail(struct net_driver_s *dev)
   if (work_available(&priv->pollwork))
     {
       /* Schedule to serialize the poll on the worker thread. */
-
+#ifdef WORK_QUEUE_BYPASS
+	  s32k1xx_txavail_work(priv);
+#else
       work_queue(ETHWORK, &priv->pollwork, s32k1xx_txavail_work, priv, 0);
+#endif
     }
 
   return OK;
@@ -1233,6 +1229,138 @@ static int s32k1xx_ioctl(struct net_driver_s *dev, int cmd,
 }
 #endif /* CONFIG_NETDEV_IOCTL */
 
+/****************************************************************************
+ * Function: s32k1xx_initalize
+ *
+ * Description:
+ *   Initialize FLEXCAN device
+ *
+ * Input Parameters:
+ *   priv - Reference to the private FLEXCAN driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int s32k1xx_initialize(struct s32k1xx_driver_s *priv)
+{
+	uint32_t regval;
+	uint32_t i;
+
+	/* initialize CAN device */
+	//FIXME we only support a single can device for now
+
+	//TEST GPIO tming
+	s32k1xx_pinconfig(PIN_PORTD | PIN31 | GPIO_OUTPUT);
+
+
+	s32k1xx_setenable(0);
+
+	/* Set SYS_CLOCK src */
+	regval  = getreg32(S32K1XX_CAN0_CTRL1);
+	regval |= CAN_CTRL1_CLKSRC;
+	putreg32(regval, S32K1XX_CAN0_CTRL1);
+
+	s32k1xx_setenable(1);
+
+	s32k1xx_reset(priv);
+
+	/* Enter freeze mode */
+	s32k1xx_setfreeze(1);
+	if(!s32k1xx_waitfreezeack_change(1))
+	{
+		ninfo("FLEXCAN: freeze fail\r\n");
+		return -1;
+	}
+
+	/*regval  = getreg32(S32K1XX_CAN0_CTRL1);
+	regval |= ((0  << CAN_CTRL1_PRESDIV_SHIFT) & CAN_CTRL1_PRESDIV_MASK)
+					  | ((46 << CAN_CTRL1_ROPSEG_SHIFT) & CAN_CTRL1_ROPSEG_MASK)
+					  | ((18 << CAN_CTRL1_PSEG1_SHIFT) & CAN_CTRL1_PSEG1_MASK)
+					  | ((12 << CAN_CTRL1_PSEG2_SHIFT) & CAN_CTRL1_PSEG2_MASK)
+					  | ((12 << CAN_CTRL1_RJW_SHIFT) & CAN_CTRL1_RJW_MASK)
+					  | CAN_CTRL1_ERRMSK
+					  | CAN_CTRL1_TWRNMSK
+					  | CAN_CTRL1_RWRNMSK;
+
+	putreg32(regval, S32K1XX_CAN0_CTRL1);*/
+
+#define BIT_METHOD2
+#ifdef BIT_METHOD2
+	/* CAN Bit Timing (CBT) configuration for a nominal phase of 1 Mbit/s
+	 * with 80 time quantas,in accordance with Bosch 2012 specification,
+	 * sample point at 83.75% */
+	regval  = getreg32(S32K1XX_CAN0_CBT);
+	regval |= CAN_CBT_BTF |     /* Enable extended bit timing configurations for CAN-FD
+	                                      for setting up separetely nominal and data phase */
+			CAN_CBT_EPRESDIV(0) |  /* Prescaler divisor factor of 1 */
+			CAN_CBT_EPROPSEG(46) | /* Propagation segment of 47 time quantas */
+			CAN_CBT_EPSEG1(18) |   /* Phase buffer segment 1 of 19 time quantas */
+			CAN_CBT_EPSEG2(12) |   /* Phase buffer segment 2 of 13 time quantas */
+			CAN_CBT_ERJW(12);      /* Resynchronization jump width same as PSEG2 */
+	putreg32(regval, S32K1XX_CAN0_CBT);
+#endif
+
+#ifdef CAN_FD
+
+	/* Enable CAN FD feature */
+	regval  = getreg32(S32K1XX_CAN0_MCR);
+	regval |= CAN_MCR_FDEN;
+	putreg32(regval, S32K1XX_CAN0_MCR);
+
+	/* CAN-FD Bit Timing (FDCBT) for a data phase of 4 Mbit/s with 20 time quantas,
+	                 in accordance with Bosch 2012 specification, sample point at 75% */
+	regval  = getreg32(S32K1XX_CAN0_FDCBT);
+	regval |= CAN_FDCBT_FPRESDIV(0) | /* Prescaler divisor factor of 1 */
+			CAN_FDCBT_FPROPSEG(7) | /* Propagation semgment of 7 time quantas
+	                                                              (only register that doesn't add 1) */
+			CAN_FDCBT_FPSEG1(6) |   /* Phase buffer segment 1 of 7 time quantas */
+			CAN_FDCBT_FPSEG2(4) |   /* Phase buffer segment 2 of 5 time quantas */
+			CAN_FDCBT_FRJW(4);      /* Resynchorinzation jump width same as PSEG2 */
+	putreg32(regval, S32K1XX_CAN0_FDCBT);
+
+	/* Additional CAN-FD configurations */
+	regval  = getreg32(S32K1XX_CAN0_FDCTRL);
+	regval |= CAN_FDCTRL_FDRATE | /* Enable bit rate switch in data phase of frame */
+			CAN_FDCTRL_TDCEN |  /* Enable transceiver delay compensation */
+			CAN_FDCTRL_TDCOFF(5) |   /* Setup 5 cycles for data phase sampling delay */
+			CAN_FDCTRL_MBDSR0(3);    /* Setup 64 bytes per message buffer (7 MB's) */
+	putreg32(regval, S32K1XX_CAN0_FDCTRL);
+
+	regval  = getreg32(S32K1XX_CAN0_CTRL2);
+	regval |= CAN_CTRL2_ISOCANFDEN;
+	putreg32(regval, S32K1XX_CAN0_CTRL2);
+#endif
+
+	for(i = TxMBCount; i < TotalMBcount; i++)
+	{
+		priv->rx[i].ID.w = 0x0;
+	}
+
+	putreg32(0x0, S32K1XX_CAN0_RXFGMASK);
+
+	for(i = 0; i < TotalMBcount; i++)
+	{
+		putreg32(0,S32K1XX_CAN0_RXIMR(i));
+	}
+
+	putreg32(FIFO_IFLAG1 | TXMBMask, S32K1XX_CAN0_IFLAG1);
+	putreg32(FIFO_IFLAG1, S32K1XX_CAN0_IMASK1);
+
+
+	/* Exit freeze mode */
+	s32k1xx_setfreeze(0);
+	if(!s32k1xx_waitfreezeack_change(0))
+	{
+		ninfo("FLEXCAN: unfreeze fail\r\n");
+		return -1;
+	}
+
+	return 1;
+}
 
 /****************************************************************************
  * Function: s32k1xx_initbuffers
@@ -1273,19 +1401,57 @@ static void s32k1xx_initbuffers(struct s32k1xx_driver_s *priv)
 
 static void s32k1xx_reset(struct s32k1xx_driver_s *priv)
 {
-  unsigned int i;
+	uint32_t regval;
+	uint32_t i;
 
-  /* Set the reset bit and clear the enable bit */
+	regval  = getreg32(S32K1XX_CAN0_MCR);
+	regval |= CAN_MCR_SOFTRST;
+	putreg32(regval, S32K1XX_CAN0_MCR);
 
-  
-  #warning Missing logic
+	if(!s32k1xx_waitmcr_change(CAN_MCR_SOFTRST, 0))
+	{
+		nerr("Reset failed");
+		return;
+	}
 
-  /* Wait at least 8 clock cycles */
+	/* TODO calculate TASD */
 
-  for (i = 0; i < 10; i++)
-    {
-      asm volatile ("nop");
-    }
+
+	regval  = getreg32(S32K1XX_CAN0_MCR);
+	regval &= ~(CAN_MCR_SUPV);
+	putreg32(regval, S32K1XX_CAN0_MCR);
+
+	/* Initialize all MB rx and tx */
+	for(i = 0; i < TotalMBcount; i++)
+	{
+		ninfo("MB %i %p\r\n", i, &priv->rx[i]);
+		ninfo("MB %i %p\r\n", i, &priv->rx[i].ID.w);
+		priv->rx[i].CS.cs = 0x0;
+		priv->rx[i].ID.w = 0x0;
+		priv->rx[i].data.l = 0x0;
+		priv->rx[i].data.h = 0x0;
+	}
+
+	regval  = getreg32(S32K1XX_CAN0_MCR);
+	regval |= CAN_MCR_RFEN | CAN_MCR_SLFWAK | CAN_MCR_WRNEN | CAN_MCR_SRXDIS
+			| CAN_MCR_IRMQ | CAN_MCR_AEN |
+			(((TotalMBcount - 1) << CAN_MCR_MAXMB_SHIFT) & CAN_MCR_MAXMB_MASK);
+	putreg32(regval, S32K1XX_CAN0_MCR);
+
+	regval  = CAN_CTRL2_RRS | CAN_CTRL2_EACEN | CAN_CTRL2_RFFN_16MB; //FIXME TASD
+	putreg32(regval, S32K1XX_CAN0_CTRL2);
+
+
+	for(i = 0; i < TotalMBcount; i++)
+	{
+		putreg32(0,S32K1XX_CAN0_RXIMR(i));
+	}
+
+	/* Filtering catchall */
+	putreg32(0x3FFFFFFF, S32K1XX_CAN0_RX14MASK);
+	putreg32(0x3FFFFFFF, S32K1XX_CAN0_RX15MASK);
+	putreg32(0x3FFFFFFF, S32K1XX_CAN0_RXMGMASK);
+	putreg32(0x0, S32K1XX_CAN0_RXFGMASK);
 }
 
 /****************************************************************************
