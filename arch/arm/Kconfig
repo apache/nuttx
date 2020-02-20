@@ -80,6 +80,7 @@ config ARCH_CHIP_IMX6
 	select BOOT_RUNFROMSDRAM
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_GLOBAL_IRQDISABLE
 	---help---
 		Freescale iMX.6 architectures (Cortex-A9)
 
