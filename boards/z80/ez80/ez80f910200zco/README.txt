@@ -72,10 +72,10 @@ Version 5.3.0
   are no errors in the compiled code.
 
 Other Versions
-  If you use any version of ZDS-II other than 5.1.1, 5.2.1, or 5.3.0 or
+  If you use any version of ZDS-II other than 5.1.1, 5.2.1, or 5.3.0/3 or
   if you install ZDS-II at any location other than the default location,
   you will have to modify three files:  (1) arch/arm/z80/src/ez80/Kconfig,
-  (2) boards/ez80f910200zco/scripts/Make.defs and, perhaps, (3)
+  (2) boards/z80/ez80/ez80f910200zco/scripts/Make.defs and, perhaps, (3)
   arch/z80/src/ez80/Toolchain.defs.
 
 Configurations
