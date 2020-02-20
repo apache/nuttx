@@ -56,13 +56,16 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "ez80f91_spi.h"
+
+#if defined(CONFIG_ARCH_CHIP_EZ80F91) || defined(CONFIG_ARCH_CHIP_EZ80F92)
+#  include "ez80f91_spi.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_EZ80F91
+#if defined(CONFIG_ARCH_CHIP_EZ80F91) || defined(CONFIG_ARCH_CHIP_EZ80F92)
 #  define GPIOB_SPI_SS      (1 << 2)  /* Pin 2: /SS (not used by driver) */
 #  define GPIOB_SPI_SCK     (1 << 3)  /* Pin 3: SCK */
 #  define GPIOB_SPI_MISO    (1 << 6)  /* Pin 6: MISO */
@@ -614,7 +617,7 @@ FAR struct spi_dev_s *ez80_spibus_initialize(int port)
    * Select the alternate function for PB2-3,6-7:
    */
 
-#ifdef CONFIG_ARCH_CHIP_EZ80F91
+#if defined(CONFIG_ARCH_CHIP_EZ80F91) || defined(CONFIG_ARCH_CHIP_EZ80F92)
   regval  = inp(EZ80_PB_DDR);
   regval |= GPIOB_SPI_PINSET;
   outp(EZ80_PB_DDR, regval);

@@ -662,7 +662,8 @@ __start:
 	/* Set up the stack pointer and clear the frame pointer */
 
 	ldr		sp, .Lstackpointer
-	mov     fp, #0
+	bic		sp, sp, #7	/* Get the stack pointer with 8-byte alignment */
+	mov		fp, #0
 
 #ifndef CONFIG_BOOT_SDRAM_DATA
 	/* Initialize .bss and .data ONLY if .bss and .data lie in SRAM that is

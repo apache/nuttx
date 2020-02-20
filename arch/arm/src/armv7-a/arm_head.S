@@ -631,6 +631,7 @@ __start:
 	/* Set up the stack pointer and clear the frame pointer */
 
 	ldr		sp, .Lstackpointer
+	bic		sp, sp, #7	/* Get the stack pointer with 8-byte alignment */
 	mov		fp, #0
 
 #ifndef CONFIG_BOOT_SDRAM_DATA
@@ -784,6 +785,7 @@ arm_data_initialize:
  * Data section variables
  ***************************************************************************/
 
+#ifndef CONFIG_SMP
 	/* This global variable is unsigned long g_idle_topstack and is
 	 * exported from here only because of its coupling to .Linitparms
 	 * above.
@@ -804,3 +806,4 @@ g_idle_topstack:
 	.size	g_idle_topstack, .-g_idle_topstack
 #endif
 	.end
+#endif

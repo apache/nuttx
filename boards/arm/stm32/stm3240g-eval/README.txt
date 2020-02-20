@@ -753,7 +753,7 @@ Where <subdir> is one of the following:
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y     : NuttX EABI buildroot toolchain
-       CONFIG_CXX_NEWLONG=y                    : size_t is long (maybe?)
+       CONFIG_ARCH_SIZET_LONG=y                : size_t is long (maybe?)
 
        This is easily changed by modifying the configuration.
 
@@ -764,7 +764,7 @@ Where <subdir> is one of the following:
        can try for yourself setting:
 
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
-       CONFIG_CXX_NEWLONG=n                    : size_t is unsigned int (maybe?)
+       CONFIG_ARCH_SIZET_LONG=n                : size_t is unsigned int (maybe?)
 
     3. In addition to the protected mode build, this NxWM configuration
        differences from the nxwm configuration in that:
@@ -1104,7 +1104,7 @@ Where <subdir> is one of the following:
     There are some special settings to make life with only a Telnet
 
     CONFIG_RAMLOG=y - Enable the RAM-based logging feature.
-    CONFIG_RAMLOG_CONSOLE=y - Use the RAM logger as the default console.
+    CONFIG_CONSOLE_SYSLOG=y - Use the RAM logger as the default console.
       This means that any console output from non-Telnet threads will
       go into the circular buffer in RAM.
     CONFIG_RAMLOG_SYSLOG - This enables the RAM-based logger as the

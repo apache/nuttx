@@ -6668,9 +6668,9 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
 <ul><pre>
 #include &lt;nuttx/syslog/syslog.h&gt;
 #ifndef CONFIG_ARCH_SYSLOG
-int syslog_initialize(enum syslog_init_e phase);
+int syslog_initialize(void);
 #else
-#  define syslog_initialize(phase)
+#  define syslog_initialize()
 #endif
 </ul></pre>
 <p><b>Description:</b>
@@ -6693,13 +6693,6 @@ int syslog_initialize(enum syslog_init_e phase);
       If <code>CONFIG_ARCH_SYSLOG</code> is selected, then the architecture-specific logic will provide its own SYSLOG device initialize which must include as a minimum a call to <code>syslog_channel()</code> to use the device.
   </li>
 </ul>
-<p><b>Input Parameters:</b>
-<ul>
-  <li>
-    <p>
-      <code>phase</code>: One of {<code>SYSLOG_INIT_EARLY</code>, <code>SYSLOG_INIT_LATE</code>}
-  </li>
-</ul>
 <p><b>Returned Value:</b>
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on any failure.
 </p>
@@ -6707,19 +6700,8 @@ int syslog_initialize(enum syslog_init_e phase);
   Different types of SYSLOG devices have different OS initialization
   requirements.  Some are available immediately at reset, some are available
   after some basic OS initialization, and some only after OS is fully
-  initialized.  In order to satisfy these different initialization
-  requirements, <code>syslog_initialize()</code> is called twice from the boot-up logic:
+  initialized.
 </p>
-<ul>
-  <li>
-    <p>
-      <code>syslog_initialize()</code> is called from the architecture-specific <code>up_initialize()</code> function as some as basic hardware resources have been initialized: Timers, interrupts, etc.  In this case, <code>syslog_initialize()</code> is called with the argument <code>SYSLOG_INIT_EARLY</code>.
-  </li>
-  <li>
-    <p>
-      <code>syslog_initialize()</code> is called again from <code>nx_start()</code> when the full OS initialization has completed, just before the application main entry point is spawned.  In this case, <code>syslog_initialize()</code> is called with the argument <code>SYSLOG_INIT_LATE</code>.
-  </li>
-</ul>
 <p>
   There are other types of SYSLOG channel devices that may require even further initialization.  For example, the file SYSLOG channel (described below) cannot be initialized until the necessary file systems have been mounted.
 </p>
@@ -6734,7 +6716,7 @@ int syslog_initialize(enum syslog_init_e phase);
 <ol>
   <li>
     <p><b>Low-Level Serial Output</b>.
-      If you are using a SYSLOG console channel (<code>CONFIG_SYSLOG_CONSOLE</code>) with a serial console (<code>CONFIG_SYSLOG_SERIAL_CONSOLE</code>) and if the underlying architecture supports the low-level <code>up_putc()</code> interface(<code>CONFIG_ARCH_LOWPUTC</code>), then the SYLOG logic will direct the output to <code>up_putc()</code> which is capable of generating the serial output within the context of an interrupt handler.
+      If you are using a SYSLOG console channel (<code>CONFIG_SYSLOG_CONSOLE</code>) and if the underlying architecture supports the low-level <code>up_putc()</code> interface(<code>CONFIG_ARCH_LOWPUTC</code>), then the SYLOG logic will direct the output to <code>up_putc()</code> which is capable of generating the serial output within the context of an interrupt handler.
     </p>
     <p>
       There are a few issues in doing this however:
@@ -6799,15 +6781,11 @@ int syslog_initialize(enum syslog_init_e phase);
   </li>
   <li>
     <p>
-      <code>CONFIG_SYSLOG_CONSOLE</code>.  This configuration option is manually selected from the SYSLOG menu.  This is the option that actually enables the SYSLOG console device.  It depends on <code>CONFIG_DEV_CONSOLE</code> and it will automatically select <code>CONFIG_SYSLOG_SERIAL_CONSOLE</code> if <code>CONFIG_SERIAL_CONSOLE</code> is selected.
+      <code>CONFIG_SYSLOG_CONSOLE</code>.  This configuration option is manually selected from the SYSLOG menu.  This is the option that actually enables the SYSLOG console device.  It depends on <code>CONFIG_DEV_CONSOLE</code>.
   </li>
   <li>
     <p>
       <code>CONFIG_ARCH_LOWPUTC</code>.  This is an indication from the architecture configuration that the platform supports the <code>up_putc()</code> interface.  <code>up_putc()</code> is a very low level UART interface that can even be used from interrupt handling.
-  </li>
-  <li>
-    <p>
-      <code>CONFIG_SYSLOG_SERIAL_CONSOLE</code>.  This enables certain features of the SYSLOG operation that depend on a serial console.  If <code>CONFIG_ARCH_LOWPUTC</code> is also selected, for example, then <code>up_putc()</code> will be used for the forced SYSLOG output.
   </li>
 </ul>
 <p>
@@ -6931,10 +6909,6 @@ int syslog_file_channel(FAR const char *devpath);
   </li>
   <li>
     <p>
-      <code>CONFIG_RAMLOG_CONSOLE</code>: Use the RAM logging device as a system console. If this feature is enabled (along with <code>CONFIG_DEV_CONSOLE</code>), then all console output will be re-directed to a circular buffer in RAM.  This might be useful, for example, if the only console is a Telnet console.  Then in that case, console output from non-Telnet threads will go to the circular buffer and can be viewed using the NSH <code>dmesg</code> command.  This optional is not useful in other scenarios.
-  </li>
-  <li>
-    <p>
       <code>CONFIG_RAMLOG_SYSLOG</code>: Use the RAM logging device for the SYSLOG interface.  If this feature is enabled, then all debug output will be re-directed to the circular  buffer in RAM.  This RAM log can be viewed from NSH using the <code>dmesg</code>  command.  NOTE:  Unlike the limited, generic character driver SYSLOG device, the RAMLOG <i>can</i> be used to capture debug output from
       interrupt level handlers.
   </li>
@@ -6943,9 +6917,6 @@ int syslog_file_channel(FAR const char *devpath);
       <code>CONFIG_RAMLOG_NPOLLWAITERS</code>: The number of threads than can be waiting for this driver on <code>poll()</code>.  Default: 4
   </li>
 </ul>
-<p>
-  If <code>CONFIG_RAMLOG_CONSOLE</code> or <code>CONFIG_RAMLOG_SYSLOG</code> is selected, then the following must also be provided:
-</p>
 <ul>
   <li>
     <p>

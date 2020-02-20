@@ -54,36 +54,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z180_uart_lowinit
- *
- * Description:
- *   Called early in the boot sequence to initialize the uart console
- *   channel (only).
- *
- ****************************************************************************/
-
-#if defined(HAVE_UART) && defined(USE_LOWSERIALINIT)
-void z180_uart_lowinit(void);
-#else
-#  define z180_uart_lowinit()
-#endif
-
-/****************************************************************************
- * Name: z180_scc_lowinit
- *
- * Description:
- *   Called early in the boot sequence to initialize the [E]SCC console
- *   channel (only).
- *
- ****************************************************************************/
-
-#if defined(HAVE_SCC) && defined(USE_LOWSERIALINIT)
-void z180_scc_lowinit(void);
-#else
-#  define z180_scc_lowinit()
-#endif
-
-/****************************************************************************
  * Name: z180_putc
  *
  * Description:

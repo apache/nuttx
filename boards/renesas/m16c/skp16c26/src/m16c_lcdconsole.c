@@ -107,8 +107,6 @@ void up_earlyconsoleinit(void)
 void up_consoleinit(void)
 {
   /* There is probably a problem if we are here */
-
-  lowconsole_init();
 }
 #endif
 

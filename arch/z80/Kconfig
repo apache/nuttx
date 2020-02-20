@@ -338,7 +338,6 @@ config ARCH_CHIP_Z8F6403
 	select ARCH_CHIP_Z8
 	select ARCH_CHIP_Z8F640X
 	select ENDIAN_BIG
-	select HAVE_LOWSERIALINIT
 	---help---
 		ZiLOG Z8F6403 (z8 Encore)
 
@@ -347,13 +346,13 @@ config ARCH_CHIP_Z8F6423
 	select ARCH_CHIP_Z8
 	select ARCH_CHIP_Z8F642X
 	select ENDIAN_BIG
-	select HAVE_LOWSERIALINIT
 	---help---
 		ZiLOG Z8F6423 (z8 Encore)
 
 config ARCH_CHIP_EZ80F91
 	bool "EZ80F91"
 	select ARCH_CHIP_EZ80
+	select ARCH_CHIP_EZ80_HAVE_PLL
 	---help---
 		ZiLOG EZ80F91 (ez80 Acclaim)
 
@@ -383,7 +382,6 @@ config ARCH_CHIP_Z180
 	select ARCH_NOINTC
 	select ARCH_HAVE_ADDRENV
 	select ARCH_ADDRENV
-	select HAVE_LOWSERIALINIT
 
 config ARCH_CHIP_Z80180
 	bool
@@ -413,11 +411,11 @@ config ARCH_CHIP_Z8
 config ARCH_CHIP_EZ80
 	bool
 	select MM_SMALL if EZ80_Z80MODE
-	select HAVE_LOWSERIALINIT
 	select ARCH_HAVE_PHY
 
-config HAVE_LOWSERIALINIT
+config ARCH_CHIP_EZ80_HAVE_PLL
 	bool
+	default n
 
 config ARCH_CHIP
 	string

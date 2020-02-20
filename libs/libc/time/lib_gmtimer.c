@@ -46,14 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/time.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define SEC_PER_MIN  ((time_t)60)
-#define SEC_PER_HOUR ((time_t)60 * SEC_PER_MIN)
-#define SEC_PER_DAY  ((time_t)24 * SEC_PER_HOUR)
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Private Function Prototypes

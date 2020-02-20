@@ -32,21 +32,10 @@ config RAMLOG
 		details as needed to support logging.
 
 if RAMLOG
-config RAMLOG_CONSOLE
-	bool "Use RAMLOG for /dev/console"
-	default n
-	depends on DEV_CONSOLE
-	---help---
-		Use the RAM logging device as a system console. If this feature is enabled (along
-		with DEV_CONSOLE), then all console output will be re-directed to a circular
-		buffer in RAM.  This is useful, for example, if the only console is a Telnet
-		console.  Then in that case, console output from non-Telnet threads will go to
-		the circular buffer and can be viewed using the NSH 'dmesg' command.
-
 config RAMLOG_BUFSIZE
 	int "RAMLOG buffer size"
 	default 1024
-	depends on RAMLOG_SYSLOG || RAMLOG_CONSOLE
+	depends on RAMLOG_SYSLOG
 	---help---
 		Size of the console RAM log.  Default: 1024
 
@@ -137,10 +126,6 @@ config SYSLOG_PREFIX_STRING
 	---help---
 		The prefix string to be prepend.
 
-config SYSLOG_SERIAL_CONSOLE
-	bool
-	default n
-
 choice
 	prompt "System log device"
 	default SYSLOG_CONSOLE if DEV_CONSOLE
@@ -167,7 +152,6 @@ config RAMLOG_SYSLOG
 config SYSLOG_CONSOLE
 	bool "Log to /dev/console"
 	depends on DEV_CONSOLE
-	select SYSLOG_SERIAL_CONSOLE if SERIAL_CONSOLE
 	select SYSLOG_WRITE
 	---help---
 		Use the system console as a SYSLOG output device.

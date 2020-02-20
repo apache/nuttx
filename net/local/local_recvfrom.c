@@ -279,7 +279,8 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Open the receiving side of the transfer */
 
-  ret = local_open_receiver(conn, _SS_ISNONBLOCK(psock->s_flags));
+  ret = local_open_receiver(conn, _SS_ISNONBLOCK(psock->s_flags) ||
+                            (flags & MSG_DONTWAIT) != 0);
   if (ret < 0)
     {
       nerr("ERROR: Failed to open FIFO for %s: %d\n",

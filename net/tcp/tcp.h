@@ -1274,10 +1274,12 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *   Perform the recvfrom operation for a TCP/IP SOCK_STREAM
  *
  * Input Parameters:
- *   psock  Pointer to the socket structure for the SOCK_DRAM socket
- *   buf    Buffer to receive data
- *   len    Length of buffer
- *   from   INET address of source (may be NULL)
+ *   psock    Pointer to the socket structure for the SOCK_DRAM socket
+ *   buf      Buffer to receive data
+ *   len      Length of buffer
+ *   flags    Receive flags
+ *   from     INET address of source (may be NULL)
+ *   fromlen  The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters received.  On  error,
@@ -1288,7 +1290,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  ****************************************************************************/
 
 ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
-                           size_t len, FAR struct sockaddr *from,
+                           size_t len, int flags, FAR struct sockaddr *from,
                            FAR socklen_t *fromlen);
 
 /****************************************************************************
@@ -1302,6 +1304,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
+ *   flags    Send flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -1350,7 +1353,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
 
 struct socket;
 ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
-                       size_t len);
+                       size_t len, int flags);
 
 /****************************************************************************
  * Name: tcp_setsockopt

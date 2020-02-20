@@ -235,7 +235,8 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
           if (pstate->ir_from)
             {
               socklen_t len = *pstate->ir_fromlen;
-              len = (socklen_t)src_addr_size > len ? len : (socklen_t)src_addr_size;
+              len = (socklen_t)
+                src_addr_size > len ? len : (socklen_t)src_addr_size;
 
               recvlen = iob_copyout((FAR uint8_t *)pstate->ir_from, iob,
                                     len, sizeof(uint8_t));
@@ -347,7 +348,8 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
 
           if (conn->domain == PF_INET6)
             {
-              FAR struct sockaddr_in6 *infrom6 = (FAR struct sockaddr_in6 *)infrom;
+              FAR struct sockaddr_in6 *infrom6 =
+                (FAR struct sockaddr_in6 *)infrom;
               FAR socklen_t *fromlen = pstate->ir_fromlen;
               FAR struct udp_hdr_s *udp   = UDPIPv6BUF;
               FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
@@ -606,7 +608,7 @@ static ssize_t udp_recvfrom_result(int result, struct udp_recvfrom_s *pstate)
  ****************************************************************************/
 
 ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR void *buf,
-                           size_t len, FAR struct sockaddr *from,
+                           size_t len, int flags, FAR struct sockaddr *from,
                            FAR socklen_t *fromlen)
 {
   FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)psock->s_conn;
@@ -637,7 +639,7 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR void *buf,
 
   /* Handle non-blocking UDP sockets */
 
-  if (_SS_ISNONBLOCK(psock->s_flags))
+  if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
     {
       /* Return the number of bytes read from the read-ahead buffer if
        * something was received (already in 'ret'); EAGAIN if not.

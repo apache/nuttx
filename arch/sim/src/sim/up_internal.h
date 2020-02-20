@@ -89,9 +89,8 @@
 
 #ifndef CONFIG_DEV_CONSOLE
 #  undef USE_DEVCONSOLE
-#  undef CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE) ||  defined(CONFIG_SYSLOG_RPMSG)
+#  ifdef CONFIG_SYSLOG_RPMSG
 #    undef USE_DEVCONSOLE
 #  else
 #    define USE_DEVCONSOLE 1

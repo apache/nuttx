@@ -64,7 +64,7 @@ endchoice # mikroBUS2 Click
 config SAME70XPLAINED_HSMCI0_AUTOMOUNT
 	bool "HSMCI0 automounter"
 	default n
-	depends on FS_AUTOMOUNTER && SAMA5_HSMCI0
+	depends on FS_AUTOMOUNTER && SAMV7_HSMCI0
 
 if SAME70XPLAINED_HSMCI0_AUTOMOUNT
 

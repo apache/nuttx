@@ -60,18 +60,8 @@
 #ifndef CONFIG_DEV_CONSOLE
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
-#  undef  CONFIG_DEV_LOWCONSOLE
-#  undef  CONFIG_RAMLOG_CONSOLE
 #else
 #  if defined(CONFIG_ARM_LWL_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  USE_EARLYSERIALINIT
-#    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  USE_EARLYSERIALINIT
-#    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_DEV_LOWCONSOLE)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #  else
@@ -93,7 +83,7 @@
 /* Check if an interrupt stack size is configured */
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
-# define CONFIG_ARCH_INTERRUPTSTACK 0
+#  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
 /* Macros to handle saving and restoring interrupt state.  In the current ARM
@@ -454,19 +444,9 @@ void rpmsg_serialinit(void);
 #endif
 
 #ifdef CONFIG_ARM_LWL_CONSOLE
-
 /* Defined in src/common/up_lwl_console.c */
 
 void lwlconsole_init(void);
-
-#elif defined(CONFIG_DEV_LOWCONSOLE)
-
-/* Defined in drivers/lowconsole.c */
-
-void lowconsole_init(void);
-
-#else
-# define lowconsole_init()
 #endif
 
 /* DMA **********************************************************************/

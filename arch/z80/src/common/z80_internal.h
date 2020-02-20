@@ -57,27 +57,10 @@
  * assumed.
  */
 
-#if defined(CONFIG_DEV_LOWCONSOLE)
-#  undef USE_SERIALDRIVER
-#  ifdef CONFIG_HAVE_LOWSERIALINIT
-#    define USE_LOWSERIALINIT 1
-#  else
-#    undef USE_LOWSERIALINIT
-#  endif
-#elif !defined(CONFIG_DEV_CONSOLE)
+#if !defined(CONFIG_DEV_CONSOLE)
 #  undef  USE_SERIALDRIVER
-#  undef  USE_LOWSERIALINIT
-#  undef  CONFIG_DEV_LOWCONSOLE
-#  undef  CONFIG_RAMLOG_CONSOLE
 #else
-#  undef  USE_LOWSERIALINIT
-#  if defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_CONSOLE_SYSLOG)
-#    undef  USE_SERIALDRIVER
-#    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_DEV_LOWCONSOLE)
+#  if defined(CONFIG_CONSOLE_SYSLOG)
 #    undef  USE_SERIALDRIVER
 #  else
 #    define USE_SERIALDRIVER 1
@@ -102,10 +85,6 @@
 #ifdef __cplusplus
 extern "C"
 {
-#endif
-
-#ifdef USE_LOWSERIALINIT
-void z80_lowserial_initialize(void);
 #endif
 
 /* Defined in xyz_doirq.c */
@@ -134,30 +113,6 @@ void z80_serial_initialize(void);
 void rpmsg_serialinit(void);
 #else
 #  define rpmsg_serialinit()
-#endif
-
-/* Defined in drivers/lowconsole.c */
-
-#ifdef CONFIG_DEV_LOWCONSOLE
-void lowconsole_init(void);
-#else
-# define lowconsole_init()
-#endif
-
-/* Defined in drivers/syslog_console.c */
-
-#ifdef CONFIG_CONSOLE_SYSLOG
-void syslog_console_init();
-#else
-# define syslog_console_init()
-#endif
-
-/* Defined in drivers/ramlog.c */
-
-#ifdef CONFIG_RAMLOG_CONSOLE
-void ramlog_consoleinit(void);
-#else
-# define ramlog_consoleinit()
 #endif
 
 /* Low level string output */

@@ -156,6 +156,14 @@ config ARCH_GNU_NO_WEAKFUNCTIONS
 	---help---
 		Disable support for weak functions.
 
+config ARCH_SIZET_LONG
+	bool "size_t is type long"
+	default n
+	---help---
+		size_t may be type long or type int.  This matters for some
+		C++ library routines because the NuttX size_t might not have
+		the same underlying type as your toolchain's size_t.
+
 comment "Architecture Options"
 
 config ARCH_NOINTC

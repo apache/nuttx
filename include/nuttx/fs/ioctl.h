@@ -172,6 +172,10 @@
                                            * OUT: Instance number is returned on
                                            *      success.
                                            */
+#define FIONBIO         _FIOC(0x000b)     /* IN:  Boolean option takes an
+                                           *      int value.
+                                           * OUT: Origin option.
+                                           */
 
 /* NuttX file system ioctl definitions **************************************/
 
