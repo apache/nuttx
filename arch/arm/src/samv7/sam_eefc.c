@@ -52,6 +52,7 @@
  * The page size is 512 bytes.  However, the smallest thing that can be
  * erased is four pages.  We will refer to this as a "cluster".
  */
+
 #  define SAMV7_LOCK_REGION_SHIFT (13)   /* 2**13 = 8*KB = 16 pages */
 #else
 #  error FLASH geometry for this SAMV7 chip not known
@@ -157,10 +158,10 @@ __ramfunc__ int sam_eefc_command(uint32_t cmd, uint32_t arg)
  ****************************************************************************/
 
 __ramfunc__ int sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
-                                      uint32_t* buffer, size_t bufsize)
+                                      uint32_t *buffer, size_t bufsize)
 {
   volatile uint32_t regval;
-  uint32_t* flash_data;
+  uint32_t *flash_data;
   size_t read_count;
 
   if (buffer == NULL)
@@ -178,7 +179,8 @@ __ramfunc__ int sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
 
   /* Send the Start Read command */
 
-  regval = EEFC_FCR_FCMD(start_cmd) |  EEFC_FCR_FARG(FCMD_GETD)| EEFC_FCR_FKEY_PASSWD;
+  regval = EEFC_FCR_FCMD(start_cmd) |  EEFC_FCR_FARG(FCMD_GETD) |
+           EEFC_FCR_FKEY_PASSWD;
   putreg32(regval, SAM_EEFC_FCR);
 
   /* Wait for the FRDY bit in the Flash Programming Status Register
@@ -202,7 +204,8 @@ __ramfunc__ int sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
 
   /* Send the Stop Read command */
 
-  regval = EEFC_FCR_FCMD(stop_cmd) |  EEFC_FCR_FARG(FCMD_GETD) | EEFC_FCR_FKEY_PASSWD;
+  regval = EEFC_FCR_FCMD(stop_cmd) |  EEFC_FCR_FARG(FCMD_GETD) |
+           EEFC_FCR_FKEY_PASSWD;
   putreg32(regval, SAM_EEFC_FCR);
 
   /* Wait for the FRDY bit in the Flash Programming Status Register
@@ -238,7 +241,7 @@ __ramfunc__ int sam_eefc_readsequence(uint32_t start_cmd, uint32_t stop_cmd,
 
 void sam_eefc_initaccess(uint32_t access_mode, uint32_t wait_status)
 {
-	sam_eefc_writefmr(access_mode | EEFC_FMR_FWS(wait_status));
+  sam_eefc_writefmr(access_mode | EEFC_FMR_FWS(wait_status));
 }
 
 /****************************************************************************
