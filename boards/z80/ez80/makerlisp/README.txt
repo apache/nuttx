@@ -35,6 +35,11 @@ Contents
 ZDS-II Compiler Versions
 ========================
 
+Version 5.3.3
+
+  As of this writing, this is the latest version available.  This is the
+  default configured for all ez80 boards.
+
 Version 5.3.0
 
   I verified compilation using 5.30 on June 2, 2019.  To use this version,
