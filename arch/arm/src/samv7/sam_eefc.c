@@ -304,7 +304,6 @@ int sam_eefc_unlock(size_t page, size_t npages)
   size_t start_page;
   size_t end_page;
   size_t lockpage;
-  irqstate_t flags;
   int ret;
 
   /* Align the page to the lock region */
@@ -316,9 +315,7 @@ int sam_eefc_unlock(size_t page, size_t npages)
        lockpage < end_page;
        lockpage += SAMV7_LOCK_REGION_SIZE)
     {
-      flags = up_irq_save();
       ret = sam_eefc_command(FCMD_CLB, lockpage);
-      up_irq_restore(flags);
       if (ret < 0)
         {
           return ret;
