@@ -343,7 +343,7 @@ uint32_t *arm_syscall(uint32_t *regs)
           DEBUGASSERT(rtcb->xcp.sigreturn == 0);
           rtcb->xcp.sigreturn  = regs[REG_PC];
 
-          /* Set up to return to the user-space pthread start-up function in
+          /* Set up to return to the user-space trampoline function in
            * unprivileged mode.
            */
 
