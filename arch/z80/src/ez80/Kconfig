@@ -73,7 +73,7 @@ config EZ80_TOOLCHAIN_ZDSII
 
 choice
 	prompt "ZDS-II Toolchain version"
-	default EZ80_ZDSII_V530
+	default EZ80_ZDSII_V533
 
 config EZ80_ZDSII_V511
 	bool "ZDS-II 5.1.1"
@@ -83,6 +83,9 @@ config EZ80_ZDSII_V521
 
 config EZ80_ZDSII_V530
 	bool "ZDS-II 5.3.0"
+
+config EZ80_ZDSII_V533
+	bool "ZDS-II 5.3.3"
 
 endchoice # ZDS-II Toolchain version
 
