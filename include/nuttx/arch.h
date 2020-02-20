@@ -53,8 +53,8 @@
  *    This chip related declarations are retained in this header file.
  *
  *    NOTE: up_ is supposed to stand for microprocessor; the u is like the
- *    Greek letter micron: µ. So it would be µP which is a common shortening
- *    of the word microprocessor.
+ *    Greek letter micron (U+03BC, or U+00B5). So it would be up which is
+ *    a common shortening of the word microprocessor.
  *
  * 2. Microprocessor-Specific Interfaces.
  *
