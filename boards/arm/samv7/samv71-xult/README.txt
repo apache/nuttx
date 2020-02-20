@@ -579,6 +579,7 @@ An on-chip FLASH driver was added and verified on 2015-11-13.  These
 configuration options were enabled to test the on-chip FLASH support:
 
   CONFIG_MTD_PROGMEM=y
+  CONFIG_ARCH_RAMFUNCS=y
   CONFIG_SAMV7_PROGMEM=y
   CONFIG_SAMV7_PROGMEM_NSECTORS=8
 
