@@ -31,7 +31,7 @@ include $(TOPDIR)/tools/Config.mk
 #
 # Your PC may be configured differently.
 #
-# Version 5.3.0 and 5.3.3, the default install location is C:\ZiLOG
+# Version 5.3.0, the default install location is C:\ZiLOG
 
 ifeq ($(CONFIG_EZ80_ZDSII_V511),y)
 INSTALLROOT = C:/PROGRA~2/ZiLOG
@@ -42,9 +42,6 @@ ZDSVERSION := 5.2.1
 else ifeq ($(CONFIG_EZ80_ZDSII_V530),y)
 INSTALLROOT = C:/ZiLOG
 ZDSVERSION := 5.3.0
-else ifeq ($(CONFIG_EZ80_ZDSII_V533),y)
-INSTALLROOT = C:/ZiLOG
-ZDSVERSION := 5.3.3
 endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)

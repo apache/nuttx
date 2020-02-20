@@ -42,17 +42,29 @@
 
 /* Helpers for accessing memory mapped registers */
 
-#define ez80_getreg8(a)   (*(uint8_t*)(a))
-#define ez80_putreg8(v,a) (*(uint8_t*)(a) = (v))
+#define ez80_getreg8(a)   (*(volatile uint8_t *)(a))
+#define ez80_putreg8(v,a) (*(volatile uint8_t *)(a) = (v))
 
 /* Memory map.  Board-specific extensions to the basic ez80f91 memory map
  * (see arch/z80/src/ez80/ez80f91.h)
  *
- * - Chip select 0 is for RAM 0 to (512k - 1), starting at address 0x40000
- *   (after the flash).
- * - Chip select 1 is for 512k to (1M - 1), at address 0xc0000.
+ * Chip select 0 is for the 512Kb AS6C4008 SRAM starting at address 0x40000
+ * (after the flash).
  *
- * All RAM has zero wait states.
+ *   __CS0_LBR_INIT_PARAM = 0x04   Lower address 04 0000
+ *   __CS0_UBR_INIT_PARAM = 0x0b   Upper address 0b ffff
+ *   __CS0_CTL_INIT_PARAM = 0x08   CTL[5-7] = Zero wait states
+ *                                 CTL[4]   = Memory (vs I/O)
+ *                                 CTL[3]   = Enable
+ *                                 CTL[0-2] = Unused
+ *   __CS0_BMC_INIT_PARAM = 0x00   BMC[6-7] = eZ80 bus mode
+ *                                 BMC[5]   = Separate address and data
+ *                                 BMC[4]   = Unused
+ *                                 BMC[0-3] = Ignored in eZ80 mode
+ *
+ * Chip select 1 is for the SSD1963 LCD frame buffer interface
+ * Chip select 2 is for the YM2413B Sound Generator
+ * Chip select 3 is not used
  */
 
 /* LED and port emulation memory register addresses */
@@ -67,12 +79,6 @@
 #define EZ80_GPIOD5       (1 << 5)
 #define EZ80_GPIOD6       (1 << 6)
 #define EZ80_GPIOD7       (1 << 7)
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-extern bool g_ebpresent;  /* True:  I/O Expansion board is present */
 
 /****************************************************************************
  * Public Functions

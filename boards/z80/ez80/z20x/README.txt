@@ -44,16 +44,12 @@ Contents
 ZDS-II Compiler Versions
 ========================
 
-Version 5.3.3
-
-  As of this writing, this is the latest version available.  This is the
-  default configured for all ez80 boards.
-
 Version 5.3.0
 
-  I verified compilation using 5.3.0 on Februray 19, 2020.  To use this
-  version, I had to make spurious modification to the implementation of
-  gmtimer() to work around an internal compiler error.
+  I verified compilation using 5.30 on June 2, 2019.  To use this version,
+  I had to make spurious modification to the implementation of gmtimer() to
+  work around an internal compiler error.  I have still not verified that
+  are no errors in the compiled code.
 
 Other Versions
   If you use any version of ZDS-II other than 5.3.0 or if you install ZDS-II

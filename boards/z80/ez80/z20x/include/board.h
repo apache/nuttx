@@ -33,12 +33,12 @@
 
 /* Clocking
  *
- * The z20x CPU board has a 5Mhz crystal. This is multiplied by 10 by
- * the PLL to obtain a system clock frequency of 50MHz.  See the PLL setup
- * in scripts/z20x.linkcmd.
+ * The z20x CPU board has a 20Mhz crystal. The eZ80F92 has no PLL; the
+ * system clock frequency is equal to the crystal frequency of 20MHz, the
+ * maximum for the eZ80F92 part.
  */
 
-#define EZ80_SYS_CLK_FREQ           50000000
+#define EZ80_SYS_CLK_FREQ           20000000
 
 /* LEDs */
 

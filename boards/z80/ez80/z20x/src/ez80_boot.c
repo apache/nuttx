@@ -34,79 +34,6 @@
 #include "z20x.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-bool g_ebpresent = false;  /* True:  I/O Expansion board is present */
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define VGA_MAX_DELAY 2000000
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: ez80_vga_initialize
- *
- * Description:
- *   If CONFIG_Z20X_VGA is defined and the I/O controller is attached,
- *   then initialize the VGA interface.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_Z20X_VGA
-static void ez80_vga_initialize(void)
-{
-  /* I/O Expansion board attached? */
-
-  if (g_ebpresent)
-    {
-      bool vgapresent = false;
-      int delay;
-
-      /* Wait for VGA ready */
-
-      for (delay = 0; delay < VGA_MAX_DELAY; delay++)
-        {
-          if ((inp(EZ80_PB_DR) & EZ80_GPIOD1) != 0)
-            {
-              vgapresent = true;
-              break;
-            }
-        }
-
-      /* Is VGA ready (and, hence, present)? */
-
-      if (vgapresent)
-        {
-          /* Yes.. set newline mode, graphic attributes:
-           *
-           * \e = ESCAPE character
-           * Assumption:  VGA is on the console UART.
-           */
-
-          up_puts("\e[20h\e[0m");
-
-          /* Clear, home cursor, beep */
-
-          up_puts("\e[2J\e[H\a");
-
-          /* The VGA display controller and keyboard controller come up by
-           * default emulating a terminal with "newline mode" on.  The
-           * following turns off that mode.
-           */
-
-          up_puts("\e[20l");
-        }
-    }
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -122,57 +49,10 @@ static void ez80_vga_initialize(void)
 
 void ez80_board_initialize(void)
 {
-  register uint8_t regval;
-
-  /* Port B pin 5 is set if the I/O expansion board is present */
-
-  regval = inp(EZ80_PB_DR);
-  g_ebpresent = (regval & EZ80_GPIOD5 != 0);
-
-  /* Set Port B pin 5 as output, assert /sysreset, SD card power off */
-
-  regval &= ~EZ80_GPIOD5;
-  outp(EZ80_PB_DR, regval);
-
-  regval  = inp(EZ80_PB_ALT1);
-  regval &= ~EZ80_GPIOD5;
-  outp(EZ80_PB_ALT1, regval);
-
-  regval  = inp(EZ80_PB_ALT2);
-  regval &= ~EZ80_GPIOD5;
-  outp(EZ80_PB_ALT2, regval);
-
-  regval  = inp(EZ80_PB_DDR);
-  regval &= ~EZ80_GPIOD5;
-  outp(EZ80_PB_DDR, regval);
-
 #ifdef CONFIG_EZ80_SPI
   /* Initialize SPI chip selects */
 
   ez80_spidev_initialize();
-#endif
-
-  /* Leave /sysreset asserted for awhile longer */
-
-  up_udelay(150);
-
-  /* Take the system out of reset and and turn on SD card power */
-
-  regval  = inp(EZ80_PB_DR);
-  regval |= EZ80_GPIOD5;
-  outp(EZ80_PB_DR, regval);
-
-  /* Wait for the SD card to power up */
-
-  up_udelay(750);
-
-#ifdef CONFIG_Z20X_VGA
-  /* Initialize the VGA interface.  We want to do this as early as possible
-   * in the boot-up sequence.  Debug output prior initializing VGA will be
-   * lost.
-   */
-
-  ez80_vga_initialize();
 #endif
 }
 

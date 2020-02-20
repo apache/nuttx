@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Target name="eZ80F910300KITG_Flash" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Schemas/target.tsd" xsi:type="TargetEZ80">
+<Target name="eZ80F920300KITG_Flash" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Schemas/target.tsd" xsi:type="TargetEZ80">
    <Clock>
       <PLL>
          <changeFrequencyOnReset>true</changeFrequencyOnReset>
          <chargePumpFreq>1f4</chargePumpFreq>
          <clockLockCriteria>8</clockLockCriteria>
-         <oscFrequency>5000000</oscFrequency>
+         <oscFrequency>20000000</oscFrequency>
       </PLL>
       <clockType>PLL</clockType>
-      <frequency>50000000</frequency>
+      <frequency>20000000</frequency>
    </Clock>
    <ControlReg>
       <pc>0</pc>
@@ -20,8 +20,8 @@
       <device />
       <externalAddress>200000</externalAddress>
       <externalAutoSelect>false</externalAutoSelect>
-      <externalRamLower>40000</externalRamLower>
-      <externalRamUpper>13FFFF</externalRamUpper>
+      <externalRamLower>040000</externalRamLower>
+      <externalRamUpper>0BFFFF</externalRamUpper>
       <manufacturer />
       <units>1</units>
       <usingExternal>false</usingExternal>
@@ -37,15 +37,15 @@
          </CS0>
          <CS1>
             <busMode>0</busMode>
-            <controlRegister>8</controlRegister>
-            <lower>C</lower>
-            <upper>13</upper>
+            <controlRegister>0</controlRegister>
+            <lower>0</lower>
+            <upper>0</upper>
          </CS1>
          <CS2>
             <busMode>0</busMode>
-            <controlRegister>88</controlRegister>
-            <lower>20</lower>
-            <upper>9F</upper>
+            <controlRegister>0</controlRegister>
+            <lower>0</lower>
+            <upper>0</upper>
          </CS2>
          <CS3>
             <busMode>0</busMode>
@@ -63,7 +63,7 @@
       </Internal>
       <waitStates>4</waitStates>
    </Memory>
-   <cpu>EZ80F91</cpu>
+   <cpu>EZ80F92</cpu>
    <schemaVersion>1.0.1</schemaVersion>
    <version>1.00</version>
 </Target>

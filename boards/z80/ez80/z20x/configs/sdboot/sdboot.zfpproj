@@ -1,5 +1,5 @@
 <project type="Standard" project-type="Standard" configuration="Debug" created-by="{{build_number}}" modified-by="{{build_number}}">
-<cpu>eZ80F91</cpu>
+<cpu>eZ80F92</cpu>
 
 <!-- file information -->
 <files>
@@ -36,7 +36,7 @@
 <option name="charsize" type="integer" change-action="rebuild">8</option>
 <option name="const" type="string" change-action="compile">RAM</option>
 <option name="debug" type="boolean" change-action="compile">true</option>
-<option name="define" type="string" change-action="compile">_EZ80F91,_EZ80ACCLAIM!</option>
+<option name="define" type="string" change-action="compile">_EZ80F92,_EZ80ACCLAIM!</option>
 <option name="doublesize" type="integer" change-action="rebuild">32</option>
 <option name="expmac" type="boolean" change-action="none">false</option>
 <option name="floatsize" type="integer" change-action="rebuild">32</option>
@@ -187,7 +187,7 @@
 <option name="charsize" type="integer" change-action="rebuild">8</option>
 <option name="const" type="string" change-action="compile">RAM</option>
 <option name="debug" type="boolean" change-action="compile">false</option>
-<option name="define" type="string" change-action="compile">_EZ80F91,_EZ80ACCLAIM!</option>
+<option name="define" type="string" change-action="compile">_EZ80F92,_EZ80ACCLAIM!</option>
 <option name="doublesize" type="integer" change-action="rebuild">32</option>
 <option name="expmac" type="boolean" change-action="none">false</option>
 <option name="floatsize" type="integer" change-action="rebuild">32</option>

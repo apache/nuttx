@@ -58,22 +58,22 @@ void ez80_spidev_initialize(void)
 #ifdef HAVE_MMCSD
   uint8_t regval;
 
-  /* MMC/SD CS: Port B pin 4 as output */
+  /* MMC/SD CS: Port PB2/nSS as output */
 
   regval  = inp(EZ80_PB_DR);
-  regval |= EZ80_GPIOD4;
+  regval |= EZ80_GPIOD2;
   outp(EZ80_PB_DR, regval);
 
   regval  = inp(EZ80_PB_ALT1);
-  regval &= ~EZ80_GPIOD4;
+  regval &= ~EZ80_GPIOD2;
   outp(EZ80_PB_ALT1, regval);
 
   regval  = inp(EZ80_PB_ALT2);
-  regval &= ~EZ80_GPIOD4;
+  regval &= ~EZ80_GPIOD2;
   outp(EZ80_PB_ALT2, regval);
 
   regval  = inp(EZ80_PB_DDR);
-  regval &= ~EZ80_GPIOD4;
+  regval &= ~EZ80_GPIOD2;
   outp(EZ80_PB_DDR, regval);
 #endif
 }
@@ -109,17 +109,17 @@ void ez80_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
     {
       uint8_t regval;
 
-      /* Set port B pin 4 output */
+      /* Set PB2/nSS output */
 
       regval  = inp(EZ80_PB_DR);
 
       if (selected)
         {
-          regval &= ~EZ80_GPIOD4;
+          regval &= ~EZ80_GPIOD2;
         }
       else
         {
-          regval |= EZ80_GPIOD4;
+          regval |= EZ80_GPIOD2;
         }
 
       outp(EZ80_PB_DR, regval);
