@@ -2197,7 +2197,12 @@ nuttx/
  |   |   |   |   |- configs/nsh/README.txt
  |   |   |   |   |- configs/poll/README.txt
  |   |   |   |   `- README.txt
- |   |   |   `- makerlisp/
+ |   |   |   |- makerlisp/
+ |   |   |   |   |- configs/nsh_flash/README.txt
+ |   |   |   |   |- configs/nsh_ram/README.txt
+ |   |   |   |   |- configs/sdboot/README.txt
+ |   |   |   |   `- README.txt
+ |   |   |   `- z80x/
  |   |   |       |- configs/nsh_flash/README.txt
  |   |   |       |- configs/nsh_ram/README.txt
  |   |   |       |- configs/sdboot/README.txt

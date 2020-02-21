@@ -870,6 +870,10 @@ boards/z16/z16f/z16f2800100zcog
   development kit and the Zilog ZDS-II Windows command line tools.  The
   development environment is Cygwin under WinXP.
 
+boards/z80/ez80/z20x
+  Microcontroller.  This directory holds the port of NuttX to the z80x board
+  based on an ez80Acclaim! eZ80F091 microcontroller.
+
 boards/z80/z80/z80sim
   z80 Microcontroller.  This port uses a Z80 instruction set simulator
   called z80sim.  This port also uses the SDCC toolchain
