@@ -2405,8 +2405,9 @@
  * interrupts.
  */
 
-#define CHIP_MIN_PRIORITY    1 /* Minimum priority. */
-#define CHIP_MAX_PRIORITY    7 /* Maximum priority. */
+#define CHIP_MIN_PRIORITY    1                       /* Minimum priority. */
+#define CHIP_MAX_PRIORITY    7                       /* Maximum priority. */
+#define CHIP_SW0_PRIORITY    (CHIP_MAX_PRIORITY - 1) /* SW0 priority. */
 
 /****************************************************************************
  * Public Types
