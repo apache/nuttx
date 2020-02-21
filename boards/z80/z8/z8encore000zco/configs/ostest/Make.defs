@@ -223,7 +223,7 @@ define MOVEOBJ
 endef
 
 define ARCHIVE
-	for %%G in ($(2)) do ( "$(AR)" $(ARFLAGS) $1=-+%%G )
+	$(Q) for %%G in ($(2)) do ( "$(AR)" $(ARFLAGS) $1=-+%%G )
 endef
 
 define CLEAN
@@ -257,8 +257,8 @@ define MOVEOBJ
 endef
 
 define ARCHIVE
-	for __obj in $(2) ; do \
-		"$(AR)" $(ARFLAGS) $1=-+$$__obj || { echo "$(AR) $1=-+$$__obj FAILED!" ; exit 1 ; } \
+	$(Q) for __obj in $(2) ; do \
+		"$(AR)" $(ARFLAGS) $1=-+$$__obj \
 	done
 endef
 

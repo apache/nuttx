@@ -213,15 +213,9 @@ endef
 #
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 define ARCHIVE
-	$(AR) $1 $(2)
+	$(Q) $(AR) $1 $(2)
 endef
-else
-define ARCHIVE
-	$(AR) $1 $(2) || { echo "$(AR) $1 FAILED!" ; exit 1 ; }
-endef
-endif
 
 # PRELINK - Prelink a list of files
 # This is useful when files were compiled with fvisibility=hidden.
