@@ -113,7 +113,7 @@ void up_irqinitialize(void)
 
   /* Set the Software Interrupt0 to a special priority */
 
-  up_prioritize_irq(PIC32MX_IRQSRC_CS0, (CHIP_MAX_PRIORITY - 1) << 2);
+  up_prioritize_irq(PIC32MX_IRQSRC_CS0, (CHIP_SW0_PRIORITY << 2));
 
   /* Set the BEV bit in the STATUS register */
 
