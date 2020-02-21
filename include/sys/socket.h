@@ -131,7 +131,7 @@
 
 /* Protocol levels supported by get/setsockopt(): */
 
-#define SOL_SOCKET      0 /* Only socket-level options supported */
+#define SOL_SOCKET       0 /* Only socket-level options supported */
 
 /* Socket-level options */
 
@@ -202,13 +202,13 @@
                             * return: int
                             */
 
-                            
 /* The options are unsupported but included for compatibility
  * and portability
  */
+
 #define SO_TIMESTAMP    29
-#define SO_SNDBUFFORCE	32 
-#define SO_RCVBUFFORCE	33 
+#define SO_SNDBUFFORCE  32
+#define SO_RCVBUFFORCE  33
 #define SO_RXQ_OVFL     40
 
 /* Protocol-level socket operations. */
@@ -266,14 +266,14 @@
  * Type Definitions
  ****************************************************************************/
 
- /* sockaddr_storage structure. This structure must be (1) large enough to
-  * accommodate all supported protocol-specific address structures, and (2)
-  * aligned at an appropriate boundary so that pointers to it can be cast
-  * as pointers to protocol-specific address structures and used to access
-  * the fields of those structures without alignment problems.
-  *
-  * REVISIT: sizeof(struct sockaddr_storge) should be 128 bytes.
-  */
+/* sockaddr_storage structure. This structure must be (1) large enough to
+ * accommodate all supported protocol-specific address structures, and (2)
+ * aligned at an appropriate boundary so that pointers to it can be cast
+ * as pointers to protocol-specific address structures and used to access
+ * the fields of those structures without alignment problems.
+ *
+ * REVISIT: sizeof(struct sockaddr_storge) should be 128 bytes.
+ */
 
 #ifdef CONFIG_NET_IPv6
 struct sockaddr_storage
@@ -336,7 +336,9 @@ static inline FAR struct cmsghdr *__cmsg_nxthdr(FAR void *__ctl,
 {
   FAR struct cmsghdr *__ptr;
 
-  __ptr = (FAR struct cmsghdr *)(((FAR char *)__cmsg) + CMSG_ALIGN(__cmsg->cmsg_len));
+  __ptr = (FAR struct cmsghdr *)
+          (((FAR char *)__cmsg) + CMSG_ALIGN(__cmsg->cmsg_len));
+
   if ((unsigned long)((FAR char *)(__ptr + 1) - (FAR char *)__ctl) > __size)
     {
       return (FAR struct cmsghdr *)NULL;

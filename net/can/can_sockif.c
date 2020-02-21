@@ -96,7 +96,6 @@ const struct sock_intf_s g_can_sockif =
   can_close         /* si_close */
 };
 
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -149,12 +148,14 @@ static uint16_t can_poll_eventhandler(FAR struct net_driver_s *dev,
           eventset |= (POLLHUP | POLLERR);
         }
 
+#if 0
       /* A poll is a sign that we are free to send data. */
 
-     /* else if ((flags & CAN_POLL) != 0 && psock_udp_cansend(info->psock) >= 0)
+      else if ((flags & CAN_POLL) != 0 && psock_udp_cansend(info->psock) >= 0)
         {
           eventset |= (POLLOUT & info->fds->events);
-        }*/
+        }
+#endif
 
       /* Awaken the caller of poll() is requested event occurred. */
 
@@ -326,23 +327,23 @@ static void can_addref(FAR struct socket *psock)
  ****************************************************************************/
 
 static int can_bind(FAR struct socket *psock,
-                        FAR const struct sockaddr *addr, socklen_t addrlen)
+                    FAR const struct sockaddr *addr, socklen_t addrlen)
 {
   FAR struct sockaddr_can *canaddr;
   FAR struct can_conn_s *conn;
+  char netdev_name[6];
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && addr != NULL &&
               addrlen >= sizeof(struct sockaddr_can));
 
   /* Save the address information in the connection structure */
 
-  canaddr         = (FAR struct sockaddr_can *)addr;
-  conn            = (FAR struct can_conn_s *)psock->s_conn;
+  canaddr = (FAR struct sockaddr_can *)addr;
+  conn    = (FAR struct can_conn_s *)psock->s_conn;
 
   /* Bind CAN device to socket */
 
-  //TODO better support for CONFIG_NETDEV_IFINDEX
-  char netdev_name[6];
+  /* TODO better support for CONFIG_NETDEV_IFINDEX */
 
   sprintf(netdev_name, "can%i", canaddr->can_ifindex);
 
@@ -374,8 +375,8 @@ static int can_bind(FAR struct socket *psock,
  ****************************************************************************/
 
 static int can_getsockname(FAR struct socket *psock,
-                               FAR struct sockaddr *addr,
-                               FAR socklen_t *addrlen)
+                           FAR struct sockaddr *addr,
+                           FAR socklen_t *addrlen)
 {
   FAR struct sockaddr_can *canaddr;
 
@@ -430,8 +431,8 @@ static int can_getsockname(FAR struct socket *psock,
  ****************************************************************************/
 
 static int can_getpeername(FAR struct socket *psock,
-                               FAR struct sockaddr *addr,
-                               FAR socklen_t *addrlen)
+                           FAR struct sockaddr *addr,
+                           FAR socklen_t *addrlen)
 {
 #warning Missing logic
   return -EOPNOTSUPP;  /* Or maybe return -EAFNOSUPPORT; */
@@ -488,8 +489,8 @@ static int can_listen(FAR struct socket *psock, int backlog)
  ****************************************************************************/
 
 static int can_connect(FAR struct socket *psock,
-                           FAR const struct sockaddr *addr,
-                           socklen_t addrlen)
+                       FAR const struct sockaddr *addr,
+                       socklen_t addrlen)
 {
 #warning Missing logic
   return -EOPNOTSUPP;
@@ -540,7 +541,7 @@ static int can_connect(FAR struct socket *psock,
  ****************************************************************************/
 
 static int can_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                          FAR socklen_t *addrlen, FAR struct socket *newsock)
+                      FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
 #warning Missing logic
   return -EOPNOTSUPP;
@@ -570,7 +571,7 @@ static int can_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  ****************************************************************************/
 
 static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
-                        bool setup)
+                          bool setup)
 {
   FAR struct can_conn_s *conn;
   FAR struct can_poll_s *info;
@@ -580,18 +581,17 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
   conn = (FAR struct can_conn_s *)psock->s_conn;
   info = conn->pollinfo;
-  
-  //FIXME add NETDEV_DOWN support
+
+  /* FIXME add NETDEV_DOWN support */
 
   /* Check if we are setting up or tearing down the poll */
 
   if (setup)
     {
-        
       net_lock();
-      
+
       info->dev = conn->dev;
-      
+
       cb = can_callback_alloc(info->dev, conn);
       if (cb == NULL)
         {
@@ -600,82 +600,84 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
         }
 
       /* Initialize the poll info container */
-    
+
       info->psock  = psock;
       info->fds    = fds;
       info->cb     = cb;
-    
+
       /* Initialize the callback structure.  Save the reference to the info
        * structure as callback private data so that it will be available during
        * callback processing.
        */
-    
+
       cb->flags    = NETDEV_DOWN;
       cb->priv     = (FAR void *)info;
       cb->event    = can_poll_eventhandler;
-    
+
       if ((fds->events & POLLOUT) != 0)
         {
           cb->flags |= CAN_POLL;
         }
-    
+
       if ((fds->events & POLLIN) != 0)
         {
           cb->flags |= CAN_NEWDATA;
         }
-    
+
       /* Save the reference in the poll info structure as fds private as well
        * for use during poll teardown as well.
        */
-    
+
       fds->priv = (FAR void *)info;
-    
+
       /* Check for read data availability now */
-    
+
       if (!IOB_QEMPTY(&conn->readahead))
         {
           /* Normal data may be read without blocking. */
-    
+
           fds->revents |= (POLLRDNORM & fds->events);
         }
-    
+
     #if 0
       if (psock_udp_cansend(psock) >= 0)
         {
           /* Normal data may be sent without blocking (at least one byte). */
-    
+
           fds->revents |= (POLLWRNORM & fds->events);
         }
     #endif
-    
+
       /* Check if any requested events are already in effect */
-    
+
       if (fds->revents != 0)
         {
           /* Yes.. then signal the poll logic */
+
           nxsem_post(fds->sem);
         }
-    
+
 errout_with_lock:
       net_unlock();
     }
-  else 
+  else
     {
       info = (FAR struct can_poll_s *)fds->priv;
-        
+
       if (info != NULL)
-      {
-        /* Cancel any response notifications */      
-        can_callback_free(info->dev, conn, info->cb);
+        {
+          /* Cancel any response notifications */
 
-        /* Release the poll/select data slot */
+          can_callback_free(info->dev, conn, info->cb);
 
-        info->fds->priv = NULL;
+          /* Release the poll/select data slot */
 
-        /* Then free the poll info container */
+          info->fds->priv = NULL;
 
-        info->psock = NULL;
-      }
+          /* Then free the poll info container */
+
+          info->psock = NULL;
+        }
     }
 
   return ret;
@@ -702,27 +704,28 @@ errout_with_lock:
  ****************************************************************************/
 
 static ssize_t can_send(FAR struct socket *psock, FAR const void *buf,
-                            size_t len, int flags)
+                        size_t len, int flags)
 {
-	  ssize_t ret;
+  ssize_t ret;
 
-	  /* Only SOCK_RAW is supported */
+  /* Only SOCK_RAW is supported */
 
-	  if (psock->s_type == SOCK_RAW)
-	    {
-	      /* Raw packet send */
-	      ret = psock_can_send(psock, buf, len);
-	    }
-	  else
-	    {
-	      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
-	       * no peer address is set.
-	       */
+  if (psock->s_type == SOCK_RAW)
+    {
+      /* Raw packet send */
 
-	      ret = -EDESTADDRREQ;
-	    }
+      ret = psock_can_send(psock, buf, len);
+    }
+  else
+    {
+      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
+       * no peer address is set.
+       */
 
-	  return ret;
+      ret = -EDESTADDRREQ;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -750,11 +753,11 @@ static ssize_t can_send(FAR struct socket *psock, FAR const void *buf,
  ****************************************************************************/
 
 static ssize_t can_sendto(FAR struct socket *psock, FAR const void *buf,
-                              size_t len, int flags,
-                              FAR const struct sockaddr *to, socklen_t tolen)
+                          size_t len, int flags,
+                          FAR const struct sockaddr *to, socklen_t tolen)
 {
-   nerr("ERROR: sendto() not supported for raw packet sockets\n");
-   return -EAFNOSUPPORT;
+  nerr("ERROR: sendto() not supported for raw packet sockets\n");
+  return -EAFNOSUPPORT;
 }
 
 /****************************************************************************

@@ -121,7 +121,8 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           default:          /* Other options are passed to usrsock daemon. */
             {
-              return usrsock_getsockopt(conn, SOL_SOCKET, option, value, value_len);
+              return usrsock_getsockopt(conn, SOL_SOCKET, option, value,
+                                        value_len);
             }
         }
     }
@@ -372,7 +373,7 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
        ret = can_getsockopt(psock, option, value, value_len);
 #endif
        break;
-       
+
       /* These levels are defined in sys/socket.h, but are not yet
        * implemented.
        */
@@ -437,7 +438,8 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
  *
  ****************************************************************************/
 
-int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_len)
+int getsockopt(int sockfd, int level, int option, FAR void *value,
+               FAR socklen_t *value_len)
 {
   FAR struct socket *psock;
   int ret;

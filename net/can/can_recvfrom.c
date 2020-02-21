@@ -1,36 +1,20 @@
 /****************************************************************************
  * net/can/can_recvfrom.c
  *
- *   Copyright (C) 2007-2009, 2011-2017, 2020 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -146,7 +130,6 @@ static size_t can_recvfrom_newdata(FAR struct net_driver_s *dev,
   /* Copy the new packet data into the user buffer */
 
   memcpy(pstate->pr_buffer, dev->d_buf, recvlen);
-  //ninfo("Received %d bytes (of %d)\n", (int)recvlen, (int)dev->d_len);
 
   /* Update the accumulated size of the data read */
 
@@ -154,7 +137,6 @@ static size_t can_recvfrom_newdata(FAR struct net_driver_s *dev,
 
   return recvlen;
 }
-
 
 /****************************************************************************
  * Name: can_newdata
@@ -187,7 +169,8 @@ static inline void can_newdata(FAR struct net_driver_s *dev,
 
   if (recvlen < dev->d_len)
     {
-      FAR struct can_conn_s *conn = (FAR struct can_conn_s *)pstate->pr_sock->s_conn;
+      FAR struct can_conn_s *conn =
+        (FAR struct can_conn_s *)pstate->pr_sock->s_conn;
       FAR uint8_t *buffer = (FAR uint8_t *)dev->d_appdata + recvlen;
       uint16_t buflen = dev->d_len - recvlen;
 #ifdef CONFIG_DEBUG_NET
@@ -249,8 +232,8 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
    * buffer.
    */
 
-  if((iob = iob_peek_queue(&conn->readahead)) != NULL &&
-          pstate->pr_buflen > 0)
+  if ((iob = iob_peek_queue(&conn->readahead)) != NULL &&
+      pstate->pr_buflen > 0)
     {
       DEBUGASSERT(iob->io_pktlen > 0);
 
@@ -292,9 +275,11 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
           iob_trimhead_queue(&conn->readahead, recvlen,
                              IOBUSER_NET_CAN_READAHEAD);
         }
-        return recvlen;
+
+      return recvlen;
     }
-    return 0;
+
+  return 0;
 }
 
 static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
@@ -302,8 +287,6 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
                                           FAR void *pvpriv, uint16_t flags)
 {
   struct can_recvfrom_s *pstate = (struct can_recvfrom_s *)pvpriv;
-
-  //ninfo("flags: %04x\n", flags);
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -319,17 +302,17 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
           /* We are finished. */
 
-          //ninfo("CAN done\n");
-
           /* Don't allow any further call backs. */
 
           pstate->pr_cb->flags   = 0;
           pstate->pr_cb->priv    = NULL;
           pstate->pr_cb->event   = NULL;
 
+#if 0
           /* Save the sender's address in the caller's 'from' location */
 
-          //pkt_recvfrom_sender(dev, pstate);
+          pkt_recvfrom_sender(dev, pstate);
+#endif
 
           /* indicate that the data has been consumed */
 
@@ -429,16 +412,15 @@ ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf,
               (fromlen != NULL && *fromlen >= sizeof(struct sockaddr_can)));
 
   conn = (FAR struct can_conn_s *)psock->s_conn;
-  
+
   if (psock->s_type != SOCK_RAW)
     {
       nerr("ERROR: Unsupported socket type: %d\n", psock->s_type);
       ret = -ENOSYS;
     }
-  
-  
+
   net_lock();
-  
+
   /* Initialize the state structure. */
 
   memset(&state, 0, sizeof(struct can_recvfrom_s));
@@ -453,19 +435,20 @@ ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf,
   state.pr_buflen = len;
   state.pr_buffer = buf;
   state.pr_sock   = psock;
-  
+
   /* Handle any any CAN data already buffered in a read-ahead buffer.  NOTE
    * that there may be read-ahead data to be retrieved even after the
    * socket has been disconnected.
    */
+
   ret = can_readahead(&state);
-  if(ret > 0)
-  {
+  if (ret > 0)
+    {
       net_unlock();
       nxsem_destroy(&state.pr_sem);
       return ret;
-  }    
-  
+    }
+
   /* Get the device driver that will service this transfer */
 
   dev  = conn->dev;
@@ -474,7 +457,7 @@ ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf,
       ret = -ENODEV;
       goto errout_with_state;
     }
-    
+
   /* Set up the callback in the connection */
 
   state.pr_cb = can_callback_alloc(dev, conn);
@@ -502,7 +485,6 @@ ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf,
       ret = -EBUSY;
     }
 
-  
 errout_with_state:
   net_unlock();
   nxsem_destroy(&state.pr_sem);

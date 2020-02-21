@@ -53,7 +53,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-
 /* Ioctl Commands *******************************************************************/
 
 /* Ioctl commands supported by the upper half CAN driver.
@@ -185,61 +184,17 @@
  *   CAN_B_NCMDS                 77                          <- Number of commands
  */
 
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-typedef FAR void *CAN_HANDLE;
-
-struct can_response_s
-{
-  sq_entry_t flink;
-
-  /* Message-specific data may follow */
-}; //FIXME remvoe
-
-
-typedef uint32_t canid_t;
-
-/*
- * Controller Area Network Error Message Frame Mask structure
- *
- * bit 0-28	: error class mask (see include/uapi/linux/can/error.h)
- * bit 29-31	: set to zero
- */
-typedef uint32_t can_err_mask_t;
-
 /* CAN payload length and DLC definitions according to ISO 11898-1 */
+
 #define CAN_MAX_DLC 8
 #define CAN_MAX_DLEN 8
 
 /* CAN FD payload length and DLC definitions according to ISO 11898-7 */
+
 #define CANFD_MAX_DLC 15
 #define CANFD_MAX_DLEN 64
 
-
-/**
- * struct can_frame - basic CAN frame structure
- * @can_id:  CAN ID of the frame and CAN_*_FLAG flags, see canid_t definition
- * @can_dlc: frame payload length in byte (0 .. 8) aka data length code
- *           N.B. the DLC field from ISO 11898-1 Chapter 8.4.2.3 has a 1:1
- *           mapping of the 'data length code' to the real payload length
- * @__pad:   padding
- * @__res0:  reserved / padding
- * @__res1:  reserved / padding
- * @data:    CAN frame payload (up to 8 byte)
- */
-struct can_frame {
-	canid_t can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
-	uint8_t    can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
-	uint8_t    __pad;   /* padding */
-	uint8_t    __res0;  /* reserved / padding */
-	uint8_t    __res1;  /* reserved / padding */
-	uint8_t    data[CAN_MAX_DLEN] __attribute__((aligned(8)));
-};
-
-/*
- * defined bits for canfd_frame.flags
+/* Defined bits for canfd_frame.flags
  *
  * The use of struct canfd_frame implies the Extended Data Length (EDL) bit to
  * be set in the CAN frame bitstream on the wire. The EDL bit switch turns
@@ -254,48 +209,94 @@ struct can_frame {
  * building a CAN FD frame for transmission. Setting the CANFD_ESI bit can make
  * sense for virtual CAN interfaces to test applications with echoed frames.
  */
+
 #define CANFD_BRS 0x01 /* bit rate switch (second bitrate for payload data) */
 #define CANFD_ESI 0x02 /* error state indicator of the transmitting node */
 
-/**
- * struct canfd_frame - CAN flexible data rate frame structure
- * @can_id: CAN ID of the frame and CAN_*_FLAG flags, see canid_t definition
- * @len:    frame payload length in byte (0 .. CANFD_MAX_DLEN)
- * @flags:  additional flags for CAN FD
- * @__res0: reserved / padding
- * @__res1: reserved / padding
- * @data:   CAN FD frame payload (up to CANFD_MAX_DLEN byte)
+#define CAN_INV_FILTER     0x20000000U /* to be set in can_filter.can_id */
+#define CAN_RAW_FILTER_MAX 512         /* maximum number of can_filter set via setsockopt() */
+
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+typedef FAR void *CAN_HANDLE;
+
+struct can_response_s
+{
+  sq_entry_t flink;
+
+  /* Message-specific data may follow */
+}; /* FIXME remove */
+
+typedef uint32_t canid_t;
+
+/* Controller Area Network Error Message Frame Mask structure
+ *
+ * bit 0-28  : error class mask (see include/uapi/linux/can/error.h)
+ * bit 29-31 : set to zero
  */
-struct canfd_frame {
-	canid_t can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
-	uint8_t    len;     /* frame payload length in byte */
-	uint8_t    flags;   /* additional flags for CAN FD */
-	uint8_t    __res0;  /* reserved / padding */
-	uint8_t    __res1;  /* reserved / padding */
-	uint8_t    data[CANFD_MAX_DLEN] __attribute__((aligned(8)));
+
+typedef uint32_t can_err_mask_t;
+
+/* struct can_frame - basic CAN frame structure
+ * can_id:  CAN ID of the frame and CAN_*_FLAG flags, see canid_t definition
+ * can_dlc: frame payload length in byte (0 .. 8) aka data length code
+ *          N.B. the DLC field from ISO 11898-1 Chapter 8.4.2.3 has a 1:1
+ *          mapping of the 'data length code' to the real payload length
+ * __pad:   padding
+ * __res0:  reserved / padding
+ * __res1:  reserved / padding
+ * data:    CAN frame payload (up to 8 byte)
+ */
+
+struct can_frame
+{
+  canid_t can_id;   /* 32 bit CAN_ID + EFF/RTR/ERR flags */
+  uint8_t  can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
+  uint8_t  __pad;   /* padding */
+  uint8_t  __res0;  /* reserved / padding */
+  uint8_t  __res1;  /* reserved / padding */
+  uint8_t  data[CAN_MAX_DLEN] __attribute__((aligned(8)));
 };
 
+/* struct canfd_frame - CAN flexible data rate frame structure
+ * can_id: CAN ID of the frame and CAN_*_FLAG flags, see canid_t definition
+ * len:    frame payload length in byte (0 .. CANFD_MAX_DLEN)
+ * flags:  additional flags for CAN FD
+ * __res0: reserved / padding
+ * __res1: reserved / padding
+ * data:   CAN FD frame payload (up to CANFD_MAX_DLEN byte)
+ */
 
-/**
- * struct can_filter - CAN ID based filter in can_register().
- * @can_id:   relevant bits of CAN ID which are not masked out.
- * @can_mask: CAN mask (see description)
+struct canfd_frame
+{
+  canid_t can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
+  uint8_t len;     /* frame payload length in byte */
+  uint8_t flags;   /* additional flags for CAN FD */
+  uint8_t __res0;  /* reserved / padding */
+  uint8_t __res1;  /* reserved / padding */
+  uint8_t data[CANFD_MAX_DLEN] __attribute__((aligned(8)));
+};
+
+/* struct can_filter - CAN ID based filter in can_register().
+ * can_id:   relevant bits of CAN ID which are not masked out.
+ * can_mask: CAN mask (see description)
  *
  * Description:
  * A filter matches, when
  *
- *          <received_can_id> & mask == can_id & mask
+ *   <received_can_id> & mask == can_id & mask
  *
  * The filter can be inverted (CAN_INV_FILTER bit set in can_id) or it can
  * filter for error message frames (CAN_ERR_FLAG bit set in mask).
  */
-struct can_filter {
-	canid_t can_id;
-	canid_t can_mask;
-};
 
-#define CAN_INV_FILTER 0x20000000U /* to be set in can_filter.can_id */
-#define CAN_RAW_FILTER_MAX 512 /* maximum number of can_filter set via setsockopt() */
+struct can_filter
+{
+  canid_t can_id;
+  canid_t can_mask;
+};
 
 /************************************************************************************
  * Public Function Prototypes
@@ -309,7 +310,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
 
 #undef EXTERN
 #if defined(__cplusplus)

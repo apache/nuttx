@@ -85,26 +85,25 @@ struct can_conn_s
   FAR struct devif_callback_s *list; /* NetLink callbacks */
 
   FAR struct net_driver_s *dev;      /* Reference to CAN device */
-  
+
   /* Read-ahead buffering.
    *
    *   readahead - A singly linked list of type struct iob_qentry_s
    *               where the CAN/IP read-ahead data is retained.
    */
 
-  struct iob_queue_s readahead;   /* remove Read-ahead buffering */
+  struct iob_queue_s readahead;      /* remove Read-ahead buffering */
 
   /* CAN-specific content follows */
 
   uint8_t protocol;                  /* Selected CAN protocol */
   int16_t crefs;                     /* Reference count */
-  
 
   /* The following is a list of poll structures of threads waiting for
    * socket events.
    */
 
-  struct can_poll_s pollinfo[4]; //FIXME make dynamic
+  struct can_poll_s pollinfo[4]; /* FIXME make dynamic */
 };
 
 /****************************************************************************
@@ -223,9 +222,9 @@ uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
  * Name: can_recvfrom
  *
  * Description:
- *   Implements the socket recvfrom interface pkt_recvfrom() receives messages from
- *   a socket, and may be used to receive data on a socket whether or not it
- *   is connection-oriented.
+ *   Implements the socket recvfrom interface pkt_recvfrom() receives
+ *   messages from a socket, and may be used to receive data on a socket
+ *   whether or not it is connection-oriented.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
@@ -314,7 +313,6 @@ ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
 #ifdef CONFIG_NET_CAN_NOTIFIER
 void can_readahead_signal(FAR struct can_conn_s *conn);
 #endif
-
 
 #undef EXTERN
 #ifdef __cplusplus

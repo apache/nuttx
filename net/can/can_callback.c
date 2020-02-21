@@ -1,35 +1,20 @@
 /****************************************************************************
  * net/pkt/pkt_callback.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -72,17 +57,15 @@ can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
                uint16_t flags)
 {
   uint16_t ret;
-  uint8_t *buffer = dev->d_appdata;
-  int      buflen = dev->d_len;
+  FAR uint8_t *buffer = dev->d_appdata;
+  int buflen = dev->d_len;
   uint16_t recvlen;
 
   ret = (flags & ~CAN_NEWDATA);
 
-  //ninfo("No listener on connection\n");
-
-   /* Save as the packet data as in the read-ahead buffer.  NOTE that
-    * partial packets will not be buffered.
-    */
+  /* Save as the packet data as in the read-ahead buffer.  NOTE that
+   * partial packets will not be buffered.
+   */
 
   recvlen = can_datahandler(conn, buffer, buflen);
   if (recvlen < buflen)
@@ -94,10 +77,11 @@ can_data_event(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn,
       ninfo("Dropped %d bytes\n", dev->d_len);
 
 #ifdef CONFIG_NET_STATISTICS
-      //g_netstats.tcp.drop++;
+      /* g_netstats.tcp.drop++; */
+
 #endif
     }
-        
+
   /* In any event, the new data has now been handled */
 
   dev->d_len = 0;
@@ -132,15 +116,15 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
       /* Perform the callback */
 
       flags = devif_conn_event(dev, conn, flags, conn->list);
-    
-    if ((flags & CAN_NEWDATA) != 0)
-      {
-        /* Data was not handled.. dispose of it appropriately */
 
-        flags = can_data_event(dev, conn, flags);
-      }
-  }
-  
+      if ((flags & CAN_NEWDATA) != 0)
+        {
+          /* Data was not handled.. dispose of it appropriately */
+
+          flags = can_data_event(dev, conn, flags);
+        }
+    }
+
   return flags;
 }
 
@@ -214,7 +198,7 @@ uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
       iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
       return 0;
     }
-    
+
 #ifdef CONFIG_NET_CAN_NOTIFIER
   /* Provide notification(s) that additional CAN read-ahead data is
    * available.

@@ -126,13 +126,13 @@ struct sockaddr_can
          *   1 bit: reserved
          */
 
-      uint32_t pgn;
+        uint32_t pgn;
 
-      /* 1 byte address */
+        /* 1 byte address */
 
-      uint8_t addr;
-    } j1939;
-  } can_addr;
+        uint8_t addr;
+      } j1939;
+    } can_addr;
 };
 
 #endif /* __INCLUDE_NETPACKET_CAN_H */
