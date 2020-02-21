@@ -1660,7 +1660,7 @@ static void stm32_freesegment(struct stm32_ethmac_s *priv,
 static int stm32_recvframe(struct stm32_ethmac_s *priv)
 {
   struct eth_desc_s *rxdesc;
-  struct eth_desc_s *rxcurr;
+  struct eth_desc_s *rxcurr = NULL;
   uint8_t *buffer;
   int i;
 
@@ -1818,6 +1818,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
         {
           /* Drop the context descriptors, we are not interested */
 
+          DEBUGASSERT(rxcurr != NULL);
           stm32_freesegment(priv, rxcurr, 1);
         }
 
