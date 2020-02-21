@@ -367,6 +367,12 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
        break;
 #endif
 
+      case SOL_CAN_RAW:
+#ifdef CONFIG_NET_TCPPROTO_OPTIONS
+       ret = can_getsockopt(psock, option, value, value_len);
+#endif
+       break;
+       
       /* These levels are defined in sys/socket.h, but are not yet
        * implemented.
        */

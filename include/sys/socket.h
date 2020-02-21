@@ -202,6 +202,15 @@
                             * return: int
                             */
 
+                            
+/* The options are unsupported but included for compatibility
+ * and portability
+ */
+#define SO_TIMESTAMP    29
+#define SO_SNDBUFFORCE	32 
+#define SO_RCVBUFFORCE	33 
+#define SO_RXQ_OVFL     40
+
 /* Protocol-level socket operations. */
 
 #define SOL_IP          1 /* See options in include/netinet/ip.h */
@@ -212,6 +221,7 @@
 #define SOL_L2CAP       6 /* See options in include/netpacket/bluetooth.h */
 #define SOL_SCO         7 /* See options in include/netpacket/bluetooth.h */
 #define SOL_RFCOMM      8 /* See options in include/netpacket/bluetooth.h */
+#define SOL_CAN_RAW     9 /* See options in include/netpacket/can.h */
 
 /* Protocol-level socket options may begin with this value */
 

@@ -81,6 +81,7 @@ static void _can_semgive(FAR sem_t *sem)
 {
   nxsem_post(sem);
 }
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -199,27 +200,6 @@ FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn)
     {
       return (FAR struct can_conn_s *)conn->node.flink;
     }
-}
-
-/****************************************************************************
- * Name: can_active
- *
- * Description:
- *   Find a connection structure that is the appropriate connection for the
- *   provided NetLink address
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-FAR struct can_conn_s *can_active(FAR struct sockaddr_can *addr)
-{
-  /* This function is used to handle routing of incoming messages to sockets
-   * connected to the address.  There is no such use case for NetLink
-   * sockets.
-   */
-
-  return NULL;
 }
 
 #endif /* CONFIG_NET_CAN */

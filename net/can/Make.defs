@@ -28,6 +28,14 @@ SOCK_CSRCS += can_sockif.c
 SOCK_CSRCS += can_send.c
 SOCK_CSRCS += can_recvfrom.c
 
+ifeq ($(CONFIG_NET_CAN_NOTIFIER),y)
+SOCK_CSRCS += can_notifier.c
+endif
+
+ifeq ($(CONFIG_NET_CANPROTO_OPTIONS),y)
+SOCK_CSRCS += can_setsockopt.c can_getsockopt.c
+endif
+
 NET_CSRCS += can_conn.c
 NET_CSRCS += can_input.c
 NET_CSRCS += can_callback.c

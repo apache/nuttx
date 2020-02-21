@@ -21,6 +21,25 @@ config CAN_CONNS
 	default 4
 	---help---
 		Maximum number of CAN connections (all tasks).
+		
+config NET_CAN_SOCK_OPTS
+	bool "sockopt support"
+	default n
+	select NET_CANPROTO_OPTIONS
+	---help---
+		Enable support for the CAN socket options
+		
+config NET_CAN_NOTIFIER
+	bool "Support CAN notifications"
+	default n
+	depends on SCHED_WORKQUEUE
+	select WQUEUE_NOTIFIER
+	---help---
+		Enable building of CAN notifier logic that will execute a worker
+		function on the low priority work queue when read-ahead data
+		is available or when a CAN connection is lost.  This is is a general
+		purpose notifier, but was developed specifically to support poll()
+		logic where the poll must wait for these events.
 
 endif # NET_CAN
 endmenu # CAN Socket Support
