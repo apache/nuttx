@@ -104,8 +104,19 @@
 #  define PWR_CR1_ALS_2V8           (3 << PWR_CR1_ALS_SHIFT) /* 11: */
                                               /* Bits 19-31: Reserved */
 
-/* Power control/status register 1 (CRS1) */
-
+/* Power control/status register 1 (CSR1) */
+                                              /* Bits 0-3: Reserved */
+#define PWR_CSR1_PVDO               (1 << 4)  /* Bit 4: Programmable voltage detect output*/
+                                              /* Bits 5-12: Reserved */
+#define PWR_CSR1_ACTVOSRDY          (1 << 13) /* Bit 13: VOS voltage level ready */
+#define PWR_CSR1_ACTVOS_SHIFT       (14)      /* Bits 14-15: Current VOS applied */
+#  define PWR_CSR1_VOS_SCALE_3R     (0 << PWR_CSR1_ACTVOS_SHIFT)
+#  define PWR_CSR1_VOS_SCALE_3      (1 << PWR_CSR1_ACTVOS_SHIFT)
+#  define PWR_CSR1_VOS_SCALE_2      (2 << PWR_CSR1_ACTVOS_SHIFT)
+#  define PWR_CSR1_VOS_SCALE_1      (3 << PWR_CSR1_ACTVOS_SHIFT)
+#  define PWR_CSR1_VOS_SCALE_0      (3 << PWR_CSR1_ACTVOS_SHIFT)
+#define PWR_CSR1_AVDO               (1 << 16) /* Bit 16: Analog voltage detector output */
+                                              /* Bits 17-31: Reserved */
 /* Power control register 2 (CR2) */
 
 #define PWR_CR2_BREN                (1 << 0)   /* Bit 0: Backup regulator enable */

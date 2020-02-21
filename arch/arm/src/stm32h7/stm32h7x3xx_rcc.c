@@ -804,6 +804,11 @@ static void stm32_stdclockconfig(void)
         {
         }
 
+      /* See Reference manual Section 5.4.1, System supply startup */
+      while ((getreg32(STM32_PWR_CSR1) & PWR_CSR1_ACTVOSRDY) == 0)
+        {
+        }
+
       /* Over-drive is needed if
        *  - Voltage output scale 1 mode is selected and SYSCLK frequency is
        *    over 400 Mhz.
