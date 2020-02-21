@@ -30,11 +30,15 @@ define PREPROCESS
 endef
 
 define COMPILE
+	$(call DELFILE, $(2))
 	$(Q) $(CC) $(CFLAGS) $($(strip $(1))_CFLAGS) ${shell echo $(1) | sed -e "s/\//\\/g"}
+	if not exist $(2) $(call MOVEFILE, $(subst .c,.obj,$(1)), $(2))
 endef
 
 define ASSEMBLE
+	$(call DELFILE, $(2))
 	$(Q) $(AS) $(AFLAGS) $($(strip $(1))_AFLAGS) ${shell echo $(1) | sed -e "s/\//\\/g"}
+	if not exist $(2) $(call MOVEFILE, $(subst .asm,.obj,$(1)), $(2))
 endef
 
 define MOVEOBJ
@@ -63,12 +67,52 @@ define PREPROCESS
 	$(Q) $(CPP) $(CPPFLAGS) $($(strip $(1))_CPPFLAGS) $(1) -o $(2)
 endef
 
+# COMPILE, ASSEMBLE, MOVEOBJ
+#
+# The ZDS-II compiler and assembler both generate object files in the
+# current directory with the same name as the source file, but with the .obj
+# extension.  The build system expects these behaviors when compiling some
+# file, say foo.c:
+#
+# 1. If the foo.obj object belongs in a lower level directory (such as bin/),
+#    then the relative path will be preface the object file name (such as
+#    bin/foo.obj)).  In this case, the build system will call MOVEOBJ to
+#    move the objects in place and nothing special need be done here.
+# 2. In other cases, the build system may decorate the object file name such
+#    as a.b.c.foo.obj.  This case is distinguished here by because does not
+#    lie in a lower directory, but lies in the current directory and is
+#    handled within COMPILE and ASSEMBLE.
+
 define COMPILE
+	$(call DELFILE, $(2))
 	$(Q) $(CC) $(CFLAGS) $($(strip $(1))_CFLAGS) `cygpath -w "$(1)"`
+	$(Q) ( \
+			set -x ; \
+			__rename=`basename $(2)` ;\
+			if [ ! -e $${__rename} ] ; then \
+				__src=`basename $(1) | cut -d'.' -f1` ; \
+				__dest=`echo $(2) | sed -e "s/.obj//g"` ; \
+				mv -f $${__src}.obj $(2) ; \
+				mv -f $${__src}.lst $${__dest}.lst ; \
+				mv -f $${__src}.src $${__dest}.src ; \
+			fi ; \
+		)
 endef
 
 define ASSEMBLE
+	$(call DELFILE, $(2))
 	$(Q) $(AS) $(AFLAGS) $($(strip $(1))_AFLAGS) `cygpath -w "$(1)"`
+	$(Q) ( \
+			set -x ; \
+			__rename=`basename $(2)` ; \
+			if [ ! -e $${__rename} ] ; then \
+				__src=`basename $(1) | cut -d'.' -f1` ; \
+				__dest=`echo $(2) | sed -e "s/.obj//g"` ; \
+				mv -f $${__src}.obj $(2) ; \
+				mv -f $${__src}.lst $${__dest}.lst ; \
+				mv -f $${__src}.src $${__dest}.src ; \
+			fi ; \
+		)
 endef
 
 define MOVEOBJ
@@ -77,10 +121,34 @@ define MOVEOBJ
 	$(call MOVEFILE, "$(1).src", "$(2)$(DELIM)$(1).src")
 endef
 
+# ARCHIVE will move a list of object files into the library.  This is
+# complex because:
+#
+# 1. The ez80lib.exe archive expects the library to reside within the
+#    current directory; it expects the library argument to a file name
+#    like foo.lib.
+# 2. Normally, the library file is in the current directory, but other
+#    times, the library is an absolute path such as
+#    D:\Spuda\Documents\projects\nuttx\master\apps-fork\libapps.lib.  In
+#    this case, the base library name is extact as the ARCHIVE logic CD's
+#    to the directory containing the library.
+
 define ARCHIVE
-	for __obj in $(2) ; do \
-		$(AR) $(ARFLAGS) $(1)=-+$$__obj \
-	done
+	( \
+		set -x ;\
+		__wd=`pwd` ;\
+		__home=`dirname $(1)` ; \
+		if [ -z "$${__home}" ] ; then \
+			__lib=$(1) ; \
+		else \
+			__lib=`basename $(1)` ; \
+			cd $${__home} ; \
+		fi ; \
+		for __obj in $(2) ; do \
+			$(AR) $(ARFLAGS) $${__lib}=-+$$__obj ; \
+		done ; \
+		cd $${__wd} ; \
+	)
 endef
 
 define CLEAN
