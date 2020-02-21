@@ -1,7 +1,7 @@
 ############################################################################
 # boards/z80/ez80/ez80f910200zco/scripts/Make.defs
 #
-#   Copyright (C) 2009, 2012-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009, 2012-2013, 2020 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,75 +35,16 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
+include ${TOPDIR}/arch/z80/src/ez80/Toolchain.defs
 
-# These are the default directories where the ZDS-II toolchain is installed.
-# NOTE that short 8.3 path names are used in order to avoid spaces.  On my
-# machine I have:
-#
-# Versions 5.1.1 and 5.2.1
-#   C:\PROGRA~1\ = C:\Program Files\
-#   C:\PROGRA~2\ = C:\Program Files (x86)\
-#
-# Your PC may be configured differently.
-#
-# Version 5.3.0 and 5.3.3, the default install location is C:\ZiLOG
-
-ifeq ($(CONFIG_EZ80_ZDSII_V511),y)
-INSTALLROOT = C:/PROGRA~2/ZiLOG
-ZDSVERSION := 5.1.1
-else ifeq ($(CONFIG_EZ80_ZDSII_V521),y)
-INSTALLROOT = C:/PROGRA~2/ZiLOG
-ZDSVERSION := 5.2.1
-else ifeq ($(CONFIG_EZ80_ZDSII_V530),y)
-INSTALLROOT = C:/ZiLOG
-ZDSVERSION := 5.3.0
-else ifeq ($(CONFIG_EZ80_ZDSII_V533),y)
-INSTALLROOT = C:/ZiLOG
-ZDSVERSION := 5.3.3
-endif
+# CFLAGS
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  ZDSINSTALLDIR := $(INSTALLROOT)/ZDSII_eZ80Acclaim!_$(ZDSVERSION)
-  INSTALLDIR = ${shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g"}
-  ZDSBINDIR := $(INSTALLDIR)\bin
-  ZDSSTDINCDIR := $(INSTALLDIR)\include\std
-  ZDSZILOGINCDIR := $(INSTALLDIR)\include\zilog
-  ZDSSTDLIBDIR := $(INSTALLDIR)\lib\std
-  ZDSZILOGLIBDIR := $(INSTALLDIR)\lib\zilog
-
-  # CFLAGS
-
   ARCHASMINCLUDES = -include:$(TOPDIR)\include;$(ZDSSTDINCDIR);$(ZDSZILOGINCDIR)
   EARCHASMINCLUDES = -include:$(TOPDIR)\include;$(ZDSSTDINCDIR);$(ZDSZILOGINCDIR)
   ARCHSTDINCLUDES = -stdinc:$(TOPDIR)\include;$(ZDSSTDINCDIR);$(ZDSZILOGINCDIR)
   ARCHUSRINCLUDES = -usrinc:.
 else
-  WINTOOL := y
-  ZDSINSTALLDIR := $(INSTALLROOT)/ZDSII_eZ80Acclaim!_$(ZDSVERSION)
-  INSTALLDIR = ${shell cygpath -u "$(ZDSINSTALLDIR)"}
-  ZDSBINDIR := $(INSTALLDIR)/bin
-  ZDSSTDINCDIR := $(INSTALLDIR)/include/std
-  ZDSZILOGINCDIR := $(INSTALLDIR)/include/zilog
-  ZDSSTDLIBDIR := $(INSTALLDIR)/lib/std
-  ZDSZILOGLIBDIR := $(INSTALLDIR)/lib/zilog
-
-  # These are the same directories but with the directory separator
-  # character swapped as needed by the ZDS-II compiler
-
-  WTOPDIR := ${shell cygpath -w "$(TOPDIR)"}
-  WZDSSTDINCDIR := ${shell cygpath -w "$(ZDSSTDINCDIR)"}
-  WZDSZILOGINCDIR := ${shell cygpath -w "$(ZDSZILOGINCDIR)"}
-  WZDSSTDLIBDIR := ${shell cygpath -w "$(ZDSSTDLIBDIR)"}
-  WZDSZILOGLIBDIR := ${shell cygpath -w "$(ZDSZILOGLIBDIR)"}
-
-  # Escaped versions
-
-  ETOPDIR := ${shell echo "$(WTOPDIR)" | sed -e "s/ /%20/g"}
-  EZDSSTDINCDIR := ${shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g"}
-  EZDSZILOGINCDIR := ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
-
-  # CFLAGs
-
   ARCHASMINCLUDES = -include:'$(WTOPDIR)\include;$(WZDSSTDINCDIR);$(WZDSZILOGINCDIR)'
   EARCHASMINCLUDES = -include:'$(ETOPDIR)\include;$(EZDSSTDINCDIR);$(EZDSZILOGINCDIR)'
   ARCHSTDINCLUDES = -stdinc:'$(WTOPDIR)\include;$(WZDSSTDINCDIR);$(WZDSZILOGINCDIR)'
