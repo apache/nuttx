@@ -214,7 +214,7 @@ endef
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
 define ARCHIVE
-	$(Q) $(AR) $1 $(2)
+	$(AR) $1 $(2)
 endef
 
 # PRELINK - Prelink a list of files

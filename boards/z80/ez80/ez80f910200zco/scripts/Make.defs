@@ -149,7 +149,7 @@ define MOVEOBJ
 endef
 
 define ARCHIVE
-	$(Q) for %%G in ($(2)) do ( $(AR) $(ARFLAGS) $1=-+%%G )
+	for %%G in ($(2)) do ( $(AR) $(ARFLAGS) $1=-+%%G )
 endef
 
 define CLEAN
@@ -183,7 +183,7 @@ define MOVEOBJ
 endef
 
 define ARCHIVE
-	$(Q) for __obj in $(2) ; do \
+	for __obj in $(2) ; do \
 		$(AR) $(ARFLAGS) $1=-+$$__obj \
 	done
 endef
