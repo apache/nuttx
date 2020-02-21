@@ -103,3 +103,48 @@ else
   EZDSSTDINCDIR := ${shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g"}
   EZDSZILOGINCDIR := ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
 endif
+
+# CPU Identification
+
+ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
+  ARCHCPU = eZ80F91
+  ARCHCPUDEF = _EZ80F91
+  ARCHFAMILY = _EZ80ACCLAIM!
+else ifeq ($(CONFIG_ARCH_CHIP_EZ80F92),y)
+  ARCHCPU = eZ80F92
+  ARCHCPUDEF = _EZ80F92
+  ARCHFAMILY = _EZ80ACCLAIM!
+endif
+
+# Optimization level
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHASMOPTIMIZATION = -debug -NOsdiopt
+  ARCHOPTIMIZATION = -debug
+else
+  ARCHASMOPTIMIZATION = -nodebug -NOsdiopt
+  ARCHOPTIMIZATION = -nodebug
+endif
+
+ifeq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -reduceopt
+#else
+#  ARCHOPTIMIZATION += -optsize
+endif
+
+# Tool names/paths.
+
+CROSSDEV =
+CC = $(ZDSBINDIR)$(DELIM)ez80cc.exe
+CPP = gcc -E
+LD = $(ZDSBINDIR)$(DELIM)ez80link.exe
+AS = $(ZDSBINDIR)$(DELIM)ez80asm.exe
+AR = $(ZDSBINDIR)$(DELIM)ez80lib.exe
+
+# File extensions
+
+ASMEXT = .asm
+OBJEXT = .obj
+LIBEXT = .lib
+EXEEXT = .lod
+HEXEXT = .hex

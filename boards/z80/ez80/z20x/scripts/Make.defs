@@ -21,6 +21,7 @@
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include ${TOPDIR}/arch/z80/src/ez80/Toolchain.defs
+include $(TOPDIR)/boards/z80/ez80/scripts/ez80_Config.mk
 
 # CFLAGS
 
@@ -38,22 +39,6 @@ endif
 
 # Assembler definitions
 
-ifeq ($(CONFIG_ARCH_CHIP_EZ80F92),y)
-  ARCHCPU = eZ80F92
-  ARCHCPUDEF = _EZ80F92
-  ARCHFAMILY = _EZ80ACCLAIM!
-else ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
-  ARCHCPU = eZ80F91
-  ARCHCPUDEF = _EZ80F91
-  ARCHFAMILY = _EZ80ACCLAIM!
-endif
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHASMOPTIMIZATION = -debug -NOsdiopt
-else
-  ARCHASMOPTIMIZATION = -nodebug -NOsdiopt
-endif
-
 ARCHASMCPUFLAGS = -cpu:$(ARCHCPU) -NOigcase
 ARCHASMLIST = -list -NOlistmac -name -pagelen:56 -pagewidth:80 -quiet
 ARCHASMWARNINGS = -warn
@@ -62,20 +47,8 @@ AFLAGS = $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMLIST) $(ARCHASMWARNINGS)
 
 # Compiler definitions
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -debug
-else
-  ARCHOPTIMIZATION = -nodebug
-endif
-
-ifeq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += -reduceopt
-else
-  ARCHOPTIMIZATION += -optsize
-endif
-
 ARCHCPUFLAGS = -chartype:S -promote -cpu:$(ARCHCPU) -NOgenprintf -NOmodsect \
-               -asmsw:" $(ARCHASMCPUFLAGS) $(EARCHASMINCLUDES) $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)"
+               -asmsw:" $(ARCHASMCPUFLAGS) $(EARCHASMINCLUDES) $(ARCHASMWARNINGS) $(ARCHOPTIMIZATION)"
 ARCHLIST = -keeplst -NOlist -NOlistinc -keepasm
 ARCHPICFLAGS =
 ARCHWARNINGS = -warn
@@ -102,93 +75,6 @@ else # ifeq ($(CONFIG_BOOT_RUNFROMEXTSRAM),y)
 endif
 
 LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
-
-# Tool names/paths.
-
-CROSSDEV =
-CC = $(ZDSBINDIR)$(DELIM)ez80cc.exe
-CPP = gcc -E
-LD = $(ZDSBINDIR)$(DELIM)ez80link.exe
-AS = $(ZDSBINDIR)$(DELIM)ez80asm.exe
-AR = $(ZDSBINDIR)$(DELIM)ez80lib.exe
-
-# File extensions
-
-ASMEXT = .asm
-OBJEXT = .obj
-LIBEXT = .lib
-EXEEXT = .lod
-HEXEXT = .hex
-
-# These are the macros that will be used in the NuttX make system
-# to compile and assembly source files and to insert the resulting
-# object files into an archive
-
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-
-define PREPROCESS
-	@echo CPP: $1->$2
-	$(Q) $(CPP) $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $1 -o $2
-endef
-
-define COMPILE
-	$(Q) $(CC) $(CFLAGS) $($(strip $1)_CFLAGS) ${shell echo $1 | sed -e "s/\//\\/g"}
-endef
-
-define ASSEMBLE
-	$(Q) $(AS) $(AFLAGS) $($(strip $1)_AFLAGS) ${shell echo $1 | sed -e "s/\//\\/g"}
-endef
-
-define MOVEOBJ
-	$(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
-	$(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
-	$(call MOVEFILE, "$1.src", "$2$(DELIM)$1.src")
-endef
-
-define ARCHIVE
-	for %%G in ($(2)) do ( $(AR) $(ARFLAGS) $1=-+%%G )
-endef
-
-define CLEAN
-	$(Q) if exist *.obj (del /f /q *.obj)
-	$(Q) if exist *.src (del /f /q *.src)
-	$(Q) if exist *.lib (del /f /q *.lib)
-	$(Q) if exist *.hex (del /f /q *.hex)
-	$(Q) if exist *.lod (del /f /q *.lod)
-	$(Q) if exist *.lst (del /f /q *.lst)
-endef
-
-else
-
-define PREPROCESS
-	@echo "CPP: $1->$2"
-	$(Q) $(CPP) $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $1 -o $2
-endef
-
-define COMPILE
-	$(Q) $(CC) $(CFLAGS) $($(strip $1)_CFLAGS) `cygpath -w "$1"`
-endef
-
-define ASSEMBLE
-	$(Q) $(AS) $(AFLAGS) $($(strip $1)_AFLAGS) `cygpath -w "$1"`
-endef
-
-define MOVEOBJ
-	$(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
-	$(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
-	$(call MOVEFILE, "$1.src", "$2$(DELIM)$1.src")
-endef
-
-define ARCHIVE
-	for __obj in $(2) ; do \
-		$(AR) $(ARFLAGS) $1=-+$$__obj \
-	done
-endef
-
-define CLEAN
-	$(Q) rm -f *.obj *.src *.lib *.hex *.lod *.lst
-endef
-endif
 
 # Windows native host tool definitions
 
