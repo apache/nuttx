@@ -1907,6 +1907,16 @@ config ARCH_BOARD_Z16F2800100ZCOG
 		development kit and the Zilog ZDS-II Windows command line tools.  The
 		development environment is Cygwin under WinXP.
 
+config ARCH_BOARD_Z20X
+	bool "z20x"
+	depends on ARCH_CHIP_EZ80F92
+	---help---
+		ez80Acclaim! Microcontroller.  This port use the z80x board
+		based on an eZ80F092 part, and the Zilog ZDS-II Windows command line
+		tools.  The development environment is Cygwin under Windows. A
+		Windows native development environment is available but has not
+		been verified.
+
 config ARCH_BOARD_Z80SIM
 	bool "Z80 Instruction Set Simulator"
 	depends on ARCH_CHIP_Z80
@@ -2225,6 +2235,7 @@ config ARCH_BOARD
 	default "viewtool-stm32f107"       if ARCH_BOARD_VIEWTOOL_STM32F107
 	default "xmc4500-relax"            if ARCH_BOARD_XMC4500RELAX
 	default "z16f2800100zcog"          if ARCH_BOARD_Z16F2800100ZCOG
+	default "z20x"                     if ARCH_BOARD_Z20X
 	default "z80sim"                   if ARCH_BOARD_Z80SIM
 	default "z8encore000zco"           if ARCH_BOARD_Z8ENCORE000ZCO
 	default "z8f64200100kit"           if ARCH_BOARD_Z8F64200100KIT
@@ -2853,6 +2864,9 @@ source "boards/z80/z8/z8encore000zco/Kconfig"
 endif
 if ARCH_BOARD_Z8F64200100KIT
 source "boards/z80/z8/z8f64200100kit/Kconfig"
+endif
+if ARCH_BOARD_Z20X
+source "boards/z80/ez80/z20x/Kconfig"
 endif
 if ARCH_BOARD_Z80SIM
 source "boards/z80/z80/z80sim/Kconfig"
