@@ -387,14 +387,6 @@ Ubuntu Bash under Windows 10
   Many Linux graphics programs would, however, also require a graphics
   framework like GTK or Qt.  So this might be a trip down the rabbit hole.
 
-Using macOS
-----------
-  You need install flock from https://github.com/discoteq/flock
-  before the build start:
-
-    brew tap discoteq/discoteq
-    brew install flock
-
 INSTALLATION
 ^^^^^^^^^^^^
 
