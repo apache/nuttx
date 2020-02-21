@@ -86,7 +86,7 @@ const struct sock_intf_s g_can_sockif =
   can_listen,       /* si_listen */
   can_connect,      /* si_connect */
   can_accept,       /* si_accept */
-  can_poll_local,         /* si_poll */
+  can_poll_local,   /* si_poll */
   can_send,         /* si_send */
   can_sendto,       /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
@@ -100,6 +100,73 @@ const struct sock_intf_s g_can_sockif =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: can_poll_eventhandler
+ *
+ * Description:
+ *   This function is called to perform the actual CAN receive operation
+ *   via the device interface layer.
+ *
+ * Input Parameters:
+ *   dev      The structure of the network driver that caused the event
+ *   conn     The connection structure associated with the socket
+ *   flags    Set of events describing why the callback was invoked
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+static uint16_t can_poll_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *conn,
+                                      FAR void *pvpriv, uint16_t flags)
+{
+  FAR struct can_poll_s *info = (FAR struct can_poll_s *)pvpriv;
+
+  DEBUGASSERT(!info || (info->psock && info->fds));
+
+  /* 'priv' might be null in some race conditions (?) */
+
+  if (info)
+    {
+      pollevent_t eventset = 0;
+
+      /* Check for data or connection availability events. */
+
+      if ((flags & CAN_NEWDATA) != 0)
+        {
+          eventset |= (POLLIN & info->fds->events);
+        }
+
+      /* Check for loss of connection events. */
+
+      if ((flags & NETDEV_DOWN) != 0)
+        {
+          eventset |= (POLLHUP | POLLERR);
+        }
+
+      /* A poll is a sign that we are free to send data. */
+
+     /* else if ((flags & CAN_POLL) != 0 && psock_udp_cansend(info->psock) >= 0)
+        {
+          eventset |= (POLLOUT & info->fds->events);
+        }*/
+
+      /* Awaken the caller of poll() is requested event occurred. */
+
+      if (eventset)
+        {
+          info->fds->revents |= eventset;
+          nxsem_post(info->fds->sem);
+        }
+    }
+
+  return flags;
+}
 
 /****************************************************************************
  * Name: can_setup
@@ -506,100 +573,109 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
                         bool setup)
 {
   FAR struct can_conn_s *conn;
-  int ret;
+  FAR struct can_poll_s *info;
+  FAR struct devif_callback_s *cb;
+  int ret = OK;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
   conn = (FAR struct can_conn_s *)psock->s_conn;
+  info = conn->pollinfo;
+  
+  //FIXME add NETDEV_DOWN support
 
   /* Check if we are setting up or tearing down the poll */
 
   if (setup)
     {
-      /* If POLLOUT is selected, return immediately (maybe) */
-
-      pollevent_t revents = POLLOUT;
-
-      /* If POLLIN is selected and a response is available, return
-       * immediately if POLLIN and/or POLLIN are included in the
-       * requested event set.
-       */
-
+        
       net_lock();
-
-#warning Missing logic
-
-      revents &= fds->events;
-      if (revents != 0)
+      
+      info->dev = conn->dev;
+      
+      cb = can_callback_alloc(info->dev, conn);
+      if (cb == NULL)
         {
-          fds->revents = revents;
-          nxsem_post(fds->sem);
-          net_unlock();
-          return OK;
+          ret = -EBUSY;
+          goto errout_with_lock;
         }
 
-      /* Set up to be notified when a response is available if POLLIN is
-       * requested.
+      /* Initialize the poll info container */
+    
+      info->psock  = psock;
+      info->fds    = fds;
+      info->cb     = cb;
+    
+      /* Initialize the callback structure.  Save the reference to the info
+       * structure as callback private data so that it will be available during
+       * callback processing.
        */
-
+    
+      cb->flags    = NETDEV_DOWN;
+      cb->priv     = (FAR void *)info;
+      cb->event    = can_poll_eventhandler;
+    
+      if ((fds->events & POLLOUT) != 0)
+        {
+          cb->flags |= CAN_POLL;
+        }
+    
       if ((fds->events & POLLIN) != 0)
         {
-          /* Some limitations:  There can be only a single outstanding POLLIN
-           * on the CAN connection.
-           */
-
-          if (conn->pollsem != NULL || conn->pollevent != NULL)
-            {
-              nerr("ERROR: Multiple polls() on socket not supported.\n");
-              net_unlock();
-              return -EBUSY;
-            }
-
-          /* Set up the notification */
-
-          conn->pollsem    = fds->sem;
-          conn->pollevent  = &fds->revents;
-
-#warning Missing logic
-
-          if (ret < 0)
-            {
-              /* Failed to set up notification */
-
-              conn->pollsem   = NULL;
-              conn->pollevent = NULL;
-            }
-          else
-            {
-              /* Setup to receive a notification when CAN data is available */
-
-#warning Missing logic
-
-              ret = OK;
-            }
+          cb->flags |= CAN_NEWDATA;
         }
-
-      /* Set up to be notified when we are able to send CAN data without
-       * waiting.
+    
+      /* Save the reference in the poll info structure as fds private as well
+       * for use during poll teardown as well.
        */
-
-      else if ((fds->events & POLLOUT) != 0)
+    
+      fds->priv = (FAR void *)info;
+    
+      /* Check for read data availability now */
+    
+      if (!IOB_QEMPTY(&conn->readahead))
         {
+          /* Normal data may be read without blocking. */
+    
+          fds->revents |= (POLLRDNORM & fds->events);
         }
-      else
+    
+    #if 0
+      if (psock_udp_cansend(psock) >= 0)
         {
-          /* There will not be any wakeups coming?  Probably an error? */
-
-          ret = OK;
+          /* Normal data may be sent without blocking (at least one byte). */
+    
+          fds->revents |= (POLLWRNORM & fds->events);
         }
-
+    #endif
+    
+      /* Check if any requested events are already in effect */
+    
+      if (fds->revents != 0)
+        {
+          /* Yes.. then signal the poll logic */
+          nxsem_post(fds->sem);
+        }
+    
+errout_with_lock:
       net_unlock();
     }
-  else
+  else 
     {
-      /* Cancel any response notifications */
+      info = (FAR struct can_poll_s *)fds->priv;
+        
+      if (info != NULL)
+      {
+        /* Cancel any response notifications */      
+        can_callback_free(info->dev, conn, info->cb);
 
-      conn->pollsem   = NULL;
-      conn->pollevent = NULL;
+        /* Release the poll/select data slot */
+
+        info->fds->priv = NULL;
+
+        /* Then free the poll info container */
+
+        info->psock = NULL;
+      }
     }
 
   return ret;

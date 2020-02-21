@@ -47,6 +47,9 @@
 #define CAN_EFF_MASK 0x1fffffff  /* Extended frame format (EFF) */
 #define CAN_ERR_MASK 0x1fffffff  /* Omit EFF, RTR, ERR flags */
 
+#define CAN_MTU		(sizeof(struct can_frame))
+#define CANFD_MTU	(sizeof(struct canfd_frame))
+
 /* PF_CAN protocols */
 
 #define CAN_RAW      1           /* RAW sockets */
@@ -57,6 +60,21 @@
 #define CAN_ISOTP    6           /* ISO 15765-2 Transport Protocol */
 #define CAN_J1939    7           /* SAE J1939 */
 #define CAN_NPROTO   8
+
+/* CAN_RAW socket options */
+
+#define CAN_RAW_FILTER         (__SO_PROTOCOL + 0)     
+                                 /* set 0 .. n can_filter(s) */
+#define CAN_RAW_ERR_FILTER     (__SO_PROTOCOL + 1)      
+                                 /* set filter for error frames */
+#define CAN_RAW_LOOPBACK       (__SO_PROTOCOL + 2)      
+                                 /* local loopback (default:on) */
+#define CAN_RAW_RECV_OWN_MSGS  (__SO_PROTOCOL + 3)	     
+                                 /* receive my own msgs (default:off) */
+#define CAN_RAW_FD_FRAMES      (__SO_PROTOCOL + 4)      
+                                 /* allow CAN FD frames (default:off) */
+#define CAN_RAW_JOIN_FILTERS   (__SO_PROTOCOL + 5)     
+                                 /* all filters must match to trigger */
 
 /****************************************************************************
  * Public Types

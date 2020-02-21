@@ -68,6 +68,7 @@
 
 struct can_recvfrom_s
 {
+  FAR struct socket       *pr_sock;      /* The parent socket structure */
   FAR struct devif_callback_s *pr_cb;  /* Reference to callback instance */
   sem_t        pr_sem;                 /* Semaphore signals recv completion */
   size_t       pr_buflen;              /* Length of receive buffer */
@@ -128,7 +129,7 @@ static inline void can_add_recvlen(FAR struct can_recvfrom_s *pstate,
  *
  ****************************************************************************/
 
-static void can_recvfrom_newdata(FAR struct net_driver_s *dev,
+static size_t can_recvfrom_newdata(FAR struct net_driver_s *dev,
                                  FAR struct can_recvfrom_s *pstate)
 {
   size_t recvlen;
@@ -150,6 +151,150 @@ static void can_recvfrom_newdata(FAR struct net_driver_s *dev,
   /* Update the accumulated size of the data read */
 
   can_add_recvlen(pstate, recvlen);
+
+  return recvlen;
+}
+
+
+/****************************************************************************
+ * Name: can_newdata
+ *
+ * Description:
+ *   Copy the read data from the packet
+ *
+ * Input Parameters:
+ *   dev      The structure of the network driver that generated the event
+ *   pstate   recvfrom state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static inline void can_newdata(FAR struct net_driver_s *dev,
+                               FAR struct can_recvfrom_s *pstate)
+{
+  /* Take as much data from the packet as we can */
+
+  size_t recvlen = can_recvfrom_newdata(dev, pstate);
+
+  /* If there is more data left in the packet that we could not buffer, then
+   * add it to the read-ahead buffers.
+   */
+
+  if (recvlen < dev->d_len)
+    {
+      FAR struct can_conn_s *conn = (FAR struct can_conn_s *)pstate->pr_sock->s_conn;
+      FAR uint8_t *buffer = (FAR uint8_t *)dev->d_appdata + recvlen;
+      uint16_t buflen = dev->d_len - recvlen;
+#ifdef CONFIG_DEBUG_NET
+      uint16_t nsaved;
+
+      nsaved = can_datahandler(conn, buffer, buflen);
+#else
+      can_datahandler(conn, buffer, buflen);
+#endif
+
+      /* There are complicated buffering issues that are not addressed fully
+       * here.  For example, what if up_datahandler() cannot buffer the
+       * remainder of the packet?  In that case, the data will be dropped but
+       * still ACKed.  Therefore it would not be resent.
+       *
+       * This is probably not an issue here because we only get here if the
+       * read-ahead buffers are empty and there would have to be something
+       * serioulsy wrong with the configuration not to be able to buffer a
+       * partial packet in this context.
+       */
+
+#ifdef CONFIG_DEBUG_NET
+      if (nsaved < buflen)
+        {
+          nerr("ERROR: packet data not saved (%d bytes)\n", buflen - nsaved);
+        }
+#endif
+    }
+
+  /* Indicate no data in the buffer */
+
+  dev->d_len = 0;
+}
+
+/****************************************************************************
+ * Name: can_readahead
+ *
+ * Description:
+ *   Copy the read-ahead data from the packet
+ *
+ * Input Parameters:
+ *   pstate   recvfrom state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static inline int can_readahead(struct can_recvfrom_s *pstate)
+{
+  FAR struct can_conn_s *conn = (FAR struct can_conn_s *)pstate->pr_sock->s_conn;
+  FAR struct iob_s *iob;
+  int recvlen;
+
+  /* Check there is any CAN data already buffered in a read-ahead
+   * buffer.
+   */
+
+  if((iob = iob_peek_queue(&conn->readahead)) != NULL &&
+          pstate->pr_buflen > 0)
+    {
+      DEBUGASSERT(iob->io_pktlen > 0);
+
+      /* Transfer that buffered data from the I/O buffer chain into
+       * the user buffer.
+       */
+
+      recvlen = iob_copyout(pstate->pr_buffer, iob, pstate->pr_buflen, 0);
+
+      /* If we took all of the data from the I/O buffer chain is empty, then
+       * release it.  If there is still data available in the I/O buffer
+       * chain, then just trim the data that we have taken from the
+       * beginning of the I/O buffer chain.
+       */
+
+      if (recvlen >= iob->io_pktlen)
+        {
+          FAR struct iob_s *tmp;
+
+          /* Remove the I/O buffer chain from the head of the read-ahead
+           * buffer queue.
+           */
+
+          tmp = iob_remove_queue(&conn->readahead);
+          DEBUGASSERT(tmp == iob);
+          UNUSED(tmp);
+
+          /* And free the I/O buffer chain */
+
+          iob_free_chain(iob, IOBUSER_NET_CAN_READAHEAD);
+        }
+      else
+        {
+          /* The bytes that we have received from the head of the I/O
+           * buffer chain (probably changing the head of the I/O
+           * buffer queue).
+           */
+
+          iob_trimhead_queue(&conn->readahead, recvlen,
+                             IOBUSER_NET_CAN_READAHEAD);
+        }
+        return recvlen;
+    }
+    return 0;
 }
 
 static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
@@ -170,7 +315,7 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Copy the packet */
 
-          can_recvfrom_newdata(dev, pstate);
+          can_newdata(dev, pstate);
 
           /* We are finished. */
 
@@ -228,7 +373,7 @@ static ssize_t can_recvfrom_result(int result,
   if (pstate->pr_result < 0)
     {
       /* This might return EAGAIN on a timeout or ENOTCONN on loss of
-       * connection (TCP only)
+       * connection (CAN only)
        */
 
       return pstate->pr_result;
@@ -307,6 +452,19 @@ ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf,
 
   state.pr_buflen = len;
   state.pr_buffer = buf;
+  state.pr_sock   = psock;
+  
+  /* Handle any any CAN data already buffered in a read-ahead buffer.  NOTE
+   * that there may be read-ahead data to be retrieved even after the
+   * socket has been disconnected.
+   */
+  ret = can_readahead(&state);
+  if(ret > 0)
+  {
+      net_unlock();
+      nxsem_destroy(&state.pr_sem);
+      return ret;
+  }    
   
   /* Get the device driver that will service this transfer */
 
@@ -317,7 +475,7 @@ ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf,
       goto errout_with_state;
     }
     
-    /* Set up the callback in the connection */
+  /* Set up the callback in the connection */
 
   state.pr_cb = can_callback_alloc(dev, conn);
   if (state.pr_cb)

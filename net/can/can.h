@@ -32,10 +32,15 @@
 
 #include <netpacket/can.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/can.h>
 #include <nuttx/net/netdev.h>
 
 #include "devif/devif.h"
 #include "socket/socket.h"
+
+#ifdef CONFIG_NET_CAN_NOTIFIER
+#  include <nuttx/wqueue.h>
+#endif
 
 #ifdef CONFIG_NET_CAN
 
@@ -54,6 +59,16 @@
  * Public Type Definitions
  ****************************************************************************/
 
+/* This is a container that holds the poll-related information */
+
+struct can_poll_s
+{
+  FAR struct socket *psock;        /* Needed to handle loss of connection */
+  FAR struct net_driver_s *dev;    /* Needed to free the callback structure */
+  struct pollfd *fds;              /* Needed to handle poll events */
+  FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
+};
+
 /* This "connection" structure describes the underlying state of the socket. */
 
 struct can_conn_s
@@ -70,16 +85,26 @@ struct can_conn_s
   FAR struct devif_callback_s *list; /* NetLink callbacks */
 
   FAR struct net_driver_s *dev;      /* Reference to CAN device */
+  
+  /* Read-ahead buffering.
+   *
+   *   readahead - A singly linked list of type struct iob_qentry_s
+   *               where the CAN/IP read-ahead data is retained.
+   */
+
+  struct iob_queue_s readahead;   /* remove Read-ahead buffering */
 
   /* CAN-specific content follows */
 
   uint8_t protocol;                  /* Selected CAN protocol */
   int16_t crefs;                     /* Reference count */
+  
 
-  /* poll() support */
+  /* The following is a list of poll structures of threads waiting for
+   * socket events.
+   */
 
-  FAR sem_t *pollsem;                /* Used to wakeup poll() */
-  FAR pollevent_t *pollevent;        /* poll() wakeup event */
+  struct can_poll_s pollinfo[4]; //FIXME make dynamic
 };
 
 /****************************************************************************
@@ -166,6 +191,35 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
                       FAR struct can_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
+ * Name: can_datahandler
+ *
+ * Description:
+ *   Handle data that is not accepted by the application.  This may be called
+ *   either (1) from the data receive logic if it cannot buffer the data, or
+ *   (2) from the CAN event logic is there is no listener in place ready to
+ *   receive the data.
+ *
+ * Input Parameters:
+ *   conn - A pointer to the CAN connection structure
+ *   buffer - A pointer to the buffer to be copied to the read-ahead
+ *     buffers
+ *   buflen - The number of bytes to copy to the read-ahead buffer.
+ *
+ * Returned Value:
+ *   The number of bytes actually buffered is returned.  This will be either
+ *   zero or equal to buflen; partial packets are not buffered.
+ *
+ * Assumptions:
+ * - The caller has checked that CAN_NEWDATA is set in flags and that is no
+ *   other handler available to process the incoming data.
+ * - Called from network stack logic with the network stack locked
+ *
+ ****************************************************************************/
+
+uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
+                         uint16_t buflen);
+
+/****************************************************************************
  * Name: can_recvfrom
  *
  * Description:
@@ -214,17 +268,6 @@ ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 void can_poll(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn);
 
 /****************************************************************************
- * Name: can_active()
- *
- * Description:
- *   Find a connection structure that is the appropriate connection for the
- *   provided NetLink address
- *
- ****************************************************************************/
-
-FAR struct can_conn_s *can_active(FAR struct sockaddr_can *addr);
-
-/****************************************************************************
  * Name: psock_can_send
  *
  * Description:
@@ -246,6 +289,31 @@ FAR struct can_conn_s *can_active(FAR struct sockaddr_can *addr);
 struct socket;
 ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len);
+
+/****************************************************************************
+ * Name: can_readahead_signal
+ *
+ * Description:
+ *   Read-ahead data has been buffered.  Signal all threads waiting for
+ *   read-ahead data to become available.
+ *
+ *   When read-ahead data becomes available, *all* of the workers waiting
+ *   for read-ahead data will be executed.  If there are multiple workers
+ *   waiting for read-ahead data then only the first to execute will get the
+ *   data.  Others will need to call can_readahead_notifier_setup() once
+ *   again.
+ *
+ * Input Parameters:
+ *   conn  - The CAN connection where read-ahead data was just buffered.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_CAN_NOTIFIER
+void can_readahead_signal(FAR struct can_conn_s *conn);
+#endif
 
 
 #undef EXTERN

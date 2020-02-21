@@ -88,13 +88,13 @@ void can_poll(FAR struct net_driver_s *dev, FAR struct can_conn_s *conn)
       dev->d_sndlen  = 0;
 
       /* Perform the application callback */
-
       can_callback(dev, conn, CAN_POLL);
 
       /* Check if the application has data to send */
 
       if (dev->d_sndlen > 0)
         {
+            //FIXME missing logic
           return;
         }
     }

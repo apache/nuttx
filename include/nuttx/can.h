@@ -45,6 +45,8 @@
 #  include <nuttx/wqueue.h>
 #endif
 
+#include <queue.h>
+
 #ifdef CONFIG_NET_CAN
 
 /************************************************************************************
@@ -187,7 +189,25 @@
  * Public Types
  ************************************************************************************/
 
+typedef FAR void *CAN_HANDLE;
+
+struct can_response_s
+{
+  sq_entry_t flink;
+
+  /* Message-specific data may follow */
+}; //FIXME remvoe
+
+
 typedef uint32_t canid_t;
+
+/*
+ * Controller Area Network Error Message Frame Mask structure
+ *
+ * bit 0-28	: error class mask (see include/uapi/linux/can/error.h)
+ * bit 29-31	: set to zero
+ */
+typedef uint32_t can_err_mask_t;
 
 /* CAN payload length and DLC definitions according to ISO 11898-1 */
 #define CAN_MAX_DLC 8
@@ -255,6 +275,27 @@ struct canfd_frame {
 	uint8_t    data[CANFD_MAX_DLEN] __attribute__((aligned(8)));
 };
 
+
+/**
+ * struct can_filter - CAN ID based filter in can_register().
+ * @can_id:   relevant bits of CAN ID which are not masked out.
+ * @can_mask: CAN mask (see description)
+ *
+ * Description:
+ * A filter matches, when
+ *
+ *          <received_can_id> & mask == can_id & mask
+ *
+ * The filter can be inverted (CAN_INV_FILTER bit set in can_id) or it can
+ * filter for error message frames (CAN_ERR_FLAG bit set in mask).
+ */
+struct can_filter {
+	canid_t can_id;
+	canid_t can_mask;
+};
+
+#define CAN_INV_FILTER 0x20000000U /* to be set in can_filter.can_id */
+#define CAN_RAW_FILTER_MAX 512 /* maximum number of can_filter set via setsockopt() */
 
 /************************************************************************************
  * Public Function Prototypes
