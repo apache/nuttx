@@ -22,45 +22,9 @@
 # and assembly source files and to insert the resulting object files into an
 # archive.  These replace the default definitions at tools/Config.mk
 
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-
-define PREPROCESS
-	@echo CPP: $(1)->$(2)
-	$(Q) $(CPP) $(CPPFLAGS) $($(strip $(1))_CPPFLAGS) $(1) -o $(2)
-endef
-
-define COMPILE
-	$(call DELFILE, $(2))
-	$(Q) $(CC) $(CFLAGS) $($(strip $(1))_CFLAGS) ${shell echo $(1) | sed -e "s/\//\\/g"}
-	if not exist $(2) $(call MOVEFILE, $(subst .c,.obj,$(1)), $(2))
-endef
-
-define ASSEMBLE
-	$(call DELFILE, $(2))
-	$(Q) $(AS) $(AFLAGS) $($(strip $(1))_AFLAGS) ${shell echo $(1) | sed -e "s/\//\\/g"}
-	if not exist $(2) $(call MOVEFILE, $(subst .asm,.obj,$(1)), $(2))
-endef
-
-define MOVEOBJ
-	$(call MOVEFILE, "$(1).obj", "$(2)$(DELIM)$(1).obj")
-	$(call MOVEFILE, "$(1).lst", "$(2)$(DELIM)$(1).lst")
-	$(call MOVEFILE, "$(1).src", "$(2)$(DELIM)$(1).src")
-endef
-
-define ARCHIVE
-	for %%G in ($(2)) do ( $(AR) $(ARFLAGS) $(1)=-+%%G )
-endef
-
-define CLEAN
-	$(Q) if exist *.obj (del /f /q *.obj)
-	$(Q) if exist *.src (del /f /q *.src)
-	$(Q) if exist *.lib (del /f /q *.lib)
-	$(Q) if exist *.hex (del /f /q *.hex)
-	$(Q) if exist *.lod (del /f /q *.lod)
-	$(Q) if exist *.lst (del /f /q *.lst)
-endef
-
-else
+# PREPROCESS
+#
+# Run a file through the C Pre-processor
 
 define PREPROCESS
 	@echo "CPP: $(1)->$(2)"
@@ -83,11 +47,26 @@ endef
 #    lie in a lower directory, but lies in the current directory and is
 #    handled within COMPILE and ASSEMBLE.
 
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+
+define COMPILE
+	$(call DELFILE, $(2))
+	$(Q) $(CC) $(CFLAGS) $($(strip $(1))_CFLAGS) ${shell echo $(1) | sed -e "s/\//\\/g"}
+	if not exist $(2) $(call MOVEFILE, $(subst .c,.obj,$(1)), $(2))
+endef
+
+define ASSEMBLE
+	$(call DELFILE, $(2))
+	$(Q) $(AS) $(AFLAGS) $($(strip $(1))_AFLAGS) ${shell echo $(1) | sed -e "s/\//\\/g"}
+	if not exist $(2) $(call MOVEFILE, $(subst .asm,.obj,$(1)), $(2))
+endef
+
+else
+
 define COMPILE
 	$(call DELFILE, $(2))
 	$(Q) $(CC) $(CFLAGS) $($(strip $(1))_CFLAGS) `cygpath -w "$(1)"`
 	$(Q) ( \
-			set -x ; \
 			__rename=`basename $(2)` ;\
 			if [ ! -e $${__rename} ] ; then \
 				__src=`basename $(1) | cut -d'.' -f1` ; \
@@ -103,7 +82,6 @@ define ASSEMBLE
 	$(call DELFILE, $(2))
 	$(Q) $(AS) $(AFLAGS) $($(strip $(1))_AFLAGS) `cygpath -w "$(1)"`
 	$(Q) ( \
-			set -x ; \
 			__rename=`basename $(2)` ; \
 			if [ ! -e $${__rename} ] ; then \
 				__src=`basename $(1) | cut -d'.' -f1` ; \
@@ -114,6 +92,7 @@ define ASSEMBLE
 			fi ; \
 		)
 endef
+endif
 
 define MOVEOBJ
 	$(call MOVEFILE, "$(1).obj", "$(2)$(DELIM)$(1).obj")
@@ -133,22 +112,31 @@ endef
 #    this case, the base library name is extact as the ARCHIVE logic CD's
 #    to the directory containing the library.
 
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+
 define ARCHIVE
-	( \
-		set -x ;\
-		__wd=`pwd` ;\
-		__home=`dirname $(1)` ; \
-		if [ -z "$${__home}" ] ; then \
-			__lib=$(1) ; \
-		else \
-			__lib=`basename $(1)` ; \
-			cd $${__home} ; \
-		fi ; \
-		for __obj in $(2) ; do \
-			$(AR) $(ARFLAGS) $${__lib}=-+$$__obj ; \
-		done ; \
-		cd $${__wd} ; \
-	)
+	for %%G in ($(2)) do ( $(AR) $(ARFLAGS) $(1)=-+%%G )
+endef
+
+define ARCHIVE
+	$(MAKE) -C $(TOPDIR)\tools\zds zdsar.exe
+	$(TOPDIR)\tools\zds\zdsar.exe --ar "$(AR)" --ar_flags "$(ARFLAGS)" --library "$(1)" $(2)
+endef
+
+define CLEAN
+	$(Q) if exist *.obj (del /f /q *.obj)
+	$(Q) if exist *.src (del /f /q *.src)
+	$(Q) if exist *.lib (del /f /q *.lib)
+	$(Q) if exist *.hex (del /f /q *.hex)
+	$(Q) if exist *.lod (del /f /q *.lod)
+	$(Q) if exist *.lst (del /f /q *.lst)
+endef
+
+else
+
+define ARCHIVE
+	$(MAKE) -C $(TOPDIR)/tools/zds zdsar.exe
+	$(TOPDIR)/tools/zds/zdsar.exe --ar "$(AR)" --ar_flags "$(ARFLAGS)" --library $(1) $(2)
 endef
 
 define CLEAN
