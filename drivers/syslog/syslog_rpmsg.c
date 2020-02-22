@@ -44,7 +44,6 @@
 #include <errno.h>
 #include <string.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/syslog/syslog.h>
@@ -347,7 +346,7 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
  * Public Functions
  ****************************************************************************/
 
-int up_putc(int ch)
+int syslog_rpmsg_putc(int ch)
 {
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
   irqstate_t flags;
