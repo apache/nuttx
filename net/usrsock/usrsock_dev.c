@@ -1155,7 +1155,6 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 {
   FAR struct usrsockdev_s *dev = conn->dev;
   FAR struct usrsock_request_common_s *req_head = iov[0].iov_base;
-  int ret = OK;
 
   if (!dev)
     {
@@ -1207,7 +1206,6 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
     {
       ninfo("usockid=%d; daemon abruptly closed /dev/usrsock.\n",
             conn->usockid);
-      ret = -ESHUTDOWN;
     }
 
   /* Free request line for next command. */
@@ -1216,7 +1214,7 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 
   --dev->req.nbusy; /* net_lock held. */
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
