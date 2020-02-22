@@ -45,16 +45,11 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <arch/arch.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define PAGE_SIZE		(4 * 1024ULL)
-#define BITS_PER_LONG		64
-#define HUGE_PAGE_SIZE		(2 * 1024 * 1024ULL)
-#define PAGE_MASK		(~(PAGE_SIZE - 1))
-#define HUGE_PAGE_MASK		(~(HUGE_PAGE_SIZE - 1))
 
 /****************************************************************************
  * Public Types

@@ -38,25 +38,46 @@
  ****************************************************************************/
 
 OUTPUT_ARCH(i386:x86-64)
-ENTRY(__reset_entry)
+ENTRY(__pmode_entry)
 SECTIONS
 {
-    . = 0x0;
+    . = 0x4M;
+    _kernel_physical_start = .;
 
-    .loader : {
-        *(.loader .loader.*)
+    .loader.text : {
+        . = ALIGN(8);
+        KEEP(*(.multiboot))
+        *(.loader.text)
     }
 
-    . = 0x00100000;
+    .loader.rodata : {
+        *(.loader.rodata)
+    }
 
-    .text : {
+    .loader.data : {
+        *(.loader.data)
+    }
+
+    .loader.bss : {
+        *(.loader.bss)
+    }
+
+    . = ALIGN(0x1000);
+      _boot_end = .;
+
+    . += 0x3c000000;
+    _kernel_virtual_start = .;
+
+    .text : AT(_boot_end)
+    {
         _stext = ABSOLUTE(.);
         *(.text .text.*)
         *(.gnu.linkonce.t.*)
         _etext = ABSOLUTE(.);
     }
 
-    .text ALIGN (0x1000) : {
+    .rodata ALIGN(0x1000) : AT ( (LOADADDR (.text) + SIZEOF (.text) + 0xFFF) & 0xFFFFFFFFFFFFF000 )
+    {
         _srodata = ABSOLUTE(.);
         *(.rodata .rodata.*)
         *(.fixup)
@@ -66,10 +87,12 @@ SECTIONS
         *(.got)
         *(.gcc_except_table)
         *(.gnu.linkonce.r.*)
+        *(.eh_frame)
         _erodata = ABSOLUTE(.);
     }
 
-    .data ALIGN (0x1000) : {
+    .data ALIGN(0x1000) : AT ( (LOADADDR (.rodata) + SIZEOF (.rodata) + 0xFFF) & 0xFFFFFFFFFFFFF000 )
+    {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
         *(.gnu.linkonce.d.*)
@@ -78,7 +101,8 @@ SECTIONS
         _edata = ABSOLUTE(.);
     }
 
-    .bss : {
+    .bss ALIGN(0x1000) : AT ( (LOADADDR (.data) + SIZEOF (.data) + 0xFFF) & 0xFFFFFFFFFFFFF000 )
+    {
         _sbss = ABSOLUTE(.);
         *(.bss .bss.*)
         *(.gnu.linkonce.b.*)
@@ -86,6 +110,10 @@ SECTIONS
         . = ALIGN(4);
         _ebss = ABSOLUTE(.);
     }
+
+    _kernel_virtual_end = .;
+
+    _kernel_physical_end = (LOADADDR (.bss) + SIZEOF (.bss) + 0xFFF) & 0xFFFFFFFFFFFFF000;
 
     /* Stabs debugging sections */
     .stab 0 : { *(.stab) }

@@ -59,6 +59,13 @@
 
 #define MSR_FS_BASE 0xc0000100 /* 64bit FS base */
 
+#define MSR_EFER        0xc0000080
+# define EFER_LME        0x00000100
+
+#define MSR_MTRR_DEF_TYPE    0x000002ff
+# define MTRR_ENABLE        0x00000800
+
+
 /* RFLAGS bits */
 
 #define X86_64_RFLAGS_CF             (1 << 0)  /* Bit 0:  Carry Flag */
@@ -84,7 +91,68 @@
 #define X86_64_RFLAGS_VIP           (1 << 20) /* Bit 20: Virtual Interrupt Pending (Pentium+) */
 #define X86_64_RFLAGS_ID            (1 << 21) /* Bit 21: CPUID detection flag (Pentium+) */
 
+/* GDT Definitions */
 
+
+/* Starting from third selector to confirm the syscall interface */
+#define X86_GDT_CODE_SEL_NUM    3
+# define X86_GDT_CODE_SEL       (1 << X86_GDT_CODE_SEL_NUM)
+
+#define X86_GDT_DATA_SEL_NUM    4
+# define X86_GDT_DATA_SEL       (1 << X86_GDT_DATA_SEL_NUM)
+
+#define X86_GDT_BASE      0x0000000000000000
+#define X86_GDT_LIMIT     0x000f00000000ffff
+
+#define X86_GDT_FLAG_LONG 0x0020000000000000
+
+#define X86_GDT_ACC_PR    0x0000800000000000
+#define X86_GDT_ACC_SEG   0x0000100000000000
+#define X86_GDT_ACC_EX    0x0000080000000000
+#define X86_GDT_ACC_WR    0x0000020000000000
+
+#define X86_GDT_CODE64_ENTRY    (X86_GDT_BASE + X86_GDT_LIMIT + X86_GDT_FLAG_LONG + X86_GDT_ACC_PR + X86_GDT_ACC_SEG + X86_GDT_ACC_EX)
+#define X86_GDT_CODE32_ENTRY    (X86_GDT_BASE + X86_GDT_LIMIT + X86_GDT_ACC_PR + X86_GDT_ACC_SEG + X86_GDT_ACC_EX)
+#define X86_GDT_DATA_ENTRY      (X86_GDT_BASE + X86_GDT_LIMIT + X86_GDT_ACC_PR + X86_GDT_ACC_SEG + X86_GDT_ACC_WR)
+
+/* CR0 Definitions */
+#define X86_CR0_PE        0x00000001
+#define X86_CR0_MP        0x00000002
+#define X86_CR0_EM        0x00000004
+#define X86_CR0_WP        0x00010000
+#define X86_CR0_PG        0x80000000
+
+/* CR4 Definitions */
+#define X86_CR4_PAE      0x00000020
+#define X86_CR4_PGE      0x00000080
+#define X86_CR4_OSXFSR   0x00000200
+#define X86_CR4_XMMEXCPT 0x00000400
+#define X86_CR4_FGSBASE  0x00010000
+#define X86_CR4_PCIDE    0x00020000
+
+/* PAGE TABLE ENTRY Definitions */
+#define X86_PAGE_PRESENT (1 << 0)
+#define X86_PAGE_WR      (1 << 1)
+#define X86_PAGE_USER    (1 << 2)
+#define X86_PAGE_WRTHR   (1 << 3)
+#define X86_PAGE_NOCACHE (1 << 4)
+#define X86_PAGE_HUGE    (1 << 7)
+#define X86_PAGE_GLOBAL  (1 << 8)
+#define X86_PAGE_NX      (1 << 63)
+
+#define X86_PAGE_ENTRY_SIZE 8
+#define X86_NUM_PAGE_ENTRY (PAGE_SIZE / X86_PAGE_ENTRY_SIZE)
+
+#define PAGE_SIZE        (0x1000)
+# define PAGE_MASK        (~(PAGE_SIZE - 1))
+
+#define HUGE_PAGE_SIZE   (0x200000)
+# define HUGE_PAGE_MASK   (~(HUGE_PAGE_SIZE - 1))
+
+
+#define BITS_PER_LONG    64
+
+#ifndef __ASSEMBLY__
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -120,8 +188,6 @@ begin_packed_struct struct idt_ptr_s
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 static inline uint64_t rdtsc(void)
 {

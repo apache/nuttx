@@ -87,7 +87,7 @@ BIN  = libarch$(LIBEXT)
 LDSTARTGROUP ?= --start-group
 LDENDGROUP ?= --end-group
 
-LDFLAGS += $(ARCHSCRIPT)
+LDFLAGS += -z max-page-size=0x1000 $(ARCHSCRIPT)
 LOADER_LDFLAGS += $(LOADER_ARCHSCRIPT)
 EXTRA_LIBS ?=
 LINKLIBS ?=
@@ -152,7 +152,7 @@ board/libboard$(LIBEXT):
 
 nuttx$(EXEEXT): board/libboard$(LIBEXT)
 	@echo "LD: nuttx$(EXEEXT)"
-	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) -o $(NUTTX) $(EXTRA_OBJS) \
+	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) -o $(NUTTX) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LIBGCC) --whole-archive  $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX) | \
