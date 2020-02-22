@@ -3204,7 +3204,7 @@ static inline void efm32_gint_ptxfeisr(FAR struct efm32_usbhost_s *priv)
   chan->xfrd    += chan->inflight;
   chan->inflight = 0;
 
-  /* If we have now transfered the entire buffer, then this transfer is
+  /* If we have now transferred the entire buffer, then this transfer is
    * complete (this case really should never happen because we disable
    * the PTXFE interrupt on the final packet).
    */
@@ -3742,7 +3742,7 @@ static void efm32_txfe_enable(FAR struct efm32_usbhost_s *priv, int chidx)
   uint32_t regval;
 
   /* Disable all interrupts so that we have exclusive access to the GINTMSK
-   * (it would be sufficent just to disable the GINT interrupt).
+   * (it would be sufficient just to disable the GINT interrupt).
    */
 
   flags = enter_critical_section();

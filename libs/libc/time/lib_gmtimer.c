@@ -260,7 +260,7 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
         }
       else
         {
-          /* No... The one we want is somwhere between value+1 and max */
+          /* No... The one we want is somewhere between value+1 and max */
 
           min = value + 1;
         }

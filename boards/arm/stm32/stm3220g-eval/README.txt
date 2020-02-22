@@ -540,7 +540,7 @@ Where <subdir> is one of the following:
   -------
 
     This configuration directory may be used to verify networking performance
-    using the STM32's Ethernet controller. It uses apps/examples/nettest to excercise the
+    using the STM32's Ethernet controller. It uses apps/examples/nettest to exercise the
     TCP/IP network.
 
     CONFIG_EXAMPLES_NETTEST_SERVER=n                       : Target is configured as the client

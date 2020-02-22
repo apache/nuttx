@@ -939,7 +939,7 @@ off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
         }
     }
 
-  /* There is no cluster information, or an error occured */
+  /* There is no cluster information, or an error occurred */
 
   return (off_t)-EINVAL;
 }

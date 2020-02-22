@@ -632,7 +632,7 @@ o SMP
                  the g_csection_wait[] needs to be moved back to
                  g_readytorun[].
               - This may result in a context switch.  The tasks should be
-                 moved back to g_readytorun[] higest priority first.  If a
+                 moved back to g_readytorun[] highest priority first.  If a
                  context switch occurs and the critical section to re-taken
                  by the re-started task, the lower priority tasks in
                  g_csection_wait[] must stay in that list.
@@ -1124,7 +1124,7 @@ o Kernel/Protected Build
                via a system call at high rates.
 
   Title:       SIGNAL ACTION VULNERABILITY
-  Description: When a signal action is peformed, the user stack is used.
+  Description: When a signal action is performed, the user stack is used.
                Unlike Linux, applications do not have separate user and
                supervisor stacks; everything is done on the user stack.
 

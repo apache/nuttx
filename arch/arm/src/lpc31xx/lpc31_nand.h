@@ -236,7 +236,7 @@
 #  define NAND_CONFIG_LC_0WAITSTATES      (0 << NAND_CONFIG_LC_SHIFT)
 #  define NAND_CONFIG_LC_1WAITSTATES      (1 << NAND_CONFIG_LC_SHIFT)
 #  define NAND_CONFIG_LC_2WAITSTATES      (2 << NAND_CONFIG_LC_SHIFT)
-#define NAND_CONFIG_ES                    (1 << 4)  /* Bit 4:  Endianess setting */
+#define NAND_CONFIG_ES                    (1 << 4)  /* Bit 4:  Endianness setting */
 #define NAND_CONFIG_DE                    (1 << 3)  /* Bit 3:  DMA external enable */
 #define NAND_CONFIG_AO                    (1 << 2)  /* Bit 2:  AES on (LPC3154 only) */
 #define NAND_CONFIG_WD                    (1 << 1)  /* Bit 1:  Wide device */

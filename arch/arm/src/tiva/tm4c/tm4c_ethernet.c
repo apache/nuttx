@@ -1492,7 +1492,7 @@ static void tiva_freesegment(FAR struct tiva_ethmac_s *priv,
       rxdesc = (struct emac_rxdesc_s *)rxdesc->rdes3;
     }
 
-  /* Reset the segment managment logic */
+  /* Reset the segment management logic */
 
   priv->rxcurr   = NULL;
   priv->segments = 0;
@@ -4220,7 +4220,7 @@ void up_netinitialize(void)
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
  *   arg     - The argument that will accompany the interrupt
- *   enable  - A function pointer that be unsed to enable or disable the
+ *   enable  - A function pointer that be unused to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:

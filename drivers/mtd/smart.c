@@ -309,8 +309,8 @@ struct smart_sect_header_s
   uint8_t               seq;              /* Incrementing sequence number */
   uint8_t               crc8;             /* CRC-8 or seq number MSB */
   uint8_t               status;           /* Status of this sector:
-                                           * Bit 7:   1 = Not commited
-                                           *          0 = commited
+                                           * Bit 7:   1 = Not committed
+                                           *          0 = committed
                                            * Bit 6:   1 = Not released
                                            *          0 = released
                                            * Bit 5:   Sector CRC enable
@@ -328,8 +328,8 @@ struct smart_sect_header_s
   uint8_t               logicalsector[2]; /* The logical sector number */
   uint8_t               crc16[2];         /* CRC-16 for this sector */
   uint8_t               status;           /* Status of this sector:
-                                           * Bit 7:   1 = Not commited
-                                           *          0 = commited
+                                           * Bit 7:   1 = Not committed
+                                           *          0 = committed
                                            * Bit 6:   1 = Not released
                                            *          0 = released
                                            * Bit 5:   Sector CRC enable
@@ -354,8 +354,8 @@ struct smart_sect_header_s
   uint8_t               logicalsector[4]; /* The logical sector number */
   uint8_t               crc32[4];         /* CRC-32 for this sector */
   uint8_t               status;           /* Status of this sector:
-                                           * Bit 7:   1 = Not commited
-                                           *          0 = commited
+                                           * Bit 7:   1 = Not committed
+                                           *          0 = committed
                                            * Bit 6:   1 = Not released
                                            *          0 = released
                                            * Bit 5:   Sector CRC enable
@@ -1070,7 +1070,7 @@ static int smart_geometry(FAR struct inode *inode, struct geometry *geometry)
  * Name: smart_setsectorsize
  *
  * Description: Sets the device's sector size and recalculates sector size
- *              dependant variables.
+ *              dependent variables.
  *
  ****************************************************************************/
 
@@ -1103,7 +1103,7 @@ static int smart_setsectorsize(FAR struct smart_struct_s *dev, uint16_t size)
 
   if (erasesize / dev->sectorsize > 256)
     {
-      /* We can't throw a error message here becasue it is too early.
+      /* We can't throw a error message here because it is too early.
        * set the erasesize to zero and exit, then we will detect
        * it during mksmartfs or mount.
        */
@@ -1934,7 +1934,7 @@ static int smart_scan(FAR struct smart_struct_s *dev)
 
   /* Find the sector size on the volume by reading headers from
    * sectors of decreasing size.  On a formatted volume, the sector
-   * size is saved in the header status byte of seach sector, so
+   * size is saved in the header status byte of search sector, so
    * by starting with the largest supported sector size and
    * decreasing from there, we will be sure to find data that is
    * a header and not sector data.
@@ -2076,7 +2076,7 @@ static int smart_scan(FAR struct smart_struct_s *dev)
           continue;
         }
 
-      /* This block is commited, therefore not free.  Update the
+      /* This block is committed, therefore not free.  Update the
        * erase block's freecount.
        */
 

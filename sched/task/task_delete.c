@@ -122,7 +122,7 @@ int task_delete(pid_t pid)
    * threads.
    *
    * REVISIT: We will need to look at this again in the future if/when
-   * permissions are supported and a user task might also be priveleged.
+   * permissions are supported and a user task might also be privileged.
    */
 
   if (((rtcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&

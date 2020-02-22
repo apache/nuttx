@@ -75,7 +75,7 @@ typedef struct LPC_SPIFI_CHIPHW {
 	volatile    uint32_t STAT;				/**< SPIFI status register */
 } LPC_SPIFI_CHIPHW_T;
 
-/** @defgroup LPCSPIFILIB_HW_PRIM LPCSPIFILIB primative API functions
+/** @defgroup LPCSPIFILIB_HW_PRIM LPCSPIFILIB primitive API functions
  * @{
  */
 

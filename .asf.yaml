@@ -2,9 +2,9 @@ github:
   description: "Apache NuttX is a mature, real-time embedded operating system (RTOS)"
   homepage: https://nuttx.apache.org/
   features:
-    # Enable issues managment
+    # Enable issues management
     issues: true
-    # Enable project for project managment boards
+    # Enable project for project management boards
     projects: true
   labels:
     - nuttx

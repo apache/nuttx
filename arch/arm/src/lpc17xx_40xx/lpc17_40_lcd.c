@@ -366,7 +366,7 @@ static int lpc17_40_putcmap(FAR struct fb_vtable_s *vtable,
                    (uint32_t)cmap->blue[i+1]  << LCD_PAL_B1_SHIFT);
         }
 
-      /* Save the new pallete value */
+      /* Save the new palette value */
 
       *pal++ = (rgb0 | rgb1);
     }

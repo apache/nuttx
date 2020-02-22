@@ -171,7 +171,7 @@ int board_app_initialize(uintptr_t arg)
     }
 
   syslog(LOG_INFO,
-         "Successfuly bound SSP port %d to MMC/SD slot %d\n",
+         "Successfully bound SSP port %d to MMC/SD slot %d\n",
          CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 #endif
 

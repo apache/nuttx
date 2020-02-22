@@ -503,7 +503,7 @@ void seq_setaddress(FAR struct seq_s *seq, uint32_t slave_addr);
  *
  * This function use 'oneshot' feature on SCU. So user unnecessary to specify
  * any opened sequencer.
- * This function usefull for accessing register directly.
+ * This function useful for accessing register directly.
  *
  * param [in]  slavesel : Slave select
  * param [in]  inst     : Sequencer instruction
@@ -523,7 +523,7 @@ int scu_spitransfer(int slavesel, uint16_t *inst, uint32_t nr_insts,
  *
  * This function use 'oneshot' feature on SCU. So user unnecessary to
  * specify any opened sequencer.
- * This function usefull for accessing register directly.
+ * This function useful for accessing register directly.
  *
  * param [in]  port     : I2C port (0 or 1)
  * param [in]  slave    : Slave address

@@ -63,7 +63,7 @@ extern "C"
  *
  * Description:
  *   Initialize the log header where the address and size of each log area
- *   are decribed. If the log header has been already configured as a wakeup
+ *   are described. If the log header has been already configured as a wakeup
  *   from sleeping or reboot case, then do nothing and return OK.
  *
  * Returned Value:

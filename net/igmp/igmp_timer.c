@@ -137,7 +137,7 @@ static void igmp_timeout_work(FAR void *arg)
           nerr("ERROR: Failed to schedule message: %d\n", ret);
         }
 
-      /* Also note:  The Membership Report is sent at most two times becasue
+      /* Also note:  The Membership Report is sent at most two times because
        * the timer is not reset here.  Hmm.. does this mean that the group
        * is stranded if both reports were lost?  This is consistent with the
        * RFC that states: "To cover the possibility of the initial Membership

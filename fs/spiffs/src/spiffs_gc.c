@@ -864,7 +864,7 @@ static int spiffs_gc_clean(FAR struct spiffs_s *fs, int16_t blkndx)
             }
           else
             {
-              /* No more data pages found, passed thru all block, start
+              /* No more data pages found, passed through all block, start
                * evacuating object indices
                */
 

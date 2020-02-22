@@ -77,7 +77,7 @@
 
 #define LPC17_40_IRQ_EXTINT        (16) /* Vector number of the first external interrupt */
 
-/* Family Specfic Interrupts */
+/* Family Specific Interrupts */
 
 #if defined(LPC176x)                 /* LPC175/6 family */
 #  include <arch/lpc17xx_40xx/lpc176x_irq.h>

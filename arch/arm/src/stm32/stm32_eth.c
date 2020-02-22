@@ -1492,7 +1492,7 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
       rxdesc = (struct eth_rxdesc_s *)rxdesc->rdes3;
     }
 
-  /* Reset the segment managment logic */
+  /* Reset the segment management logic */
 
   priv->rxcurr   = NULL;
   priv->segments = 0;

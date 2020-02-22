@@ -200,7 +200,7 @@
 
 struct pcd8544_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 

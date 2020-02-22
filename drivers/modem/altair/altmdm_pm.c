@@ -1365,14 +1365,14 @@ int altmdm_pm_wakeup(FAR struct altmdm_dev_s *priv)
         }
       else
         {
-          m_err("ERR:%04d unexpected event occurr. state:%d.\n",
+          m_err("ERR:%04d unexpected event occur. state:%d.\n",
                 __LINE__, modem_state);
         }
 
       break;
 
     default:
-      m_err("ERR:%04d unexpected event occurr. state:%d.\n",
+      m_err("ERR:%04d unexpected event occur. state:%d.\n",
             __LINE__, modem_state);
     }
 

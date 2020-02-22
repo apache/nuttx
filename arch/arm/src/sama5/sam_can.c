@@ -1529,7 +1529,7 @@ static void can_interrupt(int irq, void *context, FAR void *arg)
  *   1. Synchronization segment (SYNC_SEG): a bit change is expected to occur
  *      within this time segment. It has a fixed length of one time quantum
  *      (1 x tCAN).
- *   2. Propogation segment (PROP_SEG):  This part of the bit time is used
+ *   2. Propagation segment (PROP_SEG):  This part of the bit time is used
  *      to compensate for the physical delay times within the network. It is
  *      twice the sum of the signal’s propagation time on the bus line, the
  *      input comparator delay, and the output driver delay. It is

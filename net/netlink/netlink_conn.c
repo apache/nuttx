@@ -501,7 +501,7 @@ int netlink_notify_response(FAR struct socket *psock)
         }
       else
         {
-          /* Wait for a reponse to be queued */
+          /* Wait for a response to be queued */
 
           _netlink_semtake(&waitsem);
         }

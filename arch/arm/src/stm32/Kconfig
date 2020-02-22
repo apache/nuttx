@@ -8758,7 +8758,7 @@ config STM32_HCIUART_SW_RXFLOW
 		If HCI UART DMA is enabled, this is probably the better selection
 		as well. In that case, the Rx DMA buffer will avoid Rx overrun due
 		to short, bursty activity.  Software RTS management will probably
-		result in overall better throughput and shoudl still avoid Rx data
+		result in overall better throughput and should still avoid Rx data
 		overrun conditions.
 
 config STM32_HCIUART_UPPER_WATERMARK

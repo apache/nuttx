@@ -121,11 +121,11 @@
 
 #define ADC_VAL_MAX     4095
 
-/* Input voltage convertion ratio - 6.8k/(6.8k + 27k) */
+/* Input voltage conversion ratio - 6.8k/(6.8k + 27k) */
 
 #define V_IN_RATIO (float)((float)(6800+27000)/(float)6800)
 
-/* Output voltage convertion ratio - 3.3k/(3.3k + 13.3k) */
+/* Output voltage conversion ratio - 3.3k/(3.3k + 13.3k) */
 
 #define V_OUT_RATIO (float)((float)(3300+13300)/(float)3300)
 

@@ -619,7 +619,7 @@ Configuration sub-directories
         Initial testing shows the same basic behavior as noted before:
         The UDP test works and TCP test (usually) works.  There are,
         however, are errors in reported by the hub in the TCP test.
-        Occassionally the test will hang when ther server echoes the data
+        Occasionally the test will hang when the server echoes the data
         back to the client.  These errors are presumably the result of ACKs
         from the receiver colliding with frames from the sender.
 

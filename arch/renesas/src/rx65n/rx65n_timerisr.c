@@ -71,7 +71,7 @@
  *
  * These must be selected so that the frequency of interrupt generation is
  * CLK_TCK.  Ideally, we would like to use the full range of GRA0 for better
- * timing acuracy:
+ * timing accuracy:
  */
 
 /* The ideal divider would be one that generates exactly 65535 ticks in

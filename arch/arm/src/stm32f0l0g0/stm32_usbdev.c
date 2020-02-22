@@ -258,8 +258,8 @@
 enum stm32_ep0state_e
 {
   EP0STATE_IDLE = 0,        /* No request in progress */
-  EP0STATE_SETUP_OUT,       /* Set up recived with data for device OUT in progress */
-  EP0STATE_SETUP_READY,     /* Set up was recived prior and is in ctrl,
+  EP0STATE_SETUP_OUT,       /* Set up received with data for device OUT in progress */
+  EP0STATE_SETUP_READY,     /* Set up was received prior and is in ctrl,
                              * now the data has arrived */
   EP0STATE_WRREQUEST,       /* Write request in progress */
   EP0STATE_RDREQUEST,       /* Read request in progress */
@@ -351,7 +351,7 @@ struct stm32_usbdev_s
    *   ep0data[] before the SETUP command is re-processed.
    *
    * ep0datlen
-   *   Lenght of OUT DATA received in ep0data[]
+   *   Length of OUT DATA received in ep0data[]
    */
 
   struct usb_ctrlreq_s   ctrl;          /* Last EP0 request */

@@ -631,7 +631,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 #ifdef CONFIG_NET_ETHERNET
           /* REVISIT:  For Ethernet we may have to fix up the Ethernet header:
            * - source MAC, the MAC of the current device.
-           * - dest MAC, the MAC associated with the destination IPv6 adress.
+           * - dest MAC, the MAC associated with the destination IPv6 address.
            *   This  will involve ICMPv6 and Neighbor Discovery.
            */
 

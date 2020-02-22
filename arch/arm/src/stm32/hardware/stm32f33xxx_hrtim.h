@@ -48,14 +48,14 @@
  * Pre-processor Definitions
  ****************************************************************************************************/
 
-#define STM32_HRTIM_MASTER_OFFSET       0x0000      /* HRTIM Master Timer base adress offset */
-#define STM32_HRTIM_TIMERA_OFFSET       0x0080      /* HRTIM Timer A base adress offset */
-#define STM32_HRTIM_TIMERB_OFFSET       0x0100      /* HRTIM Timer B base adress offset */
-#define STM32_HRTIM_TIMERC_OFFSET       0x0180      /* HRTIM Timer C base adress offset */
-#define STM32_HRTIM_TIMERD_OFFSET       0x0200      /* HRTIM Timer D base adress offset */
-#define STM32_HRTIM_TIMERE_OFFSET       0x0280      /* HRTIM Timer E base adress offset */
+#define STM32_HRTIM_MASTER_OFFSET       0x0000      /* HRTIM Master Timer base address offset */
+#define STM32_HRTIM_TIMERA_OFFSET       0x0080      /* HRTIM Timer A base address offset */
+#define STM32_HRTIM_TIMERB_OFFSET       0x0100      /* HRTIM Timer B base address offset */
+#define STM32_HRTIM_TIMERC_OFFSET       0x0180      /* HRTIM Timer C base address offset */
+#define STM32_HRTIM_TIMERD_OFFSET       0x0200      /* HRTIM Timer D base address offset */
+#define STM32_HRTIM_TIMERE_OFFSET       0x0280      /* HRTIM Timer E base address offset */
                                                     /* 0x300-0x37F: Reserved */
-#define STM32_HRTIM_CMN_OFFSET          0x0380      /* HRTIM Common registers base adress offset */
+#define STM32_HRTIM_CMN_OFFSET          0x0380      /* HRTIM Common registers base address offset */
 
 #define STM32_HRTIM1_MASTER_BASE        (STM32_HRTIM_MASTER_OFFSET+STM32_HRTIM1_BASE)
 #define STM32_HRTIM1_TIMERA_BASE        (STM32_HRTIM_TIMERA_OFFSET+STM32_HRTIM1_BASE)

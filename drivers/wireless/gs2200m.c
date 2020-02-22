@@ -633,7 +633,7 @@ static bool _copy_data_from_pkt(FAR struct gs2200m_dev_s *dev,
       goto errout;
     }
 
-  /* Copy the pkt data to msg buffer upto MIN(request - len, remain) */
+  /* Copy the pkt data to msg buffer up to MIN(request - len, remain) */
 
   len = MIN(msg->reqlen - msg->len, pkt_dat->remain);
   off = pkt_dat->len - pkt_dat->remain;

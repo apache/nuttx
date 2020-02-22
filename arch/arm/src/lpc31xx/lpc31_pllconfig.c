@@ -69,7 +69,7 @@
  * Name: lpc31_switchdomains
  *
  * Description:
- *   Temporarily switch the referemce clock of all domains whose selected
+ *   Temporarily switch the reference clock of all domains whose selected
  *   input is the PLL-to-be configured .
  *
  ****************************************************************************/

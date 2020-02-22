@@ -62,8 +62,8 @@ PIC32MX460F512L Pin Out
   ---- ----------------------------  -------------------------------------------------------
   PIN  NAME                          Board Connection (omitting pins brought to J3 and J4)
   ---- ----------------------------  -------------------------------------------------------
-   26  PGEC2/AN6/OCFA/RB6            PGC    ICSP/Debug/IO (J5) pin 5 (labled PGC)
-   27  PGED2/AN7/RB7                 PGD    ICSP/Debug/IO (J5) pin 4 (labled PGD)
+   26  PGEC2/AN6/OCFA/RB6            PGC    ICSP/Debug/IO (J5) pin 5 (labeled PGC)
+   27  PGED2/AN7/RB7                 PGD    ICSP/Debug/IO (J5) pin 4 (labeled PGD)
    28  VREF-/CVREF-/PMA7/RA9
    29  VREF+/CVREF+/PMA6/RA10
    30  AVdd

@@ -43,7 +43,7 @@ config LCD_FRAMEBUFFER
 		standard, NuttX frame buffer driver.
 
 		NOTE: Some LCD drivers implement an internal framebuffer for
-		effeciency reasons but do not export a framebuffer interface.  So
+		efficiency reasons but do not export a framebuffer interface.  So
 		those LCD cannot be used as framebuffer drivers.  If the option is
 		available, then such internal framebuffer support should be
 		disabled because this external common framebuffer interface will
@@ -67,7 +67,7 @@ config LCD_NOGETRUN
 	default n
 	---help---
 		Many LCD hardware interfaces provide only minimal graphics capability.  In
-		particulary, many simple LCD interfaces are write only.  That is we, can
+		particularly, many simple LCD interfaces are write only.  That is we, can
 		write graphics data to the LCD device memory, but we cannot read it back.
 		If the LCD hardware does not support reading the graphics memory, then
 		this option should be defined so that the NX layer can taking alternative

@@ -416,7 +416,7 @@ static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
 
   if (header->response)
     {
-      /* Get write-cmd reponse, this tell how many data have sent */
+      /* Get write-cmd response, this tell how many data have sent */
 
       dev->dmatx.nbytes = header->result;
       if (header->result < 0)

@@ -139,7 +139,7 @@ static int nxterm_open(FAR struct file *filep)
 #endif
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  /* Increment the count of open file references */
+  /* Increment the count of open file reference */
 
   DEBUGASSERT(priv->orefs != UINT8_MAX);
   priv->orefs++;
@@ -174,7 +174,7 @@ static int nxterm_close(FAR struct file *filep)
       return ret;
     }
 
-  /* Has the driver been unlinked?  Was this the last open refernce to the
+  /* Has the driver been unlinked?  Was this the last open references to the
    * terminal driver?
    */
 

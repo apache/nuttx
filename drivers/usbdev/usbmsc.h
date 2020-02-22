@@ -678,7 +678,7 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
  *   2. USB_REQ_SETINTERFACE, or
  *   3. USBMSC_REQ_MSRESET
  *
- *   In all cases, the success reponse is a zero-length packet; the failure
+ *   In all cases, the success response is a zero-length packet; the failure
  *   response is an EP0 stall.
  *
  * Input Parameters:

@@ -229,7 +229,7 @@ static void ads7843e_unlock(FAR struct spi_dev_s *spi)
  *                                 DFR
  *   START      CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
  *   CMD
- *   Aquisition                    AAAAAAAAAAA
+ *   Acquisition                    AAAAAAAAAAA
  *   TIME
  *   BUSY                                     BBBBBBBB
  *   Reported

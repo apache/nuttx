@@ -373,7 +373,7 @@ struct mld_mcast_listen_done_s
 };
 
 /* This structure represents the overall MLD state for a single network.
- * This structure in included withing the net_driver_s structure.
+ * This structure in included within the net_driver_s structure.
  *
  * There will be a group for the all systems group address but this
  * will not run the state machine as it is used to kick off reports

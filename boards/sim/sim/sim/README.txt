@@ -549,7 +549,7 @@ configdata
 
 cxxtest
 
-  The C++ standard libary test at apps/testing/cxxtest configuration.  This
+  The C++ standard library test at apps/testing/cxxtest configuration.  This
   test is used to verify the uClibc++ port to NuttX.
 
   NOTES

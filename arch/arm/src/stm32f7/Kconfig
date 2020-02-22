@@ -806,7 +806,7 @@ config STM32F7_STM32F767XX
 	select STM32F7_HAVE_CAN2
 	select STM32F7_HAVE_SPI4
 
-config STM32F7_STM32F768XX # Revisit Wehn parts released
+config STM32F7_STM32F768XX # Revisit When parts released
 	bool
 	default n
 	select STM32F7_STM32F76XX
@@ -2050,7 +2050,7 @@ config STM32F7_FLOWCONTROL_BROKEN
 		Enable UART RTS flow control using Software. Because STM
 		Current STM32 have broken HW based RTS behavior (they assert
 		nRTS after every byte received)  Enable this setting workaround
-		this issue by useing software based management of RTS
+		this issue by using software based management of RTS
 
 config STM32F7_USART_BREAKS
 	bool "Add TIOxSBRK to support sending Breaks"

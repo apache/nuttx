@@ -177,7 +177,7 @@ static sem_t g_clockexc = SEM_INITIALIZER(1);
  *  swreset    : SWRESET_SCU
  *  crgintmask : CRG_INT_CLR0, CRG_INT_STAT_RAW0
  *
- * Each member values are indicated the number of bit in apropriate registers.
+ * Each member values are indicated the number of bit in appropriate registers.
  */
 
 #if defined(CONFIG_CXD56_SPI3)

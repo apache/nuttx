@@ -379,7 +379,7 @@ static int (*g_cmdlist[CXD56_GNSS_IOCTL_MAX])(FAR struct file *filep,
  * Description:
  *   Process CXD56_GNSS_IOCTL_START command.
  *   Start a positioning
- *   begining to search the satellites and measure the receiver position
+ *   beginning to search the satellites and measure the receiver position
  *
  * Input Parameters:
  *   filep - File structure pointer

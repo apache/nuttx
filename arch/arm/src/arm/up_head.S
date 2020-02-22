@@ -535,7 +535,7 @@ __start:
 	 *
 	 *   R4 = Virtual address of the page table
 	 *   R3 = Physical address of the NuttX execution space (aligned to a
-	 *        one megabyte addres boundary
+	 *        one megabyte address boundary
 	 */
 
 #ifdef CONFIG_IDENTITY_TEXTMAP

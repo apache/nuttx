@@ -100,7 +100,7 @@ int stmpe811_tempinitialize(STMPE811_HANDLE handle)
 
   stmpe811_putreg8(priv, STMPE811_TEMP_CTRL, TEMP_CTRL_ENABLE);
 
-  /* Aquire data enable */
+  /* Acquire data enable */
 
   stmpe811_putreg8(priv, STMPE811_TEMP_CTRL,
                    (TEMP_CTRL_ACQ | TEMP_CTRL_ENABLE));

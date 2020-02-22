@@ -764,7 +764,7 @@ struct adc_outterm_desc_s
   uint8_t ot_termtype[2];       /* 4: Terminal type */
   uint8_t ot_interm;            /* 6: ID of the associated input terminal */
   uint8_t ot_srcid;             /* 7: ID of unit/terminal to which terminal is connected */
-  uint8_t ot_csrcid;            /* 8: ID of clock entity to whcih terminal is connected */
+  uint8_t ot_csrcid;            /* 8: ID of clock entity to which terminal is connected */
   uint8_t ot_controls[2];       /* 9: Bits 0-1: Copy protect control,
                                  *    Bits 2-3: Connector control
                                  *    Bits 4-5: Overload control

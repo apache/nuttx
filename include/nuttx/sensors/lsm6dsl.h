@@ -205,7 +205,7 @@
 /****************************************************************************************************
  * Register Bit Definitions
  *
- * For this sensor it is choosen to not define each pin individually...its set bitwise like:
+ * For this sensor it is chosen to not define each pin individually...its set bitwise like:
  * 0b000[0]0000 with preferred hex value! Where [] is showing the [not defined in datasheet] bit.
  * A complete definition is written below, just not all registers are validated!!
  *

@@ -305,7 +305,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
     1. Install Cygwin (http://www.cygwin.com/).  My recommendation is to install
        everything.  There are many tools you will need and it is best just to
-       waste a little disk space and have everthing you need.  Everything will
+       waste a little disk space and have everything you need.  Everything will
        require a couple of gigbytes of disk space.
 
     2. Create a directory /home/OpenOCD.
@@ -794,7 +794,7 @@ Configuration Sub-Directories
 
   nettest:
     This configuration directory may be used to enable networking using the
-    LPC17xx/LPC40xx's Ethernet controller. It uses apps/examples/nettest to excercise the
+    LPC17xx/LPC40xx's Ethernet controller. It uses apps/examples/nettest to exercise the
     TCP/IP network.
 
   nsh:

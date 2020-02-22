@@ -509,7 +509,7 @@ def main():
 	do_wait_reset = True
 	if ConfigArgs.AUTO_RESET:
 		if subprocess.call("cd " + sys.path[0] + "; ./reset_board.sh", shell=True) == 0:
-			print("auto reset board sucess!!")
+			print("auto reset board success!!")
 			do_wait_reset = False
 			bootrom_msg = writer.cancel_autoboot()
 

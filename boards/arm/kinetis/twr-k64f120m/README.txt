@@ -76,7 +76,7 @@ Accelerometer        I2C SDA                   PTC11    I2C1_SDA
 
 SDHC important notice: on TWR-K64F120M, R521 (close to the SD card holder) is not placed,
 hence WRPROTEC is always ON. Either place a 4.7KOhm resistor or change PIN config
-to PULLDOWN, loosing Write Protect function. See twrk64.h.
+to PULLDOWN, losing Write Protect function. See twrk64.h.
 
 Connections via the General Purpose Tower Plug-in (TWRPI) Socket
 -------------------- ------------------------- -------- -------------------
@@ -134,9 +134,9 @@ Networking Support
    9  REFCLK   CLK_SEL J2: CLOCKOUT0/25MHz/50MHz, PHY clock input         PTC3/CLKOUT                    ---            direct to PHY
   11  MDIO     FEC_MDIO                                                   PTB0/RMII0_MDIO/MII0_MDIO      PIN_MII0_MDIO  PIN_RMII0_MDIO
   12  MDC      FEC_MDC                                                    PTB1/RMII0_MDC/MII0_MDC        PIN_MII0_MDC   PIN_RMII0_MDC
-  13  PHYAD0   FEC_RXD3 J12: PHY Adress select (pull-down if set)         PTA9/MII0_RXD3                 PIN_RMII0_RXD3 ---
-  14  PHYAD1   FEC_RXD2 J12: PHY Adress select (pull-up if set)           PTA10/MII0_RXD2                PIN_RMII0_RXD2 ---
-  15  PHYAD2   FEC_RXD1 J12: PHY Adress select (pull-up if set)           PTA12/RMII0_RXD1/MII0_RXD1     PIN_MII0_RXD1  PIN_RMII0_RXD1
+  13  PHYAD0   FEC_RXD3 J12: PHY Address select (pull-down if set)         PTA9/MII0_RXD3                 PIN_RMII0_RXD3 ---
+  14  PHYAD1   FEC_RXD2 J12: PHY Address select (pull-up if set)           PTA10/MII0_RXD2                PIN_RMII0_RXD2 ---
+  15  PHYAD2   FEC_RXD1 J12: PHY Address select (pull-up if set)           PTA12/RMII0_RXD1/MII0_RXD1     PIN_MII0_RXD1  PIN_RMII0_RXD1
   16  DUPLEX   FEC_RXD0 J12: Half-duplex (pull-down if set)               PTA13/RMII0_RXD0/MII0_RXD0     PIN_MII0_RXD0  PIN_RMII0_RXD0
   18  CONFIG2  FEC_RXDV J12: Loopback select (pull-up if set)             PTA14/RMII0_CRS_DV/MII0_RXDV   PIN_MII0_RXDV  PIN_RMII0_CRS_DV
   19  RXC      FEC_RXCLK                                                  PTA11/MII0_RXCLK               PIN_MII0_RXCLK ---
@@ -343,7 +343,7 @@ Networking Support
       need to provide some custom logic in the Freedcom K64F
       configuration to set up that PHY interrupt.
 
-    - In addtion to the PHY interrupt, the Network Monitor also requires the
+    - In addition to the PHY interrupt, the Network Monitor also requires the
       following setting:
 
         CONFIG_NETDEV_PHY_IOCTL. Enable PHY IOCTL commands in the Ethernet
@@ -408,7 +408,7 @@ as follows:
 TWR-K64F120M-specific Configuration Options
 ==========================================
 
-    CONFIG_ARCH - Identifies the arch/ subdirectory.  This sould
+    CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
 
        CONFIG_ARCH=arm

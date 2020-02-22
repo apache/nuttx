@@ -547,7 +547,7 @@ void esp32_free_cpuint(int cpuint)
  * Name:  esp32_attach_peripheral
  *
  * Description:
- *   Attach a peripheral interupt to a CPU interrupt.
+ *   Attach a peripheral interrupt to a CPU interrupt.
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
@@ -593,7 +593,7 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint)
  * Name:  esp32_detach_peripheral
  *
  * Description:
- *   Detach a peripheral interupt from a CPU interrupt.
+ *   Detach a peripheral interrupt from a CPU interrupt.
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU

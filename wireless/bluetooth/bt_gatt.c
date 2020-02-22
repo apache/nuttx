@@ -751,7 +751,7 @@ int bt_gatt_discover(FAR struct bt_conn_s *conn,
         break;
 
       default:
-        wlerr("ERROR: Unkown UUID type %u\n", params->uuid->type);
+        wlerr("ERROR: Unknown UUID type %u\n", params->uuid->type);
         bt_buf_release(buf);
         return -EINVAL;
     }

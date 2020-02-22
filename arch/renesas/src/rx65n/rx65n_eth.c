@@ -1354,7 +1354,7 @@ static void rx65n_freesegment(FAR struct rx65n_ethmac_s *priv,
       rx65n_putreg(0x00000001, RX65N_ETHD_EDRRR);
     }
 
-  /* Reset the segment managment logic */
+  /* Reset the segment management logic */
 
   priv->rxcurr   = NULL;
   priv->segments = 0;
@@ -2865,7 +2865,7 @@ static void rx65n_phyintenable(bool enable)
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
  *   arg     - The argument that will accompany the interrupt
- *   enable  - A function pointer that be unsed to enable or disable the
+ *   enable  - A function pointer that be unused to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:

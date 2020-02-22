@@ -37,7 +37,7 @@
 
 ifeq ($(CONFIG_NET_BLUETOOTH),y)
 
-# Initialization / resource managment
+# Initialization / resource management
 
 NET_CSRCS  += bluetooth_initialize.c
 NET_CSRCS  += bluetooth_conn.c

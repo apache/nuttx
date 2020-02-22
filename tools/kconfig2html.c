@@ -708,7 +708,7 @@ static char *read_line(FILE *stream)
           g_line[len] = '\0';
         }
 
-      /* Does this continue on the next line?  Note taht this check
+      /* Does this continue on the next line?  Note that this check
        * could erroneoulsy combine two lines if a comment line ends with
        * a line continuation... Don't do that!
        */

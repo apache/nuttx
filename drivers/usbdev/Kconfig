@@ -890,7 +890,7 @@ config CDCECM_EPINTIN
 endif # !CDCECM_COMPOSITE
 
 config CDCECM_EPINTIN_FSSIZE
-	int "Interupt IN full speed MAXPACKET size"
+	int "Interrupt IN full speed MAXPACKET size"
 	default 16
 	---help---
 		Max package size for the interrupt IN endpoint if full speed mode.
@@ -899,7 +899,7 @@ config CDCECM_EPINTIN_FSSIZE
 if USBDEV_DUALSPEED
 
 config CDCECM_EPINTIN_HSSIZE
-	int "Interupt IN high speed MAXPACKET size"
+	int "Interrupt IN high speed MAXPACKET size"
 	default 64
 	---help---
 		Max package size for the interrupt IN endpoint if high speed mode.

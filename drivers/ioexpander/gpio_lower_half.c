@@ -57,7 +57,7 @@
 
 struct gplh_dev_s
 {
-  /* Publically visible lower-half state */
+  /* Publicly visible lower-half state */
 
   struct gpio_dev_s gpio;
 

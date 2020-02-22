@@ -3551,7 +3551,7 @@ static int pic32mx_epbdtstall(struct usbdev_ep_s *ep, bool resume, bool epin)
 
       /* Check for the EP0 OUT endpoint.  This is a special case because we
        * need to set it up to receive the next setup packet (Hmmm... what
-       * if there are queued outgoing reponses.  We need to revisit this.)
+       * if there are queued outgoing responses.  We need to revisit this.)
        */
 
       if (epno == 0 && !epin)

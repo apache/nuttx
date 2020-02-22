@@ -151,7 +151,7 @@ enum lfs_open_flags_e
   LFS_F_DIRTY   = 0x10000, /* File does not match storage */
   LFS_F_WRITING = 0x20000, /* File has been written since last flush */
   LFS_F_READING = 0x40000, /* File has been read since last flush */
-  LFS_F_ERRED   = 0x80000, /* An error occured during write */
+  LFS_F_ERRED   = 0x80000, /* An error occurred during write */
 };
 
 /* File seek flags */
@@ -655,7 +655,7 @@ int lfs_dir_rewind(FAR lfs_t *lfs, FAR lfs_dir_t *dir);
 int lfs_traverse(FAR lfs_t *lfs, CODE int (*cb)(FAR void *, lfs_block_t),
                  FAR void *data);
 
-/* Prunes any recoverable errors that may have occured in the filesystem
+/* Prunes any recoverable errors that may have occurred in the filesystem
  *
  * Not needed to be called by user unless an operation is interrupted
  * but the filesystem is still mounted. This is already called on first

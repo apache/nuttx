@@ -122,7 +122,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This is our private version of the MAC callback stucture */
+/* This is our private version of the MAC callback structure */
 
 struct xbeenet_callback_s
 {

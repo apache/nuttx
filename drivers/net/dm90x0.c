@@ -1524,7 +1524,7 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
-  /* Initilize DM90x0 chip */
+  /* Initialize DM90x0 chip */
 
   dm9x_bringup(priv);
 

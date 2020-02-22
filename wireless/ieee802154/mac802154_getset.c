@@ -145,7 +145,7 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
 
       default:
         {
-          /* The attribute may be handled soley in the radio driver, so pass
+          /* The attribute may be handled solely in the radio driver, so pass
            * it along.
            */
 
@@ -240,7 +240,7 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
         break;
       default:
         {
-          /* The attribute may be handled soley in the radio driver, so pass
+          /* The attribute may be handled solely in the radio driver, so pass
            * it along.
            */
 

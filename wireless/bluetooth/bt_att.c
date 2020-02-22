@@ -626,7 +626,7 @@ static uint8_t find_info_cb(FAR const struct bt_gatt_attr_s *attr,
             return BT_GATT_ITER_STOP;
           }
 
-        /* Fast foward to next item position */
+        /* Fast forward to next item position */
 
         data->u.info16         = bt_buf_extend(data->buf, sizeof(*data->u.info16));
         data->u.info16->handle = BT_HOST2LE16(attr->handle);
@@ -641,7 +641,7 @@ static uint8_t find_info_cb(FAR const struct bt_gatt_attr_s *attr,
             return BT_GATT_ITER_STOP;
           }
 
-        /* Fast foward to next item position */
+        /* Fast forward to next item position */
 
         data->u.info128         = bt_buf_extend(data->buf, sizeof(*data->u.info128));
         data->u.info128->handle = BT_HOST2LE16(attr->handle);
@@ -761,7 +761,7 @@ static uint8_t find_type_cb(FAR const struct bt_gatt_attr_s *attr,
       return data->group ? BT_GATT_ITER_STOP : BT_GATT_ITER_CONTINUE;
     }
 
-  /* Fast foward to next item position */
+  /* Fast forward to next item position */
 
   data->group               = bt_buf_extend(data->buf, sizeof(*data->group));
   data->group->start_handle = BT_HOST2LE16(attr->handle);
@@ -891,7 +891,7 @@ static uint8_t read_type_cb(FAR const struct bt_gatt_attr_s *attr,
 
   wlinfo("handle 0x%04x\n", attr->handle);
 
-  /* Fast foward to next item position */
+  /* Fast forward to next item position */
 
   data->item = bt_buf_extend(data->buf, sizeof(*data->item));
   data->item->handle = BT_HOST2LE16(attr->handle);

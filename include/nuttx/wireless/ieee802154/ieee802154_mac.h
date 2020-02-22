@@ -940,7 +940,7 @@ struct ieee802154_assoc_req_s
    * or not. Which means we don't know whether to tranmsit immediately or try
    * to track the beacon. The standard does say that ALL command frames should
    * be sent during the Contention Access Period (CAP), but how could you send
-   * it at the rigth tiem, if you are not tracking the beacon. What's worse is
+   * it at the rigth time, if you are not tracking the beacon. What's worse is
    * in the association section, it says if you are tracking the beacon, to
    * send the association request during the CAP. But how can you track the
    * beacon if you are not associated. Normally tracking the beacon would be
@@ -1678,7 +1678,7 @@ union ieee802154_primitive_u
   struct ieee802154_commstatus_ind_s  commstatusind;
   struct ieee802154_syncloss_ind_s    synclossind;
 
-  /* Foward link contained as first entry of all primitives */
+  /* Forward link contained as first entry of all primitives */
 
   FAR struct ieee802154_primitive_s *flink;
 };

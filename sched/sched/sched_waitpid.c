@@ -293,7 +293,7 @@ errout_with_errno:
 /****************************************************************************
  *
  * If CONFIG_SCHED_HAVE_PARENT is defined, then waitpid will use the SIGHCLD
- * signal.  It can also handle the pid == (pid_t)-1 arguement.  This is
+ * signal.  It can also handle the pid == (pid_t)-1 argument.  This is
  * slightly more spec-compliant.
  *
  * But then I have to be concerned about the fact that NuttX does not queue

@@ -321,7 +321,7 @@ static void ads7828_shutdown(FAR struct adc_dev_s *dev)
  * Name: ads7828_rxint
  *
  * Description:
- *   Needed for ADC upper-half compatability but conversion interrupts
+ *   Needed for ADC upper-half compatibility but conversion interrupts
  *   are not supported by the ADC7828.
  *
  ****************************************************************************/

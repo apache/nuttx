@@ -67,7 +67,7 @@
 
 #define SYSTICK_RELOAD ((SYSCLK_FREQUENCY / CLK_TCK) - 1)
 
-/* The size of the reload field is 24 bits.  Verify taht the reload value
+/* The size of the reload field is 24 bits.  Verify that the reload value
  * will fit in the reload register.
  */
 

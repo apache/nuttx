@@ -77,7 +77,7 @@
 
 struct vnc_fbinfo_s
 {
-  /* The publically visible frame buffer interface.  This must appear first
+  /* The publicly visible frame buffer interface.  This must appear first
    * so that struct vnc_fbinfo_s is cast compatible with struct fb_vtable_s.
    */
 

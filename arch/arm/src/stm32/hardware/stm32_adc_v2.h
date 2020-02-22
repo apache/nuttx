@@ -76,7 +76,7 @@
 #  undef HAVE_BASIC_ADC
 #endif
 
-/* F30X and F33x dont have CFGR2 register */
+/* F30X and F33x don't have CFGR2 register */
 
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
 #  undef HAVE_ADC_CFGR2

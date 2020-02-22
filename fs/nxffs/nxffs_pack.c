@@ -1299,7 +1299,7 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
       if (wrfile)
         {
           /* If there is a write, just set ioffset to the offset of data in
-           * first block. Setting 'packed' to true will supress normal inode
+           * first block. Setting 'packed' to true will suppress normal inode
            * packing operation.  Then we can start compacting the FLASH.
            */
 
@@ -1359,7 +1359,7 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
 
           if (iooffset + CONFIG_NXFFS_TAILTHRESHOLD < volume->froffset)
             {
-              /* Setting 'packed' to true will supress normal inode packing
+              /* Setting 'packed' to true will suppress normal inode packing
                * operation.
                */
 
