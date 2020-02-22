@@ -378,7 +378,7 @@ static void ez80_i2c_stop(void)
 
  *   Or <0: Negated error value.  IFLG is cleared.
  *
- *   -EIO: Irrecoverable (or unexpected) error occured
+ *   -EIO: Irrecoverable (or unexpected) error occurred
  *   -EAGAIN: And
  *
  ****************************************************************************/

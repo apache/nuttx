@@ -85,7 +85,7 @@
 
 /* Verify that all configuration requirements have been met */
 
-/* The UG-9664HSWAG01 spec says that is supports SPI mode 0,0 only.  However, somtimes
+/* The UG-9664HSWAG01 spec says that is supports SPI mode 0,0 only.  However, sometimes
  * you need to tinker with these things.
  */
 
@@ -213,7 +213,7 @@
 
 struct ug_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 

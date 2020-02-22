@@ -80,7 +80,7 @@ config CAN_TXREADY
 		that the hardware is ready to accept another transfer.
 
 		If the CAN hardware supports a H/W FIFO, can_txdone() is not
-		called when the tranfer is complete, but rather when the
+		called when the transfer is complete, but rather when the
 		transfer is queued in the H/W FIFO.  When the H/W FIFO becomes
 		full, then dev_txready() will report false and the number of
 		queued messages in the S/W FIFO will grow.

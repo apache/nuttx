@@ -438,7 +438,7 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
                 telnet_sendopt(priv, TELNET_DO, ch);
               }
 
-            /* Reply with a DONT */
+            /* Reply with a DON'T */
 
             else
 #endif

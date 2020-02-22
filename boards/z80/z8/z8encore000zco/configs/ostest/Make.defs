@@ -181,7 +181,7 @@ ARFLAGS = -quiet -warn
 
 LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)configs$(DELIM)ostest$(DELIM)ostest.linkcmd
 
-# Tool names/pathes
+# Tool names/paths
 
 CROSSDEV =
 CC = ez8cc.exe

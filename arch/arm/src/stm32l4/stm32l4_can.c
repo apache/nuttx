@@ -1901,7 +1901,7 @@ static int stm32l4can_cellinit(FAR struct stm32l4_can_s *priv)
  *   code will have to be imported from the STM32 port.
  *
  *   32-bit IdMask mode is configured.  However, both the ID and the MASK
- *   are set to zero thus supressing all filtering because anything masked
+ *   are set to zero thus suppressing all filtering because anything masked
  *   with zero matches zero.
  *
  * Input Parameters:

@@ -162,7 +162,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
   child = group_removechild(ogrp, chpid);
   if (child)
     {
-      /* Has the new parent's task group supressed child exit status? */
+      /* Has the new parent's task group suppressed child exit status? */
 
       if ((pgrp->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0)
         {
@@ -275,7 +275,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
   child = group_removechild(otcb->group, chpid);
   if (child)
     {
-      /* Has the new parent's task group supressed child exit status? */
+      /* Has the new parent's task group suppressed child exit status? */
 
       if ((ptcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0)
         {

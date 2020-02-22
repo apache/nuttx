@@ -195,7 +195,7 @@ struct float_sat_s
 
 typedef struct float_sat_s float_sat_t;
 
-/* PI/PID controler state structure */
+/* PI/PID controller state structure */
 
 struct pid_controller_s
 {

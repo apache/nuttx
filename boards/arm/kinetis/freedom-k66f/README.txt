@@ -375,7 +375,7 @@ Networking Support
       need to provide some custom logic in the Freedcom K66F
       configuration to set up that PHY interrupt.
 
-    - In addtion to the PHY interrupt, the Network Monitor also requires the
+    - In addition to the PHY interrupt, the Network Monitor also requires the
       following setting:
 
         CONFIG_NETDEV_PHY_IOCTL. Enable PHY IOCTL commands in the Ethernet
@@ -652,7 +652,7 @@ GNU Toolchain Options
 Freedom K66F Configuration Options
 ==================================
 
-    CONFIG_ARCH - Identifies the arch/ subdirectory.  This sould
+    CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
 
        CONFIG_ARCH=arm

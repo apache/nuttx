@@ -685,7 +685,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   /* FIXME: is there anyway to determine this
-   *        it should probably be board dependant anyway */
+   *        it should probably be board dependent anyway */
 
   return SPI_STATUS_PRESENT;
 }

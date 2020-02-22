@@ -519,7 +519,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
           conn->tx_unacked += sndlen;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-          /* For compability with buffered send logic */
+          /* For compatibility with buffered send logic */
 
           conn->sndseq_max = tcp_addsequence(conn->sndseq, conn->tx_unacked);
 #endif

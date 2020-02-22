@@ -66,7 +66,7 @@ SECTIONS
   .text 0x00000000 :
     {
       /* ISpace is located at address 0.  Every (unrelocated) ISpace
-       * address is an offset from the begining of this segment.
+       * address is an offset from the beginning of this segment.
        */
 
       text_start = . ;
@@ -102,7 +102,7 @@ SECTIONS
     } > ISPACE
 
     /* DSpace is also located at address 0.  Every (unrelocated) DSpace
-     * address is an offset from the begining of this segment.
+     * address is an offset from the beginning of this segment.
      */
 
   .data 0x00000000 :

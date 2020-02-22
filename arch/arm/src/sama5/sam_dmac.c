@@ -1782,7 +1782,7 @@ static int sam_dmac_interrupt(int irq, void *context, FAR void *arg)
   regval = sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET) &
            sam_getdmac(dmac, SAM_DMAC_EBCIMR_OFFSET);
 
-  /* Check if the any transfer has completed or any errors have ocurred. */
+  /* Check if the any transfer has completed or any errors have occurred. */
 
   if (regval & DMAC_EBC_ALLCHANINTS)
     {

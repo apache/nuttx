@@ -454,12 +454,12 @@ struct efm32_usbdev_s
    *   the accompanying EP0 IN data in ep0data[] before the SETUP command is
    *   processed.
    *
-   *   For IN SETUP requests, the DATA phase will occurr AFTER the SETUP
+   *   For IN SETUP requests, the DATA phase will occur AFTER the SETUP
    *   control request is processed.  In that case, ep0data[] may be used as
    *   the response buffer.
    *
    * ep0datlen
-   *   Lenght of OUT DATA received in ep0data[] (Not used with OUT data)
+   *   Length of OUT DATA received in ep0data[] (Not used with OUT data)
    */
 
   struct usb_ctrlreq_s    ctrlreq;
@@ -5206,7 +5206,7 @@ static void efm32_hwinitialize(FAR struct efm32_usbdev_s *priv)
    */
 
   /* I never saw this in original EFM32 lib
-   * and in refrence manual I found:
+   * and in reference manual I found:
    *    "Non-periodic TxFIFO Empty Level (can be enabled only when the core is
    *    operating in Slave mode as a host.)"
    */
@@ -5531,7 +5531,7 @@ void up_usbuninitialize(void)
 
   usbtrace(TRACE_DEVUNINIT, 0);
 
-  /* To be sure that usb ref are writen, turn on USB clocking */
+  /* To be sure that usb ref are written, turn on USB clocking */
 
   modifyreg32(EFM32_CMU_HFCORECLKEN0, 0,
               CMU_HFCORECLKEN0_USB | CMU_HFCORECLKEN0_USBC);

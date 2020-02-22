@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Set up pathes to binaries, scripts, configuration files
+# Set up paths to binaries, scripts, configuration files
 
 hostos=`uname -o 2>/dev/null || echo "Other"`
 if [ "X${hostos}" = "XCygwin" ]; then
@@ -67,7 +67,7 @@ done
 
 export options="-d 1"
 
-# Run OpenOCD -- here it is assumed (1) that you must have root priveleges to
+# Run OpenOCD -- here it is assumed (1) that you must have root privileges to
 # execute OpenOCD and (2) that your user is listed in the /etc/sudoers file.
 
 $SUDO $openocd $options -f $oocdcfg

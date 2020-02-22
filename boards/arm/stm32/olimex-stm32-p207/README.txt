@@ -29,6 +29,6 @@ The following peripherals are enabled in this configuration.
  - USB-HS_OTG: The other connector (device) is connected to the high speed
                STM32 inputs (not enabled).
 
- - CAN:        Built in app 'can' works, but appart from that not really tested.
+ - CAN:        Built in app 'can' works, but apart from that not really tested.
 
  - Ethernet:   Ping to other station on the network works.

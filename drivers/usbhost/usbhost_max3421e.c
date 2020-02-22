@@ -3502,7 +3502,7 @@ static int max3421e_enumerate(FAR struct usbhost_connection_s *conn,
 
   max3421e_lock(priv);
 
-#warning REVISIT:  Isnt this already done?
+#warning REVISIT:  Isn't this already done?
 
 #ifdef CONFIG_USBHOST_HUB
   if (ROOTHUB(hport))

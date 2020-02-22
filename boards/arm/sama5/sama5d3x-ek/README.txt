@@ -188,7 +188,7 @@ IDEs
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/arm/src/sam34,
+  3) Set up include paths:  You will need include/, arch/arm/src/sam34,
      arch/arm/src/common, arch/arm/src/armv7-m, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.
@@ -3156,7 +3156,7 @@ SAMA5D3x-EK Configuration Options
 
     CONFIG_RAM_START=0x20000000
 
-  CONFIG_RAM_VSTART - The virutal start address of installed DRAM
+  CONFIG_RAM_VSTART - The virtual start address of installed DRAM
 
     CONFIG_RAM_VSTART=0x20000000
 
@@ -3678,7 +3678,7 @@ Configurations
         my external AT24 board (the TWI0 bus hangs when the AT24 is plugged
         in).  I will skip the AT24 integration since it is not on the critical
         path at the moment.
-      2013-9-12:  The I2C tool, however, seems to work well.  It succesfully
+      2013-9-12:  The I2C tool, however, seems to work well.  It successfully
         enumerates the devices on the bus and successfully exchanges a few
         commands.  The real test of the come later when a real I2C device is
         integrated.

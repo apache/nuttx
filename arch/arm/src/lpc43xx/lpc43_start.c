@@ -102,7 +102,7 @@
  *
  * Description:
  *   Set the shadow register to 0x1040:0000 and the VTOR to 0x0000:0000 so
- *   that any exceptions (particulary things like hard faults) that occur
+ *   that any exceptions (particularly things like hard faults) that occur
  *   before we are initialized are caught by the BOOT ROM.
  *
  ****************************************************************************/

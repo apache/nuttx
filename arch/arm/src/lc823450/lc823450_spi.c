@@ -347,7 +347,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   modifyreg32(LC823450_SPI_SMD, 0, SPI_SMD_SSTR);
 
-  /* Wait for Tranfer done */
+  /* Wait for Transfer done */
 
   while ((getreg32(LC823450_SPI_ISR) & SPI_ISR_SPIF) == 0)
     ;

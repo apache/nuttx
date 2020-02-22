@@ -94,7 +94,7 @@
 #define RES_8BIT        0
 #define RES_12BIT       (1 << 6)
 
-/* Data ready funtion enable bit: set during probe if using irq mode */
+/* Data ready function enable bit: set during probe if using irq mode */
 
 #define DRDYE           (1 << 5)
 

@@ -991,7 +991,7 @@ int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
           iphc1   |= SIXLOWPAN_IPHC_DAC;
           iphc[2] |= daddrcontext->number;
 
-          /* Compession compare with link adress (destination) */
+          /* Compession compare with link address (destination) */
 
           iphc1   |= compress_tagaddr(ipv6->destipaddr, destmac,
                                       SIXLOWPAN_IPHC_DAM_BIT);

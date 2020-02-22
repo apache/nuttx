@@ -52,7 +52,7 @@
 
 /* Register Offsets *****************************************************************/
 
-/* NXP/Freescale has familes and technology generations (sometimes seen as processor
+/* NXP/Freescale has families and technology generations (sometimes seen as processor
  * speed).  These are organized into feature families, and faster speeds sometimes
  * have extended features.  Families are K02 K10 K20 K22  K24 K30 K40 K50 K60 K64 K65
  * K66 K70 K80

@@ -2339,7 +2339,7 @@ int up_rtc_settime(FAR const struct timespec *tp);
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
  *   arg     - The argument that will accompany the interrupt
- *   enable  - A function pointer that be unsed to enable or disable the
+ *   enable  - A function pointer that be unused to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:

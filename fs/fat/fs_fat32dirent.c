@@ -2769,7 +2769,7 @@ int fat_dirnamewrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
     }
 
   /* On return, fat_lfsfname() will leave the short file name entry in the
-   * cache.  So we can just fall throught to write that directory entry, perhaps
+   * cache.  So we can just fall through to write that directory entry, perhaps
    * using the short file name alias for the long file name.
    */
 
@@ -2814,7 +2814,7 @@ int fat_dirwrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
     }
 
   /* On return, fat_lfsfname() will leave the short file name entry in the
-   * cache.  So we can just fall throught to write that directory entry, perhaps
+   * cache.  So we can just fall through to write that directory entry, perhaps
    * using the short file name alias for the long file name.
    */
 

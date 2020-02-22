@@ -2797,7 +2797,7 @@ typedef enum
   WLC_E_SCAN_CONFIRM_IND               =  45,
   WLC_E_PSK_SUP                        =  46, /* WPA Handshake */
   WLC_E_COUNTRY_CODE_CHANGED           =  47,
-  WLC_E_EXCEEDED_MEDIUM_TIME           =  48, /* WMMAC excedded medium time */
+  WLC_E_EXCEEDED_MEDIUM_TIME           =  48, /* WMMAC exceeded medium time */
   WLC_E_ICV_ERROR                      =  49, /* WEP ICV error occurred */
   WLC_E_UNICAST_DECODE_ERROR           =  50, /* Unsupported unicast encrypted frame */
   WLC_E_MULTICAST_DECODE_ERROR         =  51, /* Unsupported multicast encrypted frame */

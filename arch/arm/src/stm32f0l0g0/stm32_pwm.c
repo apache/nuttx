@@ -1671,7 +1671,7 @@ static uint8_t stm32pwm_pulsecount(uint32_t count)
  *   dev - A reference to the lower half PWM driver state structure
  *   on  - Enable clock if 'on' is 'true' and disable if 'false'
  *
- * Returnd Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

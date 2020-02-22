@@ -1519,7 +1519,7 @@ int can_txdone(FAR struct can_dev_s *dev)
  *   another transfer.
  *
  *   If the CAN hardware supports a H/W FIFO, can_txdone() is not called
- *   when the tranfer is complete, but rather when the transfer is queued in
+ *   when the transfer is complete, but rather when the transfer is queued in
  *   the H/W FIFO.  When the H/W FIFO becomes full, then dev_txready() will
  *   report false and the number of queued messages in the S/W FIFO will grow.
  *

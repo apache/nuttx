@@ -825,7 +825,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
        *
        * One can possibly factorize 128 and br. However, since the last
        * 6 bits of CLKDIV are don't care, we can base our integer arithmetic
-       * on the below formula without loosing any extra precision:
+       * on the below formula without losing any extra precision:
        *
        * CLKDIV / 64 = (2 * fHFPERCLK)/br - 4
        *

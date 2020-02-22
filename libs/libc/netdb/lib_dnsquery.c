@@ -664,7 +664,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
  *   hostname.
  *
  * Input Parameters:
- *   arg      - Query arguements
+ *   arg      - Query arguments
  *   addr     - DNS name server address
  *   addrlen  - Length of the DNS name server address.
  *

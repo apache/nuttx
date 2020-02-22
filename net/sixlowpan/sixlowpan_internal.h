@@ -326,7 +326,7 @@ int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
  *   meta  - obfuscated meta data that describes the MAC header
  *
  * Returned Value:
- *   The frame header length is returnd on success; otherwise, a negated
+ *   The frame header length is returned on success; otherwise, a negated
  *   errno value is return on failure.
  *
  ****************************************************************************/

@@ -999,7 +999,7 @@ static void kinetis_txtimeout_work(FAR void *arg)
   net_lock();
   NETDEV_TXTIMEOUTS(&priv->dev);
 
-  /* Take the interface down and bring it back up.  The is the most agressive
+  /* Take the interface down and bring it back up.  The is the most aggressive
    * hardware reset.
    */
 

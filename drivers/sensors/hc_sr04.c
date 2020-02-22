@@ -183,7 +183,7 @@ static ssize_t hcsr04_read(FAR struct file *filep, FAR char *buffer,
 
   hcsr04_start_measuring(priv);
 
-  /* Wait the convertion to finish */
+  /* Wait the conversion to finish */
 
   /* Get exclusive access */
 
@@ -393,7 +393,7 @@ static int hcsr04_int_handler(int irq, FAR void *context, FAR void *arg)
 
       priv->config->irq_enable(priv->config, false);
 
-      /* Convertion is done */
+      /* Conversion is done */
 
       nxsem_post(&priv->conv_donesem);
     }

@@ -109,7 +109,7 @@ extern "C"
  *
  * Description:
  *   dlsymtab() is a non-standard shared library interface.  It selects the
- *   symbol table to use when binding a shared libary to the base firmware
+ *   symbol table to use when binding a shared library to the base firmware
  *   which may be in FLASH memory.
  *
  * Input Parameters:

@@ -137,7 +137,7 @@
 #define PPULSE_SHIFT           0        /* Bits 0-5: Prox. Pulse Count (1 up to 64 pulses) */
 #define PPULSE_MASK            (0x3f << PPULSE_SHIFT)
 #  define PPULSE_NUM(n)        ((n-1) << PPULSE_SHIFT)
-#define PPLEN_SHIFT            6        /* Bits 6-7: Prox. Pulse Lenght */
+#define PPLEN_SHIFT            6        /* Bits 6-7: Prox. Pulse Length */
 #define PPLEN_MASK             (3 << PPLEN_SHIFT)
 #  define PPLEN_4US            (0 << PPLEN_SHIFT)
 #  define PPLEN_8US            (1 << PPLEN_SHIFT)

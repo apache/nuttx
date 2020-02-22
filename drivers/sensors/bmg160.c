@@ -225,12 +225,12 @@ static void bmg160_read_measurement_data(FAR struct bmg160_dev_s *dev)
 
   bmg160_read_gyroscope_data(dev, &x_gyr, &y_gyr, &z_gyr);
 
-  /* Aquire the semaphore before the data is copied */
+  /* Acquire the semaphore before the data is copied */
 
   ret = nxsem_wait(&dev->datasem);
   if (ret < 0)
     {
-      snerr("ERROR: Could not aquire dev->datasem: %d\n", ret);
+      snerr("ERROR: Could not acquire dev->datasem: %d\n", ret);
       return;
     }
 
@@ -454,12 +454,12 @@ static ssize_t bmg160_read(FAR struct file *filep, FAR char *buffer,
       return -ENOSYS;
     }
 
-  /* Aquire the semaphore before the data is copied */
+  /* Acquire the semaphore before the data is copied */
 
   ret = nxsem_wait(&priv->datasem);
   if (ret < 0)
     {
-      snerr("ERROR: Could not aquire priv->datasem: %d\n", ret);
+      snerr("ERROR: Could not acquire priv->datasem: %d\n", ret);
       return ret;
     }
 

@@ -59,7 +59,7 @@
  *   If a new path is specified, the function first attempts to close
  *   any file already associated with stream (third parameter) and
  *   disassociates it. Then, independently of whether that stream was
- *   successfuly closed or not, freopen opens the file specified by path
+ *   successfully closed or not, freopen opens the file specified by path
  *   and associates it with the stream just as fopen would do using the
  *   specified mode.
  *

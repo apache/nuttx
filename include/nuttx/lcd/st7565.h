@@ -85,7 +85,7 @@ struct st7565_lcd_s
   /* Interface to control the st7565 like lcd driver
    *
    *  - reset       Switch reset pin of LCD (optional but as your risk).
-   *  - select      Select the device (as neccessary) before performing any
+   *  - select      Select the device (as necessary) before performing any
    *                operations.
    *  - deselect    Deselect the device (as necessary).
    *  - cmddata     Select command (A0 = 0) or data (A0 = 1) mode .

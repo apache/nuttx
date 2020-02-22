@@ -693,7 +693,7 @@ void weak_function up_dma_initialize(void)
  *
  * Input parameters:
  *  ch      - DMA channel to use
- *  maxsize - Max size to be transfered in bytes
+ *  maxsize - Max size to be transferred in bytes
  *
  * Returned Value:
  *  This function ALWAYS returns a non-NULL, void* DMA channel handle.

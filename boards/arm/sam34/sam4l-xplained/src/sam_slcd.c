@@ -953,7 +953,7 @@ static ssize_t slcd_write(FAR struct file *filep,
 
           else if (ch == ASCII_DEL)
             {
-              /* Perform the foward deletion */
+              /* Perform the forward deletion */
 
               slcd_action(SLCDCODE_FWDDEL, 1);
               options = 0;

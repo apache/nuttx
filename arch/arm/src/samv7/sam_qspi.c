@@ -1582,7 +1582,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
 static FAR void *qspi_alloc(FAR struct qspi_dev_s *dev, size_t buflen)
 {
-  /* Here we exploit the internal knowlege the kmm_malloc() will return memory
+  /* Here we exploit the internal knowledge the kmm_malloc() will return memory
    * aligned to 64-bit addresses.  The buffer length must be large enough to
    * hold the rested buflen in units a 32-bits.
    */

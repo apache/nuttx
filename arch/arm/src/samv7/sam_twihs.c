@@ -496,7 +496,7 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
    */
 
 #ifdef CONFIG_I2C_RESET
-  /* Check if an Arbitration Lost has occured */
+  /* Check if an Arbitration Lost has occurred */
 
   if (priv->result == -EUSERS)
     {

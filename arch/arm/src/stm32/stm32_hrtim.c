@@ -421,7 +421,7 @@ struct stm32_hrtim_capture_s
 
 struct stm32_hrtim_timcmn_s
 {
-  uint32_t base;                 /* The base adress of the timer */
+  uint32_t base;                 /* The base address of the timer */
   uint64_t fclk;                 /* The frequency of the peripheral clock
                                   * that drives the timer module.
                                   */
@@ -597,7 +597,7 @@ struct stm32_hrtim_burst_s
 
 struct stm32_hrtim_s
 {
-  uint32_t base;                     /* Base adress of HRTIM block */
+  uint32_t base;                     /* Base address of HRTIM block */
   struct stm32_hrtim_tim_s *master;  /* Master Timer */
 #ifdef CONFIG_STM32_HRTIM_TIMA
   struct stm32_hrtim_tim_s *tima;    /* HRTIM Timer A */
@@ -1902,14 +1902,14 @@ errout:
  * Name: hrtim_base_get
  *
  * Description:
- *   Get base adress offset for given HRTIM Timer index
+ *   Get base address offset for given HRTIM Timer index
  *
  * Input Parameters:
  *   priv    - A reference to the HRTIM block
  *   timer   - An HRTIM Timer index to get
  *
  * Returned Value:
- *   Base adress offset for given Timer index
+ *   Base address offset for given Timer index
  *
  ****************************************************************************/
 

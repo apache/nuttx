@@ -850,7 +850,7 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
 
   nrf52_spi_putreg(priv, NRF52_SPIM_EVENTS_STOPPED_OFFSET, 0);
 
-  /* Clear RX/TX DMA after tranfer */
+  /* Clear RX/TX DMA after transfer */
 
   nrf52_spi_putreg(priv, NRF52_SPIM_RXDPTR_OFFSET, 0);
   nrf52_spi_putreg(priv, NRF52_SPIM_RXDMAXCNT_OFFSET, 0);

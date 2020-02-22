@@ -2235,7 +2235,7 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
                 {
                   /* On the first time through the loop, pending will be
                    * the bitset of high priority pending interrupts; on the
-                   * second time throught it will be the bitset of low
+                   * second time through it will be the bitset of low
                    * priority interrupts.
                    */
 
@@ -2380,7 +2380,7 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
         {
           /* On the first time through the loop, pending will be
            * the bitset of high priority pending interrupts; on the
-           * second time throught it will be the bitset of low
+           * second time through it will be the bitset of low
            * priority interrupts. Note that EP0 IN and OUT are
            * omitted.
            */

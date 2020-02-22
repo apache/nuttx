@@ -1965,7 +1965,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
 
       if (readwrite.count > remaining)
         {
-          /* Futher limit the write to the remaining bytes to write */
+          /* Further limit the write to the remaining bytes to write */
 
           readwrite.count = remaining;
         }

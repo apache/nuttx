@@ -210,7 +210,7 @@ struct ili9341_lcd_s
 {
   /* Interface to control the ILI9341 lcd driver
    *
-   *  - select      Select the device (as neccessary) before performing any operations.
+   *  - select      Select the device (as necessary) before performing any operations.
    *  - deselect    Deselect the device (as necessary).
    *  - sendcmd     Send specific command to the LCD driver.
    *  - sendparam   Send specific parameter to the LCD driver.
@@ -260,7 +260,7 @@ extern "C"
  * Name:  ili9341_initialize
  *
  * Description:
- *   Initialize the LCD video driver internal sturcture. Also initialize the
+ *   Initialize the LCD video driver internal structure. Also initialize the
  *   lcd hardware if not done. The control of the LCD driver is depend on the
  *   selected MCU interface and part of the platform specific subdriver (see
  *   config/stm32f429i-disco/src/stm32_ili93414ws.c)

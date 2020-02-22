@@ -68,7 +68,7 @@
 
 /* This is the send state structure */
 
-struct devif_callback_s; /* Forward refernce */
+struct devif_callback_s; /* Forward reference */
 struct net_driver_s;     /* Forward reference */
 struct iob_s;            /* Forward reference */
 

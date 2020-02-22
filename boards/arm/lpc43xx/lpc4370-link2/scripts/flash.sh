@@ -87,7 +87,7 @@ if [ ! -x "${BINDIR}/${FLASHUTIL}" ]; then
 	exit 1
 fi
 
-# FLUSHUTIL arguements
+# FLUSHUTIL arguments
 
 WIRE="-wire=winusb" # for LPC-Link on Windows Vista/Windows 7)
 

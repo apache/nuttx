@@ -161,7 +161,7 @@ int up_cpu_paused(int cpu)
  * Name: up_cpu_started
  *
  * Description:
- *   Notify the current cpu start sucessfully.
+ *   Notify the current cpu start successfully.
  *
  ****************************************************************************/
 

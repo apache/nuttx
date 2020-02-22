@@ -166,7 +166,7 @@ IDEs
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/arm/src/sam34,
+  3) Set up include paths:  You will need include/, arch/arm/src/sam34,
      arch/arm/src/common, arch/arm/src/armv7-m, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.
@@ -1732,7 +1732,7 @@ SDRAM Support
       CONFIG_SYSTEM_RAMTEST=y
 
   In this configuration, the SDRAM is not added to heap and so is not
-  accessable to the applications.  So the RAM test can be freely executed
+  accessible to the applications.  So the RAM test can be freely executed
   against the SRAM memory beginning at address 0x2000:0000 (DDR CS):
 
     nsh> ramtest -h
@@ -2947,7 +2947,7 @@ SAMA5D3-Xplained Configuration Options
 
     CONFIG_RAM_START=0x20000000
 
-  CONFIG_RAM_VSTART - The virutal start address of installed DRAM
+  CONFIG_RAM_VSTART - The virtual start address of installed DRAM
 
     CONFIG_RAM_VSTART=0x20000000
 

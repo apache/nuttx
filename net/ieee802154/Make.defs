@@ -37,7 +37,7 @@
 
 ifeq ($(CONFIG_NET_IEEE802154),y)
 
-# Initialization / resource managment
+# Initialization / resource management
 
 NET_CSRCS  += ieee802154_initialize.c
 NET_CSRCS  += ieee802154_conn.c

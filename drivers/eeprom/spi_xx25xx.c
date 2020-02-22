@@ -680,7 +680,7 @@ static ssize_t ee25xx_write(FAR struct file *filep, FAR const char *buffer,
 
   ee25xx_semtake(eedev);
 
-  /* Writes cant happen in a row like the read does.
+  /* Writes can't happen in a row like the read does.
    * The EEPROM is made of pages, and write sequences
    * cannot cross page boundaries. So every time the last
    * byte of a page is programmed, the SPI transaction is

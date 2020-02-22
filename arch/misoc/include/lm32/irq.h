@@ -48,7 +48,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* 32 True interrupts plus the sofware interrupt */
+/* 32 True interrupts plus the software interrupt */
 
 #define LM32_NINTERRUPTS 32
 #define LM32_IRQ_SWINT   32

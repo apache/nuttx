@@ -26,7 +26,7 @@ This LED can be used by the board port when CONFIG_ARCH_LEDS option is
 enabled.
 
 If enabled the LED is simply turned on when the board boots
-succesfully, and is blinking on panic / assertion failed.
+successfully, and is blinking on panic / assertion failed.
 
 PWM
 ===

@@ -96,7 +96,7 @@ extern "C"
 #define CXD56_GNSS_PVT_VELFIX_1D       5 /* 1D fix */
 #define CXD56_GNSS_PVT_VELFIX_PRED     6 /* Prediction */
 
-/* GNSS oribital infomation data type, almanac & ephemeris */
+/* GNSS oribital information data type, almanac & ephemeris */
 
 #define CXD56_GNSS_DATA_GPS      0 /* GPS data type */
 #define CXD56_GNSS_DATA_GLONASS  1 /* Glonass data type */

@@ -468,7 +468,7 @@
 #define USDHC_DL_CTRL_SLV_UPDINT_SHIFT   (20)         /* Bits 20-27: DLL Control SLV Update Interval */
 #define USDHC_DL_CTRL_SLV_UPDINT_MASK    (0xff << USDHC_DL_CTRL_SLV_UPDINT_SHIFT)
 #  define USDHC_DL_CTRL_SLV_UPDINT(n)    ((n) << USDHC_DL_CTRL_SLV_UPDINT_SHIFT)
-#define USDHC_DL_CTRL_REF_UPDINT_SHIFT   (28)         /* Bits 28-31: DLL Control Refernce Update Interval */
+#define USDHC_DL_CTRL_REF_UPDINT_SHIFT   (28)         /* Bits 28-31: DLL Control Reference Update Interval */
 #define USDHC_DL_CTRL_REF_UPDINT_MASK    (0xf << USDHC_DL_CTRL_REF_UPDINT_SHIFT)
 #  define USDHC_DL_CTRL_REF_UPDINT(n)    ((n)<< USDHC_DL_CTRL_REF_UPDINT_SHIFT)
 

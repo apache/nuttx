@@ -129,7 +129,7 @@ IDEs
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/arm/src/lpc31xx,
+  3) Set up include paths:  You will need include/, arch/arm/src/lpc31xx,
      arch/arm/src/common, arch/arm/src/arm, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.
@@ -346,7 +346,7 @@ Using OpenOCD and GDB
 
     - possibly the value of OPENOCD_PATH
     - If you are working under Linux you will need to change any
-      occurances of `cygpath -w blablabla` to just blablabla
+      occurrences of `cygpath -w blablabla` to just blablabla
 
   Then you should be able to start the OpenOCD daemon like:
 

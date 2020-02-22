@@ -72,7 +72,7 @@
  *   a1 = valid stack pointer (note: some regs may be spilled at a1-16)
  *   a0 = return PC (usually set by call0 or callx0 when calling this function)
  *   a2,a3 undefined
- *   a4 thru a15 valid, if they are part of window(s) to be spilled
+ *   a4 through a15 valid, if they are part of window(s) to be spilled
  *     (Current window a0..a15 saved if necessary.)
  *   WINDOWSTART[WINDOWBASE] = 1
  *

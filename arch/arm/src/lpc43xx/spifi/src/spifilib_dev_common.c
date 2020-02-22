@@ -637,7 +637,7 @@ SPIFI_ERR_T spifiDevSetOpts(SPIFI_HANDLE_T *pHandle, uint32_t options, uint8_t s
 	/* default to not supported */
 	SPIFI_ERR_T retValue = SPIFI_ERR_NOTSUPPORTED;
 
-	/* If changing any of the high speed modes process seperately */
+	/* If changing any of the high speed modes process separately */
 	if (options & (SPIFI_CAP_DUAL_READ | SPIFI_CAP_DUAL_WRITE | SPIFI_CAP_QUAD_READ | SPIFI_CAP_QUAD_WRITE)) {
 		uint32_t hsOptions;
 		uint8_t memMode;

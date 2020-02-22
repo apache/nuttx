@@ -2745,7 +2745,7 @@ static void adc_configure(FAR struct adc_dev_s *dev)
 
   adc_voltreg_cfg(priv);
 
-  /* Calibrate ADC - doesnt work for now */
+  /* Calibrate ADC - doesn't work for now */
 
   adc_calibrate(priv);
 

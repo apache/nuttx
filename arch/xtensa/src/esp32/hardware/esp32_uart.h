@@ -1494,7 +1494,7 @@
 /* UART_RX_GAP_TOUT : R/W ;bitpos:[23:0] ;default: 24'h1e00 ; */
 /* Description: This register is used to configure the duration time between
  * the at_cmd chars. when the duration time is less than this register
- * value it will not take the datas as continous at_cmd chars.
+ * value it will not take the datas as continuous at_cmd chars.
  */
 
 #define UART_RX_GAP_TOUT                0x00FFFFFF
@@ -1506,7 +1506,7 @@
 #define UART_AT_CMD_CHAR_REG(i)         (REG_UART_BASE(i) + UART_AT_CMD_CHAR_OFFSET)
 
 /* UART_CHAR_NUM : R/W ;bitpos:[15:8] ;default: 8'h3 ; */
-/* Description: This register is used to configure the num of continous
+/* Description: This register is used to configure the num of continuous
  * at_cmd chars received by receiver.
  */
 

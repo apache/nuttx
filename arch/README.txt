@@ -115,7 +115,7 @@ include/irq.h
   NOTE: These interfaces are not available to application code but can
   only be used within the operating system code.  And, in general,
   these functions should *never* be called directly, not unless you
-  know absolutely well what you are doing.  Rather you shoudl typically
+  know absolutely well what you are doing.  Rather you should typically
   use the wrapper functions enter_critical_section() and leave_critical_section()
   as prototyped in include/nuttx/irq.h.
 

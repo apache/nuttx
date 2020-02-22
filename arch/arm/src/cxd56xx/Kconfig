@@ -46,7 +46,7 @@ config CXD56_RESET_ON_CRASH
 	default n
 	---help---
 		If selected the board_crashdump should reset the machine after
-		saveing the state of the machine
+		saving the state of the machine
 
 comment "Basic Options"
 

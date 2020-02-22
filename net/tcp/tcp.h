@@ -1193,7 +1193,7 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn,
  *   call this API to see if there are pending connections in the backlog.
  *
  * Assumptions:
- *   Thne network is locked.
+ *   The network is locked.
  *
  ****************************************************************************/
 

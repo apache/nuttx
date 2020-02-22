@@ -79,7 +79,7 @@
  * If mode32 is enabled the consecutive odd timers will be automatically
  * enabled through menuconfig.
  * This is an indication for the user that the odd timer is in use
- * and to avoid a seperate, incorrect, utilization.
+ * and to avoid a separate, incorrect, utilization.
  * Undef it here so its (useless in this case) structures won't be created
  * later.
  */

@@ -1144,7 +1144,7 @@ static int lis2dh_handle_selftest(FAR struct lis2dh_dev_s *priv)
           goto out;
         }
 
-      /* Enable interupt 1 on INT2 pin */
+      /* Enable interrupt 1 on INT2 pin */
 
       if (lis2dh_write_register(priv, ST_LIS2DH_CTRL_REG6, 0x40) != OK)
         {

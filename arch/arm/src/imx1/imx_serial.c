@@ -514,7 +514,7 @@ static int up_setup(struct uart_dev_s *dev)
 
       ucr2 &= ~UART_UCR2_IRTS;
 
-      /* CTS controled by Rx FIFO */
+      /* CTS controlled by Rx FIFO */
 
       ucr2 |= UART_UCR2_CTSC;
 

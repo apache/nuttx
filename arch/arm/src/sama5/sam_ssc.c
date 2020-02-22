@@ -2228,7 +2228,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   flags = enter_critical_section();
   sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.pend);
-  ssc_dump_rxqueues(priv, "Receving");
+  ssc_dump_rxqueues(priv, "Receiving");
 
   /* Then start the next transfer.  If there is already a transfer in progess,
    * then this will do nothing.

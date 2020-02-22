@@ -115,7 +115,7 @@ os=`uname -o 2>/dev/null || echo "Other"`
 
 #
 # Let's assume that all GCC compiler paths contain the string gcc and
-# no non-GCC compiler pathes include this substring
+# no non-GCC compiler paths include this substring
 #
 gcc=`echo $ccpath | grep gcc`
 sdcc=`echo $ccpath | grep sdcc`

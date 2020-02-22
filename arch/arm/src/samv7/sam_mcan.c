@@ -3481,7 +3481,7 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
                * receiving at least one CAN packet all RX error interrupts
                * are turned back on.
                *
-               * The Interrupt-Flooding can for example occure if the
+               * The Interrupt-Flooding can for example occur if the
                * configured CAN speed does not match the speed of the other
                * CAN nodes in the network.
                */

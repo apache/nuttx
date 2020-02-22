@@ -362,7 +362,7 @@ Replace Boot SD Card (Successful Attempt #3)
 What if you remove the SD card after U-boot has booted, then then insert
 another SD card containing the nuttx.bin image?
 
-1. Build nuttx.bin and copy it only a FAT formated SD card.  Insert the SD
+1. Build nuttx.bin and copy it only a FAT formatted SD card.  Insert the SD
    card containing NuttX into the "other" SD card slot.  Insert the 8GB SD
    card with U-boot already on it in the normal, boot SD card slot.
 
@@ -687,7 +687,7 @@ Open Issues:
    critical sections in interrupt handlers of other CPUs.
 
    When the critical section is used to lock a resource that is also used by
-   interupt handling, the interrupt handling logic must also take the spinlock.
+   interrupt handling, the interrupt handling logic must also take the spinlock.
    This will cause the interrupt handlers on other CPUs to spin until
    leave_critical_section() is called.  More verification is needed.
 

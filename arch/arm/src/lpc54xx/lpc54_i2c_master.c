@@ -393,7 +393,7 @@ static void lpc54_i2c_xfrsetup(struct lpc54_i2cdev_s *priv)
 
   if ((msg->flags & I2C_M_NOSTART) != 0)
     {
-      /* Start condition will be ommited.  Begin the tranfer in the data
+      /* Start condition will be omitted.  Begin the transfer in the data
        * phase.
        */
 

@@ -78,7 +78,7 @@
 #define TIVA_IRQ_GPT2B               (36) /* GPT2B interrupt event */
 #define TIVA_IRQ_GPT3A               (37) /* GPT3A interrupt event */
 #define TIVA_IRQ_GPT3B               (38) /* GPT3B interrupt event */
-#define TIVA_IRQ_CRYPTO_RESULT_AVAIL (39) /* CRYPTO result available interupt
+#define TIVA_IRQ_CRYPTO_RESULT_AVAIL (39) /* CRYPTO result available interrupt
                                            * event */
 #define TIVA_IRQ_DMA_DONE            (40) /* Combined DMA done */
 #define TIVA_IRQ_DMA_ERR             (41) /* DMA bus error */

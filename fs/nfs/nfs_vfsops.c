@@ -513,7 +513,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
 
   if ((oflags & O_WRONLY) != 0)
     {
-      /* Check if anyone has priveleges to write to the file -- owner,
+      /* Check if anyone has privileges to write to the file -- owner,
        * group, or other (we are probably "other" and may still not be
        * able to write).
        */
@@ -1125,7 +1125,7 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
 
       writesize = tmp;
 
-      /* Determine the lowest committment level obtained by any of the RPCs. */
+      /* Determine the lowest commitment level obtained by any of the RPCs. */
 
       commit = *ptr++;
       if (committed == NFSV3WRITE_FILESYNC)

@@ -150,7 +150,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
           if (*addrstr == '[')
             {
-              /* Make sure that ther is a right bracket */
+              /* Make sure that there is a right bracket */
 
               ptr = strchr(addrstr, ']');
               if (ptr == NULL)

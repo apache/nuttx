@@ -118,7 +118,7 @@ bool enter_cancellation_point(void)
    * need the TCB to be stationary (no interrupt level modification is
    * anticipated).
    *
-   * REVISIT: is locking the scheduler sufficent in SMP mode?
+   * REVISIT: is locking the scheduler sufficient in SMP mode?
    */
 
   sched_lock();
@@ -207,7 +207,7 @@ void leave_cancellation_point(void)
    * need the TCB to be stationary (no interrupt level modification is
    * anticipated).
    *
-   * REVISIT: is locking the scheduler sufficent in SMP mode?
+   * REVISIT: is locking the scheduler sufficient in SMP mode?
    */
 
   sched_lock();
@@ -289,7 +289,7 @@ bool check_cancellation_point(void)
    * need the TCB to be stationary (no interrupt level modification is
    * anticipated).
    *
-   * REVISIT: is locking the scheduler sufficent in SMP mode?
+   * REVISIT: is locking the scheduler sufficient in SMP mode?
    */
 
   sched_lock();

@@ -130,7 +130,7 @@
 #  endif
 #endif
 
-/* We cant support encoding of special characters of unless the Keyboard
+/* We can't support encoding of special characters of unless the Keyboard
  * CODEC is enabled.
  */
 

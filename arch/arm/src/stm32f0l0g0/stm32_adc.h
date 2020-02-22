@@ -232,7 +232,7 @@ struct adc_sample_time_s
 };
 #endif /* CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME */
 
-/* This structure provides the publicly visable representation of the
+/* This structure provides the publicly visible representation of the
  * "lower-half" ADC driver structure.
  */
 

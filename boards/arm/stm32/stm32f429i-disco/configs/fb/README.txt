@@ -50,7 +50,7 @@ LTDC overlays are similar to a non-destructive overlay. Both LTDC overlays will
 be permanently blended in the order (background -> overlay 0 -> overlay 1) and
 converted to a resulting video signal by the LTDC controller. That means each
 operation with a LTDC overlay (Overlay 0 and Overlay 1) via nuttx framebuffer
-interface will be visible immediatelly.
+interface will be visible immediately.
 Think about continuous blending between both overlays.
 
 
@@ -64,12 +64,12 @@ Configurable via the nuttx framebuffer interface
 
 Configurable via the nuttx framebuffer interface (for each layer separately)
 
-- color (fill memory region with a specific ARGB8888 color immediatelly), if
+- color (fill memory region with a specific ARGB8888 color immediately), if
   cmap is disabled
 - blit (copy memory region to another memory region with pixel format
-  conversion if neccessary)
+  conversion if necessary)
 - blend (blend two memory regions and copy the result to a third memory region
-  with pixel format conversion if neccessary), if cmap is disabled
+  with pixel format conversion if necessary), if cmap is disabled
 
 Blit and blend operation using a fixes memory size defined by the background
 layer. DMA2D controller doesn't support scaling.

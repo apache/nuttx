@@ -379,7 +379,7 @@ struct cxd56_usbdev_s
    *   the SETUP command can be processed.
    *
    * ep0datlen
-   *   Lenght of OUT DATA received in ep0data[]
+   *   Length of OUT DATA received in ep0data[]
    */
 
   struct usb_ctrlreq_s ctrl; /* Last EP0 request */

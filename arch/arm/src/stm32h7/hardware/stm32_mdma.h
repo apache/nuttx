@@ -542,9 +542,9 @@
 #  define MDMA_CCR_PRIMED         (1 << MDMA_CCR_PL_SHIFT) /* 01: Medium */
 #  define MDMA_CCR_PRIHI          (2 << MDMA_CCR_PL_SHIFT) /* 10: High */
 #  define MDMA_CCR_PRIVERYHI      (3 << MDMA_CCR_PL_SHIFT) /* 11: Very high */
-#define MDMA_CCR_BEX              (12)      /* Bit 12: Byte endianess exchange */
-#define MDMA_CCR_HEX              (13)      /* Bit 13: Half word endianess exchange */
-#define MDMA_CCR_WEX              (14)      /* Bit 14: Word endianess exchange */
+#define MDMA_CCR_BEX              (12)      /* Bit 12: Byte endianness exchange */
+#define MDMA_CCR_HEX              (13)      /* Bit 13: Half word endianness exchange */
+#define MDMA_CCR_WEX              (14)      /* Bit 14: Word endianness exchange */
 #define MDMA_CCR_SWRQ             (16)      /* Bit 16: Software request */
 
 /* MDMA channel x transfer configuration register */
