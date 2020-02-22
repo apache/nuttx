@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * The SAM3U-EK developement board features a TFT/Transmissive color LCD
+ * The SAM3U-EK development board features a TFT/Transmissive color LCD
  * module with touch-screen, FTM280C12D, with integratd driver IC HX8346.
  * The LCD display size is 2.8 inches, with a native resolution of 240 x 320
  * pixels.
@@ -285,7 +285,7 @@
 
 struct sam_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 

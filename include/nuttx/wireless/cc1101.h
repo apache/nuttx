@@ -364,7 +364,7 @@ struct c1101_rfsettings_s
 
   /* REGULATORY LIMITS */
 
-  uint8_t CHMIN;    /* Channel Range defintion MIN .. */
+  uint8_t CHMIN;    /* Channel Range definition MIN .. */
   uint8_t CHMAX;    /* .. and MAX */
   uint8_t PAMAX;    /* at given maximum output power */
 

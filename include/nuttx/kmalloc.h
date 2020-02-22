@@ -228,7 +228,7 @@ void sched_garbage_collection(void);
  *
  * Certainly there is a race condition involved in sampling the garbage
  * state.  The looping nature of the IDLE loops should catch any missed
- * garbage from the test on the next time arround.
+ * garbage from the test on the next time around.
  */
 
 bool sched_have_garbage(void);

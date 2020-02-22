@@ -665,7 +665,7 @@ NOTES:
 
     Another NSH configuration, similar to nsh, but also enables
     SMP operation.  It differs from the nsh configuration only in these
-    addtional settings:
+    additional settings:
 
     SMP is enabled:
 

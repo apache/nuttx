@@ -740,7 +740,7 @@ static int m25p_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblock
           sectorboundry = (startblock + blkper - 1) / blkper;
           sectorboundry *= blkper;
 
-          /* If we are on a sector boundry and have at least a full sector
+          /* If we are on a sector boundary and have at least a full sector
            * of blocks left to erase, then we can do a full sector erase.
            */
 

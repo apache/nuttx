@@ -72,7 +72,7 @@
 #define NRF52_SAADC_CHLIMIT_OFFSET(x)         (0x51c + (x + 0x10)) /* High/low limits for event monitoring of a CH[x] */
 #define NRF52_SAADC_RESOLUTION_OFFSET         0x05f0 /* Resolution configuration */
 #define NRF52_SAADC_OVERSAMPLE_OFFSET         0x05f4 /* Oversampling configuration */
-#define NRF52_SAADC_SAMPLERATE_OFFSET         0x05f8 /* Controls normal or continous sample rate */
+#define NRF52_SAADC_SAMPLERATE_OFFSET         0x05f8 /* Controls normal or continuous sample rate */
 #define NRF52_SAADC_PTR_OFFSET                0x062c /* Data pointer */
 #define NRF52_SAADC_MAXCNT_OFFSET             0x0630 /* Maximum number of 16-bit samples */
 #define NRF52_SAADC_AMOUNT_OFFSET             0x0634 /* Number of 16-bit samples written to buffer */

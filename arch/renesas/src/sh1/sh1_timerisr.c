@@ -70,7 +70,7 @@
  *
  * These must be selected so that the frequency of interrupt generation is
  * CLK_TCK.  Ideally, we would like to use the full range of GRA0 for better
- * timing acuracy:
+ * timing accuracy:
  */
 
 #define DESIRED_GRA0     65535

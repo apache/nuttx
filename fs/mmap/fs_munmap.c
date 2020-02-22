@@ -127,7 +127,7 @@ int munmap(FAR void *start, size_t length)
       goto errout;
     }
 
-  /* Seach the list of regions */
+  /* Search the list of regions */
 
   for (prev = NULL, curr = g_rammaps.head; curr; prev = curr, curr = curr->flink)
     {

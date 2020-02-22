@@ -66,7 +66,7 @@
  *
  * CONFIG_BATTERY_CHARGER - Upper half battery driver support
  * CONFIG_I2C - I2C support
- * CONFIG_I2C_BQ2425X - And the driver must be explictly selected.
+ * CONFIG_I2C_BQ2425X - And the driver must be explicitly selected.
  */
 
 #if defined(CONFIG_BATTERY_CHARGER) && defined(CONFIG_I2C) && \
@@ -780,7 +780,7 @@ static int bq2425x_operate(FAR struct battery_charger_dev_s *dev,
  *
  *   CONFIG_BATTERY_CHARGER - Upper half battery driver support
  *   CONFIG_I2C - I2C support
- *   CONFIG_I2C_BQ2425X - And the driver must be explictly selected.
+ *   CONFIG_I2C_BQ2425X - And the driver must be explicitly selected.
  *
  * Input Parameters:
  *   i2c       - An instance of the I2C interface to use to communicate with

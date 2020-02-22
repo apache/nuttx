@@ -321,7 +321,7 @@ static void inline ioctl_get_ipv4broadcast(FAR struct sockaddr *outaddr,
  *
  * Input Parameters:
  *   outaddr - Pointer to the user-provided memory to receive the address.
- *   inaddr - The source IP adress in the device structure.
+ *   inaddr - The source IP address in the device structure.
  *
  ****************************************************************************/
 

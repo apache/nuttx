@@ -72,7 +72,7 @@ void nxbe_raise(FAR struct nxbe_window_s *wnd)
 {
   FAR struct nxbe_state_s *be = wnd->be;
 
-  /* A modal window should already be at the top of the heirarchy. */
+  /* A modal window should already be at the top of the hierarchy. */
 
   DEBUGASSERT(!NXBE_ISMODAL(wnd) || wnd->above == NULL);
 

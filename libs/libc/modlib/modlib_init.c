@@ -187,7 +187,7 @@ int modlib_initialize(FAR const char *filename,
     {
       /* This may not be an error because we will be called to attempt loading
        * EVERY binary.  If modlib_verifyheader() does not recognize the ELF header,
-       * it will -ENOEXEC whcih simply informs the system that the file is not an
+       * it will -ENOEXEC which simply informs the system that the file is not an
        * ELF file.  modlib_verifyheader() will return other errors if the ELF header
        * is not correctly formed.
        */

@@ -1132,7 +1132,7 @@ int init_isx012(FAR struct isx012_dev_s *priv)
                              DEVICE_STATE_WAIT_TIME, DEVICE_STATE_TIMEOUT);
   if (ret != OK)
     {
-      imagererr("OM_CHANGED_STS(PreSleep) is Not occured: %d\n", ret);
+      imagererr("OM_CHANGED_STS(PreSleep) is Not occurred: %d\n", ret);
       return ret;
     }
 
@@ -1156,7 +1156,7 @@ int init_isx012(FAR struct isx012_dev_s *priv)
                              DEVICE_STATE_WAIT_TIME, DEVICE_STATE_TIMEOUT);
   if (ret != OK)
     {
-      imagererr("OM_CHANGED_STS(Sleep) is Not occured: %d\n", ret);
+      imagererr("OM_CHANGED_STS(Sleep) is Not occurred: %d\n", ret);
       return ret;
     }
 #endif

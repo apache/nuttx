@@ -219,7 +219,7 @@ static void hostfs_mkpath(FAR struct hostfs_mountpt_s  *fs,
 
   while (relpath[x] != '\0')
     {
-      /* Test for ".." occurance */
+      /* Test for ".." occurrence */
 
       if (strncmp(&relpath[x], "..", 2) == 0)
         {

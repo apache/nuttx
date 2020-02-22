@@ -3899,7 +3899,7 @@ static void stm32_ethreset(struct stm32_ethmac_s *priv)
 
   while ((stm32_getreg(STM32_ETH_DMAMR) & ETH_DMAMR_SWR) != 0);
 
-  /* Acording to the spec, these need to be done before creating
+  /* According to the spec, these need to be done before creating
    * the descriptor lists, so initialize these already here
    */
 

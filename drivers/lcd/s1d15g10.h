@@ -82,7 +82,7 @@
 #define S1D15G10_EPMRD       0xfd /* Read from EEPROM; Data: none */
 #define S1D15G10_EPSRRD1     0x7c /* Read register 1; Data: none */
 #define S1D15G10_EPSRRD2     0x7d /* Read regiser 2; Data: none */
-#define S1D15G10_NOP         0x25 /* NOP intruction (0x45?); Data: none */
+#define S1D15G10_NOP         0x25 /* NOP instruction (0x45?); Data: none */
 #define S1D15G10_STREAD      0x20 /* Status read; Data: none */
 
 /* Display control (DISCTL) bit definitions */

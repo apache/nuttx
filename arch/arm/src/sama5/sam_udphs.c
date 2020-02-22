@@ -1248,7 +1248,7 @@ static void sam_req_wrsetup(struct sam_usbdev_s *priv,
   usbtrace(TRACE_WRITE(USB_EPNO(privep->ep.eplog)), nbytes);
 
   /* The new buffer pointer is the started of the buffer plus the number
-   * of bytes successfully transfered plus the number of bytes previously
+   * of bytes successfully transferred plus the number of bytes previously
    * "in-flight".
    */
 
@@ -2368,7 +2368,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
        */
 
       /* This is just debug logic that only does any if USB debug or tracing
-       * are enabled.  This just verifies taht BUFF_COUNT is zero.
+       * are enabled.  This just verifies that BUFF_COUNT is zero.
        */
 
       bufcnt = (dmastatus & UDPHS_DMASTATUS_BUFCNT_MASK)

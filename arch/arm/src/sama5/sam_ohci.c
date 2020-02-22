@@ -1641,7 +1641,7 @@ static void sam_ep0dequeue(struct sam_eplist_s *ep0)
   sam_putreg(regval, SAM_USBHOST_CTRL);
 
   /* Search the control list to find the entry to be removed (and its
-   * precedessor).
+   * predecessor).
    */
 
   edctrl   = ep0->ed;
@@ -2266,7 +2266,7 @@ static void sam_ohci_bottomhalf(void *arg)
            * or DMA errors.
            *
            * Treat this like a normal write done head interrupt.  We
-           * just want to see if there is any status information writen
+           * just want to see if there is any status information written
            * to the descriptors (and the normal write done head
            * interrupt will not be occurring).
            */

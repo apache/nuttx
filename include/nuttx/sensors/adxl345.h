@@ -175,7 +175,7 @@
 #define TAP_Z_ENABLE                (1 << 0)  /* Bit 0: Enable/disable Z-axis in tap detection */
 #define TAP_Y_ENABLE                (1 << 1)  /* Bit 1: Enable/disable Y-axis in tap detection */
 #define TAP_X_ENABLE                (1 << 2)  /* Bit 2: Enable/disable X-axis in tap detection */
-#define TAP_SUPRESS                 (1 << 3)  /* Bit 3: Supress double tap detection */
+#define TAP_SUPRESS                 (1 << 3)  /* Bit 3: Suppress double tap detection */
 
 /* Register 0x2b - ACT_TAP_STATUS */
 

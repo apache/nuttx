@@ -228,7 +228,7 @@
 /* SDHC
  * important notice: on TWR-K64F120M, R521 (close to the SD card holder) is
  * not placed, hence WRPROTEC is always ON. Either place a 4.7KOhm resistor
- * or change PIN config to PULLDOWN, loosing Write Protect function
+ * or change PIN config to PULLDOWN, losing Write Protect function
  */
 
 #define GPIO_SD_CARDDETECT (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTB | PIN20)

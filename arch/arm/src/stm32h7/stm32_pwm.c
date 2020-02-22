@@ -3036,7 +3036,7 @@ errout:
  *   Zero on success; a negated errno value on failure
  *
  * TODO: PWM_PULSECOUNT should be configurable for each timer instance
- * TODO: PULSECOUNT doesnt work with MULTICHAN at this moment
+ * TODO: PULSECOUNT doesn't work with MULTICHAN at this moment
  *
  ****************************************************************************/
 

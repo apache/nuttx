@@ -293,7 +293,7 @@ _up_vector:
 	sts.l	mach, @-r15
 	sts.l	macl, @-r15
 
-	/* Then save the value of the SP *before* the interrupt ocurred
+	/* Then save the value of the SP *before* the interrupt occurred
 	 *
 	 * SP -> SP		(REG_SP=9) See irq.h
 	 *       macl		(REG_MACL=10)

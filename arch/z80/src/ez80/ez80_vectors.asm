@@ -149,7 +149,7 @@ _ez80_rstcommon:
 	push	bc					; Offset 0: I with interrupt state in parity
 	di							; (not necessary)
 
-	; Call the interrupt decode logic. SP points to the beggining of the reg structure
+	; Call the interrupt decode logic. SP points to the beginning of the reg structure
 
 	ld		hl, #0				; Argument #2 is the beginning of the reg structure
 	add		hl, sp				;

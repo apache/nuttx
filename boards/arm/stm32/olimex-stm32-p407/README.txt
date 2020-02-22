@@ -620,7 +620,7 @@ must be is one of the following.
 
     The transferred file will lie in the /tmp directory.
 
-    Thn on the target side:
+    Then on the target side:
 
       [on target]
       nsh sz <filename>

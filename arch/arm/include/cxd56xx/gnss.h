@@ -665,7 +665,7 @@ struct cxd56_gnss_ope_mode_param_s
   uint32_t cycle;
 };
 
-/* Sattelite almanac, ephemeris data */
+/* Satellite almanac, ephemeris data */
 
 struct cxd56_gnss_orbital_param_s
 {

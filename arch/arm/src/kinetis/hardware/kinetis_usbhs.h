@@ -511,9 +511,9 @@
 /* Master Interface Data Burst Size Register */
 
                                                                     /* Bits 16-31: Reserved */
-#define USBHS_BURSTSIZE_TXPBURST_SHIFT                    (8)       /* Bits 8-15: Programable TX Burst length */
+#define USBHS_BURSTSIZE_TXPBURST_SHIFT                    (8)       /* Bits 8-15: Programmable TX Burst length */
 #define USBHS_BURSTSIZE_TXPBURST_MASK                     (0xff << USBHS_BURSTSIZE_TXPBURST_SHIFT)
-#define USBHS_BURSTSIZE_RXPBURST_SHIFT                    (0)       /* Bits 0-7: Programable RX Burst length */
+#define USBHS_BURSTSIZE_RXPBURST_SHIFT                    (0)       /* Bits 0-7: Programmable RX Burst length */
 #define USBHS_BURSTSIZE_RXPBURST_MASK                     (0xff << USBHS_BURSTSIZE_RXPBURST_SHIFT)
 
 /* Transmit FIFO Tuning Control Register */

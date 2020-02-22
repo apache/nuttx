@@ -75,7 +75,7 @@
 /* PWM/Timer Definitions ****************************************************/
 
 /* The following definitions are used to identify the various time types.
- * There are some differences in timer types accross STM32 families:
+ * There are some differences in timer types across STM32 families:
  *   - TIM2 is 16-bit timer for F1, L1 and L0
  *   - TIM5 is 16-bit timer for F1
  */
@@ -3316,7 +3316,7 @@ errout:
  *   Zero on success; a negated errno value on failure
  *
  * TODO: PWM_PULSECOUNT should be configurable for each timer instance
- * TODO: PULSECOUNT doesnt work with MULTICHAN at this moment
+ * TODO: PULSECOUNT doesn't work with MULTICHAN at this moment
  *
  ****************************************************************************/
 

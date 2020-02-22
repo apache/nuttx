@@ -654,7 +654,7 @@
  *
  *   Read Write
  *   Default value: 0x1a
- *   7  CW:              1 - CW Mode enabled - enables the generation of a continous wave
+ *   7  CW:              1 - CW Mode enabled - enables the generation of a continuous wave
  *                           carrier without any modulation
  *                       0 - CW Mode disabled
  *
@@ -694,7 +694,7 @@
 #define MOD0_BT_SEL_BT_MASK             ((uint8_t)0x00)  /* Select the BT = 1 or BT = 0.5
                                                           * valid only for GFSK or GMSK
                                                           * modulation */
-#define MOD0_CW                         ((uint8_t)0x80)  /* Set the Continous Wave (no
+#define MOD0_CW                         ((uint8_t)0x80)  /* Set the Continuous Wave (no
                                                           * modulation) transmit mode */
 
 /* FDEV0 register
@@ -1134,7 +1134,7 @@
  *   Read Write
  *   Default value: 0x00
  *
- *   7:0   pktlen1[7:0]: length of packet in bytes (upper field) LENGHT/256
+ *   7:0   pktlen1[7:0]: length of packet in bytes (upper field) LENGTH/256
  */
 
 #define PCKTLEN1_BASE                   ((uint8_t)0x34)  /* length of packet in bytes (upper field) */
@@ -1144,7 +1144,7 @@
  *   Read Write
  *   Default value: 0x14
  *
- *   7:0   pktlen0[7:0]: length of packet in bytes (lower field) LENGHT%256
+ *   7:0   pktlen0[7:0]: length of packet in bytes (lower field) LENGTH%256
  */
 
 #define PCKTLEN0_BASE                   ((uint8_t)0x35)  /* length of packet in bytes (lower field)

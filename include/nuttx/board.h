@@ -159,7 +159,7 @@ void board_early_initialize(void);
  *   specific device drivers for which board_early_initialize() is not
  *   suitable.
  *
- *   Waiting for events, use of I2C, SPI, etc are permissable in the context
+ *   Waiting for events, use of I2C, SPI, etc are permissible in the context
  *   of board_late_initialize().  That is because board_late_initialize()
  *   will run on a temporary, internal kernel thread.
  *

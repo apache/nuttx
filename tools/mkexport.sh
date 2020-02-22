@@ -212,7 +212,7 @@ if [ "X${USRONLY}" != "Xy" ]; then
     cp -p "${LDPATH}" "${EXPORTDIR}/scripts/." || \
       { echo "MK: cp ${LDPATH} failed"; exit 1; }
 
-    # Copy addtional ld scripts
+    # Copy additional ld scripts
 
     LDDIR="$(dirname "${LDPATH}")"
     for f in "${LDDIR}"/*.ld ; do

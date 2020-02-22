@@ -3565,7 +3565,7 @@ static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
    *   01b         K-state   Low-speed device, release ownership of port
    *
    * NOTE: Low-speed devices could be detected by examining the PORTSC PSPD
-   * field after resetting the device.  The more convential way here, however,
+   * field after resetting the device.  The more conventional way here, however,
    * also appears to work.
    */
 

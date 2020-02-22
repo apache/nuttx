@@ -96,7 +96,7 @@
  * Name: RPTUN_GET_ADDRENV
  *
  * Description:
- *   Get adress env list
+ *   Get address env list
  *
  * Input Parameters:
  *   dev  - Device-specific state data

@@ -289,7 +289,7 @@ static int get_dmasize(FAR struct altmdm_dev_s *priv, int data_size)
  * Name: wait_receiverready
  *
  * Description:
- *   Wait until reciever is ready.
+ *   Wait until receiver is ready.
  *
  ****************************************************************************/
 

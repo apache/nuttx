@@ -2296,7 +2296,7 @@ The specific environmental definitions are unique for each board but should incl
   There are many interfaces exported from board- to architecture-specific logic.
   But there are only a few exported from board-specific logic to common NuttX logic.
   Those few of those related to initialization will be discussed in this paragraph.
-  There are others, like those used by <a href="#boardctl"><code>boardctl()</code></a> that will be dicussed in other paragraphs.
+  There are others, like those used by <a href="#boardctl"><code>boardctl()</code></a> that will be discussed in other paragraphs.
 </p>
 <p>
   All of the board-specific interfaces used by the NuttX OS logic are for controlled board initialization.
@@ -2339,7 +2339,7 @@ The specific environmental definitions are unique for each board but should incl
   This additional initialization phase may be used, for example, to initialize more complex, board-specific device drivers.
 </p>
 <p>
-  Waiting for events, use of I2C, SPI, etc are permissable in the context of board_late_initialize().
+  Waiting for events, use of I2C, SPI, etc are permissible in the context of board_late_initialize().
   That is because <code>board_late_initialize()</code> will run on a temporary, internal kernel thread.
 </p>
 

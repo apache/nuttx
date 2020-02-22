@@ -65,7 +65,7 @@
  * loses control of the processor. An Xtensa co-processor exception is
  * triggered when any co-processor instruction is executed by a thread that
  * is not the owner, and the context switch of that co-processor is then
- * peformed by the handler. Ownership represents which thread's state is
+ * performed by the handler. Ownership represents which thread's state is
  * currently in the co-processor.
  *
  * Co-processors may not be used by interrupt or exception handlers. If an

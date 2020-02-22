@@ -1953,7 +1953,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                   /* Wait for the next polling interval.  For interrupt and
                    * isochronous endpoints, this is necessaryto assure the
                    * polling interval.  It is used in other cases only to
-                   * prevent the polling from consuming too much CPU bandwith.
+                   * prevent the polling from consuming too much CPU bandwidth.
                    *
                    * Small delays could require more resolution than is provided
                    * by the system timer.  For example, if the system timer
@@ -3239,7 +3239,7 @@ static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
   chan->xfrd    += chan->inflight;
   chan->inflight = 0;
 
-  /* If we have now transfered the entire buffer, then this transfer is
+  /* If we have now transferred the entire buffer, then this transfer is
    * complete (this case really should never happen because we disable
    * the PTXFE interrupt on the final packet).
    */
@@ -3775,7 +3775,7 @@ static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx)
   uint32_t regval;
 
   /* Disable all interrupts so that we have exclusive access to the GINTMSK
-   * (it would be sufficent just to disable the GINT interrupt).
+   * (it would be sufficient just to disable the GINT interrupt).
    */
 
   flags = enter_critical_section();

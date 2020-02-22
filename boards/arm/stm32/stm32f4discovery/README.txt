@@ -1166,7 +1166,7 @@ Install the libcxx files on NuttX:
 
     $ ./install.sh ../nuttx
     Installing LLVM/libcxx in the NuttX source tree
-    Installation suceeded
+    Installation succeeded
 
 Enter inside NuttX and compile it:
 
@@ -1340,7 +1340,7 @@ Configuration Sub-directories
   cxxtest:
   -------
 
-  The C++ standard libary test at apps/testing/cxxtest configuration.  This
+  The C++ standard library test at apps/testing/cxxtest configuration.  This
   test is used to verify the uClibc++ port to NuttX.  This configuration may
   be selected as follows:
 

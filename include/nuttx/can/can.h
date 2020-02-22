@@ -314,7 +314,7 @@
 #  define CAN_ERROR2_BIT1         (1 << 4) /* Bit 4: Unable to send recessive bit */
 #  define CAN_ERROR2_OVERLOAD     (1 << 5) /* Bit 5: Bus overload */
 #  define CAN_ERROR2_ACTIVE       (1 << 6) /* Bit 6: Active error announcement */
-#  define CAN_ERROR2_TX           (1 << 7) /* Bit 7: Error occured on transmission */
+#  define CAN_ERROR2_TX           (1 << 7) /* Bit 7: Error occurred on transmission */
 
 /* Data[3]:  Error in CAN protocol.  This provides the loation of the error. */
 
@@ -799,7 +799,7 @@ int can_txdone(FAR struct can_dev_s *dev);
  *   another transfer.
  *
  *   If the CAN hardware supports a H/W FIFO, can_txdone() is not called
- *   when the tranfer is complete, but rather when the transfer is queued in
+ *   when the transfer is complete, but rather when the transfer is queued in
  *   the H/W FIFO.  When the H/W FIFO becomes full, then dev_txready() will
  *   report false and the number of queued messages in the S/W FIFO will grow.
  *

@@ -61,7 +61,7 @@
  *
  * CONFIG_BATTERY - Upper half battery gauge driver support
  * CONFIG_I2C - I2C support
- * CONFIG_I2C_MAX1704X - And the driver must be explictly selected.
+ * CONFIG_I2C_MAX1704X - And the driver must be explicitly selected.
  */
 
 #if defined(CONFIG_BATTERY) && defined(CONFIG_I2C) && defined(CONFIG_I2C_MAX1704X)
@@ -517,7 +517,7 @@ static int max1704x_capacity(struct battery_gauge_dev_s *dev, b16_t *value)
  *
  *   CONFIG_BATTERY - Upper half battery driver support
  *   CONFIG_I2C - I2C support
- *   CONFIG_I2C_MAX1704X - And the driver must be explictly selected.
+ *   CONFIG_I2C_MAX1704X - And the driver must be explicitly selected.
  *   CONFIG_I2C_MAX17040 or CONFIG_I2C_MAX17041 - The driver must know which
  *     chip is on the board in order to scale the voltage correctly.
  *

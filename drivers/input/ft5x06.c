@@ -1106,7 +1106,7 @@ errout:
  *
  * Input Parameters:
  *   dev     - An I2C driver instance
- *   config  - Persistant board configuration data
+ *   config  - Persistent board configuration data
  *   minor   - The input device minor number
  *
  * Returned Value:

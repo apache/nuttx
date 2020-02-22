@@ -865,7 +865,7 @@ int cxd56_pmic_getchargevol(FAR int *voltage)
  *   Set charge voltage
  *
  * Input Parameter:
- *   voltage - Avalable values are every 50 between 4000 to 4400 (mv)
+ *   voltage - Available values are every 50 between 4000 to 4400 (mv)
  *
  * Returned Value:
  *   Return 0 on success. Otherwise, return a negated errno.

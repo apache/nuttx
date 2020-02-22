@@ -64,7 +64,7 @@
  * Description:
  *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver
  *   is used. This function is called whenever the USB enters or leaves
- *   suspend mode. This is an oportunity for the board logic to shutdown
+ *   suspend mode. This is an opportunity for the board logic to shutdown
  *   clocks, power, etc. while the USB is suspended.
  *
  * TODO:

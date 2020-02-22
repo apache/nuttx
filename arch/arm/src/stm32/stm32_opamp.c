@@ -871,7 +871,7 @@ static int stm32_opampconfig(FAR struct stm32_opamp_s *priv)
 
     if (priv->mux == 1)
       {
-        /* Enable Timer controled Mux mode */
+        /* Enable Timer controlled Mux mode */
 
         regval |= OPAMP_CSR_TCMEN;
 

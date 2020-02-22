@@ -511,7 +511,7 @@ static int lc823450_epclearreq(struct usbdev_ep_s *ep)
       q_ent = sq_remlast(&privep->req_q);
       req = &container_of(q_ent, struct lc823450_req_s, q_ent)->req;
 
-      /* return reqbuf to funciton driver */
+      /* return reqbuf to function driver */
 
       req->result = -ESHUTDOWN;
       req->callback(ep, req);

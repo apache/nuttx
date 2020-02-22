@@ -298,7 +298,7 @@
 
 #define USBOTG_STCTRL_PORTFUNC_SHIFT        (0)       /* Bits 0-1: Controls port function */
 #define USBOTG_STCTRL_PORTFUNC_MASK         (3 << USBOTG_STCTRL_PORTFUNC_SHIFT)
-#  define USBOTG_STCTRL_PORTFUNC_HNPOK      (1 << USBOTG_STCTRL_PORTFUNC_SHIFT) /* HNP suceeded */
+#  define USBOTG_STCTRL_PORTFUNC_HNPOK      (1 << USBOTG_STCTRL_PORTFUNC_SHIFT) /* HNP succeeded */
 #define USBOTG_STCTRL_TMRSCALE_SHIFT        (2)       /* Bits 2-3: Timer scale selection */
 #define USBOTG_STCTRL_TMRSCALE_MASK         (3 << USBOTG_STCTRL_TMR_SCALE_SHIFT)
 #  define USBOTG_STCTRL_TMRSCALE_10US       (0 << USBOTG_STCTRL_TMR_SCALE_SHIFT) /* 10uS (100 KHz) */
@@ -643,7 +643,7 @@
 #define CMD_USBDEV_SETMODE                  (0x00f3)
 #define CMD_USBDEV_READFRAMENO              (0x00f5)
 #define CMD_USBDEV_READTESTREG              (0x00fd)
-#define CMD_USBDEV_SETSTATUS                (0x01fe) /* Bit 8 set to distingish get from set */
+#define CMD_USBDEV_SETSTATUS                (0x01fe) /* Bit 8 set to distinguish get from set */
 #define CMD_USBDEV_GETSTATUS                (0x00fe)
 #define CMD_USBDEV_GETERRORCODE             (0x00ff)
 #define CMD_USBDEV_READERRORSTATUS          (0x00fb)
@@ -652,7 +652,7 @@
 
 #define CMD_USBDEV_EPSELECT                 (0x0000)
 #define CMD_USBDEV_EPSELECTCLEAR            (0x0040)
-#define CMD_USBDEV_EPSETSTATUS              (0x0140) /* Bit 8 set to distingish get from selectclear */
+#define CMD_USBDEV_EPSETSTATUS              (0x0140) /* Bit 8 set to distinguish get from selectclear */
 #define CMD_USBDEV_EPCLRBUFFER              (0x00f2)
 #define CMD_USBDEV_EPVALIDATEBUFFER         (0x00fa)
 

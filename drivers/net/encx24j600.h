@@ -150,7 +150,7 @@
 /* Banked Control Registers *************************************************/
 
 /* Registers are described by 16 bit values. The high byte describes the bank
- * by the appropiate bank selection command.
+ * by the appropriate bank selection command.
  * For registers which are available on all banks the comnmand is set to 0.
  * Unbanked registers are identified by 0x01.
  */

@@ -577,7 +577,7 @@ Configuration Directories
     position.  The windows are being updated from the per-winidow
     framebuffers automatically.
 
-    This example is reminescent of Pong:  Each window travels in straight
+    This example is reminiscent of Pong:  Each window travels in straight
     line until it hits an edge, then it bounces off.  The window is also
     raised when it hits the edge (gets "focus").  This tests all
     combinations of overap.

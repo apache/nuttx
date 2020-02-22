@@ -172,7 +172,7 @@ IDEs
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/avr/src/at32uc3,
+  3) Set up include paths:  You will need include/, arch/avr/src/at32uc3,
      arch/avr/src/common, arch/arm/src/avr, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.

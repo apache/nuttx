@@ -264,7 +264,7 @@ static void ieee802154_meta_data(FAR struct radio_driver_s *radio,
     }
 
   /* Handle associated with MSDU.  Will increment once per packet, not
-   * necesarily per frame:  The same MSDU handle will be used for each
+   * necessarily per frame:  The same MSDU handle will be used for each
    * fragment of a disassembled packet.
    */
 

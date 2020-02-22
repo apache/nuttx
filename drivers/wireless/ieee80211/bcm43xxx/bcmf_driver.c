@@ -988,7 +988,7 @@ int bcmf_wl_enable(FAR struct bcmf_dev_s *priv, bool enable)
   int ret;
   uint32_t out_len;
 
-  /* TODO chek device state */
+  /* TODO check device state */
 
   out_len = 0;
   ret = bcmf_cdc_ioctl(priv, CHIP_STA_INTERFACE, true,

@@ -367,7 +367,7 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 #if 0
   if (config->hwfc)
     {
-      /* CTS controled by Rx FIFO */
+      /* CTS controlled by Rx FIFO */
 
       ucr2 |= UART_UCR2_CTSC;
 

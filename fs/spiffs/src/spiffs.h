@@ -181,7 +181,7 @@ struct spiffs_file_s
  * Public Function Prototypes
  ****************************************************************************/
 
-struct stat;  /* Foward reference */
+struct stat;  /* Forward reference */
 
 /****************************************************************************
  * Name: spiffs_stat_pgndx

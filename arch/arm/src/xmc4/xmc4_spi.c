@@ -1269,7 +1269,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
   if (nbits != spics->nbits)
     {
-      /* Yes... Configure the new word lenght */
+      /* Yes... Configure the new word length */
 
       regval  = spi_getreg(spi, XMC4_USIC_SCTR_OFFSET);
       regval &= ~(USIC_SCTR_WLE_MASK);
@@ -1419,7 +1419,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       spi_putreg(spi, data, XMC4_USIC_TBUF_OFFSET);
 
-      /* Wait until the last bit be transfered */
+      /* Wait until the last bit be transferred */
 
       while ((spi_getreg(spi, XMC4_USIC_PSR_OFFSET) &
              (USIC_PSR_TSIF)) == 0)

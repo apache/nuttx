@@ -2476,7 +2476,7 @@ New features in this release include:
       the OS test and the NuttShell (NSH) both exist.
     * Tests:  New re-usable tests (in apps/examples) for PWM, ADC, and
       CAN loopback.  Several existing tests can now be built as NSH built-in
-      applicaitons (dhcpd, nettest, and all of the new tests).
+      applications (dhcpd, nettest, and all of the new tests).
 
 Bugfixes, order roughly on decreasing criticality include:
 
@@ -3295,7 +3295,7 @@ Additional new features and extended functionality:
     - Tasking logic is extended to support the notion of address
       environments.  An address environment is the key notion underlying
       "process" vs. tasks.  If tasks are created with address environments
-      (by binfmt), the OS will propogate that environment to child threads
+      (by binfmt), the OS will propagate that environment to child threads
       and will destroy the address environment when the "process" exists.
     - If support for the PATH variable is enabled, the OS start up logic
       will create an initial environment containing the default PATH
@@ -4351,7 +4351,7 @@ Additional new features and extended functionality:
       - Added support for the Atmel SAM4L Xplained Pro development board.
         This board features the ATSAM4LC4C MCU (Cortex-M4 with 256KB FLASH +
         32KB SRAM).
-      - Added support for the Atmel SAM4S Xplained developement board.  This
+      - Added support for the Atmel SAM4S Xplained development board.  This
         board features the ATSAM4S16C MCU (Cortex-M4 with 1MB FLASH + 128KB
         SRAM).
 
@@ -4968,7 +4968,7 @@ Additional new features and extended functionality:
       - Add GMII/GRMII PHY definitions for the Micrel KSZ9021/31 PHY.
       - New network-optimized, higher-performance sendfile() implementation
         from Max Holtzberg.
-      - Added a simple routing table.  This table is currenly only used (1)
+      - Added a simple routing table.  This table is currently only used (1)
         when we need to look-up an Ethernet device based on an IP address,
         and (2) in the ARP logic when we need to request the MAC address of
         the router, vs the MAC address of the peer.
@@ -9947,7 +9947,7 @@ Additional new features and extended functionality:
       - VFS:  The VFS was extended to support standard file operations on
         block drivers (open, close, read, write, etc.).  The open() interface
         accomplishes this by creating a temporary characer driver to mediate
-        the character oriented accesses to tje block driver.
+        the character oriented accesses to the block driver.
       - HOSTFS:  Added a HOSTFS file system for use with the simulator.  The
         HOSTFS file system mounts in the simulated Nuttx context by provides
         proxied access to the file system on the host PC.  This is useful for
@@ -10497,7 +10497,7 @@ Additional new features and extended functionality:
       - procfs:  Add /proc/kmm entry that shows that state of the kernel
         heap.  Only useful in PROTECTED and KERNEL build modes where there
         is a kernel heap.
-      - procfs:  Add support for showing CPU in the tast status if SMP is
+      - procfs:  Add support for showing CPU in the taste status if SMP is
         enabled.
 
     * Networking:
@@ -12338,7 +12338,7 @@ Additional new features and extended functionality:
       - task_delete() now obeys all cancellation point semantics.
       - Add task_setcancelstate(), task_setcanceltype(), and
         task_testcancel().  These are non-standard interfaces analogous to the
-        correponding pthread_ interfaces that provide cancellation controls
+        corresponding pthread_ interfaces that provide cancellation controls
         for tasks.
 
     * Graphics/Display Drivers:
@@ -12484,7 +12484,7 @@ Additional new features and extended functionality:
         mode and does not support external TIMER triggers. This is a work in
         progress.  From  Marc Rechté.
       - STM32 F3:  Add PWM driver support for STMF37xx.  The changes have been
-        tested successfuly for TIM4 and TIM17 (different IPs).  From  Marc
+        tested successfully for TIM4 and TIM17 (different IPs).  From  Marc
         Rechté.
       - STM32 F4:  Support oversampling by 8 for the STM32 F4. From David
         Sidrane.
@@ -12493,7 +12493,7 @@ Additional new features and extended functionality:
         From David Sidrane.
       - STM32 F4:  Expanded OTGFS support to stm32F469 and stm32f446.  Added
         missing bit definitions, Used stm32F469 and stm32f446 bit
-        definitions,  Removed unsed header file.  From David Sidrane.
+        definitions,  Removed unused header file.  From David Sidrane.
       - STM32 F4:  Allow dma in 1 bit mode in STM32F4xxx.  From David Sidrane.
       - STM32 F7:  Allow the config to override the clock edge setting.  From
         David Sidrane.
@@ -12691,7 +12691,7 @@ detailed bugfix information):
         enter/leave_critical_section logic to deal with the case where
         interrupts are disabled only on the local CPU.  In this case, some
         rather complex spinlocks must be used to maintain the critical section
-        accross all CPUs.
+        across all CPUs.
       - SMP Critical Sections:  Fixes for the SMP case: (1) Change order for
         SMP case in enter_critical_section:  (1) Disable local interrupts
         BEFORE taking spinlock and (2) If SMP is enabled, if any interrupt
@@ -12881,7 +12881,7 @@ detailed bugfix information):
 
     * Misoc LM32:
 
-      - Misoc LM32: Corrects a bug that never occured in qemu on simulation or
+      - Misoc LM32: Corrects a bug that never occurred in qemu on simulation or
         real fpga. The error was that the r1 register was being modified out
         of context switching and not restoring it.  From Ramtin Amin
 
@@ -13915,7 +13915,7 @@ Additional new features and extended functionality:
       - Added support for set [{+|-}{e|x|xe|ex}] [<name> <value>].  Set the
         'exit on error control' and/or 'print a trace' of commands when
         parsing scripts in NSH.  The settinngs are in effect from the point
-        of exection, until they are changed again, or in the case of the init
+        of execution, until they are changed again, or in the case of the init
         script, the settings are returned to the default settings when it
         exits.  Included child scripts will run with the parents settings and
         changes made in the child script will effect the parent on return.
@@ -14164,7 +14164,7 @@ detailed bugfix information):
         Kivilinna.
       - TCP:  Wait for 3-Way Handshare before accept() returns.  From Simon
         Piriou.
-      - TCP:  Send RST if applicaiton 'unlistens()' before we complete the
+      - TCP:  Send RST if application 'unlistens()' before we complete the
         connection sequence.
       - TCP:  An RST received during the 3-way handshake requires a little
         more clean-up.
@@ -14254,7 +14254,7 @@ detailed bugfix information):
 
       - Kinetis:  Fixed GPIO _PIN_OUTPUT_LOWDRIVE swapped with
         _PIN_OUTPUT_OPENDRAIN.  From David Sidrane.
-      - Ensure interrupts are back on BEFORE running code dependant on
+      - Ensure interrupts are back on BEFORE running code dependent on
         clock_systimer.  From David Sidrane.
       - Kinetis k66, k64, k60, k40, k20: Pin mux configure all I2C signals as
         Open Drain.  The output structure of the GPIO for I2C needs to be
@@ -14319,7 +14319,7 @@ detailed bugfix information):
         polling interval for the case of isochronous and interrupt endpoints.
       - STM32:  Fix erase sector number for microcontrolers with more than 11
         sectors.  Erase a sector from the second bank cause the bit 4 of SNB
-        being set but never unsed, so trying to erase a sector from the first
+        being set but never unused, so trying to erase a sector from the first
         bank was acually eraseing a sector from the second bank.  From José
         Roberto de Souza.
       - STM32:  Make up_progmem thread safe.  Writing to a flash sector while
@@ -14945,7 +14945,7 @@ Additional new features and extended functionality:
 
     * Tools:
 
-      - testbuild.sh:  Added -x to fail build on errors for continous
+      - testbuild.sh:  Added -x to fail build on errors for continuous
         integration (CI).  On CI we want to know ASAP of a failure.  From
         David Sidrane.
       - Improve configure.sh behavior:  (1) enable to call from top directory.
@@ -15117,7 +15117,7 @@ detailed bugfix information):
         cloned error:  It was not locking the bus while performing byte write
         operations.
       - MTD M2PX: If we READ while a write/erase is pending, the command is
-        ignored and the write/erase continues. If we dont catch this situation
+        ignored and the write/erase continues. If we don't catch this situation
         we will return garbage to the user because the flash will not execute
         the command.  So READ MUST wait for write completion, and before that,
         the bus must be locked since it's a precondition to calling
@@ -16453,7 +16453,7 @@ detailed bugfix information):
 
     * NXP/Freescale LPC43xx:
 
-      - lpc43xx:  lpc43_adc.c was being selected by the build system wehn
+      - lpc43xx:  lpc43_adc.c was being selected by the build system when
         DAC was selected.
 
     * NXP/Freescale LPC43xx Drivers:
@@ -16520,7 +16520,7 @@ detailed bugfix information):
         the RTC_TR register instead of being locked."
       - STM32 Serial:  Do not stop processing input in SW flow-control
         mode.  From Juha Niskanen.
-      - STM32F33xxx ADC:  Add some publicly visable interfaces and some
+      - STM32F33xxx ADC:  Add some publicly visible interfaces and some
         code to support injected channels.  From Mateusz Szafoni.
       - STM32F33xxx DMA:  Add public interface to handle with DMA
         interrupts.  From Mateusz Szafoni.
@@ -17911,7 +17911,7 @@ Additional new features and extended functionality:
         existing code.  The previously existing tftpget/tftpput functions
         are now wrappers on the new ones, with callbacks that read/write
         from files, so my modifications are backwards compatible with
-        existing applications, eg the associated nsh commands dont need to
+        existing applications, eg the associated nsh commands don't need to
         be changed.  From Sebastien Lorquet.
 
     * Wireless Utilities: apps/wireless:
@@ -18108,7 +18108,7 @@ detailed bugfix information):
         with parity is required. If left in 8 bit mode (M=0) with parity
         then D7 of the TX/RX register becomes parity bit.  Hence what is
         called 9-bit or 8-bit Mode Select is a misnomer.  8 bit mode when
-        parity is enabled is realy 7 bit with parity.  From David Sidrane.
+        parity is enabled is really 7 bit with parity.  From David Sidrane.
 
     * NXP/Freescale Kinetis Boards:
 
@@ -19409,7 +19409,7 @@ detailed bugfix information):
         complete.  The second problem is that Software Reset For DAT Line
         SDHC_SYSCTL[RSTD] clears the bits 24-0 in SDHC_PROTO this looses
         the wide bus setting DTW  From David Sidrane.
-      - Kinetis:  (1) PIT add Liftime and Chaining, (2) flexcan fix
+      - Kinetis:  (1) PIT add Lifetime and Chaining, (2) flexcan fix
         duplicate line and ordering, (3) kinetis_lowput.c LPUART data
         format with parity fix.  The 9-bit data mode is typically used with
         parity to allow eight bits of data plus the parity, (4) lowputc
@@ -21717,7 +21717,7 @@ detailed bugfix information):
           3.  Paste buffer from 'dd' was being free'd after the 'p'aste operation,
               preventing multiple paste opportunity.  Fixed.
           4.  The cursor was not being bound to the line end and was allowed to
-              'hover' over the '\n' EOL character.  This caused wierd (relative to
+              'hover' over the '\n' EOL character.  This caused weird (relative to
               standard vi) insertion locations and cursor movement with 'a'ppend
               and 'i'nsert.  Fixed.
           5.  The 'vi_shrinkpos' position didn't take the end of file pointer into
@@ -21725,7 +21725,7 @@ detailed bugfix information):
               wierdness when deleting things near the end of the file.  Fixed.
           6.  The 'yy'ank command was improperly deleting the text from the
              document instead of simply yanking to the paste buffer.  Fixed.
-          7.  The 'dd'elete line funciton was not copying the deleted line to the
+          7.  The 'dd'elete line function was not copying the deleted line to the
               paste buffer as part of the delete operation.  Fixed.
           8.  The bottom line of the screen was sometimes being used for document
               text and other times for command / find entry.  Fixed by reserving
@@ -21761,7 +21761,7 @@ detailed bugfix information):
           17. In command mode, backspace was deleting characters which is
               different from standard vi.  Backspace in command mode normally
               simply moves the cursor left / to the previous line.  Fixed.
-          18. Added code to handle boundry conditions when the file is new and
+          18. Added code to handle boundary conditions when the file is new and
               commands are applied to an empty file.
           19. Fixed vi_shrinktext so it doesn't allocate a zero-length buffer when
               the last character in the file is deleted.
@@ -21930,7 +21930,7 @@ Additional new features and extended functionality:
         expense of increased memory usage.  Redraw requests in other cases
         are also suppressed:  Changes to window position, size, etc.  As a
         consequence, some manual updates will be required when certain
-        events occurr (like removing a toolbar from a window).  NOTE:  A
+        events occur (like removing a toolbar from a window).  NOTE:  A
         significant amount of RAM, usually external SDRAM, may be required
         to use per-window framebuffers.
 
@@ -22175,7 +22175,7 @@ Additional new features and extended functionality:
       - tools/nxstyle.c:  Add logic to detect a blank line following a left
         brace or a blank line preceding a right brace.  From Gregory Nutt.
       - tools/nxstyle.c:  Don't complain about certain lowercase characters
-        in otherwise uppercase pre-processor identifers:  IPv6, IPv4,
+        in otherwise uppercase pre-processor identifiers:  IPv6, IPv4,
         ICMPv6, IGMPv2, p as a decimal point, d signifying a divisor.  It
         was a bad idea to let the door open a crack for there.  While they
         improve readability, the inconsistently also causes other
@@ -22626,7 +22626,7 @@ detailed bugfix information):
 
     * NXP i.MXRT:
 
-      - i.MXRT Clock Configuration:  If SDRAM is actived it was only
+      - i.MXRT Clock Configuration:  If SDRAM is activated it was only
         running at 40MHz.  This was becaus imxrt_clockconfig.c changed the
         SEMC clock divider after the DCD was configured.  This commit
         corrects that.  From Johannes.
@@ -23280,7 +23280,7 @@ detailed bugfix information):
     * Networking/Network Drivers:
 
       - getsockname():  Fix addrlen check in socket debug features.
-        Getsockname() checked erroneously a pointer agains 0, where the
+        Getsockname() checked erroneously a pointer against 0, where the
         intention was to dereference the pointer and to check the length.
         This causes also a compilation failure if the code is compiled
         with CONFIG_DEBUG_FEATURES and with -Werror flag set.  From Jukka
@@ -24919,7 +24919,7 @@ Additional new features and extended functionality:
       - Tiva Configuration:  Modify preprocessor logic to support
         configurations with no UART.  Now similar to logic for other
         architectures.  From Nathan Hartman.
-      - Tiva Interrupts:  Add handling for IRQs 128 thru 159.  From Nathan
+      - Tiva Interrupts:  Add handling for IRQs 128 through 159.  From Nathan
         Hartman.
 
     * TI Tiva Drivers:

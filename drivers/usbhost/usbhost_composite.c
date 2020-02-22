@@ -134,7 +134,7 @@ static int  usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
  *   Disconnect all contained class instances.
  *
  * Input Parameters:
- *   priv - Reference to private, composite container state stucture.
+ *   priv - Reference to private, composite container state structure.
  *
  * Returned Value:
  *   None

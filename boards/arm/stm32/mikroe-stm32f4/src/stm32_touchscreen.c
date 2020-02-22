@@ -461,7 +461,7 @@ static void tc_adc_init(void)
  * Name: tc_adc_start_sample
  *
  * Description:
- *   Perform A/D sampling.    Time must be allowed betwen the start of sampling
+ *   Perform A/D sampling.    Time must be allowed between the start of sampling
  *   and conversion (approx. 100Ms).
  *
  ****************************************************************************/
@@ -493,7 +493,7 @@ static void tc_adc_start_sample(int channel)
  * Name: tc_adc_read_sample
  *
  * Description:
- *   Begin A/D conversion.  Time must be allowed betwen the start of sampling
+ *   Begin A/D conversion.  Time must be allowed between the start of sampling
  *   and conversion (approx. 100Ms).
  *
  * Assumptions:
@@ -691,7 +691,7 @@ static int tc_waitsample(FAR struct tc_dev_s *priv,
   nxsem_post(&priv->devsem);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
-   * that is posted when new sample data is availble.
+   * that is posted when new sample data is available.
    */
 
   while (tc_sample(priv, sample) < 0)

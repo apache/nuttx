@@ -219,7 +219,7 @@ config AM335X_DDR_MAPOFFSET
 		closely to other settings:
 
 			RAM_START and RAM_VSTART give this physical and virtual addresses
-			of the start of usable memory (begining with .text).  NOTE that
+			of the start of usable memory (beginning with .text).  NOTE that
 			this may not necessarily be the actual start of the mapped SDRAM
 			region.  It will be larger if NuttX begins at an offset from
 			beginning of mapped SDRAM (which is the normal case).
@@ -242,7 +242,7 @@ config AM335X_DDR_MAPSIZE
 		closely to other settings:
 
 			RAM_START and RAM_VSTART give this physical and virtual addresses
-			of the start of usable memory (begining with .text).  NOTE that
+			of the start of usable memory (beginning with .text).  NOTE that
 			this may not necessarily be the actual start of the mapped SDRAM
 			region.  It will be larger if NuttX begins at an offset from
 			beginning of mapped SDRAM (which is the normal case).

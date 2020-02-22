@@ -1678,7 +1678,7 @@ union ieee802154_primitive_u
   struct ieee802154_commstatus_ind_s  commstatusind;
   struct ieee802154_syncloss_ind_s    synclossind;
 
-  /* Foward link contained as first entry of all primitives */
+  /* Forward link contained as first entry of all primitives */
 
   FAR struct ieee802154_primitive_s *flink;
 };

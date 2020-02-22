@@ -1607,8 +1607,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       /* Yes, setup the DMA transfer with the RX buffer.
        * We need a DMA ISR for:
        *  1 - Block done: The DMA transfer has completed succuessfully.
-       *  2 - Address error: An address error occured during the transfer.
-       *  3 - Transfer abort: Abort event occured. (i.e. SPI Error)
+       *  2 - Address error: An address error occurred during the transfer.
+       *  3 - Transfer abort: Abort event occurred. (i.e. SPI Error)
        */
 
       rxcfg.priority = CONFIG_PIC32MZ_SPI_DMA_RXPRIO;
@@ -1652,8 +1652,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       /* Yes, setup the DMA transfer with the TX buffer.
        * We need a DMA ISR for:
        *  1 - Block done: The DMA transfer has completed succuessfully.
-       *  2 - Address error: An address error occured during the transfer.
-       *  3 - Transfer abort: Abort event occured. (i.e. SPI Error)
+       *  2 - Address error: An address error occurred during the transfer.
+       *  3 - Transfer abort: Abort event occurred. (i.e. SPI Error)
        */
 
       txcfg.priority = CONFIG_PIC32MZ_SPI_DMA_TXPRIO;

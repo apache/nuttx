@@ -150,7 +150,7 @@ CSRCS += battery_gauge.c
 
 ifeq ($(CONFIG_I2C),y)
 
-# Add the MAX1704x I2C-based battery guage driver
+# Add the MAX1704x I2C-based battery gauge driver
 
 ifeq ($(CONFIG_I2C_MAX1704X),y)
 CSRCS += max1704x.c

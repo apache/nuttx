@@ -534,7 +534,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  *
  *   NOTES:
  *   1. This function does not check for the broadcast address
- *      255.255.255.255.  That must be performed as a seperate check.
+ *      255.255.255.255.  That must be performed as a separate check.
  *   2. You must also separately check if the ipaddress lies on the sub-net
  *      using, perhaps, net_ipv4addr_maskcmp().
  *

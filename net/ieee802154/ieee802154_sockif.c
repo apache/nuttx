@@ -214,7 +214,7 @@ static sockcaps_t ieee802154_sockcaps(FAR struct socket *psock)
  * Name: ieee802154_addref
  *
  * Description:
- *   Increment the refernce count on the underlying connection structure.
+ *   Increment the reference count on the underlying connection structure.
  *
  * Input Parameters:
  *   psock - Socket structure of the socket whose reference count will be

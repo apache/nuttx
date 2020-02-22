@@ -331,7 +331,7 @@ static void cisif_ycc_axi_trdn_int(uint8_t code)
 
   if (g_errint_receive)
     {
-      /* In error occured case in the same frame, ignore */
+      /* In error occurred case in the same frame, ignore */
 
       cisif_reg_write(CISIF_YCC_DREAD_CONT, 0);
       return;
@@ -380,7 +380,7 @@ static void cisif_jpg_axi_trdn_int(uint8_t code)
 
   if (g_errint_receive)
     {
-      /* In error occured case in the same frame, ignore */
+      /* In error occurred case in the same frame, ignore */
 
       cisif_reg_write(CISIF_JPG_DREAD_CONT, 0);
       return;

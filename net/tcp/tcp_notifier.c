@@ -225,7 +225,7 @@ int tcp_disconnect_notifier_setup(worker_t worker,
  *   Eliminate a TCP read-ahead notification previously setup by
  *   tcp_readahead_notifier_setup().  This function should only be called
  *   if the notification should be aborted prior to the notification.  The
- *   notification will automatically be torn down after the notifcation.
+ *   notification will automatically be torn down after the notification.
  *
  * Input Parameters:
  *   key - The key value returned from a previous call to

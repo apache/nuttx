@@ -932,7 +932,7 @@ config STM32H7_FLOWCONTROL_BROKEN
 		Enable UART RTS flow control using Software. Because STM
 		Current STM32 have broken HW based RTS behavior (they assert
 		nRTS after every byte received)  Enable this setting workaround
-		this issue by useing software based management of RTS
+		this issue by using software based management of RTS
 
 config STM32H7_USART_BREAKS
 	bool "Add TIOxSBRK to support sending Breaks"
