@@ -384,7 +384,7 @@ static const char *convert_path(const char *path)
       g_posixpath[size] = '"';
     }
 
-  g_posixpath[size+1] = '\0';
+  g_posixpath[size + 1] = '\0';
   return retptr;
 #else
   return path;
@@ -465,6 +465,8 @@ static void parse_args(int argc, char **argv)
         }
       else if (strcmp(argv[argidx], "--library") == 0)
         {
+          const char *tmp_path;
+
           argidx++;
           if (argidx >= argc)
             {
@@ -479,7 +481,13 @@ static void parse_args(int argc, char **argv)
            * native mode.
            */
 
-          library = (char *)convert_path(argv[argidx]);
+          tmp_path = convert_path(argv[argidx]);
+          library  = strdup(tmp_path);
+          if (library == NULL)
+            {
+              fprintf(stderr, "ERROR: strdup() failed\n");
+              exit(EXIT_FAILURE);
+            }
         }
       else if (strcmp(argv[argidx], "--obj-path") == 0)
         {
