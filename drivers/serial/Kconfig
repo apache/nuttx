@@ -75,7 +75,7 @@ config RPMSG_UART
 
 config RPMSG_SERIALINIT
 	bool "Add dummy up_serialinit for UART rpmsg"
-	default y if !16550_UART && !CMSDK_UART && !MCU_SERIAL
+	default y if !16550_UART && !MCU_SERIAL
 	depends on RPMSG_UART
 
 #
