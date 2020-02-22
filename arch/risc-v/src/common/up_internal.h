@@ -86,8 +86,13 @@
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
 #else
-#  define USE_SERIALDRIVER 1
-#  define USE_EARLYSERIALINIT 1
+#  if defined(CONFIG_CONSOLE_SYSLOG)
+#    undef  USE_SERIALDRIVER
+#    undef  USE_EARLYSERIALINIT
+#  else
+#    define USE_SERIALDRIVER 1
+#    define USE_EARLYSERIALINIT 1
+#  endif
 #endif
 
 /****************************************************************************
