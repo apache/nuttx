@@ -242,10 +242,18 @@ void up_addregion(void);
 /* Serial output */
 
 void up_lowputc(char ch);
-void up_earlyserialinit(void);
-void up_serialinit(void);
 
+#ifdef USE_EARLYSERIALINIT
+void up_earlyserialinit(void);
+#endif
+
+#ifdef USE_SERIALDRIVER
+void up_serialinit(void);
+#endif
+
+#ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
+#endif
 
 /* Network */
 
