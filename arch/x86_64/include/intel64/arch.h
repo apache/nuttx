@@ -149,6 +149,13 @@
 #define HUGE_PAGE_SIZE   (0x200000)
 # define HUGE_PAGE_MASK   (~(HUGE_PAGE_SIZE - 1))
 
+/* CPUID Leaf 01H Definitaions */
+#define X86_64_CPUID_01_SSE3   (1 << 0)
+#define X86_64_CPUID_01_PCID   (1 << 17)
+#define X86_64_CPUID_01_X2APIC (1 << 21)
+#define X86_64_CPUID_01_TSCDEA (1 << 24)
+#define X86_64_CPUID_01_XSAVE  (1 << 26)
+#define X86_64_CPUID_01_RDRAND (1 << 30)
 
 #define BITS_PER_LONG    64
 

@@ -74,54 +74,48 @@
 void x86_64_check_and_enable_capability(void)
 {
   unsigned long ecx;
+  unsigned long require;
 
-  bool tsc_deadline;
-  bool sse3_xsave;
-  bool rdrand;
-  bool pcid;
+  require = X86_64_CPUID_01_X2APIC;
+
+  /* Check timer availability */
+#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
+  require |= X86_64_CPUID_01_TSCDEA;
+#endif
+
+#ifdef CONFIG_ARCH_INTEL64_HAVE_SSE3
+  require |= X86_64_CPUID_01_SSE3;
+  require |= X86_64_CPUID_01_XSAVE;
+#endif
+
+#ifdef CONFIG_ARCH_INTEL64_HAVE_RDRAND
+  require |= X86_64_CPUID_01_RDRAND;
+#endif
+
+#ifdef CONFIG_ARCH_INTEL64_HAVE_PCID
+  require |= X86_64_CPUID_01_PCID;
+#endif
 
   asm volatile("cpuid" : "=c" (ecx) : "a" (1)
       : "rbx", "rdx", "memory");
 
-    /* Check timer availability */
-#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
-  tsc_deadline = !!(ecx & (1 << 24));
-
-  if(!tsc_deadline)
+  /* Check x2APIC availability */
+  if((ecx & require) != require)
     goto err;
-#endif
 
 #ifdef CONFIG_ARCH_INTEL64_HAVE_SSE3
-  sse3_xsave = !!(ecx & (1 << 0));
-  sse3_xsave &= !!(ecx & (1 << 26));
-
-  if(!sse3_xsave)
-    goto err;
-
   __enable_sse3();
 #endif
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_RDRAND
-  rdrand = !!(ecx & (1 << 30));
-
-  if(!rdrand)
-    goto err;
-#endif
-
 #ifdef CONFIG_ARCH_INTEL64_HAVE_PCID
-  pcid = !!(ecx & (1 << 17));
-
-  if(!pcid)
-    goto err;
-
   __enable_pcid();
 #endif
 
   return;
 
 err:
-    asm volatile ("cli");
-    asm volatile ("hlt");
-    goto err;
+  asm volatile ("cli");
+  asm volatile ("hlt");
+  goto err;
 }
 
