@@ -681,7 +681,7 @@ static ssize_t ft5x06_waitsample(FAR struct ft5x06_dev_s *priv,
       /* Now sample the data.
        *
        * REVISIT:  Is it safe to assume that priv->valid will always be
-       * true?  I think that sched_lock() whould protect the setting.
+       * true?  I think that sched_lock() would protect the setting.
        */
 
       ret = ft5x06_sample(priv, buffer, len);

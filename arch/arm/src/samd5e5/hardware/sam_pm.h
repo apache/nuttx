@@ -55,7 +55,7 @@
 #define SAM_PM_INTENCLR_OFFSET           0x0004  /* Interrupt enable clear register */
 #define SAM_PM_INTENSET_OFFSET           0x0005  /* Interrupt enable set register */
 #define SAM_PM_INTFLAG_OFFSET            0x0006  /* Interrupt flag status and clear register */
-#define SAM_PM_STDBYCFG_OFFSET           0x0008  /* Standy configuration */
+#define SAM_PM_STDBYCFG_OFFSET           0x0008  /* Standby configuration */
 #define SAM_PM_HIBCFG_OFFSET             0x0009  /* Hibernate configuration */
 #define SAM_PM_BKUPCFG_OFFSET            0x000a  /* Backup configuration */
 
@@ -93,7 +93,7 @@
 
 #define PM_INT_SLEEPRDY                  (1 << 0)  /* Bit 0: Sleep mode entry ready interrupt */
 
-/* Standy configuration */
+/* Standby configuration */
 
 #define PM_STDBYCFG_RAMCFG_SHIFT         (0)       /* Bits 0-1: RAM Configuration */
 #define PM_STDBYCFG_RAMCFG_MASK          (3 << PM_STDBYCFG_RAMCFG_SHIFT)

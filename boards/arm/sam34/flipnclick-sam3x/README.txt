@@ -235,7 +235,7 @@ Loading Code
 
   3. The Windows driver installation should fail.
 
-  4. Open the Device Manger
+  4. Open the Device Manager
 
   5. Look for the listing named "Ports (COM & LPT)". You should see an open
      port named "Arduino Due Prog. Port".  Right click and select "Update

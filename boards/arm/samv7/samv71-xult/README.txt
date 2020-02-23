@@ -963,7 +963,7 @@ serial device class:
 
   Device Drivers -> USB Device Driver Support
     CONFIG_CDCACM=y                           : USB Modem (CDC ACM) support
-    CONFIG_CDCACM_EP0MAXPACKET=64             : Enpoint 0 packet size
+    CONFIG_CDCACM_EP0MAXPACKET=64             : Endpoint 0 packet size
     CONFIG_CDCACM_EPINTIN=1                   : Interrupt IN endpoint number
     CONFIG_CDCACM_EPINTIN_FSSIZE=64           : Full speed packet size
     CONFIG_CDCACM_EPINTIN_HSSIZE=64           : High speed packet size
@@ -1930,7 +1930,7 @@ Configuration sub-directories
       2017-07-02:  Configurations added.  Not yet tested.
 
       2017-07-03:  Initial testing, appears to be working, but endpoints
-        fail to associate; sniffer shows that nothing sent fro the star
+        fail to associate; sniffer shows that nothing sent from the star
         hub.  I am thinking that there is something wrong with the
         GPIO interrupt configuration so that no MRF24J40 interrupt are
         being received.
@@ -2276,7 +2276,7 @@ Configuration sub-directories
          Where <cmd> is one of:
 
            Show help     : ?
-           List busses   : bus
+           List buses   : bus
            List devices  : dev [OPTIONS] <first> <last>
            Read register : get [OPTIONS] [<repititions>]
            Show help     : help
@@ -2408,7 +2408,7 @@ Configuration sub-directories
         - Other images are horizontally compressed (such as the initial NX
           logo on the background).
 
-      - As mentioned above, reading fromthe LCD is not currently functional.
+      - As mentioned above, reading from the LCD is not currently functional.
         There are some special settings work work around this but the
         bottom line is that transparent operations cannot yet be supported.
 

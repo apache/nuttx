@@ -616,7 +616,7 @@ int timer_setcallback(FAR void *handle, tccb_t callback, FAR void *arg)
 
   if (lower->ops->setcallback != NULL) /* Optional */
     {
-      /* Yes.. Defer the hander attachment to the lower half driver */
+      /* Yes.. Defer the handler attachment to the lower half driver */
 
       lower->ops->setcallback(lower, callback, arg);
       return OK;

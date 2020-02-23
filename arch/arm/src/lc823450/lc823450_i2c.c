@@ -743,7 +743,7 @@ static int lc823450_i2c_poll(FAR struct lc823450_i2c_priv_s *priv)
             }
           else
             {
-              /* We need restart from START conditon. If transfer direction is different
+              /* We need restart from START condition. If transfer direction is different
                * between current message and next message, restart is necessary.
                */
 

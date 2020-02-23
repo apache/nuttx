@@ -11,7 +11,7 @@
  *
  * This ONFI logic was based largely on Atmel sample code for the SAMA5D3x
  * with modifications for better integration with NuttX.  The Atmel sample
- * code has a BSD compatibile license that requires this copyright notice:
+ * code has a BSD compatible license that requires this copyright notice:
  *
  *   Copyright (c) 2010, Atmel Corporation
  *

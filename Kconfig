@@ -64,7 +64,7 @@ config WINDOWS_NATIVE
 	depends on EXPERIMENTAL
 	---help---
 		Build natively in a CMD.exe environment with Windows style paths
-		(like C:\cgywin\home)
+		(like C:\cygwin\home)
 
 		The Windows native build is complete and available, but not often
 		used or verified.  As a consequence, it cannot be assured to be
@@ -81,7 +81,7 @@ config WINDOWS_CYGWIN
 config WINDOWS_UBUNTU
 	bool "Ubuntu under Windows 10"
 	---help---
-		Build natively in an Ubuntu shell under Windoes 10 environment with
+		Build natively in an Ubuntu shell under Windows 10 environment with
 		POSIX style paths (like /mnt/c/Program Files)
 
 config WINDOWS_MSYS
@@ -89,7 +89,7 @@ config WINDOWS_MSYS
 	select TOOLCHAIN_WINDOWS
 	---help---
 		Build natively in a Cygwin environment with POSIX style paths (like
-		/cygdrive/c/cgywin/home)
+		/cygdrive/c/cygwin/home)
 
 config WINDOWS_OTHER
 	bool "Windows POSIX-like environment"

@@ -38,7 +38,7 @@
  * 0x1102:9000.  A 128b header will appear at this address (applied by
  * lpc313xImgCreator) and the executable code must begin at 0x1102:9080.
  *
- * The .text vitual address space begins at the same location as the physical
+ * The .text virtual address space begins at the same location as the physical
  * address space:  0x1102 8000.  The virtual space is broken up into three
  * regions:
  *

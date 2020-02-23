@@ -69,7 +69,7 @@
 #include "hardware/efm32_memorymap.h"
 
 #if !defined(CONFIG_EFM32_EFM32GG)
-#  warning This is the EFM32GG header file; Review/modification needed for this archtecture
+#  warning This is the EFM32GG header file; Review/modification needed for this architecture
 #endif
 
 /*******************************************************************************************************************************
@@ -99,7 +99,7 @@
 #define EFM32_LESENSE_IEN_OFFSET                       0x004c  /* Interrupt Enable Register */
 #define EFM32_LESENSE_SYNCBUSY_OFFSET                  0x0050  /* Synchronization Busy Register */
 #define EFM32_LESENSE_ROUTE_OFFSET                     0x0054  /* I/O Routing Register */
-#define EFM32_LESENSE_POWERDOWN_OFFSET                 0x0058  /* LESENSE RAM power-down resgister */
+#define EFM32_LESENSE_POWERDOWN_OFFSET                 0x0058  /* LESENSE RAM power-down register */
 
 #define EFM32_LESENSE_ST_OFFSET(n)                     (0x0200 + ((n) << 3))
 #define EFM32_LESENSE_ST0_OFFSET                       0x0200  /* State 0 transition configuration offset */

@@ -110,7 +110,7 @@ typedef unsigned int       _size_t;
 #endif
 
 /* This is the size of the interrupt state save returned by up_irq_save().
- * It holds the AF regiser pair + a zero pad byte
+ * It holds the AF register pair + a zero pad byte
  */
 
 typedef _uint24_t          irqstate_t;

@@ -456,7 +456,7 @@
 
 #define Z16F_UARTMDSEL_NORMAL     _HX8(00)        /* Bits 5-7=0: Multiprocessor and Normal Mode */
 #define Z16F_UARTMDSEL_FILTER     _HX8(20)        /* Bits 5-7=1: Noise Filter Control/Status */
-#define Z16F_UARTMDSEL_LINP       _HX8(40)        /* Bits 5-7=2: LIN protocol Contol/Status */
+#define Z16F_UARTMDSEL_LINP       _HX8(40)        /* Bits 5-7=2: LIN protocol Control/Status */
 #define Z16F_UARTMDSEL_HWREV      _HX8(e0)        /* Bits 5-7=7: LIN-UART Hardware Revision */
                                                   /* Bits 0-4:   Mode dependent status */
 

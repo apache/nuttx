@@ -52,7 +52,7 @@
 /* Table 14: Communication Device Class Code (see definition USB_CLASS_CDC in usb.h) */
 /* Table 18: Data Interface Class Code  (see definition USB_CLASS_CDC_DATA in usb.h) */
 
-/* Communication Inteface Class Codes *******************************************************/
+/* Communication Interface Class Codes ******************************************************/
 /* Table 15: Communication Interface Class Code */
 
 #define CDC_CLASS_COMM          0x02 /* Communication Interface Class */
@@ -379,7 +379,7 @@
                                               * transmission
                                               */
 #define ECMCAP_XMIT_LATE_COLLS     (1 << 28) /* Late collisions detected */
-                                             /* Bits 29-31 Resrved, Must be set to zero */
+                                             /* Bits 29-31 Reserved, Must be set to zero */
 
 /* Table 47: Communication Feature Selector Codes */
 

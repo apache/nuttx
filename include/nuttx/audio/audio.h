@@ -43,7 +43,7 @@
  *
  * The Audio driver is split into two parts:
  *
- * 1) An "upper half", generic driver that provides the comman Audio interface
+ * 1) An "upper half", generic driver that provides the common Audio interface
  *    to application level code, and
  * 2) A "lower half", platform-specific driver that implements the low-level
  *    controls to configure and communicate with the audio device(s).

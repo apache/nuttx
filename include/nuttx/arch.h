@@ -387,7 +387,7 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype);
  *   tcb: Refers to the tcb to be unblocked.  This tcb is
  *     in one of the waiting tasks lists.  It must be moved to
  *     the ready-to-run list and, if it is the highest priority
- *     ready to run taks, executed.
+ *     ready to run task, executed.
  *
  ****************************************************************************/
 
@@ -1433,7 +1433,7 @@ void up_timer_initialize(void);
  * is suppressed and the platform specific code is expected to provide the
  * following custom functions.
  *
- *   Architecture specific timer initialiation logic initializes the timer
+ *   Architecture specific timer initialization logic initializes the timer
  *     facilities.  This happens early in the initialization sequence (via
  *     up_initialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
@@ -1964,7 +1964,7 @@ int up_cpu_resume(int cpu);
  *
  * Description:
  *   In Harvard architectures, data accesses and instruction accesses occur
- *   on different busses, perhaps concurrently.  All data accesses are
+ *   on different buses, perhaps concurrently.  All data accesses are
  *   performed on the data bus unless special  machine instructions are
  *   used to read data from the instruction address space.  Also, in the
  *   typical MCU, the available SRAM data memory is much smaller that the

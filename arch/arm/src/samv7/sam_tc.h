@@ -332,7 +332,7 @@ uint32_t sam_tc_divfreq(TC_HANDLE handle);
  * Input Parameters:
  *   frequency  Desired timer frequency.
  *   tcclks     TCCLKS field value for divisor.
- *   actual     The actual freqency of the MCK
+ *   actual     The actual frequency of the MCK
  *
  * Returned Value:
  *   Zero (OK) if a proper divisor has been found, otherwise a negated errno

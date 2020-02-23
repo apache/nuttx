@@ -118,7 +118,7 @@ static int usbhost_devaddr_allocate(FAR struct usbhost_devaddr_s *devgen)
           return (int)devaddr;
         }
 
-      /* This address has already been allocated.  The followign logic will
+      /* This address has already been allocated.  The following logic will
        * prevent (unexpected) infinite loops.
        */
 

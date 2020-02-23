@@ -2020,7 +2020,7 @@ struct stm32_adc_dev_s
 
   FAR const struct stm32_adc_ops_s *llops;
 
-  /* Require cast-compatibility with private "lower-half" ADC strucutre */
+  /* Require cast-compatibility with private "lower-half" ADC structure */
 };
 
 /* Low-level operations for ADC */

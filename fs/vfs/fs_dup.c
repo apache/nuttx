@@ -54,7 +54,7 @@
  * Name: dup
  *
  * Description:
- *   Clone a file or socket descriptor to an arbitray descriptor number
+ *   Clone a file or socket descriptor to an arbitrary descriptor number
  *
  ****************************************************************************/
 

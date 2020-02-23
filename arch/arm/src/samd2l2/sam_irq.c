@@ -87,7 +87,7 @@ volatile uint32_t *g_current_regs[1];
  *       sam_dbgmonitor, sam_pendsv, sam_reserved
  *
  * Description:
- *   Handlers for various execptions.  None are handled and all are fatal
+ *   Handlers for various exceptions.  None are handled and all are fatal
  *   error conditions.  The only advantage these provided over the default
  *   unexpected interrupt handler is that they provide a diagnostic output.
  *

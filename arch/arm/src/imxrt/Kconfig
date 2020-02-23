@@ -1363,10 +1363,10 @@ config IMXRT_LCD_VRAMBASE
 		Default: SDRAM
 
 config IMXRT_LCD_REFRESH_FREQ
-	int "LCD refesh rate (Hz)"
+	int "LCD refresh rate (Hz)"
 	default 60
 	---help---
-		LCD refesh rate (Hz)
+		LCD refresh rate (Hz)
 
 config IMXRT_LCD_BACKLIGHT
 	bool "Enable backlight"

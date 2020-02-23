@@ -124,7 +124,7 @@ SECTIONS
     }  > L2
 
     /*--------------------------------------------------------------------*/
-    /* Global constructor/destructor segement                             */
+    /* Global constructor/destructor segment                             */
     /*--------------------------------------------------------------------*/
 
     .preinit_array :

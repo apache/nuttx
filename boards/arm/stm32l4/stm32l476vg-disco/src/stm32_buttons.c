@@ -168,7 +168,7 @@ static void button_pm_notify(struct pm_callback_s *cb, int domain,
  * for the buttons.  On the other hand, it will conflict with things done in
  * the buttons example, which registers it's own ISR, and warns if it sees
  * one already there.  I don't know if 'buttons' is overstepping it's bounds
- * in the interst of providing a compact example, (like the I2C app directly
+ * in the interest of providing a compact example, (like the I2C app directly
  * talking to the bus), or if really that should be an expected thing to do.
  */
 

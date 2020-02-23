@@ -376,7 +376,7 @@
 /* Implementation defined */
 
 /************************************************************************************
- * Assemby Macros
+ * Assembly Macros
  ************************************************************************************/
 
 #ifdef __ASSEMBLY__
@@ -463,7 +463,7 @@ static inline void cp15_wrsctlr(unsigned int sctlr)
     );
 }
 
-/* Read/write the implementation defined Auxiliary Control Regster (ACTLR) */
+/* Read/write the implementation defined Auxiliary Control Register (ACTLR) */
 
 static inline unsigned int cp15_rdactlr(void)
 {

@@ -478,7 +478,7 @@ Configurations
          https://developer.arm.com/open-source/gnu-toolchain/gnu-rm
 
        As of this writing (2015-03-11), full support is difficult to find
-       for the Cortex-M7, but is supported by at least this realease of
+       for the Cortex-M7, but is supported by at least this release of
        the ARM GNU tools:
 
          https://launchpadlibrarian.net/209776344/release.txt
@@ -526,7 +526,7 @@ Configuration Directories
     This configuration uses USART1 for the serial console.
     USART1 is connected to the ST-link virtual com inside board.h to remove
     the need of a extra serial connection to use this board.
-    From the nsh comand line execute the lvgldemo example:
+    From the nsh command line execute the lvgldemo example:
 
       nsh> lvgldemo
 

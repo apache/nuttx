@@ -79,8 +79,8 @@ struct rng_dev_s
   uint8_t *rd_buf;
   size_t   rd_count;
   size_t   buflen;
-  sem_t    rd_sem;         /* semphore for read RNG data */
-  sem_t    excl_sem;       /* semphore for access RNG dev */
+  sem_t    rd_sem;         /* semaphore for read RNG data */
+  sem_t    excl_sem;       /* semaphore for access RNG dev */
 };
 
 /****************************************************************************

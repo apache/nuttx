@@ -231,7 +231,7 @@ struct getroute_recvfrom_ipv6resplist_s
   struct getroute_recvfrom_ipv6response_s payload;
 };
 
-/* netdev_foreach() callabck */
+/* netdev_foreach() callback */
 
 struct nlroute_devinfo_s
 {

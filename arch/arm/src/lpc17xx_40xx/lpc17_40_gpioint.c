@@ -237,7 +237,7 @@ static int lpc17_40_irq2pin(int irq)
    *   LPC18x: 16 interrupts p0.0-p0.15
    *
    * See arch/arm/include/lpc17xx_40xx/irq.h:
-   * LPC17_40_VALID_SHIFT0L   0     - Bit 0 is thre first bit in the group of
+   * LPC17_40_VALID_SHIFT0L   0     - Bit 0 is the first bit in the group of
    *                               12/16 interrupts
    * LPC17_40_VALID_FIRST0L   irq   - IRQ number associated with p0.0
    * LPC17_40_VALID_NIRQS0L   12/16 - Number of interrupt bits in the group

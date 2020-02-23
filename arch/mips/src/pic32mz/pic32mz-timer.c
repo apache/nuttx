@@ -587,11 +587,11 @@ static inline bool pic32mz_timer_mode32(FAR struct pic32mz_timer_dev_s *dev)
 
 static inline uint32_t pic32mz_timer_oddoffset(uint32_t evenoffset)
 {
-  /* To access the consecutive odd timer the base needs te be changed.
+  /* To access the consecutive odd timer the base needs be changed.
    * PIC32MZ_TIMERn_OFFSET(1) represents the offset between timers' base.
    * An even timer's base + PIC32MZ_TIMERn_OFFSET(1) gives the base of
    * the next odd timer.
-   * This wil allow the access of the odd timer from the dev of its
+   * This will allow the access of the odd timer from the dev of its
    * previous even timer.
    */
 

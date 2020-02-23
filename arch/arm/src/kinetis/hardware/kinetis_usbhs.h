@@ -636,7 +636,7 @@
 /* Endpoint Initialization Register */
 
                                                                     /* Bits 20-31: Reserved */
-#define USBHS_EPPRIME_PETB_SHIFT                          (16)      /* Bits 16-19: Prime Endpoint Tansmit Buffer */
+#define USBHS_EPPRIME_PETB_SHIFT                          (16)      /* Bits 16-19: Prime Endpoint Transmit Buffer */
 #define USBHS_EPPRIME_PETB_MASK                           (0xf << USBHS_EPPRIME_PETB_SHIFT)
                                                                     /* Bits 4-15: Reserved */
 #define USBHS_EPPRIME_PERB_SHIFT                          (0)       /* Bits 0-3: Prime Endpoint Receive Buffer */
@@ -760,7 +760,7 @@
 #define USBPHY_CTRLn_HOST_FORCE_LS_SE0                    (1 << 28) /* Bit 28: Forces next FS packet tohave a EOP with low-speed timing */
 #define USBPHY_CTRLn_OTG_ID_VALUE                         (1 << 27) /* Bit 27: Indicates the results of USB_ID pin  */
                                                                     /* Bit 25-26: Reserved */
-#define USBPHY_CTRLn_FSDLL_RST_EN                         (1 << 24) /* Bit 24: Reset ofthe FSDLL lock detection logic at the end of each TX packet */
+#define USBPHY_CTRLn_FSDLL_RST_EN                         (1 << 24) /* Bit 24: Reset of the FSDLL lock detection logic at the end of each TX packet */
                                                                     /* Bit 21-23: Reserved */
 #define USBPHY_CTRLn_ENAUTOCLR_PHY_PWD                    (1 << 20) /* Bit 20: Auto-clear the PWD register bits in USBPHY_PWD if wakeup event while suspended */
 #define USBPHY_CTRLn_ENAUTOCLR_CLKGATE                    (1 << 19) /* Bit 19: Auto-clear the CLKGATE bit if wakeup event while suspended */

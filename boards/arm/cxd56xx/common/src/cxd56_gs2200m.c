@@ -234,7 +234,7 @@ int board_gs2200m_initialize(FAR const char *devpath, int bus)
       cxd56_gpio_config(PIN_UART2_CTS, true);
       cxd56_gpio_config(PIN_UART2_RTS, false);
 
-      /* Initialize spi deivce */
+      /* Initialize spi device */
 
       spi = cxd56_spibus_initialize(bus);
 

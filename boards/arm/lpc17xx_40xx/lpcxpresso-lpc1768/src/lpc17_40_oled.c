@@ -183,7 +183,7 @@ int lpc17_40_ssp1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
  *
  * Input Parameters:
  *
- *   devno - A value in the range of 0 throuh
+ *   devno - A value in the range of 0 through
  *      CONFIG_UG9664HSWAG01_NINTERFACES-1.
  *     This allows support for multiple OLED devices.
  *   on - true:turn power on, false: turn power off.

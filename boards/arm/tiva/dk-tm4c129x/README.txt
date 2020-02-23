@@ -673,7 +673,7 @@ Where <subdir> is one of the following:
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        :CONFIG_WINDOWS_CYGWIN=y                : Cygwin under Windows
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcry fro Windows (arm-none-eabi-gcc)
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcry for Windows (arm-none-eabi-gcc)
        CONFIG_RAW_BINARY=y                     : Output formats: ELF and raw binary
 
     3. Default stack sizes are large and should really be tuned to reduce

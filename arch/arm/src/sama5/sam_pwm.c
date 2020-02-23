@@ -1185,7 +1185,7 @@ static unsigned int pwm_clk_prescaler_log2(uint32_t mck, uint32_t fclk)
  * Description:
  *   Given that we have already selected the prescaler value, select the
  *   divider in the range of 1 through 255.  The CLKA/B frequency is
- *   determined by both the prescaler and divider valuess:
+ *   determined by both the prescaler and divider values:
  *
  *   frequency = MCK / prescaler / div
  *
@@ -1226,7 +1226,7 @@ static unsigned int pwm_clk_divider(uint32_t mck, uint32_t fclk,
  * Name: pwm_clk_frequency
  *
  * Description:
- *   Given that we have already selected the prescaler value and cacluated
+ *   Given that we have already selected the prescaler value and calculated
  *   the corresponding divider, the result clock frequency is give by:
  *
  *   frequency = MCK / prescaler / div

@@ -229,7 +229,7 @@
  * LED3 -- Connected to P1[13]
  * LED4 -- Connected to P4[27]
  *
- * These LEDs are connecte to ground so a high output value will illuminate
+ * These LEDs are connected to ground so a high output value will illuminate
  * them.
  */
 
@@ -324,7 +324,7 @@
 
 /* UART1:
  *
- * All pin options are controlled by older briges on the bottom of the board.
+ * All pin options are controlled by older bridges on the bottom of the board.
  * There are the default settings on my board as it came out of the box:
  *
  * RTS   --- Connected to P0[22]

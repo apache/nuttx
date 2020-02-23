@@ -1480,7 +1480,7 @@ static int
   tda19988_hdmi_putreg(priv, HDMI_AUDIO_ENC_CTRL_REG,
                        HDMI_AUDIO_ENC_CNTRL_DVI_MODE);
 
-  /* No pre-filter or interpretor */
+  /* No pre-filter or interpreter */
 
   tda19988_hdmi_putreg(priv, HDMI_CTRL_HVF_CNTRL_0_REG,
                        HDMI_CTRL_HVF_CNTRL_0_INTPOL_BYPASS |

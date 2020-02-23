@@ -132,7 +132,7 @@ config CS43L22_CLKDEBUG
 	bool "CS43L22 clock analysis"
 	default n
 	---help---
-		Enable logic to analyze CS43L22 clock configuation.
+		Enable logic to analyze CS43L22 clock configuration.
 
 endif # AUDIO_CS43L22
 
@@ -221,7 +221,7 @@ config WM8904_CLKDEBUG
 	bool "WM8904 clock analysis"
 	default n
 	---help---
-		Enable logic to analyze WM8904 clock configuation.
+		Enable logic to analyze WM8904 clock configuration.
 
 endif # AUDIO_WM8904
 

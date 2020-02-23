@@ -190,7 +190,7 @@
 
 /* Fixed vector section
  *
- * The fixed vector table begins at address ffe00.  The firt portion
+ * The fixed vector table begins at address ffe00.  The first portion
  * of the fixed vector table is the special page table.  This table
  * is not currently used.
  */

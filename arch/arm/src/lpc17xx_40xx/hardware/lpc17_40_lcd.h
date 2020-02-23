@@ -173,7 +173,7 @@
 #define LCD_UPBASE_LCDLPBASE_SHIFT          (3)       /* Bits 3-31: LCD lower panel base address */
 #define LCD_UPBASE_LCDLPBASE_MASK           (0x1FFFFFFF << LCD_UPBASE_LCDUPBASE_SHIFT)
 
-/* LCD_CTRL - Controle Register */
+/* LCD_CTRL - Control Register */
 
 #define LCD_CTRL_LCDEN                      (1 << 0)  /* Bit 0: LCD enable control bit */
 #define LCD_CTRL_LCDBPP_SHIFT               (1)       /* Bits 1-3: LCD bits per pixel */
@@ -210,7 +210,7 @@
 
 /* LCD_INTRAW - Raw Interrupt Status Register */
                                                       /* Bits 0: Reserved */
-#define LCD_INTRAW_FUFRIS                   (1 << 1)  /* Bit 1: FIFO Undeflow raw interrupt status */
+#define LCD_INTRAW_FUFRIS                   (1 << 1)  /* Bit 1: FIFO Underflow raw interrupt status */
 #define LCD_INTRAW_LNBURIS                  (1 << 2)  /* Bit 2: LCD Next address base update intterupt */
 #define LCD_INTRAW_VCOMPRIS                 (1 << 3)  /* Bit 3: Vertical compare interrupt status */
 #define LCD_INTRAW_BERRAW                   (1 << 4)  /* Bit 4: AHB Master bus error interrupt status */
@@ -219,7 +219,7 @@
 
 /* LCD_INTSTAT - Masked Interrupt Status Register */
                                                       /* Bits 0: Reserved */
-#define LCD_INTSTAT_FUFMIS                  (1 << 1)  /* Bit 1: FIFO Undeflow raw interrupt status */
+#define LCD_INTSTAT_FUFMIS                  (1 << 1)  /* Bit 1: FIFO Underflow raw interrupt status */
 #define LCD_INTSTAT_LNBUMIS                 (1 << 2)  /* Bit 2: LCD Next address base update intterupt */
 #define LCD_INTSTAT_VCOMPMIS                (1 << 3)  /* Bit 3: Vertical compare interrupt status */
 #define LCD_INTSTAT_BERMIS                  (1 << 4)  /* Bit 4: AHB Master bus error interrupt status */
@@ -228,7 +228,7 @@
 
 /* LCD_INTCLR - Interrupt Clear Register */
                                                       /* Bits 0: Reserved */
-#define LCD_INTCLR_FUFIC                    (1 << 1)  /* Bit 1: FIFO Undeflow raw interrupt clear */
+#define LCD_INTCLR_FUFIC                    (1 << 1)  /* Bit 1: FIFO Underflow raw interrupt clear */
 #define LCD_INTCLR_LNBUIC                   (1 << 2)  /* Bit 2: LCD Next address base update intterupt */
 #define LCD_INTCLR_VCOMPIC                  (1 << 3)  /* Bit 3: Vertical compare interrupt clear */
 #define LCD_INTCLR_BERIC                    (1 << 4)  /* Bit 4: AHB Master bus error interrupt clear */

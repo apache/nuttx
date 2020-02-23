@@ -498,7 +498,7 @@ static void tc_adc_start_sample(int channel)
  *
  * Assumptions:
  * 1) All output pins configured as outputs:
- * 2) Approprite pins are driven high and low
+ * 2) Appropriate pins are driven high and low
  *
  ****************************************************************************/
 
@@ -1406,7 +1406,7 @@ static int tc_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_TOUCHSCREEN_NPOLLWAITERS)
         {
-          ierr("ERROR: No availabled slot found: %d\n", i);
+          ierr("ERROR: No available slot found: %d\n", i);
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout;

@@ -717,7 +717,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 
       /* Check if the pktlen is valid.  It should be large enough to hold
        * an Ethernet header and small enough to fit entirely in the I/O
-       * buffer.  Six is subtracted to acount for the 2-byte length/type
+       * buffer.  Six is subtracted to account for the 2-byte length/type
        * and 4 byte FCS that are not copied into the network packet.
        */
 

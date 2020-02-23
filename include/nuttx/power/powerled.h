@@ -134,7 +134,7 @@ struct powerled_params_s
                                     */
 };
 
-/* Powerled private data strucutre  */
+/* Powerled private data structure  */
 
 struct powerled_s
 {

@@ -448,7 +448,7 @@ void up_disable_irq(int irq)
           return;
         }
 
-      /* If a defferent cpu requested, send an irq request */
+      /* If a different cpu requested, send an irq request */
 
       if (cpu != (int8_t)up_cpu_index())
         {

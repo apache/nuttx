@@ -110,7 +110,7 @@ These pins are available on the NuTiny-SDC-NUC120 JP5.
   confusing!
 
 UART0 is an alternative that can be selected by modifying the default
-configuation.  UART0 RX (RXD0) is on PB.0, pin 17, and the TX signal (TXD0)
+configuration.  UART0 RX (RXD0) is on PB.0, pin 17, and the TX signal (TXD0)
 is on PB.1, pin 18.  These pins are available on the NuTiny-SDC-NUC120 JP1.
 
   NOTE: PB.0, pin 17, is also used to control the user LED on board (labeled
@@ -330,5 +330,5 @@ Where <subdir> is one of the following:
          applications. Most of the memory used at runtime is allocated I/O
          buffers and the stack for the NSH main thread (1.5KB).
 
-       There is probably enough free memroy to support 3 or 4 application
+       There is probably enough free memory to support 3 or 4 application
        threads in addition to NSH.

@@ -71,7 +71,7 @@
 
 /* Dynamic Power Management - Indicated in StatusReg DPM_STAT REG08[3]
  VINDPM - Input Voltage threshold (a drop below  5V) that triggers DPM
- INLIM - Input current threshold that tiggers DPM */
+ INLIM - Input current threshold that triggers DPM */
 
 #define BQ2429XR0_VINDPM_SHIFT          3   /* VIN DPM Offset 5V? Range*/
 #define BQ2429XR0_VINDPM_MASK          (0xf << BQ2429XR0_VINDPM_SHIFT)

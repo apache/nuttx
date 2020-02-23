@@ -79,7 +79,7 @@
  * interfaces to support the system calls, even though we don't use them
  * ourself.
  *
- * The "normal" pre-processor defintions for these functions is in errno.h
+ * The "normal" pre-processor definitions for these functions is in errno.h
  * but we need the internal function prototypes in nuttx/errno.h.
  */
 

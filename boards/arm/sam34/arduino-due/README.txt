@@ -325,7 +325,7 @@ Serial Consoles
 
   The outputs from these pins is 3.3V.  You will need to connect RS232
   transceiver to get the signals to RS232 levels (or connect to the
-  USB virual COM port in the case of UART0).
+  USB virtual COM port in the case of UART0).
 
 Loading Code
 ============
@@ -352,7 +352,7 @@ Loading Code
 
   3. The Windows driver installation should fail.
 
-  4. Open the Device Manger
+  4. Open the Device Manager
 
   5. Look for the listing named "Ports (COM & LPT)". You should see an open
      port named "Arduino Due Prog. Port".  Right click and select "Update

@@ -231,7 +231,7 @@ end_wait:
  *   pstate   recvfrom state structure
  *
  * Returned Value:
- *   Nunber of bytes copied to the user buffer
+ *   Number of bytes copied to the user buffer
  *
  * Assumptions:
  *   The network is locked.

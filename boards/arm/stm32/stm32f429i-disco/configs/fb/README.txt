@@ -12,7 +12,7 @@ cd ..
 make
 
 
-Frambuffer calculation
+Framebuffer calculation
 ----------------------
 
 Use the helper script boards/stm32f429i-disco/tools/fbcalc.sh for calculating
@@ -34,7 +34,7 @@ Configured at build time
 - background color
 - default color (outside visible screen)
 
-Configurable by nuttx frambuffer interface
+Configurable by nuttx framebuffer interface
 - cmap support (color table is shared by both LTDC overlays and DMA2D when
   enabled)
 
@@ -106,6 +106,6 @@ The test will put a pattern of concentric squares in the framebuffer and
 terminate.
 
 You can also test overlay hardware acceleration functionality by executing the
-follwing command (shows a commandline help):
+following command (shows a commandline help):
 
   nsh> fboverlay

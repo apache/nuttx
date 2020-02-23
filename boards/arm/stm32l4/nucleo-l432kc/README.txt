@@ -188,7 +188,7 @@ IDEs
   there is a lot of help on the internet).
 
   Using Sourcery CodeBench from http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/overview
-    Download and install the latest version (as of this writting it was
+    Download and install the latest version (as of this writing it was
     sourceryg++-2013.05-64-arm-none-eabi)
 
    Import the  project from git.

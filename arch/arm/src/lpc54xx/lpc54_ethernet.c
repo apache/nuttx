@@ -2482,7 +2482,7 @@ static void lpc54_pktbuf_initialize(struct lpc54_ethdriver_s *priv)
  *   priv - Reference to the driver state structure
  *
  * Returned Value:
- *   A pointer to the allocated packet buffer on succes; NULL is returned if
+ *   A pointer to the allocated packet buffer on success; NULL is returned if
  *   there are no available packet buffers.
  *
  * Assumptions:
@@ -2560,7 +2560,7 @@ static void lpc54_txring_initialize(struct lpc54_ethdriver_s *priv,
   regval = ETH_DMACH_TXDESC_RING_LENGTH(txring->tr_ndesc);
   lpc54_putreg(regval, LPC54_ETH_DMACH_TXDESC_RING_LENGTH(chan));
 
-  /* Inituialize the Tx desriptors . */
+  /* Inituialize the Tx descriptors . */
 
   for (i = 0; i < txring->tr_ndesc; i++, txdesc++)
     {

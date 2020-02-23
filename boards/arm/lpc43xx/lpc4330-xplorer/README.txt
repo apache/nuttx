@@ -556,7 +556,7 @@ LPC4330-Xplorer Configuration Options
   also require CONFIG_NET and CONFIG_LPC43_ETHERNET.
 
     CONFIG_ETH0_PHY_KS8721 - Selects Micrel KS8721 PHY
-    CONFIG_LPC43_AUTONEG - Enable auto-negotion
+    CONFIG_LPC43_AUTONEG - Enable auto-negotiation
 
     CONFIG_LPC17_40_EMACRAM_SIZE - Size of EMAC RAM.  Default: 16Kb
     CONFIG_LPC43_ETH_NTXDESC - Configured number of Tx descriptors. Default: 18

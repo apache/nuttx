@@ -944,7 +944,7 @@ struct stm32_pwm_dev_s
 
   FAR const struct stm32_pwm_ops_s *llops;
 
-  /* Require cast-compatibility with private "lower-half" PWM strucutre */
+  /* Require cast-compatibility with private "lower-half" PWM structure */
 };
 
 /* Low-level operations for PWM */

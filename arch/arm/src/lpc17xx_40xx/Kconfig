@@ -839,10 +839,10 @@ config LPC17_40_LCD_VRAMBASE
 		(LPC17_40_EXTDRAM_CS0 + 0x00010000)
 
 config LPC17_40_LCD_REFRESH_FREQ
-	int "LCD refesh rate (Hz)"
+	int "LCD refresh rate (Hz)"
 	default 50
 	---help---
-		LCD refesh rate (Hz)
+		LCD refresh rate (Hz)
 
 config LPC17_40_LCD_BACKLIGHT
 	bool "Enable backlight"

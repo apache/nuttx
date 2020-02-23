@@ -956,7 +956,7 @@ static void stm32_ili93414ws_deselect(FAR struct ili9341_lcd_s *lcd)
   flags = enter_critical_section();
 
   /* Restore cr1 and cr2 register to be sure they will be usable
-   * by default spi interface structure. (This is an important workarround as
+   * by default spi interface structure. (This is an important workaround as
    * long as half duplex mode is not supported by the spi interface in
    * arch/arm/src/stm32/stm32_spi.c).
    */

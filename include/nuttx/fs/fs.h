@@ -1218,7 +1218,7 @@ int file_ioctl(FAR struct file *filep, int req, unsigned long arg);
  *
  * Input Parameters:
  *   filep - Instance for struct file for the opened file.
- *   cmd   - Indentifies the operation to be performed.
+ *   cmd   - Identifies the operation to be performed.
  *   ap    - Variable argument following the command.
  *
  * Returned Value:

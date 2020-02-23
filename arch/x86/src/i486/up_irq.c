@@ -291,7 +291,7 @@ void up_disable_irq(int irq)
 
   if (irq >= IRQ0)
     {
-      /* Map the IRQ IMR regiser to a PIC and a bit number */
+      /* Map the IRQ IMR register to a PIC and a bit number */
 
       if (irq <= IRQ7)
         {
@@ -329,7 +329,7 @@ void up_enable_irq(int irq)
 
   if (irq >= IRQ0)
     {
-      /* Map the IRQ IMR regiser to a PIC and a bit number */
+      /* Map the IRQ IMR register to a PIC and a bit number */
 
       if (irq <= IRQ7)
         {

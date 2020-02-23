@@ -704,7 +704,7 @@ static void sam_disablexfrints(struct sam_dev_s *priv)
  * Name: sam_enableints
  *
  * Description:
- *   Enable the previously configured HSMCI interrupts needed to suport the
+ *   Enable the previously configured HSMCI interrupts needed to support the
  *   wait and transfer functions.
  *
  * Input Parameters:
@@ -990,7 +990,7 @@ static inline void sam_cmdsample2(int index, uint32_t sr)
  * Name: sam_cmddump
  *
  * Description:
- *   Dump all comand/response register data
+ *   Dump all command/response register data
  *
  ****************************************************************************/
 
@@ -1182,7 +1182,7 @@ static void sam_endtransfer(struct sam_dev_s *priv,
  * Name: sam_notransfer
  *
  * Description:
- *   Setup for no transfer.  This is the default setup that is overriddden
+ *   Setup for no transfer.  This is the default setup that is overridden
  *   by sam_dmarecvsetup or sam_dmasendsetup
  *
  * Input Parameters:
@@ -2472,7 +2472,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 #endif
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
-   * enabled until after the transfer is stard with an SD command (i.e.,
+   * enabled until after the transfer is start with an SD command (i.e.,
    * at the beginning of sam_eventwait().
    */
 
@@ -2542,7 +2542,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 #endif
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
-   * enabled until after the transfer is stard with an SD command (i.e.,
+   * enabled until after the transfer is start with an SD command (i.e.,
    * at the beginning of sam_eventwait().
    */
 

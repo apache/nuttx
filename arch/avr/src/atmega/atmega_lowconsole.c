@@ -280,7 +280,7 @@ void usart0_configure(void)
   UCSR0A = 0;
 #endif
 
-  /* Select baud, parity, nubmer of bits, stop bits, etc. */
+  /* Select baud, parity, number of bits, stop bits, etc. */
 
   ucsr0b = ((1 << TXEN0)  | (1 << RXEN0));
   ucsr0c = 0;
@@ -375,7 +375,7 @@ void usart1_configure(void)
   UCSR1A = 0;
 #endif
 
-  /* Select baud, parity, nubmer of bits, stop bits, etc. */
+  /* Select baud, parity, number of bits, stop bits, etc. */
 
   ucsr1b = ((1 << TXEN1)  | (1 << RXEN1));
   ucsr1c = 0;

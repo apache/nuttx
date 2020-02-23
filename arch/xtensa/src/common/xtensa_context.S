@@ -256,7 +256,7 @@ xtensa_context_save:
 
 	/* Recover the return address and return zero */
 
-	l32i	a0, a2, (4 * REG_A0)			/* Recover return addess */
+	l32i	a0, a2, (4 * REG_A0)			/* Recover return address */
 	movi	a2, 0							/* Return zero */
 	RET(16)
 
@@ -365,7 +365,7 @@ _xtensa_save_hook:
  *   This is the implementation of xtensa_context_save for the case of the
  *   window ABI.  In the window ABI configuration, xtensa_context_save is a
  *   thin  "trampoline" layer.  It performs the ENTRY window operations on
- *   entry and the exit.  A call0 is used to force the retun from the context
+ *   entry and the exit.  A call0 is used to force the return from the context
  *   switch to the window return within this trampoline.
  *
  * Input State:
@@ -497,7 +497,7 @@ _xtensa_context_restore:
  * Description:
  *
  *   This functions implements the moral equivalent of longjmp().  It is
- *   called from user code (with interrupts disabled) to restor the current
+ *   called from user code (with interrupts disabled) to restore the current
  *   state of the running thread.  This function always appears to be a
  *   second return from xtensa_context_save except that that it returns the
  *   value 1 (because the saved value of A2 was set to 1

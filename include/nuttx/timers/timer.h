@@ -74,7 +74,7 @@
  * TCIOC_NOTIFICATION - Set up to notify an application via a signal when
  *                      the timer expires.
  *                      Argument: A read-only pointer to an instance of
- *                      stuct timer_notify_s.
+ *                      struct timer_notify_s.
  * TCIOC_MAXTIMEOUT   - Get the maximum supported timeout value
  *                      Argument: A 32-bit timeout value in microseconds.
  *
@@ -265,7 +265,7 @@ FAR void *timer_register(FAR const char *path,
 void timer_unregister(FAR void *handle);
 
 /****************************************************************************
- * Kernal internal interfaces.  Thse may not be used by application logic
+ * Kernel internal interfaces.  Thse may not be used by application logic
  ****************************************************************************/
 
 /****************************************************************************

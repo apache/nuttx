@@ -205,9 +205,9 @@ Update: Please issue these commands to setup the reliable network on Ubuntu:
   sudo nuttx/tools/simbridge.sh eth0 on
 
 Here is some tips you may need:
-  1.Must launch the exectuable with the root permission
+  1.Must launch the executable with the root permission
   2.Have to use virtual machine if host is in corporation network
-  3.Configure the network adpater in NAT mode if virtual machine is used
+  3.Configure the network adapter in NAT mode if virtual machine is used
 
 X11 Issues
 ----------
@@ -303,7 +303,7 @@ SMP
   http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1318.htm
 
   Update: The dead lock is due to up_testset call pthread API for synchronization
-  inside the signal handler. After swiching to atomic API, the problem get resolved.
+  inside the signal handler. After switching to atomic API, the problem get resolved.
 
   You can enable SMP for ostest configuration by enabling:
 
@@ -1162,7 +1162,7 @@ udgram
 unionfs
 
   This is a version of NSH dedicated to performing the simple test of the
-  Union File System at apps/exmaples/uniofs.  The command 'unionfs' will mount
+  Union File System at apps/examples/uniofs.  The command 'unionfs' will mount
   the Union File System at /mnt/unionfs.  You can than compare what you see at
   /mnt/unionfs with the content of the ROMFS file systems at
   apps/examples/unionfs/atestdir and btestdir.

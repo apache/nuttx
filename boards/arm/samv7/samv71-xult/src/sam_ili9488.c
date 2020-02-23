@@ -921,7 +921,7 @@ static void sam_lcd_endwait(struct sam_dev_s *priv, int result)
  * Name: sam_lcd_dmatimeout
  *
  * Description:
- *   The watchdog timeout setup when the DMA was startd.  Indicates a DMA
+ *   The watchdog timeout setup when the DMA was started.  Indicates a DMA
  *   timeout failure.
  *
  * Input Parameters:

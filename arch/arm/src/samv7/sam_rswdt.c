@@ -117,7 +117,7 @@ static void     sam_putreg(uint32_t regval, uintptr_t regaddr);
 # define        sam_putreg(regval,regaddr) putreg32(regval,regaddr)
 #endif
 
-/* Interrupt hanlding *******************************************************/
+/* Interrupt handling *******************************************************/
 
 #ifdef CONFIG_SAMV7_RSWDT_INTERRUPT
 static int      sam_interrupt(int irq, FAR void *context, FAR void *arg);
@@ -180,7 +180,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
 
   uint32_t regval = getreg32(regaddr);
 
-  /* Is this the same value that we read from the same registe last time?  Are
+  /* Is this the same value that we read from the same register last time?  Are
    * we polling the register?  If so, suppress some of the output.
    */
 
@@ -359,7 +359,7 @@ static int sam_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
   wdinfo("Entry\n");
 
-  /* Write RSWDT_CR_WDRSTT to the RSWDT CR regiser (along with the KEY value)
+  /* Write RSWDT_CR_WDRSTT to the RSWDT CR register (along with the KEY value)
    * will restart the watchdog timer.
    */
 
@@ -459,7 +459,7 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
       return -ERANGE;
     }
 
-  /* Calculate the reload value to achiee this (appoximate) timeout.
+  /* Calculate the reload value to achiee this (approximate) timeout.
    *
    * Examples with RSWDT_FREQUENCY = 32768 / 128 = 256:
    *  timeout = 4     -> reload = 1
@@ -487,7 +487,7 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   priv->reload = reload;
 
-  wdinfo("reload=%d timout: %d->%d\n",
+  wdinfo("reload=%d timeout: %d->%d\n",
          reload, timeout, priv->timeout);
 
   /* Set the RSWDT_MR according to calculated value

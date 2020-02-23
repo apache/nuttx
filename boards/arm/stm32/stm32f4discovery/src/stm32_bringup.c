@@ -462,7 +462,7 @@ int stm32_bringup(void)
   ret = stm32_gs2200m_initialize("/dev/gs2200m", 3);
   if (ret < 0)
     {
-      serr("ERROR: Failed to initialze GS2200M: %d \n", ret);
+      serr("ERROR: Failed to initialize GS2200M: %d \n", ret);
     }
 #endif
 

@@ -396,12 +396,12 @@
 #define PHIE_PGEIE        (1 << 1)  /* Bit 1:  PHY Global Interrupt Enable */
 #define PHIE_PLNKIE       (1 << 4)  /* Bit 4:  PHY Link Change Interrupt Enable */
 
-/* PHIR Regiser Bit Definitions */
+/* PHIR Register Bit Definitions */
 
 #define PHIR_PGIF         (1 << 2)  /* Bit 2:  PHY Global Interrupt */
 #define PHIR_PLNKIF       (1 << 4)  /* Bit 4:  PHY Link Change Interrupt */
 
-/* PHLCON Regiser Bit Definitions */
+/* PHLCON Register Bit Definitions */
                                     /* Bit 0:  Reserved */
 #define PHLCON_STRCH      (1 << 1)  /* Bit 1:  LED Pulse Stretching Enable */
 #define PHLCON_LFRQ0      (1 << 2)  /* Bit 2:  LED Pulse Stretch Time Configuration */

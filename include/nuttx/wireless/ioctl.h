@@ -80,8 +80,8 @@
 #define WL_NCMDS            0x0006          /* Number of common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
- * by the upper-half QE driver to the lower-half QE driver via the ioctl()
- * method fo the QE lower-half interface.  However, the lower-half driver
+ * by the upper-half driver to the lower-half driver via the ioctl()
+ * method of the lower-half interface.  However, the lower-half driver
  * must reserve a block of commands as follows in order prevent IOCTL
  * command numbers from overlapping.
  */

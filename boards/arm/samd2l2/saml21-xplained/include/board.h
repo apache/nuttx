@@ -181,7 +181,7 @@
 #  define BOARD_OSC16M_FREQUENCY     16000000 /* 18MHz high-accuracy internal oscillator */
 
 #else
-#  error OSC16M operating freqency not defined (CONFIG_SAML21_XPLAINED_OSC16M_*MHZ)
+#  error OSC16M operating frequency not defined (CONFIG_SAML21_XPLAINED_OSC16M_*MHZ)
 #endif
 
 /* OSCULP32K Configuration -- not used. */

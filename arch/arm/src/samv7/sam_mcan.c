@@ -3477,7 +3477,7 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
               canerr("ERROR: RX %08x\n", pending & MCAN_RXERR_INTS);
 
               /* To prevent Interrupt-Flooding the current active
-               * RX error interupts are disabled. After successfully
+               * RX error interrupts are disabled. After successfully
                * receiving at least one CAN packet all RX error interrupts
                * are turned back on.
                *

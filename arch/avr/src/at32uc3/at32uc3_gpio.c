@@ -188,7 +188,7 @@ int at32uc3_configgpio(uint16_t cfgset)
       putreg32(pinmask, base + AVR32_GPIO_GPERC_OFFSET);
     }
 
-  /* Then the "ornaments" tha do not depend on gpio/peripheral mode:
+  /* Then the "ornaments" that do not depend on gpio/peripheral mode:
    * Pull-ups and glitch filering.
    */
 

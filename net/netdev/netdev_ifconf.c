@@ -250,7 +250,7 @@ static int ifconf_ipv6_callback(FAR struct net_driver_s *dev, FAR void *arg)
  *   failure.
  *
  * Assumptions:
- *  The nework is locked
+ *  The network is locked
  *
  ****************************************************************************/
 
@@ -283,7 +283,7 @@ int netdev_ipv4_ifconf(FAR struct ifconf *ifc)
  *   failure.
  *
  * Assumptions:
- *  The nework is locked
+ *  The network is locked
  *
  ****************************************************************************/
 

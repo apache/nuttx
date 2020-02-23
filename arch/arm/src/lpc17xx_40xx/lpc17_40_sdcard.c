@@ -532,7 +532,7 @@ static inline void lpc17_40_setclock(uint32_t clkcr)
  * Name: lpc17_40_configwaitints
  *
  * Description:
- *   Enable/disable SD card interrupts needed to suport the wait function
+ *   Enable/disable SD card interrupts needed to support the wait function
  *
  * Input Parameters:
  *   priv       - A reference to the SD card device state structure
@@ -2349,7 +2349,7 @@ errout:
  *
  *   Events are automatically disabled once the callback is performed and no
  *   further callback events will occur until they are again enabled by
- *   calling this methos.
+ *   calling this method.
  *
  * Input Parameters:
  *   dev      - An instance of the SD card device interface

@@ -598,7 +598,7 @@ FAR struct lcd_dev_s *
           dev->setcontrast  = lpm013m091a_setcontrast;
           priv->lcd         = lcd;
 
-          /* Initialze the LCD driver */
+          /* Initialize the LCD driver */
 
           ret = lpm013m091a_hwinitialize(priv);
 

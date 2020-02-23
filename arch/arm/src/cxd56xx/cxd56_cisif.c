@@ -91,7 +91,7 @@
 
 #define YUV_SIZE(v, h) (v * h * 2)
 
-/* Check Buffer address alignement */
+/* Check Buffer address alignment */
 
 #define CISIF_BUFADDR_ALIGNMENT            (32)
 #define ILLEGAL_BUFADDR_ALIGNMENT(addr)    (((addr) == NULL) ||  \

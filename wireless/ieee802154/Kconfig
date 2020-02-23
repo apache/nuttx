@@ -110,7 +110,7 @@ config IEEE802154_MACDEV
 if IEEE802154_MACDEV
 
 config IEEE802154_MACDEV_RECVRPRIO
-	int "Priority of frame receiver registerd with the MAC layer"
+	int "Priority of frame receiver registered with the MAC layer"
 	default 0
 	---help---
 		When the MAC layer receives an incoming data frame, it passes the frame
@@ -141,7 +141,7 @@ config IEEE802154_NETDEV
 if IEEE802154_NETDEV
 
 config IEEE802154_NETDEV_RECVRPRIO
-	int "Priority of frame receiver registerd with the MAC layer"
+	int "Priority of frame receiver registered with the MAC layer"
 	default 1
 	---help---
 		When the MAC layer receives an incoming data frame, it passes the frame

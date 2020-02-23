@@ -133,7 +133,7 @@ struct sixlowpan_abro_s
   uint8_t verlo[2];    /* Bytes 2-3:   Version low */
   uint8_t verhi[2];    /* Bytes 4-5:   Version high */
   uint8_t lifetime[2]; /* Bytes 6-7:   Valid lifetime */
-  uint8_t ipv6[16];    /* Bytes 8-23:  IPv6 address of the 6LBR orign of version */
+  uint8_t ipv6[16];    /* Bytes 8-23:  IPv6 address of the 6LBR origin of version */
 };
 
 /* 4.4 Duplicate Address Messages (DAD for both DAR and DAC) */

@@ -121,7 +121,7 @@
 #define SX127X_FOM_TIMRES                 0x38 /* FSK/OOK: Timer 1 and 2 resolution control */
 #define SX127X_FOM_TIMER1COEF             0x39 /* FSK/OOK: Timer 1 setting */
 #define SX127X_FOM_TIMER2COEF             0x3a /* FSK/OOK: Timer 2 setting */
-#define SX127X_FOM_IMAGECAL               0x3b /* FSK/OOK: Image callibration engine control */
+#define SX127X_FOM_IMAGECAL               0x3b /* FSK/OOK: Image calibration engine control */
 #define SX127X_FOM_TEMP                   0x3c /* FSK/OOK: Temperature Sensor value */
 #define SX127X_FOM_LOWBAT                 0x3d /* FSK/OOK: Low Battery Indicator settings */
 #define SX127X_FOM_IRQ1                   0x3e /* FSK/OOK: Status register 1: PLL Lock state, Timeout, RSSI */
@@ -615,7 +615,7 @@
 #  define SX127X_FOM_TIMRES_TIM2RES_4p1ms (2 << SX127X_FOM_TIMRES_TIM2RES_SHIFT)
 #  define SX127X_FOM_TIMRES_TIM2RES_262ms (3 << SX127X_FOM_TIMRES_TIM2RES_SHIFT)
 
-/* FSK/OOK: Image callibration engine control */
+/* FSK/OOK: Image calibration engine control */
 
 #define SX127X_FOM_IMAGECAL_TEMPMONOFF    (1 << 0) /* Bit 0: Temperature monitor OFF */
 #define SX127X_FOM_IMAGECAL_TEMPTHR_SHIFT (1)      /* Bit 1-2: Temperature threshold */
@@ -625,7 +625,7 @@
 #  define SX127X_FOM_IMAGECAL_TEMPTHR_15C (2 << SX127X_FOM_IMAGECAL_TEMPTHR_SHIFT)
 #  define SX127X_FOM_IMAGECAL_TEMPTHR_20C (3 << SX127X_FOM_IMAGECAL_TEMPTHR_SHIFT)
 #define SX127X_FOM_IMAGECAL_TEMPCHANGE    (1 << 3) /* Bit 3: Temperature change */
-#define SX127X_FOM_IMAGECAL_IMGCALRUN     (1 << 5) /* Bit 5: Image Callibration are running */
+#define SX127X_FOM_IMAGECAL_IMGCALRUN     (1 << 5) /* Bit 5: Image Calibration are running */
 #define SX127X_FOM_IMAGECAL_IMGCALSTART   (1 << 6) /* Bit 6: Image Calibration start */
 #define SX127X_FOM_IMAGECAL_AUTOIMGCALON  (1 << 7) /* Bit 7: Auto Image Calibration ON */
 
@@ -723,7 +723,7 @@
 
 /* LORA: Modem PHY config 1 */
 
-#define SX127X_LRM_MDMCFG1_IMPLHDRON      (1 << 0) /* Bit 0: Implict header mode ON */
+#define SX127X_LRM_MDMCFG1_IMPLHDRON      (1 << 0) /* Bit 0: Implicit header mode ON */
 #define SX127X_LRM_MDMCFG1_CDRATE_SHIFT   (1)      /* Bits 1-3: Error coding rate */
 #define SX127X_LRM_MDMCFG1_CDRATE_MASK    (7 << SX127X_LRM_MDMCFG1_CDRATE_SHIFT)
 #  define SX127X_LRM_MDMCFG1_CDRATE_4d5   (1 << SX127X_LRM_MDMCFG1_CDRATE_SHIFT)

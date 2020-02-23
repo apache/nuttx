@@ -287,7 +287,7 @@
 
 /* 4bit: Reserved.
  * 3-2bit: Reserved for application specific command
- * 1-0bit: Reserved for manifacturer testmode
+ * 1-0bit: Reserved for manufacturer testmode
  */
 
 #define R1STATUS_ALL_ERR                        \

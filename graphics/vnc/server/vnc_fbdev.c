@@ -121,7 +121,7 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable,
 static int up_getcursor(FAR struct fb_vtable_s *vtable,
                         FAR struct fb_cursorattrib_s *attrib);
 static int up_setcursor(FAR struct fb_vtable_s *vtable,
-                        FAR struct fb_setcursor_s *setttings);
+                        FAR struct fb_setcursor_s *settings);
 #endif
 
 /****************************************************************************
@@ -490,7 +490,7 @@ static inline int vnc_wait_start(int display)
    * started.  But we might be here before the thread has gotten that far.
    *
    * If it has been allocated, then wait until it is in the INIITIALIZED
-   * state.  The INITIAILIZED states indicates tht the session structure
+   * state.  The INITIAILIZED states indicates that the session structure
    * has been allocated and fully initialized.
    */
 

@@ -131,7 +131,7 @@
 
 /* AUX_WUC_WUEVFLAGS */
 
-#define AUX_WUC_WUEVFLAGS_AON_PROG_WU             (1 << 0)  /* Bit 0:  Pending event trigged by sources select in
+#define AUX_WUC_WUEVFLAGS_AON_PROG_WU             (1 << 0)  /* Bit 0:  Pending event triggered by sources select in
                                                              *         AON_EVENT:AUXWUSEL.WU0_EV, WU1_EV, and WU2_EV */
 #define AUX_WUC_WUEVFLAGS_AON_SW                  (1 << 1)  /* Bit 1:  Pending event triggered by write to
                                                              *         ON_WUC:AUXCTL.SWEV */

@@ -153,7 +153,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
     2. Create a directory /home/OpenOCD.
 
-    3. Get the FT2232 drivr from http://www.ftdichip.com/Drivers/D2XX.htm and
+    3. Get the FT2232 driver from http://www.ftdichip.com/Drivers/D2XX.htm and
        extract it into /home/OpenOCD/ftd2xx
 
        $ pwd

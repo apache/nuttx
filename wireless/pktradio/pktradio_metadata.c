@@ -70,7 +70,7 @@ static sem_t g_metadata_sem;
 
 static bool g_metadata_initialized;
 
-/* Pool of pre-allocated meta-data stuctures */
+/* Pool of pre-allocated meta-data structures */
 
 static struct pktradio_metadata_s g_metadata_pool[CONFIG_PKTRADIO_NRXMETA];
 
@@ -170,7 +170,7 @@ FAR struct pktradio_metadata_s *pktradio_metadata_allocate(void)
   else
     {
       /* If we cannot get a meta-data instance from the free list, then we
-       * will have to allocate one from the kernal memory pool.  We won't
+       * will have to allocate one from the kernel memory pool.  We won't
        * access the free list.
        */
 

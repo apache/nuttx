@@ -164,7 +164,7 @@
 #define INTC_NMICTRL_SRCTYPE_SHIFT   (0)       /* Bits 0-1: External NMI Interrupt Source Type */
 #define INTC_NMICTRL_SRCTYPE_MASK    (3 << INTC_NMICTRL_SRCTYPE_SHIFT)
 #  define INTC_NMICTRL_SRCTYPE_LOW   (0 << INTC_NMICTRL_SRCTYPE_SHIFT) /* Low level sensitive */
-#  define INTC_NMICTRL_SRCTYPE_NEDGE (1 << INTC_NMICTRL_SRCTYPE_SHIFT) /* Negative edge trigged */
+#  define INTC_NMICTRL_SRCTYPE_NEDGE (1 << INTC_NMICTRL_SRCTYPE_SHIFT) /* Negative edge triggered */
 
 /* Interrupt IRQ Pending 0-2 Status */
 

@@ -2054,7 +2054,7 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
                USIC_PCR_SSCMODE_FEM | USIC_PCR_SSCMODE_SELINV;
       spi_putreg(spi, regval, XMC4_USIC_PCR_OFFSET);
 
-      /* Define SPI Mode 0 by defaul */
+      /* Define SPI Mode 0 by default */
 
       regval  = spi_getreg(spi, XMC4_USIC_BRG_OFFSET);
       regval &= ~(USIC_BRG_SCLKCFG_MASK);

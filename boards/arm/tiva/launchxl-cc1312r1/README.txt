@@ -43,7 +43,7 @@ Serial Console
 
   A J-Link debugger is used (see below), then the RXD/TXD jumper pins can
   be used to support a serial console through these same pins via an
-  appropriate TTL level adapater (RS-232 or USB serial).
+  appropriate TTL level adapter (RS-232 or USB serial).
 
 LEDs and Buttons
 ================

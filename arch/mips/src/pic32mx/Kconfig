@@ -1046,11 +1046,11 @@ menu "PIC32MX PHY/Ethernet device driver settings"
 	depends on PIC32MX_ETHERNET
 
 config PIC32MX_PHY_AUTONEG
-	bool "Auto-negotion"
+	bool "Auto-negotiation"
 	default y
 	depends on PIC32MX_ETHERNET
 	---help---
-		Enable auto-negotion
+		Enable auto-negotiation
 
 config PIC32MX_PHY_SPEED100
 	bool "100Mbps spped"

@@ -542,7 +542,7 @@ static ssize_t smartfs_read(FAR struct file *filep, char *buffer, size_t buflen)
           break;
         }
 
-      /* Read the curent sector into our buffer */
+      /* Read the current sector into our buffer */
 
       readwrite.logsector = sf->currsector;
       readwrite.offset = 0;
@@ -1671,7 +1671,7 @@ static int smartfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode
 
       if (parentdirsector == 0xffff)
         {
-          /* Invalid entry in the path (non-existant dir segment) */
+          /* Invalid entry in the path (non-existent dir segment) */
 
           goto errout_with_semaphore;
         }
@@ -1748,7 +1748,7 @@ int smartfs_rmdir(struct inode *mountpt, const char *relpath)
 
       /* TODO:  Need to check permissions?  */
 
-      /* Check if the directory is emtpy */
+      /* Check if the directory is empty */
 
       ret = smartfs_countdirentries(fs, &entry);
       if (ret < 0)

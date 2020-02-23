@@ -51,7 +51,7 @@ DFU and JTAG
   3. Run the DFU SE program to load nuttx.dfu into FLASH.
 
   What if the DFU loader is not in FLASH?  The loader code is available
-  inside of the Demo dirctory of the USBLib ZIP file that can be downloaded
+  inside of the Demo directory of the USBLib ZIP file that can be downloaded
   from the STMicro Website.  You can build it using RIDE (or other toolchains);
   you will need a JTAG emulator to burn it into FLASH the first time.
 
@@ -204,7 +204,7 @@ RTC
     CONFIG_RTC_HIRES - The typical RTC keeps time to resolution of 1
       second, usually supporting a 32-bit time_t value.  In this case,
       the RTC is used to &quot;seed&quot; the normal NuttX timer and the
-      NuttX timer provides for higher resoution time. If CONFIG_RTC_HIRES
+      NuttX timer provides for higher resolution time. If CONFIG_RTC_HIRES
       is enabled in the NuttX configuration, then the RTC provides higher
       resolution time and completely replaces the system timer for purpose of
       date and time.
@@ -431,7 +431,7 @@ STM3210E-EVAL-specific Configuration Options
 
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
-    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt priority.  Default: 128
     CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
@@ -723,7 +723,7 @@ Where <subdir> is one of the following:
 
             CONFIG_INPUT=y             # Enable input driver support
             CONFIG_DJOYSTICK=y         # Enable the joystick drivers
-                                       # (default parmeters should be okay)
+                                       # (default parameters should be okay)
           Enable the DJoystick Example:
 
            CONFIG_EXAMPLES_DJOYSTICK=y  # Enable the DJoystick example

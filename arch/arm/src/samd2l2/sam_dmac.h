@@ -122,7 +122,7 @@
 #define DMACH_FLAG_PERIPH_QOS_SHIFT      (22)      /* Bits 22-23:  Peripheral quality of service */
 #define DMACH_FLAG_PERIPH_QOS_MASK       (3 << DMACH_FLAG_PERIPH_QOS_SHIFT)
 #  define DMACH_FLAG_PERIPH_QOS_DISABLE  (0 << DMACH_FLAG_PERIPH_QOS_SHIFT) /* Background */
-#  define DMACH_FLAG_PERIPH_QOS_LOW      (1 << DMACH_FLAG_PERIPH_QOS_SHIFT) /* Sensitve bandwidth */
+#  define DMACH_FLAG_PERIPH_QOS_LOW      (1 << DMACH_FLAG_PERIPH_QOS_SHIFT) /* Sensitive bandwidth */
 #  define DMACH_FLAG_PERIPH_QOS_MEDIUM   (2 << DMACH_FLAG_PERIPH_QOS_SHIFT) /* Sensitive latency */
 #  define DMACH_FLAG_PERIPH_QOS_HIGH     (3 << DMACH_FLAG_PERIPH_QOS_SHIFT) /* Critical latency */
 
@@ -137,7 +137,7 @@
 #define DMACH_FLAG_MEM_QOS_SHIFT         (25)      /* Bits 25-26:  Memory quality of service */
 #define DMACH_FLAG_MEM_QOS_MASK          (3 << DMACH_FLAG_MEM_QOS_SHIFT)
 #  define DMACH_FLAG_MEM_QOS_DISABLE     (0 << DMACH_FLAG_MEM_QOS_SHIFT) /* Background */
-#  define DMACH_FLAG_MEM_QOS_LOW         (1 << DMACH_FLAG_MEM_QOS_SHIFT) /* Sensitve bandwidth */
+#  define DMACH_FLAG_MEM_QOS_LOW         (1 << DMACH_FLAG_MEM_QOS_SHIFT) /* Sensitive bandwidth */
 #  define DMACH_FLAG_MEM_QOS_MEDIUM      (2 << DMACH_FLAG_MEM_QOS_SHIFT) /* Sensitive latency */
 #  define DMACH_FLAG_MEM_QOS_HIGH        (3 << DMACH_FLAG_MEM_QOS_SHIFT) /* Critical latency */
                                                    /* Bits 27-31: Not used */

@@ -1886,7 +1886,7 @@ int altmdm_spi_init(FAR struct altmdm_dev_s *priv)
 
   g_privdata = priv;
 
-  /* Initalize modem power management driver */
+  /* Initialize modem power management driver */
 
   altmdm_pm_init(priv);
 

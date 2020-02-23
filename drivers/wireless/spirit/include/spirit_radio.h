@@ -313,8 +313,8 @@ enum spirit_agcmode_e
 
 enum spirit_clkrecmode_e
 {
-  CLK_REC_PLL      = FDEV0_CLOCK_REG_ALGO_SEL_PLL, /* PLL alogrithm for clock recovery */
-  CLK_REC_DLL      = FDEV0_CLOCK_REG_ALGO_SEL_DLL  /* DLL alogrithm for clock recovery */
+  CLK_REC_PLL      = FDEV0_CLOCK_REG_ALGO_SEL_PLL, /* PLL algorithm for clock recovery */
+  CLK_REC_DLL      = FDEV0_CLOCK_REG_ALGO_SEL_DLL  /* DLL algorithm for clock recovery */
 };
 
 /* SPIRIT Postfilter length */
@@ -706,7 +706,7 @@ int spirit_radio_set_basefrequency(FAR struct spirit_library_s *spirit,
  * Name: spirit_radio_enable_wavco_calibration
  *
  * Description:
- *   Enable/disabe the VCO calibration WA at the end of
+ *   Enable/disable the VCO calibration WA at the end of
  *   spirit_radio_set_basefrequency()
  *
  * Input Parameters:
@@ -837,7 +837,7 @@ int spirit_radio_convert_freqdev(FAR struct spirit_library_s *spirit,
  *              [100 500000].
  *
  * Returned Value:
- *   Zero (OK) is returned on succes; a negated errnor value is returned on any
+ *   Zero (OK) is returned on success; a negated errnor value is returned on any
  *   failure.
  *
  ******************************************************************************/
@@ -873,7 +873,7 @@ uint32_t spirit_radio_get_datarate(FAR struct spirit_library_s *spirit);
  *            is in the correct range [F_Xo*8/2^18, F_Xo*7680/2^18] Hz.
  *
  * Returned Value:
- *   Zero (OK) is returned on succes; a negated errnor value is returned on any
+ *   Zero (OK) is returned on success; a negated errnor value is returned on any
  *   failure.
  *
  ******************************************************************************/
@@ -914,7 +914,7 @@ uint32_t spirit_radio_get_freqdev(FAR struct spirit_library_s *spirit);
  *               spirit_radio_get_chfilterbw() API.
  *
  * Returned Value:
- *   Zero (OK) is returned on succes; a negated errnor value is returned on any
+ *   Zero (OK) is returned on success; a negated errnor value is returned on any
  *   failure.
  *
  ******************************************************************************/
@@ -949,7 +949,7 @@ uint32_t spirit_radio_get_chfilterbw(FAR struct spirit_library_s *spirit);
  *   modulation - Modulation to set.
  *
  * Returned Value:
- *   Zero (OK) is returned on succes; a negated errnor value is returned on any
+ *   Zero (OK) is returned on success; a negated errnor value is returned on any
  *   failure.
  *
  ******************************************************************************/
@@ -986,7 +986,7 @@ enum modulation_select_e
  *              or S_DISABLE .
  *
  * Returned Value:
- *   Zero (OK) is returned on succes; a negated errnor value is returned on any
+ *   Zero (OK) is returned on success; a negated errnor value is returned on any
  *   failure.
  *
  ******************************************************************************/
@@ -1005,7 +1005,7 @@ int spirit_radio_enable_cwtxmode(FAR struct spirit_library_s *spirit,
  *   ookdelay - Peak decay control for OOK.
  *
  * Returned Value:
- *   Zero (OK) is returned on succes; a negated errnor value is returned on any
+ *   Zero (OK) is returned on success; a negated errnor value is returned on any
  *   failure.
  *
  ******************************************************************************/
@@ -2031,8 +2031,8 @@ uint8_t spirit_radio_get_agclowthres(FAR struct spirit_library_s *spirit);
  *   mode   - The Clock Recovery mode. This value can be one of the values
  *            defined in enum spirit_clkrecmode_e :
  *
- *              CLK_REC_PLL  PLL alogrithm for clock recovery
- *              CLK_REC_DLL  DLL alogrithm for clock recovery
+ *              CLK_REC_PLL  PLL algorithm for clock recovery
+ *              CLK_REC_DLL  DLL algorithm for clock recovery
  *
  * Returned Value:
  *   Zero (OK) on success.  A negated errno value is returned on any failure.
@@ -2055,8 +2055,8 @@ int spirit_radio_set_clkrecmode(FAR struct spirit_library_s *spirit,
  *   Clock Recovery mode. This value can be one of the values defined in
  *   enum spirit_clkrecmode_e:
  *
- *     CLK_REC_PLL  PLL alogrithm for clock recovery
- *     CLK_REC_DLL  DLL alogrithm for clock recovery
+ *     CLK_REC_PLL  PLL algorithm for clock recovery
+ *     CLK_REC_DLL  DLL algorithm for clock recovery
  *
  ******************************************************************************/
 

@@ -48,11 +48,11 @@
 # read/write access for both the target and the debug host. A simple ping
 # pong handshake protocol over these words allows up/down link communication.
 # On the upside no additional integration is needed. On the downside it may be
-# nessessary to feed lwl with cycles to poll for changes in the downword,
+# necessary to feed lwl with cycles to poll for changes in the downword,
 # depending on the use case. For the case of a simple console, that's not
 # needed.
 #
-# For convinence these communication locations are automatically discovered
+# For convenience these communication locations are automatically discovered
 # from the RAM by searching through it. Just define downwordaddr and
 # upwordaddr if you want to work with fixed locations.
 #

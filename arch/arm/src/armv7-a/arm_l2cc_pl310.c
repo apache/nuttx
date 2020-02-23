@@ -179,7 +179,7 @@
 
 /* Bit 26: Non-Secure Lockdown Enable
  *
- * Default: 0=Lockdown registers cannot be modified using non-secure acceses
+ * Default: 0=Lockdown registers cannot be modified using non-secure accesses
  */
 
 #define L2CC_ACR_NSLEN_CONFIG      (0) /* 0=Secure access only */

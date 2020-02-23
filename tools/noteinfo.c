@@ -856,7 +856,7 @@ int main(int argc, char **argv)
         {
           switch(note->nc_type)
           {
-            /* Followed by a varible length, NULL terminated name */
+            /* Followed by a variable length, NULL terminated name */
 
             case 0: /* NOTE_START */
               buffer[size - 1] = '\0';
@@ -909,7 +909,7 @@ int main(int argc, char **argv)
               remainder--;
               break;
 
-            /* Nothing addition shold follow these types */
+            /* Nothing addition shoold follow these types */
 
             case 1: /* NOTE_STOP */
             case 3: /* NOTE_RESUME */

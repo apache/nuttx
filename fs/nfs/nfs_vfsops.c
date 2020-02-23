@@ -739,7 +739,7 @@ static int nfs_close(FAR struct file *filep)
    * free up all resources associated with the open file.
    *
    * First, find our file structure in the list of file structures
-   * containted in the mount structure.
+   * contained in the mount structure.
    */
 
   else
@@ -1566,7 +1566,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
    *
    *    File ID (8 bytes)
    *    Name length (4 bytes)
-   *    Name string (varaiable size but in multiples of 4 bytes)
+   *    Name string (variable size but in multiples of 4 bytes)
    *    Cookie (8 bytes)
    *    next entry (4 bytes)
    */
@@ -1659,7 +1659,7 @@ errout_with_semaphore:
  * Name: nfs_rewinddir
  *
  * Description:
- *  Reset the directory traveral logic to the first entry in the open
+ *  Reset the directory traversal logic to the first entry in the open
  *  directory.
  *
  * Returned Value:

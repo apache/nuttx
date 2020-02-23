@@ -340,7 +340,7 @@ static int i2cdrvr_unlink(FAR struct inode *inode)
       return OK;
     }
 
-  /* No... just mark the driver as unlinked and free the resouces when the
+  /* No... just mark the driver as unlinked and free the resources when the
    * last client closes their reference to the driver.
    */
 

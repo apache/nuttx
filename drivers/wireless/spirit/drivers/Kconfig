@@ -60,7 +60,7 @@ config SPIRIT_FIFOS
 
 		From my reading, the only known work-around is to reduce the maximum
 		packet size so that it is smaller than 96.  Hence, this option is
-		conditioned on EXPERMENTAL.
+		conditioned on EXPERIMENTAL.
 
 config SPIRIT_PROMISICUOUS
 	bool "Promiscuous mode"
@@ -74,14 +74,14 @@ config SPIRIT_MULTICAST
 	default n
 	depends on !SPIRIT_PROMISICUOUS
 	---help---
-		Enables address filtering for the multicast addess 0xee.
+		Enables address filtering for the multicast address 0xee.
 
 config SPIRIT_BROADCAST
 	bool "Broadcast address filter"
 	default n
 	depends on !SPIRIT_PROMISICUOUS
 	---help---
-		Enables address filtering for the broadcast addess 0xff.
+		Enables address filtering for the broadcast address 0xff.
 
 config SPIRIT_CRCDISABLE
 	bool "Disable CRC"

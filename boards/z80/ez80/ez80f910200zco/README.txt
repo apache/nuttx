@@ -116,7 +116,7 @@ Configuration Subdirectories
 ----------------------------
 
   dhcpd:
-    This builds the DCHP server using the examples/dhcpd application
+    This builds the DHCP server using the examples/dhcpd application
     (for execution from FLASH.) See apps/examples/README.txt for information
     about the dhcpd example.
 

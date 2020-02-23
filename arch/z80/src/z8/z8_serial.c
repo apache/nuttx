@@ -696,7 +696,7 @@ static bool z8_txempty(FAR struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -718,7 +718,7 @@ void z80_serial_initialize(void)
   CONSOLE_DEV.isconsole = true;
   z8_setup(&CONSOLE_DEV);
 
-  /* Reigster console and tty devices */
+  /* Register console and tty devices */
 
   uart_register("/dev/console", &CONSOLE_DEV);
   uart_register("/dev/ttyS0", &TTYS0_DEV);

@@ -170,7 +170,7 @@ static inline bool ieee802154_eaddrnull(FAR const uint8_t *eaddr)
  *   paylen  - The size of the data payload to be sent.
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   Ok is returned on success; Otherwise a negated errno value is returned.
  *
  * Assumptions:
  *   Called with the network locked.

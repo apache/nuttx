@@ -355,7 +355,7 @@
 
 /* USART Number of Errors Register */
 
-#define UART_NER_NBERRORS_SHIFT      (0)       /* Bits 0-7: Number of Errrors */
+#define UART_NER_NBERRORS_SHIFT      (0)       /* Bits 0-7: Number of Errors */
 #define UART_NER_NBERRORS_MASK       (0xff << UART_NER_NBERRORS_SHIFT)
 
 /* USART IrDA FILTER Register */
@@ -405,7 +405,7 @@
 
 /* USART LIN Identifier Register */
 
-#define UART_LINIR_MASK              0xff      /* Bits 0-7: Identifer character */
+#define UART_LINIR_MASK              0xff      /* Bits 0-7: Identifier character */
 
 /* USART LIN Baud Rate Register  */
 

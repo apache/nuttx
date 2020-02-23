@@ -179,7 +179,7 @@ void nxbe_hide_window(FAR struct nxbe_window_s *wnd)
  *
  * Description:
  *   Select if the window is visible or hidden.  A hidden window is still
- *   present will will update normally, but will be on the visiable on the
+ *   present will will update normally, but will be on the visible on the
  *   display until it is unhidden.
  *
  * Input Parameters:

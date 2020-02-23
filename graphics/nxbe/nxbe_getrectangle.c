@@ -126,7 +126,7 @@ static inline void nxbe_getrectangle_pwfb(FAR struct nxbe_window_s *wnd,
 
   DEBUGASSERT(pplane != NULL && pplane->pwfb.getrectangle != NULL);
 
-  /* The rectangle that we receive here is in abolute device coordinates.
+  /* The rectangle that we receive here is in absolute device coordinates.
    * We need to restore this to windows relative coordinates.
    */
 

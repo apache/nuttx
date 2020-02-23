@@ -100,7 +100,7 @@ int fat_setattrib(FAR const char *path, fat_attrib_t setbits,
  *
  *   Some hardware, however, may require special DMA-capable memory in
  *   order to perform the transfers.  If CONFIG_FAT_DMAMEMORY is defined
- *   then the architecture-specific hardware must provide the funtions
+ *   then the architecture-specific hardware must provide the functions
  *   fat_dma_alloc() and fat_dma_free() as prototyped below:  fat_dma_alloc()
  *   will allocate DMA-capable memory of the specified size; fat_dma_free()
  *   is the corresponding function that will be called to free the DMA-

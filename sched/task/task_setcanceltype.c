@@ -56,12 +56,12 @@
  *
  * Description:
  *   The task_setcanceltype() function atomically both sets the calling
- *   thread's cancelability type to the indicated type and returns the
- *   previous cancelability type at the location referenced by oldtype
+ *   thread's cancellability type to the indicated type and returns the
+ *   previous cancellability type at the location referenced by oldtype
  *   Legal values for type are TASK_CANCEL_DEFERRED and
  *   TASK_CANCEL_ASYNCHRONOUS.
  *
- *   The cancelability state and type of any newly created threads,
+ *   The cancellability state and type of any newly created threads,
  *   including the thread in which main() was first invoked, are
  *   TASK_CANCEL_ENABLE and TASK_CANCEL_DEFERRED respectively.
  *
@@ -78,7 +78,7 @@ int task_setcanceltype(int type, FAR int *oldtype)
 
   sched_lock();
 
-  /* Return the current type if so requrested */
+  /* Return the current type if so requested */
 
   if (oldtype != NULL)
     {

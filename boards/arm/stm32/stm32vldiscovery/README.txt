@@ -15,7 +15,7 @@ Contents
 LEDs
 ====
 
-It is asumed that STMicro STM32F100RB generic board board has one LED on PA0.
+It is assumed that STMicro STM32F100RB generic board board has one LED on PA0.
 You should configure the port and pin number in
 boards/arm/stm32/stm32vldiscovery/src/stm32vldiscovery.h. This LED is not used by
 the board port unless CONFIG_ARCH_LEDS is defined.  In that case, the usage by

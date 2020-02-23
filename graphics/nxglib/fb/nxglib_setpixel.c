@@ -62,7 +62,7 @@
  * Name: nxgl_setpixel_*bpp
  *
  * Description:
- *   Draw a single pixel in frambuffer memory at the given position and with
+ *   Draw a single pixel in framebuffer memory at the given position and with
  *   the given color.   This is equivalent to nxgl_fillrectangle_*bpp() with
  *   a 1x1 rectangle but is more efficient.
  *
@@ -105,7 +105,7 @@ void NXGL_FUNCNAME(nxgl_setpixel, NXGLIB_SUFFIX)
   mask    = (15 << shift);                   /* Mask is 0x0f or 0xf0 */
   color <<= shift;                           /* Color is positioned under the mask */
 #else
-#  error "Unsupport pixel depth"
+#  error "Unsupported pixel depth"
 #endif
 
 # else /* CONFIG_NX_PACKEDMSFIRST */
@@ -123,7 +123,7 @@ void NXGL_FUNCNAME(nxgl_setpixel, NXGLIB_SUFFIX)
   mask    = (15 << shift);                   /* Mask is 0x0f or 0xf0 */
   color <<= shift;                           /* Color is positioned under the mask */
 #else
-#  error "Unsupport pixel depth"
+#  error "Unsupported pixel depth"
 #endif
 #endif /* CONFIG_NX_PACKEDMSFIRST */
 

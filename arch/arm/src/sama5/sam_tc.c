@@ -523,7 +523,7 @@ static void sam_regdump(struct sam_chan_s *chan, const char *msg)
  * Input Parameters:
  *   tc      - The timer/counter peripheral state
  *   wr      - True:write access false:read access
- *   regval  - The regiser value associated with the access
+ *   regval  - The register value associated with the access
  *   regaddr - The address of the register being accessed
  *
  * Returned Value:

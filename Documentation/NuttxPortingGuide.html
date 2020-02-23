@@ -737,8 +737,8 @@
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
   </li>
-  <p>NOTE: In principle, this user mode port should run in any POSIX environement.
-    This target will probably not run &quot;out-of-the-box&quot; in unverified POSIX environments due to the many host environemnt dependencies.
+  <p>NOTE: In principle, this user mode port should run in any POSIX environment.
+    This target will probably not run &quot;out-of-the-box&quot; in unverified POSIX environments due to the many host environment dependencies.
   </p>
 
   <li><code>arch/arm</code>:
@@ -2573,7 +2573,7 @@ config ARCH_SIM
    bool "Simulation"
    select ARCH_HAVE_TICKLESS
    ---help---
-       Linux/Cywgin user-mode simulation.
+       Linux/Cygwin user-mode simulation.
 </pre></ul>
     <p>
       When the simulation platform is selected, <code>ARCH_HAVE_TICKLESS</code> is automatically selected, informing the configuration system that <i>Tickless OS</i> options can be selected.
@@ -4055,7 +4055,7 @@ void nxsched_timer_expiration(void);
     </p>
   <li>
     <p><b>Cancellation Points</b>:
-      Many of the application OS interfaces are <i>cancellation points</i>, i.e., when the task is operating in <i>defferred cancellation</i> state, it cannot be deleted or cancelled until it calls an application OS interface that is a cancellation point.
+      Many of the application OS interfaces are <i>cancellation points</i>, i.e., when the task is operating in <i>deferred cancellation</i> state, it cannot be deleted or cancelled until it calls an application OS interface that is a cancellation point.
     </p>
     <p>
       The POSIX specification is very specific about this, specific both in identifying which application OS interfaces are cancellation points and specific in the fact that it is prohibited for any OS operation other than those listed in the specification to generate cancellation points.
@@ -6716,7 +6716,7 @@ int syslog_initialize(void);
 <ol>
   <li>
     <p><b>Low-Level Serial Output</b>.
-      If you are using a SYSLOG console channel (<code>CONFIG_SYSLOG_CONSOLE</code>) and if the underlying architecture supports the low-level <code>up_putc()</code> interface(<code>CONFIG_ARCH_LOWPUTC</code>), then the SYLOG logic will direct the output to <code>up_putc()</code> which is capable of generating the serial output within the context of an interrupt handler.
+      If you are using a SYSLOG console channel (<code>CONFIG_SYSLOG_CONSOLE</code>) and if the underlying architecture supports the low-level <code>up_putc()</code> interface(<code>CONFIG_ARCH_LOWPUTC</code>), then the SYSLOG logic will direct the output to <code>up_putc()</code> which is capable of generating the serial output within the context of an interrupt handler.
     </p>
     <p>
       There are a few issues in doing this however:
@@ -6752,7 +6752,7 @@ int syslog_initialize(void);
     </li>
     <li>
       <p>
-        Later, when the next normal syslog output is generated, it will first empty the content of the interrupt buffer to the SYSLOG device in the proper context.  It will then be followed by the normal syslog output.  In this case, the interrupt level SYSLOG output will interrupt the normal output stream and the interrupt level SYSLOG output will be inserted into the correct position in the SYSLOG output when the next normal SYLOG output is generated.
+        Later, when the next normal syslog output is generated, it will first empty the content of the interrupt buffer to the SYSLOG device in the proper context.  It will then be followed by the normal syslog output.  In this case, the interrupt level SYSLOG output will interrupt the normal output stream and the interrupt level SYSLOG output will be inserted into the correct position in the SYSLOG output when the next normal SYSLOG output is generated.
       </p>
     </li>
   </ul>

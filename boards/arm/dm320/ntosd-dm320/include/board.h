@@ -58,7 +58,7 @@
 
 #define CONFIG_DM320_UARTPPLIN 1
 
-/* Configration for dm9000 network device */
+/* Configuration for dm9000 network device */
 
 #define DM9000_BASE      CONFIG_DM9000_BASE
 

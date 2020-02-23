@@ -514,7 +514,7 @@ STM3240G-EVAL-specific Configuration Options
 
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
-    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt priority.  Default: 128
     CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
@@ -589,14 +589,14 @@ STM3240G-EVAL-specific Configuration Options
       320x240 "landscape" orientation.
       In this orientation, the top of the display is to the left
       of the buttons (if the board is held so that the buttons are at the
-      botton of the board).
+      bottom of the board).
     CONFIG_LCD_RPORTRAIT - Define for 240x320 display "reverse
       portrait" orientation support.  In this orientation, the
       STM3210E-EVAL's LCD ribbon cable is at the top of the display.
       Default is 320x240 "landscape" orientation.
       In this orientation, the top of the display is to the right
       of the buttons (if the board is held so that the buttons are at the
-      botton of the board).
+      bottom of the board).
     CONFIG_STM3240G_LCD_RDSHIFT - When reading 16-bit gram data, there appears
       to be a shift in the returned data.  This value fixes the offset.
       Default 5.
@@ -646,7 +646,7 @@ Where <subdir> is one of the following:
   dhcpd:
   -----
 
-    This builds the DCHP server using the apps/examples/dhcpd application
+    This builds the DHCP server using the apps/examples/dhcpd application
     (for execution from FLASH.) See apps/examples/README.txt for information
     about the dhcpd example.
 
@@ -673,7 +673,7 @@ Where <subdir> is one of the following:
   discover:
   --------
     This configuration exercises netutils/discover utility using
-    apps/exmaples/discover.  This example initializes and starts the UDP
+    apps/examples/discover.  This example initializes and starts the UDP
     discover daemon. This daemon is useful for discovering devices in
     local networks, especially with DHCP configured devices.  It listens
     for UDP broadcasts which also can include a device class so that
@@ -1017,7 +1017,7 @@ Where <subdir> is one of the following:
         a USB host on the STM32F4Discovery, including support for a mass storage
         class driver:
 
-        CONFIG_USBDEV=n          : Make sure tht USB device support is disabled
+        CONFIG_USBDEV=n          : Make sure the USB device support is disabled
         CONFIG_USBHOST=y         : Enable USB host support
         CONFIG_STM32_OTGFS=y     : Enable the STM32 USB OTG FS block
         CONFIG_STM32_SYSCFG=y    : Needed for all USB OTF FS support

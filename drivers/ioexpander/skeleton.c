@@ -713,9 +713,9 @@ static void skel_interrupt(FAR void *arg)
  *   Initialize a I/O Expander device.
  *
  * NOTE: There are no arguments to the initialization function this
- * skelton example.  Typical implementations take two arguments:
+ * skeleton example.  Typical implementations take two arguments:
  *
- * 1) A reference to an I2C or SPI interface used to interace with the
+ * 1) A reference to an I2C or SPI interface used to interactive with the
  *    device, and
  * 2) A read-only configuration structure that provides things like:  I2C
  *    or SPI characteristics and callbacks to attache, enable, and disable

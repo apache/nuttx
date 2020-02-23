@@ -84,7 +84,7 @@
 #  define HOSTNAME  "Native" /* Windows native */
 #elif defined(HOST_CYGWIN)
 #  define SEPARATOR '/'
-#  define HOSTNAME  "Cywgin" /* Cygwin or MSYS under Windows */
+#  define HOSTNAME  "Cygwin" /* Cygwin or MSYS under Windows */
 #endif
 
 /****************************************************************************

@@ -74,7 +74,7 @@
 /* sys_call macros **********************************************************/
 /* System calls with 3 parameters and fewer are handled by sys_call0
  * (sys_call1, sys_call2, and sys_call3 are aliases for sys_call0).
- * This is because the parmeters are passed in a0-a3.  a0 is reserved for
+ * This is because the parameters are passed in a0-a3.  a0 is reserved for
  * the syscall number leaving up to three additional parameters that can be
  * passed in registers.  The remainder would have to be pushed onto the stack.
  *

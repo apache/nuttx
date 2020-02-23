@@ -55,7 +55,7 @@ struct i2c_master_s;  /* Forward reference */
 
 struct scd30_conv_data_s
 {
-  float temperature; /* Celcius */
+  float temperature; /* Celsius */
   float humidity;    /* RH-% */
   float co2;         /* CO₂ PPM */
 };

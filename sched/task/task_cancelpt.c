@@ -322,7 +322,7 @@ bool check_cancellation_point(void)
  *   while we the thread is within the cancellation point.  This logic
  *   behaves much like sending a signal:  It will cause waiting threads
  *   to wake up and terminated with ECANCELED.  A call to
- *   leave_cancellation_point() whould then follow, causing the thread to
+ *   leave_cancellation_point() would then follow, causing the thread to
  *   exit.
  *
  ****************************************************************************/
@@ -342,7 +342,7 @@ void nxnotify_cancellation(FAR struct tcb_s *tcb)
   tcb->flags |= TCB_FLAG_CANCEL_PENDING;
 
   /* We only notify the cancellation if (1) the thread has not disabled
-   * cancellation, (2) the thread uses the deffered cancellation mode,
+   * cancellation, (2) the thread uses the deferred cancellation mode,
    * (3) the thread is waiting within a cancellation point.
    */
 

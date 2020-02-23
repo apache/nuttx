@@ -321,7 +321,7 @@ trigger */
 
 /* Channel Status Register */
 
-#define DMAC_CHSTATUS_PEND               (1 << 0)  /* Bit 0:  Chennel pending */
+#define DMAC_CHSTATUS_PEND               (1 << 0)  /* Bit 0:  Channel pending */
 #define DMAC_CHSTATUS_BUSY               (1 << 1)  /* Bit 1:  Channel busy */
 #define DMAC_CHSTATUS_FERR               (1 << 2)  /* Bit 2:  Channel fetch error */
 

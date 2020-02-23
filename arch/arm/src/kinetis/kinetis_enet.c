@@ -350,7 +350,7 @@ static void kinetis_reset(struct kinetis_driver_s *priv);
  *
  * Description:
  *   The descriptors are represented by structures  Unfortunately, when the
- *   structures are overlayed on the data, the bytes are reversed because
+ *   structures are overlaid on the data, the bytes are reversed because
  *   the underlying hardware writes the data in big-endian byte order.
  *
  * Input Parameters:
@@ -1803,7 +1803,7 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
     }
   else
     {
-      /* TODO: Autonegotitation has right now failed. Maybe the Eth cable is
+      /* TODO: Autonegotiation has right now failed. Maybe the Eth cable is
        * not connected. PHY chip have mechanisms to configure link OK.
        * We should leave autconf on, and find a way to re-configure the
        * MCU whenever the link is ready.

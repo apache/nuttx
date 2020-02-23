@@ -828,7 +828,7 @@ static void sam_disablexfrints(struct sam_dev_s *priv)
  * Name: sam_enableints
  *
  * Description:
- *   Enable the previously configured HSMCI interrupts needed to suport the
+ *   Enable the previously configured HSMCI interrupts needed to support the
  *   wait and transfer functions.
  *
  * Input Parameters:
@@ -3099,7 +3099,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
   sam_dmastart(priv->dma, sam_dmacallback, priv);
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
-   * enabled until after the transfer is stard with an SD command (i.e.,
+   * enabled until after the transfer is start with an SD command (i.e.,
    * at the beginning of sam_eventwait().
    */
 

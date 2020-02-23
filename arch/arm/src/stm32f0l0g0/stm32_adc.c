@@ -140,7 +140,7 @@
 #endif
 
 /* Number of channels per ADC:
- *   - F0, L0, G0 - 19, but singe SMP for all channels
+ *   - F0, L0, G0 - 19, but single SMP for all channels
  *
  * NOTE: this value can be obtained from SMPRx register description (ST manual)
  */

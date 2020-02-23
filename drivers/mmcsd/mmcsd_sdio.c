@@ -2193,7 +2193,7 @@ static int mmcsd_close(FAR struct inode *inode)
  * Name: mmcsd_read
  *
  * Description:
- *   Read the specified numer of sectors from the read-ahead buffer or from
+ *   Read the specified number of sectors from the read-ahead buffer or from
  *   the physical device.
  *
  ****************************************************************************/

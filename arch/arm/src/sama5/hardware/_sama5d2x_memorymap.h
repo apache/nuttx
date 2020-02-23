@@ -65,7 +65,7 @@
  *  Section MMU Flags
  *  SAMA5 Virtual (mapped) Memory Map
  *  - Peripheral virtual base addresses
- *  - NuttX vitual base address
+ *  - NuttX virtual base address
  *  MMU Page Table Location
  *  Page table start addresses
  *  Base address of the interrupt vector table
@@ -386,7 +386,7 @@
 /* SAMA5 Virtual (mapped) Memory Map
  *
  * board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location becaue it depends
+ * memory map is used.  It is included in this odd location because it depends
  * on some the virtual address definitions provided above.
  */
 

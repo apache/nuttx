@@ -995,7 +995,7 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
 
   st7565_cmddata(priv, true);
 
-  /* Reset by command in case of st7565_reset not implemeted */
+  /* Reset by command in case of st7565_reset not implemented */
 
   st7565_send_one_data(priv, ST7565_EXIT_SOFTRST);
 

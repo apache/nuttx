@@ -114,7 +114,7 @@ Serial Consoles
 
   UART1
   -----
-  If you have a TTL to RS-232 convertor then this is the most convenient
+  If you have a TTL to RS-232 converter then this is the most convenient
   serial console to use.  UART1 is the default in all of these
   configurations.
 

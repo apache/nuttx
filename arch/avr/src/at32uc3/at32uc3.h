@@ -100,7 +100,7 @@
 #define GPIO_HIGH                  GPIO_VALUE
 #define GPIO_LOW                   (0)
 
-/* Input/Ouptut (Valid only if GPIO_ENABLE)
+/* Input/Output (Valid only if GPIO_ENABLE)
  * .... ..O. .... ....
  */
 
@@ -179,7 +179,7 @@ extern "C"
  * Name: up_clkinit
  *
  * Description:
- *   Initialiaze clock/PLL settings per the definitions in the board.h file.
+ *   Initialize clock/PLL settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 

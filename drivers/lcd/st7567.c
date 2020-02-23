@@ -78,7 +78,7 @@
  *   must be undefined or defined to be 1.
  * CONFIG_ST7567_POWER
  *   If the hardware supports a controllable OLED a power supply, this
- *   configuration shold be defined.  (See st7567_power() below).
+ *   configuration should be defined.  (See st7567_power() below).
  * CONFIG_LCD_ST7567DEBUG - Enable detailed ST7567 debst7567 output
  *   (CONFIG_DEBUG_FEATURES and CONFIG_VERBOSE must also be enabled).
  *

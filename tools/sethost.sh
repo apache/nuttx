@@ -282,7 +282,7 @@ if [ "X$dotconfig" != "Xy" ]; then
   sed -i -e "s/^CONFIG_APPS_DIR/# CONFIG_APPS_DIR/g" .config
 
   mv .config $configfile || \
-      { echo "ERROR: Failed to move .conig to $configfile"; exit 1; }
+      { echo "ERROR: Failed to move .config to $configfile"; exit 1; }
 
   if [ -e SAVEconfig ]; then
     mv SAVEconfig .config || \

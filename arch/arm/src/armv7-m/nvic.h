@@ -195,7 +195,7 @@
 #define NVIC_CPUID_BASE_OFFSET          0x0d00 /* CPUID base register */
 #define NVIC_INTCTRL_OFFSET             0x0d04 /* Interrupt control state register */
 #define NVIC_VECTAB_OFFSET              0x0d08 /* Vector table offset register */
-#define NVIC_AIRCR_OFFSET               0x0d0c /* Application interrupt/reset contol registr */
+#define NVIC_AIRCR_OFFSET               0x0d0c /* Application interrupt/reset control registr */
 #define NVIC_SYSCON_OFFSET              0x0d10 /* System control register */
 #define NVIC_CFGCON_OFFSET              0x0d14 /* Configuration control register */
 #define NVIC_SYSH_PRIORITY_OFFSET(n)    (0x0d14 + 4*((n) >> 2))
@@ -518,7 +518,7 @@
 #define NVIC_CFGCON_UNALIGNTRP          (1 << 3)  /* Bit 3: Enables unaligned access traps */
 #define NVIC_CFGCON_DIV0TRP             (1 << 4)  /* Bit 4: Enables fault on divide-by-zero */
 #define NVIC_CFGCON_BFHFNMIGN           (1 << 8)  /* Bit 8: Disables data bus faults */
-#define NVIC_CFGCON_STKALIGN            (1 << 9)  /* Bit 9: Indicates stack alignment on exeption */
+#define NVIC_CFGCON_STKALIGN            (1 << 9)  /* Bit 9: Indicates stack alignment on exception */
                                                   /* Cortex-M7: */
 #define NVIC_CFGCON_DC                  (1 << 16) /* Bit 16: Data cache enable */
 #define NVIC_CFGCON_IC                  (1 << 17) /* Bit 17: Instruction cache enable */

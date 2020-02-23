@@ -406,7 +406,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd);
  * Description:
  *   Close an inode (if open)
  *
- * Assumuptions:
+ * Assumptions:
  *   Caller holds the list semaphore because the file descriptor will be freed.
  *
  ****************************************************************************/
@@ -416,7 +416,7 @@ int files_close(int fd);
 /****************************************************************************
  * Name: files_release
  *
- * Assumuptions:
+ * Assumptions:
  *   Similar to files_close().  Called only from open() logic on error
  *   conditions.
  *

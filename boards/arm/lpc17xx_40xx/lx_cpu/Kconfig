@@ -16,7 +16,7 @@ choice
 		FLASH memory and start directly after MCU reset. If there is
 		bool loader then NuttX can be placed into internal FLASH after
 		the loader - "Code in internal FLASH - loader used" (LX_CPU_BOOT_FLASH_APP)
-		or it can be loaded into extarnal SDRAM and start from there.
+		or it can be loaded into external SDRAM and start from there.
 
 config LX_CPU_BOOT_FLASH_APP
 	bool "Code in internal FLASH - loader used"

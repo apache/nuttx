@@ -5047,7 +5047,7 @@ static void stm32_vbusdrive(FAR struct stm32_usbhost_s *priv, bool state)
  * Description:
  *   Initialize/re-initialize hardware for host mode operation.  At present,
  *   this function is called only from stm32_hw_initialize().  But if OTG mode
- *   were supported, this function would also be called to swtich between
+ *   were supported, this function would also be called to switch between
  *   host and device modes on a connector ID change interrupt.
  *
  * Input Parameters:
@@ -5105,7 +5105,7 @@ static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv)
             (CONFIG_STM32_OTGFS_PTXFIFO_SIZE << OTGFS_HPTXFSIZ_PTXFD_SHIFT));
   stm32_putreg(STM32_OTGFS_HPTXFSIZ, regval);
 
-  /* If OTG were supported, we sould need to clear HNP enable bit in the
+  /* If OTG were supported, we should need to clear HNP enable bit in the
    * USB_OTG control register about here.
    */
 

@@ -1578,7 +1578,7 @@ static int nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
  *   data  - Buffer where the data area will be stored.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -1880,7 +1880,7 @@ static int nand_write(struct sam_nandcs_s *priv, uint8_t *buffer,
  *   spare - Buffer where the spare area will be stored.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -1964,7 +1964,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
 
   /* Read the spare area if so requested.  If there is no data, then the
    * spare data will appear at offset 0; If there is data, thenthe spare data
-   * will appear followign the data at offset pagesize.
+   * will appear following the data at offset pagesize.
    */
 
   if (spare)
@@ -1995,7 +1995,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
  *   data  - Buffer where the data area will be stored.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2112,11 +2112,11 @@ errout:
  *   priv  - Lower-half, private NAND FLASH device state
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
- *   data  - Buffer containing the data to be writting
- *   spare - Buffer conatining the spare data to be written.
+ *   data  - Buffer containing the data to be writing
+ *   spare - Buffer containing the spare data to be written.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2266,10 +2266,10 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
  *   priv  - Lower-half, private NAND FLASH device state
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
- *   data  - Buffer containing the data to be writting
+ *   data  - Buffer containing the data to be writing
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2481,7 +2481,7 @@ errout:
  *   block  - Number of the physical block to erase.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2564,7 +2564,7 @@ static int nand_eraseblock(struct nand_raw_s *raw, off_t block)
  *   spare - Buffer where the spare area will be stored.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2597,11 +2597,11 @@ static int nand_rawread(struct nand_raw_s *raw, off_t block,
  *   raw   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
- *   data  - Buffer containing the data to be writting
+ *   data  - Buffer containing the data to be writing
  *   spare - Buffer containing the spare data to be written.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2640,7 +2640,7 @@ static int nand_rawwrite(struct nand_raw_s *raw, off_t block,
  *   spare - Buffer where the spare area will be stored.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2698,11 +2698,11 @@ static int nand_readpage(struct nand_raw_s *raw, off_t block,
  *   raw   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
- *   data  - Buffer containing the data to be writting
- *   spare - Buffer conatining the spare data to be written.
+ *   data  - Buffer containing the data to be writing
+ *   spare - Buffer containing the spare data to be written.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 

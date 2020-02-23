@@ -172,7 +172,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
        *   R0 = SYS_save_context
        *   R1 = saveregs
        *
-       * In this case, we simply need to copy the current regsters to the
+       * In this case, we simply need to copy the current registers to the
        * save register space references in the saved R1 and return.
        */
 

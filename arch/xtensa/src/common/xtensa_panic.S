@@ -116,7 +116,7 @@ _xtensa_panic:
 	rsr		a0, EXCVADDR
 	s32i	a0, sp, (4 * REG_EXCVADDR)
 
-	/* Set up PS for C, reenable hi-pri interrupts, and clear EXCM. */
+	/* Set up PS for C, re-enable hi-pri interrupts, and clear EXCM. */
 
 #ifdef __XTENSA_CALL0_ABI__
 	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM

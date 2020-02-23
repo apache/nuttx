@@ -553,7 +553,7 @@ extern "C"
  *   None
  *
  *  Returned Value:
- *    Zero (OK) is returned if the dev/userfs driver was intitialized and
+ *    Zero (OK) is returned if the dev/userfs driver was initialized and
  *    registered properly.  Otherwise, a negated errno value is returned
  *    to indicate the nature of the failure.
  *

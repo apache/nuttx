@@ -270,7 +270,7 @@
 #define GPIO_CAN2_RX      GPIO_CAN1_RX_2    /* PB5 */
 #define GPIO_CAN2_TX      GPIO_CAN1_TX_2    /* PB6 */
 
-/* DMA Channl/Stream Selections *****************************************************/
+/* DMA Channel/Stream Selections *****************************************************/
 /* Stream selections are arbitrary for now but might become important in the future
  * if we set aside more DMA channels/streams.
  *

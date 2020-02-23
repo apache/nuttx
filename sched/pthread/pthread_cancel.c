@@ -92,12 +92,12 @@ int pthread_cancel(pthread_t thread)
       /* Then we cannot cancel the thread now.  Here is how this is
        * supposed to work:
        *
-       * "When cancelability is disabled, all cancels are held pending
-       *  in the target thread until the thread changes the cancelability.
-       *  When cancelability is deferred, all cancels are held pending in
-       *  the target thread until the thread changes the cancelability, calls
+       * "When cancellability is disabled, all cancels are held pending
+       *  in the target thread until the thread changes the cancellability.
+       *  When cancellability is deferred, all cancels are held pending in
+       *  the target thread until the thread changes the cancellability, calls
        *  a function which is a cancellation point or calls pthread_testcancel(),
-       *  thus creating a cancellation point. When cancelability is asynchronous,
+       *  thus creating a cancellation point. When cancellability is asynchronous,
        *  all cancels are acted upon immediately, interrupting the thread with its
        *  processing."
        */

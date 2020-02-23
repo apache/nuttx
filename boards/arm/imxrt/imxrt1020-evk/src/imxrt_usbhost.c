@@ -151,7 +151,7 @@ int imxrt_usbhost_initialize(void)
 
   imxrt_clockall_usboh3();
 
-  /* Make sure we don't accidentially switch on USB bus power */
+  /* Make sure we don't accidentally switch on USB bus power */
 
   *((uint32_t *)IMXRT_USBNC_USB_OTG1_CTRL) = USBNC_PWR_POL;
   *((uint32_t *)0x400d9030)                = (1 << 21);

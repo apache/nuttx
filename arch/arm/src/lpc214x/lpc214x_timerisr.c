@@ -140,7 +140,7 @@ void up_timer_initialize(void)
 
   tmr_putreg32(LPC214X_PCLKFREQ/TICK_PER_SEC, LPC214X_TMR_MR0_OFFSET);
 
-  /* Reset timer counter regiser and interrupt on match */
+  /* Reset timer counter register and interrupt on match */
 
   mcr = tmr_getreg16(LPC214X_TMR_MCR_OFFSET);
   mcr &= ~LPC214X_TMR_MCR_MR1I;

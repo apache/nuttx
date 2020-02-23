@@ -170,7 +170,7 @@ static void lpc31_sdraminitialize(void)
 #endif
 
   /* Check RTL for divide by 2 possible.
-   * If so change then enable the followng logic
+   * If so change then enable the following logic
    */
 
 #if 0

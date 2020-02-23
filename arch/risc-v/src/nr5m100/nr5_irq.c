@@ -103,7 +103,7 @@ void epic_dump(void)
  * Name: nr5_trap
  *
  * Description:
- *   Handler for execptions.  None are handled and all are fatal
+ *   Handler for exceptions.  None are handled and all are fatal
  *   error conditions.  The only advantage these provided over the default
  *   unexpected interrupt handler is that they provide a diagnostic output.
  *

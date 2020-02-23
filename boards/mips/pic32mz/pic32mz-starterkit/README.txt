@@ -114,7 +114,7 @@ Creating Compatible NuttX HEX files
       cd tools/pic32mx
       make
 
-    Now you will have an excecutable file call mkpichex (or mkpichex.exe on
+    Now you will have an executable file call mkpichex (or mkpichex.exe on
     Cygwin).  This program will take the nutt.hex file as an input, it will
     convert all of the KSEG0 and KSEG1 addresses to physical address, and
     it will write the modified file, replacing the original nuttx.hex.
@@ -204,7 +204,7 @@ Serial Console
   ------------------------------------------
   If the MEB-II UART configuration when used with the I/O Expansion board
   (with the adapter), then UART will be on J11 with Pin 35 being U1RX (into
-  MZ) and Pin 37 being TU1X (out od MZ).
+  MZ) and Pin 37 being TU1X (out of MZ).
 
   Directly from the Adapter Board
   -------------------------------

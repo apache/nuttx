@@ -992,7 +992,7 @@ static int lpc43_transmit(FAR struct lpc43_ethmac_s *priv)
 
               txdesc->tdes0 |= (ETH_TDES0_LS | ETH_TDES0_IC);
 
-              /* This segement is, most likely, of fractional buffersize */
+              /* This segment is, most likely, of fractional buffersize */
 
               txdesc->tdes1  = lastsize;
               buffer        += lastsize;
@@ -2634,7 +2634,7 @@ static void lpc43_txdescinit(FAR struct lpc43_ethmac_s *priv)
         }
     }
 
-  /* Set Transmit Desciptor List Address Register */
+  /* Set Transmit Descriptor List Address Register */
 
   lpc43_putreg((uint32_t)priv->txtable, LPC43_ETH_DMATXDLA);
 }
@@ -3081,7 +3081,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
     }
 #endif
 
-  /* Perform auto-negotion if so configured */
+  /* Perform auto-negotiation if so configured */
 
 #ifdef CONFIG_LPC43_AUTONEG
   /* Wait for link status */
@@ -3212,7 +3212,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
 #endif
 #endif
 
-#else /* Auto-negotion not selected */
+#else /* Auto-negotiation not selected */
 
 #ifdef CONFIG_LPC43_ETHFD
   priv->fduplex = 1;
@@ -3267,7 +3267,7 @@ static int lpc43_phyinit(FAR struct lpc43_ethmac_s *priv)
  * Name: lpc43_selectmii
  *
  * Description:
- *   Selects the MII inteface.
+ *   Selects the MII interface.
  *
  * Input Parameters:
  *   None
@@ -3292,7 +3292,7 @@ static inline void lpc43_selectmii(void)
  * Name: lpc43_selectrmii
  *
  * Description:
- *   Selects the RMII inteface.
+ *   Selects the RMII interface.
  *
  * Input Parameters:
  *   None

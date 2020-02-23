@@ -642,7 +642,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   /* Check if we successfully initialized. We now have to be concerned
    * about asynchronous modification of crefs because the block
-   * driver has been registerd.
+   * driver has been registered.
    */
 
   if (ret >= 0)

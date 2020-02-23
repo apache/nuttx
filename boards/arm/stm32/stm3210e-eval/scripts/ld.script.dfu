@@ -35,7 +35,7 @@
 
 /* The STM32F103ZET6 has 512Kb of FLASH beginning at address 0x0800:0000 and
  * 64Kb of SRAM beginning at address 0x2000:0000.  Here we assume that the
- * STM3210E-EVAL's DFU bootloader is being used.  In that case, the corrct
+ * STM3210E-EVAL's DFU bootloader is being used.  In that case, the correct
  * load .text load address is 0x08003000 (leaving 464Kb).
  */
 

@@ -519,7 +519,7 @@ __start:
 
 	configpinsel2	r0, r1
 
-	/* Setup the External Memory Controllor (EMC) as configured */
+	/* Setup the External Memory Controller (EMC) as configured */
 
 	configemc	r0, r1
 

@@ -56,7 +56,7 @@ config NET_IEEE802154_BACKLOG
 		will be freed, preventing overrun at the cost of losing the oldest
 		frames.
 
-		NOTE: The special value of zero will disable all backlog checkes.
+		NOTE: The special value of zero will disable all backlog checks.
 
 endif # NET_IEEE802154
 endmenu # IEEE 802.15.4 Socket Support

@@ -67,7 +67,7 @@ ifeq ($(CONFIG_GPIO_LOWER_HALF),y)
 endif
 endif
 
-# The folling implements an awkward OR
+# The following implements an awkward OR
 
 ifeq ($(CONFIG_IOEXPANDER),y)
 

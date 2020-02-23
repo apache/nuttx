@@ -496,7 +496,7 @@ CXD56_AUDIO_ECODE cxd56_audio_dma_en_dmaint(void)
 
   write_int_reg(INT_EN1_REG, int_en);
 
-  /* Enalbe bus error interrupt. */
+  /* Enable bus error interrupt. */
 
   cxd56_audio_bca_reg_en_bus_err_int();
 
@@ -516,7 +516,7 @@ CXD56_AUDIO_ECODE cxd56_audio_dma_dis_dmaint(void)
 
   write_int_reg(INT_EN1_REG, int_en);
 
-  /* Disalbe bus error interrupt. */
+  /* Disable bus error interrupt. */
 
   cxd56_audio_bca_reg_dis_bus_err_int();
 

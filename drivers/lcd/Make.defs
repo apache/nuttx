@@ -35,7 +35,7 @@
 
 ifeq ($(CONFIG_LCD),y)
 
-# Support for the generic LCD framebufer front-end
+# Support for the generic LCD framebuffer front-end
 
 ifeq ($(CONFIG_LCD_FRAMEBUFFER),y)
   CSRCS += lcd_framebuffer.c

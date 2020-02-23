@@ -1104,7 +1104,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
       goto errout_with_semaphore;
     }
 
-  /* Attempts to set the position beyound the end of file will
+  /* Attempts to set the position beyond the end of file will
    * work if the file is open for write access.
    */
 

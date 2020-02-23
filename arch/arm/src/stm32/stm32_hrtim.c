@@ -520,7 +520,7 @@ struct stm32_hrtim_eev_cfg_s
   uint8_t filter:4;             /* External Event filter */
   uint8_t src:4;                /* External Event source */
   uint8_t pol:1;                /* External Event polarity */
-  uint8_t sen:1;                /* External Event sensivity */
+  uint8_t sen:1;                /* External Event ssensitivit */
   uint8_t mode:1;               /* External Event mode */
   uint8_t _res:5;
 };
@@ -1880,7 +1880,7 @@ static FAR struct stm32_hrtim_slave_priv_s *
       goto errout;
     }
 
-  /* Get Timer data strucutre */
+  /* Get Timer data structure */
 
   tim = hrtim_tim_get(priv, timer);
   if (tim == NULL)
@@ -2595,7 +2595,7 @@ static int hrtim_gpios_config(FAR struct stm32_hrtim_s *priv)
  * Input Parameters:
  *   priv    - A reference to the HRTIM block
  *   timer   - HRTIM Timer index
- *   capture - capture trigers configuration
+ *   capture - capture triggers configuration
  *
  * Returned Value:
  *   0 on success, a negated errno value on failure
@@ -3198,7 +3198,7 @@ static int hrtim_output_set_set(FAR struct hrtim_dev_s *dev, uint16_t output,
 
   timer = output_tim_index_get(output);
 
-  /* Get Slave Timer data strucutre */
+  /* Get Slave Timer data structure */
 
   slave = hrtim_slave_get(priv, timer);
   if (slave == NULL)
@@ -3252,7 +3252,7 @@ static int hrtim_output_rst_set(FAR struct hrtim_dev_s *dev, uint16_t output,
 
   timer = output_tim_index_get(output);
 
-  /* Get Salve Timer data strucutre */
+  /* Get Salve Timer data structure */
 
   slave = hrtim_slave_get(priv, timer);
   if (slave == NULL)
@@ -3644,7 +3644,7 @@ static int hrtim_tim_deadtime_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer)
       goto errout;
     }
 
-  /* Get Slave Timer data strucutre */
+  /* Get Slave Timer data structure */
 
   slave = hrtim_slave_get(priv, timer);
   if (slave == NULL)
@@ -3844,7 +3844,7 @@ static int hrtim_tim_chopper_cfg(FAR struct stm32_hrtim_s *priv,
       goto errout;
     }
 
-  /* Get Slave Timer data strucutre */
+  /* Get Slave Timer data structure */
 
   slave = hrtim_slave_get(priv, timer);
   if (slave == NULL)
@@ -4848,7 +4848,7 @@ static uint8_t hrtim_cmpcap_mask_get(FAR struct stm32_hrtim_s *priv,
   FAR struct stm32_hrtim_tim_s *tim;
   uint8_t mask = 0;
 
-  /* Get Timer data strucutre */
+  /* Get Timer data structure */
 
   tim = hrtim_tim_get(priv, timer);
   if (tim == NULL)

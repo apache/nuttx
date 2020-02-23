@@ -98,7 +98,7 @@
  *   Size of the serial receive/transmit buffers. Default 256.
  */
 
-/* Informations needed in usbdev_devinfo_s */
+/* Information needed in usbdev_devinfo_s */
 
 #define CDCACM_NUM_EPS             (3)
 

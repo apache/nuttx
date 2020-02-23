@@ -969,7 +969,7 @@ testbuild.sh
        list file.  The final, non-optional parameter, <testlist-file>,
        provides the path to that file.
 
-  The test list file is a sequence of build descriptons, one per line.  One
+  The test list file is a sequence of build descriptions, one per line.  One
   build descriptions consists of two comma separated values.  For example:
 
     stm32f429i-disco:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
@@ -986,7 +986,7 @@ testbuild.sh
   configuration names depends on the underlying architecture of the
   configured board.
 
-  The prefix '-' can be used to skip a configruation:
+  The prefix '-' can be used to skip a configuration:
   -stm32f429i-disco/nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
 
 uncrustify.cfg

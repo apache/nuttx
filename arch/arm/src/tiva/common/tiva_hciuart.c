@@ -951,7 +951,7 @@ static ssize_t hciuart_copytotxfifo(const struct hciuart_config_s *config)
  *
  *   Per "Specification of the Bluetooth System, Wireless connections made
  *   easy, Host Controller Interface [Transport Layer]", Volume 4, Revision
- *   1.2 or later, 1 January 2006, HCI UART tranport uses these settings:
+ *   1.2 or later, 1 January 2006, HCI UART transport uses these settings:
  *
  *     8 data bits, no parity, 1 stop, RTS/CTS flow control
  *
@@ -999,7 +999,7 @@ static void hciuart_line_configure(const struct hciuart_config_s *config)
  *
  *   Per "Specification of the Bluetooth System, Wireless connections made
  *   easy, Host Controller Interface [Transport Layer]", Volume 4, Revision
- *   1.2 or later, 1 January 2006, HCI UART tranport uses these settings:
+ *   1.2 or later, 1 January 2006, HCI UART transport uses these settings:
  *
  *     8 data bits, no parity, 1 stop, RTS/CTS flow control
  *

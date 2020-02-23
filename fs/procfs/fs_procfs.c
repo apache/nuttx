@@ -292,7 +292,7 @@ const struct mountpt_operations procfs_operations =
 };
 
 /* Level 0 contains the directory of active tasks in addition to other
- * statically registered entries with custom handlers.  This strcture
+ * statically registered entries with custom handlers.  This structure
  * contains a snapshot of the active tasks when the directory is first
  * opened.
  */

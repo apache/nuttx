@@ -170,7 +170,7 @@ static int up_getgrp(unsigned int irq)
  * Name: avr32_xcptn
  *
  * Description:
- *   Handlers for unexpected execptions.  All are fatal error conditions.
+ *   Handlers for unexpected exceptions.  All are fatal error conditions.
  *
  ****************************************************************************/
 

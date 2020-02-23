@@ -102,7 +102,7 @@ int stm32_bringup(void)
     }
   else
     {
-      /* Regiser the I2C character driver */
+      /* Register the I2C character driver */
 
       ret = i2c_register(i2c, 1);
       if (ret < 0)

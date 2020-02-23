@@ -79,7 +79,7 @@
 #define FE310_IRQ_MTIMER   (FE310_IRQ_ASYNC + 7)  /* Machine Timer Int */
 #define FE310_IRQ_MEXT     (FE310_IRQ_ASYNC + 11) /* Machine External Int */
 
-/* Machine Grobal External Interrupt */
+/* Machine Global External Interrupt */
 
 #define FE310_IRQ_UART0    (FE310_IRQ_MEXT + 3)
 #define FE310_IRQ_UART1    (FE310_IRQ_MEXT + 4)

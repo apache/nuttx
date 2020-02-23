@@ -76,9 +76,9 @@
 
 /* Peripherals */
 
-#  define MAX326_NWDOG       0    /* No Watchog Timers */
-#  define MAX326_NWWDOG      2    /* Two Windowed Watchog Timers */
-#  define MAX326_NRWDOG      1    /* One Recovery Watchog Timer */
+#  define MAX326_NWDOG       0    /* No Watchdog Timers */
+#  define MAX326_NWWDOG      2    /* Two Windowed Watchdog Timers */
+#  define MAX326_NRWDOG      1    /* One Recovery Watchdog Timer */
 #  define MAX326_NWAKEUP     1    /* One Wakeup Timer */
 #  define MAX326_NRTC        1    /* One RTC */
 #  define MAX326_NCRC        1    /* One CRC16/32 */
@@ -115,9 +115,9 @@
 
 /* Peripherals */
 
-#  define MAX326_NWDOG       0    /* No Watchog Timers */
-#  define MAX326_NWWDOG      2    /* Two Windowed Watchog Timers */
-#  define MAX326_NRWDOG      0    /* No Recovery Watchog Timer */
+#  define MAX326_NWDOG       0    /* No Watchdog Timers */
+#  define MAX326_NWWDOG      2    /* Two Windowed Watchdog Timers */
+#  define MAX326_NRWDOG      0    /* No Recovery Watchdog Timer */
 #  define MAX326_NWAKEUP     1    /* One Wakeup Timer */
 #  define MAX326_NRTC        1    /* One RTC */
 #  define MAX326_NCRC        1    /* One CRC16/32 */
@@ -164,9 +164,9 @@
 
 /* Peripherals */
 
-#  define MAX326_NWDOG       1    /* One Watchog Timer */
-#  define MAX326_NWWDOG      0    /* No Windowed Watchog Timers */
-#  define MAX326_NRWDOG      0    /* No Recovery Watchog Timer */
+#  define MAX326_NWDOG       1    /* One Watchdog Timer */
+#  define MAX326_NWWDOG      0    /* No Windowed Watchdog Timers */
+#  define MAX326_NRWDOG      0    /* No Recovery Watchdog Timer */
 #  define MAX326_NWAKEUP     0    /* No Wakeup Timer */
 #  define MAX326_NRTC        1    /* One RTC */
 #  define MAX326_NCRC        0    /* No CRC16/32 */

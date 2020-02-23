@@ -647,7 +647,7 @@ void bcmf_wl_scan_event_handler(FAR struct bcmf_dev_s *priv,
       goto exit_invalid_frame;
     }
 
-  /* wl_escan_result structure cointains a wl_bss_info field */
+  /* wl_escan_result structure contains a wl_bss_info field */
 
   len = result->buflen - sizeof(struct wl_escan_result)
                        + sizeof(struct wl_bss_info);

@@ -219,7 +219,7 @@ config HRT_TIMER
 	default n
 
 config DVFS
-	bool "Dynamic Voltage and Frequencey Scaling"
+	bool "Dynamic Voltage and Frequency Scaling"
 	default n
 
 endmenu

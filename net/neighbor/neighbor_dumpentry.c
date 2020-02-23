@@ -119,7 +119,7 @@ static void neighbor_dump_address(FAR const void *buf, unsigned int buflen)
  * Name: neighbor_dumpentry
  *
  * Description:
- *   Dump the conents of an entry Neighbor Table.
+ *   Dump the contents of an entry Neighbor Table.
  *
  * Input Parameters:
  *   msg      - Message to print with the entry

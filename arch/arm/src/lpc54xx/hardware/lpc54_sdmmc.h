@@ -250,7 +250,7 @@
 #define SDMMC_CMD_DISBOOT                 (1 << 26) /* Bit 26: Disable Boot */
 #define SDMMC_CMD_BOOTMODE                (1 << 27) /* Bit 27: Boot Mode */
 #define SDMMC_CMD_VSWITCH                 (1 << 28) /* Bit 28: Voltage switch bit */
-#define SDMMC_CMD_USEHOLD                 (1 << 29) /* Bit 29: Use Hold Registert */
+#define SDMMC_CMD_USEHOLD                 (1 << 29) /* Bit 29: Use Hold Registered */
                                                     /* Bit 30: Reserved */
 #define SDMMC_CMD_STARTCMD                (1 << 31) /* Bit 31: Start command */
 

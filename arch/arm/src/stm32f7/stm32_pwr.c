@@ -198,23 +198,23 @@ void stm32_pwr_enablebkp(bool writable)
  *   into the RAM will be maintained in the Standby and VBAT modes.
  *
  * Input Parameters:
- *   regon - state to set it to
+ *   region - state to set it to
  *
  * Returned Value:
  *   None
  *
  ************************************************************************************/
 
-void stm32_pwr_enablebreg(bool regon)
+void stm32_pwr_enablebreg(bool region)
 {
   uint16_t regval;
 
   regval  = stm32_pwr_getreg(STM32_PWR_CSR1_OFFSET);
   regval &= ~PWR_CSR1_BRE;
-  regval |= regon ? PWR_CSR1_BRE : 0;
+  regval |= region ? PWR_CSR1_BRE : 0;
   stm32_pwr_putreg(STM32_PWR_CSR1_OFFSET, regval);
 
-  if (regon)
+  if (region)
     {
       while ((stm32_pwr_getreg(STM32_PWR_CSR1_OFFSET) & PWR_CSR1_BRR) == 0);
     }

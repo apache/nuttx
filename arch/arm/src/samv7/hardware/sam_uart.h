@@ -82,7 +82,7 @@
 #define SAM_UART_LONPRIO_OFFSET      0x007c /* LON Priority Register (USART only) */
 #define SAM_UART_IDTTX_OFFSET        0x0080 /* LON IDT Tx Register (USART only) */
 #define SAM_UART_IDTRX_OFFSET        0x0084 /* LON IDT Rx Register (USART only) */
-#define SAM_UART_ICDIFF_OFFSET       0x0088 /* IC DIFF Registe (USART only) */
+#define SAM_UART_ICDIFF_OFFSET       0x0088 /* IC DIFF Register (USART only) */
                                             /* 0x008c-0x00e0: Reserved (USART) */
 #define SAM_UART_WPMR_OFFSET         0x00e4 /* Write Protect Mode Register (common) */
 #define SAM_UART_WPSR_OFFSET         0x00e8 /* Write Protect Status Register (USART only) */
@@ -541,7 +541,7 @@
 
 #define UART_IDTRX_MASK              0x00ffffff  /* Bits 0-23: LON Indeterminate Time after Reception */
 
-/* IC DIFF Registe (USART only) */
+/* IC DIFF Register (USART only) */
 
 #define UART_ICDIFF_MASK             0x0000000f  /* Bit 0-3: IC Differentiator Number */
 

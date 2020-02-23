@@ -266,7 +266,7 @@ static FAR struct sixlowpan_addrcontext_s *
  *   prefpost takes a byte where the first nibble specify prefix count
  *   and the second postfix count (NOTE: 15/0xf ipaddr=16 bytes copy).
  *
- *   compress_tagaddr() accepts a remote, variable length, taged MAC address;
+ *   compress_tagaddr() accepts a remote, variable length, tagged MAC address;
  *   compress_laddr() accepts a local, fixed length MAC address.
  *   compress_ipaddr() is simply the common logic that does not depend on
  *   the size of the MAC address.
@@ -529,7 +529,7 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
           srcptr += 2;
         }
 
-      /* If the IP is dervied from a MAC address big enough to include the U/L bit,
+      /* If the IP is derived from a MAC address big enough to include the U/L bit,
        * invert it.
        */
 

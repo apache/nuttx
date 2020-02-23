@@ -470,7 +470,7 @@ void nx_start(void)
 
       /* Set the entry point.  This is only for debug purposes.  NOTE: that
        * the start_t entry point is not saved.  That is acceptable, however,
-       * becaue it can be used only for restarting a task: The IDLE task
+       * because it can be used only for restarting a task: The IDLE task
        * cannot be restarted.
        */
 

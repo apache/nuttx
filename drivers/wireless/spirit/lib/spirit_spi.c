@@ -367,7 +367,7 @@ int spirit_reg_write(FAR struct spirit_library_s *spirit, uint8_t regaddr,
  *   spirit  - Reference to an instance of the driver state structure.
  *   regaddr - Base register's address to write
  *   clrbits - Bits to clear in the register
- *   setbits - Bits to set in the regiser
+ *   setbits - Bits to set in the register
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  A negated errno value is returned on

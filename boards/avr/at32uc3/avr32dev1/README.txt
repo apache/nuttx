@@ -78,7 +78,7 @@ Serial Connection
 
 USART1 is the default USART1 used in the configuration files to
 provide a serial console (of course, that can be easily changed
-by editting the configuration file).  The AVR32DEV1 board has no
+by editing the configuration file).  The AVR32DEV1 board has no
 RS-232 drivers or connectors on board.  I use an off-board MAX232
 module that I got on eBay (search for MAX232 if you want to find
 one).  I connect the MAX232 board as follows:

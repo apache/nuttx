@@ -66,7 +66,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure describes the LCD frambuffer */
+/* This structure describes the LCD framebuffer */
 
 struct lcdfb_dev_s
 {
@@ -232,7 +232,7 @@ static int lcdfb_update(FAR struct lcdfb_dev_s *priv,
 
   for (row = starty; row <= endy; row++)
     {
-      /* REVISIT: Some LCD hardware certain aligment requirements on DMA
+      /* REVISIT: Some LCD hardware certain alignment requirements on DMA
        * memory.
        */
 

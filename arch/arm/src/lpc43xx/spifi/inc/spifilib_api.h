@@ -339,7 +339,7 @@ uint32_t spifiDevGetInfo(const SPIFI_HANDLE_T *pHandle, SPIFI_INFO_ID_T infoId);
 /**
  * @brief	Returns the starting address of a block number
  * @param	pHandle		: Pointer to a LPCSPIFILIB device handle
- * @param	blockNum	: Block number fo get starting address for
+ * @param	blockNum	: Block number to get starting address for
  * @return	The starting address for the block, or 0xFFFFFFFF if the block number if invalid
  */
 uint32_t spifiGetAddrFromBlock(const SPIFI_HANDLE_T *pHandle, uint32_t blockNum);
@@ -347,7 +347,7 @@ uint32_t spifiGetAddrFromBlock(const SPIFI_HANDLE_T *pHandle, uint32_t blockNum)
 /**
  * @brief	Returns the starting address of a sub-block number
  * @param	pHandle		: Pointer to a LPCSPIFILIB device handle
- * @param	subBlockNum	: Sub-block number fo get starting address for
+ * @param	subBlockNum	: Sub-block number to get starting address for
  * @return	The starting address for the sub-block, or 0xFFFFFFFF if the block number if invalid
  */
 uint32_t spifiGetAddrFromSubBlock(const SPIFI_HANDLE_T *pHandle, uint32_t subBlockNum);

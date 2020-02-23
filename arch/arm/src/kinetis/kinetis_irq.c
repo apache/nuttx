@@ -164,7 +164,7 @@ static void kinetis_dumpnvic(const char *msg, int irq)
  *       kinetis_dbgmonitor, kinetis_pendsv, kinetis_reserved
  *
  * Description:
- *   Handlers for various execptions.  None are handled and all are fatal
+ *   Handlers for various exceptions.  None are handled and all are fatal
  *   error conditions.  The only advantage these provided over the default
  *   unexpected interrupt handler is that they provide a diagnostic output.
  *

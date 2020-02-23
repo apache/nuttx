@@ -518,7 +518,7 @@ void lc823450_dvfs_tick_callback(void)
       lc823450_dvfs_do_auto(idle);
     }
 
-  /* Update freqency statistics */
+  /* Update frequency statistics */
 
   g_dvfs_freq_stat[_dvfs_cur_idx]++;
 }

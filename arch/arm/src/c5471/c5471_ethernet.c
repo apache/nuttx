@@ -727,7 +727,7 @@ static int c5471_mdread (int adr, int reg)
  *   internal registers allowing host configuration and status access. These
  *   internal registers are accessible by clocking serial data in/out of the
  *   MDIO pin of the LU3X31T-T64 chip. For c547X, the MDC and the MDIO pins
- *   are connected to the C547x GPIO15 and GPIO14 pins respectivley. Host
+ *   are connected to the C547x GPIO15 and GPIO14 pins respectively. Host
  *   software twiddles the GPIO pins appropriately to get data serially into
  *   and out of the chip. This is typically a one time operation at boot and
  *   normal operation of the transeiver involves EIM/Transeiver interaction at
@@ -1599,7 +1599,7 @@ static void c5471_interrupt_work(FAR void *arg)
   if ((EIM_STATUS_CPU_RX & priv->c_eimstatus) != 0)
     {
       /* An outgoing packet has been processed by the EIM and the interrupt
-       * associated with EIM's CPU RX que has been asserted. It is the EIM's
+       * associated with EIM's CPU RX queue has been asserted. It is the EIM's
        * CPU RX queue that we put packets on to send them *out*. TWe use this
        * terminology to stay consistent with the Orion documentation.
        */

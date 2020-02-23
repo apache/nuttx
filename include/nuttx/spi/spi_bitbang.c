@@ -156,7 +156,7 @@ static uint32_t spi_setfrequency(FAR struct spi_bitbang_s *priv, uint32_t freque
   uint32_t pnsec;
 
   /* SPI frequency cannot be precisely controlled with a bit-bang interface.
-   * Freqency corresponds to delay in toggle the SPI clock line:  Set high,
+   * Frequency corresponds to delay in toggle the SPI clock line:  Set high,
    * wait, set low, wait, set high, wait, etc.
    *
    * Here we calcalute the half period of the frequency in nanoseconds (i.e.,

@@ -303,7 +303,7 @@ static FAR void *board_composite0_connect(int port)
 static FAR void *board_composite1_connect(int port)
 {
   /* REVISIT:  This configuration currently fails.  stm32_epallocpma() fails
-   * allocate a buffer for the 6th endpoint.  Currenlty it supports 7x64 byte
+   * allocate a buffer for the 6th endpoint.  Currently it supports 7x64 byte
    * buffers, two required for EP0, leaving only buffers for 5 additional
    * endpoints.
    */

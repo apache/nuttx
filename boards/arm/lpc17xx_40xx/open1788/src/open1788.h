@@ -65,7 +65,7 @@
  * LED3 -- Connected to P1[13]
  * LED4 -- Connected to P4[27]
  *
- * These LEDs are connecte to ground so a high output value will illuminate
+ * These LEDs are connected to ground so a high output value will illuminate
  * them.
  */
 

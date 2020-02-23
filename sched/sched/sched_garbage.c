@@ -182,7 +182,7 @@ static inline void nxsched_kcleanup(void)
  * Name: nxsched_have_kgarbage
  *
  * Description:
- *   Return TRUE if there is kernal heap garbage to be collected.
+ *   Return TRUE if there is kernel heap garbage to be collected.
  *
  * Input Parameters:
  *   None

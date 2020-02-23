@@ -47,7 +47,7 @@ import xmodem
 
 import_serial_module = True
 
-# When SDK release, plase set SDK_RELEASE as True.
+# When SDK release, please set SDK_RELEASE as True.
 SDK_RELEASE = False
 
 if SDK_RELEASE :
@@ -537,7 +537,7 @@ def main():
 
 	# Remove files
 	if ConfigArgs.ERASE_NAME :
-		print(">>> Remove exisiting files ...")
+		print(">>> Remove existing files ...")
 		writer.delete_files(ConfigArgs.ERASE_NAME)
 
 	# Install files

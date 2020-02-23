@@ -53,7 +53,7 @@
  * Pre-processor Macros
  ****************************************************************************/
 /* Align the stack to word (4 byte) boundaries.  This is probablya greater
- * alignement than is required.
+ * alignment than is required.
  */
 
 #define STACK_ALIGNMENT     4

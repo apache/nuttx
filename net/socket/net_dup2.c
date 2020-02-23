@@ -63,7 +63,7 @@
  *
  * Input Parameters:
  *   psock1 - The existing socket that is being cloned.
- *   psock2 - A reference to an uninitialized socket structure alloated by
+ *   psock2 - A reference to an uninitialized socket structure allocated by
  *            the caller.
  *
  * Returned Value:
@@ -156,7 +156,7 @@ int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2)
  * Name: net_dup2
  *
  * Description:
- *   Clone a socket descriptor to an arbitray descriptor number.  If file
+ *   Clone a socket descriptor to an arbitrary descriptor number.  If file
  *   descriptors are implemented, then this is called by dup2() for the case
  *   of socket file descriptors.  If file descriptors are not implemented,
  *   then this function IS dup2().

@@ -89,7 +89,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure descibes one DMA channel */
+/* This structure describes one DMA channel */
 
 struct stm32_dma_s
 {
@@ -545,7 +545,7 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
 
   DEBUGASSERT(handle != NULL);
 
-  /* Save the callback info.  This will be invoked whent the DMA commpletes */
+  /* Save the callback info.  This will be invoked whent the DMA completes */
 
   dmach->callback = callback;
   dmach->arg      = arg;

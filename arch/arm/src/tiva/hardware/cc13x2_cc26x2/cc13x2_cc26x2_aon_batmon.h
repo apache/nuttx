@@ -247,7 +247,7 @@
 #define AON_BATMON_TEMPUL_FRAC_MASK                     (3 << AON_BATMON_TEMPUL_FRAC_SHIFT)
 #  define AON_BATMON_TEMPUL_FRAC(n)                     ((uint32_t)(n) << AON_BATMON_TEMPUL_FRAC_SHIFT)
 #define AON_BATMON_TEMPUL_INT_SHIFT                     (8)       /* Bits 8-16:  Signed integer part
-                                                                   * of tempature upper limit */
+                                                                   * of temperature upper limit */
 #define AON_BATMON_TEMPUL_INT_MASK                      (0x1ff << AON_BATMON_TEMPUL_INT_SHIFT)
 #  define AON_BATMON_TEMPUL_INT(n)                      ((uint32_t)(n) << AON_BATMON_TEMPUL_INT_SHIFT)
 
@@ -258,7 +258,7 @@
 #define AON_BATMON_TEMPLL_FRAC_MASK                     (3 << AON_BATMON_TEMPLL_FRAC_SHIFT)
 #  define AON_BATMON_TEMPLL_FRAC(n)                     ((uint32_t)(n) << AON_BATMON_TEMPLL_FRAC_SHIFT)
 #define AON_BATMON_TEMPLL_INT_SHIFT                     (8)       /* Bits 8-16:  Signed integer part
-                                                                   * of tempature lower limit */
+                                                                   * of temperature lower limit */
 #define AON_BATMON_TEMPLL_INT_MASK                      (0x1ff << AON_BATMON_TEMPLL_INT_SHIFT)
 #  define AON_BATMON_TEMPLL_INT(n)                      ((uint32_t)(n) << AON_BATMON_TEMPLL_INT_SHIFT)
 

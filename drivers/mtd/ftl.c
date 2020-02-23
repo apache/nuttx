@@ -195,7 +195,7 @@ static int ftl_close(FAR struct inode *inode)
 /****************************************************************************
  * Name: ftl_reload
  *
- * Description:  Read the specified numer of sectors
+ * Description:  Read the specified number of sectors
  *
  ****************************************************************************/
 
@@ -220,7 +220,7 @@ static ssize_t ftl_reload(FAR void *priv, FAR uint8_t *buffer,
 /****************************************************************************
  * Name: ftl_read
  *
- * Description:  Read the specified numer of sectors
+ * Description:  Read the specified number of sectors
  *
  ****************************************************************************/
 
@@ -555,7 +555,7 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
     }
 #endif
 
-  /* No other block driver ioctl commmands are not recognized by this
+  /* No other block driver ioctl commands are not recognized by this
    * driver.  Other possible MTD driver ioctl commands are passed through
    * to the MTD driver (unchanged).
    */

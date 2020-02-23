@@ -392,7 +392,7 @@ struct scufifo_wm_s
 {
   int                    signo; /*< Signal number (0 - 31, except system reserved) */
 
-  /* Pointer to memomry to be timestamp stored */
+  /* Pointer to memory to be timestamp stored */
 
   FAR struct scutimestamp_s *ts;
 

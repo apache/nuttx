@@ -416,7 +416,7 @@
 
 /* I2S Clock Control */
 
-#define PRCM_I2SCLKCTL_EN                 (1 << 0)  /* Emable MCLK, BCLK, and WCLK */
+#define PRCM_I2SCLKCTL_EN                 (1 << 0)  /* Enable MCLK, BCLK, and WCLK */
 #define PRCM_I2SCLKCTL_WCLKPHASE_SHIFT    1         /* Bits 1-2: Wclock division ration mode */
 #define PRCM_I2SCLKCTL_WCLKPHASE_MASK     (3 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT)
 #  define PRCM_I2SCLKCTL_WCLKPHASE_SINGLE (0 << PRCM_I2SCLKCTL_WCLKPHASE_SHIFT) /* Single phase */

@@ -41,7 +41,7 @@ STM32F103C8T6 Minimum System Development Boards:
     Good things about the red board:
 
     - 1.5k pull up resistor on the PA12 pin (USB D+) which you can
-      programatically drag down for automated USB reset.
+      programmatically drag down for automated USB reset.
     - large power capacitors and LDO power.
     - User LED on PC13
 
@@ -768,7 +768,7 @@ Configurations
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
        CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART2 will be /dev/ttyS0
 
-       However, there is nothing to generate SYLOG output in the default
+       However, there is nothing to generate SYSLOG output in the default
        configuration so nothing should appear on UART2 unless you enable
        some debug output or enable the USB monitor.
 
@@ -776,7 +776,7 @@ Configurations
        device will save encoded trace output in in-memory buffer; if the
        USB monitor is enabled, that trace buffer will be periodically
        emptied and dumped to the system logging device (UART2 in this
-       configuraion):
+       configuration):
 
        CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
        CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory

@@ -195,7 +195,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 
   DEBUGASSERT(ogrp->tg_nchildren > 0);
 
-  ogrp->tg_nchildren--;  /* The orignal parent now has one few children */
+  ogrp->tg_nchildren--;  /* The original parent now has one few children */
   pgrp->tg_nchildren++;  /* The new parent has one additional child */
   ret = OK;
 
@@ -308,7 +308,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 
   DEBUGASSERT(otcb->group != NULL && otcb->group->tg_nchildren > 0);
 
-  otcb->group->tg_nchildren--;  /* The orignal parent now has one few children */
+  otcb->group->tg_nchildren--;  /* The original parent now has one few children */
   ptcb->group->tg_nchildren++;  /* The new parent has one additional child */
   ret = OK;
 

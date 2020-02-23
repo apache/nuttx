@@ -311,7 +311,7 @@ uint32_t up_pm_get_bootmask(void);
  *   Enable the boot cause of the specified bit.
  *
  * Parameter:
- *   mask - OR of Boot mask definied as PM_BOOT_XXX
+ *   mask - OR of Boot mask defined as PM_BOOT_XXX
  *
  * Return:
  *   Updated boot mask
@@ -327,7 +327,7 @@ uint32_t up_pm_set_bootmask(uint32_t mask);
  *   Disable the boot cause of the specified bit.
  *
  * Parameter:
- *   mask - OR of Boot mask definied as PM_BOOT_XXX
+ *   mask - OR of Boot mask defined as PM_BOOT_XXX
  *
  * Return:
  *   Updated boot mask

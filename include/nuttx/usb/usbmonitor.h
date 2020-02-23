@@ -67,7 +67,7 @@ extern "C"
 /****************************************************************************
  * Name: usbmonitor_start and usbmonitor_stop
  *
- *   Start and stop the USB monitor kernel deamon.
+ *   Start and stop the USB monitor kernel daemon.
  *
  * Input Parameters:
  *   None

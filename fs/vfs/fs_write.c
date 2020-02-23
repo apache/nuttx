@@ -204,7 +204,7 @@ ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes)
  *    buf is outside your accessible address space.
  *  EFBIG
  *    An attempt was made to write a file that exceeds the implementation
- *    defined maximum file size or the process' file size limit, or
+ *    defined maximum file size or the process's file size limit, or
  *    to write at a position past the maximum allowed offset.
  *  EINTR
  *    The call was interrupted by a signal before any data was written.

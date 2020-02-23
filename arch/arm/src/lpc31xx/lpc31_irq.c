@@ -101,7 +101,7 @@ void up_irqinitialize(void)
   putreg32(0, LPC31_INTC_VECTOR0);
   putreg32(0, LPC31_INTC_VECTOR1);
 
-  /* Set the priority treshold to 0, i.e. don't mask any interrupt on the
+  /* Set the priority threshold to 0, i.e. don't mask any interrupt on the
    * basis of priority level, for both targets (IRQ/FIQ)
    */
 
