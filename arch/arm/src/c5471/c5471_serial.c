@@ -792,6 +792,8 @@ static bool up_txempty(struct uart_dev_s *dev)
  * Public Funtions
  ****************************************************************************/
 
+#ifdef USE_EARLYSERIALINIT
+
 /****************************************************************************
  * Name: up_serialinit
  *
@@ -810,6 +812,7 @@ void up_earlyserialinit(void)
   CONSOLE_DEV.isconsole = true;
   up_setup(&CONSOLE_DEV);
 }
+#endif
 
 /****************************************************************************
  * Name: up_serialinit

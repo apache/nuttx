@@ -1250,8 +1250,10 @@ retry:
  * Public Functions
  ****************************************************************************/
 
+#ifdef USE_EARLYSERIALINIT
+
 /****************************************************************************
- * Name: up_serialinit
+ * Name: up_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in
@@ -1296,6 +1298,7 @@ void up_earlyserialinit(void)
   CONSOLE_DEV.isconsole = true;
   up_setup(&CONSOLE_DEV);
 }
+#endif
 
 /****************************************************************************
  * Name: up_serialinit

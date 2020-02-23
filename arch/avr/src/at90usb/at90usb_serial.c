@@ -513,6 +513,8 @@ static bool usart1_txempty(struct uart_dev_s *dev)
  * Public Functions
  ****************************************************************************/
 
+#ifdef USE_EARLYSERIALINIT
+
 /****************************************************************************
  * Name: up_earlyserialinit
  *
@@ -536,6 +538,7 @@ void up_earlyserialinit(void)
   usart1_setup(&g_usart1port);
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: up_serialinit
