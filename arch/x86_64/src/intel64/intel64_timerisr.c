@@ -84,44 +84,15 @@
  * Private Data
  ****************************************************************************/
 
-unsigned long tsc_freq;
+unsigned long x86_64_timer_freq;
 
-static unsigned long apic_tick_freq;
 static unsigned long tsc_overflow;
 static unsigned long tsc_last;
 static unsigned long tsc_overflows;
-static bool tsc_deadline;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Function:  tsc_init
- *
- * Description:
- *   calculate the TSC frequency from comm region
- *
- ****************************************************************************/
-
-unsigned long tsc_init(void)
-{
-	tsc_overflow = (0x100000000L * NS_PER_SEC) / tsc_freq;
-
-	return tsc_freq;
-}
-
-
-unsigned long tsc_read(void)
-{
-	unsigned long tmr;
-
-	tmr = ((rdtsc() & 0xffffffffLL) * NS_PER_SEC) / tsc_freq;
-	if (tmr < tsc_last)
-		tsc_overflows += tsc_overflow;
-	tsc_last = tmr;
-	return tmr + tsc_overflows;
-}
 
 /****************************************************************************
  * Function:  apic_timer_set
@@ -133,12 +104,13 @@ unsigned long tsc_read(void)
 
 void apic_timer_set(unsigned long timeout_ns)
 {
-	unsigned long long ticks =
-		(unsigned long long)timeout_ns * tsc_freq / NS_PER_SEC;
-	if (tsc_deadline)
-		write_msr(IA32_TSC_DEADLINE, rdtsc() + ticks);
-	else
-		write_msr(X2APIC_TMICT, ticks);
+  unsigned long long ticks =
+    (unsigned long long)timeout_ns * x86_64_timer_freq / NS_PER_SEC;
+#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
+    write_msr(IA32_TSC_DEADLINE, rdtsc() + ticks);
+#else
+    write_msr(X2APIC_TMICT, ticks);
+#endif
 }
 
 /****************************************************************************
@@ -153,8 +125,7 @@ void apic_timer_set(unsigned long timeout_ns)
 static int intel64_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
-
-  sched_process_timer();
+  nxsched_process_timer();
   apic_timer_set(CONFIG_USEC_PER_TICK * NS_PER_USEC);
   return 0;
 }
@@ -174,12 +145,20 @@ static int intel64_timerisr(int irq, uint32_t *regs, void *arg)
 
 void up_timer_initialize(void)
 {
-    unsigned long ecx;
-    uint32_t vector = IRQ0;
+  unsigned long ecx;
+  uint32_t vector = IRQ0;
 
-    (void)irq_attach(IRQ0, (xcpt_t)intel64_timerisr, NULL);
+  (void)irq_attach(IRQ0, (xcpt_t)intel64_timerisr, NULL);
 
-    apic_timer_set(NS_PER_MSEC);
+#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
+  vector |= LVTT_TSC_DEADLINE;
+#endif
 
-    return;
+  write_msr(X2APIC_LVTT, vector);
+
+  asm volatile("mfence" : : : "memory");
+
+  apic_timer_set(NS_PER_MSEC);
+
+  return;
 }

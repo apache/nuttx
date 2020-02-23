@@ -49,7 +49,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-extern unsigned long tsc_freq;
+extern unsigned long x86_64_timer_freq;
 
 /****************************************************************************
  * Name: x86_64_timer_initialize
@@ -78,17 +78,11 @@ extern unsigned long tsc_freq;
 
 void x86_64_timer_calibrate_freq(void)
 {
-  bool tsc_deadline;
-  unsigned long ecx;
 
-  asm volatile("cpuid" : "=c" (ecx) : "a" (1)
-      : "rbx", "rdx", "memory");
-  tsc_deadline = !!(ecx & (1 << 24));
+#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
+  x86_64_timer_freq = CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ * 1000L;
+#else
+  x86_64_timer_freq = CONFIG_ARCH_INTEL64_APIC_FREQ_KHZ * 1000L;
+#endif
 
-  if (tsc_deadline) {
-      tsc_freq = CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ * 1000L;
-  } else {
-      _alert("We only support tsc deadline");
-      PANIC();
-  }
 }
