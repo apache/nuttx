@@ -59,7 +59,7 @@
  ****************************************************************************/
 
 #define Z8_NOSTOP    (1 << 0)  /* Bit 0: No STOP on this transfer */
-#define Z8_NOSTART   (1 << 1)  /* Bit 1: No address or START on this tranfers */
+#define Z8_NOSTART   (1 << 1)  /* Bit 1: No address or START on this transfers */
 
 /****************************************************************************
  * Private Types

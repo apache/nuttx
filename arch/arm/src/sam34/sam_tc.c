@@ -176,7 +176,7 @@ static uint32_t sam34_getreg(uint32_t addr)
 
   uint32_t val = getreg32(addr);
 
-  /* Is this the same value that we read from the same registe last time?  Are
+  /* Is this the same value that we read from the same register last time?  Are
    * we polling the register?  If so, suppress some of the output.
    */
 
@@ -282,7 +282,7 @@ static int sam34_interrupt(int irq, FAR void *context, FAR void *arg)
 
           sam34_putreg(priv->clkticks, priv->base + SAM_TC_RC_OFFSET);
 
-          timeout = (1000000ULL * priv->clkticks) / TC_FCLK;    /* trucated timeout */
+          timeout = (1000000ULL * priv->clkticks) / TC_FCLK;    /* truncated timeout */
           priv->adjustment = (priv->adjustment + priv->timeout) - timeout;  /* truncated time to be added to next interval (dither) */
         }
       else
@@ -487,7 +487,7 @@ static int sam34_settimeout(FAR struct timer_lowerhalf_s *lower,
   timeout = (1000000ULL * priv->clkticks) / TC_FCLK;          /* Truncated timeout */
   priv->adjustment = priv->timeout - timeout;                 /* Truncated time to be added to next interval (dither) */
 
-  tmrinfo("fclk=%d clkticks=%d timout=%d, adjustment=%d\n",
+  tmrinfo("fclk=%d clkticks=%d timeout=%d, adjustment=%d\n",
           TC_FCLK, priv->clkticks, priv->timeout, priv->adjustment);
 
   return OK;

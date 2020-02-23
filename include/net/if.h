@@ -176,7 +176,7 @@ struct lifreq
 #define lifr_mii_val_in       lifr_ifru.lifru_mii_data.val_in  /* PHY input data */
 #define lifr_mii_val_out      lifr_ifru.lifru_mii_data.val_out /* PHY output data */
 
-/* Used only with the SIOCGLIFCONF IOCTL commnd */
+/* Used only with the SIOCGLIFCONF IOCTL command */
 
 struct lifconf
 {
@@ -226,7 +226,7 @@ struct ifreq
 #define ifr_mii_val_in        ifr_ifru.ifru_mii_data.val_in  /* PHY input data */
 #define ifr_mii_val_out       ifr_ifru.ifru_mii_data.val_out /* PHY output data */
 
-/* Used only with the SIOCGIFCONF IOCTL commnd*/
+/* Used only with the SIOCGIFCONF IOCTL command*/
 
 struct ifconf
 {

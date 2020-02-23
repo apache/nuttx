@@ -121,7 +121,7 @@ static int up_putcmap(FAR struct fb_vtable_s *vtable,
 static int up_getcursor(FAR struct fb_vtable_s *vtable,
                         FAR struct fb_cursorattrib_s *attrib);
 static int up_setcursor(FAR struct fb_vtable_s *vtable,
-                        FAR struct fb_setcursor_s *setttings);
+                        FAR struct fb_setcursor_s *settings);
 #endif
 
 /****************************************************************************
@@ -326,10 +326,10 @@ static int up_getcursor(FAR struct fb_vtable_s *vtable,
 
 #ifdef CONFIG_FB_HWCURSOR
 static int up_setcursor(FAR struct fb_vtable_s *vtable,
-                       FAR struct fb_setcursor_s *setttings)
+                       FAR struct fb_setcursor_s *settings)
 {
-  ginfo("vtable=%p setttings=%p\n", vtable, setttings);
-  if (vtable && setttings)
+  ginfo("vtable=%p settings=%p\n", vtable, settings);
+  if (vtable && settings)
     {
       ginfo("flags:   %02x\n", settings->flags);
       if ((flags & FB_CUR_SETPOSITION) != 0)

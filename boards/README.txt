@@ -913,7 +913,7 @@ tools/configure.sh
    tools/configure.sh <board>:<config-dir>
 
   There is an alternative Windows batch file that can be used in the
-  windows native enironment like:
+  windows native environment like:
 
     tools\configure.bat <board>:<config-dir>
 

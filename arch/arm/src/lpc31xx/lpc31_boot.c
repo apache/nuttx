@@ -285,7 +285,7 @@ static void up_copyvectorblock(void)
   uint32_t *dest;
 
   /* If we are using vectors in low memory but RAM in that area has been marked
-   * read only, then temparily mark the mapping write-able (non-buffered).
+   * read only, then temporarily mark the mapping write-able (non-buffered).
    */
 
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)

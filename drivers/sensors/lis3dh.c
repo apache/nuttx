@@ -286,7 +286,7 @@ static void lis3dh_queue_lock(FAR struct lis3dh_dev_s *dev)
  * Name: lis3dh_queue_unlock
  *
  * Description:
- *   Unlocks exclusive acccess to the ring buffer queue
+ *   Unlocks exclusive access to the ring buffer queue
  *
  * Input Parameters:
  *   dev - Pointer to device driver instance

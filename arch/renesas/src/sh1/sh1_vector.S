@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>	/* NuttX configuration settings */
 #include <arch/board/board.h>	/* Board-specific settings */
-#include <arch/irq.h>		/* IRQ definitons */
+#include <arch/irq.h>		/* IRQ definitions */
 
 #include "chip.h"		/* Chip-specific settings */
 #include "up_internal.h"
@@ -247,7 +247,7 @@ _up_cmi_handler:
  * Name: _up_vector
  *
  * Description:
- *   Execption entry point.  Upon entry:
+ *   Exception entry point.  Upon entry:
  *
  *  R4 :  Holds IRQ number
  *  SP -> Saved R4		(REG_R4=19)	See irq.h

@@ -116,7 +116,7 @@ int net_openroute_ipv6(int oflags, FAR struct file *filep);
  *
  * Returned Value:
  *   The number of bytes read on success.  The special return valud of zero
- *   indiates that the endof of file was encountered (and nothing was read).
+ *   indicates that the endof of file was encountered (and nothing was read).
  *   A negated errno value is returned on any failure.
  *
  ****************************************************************************/

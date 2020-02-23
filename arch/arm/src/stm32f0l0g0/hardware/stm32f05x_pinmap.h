@@ -55,7 +55,7 @@
  * _2, etc.  Drivers, however, will use the pin selection without the numeric
  * suffix.  Additional definitions are required in the board.h file.  For
  * example, if USART1_TX connects vis PA9 on some board, then the following
- * definition should appear inthe board.h header file for that board:
+ * definition should appear in the board.h header file for that board:
  *
  * #define GPIO_USART1_TX GPIO_USART1_TX_1
  *

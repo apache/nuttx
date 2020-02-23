@@ -69,7 +69,7 @@
 #define SAM_SLCDC_LMEMR_OFFSET(com) (0x200 + (com)*8 + 0x0)
 #define SAM_SLCDC_MMEMR_OFFSET(com) (0x200 + (com)*8 + 0x4)
 
-/* SLCDC register adresses ***********************************************************/
+/* SLCDC register addresses **********************************************************/
 
 #define SAM_SLCDC_CR               (SAM_SLCDC_BASE + SAM_SLCDC_CR_OFFSET)
 #define SAM_SLCDC_MR               (SAM_SLCDC_BASE + SAM_SLCDC_MR_OFFSET)

@@ -374,7 +374,7 @@ extern "C"
 
 #define CXD56_GNSS_IOCTL_AGPS_SET_FRAMETIME 32
 
-/* Set tau_GPS(&tau;GPS: Differnece of system time between GPS and Glonass
+/* Set tau_GPS(&tau;GPS: Difference of system time between GPS and Glonass
  * system).
  *
  * param[in] arg
@@ -792,7 +792,7 @@ struct cxd56_gnss_test_result_s
   float doppler; /* Doppler [Hz] */
 };
 
-/* signal setting for reading data asychronously
+/* signal setting for reading data asynchronously
  * The field 'enable' of struct #cxd56_gnss_signal_setting_s to be given as a
  * parameter must be specified as 1 when setting and 0 when unsetting.
  * Field 'gnsssig' specifies the value of 'Signal types from GNSS',
@@ -810,7 +810,7 @@ struct cxd56_gnss_signal_setting_s
   FAR void *data;    /* user data */
 };
 
-/* Information for use after being signaled to read data asychronously */
+/* Information for use after being signaled to read data asynchronously */
 
 struct cxd56_gnss_signal_info_s
 {

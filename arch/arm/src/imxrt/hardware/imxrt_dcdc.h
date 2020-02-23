@@ -141,7 +141,7 @@
 #define DCDC_REG3_TARGET_LP_MASK            (0x7 << DCDC_REG3_TARGET_LP_SHIFT)
 #  define DCDC_REG3_TARGET_LP_(n)           ((uint32_t)(n) << DCDC_REG3_TARGET_LP_SHIFT)
                                                       /* Bit 11-23: Reserved */
-#define DCDC_REG3_MINPWR_DC_HALFCLK         (1 << 24) /* Bit 24: Set DCDC clock to half freqeuncy for continuous mode */
+#define DCDC_REG3_MINPWR_DC_HALFCLK         (1 << 24) /* Bit 24: Set DCDC clock to half frequency for continuous mode */
                                                       /* Bit 25-26: Reserved */
 #define DCDC_REG3_MISC_DELAY_TIMING         (1 << 27) /* Bit 27: Adjust delay to reduce ground noise */
 #define DCDC_REG3_MISC_DISABLE_FET_LOGIC    (1 << 28) /* Bit 28: Datasheet: reserved? */

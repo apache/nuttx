@@ -538,7 +538,7 @@ static uint8_t slcd_getcontrast(void)
   uint32_t ucontrast;
   int32_t  scontrast;
 
-  /* Get the current contast value */
+  /* Get the current contrast value */
 
   regval    = getreg32(SAM_LCDCA_CFG);
   ucontrast = (regval & LCDCA_CFG_FCST_MASK) >> LCDCA_CFG_FCST_SHIFT;
@@ -588,7 +588,7 @@ static int slcd_setcontrast(unsigned int contrast)
 
   scontrast = (int)contrast - 32;
 
-  /* Set the new contast value */
+  /* Set the new contrast value */
 
   regval  = getreg32(SAM_LCDCA_CFG);
   regval &= ~LCDCA_CFG_FCST_MASK;
@@ -1152,7 +1152,7 @@ static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   if (setup)
     {
-      /* Data is always avaialble to be read / Data can always be written */
+      /* Data is always available to be read / Data can always be written */
 
       fds->revents |= (fds->events & (POLLIN | POLLOUT));
       if (fds->revents != 0)

@@ -1524,7 +1524,7 @@ typedef struct
   uint32_t  rxcgprqfrm; /* Number of received Probe requests that made it into
                * the PRQ fifo
                */
-  uint32_t  rxcgprsqovfl;   /* Rx Probe Request Que overflow in the AP */
+  uint32_t  rxcgprsqovfl;   /* Rx Probe Request Queue overflow in the AP */
   uint32_t  txcgprsfail;    /* Tx Probe Response Fail. AP sent probe response but did
                * not get ACK
                */
@@ -1768,7 +1768,7 @@ typedef struct
   uint32_t  rxcgprqfrm; /* Number of received Probe requests that made it into
                * the PRQ fifo
                */
-  uint32_t  rxcgprsqovfl;   /* Rx Probe Request Que overflow in the AP */
+  uint32_t  rxcgprsqovfl;   /* Rx Probe Request Queue overflow in the AP */
   uint32_t  txcgprsfail;    /* Tx Probe Response Fail. AP sent probe response but did
                * not get ACK
                */
@@ -2015,7 +2015,7 @@ typedef struct
   uint32_t  rxcgprqfrm; /* Number of received Probe requests that made it into
                * the PRQ fifo
                */
-  uint32_t  rxcgprsqovfl;   /* Rx Probe Request Que overflow in the AP */
+  uint32_t  rxcgprsqovfl;   /* Rx Probe Request Queue overflow in the AP */
   uint32_t  txcgprsfail;    /* Tx Probe Response Fail. AP sent probe response but did
                * not get ACK
                */

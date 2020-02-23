@@ -78,7 +78,7 @@
  *   - Reading graphics memory cannot be supported, and
  *   - All pixel writes must be aligned to byte boundaries.
  *
- *   The latter limitation effectively reduces the 128x96 disply to 64x96.
+ *   The latter limitation effectively reduces the 128x96 display to 64x96.
  *
  * Required LCD driver settings:
  * CONFIG_LCD_P14201 - Enable P14201 support
@@ -1142,7 +1142,7 @@ static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  *
  * Input Parameters:
  *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 throuh CONFIG_P14201_NINTERFACES-1.  This allows
+ *   devno - A value in the range of 0 through CONFIG_P14201_NINTERFACES-1.  This allows
  *   support for multiple OLED devices.
  *
  * Returned Value:

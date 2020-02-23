@@ -56,11 +56,11 @@
  *
  * Description:
  *   The task_setcancelstate() function atomically both sets the calling
- *   task's cancelability state to the indicated state and returns the
- *   previous cancelability state at the location referenced by oldstate.
+ *   task's cancellability state to the indicated state and returns the
+ *   previous cancellability state at the location referenced by oldstate.
  *   Legal values for state are TASK_CANCEL_ENABLE and TASK_CANCEL_DISABLE.
  *
- *   The cancelability state and type of any newly created tasks are
+ *   The cancellability state and type of any newly created tasks are
  *   TASK_CANCEL_ENABLE and TASK_CANCEL_DEFERRED respectively.
  *
  * Input Parameters:
@@ -85,7 +85,7 @@ int task_setcancelstate(int state, FAR int *oldstate)
 
   sched_lock();
 
-  /* Return the current state if so requrested */
+  /* Return the current state if so requested */
 
   if (oldstate != NULL)
     {

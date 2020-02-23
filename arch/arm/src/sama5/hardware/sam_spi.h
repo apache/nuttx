@@ -73,7 +73,7 @@
 #define SAM_SPI_WPSR_OFFSET       0x00e8 /* Write Protection Status Register */
                                          /* 0xec-0x124: Reserved */
 
-/* SPI register adresses ****************************************************************/
+/* SPI register addresses ***************************************************************/
 
 #define SAM_SPI0_CR               (SAM_SPI0_VBASE+SAM_SPI_CR_OFFSET)
 #define SAM_SPI0_MR               (SAM_SPI0_VBASE+SAM_SPI_MR_OFFSET)

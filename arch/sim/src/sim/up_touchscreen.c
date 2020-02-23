@@ -187,7 +187,7 @@ static void up_notify(FAR struct up_dev_s *priv)
   if (priv->nwaiters > 0)
     {
       /* After posting this semaphore, we need to exit because
-       * the touchscreen is no longer avaialable.
+       * the touchscreen is no longer available.
        */
 
       nxsem_post(&priv->waitsem);

@@ -100,7 +100,7 @@ Change Log:
 9. LPCXpresso XML projects added.
 10. M0 Library added.
 11. Sub-block erase fixed for devices with full capability.
-12. IAR libarary renamed to match Keil library
+12. IAR library renamed to match Keil library
 13. Moved project files into proj directory
 
 Known issues: (carried forward)

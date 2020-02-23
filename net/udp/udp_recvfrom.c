@@ -171,7 +171,7 @@ static size_t udp_recvfrom_newdata(FAR struct net_driver_s *dev,
  *   Copy the read data from the packet
  *
  * Input Parameters:
- *   dev      The sructure of the network driver that generated the event
+ *   dev      The structure of the network driver that generated the event
  *   pstate   recvfrom state structure
  *
  * Returned Value:

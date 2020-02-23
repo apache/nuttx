@@ -72,7 +72,7 @@
 #  define PIC32MZ_CP0_VIEWIPL    $12,4  /* Priority level access */
 #  define PIC32MZ_CP0_SRSMAP2    $12,5  /* Vector number to shadow set mapping */
 #  define PIC32MZ_CP0_CAUSE      $13,0  /* Cause of last general exception */
-#  define PIC32MZ_CP0_VIEWRIPL   $13,4  /* RIPL accesss */
+#  define PIC32MZ_CP0_VIEWRIPL   $13,4  /* RIPL access */
 #  define PIC32MZ_CP0_NESTEDEXC  $13,5  /* Prior error and exception level */
 #  define PIC32MZ_CP0_EPC        $14,0  /* Program counter at last exception */
 #  define PIC32MZ_CP0_NESTEDEPC  $14,2  /* Prior EPC */

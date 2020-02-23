@@ -59,7 +59,7 @@
 
 /* Configuration ************************************************************/
 
-/* The pin configurations here requires that SPI1 is avaialable */
+/* The pin configurations here requires that SPI1 is available */
 
 /* SPI should be configured with CMD/DATA support (and no transfer methods) */
 

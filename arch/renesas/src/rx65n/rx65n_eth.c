@@ -245,7 +245,7 @@
 
 /* Define the access timing of MII/RMII register */
 
-#define ETHER_CFG_PHY_MII_WAIT                      (8)     /* Plese define the value of 1 or more */
+#define ETHER_CFG_PHY_MII_WAIT                      (8)     /* Please define the value of 1 or more */
 
 /* Define the waiting time for reset completion of PHY-LSI */
 
@@ -962,7 +962,7 @@ static int rx65n_transmit(FAR struct rx65n_ethmac_s *priv)
 
               txdesc->tdes0 |= (TFP0 | TWBI);
 
-              /* This segement is, most likely, of fractional buffersize */
+              /* This segment is, most likely, of fractional buffersize */
 
               txdesc->tdes1  = (lastsize << 16);
               buffer        += lastsize;
@@ -1492,7 +1492,7 @@ static int rx65n_recvframe(FAR struct rx65n_ethmac_s *priv)
   (priv->dev.d_statistics.rx_packets)++;
 #endif
 
-              /* Return success, remebering where we should re-start scanning
+              /* Return success, remembering where we should re-start scanning
                * and resetting the segment scanning logic
                */
 
@@ -1789,7 +1789,7 @@ static void rx65n_freeframe(FAR struct rx65n_ethmac_s *priv)
 
           txdesc->tdes2 = 0;
 
-          /* Check if this is the last segement of a TX frame */
+          /* Check if this is the last segment of a TX frame */
 
           if ((txdesc->tdes0 & TFP0) != 0)
             {
@@ -2452,7 +2452,7 @@ static int rx65n_txavail(struct net_driver_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-/* Currently Not supportted, Need to update this code when support added */
+/* Currently Not supported, Need to update this code when support added */
 
 static uint32_t rx65n_calcethcrc(const uint8_t *data, size_t length)
 {
@@ -2512,7 +2512,7 @@ static int rx65n_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  *
  ****************************************************************************/
 
-/* Currently Not supportted, Need to update this code when support added */
+/* Currently Not supported, Need to update this code when support added */
 
 #ifdef CONFIG_NET_MCASTGROUP
 static int rx65n_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
@@ -2598,7 +2598,7 @@ static void rx65n_txdescinit(FAR struct rx65n_ethmac_s *priv)
         }
     }
 
-  /* Set Transmit Desciptor List Address Register */
+  /* Set Transmit Descriptor List Address Register */
 
   rx65n_putreg((uint32_t)priv->txtable, RX65N_ETHD_TDLAR);
 }
@@ -4024,7 +4024,7 @@ static void rx65n_macaddress(FAR struct rx65n_ethmac_s *priv)
  *
  ****************************************************************************/
 
-/* Currently Not supportted, Need to update this code when support added */
+/* Currently Not supported, Need to update this code when support added */
 
 #ifdef CONFIG_NET_ICMPv6
 static void rx65n_ipv6multicast(FAR struct rx65n_ethmac_s *priv)

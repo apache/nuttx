@@ -851,7 +851,7 @@ menuconfig NET_CDCECM
 		References:
 		- "Universal Serial Bus - Communications Class - Subclass
 		   Specification for Ethernet Control Model Devices,
-		   Revision 1.2, Feburary 9, 2007"
+		   Revision 1.2, February 9, 2007"
 
 		This option may require CONFIG_NETDEV_LATEINIT=y, otherwise the
 		power-up initialization may call the non-existent up_netinitialize().

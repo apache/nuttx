@@ -107,7 +107,7 @@
  */
 
 /****************************************************************************
- * Pre-processor Defintions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* MACROS TO HANDLE ABI SPECIFICS OF FUNCTION ENTRY AND RETURN

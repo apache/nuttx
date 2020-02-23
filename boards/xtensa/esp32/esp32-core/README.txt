@@ -748,7 +748,7 @@ Things to Do
        CONFIG_SUPPRESS_UART_CONFIG=y
 
      I have not debugged this in detail, but this appears to be an issue with the
-     impelentation of esp32_configgpio() and/or gpio_matrix_out() when called from
+     implementation of esp32_configgpio() and/or gpio_matrix_out() when called from
      the setup logic in arch/xtensa/src/esp32/esp32_serial.c.  I am not inclined
      to invest a lot in driver debug until the clock configuration is finalized.
 

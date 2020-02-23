@@ -346,7 +346,7 @@
 #define SDIO_CCCR_INTPEND                0x05 /* Int Pending               */
 #define SDIO_CCCR_IOABORT                0x06 /* I/O Abort                 */
 #define SDIO_CCCR_BUS_IF                 0x07 /* Bus Interface Control     */
-#define SDIO_CCCR_CARD_CAP               0x08 /* Card Capabilitiy          */
+#define SDIO_CCCR_CARD_CAP               0x08 /* Card Capability          */
 #define SDIO_CCCR_CCP                    0x09 /* Common CIS Pointer        */
 #define SDIO_CCCR_BUS_SUSP               0x0C /* Bus Suspend               */
 #define SDIO_CCCR_FUNCSEL                0x0D /* Function Select           */

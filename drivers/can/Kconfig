@@ -56,7 +56,7 @@ config CAN_TXREADY
 	default n
 	---help---
 		This selection enables the can_txready() interface.  This interface
-		is needed only for CAN hardware that supports queing of outgoing
+		is needed only for CAN hardware that supports queueing of outgoing
 		messages in a H/W FIFO.
 
 		The CAN upper half driver also supports a queue of output messages

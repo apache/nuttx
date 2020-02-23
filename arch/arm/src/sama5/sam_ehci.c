@@ -1437,7 +1437,7 @@ static int sam_ioc_wait(struct sam_epinfo_s *epinfo)
  * Name: sam_qh_enqueue
  *
  * Description:
- *   Add a new, ready-to-go QH w/attached qTDs to the asynchonous queue.
+ *   Add a new, ready-to-go QH w/attached qTDs to the asynchronous queue.
  *
  * Assumptions:  The caller holds the EHCI exclsem
  *
@@ -2104,7 +2104,7 @@ static int sam_async_setup(struct sam_rhport_s *rhport,
       physaddr = sam_physramaddr((uintptr_t)qtd);
       *flink = sam_swap32(physaddr);
 
-      /* In an IN data qTD was also enqueued, then linke the data qTD's
+      /* In an IN data qTD was also enqueued, then linked the data qTD's
        * alternate pointer to this STATUS phase qTD in order to handle short
        * transfers.
        */
@@ -3054,7 +3054,7 @@ static void sam_ehci_bottomhalf(FAR void *arg)
    *   underflow). If the TD on which the error interrupt occurred also
    *   had its IOC bit set, both this bit and USBINT bit are set. ..."
    *
-   * We do the same thing in either case:  Traverse the asynchonous queue
+   * We do the same thing in either case:  Traverse the asynchronous queue
    * and remove all of the transfers that are no longer active.
    */
 

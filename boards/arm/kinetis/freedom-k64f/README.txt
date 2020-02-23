@@ -2,7 +2,7 @@ README.txt
 ==========
 
 This is the README file for the port of NuttX to the Freescale Freedom-K64F
-develoment board.
+development board.
 
 Contents
 ========
@@ -71,7 +71,7 @@ Serial Console
   ---------------------
   An alternative serial port might use a standard serial shield mounted
   on the Freedom Board.  In this case, Arduino pin D1 provides UART TX and
-  pin D0 privides UART RX.
+  pin D0 provides UART RX.
 
   The I/O headers on the FRDM-K64F board are arranged to enable
   compatibility with Arduino shield. The outer rows of pins (even numbered
@@ -564,7 +564,7 @@ USB Device Controller Support
 
     Device Drivers -> USB Device Driver Support
       CONFIG_CDCACM=y                           : USB Modem (CDC ACM) support
-      CONFIG_CDCACM_EP0MAXPACKET=64             : Enpoint 0 packet size
+      CONFIG_CDCACM_EP0MAXPACKET=64             : Endpoint 0 packet size
       CONFIG_CDCACM_EPINTIN=1                   : Interrupt IN endpoint number
       CONFIG_CDCACM_EPINTIN_FSSIZE=64           : Full speed packet size
       CONFIG_CDCACM_EPINTIN_HSSIZE=64           : High speed packet size

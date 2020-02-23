@@ -140,7 +140,7 @@ static void spifiPrvDevGetID(uint32_t spifiAddr, SPIFI_DEVICE_ID_T *pID)
 	/* Get info from the device */
 	pID->mfgId[0] = spifi_HW_GetData8(pSpifiCtrlAddr);	/* Manufacturers ID */
 	pID->mfgId[1] = spifi_HW_GetData8(pSpifiCtrlAddr);	/* Memory Type */
-	pID->mfgId[2] = spifi_HW_GetData8(pSpifiCtrlAddr);	/* Memmory Capacity */
+	pID->mfgId[2] = spifi_HW_GetData8(pSpifiCtrlAddr);	/* Memory Capacity */
 
 	/* Read the specified number of extended bytes */
 	for (idx = 0; idx < pID->extCount; ++idx) {
@@ -758,7 +758,7 @@ uint32_t spifiGetSubBlockFromAddr(const SPIFI_HANDLE_T *pHandle, uint32_t addr)
 	return subBlock;
 }
 
-/* Returns the first sub-block in hte passed block */
+/* Returns the first sub-block in the passed block */
 uint32_t spifiGetSubBlockFromBlock(const SPIFI_HANDLE_T *pHandle, uint32_t blockNum)
 {
 	uint32_t subBlock = ~0UL;

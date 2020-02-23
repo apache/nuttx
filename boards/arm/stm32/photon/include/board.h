@@ -283,7 +283,7 @@
 #  define SDIO_SDXFR_CLKDIV     (2 << SDIO_CLKCR_CLKDIV_SHIFT)
 #endif
 
-/* DMA Channl/Stream Selections *****************************************************/
+/* DMA Channel/Stream Selections *****************************************************/
 /* Stream selections are arbitrary for now but might become important in the future
  * if we set aside more DMA channels/streams.
  *

@@ -173,7 +173,7 @@
 
 /* If the pin is a GPIO digital output, then this identifies the initial output value.
  * If the pin is an input, this bit is overloaded to provide the qualifier to
- * distinquish input pull-up and -down:
+ * distinguish input pull-up and -down:
  *
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210

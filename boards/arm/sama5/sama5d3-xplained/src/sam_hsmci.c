@@ -97,7 +97,7 @@
 struct sam_hsmci_state_s
 {
   struct sdio_dev_s *hsmci;   /* R/W device handle */
-  pio_pinset_t pincfg;        /* Card detect PIO pin configuratin */
+  pio_pinset_t pincfg;        /* Card detect PIO pin configuration */
   uint8_t irq;                /* Interrupt number (same as pid) */
   uint8_t slotno;             /* Slot number */
   bool cd;                    /* TRUE: card is inserted */

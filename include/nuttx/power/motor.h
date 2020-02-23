@@ -272,7 +272,7 @@ struct motor_ops_s
 
   CODE int (*mode_set)(FAR struct motor_dev_s *dev, uint8_t mode);
 
-  /* Set motor limts */
+  /* Set motor limits */
 
   CODE int (*limits_set)(FAR struct motor_dev_s *dev,
                          FAR struct motor_limits_s *limits);

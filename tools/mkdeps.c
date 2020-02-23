@@ -267,7 +267,7 @@ static void show_usage(const char *progname, const char *msg, int exitcode)
   fprintf(stderr, "    <path>.  if provided multiple time, only the last --obj-path will be used.\n");
   fprintf(stderr, "  --obj-suffix <suffix>\n");
   fprintf(stderr, "    If and object path is provided, then the extension will be assumed to be .o.  This\n");
-  fprintf(stderr, "    default suffix can be overrided with this command line option.\n");
+  fprintf(stderr, "    default suffix can be overriden with this command line option.\n");
   fprintf(stderr, "  --winnative\n");
   fprintf(stderr, "    By default, a POSIX-style environment is assumed (e.g., Linux, Cygwin, etc.)  This option is\n");
   fprintf(stderr, "    inform the tool that is working in a pure Windows native environment.\n");

@@ -69,7 +69,7 @@
 #  define GPIO_OUTPUT          (1 << GPIO_MODE_SHIFT) /* GPIO output */
 #  define GPIO_PERIPH          (2 << GPIO_MODE_SHIFT) /* Peripheral */
 
-/* Initial Ouptut Value:
+/* Initial Output Value:
  *
  *   GPIO OUTPUT 01V. .... .... ....  .... .... .... ....
  */

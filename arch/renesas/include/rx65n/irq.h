@@ -603,7 +603,7 @@
 
 /* Saved to the stacked by up_vector */
 
-/* Vector table offets **************************************************************/
+/* Vector table offsets *************************************************************/
 
 /* Trap instruction */
 

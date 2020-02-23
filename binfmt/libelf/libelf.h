@@ -136,7 +136,7 @@ int elf_findsymtab(FAR struct elf_loadinfo_s *loadinfo);
  * Name: elf_readsym
  *
  * Description:
- *   Read the ELF symbol structure at the specfied index into memory.
+ *   Read the ELF symbol structure at the specified index into memory.
  *
  * Input Parameters:
  *   loadinfo - Load state information

@@ -108,7 +108,7 @@
 
 #define LCD_GCR_DUTYSHIFT            (0)       /* Bits 0-2: LCD duty select */
 #define LCD_GCR_DUTY_MASK            (7 << LCD_GCR_DUTYSHIFT)
-#  define LCD_GCR_DUTY_BP(n)         (((n)-1) << LCD_GCR_DUTYSHIFT) /* Use n BP (1/n duty cyle) */
+#  define LCD_GCR_DUTY_BP(n)         (((n)-1) << LCD_GCR_DUTYSHIFT) /* Use n BP (1/n duty cycle) */
 #define LCD_GCR_LCLK_SHIFT           (3)       /* Bits 3-5: LCD clock prescaler */
 #define LCD_GCR_LCLK_MASK            (7 << LCD_GCR_LCLK_SHIFT)
 #define LCD_GCR_SOURCE               (1 << 6)  /* Bit 6:  LCD clock source select */

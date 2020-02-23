@@ -27,7 +27,7 @@ nuttx/:
  (12)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
-  (3)  Linux/Cywgin simulation (arch/sim)
+  (3)  Linux/Cygwin simulation (arch/sim)
   (5)  ARM (arch/arm/)
 
 apps/ and other Add-Ons:
@@ -473,7 +473,7 @@ o Task/Scheduler (sched/)
                2. Then when either the ELF program task or the created task
                   in the same address environment exits, it would decrement
                   the reference count.  When the last task exits, the reference
-                  count would go to zero and the address environement could be
+                  count would go to zero and the address environment could be
                   destroyed.
 
                This is complex work and would take some effort and probably
@@ -571,7 +571,7 @@ o SMP
                The returned CPU number is then used for various things,
                typically as an array index.  However, if pre-emption is
                not disabled,then it is possible that a context switch
-               could occur and that logic could run on anothe CPU with
+               could occur and that logic could run on another CPU with
                possible fatal consequences.
 
                We need to evaluate all use of this_cpu() and assure that
@@ -579,7 +579,7 @@ o SMP
                to execute on the same CPU.
 
   Status:      Open
-  Prioity:     Medium.  This is a logical problem but I have nevers seen
+  Prioity:     Medium.  This is a logical problem but I have never seen
                an bugs caused by this.  But I believe that failures are
                possible.
 
@@ -640,7 +640,7 @@ o SMP
                That is really not as much work as it sounds.  It is
                something that could be done in 2-3 days of work if you know
                what you are doing.  Getting the proper test setup and
-               verifying the cahnge would be the more difficult task.
+               verifying the change would be the more difficult task.
 
 Status:        Open
 Priority:      Unknown.  Might be high, but first we would need to confirm
@@ -791,7 +791,7 @@ o Signals (sched/signal, arch/)
   Priority:    Low. Even if there are only 31 usable signals, that is still a lot.
 
   Title:       NO QUEUING of SIGNAL ACTIONS
-  Description: In the architecture specific implemenation of struct xcptcontext,
+  Description: In the architecture specific implementation of struct xcptcontext,
                there are fields used by signal handling logic to pass the state
                information needed to dispatch signal actions to the appropriate
                handler.
@@ -807,7 +807,7 @@ o Signals (sched/signal, arch/)
                very low.
 
   Title:       QUEUED SIGNAL ACTIONS ARE INAPPROPRIATELY DEFERRED
-  Descirption: The implement of nxsig_deliver() does the followin in a loop:
+  Description: The implement of nxsig_deliver() does the following in a loop:
                - It takes the next next queued signal action from a list
                - Calls the architecture-specific up_sigdeliver() to perform
                  the signal action (through some sleight of hand in
@@ -819,7 +819,7 @@ o Signals (sched/signal, arch/)
                  uninterrupted thread instead of returning to nxsig_deliver().
 
                The loop in nxsig_deliver() then will have the opportunity to
-               run until when that normal, uniterrupted thread is suspended.
+               run until when that normal, uninterrupted thread is suspended.
                Then the loop will continue with the next queued signal
                action.
 
@@ -2471,7 +2471,7 @@ o Graphics Subsystem (graphics/)
                incomplete.  In fact, many recent changes explicitly assume a
                single color plane:  Planar colors are specified by a array
                of components; some recent logic uses only component [0],
-               ignoring the possible existence of other color componet frames.
+               ignoring the possible existence of other color component frames.
 
                Completely removing planar color support is one reasonable
                options; it is not likely that NuttX will encounter planar
@@ -2528,7 +2528,7 @@ o Other drivers (drivers/)
   Priority:    Low, provided that the application can handle these characters
                in the data stream.
 
-o Linux/Cywgin simulation (arch/sim)
+o Linux/Cygwin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       SIMULATOR HAS NO INTERRUPTS (NON-PREMPTIBLE)
@@ -2709,7 +2709,7 @@ o ARM (arch/arm/)
   Title:       USE COMMON VECTOR LOGIC IN ALL ARM ARCHITECTURES.
   Description: Originally, each ARMv7-M MCU architecture had its own
                private implementation for interrupt vectors and interrupt
-               handling logic.  This was superceded by common interrupt
+               handling logic.  This was superseded by common interrupt
                vector logic but these private implementations were never
                removed from older MCU architectures.  This is turning into
                a maintenance issue because any improvements to the common
@@ -2784,7 +2784,7 @@ o Other Applications & Tests (apps/examples/)
 
   Title:       EXAMPLES/PIPE ON CYGWIN
   Description: The redirection test (part of examples/pipe) terminates
-               incorrectly on the Cywgin-based simulation platform (but works
+               incorrectly on the Cygwin-based simulation platform (but works
                fine on the Linux-based simulation platform).
   Status:      Open
   Priority:    Low

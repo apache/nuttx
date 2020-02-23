@@ -366,7 +366,7 @@
 #define CAN_BTR_SJW_MASK                (3 << CAN_BTR_SJW_SHIFT)
 #define CAN_BTR_TSEG1_SHIFT             (16)      /* Bits 16-19: Sync to sample delay */
 #define CAN_BTR_TSEG1_MASK              (15 << CAN_BTR_TSEG1_SHIFT)
-#define CAN_BTR_TSEG2_SHIFT             (20)      /* Bits 20-22: smaple to next delay */
+#define CAN_BTR_TSEG2_SHIFT             (20)      /* Bits 20-22: sample to next delay */
 #define CAN_BTR_TSEG2_MASK              (7 << CAN_BTR_TSEG2_SHIFT)
 #define CAN_BTR_SAM                     (1 << 23) /* Bit 23: Sampling */
                                                   /* Bits 24-31: Reserved */

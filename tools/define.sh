@@ -97,7 +97,7 @@ fi
 
 #
 # Most compilers support CFLAG options like '-D<defn>' to add pre-processor
-# variable defintions.  Some (like the Zilog tools), do not.  This script
+# variable definitions.  Some (like the Zilog tools), do not.  This script
 # makes the selection of pre-processor definitions compiler independent.
 #
 # Below are all known compiler names (as found in the config/*/*/Make.defs

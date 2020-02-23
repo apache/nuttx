@@ -1028,7 +1028,7 @@ static void sdadc_shutdown(FAR struct adc_dev_s *dev)
 
   sdadc_enable(priv, false);
 
-  /* Disable intrerrupt / dma  */
+  /* Disable interrupt / dma  */
 
   sdadc_rxint(dev, false);
 

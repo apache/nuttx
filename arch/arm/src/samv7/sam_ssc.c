@@ -2209,7 +2209,7 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.pend);
   ssc_dump_rxqueues(priv, "Receiving");
 
-  /* Then start the next transfer.  If there is already a transfer in progess,
+  /* Then start the next transfer.  If there is already a transfer in progress,
    * then this will do nothing.
    */
 
@@ -2303,7 +2303,7 @@ static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
       return 0;
     }
 
-  /* Upate the DMA flags */
+  /* Update the DMA flags */
 
   ret = ssc_dma_flags(priv, &dmaflags);
   if (ret < 0)
@@ -2426,7 +2426,7 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.pend);
   ssc_dump_txqueues(priv, "Transmitting");
 
-  /* Then start the next transfer.  If there is already a transfer in progess,
+  /* Then start the next transfer.  If there is already a transfer in progress,
    * then this will do nothing.
    */
 
@@ -2542,7 +2542,7 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
   /* RFMR settings. Some of these settings will need to be configurable as well.
    * Currently hardcoded to:
    *
-   *  SSC_RFMR_DATLEN(n)    'n' deterimined by configuration
+   *  SSC_RFMR_DATLEN(n)    'n' determined by configuration
    *  SSC_RFMR_LOOP         Determined by configuration
    *  SSC_RFMR_MSBF         Most significant bit first
    *  SSC_RFMR_DATNB(n)     Data number 'n' per frame (hard-coded)

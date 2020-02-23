@@ -1117,7 +1117,7 @@ Configurations
        Binary Formats:
          CONFIG_BUILTIN=y                    : Enable support for built-in programs
 
-       Applicaton Configuration:
+       Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
 
     4. This configuration has the network enabled by default.  This can be
@@ -1345,7 +1345,7 @@ Configurations
              CONFIG_SYSLOG_CHAR=y          : Use a character device for system logging
              CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART0 will be /dev/ttyS0
 
-       However, there is nothing to generate SYLOG output in the default
+       However, there is nothing to generate SYSLOG output in the default
        configuration so nothing should appear on UART0 unless you enable
        some debug output or enable the USB monitor.
 

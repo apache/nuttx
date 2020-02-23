@@ -544,7 +544,7 @@
 
 #define TXSTAT_INFO_COLCNT_SHIFT        (21)      /* Bits 21-24: Number of collisions */
 #define TXSTAT_INFO_COLCNT_MASK         (15 << TXSTAT_INFO_COLCNT_SHIFT)
-#define TXSTAT_INFO_DEFER               (1 << 25) /* Bit 25: Packet deffered */
+#define TXSTAT_INFO_DEFER               (1 << 25) /* Bit 25: Packet deferred */
 #define TXSTAT_INFO_EXCESSDEFER         (1 << 26) /* Bit 26: Excessive packet defferals */
 #define TXSTAT_INFO_EXCESSCOL           (1 << 27) /* Bit 27: Excessive packet collisions */
 #define TXSTAT_INFO_LATECOL             (1 << 28) /* Bit 28: Out of window collision */

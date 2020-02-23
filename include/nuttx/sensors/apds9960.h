@@ -176,7 +176,7 @@
 #define CPSIEN                 (1 << 6) /* Bit 6: Clear diode Saturation Interrupt Enable */
 #define PSIEN                  (1 << 7) /* Bit 7: Proximity Saturation Interrupt Enable */
 
-/* STATUS Regiser */
+/* STATUS Register */
 
 #define AVALID                 (1 << 0) /* Bit 0: ALS Valid */
 #define PVALID                 (1 << 1) /* Bit 1: Proximity Valid */

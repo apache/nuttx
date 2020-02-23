@@ -89,7 +89,7 @@
 #define TIVA_I2C0_MICR                          (TIVA_I2C0_BASE + TIVA_I2C_MICR_OFFSET)
 #define TIVA_I2C0_MCR                           (TIVA_I2C0_BASE + TIVA_I2C_MCR_OFFSET)
 
-/* I2C bitfield defintions ******************************************************************/
+/* I2C bitfield definitions *****************************************************************/
 
 /* Slave Own Address */
 
@@ -160,7 +160,7 @@
 
 #define I2C_MCTRL_RUN                           (1 << 0)  /* Bit 0:  Enable master transfer */
 #define I2C_MCTRL_START                         (1 << 1)  /* Bit 1:  Generate [repeated] START */
-#define I2C_MCTRL_STOP                          (1 << 2)  /* Bit 2:  STOP at end of data cyle */
+#define I2C_MCTRL_STOP                          (1 << 2)  /* Bit 2:  STOP at end of data cycle */
 #define I2C_MCTRL_ACK                           (1 << 3)  /* Bit 3:  Data acknowledge enable */
 
 /* Master Data */

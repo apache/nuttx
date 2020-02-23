@@ -1443,7 +1443,7 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
  *   that performs DMA SPI transfers, but only when a larger block of
  *   data is being transferred.  And (2) another version that does polled
  *   SPI transfers.  When CONFIG_SAMV7_SPI_DMA=n the latter is the only
- *   version avaialable; when CONFIG_SAMV7_SPI_DMA=y, this version is only
+ *   version available; when CONFIG_SAMV7_SPI_DMA=y, this version is only
  *   used for short SPI transfers and gets renamed as spi_exchange_nodma).
  *
  * Input Parameters:

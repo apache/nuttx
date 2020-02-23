@@ -323,7 +323,7 @@ int lpc54_gpio_irqno(lpc54_pinset_t pinset)
  * Description:
  *   Acknowledge edge interrupts by clearing the associated bits in the rising and
  *   falling registers.  This acknowledgemment is, of course, not needed for level
- *   interupts.
+ *   interrupts.
  *
  ************************************************************************************/
 

@@ -73,7 +73,7 @@ Modules
     ----------------- ---------------------- ---------------------- ------------------------------------
     2  GND            2       GND            2  GND
     ----------------- ---------------------- ---------------------- ------------------------------------
-    3  LIGHTSENSOR    3  PB05 AIN[13]        3  PA10 AIN[18]
+    3  LIGHT_SENSOR   3  PB05 AIN[13]        3  PA10 AIN[18]
     ----------------- ---------------------- ---------------------- ------------------------------------
     4  LP_OUT         4  PA03 AIN[1]         4  PA11 AIN[19]
     ----------------- ---------------------- ---------------------- ------------------------------------
@@ -266,7 +266,7 @@ GNU Toolchain Options
 
     CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
     CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windos
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windows
     CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
     CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
     CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
@@ -692,7 +692,7 @@ Configurations
 
      Build Setup:
        CONFIG_HOST_WINDOWS=y   : Windows Host
-       CONFIG_WINDOWS_CYGWIN=y : Cygwin environment on windoes
+       CONFIG_WINDOWS_CYGWIN=y : Cygwin environment on windows
 
   4. These configurations use the CodeSourcery toolchain.  But
      that is easily reconfigured:

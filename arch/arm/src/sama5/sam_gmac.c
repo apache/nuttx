@@ -534,7 +534,7 @@ static uint16_t sam_txfree(struct sam_gmac_s *priv)
  *
  * Description:
  *   Allocate aligned TX and RX descriptors and buffers.  For the case of
- *   pre-allocated structures, the function degenerates to a few assignements.
+ *   pre-allocated structures, the function degenerates to a few assignments.
  *
  * Input Parameters:
  *   priv - The GMAC driver state
@@ -708,7 +708,7 @@ static int sam_transmit(struct sam_gmac_s *priv)
       return -EBUSY;
     }
 
-  /* Setup/Copy data to transmition buffer */
+  /* Setup/Copy data to transmission buffer */
 
   if (dev->d_len > 0)
     {
@@ -2979,7 +2979,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 
   ninfo(" MCR: 0x%X\n", phyval);
 
-  /* Wait for autonegotion to complete */
+  /* Wait for autonegotiation to complete */
 
   timeout = 0;
   for (; ; )

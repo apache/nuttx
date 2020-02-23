@@ -119,7 +119,7 @@ Configurations
   mrf24j40-mac:
   ------------
     This configuration set the proper configuration to set the 802.15.4
-    communication layer with the MRF24J40 radio. This radio works wit
+    communication layer with the MRF24J40 radio. This radio works with
     SPI, you need to do the next connections:
 
     MRF24J40 VCC  -> Board 3.3V

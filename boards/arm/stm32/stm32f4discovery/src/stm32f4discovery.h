@@ -195,7 +195,7 @@
 #  endif
 #endif
 
-/* Check if we have the prequisites for an HCI UART */
+/* Check if we have the prerequisites for an HCI UART */
 
 #if !defined(CONFIG_STM32_HCIUART) || !defined(CONFIG_BLUETOOTH_UART)
 #  undef HAVE_HCIUART

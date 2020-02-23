@@ -157,7 +157,7 @@ void nxbe_cursor_backupdraw(FAR struct nxbe_window_s *wnd,
  *   be    - The back-end state structure instance, or
  *   wnd   - Window state structure
  *   rect  - The modified region of the window.  In windows coordinates for
- *           nxbe_cursor_backupdraw(); in graphics device corrdinates for
+ *           nxbe_cursor_backupdraw(); in graphics device coordinates for
  *           nxbe_cursor_backupdraw_dev().
  *
  * Returned Value:

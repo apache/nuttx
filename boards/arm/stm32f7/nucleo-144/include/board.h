@@ -248,7 +248,7 @@
 #  define GPIO_SDMMC2_D3 GPIO_SDMMC2_D3_1
 #endif
 
-/* DMA Channl/Stream Selections *********************************************/
+/* DMA Channel/Stream Selections *********************************************/
 
 /* Stream selections are arbitrary for now but might become important in the
  * future if we set aside more DMA channels/streams.

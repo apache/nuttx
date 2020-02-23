@@ -322,7 +322,7 @@ Configuration sub-directories
     capacitive touchscreen sensor FT5336GQQ connected to the LPI2C1 bus,
     address 0x38. Nuttx support such touchscreen device via the driver
     ft5x06 (drivers/input/ft5x06.c). At the moment only the polling
-    method is available, the board features an interrupt line connecetd
+    method is available, the board features an interrupt line connected
     to the touchscreen sensor IC.
 
     IMXRT1062 MCU provides the integrated LCD driver.

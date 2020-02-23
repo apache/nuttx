@@ -302,7 +302,7 @@ static inline FAR struct stm32_dma_s *stm32_dmamap(unsigned long dmamap)
 
   unsigned int controller = STM32_DMA_CONTROLLER(dmamap);
 
-  /* Extact the stream number from the bit encoded value */
+  /* Extract the stream number from the bit encoded value */
 
   unsigned int stream = STM32_DMA_STREAM(dmamap);
 

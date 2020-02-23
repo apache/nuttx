@@ -113,7 +113,7 @@
 #  define _PIN_INPUT_PULLDOWN   (2 << _PIN_OPTIONS_SHIFT) /* x010 Input with internal pull-down resistor */
 #  define _PIN_INPUT_PULLUP     (6 << _PIN_OPTIONS_SHIFT) /* x110 Input with internal pull-up resistor */
 
-#define _PIN_OUTPUT_DRIVE_MASK  (9 << _PIN_OPTIONS_SHIFT) /* 1xx1 Mask to test for high drive strengh */
+#define _PIN_OUTPUT_DRIVE_MASK  (9 << _PIN_OPTIONS_SHIFT) /* 1xx1 Mask to test for high drive strength */
 #  define _PIN_OUTPUT_LOWDRIVE  (1 << _PIN_OPTIONS_SHIFT) /* 0xx1 Output with low drive strength */
 #  define _PIN_OUTPUT_HIGHDRIVE (9 << _PIN_OPTIONS_SHIFT) /* 1xx1 Output with high drive strength */
 

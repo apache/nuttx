@@ -86,7 +86,7 @@
 #define FT5x06_PERIODACTIVE_REG           (0x88) /* Report rate in Active mode */
 #define FT5x06_PERIODMONITOR_REG          (0x89) /* Report rate in Monitor mode */
 #define FT5x06_RADIAN_VALUE_REG           (0x91) /* Minimum allowing angle */
-#define FT5x06_OFFSET_LEFT_RIGHT_REG      (0x92) /* Mimimum offset */
+#define FT5x06_OFFSET_LEFT_RIGHT_REG      (0x92) /* Minimum offset */
 #define FT5x06_OFFSET_UP_DOWN_REG         (0x93) /* Maximum offset */
 #define FT5x06_DISTANCE_LEFT_RIGHT_REG    (0x94) /* Minimum distance */
 #define FT5x06_DISTANCE_UP_DOWN_REG       (0x95) /* Minimum distance */

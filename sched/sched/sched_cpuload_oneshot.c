@@ -80,7 +80,7 @@
 #  define CONFIG_CPULOAD_ENTROPY 0
 #endif
 
-/* Calculate the nomimal sample interval in microseconds:
+/* Calculate the nominal sample interval in microseconds:
  *
  * nominal = (1,000,000 usec/sec) / Frequency cycles/sec) = Period usec/cycle
  */
@@ -249,7 +249,7 @@ static void nxsched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
  *
  * Description:
  *   Configure to use a oneshot timer as described in
- *   include/nuttx/timers/oneshot.h to provid external clocking to assess
+ *   include/nuttx/timers/oneshot.h to provide external clocking to assess
  *   the CPU load.
  *
  * Input Parameters:

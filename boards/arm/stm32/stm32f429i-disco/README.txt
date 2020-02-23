@@ -31,7 +31,7 @@ Refer to the http://www.st.com website for further information about this
 board (search keyword: 429i-disco)
 
 NOTE:  This port was based on the original discovery kit, STM32F429I-DISCO.
-That board has been superceded by the new STM32F429I-DISC1.
+That board has been superseded by the new STM32F429I-DISC1.
 
 Contents
 ========
@@ -603,7 +603,7 @@ STM32F429I-DISCO-specific Configuration Options
 
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
-    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt priority.  Default: 128
     CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
@@ -707,7 +707,7 @@ Where <subdir> is one of the following:
     STM32F429I-DISCO LittlevGL demo example.
 
     The ltdc is initialized during boot up.  Interaction with NSH is via
-    the serial console at 115200 8N1 baud.  From the nsh comand line
+    the serial console at 115200 8N1 baud.  From the nsh command line
     execute the lvgldemo example:
 
       nsh> lvgldemo
@@ -855,7 +855,7 @@ Where <subdir> is one of the following:
        class driver:
 
        Device Drivers ->
-         CONFIG_USBDEV=n          : Make sure tht USB device support is disabled
+         CONFIG_USBDEV=n          : Make sure the USB device support is disabled
          CONFIG_USBHOST=y         : Enable USB host support
          CONFIG_USBHOST_ISOC_DISABLE=y
 
@@ -931,7 +931,7 @@ Where <subdir> is one of the following:
 
        Drivers -> USB Host Driver Support
          CONFIG_USBHOST_HUB=y     : Enable the hub class
-         CONFIG_USBHOST_ASYNCH=y  : Asynchonous I/O supported needed for hubs
+         CONFIG_USBHOST_ASYNCH=y  : Asynchronous I/O supported needed for hubs
 
        Board Selection ->
          CONFIG_STM32F429IDISCO_USBHOST_STACKSIZE=2048 (bigger than it needs to be)

@@ -523,7 +523,7 @@ static void imxrt_takesem(struct imxrt_dev_s *priv)
  * Name: imxrt_configwaitints
  *
  * Description:
- *   Enable/disable SDIO interrupts needed to suport the wait function
+ *   Enable/disable SDIO interrupts needed to support the wait function
  *
  * Input Parameters:
  *   priv       - A reference to the SDIO device state structure

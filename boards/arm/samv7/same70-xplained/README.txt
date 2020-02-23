@@ -633,7 +633,7 @@ serial device class:
 
   Device Drivers -> USB Device Driver Support
     CONFIG_CDCACM=y                           : USB Modem (CDC ACM) support
-    CONFIG_CDCACM_EP0MAXPACKET=64             : Enpoint 0 packet size
+    CONFIG_CDCACM_EP0MAXPACKET=64             : Endpoint 0 packet size
     CONFIG_CDCACM_EPINTIN=1                   : Interrupt IN endpoint number
     CONFIG_CDCACM_EPINTIN_FSSIZE=64           : Full speed packet size
     CONFIG_CDCACM_EPINTIN_HSSIZE=64           : High speed packet size
@@ -1579,7 +1579,7 @@ Configuration sub-directories
          Where <cmd> is one of:
 
            Show help     : ?
-           List busses   : bus
+           List buses   : bus
            List devices  : dev [OPTIONS] <first> <last>
            Read register : get [OPTIONS] [<repititions>]
            Show help     : help

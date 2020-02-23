@@ -1245,7 +1245,7 @@ static int up_rcvinterrupt(int irq, void *context, void *arg)
  *   when an interrupt received on the 'irq'  It should call
  *   uart_transmitchars or uart_receivechar to perform the
  *   appropriate data transfers.  The interrupt handling logic\
- *   must be able to map the 'irq' number into the approprite
+ *   must be able to map the 'irq' number into the appropriate
  *   up_dev_s structure in order to call these functions.
  *
  ****************************************************************************/

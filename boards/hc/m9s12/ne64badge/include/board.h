@@ -94,7 +94,7 @@
 /* Button definitions *******************************************************/
 
 /* The NE64 badge has 2 switches,
- * one labed SW1 and the other SW2 on the board (but
+ * one labeled SW1 and the other SW2 on the board (but
  * referred to as button1 and button2 in some documentation)
  */
 

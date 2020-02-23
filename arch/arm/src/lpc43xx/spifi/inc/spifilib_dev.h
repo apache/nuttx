@@ -129,12 +129,12 @@ typedef enum {
 } SPIFI_INFO_ID_T;
 
 /**
- * @brief SPIFI_INFO_QUADREAD_CLOCK Depricated! Do NOT use for new development
+ * @brief SPIFI_INFO_QUADREAD_CLOCK Deprecated! Do NOT use for new development
  */
 #define SPIFI_INFO_QUADREAD_CLOCK SPIFI_INFO_MAX_HSREAD_CLOCK
 
 /**
- * @brief SPIFI_INFO_QUADPROG_CLOCK Depricated! Do NOT use for new development
+ * @brief SPIFI_INFO_QUADPROG_CLOCK Deprecated! Do NOT use for new development
  */
 #define SPIFI_INFO_QUADPROG_CLOCK SPIFI_INFO_MAX_HSPROG_CLOCK
 /**
@@ -377,32 +377,32 @@ typedef struct SPIFI_DEV_ENUMERATOR {
 SPIFI_FAM_NODE_T *spifi_REG_FAMILY_CommonCommandSet(void);
 
 /**
- * @brief SPIFI_REG_FAMILY_Spansion_2Byte_PStatus Depricated! Do NOT use for new development
+ * @brief SPIFI_REG_FAMILY_Spansion_2Byte_PStatus Deprecated! Do NOT use for new development
  */
 #define SPIFI_REG_FAMILY_Spansion_2Byte_PStatus spifi_REG_FAMILY_CommonCommandSet
 
 /**
- * @brief SPIFI_REG_FAMILY_Spansion_3Byte_Status Depricated! Do NOT use for new development
+ * @brief SPIFI_REG_FAMILY_Spansion_3Byte_Status Deprecated! Do NOT use for new development
  */
 #define SPIFI_REG_FAMILY_Spansion_3Byte_Status spifi_REG_FAMILY_CommonCommandSet
 
 /**
- * @brief SPIFI_REG_FAMILY_Macronix_2Byte_Status Depricated! Do NOT use for new development
+ * @brief SPIFI_REG_FAMILY_Macronix_2Byte_Status Deprecated! Do NOT use for new development
  */
 #define SPIFI_REG_FAMILY_Macronix_2Byte_Status spifi_REG_FAMILY_CommonCommandSet
 
 /**
- * @brief SPIFI_REG_FAMILY_SpansionS25FLP Depricated! Do NOT use for new development
+ * @brief SPIFI_REG_FAMILY_SpansionS25FLP Deprecated! Do NOT use for new development
  */
 #define SPIFI_REG_FAMILY_SpansionS25FLP spifi_REG_FAMILY_CommonCommandSet
 
 /**
- * @brief SPIFI_REG_FAMILY_SpansionS25FL1 Depricated! Do NOT use for new development
+ * @brief SPIFI_REG_FAMILY_SpansionS25FL1 Deprecated! Do NOT use for new development
  */
 #define SPIFI_REG_FAMILY_SpansionS25FL1 spifi_REG_FAMILY_CommonCommandSet
 
 /**
- * @brief SPIFI_REG_FAMILY_MacronixMX25L Depricated! Do NOT use for new development
+ * @brief SPIFI_REG_FAMILY_MacronixMX25L Deprecated! Do NOT use for new development
  */
 #define SPIFI_REG_FAMILY_MacronixMX25L spifi_REG_FAMILY_CommonCommandSet
 

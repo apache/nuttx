@@ -78,7 +78,7 @@ config ARMV7M_BASEPRI_WAR
 		This update is required to be serialized to the instruction stream
 		meaning that after this update completes, it takes effect
 		immediately and no exceptions of lower priority than the new boosted
-		priority can pre-empt execution.  Because of this erratum, the
+		priority can preempt execution.  Because of this erratum, the
 		priority boosting does not take place immediately, allowing the
 		instruction after the MSR to be interrupted by an exception of
 		lower priority than the new boosted priority. This effect is only

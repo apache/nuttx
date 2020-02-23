@@ -109,7 +109,7 @@ endef
 # 2. Normally, the library file is in the current directory, but other
 #    times, the library is an absolute path such as
 #    D:\Spuda\Documents\projects\nuttx\master\apps-fork\libapps.lib.  In
-#    this case, the base library name is extact as the ARCHIVE logic CD's
+#    this case, the base library name is extract as the ARCHIVE logic CD's
 #    to the directory containing the library.
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)

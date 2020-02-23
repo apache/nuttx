@@ -113,7 +113,7 @@
  * DEPENDENCIES:  None
  *
  * CMD:           BOARDIOC_ROMDISK
- * DESCRIPTION:   Reigster
+ * DESCRIPTION:   Register
  * ARG:           Pointer to read-only instance of struct boardioc_romdisk_s.
  * CONFIGURATION: CONFIG_BOARDCTL_ROMDISK
  * DEPENDENCIES:  None

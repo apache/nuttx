@@ -1030,7 +1030,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
    * header plus the size of the data to be transferred, aligned up to the next
    * packet buffer size.  NOTE: that there is no check to see if we have
    * overran the EMAC buffer -- i.e., if the next txnext has not yet been
-   * tranmitted.
+   * transmitted.
    */
 
   txdesc = priv->txnext;
@@ -1085,7 +1085,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   txdesc->pktsize = priv->dev.d_len;
   txdesc->stat    = EMAC_TXDESC_OWNER;
 
-  /* Enable the TX poll timer.  The poll timer may alread be running.  In that
+  /* Enable the TX poll timer.  The poll timer may already be running.  In that
    * case, this will force the hardware to poll again now
    */
 
@@ -1340,8 +1340,8 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
       rwp             = ez80emac_rwp();
 
       /* Update the RRP to match our rxnext pointer: "For the hardware flow control
-       * to function properly, the software must update the hardare RRP (EmacRrp)
-       * pointer whenever the software version is upated.  The RxDMA uses RWP
+       * to function properly, the software must update the hardware RRP (EmacRrp)
+       * pointer whenever the software version is updated.  The RxDMA uses RWP
        * and the RRP to determine how many packets remain in the Rx buffer.
        */
 

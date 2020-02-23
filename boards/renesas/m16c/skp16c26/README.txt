@@ -102,7 +102,7 @@ Cygwin GCC BUILD NOTES
       cd -						# Back to the buildroot make directory
       make						# Restart the build
 
-   GCC is built twice.  First a initial, "bootstap" GCC is produced in
+   GCC is built twice.  First a initial, "bootstrap" GCC is produced in
    toolchain_build_m32c/gcc-4.2.4-initial, then the final GCC is produced in
    toolchain_build_m32c/gcc-4.2.4-final.  The above error will occur twice:  Once for
    the initial GCC build (see above) and once for the final GCC build. For the final GCC

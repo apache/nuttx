@@ -79,10 +79,10 @@
  *  M4 PA2/U1RTS/SPISEL  Virtual COM port RTS
  * J11 PF0/LED1          Ethernet LED1 (green)
  * J12 PF1/LED0          Ethernet LED0 (yellow)
- * C11 PB2               Transciever #INVALID
- * C12 PB3               Transciever #ENABLE
- *  A6 PB4               Transciever ON
- *  B7 PB5               Transciever #OFF
+ * C11 PB2               Transceiver #INVALID
+ * C12 PB3               Transceiver #ENABLE
+ *  A6 PB4               Transceiver ON
+ *  B7 PB5               Transceiver #OFF
  */
 
 /* GPIO for LEDs:
@@ -96,8 +96,8 @@
  */
 #define SSICS_GPIO    (GPIO_FUNC_OUTPUT | GPIO_VALUE_ONE | GPIO_PORTA | 3)
 
-/* GPIOs for the RS-232 transciever enable/disable.
- * Default state for these enables the transciever.
+/* GPIOs for the RS-232 transceiver enable/disable.
+ * Default state for these enables the transceiver.
  */
 #define XCVR_INV_GPIO (GPIO_FUNC_INPUT | GPIO_PORTB | 2)
 #define XCVR_ENA_GPIO (GPIO_FUNC_OUTPUT | GPIO_VALUE_ZERO | GPIO_PORTB | 3)

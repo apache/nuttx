@@ -221,7 +221,7 @@ static const struct audio_ops_s g_audioops =
 
 /* Volume control log table.  This table is in increments of 2% of
  * requested volume level and is the register value that should be
- * programmed to the VS1053 to achieve that volume pecentage.
+ * programmed to the VS1053 to achieve that volume percentage.
  */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
@@ -251,19 +251,19 @@ static const uint8_t   g_logtable [] =
 
 static void vs1053_spi_lock(FAR struct spi_dev_s *dev, unsigned long freq_mhz)
 {
-  /* On SPI busses where there are multiple devices, it will be necessary to
-   * lock SPI to have exclusive access to the busses for a sequence of
+  /* On SPI buses where there are multiple devices, it will be necessary to
+   * lock SPI to have exclusive access to the buses for a sequence of
    * transfers.  The bus should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusiv access to
-   * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
+   * This is a blocking call and will not return until we have exclusive access to
+   * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
    */
 
   SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
-   * If the SPI buss is being shared, then it may have been left in an incompatible
+   * If the SPI bus is being shared, then it may have been left in an incompatible
    * state.
    */
 

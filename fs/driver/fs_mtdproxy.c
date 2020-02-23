@@ -145,7 +145,7 @@ static FAR char *unique_blkdev(void)
  *
  *   Errors that may be returned:
  *
- *     ENOMEM - Failed to create a temporay path name.
+ *     ENOMEM - Failed to create a temporary path name.
  *
  *   Plus:
  *

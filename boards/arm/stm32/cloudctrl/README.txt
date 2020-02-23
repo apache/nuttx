@@ -361,7 +361,7 @@ Cloudctrl-specific Configuration Options
     CONFIG_STM32_MII_MCO - Use MCO to clock the MII interface
     CONFIG_STM32_RMII - Support Ethernet RMII interface
     CONFIG_STM32_RMII_MCO - Use MCO to clock the RMII interface
-    CONFIG_STM32_AUTONEG - Use PHY autonegotion to determine speed and mode
+    CONFIG_STM32_AUTONEG - Use PHY autonegotiation to determine speed and mode
     CONFIG_STM32_ETHFD - If CONFIG_STM32_AUTONEG is not defined, then this
       may be defined to select full duplex mode. Default: half-duplex
     CONFIG_STM32_ETH100MBPS - If CONFIG_STM32_AUTONEG is not defined, then this

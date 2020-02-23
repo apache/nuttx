@@ -875,7 +875,7 @@ uint16_t spirit_pktstack_get_rxpktlen(FAR struct spirit_library_s *spirit)
  *   NOTE: This filtering control is enabled by default but the source
  *   address mask is by default set to 0.  As a matter of fact the user has
  *   to enable the source filtering bit after the packet initialization
- *   because the packet initialiazation routine disables it.
+ *   because the packet initialization routine disables it.
  *
  * Input Parameters:
  *   spirit   - Reference to a Spirit library state structure instance

@@ -2359,7 +2359,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
  *   buflen - Buffer length to allocate in bytes
  *
  * Returned Value:
- *   Address of tha allocated memory on success; NULL is returned on any
+ *   Address of the allocated memory on success; NULL is returned on any
  *   failure.
  *
  ****************************************************************************/

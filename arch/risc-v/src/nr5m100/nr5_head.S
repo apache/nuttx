@@ -573,7 +573,7 @@ up_hard_remu:
 	remu	a0, a0, a1
 	ret
 
-/* Calculate number of clock cycles requried for MUL */
+/* Calculate number of clock cycles required for MUL */
 
 up_time_hard_mul:
 	rdcycle	a3

@@ -44,7 +44,7 @@
 #include <sys/types.h>
 
 /****************************************************************************
- * Pre-processor Definitons
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The dlfcn.h header defines at least the following macros for use in the

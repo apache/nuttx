@@ -296,7 +296,7 @@ int up_cpu_index(void)
  *
  *   Each CPU is provided the entry point to is IDLE task when started.  A
  *   TCB for each CPU's IDLE task has been initialized and placed in the
- *   CPU's g_assignedtasks[cpu] list.  Not stack has been alloced or
+ *   CPU's g_assignedtasks[cpu] list.  Not stack has been allocated or
  *   initialized.
  *
  *   The OS initialization logic calls this function repeatedly until each

@@ -36,7 +36,7 @@ Olimex STR-P711
  - Trimpot connected to ADC
  - Two status LEDs
  - Buzzer
- - UEXT - 10 pin extension connector for Olimex addon peripherials like MP3,
+ - UEXT - 10 pin extension connector for Olimex addon peripherals like MP3,
    RF2.4Ghz, RFID etc. modules
  - 2x SPI connectors
  - I2C connector

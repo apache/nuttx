@@ -380,7 +380,7 @@ vcommon:
  ************************************************************************************/
 
 up_fullcontextrestore:
-	/* Make sure that interrupts are dissabled */
+	/* Make sure that interrupts are disabled */
 
 	orcc	#0x50
 

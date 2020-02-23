@@ -186,7 +186,7 @@ ifeq ($(V),2)
 MKEXPORT_ARGS += -d
 endif
 
-# This is the name of the final target (relative to the top level directorty)
+# This is the name of the final target (relative to the top level directory)
 
 NUTTXNAME = nuttx
 BIN       = $(NUTTXNAME)$(EXEEXT)

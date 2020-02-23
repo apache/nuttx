@@ -102,7 +102,7 @@
 
 /* CH[n] PSELP Register */
 
-#define SAADC_CHPSELP_SHIFT            (0)       /* Bits 0-4: Intput positive pin selection for CH[x] */
+#define SAADC_CHPSELP_SHIFT            (0)       /* Bits 0-4: Input positive pin selection for CH[x] */
 #define SAADC_CHPSELP_MASK             (0xf << SAADC_CHPSELP_SHIFT)
 #  define SAADC_CHPSELP_NC             (0x0 << SAADC_CHPSELP_SHIFT)
 #  define SAADC_CHPSELP_IN0            (0x1 << SAADC_CHPSELP_SHIFT)
@@ -118,7 +118,7 @@
 
 /* CH[n] PSELN Register */
 
-#define SAADC_CHPSELN_SHIFT            (0)       /* Bits 0-4: Intput negative pin selection for CH[x] */
+#define SAADC_CHPSELN_SHIFT            (0)       /* Bits 0-4: Input negative pin selection for CH[x] */
 #define SAADC_CHPSELN_MASK             (0xf << SAADC_CHPSELN_SHIFT)
 #  define SAADC_CHPSELN_NC             (0x0 << SAADC_CHPSELN_SHIFT)
 #  define SAADC_CHPSELN_IN0            (0x1 << SAADC_CHPSELN_SHIFT)

@@ -139,7 +139,7 @@ struct misoc_net_driver_s
 
 static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
-/* Driver state structur */
+/* Driver state structure */
 
 static struct misoc_net_driver_s g_misoc_net[CONFIG_MISOC_NET_NINTERFACES];
 

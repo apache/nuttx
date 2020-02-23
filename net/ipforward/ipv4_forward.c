@@ -68,7 +68,7 @@
  *
  * Input Parameters:
  *   ipv4  - A pointer to the IPv4 header in within the IPv4 packet.  This
- *           is immeidately followed by the L3 header which may be TCP, UDP
+ *           is immediately followed by the L3 header which may be TCP, UDP
  *           or ICMP.
  *
  * Returned Value:

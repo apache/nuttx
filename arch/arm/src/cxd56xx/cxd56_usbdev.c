@@ -3031,7 +3031,7 @@ static int cxd56_vbusninterrupt(int irq, FAR void *context, FAR void *arg)
   up_disable_irq(CXD56_IRQ_USB_INT);
   up_disable_irq(CXD56_IRQ_USB_SYS);
 
-  /* Notify dettach signal */
+  /* Notify detach signal */
 
   priv->power = 0;
   cxd56_notify_signal(USBDEV_STATE_DETACH, priv->power);

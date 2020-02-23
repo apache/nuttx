@@ -404,7 +404,7 @@ static bool verify_optiondir(const char *directory)
 
   if (stat(directory, &buf) < 0)
     {
-      /* It may be okay if the dirctory does not exist */
+      /* It may be okay if the directory does not exist */
 
       /* It may be okay if the file does not exist */
 
@@ -581,7 +581,7 @@ static void config_search(const char *boarddir, config_callback callback, void *
         }
 
       /* If it is a regular file named 'defconfig' then we have found a
-       * configuration directory.  We could terminate the serach in this case
+       * configuration directory.  We could terminate the search in this case
        * because we do not expect sub-directories within configuration
        * directories.
        */
@@ -1442,7 +1442,7 @@ static void refresh(void)
   if (ret < 0)
 #endif
     {
-      fprintf(stderr, "ERROR: Failed to refresh configuations\n");
+      fprintf(stderr, "ERROR: Failed to refresh configurations\n");
       fprintf(stderr, "       kconfig-conf --olddefconfig Kconfig\n");
     }
 }

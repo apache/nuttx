@@ -579,7 +579,7 @@ end_wait:
  *   timeout - Send timeout in milliseconds
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   Ok is returned on success; Otherwise a negated errno value is returned.
  *   This function is expected to fail if the driver is not an IEEE802.15.4
  *   MAC network driver.  In that case, the logic will fall back to normal
  *   IPv4/IPv6 formatting.
@@ -878,7 +878,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
 
       if (ipv6hdr->ipv6.proto != IP_PROTO_TCP)
         {
-          nwarn("WARNING: Expected TCP protoype: %u vs %s\n",
+          nwarn("WARNING: Expected TCP prototype: %u vs %s\n",
                 ipv6hdr->ipv6.proto, IP_PROTO_TCP);
         }
       else

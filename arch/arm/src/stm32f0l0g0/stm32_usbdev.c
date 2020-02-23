@@ -4,7 +4,7 @@
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.orgr>
  *
- * Ported from the STM32 F1 implmentation.  References:
+ * Ported from the STM32 F1 implementation.  References:
  *   - RM0008 Reference manual, STMicro document ID 13902
  *   - STM32F10xxx USB development kit, UM0424, STMicro
  *
@@ -1401,7 +1401,7 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
  *
  * Description:
  *   This function is called from the stm32_ep0out handler when the ep0state
- *   is EP0STATE_SETUP_OUT and uppon new incoming data is available in the endpoint
+ *   is EP0STATE_SETUP_OUT and upon new incoming data is available in the endpoint
  *   0's buffer.  This function will simply copy the OUT data into ep0data.
  *
  ****************************************************************************/
@@ -2191,7 +2191,7 @@ static void stm32_ep0out(struct stm32_usbdev_s *priv)
                                           * last set up command with the OUT
                                           * data
                                           */
-        priv->ep0state = EP0STATE_IDLE;  /* There is no notion of reciving OUT
+        priv->ep0state = EP0STATE_IDLE;  /* There is no notion of receiving OUT
                                           * data greater then the length of
                                           * CONFIG_USBDEV_SETUP_MAXDATASIZE
                                           * so we are done

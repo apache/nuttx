@@ -55,12 +55,12 @@
  * Name: QSPI_LOCK
  *
  * Description:
- *   On QSPI busses where there are multiple devices, it will be necessary to
- *   lock QSPI to have exclusive access to the busses for a sequence of
+ *   On QSPI buses where there are multiple devices, it will be necessary to
+ *   lock QSPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the QSPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the QSPI is properly
- *   configured for the device.  If the QSPI buss is being shared, then it
+ *   configured for the device.  If the QSPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -202,7 +202,7 @@
  *   buflen - Buffer length to allocate in bytes
  *
  * Returned Value:
- *   Address of tha allocated memory on success; NULL is returned on any
+ *   Address of the allocated memory on success; NULL is returned on any
  *   failure.
  *
  ****************************************************************************/

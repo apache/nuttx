@@ -91,7 +91,7 @@ static int _net_takesem(void)
  ****************************************************************************/
 
 static int
-_net_timedwait(sem_t *sem, bool interruptable, unsigned int timeout)
+_net_timedwait(sem_t *sem, bool interruptible, unsigned int timeout)
 {
   unsigned int count;
   irqstate_t   flags;
@@ -125,7 +125,7 @@ _net_timedwait(sem_t *sem, bool interruptable, unsigned int timeout)
 
       /* Wait until we get the lock or until the timeout expires */
 
-      if (interruptable)
+      if (interruptible)
         {
           ret = nxsem_timedwait(sem, &abstime);
         }
@@ -138,7 +138,7 @@ _net_timedwait(sem_t *sem, bool interruptable, unsigned int timeout)
     {
       /* Wait as long as necessary to get the lock */
 
-      if (interruptable)
+      if (interruptible)
         {
           ret = nxsem_wait(sem);
         }

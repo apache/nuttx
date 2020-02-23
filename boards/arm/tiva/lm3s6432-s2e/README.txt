@@ -64,10 +64,10 @@ D12 PB1/U0RTS         UART0 RTS
  M4 PA2/U1RTS/SPISEL  UART1 RTS or SPI slave select
 J11 PF0/LED1          Ethernet LED1 (green)
 J12 PF1/LED0          Ethernet LED0 (yellow)
-C11 PB2               Transciever #INVALID
-C12 PB3               Transciever #ENABLE
- A6 PB4               Transciever ON
- B7 PB5               Transciever #OFF
+C11 PB2               Transceiver #INVALID
+C12 PB3               Transceiver #ENABLE
+ A6 PB4               Transceiver ON
+ B7 PB5               Transceiver #OFF
 
 Stellaris MDL-S2E Reference Design Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

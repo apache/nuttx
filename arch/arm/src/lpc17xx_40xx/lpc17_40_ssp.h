@@ -149,9 +149,9 @@ void ssp_flush(FAR struct spi_dev_s *dev);
  *
  * Description:
  *   If the board supports a card detect callback to inform the SPI-based
- *   MMC/SD drvier when an SD card is inserted or removed, then
+ *   MMC/SD driver when an SD card is inserted or removed, then
  *   CONFIG_SPI_CALLBACK should be defined and the following function(s) must
- *   must be implemented.  These functiosn implements the registercallback
+ *   must be implemented.  These functions implements the registercallback
  *   method of the SPI interface (see include/nuttx/spi/spi.h for details)
  *
  * Input Parameters:

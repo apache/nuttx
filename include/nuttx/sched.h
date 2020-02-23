@@ -277,7 +277,7 @@ typedef CODE void (*onexitfunc_t)(int exitcode, FAR void *arg);
 
 #ifdef CONFIG_SCHED_SPORADIC
 
-/* This structure represents oen replenishment interval.  This is what is
+/* This structure represents one replenishment interval.  This is what is
  * received by each timeout handler.
  */
 
@@ -640,7 +640,7 @@ struct tcb_s
   cpu_set_t affinity;                    /* Bit set of permitted CPUs           */
 #endif
   uint16_t flags;                        /* Misc. general status flags          */
-  int16_t  lockcount;                    /* 0=preemptable (not-locked)          */
+  int16_t  lockcount;                    /* 0=preemptible (not-locked)          */
 #ifdef CONFIG_IRQCOUNT
   int16_t  irqcount;                     /* 0=Not in critical section           */
 #endif
@@ -849,7 +849,7 @@ FAR struct tcb_s *sched_gettcb(pid_t pid);
 
 /* File system helpers **********************************************************/
 
-/* These functions all extract lists from the group structure assocated with the
+/* These functions all extract lists from the group structure associated with the
  * currently executing task.
  */
 
@@ -897,7 +897,7 @@ void nxtask_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
  *    - Allocation of the child task's TCB.
  *    - Initialization of file descriptors and streams
  *    - Configuration of environment variables
- *    - Setup the intput parameters for the task.
+ *    - Setup the input parameters for the task.
  *    - Initialization of the TCB (including call to up_initial_state()
  * 4) vfork() provides any additional operating context. vfork must:
  *    - Allocate and initialize the stack

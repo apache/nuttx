@@ -217,7 +217,7 @@ static int pca9635pw_open(FAR struct file *filep)
   nxsig_usleep(500);
 
   /* Turn all led drivers to mode 2 in which the led brightness is controlled
-   * by the indiviual pwm registers.
+   * by the individual pwm registers.
    */
 
   ret = pca9635pw_set_led_mode(priv, PCA9635PW_LED_OUT_x_MODE_2);
@@ -286,7 +286,7 @@ static int pca9635pw_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      /* Set the brightness of an indivual LED. Arg: pca9635pw_led_brightness_s
+      /* Set the brightness of an individual LED. Arg: pca9635pw_led_brightness_s
        * pointer.
        */
 

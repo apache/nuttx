@@ -287,7 +287,7 @@ bool pic32mx_gpioread(uint16_t pinset)
 
       base = g_gpiobase[port];
 
-      /* Get ane return the input value */
+      /* Get and return the input value */
 
       return (getreg32(base + PIC32MX_IOPORT_PORT_OFFSET) & (1 << pin)) != 0;
     }

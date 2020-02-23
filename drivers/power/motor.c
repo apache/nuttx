@@ -227,7 +227,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case PWRIOC_START:
         {
           /* Allow motor start only when some limits available
-           * and strucutre is locked.
+           * and structure is locked.
            */
 
           if ((motor->limits.lock == false) ||

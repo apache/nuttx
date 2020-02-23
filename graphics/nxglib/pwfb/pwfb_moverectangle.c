@@ -133,7 +133,7 @@ void NXGL_FUNCNAME(pwfb_moverectangle,NXGLIB_SUFFIX)
 
   stride = bwnd->stride;
 
-  /* Get the dimensions of the rectange to fill: width in pixels, height
+  /* Get the dimensions of the rectangle to fill: width in pixels, height
    * in rows
    */
 

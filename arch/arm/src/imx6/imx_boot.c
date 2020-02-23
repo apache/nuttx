@@ -366,7 +366,7 @@ static inline void imx_wdtdisable(void)
  *       a. Stack Setup for ARM supervisor mode
  *       b. Main Oscillator Detection:  The bootloader attempts to use an
  *          external crystal.  If this is not successful, then  the 12 MHz
- *          Fast RC internal oscillator is used as the main osciallator.
+ *          Fast RC internal oscillator is used as the main oscillator.
  *       c. Main Clock Selection: The Master Clock source is switched from
  *          to the main oscillator without prescaler. PCK and MCK are now
  *          the Main Clock.
@@ -467,7 +467,7 @@ void arm_boot(void)
   PROGRESS('J');
 #endif
 
-  /* Perform board-specific memroy initialization,  This must include
+  /* Perform board-specific memory initialization,  This must include
    * initialization of board-specific memory resources (e.g., SDRAM)
    *
    * NOTE: We must use caution prior to this point to make sure that
@@ -519,7 +519,7 @@ void arm_boot(void)
 #endif
 
   /* Now we can enable all other CPUs.  The enabled CPUs will start execution
-   * at __cpuN_start and, after very low-level CPU initialzation has been
+   * at __cpuN_start and, after very low-level CPU initialization has been
    * performed, will branch to arm_cpu_boot() (see arch/arm/src/armv7-a/smp.h)
    */
 

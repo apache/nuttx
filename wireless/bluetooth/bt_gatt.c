@@ -566,7 +566,7 @@ static uint8_t disconnected_cb(FAR const struct bt_gatt_attr_s *attr,
   memset(&ccc->value, 0, sizeof(ccc->value));
   ccc->cfg_changed(ccc->value);
 
-  wlinfo("ccc %p reseted\n", ccc);
+  wlinfo("ccc %p reset\n", ccc);
   return BT_GATT_ITER_CONTINUE;
 }
 

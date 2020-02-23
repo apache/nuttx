@@ -166,7 +166,7 @@ uint16_t stmpe811_tempread(STMPE811_HANDLE handle)
  *               threshold value; False:  Generate an interrupt if the
  *               temperature falls below the threshold value.
  *   callback  - The client callback function that will be called when
- *               the termperature crosses the threshold.
+ *               the temperature crosses the threshold.
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is

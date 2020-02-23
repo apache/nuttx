@@ -112,7 +112,7 @@
  * Name: RPTUN_GET_RESOURCE
  *
  * Description:
- *   Get rptun resouce
+ *   Get rptun resource
  *
  * Input Parameters:
  *   dev  - Device-specific state data

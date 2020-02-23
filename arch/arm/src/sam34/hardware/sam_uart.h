@@ -473,7 +473,7 @@
 
 /* USART Number of Errors Register (USART only) */
 
-#define UART_NER_NBERRORS_SHIFT      (0)       /* Bits 0-7: Number of Errrors (USART only) */
+#define UART_NER_NBERRORS_SHIFT      (0)       /* Bits 0-7: Number of Errors (USART only) */
 #define UART_NER_NBERRORS_MASK       (0xff << UART_NER_NBERRORS_SHIFT)
 
 /* USART IrDA FILTER Register (USART only) */

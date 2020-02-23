@@ -222,7 +222,7 @@
 	sw		t8, REG_T8(sp)
 	sw		t9, REG_T9(sp)
 
-	/* $26-$27 = ko-k1: Reserved for use in exeption handers.  These do not need to be
+	/* $26-$27 = ko-k1: Reserved for use in exception handers.  These do not need to be
 	 * saved.
 	 *
 	 * $28 = gp: Only needs to be saved under conditions where there are multiple, per-
@@ -326,7 +326,7 @@
 	lw		t8, REG_T8(k1)
 	lw		t9, REG_T9(k1)
 
-	/* $26-$27 = ko-k1: Reserved for use in exeption handers.  These do not need to be
+	/* $26-$27 = ko-k1: Reserved for use in exception handers.  These do not need to be
 	 * saved.
 	 *
 	 * $28 = gp: Only needs to be saved under conditions where there are multiple, per-

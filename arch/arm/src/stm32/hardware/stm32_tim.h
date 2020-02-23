@@ -32,7 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * This the lower half driver for PWM and the STM32 F1 to F4 family MCUs
- * Athough this driver does make the difference between 16/32-bit timers,
+ * Although this driver does make the difference between 16/32-bit timers,
  * it does manage all of them as 16-bit. This will have to be improved.
  *
  ****************************************************************************************************/

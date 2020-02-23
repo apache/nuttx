@@ -281,7 +281,7 @@ static int pmic_int_handler(int irq, void *context, void *arg)
  *
  * Description:
  *   Get Raw Interrupt Status register. And furthermore, if status is set,
- *   then clear the interrupt. Register's decription is below:
+ *   then clear the interrupt. Register's description is below:
  *
  *     7   6   5   4    3     2     1     0
  *   +---------------+-----+-----+-----+-----+
@@ -306,7 +306,7 @@ int cxd56_pmic_get_interrupt_status(uint8_t *status)
  * Name: cxd56_pmic_set_gpo_reg
  *
  * Description:
- *   Set GPO register. Register's decription is below:
+ *   Set GPO register. Register's description is below:
  *
  *     7   6   5   4   3   2   1   0
  *   +---+---+---+---+---+---+---+---+
@@ -489,7 +489,7 @@ bool cxd56_pmic_get_gpo(uint8_t chset)
  * Name: cxd56_pmic_set_loadswitch_reg
  *
  * Description:
- *   Set LoadSwitch register. Register's decription is below:
+ *   Set LoadSwitch register. Register's description is below:
  *
  *     7   6   5   4   3   2   1   0
  *   +---+---+---+---+---+---+---+---+
@@ -585,7 +585,7 @@ bool cxd56_pmic_get_loadswitch(uint8_t chset)
  * Name: cxd56_pmic_set_ddc_ldo_reg
  *
  * Description:
- *   Set DDC/LDO register. Register's decription is below:
+ *   Set DDC/LDO register. Register's description is below:
  *
  *      7    6    5    4    3    2    1    0
  *   +----+----+----+----+----+----+----+----+

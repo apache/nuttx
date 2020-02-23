@@ -232,7 +232,7 @@ Using MSYS
     4. mklink /j programfiles86 "C:/Program\ Files\ \(x86\)"
 
   They then show up as /programfiles and /programfiles86 with the MSYS2
-  sandbox.  Thos paths can then be used with the PATH variable.  I had
+  sandbox.  Those paths can then be used with the PATH variable.  I had
   to do something similar for the path to the GNU Tools "ARM Embedded
   Toolchain" which also has spaces in the path name.
 

@@ -145,7 +145,7 @@ config INPUT_ADS7843E
 	select SPI
 	---help---
 		Enable support for the TI/Burr-Brown ADS7842 touchscreen controller.  I believe
-		that driver should be compatibile with the TI/Burr-Brown TSC2046 and XPT2046
+		that driver should be compatible with the TI/Burr-Brown TSC2046 and XPT2046
 		touchscreen controllers as well.
 
 if INPUT_ADS7843E

@@ -82,7 +82,7 @@ _ez80_startup:
 
 	ld		sp, __stack
 
-	; Peform chip-specific initialization
+	; Perform chip-specific initialization
 
 	call	_ez80_init
 

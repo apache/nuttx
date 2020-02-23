@@ -322,7 +322,7 @@ static int nunchuck_open(FAR struct file *filep)
   opriv = (FAR struct nunchuck_open_s *)kmm_zalloc(sizeof(struct nunchuck_open_s));
   if (!opriv)
     {
-      ierr("ERROR: Failled to allocate open structure\n");
+      ierr("ERROR: Failed to allocate open structure\n");
       ret = -ENOMEM;
       goto errout_with_sem;
     }

@@ -247,7 +247,7 @@ extern "C"
  *   This is a non-standard LCD interface just for the STM3210E-EVAL board.  Because
  *   of the various rotations, clearing the display in the normal way by writing a
  *   sequences of runs that covers the entire display can be very slow.  Here the
- *   dispaly is cleared by simply setting all GRAM memory to the specified color.
+ *   display is cleared by simply setting all GRAM memory to the specified color.
  *
  ****************************************************************************/
 

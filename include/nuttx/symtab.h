@@ -58,7 +58,7 @@
  *    supported, then typing information would also need to be included in
  *    the structure.
  *
- * 2. Fixed size arrays.  There is no explicit provisional for dyanamically
+ * 2. Fixed size arrays.  There is no explicit provisional for dynamically
  *    adding or removing entries from the symbol table (realloc might be
  *    used for that purpose if needed).  The intention is to support only
  *    fixed size arrays completely defined at compilation or link time.

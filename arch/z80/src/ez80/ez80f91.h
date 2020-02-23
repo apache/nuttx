@@ -200,7 +200,7 @@
 #  define EZ80_TMRCLKSEL_RTC   0x20        /*   01: Real time clock input */
 #  define EZ80_TMRCLKSEL_ECF   0x40        /*   10: Event count input, falling edge */
 #  define EZ80_TMRCLKSEL_ECR   0x60        /*   11: Event count input, rising edge */
-#define EZ80_TMRCTL_CLKDIV     0x18        /* Bits 3-4: Sysem clock divider */
+#define EZ80_TMRCTL_CLKDIV     0x18        /* Bits 3-4: System clock divider */
 #  define EZ80_TMRCLKDIV_4     0x00        /*   00:   4 */
 #  define EZ80_TMRCLKDIV_16    0x08        /*   01:  16 */
 #  define EZ80_TMRCLKDIV_64    0x10        /*   10:  64 */

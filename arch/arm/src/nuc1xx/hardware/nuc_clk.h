@@ -136,7 +136,7 @@
 #define CLK_CLKSTATUS_OSC10K_STB   (1 << 3)  /* Bit 3:  Internal 10kHz low speed clock source
                                               *         stable flag */
 #define CLK_CLKSTATUS_OSC22M_STB   (1 << 4)  /* Bit 4:  Internal 22.1184MHz high speed
-                                              *         osciallator clock source stable flag */
+                                              *         oscillator clock source stable flag */
 #define CLK_CLKSTATUS_CLK_SW_FAIL  (1 << 7)  /* Bit 7:  Clock switching fail flag */
 
 /* Clock source select control register 0 */

@@ -94,7 +94,7 @@ config LCD_MAXPOWER
 	range 1 255
 	---help---
 		Maximum value of LCD power setting.  This normally equates to brightness:
-		The brighter the screen, the hight the power usage.
+		The brighter the screen, the high the power usage.
 
 		On LCDs that have a backlight, this value corresponds directly to that
 		backlight setting.  Board-specific logic may place restrictions on this
@@ -145,7 +145,7 @@ config P14201_FRAMEBUFFER
 		Reading graphics memory cannot be supported, and
 
 		All pixel writes must be aligned to byte boundaries.
-		The latter limitation effectively reduces the 128x96 disply to 64x96.
+		The latter limitation effectively reduces the 128x96 display to 64x96.
 
 		NOTE: This option should not be used if CONFIG_LCD_FRAMBEBUFFER is
 		enabled.  That options provides for a more generalized, external
@@ -1300,7 +1300,7 @@ menuconfig SLCD
 	bool "Alphanumeric/Segment LCD Devices"
 	default n
 	---help---
-		Drivers for Alphanumeric ans Segment LCDs (SLCDs).  These
+		Drivers for Alphanumeric and Segment LCDs (SLCDs).  These
 		drivers support interfaces as defined in include/nuttx/lcd/slcd_ioctl.h
 		amd slcd_codec.h
 

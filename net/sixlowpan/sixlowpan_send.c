@@ -203,7 +203,7 @@ end_wait:
  *   timeout - Send timeout in milliseconds
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   Ok is returned on success; Otherwise a negated errno value is returned.
  *   This function is expected to fail if the driver is not an IEEE802.15.4
  *   MAC network driver.  In that case, the logic will fall back to normal
  *   IPv4/IPv6 formatting.

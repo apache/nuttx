@@ -385,7 +385,7 @@ int up_x11initialize(unsigned short width, unsigned short height,
                        &windowAttributes);
 
   /* Get the pixel depth.  If the depth is 24-bits, use 32 because X expects
-   * 32-bit aligment anyway.
+   * 32-bit alignment anyway.
    */
 
   depth = windowAttributes.depth;

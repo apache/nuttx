@@ -63,7 +63,7 @@
  *
  * OSIOC_MAXDELAY   - Return the maximum delay that can be supported by
  *                    this timer.
- *                    Argument: A referenct to a struct timespec in which
+ *                    Argument: A reference to a struct timespec in which
  *                    the maximum time will be returned.
  * OSIOC_START      - Start the oneshot timer
  *                    Argument: A reference to struct oneshot_start_s
@@ -96,7 +96,7 @@
  *   lower   An instance of the lower-half oneshot state structure.  This
  *           structure must have been previously initialized via a call to
  *           oneshot_initialize();
- *   ts      The location in which to return the maxumum delay.
+ *   ts      The location in which to return the maximum delay.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned

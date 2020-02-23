@@ -95,7 +95,7 @@ static int bluetooth_count_frames(FAR struct bluetooth_conn_s *conn)
  * Input Parameters:
  *   conn   - The socket connection structure.
  *   framel - A single frame to add to the RX queue.
- *   meta   - Meta data characterizing the received frane.
+ *   meta   - Meta data characterizing the received frame.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on

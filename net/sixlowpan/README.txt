@@ -40,7 +40,7 @@ IPv6 Neighbor Discovery
 
 IPv6 Neighbor Discovery is not supported.  The current ICMPv6 and neighbor-
 related logic only works with Ethernet MAC.  For 6LoWPAN, a new more
-conservative IPv6 neigbor discovery is provided by RFC 6775 which is not
+conservative IPv6 neighbor discovery is provided by RFC 6775 which is not
 currently supported.  With IPv6 neighbor discovery, any IPv6 address may be
 associated with any short or extended address.  In fact, that is the whole
 purpose of the neighbor discover logic:  It plays the same role as ARP in
@@ -90,7 +90,7 @@ Optimal 6LoWPAN Configuration
    fe80 0000 0000 0000  0000 00ff fe00 MMMM 2-byte short address IEEE 48-bit MAC
    fe80 0000 0000 0000  NNNN NNNN NNNN NNNN 8-byte extended address IEEE EUI-64
 
-4. To be compressable, port numbers must be in the range 0xf0b0-0xf0bf,
+4. To be compressible, port numbers must be in the range 0xf0b0-0xf0bf,
    hexadecimal.  That is 61616-61631 decimal.
 
 5. IOBs: Must be big enough to hold one IEEE802.15.4 frame (typically 127).

@@ -501,7 +501,7 @@ LPCXpresso Configuration Options
   also require CONFIG_NET and CONFIG_LPC17_40_ETHERNET.
 
     CONFIG_ETH0_PHY_KS8721 - Selects Micrel KS8721 PHY
-    CONFIG_LPC17_40_PHY_AUTONEG - Enable auto-negotion
+    CONFIG_LPC17_40_PHY_AUTONEG - Enable auto-negotiation
     CONFIG_LPC17_40_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
     CONFIG_LPC17_40_PHY_FDUPLEX - Select full (vs. half) duplex
 
@@ -564,7 +564,7 @@ selected as follow:
 Where <subdir> is one of the following:
 
   dhcpd:
-    This builds the DCHP server using the apps/examples/dhcpd application
+    This builds the DHCP server using the apps/examples/dhcpd application
     (for execution from FLASH.) See apps/examples/README.txt for information
     about the dhcpd example.
 

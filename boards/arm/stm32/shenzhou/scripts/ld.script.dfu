@@ -35,7 +35,7 @@
 
 /* The STM32F107VC has 256K of FLASH beginning at address 0x0800:0000 and
  * 64K of SRAM beginning at address 0x2000:0000.  Here we assume that the
- * STMicro DFU bootloader is being used.  In that case, the corrct load .text
+ * STMicro DFU bootloader is being used.  In that case, the correct load .text
  * load address is 0x08003000 (leaving 208K).
  */
 

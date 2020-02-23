@@ -71,7 +71,7 @@
 #define VEML6070_CMD_IT_1T        0x04 /* IT1=0 : IT0=1 */
 #define VEML6070_CMD_IT_2T        0x08 /* IT1=1 : IT0=0 */
 #define VEML6070_CMD_IT_4T        0x0c /* IT1=1 : IT0=1 */
-#define VEML6070_CMD_ACK_THD      0x10 /* Acknowledge thresold:
+#define VEML6070_CMD_ACK_THD      0x10 /* Acknowledge threshold:
                                           0 = 102 steps
                                           1 = 145 steps */
 #define VEML6070_CMD_ACK          0x20 /* Acknowledge activity */

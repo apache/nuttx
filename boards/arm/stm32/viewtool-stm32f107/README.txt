@@ -1059,7 +1059,7 @@ Configurations
           Library Support:
             CONFIG_SCHED_WORKQUEUE=y           : Work queue support required
 
-          Applicaton Configuration:
+          Application Configuration:
             CONFIG_EXAMPLES_TOUCHSCREEN=y      : Enable the touchscreen built-int test
 
           Defaults should be okay for related touchscreen settings.  Touchscreen

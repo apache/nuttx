@@ -1430,7 +1430,7 @@ static bool up_txempty(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT

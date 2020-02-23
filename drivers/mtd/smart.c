@@ -798,7 +798,7 @@ int smart_checkfree(FAR struct smart_struct_s *dev, int lineno)
             }
         }
 
-      /* Modifiy the freesector count to reflect the actual calculated freecount
+      /* Modify the freesector count to reflect the actual calculated freecount
        * to get us back in line.
        */
 
@@ -845,7 +845,7 @@ int smart_checkfree(FAR struct smart_struct_s *dev, int lineno)
 /****************************************************************************
  * Name: smart_reload
  *
- * Description:  Read the specified numer of sectors
+ * Description:  Read the specified number of sectors
  *
  ****************************************************************************/
 
@@ -880,7 +880,7 @@ static ssize_t smart_reload(struct smart_struct_s *dev, FAR uint8_t *buffer,
 /****************************************************************************
  * Name: smart_read
  *
- * Description:  Read the specified numer of sectors
+ * Description:  Read the specified number of sectors
  *
  ****************************************************************************/
 
@@ -2764,7 +2764,7 @@ static int smart_relocate_static_data(FAR struct smart_struct_s *dev, uint16_t b
   if (smart_get_wear_level(dev, block) >= SMART_WEAR_FULL_RELOCATE_THRESHOLD)
     {
       /* Okay, this block is getting too worn.  Move a minimum wear level
-       * block to it in it's entirity.
+       * block to it in it's entirety.
        */
 
       /* Scan all erase blocks (or until we find a minimum wear level block
@@ -4497,7 +4497,7 @@ static int smart_writesector(FAR struct smart_struct_s *dev,
   header = (FAR struct smart_sect_header_s *)dev->rwbuffer;
 
 #ifdef CONFIG_MTD_SMART_WEAR_LEVEL
-  /* Test if an adjustement to the wear levels is needed */
+  /* Test if an adjustment to the wear levels is needed */
 
   if (dev->minwearlevel >= SMART_WEAR_MIN_LEVEL ||
       (dev->minwearlevel > 0 && dev->maxwearlevel >= SMART_WEAR_REORG_THRESHOLD))

@@ -45,7 +45,7 @@ config NET_BLUETOOTH_BACKLOG
 		will be freed, preventing overrun at the cost of losing the oldest
 		frames.
 
-		NOTE: The special value of zero will disable all backlog checkes.
+		NOTE: The special value of zero will disable all backlog checks.
 
 endif # NET_BLUETOOTH
 endmenu # Bluetooth Socket Support

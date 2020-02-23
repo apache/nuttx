@@ -147,7 +147,7 @@ void up_irqinitialize(void)
 #warning Missing logic
 #endif
 
-  /* Attach and emable internal interrupts */
+  /* Attach and enable internal interrupts */
 
 #ifdef CONFIG_SMP
   /* Attach and enable the inter-CPU interrupt */

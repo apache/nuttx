@@ -215,7 +215,7 @@
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half CAN driver to the lower-half CAN driver via the co_ioctl()
- * method fo the CAN lower-half interface.  However, the lower-half driver
+ * method of the CAN lower-half interface.  However, the lower-half driver
  * must reserve a block of commands as follows in order prevent IOCTL
  * command numbers from overlapping.
  *
@@ -777,7 +777,7 @@ int can_txdone(FAR struct can_dev_s *dev);
  * Description:
  *   Called from the CAN interrupt handler at the completion of a send
  *   operation.  This interface is needed only for CAN hardware that
- *   supports queing of outgoing messages in a H/W FIFO.
+ *   supports queueing of outgoing messages in a H/W FIFO.
  *
  *   The CAN upper half driver also supports a queue of output messages in a
  *   S/W FIFO.  Messages are added to that queue when when can_write() is

@@ -76,7 +76,7 @@ extern uint8_t g_cpu1_intmap[ESP32_NCPUINTS];
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failre.
+ *   any failure.
  *
  ****************************************************************************/
 

@@ -77,7 +77,7 @@ config ARCH_SIM
 	select ONESHOT
 	select SERIAL_CONSOLE
 	---help---
-		Linux/Cywgin user-mode simulation.
+		Linux/Cygwin user-mode simulation.
 
 config ARCH_X86
 	bool "x86"
@@ -462,7 +462,7 @@ config ARCH_KERNEL_STACKSIZE
 	int "Kernel stack size"
 	default 1568
 	---help---
-		The common size of each process' kernel stack
+		The common size of each process's kernel stack
 
 endif # ARCH_KERNEL_STACK
 

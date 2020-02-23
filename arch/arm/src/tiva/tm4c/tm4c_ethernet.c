@@ -1100,7 +1100,7 @@ static int tiva_transmit(FAR struct tiva_ethmac_s *priv)
 
               txdesc->tdes0 |= (EMAC_TDES0_LS | EMAC_TDES0_IC);
 
-              /* This segement is, most likely, of fractional buffersize */
+              /* This segment is, most likely, of fractional buffersize */
 
               txdesc->tdes1  = lastsize;
               buffer        += lastsize;
@@ -1637,7 +1637,7 @@ static int tiva_recvframe(FAR struct tiva_ethmac_s *priv)
               dev->d_buf    = (uint8_t *)rxcurr->rdes2;
               rxcurr->rdes2 = (uint32_t)buffer;
 
-              /* Return success, remebering where we should re-start scanning
+              /* Return success, remembering where we should re-start scanning
                * and resetting the segment scanning logic
                */
 
@@ -3295,7 +3295,7 @@ static int tiva_phyinit(FAR struct tiva_ethmac_s *priv)
     }
 #endif
 
-#else /* Auto-negotion not selected */
+#else /* Auto-negotiation not selected */
 
   phyval = 0;
 #ifdef CONFIG_TIVA_ETHFD

@@ -89,7 +89,7 @@
 
 void stm32_usbinitialize(void)
 {
-  /* Does the STM32 F3 hava an external soft pull-up? */
+  /* Does the STM32 F3 have an external soft pull-up? */
 }
 
 /****************************************************************************

@@ -262,7 +262,7 @@ int nxmq_wait_send(mqd_t mqdes)
         }
 
       /* Yes... We will not return control until the message queue is
-       * available or we receive a signal or at timout occurs.
+       * available or we receive a signal or at timeout occurs.
        */
 
       else

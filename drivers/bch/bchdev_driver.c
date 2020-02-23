@@ -458,7 +458,7 @@ static int bch_unlink(FAR struct inode *inode)
 
   bch->unlinked = true;
 
-  /* If there are no open references to the drvier then teardown the BCH
+  /* If there are no open references to the driver then teardown the BCH
    * device now.
    */
 

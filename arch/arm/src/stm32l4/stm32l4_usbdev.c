@@ -1416,7 +1416,7 @@ static int stm32l4_wrrequest(struct stm32l4_usbdev_s *priv,
  *
  * Description:
  *   This function is called from the stm32l4_ep0out handler when the ep0state
- *   is EP0STATE_SETUP_OUT and uppon new incoming data is available in the
+ *   is EP0STATE_SETUP_OUT and upon new incoming data is available in the
  *   endpoint 0's buffer.  This function will simply copy the OUT data into
  *   ep0data.
  *
@@ -2214,7 +2214,7 @@ static void stm32l4_ep0out(struct stm32l4_usbdev_s *priv)
                                           * last set up command with the OUT
                                           * data
                                           */
-        priv->ep0state = EP0STATE_IDLE;  /* There is no notion of reciving OUT
+        priv->ep0state = EP0STATE_IDLE;  /* There is no notion of receiving OUT
                                           * data greater then the length of
                                           * CONFIG_USBDEV_SETUP_MAXDATASIZE
                                           * so we are done

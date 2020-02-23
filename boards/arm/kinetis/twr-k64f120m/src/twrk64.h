@@ -33,7 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * This header file is only accessible from the src directory.
- * For /arch/arm/src accessibilty use ../include/board.h instead.
+ * For /arch/arm/src accessibility use ../include/board.h instead.
  ****************************************************************************/
 
 #ifndef __BOARDS_ARM_KINETIS_TWR_K64F120M_SRC_TWRK64_H

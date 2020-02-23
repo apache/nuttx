@@ -209,7 +209,7 @@ void arm_boot(void)
 
   up_copyvectorblock();
 
-  /* Perform board-specific initialiation */
+  /* Perform board-specific initialization */
 
   imx_board_initialize();
 

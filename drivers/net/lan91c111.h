@@ -103,7 +103,7 @@
 #define RCR_RX_ABORT            0x0001 /* Set if a rx frame was aborted */
 #define RCR_PRMS                0x0002 /* Enable promiscuous mode */
 #define RCR_ALMUL               0x0004 /* When set accepts all multicast frames */
-#define RCR_RXEN                0x0100 /* IFF this is set, we can receive packets */
+#define RCR_RXEN                0x0100 /* IF this is set, we can receive packets */
 #define RCR_STRIP_CRC           0x0200 /* When set strips CRC from rx packets */
 #define RCR_ABORT_ENB           0x2000 /* When set will abort rx on collision */
 #define RCR_FILT_CAR            0x4000 /* When set filters leading 12 bit s of carrier */

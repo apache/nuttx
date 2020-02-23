@@ -1064,7 +1064,7 @@ static int stm32pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   if (priv->timtype == TIMTYPE_ADVANCED)
     {
       /* If a non-zero repetition count has been selected, then set the
-       * repitition counter to the count-1 (stm32pwm_start() has already
+       * repetition counter to the count-1 (stm32pwm_start() has already
        * assured us that the count value is within range).
        */
 
@@ -1545,7 +1545,7 @@ static int stm32pwm_interrupt(struct stm32_pwmtimer_s *priv)
       regval &= ~ATIM_BDTR_MOE;
       stm32pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, regval);
 
-      /* Disable first interrtups, stop and reset the timer */
+      /* Disable first interrupts, stop and reset the timer */
 
       stm32pwm_stop((FAR struct pwm_lowerhalf_s *)priv);
 

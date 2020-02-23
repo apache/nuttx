@@ -1051,7 +1051,7 @@ static void sai_worker(void *arg)
   while (sq_peek(&priv->done) != NULL)
     {
       /* Remove the buffer container from the done queue.  NOTE that
-       * interupts must be enabled to do this because the done queue is
+       * interrupts must be enabled to do this because the done queue is
        * also modified from the interrupt level.
        */
 
@@ -1334,7 +1334,7 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   flags = enter_critical_section();
   sq_addlast((sq_entry_t *)bfcontainer, &priv->pend);
 
-  /* Then start the next transfer.  If there is already a transfer in progess,
+  /* Then start the next transfer.  If there is already a transfer in progress,
    * then this will do nothing.
    */
 
@@ -1434,7 +1434,7 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   flags = enter_critical_section();
   sq_addlast((sq_entry_t *)bfcontainer, &priv->pend);
 
-  /* Then start the next transfer.  If there is already a transfer in progess,
+  /* Then start the next transfer.  If there is already a transfer in progress,
    * then this will do nothing.
    */
 

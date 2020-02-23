@@ -251,7 +251,7 @@
 #define MII_ADVERTISE_1000XASYMPAU   (1 << 8)  /* Bit 8:  Try 1000BASE-X asym pause */
 #define MII_ADVERTISE_100BASET4      (1 << 9)  /* Bit 9:  Try 100BASE-T4 */
 #define MII_ADVERTISE_FDXPAUSE       (1 << 10) /* Bit 10: Try full duplex flow control */
-#define MII_ADVERTISE_ASYMPAUSE      (1 << 11) /* Bit 11: Try asymetric pause */
+#define MII_ADVERTISE_ASYMPAUSE      (1 << 11) /* Bit 11: Try asymmetric pause */
 #define MII_ADVERTISE_RFAULT         (1 << 13) /* Bit 13: Remote fault supported */
 #define MII_ADVERTISE_LPACK          (1 << 14) /* Bit 14: Ack link partners response */
 #define MII_ADVERTISE_NXTPAGE        (1 << 15) /* Bit 15: Next page enabled */
@@ -290,7 +290,7 @@
 
 /* MII Auto-negotiation expansion register bit definitions */
 
-#define MII_EXPANSION_ANEGABLE       (1 << 0)  /* Bit 0: Link partner is auto-negotion able */
+#define MII_EXPANSION_ANEGABLE       (1 << 0)  /* Bit 0: Link partner is auto-negotiation able */
 #define MII_EXPANSION_PAGERECVD      (1 << 1)  /* Bit 1: New link code word in LPA ability reg */
 #define MII_EXPANSION_ENABLENPAGE    (1 << 2)  /* Bit 2: This enables npage words */
 #define MII_EXPANSION_NXTPAGEABLE    (1 << 3)  /* Bit 3: Link partner supports next page */
@@ -516,7 +516,7 @@
 #define KS8721_INTCS_LINKUP          (1 << 0)  /* Bit 0:  Link up occurred */
 #define KS8721_INTCS_REMFAULT        (1 << 1)  /* Bit 1:  Remote fault occurred */
 #define KS8721_INTCS_LINKDOWN        (1 << 2)  /* Bit 2:  Link down occurred */
-#define KS8721_INTCS_LPACK           (1 << 3)  /* Bit 3:  Link partner acknowlege occurred */
+#define KS8721_INTCS_LPACK           (1 << 3)  /* Bit 3:  Link partner acknowledge occurred */
 #define KS8721_INTCS_PDFAULT         (1 << 4)  /* Bit 4:  Parallel detect fault occurred */
 #define KS8721_INTCS_PGRCVD          (1 << 5)  /* Bit 5:  Page received occurred */
 #define KS8721_INTCS_RXERR           (1 << 6)  /* Bit 6:  Receive error occurred */

@@ -196,7 +196,7 @@ CONFIG_DEBUG_SYMBOLS = y (Set this option, using menuconfig only, DO NOT Enable 
 
 Flashing NuttX
 ===============
-Alternativly, NuttX binary can be flashed using Renesas flash programmer tool without using e2 studio/Cygwin
+Alternatively, NuttX binary can be flashed using Renesas flash programmer tool without using e2 studio/Cygwin
 
 Below are the steps mentioned to flash NuttX binary using Renesas flash programmer tool(RFP).
 

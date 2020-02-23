@@ -163,7 +163,7 @@ static void xmc4_dump_nvic(const char *msg, int irq)
  *       xmc4_dbgmonitor, xmc4_pendsv, xmc4_reserved
  *
  * Description:
- *   Handlers for various execptions.  None are handled and all are fatal
+ *   Handlers for various exceptions.  None are handled and all are fatal
  *   error conditions.  The only advantage these provided over the default
  *   unexpected interrupt handler is that they provide a diagnostic output.
  *

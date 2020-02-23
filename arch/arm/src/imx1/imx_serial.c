@@ -660,7 +660,7 @@ static int up_setup(struct uart_dev_s *dev)
   up_serialout(priv, UART_UBIR, den - 1);
   up_serialout(priv, UART_UBMR, num - 1);
 
-  /* Fixup the divisor, the value in the UFCR regiser is
+  /* Fixup the divisor, the value in the UFCR register is
    *
    *   000 = Divide input clock by 6
    *   001 = Divide input clock by 5
@@ -815,7 +815,7 @@ static void up_detach(struct uart_dev_s *dev)
  *   when an interrupt received on the 'irq'  It should call
  *   uart_transmitchars or uart_receivechar to perform the
  *   appropriate data transfers.  The interrupt handling logic\
- *   must be able to map the 'irq' number into the approprite
+ *   must be able to map the 'irq' number into the appropriate
  *   uart_dev_s structure in order to call these functions.
  *
  ****************************************************************************/
@@ -1057,7 +1057,7 @@ static bool up_txempty(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 #ifdef USE_EARLYSERIALINIT

@@ -938,7 +938,7 @@ static uint16_t sam_txfree(struct sam_emac_s *priv)
  *
  * Description:
  *   Allocate aligned TX and RX descriptors and buffers.  For the case of
- *   pre-allocated structures, the function degenerates to a few assignements.
+ *   pre-allocated structures, the function degenerates to a few assignments.
  *
  * Input Parameters:
  *   priv - The EMAC driver state
@@ -3360,7 +3360,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   regval |= EMAC_NCR_MPE;
   sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
 
-  /* Verify tht we can read the PHYID register */
+  /* Verify that we can read the PHYID register */
 
   ret = sam_phyread(priv, priv->phyaddr, MII_PHYID1, &phyid1);
   if (ret < 0)

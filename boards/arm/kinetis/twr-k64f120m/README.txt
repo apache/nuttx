@@ -118,12 +118,12 @@ Networking Support
 
   U2 is a 25 MHz oscillator (which may be disabled by setting J4), which clock is sent to U1.
   U1 has two clock output banks: 25MHz (CLKBx) and 50MHz (CLKAx).
-  J2 (ser board) is used to select the PHY clock source: 50MHz, 25MHz or CLCKOUT0 from K64. Set it to 25MHz.
+  J2 (set board) is used to select the PHY clock source: 50MHz, 25MHz or CLCKOUT0 from K64. Set it to 25MHz.
   In order to keep synchornized the PHY clock with the K64 clock, one can set J3 (default is open)
   to route CLOCKIN0 either from 25MHz or 50Mhz lines. In that case, J33 (main board) will have to be removed
-  and J32 (main board set) set to disable its 50MHz_OSC and use CLKIN0 provided by ser board.
+  and J32 (main board set) set to disable its 50MHz_OSC and use CLKIN0 provided by set board.
   J12 is by default set to RMII mode. In this case J2 should be placed to 50MHz clock
-  Note that in MII mode, MII0_TXER is required by kinetis driver, but not connected on ser board
+  Note that in MII mode, MII0_TXER is required by kinetis driver, but not connected on set board
 
   Ethernet MAC/KSZ8041NL PHY
   --------------------------

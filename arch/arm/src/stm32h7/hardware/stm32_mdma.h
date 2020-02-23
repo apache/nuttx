@@ -530,7 +530,7 @@
 
 /* MDMA channel x control register */
 
-#define MDMA_CCR_EN               (0)      /* Bit 0: Channel eanble / flag channel ready */
+#define MDMA_CCR_EN               (0)      /* Bit 0: Channel enable / flag channel ready */
 #define MDMA_CCR_TEIE             (1)      /* Bit 1: Transfer error interrupt enable */
 #define MDMA_CCR_CTCIE            (2)      /* Bit 2: Channel transfer complete interrupt enable */
 #define MDMA_CCR_BRTIE            (3)      /* Bit 3: Block repeat transfer interrupt enable */
@@ -607,7 +607,7 @@
 #define MDMA_CTCR_TLEN_MASK       (0x7f << MDMA_CTCR_TLEN_SHIFT)
 #  define MDMA_CTCR_TLEN(len)     (((len-1) << MDMA_CTCR_TLEN_SHIFT) & MDMA_CTCR_TLEN_MASK)
 #define MDMA_CTCR_PKE             (25) /* Bit 25: Pack enable */
-#define MDMA_CTCR_PAM_SHIFT       (26) /* Bits 26-27: Padding/alignement mode */
+#define MDMA_CTCR_PAM_SHIFT       (26) /* Bits 26-27: Padding/alignment mode */
 #define MDMA_CTCR_PAM_MASK        (3 << MDMA_CTCR_PAM_SHIFT)
 #  define MDMA_CTCR_PAM_RIGHT     (0 << MDMA_CTCR_PAM_SHIFT) /* 00: */
 #  define MDMA_CTCR_PAM_SINRIGHT  (1 << MDMA_CTCR_PAM_SHIFT) /* 01: */

@@ -132,7 +132,7 @@ GNU Toolchain Options
 
     CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
     CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_ARMV7A_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windos
+    CONFIG_ARMV7A_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windows
     CONFIG_ARMV7A_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
     CONFIG_ARMV7A_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
     CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
@@ -543,7 +543,7 @@ DRAMBOOT
 
   The boards/arm/sama5/sama5d4-ek/README.txt also describes variants AT25BOOT and
   SRAMBOOT.  This have not been ported to the SAMA5D3x-EK, but are available
-  if they are usefult too you.
+  if they are useful too you.
 
 NAND FLASH Memory Map
 ---------------------
@@ -553,7 +553,7 @@ NAND FLASH Memory Map
   0x0000:0000 - 0x0003:ffff: AT91BootStrap
   0x0004:0000 - 0x000b:ffff: U-Boot
   0x000c:0000 - 0x000f:ffff: U-Boot environment
-  0x0010:0000 - 0x0017:ffff: U-Boot environement redundant
+  0x0010:0000 - 0x0017:ffff: U-Boot environment redundant
   0x0018:0000 - 0x001f:ffff: Device tree (DTB)
   0x0020:0000 - 0x007f:ffff: NuttX
   0x0080:0000 - end:         Available for use as a NAND file system
@@ -646,7 +646,7 @@ Programming U-Boot
      - Press the "Send File" button
      - Close SAM-BA, remove the USB Device cable.
 
-  You should now be able to interrupt with U-Boot vie the DBGU interface.
+  You should now be able to interrupt with U-Boot via the DBGU interface.
 
 Load NuttX with U-Boot on AT91 boards
 -------------------------------------
@@ -1148,7 +1148,7 @@ Networking
 
     - One other thing: UDP support is required (CONFIG_NET_UDP).
 
-  Given those prerequisites, the newtork monitor can be selected with these additional settings.
+  Given those prerequisites, the network monitor can be selected with these additional settings.
 
     Networking Support -> Networking Device Support
       CONFIG_NETDEV_PHY_IOCTL=y             : Enable PHY ioctl support
@@ -1628,7 +1628,7 @@ USB High-Speed Host
 
     Drivers -> USB Host Driver Support
       CONFIG_USBHOST_HUB=y                 : Enable the hub class
-      CONFIG_USBHOST_ASYNCH=y              : Asynchonous I/O supported needed for hubs
+      CONFIG_USBHOST_ASYNCH=y              : Asynchronous I/O supported needed for hubs
 
     System Type -> USB High Speed Host driver options
       CONFIG_SAMA5_OHCI_NEDS=12            : You will probably want more pipes
@@ -2318,7 +2318,7 @@ I2C Tool
     Where <cmd> is one of:
 
       Show help     : ?
-      List busses   : bus
+      List buses   : bus
       List devices  : dev [OPTIONS] <first> <last>
       Read register : get [OPTIONS] [<repititions>]
       Show help     : help
@@ -2342,7 +2342,7 @@ I2C Tool
     o The I2C dev command may have bad side effects on your I2C devices.
       Use only at your own risk.
 
-    As an example, the I2C dev comman can be used to list all devices
+    As an example, the I2C dev command can be used to list all devices
     responding on TWI0 (the default) like this:
 
       nsh> i2c dev 0x03 0x77
@@ -3651,7 +3651,7 @@ Configurations
         configuration settings.
 
     15. You can enable the touchscreen and a touchscreen by following the
-        configuration instrcutions in the section entitled "Touchscreen
+        configuration instructions in the section entitled "Touchscreen
         Testing" above.
 
     16. The Real Time Clock/Calendar (RTC) may be enabled by reconfiguring NuttX.

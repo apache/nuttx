@@ -490,7 +490,7 @@ int usrsock_listen(FAR struct socket *psock, int backlog);
  *
  * Returned Value:
  *   Returns 0 (OK) on success.  On failure, it returns a negated errno
- *   value.  See accept() for a desrciption of the approriate error value.
+ *   value.  See accept() for a desrciption of the appropriate error value.
  *
  * Assumptions:
  *   The network is locked.

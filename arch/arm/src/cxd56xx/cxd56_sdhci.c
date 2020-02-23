@@ -573,7 +573,7 @@ static void cxd56_takesem(struct cxd56_sdiodev_s *priv)
  * Name: cxd56_configwaitints
  *
  * Description:
- *   Enable/disable SDIO interrupts needed to suport the wait function
+ *   Enable/disable SDIO interrupts needed to support the wait function
  *
  * Input Parameters:
  *   priv       - A reference to the SDIO device state structure
@@ -1955,7 +1955,7 @@ static int cxd56_sdio_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
  * Name: cxd56_blocksetup
  *
  * Description:
- *   Some hardward needs to be informed of the selected blocksize.
+ *   Some hardware needs to be informed of the selected blocksize.
  *
  * Input Parameters:
  *   dev      - An instance of the SDIO device interface
@@ -4516,7 +4516,7 @@ FAR struct sdio_dev_s *cxd56_sdhci_initialize(int slotno)
   struct cxd56_sdiodev_s *priv = &g_sdhcdev;
   DEBUGASSERT(slotno == 0);
 
-  /* Initalize the pins */
+  /* Initialize the pins */
 
   board_sdcard_pin_initialize();
 

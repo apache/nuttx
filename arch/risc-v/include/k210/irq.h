@@ -80,7 +80,7 @@
 #define K210_IRQ_MTIMER   (K210_IRQ_ASYNC + 7)  /* Machine Timer Int */
 #define K210_IRQ_MEXT     (K210_IRQ_ASYNC + 11) /* Machine External Int */
 
-/* Machine Grobal External Interrupt */
+/* Machine Global External Interrupt */
 
 #ifdef CONFIG_K210_WITH_QEMU
 #define K210_IRQ_UART0    (K210_IRQ_MEXT + 4)

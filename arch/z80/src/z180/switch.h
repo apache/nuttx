@@ -81,7 +81,7 @@
  * to implement nested interrupts, you would have to change the way that
  * g_current_regs/cbr is handled.  The savestate/savecbr variables would not work
  * for that purpose as implemented here because only the outermost nested
- * interrupt can result in a context switch (they can probabaly be deleted).
+ * interrupt can result in a context switch (they can probably be deleted).
  */
 
 #define DECL_SAVESTATE() \

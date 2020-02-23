@@ -103,7 +103,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
             {
               /* No.. return the ECONNRESET error now.  Otherwise,
                * process the received data and return ENOTCONN the
-               * next time that psock_recvfrom() is calle.
+               * next time that psock_recvfrom() is called.
                */
 
               return ret;

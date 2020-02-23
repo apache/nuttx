@@ -1477,7 +1477,7 @@ begin_packed_struct struct adc_hilo_rangeparm_s
 struct adc_int_message_s
 {
   uint8_t im_info;              /* 0: Bitmap
-                                 *    Bit 0: Vender specific,
+                                 *    Bit 0: Vendor specific,
                                  *    Bit 1: Interface or endpoint
                                  *    Bits 2-7: Reserved */
   uint8_t im_attr;              /* 1: The attribute that cause the interrupt */

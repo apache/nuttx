@@ -73,7 +73,7 @@
 #define DBGMCU_CR_STANDBY         (1 << 2)  /* Bit 2: Debug Standby mode */
 #define DBGMCU_CR_TRACEIOEN       (1 << 5)  /* Bit 5: Trace enabled */
 
-#define DBGMCU_CR_TRACEMODE_SHIFT (6)        /* Bits 7-6: Trace mode pin assignement */
+#define DBGMCU_CR_TRACEMODE_SHIFT (6)        /* Bits 7-6: Trace mode pin assignment */
 #define DBGMCU_CR_TRACEMODE_MASK  (3 << DBGMCU_CR_TRACEMODE_SHIFT)
 #define DBGMCU_CR_ASYNCH          (0 << DBGMCU_CR_TRACEMODE_SHIFT) /* Asynchronous Mode */
 

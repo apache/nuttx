@@ -971,7 +971,7 @@ static void sam_dma_wrsetup(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
         {
           privreq->inflight = remaining;
 
-          /* If the size is an exact multple of full packets, then note if
+          /* If the size is an exact multiple of full packets, then note if
            * we need to send a zero length packet next.
            */
 
@@ -2432,8 +2432,8 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
     }
 
   /* Check for end of channel transfer. END_TR_ST is set by hardware when
-   * the last packet transfer is complete iff END_TR_EN is set in the
-   * DMACONTROL rgister.  The request is complete.
+   * the last packet transfer is complete if END_TR_EN is set in the
+   * DMACONTROL register.  The request is complete.
    *
    * "Used for OUT transfers only.
    *

@@ -240,7 +240,7 @@ int vnc_server(int argc, FAR char *argv[])
   int display;
   int ret;
 
-  /* A single argument is expected:  A diplay port number in ASCII form */
+  /* A single argument is expected:  A display port number in ASCII form */
 
   if (argc != 2)
     {
@@ -344,7 +344,7 @@ int vnc_server(int argc, FAR char *argv[])
               continue;
             }
 
-          /* Let the framebuffer driver know that we are ready to preform
+          /* Let the framebuffer driver know that we are ready to perform
            * updates.
            */
 

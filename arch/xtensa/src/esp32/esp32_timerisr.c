@@ -69,7 +69,7 @@ static uint32_t g_tick_divisor;
  *
  ****************************************************************************/
 
-/* Return the current value of the cyle count register */
+/* Return the current value of the cycle count register */
 
 static inline uint32_t xtensa_getcount(void)
 {

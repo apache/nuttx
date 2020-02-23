@@ -105,7 +105,7 @@ const uint32_t g_gpiobase[STM32_NPORTS] =
  *
  * Assumptions:
  *   This function is called early in the initialization sequence so that
- *   no mutual exlusion is necessary.
+ *   no mutual exclusion is necessary.
  *
  ****************************************************************************/
 
@@ -124,7 +124,7 @@ void stm32_gpioinit(void)
  *
  * Returned Value:
  *   OK on success
- *   A negated errono valu on invalid port, or when pin is locked as ALT
+ *   A negated errono value on invalid port, or when pin is locked as ALT
  *   function.
  *
  * To-Do: Auto Power Enable

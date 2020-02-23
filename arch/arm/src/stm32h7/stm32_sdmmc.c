@@ -2804,7 +2804,7 @@ errout:
  *
  *   Events are automatically disabled once the callback is performed and no
  *   further callback events will occur until they are again enabled by
- *   calling this methos.
+ *   calling this method.
  *
  * Input Parameters:
  *   dev      - An instance of the SDIO device interface

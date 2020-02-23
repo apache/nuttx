@@ -248,7 +248,7 @@ static void usbhost_hport_deactivate(FAR struct usbhost_hubport_s *hport)
   hport->funcaddr = 0;
 
   /* If this is a downstream hub port, then there should be no class driver
-   * associated wit it.
+   * associated with it.
    */
 
   DEBUGASSERT(ROOTHUB(hport) || hport->devclass == NULL);

@@ -34,7 +34,7 @@ Status
 
   The basic port is complete.  A NuttShell (NSH) configuration exists for the
   STM32L-Discovery board.  A driver has been developed for the segment LCD on
-  board the STM32L-Discovery.  In the NSH configuration discription below,
+  board the STM32L-Discovery.  In the NSH configuration description below,
   there is information about how the basic NSH extension can be extended to
   use apps/examples/slcd to exercise the segment LCD.
 

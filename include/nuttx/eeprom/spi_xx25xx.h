@@ -40,7 +40,7 @@
  * Public Types
  ****************************************************************************/
 
-/* DO NOT CHANGE ORDER, IT MACHES CODE IN drivers/eeprom/spieeprom.c */
+/* DO NOT CHANGE ORDER, IT MATCHES CODE IN drivers/eeprom/spieeprom.c */
 
 enum eeprom_25xx_e
 {

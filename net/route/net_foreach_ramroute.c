@@ -88,7 +88,7 @@ int net_foreachroute_ipv4(route_handler_ipv4_t handler, FAR void *arg)
   for (route = g_ipv4_routes.head; ret == 0 && route != NULL; route = next)
     {
       /* Get the next entry in the to visit.  We do this BEFORE calling the
-       * handler because the hanlder may delete this entry.
+       * handler because the handler may delete this entry.
        */
 
       next = route->flink;
@@ -118,7 +118,7 @@ int net_foreachroute_ipv6(route_handler_ipv6_t handler, FAR void *arg)
   for (route = g_ipv6_routes.head; ret == 0 && route != NULL; route = next)
     {
       /* Get the next entry in the to visit.  We do this BEFORE calling the
-       * handler because the hanlder may delete this entry.
+       * handler because the handler may delete this entry.
        */
 
       next = route->flink;

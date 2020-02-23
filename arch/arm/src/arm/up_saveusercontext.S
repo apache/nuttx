@@ -83,7 +83,7 @@ up_saveusercontext:
 	/* Make sure that the return value will be non-zero (the
 	 * value of the other volatile registers don't matter --
 	 * r1-r3, ip).  This function is called through the
-	 * noraml C calling conventions and the values of these
+	 * normal C calling conventions and the values of these
 	 * registers cannot be assumed at the point of setjmp
 	 * return.
 	 */

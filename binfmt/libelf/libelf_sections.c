@@ -204,7 +204,7 @@ int elf_loadshdrs(FAR struct elf_loadinfo_s *loadinfo)
   shdrsize = (size_t)loadinfo->ehdr.e_shentsize * (size_t)loadinfo->ehdr.e_shnum;
   if (loadinfo->ehdr.e_shoff + shdrsize > loadinfo->filelen)
     {
-      berr("Insufficent space in file for section header table\n");
+      berr("Insufficient space in file for section header table\n");
       return -ESPIPE;
     }
 

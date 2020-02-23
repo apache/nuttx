@@ -80,7 +80,7 @@
 #define DS3231_I2C_ADDRESS 0x68
 
 /************************************************************************************
- * Priviate Types
+ * Private Types
  ************************************************************************************/
 
 /* This structure describes the state of the DS3231 chip.  Only a single RTC is
@@ -444,7 +444,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Construct the message */
 
-  /* Write starting with the seconds regiser */
+  /* Write starting with the seconds register */
 
   buffer[0] = DSXXXX_TIME_SECR;
 

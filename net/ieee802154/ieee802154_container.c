@@ -64,7 +64,7 @@
 
 static FAR struct ieee802154_container_s *g_free_container;
 
-/* Pool of pre-allocated meta-data stuctures */
+/* Pool of pre-allocated meta-data structures */
 
 static struct ieee802154_container_s
   g_container_pool[CONFIG_NET_IEEE802154_NCONTAINERS];

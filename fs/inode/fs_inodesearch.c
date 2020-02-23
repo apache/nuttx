@@ -244,7 +244,7 @@ static int _inode_search(FAR struct inode_search_s *desc)
   int ret = -ENOENT;
 
   /* Get the search path, skipping over the leading '/'.  The leading '/' is
-   * mandatory because only absolte paths are expected in this context.
+   * mandatory because only absolute paths are expected in this context.
    */
 
   DEBUGASSERT(desc != NULL && desc->path != NULL);

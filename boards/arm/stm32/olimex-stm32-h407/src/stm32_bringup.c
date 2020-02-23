@@ -85,7 +85,7 @@
  *   Otherwise CONFIG_BOARD_LATE_INITIALIZE=y:
  *     Called from board_late_initialize().
  *
- *   Otherise, bad news:  Never called
+ *   Otherwise, bad news:  Never called
  *
  ****************************************************************************/
 

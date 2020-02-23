@@ -206,7 +206,7 @@ static void tiva_dumpnvic(const char *msg, int irq)
  *       tiva_dbgmonitor, tiva_pendsv, tiva_reserved
  *
  * Description:
- *   Handlers for various execptions.  None are handled and all are fatal
+ *   Handlers for various exceptions.  None are handled and all are fatal
  *   error conditions.  The only advantage these provided over the default
  *   unexpected interrupt handler is that they provide a diagnostic output.
  *

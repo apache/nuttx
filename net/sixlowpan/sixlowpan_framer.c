@@ -143,7 +143,7 @@ static inline bool sixlowpan_eaddrnull(FAR const uint8_t *eaddr)
  *   meta    - Location to return the corresponding meta data.
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   Ok is returned on success; Otherwise a negated errno value is returned.
  *
  * Assumptions:
  *   Called with the network locked.

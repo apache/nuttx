@@ -526,7 +526,7 @@ static struct ili9341_dev_s g_lcddev[CONFIG_LCD_ILI9341_NINTERFACES] =
  * Name:  ili9341_getxres
  *
  * Description:
- *   Get horicontal resolution of the connected LCD driver depending on the
+ *   Get horizontal resolution of the connected LCD driver depending on the
  *   configured display orientation.
  *
  * Input Parameters:
@@ -534,7 +534,7 @@ static struct ili9341_dev_s g_lcddev[CONFIG_LCD_ILI9341_NINTERFACES] =
  *
  * Returned Value:
  *
- *   Horicontal resolution
+ *   Horizontal resolution
  *
  ****************************************************************************/
 
@@ -1167,7 +1167,7 @@ FAR struct lcd_dev_s *
           dev->setcontrast  = ili9341_setcontrast;
           priv->lcd         = lcd;
 
-          /* Initialze the LCD driver */
+          /* Initialize the LCD driver */
 
           ret = ili9341_hwinitialize(priv);
 

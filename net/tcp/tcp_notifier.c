@@ -75,7 +75,7 @@
  *           may be used later in a call to tcp_notifier_teardown().
  *   == 0  - There is already buffered read-ahead data.  No notification
  *           will be provided.
- *   < 0   - An unexpected error occurred and notification will ocur.  The
+ *   < 0   - An unexpected error occurred and notification will occur.  The
  *           returned value is a negated errno value that indicates the
  *           nature of the failure.
  *

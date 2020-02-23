@@ -1158,9 +1158,9 @@ static int bq2429x_input_current(FAR struct battery_charger_dev_s *dev,
  *   REG00[4] VINDPM 3.88-5.08V Default:4.36V
  *   REG01[3] Min Sys Voltage Range3.0-3.7V
  *   REG04[6] Charge Voltage Limit 3504-4400mV Default: 4208mV
- *   REG04[1] Battery Recharge Threhold 100/300mV Default 100mV
+ *   REG04[1] Battery Recharge Threshold 100/300mV Default 100mV
  *   REG06[4] BOOSTV - Boost Voltage 4550-5510mV Default 4998mV
- *   REG06[2] BHOT Boost Mode Termperature Monitor
+ *   REG06[2] BHOT Boost Mode Temperature Monitor
  *
  ****************************************************************************/
 

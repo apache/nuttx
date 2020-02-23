@@ -147,7 +147,7 @@
 /* Windows ******************************************************************/
 
 /* This structure represents one window.  This is the "base" form of the
- * opaque types NXWINDOW and NXTKWINDOW.  Any Window implementatin must
+ * opaque types NXWINDOW and NXTKWINDOW.  Any Window implementation must
  * be described with a structure that is at least cast-compatible with
  * struct nxbe_window_s.
  */

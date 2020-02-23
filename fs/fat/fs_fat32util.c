@@ -319,7 +319,7 @@ void fat_putuint16(FAR uint8_t *ptr, uint16_t value16)
 
 #ifdef CONFIG_ENDIAN_BIG
   /* If the target is big-endian then the bytes always have to be swapped so
-   * that the representation is litle endian in the file system.
+   * that the representation is little endian in the file system.
    */
 
   ptr[0] = val[1];
@@ -345,7 +345,7 @@ void fat_putuint32(FAR uint8_t *ptr, uint32_t value32)
 
 #ifdef CONFIG_ENDIAN_BIG
   /* If the target is big-endian then the bytes always have to be swapped so
-   * that the representation is litle endian in the file system.
+   * that the representation is little endian in the file system.
    */
 
   fat_putuint16(&ptr[0], val[1]);

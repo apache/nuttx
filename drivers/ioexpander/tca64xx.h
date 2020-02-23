@@ -224,7 +224,7 @@ struct tca64_dev_s
   WDOG_ID wdog;                      /* Timer used to poll for missed interrupts */
 #endif
 
-  ioe_pinset_t input;                /* Last input registeres */
+  ioe_pinset_t input;                /* Last input registers */
   ioe_pinset_t intstat;              /* Pending interrupts */
   ioe_pinset_t trigger;              /* Bit encoded: 0=level 1=edge */
   ioe_pinset_t level[2];             /* Bit encoded: 01=high/rising, 10 low/falling, 11 both */

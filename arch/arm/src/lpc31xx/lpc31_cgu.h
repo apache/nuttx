@@ -1009,7 +1009,7 @@
 #define LPC31_CGU_DYNSEL5              (LPC31_CGU_CSB_VBASE+LPC31_CGU_DYNSEL5_OFFSET)
 #define LPC31_CGU_DYNSEL6              (LPC31_CGU_CSB_VBASE+LPC31_CGU_DYNSEL6_OFFSET)
 
-/* CGU configuration (virtural) register address ************************************************/
+/* CGU configuration (virtual) register address *************************************************/
 /* Power and oscillator control */
 
 #define LPC31_CGU_POWERMODE            (LPC31_CGU_CFG_VBASE+LPC31_CGU_POWERMODE_OFFSET)

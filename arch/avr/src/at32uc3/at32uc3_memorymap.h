@@ -65,7 +65,7 @@
 #define AVR32_P3_BASE           0xc0000000 /* 512MB translated space, cacheable */
 #define AVR32_P4_BASE           0xe0000000 /* 512MB system space, non-cacheable */
 
-/* Reset vector addess */
+/* Reset vector address */
 
 #if defined(CONFIG_ARCH_CHIP_AT32UC3A)
 #  define AVR32_VECTOR_BASE     AVR32_P1_BASE

@@ -278,7 +278,7 @@
 #define PIT_REG_COUNTER2        0x42
 #define PIT_REG_COMMAND         0x43
 
-/* PIT command bit defintions */
+/* PIT command bit definitions */
 
 #  define PIT_OCW_BINCOUNT_BCD  (1 << 0) /* vs binary */
 #  define PIT_OCW_MODE_SHIFT    (1)

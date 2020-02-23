@@ -148,7 +148,7 @@ static FAR char *unique_chardev(void)
  *
  *   Errors that may be returned:
  *
- *     ENOMEM - Failed to create a temporay path name.
+ *     ENOMEM - Failed to create a temporary path name.
  *
  *   Plus:
  *

@@ -280,7 +280,7 @@
 
 /* DPLL synchronization busy */
 
-#define OSCCTRL_DPLLSYNCBUSY_ENABLE      (1 << 1)  /* Bit 1:  DPLL Enable synchonization status */
+#define OSCCTRL_DPLLSYNCBUSY_ENABLE      (1 << 1)  /* Bit 1:  DPLL Enable synchronization status */
 #define OSCCTRL_DPLLSYNCBUSY_DPLLRATIO   (1 << 2)  /* Bit 2:  DPLL Loop divider ration status */
 #define OSCCTRL_DPLLSYNCBUSY_DPLLPRESC   (1 << 3)  /* Bit 3:  DPLL prescaler synchronization status */
 

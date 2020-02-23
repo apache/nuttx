@@ -76,7 +76,7 @@ static bool errata_16(void)
 
 static bool errata_66(void)
 {
-  /* This piece of code is modifed from Nordic SDK , there is no document to
+  /* This piece of code is modified from Nordic SDK , there is no document to
    * describe how to get the errdata information
    */
 

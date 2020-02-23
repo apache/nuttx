@@ -371,7 +371,7 @@ extern "C"
  *   caller exclusive access to the DMA channel.
  *
  *   The naming convention in all of the DMA interfaces is that one side is the
- *   'peripheral' and the other is 'memory'.  Howerver, the interface could still
+ *   'peripheral' and the other is 'memory'.  However, the interface could still
  *   be used if, for example, both sides were memory although the naming would be
  *   awkward.
  *

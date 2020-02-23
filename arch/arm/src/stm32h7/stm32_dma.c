@@ -94,7 +94,7 @@
 #define BDMA_FIRST       (DMA2_LAST)
 #define BDMA_LAST        (BDMA_FIRST+BDMA_NCHAN)
 
-/* All availalbe DMA channels (streams from standard DMA and
+/* All available DMA channels (streams from standard DMA and
  * channels from BDMA and MDMA)
  */
 
@@ -156,7 +156,7 @@ struct stm32_dmach_s
 
 typedef FAR struct stm32_dmach_s *DMA_CHANNEL;
 
-/* DMA opertions */
+/* DMA operations */
 
 struct stm32_dma_ops_s
 {

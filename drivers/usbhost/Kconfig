@@ -171,7 +171,7 @@ config USBHOST_CDCACM_BULKONLY
 		By default, both the CDC/ACM compliant protocol and the reduced
 		protocol are supported.  This option is then most useful for testing
 		purposes.  The interrupt IN control interface will not be used even
-		if it is available; nor will EP0 class requestes.
+		if it is available; nor will EP0 class requests.
 
 endchoice # CDC/ACM Protocol
 
@@ -258,7 +258,7 @@ config USBHOST_CDCACM_TXBUFSIZE
 	default 128
 	---help---
 		This is the size of the serial buffer that will be used to hold
-		data waiting for tranmission.
+		data waiting for transmission.
 
 endif # USBHOST_CDCACM
 

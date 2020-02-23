@@ -317,7 +317,7 @@ config RX65N_EMAC0_NRXBUFFERS
 		descriptors that will be allocated  The selected value must be an
 		even power of 2.
 
-		NOTE that the defaut of 16 correspond to a total of only 2Kb of
+		NOTE that the default of 16 correspond to a total of only 2Kb of
 		RX buffering.  That can easily exceeded on a busy network or with
 		large packet MTUs.  You will know if this happens because you will
 		see the "Buffer Not Available (BNA)" receive error.

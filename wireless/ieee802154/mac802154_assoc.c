@@ -237,7 +237,7 @@ int mac802154_req_associate(MACHANDLE mac,
   txdesc->frametype = IEEE802154_FRAME_COMMAND;
   txdesc->ackreq = true;
 
-  /* Save a copy of the destination addressing infromation into the tx
+  /* Save a copy of the destination addressing information into the tx
    * descriptor.  We only do this for commands to help with handling their
    * progession.
    */
@@ -764,7 +764,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
        *
        * TODO: What is supposed to happen in this situation. Are we supposed
        * to accept the request? Are we supposed to Disassociate with the
-       * network as a convienience to the PAN Coordinator. So that it does
+       * network as a convenience to the PAN Coordinator. So that it does
        * not need to waste space holding our information?
        */
 

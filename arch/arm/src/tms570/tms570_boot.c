@@ -177,7 +177,7 @@ static inline void tms570_enable_ramecc(void)
  * Name: tms570_memory_initialize
  *
  * Description:
- *   Perform memroy initialization of selected RAMs
+ *   Perform memory initialization of selected RAMs
  *
  *   This function uses the system module's hardware for auto-initialization
  *   of memories and their associated protection schemes.

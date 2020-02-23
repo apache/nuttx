@@ -1076,7 +1076,7 @@ static ssize_t slcd_read(FAR struct file *filep, FAR char *buffer, size_t len)
       *buffer++ = g_slcdstate.buffer[i];
       ret++;
 
-      /* Check if the character is decorated with a folling period or colon */
+      /* Check if the character is decorated with a following period or colon */
 
       if (ret < len && g_slcdstate.buffer[i] != 0)
         {
@@ -1435,7 +1435,7 @@ static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   if (setup)
     {
-      /* Data is always avaialble to be read / Data can always be written */
+      /* Data is always available to be read / Data can always be written */
 
       fds->revents |= (fds->events & (POLLIN|POLLOUT));
       if (fds->revents != 0)

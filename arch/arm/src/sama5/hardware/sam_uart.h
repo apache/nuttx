@@ -92,7 +92,7 @@
 #endif
                                             /* 0x00ec-0xfc: Reserved (USART) */
 
-/* UART register adresses ***********************************************************************/
+/* UART register addresses **********************************************************************/
 
 #define SAM_UART0_CR                 (SAM_UART0_VBASE+SAM_UART_CR_OFFSET)
 #define SAM_UART0_MR                 (SAM_UART0_VBASE+SAM_UART_MR_OFFSET)
@@ -508,7 +508,7 @@
 #if defined(ATSAMA5D3) ||defined(ATSAMA5D4)
 /* USART Number of Errors Register (USART only) */
 
-#  define UART_NER_NBERRORS_SHIFT    (0)       /* Bits 0-7: Number of Errrors (USART only) */
+#  define UART_NER_NBERRORS_SHIFT    (0)       /* Bits 0-7: Number of Errors (USART only) */
 #  define UART_NER_NBERRORS_MASK     (0xff << UART_NER_NBERRORS_SHIFT)
 #endif
 

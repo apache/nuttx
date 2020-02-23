@@ -89,7 +89,7 @@
 #define AK09912_ASAX       0x60
 
 /* REGISTER: CNTL1
- * Enable or disable temparature measure or enable or disable Noise
+ * Enable or disable temperature measure or enable or disable Noise
  *  suppression filter.
  */
 

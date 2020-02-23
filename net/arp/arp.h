@@ -286,7 +286,7 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify);
  *   timeout occurs.
  *
  * Assumptions:
- *   This function is called from ARP send and mut execute with the network
+ *   This function is called from ARP send and must execute with the network
  *   un-locked.
  *
  ****************************************************************************/

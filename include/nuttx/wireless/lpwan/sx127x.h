@@ -107,7 +107,7 @@
  * - SF for LORA
  * - CR for LORA
  * - FREQ HOPPING
- * - IMPLICT HEADER for LORA
+ * - IMPLICIT HEADER for LORA
  */
 
 /* RX FIFO data *************************************************************/

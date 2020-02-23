@@ -198,7 +198,7 @@ static int nxflat_loadbinary(FAR struct binary_s *binp)
   binp->stacksize = loadinfo.stacksize;
 
   /* Add the ELF allocation to the alloc[] only if there is no address
-   * enironment.  If there is an address environment, it will automatically
+   * environment.  If there is an address environment, it will automatically
    * be freed when the function exits
    *
    * REVISIT:  If the module is loaded then unloaded, wouldn't this cause

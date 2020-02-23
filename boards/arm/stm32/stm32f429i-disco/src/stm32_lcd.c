@@ -84,7 +84,7 @@
                                       ILI9341_PIXEL_FORMAT_SET_DBI(5))
 
 /* DE Mode RCM = 2, Sync Mode RCM = 3
- * Interface Mode Controle
+ * Interface Mode Control
  *
  * EPL:         0 High enable for RGB interface
  * DPL:         1 data fetched at the falling time
@@ -418,7 +418,7 @@ static int stm32_ili9341_initialize(void)
  * Name: board_lcd_uninitialize
  *
  * Description:
- *   Unitialize the LCD Device.
+ *   Uninitialize the LCD Device.
  *
  * Input Parameters:
  *

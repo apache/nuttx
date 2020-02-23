@@ -1081,7 +1081,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
        /* FT80X_IOC_AUDIO:
-        *   Description:  Enable/disable an external audio amplifer.
+        *   Description:  Enable/disable an external audio amplifier.
         *   Argument:     0=disable; 1=enable.
         *   Returns:      None.
         */

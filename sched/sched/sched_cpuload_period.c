@@ -77,7 +77,7 @@
 #  define CONFIG_CPULOAD_ENTROPY 0
 #endif
 
-/* Calculate the nomimal sample interval in microseconds:
+/* Calculate the nominal sample interval in microseconds:
  *
  * nominal = (1,000,000 usec/sec) / Frequency cycles/sec) = Period usec/cycle
  */

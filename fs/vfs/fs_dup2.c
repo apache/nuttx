@@ -47,7 +47,7 @@
 #include "inode/inode.h"
 
 /* This logic in this applies only when both socket and file descriptors are
- * in that case, this function descriminates which type of dup2 is being
+ * in that case, this function discriminates which type of dup2 is being
  * performed.
  */
 

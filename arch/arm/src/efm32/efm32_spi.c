@@ -802,7 +802,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   if (frequency == priv->frequency)
     {
-      /* No... just return the actual frequency from the last calcualtion */
+      /* No... just return the actual frequency from the last calculation */
 
       actual = priv->actual;
     }
