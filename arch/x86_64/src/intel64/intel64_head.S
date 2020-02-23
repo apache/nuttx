@@ -91,6 +91,7 @@
     /* These are the page tables */
     .global     pdpt
     .global     pd
+    .global     kernel_pd
     .global     full_map_pd1
     .global     pt
 
@@ -144,36 +145,9 @@ start32:
     lea     pd,     %edi
     lea     pt,     %esi
 
-    // Populate the whole lower 1GB on 1:1 mapping
-    mov     $(X86_PAGE_GLOBAL | X86_PAGE_WR | X86_PAGE_PRESENT), %eax
-
-    // for ecx = 0...512 : Loop and setup the page directories
-    mov     $512,   %ecx
-pd_loop: 
-    mov     %esi,   %edx
-    or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %edx
-    mov     %edx, 0(%edi)
-    add     $(X86_PAGE_ENTRY_SIZE), %edi
-
-    // for ebx = 0...512: Loop and setup the page table of each page directory
-    mov     $512,   %ebx
-pt_loop:
-    mov     %eax, 0(%esi)
-    add     $(PAGE_SIZE), %eax
-    add     $(X86_PAGE_ENTRY_SIZE), %esi
-
-    // end for ebx
-    dec     %ebx
-    jnz     pt_loop
-
-    // end for ecx
-    dec     %ecx
-    jnz     pd_loop
-
-
-    // Popluate the upper 3GB as non-present
-    // for ecx = 0...512 * 3 : Loop and setup the page directories
-    mov     $0x600, %ecx // 512 * 3
+    // Popluate the lower 4GB as non-present
+    // for ecx = 0...512 * 4 : Loop and setup the page directories
+    mov     $0x800, %ecx // 512 * 3
 epd_loop: 
     mov     %esi,   %edx
     or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %edx
@@ -193,6 +167,36 @@ ept_loop:
     // end for ecx
     dec     %ecx
     jnz     epd_loop
+
+    // Temporary populate the lower 128MB on 1:1 mapping
+    lea     pd,     %edi
+    mov     $(X86_PAGE_GLOBAL | X86_PAGE_WR | X86_PAGE_PRESENT | X86_PAGE_HUGE), %eax
+
+    // for ecx = 0...64 : Loop and setup 64x 2MB page directories
+    mov     $64,   %ecx
+pd_loop: 
+    mov     %eax, 0(%edi)
+    add     $(HUGE_PAGE_SIZE), %eax
+    add     $(X86_PAGE_ENTRY_SIZE), %edi
+
+    // end for ecx
+    dec     %ecx
+    jnz     pd_loop
+
+    // Populate the 128MB after 4GB boundary with Global mapping to 1MB~ for kernel code
+    lea     kernel_pd,     %edi
+    mov     $(X86_PAGE_GLOBAL | X86_PAGE_WR | X86_PAGE_PRESENT | X86_PAGE_HUGE), %eax
+
+    // for ecx = 0...64 : Loop and setup 128MB, 64x 2MB page directories
+    mov     $64,   %ecx
+kpd_loop: 
+    mov     %eax, 0(%edi)
+    add     $(HUGE_PAGE_SIZE), %eax
+    add     $(X86_PAGE_ENTRY_SIZE), %edi
+
+    // end for ecx
+    dec     %ecx
+    jnz     kpd_loop
 
     // Enable PAE
     mov     %cr4,   %eax
@@ -287,9 +291,25 @@ clear_bss:
  *
  ****************************************************************************/
 
+    .section .text, "a"
     .type   __nxstart, @function
 
 __nxstart:
+    /* We are now in high memory, revoke the lower 128MB memory mapping */
+    lea     pd,     %edi
+    mov     $0,     %eax
+
+    // for ecx = 0...64 : Loop and setup 64x 2MB page directories
+    mov     $64,   %ecx
+npd_loop: 
+    mov     %eax, 0(%edi)
+    add     $(HUGE_PAGE_SIZE), %eax
+    add     $(X86_PAGE_ENTRY_SIZE), %edi
+
+    // end for ecx
+    dec     %ecx
+    jnz     npd_loop
+
     /* Initialize and start NuttX */
     movabs  $up_lowsetup,   %rbx
     call    *%rbx                          /* Low-level, pre-OS initialization */
@@ -365,6 +385,7 @@ pdpt:
     .quad    pd_2 + X86_PAGE_PRESENT + X86_PAGE_WR
     .quad    pd_3 + X86_PAGE_PRESENT + X86_PAGE_WR
     .quad    pd_4 + X86_PAGE_PRESENT + X86_PAGE_WR
+    .quad    kernel_pd + X86_PAGE_PRESENT + X86_PAGE_WR
 
     .align(PAGE_SIZE)
 pd:
@@ -380,6 +401,10 @@ pd_3:
 
     .align(PAGE_SIZE)
 pd_4:
+    .fill X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
+
+    .align(PAGE_SIZE)
+kernel_pd:
     .fill X86_NUM_PAGE_ENTRY, X86_PAGE_ENTRY_SIZE, 0
 
     .align(PAGE_SIZE)

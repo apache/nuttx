@@ -65,12 +65,14 @@ SECTIONS
     . = ALIGN(0x1000);
       _boot_end = .;
 
-    . += 0x3c000000;
+    . += 0x100000000;
     _kernel_virtual_start = .;
 
     .text : AT(_boot_end)
     {
         _stext = ABSOLUTE(.);
+        . = ALIGN(8);
+        KEEP(*(.multiboot))
         *(.text .text.*)
         *(.gnu.linkonce.t.*)
         _etext = ABSOLUTE(.);
