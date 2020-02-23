@@ -1,5 +1,5 @@
 /****************************************************************************
- * tools/zdsar.c
+ * tools/zds/zdsar.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -99,17 +99,6 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-enum slashmode_e
-{
-  MODE_FSLASH  = 0,
-  MODE_BSLASH  = 1,
-  MODE_DBLBACK = 2
-};
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -124,11 +113,11 @@ static int   g_debug      = 0;       /* Debug output enabled if >0 */
 static char  g_command[MAX_BUFFER];  /* Full librarian command */
 static char  g_initial_wd[MAX_PATH]; /* Initial working directory */
 static char  g_path[MAX_PATH];       /* Buffer for expanding paths */
-static char  g_objpath[MAX_PATH];    /* Path to the object files */
+static char  g_objpath[MAX_PATH];    /* Temporary for path generation */
 #ifdef HOST_CYGWIN
-static char  g_expand[MAX_EXPAND];   /* Expanded path */
-static char  g_dequoted[MAX_PATH];   /* De-quoted path */
-static char  g_posixpath[MAX_PATH];  /* Full POSIX path */
+static char  g_expand[MAX_EXPAND];   /* Temporary for expanded path */
+static char  g_dequoted[MAX_PATH];   /* Temporary for de-quoted path */
+static char  g_hostpath[MAX_PATH];   /* Temporary for host path conversions */
 #endif
 
 /****************************************************************************
@@ -352,7 +341,7 @@ static bool dequote_path(const char *winpath)
 #endif
 
 /* If using Cygwin with a Window's Toolchain, then we have to convert the
- * POSIX path to a Windows path.
+ * POSIX path to a Windows or POSIX path.
  */
 
 #ifdef HOST_CYGWIN
@@ -366,11 +355,11 @@ static const char *convert_path(const char *path, cygwin_conv_path_t what)
   quoted = dequote_path(path);
   if (quoted)
     {
-      retptr = g_posixpath;
+      retptr = g_hostpath;
     }
   else
     {
-      retptr = &g_posixpath[1];
+      retptr = &g_hostpath[1];
     }
 
   size = cygwin_conv_path(what | CCP_RELATIVE, g_dequoted, NULL, 0);
@@ -382,7 +371,7 @@ static const char *convert_path(const char *path, cygwin_conv_path_t what)
     }
 
   ret = cygwin_conv_path(what | CCP_RELATIVE, g_dequoted,
-                         &g_posixpath[1], MAX_PATH - 3);
+                         &g_hostpath[1], MAX_PATH - 3);
   if (ret < 0)
     {
       fprintf(stderr, "# ERROR: cygwin_conv_path '%s' failed: %s\n",
@@ -393,11 +382,11 @@ static const char *convert_path(const char *path, cygwin_conv_path_t what)
   if (quoted)
     {
       size++;
-      g_posixpath[0] = '"';
-      g_posixpath[size] = '"';
+      g_hostpath[0] = '"';
+      g_hostpath[size] = '"';
     }
 
-  g_posixpath[size + 1] = '\0';
+  g_hostpath[size + 1] = '\0';
   return retptr;
 }
 #endif
@@ -467,7 +456,7 @@ static void parse_args(int argc, char **argv)
   char *objpath = NULL;
   int argidx;
 
-  /* Accumulate ARFLAGS up to "--" */
+  /* Parse arguments */
 
   for (argidx = 1; argidx < argc; argidx++)
     {
@@ -753,6 +742,7 @@ static void do_archive(void)
    * to the librarian.
    */
 
+  lasts = NULL;
   for (; ; )
     {
       /* Copy the librarian into the command buffer */

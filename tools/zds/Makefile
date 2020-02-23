@@ -50,8 +50,8 @@ endif
 
 # Targets
 
-all: zdsar.exe
-default: zdsar.exe
+all: zdsar.exe zdsgen.exe
+default: all
 .PHONY: clean
 
 # Add CFLAGS=-g on the make command line to build debug versions
@@ -59,10 +59,15 @@ default: zdsar.exe
 CFLAGS = -O2 -Wall -Wstrict-prototypes -Wshadow -I.
 CFLAGS += -DHAVE_STRTOK_C=1
 
-# zdsar - Convert virtual addresses in nuttx.hex to physical addresses
+# zdsar - Wrapper for the ZDS-II librarian
 
-zdsar.exe: zdsar.c zdsar.c
+zdsar.exe: zdsar.c
 	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o zdsar.exe zdsar.c
+
+# zdsgen - Wrapper for the ZDS-II compiler and assembler
+
+zdsgen.exe: zdsgen.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o zdsgen.exe zdsgen.c
 
 clean:
 	@rm -f *.o *.a *.dSYM *~ .*.swp
