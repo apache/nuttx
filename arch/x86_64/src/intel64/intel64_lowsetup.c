@@ -79,6 +79,15 @@ void up_lowsetup(void)
   /* GDT is loaded with 64bit GDT  */
   /* Paging is enabled*/
 
+  /* Setup pointers for accessing Page table and GDT in high address */
+  pdpt = &pdpt_low + X86_64_LOAD_OFFSET;
+  pd   = &pd_low   + X86_64_LOAD_OFFSET;
+  pt   = &pt_low   + X86_64_LOAD_OFFSET;
+
+  ist64     = &ist64_low     + X86_64_LOAD_OFFSET;
+  gdt64     = &gdt64_low     + X86_64_LOAD_OFFSET;
+  gdt64_ist = &gdt64_ist_low + X86_64_LOAD_OFFSET;
+
   /* Do some checking on CPU compatibilities */
   x86_64_check_and_enable_capability();
 

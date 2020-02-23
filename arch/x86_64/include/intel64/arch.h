@@ -64,6 +64,8 @@
 
 #define MSR_MTRR_DEF_TYPE    0x000002ff
 # define MTRR_ENABLE        0x00000800
+ 
+#define X86_64_LOAD_OFFSET 0x100000000
 
 
 /* RFLAGS bits */
@@ -370,15 +372,23 @@ static inline uint32_t up_getgs()
  * Public Data
  ****************************************************************************/
 
-extern volatile uint64_t pdpt[512];
-extern volatile uint64_t pd[2048];
-extern volatile uint64_t pt[1048576];
+/* These are defined in intel64_head.S */
+extern volatile uint8_t pdpt_low;
+extern volatile uint8_t pd_low;
+extern volatile uint8_t pt_low;
 
-extern volatile uint32_t ist64;
-extern volatile uint64_t gdt64;
-extern volatile uint64_t gdt64_ist[2];
+extern volatile uint8_t ist64_low;
+extern volatile uint8_t gdt64_low;
+extern volatile uint8_t gdt64_ist_low;
 
-void* page_map[16];
+/* The actual address of the page table and gdt/ist after mapping the kernel in high address*/
+volatile uint64_t* pdpt;
+volatile uint64_t* pd;
+volatile uint64_t* pt;
+
+volatile uint32_t* ist64;
+volatile uint64_t* gdt64;
+volatile uint64_t* gdt64_ist;
 
 /****************************************************************************
  * Public Function Prototypes
