@@ -75,9 +75,20 @@
 #  endif
 #endif
 
-/* Maximum objects per librarian call */
+/* Maximum objects per librarian call.
+ *
+ * REVISIT:  The librarian is supposed to handle multiple object insertions
+ * per call, but my experience is that it is unreliable in that case.
+ */
 
-#define MAX_OBJECTS 64
+#define MAX_OBJECTS 1 /* 64 */
+
+/* Name of the host.  The ZDS-II toolchain runs only on Windows.  Therefore,
+ * the only options are (1) Windows native, or (2) Cygwin or environments
+ * that derive for Cygwin (like MSYS2).
+ */
+
+#define WINSEPARATOR '\\'
 
 #if defined(HOST_NATIVE)
 #  define SEPARATOR '\\'
@@ -102,21 +113,22 @@ enum slashmode_e
  * Private Data
  ****************************************************************************/
 
-static char   *g_ar        = NULL;   /* Full path to the librarian program */
-static char   *g_arflags   = NULL;   /* Flags to use with the librarian program */
-static char   *g_libpath   = NULL;   /* Path to the library */
-static char   *g_libname   = NULL;   /* Library file name*/
-static char   *g_objects   = NULL;   /* List of object files */
-static int     g_debug     = 0;      /* Debug output enabled if >0 */
+static char *g_current_wd = NULL;    /* Current working directory */
+static char *g_ar         = NULL;    /* Full path to the librarian program */
+static char *g_arflags    = NULL;    /* Flags to use with the librarian program */
+static char *g_libpath    = NULL;    /* Path to the library */
+static char *g_libname    = NULL;    /* Library file name*/
+static char *g_objects    = NULL;    /* List of object files */
+static int   g_debug      = 0;       /* Debug output enabled if >0 */
 
-static char   g_command[MAX_BUFFER]; /* Full librarian command */
-static char   g_wd[MAX_PATH];        /* Current working directory */
-static char   g_path[MAX_PATH];      /* Buffer for expanding paths */
-static char   g_objpath[MAX_PATH];   /* Path to the object files */
+static char  g_command[MAX_BUFFER];  /* Full librarian command */
+static char  g_initial_wd[MAX_PATH]; /* Initial working directory */
+static char  g_path[MAX_PATH];       /* Buffer for expanding paths */
+static char  g_objpath[MAX_PATH];    /* Path to the object files */
 #ifdef HOST_CYGWIN
-static char   g_expand[MAX_EXPAND];  /* Expanded path */
-static char   g_dequoted[MAX_PATH];  /* De-quoted path */
-static char   g_posixpath[MAX_PATH]; /* Full POSIX path */
+static char  g_expand[MAX_EXPAND];   /* Expanded path */
+static char  g_dequoted[MAX_PATH];   /* De-quoted path */
+static char  g_posixpath[MAX_PATH];  /* Full POSIX path */
 #endif
 
 /****************************************************************************
@@ -341,9 +353,9 @@ static bool dequote_path(const char *winpath)
  * POSIX path to a Windows path.
  */
 
-static const char *convert_path(const char *path)
-{
 #ifdef HOST_CYGWIN
+static const char *convert_path(const char *path, cygwin_conv_path_t what)
+{
   const char *retptr;
   ssize_t size;
   ssize_t ret;
@@ -359,8 +371,7 @@ static const char *convert_path(const char *path)
       retptr = &g_posixpath[1];
     }
 
-  size = cygwin_conv_path(CCP_POSIX_TO_WIN_A | CCP_RELATIVE, g_dequoted,
-                          NULL, 0);
+  size = cygwin_conv_path(what | CCP_RELATIVE, g_dequoted, NULL, 0);
   if (size > (MAX_PATH - 3))
     {
       fprintf(stderr, "# ERROR: POSIX path too long: %lu\n",
@@ -368,7 +379,7 @@ static const char *convert_path(const char *path)
       exit(EXIT_FAILURE);
     }
 
-  ret = cygwin_conv_path(CCP_POSIX_TO_WIN_A | CCP_RELATIVE, g_dequoted,
+  ret = cygwin_conv_path(what | CCP_RELATIVE, g_dequoted,
                          &g_posixpath[1], MAX_PATH - 3);
   if (ret < 0)
     {
@@ -386,6 +397,22 @@ static const char *convert_path(const char *path)
 
   g_posixpath[size + 1] = '\0';
   return retptr;
+}
+#endif
+
+static const char *convert_path_windows(const char *path)
+{
+#ifdef HOST_CYGWIN
+  return convert_path(path, CCP_POSIX_TO_WIN_A);
+#else
+  return path;
+#endif
+}
+
+static const char *convert_path_posix(const char *path)
+{
+#ifdef HOST_CYGWIN
+  return convert_path(path, CCP_WIN_A_TO_POSIX);
 #else
   return path;
 #endif
@@ -400,7 +427,7 @@ static void show_usage(const char *progname, const char *msg, int exitcode)
     }
 
   fprintf(stderr, "\n");
-  fprintf(stderr, "%s  [OPTIONS] --ar \"<AR>\" --library \"<LIBRARY>\" obj [obj [obj...]]\n",
+  fprintf(stderr, "%s [OPTIONS] --ar \"<AR>\" --library \"<LIBRARY>\" obj [obj [obj...]]\n",
           progname);
   fprintf(stderr, "\n");
   fprintf(stderr, "Where:\n");
@@ -481,7 +508,7 @@ static void parse_args(int argc, char **argv)
            * native mode.
            */
 
-          tmp_path = convert_path(argv[argidx]);
+          tmp_path = convert_path_posix(argv[argidx]);
           library  = strdup(tmp_path);
           if (library == NULL)
             {
@@ -531,13 +558,13 @@ static void parse_args(int argc, char **argv)
   if (g_debug)
     {
       fprintf(stderr, "Selections:\n");
-      fprintf(stderr, "  CWD            : [%s]\n", g_wd);
+      fprintf(stderr, "  CWD            : [%s]\n", g_initial_wd);
+      fprintf(stderr, "  Host Environ   : [%s]\n", HOSTNAME);
       fprintf(stderr, "  AR             : [%s]\n", g_ar ? g_ar : "(None)");
       fprintf(stderr, "  AR Flags       : [%s]\n", g_arflags ? g_arflags : "(None)");
       fprintf(stderr, "  Library        : [%s]\n", library ? library : "(None)");
       fprintf(stderr, "  Object Path    : [%s]\n", objpath ? objpath : "(None");
-      fprintf(stderr, "  Object Files   : [%s]\n", g_objects ? g_objects : "(None)");
-      fprintf(stderr, "  Host Environ   : [%s]\n\n", HOSTNAME);
+      fprintf(stderr, "  Object Files   : [%s]\n\n", g_objects ? g_objects : "(None)");
     }
 
   /* Check for required parameters */
@@ -557,8 +584,8 @@ static void parse_args(int argc, char **argv)
        * expects the library to be in the current working directory.
        */
 
+      g_libname = basename(library); /* Must come first */
       g_libpath = dirname(library);
-      g_libname = basename(library);
     }
 
   if (g_objects == NULL)
@@ -593,34 +620,35 @@ static void parse_args(int argc, char **argv)
         {
           /* Add the default working directory to the path */
 
-          /* Copy the obj_path */
+          /* Copy the initial working directory */
 
-          pathlen = strlen(g_wd);
+          pathlen = strlen(g_initial_wd);
           if (pathlen >= MAX_PATH)
             {
               fprintf(stderr, "ERROR: Working directory path is "
                               "too long [%d/%d]: %s\n",
-                      pathlen, MAX_PATH, g_wd);
+                      pathlen, MAX_PATH, g_initial_wd);
               exit(EXIT_FAILURE);
             }
 
-          strcpy(g_path, g_wd);
+          strcpy(g_path, g_initial_wd);
 
           /* Append a separator is one is not already present */
 
-          if (g_path[pathlen - 1] != SEPARATOR)
+          if (g_path[pathlen - 1] != WINSEPARATOR)
             {
-              pathlen++;
-              if (pathlen >= MAX_PATH)
+              int newlen = pathlen + 1;
+              if (newlen >= MAX_PATH)
                 {
                   fprintf(stderr, "ERROR: Object path is too long "
                           "with separator[%d/%d]: %s\n",
-                          pathlen, MAX_PATH, g_wd);
+                          newlen, MAX_PATH, g_initial_wd);
                   exit(EXIT_FAILURE);
                 }
 
-              g_path[pathlen] = SEPARATOR;
+              g_path[pathlen]     = WINSEPARATOR;
               g_path[pathlen + 1] = '\0';
+              pathlen             = newlen;
             }
         }
 
@@ -636,18 +664,30 @@ static void parse_args(int argc, char **argv)
 
       strcat(g_path, objpath);
 
-#ifdef HOST_CYGWIN
-      /* Convert the POSIX working directory to a Windows native path */
+      /* Convert the POSIX working directory to a Windows native path.  NOTE
+       * that convert_path_windows() is a no-op in Windows native mode.
+       */
 
-      hostpath = convert_path(g_path);
+      hostpath = convert_path_windows(g_path);
       strcpy(g_objpath, hostpath);
-#endif
+    }
+
+  /* The object was in the current working directory.  If a library path
+   * is NOT the current working directory, then the library path will now
+   * be the current working directory and the path to the objects will be
+   * the  working directory when the program was started.
+   */
+
+  else if (g_libpath != NULL && strcmp(g_libpath, ".") != 0)
+    {
+      const char *converted = convert_path_windows(g_initial_wd);
+      strcpy(g_objpath, converted);
     }
 
   if (g_debug)
     {
       fprintf(stderr, "Derived:\n");
-      fprintf(stderr, "  Abs Object Path: [%s]\n", g_objpath[0] != '\0' ? g_objpath : "(None");
+      fprintf(stderr, "  Object Path    : [%s]\n", g_objpath[0] != '\0' ? g_objpath : "(None");
       fprintf(stderr, "  Library Path   : [%s]\n", g_libpath ? g_libpath : "(None)");
       fprintf(stderr, "  Library Name   : [%s]\n\n", g_libname ? g_libname : "(None)");
     }
@@ -769,19 +809,20 @@ static void do_archive(void)
 
               /* Append a separator is one is not already present */
 
-              if (g_path[pathlen - 1] != SEPARATOR)
+              if (g_path[pathlen - 1] != WINSEPARATOR)
                 {
-                  pathlen++;
-                  if (pathlen >= MAX_PATH)
+                  int newlen = pathlen + 1;
+                  if (newlen >= MAX_PATH)
                     {
                       fprintf(stderr, "ERROR: Path is too long with "
                               "separator[%d/%d]: %s\n",
-                              pathlen, MAX_PATH, g_path);
+                              newlen, MAX_PATH, g_path);
                       exit(EXIT_FAILURE);
                     }
 
-                  g_path[pathlen] = SEPARATOR;
+                  g_path[pathlen]     = WINSEPARATOR;
                   g_path[pathlen + 1] = '\0';
+                  pathlen             = newlen;
                 }
             }
 
@@ -798,12 +839,16 @@ static void do_archive(void)
 
           strcat(g_path, object);
 
-          /* Check that a object file actually exists at this path */
+          /* Check that a object file actually exists at this path.  NOTE
+           * that convert_path_posix() is a no-op in Windows native mode.
+           */
 
-          converted = convert_path(g_path);
+          converted = convert_path_posix(g_path);
           ret = stat(converted, &buf);
           if (ret < 0)
             {
+              fprintf(stderr, "WARNING: Stat of object %s failed: %s\n",
+                      g_path, strerror(errno));
               continue;
             }
 
@@ -818,10 +863,10 @@ static void do_archive(void)
 
           /* Copy the librarian argument of form like:
            *
-           * <libname>=+-<objpath>
+           * <libname>=-+<objpath>
            */
 
-          pathlen   = 4;  /* For =+- and terminator */
+          pathlen   = 4;  /* For =-+ and terminator */
 
           expanded  = do_expand(g_path);
           pathlen  += strlen(expanded);
@@ -833,14 +878,14 @@ static void do_archive(void)
 
           if (totallen >= MAX_BUFFER)
             {
-              fprintf(stderr, "ERROR: object argument is too long [%d/%d]: %s=+-%s\n",
+              fprintf(stderr, "ERROR: object argument is too long [%d/%d]: %s=-+%s\n",
                       totallen, MAX_BUFFER, g_libname, expanded);
               exit(EXIT_FAILURE);
             }
 
           /* Append the next librarian command */
 
-          pathlen = snprintf(&g_command[cmdlen], MAX_BUFFER - cmdlen, "%s=+-%s",
+          pathlen = snprintf(&g_command[cmdlen], MAX_BUFFER - cmdlen, "%s=-+%s",
                              g_libname, expanded);
           cmdlen += pathlen;
 
@@ -852,44 +897,51 @@ static void do_archive(void)
             }
         }
 
-      /* Okay.. we have everything.  Add the object files to the library.  On
-       * a failure to start the compiler, system() will return -1;  Otherwise,
-       * the returned value from the compiler is in WEXITSTATUS(ret).
-       */
+      /* Handling the final command which may have not objects to insert */
 
-      if (g_debug)
+      if (nobjects > 0)
         {
-          fprintf(stderr, "Executing: %s\n", g_command);
-        }
+          /* Okay.. we have everything.  Add the object files to the library.  On
+           * a failure to start the compiler, system() will return -1;  Otherwise,
+           * the returned value from the compiler is in WEXITSTATUS(ret).
+           */
 
-      ret = system(g_command);
+          if (g_debug)
+            {
+              fprintf(stderr, "Executing: %s\n", g_command);
+            }
+
+          ret = system(g_command);
 #ifdef WEXITSTATUS
-      if (ret < 0 || WEXITSTATUS(ret) != 0)
-        {
+          if (ret < 0 || WEXITSTATUS(ret) != 0)
+            {
+              if (ret < 0)
+                {
+                  fprintf(stderr, "ERROR: system failed: %s\n",
+                                  strerror(errno));
+                }
+              else
+                {
+                  fprintf(stderr, "ERROR: %s failed: %d\n", g_ar,
+                          WEXITSTATUS(ret));
+                }
+
+              fprintf(stderr, "       command: %s\n", g_command);
+              exit(EXIT_FAILURE);
+            }
+#else
           if (ret < 0)
             {
               fprintf(stderr, "ERROR: system failed: %s\n", strerror(errno));
+              fprintf(stderr, "       command: %s\n", g_command);
+              exit(EXIT_FAILURE);
             }
-          else
-            {
-              fprintf(stderr, "ERROR: %s failed: %d\n", g_ar, WEXITSTATUS(ret));
-            }
-
-          fprintf(stderr, "       command: %s\n", g_command);
-          exit(EXIT_FAILURE);
-        }
-#else
-      if (ret < 0)
-        {
-          fprintf(stderr, "ERROR: system failed: %s\n", strerror(errno));
-          fprintf(stderr, "       command: %s\n", g_command);
-          exit(EXIT_FAILURE);
-        }
 #endif
 
-       /* We don't really know that the command succeeded... Let's assume
-        * that it did
-        */
+         /* We don't really know that the command succeeded... Let's assume
+          * that it did
+          */
+        }
 
        /* Check if we have more objects to process */
 
@@ -911,26 +963,18 @@ static void do_archive(void)
 int main(int argc, char **argv, char **envp)
 {
   char *wd;
-  int len;
   int ret;
 
   /* Get the current working directory */
 
-  wd = getcwd(g_wd, MAX_PATH);
+  wd = getcwd(g_initial_wd, MAX_PATH);
   if (wd == NULL)
     {
-      fprintf(stderr, "ERROR: getcwd failed: %d\n", errno);
+      fprintf(stderr, "ERROR: getcwd failed: %s\n", strerror(errno));
       return EXIT_FAILURE;
     }
 
-  len = strlen(wd);
-  if (len >= PATH_MAX)
-    {
-      fprintf(stderr, "ERROR: Current directory too long: [%s]\n", wd);
-      return EXIT_FAILURE;
-    }
-
-  strcpy(g_wd, wd);
+  g_current_wd = g_initial_wd;
 
   /* Parse command line parameters */
 
@@ -938,14 +982,16 @@ int main(int argc, char **argv, char **envp)
 
   /* Change to the directory containing the library */
 
-  if (g_libpath != NULL)
+  if (g_libpath != NULL && strcmp(g_libpath, ".") != 0)
     {
       ret = chdir(g_libpath);
       if (ret < 0)
         {
-          fprintf(stderr, "ERROR: getcwd failed: %d\n", errno);
+          fprintf(stderr, "ERROR: getcwd failed: %s\n", strerror(errno));
           return EXIT_FAILURE;
         }
+
+      g_current_wd = g_libpath;
     }
 
   /* Then generate dependencies for each path on the command line. */
