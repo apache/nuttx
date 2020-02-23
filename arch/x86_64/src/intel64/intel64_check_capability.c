@@ -1,12 +1,10 @@
 /****************************************************************************
- *  arch/x86_64/src/intel64/intel64_lowsetup.c
+ *  arch/x86_64/src/intel64/intel64_capability.c
  *
- *   Copyright (C) 2011-2012, 2015 Gregory Nutt,
- *                 2020 Chung-Fan Yang.
+ *   Copyright (C) 2020 Chung-Fan Yang.
  *   All rights reserved.
  *
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Chung-Fan Yang <sonic.tw.tp@gmail.com>
+ *   Author: Chung-Fan Yang <sonic.tw.tp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -65,35 +63,65 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowsetup
+ * Name: x86_64_check_capability
  *
  * Description:
- *   Called from intel64_head BEFORE starting the operating system in order
- *   perform any necessary, early initialization.
+ *   Called from up_lowsetup to check various CPU capabilities, matching the
+ *   RTOS config
  *
  ****************************************************************************/
 
-void up_lowsetup(void)
+void x86_64_check_and_enable_capability(void)
 {
-  /* we should be in long mode at this point*/
-  /* GDT is loaded with 64bit GDT  */
-  /* Paging is enabled*/
+  unsigned long ecx;
 
-  /* Do some checking on CPU compatibilities */
-  x86_64_check_and_enable_capability();
+  bool tsc_deadline;
+  bool sse3_xsave;
+  bool rdrand;
+  bool pcid;
 
-  /* perform board-specific initializations */
-  x86_64_boardinitialize();
+  asm volatile("cpuid" : "=c" (ecx) : "a" (1)
+      : "rbx", "rdx", "memory");
 
-  /* Early serial driver initialization */
+    /* Check timer availability */
+#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
+  tsc_deadline = !!(ecx & (1 << 24));
 
-  up_earlyserialinit();
-
-  x86_64_timer_calibrate_freq();
-
-#ifdef CONFIG_LIB_SYSCALL
-  enable_syscall();
+  if(!tsc_deadline)
+    goto err;
 #endif
 
+#ifdef CONFIG_ARCH_INTEL64_HAVE_SSE3
+  sse3_xsave = !!(ecx & (1 << 0));
+  sse3_xsave &= !!(ecx & (1 << 26));
+
+  if(!sse3_xsave)
+    goto err;
+
+  __enable_sse3();
+#endif
+
+#ifdef CONFIG_ARCH_INTEL64_HAVE_RDRAND
+  rdrand = !!(ecx & (1 << 30));
+
+  if(!rdrand)
+    goto err;
+#endif
+
+#ifdef CONFIG_ARCH_INTEL64_HAVE_PCID
+  pcid = !!(ecx & (1 << 17));
+
+  if(!pcid)
+    goto err;
+
+  __enable_pcid();
+#endif
+
+  return;
+
+err:
+    asm volatile ("cli");
+    asm volatile ("hlt");
+    goto err;
 }
 

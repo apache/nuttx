@@ -86,7 +86,7 @@ void x86_64_timer_calibrate_freq(void)
   tsc_deadline = !!(ecx & (1 << 24));
 
   if (tsc_deadline) {
-      tsc_freq = CONFIG_ARCH_INTEL64_TSC_FREQ_KHZ * 1000L;
+      tsc_freq = CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ * 1000L;
   } else {
       _alert("We only support tsc deadline");
       PANIC();

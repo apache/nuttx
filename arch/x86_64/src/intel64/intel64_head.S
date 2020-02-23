@@ -84,6 +84,8 @@
  ****************************************************************************/
     .global     __pmode_entry                   /* The 32bit protected mode entry */
     .global     __nxstart
+    .global     __enable_sse3
+    .global     __enable_pcid
     .global     nx_start                        /* nx_start is defined elsewhere */
     .global     up_lowsetup                     /* up_lowsetup is defined elsewhere */
     .global     g_idle_topstack                 /* The end of the idle stack, the start of the heap */
@@ -225,9 +227,8 @@ kpd_loop:
     mov     $(X86_CR0_PG | X86_CR0_WP | X86_CR0_PE),    %eax
     mov     %eax,   %cr0
 
-    // Enable PCID and FGSBASE
+    // Enable FGSBASE
     mov     %cr4,   %eax
-    or      $X86_CR4_PCIDE,     %eax
     or      $X86_CR4_FGSBASE,   %eax
     mov     %eax,   %cr4
 
@@ -249,38 +250,9 @@ start64:
     mov     %ax,    %fs
     mov     %ax,    %gs
 
-    // Enable SSE
-    mov     %cr0,   %rax
-    mov     $(X86_CR0_EM), %rbx
-    not     %rbx
-    and     %rbx,   %rax
-    or      $(X86_CR0_MP), %rax 
-    mov     %rax,   %cr0
-
-    // Enable Saving XMM context
-    mov     %cr4,   %rax
-    or      $(X86_CR4_OSXFSR | X86_CR4_XMMEXCPT),   %rax 
-    mov     %rax,   %cr4
-
-    // Setup MXCSR, masking all SSE precision exception
-    ldmxcsr     mxcsr_mem
-
-    //clear out bss section
-    movabs  $_sbss, %rbx
-    movabs  $_ebss, %rdx
-clear_bss:
-    movb    $0,    (%rbx)
-    inc     %rbx
-    cmp     %rbx,   %rdx
-    jne     clear_bss
-
-    // Properly setup RSP to idle stack
-    movabs  $idle_stack,    %rbx
-    add     $CONFIG_IDLETHREAD_STACKSIZE,   %rbx
-    mov     %rbx,   %rsp
-
     // Finally, we can start the OS
-    jmp     __nxstart
+    movabs  $__nxstart,   %rbx
+    jmp     *%rbx
     .size   __pmode_entry, . - __pmode_entry
 
 /****************************************************************************
@@ -310,12 +282,25 @@ npd_loop:
     dec     %ecx
     jnz     npd_loop
 
-    /* Initialize and start NuttX */
-    movabs  $up_lowsetup,   %rbx
-    call    *%rbx                          /* Low-level, pre-OS initialization */
+    //clear out bss section
+    movabs  $_sbss, %rbx
+    movabs  $_ebss, %rdx
+clear_bss:
+    movb    $0,    (%rbx)
+    inc     %rbx
+    cmp     %rbx,   %rdx
+    jne     clear_bss
 
-    movabs  $nx_start,   %rbx
-    call    *%rbx                           /* Start NuttX */
+    // Properly setup RSP to idle stack
+    movabs  $idle_stack,    %rbx
+    add     $CONFIG_IDLETHREAD_STACKSIZE,   %rbx
+    mov     %rbx,   %rsp
+
+
+    /* Initialize and start NuttX */
+    call    up_lowsetup                     /* Low-level, pre-OS initialization */
+
+    call    nx_start                        /* Start NuttX */
 
     /* NuttX will not return */
     /* We should never end up here */
@@ -326,6 +311,59 @@ hang:
     hlt                                    /* Halt machine should NuttX return */
     jmp    hang
     .size    __nxstart, . - __nxstart
+
+
+/****************************************************************************
+ * Name: __enable_sse3
+ *
+ * Description:
+ *   Do low-level initialization SSE related processor setting
+ *
+ ****************************************************************************/
+
+    .type   __enable_sse3, @function
+
+__enable_sse3:
+    // Enable SSE
+    mov     %cr0,   %rax
+    mov     $(X86_CR0_EM), %rbx
+    not     %rbx
+    and     %rbx,   %rax
+    or      $(X86_CR0_MP), %rax 
+    mov     %rax,   %cr0
+
+    // Enable Saving XMM context
+    mov     %cr4,   %rax
+    or      $(X86_CR4_OSXFSR | X86_CR4_XMMEXCPT),   %rax 
+    mov     %rax,   %cr4
+
+    // Setup MXCSR, masking all SSE precision exception
+    ldmxcsr     mxcsr_mem
+
+    ret
+
+    .size    __enable_sse3, . - __enable_sse3
+
+
+/****************************************************************************
+ * Name: __enable_pcid
+ *
+ * Description:
+ *   Enable PCID support
+ *
+ ****************************************************************************/
+
+    .type   __enable_pcid, @function
+
+__enable_pcid:
+    // Enable PCID and FGSBASE
+    mov     %cr4,   %rax
+    or      $X86_CR4_PCIDE,     %rax
+    mov     %rax,   %cr4
+
+    ret
+
+    .size    __enable_pcid, . - __enable_pcid
 
 /****************************************************************************
  * .data
