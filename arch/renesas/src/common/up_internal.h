@@ -158,13 +158,16 @@ void up_vectorfiq(void);
 
 /* Defined in xyz_serial.c */
 
+#ifdef USE_EARLYSERIALINIT
 void up_earlyconsoleinit(void);
+#endif
+
+#ifdef USE_SERIALDRIVER
 void up_consoleinit(void);
+#endif
 
 #ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
-#else
-#  define rpmsg_serialinit()
 #endif
 
 /* Defined in xyz_watchdog.c */

@@ -145,14 +145,15 @@ void up_addregion(void);
 /* Defined in xyz_serial.c */
 
 #ifdef USE_SERIALDRIVER
-void up_earlyserialinit(void);
 void up_serialinit(void);
+#endif
+
+#ifdef USE_EARLYSERIALINIT
+void up_earlyserialinit(void);
 #endif
 
 #ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
-#else
-#  define rpmsg_serialinit()
 #endif
 
 /* Defined in xyz_irq.c */
