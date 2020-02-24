@@ -88,6 +88,8 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                        int flags, FAR struct sockaddr *from,
                        FAR socklen_t *fromlen)
 {
+  ssize_t ret;
+
   /* Verify that non-NULL pointers were passed */
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -116,7 +118,23 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   DEBUGASSERT(psock->s_sockif != NULL &&
              psock->s_sockif->si_recvfrom != NULL);
 
-  return psock->s_sockif->si_recvfrom(psock, buf, len, flags, from, fromlen);
+  /* Save *fromlen before calling si_recvfrom() */
+
+#ifdef CONFIG_NET_IPv4
+  socklen_t reqlen = *fromlen;
+#endif
+
+  ret = psock->s_sockif->si_recvfrom(psock, buf, len,
+                                     flags, from, fromlen);
+
+#ifdef CONFIG_NET_IPv4
+  if (-1 != ret)
+    {
+      net_clear_sinzero(from, reqlen);
+    }
+#endif
+
+  return ret;
 }
 
 /****************************************************************************

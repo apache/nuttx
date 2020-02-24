@@ -147,6 +147,12 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   DEBUGASSERT(psock->s_sockif != NULL && psock->s_sockif->si_accept != NULL);
 
+  /* Save *addrlen before calling si_accept() */
+
+#ifdef CONFIG_NET_IPv4
+  socklen_t reqlen = *addrlen;
+#endif
+
   net_lock();
   ret = psock->s_sockif->si_accept(psock, addr, addrlen, newsock);
   if (ret < 0)
@@ -154,6 +160,10 @@ int psock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       nerr("ERROR: si_accept failed: %d\n", ret);
       goto errout_with_lock;
     }
+
+#ifdef CONFIG_NET_IPv4
+  net_clear_sinzero(addr, reqlen);
+#endif
 
   /* Mark the new socket as connected. */
 

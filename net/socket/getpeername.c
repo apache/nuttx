@@ -94,6 +94,8 @@
 int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
                       FAR socklen_t *addrlen)
 {
+  int ret;
+
   /* Verify that the psock corresponds to valid, allocated socket */
 
   if (psock == NULL || psock->s_crefs <= 0)
@@ -121,7 +123,22 @@ int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
       return -EOPNOTSUPP;
     }
 
-  return psock->s_sockif->si_getpeername(psock, addr, addrlen);
+  /* Save *addrlen before calling si_getpeername() */
+
+#ifdef CONFIG_NET_IPv4
+  socklen_t reqlen = *addrlen;
+#endif
+
+  ret = psock->s_sockif->si_getpeername(psock, addr, addrlen);
+
+#ifdef CONFIG_NET_IPv4
+  if (-1 != ret)
+    {
+      net_clear_sinzero(addr, reqlen);
+    }
+#endif
+
+  return ret;
 }
 
 /****************************************************************************

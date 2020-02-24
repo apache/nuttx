@@ -479,6 +479,26 @@ FAR struct iob_s *net_ioballoc(bool throttled, enum iob_user_e consumerid);
 int net_checksd(int fd, int oflags);
 
 /****************************************************************************
+ * Name: net_clear_sinzero()
+ *
+ * Description:
+ *   In IPv4, sin_zero field exists in sockaddr_in for padding and should
+ *   be set to zero.
+ *
+ * Input Parameters:
+ *   from    - Address of source (may be NULL)
+ *   fromlen - The length of the address structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_IPv4
+void net_clear_sinzero(FAR struct sockaddr *from, socklen_t len);
+#endif
+
+/****************************************************************************
  * Name: net_initlist
  *
  * Description:
