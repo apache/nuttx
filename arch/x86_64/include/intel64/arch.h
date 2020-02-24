@@ -55,16 +55,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* x86_64 MSRs */
-
-#define MSR_FS_BASE 0xc0000100 /* 64bit FS base */
-
-#define MSR_EFER        0xc0000080
-# define EFER_LME        0x00000100
-
-#define MSR_MTRR_DEF_TYPE    0x000002ff
-# define MTRR_ENABLE        0x00000800
- 
 #define X86_64_LOAD_OFFSET 0x100000000
 
 
@@ -158,6 +148,28 @@
 #define X86_64_CPUID_01_TSCDEA (1 << 24)
 #define X86_64_CPUID_01_XSAVE  (1 << 26)
 #define X86_64_CPUID_01_RDRAND (1 << 30)
+
+/* MSR Definitions */
+
+#define MSR_FS_BASE             0xc0000100 /* 64bit FS base */
+
+#define MSR_EFER                0xc0000080
+# define EFER_LME               0x00000100
+
+#define MSR_MTRR_DEF_TYPE       0x000002ff
+# define MTRR_ENABLE            0x00000800
+
+#define MSR_IA32_TSC_DEADLINE   0x6e0
+
+#define MSR_X2APIC_ID           0x802
+#define MSR_X2APIC_SPIV         0x80f
+#define MSR_X2APIC_LVTT         0x832
+#define MSR_X2APIC_TMICT        0x838
+#define MSR_X2APIC_TMCCT        0x839
+#define MSR_X2APIC_TDCR         0x83e
+
+/* APIC related Definition */
+#define LVTT_TSC_DEADLINE  (1 << 18)
 
 #define BITS_PER_LONG    64
 

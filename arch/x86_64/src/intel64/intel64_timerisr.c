@@ -68,17 +68,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-#define NS_PER_USEC		1000UL
-#define NS_PER_MSEC		1000000UL
-#define NS_PER_SEC		1000000000UL
-
-#define IA32_TSC_DEADLINE	0x6e0
-
-#define X2APIC_LVTT		0x832
-#define LVTT_TSC_DEADLINE	(1 << 18)
-#define X2APIC_TMICT		0x838
-#define X2APIC_TMCCT		0x839
-#define X2APIC_TDCR		0x83e
+#define NS_PER_USEC    1000UL
+#define NS_PER_MSEC    1000000UL
+#define NS_PER_SEC    1000000000UL
 
 /****************************************************************************
  * Private Data
@@ -107,9 +99,9 @@ void apic_timer_set(unsigned long timeout_ns)
   unsigned long long ticks =
     (unsigned long long)timeout_ns * x86_64_timer_freq / NS_PER_SEC;
 #ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
-    write_msr(IA32_TSC_DEADLINE, rdtsc() + ticks);
+    write_msr(MSR_IA32_TSC_DEADLINE, rdtsc() + ticks);
 #else
-    write_msr(X2APIC_TMICT, ticks);
+    write_msr(MSR_X2APIC_TMICT, ticks);
 #endif
 }
 
@@ -151,10 +143,10 @@ void up_timer_initialize(void)
   (void)irq_attach(IRQ0, (xcpt_t)intel64_timerisr, NULL);
 
 #ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
-  vector |= LVTT_TSC_DEADLINE;
+  vector |= MSR_X2APIC_LVTT_TSC_DEALINE;
 #endif
 
-  write_msr(X2APIC_LVTT, vector);
+  write_msr(MSR_X2APIC_LVTT, vector);
 
   asm volatile("mfence" : : : "memory");
 

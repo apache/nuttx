@@ -62,8 +62,6 @@
 
 #define IRQ_STACK_SIZE 0x2000
 
-#define X2APIC_SPIV		0x80f
-
 #define IOAPIC_BASE             ((void *)0xfec00000)
 #define IOAPIC2_BASE             ((void *)0xfec01000)
 #define IOAPIC_REG_INDEX        0x00
@@ -200,7 +198,7 @@ static void up_ist_init(void)
 
 static void up_apic_init(void)
 {
-  write_msr(X2APIC_SPIV, 0x1ff);
+  write_msr(MSR_X2APIC_SPIV, 0x1ff);
 }
 
 /****************************************************************************
