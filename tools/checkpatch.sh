@@ -26,9 +26,9 @@ usage() {
   echo ""
   echo "Options:"
   echo "-h"
-  echo "-r range check only (used with -p and -c)"
+  echo "-r range check only (used with -p and -g)"
   echo "-p <patch list> (default)"
-  echo "-c <commit list>"
+  echo "-g <commit list>"
   echo "-f <file list>"
   echo "-  read standard input mainly used by git pre-commit hook as below:"
   echo "   git diff --cached | ./tools/checkpatch.sh -"
@@ -106,7 +106,7 @@ while [ ! -z "$1" ]; do
     patches=$@
     break
     ;;
-  -c )
+  -g )
     shift
     commits=$@
     break
