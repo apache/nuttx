@@ -383,4 +383,52 @@ void stm32_pwr_configurewkup(uint32_t pin, bool en, bool rising, uint32_t pull)
 
   leave_critical_section(flags);
 }
+
+/************************************************************************************
+ * Name: stm32_pwr_setvbatcharge
+ *
+ * Description:
+ *   Configures the internal charge resistor to charge a battery attached to
+ *   the VBAT pin.
+ *
+ *
+ * Input Parameters:
+ *   enable    - Enables the charge resistor if true, disables it if false
+ *   resistor  - Sets charge resistor to 1.5 KOhm if true, sets it to 5 KOhm if false.
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+void stm32_pwr_setvbatcharge(bool enable, bool resistor)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  flags = enter_critical_section();
+
+  regval      = stm32_pwr_getreg(STM32_PWR_CR3_OFFSET);
+
+  if (enable)
+    {
+      regval |= STM32_PWR_CR3_VBE;
+    }
+  else
+    {
+      regval &= ~STM32_PWR_CR3_VBE;
+    }
+
+  if (resistor)
+    {
+      regval |= STM32_PWR_CR3_VBRS;
+    }
+  else
+    {
+      regval &= ~STM32_PWR_CR3_VBRS;
+    }
+
+  stm32_pwr_putreg(STM32_PWR_CR3_OFFSET, regval);
+
+  leave_critical_section(flags);
+}
 #endif /* CONFIG_STM32_PWR */

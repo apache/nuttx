@@ -148,6 +148,24 @@ void stm32_pwr_enablebreg(bool regon);
 
 void stm32_pwr_configurewkup(uint32_t pin, bool en, bool rising, uint32_t pull);
 
+/************************************************************************************
+ * Name: stm32_pwr_setvbatcharge
+ *
+ * Description:
+ *   Configures the internal charge resistor to charge a battery attached to
+ *   the VBAT pin.
+ *
+ *
+ * Input Parameters:
+ *   enable    - Enables the charge resistor if true, disables it if false
+ *   resistor  - Sets charge resistor to 1.5 KOhm if true, sets it to 5 KOhm if false.
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+void stm32_pwr_setvbatcharge(bool enable, bool resistor);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
