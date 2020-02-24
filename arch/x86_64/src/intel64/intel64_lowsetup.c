@@ -84,9 +84,8 @@ void up_lowsetup(void)
   pd   = &pd_low   + X86_64_LOAD_OFFSET;
   pt   = &pt_low   + X86_64_LOAD_OFFSET;
 
-  ist64     = &ist64_low     + X86_64_LOAD_OFFSET;
-  gdt64     = &gdt64_low     + X86_64_LOAD_OFFSET;
-  gdt64_ist = &gdt64_ist_low + X86_64_LOAD_OFFSET;
+  ist64     = (struct ist_s*)((void*)&ist64_low           + X86_64_LOAD_OFFSET);
+  gdt64     = (struct gdt_entry_s*)((void*)&gdt64_low     + X86_64_LOAD_OFFSET);
 
   /* reload the GDTR with mapped high memory address */
   setgdt(gdt64, (uintptr_t)(&gdt64_low_end - &gdt64_low) - 1);

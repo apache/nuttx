@@ -87,11 +87,16 @@
 
 
 /* Starting from third selector to confirm the syscall interface */
-#define X86_GDT_CODE_SEL_NUM    3
-# define X86_GDT_CODE_SEL       (1 << X86_GDT_CODE_SEL_NUM)
+#define X86_GDT_ENTRY_SIZE      0x8
 
-#define X86_GDT_DATA_SEL_NUM    4
-# define X86_GDT_DATA_SEL       (1 << X86_GDT_DATA_SEL_NUM)
+#define X86_GDT_CODE_SEL_NUM    1
+# define X86_GDT_CODE_SEL       (X86_GDT_CODE_SEL_NUM * X86_GDT_ENTRY_SIZE)
+
+#define X86_GDT_DATA_SEL_NUM    2
+# define X86_GDT_DATA_SEL       (X86_GDT_DATA_SEL_NUM * X86_GDT_ENTRY_SIZE)
+
+#define X86_GDT_ISTL_SEL_NUM    6
+#define X86_GDT_ISTH_SEL_NUM    (X86_GDT_ISTL_SEL_NUM + 1)
 
 #define X86_GDT_BASE      0x0000000000000000
 #define X86_GDT_LIMIT     0x000f00000000ffff
@@ -206,6 +211,33 @@ begin_packed_struct struct idt_ptr_s
   uint64_t base;             /* The address of the first GDT entry */
 } end_packed_struct;
 
+
+/* GDT data structures ******************************************************
+ *
+ * The Global Descriptor Table (GDT) is a data structure used by the x86
+ * architecture to implement segments and privilege levels. The GDT is used
+ * by the processor to determine current privilege level and memory access right.
+ */
+
+begin_packed_struct struct gdt_entry_s
+{
+  uint16_t limit_low;            /* Lower 16-bits of segment limit */
+  uint32_t base_low:24;          /* Lower 24-bits of base address */
+  uint8_t  AC:1;                 /* 1: CPU accessed this segement */
+  uint8_t  RW:1;                 /* 1: Data Segement 0: Code Segement */
+  uint8_t  DC:1;                 /* Direction bit/Conforming bit.  */
+  uint8_t  EX:1;                 /* 1: Segment can be executed  */
+  uint8_t  S:1;                  /* S: 0:TSS 1:Code/Data Segement */
+  uint8_t  DPL:2;                /* DPL */
+  uint8_t  P:1;                  /* Present? 1:Segment is preset */
+  uint8_t  limit_high:4;         /* Upper 4-bits of segment limit */
+  uint8_t  RESV:1;               /* Reserved */
+  uint8_t  L:1;                  /* 1: Long Mode 0: IA32e Mode */
+  uint8_t  SZ:1;                 /* 1: 32bit protected mode 0: 16bit protected mode  */
+  uint8_t  GR:1;                 /* 0: Byte Granularity 1: 4KB Granularity  */
+  uint32_t base_high:8;          /* Upper 8-bits of base address */
+} end_packed_struct;
+
 /* A struct describing a pointer to an array of global descriptors.  This is
  * in a format suitable for giving to 'lgdt'.
  */
@@ -215,6 +247,34 @@ begin_packed_struct struct gdt_ptr_s
   uint16_t limit;
   uint64_t base;             /* The address of the first GDT entry */
 } end_packed_struct;
+
+/* IST data structures ******************************************************
+ *
+ * The Interrupt Stack Table (GDT) is a data structure used by the x86-64
+ * architecture to automatically switch stack on interrupt and privilege change.
+ * It allows setting up to 7 different stack for interrupts.
+ */
+
+begin_packed_struct struct ist_s
+{
+  uint32_t reserved1;            /* reserved */
+  uint64_t RSP0;                 /* Stack for Ring 0 */
+  uint64_t RSP1;                 /* Stack for Ring 1 */
+  uint64_t RSP2;                 /* Stack for Ring 2 */
+  uint64_t reserved2;            /* reserved */
+  uint64_t IST1;                 /* Interrupt Stack 1 */
+  uint64_t IST2;                 /* Interrupt Stack 2 */
+  uint64_t IST3;                 /* Interrupt Stack 3 */
+  uint64_t IST4;                 /* Interrupt Stack 4 */
+  uint64_t IST5;                 /* Interrupt Stack 5 */
+  uint64_t IST6;                 /* Interrupt Stack 6 */
+  uint64_t IST7;                 /* Interrupt Stack 7 */
+  uint64_t reserved3;            /* reserved */
+  uint64_t reserved4;            /* reserved */
+  uint16_t reserved5;            /* reserved */
+  uint16_t IOPB_offset;          /* IOPB_offset */
+} end_packed_struct;
+
 
 /****************************************************************************
  * Inline functions
@@ -417,9 +477,8 @@ volatile uint64_t* pdpt;
 volatile uint64_t* pd;
 volatile uint64_t* pt;
 
-volatile uint32_t* ist64;
-volatile uint64_t* gdt64;
-volatile uint64_t* gdt64_ist;
+volatile struct ist_s* ist64;
+volatile struct gdt_entry_s* gdt64;
 
 /****************************************************************************
  * Public Function Prototypes

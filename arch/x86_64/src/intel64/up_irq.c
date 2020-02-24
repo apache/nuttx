@@ -168,24 +168,28 @@ void up_ioapic_unmask_pin(unsigned int pin)
 
 static void up_ist_init(void)
 {
-    uint64_t tss_l = 0;
-    uint64_t tss_h = 0;
-    volatile uint64_t* ist_IST1 = (void*)&ist64 + 0x24;
-    volatile uint64_t* ist_IST2 = (void*)&ist64 + 0x2C;
+  struct gdt_entry_s tss_l;
+  struct gdt_entry_s tss_h;
 
-    tss_l |= (((104 - 1) & 0xffff)); // Segment limit = TSS size - 1
-    tss_l |= (((uintptr_t)&ist64 & 0x00ffffff) << 16);          // Low address 1
-    tss_l |= (((uintptr_t)&ist64 & 0xff000000) << (56 - 24));   // Low address 2
-    tss_l |= (((uint64_t)0b10001001 & 0xff) << 40);             // Present | Type = TSS
-    tss_h |= (((uintptr_t)&ist64 >> 32) & 0xffffffff);          // High address
+  memset(&tss_l, 0, sizeof(tss_l));
+  memset(&tss_h, 0, sizeof(tss_h));
 
-    gdt64_ist[0] = tss_l;
-    gdt64_ist[1] = tss_h;
+  tss_l.limit_low = (((104 - 1) & 0xffff)); // Segment limit = TSS size - 1
+  tss_l.base_low  = ((uintptr_t)&ist64 & 0x00ffffff);           // Low address 1
+  tss_l.base_high = (((uintptr_t)&ist64 & 0xff000000) >> 24);   // Low address 2
+  tss_l.P = 1;
+  tss_l.AC = 1;
+  tss_l.EX = 1;
 
-    *ist_IST1 = (uintptr_t)g_interrupt_stack_end;
-    *ist_IST2 = (uintptr_t)g_isr_stack_end;
+  tss_l.base_low  = (((uintptr_t)&ist64 >> 32) & 0xffffffff);          // High address
 
-    asm volatile ("mov $0x30, %%ax; ltr %%ax":::"memory", "rax");
+  gdt64[X86_GDT_ISTL_SEL_NUM] = tss_l;
+  gdt64[X86_GDT_ISTH_SEL_NUM] = tss_h;
+
+  ist64->IST1 = (uintptr_t)g_interrupt_stack_end;
+  ist64->IST2 = (uintptr_t)g_isr_stack_end;
+
+  asm volatile ("mov $0x30, %%ax; ltr %%ax":::"memory", "rax");
 }
 
 /****************************************************************************
