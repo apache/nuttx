@@ -78,7 +78,9 @@
 /* Maximum objects per librarian call.
  *
  * REVISIT:  The librarian is supposed to handle multiple object insertions
- * per call, but my experience is that it is unreliable in that case.
+ * per call, but my experience was that it was unreliable in that case.  That
+ * may have improved, however, and perhaps we can increase MAX_OPBJEXT.. TRY
+ * IT!
  */
 
 #define MAX_OBJECTS 1 /* 64 */

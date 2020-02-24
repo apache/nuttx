@@ -1,7 +1,7 @@
 ############################################################################
 # boards/z16/z16f/z16f2800100zcog/scripts/Make.defs
 #
-#   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014, 2017, 2020 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,69 +35,17 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
+include ${TOPDIR}/arch/z16/src/z16f/Toolchain.defs
+include $(TOPDIR)/tools/zds/zds_Config.mk
 
-# These are the default directories where the ZDS-II toolchain is installed.
-# NOTE that short 8.3 path names are used in order to avoid spaces.  On my
-# machine I have:
-#
-# Versions 5.0.1
-#   C:\PROGRA~1\ = C:\Program Files\
-#   C:\PROGRA~2\ = C:\Program Files (x86)\
-#
-# Your PC may be configured differently.
-#
-# Version 5.2.1, the default install location is C:\ZiLOG
-
-ifeq ($(CONFIG_Z16F_ZDSII_V511),y)
-INSTALLROOT = C:/PROGRA~2/ZiLOG
-ZDSVERSION := 5.0.1
-else ifeq ($(CONFIG_Z16F_ZDSII_V521),y)
-INSTALLROOT = C:/ZiLOG
-ZDSVERSION := 5.2.1
-endif
+# CFLAGS
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  ZDSINSTALLDIR = $(INSTALLROOT)/ZDSII_ZNEO_$(ZDSVERSION)
-  INSTALLDIR = ${shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g"}
-  ZDSBINDIR = $(INSTALLDIR)\bin
-  ZDSSTDINCDIR = $(INSTALLDIR)\include\std
-  ZDSZILOGINCDIR = $(INSTALLDIR)\include\zilog
-  ZDSSTDLIBDIR = $(INSTALLDIR)\lib\std
-  ZDSZILOGLIBDIR = $(INSTALLDIR)\lib\zilog
-
-  # CFLAGs
-
   ARCHASMINCLUDES = -include:$(TOPDIR)\include;$(ZDSSTDINCDIR);$(ZDSZILOGINCDIR)
   EARCHASMINCLUDES = -include:$(TOPDIR)\include;$(ZDSSTDINCDIR);$(ZDSZILOGINCDIR)
   ARCHSTDINCLUDES = -stdinc:$(TOPDIR)\include;$(ZDSSTDINCDIR);$(ZDSZILOGINCDIR)
   ARCHUSRINCLUDES = -usrinc:.
 else
-  WINTOOL = y
-  ZDSINSTALLDIR = $(INSTALLROOT)/ZDSII_ZNEO_$(ZDSVERSION)
-  INSTALLDIR = ${shell cygpath -u "$(ZDSINSTALLDIR)"}
-  ZDSBINDIR = $(INSTALLDIR)/bin
-  ZDSSTDINCDIR = $(INSTALLDIR)/include/std
-  ZDSZILOGINCDIR = $(INSTALLDIR)/include/zilog
-  ZDSSTDLIBDIR = $(INSTALLDIR)/lib/std
-  ZDSZILOGLIBDIR = $(INSTALLDIR)/lib/zilog
-
-  # These are the same directories but with the directory separator
-  # character swapped as needed by the ZDS-II compiler
-
-  WTOPDIR = ${shell cygpath -w "$(TOPDIR)"}
-  WZDSSTDINCDIR = ${shell cygpath -w "$(ZDSSTDINCDIR)"}
-  WZDSZILOGINCDIR = ${shell cygpath -w "$(ZDSZILOGINCDIR)"}
-  WZDSSTDLIBDIR = ${shell cygpath -w "$(ZDSSTDLIBDIR)"}
-  WZDSZILOGLIBDIR = ${shell cygpath -w "$(ZDSZILOGLIBDIR)"}
-
-  # Escaped versions
-
-  ETOPDIR = ${shell echo "$(WTOPDIR)" | sed -e "s/ /%20/g"}
-  EZDSSTDINCDIR = ${shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g"}
-  EZDSZILOGINCDIR = ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
-
-  # CFLAGs
-
   ARCHASMINCLUDES = -include:'$(WTOPDIR)\include;$(WZDSSTDINCDIR);$(WZDSZILOGINCDIR)'
   EARCHASMINCLUDES = -include:'$(ETOPDIR)\include;$(EZDSSTDINCDIR);$(EZDSZILOGINCDIR)'
   ARCHSTDINCLUDES = -stdinc:'$(WTOPDIR)\include;$(WZDSSTDINCDIR);$(WZDSZILOGINCDIR)'
@@ -106,12 +54,6 @@ endif
 
 # Assembler definitions
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHASMOPTIMIZATION = -debug
-else
-  ARCHASMOPTIMIZATION = -nodebug
-endif
-
 ARCHASMCPUFLAGS = -cpu:Z16F2811AL -NOigcase
 ARCHASMLIST = -NOlistmac -name -pagelen:56 -pagewidth:80 -quiet
 ARCHASMWARNINGS = -warn
@@ -119,18 +61,6 @@ ARCHASMDEFINES = -define:_Z16F2811AL=1 -define:_Z16K_SERIES=1 -define:_Z16F_SERI
 AFLAGS = $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMLIST) $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)
 
 # Compiler definitions
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -debug
-else
-  ARCHOPTIMIZATION = -nodebug
-endif
-
-ifeq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += -NOregvar -reduceopt
-else
-  ARCHOPTIMIZATION += -regvar
-endif
 
 ARCHCPUFLAGS = -chartype:S -model:L -NOmodsect -cpu:Z16F2811AL -NOgenprint \
                -asmsw:" $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)"
@@ -152,80 +82,6 @@ ARFLAGS = -quiet -warn
 # Linker definitions
 
 LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)z16f2800100zcog$(DELIM)scripts$(DELIM)z16f2800100zcog.linkcmd
-
-# Tool names/paths
-
-CROSSDEV =
-CC = $(ZDSBINDIR)$(DELIM)zneocc.exe
-CPP = gcc -E
-LD = $(ZDSBINDIR)$(DELIM)zneolink.exe
-AS = $(ZDSBINDIR)$(DELIM)zneoasm.exe
-AR = $(ZDSBINDIR)$(DELIM)zneolib.exe
-
-# File extensions
-
-ASMEXT = .asm
-OBJEXT = .obj
-LIBEXT = .lib
-EXEEXT = .hex
-
-# These are the macros that will be used in the NuttX make system
-# to compile and assembly source files and to insert the resulting
-# object files into an archive
-
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-
-define PREPROCESS
-	@echo CPP: $1->$2
-	$(Q) "$(CPP)" $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $1 -o $2
-endef
-
-define COMPILE
-	$(Q) "$(CC)" $(CFLAGS) $($(strip $1)_CFLAGS) ${shell echo $1 | sed -e "s/\//\\/g"}
-endef
-
-define ASSEMBLE
-	$(Q) "$(AS)" $(AFLAGS) $($(strip $1)_AFLAGS) ${shell echo $1 | sed -e "s/\//\\/g"}
-endef
-
-define ARCHIVE
-	for %%G in ($(2)) do ( "$(AR)" $(ARFLAGS) $1=-+%%G )
-endef
-
-define CLEAN
-	$(Q) if exist *.obj (del /f /q *.obj)
-	$(Q) if exist *.src (del /f /q *.src)
-	$(Q) if exist *.lib (del /f /q *.lib)
-	$(Q) if exist *.hex (del /f /q *.hex)
-	$(Q) if exist *.lod (del /f /q *.lod)
-	$(Q) if exist *.lst (del /f /q *.lst)
-endef
-
-else
-
-define PREPROCESS
-	@echo "CPP: $1->$2"
-	$(Q) "$(CPP)" $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $1 -o $2
-endef
-
-define COMPILE
-	$(Q) "$(CC)" $(CFLAGS) $($(strip $1)_CFLAGS) `cygpath -w "$1"`
-endef
-
-define ASSEMBLE
-	$(Q) "$(AS)" $(AFLAGS) $($(strip $1)_AFLAGS) `cygpath -w "$1"`
-endef
-
-define ARCHIVE
-	for __obj in $(2) ; do \
-		"$(AR)" $(ARFLAGS) $1=-+$$__obj \
-	done
-endef
-
-define CLEAN
-	$(Q) rm -f *.obj *.src *.lib *.hex *.lod *.lst
-endef
-endif
 
 # Windows native host tool definitions
 
