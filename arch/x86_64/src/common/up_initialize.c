@@ -1,8 +1,12 @@
 /****************************************************************************
  * arch/x86_64/src/common/up_initialize.c
  *
- *   Copyright (C) 2011-2013, 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015-2017 Gregory Nutt,
+ *                 2020 Chung-Fan Yang.
+ *   All rights reserved.
+ *
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Chung-Fan Yang <sonic.tw.tp@gamil.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -119,17 +123,9 @@ void up_initialize(void)
 
   g_current_regs = NULL;
 
-  /* Calibrate the timing loop */
-
-  up_calibratedelay();
-
   /* Add any extra memory fragments to the memory manager */
 
   up_addregion();
-
-  /* Initialize the interrupt subsystem */
-
-  up_irqinitialize();
 
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
@@ -142,26 +138,18 @@ void up_initialize(void)
 #endif
 
 #ifdef CONFIG_ARCH_DMA
-  /* Initialize the DMA subsystem if the weak function up_dmainitialize has been
+  /* Initialize the DMA subsystem if the weak function up_dma_initialize has been
    * brought into the build
    */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (up_dmainitialize)
+  if (up_dma_initialize)
 #endif
     {
-      up_dmainitialize();
+      up_dma_initialize();
     }
 #endif
 
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
-#endif
-
-#if CONFIG_NFILE_DESCRIPTORS > 0
   /* Register devices */
 
 #if defined(CONFIG_DEV_NULL)
@@ -183,7 +171,6 @@ void up_initialize(void)
 #if defined(CONFIG_DEV_LOOP)
   loop_register();      /* Standard /dev/loop */
 #endif
-#endif /* CONFIG_NFILE_DESCRIPTORS */
 
 #if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
     defined(CONFIG_DRIVER_NOTE)
@@ -196,30 +183,23 @@ void up_initialize(void)
   up_serialinit();
 #endif
 
+#ifdef CONFIG_RPMSG_UART
+  rpmsg_serialinit();
+#endif
+
   /* Initialize the console device driver (if it is other than the standard
    * serial driver).
    */
 
-#if defined(CONFIG_DEV_LOWCONSOLE)
-  lowconsole_init();
-#elif defined(CONFIG_CONSOLE_SYSLOG)
+#if defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
-#elif defined(CONFIG_RAMLOG_CONSOLE)
-  ramlog_consoleinit();
 #endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_PSEUDOTERM_SUSV1)
+#ifdef CONFIG_PSEUDOTERM_SUSV1
   /* Register the master pseudo-terminal multiplexor device */
 
-  (void)ptmx_register();
+  ptmx_register();
 #endif
-
-  /* Early initialization of the system logging device.  Some SYSLOG channel
-   * can be initialized early in the initialization sequence because they
-   * depend on only minimal OS initialization.
-   */
-
-  syslog_initialize();
 
 #if defined(CONFIG_CRYPTO)
   /* Initialize the HW crypto and /dev/crypto */
@@ -227,7 +207,7 @@ void up_initialize(void)
   up_cryptoinitialize();
 #endif
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_CRYPTO_CRYPTODEV)
+#ifdef CONFIG_CRYPTO_CRYPTODEV
   devcrypto_register();
 #endif
 
@@ -237,27 +217,26 @@ void up_initialize(void)
   up_netinitialize();
 #endif
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
   /* Initialize the local loopback device */
 
-  (void)localhost_initialize();
+  localhost_initialize();
 #endif
 
 #ifdef CONFIG_NET_TUN
   /* Initialize the TUN device */
 
-  (void)tun_initialize();
+  tun_initialize();
 #endif
 
 #ifdef CONFIG_NETDEV_TELNET
   /* Initialize the Telnet session factory */
 
-  (void)telnet_initialize();
+  telnet_initialize();
 #endif
 
   /* Initialize USB -- device and/or host */
 
   up_usbinitialize();
   board_autoled_on(LED_IRQSENABLED);
-
 }
