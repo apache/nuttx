@@ -20,12 +20,14 @@ TOOLDIR=$(dirname $0)
 
 fail=0
 range=0
+spell=0
 
 usage() {
   echo "USAGE: ${0} [options] [list|-]"
   echo ""
   echo "Options:"
   echo "-h"
+  echo "-c spell check with codespell(install with: pip install codespell"
   echo "-r range check only (used with -p and -g)"
   echo "-p <patch list> (default)"
   echo "-g <commit list>"
@@ -39,6 +41,14 @@ check_file() {
   ret=$?
   if [ $ret != 0 ]; then
     fail=$ret
+  fi
+
+  if [ $spell != 0 ]; then
+    codespell -q 7 ${@: -1}
+    ret=$?
+    if [ $ret != 0 ]; then
+      fail=$ret
+    fi
   fi
 }
 
@@ -97,6 +107,9 @@ while [ ! -z "$1" ]; do
   -h )
     usage
     exit 0
+    ;;
+  -c )
+    spell=1
     ;;
   -r )
     range=1
