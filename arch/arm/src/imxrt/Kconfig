@@ -192,6 +192,10 @@ config IMXRT_USBOTG
 	select USBHOST_HAVE_ASYNCH if USBHOST
 	select USBHOST_ASYNCH
 
+config IMXRT_USBDEV
+	bool "USB Device"
+	default n
+
 config IMXRT_ENET
 	bool "Ethernet"
 	default n
@@ -1526,5 +1530,32 @@ config IMXRT_EHCI_PREALLOCATE
 
 endmenu # USB host controller driver (HCD) options
 endif # IMXRT_USBOTG && USBHOST
+
+if IMXRT_USBDEV
+
+menu "USB device controller driver (DCD) options"
+
+config IMXRT_USBDEV_NOVBUS
+    bool "No USB VBUS sensing"
+    default n
+
+config IMXRT_USBDEV_FRAME_INTERRUPT
+    bool "USB frame interrupt"
+    default n
+    ---help---
+        Handle USB Start-Of-Frame events.  Enable reading SOF from interrupt
+        handler vs. simply reading on demand. Probably a bad idea... Unless
+        there is some issue with sampling the SOF from hardware asynchronously.
+
+config IMXRT_USBDEV_REGDEBUG
+    bool "Register level debug"
+    depends on DEBUG_USB_INFO
+    default n
+    ---help---
+        Output detailed register-level USB device debug information.  Requires
+        also CONFIG_DEBUG_USB_INFO.
+
+endmenu # USB device controller driver (DCD) options
+endif # IMXRT_USBDEV
 
 endif # ARCH_CHIP_IMXRT
