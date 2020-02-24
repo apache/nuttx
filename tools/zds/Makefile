@@ -50,7 +50,7 @@ endif
 
 # Targets
 
-all: zdsar.exe zdsgen.exe
+all: zdsar.exe
 default: all
 .PHONY: clean
 
@@ -63,11 +63,6 @@ CFLAGS += -DHAVE_STRTOK_C=1
 
 zdsar.exe: zdsar.c
 	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o zdsar.exe zdsar.c
-
-# zdsgen - Wrapper for the ZDS-II compiler and assembler
-
-zdsgen.exe: zdsgen.c
-	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o zdsgen.exe zdsgen.c
 
 clean:
 	@rm -f *.o *.a *.dSYM *~ .*.swp

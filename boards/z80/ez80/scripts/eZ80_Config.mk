@@ -47,57 +47,63 @@ endef
 #    lie in a lower directory, but lies in the current directory and is
 #    handled within COMPILE and ASSEMBLE.
 
+define RMOBJS
+	$(call DELFILE, $(1))
+	$(call DELFILE, $(subst .obj,.lst,$(1)))
+	$(call DELFILE, $(subst .obj,.src,$(1)))
+endef
+
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 
+define CONDMOVE
+	$(Q) if not exist $1 (move /Y $2 $3)
+endef
+
+define MVOBJS
+	$(call CONDMOVE, $(1),$(subst .obj,.src,$(2)),$(subst .obj,.src,$(3)))
+	$(call CONDMOVE, $(1),$(subst .obj,.lst,$(2)),$(subst .obj,.lst,$(3)))
+	$(call CONDMOVE, $(1),$(2),$(3))
+endef
+
 define COMPILE
-	$(call DELFILE, $(2))
+	$(call RMOBJS, $(2))
 	$(Q) $(CC) $(CFLAGS) $($(strip $(1))_CFLAGS) ${shell echo $(1) | sed -e "s/\//\\/g"}
-	if not exist $(2) $(call MOVEFILE, $(subst .c,.obj,$(1)), $(2))
+	$(call MVOBJS, $(2), $(subst .c,.obj,$(notdir $(1))), $(2))
 endef
 
 define ASSEMBLE
-	$(call DELFILE, $(2))
+	$(call RMOBJS, $(2))
 	$(Q) $(AS) $(AFLAGS) $($(strip $(1))_AFLAGS) ${shell echo $(1) | sed -e "s/\//\\/g"}
-	if not exist $(2) $(call MOVEFILE, $(subst .asm,.obj,$(1)), $(2))
+	$(call MVOBJS, $(2), $(subst .asm,.obj,$(notdir $(1))), $(2))
 endef
 
 else
 
+define CONDMOVE
+	$(Q) if [ ! -e $(1) ]; then mv -f $(2) $(3) ; fi
+endef
+
+define MVOBJS
+	$(call CONDMOVE, $(1),$(subst .obj,.src,$(2)),$(subst .obj,.src,$(3)))
+	$(call CONDMOVE, $(1),$(subst .obj,.lst,$(2)),$(subst .obj,.lst,$(3)))
+	$(call CONDMOVE, $(1),$(2),$(3))
+endef
+
 define COMPILE
-	$(call DELFILE, $(2))
+	$(call RMOBJS, $(2))
 	$(Q) $(CC) $(CFLAGS) $($(strip $(1))_CFLAGS) `cygpath -w "$(1)"`
-	$(Q) ( \
-			__rename=`basename $(2)` ;\
-			if [ ! -e $${__rename} ] ; then \
-				__src=`basename $(1) | cut -d'.' -f1` ; \
-				__dest=`echo $(2) | sed -e "s/.obj//g"` ; \
-				mv -f $${__src}.obj $(2) ; \
-				mv -f $${__src}.lst $${__dest}.lst ; \
-				mv -f $${__src}.src $${__dest}.src ; \
-			fi ; \
-		)
+	$(call MVOBJS, $(2), $(subst .c,.obj,$(notdir $(1))), $(2))
 endef
 
 define ASSEMBLE
-	$(call DELFILE, $(2))
+	$(call RMOBJS, $(2))
 	$(Q) $(AS) $(AFLAGS) $($(strip $(1))_AFLAGS) `cygpath -w "$(1)"`
-	$(Q) ( \
-			__rename=`basename $(2)` ; \
-			if [ ! -e $${__rename} ] ; then \
-				__src=`basename $(1) | cut -d'.' -f1` ; \
-				__dest=`echo $(2) | sed -e "s/.obj//g"` ; \
-				mv -f $${__src}.obj $(2) ; \
-				mv -f $${__src}.lst $${__dest}.lst ; \
-				mv -f $${__src}.src $${__dest}.src ; \
-			fi ; \
-		)
+	$(call MVOBJS, $(2), $(subst .asm,.obj,$(notdir $(1))), $(2))
 endef
+
 endif
 
 define MOVEOBJ
-	$(call MOVEFILE, "$(1).obj", "$(2)$(DELIM)$(1).obj")
-	$(call MOVEFILE, "$(1).lst", "$(2)$(DELIM)$(1).lst")
-	$(call MOVEFILE, "$(1).src", "$(2)$(DELIM)$(1).src")
 endef
 
 # ARCHIVE will move a list of object files into the library.  This is
@@ -142,4 +148,5 @@ endef
 define CLEAN
 	$(Q) rm -f *.obj *.src *.lib *.hex *.lod *.lst
 endef
+
 endif

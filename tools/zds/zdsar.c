@@ -115,7 +115,7 @@ static char  g_initial_wd[MAX_PATH]; /* Initial working directory */
 static char  g_path[MAX_PATH];       /* Buffer for expanding paths */
 static char  g_objpath[MAX_PATH];    /* Temporary for path generation */
 #ifdef HOST_CYGWIN
-static char  g_expand[MAX_EXPAND];   /* Temporary for expanded path */
+static char  g_expand[MAX_EXPAND];   /* Temporary for quoted path */
 static char  g_dequoted[MAX_PATH];   /* Temporary for de-quoted path */
 static char  g_hostpath[MAX_PATH];   /* Temporary for host path conversions */
 #endif
@@ -231,7 +231,7 @@ static void append(char **base, char *str)
   *base = newbase;
 }
 
-static const char *do_expand(const char *argument)
+static const char *quote_backslash(const char *argument)
 {
 #ifdef HOST_CYGWIN
   const char *src;
@@ -254,7 +254,7 @@ static const char *do_expand(const char *argument)
               break;
             }
 
-          /* Already expanded? */
+          /* Already quoted? */
 
           if (*src == '\\')
             {
@@ -767,10 +767,10 @@ static void do_archive(void)
 
       if (g_arflags != NULL)
         {
-          const char *expanded;
+          const char *quoted;
 
-          expanded = do_expand(g_arflags);
-          cmdlen  += strlen(expanded);
+          quoted  = quote_backslash(g_arflags);
+          cmdlen += strlen(quoted);
 
           if (cmdlen >= MAX_BUFFER)
             {
@@ -779,7 +779,7 @@ static void do_archive(void)
               exit(EXIT_FAILURE);
             }
 
-          strcat(g_command, expanded);
+          strcat(g_command, quoted);
         }
 
       /* Add each object file.  This loop will continue until each path has been
@@ -789,7 +789,7 @@ static void do_archive(void)
       nobjects = 0;
       while ((object = strtok_r(objects, " ", &lasts)) != NULL)
         {
-          const char *expanded;
+          const char *quoted;
           const char *converted;
 
           /* Set objects to NULL.  This will force strtok_r to move from the
@@ -887,8 +887,8 @@ static void do_archive(void)
 
           pathlen   = 4;  /* For =-+ and terminator */
 
-          expanded  = do_expand(g_path);
-          pathlen  += strlen(expanded);
+          quoted   = quote_backslash(g_path);
+          pathlen += strlen(quoted);
 
           /* Get the full length */
 
@@ -899,14 +899,14 @@ static void do_archive(void)
             {
               fprintf(stderr, "ERROR: object argument is too long [%d/%d]: "
                       "%s=-+%s\n",
-                      totallen, MAX_BUFFER, g_libname, expanded);
+                      totallen, MAX_BUFFER, g_libname, quoted);
               exit(EXIT_FAILURE);
             }
 
           /* Append the next librarian command */
 
           pathlen = snprintf(&g_command[cmdlen], MAX_BUFFER - cmdlen, "%s=-+%s",
-                             g_libname, expanded);
+                             g_libname, quoted);
           cmdlen += pathlen;
 
           /* Terminate early if we have a LOT files in the command line */
