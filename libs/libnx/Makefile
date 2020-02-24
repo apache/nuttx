@@ -229,11 +229,9 @@ gensources: gen1bppsources gen2bppsource gen4bppsource gen8bppsource gen16bppsou
 
 $(AOBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
-	$(call MOVEOBJ,$(patsubst $(BINDIR)$(DELIM)%$(OBJEXT),%,$@),$(BINDIR))
 
 $(COBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
-	$(call MOVEOBJ,$(patsubst $(BINDIR)$(DELIM)%$(OBJEXT),%,$@),$(BINDIR))
 
 # NX library for the flat build
 

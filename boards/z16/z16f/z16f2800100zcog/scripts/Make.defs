@@ -188,11 +188,6 @@ define ASSEMBLE
 	$(Q) "$(AS)" $(AFLAGS) $($(strip $1)_AFLAGS) ${shell echo $1 | sed -e "s/\//\\/g"}
 endef
 
-define MOVEOBJ
-	$(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
-	$(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
-endef
-
 define ARCHIVE
 	for %%G in ($(2)) do ( "$(AR)" $(ARFLAGS) $1=-+%%G )
 endef
@@ -219,11 +214,6 @@ endef
 
 define ASSEMBLE
 	$(Q) "$(AS)" $(AFLAGS) $($(strip $1)_AFLAGS) `cygpath -w "$1"`
-endef
-
-define MOVEOBJ
-	$(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
-	$(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
 endef
 
 define ARCHIVE
