@@ -98,6 +98,7 @@
     /* These are the GDT */
     .global     gdt64_low
     .global     gdt64_ist_low
+    .global     gdt64_low_end
 
     .global     ist64_low
 
@@ -399,9 +400,10 @@ gdt64_low:
 gdt64_ist_low:
     .quad   0x0 // TSS segment low
     .quad   0x0 // TSS segment high
+gdt64_low_end:
 
 gdt64_ptr:
-    .short  gdt64_ptr - gdt64_low - 1
+    .short  gdt64_low_end - gdt64_low - 1
     .long   gdt64_low
 
 mxcsr_mem:

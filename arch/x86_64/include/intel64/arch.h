@@ -194,9 +194,27 @@ begin_packed_struct struct idt_ptr_s
   uint64_t base;             /* The address of the first GDT entry */
 } end_packed_struct;
 
+/* A struct describing a pointer to an array of global descriptors.  This is
+ * in a format suitable for giving to 'lgdt'.
+ */
+
+begin_packed_struct struct gdt_ptr_s
+{
+  uint16_t limit;
+  uint64_t base;             /* The address of the first GDT entry */
+} end_packed_struct;
+
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
+
+static inline void setgdt(void* gdt, int size) {
+  struct gdt_ptr_s gdt_ptr;
+  gdt_ptr.limit = size;
+  gdt_ptr.base = (uintptr_t)gdt;
+
+  asm volatile ("lgdt %0"::"m"(gdt_ptr):"memory");
+}
 
 static inline uint64_t rdtsc(void)
 {
@@ -380,6 +398,7 @@ extern volatile uint8_t pt_low;
 extern volatile uint8_t ist64_low;
 extern volatile uint8_t gdt64_low;
 extern volatile uint8_t gdt64_ist_low;
+extern volatile uint8_t gdt64_low_end;
 
 /* The actual address of the page table and gdt/ist after mapping the kernel in high address*/
 volatile uint64_t* pdpt;
