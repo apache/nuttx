@@ -114,8 +114,8 @@ static int   g_debug      = 0;       /* Debug output enabled if >0 */
 
 static char  g_command[MAX_BUFFER];  /* Full librarian command */
 static char  g_initial_wd[MAX_PATH]; /* Initial working directory */
-static char  g_path[MAX_PATH];       /* Buffer for expanding paths */
-static char  g_objpath[MAX_PATH];    /* Temporary for path generation */
+static char  g_path[MAX_PATH];       /* Temporary for path generation */
+static char  g_objpath[MAX_PATH];    /* Holds the relative path to the objects */
 #ifdef HOST_CYGWIN
 static char  g_expand[MAX_EXPAND];   /* Temporary for quoted path */
 static char  g_dequoted[MAX_PATH];   /* Temporary for de-quoted path */
@@ -398,7 +398,8 @@ static const char *convert_path_windows(const char *path)
 #ifdef HOST_CYGWIN
   return convert_path(path, CCP_POSIX_TO_WIN_A);
 #else
-  return path;
+  strcpy(g_path, path);
+  return g_path;
 #endif
 }
 
@@ -407,7 +408,8 @@ static const char *convert_path_posix(const char *path)
 #ifdef HOST_CYGWIN
   return convert_path(path, CCP_WIN_A_TO_POSIX);
 #else
-  return path;
+  strcpy(g_path, path);
+  return g_path;
 #endif
 }
 
@@ -442,8 +444,8 @@ static void show_usage(const char *progname, const char *msg, int exitcode)
   fprintf(stderr, "    Optional librarian flags\n");
   fprintf(stderr, "  --obj-path <path>\n");
   fprintf(stderr, "    Do not look in the current directory for the object "
-                  "files.  Instead, look in <path> to\n");
-  fprintf(stderr, "    for the object files.  --obj-path may be used once "
+                  "files.  Instead, look in <path> for\n");
+  fprintf(stderr, "    the object files.  --obj-path may be used only once "
                   "on the command line\n");
   fprintf(stderr, "  --debug\n");
   fprintf(stderr, "    Enable %s debug output\n", progname);
@@ -454,8 +456,10 @@ static void show_usage(const char *progname, const char *msg, int exitcode)
 
 static void parse_args(int argc, char **argv)
 {
-  char *library = NULL;
-  char *objpath = NULL;
+  const char *tmp = NULL;
+  char *library   = NULL;
+  char *objpath   = NULL;
+  int pathlen;
   int argidx;
 
   /* Parse arguments */
@@ -616,9 +620,6 @@ static void parse_args(int argc, char **argv)
   g_objpath[0] = '\0';
   if (objpath != NULL)
     {
-      const char *hostpath;
-      int pathlen;
-
       /* If the object path relative to the current working directory? */
 
       /* It is a relative path if the path does not begin with the path
@@ -652,7 +653,7 @@ static void parse_args(int argc, char **argv)
 
           /* Append a separator is one is not already present */
 
-          if (g_path[pathlen - 1] != WINSEPARATOR)
+          if (g_path[pathlen - 1] != SEPARATOR)
             {
               int newlen = pathlen + 1;
               if (newlen >= MAX_PATH)
@@ -663,7 +664,7 @@ static void parse_args(int argc, char **argv)
                   exit(EXIT_FAILURE);
                 }
 
-              g_path[pathlen]     = WINSEPARATOR;
+              g_path[pathlen]     = SEPARATOR;
               g_path[pathlen + 1] = '\0';
               pathlen             = newlen;
             }
@@ -680,13 +681,6 @@ static void parse_args(int argc, char **argv)
         }
 
       strcat(g_path, objpath);
-
-      /* Convert the POSIX working directory to a Windows native path.  NOTE
-       * that convert_path_windows() is a no-op in Windows native mode.
-       */
-
-      hostpath = convert_path_windows(g_path);
-      strcpy(g_objpath, hostpath);
     }
 
   /* The object was in the current working directory.  If a library path
@@ -697,9 +691,56 @@ static void parse_args(int argc, char **argv)
 
   else if (g_libpath != NULL && strcmp(g_libpath, ".") != 0)
     {
-      const char *converted = convert_path_windows(g_initial_wd);
-      strcpy(g_objpath, converted);
+      strcpy(g_path, g_initial_wd);
     }
+
+  /* Convert the absolute objection file path to the native host path form
+   * NOTE that convert_path_posix() is a no-op in Windows native mode.
+   */
+
+  tmp = convert_path_posix(g_path);
+  strcpy(g_path, tmp);
+
+  /* Check for a relative path.  We will CD to g_libpath because the
+   * library must be in the current working directory.
+   */
+
+  pathlen = strlen(g_libpath);
+  if (strncmp(g_path, g_libpath, pathlen) ==  0)
+    {
+      const char *relpath = &g_path[pathlen];
+
+      /* Skip over leading path segment delimiters.. that should be as
+       * least one.
+       */
+
+      while (*relpath == SEPARATOR)
+        {
+          relpath++;
+        }
+
+      /* Convert the relative object file path to the Windows path form
+       * for the ZDS-II tool tool.  NOTE that convert_path_windows() is
+       * a no-op in Windows native mode.
+       */
+
+      tmp = convert_path_windows(relpath);
+    }
+  else
+    {
+      /* Convert the absolute object file path to the Windows path form
+       * for the ZDS-II tool tool.  NOTE that convert_path_windows() is
+       * a no-op in Windows native mode.
+       */
+
+      tmp = convert_path_windows(g_path);
+    }
+
+  /* And save the path in as a native Windows path */
+
+  strcpy(g_objpath, tmp);
+
+  /* Dump some intermediate results */
 
   if (g_debug)
     {
