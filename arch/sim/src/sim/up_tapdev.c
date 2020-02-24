@@ -100,7 +100,7 @@ void netdriver_setmacaddr(unsigned char *macaddr);
 #ifdef TAPDEV_DEBUG
 static int  gdrop = 0;
 #endif
-static int  gtapdevfd;
+static int  gtapdevfd = -1;
 static char gdevname[IFNAMSIZ];
 
 #ifdef CONFIG_SIM_NET_HOST_ROUTE
@@ -167,6 +167,7 @@ static void set_macaddr(void)
 void tapdev_init(void)
 {
   struct ifreq ifr;
+  int tapdevfd;
   int ret;
 
 #ifdef CONFIG_SIM_NET_BRIDGE
@@ -175,10 +176,10 @@ void tapdev_init(void)
 
   /* Open the tap device */
 
-  gtapdevfd = open(DEVTAP, O_RDWR, 0644);
-  if (gtapdevfd < 0)
+  tapdevfd = open(DEVTAP, O_RDWR, 0644);
+  if (tapdevfd < 0)
     {
-      printf("TAPDEV: open failed: %d\r\n", -gtapdevfd);
+      printf("TAPDEV: open failed: %d\r\n", -tapdevfd);
       return;
     }
 
@@ -186,10 +187,11 @@ void tapdev_init(void)
 
   memset(&ifr, 0, sizeof(ifr));
   ifr.ifr_flags = IFF_TAP | IFF_NO_PI;
-  ret = ioctl(gtapdevfd, TUNSETIFF, (unsigned long) &ifr);
+  ret = ioctl(tapdevfd, TUNSETIFF, (unsigned long) &ifr);
   if (ret < 0)
     {
       printf("TAPDEV: ioctl failed: %d\r\n", -ret);
+      close(tapdevfd);
       return;
     }
 
@@ -206,6 +208,7 @@ void tapdev_init(void)
   if (sockfd < 0)
     {
       printf("TAPDEV: Can't open socket: %d\r\n", -sockfd);
+      close(tapdevfd);
       return;
     }
 
@@ -216,15 +219,18 @@ void tapdev_init(void)
   ifr.ifr_ifindex = if_nametoindex(gdevname);
 
   ret = ioctl(sockfd, SIOCBRADDIF, &ifr);
+  close(sockfd);
   if (ret < 0)
     {
       printf("TAPDEV: ioctl failed (can't add interface %s to "
              "bridge %s): %d\r\n",
              gdevname, CONFIG_SIM_NET_BRIDGE_DEVICE, -ret);
-    }
-
-  close(sockfd);
+      close(tapdevfd);
+      return;
+   }
 #endif
+
+  gtapdevfd = tapdevfd;
 
   /* Set the MAC address */
 
@@ -277,6 +283,12 @@ unsigned int tapdev_read(unsigned char *buf, unsigned int buflen)
 void tapdev_send(unsigned char *buf, unsigned int buflen)
 {
   int ret;
+
+  if (gtapdevfd < 0)
+    {
+      return;
+    }
+
 #ifdef TAPDEV_DEBUG
   printf("tapdev_send: sending %d bytes\r\n", buflen);
 
@@ -307,6 +319,11 @@ void tapdev_ifup(in_addr_t ifaddr)
 #ifdef CONFIG_SIM_NET_HOST_ROUTE
   struct sockaddr_in *addr;
 #endif
+
+  if (gtapdevfd < 0)
+    {
+      return;
+    }
 
   /* Get a socket with which to manipulate the tap device */
 
@@ -368,6 +385,11 @@ void tapdev_ifdown(void)
 #ifdef CONFIG_SIM_NET_HOST_ROUTE
   int sockfd;
   int ret;
+
+  if (gtapdevfd < 0)
+    {
+      return;
+    }
 
   if (((struct sockaddr_in *)&ghostroute.rt_dst)->sin_addr.s_addr != 0)
     {
