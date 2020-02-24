@@ -241,12 +241,12 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn, FAR struct tcp_conn_s *blconn)
   bls = conn->backlog;
   if (bls && blconn)
     {
-      /* Allocate a container for the connection from the free list */
+      /* Get a container for the connection from the free list */
 
       blc = (FAR struct tcp_blcontainer_s *)sq_remfirst(&bls->bl_free);
       if (!blc)
         {
-          nerr("ERROR: Failed to allocate container\n");
+          nerr("ERROR: There are no free containers for TCP BACKLOG!\n");
           ret = -ENOMEM;
         }
       else
