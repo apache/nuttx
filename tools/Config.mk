@@ -186,17 +186,6 @@ define INSTALL_LIB
 	$(Q) install -m 0644 $1 $2
 endef
 
-# MOVEOBJ - Default macro to move an object file to the correct location
-# Example: $(call MOVEOBJ, prefix, directory)
-#
-# This is only used in directories that keep object files in sub-directories.
-# Certain compilers (ZDS-II) always place the resulting files in the
-# directory where the compiler was invoked with no option to generate objects
-# in a different location.
-
-define MOVEOBJ
-endef
-
 # ARCHIVE - Add a list of files to an archive
 # Example: $(call ARCHIVE, archive-file, "file1 file2 file3 ...")
 #
