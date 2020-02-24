@@ -166,15 +166,96 @@
 
 #define MSR_IA32_TSC_DEADLINE   0x6e0
 
+#define MSR_IA32_APIC_BASE      0x01b
+# define MSR_IA32_APIC_EN       0x800
+# define MSR_IA32_APIC_X2APIC   0x400
+# define MSR_IA32_APIC_BSP      0x100
+
 #define MSR_X2APIC_ID           0x802
+#define MSR_X2APIC_VER          0x803
+#define MSR_X2APIC_TPR          0x808
+#define MSR_X2APIC_PPR          0x80a
+#define MSR_X2APIC_EOI          0x80b
+#define MSR_X2APIC_LDR          0x80d
+
 #define MSR_X2APIC_SPIV         0x80f
+# define MSR_X2APIC_SPIV_EN     0x100
+
+#define MSR_X2APIC_ISR0         0x810
+#define MSR_X2APIC_ISR1         0x811
+#define MSR_X2APIC_ISR2         0x812
+#define MSR_X2APIC_ISR3         0x813
+#define MSR_X2APIC_ISR4         0x814
+#define MSR_X2APIC_ISR5         0x815
+#define MSR_X2APIC_ISR6         0x816
+#define MSR_X2APIC_ISR7         0x817
+
+#define MSR_X2APIC_TMR0         0x818
+#define MSR_X2APIC_TMR1         0x819
+#define MSR_X2APIC_TMR2         0x81a
+#define MSR_X2APIC_TMR3         0x81b
+#define MSR_X2APIC_TMR4         0x81c
+#define MSR_X2APIC_TMR5         0x81d
+#define MSR_X2APIC_TMR6         0x81e
+#define MSR_X2APIC_TMR7         0x81f
+
+#define MSR_X2APIC_IRR0         0x820
+#define MSR_X2APIC_IRR1         0x821
+#define MSR_X2APIC_IRR2         0x822
+#define MSR_X2APIC_IRR3         0x823
+#define MSR_X2APIC_IRR4         0x824
+#define MSR_X2APIC_IRR5         0x825
+#define MSR_X2APIC_IRR6         0x826
+#define MSR_X2APIC_IRR7         0x827
+
+#define MSR_X2APIC_ESR          0x828
+#define MSR_X2APIC_ICR          0x830
+# define MSR_X2APIC_ICR_INIT                   0x00000500   // INIT/RESET
+# define MSR_X2APIC_ICR_STARTUP                0x00000600   // Startup IPI
+# define MSR_X2APIC_ICR_DELIVS                 0x00001000   // Delivery status
+# define MSR_X2APIC_ICR_ASSERT                 0x00004000   // Assert interrupt (vs deassert)
+# define MSR_X2APIC_ICR_DEASSERT               0x00000000
+# define MSR_X2APIC_ICR_LEVEL                  0x00008000   // Level triggered
+# define MSR_X2APIC_ICR_BCAST                  0x00080000   // Send to all APICs, including self.
+# define MSR_X2APIC_ICR_BUSY                   0x00001000
+# define MSR_X2APIC_ICR_FIXED                  0x00000000
 #define MSR_X2APIC_LVTT         0x832
+# define MSR_X2APIC_LVTT_X1                    0x0000000B   // divide counts by 1
+# define MSR_X2APIC_LVTT_PERIODIC              0x00020000   // Periodic
+# define MSR_X2APIC_LVTT_TSC_DEALINE           0x00040000   // Enable TSC DEADLINE One-shot timer
+#define MSR_X2APIC_LVTTHER      0x833
+#define MSR_X2APIC_LVTPMR       0x834
+#define MSR_X2APIC_LINT0        0x835
+#define MSR_X2APIC_LINT1        0x836
+#define MSR_X2APIC_LERR         0x837
+# define MSR_X2APIC_MASKED                     0x00010000   // Interrupt masked
 #define MSR_X2APIC_TMICT        0x838
 #define MSR_X2APIC_TMCCT        0x839
 #define MSR_X2APIC_TDCR         0x83e
 
-/* APIC related Definition */
-#define LVTT_TSC_DEADLINE  (1 << 18)
+/* IOAPIC related Definitions */
+
+#define IOAPIC_BASE             0xfec00000
+#define IOAPIC_REG_INDEX        0x00
+#define IOAPIC_REG_DATA         0x10
+# define IOAPIC_REG_ID          0x00       // Register index: ID
+# define IOAPIC_REG_VER         0x01       // Register index: version
+# define IOAPIC_REG_TABLE       0x10       // Redirection table base
+#  define IOAPIC_PIN_DISABLE        (1 << 16)  // Disable
+
+/* PIC related Definitions */
+
+#define X86_IO_PORT_PIC1_CMD   0x20
+#define X86_IO_PORT_PIC1_DATA  (X86_IO_PORT_PIC1_CMD + 1)
+#define X86_IO_PORT_PIC2_CMD   0xA0
+#define X86_IO_PORT_PIC2_DATA  (X86_IO_PORT_PIC2_CMD + 2)
+
+#define X86_PIC_INIT           0x11
+#define X86_PIC1_CASCADE       4
+#define X86_PIC2_CASCADE       2
+#define X86_PIC_8086           1
+#define X86_PIC_EOI            0x20
+
 
 #define BITS_PER_LONG    64
 
@@ -286,6 +367,14 @@ static inline void setgdt(void* gdt, int size) {
   gdt_ptr.base = (uintptr_t)gdt;
 
   asm volatile ("lgdt %0"::"m"(gdt_ptr):"memory");
+}
+
+static inline void setidt(void* idt, int size) {
+  struct idt_ptr_s idt_ptr;
+  idt_ptr.limit = size;
+  idt_ptr.base = (uintptr_t)idt;
+
+  asm volatile ("lidt %0"::"m"(idt_ptr):"memory");
 }
 
 static inline uint64_t rdtsc(void)
@@ -497,8 +586,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-void idt_flush(uint32_t idt_addr);
 
 #undef EXTERN
 #ifdef __cplusplus

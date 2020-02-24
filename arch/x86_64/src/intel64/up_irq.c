@@ -1,8 +1,15 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/up_irq.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt,
+ *                 2020 Chung-Fan Yang.
+ *   All rights reserved.
+ *
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Chung-Fan Yang <sonic.tw.tp@gmail.com>
+ *
+ *   Referencing MIT PDOS xv6 for LAPIC initialization and OSdev wiki for
+ *   8250 initialization/disable procedure.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -62,12 +69,6 @@
 
 #define IRQ_STACK_SIZE 0x2000
 
-#define IOAPIC_BASE             ((void *)0xfec00000)
-#define IOAPIC2_BASE             ((void *)0xfec01000)
-#define IOAPIC_REG_INDEX        0x00
-#define IOAPIC_REG_DATA         0x10
-#define IOAPIC_REDIR_TBL_START  0x10
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -84,11 +85,11 @@ static inline void up_idtinit(void);
 
 volatile uint64_t *g_current_regs;
 
-uint8_t g_interrupt_stack[IRQ_STACK_SIZE];
-uint8_t* g_interrupt_stack_end = g_interrupt_stack + IRQ_STACK_SIZE - 1;
+uint8_t g_interrupt_stack[IRQ_STACK_SIZE] __attribute__ ((aligned (16)));
+uint8_t* g_interrupt_stack_end = g_interrupt_stack + IRQ_STACK_SIZE - 16;
 
-uint8_t g_isr_stack[IRQ_STACK_SIZE];
-uint8_t* g_isr_stack_end = g_isr_stack + IRQ_STACK_SIZE - 1;
+uint8_t g_isr_stack[IRQ_STACK_SIZE] __attribute__ ((aligned (16)));
+uint8_t* g_isr_stack_end = g_isr_stack + IRQ_STACK_SIZE - 16;
 
 /****************************************************************************
  * Private Data
@@ -101,6 +102,34 @@ static struct idt_entry_s idt_entries[256];
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_ioapic_read
+ *
+ * Description:
+ *  Read a IOAPIC register
+ *
+ ****************************************************************************/
+
+uint32_t up_ioapic_read(uint32_t reg)
+{
+  mmio_write32((void*)IOAPIC_BASE + IOAPIC_REG_INDEX, reg);
+  return mmio_read32((void*)IOAPIC_BASE + IOAPIC_REG_DATA);
+}
+
+/****************************************************************************
+ * Name: up_ioapic_write
+ *
+ * Description:
+ *  Write a IOAPIC register
+ *
+ ****************************************************************************/
+
+void up_ioapic_write(uint32_t reg, uint32_t data)
+{
+  mmio_write32((void*)IOAPIC_BASE + IOAPIC_REG_INDEX, reg);
+  mmio_write32((void*)IOAPIC_BASE + IOAPIC_REG_DATA, data);
+}
+
+/****************************************************************************
  * Name: up_ioapic_pin_set_vector
  *
  * Description:
@@ -110,14 +139,10 @@ static struct idt_entry_s idt_entries[256];
 
 void up_ioapic_pin_set_vector(unsigned int pin, enum ioapic_trigger_mode trigger_mode, unsigned int vector)
 {
-  mmio_write32(IOAPIC_BASE + IOAPIC_REG_INDEX,
-    IOAPIC_REDIR_TBL_START + pin * 2 + 1);
-  mmio_write32(IOAPIC_BASE + IOAPIC_REG_DATA, up_apic_cpu_id() << (56 - 32));
-
-  mmio_write32(IOAPIC_BASE + IOAPIC_REG_INDEX,
-    IOAPIC_REDIR_TBL_START + pin * 2);
-  mmio_write32(IOAPIC_BASE + IOAPIC_REG_DATA, trigger_mode | vector);
-
+  up_ioapic_write(IOAPIC_REG_TABLE + pin * 2 + 1,
+      up_apic_cpu_id() << (56 - 32));
+  up_ioapic_write(IOAPIC_REG_TABLE + pin * 2,
+      trigger_mode | vector);
 }
 
 /****************************************************************************
@@ -131,12 +156,10 @@ void up_ioapic_pin_set_vector(unsigned int pin, enum ioapic_trigger_mode trigger
 void up_ioapic_mask_pin(unsigned int pin)
 {
   uint32_t cur;
-  mmio_write32(IOAPIC_BASE + IOAPIC_REG_INDEX,
-    IOAPIC_REDIR_TBL_START + pin * 2);
-  cur = mmio_read32(IOAPIC_BASE + IOAPIC_REG_DATA);
-  mmio_write32(IOAPIC_BASE + IOAPIC_REG_INDEX,
-    IOAPIC_REDIR_TBL_START + pin * 2);
-  mmio_write32(IOAPIC_BASE + IOAPIC_REG_DATA, cur | (1 << 16));
+
+  cur = up_ioapic_read(IOAPIC_REG_TABLE + pin * 2);
+  up_ioapic_write(IOAPIC_REG_TABLE + pin * 2,
+      cur | IOAPIC_PIN_DISABLE);
 }
 
 /****************************************************************************
@@ -150,12 +173,10 @@ void up_ioapic_mask_pin(unsigned int pin)
 void up_ioapic_unmask_pin(unsigned int pin)
 {
   uint32_t cur;
-  mmio_write32(IOAPIC_BASE + IOAPIC_REG_INDEX,
-    IOAPIC_REDIR_TBL_START + pin * 2);
-  cur = mmio_read32(IOAPIC_BASE + IOAPIC_REG_DATA);
-  mmio_write32(IOAPIC_BASE + IOAPIC_REG_INDEX,
-    IOAPIC_REDIR_TBL_START + pin * 2);
-  mmio_write32(IOAPIC_BASE + IOAPIC_REG_DATA, cur & ~(1 << 16));
+
+  cur = up_ioapic_read(IOAPIC_REG_TABLE + pin * 2);
+  up_ioapic_write(IOAPIC_REG_TABLE + pin * 2,
+      cur & ~(IOAPIC_PIN_DISABLE));
 }
 
 /****************************************************************************
@@ -169,27 +190,63 @@ void up_ioapic_unmask_pin(unsigned int pin)
 static void up_ist_init(void)
 {
   struct gdt_entry_s tss_l;
-  struct gdt_entry_s tss_h;
+  uint64_t           tss_h;
 
   memset(&tss_l, 0, sizeof(tss_l));
   memset(&tss_h, 0, sizeof(tss_h));
 
   tss_l.limit_low = (((104 - 1) & 0xffff)); // Segment limit = TSS size - 1
-  tss_l.base_low  = ((uintptr_t)&ist64 & 0x00ffffff);           // Low address 1
-  tss_l.base_high = (((uintptr_t)&ist64 & 0xff000000) >> 24);   // Low address 2
+  tss_l.base_low  = ((uintptr_t)ist64 & 0x00ffffff);           // Low address 1
+  tss_l.base_high = (((uintptr_t)ist64 & 0xff000000) >> 24);   // Low address 2
+
   tss_l.P = 1;
+
+  // Set type as IST
   tss_l.AC = 1;
   tss_l.EX = 1;
 
-  tss_l.base_low  = (((uintptr_t)&ist64 >> 32) & 0xffffffff);          // High address
+  tss_h = (((uintptr_t)ist64 >> 32) & 0xffffffff);          // High address
 
   gdt64[X86_GDT_ISTL_SEL_NUM] = tss_l;
-  gdt64[X86_GDT_ISTH_SEL_NUM] = tss_h;
+  gdt64[X86_GDT_ISTH_SEL_NUM] = *((struct gdt_entry_s*)&tss_h);
 
   ist64->IST1 = (uintptr_t)g_interrupt_stack_end;
   ist64->IST2 = (uintptr_t)g_isr_stack_end;
 
   asm volatile ("mov $0x30, %%ax; ltr %%ax":::"memory", "rax");
+}
+
+/****************************************************************************
+ * Name: up_deinit_8259
+ *
+ * Description:
+ *  Initialize the Legacy 8259 PIC
+ *
+ ****************************************************************************/
+
+static void up_deinit_8259(void)
+{
+  /* First do an initialization to for any pending interrupt to vanish */
+  outb(X86_PIC_INIT, X86_IO_PORT_PIC1_CMD);  // starts the initialization sequence (in cascade mode)
+  outb(X86_PIC_INIT, X86_IO_PORT_PIC2_CMD);
+
+  /* Remap the IRQ to 32~ in case of a spurious interrupt */
+  outb(IRQ0,     X86_IO_PORT_PIC1_DATA);  // ICW2: Master PIC vector offset
+  outb(IRQ0 + 8, X86_IO_PORT_PIC2_DATA);  // ICW2: Slave PIC vector offset
+
+  /* Tell the PICs they are in cascade */
+  outb(X86_PIC1_CASCADE, X86_IO_PORT_PIC1_DATA);  // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
+  outb(X86_PIC2_CASCADE, X86_IO_PORT_PIC2_DATA);  // ICW3: tell Slave PIC its cascade identity (0000 0010)
+
+  /* Put the PICs into 8086 mode */
+  outb(X86_PIC_8086, X86_IO_PORT_PIC1_DATA);
+  outb(X86_PIC_8086, X86_IO_PORT_PIC2_DATA);
+
+  /* Disable the 8259 PIC by masking all the interrupt and acking them*/
+  outb(0xff, X86_IO_PORT_PIC1_DATA);
+  outb(0xff, X86_IO_PORT_PIC2_DATA);
+  outb(X86_PIC_EOI, X86_IO_PORT_PIC1_CMD);
+  outb(X86_PIC_EOI, X86_IO_PORT_PIC2_CMD);
 }
 
 /****************************************************************************
@@ -202,7 +259,45 @@ static void up_ist_init(void)
 
 static void up_apic_init(void)
 {
-  write_msr(MSR_X2APIC_SPIV, 0x1ff);
+  uint32_t ver;
+  uint32_t icrl;
+  uint32_t apic_base;
+
+  /* Enable the APIC in X2APIC MODE */
+  apic_base = read_msr(MSR_IA32_APIC_BASE) & 0xfffff000;
+  write_msr(MSR_IA32_APIC_BASE, apic_base | MSR_IA32_APIC_EN | MSR_IA32_APIC_X2APIC | MSR_IA32_APIC_BSP);
+
+  /* Enable the APIC and setup an spurious interrupt vector */
+  write_msr(MSR_X2APIC_SPIV, MSR_X2APIC_SPIV_EN | IRQ_SPURIOUS);
+
+  /* Disable the LINT interrupt lines */
+  write_msr(MSR_X2APIC_LINT0, MSR_X2APIC_MASKED);
+  write_msr(MSR_X2APIC_LINT1, MSR_X2APIC_MASKED);
+
+  // Disable performance counter overflow interrupts
+  // on machines that provide that interrupt entry.
+  ver = read_msr(MSR_X2APIC_VER);
+  if(((ver >> 16) & 0xFF) >= 4)
+    write_msr(MSR_X2APIC_LVTPMR, MSR_X2APIC_MASKED);
+
+  // Map error interrupt to IRQ_ERROR.
+  write_msr(MSR_X2APIC_LERR, MSR_X2APIC_MASKED);
+
+  // Clear error status register (requires back-to-back writes).
+  write_msr(MSR_X2APIC_ESR, 0);
+  write_msr(MSR_X2APIC_ESR, 0);
+
+  // Ack any outstanding interrupts.
+  write_msr(MSR_X2APIC_EOI, 0);
+
+  // Send an Init Level De-Assert to synchronise arbitration ID's.
+  write_msr(MSR_X2APIC_ICR, MSR_X2APIC_ICR_BCAST | MSR_X2APIC_ICR_INIT | MSR_X2APIC_ICR_LEVEL);
+  do{
+    icrl = read_msr(MSR_X2APIC_ICR);
+  }while(icrl & MSR_X2APIC_ICR_DELIVS);
+
+  // Enable interrupts on the APIC (but not on the processor).
+  write_msr(MSR_X2APIC_TPR, 0);
 }
 
 /****************************************************************************
@@ -228,13 +323,16 @@ static int __attribute__((unused)) legacy_pic_irq_handler(int irq, uint32_t *reg
 
 static void up_ioapic_init(void)
 {
-  up_map_region(IOAPIC_BASE, HUGE_PAGE_SIZE, 0x10);
+  up_map_region((void*)IOAPIC_BASE, HUGE_PAGE_SIZE, X86_PAGE_PRESENT | X86_PAGE_WR | X86_PAGE_NOCACHE);
 
-  /* setup virtual wire mode */
-  /* 8259 PIC is routed to ININT0 a.k.a pin0 of IOAPIC 0 */
-  /* Therefore, we hook that to IRQ0, the lowest priority IRQ */
-  /*up_ioapic_pin_set_vector(0, TRIGGER_LEVEL_ACTIVE_LOW, IRQ15);*/
-  /*(void)irq_attach(IRQ15, (xcpt_t)legacy_pic_irq_handler, NULL);*/
+  /* Setup the IO-APIC, remap the interrupt to 32~ */
+
+  uint32_t maxintr = (up_ioapic_read(IOAPIC_REG_VER) >> 16) & 0xFF;
+
+  for(int i = 0; i < maxintr; i++) {
+    up_ioapic_pin_set_vector(i, TRIGGER_RISING_EDGE, IRQ0 + i);
+    up_ioapic_mask_pin(i);
+  }
 
   return;
 }
@@ -281,9 +379,6 @@ struct idt_ptr_s idt_ptr;
 
 static inline void up_idtinit(void)
 {
-  idt_ptr.limit = sizeof(struct idt_entry_s) * NR_IRQS - 1;
-  idt_ptr.base  = (uint64_t)&idt_entries;
-
   memset(&idt_entries, 0, sizeof(struct idt_entry_s)*256);
 
   /* Set each ISR/IRQ to the appropriate vector with selector=8 and with
@@ -343,7 +438,7 @@ static inline void up_idtinit(void)
 
   /* Then program the IDT */
 
-  idt_flush((uint64_t)&idt_ptr);
+  setidt(&idt_entries, sizeof(struct idt_entry_s) * NR_IRQS - 1);
 }
 
 /****************************************************************************
@@ -363,6 +458,10 @@ void up_irqinitialize(void)
   /* Initialize the IST */
 
   up_ist_init();
+
+  /* Disable 8259 PIC */
+
+  up_deinit_8259();
 
   /* Initialize the APIC */
 
@@ -393,9 +492,8 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-  /*if(irq == IRQ15){*/
-    /*up_ioapic_mask_pin(0);*/
-  /*}*/
+  if(irq >= IRQ0)
+    up_ioapic_mask_pin(irq - IRQ0);
 }
 
 /****************************************************************************
@@ -408,9 +506,8 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-  /*if(irq == IRQ15){*/
-    /*up_ioapic_unmask_pin(0);*/
-  /*}*/
+  if(irq >= IRQ0)
+    up_ioapic_unmask_pin(irq - IRQ0);
 }
 
 /****************************************************************************
