@@ -1,5 +1,5 @@
 ############################################################################
-# boards/z80/ez80/scripts/eZ80_Config.defs
+# tools/zds/zds_Config.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -78,7 +78,7 @@ endef
 else
 
 define CONDMOVE
-	$(Q) if [ ! -e $(1) && -e $(2) ]; then mv -f $(2) $(3) ; fi
+	$(Q) if [ ! -e $(1) -a -e $(2) ] ; then mv -f $(2) $(3) ; fi
 endef
 
 define MVOBJS
@@ -104,7 +104,7 @@ endif
 # ARCHIVE will move a list of object files into the library.  This is
 # complex because:
 #
-# 1. The ez80lib.exe archive expects the library to reside within the
+# 1. The ZDS-II librarian expects the library to reside within the
 #    current directory; it expects the library argument to a file name
 #    like foo.lib.
 # 2. Normally, the library file is in the current directory, but other
