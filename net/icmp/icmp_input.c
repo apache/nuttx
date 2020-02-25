@@ -47,6 +47,7 @@
 #ifdef CONFIG_NET
 
 #include <stdint.h>
+#include <string.h>
 #include <debug.h>
 
 #include <net/if.h>
