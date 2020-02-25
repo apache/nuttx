@@ -20,7 +20,7 @@
       <device />
       <externalAddress>200000</externalAddress>
       <externalAutoSelect>false</externalAutoSelect>
-      <externalRamLower>40000</externalRamLower>
+      <externalRamLower>040000</externalRamLower>
       <externalRamUpper>0BFFFF</externalRamUpper>
       <manufacturer />
       <units>1</units>

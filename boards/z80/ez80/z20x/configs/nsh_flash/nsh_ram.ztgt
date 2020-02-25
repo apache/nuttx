@@ -37,15 +37,15 @@
          </CS0>
          <CS1>
             <busMode>0</busMode>
-            <controlRegister>8</controlRegister>
-            <lower>8</lower>
-            <upper>F</upper>
+            <controlRegister>0</controlRegister>
+            <lower>0</lower>
+            <upper>0</upper>
          </CS1>
          <CS2>
             <busMode>0</busMode>
-            <controlRegister>28</controlRegister>
-            <lower>20</lower>
-            <upper>9F</upper>
+            <controlRegister>0</controlRegister>
+            <lower>0</lower>
+            <upper>0</upper>
          </CS2>
          <CS3>
             <busMode>0</busMode>
