@@ -423,7 +423,7 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 #else
   resp->iface.ifi_index  = 0;
 #endif
-  resp->iface.ifi_flags  = devinfo->req->hdr.nlmsg_flags;
+  resp->iface.ifi_flags  = dev->d_flags;
   resp->iface.ifi_change = 0xffffffff;
 
   resp->attr.rta_len     = RTA_LENGTH(strnlen(dev->d_ifname, IFNAMSIZ));
