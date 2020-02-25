@@ -111,8 +111,10 @@ ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
   ARCHCPUDEF = _EZ80F91
   ARCHFAMILY = _EZ80ACCLAIM!
 else ifeq ($(CONFIG_ARCH_CHIP_EZ80F92),y)
-  ARCHCPU = eZ80F92
-  ARCHCPUDEF = _EZ80F92
+  #ARCHCPU = eZ80F92
+  #ARCHCPUDEF = _EZ80F92
+  ARCHCPU = eZ80F91
+  ARCHCPUDEF = _EZ80F91
   ARCHFAMILY = _EZ80ACCLAIM!
 endif
 
@@ -122,14 +124,15 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHASMOPTIMIZATION = -debug -NOsdiopt
   ARCHOPTIMIZATION = -debug
 else
-  ARCHASMOPTIMIZATION = -nodebug -NOsdiopt
-  ARCHOPTIMIZATION = -nodebug
+  ARCHASMOPTIMIZATION = -nodebug -sdiopt
+  ARCHOPTIMIZATION = -NOdebug
 endif
 
 ifeq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -reduceopt
 #else
-#  ARCHOPTIMIZATION += -optsize
+#  ARCHOPTIMIZATION += -promote -NOreduceopt -optsize
+  ARCHOPTIMIZATION += -promote -NOreduceopt
 endif
 
 # Tool names/paths.

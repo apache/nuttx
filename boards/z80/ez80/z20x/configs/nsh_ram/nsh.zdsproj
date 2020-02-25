@@ -1,4 +1,4 @@
-<project type="Executable" project-type="Standard" configuration="Release" created-by="d:5.3.0:17021001" modified-by="d:5.3.0:17021001" ZDSII="ZDSII - eZ80Acclaim! 5.3.0 (Build 17041303)">
+<project type="Executable" project-type="Standard" configuration="Release" created-by="d:5.3.0:17021001" modified-by="d:5.3.0:19052909" ZDSII="ZDSII - eZ80Acclaim! 5.3.3 (Build 19083001)">
 <cpu>eZ80F92</cpu>
 
 <!-- file information -->
@@ -107,8 +107,8 @@
 <option name="padhex" type="boolean" change-action="build">false</option>
 <option name="fplib" type="string" change-action="build">Real</option>
 <option name="useadddirectives" type="boolean" change-action="build">false</option>
-<option name="linkconfig" type="string" change-action="build">CopyToRam</option>
-<option name="flashinfo" type="string" change-action="build">000000-0001FF</option>
+<option name="linkconfig" type="string" change-action="build">AllRam</option>
+<option name="flashinfo" type="string" change-action="build">000000-0000FF</option>
 <option name="ram" type="string" change-action="build">040000-0FFFFF</option>
 <option name="rom" type="string" change-action="build">000000-03FFFF</option>
 <option name="extio" type="string" change-action="build">000000-00FFFF</option>
@@ -196,7 +196,7 @@
 <option name="debug" type="boolean" change-action="assemble">true</option>
 <option name="debugcache" type="boolean" change-action="none">true</option>
 <option name="igcase" type="boolean" change-action="assemble">false</option>
-<option name="outputdir" type="string" change-action="compile">..\..\..\nuttx</option>
+<option name="outputdir" type="string" change-action="compile">..\..\..\nuttx\</option>
 </options>
 </tool>
 <tool name="Librarian">
@@ -227,8 +227,8 @@
 <option name="padhex" type="boolean" change-action="build">false</option>
 <option name="fplib" type="string" change-action="build">Real</option>
 <option name="useadddirectives" type="boolean" change-action="build">false</option>
-<option name="linkconfig" type="string" change-action="build">CopyToRam</option>
-<option name="flashinfo" type="string" change-action="build">000000-0001FF</option>
+<option name="linkconfig" type="string" change-action="build">AllRam</option>
+<option name="flashinfo" type="string" change-action="build">000000-0000FF</option>
 <option name="ram" type="string" change-action="build">040000-0BFFFF</option>
 <option name="rom" type="string" change-action="build">000000-03FFFF</option>
 <option name="extio" type="string" change-action="build">000000-00FFFF</option>
