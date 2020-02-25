@@ -193,6 +193,8 @@ BIN       = $(NUTTXNAME)$(EXEEXT)
 
 all: $(BIN)
 .PHONY: dirlinks context clean_context check_context config oldconfig menuconfig nconfig qconfig gconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
+.PHONY: pass1 pass1deps pass1dep
+.PHONY: pass2 pass2deps pass2dep
 ifeq ($(GIT_DIR),y)
 .PHONY: $(TOPDIR)/.version
 endif
