@@ -114,6 +114,8 @@
 #define CAN_FIFO_OV                 (1 << 6)
 #define CAN_FIFO_WARN               (1 << 7)
 
+#define POOL_SIZE                   1
+
 /* Interrupt flags for RX fifo */
 #define IFLAG1_RXFIFO               (CAN_FIFO_NE | CAN_FIFO_WARN | CAN_FIFO_OV)
 
@@ -236,8 +238,13 @@ struct s32k1xx_driver_s
   WDOG_ID txtimeout;           /* TX timeout timer */
   struct work_s irqwork;       /* For deferring interrupt work to the work queue */
   struct work_s pollwork;      /* For deferring poll work to the work queue */
-  struct enet_desc_s *txdesc;  /* A pointer to the list of TX descriptor */
-  struct enet_desc_s *rxdesc;  /* A pointer to the list of RX descriptors */
+#ifdef CAN_FD
+  struct canfd_frame *txdesc;  /* A pointer to the list of TX descriptor */
+  struct canfd_frame *rxdesc;  /* A pointer to the list of RX descriptors */
+#else
+  struct can_frame *txdesc;  /* A pointer to the list of TX descriptor */
+  struct can_frame *rxdesc;  /* A pointer to the list of RX descriptors */
+#endif
 
   /* This holds the information visible to the NuttX network */
 
@@ -253,8 +260,16 @@ struct s32k1xx_driver_s
 
 static struct s32k1xx_driver_s g_flexcan[CONFIG_S32K1XX_ENET_NETHIFS];
 
-static uint8_t g_desc_pool[2000]
+#ifdef CAN_FD
+static uint8_t g_tx_pool[sizeof(struct canfd_frame)*POOL_SIZE];
+static uint8_t g_rx_pool[sizeof(struct canfd_frame)*POOL_SIZE];
+#else
+static uint8_t g_tx_pool[sizeof(struct can_frame)*POOL_SIZE]
                __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+static uint8_t g_rx_pool[sizeof(struct can_frame)*POOL_SIZE]
+               __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+#endif
+
 
 /****************************************************************************
  * Private Function Prototypes
@@ -368,16 +383,17 @@ static void s32k1xx_reset(struct s32k1xx_driver_s *priv);
 
 static bool s32k1xx_txringfull(FAR struct s32k1xx_driver_s *priv)
 {
-  uint8_t txnext;
+  uint32_t mbi = 0;
 
-  /* Check if there is room in the hardware to hold another outgoing
-   * packet.  The ring is full if incrementing the head pointer would
-   * collide with the tail pointer.
-   */
-
-  txnext = priv->txhead + 1;
-
-  return priv->txtail == txnext;
+  while (mbi < TXMBCOUNT)
+	{
+	  if (priv->tx[mbi].cs.code != CAN_TXMB_DATAORREMOTE)
+		{
+		  return 0;
+		}
+	  mbi++;
+	}
+  return 1;
 }
 
 /****************************************************************************
@@ -403,19 +419,6 @@ static bool s32k1xx_txringfull(FAR struct s32k1xx_driver_s *priv)
 static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 {
   #warning Missing logic
-
-  struct can_frame *frame = (struct can_frame *)priv->dev.d_buf;
-
-#if 0
-  ninfo("CAN id: %i dlc: %i", frame->can_id, frame->can_dlc);
-
-  for (int i = 0; i < frame->can_dlc; i++)
-    {
-      ninfo(" %02X", frame->data[i]);
-    }
-
-  ninfo("\r\n");
-#endif
 
   /* Attempt to write frame */
 
@@ -456,45 +459,98 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
   struct mb_s *mb = &priv->tx[mbi];
   mb->cs.code = CAN_TXMB_INACTIVE;
 
-  if (0) /* FIXME detect Std or Ext id */
+  if(priv->dev.d_len == sizeof(struct can_frame))
     {
-      cs.ide = 1;
-      mb->id.ext = frame->can_id & MASKEXTID;
+	  struct can_frame *frame = (struct can_frame *)priv->dev.d_buf;
+
+	  if (0) /* FIXME detect Std or Ext id */
+	    {
+	      cs.ide = 1;
+	      mb->id.ext = frame->can_id & MASKEXTID;
+	    }
+	  else
+	    {
+	      mb->id.std = frame->can_id & MASKSTDID;
+	    }
+
+	#if 0
+	  cs.rtr = frame.isRemoteTransmissionRequest();
+	#endif
+
+	  cs.dlc = frame->can_dlc;
+
+	  mb->data[0].w00 = __builtin_bswap32(*(uint32_t*)&frame->data[0]);
+	  mb->data[1].w00 = __builtin_bswap32(*(uint32_t*)&frame->data[4]);
+
     }
-  else
+  else /* CAN FD frame */
     {
-      mb->id.std = frame->can_id & MASKSTDID;
+  	  struct canfd_frame *frame = (struct canfd_frame *)priv->dev.d_buf;
+
+  	  cs.edl = 1; /* CAN FD Frame */
+
+  	  if (0) /* FIXME detect Std or Ext id */
+  	    {
+  	      cs.ide = 1;
+  	      mb->id.ext = frame->can_id & MASKEXTID;
+  	    }
+  	  else
+  	    {
+  	      mb->id.std = frame->can_id & MASKSTDID;
+  	    }
+
+  	#if 0
+  	  cs.rtr = frame.isRemoteTransmissionRequest();
+  	#endif
+
+  	  if(frame->len < 9)
+  	    {
+  		  cs.dlc = frame->len;
+  	    }
+  	  else
+  	    {
+  	      if (frame->len < 13)
+  	        {
+			  cs.dlc = 9;
+  	        }
+  	      else if (frame->len < 17)
+  	        {
+			   cs.dlc = 10;
+  	        }
+  	      else if (frame->len < 21)
+  	        {
+			   cs.dlc = 11;
+  	        }
+  	      else if (frame->len < 25)
+  	        {
+			   cs.dlc = 12;
+  	        }
+  	      else if (frame->len < 33)
+  	        {
+			   cs.dlc = 13;
+  	        }
+  	      else if (frame->len < 49)
+  	        {
+			   cs.dlc = 14;
+  	        }
+  	      else if (frame->len < 65)
+  	        {
+			   cs.dlc = 15;
+  	        }
+  	      else
+  	        {
+  	    	   cs.dlc = 15; /* FIXME check CAN FD spec */
+  	        }
+  	    }
+
+  	  uint32_t* frame_data_word = (uint32_t*)&frame->data[0];
+
+	  for(int i = 0; i < (frame->len + 4 - 1) / 4; i++)
+		{
+	  	  mb->data[i].w00 = __builtin_bswap32(frame_data_word[i]);
+		}
     }
 
-#if 0
-  cs.rtr = frame.isRemoteTransmissionRequest();
-#endif
-
-  cs.dlc = frame->can_dlc;
-
-  /* FIXME endian swap instruction or somekind takes 1.5us right now */
-
-  mb->data[0].b00 = frame->data[0];
-  mb->data[0].b01 = frame->data[1];
-  mb->data[0].b02 = frame->data[2];
-  mb->data[0].b03 = frame->data[3];
-  mb->data[1].b00 = frame->data[4];
-  mb->data[1].b01 = frame->data[5];
-  mb->data[1].b02 = frame->data[6];
-  mb->data[1].b03 = frame->data[7];
-
-#if 0
-  /* Registering the pending transmission so we can track its deadline and
-   * loopback it as needed
-   */
-
-  txitem& txi        = pending_tx_[mbi];
-  txi.deadline       = tx_deadline;
-  txi.frame          = frame;
-  txi.loopback       = (flags & uavcan::CanIOFlagLoopback) != 0;
-  txi.abort_on_error = (flags & uavcan::CanIOFlagAbortOnError) != 0;
-  txi.pending        = txitem::busy;
-#endif
 
   s32k1xx_gpiowrite(PIN_PORTD | PIN31, 0);
 
@@ -552,6 +608,7 @@ static int s32k1xx_txpoll(struct net_driver_s *dev)
 
           s32k1xx_transmit(priv);
 #if 0
+          //FIXME implement ring buffer and increment pointer just like the enet driver??
           priv->dev.d_buf =
             (uint8_t *)s32k1xx_swap32((uint32_t)priv->txdesc[priv->txhead].data);
 #endif
@@ -633,130 +690,113 @@ static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv, uint32_t flags)
 
       if(rf->cs.edl) /* CAN FD frame */
         {
-
-    	  struct canfd_frame frame;
+    	  struct canfd_frame* frame = priv->rxdesc;
 
           if (rf->cs.ide)
             {
-              frame.can_id = MASKEXTID & rf->id.ext;
-              frame.can_id |= FLAGEFF;
+              frame->can_id = MASKEXTID & rf->id.ext;
+              frame->can_id |= FLAGEFF;
             }
           else
             {
-              frame.can_id = MASKSTDID & rf->id.std;
+              frame->can_id = MASKSTDID & rf->id.std;
             }
 
           if (rf->cs.rtr)
             {
-              frame.can_id |= FLAGRTR;
+              frame->can_id |= FLAGRTR;
             }
 
           if(rf->cs.dlc < 9){
-              frame.len = rf->cs.dlc;
+              frame->len = rf->cs.dlc;
           } else {
         	  switch(rf->cs.dlc)
         	    {
         	     case 9:
-        	       frame.len = 12;
+        	       frame->len = 12;
         	       break;
 
         	     case 10:
-        	       frame.len = 16;
+        	       frame->len = 16;
         	       break;
 
         	     case 11:
-        	       frame.len = 20;
+        	       frame->len = 20;
         	       break;
 
         	     case 12:
-        	       frame.len = 24;
+        	       frame->len = 24;
         	       break;
 
         	     case 13:
-        	       frame.len = 32;
+        	       frame->len = 32;
         	       break;
 
         	     case 14:
-        	       frame.len = 48;
+        	       frame->len = 48;
         	       break;
 
         	     case 15:
-        	       frame.len = 64;
+        	       frame->len = 64;
         	       break;
         	    }
           }
 
-    	  int j = 0;
-          for(int i = 0; i < (frame.len + 4 - 1) / 4; i++)
+    	  uint32_t* frame_data_word = (uint32_t*)&frame->data[0];
+
+          for(int i = 0; i < (frame->len + 4 - 1) / 4; i++)
             {
-              frame.data[0+j] = rf->data[i].b00;
-              frame.data[1+j] = rf->data[i].b01;
-              frame.data[2+j] = rf->data[i].b02;
-              frame.data[3+j] = rf->data[i].b03;
-              j = j + 4;
+        	  frame_data_word[i] = __builtin_bswap32(rf->data[i].w00);
             }
 
           /* Clear MB interrupt flag */
           regval  = getreg32(S32K1XX_CAN0_IFLAG1);
-          regval |= (1 << mb_index);
+          regval |= (0x80000000 >> mb_index);
           putreg32(regval, S32K1XX_CAN0_IFLAG1);
 
-          /* Copy the buffer pointer to priv->dev.d_buf.  Set amount of data
+          /* Copy the buffer pointer to priv->dev..  Set amount of data
            * in priv->dev.d_len
            */
 
           priv->dev.d_len = sizeof(struct canfd_frame);
-          priv->dev.d_buf = (uint8_t *)s32k1xx_swap32((uint32_t)&frame); /* FIXME */
+          priv->dev.d_buf = frame;
         }
       else /* CAN 2.0 Frame */
         {
-    	  struct can_frame frame;
+    	  struct can_frame* frame = priv->rxdesc;
 
           if (rf->cs.ide)
             {
-              frame.can_id = MASKEXTID & rf->id.ext;
-              frame.can_id |= FLAGEFF;
+              frame->can_id = MASKEXTID & rf->id.ext;
+              frame->can_id |= FLAGEFF;
             }
           else
             {
-              frame.can_id = MASKSTDID & rf->id.std;
+              frame->can_id = MASKSTDID & rf->id.std;
             }
 
           if (rf->cs.rtr)
             {
-              frame.can_id |= FLAGRTR;
+              frame->can_id |= FLAGRTR;
             }
 
-          frame.can_dlc = rf->cs.dlc;
+          frame->can_dlc = rf->cs.dlc;
 
-          frame.data[0] = rf->data[0].b00;
-          frame.data[1] = rf->data[0].b01;
-          frame.data[2] = rf->data[0].b02;
-          frame.data[3] = rf->data[0].b03;
-          frame.data[4] = rf->data[1].b00;
-          frame.data[5] = rf->data[1].b01;
-          frame.data[6] = rf->data[1].b02;
-          frame.data[7] = rf->data[1].b03;
+    	  *(uint32_t*)&frame->data[0] = __builtin_bswap32(rf->data[0].w00);
+    	  *(uint32_t*)&frame->data[4] = __builtin_bswap32(rf->data[1].w00);
 
           /* Clear MB interrupt flag */
           regval  = getreg32(S32K1XX_CAN0_IFLAG1);
           regval |= (1 << mb_index);
           putreg32(regval, S32K1XX_CAN0_IFLAG1);
 
-          /* Copy the buffer pointer to priv->dev.d_buf.  Set amount of data
+          /* Copy the buffer pointer to priv->dev..  Set amount of data
            * in priv->dev.d_len
            */
 
           priv->dev.d_len = sizeof(struct can_frame);
-          priv->dev.d_buf = (uint8_t *)s32k1xx_swap32((uint32_t)&frame); /* FIXME */
+          priv->dev.d_buf = frame;
         }
-
-      /* Invalidate the buffer so that the correct packet will be re-read
-       * from memory when the packet content is accessed.
-       */
-
-      up_invalidate_dcache((uintptr_t)priv->dev.d_buf,
-                      (uintptr_t)priv->dev.d_buf + priv->dev.d_len);
 
       /* Send to socket interface */
 
@@ -764,7 +804,13 @@ static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv, uint32_t flags)
 
       can_input(&priv->dev);
 
-      /* Store with timeout into the FIFO buffer and signal update event */
+      /* Point the packet buffer back to the next Tx buffer that will be
+       * used during the next write.  If the write queue is full, then
+       * this will point at an active buffer, which must not be written
+       * to.  This is OK because devif_poll won't be called unless the
+       * queue is not full.
+       */
+      priv->dev.d_buf = priv->txdesc;
     }
 }
 
@@ -790,6 +836,12 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv, uint32_t flags)
 {
   #warning Missing logic
 
+  /* We are here because a transmission completed, so the watchdog can be
+   * canceled.
+   */
+
+  wd_cancel(priv->txtimeout);
+
   /* FIXME process aborts */
 
   /* Process TX completions */
@@ -805,10 +857,18 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv, uint32_t flags)
           const bool txok = priv->tx[mbi].cs.code != CAN_TXMB_ABORT;
           handleTxMailboxInterrupt(mbi, txok, utc_usec);
 #endif
+
+          NETDEV_TXDONE(&priv->dev);
         }
 
       mb_bit <<= 1;
     }
+
+  /* There should be space for a new TX in any event.  Poll the network for
+   * new XMIT data
+   */
+
+  devif_poll(&priv->dev, s32k1xx_txpoll);
 }
 
 /****************************************************************************
@@ -950,7 +1010,7 @@ static void s32k1xx_poll_work(FAR void *arg)
    */
 
   net_lock();
-  if (1) /* !s32k1xx_txringfull(priv)) */
+  if (!s32k1xx_txringfull(priv))
     {
       /* If so, update TCP timing states and poll the network for new XMIT
        * data. Hmmm.. might be bug here.  Does this mean if there is a
@@ -1096,7 +1156,10 @@ static int s32k1xx_ifup(struct net_driver_s *dev)
 
   priv->bifup = true;
 
-  priv->dev.d_buf = &g_desc_pool;
+  priv->txdesc = &g_tx_pool;
+  priv->rxdesc = &g_rx_pool;
+
+  priv->dev.d_buf = priv->txdesc;
 
   /* Set interrupts */
 
@@ -1461,7 +1524,7 @@ static void s32k1xx_reset(struct s32k1xx_driver_s *priv)
             (((TOTALMBCOUNT - 1) << CAN_MCR_MAXMB_SHIFT) & CAN_MCR_MAXMB_MASK);
   putreg32(regval, S32K1XX_CAN0_MCR);
 
-  regval  = CAN_CTRL2_RRS | CAN_CTRL2_EACEN | CAN_CTRL2_RFFN_16MB; /* FIXME TASD */
+  regval  = CAN_CTRL2_RRS | CAN_CTRL2_EACEN; /* FIXME TASD */
   putreg32(regval, S32K1XX_CAN0_CTRL2);
 
   for (i = 0; i < TOTALMBCOUNT; i++)

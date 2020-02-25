@@ -30,6 +30,7 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/mm/iob.h>
 
 #include "devif/devif.h"
 #include "can/can.h"
