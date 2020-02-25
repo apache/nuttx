@@ -83,9 +83,10 @@ endif
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
 CXXOBJS = $(CXXSRCS:.cxx=$(OBJEXT))
+CPPOBJS = $(CPPSRCS:.cpp=$(OBJEXT))
 
-SRCS = $(ASRCS) $(CSRCS) $(CXXSRCS)
-OBJS = $(AOBJS) $(COBJS) $(CXXOBJS)
+SRCS = $(ASRCS) $(CSRCS) $(CXXSRCS) $(CPPSRCS)
+OBJS = $(AOBJS) $(COBJS) $(CXXOBJS) $(CPPOBJS)
 
 BIN = libxx$(LIBEXT)
 
@@ -99,6 +100,9 @@ $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 $(CXXOBJS): %$(OBJEXT): %.cxx
+	$(call COMPILEXX, $<, $@)
+
+$(CPPOBJS): %$(OBJEXT): %.cpp
 	$(call COMPILEXX, $<, $@)
 
 $(BIN):	$(OBJS)
