@@ -681,6 +681,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
               addr4->sin_family = AF_INET;
               addr4->sin_port   = conn->rport;
               net_ipv4addr_copy(addr4->sin_addr.s_addr, conn->u.ipv4.raddr);
+              memset(addr4->sin_zero, 0, sizeof(addr4->sin_zero));
             }
 #endif /* CONFIG_NET_IPv4 */
 

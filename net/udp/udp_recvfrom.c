@@ -375,6 +375,7 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
 
               net_ipv4addr_copy(infrom->sin_addr.s_addr,
                                 net_ip4addr_conv32(ipv4->srcipaddr));
+              memset(infrom->sin_zero, 0, sizeof(infrom->sin_zero));
             }
         }
     }

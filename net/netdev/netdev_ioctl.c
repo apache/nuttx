@@ -286,6 +286,7 @@ static void ioctl_get_ipv4addr(FAR struct sockaddr *outaddr,
   dest->sin_family              = AF_INET;
   dest->sin_port                = 0;
   dest->sin_addr.s_addr         = inaddr;
+  memset(dest->sin_zero, 0, sizeof(dest->sin_zero));
 }
 #endif
 
@@ -310,6 +311,7 @@ static void inline ioctl_get_ipv4broadcast(FAR struct sockaddr *outaddr,
   dest->sin_family              = AF_INET;
   dest->sin_port                = 0;
   dest->sin_addr.s_addr         = net_ipv4addr_broadcast(inaddr, netmask);
+  memset(dest->sin_zero, 0, sizeof(dest->sin_zero));
 }
 #endif
 

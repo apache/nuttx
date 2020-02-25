@@ -141,6 +141,7 @@ int ipv4_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   outaddr->sin_family      = psock->s_domain;
   outaddr->sin_addr.s_addr = ripaddr;
+  memset(outaddr->sin_zero, 0, sizeof(outaddr->sin_zero));
   *addrlen = sizeof(struct sockaddr_in);
 
   /* Return success */

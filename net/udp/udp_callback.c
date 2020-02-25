@@ -165,6 +165,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
 
           net_ipv4addr_copy(src_addr4.sin_addr.s_addr,
                             net_ip4addr_conv32(ipv4->srcipaddr));
+          memset(src_addr4.sin_zero, 0, sizeof(src_addr4.sin_zero));
 
           src_addr_size = sizeof(src_addr4);
           src_addr = &src_addr4;
