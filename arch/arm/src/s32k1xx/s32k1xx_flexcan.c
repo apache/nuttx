@@ -32,22 +32,13 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <arpa/inet.h>
-
 #include <nuttx/can.h>
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/signal.h>
-#include <nuttx/net/mii.h>
-#include <nuttx/net/arp.h>
-#include <nuttx/net/phy.h>
 #include <nuttx/net/netdev.h>
-
-#ifdef CONFIG_NET_PKT
-#  include <nuttx/net/pkt.h>
-#endif
 
 #include "up_arch.h"
 #include "chip.h"
@@ -70,6 +61,7 @@
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Work queue support is required
+   //FIXME maybe for enet not sure for FLEXCAN
 #else
 
   /* Select work queue.  Always use the LP work queue if available.  If not,
@@ -109,17 +101,21 @@
 
 /* Fixme nice variables/constants */
 
-#define RXMBCOUNT                   6
-#define FILTERCOUNT                 0
-#define RXANDFILTERMBCOUNT          (RXMBCOUNT + FILTERCOUNT)
-#define TXMBCOUNT                   12 //???????????? why 12 idk it works
-#define TOTALMBCOUNT                RXANDFILTERMBCOUNT + TXMBCOUNT
-#define TXMBMASK                    (((1 << TXMBCOUNT)-1) << RXANDFILTERMBCOUNT)
+#define CAN_FD
+
+#define RXMBCOUNT                   5
+#define TXMBCOUNT                   2
+#define TOTALMBCOUNT                RXMBCOUNT + TXMBCOUNT
+
+#define IFLAG1_RX                   ((1 << RXMBCOUNT)-1)
+#define IFLAG1_TX                   (((1 << TXMBCOUNT)-1) << RXMBCOUNT)
 
 #define CAN_FIFO_NE                 (1 << 5)
 #define CAN_FIFO_OV                 (1 << 6)
 #define CAN_FIFO_WARN               (1 << 7)
-#define FIFO_IFLAG1                 (CAN_FIFO_NE | CAN_FIFO_WARN | CAN_FIFO_OV)
+
+/* Interrupt flags for RX fifo */
+#define IFLAG1_RXFIFO               (CAN_FIFO_NE | CAN_FIFO_WARN | CAN_FIFO_OV)
 
 static int peak_tx_mailbox_index_ = 0;
 
@@ -162,54 +158,12 @@ static int peak_tx_mailbox_index_ = 0;
 #define FLEXCAN_ALIGN_MASK   (FLEXCAN_ALIGN - 1)
 #define FLEXCAN_ALIGN_UP(n)  (((n) + FLEXCAN_ALIGN_MASK) & ~FLEXCAN_ALIGN_MASK)
 
-/* TX timeout = 1 minute */
-
-#define S32K1XX_TXTIMEOUT   (60*CLK_TCK)
-#define MII_MAXPOLLS      (0x1ffff)
-#define LINK_WAITUS       (500*1000)
-#define LINK_NLOOPS       (10)
-
-/* Interrupt groups */
-
-#define RX_INTERRUPTS     (FLEXCAN_INT_RXF | FLEXCAN_INT_RXB)
-#define TX_INTERRUPTS      FLEXCAN_INT_TXF
-#define ERROR_INTERRUPTS  (FLEXCAN_INT_UN    | FLEXCAN_INT_RL   | FLEXCAN_INT_LC | \
-                           FLEXCAN_INT_EBERR | FLEXCAN_INT_BABT | FLEXCAN_INT_BABR)
-
-/* The subset of errors that require us to reset the hardware - this list
- * may need to be revisited if it's found that some error above leads to a
- * locking up of the Ethernet interface.
- */
-
-#define CRITICAL_ERROR    (FLEXCAN_INT_UN | FLEXCAN_INT_RL | FLEXCAN_INT_EBERR )
-
-/* This is a helper pointer for accessing the contents of the Ethernet header */
-
-#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
-
-#define S32K1XX_BUF_SIZE  FLEXCAN_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-union txcs_e
-{
-  volatile uint32_t w;
-  struct
-  {
-    volatile uint32_t time_stamp : 16;
-    volatile uint32_t dlc : 4;
-    volatile uint32_t rtr : 1;
-    volatile uint32_t ide : 1;
-    volatile uint32_t srr : 1;
-    volatile uint32_t res : 1;
-    volatile uint32_t code : 4;
-    volatile uint32_t res2 : 4;
-  };
-};
-
-union rxcs_e
+union cs_e
 {
   volatile uint32_t cs;
   struct
@@ -219,7 +173,12 @@ union rxcs_e
     volatile uint32_t rtr : 1;
     volatile uint32_t ide : 1;
     volatile uint32_t srr : 1;
-    volatile uint32_t res : 9;
+    volatile uint32_t res : 1;
+    volatile uint32_t code : 4;
+    volatile uint32_t res2 : 1;
+    volatile uint32_t esi : 1;
+    volatile uint32_t brs : 1;
+    volatile uint32_t edl : 1;
   };
 };
 
@@ -241,33 +200,25 @@ union id_e
 
 union data_e
 {
-  volatile uint32_t l;
-  volatile uint32_t h;
+  volatile uint32_t w00;
   struct
   {
-    volatile uint32_t b3 : 8;
-    volatile uint32_t b2 : 8;
-    volatile uint32_t b1 : 8;
-    volatile uint32_t b0 : 8;
-    volatile uint32_t b7 : 8;
-    volatile uint32_t b6 : 8;
-    volatile uint32_t b5 : 8;
-    volatile uint32_t b4 : 8;
+    volatile uint32_t b03 : 8;
+    volatile uint32_t b02 : 8;
+    volatile uint32_t b01 : 8;
+    volatile uint32_t b00 : 8;
   };
 };
 
-struct mbtx_s
+struct mb_s
 {
-  union txcs_e cs;
+  union cs_e cs;
   union id_e id;
-  union data_e data;
-};
-
-struct mbrx_s
-{
-  union rxcs_e cs;
-  union id_e id;
-  union data_e data;
+#ifdef CAN_FD
+  union data_e data[16];
+#else
+  union data_e data[2];
+#endif
 };
 
 /* The s32k1xx_driver_s encapsulates all state information for a single
@@ -292,8 +243,8 @@ struct s32k1xx_driver_s
 
   struct net_driver_s dev;     /* Interface understood by the network */
 
-  struct mbrx_s *rx;
-  struct mbtx_s *tx;
+  struct mb_s *rx;
+  struct mb_s *tx;
 };
 
 /****************************************************************************
@@ -324,6 +275,28 @@ static inline uint16_t s32k1xx_swap16(uint16_t value);
 #endif
 #endif
 
+/****************************************************************************
+ * Name: arm_clz
+ *
+ * Description:
+ *   Access to CLZ instructions
+ *
+ * Input Parameters:
+ *   value - The value to perform the Count Leading Zeros operation on
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline uint32_t arm_clz(unsigned int value)
+{
+  uint32_t ret;
+
+  __asm__ __volatile__ ("clz %0, %1" : "=r"(ret) : "r"(value));
+  return ret;
+}
+
 /* Common TX logic */
 
 static bool s32k1xx_txringfull(FAR struct s32k1xx_driver_s *priv);
@@ -340,8 +313,8 @@ static uint32_t s32k1xx_waitmcr_change(uint32_t mask,
 /* Interrupt handling */
 
 static void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv);
-static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv);
-static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv);
+static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv, uint32_t flags);
+static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv, uint32_t flags);
 
 static void s32k1xx_flexcan_interrupt_work(FAR void *arg);
 static int  s32k1xx_flexcan_interrupt(int irq, FAR void *context,
@@ -362,12 +335,6 @@ static int  s32k1xx_ifdown(struct net_driver_s *dev);
 
 static void s32k1xx_txavail_work(FAR void *arg);
 static int  s32k1xx_txavail(struct net_driver_s *dev);
-
-#ifdef CONFIG_NET_MCASTGROUP
-static int  s32k1xx_addmac(struct net_driver_s *dev,
-                           FAR const uint8_t *mac);
-static int  s32k1xx_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
-#endif
 
 #ifdef CONFIG_NETDEV_IOCTL
 static int  s32k1xx_ioctl(struct net_driver_s *dev, int cmd,
@@ -456,11 +423,12 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
   if ((getreg32(S32K1XX_CAN0_ESR2) & (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
       (CAN_ESR2_IMB | CAN_ESR2_VPS))
     {
-      mbi = (getreg32(S32K1XX_CAN0_ESR2) & CAN_ESR2_LPTM_MASK) >>
-            CAN_ESR2_LPTM_SHIFT;
+      mbi  = ((getreg32(S32K1XX_CAN0_ESR2) &
+    		CAN_ESR2_LPTM_MASK) >> CAN_ESR2_LPTM_SHIFT);
+      mbi -= RXMBCOUNT;
     }
 
-  uint32_t mb_bit = 1 << (RXANDFILTERMBCOUNT + mbi);
+  uint32_t mb_bit = 1 << (RXMBCOUNT + mbi);
 
   while (mbi < TXMBCOUNT)
     {
@@ -474,7 +442,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
       mbi++;
     }
 
-  if ((mbi - RXANDFILTERMBCOUNT) == TXMBCOUNT)
+  if (mbi == TXMBCOUNT)
     {
       nwarn("No TX MB available mbi %i\r\n", mbi);
       return 0;       /* No transmission for you! */
@@ -483,9 +451,9 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
   peak_tx_mailbox_index_ =
     (peak_tx_mailbox_index_ > mbi ? peak_tx_mailbox_index_ : mbi);
 
-  union txcs_e cs;
+  union cs_e cs;
   cs.code = CAN_TXMB_DATAORREMOTE;
-  struct mbtx_s *mb = &priv->tx[mbi];
+  struct mb_s *mb = &priv->tx[mbi];
   mb->cs.code = CAN_TXMB_INACTIVE;
 
   if (0) /* FIXME detect Std or Ext id */
@@ -506,14 +474,14 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
   /* FIXME endian swap instruction or somekind takes 1.5us right now */
 
-  mb->data.b0 = frame->data[0];
-  mb->data.b1 = frame->data[1];
-  mb->data.b2 = frame->data[2];
-  mb->data.b3 = frame->data[3];
-  mb->data.b4 = frame->data[4];
-  mb->data.b5 = frame->data[5];
-  mb->data.b6 = frame->data[6];
-  mb->data.b7 = frame->data[7];
+  mb->data[0].b00 = frame->data[0];
+  mb->data[0].b01 = frame->data[1];
+  mb->data[0].b02 = frame->data[2];
+  mb->data[0].b03 = frame->data[3];
+  mb->data[1].b00 = frame->data[4];
+  mb->data[1].b01 = frame->data[5];
+  mb->data[1].b02 = frame->data[6];
+  mb->data[1].b03 = frame->data[7];
 
 #if 0
   /* Registering the pending transmission so we can track its deadline and
@@ -646,77 +614,142 @@ static inline void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv)
  *
  ****************************************************************************/
 
-static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv)
+static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv, uint32_t flags)
 {
   #warning Missing logic
+  uint32_t regval;
+
   s32k1xx_gpiowrite(PIN_PORTD | PIN31, 1);
 
-  struct can_frame frame;
-  uint32_t flags = getreg32(S32K1XX_CAN0_IFLAG1);
 
-  if ((flags & FIFO_IFLAG1) == 0)
+  //FIXME naive what if multiple flags are high??
+  uint32_t mb_index = arm_clz(flags);
+
+  if (mb_index)
     {
-      /* Weird, IRQ is here but no data to read */
-
-      return;
-    }
-
-  if (flags & CAN_FIFO_OV)
-    {
-#if 0
-      error_cnt_++;
-#endif
-      putreg32(CAN_FIFO_OV, S32K1XX_CAN0_IFLAG1);
-    }
-
-  if (flags & CAN_FIFO_WARN)
-    {
-#if 0
-      fifo_warn_cnt_++;
-#endif
-      putreg32(CAN_FIFO_WARN, S32K1XX_CAN0_IFLAG1);
-    }
-
-  if (flags & CAN_FIFO_NE)
-    {
-      struct mbrx_s *rf = priv->rx;
+      struct mb_s *rf = &priv->rx[31 - mb_index];
 
       /* Read the frame contents */
 
-      if (rf->cs.ide)
+      if(rf->cs.edl) /* CAN FD frame */
         {
-          frame.can_id = MASKEXTID & rf->id.ext;
-          frame.can_id |= FLAGEFF;
+
+    	  struct canfd_frame frame;
+
+          if (rf->cs.ide)
+            {
+              frame.can_id = MASKEXTID & rf->id.ext;
+              frame.can_id |= FLAGEFF;
+            }
+          else
+            {
+              frame.can_id = MASKSTDID & rf->id.std;
+            }
+
+          if (rf->cs.rtr)
+            {
+              frame.can_id |= FLAGRTR;
+            }
+
+          if(rf->cs.dlc < 9){
+              frame.len = rf->cs.dlc;
+          } else {
+        	  switch(rf->cs.dlc)
+        	    {
+        	     case 9:
+        	       frame.len = 12;
+        	       break;
+
+        	     case 10:
+        	       frame.len = 16;
+        	       break;
+
+        	     case 11:
+        	       frame.len = 20;
+        	       break;
+
+        	     case 12:
+        	       frame.len = 24;
+        	       break;
+
+        	     case 13:
+        	       frame.len = 32;
+        	       break;
+
+        	     case 14:
+        	       frame.len = 48;
+        	       break;
+
+        	     case 15:
+        	       frame.len = 64;
+        	       break;
+        	    }
+          }
+
+    	  int j = 0;
+          for(int i = 0; i < (frame.len + 4 - 1) / 4; i++)
+            {
+              frame.data[0+j] = rf->data[i].b00;
+              frame.data[1+j] = rf->data[i].b01;
+              frame.data[2+j] = rf->data[i].b02;
+              frame.data[3+j] = rf->data[i].b03;
+              j = j + 4;
+            }
+
+          /* Clear MB interrupt flag */
+          regval  = getreg32(S32K1XX_CAN0_IFLAG1);
+          regval |= (1 << mb_index);
+          putreg32(regval, S32K1XX_CAN0_IFLAG1);
+
+          /* Copy the buffer pointer to priv->dev.d_buf.  Set amount of data
+           * in priv->dev.d_len
+           */
+
+          priv->dev.d_len = sizeof(struct canfd_frame);
+          priv->dev.d_buf = (uint8_t *)s32k1xx_swap32((uint32_t)&frame); /* FIXME */
         }
-      else
+      else /* CAN 2.0 Frame */
         {
-          frame.can_id = MASKSTDID & rf->id.std;
+    	  struct can_frame frame;
+
+          if (rf->cs.ide)
+            {
+              frame.can_id = MASKEXTID & rf->id.ext;
+              frame.can_id |= FLAGEFF;
+            }
+          else
+            {
+              frame.can_id = MASKSTDID & rf->id.std;
+            }
+
+          if (rf->cs.rtr)
+            {
+              frame.can_id |= FLAGRTR;
+            }
+
+          frame.can_dlc = rf->cs.dlc;
+
+          frame.data[0] = rf->data[0].b00;
+          frame.data[1] = rf->data[0].b01;
+          frame.data[2] = rf->data[0].b02;
+          frame.data[3] = rf->data[0].b03;
+          frame.data[4] = rf->data[1].b00;
+          frame.data[5] = rf->data[1].b01;
+          frame.data[6] = rf->data[1].b02;
+          frame.data[7] = rf->data[1].b03;
+
+          /* Clear MB interrupt flag */
+          regval  = getreg32(S32K1XX_CAN0_IFLAG1);
+          regval |= (1 << mb_index);
+          putreg32(regval, S32K1XX_CAN0_IFLAG1);
+
+          /* Copy the buffer pointer to priv->dev.d_buf.  Set amount of data
+           * in priv->dev.d_len
+           */
+
+          priv->dev.d_len = sizeof(struct can_frame);
+          priv->dev.d_buf = (uint8_t *)s32k1xx_swap32((uint32_t)&frame); /* FIXME */
         }
-
-      if (rf->cs.rtr)
-        {
-          frame.can_id |= FLAGRTR;
-        }
-
-      frame.can_dlc = rf->cs.dlc;
-
-      frame.data[0] = rf->data.b0;
-      frame.data[1] = rf->data.b1;
-      frame.data[2] = rf->data.b2;
-      frame.data[3] = rf->data.b3;
-      frame.data[4] = rf->data.b4;
-      frame.data[5] = rf->data.b5;
-      frame.data[6] = rf->data.b6;
-      frame.data[7] = rf->data.b7;
-
-      putreg32(CAN_FIFO_NE, S32K1XX_CAN0_IFLAG1);
-
-      /* Copy the buffer pointer to priv->dev.d_buf.  Set amount of data
-       * in priv->dev.d_len
-       */
-
-      priv->dev.d_len = sizeof(struct can_frame);
-      priv->dev.d_buf = (uint8_t *)s32k1xx_swap32((uint32_t)&frame); /* FIXME */
 
       /* Invalidate the buffer so that the correct packet will be re-read
        * from memory when the packet content is accessed.
@@ -753,24 +786,21 @@ static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv)
  *
  ****************************************************************************/
 
-static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv)
+static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv, uint32_t flags)
 {
   #warning Missing logic
-
-  uint32_t tx_iflags;
-  tx_iflags = getreg32(S32K1XX_CAN0_IFLAG1) & TXMBMASK;
 
   /* FIXME process aborts */
 
   /* Process TX completions */
 
   uint32_t mb_bit = 1 << RXMBCOUNT;
-  for (uint32_t mbi = 0; tx_iflags && mbi < TXMBCOUNT; mbi++)
+  for (uint32_t mbi = 0; flags && mbi < TXMBCOUNT; mbi++)
     {
-      if (tx_iflags & mb_bit)
+      if (flags & mb_bit)
         {
           putreg32(mb_bit, S32K1XX_CAN0_IFLAG1);
-          tx_iflags &= ~mb_bit;
+          flags &= ~mb_bit;
 #if 0
           const bool txok = priv->tx[mbi].cs.code != CAN_TXMB_ABORT;
           handleTxMailboxInterrupt(mbi, txok, utc_usec);
@@ -829,19 +859,19 @@ static int s32k1xx_flexcan_interrupt(int irq, FAR void *context, FAR void *arg)
   FAR struct s32k1xx_driver_s *priv = &g_flexcan[0];
   uint32_t flags;
   flags  = getreg32(S32K1XX_CAN0_IFLAG1);
-  flags &= FIFO_IFLAG1;
+  flags &= IFLAG1_RX;
 
   if (flags)
     {
-      s32k1xx_receive(priv);
+      s32k1xx_receive(priv, flags);
     }
 
   flags  = getreg32(S32K1XX_CAN0_IFLAG1);
-  flags &= TXMBMASK;
+  flags &= IFLAG1_TX;
 
   if (flags)
     {
-      s32k1xx_txdone(priv);
+      s32k1xx_txdone(priv, flags);
     }
 }
 
@@ -1271,38 +1301,18 @@ static int s32k1xx_initialize(struct s32k1xx_driver_s *priv)
       return -1;
     }
 
-#if 0
-  regval  = getreg32(S32K1XX_CAN0_CTRL1);
-  regval |= ((0  << CAN_CTRL1_PRESDIV_SHIFT) & CAN_CTRL1_PRESDIV_MASK) |
-            ((46 << CAN_CTRL1_ROPSEG_SHIFT) & CAN_CTRL1_ROPSEG_MASK) |
-            ((18 << CAN_CTRL1_PSEG1_SHIFT) & CAN_CTRL1_PSEG1_MASK) |
-            ((12 << CAN_CTRL1_PSEG2_SHIFT) & CAN_CTRL1_PSEG2_MASK) |
-            ((12 << CAN_CTRL1_RJW_SHIFT) & CAN_CTRL1_RJW_MASK) |
-            CAN_CTRL1_ERRMSK |
-            CAN_CTRL1_TWRNMSK |
-            CAN_CTRL1_RWRNMSK;
 
-  putreg32(regval, S32K1XX_CAN0_CTRL1);
-#endif
-
-#define BIT_METHOD2
-#ifdef BIT_METHOD2
-  /* CAN Bit Timing (CBT) configuration for a nominal phase of 1 Mbit/s
-   * with 80 time quantas,in accordance with Bosch 2012 specification,
-   * sample point at 83.75%
-   */
-
+  /* Based on 80Mhz BUS clock calc through S32DS */
   regval  = getreg32(S32K1XX_CAN0_CBT);
   regval |= CAN_CBT_BTF |          /* Enable extended bit timing configurations
                                     * for CAN-FD for setting up separately
                                     * nominal and data phase */
-            CAN_CBT_EPRESDIV(0) |  /* Prescaler divisor factor of 1 */
-            CAN_CBT_EPROPSEG(46) | /* Propagation segment of 47 time quantas */
-            CAN_CBT_EPSEG1(18) |   /* Phase buffer segment 1 of 19 time quantas */
-            CAN_CBT_EPSEG2(12) |   /* Phase buffer segment 2 of 13 time quantas */
-            CAN_CBT_ERJW(12);      /* Resynchronization jump width same as PSEG2 */
+            CAN_CBT_EPRESDIV(3) |  /* Prescaler divisor factor of 3 */
+            CAN_CBT_EPROPSEG(7) | /* Propagation segment of 7 time quantas */
+            CAN_CBT_EPSEG1(6) |   /* Phase buffer segment 1 of 6 time quantas */
+            CAN_CBT_EPSEG2(3) |   /* Phase buffer segment 2 of 3 time quantas */
+            CAN_CBT_ERJW(1);      /* Resynchronization jump width */
   putreg32(regval, S32K1XX_CAN0_CBT);
-#endif
 
 #ifdef CAN_FD
   /* Enable CAN FD feature */
@@ -1311,17 +1321,14 @@ static int s32k1xx_initialize(struct s32k1xx_driver_s *priv)
   regval |= CAN_MCR_FDEN;
   putreg32(regval, S32K1XX_CAN0_MCR);
 
-  /* CAN-FD Bit Timing (FDCBT) for a data phase of 4 Mbit/s with 20 time quantas,
-   * in accordance with Bosch 2012 specification, sample point at 75%
-   */
-
+  /* Based on 80Mhz BUS clock calc through S32DS */
   regval  = getreg32(S32K1XX_CAN0_FDCBT);
   regval |= CAN_FDCBT_FPRESDIV(0) | /* Prescaler divisor factor of 1 */
-            CAN_FDCBT_FPROPSEG(7) | /* Propagation semgment of 7 time quantas
+            CAN_FDCBT_FPROPSEG(15) | /* Propagation semgment of 7 time quantas
                                      * (only register that doesn't add 1) */
-            CAN_FDCBT_FPSEG1(6) |   /* Phase buffer segment 1 of 7 time quantas */
-            CAN_FDCBT_FPSEG2(4) |   /* Phase buffer segment 2 of 5 time quantas */
-            CAN_FDCBT_FRJW(4);      /* Resynchorinzation jump width same as PSEG2 */
+            CAN_FDCBT_FPSEG1(1) |   /* Phase buffer segment 1 of 7 time quantas */
+            CAN_FDCBT_FPSEG2(1) |   /* Phase buffer segment 2 of 5 time quantas */
+            CAN_FDCBT_FRJW(1);      /* Resynchorinzation jump width same as PSEG2 */
   putreg32(regval, S32K1XX_CAN0_FDCBT);
 
   /* Additional CAN-FD configurations */
@@ -1351,8 +1358,20 @@ static int s32k1xx_initialize(struct s32k1xx_driver_s *priv)
       putreg32(0, S32K1XX_CAN0_RXIMR(i));
     }
 
-  putreg32(FIFO_IFLAG1 | TXMBMASK, S32K1XX_CAN0_IFLAG1);
-  putreg32(FIFO_IFLAG1, S32K1XX_CAN0_IMASK1);
+  for (i = 0; i < RXMBCOUNT; i++)
+    {
+      ninfo("Set MB%i to receive %p\r\n", i, &priv->rx[i]);
+      priv->rx[i].cs.edl = 0x1;
+      priv->rx[i].cs.brs = 0x1;
+      priv->rx[i].cs.esi = 0x0;
+      priv->rx[i].cs.code = 4;
+      priv->rx[i].cs.srr = 0x0;
+      priv->rx[i].cs.ide = 0x1;
+      priv->rx[i].cs.rtr = 0x0;
+    }
+
+  putreg32(IFLAG1_RX, S32K1XX_CAN0_IFLAG1);
+  putreg32(IFLAG1_RX, S32K1XX_CAN0_IMASK1);
 
   /* Exit freeze mode */
 
@@ -1432,12 +1451,12 @@ static void s32k1xx_reset(struct s32k1xx_driver_s *priv)
       ninfo("MB %i %p\r\n", i, &priv->rx[i].id.w);
       priv->rx[i].cs.cs = 0x0;
       priv->rx[i].id.w = 0x0;
-      priv->rx[i].data.l = 0x0;
-      priv->rx[i].data.h = 0x0;
+      priv->rx[i].data[0].w00 = 0x0;
+      priv->rx[i].data[1].w00 = 0x0;
     }
 
   regval  = getreg32(S32K1XX_CAN0_MCR);
-  regval |= CAN_MCR_RFEN | CAN_MCR_SLFWAK | CAN_MCR_WRNEN | CAN_MCR_SRXDIS |
+  regval |= CAN_MCR_SLFWAK | CAN_MCR_WRNEN | CAN_MCR_SRXDIS |
             CAN_MCR_IRMQ | CAN_MCR_AEN |
             (((TOTALMBCOUNT - 1) << CAN_MCR_MAXMB_SHIFT) & CAN_MCR_MAXMB_MASK);
   putreg32(regval, S32K1XX_CAN0_MCR);
@@ -1546,9 +1565,9 @@ int s32k1xx_netinitialize(int intf)
 
   priv->txpoll        = wd_create();       /* Create periodic poll timer */
   priv->txtimeout     = wd_create();       /* Create TX timeout timer */
-  priv->rx            = (struct mbrx_s *)(S32K1XX_CAN0_MB);
-  priv->tx            = (struct mbtx_s *)(S32K1XX_CAN0_MB +
-                          (sizeof(struct mbrx_s) * RXMBCOUNT));
+  priv->rx            = (struct mb_s *)(S32K1XX_CAN0_MB);
+  priv->tx            = (struct mb_s *)(S32K1XX_CAN0_MB +
+                          (sizeof(struct mb_s) * RXMBCOUNT));
 
   /* Put the interface in the down state.  This usually amounts to resetting
    * the device and/or calling s32k1xx_ifdown().
