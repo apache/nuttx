@@ -912,6 +912,18 @@ sethost.sh
       -h will show this help test and terminate
       <config> selects configuration file.  Default: .config
 
+simhostroute.sh
+---------------
+
+   Helper script used to set up the tap driver, host routes,
+   and IP Tables rules to support networking with the
+   simulator under Linux.  General usage:
+
+     $ tools/simhostroute.sh
+     Usage: tools/simhostroute.sh <interface> <on|off>
+
+  See boards/sim/sim/sim/NETWORK-LINUX.txt for further information
+
 simbridge.sh
 ------------
 
