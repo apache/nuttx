@@ -307,6 +307,10 @@ void __start(void)
   __asm__ volatile ("sub r10, sp, %0" : : "r" (CONFIG_IDLETHREAD_STACKSIZE - 64) : );
 #endif
 
+#ifdef CONFIG_BOOT_RUNFROMISRAM
+    imxrt_ocram_initialize();
+#endif
+
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */
