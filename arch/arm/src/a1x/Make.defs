@@ -39,6 +39,7 @@
 HEAD_ASRC  = arm_vectortab.S
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
+CMN_UCSRCS = crt0.c
 STARTUP_OBJS = crt0$(OBJEXT)
 endif
 
