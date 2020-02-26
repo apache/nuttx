@@ -413,8 +413,15 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode)
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_FILE /* Currently only used in this configuration */
-int syslog_dev_uninitialize(void)
+void syslog_dev_uninitialize(void)
 {
+  /* Check if the system is ready */
+
+  if (syslog_dev_outputready() < 0)
+    {
+      return;
+    }
+
   /* Attempt to flush any buffered data */
 
   sched_lock();
@@ -422,6 +429,7 @@ int syslog_dev_uninitialize(void)
 
   /* Close the detached file instance */
 
+  g_syslog_dev.sl_state = SYSLOG_UNINITIALIZED;
   file_close(&g_syslog_dev.sl_file);
 
   /* Free the device path */
@@ -439,7 +447,6 @@ int syslog_dev_uninitialize(void)
 
   memset(&g_syslog_dev, 0, sizeof(struct syslog_dev_s));
   sched_unlock();
-  return OK;
 }
 #endif /* CONFIG_SYSLOG_FILE */
 
