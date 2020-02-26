@@ -1,8 +1,12 @@
 /****************************************************************************
  * arch/x86_64/include/intel64/arch.h
  *
- *   Copyright (C) 2011, 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015, 2017 Gregory Nutt,
+ *                 2020 Chung-Fan Yang.
+ *   All rights reserved.
+ *
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Chung-Fan Yang <sonic.tw.tp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -381,80 +385,80 @@ static inline void setidt(void* idt, int size) {
 
 static inline uint64_t rdtsc(void)
 {
-	uint32_t lo, hi;
+  uint32_t lo, hi;
 
-	asm volatile("rdtscp" : "=a" (lo), "=d" (hi)::"memory");
-	return (uint64_t)lo | (((uint64_t)hi) << 32);
+  asm volatile("rdtscp" : "=a" (lo), "=d" (hi)::"memory");
+  return (uint64_t)lo | (((uint64_t)hi) << 32);
 }
 
 static inline uint64_t _rdtsc(void)
 {
-	uint32_t lo, hi;
+  uint32_t lo, hi;
 
-	asm volatile("rdtsc" : "=a" (lo), "=d" (hi)::"memory");
-	return (uint64_t)lo | (((uint64_t)hi) << 32);
+  asm volatile("rdtsc" : "=a" (lo), "=d" (hi)::"memory");
+  return (uint64_t)lo | (((uint64_t)hi) << 32);
 }
 
 static inline void set_pcid(uint64_t pcid)
 {
     if(pcid < 4095)
-        asm volatile("mov %%cr3, %%rbx; andq $-4096, %%rbx; or %0, %%rbx; mov %%rbx, %%cr3;"::"g"(pcid):"memory", "rbx", "rax");
+      asm volatile("mov %%cr3, %%rbx; andq $-4096, %%rbx; or %0, %%rbx; mov %%rbx, %%cr3;"::"g"(pcid):"memory", "rbx", "rax");
     else
-        PANIC();
+      PANIC();
 }
 
 static inline unsigned long read_msr(unsigned int msr)
 {
-	uint32_t low, high;
+  uint32_t low, high;
 
-	asm volatile("rdmsr" : "=a" (low), "=d" (high) : "c" (msr));
-	return low | ((unsigned long)high << 32);
+  asm volatile("rdmsr" : "=a" (low), "=d" (high) : "c" (msr));
+  return low | ((unsigned long)high << 32);
 }
 
 static inline void write_msr(unsigned int msr, unsigned long val)
 {
-	asm volatile("wrmsr"
-		: /* no output */
-		: "c" (msr), "a" (val), "d" (val >> 32)
-		: "memory");
+  asm volatile("wrmsr"
+    : /* no output */
+    : "c" (msr), "a" (val), "d" (val >> 32)
+    : "memory");
 }
 
 static inline uint64_t read_fsbase()
 {
     uint64_t val;
-	asm volatile("rdfsbase %0"
-		: "=r" (val)
-		: /* no output */
-		: "memory");
+  asm volatile("rdfsbase %0"
+    : "=r" (val)
+    : /* no output */
+    : "memory");
 
     return val;
 }
 
 static inline void write_fsbase(unsigned long val)
 {
-	asm volatile("wrfsbase %0"
-		: /* no output */
-		: "r" (val)
-		: "memory");
+  asm volatile("wrfsbase %0"
+    : /* no output */
+    : "r" (val)
+    : "memory");
 }
 
 static inline uint64_t read_gsbase()
 {
     uint64_t val;
-	asm volatile("rdgsbase %0"
-		: "=r" (val)
-		: /* no output */
-		: "memory");
+  asm volatile("rdgsbase %0"
+    : "=r" (val)
+    : /* no output */
+    : "memory");
 
     return val;
 }
 
 static inline void write_gsbase(unsigned long val)
 {
-	asm volatile("wrgsbase %0"
-		: /* no output */
-		: "r" (val)
-		: "memory");
+  asm volatile("wrgsbase %0"
+    : /* no output */
+    : "r" (val)
+    : "memory");
 }
 
 

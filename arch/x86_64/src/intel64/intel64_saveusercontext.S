@@ -45,7 +45,7 @@
 #include <arch/irq.h>
 #include "up_internal.h"
 
-	.file	"intel64_saveusercontext.S"
+    .file    "intel64_saveusercontext.S"
 
 /**************************************************************************
  * Pre-processor Definitions
@@ -57,29 +57,29 @@
 
 /* Trace macros, use like trace 'i' to print char to serial port. */
 
-	.macro	chout, addr, ch
+    .macro    chout, addr, ch
 #ifdef CONFIG_DEBUG_FEATURES
-	mov		$\addr, %dx
-	mov		$\ch, %al
-	out		%al, %dx
+    mov        $\addr, %dx
+    mov        $\ch, %al
+    out        %al, %dx
 #endif
-	.endm
+    .endm
 
-	.macro	trace, ch
+    .macro    trace, ch
 #ifdef CONFIG_DEBUG_FEATURES
-	push	%eax
-	push	%edx
-	chout	0x3f8, \ch
-	pop		%edx
-	pop		%eax
+    push    %eax
+    push    %edx
+    chout    0x3f8, \ch
+    pop        %edx
+    pop        %eax
 #endif
-	.endm
+    .endm
 
 /**************************************************************************
  * .text
  **************************************************************************/
 
-	.text
+    .text
 .code64
 /**************************************************************************
  * Name: up_saveusercontext
@@ -103,66 +103,66 @@
  *
  **************************************************************************/
 
-	.globl	up_saveusercontext
-	.type	up_saveusercontext, @function
+    .globl    up_saveusercontext
+    .type    up_saveusercontext, @function
 up_saveusercontext:
     
     // callee saved regs
-	movq    %rbx, (8*REG_RBX)(%rdi)
-	movq    %r12, (8*REG_R12)(%rdi)
-	movq    %r13, (8*REG_R13)(%rdi)
-	movq    %r14, (8*REG_R14)(%rdi)
-	movq    %r15, (8*REG_R15)(%rdi)
+    movq    %rbx, (8*REG_RBX)(%rdi)
+    movq    %r12, (8*REG_R12)(%rdi)
+    movq    %r13, (8*REG_R13)(%rdi)
+    movq    %r14, (8*REG_R14)(%rdi)
+    movq    %r15, (8*REG_R15)(%rdi)
 
     // save xmm registers
     fxsaveq (%rdi)
 
-	/* Save the value of SP as will be at the time of the IRET that will
-	 * appear to be the return from this function.
-	 *
-	 * 		CURRENT STACK           IRET STACK
-	 *		------------------------------		-----------------
-	 *                              RIP
+    /* Save the value of SP as will be at the time of the IRET that will
+     * appear to be the return from this function.
+     *
+     *         CURRENT STACK           IRET STACK
+     *        ------------------------------        -----------------
+     *                              RIP
      *                              CS
      *                              RFLAGS
      *                              RSP
-	 * ESP->Return address          SS
-	 * Argument                     Alignment (16bytes)
-	 *
-	 */
+     * ESP->Return address          SS
+     * Argument                     Alignment (16bytes)
+     *
+     */
 
-	leaq    8(%rsp), %rcx
-	movq    %rcx, (8*REG_RSP)(%rdi)
+    leaq    8(%rsp), %rcx
+    movq    %rcx, (8*REG_RSP)(%rdi)
 
-	/* Fetch the PC from the stack and save it in the save block */
+    /* Fetch the PC from the stack and save it in the save block */
 
-	movq    0(%rsp), %rcx
-	movq    %rcx, (8*REG_RIP)(%rdi)
+    movq    0(%rsp), %rcx
+    movq    %rcx, (8*REG_RIP)(%rdi)
 
-	/* Save the framepointer */
+    /* Save the framepointer */
 
-	movq    %rbp, (8*REG_RBP)(%rdi)
+    movq    %rbp, (8*REG_RBP)(%rdi)
 
-	/* Save EAX=1.  This will be the "apparent" return value from this
-	 * function when context is switch back to this thread.  The non-zero
-	 * return value is the indication that we have been resumed.
-	 */
+    /* Save EAX=1.  This will be the "apparent" return value from this
+     * function when context is switch back to this thread.  The non-zero
+     * return value is the indication that we have been resumed.
+     */
 
-	movq    $1, (8*REG_RAX)(%rdi)
+    movq    $1, (8*REG_RAX)(%rdi)
 
-	/* Get and save the interrupt state */
+    /* Get and save the interrupt state */
 
-	pushf
-	pop     %rcx
-	movq    %rcx, (8*REG_RFLAGS)(%rdi)
+    pushf
+    pop     %rcx
+    movq    %rcx, (8*REG_RFLAGS)(%rdi)
 
-	/* And return 0 -- The zero return value is the indication that that
-	 * this is the original, "true" return from the function.
-	 *
-	 * 'ret' will remove the RIP from the top of the stack.
-	 */
+    /* And return 0 -- The zero return value is the indication that that
+     * this is the original, "true" return from the function.
+     *
+     * 'ret' will remove the RIP from the top of the stack.
+     */
 
-	xor     %rax, %rax
-	ret
-	.size	up_saveusercontext, . - up_saveusercontext
-	.end
+    xor     %rax, %rax
+    ret
+    .size    up_saveusercontext, . - up_saveusercontext
+    .end

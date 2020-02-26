@@ -1,8 +1,12 @@
 /****************************************************************************
  * arch/x86_64/src/common/up_assert.c
  *
- *   Copyright (C) 2011-2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2016, 2018 Gregory Nutt,
+ *                 2020 Chung-Fan Yang
+ *   All rights reserved.
+ *
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Chung-Fan Yang <sonic.tw.tp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -230,16 +234,16 @@ static void _up_assert(int errorcode)
 
   if (g_current_regs || (this_task())->pid == 0)
     {
-       (void)up_irq_save();
-        for (;;)
-          {
+      (void)up_irq_save();
+      for (;;)
+        {
 #ifdef CONFIG_ARCH_LEDS
-            board_autoled_on(LED_PANIC);
-            up_mdelay(250);
-            board_autoled_off(LED_PANIC);
-            up_mdelay(250);
+          board_autoled_on(LED_PANIC);
+          up_mdelay(250);
+          board_autoled_off(LED_PANIC);
+          up_mdelay(250);
 #endif
-          }
+        }
     }
   else
     {

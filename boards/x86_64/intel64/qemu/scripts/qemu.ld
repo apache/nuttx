@@ -2,11 +2,11 @@
  * boards/x86_64/intel64/qemu/scripts/qemu.ld
  *
  *   Copyright (C) 2011, 2017 Gregory Nutt,
- *                 2020 ChungFan Yang.
+ *                 2020 Chung-Fan Yang.
  *   All rights reserved.
  *
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           ChungFan Yang <sonic.tw.tp@gmail.com>
+ *           Chung-Fan Yang <sonic.tw.tp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

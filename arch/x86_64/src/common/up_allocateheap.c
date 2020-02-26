@@ -1,8 +1,12 @@
 /****************************************************************************
  * arch/x86_64/src/common/up_allocateheap.c
  *
- *   Copyright (C) 2011, 2013, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2015 Gregory Nutt,
+ *                 2020 Chung-Fan Yang.
+ *   All rights reserved.
+ *
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Chung-Fan Yang <sonic.tw.tp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -83,8 +87,11 @@
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
-  uintptr_t hstart = (((uintptr_t)&_ebss + PAGE_SIZE - 1) & PAGE_MASK); // End of .bss section
 
+  // Calculate the end of .bss section
+  uintptr_t hstart = (((uintptr_t)&_ebss + PAGE_SIZE - 1) & PAGE_MASK);
   *heap_start = (void*)hstart;
-  *heap_size = (size_t)(CONFIG_RAM_SIZE - (hstart - 0x100000000 - 1)); // Rest of the RAM
+
+  // The size is the rest of the RAM
+  *heap_size = (size_t)(CONFIG_RAM_SIZE - (hstart - 0x100000000 - 1));
 }

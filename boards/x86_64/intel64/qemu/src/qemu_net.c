@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/jailhouse-amd64/src/jailhouse_boot.c
+ * oards/x86_64/intel64/qemu/src/qemu_net.c
  *
  *   Copyright (C) 2011, 2014-2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

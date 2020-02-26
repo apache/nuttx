@@ -174,14 +174,15 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
   DEBUGASSERT(g_current_regs == NULL);
   g_current_regs = regs;
 
-  switch(irq) {
+  switch(irq)
+    {
       case 0:
       case 16:
-          asm volatile("fnclex":::"memory");
-          break;
-          _alert("Task: %d Floating point exception occurred\n", this_task()->pid);
-          nxsig_kill(this_task()->pid, SIGFPE);
-          break;
+        asm volatile("fnclex":::"memory");
+        break;
+        _alert("Task: %d Floating point exception occurred\n", this_task()->pid);
+        nxsig_kill(this_task()->pid, SIGFPE);
+        break;
       deafult:
         /* Let's say, all ISR are asserted when REALLY BAD things happened */
         /* Don't even brother to recover, just dump the regs and PANIC*/

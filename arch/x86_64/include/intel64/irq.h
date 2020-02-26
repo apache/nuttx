@@ -2,11 +2,11 @@
  * arch/x86_64/include/intel64/irq.h
  *
  *   Copyright (C) 2011 Gregory Nutt,
- *                 2020 ChungFan Yang.
+ *                 2020 Chung-Fan Yang.
  *
  *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           ChungFan Yang <sonic.tw.tp@gmail.com>
+ *           Chung-Fan Yang <sonic.tw.tp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -289,7 +289,7 @@ static inline void up_irq_restore(irqstate_t flags)
 
 static inline unsigned int up_apic_cpu_id(void)
 {
-	return read_msr(MSR_X2APIC_ID);
+  return read_msr(MSR_X2APIC_ID);
 }
 
 /****************************************************************************

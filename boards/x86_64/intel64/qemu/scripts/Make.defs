@@ -1,8 +1,13 @@
 ############################################################################
-# boards/x86/qemu/qemu-i486/scripts/Make.defs
+# boards/x86_64/intel64/qemu/scripts/Make.defs
 #
-#   Copyright (C) 2011, 2014, 2017 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2014, 2017 Gregory Nutt,
+#                 2020 Chung-Fan Yang.
+#
+#   All rights reserved.
+#
 #   Author: Gregory Nutt <gnutt@nuttx.org>
+#           Chung-Fan Yang <sonic.tw.tp@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -36,14 +41,15 @@
 include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 
-HOSTOS = ${shell uname -o 2>/dev/null || uname -s 2>/dev/null || echo "Other"}
+HOSTOS = ${shell uname -o 2>/dev/null || echo "Other"}
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += -O2
+  ARCHOPTIMIZATION += -O2 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fno-crossjumping -fno-delete-null-pointer-checks
+
 endif
 
 ifeq ($(WINTOOL),y)
@@ -63,17 +69,10 @@ else
   ARCHSCRIPT = -T$(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/qemu.ld
 endif
 
-ARCHCPUFLAGS = -march=i486 -mtune=i486 -fno-builtin -fno-stack-protector
-ARCHPICFLAGS = -fpic
+ARCHCPUFLAGS = -fPIC -fno-builtin -fno-stack-protector -mno-red-zone -mrdrnd
+ARCHPICFLAGS = -fPIC
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHDEFINES =
-
-# Check if building a 32-bit target with a 64-bit toolchain
-
-ifeq ($(CONFIG_ARCH_X86_M32),y)
-ARCHCPUFLAGS += -m32
-LDFLAGS += -m elf_i386
-endif
 
 # We have to use a cross-development toolchain under Cygwin because the native
 # Cygwin toolchains don't generate ELF binaries.

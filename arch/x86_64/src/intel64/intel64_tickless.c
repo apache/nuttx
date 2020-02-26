@@ -158,21 +158,24 @@ static inline void up_tick2ts(uint64_t tick, FAR struct timespec *ts)
 
 static inline void up_tmr_sync_up(void)
 {
-  if(!g_tmr_sync_count){
-    g_tmr_flags = enter_critical_section();
-  }
+  if(!g_tmr_sync_count)
+    {
+      g_tmr_flags = enter_critical_section();
+    }
   g_tmr_sync_count++;
 }
 
 static inline void up_tmr_sync_down(void)
 {
-  if(g_tmr_sync_count == 1){
-    leave_critical_section(g_tmr_flags);
-  }
+  if(g_tmr_sync_count == 1)
+    {
+      leave_critical_section(g_tmr_flags);
+    }
 
-  if(g_tmr_sync_count > 0){
-    g_tmr_sync_count--;
-  }
+  if(g_tmr_sync_count > 0)
+    {
+      g_tmr_sync_count--;
+    }
 }
 
 /****************************************************************************
@@ -254,17 +257,18 @@ int up_timer_cancel(FAR struct timespec *ts)
 
   up_mask_tmr();
 
-  if (ts != NULL){
-    if (g_timer_active)
+  if (ts != NULL)
     {
-      up_tick2ts(g_goal_time - rdtsc(), ts);
+      if (g_timer_active)
+        {
+          up_tick2ts(g_goal_time - rdtsc(), ts);
+        }
+      else
+        {
+          ts->tv_sec = 0;
+          ts->tv_nsec = 0;
+        }
     }
-    else
-    {
-      ts->tv_sec = 0;
-      ts->tv_nsec = 0;
-    }
-  }
 
   g_timer_active = 0;
 
@@ -381,17 +385,10 @@ int up_alarm_cancel(FAR struct timespec *ts)
 
   up_mask_tmr();
 
-  if (ts != NULL){
-    /*if (g_timer_active)*/
-    /*{*/
-      /*ts->tv_sec = g_goal_time_ts.tv_sec;*/
-      /*ts->tv_nsec = g_goal_time_ts.tv_nsec;*/
-    /*}*/
-    /*else*/
-    /*{*/
+  if (ts != NULL)
+    {
       up_timer_gettime(ts);
-    /*}*/
-  }
+    }
 
   g_timer_active = 0;
 

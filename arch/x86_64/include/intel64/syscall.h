@@ -1,8 +1,12 @@
 /****************************************************************************
  * arch/x86_64/include/intel64/syscall.h
  *
- *   Copyright (C) 2011, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2015 Gregory Nutt,
+ *                 2020 Chung-Fan Yang.
+ *   All rights reserved.
+ *
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Chung-Fan Yang <sonic.tw.tp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

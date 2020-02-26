@@ -127,30 +127,34 @@ static int x86_rng_initialize(void)
 
 static ssize_t x86_rngread(struct file *filep, char *buffer, size_t buflen)
 {
-  for(; buflen > 8; buflen -= 8) {
-    while(_rdrand64_step((unsigned long long*)buffer))
+  for(; buflen > 8; buflen -= 8)
+    {
+      while(_rdrand64_step((unsigned long long*)buffer))
         sched_yield();
-    buffer += 8;
-  }
+      buffer += 8;
+    }
 
-  for(; buflen > 4; buflen -= 4) {
-    while(_rdrand32_step((unsigned int*)buffer))
+  for(; buflen > 4; buflen -= 4)
+    {
+      while(_rdrand32_step((unsigned int*)buffer))
         sched_yield();
-    buffer += 4;
-  }
+      buffer += 4;
+    }
 
-  for(; buflen > 2; buflen -= 2) {
-    while(_rdrand16_step((unsigned short*)buffer))
+  for(; buflen > 2; buflen -= 2)
+    {
+      while(_rdrand16_step((unsigned short*)buffer))
         sched_yield();
-    buffer += 2;
-  }
+      buffer += 2;
+    }
 
-  if(buflen != 0) {
-    unsigned short temp = 0;
-    while(_rdrand16_step((unsigned short*)temp))
+  if(buflen != 0)
+    {
+      unsigned short temp = 0;
+      while(_rdrand16_step((unsigned short*)temp))
         sched_yield();
-    *buffer = (temp & 0xFF);
-  }
+      *buffer = (temp & 0xFF);
+    }
 
   return buflen;
 }

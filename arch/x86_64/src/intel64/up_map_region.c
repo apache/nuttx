@@ -75,12 +75,13 @@ int up_map_region(void* base, int size, int flags)
   if(bb > 0xFFFFFFFF) return -1; //Only < 4GB can be mapped
 
   curr = bb;
-  for(int i = 0; i < num_of_pages; i++){
-    entry = (curr >> 12) & 0x7ffffff;
+  for(int i = 0; i < num_of_pages; i++)
+    {
+      entry = (curr >> 12) & 0x7ffffff;
 
-    pt[entry] = curr | flags;
-    curr += PAGE_SIZE;
-  }
+      pt[entry] = curr | flags;
+      curr += PAGE_SIZE;
+    }
 
   return 0;
 }

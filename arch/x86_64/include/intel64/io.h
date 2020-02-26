@@ -1,8 +1,11 @@
 /****************************************************************************
  * arch/x86_64/include/intel64/io.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt,
+ *                 2020 Chung-Fan Yang
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Chung-Fan Yang <sonic.tw.tp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -128,47 +131,47 @@ static inline uint32_t inl(uint16_t port)
 
 static inline uint8_t mmio_read8(void *address)
 {
-	return *(volatile uint8_t *)address;
+  return *(volatile uint8_t *)address;
 }
 
 static inline uint16_t mmio_read16(void *address)
 {
-	return *(volatile uint16_t *)address;
+  return *(volatile uint16_t *)address;
 }
 
 static inline uint32_t mmio_read32(void *address)
 {
-	uint32_t value;
+  uint32_t value;
 
-	/* assembly-encoded to match the hypervisor MMIO parser support */
-	asm volatile("movl (%1),%0" : "=r" (value) : "r" (address));
-	return value;
+  /* assembly-encoded to match the hypervisor MMIO parser support */
+  asm volatile("movl (%1),%0" : "=r" (value) : "r" (address));
+  return value;
 }
 
 static inline uint64_t mmio_read64(void *address)
 {
-	return *(volatile uint64_t *)address;
+  return *(volatile uint64_t *)address;
 }
 
 static inline void mmio_write8(void *address, uint8_t value)
 {
-	*(volatile uint8_t *)address = value;
+  *(volatile uint8_t *)address = value;
 }
 
 static inline void mmio_write16(void *address, uint16_t value)
 {
-	*(volatile uint16_t *)address = value;
+  *(volatile uint16_t *)address = value;
 }
 
 static inline void mmio_write32(void *address, uint32_t value)
 {
-	/* assembly-encoded to match the hypervisor MMIO parser support */
-	asm volatile("movl %0,(%1)" : : "r" (value), "r" (address));
+  /* assembly-encoded to match the hypervisor MMIO parser support */
+  asm volatile("movl %0,(%1)" : : "r" (value), "r" (address));
 }
 
 static inline void mmio_write64(void *address, uint64_t value)
 {
-	*(volatile uint64_t *)address = value;
+  *(volatile uint64_t *)address = value;
 }
 
 static inline void up_trash_cpu(void)

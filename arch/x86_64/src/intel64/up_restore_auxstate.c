@@ -1,8 +1,8 @@
 /****************************************************************************
  * arch/x86_64/src/intel64/up_restore_auxstate.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2020 Chung-Fan Yang. All rights reserved.
+ *   Author: Chung-Fan Yang <sonic.tw.tp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -69,8 +69,8 @@
  * Name: up_restore_auxstate
  *
  * Description:
- *   This function saves the interrupt level context information in the
- *   TCB.  This would just be a up_copystate.
+ *   This function performs some additional action required to complete the
+ *   CTX on intel64 processor.
  *
  ****************************************************************************/
 

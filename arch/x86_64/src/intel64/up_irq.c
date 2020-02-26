@@ -292,9 +292,11 @@ static void up_apic_init(void)
 
   // Send an Init Level De-Assert to synchronise arbitration ID's.
   write_msr(MSR_X2APIC_ICR, MSR_X2APIC_ICR_BCAST | MSR_X2APIC_ICR_INIT | MSR_X2APIC_ICR_LEVEL);
-  do{
-    icrl = read_msr(MSR_X2APIC_ICR);
-  }while(icrl & MSR_X2APIC_ICR_DELIVS);
+  do
+    {
+      icrl = read_msr(MSR_X2APIC_ICR);
+    }
+  while(icrl & MSR_X2APIC_ICR_DELIVS);
 
   // Enable interrupts on the APIC (but not on the processor).
   write_msr(MSR_X2APIC_TPR, 0);
@@ -329,10 +331,11 @@ static void up_ioapic_init(void)
 
   uint32_t maxintr = (up_ioapic_read(IOAPIC_REG_VER) >> 16) & 0xFF;
 
-  for(int i = 0; i < maxintr; i++) {
-    up_ioapic_pin_set_vector(i, TRIGGER_RISING_EDGE, IRQ0 + i);
-    up_ioapic_mask_pin(i);
-  }
+  for(int i = 0; i < maxintr; i++)
+    {
+      up_ioapic_pin_set_vector(i, TRIGGER_RISING_EDGE, IRQ0 + i);
+      up_ioapic_mask_pin(i);
+    }
 
   return;
 }

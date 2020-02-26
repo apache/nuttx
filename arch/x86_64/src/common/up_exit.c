@@ -1,8 +1,12 @@
 /****************************************************************************
  * common/up_exit.c
  *
- *   Copyright (C) 2011, 2013-2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-2014, 2016-2017 Gregory Nutt,
+ *                 2020 Chung-Fan Yang.
+ *   All rights reserved.
+ *
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Chung-Fan Yang <sonic.tw.tp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

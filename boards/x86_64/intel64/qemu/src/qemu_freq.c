@@ -1,8 +1,9 @@
 /****************************************************************************
  * boards/x86_64/intel64/qemu/src/qemu_freq.c
  *
- *   Copyright (C) 2020 ChungFan Yang. All rights reserved.
- *   Author: ChungFan Yang <sonic.tw.tp@gmail.com>
+ *   Copyright (C) 2020 Chung-Fan Yang. All rights reserved.
+ *
+ *   Author: Chung-Fan Yang <sonic.tw.tp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

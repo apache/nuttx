@@ -1,8 +1,12 @@
 /****************************************************************************
  * arch/x86/src/intel64/up_regdump.c
  *
- *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt,
+ *                 2020 Chung-Fan Yang.
+ *   All rights reserved.
+ *
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Chung-Fan Yang <sonic.tw.tp@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,12 +61,14 @@ void print_mem(void* sp, size_t size){
   int i, j;
 
   _alert("Memory Dump (%d bytes):\n", size);
-  for(i = 0; i < size / 8; i++){
-    for(j = 0; j < 8; j++){
-      buf[j] = *((uint8_t*)(sp + i * 8 + j));
-      if((buf[j] > 126) || (buf[j] < 32))
-        buf[j] = '.';
-    }
+  for(i = 0; i < size / 8; i++)
+    {
+      for(j = 0; j < 8; j++)
+        {
+          buf[j] = *((uint8_t*)(sp + i * 8 + j));
+          if((buf[j] > 126) || (buf[j] < 32))
+            buf[j] = '.';
+        }
 
     buf[8] = '\0';
     _alert(" %016llx\t%02x %02x %02x %02x %02x %02x %02x %02x\t%s\n",
@@ -76,22 +82,23 @@ void print_mem(void* sp, size_t size){
             *((uint8_t*)(sp + i * 8 + 6)),
             *((uint8_t*)(sp + i * 8 + 7)),
             buf);
-  }
+    }
 }
 
 void backtrace(uint64_t rbp)
 {
   int i, j;
   _alert("Frame Dump (64 bytes):\n");
-  for(i = 0; i < 16; i++){
-    if((rbp < 0x200000) || (rbp > 0xffffffff))
+  for(i = 0; i < 16; i++)
+    {
+      if((rbp < 0x200000) || (rbp > 0xffffffff))
         break;
-    _alert("  %016llx\t%016llx\n", *((uint64_t*)(rbp)), *((uint64_t*)(rbp + 1 * 8)));
-    if((rbp) && *((uint64_t*)(rbp + 1 * 8)) )
+      _alert("  %016llx\t%016llx\n", *((uint64_t*)(rbp)), *((uint64_t*)(rbp + 1 * 8)));
+      if((rbp) && *((uint64_t*)(rbp + 1 * 8)) )
         rbp = *(uint64_t*)rbp;
-    else
+      else
         break;
-  }
+    }
 }
 
 void up_registerdump(uint64_t *regs)
@@ -124,9 +131,9 @@ void up_registerdump(uint64_t *regs)
   _alert("R14: %016llx, R15: %016llx\n", regs[REG_R14], regs[REG_R15]);
   _alert("Dumping Stack (+-64 bytes):\n");
   if(regs[REG_RSP] > 0 && regs[REG_RSP] < 0x1000000)
-      print_mem(regs[REG_RSP] - 512, 128 * 0x200000 - regs[REG_RSP] + 512);
+    print_mem(regs[REG_RSP] - 512, 128 * 0x200000 - regs[REG_RSP] + 512);
   else
-      print_mem(regs[REG_RSP] - 512, 1024);
+    print_mem(regs[REG_RSP] - 512, 1024);
 
 #ifdef CONFIG_DEBUG_NOOPT
   backtrace(regs[REG_RBP]);
