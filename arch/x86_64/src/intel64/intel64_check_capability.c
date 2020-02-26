@@ -96,7 +96,7 @@ void x86_64_check_and_enable_capability(void)
   require |= X86_64_CPUID_01_PCID;
 #endif
 
-  asm volatile("cpuid" : "=c" (ecx) : "a" (1)
+  asm volatile("cpuid" : "=c" (ecx) : "a" (X86_64_CPUID_CAP)
       : "rbx", "rdx", "memory");
 
   /* Check x2APIC availability */

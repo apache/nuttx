@@ -80,7 +80,22 @@ void x86_64_timer_calibrate_freq(void)
 {
 
 #ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
-  x86_64_timer_freq = CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ * 1000L;
+
+  unsigned long crystal_freq;
+  unsigned long numerator, denominator;
+
+  asm volatile("cpuid" : "=c" (crystal_freq), "=b" (numerator), "=a" (denominator)
+      : "a" (X86_64_CPUID_TSC)
+      : "rdx", "memory");
+
+  if(numerator == 0 || denominator == 0 || crystal_freq == 0)
+    {
+      x86_64_timer_freq = CONFIG_ARCH_INTEL64_CORE_FREQ_KHZ * 1000L;
+    }
+  else
+    {
+      x86_64_timer_freq = crystal_freq / denominator * numerator;
+    }
 #else
   x86_64_timer_freq = CONFIG_ARCH_INTEL64_APIC_FREQ_KHZ * 1000L;
 #endif
