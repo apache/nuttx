@@ -176,9 +176,11 @@ static inline void mmio_write64(void *address, uint64_t value)
 
 static inline void up_trash_cpu(void)
 {
-  asm("mov $0, %%al":::);
-  asm("mov $0xfa, %%dx":::);
-  asm("out %%al, (%%dx)":::);
+  for(;;)
+    {
+      asm volatile ("cli;hlt;");
+    }
+  asm("ud2":::"memory");
 }
 
 static inline void up_invalid_TLB(uintptr_t start, uintptr_t end)
