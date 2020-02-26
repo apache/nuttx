@@ -46,6 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/serial/uart_16550.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -78,6 +79,15 @@
 
 void x86_64_boardinitialize(void)
 {
+
+#if defined(CONFIG_16550_UART0) && (CONFIG_16550_UART0_BASE == 0x3f8)
+  uart_putreg(CONFIG_16550_UART0_BASE, UART_MCR_OFFSET, UART_MCR_OUT2);
+#endif
+
+#if defined(CONFIG_16550_UART1) && (CONFIG_16550_UART1_BASE == 0x3f8)
+  uart_putreg(CONFIG_16550_UART1_BASE, UART_MCR_OFFSET, UART_MCR_OUT2);
+#endif
+
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS

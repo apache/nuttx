@@ -85,6 +85,11 @@ uart_datawidth_t uart_getreg(uart_addrwidth_t base, unsigned int offset)
 
 void uart_putreg(uart_addrwidth_t base, unsigned int offset, uart_datawidth_t value)
 {
+  /* Intel x86 platform require OUT2 of MCR being set
+   * for interrupt to be triggered. We make sure that bit is stuck at 1.
+   * */
+  if(offset == UART_MCR_OFFSET)
+    value |= UART_MCR_OUT2;
   outb(value, base + offset);
 }
 
