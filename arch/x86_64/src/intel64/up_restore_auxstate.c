@@ -74,16 +74,8 @@
  *
  ****************************************************************************/
 
-extern uint64_t full_map_pd1[512];
-
 void up_restore_auxstate(struct tcb_s *rtcb)
 {
-  struct vma_s* ptr;
-  uint64_t i, j;
-
-  /* some dirty hack to speed up the switching of full mapping */
-  static int cached = 0;
-
   // set PCID, avoid TLB flush
   set_pcid(rtcb->pid);
 }
