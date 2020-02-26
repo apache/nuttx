@@ -138,6 +138,9 @@ FAR struct can_conn_s *can_alloc(void)
       /* Make sure that the connection is marked as uninitialized */
 
       memset(conn, 0, sizeof(*conn));
+      
+      /* FIXME SocketCAN default behavior enables loopback */
+      
 
       /* Enqueue the connection into the active list */
 

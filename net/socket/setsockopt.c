@@ -396,6 +396,12 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
         break;
 #endif
 
+#ifdef CONFIG_NET_CAN
+      case SOL_CAN_RAW:   /* CAN protocol socket options (see include/netpacket/can.h) */
+        ret = can_setsockopt(psock, option, value, value_len);
+        break;
+#endif
+
       default:         /* The provided level is invalid */
         ret = -EINVAL;
         break;

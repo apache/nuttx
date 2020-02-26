@@ -108,13 +108,28 @@ int can_setsockopt(FAR struct socket *psock, int option,
         break;
 
       case CAN_RAW_LOOPBACK:
-        break;
+		if (value_len != sizeof(conn->loopback))
+			return -EINVAL;
+
+		conn->loopback = *(FAR int32_t *)value;
+
+		break;
 
       case CAN_RAW_RECV_OWN_MSGS:
-        break;
+		if (value_len != sizeof(conn->recv_own_msgs))
+			return -EINVAL;
+
+		conn->recv_own_msgs = *(FAR int32_t *)value;
+
+		break;
 
       case CAN_RAW_FD_FRAMES:
-        break;
+		if (value_len != sizeof(conn->fd_frames))
+			return -EINVAL;
+
+		conn->fd_frames = *(FAR int32_t *)value;
+
+		break;
 
       case CAN_RAW_JOIN_FILTERS:
         break;

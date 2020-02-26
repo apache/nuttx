@@ -184,6 +184,21 @@ ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
     {
       return -ENODEV;
     }
+    
+  if(conn->fd_frames)
+    {
+        if(len != CANFD_MTU && len != CAN_MTU)
+          {
+              return -EINVAL;
+          } 
+    }
+    else 
+    {
+        if(len != CAN_MTU)
+          {
+              return -EINVAL;
+          }
+    }
 
   /* Perform the send operation */
 
@@ -205,33 +220,30 @@ ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
   state.snd_buflen    = len;            /* Number of bytes to send */
   state.snd_buffer    = buf;            /* Buffer to send from */
 
-  if (len > 0)
+  /* Allocate resource to receive a callback */
+
+  state.snd_cb = can_callback_alloc(dev, conn);
+  if (state.snd_cb)
     {
-      /* Allocate resource to receive a callback */
+      /* Set up the callback in the connection */
 
-      state.snd_cb = can_callback_alloc(dev, conn);
-      if (state.snd_cb)
-        {
-          /* Set up the callback in the connection */
+      state.snd_cb->flags = CAN_POLL;
+      state.snd_cb->priv  = (FAR void *)&state;
+      state.snd_cb->event = psock_send_eventhandler;
 
-          state.snd_cb->flags = CAN_POLL;
-          state.snd_cb->priv  = (FAR void *)&state;
-          state.snd_cb->event = psock_send_eventhandler;
+      /* Notify the device driver that new TX data is available. */
 
-          /* Notify the device driver that new TX data is available. */
+      netdev_txnotify_dev(dev);
 
-          netdev_txnotify_dev(dev);
+      /* Wait for the send to complete or an error to occur.
+      * net_lockedwait will also terminate if a signal is received.
+      */
 
-          /* Wait for the send to complete or an error to occur.
-           * net_lockedwait will also terminate if a signal is received.
-           */
+      ret = net_lockedwait(&state.snd_sem);
 
-          ret = net_lockedwait(&state.snd_sem);
+      /* Make sure that no further events are processed */
 
-          /* Make sure that no further events are processed */
-
-          can_callback_free(dev, conn, state.snd_cb);
-        }
+      can_callback_free(dev, conn, state.snd_cb);
     }
 
   nxsem_destroy(&state.snd_sem);

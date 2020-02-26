@@ -104,6 +104,16 @@ struct can_conn_s
    */
 
   struct can_poll_s pollinfo[4]; /* FIXME make dynamic */
+  
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+  int32_t loopback;
+  int32_t recv_own_msgs;
+  int32_t fd_frames;
+  
+  /* TODO add filter support */
+#endif
+  
+  
 };
 
 /****************************************************************************

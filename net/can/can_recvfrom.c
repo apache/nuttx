@@ -276,6 +276,16 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
                              IOBUSER_NET_CAN_READAHEAD);
         }
 
+	  /* do not pass frames with DLC > 8 to a legacy socket */
+	  if (!conn->fd_frames)
+	    {
+		  struct canfd_frame *cfd = (struct canfd_frame *)pstate->pr_buffer;
+		  if (cfd->len > CAN_MAX_DLEN)
+		    {
+	  			return 0;
+		    }
+	    }
+
       return recvlen;
     }
 
@@ -287,6 +297,7 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
                                           FAR void *pvpriv, uint16_t flags)
 {
   struct can_recvfrom_s *pstate = (struct can_recvfrom_s *)pvpriv;
+  struct can_conn_s *conn = (struct can_conn_s *)pstate->pr_sock->s_conn;
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -296,6 +307,18 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
       if ((flags & CAN_NEWDATA) != 0)
         {
+    	  /* do not pass frames with DLC > 8 to a legacy socket */
+    	  if (!conn->fd_frames)
+    	    {
+    		  struct canfd_frame *cfd = (struct canfd_frame *)dev->d_appdata;
+    	      if (cfd->len > CAN_MAX_DLEN)
+    	      {
+    	    	/* DO WE NEED TO CLEAR FLAGS?? */
+    	        flags &= ~CAN_NEWDATA;
+  	  			return flags;
+    	      }
+    	    }
+
           /* Copy the packet */
 
           can_newdata(dev, pstate);
@@ -355,10 +378,7 @@ static ssize_t can_recvfrom_result(int result,
 
   if (pstate->pr_result < 0)
     {
-      /* This might return EAGAIN on a timeout or ENOTCONN on loss of
-       * connection (CAN only)
-       */
-
+      /* This might return EAGAIN on a timeout */
       return pstate->pr_result;
     }
 

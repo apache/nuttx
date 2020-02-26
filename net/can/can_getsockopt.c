@@ -114,12 +114,60 @@ int can_getsockopt(FAR struct socket *psock, int option,
         break;
 
       case CAN_RAW_LOOPBACK:
+        if (*value_len < sizeof(conn->loopback))
+          {
+            /* REVISIT: POSIX says that we should truncate the value if it
+             * is larger than value_len.   That just doesn't make sense
+             * to me in this case.
+             */
+
+            ret              = -EINVAL;
+          }
+        else
+          {
+            FAR int *loopback  = (FAR int32_t *)value;
+            *loopback          = conn->loopback;
+            *value_len         = sizeof(conn->loopback);
+            ret                = OK;
+          }
         break;
 
       case CAN_RAW_RECV_OWN_MSGS:
+        if (*value_len < sizeof(conn->recv_own_msgs))
+          {
+            /* REVISIT: POSIX says that we should truncate the value if it
+             * is larger than value_len.   That just doesn't make sense
+             * to me in this case.
+             */
+
+            ret              = -EINVAL;
+          }
+        else
+          {
+            FAR int *recv_own_msgs = (FAR int32_t *)value;
+            *recv_own_msgs         = conn->recv_own_msgs;
+            *value_len             = sizeof(conn->recv_own_msgs);
+            ret                    = OK;
+          }
         break;
 
       case CAN_RAW_FD_FRAMES:
+        if (*value_len < sizeof(conn->fd_frames))
+          {
+            /* REVISIT: POSIX says that we should truncate the value if it
+             * is larger than value_len.   That just doesn't make sense
+             * to me in this case.
+             */
+
+            ret              = -EINVAL;
+          }
+        else
+          {
+            FAR int *fd_frames = (FAR int32_t *)value;
+            *fd_frames         = conn->fd_frames;
+            *value_len         = sizeof(conn->fd_frames);
+            ret                = OK;
+          }
         break;
 
       case CAN_RAW_JOIN_FILTERS:
