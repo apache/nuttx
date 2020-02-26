@@ -47,7 +47,7 @@ STATUS
   The NuttX fork, TizenRT, has taken the NuttX ESP32 code and developed it
   further.  Refer to:
 
-    https://github.com/Samsung/TizenRT/tree/master/os/arch/xtensai
+    https://github.com/Samsung/TizenRT/tree/master/os/arch/xtensa
 
   for the current status.
 
@@ -455,7 +455,7 @@ OpenOCD for the ESP32
   -----
   OpenOCD currently doesn't have a FLASH driver for ESP32, so you can load
   code into IRAM only via JTAG. FLASH-resident sections like .FLASH.rodata
-  will fail to load.  The bootloader in ROM doesn't parse ELF, so any imag
+  will fail to load.  The bootloader in ROM doesn't parse ELF, so any image
   which is bootloaded from FLASH has to be converted into a custom image
   format first.
 
