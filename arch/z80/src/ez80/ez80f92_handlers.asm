@@ -1,5 +1,5 @@
 ;**************************************************************************
-; arch/z80/src/ez80/ez80f91_handlers.asm
+; arch/z80/src/ez80/ez80f92_handlers.asm
 ;
 ; Licensed to the Apache Software Foundation (ASF) under one or more
 ; contributor license agreements.  See the NOTICE file distributed with
