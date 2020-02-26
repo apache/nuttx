@@ -86,7 +86,4 @@ void up_restore_auxstate(struct tcb_s *rtcb)
 
   // set PCID, avoid TLB flush
   set_pcid(rtcb->pid);
-
-  sinfo("resuming %d\n", rtcb->pid);
-
 }
