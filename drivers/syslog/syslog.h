@@ -119,7 +119,7 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_FILE
-int syslog_dev_uninitialize(void);
+void syslog_dev_uninitialize(void);
 #endif /* CONFIG_SYSLOG_FILE */
 
 /****************************************************************************
