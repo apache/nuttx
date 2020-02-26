@@ -5,6 +5,30 @@
 
 if ARCH_CHIP_Z8
 
+config ARCH_CHIP_Z8F640X
+	bool
+
+config ARCH_CHIP_Z8F642X
+	bool
+
+choice
+	prompt "z8 Chip Selection"
+	default ARCH_CHIP_Z8F6403
+
+config ARCH_CHIP_Z8F6403
+	bool "Z8F6403"
+	select ARCH_CHIP_Z8F640X
+	---help---
+		ZiLOG Z8F6403 (z8 Encore)
+
+config ARCH_CHIP_Z8F6423
+	bool "Z8F6423"
+	select ARCH_CHIP_Z8F642X
+	---help---
+		ZiLOG Z8F6423 (z8 Encore)
+
+endchoice
+
 # UART0/1 always enabled
 
 config Z8_UART0
