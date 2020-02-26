@@ -75,7 +75,6 @@ struct nfsmount
   struct rpcclnt  *nm_rpcclnt;                /* RPC state */
   struct socket   *nm_so;                     /* RPC socket */
   struct sockaddr  nm_nam;                    /* Addr of server */
-  bool             nm_mounted;                /* true: The file system is ready */
   uint8_t          nm_fhsize;                 /* Size of root file handle (host order) */
   uint8_t          nm_sotype;                 /* Type of socket */
   uint8_t          nm_retry;                  /* Max retries */

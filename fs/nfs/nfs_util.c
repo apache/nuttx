@@ -140,39 +140,6 @@ void nfs_semgive(struct nfsmount *nmp)
 }
 
 /****************************************************************************
- * Name: nfs_checkmount
- *
- * Description: Check if the mountpoint is still valid.
- *
- *   The caller should hold the mountpoint semaphore
- *
- ****************************************************************************/
-
-int nfs_checkmount(struct nfsmount *nmp)
-{
-  struct nfsnode *file;
-
-  /* If the nm_mounted flag is false, then we have already handled the loss
-   * of the mount.
-   */
-
-  DEBUGASSERT(nmp);
-  if (!nmp->nm_mounted)
-    {
-      /* Make sure that this is flagged in every opened file */
-
-      for (file = nmp->nm_head; file; file = file->n_next)
-        {
-          file->n_flags &= ~NFSNODE_OPEN;
-        }
-
-      return -ENODEV;
-    }
-
-  return 0;
-}
-
-/****************************************************************************
  * Name: nfs_request
  *
  * Description:

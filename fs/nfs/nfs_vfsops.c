@@ -605,15 +605,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
       return -ENOMEM;
     }
 
-  /* Check if the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Try to open an existing file at that path */
 
@@ -677,7 +669,6 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
   np->n_next   = nmp->nm_head;
   nmp->nm_head = np;
 
-  np->n_flags |= (NFSNODE_OPEN | NFSNODE_MODIFIED);
   nfs_semgive(nmp);
   return OK;
 
@@ -818,15 +809,7 @@ static ssize_t nfs_read(FAR struct file *filep, char *buffer, size_t buflen)
 
   DEBUGASSERT(nmp != NULL);
 
-  /* Make sure that the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Get the number of bytes left in the file and truncate read count so that
    * it does not exceed the number of bytes left in the file.
@@ -994,15 +977,7 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
 
   DEBUGASSERT(nmp != NULL);
 
-  /* Make sure that the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Check if the file size would exceed the range of off_t */
 
@@ -1165,7 +1140,6 @@ static int nfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
   struct nfsmount *nmp;
   FAR struct nfsnode *np;
-  int error;
 
   finfo("Dup %p->%p\n", oldp, newp);
 
@@ -1180,16 +1154,7 @@ static int nfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   DEBUGASSERT(nmp != NULL);
 
-  /* Check if the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      nfs_semgive(nmp);
-      return -error;
-    }
 
   /* Increment the reference count on the NFS node structure */
 
@@ -1242,15 +1207,7 @@ static int nfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   nmp = (FAR struct nfsmount *)filep->f_inode->i_private;
   DEBUGASSERT(nmp != NULL);
 
-  /* Make sure that the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Extract the file mode, file type, and file size from the nfsnode
    * structure.
@@ -1312,21 +1269,12 @@ static int nfs_truncate(FAR struct file *filep, off_t length)
 
   DEBUGASSERT(nmp != NULL);
 
-  /* Make sure that the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Then perform the SETATTR RPC to set the new file size */
 
   error = nfs_filetruncate(nmp, np, length);
 
-errout_with_semaphore:
   nfs_semgive(nmp);
   return -error;
 }
@@ -1365,15 +1313,7 @@ static int nfs_opendir(struct inode *mountpt, const char *relpath,
 
   memset(&dir->u.nfs, 0, sizeof(struct nfsdir_s));
 
-  /* Make sure that the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Find the NFS node associate with the path */
 
@@ -1442,15 +1382,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
   nmp = mountpt->i_private;
 
-  /* Make sure that the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Request a block directory entries, copying directory information from
    * the dirent structure.
@@ -1967,7 +1899,6 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
         }
     }
 
-  nmp->nm_mounted        = true;
   nmp->nm_so             = nmp->nm_rpcclnt->rc_so;
   nmp->nm_fhsize         = nmp->nm_rpcclnt->rc_fhsize;
   memcpy(&nmp->nm_fh, &nmp->nm_rpcclnt->rc_fh, sizeof(nfsfh_t));
@@ -2211,15 +2142,7 @@ static int nfs_statfs(FAR struct inode *mountpt, FAR struct statfs *sbp)
 
   nmp = (FAR struct nfsmount *)mountpt->i_private;
 
-  /* Check if the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Fill in the statfs info */
 
@@ -2289,15 +2212,7 @@ static int nfs_remove(struct inode *mountpt, const char *relpath)
 
   nmp = (FAR struct nfsmount *)mountpt->i_private;
 
-  /* Check if the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Find the NFS node of the directory containing the file to be deleted */
 
@@ -2375,15 +2290,7 @@ static int nfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
 
   nmp = (FAR struct nfsmount *) mountpt->i_private;
 
-  /* Check if the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Find the NFS node of the directory containing the directory to be created */
 
@@ -2391,7 +2298,7 @@ static int nfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode)
   if (error != OK)
     {
       ferr("ERROR: nfs_finddir returned: %d\n", error);
-      return error;
+      goto errout_with_semaphore;
     }
 
   /* Format the MKDIR call message arguments */
@@ -2501,15 +2408,7 @@ static int nfs_rmdir(struct inode *mountpt, const char *relpath)
 
   nmp = (struct nfsmount *)mountpt->i_private;
 
-  /* Check if the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Find the NFS node of the directory containing the directory to be removed */
 
@@ -2517,7 +2416,7 @@ static int nfs_rmdir(struct inode *mountpt, const char *relpath)
   if (error != OK)
     {
       ferr("ERROR: nfs_finddir returned: %d\n", error);
-      return error;
+      goto errout_with_semaphore;
     }
 
   /* Set up the RMDIR call message arguments */
@@ -2589,15 +2488,7 @@ static int nfs_rename(struct inode *mountpt, const char *oldrelpath,
 
   nmp = (struct nfsmount *)mountpt->i_private;
 
-  /* Check if the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount returned: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Find the NFS node of the directory containing the 'from' object */
 
@@ -2605,7 +2496,7 @@ static int nfs_rename(struct inode *mountpt, const char *oldrelpath,
   if (error != OK)
     {
       ferr("ERROR: nfs_finddir returned: %d\n", error);
-      return error;
+      goto errout_with_semaphore;
     }
 
   /* Find the NFS node of the directory containing the 'from' object */
@@ -2614,7 +2505,7 @@ static int nfs_rename(struct inode *mountpt, const char *oldrelpath,
   if (error != OK)
     {
       ferr("ERROR: nfs_finddir returned: %d\n", error);
-      return error;
+      goto errout_with_semaphore;
     }
 
   /* Format the RENAME RPC arguments */
@@ -2786,15 +2677,7 @@ static int nfs_stat(struct inode *mountpt, const char *relpath,
   nmp = (FAR struct nfsmount *)mountpt->i_private;
   DEBUGASSERT(nmp && buf);
 
-  /* Check if the mount is still healthy */
-
   nfs_semtake(nmp);
-  error = nfs_checkmount(nmp);
-  if (error != OK)
-    {
-      ferr("ERROR: nfs_checkmount failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
 
   /* Get the file handle attributes of the requested node */
 

@@ -117,7 +117,6 @@ extern "C" {
 
 EXTERN void nfs_semtake(FAR struct nfsmount *nmp);
 EXTERN void nfs_semgive(FAR struct nfsmount *nmp);
-EXTERN int  nfs_checkmount(FAR struct nfsmount *nmp);
 EXTERN int  nfs_fsinfo(FAR struct nfsmount *nmp);
 EXTERN int nfs_request(struct nfsmount *nmp, int procnum,
                 FAR void *request, size_t reqlen,

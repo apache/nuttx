@@ -51,15 +51,6 @@
 #include "nfs_proto.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Flags for struct nfsnode n_flag */
-
-#define NFSNODE_OPEN           (1 << 0) /* File is still open */
-#define NFSNODE_MODIFIED       (1 << 1) /* Might have a modified buffer */
-
-/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -73,7 +64,6 @@ struct nfsnode
   uint8_t            n_crefs;       /* Reference count (for nfs_dup) */
   uint8_t            n_type;        /* File type */
   uint8_t            n_fhsize;      /* Size in bytes of the file handle */
-  uint8_t            n_flags;       /* Node flags */
   uint16_t           n_mode;        /* File mode for fstat() */
   time_t             n_mtime;       /* File modification time */
   time_t             n_ctime;       /* File creation time */
