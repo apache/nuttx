@@ -149,12 +149,6 @@ config EZ80_PHYCONFIG
 	---help---
 		0:Autonegotiate, 1:100FD, 2:100HD, 3:10FD, 4:10HD
 
-config EZ80_RAMADDR
-	hex "Address of internal SRAM"
-	default 0xffc000
-	---help---
-		Address of internal SRAM (default is 0xffc000)
-
 config EZ80_PKTBUFSIZE
 	int "Packet Buffer Size"
 	default 64

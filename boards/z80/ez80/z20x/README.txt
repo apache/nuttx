@@ -33,6 +33,7 @@ Contents
 ========
 
   o ZDS-II Compiler Versions
+  o Environments
   o Serial Console
   o LEDs and Buttons
     - LEDs
@@ -61,6 +62,26 @@ Other Versions
   three files:  (1) arch/arm/z80/src/ez80/Kconfig, (2)
   boards/z80/ez80/z20x/scripts/Make.defs and, perhaps, (3)
   arch/z80/src/ez80/Toolchain.defs.
+
+Environments
+============
+
+Cygwin:
+
+  All testing was done using the Cygwin environment under Windows.
+
+MinGW/MSYS
+
+  One attempt was made using the MSYS2 environment under Windws.  That build
+  correctly until the very end, then it failed to include "chip.h".  this
+  was traced to arch/z80/src/Makefile.zdsiil:  The usrinc paths created by
+  Makefile.zdsiil contained POSIX-style paths that were not usable to the
+  ZDS-II compiler.
+
+Native
+
+  The Windows native build has not been attempt.  I would expect that it
+  would have numerous problems.
 
 Serial Console
 ==============
