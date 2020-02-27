@@ -1092,6 +1092,13 @@ config IMXRT_DTCM_HEAP
 	---help---
 		Select to add the entire DTCM to the heap
 
+config IMXRT_BOOTLOADER_HEAP
+	bool "Add ROM bootloader 40Kib RAM to heap"
+	default false
+	depends on BOOT_RUNFROMISRAM
+	---help---
+		Select to add the memory used by the ROM bootloader to heap
+
 config IMXRT_SDRAM_HEAP
 	bool "Add SDRAM to heap"
 	depends on IMXRT_SEMC_SDRAM && !IMXRT_SDRAM_PRIMARY
