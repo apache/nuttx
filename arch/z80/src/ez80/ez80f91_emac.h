@@ -1,6 +1,5 @@
 /************************************************************************************
  * arch/z80/src/ez80/ez80f91_emac.h
- * arch/z80/src/chip/ez80f91_emac.h
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

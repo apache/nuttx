@@ -48,6 +48,14 @@
 /* Memory map.  Board-specific extensions to the basic ez80f91 memory map
  * (see arch/z80/src/ez80/ez80f91.h)
  *
+ *   00 0000 - 01 ffff - 128Kb FLASH
+ *   02 0000 - 03 ffff - (Reserved for parts with 256Kb FLASH)
+ *   04 0000 - 0b ffff - 512Kb External SRAM
+ *                       SSD1963  LCD frame buffer interface
+ *                       YM2413B Sound Generator
+ *   af e000 - af ffff - 8Kb on-chip SRAM
+ *   af e000 - af e3ff - IDLE stack
+ *
  * Chip select 0 is for the 512Kb AS6C4008 SRAM starting at address 0x40000
  * (after the flash).
  *
