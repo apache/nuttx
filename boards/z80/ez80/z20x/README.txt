@@ -34,6 +34,7 @@ Contents
 
   o ZDS-II Compiler Versions
   o Environments
+  o Memory Constaints
   o Serial Console
   o LEDs and Buttons
     - LEDs
@@ -82,6 +83,17 @@ Native
 
   The Windows native build has not been attempt.  I would expect that it
   would have numerous problems.
+
+Memory Constaints
+=================
+
+  The eZ80F92 has a smaller FLASH memory of 128Kb.  That combined with the
+  fact that the size of NuttX is increasing means that it is very easy to
+  exceed the ROM address space.
+
+  The sdboot configuration will fit into the ROM address space, but NOT if
+  you enable assertions, debug outputs, or even debug symbols.  It is very
+  unlikely that the nsh_flash configuration will fit into FLASH at all!
 
 Serial Console
 ==============
@@ -199,6 +211,9 @@ Configuration Subdirectories
     found in apps/system/nsh and apps/system/nshlib..  For more
     information see:  apps/system/nsh/README.txt and
     Documentation/NuttShell.html.
+
+    UNVERIFIED!  I doubt that the nsh_flash program will fit into the
+    smaller FLASH memory of the eZ80F92 part.
 
     NOTES:
 
