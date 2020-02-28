@@ -228,7 +228,7 @@
 #define MSR_X2APIC_LVTT         0x832
 # define MSR_X2APIC_LVTT_X1                    0x0000000B   // divide counts by 1
 # define MSR_X2APIC_LVTT_PERIODIC              0x00020000   // Periodic
-# define MSR_X2APIC_LVTT_TSC_DEALINE           0x00040000   // Enable TSC DEADLINE One-shot timer
+# define MSR_X2APIC_LVTT_TSC_DEADLINE           0x00040000   // Enable TSC DEADLINE One-shot timer
 #define MSR_X2APIC_LVTTHER      0x833
 #define MSR_X2APIC_LVTPMR       0x834
 #define MSR_X2APIC_LINT0        0x835
