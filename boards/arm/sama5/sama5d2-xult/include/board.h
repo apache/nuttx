@@ -91,6 +91,15 @@
 
 #  include <arch/board/board_384mhz.h>
 
+#elif defined(CONFIG_SAMA5D2XULT_498MHZ)
+
+/* This is the configuration results in a CPU clock of 498MHz.
+ *
+ * In this configuration, UPLL is the source of the UHPHS clock (if enabled).
+ */
+
+#  include <arch/board/board_498mhz.h>
+
 #elif defined(CONFIG_SAMA5D2XULT_528MHZ)
 
 /* This is the configuration results in a CPU clock of 528MHz.
