@@ -86,7 +86,8 @@
           ((type *)((intptr_t)(ptr) - offsetof(type, member)))
 #endif
 
-/* ADC Channels/DMA ********************************************************/
+/* ADC Channels/DMA *********************************************************/
+
 /* The maximum number of channels that can be sampled.  While DMA support is
  * very nice for reliable multi-channel sampling, the STM32H7 can function
  * without, although there is a risk of overrun.
@@ -174,7 +175,7 @@ struct stm32_dev_s
   uint32_t base;        /* Base address of registers unique to this ADC
                          * block */
   uint32_t mbase;       /* Base address of master ADC (allows for access to
-                           shared common registers) */
+                         * shared common registers) */
   bool     initialized; /* Keeps track of the initialization status of the ADC */
 #ifdef ADC_HAVE_TIMER
   uint32_t tbase;       /* Base address of timer used by this ADC block */
@@ -228,10 +229,11 @@ static void     tim_dumpregs(FAR struct stm32_dev_s *priv,
 
 static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset);
 static void adc_enable(FAR struct stm32_dev_s *priv);
-static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first, int last,
-                            int offset);
+static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first,
+                            int last, int offset);
 static int      adc_set_ch(FAR struct adc_dev_s *dev, uint8_t ch);
-static bool     adc_internal(FAR struct stm32_dev_s * priv, uint32_t *adc_ccr);
+static bool     adc_internal(FAR struct stm32_dev_s * priv,
+                             uint32_t *adc_ccr);
 
 #ifdef ADC_HAVE_TIMER
 static void adc_timstart(FAR struct stm32_dev_s *priv, bool enable);
@@ -485,6 +487,7 @@ static void adc_modifyreg(FAR struct stm32_dev_s *priv, int offset,
 {
   adc_putreg(priv, offset, (adc_getreg(priv, offset) & ~clrbits) | setbits);
 }
+
 /****************************************************************************
  * Name: adc_getregm
  *
@@ -848,7 +851,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 
   /* Set the reload and prescaler values */
 
-  tim_putreg(priv, STM32_GTIM_PSC_OFFSET, prescaler-1);
+  tim_putreg(priv, STM32_GTIM_PSC_OFFSET, prescaler - 1);
   tim_putreg(priv, STM32_GTIM_ARR_OFFSET, reload);
 
   /* Clear the advanced timers repetition counter in TIM1 */
@@ -949,6 +952,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
       case 4: /* TimerX TRGO event */
         {
           /* TODO: TRGO support not yet implemented */
+
           /* Set the event TRGO */
 
           ccenable = 0;
@@ -1053,9 +1057,11 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
  *
  * Description:
  *   Called by power management framework when it wants to enter low power
- *   states. Check if ADC is in progress and if so prevent from entering STOP.
+ *   states. Check if ADC is in progress and if so prevent from entering
+ *   STOP.
  *
  ****************************************************************************/
+
 #ifdef CONFIG_PM
 static int adc_pm_prepare(struct pm_callback_s *cb, int domain,
                           enum pm_state_e state)
@@ -1167,7 +1173,7 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset)
       bit = RCC_AHB1RSTR_ADC12RST;
     }
 
-   /* First must disable interrupts because the AHB2RSTR register is used by
+  /* First must disable interrupts because the AHB2RSTR register is used by
    * several different drivers.
    */
 
@@ -1249,8 +1255,8 @@ static void adc_enable(FAR struct stm32_dev_s *priv)
  * Name: adc_bind
  *
  * Description:
- *   Bind the upper-half driver callbacks to the lower-half implementation.  This
- *   must be called early in order to receive ADC event notifications.
+ *   Bind the upper-half driver callbacks to the lower-half implementation.
+ *   This must be called early in order to receive ADC event notifications.
  *
  ****************************************************************************/
 
@@ -1332,15 +1338,16 @@ static int adc_setup(FAR struct adc_dev_s *dev)
    * other has already been reset. (We only need to worry about this if both
    * ADC1 and ADC2 are enabled.)
    */
+
 #if defined(CONFIG_STM32H7_ADC1) && defined(CONFIG_STM32H7_ADC2)
   if ((dev == &g_adcdev1 &&
       !((FAR struct stm32_dev_s *)g_adcdev2.ad_priv)->initialized) ||
      (dev == &g_adcdev2 &&
       !((FAR struct stm32_dev_s *)g_adcdev1.ad_priv)->initialized))
 #endif
-  {
-     adc_reset(dev);
-  }
+    {
+      adc_reset(dev);
+    }
 
   /* Initialize the same sample time for each ADC.
    * During sample cycles channel selection bits must remain unchanged.
@@ -1446,7 +1453,6 @@ static int adc_setup(FAR struct adc_dev_s *dev)
   setbits &= ADC_PCSEL_PCSEL_ALL;
 
   adc_modifyreg(priv, STM32_ADC_PCSEL_OFFSET, clrbits, setbits);
-
 
   /* Set ADEN to wake up the ADC from Power Down. */
 
@@ -1554,6 +1560,7 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 
       regval &= ~ADC_INT_MASK;
     }
+
   adc_putreg(priv, STM32_ADC_IER_OFFSET, regval);
 }
 
@@ -1608,9 +1615,9 @@ static bool adc_internal(FAR struct stm32_dev_s * priv, uint32_t *adc_ccr)
                     break;
                 }
             }
-
         }
     }
+
   return internal;
 }
 
@@ -1786,7 +1793,7 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 
           /* Set the watchdog threshold register */
 
-          regval= ((arg << ADC_LTR1_LT_SHIFT) & ADC_LTR1_LT_MASK);
+          regval = ((arg << ADC_LTR1_LT_SHIFT) & ADC_LTR1_LT_MASK);
           adc_putreg(priv, STM32_ADC_LTR1_OFFSET, regval);
 
           /* Ensure analog watchdog is enabled */
@@ -1941,6 +1948,7 @@ static int adc12_interrupt(int irq, FAR void *context, FAR void *arg)
  * Returned Value:
  *
  ****************************************************************************/
+
 #ifdef CONFIG_STM32H7_ADC3
 static int adc3_interrupt(int irq, FAR void *context, FAR void *arg)
 {
@@ -1994,7 +2002,8 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr, FAR void *arg)
 
       for (i = 0; i < priv->nchannels; i++)
         {
-          priv->cb->au_receive(dev, priv->chanlist[priv->current], priv->dmabuffer[priv->current]);
+          priv->cb->au_receive(dev, priv->chanlist[priv->current],
+                               priv->dmabuffer[priv->current]);
           priv->current++;
           if (priv->current >= priv->nchannels)
             {

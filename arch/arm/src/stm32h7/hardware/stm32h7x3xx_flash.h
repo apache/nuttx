@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_flash.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,16 +31,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_FLASH_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_FLASH_H
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_FLASH_ACR_OFFSET         0x0000 /* Access control register */
 #define STM32_FLASH_KEYR1_OFFSET       0x0004 /* Key register for bank 1 */
@@ -84,7 +84,7 @@
 #define STM32_FLASH_BANK1_OFFSET       0x0000 /* Bank 1 registers offset */
 #define STM32_FLASH_BANK2_OFFSET       0x0100 /* Bank 2 registers offset */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_FLASH_ACR                (STM32_FLASHIF_BASE + STM32_FLASH_ACR_OFFSET)
 #define STM32_FLASH_KEYR1              (STM32_FLASHIF_BASE + STM32_FLASH_KEYR1_OFFSET)
@@ -125,7 +125,7 @@
 #define STM32_FLASH_CRCEADD2R          (STM32_FLASHIF_BASE + STM32_FLASH_CRCEADD2R_OFFSET)
 #define STM32_FLASH_ECC_FA2R           (STM32_FLASHIF_BASE + STM32_FLASH_ECC_FA2R_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Flash Access Control Register (ACR) Bank 1 or 2 */
 

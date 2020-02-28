@@ -80,8 +80,9 @@ void stm32_pmstandby(void)
 
   modifyreg32(STM32_RCC_CSR, 0, RCC_RSR_RMVF);
 
-  /* Set the domain Power Down Deep Sleep (PDDS) bits in the power control register.
-   * so that D1, D2, and D3 will go into the DStop state. */
+  /* Set the domain Power Down Deep Sleep (PDDS) bits in the power control
+   * register so that D1, D2, and D3 will go into the DStop state.
+   */
 
   modifyreg32(STM32_PWR_CPUCR, 0, STM32_PWR_CPUCR_PDDS_D1 |
                                   STM32_PWR_CPUCR_PDDS_D2 |

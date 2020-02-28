@@ -58,8 +58,8 @@
  *
  * Input Parameters:
  *   lpds - true: To further reduce power consumption in Stop mode, put the
- *          internal voltage regulator in low-power under-drive mode using the
- *          LPDS and LPUDS bits of the Power control register (PWR_CR1).
+ *          internal voltage regulator in low-power under-drive mode using
+ *          the LPDS and LPUDS bits of the Power control register (PWR_CR1).
  *
  * Returned Value:
  *   None
@@ -70,7 +70,8 @@ void stm32_pmstop(bool lpds)
 {
   uint32_t regval;
 
-  /* Clear the Low Power Deep Sleep (LPDS) bit in the CPU power control register.
+  /* Clear the Low Power Deep Sleep (LPDS) bit in the CPU power control
+   * register.
    */
 
   regval  = getreg32(STM32_PWR_CR1);
@@ -94,7 +95,8 @@ void stm32_pmstop(bool lpds)
   /* Clear the domain standby bits so D1, D2 and D3 remain in DStop mode */
 
   regval  = getreg32(STM32_PWR_CPUCR);
-  regval &= ~(STM32_PWR_CPUCR_PDDS_D1 | STM32_PWR_CPUCR_PDDS_D2 | STM32_PWR_CPUCR_PDDS_D3);
+  regval &= ~(STM32_PWR_CPUCR_PDDS_D1 | STM32_PWR_CPUCR_PDDS_D2 |
+              STM32_PWR_CPUCR_PDDS_D3);
   putreg32(regval, STM32_PWR_CPUCR);
 
   /* Set SLEEPDEEP bit of Cortex System Control Register */

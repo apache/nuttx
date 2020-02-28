@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32h7_flash.c
+ * arch/arm/src/stm32h7/stm32_flash.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -76,8 +76,8 @@
 /* Flash size is known from the chip selection:
  *
  *   When CONFIG_STM32H7_FLASH_OVERRIDE_DEFAULT is set the
- *   CONFIG_STM32H7_FLASH_CONFIG_x selects the default FLASH size based on the
- *   chip part number. This value can be overridden with
+ *   CONFIG_STM32H7_FLASH_CONFIG_x selects the default FLASH size based on
+ *   the chip part number. This value can be overridden with
  *   CONFIG_STM32H7_FLASH_OVERRIDE_x
  *
  *   Parts STM32H74xxE have 512Kb of FLASH
@@ -147,7 +147,7 @@
 
 #define PROGMEM_NBLOCKS STM32_FLASH_NPAGES
 
-/*****************************************************************************
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -184,13 +184,13 @@ static struct stm32h7_flash_priv_s stm32h7_flash_bank2_priv =
  * Private Functions
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_flash_getreg32
  *
  * Description:
  *   Get a 32-bit register value by offset
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t stm32h7_flash_getreg32(FAR struct stm32h7_flash_priv_s
                                             *priv, uint32_t offset)
@@ -198,7 +198,7 @@ static inline uint32_t stm32h7_flash_getreg32(FAR struct stm32h7_flash_priv_s
   return getreg32(priv->ifbase + offset);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_flash_putreg32
  *
  * Description:
@@ -213,13 +213,13 @@ static inline void stm32h7_flash_putreg32(FAR struct stm32h7_flash_priv_s
   putreg32(value, priv->ifbase + offset);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_flash_modifyreg32
  *
  * Description:
  *   Modify a 32-bit register value by offset
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32h7_flash_modifyreg32(FAR struct stm32h7_flash_priv_s
                                              *priv, uint32_t offset,
@@ -229,26 +229,26 @@ static inline void stm32h7_flash_modifyreg32(FAR struct stm32h7_flash_priv_s
   modifyreg32(priv->ifbase + offset, clearbits, setbits);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_flash_sem_lock
  *
  * Description:
  *   Take the Bank exclusive access semaphore
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32h7_flash_sem_lock(FAR struct stm32h7_flash_priv_s *priv)
 {
   nxsem_wait_uninterruptible(&priv->sem);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_flash_sem_unlock
  *
  * Description:
  *   Release the Bank exclusive access semaphore
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline void stm32h7_flash_sem_unlock(FAR struct stm32h7_flash_priv_s
                                             *priv)
@@ -256,13 +256,13 @@ static inline void stm32h7_flash_sem_unlock(FAR struct stm32h7_flash_priv_s
   nxsem_post(&priv->sem);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_unlock_flash
  *
  * Description:
  *   Unlock the Bank
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32h7_unlock_flash(FAR struct stm32h7_flash_priv_s *priv)
 {
@@ -279,38 +279,39 @@ static void stm32h7_unlock_flash(FAR struct stm32h7_flash_priv_s *priv)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_lock_flash
  *
  * Description:
  *   Lock the Bank
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32h7_lock_flash(FAR struct stm32h7_flash_priv_s *priv)
 {
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET, 0, FLASH_CR_LOCK);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_flash_size
  *
  * Description:
  *   Returns the size in bytes of FLASH
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t stm32h7_flash_size(FAR struct stm32h7_flash_priv_s *priv)
 {
   return FLASH_SECTOR_SIZE * PROGMEM_NBLOCKS;
 }
-/*****************************************************************************
+
+/****************************************************************************
  * Name: stm32h7_flash_bank
  *
  * Description:
  *   Returns the priv pointer to the correct bank
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline
 FAR struct stm32h7_flash_priv_s * stm32h7_flash_bank(size_t address)
@@ -320,6 +321,7 @@ FAR struct stm32h7_flash_priv_s * stm32h7_flash_bank(size_t address)
     {
       return NULL;
     }
+
 #if STM32_FLASH_NPAGES > 1
   if (address >= stm32h7_flash_bank2_priv.base)
     {
@@ -330,13 +332,13 @@ FAR struct stm32h7_flash_priv_s * stm32h7_flash_bank(size_t address)
   return priv;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_unlock_flashopt
  *
  * Description:
  *   Unlock the flash option bytes
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32h7_unlock_flashopt(FAR struct stm32h7_flash_priv_s *priv)
 {
@@ -353,26 +355,26 @@ static void stm32h7_unlock_flashopt(FAR struct stm32h7_flash_priv_s *priv)
     }
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_lock_flashopt
  *
  * Description:
  *   Lock the flash option bytes
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32h7_lock_flashopt(FAR struct stm32h7_flash_priv_s *priv)
 {
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_OPTCR_OFFSET, 0, FLASH_OPTCR_OPTLOCK);
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_save_flashopt
  *
  * Description:
  *   Save the flash option bytes to non-volatile storage.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void stm32h7_save_flashopt(FAR struct stm32h7_flash_priv_s *priv)
 {
@@ -386,13 +388,18 @@ static void stm32h7_save_flashopt(FAR struct stm32h7_flash_priv_s *priv)
     }
 
   /* Can only write flash options if the option control reg is unlocked */
-  if (!(stm32h7_flash_getreg32(priv, STM32_FLASH_OPTCR_OFFSET) & FLASH_OPTCR_OPTLOCK))
+
+  if (!(stm32h7_flash_getreg32(priv, STM32_FLASH_OPTCR_OFFSET) &
+                               FLASH_OPTCR_OPTLOCK))
     {
-      stm32h7_flash_modifyreg32(priv, STM32_FLASH_OPTCR_OFFSET, 0, FLASH_OPTCR_OPTSTRT);
+      stm32h7_flash_modifyreg32(priv, STM32_FLASH_OPTCR_OFFSET, 0,
+                                FLASH_OPTCR_OPTSTRT);
     }
 
   /* Wait for the update to complete */
-  while (stm32h7_flash_getreg32(priv, STM32_FLASH_OPTSR_CUR_OFFSET) & FLASH_OPTSR_BUSYV)
+
+  while (stm32h7_flash_getreg32(priv, STM32_FLASH_OPTSR_CUR_OFFSET) &
+                                      FLASH_OPTSR_BUSYV)
     {
     }
 }
@@ -401,13 +408,13 @@ static void stm32h7_save_flashopt(FAR struct stm32h7_flash_priv_s *priv)
  * Public Functions
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_flash_unlock
  *
  * Description:
  *   Unlocks a bank
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int stm32h7_flash_unlock(size_t addr)
 {
@@ -425,13 +432,13 @@ int stm32h7_flash_unlock(size_t addr)
   return rv;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: stm32h7_flash_lock
  *
  * Description:
  *   Locks a bank
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int stm32h7_flash_lock(size_t addr)
 {
@@ -506,6 +513,7 @@ uint32_t stm32h7_flash_getopt(void)
     {
       return stm32h7_flash_getreg32(priv, STM32_FLASH_OPTSR_CUR_OFFSET);
     }
+
   return 0;
 }
 
@@ -526,7 +534,7 @@ void stm32h7_flash_optmodify(uint32_t clear, uint32_t set)
     stm32h7_unlock_flashopt(priv);
     stm32h7_flash_modifyreg32(priv, STM32_FLASH_OPTSR_PRG_OFFSET, clear, set);
     stm32h7_save_flashopt(priv);
-  }
+    }
 }
 
 /****************************************************************************
@@ -566,6 +574,7 @@ ssize_t up_progmem_getpage(size_t addr)
     {
       return -EFAULT;
     }
+
   return  priv->stblock + ((addr - priv->base) / FLASH_SECTOR_SIZE);
 }
 
@@ -811,6 +820,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
             }
         }
     }
+
   stm32h7_flash_modifyreg32(priv, STM32_FLASH_CR1_OFFSET, FLASH_CR_PG, 0);
   stm32h7_flash_sem_unlock(priv);
   return written;

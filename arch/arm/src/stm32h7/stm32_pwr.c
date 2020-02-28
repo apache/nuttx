@@ -270,12 +270,13 @@ void stm32_pwr_disablepvd(void)
  * Description:
  *   Enables the Backup regulator, the Backup regulator (used to maintain backup
  *   SRAM content in Standby and VBAT modes) is enabled. If BRE is reset, the backup
- *   regulator is switched off. The backup SRAM can still be used but its content will
- *   be lost in the Standby and VBAT modes. Once set, the application must wait that
- *   the Backup Regulator Ready flag (BRR) is set to indicate that the data written
- *   into the RAM will be maintained in the Standby and VBAT modes.
+ *   regulator is switched off. The backup SRAM can still be used but its content
+ *   will be lost in the Standby and VBAT modes. Once set, the application must wait
+ *   that the Backup Regulator Ready flag (BRR) is set to indicate that the data
+ *   written into the RAM will be maintained in the Standby and VBAT modes.
  *
- *   This function needs to be called after stm32_pwr_enablebkp(true) has been called.
+ *   This function needs to be called after stm32_pwr_enablebkp(true) has been
+ *   called.
  *
  * Input Parameters:
  *   region - state to set it to
@@ -367,7 +368,9 @@ void stm32_pwr_configurewkup(uint32_t pin, bool en, bool rising, uint32_t pull)
     {
       regval     |= STM32_PWR_WKUPP(pin);
     }
+
   /* Set to the no pull-up state by default*/
+
   regval &= ~ (STM32_PWR_WKUPPUPD_MASK << STM32_PWR_WKUPPUPD_SHIFT(pin));
 
   if (pull == GPIO_PULLUP)
@@ -394,12 +397,14 @@ void stm32_pwr_configurewkup(uint32_t pin, bool en, bool rising, uint32_t pull)
  *
  * Input Parameters:
  *   enable    - Enables the charge resistor if true, disables it if false
- *   resistor  - Sets charge resistor to 1.5 KOhm if true, sets it to 5 KOhm if false.
+ *   resistor  - Sets charge resistor to 1.5 KOhm if true,
+ *               sets it to 5 KOhm if false.
  *
  * Returned Value:
  *   None
  *
  ************************************************************************************/
+
 void stm32_pwr_setvbatcharge(bool enable, bool resistor)
 {
   irqstate_t flags;

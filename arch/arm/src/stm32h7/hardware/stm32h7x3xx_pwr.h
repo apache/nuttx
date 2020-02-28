@@ -75,7 +75,6 @@
                                                 /* Bits 1-3: Reserved */
 #define PWR_CR1_PVDE                (1 << 4)    /* Bit 4: Programmable voltage detector enable */
 
-
 #define PWR_CR1_PLS_SHIFT           (5)        /* Bits 5-7: Programmable voltage detector level */
 #define PWR_CR1_PLS_MASK            (7 << PWR_CR1_PLS_SHIFT)
 #  define PWR_CR1_PLS_1V95          (0 << PWR_CR1_PLS_SHIFT) /* 000: */
@@ -105,6 +104,7 @@
                                               /* Bits 19-31: Reserved */
 
 /* Power control/status register 1 (CSR1) */
+
                                               /* Bits 0-3: Reserved */
 #define PWR_CSR1_PVDO               (1 << 4)  /* Bit 4: Programmable voltage detect output*/
                                               /* Bits 5-12: Reserved */

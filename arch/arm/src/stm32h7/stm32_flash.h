@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_fflash.h
+ * arch/arm/src/stm32h7/stm32_flash.h
  *
  *   Copyright (C) 2020 Gregory Nutt. All rights reserved.
  *   Author: Joshua Lange <jlange@2g-eng.com>
@@ -46,7 +46,7 @@
 #include "hardware/stm32_flash.h"
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
