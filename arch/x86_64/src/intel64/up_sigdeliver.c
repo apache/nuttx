@@ -83,10 +83,10 @@
 void up_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
+  sig_deliver_t sighandler;
   uint64_t regs_area[XCPTCONTEXT_REGS + 2];
   uint64_t* regs;
   regs = (uint64_t*)(((uint64_t)(regs_area) + 15) & (~(uint64_t)15)); // align regs to 16byte boundary for SSE instrucitons
-  sig_deliver_t sigdeliver;
 
   /* Save the errno.  This must be preserved throughout the signal handling
    * so that the user code final gets the correct errno value (probably
@@ -95,33 +95,33 @@ void up_sigdeliver(void)
 
   int saved_errno = rtcb->pterrno;
 
+  /* Save the real return state on the stack ASAP before any chance we went sleeping and break the register profile.
+   * We entered this function with interrupt disabled, therefore we don't have to worried being preempted by interrupt.*/
+
+  up_copystate(regs, rtcb->xcp.regs);
+
+  /* grab on a copy of the signal hander function pointer before any possibility to be switched out */
+  ASSERT(rtcb->xcp.sigdeliver != NULL);
+  sighandler = rtcb->xcp.sigdeliver;
+
   board_autoled_on(LED_SIGNAL);
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  ASSERT(rtcb->xcp.sigdeliver != NULL);
 
-  /* Save the real return state on the stack. */
-
-  up_copystate(regs, rtcb->xcp.regs);
-  regs[REG_RIP]        = rtcb->xcp.saved_rip;
-  regs[REG_RFLAGS]     = rtcb->xcp.saved_rflags;
-
-  /* Get a local copy of the sigdeliver function pointer. we do this so that
-   * we can nullify the sigdeliver function pointer in the TCB and accept
-   * more signal deliveries while processing the current pending signals.
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  /* Then make sure that interrupts are enabled.  Signal handlers must always
+   * run with interrupts enabled.
    */
 
-  sigdeliver           = rtcb->xcp.sigdeliver;
-  rtcb->xcp.sigdeliver = NULL;
-
-  /* Then restore the task interrupt state */
-
-  up_irq_restore(regs[REG_RFLAGS]);
+  up_irq_enable();
+#endif
 
   /* Deliver the signals */
 
-  sigdeliver(rtcb);
+  _err("Deliver signal to %llx: %llx\n", rtcb, rtcb->xcp.sigdeliver);
+
+  sighandler(rtcb);
 
   /* Output any debug messages BEFORE restoring errno (because they may
    * alter errno), then disable interrupts again and restore the original
@@ -132,10 +132,20 @@ void up_sigdeliver(void)
   (void)up_irq_save();
   rtcb->pterrno = saved_errno;
 
-  if(rtcb->xcp.saved_rsp){
-    regs[REG_RSP]      = rtcb->xcp.saved_rsp;
-    rtcb->xcp.saved_rsp = 0;
-  }
+  /* Modify the saved return state with the actual saved values in the
+   * TCB.  This depends on the fact that nested signal handling is
+   * not supported.  Therefore, these values will persist throughout the
+   * signal handling action.
+   *
+   * Keeping this data in the TCB resolves a security problem in protected
+   * and kernel mode:  The regs[] array is visible on the user stack and
+   * could be modified by a hostile program.
+   */
+
+  regs[REG_RIP]        = rtcb->xcp.saved_rip;
+  regs[REG_RSP]        = rtcb->xcp.saved_rsp;
+  regs[REG_RFLAGS]     = rtcb->xcp.saved_rflags;
+  rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
   /* Then restore the correct state for this thread of execution. */
 

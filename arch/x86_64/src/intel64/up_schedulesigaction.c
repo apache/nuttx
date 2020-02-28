@@ -100,9 +100,9 @@
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
   irqstate_t flags;
-  uint64_t curr_rsp, new_rsp, kstack;
 
   sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
+  sinfo("rtcb=0x%p g_current_regs=0x%p\n", this_task(), g_current_regs);
 
   /* Make sure that interrupts are disabled */
 
@@ -115,8 +115,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
       /* First, handle some special cases when the signal is being delivered
        * to the currently executing task.
        */
-
-      sinfo("rtcb=0x%p g_current_regs=0x%p\n", this_task(), g_current_regs);
 
       if (tcb == this_task())
         {
@@ -150,6 +148,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               tcb->xcp.sigdeliver       = sigdeliver;
               tcb->xcp.saved_rip        = g_current_regs[REG_RIP];
+              tcb->xcp.saved_rsp        = tcb->xcp.regs[REG_RSP];
               tcb->xcp.saved_rflags     = g_current_regs[REG_RFLAGS];
 
               /* Then set up to vector to the trampoline with interrupts
@@ -182,6 +181,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.sigdeliver       = sigdeliver;
           tcb->xcp.saved_rip        = tcb->xcp.regs[REG_RIP];
+          tcb->xcp.saved_rsp        = tcb->xcp.regs[REG_RSP];
           tcb->xcp.saved_rflags     = tcb->xcp.regs[REG_RFLAGS];
 
           /* Then set up to vector to the trampoline with interrupts
