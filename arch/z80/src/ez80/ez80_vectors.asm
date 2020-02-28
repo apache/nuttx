@@ -37,9 +37,7 @@
 ; Constants
 ;**************************************************************************
 
-NVECTORS	EQU	64		; max possible interrupt vectors
-
-;* Bits in the Z80 FLAGS register *****************************************
+; Bits in the Z80 FLAGS register *****************************************
 
 EZ80_C_FLAG	EQU	01h		; Bit 0: Carry flag
 EZ80_N_FLAG	EQU	02h		; Bit 1: Add/Subtract flag
@@ -52,8 +50,6 @@ EZ80_S_FLAG	EQU	80h		; Bit 7: Sign flag
 ; Global Symbols Imported
 ;**************************************************************************
 
-	xref	_ez80_handlers
-	xref	_handlersize
 	xref	_ez80_startup
 	xref	_z80_doirq
 
@@ -62,10 +58,7 @@ EZ80_S_FLAG	EQU	80h		; Bit 7: Sign flag
 ;**************************************************************************
 
 	xdef	_ez80_reset
-	xdef	_ez80_initvectors
 	xdef	_ez80_rstcommon
-	xdef	_ez80_initvectors
-	xdef	_ez80_vectable
 
 ;**************************************************************************
 ; Macros
@@ -199,58 +192,4 @@ _ez80_rstcommon:
 nointenable:
 	ex		af, af'				; Restore AF
 	reti
-
-;**************************************************************************
-; Vector Setup Logic
-;**************************************************************************
-
-_ez80_initvectors:
-
-	; Initialize the vector table
-
-	ld		iy, _ez80_vectable
-	ld		ix, 4
-	ld		bc, 4
-	ld		b, NVECTORS
-	xor		a, a				; Clear carry
-	ld		de, _handlersize	; Length of one irq handler in de
-	ld		hl, _ez80_handlers 	; Start of handlers in hl
-
-	ld		a, 0
-$1:
-	ld		(iy), hl			; Store IRQ handler
-	ld		(iy+3), a			; Pad to 4 bytes
-	add		hl, de				; Point to next handler
-	push	de
-	ld		de, 4
-	add		iy, de				; Point to next entry in vector table
-	pop		de
-	djnz	$1					; Loop until all vectors have been written
-
-	; Select interrupt mode 2
-
-	im	2						; Interrupt mode 2
-
-	; Write the address of the vector table into the interrupt vector base
-
-	ld		hl, _ez80_vectable >> 8
-	ld		i, hl
-	ret
-
-;**************************************************************************
-; Vector Table
-;**************************************************************************
-
-; This segment must be aligned on a 512 byte boundary anywhere in RAM
-; Each entry will be a 3-byte address in a 4-byte space
-
-	define	.IVECTS, space = RAM, align = 200h
-	segment	.IVECTS
-
-	; The first 64 bytes are not used... the vectors actually start at +0x40
-
-_ez80_vecreserve:
-	ds	64
-_ez80_vectable:
-	ds	NVECTORS * 4
 	end

@@ -36,8 +36,13 @@ EZ80_UNUSED		EQU	40h
 ; Global Symbols Exported
 ;**************************************************************************
 
-	xdef	_ez80_handlers
-	xdef	_handlersize
+	xdef	_ez80_initvectors
+
+;**************************************************************************
+; Constants
+;**************************************************************************
+
+NVECTORS	EQU	64		; max possible interrupt vectors
 
 ;**************************************************************************
 ; Macros
@@ -55,11 +60,92 @@ irqhandler: macro vectno
 	endmac	irqhandler
 
 ;**************************************************************************
+; Vector Table
+;**************************************************************************
+
+; This segment must be aligned on a 256 byte boundary anywhere in RAM
+; Each entry will be a 2-byte address in a 2-byte space
+
+	define	.IVECTS, space = RAM, align = 100h
+	segment	.IVECTS
+
+; Vector table is a 2-bit address.  The MSB is the I register; the LSB is
+; the vector number.  The vector table lies in FLASH.  The addresses
+; contained in the refers to an entry in the handler table that re-
+; directs the interrupt to common interrupt handling logic.
+
+_ez80_vectable:
+	dw	_ez80_handlers + 0*_handlersize
+	dw	_ez80_handlers + 1*_handlersize
+	dw	_ez80_handlers + 2*_handlersize
+	dw	_ez80_handlers + 3*_handlersize
+	dw	_ez80_handlers + 4*_handlersize
+	dw	_ez80_handlers + 5*_handlersize
+	dw	_ez80_handlers + 6*_handlersize
+	dw	_ez80_handlers + 7*_handlersize
+	dw	_ez80_handlers + 8*_handlersize
+	dw	_ez80_handlers + 9*_handlersize
+	dw	_ez80_handlers + 10*_handlersize
+	dw	_ez80_handlers + 11*_handlersize
+	dw	_ez80_handlers + 12*_handlersize
+	dw	_ez80_handlers + 13*_handlersize
+	dw	_ez80_handlers + 14*_handlersize
+	dw	_ez80_handlers + 15*_handlersize
+	dw	_ez80_handlers + 16*_handlersize
+	dw	_ez80_handlers + 17*_handlersize
+	dw	_ez80_handlers + 18*_handlersize
+	dw	_ez80_handlers + 19*_handlersize
+	dw	_ez80_handlers + 20*_handlersize
+	dw	_ez80_handlers + 21*_handlersize
+	dw	_ez80_handlers + 22*_handlersize
+	dw	_ez80_handlers + 23*_handlersize
+	dw	_ez80_handlers + 24*_handlersize
+	dw	_ez80_handlers + 25*_handlersize
+	dw	_ez80_handlers + 26*_handlersize
+	dw	_ez80_handlers + 27*_handlersize
+	dw	_ez80_handlers + 28*_handlersize
+	dw	_ez80_handlers + 29*_handlersize
+	dw	_ez80_handlers + 30*_handlersize
+	dw	_ez80_handlers + 31*_handlersize
+	dw	_ez80_handlers + 32*_handlersize
+	dw	_ez80_handlers + 33*_handlersize
+	dw	_ez80_handlers + 34*_handlersize
+	dw	_ez80_handlers + 35*_handlersize
+	dw	_ez80_handlers + 36*_handlersize
+	dw	_ez80_handlers + 37*_handlersize
+	dw	_ez80_handlers + 38*_handlersize
+	dw	_ez80_handlers + 39*_handlersize
+	dw	_ez80_handlers + 40*_handlersize
+	dw	_ez80_handlers + 41*_handlersize
+	dw	_ez80_handlers + 42*_handlersize
+	dw	_ez80_handlers + 43*_handlersize
+	dw	_ez80_handlers + 44*_handlersize
+	dw	_ez80_handlers + 45*_handlersize
+	dw	_ez80_handlers + 46*_handlersize
+	dw	_ez80_handlers + 47*_handlersize
+	dw	_ez80_handlers + 48*_handlersize
+	dw	_ez80_handlers + 49*_handlersize
+	dw	_ez80_handlers + 50*_handlersize
+	dw	_ez80_handlers + 51*_handlersize
+	dw	_ez80_handlers + 52*_handlersize
+	dw	_ez80_handlers + 53*_handlersize
+	dw	_ez80_handlers + 54*_handlersize
+	dw	_ez80_handlers + 55*_handlersize
+	dw	_ez80_handlers + 56*_handlersize
+	dw	_ez80_handlers + 57*_handlersize
+	dw	_ez80_handlers + 58*_handlersize
+	dw	_ez80_handlers + 59*_handlersize
+	dw	_ez80_handlers + 60*_handlersize
+	dw	_ez80_handlers + 61*_handlersize
+	dw	_ez80_handlers + 62*_handlersize
+	dw	_ez80_handlers + 63*_handlersize
+
+;**************************************************************************
 ; Interrupt Vector Handlers
 ;**************************************************************************
 
-	define .STARTUP, space = ROM
-	segment .STARTUP
+; Still in .IVECTS section
+
 	.assume ADL=1
 
 						; Symbol           Val VecNo Addr
@@ -130,4 +216,27 @@ _ez80_handlers:
 	irqhandler	EZ80_UNUSED+26	;               61   0x134
 	irqhandler	EZ80_UNUSED+27	;               62   0x138
 	irqhandler	EZ80_UNUSED+28	;               63   0x13c
+
+;**************************************************************************
+; Vector Setup Logic
+;**************************************************************************
+
+	define .STARTUP, space = ROM
+	segment .STARTUP
+	.assume ADL=1
+
+_ez80_initvectors:
+
+	; We don't need to do much here.  The interrupt vectors and handlers
+	; are all in FLASH.
+
+	; Select interrupt mode 2
+
+	im		2					; Interrupt mode 2
+
+	; Write the address of the vector table into the interrupt vector base
+
+	ld		a, _ez80_vectable >> 8 & 0ffh
+	ld		i, a
+	ret
 	end
