@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-/* If CONFIG_ARCH_STDARG_H is defined, then the top-level Makefile will copy
+/* If CONFIG_ARCH_STDARG_H is defined, then the top-level Nuttx.mk will copy
  * this header file to include/stdarg.h where it will become the system
  * stdarg.h header file.  In this case, the architecture specific code must
  * provide an arch/<architecture>/include/stdarg.h file which will be

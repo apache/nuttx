@@ -1,0 +1,105 @@
+############################################################################
+# tools/Nuttx.mk.export
+#
+#   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(EXPORTDIR)/Nuttx.defs
+
+ifdef ARCHSCRIPT
+
+# ARCHSCRIPT may contain a leading -T; it must not be followed by a space
+# for this to work.
+
+ifeq ($(WINTOOL),y)
+LDPATH = $(shell cygpath -u $(patsubst -T%,%,$(ARCHSCRIPT)))
+else
+LDPATH = $(patsubst -T%,%,$(ARCHSCRIPT))
+endif
+
+LDNAME = ${notdir ${LDPATH}}
+LDDIR = ${dir ${LDPATH}}
+endif
+
+ARCHSUBDIR = "arch/$(CONFIG_ARCH)/src"
+ARCHDIR ="$(TOPDIR)/$(ARCHSUBDIR)"
+
+all: $(EXPORTDIR)/makeinfo.sh
+default: all
+.PHONY: clean
+
+$(EXPORTDIR)/makeinfo.sh: $(TOPDIR)/.config $(EXPORTDIR)/Nuttx.defs
+	@echo "#!/bin/bash" > $(EXPORTDIR)/makeinfo.sh
+	@echo "" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHSUBDIR=\"$(ARCHSUBDIR)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHDIR=\"$(ARCHDIR)\"" >> $(EXPORTDIR)/makeinfo.sh
+ifdef ARCHSCRIPT
+	@echo "LDNAME=\"$(LDNAME)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LDDIR=\"$(LDDIR)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LDPATH=\"$(LDPATH)\"" >> $(EXPORTDIR)/makeinfo.sh
+endif
+	@echo "ARCHCFLAGS=\"$(ARCHCFLAGS) $(ARCHCPUFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHCXXFLAGS=\"$(ARCHCXXFLAGS) $(ARCHCPUFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHPICFLAGS=\"$(ARCHPICFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHWARNINGS=\"$(ARCHWARNINGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHWARNINGSXX=\"$(ARCHWARNINGSXX)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "ARCHOPTIMIZATION=\"$(ARCHOPTIMIZATION)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "WINTOOL=\"$(WINTOOL)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "CROSSDEV=\"$(CROSSDEV)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "CC=\"$(CC)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "CXX=\"$(CXX)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "CPP=\"$(CPP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LD=\"$(LD)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "AR=\"$(AR)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "NM=\"$(NM)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "STRIP=\"$(STRIP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "OBJCOPY=\"$(OBJCOPY)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "OBJDUMP=\"$(OBJDUMP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "NXFLATLDFLAGS1=\"$(NXFLATLDFLAGS1)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "NXFLATLDFLAGS2=\"$(NXFLATLDFLAGS2)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "OBJEXT=\"$(OBJEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LIBEXT=\"$(LIBEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "EXEEXT=\"$(EXEEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTCC=\"$(HOSTCC)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTINCLUDES=\"$(HOSTINCLUDES)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTCFLAGS=\"$(HOSTCFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTLDFLAGS=\"$(HOSTLDFLAGS)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "HOSTEXEEXT=\"$(HOSTEXEEXT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "DIRLINK=\"$(DIRLINK)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "DIRUNLINK=\"$(DIRUNLINK)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "MKDEP=\"$(MKDEP)\"" >> $(EXPORTDIR)/makeinfo.sh
+	@echo "LDSCRIPT=\"$(LDSCRIPT)\"" >> $(EXPORTDIR)/makeinfo.sh
+	$(Q) chmod 755 $(EXPORTDIR)/makeinfo.sh
+
+clean:
+	$(Q) rm -f $(EXPORTDIR)/makeinfo.sh

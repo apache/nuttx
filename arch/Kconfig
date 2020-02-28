@@ -681,7 +681,7 @@ config ARCH_IDLE_CUSTOM
 		NOTE: As of this writing, this capability is only supported by ARM
 		and MIPS architectures.  However, the implementation is trivial:  If
 		CONFIG_ARCH_IDLE_CUSTOM is defined, then the default IDLE loop file
-		is not included in the MCU-specific Make.defs file.
+		is not included in the MCU-specific Nuttx.defs file.
 
 config ARCH_CUSTOM_PMINIT
 	bool "Custom PM initialization"
@@ -698,7 +698,7 @@ config ARCH_CUSTOM_PMINIT
 		NOTE: As of this writing, this capability is only supported by the
 		STM32.  However, the implementation is trivial:  If CONFIG_ARCH_CUSTOM_PMINIT,
 		then the default PM initialization is not included in the MCU-specific
-		Make.defs file.
+		Nuttx.defs file.
 
 config ARCH_HAVE_RAMFUNCS
 	bool

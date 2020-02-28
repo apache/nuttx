@@ -120,7 +120,7 @@ define ARCHIVE
 endef
 
 define ARCHIVE
-	$(MAKE) -C $(TOPDIR)\tools\zds zdsar.exe
+	$(MAKE) -f Nuttx.mk -C $(TOPDIR)\tools\zds zdsar.exe
 	$(TOPDIR)\tools\zds\zdsar.exe --ar "$(AR)" --ar_flags "$(ARFLAGS)" --library "$(1)" $(2)
 endef
 
@@ -136,7 +136,7 @@ endef
 else
 
 define ARCHIVE
-	$(MAKE) -C $(TOPDIR)/tools/zds zdsar.exe
+	$(MAKE) -f Nuttx.mk -C $(TOPDIR)/tools/zds zdsar.exe
 	$(TOPDIR)/tools/zds/zdsar.exe --ar "$(AR)" --ar_flags "$(ARFLAGS)" --library $(1) $(2)
 endef
 

@@ -60,7 +60,7 @@ USERDEPDIRS :=
 # In the protected build, the applications in the apps/ directory will be
 # into the userspace; in the flat build, the applications will be built into
 # the kernel space.  But in the kernel build, the applications will not be
-# built at all by this Makefile.
+# built at all by this Nuttx.mk.
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 USERDEPDIRS += $(APPDIR)

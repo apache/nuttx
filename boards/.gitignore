@@ -1,5 +1,5 @@
 .depend
-Make.dep
+Nuttx.dep
 *.o
 *.a
 *.d
@@ -12,7 +12,7 @@ core
 .project
 .cproject
 cscope.out
-/Make.dep
+/Nuttx.dep
 /.depend
 /*.asm
 /*.obj

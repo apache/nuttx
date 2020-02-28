@@ -1,0 +1,195 @@
+############################################################################
+# arch/arm/src/tiva/Nuttx.defs
+#
+#   Copyright (C) 2009-2011, 2013-2014, 2018 Gregory Nutt. All rights
+#     reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+HEAD_ASRC  =
+
+CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
+CMN_ASRCS += up_testset.S up_fetchadd.S  vfork.S
+
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+CMN_ASRCS += up_setjmp.S
+endif
+endif
+
+CMN_CSRCS  = up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c
+CMN_CSRCS += up_doirq.c up_exit.c up_hardfault.c up_initialize.c
+CMN_CSRCS += up_initialstate.c up_interruptcontext.c up_mdelay.c
+CMN_CSRCS += up_memfault.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
+CMN_CSRCS += up_releasepending.c up_releasestack.c up_reprioritizertr.c
+CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_stackframe.c
+CMN_CSRCS += up_svcall.c up_trigger_irq.c up_unblocktask.c up_udelay.c
+CMN_CSRCS += up_usestack.c up_vfork.c
+
+ifeq ($(CONFIG_ARM_SEMIHOSTING_HOSTFS),y)
+  CMN_CSRCS += up_hostfs.c
+endif
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+  CMN_CSRCS += up_idle.c
+endif
+
+ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
+  CMN_ASRCS += up_lazyexception.S
+else
+  CMN_ASRCS += up_exception.S
+endif
+
+CMN_CSRCS += up_vectors.c
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+  CMN_ASRCS += up_fpu.S
+  CMN_CSRCS += up_copyarmstate.c
+endif
+
+ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
+  CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
+endif
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+  CMN_CSRCS += up_checkstack.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
+  CMN_CSRCS += up_signal_dispatch.c
+  CMN_UASRCS += up_signal_handler.S
+else
+  CMN_CSRCS += up_allocateheap.c
+endif
+
+CHIP_ASRCS  =
+CHIP_CSRCS  = tiva_allocateheap.c tiva_irq.c tiva_lowputc.c tiva_serial.c
+CHIP_CSRCS += tiva_ssi.c
+
+ifeq ($(CONFIG_ARCH_CHIP_LM3S),y)
+  CHIP_CSRCS += lmxx_tm4c_start.c lm3s_gpio.c lmxx_tm4c_gpioirq.c
+  CHIP_CSRCS += lm4xx_tm3c_sysctrl.c
+else ifeq ($(CONFIG_ARCH_CHIP_LM4F),y)
+  CHIP_CSRCS += lmxx_tm4c_start.c lm4f_gpio.c lmxx_tm4c_gpioirq.c
+  CHIP_CSRCS += lm4xx_tm3c_sysctrl.c
+else ifeq ($(CONFIG_ARCH_CHIP_TM4C),y)
+  CHIP_CSRCS += lmxx_tm4c_start.c tm4c_gpio.c lmxx_tm4c_gpioirq.c
+ifeq ($(CONFIG_ARCH_CHIP_TM4C129),y)
+  CHIP_CSRCS += tm4c129_sysctrl.c
+else
+  CHIP_CSRCS += lm4xx_tm3c_sysctrl.c
+endif
+else ifeq ($(CONFIG_ARCH_CHIP_CC13X0),y)
+  CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_chipinfo.c cc13xx_gpio.c
+  CHIP_CSRCS += cc13xx_gpioirq.c cc13xx_enableclks.c cc13xx_enablepwr.c
+  CHIP_CSRCS += cc13x0_trim.c cc13x0_rom.c
+else ifeq ($(CONFIG_ARCH_CHIP_CC13X2),y)
+  CHIP_CSRCS += cc13xx_start.c cc13xx_prcm.c cc13xx_chipinfo.c cc13xx_gpio.c
+  CHIP_CSRCS += cc13xx_gpioirq.c cc13xx_enableclks.c cc13xx_enablepwr.c
+  CHIP_CSRCS += cc13x2_aux_sysif.c
+ifeq ($(CONFIG_ARCH_CHIP_CC13XX_V1),y)
+  CHIP_CSRCS += cc13x2_v1_trim.c cc13x2_cc26x2_v1_rom.c
+else
+  CHIP_CSRCS += cc13x2_v2_trim.c
+endif
+endif
+
+ifeq ($(CONFIG_DEBUG_GPIO_INFO),y)
+  CHIP_CSRCS += tiva_dumpgpio.c
+endif
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+  CHIP_CSRCS += tiva_timerisr.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  CHIP_CSRCS += tiva_userspace.c tiva_mpuinit.c
+endif
+
+ifeq ($(CONFIG_TIVA_I2C),y)
+  CHIP_CSRCS += tiva_i2c.c
+endif
+
+ifeq ($(CONFIG_TIVA_PWM),y)
+  CHIP_CSRCS += tiva_pwm.c
+endif
+
+ifeq ($(CONFIG_TIVA_QEI),y)
+  CHIP_CSRCS += tiva_qencoder.c
+endif
+
+ifeq ($(CONFIG_TIVA_TIMER),y)
+  CHIP_CSRCS += tiva_timerlib.c
+ifeq ($(CONFIG_TIVA_TIMER32_PERIODIC),y)
+  CHIP_CSRCS += tiva_timerlow32.c
+endif
+endif
+
+ifeq ($(CONFIG_TIVA_ADC),y)
+  CHIP_CSRCS += tiva_adclow.c
+  CHIP_CSRCS += tiva_adclib.c
+endif
+
+ifeq ($(CONFIG_TIVA_ETHERNET),y)
+ifeq ($(CONFIG_ARCH_CHIP_LM3S),y)
+  CHIP_CSRCS += lm3s_ethernet.c
+endif
+ifeq ($(CONFIG_ARCH_CHIP_TM4C),y)
+  CHIP_CSRCS += tm4c_ethernet.c
+endif
+endif
+
+ifeq ($(CONFIG_TIVA_FLASH),y)
+  CHIP_CSRCS += tiva_flash.c
+endif
+
+ifeq ($(CONFIG_TIVA_EEPROM),y)
+  CHIP_CSRCS += tiva_eeprom.c
+endif
+
+ifeq ($(CONFIG_TIVA_HCIUART),y)
+CHIP_CSRCS += tiva_hciuart.c
+endif
+
+# Paths to source files
+
+VPATH += chip/common
+
+ifeq ($(CONFIG_ARCH_CHIP_LM),y)
+VPATH += chip/lm
+else ifeq ($(CONFIG_ARCH_CHIP_TM4C),y)
+VPATH += chip/tm4c
+else ifeq ($(CONFIG_ARCH_CHIP_CC13X0),y)
+VPATH += chip/cc13xx
+else ifeq ($(CONFIG_ARCH_CHIP_CC13X2),y)
+VPATH += chip/cc13xx
+endif

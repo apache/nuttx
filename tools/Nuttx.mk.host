@@ -1,0 +1,310 @@
+############################################################################
+# tools/Nuttx.mk.host
+#
+#   Copyright (C) 2007, 2008, 2011-2012, 2015, 2017-2018 Gregory Nutt. All
+#     rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+TOPDIR ?= $(CURDIR)/..
+-include $(TOPDIR)/Nuttx.defs
+include ${TOPDIR}/tools/Config.mk
+
+# Check the endian-ness of the target
+
+# Define HOSTCC on the make command line if it differs from these defaults
+# Define HOSTCFLAGS with -g on the make command line to build debug versions
+
+HOSTOS = ${shell uname -o 2>/dev/null || uname -s 2>/dev/null || echo "Other"}
+
+ifeq ($(HOSTOS),MinGW)
+
+# In the Windows native environment, the MinGW GCC compiler is used
+
+HOSTCC ?= mingw32-gcc.exe
+HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I. -DCONFIG_WINDOWS_NATIVE=y
+
+else
+
+# GCC or clang is assumed in all other POSIX environments
+# (Linux, Cygwin, MSYS2, macOS).
+# strtok_r is used in some tools, but does not seem to be available in
+# the MinGW environment.
+
+HOSTCC ?= cc
+HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I.
+HOSTCFLAGS += -DHAVE_STRTOK_C=1
+
+ifeq ($(HOSTOS),Cygwin)
+HOSTCFLAGS += -DHOST_CYGWIN=1
+HOSTEXEEXT ?= .exe
+endif
+endif
+
+ifeq ($(CONFIG_ENDIAN_BIG),y)
+CFLAGS += -DTGT_BIGENDIAN=1
+endif
+
+# Targets
+
+all: b16$(HOSTEXEEXT) bdf-converter$(HOSTEXEEXT) cmpconfig$(HOSTEXEEXT) \
+    configure$(HOSTEXEEXT) mkconfig$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT) \
+    mksymtab$(HOSTEXEEXT)  mksyscall$(HOSTEXEEXT) mkversion$(HOSTEXEEXT) \
+    cnvwindeps$(HOSTEXEEXT) nxstyle$(HOSTEXEEXT) initialconfig$(HOSTEXEEXT) \
+    logparser$(HOSTEXEEXT) gencromfs$(HOSTEXEEXT) convert-comments$(HOSTEXEEXT) \
+    lowhex$(HOSTEXEEXT) detab$(HOSTEXEEXT) rmcr$(HOSTEXEEXT)
+default: mkconfig$(HOSTEXEEXT) mksyscall$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT) \
+    cnvwindeps$(HOSTEXEEXT)
+
+ifdef HOSTEXEEXT
+.PHONY: b16 bdf-converter cmpconfig clean configure kconfig2html mkconfig \
+    mkdeps mksymtab mksyscall mkversion cnvwindeps nxstyle initialconfig \
+    logparser gencromfs convert-comments lowhex detab rmcr
+else
+.PHONY: clean
+endif
+
+# b16 - Fixed precision math conversion tool
+
+b16$(HOSTEXEEXT): b16.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o b16$(HOSTEXEEXT) b16.c
+
+ifdef HOSTEXEEXT
+b16: b16$(HOSTEXEEXT)
+endif
+
+# configure - Instantiate a canned NuttX configuration
+
+configure$(HOSTEXEEXT): configure.c cfgparser.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o configure$(HOSTEXEEXT) configure.c cfgparser.c
+
+ifdef HOSTEXEEXT
+configure: configure$(HOSTEXEEXT)
+endif
+
+# mkconfig - Convert a .config file into a C config.h file
+
+mkconfig$(HOSTEXEEXT): mkconfig.c cfgdefine.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o mkconfig$(HOSTEXEEXT) mkconfig.c cfgdefine.c
+
+ifdef HOSTEXEEXT
+mkconfig: mkconfig$(HOSTEXEEXT)
+endif
+
+# cmpconfig - Compare the contents of two configuration files
+
+cmpconfig$(HOSTEXEEXT): cmpconfig.c cfgparser.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o cmpconfig$(HOSTEXEEXT) cmpconfig.c cfgparser.c
+
+ifdef HOSTEXEEXT
+cmpconfig: cmpconfig$(HOSTEXEEXT)
+endif
+
+# kconfig2html - Create an HTML document describing the configuration options
+
+kconfig2html$(HOSTEXEEXT): kconfig2html.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o kconfig2html$(HOSTEXEEXT) kconfig2html.c
+
+ifdef HOSTEXEEXT
+kconfig2html: kconfig2html$(HOSTEXEEXT)
+endif
+
+# mkversion - Convert a .version file into a C version.h file
+
+mkversion$(HOSTEXEEXT): mkconfig.c cfgdefine.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o mkversion$(HOSTEXEEXT) mkversion.c cfgdefine.c
+
+ifdef HOSTEXEEXT
+mkversion: mkversion$(HOSTEXEEXT)
+endif
+
+# mksyscall - Convert a CSV file into syscall stubs and proxies
+
+mksyscall$(HOSTEXEEXT): mksyscall.c csvparser.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o mksyscall$(HOSTEXEEXT) mksyscall.c csvparser.c
+
+ifdef HOSTEXEEXT
+mksyscall: mksyscall$(HOSTEXEEXT)
+endif
+
+# mksymtab - Convert a CSV file into a symbol table
+
+mksymtab$(HOSTEXEEXT): mksymtab.c csvparser.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o mksymtab$(HOSTEXEEXT) mksymtab.c csvparser.c
+
+ifdef HOSTEXEEXT
+mksymtab: mksymtab$(HOSTEXEEXT)
+endif
+
+# bdf-converter - Converts a BDF font to the NuttX font format
+
+bdf-converter$(HOSTEXEEXT): bdf-converter.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o bdf-converter$(HOSTEXEEXT) bdf-converter.c
+
+ifdef HOSTEXEEXT
+bdf-converter: bdf-converter$(HOSTEXEEXT)
+endif
+
+# nxstyle - Check a file for compliance to NuttX coding style
+
+nxstyle$(HOSTEXEEXT): nxstyle.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o nxstyle$(HOSTEXEEXT) nxstyle.c
+
+ifdef HOSTEXEEXT
+nxstyle: nxstyle$(HOSTEXEEXT)
+endif
+
+# initialconfig - Create a barebones .config file sufficient only for
+# instantiating the symbolic links necessary to do a real configuration
+# from scratch.
+
+initialconfig$(HOSTEXEEXT): initialconfig.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o initialconfig$(HOSTEXEEXT) initialconfig.c
+
+ifdef HOSTEXEEXT
+initialconfig: initialconfig$(HOSTEXEEXT)
+endif
+
+# logparser - Convert a git log to ChangeLog format.
+
+logparser$(HOSTEXEEXT): logparser.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o logparser$(HOSTEXEEXT) logparser.c
+
+ifdef HOSTEXEEXT
+logparser: logparser$(HOSTEXEEXT)
+endif
+
+# gencromfs - Generate a CROMFS file system
+
+gencromfs$(HOSTEXEEXT): gencromfs.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o gencromfs$(HOSTEXEEXT) gencromfs.c
+
+ifdef HOSTEXEEXT
+gencromfs: gencromfs$(HOSTEXEEXT)
+endif
+
+# convert-comments - Convert C++-style comments to C-style comments
+
+convert-comments$(HOSTEXEEXT): convert-comments.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o convert-comments$(HOSTEXEEXT) convert-comments.c
+
+ifdef HOSTEXEEXT
+convert-comments: convert-comments$(HOSTEXEEXT)
+endif
+
+# lowhex - Convert hexadecimal constants to lower cast format
+
+lowhex$(HOSTEXEEXT): lowhex.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o lowhex$(HOSTEXEEXT) lowhex.c
+
+ifdef HOSTEXEEXT
+lowhex: lowhex$(HOSTEXEEXT)
+endif
+
+# detab - Convert tabs to spaces
+
+detab$(HOSTEXEEXT): detab.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o detab$(HOSTEXEEXT) detab.c
+
+ifdef HOSTEXEEXT
+detab: detab$(HOSTEXEEXT)
+endif
+
+# rmcr - Convert tabs to spaces
+
+rmcr$(HOSTEXEEXT): rmcr.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o rmcr$(HOSTEXEEXT) rmcr.c
+
+ifdef HOSTEXEEXT
+rmcr: rmcr$(HOSTEXEEXT)
+endif
+
+# cnvwindeps - Convert dependences generated by a Windows native toolchain
+# for use in a Cygwin/POSIX build environment
+
+cnvwindeps$(HOSTEXEEXT): cnvwindeps.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o cnvwindeps$(HOSTEXEEXT) cnvwindeps.c
+
+ifdef HOSTEXEEXT
+cnvwindeps: cnvwindeps$(HOSTEXEEXT)
+endif
+
+# Create dependencies for a list of files
+
+mkdeps$(HOSTEXEEXT): mkdeps.c csvparser.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o mkdeps$(HOSTEXEEXT) mkdeps.c
+
+ifdef HOSTEXEEXT
+mkdeps: mkdeps$(HOSTEXEEXT)
+endif
+
+clean:
+	$(call DELFILE, b16)
+	$(call DELFILE, b16.exe)
+	$(call DELFILE, bdf-converter)
+	$(call DELFILE, bdf-converter.exe)
+	$(call DELFILE, cmpconfig)
+	$(call DELFILE, cmpconfig.exe)
+	$(call DELFILE, cnvwindeps)
+	$(call DELFILE, cnvwindeps.exe)
+	$(call DELFILE, convert-comments)
+	$(call DELFILE, convert-comments.exe)
+	$(call DELFILE, configure)
+	$(call DELFILE, configure.exe)
+	$(call DELFILE, detab)
+	$(call DELFILE, detab.exe)
+	$(call DELFILE, gencromfs)
+	$(call DELFILE, gencromfs.exe)
+	$(call DELFILE, initialconfig)
+	$(call DELFILE, initialconfig.exe)
+	$(call DELFILE, logparser)
+	$(call DELFILE, logparser.exe)
+	$(call DELFILE, lowhex)
+	$(call DELFILE, lowhex.exe)
+	$(call DELFILE, Nuttx.dep)
+	$(call DELFILE, mkconfig)
+	$(call DELFILE, mkconfig.exe)
+	$(call DELFILE, mkdeps)
+	$(call DELFILE, mkdeps.exe)
+	$(call DELFILE, mksymtab)
+	$(call DELFILE, mksymtab.exe)
+	$(call DELFILE, mksyscall)
+	$(call DELFILE, mksyscall.exe)
+	$(call DELFILE, mkversion)
+	$(call DELFILE, mkversion.exe)
+	$(call DELFILE, nxstyle)
+	$(call DELFILE, nxstyle.exe)
+	$(call DELFILE, rmcr)
+	$(call DELFILE, rmcr.exe)
+ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+	$(Q) rm -rf *.dSYM
+endif
+	$(call CLEAN)

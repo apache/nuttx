@@ -108,10 +108,10 @@ if [ ! -d "${TOPDIR}" ]; then
 fi
 
 # Check configuration
-# Verify that we have Make.defs, .config, and .version files.
+# Verify that we have Nuttx.defs, .config, and .version files.
 
-if [ ! -f "${TOPDIR}/Make.defs" ]; then
-  echo "MK: Directory ${TOPDIR}/Make.defs does not exist"
+if [ ! -f "${TOPDIR}/Nuttx.defs" ]; then
+  echo "MK: Directory ${TOPDIR}/Nuttx.defs does not exist"
   exit 1
 fi
 
@@ -173,16 +173,16 @@ fi
 cp -a "${TOPDIR}/.config" "${EXPORTDIR}/.config" ||
   { echo "MK: Failed to copy ${TOPDIR}/.config to ${EXPORTDIR}/.config"; exit 1; }
 
-# Copy the Make.defs files, but disable windows path conversions
+# Copy the Nuttx.defs files, but disable windows path conversions
 
-grep -v "WINTOOL[ \t]*=[ \t]y" "${TOPDIR}/Make.defs"  > "${EXPORTDIR}/Make.defs"
+grep -v "WINTOOL[ \t]*=[ \t]y" "${TOPDIR}/Nuttx.defs"  > "${EXPORTDIR}/Nuttx.defs"
 
-# Extract information from the Make.defs file.  A Makefile can do this best
+# Extract information from the Nuttx.defs file.  A Nuttx.mk can do this best
 
-${MAKE} -C "${TOPDIR}/tools" -f Makefile.export TOPDIR="${TOPDIR}" EXPORTDIR="${EXPORTDIR}"
+${MAKE} -C "${TOPDIR}/tools" -f Nuttx.mk.export TOPDIR="${TOPDIR}" EXPORTDIR="${EXPORTDIR}"
 source "${EXPORTDIR}/makeinfo.sh"
 rm -f "${EXPORTDIR}/makeinfo.sh"
-rm -f "${EXPORTDIR}/Make.defs"
+rm -f "${EXPORTDIR}/Nuttx.defs"
 
 # Verify the build info that we got from makeinfo.sh
 
@@ -223,49 +223,49 @@ fi
 
 # Save the compilation options
 
-echo "ARCHCFLAGS       = ${ARCHCFLAGS}" >"${EXPORTDIR}/scripts/Make.defs"
-echo "ARCHCXXFLAGS     = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "ARCHPICFLAGS     = ${ARCHPICFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "ARCHWARNINGS     = ${ARCHWARNINGS}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "ARCHWARNINGSXX   = ${ARCHWARNINGSXX}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "ARCHOPTIMIZATION = ${ARCHOPTIMIZATION}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "WINTOOL          = ${WINTOOL}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "CROSSDEV         = ${CROSSDEV}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "CC               = ${CC}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "CXX              = ${CXX}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "CPP              = ${CPP}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "LD               = ${LD}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "AR               = ${AR}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "NM               = ${NM}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "STRIP            = ${STRIP}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "OBJCOPY          = ${OBJCOPY}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "OBJDUMP          = ${OBJDUMP}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "NXFLATLDFLAGS1   = ${NXFLATLDFLAGS1}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "NXFLATLDFLAGS2   = ${NXFLATLDFLAGS2}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "OBJEXT           = ${OBJEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "LIBEXT           = ${LIBEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "EXEEXT           = ${EXEEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "HOSTCC           = ${HOSTCC}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "HOSTINCLUDES     = ${HOSTINCLUDES}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "HOSTCFLAGS       = ${HOSTCFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "HOSTLDFLAGS      = ${HOSTLDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "HOSTEXEEXT       = ${HOSTEXEEXT}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "DIRLINK          = ${DIRLINK}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "DIRUNLINK        = ${DIRUNLINK}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "MKDEP            = ${MKDEP}" >>"${EXPORTDIR}/scripts/Make.defs"
-echo "LDSCRIPT         = ${LDSCRIPT}" >>"${EXPORTDIR}/scripts/Make.defs"
+echo "ARCHCFLAGS       = ${ARCHCFLAGS}" >"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "ARCHCXXFLAGS     = ${ARCHCXXFLAGS}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "ARCHPICFLAGS     = ${ARCHPICFLAGS}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "ARCHWARNINGS     = ${ARCHWARNINGS}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "ARCHWARNINGSXX   = ${ARCHWARNINGSXX}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "ARCHOPTIMIZATION = ${ARCHOPTIMIZATION}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "WINTOOL          = ${WINTOOL}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "CROSSDEV         = ${CROSSDEV}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "CC               = ${CC}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "CXX              = ${CXX}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "CPP              = ${CPP}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "LD               = ${LD}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "AR               = ${AR}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "NM               = ${NM}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "STRIP            = ${STRIP}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "OBJCOPY          = ${OBJCOPY}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "OBJDUMP          = ${OBJDUMP}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "NXFLATLDFLAGS1   = ${NXFLATLDFLAGS1}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "NXFLATLDFLAGS2   = ${NXFLATLDFLAGS2}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "OBJEXT           = ${OBJEXT}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "LIBEXT           = ${LIBEXT}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "EXEEXT           = ${EXEEXT}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "HOSTCC           = ${HOSTCC}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "HOSTINCLUDES     = ${HOSTINCLUDES}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "HOSTCFLAGS       = ${HOSTCFLAGS}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "HOSTLDFLAGS      = ${HOSTLDFLAGS}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "HOSTEXEEXT       = ${HOSTEXEEXT}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "DIRLINK          = ${DIRLINK}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "DIRUNLINK        = ${DIRUNLINK}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "MKDEP            = ${MKDEP}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+echo "LDSCRIPT         = ${LDSCRIPT}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
 
 # Additional compilation options when the kernel is built
 
 if [ "X${USRONLY}" != "Xy" ]; then
-  echo "LDFLAGS      = ${LDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "HEAD_OBJ     = ${HEAD_OBJ}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "EXTRA_OBJS   = ${EXTRA_OBJS}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LDSTARTGROUP = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LDLIBS       = ${LDLIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "EXTRA_LIBS   = ${EXTRA_LIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LIBGCC       = ${LIBGCC}" >>"${EXPORTDIR}/scripts/Make.defs"
-  echo "LDENDGROUP   = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LDFLAGS      = ${LDFLAGS}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+  echo "HEAD_OBJ     = ${HEAD_OBJ}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+  echo "EXTRA_OBJS   = ${EXTRA_OBJS}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+  echo "LDSTARTGROUP = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+  echo "LDLIBS       = ${LDLIBS}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+  echo "EXTRA_LIBS   = ${EXTRA_LIBS}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+  echo "LIBGCC       = ${LIBGCC}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
+  echo "LDENDGROUP   = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Nuttx.defs"
 fi
 
 # Copy the system map file(s)
@@ -285,7 +285,7 @@ cp -LR -p "${TOPDIR}/include" "${EXPORTDIR}/." || \
 
 # Copy the startup object file(s)
 
-${MAKE} -C ${ARCHDIR} export_startup TOPDIR=${TOPDIR} EXPORT_DIR="${EXPORTDIR}"
+${MAKE} -f Nuttx.mk -C ${ARCHDIR} export_startup TOPDIR=${TOPDIR} EXPORT_DIR="${EXPORTDIR}"
 
 # Copy architecture-specific header files into the arch export sub-directory.
 # This is tricky because each architecture does things in a little different
@@ -429,8 +429,8 @@ cp -f "${TOPDIR}/tools/unlink.sh" "${EXPORTDIR}/tools/"
 cd "${TOPDIR}" || \
   { echo "MK: 'cd ${TOPDIR}' failed"; exit 1; }
 
-if [ -e "${APPDIR}/Makefile" ]; then
-  "${MAKE}" -C "${TOPDIR}/${APPDIR}" EXPORTDIR="$(cd "${EXPORTSUBDIR}" ; pwd )" TOPDIR="${TOPDIR}" export || \
+if [ -e "${APPDIR}/Nuttx.mk" ]; then
+  "${MAKE}" -f Nuttx.mk -C "${TOPDIR}/${APPDIR}" EXPORTDIR="$(cd "${EXPORTSUBDIR}" ; pwd )" TOPDIR="${TOPDIR}" export || \
       { echo "MK: call make export for APPDIR not supported"; }
 fi
 

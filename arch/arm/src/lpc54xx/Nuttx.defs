@@ -1,0 +1,149 @@
+############################################################################
+# arch/arm/src/lpc54xx/Nuttx.defs
+#
+#   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+HEAD_ASRC  =
+
+CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
+CMN_ASRCS += up_testset.S up_fetchadd.S vfork.S
+
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+CMN_ASRCS += up_setjmp.S
+endif
+endif
+
+CMN_CSRCS  = up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c
+CMN_CSRCS += up_doirq.c up_exit.c up_hardfault.c up_initialize.c
+CMN_CSRCS += up_initialstate.c up_interruptcontext.c up_mdelay.c
+CMN_CSRCS += up_memfault.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
+CMN_CSRCS += up_releasepending.c up_releasestack.c up_reprioritizertr.c
+CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_stackframe.c
+CMN_CSRCS += up_svcall.c up_trigger_irq.c up_unblocktask.c up_udelay.c
+CMN_CSRCS += up_usestack.c up_vfork.c
+
+ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
+CMN_ASRCS += up_lazyexception.S
+else
+CMN_ASRCS += up_exception.S
+endif
+CMN_CSRCS += up_vectors.c
+
+ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
+CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
+CMN_CSRCS += up_signal_dispatch.c
+CMN_UASRCS += up_signal_handler.S
+endif
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += up_checkstack.c
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_ASRCS += up_fpu.S
+CMN_CSRCS += up_copyarmstate.c
+endif
+
+CHIP_ASRCS  =
+CHIP_CSRCS  = lpc54_start.c lpc54_clockconfig.c lpc54_irq.c lpc54_clrpend.c
+CHIP_CSRCS += lpc54_allocateheap.c lpc54_lowputc.c lpc54_gpio.c lpc54_reset.c
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += lpc54_timerisr.c
+else
+CHIP_CSRCS += lpc54_tickless.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += lpc54_userspace.c lpc54_mpuinit.c
+endif
+
+ifeq ($(CONFIG_LPC54_DMA),y)
+CHIP_CSRCS += lpc54_dma.c
+endif
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += lpc54_idle.c
+endif
+
+ifeq ($(CONFIG_LPC54_GPIOIRQ),y)
+CHIP_CSRCS += lpc54_gpioirq.c
+endif
+
+ifeq ($(CONFIG_RTC),y)
+CHIP_CSRCS += lpc54_rtc.c
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += lpc54_rtc_lowerhalf.c
+endif
+endif
+
+ifeq ($(CONFIG_LPC54_WWDT),y)
+CHIP_CSRCS += lpc54_wwdt.c
+endif
+
+ifeq ($(CONFIG_LPC54_RNG),y)
+CHIP_CSRCS += lpc54_rng.c
+endif
+
+ifeq ($(CONFIG_LPC54_HAVE_USART),y)
+CHIP_CSRCS += lpc54_serial.c
+endif
+
+ifeq ($(CONFIG_LPC54_HAVE_I2C_MASTER),y)
+CHIP_CSRCS += lpc54_i2c_master.c
+endif
+
+ifeq ($(CONFIG_LPC54_HAVE_SPI_MASTER),y)
+CHIP_CSRCS += lpc54_spi_master.c
+endif
+
+ifeq ($(CONFIG_LPC54_EMC),y)
+CHIP_CSRCS += lpc54_emc.c
+endif
+
+ifeq ($(CONFIG_LPC54_ETHERNET),y)
+CHIP_CSRCS += lpc54_ethernet.c
+endif
+
+ifeq ($(CONFIG_LPC54_LCD),y)
+CHIP_CSRCS += lpc54_lcd.c
+endif
+
+ifeq ($(CONFIG_LPC54_SDMMC),y)
+CHIP_CSRCS += lpc54_sdmmc.c
+endif

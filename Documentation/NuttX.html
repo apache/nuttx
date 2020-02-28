@@ -7167,7 +7167,7 @@ avr, m68k, m68hc11, m68hc12, m9s12, blackfin, m32c, h8, and SuperH ports.</block
       <li>
         <b>Dependencies</b>
         NuttX uses the GCC compiler's <code>-M</code> option to generate make dependencies.  These
-        dependencies are retained in files called <code>Make.deps</code> throughout the system.
+        dependencies are retained in files called <code>Nuttx.deps</code> throughout the system.
         For compilers other than GCC, there is no support for making dependencies in this way.
       </li>
       <p><small>
@@ -7271,7 +7271,7 @@ avr, m68k, m68hc11, m68hc12, m9s12, blackfin, m32c, h8, and SuperH ports.</block
 if [ -x "$WINELOADER" ]; then exec "$WINELOADER" "$appname" "$@"; fi
 </pre></ul>
       <p>
-        &quot;Better solution would be replacing all <code>cygpath</code> references in  <code>Makefiles </code> with  <code>$(CONVPATH)</code> (or  <code>${CONVPATH}</code> in shell scripts) and setting <code>CONVPATH</code> to  <code>cygpath</code> or  <code>winepath</code> regarding to currently used environment.
+        &quot;Better solution would be replacing all <code>cygpath</code> references in  <code>Nuttx.mks </code> with  <code>$(CONVPATH)</code> (or  <code>${CONVPATH}</code> in shell scripts) and setting <code>CONVPATH</code> to  <code>cygpath</code> or  <code>winepath</code> regarding to currently used environment.
       </p>
     </blockquote>
   </td>

@@ -41,7 +41,7 @@ USAGE: ${0} [-d] [-s] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>
 
 Where:
   -d enables script debug output
-  -s skip the .config/Make.defs existence check
+  -s skip the .config/Nuttx.defs existence check
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
   -c selects the Windows host and Cygwin (c) environment.
@@ -151,16 +151,16 @@ if [ ! -d ${configpath} ]; then
   fi
 fi
 
-src_makedefs=${TOPDIR}/boards/*/*/${boarddir}/configs/${configdir}/Make.defs
-dest_makedefs="${TOPDIR}/Make.defs"
+src_makedefs=${TOPDIR}/boards/*/*/${boarddir}/configs/${configdir}/Nuttx.defs
+dest_makedefs="${TOPDIR}/Nuttx.defs"
 
 if [ ! -r ${src_makedefs} ]; then
-  src_makedefs=${TOPDIR}/boards/*/*/${boarddir}/scripts/Make.defs
+  src_makedefs=${TOPDIR}/boards/*/*/${boarddir}/scripts/Nuttx.defs
 
   if [ ! -r ${src_makedefs} ]; then
-    src_makedefs=${TOPDIR}/${boardconfig}/Make.defs
+    src_makedefs=${TOPDIR}/${boardconfig}/Nuttx.defs
     if [ ! -r ${src_makedefs} ]; then
-      echo "File Make.defs could not be found"
+      echo "File Nuttx.defs could not be found"
       exit 4
     fi
   fi

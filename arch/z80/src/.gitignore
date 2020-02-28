@@ -1,4 +1,4 @@
-/Make.dep
+/Nuttx.dep
 /.depend
 /up_mem.h
 /asm_mem.h

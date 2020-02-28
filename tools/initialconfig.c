@@ -512,14 +512,14 @@ static int enum_mcus(const char *dirpath, struct dirent *entry, void *arg)
   char *mcupath;
   char *testpath;
 
-  /* All MCU directories should contain a Kconfig and a Make.defs file. */
+  /* All MCU directories should contain a Kconfig and a Nuttx.defs file. */
 
   asprintf(&mcupath, "%s%c%s", dirpath, g_delim, entry->d_name);
   asprintf(&testpath, "%s%cKconfig", mcupath, g_delim);
   if (test_filepath(testpath))
     {
       free(testpath);
-      asprintf(&testpath, "%s%cMake.defs", mcupath, g_delim);
+      asprintf(&testpath, "%s%cNuttx.defs", mcupath, g_delim);
       if (test_filepath(testpath))
         {
           if (g_nmcu >= MAX_MCUS)

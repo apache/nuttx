@@ -1,5 +1,5 @@
 /platform
-/Make.dep
+/Nuttx.dep
 /.depend
 /*.asm
 /*.obj

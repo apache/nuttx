@@ -143,7 +143,7 @@
 ;**************************************************************************
 
 _up_reset:
-	; Set up the stack pointer at the location determined the Makefile
+	; Set up the stack pointer at the location determined the Nuttx.mk
 	; and stored in asm_mem.h
 
 	ld		SP, #CONFIG_STACK_END	; Set stack pointer

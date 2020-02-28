@@ -51,7 +51,7 @@
 #include "z80_internal.h"
 
 #ifdef SDCC
-/* For the SDCC toolchain, the arch/z80/src/Makefile will parse the map file
+/* For the SDCC toolchain, the arch/z80/src/Nuttx.mk will parse the map file
  * to determine how much memory is available for the heap.  This parsed data
  * is provided via the auto-generated file up_mem.h
  */

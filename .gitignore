@@ -1,5 +1,5 @@
 .depend
-Make.dep
+Nuttx.dep
 *.o
 *.a
 *.d
@@ -14,7 +14,7 @@ core
 /.config.old
 /.version
 /defconfig
-/Make.defs
+/Nuttx.defs
 /staging
 /nuttx
 /nuttx.*

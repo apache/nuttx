@@ -1,0 +1,67 @@
+############################################################################
+# libs/libc/string/Nuttx.defs
+#
+#   Copyright (C) 2011-2012, 2014, 2016-2019 Gregory Nutt. All rights
+#     reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+# Add the string C files to the build
+
+CSRCS += lib_ffs.c lib_ffsl.c lib_ffsll.c lib_fls.c lib_flsl.c
+CSRCS += lib_flsll.c lib_isbasedigit.c lib_memset.c lib_memchr.c
+CSRCS += lib_memccpy.c lib_memcmp.c lib_memmove.c lib_memrchr.c
+CSRCS += lib_skipspace.c lib_stpcpy.c lib_stpncpy.c lib_strcasecmp.c
+CSRCS += lib_strcat.c lib_strchr.c lib_strcpy.c lib_strcmp.c lib_strcspn.c
+CSRCS += lib_strdup.c lib_strerror.c lib_strlen.c lib_strnlen.c
+CSRCS += lib_strncasecmp.c lib_strncat.c lib_strncmp.c lib_strncpy.c
+CSRCS += lib_strndup.c lib_strcasestr.c lib_strpbrk.c lib_strrchr.c
+CSRCS += lib_strspn.c lib_strstr.c lib_strtok.c lib_strtokr.c
+CSRCS += lib_strsep.c lib_strerrorr.c lib_explicit_bzero.c lib_strsignal.c
+CSRCS += lib_anbstr2cstr.c lib_ancstr2bstr.c lib_bmem2cmem.c
+CSRCS += lib_bstrnlen.c lib_cmem2bmem.c lib_nbstr2cstr.c lib_ncstr2bstr.c
+
+ifneq ($(CONFIG_LIBC_ARCH_MEMCPY),y)
+ifeq ($(CONFIG_MEMCPY_VIK),y)
+CSRCS += lib_vikmemcpy.c
+else
+CSRCS += lib_memcpy.c
+endif
+endif
+
+ifeq ($(CONFIG_LIBC_LOCALE),y)
+CSRCS += lib_strcoll.c lib_strxfrm.c
+endif
+
+# Add the string directory to the build
+
+DEPPATH += --dep-path string
+VPATH += :string

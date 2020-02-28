@@ -137,7 +137,7 @@ else
 fi
 
 rm -f $nuttx/SAVEconfig
-rm -f $nuttx/SAVEMake.defs
+rm -f $nuttx/SAVENuttx.defs
 
 unset dotconfig
 if [ -z "$configfile" ]; then
@@ -161,8 +161,8 @@ if [ "X$dotconfig" = "Xy" ]; then
     exit 1
   fi
 
-  if [ ! -r $nuttx/Make.defs ]; then
-    echo "ERROR: No readable Make.defs file exists at $nuttx"
+  if [ ! -r $nuttx/Nuttx.defs ]; then
+    echo "ERROR: No readable Nuttx.defs file exists at $nuttx"
     exit 1
   fi
 else
@@ -172,10 +172,10 @@ else
   fi
 
   configdir=`dirname $configfile`
-  makedefs=$configdir/Make.defs
+  makedefs=$configdir/Nuttx.defs
 
   if [ ! -r $makedefs ]; then
-    echo "ERROR: No readable Make.defs file exists at $configdir"
+    echo "ERROR: No readable Nuttx.defs file exists at $configdir"
     exit 1
   fi
 
@@ -185,11 +185,11 @@ else
   cp $configfile $nuttx/.config || \
     { echo "ERROR: cp to $nuttx/.config failed"; exit 1; }
 
-  if [ -f $nuttx/Make.defs ]; then
-    mv $nuttx/Make.defs $nuttx/SAVEMake.defs
+  if [ -f $nuttx/Nuttx.defs ]; then
+    mv $nuttx/Nuttx.defs $nuttx/SAVENuttx.defs
   fi
-  cp $makedefs $nuttx/Make.defs || \
-    { echo "ERROR: cp to $nuttx/Make.defs failed"; exit 1; }
+  cp $makedefs $nuttx/Nuttx.defs || \
+    { echo "ERROR: cp to $nuttx/Nuttx.defs failed"; exit 1; }
 fi
 
 # Modify the configuration
@@ -276,7 +276,7 @@ else
 fi
 
 # Move config file to correct location and restore any previous .config
-# and Make.defs files
+# and Nuttx.defs files
 
 if [ "X$dotconfig" != "Xy" ]; then
   sed -i -e "s/^CONFIG_APPS_DIR/# CONFIG_APPS_DIR/g" .config
@@ -289,8 +289,8 @@ if [ "X$dotconfig" != "Xy" ]; then
       { echo "ERROR: Failed to move SAVEconfig to .config"; exit 1; }
   fi
 
-  if [ -e SAVEMake.defs ]; then
-    mv SAVEMake.defs Make.defs || \
-      { echo "ERROR: Failed to move SAVEMake.defs to Make.defs"; exit 1; }
+  if [ -e SAVENuttx.defs ]; then
+    mv SAVENuttx.defs Nuttx.defs || \
+      { echo "ERROR: Failed to move SAVENuttx.defs to Nuttx.defs"; exit 1; }
   fi
 fi

@@ -831,7 +831,7 @@ config ARM_LWL_CONSOLE
 
 		Currently only available for STM32 architectures, but easily
 		added to other ARM architectures be add up_low_console.c to the
-		architecture Make.defs file.
+		architecture Nuttx.defs file.
 
 if ARCH_CORTEXM0
 source arch/arm/src/armv6-m/Kconfig

@@ -1,0 +1,69 @@
+############################################################################
+# sched/pthread/Nuttx.defs
+#
+#   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+CSRCS += pthread_keycreate.c pthread_setspecific.c pthread_getspecific.c
+CSRCS += pthread_keydelete.c
+
+ifneq ($(CONFIG_DISABLE_PTHREAD),y)
+
+CSRCS += pthread_create.c pthread_exit.c pthread_join.c pthread_detach.c
+CSRCS += pthread_getschedparam.c pthread_setschedparam.c
+CSRCS += pthread_mutexinit.c pthread_mutexdestroy.c
+CSRCS += pthread_mutextimedlock.c pthread_mutextrylock.c pthread_mutexunlock.c
+CSRCS += pthread_condwait.c pthread_condsignal.c pthread_condbroadcast.c
+CSRCS += pthread_condtimedwait.c pthread_kill.c pthread_sigmask.c
+CSRCS += pthread_cancel.c
+CSRCS += pthread_initialize.c pthread_completejoin.c pthread_findjoininfo.c
+CSRCS += pthread_release.c pthread_setschedprio.c
+CSRCS += pthread_get_stackaddr_np.c pthread_get_stacksize_np.c
+
+ifneq ($(CONFIG_PTHREAD_MUTEX_UNSAFE),y)
+CSRCS += pthread_mutex.c pthread_mutexconsistent.c pthread_mutexinconsistent.c
+endif
+
+ifeq ($(CONFIG_SMP),y)
+CSRCS += pthread_setaffinity.c pthread_getaffinity.c
+endif
+
+ifeq ($(CONFIG_PTHREAD_CLEANUP),y)
+CSRCS += pthread_cleanup.c
+endif
+
+endif
+
+# Include pthread build support
+
+DEPPATH += --dep-path pthread
+VPATH += :pthread

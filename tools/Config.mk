@@ -8,7 +8,7 @@
 #           Gregory Nutt <gnutt@nuttx.org>
 #
 # This file (along with $(TOPDIR)/.config) must be included by every
-# configuration-specific Make.defs file.
+# configuration-specific Nuttx.defs file.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -82,7 +82,7 @@ endif
 # shell
 #
 # Depends on this setting passed as a make command line definition from the
-# toplevel Makefile:
+# toplevel Nuttx.mk:
 #
 #   TOPDIR - The path to the top level NuttX directory in the form
 #     appropriate for the current build environment
@@ -103,8 +103,8 @@ endif
 # PREPROCESS - Default macro to run the C pre-processor
 # Example: $(call PREPROCESS, in-file, out-file)
 #
-# Depends on these settings defined in board-specific Make.defs file
-# installed at $(TOPDIR)/Make.defs:
+# Depends on these settings defined in board-specific Nuttx.defs file
+# installed at $(TOPDIR)/Nuttx.defs:
 #
 #   CPP - The command to invoke the C pre-processor
 #   CPPFLAGS - Options to pass to the C pre-processor
@@ -121,8 +121,8 @@ endef
 # COMPILE - Default macro to compile one C file
 # Example: $(call COMPILE, in-file, out-file)
 #
-# Depends on these settings defined in board-specific Make.defs file
-# installed at $(TOPDIR)/Make.defs:
+# Depends on these settings defined in board-specific Nuttx.defs file
+# installed at $(TOPDIR)/Nuttx.defs:
 #
 #   CC - The command to invoke the C compiler
 #   CFLAGS - Options to pass to the C compiler
@@ -138,8 +138,8 @@ endef
 # COMPILEXX - Default macro to compile one C++ file
 # Example: $(call COMPILEXX, in-file, out-file)
 #
-# Depends on these settings defined in board-specific Make.defs file
-# installed at $(TOPDIR)/Make.defs:
+# Depends on these settings defined in board-specific Nuttx.defs file
+# installed at $(TOPDIR)/Nuttx.defs:
 #
 #   CXX - The command to invoke the C++ compiler
 #   CXXFLAGS - Options to pass to the C++ compiler
@@ -162,8 +162,8 @@ endef
 # platforms using those other tools should define AS and over-ride this
 # definition in order to use the assembler directly.
 #
-# Depends on these settings defined in board-specific Make.defs file
-# installed at $(TOPDIR)/Make.defs:
+# Depends on these settings defined in board-specific Nuttx.defs file
+# installed at $(TOPDIR)/Nuttx.defs:
 #
 #   CC - By default, the C compiler is used to compile assembly language
 #        files
@@ -192,8 +192,8 @@ endef
 # Note: The fileN strings may not contain spaces or  characters that may be
 # interpreted strangely by the shell
 #
-# Depends on these settings defined in board-specific Make.defs file
-# installed at $(TOPDIR)/Make.defs:
+# Depends on these settings defined in board-specific Nuttx.defs file
+# installed at $(TOPDIR)/Nuttx.defs:
 #
 #   AR - The command to invoke the archiver (includes any options)
 #
@@ -216,8 +216,8 @@ endef
 # Note: The fileN strings may not contain spaces or  characters that may be
 # interpreted strangely by the shell
 #
-# Depends on these settings defined in board-specific Make.defs file
-# installed at $(TOPDIR)/Make.defs:
+# Depends on these settings defined in board-specific Nuttx.defs file
+# installed at $(TOPDIR)/Nuttx.defs:
 #
 #   LD      - The command to invoke the linker (includes any options)
 #   OBJCOPY - The command to invoke the object cop (includes any options)

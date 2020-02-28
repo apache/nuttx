@@ -127,7 +127,7 @@ static char        g_delim         = '/';   /* Delimiter to use when forming pat
 static bool        g_winpaths      = false; /* False: POSIX style paths */
 #endif
 static bool        g_debug         = false; /* Enable debug output */
-static bool        g_skip          = false; /* Skip .config/Make.defs existence check */
+static bool        g_skip          = false; /* Skip .config/Nuttx.defs existence check */
 
 static const char *g_appdir        = NULL;  /* Relative path to the application directory */
 static const char *g_archdir       = NULL;  /* Name of architecture subdirectory */
@@ -143,7 +143,7 @@ static char       *g_scriptspath   = NULL;  /* Full path to the scripts sub-dire
 static char       *g_verstring     = "0.0"; /* Version String */
 
 static char       *g_srcdefconfig  = NULL;  /* Source defconfig file */
-static char       *g_srcmakedefs   = NULL;  /* Source Make.defs file */
+static char       *g_srcmakedefs   = NULL;  /* Source Nuttx.defs file */
 
 static bool        g_winnative     = false; /* True: Windows native configuration */
 static bool        g_oldnative     = false; /* True: Was Windows native configuration */
@@ -180,7 +180,7 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "  -d:\n");
   fprintf(stderr, "    Enables debug output\n");
   fprintf(stderr, "  -s:\n");
-  fprintf(stderr, "    Skip the .config/Make.defs existence check\n");
+  fprintf(stderr, "    Skip the .config/Nuttx.defs existence check\n");
   fprintf(stderr, "  -b:\n");
 #ifdef CONFIG_WINDOWS_NATIVE
   fprintf(stderr, "    Informs the tool that it should use Windows style paths like C:\\Program Files\n");
@@ -746,14 +746,14 @@ static void check_configdir(void)
 
 static void check_configured(void)
 {
-  /* Skip to check .config/Make.defs? */
+  /* Skip to check .config/Nuttx.defs? */
 
   if (g_skip)
     {
       return;
     }
 
-  /* If we are already configured then there will be a .config and a Make.defs
+  /* If we are already configured then there will be a .config and a Nuttx.defs
    * file in the top-level directory.
    */
 
@@ -766,9 +766,9 @@ static void check_configured(void)
       exit(EXIT_FAILURE);
     }
 
-  /* Try the Make.defs file */
+  /* Try the Nuttx.defs file */
 
-  snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs", g_topdir, g_delim);
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cNuttx.defs", g_topdir, g_delim);
   debug("check_configuration: Checking %s\n", g_buffer);
   if (verify_file(g_buffer))
     {
@@ -959,7 +959,7 @@ static void check_configuration(void)
       g_winnative = true;
     }
 
-  /* All configurations must provide a defconfig and Make.defs file */
+  /* All configurations must provide a defconfig and Nuttx.defs file */
 
   snprintf(g_buffer, BUFFER_SIZE, "%s%cdefconfig", g_configpath, g_delim);
   debug("check_configuration: Checking %s\n", g_buffer);
@@ -973,9 +973,9 @@ static void check_configuration(void)
 
   g_srcdefconfig = strdup(g_buffer);
 
-  /* Try the Make.defs file */
+  /* Try the Nuttx.defs file */
 
-  snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs", g_configpath, g_delim);
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cNuttx.defs", g_configpath, g_delim);
   debug("check_configuration: Checking %s\n", g_buffer);
   if (!verify_file(g_buffer))
     {
@@ -983,19 +983,19 @@ static void check_configuration(void)
 
       if (g_scriptspath != NULL)
         {
-          snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs", g_scriptspath, g_delim);
+          snprintf(g_buffer, BUFFER_SIZE, "%s%cNuttx.defs", g_scriptspath, g_delim);
           debug("check_configuration: Checking %s\n", g_buffer);
           if (!verify_file(g_buffer))
             {
-              fprintf(stderr, "ERROR: No Make.defs file in %s\n", g_configpath);
-              fprintf(stderr, "       No Make.defs file in %s\n", g_scriptspath);
+              fprintf(stderr, "ERROR: No Nuttx.defs file in %s\n", g_configpath);
+              fprintf(stderr, "       No Nuttx.defs file in %s\n", g_scriptspath);
               enumerate_configs();
               exit(EXIT_FAILURE);
             }
         }
       else
         {
-          fprintf(stderr, "ERROR: No Make.defs file in %s\n", g_configpath);
+          fprintf(stderr, "ERROR: No Nuttx.defs file in %s\n", g_configpath);
           enumerate_configs();
           exit(EXIT_FAILURE);
         }
@@ -1324,9 +1324,9 @@ static void configure(void)
   debug("configure: Copying from %s to %s\n", g_srcdefconfig, destconfig);
   copy_file(g_srcdefconfig, destconfig, 0644);
 
-  /* Copy the Make.defs file as Make.defs */
+  /* Copy the Nuttx.defs file as Nuttx.defs */
 
-  snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs", g_topdir, g_delim);
+  snprintf(g_buffer, BUFFER_SIZE, "%s%cNuttx.defs", g_topdir, g_delim);
   debug("configure: Copying from %s to %s\n", g_srcmakedefs, g_buffer);
   copy_file(g_srcmakedefs, g_buffer, 0644);
 

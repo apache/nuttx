@@ -18,7 +18,7 @@ config HAVE_CXX
 	default n
 	---help---
 		Toolchain supports C++ and CXX, CXXFLAGS, and COMPILEXX have been
-		defined in the configurations Make.defs file.
+		defined in the configurations Nuttx.defs file.
 
 if HAVE_CXX
 

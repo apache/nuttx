@@ -95,7 +95,7 @@ check_commit() {
   check_ranges <<< "$diffs"
 }
 
-make -C $TOOLDIR -f Makefile.host nxstyle 1>/dev/null
+make -C $TOOLDIR -f Nuttx.mk.host nxstyle 1>/dev/null
 
 if [ -z "$1" ]; then
   usage

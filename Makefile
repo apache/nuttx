@@ -33,17 +33,17 @@
 #
 ############################################################################
 
-# This is a top-level "kludge" Makefile that just includes the correct
-# Makefile.  If you already know the Makefile that you want, you can skip
+# This is a top-level "kludge" Nuttx.mk that just includes the correct
+# Nuttx.mk.  If you already know the Nuttx.mk that you want, you can skip
 # this nonsense using:
 #
-#   make -f tools/Makefile.unix, OR
-#   make -f tools/Makefile.win
+#   make -f tools/Nuttx.mk.unix, OR
+#   make -f tools/Nuttx.mk.win
 #
 
 -include .config
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-include tools/Makefile.win
+include tools/Nuttx.mk.win
 else
-include tools/Makefile.unix
+include tools/Nuttx.mk.unix
 endif

@@ -130,7 +130,7 @@ if [ -z "${BUILD}" ]; then
 fi
 
 # Write a version file into the NuttX directory.  The syntax of file is such that it
-# may be sourced by a bash script or included by a Makefile.
+# may be sourced by a bash script or included by a Nuttx.mk.
 
 echo "#!/bin/bash" >${OUTFILE}
 echo "" >>${OUTFILE}

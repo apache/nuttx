@@ -5109,25 +5109,25 @@ int hello_main(int argc, char *argv[])
 
 <p>
   This is the built in function that will be registered during the <i>context</i> build phase of the NuttX build.
-  That registration is performed by logic in <code>apps/examples/hello/Makefile</code>.
+  That registration is performed by logic in <code>apps/examples/hello/Nuttx.mk</code>.
   But the build system gets to that logic through a rather tortuous path:
 </p>
 
 <ol>
   <li>
     <p>
-      The top-level context make target is in <code>nuttx/Makefile</code>.
+      The top-level context make target is in <code>nuttx/Nuttx.mk</code>.
       All build targets depend upon the <i>context</i> build target.
-      For the <code>apps/</code> directory, this build target will execute the <i>context</i> target in the <code>apps/Makefile</code>.
+      For the <code>apps/</code> directory, this build target will execute the <i>context</i> target in the <code>apps/Nuttx.mk</code>.
     </p>
   <li>
     <p>
-      The <code>apps/Makefile</code> will, in turn, execute the <i>context</i> targets in all of the configured sub-directories.
-      In our case will include the <code>Makefile</code> in <code>apps/examples</code>.
+      The <code>apps/Nuttx.mk</code> will, in turn, execute the <i>context</i> targets in all of the configured sub-directories.
+      In our case will include the <code>Nuttx.mk</code> in <code>apps/examples</code>.
     </p>
   <li>
     <p>
-      And finally, the <code>apps/examples/Makefile</code> will execute the <i>context</i> target in all configured <code>example</code>sub-directories, getting us finally to <code>apps/examples/Makefile</code> which is covered below.</p>
+      And finally, the <code>apps/examples/Nuttx.mk</code> will execute the <i>context</i> target in all configured <code>example</code>sub-directories, getting us finally to <code>apps/examples/Nuttx.mk</code> which is covered below.</p>
 </ol>
 
 <p>
@@ -5150,16 +5150,16 @@ make apps_distclean
 </pre></ul>
 
 <p>
-  Logic for the <code>context</code> target in <code>apps/examples/hello/Makefile</code> registers the <code>hello_main()</code> application in the <code>builtin</code>'s <code>builtin_proto.h</code>and <code>builtin_list.h</code> files.
-  That logic that does that in  <code>apps/examples/hello/Makefile</code> is abstracted below:
+  Logic for the <code>context</code> target in <code>apps/examples/hello/Nuttx.mk</code> registers the <code>hello_main()</code> application in the <code>builtin</code>'s <code>builtin_proto.h</code>and <code>builtin_list.h</code> files.
+  That logic that does that in  <code>apps/examples/hello/Nuttx.mk</code> is abstracted below:
 </p>
 <ol>
   <li>
     <p>
-      First, the <code>Makefile</code> includes <code>apps/Make.defs</code>:
+      First, the <code>Nuttx.mk</code> includes <code>apps/Nuttx.defs</code>:
     </p>
 <ul><pre>
-include $(APPDIR)/Make.defs
+include $(APPDIR)/Nuttx.defs
 </pre></ul>
     <p>
       This defines a macro called <code>REGISTER</code> that adds data to the <i>builtin</i> header files:
@@ -5186,7 +5186,7 @@ STACKSIZE       = 2048
 
   <li>
     <p>
-      And finally, the <code>Makefile</code> invokes the <code>REGISTER</code> macro to added the <code>hello_main()</code> builtin application.
+      And finally, the <code>Nuttx.mk</code> invokes the <code>REGISTER</code> macro to added the <code>hello_main()</code> builtin application.
       Then, when the system build completes, the <code>hello</code> command can be executed from the NSH command line.
       When the <code>hello</code> command is executed, it will start the task with entry point <code>hello_main()</code> with the default priority and with a stack size of 2K.
    </p>

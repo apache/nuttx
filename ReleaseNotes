@@ -26554,7 +26554,7 @@ information):
 
       - apps/testing/cxxtest/:  Fix typo error in testing/cxxtest.  From
         Xiang Xiao.
-      - apps/testing/unity/:  Fix the error when creating Make.dep.  From
+      - apps/testing/unity/:  Fix the error when creating Nuttx.dep.  From
         raiden00pl.
 
     * NSH Library: apps/nshlib:
@@ -26607,7 +26607,7 @@ information):
     * Network Utilities: apps/netutils:
 
       - apps/netutils/cjson/Makefile:  Fix the error when creating
-        Make.dep.  From raiden00pl.
+        Nuttx.dep.  From raiden00pl.
 
     * Graphics: apps/graphics:
 

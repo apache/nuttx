@@ -1,4 +1,4 @@
 /chip
 /board
 /.depend
-/Make.dep
+/Nuttx.dep

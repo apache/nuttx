@@ -35,7 +35,7 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+-include $(TOPDIR)/Nuttx.defs
 
 ifneq ($(ZDSVERSION),)
 AOBJS = $(ASRCS:.S=$(OBJEXT))
@@ -119,14 +119,14 @@ ifneq ($(CXXOBJS),)
 	$(call ARCHIVE, $@, $(CXXOBJS))
 endif
 
-.depend: Makefile $(SRCS) $(CXXSRCS)
+.depend: Nuttx.mk $(SRCS) $(CXXSRCS)
 ifneq ($(ZDSVERSION),)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Nuttx.dep
 else
-	$(Q) $(MKDEP) $(DEPPATH) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MKDEP) $(DEPPATH) $(CC) -- $(CFLAGS) -- $(SRCS) >Nuttx.dep
 endif
 ifneq ($(CXXSRCS),)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CXX)" -- $(CXXFLAGS) -- $(CXXSRCS) >>Make.dep
+	$(Q) $(MKDEP) $(DEPPATH) "$(CXX)" -- $(CXXFLAGS) -- $(CXXSRCS) >>Nuttx.dep
 endif
 	$(Q) touch $@
 
@@ -142,8 +142,8 @@ clean:
 	$(EXTRA_CLEAN)
 
 distclean: clean
-	$(call DELFILE, Make.dep)
+	$(call DELFILE, Nuttx.dep)
 	$(call DELFILE, .depend)
 	$(EXTRA_DISTCLEAN)
 
--include Make.dep
+-include Nuttx.dep

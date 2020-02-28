@@ -135,14 +135,14 @@ config APPS_DIR
 			build
 			|-nuttx
 			|  |
-			|  `- Makefile
+			|  `- Nuttx.mk
 			`-application
 			|
-			`- Makefile
+			`- Nuttx.mk
 
 		Then you would set APPS_DIR=../application.
 
-		The application direction must contain Makefile and this make
+		The application direction must contain Nuttx.mk and this make
 		file must support the following targets:
 
 		1)libapps$(LIBEXT) (usually libapps.a). libapps.a is a static
@@ -164,7 +164,7 @@ config APPS_DIR
 		$(MAKE) -C $(CONFIG_APPS_DIR) TOPDIR="$(TOPDIR)" <target>
 
 		TOPDIR is the full path to the NuttX directory. It can be used, for
-		example, to include makefile fragments (e.g., .config or Make.defs)
+		example, to include makefile fragments (e.g., .config or Nuttx.defs)
 		or to set up include file paths.
 
 config BUILD_LOADABLE
@@ -229,7 +229,7 @@ config BUILD_2PASS
 		Two-pass build options.  If the 2 pass build option is selected, then these
 		options configure the make system build a extra link object. This link object
 		is assumed to be an incremental (relative) link object, but could be a static
-		library (archive) (some modification to this Makefile would be required if
+		library (archive) (some modification to this Nuttx.mk would be required if
 		PASS1_TARGET generates an archive). Pass 1 1ncremental (relative) link
 		objects should be put into the processor-specific source directory (where other
 		link objects will be created).  If the pass1 object is an archive, it could
@@ -250,8 +250,8 @@ config PASS1_BUILDIR
 	default "build"
 	---help---
 		The path, relative to the top NuttX build
-		directory to directory that contains the Makefile to build the
-		first pass object.  The Makefile must support the following targets:
+		directory to directory that contains the Nuttx.mk to build the
+		first pass object.  The Nuttx.mk must support the following targets:
 		The special target PASS1_TARGET (if defined)
 		and the usual depend, clean, and distclean targets.
 

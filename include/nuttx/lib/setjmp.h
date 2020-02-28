@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-/* If CONFIG_ARCH_SETJMP_H is defined, then the top-level Makefile will copy
+/* If CONFIG_ARCH_SETJMP_H is defined, then the top-level Nuttx.mk will copy
  * this header file to include/setjmp.h where it will become the system
  * setjmp.h header file.  In this case, the architecture specific code must
  * provide an arch/<architecture>/include/setjmp.h file which will be

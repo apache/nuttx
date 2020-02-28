@@ -100,7 +100,7 @@ fi
 # variable definitions.  Some (like the Zilog tools), do not.  This script
 # makes the selection of pre-processor definitions compiler independent.
 #
-# Below are all known compiler names (as found in the config/*/*/Make.defs
+# Below are all known compiler names (as found in the config/*/*/Nuttx.defs
 # files).  If a new compiler is used that has some unusual syntax, then
 # additional logic needs to be added to this file.
 #

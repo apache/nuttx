@@ -55,7 +55,7 @@
     <a href="#DirStructSyscall">2.17 nuttx/syscall/</a><br>
     <a href="#DirStructTools">2.18 nuttx/tools/</a><br>
     <a href="#DirStructWireless">2.19 nuttx/wireless/</a><br>
-    <a href="#topmakefile">2.20 nuttx/Makefile</a><br>
+    <a href="#topmakefile">2.20 nuttx/Nuttx.mk</a><br>
   </ul>
   <a href="#configandbuild">3.0 Configuring and Building</a>
   <ul>
@@ -281,7 +281,7 @@
 <ul><pre>
 .
 |- nuttx
-|   |-- <a href="#topmakefile">Makefile</a>
+|   |-- <a href="#topmakefile">Nuttx.mk</a>
 |   |-- Kconfig
 |   |-- <a href="#DirStructDocumentation">Documentation</a>
 |   |   `-- <i>(documentation files)</i>/
@@ -300,11 +300,11 @@
 |   |   |       `-- <i>(architecture-specific source files)</i>
 |   |   `-- <i>&lt;other-architecture directories&gt;</i>/
 |   |-- <a href="#DirStructAudio">audio</a>/
-|   |   |-- Makefile
+|   |   |-- Nuttx.mk
 |   |   |-- Kconfig
 |   |   `-- <i>(common audio source files)</i>
 |   |-- <a href="#DirStructBinFmt">binfmt</a>/
-|   |   |-- Makefile
+|   |   |-- Nuttx.mk
 |   |   |-- Kconfig
 |   |   |-- <i>(binfmt-specific sub-directories)</i>/
 |   |   |   `-- <i>(binfmt-specific source files)</i>
@@ -325,23 +325,23 @@
 |   |   |   `-- <i>&lt;(other chip directories)&gt;</i>/
 |   |   `-- <i>&lt;(other architecture directories)&gt;</i>/
 |   |-- crypto
-|   |   |-- Makefile
+|   |   |-- Nuttx.mk
 |   |   |-- Kconfig
 |   |   `-- <i>(common crypto source files)</i>
 |   |-- <a href="#DirStructDrivers">drivers</a>/
-|   |   |-- Makefile
+|   |   |-- Nuttx.mk
 |   |   |-- Kconfig
 |   |   |-- <i>(driver-specific sub-directories)/</i>
 |   |   |   `-- <i>(driver-specific source files)</i>
 |   |   `-- <i>(common driver source files)</i>
 |   |-- <a href="#DirStructFs">fs</a>/
-|   |   |-- Makefile
+|   |   |-- Nuttx.mk
 |   |   |-- Kconfig
 |   |   |-- <i>(file system-specific sub-directories)</i>/
 |   |   |   `-- <i>(file system-specific source files)</i>
 |   |   `-- <i>(common file system source files)</i>
 |   |-- <a href="#DirStructGraphics">graphics</a>/
-|   |   |-- Makefile
+|   |   |-- Nuttx.mk
 |   |   |-- Kconfig
 |   |   |-- <i>(feature-specific sub-directories)</i>/
 |   |   |   `-- <i>(feature-specific source files library source files)</i>
@@ -354,27 +354,27 @@
 |   |       `-- <i>(non-standard header files)</i>
 |   |-- libs/
 |   |   |-- <a href="#DirStructLibC">libc</a>/
-|   |   |   |-- Makefile
+|   |   |   |-- Nuttx.mk
 |   |   |   |-- Kconfig
 |   |   |   `-- <i>(libc source files)</i>
 |   |   |-- libdsp/
-|   |   |   |-- Makefile
+|   |   |   |-- Nuttx.mk
 |   |   |   |-- Kconfig
 |   |   |   `-- <i>(libdsp source files)</i>
 |   |   |-- libnx/
-|   |   |   |-- Makefile
+|   |   |   |-- Nuttx.mk
 |   |   |   |-- Kconfig
 |   |   |   `-- <i>(libdsp source files)</i>
 |   |   `-- <a href="#DirStructLibXX">libxx</a>/
-|   |       |-- Makefile
+|   |       |-- Nuttx.mk
 |   |       |-- Kconfig
 |   |       `-- <i>(libxx source files)</i>
 |   |-- <a href="#DirStructMm">mm</a>/
-|   |   |-- Makefile
+|   |   |-- Nuttx.mk
 |   |   |-- Kconfig
 |   |   `-- <i>(memory management source files)</i>
 |   |-- <a href="#DirStructNet">net</a>/
-|   |   |-- Makefile
+|   |   |-- Nuttx.mk
 |   |   |-- Kconfig
 |   |   |-- arp/
 |   |   |   `-- <i>(ARP source files)</i>
@@ -403,90 +403,90 @@
 |   |   `-- utils/
 |   |       `-- <i>(Miscellaneous, utility source files)</i>
 |   |-- pass1/
-|   |   `-- Makefile
+|   |   `-- Nuttx.mk
 |   |-- <a href="#DirStructSched">sched</a>/
-|   |   |-- Makefile
+|   |   |-- Nuttx.mk
 |   |   |-- Kconfig
 |   |   `-- <i>(sched source files)</i>
 |   |-- <a href="#DirStructSysCall">syscall</a>/
-|   |   |-- Makefile
+|   |   |-- Nuttx.mk
 |   |   |-- Kconfig
 |   |   `-- <i>(syscall source files)</i>
 |   |-- <a href="#DirStructTools">tools</a>/
 |   |   `-- <i>(miscellaneous scripts and programs)</i>
 |   `-- <a href="#DirStructWireless">wireless</a>/
-|       |-- Makefile
+|       |-- Nuttx.mk
 |       |-- Kconfig
 |       `-- <i>(wireless source files)</i>
 `- apps
     |-- builtin/
-    |   |-- Makefile
-    |   |-- Make.defs
+    |   |-- Nuttx.mk
+    |   |-- Nuttx.defs
     |   |-- Kconfig
     |   `-- <i>(builtin source files)</i>
     |-- canutils/
-    |   |-- Makefile
-    |   |-- Make.defs
+    |   |-- Nuttx.mk
+    |   |-- Nuttx.defs
     |   |-- Kconfig
     |   `-- <i>(can utililities sub-directories)</i>
     |-- fsutils/
-    |   |-- Makefile
-    |   |-- Make.defs
+    |   |-- Nuttx.mk
+    |   |-- Nuttx.defs
     |   |-- Kconfig
     |   `-- <i>(File system utilities sub-directories)</i>
     |-- gpsutils/
-    |   |-- Makefile
-    |   |-- Make.defs
+    |   |-- Nuttx.mk
+    |   |-- Nuttx.defs
     |   |-- Kconfig
     |   `-- <i>(GPS utilities sub-directories)</i>
     |-- include/
     |   `-- <i>(Include sub-directories)</i>
     |-- interpreters/
-    |   |-- Makefile
-    |   |-- Make.defs
+    |   |-- Nuttx.mk
+    |   |-- Nuttx.defs
     |   |-- Kconfig
     |   `-- <i>(Interpreter sub-directories)</i>
     |-- modbus/
-    |   |-- Makefile
-    |   |-- Make.defs
+    |   |-- Nuttx.mk
+    |   |-- Nuttx.defs
     |   |-- Kconfig
     |   `-- <i>(Modbus source files)</i>
     |-- <a href="#DirStructNetUtils">netutils</a>/
-    |   |-- Makefile
-    |   |-- Make.defs
+    |   |-- Nuttx.mk
+    |   |-- Nuttx.defs
     |   |-- Kconfig
     |   |-- <i>(network feature sub-directories)</i>/
     |   |   `-- <i>(network utilities sub-directories)</i>
     |   `-- <i>(netutils common files)</i>
     |-- <a href="#DirStructNshLib">nshlib</a>/
-    |   |-- Makefile
-    |   |-- Make.defs
+    |   |-- Nuttx.mk
+    |   |-- Nuttx.defs
     |   |-- Kconfig
     |   `-- <i>NuttShell (NSH) files</i>
     |-- platform/
-    |   |-- Makefile
-    |   |-- Make.defs
+    |   |-- Nuttx.mk
+    |   |-- Nuttx.defs
     |   |-- Kconfig
     |   `-- <i>(Platform-specific sub-directories)</i>
     |-- system/
-    |   |-- Makefile
-    |   |-- Make.defs
+    |   |-- Nuttx.mk
+    |   |-- Nuttx.defs
     |   |-- Kconfig
     |   `-- <i>(System utilities sub-directories)</i>
     |-- testing/
-    |   |-- Makefile
-    |   |-- Make.defs
+    |   |-- Nuttx.mk
+    |   |-- Nuttx.defs
     |   |-- Kconfig
     |   `-- <i>(Test support sub-directories)</i>
     |-- wireless/
-    |   |-- Makefile
-    |   |-- Make.defs
+    |   |-- Nuttx.mk
+    |   |-- Nuttx.defs
     |   |-- Kconfig
     |   `-- <i>(Wireless utilities sub-directories)</i>
     `-- <a href="#DirStructExamples">examples</a>/
         `-- <i>(example)</i>/
-            |-- Makefile
-            |-- Make.defs
+            |-- Nuttx.mk
+            |-- Nuttx.defs
             |-- Kconfig
             `-- <i>(example sub-directories)</i>
 </pre></ul>
@@ -576,7 +576,7 @@
     |--<i>&lt;chip-name&gt;</i>/
     |  `-- <i>(chip-specific source files)</i>
     |--<i>&lt;other-chips&gt;</i>/
-    |-- Makefile
+    |-- Nuttx.mk
     `-- <i>(architecture-specific source files)</i>
 </pre></ul>
 
@@ -705,7 +705,7 @@
     This sub-directory contains chip-specific source files.
   </li>
   <li>
-    <code>src/Makefile</code>:
+    <code>src/Nuttx.mk</code>:
     This makefile will be executed to build the targets <code>src/libup.a</code> and
     <code>src/up_head.o</code>.  The <code>up_head.o</code> file holds the entry point into the system
     (power-on reset entry point, for example).  It will be used in
@@ -814,19 +814,19 @@
 |   |-- board.h
 |   `-- <i>(board-specific header files)</i>
 |-- src/
-|   |-- Makefile
+|   |-- Nuttx.mk
 |   `-- <i>(board-specific source files)</i>
 |-- configs/
 |   |-- <i>&lt;config1-dir&gt;</i>
-|   |   |-- Make.defs (optional)
+|   |   |-- Nuttx.defs (optional)
 |   |   `-- defconfig
 |   |-- <i>&lt;config2-dir&gt;</i>
-|   |   |-- Make.defs
+|   |   |-- Nuttx.defs
 |   |   `-- defconfig
 |   ...
 |-- scripts/
 |   |-- <i>(linker script files)</i>
-|   `-- Make.defs <i>(optional)</i>
+|   `-- Nuttx.defs <i>(optional)</i>
 `-- <i>(other board-specific configuration sub-directories)</i>/
 </pre></ul>
 
@@ -848,7 +848,7 @@
     time and will be integrated into the build system.
   </li>
   <li>
-    <code>src/Makefile</code>:
+    <code>src/Nuttx.mk</code>:
     This makefile will be invoked to build the board specific drivers.
     It must support the following targets:  <code>libext$(LIBEXT)</code>, <code>clean</code>, and <code>distclean</code>.
   </li>
@@ -858,15 +858,15 @@
   The <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/configs</code> sub-directory holds all of the
   files that are necessary to configure NuttX for the particular board.
   A board may have various different configurations using the common source files.
-  Each board configuration is described by two files:  <code>Make.defs</code> and <code>defconfig</code>.
+  Each board configuration is described by two files:  <code>Nuttx.defs</code> and <code>defconfig</code>.
   Typically, each set of configuration files is retained in a separate configuration sub-directory
   (<i>&lt;config1-dir&gt;</i>, <i>&lt;config2-dir&gt;</i>, .. in the above diagram).
 </p>
 <p>
-  NOTE: That the <code>Make.defs</code> file may reside in one of two locations:
-  There may be a unique Make.defs file for each configuration in the configuration directory <i>OR</i>
-  if that file is absent, there may be a common board <code>Make.defs</code> file in the <code>/scripts</code> directory.
-  The <code>Make.defs</code> file in the configuration takes precedence if it is present.
+  NOTE: That the <code>Nuttx.defs</code> file may reside in one of two locations:
+  There may be a unique Nuttx.defs file for each configuration in the configuration directory <i>OR</i>
+  if that file is absent, there may be a common board <code>Nuttx.defs</code> file in the <code>/scripts</code> directory.
+  The <code>Nuttx.defs</code> file in the configuration takes precedence if it is present.
 </p>
 <p>
   The procedure for configuring NuttX is described <a href="#configuringnuttx">below</a>,
@@ -874,7 +874,7 @@
 </p>
 <ul>
   <li>
-    <code>Make.defs</code>: This makefile fragment provides architecture and
+    <code>Nuttx.defs</code>: This makefile fragment provides architecture and
     tool-specific build options.  It will be included by all other
     makefiles in the build (once it is installed).  This make fragment
     should define:
@@ -892,13 +892,13 @@
       <li><code>$(TOPDIR)/tools/Config.mk</code>  : Common definitions</li>
     </ul>
     <p>
-      Definitions in the <code>Make.defs</code> file probably depend on some of the
+      Definitions in the <code>Nuttx.defs</code> file probably depend on some of the
       settings in the .<code>config</code> file.  For example, the <code>CFLAGS</code> will most likely be
       different if <code>CONFIG_DEBUG_FEATURES=y</code>.
     </p>
     <p>
       The included <code>tools/Config.mk</code> file contains additional definitions that may
-      be overridden in the architecture-specific Make.defs file as necessary:
+      be overridden in the architecture-specific Nuttx.defs file as necessary:
     </p>
     <ul>
       <li><code>COMPILE</code>, <code>ASSEMBLE</code>, <code>ARCHIVE</code>, <code>CLEAN</code>, and <code>MKDEP</code> macros</li>
@@ -1019,126 +1019,126 @@ endif
 <ul><pre>
 drivers/
 |-- Kconfig
-|-- Makefile
+|-- Nuttx.mk
 |-- 1wire/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(1-wire device source files)</i>
 |-- analog/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(ADC and DAC driver source files)</i>
 |-- audio/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Audio device source files)</i>
 |-- bch/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(BCH driver source files)</i>
 |-- can/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(CAN driver source files)</i>
 |-- contactless/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Contactless device driver source files)</i>
 |-- eeprom/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(EEPROM character driver source files)</i>
 |-- i2c/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(I2C device driver source files)</i>
 |-- input/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Touchscreen and keypad driver source files)</i>
 |-- ioexpander/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(I/O expander and GPIO-related driver source files)</i>
 |-- lcd/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(LCD driver source files)</i>
 |-- leds/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(LED device driver source files)</i>
 |-- loop/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Loop device driver source files)</i>
 |-- mmcsd/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(MMC/SD card driver source files)</i>
 |-- modem/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Modem driver source files)</i>
 |-- mtd/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Memory technology device driver source files)</i>
 |-- net/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Network driver source files)</i>
 |-- pipes/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Pipe and FIFO driver source files)</i>
 |-- power/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Power-related driver source files)</i>
 |-- sensors/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Sensor driver source files)</i>
 |-- serial/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Front-end character drivers for chip-specific UARTs, 16550 UART support, and Pseudo-Terminal support)</i>
 |-- spi/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(SPI-related drivers and helper functions)</i>
 |-- syslog/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(System logging device support)</i>
 |-- timers/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Timer-based device driver support)</i>
 |-- usbdev/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(USB device driver source files)</i>
 |-- usbhost/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(USB host driver source files)</i>
 |-- usbmisc/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Miscellaneous USB driver source files)</i>
 |-- usbmonitor/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(USB monitor source files)</i>
 |-- video/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Video driver source files)</i>
 |-- wireless/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Wireless driver source files)</i>
 `-- <i>(Various uncategorized driver source files)</i>
 </pre></ul>
@@ -1152,78 +1152,78 @@ drivers/
 <ul><pre>
 fs/
 |-- Kconfig
-|-- Makefile
+|-- Nuttx.mk
 |-- binfs/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(BINFS file system source files)</i>
 |-- cromfs/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(CROMFS file system source files)</i>
 |-- dirent/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(VFS directory access source files)</i>
 |-- driver/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Driver registration OS internal interfaces)</i>
 |-- fat/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(FAT file system source files)</i>
 |-- inode/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Pseudo-file system OS internal interfaces)</i>
 |-- hostfs/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(HOSTFS file system source files)</i>
 |-- mmap/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(RAM-based file mapping source files)</i>
 |-- mount/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(Mount point-related OS internal interfaces)</i>
 |-- mqueue/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(POSIX message queue OS internal interfaces)</i>
 |-- nfs/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(NFS client file system source files)</i>
 |-- nxffs/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(NuttX Flash File System (NXFFS) source files)</i>
 |-- procfs/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(PROCFS pseudo-file system source files)</i>
 |-- romfs/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(ROMFS file system source files)</i>
 |-- smartfs/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(SmartFS file system source files)</i>
 |-- unionfs/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(UnionFS file system source files)</i>
 |-- userfs/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(UserFS file system source files)</i>
 |-- vfs/
 |   |-- Kconfig
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(VFS OS internal interfaces)</i>
  `-- <i>(common file system source files)</i>
 </pre></ul>
@@ -1236,21 +1236,21 @@ fs/
 <ul><pre>
 graphics/
 |-- Kconfig
-|-- Makefile
+|-- Nuttx.mk
 |-- nxbe/
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(NuttX graphics back-end (NXBE) source files)</i>
 |-- nxglib/
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(NuttX graphics library (NXGL) source files)</i>
 |-- nxmu/
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(NuttX graphics multi-user (NXMU) server source files)</i>
 |-- nxterm/
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(NX terminal (NxTerm) source files)</i>
 |-- vnc/
-|   |-- Make.defs
+|   |-- Nuttx.defs
 |   `-- <i>(VNC client/server source files)</i>
 `-- <i>(common file system source files)</i>
 </pre></ul>
@@ -1481,9 +1481,9 @@ libc/
 </p>
 <ul><pre>
 tools/
-|-- Makefile.host
-|-- Makefile.export
-|-- Makefile.unix, Makefile.win, FlatLibs.mk, KernelLibs.mk, LibTargets.mk, ProtectedLibs.mk
+|-- Nuttx.mk.host
+|-- Nuttx.mk.export
+|-- Nuttx.mk.unix, Nuttx.mk.win, FlatLibs.mk, KernelLibs.mk, LibTargets.mk, ProtectedLibs.mk
 |-- README.txt
 |-- b16.c
 |-- bdf-converter.c
@@ -1536,11 +1536,11 @@ tools/
   This directory holds support for hardware-independent wireless support.
 </p>
 
-<h2>2.20 <a name="topmakefile">nuttx/Makefile</a></h2>
+<h2>2.20 <a name="topmakefile">nuttx/Nuttx.mk</a></h2>
 <p>
-  The top-level <code>Makefile</code> in the <code>${TOPDIR}</code> directory contains all of the top-level control
+  The top-level <code>Nuttx.mk</code> in the <code>${TOPDIR}</code> directory contains all of the top-level control
   logic to build NuttX.
-  Use of this <code>Makefile</code> to build NuttX is described <a href="#buildingnuttx">below</a>.
+  Use of this <code>Nuttx.mk</code> to build NuttX is described <a href="#buildingnuttx">below</a>.
 </p>
 
 <table width ="100%">
@@ -1559,7 +1559,7 @@ tools/
   This could be done manually as follows:
 </p>
 <ul>
-  <li>Copy <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/configs/[</code><i>&lt;config-dir&gt;</i><code>/]Make.defs</code> to <code>${TOPDIR}/Make.defs</code> (see NOTE below),</li>
+  <li>Copy <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/configs/[</code><i>&lt;config-dir&gt;</i><code>/]Nuttx.defs</code> to <code>${TOPDIR}/Nuttx.defs</code> (see NOTE below),</li>
   <li>Copy <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i><code>/configs/[</code><i>&lt;config-dir&gt;</i><code>/]defconfig</code> to <code>${TOPDIR}/.config</code></li>
 </ul>
 
@@ -1572,7 +1572,7 @@ tools/
   And &lt;app-dir&gt; is the location of the optional application directory.
 </p>
 <p>
-  NOTE:  Recall that the <code>Make.defs</code> file may reside in either the <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i>/<code>configs/[</code><i>&lt;config-dir&gt;</i></code> directory or in the <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i>/<code>scripts</code>.
+  NOTE:  Recall that the <code>Nuttx.defs</code> file may reside in either the <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i>/<code>configs/[</code><i>&lt;config-dir&gt;</i></code> directory or in the <code>boards/</code><i>&lt;arch-name&gt;</i><code>/</code><i>&lt;chip-name&gt;</i><code>/</code><i>&lt;board-name&gt;</i>/<code>scripts</code>.
 </p>
 <p>
   <b>Automated Configuration</b>.
@@ -1634,7 +1634,7 @@ Where:
   That version file is called <code>.version</code>.
   The correct version file is installed in each versioned NuttX released.
   However, if you are working from an GIT snapshot, then there will be no version file.
-  If there is no version file, the top-level <code>Makefile</code> will create a dummy <code>.version</code> file on the first make.
+  If there is no version file, the top-level <code>Nuttx.mk</code> will create a dummy <code>.version</code> file on the first make.
   This dummy version file will contain all zeroes for version information.
   If that is not what you want, they you should run the <code>version.sh</code> script to create a better <code>.version</code> file.
 </p>
@@ -1679,7 +1679,7 @@ tools/version.h -v 6.1 .version
 
 <p>
   <b>Additional Configuration Steps</b>.
-  The remainder of configuration steps will be performed by <a href="#topmakefile"><code>${TOPDIR}/Makefile</code></a>
+  The remainder of configuration steps will be performed by <a href="#topmakefile"><code>${TOPDIR}/Nuttx.mk</code></a>
   the first time the system is built as described below.
 </p>
 
@@ -1696,18 +1696,18 @@ make
   The <code>${TOPDIR}</code> directory holds:
 </p>
 <ul>
-  <li>The top level <a href="#topmakefile"><code>Makefile</code></a> that controls the NuttX build.
+  <li>The top level <a href="#topmakefile"><code>Nuttx.mk</code></a> that controls the NuttX build.
 </ul>
 <p>
   That directory also holds:
 </p>
 <ul>
   <li>The makefile fragment <a href="#boardconfigsubdirs"><code>.config</code></a> that describes the current configuration, and</li>
-  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>Make.defs</code></a> that provides customized build targets.</li>
+  <li>The makefile fragment <a href="#boardconfigsubdirs"><code>Nuttx.defs</code></a> that provides customized build targets.</li>
 </ul>
 <p>
 <b>Environment Variables</b>.
-The specific environmental definitions are unique for each board but should include, as a minimum, updates to the <code>PATH</code> variable to include the full path to the architecture-specific toolchain identified in <a href="#boardconfigsubdirs"><code>Make.defs</code></a>.
+The specific environmental definitions are unique for each board but should include, as a minimum, updates to the <code>PATH</code> variable to include the full path to the architecture-specific toolchain identified in <a href="#boardconfigsubdirs"><code>Nuttx.defs</code></a>.
 </p>
 <p>
   <b>First Time Make.</b>

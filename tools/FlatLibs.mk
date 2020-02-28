@@ -35,7 +35,7 @@
 ############################################################################
 
 # NUTTXLIBS is the list of NuttX libraries that is passed to the
-#   processor-specific Makefile to build the final NuttX target.
+#   processor-specific Nuttx.mk to build the final NuttX target.
 # USERLIBS is the list of libraries used to build the final user-space
 #   application
 # EXPORTLIBS is the list of libraries that should be exported by
@@ -71,7 +71,7 @@ NUTTXLIBS += staging$(DELIM)libpass1$(LIBEXT)
 endif
 
 # Add libraries for C++ support.  CXX, CXXFLAGS, and COMPILEXX must
-# be defined in Make.defs for this to work!
+# be defined in Nuttx.defs for this to work!
 
 ifeq ($(CONFIG_HAVE_CXX),y)
 NUTTXLIBS += staging$(DELIM)libxx$(LIBEXT)

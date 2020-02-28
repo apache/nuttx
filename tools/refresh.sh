@@ -109,7 +109,7 @@ fi
 CMPCONFIG_TARGET=cmpconfig
 CMPCONFIG1=tools/cmpconfig
 CMPCONFIG2=tools/cmpconfig.exe
-CMPCONFIGMAKEFILE=Makefile.host
+CMPCONFIGMAKEFILE=Nuttx.mk.host
 CMPCONFIGMAKEDIR=tools
 
 if [ -x ${CMPCONFIG1} ]; then
@@ -169,11 +169,11 @@ for CONFIG in ${CONFIGS}; do
 
   BOARDDIR=boards/*/*/$BOARDSUBDIR
   SCRIPTSDIR=$BOARDDIR/scripts
-  MAKEDEFS1=$SCRIPTSDIR/Make.defs
+  MAKEDEFS1=$SCRIPTSDIR/Nuttx.defs
 
   CONFIGDIR=$BOARDDIR/configs/$CONFIGSUBDIR
   DEFCONFIG=$CONFIGDIR/defconfig
-  MAKEDEFS2=$CONFIGDIR/Make.defs
+  MAKEDEFS2=$CONFIGDIR/Nuttx.defs
 
   # Check the board configuration directory
 
@@ -198,12 +198,12 @@ for CONFIG in ${CONFIGS}; do
     if [ -r $MAKEDEFS2 ]; then
       MAKEDEFS=$MAKEDEFS2
     else
-      echo "No readable Make.defs file at $MAKEDEFS1 or $MAKEDEFS2"
+      echo "No readable Nuttx.defs file at $MAKEDEFS1 or $MAKEDEFS2"
       exit 1
     fi
   fi
 
-  # Copy the .config and Make.defs to the toplevel directory
+  # Copy the .config and Nuttx.defs to the toplevel directory
 
   rm -f SAVEconfig
   if [ -e .config ]; then
@@ -214,14 +214,14 @@ for CONFIG in ${CONFIGS}; do
   cp -a $DEFCONFIG .config || \
     { echo "ERROR: Failed to copy $DEFCONFIG to .config"; exit 1; }
 
-  rm -f SAVEMake.defs
-  if [ -e Make.defs ]; then
-    mv Make.defs SAVEMake.defs || \
-      { echo "ERROR: Failed to move Make.defs to SAVEMake.defs"; exit 1; }
+  rm -f SAVENuttx.defs
+  if [ -e Nuttx.defs ]; then
+    mv Nuttx.defs SAVENuttx.defs || \
+      { echo "ERROR: Failed to move Nuttx.defs to SAVENuttx.defs"; exit 1; }
   fi
 
-  cp -a $MAKEDEFS Make.defs || \
-    { echo "ERROR: Failed to copy $MAKEDEFS to Make.defs"; exit 1; }
+  cp -a $MAKEDEFS Nuttx.defs || \
+    { echo "ERROR: Failed to copy $MAKEDEFS to Nuttx.defs"; exit 1; }
 
   # Then run oldconfig or oldefconfig
 
@@ -259,15 +259,15 @@ for CONFIG in ${CONFIGS}; do
     chmod 644 $DEFCONFIG
   fi
 
-  # Restore any previous .config and Make.defs files
+  # Restore any previous .config and Nuttx.defs files
 
   if [ -e SAVEconfig ]; then
     mv SAVEconfig .config || \
       { echo "ERROR: Failed to move SAVEconfig to .config"; exit 1; }
   fi
 
-  if [ -e SAVEMake.defs ]; then
-    mv SAVEMake.defs Make.defs || \
-      { echo "ERROR: Failed to move SAVEMake.defs to Make.defs"; exit 1; }
+  if [ -e SAVENuttx.defs ]; then
+    mv SAVENuttx.defs Nuttx.defs || \
+      { echo "ERROR: Failed to move SAVENuttx.defs to Nuttx.defs"; exit 1; }
   fi
 done

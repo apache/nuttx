@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-/* If CONFIG_ARCH_MATH_H is defined, then the top-level Makefile will copy
+/* If CONFIG_ARCH_MATH_H is defined, then the top-level Nuttx.mk will copy
  * this header file to include/math.h where it will become the system math.h
  * header file.  In this case, the architecture specific code must provide
  * an arch/<architecture>/include/math.h file which will be included below:
