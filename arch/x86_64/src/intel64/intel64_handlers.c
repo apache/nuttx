@@ -181,7 +181,7 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
         asm volatile("fnclex":::"memory");
         nxsig_kill(this_task()->pid, SIGFPE);
         break;
-      deafult:
+      default:
         /* Let's say, all ISR are asserted when REALLY BAD things happened */
         /* Don't even brother to recover, just dump the regs and PANIC*/
         _alert("PANIC:\n");
@@ -190,7 +190,6 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
         up_registerdump(regs);
 
         up_trash_cpu();
-        PANIC();
         break;
 
   }
