@@ -23,4 +23,3 @@ flash write 0 nuttx.bin 0x0
 reset run
 sleep 10
 shutdown
-

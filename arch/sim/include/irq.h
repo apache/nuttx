@@ -62,7 +62,7 @@
 
 #  define XCPTCONTEXT_REGS    6
 #elif defined(CONFIG_HOST_ARM)
-#  define XCPTCONTEXT_REGS 16
+#  define XCPTCONTEXT_REGS    16
 #endif
 
 /****************************************************************************
@@ -70,7 +70,6 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
-/* Number of registers saved in context switch */
 
 #if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
 typedef unsigned long xcpt_reg_t;
@@ -93,6 +92,14 @@ struct xcptcontext
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Name: up_irqinitialize
+ ****************************************************************************/
+
+static inline void up_irqinitialize(void)
+{
+}
 
 /* Name: up_irq_save, up_irq_restore, and friends.
  *
@@ -135,4 +142,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_SIM_INCLUDE_IRQ_H */
-

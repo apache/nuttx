@@ -22,7 +22,7 @@
  *    distribution.
  * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
- *    without specific prior writen permission.
+ *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -65,10 +65,10 @@
 /* This is the generic lcd driver interface for the ili9340 Single Chip LCD
  * driver. The driver supports multiple displays, each connected with an own
  * ili9340 Single Chip LCD driver. The communication with the LCD single chip
- * driver must be provide by a subdriver accessable trough the ili9340_dev_s
+ * driver must be provide by a subdriver accessible through the ili9340_dev_s
  * structure which is platform and MCU interface specific.
  *
- * Supported MCU interfaces (planed to support)
+ * Supported MCU interfaces (planned to support)
  *
  * Interface I
  *
@@ -89,7 +89,7 @@
  * 4-wire 8-bit data serial Interface
  *
  * Note! RGB interface will not supported by the lcd driver.
- * It should be use with the platform specific RGB grapic controller and the
+ * It should be use with the platform specific RGB graphic controller and the
  * nuttx framebuffer interface.
  *
  */
@@ -373,7 +373,7 @@
 
 struct ili9340_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 
@@ -522,7 +522,7 @@ static struct ili9340_dev_s g_lcddev[CONFIG_LCD_ILI9340_NINTERFACES] =
  * Name:  ili9340_getxres
  *
  * Description:
- *   Get horicontal resolution of the connected LCD driver depending on the
+ *   Get horizontal resolution of the connected LCD driver depending on the
  *   configured display orientation.
  *
  * Parameters:
@@ -530,7 +530,7 @@ static struct ili9340_dev_s g_lcddev[CONFIG_LCD_ILI9340_NINTERFACES] =
  *
  * Return Value:
  *
- *   Horicontal resolution
+ *   Horizontal resolution
  *
  ****************************************************************************/
 
@@ -618,7 +618,7 @@ static void ili9340_selectarea(FAR struct ili9340_lcd_s *lcd,
  *   devno   - Number of lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
- *   buffer  - The buffer containing the run to be writen to the LCD
+ *   buffer  - The buffer containing the run to be written to the LCD
  *   npixels - The number of pixels to write to the
  *             (range: 0 < npixels <= xres-col)
  *
@@ -837,7 +837,7 @@ static int ili9340_hwinitialize(FAR struct ili9340_dev_s *dev)
  * Parameter:
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
- *   buffer  - The buffer containing the run to be writen to the LCD
+ *   buffer  - The buffer containing the run to be written to the LCD
  *   npixels - The number of pixels to write to the
  *             (range: 0 < npixels <= xres-col)
  *
@@ -873,7 +873,7 @@ static int ili9340_putrun1(fb_coord_t row, fb_coord_t col,
  * Parameter:
  *   row     - Starting row to read from (range: 0 <= row < yres)
  *   col     - Starting column to read from (range: 0 <= col <= xres-npixels)
- *   buffer  - The buffer containing the run to be writen to the LCD
+ *   buffer  - The buffer containing the run to be written to the LCD
  *   npixels - The number of pixels to read from the
  *             (range: 0 < npixels <= xres-col)
  *
@@ -1119,7 +1119,7 @@ static int ili9340_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  * Name:  ili9340_initialize
  *
  * Description:
- *  Initialize the LCD video driver internal sturcture. Also initialize the
+ *  Initialize the LCD video driver internal structure. Also initialize the
  *  lcd hardware if not done. The control of the LCD driver is depend on the
  *  selected MCU interface and part of the platform specific subdriver (see
  *  config/stm32f429i-disco/src/stm32_ili93404ws.c)
@@ -1162,7 +1162,7 @@ FAR struct lcd_dev_s *ili9340_initialize(
           dev->setcontrast  = ili9340_setcontrast;
           priv->lcd         = lcd;
 
-          /* Initialze the LCD driver */
+          /* Initialize the LCD driver */
 
           ret = ili9340_hwinitialize(priv);
 

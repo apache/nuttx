@@ -218,7 +218,7 @@ boards/arm/stm32/cloudctrl
   board. Based on the Shenzhou IV development board design.  It is based on
   the STM32F107VC MCU.
 
-boards/hc/mcs92s12ne64/demo9s12ne64
+boards/hc/m9s12/demo9s12ne64
   NXP/FreeScale DMO9S12NE64 board based on the MC9S12NE64 hcs12 cpu.  This
   port uses the m9s12x GCC toolchain.  STATUS:  (Still) under development; it
   is code complete but has not yet been verified.
@@ -717,7 +717,7 @@ boards/arm/stm32/shenzhou
   This is the port of NuttX to the Shenzhou development board from
   www.armjishu.com. This board features the STMicro STM32F107VCT MCU.
 
-boards/renesas/m32262f8/skp16c26
+boards/renesas/m16c/skp16c26
   Renesas M16C processor on the Renesas SKP16C26 StarterKit.  This port
   uses the GNU m32c toolchain.  STATUS:  The port is complete but untested
   due to issues with compiler internal errors.
@@ -853,7 +853,7 @@ boards/mips/pic32mx/ubw32
   with this board http://www.sparkfun.com/products/9713. See also
   http://www.schmalzhaus.com/UBW32/.
 
-boards/renesas/sh7032/us7032evb1
+boards/renesas/sh1/us7032evb1
   This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
   STATUS:  Work has just began on this port.
 
@@ -865,10 +865,14 @@ boards/arm/stm32/viewtool-stm32f107
 config/xmc4500-relax
   Infineon XMC4000 Relax Lite v1
 
-boards/z16/z16f2811/z16f2800100zcog
+boards/z16/z16f/z16f2800100zcog
   z16f Microcontroller.  This port use the Zilog z16f2800100zcog
   development kit and the Zilog ZDS-II Windows command line tools.  The
   development environment is Cygwin under WinXP.
+
+boards/z80/ez80/z20x
+  Microcontroller.  This directory holds the port of NuttX to the z80x board
+  based on an ez80Acclaim! eZ80F091 microcontroller.
 
 boards/z80/z80/z80sim
   z80 Microcontroller.  This port uses a Z80 instruction set simulator
@@ -909,7 +913,7 @@ tools/configure.sh
    tools/configure.sh <board>:<config-dir>
 
   There is an alternative Windows batch file that can be used in the
-  windows native enironment like:
+  windows native environment like:
 
     tools\configure.bat <board>:<config-dir>
 

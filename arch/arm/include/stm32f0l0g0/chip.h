@@ -50,7 +50,26 @@
 
 /* Get customizations for each supported chip */
 
-#if defined(CONFIG_ARCH_CHIP_STM32F051R8)
+#if defined(CONFIG_ARCH_CHIP_STM32F030RC) || defined(CONFIG_ARCH_CHIP_STM32F030CC)
+
+#  define STM32_FLASH_SIZE      (256*1024) /* 256Kb */
+#  define STM32_SRAM_SIZE       (32*1024)  /*  32Kb */
+
+#  define STM32_NSPI            2  /* Two SPI modules (SPI or I2S) */
+#  define STM32_NI2S            0  /* No I2S modules */
+#  define STM32_NI2C            2  /* Two I2C modules */
+#  define STM32_NDMA            1  /* 1 DMA1, 7-channels */
+#  define STM32_NUSART          6  /* Six USARTs modules */
+#  define STM32_NCAN            0  /* No CAN controllers */
+#  define STM32_NUSBDEV         0  /* One USB full-speed device controller */
+#  define STM32_NUSBOTG         0  /* No USB OTG FS/HS (only USB 2.0 device) */
+#  define STM32_NADC            1  /* One 12-bit module */
+#  define STM32_NDAC            0  /* One DAC channel */
+#  define STM32_NCOMP           0  /* Two Analog Comparators */
+#  define STM32_NCAP            0  /* Capacitive sensing channels (14 on UFQFPN32)) */
+#  define STM32_NPORTS          5  /* Six GPIO ports, GPIOA-F */
+
+#elif defined(CONFIG_ARCH_CHIP_STM32F051R8)
 
 #  define STM32_FLASH_SIZE      (64*1024) /* 64Kb */
 #  define STM32_SRAM_SIZE       (8*1024)  /*  8Kb */

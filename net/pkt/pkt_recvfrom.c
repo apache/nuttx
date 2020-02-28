@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/pkt/pkt_recvfrom.c
  *
- *   Copyright (C) 2007-2009, 2011-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2017, 2020 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +52,6 @@
 
 #include <arch/irq.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -69,11 +69,11 @@
 struct pkt_recvfrom_s
 {
   FAR struct devif_callback_s *pr_cb;  /* Reference to callback instance */
-  sem_t    pr_sem;                     /* Semaphore signals recv completion */
-  size_t   pr_buflen;                  /* Length of receive buffer */
-  uint8_t *pr_buffer;                  /* Pointer to receive buffer */
-  ssize_t  pr_recvlen;                 /* The received length */
-  int      pr_result;                  /* Success:OK, failure:negated errno */
+  sem_t        pr_sem;                 /* Semaphore signals recv completion */
+  size_t       pr_buflen;              /* Length of receive buffer */
+  FAR uint8_t *pr_buffer;              /* Pointer to receive buffer */
+  ssize_t      pr_recvlen;             /* The received length */
+  int          pr_result;              /* Success:OK, failure:negated errno */
 };
 
 /****************************************************************************
@@ -294,7 +294,8 @@ static void pkt_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
  *
  ****************************************************************************/
 
-static ssize_t pkt_recvfrom_result(int result, struct pkt_recvfrom_s *pstate)
+static ssize_t pkt_recvfrom_result(int result,
+                                   FAR struct pkt_recvfrom_s *pstate)
 {
   /* Check for a error/timeout detected by the event handler.  Errors are
    * signaled by negative errno values for the rcv length
@@ -309,8 +310,9 @@ static ssize_t pkt_recvfrom_result(int result, struct pkt_recvfrom_s *pstate)
       return pstate->pr_result;
     }
 
-  /* If net_lockedwait failed, then we were probably reawakened by a signal. In
-   * this case, net_lockedwait will have returned negated errno appropriately.
+  /* If net_lockedwait failed, then we were probably reawakened by a signal.
+   * In this case, net_lockedwait will have returned negated errno
+   * appropriately.
    */
 
   if (result < 0)
@@ -357,8 +359,8 @@ static ssize_t pkt_recvfrom_result(int result, struct pkt_recvfrom_s *pstate)
  ****************************************************************************/
 
 ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
-                      int flags, FAR struct sockaddr *from,
-                      FAR socklen_t *fromlen)
+                     int flags, FAR struct sockaddr *from,
+                     FAR socklen_t *fromlen)
 {
   FAR struct pkt_conn_s *conn = (FAR struct pkt_conn_s *)psock->s_conn;
   FAR struct net_driver_s *dev;
@@ -398,8 +400,8 @@ ssize_t pkt_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       goto errout_with_state;
     }
 
-  /* TODO pkt_recvfrom_initialize() expects from to be of type sockaddr_in, but
-   * in our case is sockaddr_ll
+  /* TODO pkt_recvfrom_initialize() expects from to be of type sockaddr_in,
+   * but in our case is sockaddr_ll
    */
 
 #if 0

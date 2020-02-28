@@ -85,7 +85,7 @@
 #define SAM_FLEXUS_WPSR_OFFSET         0x02e8 /* Write Protect Status Register (4) */
                                               /* 0x02ec-0x02fc: Reserved (USART) */
 
-/* USART register adresses ***********************************************************************/
+/* USART register addresses **********************************************************************/
 
 #ifdef CONFIG_SAMA5_HAVE_FLEXCOM0
 #  define SAM_FLEXUS0_CR               (SAM_FLEXCOM0_VBASE+SAM_FLEXUS_CR_OFFSET)
@@ -426,7 +426,7 @@
 
 /* FLEXUS Number of Errors Register */
 
-#define FLEXUS_NER_NBERRORS_SHIFT      (0)       /* Bits 0-7: Number of Errrors */
+#define FLEXUS_NER_NBERRORS_SHIFT      (0)       /* Bits 0-7: Number of Errors */
 #define FLEXUS_NER_NBERRORS_MASK       (0xff << FLEXUS_NER_NBERRORS_SHIFT)
 
 /* FLEXUS IrDA FILTER Register */

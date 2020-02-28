@@ -300,7 +300,7 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void)
 #endif
         {
           /* If we cannot a primitive structure from the free list, then we
-           * will have to allocate one from the kernal memory pool.
+           * will have to allocate one from the kernel memory pool.
            */
 
           leave_critical_section(flags);

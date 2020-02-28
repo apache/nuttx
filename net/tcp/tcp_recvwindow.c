@@ -75,10 +75,8 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
   uint16_t iplen;
   uint16_t mss;
   uint16_t recvwndo;
-#ifdef CONFIG_NET_TCP_READAHEAD
-  int  niob_avail;
-  int  nqentry_avail;
-#endif
+  int niob_avail;
+  int nqentry_avail;
 
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_IPv4
@@ -106,7 +104,6 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
 
   mss = dev->d_pktsize - (NET_LL_HDRLEN(dev) + iplen + TCP_HDRLEN);
 
-#ifdef CONFIG_NET_TCP_READAHEAD
   /* Update the TCP received window based on read-ahead I/O buffer
    * and IOB chain availability.  At least one queue entry is required.
    * If one queue entry is available, then the amount of read-ahead
@@ -168,7 +165,6 @@ uint16_t tcp_get_recvwindow(FAR struct net_driver_s *dev)
       recvwndo = (uint16_t)rwnd;
     }
   else /* nqentry_avail == 0 || niob_avail == 0 */
-#endif
     {
       /* No IOB chains or noIOBs are available.  The only buffering
        * available is within the packet buffer itself.  We can buffer no

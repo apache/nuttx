@@ -100,7 +100,7 @@ static const uint8_t g_srctype[SCRTYPE_NTYPES] =
   0, 0, 1, 1, 2, 3
 };
 
-/* This is an arry of bit maps that can be used to quickly determine is the
+/* This is an array of bit maps that can be used to quickly determine is the
  * peripheral identified by its PID is served by H64MX or H32MX.  Then the
  * appropriate MATRIX SPSELR register can be consulted to determine if the
  * peripheral interrupts are secured or not.
@@ -841,6 +841,8 @@ int up_prioritize_irq(int irq, int priority)
     {
       sam_prioritize_irq(SAM_AIC_VBASE, irq, priority);
     }
+
+  return OK;
 }
 #endif
 

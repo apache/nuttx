@@ -41,11 +41,16 @@
 ; Constants
 ;**************************************************************************
 
+EZ80_RAM_CTL      EQU %b4
+EZ80_RAM_ADDR_U   EQU %b5
+
+EZ80_FLASH_ADDR_U EQU %f7
+EZ80_FLASH_CTRL   EQU %f8
+
 ;**************************************************************************
 ; Global symbols used
 ;**************************************************************************
 
-	xref	__stack
 	xref	_ez80_init
 	xref	_ez80_initvectors
 	xref	_ez80_initsysclk
@@ -61,6 +66,12 @@
 	xref	__len_code
 	xref	__low_code
 	xref	__low_romcode
+
+	xref	__RAM_ADDR_U_INIT_PARAM
+	xref	__RAM_CTL_INIT_PARAM
+	xref	__FLASH_ADDR_U_INIT_PARAM
+	xref	__FLASH_CTL_INIT_PARAM
+
 	xref	_nx_start
 	xdef	_ez80_startup
 	xdef	_ez80_halt
@@ -77,12 +88,24 @@
 ;**************************************************************************
 
 _ez80_startup:
-	; Set up the stack pointer at the location determined the linkcmd
-	; file
+	; Enable internal memory using settings from the linkcmd file
 
-	ld		sp, __stack
+	ld		a, __FLASH_ADDR_U_INIT_PARAM
+	out0	(EZ80_FLASH_ADDR_U), a
+	ld		a, __FLASH_CTL_INIT_PARAM
+	out0	(EZ80_FLASH_CTRL), a
 
-	; Peform chip-specific initialization
+	ld		a, __RAM_ADDR_U_INIT_PARAM
+	out0	(EZ80_RAM_ADDR_U), a
+	ld		a, __RAM_CTL_INIT_PARAM
+	out0	(EZ80_RAM_CTL), a
+
+	; Position the IDLE task stack point at an offset of 1Kb in on-chip SRAM
+	; On-chip SRAM resides at an offset of %00e000 from the RAM base address.
+
+	ld		sp, __RAM_ADDR_U_INIT_PARAM << 16 + %00e400
+
+	; Perform chip-specific initialization
 
 	call	_ez80_init
 

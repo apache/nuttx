@@ -1,7 +1,7 @@
 ############################################################################
 # arch/z80/src/z8/Toolchain.defs
 #
-#   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012, 2020 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,3 +45,119 @@ CONFIG_Z8_TOOLCHAIN ?= ZDSII
 ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
   WINTOOL = y
 endif
+
+# These are the directories where the ZDS-II toolchain is installed.  NOTE
+# that short 8.3 path names are used in order to avoid spaces.  On my machine
+# I have:
+#
+# C:\PROGRA~1\ = C:\Profram Files\
+# C:\PROGRA~2\ = C:\Program Files (x86)\
+#
+# Your PC may be configured differently.
+
+ifeq ($(CONFIG_Z8_ZDSII_V522),y)
+ZDSVERSION = 5.2.2
+else # ifeq ($(CONFIG_Z8_ZDSII_V500),y)
+ZDSVERSION = 5.0.0
+endif
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  ZDSINSTALLDIR = C:/PROGRA~2/ZiLOG/ZDSII_Z8Encore!_$(ZDSVERSION)
+  INSTALLDIR = ${shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g"}
+  ZDSBINDIR = $(INSTALLDIR)\bin
+  ZDSSTDINCDIR = $(INSTALLDIR)\include\std
+  ZDSZILOGINCDIR = $(INSTALLDIR)\include\zilog
+ifeq ($(CONFIG_ARCH_CHIP_Z8F642X),y)
+  ZDSDEVINCDIR = $(INSTALLDIR)\Z8Encore_F642X
+endif
+ifeq ($(CONFIG_ARCH_CHIP_Z8F640X),y)
+  ZDSDEVINCDIR = $(INSTALLDIR)\Z8Encore_F640X
+endif
+  ZDSSTDLIBDIR = $(INSTALLDIR)\lib\std
+  ZDSZILOGLIBDIR = $(INSTALLDIR)\lib\zilog
+else
+  WINTOOL = y
+  ZDSINSTALLDIR = C:/PROGRA~2/ZiLOG/ZDSII_Z8Encore!_$(ZDSVERSION)
+  INSTALLDIR = ${shell cygpath -u "$(ZDSINSTALLDIR)"}
+  ZDSBINDIR = $(INSTALLDIR)/bin
+  ZDSSTDINCDIR = $(INSTALLDIR)/include/std
+  ZDSZILOGINCDIR = $(INSTALLDIR)/include/zilog
+ifeq ($(CONFIG_ARCH_CHIP_Z8F642X),y)
+  ZDSDEVINCDIR = $(ZDSZILOGINCDIR)/Z8Encore_F642X
+endif
+ifeq ($(CONFIG_ARCH_CHIP_Z8F640X),y)
+  ZDSDEVINCDIR = $(ZDSZILOGINCDIR)/Z8Encore_F640X
+endif
+  ZDSSTDLIBDIR = $(INSTALLDIR)/lib/std
+  ZDSZILOGLIBDIR = $(INSTALLDIR)/lib/zilog
+
+  # These are the same directories but with the directory separator
+  # character swapped as needed by the ZDS-II compiler
+
+  WTOPDIR = ${shell cygpath -w "$(TOPDIR)"}
+  WZDSSTDINCDIR = ${shell cygpath -w "$(ZDSSTDINCDIR)"}
+  WZDSZILOGINCDIR = ${shell cygpath -w "$(ZDSZILOGINCDIR)"}
+  WZDSDEVINCDIR = ${shell cygpath -w "$(ZDSDEVINCDIR)"}
+  WZDSSTDLIBDIR = ${shell cygpath -w "$(ZDSSTDLIBDIR)"}
+  WZDSZILOGLIBDIR = ${shell cygpath -w "$(ZDSZILOGLIBDIR)"}
+
+  # Escaped versions
+
+  ETOPDIR = ${shell echo "$(WTOPDIR)" | sed -e "s/ /%20/g"}
+  EZDSSTDINCDIR = ${shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g"}
+  EZDSZILOGINCDIR = ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
+endif
+
+# CPU Identification
+
+ifeq ($(CONFIG_ARCH_CHIP_Z8F642X),y)
+  ARCHFAMILYDEF = _Z8ENCORE_F642X
+  ARCHSERIESDEF = _Z8ENCORE_64K_SERIES
+  ARCHREVAA = -NOrevaa
+ifeq ($(CONFIG_ARCH_CHIP_Z8F6423),y)
+  ARCHCPU = Z8F6423
+  ARCHCPUDEF = _Z8F6423
+endif
+endif
+
+ifeq ($(CONFIG_ARCH_CHIP_Z8F640X),y)
+  ARCHFAMILYDEF = _Z8ENCORE_F640X
+  ARCHSERIESDEF = _Z8ENCORE_640_FAMILY
+  ARCHREVAA = -revaa
+ifeq ($(CONFIG_ARCH_CHIP_Z8F6403),y)
+  ARCHCPU = Z8F6403
+  ARCHCPUDEF = _Z8F6403
+endif
+endif
+
+# Optimization level
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION += -NOregvar -reduceopt
+  ARCHASMOPTIMIZATION = -debug -sdiopt
+else
+  ARCHOPTIMIZATION += -regvar
+  ARCHASMOPTIMIZATION = -nodebug -sdiopt
+endif
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION = -debug
+else
+  ARCHOPTIMIZATION = -nodebug
+endif
+
+# Tool names/paths
+
+CROSSDEV =
+CC = ez8cc.exe
+CPP = gcc -E
+LD = ez8link.exe
+AS = ez8asm.exe
+AR = ez8lib.exe
+
+# File extensions
+
+ASMEXT = .asm
+OBJEXT = .obj
+LIBEXT = .lib
+EXEEXT = .hex

@@ -276,7 +276,7 @@
 #define _ETM_ETMCCR_TRACESS_MASK                      0x4000000UL                              /* Bit mask for ETM_TRACESS */
 #define _ETM_ETMCCR_TRACESS_DEFAULT                   0x00000001UL                             /* Mode DEFAULT for ETM_ETMCCR */
 #define ETM_ETMCCR_TRACESS_DEFAULT                    (_ETM_ETMCCR_TRACESS_DEFAULT << 26)      /* Shifted mode DEFAULT for ETM_ETMCCR */
-#define ETM_ETMCCR_MMACCESS                           (0x1UL << 27)                            /* Coprocessor and Memeory Access */
+#define ETM_ETMCCR_MMACCESS                           (0x1UL << 27)                            /* Coprocessor and Memory Access */
 #define _ETM_ETMCCR_MMACCESS_SHIFT                    27                                       /* Shift value for ETM_MMACCESS */
 #define _ETM_ETMCCR_MMACCESS_MASK                     0x8000000UL                              /* Bit mask for ETM_MMACCESS */
 #define _ETM_ETMCCR_MMACCESS_DEFAULT                  0x00000001UL                             /* Mode DEFAULT for ETM_ETMCCR */

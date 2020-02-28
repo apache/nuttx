@@ -45,7 +45,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -2350,7 +2349,7 @@ static int lpc17_40_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   lpc17_40_takesem(&priv->exclsem);
 
-  /* Remove the ED to the correct list depending on the trasfer type */
+  /* Remove the ED to the correct list depending on the transfer type */
 
   switch (ed->xfrtype)
     {

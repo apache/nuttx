@@ -384,7 +384,7 @@ struct lcd_regs_s
 
 struct stm32_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 
@@ -1907,7 +1907,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
  * Name:  board_lcd_uninitialize
  *
  * Description:
- *   Unitialize the LCD support
+ *   Uninitialize the LCD support
  *
  ****************************************************************************/
 

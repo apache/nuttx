@@ -50,7 +50,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -606,7 +605,7 @@ static void lpc17can_rxint(FAR struct can_dev_s *dev, bool enable)
 
   caninfo("CAN%d enable: %d\n", priv->port, enable);
 
-  /* The EIR register is also modifed from the interrupt handler, so we have
+  /* The EIR register is also modified from the interrupt handler, so we have
    * to protect this code section.
    */
 
@@ -721,7 +720,7 @@ static int lpc17can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
  *
  *    Byte 0:      Bits 0-7: Bits 3-10 of the 11-bit CAN identifier
  *    Byte 1:      Bits 5-7: Bits 0-2 of the 11-bit CAN identifier
- *                 Bit 4:    Remote Tranmission Request (RTR)
+ *                 Bit 4:    Remote Transmission Request (RTR)
  *                 Bits 0-3: Data Length Code (DLC)
  *    Bytes 2-10: CAN data
  *
@@ -751,7 +750,7 @@ static int lpc17can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
     }
 
   /* Set the FF bit in the TFI register if this message should be sent with
-   * the extended frame format (and 29-bit extened ID).
+   * the extended frame format (and 29-bit extended ID).
    */
 
 #ifdef CONFIG_CAN_EXTID

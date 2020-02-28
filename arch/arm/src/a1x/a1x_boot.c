@@ -240,7 +240,7 @@ static void a1x_copyvectorblock(void)
   uint32_t *dest;
 
   /* If we are using re-mapped vectors in an area that has been marked
-   * read only, then temparily mark the mapping write-able (non-buffered).
+   * read only, then temporarily mark the mapping write-able (non-buffered).
    */
 
 #ifdef CONFIG_PAGING

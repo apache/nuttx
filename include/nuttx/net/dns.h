@@ -253,4 +253,3 @@ int dns_unregister_notify(dns_callback_t callback, FAR void *arg);
 #endif
 
 #endif /* __INCLUDE_NUTTX_NET_DNS_H */
-

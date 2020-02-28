@@ -43,7 +43,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -670,6 +669,7 @@ static int up_attach(struct uart_dev_s *dev)
 
       up_enable_irq(priv->irq);
     }
+
   return ret;
 }
 
@@ -789,6 +789,7 @@ static int up_interrupt(int irq, void *context, void *arg)
             }
         }
     }
+
     return OK;
 }
 
@@ -801,7 +802,7 @@ static int up_interrupt(int irq, void *context, void *arg)
  *
  *   Supported and un-supported LPC43 RS-485 features:
  *
- *     RS-485/EIA-485 Normal Multidrop Mode (NMM) -- NOT suppored
+ *     RS-485/EIA-485 Normal Multidrop Mode (NMM) -- NOT supported
  *
  *       In this mode, an address is detected when a received byte causes the
  *       USART to set the parity error and generate an interrupt.  When the
@@ -888,13 +889,13 @@ static inline int up_set_rs485_mode(struct up_dev_s *priv,
 
 #ifdef BOARD_LPC43_UART1_DTRDIR
       if (priv->dtrdir)
-      {
-         /* If we ar using DTR for direction then ensure the H/W is
-          * configured correctly.
-          */
+        {
+          /* If we are using DTR for direction then ensure the H/W is
+           * configured correctly.
+           */
 
-         regval |= UART_RS485CTRL_SEL;
-      }
+          regval |= UART_RS485CTRL_SEL;
+        }
 #endif
 
       up_serialout(priv, LPC43_UART_RS485CTRL_OFFSET, regval);
@@ -936,7 +937,6 @@ static inline int up_set_rs485_mode(struct up_dev_s *priv,
             }
         }
 
-
       up_serialout(priv, LPC43_UART_RS485DLY_OFFSET, regval);
     }
 
@@ -966,7 +966,7 @@ static inline int up_get_rs485_mode(struct up_dev_s *priv,
 
   /* Assume disabled */
 
-   memset(mode, 0, sizeof(struct serial_rs485));
+  memset(mode, 0, sizeof(struct serial_rs485));
 
   /* If RS-485 mode is enabled, then the DCTRL will be set in the RS485CTRL
    * register.
@@ -1226,6 +1226,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       priv->ier &= ~UART_IER_THREIE;
       up_serialout(priv, LPC43_UART_IER_OFFSET, priv->ier);
     }
+
   leave_critical_section(flags);
 }
 
@@ -1258,7 +1259,7 @@ static bool up_txempty(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************

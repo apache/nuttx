@@ -62,7 +62,7 @@
 
 struct progmem_dev_s
 {
-  /* Publically visible representation of the interface */
+  /* Publicly visible representation of the interface */
 
   struct mtd_dev_s mtd;
 

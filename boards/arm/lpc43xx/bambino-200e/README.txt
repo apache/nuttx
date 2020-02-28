@@ -305,7 +305,7 @@ Bambino-200e Configuration Options
   also require CONFIG_NET and CONFIG_LPC43_ETHERNET.
 
     CONFIG_ETH0_PHY_KS8721 - Selects Micrel KS8721 PHY
-    CONFIG_LPC43_AUTONEG - Enable auto-negotion
+    CONFIG_LPC43_AUTONEG - Enable auto-negotiation
 
     CONFIG_LPC17_40_EMACRAM_SIZE - Size of EMAC RAM.  Default: 16Kb
     CONFIG_LPC43_ETH_NTXDESC - Configured number of Tx descriptors. Default: 18
@@ -517,7 +517,7 @@ Where <subdir> is one of the following:
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
        CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART1 will be /dev/ttyS0
 
-       However, there is nothing to generate SYLOG output in the default
+       However, there is nothing to generate SYSLOG output in the default
        configuration so nothing should appear on UART1 unless you enable
        some debug output or enable the USB monitor.
 
@@ -547,4 +547,3 @@ Where <subdir> is one of the following:
        CONFIG_USBMONITOR_TRACETRANSFERS=y
        CONFIG_USBMONITOR_TRACECONTROLLER=y
        CONFIG_USBMONITOR_TRACEINTERRUPTS=y
-

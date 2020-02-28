@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated November 21, 2019)
+NuttX TODO List (Last updated January 3, 2019)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -27,7 +27,7 @@ nuttx/:
  (12)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
-  (3)  Linux/Cywgin simulation (arch/sim)
+  (3)  Linux/Cygwin simulation (arch/sim)
   (5)  ARM (arch/arm/)
 
 apps/ and other Add-Ons:
@@ -473,7 +473,7 @@ o Task/Scheduler (sched/)
                2. Then when either the ELF program task or the created task
                   in the same address environment exits, it would decrement
                   the reference count.  When the last task exits, the reference
-                  count would go to zero and the address environement could be
+                  count would go to zero and the address environment could be
                   destroyed.
 
                This is complex work and would take some effort and probably
@@ -571,7 +571,7 @@ o SMP
                The returned CPU number is then used for various things,
                typically as an array index.  However, if pre-emption is
                not disabled,then it is possible that a context switch
-               could occur and that logic could run on anothe CPU with
+               could occur and that logic could run on another CPU with
                possible fatal consequences.
 
                We need to evaluate all use of this_cpu() and assure that
@@ -579,7 +579,7 @@ o SMP
                to execute on the same CPU.
 
   Status:      Open
-  Prioity:     Medium.  This is a logical problem but I have nevers seen
+  Prioity:     Medium.  This is a logical problem but I have never seen
                an bugs caused by this.  But I believe that failures are
                possible.
 
@@ -589,32 +589,58 @@ o SMP
                can that occur?  I think it can occur in the following
                situation:
 
-               CPU0 - Task A is running.
-                    - The CPU0 IDLE task is the only other task in the
-                      CPU0 ready-to-run list.
-               CPU1 - Task B is running.
-                    - Task C is blocked but remains in the g_assignedtasks[]
-                      list because of a CPU affinity selection.  Task C
-                      also holds the critical section which is temporarily
-                      relinquished because Task C is blocked by Task B.
-                    - The CPU1 IDLE task is at the end of the list.
+               The log below was reported is Nuttx running on two cores
+               Cortex-A7 architecture in SMP mode.  You can notice see that
+               when sched_addreadytorun() was called, the g_cpu_irqset is 3.
 
-               Actions:
-               1. Task A/CPU 0 takes the critical section.
-               2. Task B/CPU 1 suspends waiting for an event
-               3. Task C is restarted.
+                 sched_addreadytorun: irqset cpu 1, me 0 btcbname init, irqset 1 irqcount 2.
+                 sched_addreadytorun: sched_addreadytorun line 338 g_cpu_irqset = 3.
 
-               Now both Task A and Task C hold the critical section.
+               This can happen, but only under a very certain condition.
+               g_cpu_irqset only exists to support this certain condition:
 
-               This problem has never been observed, but seems to be a
-               possibility.  I believe it could only occur if CPU affinity
-               is used (otherwise, tasks will pend must as when pre-
-               emption is disabled).
+                 a. A task running on CPU 0 takes the critical section.  So
+                    g_cpu_irqset == 0x1.
 
-               A proper solution would probably involve re-designing how
-               CPU affinity is implemented.  The CPU1 IDLE thread should
-               more appropriately run, but cannot because the Task C TCB
-               is in the g_assignedtasks[] list.
+                 b. A task exits on CPU 1 and a waiting, ready-to-run task
+                    is re-started on CPU 1.  This new task also holds the
+                    critical section.  So when the task is re-restarted on
+                    CPU 1, we than have g_cpu_irqset == 0x3
+
+               So we are in a very perverse state!  There are two tasks
+               running on two different CPUs and both hold the critical
+               section.  I believe that is a dangerous situation and there
+               could be undiscovered bugs that could happen in that case.
+               However, as of this moment, I have not heard of any specific
+               problems caused by this weird behavior.
+
+               A possible solution would be to add a new task state that
+               would exist only for SMP.
+
+               - Add a new SMP-only task list and state.  Say,
+                 g_csection_wait[].  It should be prioritized.
+               - When a task acquires the critical section, all tasks in
+                 g_readytorun[] that need the critical section would be
+                 moved to g_csection_wait[].
+               - When any task is unblocked for any reason and moved to the
+                 g_readytorun[] list, if that unblocked task needs the
+                 critical section, it would also be moved to the
+                 g_csection_wait[] list.  No task that needs the critical
+                 section can be in the ready-to-run list if the critical
+                 section is not available.
+               - When the task releases the critical section, all tasks in
+                 the g_csection_wait[] needs to be moved back to
+                 g_readytorun[].
+              - This may result in a context switch.  The tasks should be
+                 moved back to g_readytorun[] highest priority first.  If a
+                 context switch occurs and the critical section to re-taken
+                 by the re-started task, the lower priority tasks in
+                 g_csection_wait[] must stay in that list.
+
+               That is really not as much work as it sounds.  It is
+               something that could be done in 2-3 days of work if you know
+               what you are doing.  Getting the proper test setup and
+               verifying the change would be the more difficult task.
 
 Status:        Open
 Priority:      Unknown.  Might be high, but first we would need to confirm
@@ -765,7 +791,7 @@ o Signals (sched/signal, arch/)
   Priority:    Low. Even if there are only 31 usable signals, that is still a lot.
 
   Title:       NO QUEUING of SIGNAL ACTIONS
-  Description: In the architecture specific implemenation of struct xcptcontext,
+  Description: In the architecture specific implementation of struct xcptcontext,
                there are fields used by signal handling logic to pass the state
                information needed to dispatch signal actions to the appropriate
                handler.
@@ -781,7 +807,7 @@ o Signals (sched/signal, arch/)
                very low.
 
   Title:       QUEUED SIGNAL ACTIONS ARE INAPPROPRIATELY DEFERRED
-  Descirption: The implement of nxsig_deliver() does the followin in a loop:
+  Description: The implement of nxsig_deliver() does the following in a loop:
                - It takes the next next queued signal action from a list
                - Calls the architecture-specific up_sigdeliver() to perform
                  the signal action (through some sleight of hand in
@@ -793,7 +819,7 @@ o Signals (sched/signal, arch/)
                  uninterrupted thread instead of returning to nxsig_deliver().
 
                The loop in nxsig_deliver() then will have the opportunity to
-               run until when that normal, uniterrupted thread is suspended.
+               run until when that normal, uninterrupted thread is suspended.
                Then the loop will continue with the next queued signal
                action.
 
@@ -1098,7 +1124,7 @@ o Kernel/Protected Build
                via a system call at high rates.
 
   Title:       SIGNAL ACTION VULNERABILITY
-  Description: When a signal action is peformed, the user stack is used.
+  Description: When a signal action is performed, the user stack is used.
                Unlike Linux, applications do not have separate user and
                supervisor stacks; everything is done on the user stack.
 
@@ -1138,11 +1164,12 @@ o C++ Support
                that size_t is of a different type resulting in compilation errors
                in the operator.  Using the underlying integer type Instead of
                size_t seems to resolve the compilation issues.
-  Status:      Kind of open.  There is a workaround.  Setting CONFIG_CXX_NEWLONG=y
-               will define the operators with argument of type unsigned long;
-               Setting CONFIG_CXX_NEWLONG=n will define the operators with argument
-               of type unsigned int.  But this is pretty ugly!  A better solution
-               would be to get a hold of the compilers definition of size_t.
+  Status:      Kind of open. There is a workaround. Setting CONFIG_ARCH_SIZET_LONG
+               =y will define the operators with argument of type unsigned long;
+               Setting CONFIG_ARCH_SIZET_LONG=n will define the operators with
+               argument of type unsigned int. But this is pretty ugly!  A better
+               solution would be to get a hold of the compilers definition of
+               size_t.
   Priority:    Low.
 
   Title:       STATIC CONSTRUCTORS AND MULTITASKING
@@ -2090,13 +2117,6 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Medium-Low
 
-  Title:       CONFIG_RAMLOG_CONSOLE DOES NOT WORK
-  Description: When I enable CONFIG_RAMLOG_CONSOLE, the system does not come up
-               properly (using configuration stm3240g-eval/nsh2).  The problem
-               may be an assertion that is occurring before we have a console.
-  Status:      Open
-  Priority:    Medium
-
   Title:       UNIFIED DESCRIPTOR REPRESENTATION
   Description: There are two separate ranges of descriptors for file and
                socket descriptors: if a descriptor is in one range then it is
@@ -2451,7 +2471,7 @@ o Graphics Subsystem (graphics/)
                incomplete.  In fact, many recent changes explicitly assume a
                single color plane:  Planar colors are specified by a array
                of components; some recent logic uses only component [0],
-               ignoring the possible existence of other color componet frames.
+               ignoring the possible existence of other color component frames.
 
                Completely removing planar color support is one reasonable
                options; it is not likely that NuttX will encounter planar
@@ -2508,7 +2528,7 @@ o Other drivers (drivers/)
   Priority:    Low, provided that the application can handle these characters
                in the data stream.
 
-o Linux/Cywgin simulation (arch/sim)
+o Linux/Cygwin simulation (arch/sim)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       SIMULATOR HAS NO INTERRUPTS (NON-PREMPTIBLE)
@@ -2689,7 +2709,7 @@ o ARM (arch/arm/)
   Title:       USE COMMON VECTOR LOGIC IN ALL ARM ARCHITECTURES.
   Description: Originally, each ARMv7-M MCU architecture had its own
                private implementation for interrupt vectors and interrupt
-               handling logic.  This was superceded by common interrupt
+               handling logic.  This was superseded by common interrupt
                vector logic but these private implementations were never
                removed from older MCU architectures.  This is turning into
                a maintenance issue because any improvements to the common
@@ -2764,7 +2784,7 @@ o Other Applications & Tests (apps/examples/)
 
   Title:       EXAMPLES/PIPE ON CYGWIN
   Description: The redirection test (part of examples/pipe) terminates
-               incorrectly on the Cywgin-based simulation platform (but works
+               incorrectly on the Cygwin-based simulation platform (but works
                fine on the Linux-based simulation platform).
   Status:      Open
   Priority:    Low

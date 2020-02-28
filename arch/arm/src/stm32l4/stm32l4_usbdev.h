@@ -82,4 +82,3 @@ void stm32l4_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_USBDEV_H */
-

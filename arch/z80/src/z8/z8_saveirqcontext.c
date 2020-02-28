@@ -130,4 +130,3 @@ void z8_saveirqcontext(FAR chipreg_t *regs)
       g_z8irqstate.regs  = regs;
     }
 }
-

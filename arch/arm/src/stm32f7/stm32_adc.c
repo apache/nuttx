@@ -52,7 +52,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -738,7 +737,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 
   /* Configure the timer channel to drive the ADC */
 
-  /* Caculate optimal values for the timer prescaler and for the timer
+  /* Calculate optimal values for the timer prescaler and for the timer
    * reload register.  If freq is the desired frequency, then
    *
    *   reload = timclk / freq

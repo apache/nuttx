@@ -1,4 +1,4 @@
-/************************************************************************************************
+/****************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_twi.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************************/
+ ***************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_TWI_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_TWI_H
 
-/************************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************************/
+ ***************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
-/************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************************/
+ ***************************************************************************/
 
-/* Register offsets for TWI master (TWIM) *******************************************************/
+/* Register offsets for TWI master (TWIM) **********************************/
 
 #define NRF52_TWIM_TASKS_STARTRX_OFFSET     0x0000 /* Start TWIM receive sequence */
 #define NRF52_TWIM_TASKS_STARTTX_OFFSET     0x0008 /* Start TWIM transmit sequence */
@@ -80,7 +80,7 @@
 #define NRF52_TWIM_TXLIST_OFFSET            0x0550 /* TX EasyDMA list type */
 #define NRF52_TWIM_ADDRESS_OFFSET           0x0588 /* TWIM address */
 
-/* Register offsets for TWI slave (TWIS) ********************************************************/
+/* Register offsets for TWI slave (TWIS) ***********************************/
 
 #define NRF52_TWIS_TASKS_STOP_OFFSET        0x0014 /* Stop TWIS transaction */
 #define NRF52_TWIS_TASKS_SUSPEND_OFFSET     0x001c /* Suspend TWIS transaction */
@@ -115,7 +115,7 @@
 #define NRF52_TWIS_CONFIG_OFFSET            0x0594 /* Configuration register for the address match mechanism */
 #define NRF52_TWIS_ORC_OFFSET               0x05c0 /* Over-read character */
 
-/* Register Bitfield Definitions for TWIM *******************************************************/
+/* Register Bitfield Definitions for TWIM **********************************/
 
 /* SHORTS Register */
 
@@ -145,29 +145,31 @@
 /* ENABLE Register */
 
 #define TWIM_ENABLE_DIS                     (0)        /* Disable TWIM */
-#define TWIM_ENABLE_EN                      (0xf << 0) /* Disable TWIM */
+#define TWIM_ENABLE_EN                      (0x6 << 0) /* Disable TWIM */
 
 /* PSELSCL Register */
 
 #define TWIM_PSELSCL_PIN_SHIFT              (0)        /* Bits 0-4: SCL pin number */
-#define TWIM_PSELSCL_PIN_MASK               (0xf << TWIM_PSELSCL_PIN_SHIFT)
+#define TWIM_PSELSCL_PIN_MASK               (0x1f << TWIM_PSELSCL_PIN_SHIFT)
 #define TWIM_PSELSCL_PORT_SHIFT             (5)        /* Bit 5: SCL port number */
 #define TWIM_PSELSCL_PORT_MASK              (0x1 << TWIM_PSELSCL_PORT_SHIFT)
 #define TWIM_PSELSCL_CONNECTED              (1 << 31)  /* Bit 31: Connection */
+#define TWIM_PSELSCL_RESET                  (0xffffffff)
 
 /* PSELSDA Register */
 
 #define TWIM_PSELSDA_PIN_SHIFT              (0)        /* Bits 0-4: SDA pin number */
-#define TWIM_PSELSDA_PIN_MASK               (0xf << TWIM_PSELSDA_PIN_SHIFT)
+#define TWIM_PSELSDA_PIN_MASK               (0x1f << TWIM_PSELSDA_PIN_SHIFT)
 #define TWIM_PSELSDA_PORT_SHIFT             (5)        /* Bit 5: SDA port number */
 #define TWIM_PSELSDA_PORT_MASK              (0x1 << TWIM_PSELSDA_PORT_SHIFT)
 #define TWIM_PSELSDA_CONNECTED              (1 << 31)  /* Bit 31: Connection */
+#define TWIM_PSELSDA_RESET                  (0xffffffff)
 
 /* FREQUENCY Register */
 
 #define TWIM_FREQUENCY_100KBPS              (0x01980000) /* 100 kbps */
 #define TWIM_FREQUENCY_250KBPS              (0x04000000) /* 250 kbps */
-#define TWIM_FREQUENCY_400KBPS              (0x64000000) /* 400 kbps */
+#define TWIM_FREQUENCY_400KBPS              (0x06400000) /* 400 kbps */
 
 /* RXDMAXCNT Register */
 

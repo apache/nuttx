@@ -58,6 +58,7 @@
  ****************************************************************************/
 
 /* USB descriptor templates these will be copied and modified **************/
+
 /* Device Descriptor.  If the USB serial device is configured as part of
  * composite device, then the device descriptor will be provided by the
  * composite device logic.
@@ -182,27 +183,27 @@ int cdcacm_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
       return -EINVAL;
     }
 
-   /* The string is utf16-le.  The poor man's utf-8 to utf16-le
-    * conversion below will only handle 7-bit en-us ascii
-    */
+  /* The string is utf16-le.  The poor man's utf-8 to utf16-le
+   * conversion below will only handle 7-bit en-us ascii
+   */
 
-   len = strlen(str);
-   if (len > (CDCACM_MAXSTRLEN / 2))
-     {
-       len = (CDCACM_MAXSTRLEN / 2);
-     }
+  len = strlen(str);
+  if (len > (CDCACM_MAXSTRLEN / 2))
+    {
+      len = (CDCACM_MAXSTRLEN / 2);
+    }
 
-   for (i = 0, ndata = 0; i < len; i++, ndata += 2)
-     {
-       strdesc->data[ndata]   = str[i];
-       strdesc->data[ndata+1] = 0;
-     }
+  for (i = 0, ndata = 0; i < len; i++, ndata += 2)
+    {
+      strdesc->data[ndata]   = str[i];
+      strdesc->data[ndata + 1] = 0;
+    }
 
-   strdesc->len  = ndata+2;
-   strdesc->type = USB_DESC_TYPE_STRING;
-   return strdesc->len;
+  strdesc->len  = ndata + 2;
+  strdesc->type = USB_DESC_TYPE_STRING;
+  return strdesc->len;
 #else
-   return -EINVAL;
+  return -EINVAL;
 #endif
 }
 
@@ -388,7 +389,11 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 #endif
 
       dest->len         = USB_SIZEOF_CFGDESC;                /* Descriptor length */
+#ifdef CONFIG_USBDEV_DUALSPEED
+      dest->type        = type;                              /* Descriptor type */
+#else
       dest->type        = USB_DESC_TYPE_CONFIG;              /* Descriptor type */
+#endif
       dest->totallen[0] = LSBYTE(size);                      /* LS Total length */
       dest->totallen[1] = MSBYTE(size);                      /* MS Total length */
       dest->ninterfaces = CDCACM_NINTERFACES;                /* Number of interfaces */
@@ -515,7 +520,8 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
   if (buf != NULL)
     {
-      FAR struct cdc_callmgmt_funcdesc_s *dest = (FAR struct cdc_callmgmt_funcdesc_s *)buf;
+      FAR struct cdc_callmgmt_funcdesc_s *dest =
+                 (FAR struct cdc_callmgmt_funcdesc_s *)buf;
 
       dest->size    = SIZEOF_CALLMGMT_FUNCDESC;               /* Descriptor length */
       dest->type    = USB_DESC_TYPE_CSINTERFACE;              /* Descriptor type */
@@ -532,7 +538,9 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
   if (buf != NULL)
     {
-      cdcacm_copy_epdesc(CDCACM_EPINTIN, (struct usb_epdesc_s *)buf, devinfo, hispeed);
+      cdcacm_copy_epdesc(CDCACM_EPINTIN, (struct usb_epdesc_s *)buf,
+                         devinfo,
+                         hispeed);
 
       buf += USB_SIZEOF_EPDESC;
     }
@@ -568,7 +576,9 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
   if (buf != NULL)
     {
-      cdcacm_copy_epdesc(CDCACM_EPBULKOUT, (struct usb_epdesc_s *)buf, devinfo, hispeed);
+      cdcacm_copy_epdesc(CDCACM_EPBULKOUT, (struct usb_epdesc_s *)buf,
+                         devinfo,
+                         hispeed);
       buf += USB_SIZEOF_EPDESC;
     }
 
@@ -578,7 +588,9 @@ int16_t cdcacm_mkcfgdesc(FAR uint8_t *buf,
 
   if (buf != NULL)
     {
-      cdcacm_copy_epdesc(CDCACM_EPBULKIN, (struct usb_epdesc_s *)buf, devinfo, hispeed);
+      cdcacm_copy_epdesc(CDCACM_EPBULKIN, (struct usb_epdesc_s *)buf,
+                         devinfo,
+                         hispeed);
       buf += USB_SIZEOF_EPDESC;
     }
 

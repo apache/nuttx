@@ -3,7 +3,14 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menuconfig EEPROM
+	bool "EEPROM support"
+	default n
+	---help---
+		This directory holds implementations of EEPROM drivers.
+
 if EEPROM
+
 config SPI_EE_25XX
 	bool "Microchip 25xxNNN / Atmel AT25NNN / ST M95NNN SPI EEPROM devices"
 	default n
@@ -52,4 +59,4 @@ config AT24CS_UUID
 
 endif # I2C_EE_24XX
 
-endif # EEPROM
+endif

@@ -2,7 +2,7 @@
  * net/icmpv6/icmpv6_radvertise.c
  * Send an ICMPv6 Router Advertisement
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -194,7 +194,8 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   /* Set up the source address option */
 
   srcaddr           = (FAR struct icmpv6_srclladdr_s *)
-                      ((FAR uint8_t *)adv + sizeof(struct icmpv6_router_advertise_s));
+                      ((FAR uint8_t *)adv +
+                      sizeof(struct icmpv6_router_advertise_s));
   srcaddr->opttype  = ICMPv6_OPT_SRCLLADDR;
   srcaddr->optlen   = ICMPv6_OPT_OCTECTS(lladdrsize);
   memcpy(srcaddr->srclladdr, &dev->d_mac, lladdrsize);
@@ -202,7 +203,8 @@ void icmpv6_radvertise(FAR struct net_driver_s *dev)
   /* Set up the MTU option */
 
   mtu               = (FAR struct icmpv6_mtu_s *)
-                      ((FAR uint8_t *)srcaddr + SIZEOF_ICMPV6_SRCLLADDR_S(lladdrsize));
+                      ((FAR uint8_t *)srcaddr +
+                       SIZEOF_ICMPV6_SRCLLADDR_S(lladdrsize));
   mtu->opttype      = ICMPv6_OPT_MTU;
   mtu->optlen       = 1;
   mtu->reserved     = 0;

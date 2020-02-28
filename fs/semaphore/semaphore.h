@@ -70,4 +70,3 @@ extern "C"
 #endif
 
 #endif /* __FS_SEMAPHORE_SEMAPHORE_H */
-

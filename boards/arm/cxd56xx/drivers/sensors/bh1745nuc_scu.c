@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/platform/sensors/bh1745nuc_scu.c
+ * boards/arm/cxd56xx/drivers/sensors/bh1745nuc_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -44,7 +44,6 @@
 #include <fixedmath.h>
 #include <errno.h>
 #include <debug.h>
-#include <semaphore.h>
 #include <arch/types.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -270,6 +269,7 @@ static int bh1745nuc_seqinit(FAR struct bh1745nuc_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_seq;
 
   seq_setaddress(priv->seq, priv->addr);

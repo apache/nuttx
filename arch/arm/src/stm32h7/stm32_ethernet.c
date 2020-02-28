@@ -230,7 +230,7 @@
 
 #define STM32_ETH_NFREEBUFFERS (CONFIG_STM32H7_ETH_NTXDESC+1)
 
-/* Buffers use fro DMA access must begin on an address aligned with the
+/* Buffers use for DMA access must begin on an address aligned with the
  * D-Cache line and must be an even multiple of the D-Cache line size.
  * These size/alignment requirements are necessary so that D-Cache flush
  * and invalidate operations will not have any additional effects.
@@ -1156,7 +1156,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
               txdesc->des3 |= ETH_TDES3_RD_LD;
 
-              /* This segement is, most likely, of fractional buffersize */
+              /* This segment is, most likely, of fractional buffersize */
 
               /* ask for an interrupt when this segment transfer completes. */
 
@@ -3617,7 +3617,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
     }
 #endif
 
-#else /* Auto-negotion not selected */
+#else /* Auto-negotiation not selected */
 
   phyval = 0;
 #ifdef CONFIG_STM32H7_ETHFD
@@ -3657,7 +3657,7 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
  * Name: stm32_selectmii
  *
  * Description:
- *   Selects the MII inteface.
+ *   Selects the MII interface.
  *
  * Input Parameters:
  *   None
@@ -3683,7 +3683,7 @@ static inline void stm32_selectmii(void)
  * Name: stm32_selectrmii
  *
  * Description:
- *   Selects the RMII inteface.
+ *   Selects the RMII interface.
  *
  * Input Parameters:
  *   None
@@ -3899,7 +3899,7 @@ static void stm32_ethreset(struct stm32_ethmac_s *priv)
 
   while ((stm32_getreg(STM32_ETH_DMAMR) & ETH_DMAMR_SWR) != 0);
 
-  /* Acording to the spec, these need to be done before creating
+  /* According to the spec, these need to be done before creating
    * the descriptor lists, so initialize these already here
    */
 

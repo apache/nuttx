@@ -93,4 +93,3 @@ void mq_inode_release(FAR struct inode *inode);
 #endif
 
 #endif /* __FS_MQUEUE_MQUEUE_H */
-

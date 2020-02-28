@@ -67,7 +67,7 @@
 
 #define SYSTICK_RELOAD ((SYSCLK_FREQUENCY / CLK_TCK) - 1)
 
-/* The size of the reload field is 24 bits.  Verify taht the reload value
+/* The size of the reload field is 24 bits.  Verify that the reload value
  * will fit in the reload register.
  */
 
@@ -101,7 +101,7 @@ static int tiva_timerisr(int irq, uint32_t *regs, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  arm_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -109,7 +109,7 @@ static int tiva_timerisr(int irq, uint32_t *regs, void *arg)
  *
  ****************************************************************************/
 
-void arm_timer_initialize(void)
+void up_timer_initialize(void)
 {
   uint32_t regval;
 

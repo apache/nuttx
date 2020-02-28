@@ -61,7 +61,7 @@
 #define SAM_PM_INTENCLR_OFFSET             0x0004  /* Interrupt enable clear register */
 #define SAM_PM_INTENSET_OFFSET             0x0005  /* Interrupt enable set register */
 #define SAM_PM_INTFLAG_OFFSET              0x0006  /* Interrupt flag status and clear register */
-#define SAM_PM_STDBYCFG_OFFSET             0x0008  /* Standy configuration */
+#define SAM_PM_STDBYCFG_OFFSET             0x0008  /* Standby configuration */
 
 /* PM register addresses ****************************************************************************/
 
@@ -100,7 +100,7 @@
 
 #define PM_INT_PLRDY                       (1 << 0)  /* Bit 0: Performanc level ready */
 
-/* Standy configuration */
+/* Standby configuration */
 
 #define PM_STDBYCFG_PDCFG_SHIFT            (0)       /* Bits 0-1: Power domain configuration */
 #define PM_STDBYCFG_PDCFG_MASK             (3 << PM_STDBYCFG_PDCFG_SHIFT)

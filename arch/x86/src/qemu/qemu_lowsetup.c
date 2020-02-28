@@ -137,4 +137,3 @@ void up_lowsetup(void)
 
   x86_boardinitialize();
 }
-

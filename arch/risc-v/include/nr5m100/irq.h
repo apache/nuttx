@@ -69,4 +69,3 @@ void up_irq_restore(irqstate_t irqstate);
 irqstate_t up_irq_enable(void);
 
 #endif /* __ARCH_RISCV_INCLUDE_NR5M100_IRQ_H */
-

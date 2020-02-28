@@ -72,7 +72,7 @@
  *
  *    NOTE 2: CONFIG_SCHED_ONEXIT must be defined to enable this function
  *
- *    Limitiations in the current implementation:
+ *    Limitations in the current implementation:
  *
  *      1. Only a single on_exit function can be registered unless
  *         CONFIG_SCHED_ONEXIT_MAX defines a larger number.
@@ -106,7 +106,7 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
       sched_lock();
 
       /* Search for the first available slot.  on_exit() functions are registered
-       * from lower to higher arry indices; they must be called in the reverse
+       * from lower to higher array indices; they must be called in the reverse
        * order of registration when task exists, i.e., from higher to lower
        * indices.
        */

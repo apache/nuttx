@@ -761,7 +761,7 @@ static void twi_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
 
       for (ckdiv = 0; ckdiv < 8; ckdiv++)
         {
-          /* Calulate the CLDIV value using the current CKDIV guess */
+          /* Calculate the CLDIV value using the current CKDIV guess */
 
           cldiv = ((priv->clkin / (frequency << 1)) - 4) / (1 << ckdiv);
 

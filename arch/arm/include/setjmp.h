@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_SETJUMP_H
-#define __ARCH_ARM_INCLUDE_SETJUMP_H 1
+#define __ARCH_ARM_INCLUDE_SETJUMP_H
 
 /****************************************************************************
  * Included Files

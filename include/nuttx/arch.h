@@ -53,8 +53,7 @@
  *    This chip related declarations are retained in this header file.
  *
  *    NOTE: up_ is supposed to stand for microprocessor; the u is like the
- *    Greek letter micron: µ. So it would be µP which is a common shortening
- *    of the word microprocessor.
+ *    Greek letter micron.
  *
  * 2. Microprocessor-Specific Interfaces.
  *
@@ -388,7 +387,7 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype);
  *   tcb: Refers to the tcb to be unblocked.  This tcb is
  *     in one of the waiting tasks lists.  It must be moved to
  *     the ready-to-run list and, if it is the highest priority
- *     ready to run taks, executed.
+ *     ready to run task, executed.
  *
  ****************************************************************************/
 
@@ -1332,6 +1331,12 @@ int up_shmdt(uintptr_t vaddr, unsigned int npages);
 /* See prototype in include/nuttx/elf.h */
 
 /****************************************************************************
+ * Name: up_irqinitialize
+ ****************************************************************************/
+
+void up_irqinitialize(void);
+
+/****************************************************************************
  * Name: up_interrupt_context
  *
  * Description:
@@ -1411,13 +1416,24 @@ int up_prioritize_irq(int irq, int priority);
 #endif
 
 /****************************************************************************
+ * Function:  up_timer_initialize
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer hardware.
+ *
+ ****************************************************************************/
+
+void up_timer_initialize(void);
+
+/****************************************************************************
  * Tickless OS Support.
  *
  * When CONFIG_SCHED_TICKLESS is enabled, all support for timer interrupts
  * is suppressed and the platform specific code is expected to provide the
  * following custom functions.
  *
- *   Architecture specific timer initialiation logic initializes the timer
+ *   Architecture specific timer initialization logic initializes the timer
  *     facilities.  This happens early in the initialization sequence (via
  *     up_initialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
@@ -1948,7 +1964,7 @@ int up_cpu_resume(int cpu);
  *
  * Description:
  *   In Harvard architectures, data accesses and instruction accesses occur
- *   on different busses, perhaps concurrently.  All data accesses are
+ *   on different buses, perhaps concurrently.  All data accesses are
  *   performed on the data bus unless special  machine instructions are
  *   used to read data from the instruction address space.  Also, in the
  *   typical MCU, the available SRAM data memory is much smaller that the
@@ -2323,7 +2339,7 @@ int up_rtc_settime(FAR const struct timespec *tp);
  *             signal tasks in user space.  A value of NULL can be passed
  *             in order to detach and disable the PHY interrupt.
  *   arg     - The argument that will accompany the interrupt
- *   enable  - A function pointer that be unsed to enable or disable the
+ *   enable  - A function pointer that be unused to enable or disable the
  *             PHY interrupt.
  *
  * Returned Value:

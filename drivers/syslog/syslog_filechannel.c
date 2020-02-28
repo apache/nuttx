@@ -139,7 +139,6 @@ static int syslog_file_force(int ch)
 
 int syslog_file_channel(FAR const char *devpath)
 {
-  FAR const struct syslog_channel_s *saved_channel;
   int ret;
 
   /* Reset the default SYSLOG channel so that we can safely modify the
@@ -151,35 +150,16 @@ int syslog_file_channel(FAR const char *devpath)
    */
 
   sched_lock();
-  saved_channel = g_syslog_channel;
-  ret = syslog_channel(&g_default_channel);
-  if (ret < 0)
-    {
-      goto errout_with_lock;
-    }
 
   /* Uninitialize any driver interface that may have been in place */
 
-  ret = syslog_dev_uninitialize();
-  if (ret < 0)
-    {
-      /* Nothing fatal has happened yet, we can restore the last channel
-       * since it was not uninitialized (was it?)
-       */
-
-      syslog_channel(saved_channel);
-      goto errout_with_lock;
-    }
+  syslog_dev_uninitialize();
 
   /* Then initialize the file interface */
 
   ret = syslog_dev_initialize(devpath, OPEN_FLAGS, OPEN_MODE);
   if (ret < 0)
     {
-      /* We should still be able to back-up and re-initialized everything */
-
-      syslog_initialize(SYSLOG_INIT_EARLY);
-      syslog_initialize(SYSLOG_INIT_LATE);
       goto errout_with_lock;
     }
 

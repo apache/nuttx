@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/netinet/arp.h
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,15 +44,15 @@
 
 #include <stdint.h>
 #include <net/if.h>
+
 #include <nuttx/fs/ioctl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Three ioctls are available on all PF_INET sockets, but only if the NuttX
- * configuration CONFIG_NET_ARPIOCTLS is defined. Each ioctl takes a pointer
- * to a 'struct arpreq' as its parameter.
+/* Three ioctls are available on all PF_INET sockets. Each ioctl takes a
+ * pointer to a 'struct arpreq' as its parameter.
  */
 
 #define SIOCSARP        _ARPIOC(1) /* Set a ARP mapping */
@@ -83,7 +83,7 @@ struct arpreq
   struct sockaddr arp_ha;          /* Hardware address */
   struct sockaddr arp_netmask;     /* Netmask of protocol address */
   uint8_t         arp_flags;       /* Flags */
-  uint8_t         arp_dev[IFNAMSIZ+1]; /* Device name (zero terminated)*/
+  uint8_t         arp_dev[IFNAMSIZ + 1]; /* Device name (zero terminated) */
 };
 
 /****************************************************************************
@@ -102,15 +102,9 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* If CONFIG_NET_ARPIOCTLS is defined then the semi-standard ioctl commands
- * described above are supported.  If not, you can call the network ARP
- * interfaces directly in a very non-standard way.  See
- * include/nuttx/net/arp.h for prototypes.
- */
-
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*   __INCLUDE_NETINET_ARP_H */
+#endif /* __INCLUDE_NETINET_ARP_H */

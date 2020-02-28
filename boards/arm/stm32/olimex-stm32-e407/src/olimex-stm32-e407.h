@@ -380,5 +380,5 @@ int stm32_timer_driver_setup(FAR const char *devpath, int timer);
 int stm32_mrf24j40_initialize(void);
 #endif
 
-#endif  /* __ASSEMBLY__ */
+#endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_E407_SRC_INTERNAL_H */

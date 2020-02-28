@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_IOCTL_H
-#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_IOCTL_H 1
+#define __INCLUDE_NUTTX_WIRELESS_BLUETOOTH_BT_IOCTL_H
 
 /****************************************************************************
  * Included Files

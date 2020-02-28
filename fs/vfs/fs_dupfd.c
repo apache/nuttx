@@ -103,7 +103,7 @@ int file_dup(FAR struct file *filep, int minfd)
  * Name: fs_dupfd OR dup
  *
  * Description:
- *   Clone a file descriptor 'fd' to an arbitray descriptor number (any value
+ *   Clone a file descriptor 'fd' to an arbitrary descriptor number (any value
  *   greater than or equal to 'minfd'). If socket descriptors are
  *   implemented, then this is called by dup() for the case of file
  *   descriptors.  If socket descriptors are not implemented, then this
@@ -145,4 +145,3 @@ errout:
   set_errno(-ret);
   return ERROR;
 }
-

@@ -41,7 +41,6 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <semaphore.h>
 #include <string.h>
 #include <queue.h>
 #include <assert.h>
@@ -68,7 +67,6 @@
 #include <netinet/in.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
 #include "vnc_server.h"
@@ -119,9 +117,7 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
   /* [Re-]initialize the session. */
 
   memset(&session->connect, 0, sizeof(struct socket));
-  session->connect.s_crefs = 1;
   memset(&session->listen, 0, sizeof(struct socket));
-  session->listen.s_crefs = 1;
 
   /* Put all of the pre-allocated update structures into the freelist */
 
@@ -244,7 +240,7 @@ int vnc_server(int argc, FAR char *argv[])
   int display;
   int ret;
 
-  /* A single argument is expected:  A diplay port number in ASCII form */
+  /* A single argument is expected:  A display port number in ASCII form */
 
   if (argc != 2)
     {
@@ -348,7 +344,7 @@ int vnc_server(int argc, FAR char *argv[])
               continue;
             }
 
-          /* Let the framebuffer driver know that we are ready to preform
+          /* Let the framebuffer driver know that we are ready to perform
            * updates.
            */
 

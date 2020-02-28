@@ -322,5 +322,3 @@ nxgl_copyrun_4bpp(FAR const uint8_t *src, FAR uint8_t *dest,
 }
 #endif
 #endif /* __GRAPHICS_NXGLIB_NXGLIB_COPYRUN_H */
-
-

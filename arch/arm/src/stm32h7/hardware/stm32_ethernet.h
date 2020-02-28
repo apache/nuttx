@@ -172,7 +172,7 @@
 
 #define ETH_MACCR_RE                 (1 << 0)  /* Bit 0:  Receiver enable */
 #define ETH_MACCR_TE                 (1 << 1)  /* Bit 1:  Transmitter enable */
-#define ETH_MACCR_PRELEN_SHIFT       (2)       /* Bits 2-3: Preample length for transmit packets */
+#define ETH_MACCR_PRELEN_SHIFT       (2)       /* Bits 2-3: Preamble length for transmit packets */
 #define ETH_MACCR_PRELEN_MASK        (3 << ETH_MACCR_PRELEN_SHIFT)
 #  define ETH_MACCR_PRELEN_7         (0 << ETH_MACCR_PRELEN_SHIFT) /* 00: 7 bytes of preamble */
 #  define ETH_MACCR_PRELEN_5         (1 << ETH_MACCR_PRELEN_SHIFT) /* 01: 5 bytes of preamble */

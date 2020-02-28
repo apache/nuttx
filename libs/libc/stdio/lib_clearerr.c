@@ -66,4 +66,3 @@ void clearerr(FILE *stream)
   stream->fs_flags = 0;
 }
 #endif /* CONFIG_NFILE_STREAMS */
-

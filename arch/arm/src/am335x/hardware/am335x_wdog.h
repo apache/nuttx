@@ -130,4 +130,3 @@
 #define WDT_SPR_STOP_FEED_B             (0x00005555)
 
 #endif /* __ARCH_ARM_SRC_AM335X_HARDWARE_AM335X_WDOG_H */
-

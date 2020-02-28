@@ -453,7 +453,7 @@
 /* Legacy/Common TX Buffer Descriptor Bit Definitions.
  *
  *   The descriptors are represented by structures  Unfortunately, when the
- *   structures are overlayed on the data, the bytes are reversed because
+ *   structures are overlaid on the data, the bytes are reversed because
  *   the underlying hardware writes the data in big-endian byte order.
  */
 

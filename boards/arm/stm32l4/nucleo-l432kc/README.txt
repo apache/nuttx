@@ -128,7 +128,7 @@ GNU Toolchain Options
      An alias in your .bashrc file might make that less painful.
 
   3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows pathes which do not
+     because the dependencies are generated using Windows paths which do not
      work with the Cygwin make.
 
        MKDEP = $(TOPDIR)/tools/mknulldeps.sh
@@ -188,7 +188,7 @@ IDEs
   there is a lot of help on the internet).
 
   Using Sourcery CodeBench from http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/overview
-    Download and install the latest version (as of this writting it was
+    Download and install the latest version (as of this writing it was
     sourceryg++-2013.05-64-arm-none-eabi)
 
    Import the  project from git.
@@ -206,7 +206,7 @@ IDEs
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/arm/src/stm32,
+  3) Set up include paths:  You will need include/, arch/arm/src/stm32,
      arch/arm/src/common, arch/arm/src/armv7-m, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.
@@ -535,3 +535,14 @@ Configurations
        Pin 33 PA10 USART1_TX    some RS-232 converters
        Pin 20 GND
        Pin 8  U5V
+
+  spwm
+  ----
+
+    Configures the sinusoidal PWM (SPWM) example which presents a simple use case
+    of the STM32L4 PWM lower-half driver without generic upper-half PWM logic.
+
+    It uses TIM1 to generate PWM and TIM6 to change waveform samples
+
+    At the moment, the waveform parameters are hardcoded, but it should be easy to
+    modify this example and make it more functional.

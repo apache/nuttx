@@ -49,4 +49,3 @@ DEPPATH += --dep-path termios
 VPATH += termios
 
 endif
-

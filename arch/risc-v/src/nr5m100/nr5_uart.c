@@ -260,4 +260,3 @@ void nr5_uart_put_tx(uint8_t ch)
 
    *g_nr5_uart1.regs->ptx = ch;
 }
-

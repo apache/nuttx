@@ -43,7 +43,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/fs/ioctl.h>
@@ -51,7 +50,6 @@
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
 #include <nuttx/mtd/mtd.h>
-#include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
@@ -189,13 +187,7 @@ void up_initialize(void)
    * with the power management subsystem).
    */
 
-  up_pminitialize();
-#endif
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
+  pm_initialize();
 #endif
 
   /* Register devices */
@@ -239,8 +231,6 @@ void up_initialize(void)
   up_devconsole();          /* Our private /dev/console */
 #elif defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
-#elif defined(CONFIG_RAMLOG_CONSOLE)
-  ramlog_consoleinit();
 #endif
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1
@@ -248,13 +238,6 @@ void up_initialize(void)
 
   ptmx_register();
 #endif
-
-  /* Early initialization of the system logging device.  Some SYSLOG channel
-   * can be initialized early in the initialization sequence because they
-   * depend on only minimal OS initialization.
-   */
-
-  syslog_initialize(SYSLOG_INIT_EARLY);
 
 #if defined(CONFIG_CRYPTO)
   /* Initialize the HW crypto and /dev/crypto */
@@ -270,11 +253,11 @@ void up_initialize(void)
   up_registerblockdevice(); /* Our FAT ramdisk at /dev/ram0 */
 #endif
 
-#if defined(CONFIG_NET_ETHERNET) && defined(CONFIG_SIM_NETDEV)
+#ifdef CONFIG_SIM_NETDEV
   netdriver_init();         /* Our "real" network driver */
 #endif
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
   /* Initialize the local loopback device */
 
   localhost_initialize();

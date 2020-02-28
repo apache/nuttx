@@ -88,7 +88,7 @@ int k28_bringup(void)
 #endif
 
 #if defined(CONFIG_KINETIS_I2C0) || defined(CONFIG_KINETIS_I2C1)
-  /* Initialize I2C busses */
+  /* Initialize I2C buses */
 
   k28_i2cdev_initialize();
 #endif

@@ -35,7 +35,7 @@
 
 ifeq ($(CONFIG_LCD),y)
 
-# Support for the generic LCD framebufer front-end
+# Support for the generic LCD framebuffer front-end
 
 ifeq ($(CONFIG_LCD_FRAMEBUFFER),y)
   CSRCS += lcd_framebuffer.c
@@ -122,6 +122,10 @@ endif
 
 ifeq ($(CONFIG_LCD_ILI9341),y)
   CSRCS += ili9341.c
+endif
+
+ifeq ($(CONFIG_LCD_LCDDRV_SPIIF),y)
+  CSRCS += lcddrv_spiif.c
 endif
 
 ifeq ($(CONFIG_LCD_RA8875),y)

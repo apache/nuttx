@@ -178,7 +178,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
        *   R0 = SYS_save_context
        *   R1 = saveregs
        *
-       * In this case, we simply need to copy the current regsters to the
+       * In this case, we simply need to copy the current registers to the
        * save register space references in the saved R1 and return.
        */
 
@@ -369,7 +369,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
           DEBUGASSERT(rtcb->xcp.sigreturn == 0);
           rtcb->xcp.sigreturn  = regs[REG_PC];
 
-          /* Set up to return to the user-space pthread start-up function in
+          /* Set up to return to the user-space trampoline function in
            * unprivileged mode.
            */
 

@@ -12,7 +12,7 @@ cd ..
 make
 
 
-Frambuffer calculation
+Framebuffer calculation
 ----------------------
 
 Use the helper script boards/stm32f429i-disco/tools/fbcalc.sh for calculating
@@ -34,7 +34,7 @@ Configured at build time
 - background color
 - default color (outside visible screen)
 
-Configurable by nuttx frambuffer interface
+Configurable by nuttx framebuffer interface
 - cmap support (color table is shared by both LTDC overlays and DMA2D when
   enabled)
 
@@ -50,7 +50,7 @@ LTDC overlays are similar to a non-destructive overlay. Both LTDC overlays will
 be permanently blended in the order (background -> overlay 0 -> overlay 1) and
 converted to a resulting video signal by the LTDC controller. That means each
 operation with a LTDC overlay (Overlay 0 and Overlay 1) via nuttx framebuffer
-interface will be visible immediatelly.
+interface will be visible immediately.
 Think about continuous blending between both overlays.
 
 
@@ -64,12 +64,12 @@ Configurable via the nuttx framebuffer interface
 
 Configurable via the nuttx framebuffer interface (for each layer separately)
 
-- color (fill memory region with a specific ARGB8888 color immediatelly), if
+- color (fill memory region with a specific ARGB8888 color immediately), if
   cmap is disabled
 - blit (copy memory region to another memory region with pixel format
-  conversion if neccessary)
+  conversion if necessary)
 - blend (blend two memory regions and copy the result to a third memory region
-  with pixel format conversion if neccessary), if cmap is disabled
+  with pixel format conversion if necessary), if cmap is disabled
 
 Blit and blend operation using a fixes memory size defined by the background
 layer. DMA2D controller doesn't support scaling.
@@ -106,7 +106,6 @@ The test will put a pattern of concentric squares in the framebuffer and
 terminate.
 
 You can also test overlay hardware acceleration functionality by executing the
-follwing command (shows a commandline help):
+following command (shows a commandline help):
 
   nsh> fboverlay
-

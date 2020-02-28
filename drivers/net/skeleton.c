@@ -301,7 +301,7 @@ static int skel_txpoll(FAR struct net_driver_s *dev)
 
       /* Check if the network is sending this packet to the IP address of
        * this device.  If so, just loop the packet back into the network but
-       * don't attmpt to put it on the wire.
+       * don't attempt to put it on the wire.
        */
 
       if (!devif_loopback(&priv->sk_dev))

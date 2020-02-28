@@ -77,7 +77,7 @@
 
 struct sam_isi_s
 {
-  uint32_t actual;  /* Acutal ISI_MCK frequency */
+  uint32_t actual;  /* Actual ISI_MCK frequency */
 };
 
 /****************************************************************************

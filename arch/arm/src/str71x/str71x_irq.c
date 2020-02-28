@@ -220,4 +220,3 @@ int up_prioritize_irq(int irq, int priority)
   return -EINVAL;
 }
 #endif
-

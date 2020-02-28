@@ -43,7 +43,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
@@ -78,7 +77,7 @@
 
 /* Configuration ************************************************************/
 
-#if ((defined(CONFIG_IMXRT_USDHC1) && !defined(CONFIG_IMXRT_USDHC2)) ||	\
+#if ((defined(CONFIG_IMXRT_USDHC1) && !defined(CONFIG_IMXRT_USDHC2)) || \
      (defined(CONFIG_IMXRT_USDHC2) && !defined(CONFIG_IMXRT_USDHC1)))
 #  define  IMXRT_MAX_SDHC_DEV_SLOTS  1
 #elif (defined(CONFIG_IMXRT_USDHC1) && defined(CONFIG_IMXRT_USDHC2))
@@ -524,7 +523,7 @@ static void imxrt_takesem(struct imxrt_dev_s *priv)
  * Name: imxrt_configwaitints
  *
  * Description:
- *   Enable/disable SDIO interrupts needed to suport the wait function
+ *   Enable/disable SDIO interrupts needed to support the wait function
  *
  * Input Parameters:
  *   priv       - A reference to the SDIO device state structure
@@ -1232,9 +1231,28 @@ static int imxrt_interrupt(int irq, void *context, FAR void *arg)
 
       /* We don't want any more ints now, so switch it off */
 
-      priv->cintints  = 0;
       regval         &= ~USDHC_INT_CINT;
+      priv->cintints  = regval;
       putreg32(regval, priv->addr + IMXRT_USDHC_IRQSIGEN_OFFSET);
+    }
+
+  if ((pending & USDHC_INT_CINS) != 0 || (pending & USDHC_INT_CRM) != 0)
+    {
+      if (up_interrupt_context())
+        {
+          /* Yes.. queue it */
+
+          mcinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
+          (void)work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
+                          priv->cbarg, 0);
+        }
+      else
+        {
+          /* No.. then just call the callback here */
+
+          mcinfo("Callback to %p(%p)\n", priv->callback, priv->cbarg);
+          priv->callback(priv->cbarg);
+        }
     }
 
   /* Handle wait events *****************************************************/
@@ -3019,7 +3037,14 @@ void imxrt_usdhc_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
       priv->cintints = 0;
     }
 
-  flags = enter_critical_section();
+#if defined(CONFIG_MMCSD_HAVE_CARDDETECT)
+  if (priv->sw_cd_gpio == 0)
+    {
+      priv->cintints |= USDHC_INT_CINS | USDHC_INT_CRM;
+    }
+#endif
+
+  flags  = enter_critical_section();
   regval = getreg32(priv->addr + IMXRT_USDHC_IRQSIGEN_OFFSET);
   regval = (regval & ~USDHC_INT_CINT) | priv->cintints;
   putreg32(regval, priv->addr + IMXRT_USDHC_IRQSIGEN_OFFSET);
@@ -3142,4 +3167,4 @@ FAR struct sdio_dev_s *imxrt_usdhc_initialize(int slotno)
   return &g_sdhcdev[slotno].dev;
 }
 
-#endif  /* CONFIG_IMXRT_USDHC */
+#endif /* CONFIG_IMXRT_USDHC */

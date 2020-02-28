@@ -284,7 +284,7 @@ as follows:
 TWR-K60N512-specific Configuration Options
 ==========================================
 
-    CONFIG_ARCH - Identifies the arch/ subdirectory.  This sould
+    CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
 
        CONFIG_ARCH=arm
@@ -484,7 +484,7 @@ Where <subdir> is one of the following:
       CONFIG_FAT=y                         : Eable FAT file system
       CONFIG_FAT_LCNAMES=y                 : FAT lower case name support
       CONFIG_FAT_LFN=y                     : FAT long file name support
-      CONFIG_FAT_MAXFNAME=32               : Maximum lenght of a long file name
+      CONFIG_FAT_MAXFNAME=32               : Maximum length of a long file name
 
       CONFIG_KINETIS_GPIOIRQ=y             : Enable GPIO interrupts
       CONFIG_KINETIS_PORTEINTS=y           : Enable PortE GPIO interrupts

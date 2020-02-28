@@ -127,4 +127,4 @@
  ************************************************************************************/
 
 #endif /* CONFIG_LIB_SYSCALL */
-#endif  /* __ARCH_ARM_SRC_ARMV7_A_SVCALL_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_A_SVCALL_H */

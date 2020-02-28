@@ -1036,7 +1036,7 @@ static void sam_dma_wrsetup(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
         {
           privreq->inflight = remaining;
 
-          /* If the size is an exact multple of full packets, then note if
+          /* If the size is an exact multiple of full packets, then note if
            * we need to send a zero length packet next.
            */
 
@@ -1216,7 +1216,7 @@ static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
        *
        * At least the USB class CDC/ACM calls the function sam_ep_submit within
        * the callback. This function uses sam_req_write or sam_req_read to process
-       * the request, both functions can change the state. Therefore it is verry
+       * the request, both functions can change the state. Therefore it is very
        * important to set the state to USBHS_EPSTATE_IDLE before the callback is
        * called.
        */
@@ -1702,7 +1702,7 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
             }
 
           /* No DMA for this endpoint and we have an available, empty read
-           * request.  We need to wait for data to become avaialable.
+           * request.  We need to wait for data to become available.
            */
 
           else
@@ -2603,7 +2603,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
     }
 
   /* Check for end of channel transfer. END_TR_ST is set by hardware when
-   * the last packet transfer is complete iff END_TR_EN is set in the
+   * the last packet transfer is complete if END_TR_EN is set in the
    * DMACONTROL register.  The request is complete.
    *
    * "Used for OUT transfers only.

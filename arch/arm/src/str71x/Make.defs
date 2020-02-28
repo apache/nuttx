@@ -70,4 +70,3 @@ endif
 ifeq ($(CONFIG_STR71X_XTI),y)
 CHIP_CSRCS+= str71x_xti.c
 endif
-

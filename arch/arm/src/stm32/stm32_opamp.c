@@ -175,7 +175,7 @@
 #    endif
 #  endif
 #  ifndef OPAMP1_VPSEL
-#    error "OPAMP1_VPSEL must be slected in standalone mode!"
+#    error "OPAMP1_VPSEL must be selected in standalone mode!"
 #  endif
 #endif
 #ifdef CONFIG_STM32_OPAMP2
@@ -191,7 +191,7 @@
 #    endif
 #  endif
 #  ifndef OPAMP2_VPSEL
-#    error "OPAMP2_VPSEL must be slected in standalone mode!"
+#    error "OPAMP2_VPSEL must be selected in standalone mode!"
 #  endif
 #endif
 #ifdef CONFIG_STM32_OPAMP3
@@ -207,7 +207,7 @@
 #    endif
 #  endif
 #  ifndef OPAMP3_VPSEL
-#    error "OPAMP3_VPSEL must be slected in standalone mode!"
+#    error "OPAMP3_VPSEL must be selected in standalone mode!"
 #  endif
 #endif
 #ifdef CONFIG_STM32_OPAMP4
@@ -223,7 +223,7 @@
 #    endif
 #  endif
 #  ifndef OPAMP4_VPSEL
-#    error "OPAMP4_VPSEL must be slected in standalone mode!"
+#    error "OPAMP4_VPSEL must be selected in standalone mode!"
 #  endif
 #endif
 
@@ -871,7 +871,7 @@ static int stm32_opampconfig(FAR struct stm32_opamp_s *priv)
 
     if (priv->mux == 1)
       {
-        /* Enable Timer controled Mux mode */
+        /* Enable Timer controlled Mux mode */
 
         regval |= OPAMP_CSR_TCMEN;
 
@@ -1113,7 +1113,7 @@ static int stm32_opampconfig(FAR struct stm32_opamp_s *priv)
 
     opamp_putreg_csr(priv, regval);
 
-    /* Configure defaul gain in PGA mode */
+    /* Configure default gain in PGA mode */
 
     stm32_opampgain_set(priv, priv->gain);
 
@@ -1408,10 +1408,10 @@ FAR struct opamp_dev_s* stm32_opampinitialize(int intf)
   return dev;
 }
 
-#endif  /* CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F33XX*/
+#endif /* CONFIG_STM32_STM32F30XX || CONFIG_STM32_STM32F33XX*/
 
-#endif  /* CONFIG_STM32_OPAMP1 || CONFIG_STM32_OPAMP2 ||
-         * CONFIG_STM32_OPAMP3 || CONFIG_STM32_OPAMP4
-         */
+#endif /* CONFIG_STM32_OPAMP1 || CONFIG_STM32_OPAMP2 ||
+        * CONFIG_STM32_OPAMP3 || CONFIG_STM32_OPAMP4
+        */
 
 #endif /* CONFIG_STM32_OPAMP */

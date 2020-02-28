@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NETINET_I6P_H
-#define __INCLUDE_NETINET_I6P_H
+#ifndef __INCLUDE_NETINET_IP6_H
+#define __INCLUDE_NETINET_IP6_H
 
 /****************************************************************************
  * Included Files
@@ -51,4 +51,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __INCLUDE_NETINET_I6P_H */
+#endif /* __INCLUDE_NETINET_IP6_H */

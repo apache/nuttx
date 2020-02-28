@@ -500,7 +500,7 @@ int imxrt_lpuart_configure(uint32_t base,
   else if (config->users485)
     {
       /* Both TX and RX side can't control RTS, so this gives
-       * the RX side precidence. This should have been filtered
+       * the RX side precedence. This should have been filtered
        * in layers above anyway, but it's just a precaution.
        */
 

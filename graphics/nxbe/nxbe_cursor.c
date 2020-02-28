@@ -114,7 +114,7 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
       be->cursor.visible = true;
 
       /* For a hardware cursor, this would require some interaction with the
-       * grahics device.
+       * graphics device.
        */
 
 #  error Missing logic
@@ -147,7 +147,7 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable)
         }
 #else
       /* For a hardware cursor, this would require some interaction with the
-       * grahics device.
+       * graphics device.
        */
 
 #  error Missing logic
@@ -284,7 +284,7 @@ errout_with_erase:
 
 #else
   /* For a hardware cursor, this would require some interaction with the
-   * grahics device.
+   * graphics device.
    */
 
 #  error Missing logic
@@ -361,7 +361,7 @@ void nxbe_cursor_setposition(FAR struct nxbe_state_s *be,
 
 #else
   /* For a hardware cursor, this would require some interaction with the
-   * grahics device.
+   * graphics device.
    */
 
 #  error Missing logic

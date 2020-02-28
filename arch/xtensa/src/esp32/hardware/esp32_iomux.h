@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 #ifndef __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_MUX_H
-#define __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_MUX_H 1
+#define __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_MUX_H
 
 /****************************************************************************
  * Included Files

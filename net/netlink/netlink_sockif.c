@@ -287,7 +287,6 @@ static int netlink_bind(FAR struct socket *psock,
   conn->pid       = nladdr->nl_pid;
   conn->groups    = nladdr->nl_groups;
 
-  psock->s_flags |= _SF_BOUND;
   return OK;
 }
 
@@ -503,21 +502,9 @@ static int netlink_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
 static void netlink_response_available(FAR void *arg)
 {
-  /* The entire notifier entry is passed to us.  That is because we are
-   * responsible for disposing of the entry via kmm_free() when we are
-   * finished with it.
-   */
+  FAR struct netlink_conn_s *conn = arg;
 
-  FAR struct work_notifier_entry_s *notifier =
-    (FAR struct work_notifier_entry_s *)arg;
-  FAR struct netlink_conn_s *conn;
-
-  DEBUGASSERT(notifier != NULL && notifier->info.qualifier != NULL);
-  conn = (FAR struct netlink_conn_s *)notifier->info.qualifier;
-
-  /* Free the notifier entry */
-
-  kmm_free(notifier);
+  DEBUGASSERT(conn != NULL);
 
   /* The following should always be true ... but maybe not in some race
    * condition?

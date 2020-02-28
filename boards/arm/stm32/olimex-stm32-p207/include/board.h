@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_P207_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32_OLIMEX_STM32_P207_INCLUDE_BOARD_H 1
+#define __BOARDS_ARM_STM32_OLIMEX_STM32_P207_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files

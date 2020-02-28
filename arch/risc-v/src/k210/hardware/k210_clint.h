@@ -37,6 +37,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define K210_CLINT_MSIP      (K210_CLINT_BASE + 0x0000)
 #define K210_CLINT_MTIMECMP  (K210_CLINT_BASE + 0x4000)
 #define K210_CLINT_MTIME     (K210_CLINT_BASE + 0xbff8)
 

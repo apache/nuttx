@@ -35,11 +35,13 @@
 HEAD_ASRC = k210_vectors.S
 
 # Specify our general Assembly files
-CHIP_ASRCS = k210_head.S up_syscall.S
+CHIP_ASRCS = k210_head.S
+
+CMN_ASRCS  += up_testset.S
 
 # Specify C code within the common directory to be included
 CMN_CSRCS  += up_initialize.c up_swint.c
-CMN_CSRCS  += up_allocateheap.c up_createstack.c up_exit.c
+CMN_CSRCS  += up_allocateheap.c up_createstack.c up_exit.c up_fault.c
 CMN_CSRCS  += up_assert.c up_blocktask.c up_copystate.c up_initialstate.c
 CMN_CSRCS  += up_interruptcontext.c up_modifyreg32.c up_puts.c
 CMN_CSRCS  += up_releasepending.c up_reprioritizertr.c
@@ -60,3 +62,15 @@ CHIP_CSRCS += k210_idle.c k210_irq.c k210_irq_dispatch.c
 CHIP_CSRCS += k210_lowputc.c k210_serial.c
 CHIP_CSRCS += k210_start.c k210_timerisr.c
 
+ifeq ($(CONFIG_SMP), y)
+CHIP_CSRCS += k210_cpuidlestack.c k210_cpuindex.c
+CHIP_CSRCS += k210_cpupause.c k210_cpustart.c
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CMN_CSRCS  += up_task_start.c up_pthread_start.c
+CMN_CSRCS  += up_signal_dispatch.c
+CMN_UASRCS += up_signal_handler.S
+
+CHIP_CSRCS += k210_userspace.c
+endif

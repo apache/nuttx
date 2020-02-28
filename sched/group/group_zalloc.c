@@ -72,4 +72,4 @@ FAR void *group_zalloc(FAR struct task_group_s *group, size_t nbytes)
   return mem;
 }
 
-#endif  /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) && CONFIG_MM_KERNEL_HEAP */
+#endif /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) && CONFIG_MM_KERNEL_HEAP */

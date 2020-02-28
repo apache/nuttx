@@ -49,7 +49,6 @@
 
 #include <net/ethernet.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/sixlowpan.h>
@@ -210,7 +209,7 @@ unsigned int neighbor_snapshot(FAR struct neighbor_entry_s *snapshot,
  * Name: neighbor_dumpentry
  *
  * Description:
- *   Dump the conents of an entry Neighbor Table.
+ *   Dump the contents of an entry Neighbor Table.
  *
  * Input Parameters:
  *   msg      - Message to print with the entry
@@ -252,4 +251,3 @@ void neighbor_dumpipaddr(FAR const char *msg,
 
 #endif /* CONFIG_NET_IPv6 */
 #endif /* __NET_NEIGHBOR_NEIGHBOR_H */
-

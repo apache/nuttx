@@ -3,6 +3,21 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config HAVE_USBTRACE
+	bool
+	default n
+
+menuconfig USBMONITOR
+	bool "USB Monitor"
+	default n
+	depends on HAVE_USBTRACE
+	---help---
+		If USB device tracing (USBDEV_TRACE) AND/OR USB host tracing
+		(USBHOST_TRACE) are enabled then this option will select the USB
+		monitor.  The USB monitor is a daemon that will periodically collect
+		the buffered USB trace data and dump it to the SYSLOG device.
+
+if USBMONITOR
 
 config USBMONITOR_STACKSIZE
 	int "USB Monitor daemon stack size"
@@ -56,3 +71,5 @@ config USBMONITOR_TRACEINTERRUPTS
 		Show interrupt-related events
 
 endif # USBDEV && USBDEV_TRACE
+
+endif # USBMONITOR

@@ -3,6 +3,17 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config ARCH_HAVE_I2CRESET
+	bool
+	default n
+
+menuconfig I2C
+	bool "I2C Driver Support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" I2C driver.
+		See include/nuttx/i2c/i2c_master.h for further I2C driver information.
+
 if I2C
 
 config I2C_SLAVE
@@ -49,4 +60,4 @@ config I2CMULTIPLEXER_PCA9540BDP
 
 endmenu # I2C Multiplexer Support
 
-endif # I2C
+endif

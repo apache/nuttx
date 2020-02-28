@@ -158,7 +158,7 @@
 #define CACHE_VA_MASK       (0xfffffffe0) /* Bits 5-31: Virtual address */
 
 /************************************************************************************
- * Assemby Macros
+ * Assembly Macros
  ************************************************************************************/
 /* cp15_cache Cache Operations
  *
@@ -277,7 +277,7 @@
  * Name: cp15_invalidate_icache_inner_sharable
  *
  * Description:
- *   Invalidate I cache predictor array inner sharable
+ *   Invalidate I cache predictor array inner shareable
  *
  * Input Parameters:
  *   None
@@ -296,7 +296,7 @@
  * Name: cp15_invalidate_btb_inner_sharable
  *
  * Description:
- *   Invalidate entire branch predictor array inner sharable
+ *   Invalidate entire branch predictor array inner shareable
  *
  * Input Parameters:
  *   None
@@ -632,7 +632,7 @@ static inline void cp15_disable_icache(void)
  * Name: cp15_invalidate_icache_inner_sharable
  *
  * Description:
- *   Invalidate I cache predictor array inner sharable
+ *   Invalidate I cache predictor array inner shareable
  *
  * Input Parameters:
  *   None
@@ -658,7 +658,7 @@ static inline void cp15_invalidate_icache_inner_sharable(void)
  * Name: cp15_invalidate_btb_inner_sharable
  *
  * Description:
- *   Invalidate entire branch predictor array inner sharable
+ *   Invalidate entire branch predictor array inner shareable
  *
  * Input Parameters:
  *   None
@@ -1080,4 +1080,4 @@ void cp15_flush_dcache(uintptr_t start, uintptr_t end);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_A_CP15_CACHEOPS_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_A_CP15_CACHEOPS_H */

@@ -137,7 +137,7 @@
 #define PPULSE_SHIFT           0        /* Bits 0-5: Prox. Pulse Count (1 up to 64 pulses) */
 #define PPULSE_MASK            (0x3f << PPULSE_SHIFT)
 #  define PPULSE_NUM(n)        ((n-1) << PPULSE_SHIFT)
-#define PPLEN_SHIFT            6        /* Bits 6-7: Prox. Pulse Lenght */
+#define PPLEN_SHIFT            6        /* Bits 6-7: Prox. Pulse Length */
 #define PPLEN_MASK             (3 << PPLEN_SHIFT)
 #  define PPLEN_4US            (0 << PPLEN_SHIFT)
 #  define PPLEN_8US            (1 << PPLEN_SHIFT)
@@ -176,7 +176,7 @@
 #define CPSIEN                 (1 << 6) /* Bit 6: Clear diode Saturation Interrupt Enable */
 #define PSIEN                  (1 << 7) /* Bit 7: Proximity Saturation Interrupt Enable */
 
-/* STATUS Regiser */
+/* STATUS Register */
 
 #define AVALID                 (1 << 0) /* Bit 0: ALS Valid */
 #define PVALID                 (1 << 1) /* Bit 1: Proximity Valid */

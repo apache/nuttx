@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_SAM_CONFIG_H
-#define __ARCH_ARM_SRC_SAMA5_SAM_CONFIG_H 1
+#define __ARCH_ARM_SRC_SAMA5_SAM_CONFIG_H
 
 /****************************************************************************
  * Included Files

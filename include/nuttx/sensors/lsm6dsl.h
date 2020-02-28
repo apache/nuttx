@@ -53,8 +53,8 @@
 
 /* Accelerometer addresses */
 
-#define LSM6DSLACCEL_ADDR0  (0xD4>>1) /*0x6a low */
-#define LSM6DSLACCEL_ADDR1  (0xD6>>1) /* 0x6B .. high */
+#define LSM6DSLACCEL_ADDR0  (0xD4 >> 1) /* 0x6a low */
+#define LSM6DSLACCEL_ADDR1  (0xD6 >> 1) /* 0x6B .. high */
 
 /* Gyroscope addresses */
 
@@ -138,12 +138,10 @@
 #define LSM6DSL_SENSORHUB16_REG                         0x50 /* Sixteenth byte associated to external sensors. */
 #define LSM6DSL_SENSORHUB17_REG                         0x51 /* Seventeenth byte associated to external sensors. */
 #define LSM6DSL_SENSORHUB18_REG                         0x52 /* Eighteenth byte associated to external sensors. */
-#define LSM6DSL_FUNC_SRC1                               0x53 /* Significant motion, tilt, step detector, hard/soft-iron and sensor hub interrupt source register
-(r). */
+#define LSM6DSL_FUNC_SRC1                               0x53 /* Significant motion, tilt, step detector, hard/soft-iron and sensor hub interrupt source register (r). */
 #define LSM6DSL_FUNC_SRC2                               0x54 /* Wrist tilt interrupt source register (r). */
 #define LSM6DSL_WRIST_TILT_IA                           0x55 /* Wrist tilt interrupt source register (r). */
-#define LSM6DSL_TAP_CFG                                 0x58 /* Enables interrupt and inactivity functions, configuration of filtering and tap recognition
-functions (r/w). */
+#define LSM6DSL_TAP_CFG                                 0x58 /* Enables interrupt and inactivity functions, configuration of filtering and tap recognition functions (r/w). */
 #define LSM6DSL_TAP_THS_6D                              0x59 /* Portrait/landscape position and tap function threshold register (r/w). */
 #define LSM6DSL_INT_DUR2                                0x5A /* Tap recognition function setting register (r/w). */
 #define LSM6DSL_WAKE_UP_THS                             0x5B /* Single and double-tap function threshold register (r/w). */
@@ -207,7 +205,7 @@ functions (r/w). */
 /****************************************************************************************************
  * Register Bit Definitions
  *
- * For this sensor it is choosen to not define each pin individually...its set bitwise like:
+ * For this sensor it is chosen to not define each pin individually...its set bitwise like:
  * 0b000[0]0000 with preferred hex value! Where [] is showing the [not defined in datasheet] bit.
  * A complete definition is written below, just not all registers are validated!!
  *
@@ -834,7 +832,7 @@ struct lsm6dsl_sensor_data_s
 };
 
 /****************************************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************************************/
 
 struct lsm6dsl_dev_s;

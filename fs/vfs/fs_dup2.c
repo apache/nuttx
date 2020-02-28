@@ -47,7 +47,7 @@
 #include "inode/inode.h"
 
 /* This logic in this applies only when both socket and file descriptors are
- * in that case, this function descriminates which type of dup2 is being
+ * in that case, this function discriminates which type of dup2 is being
  * performed.
  */
 
@@ -82,7 +82,7 @@ int dup2(int fd1, int fd2)
         {
           /* Yes.. dup the socket descriptor. The errno value is not set. */
 
-          ret = net_dupsd2(fd1, fd2);
+          ret = net_dup2(fd1, fd2);
         }
       else
         {
@@ -112,4 +112,3 @@ int dup2(int fd1, int fd2)
 }
 
 #endif /* CONFIG_NET */
-

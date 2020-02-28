@@ -160,4 +160,3 @@ int stm32_tsc_setup(int minor);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_HYMINI_STM32V_H */
-

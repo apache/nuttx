@@ -181,7 +181,7 @@ struct spiffs_file_s
  * Public Function Prototypes
  ****************************************************************************/
 
-struct stat;  /* Foward reference */
+struct stat;  /* Forward reference */
 
 /****************************************************************************
  * Name: spiffs_stat_pgndx
@@ -335,4 +335,4 @@ void spiffs_fobj_free(FAR struct spiffs_s *fs,
 }
 #endif
 
-#endif  /* __FS_SPIFFS_SRC_SPIFFS_H */
+#endif /* __FS_SPIFFS_SRC_SPIFFS_H */

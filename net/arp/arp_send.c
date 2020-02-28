@@ -41,14 +41,11 @@
 
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
-#include <time.h>
 #include <debug.h>
 
 #include <netinet/in.h>
 #include <net/if.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
@@ -60,15 +57,6 @@
 #include "arp/arp.h"
 
 #ifdef CONFIG_NET_ARP_SEND
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define CONFIG_ARP_SEND_DELAYSEC  \
-  (CONFIG_ARP_SEND_DELAYMSEC / 1000)
-#define CONFIG_ARP_SEND_DELAYNSEC \
-  ((CONFIG_ARP_SEND_DELAYMSEC - 1000*CONFIG_ARP_SEND_DELAYSEC) * 1000000)
 
 /****************************************************************************
  * Private Functions
@@ -202,7 +190,6 @@ int arp_send(in_addr_t ipaddr)
 {
   FAR struct net_driver_s *dev;
   struct arp_notify_s notify;
-  struct timespec delay;
   struct arp_send_s state;
   int ret;
 
@@ -248,7 +235,8 @@ int arp_send(in_addr_t ipaddr)
    * Ethernet link layer protocol.
    */
 
-  if (dev->d_lltype != NET_LL_ETHERNET)
+  if (dev->d_lltype != NET_LL_ETHERNET &&
+      dev->d_lltype != NET_LL_IEEE80211)
     {
       return OK;
     }
@@ -323,11 +311,6 @@ int arp_send(in_addr_t ipaddr)
    * sending the ARP request if it is not.
    */
 
-  /* The optimal delay would be the worst case round trip time. */
-
-  delay.tv_sec  = CONFIG_ARP_SEND_DELAYSEC;
-  delay.tv_nsec = CONFIG_ARP_SEND_DELAYNSEC;
-
   ret = -ETIMEDOUT; /* Assume a timeout failure */
 
   while (state.snd_retries < CONFIG_ARP_SEND_MAXTRIES)
@@ -386,7 +369,7 @@ int arp_send(in_addr_t ipaddr)
 
       /* Now wait for response to the ARP response to be received. */
 
-      ret = arp_wait(&notify, &delay);
+      ret = arp_wait(&notify, CONFIG_ARP_SEND_DELAYMSEC);
 
       /* arp_wait will return OK if and only if the matching ARP response
        * is received.  Otherwise, it will return -ETIMEDOUT.
@@ -399,10 +382,9 @@ int arp_send(in_addr_t ipaddr)
           break;
         }
 
-      /* Increment the retry count and double the delay time */
+      /* Increment the retry count */
 
       state.snd_retries++;
-      clock_timespec_add(&delay, &delay, &delay);
       nerr("ERROR: arp_wait failed: %d\n", ret);
     }
 

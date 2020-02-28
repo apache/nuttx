@@ -433,4 +433,3 @@ void lpc17_40_lowsetup(void)
 #endif
 #endif /* HAVE_UART */
 }
-

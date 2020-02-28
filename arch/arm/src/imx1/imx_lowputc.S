@@ -115,7 +115,7 @@ up_lowputc:
 	moveq   r0, #'\r'
 	beq     1b
 
-	/* Wait for the tranmsit regiser to be emptied. When the bit is
+	/* Wait for the tranmsit register to be emptied. When the bit is
 	 * non-zero, the TX Buffer FIFO is empty.
 	 */
 
@@ -127,4 +127,3 @@ up_lowputc:
 
 	mov     pc, lr
 	.end
-

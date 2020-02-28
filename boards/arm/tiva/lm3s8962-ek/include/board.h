@@ -116,4 +116,4 @@
 #define LED_ASSERTION     6     /* ON   OFF */
 #define LED_PANIC         7     /* ON   OFF */
 
-#endif  /* __BOARDS_ARM_TIVA_LM3S8962_EK_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_TIVA_LM3S8962_EK_INCLUDE_BOARD_H */

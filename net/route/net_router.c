@@ -54,7 +54,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
 
 /****************************************************************************
- * Pre-processor defintions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifdef CONFIG_ROUTE_IPv6_CACHEROUTE
@@ -70,7 +70,7 @@
 #endif
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4

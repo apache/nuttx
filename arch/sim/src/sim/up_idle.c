@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/up_idle.c
  *
- *   Copyright (C) 2007-2009, 2011-2012, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014, 2016, 2020 Gregory Nutt. All
+ *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,18 +40,8 @@
 
 #include <nuttx/config.h>
 
-#include <pthread.h>
-#include <time.h>
-
 #include <nuttx/arch.h>
-
-#ifdef CONFIG_PM
-#  include <nuttx/power/pm.h>
-#endif
-
-#ifdef CONFIG_SMP
-#  include <nuttx/spinlock.h>
-#endif
+#include <nuttx/power/pm.h>
 
 #include "up_internal.h"
 
@@ -59,22 +50,6 @@
  ****************************************************************************/
 
 #define PM_IDLE_DOMAIN 0 /* Revisit */
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#ifdef CONFIG_SIM_X11FB
-static int g_x11refresh = 0;
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef CONFIG_SIM_X11FB
-extern void up_x11update(void);
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -97,52 +72,36 @@ extern void up_x11update(void);
 
 void up_idle(void)
 {
-#ifdef CONFIG_SMP
-  /* In the SMP configuration, only one CPU should do these operations.  It
-   * should not matter which, however.
-   */
+#ifdef CONFIG_PM
+  static enum pm_state_e state = PM_NORMAL;
+  enum pm_state_e newstate;
 
-  static volatile spinlock_t lock SP_SECTION = SP_UNLOCKED;
+  /* Fake some power management stuff for testing purposes */
 
-  /* The one that gets the lock is the one that executes the IDLE operations */
-
-  if (up_testset(&lock) != SP_UNLOCKED)
+  newstate = pm_checkstate(PM_IDLE_DOMAIN);
+  if (newstate != state)
     {
-      /* We didn't get it... Give other pthreads/CPUs a shot and try again
-       * later.
-       */
-
-      pthread_yield();
-      return;
+      if (pm_changestate(PM_IDLE_DOMAIN, newstate) == OK)
+        {
+          state = newstate;
+          pwrinfo("IDLE: switching to new state %i\n", state);
+        }
     }
-#endif
-
-#ifdef CONFIG_SCHED_TICKLESS
-  /* Driver the simulated interval timer */
-
-  up_timer_update();
-#else
-  /* If the system is idle, then process "fake" timer interrupts.
-   * Hopefully, something will wake up.
-   */
-
-  nxsched_process_timer();
 #endif
 
 #ifdef USE_DEVCONSOLE
   /* Handle UART data availability */
 
-  if (g_uart_data_available)
-    {
-#ifdef CONFIG_PM
-      pm_activity(PM_IDLE_DOMAIN, 100);  /* Report important activity to PM */
-#endif
-      g_uart_data_available = 0;
-      simuart_post();
-    }
+  up_devconloop();
 #endif
 
-#if defined(CONFIG_NET_ETHERNET) && defined(CONFIG_SIM_NETDEV)
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
+  /* Drive the X11 event loop */
+
+  up_x11events();
+#endif
+
+#ifdef CONFIG_SIM_NETDEV
   /* Run the network if enabled */
 
   netdriver_loop();
@@ -152,64 +111,9 @@ void up_idle(void)
   up_rptun_loop();
 #endif
 
-#ifdef CONFIG_PM
-  /* Fake some power management stuff for testing purposes */
+#ifdef CONFIG_ONESHOT
+  /* Driver the simulated interval timer */
 
-  {
-    static enum pm_state_e state = PM_NORMAL;
-    enum pm_state_e newstate;
-
-    newstate = pm_checkstate(PM_IDLE_DOMAIN);
-    if (newstate != state)
-      {
-        if (pm_changestate(PM_IDLE_DOMAIN, newstate) == OK)
-          {
-            state = newstate;
-            pwrinfo("IDLE: switching to new state %i\n", state);
-          }
-      }
-  }
-#endif
-
-#if defined(CONFIG_SIM_WALLTIME) || defined(CONFIG_SIM_X11FB)
-  /* Wait a bit so that the nxsched_process_timer() is called close to the
-   * correct rate.
-   */
-
-  up_hostusleep(1000000 / CLK_TCK);
-
-  /* Handle X11-related events */
-
-#ifdef CONFIG_SIM_X11FB
-  if (g_x11initialized)
-    {
-#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
-      /* Drive the X11 event loop */
-
-      if (g_eventloop)
-        {
-          up_x11events();
-        }
-#endif
-
-      /* Update the display periodically */
-
-      g_x11refresh += 1000000 / CLK_TCK;
-      if (g_x11refresh > 500000)
-        {
-          up_x11update();
-        }
-    }
-#endif
-#endif
-
-#ifdef CONFIG_SMP
-  /* Release the spinlock */
-
-  lock = SP_UNLOCKED;
-
-  /* Give other pthreads/CPUs a shot */
-
-  pthread_yield();
+  up_timer_update();
 #endif
 }

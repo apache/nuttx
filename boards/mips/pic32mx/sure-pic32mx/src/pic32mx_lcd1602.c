@@ -75,7 +75,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <ctype.h>
 #include <poll.h>
 #include <errno.h>
@@ -87,6 +86,7 @@
 #include <nuttx/lcd/hd4478ou.h>
 #include <nuttx/lcd/slcd_ioctl.h>
 #include <nuttx/lcd/slcd_codec.h>
+#include <nuttx/semaphore.h>
 
 #include "up_arch.h"
 #include "pic32mx-ioport.h"
@@ -365,7 +365,7 @@ static void lcd_wrcommand(uint8_t cmd)
 
   putreg16(0, PIC32MX_IOPORTE_TRIS);
 
-  /* Set up to write the commond */
+  /* Set up to write the command */
 
   pic32mx_gpiowrite(GPIO_LCD_RS, false); /* Select command */
   pic32mx_gpiowrite(GPIO_LCD_RW, false); /* Select write */
@@ -1019,7 +1019,7 @@ static int lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   if (setup)
     {
-      /* Data is always avaialble to be read */
+      /* Data is always available to be read */
 
       fds->revents |= (fds->events & (POLLIN|POLLOUT));
       if (fds->revents != 0)
@@ -1056,7 +1056,7 @@ int up_lcd1602_initialize(void)
       /* Configure GPIO pins */
 
       putreg16(0, PIC32MX_IOPORTE_TRIS);       /* Set DB0-15 as outputs */
-      pic32mx_configgpio(GPIO_LCD_RS);         /* RS: Selects commnand or data */
+      pic32mx_configgpio(GPIO_LCD_RS);         /* RS: Selects command or data */
       pic32mx_configgpio(GPIO_LCD_RW);         /* RW: Selects read or write */
       pic32mx_configgpio(GPIO_LCD_E);          /* E:  Starts transfer */
 
@@ -1065,7 +1065,7 @@ int up_lcd1602_initialize(void)
       pic32mx_configgpio(GPIO_LCD_LIGHT);       /* K */
       pic32mx_configgpio(GPIO_LCD_COMP);        /* Vo */
       pic32mx_configgpio(GPIO_LCD_PWR);         /* Vbuson/AN5/RB5 controls +5V USB */
-      g_lcd1602.brightness = 0;                 /* Remember tht the light is off */
+      g_lcd1602.brightness = 0;                 /* Remember the light is off */
 
       /* A small delay is necessary between when GPIO_LCD_E was set up as an
        * output with initial value of 0 and this operation.  That delay should

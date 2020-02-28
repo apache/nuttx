@@ -363,7 +363,7 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
         case AUDIO_FU_VOLUME:
           audinfo("    Volume: %d\n", caps->ac_controls.hw[0]);
           break;
-#endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
         case AUDIO_FU_BASS:
@@ -373,7 +373,7 @@ static int null_configure(FAR struct audio_lowerhalf_s *dev,
         case AUDIO_FU_TREBLE:
           audinfo("    Treble: %d\n", caps->ac_controls.b[0]);
           break;
-#endif  /* CONFIG_AUDIO_EXCLUDE_TONE */
+#endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
         default:
           auderr("    ERROR: Unrecognized feature unit\n");

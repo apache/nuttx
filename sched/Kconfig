@@ -390,7 +390,7 @@ config INIT_SYMTAB
 	default EXECFUNCS_SYMTAB_ARRAY if EXECFUNCS_HAVE_SYMTAB
 	depends on !BUILD_PROTECTED && !BUILD_KERNEL
 	---help---
-		The name of othe global array that holds the exported symbol table.
+		The name of other global array that holds the exported symbol table.
 		The special string "NULL" may be provided if there is no symbol
 		table.  Quotation marks will be stripped when config.h is generated.
 
@@ -455,7 +455,7 @@ config RR_INTERVAL
 	default 0
 	---help---
 		The round robin timeslice will be set this number of milliseconds;
-		Round roben scheduling (SCHED_RR) is enabled by setting this
+		Round robin scheduling (SCHED_RR) is enabled by setting this
 		interval to a positive, non-zero value.
 
 config SCHED_SPORADIC
@@ -527,7 +527,7 @@ config SCHED_CHILD_STATUS
 	---help---
 		If this option is selected, then the exit status of the child task
 		will be retained after the child task exits.  This option should be
-		selected if you require knowledge of a child process' exit status.
+		selected if you require knowledge of a child process's exit status.
 		Without this setting, wait(), waitpid() or waitid() may fail.  For
 		example, if you do:
 
@@ -634,7 +634,7 @@ config SCHED_USER_IDENTITY
 	---help---
 		This selection enables functionality of getuid(), setuid(), getgid(),
 		setgid().  If this option is not selected, then stub, root-only
-		versions of these interfaces are avaialbe.  When selected, these
+		versions of these interfaces are available.  When selected, these
 		interfaces will associate a UID and/or GID with each task group.
 		Those can then be managed using the interfaces.  Child tasks will
 		inherit the UID and GID of its parent.
@@ -1003,7 +1003,7 @@ config SCHED_INSTRUMENTATION_BUFFER
 		If this option is selected, then in-memory buffering logic is
 		enabled to capture scheduler instrumentation data.  This has
 		the advantage that (1) the platform logic does not have to provide
-		the sched_note_* interaces described for the previous settings.
+		the sched_note_* interfaces described for the previous settings.
 		Instead, the buffering logic catches all of these.  It encodes
 		timestamps the scheduler note and adds the note to an in-memory,
 		circular buffer.  And (2) buffering the scheduler instrumentation
@@ -1114,7 +1114,13 @@ config NAME_MAX
 	int "Maximum size of a file name"
 	default 32
 	---help---
-	The maximum size of a file name.
+		The maximum size of a file name.
+
+config PATH_MAX
+	int "Maximum size of path name"
+	default 256
+	---help---
+		The maximum size of path name.
 
 endmenu # Files and I/O
 
@@ -1209,7 +1215,7 @@ config BOARD_EARLY_INITIALIZE
 		phase may be used, for example, to initialize more complex,
 		board-specific device drivers.
 
-		Waiting for events, use of I2C, SPI, etc are permissable in the
+		Waiting for events, use of I2C, SPI, etc are permissible in the
 		context of board_late_initialize().  That is because
 		board_late_initialize() will run on a temporary, internal kernel
 		thread.
@@ -1257,7 +1263,7 @@ config BOARD_LATE_INITIALIZE
 		phase may be used, for example, to initialize more complex,
 		board-specific device drivers.
 
-		Waiting for events, use of I2C, SPI, etc are permissable in the
+		Waiting for events, use of I2C, SPI, etc are permissible in the
 		context of board_late_initialize().  That is because
 		board_late_initialize() will run on a temporary, internal kernel
 		thread.

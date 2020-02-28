@@ -496,7 +496,7 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
    */
 
 #ifdef CONFIG_I2C_RESET
-  /* Check if an Arbitration Lost has occured */
+  /* Check if an Arbitration Lost has occurred */
 
   if (priv->result == -EUSERS)
     {
@@ -623,7 +623,7 @@ static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
           if (priv->msgc <= 1 || (next->flags & I2C_M_NOSTART) == 0)
             {
               /* This is the last message OR a restart is required before
-               * the next mesage.  Send the stop signal.
+               * the next message.  Send the stop signal.
                */
 
               twi_putrel(priv, SAM_TWIHS_CR_OFFSET, TWIHS_CR_STOP);

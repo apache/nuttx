@@ -51,7 +51,6 @@
 
 #include <arch/irq.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/net.h>
@@ -154,8 +153,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
  * Name: psock_pkt_send
  *
  * Description:
- *   The psock_pkt_send() call may be used only when the packet socket is in a
- *   connected state (so that the intended recipient is known).
+ *   The psock_pkt_send() call may be used only when the packet socket is in
+ *   a connected state (so that the intended recipient is known).
  *
  * Input Parameters:
  *   psock    An instance of the internal socket structure.
@@ -254,8 +253,9 @@ ssize_t psock_pkt_send(FAR struct socket *psock, FAR const void *buf,
       return state.snd_sent;
     }
 
-  /* If net_lockedwait failed, then we were probably reawakened by a signal. In
-   * this case, net_lockedwait will have returned negated errno appropriately.
+  /* If net_lockedwait failed, then we were probably reawakened by a signal.
+   * In this case, net_lockedwait will have returned negated errno
+   * appropriately.
    */
 
   if (ret < 0)

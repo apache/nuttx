@@ -145,7 +145,8 @@
 #define STM32L4_FLASH_PCROP1ER_OFFSET 0x0028
 #define STM32L4_FLASH_WRP1AR_OFFSET   0x002c
 #define STM32L4_FLASH_WRP1BR_OFFSET   0x0030
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6) || \
+    defined(CONFIG_STM32L4_STM32L4XR)
 #  define STM32L4_FLASH_PCROP2SR_OFFSET 0x0044
 #  define STM32L4_FLASH_PCROP2ER_OFFSET 0x0048
 #  define STM32L4_FLASH_WRP2AR_OFFSET   0x004c
@@ -169,7 +170,8 @@
 #define STM32L4_FLASH_PCROP1ER       (STM32L4_FLASHIF_BASE+STM32L4_FLASH_PCROP1ER_OFFSET)
 #define STM32L4_FLASH_WRP1AR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP1AR_OFFSET)
 #define STM32L4_FLASH_WRP1BR         (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP1BR_OFFSET)
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6) || \
+    defined(CONFIG_STM32L4_STM32L4XR)
 #  define STM32L4_FLASH_PCROP2SR     (STM32L4_FLASHIF_BASE+STM32L4_FLASH_PCROP2SR_OFFSET)
 #  define STM32L4_FLASH_PCROP2ER     (STM32L4_FLASHIF_BASE+STM32L4_FLASH_PCROP2ER_OFFSET)
 #  define STM32L4_FLASH_WRP2AR       (STM32L4_FLASHIF_BASE+STM32L4_FLASH_WRP2AR_OFFSET)
@@ -228,7 +230,8 @@
 #define FLASH_CR_PNB_MASK           (0xFF << FLASH_CR_PNB_SHIFT)
 #define FLASH_CR_PNB(n)             ((n)  << FLASH_CR_PNB_SHIFT) /* Page n (if BKER=0) or n+256 (if BKER=1), n=0..255 */
 
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6) || \
+    defined(CONFIG_STM32L4_STM32L4XR)
 #  define FLASH_CR_BKER             (1 << 11)               /* Bit 11: Page number MSB (Bank selection) */
 #  define FLASH_CR_MER2             (1 << 15)               /* Bit 15: Mass Erase Bank 2 */
 #endif
@@ -246,7 +249,8 @@
 
 #define FLASH_ECCR_ADDR_ECC_SHIFT   (0)                    /* Bits 8-15: Read protect */
 #define FLASH_ECCR_ADDR_ECC_MASK    (0x07ffff << FLASH_ECCR_ADDR_ECC_SHIFT)
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6) || \
+    defined(CONFIG_STM32L4_STM32L4XR)
 #  define FLASH_ECCR_BK_ECC         (1 << 19)               /* Bit 19: ECC fail bank */
 #endif
 #define FLASH_ECCR_SYSF_ECC         (1 << 20)               /* Bit 20: System Flash ECC fail */
@@ -263,7 +267,8 @@
 #define FLASH_OPTCR_IWDG_STOP       (1 << 17)               /* Bit 17: Independent watchdog counter freeze in Stop mode */
 #define FLASH_OPTCR_IWDG_STDBY      (1 << 18)               /* Bit 18: Independent watchdog counter freeze in Standby mode*/
 #define FLASH_OPTCR_WWDG_SW         (1 << 19)               /* Bit 19: Window watchdog selection */
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6) || \
+    defined(CONFIG_STM32L4_STM32L4XR)
 #  define FLASH_OPTCR_BFB2          (1 << 20)               /* Bit 20: Dual bank boot */
 #  define FLASH_OPTCR_DUALBANK      (1 << 21)               /* Bit 21: Dual bank enable */
 #endif

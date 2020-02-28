@@ -106,8 +106,8 @@ up_lowputc:
 
 	str     r0, [r2, #UART_THR_OFFS]
 
-	/* Wait for the tranmsit holding regiser (THR) to be
-	 * emptied. This is detemined when bit 6 of the LSR
+	/* Wait for the tranmsit holding register (THR) to be
+	 * emptied. This is determined when bit 6 of the LSR
 	 * is set.
 	 */
 
@@ -126,4 +126,3 @@ up_lowputc:
 	/* And return */
 
 	mov     pc, lr
-

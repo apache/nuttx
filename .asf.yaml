@@ -1,0 +1,22 @@
+github:
+  description: "Apache NuttX is a mature, real-time embedded operating system (RTOS)"
+  homepage: https://nuttx.apache.org/
+  features:
+    # Enable issues management
+    issues: true
+    # Enable project for project management boards
+    projects: true
+  labels:
+    - nuttx
+    - rtos
+    - embedded
+    - real-time
+    - mcu
+    - microcontroller
+  enabled_merge_buttons:
+    # enable squash button:
+    squash:  true
+    # enable merge button:
+    merge:   true
+    # enable rebase button:
+    rebase:  true

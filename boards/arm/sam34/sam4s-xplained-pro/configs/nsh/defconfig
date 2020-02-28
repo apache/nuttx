@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_ARCH_RAMFUNCS is not set
-# CONFIG_EXAMPLES_SERIALRX_BUFFERED is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="sam4s-xplained-pro"
 CONFIG_ARCH_BOARD_SAM4S_XPLAINED_PRO=y

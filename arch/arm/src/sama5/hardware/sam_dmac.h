@@ -92,7 +92,7 @@
 #define SAM_DMAC_WPSR_OFFSET           0x01e8 /* DMAC Write Protect Status Register */
                                               /* 0x01ec-0x1fc: Reserved */
 
-/* DMAC0 register adresses **************************************************************/
+/* DMAC0 register addresses *************************************************************/
 /* DMAC0 Global Registers */
 
 #define SAM_DMAC0_GCFG                 (SAM_DMAC0_VBASE+SAM_DMAC_GCFG_OFFSET)
@@ -204,7 +204,7 @@
 #define SAM_DMAC0_CH7_SPIP             (SAM_DMAC0_CH7_BASE+SAM_DMAC_CH_SPIP_OFFSET)
 #define SAM_DMAC0_CH7_DPIP             (SAM_DMAC0_CH7_BASE+SAM_DMAC_CH_DPIP_OFFSET)
 
-/* DMAC1 register adresses **************************************************************/
+/* DMAC1 register addresses *************************************************************/
 /* DMAC1 Global Registers */
 
 #define SAM_DMAC1_GCFG                 (SAM_DMAC1_VBASE+SAM_DMAC_GCFG_OFFSET)

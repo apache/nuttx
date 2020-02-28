@@ -50,7 +50,7 @@
 #define TIMER_TPRER_OFFSET          0x0004 /* Timer prescaler register */
 #define TIMER_TCMP_OFFSET           0x0008 /* Timer compare register */
 #define TIMER_TCR_OFFSET            0x000c /* Timer capture register */
-#define TIMER_TCN_OFFSET            0x0010 /* Timer counter regiser */
+#define TIMER_TCN_OFFSET            0x0010 /* Timer counter register */
 #define TIMER_TSTAT_OFFSET          0x0014 /* Timer status register */
 
 /* Timer Register Addresses *********************************************************/
@@ -101,4 +101,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_IMX_TIMER_H */
+#endif /* __ARCH_ARM_IMX_TIMER_H */

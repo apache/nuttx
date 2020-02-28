@@ -2410,7 +2410,7 @@ Bugfixes, order roughly on decreasing criticality include:
 
     * NXFFS: Corrected critical bugs in initialization, some full FLASH handling,
       and errors in certain cases where the FLASH is repacked.
-    * ARM EABI: Fix stack aligment required for passing floating point values.
+    * ARM EABI: Fix stack alignment required for passing floating point values.
     * Build system: Fix build issues when g++ is used as the compiler.
     * NX Graphics: Bitmap error handling, correct RGB color conversion macros,
       Error when the background window is released.
@@ -2476,7 +2476,7 @@ New features in this release include:
       the OS test and the NuttShell (NSH) both exist.
     * Tests:  New re-usable tests (in apps/examples) for PWM, ADC, and
       CAN loopback.  Several existing tests can now be built as NSH built-in
-      applicaitons (dhcpd, nettest, and all of the new tests).
+      applications (dhcpd, nettest, and all of the new tests).
 
 Bugfixes, order roughly on decreasing criticality include:
 
@@ -2531,7 +2531,7 @@ New features in this release include:
       formatting (Contributed by Mikhail Bychek)
 
     * Build.  New targets apps_clean and apps_distclean to simplify working
-      with application diretories.
+      with application directories.
 
 Bugfixes include:
 
@@ -2812,7 +2812,7 @@ New features and extended functionality:
       support for STMicro STMPE811 I/O Expander/touchscreen device.
 
     * STM32. Add support for the STM32 IWDG and WWDG watchodog timers.  DMA
-      now supports cicular buffer mode; serial driver now uses circular
+      now supports circular buffer mode; serial driver now uses circular
       DMA to improve Rx performance (Contributed by Mike Smith).
 
     * STM3240G-EVAL Board.  Add support for the LCD and for the STMPE811
@@ -3295,7 +3295,7 @@ Additional new features and extended functionality:
     - Tasking logic is extended to support the notion of address
       environments.  An address environment is the key notion underlying
       "process" vs. tasks.  If tasks are created with address environments
-      (by binfmt), the OS will propogate that environment to child threads
+      (by binfmt), the OS will propagate that environment to child threads
       and will destroy the address environment when the "process" exists.
     - If support for the PATH variable is enabled, the OS start up logic
       will create an initial environment containing the default PATH
@@ -3491,8 +3491,8 @@ Additional new features and extended functionality:
         available only for ARM7/9, ARMv7-M (Cortext-M3/4), and MIPS32
         (PIC32MX) platforms.
       - exec() now sets the priority of the new task to the same priority as
-        the parent task (instead of the arbirtrary value of 50).
-      - New, partially complient implementations of execv() and execl().
+        the parent task (instead of the arbitrary value of 50).
+      - New, partially compliant implementations of execv() and execl().
         These are only partially compliant because they do not overlay any
         existing "process space" but rather create the new task and exit().
       - Add a complete implementation of posix_spawn().  This standard
@@ -3633,7 +3633,7 @@ Additional new features and extended functionality:
     * Build System:
 
       - Add an options to better manage toolchain prefixes.
-      - Redesigned how the context targer works in the apps/ directory.
+      - Redesigned how the context target works in the apps/ directory.
         The old design caused lots of problems when changing configurations
         because there is no easy way to get the system to rebuild the
         context.  This change should solve most the problems and eliminate
@@ -3914,9 +3914,9 @@ Additional new features and extended functionality:
     * Memory Management:
 
       - Extended to support multiple heaps.  This is used as part of
-        the kernel build in order to support separater user- and
+        the kernel build in order to support separator user- and
         kernel-mode heaps.
-      - The stand-alone memory manger test had to be removed.  It
+      - The stand-alone memory manager test had to be removed.  It
         was too entangled and made extension of the memory manager
         nearly impossible.  This is a loss.
 
@@ -4093,7 +4093,7 @@ Additional new features and extended functionality:
       - Open1788: Basic support for the WaveShare Open1788 board is complete
         with working OS test, NSH, and graphics configurations.
       - Open1788: Integrated the LPC178x LCD driver with the WaveShare display.
-        Touchscreen support is included, howerver, there appears to be an
+        Touchscreen support is included, however, there appears to be an
         issue with the Open1788 touchscreen interrupt signal.
       - Open1788:  Now supports SDRAM (used to provide the LCD framebuffer).
       - Open 1788: Reversed sense of the IDLE LCD. It is now off when the
@@ -4117,7 +4117,7 @@ Additional new features and extended functionality:
     * STM32:
 
       - Added support for kernel mode build.
-      - Added architecure support for the STM32 F427/F437 chips. Contributed
+      - Added architecture support for the STM32 F427/F437 chips. Contributed
         by Mike Smith
 
     * STM32 Boards:
@@ -4153,7 +4153,7 @@ Additional new features and extended functionality:
     * Tools:
 
       - kconfig2html is a new tool which will replace the hand-generated
-        documentation of the NuttX configruation variables with auto-
+        documentation of the NuttX configuration variables with auto-
         generated documentation.
 
 Efforts In Progress.  The following are features that are partially
@@ -4351,7 +4351,7 @@ Additional new features and extended functionality:
       - Added support for the Atmel SAM4L Xplained Pro development board.
         This board features the ATSAM4LC4C MCU (Cortex-M4 with 256KB FLASH +
         32KB SRAM).
-      - Added support for the Atmel SAM4S Xplained developement board.  This
+      - Added support for the Atmel SAM4S Xplained development board.  This
         board features the ATSAM4S16C MCU (Cortex-M4 with 1MB FLASH + 128KB
         SRAM).
 
@@ -4968,7 +4968,7 @@ Additional new features and extended functionality:
       - Add GMII/GRMII PHY definitions for the Micrel KSZ9021/31 PHY.
       - New network-optimized, higher-performance sendfile() implementation
         from Max Holtzberg.
-      - Added a simple routing table.  This table is currenly only used (1)
+      - Added a simple routing table.  This table is currently only used (1)
         when we need to look-up an Ethernet device based on an IP address,
         and (2) in the ARP logic when we need to request the MAC address of
         the router, vs the MAC address of the peer.
@@ -5078,7 +5078,7 @@ Additional new features and extended functionality:
 
     * Kinetis KL Boards
 
-      - A new configuration called minnsh was added is an experiement to
+      - A new configuration called minnsh was added is an experiment to
         see how small we can get the NuttX footprint and still support NSH.
         From Alan Carvalho de Assis..
 
@@ -5126,7 +5126,7 @@ completed soon.
 
 Bugfixes (see the ChangeLog for details).  Some of these are very important:
 
-    * Initialzation and Scheduling:
+    * Initialization and Scheduling:
 
       - IDLE thread initialization logic should not call group_setupidlefiles()
         if there are no file descriptors (and, hence, no file system).
@@ -5394,7 +5394,7 @@ Additional new features and extended functionality:
 
     * NXP LPC31xx Boards:
 
-      - Board-specific USB host support for the Emedded Artists EA3131 board.
+      - Board-specific USB host support for the Embedded Artists EA3131 board.
         (Missing PCA9532 controls).
       - Add support for the Olimex LPC-H3131 board.  Including USB host
         support (which does not depend on the PCA8532 interface).
@@ -5644,7 +5644,7 @@ Additional new features and extended functionality:
 
       - Pattern matching logic extended to handle set of characters and
         ranges of character values.  From Ken Pettit.
-      - sleep() and usleep() moved intot the C library.  These are not
+      - sleep() and usleep() moved into the C library.  These are not
         longer core OS interfaces; they are simple wrappers for the
         nanosleep().
       - Add an implementation of gets_s().
@@ -6471,7 +6471,7 @@ Additional new features and extended functionality:
     * Applications:
 
       - prun:  An NSH built-in application that can be used to run
-        Pascal P-Code programs either programatically or from the NSH
+        Pascal P-Code programs either programmatically or from the NSH
         command line.
       - netpkt:  A "raw" socket test from Lazlo Sitzer.
       - hex2bin:  A library and built-in task to convert from
@@ -6497,7 +6497,7 @@ Bugfixes.  Only the most critical bugfixes are listed here (see the ChangeLog fo
 
     * Networking:
 
-      - Modify TCP timout handling to provent situations where connections
+      - Modify TCP timeout handling to provent situations where connections
         may not be freed. From Max Holtzberg.
       - Improved TCP fallback allocation logic from Max Holtzberg. Also,
         fallback mechanism is disabled when SO_LINGER is to prevent
@@ -6781,7 +6781,7 @@ Additional new features and extended functionality:
 
     * Applications:
 
-      - sysem/mdio:  New PHY tool from Daniel Lazlo Sizter.
+      - system/mdio:  New PHY tool from Daniel Lazlo Sizter.
       - NSH:  Networking logic modified to handler the case of SLIP
         transport.  From Max Neklyudov.
       - NSH:  Add a configuration to use a USB keyboard for the stdin
@@ -9946,8 +9946,8 @@ Additional new features and extended functionality:
         files.
       - VFS:  The VFS was extended to support standard file operations on
         block drivers (open, close, read, write, etc.).  The open() interface
-        accomplishes this by creating a temporary characer driver to mediate
-        the character oriented accesses to tje block driver.
+        accomplishes this by creating a temporary character driver to mediate
+        the character oriented accesses to the block driver.
       - HOSTFS:  Added a HOSTFS file system for use with the simulator.  The
         HOSTFS file system mounts in the simulated Nuttx context by provides
         proxied access to the file system on the host PC.  This is useful for
@@ -10066,7 +10066,7 @@ Additional new features and extended functionality:
 
       - bsearch():  Added the bsearch() function from NetBSD.
       - freopen():  Added support for freopen().
-      - strftime():  Added day-of-week support (when avaialable).
+      - strftime():  Added day-of-week support (when available).
 
     * Tools:
 
@@ -10173,7 +10173,7 @@ detailed bugfix information):
 
     * STMicro STM32 Boards:
 
-      - STM32F429i-Disco:  Calculated partition boundries based on page
+      - STM32F429i-Disco:  Calculated partition boundaries based on page
         block sizes but mtd_partition() is expecting calculations based on
         erase block size. From Alan Carvalho de Assis.
 
@@ -10497,7 +10497,7 @@ Additional new features and extended functionality:
       - procfs:  Add /proc/kmm entry that shows that state of the kernel
         heap.  Only useful in PROTECTED and KERNEL build modes where there
         is a kernel heap.
-      - procfs:  Add support for showing CPU in the tast status if SMP is
+      - procfs:  Add support for showing CPU in the taste status if SMP is
         enabled.
 
     * Networking:
@@ -10584,7 +10584,7 @@ Additional new features and extended functionality:
 
     * Tools:
 
-      - tools/refesh.sh now has a --silent option so that it can be used in
+      - tools/refresh.sh now has a --silent option so that it can be used in
         batch modes without human input.
 
     * Build System:
@@ -10609,7 +10609,7 @@ Additional new features and extended functionality:
 
       - apps/examples/chat: Chat example contributed by Vladimir
         Komendantskiy.
-      - apps/sysem/ubloxmodem:  Example to control the power
+      - apps/system/ubloxmodem:  Example to control the power
         state of the modem in nsh.  From  Vladimir Komendantskiy.
       - apps/examples/leds: An example to demonstrate use of LED driver.
       - apps/examples/smp:  Add a test to verify SMP configurations.
@@ -11013,7 +11013,7 @@ detailed bugfix information):
     * Atmel SAMV7 Drivers:
 
       - SAMV7 TWIHS (as well as SAM3/4 and SAMA5:  Ensure that the TWIHS
-        (i2c) hw get's its clock set when the sequence of
+        (i2c) hw gets its clock set when the sequence of
         sam_i2cbus_initialize(), sam_i2cbus_uninitialize(), then
         sam_i2cbus_initialize() or twi_reset() is called.  I found this a
         while back in the stm32 family, so there may be more arch-es with
@@ -11127,7 +11127,7 @@ Additional new features and extended functionality:
         fifo buffers.  Adds mkfifo2() and pipe2() which are just like mkfifo()
         and pipe(), but allow control of the size of the underlying, in-memory
         circular buffer.  Move pipe() and mkpipe() to the C library, they are
-        no longer core OS interfaces.  Capability currenty used only by PTY
+        no longer core OS interfaces.  Capability currently used only by PTY
         logic to support, configurable, smaller buffers for PTYs.
 
     * SYSLOG/Debug Output:
@@ -11175,7 +11175,7 @@ Additional new features and extended functionality:
 
     * Simulation Platform:
 
-      - Added the simulated QSPI (N25Q) flash to the simulation and extened
+      - Added the simulated QSPI (N25Q) flash to the simulation and extended
         flash simulation capabilities to run with MTD drivers based on config
         options (currently m25p, sst26 and w25). From Ken Pettit.
 
@@ -11206,7 +11206,7 @@ Additional new features and extended functionality:
                 available in time
               - force CS active after transfer: this forces the CS to stay
                 active after a transfer, even if the chip runs out of data.
-                Btw.: this is a prerequisit to make the LASTXFER bit working
+                Btw.: this is a prerequisite to make the LASTXFER bit working
                 at all.
               - escape LASTXFER: this suppresses the LASTXFER bit at the end
                 of the next transfer. The "escape"-Flag is reset automatically.
@@ -11321,12 +11321,12 @@ Additional new features and extended functionality:
         Mateusz Szafoni.
       - Nucleo-144: Added USB OTG device to Nucleo-144.  From David Sidrane.
       - Nucleo-144: Added bbsram test to Nucleo-144.  From David Sidrane.
-      - STM32F4 Disovery:  Add CAN support for STM32F4 Discovery.  From
+      - STM32F4 Discovery:  Add CAN support for STM32F4 Discovery.  From
         Matthias Renner.
-      - STM32F4 Disovery:  added a canard configuration files.  From
+      - STM32F4 Discovery:  added a canard configuration files.  From
         Matthias Renner.
       - STM32F4 Discovery: Add FPU support for ostest for the STM32F4
-        Disovery platform. From David Alessio.
+        Discovery platform. From David Alessio.
       - STM32L476 Discovery: Update stm32l476 disco to include init code for
         smartfs and nxffs for cases where those fs are included in build.
         From ziggurat29.
@@ -11351,7 +11351,7 @@ Additional new features and extended functionality:
       - printf(): If there are no streams, let printf() fall back to use
         syslog() for output.
       - Move pipe() and mkpipe() to nuttx/libc, they are no
-        longer core OS interfaces.  Capability currenty used only by PTY logi
+        longer core OS interfaces.  Capability currently used only by PTY logi
         to support, configurable, smaller buffers for PTYs.
       - Move driver-related files from include/nuttx to include/nuttx/drivers.
         Move driver related prototypes out of include/nuttx/fs/fs.h and into
@@ -11373,7 +11373,7 @@ Additional new features and extended functionality:
 
       - tools/tesbuild.sh will now build NxWM configurations.
 
-    * Appplication Build/Configuration System:
+    * Application Build/Configuration System:
 
       - Change to the way that apps/ Kconfig files are generated in
         order to better support reuse of the apps/ directory in NuttX
@@ -11491,7 +11491,7 @@ detailed bugfix information):
         This arises due to freeing the bulk IN endpoint before the loop
         that frees the requests via cdcasm_freereq.  That function checks
         the parameters and skips the freeing if either is NULL.  Freeing
-        the bulk IN enpoint will cause the first param to be NULL, thereby
+        the bulk IN endpoint will cause the first param to be NULL, thereby
         bypassing the free operation.  To fix, I moved the release of the
         bulk IN endpoint until after to loop (much as was the case for the
         OUT and read requests, which did not exhibit the problem).  From
@@ -11653,7 +11653,7 @@ detailed bugfix information):
         From Konstantin Berezenko.
       - STM32 F1-F4: Move backup domain reset to earlier in the
         initialization sequence (stm32_rcc.c() in order to avoid disabling
-        LSE during RTC initialiation.  From Alan Carvalho de Assis.
+        LSE during RTC initialization.  From Alan Carvalho de Assis.
       - STM32 F1-F4: When configuring a GPIO via stm32_configgpio() the
         function will first set the mode to output and then set the initial
         state of the gpio later on.  If you have an application with an
@@ -11825,19 +11825,19 @@ Additional new features and extended functionality:
       - Add driver for the Bosch BMG160 3 axis gyroscope. From Alexander
         Entinger.
       - Add support for the  Sensixs XEN1210 3D-board. This sensor is used
-        on NANOSATC-BR2 a Brazillian CUBESAT project.  From Alan Carvalho
+        on NANOSATC-BR2 a Brazilian CUBESAT project.  From Alan Carvalho
         de Assis.
       - Add a new ioctl command (set MAXPOS) for Tiva QEI.  From Young.
 
     * Other Common Device Drivers:
 
       - I/O Expander: Remove hard-coded PCA9555 fields from ioexpander.h
-        definitons.  Add support for an attach() method that may be used
+        definitions.  Add support for an attach() method that may be used
         when any subset of pin interrupts occur.
       - I/O Expander Interface:  Encode and extend I/O expander options to
         include interrupt configuration.
       - PCA9555 Driver:  Replace the signalling logic with a simple callback
-        using the new definitons of ioexpander.h.  This repartitioning of
+        using the new definitions of ioexpander.h.  This repartitioning of
         functionality is necessary because (1) the I/O expander driver is
         the lower-lower part of any driver that uses GPIOs (include the GPIO
         driver itself) and should not be interacting directly with the much
@@ -11975,7 +11975,7 @@ Additional new features and extended functionality:
     * Platforms: apps/system:
 
       - Port tee command from NetBSD.
-      - Add a generic system command.  Current implentation cannot use
+      - Add a generic system command.  Current implementation cannot use
         /bin/sh and spawns the custom NSH system command directly.
 
     * Platforms: apps/platform:
@@ -12338,7 +12338,7 @@ Additional new features and extended functionality:
       - task_delete() now obeys all cancellation point semantics.
       - Add task_setcancelstate(), task_setcanceltype(), and
         task_testcancel().  These are non-standard interfaces analogous to the
-        correponding pthread_ interfaces that provide cancellation controls
+        corresponding pthread_ interfaces that provide cancellation controls
         for tasks.
 
     * Graphics/Display Drivers:
@@ -12479,12 +12479,12 @@ Additional new features and extended functionality:
 
     * STMicro STM32 Drivers:
 
-      - STM32 F3:  Implemention of the STM32 F37xx SDADC module. There are
+      - STM32 F3:  Implementation of the STM32 F37xx SDADC module. There are
         also changes to ADC, DAC modules. SDADC has only been tested in DMA
         mode and does not support external TIMER triggers. This is a work in
         progress.  From  Marc Rechté.
       - STM32 F3:  Add PWM driver support for STMF37xx.  The changes have been
-        tested successfuly for TIM4 and TIM17 (different IPs).  From  Marc
+        tested successfully for TIM4 and TIM17 (different IPs).  From  Marc
         Rechté.
       - STM32 F4:  Support oversampling by 8 for the STM32 F4. From David
         Sidrane.
@@ -12493,7 +12493,7 @@ Additional new features and extended functionality:
         From David Sidrane.
       - STM32 F4:  Expanded OTGFS support to stm32F469 and stm32f446.  Added
         missing bit definitions, Used stm32F469 and stm32f446 bit
-        definitions,  Removed unsed header file.  From David Sidrane.
+        definitions,  Removed unused header file.  From David Sidrane.
       - STM32 F4:  Allow dma in 1 bit mode in STM32F4xxx.  From David Sidrane.
       - STM32 F7:  Allow the config to override the clock edge setting.  From
         David Sidrane.
@@ -12691,7 +12691,7 @@ detailed bugfix information):
         enter/leave_critical_section logic to deal with the case where
         interrupts are disabled only on the local CPU.  In this case, some
         rather complex spinlocks must be used to maintain the critical section
-        accross all CPUs.
+        across all CPUs.
       - SMP Critical Sections:  Fixes for the SMP case: (1) Change order for
         SMP case in enter_critical_section:  (1) Disable local interrupts
         BEFORE taking spinlock and (2) If SMP is enabled, if any interrupt
@@ -12715,7 +12715,7 @@ detailed bugfix information):
         with three APIs in the SMP configuration.  The new internal interface
         is sched_cpu_pause(tcb).  This function will pause a CPU if the task
         associated with 'tcb' is running on that CPU.  This allows a different
-        CPU to modify that OS data stuctures associated with the CPU.  When
+        CPU to modify that OS data structures associated with the CPU.  When
         the other CPU is resumed, those modifications can safely take place.
         The three fixes are to handle cases in the SMP configuration where one
         CPU does need to make modifications to TCB and data structures on a
@@ -12801,7 +12801,7 @@ detailed bugfix information):
       - ARMv7-R:  Add new Kconfig entries for D/I-cache. Unlike in ARMv7-A/M,
         Kconfig entries for data and instruction caches are currently missing
         in ARMv7-R. This change adds those missing Kconfig entries. Actual
-        implmenetation for those functions will be added in the subsequent
+        implementation for those functions will be added in the subsequent
         patches.  From Heesub Shin.
       - ARMv7-R: Add cache handling functions.  This change adds functions for
         enabling and disabling d/i-caches which were missing for ARMv7-R.
@@ -12881,7 +12881,7 @@ detailed bugfix information):
 
     * Misoc LM32:
 
-      - Misoc LM32: Corrects a bug that never occured in qemu on simulation or
+      - Misoc LM32: Corrects a bug that never occurred in qemu on simulation or
         real fpga. The error was that the r1 register was being modified out
         of context switching and not restoring it.  From Ramtin Amin
 
@@ -13050,7 +13050,7 @@ detailed bugfix information):
 
     * apps/netutils:
 
-      - FTPD: Fixed bug that didn't free ftpd ressources on exit.  From Pascal
+      - FTPD: Fixed bug that didn't free ftpd resources on exit.  From Pascal
         Speck.
       - NTP client: Fix missing left parenthesis.  From Pierre-Noel Bouteville.
       - cJSON: Import patch to fix:cJSON_PrintUnformatted() behaves unexpected
@@ -13077,7 +13077,7 @@ detailed bugfix information):
         encoder by a direct call into the board, cheating in a local header to
         declare the normally unavailable function prototype.  From Sebastien
         Lorquet.
-      - apps/examples/archbuttons:  Removed becaue it violates OS interface
+      - apps/examples/archbuttons:  Removed because it violates OS interface
         principles.
       - examples/adc, pwm, can: Remove all usage of BOARDIOC_ADCTEST_SETUP,
         BIOARDIOC_PWMSETUP.  Remove BOARDIOC_CAN_INITIALIZE.  CAN
@@ -13146,7 +13146,7 @@ Additional new features and extended functionality:
       - Fonts: Add support for Tom Thumb small mono-space font. From Alan
         Carvalho de Assis.
       - Graphics:  Separated of font cache from graphics/nxterm.  Now in
-        libnx/nxfronts where it can be shared with other grapics
+        libnx/nxfronts where it can be shared with other graphics
         applications.
 
     * Networking/Network Drivers:
@@ -13296,7 +13296,7 @@ Additional new features and extended functionality:
 
       - NSH: Add support for the 'ln' command.
       - NSH ls command: if node is a symobolic link, use readlink() to get
-        and the display the target of the symblic link.
+        and the display the target of the symbolic link.
       - NSH: Add readlink command.
 
     * Applications: apps/examples:
@@ -13351,7 +13351,7 @@ detailed bugfix information):
         tasks running on other CPUs.
       - SMP:  Fix timer related issues:  Round robin and sporadic
         scheduling were only being performed for tasks running on the CPU
-        that processes the system timer interrupt.  Similary, CPU load
+        that processes the system timer interrupt.  Similarly, CPU load
         measurements were only be processed for running on the CPU that
         receives the sampling interrupt.
       - sched_note: Fix spinlock instrumentation.  From Masayuki Ishikawa.
@@ -13643,7 +13643,7 @@ Additional new features and extended functionality:
         Recently, Anthony Merlino has taken on this effort and has made
         some significant progress.  Using the Microchip MRF24J40 module with
         the Mikroe Clicker2-STM32 board along with a PC-based IEEE 802.15.4
-        sniffer, Anthonly has verified correct transmittion and receipt of
+        sniffer, Anthonly has verified correct transmission and receipt of
         basic frames.
       - Microchip MRF24J40: As mentioned above, this IEEE 802.15.4 radio
         driver is now basically functional.
@@ -13915,7 +13915,7 @@ Additional new features and extended functionality:
       - Added support for set [{+|-}{e|x|xe|ex}] [<name> <value>].  Set the
         'exit on error control' and/or 'print a trace' of commands when
         parsing scripts in NSH.  The settinngs are in effect from the point
-        of exection, until they are changed again, or in the case of the init
+        of execution, until they are changed again, or in the case of the init
         script, the settings are returned to the default settings when it
         exits.  Included child scripts will run with the parents settings and
         changes made in the child script will effect the parent on return.
@@ -14164,7 +14164,7 @@ detailed bugfix information):
         Kivilinna.
       - TCP:  Wait for 3-Way Handshare before accept() returns.  From Simon
         Piriou.
-      - TCP:  Send RST if applicaiton 'unlistens()' before we complete the
+      - TCP:  Send RST if application 'unlistens()' before we complete the
         connection sequence.
       - TCP:  An RST received during the 3-way handshake requires a little
         more clean-up.
@@ -14254,7 +14254,7 @@ detailed bugfix information):
 
       - Kinetis:  Fixed GPIO _PIN_OUTPUT_LOWDRIVE swapped with
         _PIN_OUTPUT_OPENDRAIN.  From David Sidrane.
-      - Ensure interrupts are back on BEFORE running code dependant on
+      - Ensure interrupts are back on BEFORE running code dependent on
         clock_systimer.  From David Sidrane.
       - Kinetis k66, k64, k60, k40, k20: Pin mux configure all I2C signals as
         Open Drain.  The output structure of the GPIO for I2C needs to be
@@ -14299,7 +14299,7 @@ detailed bugfix information):
     * STMicro STM32 Drivers:
 
       - STM32, STM32 F7, STM32 L4:  OTG host drivers: Do not do data toggle
-        if interrupt transfer is NAKed.  Sugested by webbbn@gmail.com.
+        if interrupt transfer is NAKed.  Suggested by webbbn@gmail.com.
       - Save elapsed time before handling I2C in stm32_i2c_sem_waitstop().
         This change follows the same logic as in previous fix to
         stm32_i2c_sem_waitdone().  It is possible that a context switch
@@ -14319,12 +14319,12 @@ detailed bugfix information):
         polling interval for the case of isochronous and interrupt endpoints.
       - STM32:  Fix erase sector number for microcontrolers with more than 11
         sectors.  Erase a sector from the second bank cause the bit 4 of SNB
-        being set but never unsed, so trying to erase a sector from the first
-        bank was acually eraseing a sector from the second bank.  From José
+        being set but never unused, so trying to erase a sector from the first
+        bank was actually eraseing a sector from the second bank.  From José
         Roberto de Souza.
       - STM32:  Make up_progmem thread safe.  Writing to a flash sector while
         starting the erase of other sector have a undefined behavior so lets
-        add a semaphore and syncronize access to Flash registers.  But for
+        add a semaphore and synchronize access to Flash registers.  But for
         the semaphore to work it needs to be initialized so each board needs
         call stm32_flash_initialize() on initialization, so to avoid runtime
         problems it is only using semaphore and making it thread safe if
@@ -14505,7 +14505,7 @@ detailed bugfix information):
       - examples/random:  Avoid stack overflows.  From Juha Niskanen.
       - examples/nettest:  Fix an error in pre-processor expression.
       - examples/mtdpart:  Prevent part array overflow.  mtdpart examples
-        create partions and allocate from 1 index not a 0 index to part[]
+        create partitions and allocate from 1 index not a 0 index to part[]
         array. This cause buffer overflow for part array.  This change fixes
         this problem.  From  EunBong Song.
       - examples/can:  Fix can example app to print data when
@@ -14587,7 +14587,7 @@ Additional new features and extended functionality:
 
       - Sockets: Support listening sockets in the getsockname() function.
         From Roland Takacs.
-      - IP Forwading:  At the IP level, network may be configured to forward
+      - IP Forwarding:  At the IP level, network may be configured to forward
         IP packets that are not destined for the target through a different
         network device, decrementing the packet TTL.
       - IP forwarding:  Add optional support to forward broadcast and
@@ -14658,7 +14658,7 @@ Additional new features and extended functionality:
         the representation of radio MAC meta-data,  (2) changes to handle
         variable-length radio addresses,  (3) removal of all explicit IEEE
         802.15.4 types, references, and interfaces, (4) a new radio driver
-        interface to return 'capabilities' of the drvier.
+        interface to return 'capabilities' of the driver.
       - ICMPv6:  Update so that ICMPv6 can be used with 6LoWPAN.
       - IPv6 Neighbor:  Update table format to support IEEE 802.15.4 MAC
         addresses.
@@ -14749,7 +14749,7 @@ Additional new features and extended functionality:
         Read access to FLASH.  From David Sidrane.
       - configs/teensy-3.x:  Removed call to khci_usbattach.  The call is not
         need by the driver if CONFIG_USBDEV_BUSPOWERED=y.  On a USB powered device if we are running we are attached.  From David Sidrane.
-      - freedom-k66f:  Use SPI driver.  Initalize SPI1 on connector J6. No
+      - freedom-k66f:  Use SPI driver.  Initialize SPI1 on connector J6. No
         real use, as of yet.  From David Sidrane.
 
     * NXP Freescale LPC43xx:
@@ -14860,7 +14860,7 @@ Additional new features and extended functionality:
         mend+1, the next next address are not on ARMV7M_DCACHE_LINESIZE
         boundaries.  From David Sidrane.
       - STM32 F7 SDMMC: SDMMC remove widebus limitation on DMA.  There is no
-        documantation for the STM32F7 that limits DMA on 1 bit vrs 4 bit
+        documentation for the STM32F7 that limits DMA on 1 bit vrs 4 bit
         mode.  From David Sidrane.
       - STM32 F7 SDMMC: SDMMC add dcache alignment check in
         dma{recv|send}setup. In the case where CONFIG_SDIO_PREFLIGHT is not
@@ -14945,7 +14945,7 @@ Additional new features and extended functionality:
 
     * Tools:
 
-      - testbuild.sh:  Added -x to fail build on errors for continous
+      - testbuild.sh:  Added -x to fail build on errors for continuous
         integration (CI).  On CI we want to know ASAP of a failure.  From
         David Sidrane.
       - Improve configure.sh behavior:  (1) enable to call from top directory.
@@ -14980,7 +14980,7 @@ Additional new features and extended functionality:
         started from the NSH command line after the network is configured.
       - NSH Library:  Misc changes needed for PktRadio support.
       - NSH Library:  Extend ifconfig command so that it can set variable
-        length packet radio addresss.
+        length packet radio address.
       - NSH Library:  Update addroute and delroute command.  The would support either
         IPv4 or IPv6, but not both.  Allow expression of the netmask in IPv4 CIDR or
         IPv6 slash notation.  This really reduces the pain of using the commands,
@@ -15007,7 +15007,7 @@ Additional new features and extended functionality:
         Separate out network initialization so that it may be used by both a
         target server and a target client.  Fix client/server naming
         confusion; Add command line option to select the server address on the
-        target.  Add support for both enpoints on target boards vs. one on a
+        target.  Add support for both endpoints on target boards vs. one on a
         target and one on the host PC.
       - examples/nettest:  The send buffer size is now a configuration option.
       - examples/nettest:  Loopback option should be available in Kconfig for
@@ -15015,7 +15015,7 @@ Additional new features and extended functionality:
       - examples/keypadtest: REMOVED and warehoused in the Obsoleted
         repository.  This was just a bad clone of apps/examples/hidkbd for a
         keypad driver that was removed years ago.  It also uses illegal
-        function calls into the OS.  So it has no purpse:  It is redundant, it
+        function calls into the OS.  So it has no purpose:  It is redundant, it
         uses illegal interfaces, and is a test for non-existent code.
       - examples/ipforward: Add an IP forwarding example using only TUN
         devices.  Test extended to test forwarding of ICMPv6 multicast messages.
@@ -15060,7 +15060,7 @@ Additional new features and extended functionality:
 
     * System Utilities (apps/system)
 
-      - apps/system/composite: Update to apps/system/composite assocated with
+      - apps/system/composite: Update to apps/system/composite associated with
         big changes to the composite device logic.  From Frank Benkert.
       - apps/system/composite:  Remove CDC/ACM and MSC configuration logic.
         This belongs in the OS composite initialization.  Add and argument so
@@ -15073,7 +15073,7 @@ Additional new features and extended functionality:
         calls to support multiple composite device configurations dynamically.
       - apps/system/composite:  Remove references to USBMSC.  There still
         dependencies on CDC/ACM in the serial USB trace output.
-      - apps/system/telnet:  Add Telnet Chat deamon and client from
+      - apps/system/telnet:  Add Telnet Chat daemon and client from
         libtelent.
 
     * Platform-Specific Support (apps/platform)
@@ -15117,7 +15117,7 @@ detailed bugfix information):
         cloned error:  It was not locking the bus while performing byte write
         operations.
       - MTD M2PX: If we READ while a write/erase is pending, the command is
-        ignored and the write/erase continues. If we dont catch this situation
+        ignored and the write/erase continues. If we don't catch this situation
         we will return garbage to the user because the flash will not execute
         the command.  So READ MUST wait for write completion, and before that,
         the bus must be locked since it's a precondition to calling
@@ -15138,7 +15138,7 @@ detailed bugfix information):
 
       - TCP Listen: Throw error when error happens in the tcp_listen
         function.  From Roland Takacs.
-      - Nework Device Management:  Do not search net device when all-zeros
+      - Network Device Management:  Do not search net device when all-zeros
         address is used.  From Roland Takacs.
       - Network Device Management:  Fix a error in netdev_register(); it was
         not handling device names properly when TUN is the only network device.
@@ -15385,7 +15385,7 @@ detailed bugfix information):
         and the variables used are byte or/and halfword types, since there is
         no ECC management in this RAM on the STM32F7 Series, it is recommended
         to disable the read-modify-write of the DTCM-RAM in the DTCM interface
-        (inthe DTCMCR register) to increase the performance." From Jussi
+        (in the DTCMCR register) to increase the performance." From Jussi
         Kivilinna.
 
     * STMicro STM32 Drivers:
@@ -15396,7 +15396,7 @@ detailed bugfix information):
         caused old samples being fetched from cache.  From Jussi Kivilinna.
       - STM32, STM32L4, STM32F7 ADC:  Fix channel 18 sample time.  From Juha
         Niskanen.
-      - STM32 DAC:  Fix some configuration logic. When STM32_NDAC is greather
+      - STM32 DAC:  Fix some configuration logic. When STM32_NDAC is greater
         than 1, then second channel is always DAC1OUT2.  From Mateusz Szafoni.
       - STM32 DAC:  Fix compilation when DMA disabled for channel.  From
         Mateusz Szafoni.
@@ -15677,7 +15677,7 @@ Additional new features and extended functionality:
         capability of FTL which will let you use an MTD interface directly
         as a block device.  From Jussi Kivilinna.
       - BCH:  The character driver to block device access now supports an
-        IOCTL to get the geomtry of the underlying block device.
+        IOCTL to get the geometry of the underlying block device.
       - mkfatfs:  Remove mkfatfs from the OS.  This is a user-space
         application and belongs in apps, not in the OS.
       - procfs:  Implements procfs /proc/fs/blocks and /proc/fs/usage files,
@@ -15685,7 +15685,7 @@ Additional new features and extended functionality:
         file, replacing the NSH mount command when there are no arguments.
       - procfs:  Add /proc/meminfo.  This is an alternative way to get the
         information that was previoulsy available in apps/system/free.
-        apps/system/free was removed beause it made illegal calls into the
+        apps/system/free was removed because it made illegal calls into the
         OS violating the portable interface.  This new procfs entry provides
         the same information with no such violation.  it also provides
         information about the kernel heap (formerly /proc/kmm), about the
@@ -15706,13 +15706,13 @@ Additional new features and extended functionality:
 
     * Graphics/Display Drivers:
 
-      - Framebufer character driver:  Add framebuffer character device driver.
+      - Framebuffer character driver:  Add framebuffer character device driver.
       - LCD Framebuffer:  Add support for a generic front-end that will
         convert any LCD driver into a framebuffer driver.
-      - Framebufer character driver:  Include support for LCD drivers that
+      - Framebuffer character driver:  Include support for LCD drivers that
         use a simulated framebuffer and must receive explicit notification
         when there is an update to a region in the framebuffer.
-      - LCD:  Make LCD driver configuration indepently selected from NX
+      - LCD:  Make LCD driver configuration independently selected from NX
         graphics configuration.  This makes things awkward and loses some
         error checking but is a necessary step in order to make LCD drivers
         usable when the NX graphics system is disabled.
@@ -15720,7 +15720,7 @@ Additional new features and extended functionality:
     * Networking/Network Drivers:
 
       - Networking:   Add implementation of logic for SIOCGIFCONF and
-        SIOCGLIFCOF IOCTL commnds.
+        SIOCGLIFCOF IOCTL commands.
       - Network IOCTLs:  Add support for the SIOCGIFBRDADDR ioctl() command.
       - Routing Tables:  Permit IPv4 and IPv6 routing tables to be of
         different sizes.
@@ -15849,7 +15849,7 @@ Additional new features and extended functionality:
     * Simulation
 
       - Simulation:  Add a configuration for non-graphical testing of the
-        frambuffer character driver using apps/example/fb.
+        framebuffer character driver using apps/example/fb.
       - Simulation:  Add a configuration for testing the UserFS using
         apps/examples/userfs.
 
@@ -15985,7 +15985,7 @@ Additional new features and extended functionality:
         Alan Carvalho de Assis.
       - STM32F103-Minimum:  Add board support for MAX7219 LED Matrix
         controller.  From Alan Carvalho de Assis.
-      - STM32F103-Minimum:  Add USB MSC device initialzation to
+      - STM32F103-Minimum:  Add USB MSC device initialization to
         stm32f103-minimum.  From Alan Carvalho de Assis.
       - STM32F103-Minimum:  Add framebuffer driver initialization for
         stm32f103-minimum board.  From Alan Carvalho de Assis.
@@ -16276,7 +16276,7 @@ detailed bugfix information):
         case, only three files that have fs/ in their relative pathnames.
         The logic was detecting that fs was the name of the enty to report,
         but it was then declaring that fs was a file (because fs/block is of
-        type file).  This was fixed by adding a check for matching lenghts.
+        type file).  This was fixed by adding a check for matching lengths.
         i.e., if strlen(fs) != strlen(fs/block), then report fs as a
         directory instead of a file.
       - procfs:  Fix uptime being clse to maximum 32-bit value in certain
@@ -16312,7 +16312,7 @@ detailed bugfix information):
       - sockgetname() files need to include udp/udp.h and tcp/tcp.h or
         otherwise NET_UDP_HAVE_STACK and NET_TCP_HAVE_STACK are undefined
         and the logic is never compiled.  Noted by Anthony Merlino.
-      - dup()/dup2():  There was a reference counting problem in the TPC
+      - dup()/dup2():  There was a reference counting problem in the TCP
         logic of net_clone().  net_clone() which is the common logic
         underlying dup() and dup2() for sockets.  When net_clone() calls
         net_start_monitor() and net_start_monitor() returns a failure
@@ -16343,10 +16343,10 @@ detailed bugfix information):
         after it was nullifed.  Fixed in tcp_lost_connectino() by adding a
         NULL pointer change before the access.  This was reported by Dmitriy
         Linikov in Bitbucket Issue 72.
-      - UDP Broadcat:  Fix some issues with regard to UDP broadcast
+      - UDP Broadcast:  Fix some issues with regard to UDP broadcast
         handling.  This is Bitbucket Issue #77.
       - ICMP:  Fix an error in the poll logic.  It was assumed that the
-        input parmeter pvconn was valid.  It was not.  Instead, the poll
+        input parameter pvconn was valid.  It was not.  Instead, the poll
         logic must work like the sendto() and recvfrom() logic:  It must
         keep a copy of the conn structure in the private data.
       - ICMPv6: Fixes several errors preventing icmpv6_radvertise.c from
@@ -16361,7 +16361,7 @@ detailed bugfix information):
       - ICMPV6:  icmpv6_input() needs to set d_len to 0 after consuming echo
         reply, otherwise, garbage will get sent out.  From Anthony Merlino.
       - ICMPV6:  Fix an error in the poll logic.  It was assumed that the
-        input parmeter pvconn was valid.  It was not.  Instead, the poll
+        input parameter pvconn was valid.  It was not.  Instead, the poll
         logic must work like the sendto() and recvfrom() logic:  It must
         keep a copy of the conn structure in the private data.
       - IGMPv2 Send:  Fix incoming IGMP checksum calculation.  From Louis
@@ -16453,7 +16453,7 @@ detailed bugfix information):
 
     * NXP/Freescale LPC43xx:
 
-      - lpc43xx:  lpc43_adc.c was being selected by the build system wehn
+      - lpc43xx:  lpc43_adc.c was being selected by the build system when
         DAC was selected.
 
     * NXP/Freescale LPC43xx Drivers:
@@ -16520,7 +16520,7 @@ detailed bugfix information):
         the RTC_TR register instead of being locked."
       - STM32 Serial:  Do not stop processing input in SW flow-control
         mode.  From Juha Niskanen.
-      - STM32F33xxx ADC:  Add some publicly visable interfaces and some
+      - STM32F33xxx ADC:  Add some publicly visible interfaces and some
         code to support injected channels.  From Mateusz Szafoni.
       - STM32F33xxx DMA:  Add public interface to handle with DMA
         interrupts.  From Mateusz Szafoni.
@@ -16598,7 +16598,7 @@ detailed bugfix information):
 
     * ZiLOG Z80
 
-      - configs/z80sim and xtrs:  Serial driver lower halfs ioctl methods
+      - configs/z80sim and xtrs:  Serial driver lower halves ioctl methods
         should return a negated errno value, not set the errno variable.
       - z80 Make.defs:  Fixes dependency generation with newest SDCC
         compiler.
@@ -16608,7 +16608,7 @@ detailed bugfix information):
 
     * Build System
 
-      - configs/:  All defconfig filess that include
+      - configs/:  All defconfig files that include
         CONFIG_NET_ICMPv6_SOCKET=y need to select CONFIG_SYSTEM_PING6=y and
         deselect CONFIG_DISABLE_POLL.
       - configs/:  All NX configuration... Because of recent changes to
@@ -16650,7 +16650,7 @@ detailed bugfix information):
       - apps/nshlib/:  Avoid truncating the strcmp result in the parser
         into a unsigned char variable.  nshlib/nsh_netcmds.c:  Check for
         valid hostip before using it.   From Bruno Herrera.
-      - apps/nshlib/:  Fix resouce leak in 'dd' commenad when 'if=' or
+      - apps/nshlib/:  Fix resource leak in 'dd' commenad when 'if=' or
         'of=' params are repeated in the command line.  For example:
           dd if=/dev/null if=/dev/zero of=/dev/null or
           dd if=/dev/zero of=/dev/zero of=/dev/null.   From Bruno Herrera.
@@ -16738,7 +16738,7 @@ Additional new features and extended functionality:
         Masayuki Ishikawa.
       - SMP: Introduce spin_lock_wo_note() and spin_unlock_wo_note().  These
         APIs are used in sched_note.c to protect instrumentation data.  The
-        difference between these APIs to exsiting spin_lock() and
+        difference between these APIs to existing spin_lock() and
         spin_unlock() is that they do not perform instrumentation to avoid
         recursive call when SCHED_INSTRUMENTATION_SPINLOCKS=y.  From
         Masayuki Ishikawa.
@@ -17185,7 +17185,7 @@ detailed bugfix information):
         equivalent to their counterparts without the nx on front.  These
         versions do not modify the errno value.  Changed all calls within
         the OS to use these newer versions of the functions.
-      - errno:  binfmt/, configs/, grahics/, libc/, mm/, net/, sched/:  OS
+      - errno:  binfmt/, configs/, graphics/, libc/, mm/, net/, sched/:  OS
         references to the errno variable should always use the set_errno(),
         get_errno() macros.
       - drivers/, fs/ and libc/:  OS references to the errno variable should
@@ -17467,7 +17467,7 @@ Additional new features and extended functionality:
 
     * File Systems/Block and MTD Drivers
 
-      - fs/cromfs:  Added CROMFS file system.  CROMFS is a commpressed, in-
+      - fs/cromfs:  Added CROMFS file system.  CROMFS is a compressed, in-
         memory, read-only file system based on LZF.
       - fs/vfs:  Added support for checking if a descriptor is a socket in
         fstat().  From Pelle Windestam.
@@ -17911,7 +17911,7 @@ Additional new features and extended functionality:
         existing code.  The previously existing tftpget/tftpput functions
         are now wrappers on the new ones, with callbacks that read/write
         from files, so my modifications are backwards compatible with
-        existing applications, eg the associated nsh commands dont need to
+        existing applications, eg the associated nsh commands don't need to
         be changed.  From Sebastien Lorquet.
 
     * Wireless Utilities: apps/wireless:
@@ -17985,7 +17985,7 @@ detailed bugfix information):
 
     * Networking/Network Drivers:
 
-      - net/tcp:  Fixed problem with send() retrun value when using
+      - net/tcp:  Fixed problem with send() return value when using
         nonblocking I/O over buffered tcp socket  From Dmitriy Linikov.
       - net/sixlowpan:  Fix a nasty, byte-ordering/endian-ness problem.
         The root cause has been found and corrected.  And a half dozen
@@ -18108,7 +18108,7 @@ detailed bugfix information):
         with parity is required. If left in 8 bit mode (M=0) with parity
         then D7 of the TX/RX register becomes parity bit.  Hence what is
         called 9-bit or 8-bit Mode Select is a misnomer.  8 bit mode when
-        parity is enabled is realy 7 bit with parity.  From David Sidrane.
+        parity is enabled is really 7 bit with parity.  From David Sidrane.
 
     * NXP/Freescale Kinetis Boards:
 
@@ -19040,7 +19040,7 @@ Additional new features and extended functionality:
         characters. From mst.
       - apps/system/i2c:  Adapt to rename I2C_M_RESTART->i2C_M_START.
         I2C_M_NOSTOP should be in flags of first message in every
-        write-read and write-write mesage sequence.  From Gregory Nutt.
+        write-read and write-write message sequence.  From Gregory Nutt.
       - apps/system/i2c: Allow registers besides 0x00 in the dev command.
         From Jakob Haufe.
       - apps/system/nsh:  Add logic to automatically register an
@@ -19360,7 +19360,7 @@ detailed bugfix information):
         not take effect immediately.  This update is required to be
         serialized to the instruction stream meaning that after this update
         completes, it takes effect immediately and no exceptions of lower
-        priority than the new boosted priority can pre-empt execution.
+        priority than the new boosted priority can preempt execution.
         Because of this erratum, the priority boosting does not take place
         immediately, allowing the instruction after the MSR to be
         interrupted by an exception of lower priority than the new boosted
@@ -19409,7 +19409,7 @@ detailed bugfix information):
         complete.  The second problem is that Software Reset For DAT Line
         SDHC_SYSCTL[RSTD] clears the bits 24-0 in SDHC_PROTO this looses
         the wide bus setting DTW  From David Sidrane.
-      - Kinetis:  (1) PIT add Liftime and Chaining, (2) flexcan fix
+      - Kinetis:  (1) PIT add Lifetime and Chaining, (2) flexcan fix
         duplicate line and ordering, (3) kinetis_lowput.c LPUART data
         format with parity fix.  The 9-bit data mode is typically used with
         parity to allow eight bits of data plus the parity, (4) lowputc
@@ -19727,7 +19727,7 @@ Additional new features and extended functionality:
       - WDOG Timer:  Improve accuracy of wd_gettime() in tickless mode  From
         ligd.
       - Work Queues:  Add a generic notification facility that runs on a work
-        queue.  The notication facility can notify a group of subscribers to
+        queue.  The notification facility can notify a group of subscribers to
         an event via callbacks.  This API is for use within the OS only.  From
         Gregory Nutt.
 
@@ -20236,7 +20236,7 @@ detailed bugfix information):
         multicast address.  Exiting logic only supported UDP multicast.  But
         MLD and certain other ICMPv6 packets also require acceptance of
         multicast packets.  From Gregory Nutt.
-      - TCP:  In TPC recv window calculations, in order to receive data we
+      - TCP:  In TCP recv window calculations, in order to receive data we
         must not only have IOBs available, but we must also have at least one
         IOB chain qentry available.  Otherwise, we will advertise that we an
         buffer a lot of data when, in fact, we cannot.  This is an
@@ -20289,7 +20289,7 @@ detailed bugfix information):
       - S25FL1:  During a MTDIOC_GEOMETRY ioctl call, the driver was
         incorrectly reporting the blocksize to be the same as the erasesize.
         The blocksize should be 256 (the page size).  This patch fixes that,
-        and now the SmartFS configration is working.  From Ken Pettit.
+        and now the SmartFS configuration is working.  From Ken Pettit.
       - SYSLOG:  nx_syslog's return value should include the timestamp length
         From Xiang Xiao.
       - SYSLOG:  syslog_putc() calls sc_force in idle task even if interrupt
@@ -21205,7 +21205,7 @@ Additional new features and extended functionality:
           18. Support for '?' reverse search mode.
           19. Support for 'J'oin next line with current line command.
           20. Printing of current row,col in status line of display.
-          21. Command repeat '.' support for commands that modifiy text.
+          21. Command repeat '.' support for commands that modify text.
           22. Support in replace  / insert mode for arrow keys, PGUP / PGDN, HOME,
               and END.  Using these will cause the command repeat buffer to reset
               such that only the last text addition after a cursor movement is saved.
@@ -21717,15 +21717,15 @@ detailed bugfix information):
           3.  Paste buffer from 'dd' was being free'd after the 'p'aste operation,
               preventing multiple paste opportunity.  Fixed.
           4.  The cursor was not being bound to the line end and was allowed to
-              'hover' over the '\n' EOL character.  This caused wierd (relative to
+              'hover' over the '\n' EOL character.  This caused weird (relative to
               standard vi) insertion locations and cursor movement with 'a'ppend
               and 'i'nsert.  Fixed.
           5.  The 'vi_shrinkpos' position didn't take the end of file pointer into
               account when calculating 'curpos', 'prevpos' variables causing
-              wierdness when deleting things near the end of the file.  Fixed.
+              weirdness when deleting things near the end of the file.  Fixed.
           6.  The 'yy'ank command was improperly deleting the text from the
              document instead of simply yanking to the paste buffer.  Fixed.
-          7.  The 'dd'elete line funciton was not copying the deleted line to the
+          7.  The 'dd'elete line function was not copying the deleted line to the
               paste buffer as part of the delete operation.  Fixed.
           8.  The bottom line of the screen was sometimes being used for document
               text and other times for command / find entry.  Fixed by reserving
@@ -21761,7 +21761,7 @@ detailed bugfix information):
           17. In command mode, backspace was deleting characters which is
               different from standard vi.  Backspace in command mode normally
               simply moves the cursor left / to the previous line.  Fixed.
-          18. Added code to handle boundry conditions when the file is new and
+          18. Added code to handle boundary conditions when the file is new and
               commands are applied to an empty file.
           19. Fixed vi_shrinktext so it doesn't allocate a zero-length buffer when
               the last character in the file is deleted.
@@ -21861,7 +21861,7 @@ Additional new features and extended functionality:
       - Protected Build:  Add add a new field (us_heapend) to struct
         userspace_s that labels the end of the heap.  From Xiang Xiao.
 
-    * Binary Loader/Kernal Modules/Shared Libraries
+    * Binary Loader/Kernel Modules/Shared Libraries
 
       - Shared Libraries:  Implement dlerror() using strerror().  From Xiang
         Xiao.
@@ -21912,12 +21912,12 @@ Additional new features and extended functionality:
         number as an argument.  This makes it possible to have multiple
         instances of the NX server running on boards that support multiple
         displays.  Also includes updates to boardctl() to accept display
-        number paramters.  From Gregory Nutt.
+        number parameters.  From Gregory Nutt.
       - Graphics:  nx_openwindow() and nxtk_openwindow() now accept an
         additional 'flag' parameter.  This argument is current used only to
         select a RAM backed, per-window framebuffer.  From Gregory Nutt.
       - Per-Window Framebuffers:  Windows may now be optionally created
-        with a RAM frambuffer backing up the window content.  Rending into
+        with a RAM framebuffer backing up the window content.  Rending into
         the window will result in rending into the backup framebuffer, then
         updating the physical display from the framebuffer.  The advantage
         of this option is that the application that manages window will no
@@ -21930,7 +21930,7 @@ Additional new features and extended functionality:
         expense of increased memory usage.  Redraw requests in other cases
         are also suppressed:  Changes to window position, size, etc.  As a
         consequence, some manual updates will be required when certain
-        events occurr (like removing a toolbar from a window).  NOTE:  A
+        events occur (like removing a toolbar from a window).  NOTE:  A
         significant amount of RAM, usually external SDRAM, may be required
         to use per-window framebuffers.
 
@@ -22038,7 +22038,7 @@ Additional new features and extended functionality:
       - i.MXRT OCOTP:  Added OCOTP Support.  From David Sidrane.
       - i.MXRT LCD:  Adds framebuffer support for the i.MXRT 1050.
         Includes DCD initialization for SDRAM to provide space for the
-        framebufer. External code I used/ported is from NXP and is BSD
+        framebuffer. External code I used/ported is from NXP and is BSD
         3-clause license.  From Johannes.
 
     * NXP i.MX RT Boards:
@@ -22175,7 +22175,7 @@ Additional new features and extended functionality:
       - tools/nxstyle.c:  Add logic to detect a blank line following a left
         brace or a blank line preceding a right brace.  From Gregory Nutt.
       - tools/nxstyle.c:  Don't complain about certain lowercase characters
-        in otherwise uppercase pre-processor identifers:  IPv6, IPv4,
+        in otherwise uppercase pre-processor identifiers:  IPv6, IPv4,
         ICMPv6, IGMPv2, p as a decimal point, d signifying a divisor.  It
         was a bad idea to let the door open a crack for there.  While they
         improve readability, the inconsistently also causes other
@@ -22378,7 +22378,7 @@ detailed bugfix information):
         order to avoid the conflict with the 3rd party libraries and clean
         up the file inclusion:  (1) Remove redundant elf32.h, (2) Remove
         nuttx/binfmt/elf.h in libs/libc/machine, (2) Remove
-        nuttx/binfmt/elf.h in modlib, and (4) Rmove nuttx/module.h in
+        nuttx/binfmt/elf.h in modlib, and (4) Remove nuttx/module.h in
         modlib. From Xiang Xiao.
       - ELF Executables:  If there is an address environment
         (CONFIG_ARCH_ADDRENV), binfmt/elf doesn't need to free ctor/dtor
@@ -22440,7 +22440,7 @@ detailed bugfix information):
         Resolves the issue that bind() could not be called before send()
         From anchao.
       - TUN/TAP Driver:  Re-order all TUN/TAP driver state data.  Not only
-        was was with wasting memory due to alignement requirements, it was
+        was was with wasting memory due to alignment requirements, it was
         also causing network packet buffers to be improperly aligned
         causing problems because the network requires 16-bit packet buffer
         alignment for uint16_t accesses.  This alignment problem was
@@ -22475,7 +22475,7 @@ detailed bugfix information):
       - Graphics:  Fix a coordinate system error in nx_filltrapezoid().
         When no clipping rectangle is falls, it falls back to use the
         entire window as for the clip.  However, that window must then then
-        be in window relative coordinates, not in absoute device
+        be in window relative coordinates, not in absolute device
         coordinates.  From Gregory Nutt.
 
     * Common Board Logic:
@@ -22522,7 +22522,7 @@ detailed bugfix information):
       - arch/ Common:  Align semi-hosting call style with other syscalls in
         architecture-specific syscall.h.  From Xiang Xiao.
       - arch/ Common:  Every file that uses serial IOCTLs (TIOC*) must
-        explicity include nuttx/fs/ioctl.h.  This was included previously
+        explicitly include nuttx/fs/ioctl.h.  This was included previously
         via sneak path in the now deleted arch/serial.h.  From Gregory Nutt.
       - arch/ Interfaces:  Rename sched_process_cpuload to
         nxsched_process_cpuload.  All internal sched_ functions should be
@@ -22626,8 +22626,8 @@ detailed bugfix information):
 
     * NXP i.MXRT:
 
-      - i.MXRT Clock Configuration:  If SDRAM is actived it was only
-        running at 40MHz.  This was becaus imxrt_clockconfig.c changed the
+      - i.MXRT Clock Configuration:  If SDRAM is activated it was only
+        running at 40MHz.  This was because imxrt_clockconfig.c changed the
         SEMC clock divider after the DCD was configured.  This commit
         corrects that.  From Johannes.
 
@@ -22697,7 +22697,7 @@ detailed bugfix information):
         configurations.  From Mateusz Szafoni.
       - STM32F7 Interrupts:  Add the missing macro STM32_IRQ_NIRQS used by
         arch/arm/src/stm32f7/stm32_irq.c.  From Kejun ZHOU.
-      - STM32H7 DMA:  Fix AHB1 base adresses memory map. From Mateusz
+      - STM32H7 DMA:  Fix AHB1 base addresses memory map. From Mateusz
         Szafoni.
       - STM32H7 SysTick:  H7 appears to ignore the SysTick CLKSOURCE bit
         and use the CPU clock in all cases.  From Mateusz Szafoni.
@@ -23260,8 +23260,8 @@ detailed bugfix information):
       - Signals:  The abnormal termination signal handler was just calling
         exit() conditionally when, for example, Ctrl-C is sent to a task.
         The abnormal termination handler must obey the rules of cancellation
-        points:  If cancelation is disabled, then the abnormal termination
-        logic must wait for cancelation to be re-enabled; If cancellation
+        points:  If cancellation is disabled, then the abnormal termination
+        logic must wait for cancellation to be re-enabled; If cancellation
         is deferred then the abnormal termination logic may have to wait
         for the victim task to enter or exit a cancellation point.  From
         Gregory Nutt.
@@ -23280,7 +23280,7 @@ detailed bugfix information):
     * Networking/Network Drivers:
 
       - getsockname():  Fix addrlen check in socket debug features.
-        Getsockname() checked erroneously a pointer agains 0, where the
+        Getsockname() checked erroneously a pointer against 0, where the
         intention was to dereference the pointer and to check the length.
         This causes also a compilation failure if the code is compiled
         with CONFIG_DEBUG_FEATURES and with -Werror flag set.  From Jukka
@@ -23744,7 +23744,7 @@ Additional new features and extended functionality:
         Jerpelea.
       - Add I2CTOOL support and extend GPIO for future use. Add delay
         support for CXD56xx chip.  For development is useful to register
-        I2C busses when the I2CTOOL is built.  Enable GPIO interface on
+        I2C buses when the I2CTOOL is built.  Enable GPIO interface on
         the Spresense board.  From Alin Jerpelea.
       - Add use o the CXD56_I2C_DRIVER to register the /dev/i2c character
         devices.  Enable battery gauge and battery charger support.  From
@@ -24055,7 +24055,7 @@ Additional new features and extended functionality:
         determines a preferred window width based primarily on the font
         size.  From Gregory Nutt.
       - apps/graphics/tmw4nx:  Add a CClock class that implements the
-        Twm4Nx digital clock based on the CSLcd simulated SLCD segements.
+        Twm4Nx digital clock based on the CSLcd simulated SLCD segments.
         From Gregory Nutt.
       - apps/graphics/twm4nx/README.txt:  Add an overview of how to create
         Twm4Nx applications.  From Gregory Nutt.
@@ -24440,7 +24440,7 @@ detailed bugfix information):
 
       - apps/nshlib:  Fix all places where cle() and readline() are used.
         readline() returns EOF on a failure.  cle() returns a negated errno
-        value.  Checking only for EOF causes failues to be missed (and
+        value.  Checking only for EOF causes failures to be missed (and
         infinite loops ensuing).  From Valmantas Paliksa.
       - nshlib/nsh_parse.c:  Fix a warning about an uninitialized variable
         from the ZDS-II compiler.  From Gregory Nutt.
@@ -24919,7 +24919,7 @@ Additional new features and extended functionality:
       - Tiva Configuration:  Modify preprocessor logic to support
         configurations with no UART.  Now similar to logic for other
         architectures.  From Nathan Hartman.
-      - Tiva Interrupts:  Add handling for IRQs 128 thru 159.  From Nathan
+      - Tiva Interrupts:  Add handling for IRQs 128 through 159.  From Nathan
         Hartman.
 
     * TI Tiva Drivers:
@@ -25628,7 +25628,7 @@ information):
         index, i.e. the AT24CS0x, FLASH chips with a UUID that appears as a
         2nd I2C slave at (address+8), report their serial number at
         Reg[80]-Reg[8F] and will NAK a read of Reg[0].  (2) Modify get/set
-        to prevent write of reg index if not specifed  From David Alessio.
+        to prevent write of reg index if not specified  From David Alessio.
 
     * Network Utilities: apps/netutils:
 
@@ -25651,7 +25651,7 @@ information):
 NuttX-8.2 Release Notes
 ------------------------
 
-The 133nd release of NuttX, Version 8.3, was made on November 16, 2019,
+The 133rd release of NuttX, Version 8.2, was made on November 16, 2019,
 and is available for download from the Bitbucket.org website.  Note
 that release consists of two tarballs:  nuttx-8.2.tar.gz and
 apps-8.2.tar.gz.  These are available from:
@@ -25987,7 +25987,7 @@ Additional new features and extended functionality:
         table for dlopen/insmod.  From Xiang Xiao.
       - getdelim() and getline():  Add implementations of the POSIX
         functions getdelim() and getline().  Because of how the function is
-        defined, getline() canot be used on platforms that use CR-LF lin
+        defined, getline() cannot be used on platforms that use CR-LF lin
         terminations.  From Gregory Nutt.
       - alarm(), setitimer(), and getitimer():  Implement alarm(),
         setitimer() and getitimer() APIs.  From liuhaitao.
@@ -26590,7 +26590,7 @@ information):
       - apps/system/cu/: (1) Fix early exit.  getc(stdin) can return 0 the
         first time around.  (2) Set optind to zero.  getopt() was being
         left in a bad state, causing parsing errors on second use.  (3) Fix
-        priority of cu_listen().  (4) Add suppor for -h.  From David
+        priority of cu_listen().  (4) Add support for -h.  From David
         Alessio.
       - apps/system/lzf/: Check the protection by CONFIG_SYSTEM_LZF !=
         CONFIG_m (not elf binary) instead of CONFIG_KERNEL_BUILD.  From

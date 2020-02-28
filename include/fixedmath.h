@@ -53,8 +53,8 @@
 #define b8TEN           0x0a00                   /* 10 */
 #define b8ONE           0x0100                   /* 1 */
 #define b8HALF          0x0080                   /* 0.5 */
-#define b8ONETENTH      0x001a                   /* 0.1 (acutally 0.1015625) */
-#define b8ONEHUNDRTH    0x0003                   /* 0.01 (actualy 0.0117198765) */
+#define b8ONETENTH      0x001a                   /* 0.1 (actually 0.1015625) */
+#define b8ONEHUNDRTH    0x0003                   /* 0.01 (actually 0.0117198765) */
 #define b8HALFPI        0x0192                   /* 1.5703125 */
 #define b8PI            0x0324                   /* 3.1406250 */
 #define b8TWOPI         0x0648                   /* 6.2812500 */

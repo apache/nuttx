@@ -83,7 +83,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
 
   deststride = pinfo->stride;
 
-  /* Get the dimensions of the rectange to fill: width in pixels,
+  /* Get the dimensions of the rectangle to fill: width in pixels,
    * height in rows
    */
 

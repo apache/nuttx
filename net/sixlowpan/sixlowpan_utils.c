@@ -251,7 +251,7 @@ int sixlowpan_destaddrfromip(FAR struct radio_driver_s *radio,
   struct radiodev_properties_s properties;
   int ret;
 
-#ifdef  CONFIG_NET_STARPOINT
+#ifdef CONFIG_NET_STARPOINT
   /* Only the radio driver knows the correct address of the hub.  For IEEE
    * 802.15.4 this will be the address of the PAN coordinator.  For other
    * radios, this may be some configured, "well-known" address.
@@ -585,7 +585,7 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  * Name: sixlowpan_radio_framelen
  *
  * Description:
- *   Get the maximum frame length supported by radio network drvier.
+ *   Get the maximum frame length supported by radio network driver.
  *
  * Input Parameters:
  *   radio - Reference to a radio network driver state instance.

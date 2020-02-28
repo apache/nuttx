@@ -64,7 +64,7 @@
  *   tcb: Refers to the tcb to be unblocked.  This tcb is
  *     in one of the waiting tasks lists.  It must be moved to
  *     the ready-to-run list and, if it is the highest priority
- *     ready to run taks, executed.
+ *     ready to run task, executed.
  *
  ****************************************************************************/
 
@@ -144,4 +144,3 @@ void up_unblock_task(struct tcb_s *tcb)
         }
     }
 }
-

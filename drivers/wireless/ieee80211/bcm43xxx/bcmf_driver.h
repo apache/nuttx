@@ -38,9 +38,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <semaphore.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/semaphore.h>
 #include <net/if.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>

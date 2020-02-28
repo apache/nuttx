@@ -49,7 +49,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <fixedmath.h>
@@ -60,6 +59,7 @@
 #include <nuttx/fs/unionfs.h>
 #include <nuttx/fs/dirent.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/semaphore.h>
 
 #include "inode/inode.h"
 
@@ -765,7 +765,7 @@ static int unionfs_unbind_child(FAR struct unionfs_mountpt_s *um)
     }
   else if (ret > 0)
     {
-      /* REVISIT: This is bad if the file sysem cannot support a deferred
+      /* REVISIT: This is bad if the file system cannot support a deferred
        * unmount.  Ideally it would perform the unmount when the last file
        * is closed.  But I don't think any file system do that.
        */
@@ -1834,7 +1834,7 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                         {
                           /* There is something there!
                            * REVISIT: We could allow files and directories to
-                           * have duplicat names.
+                           * have duplicate names.
                            */
 
                           return -ENOENT;
@@ -1902,7 +1902,7 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                     {
                       /* There is something there!
                        * REVISIT: We could allow files and directories to
-                       * have duplicat names.
+                       * have duplicate names.
                        */
 
                       duplicate = true;
@@ -2278,7 +2278,7 @@ static int unionfs_unlink(FAR struct inode *mountpt,
 
   else
     {
-      /* Check if the file exists with with name on file system 2.  The only
+      /* Check if the file exists with name on file system 2.  The only
        * reason that we check here is so that we can return the more
        * meaningful -ENOSYS if file system 2 is a read-only file system.
        */

@@ -75,7 +75,7 @@
 #  define CONFIG_LPC17_40_USBDEV_EP0_MAXSIZE 64
 #endif
 
-#ifndef  CONFIG_USBDEV_MAXPOWER
+#ifndef CONFIG_USBDEV_MAXPOWER
 #  define CONFIG_USBDEV_MAXPOWER 100  /* mA */
 #endif
 
@@ -220,7 +220,7 @@
 #define DEVSTATUS_RESET(s)      (((s)&CMD_STATUS_RESET)!=0)
 
 /* If this bit is set in the lpc17_40_epread response, it means that the
- * recevied packet was overwritten by a later setup packet (ep0 only).
+ * received packet was overwritten by a later setup packet (ep0 only).
  */
 
 #define LPC17_40_READOVERRUN_BIT (0x80000000)
@@ -255,7 +255,7 @@
 #define LPC17_40_EP0MAXPACKET         (64)          /* EP0 max packet size (1-64) */
 #define LPC17_40_BULKMAXPACKET        (64)          /* Bulk endpoint max packet (8/16/32/64) */
 #define LPC17_40_INTRMAXPACKET        (64)          /* Interrupt endpoint max packet (1 to 64) */
-#define LPC17_40_ISOCMAXPACKET        (512)         /* Acutally 1..1023 */
+#define LPC17_40_ISOCMAXPACKET        (512)         /* Actually 1..1023 */
 
 /* EP0 status.  EP0 transfers occur in a number of different contexts.  A
  * simple state machine is required to handle the various transfer complete
@@ -973,7 +973,7 @@ static int lpc17_40_epread(uint8_t epphy, uint8_t *data, uint32_t nbytes)
   result = lpc17_40_usbcmd(CMD_USBDEV_EPCLRBUFFER, 0);
 
   /* The packet overrun bit in the clear buffer response is applicable only
-   * on EP0 transfers.  If set it means that the recevied packet was overwritten
+   * on EP0 transfers.  If set it means that the received packet was overwritten
    * by a later setup packet.
    */
 
@@ -2235,7 +2235,7 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
                 {
                   /* On the first time through the loop, pending will be
                    * the bitset of high priority pending interrupts; on the
-                   * second time throught it will be the bitset of low
+                   * second time through it will be the bitset of low
                    * priority interrupts.
                    */
 
@@ -2285,7 +2285,7 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
 
                           lpc17_40_epclrinterrupt(epphy);
 
-                          /* Get the endpoint sructure corresponding to the physical
+                          /* Get the endpoint structure corresponding to the physical
                            * endpoint number.
                            */
 
@@ -2380,7 +2380,7 @@ static int lpc17_40_usbinterrupt(int irq, FAR void *context, FAR void *arg)
         {
           /* On the first time through the loop, pending will be
            * the bitset of high priority pending interrupts; on the
-           * second time throught it will be the bitset of low
+           * second time through it will be the bitset of low
            * priority interrupts. Note that EP0 IN and OUT are
            * omitted.
            */

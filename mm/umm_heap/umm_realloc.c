@@ -71,6 +71,12 @@ FAR void *realloc(FAR void *oldmem, size_t size)
   FAR void *brkaddr;
   FAR void *mem;
 
+  if (size < 1)
+    {
+      mm_free(USR_HEAP, oldmem);
+      return NULL;
+    }
+
   /* Loop until we successfully allocate the memory or until an error
    * occurs. If we fail to allocate memory on the first pass, then call
    * sbrk to extend the heap by one page.  This may require several

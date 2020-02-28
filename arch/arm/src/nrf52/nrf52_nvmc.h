@@ -326,4 +326,3 @@ uint32_t nrf_nvmc_read_dev_id1(void);
 #endif
 
 #endif /* __ARCH_ARM_SRC_NRF52_NRF52_NVMC_H */
-

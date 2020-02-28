@@ -205,7 +205,7 @@ int board_isx012_initialize(int i2c_bus_num)
 
   CXD56_PIN_CONFIGS(PINCONFS_IS);
 
-  /* Initialize i2c deivce */
+  /* Initialize i2c device */
 
   i2c = cxd56_i2cbus_initialize(i2c_bus_num);
   if (!i2c)
@@ -228,7 +228,7 @@ int board_isx012_uninitialize(void)
 
   _info("Uninitializing ISX012...\n");
 
-  /* Initialize i2c deivce */
+  /* Initialize i2c device */
 
   ret = isx012_unregister();
   if (ret < 0)

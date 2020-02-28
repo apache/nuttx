@@ -389,4 +389,3 @@ void up_lowputc(char ch)
   usart_putreg(AVR32_CONSOLE_BASE, AVR32_USART_THR_OFFSET, (uint32_t)ch);
 #endif
 }
-

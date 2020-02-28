@@ -3,9 +3,33 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menuconfig DRIVERS_VIDEO
+	bool "Video Device Support"
+	default n
+	---help---
+		Enable support for video device drivers.
+
+if DRIVERS_VIDEO
+
 config VIDEO_FB
 	bool "Framebuffer character driver"
 	default n
+
+config FB_CMAP
+	bool
+	depends on VIDEO_FB
+	default n
+	---help---
+		Set by driver-specific configuration to indicate support for color
+		mapping.  Not directly user selectable.
+
+config FB_TRANSPARENCY
+	bool
+	depends on VIDEO_FB
+	default n
+	---help---
+		Set by driver-specific configuration to indicate support for color
+		transparency.  Not directly user selectable.
 
 config FB_SYNC
 	bool "Hardware signals vertical sync"
@@ -147,3 +171,5 @@ config OV2640_REGDEBUG
 		Enable details, register level debug output.
 
 endif
+
+endif # DRIVERS_VIDEO

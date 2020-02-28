@@ -198,7 +198,7 @@ FAR char *envpath_next(ENVPATH_HANDLE handle, FAR const char *relpath)
        }
 
       /* Okay... 'path' points to the beginning of the string.  The string may
-       * be termined either with (1) ':' which separates the path from the
+       * be terminated either with (1) ':' which separates the path from the
        * next path in the list, or (2) NUL which marks the end of the list.
        */
 
@@ -275,4 +275,3 @@ void envpath_release(ENVPATH_HANDLE handle)
 }
 
 #endif /* CONFIG_LIBC_ENVPATH */
-

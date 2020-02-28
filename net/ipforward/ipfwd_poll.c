@@ -183,7 +183,7 @@ void ipfwd_poll(FAR struct net_driver_s *dev)
   dev->d_sndlen  = 0;
 
   /* Perform the forwarding callbacks.  Returns the new set of flags.  If
-   * the packet was fowarded, then the new set will be zero.
+   * the packet was forwarded, then the new set will be zero.
    */
 
   flags = devif_conn_event(dev, NULL, IPFWD_POLL, dev->d_conncb);

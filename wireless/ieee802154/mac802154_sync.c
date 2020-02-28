@@ -77,4 +77,3 @@ int mac802154_req_sync(MACHANDLE mac, FAR struct ieee802154_sync_req_s *req)
 #endif
   return -ENOTTY;
 }
-

@@ -154,7 +154,7 @@ static void pbist_memtest_start(uint32_t rinfol, uint32_t algomask)
  *   None
  *
  * Returned Value:
- *   true if the PBIST test is compelte
+ *   true if the PBIST test is complete
  *
  ****************************************************************************/
 

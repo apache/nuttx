@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __DRIVERS_USBDEV_CDCACM_H
-#define __DRIVERS_USBDEV_CDCACM_H 1
+#define __DRIVERS_USBDEV_CDCACM_H
 
 /****************************************************************************
  * Included Files
@@ -51,7 +51,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* If the serial device is configured as part of a composite device than both
  * CONFIG_USBDEV_COMPOSITE and CONFIG_CDCACM_COMPOSITE must be defined.
  */
@@ -61,7 +63,7 @@
 #endif
 
 #if defined(CONFIG_CDCACM_COMPOSITE) && !defined(CONFIG_CDCACM_STRBASE)
-#  define CONFIG_CDCACM_STRBASE    (4)
+#  define CONFIG_CDCACM_STRBASE    (0)
 #endif
 
 #if defined(CONFIG_CDCACM_COMPOSITE) && !defined(CONFIG_COMPOSITE_IAD)
@@ -90,6 +92,7 @@
 #endif
 
 /* Descriptors **************************************************************/
+
 /* These settings are not modifiable via the NuttX configuration */
 
 #define CDC_VERSIONNO              0x0110   /* CDC version number 1.10 (BCD) */
@@ -169,6 +172,7 @@
 #define CDCACM_EPINBULK_ATTR       (USB_EP_ATTR_XFER_BULK)
 
 /* Device driver definitions ************************************************/
+
 /* A CDC/ACM device is specific by a minor number in the range of 0-255.
  * This maps to a character device at /dev/ttyACMx, x=0..255.
  */
@@ -177,6 +181,7 @@
 #define CDCACM_DEVNAME_SIZE        16
 
 /* Misc Macros **************************************************************/
+
 /* MIN/MAX macros */
 
 #ifndef MIN

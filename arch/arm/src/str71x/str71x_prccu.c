@@ -233,7 +233,6 @@
    APB2EN_ADC12 | APB2EN_CKOUT | APB2EN_TIM0  | APB2EN_TIM1  | \
    APB2EN_TIM2  | APB2EN_TIM3  | APB2EN_RTC   | APB2EN_EIC)
 
-
 #if STR71X_PLL1OUT_MUL == 12
 #  define PLL1MUL STR71X_RCCUPLL1CR_MUL12
 #elif STR71X_PLL1OUT_MUL == 16
@@ -243,7 +242,7 @@
 #elif STR71X_PLL1OUT_MUL == 24
 #  define PLL1MUL STR71X_RCCUPLL1CR_MUL24
 #else
-#  error "Unsupporetd value for STR71X_PLL1OUT_MUL"
+#  error "Unsupported value for STR71X_PLL1OUT_MUL"
 #endif
 
 #if STR71X_PLL1OUT_DIV == 1
@@ -309,7 +308,7 @@
 #elif STR71X_PLL2OUT_MUL == 28
 #  define PLL2MUL STR71X_PCUPPL2CR_MUL28
 #else
-#  error "Unsupporetd value for STR71X_PLL2OUT_MUL"
+#  error "Unsupported value for STR71X_PLL2OUT_MUL"
 #endif
 
 #if STR71X_PLL2OUT_DIV == 1
@@ -453,7 +452,9 @@ void str71x_prccuinit(void)
   putreg16(reg16, STR71X_PCU_PLL2CR);
 
   /* Wait for PLL2 to lock in */
-  // while ((getreg16(STR71X_PCU_PLL2CR) & STR71X_PCUPPL2CR_LOCK) == 0);
+
+  /* while ((getreg16(STR71X_PCU_PLL2CR) & STR71X_PCUPPL2CR_LOCK) == 0); */
+
 #endif
 
   /* Select the USB clock source */
@@ -472,5 +473,3 @@ void str71x_prccuinit(void)
   putreg16(reg16, STR71X_PCU_PLL2CR);
 #endif
 }
-
-

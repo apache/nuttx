@@ -465,4 +465,4 @@
 
 #define BOARD_USB_GCLKGEN            1                   /* GCLK1, 48MHz */
 
-#endif  /* __BOARDS_ARM_SAMD5E5_METRO_M4_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_SAMD5E5_METRO_M4_INCLUDE_BOARD_H */

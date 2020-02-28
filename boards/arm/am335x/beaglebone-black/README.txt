@@ -131,7 +131,7 @@ Booting NuttX from an SD card
   These are the steps to get U-Boot booting from SD Card:
 
     1. Configure and build the NuttX Beaglebone Black configuration.  You
-       should have a file alled nuttx.bin when the build completes.
+       should have a file called nuttx.bin when the build completes.
 
     2. Insert a FLASH stick into the host PC and format it for FAT32 FS.
 

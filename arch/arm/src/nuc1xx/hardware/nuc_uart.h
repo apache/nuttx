@@ -152,7 +152,7 @@
 #  define UART_FCR_RFITL_30        (4 << UART_FCR_RFITL_SHIFT) /* High speed */
 #  define UART_FCR_RFITL_46        (5 << UART_FCR_RFITL_SHIFT) /* High speed */
 #  define UART_FCR_RFITL_62        (6 << UART_FCR_RFITL_SHIFT) /* High speed */
-#define UART_FCR_RX_DIS            (1 << 8)  /* Bit 8:  Recive disable register */
+#define UART_FCR_RX_DIS            (1 << 8)  /* Bit 8:  Receive disable register */
 #define UART_FCR_RTS_TRI_LEV_SHIFT (16)      /* Bits 16-19: RTS trigger level for auto flow control */
 #define UART_FCR_RTS_TRI_LEV_MASK  (15 << UART_FCR_RTS_TRI_LEV_SHIFT)
 #  define UART_FCR_RTS_TRI_LEV_1   (0 << UART_FCR_RTS_TRI_LEV_SHIFT)

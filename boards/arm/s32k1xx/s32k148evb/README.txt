@@ -16,7 +16,7 @@ Status
 ======
 
   2019-08-20:  NSH configuration created but entirely untested.
-  2019-08-24:  NSH configuratin verified running from FLASH.
+  2019-08-24:  NSH configuration verified running from FLASH.
 
   TODO:  Need calibrate the delay loop.  The current value of
   CONFIG_BOARD_LOOPSPERMSEC is a bogus value retained from a copy-paste
@@ -54,7 +54,7 @@ LEDs and Buttons
   the common RGB LED driver.
 
   If CONFIG_ARCH_LEDs is defined, then NuttX will control the LEDs on board
-  the s32k148evb.  The following definitions describe how NuttX controls the
+  the S32K148EVB.  The following definitions describe how NuttX controls the
   LEDs:
 
     ==========================================+========+========+=========
@@ -69,7 +69,7 @@ LEDs and Buttons
     LED_SIGNAL       In a signal handler               (no change)
     LED_ASSERTION    An assertion failed               (no change)
     LED_PANIC        The system has crashed      FLASH    OFF      OFF
-    LED_IDLE         S32K148EVN in sleep mode          (no change)
+    LED_IDLE         S32K148EVB in sleep mode          (no change)
     ==========================================+========+========+=========
 
   Buttons

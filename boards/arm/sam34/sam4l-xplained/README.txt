@@ -48,7 +48,7 @@ Modules
     ----------------- -------------------- -------------------- ------------------------------------
     1  ID             1                    1
     2  GND            2       GND          2
-    3  LIGHTSENSOR    3  PA04 ADCIFE/AD0   3  PA07 ADCIFE/AD2
+    3  LIGHT_SENSOR   3  PA04 ADCIFE/AD0   3  PA07 ADCIFE/AD2
     4  LP_OUT         4  PA05 ADCIFE/AD1   4  PB02 ADCIFE/AD3
     5  GPIO1          5  PB12 GPIO         5  PC08 GPIO         PB12 and PC8 on EXT5
     6  GPIO2          6  PC02 GPIO         6  PB10 GPIO         PB10 on EXT5
@@ -217,7 +217,7 @@ Serial Consoles
      19    19         GND
      20    20         VCC
 
-  If you have a TTL to RS-232 convertor then this is the most convenient
+  If you have a TTL to RS-232 converter then this is the most convenient
   serial console to use.  It is the default in all of these configurations.
   An option is to use the virtual COM port.
 
@@ -490,7 +490,7 @@ Configuration sub-directories
        Sometimes NuttX and your toolchain will disagree on the underlying
        type of size_t; sometimes it is an 'unsigned int' and sometimes it is
        an 'unsigned long int'.  If this error occurs, then you may need to
-       toggle the value of CONFIG_CXX_NEWLONG.
+       toggle the value of CONFIG_ARCH_SIZET_LONG.
 
     2. If the I/O1 module is connected to the SAM4L Xplained Pro, then
        support for the SD card slot can be enabled by making the following
@@ -618,7 +618,7 @@ Configuration sub-directories
          CONFIG_EXAMPLES_NXHELLO_BPP=1            : One bit per pixel
          CONFIG_EXAMPLES_NXHELLO_EXTERNINIT=y     : Special initialization is required.
 
-        * The OLED is monochrome so the only "colors" are blacka nd white.
+        * The OLED is monochrome so the only "colors" are black and white.
           The default "colors" will give you while text on a black background.
           You can override the faults it you want black text on a while background.
 

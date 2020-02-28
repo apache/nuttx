@@ -357,7 +357,7 @@ bool stm32_pwr_getwuf(void)
  *   into the RAM will be maintained in the Standby and VBAT modes.
  *
  * Input Parameters:
- *   regon - state to set it to
+ *   region - state to set it to
  *
  * Returned Value:
  *   None
@@ -365,16 +365,16 @@ bool stm32_pwr_getwuf(void)
  ************************************************************************************/
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
-void stm32_pwr_enablebreg(bool regon)
+void stm32_pwr_enablebreg(bool region)
 {
   uint16_t regval;
 
   regval  = stm32_pwr_getreg32(STM32_PWR_CSR_OFFSET);
   regval &= ~PWR_CSR_BRE;
-  regval |= regon ? PWR_CSR_BRE : 0;
+  regval |= region ? PWR_CSR_BRE : 0;
   stm32_pwr_putreg32(STM32_PWR_CSR_OFFSET, regval);
 
-  if (regon)
+  if (region)
     {
       while ((stm32_pwr_getreg32(STM32_PWR_CSR_OFFSET) & PWR_CSR_BRR) == 0);
     }

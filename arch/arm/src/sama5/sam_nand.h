@@ -45,10 +45,10 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <debug.h>
 
 #include <nuttx/mtd/nand_raw.h>
+#include <nuttx/semaphore.h>
 
 #include "up_arch.h"
 #include "chip.h"

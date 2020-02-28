@@ -61,7 +61,7 @@
  *
  * Description:
  *   Configure a PIN based on bit-encoded description of the pin.  NOTE that
- *   DMA/interrupts are disabled at the initial PIN configuratin.
+ *   DMA/interrupts are disabled at the initial PIN configuration.
  *
  ****************************************************************************/
 

@@ -269,7 +269,7 @@ static int lpc54_getcmap(FAR struct fb_vtable_s *vtable,
       cmap->transp[i] = 0;
 #endif
 
-      /* Handle the case where the len ends on an odd boudary */
+      /* Handle the case where the len ends on an odd boundary */
 
       if ((i + 1) < last)
         {
@@ -349,7 +349,7 @@ static int lpc54_putcmap(FAR struct fb_vtable_s *vtable,
                    (uint32_t)cmap->blue[i+1]  << LCD_PAL_B1_SHIFT);
         }
 
-      /* Save the new pallete value */
+      /* Save the new palette value */
 
       *pal++ = (rgb0 | rgb1);
     }
@@ -884,7 +884,7 @@ void up_fbuninitialize(int display)
  * Description:
  *   This is a non-standard LCD interface just for the LPC54xx.  Clearing
  *   the display in the normal way by writing a sequences of runs that
- *   covers the entire display can be slow.  Here the dispaly is cleared by
+ *   covers the entire display can be slow.  Here the display is cleared by
  *   simply setting all VRAM memory to the specified color.
  *
  ****************************************************************************/

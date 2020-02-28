@@ -59,7 +59,7 @@ Execute
 =======
   You may download the ELF to the board by `plpbridge` in gap_sdk.
   Remember to first `cd` to the gap_sdk/ and `source sourceme.sh`, so
-  that you have the $GAP_SDK_HOME environment varible.
+  that you have the $GAP_SDK_HOME environment variable.
 
   Use the following command to download and run the ELF through JTAG:
 

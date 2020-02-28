@@ -133,7 +133,7 @@
  * MIO283QT2 controllers.  I have tried to summarize these differences as "LCD profiles"
  *
  * Most of the differences between LCDs are nothing more than a few minor bit
- * settings.  The most significant difference betwen LCD drivers in is the
+ * settings.  The most significant difference between LCD drivers in is the
  * manner in which the LCD is powered up and in how the power controls are set.
  * My suggestion is that if you have working LCD initialization code, you should
  * simply replace the code in mio283qt2_hwinitialize with your working code.
@@ -231,7 +231,7 @@
 
 struct mio283qt2_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 

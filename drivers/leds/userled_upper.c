@@ -172,7 +172,7 @@ static int userled_open(FAR struct file *filep)
   opriv = (FAR struct userled_open_s *)kmm_zalloc(sizeof(struct userled_open_s));
   if (!opriv)
     {
-      lederr("ERROR: Failled to allocate open structure\n");
+      lederr("ERROR: Failed to allocate open structure\n");
       ret = -ENOMEM;
       goto errout_with_sem;
     }

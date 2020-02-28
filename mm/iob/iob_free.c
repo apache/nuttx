@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -170,7 +169,8 @@ FAR struct iob_s *iob_free(FAR struct iob_s *iob,
 
 #if CONFIG_IOB_THROTTLE > 0
   nxsem_post(&g_throttle_sem);
-  DEBUGASSERT(g_throttle_sem.semcount <= (CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE));
+  DEBUGASSERT(g_throttle_sem.semcount <=
+              (CONFIG_IOB_NBUFFERS - CONFIG_IOB_THROTTLE));
 #endif
 
 #ifdef CONFIG_IOB_NOTIFIER

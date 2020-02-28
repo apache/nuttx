@@ -135,4 +135,3 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
 #endif
 
 #endif /* __ARCH_X86_INCLUDE_I486_SYSCALL_H */
-

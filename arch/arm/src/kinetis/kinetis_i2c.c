@@ -1030,6 +1030,7 @@ static int kinetis_i2c_interrupt(int irq, void *context, void *arg)
                     }
 
                   /* TODO: handle zero-length reads */
+
                   /* Dummy read to initiate reception */
 
                   dummy = kinetis_i2c_getreg(priv, KINETIS_I2C_D_OFFSET);
@@ -1347,7 +1348,7 @@ out:
   kinetis_i2c_sem_post(priv);
   return ret;
 }
-#endif  /* CONFIG_I2C_RESET */
+#endif /* CONFIG_I2C_RESET */
 
 /****************************************************************************
  * Public Functions
@@ -1395,8 +1396,7 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
 #endif
 
     default:
-      i2cerr("ERROR: Kinetis I2C Only suppors ports 0 and %d\n",
-             KINETIS_NI2C - 1);
+      i2cerr("ERROR: Unsupported I2C port %d\n", port);
       return NULL;
     }
 
@@ -1410,9 +1410,11 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
           priv->refs--;
           goto errout;
       }
+
       kinetis_i2c_sem_init(priv);
       kinetis_i2c_init(priv);
     }
+
   leave_critical_section(flags);
 
   return &priv->dev;
@@ -1420,7 +1422,6 @@ struct i2c_master_s *kinetis_i2cbus_initialize(int port)
 errout:
   leave_critical_section(flags);
   return NULL;
-
 }
 
 /****************************************************************************

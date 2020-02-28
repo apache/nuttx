@@ -189,5 +189,3 @@ void stm32_selectsram(void)
 }
 
 #endif /* CONFIG_STM32_FSMC */
-
-

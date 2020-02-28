@@ -41,7 +41,6 @@
 
 #include <stdbool.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
@@ -79,6 +78,7 @@ int iob_navail(bool throttled)
           ret -= CONFIG_IOB_THROTTLE;
         }
 #endif
+
       if (ret < 0)
         {
           ret = 0;

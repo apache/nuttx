@@ -44,7 +44,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -524,7 +523,7 @@ static int usart0_txinterrupt(int irq, void *context, FAR void *arg)
 
   if ((ucsr0a & (1 << UDRE0)) != 0)
     {
-      /* Transmit data regiser empty ... process outgoing bytes */
+      /* Transmit data register empty ... process outgoing bytes */
 
       uart_xmitchars(&g_usart0port);
     }
@@ -544,7 +543,7 @@ static int usart1_txinterrupt(int irq, void *context, FAR void *arg)
 
   if ((ucsr1a & (1 << UDRE1)) != 0)
     {
-      /* Transmit data regiser empty ... process outgoing bytes */
+      /* Transmit data register empty ... process outgoing bytes */
 
       uart_xmitchars(&g_usart1port);
     }
@@ -888,6 +887,8 @@ static bool usart1_txempty(struct uart_dev_s *dev)
  * Public Functions
  ****************************************************************************/
 
+#ifdef USE_EARLYSERIALINIT
+
 /****************************************************************************
  * Name: up_earlyserialinit
  *
@@ -920,6 +921,7 @@ void up_earlyserialinit(void)
 #  endif
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: up_serialinit
@@ -1014,4 +1016,3 @@ int up_putc(int ch)
 }
 
 #endif /* USE_SERIALDRIVER */
-

@@ -601,7 +601,7 @@ static inline int nxtask_stackargsetup(FAR struct task_tcb_s *tcb,
     }
 
   /* Put a terminator entry at the end of the argv[] array.  Then save the
-   * argv[] arry pointer in the TCB where it will be recovered later by
+   * argv[] array pointer in the TCB where it will be recovered later by
    * nxtask_start().
    */
 

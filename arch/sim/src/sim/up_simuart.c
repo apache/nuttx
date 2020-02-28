@@ -42,42 +42,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <termios.h>
-#include <pthread.h>
-#include <errno.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Simulated console UART input buffer size */
-/* Must match the defintion in up_internal.h */
-
-#define SIMUART_BUFSIZE 256
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static char g_uartbuffer[SIMUART_BUFSIZE];
-static volatile int  g_uarthead;
-static volatile int  g_uarttail;
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile int g_uart_data_available;
-
-/****************************************************************************
- * NuttX Domain Public Function Prototypes
- ****************************************************************************/
-
-void sched_lock(void);
-void sched_unlock(void);
-
-void simuart_initialize(void);
-void simuart_post(void);
-void simuart_wait(void);
+#include <poll.h>
 
 /****************************************************************************
  * Private Data
@@ -126,75 +91,15 @@ static void restoremode(void)
 }
 
 /****************************************************************************
- * Name: simuart_thread
- ****************************************************************************/
-
-static void *simuart_thread(void *arg)
-{
-  unsigned char ch;
-  ssize_t nread;
-  int next;
-  int prev;
-
-  /* Now loop, collecting a buffering data from stdin forever */
-
-  for (; ; )
-    {
-      /* Read one character from stdin */
-
-      nread = read(0, &ch, 1);
-
-      /* Check for failures (but don't do anything) */
-
-      if (nread == 1)
-        {
-          /* Get the index to the next slot in the UART buffer */
-
-          prev = g_uarthead;
-          next = prev + 1;
-          if (next >= SIMUART_BUFSIZE)
-            {
-              next = 0;
-            }
-
-          /* Would adding this character cause an overflow? */
-
-          if (next != g_uarttail)
-            {
-              /* No.. Add the character to the UART buffer */
-
-              g_uartbuffer[prev] = ch;
-
-              /* Update the head index (BEFORE posting) */
-
-              g_uarthead = next;
-
-              /* Was the buffer previously empty? */
-
-              if (prev == g_uarttail)
-                {
-                  /* Yes.. signal any (NuttX) threads waiting for serial
-                   * input.
-                   */
-
-                  g_uart_data_available = 1;
-                }
-            }
-        }
-    }
-
-  return NULL;
-}
-
-/****************************************************************************
  * Name: simuart_putraw
  ****************************************************************************/
 
 int simuart_putraw(int ch)
 {
   ssize_t nwritten;
+  unsigned char buf = ch;
 
-  nwritten = write(1, &ch, 1);
+  nwritten = write(1, &buf, 1);
   if (nwritten != 1)
     {
       return -1;
@@ -213,13 +118,6 @@ int simuart_putraw(int ch)
 
 void simuart_start(void)
 {
-  pthread_t tid;
-
-  /* This thread runs in the host domain */
-  /* Perform the NuttX domain initialization */
-
-  simuart_initialize();
-
   /* Put stdin into raw mode */
 
   setrawmode();
@@ -227,12 +125,6 @@ void simuart_start(void)
   /* Restore the original terminal mode before exit */
 
   atexit(restoremode);
-
-  /* Start the simulated UART thread -- all default settings; no error
-   * checking.
-   */
-
-  pthread_create(&tid, NULL, simuart_thread, NULL);
 }
 
 /****************************************************************************
@@ -260,57 +152,24 @@ int simuart_putc(int ch)
  * Name: simuart_getc
  ****************************************************************************/
 
-int simuart_getc(bool block)
+int simuart_getc(void)
 {
-  int index;
-  int ch;
+  int ret;
+  unsigned char ch;
 
-  /* Locking the scheduler should eliminate the race conditions in the
-   * unlikely case of multiple reading threads.
-   */
-
-  sched_lock();
-  for (; ; )
-    {
-      /* Wait for a byte to become available */
-
-      if (!block && (g_uarthead == g_uarttail))
-        {
-          sched_unlock();
-          return -EAGAIN;
-        }
-
-      while (g_uarthead == g_uarttail)
-        {
-          simuart_wait();
-        }
-
-      /* The UART buffer is non-empty...  Take the next byte from the tail
-       * of the buffer.
-       */
-
-      index = g_uarttail;
-      ch    = (int)g_uartbuffer[index];
-
-      /* Increment the tai index (with wrapping) */
-
-      if (++index >= SIMUART_BUFSIZE)
-        {
-          index = 0;
-        }
-
-      g_uarttail = index;
-      sched_unlock();
-      return ch;
-    }
+  ret = read(0, &ch, 1);
+  return ret < 0 ? ret : ch;
 }
 
 /****************************************************************************
- * Name: simuart_getc
+ * Name: simuart_checkc
  ****************************************************************************/
 
 bool simuart_checkc(void)
 {
-  return g_uarthead != g_uarttail;
-}
+  struct pollfd pfd;
 
+  pfd.fd     = 0;
+  pfd.events = POLLIN;
+  return poll(&pfd, 1, 0) == 1;
+}

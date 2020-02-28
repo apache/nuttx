@@ -79,8 +79,8 @@ struct rng_dev_s
   uint8_t *rd_buf;
   size_t   rd_count;
   size_t   buflen;
-  sem_t    rd_sem;         /* semphore for read RNG data */
-  sem_t    excl_sem;       /* semphore for access RNG dev */
+  sem_t    rd_sem;         /* semaphore for read RNG data */
+  sem_t    excl_sem;       /* semaphore for access RNG dev */
 };
 
 /****************************************************************************
@@ -91,8 +91,8 @@ static struct rng_dev_s g_rngdev;
 
 static const struct file_operations g_rngops =
 {
-  .open  = nrf52_rng_open,       /* open   */
-  .read  = nrf52_rng_read,       /* read   */
+  .open  = nrf52_rng_open,       /* open */
+  .read  = nrf52_rng_read,       /* read */
 };
 
 /****************************************************************************
@@ -104,11 +104,11 @@ static void nrf52_rng_start(void)
   irqstate_t flag;
   flag = enter_critical_section();
 
-  nrf52_event_clear(NRF52_RNG_EVENT_RDY);
+  nrf52_event_clear(NRF52_RNG_EVENTS_RDY);
 
   putreg32(1, NRF52_RNG_CONFIG);
-  nrf52_interrupt_enable(NRF52_RNG_INT_SET, NRF52_RNG_INT_EVENT_RDY);
-  nrf52_task_trigger(NRF52_RNG_T_START);
+  nrf52_interrupt_enable(NRF52_RNG_INTSET, RNG_INT_RDY);
+  nrf52_task_trigger(NRF52_RNG_TASKS_START);
 
   up_enable_irq(NRF52_IRQ_RNG);
 
@@ -122,10 +122,10 @@ static void nrf52_rng_stop(void)
 
   up_disable_irq(NRF52_IRQ_RNG);
 
-  nrf52_task_trigger(NRF52_RNG_T_STOP);
-  nrf52_interrupt_disable(NRF52_RNG_INT_CLR, NRF52_RNG_INT_EVENT_RDY);
+  nrf52_task_trigger(NRF52_RNG_TASKS_STOP);
+  nrf52_interrupt_disable(NRF52_RNG_INTCLR, RNG_INT_RDY);
 
-  nrf52_event_clear(NRF52_RNG_EVENT_RDY);
+  nrf52_event_clear(NRF52_RNG_EVENTS_RDY);
 
   leave_critical_section(flag);
 }
@@ -169,9 +169,9 @@ static int nrf52_rng_irqhandler(int irq, FAR void *context, FAR void *arg)
   FAR struct rng_dev_s *priv = (struct rng_dev_s *) &g_rngdev;
   uint8_t *addr;
 
-  if (getreg32(NRF52_RNG_EVENT_RDY) == NRF52_RNG_INT_EVENT_RDY)
+  if (getreg32(NRF52_RNG_EVENTS_RDY) == RNG_INT_RDY)
     {
-      nrf52_event_clear(NRF52_RNG_EVENT_RDY);
+      nrf52_event_clear(NRF52_RNG_EVENTS_RDY);
       if (priv->rd_count < priv->buflen)
         {
           addr = priv->rd_buf + priv->rd_count++;

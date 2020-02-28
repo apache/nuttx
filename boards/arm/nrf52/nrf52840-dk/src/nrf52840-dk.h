@@ -67,6 +67,16 @@
 #define GPIO_BUTTON3 (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN(24))
 #define GPIO_BUTTON4 (GPIO_INPUT | GPIO_PULLUP | GPIO_PORT0 | GPIO_PIN(25))
 
+/* Dragino LORA shield (v1.4) - RF98 module (based on SX127X)
+ * RESET - P1.11 (D9)
+ * CS    - P1.12 (D10)
+ * DIO0  - P1.03 (D2)
+ */
+
+#define GPIO_SX127X_RESET (GPIO_PORT1 | GPIO_PIN(11))
+#define GPIO_SX127X_CS    (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(12))
+#define GPIO_SX127X_DIO0  (GPIO_INPUT  | GPIO_PORT1 | GPIO_PIN(3))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -96,6 +106,66 @@
  ****************************************************************************/
 
 int nrf52_bringup(void);
+
+/****************************************************************************
+ * Name: nrf52_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the
+ *   nrf52840-dk board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NRF52_SPI_MASTER
+void nrf52_spidev_initialize(void);
+#endif
+
+/*****************************************************************************
+ * Name: nrf52_lsm6dsl_initialize
+ *
+ * Description:
+ *   Initialize I2C-based LSM6DSL.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_LSM6DSL
+int nrf52_lsm6dsl_initialize(char *devpath);
+#endif
+
+/*****************************************************************************
+ * Name: nrf52_lsm303agr_initialize
+ *
+ * Description:
+ *   Initialize I2C-based LSM303AGR.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_LSM303AGR
+int nrf52_lsm303agr_initialize(char *devpath);
+#endif
+
+/*****************************************************************************
+ * Name: nrf52_hts221_initialize
+ *
+ * Description:
+ *   Initialize I2C-based HTS221.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_HTS221
+int nrf52_hts221_initialize(char *devpath);
+#endif
+
+/*****************************************************************************
+ * Name: nrf52_lpwaninitialize
+ *
+ * Description:
+ *   Initialize SX127X LPWAN interaface.
+ ****************************************************************************/
+
+#ifdef CONFIG_LPWAN_SX127X
+int nrf52_lpwaninitialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF52_NRF52840_DK_SRC_NRF52840_DK_H */

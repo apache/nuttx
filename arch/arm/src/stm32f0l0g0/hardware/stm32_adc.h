@@ -182,7 +182,7 @@
 #  define ADC_CFGR1_EXTEN_BOTH      (3 << ADC_CFGR1_EXTEN_SHIFT) /* Trigger detection on both edges */
 #define ADC_CFGR1_OVRMOD            (1 << 12) /* Bit 12: Overrun Mode */
 #define ADC_CFGR1_CONT              (1 << 13) /* Bit 13: Continuous mode for regular conversions */
-#define ADC_CFGR1_WAIT              (1 << 14) /* Bit 14: Wait convertion mode */
+#define ADC_CFGR1_WAIT              (1 << 14) /* Bit 14: Wait conversion mode */
 #define ADC_CFGR1_AUTOFF            (1 << 15) /* Bit 15: Auto-off mode */
 #define ADC_CFGR1_DISCEN            (1 << 16) /* Bit 16: Discontinuous mode on regular channels */
 #define ADC_CFGR1_AWDSGL            (1 << 22) /* Bit 22: Enable watchdog on single/all channels */

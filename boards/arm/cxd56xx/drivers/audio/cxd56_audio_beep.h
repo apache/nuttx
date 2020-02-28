@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_beep.h
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_beep.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_BEEP_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_BEEP_H
+#ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_BEEP_H
+#define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_BEEP_H
 
 /***************************************************************************
  * Included Files
@@ -67,4 +67,4 @@ CXD56_AUDIO_ECODE cxd56_audio_beep_set_vol(int16_t vol);
 void cxd56_audio_beep_play(void);
 void cxd56_audio_beep_stop(void);
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_BEEP_H */
+#endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_BEEP_H */

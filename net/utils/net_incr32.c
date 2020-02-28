@@ -39,16 +39,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
-#include <debug.h>
-
-#include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
-#include <nuttx/net/ip.h>
-#include <nuttx/net/icmp.h>
-
-#include "utils/utils.h"
 
 #ifndef CONFIG_NET_ARCH_INCR32
 

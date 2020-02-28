@@ -95,4 +95,4 @@ void group_delwaiter(FAR struct task_group_s *group)
     }
 }
 
-#endif  /* CONFIG_SCHED_WAITPID && !CONFIG_SCHED_HAVE_PARENT */
+#endif /* CONFIG_SCHED_WAITPID && !CONFIG_SCHED_HAVE_PARENT */

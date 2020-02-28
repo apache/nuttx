@@ -42,11 +42,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mm/iob.h>
 
@@ -75,7 +73,7 @@ static FAR struct sixlowpan_reassbuf_s *g_free_reass;
 
 static FAR struct sixlowpan_reassbuf_s *g_active_reass;
 
-/* Pool of pre-allocated reassembly buffer stuctures */
+/* Pool of pre-allocated reassembly buffer structures */
 
 static struct sixlowpan_reassbuf_s g_metadata_pool[CONFIG_NET_6LOWPAN_NREASSBUF];
 
@@ -88,7 +86,7 @@ static struct sixlowpan_reassbuf_s g_metadata_pool[CONFIG_NET_6LOWPAN_NREASSBUF]
  *
  * Description:
  *   Check if the fragment that we just received is from the same source as
- *   the previosly received fragements.
+ *   the previously received fragments.
  *
  * Input Parameters:
  *   radio    - Radio network device driver state instance
@@ -162,7 +160,7 @@ static void sixlowpan_reass_expire(void)
 
           /* If the reassembly has expired, then free the reassembly buffer */
 
-          if (elapsed > NET_6LOWPAN_TIMEOUT)
+          if (elapsed >= NET_6LOWPAN_TIMEOUT)
             {
               nwarn("WARNING: Reassembly timed out\n");
               sixlowpan_reass_free(reass);
@@ -317,7 +315,7 @@ FAR struct sixlowpan_reassbuf_s *
       reass         = NULL;
 #else
       /* If we cannot get a reassembly buffer instance from the free list, then we
-       * will have to allocate one from the kernal memory pool.
+       * will have to allocate one from the kernel memory pool.
        */
 
       reass = (FAR struct sixlowpan_reassbuf_s *)

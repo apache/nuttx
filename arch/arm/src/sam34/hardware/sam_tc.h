@@ -337,7 +337,7 @@
 #define TC_CMR_CLKI                  (1 << 3)  /* Bit 3: Clock Invert */
 #define TC_CMR_BURST_SHIFT           (4)       /* Bits 4-5: Burst Signal Selection */
 #define TC_CMR_BURST_MASK            (3 << TC_CMR_BURST_SHIFT)
-#  define TC_CMR_BURST_NOTGATED      (0 << TC_CMR_BURST_SHIFT) /* Nott gated by external signal */
+#  define TC_CMR_BURST_NOTGATED      (0 << TC_CMR_BURST_SHIFT) /* Not gated by external signal */
 #  define TC_CMR_BURST_XC0           (1 << TC_CMR_BURST_SHIFT) /* XC0 ANDed with selected clock */
 #  define TC_CMR_BURST_XC1           (2 << TC_CMR_BURST_SHIFT) /* XC1 ANDed with selected clock */
 #  define TC_CMR_BURST_XC2           (3 << TC_CMR_BURST_SHIFT) /* XC2 ANDed with selected clock */

@@ -340,4 +340,3 @@ void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 #endif
 
 #endif /* CONFIG_STM32_OTGFS */
-

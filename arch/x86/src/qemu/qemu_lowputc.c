@@ -101,4 +101,3 @@ void up_lowputc(char ch)
 
   outb(ch, COM1_PORT+COM_THR);
 }
-

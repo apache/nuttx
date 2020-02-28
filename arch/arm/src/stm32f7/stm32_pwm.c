@@ -216,7 +216,7 @@ struct stm32_pwmtimer_s
   uint8_t irq;                         /* Timer update IRQ */
   uint8_t prev;                        /* The previous value of the RCR (pre-loaded) */
   uint8_t curr;                        /* The current value of the RCR (pre-loaded) */
-  uint32_t count;                      /* Remaining pluse count */
+  uint32_t count;                      /* Remaining pulse count */
 #else
   uint32_t frequency;                  /* Current frequency setting */
 #endif
@@ -1115,7 +1115,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   uint16_t ccmr1;
   uint16_t ccmr2;
 
-  /* New timer regiser bit settings */
+  /* New timer register bit settings */
 
   uint16_t ccenable;
   uint16_t ocmode1;
@@ -1295,7 +1295,7 @@ static int pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   if (priv->timtype == TIMTYPE_ADVANCED)
     {
       /* If a non-zero repetition count has been selected, then set the
-       * repitition counter to the count-1 (pwm_start() has already
+       * repetition counter to the count-1 (pwm_start() has already
        * assured us that the count value is within range).
        */
 
@@ -1752,7 +1752,7 @@ static int pwm_interrupt(struct stm32_pwmtimer_s *priv)
       regval &= ~ATIM_BDTR_MOE;
       pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, regval);
 
-      /* Disable first interrtups, stop and reset the timer */
+      /* Disable first interrupts, stop and reset the timer */
 
       pwm_stop((FAR struct pwm_lowerhalf_s *)priv);
 

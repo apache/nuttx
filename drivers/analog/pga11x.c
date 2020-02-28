@@ -328,7 +328,7 @@ PGA11X_HANDLE pga11x_initialize(FAR struct spi_dev_s *spi)
 
   /* No Special state is required, just return the SPI driver instance as
    * the handle.  This gives us a place to extend functionality in the
-   * future if neccessary.
+   * future if necessary.
    */
 
   return (PGA11X_HANDLE)spi;
@@ -748,4 +748,3 @@ int pga11x_uenable(PGA11X_HANDLE handle, int pos)
 #endif
 
 #endif /* CONFIG_ADC && CONFIG_ADC_PGA11X */
-

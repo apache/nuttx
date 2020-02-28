@@ -820,7 +820,7 @@ static int mac802154dev_rxframe(FAR struct mac802154_chardevice_s *dev,
  *   user-space
  *
  * Input Parameters:
- *   mac - Pointer to the mac layer struct to be registerd.
+ *   mac - Pointer to the mac layer struct to be registered.
  *   minor - The device minor number.  The IEEE802.15.4 MAC character device
  *     will be registered as /dev/ieeeN where N is the minor number
  *

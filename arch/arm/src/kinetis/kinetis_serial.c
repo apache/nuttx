@@ -45,7 +45,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -137,7 +136,7 @@
 #  endif
 #elif defined(CONFIG_UART5_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart5port /* UART5 is console */
-#    define TTYS5_DEV           g_uart5port /* UART5 is ttyS0 */
+#    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
 #    define UART5_ASSIGNED      1
 #  if defined(CONFIG_KINETIS_UART5_RXDMA)
 #    define SERIAL_HAVE_CONSOLE_DMA 1
@@ -1163,7 +1162,7 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
  *   interrupt received on the 'irq'  It should call uart_transmitchars or
  *   uart_receivechar to perform the appropriate data transfers.  The
  *   interrupt handling logic must be able to map the 'irq' number into the
- *   approprite uart_dev_s structure in order to call these functions.
+ *   appropriate uart_dev_s structure in order to call these functions.
  *
  ****************************************************************************/
 

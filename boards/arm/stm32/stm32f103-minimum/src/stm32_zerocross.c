@@ -191,4 +191,3 @@ int stm32_zerocross_initialize(void)
 }
 
 #endif /* CONFIG_SENSORS_ZEROCROSS */
-

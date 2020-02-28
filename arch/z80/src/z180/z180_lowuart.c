@@ -50,8 +50,6 @@
 #include "common/z80_internal.h"
 #include "z180_config.h"
 
-#if defined(USE_LOWSERIALINIT) && defined(HAVE_UART)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -88,24 +86,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z180_uart_lowinit
- *
- * Description:
- *   Called early in the boot sequence to initialize the uart console
- *   channel (only).
- *
- ****************************************************************************/
-
-#ifdef USE_LOWSERIALINIT
-void z180_uart_lowinit(void)
-{
-#ifdef HAVE_UART_CONSOLE
-#warning "Missing logic"
-#endif
-}
-#endif
-
-/****************************************************************************
  * Name: z180_putc
  *
  * Description:
@@ -119,5 +99,3 @@ void z180_putc(uint8_t ch)
 #warning "Missing logic"
 }
 #endif
-
-#endif /* USE_LOWSERIALINIT && HAVE_UART*/

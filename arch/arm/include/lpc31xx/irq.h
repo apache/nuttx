@@ -116,4 +116,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_LPC31XX_IRQ_H */
-

@@ -47,12 +47,12 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
-#include <semaphore.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include <nuttx/wireless/ieee802154/at86rf23x.h>
@@ -417,8 +417,8 @@ static uint8_t at86rf23x_get_trxstate(FAR struct at86rf23x_dev_s *dev)
  * Description:
  *   Set the TRX state machine to the desired state.  If the state machine
  *   cannot move to the desired state an ERROR is returned.  If the
- *   transistion is successful an OK is returned.  This is a long running
- *   function due to waiting for the transistion delay between states.  This
+ *   transition is successful an OK is returned.  This is a long running
+ *   function due to waiting for the transition delay between states.  This
  *   can be as long as 510us.
  *
  ****************************************************************************/
@@ -631,7 +631,7 @@ static int at86rf23x_set_trxstate(FAR struct at86rf23x_dev_s *dev,
 
   if (ret == ERROR)
     {
-      wlerr("ERROR: State Transistion Error\n");
+      wlerr("ERROR: State Transition Error\n");
     }
 
   wlinfo("Radio state change state[0x%02x]->state[0x%02x]\n",
@@ -975,7 +975,7 @@ static int at86rf23x_settxpower(FAR struct ieee802154_radio_s *ieee,
 {
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
 
-  /* TODO: this needs alot of work to make sure all chips can share this function */
+  /* TODO: this needs a lot of work to make sure all chips can share this function */
 
   /* Right now we only set tx power to 0 */
 
@@ -997,7 +997,7 @@ static int at86rf23x_gettxpower(FAR struct ieee802154_radio_s *ieee,
   FAR struct at86rf23x_dev_s *dev = (struct at86rf23x_dev_s *)ieee;
   uint8_t reg;
 
-  /* TODO: this needs alot of work to make sure all chips can share this
+  /* TODO: this needs a lot of work to make sure all chips can share this
    * function.
    */
 

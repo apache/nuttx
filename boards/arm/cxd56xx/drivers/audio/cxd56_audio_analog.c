@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_analog.c
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_analog.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -64,9 +64,9 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-  inline void cxd56_audio_clock_enable(uint32_t clk, uint32_t div);
-  inline void cxd56_audio_clock_disable(void);
-  inline bool cxd56_audio_clock_is_enabled(void);
+inline void cxd56_audio_clock_enable(uint32_t clk, uint32_t div);
+inline void cxd56_audio_clock_disable(void);
+inline bool cxd56_audio_clock_is_enabled(void);
 
 /****************************************************************************
  * Private Data
@@ -105,6 +105,7 @@ static void wait_mic_boot_finish(void)
         {
           return;
         }
+
       uint64_t time = (uint64_t)end.tv_sec * 1000 +
                       (uint64_t)end.tv_nsec / 1000000 -
                        g_mic_boot_start_time;
@@ -231,6 +232,7 @@ CXD56_AUDIO_ECODE cxd56_audio_analog_poweroff_input(void)
     {
       return ret;
     }
+
   clear_mic_boot_time();
 #endif
 

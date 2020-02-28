@@ -195,7 +195,7 @@ IDEs
   there is a lot of help on the internet).
 
   Using Sourcery CodeBench from http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/overview
-    Download and install the latest version (as of this writting it was
+    Download and install the latest version (as of this writing it was
     sourceryg++-2013.05-64-arm-none-eabi)
 
    Import the  project from git.
@@ -213,7 +213,7 @@ IDEs
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/arm/src/stm32,
+  3) Set up include paths:  You will need include/, arch/arm/src/stm32,
      arch/arm/src/common, arch/arm/src/armv7-m, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.

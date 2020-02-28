@@ -50,6 +50,7 @@
 #include <nuttx/modem/altmdm.h>
 #include <arch/board/cxd56_altmdm.h>
 #include "cxd56_spi.h"
+#include "cxd56_dmac.h"
 #include "cxd56_pinconfig.h"
 
 /****************************************************************************
@@ -57,29 +58,27 @@
  ****************************************************************************/
 
 #if defined(CONFIG_CXD56_LTE_SPI4)
-#define SPI_CH (4)
-#if  defined(CONFIG_CXD56_LTE_SPI4_DMAC)
-#  if defined(CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE)
-#    if (CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE > CONFIG_CXD56_DMAC_SPI4_TX_MAXSIZE)
-#      error CONFIG_CXD56_DMAC_SPI4_TX_MAXSIZE too small
-#    endif
-#    if (CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE > CONFIG_CXD56_DMAC_SPI4_RX_MAXSIZE)
-#      error CONFIG_CXD56_DMAC_SPI4_RX_MAXSIZE too small
+#  define SPI_CH (4)
+#  if  defined(CONFIG_CXD56_LTE_SPI4_DMAC)
+#    define DMA_TXCH    (2)
+#    define DMA_RXCH    (3)
+#    define DMA_TXCHCHG (CXD56_DMA_PERIPHERAL_SPI4_TX)
+#    define DMA_RXCHCFG (CXD56_DMA_PERIPHERAL_SPI4_RX)
+#    if !defined(CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE)
+#        error CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE is not set
 #    endif
 #  endif
-#endif
 #elif defined(CONFIG_CXD56_LTE_SPI5)
-#define SPI_CH (5)
-#if  defined(CONFIG_CXD56_LTE_SPI5_DMAC)
-#  if defined(CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE)
-#    if (CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE > CONFIG_CXD56_DMAC_SPI5_TX_MAXSIZE)
-#      error CONFIG_CXD56_DMAC_SPI5_TX_MAXSIZE too small
-#    endif
-#    if (CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE > CONFIG_CXD56_DMAC_SPI5_RX_MAXSIZE)
-#      error CONFIG_CXD56_DMAC_SPI5_RX_MAXSIZE too small
+#  define SPI_CH (5)
+#  if  defined(CONFIG_CXD56_LTE_SPI5_DMAC)
+#    define DMA_TXCH    (4)
+#    define DMA_RXCH    (5)
+#    define DMA_TXCHCHG (CXD56_DMA_PERIPHERAL_SPI5_TX)
+#    define DMA_RXCHCFG (CXD56_DMA_PERIPHERAL_SPI5_RX)
+#    if !defined(CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE)
+#        error CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE is not set
 #    endif
 #  endif
-#endif
 #else
 #  error "Select LTE SPI 4 or 5"
 #endif
@@ -110,44 +109,45 @@ static void spi_pincontrol(int bus, bool on)
   switch (bus)
     {
 #ifdef CONFIG_CXD56_SPI4
-    case 4:
-      if (on)
-        {
-          CXD56_PIN_CONFIGS(PINCONFS_SPI4);
-        }
-      else
-        {
-          CXD56_PIN_CONFIGS(PINCONFS_SPI4_GPIO);
-        }
-      break;
-#endif  /* CONFIG_CXD56_SPI4 */
+      case 4:
+        if (on)
+          {
+            CXD56_PIN_CONFIGS(PINCONFS_SPI4);
+          }
+        else
+          {
+            CXD56_PIN_CONFIGS(PINCONFS_SPI4_GPIO);
+          }
+        break;
+#endif /* CONFIG_CXD56_SPI4 */
 
 #ifdef CONFIG_CXD56_SPI5
-    case 5:
+      case 5:
 #ifdef CONFIG_CXD56_SPI5_PINMAP_EMMC
-      if (on)
-        {
-          CXD56_PIN_CONFIGS(PINCONFS_EMMCA_SPI5);
-        }
-      else
-        {
-          CXD56_PIN_CONFIGS(PINCONFS_EMMCA_GPIO);
-        }
-#endif  /* CONFIG_CXD56_SPI5_PINMAP_EMMC */
+        if (on)
+          {
+            CXD56_PIN_CONFIGS(PINCONFS_EMMCA_SPI5);
+          }
+        else
+          {
+            CXD56_PIN_CONFIGS(PINCONFS_EMMCA_GPIO);
+          }
+#endif /* CONFIG_CXD56_SPI5_PINMAP_EMMC */
+
 #ifdef CONFIG_CXD56_SPI5_PINMAP_SDIO
-      if (on)
-        {
-          CXD56_PIN_CONFIGS(PINCONFS_SDIOA_SPI5);
-        }
-      else
-        {
-          CXD56_PIN_CONFIGS(PINCONFS_SDIOA_GPIO);
-        }
-#endif  /* CONFIG_CXD56_SPI5_PINMAP_SDIO */
-      break;
-#endif  /* CONFIG_CXD56_SPI5 */
-    default:
-      break;
+        if (on)
+          {
+            CXD56_PIN_CONFIGS(PINCONFS_SDIOA_SPI5);
+          }
+        else
+          {
+            CXD56_PIN_CONFIGS(PINCONFS_SDIOA_GPIO);
+          }
+#endif /* CONFIG_CXD56_SPI5_PINMAP_SDIO */
+        break;
+#endif /* CONFIG_CXD56_SPI5 */
+      default:
+        break;
     }
 }
 
@@ -166,13 +166,17 @@ static void spi_pincontrol(int bus, bool on)
 int board_altmdm_initialize(FAR const char *devpath)
 {
   FAR struct spi_dev_s *spi;
-  int spi_ch = SPI_CH;
+  int                   spi_ch = SPI_CH;
+#if defined(CONFIG_CXD56_LTE_SPI4_DMAC) || defined(CONFIG_CXD56_LTE_SPI5_DMAC)
+  DMA_HANDLE            hdl;
+  dma_config_t          conf;
+#endif
 
   m_info("Initializing ALTMDM..\n");
 
   if (!g_devhandle)
     {
-      /* Initialize spi deivce */
+      /* Initialize spi device */
 
       spi = cxd56_spibus_initialize(spi_ch);
       if (!spi)
@@ -180,6 +184,26 @@ int board_altmdm_initialize(FAR const char *devpath)
           m_err("ERROR: Failed to initialize spi%d.\n", spi_ch);
           return -ENODEV;
         }
+
+#if defined(CONFIG_CXD56_LTE_SPI4_DMAC) || defined(CONFIG_CXD56_LTE_SPI5_DMAC)
+      hdl = cxd56_dmachannel(DMA_TXCH, CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE);
+      if (hdl)
+        {
+          conf.channel_cfg = DMA_TXCHCHG;
+          conf.dest_width  = CXD56_DMAC_WIDTH8;
+          conf.src_width   = CXD56_DMAC_WIDTH8;
+          cxd56_spi_dmaconfig(spi_ch, CXD56_SPI_DMAC_CHTYPE_TX, hdl, &conf);
+        }
+
+      hdl = cxd56_dmachannel(DMA_RXCH, CONFIG_MODEM_ALTMDM_MAX_PACKET_SIZE);
+      if (hdl)
+        {
+          conf.channel_cfg = DMA_RXCHCFG;
+          conf.dest_width  = CXD56_DMAC_WIDTH8;
+          conf.src_width   = CXD56_DMAC_WIDTH8;
+          cxd56_spi_dmaconfig(spi_ch, CXD56_SPI_DMAC_CHTYPE_RX, hdl, &conf);
+        }
+#endif
 
       spi_pincontrol(spi_ch, false);
 

@@ -387,7 +387,7 @@ __start:
 	 */
 
 	orr		r0, r0, #(CR_M|CR_P|CR_D)
-	
+
 	/* In most architectures, vectors are relocated to 0xffff0000.
 	 * -- but not all
 	 *
@@ -437,7 +437,7 @@ __start:
  ****************************************************************************/
 
 	/* Most addresses are all virtual address */
-	
+
 	.type	.LCvstart, %object
 .LCvstart:
 	.long	.Lvstart
@@ -535,7 +535,7 @@ __start:
 	 *
 	 *   R4 = Virtual address of the page table
 	 *   R3 = Physical address of the NuttX execution space (aligned to a
-	 *        one megabyte addres boundary
+	 *        one megabyte address boundary
 	 */
 
 #ifdef CONFIG_IDENTITY_TEXTMAP
@@ -583,12 +583,12 @@ __start:
 
 	mov		fp, #0
 
-.Lbssinit:	
+.Lbssinit:
 	cmp		r0, r1					/* Clear up to _bss_end_ */
 	strcc	fp, [r0],#4
 	bcc		.Lbssinit
 
-	/* If the .data section is in a separate, unitialized address space,
+	/* If the .data section is in a separate, uninitialized address space,
 	 * then we will also need to copy the initial values of of the .data
 	 * section from the .text region into that .data region.  This would
 	 * be the case if we are executing from FLASH and the .data section
@@ -635,7 +635,7 @@ __start:
 	/* Text-section constants:
 	 *
 	 *   _sbss is the start of the BSS region (see ld.script)
-	 *   _ebss is the end of the BSS regsion (see ld.script)
+	 *   _ebss is the end of the BSS region (see ld.script)
 	 *
 	 * The idle task stack starts at the end of BSS and is of size
 	 * CONFIG_IDLETHREAD_STACKSIZE.  The heap continues from there until the

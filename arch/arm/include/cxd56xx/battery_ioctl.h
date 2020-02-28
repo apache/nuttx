@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/arch/chip/battery_ioctl.h
+ * arch/arm/include/cxd56xx/battery_ioctl.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

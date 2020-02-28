@@ -5,6 +5,73 @@
 
 if ARCH_CHIP_EZ80
 
+config ARCH_EZ80_HAVE_PLL
+	bool
+	default n
+
+config ARCH_EZ80_HAVE_ETHERNET
+	bool
+	default n
+
+config ARCH_EZ80_HAVE_UART2
+	bool
+	default n
+
+config ARCH_EZ80_HAVE_TIMER_INTREGS
+	bool
+	default n
+
+choice
+	prompt "eZ80 Chip Selection"
+	default ARCH_CHIP_EZ80F91
+
+config ARCH_CHIP_EZ80F91
+	bool "EZ80F91"
+	select ARCH_EZ80_HAVE_PLL
+	select ARCH_EZ80_HAVE_ETHERNET
+	select ARCH_EZ80_HAVE_UART2
+	select ARCH_EZ80_HAVE_TIMER_INTREGS
+	---help---
+		ZiLOG EZ80F91 (ez80 Acclaim)
+
+config ARCH_CHIP_EZ80F92
+	bool "EZ80F92"
+	---help---
+		ZiLOG EZ80F92 (ez80 Acclaim)
+
+config ARCH_CHIP_EZ80F93
+	bool "EZ80F93"
+	---help---
+		ZiLOG EZ80F93 (ez80 Acclaim)
+
+endchoice
+
+# The ZiLOG ZDS-II Windows toolchain is the only toolchain available for
+# the ez80.
+#
+
+config EZ80_TOOLCHAIN_ZDSII
+	bool
+	default y
+
+choice
+	prompt "ZDS-II Toolchain version"
+	default EZ80_ZDSII_V533
+
+config EZ80_ZDSII_V511
+	bool "ZDS-II 5.1.1"
+
+config EZ80_ZDSII_V521
+	bool "ZDS-II 5.2.1"
+
+config EZ80_ZDSII_V530
+	bool "ZDS-II 5.3.0"
+
+config EZ80_ZDSII_V533
+	bool "ZDS-II 5.3.3"
+
+endchoice # ZDS-II Toolchain version
+
 menu "ez80 Peripheral Support"
 
 config EZ80_UART0
@@ -21,6 +88,7 @@ config EZ80_UART2
 	bool "UART2"
 	select UART2_SERIALDRIVER
 	default n
+	depends on ARCH_EZ80_HAVE_UART2
 
 config EZ80_I2C
 	bool "I2C"
@@ -35,13 +103,13 @@ config EZ80_RTC
 	default n
 	select RTC
 	select RTC_DATETIME
-	select TIME_EXTENDED
 
 config EZ80_EMAC
 	bool "Ethernet MAC"
 	default n
 	select ARCH_HAVE_PHY
 	select ARCH_HAVE_NETDEV_STATISTICS
+	depends on ARCH_EZ80_HAVE_ETHERNET
 	---help---
 		Enables support for ez80 EMAC driver.
 
@@ -63,30 +131,6 @@ config EZ80_RTC_LINEFREQ50
 		If there is no 32Hz crystal, the RTC will fall back to use the line
 		frequency, either 50 or 60Hz.
 
-# The ZiLOG ZDS-II Windows toolchain is the only toolchain available for
-# the ez80.
-#
-
-config EZ80_TOOLCHAIN_ZDSII
-	bool
-	default y if ARCH_CHIP_EZ80
-	default n if !ARCH_CHIP_EZ80
-
-choice
-	prompt "ZDS-II Toolchain version"
-	default EZ80_ZDSII_V530
-
-config EZ80_ZDSII_V511
-	bool "ZDS-II 5.1.1"
-
-config EZ80_ZDSII_V521
-	bool "ZDS-II 5.2.1"
-
-config EZ80_ZDSII_V530
-	bool "ZDS-II 5.3.0"
-
-endchoice # ZDS-II Toolchain version
-
 if EZ80_EMAC
 
 config EZ80_FIAD
@@ -104,12 +148,6 @@ config EZ80_PHYCONFIG
 	default 0
 	---help---
 		0:Autonegotiate, 1:100FD, 2:100HD, 3:10FD, 4:10HD
-
-config EZ80_RAMADDR
-	hex "Address of internal SRAM"
-	default 0xffc000
-	---help---
-		Address of internal SRAM (default is 0xffc000)
 
 config EZ80_PKTBUFSIZE
 	int "Packet Buffer Size"

@@ -120,7 +120,7 @@
 #define REG_R24_NDX         27
 #define REG_R25_NDX         28
 
-/* $26-$27 = ko-k1: Reserved for use in exeption handers.  These do not need
+/* $26-$27 = ko-k1: Reserved for use in exception handers.  These do not need
  * to be saved.
  */
 
@@ -583,4 +583,3 @@ void up_irq_enable(void);
 
 #endif /* __ASSEMBLY */
 #endif /* __ARCH_MIPS_INCLUDE_MIPS32_IRQ_H */
-

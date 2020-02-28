@@ -41,4 +41,3 @@ CSRCS += nxmu_start.c
 DEPPATH += --dep-path nxmu
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxmu}
 VPATH += :nxmu
-

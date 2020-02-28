@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/s32k1xx/s32k1xx.h
+ * arch/arm/src/s32k1xx/s32k1xx_pin.h
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -57,6 +57,7 @@
  ************************************************************************************/
 
 /* Bit-encoded input to s32k1xx_pinconfig() *****************************************/
+
 /* General form (32-bits, only 22 bits are unused in the encoding):
  *
  * oooo mmmv iiii ifd- ---- -ppp ---b bbbb
@@ -75,7 +76,9 @@
 #define _PIN_OPTIONS_MASK       (15 << _PIN_OPTIONS_SHIFT)
 
 /* Port Modes */
-                                                       /* Unshifted versions: */
+
+/* Unshifted versions: */
+
 #define PIN_MODE_ANALOG         (0)                     /*   000 Pin Disabled (Analog) */
 #define PIN_MODE_ALT1           (1)                     /*   001 Alternative 1 */
 #define PIN_MODE_GPIO           PIN_MODE_ALT1           /*   001 Alternative 1 (GPIO) */
@@ -85,7 +88,9 @@
 #define PIN_MODE_ALT5           (5)                     /*   101 Alternative 5 */
 #define PIN_MODE_ALT6           (6)                     /*   110 Alternative 6 */
 #define PIN_MODE_ALT7           (7)                     /*   111 Alternative 7 */
-                                                       /* Shifted versions: */
+
+/* Shifted versions: */
+
 #define _PIN_MODE_ANALOG        (0 << _PIN_MODE_SHIFT)  /*   000 Pin Disabled (Analog) */
 #define _PIN_MODE_ALT1          (1 << _PIN_MODE_SHIFT)  /*   001 Alternative 1 */
 #define _PIN_MODE_GPIO          (1 << _PIN_MODE_SHIFT)  /*   001 Alternative 1 (GPIO) */
@@ -108,7 +113,7 @@
 #  define _PIN_INPUT_PULLDOWN   (2 << _PIN_OPTIONS_SHIFT) /* x010 Input with internal pull-down resistor */
 #  define _PIN_INPUT_PULLUP     (6 << _PIN_OPTIONS_SHIFT) /* x110 Input with internal pull-up resistor */
 
-#define _PIN_OUTPUT_DRIVE_MASK  (9 << _PIN_OPTIONS_SHIFT) /* 1xx1 Mask to test for high drive strengh */
+#define _PIN_OUTPUT_DRIVE_MASK  (9 << _PIN_OPTIONS_SHIFT) /* 1xx1 Mask to test for high drive strength */
 #  define _PIN_OUTPUT_LOWDRIVE  (1 << _PIN_OPTIONS_SHIFT) /* 0xx1 Output with low drive strength */
 #  define _PIN_OUTPUT_HIGHDRIVE (9 << _PIN_OPTIONS_SHIFT) /* 1xx1 Output with high drive strength */
 

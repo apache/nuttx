@@ -602,7 +602,7 @@ void lpc43_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
   uint32_t cdivadd;  /* Candidate FDR DIVADDVAL value */
   uint32_t errval;   /* Error value associated with the candidate */
 
-  /* The U[S]ART buad is given by:
+  /* The U[S]ART baud is given by:
    *
    * Fbaud =  Fbase * mul / (mul + divadd) / (16 * dl)
    * dl    =  Fbase * mul / (mul + divadd) / Fbaud / 16

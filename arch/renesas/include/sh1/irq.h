@@ -256,7 +256,7 @@
 #define SH1_SYSTIMER_IRQ   SH1_IMIA0_IRQ
 #endif
 
-/* Vector table offets **************************************************************/
+/* Vector table offsets *************************************************************/
 
 /* The following provides the vector numbers for each IRQ.  The IRQ numbers (above)
  * form the densely packet number space used by the system to identify IRQs.  The
@@ -569,4 +569,3 @@ static inline void up_irq_restore(irqstate_t flags)
 #endif
 
 #endif /* __ARCH_RENESAS_INCLUDE_SH1_IRQ_H */
-

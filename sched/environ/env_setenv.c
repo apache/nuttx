@@ -103,7 +103,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
 
   if (!value || *value == '\0')
     {
-      /* If overwite is set then this is the same as unsetenv */
+      /* If overwrite is set then this is the same as unsetenv */
 
       if (overwrite)
         {
@@ -198,4 +198,3 @@ errout:
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */
-

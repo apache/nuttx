@@ -117,4 +117,4 @@
 #define LED_ASSERTION     6     /* ON   OFF */
 #define LED_PANIC         7     /* ON   OFF */
 
-#endif  /* __BOARDS_ARM_TIVA_EAGLE100_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_TIVA_EAGLE100_INCLUDE_BOARD_H */

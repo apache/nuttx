@@ -895,7 +895,7 @@
 
 /* Screening Type1 Register Priority Queue 0-15 */
 
-#define GMAC_ST1RPQ0_QNB_SHIFT    (0)       /* Bits 0-3: Que Number (0->7) */
+#define GMAC_ST1RPQ0_QNB_SHIFT    (0)       /* Bits 0-3: Queue Number (0->7) */
 #define GMAC_ST1RPQ0_QNB_MASK     (15 << GMAC_ST1RPQ0_QNB_SHIFT)
 #  define GMAC_ST1RPQ0_QNB(n)     ((uint32_t)(n) << GMAC_ST1RPQ0_QNB_SHIFT)
 #define GMAC_ST1RPQ0_DSTCM_SHIFT  (4)       /* Bits 4-11: Differentiated Services or Traffic Class Match */
@@ -909,7 +909,7 @@
 
 /* Screening Type2 Register Priority Queue 0-15 */
 
-#define GMAC_ST2RPQ0_QNB_SHIFT    (0)       /* Bits 0-3: Que Number (0->7) */
+#define GMAC_ST2RPQ0_QNB_SHIFT    (0)       /* Bits 0-3: Queue Number (0->7) */
 #define GMAC_ST2RPQ0_QNB_MASK     (15 << GMAC_ST2RPQ0_QNB_SHIFT)
 #  define GMAC_ST2RPQ0_QNB(n)     ((uint32_t)(n) << GMAC_ST2RPQ0_QNB_SHIFT)
 #define GMAC_ST2RPQ0_VLANP_SHIFT  (4)       /* Bits 4-7: VLAN Priority */

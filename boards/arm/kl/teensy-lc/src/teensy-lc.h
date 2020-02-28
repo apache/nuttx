@@ -106,4 +106,3 @@ void kl_led_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_KL_TEENSY_LC_SRC_TEENSY_LC_H */
-

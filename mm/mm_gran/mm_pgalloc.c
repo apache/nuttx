@@ -51,7 +51,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* CONFIG_MM_PGALLOC - Enable page allocator support
  * CONFIG_MM_PGSIZE - The page size.  Must be one of {1024, 2048,
  *   4096, 8192, or 16384}.  This is easily extensible, but only those
@@ -223,4 +225,3 @@ void mm_pginfo(FAR struct pginfo_s *info)
 }
 
 #endif /* CONFIG_MM_PGALLOC */
-

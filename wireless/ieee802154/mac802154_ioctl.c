@@ -164,4 +164,3 @@ int mac802154_ioctl(MACHANDLE mac, int cmd, unsigned long arg)
     }
   return ret;
 }
-

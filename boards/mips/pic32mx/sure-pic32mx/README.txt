@@ -292,7 +292,7 @@ Toolchains
 
   Another option is the mips-elf toolchain used with the Penguino project.  This
   is a relatively current mips-elf GCC and should provide free C++ support as
-  well. This toolchain can be downloded from the Penguino website:
+  well. This toolchain can be downloaded from the Penguino website:
   http://wiki.pinguino.cc/index.php/Main_Page#Download .
 
   See also boards/mirtoo/README.txt.  There is an experimental (untested)
@@ -377,7 +377,7 @@ Loading NuttX with PICkit2
       cd tools/pic32mx
       make
 
-    Now you will have an excecutable file call mkpichex (or mkpichex.exe on
+    Now you will have an executable file call mkpichex (or mkpichex.exe on
     Cygwin).  This program will take the nutt.hex file as an input, it will
     convert all of the KSEG0 and KSEG1 addresses to physical address, and
     it will write the modified file, replacing the original nuttx.hex.
@@ -659,7 +659,7 @@ Where <subdir> is one of the following:
        System Type:
          CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE=y : Older C32 toolchain
 
-    2. USB Configuations.
+    2. USB Configurations.
 
       Several USB device configurations can be enabled and included
       as NSH built-in built in functions.  All require the following
@@ -886,14 +886,13 @@ Where <subdir> is one of the following:
         output will come the USB console, and 2) all debug output prior
         to connecting the USB console will be lost:
 
-        The second options is to configure a RAM SYLOG device.  This is
+        The second options is to configure a RAM SYSLOG device.  This is
         a circular buffer that accumulated debug output in memory.  The
         contents of the circular buffer can be dumped from the NSH command
         line using the 'dmesg' command.
 
         Device Drivers -> System Logging Device Options:
           CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
-          CONFIG_RAMLOG_CONSOLE=n     : (there is no default console device)
           CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the
                                         system logger.
 

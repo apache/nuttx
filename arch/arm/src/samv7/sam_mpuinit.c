@@ -148,4 +148,3 @@ void sam_mpu_uheap(uintptr_t start, size_t size)
 #endif
 
 #endif /* CONFIG_ARM_MPU */
-

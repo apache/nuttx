@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #ifndef __WIRELESS_BLUETOOTH_BT_SMP_H
-#define __WIRELESS_BLUETOOTH_BT_SMP_H 1
+#define __WIRELESS_BLUETOOTH_BT_SMP_H
 
 /****************************************************************************
  * Included Files

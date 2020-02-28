@@ -77,4 +77,3 @@ int sched_yield(void)
   ret = nxsched_setpriority(rtcb, rtcb->sched_priority);
   return ret < 0 ? ERROR : OK;
 }
-

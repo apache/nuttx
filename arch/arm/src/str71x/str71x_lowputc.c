@@ -320,5 +320,3 @@ void up_lowsetup(void)
   putreg16(reg16, STR71X_GPIO0_PC2);
 #endif
 }
-
-

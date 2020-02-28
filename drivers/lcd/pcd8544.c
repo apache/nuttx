@@ -200,7 +200,7 @@
 
 struct pcd8544_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 
@@ -999,4 +999,3 @@ FAR struct lcd_dev_s *pcd8544_initialize(FAR struct spi_dev_s *spi, unsigned int
   up_clear(priv);
   return &priv->dev;
 }
-

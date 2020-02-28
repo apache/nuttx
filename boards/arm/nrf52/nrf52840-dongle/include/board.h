@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <stdbool.h>
 
-#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_NRF52_GPIO_IRQ)
+#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_NRF52_GPIOTE)
 #  include <nuttx/irq.h>
 #endif
 
@@ -109,4 +109,4 @@
 #define BOARD_UART0_RX_PIN  (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(13))
 #define BOARD_UART0_TX_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(15))
 
-#endif  /* __BOARDS_ARM_NRF52_NRF52840_DONGLE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_NRF52_NRF52840_DONGLE_INCLUDE_BOARD_H */

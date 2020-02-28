@@ -54,7 +54,7 @@
 #  define HAVE_UART 1
 #endif
 
-/* Make sure all features are disabled for diabled U[S]ARTs.  This simplifies
+/* Make sure all features are disabled for disabled U[S]ARTs.  This simplifies
  * checking later.
  */
 

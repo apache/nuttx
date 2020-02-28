@@ -249,7 +249,7 @@
 
 /* An alternative serial port might use a standard serial shield mounted
  * on the Freedom Board.  In this case, Arduino pin D1 provides UART TX and
- * pin D0 privides UART RX.
+ * pin D0 provides UART RX.
  *
  * The I/O headers on the FRDM-K64F board are arranged to enable
  * compatibility with Arduino shield. The outer rows of pins (even numbered
@@ -268,4 +268,4 @@
 #define PIN_UART3_RX      PIN_UART3_RX_2
 #define PIN_UART3_TX      PIN_UART3_TX_2
 
-#endif  /* __BOARDS_ARM_FREEDOM_K64F_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_FREEDOM_K64F_INCLUDE_BOARD_H */

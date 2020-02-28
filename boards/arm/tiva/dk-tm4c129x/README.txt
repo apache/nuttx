@@ -232,11 +232,9 @@ Networking Support
     CONFIG_NET_ARP_IPIN=y               : Enable ARP address harvesting
     CONFIG_NET_ARP_SEND=y               : Send ARP request before sending data
     CONFIG_NET_TCP=y                    : Enable TCP/IP networking
-    CONFIG_NET_TCP_READAHEAD=y          : Support TCP read-ahead
     CONFIG_NET_TCP_WRITE_BUFFERS=y      : Support TCP write-buffering
     CONFIG_NET_TCPBACKLOG=y             : Support TCP/IP backlog
     CONFIG_NET_MAX_LISTENPORTS=20       :
-    CONFIG_NET_TCP_READAHEAD_BUFSIZE=536  Read-ahead buffer size
     CONFIG_NET_UDP=y                    : Enable UDP networking
     CONFIG_NET_BROADCAST=y              : Needed for DNS name resolution
     CONFIG_NET_ICMP=y                   : Enable ICMP networking
@@ -675,7 +673,7 @@ Where <subdir> is one of the following:
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        :CONFIG_WINDOWS_CYGWIN=y                : Cygwin under Windows
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcry fro Windows (arm-none-eabi-gcc)
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcry for Windows (arm-none-eabi-gcc)
        CONFIG_RAW_BINARY=y                     : Output formats: ELF and raw binary
 
     3. Default stack sizes are large and should really be tuned to reduce
@@ -687,7 +685,6 @@ Where <subdir> is one of the following:
          CONFIG_PTHREAD_STACK_DEFAULT=2048
          CONFIG_POSIX_SPAWN_PROXY_STACKSIZE=1024
          CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE=2048
-         CONFIG_BUILTIN_PROXY_STACKSIZE=1024
          CONFIG_NSH_TELNETD_DAEMONSTACKSIZE=2048
          CONFIG_NSH_TELNETD_CLIENTSTACKSIZE=2048
 

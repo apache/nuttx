@@ -40,7 +40,6 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <sched.h>
 #include <assert.h>
 #include <debug.h>

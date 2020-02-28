@@ -86,4 +86,3 @@
 #define UPTR_MAX    4294967295U
 
 #endif /* __ARCH_AVR_INCLUDE_AVR32_LIMITS_H */
-

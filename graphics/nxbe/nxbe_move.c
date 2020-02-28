@@ -336,7 +336,7 @@ static inline void nxbe_move_pwfb(FAR struct nxbe_window_s *wnd,
   struct nxgl_rect_s destrect;
   unsigned int bpp;
 
-  /* The rectangle that we receive here is in abolute device coordinates.  We
+  /* The rectangle that we receive here is in absolute device coordinates.  We
    * need to restore this to windows relative coordinates.
    */
 

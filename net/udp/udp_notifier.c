@@ -83,7 +83,6 @@ int udp_readahead_notifier_setup(worker_t worker,
                                  FAR struct udp_conn_s *conn,
                                  FAR void *arg)
 {
-#ifdef CONFIG_NET_UDP_READAHEAD
   struct work_notifier_s info;
 
   DEBUGASSERT(worker != NULL);
@@ -106,9 +105,6 @@ int udp_readahead_notifier_setup(worker_t worker,
   info.worker    = worker;
 
   return work_notifier_setup(&info);
-#else
-  return 0;
-#endif
 }
 
 /****************************************************************************
@@ -215,14 +211,12 @@ int udp_notifier_teardown(int key)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP_READAHEAD
 void udp_readahead_signal(FAR struct udp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_UDP_READAHEAD, conn);
+  work_notifier_signal(WORK_UDP_READAHEAD, conn);
 }
-#endif
 
 /****************************************************************************
  * Name: udp_writebuffer_signal
@@ -250,7 +244,7 @@ void udp_writebuffer_signal(FAR struct udp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_UDP_WRITEBUFFER, conn);
+  work_notifier_signal(WORK_UDP_WRITEBUFFER, conn);
 }
 #endif
 

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/analog/adc.h
  *
  *   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
@@ -38,14 +38,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_ANALOG_ADC_H
 #define __INCLUDE_NUTTX_ANALOG_ADC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -54,17 +54,19 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
+
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/i2c/i2c_master.h>
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Default configuration settings that may be overridden in the NuttX configuration
- * file.  The configured size is limited to 255 to fit into a uint8_t.
+/* Default configuration settings that may be overridden in the NuttX
+ * configuration file.  The configured size is limited to 255 to fit into a
+ * uint8_t.
  */
 
 #if !defined(CONFIG_ADC_FIFOSIZE)
@@ -84,9 +86,10 @@
 #define ADC_RXINT(dev)         ((dev)->ad_ops->ao_rxint((dev)))
 #define ADC_IOCTL(dev,cmd,arg) ((dev)->ad_ops->ao_ioctl((dev),(cmd),(arg)))
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
+
 /* These are callbacks to notify the upper-half driver of ADC events */
 
 struct adc_dev_s;
@@ -96,7 +99,8 @@ struct adc_callback_s
    * new ADC sample data is available.
    *
    * Input Parameters:
-   *   dev  - The ADC device structure that was previously registered by adc_register()
+   *   dev  - The ADC device structure that was previously registered by
+   *          adc_register()
    *   ch   - And ID for the ADC channel number that generated the data
    *   data - The actual converted data from the channel.
    *
@@ -126,9 +130,9 @@ struct adc_fifo_s
   struct adc_msg_s af_buffer[CONFIG_ADC_FIFOSIZE];
 };
 
-/* This structure defines all of the operations providd by the architecture specific
- * logic.  All fields must be provided with non-NULL function pointers by the
- * caller of adc_register().
+/* This structure defines all of the operations providd by the architecture
+ * specific logic.  All fields must be provided with non-NULL function
+ * pointers by the caller of adc_register().
  */
 
 struct adc_dev_s;
@@ -204,26 +208,26 @@ struct adc_dev_s
   FAR void                   *ad_priv;       /* Used by the arch-specific logic */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(__cplusplus)
 extern "C"
 {
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * "Upper-Half" ADC Driver Interfaces
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: adc_register
  *
  * Description:
- *   Register a ADC driver. This function binds an instance of a "lower half" ADC
- *   driver with the "upper half" ADC device and registers that device so that can
- *   be used by application code.
+ *   Register a ADC driver. This function binds an instance of a "lower half"
+ *   ADC driver with the "upper half" ADC device and registers that device
+ *   so that can be used by application code.
  *
  * Input Parameters:
  *   path - The full path to the driver to be registers in the NuttX pseudo-
@@ -237,21 +241,21 @@ extern "C"
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int adc_register(FAR const char *path, FAR struct adc_dev_s *dev);
 
-/************************************************************************************
+/****************************************************************************
  * Platform-Independent "Lower Half" ADC Driver Interfaces
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_ads1255initialize
  *
  * Description:
  *   Initialize the TI ADS 125X lower half driver
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi,
                                            unsigned int devno);
@@ -273,6 +277,24 @@ FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi,
 
 FAR struct adc_dev_s *lmp92001_adc_initialize(FAR struct i2c_master_s *i2c,
                                               uint8_t addr);
+
+/****************************************************************************
+ * Name: ads7828_initialize
+ *
+ * Description:
+ *   Initialize ADC
+ *
+ * Input Parameters:
+ *   i2c - Pointer to a valid I2C master struct.
+ *   addr - I2C device address.
+ *
+ * Returned Value:
+ *   Valid ADS7828 device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct adc_dev_s *ads7828_initialize(FAR struct i2c_master_s *i2c,
+                                               uint8_t addr);
 
 #if defined(__cplusplus)
 }

@@ -43,13 +43,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/signal.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxmu.h>
 

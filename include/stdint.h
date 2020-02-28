@@ -271,10 +271,14 @@ typedef _int64_t            int_fast64_t;
 typedef _uint64_t           uint_fast64_t;
 #endif
 
-/* Integer types capable of holding object pointers */
+/* Integer types capable of holding object pointers
+ * As a general rule, the size of size_t should be the same as the size of
+ * uintptr_t: 32-bits on a machine with 32-bit addressing but 64-bits on a
+ * machine with 64-bit addressing.
+ */
 
-typedef _intptr_t           intptr_t;
-typedef _uintptr_t          uintptr_t;
+typedef _ssize_t            intptr_t;
+typedef _size_t             uintptr_t;
 
 /* Some architectures support a FAR pointer which is larger then the normal
  * (near) pointer

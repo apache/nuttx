@@ -76,3 +76,5 @@ endif
 
 DEPPATH += --dep-path group
 VPATH += :group
+
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net}

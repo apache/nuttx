@@ -41,7 +41,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
@@ -705,7 +704,7 @@ static void sam_disablexfrints(struct sam_dev_s *priv)
  * Name: sam_enableints
  *
  * Description:
- *   Enable the previously configured HSMCI interrupts needed to suport the
+ *   Enable the previously configured HSMCI interrupts needed to support the
  *   wait and transfer functions.
  *
  * Input Parameters:
@@ -991,7 +990,7 @@ static inline void sam_cmdsample2(int index, uint32_t sr)
  * Name: sam_cmddump
  *
  * Description:
- *   Dump all comand/response register data
+ *   Dump all command/response register data
  *
  ****************************************************************************/
 
@@ -1183,7 +1182,7 @@ static void sam_endtransfer(struct sam_dev_s *priv,
  * Name: sam_notransfer
  *
  * Description:
- *   Setup for no transfer.  This is the default setup that is overriddden
+ *   Setup for no transfer.  This is the default setup that is overridden
  *   by sam_dmarecvsetup or sam_dmasendsetup
  *
  * Input Parameters:
@@ -2000,7 +1999,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
  *
  * Returned Value:
  *   Number of bytes sent on success; a negated errno on failure.  Here a
- *   failure means only a failure to obtain the requested reponse (due to
+ *   failure means only a failure to obtain the requested response (due to
  *   transport problem -- timeout, CRC, etc.).  The implementation only
  *   assures that the response is returned intact and does not check errors
  *   within the response itself.
@@ -2382,7 +2381,7 @@ static void sam_callbackenable(FAR struct sdio_dev_s *dev,
  *
  * Input Parameters:
  *   dev -      Device-specific state data
- *   callback - The funtion to call on the media change
+ *   callback - The function to call on the media change
  *   arg -      A caller provided value to return with the callback
  *
  * Returned Value:
@@ -2473,7 +2472,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 #endif
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
-   * enabled until after the transfer is stard with an SD command (i.e.,
+   * enabled until after the transfer is start with an SD command (i.e.,
    * at the beginning of sam_eventwait().
    */
 
@@ -2543,7 +2542,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 #endif
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
-   * enabled until after the transfer is stard with an SD command (i.e.,
+   * enabled until after the transfer is start with an SD command (i.e.,
    * at the beginning of sam_eventwait().
    */
 

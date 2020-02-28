@@ -307,10 +307,10 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                             }
                         }
 
-                      /* The interrupts stay disabled until after we sample the errno.
-                       * This is because when debug is enabled and the console is used
-                       * for debug output, then the errno can be altered by interrupt
-                       * handling! (bad)
+                      /* The interrupts stay disabled until after we sample the
+                       * errno.  This is because when debug is enabled and the
+                       * console is used for debug output, then the errno can be
+                       * altered by interrupt handling! (bad)
                        */
 
                       leave_critical_section(flags);
@@ -349,4 +349,3 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
   sinfo("Returning %d\n", ret);
   return ret;
 }
-

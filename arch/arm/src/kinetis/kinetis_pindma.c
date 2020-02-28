@@ -163,4 +163,3 @@ void kinetis_pindmadisable(uint32_t pinset)
 }
 
 #endif
-

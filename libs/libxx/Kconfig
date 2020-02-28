@@ -22,14 +22,6 @@ config HAVE_CXX
 
 if HAVE_CXX
 
-config CXX_NEWLONG
-	bool "size_t is type long"
-	default n
-	---help---
-		size_t may be type long or type int.  This matters for some
-		C++ library routines because the NuttX size_t might not have
-		the same underlying type as your toolchain's size_t.
-
 config CXX_EXCEPTION
 	bool
 
@@ -44,7 +36,6 @@ config LIBCXX
 	select CLOCK_MONOTONIC
 	select LIBC_WCHAR
 	select LIBC_LOCALE
-	select TIME_EXTENDED
 	---help---
 		If you have installed libcxx into the NuttX source tree, then it can
 		be built by selecting this option.  See the README.txt file in the

@@ -58,6 +58,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_PIC32MZ_MVEC
@@ -65,6 +66,7 @@
 #endif
 
 /* Interrupt controller definitions *****************************************/
+
 /* Number of interrupt enable/interrupt status registers */
 
 #define INT_NREGS ((NR_IRQS + 31) >> 5)
@@ -73,7 +75,13 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *g_current_regs;
+/* g_current_regs holds a references to the current interrupt level
+ * register storage structure.  It is non-NULL only during interrupt
+ * processing.  Access to g_current_regs must be through the macro
+ * CURRENT_REGS for portability.
+ */
+
+volatile uint32_t *g_current_regs[1];
 
 /****************************************************************************
  * Private Data
@@ -192,6 +200,10 @@ void up_irqinitialize(void)
       pic32mz_prioritize_irq(irq, (INT_IPC_MID_PRIORITY << 2));
     }
 
+  /* Set the Software Interrupt0 to a special priority */
+
+  pic32mz_prioritize_irq(PIC32MZ_IRQ_CS0, (CHIP_SW0_PRIORITY << 2));
+
   /* Set the BEV bit in the STATUS register */
 
   regval  = cp0_getstatus();
@@ -241,7 +253,7 @@ void up_irqinitialize(void)
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
-  g_current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* And finally, enable interrupts */
 
@@ -253,11 +265,11 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then enable all interrupt levels */
 
-  up_irq_restore(CP0_STATUS_IM_ALL);
+  up_irq_restore(CP0_STATUS_INT_ENALL);
 #else
   /* Enable only software interrupts */
 
-  up_irq_restore(CP0_STATUS_IM_SWINTS);
+  up_irq_restore(CP0_STATUS_INT_SW0);
 #endif
 }
 
@@ -385,6 +397,19 @@ void up_clrpend_irq(int irq)
 
       putreg32((1 << bitno), regaddr);
     }
+}
+
+/****************************************************************************
+ * Name: up_clrpend_sw0
+ *
+ * Description:
+ *   Clear a pending Software Interrupt.
+ *
+ ****************************************************************************/
+
+void up_clrpend_sw0(void)
+{
+  up_clrpend_irq(PIC32MZ_IRQ_CS0);
 }
 
 /****************************************************************************

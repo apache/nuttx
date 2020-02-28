@@ -3,6 +3,12 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menuconfig DRIVERS_CONTACTLESS
+	bool "Contactless Device Support"
+	default n
+	---help---
+		Drivers for various contactless devices.
+
 if DRIVERS_CONTACTLESS
 
 config CL_MFRC522
@@ -56,4 +62,5 @@ config CL_PN532_DEBUG_RX
 	depends on DEBUG_CONTACTLESS
 
 endif # CL_PN532
+
 endif # DRIVERS_CONTACTLESS

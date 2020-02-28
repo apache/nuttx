@@ -120,4 +120,3 @@ up_switchcontext:
 	.word	up_fullcontextrestore
 	.size	up_switchcontext, .-up_switchcontext
 	.end
-

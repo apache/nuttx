@@ -1,7 +1,7 @@
 ############################################################################
 # arch/z80/src/ez80/Toolchain.defs
 #
-#   Copyright (C) 2012, 2016 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012, 2016, 2020 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,3 +45,110 @@ CONFIG_EZ80_TOOLCHAIN ?= ZDSII
 ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
   WINTOOL = y
 endif
+
+# These are the default directories where the ZDS-II toolchain is installed.
+# NOTE that short 8.3 path names are used in order to avoid spaces.  On my
+# machine I have:
+#
+# Versions 5.1.1 and 5.2.1
+#   C:\PROGRA~1\ = C:\Program Files\
+#   C:\PROGRA~2\ = C:\Program Files (x86)\
+#
+# Your PC may be configured differently.
+#
+# Version 5.3.0 and 5.3.3, the default install location is C:\ZiLOG
+
+ifeq ($(CONFIG_EZ80_ZDSII_V511),y)
+INSTALLROOT = C:/PROGRA~2/ZiLOG
+ZDSVERSION := 5.1.1
+else ifeq ($(CONFIG_EZ80_ZDSII_V521),y)
+INSTALLROOT = C:/PROGRA~2/ZiLOG
+ZDSVERSION := 5.2.1
+else ifeq ($(CONFIG_EZ80_ZDSII_V530),y)
+INSTALLROOT = C:/ZiLOG
+ZDSVERSION := 5.3.0
+else ifeq ($(CONFIG_EZ80_ZDSII_V533),y)
+INSTALLROOT = C:/ZiLOG
+ZDSVERSION := 5.3.3
+endif
+
+ZDSINSTALLDIR := $(INSTALLROOT)/ZDSII_eZ80Acclaim!_$(ZDSVERSION)
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  INSTALLDIR = ${shell echo $(ZDSINSTALLDIR)| sed -e "s/\//\\/g"}
+  ZDSBINDIR := $(INSTALLDIR)\bin
+  ZDSSTDINCDIR := $(INSTALLDIR)\include\std
+  ZDSZILOGINCDIR := $(INSTALLDIR)\include\zilog
+  ZDSSTDLIBDIR := $(INSTALLDIR)\lib\std
+  ZDSZILOGLIBDIR := $(INSTALLDIR)\lib\zilog
+else
+  INSTALLDIR = ${shell cygpath -u "$(ZDSINSTALLDIR)"}
+  ZDSBINDIR := $(INSTALLDIR)/bin
+  ZDSSTDINCDIR := $(INSTALLDIR)/include/std
+  ZDSZILOGINCDIR := $(INSTALLDIR)/include/zilog
+  ZDSSTDLIBDIR := $(INSTALLDIR)/lib/std
+  ZDSZILOGLIBDIR := $(INSTALLDIR)/lib/zilog
+
+  # These are the same directories but with the directory separator
+  # character swapped as needed by the ZDS-II compiler
+
+  WTOPDIR := ${shell cygpath -w "$(TOPDIR)"}
+  WZDSSTDINCDIR := ${shell cygpath -w "$(ZDSSTDINCDIR)"}
+  WZDSZILOGINCDIR := ${shell cygpath -w "$(ZDSZILOGINCDIR)"}
+  WZDSSTDLIBDIR := ${shell cygpath -w "$(ZDSSTDLIBDIR)"}
+  WZDSZILOGLIBDIR := ${shell cygpath -w "$(ZDSZILOGLIBDIR)"}
+
+  # Escaped versions
+
+  ETOPDIR := ${shell echo "$(WTOPDIR)" | sed -e "s/ /%20/g"}
+  EZDSSTDINCDIR := ${shell echo "$(WZDSSTDINCDIR)" | sed -e "s/ /%20/g"}
+  EZDSZILOGINCDIR := ${shell echo "$(WZDSZILOGINCDIR)" | sed -e "s/ /%20/g"}
+endif
+
+# CPU Identification
+
+ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
+  ARCHCPU = eZ80F91
+  ARCHCPUDEF = _EZ80F91
+  ARCHFAMILY = _EZ80ACCLAIM!
+else ifeq ($(CONFIG_ARCH_CHIP_EZ80F92),y)
+  #ARCHCPU = eZ80F92
+  #ARCHCPUDEF = _EZ80F92
+  ARCHCPU = eZ80F91
+  ARCHCPUDEF = _EZ80F91
+  ARCHFAMILY = _EZ80ACCLAIM!
+endif
+
+# Optimization level
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHASMOPTIMIZATION = -debug
+  ARCHOPTIMIZATION = -debug
+else
+  ARCHASMOPTIMIZATION = -NOdebug
+  ARCHOPTIMIZATION = -NOdebug
+endif
+
+ifeq ($(CONFIG_DEBUG_NOOPT),y)
+#  ARCHOPTIMIZATION += -promote -reduceopt -NOsdiopt
+  ARCHOPTIMIZATION += -NOsdiopt
+else
+#  ARCHOPTIMIZATION += -NOpromote -NOreduceopt -sdiopt -optsize
+  ARCHOPTIMIZATION += -sdiopt
+endif
+
+# Tool names/paths.
+
+CROSSDEV =
+CC = $(ZDSBINDIR)$(DELIM)ez80cc.exe
+CPP = gcc -E
+LD = $(ZDSBINDIR)$(DELIM)ez80link.exe
+AS = $(ZDSBINDIR)$(DELIM)ez80asm.exe
+AR = $(ZDSBINDIR)$(DELIM)ez80lib.exe
+
+# File extensions
+
+ASMEXT = .asm
+OBJEXT = .obj
+LIBEXT = .lib
+EXEEXT = .lod
+HEXEXT = .hex

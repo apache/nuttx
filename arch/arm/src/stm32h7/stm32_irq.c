@@ -423,7 +423,7 @@ void up_irqinitialize(void)
    *
    *  0 -> 32 interrupt lines, 1 enable register,   8 priority registers
    *  1 -> 64 "       " "   ", 2 enable registers, 16 priority registers
-   *  2 -> 96 "       " "   ", 3 enable regsiters, 24 priority registers
+   *  2 -> 96 "       " "   ", 3 enable registers, 24 priority registers
    *  ...
    */
 
@@ -519,7 +519,7 @@ void up_irqinitialize(void)
   irq_attach(STM32_IRQ_RESERVED, stm32_reserved, NULL);
 #endif
 
-  stm32_dumpnvic("initial", STM32_IRQ_NIRQS);
+  stm32_dumpnvic("initial", NR_IRQS);
 
   /* If a debugger is connected, try to prevent it from catching hardfaults.
    * If CONFIG_ARMV7M_USEBASEPRI, no hardfaults are expected in normal

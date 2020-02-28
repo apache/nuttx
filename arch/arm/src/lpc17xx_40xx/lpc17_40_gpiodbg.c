@@ -178,4 +178,3 @@ int lpc17_40_dumpgpio(lpc17_40_pinset_t pinset, const char *msg)
   return OK;
 }
 #endif /* CONFIG_DEBUG_GPIO_INFO */
-

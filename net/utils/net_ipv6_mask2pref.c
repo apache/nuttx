@@ -39,9 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <arpa/inet.h>
-
 #include "utils/utils.h"
 
 #ifdef CONFIG_NET_IPv6
@@ -71,7 +68,7 @@ static const uint8_t g_nibblemap[16] =
 
 static inline uint8_t net_msbits4(uint8_t nibble)
 {
-  /* Return the number of leading zeroes: 0-4) */
+  /* Return the number of leading ones: 0-4) */
 
   return g_nibblemap[nibble];
 }

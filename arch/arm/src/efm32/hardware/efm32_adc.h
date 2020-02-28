@@ -69,7 +69,7 @@
 #include "hardware/efm32_memorymap.h"
 
 #if !defined(CONFIG_EFM32_EFM32GG)
-#  warning This is the EFM32GG header file; Review/modification needed for this archtecture
+#  warning This is the EFM32GG header file; Review/modification needed for this architecture
 #endif
 
 /*******************************************************************************************************************************

@@ -35,14 +35,63 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/userspace.h>
 
 #include <arch/board/board.h>
 
 #include "k210.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SRAM1_END CONFIG_RAM_END
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_allocate_kheap
+ *
+ * Description:
+ *   For the kernel build (CONFIG_BUILD_PROTECTED=y) with both kernel- and
+ *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function allocates
+ *   (and protects) the kernel-space heap.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
+void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
+{
+  /* Get the unaligned size and position of the user-space heap.
+   * This heap begins after the user-space .bss section at an offset
+   * of CONFIG_MM_KERNEL_HEAPSIZE (subject to alignment).
+   */
+
+  uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend;
+  ubase          += CONFIG_MM_KERNEL_HEAPSIZE;
+
+  size_t    usize = SRAM1_END - ubase;
+
+  DEBUGASSERT(ubase < (uintptr_t)SRAM1_END);
+
+  /* TODO: Adjust that size to account for MPU alignment requirements.
+   * NOTE that there is an implicit assumption that the SRAM1_END
+   * is aligned to the MPU requirement.
+   */
+
+  ubase = SRAM1_END - usize;
+
+  /* Return the kernel heap settings (i.e., the part of the heap region
+   * that was not dedicated to the user heap).
+   */
+
+  *heap_start = (FAR void *)USERSPACE->us_bssend;
+  *heap_size  = ubase - (uintptr_t)USERSPACE->us_bssend;
+}
+#endif
 
 /****************************************************************************
  * Name: up_addregion
@@ -51,4 +100,3 @@
 void up_addregion(void)
 {
 }
-

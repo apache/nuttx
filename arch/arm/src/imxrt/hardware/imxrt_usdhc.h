@@ -391,7 +391,7 @@
 /* Mixer Control Register */
 
 #define USDHC_MC_DEFAULTVAL              (0x80000000) /* Bit 31 is always set */
-#define USDHC_MC_DMAEN                   (1 << 0)     /* Bit 0: DMA Enble */
+#define USDHC_MC_DMAEN                   (1 << 0)     /* Bit 0: DMA Enable */
 #define USDHC_MC_BCEN                    (1 << 1)     /* Bit 1: Block Count Enable */
 #define USDHC_MC_AC12EN                  (1 << 2)     /* Bit 2: Auto CMD12 Enable */
 #define USDHC_MC_DDR_EN                  (1 << 3)     /* Bit 3: DDR mode enable */
@@ -468,7 +468,7 @@
 #define USDHC_DL_CTRL_SLV_UPDINT_SHIFT   (20)         /* Bits 20-27: DLL Control SLV Update Interval */
 #define USDHC_DL_CTRL_SLV_UPDINT_MASK    (0xff << USDHC_DL_CTRL_SLV_UPDINT_SHIFT)
 #  define USDHC_DL_CTRL_SLV_UPDINT(n)    ((n) << USDHC_DL_CTRL_SLV_UPDINT_SHIFT)
-#define USDHC_DL_CTRL_REF_UPDINT_SHIFT   (28)         /* Bits 28-31: DLL Control Refernce Update Interval */
+#define USDHC_DL_CTRL_REF_UPDINT_SHIFT   (28)         /* Bits 28-31: DLL Control Reference Update Interval */
 #define USDHC_DL_CTRL_REF_UPDINT_MASK    (0xf << USDHC_DL_CTRL_REF_UPDINT_SHIFT)
 #  define USDHC_DL_CTRL_REF_UPDINT(n)    ((n)<< USDHC_DL_CTRL_REF_UPDINT_SHIFT)
 

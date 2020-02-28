@@ -257,7 +257,7 @@ static void stm32_idlepm(void)
    * wake-up event, then PM_SLEEP is entered.
    *
    * Logically, this code belongs at the end of the PM_STANDBY case below,
-   * does not work in the position for some unkown reason.
+   * does not work in the position for some unknown reason.
    */
 
   if (oldstate == PM_STANDBY)

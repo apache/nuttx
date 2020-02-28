@@ -63,7 +63,7 @@
  *
  * Description:
  *   Return the index to the CPU with the lowest priority running task,
- *   possbily its IDLE task.
+ *   possibly its IDLE task.
  *
  * Input Parameters:
  *   affinity - The set of CPUs on which the thread is permitted to run.

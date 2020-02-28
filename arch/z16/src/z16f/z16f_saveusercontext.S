@@ -76,7 +76,7 @@
 
 _up_saveusercontext:
 	/* Save the flags (needed to restore the interrupt state) */
-	
+
 	ld.ub	r3, Z16F_CNTRL_FLAGS	/* Fetch the flags register (zero padded) */
 	ld.w	2*REG_FLAGS(r1), r3	/* Save 16-bit value */
 

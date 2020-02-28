@@ -80,7 +80,7 @@
 #define PCF85263_I2C_ADDRESS 0x51
 
 /************************************************************************************
- * Priviate Types
+ * Private Types
  ************************************************************************************/
 
 /* This structure describes the state of the PCF85263 chip.  Only a single RTC is
@@ -136,11 +136,9 @@ static void rtc_dumptime(FAR struct tm *tp, FAR const char *msg)
   rtcinfo("  tm_mday: %08x\n", tp->tm_mday);
   rtcinfo("   tm_mon: %08x\n", tp->tm_mon);
   rtcinfo("  tm_year: %08x\n", tp->tm_year);
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   rtcinfo("  tm_wday: %08x\n", tp->tm_wday);
   rtcinfo("  tm_yday: %08x\n", tp->tm_yday);
   rtcinfo(" tm_isdst: %08x\n", tp->tm_isdst);
-#endif
 }
 #else
 #  define rtc_dumptime(tp, msg)
@@ -269,12 +267,9 @@ int up_rtc_getdatetime(FAR struct tm *tp)
       tp->tm_min  = 0;
       tp->tm_hour = 0;
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
       /* Jan 1, 1970 was a Thursday */
 
       tp->tm_wday = 4;
-#endif
-
       tp->tm_mday = 1;
       tp->tm_mon  = 0;
       tp->tm_year = 70;
@@ -349,11 +344,9 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
   tp->tm_mday = rtc_bcd2bin(buffer[3] & PCF85263_RTC_DAYS_MASK);
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   /* Return the day of the week (0-6) */
 
   tp->tm_wday = (rtc_bcd2bin(buffer[4]) & PCF85263_RTC_WEEKDAYS_MASK);
-#endif
 
   /* Return the month (0-11) */
 
@@ -460,11 +453,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Save the day of the week (1-7) */
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   buffer[6] = rtc_bin2bcd(newtm.tm_wday);
-#else
-  buffer[6] = 0;
-#endif
 
   /* Save the month (1-12) */
 

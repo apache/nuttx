@@ -44,7 +44,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -832,7 +831,7 @@ static inline void
     {
       elapsed = clock_systimer() - start;
 
-      /* The bus is idle if the five least signifcant bits of I2CxCON
+      /* The bus is idle if the five least significant bits of I2CxCON
        * are cleared and the I2CxSTAT<TRSTAT> flag is cleared.
        */
 
@@ -1575,7 +1574,7 @@ static int pic32mz_i2c_deinit(FAR struct pic32mz_i2c_priv_s *priv)
 
   pic32mz_i2c_putreg(priv, PIC32MZ_I2C_CONCLR_OFFSET, I2C_CON_ON);
 
-  /* Disable and dettach ISRs */
+  /* Disable and detach ISRs */
 
 #ifndef CONFIG_I2C_POLLED
   up_disable_irq(priv->config->ev_irq);
@@ -1671,7 +1670,7 @@ static int pic32mz_i2c_transfer(FAR struct i2c_master_s *dev,
       status = pic32mz_i2c_getstatus(priv);
     }
 
-  /* Check for erros. */
+  /* Check for errors. */
 
   if ((status & I2C_STAT_BCL))
     {
@@ -1941,4 +1940,3 @@ int pic32mz_i2cbus_uninitialize(FAR struct i2c_master_s *dev)
 }
 
 #endif /* CONFIG_PIC32MZ_I2C */
-

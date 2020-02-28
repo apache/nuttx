@@ -25,4 +25,3 @@ config FS_UNIONFS
 		by the file in file system1.
 
 		See include/nutts/unionfs.h for additional information.
-

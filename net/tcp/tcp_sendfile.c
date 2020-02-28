@@ -55,7 +55,6 @@
 #include <debug.h>
 
 #include <arch/irq.h>
-#include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
@@ -105,54 +104,11 @@ struct sendfile_s
   ssize_t            snd_sent;    /* The number of bytes sent */
   uint32_t           snd_isn;     /* Initial sequence number */
   uint32_t           snd_acked;   /* The number of bytes acked */
-#ifdef CONFIG_NET_SOCKOPTS
-  clock_t            snd_time;    /* Last send time for determining timeout */
-#endif
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sendfile_timeout
- *
- * Description:
- *   Check for send timeout.
- *
- * Input Parameters:
- *   pstate - send state structure
- *
- * Returned Value:
- *   TRUE:timeout FALSE:no timeout
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_SOCKOPTS
-static inline int sendfile_timeout(FAR struct sendfile_s *pstate)
-{
-  FAR struct socket *psock = 0;
-
-  /* Check for a timeout configured via setsockopts(SO_SNDTIMEO).
-   * If none... we well let the send wait forever.
-   */
-
-  psock = pstate->snd_sock;
-  if (psock && psock->s_sndtimeo != 0)
-    {
-      /* Check if the configured timeout has elapsed */
-
-      return net_timeo(pstate->snd_time, psock->s_sndtimeo);
-    }
-
-  /* No timeout */
-
-  return FALSE;
-}
-#endif /* CONFIG_NET_SOCKOPTS */
 
 static uint16_t ack_eventhandler(FAR struct net_driver_s *dev,
                                  FAR void *pvconn,
@@ -166,12 +122,6 @@ static uint16_t ack_eventhandler(FAR struct net_driver_s *dev,
     {
       FAR struct tcp_hdr_s *tcp;
 
-#ifdef CONFIG_NET_SOCKOPTS
-      /* Update the timeout */
-
-      pstate->snd_time = clock_systimer();
-#endif
-
       /* Get the offset address of the TCP header */
 
 #ifdef CONFIG_NET_IPv6
@@ -179,7 +129,7 @@ static uint16_t ack_eventhandler(FAR struct net_driver_s *dev,
       if (IFF_IS_IPv6(dev->d_flags))
 #endif
         {
-          DEBUGASSERT(pstate->snd_sock == PF_INET6);
+          DEBUGASSERT(pstate->snd_sock->s_domain == PF_INET6);
           tcp = TCPIPv6BUF;
         }
 #endif /* CONFIG_NET_IPv6 */
@@ -189,7 +139,7 @@ static uint16_t ack_eventhandler(FAR struct net_driver_s *dev,
       else
 #endif
         {
-          DEBUGASSERT(pstate->snd_sock == PF_INET);
+          DEBUGASSERT(pstate->snd_sock->s_domain == PF_INET);
           tcp = TCPIPv4BUF;
         }
 #endif /* CONFIG_NET_IPv4 */
@@ -401,21 +351,6 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
         }
     }
 
-#ifdef CONFIG_NET_SOCKOPTS
-  /* All data has been send and we are just waiting for ACK or re-transmit
-   * indications to complete the send.  Check for a timeout.
-   */
-
-  if (sendfile_timeout(pstate))
-    {
-      /* Yes.. report the timeout */
-
-      nwarn("WARNING: SEND timeout\n");
-      pstate->snd_sent = -ETIMEDOUT;
-      goto end_wait;
-    }
-#endif /* CONFIG_NET_SOCKOPTS */
-
   if (pstate->snd_sent >= pstate->snd_flen
       && pstate->snd_acked < pstate->snd_flen)
     {
@@ -612,12 +547,6 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
 
   conn->tx_unacked       = 0;
 
-#ifdef CONFIG_NET_SOCKOPTS
-  /* Set the initial time for calculating timeouts */
-
-  state.snd_time         = clock_systimer();
-#endif
-
   /* Set up the ACK callback in the connection */
 
   state.snd_ackcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_DISCONN_EVENTS);
@@ -626,18 +555,25 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
 
   /* Perform the TCP send operation */
 
-  do
+  state.snd_datacb->flags = TCP_POLL;
+  state.snd_datacb->priv  = (FAR void *)&state;
+  state.snd_datacb->event = sendfile_eventhandler;
+
+  /* Notify the device driver of the availability of TX data */
+
+  sendfile_txnotify(psock, conn);
+
+  for (; ; )
     {
-      state.snd_datacb->flags = TCP_POLL;
-      state.snd_datacb->priv  = (FAR void *)&state;
-      state.snd_datacb->event = sendfile_eventhandler;
+      uint32_t acked = state.snd_acked;
 
-      /* Notify the device driver of the availability of TX data */
-
-      sendfile_txnotify(psock, conn);
-      net_lockedwait(&state.snd_sem);
+      ret = net_timedwait_uninterruptible(&state.snd_sem,
+                                          _SO_TIMEOUT(psock->s_sndtimeo));
+      if (ret != -ETIMEDOUT || acked == state.snd_acked)
+        {
+          break; /* Timeout without any progress */
+        }
     }
-  while (state.snd_sent >= 0 && state.snd_acked < state.snd_flen);
 
   tcp_callback_free(conn, state.snd_ackcb);
 
@@ -646,7 +582,7 @@ errout_datacb:
 
 errout_locked:
 
-  nxsem_destroy(&state. snd_sem);
+  nxsem_destroy(&state.snd_sem);
   net_unlock();
 
   if (ret < 0)

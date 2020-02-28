@@ -184,4 +184,3 @@ errout_with_sem:
   return 0;
 #endif
 }
-

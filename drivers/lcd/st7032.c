@@ -800,7 +800,7 @@ static ssize_t st7032_write(FAR struct file *filep, FAR const char *buffer,
 
           if (ch == ASCII_TAB)
             {
-              /* Blink Cursor? Shouln't it be just 4 spaces to indicate TAB? */
+              /* Blink Cursor? Shouldn't it be just 4 spaces to indicate TAB? */
 
               st7032_write_inst(priv, ST7032_DISPLAY_ON_OFF |
                                       DISPLAY_ON_OFF_D | DISPLAY_ON_OFF_C |

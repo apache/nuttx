@@ -44,14 +44,12 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
 #include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
 #include <nuttx/power/pm.h>
@@ -67,26 +65,12 @@
 
 void up_initialize(void)
 {
-  /* Initialize the System Timer */
-
-  lm32_irq_initialize();
-
   /* Initialize the serial driver */
 
   misoc_serial_initialize();
 
 #ifdef CONFIG_RPMSG_UART
   rpmsg_serialinit();
-#endif
-
-  /* Initialize the system timer */
-
-  misoc_timer_initialize();
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
 #endif
 
 #if 0 /* REVISIT */

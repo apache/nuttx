@@ -89,7 +89,7 @@
  *  - i.MX6 AIPS-2 Virtual Base Addresses
  *  - i.MX6 DAP AIPS-2 Virtual Base Addresses
  *  - i.MX6 SATA Virtual Base Addresses
- *  - NuttX vitual base address
+ *  - NuttX virtual base address
  *  MMU Page Table Location
  *  Page table start addresses
  *  Base address of the interrupt vector table
@@ -539,7 +539,7 @@
 /* i.MX6 Virtual (mapped) Memory Map
  *
  * board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location becaue it depends
+ * memory map is used.  It is included in this odd location because it depends
  * on some the virtual address definitions provided above.
  */
 
@@ -780,7 +780,7 @@
  * are a few conditions that affect this:
  *
  * If CONFIG_ARCH_ROMPGTABLE, then the page table resides in ROM and we will
- * not use any page table in RAM, and in that case the user must sepcify the
+ * not use any page table in RAM, and in that case the user must specify the
  * address of the page table explicitly by defining PGTABLE_BASE_VADDR and
  * PGTABLE_BASE_PADDR in the board.h file.
  */

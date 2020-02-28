@@ -127,7 +127,7 @@ static int atmega_timerisr(int irq, uint32_t *regs, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  avr_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -136,7 +136,7 @@ static int atmega_timerisr(int irq, uint32_t *regs, FAR void *arg)
  *
  ****************************************************************************/
 
-void avr_timer_initialize(void)
+void up_timer_initialize(void)
 {
   /* Setup timer 1 compare match A to generate a tick interrupt.
    *

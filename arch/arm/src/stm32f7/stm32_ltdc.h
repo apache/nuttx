@@ -44,7 +44,6 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <semaphore.h>
 
 #include <nuttx/video/fb.h>
 #include <nuttx/nx/nxglib.h>
@@ -80,7 +79,7 @@ int stm32_ltdcinitialize(void);
  * Name: stm32_ltdcuninitialize
  *
  * Description:
- *   Unitialize the ltdc controller
+ *   Uninitialize the ltdc controller
  *
  ****************************************************************************/
 

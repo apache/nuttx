@@ -255,7 +255,7 @@ static void stmpe811_reset(FAR struct stmpe811_dev_s *priv)
  *
  * Input Parameters:
  *   dev     - An I2C or SPI driver instance
- *   config  - Persistant board configuration data
+ *   config  - Persistent board configuration data
  *
  * Returned Value:
  *   A non-zero handle is returned on success.  This handle may then be used
@@ -523,4 +523,3 @@ uint16_t stmpe811_getreg16(FAR struct stmpe811_dev_s *priv, uint8_t regaddr)
 #endif
 
 #endif /* CONFIG_INPUT && CONFIG_INPUT_STMPE811 */
-

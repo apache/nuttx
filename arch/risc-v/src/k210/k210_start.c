@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/k210_init.c
+ * arch/risc-v/src/k210/k210_start.c
  *
  *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
@@ -36,9 +36,12 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
 
+#include "up_arch.h"
 #include "k210_clockconfig.h"
+#include "k210_userspace.h"
 #include "k210.h"
 #include "chip.h"
 
@@ -67,6 +70,9 @@
  */
 
 uintptr_t g_idle_topstack = K210_IDLESTACK_TOP;
+volatile bool g_serial_ok = false;
+
+extern void k210_cpu_boot(uint32_t);
 
 /****************************************************************************
  * Public Functions
@@ -76,10 +82,17 @@ uintptr_t g_idle_topstack = K210_IDLESTACK_TOP;
  * Name: k210_start
  ****************************************************************************/
 
-void __k210_start(void)
+void __k210_start(uint32_t mhartid)
 {
   const uint32_t *src;
   uint32_t *dest;
+
+  g_serial_ok = false;
+
+  if (0 < mhartid)
+    {
+      goto cpu1;
+    }
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
@@ -117,17 +130,39 @@ void __k210_start(void)
 
   showprogress('B');
 
+  g_serial_ok = true;
+
   /* Do board initialization */
 
   k210_boardinitialize();
 
   showprogress('C');
 
+  /* For the case of the separate user-/kernel-space build, perform whatever
+   * platform specific initialization of the user memory is required.
+   * Normally this just means initializing the user space .data and .bss
+   * segments.
+   */
+
+#ifdef CONFIG_BUILD_PROTECTED
+  k210_userspace();
+  showprogress('D');
+#endif
+
   /* Call nx_start() */
 
   nx_start();
 
-  /* Shouldn't get here */
+cpu1:
 
-  for (; ; );
+  showprogress('a');
+
+#if defined(CONFIG_SMP) && (CONFIG_SMP_NCPUS == 2)
+  k210_cpu_boot(mhartid);
+#endif
+
+  while (true)
+    {
+      asm("WFI");
+    }
 }

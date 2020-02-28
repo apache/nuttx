@@ -199,7 +199,7 @@
 #else
 #  define STM32L4_NPORTS                   8   /* 8 GPIO ports, GPIOA-H */
 #endif
-#  define STM32L4_NADC                     3   /* 12-bit ADC1-3, upto 24 channels */
+#  define STM32L4_NADC                     3   /* 12-bit ADC1-3, up to 24 channels */
 #  define STM32L4_NDAC                     2   /* 12-bit DAC1-2 */
 #  define STM32L4_NCRC                     1   /* CRC */
 #  define STM32L4_NCOMP                    2   /* Comparators */

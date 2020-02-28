@@ -99,4 +99,3 @@ FAR void *pthread_getspecific(pthread_key_t key)
   return NULL;
 #endif
 }
-

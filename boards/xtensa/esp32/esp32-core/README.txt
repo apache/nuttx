@@ -47,7 +47,7 @@ STATUS
   The NuttX fork, TizenRT, has taken the NuttX ESP32 code and developed it
   further.  Refer to:
 
-    https://github.com/Samsung/TizenRT/tree/master/os/arch/xtensai
+    https://github.com/Samsung/TizenRT/tree/master/os/arch/xtensa
 
   for the current status.
 
@@ -239,7 +239,7 @@ SMP
 
   Open Issues:
 
-  1. Cache Issues.  I have not though about this yet, but certainly caching is
+  1. Cache Issues.  I have not thought about this yet, but certainly caching is
      an issue in an SMP system:
 
      - Cache coherency.  Are there separate caches for each CPU?  Or a single
@@ -455,7 +455,7 @@ OpenOCD for the ESP32
   -----
   OpenOCD currently doesn't have a FLASH driver for ESP32, so you can load
   code into IRAM only via JTAG. FLASH-resident sections like .FLASH.rodata
-  will fail to load.  The bootloader in ROM doesn't parse ELF, so any imag
+  will fail to load.  The bootloader in ROM doesn't parse ELF, so any image
   which is bootloaded from FLASH has to be converted into a custom image
   format first.
 
@@ -566,7 +566,7 @@ OpenOCD for the ESP32
 
   Single stepping works fine for me as do breakpoints:
 
-    Breakpoint 1, xtensa_timer_initialize () at chip/esp32_timerisr.c:172
+    Breakpoint 1, up_timer_initialize () at chip/esp32_timerisr.c:172
     72 {
     (gdb) n
     esp32.cpu0: Target halted, pc=0x400835BF
@@ -665,7 +665,7 @@ NOTES:
 
     Another NSH configuration, similar to nsh, but also enables
     SMP operation.  It differs from the nsh configuration only in these
-    addtional settings:
+    additional settings:
 
     SMP is enabled:
 
@@ -748,7 +748,7 @@ Things to Do
        CONFIG_SUPPRESS_UART_CONFIG=y
 
      I have not debugged this in detail, but this appears to be an issue with the
-     impelentation of esp32_configgpio() and/or gpio_matrix_out() when called from
+     implementation of esp32_configgpio() and/or gpio_matrix_out() when called from
      the setup logic in arch/xtensa/src/esp32/esp32_serial.c.  I am not inclined
      to invest a lot in driver debug until the clock configuration is finalized.
 

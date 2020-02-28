@@ -85,7 +85,7 @@
 #define IMXRT_CCM_CCGR5_OFFSET                   0x007c  /* CCM Clock Gating Register 5 */
 #define IMXRT_CCM_CCGR6_OFFSET                   0x0080  /* CCM Clock Gating Register 6 */
                                               /* 0x0084  Reserved */
-#define IMXRT_CCM_CMEOR_OFFSET                   0x0088  /* CCM Module Enable Overide Register */
+#define IMXRT_CCM_CMEOR_OFFSET                   0x0088  /* CCM Module Enable Override Register */
 
 /* Analog */
 
@@ -160,9 +160,10 @@
 #define IMXRT_CCM_ANALOG_MISC1                   (IMXRT_ANATOP_BASE + IMXRT_CCM_ANALOG_MISC1_OFFSET)
 #define IMXRT_CCM_ANALOG_MISC2                   (IMXRT_ANATOP_BASE + IMXRT_CCM_ANALOG_MISC2_OFFSET)
 
-/* Helper Macros *********************************************************************************/
+/* Helper Macros ********************************************************************************************/
 
 #define CCM_PODF_FROM_DIVISOR(n)                   ((n)-1)  /* PODF Values are divisor-1 */
+#define CCM_PRED_FROM_DIVISOR(n)                   ((n)-1)  /* PRED Values are divisor-1 */
 
 /* Register bit definitions *********************************************************************************/
 
@@ -359,7 +360,7 @@
 #  define CCM_CSCDR1_TRACE_PODF(n)               ((uint32_t)(n) << CCM_CSCDR1_TRACE_PODF_SHIFT)
                                                            /* Bits 28-31: Reserved */
 
-/*  Clock Divider Register 1 */
+/* Clock Divider Register 1 */
 
 #define CCM_CS1CDR_SAI1_CLK_PODF_SHIFT           (0)       /* Bits 0-5:   Divider for sai1 clock podf */
 #define CCM_CS1CDR_SAI1_CLK_PODF_MASK            (0x3f << CCM_CS1CDR_SAI1_CLK_PODF_SHIFT)
@@ -382,7 +383,7 @@
 #  define CCM_CS1CDR_FLEXIO2_CLK_PODF(n)         ((uint32_t)(n) << CCM_CS1CDR_FLEXIO2_CLK_PODF_SHIFT)
                                                            /* Bits 28-31: Reserved */
 
-/*  Clock Divider Register 2 */
+/* Clock Divider Register 2 */
 
 #define CCM_CS2CDR_SAI2_CLK_PODF_SHIFT           (0)       /* Bits 0-5:   Divider for sai2 clock podf */
 #define CCM_CS2CDR_SAI2_CLK_PODF_MASK            (0x3f << CCM_CS2CDR_SAI2_CLK_PODF_SHIFT)
@@ -537,7 +538,7 @@
 #define CCM_CIMR_MASK_ARM_PODF_LOADED            (1 << 26) /* Bit 26:     mask interrupt generation due to frequency change of arm_podf */
                                                            /* Bits 27-31: Reserved */
 
-/*  Clock Output Source Register */
+/* Clock Output Source Register */
 
 #define CCM_CCOSR_CLKO1_SEL_SHIFT                (0)       /* Bits 0-3:   Selection of the clock to be generated on CCM_CLKO1 */
 #define CCM_CCOSR_CLKO1_SEL_MASK                 (0xF << CCM_CCOSR_CLKO1_SEL_SHIFT)
@@ -580,7 +581,7 @@
 
 #define CCM_CGPR_PMIC_DELAY_SCALER               (1 << 0)  /* Bit 0:      Defines clock division of clock for stby_count */
                                                            /* Bits 1-3:   Reserved */
-#define CCM_CGPR_EFUSE_PROG_SUPPLY_GATE          (1 << 4)  /* Bit 4:      allow fuse programing */
+#define CCM_CGPR_EFUSE_PROG_SUPPLY_GATE          (1 << 4)  /* Bit 4:      allow fuse programming */
                                                            /* Bits 5-13:  Reserved */
 #define CCM_CGPR_SYS_MEM_DS_CTRL_SHIFT           (14)      /* Bits 14-15: System memory DS control */
 #define CCM_CGPR_SYS_MEM_DS_CTRL_MASK            (0x7 << CCM_CGPR_SYS_MEM_DS_CTRL_SHIFT)
@@ -766,13 +767,13 @@
 /* Module Enable Override Register */
 
                                                            /* Bits 0-4: Reserved */
-#define CCM_CMEOR_MOD_EN_OV_GPT                  (1 << 5)  /* Bit 5:      Overide clock enable signal from GPT */
-#define CCM_CMEOR_MOD_EN_OV_PIT                  (1 << 6)  /* Bit 6:      Overide clock enable signal from PIT */
-#define CCM_CMEOR_MOD_EN_OV_USDHC                (1 << 7)  /* Bit 7:      Overide clock enable signal from USDHC */
-#define CCM_CMEOR_MOD_EN_OV_TRNG                 (1 << 9)  /* Bit 9:      Overide clock enable signal from TRNG */
+#define CCM_CMEOR_MOD_EN_OV_GPT                  (1 << 5)  /* Bit 5:      Override clock enable signal from GPT */
+#define CCM_CMEOR_MOD_EN_OV_PIT                  (1 << 6)  /* Bit 6:      Override clock enable signal from PIT */
+#define CCM_CMEOR_MOD_EN_OV_USDHC                (1 << 7)  /* Bit 7:      Override clock enable signal from USDHC */
+#define CCM_CMEOR_MOD_EN_OV_TRNG                 (1 << 9)  /* Bit 9:      Override clock enable signal from TRNG */
                                                            /* Bits 10-27: Reserved */
-#define CCM_CMEOR_MOD_EN_OV_CAN2_CPI             (1 << 28) /* Bit 28:     Overide clock enable signal from CAN2 */
-#define CCM_CMEOR_MOD_EN_OV_CAN1_CPI             (1 << 30) /* Bit 30:     Overide clock enable signal from CAN1 */
+#define CCM_CMEOR_MOD_EN_OV_CAN2_CPI             (1 << 28) /* Bit 28:     Override clock enable signal from CAN2 */
+#define CCM_CMEOR_MOD_EN_OV_CAN1_CPI             (1 << 30) /* Bit 30:     Override clock enable signal from CAN1 */
                                                            /* Bit 31:     Reserved */
 
 /* Analog ARM PLL control Register */

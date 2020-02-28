@@ -2400,6 +2400,15 @@
 #  error "Unrecognized PIC32 device
 #endif
 
+/* IPL priority levels *****************************************************/
+/* These priorities will be used by the core to properly disable/mask
+ * interrupts.
+ */
+
+#define CHIP_MIN_PRIORITY    1                       /* Minimum priority. */
+#define CHIP_MAX_PRIORITY    7                       /* Maximum priority. */
+#define CHIP_SW0_PRIORITY    (CHIP_MAX_PRIORITY - 1) /* SW0 priority. */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

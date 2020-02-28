@@ -44,7 +44,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -803,7 +802,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   if (frequency == priv->frequency)
     {
-      /* No... just return the actual frequency from the last calcualtion */
+      /* No... just return the actual frequency from the last calculation */
 
       actual = priv->actual;
     }
@@ -826,7 +825,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
        *
        * One can possibly factorize 128 and br. However, since the last
        * 6 bits of CLKDIV are don't care, we can base our integer arithmetic
-       * on the below formula without loosing any extra precision:
+       * on the below formula without losing any extra precision:
        *
        * CLKDIV / 64 = (2 * fHFPERCLK)/br - 4
        *

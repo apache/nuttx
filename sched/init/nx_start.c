@@ -51,6 +51,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/mm/shm.h>
 #include <nuttx/kmalloc.h>
@@ -389,11 +390,7 @@ static FAR char *g_idleargv[1][2];
 
 void nx_start(void)
 {
-#ifdef CONFIG_SMP
-  int cpu;
-#else
-# define cpu 0
-#endif
+  int cpu = 0;
   int i;
 
   sinfo("Entry\n");
@@ -473,7 +470,7 @@ void nx_start(void)
 
       /* Set the entry point.  This is only for debug purposes.  NOTE: that
        * the start_t entry point is not saved.  That is acceptable, however,
-       * becaue it can be used only for restarting a task: The IDLE task
+       * because it can be used only for restarting a task: The IDLE task
        * cannot be restarted.
        */
 
@@ -612,6 +609,12 @@ void nx_start(void)
     mm_pginitialize(heap_start, heap_size);
 #endif
   }
+#endif
+
+#ifdef CONFIG_MM_IOB
+  /* Initialize IO buffering */
+
+  iob_initialize();
 #endif
 
   /* The memory manager is available */
@@ -798,7 +801,7 @@ void nx_start(void)
    * depend on having IDLE task file structures setup.
    */
 
-  syslog_initialize(SYSLOG_INIT_LATE);
+  syslog_initialize();
 
 #ifdef CONFIG_SMP
   /* Start all CPUs *********************************************************/

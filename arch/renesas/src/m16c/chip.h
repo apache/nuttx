@@ -170,7 +170,7 @@
 #define M16C_IDB0          0x0034a    /* Three-phase output buffer 0 */
 #define M16C_IDB1          0x0034b    /* Three-phase output buffer 1 */
 #define M16C_DTT           0x0034c    /* Dead time timer */
-#define M16C_ICTB2         0x0034d    /* Timer B2 interrupt occurences frequency set counter */
+#define M16C_ICTB2         0x0034d    /* Timer B2 interrupt occurrences frequency set counter */
 #define M16C_IFSR          0x0035f    /* Interrupt request cause select */
 #define M16C_U2SMR4        0x00374    /* UART2 special mode register4 */
 #define M16C_U2SMR3        0x00375    /* UART2 special mode register3 */

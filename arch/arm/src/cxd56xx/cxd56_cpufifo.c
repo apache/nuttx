@@ -104,6 +104,7 @@ static int cpufifo_txhandler(int irq, FAR void *context, FAR void *arg)
       cpufifo_trypush(pd->data);
       sq_addlast(&pd->entry, &g_emptyqueue);
     }
+
   if (sq_empty(&g_pushqueue))
     {
       up_disable_irq(CXD56_IRQ_FIFO_TO);
@@ -114,7 +115,11 @@ static int cpufifo_txhandler(int irq, FAR void *context, FAR void *arg)
 
 static int cpufifo_rxhandler(int irq, FAR void *context, FAR void *arg)
 {
-  uint32_t word[2] = {0};
+  uint32_t word[2] =
+                     {
+                      0
+                     };
+
   int cpuid;
 
   /* Drain from PULL FIFO. But not all data because this handler
@@ -182,6 +187,7 @@ int cxd56_cfpush(uint32_t data[2])
   if (!sq_empty(&g_pushqueue))
     {
       ret = cpufifo_reserve(data);
+      leave_critical_section(flags);
       return ret;
     }
 
@@ -225,6 +231,7 @@ int cxd56_cfregrxhandler(cpufifo_handler_t handler)
     {
       g_cfrxhandler = handler;
     }
+
   leave_critical_section(flags);
   return ret;
 }

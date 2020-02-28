@@ -35,7 +35,7 @@ On the H407 board, ?? all uarts are available for pin mappings
 USART2 can be used for nsh console like on Discovery board,
 or you can use USART6 exposed via UEXT connector.
 
-Olimex offers MOD-RS232 voltage level convertor for the UEXT so it can be
+Olimex offers MOD-RS232 voltage level converter for the UEXT so it can be
 attached to computer serial port.
 
 STM32-H407-specific Configuration Options

@@ -155,7 +155,7 @@ int sam_watchdog_initialize(void)
   FAR struct file filestruct;
   int ret;
 
-  /* Initialize tha register the watchdog timer device */
+  /* Initialize the watchdog timer device */
 
   wdinfo("Initializing Watchdog driver...\n");
 

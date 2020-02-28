@@ -304,7 +304,7 @@
     NX supports any graphics device either of two device interfaces:
     <ul>
       <li>
-        Any device with random accesss video memory using the NuttX framebuffer driver interface
+        Any device with random access video memory using the NuttX framebuffer driver interface
         (see <code>include/nuttx/video/fb.h</code>).
       </li>
       <li>
@@ -370,7 +370,7 @@
 <p>
   NX is the tiny NuttX windowing system for raw windows (i.e., simple regions of
   graphics memory).
-  NX includes a small-footprint, multi-user implentation (NXMU as described below).
+  NX includes a small-footprint, multi-user implementation (NXMU as described below).
   NX can be used without NxWidgets and without NXTOOLKIT for raw window displays.
 </p>
 
@@ -642,7 +642,7 @@ void nxgl_rectunion(FAR struct nxgl_rect_s *dest,
 </pre></ul>
 <p>
   <b>Description:</b>
-  Given two rectanges, <code>src1</code> and <code>src2</code>, return the larger rectangle that
+  Given two rectangles, <code>src1</code> and <code>src2</code>, return the larger rectangle that
   contains both, <code>dest</code>.
 </p>
 
@@ -1023,7 +1023,7 @@ int nxmu_start(int display, int plane);
   In it is especially useful for setting up board operational and test configurations.
 </p>
 <p>
- When called with the <code>cmd</code> of <code>BOARDIOC_NX_START</code>, then the  <code>boardctl()</code> will call <code>nxmu_start</code> indirectly on behalf of the appication.
+ When called with the <code>cmd</code> of <code>BOARDIOC_NX_START</code>, then the  <code>boardctl()</code> will call <code>nxmu_start</code> indirectly on behalf of the application.
  In this case the <code>arg</code> parameter is ignored.
 </p>
 <p>
@@ -1872,7 +1872,7 @@ bool nx_ishidden(NXWINDOW hwnd);
   <b>Input Parameters:</b>
   <ul><dl>
     <dt><code>hwnd</code>
-    <dd>The handle returned by <a href="#nxopenwindow"><code>nx_openwindow()</code></a> that indentifies the window to be queried.
+    <dd>The handle returned by <a href="#nxopenwindow"><code>nx_openwindow()</code></a> that identifies the window to be queried.
   </dl></ul>
 </p>
 <p>
@@ -2278,7 +2278,7 @@ int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons)
     as well as mouse and keyboard inputs.
     The client sub-window callbacks are registered when the framed window is
     created with a call to <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a>;
-    Separate toolbar sub-window callbakcs are reigistered when the toolbar
+    Separate toolbar sub-window callbacks are reigistered when the toolbar
     is added using <a href="#nxtkopentoolbar"><code>nxtk_opentoolbar()</code></a>.
     (NOTES: (1) only the client sub-window receives keyboard input and,
     (2) border callbacks are not currently accessible by the user).
@@ -2685,7 +2685,7 @@ bool nxtk_ishidden(NXTKWINDOW hfwnd);
   <b>Input Parameters:</b>
   <ul><dl>
     <dt><code>hfwnd</code>
-    <dd>The handle returned by <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a> that indentifies the window to be queried.
+    <dd>The handle returned by <a href="#nxtkopenwindow"><code>nxtk_openwindow()</code></a> that identifies the window to be queried.
   </dl></ul>
 </p>
 <p>
@@ -3600,7 +3600,7 @@ int nxcursor_setimage(NXHANDLE hnd, FAR const struct nx_cursorimage_s *image);
   Set the cursor image.
 </p>
 <p>
-  The image is provided a a 2-bits-per-pixel image.  The two bit incoding is as followings:
+  The image is provided a a 2-bits-per-pixel image.  The two bit incoding is as following:
 </p>
 <ul>
   00 - The transparent background.<br>
@@ -3768,7 +3768,7 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos);
     <dd>Enables overall support for graphics library and NX
     <dt><code>CONFIG_NX_RAMBACKED</code>
     <dd>Enables RAM backed window support.
-    If this option is selected, then windows may be optionally created with a RAM frambuffer backing up the window content.
+    If this option is selected, then windows may be optionally created with a RAM framebuffer backing up the window content.
     Rending into the window will result in rending into the backup framebuffer, then updating the physical display from the framebuffer.
     <p>
       The advantage of this option is that the application that manages window will no longer receive redraw() callbacks.
@@ -3852,7 +3852,7 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos);
 <ul>
   <dl>
     <dt><code>CONFIG_NXTK_BORDERWIDTH</code>:
-      <dd>Specifies with with of the border (in pixels) used with
+      <dd>Specifies the width of the border (in pixels) used with
       framed windows.   The default is 4.
     <dt><code>CONFIG_NXTK_BORDERCOLOR1</code>, <code>CONFIG_NXTK_BORDERCOLOR2</code>, and <code>CONFIG_NXTK_BORDERCOLOR3</code>:
       <dd>Specify the colors of the border used with framed windows.
@@ -4019,7 +4019,7 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos);
 <p>
   <b>Font Installation Steps</b>,
   Below are general instructions for creating and installing a new font in the NX graphic system.
-  The first two steps only appy if you are using the BDF font converter program.
+  The first two steps only apply if you are using the BDF font converter program.
 </p>
 <ol start="1">
   <li>
@@ -4817,4 +4817,3 @@ sudo ln -s libXext.so.6.4.0 libXext.so
 
 </body>
 </html>
-

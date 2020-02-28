@@ -67,4 +67,4 @@
 
 #endif
 
-#endif  /* ___ARCH_RENESAS_SRC_COMMON_UP_ARCH_H */
+#endif /* ___ARCH_RENESAS_SRC_COMMON_UP_ARCH_H */

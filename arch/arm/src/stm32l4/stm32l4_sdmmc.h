@@ -127,4 +127,3 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32_SDMMC_H */
-

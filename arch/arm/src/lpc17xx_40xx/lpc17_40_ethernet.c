@@ -108,14 +108,15 @@
  * hardware!
  */
 
-#if !defined(CONFIG_LPC17_40_NINTERFACES) || CONFIG_LPC17_40_NINTERFACES > LPC17_40_NETHCONTROLLERS
+#if !defined(CONFIG_LPC17_40_NINTERFACES) || \
+    CONFIG_LPC17_40_NINTERFACES > LPC17_40_NETHCONTROLLERS
 #  undef CONFIG_LPC17_40_NINTERFACES
 #  define CONFIG_LPC17_40_NINTERFACES LPC17_40_NETHCONTROLLERS
 #endif
 
 /* The logic here has a few hooks for support for multiple interfaces, but
- * that capability is not yet in place (and I won't worry about it until I get
- * the first multi-interface LPC17xx/LPC40xx).
+ * that capability is not yet in place (and I won't worry about it until I
+ * get the first multi-interface LPC17xx/LPC40xx).
  */
 
 #if CONFIG_LPC17_40_NINTERFACES > 1
@@ -132,7 +133,7 @@
 
 #define PKTBUF_SIZE (MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE)
 
-/* Debug Configuration *****************************************************/
+/* Debug Configuration ******************************************************/
 
 /* Register debug -- can only happen of CONFIG_DEBUG_NET_INFO is selected */
 
@@ -171,7 +172,7 @@
 #define ETH_TXINTS           (ETH_INT_TXUNR | ETH_INT_TXERR | \
                               ETH_INT_TXFIN | ETH_INT_TXDONE)
 
-/* Misc. Helpers ***********************************************************/
+/* Misc. Helpers ************************************************************/
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
@@ -436,16 +437,14 @@ static inline int lpc17_40_phyreset(uint8_t phyaddr);
 static inline int lpc17_40_phyautoneg(uint8_t phyaddr);
 #  endif
 static int lpc17_40_phymode(uint8_t phyaddr, uint8_t mode);
-static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv);
-#else
-#  define lpc17_40_phyinit(priv)
 #endif
+static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv);
 
 /* EMAC Initialization functions */
 
 static inline void lpc17_40_txdescinit(struct lpc17_40_driver_s *priv);
 static inline void lpc17_40_rxdescinit(struct lpc17_40_driver_s *priv);
-static void lpc17_40_macmode(uint8_t mode);
+static inline void lpc17_40_macmode(uint8_t mode);
 static void lpc17_40_ethreset(struct lpc17_40_driver_s *priv);
 
 /****************************************************************************
@@ -659,8 +658,8 @@ static int lpc17_40_transmit(struct lpc17_40_driver_s *priv)
 
   prodidx = lpc17_40_getreg(LPC17_40_ETH_TXPRODIDX) & ETH_TXPRODIDX_MASK;
 
-  /* Get the packet address from the descriptor and set the descriptor control
-   * fields.
+  /* Get the packet address from the descriptor and set the descriptor
+   * control fields.
    */
 
   txdesc   = (uint32_t *)(LPC17_40_TXDESC_BASE + (prodidx << 3));
@@ -732,7 +731,8 @@ static int lpc17_40_transmit(struct lpc17_40_driver_s *priv)
 
 static int lpc17_40_txpoll(struct net_driver_s *dev)
 {
-  struct lpc17_40_driver_s *priv = (struct lpc17_40_driver_s *)dev->d_private;
+  struct lpc17_40_driver_s *priv =
+    (struct lpc17_40_driver_s *)dev->d_private;
   int ret = OK;
 
   /* If the polling resulted in data that should be sent out on the network,
@@ -779,8 +779,8 @@ static int lpc17_40_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return ret;
@@ -893,8 +893,8 @@ static void lpc17_40_rxdone_work(FAR void *arg)
       rxstat   = (uint32_t *)(LPC17_40_RXSTAT_BASE + (considx << 3));
       pktlen   = (*rxstat & RXSTAT_INFO_RXSIZE_MASK) - 3;
 
-      /* Check for errors.  NOTE:  The DMA engine reports bogus length errors,
-       * making this a pretty useless (as well as annoying) check.
+      /* Check for errors.  NOTE:  The DMA engine reports bogus length
+       * errors, making this a pretty useless (as well as annoying) check.
        */
 
       if ((*rxstat & RXSTAT_INFO_ERROR) != 0)
@@ -910,7 +910,7 @@ static void lpc17_40_rxdone_work(FAR void *arg)
        * imply that the packet is too big.
        */
 
-      /* else */ if (pktlen > CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE)
+      if (pktlen > CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE)
         {
           nwarn("WARNING: Too big. considx: %08x prodidx: %08x pktlen: %d "
                 "rxstat: %08x\n",
@@ -1131,8 +1131,9 @@ static void lpc17_40_txdone_work(FAR void *arg)
   DEBUGASSERT(priv);
   DEBUGASSERT(lpc17_40_txdesc(priv) == OK);
 
-  /* Check if there is a pending Tx transfer that was scheduled by Rx handling
-   * while the Tx logic was busy.  If so, processing that pending Tx now.
+  /* Check if there is a pending Tx transfer that was scheduled by Rx
+   * handling while the Tx logic was busy.  If so, processing that pending
+   * Tx now.
    */
 
   net_lock();
@@ -1267,7 +1268,8 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
            * the descriptor was set.
            */
 
-          if ((status & ETH_INT_RXFIN) != 0 || (status & ETH_INT_RXDONE) != 0)
+          if ((status & ETH_INT_RXFIN) != 0 ||
+              (status & ETH_INT_RXDONE) != 0)
             {
               /* We have received at least one new incoming packet.
                * Disable further TX interrupts for now.  TX interrupts will
@@ -1333,8 +1335,8 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
               priv->lp_inten &= ~ETH_TXINTS;
               lpc17_40_putreg(priv->lp_inten, LPC17_40_ETH_INTEN);
 
-              /* Cancel any pending TX done work (to prevent overruns and also
-               * to avoid race conditions with the TX timeout work)
+              /* Cancel any pending TX done work (to prevent overruns and
+               * also to avoid race conditions with the TX timeout work)
                */
 
               work_cancel(ETHWORK, &priv->lp_txwork);
@@ -1441,7 +1443,8 @@ static void lpc17_40_txtimeout_expiry(int argc, uint32_t arg, ...)
     {
       /* Schedule to perform the interrupt processing on the worker thread. */
 
-      work_queue(ETHWORK, &priv->lp_txwork, lpc17_40_txtimeout_work, priv, 0);
+      work_queue(ETHWORK, &priv->lp_txwork, lpc17_40_txtimeout_work,
+                 priv, 0);
     }
 }
 
@@ -1626,7 +1629,8 @@ static void lpc17_40_ipv6multicast(FAR struct lpc17_40_driver_s *priv)
 
 static int lpc17_40_ifup(struct net_driver_s *dev)
 {
-  struct lpc17_40_driver_s *priv = (struct lpc17_40_driver_s *)dev->d_private;
+  struct lpc17_40_driver_s *priv =
+    (struct lpc17_40_driver_s *)dev->d_private;
   uint32_t regval;
   int ret;
 
@@ -1786,7 +1790,8 @@ static int lpc17_40_ifup(struct net_driver_s *dev)
 
 static int lpc17_40_ifdown(struct net_driver_s *dev)
 {
-  struct lpc17_40_driver_s *priv = (struct lpc17_40_driver_s *)dev->d_private;
+  struct lpc17_40_driver_s *priv =
+    (struct lpc17_40_driver_s *)dev->d_private;
   irqstate_t flags;
 
   /* Disable the Ethernet interrupt */
@@ -1880,7 +1885,8 @@ static int lpc17_40_txavail(struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-      work_queue(ETHWORK, &priv->lp_pollwork, lpc17_40_txavail_work, priv, 0);
+      work_queue(ETHWORK, &priv->lp_pollwork, lpc17_40_txavail_work,
+                 priv, 0);
     }
 
   return OK;
@@ -2014,8 +2020,8 @@ static int lpc17_40_addmac(struct net_driver_s *dev, const uint8_t *mac)
    * calculated from the 6 byte MAC address.  Bits [28:23] out of the 32-bit
    * CRC result are taken to form the hash. The 6-bit hash is used to access
    * the hash table: it is used as an index in the 64-bit HashFilter register
-   * that has been programmed with accept values. If the selected accept value
-   * is 1, the frame is accepted.
+   * that has been programmed with accept values. If the selected accept
+   * value is 1, the frame is accepted.
    */
 
   crc = lpc17_40_calcethcrc(mac, 6);
@@ -2090,8 +2096,8 @@ static int lpc17_40_rmmac(struct net_driver_s *dev, const uint8_t *mac)
    * calculated from the 6 byte MAC address.  Bits [28:23] out of the 32-bit
    * CRC result are taken to form the hash. The 6-bit hash is used to access
    * the hash table: it is used as an index in the 64-bit HashFilter register
-   * that has been programmed with accept values. If the selected accept value
-   * is 1, the frame is accepted.
+   * that has been programmed with accept values. If the selected accept
+   * value is 1, the frame is accepted.
    */
 
   crc = lpc17_40_calcethcrc(mac, 6);
@@ -2160,7 +2166,8 @@ static int lpc17_40_eth_ioctl(struct net_driver_s *dev, int cmd,
                            unsigned long arg)
 {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
-  struct lpc17_40_driver_s *priv = (struct lpc17_40_driver_s *)dev->d_private;
+  struct lpc17_40_driver_s *priv =
+    (struct lpc17_40_driver_s *)dev->d_private;
 #endif
   int ret;
 
@@ -2471,7 +2478,7 @@ static inline int lpc17_40_phyreset(uint8_t phyaddr)
  *   None
  *
  * Assumptions:
- *   The adverisement regiser has already been configured.
+ *   The adverisement register has already been configured.
  *
  ****************************************************************************/
 
@@ -2671,6 +2678,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
       nerr("ERROR: No PHY detected\n");
       return -ENODEV;
     }
+
   ninfo("phyaddr: %d\n", phyaddr);
 
   /* Save the discovered PHY device address */
@@ -2684,6 +2692,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
     {
       return ret;
     }
+
   lpc17_40_showmii(phyaddr, "After reset");
 
   /* Check for preamble suppression support */
@@ -2807,6 +2816,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
         nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
+
 #elif defined(CONFIG_ETH0_PHY_KSZ8081)
   phyreg = lpc17_40_phyread(phyaddr, MII_KSZ8081_PHYCTRL1);
 
@@ -2834,6 +2844,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
         nerr("ERROR: Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
+
 #elif defined(CONFIG_ETH0_PHY_DP83848C)
   phyreg = lpc17_40_phyread(phyaddr, MII_DP83848C_STS);
 
@@ -2936,6 +2947,7 @@ static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
   lpc17_40_showmii(phyaddr, "After final configuration");
   return ret;
 }
+
 #else
 static inline int lpc17_40_phyinit(struct lpc17_40_driver_s *priv)
 {
@@ -3074,7 +3086,7 @@ static inline void lpc17_40_rxdescinit(struct lpc17_40_driver_s *priv)
  ****************************************************************************/
 
 #ifdef LPC17_40_HAVE_PHY
-static void lpc17_40_macmode(uint8_t mode)
+static inline void lpc17_40_macmode(uint8_t mode)
 {
   uint32_t regval;
 
@@ -3133,8 +3145,14 @@ static void lpc17_40_macmode(uint8_t mode)
     {
       regval &= ~ETH_SUPP_SPEED;
     }
+
   lpc17_40_putreg(regval, LPC17_40_ETH_SUPP);
 #endif
+}
+
+#else
+static inline void lpc17_40_macmode(uint8_t mode)
+{
 }
 #endif
 

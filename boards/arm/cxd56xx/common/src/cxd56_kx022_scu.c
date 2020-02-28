@@ -65,7 +65,7 @@ int board_kx022_initialize(FAR const char *devpath, int bus)
 
   sninfo("Initializing KX022...\n");
 
-  /* Initialize i2c deivce */
+  /* Initialize i2c device */
 
   i2c = cxd56_i2cbus_initialize(bus);
   if (!i2c)

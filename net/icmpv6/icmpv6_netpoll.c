@@ -43,6 +43,7 @@
 #include <poll.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
 #include "devif/devif.h"
@@ -158,7 +159,7 @@ int icmpv6_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   FAR struct icmpv6_conn_s *conn = psock->s_conn;
   FAR struct icmpv6_poll_s *info;
   FAR struct devif_callback_s *cb;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(conn != NULL && fds != NULL);
 

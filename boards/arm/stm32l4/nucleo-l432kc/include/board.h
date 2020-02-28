@@ -246,6 +246,22 @@
 #define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_1
 #define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2N_1
 
+/* LPTIM2 PWM output
+ * REVISIT : Add support for the other clock sources, LSE, LSI and HSI
+ *
+ * CH1     | 1(A4) 2(A8)
+ */
+
+#if defined(CONFIG_STM32L4_LPTIM2_CLK_APB1)
+#  define STM32L4_LPTIM2_FREQUENCY STM32L4_APB1_LPTIM2_CLKIN
+#endif
+
+#if 1
+#  define GPIO_LPTIM2_CH1OUT GPIO_LPTIM2_OUT_1
+#else
+#  define GPIO_LPTIM2_CH1OUT GPIO_LPTIM2_OUT_2
+#endif
+
 /*******************************************************************************
  * Public Data
  ******************************************************************************/
@@ -283,4 +299,4 @@ void stm32l4_board_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32L4_NUCLEO_L432KC_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32L4_NUCLEO_L432KC_INCLUDE_BOARD_H */

@@ -151,7 +151,7 @@ static inline void nxbe_filltrapezoid_dev(FAR struct nxbe_window_s *wnd,
 #endif
     {
       /* Rend any part of the trapezoid that is not occluded by a window
-       * higher in the hiearchy.
+       * higher in the hierarchy.
        */
 
       info.color = color[i];
@@ -201,7 +201,7 @@ static inline void nxbe_filltrapezoid_pwfb(FAR struct nxbe_window_s *wnd,
   struct nxgl_point_s origin;
   unsigned int bpp;
 
-  /* Both the rectangle that we receive here are in abolute device
+  /* Both the rectangle that we receive here are in absolute device
    * coordinates.  We need to restore both to windows relative coordinates.
    */
 

@@ -54,7 +54,7 @@
  * Automounter configuration
  *   CONFIG_FS_AUTOMOUNTER - Enables automount support
  *
- * Prequisites:
+ * Prerequisites:
  *   CONFIG_SCHED_WORKQUEUE -  Work queue support is required
  *   And others that would only matter if you are working in a very minimal
  *   configuration.

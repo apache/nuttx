@@ -126,4 +126,3 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype)
 
   dtcb->adj_stack_size = 0;
 }
-

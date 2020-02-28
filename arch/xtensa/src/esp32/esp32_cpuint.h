@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_CPUINT_H
-#define __ARCH_XTENSA_SRC_ESP32_ESP32_CPUINT_H 1
+#define __ARCH_XTENSA_SRC_ESP32_ESP32_CPUINT_H
 
 /****************************************************************************
  * Included Files
@@ -76,7 +76,7 @@ extern uint8_t g_cpu1_intmap[ESP32_NCPUINTS];
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failre.
+ *   any failure.
  *
  ****************************************************************************/
 
@@ -140,7 +140,7 @@ void esp32_free_cpuint(int cpuint);
  * Name:  esp32_attach_peripheral
  *
  * Description:
- *   Attach a peripheral interupt to a CPU interrupt.
+ *   Attach a peripheral interrupt to a CPU interrupt.
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
@@ -160,7 +160,7 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint);
  * Name:  esp32_detach_peripheral
  *
  * Description:
- *   Detach a peripheral interupt from a CPU interrupt.
+ *   Detach a peripheral interrupt from a CPU interrupt.
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU

@@ -151,7 +151,7 @@ void stm32l4_clockconfig(void);
  *
  * Description:
  *   Any STM32L4 board may replace the "standard" board clock configuration logic with
- *   its own, custom clock cofiguration logic.
+ *   its own, custom clock configuration logic.
  *
  ************************************************************************************/
 
@@ -170,7 +170,7 @@ void stm32l4_board_clockconfig(void);
  *
  *   This functional performs a subset of the operations performed by
  *   stm32l4_clockconfig():  It does not reset any devices, and it does not reset the
- *   currenlty enabled peripheral clocks.
+ *   currently enabled peripheral clocks.
  *
  *   If CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG is defined, then clocking will
  *   be enabled by an externally provided, board-specific function called

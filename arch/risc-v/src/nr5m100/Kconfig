@@ -106,16 +106,15 @@ config NR5_UART
 	bool
 
 config NR5_UART_RX_BUF_SIZE
-	int "UART RX Bufer size"
+	int "UART RX Buffer size"
 	default 64
 	depends on NR5_UART
 	---help---
 		Size of RX buffers for NR5 UARTs
 
 config NR5_UART_TX_BUF_SIZE
-	int "UART TX Bufer size"
+	int "UART TX Buffer size"
 	default 64
 	depends on NR5_UART
 	---help---
 		Size of TX buffers for NR5 UARTs
-

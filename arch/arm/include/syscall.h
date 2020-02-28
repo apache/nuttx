@@ -94,4 +94,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_SYSCALL_H */
-

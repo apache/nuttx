@@ -244,7 +244,7 @@ Code Red IDE
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/arm/src/lpc17xx_40xx,
+  3) Set up include paths:  You will need include/, arch/arm/src/lpc17xx_40xx,
      arch/arm/src/common, arch/arm/src/armv7-m, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.
@@ -501,7 +501,7 @@ LPCXpresso Configuration Options
   also require CONFIG_NET and CONFIG_LPC17_40_ETHERNET.
 
     CONFIG_ETH0_PHY_KS8721 - Selects Micrel KS8721 PHY
-    CONFIG_LPC17_40_PHY_AUTONEG - Enable auto-negotion
+    CONFIG_LPC17_40_PHY_AUTONEG - Enable auto-negotiation
     CONFIG_LPC17_40_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
     CONFIG_LPC17_40_PHY_FDUPLEX - Select full (vs. half) duplex
 
@@ -564,7 +564,7 @@ selected as follow:
 Where <subdir> is one of the following:
 
   dhcpd:
-    This builds the DCHP server using the apps/examples/dhcpd application
+    This builds the DHCP server using the apps/examples/dhcpd application
     (for execution from FLASH.) See apps/examples/README.txt for information
     about the dhcpd example.
 
@@ -680,4 +680,3 @@ Where <subdir> is one of the following:
 
     3. Jumpers: J55 must be set to provide chip select PIO1_11 signal as
        the SD slot chip select.
-

@@ -116,4 +116,3 @@ int net_poll(int sockfd, struct pollfd *fds, bool setup)
 
   return psock_poll(psock, fds, setup);
 }
-

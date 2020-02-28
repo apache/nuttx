@@ -41,7 +41,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <semaphore.h>
 #include "altmdm_dev.h"
 #include "altmdm_sys.h"
 

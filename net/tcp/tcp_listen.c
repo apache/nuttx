@@ -73,7 +73,7 @@ static FAR struct tcp_conn_s *tcp_listenports[CONFIG_NET_MAX_LISTENPORTS];
  *   Return the connection listener for connections on this port (if any)
  *
  * Assumptions:
- *   This function is called from network logic with the nework locked.
+ *   This function is called from network logic with the network locked.
  *
  ****************************************************************************/
 
@@ -237,7 +237,7 @@ int tcp_listen(FAR struct tcp_conn_s *conn)
  *   Return true is there is a listener for the specified port
  *
  * Assumptions:
- *   This function is called from network logic with the nework locked.
+ *   This function is called from network logic with the network locked.
  *
  ****************************************************************************/
 

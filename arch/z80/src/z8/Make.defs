@@ -44,7 +44,7 @@ CMN_CSRCS += up_mdelay.c up_stackframe.c up_udelay.c up_usestack.c
 
 CHIP_SSRCS  = z8_vector.S z8_saveusercontext.S z8_restorecontext.S
 CHIP_CSRCS  = z8_initialstate.c z8_irq.c z8_saveirqcontext.c
-CHIP_CSRCS += z8_schedulesigaction.c z8_sigdeliver.c z8_lowuart.c
+CHIP_CSRCS += z8_schedulesigaction.c z8_sigdeliver.c
 CHIP_CSRCS += z8_serial.c z8_i2c.c z8_registerdump.c
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)

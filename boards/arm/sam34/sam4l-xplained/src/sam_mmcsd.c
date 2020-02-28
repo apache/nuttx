@@ -119,7 +119,7 @@ int sam_sdinitialize(int minor)
       return ret;
     }
 
-  finfo("Successfuly bound SPI chip select %d to MMC/SD slot %d\n",
+  finfo("Successfully bound SPI chip select %d to MMC/SD slot %d\n",
         SD_CSNO, SAM34_MMCSDSLOTNO);
 
   return OK;

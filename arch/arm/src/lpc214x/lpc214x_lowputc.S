@@ -193,7 +193,7 @@ up_lowsetup:
 	strb	r1, [r0, #LPC214X_UART_DLL_OFFSET]
 
 	/* Clear DLAB */
-	
+
 	mov	r1, #LPC214X_LCR_VALUE
 	strb	r1, [r0, #LPC214X_UART_LCR_OFFSET]
 

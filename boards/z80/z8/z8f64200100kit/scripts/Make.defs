@@ -1,0 +1,114 @@
+############################################################################
+# boards/z80/z8/z8f64200100kit/configs/ostest/Make.defs
+#
+#   Copyright (C) 2008, 2012-2013, 2020 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name NuttX nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include ${TOPDIR}/arch/z80/src/z8/Toolchain.defs
+include $(TOPDIR)/tools/zds/zds_Config.mk
+
+# CFLAGS
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  ARCHASMINCLUDES = -include:$(TOPDIR)\include;$(ZDSSTDINCDIR);$(ZDSZILOGINCDIR)
+  EARCHASMINCLUDES = -include:$(TOPDIR)\include;$(ZDSSTDINCDIR);$(ZDSZILOGINCDIR)
+  ARCHSTDINCLUDES = -stdinc:$(TOPDIR)\include;$(ZDSSTDINCDIR);$(ZDSZILOGINCDIR);$(ZDSDEVINCDIR)
+  ARCHUSRINCLUDES = -usrinc:.
+else
+  ARCHASMINCLUDES = -include:'$(WTOPDIR)\include;$(WZDSSTDINCDIR);$(WZDSZILOGINCDIR)'
+  EARCHASMINCLUDES = -include:'$(ETOPDIR)\include;$(EZDSSTDINCDIR);$(EZDSZILOGINCDIR)'
+  ARCHSTDINCLUDES = -stdinc:'$(WTOPDIR)\include;$(WZDSSTDINCDIR);$(WZDSZILOGINCDIR);$(WZDSDEVINCDIR)'
+  ARCHUSRINCLUDES = -usrinc:'.'
+endif
+
+# Assembler definitions
+
+ARCHASMCPUFLAGS = -cpu:$(ARCHCPU) -NOigcase $(ARCHREVAA)
+ARCHASMLIST = -list -NOlistmac -name -pagelen:56 -pagewidth:80 -quiet
+ARCHASMWARNINGS = -warn
+ARCHASMDEFINES = -define:$(ARCHCPUDEF)=1 -define:$(ARCHSERIESDEF)=1 -define:$(ARCHFAMILYDEF)=1 -define:__ASSEMBLY__
+AFLAGS = $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMLIST) $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)
+
+# Compiler definitions
+
+ARCHCPUFLAGS = -chartype:S -model:L -const:RAM -NOoptlink -promote -cpu:$(ARCHCPU) $(ARCHREVAA) -NOgenprintf \
+			   -asmsw:" $(ARCHASMCPUFLAGS) $(EARCHASMINCLUDES) $(ARCHASMWARNINGS) $(ARCHASMOPTIMIZATION)"
+ARCHLIST = -keeplst -NOlist -NOlistinc -keepasm
+ARCHPICFLAGS =
+ARCHWARNINGS = -warn
+ARCHDEFINES = -define:$(ARCHFAMILYDEF) -define:$(ARCHCPUDEF) -define:$(ARCHSERIESDEF)
+ARCHINCLUDES = $(ARCHSTDINCLUDES) $(ARCHUSRINCLUDES)
+CFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHLIST) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
+
+CPPDEFINES = -D$(ARCHFAMILYDEF) -D$(ARCHCPUDEF) -D$(ARCHSERIESDEF) -D__ASSEMBLY__
+CPPINCLUDES = -I$(TOPDIR)$(DELIM)include
+CPPFLAGS = $(CPPDEFINES) $(CPPINCLUDES)
+
+# Librarian definitions
+
+ARFLAGS = -quiet -warn
+
+# Linker definitions
+
+LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)configs$(DELIM)ostest$(DELIM)ostest.linkcmd
+
+# Windows native host tool definitions
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  HOSTCC = mingw32-gcc.exe
+  HOSTINCLUDES = -I.
+  HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
+  HOSTLDFLAGS =
+  HOSTEXEEXT = .exe
+
+  # Windows-native host tools
+
+  MKDEP = $(TOPDIR)\tools\mkdeps.exe --winnative
+else
+
+# Linux/Cygwin host tool definitions
+
+  HOSTCC = gcc
+  HOSTINCLUDES = -I.
+  HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
+  HOSTLDFLAGS =
+
+  # This is the tool to use for dependencies (i.e., none)
+
+  MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkwindeps.sh
+
+  # ZDS-II cannot follow Cygwin soft links, so we will have to use directory copies
+
+  DIRLINK = $(TOPDIR)$(DELIM)tools$(DELIM)copydir.sh
+  DIRUNLINK = $(TOPDIR)$(DELIM)tools$(DELIM)unlink.sh
+endif

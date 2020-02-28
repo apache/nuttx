@@ -60,11 +60,6 @@
  *   socket() creates an endpoint for communication and returns a socket
  *   structure.
  *
- *   NOTE: This function does not set the reference count on the socket
- *   structure.  This down by the socket() front end when socket structure
- *   was allocated.  Internal OS users of psock_socket() must set the s_crefs
- *   field to one if psock_socket() returns success.
- *
  * Input Parameters:
  *   domain   (see sys/socket.h)
  *   type     (see sys/socket.h)
@@ -102,6 +97,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
   /* Initialize the socket structure */
 
+  psock->s_crefs  = 1;
   psock->s_domain = domain;
   psock->s_type   = type;
   psock->s_conn   = NULL;
@@ -117,23 +113,8 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
        */
 
       ret = g_usrsock_sockif.si_setup(psock, protocol);
-      if (ret == -ENETDOWN)
-        {
-          /* -ENETDOWN means that USRSOCK daemon is not running.  Attempt to
-           * open socket with kernel networking stack.
-           */
-        }
-      else
-        {
-          psock->s_sockif = &g_usrsock_sockif;
-
-          if (ret < 0)
-            {
-              return ret;
-            }
-
-          return ret;
-        }
+      psock->s_sockif = &g_usrsock_sockif;
+      return ret;
     }
 #endif /* CONFIG_NET_USRSOCK */
 

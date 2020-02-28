@@ -46,7 +46,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
+#include <mqueue.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
@@ -57,7 +57,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/audio/audio.h>
-#include <mqueue.h>
+#include <nuttx/semaphore.h>
 
 #include <arch/irq.h>
 
@@ -465,7 +465,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
         }
         break;
-#endif  /* CONFIG_AUDIO_EXCLUDE_STOP */
+#endif /* CONFIG_AUDIO_EXCLUDE_STOP */
 
       /* AUDIOIOC_PAUSE - Pause the audio stream.
        *
@@ -513,7 +513,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-#endif  /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
 
       /* AUDIOIOC_ALLOCBUFFER - Allocate an audio buffer
        *

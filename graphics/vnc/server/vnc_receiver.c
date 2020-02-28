@@ -480,7 +480,7 @@ int vnc_client_encodings(FAR struct vnc_session_s *session,
 
       encoding = rfb_getbe32(&encodings->encodings[i << 2]);
 
-      /* Only a limited support for of RRE is vailable now. */
+      /* Only a limited support for of RRE is available now. */
 
       if (encoding == RFB_ENCODING_RRE)
         {

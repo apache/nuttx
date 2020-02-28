@@ -59,7 +59,7 @@
 
 /* Most internal nxmq_* interfaces are not available in the user space in
  * PROTECTED and KERNEL builds.  In that context, the application message
- * queu interfaces must be used.  The differences between the two sets of
+ * queue interfaces must be used.  The differences between the two sets of
  * interfaces are:  (1) the nxmq_* interfaces do not cause cancellation
  * points and (2) they do not modify the errno variable.
  *
@@ -407,4 +407,3 @@ int nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group);
 
 #endif /* CONFIG_MQ_MAXMSGSIZE > 0 */
 #endif /* ___INCLUDE_NUTTX_MQUEUE_H */
-

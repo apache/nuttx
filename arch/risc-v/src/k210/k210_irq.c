@@ -52,6 +52,24 @@
 #include "k210.h"
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+/* For the case of configurations with multiple CPUs, then there must be one
+ * such value for each processor that can receive an interrupt.
+ */
+
+volatile uint64_t *g_current_regs[CONFIG_SMP_NCPUS];
+#else
+volatile uint64_t *g_current_regs[1];
+#endif
+
+#ifdef CONFIG_SMP
+extern int riscv_pause_handler(int irq, void *c, FAR void *arg);
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -63,7 +81,7 @@ void up_irqinitialize(void)
 {
   /* Disable Machine interrupts */
 
-  (void)up_irq_save();
+  up_irq_save();
 
   /* Disable all global interrupts */
 
@@ -98,18 +116,32 @@ void up_irqinitialize(void)
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
-  g_current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* Attach the ecall interrupt handler */
 
   irq_attach(K210_IRQ_ECALLM, up_swint, NULL);
-  up_enable_irq(K210_IRQ_ECALLM);
+
+#ifdef CONFIG_BUILD_PROTECTED
+  irq_attach(K210_IRQ_ECALLU, up_swint, NULL);
+#endif
+
+#ifdef CONFIG_SMP
+  /* Clear MSOFT for CPU0 */
+
+  putreg32(0, K210_CLINT_MSIP);
+
+  /* Setup MSOFT for CPU0 with pause handler */
+
+  irq_attach(K210_IRQ_MSOFT, riscv_pause_handler, NULL);
+  up_enable_irq(K210_IRQ_MSOFT);
+#endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
   /* And finally, enable interrupts */
 
-  (void)up_irq_enable();
+  up_irq_enable();
 #endif
 }
 
@@ -124,9 +156,15 @@ void up_irqinitialize(void)
 void up_disable_irq(int irq)
 {
   int extirq;
-  uint32_t oldstat;
+  uint64_t oldstat;
 
-  if (irq == K210_IRQ_MTIMER)
+  if (irq == K210_IRQ_MSOFT)
+    {
+      /* Read mstatus & clear machine software interrupt enable in mie */
+
+      asm volatile ("csrrc %0, mie, %1": "=r" (oldstat) : "r"(MIE_MSIE));
+    }
+  else if (irq == K210_IRQ_MTIMER)
     {
       /* Read mstatus & clear machine timer interrupt enable in mie */
 
@@ -161,9 +199,15 @@ void up_disable_irq(int irq)
 void up_enable_irq(int irq)
 {
   int extirq;
-  uint32_t oldstat;
+  uint64_t oldstat;
 
-  if (irq == K210_IRQ_MTIMER)
+  if (irq == K210_IRQ_MSOFT)
+    {
+      /* Read mstatus & set machine software interrupt enable in mie */
+
+      asm volatile ("csrrs %0, mie, %1": "=r" (oldstat) : "r"(MIE_MSIE));
+    }
+  else if (irq == K210_IRQ_MTIMER)
     {
       /* Read mstatus & set machine timer interrupt enable in mie */
 
@@ -191,13 +235,21 @@ void up_enable_irq(int irq)
  * Name: up_get_newintctx
  *
  * Description:
- *   Return a value for EPIC. But K210 doesn't use EPIC for event control.
+ *   Return initial mstatus when a task is created.
  *
  ****************************************************************************/
 
 uint32_t up_get_newintctx(void)
 {
-  return 0;
+  /* Set machine previous privilege mode to machine mode. Reegardless of
+   * how NuttX is configured and of what kind of thread is being started.
+   * That is because all threads, even user-mode threads will start in
+   * kernel trampoline at nxtask_start() or pthread_start().
+   * The thread's privileges will be dropped before transitioning to
+   * user code. Also set machine previous interrupt enable.
+   */
+
+  return (MSTATUS_MPPM | MSTATUS_MPIE);
 }
 
 /****************************************************************************
@@ -222,7 +274,7 @@ void up_ack_irq(int irq)
 
 irqstate_t up_irq_save(void)
 {
-  uint32_t oldstat;
+  uint64_t oldstat;
 
   /* Read mstatus & clear machine interrupt enable (MIE) in mstatus */
 
@@ -240,7 +292,7 @@ irqstate_t up_irq_save(void)
 
 void up_irq_restore(irqstate_t flags)
 {
-  /* Machine mode - mstatus */
+  /* Write flags to mstatus */
 
   asm volatile("csrw mstatus, %0" : /* no output */ : "r" (flags));
 }
@@ -255,7 +307,7 @@ void up_irq_restore(irqstate_t flags)
 
 irqstate_t up_irq_enable(void)
 {
-  uint32_t oldstat;
+  uint64_t oldstat;
 
 #if 1
   /* Enable MEIE (machine external interrupt enable) */

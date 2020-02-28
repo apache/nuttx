@@ -286,8 +286,8 @@
 
 #ifdef ATSAMA5D2
 #  define PMC_CKGR_MCFR_CCSS           (1 << 24) /* Bit 24: Counter Clock Source Selection */
-#    define PMC_CKGR_MCFR_CCSS_RCOSC   (0)       /* Bit 24: 0=MAINF clock is the RC osciallator */
-#    define PMC_CKGR_MCFR_CCSS_XOSC    (1 << 24) /* Bit 24: 1=MAINF clock is the crystal osciallator */
+#    define PMC_CKGR_MCFR_CCSS_RCOSC   (0)       /* Bit 24: 0=MAINF clock is the RC oscillator */
+#    define PMC_CKGR_MCFR_CCSS_XOSC    (1 << 24) /* Bit 24: 1=MAINF clock is the crystal oscillator */
 #endif
 
 /* PMC Clock Generator PLLA Register */

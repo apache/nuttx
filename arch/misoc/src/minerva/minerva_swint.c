@@ -118,7 +118,7 @@ static void dispatch_syscall(void) naked_function;
 
 /* Call the stub */
 
-/* Restore regsisters */
+/* Restore registers */
 
 /* Return from the syscall */
 }

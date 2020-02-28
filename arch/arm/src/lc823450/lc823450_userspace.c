@@ -118,4 +118,3 @@ void lc823450_userspace(void)
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */
-

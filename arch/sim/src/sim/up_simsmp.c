@@ -41,7 +41,6 @@
 
 #include <stdint.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <signal.h>
 #include <errno.h>
 
@@ -61,10 +60,6 @@
  */
 
 typedef unsigned char spinlock_t;
-
-/* Task entry point type */
-
-typedef int (*main_t)(int argc, char **argv);
 
 struct sim_cpuinfo_s
 {
@@ -100,61 +95,13 @@ volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
  * NuttX domain function prototypes
  ****************************************************************************/
 
-void nx_start(void) __attribute__ ((noreturn));
-void up_cpu_paused(int cpu);
-void sim_smp_hook(void);
+void nx_start(void);
+void up_cpu_started(void);
+int up_cpu_paused(int cpu);
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sim_cpu0_trampoline
- *
- * Description:
- *   This is a pthread task entry point.  This (host) pthread is used to
- *   simulate a CPU0.  It simply calls OS start.
- *
- * Input Parameters:
- *   arg - Standard pthread argument
- *
- * Returned Value:
- *   This function does not return
- *
- ****************************************************************************/
-
-static void *sim_cpu0_trampoline(void *arg)
-{
-  sigset_t set;
-  int ret;
-
-  /* Set the CPU number zero for the CPU thread */
-
-  ret = pthread_setspecific(g_cpukey, (const void *)0);
-  if (ret != 0)
-    {
-      return NULL;
-    }
-
-  /* Make sure the SIGUSR1 is not masked */
-
-  sigemptyset(&set);
-  sigaddset(&set, SIGUSR1);
-
-  ret = pthread_sigmask(SIG_UNBLOCK, &set, NULL);
-  if (ret < 0)
-    {
-      return NULL;
-    }
-
-  /* Give control to nx_start() */
-
-  nx_start();
-
-  /* nx_start() should not return */
-
-  return NULL;
-}
 
 /****************************************************************************
  * Name: sim_idle_trampoline
@@ -205,14 +152,20 @@ static void *sim_idle_trampoline(void *arg)
 
   pthread_mutex_unlock(&cpuinfo->mutex);
 
-  /* Give control to the IDLE task via the nasty little sim_smp_hook().
-   * sim_smp_hook() is logically a part of this function but needs to be
+  /* up_cpu_started() is logically a part of this function but needs to be
    * inserted in the path because in needs to access NuttX domain definitions.
    */
 
-  sim_smp_hook();
+  up_cpu_started();
 
-  /* The IDLE task will not return.  This is just to keep the compiler happy */
+  /* The idle Loop */
+
+  for (; ; )
+    {
+      /* Give other pthreads/CPUs a shot */
+
+      pthread_yield();
+    }
 
   return NULL;
 }
@@ -244,66 +197,11 @@ static void sim_handle_signal(int signo, siginfo_t *info, void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_cpu0_initialize
+ * Name: sim_cpu0_start
  *
  * Description:
  *   Create the pthread-specific data key and set the indication of CPU0
  *   the main thread.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- ****************************************************************************/
-
-int sim_cpu0_initialize(void)
-{
-  struct sigaction act;
-  sigset_t set;
-  int ret;
-
-  /* Create the pthread key */
-
-  ret = pthread_key_create(&g_cpukey, NULL);
-  if (ret != 0)
-    {
-      return -ret;
-    }
-
-  /* Register the common signal handler for all threads */
-
-  act.sa_sigaction = sim_handle_signal;
-  act.sa_flags     = SA_SIGINFO;
-  sigemptyset(&act.sa_mask);
-
-  ret = sigaction(SIGUSR1, &act, NULL);
-  if (ret < 0)
-    {
-      return -errno;
-    }
-
-  /* Make sure the SIGUSR1 is not masked */
-
-  sigemptyset(&set);
-  sigaddset(&set, SIGUSR1);
-
-  ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
-  if (ret < 0)
-    {
-      return -errno;
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: sim_cpu0_start
- *
- * Description:
- *   Start CPU0 and initialize the operating system.
  *
  * Input Parameters:
  *   None
@@ -315,22 +213,54 @@ int sim_cpu0_initialize(void)
 
 void sim_cpu0_start(void)
 {
-  void *value;
+  struct sigaction act;
+  sigset_t set;
   int ret;
 
-  /* Start the CPU0 emulation thread.  This is analogous to power-up reset
-   * of CPU0  in a multi-CPU hardware model.
-   */
+  g_sim_cputhread[0] = pthread_self();
 
-  ret = pthread_create(&g_sim_cputhread[0], NULL, sim_cpu0_trampoline, NULL);
-  if (ret == 0)
+  /* Create the pthread key */
+
+  ret = pthread_key_create(&g_cpukey, NULL);
+  if (ret != 0)
     {
-      /* The CPU0 emulation thread should never return, the main thread will
-       * wait just in case.
-       */
-
-      pthread_join(g_sim_cputhread[0], &value);
+      return;
     }
+
+  /* Set the CPU number zero for the CPU thread */
+
+  ret = pthread_setspecific(g_cpukey, (const void *)0);
+  if (ret != 0)
+    {
+      return;
+    }
+
+  /* Register the common signal handler for all threads */
+
+  act.sa_sigaction = sim_handle_signal;
+  act.sa_flags     = SA_SIGINFO;
+  sigemptyset(&act.sa_mask);
+
+  ret = sigaction(SIGUSR1, &act, NULL);
+  if (ret < 0)
+    {
+      return;
+    }
+
+  /* Make sure the SIGUSR1 is not masked */
+
+  sigemptyset(&set);
+  sigaddset(&set, SIGUSR1);
+
+  ret = sigprocmask(SIG_UNBLOCK, &set, NULL);
+  if (ret < 0)
+    {
+      return;
+    }
+
+  /* Give control to nx_start() */
+
+  nx_start();
 }
 
 /****************************************************************************
@@ -366,7 +296,7 @@ int up_cpu_index(void)
  *
  *   Each CPU is provided the entry point to is IDLE task when started.  A
  *   TCB for each CPU's IDLE task has been initialized and placed in the
- *   CPU's g_assignedtasks[cpu] list.  Not stack has been alloced or
+ *   CPU's g_assignedtasks[cpu] list.  Not stack has been allocated or
  *   initialized.
  *
  *   The OS initialization logic calls this function repeatedly until each

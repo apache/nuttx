@@ -443,4 +443,4 @@ extern "C"
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_COMMON_ARM_H */
+#endif /* __ARCH_ARM_SRC_COMMON_ARM_H */

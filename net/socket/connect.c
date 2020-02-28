@@ -156,6 +156,15 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
       return ret;
     }
 
+  if (addr != NULL)
+    {
+      psock->s_flags |= _SF_CONNECTED;
+    }
+  else
+    {
+      psock->s_flags &= ~_SF_CONNECTED;
+    }
+
   return OK;
 }
 

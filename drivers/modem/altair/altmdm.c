@@ -126,7 +126,7 @@ static int altmdm_initialize(FAR struct altmdm_dev_s *priv)
 
   priv->poweron = 0;
 
-  /* Intialize ALTMDM SPI driver. */
+  /* Initialize ALTMDM SPI driver. */
 
   ret = altmdm_spi_init(priv);
 
@@ -336,7 +336,7 @@ static int altmdm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 
-    case MODEM_IOC_PM_INITWAKELOCK:    /* Initialze wakelock resource. */
+    case MODEM_IOC_PM_INITWAKELOCK:    /* Initialize wakelock resource. */
       {
         ret = altmdm_pm_initwakelock((struct altmdm_pm_wakelock_s *)arg);
       }

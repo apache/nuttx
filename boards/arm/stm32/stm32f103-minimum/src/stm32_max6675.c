@@ -99,4 +99,3 @@ int stm32_max6675initialize(FAR const char *devpath)
 }
 
 #endif /* CONFIG_SPI && CONFIG_SENSORS_MAX6675 */
-

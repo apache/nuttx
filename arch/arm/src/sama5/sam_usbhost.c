@@ -255,4 +255,3 @@ FAR const char *usbhost_trformat2(uint16_t id)
 }
 
 #endif /* HAVE_USBHOST_TRACE */
-

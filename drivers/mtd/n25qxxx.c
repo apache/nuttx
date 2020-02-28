@@ -357,7 +357,7 @@ static void n25qxxx_lock(FAR struct qspi_dev_s *qspi)
    * transfers.  The bus should be locked before the chip is selected.
    *
    * This is a blocking call and will not return until we have exclusive access to
-   * the QuadSPI buss.  We will retain that exclusive access until the bus is
+   * the QuadSPI bus.  We will retain that exclusive access until the bus is
    * unlocked.
    */
 
@@ -365,7 +365,7 @@ static void n25qxxx_lock(FAR struct qspi_dev_s *qspi)
 
   /* After locking the QuadSPI bus, the we also need call the setfrequency, setbits,
    * and setmode methods to make sure that the QuadSPI is properly configured for
-   * the device. If the QuadSPI buss is being shared, then it may have been left in
+   * the device. If the QuadSPI bus is being shared, then it may have been left in
    * an incompatible state.
    */
 

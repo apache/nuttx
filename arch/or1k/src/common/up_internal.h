@@ -60,14 +60,8 @@
 #ifndef CONFIG_DEV_CONSOLE
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
-#  undef  CONFIG_DEV_LOWCONSOLE
-#  undef  CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  USE_EARLYSERIALINIT
-#    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_DEV_LOWCONSOLE)
+#  if defined(CONFIG_CONSOLE_SYSLOG)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #  else
@@ -89,7 +83,7 @@
 /* Check if an interrupt stack size is configured */
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
-# define CONFIG_ARCH_INTERRUPTSTACK 0
+#  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
 #define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
@@ -263,8 +257,6 @@ void up_pminitialize(void);
 
 /* Interrupt handling *******************************************************/
 
-void up_irqinitialize(void);
-
 /* Exception handling logic unique to the Cortex-M family */
 
 /* Interrupt acknowledge and dispatch */
@@ -285,10 +277,6 @@ uint32_t *or1k_doirq(int irq, uint32_t *regs);
 
 uint32_t *or1k_syscall(uint32_t *regs);
 
-/* System timer *************************************************************/
-
-void or1k_timer_initialize(void);
-
 /* Low level serial output **************************************************/
 
 void up_lowputc(char ch);
@@ -297,28 +285,14 @@ void up_lowputs(const char *str);
 
 #ifdef USE_SERIALDRIVER
 void up_serialinit(void);
-#else
-#  define up_serialinit()
 #endif
 
 #ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void);
-#else
-#  define up_earlyserialinit()
 #endif
 
 #ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
-#else
-#  define rpmsg_serialinit()
-#endif
-
-/* Defined in drivers/lowconsole.c */
-
-#ifdef CONFIG_DEV_LOWCONSOLE
-void lowconsole_init(void);
-#else
-# define lowconsole_init()
 #endif
 
 /* DMA **********************************************************************/
@@ -386,4 +360,4 @@ void up_stack_color(FAR void *stackbase, size_t nbytes);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_OR1K_SRC_COMMON_UP_INTERNAL_H */
+#endif /* __ARCH_OR1K_SRC_COMMON_UP_INTERNAL_H */

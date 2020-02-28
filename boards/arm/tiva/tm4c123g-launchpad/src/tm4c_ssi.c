@@ -125,4 +125,3 @@ uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, uint32_t devid)
 }
 
 #endif /* CONFIG_TIVA_SSI0 || CONFIG_TIVA_SSI1 */
-

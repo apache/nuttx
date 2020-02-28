@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_CXD56XX_CXD56_ADC_H
-#define __ARCH_ARM_INCLUDE_CXD56XX_CXD56_ADC_H
+#ifndef __ARCH_ARM_INCLUDE_CXD56XX_ADC_H
+#define __ARCH_ARM_INCLUDE_CXD56XX_ADC_H
 
 /****************************************************************************
  * include files
@@ -93,4 +93,4 @@
 
 int cxd56_adcinitialize(void);
 
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_CXD56_ADC_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_ADC_H */

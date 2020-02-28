@@ -205,4 +205,3 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 
 #endif /* CONFIG_LIB_SLCDCODEC */
 #endif /* __INCLUDE_NUTTX_LCD_SLCD_CODEC_H */
-

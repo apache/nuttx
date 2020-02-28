@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_copyargv.c
  *
- *   Copyright (C) 2009, 2013-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013-2015, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* This is an artificial limit to detect error conditions where an argv[]
  * list is not properly terminated.
  */
@@ -60,7 +61,7 @@
 #define MAX_EXEC_ARGS 256
 
 /****************************************************************************
- * Public Function
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -77,7 +78,7 @@
  *   argv     - Argument list
  *
  * Returned Value:
- *   Zero (OK) on success; a negated erro value on failure.
+ *   Zero (OK) on success; a negated error value on failure.
  *
  ****************************************************************************/
 
@@ -187,10 +188,10 @@ void binfmt_freeargv(FAR struct binary_s *binp)
       kmm_free(binp->argbuffer);
     }
 
-   /* Nullify the allocated argv[] array and the argument buffer pointers */
+  /* Nullify the allocated argv[] array and the argument buffer pointers */
 
-   binp->argbuffer = (FAR char *)NULL;
-   binp->argv      = (FAR char **)NULL;
+  binp->argbuffer = (FAR char *)NULL;
+  binp->argv      = (FAR char **)NULL;
 }
 #endif
 

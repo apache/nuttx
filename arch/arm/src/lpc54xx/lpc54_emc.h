@@ -82,7 +82,7 @@ enum emc_dynamic_read_e
 {
   EMC_NODELAY = 0,     /* No delay */
   EMC_CMDDELAY,        /* Command delayed strategy, using EMCCLKDELAY */
-  EMC_CMDDELAYPLUS1,   /* Command delayed strategy pluse one clock cycle
+  EMC_CMDDELAYPLUS1,   /* Command delayed strategy pulse one clock cycle
                         * using EMCCLKDELAY */
   EMC_CMDDELAYPLUS2,   /* Command delayed strategy pulse two clock cycle
                         * using EMCCLKDELAY */

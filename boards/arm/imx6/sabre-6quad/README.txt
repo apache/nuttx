@@ -362,7 +362,7 @@ Replace Boot SD Card (Successful Attempt #3)
 What if you remove the SD card after U-boot has booted, then then insert
 another SD card containing the nuttx.bin image?
 
-1. Build nuttx.bin and copy it only a FAT formated SD card.  Insert the SD
+1. Build nuttx.bin and copy it only a FAT formatted SD card.  Insert the SD
    card containing NuttX into the "other" SD card slot.  Insert the 8GB SD
    card with U-boot already on it in the normal, boot SD card slot.
 
@@ -586,6 +586,86 @@ A: Yes with the following modifications to the procedure above.
        gdb> mon reg pc 0x10800040
        gdb> s
 
+
+Debugging with QEMU
+================================
+
+The nuttx ELF image can be debugged with QEMU.
+
+1. Before debugging, following change (enabling wfi instruction in up_idle)
+   is recommended to reduce CPU usage on host PC.
+
+diff --git a/arch/arm/src/common/up_idle.c b/arch/arm/src/common/up_idle.c
+index 45fab0b7c6..c54c1178a1 100644
+--- a/arch/arm/src/common/up_idle.c
++++ b/arch/arm/src/common/up_idle.c
+@@ -71,7 +71,7 @@ void up_idle(void)
+
+   /* Sleep until an interrupt occurs to save power */
+
+-#if 0
++#if 1
+   asm("WFI");  /* For example */
+ #endif
+ #endif
+
+2. Also, to debug the nuttx (ELF) with symbols, following change must
+   be applied to defconfig.
+
+diff --git a/boards/arm/imx6/sabre-6quad/configs/nsh/defconfig b/boards/arm/imx6/sabre-6quad/configs/nsh/defconfig
+index b15becbb51..3ad4d13ad7 100644
+--- a/boards/arm/imx6/sabre-6quad/configs/nsh/defconfig
++++ b/boards/arm/imx6/sabre-6quad/configs/nsh/defconfig
+@@ -21,11 +21,12 @@ CONFIG_ARCH_STACKDUMP=y
+ CONFIG_BOARD_LOOPSPERMSEC=99369
+ CONFIG_BOOT_RUNFROMSDRAM=y
+ CONFIG_BUILTIN=y
++CONFIG_DEBUG_FULLOPT=y
++CONFIG_DEBUG_SYMBOLS=y
+ CONFIG_DEV_ZERO=y
+
+
+3. Run QEMU
+
+   Run qemu with following options, these options do not load nuttx.
+   Instead, just stops the emulated CPU like "reset halt" with OpenOCD.
+
+   $ qemu-system-arm -M sabrelite -smp 4 -nographic -s -S
+
+   NOTE: -smp 4 option should be used for both nsh configuration
+   (non-SMP) and smp configuration (regardless of CONFIG_SMP_NCPUS)
+
+   To quit QEMU, type Ctrl-A + X
+
+3. Run gdb, connect to QEMU, load nuttx and continue
+
+   $ arm-none-eabi-gdb ./nuttx
+   (gdb) target  extended-remote :1234
+   Remote debugging using :1234
+   0x00000000 in ?? ()
+   (gdb) load nuttx
+   Loading section .text, size 0x17f6b lma 0x10800000
+   Loading section .ARM.exidx, size 0x8 lma 0x10817f6c
+   Loading section .data, size 0x98 lma 0x10817f74
+   Start address 0x10800040, load size 98315
+   Transfer rate: 8728 KB/sec, 1927 bytes/write.
+   (gdb) c
+   Continuing.
+   ^C
+   Thread 1 received signal SIGINT, Interrupt.
+   up_idle () at common/up_idle.c:78
+   78	}
+   (gdb) where
+   #0  up_idle () at common/up_idle.c:78
+   #1  0x10801ba4 in nx_start () at init/nx_start.c:874
+   #2  0x00000000 in ?? ()
+   (gdb) info threads
+     Id   Target Id         Frame
+   * 1    Thread 1 (CPU#0 [halted ]) up_idle () at common/up_idle.c:78
+     2    Thread 2 (CPU#1 [halted ]) 0x00000000 in ?? ()
+     3    Thread 3 (CPU#2 [halted ]) 0x00000000 in ?? ()
+     4    Thread 4 (CPU#3 [halted ]) 0x00000000 in ?? ()
+
 SMP
 ===
 
@@ -607,7 +687,7 @@ Open Issues:
    critical sections in interrupt handlers of other CPUs.
 
    When the critical section is used to lock a resource that is also used by
-   interupt handling, the interrupt handling logic must also take the spinlock.
+   interrupt handling, the interrupt handling logic must also take the spinlock.
    This will cause the interrupt handlers on other CPUs to spin until
    leave_critical_section() is called.  More verification is needed.
 

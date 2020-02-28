@@ -150,8 +150,8 @@
 /* Banked Control Registers *************************************************/
 
 /* Registers are described by 16 bit values. The high byte describes the bank
- * by the appropiate bank selection command.
- * For registers which are available on all banks the comnmand is set to 0.
+ * by the appropriate bank selection command.
+ * For registers which are available on all banks the command is set to 0.
  * Unbanked registers are identified by 0x01.
  */
 
@@ -178,7 +178,7 @@
 #define ENC_ETXSTAT     REGADDR(0x12, ENC_B0SEL)
 #define ENC_ETXWIRE     REGADDR(0x14, ENC_B0SEL)
 
-/* Bank 1 Contro Register Addresses */
+/* Bank 1 Control Register Addresses */
 
 #define ENC_EHT1        REGADDR(0x00, ENC_B1SEL)
 #define ENC_EHT2        REGADDR(0x02, ENC_B1SEL)
@@ -425,4 +425,4 @@
 
 #define RXSTAT_OK       (1 << 7)
 
-#endif  /* __DRIVERS_NET_ENCX24J600_H */
+#endif /* __DRIVERS_NET_ENCX24J600_H */

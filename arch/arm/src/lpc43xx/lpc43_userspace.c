@@ -104,4 +104,3 @@ void lpc43_userspace(void)
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */
-

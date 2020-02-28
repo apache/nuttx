@@ -332,7 +332,7 @@ static int check_diskformat(void)
       return 0;
     }
 
-  /* If part2 has MBR signature, this eMMC was formated by PC.
+  /* If part2 has MBR signature, this eMMC was formatted by PC.
    * This means the set is just after writing IPL2.
    */
 
@@ -760,4 +760,3 @@ int ipl2_main(int argc, char *argv[])
 
   return -1;
 }
-

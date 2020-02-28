@@ -128,7 +128,7 @@ static void stm32_dumpnvic(const char *msg, int irq)
  *       stm32_dbgmonitor, stm32_pendsv, stm32_reserved
  *
  * Description:
- *   Handlers for various execptions.  None are handled and all are fatal
+ *   Handlers for various exceptions.  None are handled and all are fatal
  *   error conditions.  The only advantage these provided over the default
  *   unexpected interrupt handler is that they provide a diagnostic output.
  *

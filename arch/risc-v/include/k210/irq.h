@@ -45,10 +45,13 @@
 
 /* Machine Interrupt Enable bit in mstatus register */
 
-#define MSTATUS_MIE  (0x1 << 3)
+#define MSTATUS_MIE   (0x1 << 3)  /* Machine Interrupt Enable */
+#define MSTATUS_MPIE  (0x1 << 7)  /* Machine Previous Interrupt Enable */
+#define MSTATUS_MPPM  (0x3 << 11) /* Machine Previous Privilege (m-mode) */
 
 /* In mie (machine interrupt enable) register */
 
+#define MIE_MSIE      (0x1 << 3)  /* Machine Software Interrupt Enable */
 #define MIE_MTIE      (0x1 << 7)  /* Machine Timer Interrupt Enable */
 #define MIE_MEIE      (0x1 << 11) /* Machine External Interrupt Enable */
 
@@ -77,9 +80,13 @@
 #define K210_IRQ_MTIMER   (K210_IRQ_ASYNC + 7)  /* Machine Timer Int */
 #define K210_IRQ_MEXT     (K210_IRQ_ASYNC + 11) /* Machine External Int */
 
-/* Machine Grobal External Interrupt */
+/* Machine Global External Interrupt */
 
+#ifdef CONFIG_K210_WITH_QEMU
+#define K210_IRQ_UART0    (K210_IRQ_MEXT + 4)
+#else
 #define K210_IRQ_UART0    (K210_IRQ_MEXT + 33)
+#endif
 
 /* Total number of IRQs */
 
@@ -118,4 +125,3 @@ EXTERN irqstate_t up_irq_enable(void);
 #endif
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_INCLUDE_K210_IRQ_H */
-

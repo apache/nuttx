@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <stdbool.h>
 
-#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_NRF52_GPIO_IRQ)
+#if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_NRF52_GPIOTE)
 #  include <nuttx/irq.h>
 #endif
 
@@ -130,4 +130,26 @@
 #define BOARD_UART1_RX_PIN  (GPIO_INPUT  | GPIO_PORT1 | GPIO_PIN(1))
 #define BOARD_UART1_TX_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN(2))
 
-#endif  /* __BOARDS_ARM_NRF52_NRF52840_DK_INCLUDE_BOARD_H */
+/* SPI Pins *****************************************************************/
+
+/* SPI0 - Arduino PINs
+ *   SPI0_SCK  - P1.15 (P13)
+ *   SPI0_MOSI - P1.13 (D11)
+ *   SPI0_MISO - P1.14 (D12)
+ */
+
+#define BOARD_SPI0_SCK_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT1 | GPIO_PIN(15))
+#define BOARD_SPI0_MOSI_PIN (GPIO_OUTPUT | GPIO_PORT1 | GPIO_PIN(13))
+#define BOARD_SPI0_MISO_PIN (GPIO_INPUT  | GPIO_PORT1 | GPIO_PIN(14))
+
+/* I2C Pins *****************************************************************/
+
+/* I2C0 (TWI0) - Arduino PINs
+ *    I2C0_SCL - P0.27
+ *    I2C0_SDA - P0.26
+ */
+
+#define BOARD_I2C0_SCL_PIN (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(27))
+#define BOARD_I2C0_SDA_PIN (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(26))
+
+#endif /* __BOARDS_ARM_NRF52_NRF52840_DK_INCLUDE_BOARD_H */

@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
+/* This file should never be included directly but, rather, only indirectly
  * through include/syscall.h or include/sys/sycall.h
  */
 
@@ -44,10 +44,10 @@
  * Included Files
  ****************************************************************************/
 
-/* Include ARM architecture-specific syscall macros */
+/* Include MIPS architecture-specific syscall macros */
 
 #ifdef CONFIG_ARCH_MIPS32
-# include <arch/mips32/syscall.h>
+#  include <arch/mips32/syscall.h>
 #endif
 
 /****************************************************************************
@@ -86,4 +86,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_MIPS_INCLUDE_SYSCALL_H */
-

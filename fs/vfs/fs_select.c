@@ -284,4 +284,3 @@ errout:
   leave_cancellation_point();
   return ERROR;
 }
-

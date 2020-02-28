@@ -47,6 +47,8 @@
 
 #ifdef CONFIG_RAMLOG_SYSLOG
 #  include <nuttx/syslog/ramlog.h>
+#elif defined(CONFIG_SYSLOG_RPMSG)
+#  include <nuttx/syslog/syslog_rpmsg.h>
 #elif defined(CONFIG_ARCH_LOWPUTC)
 #  include <nuttx/arch.h>
 #endif
@@ -59,7 +61,7 @@
 
 #if defined(CONFIG_ARCH_LOWPUTC)
 #  define HAVE_LOWPUTC
-#elif !defined(CONFIG_RAMLOG_SYSLOG)
+#elif !defined(CONFIG_RAMLOG_SYSLOG) && !defined(CONFIG_SYSLOG_RPMSG)
 #  define NEED_LOWPUTC
 #endif
 
@@ -77,21 +79,28 @@ static int syslog_default_flush(void);
  ****************************************************************************/
 
 #if defined(CONFIG_RAMLOG_SYSLOG)
-const struct syslog_channel_s g_default_channel =
+static const struct syslog_channel_s g_default_channel =
 {
   ramlog_putc,
   ramlog_putc,
   syslog_default_flush
 };
+#elif defined(CONFIG_SYSLOG_RPMSG)
+static const struct syslog_channel_s g_default_channel =
+{
+  syslog_rpmsg_putc,
+  syslog_rpmsg_putc,
+  syslog_default_flush
+};
 #elif defined(HAVE_LOWPUTC)
-const struct syslog_channel_s g_default_channel =
+static const struct syslog_channel_s g_default_channel =
 {
   up_putc,
   up_putc,
   syslog_default_flush
 };
 #else
-const struct syslog_channel_s g_default_channel =
+static const struct syslog_channel_s g_default_channel =
 {
   syslog_default_putc,
   syslog_default_putc,

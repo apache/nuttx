@@ -1009,7 +1009,7 @@
 #define LPC31_CGU_DYNSEL5              (LPC31_CGU_CSB_VBASE+LPC31_CGU_DYNSEL5_OFFSET)
 #define LPC31_CGU_DYNSEL6              (LPC31_CGU_CSB_VBASE+LPC31_CGU_DYNSEL6_OFFSET)
 
-/* CGU configuration (virtural) register address ************************************************/
+/* CGU configuration (virtual) register address *************************************************/
 /* Power and oscillator control */
 
 #define LPC31_CGU_POWERMODE            (LPC31_CGU_CFG_VBASE+LPC31_CGU_POWERMODE_OFFSET)
@@ -1241,7 +1241,7 @@
 #define CGU_FDC17_RUN                    (1 << 0)  /* Bit 0:  Enable fractional divider */
 
 #define CGU_FDC_FIELDWIDTH               8         /* MSUB and MADD fields are 8-bits in width */
-#define CGU_FDC17_FIELDWIDTH             13        /* Exept for FDC17 which is 13-bits in width */
+#define CGU_FDC17_FIELDWIDTH             13        /* Except for FDC17 which is 13-bits in width */
 
 /* Dynamic Fractional Divider registers DYNFDC0 to DYNFDC6, addresses 0x13004578 to 0x13004590 */
 
@@ -1566,44 +1566,44 @@ Nandflash Controller */
 #define CGU_HPREQ_N                      (1 << 1)  /* Bit 1:  Pre-divider ratio change request */
 #define CGU_HPREQ_M                      (1 << 0)  /* Bit 0:  Feedback divider ratio change request */
 
-/* HP0 Bandwith Selection register HP0_INSELR, address 0x13004d10,
- * HP1 bandwith Selection register HP1_INSELR, address 0x13004d48
+/* HP0 Bandwidth Selection register HP0_INSELR, address 0x13004d10,
+ * HP1 bandwidth Selection register HP1_INSELR, address 0x13004d48
  */
 
 #define CGU_HPINSELR_SHIFT               (0)      /* Bits 0-3: Pins to select the bandwidth */
 #define CGU_HPINSELR_MASK                (15 << CGU_HPINSELR_SHIFT)
 
-/* HP0 Bandwith Selection register HP0_INSELI, address 0x13004d14,
- * HP1 bandwith Selection register HP1_INSELI, address 0x13004d4c
+/* HP0 Bandwidth Selection register HP0_INSELI, address 0x13004d14,
+ * HP1 bandwidth Selection register HP1_INSELI, address 0x13004d4c
  */
 
 #define CGU_HPINSELI_SHIFT               (0)      /* Bits 0-5: Bandwidth selection register of HP0/1 PLL */
 #define CGU_HPINSELI_MASK                (63 << CGU_HPINSELI_SHIFT)
 
 
-/* HP0 Bandwith Selection register HP0_INSELP, address 0x13004d18,
- * HP1 bandwith Selection register HP1_INSELP, address 0x13004d50
+/* HP0 Bandwidth Selection register HP0_INSELP, address 0x13004d18,
+ * HP1 bandwidth Selection register HP1_INSELP, address 0x13004d50
  */
 
 #define CGU_HPINSELP_SHIFT               (0)      /* Bits 0-4: Bandwidth selection register of HP0/1 PLL */
 #define CGU_HPINSELP_MASK                (31 << CGU_HPINSELP_SHIFT)
 
-/* HP0 Bandwith Selection register HP0_SELR, address 0x13004d1c,
- * HP1 bandwith Selection register HP1_SELR, address 0x13004d54
+/* HP0 Bandwidth Selection register HP0_SELR, address 0x13004d1c,
+ * HP1 bandwidth Selection register HP1_SELR, address 0x13004d54
  */
 
 #define CGU_HPSELR_SHIFT                 (0)      /* Bits 0-3: Bandwidth selection register of HP0/1 PLL */
 #define CGU_HPSELR_MASK                  (15 << CGU_HPSELR_SHIFT)
 
-/* HP0 Bandwith Selection register HP0_SELI, address 0x13004d20
- * HP1 bandwith Selection register HP1_SELI, address 0x13004d58
+/* HP0 Bandwidth Selection register HP0_SELI, address 0x13004d20
+ * HP1 bandwidth Selection register HP1_SELI, address 0x13004d58
  */
 
 #define CGU_HPSELI_SHIFT                 (0)      /* Bits 0-5: Bandwidth selection register of HP0/1 PLL */
 #define CGU_HPSELI_MASK                  (63 << CGU_HPSELI_SHIFT)
 
-/* HP0 Bandwith Selection register HP0_SELP, address 0x13004d24,
- * HP1 bandwith Selection register HP1_SELP, address 0x13004d5c
+/* HP0 Bandwidth Selection register HP0_SELP, address 0x13004d24,
+ * HP1 bandwidth Selection register HP1_SELP, address 0x13004d5c
  */
 
 #define CGU_HPSELP_SHIFT                 (0)      /* Bits 0-4: Bandwidth selection register of HP0/1 PLL */

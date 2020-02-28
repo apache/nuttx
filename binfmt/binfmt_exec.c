@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_exec.c
  *
- *   Copyright (C) 2009, 2013-2014, 2017-2018 Gregory Nutt. All rights
+ *   Copyright (C) 2009, 2013-2014, 2017-2018, 2020 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -57,44 +57,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: exec
+ * Name: exec_spawn
  *
  * Description:
- *   This is a convenience function that wraps load_ and exec_module into
- *   one call.  If CONFIG_BINFMT_LOADABLE is defined, this function will
- *   schedule to unload the module when task exits.
- *
- *   This non-standard, NuttX function is similar to execv() and
- *   posix_spawn() but differs in the following ways;
- *
- *   - Unlike execv() and posix_spawn() this function accepts symbol table
- *     information as input parameters. This means that the symbol table
- *     used to link the application prior to execution is provided by the
- *     caller, not by the system.
- *   - Unlike execv(), this function always returns.
- *
- *   This non-standard interface is included as a official NuttX API only
- *   because it is needed in certain build modes: exec() is probably the
- *   only want to load programs in the PROTECTED mode. Other file execution
- *   APIs rely on a symbol table provided by the OS. In the PROTECTED build
- *   mode, the OS cannot provide any meaningful symbolic information for
- *   execution of code in the user-space blob so that is the exec() function
- *   is really needed in that build case
- *
- *   The interface is available in the FLAT build mode although it is not
- *   really necessary in that case. It is currently used by some example
- *   code under the apps/ that that generate their own symbol tables for
- *   linking test programs. So althought it is not necessary, it can still
- *   be useful.
- *
- *   The interface would be completely useless and will not be supported in
- *   in the KERNEL build mode where the contrary is true: An application
- *   process cannot provide any meaning symbolic information for use in
- *   linking a different process.
- *
- *   NOTE: This function is flawed and useless without CONFIG_BINFMT_LOADABLE
- *   because without that features there is then no mechanism to unload the
- *   module once it exits.
+ *   exec() configurable version, delivery the spawn attribute if this
+ *   process has special customization.
  *
  * Input Parameters:
  *   filename - The path to the program to be executed. If
@@ -109,6 +76,7 @@
  *              exported by the caller and made available for linking the
  *              module into the system.
  *   nexports - The number of symbols in the exports table.
+ *   attr     - The spawn attributes.
  *
  * Returned Value:
  *   This is an end-user function, so it follows the normal convention:
@@ -117,8 +85,9 @@
  *
  ****************************************************************************/
 
-int exec(FAR const char *filename, FAR char * const *argv,
-         FAR const struct symtab_s *exports, int nexports)
+int exec_spawn(FAR const char *filename, FAR char * const *argv,
+               FAR const struct symtab_s *exports, int nexports,
+               FAR const posix_spawnattr_t *attr)
 {
   FAR struct binary_s *bin;
   int pid;
@@ -161,6 +130,23 @@ int exec(FAR const char *filename, FAR char * const *argv,
       goto errout_with_argv;
     }
 
+  /* Update the spawn attribute */
+
+  if (attr)
+    {
+      if (attr->priority > 0)
+        {
+          bin->priority = attr->priority;
+        }
+
+#ifndef CONFIG_BUILD_KERNEL
+      if (attr->stacksize > 0)
+        {
+          bin->stacksize = attr->stacksize;
+        }
+#endif
+    }
+
   /* Disable pre-emption so that the executed module does
    * not return until we get a chance to connect the on_exit
    * handler.
@@ -197,6 +183,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
   kmm_free(bin);
 
   /* TODO: How does the module get unloaded in this case? */
+
 #endif
 
   sched_unlock();
@@ -212,7 +199,73 @@ errout_with_bin:
 errout:
   set_errno(errcode);
   return ERROR;
+}
 
+/****************************************************************************
+ * Name: exec
+ *
+ * Description:
+ *   This is a convenience function that wraps load_ and exec_module into
+ *   one call.  If CONFIG_BINFMT_LOADABLE is defined, this function will
+ *   schedule to unload the module when task exits.
+ *
+ *   This non-standard, NuttX function is similar to execv() and
+ *   posix_spawn() but differs in the following ways;
+ *
+ *   - Unlike execv() and posix_spawn() this function accepts symbol table
+ *     information as input parameters. This means that the symbol table
+ *     used to link the application prior to execution is provided by the
+ *     caller, not by the system.
+ *   - Unlike execv(), this function always returns.
+ *
+ *   This non-standard interface is included as a official NuttX API only
+ *   because it is needed in certain build modes: exec() is probably the
+ *   only way to load programs in the PROTECTED mode. Other file execution
+ *   APIs rely on a symbol table provided by the OS. In the PROTECTED build
+ *   mode, the OS cannot provide any meaningful symbolic information for
+ *   execution of code in the user-space blob so that is the exec() function
+ *   is really needed in that build case
+ *
+ *   The interface is available in the FLAT build mode although it is not
+ *   really necessary in that case. It is currently used by some example
+ *   code under the apps/ that that generate their own symbol tables for
+ *   linking test programs. So although it is not necessary, it can still
+ *   be useful.
+ *
+ *   The interface would be completely useless and will not be supported in
+ *   in the KERNEL build mode where the contrary is true: An application
+ *   process cannot provide any meaningful symbolic information for use in
+ *   linking a different process.
+ *
+ *   NOTE: This function is flawed and useless without CONFIG_BINFMT_LOADABLE
+ *   because without that features there is then no mechanism to unload the
+ *   module once it exits.
+ *
+ * Input Parameters:
+ *   filename - The path to the program to be executed. If
+ *              CONFIG_LIB_ENVPATH is defined in the configuration, then
+ *              this may be a relative path from the current working
+ *              directory. Otherwise, path must be the absolute path to the
+ *              program.
+ *   argv     - A pointer to an array of string arguments. The end of the
+ *              array is indicated with a NULL entry.
+ *   exports  - The address of the start of the caller-provided symbol
+ *              table. This symbol table contains the addresses of symbols
+ *              exported by the caller and made available for linking the
+ *              module into the system.
+ *   nexports - The number of symbols in the exports table.
+ *
+ * Returned Value:
+ *   This is an end-user function, so it follows the normal convention:
+ *   It returns the PID of the exec'ed module.  On failure, it returns
+ *   -1 (ERROR) and sets errno appropriately.
+ *
+ ****************************************************************************/
+
+int exec(FAR const char *filename, FAR char * const *argv,
+         FAR const struct symtab_s *exports, int nexports)
+{
+  return exec_spawn(filename, argv, exports, nexports, NULL);
 }
 
 #endif /* !CONFIG_BINFMT_DISABLE */

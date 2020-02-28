@@ -75,7 +75,7 @@
  ****************************************************************************/
 
 FAR const struct sock_intf_s *
-  net_sockif(sa_family_t family, int type, int protocol)
+net_sockif(sa_family_t family, int type, int protocol)
 {
   FAR const struct sock_intf_s *sockif = NULL;
 

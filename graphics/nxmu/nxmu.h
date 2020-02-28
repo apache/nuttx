@@ -45,7 +45,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <mqueue.h>
-#include <semaphore.h>
 
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxmu.h>
@@ -291,4 +290,4 @@ void nxmu_kbdin(FAR struct nxmu_state_s *nxmu, uint8_t nch, FAR uint8_t *ch);
 }
 #endif
 
-#endif  /* __GRAPHICS_NXMU_NXMU_H */
+#endif /* __GRAPHICS_NXMU_NXMU_H */

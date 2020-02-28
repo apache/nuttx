@@ -39,16 +39,20 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <time.h>
 #include <limits.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <queue.h>
 
-#include <nuttx/wdog.h>
+#include <nuttx/nuttx.h>
+#include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/timers/oneshot.h>
+#include <nuttx/timers/arch_alarm.h>
+
+#include "up_internal.h"
 
 /****************************************************************************
  * Private Types
@@ -68,7 +72,9 @@ struct sim_oneshot_lowerhalf_s
 
   /* Private lower half data follows */
 
-  WDOG_ID wdog;                   /* Simulates oneshot timer */
+  sq_entry_t link;
+  struct timespec alarm;
+
   oneshot_callback_t callback;    /* internal handler that receives callback */
   FAR void *arg;                  /* Argument that is passed to the handler */
 };
@@ -77,7 +83,7 @@ struct sim_oneshot_lowerhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void sim_oneshot_handler(int argc, wdparm_t arg1, ...);
+static void sim_process_tick(sq_entry_t *entry);
 
 static int sim_max_delay(FAR struct oneshot_lowerhalf_s *lower,
                          FAR struct timespec *ts);
@@ -86,10 +92,15 @@ static int sim_start(FAR struct oneshot_lowerhalf_s *lower,
                      FAR const struct timespec *ts);
 static int sim_cancel(FAR struct oneshot_lowerhalf_s *lower,
                       FAR struct timespec *ts);
+static int sim_current(FAR struct oneshot_lowerhalf_s *lower,
+                       FAR struct timespec *ts);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static struct timespec g_current;
+static sq_queue_t g_oneshot_list;
 
 /* Lower half operations */
 
@@ -98,6 +109,7 @@ static const struct oneshot_operations_s g_oneshot_ops =
   .max_delay = sim_max_delay,
   .start     = sim_start,
   .cancel    = sim_cancel,
+  .current   = sim_current,
 };
 
 /****************************************************************************
@@ -105,35 +117,35 @@ static const struct oneshot_operations_s g_oneshot_ops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_oneshot_handler
+ * Name: sim_process_tick
  *
  * Description:
  *   Timer expiration handler
  *
  * Input Parameters:
- *   arg - Should be the same argument provided when sim_oneshot_start()
- *         was called.
+ *   entry - Point to the link field of sim_oneshot_lowerhalf_s.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void sim_oneshot_handler(int argc, wdparm_t arg1, ...)
+static void sim_process_tick(sq_entry_t *entry)
 {
   FAR struct sim_oneshot_lowerhalf_s *priv =
-    (FAR struct sim_oneshot_lowerhalf_s *)arg1;
+    container_of(entry, struct sim_oneshot_lowerhalf_s, link);
   oneshot_callback_t callback;
   FAR void *cbarg;
 
-  DEBUGASSERT(argc == 1 && priv != NULL);
-
-  /* Perhaps the callback was nullified in a race condition with
-   * sim_cancel?
-   */
+  DEBUGASSERT(priv != NULL);
 
   if (priv->callback)
     {
+      if (clock_timespec_compare(&priv->alarm, &g_current) > 0)
+        {
+          return; /* Alarm doesn't expire yet */
+        }
+
       /* Sample and nullify BEFORE executing callback (in case the callback
        * restarts the oneshot).
        */
@@ -153,13 +165,13 @@ static void sim_oneshot_handler(int argc, wdparm_t arg1, ...)
  * Name: sim_max_delay
  *
  * Description:
- *   Determine the maximum delay of the one-shot timer (in microseconds)
+ *   Determine the maximum delay of the one-shot timer
  *
  * Input Parameters:
  *   lower   An instance of the lower-half oneshot state structure.  This
  *           structure must have been previously initialized via a call to
  *           oneshot_initialize();
- *   ts      The location in which to return the maxumum delay.
+ *   ts      The location in which to return the maximum delay.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
@@ -172,8 +184,8 @@ static int sim_max_delay(FAR struct oneshot_lowerhalf_s *lower,
 {
   DEBUGASSERT(lower != NULL && ts != NULL);
 
-  ts->tv_sec  = INT_MAX;
-  ts->tv_nsec = 1000000000ul - 1;
+  ts->tv_sec  = UINT_MAX;
+  ts->tv_nsec = NSEC_PER_SEC - 1;
   return OK;
 }
 
@@ -203,24 +215,15 @@ static int sim_start(FAR struct oneshot_lowerhalf_s *lower,
 {
   FAR struct sim_oneshot_lowerhalf_s *priv =
     (FAR struct sim_oneshot_lowerhalf_s *)lower;
-  clock_t ticks;
-  int64_t nsec;
 
   DEBUGASSERT(priv != NULL && callback != NULL && ts != NULL);
 
-  /* Convert time to ticks */
-
-  nsec = (int64_t)ts->tv_sec * NSEC_PER_SEC +
-         (int64_t)ts->tv_nsec;
-  ticks = (clock_t)((nsec + NSEC_PER_TICK - 1) / NSEC_PER_TICK);
-
-  /* Save the callback information and start the timer */
+  clock_timespec_add(&g_current, ts, &priv->alarm);
 
   priv->callback = callback;
   priv->arg      = arg;
 
-  return wd_start(priv->wdog, ticks, (wdentry_t)sim_oneshot_handler,
-                  1, (wdparm_t)priv);
+  return OK;
 }
 
 /****************************************************************************
@@ -252,17 +255,48 @@ static int sim_cancel(FAR struct oneshot_lowerhalf_s *lower,
 {
   FAR struct sim_oneshot_lowerhalf_s *priv =
     (FAR struct sim_oneshot_lowerhalf_s *)lower;
-  int ret;
 
-  DEBUGASSERT(priv != NULL);
+  DEBUGASSERT(priv != NULL && ts != NULL);
 
-  /* Cancel the timer */
+  clock_timespec_subtract(&priv->alarm, &g_current, ts);
 
-  ret            = wd_cancel(priv->wdog);
   priv->callback = NULL;
   priv->arg      = NULL;
 
-  return ret;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: sim_current
+ *
+ * Description:
+ *  Get the current time.
+ *
+ * Input Parameters:
+ *   lower   Caller allocated instance of the oneshot state structure.  This
+ *           structure must have been previously initialized via a call to
+ *           oneshot_initialize();
+ *   ts      The location in which to return the current time. A time of zero
+ *           is returned for the initialization moment.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success, a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+static int sim_current(FAR struct oneshot_lowerhalf_s *lower,
+                       FAR struct timespec *ts)
+{
+#ifdef CONFIG_DEBUG_ASSERTIONS
+  FAR struct sim_oneshot_lowerhalf_s *priv =
+    (FAR struct sim_oneshot_lowerhalf_s *)lower;
+#endif
+
+  DEBUGASSERT(priv != NULL && ts != NULL);
+
+  *ts = g_current;
+  return OK;
 }
 
 /****************************************************************************
@@ -306,17 +340,61 @@ FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
 
   /* Initialize the lower-half driver structure */
 
+  sq_addlast(&priv->link, &g_oneshot_list);
   priv->lh.ops = &g_oneshot_ops;
 
-  /* Initialize the contained watchdog timer */
-
-  priv->wdog = wd_create();
-  if (priv->wdog == NULL)
-    {
-      tmrerr("ERROR: Failed to create wdog\n");
-      kmm_free(priv);
-      return NULL;
-    }
-
   return &priv->lh;
+}
+
+/****************************************************************************
+ * Function:  up_timer_initialize
+ *
+ * Description:
+ *   This function is called during start-up to initialize
+ *   the timer hardware.
+ *
+ ****************************************************************************/
+
+void up_timer_initialize(void)
+{
+  up_alarm_set_lowerhalf(oneshot_initialize(0, 0));
+}
+
+/****************************************************************************
+ * Name: up_timer_update
+ *
+ * Description:
+ *   Called from the IDLE loop to fake one timer tick.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void up_timer_update(void)
+{
+  static const struct timespec tick =
+  {
+    .tv_sec  = 0,
+    .tv_nsec = NSEC_PER_TICK,
+  };
+
+  FAR sq_entry_t *entry;
+
+  clock_timespec_add(&g_current, &tick, &g_current);
+
+#ifdef CONFIG_SIM_WALLTIME
+  /* Wait a bit so that the timing is close to the correct rate. */
+
+  host_sleepuntil(g_current.tv_nsec +
+    (uint64_t)g_current.tv_sec * NSEC_PER_SEC);
+#endif
+
+  for (entry = sq_peek(&g_oneshot_list); entry; entry = sq_next(entry))
+    {
+      sim_process_tick(entry);
+    }
 }

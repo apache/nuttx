@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/platform/sensors/lt1pa01_scu.c
+ * boards/arm/cxd56xx/drivers/sensors/lt1pa01_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -44,7 +44,6 @@
 #include <fixedmath.h>
 #include <errno.h>
 #include <debug.h>
-#include <semaphore.h>
 #include <arch/types.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -144,6 +143,7 @@
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
+
 /**
  * @brief Structure for lt1pa01 device
  */
@@ -349,6 +349,7 @@ static int lt1pa01als_seqinit(FAR struct lt1pa01_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_als_seq;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -382,6 +383,7 @@ static int lt1pa01prox_seqinit(FAR struct lt1pa01_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_prox_seq;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -712,7 +714,7 @@ static int lt1pa01_ioctl_prox(FAR struct file *filep, int cmd,
 
               ret = seq_ioctl(priv->seq, priv->minor, cmd, arg);
 #else
-              snerr("Unregisted SCU sequencer cmd: %d\n", cmd);
+              snerr("Unregistered SCU sequencer cmd: %d\n", cmd);
               ret = - ENOTTY;
 #endif
             }

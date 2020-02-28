@@ -30,7 +30,7 @@ config ARMV7R_HAVE_L2CC
 	bool
 	default n
 	---help---
-		Selected by the configuration tool if the architecutre supports any
+		Selected by the configuration tool if the architecture supports any
 		kind of L2 cache.
 
 config ARMV7R_HAVE_L2CC_PL310

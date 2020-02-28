@@ -58,7 +58,11 @@
 #define getreg64(a)   (*(volatile uint64_t *)(a))
 #define putreg64(v,a) (*(volatile uint64_t *)(a) = (v))
 
+#ifdef CONFIG_K210_WITH_QEMU
+#define TICK_COUNT (10000000 / TICK_PER_SEC)
+#else
 #define TICK_COUNT ((k210_get_cpuclk() / 50) / TICK_PER_SEC)
+#endif
 
 /****************************************************************************
  * Private Data
@@ -118,7 +122,7 @@ static int k210_timerisr(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: riscv_timer_initialize
+ * Name: up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -126,12 +130,12 @@ static int k210_timerisr(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void riscv_timer_initialize(void)
+void up_timer_initialize(void)
 {
 #if 1
   /* Attach timer interrupt handler */
 
-  (void)irq_attach(K210_IRQ_MTIMER, k210_timerisr, NULL);
+  irq_attach(K210_IRQ_MTIMER, k210_timerisr, NULL);
 
   /* Reload CLINT mtimecmp */
 
@@ -142,4 +146,3 @@ void riscv_timer_initialize(void)
   up_enable_irq(K210_IRQ_MTIMER);
 #endif
 }
-

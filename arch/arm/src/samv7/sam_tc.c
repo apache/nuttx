@@ -54,12 +54,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -663,7 +663,7 @@ static void sam_regdump(struct sam_chan_s *chan, const char *msg)
  * Input Parameters:
  *   tc      - The timer/counter peripheral state
  *   wr      - True:write access false:read access
- *   regval  - The regiser value associated with the access
+ *   regval  - The register value associated with the access
  *   regaddr - The address of the register being accessed
  *
  * Returned Value:
@@ -1026,7 +1026,7 @@ static inline uint32_t sam_tc_tcclks_lookup(int ndx)
  * Input Parameters:
  *   frequency  Desired timer frequency.
  *   tcclks     TCCLKS field value for divisor.
- *   actual     The actual freqency of the MCK
+ *   actual     The actual frequency of the MCK
  *
  * Returned Value:
  *   Zero (OK) if a proper divisor has been found, otherwise a negated errno
@@ -1648,7 +1648,7 @@ uint32_t sam_tc_divfreq(TC_HANDLE handle)
  * Input Parameters:
  *   frequency  Desired timer frequency.
  *   tcclks     TCCLKS field value for divisor.
- *   actual     The actual freqency of the MCK
+ *   actual     The actual frequency of the MCK
  *
  * Returned Value:
  *   Zero (OK) if a proper divisor has been found, otherwise a negated errno

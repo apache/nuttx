@@ -79,4 +79,3 @@ void up_systemreset(void)
 
   for (; ; );
 }
-

@@ -50,7 +50,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include "semaphore/semaphore.h"
 #include "signal/signal.h"
 
 /****************************************************************************
@@ -150,7 +149,7 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
 
       if (nxsig_isdefault(stcb, sigq->info.si_signo))
         {
-          /* Leave the critical section befor calling the handler */
+          /* Leave the critical section before calling the handler */
 
           leave_critical_section(flags);
           (*sigq->action.sighandler)(sigq->info.si_signo, &sigq->info,
@@ -172,7 +171,7 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
 
           memcpy(&info, &sigq->info, sizeof(siginfo_t));
 
-          /* Leave the critical section befor calling the handler */
+          /* Leave the critical section before calling the handler */
 
           leave_critical_section(flags);
           up_signal_dispatch(sigq->action.sighandler, sigq->info.si_signo,

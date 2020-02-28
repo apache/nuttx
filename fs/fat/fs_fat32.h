@@ -46,11 +46,11 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <time.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/dirent.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -242,7 +242,7 @@
  */
 
 #define DIR_NAME             0 /* 11@ 0: NAME: 8 bytes + 3 byte extension */
-#define DIR_ATTRIBUTES      11 /*  1@11: File attibutes (see below) */
+#define DIR_ATTRIBUTES      11 /*  1@11: File attributes (see below) */
 #define DIR_NTRES           12 /*  1@12: Reserved for use by NT */
 #define DIR_CRTTIMETENTH    13 /*  1@13: Tenth sec creation timestamp */
 #define DIR_CRTIME          14 /*  2@14: Time file created */
@@ -371,7 +371,7 @@
 #define FAT_BAD            0x0ffffff7
 
 /****************************************************************************
- * Maximum cluster by FAT type.  This is the key value used to distinquish
+ * Maximum cluster by FAT type.  This is the key value used to distinguish
  * between FAT12, 16, and 32.
  */
 
@@ -847,7 +847,7 @@
  *
  *   Some hardware, however, may require special DMA-capable memory in
  *   order to perform the transfers.  If CONFIG_FAT_DMAMEMORY is defined
- *   then the architecture-specific hardware must provide the funtions
+ *   then the architecture-specific hardware must provide the functions
  *   fat_dma_alloc() and fat_dma_free() as prototyped below:  fat_dmalloc()
  *   will allocate DMA-capable memory of the specified size; fat_dmafree()
  *   is the corresponding function that will be called to free the DMA-
@@ -926,7 +926,7 @@ struct fat_file_s
 
 /* This structure holds the sequence of directory entries used by one
  * file element (directory or file).  For short file names, this is
- * single diretory entry.  But for long file names, the is a sequence
+ * single directory entry.  But for long file names, the is a sequence
  * of directory entries.  Long directory name entries appear in reverse
  * order: Last, next-to-last, ..., first.  The "first" long file name
  * directory is then following by the short directory name entry.  The

@@ -45,7 +45,6 @@
 #include <string.h>
 #include <fcntl.h>
 #include <dirent.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -994,7 +993,7 @@ static int tmpfs_find_object(FAR struct tmpfs_s *fs,
                break;
             }
 
-          /* No, this was not the final segement of the relpath.
+          /* No, this was not the final segment of the relpath.
            * We cannot continue the search if any of the intermediate
            * segments do no correspond to directories.
            */
@@ -1003,7 +1002,7 @@ static int tmpfs_find_object(FAR struct tmpfs_s *fs,
           return -ENOTDIR;
         }
 
-      /* Search this directory for the next segement.  If we
+      /* Search this directory for the next segment.  If we
        * exit the loop, tdo will still refer to the parent
        * directory of to.
        */
@@ -1163,7 +1162,7 @@ static int tmpfs_statfs_callout(FAR struct tmpfs_directory_s *tdo,
 
   DEBUGASSERT(to != NULL);
 
-  /* Accumulate statistics.  Save the total memory allocted for this object. */
+  /* Accumulate statistics.  Save the total memory allocated for this object. */
 
   tmpbuf->tsf_alloc += to->to_alloc;
 

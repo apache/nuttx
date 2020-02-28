@@ -47,7 +47,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* FLEXSPI memory config block related defintions */
+/* FLEXSPI memory config block related definitions */
 
 #define FLEXSPI_CFG_BLK_TAG         (0x42464346ul)
 #define FLEXSPI_CFG_BLK_VERSION     (0x56010400ul)
@@ -57,7 +57,7 @@
 
 #define FLEXSPI_FEATURE_HAS_PARALLEL_MODE 1
 
-/* Lookup table related defintions */
+/* Lookup table related definitions */
 
 #define CMD_INDEX_READ              0
 #define CMD_INDEX_READSTATUS        1
@@ -255,7 +255,7 @@ enum flash_flash_type_e
   FLEXSPI_DEVICE_TYPE_SERIAL_NAND = 2,             /* Flash devices are Serial NAND */
   FLEXSPI_DEVICE_TYPE_SERIAL_RAM = 3,              /* Flash devices are Serial RAM/HyperFLASH */
   FLEXSPI_DEVICE_TYPE_MCP_NOR_NAND = 0x12,         /* Flash device is MCP device, A1 is Serial NOR, A2 is Serial NAND */
-  FLEXSPI_DEVICE_TYPE_MCP_NOR_RAM = 0x13,          /* Flash deivce is MCP device, A1 is Serial NOR, A2 is Serial RAMs */
+  FLEXSPI_DEVICE_TYPE_MCP_NOR_RAM = 0x13,          /* Flash device is MCP device, A1 is Serial NOR, A2 is Serial RAMs */
 };
 
 /* Flash Pad Definitions */
@@ -350,7 +350,7 @@ struct flexspi_nor_config_s
   uint8_t serial_nor_type;             /* Serial NOR Flash type: 0/1/2/3 */
   uint8_t need_exit_nocmdmode;         /* Need to exit NoCmd mode before other IP command */
   uint8_t halfclk_for_nonreadcmd;      /* Half the Serial Clock for non-read command: true/false */
-  uint8_t need_restore_nocmdmode;      /* Need to Restore NoCmd mode after IP commmand execution */
+  uint8_t need_restore_nocmdmode;      /* Need to Restore NoCmd mode after IP command execution */
   uint32_t blocksize;                  /* Block size */
   uint32_t reserve2[11];               /* Reserved for future use */
 };

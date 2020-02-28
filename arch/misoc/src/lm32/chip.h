@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __ARCH_MISOC_SRC_LM32_CHIP_H
-#define __ARCH_MISOC_SRC_LM32_CHIP_H 1
+#define __ARCH_MISOC_SRC_LM32_CHIP_H
 
 /****************************************************************************
  * Inline Functions

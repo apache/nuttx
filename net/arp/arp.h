@@ -53,13 +53,13 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <semaphore.h>
 #include <queue.h>
 #include <errno.h>
 
 #include <netinet/in.h>
 
 #include <nuttx/net/netdev.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -107,7 +107,7 @@ struct arp_hdr_s
   uint8_t  ah_protolen;      /*  8-bit Procotol address size (4) */
   uint16_t ah_opcode;        /* 16-bit Operation */
   uint8_t  ah_shwaddr[6];    /* 48-bit Sender hardware address */
-  uint16_t ah_sipaddr[2];    /* 32-bit Sender IP adress */
+  uint16_t ah_sipaddr[2];    /* 32-bit Sender IP address */
   uint8_t  ah_dhwaddr[6];    /* 48-bit Target hardware address */
   uint16_t ah_dipaddr[2];    /* 32-bit Target IP address */
 };
@@ -286,14 +286,13 @@ int arp_wait_cancel(FAR struct arp_notify_s *notify);
  *   timeout occurs.
  *
  * Assumptions:
- *   This function is called from ARP send and mut execute with the network
+ *   This function is called from ARP send and must execute with the network
  *   un-locked.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ARP_SEND
-struct timespec;
-int arp_wait(FAR struct arp_notify_s *notify, FAR struct timespec *timeout);
+int arp_wait(FAR struct arp_notify_s *notify, unsigned int timeout);
 #else
 #  define arp_wait(n,t) (0)
 #endif

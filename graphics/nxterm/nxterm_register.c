@@ -48,7 +48,6 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 
 #include "nxterm.h"

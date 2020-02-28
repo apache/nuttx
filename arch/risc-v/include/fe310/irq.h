@@ -46,6 +46,8 @@
 /* In mstatus register */
 
 #define MSTATUS_MIE   (0x1 << 3)  /* Machine Interrupt Enable */
+#define MSTATUS_MPIE  (0x1 << 7)  /* Machine Previous Interrupt Enable */
+#define MSTATUS_MPPM  (0x3 << 11) /* Machine Previous Privilege (m-mode) */
 
 /* In mie (machine interrupt enable) register */
 
@@ -77,7 +79,7 @@
 #define FE310_IRQ_MTIMER   (FE310_IRQ_ASYNC + 7)  /* Machine Timer Int */
 #define FE310_IRQ_MEXT     (FE310_IRQ_ASYNC + 11) /* Machine External Int */
 
-/* Machine Grobal External Interrupt */
+/* Machine Global External Interrupt */
 
 #define FE310_IRQ_UART0    (FE310_IRQ_MEXT + 3)
 #define FE310_IRQ_UART1    (FE310_IRQ_MEXT + 4)
@@ -152,4 +154,3 @@ EXTERN irqstate_t up_irq_enable(void);
 #endif
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_INCLUDE_FE310_IRQ_H */
-

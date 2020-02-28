@@ -277,7 +277,7 @@
 /* Write Registers. The SCC contains fifteen write registers that are programmed
  * to configure the operating modes of the channel. With the exception of WR0, programming
  * the write registers is a two step operation. The first operation is a pointer written to
- * WR0 that points to the selected register. The second operation is the actual contro
+ * WR0 that points to the selected register. The second operation is the actual control
  * word that is written into the register to configure the SCC channel
  */
 
@@ -669,7 +669,7 @@
 /* RR10: Miscellaneous status bits */
 
 #define RR10_1MISS           (0x80) /* Bit 7: One Clock Missing */
-#define RR10_2MISS           (0x40) /* Bit 6: Two Clocks Mising */
+#define RR10_2MISS           (0x40) /* Bit 6: Two Clocks Missing */
 #define RR10_SEND            (0x10) /* Bit 4: Loop Sending */
 #define RR10_ON              (0x02) /* Bit 1: On Loop */
 

@@ -43,9 +43,9 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/semaphore.h>
 
 #include <stdbool.h>
-#include <semaphore.h>
 #include <fixedmath.h>
 
 #ifdef CONFIG_BATTERY_GAUGE
@@ -182,7 +182,7 @@ int battery_gauge_register(FAR const char *devpath,
  *
  *   CONFIG_BATTERY_GAUGE - Upper half battery fuel gauge driver support
  *   CONFIG_I2C - I2C support
- *   CONFIG_I2C_MAX1704X - And the driver must be explictly selected.
+ *   CONFIG_I2C_MAX1704X - And the driver must be explicitly selected.
  *   CONFIG_I2C_MAX17040 or CONFIG_I2C_MAX17041 - The driver must know which
  *     chip is on the board in order to scale the voltage correctly.
  *

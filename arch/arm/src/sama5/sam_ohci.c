@@ -43,7 +43,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -100,7 +99,7 @@
 #endif
 
 #if CONFIG_SAMA5_OHCI_NTDS < 2
-#  error Insufficent number of transfer descriptors (CONFIG_SAMA5_OHCI_NTDS < 2)
+#  error Insufficient number of transfer descriptors (CONFIG_SAMA5_OHCI_NTDS < 2)
 #endif
 
 /* Minimum alignment for DMA access is 16 bytes, but it is safer to align to the
@@ -285,7 +284,7 @@ struct sam_ohci_s
 /* The OCHI expects the size of an endpoint descriptor to be 16 bytes.
  * However, the size allocated for an endpoint descriptor is 32 bytes.  This
  * is necessary first because the Cortex-A5 cache line size is 32 bytes and
- * tht is the smallest amount of memory that we can perform cache operations
+ * this is the smallest amount of memory that we can perform cache operations
  * on.  The  16-bytes is also used by the OHCI host driver in order to maintain
  * additional endpoint-specific data.
  */
@@ -1642,7 +1641,7 @@ static void sam_ep0dequeue(struct sam_eplist_s *ep0)
   sam_putreg(regval, SAM_USBHOST_CTRL);
 
   /* Search the control list to find the entry to be removed (and its
-   * precedessor).
+   * predecessor).
    */
 
   edctrl   = ep0->ed;
@@ -2267,7 +2266,7 @@ static void sam_ohci_bottomhalf(void *arg)
            * or DMA errors.
            *
            * Treat this like a normal write done head interrupt.  We
-           * just want to see if there is any status information writen
+           * just want to see if there is any status information written
            * to the descriptors (and the normal write done head
            * interrupt will not be occurring).
            */

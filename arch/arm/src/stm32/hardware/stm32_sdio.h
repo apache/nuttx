@@ -288,4 +288,3 @@
 #define SDIO_FIFOCNT_MASK              (0x01ffffff << SDIO_FIFOCNT_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_SDIO_H */
-

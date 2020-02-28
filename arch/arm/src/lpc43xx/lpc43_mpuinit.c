@@ -113,4 +113,3 @@ void lpc43_mpu_uheap(uintptr_t start, size_t size)
 }
 
 #endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARM_MPU */
-

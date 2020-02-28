@@ -94,4 +94,3 @@ define __PLL_CTL0_INIT_PARAM = $41
 define _zsl_g_clock_xdefine = 50000000
 
 /* arch/z80/src/Makefile.zdsii will append target, object and library paths below */
-

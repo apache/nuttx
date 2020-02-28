@@ -120,4 +120,3 @@ int stm32_lm75attach(xcpt_t irqhandler, void *arg)
 }
 
 #endif /* CONFIG_I2C && CONFIG_LM75_I2C && CONFIG_STM32_I2C1 */
-

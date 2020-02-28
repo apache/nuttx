@@ -77,7 +77,7 @@ static const char g_modmagic[EI_MAGIC_SIZE] =
  *
  ****************************************************************************/
 
-int modlib_verifyheader(FAR const Elf32_Ehdr *ehdr)
+int modlib_verifyheader(FAR const Elf_Ehdr *ehdr)
 {
   if (!ehdr)
     {

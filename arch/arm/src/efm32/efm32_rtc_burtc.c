@@ -107,23 +107,23 @@
 #elif  (BOARD_BURTC_PRESC == BURTC_CTRL_PRESC_DIV64)
 #   define BURTC_CLK_DIV 128
 #else
-#   error "BOARD_BURTC_PRESC is setted with unknown value"
+#   error "BOARD_BURTC_PRESC is set with unknown value"
 #endif
 
 #if   (BOARD_BURTC_CLKSRC == BURTC_CTRL_CLKSEL_LFRCO)
 #   if (CONFIG_RTC_FREQUENCY*BURTC_CLK_DIV != BOARD_LFRCO_FREQUENCY)
-#       error "CONFIG_RTC_FREQUENCY is not well be setted"
+#       error "CONFIG_RTC_FREQUENCY is not well be set"
 #   endif
 #elif (BOARD_BURTC_CLKSRC == BURTC_CTRL_CLKSEL_LFXO)
 #   if (CONFIG_RTC_FREQUENCY*BURTC_CLK_DIV != BOARD_LFXO_FREQUENCY)
-#       error "CONFIG_RTC_FREQUENCY is not well be setted"
+#       error "CONFIG_RTC_FREQUENCY is not well be set"
 #   endif
 #elif (BOARD_BURTC_CLKSRC == BURTC_CTRL_CLKSEL_ULFRCO)
 #   if (CONFIG_RTC_FREQUENCY*BURTC_CLK_DIV != BOARD_ULFRCO_FREQUENCY)
-#       error "CONFIG_RTC_FREQUENCY is not well be setted"
+#       error "CONFIG_RTC_FREQUENCY is not well be set"
 #   endif
 #else
-#   error "BOARD_BURTC_CLKSRC badly setted !"
+#   error "BOARD_BURTC_CLKSRC badly set !"
 #endif
 
 #define __CNT_TOP               (((uint64_t)(_BURTC_CNT_MASK))+1)
@@ -266,7 +266,7 @@ static void efm32_rtc_burtc_init(void)
 
   putreg32(BURTC_FREEZE_REGFREEZE_FREEZE, EFM32_BURTC_FREEZE);
 
-  /* Restore all not setted BURTC registers to default value */
+  /* Restore all not set BURTC registers to default value */
 
 //  putreg32(_BURTC_LPMODE_RESETVALUE,      EFM32_BURTC_LPMODE);
 //  putreg32(_BURTC_LFXOFDET_RESETVALUE,    EFM32_BURTC_LFXOFDET);

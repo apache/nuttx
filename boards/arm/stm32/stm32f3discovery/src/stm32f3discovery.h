@@ -207,4 +207,3 @@ int stm32_qencoder_initialize(FAR const char *devpath, int timer);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_H */
-

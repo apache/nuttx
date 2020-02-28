@@ -188,4 +188,3 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
 
   return 0;
 }
-

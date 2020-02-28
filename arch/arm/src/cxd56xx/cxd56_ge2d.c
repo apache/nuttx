@@ -42,8 +42,9 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
+
 #include <queue.h>
-#include <semaphore.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>

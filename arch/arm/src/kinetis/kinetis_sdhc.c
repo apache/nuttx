@@ -41,7 +41,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
@@ -437,7 +436,7 @@ static void kinetis_takesem(struct kinetis_dev_s *priv)
  * Name: kinetis_configwaitints
  *
  * Description:
- *   Enable/disable SDIO interrupts needed to suport the wait function
+ *   Enable/disable SDIO interrupts needed to support the wait function
  *
  * Input Parameters:
  *   priv       - A reference to the SDIO device state structure
@@ -1413,7 +1412,7 @@ static void kinetis_frequency(FAR struct sdio_dev_s *dev, uint32_t frequency)
    *
    * SDCLK  frequency = (base clock) / (prescaler * divisor)
    *
-   * The prescaler is avalable only for the values:  2, 4, 8, 16, 32, 64, 128,
+   * The prescaler is available only for the values:  2, 4, 8, 16, 32, 64, 128,
    * and 256.  Pick the smallest value of SDCLKFS that would result in an
    * in-range frequency.
    *
@@ -2136,7 +2135,7 @@ static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
  *
  * Returned Value:
  *   Number of bytes sent on success; a negated errno on failure.  Here a
- *   failure means only a faiure to obtain the requested reponse (due to
+ *   failure means only a faiure to obtain the requested response (due to
  *   transport problem -- timeout, CRC, etc.).  The implementation only
  *   assures that the response is returned intacta and does not check errors
  *   within the response itself.

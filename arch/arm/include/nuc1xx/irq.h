@@ -107,4 +107,3 @@ extern "C"
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_ARM_INCLUDE_NUC1XX_IRQ_H */
-

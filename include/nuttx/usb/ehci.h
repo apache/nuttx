@@ -220,7 +220,7 @@
 #define EHCI_PCI_USBLEGCTLSTS_PC       (1 << 30)  /* Bit 30: SMI on PCI Command */
 #define EHCI_PCI_USBLEGCTLSTS_BAR      (1 << 31)  /* Bit 31: SMI on BAR */
 
-/* Host Controller Capability Register Bit Defintions ***************************************/
+/* Host Controller Capability Register Bit Definitions ***************************************/
 /* Paragraph 2.2 */
 
 /* Core Capability Register Length. Paragraph 2.2.1. 8-bit length. */

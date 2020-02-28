@@ -311,7 +311,7 @@ static uint32_t stm32_bbsram_crc(FAR struct bbsramfh_s *pf)
  *   ensures that non uint32 data is committed to SRAM
  *
  * Input Parameters:
- *   pf = ponter to the bbsramfh_s
+ *   pf = pointer to the bbsramfh_s
  *
  * Returned Value:
  *   None

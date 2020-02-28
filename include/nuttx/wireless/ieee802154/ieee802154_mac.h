@@ -271,7 +271,7 @@
 #define IEEE802154_MIN_CAP_LENGTH             440
 #define IEEE802154_UNIT_BACKOFF_PERIOD        20
 
-/* IEEE 802.15.4 MAC PIB Attribut Defaults */
+/* IEEE 802.15.4 MAC PIB Attribute Defaults */
 
 /* Definitions used by IOCTL calls */
 
@@ -455,7 +455,7 @@ enum ieee802154_attr_e
   IEEE802154_ATTR_MAC_PANCOORD_EXT_ADDR,
   IEEE802154_ATTR_MAC_PANCOORD_SHORT_ADDR,
 
-  /* Non-standard MAC Atrributes*/
+  /* Non-standard MAC Attributes*/
 
   IEEE802154_ATTR_MAC_DEVMODE,
 };
@@ -827,7 +827,7 @@ struct ieee802154_data_ind_s
   FAR struct iob_s *frame;
 
   struct ieee802154_addr_s src;     /* Source addressing information */
-  struct ieee802154_addr_s dest;    /* Destination addressing infromation */
+  struct ieee802154_addr_s dest;    /* Destination addressing information */
   uint8_t lqi;                      /* Link Quality Index */
   uint8_t rssi;                     /* Non-standard field */
   uint8_t dsn;                      /* Data Sequence Number */
@@ -940,7 +940,7 @@ struct ieee802154_assoc_req_s
    * or not. Which means we don't know whether to tranmsit immediately or try
    * to track the beacon. The standard does say that ALL command frames should
    * be sent during the Contention Access Period (CAP), but how could you send
-   * it at the rigth tiem, if you are not tracking the beacon. What's worse is
+   * it at the right time, if you are not tracking the beacon. What's worse is
    * in the association section, it says if you are tracking the beacon, to
    * send the association request during the CAP. But how can you track the
    * beacon if you are not associated. Normally tracking the beacon would be
@@ -1465,7 +1465,7 @@ struct ieee802154_get_req_s
  *    Attempts to write the given value to the indicated PIB attribute.
  *
  *  NOTE: The standard specifies that confirmation should be indicated via
- *  the asynchronous MLME-SET.confirm primitve.  However, in our implementation
+ *  the asynchronous MLME-SET.confirm primitive.  However, in our implementation
  *  there is no reason not to synchronously return the status immediately.
  *  Therefore, we do merge the functionality of the MLME-SET.request and
  *  MLME-SET.confirm primitives together.
@@ -1678,7 +1678,7 @@ union ieee802154_primitive_u
   struct ieee802154_commstatus_ind_s  commstatusind;
   struct ieee802154_syncloss_ind_s    synclossind;
 
-  /* Foward link contained as first entry of all primitives */
+  /* Forward link contained as first entry of all primitives */
 
   FAR struct ieee802154_primitive_s *flink;
 };

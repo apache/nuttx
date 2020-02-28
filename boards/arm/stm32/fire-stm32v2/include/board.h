@@ -354,8 +354,8 @@
  * PIN NAME   SIGNAL         NOTES
  * --- ------ -------------- -------------------------------------------------------------------
  *
- * 95  PB8    PB8-CAN-RX     CAN tranceiver, Header 2H
- * 96  PB9    PB9-CAN-TX     CAN tranceiver, Header 2H
+ * 95  PB8    PB8-CAN-RX     CAN transceiver, Header 2H
+ * 96  PB9    PB9-CAN-TX     CAN transceiver, Header 2H
  */
 
 #if defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN1_REMAP1)
@@ -388,7 +388,7 @@ extern "C"
  *   This is a non-standard LCD interface just for the M3 Wildfire board.  Because
  *   of the various rotations, clearing the display in the normal way by writing a
  *   sequences of runs that covers the entire display can be very slow.  Here the
- *   dispaly is cleared by simply setting all GRAM memory to the specified color.
+ *   display is cleared by simply setting all GRAM memory to the specified color.
  *
  ****************************************************************************/
 
@@ -402,4 +402,4 @@ void fire_lcdclear(uint16_t color);
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32_FIRE_STM32V2_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_FIRE_STM32V2_INCLUDE_BOARD_H */

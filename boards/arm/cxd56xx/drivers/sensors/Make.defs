@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/platform/sensors/Make.defs
+# boards/arm/cxd56xx/drivers/sensors/Make.defs
 #
 #   Copyright 2018 Sony Semiconductor Solutions Corporation
 #

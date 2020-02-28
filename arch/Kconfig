@@ -67,14 +67,17 @@ config ARCH_RISCV
 config ARCH_SIM
 	bool "Simulation"
 	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_RTC_SUBSECONDS
 	select ARCH_HAVE_TLS
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_TESTSET
 	select ARCH_NOINTC
+	select ALARM_ARCH
+	select ONESHOT
 	select SERIAL_CONSOLE
 	---help---
-		Linux/Cywgin user-mode simulation.
+		Linux/Cygwin user-mode simulation.
 
 config ARCH_X86
 	bool "x86"
@@ -152,6 +155,14 @@ config ARCH_GNU_NO_WEAKFUNCTIONS
 	default n
 	---help---
 		Disable support for weak functions.
+
+config ARCH_SIZET_LONG
+	bool "size_t is type long"
+	default n
+	---help---
+		size_t may be type long or type int.  This matters for some
+		C++ library routines because the NuttX size_t might not have
+		the same underlying type as your toolchain's size_t.
 
 comment "Architecture Options"
 
@@ -451,7 +462,7 @@ config ARCH_KERNEL_STACKSIZE
 	int "Kernel stack size"
 	default 1568
 	---help---
-		The common size of each process' kernel stack
+		The common size of each process's kernel stack
 
 endif # ARCH_KERNEL_STACK
 

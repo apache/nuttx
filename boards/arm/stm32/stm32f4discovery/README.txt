@@ -41,6 +41,8 @@ Contents
   - RTC DS1307
   - SSD1289
   - UG-2864AMBAG01 / UG-2864HSWEG01
+  - NiceRF LoRa (2AD66-LoRa V2)
+  - Ethernet SPI Module ENC28J60
   - HCI UART
   - STM32F4Discovery-specific Configuration Options
   - BASIC
@@ -87,7 +89,7 @@ using PWM output.  The external RGB connected this way:
    B = TIM3 CH3 on PB0
 
 The RGB LED driver that uses PWM to control the red, green, and blue color
-components can be enabled with the following configuratin settings:
+components can be enabled with the following configuration settings:
 
   +CONFIG_RGBLED=y
 
@@ -642,6 +644,32 @@ Darcy Gong recently added support for the UG-2864HSWEG01 OLED which is also
 an option with this configuration.  I have little technical information about
 the UG-2864HSWEG01 interface (see boards/arm/stm32/stm32f4discovery/src/up_ug2864hsweg01.c).
 
+NiceRF LoRa (2AD66-LoRa V2)
+===========================
+
+It is possible to wire an external LoRa module to STM32F4Discovery board.
+
+First connect the GND and VCC (to 3.3V) and then connect the SCK label to PA5,
+connect the MISO to PA6, connect the MOSI to PA7, connect the NSS to PD8,
+connect DIO0 to PD0 and finally connect NRESET to PD4.
+
+Ethernet SPI Module ENC28J60
+============================
+
+You can use an external Ethernet SPI Module ENC28J60 with STM32F4Discovery board.
+
+First connect the GND and VCC (to 3.3V). Note: according with ENC28J60 datasheet
+the Operating Voltage should be between 3.1V to 3.6V, but STM32F4Discover only
+supply 3.0V. You can modify your board to supply 3.3V: just remove the D3 diode
+and short-circuit the board pads where it was soldered).
+
+Connect the SCK label to PA5, connect the SO to PA6, connect the SI to PA7,
+connect the CS to PA4, connect RST to PE1 and finally connect INT to PE4.
+
+The next step is to enable the ENC28J60 in the menuconfig ("make menuconfig")
+and the necessary Network configuration, you can use the
+boards/arm/stm32/fire-stm32v2/configs/nsh/defconfig as reference.
+
 HCI UART
 ========
 
@@ -988,7 +1016,7 @@ STM32F4Discovery-specific Configuration Options
 
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
-    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt priority.  Default: 128
     CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
@@ -1138,7 +1166,7 @@ Install the libcxx files on NuttX:
 
     $ ./install.sh ../nuttx
     Installing LLVM/libcxx in the NuttX source tree
-    Installation suceeded
+    Installation succeeded
 
 Enter inside NuttX and compile it:
 
@@ -1312,7 +1340,7 @@ Configuration Sub-directories
   cxxtest:
   -------
 
-  The C++ standard libary test at apps/testing/cxxtest configuration.  This
+  The C++ standard library test at apps/testing/cxxtest configuration.  This
   test is used to verify the uClibc++ port to NuttX.  This configuration may
   be selected as follows:
 
@@ -1907,7 +1935,7 @@ Configuration Sub-directories
        class driver:
 
        Device Drivers ->
-         CONFIG_USBDEV=n          : Make sure tht USB device support is disabled
+         CONFIG_USBDEV=n          : Make sure the USB device support is disabled
          CONFIG_USBHOST=y         : Enable USB host support
          CONFIG_USBHOST_ISOC_DISABLE=y
 
@@ -1983,7 +2011,7 @@ Configuration Sub-directories
 
        Drivers -> USB Host Driver Support
          CONFIG_USBHOST_HUB=y     : Enable the hub class
-         CONFIG_USBHOST_ASYNCH=y  : Asynchonous I/O supported needed for hubs
+         CONFIG_USBHOST_ASYNCH=y  : Asynchronous I/O supported needed for hubs
 
        System Type -> USB host configuration
          To be determined
@@ -2137,7 +2165,7 @@ Configuration Sub-directories
      +CONFIG_EXAMPLES_NXLINES_BPP=1
      +CONFIG_EXAMPLES_NXLINES_EXTERNINIT=y
 
-     There are some issues with with the presentation... some tuning of the
+     There are some issues with the presentation... some tuning of the
      configuration could fix that.  Lower resolution displays are also more
      subject to the "fat, flat line bug" that I need to fix someday.  See
      http://www.nuttx.org/doku.php?id=wiki:graphics:nxgraphics for a description
@@ -2349,7 +2377,7 @@ Configuration Sub-directories
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
        CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : USART2 will be /dev/ttyS0
 
-       However, there is nothing to generate SYLOG output in the default
+       However, there is nothing to generate SYSLOG output in the default
        configuration so nothing should appear on USART2 unless you enable
        some debug output or enable the USB monitor.
 

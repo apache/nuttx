@@ -183,4 +183,3 @@ void up_idle(void)
   END_IDLE();
 #endif
 }
-

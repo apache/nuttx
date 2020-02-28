@@ -49,4 +49,3 @@
 #endif
 
 #endif /* __ARCH_ARM_SRC_LPC54XX_HARDWARE_LPC54_MEMORYMAP_H */
-

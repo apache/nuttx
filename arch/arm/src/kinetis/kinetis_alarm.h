@@ -74,7 +74,7 @@ enum alm_id_e
   RTC_ALARM_LAST
 };
 
-/* Structure used to pass parmaters to set an alarm */
+/* Structure used to pass parameters to set an alarm */
 
 struct alm_setalarm_s
 {

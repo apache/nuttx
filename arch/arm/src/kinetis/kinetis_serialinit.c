@@ -124,4 +124,3 @@ void up_serialinit(void)
 
 }
 #endif /* USE_SERIALDRIVER */
-

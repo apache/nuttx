@@ -66,5 +66,9 @@
 
 bool up_interrupt_context(void)
 {
-   return g_current_regs != NULL;
+#ifdef CONFIG_ARCH_RV64GC
+  return CURRENT_REGS != NULL;
+#else
+  return g_current_regs != NULL;
+#endif
 }

@@ -39,10 +39,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
-
-#include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 
 #include "utils/utils.h"

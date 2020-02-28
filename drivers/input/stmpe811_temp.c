@@ -100,7 +100,7 @@ int stmpe811_tempinitialize(STMPE811_HANDLE handle)
 
   stmpe811_putreg8(priv, STMPE811_TEMP_CTRL, TEMP_CTRL_ENABLE);
 
-  /* Aquire data enable */
+  /* Acquire data enable */
 
   stmpe811_putreg8(priv, STMPE811_TEMP_CTRL,
                    (TEMP_CTRL_ACQ | TEMP_CTRL_ENABLE));
@@ -166,7 +166,7 @@ uint16_t stmpe811_tempread(STMPE811_HANDLE handle)
  *               threshold value; False:  Generate an interrupt if the
  *               temperature falls below the threshold value.
  *   callback  - The client callback function that will be called when
- *               the termperature crosses the threshold.
+ *               the temperature crosses the threshold.
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -176,4 +176,3 @@ uint16_t stmpe811_tempread(STMPE811_HANDLE handle)
 /* Not implemented */
 
 #endif /* CONFIG_INPUT && CONFIG_INPUT_STMPE811 && !CONFIG_STMPE811_TEMP_DISABLE */
-

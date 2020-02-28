@@ -36,4 +36,3 @@ config NET_IPFORWARD_NSTRUCT
 		packets that may be waiting to be forwarded from one network device
 		to another.  CONFIG_IOB_NBUFFERS also limits the forward because the
 		payload of the packet (up to the MSS) is retain in IOBs.
-

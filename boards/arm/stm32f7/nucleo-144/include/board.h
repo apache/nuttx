@@ -248,7 +248,7 @@
 #  define GPIO_SDMMC2_D3 GPIO_SDMMC2_D3_1
 #endif
 
-/* DMA Channl/Stream Selections *********************************************/
+/* DMA Channel/Stream Selections *********************************************/
 
 /* Stream selections are arbitrary for now but might become important in the
  * future if we set aside more DMA channels/streams.
@@ -509,4 +509,4 @@
 #define GPIO_ETH_RMII_TXD0    GPIO_ETH_RMII_TXD0_2
 #define GPIO_ETH_RMII_TXD1    GPIO_ETH_RMII_TXD1_1
 
-#endif  /* __BOARDS_ARM_STM32F7_NUCLEO_144_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32F7_NUCLEO_144_INCLUDE_BOARD_H */

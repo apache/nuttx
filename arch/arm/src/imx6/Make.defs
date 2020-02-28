@@ -76,7 +76,7 @@ CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
 CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CMN_CSRCS += up_idle.c
+CMN_CSRCS += imx_idle.c
 endif
 
 ifeq ($(CONFIG_SMP),y)

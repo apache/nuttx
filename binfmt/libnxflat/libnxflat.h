@@ -79,7 +79,7 @@ int nxflat_addrenv_alloc(FAR struct nxflat_loadinfo_s *loadinfo, size_t envsize)
  * Name: nxflat_addrenv_select
  *
  * Description:
- *   Temporarity select the task's address environemnt.
+ *   Temporarity select the task's address environment.
  *
  * Input Parameters:
  *   loadinfo - Load state information

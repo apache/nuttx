@@ -346,7 +346,7 @@ Configurations
     This is identical to the nsh configuration below except that (1) NuttX
     is built as a PROTECTED mode, monolithic module and the user applications
     are built separately and, as a consequence, (2) some features that are
-    only availabled in the FLAT build are disabled.
+    only available in the FLAT build are disabled.
 
     It is recommends to use a special make command; not just 'make' but make
     with the following two arguments:

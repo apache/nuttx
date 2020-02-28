@@ -108,9 +108,9 @@
 
 #include <sys/types.h>
 #include <queue.h>
-#include <semaphore.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/ip.h>
 

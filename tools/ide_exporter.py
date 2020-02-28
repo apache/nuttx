@@ -1009,4 +1009,3 @@ if __name__ == '__main__':
     ww_fname = os.path.join(prj_dir, 'nuttx' + ws_ext)
     ws.write(ww_fname)
     print("Exported " + ww_fname)
-

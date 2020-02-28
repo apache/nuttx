@@ -36,7 +36,7 @@ Olimex STR-P711
  - Trimpot connected to ADC
  - Two status LEDs
  - Buzzer
- - UEXT - 10 pin extension connector for Olimex addon peripherials like MP3,
+ - UEXT - 10 pin extension connector for Olimex addon peripherals like MP3,
    RF2.4Ghz, RFID etc. modules
  - 2x SPI connectors
  - I2C connector
@@ -222,7 +222,7 @@ GENERAL STEPS:
   Install OpenOCD.  Since we used the default configuration the code will be
   installed at /usr/local/bin/openocd. Other files will be installed at
   /usr/local/lib/openocd (configuration files, scripts, etc.) and /usr/local/share/info
-  (online documentation accessable via 'info openocd').  You need root priviledges
+  (online documentation accessible via 'info openocd').  You need root privileges
   to do the following:
 
     make install.
@@ -272,7 +272,7 @@ Windows OpenOCD will Olimex JTAG
 
     - possibly the value of OPENOCD_PATH
     - If you are working under Linux you will need to change any
-      occurances of `cygpath -w blablabla` to just blablabla
+      occurrences of `cygpath -w blablabla` to just blablabla
 
   If you have $PATH and other environment variables set up, then you should
   be able to start the OpenOCD daemon like:

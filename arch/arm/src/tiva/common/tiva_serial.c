@@ -44,7 +44,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -971,7 +970,7 @@ static void up_detach(struct uart_dev_s *dev)
  *   when an interrupt received on the 'irq'  It should call
  *   uart_transmitchars or uart_receivechar to perform the
  *   appropriate data transfers.  The interrupt handling logic
- *   must be able to map the 'irq' number into the approprite
+ *   must be able to map the 'irq' number into the appropriate
  *   uart_dev_s structure in order to call these functions.
  *
  ****************************************************************************/
@@ -1323,7 +1322,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NO_SERIAL_CONSOLE
+#ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void)
 {
   /* NOTE:  All GPIO configuration for the UARTs was performed in
@@ -1362,7 +1361,7 @@ void up_earlyserialinit(void)
   up_setup(&CONSOLE_DEV);
 #endif
 }
-#endif /* !CONFIG_NO_SERIAL_CONSOLE */
+#endif /* !USE_EARLYSERIALINIT */
 
 /****************************************************************************
  * Name: up_serialinit

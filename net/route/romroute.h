@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __NET_ROUTE_ROMROUTE_H
-#define __NET_ROUTE_ROMROUTE_H 1
+#define __NET_ROUTE_ROMROUTE_H
 
 /****************************************************************************
  * Included Files

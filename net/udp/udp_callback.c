@@ -75,7 +75,6 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_UDP_READAHEAD
 static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
                                 FAR struct udp_conn_s *conn,
                                 FAR uint8_t *buffer, uint16_t buflen)
@@ -166,6 +165,7 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
 
           net_ipv4addr_copy(src_addr4.sin_addr.s_addr,
                             net_ip4addr_conv32(ipv4->srcipaddr));
+          memset(src_addr4.sin_zero, 0, sizeof(src_addr4.sin_zero));
 
           src_addr_size = sizeof(src_addr4);
           src_addr = &src_addr4;
@@ -245,7 +245,6 @@ static uint16_t udp_datahandler(FAR struct net_driver_s *dev,
   ninfo("Buffered %d bytes\n", buflen);
   return buflen;
 }
-#endif /* CONFIG_NET_UDP_READAHEAD */
 
 /****************************************************************************
  * Name: net_dataevent
@@ -260,11 +259,9 @@ net_dataevent(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
               uint16_t flags)
 {
   uint16_t ret;
-#ifdef CONFIG_NET_UDP_READAHEAD
   uint8_t *buffer = dev->d_appdata;
   int      buflen = dev->d_len;
   uint16_t recvlen;
-#endif
 
   ret = (flags & ~UDP_NEWDATA);
 
@@ -274,14 +271,12 @@ net_dataevent(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn,
 
   ninfo("No receive on connection\n");
 
-#ifdef CONFIG_NET_UDP_READAHEAD
   /* Save as the packet data as in the read-ahead buffer.  NOTE that
    * partial packets will not be buffered.
    */
 
   recvlen = udp_datahandler(dev, conn, buffer, buflen);
   if (recvlen < buflen)
-#endif
     {
       /* There is no handler to receive new data and there are no free
        * read-ahead buffers to retain the data -- drop the packet.

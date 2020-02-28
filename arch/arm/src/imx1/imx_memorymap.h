@@ -256,4 +256,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_IMX_MEMORYMAP_H */
+#endif /* __ARCH_ARM_IMX_MEMORYMAP_H */

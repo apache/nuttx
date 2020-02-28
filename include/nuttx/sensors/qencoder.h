@@ -74,7 +74,7 @@
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half QE driver to the lower-half QE driver via the ioctl()
- * method fo the QE lower-half interface.  However, the lower-half driver
+ * method of the QE lower-half interface.  However, the lower-half driver
  * must reserve a block of commands as follows in order prevent IOCTL
  * command numbers from overlapping.
  */

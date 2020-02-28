@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# mkctags.sh
+# tools/mkctags.sh
 #
 #   Copyright (C) 2013 Ken pettit All rights reserved.
 #   Author: Ken pettit <pettitkd@gmail.com>
@@ -35,7 +35,7 @@
 WD=`pwd`
 if [[ "$WD" =~ "nuttx/tools" ]]
 then
-	cd ..
+  cd ..
 fi
 
 find .. -type f -iname "*.[chs]" -o -iname "*.cxx" -o -iname "*.hxx" | xargs ctags -a

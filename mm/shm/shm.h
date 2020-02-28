@@ -45,9 +45,9 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <stdint.h>
-#include <semaphore.h>
 
 #include <nuttx/addrenv.h>
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_MM_SHM
 

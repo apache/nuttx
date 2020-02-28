@@ -293,4 +293,3 @@ struct variable_s *find_variable(const char *varname, struct variable_s *list)
 
   return NULL;
 }
-

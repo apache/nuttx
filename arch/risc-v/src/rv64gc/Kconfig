@@ -26,4 +26,3 @@ config RV64GC_TOOLCHAIN_GNU_RVGW
 		configured for riscv64-unknown-elf.
 
 endchoice
-

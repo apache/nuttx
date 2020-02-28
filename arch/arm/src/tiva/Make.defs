@@ -54,6 +54,10 @@ CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_stackframe.c
 CMN_CSRCS += up_svcall.c up_trigger_irq.c up_unblocktask.c up_udelay.c
 CMN_CSRCS += up_usestack.c up_vfork.c
 
+ifeq ($(CONFIG_ARM_SEMIHOSTING_HOSTFS),y)
+  CMN_CSRCS += up_hostfs.c
+endif
+
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
   CMN_CSRCS += up_idle.c
 endif

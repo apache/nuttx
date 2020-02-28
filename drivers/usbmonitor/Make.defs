@@ -48,4 +48,3 @@ VPATH += :usbmonitor
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)usbmonitor}
 
 endif
-

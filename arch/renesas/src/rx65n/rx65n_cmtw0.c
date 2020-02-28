@@ -201,7 +201,7 @@ void rx65n_cmtw0_start(uint8_t type, uint32_t timeout)
 
 void rx65n_cmtw0_stop(uint8_t type)
 {
-  /* STOP OC0I0 fot polling */
+  /* STOP OC0I0 for polling */
 
   if (type == rx65n_cmtw0_txpoll)
     {
@@ -214,7 +214,7 @@ void rx65n_cmtw0_stop(uint8_t type)
       CMTW0.CMWIOR.WORD &=  ~(_1000_CMTW_CMWIOR_OC0E_ENABLE);
     }
 
-  /* Stop OC0I1 fot timeout */
+  /* Stop OC0I1 for timeout */
 
   if (type == rx65n_cmtw0_timeout)
     {

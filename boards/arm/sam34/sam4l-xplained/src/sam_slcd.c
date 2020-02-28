@@ -47,7 +47,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <poll.h>
 #include <errno.h>
 #include <debug.h>
@@ -57,6 +56,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/lcd/slcd_ioctl.h>
 #include <nuttx/lcd/slcd_codec.h>
+#include <nuttx/semaphore.h>
 
 #include "up_arch.h"
 #include "sam_gpio.h"
@@ -538,7 +538,7 @@ static uint8_t slcd_getcontrast(void)
   uint32_t ucontrast;
   int32_t  scontrast;
 
-  /* Get the current contast value */
+  /* Get the current contrast value */
 
   regval    = getreg32(SAM_LCDCA_CFG);
   ucontrast = (regval & LCDCA_CFG_FCST_MASK) >> LCDCA_CFG_FCST_SHIFT;
@@ -588,7 +588,7 @@ static int slcd_setcontrast(unsigned int contrast)
 
   scontrast = (int)contrast - 32;
 
-  /* Set the new contast value */
+  /* Set the new contrast value */
 
   regval  = getreg32(SAM_LCDCA_CFG);
   regval &= ~LCDCA_CFG_FCST_MASK;
@@ -953,7 +953,7 @@ static ssize_t slcd_write(FAR struct file *filep,
 
           else if (ch == ASCII_DEL)
             {
-              /* Perform the foward deletion */
+              /* Perform the forward deletion */
 
               slcd_action(SLCDCODE_FWDDEL, 1);
               options = 0;
@@ -1152,7 +1152,7 @@ static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   if (setup)
     {
-      /* Data is always avaialble to be read / Data can always be written */
+      /* Data is always available to be read / Data can always be written */
 
       fds->revents |= (fds->events & (POLLIN | POLLOUT));
       if (fds->revents != 0)

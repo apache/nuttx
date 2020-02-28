@@ -74,6 +74,7 @@ void up_release_pending(void)
   /* Merge the g_pendingtasks list into the ready-to-run task list */
 
   /* sched_lock(); */
+
   if (sched_mergepending())
     {
       /* The currently active task has changed!  We will need to switch
@@ -86,7 +87,7 @@ void up_release_pending(void)
 
       /* Are we operating in interrupt context? */
 
-      if (g_current_regs)
+      if (CURRENT_REGS)
         {
           /* Yes, then we have to do things differently.
            * Just copy the g_current_regs into the OLD rtcb.

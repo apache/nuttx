@@ -49,7 +49,6 @@
 #include <arch/irq.h>
 
 #include <sys/socket.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/usrsock.h>
 
@@ -227,10 +226,6 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   socklen_t addrlen = 0;
   socklen_t outaddrlen = 0;
   ssize_t ret;
-#ifdef CONFIG_NET_SOCKOPTS
-  struct timespec abstime;
-#endif
-  struct timespec *ptimeo = NULL;
 
   DEBUGASSERT(conn);
 
@@ -297,25 +292,6 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       goto errout_unlock;
     }
 
-#ifdef CONFIG_NET_SOCKOPTS
-  if (psock->s_rcvtimeo != 0)
-    {
-      DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
-
-      /* Prepare timeout value for recvfrom. */
-
-      abstime.tv_sec += psock->s_rcvtimeo / DSEC_PER_SEC;
-      abstime.tv_nsec += (psock->s_rcvtimeo % DSEC_PER_SEC) * NSEC_PER_DSEC;
-      if (abstime.tv_nsec >= NSEC_PER_SEC)
-        {
-          abstime.tv_sec++;
-          abstime.tv_nsec -= NSEC_PER_SEC;
-        }
-
-      ptimeo = &abstime;
-    }
-#endif
-
   do
     {
       /* Check if remote end has closed connection. */
@@ -332,7 +308,7 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       if (!(conn->flags & USRSOCK_EVENT_RECVFROM_AVAIL))
         {
-          if (_SS_ISNONBLOCK(psock->s_flags))
+          if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
             {
               /* Nothing to receive from daemon side. */
 
@@ -354,7 +330,8 @@ ssize_t usrsock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
           /* Wait for receive-avail (or abort, or timeout, or signal). */
 
-          ret = net_timedwait(&state.reqstate.recvsem, ptimeo);
+          ret = net_timedwait(&state.reqstate.recvsem,
+                              _SO_TIMEOUT(psock->s_rcvtimeo));
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)

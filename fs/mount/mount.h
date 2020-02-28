@@ -103,4 +103,3 @@ FAR const char *fs_gettype(FAR struct statfs *statbuf);
 
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 #endif /* __FS_MOUNT_MOUNT_H */
-

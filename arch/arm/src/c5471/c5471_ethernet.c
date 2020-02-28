@@ -259,7 +259,7 @@
                                          /* Bits 16-31: reserved */
 #define ENET_MODO_FIFO_EN     0x00008000 /* Bit 15: Fifo enable */
                                          /* Bits 8-14: reserved */
-#define ENET_MODE_RJCT_SFE    0x00000080 /* Bit 7: Reject short frames durig receive */
+#define ENET_MODE_RJCT_SFE    0x00000080 /* Bit 7: Reject short frames during receive */
 #define ENET_MODE_DPNET       0x00000040 /* Bit 6: Demand priority networkd vs CSMA/CD */
 #define ENET_MODE_MWIDTH      0x00000020 /* Bit 5: Select nibble mode MII port */
 #define ENET_MODE_WRAP        0x00000010 /* Bit 4: Internal MAC loopback */
@@ -725,9 +725,9 @@ static int c5471_mdread (int adr, int reg)
  *   end offers either the 10baseT or 100baseT electrical interface connecting
  *   to an RJ45 onboard network connector. The PHY transeiver has several
  *   internal registers allowing host configuration and status access. These
- *   internal registers are accessable by clocking serial data in/out of the
+ *   internal registers are accessible by clocking serial data in/out of the
  *   MDIO pin of the LU3X31T-T64 chip. For c547X, the MDC and the MDIO pins
- *   are connected to the C547x GPIO15 and GPIO14 pins respectivley. Host
+ *   are connected to the C547x GPIO15 and GPIO14 pins respectively. Host
  *   software twiddles the GPIO pins appropriately to get data serially into
  *   and out of the chip. This is typically a one time operation at boot and
  *   normal operation of the transeiver involves EIM/Transeiver interaction at
@@ -1599,7 +1599,7 @@ static void c5471_interrupt_work(FAR void *arg)
   if ((EIM_STATUS_CPU_RX & priv->c_eimstatus) != 0)
     {
       /* An outgoing packet has been processed by the EIM and the interrupt
-       * associated with EIM's CPU RX que has been asserted. It is the EIM's
+       * associated with EIM's CPU RX queue has been asserted. It is the EIM's
        * CPU RX queue that we put packets on to send them *out*. TWe use this
        * terminology to stay consistent with the Orion documentation.
        */
@@ -1842,7 +1842,7 @@ static int c5471_ifup(struct net_driver_s *dev)
         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
-  /* Initilize Ethernet interface */
+  /* Initialize Ethernet interface */
 
   c5471_reset(priv);
 

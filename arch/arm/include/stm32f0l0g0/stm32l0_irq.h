@@ -96,7 +96,7 @@
 #define STM32_IRQ_USART2      (STM32_IRQ_EXTINT + 28) /* 28: USART2 global interrupt */
 #define STM32_IRQ_LPUART1     (STM32_IRQ_EXTINT + 29) /* 29: LPUART1 global interrupt */
 #define STM32_IRQ_AES         (STM32_IRQ_EXTINT + 29) /* 29: AES global interrupt */
-#define STM32_IRQ_RNG         (STM32_IRQ_EXTINT + 29) /* 29: RNG gloabl interrupt */
+#define STM32_IRQ_RNG         (STM32_IRQ_EXTINT + 29) /* 29: RNG global interrupt */
 #define STM32_IRQ_LCD         (STM32_IRQ_EXTINT + 30) /* 30: LCD global interrupt */
 #define STM32_IRQ_USB         (STM32_IRQ_EXTINT + 31) /* 31: USB global interrupt */
 

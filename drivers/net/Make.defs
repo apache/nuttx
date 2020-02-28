@@ -39,7 +39,7 @@ ifeq ($(CONFIG_NET),y)
 
 # Include network interface drivers
 
-ifeq ($(CONFIG_NETDEV_LOOPBACK),y)
+ifeq ($(CONFIG_NET_LOOPBACK),y)
   CSRCS += loopback.c
 endif
 
@@ -88,4 +88,3 @@ endif
 DEPPATH += --dep-path net
 VPATH += :net
 endif
-

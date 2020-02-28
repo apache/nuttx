@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_autoconfig.c
  *
- *   Copyright (C) 2015-2016, 2018-2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016, 2018-2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <time.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -57,15 +56,6 @@
 #include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define CONFIG_ICMPv6_AUTOCONF_DELAYSEC  \
-  (CONFIG_ICMPv6_AUTOCONF_DELAYMSEC / 1000)
-#define CONFIG_ICMPv6_AUTOCONF_DELAYNSEC \
-  ((CONFIG_ICMPv6_AUTOCONF_DELAYMSEC - 1000*CONFIG_ICMPv6_AUTOCONF_DELAYSEC) * 1000000)
 
 /****************************************************************************
  * Private Types
@@ -293,7 +283,6 @@ errout_with_semaphore:
 int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 {
   struct icmpv6_rnotify_s notify;
-  struct timespec delay;
   net_ipv6addr_t lladdr;
   int retries;
   int ret;
@@ -320,7 +309,8 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
   net_lock();
 
   /* IPv6 Stateless Autoconfiguration
-   * Reference: http://www.tcpipguide.com/free/t_IPv6AutoconfigurationandRenumbering.htm
+   * Reference:
+   * http://www.tcpipguide.com/free/t_IPv6AutoconfigurationandRenumbering.htm
    *
    * The following is a summary of the steps a device takes when using
    * stateless auto-configuration:
@@ -374,11 +364,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
   net_ipv6addr_copy(dev->d_ipv6addr, lladdr);
 
-  /* The optimal delay would be the worst case round trip time. */
-
-  delay.tv_sec  = CONFIG_ICMPv6_AUTOCONF_DELAYSEC;
-  delay.tv_nsec = CONFIG_ICMPv6_AUTOCONF_DELAYNSEC;
-
   /* 4. Router Contact: The node next attempts to contact a local router for
    *    more information on continuing the configuration. This is done either
    *    by listening for Router Advertisement messages sent periodically by
@@ -405,7 +390,7 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
 
       /* Wait to receive the Router Advertisement message */
 
-      ret = icmpv6_rwait(&notify, &delay);
+      ret = icmpv6_rwait(&notify, CONFIG_ICMPv6_AUTOCONF_DELAYMSEC);
       if (ret != -ETIMEDOUT)
         {
           /* ETIMEDOUT is the only expected failure.  We will retry on that
@@ -415,9 +400,6 @@ int icmpv6_autoconfig(FAR struct net_driver_s *dev)
           break;
         }
 
-      /* Double the delay time for the next loop */
-
-      clock_timespec_add(&delay, &delay, &delay);
       ninfo("Timed out... retrying %d\n", retries + 1);
     }
 

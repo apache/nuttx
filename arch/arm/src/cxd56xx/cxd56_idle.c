@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cxd56/cxd56_idle.c
+ * arch/arm/src/cxd56xx/cxd56_idle.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

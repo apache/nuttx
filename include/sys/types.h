@@ -139,14 +139,10 @@ typedef int16_t      ssize_t;
 typedef uint16_t     rsize_t;
 
 #else /* CONFIG_SMALL_MEMORY */
-/* As a general rule, the size of size_t should be the same as the size of
- * uintptr_t: 32-bits on a machine with 32-bit addressing but 64-bits on a
- * machine with 64-bit addressing.
- */
 
-typedef uintptr_t    size_t;
-typedef intptr_t     ssize_t;
-typedef uintptr_t    rsize_t;
+typedef _size_t      size_t;
+typedef _ssize_t     ssize_t;
+typedef _size_t      rsize_t;
 
 #endif /* CONFIG_SMALL_MEMORY */
 

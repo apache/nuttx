@@ -511,7 +511,7 @@ struct fb_vtable_s
 
 #ifdef CONFIG_FB_SYNC
   /* The following are provided only if the video hardware signals
-   * vertical snyc.
+   * vertical sync.
    */
 
   int (*waitforvsync)(FAR struct fb_vtable_s *vtable);

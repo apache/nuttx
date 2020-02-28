@@ -54,7 +54,7 @@
  * LED_PANIC                  4     NC     NC     ON  (2Hz flashing)
  * LED_IDLE                         Sleep mode indication not supported
  *
- * After booting, LEDs D9 and D11 are avaible for use by the user.  If the
+ * After booting, LEDs D9 and D11 are available for use by the user.  If the
  * system booted properly, D9 and D11 should be OFF and D12 should be glowing
  * to indicate that interrupts are occurring.  If D12 is flash at 2Hz, then
  * the system has crashed.

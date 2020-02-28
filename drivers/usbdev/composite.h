@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __DRIVERS_USBDEV_COMPOSITE_H
-#define __DRIVERS_USBDEV_COMPOSITE_H 1
+#define __DRIVERS_USBDEV_COMPOSITE_H
 
 /****************************************************************************
  * Included Files

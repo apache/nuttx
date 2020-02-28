@@ -52,8 +52,10 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
 #include "sched/sched.h"
+#include "irq/irq.h"
+
+#include "up_arch.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -156,48 +158,48 @@ static inline void up_registerdump(void)
 {
   /* Are user registers available from interrupt processing? */
 
-  if (g_current_regs)
+  if (CURRENT_REGS)
     {
       _alert("EPC:%016x \n",
-             g_current_regs[REG_EPC]);
+             CURRENT_REGS[REG_EPC]);
 
       _alert("A0:%016x A1:%016x A2:%016x A3:%016x \n",
-             g_current_regs[REG_A0], g_current_regs[REG_A1],
-             g_current_regs[REG_A2], g_current_regs[REG_A3]);
+             CURRENT_REGS[REG_A0], CURRENT_REGS[REG_A1],
+             CURRENT_REGS[REG_A2], CURRENT_REGS[REG_A3]);
 
       _alert("A4:%016x A5:%016x A6:%016x A7:%016x \n",
-             g_current_regs[REG_A4], g_current_regs[REG_A5],
-             g_current_regs[REG_A6], g_current_regs[REG_A7]);
+             CURRENT_REGS[REG_A4], CURRENT_REGS[REG_A5],
+             CURRENT_REGS[REG_A6], CURRENT_REGS[REG_A7]);
 
       _alert("T0:%016x T1:%016x T2:%016x T3:%016x \n",
-             g_current_regs[REG_T0], g_current_regs[REG_T1],
-             g_current_regs[REG_T2], g_current_regs[REG_T3]);
+             CURRENT_REGS[REG_T0], CURRENT_REGS[REG_T1],
+             CURRENT_REGS[REG_T2], CURRENT_REGS[REG_T3]);
 
       _alert("T4:%016x T5:%016x T6:%016x \n",
-             g_current_regs[REG_T4], g_current_regs[REG_T5],
-             g_current_regs[REG_T6]);
+             CURRENT_REGS[REG_T4], CURRENT_REGS[REG_T5],
+             CURRENT_REGS[REG_T6]);
 
       _alert("S0:%016x S1:%016x S2:%016x S3:%016x \n",
-             g_current_regs[REG_S0], g_current_regs[REG_S1],
-             g_current_regs[REG_S2], g_current_regs[REG_S3]);
+             CURRENT_REGS[REG_S0], CURRENT_REGS[REG_S1],
+             CURRENT_REGS[REG_S2], CURRENT_REGS[REG_S3]);
 
       _alert("S4:%016x S5:%016x S6:%016x S7:%016x \n",
-             g_current_regs[REG_S4], g_current_regs[REG_S5],
-             g_current_regs[REG_S6], g_current_regs[REG_S7]);
+             CURRENT_REGS[REG_S4], CURRENT_REGS[REG_S5],
+             CURRENT_REGS[REG_S6], CURRENT_REGS[REG_S7]);
 
       _alert("S8:%016x S9:%016x S10:%016x S11:%016x \n",
-             g_current_regs[REG_S8], g_current_regs[REG_S9],
-             g_current_regs[REG_S10], g_current_regs[REG_S11]);
+             CURRENT_REGS[REG_S8], CURRENT_REGS[REG_S9],
+             CURRENT_REGS[REG_S10], CURRENT_REGS[REG_S11]);
 
 #ifdef RISCV_SAVE_GP
       _alert("GP:%016x SP:%016x FP:%016x TP:%016x RA:%016x \n",
-             g_current_regs[REG_GP], g_current_regs[REG_SP],
-             g_current_regs[REG_FP], g_current_regs[REG_TP],
-             g_current_regs[REG_RA]);
+             CURRENT_REGS[REG_GP], CURRENT_REGS[REG_SP],
+             CURRENT_REGS[REG_FP], CURRENT_REGS[REG_TP],
+             CURRENT_REGS[REG_RA]);
 #else
       _alert("SP:%016x FP:%016x TP:%016x RA:%016x \n",
-             g_current_regs[REG_SP], g_current_regs[REG_FP],
-             g_current_regs[REG_TP], g_current_regs[REG_RA]);
+             CURRENT_REGS[REG_SP], CURRENT_REGS[REG_FP],
+             CURRENT_REGS[REG_TP], CURRENT_REGS[REG_RA]);
 #endif
     }
 }
@@ -259,10 +261,10 @@ static void up_dumpstate(void)
 
       /* Extract the user stack pointer */
 
-      sp = g_current_regs[REG_SP];
+      sp = CURRENT_REGS[REG_SP];
       _alert("sp:     %016x\n", sp);
     }
-  else if (g_current_regs)
+  else if (CURRENT_REGS)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
       up_stackdump(istackbase - istacksize, istackbase);
@@ -305,15 +307,21 @@ static void _up_assert(int errorcode)
 {
   /* Flush any buffered SYSLOG data */
 
-  (void)syslog_flush();
+  syslog_flush();
 
   /* Are we in an interrupt handler or the idle task? */
 
-  if (g_current_regs || running_task()->flink == NULL)
+  if (CURRENT_REGS || running_task()->flink == NULL)
     {
-      (void)up_irq_save();
+      up_irq_save();
       for (; ; )
         {
+#ifdef CONFIG_SMP
+          /* Try (again) to stop activity on other CPUs */
+
+          spin_trylock(&g_cpu_irqlock);
+#endif
+
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
           board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
@@ -377,8 +385,17 @@ void up_assert(const uint8_t *filename, int lineno)
 
   /* Flush any buffered SYSLOG data (from prior to the assertion) */
 
-  (void)syslog_flush();
+  syslog_flush();
 
+#ifdef CONFIG_SMP
+#if CONFIG_TASK_NAME_SIZE > 0
+  _alert("Assertion failed CPU%d at file:%s line: %d task: %s\n",
+        up_cpu_index(), filename, lineno, rtcb->name);
+#else
+  _alert("Assertion failed CPU%d at file:%s line: %d\n",
+        up_cpu_index(), filename, lineno);
+#endif
+#else
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file:%s line: %d task: %s\n",
         filename, lineno, rtcb->name);
@@ -386,8 +403,15 @@ void up_assert(const uint8_t *filename, int lineno)
   _alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
 #endif
+#endif
 
   up_dumpstate();
+
+#ifdef CONFIG_SMP
+  /* Show the CPU number */
+
+  _alert("CPU%d:\n", up_cpu_index());
+#endif
 
   /* Dump the state of all tasks (if available) */
 
@@ -396,12 +420,12 @@ void up_assert(const uint8_t *filename, int lineno)
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */
 
-  (void)usbtrace_enumerate(assert_tracecallback, NULL);
+  usbtrace_enumerate(assert_tracecallback, NULL);
 #endif
 
   /* Flush any buffered SYSLOG data (from the above) */
 
-  (void)syslog_flush();
+  syslog_flush();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
   board_crashdump(up_getsp(), running_task(), filename, lineno);

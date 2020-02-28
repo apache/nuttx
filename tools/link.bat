@@ -35,7 +35,7 @@ rem
 
 set usemklink=
 if "%1"=="-m" (
-set usemklink="y"
+  set usemklink="y"
 shift
 )
 
@@ -84,18 +84,20 @@ rem Copy the directory
 :MkLink
 
 if "%usemklink%"=="y" (
-/user:administrator mklink /d %src% %link%
+  /user:administrator mklink /d %src% %link%
 goto :End
 )
 
-xcopy %src% %link% /c /q /s /e /y /i
+rem %src% may include forward slashes.  That upsets xcopy, but not GNUWin32 cp
+rem xcopy %src% %link% /c /q /s /e /y /i
+cp -dR %src% %link%
 echo FAKELNK > %link%\.fakelnk
 goto :End
 
 :ShowUsage
 echo USAGE: %0 ^<src^> ^<link^>
 echo Where:
-echo   ^<src^> is the source directory to be linked
-echo   ^<link^> is the link to be created
+echo  ^<src^> is the source directory to be linked
+echo  ^<link^> is the link to be created
 
 :End

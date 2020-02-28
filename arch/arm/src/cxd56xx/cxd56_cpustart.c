@@ -155,7 +155,7 @@ static void appdsp_boot(void)
  *
  *   Each CPU is provided the entry point to is IDLE task when started.  A
  *   TCB for each CPU's IDLE task has been initialized and placed in the
- *   CPU's g_assignedtasks[cpu] list.  Not stack has been alloced or
+ *   CPU's g_assignedtasks[cpu] list.  Not stack has been allocated or
  *   initialized.
  *
  *   The OS initialization logic calls this function repeatedly until each
@@ -236,7 +236,7 @@ int up_cpu_start(int cpu)
 
       putreg32(0, CXD56_CPU_P2_INT);
 
-      /* Setup SW_INT fot this APP_DSP0 */
+      /* Setup SW_INT for this APP_DSP0 */
 
       irq_attach(CXD56_IRQ_SW_INT, arm_pause_handler, NULL);
       up_enable_irq(CXD56_IRQ_SW_INT);

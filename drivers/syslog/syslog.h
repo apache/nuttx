@@ -58,15 +58,11 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* The default SYSLOG channel */
-
-struct syslog_channel_s; /* Forward reference */
-EXTERN const struct syslog_channel_s g_default_channel;
-
 /* This is the current syslog channel in use.  It initially points to
  * g_default_channel.
  */
 
+struct syslog_channel_s; /* Forward reference */
 EXTERN FAR const struct syslog_channel_s *g_syslog_channel;
 
 /****************************************************************************
@@ -123,7 +119,7 @@ int syslog_dev_initialize(FAR const char *devpath, int oflags, int mode);
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_FILE
-int syslog_dev_uninitialize(void);
+void syslog_dev_uninitialize(void);
 #endif /* CONFIG_SYSLOG_FILE */
 
 /****************************************************************************

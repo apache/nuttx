@@ -70,7 +70,6 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
 static const char * const g_abbrev_wdayname[7] =
 {
   "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
@@ -80,7 +79,6 @@ static const char * const g_wdayname[7] =
 {
   "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 };
-#endif
 
 static const char * const g_abbrev_monthname[12] =
 {
@@ -181,7 +179,6 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
 
        switch (*format++)
          {
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
            /* %a: A three-letter abbreviation for the day of the week. */
 
            case 'a':
@@ -205,17 +202,6 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
                  }
              }
              break;
-#else
-           /* %a: A three-letter abbreviation for the day of the week. */
-           /* %A: The full name for the day of the week. */
-
-           case 'a':
-           case 'A':
-             {
-               len = snprintf(dest, chleft, "Day"); /* Not supported */
-             }
-             break;
-#endif
 
            /* %h: Equivalent to %b */
 
@@ -301,7 +287,9 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
              {
                if (tm->tm_mon < 12)
                  {
-                   value = clock_daysbeforemonth(tm->tm_mon, clock_isleapyear(tm->tm_year)) + tm->tm_mday;
+                   value = clock_daysbeforemonth(tm->tm_mon,
+                                                 clock_isleapyear(tm->tm_year)) +
+                                                 tm->tm_mday;
                    len   = snprintf(dest, chleft, "%03d", value);
                  }
              }
@@ -364,6 +352,7 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
                  {
                    str = "AM";
                  }
+
                len = snprintf(dest, chleft, "%s", str);
              }
              break;
@@ -380,6 +369,7 @@ size_t strftime(FAR char *s, size_t max, FAR const char *format,
                  {
                    str = "am";
                  }
+
                len = snprintf(dest, chleft, "%s", str);
              }
              break;

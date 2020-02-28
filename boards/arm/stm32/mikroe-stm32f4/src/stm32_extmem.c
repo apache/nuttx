@@ -125,7 +125,7 @@ void stm32_extmemgpios(const uint32_t *gpios, int ngpios)
  * Name: stm32_extmemaddr
  *
  * Description:
- *   Initialize adress line GPIOs for external memory access
+ *   Initialize address line GPIOs for external memory access
  *
  ****************************************************************************/
 
@@ -146,4 +146,3 @@ void stm32_extmemdata(int ndata)
 {
   stm32_extmemgpios(g_dataconfig, ndata);
 }
-

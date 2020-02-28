@@ -116,4 +116,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_STM32L4_IRQ_H */
-

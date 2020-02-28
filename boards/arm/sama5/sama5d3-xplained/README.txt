@@ -90,7 +90,7 @@ Development Environment
   Several possible development environments may be used:
 
   - Linux or macOS native
-  - Cygwin unders Windows
+  - Cygwin under Windows
   - MinGW + MSYS under Windows
   - Windows native (with GNUMake from GNUWin32).
 
@@ -110,7 +110,7 @@ GNU Toolchain Options
 
     CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
     CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_ARMV7A_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windos
+    CONFIG_ARMV7A_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windows
     CONFIG_ARMV7A_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
     CONFIG_ARMV7A_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
     CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
@@ -166,7 +166,7 @@ IDEs
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/arm/src/sam34,
+  3) Set up include paths:  You will need include/, arch/arm/src/sam34,
      arch/arm/src/common, arch/arm/src/armv7-m, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.
@@ -278,7 +278,14 @@ Loading Code into SRAM with J-Link
          (gdb) target remote localhost:2331
          (gdb) mon reset
          (gdb) load nuttx
-         (gdb) ... start debugging ...
+         (gdb) breakpoint nsh_main
+         (gdb) continue
+         Continuing.
+
+         Breakpoint 1, nsh_main (argc=1, argv=0x2007757c) at nsh_main.c:218
+         218	  sched_getparam(0, &param);
+         (gdb) continue
+         (gdb) ... debugging ...
 
   Loading code using J-Link Commander
   ----------------------------------
@@ -395,7 +402,7 @@ NAND FLASH Memory Map
   0x0000:0000 - 0x0003:ffff: AT91BootStrap
   0x0004:0000 - 0x000b:ffff: U-Boot
   0x000c:0000 - 0x000f:ffff: U-Boot environment
-  0x0010:0000 - 0x0017:ffff: U-Boot environement redundant
+  0x0010:0000 - 0x0017:ffff: U-Boot environment redundant
   0x0018:0000 - 0x001f:ffff: Device tree (DTB)
   0x0020:0000 - 0x007f:ffff: NuttX
   0x0080:0000 - end:         Available for use as a NAND file system
@@ -488,7 +495,7 @@ Programming U-Boot
      - Press the "Send File" button
      - Close SAM-BA, remove the USB Device cable.
 
-  You should now be able to interrupt with U-Boot vie the DBGU interface.
+  You should now be able to interrupt with U-Boot via the DBGU interface.
 
 Load NuttX with U-Boot on AT91 boards
 -------------------------------------
@@ -577,6 +584,28 @@ Load NuttX with U-Boot on AT91 boards
 
         NuttShell (NSH) NuttX-7.2
         nsh>
+
+      It is possible to autoboot from the SD Card:
+
+        1. Format an SD Card as FAT.
+        2. Copy the file nuttx/boards/arm/sama5/sama5d3-xplained/boot/uImage file to the SD Card.
+        3. Copy the file nuttx.bin you just compiled to the SD Card.
+        4. Attach a 3.3V USB-serial adapter to the DEBUG console port.
+        5. Open a serial terminal to the debug console. In Linux, do this:
+
+          picocom -b 115200 /dev/ttyUSB0
+
+        6. Press the RESET button. You should see a U-Boot prompt. Press a key to stop the booting process.
+        7. Issue the following commands to U-Boot:
+
+          U-Boot> setenv load_nuttx 'fatload mmc 0 0x20008000 nuttx.bin'
+          U-Boot> setenv run_nuttx 'go 0x20008040'
+          U-Boot> setenv boot_nuttx 'run load_nuttx; run run_nuttx'
+          U-Boot> setenv bootcmd 'boot_nuttx'
+          U-Boot> saveenv
+          U-Boot> reset
+
+        8. The board should now always boot to NuttX if you have the SD Card inserted.
 
   Loading through network
 
@@ -761,7 +790,9 @@ Networking
   Networking support via the can be added to NSH by selecting the following
   configuration options.  The SAMA5D36 supports two different Ethernet MAC
   peripherals:  (1) The 10/100Base-T EMAC peripheral and (2) the
-  10/100/1000Base-T GMAC peripheral.
+  10/100/1000Base-T GMAC peripheral. Ethernet over USB using the
+  CDC ECM driver is also supported, and should work on Linux, macOS, and
+  Windows.
 
   Selecting the EMAC peripheral
   -----------------------------
@@ -805,6 +836,21 @@ Networking
   PHY selection.  Later in the configuration steps, you will need to select
   the  KSZ9081 PHY for GMAC (See below)
 
+  Selecting Ethernet over USB (CDC ECM driver)
+  --------------------------------------------
+
+  This uses the USB 2.0 connector labeled USB-A. On the host computer you will
+  need to configure the CDC ECM Ethernet over USB driver (see below for Linux
+  configuration script).
+
+    CONFIG_USBDEV=y
+    CONFIG_USBDEV_DMA=y
+    CONFIG_USBDEV_DUALSPEED=y
+    CONFIG_NET_CDCECM=y
+    CONFIG_NET_ETH_PKTSIZE=1514
+
+  You can also use the defconfig file in `boards/arm/sama5/sama5d3-xplained/configs/ethernet-over-usb-2-high-speed`.
+
   Common configuration settings
   -----------------------------
 
@@ -814,7 +860,6 @@ Networking
     CONFIG_NET_ETH_PKTSIZE=562           : Maximum packet size 1518 is more standard
     CONFIG_NET_TCP=y                     : Enable TCP/IP networking
     CONFIG_NET_TCPBACKLOG=y              : Support TCP/IP backlog
-    CONFIG_NET_TCP_READAHEAD_BUFSIZE=562 : Read-ahead buffer size
     CONFIG_NET_UDP=y                     : Enable UDP networking
     CONFIG_NET_ICMP=y                    : Enable ICMP networking
     CONFIG_NET_ICMP_SOCKET=y             : Needed for NSH ping command
@@ -980,7 +1025,7 @@ Networking
 
     - One other thing: UDP support is required (CONFIG_NET_UDP).
 
-  Given those prerequisites, the newtork monitor can be selected with these additional settings.
+  Given those prerequisites, the network monitor can be selected with these additional settings.
 
     Networking Support -> Networking Device Support
       CONFIG_NETDEV_PHY_IOCTL=y             : Enable PHY ioctl support
@@ -990,6 +1035,69 @@ Networking
       CONFIG_NSH_NETINIT_MONITOR=y          : Enable the network monitor
       CONFIG_NSH_NETINIT_RETRYMSEC=2000     : Configure the network monitor as you like
       CONFIG_NSH_NETINIT_SIGNO=18
+
+  Ethernet Over USB Configuration Script
+  --------------------------------------
+
+  There is a configuration script for Linux that will configure the USB Ethernet interface,
+  it is in `tools/netusb.sh`. You can use it as follows:
+
+  Once you boot a NuttX system with the CDC ECM Ethernet over USB device, the Linux network interface
+  will be added to your system. You should see something like the following messages in
+  /var/log/kern.log:
+
+   [302074.552879] usb 1-2: new high-speed USB device number 107 using ehci-pci
+   [302074.718264] usb 1-2: New USB device found, idVendor=0525, idProduct=a4a2, bcdDevice= 1.00
+   [302074.718267] usb 1-2: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+   [302074.718269] usb 1-2: Product: CDC/ECM Ethernet
+   [302074.718271] usb 1-2: Manufacturer: NuttX
+   [302074.718272] usb 1-2: SerialNumber: 0
+   [302074.760638] cdc_ether 1-2:1.0 usb0: register 'cdc_ether' at usb-0000:02:03.0-2, CDC Ethernet Device, 02:00:00:11:22:33
+   [302074.796215] cdc_ether 1-2:1.0 ens160u4u2: renamed from usb0
+
+
+  If you execute the command 'ifconfig -a' you should see a new interface:
+
+  $ ifconfig -a
+
+  ens33: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+          inet 192.168.46.156  netmask 255.255.255.0  broadcast 192.168.46.255
+          inet6 fe80::20c:29ff:fe57:d0f8  prefixlen 64  scopeid 0x20<link>
+          ether 00:0c:29:57:d0:f8  txqueuelen 1000  (Ethernet)
+          RX packets 7628014  bytes 2002078802 (2.0 GB)
+          RX errors 0  dropped 0  overruns 0  frame 0
+          TX packets 6040388  bytes 5327276865 (5.3 GB)
+          TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+  ens160u4u2: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+          inet6 fe80::ff:fe11:2233  prefixlen 64  scopeid 0x20<link>
+          ether 02:00:00:11:22:33  txqueuelen 1000  (Ethernet)
+          RX packets 36798  bytes 51705300 (51.7 MB)
+          RX errors 0  dropped 0  overruns 0  frame 0
+          TX packets 24196  bytes 1312512 (1.3 MB)
+          TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+  ens33 is the host Ethernet or wireless LAN interface. ens160u4u2 is the USB Ethernet
+  interface.
+
+  The script will bring up the interface, configure it, and set up routes and IP Tables rules so the
+  nuttx system can access the internet:
+
+  $ sudo ./tools/netusb.sh ens33 ens160u4u2 on
+
+  This will bring down the interface, configure it, and delete routes and IP Tables rules:
+
+  $ sudo ./tools/netusb.sh ens33 ens160u4u2 off
+
+  Now that the new interface has an IP address, you can ping the NuttX box at 10.0.0.2
+  (or whatever IP address you configured it to have). If you configured the telnet daemon
+  and started it, you should be able to telnet to the board using:
+
+  $ telnet 10.0.0.2
+
+  The helper script also sets up Network Address Translation (NAT) so the NuttX system
+  can access the Internet. If that is not what you want, you can remove the iptables
+
 
 AT25 Serial FLASH
 =================
@@ -1349,6 +1457,14 @@ USB High-Speed Device
     Application Configuration -> Examples:
       CONFIG_SYSTEM_CDCACM=y              : Enable an CDC/ACM example
 
+  CDC/ECM Ethernet Over USB
+  -------------------------
+
+  This allows networking to the host system via Ethernet over USB. See the
+  Networking section for configuration. On USB 2.0 High Speed, the CDC ECM
+  driver uses DMA and can transfer 4.4 MBytes/sec (34 Mbits/sec).
+
+
   Debugging USB Device
   --------------------
 
@@ -1460,7 +1576,7 @@ file1: CONFIG_USBHOST_ISOC_DISABLE=y
 
     Drivers -> USB Host Driver Support
       CONFIG_USBHOST_HUB=y                 : Enable the hub class
-      CONFIG_USBHOST_ASYNCH=y              : Asynchonous I/O supported needed for hubs
+      CONFIG_USBHOST_ASYNCH=y              : Asynchronous I/O supported needed for hubs
 
     System Type -> USB High Speed Host driver options
       CONFIG_SAMA5_OHCI_NEDS=12            : You will probably want more pipes
@@ -1620,7 +1736,7 @@ SDRAM Support
       CONFIG_SYSTEM_RAMTEST=y
 
   In this configuration, the SDRAM is not added to heap and so is not
-  accessable to the applications.  So the RAM test can be freely executed
+  accessible to the applications.  So the RAM test can be freely executed
   against the SRAM memory beginning at address 0x2000:0000 (DDR CS):
 
     nsh> ramtest -h
@@ -2041,7 +2157,7 @@ I2C Tool
     Where <cmd> is one of:
 
       Show help     : ?
-      List busses   : bus
+      List buses   : bus
       List devices  : dev [OPTIONS] <first> <last>
       Read register : get [OPTIONS] [<repititions>]
       Show help     : help
@@ -2065,7 +2181,7 @@ I2C Tool
     o The I2C dev command may have bad side effects on your I2C devices.
       Use only at your own risk.
 
-    As an example, the I2C dev comman can be used to list all devices
+    As an example, the I2C dev command can be used to list all devices
     responding on TWI0 (the default) like this:
 
       nsh> i2c dev 0x03 0x77
@@ -2835,7 +2951,7 @@ SAMA5D3-Xplained Configuration Options
 
     CONFIG_RAM_START=0x20000000
 
-  CONFIG_RAM_VSTART - The virutal start address of installed DRAM
+  CONFIG_RAM_VSTART - The virtual start address of installed DRAM
 
     CONFIG_RAM_VSTART=0x20000000
 

@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP__CXD56_CISIF_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP__CXD56_CISIF_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_CISIF_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_CISIF_H
 
 /****************************************************************************
  * Included Files
@@ -110,4 +110,4 @@
 #define MODE_JPG_TRS_EN      (0x00000109)
 #define MODE_INTLEV_TRS_EN   (0x0000010E)
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP__CXD56_CISIF_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_CISIF_H */

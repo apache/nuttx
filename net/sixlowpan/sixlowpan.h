@@ -252,7 +252,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
  *   used by the IPv6 forwarding logic.
  *
  * Input Parameters:
- *   dev    - An instance of nework device state structure
+ *   dev    - An instance of network device state structure
  *   fwddev - The network device used to send the data.  This will be the
  *            same device except for the IP forwarding case where packets
  *            are sent across devices.

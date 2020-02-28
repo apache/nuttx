@@ -74,4 +74,3 @@ void ez80_copystate(chipreg_t *dest, const chipreg_t *src)
       *dest++ = *src++;
     }
 }
-

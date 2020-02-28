@@ -488,7 +488,7 @@ uint32_t lc823450_get_apb(void)
 
 /****************************************************************************
  * Name: lc823450_dvfs_tick_callback
- * This callback is called in the timer interupt on CPU0
+ * This callback is called in the timer interrupt on CPU0
  ****************************************************************************/
 
 void lc823450_dvfs_tick_callback(void)
@@ -518,7 +518,7 @@ void lc823450_dvfs_tick_callback(void)
       lc823450_dvfs_do_auto(idle);
     }
 
-  /* Update freqency statistics */
+  /* Update frequency statistics */
 
   g_dvfs_freq_stat[_dvfs_cur_idx]++;
 }

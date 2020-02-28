@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <semaphore.h>
 #include <sched.h>
 #include <pthread.h>
 #include <queue.h>
@@ -63,8 +62,6 @@
 #  define CONFIG_DEBUG_GRAPHICS_INFO  1
 #endif
 #include <debug.h>
-
-#include <nuttx/semaphore.h>
 
 #include "vnc_server.h"
 
@@ -379,7 +376,7 @@ static FAR void *vnc_updater(FAR void *arg)
   while (session->state == VNCSERVER_RUNNING)
     {
       /* Get the next queued rectangle update.  This call will block until an
-       * upate is available for the case where the update queue is empty.
+       * update is available for the case where the update queue is empty.
        */
 
       srcrect = vnc_remove_queue(session);

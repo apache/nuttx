@@ -374,8 +374,6 @@ ViewTool DP83848 Ethernet Module
       CONFIG_NET_SOCKOPTS=y
 
       CONFIG_NET_ETH_PKTSIZE=650             : Maximum packet size
-      CONFIG_NET_TCP_READAHEAD=y             : Enable read-ahead buffering
-      CONFIG_NET_TCP_READAHEAD_BUFSIZE=650
 
       CONFIG_NET_TCP=y                       : TCP support
       CONFIG_NET_NTCP_READAHEAD_BUFFERS=8
@@ -1061,7 +1059,7 @@ Configurations
           Library Support:
             CONFIG_SCHED_WORKQUEUE=y           : Work queue support required
 
-          Applicaton Configuration:
+          Application Configuration:
             CONFIG_EXAMPLES_TOUCHSCREEN=y      : Enable the touchscreen built-int test
 
           Defaults should be okay for related touchscreen settings.  Touchscreen

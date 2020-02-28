@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __NET_ROUTE_CACHEROUTE_H
-#define __NET_ROUTE_CACHEROUTE_H 1
+#define __NET_ROUTE_CACHEROUTE_H
 
 /****************************************************************************
  * Included Files
@@ -96,7 +96,7 @@ int net_addcache_ipv6(FAR struct net_route_ipv6_s *route);
  * Name: net_foreachcache_ipv4/net_foreachcache_ipv6
  *
  * Description:
- *   Traverse the routing table cahce
+ *   Traverse the routing table cache
  *
  * Input Parameters:
  *   handler - Will be called for each route in the routing table cache.

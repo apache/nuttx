@@ -42,12 +42,12 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <arch/stm32f7/chip.h>
 
 #include "up_arch.h"
@@ -302,7 +302,7 @@ static inline FAR struct stm32_dma_s *stm32_dmamap(unsigned long dmamap)
 
   unsigned int controller = STM32_DMA_CONTROLLER(dmamap);
 
-  /* Extact the stream number from the bit encoded value */
+  /* Extract the stream number from the bit encoded value */
 
   unsigned int stream = STM32_DMA_STREAM(dmamap);
 

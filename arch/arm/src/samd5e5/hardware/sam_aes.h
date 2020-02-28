@@ -51,7 +51,7 @@
 /* AES register offsets ********************************************************************/
 
 #define SAM_AES_CTRLA_OFFSET       0x0000 /* Control A Register */
-#define SAM_AES_CTRLB_OFFSET       0x0004 /*  Control B Register */
+#define SAM_AES_CTRLB_OFFSET       0x0004 /* Control B Register */
 #define SAM_AES_INTENCLR_OFFSET    0x0005 /* Interrupt Enable Clear Register */
 #define SAM_AES_INTENSET_OFFSET    0x0006 /* Interrupt Enable Set Register */
 #define SAM_AES_INTENFLAG_OFFSET   0x0007 /* Interrupt Flag Status and Clear Register */
@@ -165,7 +165,7 @@
 #  define AES_CTRLA_CTYPE4_DISAB   (0 << AES_CTRLA_CTYPE_SHIFT) /* Countermeasure 4 disabled */
 #  define AES_CTRLA_CTYPE4_ENAB    (8 << AES_CTRLA_CTYPE_SHIFT) /* Countermeasure 4 enabled */
 
-/*  Control B Register */
+/* Control B Register */
 
 #define AES_CTRLB_START            (1 << 0)  /* Bit 0:  Start encryption/decryption */
 #define AES_CTRLB_NEWMSG           (1 << 1)  /* Bit 1:  New message */

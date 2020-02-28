@@ -62,7 +62,7 @@
  *   This function is called by the OS when one or more
  *   signal handling actions have been queued for execution.
  *   The architecture specific code must configure things so
- *   that the 'igdeliver' callback is executed on the thread
+ *   that the 'sigdeliver' callback is executed on the thread
  *   specified by 'tcb' as soon as possible.
  *
  *   This function may be called from interrupt handling logic.
@@ -107,8 +107,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
        * being delivered to the currently executing task.
        */
 
-      sinfo("rtcb=0x%p g_current_regs=0x%p\n",
-            this_task(), g_current_regs);
+      sinfo("rtcb=0x%p CURRENT_REGS=0x%p\n",
+            this_task(), CURRENT_REGS);
 
       if (tcb == this_task())
         {
@@ -116,7 +116,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * a task is signalling itself for some reason.
            */
 
-          if (!g_current_regs)
+          if (!CURRENT_REGS)
             {
               /* In this case just deliver the signal now. */
 
@@ -143,18 +143,18 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                */
 
               tcb->xcp.sigdeliver       = sigdeliver;
-              tcb->xcp.saved_epc        = g_current_regs[REG_EPC];
-              tcb->xcp.saved_status     = g_current_regs[REG_STATUS];
+              tcb->xcp.saved_epc        = CURRENT_REGS[REG_EPC];
+              tcb->xcp.saved_status     = CURRENT_REGS[REG_STATUS];
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
                */
 
-              g_current_regs[REG_EPC]      = (uint32_t)up_sigdeliver;
-              status                     = g_current_regs[REG_STATUS];
-              status                    &= ~CP0_STATUS_IM_MASK;
-              status                    |= CP0_STATUS_IM_SWINTS;
-              g_current_regs[REG_STATUS]   = status;
+              CURRENT_REGS[REG_EPC]      = (uint32_t)up_sigdeliver;
+              status                     = CURRENT_REGS[REG_STATUS];
+              status                    &= ~CP0_STATUS_INT_MASK;
+              status                    |= CP0_STATUS_INT_SW0;
+              CURRENT_REGS[REG_STATUS]   = status;
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.
@@ -164,7 +164,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",
                     tcb->xcp.saved_epc, tcb->xcp.saved_status,
-                    g_current_regs[REG_EPC], g_current_regs[REG_STATUS]);
+                    CURRENT_REGS[REG_EPC], CURRENT_REGS[REG_STATUS]);
             }
         }
 
@@ -191,8 +191,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.regs[REG_EPC]     = (uint32_t)up_sigdeliver;
           status                     = tcb->xcp.regs[REG_STATUS];
-          status                    &= ~CP0_STATUS_IM_MASK;
-          status                    |= CP0_STATUS_IM_SWINTS;
+          status                    &= ~CP0_STATUS_INT_MASK;
+          status                    |= CP0_STATUS_INT_SW0;
           tcb->xcp.regs[REG_STATUS]  = status;
 
           sinfo("PC/STATUS Saved: %08x/%08x New: %08x/%08x\n",

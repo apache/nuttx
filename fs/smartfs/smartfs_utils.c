@@ -45,7 +45,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -55,6 +54,12 @@
 #include <nuttx/fs/ioctl.h>
 
 #include "smartfs.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define WORKBUFFER_SIZE 256
 
 /****************************************************************************
  * Private Data
@@ -269,7 +274,7 @@ int smartfs_mount(struct smartfs_mountpt_s *fs, bool writeable)
   if (nextfs == NULL)
     {
       fs->fs_rwbuffer = (char *) kmm_malloc(fs->fs_llformat.availbytes);
-      fs->fs_workbuffer = (char *) kmm_malloc(256);
+      fs->fs_workbuffer = (char *) kmm_malloc(WORKBUFFER_SIZE);
     }
 
   /* Now add ourselves to the linked list of SMART mounts */
@@ -292,11 +297,11 @@ int smartfs_mount(struct smartfs_mountpt_s *fs, bool writeable)
   g_mounthead = fs;
 #endif
 
-#endif /* CONFIG_SMARTFS_MULTI_ROOT_DIRS */
-
   fs->fs_rwbuffer = (char *) kmm_malloc(fs->fs_llformat.availbytes);
-  fs->fs_workbuffer = (char *) kmm_malloc(256);
+  fs->fs_workbuffer = (char *) kmm_malloc(WORKBUFFER_SIZE);
   fs->fs_rootsector = SMARTFS_ROOT_DIR_SECTOR;
+
+#endif /* CONFIG_SMARTFS_MULTI_ROOT_DIRS */
 
   /* We did it! */
 
@@ -486,6 +491,11 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
   struct      smart_read_write_s readwrite;
   struct      smartfs_entry_header_s *entry;
 
+  /* Set the initial value of the output */
+
+  *parentdirsector = 0xffff;
+  *filename = NULL;
+
   /* Initialize directory level zero as the root sector */
 
   dirstack[0] = fs->fs_rootsector;
@@ -521,6 +531,14 @@ int smartfs_finddirentry(struct smartfs_mountpt_s *fs,
         {
           seglen++;
           ptr++;
+        }
+
+      /* Check to avoid buffer overflow */
+
+      if (seglen >= WORKBUFFER_SIZE)
+        {
+          ret = -ENAMETOOLONG;
+          goto errout;
         }
 
       strncpy(fs->fs_workbuffer, segment, seglen);
@@ -832,6 +850,9 @@ int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
   uint16_t  entrysize;
   struct    smartfs_entry_header_s *entry;
   struct    smartfs_chain_header_s *chainheader;
+  int       update_chain = 0;
+  struct    smart_read_write_s     update_readwrite;
+  struct    smartfs_chain_header_s update_header;
 
   /* Start at the 1st sector in the parent directory */
 
@@ -924,19 +945,15 @@ int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
 
           nextsector = (uint16_t) ret;
 
-          /* Chain the next sector into this sector sector */
+          /* Chain the next sector into this sector. */
 
-          *((FAR uint16_t *)chainheader->nextsector) = nextsector;
-          readwrite.offset = offsetof(struct smartfs_chain_header_s,
-              nextsector);
-          readwrite.count = sizeof(uint16_t);
-          readwrite.buffer = chainheader->nextsector;
-          ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &readwrite);
-          if (ret < 0)
-            {
-              ferr("ERROR: Error chaining sector %d\n", nextsector);
-              goto errout;
-            }
+          *((uint16_t *)update_header.nextsector) = nextsector;
+          update_readwrite.logsector = psector;
+          update_readwrite.offset = offsetof(struct smartfs_chain_header_s,
+                                             nextsector);
+          update_readwrite.count = sizeof(uint16_t);
+          update_readwrite.buffer = update_header.nextsector;
+          update_chain = 1;
         }
 
       /* Now update to the next sector */
@@ -964,7 +981,7 @@ int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
   entry->flags = (uint16_t) (SMARTFS_DIRENT_EMPTY | type |
         (mode & SMARTFS_DIRENT_MODE));
 #endif
-#endif  /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
+#endif /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
 
   if (sectorno == 0xffff)
     {
@@ -1046,6 +1063,19 @@ int smartfs_createentry(FAR struct smartfs_mountpt_s *fs,
   if (ret < 0)
     {
       goto errout;
+    }
+
+  if (update_chain)
+    {
+      /* Update chain header after the next sector was written */
+
+      ret = FS_IOCTL(fs, BIOC_WRITESECT, (unsigned long) &update_readwrite);
+      if (ret < 0)
+        {
+          ferr("ERROR: Error chaining sector %d\n",
+               update_readwrite.logsector);
+          goto errout;
+        }
     }
 
   /* Now fill in the entry */
@@ -1167,7 +1197,7 @@ int smartfs_deleteentry(struct smartfs_mountpt_s *fs,
 #else
   direntry->flags |= SMARTFS_DIRENT_ACTIVE;
 #endif
-#endif  /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
+#endif /* CONFIG_SMARTFS_ERASEDSTATE == 0xff */
 
   /* Write the updated flags back to the sector */
 
@@ -1482,7 +1512,7 @@ int smartfs_sync_internal(FAR struct smartfs_mountpt_s *fs,
 
       sf->byteswritten = 0;
     }
-#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
 
 errout:
   return ret;
@@ -1935,7 +1965,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
 
       if (readwrite.count > remaining)
         {
-          /* Futher limit the write to the remaining bytes to write */
+          /* Further limit the write to the remaining bytes to write */
 
           readwrite.count = remaining;
         }
@@ -1952,7 +1982,7 @@ int smartfs_extendfile(FAR struct smartfs_mountpt_s *fs,
               goto errout_with_buffer;
             }
         }
-#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
 
       /* Update our control variables */
 

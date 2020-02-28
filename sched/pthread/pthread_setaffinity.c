@@ -97,4 +97,3 @@ int pthread_setaffinity_np(pthread_t thread, size_t cpusetsize,
 }
 
 #endif /* CONFIG_SMP */
-

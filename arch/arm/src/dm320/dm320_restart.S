@@ -135,4 +135,3 @@ up_phyrestart:
 	.size	up_restart, .-up_restart
 
 	.end
-

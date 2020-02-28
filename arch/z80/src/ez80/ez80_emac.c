@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_emac.c
  *
- *   Copyright (C) 2009-2010, 2012, 2014-2018 Gregory Nutt. All rights
+ *   Copyright (C) 2009-2010, 2012, 2014-2018, 2020 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -96,9 +96,14 @@
 
 #define ETHWORK LPWORK
 
-#ifndef CONFIG_EZ80_RAMADDR
-#  define CONFIG_EZ80_RAMADDR EZ80_EMACSRAM
-#endif
+/* The eZ80F92 has 16Kb of SRAM.  The base address of the SRAM is setup by
+ * the eZ80 start-up logic by setting the RAM_ADDR_U register to the upper
+ * 8 bits of the 24-bit address.  The EMAC RAM is at an offset of 0x00c000
+ * into that region.
+ */
+
+extern uintptr_t __RAM_ADDR_U_INIT_PARAM;
+#define ETH_RAMADDR ((uintptr_t)&__RAM_ADDR_U_INIT_PARAM << 16) + 0x00c000
 
 #if CONFIG_NET_ETH_PKTSIZE > 1518
 #  error "MAXF size too big for this device"
@@ -380,11 +385,12 @@ static struct ez80emac_driver_s g_emac;
 /* MII logic */
 
 static void ez80emac_waitmiibusy(void);
-static void ez80emac_miiwrite(FAR struct ez80emac_driver_s *priv, uint8_t offset,
-              uint16_t value);
-static uint16_t ez80emac_miiread(FAR struct ez80emac_driver_s *priv, uint32_t offset);
-static bool ez80emac_miipoll(FAR struct ez80emac_driver_s *priv, uint32_t offset,
-              uint16_t bits, bool bclear);
+static void ez80emac_miiwrite(FAR struct ez80emac_driver_s *priv,
+              uint8_t offset, uint16_t value);
+static uint16_t ez80emac_miiread(FAR struct ez80emac_driver_s *priv,
+              uint32_t offset);
+static bool ez80emac_miipoll(FAR struct ez80emac_driver_s *priv,
+              uint32_t offset, uint16_t bits, bool bclear);
 static int  ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv);
 
 /* Multi-cast filtering */
@@ -405,13 +411,16 @@ static int  ez80emac_receive(struct ez80emac_driver_s *priv);
 /* Interrupt handling */
 
 static void ez80emac_txinterrupt_work(FAR void *arg);
-static int  ez80emac_txinterrupt(int irq, FAR void *context, FAR void *arg);
+static int  ez80emac_txinterrupt(int irq, FAR void *context,
+              FAR void *arg);
 
 static void ez80emac_rxinterrupt_work(FAR void *arg);
-static int  ez80emac_rxinterrupt(int irq, FAR void *context, FAR void *arg);
+static int  ez80emac_rxinterrupt(int irq, FAR void *context,
+              FAR void *arg);
 
 static void ez80emac_sysinterrupt_work(FAR void *arg);
-static int  ez80emac_sysinterrupt(int irq, FAR void *context, FAR void *arg);
+static int  ez80emac_sysinterrupt(int irq, FAR void *context,
+              FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -430,8 +439,10 @@ static void ez80emac_txavail_work(FAR void *arg);
 static int  ez80emac_txavail(struct net_driver_s *dev);
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int ez80emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
-static int ez80emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int ez80emac_addmac(struct net_driver_s *dev,
+             FAR const uint8_t *mac);
+static int ez80emac_rmmac(struct net_driver_s *dev,
+             FAR const uint8_t *mac);
 #endif
 
 /* Initialization */
@@ -750,16 +761,26 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
     }
 
 dumpregs:
-  ninfo("Am79c874 MII registers (FIAD=%lx)\n", CONFIG_EZ80_FIAD);
-  ninfo("  MII_MCR:         %04x\n", ez80emac_miiread(priv, MII_MCR));
-  ninfo("  MII_MSR:         %04x\n", ez80emac_miiread(priv, MII_MSR));
-  ninfo("  MII_PHYID1:      %04x\n", ez80emac_miiread(priv, MII_PHYID1));
-  ninfo("  MII_PHYID2:      %04x\n", ez80emac_miiread(priv, MII_PHYID2));
-  ninfo("  MII_ADVERTISE:   %04x\n", ez80emac_miiread(priv, MII_ADVERTISE));
-  ninfo("  MII_LPA:         %04x\n", ez80emac_miiread(priv, MII_LPA));
-  ninfo("  MII_EXPANSION:   %04x\n", ez80emac_miiread(priv, MII_EXPANSION));
-  ninfo("  MII_DIAGNOSTICS: %04x\n", ez80emac_miiread(priv, MII_AM79C874_DIAGNOSTIC));
-  ninfo("EMAC CFG1:         %02x\n", inp(EZ80_EMAC_CFG1));
+  ninfo("Am79c874 MII registers (FIAD=%lx)\n",
+        CONFIG_EZ80_FIAD);
+  ninfo("  MII_MCR:         %04x\n",
+        ez80emac_miiread(priv, MII_MCR));
+  ninfo("  MII_MSR:         %04x\n",
+        ez80emac_miiread(priv, MII_MSR));
+  ninfo("  MII_PHYID1:      %04x\n",
+        ez80emac_miiread(priv, MII_PHYID1));
+  ninfo("  MII_PHYID2:      %04x\n",
+        ez80emac_miiread(priv, MII_PHYID2));
+  ninfo("  MII_ADVERTISE:   %04x\n",
+        ez80emac_miiread(priv, MII_ADVERTISE));
+  ninfo("  MII_LPA:         %04x\n",
+        ez80emac_miiread(priv, MII_LPA));
+  ninfo("  MII_EXPANSION:   %04x\n",
+        ez80emac_miiread(priv, MII_EXPANSION));
+  ninfo("  MII_DIAGNOSTICS: %04x\n",
+        ez80emac_miiread(priv, MII_AM79C874_DIAGNOSTIC));
+  ninfo("EMAC CFG1:         %02x\n",
+        inp(EZ80_EMAC_CFG1));
   return ret;
 }
 #else
@@ -824,7 +845,8 @@ static int ez80emac_miiconfigure(FAR struct ez80emac_driver_s *priv)
 
   /* Check for 100BASETX half duplex */
 
-  else if ((advertise & MII_ADVERTISE_100BASETXHALF) && (lpa & MII_LPA_100BASETXHALF))
+  else if ((advertise & MII_ADVERTISE_100BASETXHALF) &&
+           (lpa & MII_LPA_100BASETXHALF))
     {
       ninfo("100BASETX half duplex\n");
       regval            = inp(EZ80_EMAC_CFG1);
@@ -1030,7 +1052,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
    * header plus the size of the data to be transferred, aligned up to the next
    * packet buffer size.  NOTE: that there is no check to see if we have
    * overran the EMAC buffer -- i.e., if the next txnext has not yet been
-   * tranmitted.
+   * transmitted.
    */
 
   txdesc = priv->txnext;
@@ -1085,7 +1107,7 @@ static int ez80emac_transmit(struct ez80emac_driver_s *priv)
   txdesc->pktsize = priv->dev.d_len;
   txdesc->stat    = EMAC_TXDESC_OWNER;
 
-  /* Enable the TX poll timer.  The poll timer may alread be running.  In that
+  /* Enable the TX poll timer.  The poll timer may already be running.  In that
    * case, this will force the hardware to poll again now
    */
 
@@ -1195,7 +1217,7 @@ static int ez80emac_txpoll(struct net_driver_s *dev)
 static inline FAR struct ez80emac_desc_s *ez80emac_rwp(void)
 {
   return (FAR struct ez80emac_desc_s *)
-    (CONFIG_EZ80_RAMADDR +
+    (ETH_RAMADDR +
     ((uint24_t)inp(EZ80_EMAC_RWP_H) << 8) + (uint24_t)inp(EZ80_EMAC_RWP_L));
 }
 
@@ -1216,7 +1238,7 @@ static inline FAR struct ez80emac_desc_s *ez80emac_rwp(void)
 static inline FAR struct ez80emac_desc_s *ez80emac_rrp(void)
 {
   return (FAR struct ez80emac_desc_s *)
-    (CONFIG_EZ80_RAMADDR +
+    (ETH_RAMADDR +
     ((uint24_t)inp(EZ80_EMAC_RRP_H) << 8) + (uint24_t)inp(EZ80_EMAC_RRP_L));
 }
 
@@ -1340,8 +1362,8 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
       rwp             = ez80emac_rwp();
 
       /* Update the RRP to match our rxnext pointer: "For the hardware flow control
-       * to function properly, the software must update the hardare RRP (EmacRrp)
-       * pointer whenever the software version is upated.  The RxDMA uses RWP
+       * to function properly, the software must update the hardware RRP (EmacRrp)
+       * pointer whenever the software version is updated.  The RxDMA uses RWP
        * and the RRP to determine how many packets remain in the Rx buffer.
        */
 
@@ -1772,9 +1794,11 @@ static void ez80emac_sysinterrupt_work(FAR void *arg)
 
   if ((istat & EMAC_ISTAT_TXFSMERR) != 0)
     {
-      nwarn("WARNING: Tx FSMERR txhead=%p {%06x, %u, %04x} trp=%02x%02x istat=%02x\n",
-           priv->txhead, priv->txhead->np, priv->txhead->pktsize, priv->txhead->stat,
-           inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L), istat);
+      nwarn("WARNING: Tx FSMERR txhead=%p {%06x, %u, %04x} trp=%02x%02x "
+            "istat=%02x\n",
+            priv->txhead, priv->txhead->np, priv->txhead->pktsize,
+            priv->txhead->stat, inp(EZ80_EMAC_TRP_H), inp(EZ80_EMAC_TRP_L),
+            istat);
 
       /* Increment statistics */
 
@@ -2017,7 +2041,8 @@ static void ez80emac_poll_expiry(int argc, wdparm_t arg, ...)
 
 static int ez80emac_ifup(FAR struct net_driver_s *dev)
 {
-  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
+  FAR struct ez80emac_driver_s *priv =
+    (FAR struct ez80emac_driver_s *)dev->d_private;
   uint8_t regval;
   int ret;
 
@@ -2202,7 +2227,8 @@ static void ez80emac_txavail_work(FAR void *arg)
 
 static int ez80emac_txavail(FAR struct net_driver_s *dev)
 {
-  FAR struct ez80emac_driver_s *priv = (FAR struct ez80emac_driver_s *)dev->d_private;
+  FAR struct ez80emac_driver_s *priv =
+    (FAR struct ez80emac_driver_s *)dev->d_private;
 
   /* Is our single work structure available?  It may not be if there are
    * pending interrupt actions and we will have to ignore the Tx
@@ -2313,12 +2339,14 @@ static int ez80_emacinitialize(void)
 
   /* The ez80 has a fixed 8kb of EMAC SRAM memory (+ 8kb of
    * general purpose SRAM) located in the high address space.
-   * Configure the GP and EMAC SRAM
+   * Configure the GP and EMAC SRAM.
+   *
+   * EZ80_RAM_CTL and EZ80_RAM_ADDR_U where configured by ez80 start-up
+   * logic.  We need only enable EMAC RAM here.
    */
 
   outp(EZ80_RAM_CTL, (RAMCTL_ERAMEN | RAMCTL_GPRAMEN));
-  outp(EZ80_RAM_ADDR_U, (CONFIG_EZ80_RAMADDR >> 16));
-  outp(EZ80_EMAC_BP_U, (CONFIG_EZ80_RAMADDR >> 16));
+  outp(EZ80_EMAC_BP_U, (ETH_RAMADDR >> 16));
 
   /* The EMAC memory is broken into two parts: the Tx buffer and the Rx buffer.
    *
@@ -2328,7 +2356,7 @@ static int ez80_emacinitialize(void)
    * The Transmit Write Pointer, TRP, will be set to the TLBP.
    */
 
-  addr                  = CONFIG_EZ80_RAMADDR;
+  addr                  = ETH_RAMADDR;
   outp(EZ80_EMAC_TLBP_L, (uint8_t)(addr & 0xff));
   outp(EZ80_EMAC_TLBP_H, (uint8_t)((addr >> 8) & 0xff));
 
@@ -2674,4 +2702,3 @@ void up_netuninitialize(void)
 }
 
 #endif /* CONFIG_NET && CONFIG_EZ80_EMAC */
-

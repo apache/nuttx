@@ -71,7 +71,7 @@ int board_bmp280_initialize(int bus)
 
   sninfo("Initializing BMP280..\n");
 
-  /* Initialize i2c deivce */
+  /* Initialize i2c device */
 
   i2c = cxd56_i2cbus_initialize(bus);
   if (!i2c)

@@ -43,7 +43,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -326,7 +325,7 @@ enum usbhost_trace1codes_e
   EHCI_TRACE1_QTDSTATUS_FAILED,     /* EHCI ERROR: lpc31_qtd_statusphase failed */
   EHCI_TRACE1_TRANSFER_FAILED,      /* EHCI ERROR: Transfer failed */
   EHCI_TRACE1_QHFOREACH_FAILED,     /* EHCI ERROR: lpc31_qh_foreach failed: */
-  EHCI_TRACE1_SYSERR_INTR,          /* EHCI: Host System Error Interrup */
+  EHCI_TRACE1_SYSERR_INTR,          /* EHCI: Host System Error Interrupt */
   EHCI_TRACE1_USBERR_INTR,          /* EHCI: USB Error Interrupt (USBERRINT) Interrupt */
   EHCI_TRACE1_EPALLOC_FAILED,       /* EHCI ERROR: Failed to allocate EP info structure */
   EHCI_TRACE1_BADXFRTYPE,           /* EHCI ERROR: Support for transfer type not implemented */
@@ -1619,7 +1618,7 @@ static int lpc31_ioc_wait(struct lpc31_epinfo_s *epinfo)
  * Name: lpc31_qh_enqueue
  *
  * Description:
- *   Add a new, ready-to-go QH w/attached qTDs to the asynchonous queue.
+ *   Add a new, ready-to-go QH w/attached qTDs to the asynchronous queue.
  *
  * Assumptions:  The caller holds the EHCI exclsem
  *
@@ -1986,7 +1985,7 @@ static struct lpc31_qtd_s *lpc31_qtd_dataphase(struct lpc31_epinfo_s *epinfo,
 
   qtd->hw.token = lpc31_swap32(regval);
 
-  /* Add the buffer information to the bufffer pointer list */
+  /* Add the buffer information to the buffer pointer list */
 
   ret = lpc31_qtd_addbpl(qtd, buffer, buflen);
   if (ret < 0)
@@ -2282,7 +2281,7 @@ static int lpc31_async_setup(struct lpc31_rhport_s *rhport,
       physaddr = lpc31_physramaddr((uintptr_t)qtd);
       *flink = lpc31_swap32(physaddr);
 
-      /* In an IN data qTD was also enqueued, then linke the data qTD's
+      /* In an IN data qTD was also enqueued, then linked the data qTD's
        * alternate pointer to this STATUS phase qTD in order to handle short
        * transfers.
        */
@@ -3237,7 +3236,7 @@ static void lpc31_ehci_bottomhalf(FAR void *arg)
    *   underflow). If the TD on which the error interrupt occurred also
    *   had its IOC bit set, both this bit and USBINT bit are set. ..."
    *
-   * We do the same thing in either case:  Traverse the asynchonous queue
+   * We do the same thing in either case:  Traverse the asynchronous queue
    * and remove all of the transfers that are no longer active.
    */
 
@@ -3566,7 +3565,7 @@ static int lpc31_rh_enumerate(FAR struct usbhost_connection_s *conn,
    *   01b         K-state   Low-speed device, release ownership of port
    *
    * NOTE: Low-speed devices could be detected by examining the PORTSC PSPD
-   * field after resetting the device.  The more convential way here, however,
+   * field after resetting the device.  The more conventional way here, however,
    * also appears to work.
    */
 
@@ -5244,7 +5243,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   lpc31_putreg(regval, &HCOR->usbcmd);
 
-  /* Start the host controller by setting the RUN bit in the USBCMD regsiter. */
+  /* Start the host controller by setting the RUN bit in the USBCMD register. */
 
   regval  = lpc31_getreg(&HCOR->usbcmd);
   regval |= EHCI_USBCMD_RUN;

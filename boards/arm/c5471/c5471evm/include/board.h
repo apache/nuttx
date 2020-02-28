@@ -63,4 +63,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif  /* __BOARDS_ARM_C5471_C5471EVM_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_C5471_C5471EVM_INCLUDE_BOARD_H */

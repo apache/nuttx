@@ -133,4 +133,3 @@ void sam_pck_enable(enum pckid_e pckid, bool enable);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_SAMA5_SAM_PCK_H */
-

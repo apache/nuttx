@@ -42,8 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
-
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #ifdef CONFIG_SPI_BITBANG

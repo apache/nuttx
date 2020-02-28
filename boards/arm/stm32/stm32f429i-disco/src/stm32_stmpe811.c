@@ -339,4 +339,3 @@ int stm32_tsc_setup(int minor)
 }
 
 #endif /* CONFIG_INPUT_STMPE811 */
-

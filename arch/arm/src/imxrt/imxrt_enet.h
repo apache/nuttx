@@ -121,4 +121,3 @@ int imxrt_phy_boardinitialize(int intf);
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_IMXRT_ENET */
 #endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_ENET_H */
-

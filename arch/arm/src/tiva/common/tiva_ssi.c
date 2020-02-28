@@ -42,7 +42,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -192,7 +191,7 @@ struct tiva_ssidev_s
 
   /* These are functions pointers that are configured to perform the
    * appropriate transfer for the particular kind of exchange that is
-   * occurring.  Differnt functions may be selected depending on (1)
+   * occurring.  Different functions may be selected depending on (1)
    * if the tx or txbuffer is NULL and depending on the number of bits
    * per word.
    */
@@ -322,7 +321,7 @@ static const struct spi_ops_s g_spiops =
 #endif
 };
 
-/* This supports is up to two SSI busses/ports */
+/* This supports is up to two SSI buses/ports */
 
 static struct tiva_ssidev_s g_ssidev[] =
 {
@@ -553,7 +552,7 @@ static void ssi_txuint8(struct tiva_ssidev_s *priv)
  * Description:
  *   Discard input, save a uint8_t, or or save a uint16_t from Tx FIFO in the
  *   user rxvbuffer and update the rxbuffer pointer appropriately.  The
- *   selected function dependes on (1) if there is a desination rxbuffer
+ *   selected function dependes on (1) if there is a destination rxbuffer
  *   provided, and (2) if the number of bits per word is <=8 or >8.
  *
  * Input Parameters:
@@ -1058,12 +1057,12 @@ static int ssi_interrupt(int irq, void *context, FAR void *arg)
  * Name: ssi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -1191,7 +1190,7 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
       ssi_putreg(priv, TIVA_SSI_CR0_OFFSET, regval);
       spiinfo("CR0: %08x CPSR: %08x\n", regval, cpsdvsr);
 
-      /* Calcluate the actual frequency */
+      /* Calculate the actual frequency */
 
       actual = SYSCLK_FREQUENCY / (cpsdvsr * (scr + 1));
 

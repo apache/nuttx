@@ -697,7 +697,7 @@ static void vl53l1x_getoffset(FAR struct vl53l1x_dev_s *priv,
  * Description:
  *  This function performs the temperature calibration. It is recommended to
  *  call this function any time the temperature might have changed by more
- *  tahn 8 deg C without sensor ranging activity for an extended period.
+ *  than 8 deg C without sensor ranging activity for an extended period.
  *
  ****************************************************************************/
 
@@ -1193,4 +1193,4 @@ int vl53l1x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   return 1;
 }
 
-#endif  /* CONFIG_I2C && CONFIG_SENSORS_VL53L1X */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_VL53L1X */

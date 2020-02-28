@@ -81,7 +81,7 @@ static struct z180_cbr_s g_cbrs[CONFIG_MAX_TASKS];
  * Name: z180_mmu_alloccbr
  *
  * Description:
- *   Find an unused struture in g_cbrs (i.e., one with reference count == 0).
+ *   Find an unused structure in g_cbrs (i.e., one with reference count == 0).
  *   If a structure is found, its reference count is set to one and a pointer
  *   to the structure is returned.
  *
@@ -108,7 +108,7 @@ static inline FAR struct z180_cbr_s *z180_mmu_alloccbr(void)
  * Name: z180_mmu_freecbr
  *
  * Description:
- *   Free a struture in g_cbrs by setting its reference count to 0;
+ *   Free a structure in g_cbrs by setting its reference count to 0;
  *
  ****************************************************************************/
 

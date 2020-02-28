@@ -190,7 +190,7 @@ static void lc823450_dumpnvic(const char *msg, int irq)
  *       lc823450_dbgmonitor, lc823450_pendsv, lc823450_reserved
  *
  * Description:
- *   Handlers for various execptions.  None are handled and all are fatal
+ *   Handlers for various exceptions.  None are handled and all are fatal
  *   error conditions.  The only advantage these provided over the default
  *   unexpected interrupt handler is that they provide a diagnostic output.
  *
@@ -232,7 +232,7 @@ static int lc823450_pendsv(int irq, FAR void *context, FAR void *arg)
 static int lc823450_dbgmonitor(int irq, FAR void *context, FAR void *arg)
 {
   enter_critical_section();
-  irqinfo("PANIC!!! Debug Monitor receieved\n");
+  irqinfo("PANIC!!! Debug Monitor received\n");
   PANIC();
   return 0;
 }
@@ -343,7 +343,7 @@ static int lc823450_extint_isr(int irq, FAR void *context, FAR void *arg)
  * Name: lc823425_extint_initialize
  *
  * Description:
- *   Initialize external interrup.
+ *   Initialize external interrupt.
  *
  ***********************************************************************/
 

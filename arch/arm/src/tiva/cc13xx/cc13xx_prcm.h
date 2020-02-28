@@ -85,7 +85,8 @@
                                              * it is an option to select that
                                              * VIMS power domain shall not
                                              * power up during the next wake
-                                             * up from uLDO (VIMS_MODE=0b10). */
+                                             * up from uLDO (VIMS_MODE=0b10).
+                                             */
 
 /* Encoded values used for enabling and disabling peripheral modules in the
  * MCU domain.  Encoding:
@@ -265,7 +266,7 @@ static inline void prcm_gptclock_set(uint32_t clkdiv)
 }
 
 /******************************************************************************
- * Name: 
+ * Name:
  *
  * Description:
  *   Get the clock division factor for the GP-Timer domain.
@@ -326,7 +327,7 @@ static inline void prcm_load_set(void)
 static inline bool prcm_load_get(void)
 {
   /* Return the load status. */
-  
+
   return ((getreg32(TIVA_PRCM_CLKLOADCTL) & PRCM_CLKLOADCTL_LOADDONE) != 0);
 }
 
@@ -395,7 +396,7 @@ static inline void prcm_domain_disable(uint32_t domains)
               (domains & PRCM_DOMAIN_VIMS) != 0);
 
   /* Disable the power domains. */
- 
+
   if ((domains & PRCM_DOMAIN_RFCORE) != 0)
     {
       putreg32(0, TIVA_PRCM_RFCCLKG);
@@ -602,7 +603,7 @@ void prcm_audioclock_configure(uint32_t clkconfig,
  *   - SERIAL power domain:
  *     - Power on  : Domain is powered on.
  *     - Power off : Domain is powered off.
- *   - PERIPHERIAL power domain:
+ *   - PERIPHERAL power domain:
  *     - Power on  : Domain is powered on.
  *     - Power off : Domain is powered off.
  *   - VIMS power domain:
@@ -719,7 +720,7 @@ bool prcm_powerdomain_status(uint32_t domains);
  *   system controller in the AON domain a call to this function should always
  *   be followed by a call to prcm_load_set().
  *
- * Input Paramters:
+ * Input Parameters:
  *   peripheral - The peripheral to enable. This is an encoded value.  See the
  *                PRCRM_PERIPH_* definitions for available encodings.
  *
@@ -749,7 +750,7 @@ void prcm_periph_runenable(uint32_t peripheral);
  *   ensure that the peripheral is not accessed in this interval as this might
  *   cause the system to hang.
  *
- * Input Paramters:
+ * Input Parameters:
  *   peripheral - The peripheral to enable. This is an encoded value.  See the
  *                PRCRM_PERIPH_* definitions for available encodings.
  *

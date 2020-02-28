@@ -27,7 +27,7 @@ at the present, but here is the longer term roadmap:
               without NxWidgets and is built on top of NX.
   NXFONTS   - A set of C graphics tools for presenting (bitmap) font images.
   NX        - The tiny NuttX windowing system.  This includes the small-footprint
-              multi-user implentation (NXMU as described below).  NX can be used
+              multi-user implementation (NXMU as described below).  NX can be used
               without NxWidgets and without NXTOOLKIT for raw access to window memory.
   NXGLIB    - Low level graphics utilities and direct framebuffer rendering logic.
               NX is built on top of NXGLIB.
@@ -138,7 +138,7 @@ CONFIG_NX_XYINPUT
 CONFIG_NX_KBD
   Build in support of keypad/keyboard input.
 CONFIG_NXTK_BORDERWIDTH
-  Specifies with with of the border (in pixels) used with framed windows.
+  Specifies the width of the border (in pixels) used with framed windows.
   The default is 4.
 CONFIG_NXTK_BORDERCOLOR1, CONFIG_NXTK_BORDERCOLOR2, CONFIG_NXTK_BORDERCOLOR3
   Specify the colors of the border used with framed windows.

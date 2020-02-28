@@ -116,7 +116,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
   top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
 
   /* Align the stack to word (4 byte) boundaries.  This is probably
-   * a greater alignement than is required.
+   * a greater alignment than is required.
    */
 
   top_of_stack &= ~3;

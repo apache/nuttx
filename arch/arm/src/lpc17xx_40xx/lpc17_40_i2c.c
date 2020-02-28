@@ -179,7 +179,7 @@ static void lpc17_40_i2c_setfrequency(struct lpc17_40_i2cdev_s *priv,
     {
       if (frequency > 100000)
         {
-          /* Asymetric per 400Khz I2C spec */
+          /* Asymmetric per 400Khz I2C spec */
 
           putreg32(LPC17_40_CCLK / (83 + 47) * 47 / frequency,
                    priv->base + LPC17_40_I2C_SCLH_OFFSET);

@@ -72,7 +72,7 @@
 #  define PIC32MZ_CP0_VIEWIPL    $12,4  /* Priority level access */
 #  define PIC32MZ_CP0_SRSMAP2    $12,5  /* Vector number to shadow set mapping */
 #  define PIC32MZ_CP0_CAUSE      $13,0  /* Cause of last general exception */
-#  define PIC32MZ_CP0_VIEWRIPL   $13,4  /* RIPL accesss */
+#  define PIC32MZ_CP0_VIEWRIPL   $13,4  /* RIPL access */
 #  define PIC32MZ_CP0_NESTEDEXC  $13,5  /* Prior error and exception level */
 #  define PIC32MZ_CP0_EPC        $14,0  /* Program counter at last exception */
 #  define PIC32MZ_CP0_NESTEDEPC  $14,2  /* Prior EPC */
@@ -211,7 +211,7 @@
  *      CP0_STATUS_IMPL Bits 16-17: Implementation dependent
  *      CP0_STATUS_PX   Bit 23: Enables 64-bit operations (Not MIPS32)
  *      CP0_STATUS_FR   Bit 26: Controls the floating point register mode (Not MIPS32)
- *      CP0_STATUS_MX   Bit 24: Enables MDMX™ (Not MIPS32)
+ *      CP0_STATUS_MX   Bit 24: Enables MDMX (Not MIPS32)
  *      CP0_STATUS_CU1  Bit 29: Controls access to coprocessor 1
  *      CP0_STATUS_CU2  Bit 30: Controls access to coprocessor 2
  *      CP0_STATUS_CU3  Bit 31: Controls access to coprocessor 3
@@ -228,18 +228,6 @@
 #undef CP0_STATUS_CU1
 #undef CP0_STATUS_CU2
 #undef CP0_STATUS_CU3
-
-/*   2. The following field is of a different width.  Apparently, it
- *      excludes the software interrupt bits.
- *
- *      CP0_STATUS_IM   Bits 8-15: Interrupt Mask
- *      Vs.
- *      CP0_STATUS_IPL  Bits 10-16+18: Interrupt priority level
- *                      Bits 8-9 reserved
- */
-
-#define CP0_STATUS_IPL_SHIFT        (10)   /*  Bits 10-16+18: Interrupt priority level */
-#define CP0_STATUS_IPL_MASK         (0x17f << CP0_STATUS_IPL_SHIFT)
 
 /*   3. Supervisor mode not supported
  *       CP0_STATUS_KSU Bits 3-4: Operating mode (with supervisor mode)

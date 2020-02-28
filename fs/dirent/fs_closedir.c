@@ -97,7 +97,7 @@ int closedir(FAR DIR *dirp)
   if (idir->fd_root)
     {
       /* This is the 'root' inode of the directory.  This means different
-       * things wih different filesystems.
+       * things with different filesystems.
        */
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT

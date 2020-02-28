@@ -97,4 +97,3 @@ void up_idle(void)
   nxsched_process_timer();
 #endif
 }
-

@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 /* This is the size of a large, allocated temporary buffer that we will use
- * to constuct custom configuration descriptors for each member class.
+ * to construct custom configuration descriptors for each member class.
  */
 
 #define CUSTOM_CONFIG_BUFSIZE  \
@@ -134,7 +134,7 @@ static int  usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
  *   Disconnect all contained class instances.
  *
  * Input Parameters:
- *   priv - Reference to private, composite container state stucture.
+ *   priv - Reference to private, composite container state structure.
  *
  * Returned Value:
  *   None
@@ -577,7 +577,7 @@ int usbhost_composite(FAR struct usbhost_hubport_s *hport,
      }
 
   /* First, count the number of interface descriptors (nintfs) and the
-   * number of interfaces that are assocated to one device via IAD
+   * number of interfaces that are associated to one device via IAD
    * descriptor (nmerged).
    */
 

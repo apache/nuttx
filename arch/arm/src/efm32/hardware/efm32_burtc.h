@@ -69,7 +69,7 @@
 #include "hardware/efm32_memorymap.h"
 
 #if !defined(CONFIG_EFM32_EFM32GG)
-#  warning This is the EFM32GG header file; Review/modification needed for this archtecture
+#  warning This is the EFM32GG header file; Review/modification needed for this architecture
 #endif
 
 /*******************************************************************************************************************************
@@ -88,7 +88,7 @@
 #define EFM32_BURTC_LFXOFDET_OFFSET           0x0014  /* LFXO */
 #define EFM32_BURTC_STATUS_OFFSET             0x0018  /* Backup domain status */
 #define EFM32_BURTC_CMD_OFFSET                0x001c  /* Command Register */
-#define EFM32_BURTC_POWERDOWN_OFFSET          0x0020  /* Retention RAM power-down resgister */
+#define EFM32_BURTC_POWERDOWN_OFFSET          0x0020  /* Retention RAM power-down register */
 #define EFM32_BURTC_LOCK_OFFSET               0x0024  /* Configuration Lock Register */
 #define EFM32_BURTC_IF_OFFSET                 0x0028  /* Interrupt Flag Register */
 #define EFM32_BURTC_IFS_OFFSET                0x002c  /* Interrupt Flag Set Register */

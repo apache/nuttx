@@ -323,7 +323,7 @@ int spirit_csma_set_persistentmode(FAR struct spirit_library_s *spirit,
           regval &= ~PROTOCOL1_CSMA_PERS_ON_MASK;
         }
 
-      /* Write the new vaue on the PROTOCOL1 register */
+      /* Write the new value on the PROTOCOL1 register */
 
       ret = spirit_reg_write(spirit, PROTOCOL1_BASE, &regval, 1);
     }

@@ -145,4 +145,4 @@ extern unsigned _xt_tick_divisor;
 void _xt_tick_divisor_init(void);
 #endif
 
-#endif  /* __ARCH_XTENSA_SRC_COMMON_XTENSA_TIMER_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_TIMER_H */

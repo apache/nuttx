@@ -177,14 +177,14 @@
 #define FLASH_CR_PGSERRIE              (1 << 18)  /* Bit 18: Programming sequence error interrupt enable */
 #define FLASH_CR_STRBERRIE             (1 << 19)  /* Bit 19: Strobe error interrupt enable */
                                                   /* Bit 20: Reserved */
-#define FLASH_CR_INCERRIE              (1 << 21)  /* Bit 21: Inconsistency error interrupt enbale */
+#define FLASH_CR_INCERRIE              (1 << 21)  /* Bit 21: Inconsistency error interrupt enable */
 #define FLASH_CR_OPERRIE               (1 << 22)  /* Bit 22: Write/erase error interrupt enable */
 #define FLASH_CR_RDPERRIE              (1 << 23)  /* Bit 23: Read protection error interrupt enable */
 #define FLASH_CR_RDSERRIE              (1 << 24)  /* Bit 24: Secure error interrupt enable */
 #define FLASH_CR_SNECCERRIE            (1 << 25)  /* Bit 25: ECC single correction error interrupt enable */
 #define FLASH_CR_DBECCERRIE            (1 << 26)  /* Bit 26: ECC double detection error interrupt enable */
 #define FLASH_CR_CRCENDIE              (1 << 27)  /* Bit 27: CRC end of calculation interrupt enable */
-                                                  /* Bits 28-31: Reserverd */
+                                                  /* Bits 28-31: Reserved */
 
 /* Flash Status Register (SR)  Bank 1 or 2 */
 

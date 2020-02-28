@@ -511,7 +511,7 @@ static int lc823450_epclearreq(struct usbdev_ep_s *ep)
       q_ent = sq_remlast(&privep->req_q);
       req = &container_of(q_ent, struct lc823450_req_s, q_ent)->req;
 
-      /* return reqbuf to funciton driver */
+      /* return reqbuf to function driver */
 
       req->result = -ESHUTDOWN;
       req->callback(ep, req);
@@ -689,7 +689,7 @@ static int lc823450_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
     }
   else if (privep->in)
     {
-      /* Send packet requst from function driver */
+      /* Send packet request from function driver */
 
       flags = spin_lock_irqsave();
 
@@ -917,6 +917,7 @@ int lc823450_usbpullup(struct usbdev_s *dev, bool enable)
     {
       modifyreg32(USB_DEVC, 0 , USB_DEVC_DISCON);
     }
+
   return 0;
 }
 
@@ -956,6 +957,7 @@ static void usb_suspend_work_func(void *arg)
       g_usbsuspend = 1;
       wake_unlock(&priv->wlock);
     }
+
   spin_unlock_irqrestore(flags);
 }
 #endif
@@ -1151,7 +1153,6 @@ static void subintr_ep0(void)
                     case USB_REQ_RECIPIENT_INTERFACE:
                       resp[0] = 0; /* reserved */
                       break;
-
                   }
 
                 epbuf_write(0, &resp, 2);
@@ -1242,6 +1243,7 @@ static void subintr_ep0(void)
                     {
                       break;
                     }
+
                   up_udelay(10);
                 }
               while (tout--);
@@ -1290,6 +1292,7 @@ static void subintr_epin(uint8_t epnum, struct lc823450_ep_s *privep)
       req = &container_of(q_ent, struct lc823450_req_s, q_ent)->req;
 
       /* Write to TX FIFO */
+
       /* int clear!! before epbuf write */
 
       epcmd_write(epnum, USB_EPCMD_EMPTY_CLR);
@@ -1552,7 +1555,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   g_usbdev.bufoffset = 0x180;
 
-  /* Device mode enbale */
+  /* Device mode enable */
 
   modifyreg32(USB_MODE, 0, USB_MODE_DEV_EN);
 
@@ -1925,7 +1928,7 @@ int usbdev_msc_epread(void *buf, int len)
            CONFIG_USBMSC_EPBULKOUT  << USB_DMAC_DMAEP_SHIFT |
            USB_DMAC_START,
            USB_DMAC1);
-           nxsem_wait(&dma_wait);
+  nxsem_wait(&dma_wait);
 
   return 0;
 }
@@ -1944,6 +1947,7 @@ void usbdev_msc_stop(void)
  * return value : 0 : charger was not detected.
  *               !0 : charger was detected.
  ****************************************************************************/
+
 int usbdev_is_usbcharger(void)
 {
   return g_usbdev.charger;
@@ -1971,11 +1975,13 @@ static void usbdev_pmnotify(struct pm_callback_s *cb, enum pm_state_e pmstate)
           {
             CLASS_RESUME(g_usbdev.driver, &g_usbdev.usbdev);
           }
+
         break;
 
       default:
         break;
     }
+
   spin_unlock_irqrestore(flags);
 }
 #endif

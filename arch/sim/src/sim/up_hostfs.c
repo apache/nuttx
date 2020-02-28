@@ -41,7 +41,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/statfs.h>
+#include <sys/statvfs.h>
 #include <sys/ioctl.h>
 
 #include <dirent.h>
@@ -168,10 +168,12 @@ int host_open(const char *pathname, int flags, int mode)
       mapflags |= O_SYNC;
     }
 
+#ifdef O_DIRECT
   if (flags & NUTTX_O_DIRECT)
     {
       mapflags |= O_DIRECT;
     }
+#endif
 
   return open(pathname, mapflags, mode);
 }
@@ -376,17 +378,17 @@ int host_closedir(void *dirp)
 
 int host_statfs(const char *path, struct nuttx_statfs_s *buf)
 {
-  int           ret;
-  struct statfs hostbuf;
+  int            ret;
+  struct statvfs hostbuf;
 
   /* Call the host's statfs routine */
 
-  ret = statfs(path, &hostbuf);
+  ret = statvfs(path, &hostbuf);
 
   /* Map the struct statfs value */
 
-  buf->f_type    = hostbuf.f_type;
-  buf->f_namelen = hostbuf.f_namelen;
+  buf->f_type    = 0; /* hostfs overwrites f_type anyway */
+  buf->f_namelen = hostbuf.f_namemax;
   buf->f_bsize   = hostbuf.f_bsize;
   buf->f_blocks  = hostbuf.f_blocks;
   buf->f_bfree   = hostbuf.f_bfree;

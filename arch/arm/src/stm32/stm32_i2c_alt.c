@@ -85,7 +85,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -217,8 +216,8 @@ static const uint16_t I2CEVENT_ADDR_HDL_READ_2 = 52;       /* Read of length 2 a
 static const uint16_t I2CEVENT_EMPTY_MSG = 5000;           /* Empty message detected, param=0 */
 
 static const uint16_t I2CEVENT_ADDRESS_ACKED = 6;          /* Address has been ACKed(i.e. it's a valid address) param = address */
-static const uint16_t I2CEVENT_ADDRESS_ACKED_READ_1 = 63;  /* Event when reading single byte just after address is beeing ACKed, param = 0 */
-static const uint16_t I2CEVENT_ADDRESS_ACKED_READ_2 = 61;  /* Event when reading two bytes just after address is beeing ACKed, param = 0 */
+static const uint16_t I2CEVENT_ADDRESS_ACKED_READ_1 = 63;  /* Event when reading single byte just after address is being ACKed, param = 0 */
+static const uint16_t I2CEVENT_ADDRESS_ACKED_READ_2 = 61;  /* Event when reading two bytes just after address is being ACKed, param = 0 */
 static const uint16_t I2CEVENT_ADDRESS_ACKED_WRITE = 681;  /* Address has been ACKed(i.e. it's a valid address) in write mode and byte has been written */
 static const uint16_t I2CEVENT_ADDRESS_NACKED = 6000;      /* Address has been NACKed(i.e. it's an invalid address) param = address */
 

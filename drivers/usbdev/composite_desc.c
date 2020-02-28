@@ -169,20 +169,20 @@ int composite_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
       return -EINVAL;
     }
 
-   /* The string is utf16-le.  The poor man's utf-8 to utf16-le
-    * conversion below will only handle 7-bit en-us ascii
-    */
+  /* The string is utf16-le.  The poor man's utf-8 to utf16-le
+   * conversion below will only handle 7-bit en-us ascii
+   */
 
-   len = strlen(str);
-   for (i = 0, ndata = 0; i < len; i++, ndata += 2)
-     {
-       strdesc->data[ndata]   = str[i];
-       strdesc->data[ndata+1] = 0;
-     }
+  len = strlen(str);
+  for (i = 0, ndata = 0; i < len; i++, ndata += 2)
+    {
+      strdesc->data[ndata]   = str[i];
+      strdesc->data[ndata + 1] = 0;
+    }
 
-   strdesc->len  = ndata+2;
-   strdesc->type = USB_DESC_TYPE_STRING;
-   return strdesc->len;
+  strdesc->len  = ndata + 2;
+  strdesc->type = USB_DESC_TYPE_STRING;
+  return strdesc->len;
 }
 
 /****************************************************************************
@@ -219,10 +219,15 @@ int16_t composite_mkcfgdesc(FAR struct composite_dev_s *priv, FAR uint8_t *buf)
   int i;
 
   /* Configuration descriptor for the composite device */
+
   /* Fill in the values directly into the buf */
 
   cfgdesc->len         = USB_SIZEOF_CFGDESC;               /* Descriptor length */
+#ifdef CONFIG_USBDEV_DUALSPEED
+  cfgdesc->type        = type;                             /* Descriptor type */
+#else
   cfgdesc->type        = USB_DESC_TYPE_CONFIG;             /* Descriptor type */
+#endif
   cfgdesc->totallen[0] = LSBYTE(priv->cfgdescsize);        /* Lower Byte of Total length */
   cfgdesc->totallen[1] = MSBYTE(priv->cfgdescsize);        /* High Byte of Total length */
   cfgdesc->ninterfaces = priv->ninterfaces;                /* Number of interfaces */

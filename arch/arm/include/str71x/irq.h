@@ -149,4 +149,3 @@ extern "C"
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_ARM_INCLUDE_STR71X_IRQ_H */
-

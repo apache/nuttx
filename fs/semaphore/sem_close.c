@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <sched.h>
 #include <errno.h>
 
@@ -130,4 +129,3 @@ int sem_close(FAR sem_t *sem)
 }
 
 #endif /* CONFIG_FS_NAMED_SEMAPHORES */
-

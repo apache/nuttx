@@ -77,4 +77,3 @@ void perror(FAR const char *s)
   fprintf(PERROR_STREAM, "%s: Error %d\n", s, errno);
 #endif
 }
-

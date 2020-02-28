@@ -79,4 +79,3 @@ int sigdelset(FAR sigset_t *set, int signo)
       return OK;
     }
 }
-

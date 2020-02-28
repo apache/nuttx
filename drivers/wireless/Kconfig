@@ -3,6 +3,12 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menuconfig DRIVERS_WIRELESS
+	bool "Wireless Device Support"
+	default n
+	---help---
+		Drivers for various wireless devices.
+
 if DRIVERS_WIRELESS
 
 config WL_CC1101
@@ -32,13 +38,24 @@ config WL_GS2200M
 if WL_GS2200M
 
 config WL_GS2200M_SPI_FREQUENCY
-	int "SPI frequencey for GS2200M"
+	int "SPI frequency for GS2200M"
 	default 4000000
 	range 4000000 10000000
 
 config WL_GS2200M_DISABLE_DHCPC
 	bool "Disable the internal dhcp client"
 	default n
+
+config WL_GS2200M_CHECK_VERSION
+	bool "Check the version of GS2200M"
+	default n
+
+config WL_GS2200M_LOGLEVEL
+	int "Log level"
+	default 0
+	range 0 2
+	---help---
+		The debug level of GS2200M. (AT+LOGLVL)
 
 endif
 

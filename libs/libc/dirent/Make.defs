@@ -41,4 +41,3 @@ CSRCS += lib_readdirr.c lib_telldir.c lib_alphasort.c lib_scandir.c
 
 DEPPATH += --dep-path dirent
 VPATH += :dirent
-

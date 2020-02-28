@@ -110,4 +110,3 @@ config C5471_BASET10
 	bool "10BaseT FullDuplex"
 
 endchoice
-

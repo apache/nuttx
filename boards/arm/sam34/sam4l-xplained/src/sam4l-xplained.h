@@ -365,4 +365,3 @@ int sam_slcd_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_SAM34_SAM4L_XPLAINED_SRC_SAM4L_XPLAINED_H */
-

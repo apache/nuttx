@@ -77,4 +77,4 @@ extern "C"
 #endif
 #endif
 
-#endif  /* __ARCH_Z80_INCLUDE_Z80_CHIP_H */
+#endif /* __ARCH_Z80_INCLUDE_Z80_CHIP_H */

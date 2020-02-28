@@ -755,7 +755,7 @@ _z8_common_handler:
 	/* Pass the IRQ number */
 
 	push	r0
-	
+
 	/* Process the interrupt */
 
 	call	_z80_doirq		/* Call the IRQ handler */
@@ -782,7 +782,7 @@ _z8_common_handler:
 _z8_switch:
 
 	/* Destroy the interrupt return information on the stack */
-	
+
 	pop	r4			/* Destroy saved RP */
 	pop	r4			/* Destroy saved flags */
 	pop	r4			/* Destroy saved return address */
@@ -821,7 +821,7 @@ _z8_restore:
 
 	ldx	r3, XCPT_FLAGS_OFFS(rr0)
 	ldx	r4, XCPT_RP_OFFS(rr0)
-	
+
 	/* Determine whether interrupts must be enabled on return.  This
 	 * would be nicer to do below, but later we will need to preserve
 	 * the condition codes in the flags.

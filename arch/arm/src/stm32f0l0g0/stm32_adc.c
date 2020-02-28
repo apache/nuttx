@@ -45,7 +45,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -56,6 +55,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
 #include <nuttx/analog/ioctl.h>
+#include <nuttx/semaphore.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -140,7 +140,7 @@
 #endif
 
 /* Number of channels per ADC:
- *   - F0, L0, G0 - 19, but singe SMP for all channels
+ *   - F0, L0, G0 - 19, but single SMP for all channels
  *
  * NOTE: this value can be obtained from SMPRx register description (ST manual)
  */
@@ -298,7 +298,7 @@ static void adc_rccreset(FAR struct stm32_dev_s *priv, bool reset);
 #ifndef CONFIG_STM32F0L0G0_ADC_NOIRQ
 static int  adc_interrupt(FAR struct adc_dev_s *dev);
 static int  adc1_interrupt(int irq, FAR void *context, FAR void *arg);
-#endif  /* CONFIG_STM32F0L0G0_ADC_NOIRQ */
+#endif /* CONFIG_STM32F0L0G0_ADC_NOIRQ */
 
 /* ADC Driver Methods */
 
@@ -417,7 +417,7 @@ static struct stm32_dev_s g_adcpriv1 =
 #ifndef CONFIG_STM32F0L0G0_ADC_NOIRQ
   .irq         = STM32_IRQ_ADC,
   .isr         = adc1_interrupt,
-#endif  /* CONFIG_STM32F0L0G0_ADC_NOIRQ */
+#endif /* CONFIG_STM32F0L0G0_ADC_NOIRQ */
 #ifdef HAVE_ADC_CMN_DATA
   .cmn         = &ADC1CMN_DATA,
 #endif
@@ -596,7 +596,7 @@ static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset)
   return getreg32(base+offset);
 }
 #  endif
-#endif  /* HAVE_ADC_CMN_REGS */
+#endif /* HAVE_ADC_CMN_REGS */
 
 /****************************************************************************
  * Name: tim_getreg
@@ -1236,7 +1236,7 @@ static void adc_dma_start(FAR struct adc_dev_s *dev)
 
   stm32_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
 }
-#endif  /* ADC_HAVE_DMA */
+#endif /* ADC_HAVE_DMA */
 
 /****************************************************************************
  * Name: adc_configure
@@ -1254,7 +1254,7 @@ static void adc_configure(FAR struct adc_dev_s *dev)
 
   adc_voltreg_cfg(priv);
 
-  /* Calibrate ADC - doesnt work for now */
+  /* Calibrate ADC - doesn't work for now */
 
   adc_calibrate(priv);
 
@@ -2256,7 +2256,7 @@ static int adc_llops_regbufregister(FAR struct stm32_adc_dev_s *dev,
 
   return OK;
 }
-#endif  /* ADC_HAVE_DMA */
+#endif /* ADC_HAVE_DMA */
 
 /****************************************************************************
  * Name: adc_sampletime_write
@@ -2302,7 +2302,7 @@ void adc_sampletime_set(FAR struct stm32_adc_dev_s *dev,
 {
   #error TODO adc_sampletime_write
 }
-#endif  /* CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME */
+#endif /* CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME */
 
 /****************************************************************************
  * Name: adc_llops_dumpregs
@@ -2315,7 +2315,7 @@ static void adc_llops_dumpregs(FAR struct stm32_adc_dev_s *dev)
   adc_dumpregs(priv);
 }
 
-#endif  /* CONFIG_STM32F0L0G0_ADC_LL_OPS */
+#endif /* CONFIG_STM32F0L0G0_ADC_LL_OPS */
 
 /****************************************************************************
  * Public Functions

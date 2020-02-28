@@ -279,7 +279,7 @@
 #define USART_CFG_DATALEN_MASK          (3 << USART_CFG_DATALEN_SHIFT)
 #  define USART_CFG_DATALEN_7BIT        (0 << USART_CFG_DATALEN_SHIFT) /* 7 bit Data length */
 #  define USART_CFG_DATALEN_8BIT        (1 << USART_CFG_DATALEN_SHIFT) /* 8 bit Data length */
-#  define USART_CFG_DATALEN_9BIT        (2 << USART_CFG_DATALEN_SHIFT) /* 9 bit data lengt */
+#  define USART_CFG_DATALEN_9BIT        (2 << USART_CFG_DATALEN_SHIFT) /* 9 bit data length */
 #define USART_CFG_PARITYSEL_SHIFT       (4)       /* Bits 4-5: Selects what type of parity is used by the USART */
 #define USART_CFG_PARITYSEL_MASK        (3 << USART_CFG_PARITYSEL_SHIFT)
 #  define USART_CFG_PARITYSEL_NONE      (0 << USART_CFG_PARITYSEL_SHIFT) /* No parity */

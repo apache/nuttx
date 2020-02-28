@@ -307,4 +307,4 @@ int stm32_slcd_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_STM32_STM32LDISCOVERY_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_STM32LDISCOVERY_INCLUDE_BOARD_H */

@@ -47,7 +47,7 @@ config NX_RAMBACKED
 	default n
 	---help---
 		If this option is selected, then windows may be optionally created
-		with a RAM frambuffer backing up the window content.  Rending into
+		with a RAM framebuffer backing up the window content.  Rending into
 		the window will result in rending into the backup framebuffer, then
 		updating the physical display from the framebuffer.
 
@@ -299,7 +299,7 @@ config NXTK_BORDERWIDTH
 	int "Border Width"
 	default 4
 	---help---
-		Specifies with with of the border (in pixels) used with framed windows.
+		Specifies the width of the border (in pixels) used with framed windows.
 		The default is 4.
 
 config NXTK_DEFAULT_BORDERCOLORS

@@ -93,7 +93,7 @@
 /* TIMER register bit definitions ***************************************************************/
 
 /* Timer Control register TIMER0_CTRL, address 0x13008008 TIMER1_CTRL, address 0x13008408
- * TIMER2_CTRL, address 0x13008808 TIMER3_CTRL, adddress 0x13008c08
+ * TIMER2_CTRL, address 0x13008808 TIMER3_CTRL, address 0x13008c08
  */
 
 #define TIMER_CTRL_ENABLE                (1 << 7)  /* Bit 7:  Timer enable */

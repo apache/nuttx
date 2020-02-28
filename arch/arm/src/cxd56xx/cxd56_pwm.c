@@ -258,7 +258,7 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param)
       return -1;
     }
 
-  /* calcurate period and offperiod */
+  /* calculate period and offperiod */
 
   period = (pwmfreq * 10 / freq - 5) / 10;
   if (period > 0xffff)

@@ -138,7 +138,7 @@
  * 3. D7 / Orange LED   PTE8
  * 4  D9 / Blue LED     PTE9
  *
- * LED4 is reservered for user.
+ * LED4 is reserved for user.
  * The 3 first LEDs are encoded as follows:
  */
 
@@ -162,4 +162,4 @@
 #  define CONFIG_KINETIS_NENET 1
 #endif
 
-#endif  /* __BOARDS_ARM_KINETIS_TWR_K64F120M_INCLUDE_BOARCH_H */
+#endif /* __BOARDS_ARM_KINETIS_TWR_K64F120M_INCLUDE_BOARCH_H */

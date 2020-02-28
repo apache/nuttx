@@ -57,5 +57,3 @@ o Processor wake-up from Power-down mode via external interrupt or BOD.
 o Single power supply chip with POR and BOD circuits:
 o CPU operating voltage range of 3.0 V to 3.6 V (3.3 V +- 10 pct) with 5 V tolerant
   I/O pads.
-
-

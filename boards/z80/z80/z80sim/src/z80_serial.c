@@ -339,4 +339,3 @@ int up_putc(int ch)
   z80_lowputc(ch);
   return 0;
 }
-

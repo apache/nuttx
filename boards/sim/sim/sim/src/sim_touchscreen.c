@@ -44,7 +44,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <sched.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -52,6 +51,7 @@
 #include <nuttx/board.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/input/touchscreen.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxglib.h>
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * syscall/syscall_stublookup.c
  *
- *   Copyright (C) 2011-2013, 2015-2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013, 2015-2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,10 +49,6 @@
 #if defined(CONFIG_LIB_SYSCALL)
 
 /****************************************************************************
- * Pre-processor definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Stub Function Prototypes
  ****************************************************************************/
 
@@ -64,6 +60,7 @@ uintptr_t STUB__exit(int nbr, uintptr_t parm1);
 uintptr_t STUB_exit(int nbr, uintptr_t parm1);
 uintptr_t STUB_get_errno(int nbr);
 uintptr_t STUB_getpid(int nbr);
+
 uintptr_t STUB_sched_getparam(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_sched_getscheduler(int nbr, uintptr_t parm1);
 uintptr_t STUB_sched_lock(int nbr);
@@ -75,6 +72,13 @@ uintptr_t STUB_sched_setscheduler(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 uintptr_t STUB_sched_unlock(int nbr);
 uintptr_t STUB_sched_yield(int nbr);
+
+uintptr_t STUB_sched_getaffinity(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
+uintptr_t STUB_sched_getcpu(int nbr);
+uintptr_t STUB_sched_setaffinity(int nbr, uintptr_t parm1, uintptr_t parm2,
+            uintptr_t parm3);
+
 uintptr_t STUB_set_errno(int nbr, uintptr_t parm1);
 uintptr_t STUB_uname(int nbr, uintptr_t parm1);
 
@@ -422,7 +426,8 @@ uintptr_t STUB_prctl(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
 
 /* The following is defined only if entropy pool random number generator
- * is enabled. */
+ * is enabled.
+ */
 
 uintptr_t STUB_getrandom(int nbr, uintptr_t parm1, uintptr_t parm2);
 

@@ -54,7 +54,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -66,6 +65,7 @@
 #include <nuttx/drivers/rwbuffer.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/semaphore.h>
 
 #include "mmcsd.h"
 #include "mmcsd_sdio.h"
@@ -2193,7 +2193,7 @@ static int mmcsd_close(FAR struct inode *inode)
  * Name: mmcsd_read
  *
  * Description:
- *   Read the specified numer of sectors from the read-ahead buffer or from
+ *   Read the specified number of sectors from the read-ahead buffer or from
  *   the physical device.
  *
  ****************************************************************************/
@@ -3736,4 +3736,3 @@ errout_with_alloc:
 }
 
 #endif /* defined (CONFIG_MMCSD) && defined (CONFIG_MMCSD_SDIO) */
-

@@ -45,7 +45,8 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
+
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 
 /****************************************************************************

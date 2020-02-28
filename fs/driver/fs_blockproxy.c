@@ -46,7 +46,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -55,6 +54,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT) && \
     !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
@@ -148,7 +148,7 @@ static FAR char *unique_chardev(void)
  *
  *   Errors that may be returned:
  *
- *     ENOMEM - Failed to create a temporay path name.
+ *     ENOMEM - Failed to create a temporary path name.
  *
  *   Plus:
  *

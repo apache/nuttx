@@ -37,8 +37,6 @@
  * Included Files
  ****************************************************************************/
 
-#define CONFIG_SIM_X11NOSHM 1
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,7 +56,6 @@
 /* Also used in up_x11eventloop */
 
 Display *g_display;
-int g_x11initialized;
 
 /****************************************************************************
  * Private Data
@@ -99,7 +96,7 @@ static inline int up_x11createframe(void)
   g_display = XOpenDisplay(NULL);
   if (g_display == NULL)
     {
-      printf("Unable to open display.\n");
+      printf("Unable to open display.\r\n");
       return -1;
     }
 
@@ -193,37 +190,33 @@ static int up_x11untraperrors(void)
 
 static void up_x11uninitX(void)
 {
-  if (g_x11initialized)
-    {
 #ifndef CONFIG_SIM_X11NOSHM
-      if (g_shmcheckpoint > 4)
-        {
-          XShmDetach(g_display, &g_xshminfo);
-        }
+  if (g_shmcheckpoint > 4)
+    {
+      XShmDetach(g_display, &g_xshminfo);
+    }
 
-      if (g_shmcheckpoint > 3)
-        {
-          shmdt(g_xshminfo.shmaddr);
-        }
+  if (g_shmcheckpoint > 3)
+    {
+      shmdt(g_xshminfo.shmaddr);
+    }
 
-      if (g_shmcheckpoint > 2)
-        {
-          shmctl(g_xshminfo.shmid, IPC_RMID, 0);
-        }
+  if (g_shmcheckpoint > 2)
+    {
+      shmctl(g_xshminfo.shmid, IPC_RMID, 0);
+    }
 #endif
 
-      if (g_shmcheckpoint > 1)
-        {
-          XDestroyImage(g_image);
-        }
+  if (g_shmcheckpoint > 1)
+    {
+      XDestroyImage(g_image);
+    }
 
-      /* Un-grab the mouse buttons */
+  /* Un-grab the mouse buttons */
 
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
-      XUngrabButton(g_display, Button1, AnyModifier, g_window);
+  XUngrabButton(g_display, Button1, AnyModifier, g_window);
 #endif
-      g_x11initialized = 0;
-    }
 
   XCloseDisplay(g_display);
 }
@@ -235,7 +228,6 @@ static void up_x11uninitX(void)
 #ifndef CONFIG_SIM_X11NOSHM
 static void up_x11uninitialize(void)
 {
-  fprintf(stderr, "Uninitializing\n");
   if (g_shmcheckpoint > 1)
     {
       if (!b_useshm && g_framebuffer)
@@ -270,10 +262,10 @@ static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
   if (XShmQueryExtension(g_display))
     {
       b_useshm = 1;
-      printf("Using shared memory.\n");
 
       up_x11traperrors();
-      g_image = XShmCreateImage(g_display, DefaultVisual(g_display, g_screen),
+      g_image = XShmCreateImage(g_display,
+                                DefaultVisual(g_display, g_screen),
                                 depth, ZPixmap, NULL, &g_xshminfo,
                                 g_fbpixelwidth, g_fbpixelheight);
       if (up_x11untraperrors())
@@ -281,11 +273,13 @@ static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
           up_x11uninitialize();
           goto shmerror;
         }
+
       if (!g_image)
         {
-          fprintf(stderr, "Unable to create g_image.");
+          fprintf(stderr, "Unable to create g_image.\r\n");
           return -1;
         }
+
       g_shmcheckpoint++;
 
       g_xshminfo.shmid = shmget(IPC_PRIVATE,
@@ -296,6 +290,7 @@ static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
           up_x11uninitialize();
           goto shmerror;
         }
+
       g_shmcheckpoint++;
 
       g_image->data = (char *) shmat(g_xshminfo.shmid, 0, 0);
@@ -304,6 +299,7 @@ static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
           up_x11uninitialize();
           goto shmerror;
         }
+
       g_shmcheckpoint++;
 
       g_xshminfo.shmaddr = g_image->data;
@@ -317,8 +313,8 @@ static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
           goto shmerror;
         }
 
+      g_framebuffer = (unsigned char *)g_image->data;
       g_shmcheckpoint++;
-
     }
   else
 #endif
@@ -331,18 +327,20 @@ shmerror:
 
       g_framebuffer = (unsigned char *)malloc(fblen);
 
-      g_image = XCreateImage(g_display, DefaultVisual(g_display, g_screen), depth,
-                             ZPixmap, 0, (char *)g_framebuffer, g_fbpixelwidth, g_fbpixelheight,
+      g_image = XCreateImage(g_display, DefaultVisual(g_display, g_screen),
+                             depth, ZPixmap, 0, (char *)g_framebuffer,
+                             g_fbpixelwidth, g_fbpixelheight,
                              8, 0);
 
       if (g_image == NULL)
-         {
-            fprintf(stderr, "Unable to create g_image\n");
-            return -1;
-         }
+        {
+          fprintf(stderr, "Unable to create g_image\r\n");
+          return -1;
+        }
 
       g_shmcheckpoint++;
     }
+
   return 0;
 }
 
@@ -359,53 +357,48 @@ shmerror:
  ****************************************************************************/
 
 int up_x11initialize(unsigned short width, unsigned short height,
-                     void **fbmem, unsigned int *fblen, unsigned char *bpp,
+                     void **fbmem, size_t *fblen, unsigned char *bpp,
                      unsigned short *stride)
 {
   XWindowAttributes windowAttributes;
   int depth;
   int ret;
 
-  /* Check if we are already initialized */
+  /* Save inputs */
 
-  if (!g_x11initialized)
+  g_fbpixelwidth  = width;
+  g_fbpixelheight = height;
+
+  /* Create the X11 window */
+
+  ret = up_x11createframe();
+  if (ret < 0)
     {
-      /* Save inputs */
-
-      g_fbpixelwidth  = width;
-      g_fbpixelheight = height;
-
-      /* Create the X11 window */
-
-      ret = up_x11createframe();
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      /* Determine the supported pixel bpp of the current window */
-
-      XGetWindowAttributes(g_display, DefaultRootWindow(g_display), &windowAttributes);
-
-      /* Get the pixel depth.  If the depth is 24-bits, use 32 because X expects
-       * 32-bit aligment anyway.
-       */
-
-      depth =  windowAttributes.depth;
-      if (depth == 24)
-        {
-          depth = 32;
-        }
-
-      *bpp    = depth;
-      *stride = (depth * width / 8);
-      *fblen  = (*stride * height);
-
-      /* Map the window to shared memory */
-
-      up_x11mapsharedmem(windowAttributes.depth, *fblen);
-      g_x11initialized = 1;
+      return ret;
     }
+
+  /* Determine the supported pixel bpp of the current window */
+
+  XGetWindowAttributes(g_display, DefaultRootWindow(g_display),
+                       &windowAttributes);
+
+  /* Get the pixel depth.  If the depth is 24-bits, use 32 because X expects
+   * 32-bit alignment anyway.
+   */
+
+  depth = windowAttributes.depth;
+  if (depth == 24)
+    {
+      depth = 32;
+    }
+
+  *bpp    = depth;
+  *stride = (depth * width / 8);
+  *fblen  = (*stride * height);
+
+  /* Map the window to shared memory */
+
+  up_x11mapsharedmem(windowAttributes.depth, *fblen);
 
   *fbmem  = (void *)g_framebuffer;
   return 0;
@@ -422,8 +415,6 @@ int up_x11cmap(unsigned short first, unsigned short len,
   Colormap cMap;
   int ndx;
 
-  printf("Creating Colormap\n");
-
   /* Convert each color to X11 scaling */
 
   cMap = DefaultColormap(g_display, g_screen);
@@ -435,18 +426,18 @@ int up_x11cmap(unsigned short first, unsigned short len,
        * ranges from 0-255; for X11 the range is 0-65536
        */
 
-     color.red   = (short)(*red++) << 8;
-     color.green = (short)(*green++) << 8;
-     color.blue  = (short)(*blue++) << 8;
-     color.flags = DoRed | DoGreen | DoBlue;
+      color.red   = (short)(*red++) << 8;
+      color.green = (short)(*green++) << 8;
+      color.blue  = (short)(*blue++) << 8;
+      color.flags = DoRed | DoGreen | DoBlue;
 
-     /* Then allocate a color for this selection */
+      /* Then allocate a color for this selection */
 
-     if (!XAllocColor(g_display, cMap, &color))
-       {
-         fprintf(stderr, "Failed to allocate color%d\n", ndx);
-         return -1;
-       }
+      if (!XAllocColor(g_display, cMap, &color))
+        {
+          fprintf(stderr, "Failed to allocate color%d\r\n", ndx);
+          return -1;
+        }
     }
 
   return 0;

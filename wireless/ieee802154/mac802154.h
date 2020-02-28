@@ -162,7 +162,7 @@ int mac802154_req_data(MACHANDLE mac,
  *   the struct mac802154_maccb_s->conf_purge callback.
  *
  *   NOTE: The standard specifies that confirmation should be indicated via
- *   the asynchronous MLME-PURGE.confirm primitve.  However, in our
+ *   the asynchronous MLME-PURGE.confirm primitive.  However, in our
  *   implementation we synchronously return the status from the request.
  *   Therefore, we merge the functionality of the MLME-PURGE.request and
  *   MLME-PURGE.confirm primitives together.
@@ -222,7 +222,7 @@ int mac802154_req_gts(MACHANDLE mac, FAR struct ieee802154_gts_req_s *req);
  *   that the MLME performs a reset operation.
  *
  *   NOTE: The standard specifies that confirmation should be provided via
- *   via the asynchronous MLME-RESET.confirm primitve.  However, in our
+ *   via the asynchronous MLME-RESET.confirm primitive.  However, in our
  *   implementation we synchronously return the value immediately. Therefore,
  *   we merge the functionality of the MLME-RESET.request and MLME-RESET.confirm
  *   primitives together.
@@ -274,7 +274,7 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req);
  *   attribute.
  *
  *   NOTE: The standard specifies that the attribute value should be returned
- *   via the asynchronous MLME-GET.confirm primitve.  However, in our
+ *   via the asynchronous MLME-GET.confirm primitive.  However, in our
  *   implementation, we synchronously return the value immediately.Therefore, we
  *   merge the functionality of the MLME-GET.request and MLME-GET.confirm
  *   primitives together.
@@ -292,7 +292,7 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e ,
  *   indicated MAC PIB attribute.
  *
  *   NOTE: The standard specifies that confirmation should be indicated via
- *   the asynchronous MLME-SET.confirm primitve.  However, in our implementation
+ *   the asynchronous MLME-SET.confirm primitive.  However, in our implementation
  *   we synchronously return the status from the request. Therefore, we do merge
  *   the functionality of the MLME-SET.request and MLME-SET.confirm primitives
  *   together.

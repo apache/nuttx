@@ -137,7 +137,7 @@ struct boot_data_s
   uint32_t start;           /* boot start location */
   uint32_t size;            /* size */
   uint32_t plugin;          /* plugin flag - 1 if downloaded application is plugin */
-  uint32_t placeholder;     /* placehoder to make even 0x10 size */
+  uint32_t placeholder;     /* placeholder to make even 0x10 size */
 };
 
 /****************************************************************************

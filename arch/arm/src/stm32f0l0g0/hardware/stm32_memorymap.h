@@ -44,8 +44,11 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32F0L0G0_STM32F05X) || defined(CONFIG_STM32F0L0G0_STM32F07X) || \
-    defined(CONFIG_STM32F0L0G0_STM32F09X)
+#if defined(CONFIG_STM32F0L0G0_STM32F03X)
+#  include "hardware/stm32f03x_memorymap.h"
+#elif defined(CONFIG_STM32F0L0G0_STM32F05X) || \
+      defined(CONFIG_STM32F0L0G0_STM32F07X) || \
+      defined(CONFIG_STM32F0L0G0_STM32F09X)
 #  include "hardware/stm32f05xf07xf09x_memorymap.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32L0)
 #  include "hardware/stm32l0_memorymap.h"

@@ -87,7 +87,7 @@
 #define LPC214X_SPI0CR0_BITS15   (0x0f00) /*  15-bits per transfer */
 #define LPC214X_SPI0CR0_BITS16   (0x0000) /*  16-bits per transfer */
 
-/* Status Regiser (SR) for SPI0 */
+/* Status Register (SR) for SPI0 */
 
 #define LPC214X_SPI0SR_ABRT      (0x08)   /* Bit 3=1: Slave abort */
 #define LPC214X_SPI0SR_MODF      (0x10)   /* Bit 4=1: Mode fault */
@@ -173,4 +173,4 @@ struct spi_dev_s; /* Forward reference */
 
 FAR struct spi_dev_s *lpc214x_spibus_initialize(int port);
 
-#endif  /* __ARCH_ARM_SRC_LPC214X_LPC214X_SPI_H */
+#endif /* __ARCH_ARM_SRC_LPC214X_LPC214X_SPI_H */

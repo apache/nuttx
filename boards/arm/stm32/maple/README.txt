@@ -87,7 +87,7 @@ DFU
   3. Run the DFU SE program to load nuttx.bin into FLASH.
 
   What if the DFU loader is not in FLASH? The loader code is available
-  inside of the Demo dirctory of the USBLib ZIP file that can be downloaded
+  inside of the Demo directory of the USBLib ZIP file that can be downloaded
   from the STMicro Website. You can build it using RIDE (or other toolchains);
   you will need a JTAG emulator to burn it into FLASH the first time.
 

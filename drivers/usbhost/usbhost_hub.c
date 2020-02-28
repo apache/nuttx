@@ -43,7 +43,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -54,6 +53,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -248,7 +248,7 @@ static void usbhost_hport_deactivate(FAR struct usbhost_hubport_s *hport)
   hport->funcaddr = 0;
 
   /* If this is a downstream hub port, then there should be no class driver
-   * associated wit it.
+   * associated with it.
    */
 
   DEBUGASSERT(ROOTHUB(hport) || hport->devclass == NULL);
@@ -1510,4 +1510,4 @@ int usbhost_hub_initialize(void)
   return usbhost_registerclass(&g_hub);
 }
 
-#endif  /* CONFIG_USBHOST_HUB */
+#endif /* CONFIG_USBHOST_HUB */

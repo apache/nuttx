@@ -1,7 +1,7 @@
 /*****************************************************************************
  * arch/arm/src/armv7-m/mpu.h
  *
- *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_ARMV7M_MPU_H
 #define __ARCH_ARM_SRC_ARMV7M_MPU_H
 
-/****************************************************************************
+/*****************************************************************************
  * Included Files
- ****************************************************************************/
+ *****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -52,9 +52,9 @@
 #  include "up_arch.h"
 #endif
 
-/****************************************************************************
+/*****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
+ *****************************************************************************/
 
 /* MPU Register Addresses */
 
@@ -127,8 +127,16 @@
 #  define MPU_RASR_B            (1 << 16) /* Bit 16: Bufferable */
 #  define MPU_RASR_C            (1 << 17) /* Bit 17: Cacheable */
 #  define MPU_RASR_S            (1 << 18) /* Bit 18: Shareable */
-#  define MPU_RASR_TEX_SHIFT    (19)      /* Bits 19-21: TEX Address Permisson */
+#  define MPU_RASR_TEX_SHIFT    (19)      /* Bits 19-21: TEX Address Permission */
 #  define MPU_RASR_TEX_MASK     (7 << MPU_RASR_TEX_SHIFT)
+#    define MPU_RASR_TEX_SO     (0 << MPU_RASR_TEX_SHIFT) /* Strongly Ordered */
+#    define MPU_RASR_TEX_NOR    (1 << MPU_RASR_TEX_SHIFT) /* Normal           */
+#    define MPU_RASR_TEX_DEV    (2 << MPU_RASR_TEX_SHIFT) /* Device           */
+#    define MPU_RASR_TEX_BB(bb) (4|(bb)) << MPU_RASR_TEX_SHIFT) /* Normal BB AA */
+#      define MPU_RASR_CP_NC    (0)  /* Non-cacheable */
+#      define MPU_RASR_CP_WBRA  (1)  /* Write back, write and Read- Allocate */
+#      define MPU_RASR_CP_WT    (2)  /* Write through, no Write-Allocate */
+#      define MPU_RASR_CP_WB    (4)  /* Write back, no Write-Allocate */
 #  define MPU_RASR_AP_SHIFT     (24)      /* Bits 24-26: Access permission */
 #  define MPU_RASR_AP_MASK      (7 << MPU_RASR_AP_SHIFT)
 #    define MPU_RASR_AP_NONO    (0 << MPU_RASR_AP_SHIFT) /* P:None U:None */
@@ -139,9 +147,9 @@
 #    define MPU_RASR_AP_RORO    (6 << MPU_RASR_AP_SHIFT) /* P:RO   U:RO   */
 #  define MPU_RASR_XN           (1 << 28) /* Bit 28: Instruction access disable */
 
-/****************************************************************************
+/*****************************************************************************
  * Public Function Prototypes
- ****************************************************************************/
+ *****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #undef EXTERN
@@ -153,17 +161,17 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_allocregion
  *
  * Description:
  *  Allocate the next region
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 unsigned int mpu_allocregion(void);
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_log2regionceil
  *
  * Description:
@@ -172,11 +180,11 @@ unsigned int mpu_allocregion(void);
  *
  *   size <= (1 << l2size)
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 uint8_t mpu_log2regionceil(size_t size);
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_log2regionfloor
  *
  * Description:
@@ -185,11 +193,11 @@ uint8_t mpu_log2regionceil(size_t size);
  *
  *   size >= (1 << l2size)
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 uint8_t mpu_log2regionfloor(size_t size);
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_subregion
  *
  * Description:
@@ -201,21 +209,21 @@ uint8_t mpu_log2regionfloor(size_t size);
  *   l2size has the same properties as the return value from
  *   mpu_log2regionceil()
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 uint32_t mpu_subregion(uintptr_t base, size_t size, uint8_t l2size);
 
-/****************************************************************************
+/*****************************************************************************
  * Inline Functions
- ****************************************************************************/
+ *****************************************************************************/
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_showtype
  *
  * Description:
  *   Show the characteristics of the MPU
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static inline void mpu_showtype(void)
 {
@@ -229,13 +237,13 @@ static inline void mpu_showtype(void)
 #endif
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_control
  *
  * Description:
  *   Configure and enable (or disable) the MPU
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static inline void mpu_control(bool enable, bool hfnmiena, bool privdefena)
 {
@@ -259,20 +267,40 @@ static inline void mpu_control(bool enable, bool hfnmiena, bool privdefena)
   putreg32(regval, MPU_CTRL);
 }
 
-/****************************************************************************
- * Name: mpu_priv_stronglyordered
+/*****************************************************************************
+ * Name: mpu_configure_region
  *
  * Description:
  *   Configure a region for privileged, strongly ordered memory
  *
- ****************************************************************************/
+ *****************************************************************************/
 
-static inline void mpu_priv_stronglyordered(uintptr_t base, size_t size)
+static inline void mpu_configure_region(uintptr_t base, size_t size,
+                                        uint32_t flags)
 {
   unsigned int region = mpu_allocregion();
   uint32_t     regval;
   uint8_t      l2size;
   uint8_t      subregions;
+  uintptr_t    alignedbase;
+
+  /* Ensure the base address alignment
+   *
+   * ARMv7-M Architecture Reference Manual
+   * B3.5.8 MPU Region Base Address Register, MPU_RBAR
+   * "Software must ensure that the value written to the ADDR field
+   * aligns with the size of the selected region."
+   */
+
+  alignedbase  = base & MPU_RBAR_ADDR_MASK;
+  l2size       = mpu_log2regionceil(size + base - alignedbase);
+  alignedbase &= ~((1 << l2size) - 1);
+  l2size       = mpu_log2regionceil(size + base - alignedbase);
+
+  DEBUGASSERT(alignedbase + (1 << l2size) >= base + size);
+  DEBUGASSERT(l2size == 5 || alignedbase + (1 << (l2size - 1)) < base + size);
+  DEBUGASSERT((alignedbase & MPU_RBAR_ADDR_MASK) == alignedbase);
+  DEBUGASSERT((alignedbase & ((1 << l2size) - 1)) == 0);
 
   /* Select the region */
 
@@ -280,11 +308,10 @@ static inline void mpu_priv_stronglyordered(uintptr_t base, size_t size)
 
   /* Select the region base address */
 
-  putreg32((base & MPU_RBAR_ADDR_MASK) | region | MPU_RBAR_VALID, MPU_RBAR);
+  putreg32(alignedbase | region | MPU_RBAR_VALID, MPU_RBAR);
 
   /* Select the region size and the sub-region map */
 
-  l2size     = mpu_log2regionceil(size);
   subregions = mpu_subregion(base, size, l2size);
 
   /* The configure the region */
@@ -292,327 +319,197 @@ static inline void mpu_priv_stronglyordered(uintptr_t base, size_t size)
   regval = MPU_RASR_ENABLE                              | /* Enable region  */
            MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size    */
            ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions    */
-                                                          /* Not Cacheable  */
-                                                          /* Not Bufferable */
-           MPU_RASR_S                                   | /* Shareable      */
-           MPU_RASR_AP_RWNO;                              /* P:RW   U:None  */
+           flags;
   putreg32(regval, MPU_RASR);
 }
 
-/****************************************************************************
+/*****************************************************************************
+ * Name: mpu_priv_stronglyordered
+ *
+ * Description:
+ *   Configure a region for privileged, strongly ordered memory
+ *
+ *****************************************************************************/
+
+static inline void mpu_priv_stronglyordered(uintptr_t base, size_t size)
+{
+  /* The configure the region */
+
+  mpu_configure_region(base, size,
+                       MPU_RASR_TEX_SO   | /* Ordered            */
+                                           /* Not Cacheable      */
+                                           /* Not Bufferable     */
+                       MPU_RASR_S        | /* Shareable          */
+                       MPU_RASR_AP_RWNO    /* P:RW   U:None      */
+                                           /* Instruction access */);
+}
+
+/*****************************************************************************
  * Name: mpu_user_flash
  *
  * Description:
  *   Configure a region for user program flash
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static inline void mpu_user_flash(uintptr_t base, size_t size)
 {
-  unsigned int region = mpu_allocregion();
-  uint32_t     regval;
-  uint8_t      l2size;
-  uint8_t      subregions;
-
-  /* Select the region */
-
-  putreg32(region, MPU_RNR);
-
-  /* Select the region base address */
-
-  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
-
-  /* Select the region size and the sub-region map */
-
-  l2size     = mpu_log2regionceil(size);
-  subregions = mpu_subregion(base, size, l2size);
-
   /* The configure the region */
 
-  regval = MPU_RASR_ENABLE                              | /* Enable region */
-           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
-           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
-           MPU_RASR_C                                   | /* Cacheable     */
-           MPU_RASR_AP_RORO;                              /* P:RO   U:RO   */
-  putreg32(regval, MPU_RASR);
+  mpu_configure_region(base, size,
+                       MPU_RASR_TEX_SO   | /* Ordered            */
+                       MPU_RASR_C        | /* Cacheable          */
+                                           /* Not Bufferable     */
+                                           /* Not Shareable      */
+                       MPU_RASR_AP_RORO    /* P:RO   U:RO        */
+                                           /* Instruction access */);
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_priv_flash
  *
  * Description:
  *   Configure a region for privileged program flash
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static inline void mpu_priv_flash(uintptr_t base, size_t size)
 {
-  unsigned int region = mpu_allocregion();
-  uint32_t     regval;
-  uint8_t      l2size;
-  uint8_t      subregions;
-
-  /* Select the region */
-
-  putreg32(region, MPU_RNR);
-
-  /* Select the region base address */
-
-  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
-
-  /* Select the region size and the sub-region map */
-
-  l2size     = mpu_log2regionceil(size);
-  subregions = mpu_subregion(base, size, l2size);
-
   /* The configure the region */
 
-  regval = MPU_RASR_ENABLE                              | /* Enable region */
-           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
-           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
-           MPU_RASR_C                                   | /* Cacheable     */
-           MPU_RASR_AP_RONO;                              /* P:RO   U:None */
-  putreg32(regval, MPU_RASR);
+mpu_configure_region(base, size,
+                     MPU_RASR_TEX_SO   | /* Ordered            */
+                     MPU_RASR_C        | /* Cacheable          */
+                                         /* Not Bufferable     */
+                                         /* Not Shareable      */
+                     MPU_RASR_AP_RONO    /* P:RO   U:None      */
+                                         /* Instruction access */);
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_user_intsram
  *
  * Description:
  *   Configure a region as user internal SRAM
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static inline void mpu_user_intsram(uintptr_t base, size_t size)
 {
-  unsigned int region = mpu_allocregion();
-  uint32_t     regval;
-  uint8_t      l2size;
-  uint8_t      subregions;
-
-  /* Select the region */
-
-  putreg32(region, MPU_RNR);
-
-  /* Select the region base address */
-
-  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
-
-  /* Select the region size and the sub-region map */
-
-  l2size     = mpu_log2regionceil(size);
-  subregions = mpu_subregion(base, size, l2size);
-
   /* The configure the region */
 
-  regval = MPU_RASR_ENABLE                              | /* Enable region */
-           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
-           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
-           MPU_RASR_S                                   | /* Shareable     */
-           MPU_RASR_C                                   | /* Cacheable     */
-           MPU_RASR_AP_RWRW;                              /* P:RW   U:RW   */
-  putreg32(regval, MPU_RASR);
+  mpu_configure_region(base, size,
+                       MPU_RASR_TEX_SO   | /* Ordered            */
+                       MPU_RASR_C        | /* Cacheable          */
+                                           /* Not Bufferable     */
+                       MPU_RASR_S        | /* Shareable          */
+                       MPU_RASR_AP_RWRW    /* P:RW   U:RW        */
+                                           /* Instruction access */);
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_priv_intsram
  *
  * Description:
  *   Configure a region as privileged internal SRAM
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static inline void mpu_priv_intsram(uintptr_t base, size_t size)
 {
-  unsigned int region = mpu_allocregion();
-  uint32_t     regval;
-  uint8_t      l2size;
-  uint8_t      subregions;
-
-  /* Select the region */
-
-  putreg32(region, MPU_RNR);
-
-  /* Select the region base address */
-
-  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
-
-  /* Select the region size and the sub-region map */
-
-  l2size     = mpu_log2regionceil(size);
-  subregions = mpu_subregion(base, size, l2size);
-
   /* The configure the region */
 
-  regval = MPU_RASR_ENABLE                              | /* Enable region */
-           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
-           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
-           MPU_RASR_S                                   | /* Shareable     */
-           MPU_RASR_C                                   | /* Cacheable     */
-           MPU_RASR_AP_RWNO;                              /* P:RW   U:None */
-  putreg32(regval, MPU_RASR);
+  mpu_configure_region(base, size,
+                       MPU_RASR_TEX_SO   | /* Ordered            */
+                       MPU_RASR_C        | /* Cacheable          */
+                                           /* Not Bufferable     */
+                       MPU_RASR_S        | /* Shareable          */
+                       MPU_RASR_AP_RWNO    /* P:RW   U:None      */
+                                           /* Instruction access */);
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_user_extsram
  *
  * Description:
  *   Configure a region as user external SRAM
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static inline void mpu_user_extsram(uintptr_t base, size_t size)
 {
-  unsigned int region = mpu_allocregion();
-  uint32_t     regval;
-  uint8_t      l2size;
-  uint8_t      subregions;
-
-  /* Select the region */
-
-  putreg32(region, MPU_RNR);
-
-  /* Select the region base address */
-
-  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
-
-  /* Select the region size and the sub-region map */
-
-  l2size     = mpu_log2regionceil(size);
-  subregions = mpu_subregion(base, size, l2size);
-
   /* The configure the region */
 
-  regval = MPU_RASR_ENABLE                              | /* Enable region */
-           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
-           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
-           MPU_RASR_S                                   | /* Shareable     */
-           MPU_RASR_C                                   | /* Cacheable     */
-           MPU_RASR_B                                   | /* Bufferable    */
-           MPU_RASR_AP_RWRW;                              /* P:RW   U:RW   */
-  putreg32(regval, MPU_RASR);
+  mpu_configure_region(base, size,
+                       MPU_RASR_TEX_SO   | /* Ordered            */
+                       MPU_RASR_C        | /* Cacheable          */
+                       MPU_RASR_B        | /* Bufferable         */
+                       MPU_RASR_S        | /* Shareable          */
+                       MPU_RASR_AP_RWRW    /* P:RW   U:RW        */
+                                           /* Instruction access */);
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_priv_extsram
  *
  * Description:
  *   Configure a region as privileged external SRAM
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static inline void mpu_priv_extsram(uintptr_t base, size_t size)
 {
-  unsigned int region = mpu_allocregion();
-  uint32_t     regval;
-  uint8_t      l2size;
-  uint8_t      subregions;
-
-  /* Select the region */
-
-  putreg32(region, MPU_RNR);
-
-  /* Select the region base address */
-
-  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
-
-  /* Select the region size and the sub-region map */
-
-  l2size     = mpu_log2regionceil(size);
-  subregions = mpu_subregion(base, size, l2size);
-
   /* The configure the region */
 
-  regval = MPU_RASR_ENABLE                              | /* Enable region */
-           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
-           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
-           MPU_RASR_S                                   | /* Shareable     */
-           MPU_RASR_C                                   | /* Cacheable     */
-           MPU_RASR_B                                   | /* Bufferable    */
-           MPU_RASR_AP_RWNO;                              /* P:RW   U:None */
-  putreg32(regval, MPU_RASR);
+  mpu_configure_region(base, size,
+                       MPU_RASR_TEX_SO   | /* Ordered            */
+                       MPU_RASR_C        | /* Cacheable          */
+                       MPU_RASR_B        | /* Bufferable         */
+                       MPU_RASR_S        | /* Shareable          */
+                       MPU_RASR_AP_RWNO    /* P:RW   U:None      */
+                                           /* Instruction access */);
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_peripheral
  *
  * Description:
  *   Configure a region as privileged peripheral address space
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static inline void mpu_peripheral(uintptr_t base, size_t size)
 {
-  unsigned int region = mpu_allocregion();
-  uint32_t     regval;
-  uint8_t      l2size;
-  uint8_t      subregions;
-
-  /* Select the region */
-
-  putreg32(region, MPU_RNR);
-
-  /* Select the region base address */
-
-  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
-
-  /* Select the region size and the sub-region map */
-
-  l2size     = mpu_log2regionceil(size);
-  subregions = mpu_subregion(base, size, l2size);
-
   /* Then configure the region */
 
-  regval = MPU_RASR_ENABLE                              | /* Enable region */
-           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
-           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
-           MPU_RASR_S                                   | /* Shareable     */
-           MPU_RASR_B                                   | /* Bufferable    */
-           MPU_RASR_AP_RWNO                             | /* P:RW   U:None */
-           MPU_RASR_XN;                                   /* Instruction access disable */
-
-  putreg32(regval, MPU_RASR);
+  mpu_configure_region(base, size,
+                       MPU_RASR_TEX_DEV  | /* Device                */
+                                           /* Not Cacheable         */
+                       MPU_RASR_B        | /* Bufferable            */
+                       MPU_RASR_S        | /* Shareable             */
+                       MPU_RASR_AP_RWNO  | /* P:RW   U:None         */
+                       MPU_RASR_XN         /* No Instruction access */);
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_user_peripheral
  *
  * Description:
  *   Configure a region as user peripheral address space
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static inline void mpu_user_peripheral(uintptr_t base, size_t size)
 {
-  unsigned int region = mpu_allocregion();
-  uint32_t     regval;
-  uint8_t      l2size;
-  uint8_t      subregions;
-
-  /* Select the region */
-
-  putreg32(region, MPU_RNR);
-
-  /* Select the region base address */
-
-  putreg32((base & MPU_RBAR_ADDR_MASK) | region, MPU_RBAR);
-
-  /* Select the region size and the sub-region map */
-
-  l2size     = mpu_log2regionceil(size);
-  subregions = mpu_subregion(base, size, l2size);
-
   /* Then configure the region */
 
-  regval = MPU_RASR_ENABLE                              | /* Enable region */
-           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size   */
-           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions   */
-           MPU_RASR_S                                   | /* Shareable     */
-           MPU_RASR_B                                   | /* Bufferable    */
-           MPU_RASR_AP_RWRW                             | /* P:RW   U:RW */
-           MPU_RASR_XN;                                   /* Instruction access disable */
-
-  putreg32(regval, MPU_RASR);
+  mpu_configure_region(base, size,
+                       MPU_RASR_TEX_DEV  | /* Device                */
+                                           /* Not Cacheable         */
+                       MPU_RASR_B        | /* Bufferable            */
+                       MPU_RASR_S        | /* Shareable             */
+                       MPU_RASR_AP_RWRW  | /* P:RW     U:RW         */
+                       MPU_RASR_XN         /* No Instruction access */);
 }
 
 #undef EXTERN
@@ -620,6 +517,5 @@ static inline void mpu_user_peripheral(uintptr_t base, size_t size)
 }
 #endif
 
-#endif  /* __ASSEMBLY__ */
-#endif  /* __ARCH_ARM_SRC_ARMV7M_MPU_H */
-
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_ARMV7M_MPU_H */

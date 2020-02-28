@@ -1049,6 +1049,7 @@ config TIVA_ETHERNET
 	default n
 	depends on TIVA_HAVE_ETHERNET
 	select NETDEVICES
+	select ARCH_HAVE_PHY
 	select ARCH_HAVE_NETDEV_STATISTICS if ARCH_CHIP_LM3S || ARCH_CHIP_LM4F
 	---help---
 		This must be set (along with NET) to build the Stellaris Ethernet driver.
@@ -1683,4 +1684,3 @@ config TIVA_FLASH_STARTPAGE
 
 endmenu
 endif
-

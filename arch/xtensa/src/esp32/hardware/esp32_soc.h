@@ -278,7 +278,7 @@
 #define ETS_CAN_INTR_SOURCE                     45 /* Interrupt of can, level */
 #define ETS_RTC_CORE_INTR_SOURCE                46 /* Interrupt of rtc core, level, include rtc watchdog */
 #define ETS_RMT_INTR_SOURCE                     47 /* Interrupt of remote controller, level */
-#define ETS_PCNT_INTR_SOURCE                    48 /* Interrupt of pluse count, level */
+#define ETS_PCNT_INTR_SOURCE                    48 /* Interrupt of pulse count, level */
 #define ETS_I2C_EXT0_INTR_SOURCE                49 /* Interrupt of I2C controller1, level */
 #define ETS_I2C_EXT1_INTR_SOURCE                50 /* Interrupt of I2C controller0, level */
 #define ETS_RSA_INTR_SOURCE                     51 /* Interrupt of RSA accelerator, level */
@@ -346,7 +346,7 @@
 #define ETS_WBB_INUM                            4
 #define ETS_TG0_T1_INUM                         10 /* Use edge interrupt */
 
-/* CPU0 Intrrupt number used in ROM, should be cancelled in SDK */
+/* CPU0 Interrupt number used in ROM, should be cancelled in SDK */
 
 #define ETS_SLC_INUM                            1
 #define ETS_UART0_INUM                          5

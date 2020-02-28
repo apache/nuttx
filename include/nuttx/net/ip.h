@@ -52,7 +52,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <queue.h>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -262,12 +261,12 @@ extern "C"
 
 #ifdef CONFIG_ENDIAN_BIG
 #  define net_ip4addr_conv32(addr) \
-    (((in_addr_t)((uint16_t*)addr)[0] << 16) | \
-     (in_addr_t)((uint16_t*)addr)[1])
+    (((in_addr_t)((FAR uint16_t *)addr)[0] << 16) | \
+     (in_addr_t)((FAR uint16_t *)addr)[1])
 #else
 #  define net_ip4addr_conv32(addr) \
-    (((in_addr_t)((uint16_t*)addr)[1] << 16) | \
-     (in_addr_t)((uint16_t*)addr)[0])
+    (((in_addr_t)((FAR uint16_t *)addr)[1] << 16) | \
+     (in_addr_t)((FAR uint16_t *)addr)[0])
 #endif
 
 /****************************************************************************
@@ -305,14 +304,14 @@ extern "C"
 
 #define ip6_addr(addr, addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7) \
   do { \
-    ((uint16_t*)(addr))[0] = HTONS((addr0)); \
-    ((uint16_t*)(addr))[1] = HTONS((addr1)); \
-    ((uint16_t*)(addr))[2] = HTONS((addr2)); \
-    ((uint16_t*)(addr))[3] = HTONS((addr3)); \
-    ((uint16_t*)(addr))[4] = HTONS((addr4)); \
-    ((uint16_t*)(addr))[5] = HTONS((addr5)); \
-    ((uint16_t*)(addr))[6] = HTONS((addr6)); \
-    ((uint16_t*)(addr))[7] = HTONS((addr7)); \
+    ((FAR uint16_t *)(addr))[0] = HTONS((addr0)); \
+    ((FAR uint16_t *)(addr))[1] = HTONS((addr1)); \
+    ((FAR uint16_t *)(addr))[2] = HTONS((addr2)); \
+    ((FAR uint16_t *)(addr))[3] = HTONS((addr3)); \
+    ((FAR uint16_t *)(addr))[4] = HTONS((addr4)); \
+    ((FAR uint16_t *)(addr))[5] = HTONS((addr5)); \
+    ((FAR uint16_t *)(addr))[6] = HTONS((addr6)); \
+    ((FAR uint16_t *)(addr))[7] = HTONS((addr7)); \
   } while (0)
 
 /****************************************************************************
@@ -416,8 +415,8 @@ extern "C"
    } while (0)
 #  define net_ipv4addr_hdrcopy(dest, src) \
    do { \
-     ((uint16_t*)(dest))[0] = ((uint16_t*)(src))[0]; \
-     ((uint16_t*)(dest))[1] = ((uint16_t*)(src))[1]; \
+     ((FAR uint16_t *)(dest))[0] = ((FAR uint16_t *)(src))[0]; \
+     ((FAR uint16_t *)(dest))[1] = ((FAR uint16_t *)(src))[1]; \
    } while (0)
 #endif
 
@@ -535,7 +534,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  *
  *   NOTES:
  *   1. This function does not check for the broadcast address
- *      255.255.255.255.  That must be performed as a seperate check.
+ *      255.255.255.255.  That must be performed as a separate check.
  *   2. You must also separately check if the ipaddress lies on the sub-net
  *      using, perhaps, net_ipv4addr_maskcmp().
  *
@@ -564,7 +563,7 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
  * Name: net_is_addr_loopback
  *
  * Description:
- *   Is Ithe Pv6 address a the loopback address?  See RFC 4291 (replaces
+ *   Is the IPv6 address a the loopback address?  See RFC 4291 (replaces
  *   3513).
  *
  ****************************************************************************/

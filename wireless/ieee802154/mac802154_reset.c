@@ -67,7 +67,7 @@
  *   that the MLME performs a reset operation.
  *
  *   NOTE: The standard specifies that confirmation should be provided via
- *   via the asynchronous MLME-RESET.confirm primitve.  However, in our
+ *   via the asynchronous MLME-RESET.confirm primitive.  However, in our
  *   implementation we synchronously return the value immediately. Therefore,
  *   we merge the functionality of the MLME-RESET.request and MLME-RESET.confirm
  *   primitives together.

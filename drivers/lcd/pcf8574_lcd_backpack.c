@@ -256,7 +256,7 @@ static inline uint8_t rc2addr(FAR struct pcf8574_lcd_dev_s *priv,
     }
   else
     {
-      /* 4 line displays are intersting; third line really is a continuation
+      /* 4 line displays are interesting; third line really is a continuation
        * of first line, and fourth line is a continuation of second.
        */
 

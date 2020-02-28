@@ -97,16 +97,28 @@ static void dispatch_syscall(void)
 {
   __asm__ __volatile__
   (
-    " sub sp, sp, #16\n"           /* Create a stack frame to hold 3 parms + lr */
+    /* Create a stack frame to hold 3 parameters + LR and SP adjustment value.
+     * Also, Ensure 8 bytes alignment. We use IP as a scratch.
+     *
+     * NOTE: new_SP = (orig_SP - 20) & ~7
+     *              = orig_SP - 20 - ((orig_SP - 20) & ~7)
+     */
+    " mov ip, sp\n"                /* Calculate (orig_SP - new_SP) */
+    " sub ip, ip, #20\n"
+    " and ip, ip, #7\n"
+    " add ip, ip, #20\n"
+    " sub sp, sp, ip\n"
     " str r4, [sp, #0]\n"          /* Move parameter 4 (if any) into position */
     " str r5, [sp, #4]\n"          /* Move parameter 5 (if any) into position */
     " str r6, [sp, #8]\n"          /* Move parameter 6 (if any) into position */
     " str lr, [sp, #12]\n"         /* Save lr in the stack frame */
+    " str ip, [sp, #16]\n"         /* Save (orig_SP - new_SP) value */
     " ldr ip, =g_stublookup\n"     /* R12=The base of the stub lookup table */
     " ldr ip, [ip, r0, lsl #2]\n"  /* R12=The address of the stub for this syscall */
     " blx ip\n"                    /* Call the stub (modifies lr) */
     " ldr lr, [sp, #12]\n"         /* Restore lr */
-    " add sp, sp, #16\n"           /* Destroy the stack frame */
+    " ldr r2, [sp, #16]\n"         /* Restore (orig_SP - new_SP) value */
+    " add sp, sp, r2\n"            /* Restore SP */
     " mov r2, r0\n"                /* R2=Save return value in R2 */
     " mov r0, #3\n"                /* R0=SYS_syscall_return */
     " svc 0"                       /* Return from the syscall */
@@ -172,7 +184,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
        *   R0 = SYS_save_context
        *   R1 = saveregs
        *
-       * In this case, we simply need to copy the current regsters to the
+       * In this case, we simply need to copy the current registers to the
        * save register space references in the saved R1 and return.
        */
 
@@ -369,7 +381,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
           DEBUGASSERT(rtcb->xcp.sigreturn == 0);
           rtcb->xcp.sigreturn  = regs[REG_PC];
 
-          /* Set up to return to the user-space pthread start-up function in
+          /* Set up to return to the user-space trampoline function in
            * unprivileged mode.
            */
 

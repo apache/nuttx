@@ -46,12 +46,8 @@
 #include <sys/socket.h>
 #include <queue.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/net/ip.h>
-
-#ifdef CONFIG_NET_UDP_READAHEAD
-#  include <nuttx/mm/iob.h>
-#endif
+#include <nuttx/mm/iob.h>
 
 #ifdef CONFIG_NET_UDP_NOTIFIER
 #  include <nuttx/wqueue.h>
@@ -143,7 +139,6 @@ struct udp_conn_s
                            * Unbound: 0, Bound: 1-MAX_IFINDEX */
 #endif
 
-#ifdef CONFIG_NET_UDP_READAHEAD
   /* Read-ahead buffering.
    *
    *   readahead - A singly linked list of type struct iob_qentry_s
@@ -151,7 +146,6 @@ struct udp_conn_s
    */
 
   struct iob_queue_s readahead;   /* Read-ahead buffering */
-#endif
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
   /* Write buffering
@@ -180,9 +174,6 @@ struct udp_wrbuffer_s
 {
   sq_entry_t wb_node;              /* Supports a singly linked list */
   struct sockaddr_storage wb_dest; /* Destination address */
-#ifdef CONFIG_NET_SOCKOPTS
-  clock_t wb_start;                /* Start time for timeout calculation */
-#endif
   struct iob_s *wb_iob;            /* Head of the I/O buffer chain */
 };
 #endif
@@ -308,6 +299,22 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
  ****************************************************************************/
 
 int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr);
+
+/****************************************************************************
+ * Name: udp_close
+ *
+ * Description:
+ *   Break any current UDP connection
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *
+ * Assumptions:
+ *   Called from normal user-level logic
+ *
+ ****************************************************************************/
+
+int udp_close(FAR struct socket *psock);
 
 /****************************************************************************
  * Name: udp_ipv4_select
@@ -456,7 +463,6 @@ void udp_wrbuffer_initialize(void);
 
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
 struct udp_wrbuffer_s;
-
 FAR struct udp_wrbuffer_s *udp_wrbuffer_alloc(void);
 #endif /* CONFIG_NET_UDP_WRITE_BUFFERS */
 
@@ -632,15 +638,30 @@ uint16_t udp_callback(FAR struct net_driver_s *dev,
                       FAR struct udp_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
- * Name: psock_udp_send
+ * Name: psock_udp_recvfrom
  *
  * Description:
- *   Implements send() for connected UDP sockets
+ *   Perform the recvfrom operation for a UDP SOCK_DGRAM
+ *
+ * Input Parameters:
+ *   psock    Pointer to the socket structure for the SOCK_DRAM socket
+ *   buf      Buffer to receive data
+ *   len      Length of buffer
+ *   flags    Receive flags
+ *   from     INET address of source (may be NULL)
+ *   fromlen  The length of the address structure
+ *
+ * Returned Value:
+ *   On success, returns the number of characters received.  On  error,
+ *   -errno is returned (see recvfrom for list of errnos).
+ *
+ * Assumptions:
  *
  ****************************************************************************/
 
-ssize_t psock_udp_send(FAR struct socket *psock, FAR const void *buf,
-                       size_t len);
+ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR void *buf,
+                           size_t len, int flags, FAR struct sockaddr *from,
+                           FAR socklen_t *fromlen);
 
 /****************************************************************************
  * Name: psock_udp_sendto
@@ -814,7 +835,7 @@ int udp_notifier_teardown(int key);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_UDP_READAHEAD) && defined(CONFIG_NET_UDP_NOTIFIER)
+#ifdef CONFIG_NET_UDP_NOTIFIER
 void udp_readahead_signal(FAR struct udp_conn_s *conn);
 #endif
 
@@ -851,7 +872,7 @@ void udp_writebuffer_signal(FAR struct udp_conn_s *conn);
  *
  * Input Parameters:
  *   psock   - An instance of the internal socket structure.
- *   abstime - The absolute time when the timeout will occur
+ *   timeout - The relative time when the timeout will occur
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
@@ -860,11 +881,9 @@ void udp_writebuffer_signal(FAR struct udp_conn_s *conn);
  ****************************************************************************/
 
 #if defined(CONFIG_NET_UDP_WRITE_BUFFERS) && defined(CONFIG_NET_UDP_NOTIFIER)
-struct timespec;
-int udp_txdrain(FAR struct socket *psock,
-                FAR const struct timespec *abstime);
+int udp_txdrain(FAR struct socket *psock, unsigned int timeout);
 #else
-#  define udp_txdrain(conn, abstime) (0)
+#  define udp_txdrain(conn, timeout) (0)
 #endif
 
 #undef EXTERN

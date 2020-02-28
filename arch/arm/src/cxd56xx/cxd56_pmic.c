@@ -163,7 +163,7 @@ struct pmic_temp_mode_s
   int high;
 };
 
-extern int PM_PmicControl(int cmd, void *arg);
+extern int pm_pmic_control(int cmd, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -198,6 +198,7 @@ static bool is_notify_registerd(void)
           return true;
         }
     }
+
   return false;
 }
 
@@ -280,7 +281,7 @@ static int pmic_int_handler(int irq, void *context, void *arg)
  *
  * Description:
  *   Get Raw Interrupt Status register. And furthermore, if status is set,
- *   then clear the interrupt. Register's decription is below:
+ *   then clear the interrupt. Register's description is below:
  *
  *     7   6   5   4    3     2     1     0
  *   +---------------+-----+-----+-----+-----+
@@ -298,14 +299,14 @@ static int pmic_int_handler(int irq, void *context, void *arg)
 
 int cxd56_pmic_get_interrupt_status(uint8_t *status)
 {
-  return PM_PmicControl(PMIC_CMD_INTSTATUS, status);
+  return pm_pmic_control(PMIC_CMD_INTSTATUS, status);
 }
 
 /****************************************************************************
  * Name: cxd56_pmic_set_gpo_reg
  *
  * Description:
- *   Set GPO register. Register's decription is below:
+ *   Set GPO register. Register's description is below:
  *
  *     7   6   5   4   3   2   1   0
  *   +---+---+---+---+---+---+---+---+
@@ -337,6 +338,7 @@ int cxd56_pmic_set_gpo_reg(uint8_t *setbit0, uint8_t *clrbit0,
       uint8_t *setbit1;
       uint8_t *clrbit1;
     }
+
   arg =
     {
       .setbit0 = setbit0,
@@ -345,7 +347,7 @@ int cxd56_pmic_set_gpo_reg(uint8_t *setbit0, uint8_t *clrbit0,
       .clrbit1 = clrbit1,
     };
 
-  return PM_PmicControl(PMIC_CMD_GPO, &arg);
+  return pm_pmic_control(PMIC_CMD_GPO, &arg);
 }
 
 /****************************************************************************
@@ -479,6 +481,7 @@ bool cxd56_pmic_get_gpo(uint8_t chset)
     {
       return true;
     }
+
   return false;
 }
 
@@ -486,7 +489,7 @@ bool cxd56_pmic_get_gpo(uint8_t chset)
  * Name: cxd56_pmic_set_loadswitch_reg
  *
  * Description:
- *   Set LoadSwitch register. Register's decription is below:
+ *   Set LoadSwitch register. Register's description is below:
  *
  *     7   6   5   4   3   2   1   0
  *   +---+---+---+---+---+---+---+---+
@@ -512,13 +515,14 @@ int cxd56_pmic_set_loadswitch_reg(uint8_t *setbit, uint8_t *clrbit)
       uint8_t *setbit;
       uint8_t *clrbit;
     }
+
   arg =
     {
       .setbit = setbit,
       .clrbit = clrbit,
     };
 
-  return PM_PmicControl(PMIC_CMD_LOADSW, &arg);
+  return pm_pmic_control(PMIC_CMD_LOADSW, &arg);
 }
 
 /****************************************************************************
@@ -549,6 +553,7 @@ int cxd56_pmic_set_loadswitch(uint8_t chset, bool value)
     {
       clrbit = chset;
     }
+
   return cxd56_pmic_set_loadswitch_reg(&setbit, &clrbit);
 }
 
@@ -580,7 +585,7 @@ bool cxd56_pmic_get_loadswitch(uint8_t chset)
  * Name: cxd56_pmic_set_ddc_ldo_reg
  *
  * Description:
- *   Set DDC/LDO register. Register's decription is below:
+ *   Set DDC/LDO register. Register's description is below:
  *
  *      7    6    5    4    3    2    1    0
  *   +----+----+----+----+----+----+----+----+
@@ -607,13 +612,14 @@ int cxd56_pmic_set_ddc_ldo_reg(uint8_t *setbit, uint8_t *clrbit)
       uint8_t *setbit;
       uint8_t *clrbit;
     }
+
   arg =
     {
       .setbit = setbit,
       .clrbit = clrbit,
     };
 
-  return PM_PmicControl(PMIC_CMD_DDCLDO, &arg);
+  return pm_pmic_control(PMIC_CMD_DDCLDO, &arg);
 }
 
 /****************************************************************************
@@ -644,6 +650,7 @@ int cxd56_pmic_set_ddc_ldo(uint8_t chset, bool value)
     {
       clrbit = chset;
     }
+
   return cxd56_pmic_set_ddc_ldo_reg(&setbit, &clrbit);
 }
 
@@ -698,10 +705,10 @@ int cxd56_pmic_get_rtc(uint64_t *count)
   if (ret) goto error;
 
   do
-  {
-    ret = cxd56_pmic_read(PMIC_REG_RRQ_LRQ_STATUS, &data, sizeof(data));
-    if (ret) goto error;
-  }
+    {
+      ret = cxd56_pmic_read(PMIC_REG_RRQ_LRQ_STATUS, &data, sizeof(data));
+      if (ret) goto error;
+    }
   while (!(RRQ_TIME_STATE & data));
 
   ret = cxd56_pmic_read(PMIC_REG_RTC, rtc, sizeof(rtc));
@@ -731,7 +738,7 @@ error:
 
 int cxd56_pmic_get_gauge(FAR struct pmic_gauge_s *gauge)
 {
-  return PM_PmicControl(PMIC_CMD_AFE, gauge);
+  return pm_pmic_control(PMIC_CMD_AFE, gauge);
 }
 
 /****************************************************************************
@@ -741,16 +748,73 @@ int cxd56_pmic_get_gauge(FAR struct pmic_gauge_s *gauge)
  *   Get lower limit of voltage for system to be running.
  *
  * Input Parameter:
- *   voltage - Lower limit voltage (mV)
+ *   voltage - Lower limit voltage (mv)
  *
  * Returned Value:
  *   Return 0 on success. Otherwise, return a negated errno.
  *
  ****************************************************************************/
 
-int cxd56_pmic_getlowervol(FAR int *vol)
+int cxd56_pmic_getlowervol(FAR int *voltage)
 {
-  return PM_PmicControl(PMIC_CMD_GETVSYS, vol);
+  return pm_pmic_control(PMIC_CMD_GETVSYS, voltage);
+}
+
+/****************************************************************************
+ * Name: cxd56_pmic_setlowervol
+ *
+ * Description:
+ *   Set lower limit of voltage for system to be running.
+ *
+ * Input Parameter:
+ *   voltage - Lower limit voltage (mv)
+ *
+ * Returned Value:
+ *   Return 0 on success. Otherwise, return a negated errno.
+ *
+ ****************************************************************************/
+
+int cxd56_pmic_setlowervol(int voltage)
+{
+  return pm_pmic_control(PMIC_CMD_SETVSYS, (void *)voltage);
+}
+
+/****************************************************************************
+ * Name: cxd56_pmic_getnotifyvol
+ *
+ * Description:
+ *   Get voltage for the low battery notification
+ *
+ * Input Parameter:
+ *   voltage - Low battery voltage (mv)
+ *
+ * Returned Value:
+ *   Return 0 on success. Otherwise, return a negated errno.
+ *
+ ****************************************************************************/
+
+int cxd56_pmic_getnotifyvol(FAR int *voltage)
+{
+  return pm_pmic_control(PMIC_CMD_GETPREVSYS, voltage);
+}
+
+/****************************************************************************
+ * Name: cxd56_pmic_setnotifyvol
+ *
+ * Description:
+ *   Set voltage for the low battery notification
+ *
+ * Input Parameter:
+ *   voltage - Low battery voltage (mv)
+ *
+ * Returned Value:
+ *   Return 0 on success. Otherwise, return a negated errno.
+ *
+ ****************************************************************************/
+
+int cxd56_pmic_setnotifyvol(int voltage)
+{
+  return pm_pmic_control(PMIC_CMD_SETPREVSYS, (void *)voltage);
 }
 
 /****************************************************************************
@@ -760,7 +824,7 @@ int cxd56_pmic_getlowervol(FAR int *vol)
  *   Get charge voltage
  *
  * Input Parameter:
- *   voltage - Possible values are every 50 between 4000 to 4400 (mV)
+ *   voltage - Possible values are every 50 between 4000 to 4400 (mv)
  *
  * Returned Value:
  *   Return 0 on success. Otherwise, return a negated errno.
@@ -772,7 +836,7 @@ int cxd56_pmic_getchargevol(FAR int *voltage)
   int val;
   int ret;
 
-  ret = PM_PmicControl(PMIC_CMD_GET_CHG_VOLTAGE, &val);
+  ret = pm_pmic_control(PMIC_CMD_GET_CHG_VOLTAGE, &val);
   if (ret)
     {
       return -EIO;
@@ -780,7 +844,7 @@ int cxd56_pmic_getchargevol(FAR int *voltage)
 
   val &= 0xf;
 
-  /* Convert register value to actual voltage (mV) */
+  /* Convert register value to actual voltage (mv) */
 
   if (val <= 8)
     {
@@ -801,7 +865,7 @@ int cxd56_pmic_getchargevol(FAR int *voltage)
  *   Set charge voltage
  *
  * Input Parameter:
- *   voltage - Avalable values are every 50 between 4000 to 4400 (mV)
+ *   voltage - Available values are every 50 between 4000 to 4400 (mv)
  *
  * Returned Value:
  *   Return 0 on success. Otherwise, return a negated errno.
@@ -818,16 +882,17 @@ int cxd56_pmic_setchargevol(int voltage)
     {
       return -EINVAL;
     }
+
   if (voltage % 50)
     {
       return -EINVAL;
     }
 
-  /* Register setting values are every 50mV between 4.0V to 4.4V */
+  /* Register setting values are every 50mv between 4.0V to 4.4V */
 
   val = (voltage - 4000) / 50;
 
-  return PM_PmicControl(PMIC_CMD_SET_CHG_VOLTAGE, (void *)val);
+  return pm_pmic_control(PMIC_CMD_SET_CHG_VOLTAGE, (void *)val);
 }
 
 /****************************************************************************
@@ -850,7 +915,7 @@ int cxd56_pmic_getchargecurrent(FAR int *current)
   int val;
   int ret;
 
-  ret = PM_PmicControl(PMIC_CMD_GET_CHG_CURRENT, &val);
+  ret = pm_pmic_control(PMIC_CMD_GET_CHG_CURRENT, &val);
   if (ret)
     {
       return ret;
@@ -918,7 +983,7 @@ int cxd56_pmic_setchargecurrent(int current)
         return -EFAULT;
     }
 
-  return PM_PmicControl(PMIC_CMD_SET_CHG_CURRENT, (void *)val);
+  return pm_pmic_control(PMIC_CMD_SET_CHG_CURRENT, (void *)val);
 }
 
 /****************************************************************************
@@ -937,7 +1002,7 @@ int cxd56_pmic_setchargecurrent(int current)
 
 int cxd56_pmic_getporttype(FAR int *porttype)
 {
-  return PM_PmicControl(PMIC_CMD_GET_USB_PORT_TYPE, porttype);
+  return pm_pmic_control(PMIC_CMD_GET_USB_PORT_TYPE, porttype);
 }
 
 /****************************************************************************
@@ -962,7 +1027,7 @@ int cxd56_pmic_getchargestate(uint8_t *state)
 
   /* Update charge state */
 
-  ret = PM_PmicControl(PMIC_CMD_AFE, &arg);
+  ret = pm_pmic_control(PMIC_CMD_AFE, &arg);
   if (ret)
     {
       return ret;
@@ -970,7 +1035,7 @@ int cxd56_pmic_getchargestate(uint8_t *state)
 
   /* Get actual charging state (CNT_USB1) */
 
-  ret = PM_PmicControl(PMIC_CMD_GET_CHG_STATE, &val);
+  ret = pm_pmic_control(PMIC_CMD_GET_CHG_STATE, &val);
   *state = val & 0xff;
 
   return ret;
@@ -983,20 +1048,20 @@ int cxd56_pmic_getchargestate(uint8_t *state)
  *   Set threshold voltage against full charge for automatic restart charging.
  *
  * Input Parameter:
- *   mV - Available values are -400, -350, -300 and -250 (mV)
+ *   mv - Available values are -400, -350, -300 and -250 (mv)
  *
  * Returned Value:
  *   Return 0 on success. Otherwise, return a negated errno.
  *
  ****************************************************************************/
 
-int cxd56_pmic_setrechargevol(int mV)
+int cxd56_pmic_setrechargevol(int mv)
 {
   int val;
 
   /* Convert voltage to register value */
 
-  switch (mV)
+  switch (mv)
     {
       case -400:
         val = PMIC_CHG_DET_MINUS400;
@@ -1018,7 +1083,7 @@ int cxd56_pmic_setrechargevol(int mV)
         return -EINVAL;
     }
 
-  return PM_PmicControl(PMIC_CMD_SET_RECHG_VOLTAGE, (void *)val);
+  return pm_pmic_control(PMIC_CMD_SET_RECHG_VOLTAGE, (void *)val);
 }
 
 /****************************************************************************
@@ -1028,42 +1093,42 @@ int cxd56_pmic_setrechargevol(int mV)
  *   Get threshold voltage against full charge for automatic restart charging.
  *
  * Input Parameter:
- *   mV - Possible values are -400, -350, -300 and -250 (mV)
+ *   mv - Possible values are -400, -350, -300 and -250 (mv)
  *
  * Returned Value:
  *   Return 0 on success. Otherwise, return a negated errno.
  *
  ****************************************************************************/
 
-int cxd56_pmic_getrechargevol(FAR int *mV)
+int cxd56_pmic_getrechargevol(FAR int *mv)
 {
   int val;
   int ret;
 
-  ret = PM_PmicControl(PMIC_CMD_GET_RECHG_VOLTAGE, &val);
+  ret = pm_pmic_control(PMIC_CMD_GET_RECHG_VOLTAGE, &val);
   if (ret)
     {
       return ret;
     }
 
-  /* Convert regsiter value to voltage */
+  /* Convert register value to voltage */
 
   switch (val)
     {
       case PMIC_CHG_DET_MINUS400:
-        *mV = -400;
+        *mv = -400;
         break;
 
       case PMIC_CHG_DET_MINUS350:
-        *mV = -350;
+        *mv = -350;
         break;
 
       case PMIC_CHG_DET_MINUS300:
-        *mV = -300;
+        *mv = -300;
         break;
 
       case PMIC_CHG_DET_MINUS250:
-        *mV = -250;
+        *mv = -250;
         break;
 
       default:
@@ -1120,7 +1185,7 @@ int cxd56_pmic_setchargecompcurrent(int current)
         break;
     }
 
-  return PM_PmicControl(PMIC_CMD_SET_CHG_IFIN, (void *)val);
+  return pm_pmic_control(PMIC_CMD_SET_CHG_IFIN, (void *)val);
 }
 
 /****************************************************************************
@@ -1142,7 +1207,7 @@ int cxd56_pmic_getchargecompcurrent(FAR int *current)
   int val;
   int ret;
 
-  ret = PM_PmicControl(PMIC_CMD_GET_CHG_IFIN, &val);
+  ret = pm_pmic_control(PMIC_CMD_GET_CHG_IFIN, &val);
   if (ret)
     {
       return ret;
@@ -1200,7 +1265,7 @@ int cxd56_pmic_gettemptable(FAR struct pmic_temp_table_s *table)
 {
   /* SET_T60 (70h) - SET_T0_2 (78h) */
 
-  return PM_PmicControl(PMIC_CMD_GET_CHG_TEMPERATURE_TABLE, table);
+  return pm_pmic_control(PMIC_CMD_GET_CHG_TEMPERATURE_TABLE, table);
 }
 
 /****************************************************************************
@@ -1220,7 +1285,7 @@ int cxd56_pmic_gettemptable(FAR struct pmic_temp_table_s *table)
 
 int cxd56_pmic_settemptable(FAR struct pmic_temp_table_s *table)
 {
-  return PM_PmicControl(PMIC_CMD_SET_CHG_TEMPERATURE_TABLE, table);
+  return pm_pmic_control(PMIC_CMD_SET_CHG_TEMPERATURE_TABLE, table);
 }
 
 /****************************************************************************
@@ -1273,7 +1338,7 @@ int cxd56_pmic_setchargemode(int low, int high)
       return -EINVAL;
     }
 
-  return PM_PmicControl(PMIC_CMD_SET_CHG_TEMPERATURE_MODE, &arg);
+  return pm_pmic_control(PMIC_CMD_SET_CHG_TEMPERATURE_MODE, &arg);
 }
 
 /****************************************************************************
@@ -1300,7 +1365,7 @@ int cxd56_pmic_getchargemode(FAR int *low, FAR int *high)
   struct pmic_temp_mode_s arg;
   int ret;
 
-  ret = PM_PmicControl(PMIC_CMD_GET_CHG_TEMPERATURE_MODE, &arg);
+  ret = pm_pmic_control(PMIC_CMD_GET_CHG_TEMPERATURE_MODE, &arg);
   if (ret)
     {
       return ret;
@@ -1319,22 +1384,22 @@ int cxd56_pmic_getchargemode(FAR int *low, FAR int *high)
 
 int cxd56_pmic_monitor_enable(FAR struct pmic_mon_s *ptr)
 {
-  return PM_PmicControl(PMIC_CMD_POWER_MONITOR_ENABLE, ptr);
+  return pm_pmic_control(PMIC_CMD_POWER_MONITOR_ENABLE, ptr);
 }
 
 int cxd56_pmic_monitor_status(FAR struct pmic_mon_status_s *ptr)
 {
-  return PM_PmicControl(PMIC_CMD_POWER_MONITOR_STATUS, ptr);
+  return pm_pmic_control(PMIC_CMD_POWER_MONITOR_STATUS, ptr);
 }
 
 int cxd56_pmic_monitor_set(FAR struct pmic_mon_set_s *ptr)
 {
-  return PM_PmicControl(PMIC_CMD_POWER_MONITOR_SET, ptr);
+  return pm_pmic_control(PMIC_CMD_POWER_MONITOR_SET, ptr);
 }
 
 int cxd56_pmic_monitor_get(FAR struct pmic_mon_log_s *ptr)
 {
-  return PM_PmicControl(PMIC_CMD_POWER_MONITOR_GET, ptr);
+  return pm_pmic_control(PMIC_CMD_POWER_MONITOR_GET, ptr);
 }
 #endif
 
@@ -1428,6 +1493,7 @@ int cxd56_pmic_read(uint8_t addr, void *buf, uint32_t size)
       void     *buf;
       uint32_t size;
     }
+
   arg =
     {
       .addr = addr,
@@ -1435,7 +1501,7 @@ int cxd56_pmic_read(uint8_t addr, void *buf, uint32_t size)
       .size = size,
     };
 
-  return PM_PmicControl(PMIC_CMD_READ, &arg);
+  return pm_pmic_control(PMIC_CMD_READ, &arg);
 }
 
 /****************************************************************************
@@ -1462,6 +1528,7 @@ int cxd56_pmic_write(uint8_t addr, void *buf, uint32_t size)
       void     *buf;
       uint32_t size;
     }
+
   arg =
     {
       .addr = addr,
@@ -1469,7 +1536,7 @@ int cxd56_pmic_write(uint8_t addr, void *buf, uint32_t size)
       .size = size,
     };
 
-  return PM_PmicControl(PMIC_CMD_WRITE, &arg);
+  return pm_pmic_control(PMIC_CMD_WRITE, &arg);
 }
 
 #endif /* CONFIG_CXD56_PMIC */

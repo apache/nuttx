@@ -205,7 +205,7 @@
  *   Peripheral:  .... .... .... .... .... ....
  */
 
-#define GPIO_OUTPUT_SET            (1 << 12)    /* Bit 12: Inital value of output */
+#define GPIO_OUTPUT_SET            (1 << 12)    /* Bit 12: Initial value of output */
 #define GPIO_OUTPUT_CLEAR          (0)
 
 /* Selections for an interrupting input and peripheral events:

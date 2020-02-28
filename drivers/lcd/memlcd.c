@@ -18,7 +18,7 @@
  *    distribution.
  * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
- *    without specific prior writen permission.
+ *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -125,7 +125,7 @@
 
 struct memlcd_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 
@@ -400,7 +400,7 @@ static int memlcd_extcominisr(int irq, FAR void *context, void *arg)
  * Input Parameters:
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
- *   buffer  - The buffer containing the run to be writen to the LCD
+ *   buffer  - The buffer containing the run to be written to the LCD
  *   npixels - The number of pixels to write to the LCD
  *             (range: 0 < npixels <= xres-col)
  *

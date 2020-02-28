@@ -445,7 +445,7 @@ int hid_getitem(FAR const uint8_t *report, FAR struct hid_rptitem_s *item)
 /****************************************************************************
  * Name: hid_putitem
  *
- * Desription:
+ * Description:
  *   Retrieves the given report item's value out of the Value member of the
  *   report item's struct hid_rptitem_s structure and places it into the correct
  *   position in the HID report buffer. The report buffer is assumed to have

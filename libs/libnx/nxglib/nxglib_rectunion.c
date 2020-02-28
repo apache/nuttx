@@ -63,4 +63,3 @@ void nxgl_rectunion(FAR struct nxgl_rect_s *dest,
   dest->pt2.x = ngl_max(src1->pt2.x, src2->pt2.x);
   dest->pt2.y = ngl_max(src1->pt2.y, src2->pt2.y);
 }
-

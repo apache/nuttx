@@ -56,7 +56,7 @@
  * Drivers, however, will use the pin selection without the numeric suffix.
  * Additional definitions are required in the board.h file.  For example, if
  * CAN1_RX connects vis PA11 on some board, then the following definitions should
- * appear inthe board.h header file for that board:
+ * appear in the board.h header file for that board:
  *
  * #define GPIO_CAN1_RX GPIO_CAN1_RX_1
  *
@@ -609,4 +609,3 @@
 #define GPIO_PF10_EVENT_OUT (GPIO_ALT|GPIO_AF1|GPIO_PORTF|GPIO_PIN10)
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F37XXX_PINMAP_H */
-

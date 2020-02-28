@@ -285,10 +285,13 @@
 
 /* This structure represents the return state from a system call */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
 struct xcpt_syscall_s
 {
   uint64_t sysreturn;   /* The return PC */
+#ifdef CONFIG_BUILD_PROTECTED
+  uint64_t int_ctx;     /* Interrupt context (i.e. mstatus) */
+#endif
 };
 #endif
 
@@ -316,7 +319,7 @@ struct xcptcontext
   uint64_t saved_epc;     /* Trampoline PC */
   uint64_t saved_int_ctx; /* Interrupt context with interrupts disabled. */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_PROTECTED
   /* This is the saved address to use when returning from a user-space
    * signal handler.
    */
@@ -324,7 +327,7 @@ struct xcptcontext
   uint32_t sigreturn;
 #endif
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_LIB_SYSCALL
   /* The following array holds information needed to return from each nested
    * system call.
    */
@@ -339,7 +342,7 @@ struct xcptcontext
   uint64_t regs[XCPTCONTEXT_REGS];
 };
 
-#endif  /* __ASSEMBLY__ */
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Public Variables

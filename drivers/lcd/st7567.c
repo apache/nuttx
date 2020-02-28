@@ -78,7 +78,7 @@
  *   must be undefined or defined to be 1.
  * CONFIG_ST7567_POWER
  *   If the hardware supports a controllable OLED a power supply, this
- *   configuration shold be defined.  (See st7567_power() below).
+ *   configuration should be defined.  (See st7567_power() below).
  * CONFIG_LCD_ST7567DEBUG - Enable detailed ST7567 debst7567 output
  *   (CONFIG_DEBUG_FEATURES and CONFIG_VERBOSE must also be enabled).
  *
@@ -93,7 +93,7 @@
 
 /* Verify that all configuration requirements have been met */
 
-/* The ST7567 spec says that is supports SPI mode 0,0 only.  However, somtimes
+/* The ST7567 spec says that is supports SPI mode 0,0 only.  However, sometimes
  * you need to tinker with these things.
  */
 
@@ -208,7 +208,7 @@
 
 struct st7567_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 
@@ -948,4 +948,3 @@ FAR struct lcd_dev_s *st7567_initialize(FAR struct spi_dev_s *spi, unsigned int 
   up_clear(priv);
   return &priv->dev;
 }
-

@@ -58,7 +58,7 @@
 #define STM32_SPI_CR2_OFFSET      0x0004  /* SPI control register 2 */
 #define STM32_SPI_CFG1_OFFSET     0x0008  /* SPI configuration register 1 */
 #define STM32_SPI_CFG2_OFFSET     0x000C  /* SPI configuration register 2 */
-#define STM32_SPI_IER_OFFSET      0x0010  /* SPI/I2S interupt enable register */
+#define STM32_SPI_IER_OFFSET      0x0010  /* SPI/I2S interrupt enable register */
 #define STM32_SPI_SR_OFFSET       0x0014  /* SPI/I2S status register */
 #define STM32_SPI_IFCR_OFFSET     0x0018  /* SPI/I2S interrupt/status flags clear register */
 #define STM32_SPI_TXDR_OFFSET     0x0020  /* SPI/I2S transmit data register */

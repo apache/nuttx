@@ -183,4 +183,4 @@ int ez80_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 #endif /* __cplusplus */
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_Z80_SRC_EZ80_EZ80F91_I2C_H */
+#endif /* __ARCH_Z80_SRC_EZ80_EZ80F91_I2C_H */

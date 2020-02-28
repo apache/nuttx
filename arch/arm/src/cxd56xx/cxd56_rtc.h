@@ -64,7 +64,7 @@ enum alm_id_e
   RTC_ALARM2,               /* RTC ALARM 2 (relative) */
 };
 
-/* Structure used to pass parmaters to set an alarm */
+/* Structure used to pass parameters to set an alarm */
 
 struct alm_setalarm_s
 {

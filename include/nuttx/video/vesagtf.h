@@ -118,4 +118,4 @@ void vesagtf_mode_params(unsigned int x, unsigned int y, unsigned int refresh,
                          unsigned int flags,
                          FAR struct videomode_s *videomode);
 
-#endif  /* __INCLUDE_NUTTX_VIDEO_VESAGTF */
+#endif /* __INCLUDE_NUTTX_VIDEO_VESAGTF */
