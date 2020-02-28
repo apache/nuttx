@@ -68,6 +68,7 @@
 #define BATIOC_SETLIMITS     _BATIOC(0x000D)
 #define BATIOC_CHGDSG        _BATIOC(0x000E)
 #define BATIOC_CLEARFAULTS   _BATIOC(0x000F)
+#define BATIOC_COULOMBS      _BATIOC(0x0010)
 
 /****************************************************************************
  * Public Types

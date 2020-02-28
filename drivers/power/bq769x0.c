@@ -2,7 +2,7 @@
  * drivers/power/bq769x0.c
  * Lower half driver for BQ769x0 battery monitor
  *
- *   Copyright (C) 2019 2G Engineering. All rights reserved.
+ *   Copyright (C) 2019, 2020 2G Engineering. All rights reserved.
  *   Author: Josh Lange <jlange@2g-eng.com>
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
@@ -38,9 +38,9 @@
  ****************************************************************************/
 
 /* The bq76920/bq76930/bq76940 battery monitor ICs provide voltage, current,
- * and temperature monitoring of up to 15-series cells.  These ICs also provide
- * Coulomb counting for state-of-charge measurement, balance drivers for all
- * cells, and drivers for external cell protection switches.
+ * and temperature monitoring of up to 15-series cells.  These ICs also
+ * provide Coulomb counting for state-of-charge measurement, balance drivers
+ * for all cells, and drivers for external cell protection switches.
  */
 
 /****************************************************************************
@@ -90,6 +90,7 @@
 #endif
 
 /* The CRC function expects to see address bytes as they appear on the wire */
+
 #define WR_ADDR(a)  ((a) << 1)
 #define RD_ADDR(a)  (((a) << 1) | 1)
 
@@ -142,6 +143,7 @@ struct bq769x0_dev_s
  * to the BQ769X0.  These tables map cell number (array index) to physical
  * cell channel (array value).  See TI datasheet for cell connections table.
  */
+
 static const uint8_t bq76920_3cell_mapping[] =
     {
         0, 1, 4
@@ -167,7 +169,7 @@ static const uint8_t bq76930_6cell_mapping[] =
 };
 static const uint8_t bq76930_7cell_mapping[] =
 {
-    0,1, 2, 4, 5, 6, 9
+    0, 1, 2, 4, 5, 6, 9
 };
 static const uint8_t bq76930_8cell_mapping[] =
 {
@@ -236,6 +238,7 @@ static const uint8_t *bq76940_cell_mapping[] =
  * The last values in each list are somewhat arbitrary upper bounds -
  * The algorithm rounds down when selecting a register value
  */
+
 static const uint8_t ocd_t_rsns_0_limits[] =
     {
         8, 11, 14, 17, 19, 22, 25, 28, 31, 33, 36, 39, 42, 44, 47, 50, 53
@@ -256,6 +259,7 @@ static const uint8_t scd_t_rsns_1_limits[] =
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* I2C support functions */
 
 static int bq769x0_getreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
@@ -268,6 +272,7 @@ static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
                              FAR uint16_t *regvals, unsigned int count);
 
 /* Device functions */
+
 static inline int bq769x0_getreport(FAR struct bq769x0_dev_s *priv,
                                     FAR uint8_t *report);
 static inline int bq769x0_getvolt(FAR struct bq769x0_dev_s *priv,
@@ -301,7 +306,8 @@ static int bq769x0_cellvoltage(struct battery_monitor_dev_s *dev,
 static int bq769x0_current(struct battery_monitor_dev_s *dev,
                            struct battery_monitor_current_s *current);
 static int bq769x0_soc(struct battery_monitor_dev_s *dev, b16_t *value);
-static int bq769x0_coulombs(struct battery_monitor_dev_s *dev, int *coulombs);
+static int bq769x0_coulombs(struct battery_monitor_dev_s *dev,
+                            int *coulombs);
 static int bq769x0_temp(struct battery_monitor_dev_s *dev,
                         struct battery_monitor_temperature_s *temps);
 static int bq769x0_balance(struct battery_monitor_dev_s *dev,
@@ -314,7 +320,8 @@ static int bq769x0_chgdsg(struct battery_monitor_dev_s *dev,
                           struct battery_monitor_switches_s *sw);
 static int bq769x0_clearfaults(struct battery_monitor_dev_s *dev,
                                uintptr_t param);
-static int bq769x0_operate(struct battery_monitor_dev_s *dev, uintptr_t param);
+static int bq769x0_operate(struct battery_monitor_dev_s *dev,
+                           uintptr_t param);
 
 /****************************************************************************
  * Private Data
@@ -400,6 +407,7 @@ static int bq769x0_getreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
     }
 
   /* If CRC is used, verify that it is correct */
+
   if (priv->crc)
     {
       sl_addr = RD_ADDR(priv->addr);
@@ -407,7 +415,8 @@ static int bq769x0_getreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
       crc = crc8ccittpart(val, 1, crc);
       if (crc != val[1])
         {
-          baterr("ERROR: CRC mismatch: Got %02x, Expected %02x\n", val[1], crc);
+          baterr("ERROR: CRC mismatch: Got %02x, Expected %02x\n", val[1],
+                 crc);
           return ERROR;
         }
     }
@@ -451,6 +460,7 @@ static int bq769x0_putreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
   buffer[1] = regval;
 
   /* Our expected data length varies depending on whether or not a CRC is used */
+
   if (priv->crc)
     {
       datalen = 3;
@@ -484,8 +494,9 @@ static int bq769x0_putreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
 static int bq769x0_getreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
                            FAR uint16_t *regval)
 {
-    return bq769x0_getnreg16(priv, regaddr, regval, 1);
+  return bq769x0_getnreg16(priv, regaddr, regval, 1);
 }
+
 /****************************************************************************
  * Name: bq769x0_getnreg16
  *
@@ -514,6 +525,7 @@ static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
   /* Make sure specified number of registers will fit in our buffer.
    * If not, limit read to the available buffer size
    */
+
   if (priv->crc)
     {
       if (count >= (sizeof(tmp_val) / 4))
@@ -523,11 +535,11 @@ static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
     }
   else
     {
-  if (count >= (sizeof(tmp_val) / 2))
-    {
-      count = sizeof(tmp_val) / 2;
+      if (count >= (sizeof(tmp_val) / 2))
+        {
+          count = sizeof(tmp_val) / 2;
+        }
     }
-  }
 
   /* Set up the I2C configuration */
 
@@ -551,6 +563,7 @@ static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
   if (priv->crc)
     {
       /* When reading multiple bytes, there is 1 CRC byte per data byte */
+
       datalen = (4 * count);
     }
   else
@@ -569,34 +582,45 @@ static int bq769x0_getnreg16(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
 
   /* If CRC is used, verify that it is correct
    * We only include the address with the first data byte.
-   * After that, we compare the CRC of each byte with its following byte*/
+   * After that, we compare the CRC of each byte with its following byte
+   */
+
   if (priv->crc)
     {
       sl_addr = RD_ADDR(priv->addr);
       crc = crc8ccittpart(&sl_addr, 1, 0);
-      for (i = 0; i < byte_count; i += 2) {
-        crc = crc8ccittpart(&tmp_val[i], 1, crc);
-        if (crc != tmp_val[i + 1])
-          {
-            baterr("ERROR: CRC mismatch: Got %02x, Expected %02x\n", tmp_val[2], crc);
-            return ERROR;
-          }
-        crc = 0;
-      }
+      for (i = 0; i < byte_count; i += 2)
+        {
+          crc = crc8ccittpart(&tmp_val[i], 1, crc);
+          if (crc != tmp_val[i + 1])
+            {
+              baterr("ERROR: CRC mismatch: Got %02x, Expected %02x\n",
+                     tmp_val[2], crc);
+              return ERROR;
+            }
+
+          crc = 0;
+        }
+
       /* Copy 16-bit values to be returned, skipping CRC bytes*/
-      for (i = 0; i < datalen; i += 4) {
+
+      for (i = 0; i < datalen; i += 4)
+        {
           *regvals = (uint16_t)tmp_val[i] << 8 | (uint16_t)tmp_val[i + 2];
           regvals += 1;
-      }
+        }
     }
   else
     {
       /* Copy 16-bit values to be returned */
-      for (i = 0; i < datalen; i += 2) {
+
+      for (i = 0; i < datalen; i += 2)
+        {
           *regvals = (uint16_t)tmp_val[i] << 8 | (uint16_t)tmp_val[i + 1];
           regvals += 1;
-      }
+        }
     }
+
   return OK;
 }
 
@@ -648,12 +672,14 @@ static inline int bq769x0_updategain(FAR struct bq769x0_dev_s *priv)
       baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
       return ret;
     }
+
   ret = bq769x0_getreg8(priv, BQ769X0_REG_ADCGAIN2, &gainreg2);
   if (ret < 0)
     {
       baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
       return ret;
     }
+
   ret = bq769x0_getreg8(priv, BQ769X0_REG_ADCOFFSET, (uint8_t *)&offset);
   if (ret < 0)
     {
@@ -673,7 +699,8 @@ static inline int bq769x0_updategain(FAR struct bq769x0_dev_s *priv)
   priv->gain = gain + BQ769X0_BASE_GAIN;
   priv->offset = offset * 1000; /* Convert mV to uV */
 
-  batinfo("Battery monitor gain: %d uV/LSB, offset: %d uV.\n", priv->gain, priv->offset);
+  batinfo("Battery monitor gain: %d uV/LSB, offset: %d uV.\n", priv->gain,
+          priv->offset);
 
   return OK;
 }
@@ -687,61 +714,63 @@ static inline int bq769x0_updategain(FAR struct bq769x0_dev_s *priv)
  *
  ****************************************************************************/
 
-static inline int bq769x0_doshutdown(FAR struct bq769x0_dev_s *priv) {
-    int ret;
-    uint8_t regval;
+static inline int bq769x0_doshutdown(FAR struct bq769x0_dev_s *priv)
+{
+  int ret;
+  uint8_t regval;
 
-    /* Read current register value */
+  /* Read current register value */
 
-    ret = bq769x0_getreg8(priv, BQ769X0_REG_SYS_CTRL1, &regval);
-    if (ret < 0)
-      {
-        baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
+  ret = bq769x0_getreg8(priv, BQ769X0_REG_SYS_CTRL1, &regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
 
-    /* Mask off the writeable bits */
+  /* Mask off the writeable bits */
 
-    regval &= BQ769X0_SYS_CTRL1_WRITE_MASK;
+  regval &= BQ769X0_SYS_CTRL1_WRITE_MASK;
 
-    /* Set SHUT_A and SHUT_B to 0 */
+  /* Set SHUT_A and SHUT_B to 0 */
 
-    regval &= ~BQ769X0_SYS_CTRL1_SHUTDOWN_MASK;
+  regval &= ~BQ769X0_SYS_CTRL1_SHUTDOWN_MASK;
 
-    /* Write the shutdown sequence */
-    ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_CTRL1, regval);
-    if (ret < 0)
-      {
-        baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
+  /* Write the shutdown sequence */
 
-    /* Set SHUT_A to 0 and SHUT_B to 1 */
+  ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_CTRL1, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
 
-    regval |= BQ769X0_SHUT_B;
+  /* Set SHUT_A to 0 and SHUT_B to 1 */
 
-    ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_CTRL1, regval);
-    if (ret < 0)
-      {
-        baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
+  regval |= BQ769X0_SHUT_B;
 
-    /* Set SHUT_A to 1 and SHUT_B to 0 */
+  ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_CTRL1, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
 
-    regval &= ~BQ769X0_SYS_CTRL1_SHUTDOWN_MASK;
-    regval |= BQ769X0_SHUT_A;
+  /* Set SHUT_A to 1 and SHUT_B to 0 */
 
-    ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_CTRL1, regval);
-    if (ret < 0)
-      {
-        baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
+  regval &= ~BQ769X0_SYS_CTRL1_SHUTDOWN_MASK;
+  regval |= BQ769X0_SHUT_A;
 
-    batinfo("Device should now be in ship mode\n");
+  ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_CTRL1, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
 
-    return OK;
+  batinfo("Device should now be in ship mode\n");
+
+  return OK;
 }
 
 /****************************************************************************
@@ -755,417 +784,432 @@ static inline int bq769x0_doshutdown(FAR struct bq769x0_dev_s *priv) {
 static inline int bq769x0_setlimits(FAR struct bq769x0_dev_s *priv,
                                     struct battery_monitor_limits_s *limits)
 {
-    int ret;
-    int i;
-    uint8_t regval;
-    uint32_t tripval;
-    bool rsns_0_scd_found;
-    bool rsns_1_scd_found;
-    bool rsns_0_ocd_found;
-    bool rsns_1_ocd_found;
+  int ret;
+  int i;
+  uint8_t regval;
+  uint32_t tripval;
+  bool rsns_0_scd_found;
+  bool rsns_1_scd_found;
+  bool rsns_0_ocd_found;
+  bool rsns_1_ocd_found;
 
-    uint8_t rsns_0_scd_idx;
-    uint8_t rsns_1_scd_idx;
-    uint8_t rsns_0_ocd_idx;
-    uint8_t rsns_1_ocd_idx;
+  uint8_t rsns_0_scd_idx;
+  uint8_t rsns_1_scd_idx;
+  uint8_t rsns_0_ocd_idx;
+  uint8_t rsns_1_ocd_idx;
 
-    regval = 0;
+  regval = 0;
 
-    /* The OCD (Over current in discharge) and SCD
-     * (Short circuit in discharge) registers are both
-     * affected by the RSNS bit.  We ideally want to find
-     * a mapping that satisfies both registers for the provided values
-     * using only a single RSNS value.
-     */
+  /* The OCD (Over current in discharge) and SCD
+   * (Short circuit in discharge) registers are both
+   * affected by the RSNS bit.  We ideally want to find
+   * a mapping that satisfies both registers for the provided values
+   * using only a single RSNS value.
+   */
 
-    /* Compute overcurrent voltage trip point based on provided
-     * current trip point.
-     */
+  /* Compute overcurrent voltage trip point based on provided
+   * current trip point.
+   */
 
-    tripval = limits->overcurrent_limit * priv->sense_r;
+  tripval = limits->overcurrent_limit * priv->sense_r;
 
-    /* result is in milli-amps * micro-ohms
-     * e.g. 20A * 5 milli-ohms = 20000 * 5000 = 100000000
-     * Divide by 1000000 to get millivolts
-     */
+  /* result is in milli-amps * micro-ohms
+   * e.g. 20A * 5 milli-ohms = 20000 * 5000 = 100000000
+   * Divide by 1000000 to get millivolts
+   */
 
-    tripval /= 1000000UL;
+  tripval /= 1000000UL;
 
-    batinfo("Overcurrent trip voltage is %d mV\n", tripval);
+  batinfo("Overcurrent trip voltage is %d mV\n", tripval);
 
-    /* Now look up overcurrent limit value in the OCD_T
-     * lookup tables.  Check both RSNS = 0 and RSNS = 1
-     * so we can make a decision about which one to use.
-     * Note that limits lower than the minimum will be set to the
-     * minimum value.
-     */
-    rsns_0_ocd_found = false;
-    rsns_1_ocd_found = false;
-    rsns_0_ocd_idx = 0;
-    rsns_1_ocd_idx = 0;
-    for (i = 1; i < sizeof(ocd_t_rsns_0_limits) /
-         sizeof(ocd_t_rsns_0_limits[0]); i += 1)
-      {
-        if (tripval <= ocd_t_rsns_0_limits[i])
-          {
-            rsns_0_ocd_idx = i - 1; /* round down */
-            rsns_0_ocd_found = true;
-            break;
-          }
-      }
-    for (i = 1; i < sizeof(ocd_t_rsns_1_limits) /
-         sizeof(ocd_t_rsns_1_limits[0]); i += 1)
-      {
-        if (tripval <= ocd_t_rsns_1_limits[i])
-          {
-            rsns_1_ocd_idx = i - 1; /* round down */
-            rsns_1_ocd_found = true;
-            break;
-          }
-      }
-    if (!rsns_0_ocd_found && !rsns_1_ocd_found)
-      {
-        baterr("ERROR: Failed to find suitable value for OCD_T\n");
-        return -EINVAL;
-      }
+  /* Now look up overcurrent limit value in the OCD_T
+   * lookup tables.  Check both RSNS = 0 and RSNS = 1
+   * so we can make a decision about which one to use.
+   * Note that limits lower than the minimum will be set to the
+   * minimum value.
+   */
 
-    /* Compute short circuit voltage trip point based on provided
-     * current trip point
-     */
+  rsns_0_ocd_found = false;
+  rsns_1_ocd_found = false;
+  rsns_0_ocd_idx = 0;
+  rsns_1_ocd_idx = 0;
+  for (i = 1; i < sizeof(ocd_t_rsns_0_limits) /
+       sizeof(ocd_t_rsns_0_limits[0]); i += 1)
+    {
+      if (tripval <= ocd_t_rsns_0_limits[i])
+        {
+          rsns_0_ocd_idx = i - 1; /* round down */
+          rsns_0_ocd_found = true;
+          break;
+        }
+    }
 
-    tripval = limits->shortcircuit_limit * priv->sense_r;
+  for (i = 1; i < sizeof(ocd_t_rsns_1_limits) /
+       sizeof(ocd_t_rsns_1_limits[0]); i += 1)
+    {
+      if (tripval <= ocd_t_rsns_1_limits[i])
+        {
+          rsns_1_ocd_idx = i - 1; /* round down */
+          rsns_1_ocd_found = true;
+          break;
+        }
+    }
 
-    /* result is in milli-amps * micro-ohms
-     * e.g. 20A * 5 milli-ohms = 20000 * 5000 = 100000000
-     * Divide by 1000000 to get millivolts
-     */
+  if (!rsns_0_ocd_found && !rsns_1_ocd_found)
+    {
+      baterr("ERROR: Failed to find suitable value for OCD_T\n");
+      return -EINVAL;
+    }
 
-    tripval /= 1000000UL;
-    batinfo("Short circuit trip voltage is %d mV\n", tripval);
+  /* Compute short circuit voltage trip point based on provided
+   * current trip point
+   */
 
-    /* Now look up the short circuit limit value in the SCD_T
-     * lookup tables.  Check both RSNS = 0 and RSNS = 1
-     * so we can make a decision about which one to use.
-     * Note that limits lower than the minimum will be set to the
-     * minimum value.
-     */
-    rsns_0_scd_found = false;
-    rsns_1_scd_found = false;
-    rsns_0_scd_idx = 0;
-    rsns_1_scd_idx = 0;
-    /* Don't look at the first element since we're rounding down anyway */
-    for (i = 1; i < sizeof(scd_t_rsns_0_limits) /
-         sizeof(scd_t_rsns_0_limits[0]); i += 1)
-      {
-        if (tripval < scd_t_rsns_0_limits[i])
-          {
-            rsns_0_scd_idx = i - 1; /* round down */
-            rsns_0_scd_found = true;
-            break;
-          }
-      }
-    for (i = 1; i < sizeof(scd_t_rsns_1_limits) /
-         sizeof(scd_t_rsns_1_limits[0]); i += 1)
-      {
-        if (tripval < scd_t_rsns_1_limits[i])
-          {
-            rsns_1_scd_idx = i - 1; /* round down */
-            rsns_1_scd_found = true;
-            break;
-          }
-      }
-    if (!rsns_0_scd_found && !rsns_1_scd_found)
-      {
-        baterr("ERROR: Failed to find suitable value for SCD_T\n");
-        return -EINVAL;
-      }
+  tripval = limits->shortcircuit_limit * priv->sense_r;
 
-    /* Now let's figure out RSNS.
-     * We prefer RSNS = 0 if available, because it gives us finer-grained
-     * control over the actual trip voltage
-     */
+  /* result is in milli-amps * micro-ohms
+   * e.g. 20A * 5 milli-ohms = 20000 * 5000 = 100000000
+   * Divide by 1000000 to get millivolts
+   */
 
-    if (rsns_0_ocd_found && rsns_0_scd_found)
-      {
-        batinfo("Using RSNS = 0\n");
-        batinfo("Using SCD_T %x\n",rsns_0_scd_idx);
-        regval |= (rsns_0_scd_idx << BQ769X0_SCD_THRESH_SHIFT) &
-                  BQ769X0_SCD_THRESH_MASK;
-      }
-    else if (rsns_1_ocd_found && rsns_1_scd_found)
-      {
-        batinfo("Using RSNS = 1\n");
-        batinfo("Using SCD_T %x\n",rsns_1_scd_idx);
-        regval |= BQ769X0_RSNS;
-        regval |= (rsns_1_scd_idx << BQ769X0_SCD_THRESH_SHIFT) &
-                  BQ769X0_SCD_THRESH_MASK;
-      }
-    else
-      {
+  tripval /= 1000000UL;
+  batinfo("Short circuit trip voltage is %d mV\n", tripval);
 
-        /* Not possible to meet both trip points with a single RSNS value
-         * For now, let's call that an error.
-         */
-        limits->overcurrent_limit = 0;
-        limits->shortcircuit_limit = 0;
-        baterr("ERROR: OCD_T and SCD_T could not agree on RSNS.\n");
-        return -EINVAL;
-      }
+  /* Now look up the short circuit limit value in the SCD_T
+   * lookup tables.  Check both RSNS = 0 and RSNS = 1
+   * so we can make a decision about which one to use.
+   * Note that limits lower than the minimum will be set to the
+   * minimum value.
+   */
 
-    /* Configure short circuit delay and threshold.
-     * Always round down if we are less than the
-     * next highest value.
-     * Throw an error if we are out of bounds
-     * (+/- an arbitrarily-chosen buffer)
-     */
-    if (limits->shortcircuit_delay < 68)
-      {
-        limits->shortcircuit_delay = 0;
-        baterr("ERROR: Short circuit delay is too short\n");
-        return -EINVAL;
-      }
-    else if (limits->shortcircuit_delay < 100)
-      {
-        limits->shortcircuit_delay = 70;
-        regval |= BQ769X0_SCD_DELAY_70us;
-        batinfo("Short circuit delay set to 70uS\n");
-      }
-    else if (limits->shortcircuit_delay < 200)
-      {
-        limits->shortcircuit_delay = 100;
-        regval |= BQ769X0_SCD_DELAY_100us;
-        batinfo("Short circuit delay set to 100uS\n");
-      }
-    else if (limits->shortcircuit_delay < 400)
-      {
-        limits->shortcircuit_delay = 200;
-        regval |= BQ769X0_SCD_DELAY_200us;
-        batinfo("Short circuit delay set to 200uS\n");
-      }
-    else if (limits->shortcircuit_delay < 410)
-      {
-        limits->shortcircuit_delay = 400;
-        regval |= BQ769X0_SCD_DELAY_400us;
-        batinfo("Short circuit delay set to 400uS\n");
-      }
-    else
-      {
-        limits->shortcircuit_delay = 0;
-        baterr("ERROR: Short circuit delay is too long\n");
-        return -EINVAL;
-      }
+  rsns_0_scd_found = false;
+  rsns_1_scd_found = false;
+  rsns_0_scd_idx = 0;
+  rsns_1_scd_idx = 0;
 
-    ret = bq769x0_putreg8(priv, BQ769X0_REG_PROTECT1, regval);
-    if (ret < 0)
-      {
-        baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
+  /* Don't look at the first element since we're rounding down anyway */
 
-    /* Configure overcurrent delay and threshold
-     * Always round down if we are less than the
-     * next highest value.
-     * Throw an error if we are out of bounds
-     * (+/- an arbitrarily-chosen buffer)
-     */
-    regval = 0;
-    if (limits->overcurrent_delay < (7 * USEC_PER_MSEC))
-      {
-        limits->overcurrent_delay = 0;
-        baterr("ERROR: Overcurrent delay is too short\n");
-        return -EINVAL;
-      }
-    else if (limits->overcurrent_delay < (20 * USEC_PER_MSEC))
-      {
-        limits->overcurrent_delay = 8 * USEC_PER_MSEC;
-        regval |= BQ769X0_OCD_DELAY_8MS;
-        batinfo("Overcurrent delay set to 8mS\n");
-      }
-    else if (limits->overcurrent_delay < (40 * USEC_PER_MSEC))
-      {
-        limits->overcurrent_delay = 20 * USEC_PER_MSEC;
-        regval |= BQ769X0_OCD_DELAY_20MS;
-        batinfo("Overcurrent delay set to 20mS\n");
-      }
-    else if (limits->overcurrent_delay < (80 * USEC_PER_MSEC))
-      {
-        limits->overcurrent_delay = 40 * USEC_PER_MSEC;
-        regval |= BQ769X0_OCD_DELAY_40MS;
-        batinfo("Overcurrent delay set to 40mS\n");
-      }
-    else if (limits->overcurrent_delay < (160 * USEC_PER_MSEC))
-      {
-        limits->overcurrent_delay = 80 * USEC_PER_MSEC;
-        regval |= BQ769X0_OCD_DELAY_80MS;
-        batinfo("Overcurrent delay set to 80mS\n");
-      }
-    else if (limits->overcurrent_delay < (320 * USEC_PER_MSEC))
-      {
-        limits->overcurrent_delay = 160 * USEC_PER_MSEC;
-        regval |= BQ769X0_OCD_DELAY_160MS;
-        batinfo("Overcurrent delay set to 160mS\n");
-      }
-    else if (limits->overcurrent_delay < (640 * USEC_PER_MSEC))
-      {
-        limits->overcurrent_delay = 320 * USEC_PER_MSEC;
-        regval |= BQ769X0_OCD_DELAY_320MS;
-        batinfo("Overcurrent delay set to 320mS\n");
-      }
-    else if (limits->overcurrent_delay < (1280 * USEC_PER_MSEC))
-      {
-        limits->overcurrent_delay = 640 * USEC_PER_MSEC;
-        regval |= BQ769X0_OCD_DELAY_640MS;
-        batinfo("Overcurrent delay set to 640mS\n");
-      }
-    else if (limits->overcurrent_delay < 1300 * USEC_PER_MSEC)
-      {
-        limits->overcurrent_delay = 1280 * USEC_PER_MSEC;
-        regval |= BQ769X0_OCD_DELAY_1280MS;
-        batinfo("Overcurrent delay set to 1280mS\n");
-      }
-    else
-      {
-        limits->overcurrent_delay = 0;
-        baterr("ERROR: Overcurrent delay is too long\n");
-        return -EINVAL;
-      }
+  for (i = 1; i < sizeof(scd_t_rsns_0_limits) /
+       sizeof(scd_t_rsns_0_limits[0]); i += 1)
+    {
+      if (tripval < scd_t_rsns_0_limits[i])
+        {
+          rsns_0_scd_idx = i - 1; /* round down */
+          rsns_0_scd_found = true;
+          break;
+        }
+    }
 
-    /* If neither rsns_0 or rsns_1 work, we would have
-     * errored out before this point.
-     */
+  for (i = 1; i < sizeof(scd_t_rsns_1_limits) /
+       sizeof(scd_t_rsns_1_limits[0]); i += 1)
+    {
+      if (tripval < scd_t_rsns_1_limits[i])
+        {
+          rsns_1_scd_idx = i - 1; /* round down */
+          rsns_1_scd_found = true;
+          break;
+        }
+    }
 
-    if (rsns_0_ocd_found)
-      {
-        batinfo("Using OCD_T %x\n",rsns_0_ocd_idx);
-        regval |= (rsns_0_ocd_idx << BQ769X0_OCD_THRESH_SHIFT) &
-                  BQ769X0_OCD_THRESH_MASK;
-      }
-    else if (rsns_1_ocd_found)
-      {
-        batinfo("Using OCD_T %x\n",rsns_1_ocd_idx);
-        regval |= (rsns_1_ocd_idx << BQ769X0_OCD_THRESH_SHIFT) &
-                  BQ769X0_OCD_THRESH_MASK;
-      }
-    ret = bq769x0_putreg8(priv, BQ769X0_REG_PROTECT2, regval);
-    if (ret < 0)
-      {
-        baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
+  if (!rsns_0_scd_found && !rsns_1_scd_found)
+    {
+      baterr("ERROR: Failed to find suitable value for SCD_T\n");
+      return -EINVAL;
+    }
 
-    /* Configure overvoltage and undervoltage delays
-     * Throw an error if we are out of bounds
-     * (+/- an arbitrarily-chosen buffer)*/
+  /* Now let's figure out RSNS.
+   * We prefer RSNS = 0 if available, because it gives us finer-grained
+   * control over the actual trip voltage
+   */
 
-    regval = 0;
-    if (limits->overvoltage_delay < (1 * USEC_PER_SEC))
-      {
-        limits->overvoltage_delay = 0;
-        baterr("ERROR: overvoltage delay is too short\n");
-        return -EINVAL;
-      }
-    else if (limits->overvoltage_delay < (2 * USEC_PER_SEC))
-      {
-        limits->overvoltage_delay = 1 * USEC_PER_SEC;
-        regval |= BQ769X0_OV_DELAY_1S;
-        batinfo("Overvoltage delay set to 1S\n");
-      }
-    else if (limits->overvoltage_delay < (4 * USEC_PER_SEC))
-      {
-        limits->overvoltage_delay = 2 * USEC_PER_SEC;
-        regval |= BQ769X0_OV_DELAY_2S;
-        batinfo("Overvoltage delay set to 2S\n");
-      }
-    else if (limits->overvoltage_delay < (8 * USEC_PER_SEC))
-      {
-        limits->overvoltage_delay = 4 * USEC_PER_SEC;
-        regval |= BQ769X0_OV_DELAY_4S;
-        batinfo("Overvoltage delay set to 4S\n");
-      }
-    else if (limits->overvoltage_delay < (10 * USEC_PER_SEC))
-      {
-        limits->overvoltage_delay = 8 * USEC_PER_SEC;
-        regval |= BQ769X0_OV_DELAY_8S;
-        batinfo("Overvoltage delay set to 8S\n");
-      }
-    else
-      {
-        limits->overvoltage_delay = 0;
-        baterr("ERROR: overvoltage delay is too long\n");
-        return -EINVAL;
-      }
+  if (rsns_0_ocd_found && rsns_0_scd_found)
+    {
+      batinfo("Using RSNS = 0\n");
+      batinfo("Using SCD_T %x\n", rsns_0_scd_idx);
+      regval |= (rsns_0_scd_idx << BQ769X0_SCD_THRESH_SHIFT) &
+                BQ769X0_SCD_THRESH_MASK;
+    }
+  else if (rsns_1_ocd_found && rsns_1_scd_found)
+    {
+      batinfo("Using RSNS = 1\n");
+      batinfo("Using SCD_T %x\n", rsns_1_scd_idx);
+      regval |= BQ769X0_RSNS;
+      regval |= (rsns_1_scd_idx << BQ769X0_SCD_THRESH_SHIFT) &
+                BQ769X0_SCD_THRESH_MASK;
+    }
+  else
+    {
+      /* Not possible to meet both trip points with a single RSNS value
+       * For now, let's call that an error.
+       */
 
-    if (limits->undervoltage_delay < (1 * USEC_PER_SEC))
-      {
-        limits->undervoltage_delay = 0;
-        baterr("ERROR: undervoltage delay is too short\n");
-        return -EINVAL;
-      }
-    else if (limits->undervoltage_delay < (4 * USEC_PER_SEC))
-      {
-        limits->undervoltage_delay = 1 * USEC_PER_SEC;
-        regval |= BQ769X0_UV_DELAY_1S;
-        batinfo("Undervoltage delay set to 1S\n");
-      }
-    else if (limits->undervoltage_delay < (8 * USEC_PER_SEC))
-      {
-        limits->undervoltage_delay = 4 * USEC_PER_SEC;
-        regval |= BQ769X0_UV_DELAY_4S;
-        batinfo("Undervoltage delay set to 4S\n");
-      }
-    else if (limits->undervoltage_delay < (16 * USEC_PER_SEC))
-      {
-        limits->undervoltage_delay = 8 * USEC_PER_SEC;
-        regval |= BQ769X0_UV_DELAY_8S;
-        batinfo("Undervoltage delay set to 8S\n");
-      }
-    else if (limits->undervoltage_delay < (20 * USEC_PER_SEC))
-      {
-        limits->undervoltage_delay = 16 * USEC_PER_SEC;
-        regval |= BQ769X0_UV_DELAY_16S;
-        batinfo("Undervoltage delay set to 16S\n");
-      }
-    else
-      {
-        limits->undervoltage_delay = 0;
-        baterr("ERROR: undervoltage delay is too long\n");
-        return -EINVAL;
-      }
+      limits->overcurrent_limit = 0;
+      limits->shortcircuit_limit = 0;
+      baterr("ERROR: OCD_T and SCD_T could not agree on RSNS.\n");
+      return -EINVAL;
+    }
 
-    ret = bq769x0_putreg8(priv, BQ769X0_REG_PROTECT3, regval);
-    if (ret < 0)
-      {
-        baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
+  /* Configure short circuit delay and threshold.
+   * Always round down if we are less than the
+   * next highest value.
+   * Throw an error if we are out of bounds
+   * (+/- an arbitrarily-chosen buffer)
+   */
 
-    /* Calculate OV_TRIP register value based on provided limit.
-     * Note that the register format limits the trip range to
-     * approximately 3.15V to 4.7V
-     */
-    tripval = (limits->overvoltage_limit - priv->offset) / priv->gain;
-    tripval >>= 4;
-    regval = (uint8_t)(tripval & 0xFF);
-    ret = bq769x0_putreg8(priv, BQ769X0_REG_OV_TRIP, regval);
-    if (ret < 0)
-      {
-        baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
+  if (limits->shortcircuit_delay < 68)
+    {
+      limits->shortcircuit_delay = 0;
+      baterr("ERROR: Short circuit delay is too short\n");
+      return -EINVAL;
+    }
+  else if (limits->shortcircuit_delay < 100)
+    {
+      limits->shortcircuit_delay = 70;
+      regval |= BQ769X0_SCD_DELAY_70US;
+      batinfo("Short circuit delay set to 70uS\n");
+    }
+  else if (limits->shortcircuit_delay < 200)
+    {
+      limits->shortcircuit_delay = 100;
+      regval |= BQ769X0_SCD_DELAY_100US;
+      batinfo("Short circuit delay set to 100uS\n");
+    }
+  else if (limits->shortcircuit_delay < 400)
+    {
+      limits->shortcircuit_delay = 200;
+      regval |= BQ769X0_SCD_DELAY_200US;
+      batinfo("Short circuit delay set to 200uS\n");
+    }
+  else if (limits->shortcircuit_delay < 410)
+    {
+      limits->shortcircuit_delay = 400;
+      regval |= BQ769X0_SCD_DELAY_400US;
+      batinfo("Short circuit delay set to 400uS\n");
+    }
+  else
+    {
+      limits->shortcircuit_delay = 0;
+      baterr("ERROR: Short circuit delay is too long\n");
+      return -EINVAL;
+    }
 
-    /* Calculate UV_TRIP register value based on provided limit.
-     * Note that the register format limits the trip range to
-     * approximately 1.58V to 3.1V
-     */
-    tripval = (limits->undervoltage_limit - priv->offset) / priv->gain;
-    tripval >>= 4;
-    regval = (uint8_t)(tripval & 0xFF);
-    ret = bq769x0_putreg8(priv, BQ769X0_REG_UV_TRIP, regval);
-    if (ret < 0)
-      {
-        baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
+  ret = bq769x0_putreg8(priv, BQ769X0_REG_PROTECT1, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
+
+  /* Configure overcurrent delay and threshold
+   * Always round down if we are less than the
+   * next highest value.
+   * Throw an error if we are out of bounds
+   * (+/- an arbitrarily-chosen buffer)
+   */
+
+  regval = 0;
+  if (limits->overcurrent_delay < (7 * USEC_PER_MSEC))
+    {
+      limits->overcurrent_delay = 0;
+      baterr("ERROR: Overcurrent delay is too short\n");
+      return -EINVAL;
+    }
+  else if (limits->overcurrent_delay < (20 * USEC_PER_MSEC))
+    {
+      limits->overcurrent_delay = 8 * USEC_PER_MSEC;
+      regval |= BQ769X0_OCD_DELAY_8MS;
+      batinfo("Overcurrent delay set to 8mS\n");
+    }
+  else if (limits->overcurrent_delay < (40 * USEC_PER_MSEC))
+    {
+      limits->overcurrent_delay = 20 * USEC_PER_MSEC;
+      regval |= BQ769X0_OCD_DELAY_20MS;
+      batinfo("Overcurrent delay set to 20mS\n");
+    }
+  else if (limits->overcurrent_delay < (80 * USEC_PER_MSEC))
+    {
+      limits->overcurrent_delay = 40 * USEC_PER_MSEC;
+      regval |= BQ769X0_OCD_DELAY_40MS;
+      batinfo("Overcurrent delay set to 40mS\n");
+    }
+  else if (limits->overcurrent_delay < (160 * USEC_PER_MSEC))
+    {
+      limits->overcurrent_delay = 80 * USEC_PER_MSEC;
+      regval |= BQ769X0_OCD_DELAY_80MS;
+      batinfo("Overcurrent delay set to 80mS\n");
+    }
+  else if (limits->overcurrent_delay < (320 * USEC_PER_MSEC))
+    {
+      limits->overcurrent_delay = 160 * USEC_PER_MSEC;
+      regval |= BQ769X0_OCD_DELAY_160MS;
+      batinfo("Overcurrent delay set to 160mS\n");
+    }
+  else if (limits->overcurrent_delay < (640 * USEC_PER_MSEC))
+    {
+      limits->overcurrent_delay = 320 * USEC_PER_MSEC;
+      regval |= BQ769X0_OCD_DELAY_320MS;
+      batinfo("Overcurrent delay set to 320mS\n");
+    }
+  else if (limits->overcurrent_delay < (1280 * USEC_PER_MSEC))
+    {
+      limits->overcurrent_delay = 640 * USEC_PER_MSEC;
+      regval |= BQ769X0_OCD_DELAY_640MS;
+      batinfo("Overcurrent delay set to 640mS\n");
+    }
+  else if (limits->overcurrent_delay < 1300 * USEC_PER_MSEC)
+    {
+      limits->overcurrent_delay = 1280 * USEC_PER_MSEC;
+      regval |= BQ769X0_OCD_DELAY_1280MS;
+      batinfo("Overcurrent delay set to 1280mS\n");
+    }
+  else
+    {
+      limits->overcurrent_delay = 0;
+      baterr("ERROR: Overcurrent delay is too long\n");
+      return -EINVAL;
+    }
+
+  /* If neither rsns_0 or rsns_1 work, we would have
+   * errored out before this point.
+   */
+
+  if (rsns_0_ocd_found)
+    {
+      batinfo("Using OCD_T %x\n", rsns_0_ocd_idx);
+      regval |= (rsns_0_ocd_idx << BQ769X0_OCD_THRESH_SHIFT) &
+                BQ769X0_OCD_THRESH_MASK;
+    }
+  else if (rsns_1_ocd_found)
+    {
+      batinfo("Using OCD_T %x\n", rsns_1_ocd_idx);
+      regval |= (rsns_1_ocd_idx << BQ769X0_OCD_THRESH_SHIFT) &
+                BQ769X0_OCD_THRESH_MASK;
+    }
+
+  ret = bq769x0_putreg8(priv, BQ769X0_REG_PROTECT2, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
+
+  /* Configure overvoltage and undervoltage delays
+   * Throw an error if we are out of bounds
+   * (+/- an arbitrarily-chosen buffer)
+   */
+
+  regval = 0;
+  if (limits->overvoltage_delay < (1 * USEC_PER_SEC))
+    {
+      limits->overvoltage_delay = 0;
+      baterr("ERROR: overvoltage delay is too short\n");
+      return -EINVAL;
+    }
+  else if (limits->overvoltage_delay < (2 * USEC_PER_SEC))
+    {
+      limits->overvoltage_delay = 1 * USEC_PER_SEC;
+      regval |= BQ769X0_OV_DELAY_1S;
+      batinfo("Overvoltage delay set to 1S\n");
+    }
+  else if (limits->overvoltage_delay < (4 * USEC_PER_SEC))
+    {
+      limits->overvoltage_delay = 2 * USEC_PER_SEC;
+      regval |= BQ769X0_OV_DELAY_2S;
+      batinfo("Overvoltage delay set to 2S\n");
+    }
+  else if (limits->overvoltage_delay < (8 * USEC_PER_SEC))
+    {
+      limits->overvoltage_delay = 4 * USEC_PER_SEC;
+      regval |= BQ769X0_OV_DELAY_4S;
+      batinfo("Overvoltage delay set to 4S\n");
+    }
+  else if (limits->overvoltage_delay < (10 * USEC_PER_SEC))
+    {
+      limits->overvoltage_delay = 8 * USEC_PER_SEC;
+      regval |= BQ769X0_OV_DELAY_8S;
+      batinfo("Overvoltage delay set to 8S\n");
+    }
+  else
+    {
+      limits->overvoltage_delay = 0;
+      baterr("ERROR: overvoltage delay is too long\n");
+      return -EINVAL;
+    }
+
+  if (limits->undervoltage_delay < (1 * USEC_PER_SEC))
+    {
+      limits->undervoltage_delay = 0;
+      baterr("ERROR: undervoltage delay is too short\n");
+      return -EINVAL;
+    }
+  else if (limits->undervoltage_delay < (4 * USEC_PER_SEC))
+    {
+      limits->undervoltage_delay = 1 * USEC_PER_SEC;
+      regval |= BQ769X0_UV_DELAY_1S;
+      batinfo("Undervoltage delay set to 1S\n");
+    }
+  else if (limits->undervoltage_delay < (8 * USEC_PER_SEC))
+    {
+      limits->undervoltage_delay = 4 * USEC_PER_SEC;
+      regval |= BQ769X0_UV_DELAY_4S;
+      batinfo("Undervoltage delay set to 4S\n");
+    }
+  else if (limits->undervoltage_delay < (16 * USEC_PER_SEC))
+    {
+      limits->undervoltage_delay = 8 * USEC_PER_SEC;
+      regval |= BQ769X0_UV_DELAY_8S;
+      batinfo("Undervoltage delay set to 8S\n");
+    }
+  else if (limits->undervoltage_delay < (20 * USEC_PER_SEC))
+    {
+      limits->undervoltage_delay = 16 * USEC_PER_SEC;
+      regval |= BQ769X0_UV_DELAY_16S;
+      batinfo("Undervoltage delay set to 16S\n");
+    }
+  else
+    {
+      limits->undervoltage_delay = 0;
+      baterr("ERROR: undervoltage delay is too long\n");
+      return -EINVAL;
+    }
+
+  ret = bq769x0_putreg8(priv, BQ769X0_REG_PROTECT3, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
+
+  /* Calculate OV_TRIP register value based on provided limit.
+   * Note that the register format limits the trip range to
+   * approximately 3.15V to 4.7V
+   */
+
+  tripval = (limits->overvoltage_limit - priv->offset) / priv->gain;
+  tripval >>= 4;
+  regval = (uint8_t)(tripval & 0xff);
+  ret = bq769x0_putreg8(priv, BQ769X0_REG_OV_TRIP, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
+
+  /* Calculate UV_TRIP register value based on provided limit.
+   * Note that the register format limits the trip range to
+   * approximately 1.58V to 3.1V
+   */
+
+  tripval = (limits->undervoltage_limit - priv->offset) / priv->gain;
+  tripval >>= 4;
+  regval = (uint8_t)(tripval & 0xff);
+  ret = bq769x0_putreg8(priv, BQ769X0_REG_UV_TRIP, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
+
   return OK;
 }
 
@@ -1180,45 +1224,47 @@ static inline int bq769x0_setlimits(FAR struct bq769x0_dev_s *priv,
 static inline int bq769x0_setchgdsg(FAR struct bq769x0_dev_s *priv,
                                     struct battery_monitor_switches_s *sw)
 {
-    int ret;
-    uint8_t regval;
+  int ret;
+  uint8_t regval;
 
-    /* Read current register value */
+  /* Read current register value */
 
-    ret = bq769x0_getreg8(priv, BQ769X0_REG_SYS_CTRL2, &regval);
-    if (ret < 0)
-      {
-        baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
+  ret = bq769x0_getreg8(priv, BQ769X0_REG_SYS_CTRL2, &regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
 
-    /* Mask off the writeable bits */
+  /* Mask off the writeable bits */
 
-    regval &= BQ769X0_SYS_CTRL2_WRITE_MASK;
+  regval &= BQ769X0_SYS_CTRL2_WRITE_MASK;
 
-    /* Set CHG_ON and DSG_ON */
+  /* Set CHG_ON and DSG_ON */
 
-    regval &= ~BQ769X0_SYS_CTRL2_CHGDSG_MASK;
-    if (sw->charge)
-      {
-        regval |= BQ769X0_CHG_ON;
-        batinfo("Turned on charge switch\n");
-      }
-    if (sw->discharge)
-      {
-        regval |= BQ769X0_DSG_ON;
-        batinfo("Turned on discharge switch\n");
-      }
+  regval &= ~BQ769X0_SYS_CTRL2_CHGDSG_MASK;
+  if (sw->charge)
+    {
+      regval |= BQ769X0_CHG_ON;
+      batinfo("Turned on charge switch\n");
+    }
 
-    /* Write the new register value */
-    ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_CTRL2, regval);
-    if (ret < 0)
-      {
-        baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
+  if (sw->discharge)
+    {
+      regval |= BQ769X0_DSG_ON;
+      batinfo("Turned on discharge switch\n");
+    }
 
-    return OK;
+  /* Write the new register value */
+
+  ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_CTRL2, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1232,21 +1278,21 @@ static inline int bq769x0_setchgdsg(FAR struct bq769x0_dev_s *priv,
 static inline int bq769x0_clear_chipfaults(FAR struct bq769x0_dev_s *priv,
                                             uint8_t faults)
 {
-    int ret;
+  int ret;
 
-    batinfo("Clearing battery faults: %02x\n", faults);
+  batinfo("Clearing battery faults: %02x\n", faults);
 
-    /* Write the new register value */
+  /* Write the new register value */
 
-    ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_STAT, faults);
+  ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_STAT, faults);
 
-    if (ret < 0)
-      {
-        baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
-        return ret;
-      }
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
 
-    return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -1270,14 +1316,15 @@ static int bq769x0_state(struct battery_monitor_dev_s *dev, int *status)
       *status = BATTERY_UNKNOWN;
       return ret;
     }
-    if (regval & BQ769X0_FAULT_MASK)
-      {
-        *status = BATTERY_FAULT;
-      }
-    else
-      {
-        *status = BATTERY_IDLE;
-      }
+
+  if (regval & BQ769X0_FAULT_MASK)
+    {
+      *status = BATTERY_FAULT;
+    }
+  else
+    {
+      *status = BATTERY_IDLE;
+    }
 
   return OK;
 }
@@ -1338,6 +1385,7 @@ static int bq769x0_health(struct battery_monitor_dev_s *dev, int *health)
     {
      *health = BATTERY_HEALTH_GOOD;
     }
+
   return OK;
 }
 
@@ -1385,8 +1433,8 @@ static inline int bq769x0_getvolt(FAR struct bq769x0_dev_s *priv, int *volts)
    * it is cumulative.  See TI appnote SLUUB41.
    */
 
-*volts = ((uint32_t) regval * priv->gain * 4) +
-          (priv->offset * bq769x0_chip_cellcount(priv));
+  *volts = ((uint32_t) regval * priv->gain * 4) +
+            (priv->offset * bq769x0_chip_cellcount(priv));
 
   return OK;
 }
@@ -1401,7 +1449,7 @@ static inline int bq769x0_getvolt(FAR struct bq769x0_dev_s *priv, int *volts)
 
 static inline int bq769x0_getcellvolt(FAR struct bq769x0_dev_s *priv,
                                       struct battery_monitor_voltage_s *voltages)
-  {
+{
   uint16_t regvals[BQ769X0_MAX_CELLS];
   int ret;
   int i;
@@ -1409,21 +1457,21 @@ static inline int bq769x0_getcellvolt(FAR struct bq769x0_dev_s *priv,
 
   if (voltages)
     {
-
-      /*Check how many cells were requested.  If more than available,
+      /* Check how many cells were requested.  If more than available,
        * overwrite with the number available.
        */
 
-     if (voltages->cell_count > priv->cellcount)
-       {
-         voltages->cell_count = priv->cellcount;
-       }
+      if (voltages->cell_count > priv->cellcount)
+        {
+          voltages->cell_count = priv->cellcount;
+        }
     }
 
   /* Due to gaps in cell voltages when the whole stack is not filled,
    * We'll read the maximum number of cells supported by the chip
    * and discard what we don't need.
    */
+
   cellsread = bq769x0_chip_cellcount(priv);
   ret = bq769x0_getnreg16(priv, BQ769X0_REG_VC1_HI, regvals, cellsread);
   if (ret < 0)
@@ -1442,7 +1490,8 @@ static inline int bq769x0_getcellvolt(FAR struct bq769x0_dev_s *priv,
 
       voltages->cell_voltages[i] = ((uint32_t) regvals[priv->mapping[i]] *
                                     priv->gain) + priv->offset;
-  }
+    }
+
   return OK;
 }
 
@@ -1455,6 +1504,7 @@ static inline int bq769x0_getcellvolt(FAR struct bq769x0_dev_s *priv,
  *   values, as many types of temperature sensors exist.
  *
  ****************************************************************************/
+
 static inline int bq769x0_gettemperature(FAR struct bq769x0_dev_s *priv,
                                          struct battery_monitor_temperature_s *temps)
 {
@@ -1463,7 +1513,9 @@ static inline int bq769x0_gettemperature(FAR struct bq769x0_dev_s *priv,
   int i;
   uint16_t regvals[3];
 
-  /* The number of temperature registers varies depending on the chip variant */
+  /* The number of temperature registers varies depending on the
+   * chip variant
+   */
 
   switch (priv->chip)
     {
@@ -1484,7 +1536,8 @@ static inline int bq769x0_gettemperature(FAR struct bq769x0_dev_s *priv,
    */
 
   temps->sensor_count = MIN(chip_sensors, temps->sensor_count);
-  ret = bq769x0_getnreg16(priv, BQ769X0_REG_TS1_HI, regvals, temps->sensor_count);
+  ret = bq769x0_getnreg16(priv, BQ769X0_REG_TS1_HI, regvals,
+                          temps->sensor_count);
   if (ret < 0)
     {
       baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
@@ -1495,10 +1548,11 @@ static inline int bq769x0_gettemperature(FAR struct bq769x0_dev_s *priv,
 
   for (i = 0; i < temps->sensor_count; i += 1)
     {
-      temps->temperatures[i] = ((uint32_t) regvals[i] * priv->gain) + priv->offset;
+      temps->temperatures[i] = ((uint32_t) regvals[i] * priv->gain) +
+                               priv->offset;
     }
-  return OK;
 
+  return OK;
 }
 
 /****************************************************************************
@@ -1508,6 +1562,7 @@ static inline int bq769x0_gettemperature(FAR struct bq769x0_dev_s *priv,
  *   Returns the number of cell channels on the specified device
  *
  ****************************************************************************/
+
 static int bq769x0_chip_cellcount(FAR struct bq769x0_dev_s *priv)
 {
   switch (priv->chip)
@@ -1538,81 +1593,84 @@ static int bq769x0_chip_cellcount(FAR struct bq769x0_dev_s *priv)
 static inline int bq769x0_getcurrent(FAR struct bq769x0_dev_s *priv,
                                      FAR struct battery_monitor_current_s *current)
 {
+  /* The BQ769X0's "coulomb counter" reports average current over a 250ms
+   * period. This can be integrated by the user application to measure
+   * amp-hours.
+   */
 
-    /* The BQ769X0's "coulomb counter" reports average current over a 250ms period.
-      * This can be integrated by the user application to measure amp-hours.
-      */
+  int i;
+  uint8_t regval;
+  int16_t ccval;
+  int32_t ccvolts;
+  int32_t ccamps;
+  int ret;
 
-       int i;
-       uint8_t regval;
-       int16_t ccval;
-       int32_t ccvolts;
-       int32_t ccamps;
-       int ret;
+  /* Poll SYS_STAT register until a new Coulomb counter value is ready
+   * or until we time out
+   */
 
-       /* Poll SYS_STAT register until a new Coulomb counter value is ready
-        * or until we time out */
-       for (i = 0; i < 6; i += 1)
-         {
-           ret = bq769x0_getreg8(priv, BQ769X0_REG_SYS_STAT, &regval);
-           if (ret < 0)
-             {
-               baterr("ERROR: Failed to read BQ769X0 Status! Error = %d\n", ret);
-               return ret;
-             }
+  for (i = 0; i < 6; i += 1)
+    {
+      ret = bq769x0_getreg8(priv, BQ769X0_REG_SYS_STAT, &regval);
+      if (ret < 0)
+        {
+          baterr("ERROR: Failed to read BQ769X0 Status! Error = %d\n", ret);
+          return ret;
+        }
 
-           if (regval & BQ769X0_CC_READY)
-             {
+      if (regval & BQ769X0_CC_READY)
+        {
+          /* Clear the CC_ready flag */
 
-               /* Clear the CC_ready flag */
+          ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_STAT,
+                                BQ769X0_CC_READY);
+          if (ret < 0)
+            {
+              baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
+              return ret;
+            }
 
-               ret = bq769x0_putreg8(priv, BQ769X0_REG_SYS_STAT, BQ769X0_CC_READY);
-               if (ret < 0)
-                 {
-                   baterr("ERROR: Error writing to BQ769X0! Error = %d\n", ret);
-                   return ret;
-                 }
+          /* Get the CC register data (a signed value) */
 
-               /* Get the CC register data (a signed value) */
+          ret = bq769x0_getreg16(priv, BQ769X0_REG_CC_HI,
+                                 (uint16_t *)&ccval);
+          if (ret < 0)
+            {
+              baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
+              return ret;
+            }
 
-               ret = bq769x0_getreg16(priv, BQ769X0_REG_CC_HI, (uint16_t *)&ccval);
-               if (ret < 0)
-                 {
-                   baterr("ERROR: Error reading from BQ769X0! Error = %d\n", ret);
-                   return ret;
-                 }
+          batinfo("Coulomb counter raw value: %d\n", ccval);
 
-               batinfo("Coulomb counter raw value: %d\n", ccval);
+          /* Convert coulomb counter to real units
+           * Multiply by 4 for some extra resolution
+           */
 
-               /* Convert coulomb counter to real units
-                * Multiply by 4 for some extra resolution
-                */
+          ccvolts = (int32_t)ccval * (int32_t)BQ769X0_CC_SCALE * (int32_t)4;
 
-               ccvolts = (int32_t)ccval * (int32_t)BQ769X0_CC_SCALE * (int32_t)4;
+          /* ccvolts is nV, sense_r is uOhm.  Result is in mA
+           * convert to uA, and don't forget to divide the 4 back out
+           */
 
-               /* ccvolts is nV, sense_r is uOhm.  Result is in mA
-                * convert to uA, and don't forget to divide the 4 back out
-                */
+          ccamps = ccvolts / ((int32_t)priv->sense_r);
+          ccamps *= (int32_t)1000;
+          ccamps /= (int32_t)4;
+          current->current = ccamps;
 
-               ccamps = ccvolts / ((int32_t)priv->sense_r);
-               ccamps *= (int32_t)1000;
-               ccamps /= (int32_t)4;
-               current->current = ccamps;
+          /* Acquisition time is constant with this device */
 
-               /* Acquisition time is constant with this device */
+          current->time = (BQ769X0_CC_TIME * USEC_PER_MSEC);
+          return OK;
+        }
 
-               current->time = (BQ769X0_CC_TIME * USEC_PER_MSEC);
-               return OK;
-             }
+      /* Sample is not complete, wait and try again */
 
-           /* Sample is not complete, wait and try again */
+      usleep(BQ769X0_CC_POLL_INTERVAL * USEC_PER_MSEC);
+    }
 
-           usleep(BQ769X0_CC_POLL_INTERVAL * USEC_PER_MSEC);
-         }
+  /* CC value didn't become available in the expected amount of time */
 
-       /* CC value didn't become available in the expected amount of time */
-
-       return -ETIMEDOUT;
+  return -ETIMEDOUT;
 }
 
 /****************************************************************************
@@ -1636,8 +1694,7 @@ static inline int bq769x0_setbalance(FAR struct bq769x0_dev_s *priv,
   bool lastbit;
   int currentindex;
 
-
-  /*Check how many balance switches were requested.  If more than available,
+  /* Check how many balance switches were requested.  If more than available,
    * overwrite with the number available.
    */
 
@@ -1653,6 +1710,7 @@ static inline int bq769x0_setbalance(FAR struct bq769x0_dev_s *priv,
    * We will never have more than 15 cells, so we can store the
    * result in a 16-bit int.
    */
+
   balancebits = 0;
 
   for (i = 0; i < BQ769X0_BAL_REG_COUNT; i += 1)
@@ -1664,18 +1722,24 @@ static inline int bq769x0_setbalance(FAR struct bq769x0_dev_s *priv,
           if (currentindex >= bal->balance_count)
             {
               break;
-          }
+            }
+
           currentbit = bal->balance[currentindex];
-          if (currentbit && lastbit) {
+          if (currentbit && lastbit)
+            {
               bal->balance[currentindex] = false;
               batinfo("Skipping cell %d because balance is set and previous "
-                  "cell balance is set\n", currentindex);
-          } else {
-              balancebits |= (currentbit ? 1 : 0) << priv->mapping[currentindex];
+                      "cell balance is set\n", currentindex);
+            }
+          else
+            {
+              balancebits |= (currentbit ? 1 : 0) <<
+                             priv->mapping[currentindex];
               batinfo("Setting cell balance %d to %d\n", currentindex,
                       currentbit);
               batinfo("Balance bits are %02x\n", balancebits);
-          }
+            }
+
           lastbit = currentbit;
         }
     }
@@ -1730,8 +1794,8 @@ static int bq769x0_voltage(struct battery_monitor_dev_s *dev, int *value)
  ****************************************************************************/
 
 static int bq769x0_cellvoltage(struct battery_monitor_dev_s *dev,
-                               struct battery_monitor_voltage_s *cellv) {
-
+                               struct battery_monitor_voltage_s *cellv)
+{
   FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
   int ret;
 
@@ -1758,20 +1822,19 @@ static int bq769x0_cellvoltage(struct battery_monitor_dev_s *dev,
 static int bq769x0_current(struct battery_monitor_dev_s *dev,
     struct battery_monitor_current_s *current)
 {
+  FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
+  int ret;
 
-    FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
-     int ret;
+  /* Get current from battery monitor */
 
-     /* Get current from battery monitor */
+  ret = bq769x0_getcurrent(priv, current);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error getting current from BQ769X0! Error = %d\n", ret);
+      return ret;
+    }
 
-     ret = bq769x0_getcurrent(priv, current);
-     if (ret < 0)
-       {
-         baterr("ERROR: Error getting current from BQ769X0! Error = %d\n", ret);
-         return ret;
-       }
-
-     return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -1782,8 +1845,8 @@ static int bq769x0_current(struct battery_monitor_dev_s *dev,
  *
  ****************************************************************************/
 
-static int bq769x0_soc(struct battery_monitor_dev_s *dev, b16_t *value) {
-
+static int bq769x0_soc(struct battery_monitor_dev_s *dev, b16_t *value)
+{
   /* The BQ769X0 does not support directly reporting pack state of charge.
    * You should be able to come up with a state-of-charge value by knowing an
    * initial value and looking at the Coulomb counter.  This is out of scope
@@ -1801,12 +1864,12 @@ static int bq769x0_soc(struct battery_monitor_dev_s *dev, b16_t *value) {
  *
  ****************************************************************************/
 
-static int bq769x0_coulombs(struct battery_monitor_dev_s *dev, int *coulombs) {
-
-
+static int bq769x0_coulombs(struct battery_monitor_dev_s *dev, int *coulombs)
+{
   /* The data from the coulomb counter on this part can be accessed via
    * the "get current" command.
    */
+
   return -ENOSYS;
 }
 
@@ -1827,7 +1890,8 @@ static int bq769x0_temp(struct battery_monitor_dev_s *dev,
   ret =  bq769x0_gettemperature(priv, temps);
   if (ret < 0)
     {
-      baterr("ERROR: Error getting temperature from BQ769X0! Error = %d\n", ret);
+      baterr("ERROR: Error getting temperature from BQ769X0! Error = %d\n",
+             ret);
       return ret;
     }
 
@@ -1843,14 +1907,16 @@ static int bq769x0_temp(struct battery_monitor_dev_s *dev,
  ****************************************************************************/
 
 static int bq769x0_balance(struct battery_monitor_dev_s *dev,
-                           struct battery_monitor_balance_s *bal) {
+                           struct battery_monitor_balance_s *bal)
+{
   FAR struct bq769x0_dev_s *priv = (FAR struct bq769x0_dev_s *)dev;
   int ret;
 
   ret =  bq769x0_setbalance(priv, bal);
   if (ret < 0)
     {
-      baterr("ERROR: Error getting temperature from BQ769X0! Error = %d\n", ret);
+      baterr("ERROR: Error getting temperature from BQ769X0! Error = %d\n",
+             ret);
       return ret;
     }
 
@@ -1874,7 +1940,8 @@ static int bq769x0_shutdown(struct battery_monitor_dev_s *dev,
   ret =  bq769x0_doshutdown(priv);
   if (ret < 0)
     {
-      baterr("ERROR: Error putting BQ769X0 into low-power state! Error = %d\n", ret);
+      baterr("ERROR: Error putting BQ769X0 into low-power state! Error = %d\n",
+             ret);
       return ret;
     }
 
@@ -1898,7 +1965,8 @@ static int bq769x0_limits(struct battery_monitor_dev_s *dev,
   ret =  bq769x0_setlimits(priv, limits);
   if (ret < 0)
     {
-      baterr("ERROR: Error updating BQ769X0 safety limits! Error = %d\n", ret);
+      baterr("ERROR: Error updating BQ769X0 safety limits! Error = %d\n",
+             ret);
       return ret;
     }
 
@@ -1982,6 +2050,7 @@ static int bq769x0_clearfaults(struct battery_monitor_dev_s *dev,
           return ret;
         }
     }
+
   return OK;
 }
 
@@ -1993,7 +2062,8 @@ static int bq769x0_clearfaults(struct battery_monitor_dev_s *dev,
  *
  ****************************************************************************/
 
-static int bq769x0_operate(struct battery_monitor_dev_s *dev, uintptr_t param)
+static int bq769x0_operate(struct battery_monitor_dev_s *dev,
+                           uintptr_t param)
 {
   return -ENOSYS;
 }
@@ -2065,6 +2135,7 @@ FAR struct battery_monitor_dev_s *
       priv->fault_cache = 0;
 
       /* Sanity check the device setup and assign cell mapping table */
+
       switch (chip)
         {
         case CHIP_BQ76920:
@@ -2075,9 +2146,11 @@ FAR struct battery_monitor_dev_s *
                    cellcount);
               kmm_free(priv);
               return NULL;
-            } else {
-                priv->mapping = bq76920_cell_mapping[cellcount -
-                                                     BQ76920_MIN_CELL_COUNT];
+            }
+          else
+            {
+              priv->mapping = bq76920_cell_mapping[cellcount -
+                                                   BQ76920_MIN_CELL_COUNT];
             }
           break;
 
@@ -2089,9 +2162,11 @@ FAR struct battery_monitor_dev_s *
                    cellcount);
               kmm_free(priv);
               return NULL;
-            } else {
-                priv->mapping = bq76930_cell_mapping[cellcount -
-                                                     BQ76930_MIN_CELL_COUNT];
+            }
+          else
+            {
+              priv->mapping = bq76930_cell_mapping[cellcount -
+                                                   BQ76930_MIN_CELL_COUNT];
             }
           break;
 
@@ -2103,9 +2178,11 @@ FAR struct battery_monitor_dev_s *
                    cellcount);
               kmm_free(priv);
               return NULL;
-            } else {
-                priv->mapping = bq76940_cell_mapping[cellcount -
-                                                     BQ76940_MIN_CELL_COUNT];
+            }
+          else
+            {
+              priv->mapping = bq76940_cell_mapping[cellcount -
+                                                   BQ76940_MIN_CELL_COUNT];
             }
           break;
 
@@ -2117,7 +2194,8 @@ FAR struct battery_monitor_dev_s *
         }
 
       /* Configure the BQ769x0
-       * Set default CC_CFG register (required per datasheet)*/
+       * Set default CC_CFG register (required per datasheet)
+       */
 
       ret = bq769x0_putreg8(priv, BQ769X0_REG_CC_CFG,
                             BQ769X0_CC_CFG_DEFAULT_VAL);
@@ -2172,12 +2250,11 @@ FAR struct battery_monitor_dev_s *
       ret = bq769x0_updategain(priv);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to get gain/offset values from the BQ769x0: %d\n", ret);
+          baterr("ERROR: Failed to get gain/offset values from the BQ769x0: "
+                 "%d\n", ret);
           kmm_free(priv);
           return NULL;
         }
-
-
     }
 
   return (FAR struct battery_monitor_dev_s *)priv;

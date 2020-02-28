@@ -2,7 +2,7 @@
  * drivers/power/battery_monitor.c
  * Upper-half, character driver for battery manager & monitor ICs.
  *
- *   Copyright (C) 2019 2G Engineering. All rights reserved.
+ *   Copyright (C) 2019, 2020 2G Engineering. All rights reserved.
  *   Author: Josh Lange <jlange@2g-eng.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,6 +97,7 @@ static const struct file_operations g_batteryops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: bat_monitor_open
  *
@@ -257,6 +258,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_SHUTDOWN:
         {
           /* Options are not currently used by shutdown */
+
           ret = dev->ops->shutdown(dev, (uintptr_t)arg);
         }
         break;
@@ -286,6 +288,7 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
       case BATIOC_CLEARFAULTS:
         {
           /* Options are not currently used by clear faults operation */
+
           ret = dev->ops->clearfaults(dev, (uintptr_t)arg);
         }
         break;
@@ -297,6 +300,16 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
           if (ptr)
             {
               ret = dev->ops->temperature(dev, ptr);
+            }
+        }
+        break;
+
+      case BATIOC_COULOMBS:
+        {
+          FAR int *coulombp = (FAR int *)((uintptr_t)arg);
+          if (coulombp)
+            {
+              ret = dev->ops->coulombs(dev, coulombp);
             }
         }
         break;

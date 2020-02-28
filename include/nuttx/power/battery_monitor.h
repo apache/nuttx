@@ -2,7 +2,7 @@
  * include/nuttx/power/battery_monitor.h
  * NuttX Battery battery manager & monitor interfaces
  *
- *   Copyright (C) 2019 2G Engineering. All rights reserved.
+ *   Copyright (C) 2019, 2020 2G Engineering. All rights reserved.
  *   Author: Josh Lange <jlange@2g-eng.com>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* CONFIG_BATTERY_MONITOR - Upper half battery monitor driver support
  *
  * Specific, lower-half drivers will have other configuration requirements
@@ -65,11 +67,12 @@
  */
 
 /* IOCTL Commands ***********************************************************/
-/* The upper-half battery monitor driver provides a character driver "wrapper"
- * around the lower-half battery monitor driver that does all of the real work.
- * Since there is no real data transfer to/or from a battery, all of the
- * driver interaction is through IOCTL commands.  The IOCTL commands
- * supported by the upper-half driver simply provide calls into the
+
+/* The upper-half battery monitor driver provides a character driver
+ * "wrapper" around the lower-half battery monitor driver that does all of
+ * the real work. Since there is no real data transfer to/or from a battery,
+ * all of the driver interaction is through IOCTL commands.  The IOCTL
+ * commands supported by the upper-half driver simply provide calls into the
  * lower half as summarized below:
  *
  * BATIOC_STATE - Return the current state of the battery (see
@@ -80,16 +83,36 @@
  *   Input value:  A pointer to type int.
  * BATIOC_ONLINE - Return 1 if the battery is online; 0 if offline.
  *   Input value:  A pointer to type bool.
- * BATIOC_VOLTAGE - Return the current battery pack voltage. The returned value
- *   is a fixed precision number in units of volts.
- *   Input value:  A pointer to type b32_t.
- * BATIOC_CURRENT - Return the current battery pack current. The returned value
- *   is a fixed precision number in units of Amperes.
- *   Input value:  A pointer to type b32_t.
- * BATIOC_INPUT_CURRENT - Define the input current limit of power supply.
- *   Input value:  An int defining the input current limit value.
+ * BATIOC_VOLTAGE - Return the current battery pack voltage in microvolts.
+ *   Input value:  A pointer to type int.
+ * BATIOC_CELLVOLTAGE - Return the voltage of all cells in microvolts.
+ *   Input value:  A pointer to type battery_monitor_voltage_s.
+ * BATIOC_CURRENT - Return the current battery pack current in microamps.
+ *   The returned data includes duration over which measurement was done, if
+ *   provided by the hardware.
+ *   Input value:  A pointer to type battery_monitor_current_s.
+ * BATIOC_SOC - Return the state-of-charge of the battery, in percent.
+ *   Input value:  A pointer to type b16_t.
+ * BATIOC_COULOMBS - Return the value of the monitor's coulomb counter,
+ *   if provided by the hardware
+ *   Input value:  A pointer to type int.
+ * BATIOC_TEMPERATURE - Return the value of any temperature sensors attached
+ *   to the monitor, in microvolts.
+ *   Input value:  A pointer to type battery_monitor_temperature_s.
+ * BATIOC_BALANCE - Set the monitor's battery balancing switches.
+ *   Input value:  A pointer to type battery_monitor_balance_s.
+ * BATIOC_SHUTDOWN - Put the device into low-power shutdown mode.
+ *   Input value:  None.
+ * BATIOC_SETLIMITS - Set the device's safety limits for voltage, current,
+ *   etc.
+ *   Input value:  A pointer to type battery_monitor_limits_s.
+ * BATIOC_CHGDSG - Set the device's charge and discharge switches.
+ *   Input value:  A pointer to type battery_monitor_switches_s.
+ * BATIOC_CLEARFAULTS - Clear the device's most recent fault.
+ *   Input value:  None.
  * BATIOC_OPERATE - Perform miscellaneous, device-specific charger operation.
- *   Input value:  An uintptr_t that can hold a pointer to struct batio_operate_msg_s.
+ *   Input value:  An uintptr_t that can hold a pointer to struct
+ *   batio_operate_msg_s.
  */
 
 /* Special input values for BATIOC_INPUT_CURRENT that may optionally
@@ -101,6 +124,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* Battery status */
 
 enum battery_monitor_status_e
@@ -117,18 +141,18 @@ enum battery_monitor_status_e
 
 enum battery_monitor_health_e
 {
-  BATTERY_HEALTH_UNKNOWN = 0,  /* Battery health state is not known */
-  BATTERY_HEALTH_GOOD,         /* Battery is in good condition */
-  BATTERY_HEALTH_DEAD,         /* Battery is dead, nothing we can do */
-  BATTERY_HEALTH_OVERHEAT,     /* Battery is over recommended temperature */
-  BATTERY_HEALTH_OVERVOLTAGE,  /* Battery voltage is over recommended level */
-  BATTERY_HEALTH_UNDERVOLTAGE, /* Battery monitor reported an unspecified failure */
-  BATTERY_HEALTH_OVERCURRENT,  /* Battery monitor reported an overcurrent event */
-  BATTERY_HEALTH_SHORT_CIRCUIT,/* Battery monitor reported a short circuit event */
-  BATTERY_HEALTH_UNSPEC_FAIL,  /* Battery monitor reported an unspecified failure */
-  BATTERY_HEALTH_COLD,         /* Battery is under recommended temperature */
-  BATTERY_HEALTH_WD_TMR_EXP,   /* Battery WatchDog Timer Expired */
-  BATTERY_HEALTH_DISCONNECTED  /* Battery is not connected */
+  BATTERY_HEALTH_UNKNOWN = 0,   /* Battery health state is not known */
+  BATTERY_HEALTH_GOOD,          /* Battery is in good condition */
+  BATTERY_HEALTH_DEAD,          /* Battery is dead, nothing we can do */
+  BATTERY_HEALTH_OVERHEAT,      /* Battery is over recommended temperature */
+  BATTERY_HEALTH_OVERVOLTAGE,   /* Battery voltage is over recommended level */
+  BATTERY_HEALTH_UNDERVOLTAGE,  /* Battery monitor reported an unspecified failure */
+  BATTERY_HEALTH_OVERCURRENT,   /* Battery monitor reported an overcurrent event */
+  BATTERY_HEALTH_SHORT_CIRCUIT, /* Battery monitor reported a short circuit event */
+  BATTERY_HEALTH_UNSPEC_FAIL,   /* Battery monitor reported an unspecified failure */
+  BATTERY_HEALTH_COLD,          /* Battery is under recommended temperature */
+  BATTERY_HEALTH_WD_TMR_EXP,    /* Battery WatchDog Timer Expired */
+  BATTERY_HEALTH_DISCONNECTED   /* Battery is not connected */
 };
 
 struct battery_monitor_voltage_s
@@ -190,10 +214,12 @@ struct battery_monitor_balance_s
 struct battery_monitor_limits_s
 {
   /* The driver may overwrite any value in this structure to indicate the
-   * actual value that was set if the exact requested value was not available.
+   * actual value that was set if the exact requested value was not
+   * available.
    *
    * All voltage limits are per-cell.
    */
+
   uint32_t overvoltage_limit;   /* Overvoltage trip threshold, in uV */
   uint32_t undervoltage_limit;  /* Undervoltage trip threshold, in uV */
   uint32_t overcurrent_limit;   /* Overcurrent trip threshold, in mA */
@@ -202,15 +228,14 @@ struct battery_monitor_limits_s
   uint32_t undervoltage_delay;  /* Delay before undervoltage trips, in uS */
   uint32_t overcurrent_delay;   /* Delay before overcurrent trips, in uS */
   uint32_t shortcircuit_delay;  /* Delay before short circuit trips, in uS */
-
 };
 
 struct battery_monitor_switches_s
 {
-
   /* Sets the state of the CHARGE switch, which allows the
    * battery to accept current.
    */
+
   bool charge;
 
   /* Sets the state of the DISCHARGE switch, which allows the
@@ -218,12 +243,12 @@ struct battery_monitor_switches_s
    */
 
   bool discharge;
-
 };
 
 struct battery_monitor_current_s
 {
   /* The value of current measured by the monitor IC, in uA */
+
   int32_t current;
 
   /* The time over which the above current was measured,
@@ -235,9 +260,9 @@ struct battery_monitor_current_s
    */
 
   uint32_t time;
-
 };
- /* This structure defines the lower half battery interface */
+
+  /* This structure defines the lower half battery interface */
 
 struct battery_monitor_dev_s;
 
@@ -339,6 +364,7 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
 /****************************************************************************
  * Name: battery_monitor_register
  *
@@ -404,7 +430,8 @@ struct i2c_master_s;
 FAR struct battery_monitor_dev_s *bq769x0_initialize(FAR struct i2c_master_s *i2c,
                                                      uint8_t addr,
                                                      uint32_t frequency,
-                                                     bool crc, uint8_t cellcount,
+                                                     bool crc,
+                                                     uint8_t cellcount,
                                                      uint8_t chip,
                                                      uint32_t sense_r);
 #endif
