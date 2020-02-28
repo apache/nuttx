@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/arm_schedulesigaction.c
+ * arch/xtensa/src/common/xtensa_schedulesigaction.c
  *
  *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

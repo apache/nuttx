@@ -85,8 +85,8 @@
  *
  *   This function is called directly by interrupt handling logic and from
  *   xtensa_context_save() below with interrupts disabled.  In either calling
- *   context, caller saves saves PC, PS, A0, A1 (SP), and A2.  This
- *   logic also executes indirectly from xtena_context_save() by falling
+ *   context, caller saves PC, PS, A0, A1 (SP), and A2.  This
+ *   logic also executes indirectly from xtensa_context_save() by falling
  *   through from above.
  *
  *   The counterpart to this function is _xtensa_context_restore().
@@ -158,7 +158,7 @@ _xtensa_context_save:
 	 * as of now, overlays only work for windowed calling ABI.
 	 */
 
-#error Overly support is not implemented
+#error Overlay support is not implemented
 #endif
 
 	s32i	a0, a2, (4 * REG_TMP0)			/* Save return address */
