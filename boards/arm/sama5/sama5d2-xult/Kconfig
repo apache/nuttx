@@ -15,6 +15,9 @@ config SAMA5D2XULT_384MHZ
 config SAMA5D2XULT_396MHZ
 	bool "396 MHz"
 
+config SAMA5D2XULT_498MHZ
+	bool "498 MHz"
+
 config SAMA5D2XULT_528MHZ
 	bool "528 MHz"
 

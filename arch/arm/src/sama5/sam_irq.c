@@ -392,6 +392,10 @@ static void sam_aic_initialize(uintptr_t base)
 
   putreg32((uint32_t)sam_spurious, base + SAM_AIC_SPU_OFFSET);
 
+  /* Configure debug register */
+
+  putreg32(AIC_DCR_PROT, base + SAM_AIC_DCR_OFFSET);
+
   /* Perform 8 interrupt acknowledgements by writing any value to the
    * EOICR register.
    */
