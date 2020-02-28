@@ -493,5 +493,8 @@ void up_lowputc(char ch)
 
   pic32mz_putreg(PIC32MZ_CONSOLE_BASE, PIC32MZ_UART_TXREG_OFFSET,
                  (uint32_t)ch);
+
+  while ((pic32mz_getreg(PIC32MZ_CONSOLE_BASE, PIC32MZ_UART_STA_OFFSET) &
+          UART_STA_UTRMT) == 0);
 #endif
 }

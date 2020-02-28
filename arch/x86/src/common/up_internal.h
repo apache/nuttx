@@ -59,14 +59,8 @@
 #ifndef CONFIG_DEV_CONSOLE
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
-#  undef  CONFIG_DEV_LOWCONSOLE
-#  undef  CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  USE_EARLYSERIALINIT
-#    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_DEV_LOWCONSOLE)
+#  if defined(CONFIG_CONSOLE_SYSLOG)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #  else
@@ -88,7 +82,7 @@
 /* Check if an interrupt stack size is configured */
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
-# define CONFIG_ARCH_INTERRUPTSTACK 0
+#  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
 /* Macros to handle saving and restore interrupt state.  In the current
@@ -177,7 +171,6 @@ void x86_boardinitialize(void);
 void up_copystate(uint32_t *dest, uint32_t *src);
 void up_savestate(uint32_t *regs);
 void up_decodeirq(uint32_t *regs);
-void up_irqinitialize(void);
 #ifdef CONFIG_ARCH_DMA
 void weak_function up_dma_initialize(void);
 #endif
@@ -202,30 +195,21 @@ void up_addregion(void);
 
 /* Defined in xyz_serial.c */
 
+#ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void);
+#endif
+
+#ifdef USE_SERIALDRIVER
 void up_serialinit(void);
+#endif
 
 #ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
-#else
-#  define rpmsg_serialinit()
-#endif
-
-/* Defined in drivers/lowconsole.c */
-
-#ifdef CONFIG_DEV_LOWCONSOLE
-void lowconsole_init(void);
-#else
-# define lowconsole_init()
 #endif
 
 /* Defined in xyz_watchdog.c */
 
 void up_wdtinit(void);
-
-/* Defined in xyz_timerisr.c */
-
-void x86_timer_initialize(void);
 
 /* Defined in board/up_network.c */
 
@@ -245,4 +229,4 @@ void up_usbuninitialize(void);
 
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_X86_SRC_COMMON_UP_INTERNAL_H */
+#endif /* __ARCH_X86_SRC_COMMON_UP_INTERNAL_H */

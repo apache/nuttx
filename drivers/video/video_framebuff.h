@@ -37,7 +37,7 @@
 #define __VIDEO_VIDEO_FRAMEBUFF_H__
 
 #include <nuttx/video/video.h>
-#include <semaphore.h>
+#include <nuttx/semaphore.h>
 
 struct vbuf_container_s
 {
@@ -87,4 +87,4 @@ void              video_framebuff_dma_done
 void              video_framebuff_change_mode
                        (video_framebuff_t *fbuf, enum v4l2_buf_mode mode);
 
-#endif  // __VIDEO_VIDEO_FRAMEBUFF_H__
+#endif // __VIDEO_VIDEO_FRAMEBUFF_H__

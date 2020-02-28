@@ -156,7 +156,7 @@ static FAR const char *findscanset(FAR const char *fmt,
            * scanset such as [a-zA-Z0-9] is implementation defined.  The V7
            * Unix scanf treats "a-z" as "the letters a through z", but treats
            * "a-a" as "the letter a, the character -, and the letter a". For
-           * compatibility, the `-' is not considerd to define a range if the
+           * compatibility, the `-' is not considered to define a range if the
            * character following it is either a close bracket (required by
            * ANSI) or is not numerically greater than the character* we just
            * stored in the table (c).
@@ -1220,4 +1220,3 @@ int lib_vscanf(FAR struct lib_instream_s *obj, FAR int *lastc,
   *lastc = c;
   return (count || !conv) ? assigncount : EOF;
 }
-

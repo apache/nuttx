@@ -151,7 +151,7 @@ int up_cpu_paused(int cpu)
   spin_unlock(&g_cpu_paused[cpu]);
 
   /* Wait for the spinlock to be released.  The requesting CPU will release
-   * the spinlcok when the CPU is resumed.
+   * the spinlock when the CPU is resumed.
    */
 
   spin_lock(&g_cpu_wait[cpu]);

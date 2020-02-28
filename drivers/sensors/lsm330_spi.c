@@ -46,11 +46,10 @@
 #include <errno.h>
 #include <debug.h>
 #include <string.h>
-#include <semaphore.h>
 
 #include <nuttx/kmalloc.h>
-
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/sensors/lsm330.h>
 
 /****************************************************************************

@@ -119,4 +119,4 @@
 #define LED_ASSERTION     6     /* ON   OFF */
 #define LED_PANIC         7     /* ON   OFF */
 
-#endif  /* __BOARDS_ARM_TIVA_LM3S6432_S2E_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_TIVA_LM3S6432_S2E_INCLUDE_BOARD_H */

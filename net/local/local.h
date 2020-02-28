@@ -46,13 +46,13 @@
 #include <sys/un.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <queue.h>
 #include <stdint.h>
 #include <poll.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_NET_LOCAL
 
@@ -72,7 +72,7 @@
  */
 
 #define LOCAL_SYNC_BYTE   0x42     /* Byte in sync sequence */
-#define LOCAL_END_BYTE    0xbd     /* End of sync seqence */
+#define LOCAL_END_BYTE    0xbd     /* End of sync sequence */
 
 /****************************************************************************
  * Public Type Definitions
@@ -513,7 +513,7 @@ int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf, size_t *len);
  * Input Parameters:
  *   conn - The connection
  *   addr - The location to return the address
- *   addrlen - The size of the memory allocat by the caller to receive the
+ *   addrlen - The size of the memory allocate by the caller to receive the
  *             address.
  *
  * Returned Value:

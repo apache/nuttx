@@ -44,12 +44,12 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 
 #include "up_arch.h"
 #include "cxd56_clock.h"
@@ -65,7 +65,7 @@
 #define ALIGN_UP(v, m)   (((v) + (m)) & ~m)
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
 
 /* This structure describes one DMA channel */
@@ -305,7 +305,7 @@ DMA_HANDLE cxd56_udmachannel(void)
   unsigned int ch;
   uint32_t bit;
 
-  /* Take a count from from the channel counting semaphore.  We may block
+  /* Take a count from the channel counting semaphore.  We may block
    * if there are no free channels.  When we get the count, then we can
    * be assured that a channel is available in the channel list and is
    * reserved for us.

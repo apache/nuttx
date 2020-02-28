@@ -106,4 +106,3 @@
 #define DIRECTION_BACKWARD              (1)     /* (Value) Backward */
 
 #endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TIVA_QENCODER_H */
-

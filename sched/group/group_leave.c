@@ -237,11 +237,11 @@ static inline void group_release(FAR struct task_group_s *group)
   sched_ufree(group->tg_streamlist);
 
 #  elif defined(CONFIG_BUILD_KERNEL)
-  /* In the kernel build, the unprivileged process' stream list will be
+  /* In the kernel build, the unprivileged process's stream list will be
    * allocated from with its per-process, private user heap. But in that
    * case, there is no reason to do anything here:  That allocation resides
    * in the user heap which which be completely freed when we destroy the
-   * process' address environment.
+   * process's address environment.
    */
 
   if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) != 0)
@@ -442,4 +442,3 @@ void group_leave(FAR struct tcb_s *tcb)
 }
 
 #endif /* HAVE_GROUP_MEMBERS */
-

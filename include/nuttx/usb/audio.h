@@ -764,7 +764,7 @@ struct adc_outterm_desc_s
   uint8_t ot_termtype[2];       /* 4: Terminal type */
   uint8_t ot_interm;            /* 6: ID of the associated input terminal */
   uint8_t ot_srcid;             /* 7: ID of unit/terminal to which terminal is connected */
-  uint8_t ot_csrcid;            /* 8: ID of clock entity to whcih terminal is connected */
+  uint8_t ot_csrcid;            /* 8: ID of clock entity to which terminal is connected */
   uint8_t ot_controls[2];       /* 9: Bits 0-1: Copy protect control,
                                  *    Bits 2-3: Connector control
                                  *    Bits 4-5: Overload control
@@ -1477,7 +1477,7 @@ begin_packed_struct struct adc_hilo_rangeparm_s
 struct adc_int_message_s
 {
   uint8_t im_info;              /* 0: Bitmap
-                                 *    Bit 0: Vender specific,
+                                 *    Bit 0: Vendor specific,
                                  *    Bit 1: Interface or endpoint
                                  *    Bits 2-7: Reserved */
   uint8_t im_attr;              /* 1: The attribute that cause the interrupt */

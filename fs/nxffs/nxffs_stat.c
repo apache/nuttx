@@ -50,7 +50,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mtd/mtd.h>
 

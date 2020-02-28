@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_execsymtab.c
  *
- *   Copyright (C) 2013, 2016, 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016, 2018, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* If CONFIG_LIBC_EXECFUNCS is defined in the configuration, then the
  * following must also be defined:
  */
@@ -113,7 +114,7 @@ void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
    * size are returned as a single atomic operation.
    */
 
-  flags     = enter_critical_section();
+  flags = enter_critical_section();
 
 #ifdef CONFIG_EXECFUNCS_HAVE_SYMTAB
   /* If a bring-up symbol table has been provided and if the exec symbol
@@ -121,11 +122,11 @@ void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols)
    * symbol table.
    */
 
-   if (g_exec_symtab == NULL)
-     {
-       g_exec_symtab = CONFIG_EXECFUNCS_SYMTAB_ARRAY;
-       g_exec_nsymbols = CONFIG_EXECFUNCS_NSYMBOLS_VAR;
-     }
+  if (g_exec_symtab == NULL)
+    {
+      g_exec_symtab = CONFIG_EXECFUNCS_SYMTAB_ARRAY;
+      g_exec_nsymbols = CONFIG_EXECFUNCS_NSYMBOLS_VAR;
+    }
 #endif
 
   /* Return the symbol table and its size */

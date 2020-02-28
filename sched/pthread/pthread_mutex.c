@@ -294,7 +294,7 @@ int pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex)
  * Name: pthread_mutex_give
  *
  * Description:
- *   Take the pthread_mutex and, if successful, add the mutex to the ist of
+ *   Take the pthread_mutex and, if successful, add the mutex to the list of
  *   mutexes held by this thread.
  *
  * Input Parameters:

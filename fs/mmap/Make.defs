@@ -44,4 +44,3 @@ endif
 
 DEPPATH += --dep-path mmap
 VPATH += :mmap
-

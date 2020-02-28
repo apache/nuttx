@@ -49,13 +49,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <queue.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -713,10 +713,10 @@ void weak_function up_dma_initialize(void)
   regval |= EDMA_CR_HOE;    /* Halt On Error */
 #endif
 #ifdef CONFIG_S32K1XX_EDMA_CLM
-  regval |= EDMA_CR_CLM;    /*  Continuous Link Mode */
+  regval |= EDMA_CR_CLM;    /* Continuous Link Mode */
 #endif
 #ifdef CONFIG_S32K1XX_EDMA_EMLIM
-  regval |= EDMA_CR_EMLM;   /*  Enable Minor Loop Mapping */
+  regval |= EDMA_CR_EMLM;   /* Enable Minor Loop Mapping */
 #endif
 
   putreg32(regval, S32K1XX_EDMA_CR);

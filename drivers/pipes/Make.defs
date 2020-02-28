@@ -41,4 +41,3 @@ CSRCS += pipe.c fifo.c pipe_common.c
 
 DEPPATH += --dep-path pipes
 VPATH += :pipes
-

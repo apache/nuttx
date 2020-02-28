@@ -73,4 +73,3 @@ General instructions.
 
 What will run is an a simple OS test that will verify many of the
 features of the OS.  (this is nutts/examples/ostest).
-

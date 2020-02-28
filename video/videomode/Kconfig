@@ -9,4 +9,3 @@ config VIDEO_EDID
 	---help---
 		Enable support for managing EDID data EDID (Extended Display
 		Identification Data).
-

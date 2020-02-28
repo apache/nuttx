@@ -113,6 +113,9 @@ CHIP_CSRCS += imxrt_gpioirq.c
 endif
 
 ifeq ($(CONFIG_ARM_MPU),y)
+ifneq ($(CONFIG_BUILD_PROTECTED),y)
+CMN_CSRCS += up_mpu.c
+endif
 CHIP_CSRCS += imxrt_mpuinit.c
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += imxrt_userspace.c

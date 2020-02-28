@@ -40,15 +40,12 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <time.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <netinet/in.h>
 
 #include <nuttx/irq.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
@@ -266,46 +263,25 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify)
  *
  ****************************************************************************/
 
-int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
-                 FAR struct timespec *timeout)
+int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout)
 {
-  struct timespec abstime;
-  irqstate_t flags;
   int ret;
 
   ninfo("Waiting...\n");
 
-  /* And wait for the Neighbor Advertisement (or a timeout).  Interrupts will
-   * be re-enabled while we wait.
-   */
+  /* And wait for the Neighbor Advertisement (or a timeout). */
 
-  flags = enter_critical_section();
-  DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
-
-  abstime.tv_sec  += timeout->tv_sec;
-  abstime.tv_nsec += timeout->tv_nsec;
-  if (abstime.tv_nsec >= 1000000000)
+  ret = net_timedwait(&notify->rn_sem, timeout);
+  if (ret >= 0)
     {
-      abstime.tv_sec++;
-      abstime.tv_nsec -= 1000000000;
+      ret = notify->rn_result;
     }
-
-  /* REVISIT:  If net_timedwait() is awakened with  signal, we will return
-   * the wrong error code.
-   */
-
-  net_timedwait(&notify->rn_sem, &abstime);
-  ret = notify->rn_result;
 
   /* Remove our wait structure from the list (we may no longer be at the
    * head of the list).
    */
 
   icmpv6_rwait_cancel(notify);
-
-  /* Re-enable interrupts and return the result of the wait */
-
-  leave_critical_section(flags);
   return ret;
 }
 

@@ -54,13 +54,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
 #include <nuttx/can/can.h>
+#include <nuttx/semaphore.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -95,7 +95,7 @@
 #if SAM_CAN_NMAILBOXES == 8
 #  define CAN_ALL_MAILBOXES 0xff /* 8 mailboxes */
 #else
-#  error Unsupport/undefined number of mailboxes
+#  error Unsupported/undefined number of mailboxes
 #endif
 
 /* Interrupts ***************************************************************/
@@ -1047,7 +1047,7 @@ static int can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
  *
  *    Byte 0:      Bits 0-7: Bits 3-10 of the 11-bit CAN identifier
  *    Byte 1:      Bits 5-7: Bits 0-2 of the 11-bit CAN identifier
- *                 Bit 4:    Remote Tranmission Request (RTR)
+ *                 Bit 4:    Remote Transmission Request (RTR)
  *                 Bits 0-3: Data Length Code (DLC)
  *    Bytes 2-10: CAN data
  *
@@ -1529,7 +1529,7 @@ static void can_interrupt(int irq, void *context, FAR void *arg)
  *   1. Synchronization segment (SYNC_SEG): a bit change is expected to occur
  *      within this time segment. It has a fixed length of one time quantum
  *      (1 x tCAN).
- *   2. Propogation segment (PROP_SEG):  This part of the bit time is used
+ *   2. Propagation segment (PROP_SEG):  This part of the bit time is used
  *      to compensate for the physical delay times within the network. It is
  *      twice the sum of the signal’s propagation time on the bus line, the
  *      input comparator delay, and the output driver delay. It is
@@ -1537,7 +1537,7 @@ static void can_interrupt(int irq, void *context, FAR void *arg)
  *      PROPAG field of the CAN Baudrate Register.
  *   3. Phase segment 1 (PHASE_SEG1): defines the location of the sample
  *      point.  Phase Segment 1 is programmable to be 1-8 Tq long.
- *   4. Phase segement 2 (PHASE_SEG2):  defines the location of the transmit
+ *   4. Phase segment 2 (PHASE_SEG2):  defines the location of the transmit
  *      point.Phase Segment 2 length has to be at least as long as the
  *      Information Processing Time (IPT) and may not be more than the
  *      length of Phase Segment 1 (since Phase Segment 2 also begins at the
@@ -1654,7 +1654,7 @@ static int can_bittiming(struct sam_can_s *priv)
 
   t1t2 = tq - 1 - (propag + 1);
 
-  /* Calcuate phase1 and phase2 */
+  /* Calculate phase1 and phase2 */
 
   phase1 = (t1t2 >> 1) - 1;
   phase2 = phase1;

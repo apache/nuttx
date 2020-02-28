@@ -65,7 +65,7 @@ LEDs and Buttons
   the common RGB LED driver.
 
   If CONFIG_ARCH_LEDs is defined, then NuttX will control the LEDs on board
-  the s32k118evb.  The following definitions describe how NuttX controls the
+  the S32K118EVB.  The following definitions describe how NuttX controls the
   LEDs:
 
     ==========================================+========+========+=========
@@ -80,7 +80,7 @@ LEDs and Buttons
     LED_SIGNAL       In a signal handler               (no change)
     LED_ASSERTION    An assertion failed               (no change)
     LED_PANIC        The system has crashed      FLASH    OFF      OFF
-    LED_IDLE         S32K118EVN in sleep mode          (no change)
+    LED_IDLE         S32K118EVB in sleep mode          (no change)
     ==========================================+========+========+=========
 
   Buttons
@@ -137,5 +137,5 @@ Configurations
       for builtin applications is enabled, but in the base configuration no
       builtin applications are selected.
 
-      NOTE:  This is a very minimal NSH configuration in order to recude
+      NOTE:  This is a very minimal NSH configuration in order to reduce
       memory usage.  Most of the NSH niceties are not available.

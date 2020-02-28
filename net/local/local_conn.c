@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
-#include <semaphore.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -48,7 +47,6 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
 
 #include "local/local.h"
 

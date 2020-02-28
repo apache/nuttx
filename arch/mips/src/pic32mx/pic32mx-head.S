@@ -333,7 +333,7 @@ __start:
 	b		.Lbsscheck
 	nop
 
-.Lbssloop:	
+.Lbssloop:
 	sw		zero, 0x0(t0)
 	sw		zero, 0x4(t0)
 	sw		zero, 0x8(t0)
@@ -352,7 +352,7 @@ __start:
 	b		.Ldatacheck
 	nop
 
-.Ldataloop:	
+.Ldataloop:
 	lw		t3, (t0)
 	sw		t3, (t1)
 	addu	t0, 4
@@ -442,7 +442,7 @@ __start:
 	 * - Preserve soft reset (SR) and non-maskable interrupt (NMI)
 	 * - CorExtend enabled based on whether CorExtend User Defined
 	 *   Instructions have been implemented (CEE = Config(UDI))
-	 * - Disable any pending interrups (IM7..IM2 = 0, IM1..IM0 = 0)
+	 * - Disable any pending interrupts (IM7..IM2 = 0, IM1..IM0 = 0)
 	 * - Disable hardware interrupts (IPL7:IPL2 = 0)
 	 * - Base mode is Kernel mode (UM = 0)
 	 * - Error level is normal (ERL = 0)
@@ -707,4 +707,3 @@ g_nestlevel:
 g_idle_topstack:
 	.long	PIC32MX_HEAP_BASE
 	.size	g_idle_topstack, .-g_idle_topstack
-

@@ -76,7 +76,7 @@ void NXGL_FUNCNAME(nxgl_fillrectangle, NXGLIB_SUFFIX)
   unsigned int ncols;
   unsigned int row;
 
-  /* Get the dimensions of the rectange to fill in pixels */
+  /* Get the dimensions of the rectangle to fill in pixels */
 
   ncols  = rect->pt2.x - rect->pt1.x + 1;
 

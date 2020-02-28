@@ -67,7 +67,7 @@
  *   attribute.
  *
  *   NOTE: The standard specifies that the attribute value should be returned
- *   via the asynchronous MLME-GET.confirm primitve.  However, in our
+ *   via the asynchronous MLME-GET.confirm primitive.  However, in our
  *   implementation, we synchronously return the value immediately.Therefore, we
  *   merge the functionality of the MLME-GET.request and MLME-GET.confirm
  *   primitives together.
@@ -145,7 +145,7 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
 
       default:
         {
-          /* The attribute may be handled soley in the radio driver, so pass
+          /* The attribute may be handled solely in the radio driver, so pass
            * it along.
            */
 
@@ -165,7 +165,7 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
  *   indicated MAC PIB attribute.
  *
  *   NOTE: The standard specifies that confirmation should be indicated via
- *   the asynchronous MLME-SET.confirm primitve.  However, in our implementation
+ *   the asynchronous MLME-SET.confirm primitive.  However, in our implementation
  *   we synchronously return the status from the request. Therefore, we do merge
  *   the functionality of the MLME-SET.request and MLME-SET.confirm primitives
  *   together.
@@ -240,7 +240,7 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
         break;
       default:
         {
-          /* The attribute may be handled soley in the radio driver, so pass
+          /* The attribute may be handled solely in the radio driver, so pass
            * it along.
            */
 

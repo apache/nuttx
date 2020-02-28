@@ -40,9 +40,6 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
-
-#include <nuttx/semaphore.h>
 #include <nuttx/power/pm.h>
 
 #include "pm.h"

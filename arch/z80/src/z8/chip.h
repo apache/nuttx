@@ -158,13 +158,13 @@
 #define Z8_UARTCTL1_DEPOL    _HX(08)        /* Bit 3: Driver Enable Polarity */
 #define Z8_UARTCTL1_BRGCTL   _HX(04)        /* Bit 2: Baud Rate Generator Control */
 #define Z8_UARTCTL1_RDAIRQ   _HX(02)        /* Bit 1: Receive Data Interrupt Enable */
-#define Z8_UARTCTL1_IREN     _HX(01)        /* Bit 0: Infrared Encoder/Decoder Eanble */
+#define Z8_UARTCTL1_IREN     _HX(01)        /* Bit 0: Infrared Encoder/Decoder Enable */
 
 /* UART0/1 Mode Status/Select Register Bit Definitions ******************************/
 
 #define Z8_UARTMDSEL_NORMAL  _HX(00)        /* Bits 5-7=0: Multiprocessor and Normal Mode */
 #define Z8_UARTMDSEL_FILTER   HX(20)        /* Bits 5-7=1: Noise Filter Control/Status */
-#define Z8_UARTMDSEL_LINP     HX(40)        /* Bits 5-7=2: LIN protocol Contol/Status */
+#define Z8_UARTMDSEL_LINP     HX(40)        /* Bits 5-7=2: LIN protocol Control/Status */
 #define Z8_UARTMDSEL_HWREV    HX(e0)        /* Bits 5-7=7: LIN-UART Hardware Revision */
                                             /* Bits 0-4:   Mode dependent status */
 
@@ -236,4 +236,4 @@ extern "C"
 #endif
 #endif
 
-#endif  /* __ARCH_Z80_SRC_Z8_CHIP_H */
+#endif /* __ARCH_Z80_SRC_Z8_CHIP_H */

@@ -267,7 +267,7 @@ static uint32_t sam_configcommon(pio_pinset_t cfgset)
     }
 
   /* Select I/O drive.
-   * REVISIT: Does't rive strength apply only to output and peripheral
+   * REVISIT: Doesn't rive strength apply only to output and peripheral
    * pins as well?
    */
 

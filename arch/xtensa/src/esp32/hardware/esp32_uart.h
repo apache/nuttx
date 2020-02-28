@@ -115,7 +115,7 @@
 
 /* UART_TX_BRK_DONE_INT_RAW : RO ;bitpos:[12] ;default: 1'b0 ; */
 /* Description: This interrupt raw bit turns to high level when transmitter
- * completes sending  0 after all the datas in transmitter's fifo are send.
+ * completes sending  0 after all the data in transmitter's fifo are send.
  */
 
 #define UART_TX_BRK_DONE_INT_RAW        (BIT(12))
@@ -776,7 +776,7 @@
 #define UART_AUTOBAUD_REG(i)            (REG_UART_BASE(i) + UART_AUTOBAUD_OFFSET)
 
 /* UART_GLITCH_FILT : R/W ;bitpos:[15:8] ;default: 8'h10 ; */
-/* Description: when input pulse width is lower then this value igore this
+/* Description: when input pulse width is lower then this value ignore this
  * pulse.  This register is used in autobaud detect process.
  */
 
@@ -839,7 +839,7 @@
 #define UART_ST_UTX_OUT_S               24
 
 /* UART_TXFIFO_CNT : RO ;bitpos:[23:16] ;default: 8'b0 ; */
-/* Description: (tx_mem_cnt txfifo_cnt) stores the byte num of valid datas
+/* Description: (tx_mem_cnt txfifo_cnt) stores the byte num of valid data
  * in transmitter's fifo.  tx_mem_cnt stores the 3 most significant bits
  * txfifo_cnt stores the 8 least significant bits.
  */
@@ -893,7 +893,7 @@
 #define UART_ST_URX_OUT_S               8
 
 /* UART_RXFIFO_CNT : RO ;bitpos:[7:0] ;default: 8'b0 ; */
-/* Description: (rx_mem_cnt rxfifo_cnt) stores the byte num of valid datas
+/* Description: (rx_mem_cnt rxfifo_cnt) stores the byte num of valid data
  * in receiver's fifo. rx_mem_cnt register stores the 3 most significant
  * bits rxfifo_cnt stores the 8 least significant bits.
  */
@@ -1069,7 +1069,7 @@
 #define UART_IRDA_DPLX_S                9
 
 /* UART_TXD_BRK : R/W ;bitpos:[8] ;default: 1'b0 ; */
-/* Description: Set this bit to enbale transmitter to  send 0 when the
+/* Description: Set this bit to enable transmitter to  send 0 when the
  * process of sending data is done.
  */
 
@@ -1109,7 +1109,7 @@
 #define UART_STOP_BIT_NUM_S             4
 
 /* UART_BIT_NUM : R/W ;bitpos:[3:2] ;default: 2'd3 ; */
-/* Description: This registe is used to set the length of data:
+/* Description: This register is used to set the length of data:
  * 0:5bits 1:6bits 2:7bits 3:8bits
  */
 
@@ -1140,7 +1140,7 @@
 #define UART_CONF1_REG(i)               (REG_UART_BASE(i) + UART_CONF1_OFFSET)
 
 /* UART_RX_TOUT_EN : R/W ;bitpos:[31] ;default: 1'b0 ; */
-/* Description: This is the enble bit for uart receiver's timeout function.*/
+/* Description: This is the enable bit for uart receiver's timeout function.*/
 
 #define UART_RX_TOUT_EN                 (BIT(31))
 #define UART_RX_TOUT_EN_M               (BIT(31))
@@ -1217,7 +1217,7 @@
 #define UART_HIGHPULSE_REG(i)           (REG_UART_BASE(i) + UART_HIGHPULSE_OFFSET)
 
 /* UART_HIGHPULSE_MIN_CNT : RO ;bitpos:[19:0] ;default: 20'hFFFFF ; */
-/* Description: This register stores  the value of the maxinum duration time
+/* Description: This register stores  the value of the maximum duration time
  * for the high level pulse. it is used in baudrate-detect process.
  */
 
@@ -1494,7 +1494,7 @@
 /* UART_RX_GAP_TOUT : R/W ;bitpos:[23:0] ;default: 24'h1e00 ; */
 /* Description: This register is used to configure the duration time between
  * the at_cmd chars. when the duration time is less than this register
- * value it will not take the datas as continous at_cmd chars.
+ * value it will not take the data as continuous at_cmd chars.
  */
 
 #define UART_RX_GAP_TOUT                0x00FFFFFF
@@ -1506,7 +1506,7 @@
 #define UART_AT_CMD_CHAR_REG(i)         (REG_UART_BASE(i) + UART_AT_CMD_CHAR_OFFSET)
 
 /* UART_CHAR_NUM : R/W ;bitpos:[15:8] ;default: 8'h3 ; */
-/* Description: This register is used to configure the num of continous
+/* Description: This register is used to configure the num of continuous
  * at_cmd chars received by receiver.
  */
 
@@ -1696,4 +1696,3 @@
 #define UART_ID_S                       0
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_UART_H */
-

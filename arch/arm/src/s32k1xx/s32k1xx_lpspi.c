@@ -35,27 +35,27 @@
  ************************************************************************************/
 
 /************************************************************************************
- * The external functions, s32k1xx_lpspi1/2/3/4select and s32k1xx_lpspi1/2/3/4status
+ * The external functions, s32k1xx_lpspi0/1/2select and s32k1xx_lpspi0/1/2status
  * must be provided by board-specific logic.  They are implementations of the select
  * and status methods of the SPI interface defined by struct s32k1xx_lpspi_ops_s (see
- * include/nuttx/spi/spi.h). All other methods (including s32k1xx_lpspibus_initialize())
- * are provided by common S32K1XX logic.  To use this common SPI logic on your
- * board:
+ * include/nuttx/spi/spi.h). All other methods (including
+ * s32k1xx_lpspibus_initialize()) are provided by common S32K1XX logic.  To use this
+ * common SPI logic on your board:
  *
  *   1. Provide logic in s32k1xx_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide s32k1xx_lpspi1/2/3/4select() and s32k1xx_lpspi1/2/3/4status()
+ *   2. Provide s32k1xx_lpspi0/1/2select() and s32k1xx_lpspi0/1/2status()
  *      functions in your board-specific logic.  These functions will perform chip
  *      selection and status operations using GPIOs in the way your board is
  *      configured.
  *   3. Add a calls to s32k1xx_lpspibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by s32k1xx_lpspibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by s32k1xx_lpspibus_initialize() may then be used to bind
+ *      the SPI driver to higher level logic (e.g., calling
  *      mmcsd_lpspislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ****************************************************c*******************************/
+ ************************************************************************************/
 
 /************************************************************************************
  * Included Files
@@ -67,7 +67,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -90,7 +89,8 @@
 
 #include <arch/board/board.h>
 
-#ifdef CONFIG_S32K1XX_LPSPI
+#if defined(CONFIG_S32K1XX_LPSPI0) || defined(CONFIG_S32K1XX_LPSPI1) || \
+    defined(CONFIG_S32K1XX_LPSPI2)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -830,12 +830,12 @@ static inline void s32k1xx_lpspi_master_set_delays(FAR struct s32k1xx_lpspidev_s
  * Name: s32k1xx_lpspi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -953,8 +953,7 @@ static uint32_t s32k1xx_lpspi_setfrequency(FAR struct spi_dev_s *dev,
       s32k1xx_lpspi_putreg32(priv, S32K1XX_LPSPI_CCR_OFFSET, regval);
 
       s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_TCR_OFFSET,
-                              LPSPI_TCR_PRESCALE_MASK, 0);
-      s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_TCR_OFFSET, 0,
+                              LPSPI_TCR_PRESCALE_MASK,
                               LPSPI_TCR_PRESCALE(best_prescaler));
 
       priv->frequency = frequency;
@@ -971,7 +970,8 @@ static uint32_t s32k1xx_lpspi_setfrequency(FAR struct spi_dev_s *dev,
 
       if (men)
         {
-          s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CR_OFFSET, 0, LPSPI_CR_MEN);
+          s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_CR_OFFSET, 0,
+                                  LPSPI_CR_MEN);
         }
     }
 
@@ -1091,7 +1091,6 @@ static void s32k1xx_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
-
       if (nbits < 2 || nbits > 4096)
         {
           return;
@@ -1125,7 +1124,7 @@ static void s32k1xx_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits)
     }
 }
 
-/****************************************************************************
+/************************************************************************************
  * Name: s32k1xx_lpspi_hwfeatures
  *
  * Description:
@@ -1139,7 +1138,7 @@ static void s32k1xx_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *   Zero (OK) if the selected H/W features are enabled; A negated errno
  *   value if any H/W feature is not supportable.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_SPI_HWFEATURES
 static int s32k1xx_lpspi_hwfeatures(FAR struct spi_dev_s *dev,
@@ -1233,7 +1232,8 @@ static uint16_t s32k1xx_lpspi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *   nwords   - the length of data to be exchaned in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1327,7 +1327,7 @@ static void s32k1xx_lpspi_exchange_nodma(FAR struct spi_dev_s *dev,
 }
 #endif /* !CONFIG_S32K1XX_LPSPI_DMA || CONFIG_S32K1XX_DMACAPABLE */
 
-/****************************************************************************
+/************************************************************************************
  * Name: s32k1xx_lpspi_sndblock
  *
  * Description:
@@ -1339,7 +1339,8 @@ static void s32k1xx_lpspi_exchange_nodma(FAR struct spi_dev_s *dev,
  *   nwords   - the length of data to send from the buffer in number of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1367,7 +1368,8 @@ static void s32k1xx_lpspi_sndblock(FAR struct spi_dev_s *dev,
  *   nwords   - the length of data that can be received in the buffer in number
  *              of words.  The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1387,7 +1389,8 @@ static void s32k1xx_lpspi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffe
  * Name: s32k1xx_lpspi_bus_initialize
  *
  * Description:
- *   Initialize the selected SPI bus in its default state (Master, 8-bit, mode 0, etc.)
+ *   Initialize the selected SPI bus in its default state (Master, 8-bit, mode 0,
+ *   etc.)
  *
  * Input Parameters:
  *   priv   - private SPI device structure
@@ -1418,6 +1421,7 @@ static void s32k1xx_lpspi_bus_initialize(struct s32k1xx_lpspidev_s *priv)
                           LPSPI_CFGR1_MASTER);
 
   /* Set specific PCS to active high or low */
+
   /* TODO: Not needed for now */
 
   /* Set Configuration Register 1 related setting. */
@@ -1557,4 +1561,4 @@ FAR struct spi_dev_s *s32k1xx_lpspibus_initialize(int bus)
   return (FAR struct spi_dev_s *)priv;
 }
 
-#endif /* CONFIG_S32K1XX_LPSPI */
+#endif /* CONFIG_S32K1XX_LPSPI0 || CONFIG_S32K1XX_LPSPI1 || CONFIG_S32K1XX_LPSPI2 */

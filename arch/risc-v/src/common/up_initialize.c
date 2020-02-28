@@ -43,9 +43,8 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/mm/iob.h>
 #include <nuttx/serial/pty.h>
-#include <nuttx/syslog/syslog.h>
+#include <nuttx/syslog/syslog_console.h>
 #include <nuttx/drivers/drivers.h>
 
 #include <arch/board/board.h>
@@ -114,23 +113,6 @@ void up_initialize(void)
 
   up_addregion();
 
-  /* Initialize the interrupt subsystem */
-
-  up_irqinitialize();
-
-  /* Initialize the system timer interrupt */
-
-#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS) && \
-    !defined(CONFIG_SYSTEMTICK_EXTCLK)
-  riscv_timer_initialize();
-#endif
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
-#endif
-
   /* Register devices */
 
 #if defined(CONFIG_DEV_NULL)
@@ -155,29 +137,14 @@ void up_initialize(void)
    * serial driver).
    */
 
-#if defined(CONFIG_DEV_LOWCONSOLE)
-  lowconsole_init();
-#elif defined(CONFIG_CONSOLE_SYSLOG)
+#if defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
-#elif defined(CONFIG_RAMLOG_CONSOLE)
-  ramlog_consoleinit();
 #endif
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1
   /* Register the master pseudo-terminal multiplexor device */
 
   ptmx_register();
-#endif
-
-  /* Early initialization of the system logging device.  Some SYSLOG channel
-   * can be initialized early in the initialization sequence because they
-   * depend on only minimal OS initialization.
-   */
-
-  syslog_initialize(SYSLOG_INIT_EARLY);
-
-#ifdef CONFIG_RAMLOG_SYSLOG
-  ramlog_sysloginit();
 #endif
 
   board_autoled_on(LED_IRQSENABLED);

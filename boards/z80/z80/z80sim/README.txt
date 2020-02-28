@@ -119,7 +119,7 @@ All of the z80 configurations in this this directory are set up to build
 under Linux.  That configuration can be converted to run natively in a
 Windows CMD.exe shell.  That configuration requires the MinGW host compiler
 and several GNUWin32 tools (see discussion in the top-level NuttX/README.txt
-file) and the following changes to the configuation file:
+file) and the following changes to the configuration file:
 
   -CONFIG_HOST_LINUX=y
   +CONFIG_HOST_WINDOWS=y
@@ -190,4 +190,3 @@ Known compilation problems:
   Workaround: Remove lib_strtof.c from libs/libc/stdlib/Make.defs
 
   In arch/z80/src/z180:  error 26: '_cbr' not a structure/union member
-

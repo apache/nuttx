@@ -112,5 +112,3 @@ void stm32_extcontextrestore(struct extmem_save_s *restore)
 }
 
 #endif /* CONFIG_STM32_FSMC */
-
-

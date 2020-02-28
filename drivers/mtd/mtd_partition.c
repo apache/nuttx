@@ -432,13 +432,13 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
           if (ppv)
             {
-              /* Get hte XIP base of the entire FLASH */
+              /* Get the XIP base of the entire FLASH */
 
               ret = priv->parent->ioctl(priv->parent, MTDIOC_XIPBASE,
                                         (unsigned long)((uintptr_t)&base));
               if (ret == OK)
                 {
-                  /* Add the offset of this partion to the XIP base and
+                  /* Add the offset of this partition to the XIP base and
                    * return the sum to the caller.
                    */
 
@@ -693,7 +693,7 @@ static int part_procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
       return -ENOMEM;
     }
 
-  /* The copy the file attribtes from the old attributes to the new */
+  /* The copy the file attribute from the old attributes to the new */
 
   memcpy(newattr, oldattr, sizeof(struct part_procfs_file_s));
 
@@ -893,4 +893,3 @@ int mtd_setpartitionname(FAR struct mtd_dev_s *mtd, FAR const char *name)
   return OK;
 }
 #endif
-

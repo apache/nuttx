@@ -70,10 +70,14 @@ unsigned int alarm(unsigned int seconds)
 {
   struct itimerval value =
   {
+    {0, 0},
+    {0, 0}
   };
 
   struct itimerval ovalue =
   {
+    {0, 0},
+    {0, 0}
   };
 
   value.it_value.tv_sec = seconds;

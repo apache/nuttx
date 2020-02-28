@@ -154,4 +154,3 @@
  */
 
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_SRC_H */
-

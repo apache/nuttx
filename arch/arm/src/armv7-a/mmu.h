@@ -889,7 +889,7 @@ struct section_mapping_s
 #endif
 
 /************************************************************************************
- * Assemby Macros
+ * Assembly Macros
  ************************************************************************************/
 
 #ifdef __ASSEMBLY__
@@ -1510,4 +1510,4 @@ void mmu_invalidate_region(uint32_t vstart, size_t size);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_A_MMU_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_A_MMU_H */

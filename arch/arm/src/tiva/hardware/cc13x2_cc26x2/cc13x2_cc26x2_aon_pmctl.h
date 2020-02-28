@@ -96,7 +96,7 @@
 /* TIVA_AON_PMCTL_RAMCFG */
 
 #define AON_PMCTL_RAMCFG_BUS_SRAM_RET_EN_SHIFT        (0)       /* Bits 0-3: Select banks for retention during MCU
-                                                                 *           bus doman power off */
+                                                                 *           bus domain power off */
 #define AON_PMCTL_RAMCFG_BUS_SRAM_RET_EN_MASK         (15 << AON_PMCTL_RAMCFG_BUS_SRAM_RET_EN_SHIFT)
 #  define AON_PMCTL_RAMCFG_BUS_SRAM_RET_EN_RET_NONE   (0 << AON_PMCTL_RAMCFG_BUS_SRAM_RET_EN_SHIFT)  /* Retention is disabled */
 #  define AON_PMCTL_RAMCFG_BUS_SRAM_RET_EN_RET_LEVEL1 (1 << AON_PMCTL_RAMCFG_BUS_SRAM_RET_EN_SHIFT)  /* Retention on for all banks SRAM:BANK0

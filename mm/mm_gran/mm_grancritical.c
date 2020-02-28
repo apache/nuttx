@@ -43,7 +43,6 @@
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/irq.h>
 #include <nuttx/mm/gran.h>
 
@@ -86,6 +85,5 @@ void gran_leave_critical(FAR struct gran_s *priv)
   nxsem_post(&priv->exclsem);
 #endif
 }
-
 
 #endif /* CONFIG_GRAN */

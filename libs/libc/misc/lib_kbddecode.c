@@ -264,4 +264,3 @@ int kbd_decode(FAR struct lib_instream_s *stream,
   state->nch = 0;
   return TERM_RETURN(state->buf[NDX_TERMINATOR]);
 }
-

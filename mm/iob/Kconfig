@@ -16,8 +16,8 @@ if MM_IOB
 
 config IOB_NBUFFERS
 	int "Number of pre-allocated I/O buffers"
-	default 24 if (NET_WRITE_BUFFERS && !NET_READAHEAD) || (!NET_WRITE_BUFFERS && NET_READAHEAD)
-	default 36 if NET_WRITE_BUFFERS && NET_READAHEAD
+	default 36 if NET_WRITE_BUFFERS
+	default 24 if !NET_WRITE_BUFFERS && NET_READAHEAD
 	default 8 if !NET_WRITE_BUFFERS && !NET_READAHEAD
 	---help---
 		Each packet is represented by a series of small I/O buffers in a
@@ -34,8 +34,8 @@ config IOB_BUFSIZE
 
 config IOB_NCHAINS
 	int "Number of pre-allocated I/O buffer chain heads"
-	default 0 if !NET_READAHEAD && !NET_UDP_READAHEAD
-	default IOB_NBUFFERS if NET_READAHEAD || NET_UDP_READAHEAD
+	default 0 if !NET_READAHEAD
+	default IOB_NBUFFERS if NET_READAHEAD
 	---help---
 		These tiny nodes are used as "containers" to support queueing of
 		I/O buffer chains.  This will limit the number of I/O transactions

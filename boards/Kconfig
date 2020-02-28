@@ -1245,6 +1245,36 @@ config ARCH_BOARD_S32K118EVB
 		This options selects support for NuttX on the NXP S32K118EVB board
 		featuring the S32K118 Cortex-M0+.
 
+config ARCH_BOARD_S32K144EVB
+	bool "NXP S32K144EVB"
+	depends on ARCH_CHIP_S32K144
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP S32K144EVB board
+		featuring the S32K144 Cortex-M4F.
+
+config ARCH_BOARD_RDDRONE_UAVCAN144
+	bool "NXP RDDRONE-UAVCAN144"
+	depends on ARCH_CHIP_S32K144
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP RDDRONE-UAVCAN board
+		featuring the S32K144 Cortex-M4F.
+
+config ARCH_BOARD_RDDRONE_UAVCAN146
+	bool "NXP RDDRONE-UAVCAN146"
+	depends on ARCH_CHIP_S32K146
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP RDDRONE-UAVCAN board
+		featuring the S32K146 Cortex-M4F.
+
 config ARCH_BOARD_S32K146EVB
 	bool "NXP S32K146EVB"
 	depends on ARCH_CHIP_S32K146
@@ -1290,7 +1320,7 @@ config ARCH_BOARD_SAMA5D3X_EK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAMA5D3x-EK development board (where x=1,3,4, or 5).
 
@@ -1300,7 +1330,7 @@ config ARCH_BOARD_SAMA5D3_XPLAINED
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT if SAMA5_EMACA || SAMA5_EMAC0 || SAMA5_EMAC1 || SAMA5_GMAC
 	---help---
 		The port of NuttX to the Atmel SAMA5D3 Xplained development board.
 
@@ -1310,7 +1340,7 @@ config ARCH_BOARD_SAMA5D4_EK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAMA5D4-EK development board
 
@@ -1377,7 +1407,7 @@ config ARCH_BOARD_SAM4EEK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAM4E-EK development board.  This
 		board features the SAM4E16 MCU running at up to 120MHz.
@@ -1415,7 +1445,7 @@ config ARCH_BOARD_SAME70_XPLAINED
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAME70 Xplained evaluation board.
 
@@ -1425,7 +1455,7 @@ config ARCH_BOARD_SAMV71_XULT
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 	---help---
 		The port of NuttX to the Atmel SAMV71 Xplained Ultra evaluation board.
 
@@ -1877,6 +1907,16 @@ config ARCH_BOARD_Z16F2800100ZCOG
 		development kit and the Zilog ZDS-II Windows command line tools.  The
 		development environment is Cygwin under WinXP.
 
+config ARCH_BOARD_Z20X
+	bool "z20x"
+	depends on ARCH_CHIP_EZ80F92
+	---help---
+		ez80Acclaim! Microcontroller.  This port use the z80x board
+		based on an eZ80F092 part, and the Zilog ZDS-II Windows command line
+		tools.  The development environment is Cygwin under Windows. A
+		Windows native development environment is available but has not
+		been verified.
+
 config ARCH_BOARD_Z80SIM
 	bool "Z80 Instruction Set Simulator"
 	depends on ARCH_CHIP_Z80
@@ -2000,7 +2040,7 @@ config BOARD_CUSTOM_INTERRUPT
 	bool "Custom board PHY interrupts"
 	default n
 	depends on NETDEVICES
-	select ARCH_PHY_INTERRUPT if NETDEVICES
+	select ARCH_PHY_INTERRUPT
 
 endmenu # Custom Board Configuration
 endif #ARCH_BOARD_CUSTOM
@@ -2125,10 +2165,13 @@ config ARCH_BOARD
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
 	default "rx65n"                    if ARCH_BOARD_RX65N
-	default "rx65n"                    if ARCH_BOARD_RX65N_RSK1MB
-	default "rx65n"                    if ARCH_BOARD_RX65N_RSK2MB
-	default "rx65n"                    if ARCH_BOARD_RX65N_GRROSE
+	default "rx65n-rsk1mb"             if ARCH_BOARD_RX65N_RSK1MB
+	default "rx65n-rsk2mb"             if ARCH_BOARD_RX65N_RSK2MB
+	default "rx65n-grrose"             if ARCH_BOARD_RX65N_GRROSE
 	default "s32k118evb"               if ARCH_BOARD_S32K118EVB
+	default "s32k144evb"               if ARCH_BOARD_S32K144EVB
+	default "rddrone-uavcan144"        if ARCH_BOARD_RDDRONE_UAVCAN144
+	default "rddrone-uavcan146"        if ARCH_BOARD_RDDRONE_UAVCAN146
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
@@ -2192,6 +2235,7 @@ config ARCH_BOARD
 	default "viewtool-stm32f107"       if ARCH_BOARD_VIEWTOOL_STM32F107
 	default "xmc4500-relax"            if ARCH_BOARD_XMC4500RELAX
 	default "z16f2800100zcog"          if ARCH_BOARD_Z16F2800100ZCOG
+	default "z20x"                     if ARCH_BOARD_Z20X
 	default "z80sim"                   if ARCH_BOARD_Z80SIM
 	default "z8encore000zco"           if ARCH_BOARD_Z8ENCORE000ZCO
 	default "z8f64200100kit"           if ARCH_BOARD_Z8F64200100KIT
@@ -2262,6 +2306,15 @@ source "boards/arm/efm32/olimex-efm32g880f128-stk/Kconfig"
 endif
 if ARCH_BOARD_S32K118EVB
 source "boards/arm/s32k1xx/s32k118evb/Kconfig"
+endif
+if ARCH_BOARD_S32K144EVB
+source "boards/arm/s32k1xx/s32k144evb/Kconfig"
+endif
+if ARCH_BOARD_RDDRONE_UAVCAN144
+source "boards/arm/s32k1xx/rddrone-uavcan144/Kconfig"
+endif
+if ARCH_BOARD_RDDRONE_UAVCAN146
+source "boards/arm/s32k1xx/rddrone-uavcan146/Kconfig"
 endif
 if ARCH_BOARD_S32K146EVB
 source "boards/arm/s32k1xx/s32k146evb/Kconfig"
@@ -2720,10 +2773,10 @@ if ARCH_BOARD_CUSTOM
 source "boards/dummy/Kconfig"
 endif
 if ARCH_BOARD_DEMOS92S12NEC64
-source "boards/hc/mcs92s12ne64/demo9s12ne64/Kconfig"
+source "boards/hc/m9s12/demo9s12ne64/Kconfig"
 endif
 if ARCH_BOARD_NE64BADGE
-source "boards/hc/mcs92s12ne64/ne64badge/Kconfig"
+source "boards/hc/m9s12/ne64badge/Kconfig"
 endif
 if ARCH_BOARD_MIRTOO
 source "boards/mips/pic32mx/mirtoo/Kconfig"
@@ -2753,10 +2806,10 @@ if ARCH_BOARD_OR1K
 source "boards/or1k/mor1kx/or1k/Kconfig"
 endif
 if ARCH_BOARD_SKP16C26
-source "boards/renesas/m32262f8/skp16c26/Kconfig"
+source "boards/renesas/m16c/skp16c26/Kconfig"
 endif
 if ARCH_BOARD_US7032EVB1
-source "boards/renesas/sh7032/us7032evb1/Kconfig"
+source "boards/renesas/sh1/us7032evb1/Kconfig"
 endif
 if ARCH_BOARD_GAPUINO
 source "boards/risc-v/gap8/gapuino/Kconfig"
@@ -2792,7 +2845,7 @@ if ARCH_BOARD_ESP32CORE
 source "boards/xtensa/esp32/esp32-core/Kconfig"
 endif
 if ARCH_BOARD_Z16F2800100ZCOG
-source "boards/z16/z16f2811/z16f2800100zcog/Kconfig"
+source "boards/z16/z16f/z16f2800100zcog/Kconfig"
 endif
 if ARCH_BOARD_EZ80F910200KITG
 source "boards/z80/ez80/ez80f910200kitg/Kconfig"
@@ -2811,6 +2864,9 @@ source "boards/z80/z8/z8encore000zco/Kconfig"
 endif
 if ARCH_BOARD_Z8F64200100KIT
 source "boards/z80/z8/z8f64200100kit/Kconfig"
+endif
+if ARCH_BOARD_Z20X
+source "boards/z80/ez80/z20x/Kconfig"
 endif
 if ARCH_BOARD_Z80SIM
 source "boards/z80/z80/z80sim/Kconfig"

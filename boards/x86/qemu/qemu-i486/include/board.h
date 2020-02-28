@@ -88,4 +88,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_X86_QEMU_QEMU_QEMU_I486_INCLUDE_BOARD_H */
+#endif /* __BOARDS_X86_QEMU_QEMU_QEMU_I486_INCLUDE_BOARD_H */

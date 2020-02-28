@@ -130,7 +130,7 @@ void NXGL_FUNCNAME(nxgl_getrectangle, NXGLIB_SUFFIX)
 
   fbstride = pinfo->stride;
 
-  /* Get the dimensions of the rectange to copy: width in pixels, height
+  /* Get the dimensions of the rectangle to copy: width in pixels, height
    * in rows
    */
 

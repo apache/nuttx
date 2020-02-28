@@ -110,7 +110,7 @@
         PORTA.PDR.BIT.BT0       =       PORTA.PDR.BIT.B1        = 1;    \
 }
 #else
-#errror "LEDs are not defined."
+#error "LEDs are not defined."
 #endif
 
 #define LED_STARTED       1     /* ON    OFF   NC    NC   */
@@ -147,4 +147,4 @@ extern "C"
 #endif
 #endif
 
-#endif  /* __BOARDS_RENESAS_RX65N_RX65N_RSK2MB_INCLUDE_BOARD_H */
+#endif /* __BOARDS_RENESAS_RX65N_RX65N_RSK2MB_INCLUDE_BOARD_H */

@@ -37,8 +37,8 @@
 # Makefile.  If you already know the Makefile that you want, you can skip
 # this nonsense using:
 #
-#   make -f Makefile.unix, OR
-#   make -f Makefile.win
+#   make -f tools/Makefile.unix, OR
+#   make -f tools/Makefile.win
 #
 
 -include .config

@@ -57,7 +57,7 @@
  * 3. Alternative pin selections are provided with a numeric suffix like _1, _2, etc. Drivers,
  *    however, will use the pin selection without the numeric suffix.  Additional definitions are
  *    required in the board.h file to select between the alternative pins.  For example, if CAN1_RD
- *    connects via Pins1[18], then the following definition should appear inthe board.h header file
+ *    connects via Pins1[18], then the following definition should appear in the board.h header file
  *    for that board:
  *
  * 4. For ADC pins (PINCONF_ADCNpM), the pin must first be configured configured as a GPIO input.

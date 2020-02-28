@@ -11,13 +11,23 @@ config ARCH_HAVE_PHY
 	bool
 	default n
 
+config ARCH_PHY_INTERRUPT
+	bool
+	default n
+
+config ARCH_HAVE_NETDEV_STATISTICS
+	bool
+	default n
+
 config NET_WRITE_BUFFERS
 	bool
 	default n
+	select MM_IOB
 
 config NET_READAHEAD
 	bool
 	default n
+	select MM_IOB
 
 config NET_MCASTGROUP
 	bool
@@ -82,7 +92,7 @@ config NET_SLIP_PKTSIZE
 		296 are not recommended.
 
 		The Linux slip module hard-codes its MTU size to 296 (40 bytes for
-		the IP+TPC headers plus 256 bytes of data).  So you might as well
+		the IP+TCP headers plus 256 bytes of data).  So you might as well
 		set CONFIG_NET_SLIP_PKTSIZE to 296 as well.
 
 		There may be an issue with this setting, however.  I see that Linux
@@ -117,12 +127,32 @@ config NET_ETHERNET
 
 config NET_LOOPBACK
 	bool "Local loopback"
+	select ARCH_HAVE_NETDEV_STATISTICS
 	default n
 	---help---
 		Add support for the local network loopback device, lo.
 
+config NET_LOOPBACK_PKTSIZE
+	int "Loopback packet buffer size"
+	default 0
+	depends on NET_LOOPBACK
+	range 0 65535
+	---help---
+		The loopback driver packet buffer should be quite large.  The larger
+		the loopback packet buffer, the better will be TCP performance of
+		the loopback transfers.  The Linux loopback device historically used
+		packet buffers of size 16Kb, but that was increased in recent Linux
+		versions to 64Kb.  Those sizes may be excessive for resource
+		constrained MCUs, however.
+
+		The network enforces a lower limit that is the maximum packet size
+		of all enabled link layer protocols.  The default value of
+		CONFIG_NET_LOOPBACK_PKTSIZE is zero, meaning that this maximum
+		packet size will be used by loopback driver.
+
 menuconfig NET_SLIP
 	bool "SLIP support"
+	select ARCH_HAVE_NETDEV_STATISTICS
 	default n
 	---help---
 		Enables building of the SLIP driver. SLIP requires

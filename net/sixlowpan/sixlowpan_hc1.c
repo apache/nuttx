@@ -110,7 +110,7 @@
  *
  * Input Parameters:
  *   radio   - A reference to a radio network device instance
- *   ipv6    - The IPv6 header followd by TCP, UDP, or ICMPv6 header to be
+ *   ipv6    - The IPv6 header followed by TCP, UDP, or ICMPv6 header to be
  *             compressed
  *   destmac - L2 destination address, needed to compress the IP
  *             destination field
@@ -228,8 +228,10 @@ int sixlowpan_compresshdr_hc1(FAR struct radio_driver_s *radio,
                 hcudp[SIXLOWPAN_HC1_HC_UDP_UDP_ENCODING] = 0xe0;
                 hcudp[SIXLOWPAN_HC1_HC_UDP_TTL]          = ipv6->ttl;
                 hcudp[SIXLOWPAN_HC1_HC_UDP_PORTS]        =
-                  (uint8_t)((ntohs(udp->srcport) - CONFIG_NET_6LOWPAN_MINPORT) << 4) +
-                  (uint8_t)((ntohs(udp->destport) - CONFIG_NET_6LOWPAN_MINPORT));
+                  (uint8_t)((ntohs(udp->srcport) -
+                            CONFIG_NET_6LOWPAN_MINPORT) << 4) +
+                  (uint8_t)((ntohs(udp->destport) -
+                            CONFIG_NET_6LOWPAN_MINPORT));
 
                 memcpy(&hcudp[SIXLOWPAN_HC1_HC_UDP_CHKSUM], &udp->udpchksum, 2);
 

@@ -173,4 +173,4 @@ static inline uintptr_t up_intstack_base(void)
 
 #endif /* !__ASSEMBLY__ */
 
-#endif  /* _ARCH_ARM_SRC_LC823450_CHIP_H */
+#endif /* _ARCH_ARM_SRC_LC823450_CHIP_H */

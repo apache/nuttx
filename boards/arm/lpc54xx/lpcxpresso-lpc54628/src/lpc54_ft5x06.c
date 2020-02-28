@@ -53,7 +53,7 @@
 #ifdef HAVE_FT5x06
 
 /****************************************************************************
- * Pre-processor Defintions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define FT5x06_FREQUENCY 400000  /* For now, will boost later */

@@ -37,7 +37,6 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -237,7 +236,7 @@ FAR struct ieee802154_conn_s *
         }
 
       /* Is the socket "connected?" to a remote peer?  If so, check if the
-       * source address matches the connected remote adress.
+       * source address matches the connected remote address.
        */
 
       switch (conn->raddr.s_mode)

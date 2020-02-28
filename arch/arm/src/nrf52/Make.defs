@@ -101,6 +101,10 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += nrf52_idle.c
 endif
 
+ifeq ($(CONFIG_NRF52_GPIOTE),y)
+CHIP_CSRCS += nrf52_gpiote.c
+endif
+
 ifeq ($(CONFIG_NRF52_UART),y)
 CHIP_CSRCS += nrf52_serial.c
 endif
@@ -117,3 +121,10 @@ ifeq ($(CONFIG_NRF52_RNG),y)
 CHIP_CSRCS += nrf52_rng.c
 endif
 
+ifeq ($(CONFIG_NRF52_SPI_MASTER),y)
+CHIP_CSRCS += nrf52_spi.c
+endif
+
+ifeq ($(CONFIG_NRF52_I2C_MASTER),y)
+CHIP_CSRCS += nrf52_i2c.c
+endif

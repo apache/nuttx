@@ -55,6 +55,9 @@
 #define EZ80_EMACSRAM     0xffc000 /* On-chip EMAC SRAM (8Kb) on reset*/
 #define EZ80_ONCHIPSRAM   0xffe000 /* On-chip SRAM (8Kb) on reset */
 
+#define EZ80_FLASH_SIZE   0x040000 /* 256Kb on-chip flash */
+#define EZ80_SRAM_SIZE    0x002000 /* 8Kb on-chip sram */
+
 /* Product ID Registers  ************************************************************/
 
 #define EZ80_ZDI_ID_L          0x00
@@ -200,7 +203,7 @@
 #  define EZ80_TMRCLKSEL_RTC   0x20        /*   01: Real time clock input */
 #  define EZ80_TMRCLKSEL_ECF   0x40        /*   10: Event count input, falling edge */
 #  define EZ80_TMRCLKSEL_ECR   0x60        /*   11: Event count input, rising edge */
-#define EZ80_TMRCTL_CLKDIV     0x18        /* Bits 3-4: Sysem clock divider */
+#define EZ80_TMRCTL_CLKDIV     0x18        /* Bits 3-4: System clock divider */
 #  define EZ80_TMRCLKDIV_4     0x00        /*   00:   4 */
 #  define EZ80_TMRCLKDIV_16    0x08        /*   01:  16 */
 #  define EZ80_TMRCLKDIV_64    0x10        /*   10:  64 */
@@ -498,4 +501,4 @@ extern "C"
 #endif
 #endif
 
-#endif  /* __ARCH_Z80_SRC_EZ80_EZ80F91_H */
+#endif /* __ARCH_Z80_SRC_EZ80_EZ80F91_H */

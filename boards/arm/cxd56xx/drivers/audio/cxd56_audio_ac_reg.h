@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_ac_reg.h
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_ac_reg.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_AC_REG_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_AC_REG_H
+#ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_AC_REG_H
+#define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_AC_REG_H
 
 /***************************************************************************
  * Included Files
@@ -451,4 +451,5 @@ void cxd56_audio_ac_reg_disable_cstereo(void);
 void cxd56_audio_ac_reg_set_vol_sdin1(uint32_t vol);
 void cxd56_audio_ac_reg_set_vol_sdin2(uint32_t vol);
 void cxd56_audio_ac_reg_set_vol_dac(uint32_t vol);
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_AC_REG_H */
+
+#endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_AC_REG_H */

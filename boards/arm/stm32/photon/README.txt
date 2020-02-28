@@ -112,7 +112,7 @@ Flashing NuttX in the Photon board
    3) Restore the original firmware
 
      If you config to use the stock bootloader of Photon, you may
-     reload the original firmware with dfu-utils as you like. Otherwize
+     reload the original firmware with dfu-utils as you like. Otherwise
      you must have backuped the whole image beforehand, and reload it
      via SWD debug port.
 

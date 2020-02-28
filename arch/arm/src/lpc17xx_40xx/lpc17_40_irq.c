@@ -143,7 +143,7 @@ static void lpc17_40_dumpnvic(const char *msg, int irq)
  *       lpc17_40_dbgmonitor, lpc17_40_pendsv, lpc17_40_reserved
  *
  * Description:
- *   Handlers for various execptions.  None are handled and all are fatal
+ *   Handlers for various exceptions.  None are handled and all are fatal
  *   error conditions.  The only advantage these provided over the default
  *   unexpected interrupt handler is that they provide a diagnostic output.
  *
@@ -307,7 +307,7 @@ void up_irqinitialize(void)
    *
    *  0 -> 32 interrupt lines, 1 enable register,   8 priority registers
    *  1 -> 64 "       " "   ", 2 enable registers, 16 priority registers
-   *  2 -> 96 "       " "   ", 3 enable regsiters, 24 priority registers
+   *  2 -> 96 "       " "   ", 3 enable registers, 24 priority registers
    *  ...
    */
 

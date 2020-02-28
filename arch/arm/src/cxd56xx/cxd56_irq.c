@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/cxd56/cxd56_irq.c
+ * arch/arm/src/cxd56xx/cxd56_irq.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -364,7 +364,9 @@ void up_irqinitialize(void)
   /* Set the priority of the SVCall interrupt */
 
 #ifdef CONFIG_ARCH_IRQPRIO
-  /* up_prioritize_irq(CXD56_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
+  /* up_prioritize_irq(CXD56_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN);
+   */
+
 #endif
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
@@ -402,13 +404,13 @@ void up_irqinitialize(void)
    */
 
 #if defined(CONFIG_DEBUG_FEATURES) && !defined(CONFIG_ARMV7M_USEBASEPRI)
-  {
-    uint32_t regval;
+    {
+      uint32_t regval;
 
-    regval  = getreg32(NVIC_DEMCR);
-    regval &= ~NVIC_DEMCR_VCHARDERR;
-    putreg32(regval, NVIC_DEMCR);
-  }
+      regval  = getreg32(NVIC_DEMCR);
+      regval &= ~NVIC_DEMCR_VCHARDERR;
+      putreg32(regval, NVIC_DEMCR);
+    }
 #endif
 
   /* And finally, enable interrupts */
@@ -446,7 +448,7 @@ void up_disable_irq(int irq)
           return;
         }
 
-      /* If a defferent cpu requested, send an irq request */
+      /* If a different cpu requested, send an irq request */
 
       if (cpu != (int8_t)up_cpu_index())
         {

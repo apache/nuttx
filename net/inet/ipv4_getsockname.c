@@ -137,6 +137,7 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
     {
        outaddr->sin_family      = psock->s_domain;
        outaddr->sin_addr.s_addr = 0;
+       memset(outaddr->sin_zero, 0, sizeof(outaddr->sin_zero));
        *addrlen = sizeof(struct sockaddr_in);
 
        return OK;
@@ -166,6 +167,8 @@ int ipv4_getsockname(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   outaddr->sin_family      = psock->s_domain;
   outaddr->sin_addr.s_addr = dev->d_ipaddr;
+  memset(outaddr->sin_zero, 0, sizeof(outaddr->sin_zero));
+
   *addrlen = sizeof(struct sockaddr_in);
 
   net_unlock();

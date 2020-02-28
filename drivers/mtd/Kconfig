@@ -3,7 +3,20 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "MTD Configuration"
+menuconfig MTD
+	bool "Memory Technology Device (MTD) Support"
+	default n
+	---help---
+		Memory Technology Device (MTD) drivers.  Some simple drivers for
+		memory technologies like FLASH, EEPROM, NVRAM, etc.  See
+		include/nuttx/mtd/mtd.h
+
+		(Note: This is a simple memory interface and should not be
+		confused with the "real" MTD developed at infradead.org.  This
+		logic is unrelated; I just used the name MTD because I am not
+		aware of any other common way to refer to this class of devices).
+
+if MTD
 
 config MTD_PARTITION
 	bool "Support MTD partitions"
@@ -775,6 +788,21 @@ config SMART_CRC_16
 
 endchoice # CRC level selection
 
+config MTD_SMART_FSCK
+	bool "Enable SMART file system check"
+	default n
+	depends on FS_WRITABLE
+	---help---
+		Enables fsck to check and repair the SMART file system.
+
+config MTD_SMART_FSCK_ENABLE_CRC
+	bool "Enable SMART file system CRC check during fsck"
+	default n
+	depends on MTD_SMART_FSCK && MTD_SMART_ENABLE_CRC
+	---help---
+		Enables CRC check during fsck. It's possible to check the file
+		system strictly, but it takes long time to do fsck.
+
 config MTD_SMART_MINIMIZE_RAM
 	bool "Minimize SMART RAM usage using logical sector cache"
 	depends on MTD_SMART
@@ -794,7 +822,7 @@ config MTD_SMART_SECTOR_CACHE_SIZE
 	---help---
 		Sets the size of the cache used for logical to physical sector mapping.  A
 		larger number allows larger files to be "seek"ed randomly without encountering
-		cache misses.  Any files larger than CACH_SIZE * SECTOR_SIZE that are seeked
+		cache misses.  Any files larger than CACH_SIZE * SECTOR_SIZE that are sought
 		start to end will cause the cache to flush forcing manual scanning of the
 		MTD device to find the logical to physical mappings.
 
@@ -1072,3 +1100,5 @@ config GD5F_SPIFREQUENCY
 	default 20000000
 
 endif # MTD_GD5F
+
+endif # MTD

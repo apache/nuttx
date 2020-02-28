@@ -2,7 +2,7 @@
  * include/sys/syscall.h
  * This file contains the system call numbers.
  *
- *   Copyright (C) 2011-2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2019, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,6 +71,7 @@
 #define SYS_exit                       (CONFIG_SYS_RESERVED + 1)
 #define SYS_get_errno                  (CONFIG_SYS_RESERVED + 2)
 #define SYS_getpid                     (CONFIG_SYS_RESERVED + 3)
+
 #define SYS_sched_getparam             (CONFIG_SYS_RESERVED + 4)
 #define SYS_sched_getscheduler         (CONFIG_SYS_RESERVED + 5)
 #define SYS_sched_lock                 (CONFIG_SYS_RESERVED + 6)
@@ -80,9 +81,19 @@
 #define SYS_sched_setscheduler         (CONFIG_SYS_RESERVED + 10)
 #define SYS_sched_unlock               (CONFIG_SYS_RESERVED + 11)
 #define SYS_sched_yield                (CONFIG_SYS_RESERVED + 12)
-#define SYS_set_errno                  (CONFIG_SYS_RESERVED + 13)
-#define SYS_uname                      (CONFIG_SYS_RESERVED + 14)
-#define __SYS_uid                      (CONFIG_SYS_RESERVED + 15)
+
+#ifdef CONFIG_SMP
+#  define SYS_sched_getaffinity        (CONFIG_SYS_RESERVED + 13)
+#  define SYS_sched_getcpu             (CONFIG_SYS_RESERVED + 14)
+#  define SYS_sched_setaffinity        (CONFIG_SYS_RESERVED + 15)
+#  define __SYS_set_errno              (CONFIG_SYS_RESERVED + 16)
+#else
+#  define __SYS_set_errno              (CONFIG_SYS_RESERVED + 13)
+#endif
+
+#define SYS_set_errno                  (__SYS_set_errno + 0)
+#define SYS_uname                      (__SYS_set_errno + 1)
+#define __SYS_uid                      (__SYS_set_errno + 2)
 
 /* User identity */
 
@@ -625,7 +636,7 @@ EXTERN const uintptr_t g_stublookup[SYS_nsyscalls];
 EXTERN const uint8_t g_funcnparms[SYS_nsyscalls];
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN
@@ -636,4 +647,3 @@ EXTERN const uint8_t g_funcnparms[SYS_nsyscalls];
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_LIB_SYSCALL */
 #endif /* __INCLUDE_SYS_SYSCALL_H */
-

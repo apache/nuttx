@@ -89,7 +89,7 @@ struct mod_exportinfo_s
  ****************************************************************************/
 
 static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
-                          FAR const Elf32_Sym *sym)
+                          FAR const Elf_Sym *sym)
 {
   FAR uint8_t *buffer;
   off_t  offset;
@@ -276,14 +276,14 @@ int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo)
  ****************************************************************************/
 
 int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
-                   FAR Elf32_Sym *sym)
+                   FAR Elf_Sym *sym)
 {
-  FAR Elf32_Shdr *symtab = &loadinfo->shdr[loadinfo->symtabidx];
+  FAR Elf_Shdr *symtab = &loadinfo->shdr[loadinfo->symtabidx];
   off_t offset;
 
   /* Verify that the symbol table index lies within symbol table */
 
-  if (index < 0 || index > (symtab->sh_size / sizeof(Elf32_Sym)))
+  if (index < 0 || index > (symtab->sh_size / sizeof(Elf_Sym)))
     {
       berr("ERROR: Bad relocation symbol index: %d\n", index);
       return -EINVAL;
@@ -291,11 +291,11 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
 
   /* Get the file offset to the symbol table entry */
 
-  offset = symtab->sh_offset + sizeof(Elf32_Sym) * index;
+  offset = symtab->sh_offset + sizeof(Elf_Sym) * index;
 
   /* And, finally, read the symbol table entry into memory */
 
-  return modlib_read(loadinfo, (FAR uint8_t *)sym, sizeof(Elf32_Sym), offset);
+  return modlib_read(loadinfo, (FAR uint8_t *)sym, sizeof(Elf_Sym), offset);
 }
 
 /****************************************************************************
@@ -323,7 +323,7 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  ****************************************************************************/
 
 int modlib_symvalue(FAR struct module_s *modp,
-                    FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym)
+                    FAR struct mod_loadinfo_s *loadinfo, FAR Elf_Sym *sym)
 {
   FAR const struct symtab_s *symbol;
   struct mod_exportinfo_s exportinfo;
@@ -416,7 +416,7 @@ int modlib_symvalue(FAR struct module_s *modp,
               loadinfo->iobuffer, sym->st_value, symbol->sym_value,
               sym->st_value + symbol->sym_value);
 
-        sym->st_value += (Elf32_Word)((uintptr_t)symbol->sym_value);
+        sym->st_value += (Elf_Word)((uintptr_t)symbol->sym_value);
       }
       break;
 

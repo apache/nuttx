@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef  __INCLUDE_NUTTX_NET_BLUETOOTH_H
-#define  __INCLUDE_NUTTX_NET_BLUETOOTH_H
+#ifndef __INCLUDE_NUTTX_NET_BLUETOOTH_H
+#define __INCLUDE_NUTTX_NET_BLUETOOTH_H
 
 /****************************************************************************
  * Public Function Prototypes
@@ -148,4 +148,4 @@ int bluetooth_input(FAR struct radio_driver_s *radio,
                      FAR struct bluetooth_frame_meta_s *meta);
 
 #endif /* CONFIG_NET_BLUETOOTH */
-#endif /*  __INCLUDE_NUTTX_NET_BLUETOOTH_H */
+#endif /* __INCLUDE_NUTTX_NET_BLUETOOTH_H */

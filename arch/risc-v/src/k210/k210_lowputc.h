@@ -72,4 +72,3 @@ EXTERN void k210_lowsetup(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_SRC_K210_K210_LOWPUTC_H */
-

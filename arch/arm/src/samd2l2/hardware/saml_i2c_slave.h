@@ -144,7 +144,7 @@
 #define I2C_CTRLA_SPEED_SHIFT      (24)      /* Bits 24-25: Trnasfer speed */
 #define I2C_CTRLA_SPEED_MASK       (3 << I2C_CTRLA_SPEED_SHIFT)
 #  define I2C_CTRLA_SPEED_STD      (0 << I2C_CTRLA_SPEED_SHIFT) /* Standard (<=100KHz) fast <=400KHz */
-#  define I2C_CTRLA_SPEED_FAST     (1 << I2C_CTRLA_SPEED_SHIFT) /* Fast-mode plase (<=1MHz) */
+#  define I2C_CTRLA_SPEED_FAST     (1 << I2C_CTRLA_SPEED_SHIFT) /* Fast-mode please (<=1MHz) */
 #  define I2C_CTRLA_SPEED_HIGH     (2 << I2C_CTRLA_SPEED_SHIFT) /* High-speed mode (<=3.4Mhz */
 #define I2C_CTRLA_SCLSM            (1 << 27) /* Bit 27: SCL clock stretch mode */
 #define I2C_CTRLA_LOWTOUT          (1 << 30) /* Bit 30: SCL Low Time-Out */
@@ -152,7 +152,7 @@
 /* Control B register */
 
 #define I2C_CTRLB_SMEN             (1 << 8)  /* Bit 8:  Smart Mode Enable */
-#define I2C_CTRLB_GCMD             (1 << 9)  /* Bit 9:  PMBus group commend */
+#define I2C_CTRLB_GCMD             (1 << 9)  /* Bit 9:  PMBus group command */
 #define I2C_CTRLB_AACKEN           (1 << 10) /* Bit 10: Automatic acknowledge enable */
 #define I2C_CRLB_AMODE_SHIFT       (14)      /* Bits 14-15: Address Mode */
 #define I2C_CRLB_AMODE_MASK        (3 << I2C_CRLB_AMODE_SHIFT)

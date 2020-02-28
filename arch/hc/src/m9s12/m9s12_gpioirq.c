@@ -290,4 +290,3 @@ void hcs12_gpioirqdisable(int irq)
     }
 }
 #endif /* CONFIG_HCS12_GPIOIRQ */
-

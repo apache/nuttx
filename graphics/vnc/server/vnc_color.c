@@ -375,7 +375,7 @@ int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
 
   for (pixndx = 0; pixndx < ncolors - 1; pixndx++)
     {
-      /* Compare color N with with colors M={(N_1)..ncolors} */
+      /* Compare color N with colors M={(N_1)..ncolors} */
 
       maxndx = pixndx;
       for (cmpndx = maxndx + 1; cmpndx < ncolors; cmpndx++)

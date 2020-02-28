@@ -58,7 +58,7 @@
  * internal +/- 0.9% FRC clock.  That clock has a nomninal frequency of 8MHz.
  */
 
-#define BOARD_FRC_FREQ         8000000  /* FRC nomimal frequency(8MHz) */
+#define BOARD_FRC_FREQ         8000000  /* FRC nominal frequency(8MHz) */
 
 /* Oscillator modes */
 

@@ -109,7 +109,7 @@ int find_blockdriver(FAR const char *pathname, int mountflags,
  *
  *   Errors that may be returned:
  *
- *     ENOMEM - Failed to create a temporay path name.
+ *     ENOMEM - Failed to create a temporary path name.
  *
  *   Plus:
  *
@@ -142,7 +142,7 @@ int block_proxy(FAR const char *blkdev, int oflags);
  *
  *   Errors that may be returned:
  *
- *     ENOMEM - Failed to create a temporay path name.
+ *     ENOMEM - Failed to create a temporary path name.
  *
  *   Plus:
  *

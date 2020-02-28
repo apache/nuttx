@@ -226,7 +226,6 @@ Networking Support
     CONFIG_NET_ETH_PKTSIZE=562          : Maximum packet size 1518 is more standard
     CONFIG_NET_TCP=y                    : Enable TCP/IP networking
     CONFIG_NET_TCPBACKLOG=y             : Support TCP/IP backlog
-    CONFIG_NET_TCP_READAHEAD_BUFSIZE=536  Read-ahead buffer size
     CONFIG_NET_UDP=y                    : Enable UDP networking
     CONFIG_NET_BROADCAST=y              : Needed for DNS name resolution
     CONFIG_NET_ICMP=y                   : Enable ICMP networking
@@ -1075,7 +1074,7 @@ Configurations
        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
 
      Library Routines ->
-       CONFIG_CXX_NEWLONG=n                : size_t is an unsigned int, not long
+       CONFIG_ARCH_SIZET_LONG=n            : size_t is an unsigned int, not long
 
      This re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building
@@ -1118,7 +1117,7 @@ Configurations
        Binary Formats:
          CONFIG_BUILTIN=y                    : Enable support for built-in programs
 
-       Applicaton Configuration:
+       Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
 
     4. This configuration has the network enabled by default.  This can be
@@ -1346,7 +1345,7 @@ Configurations
              CONFIG_SYSLOG_CHAR=y          : Use a character device for system logging
              CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART0 will be /dev/ttyS0
 
-       However, there is nothing to generate SYLOG output in the default
+       However, there is nothing to generate SYSLOG output in the default
        configuration so nothing should appear on UART0 unless you enable
        some debug output or enable the USB monitor.
 

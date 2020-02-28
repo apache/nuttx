@@ -44,7 +44,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -1119,7 +1118,8 @@ static void imxrt_lpi2c_setclock(FAR struct imxrt_lpi2c_priv_s *priv,
                 }
             }
 
-          imxrt_lpi2c_modifyreg(priv, IMXRT_LPI2C_MCFGR1_OFFSET, 0,
+          imxrt_lpi2c_modifyreg(priv, IMXRT_LPI2C_MCFGR1_OFFSET,
+                                LPI2C_MCFGR1_PRESCALE_MASK,
                                 LPI2C_MCFGR1_PRESCALE(best_prescale));
 
           /* Re-enable LPI2C if it was enabled previously */
@@ -1268,7 +1268,7 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
           imxrt_lpi2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
 
           /* No interrupts or contex switches should occur in the following
-           * seuence. Otherwise, additional bytes may be sent by the device.
+           * sequence. Otherwise, additional bytes may be sent by the device.
            */
 
 #ifdef CONFIG_I2C_POLLED
@@ -1305,7 +1305,8 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
 
           if ((priv->msgv->flags & I2C_M_NOSTART) == 0)
             {
-              imxrt_lpi2c_traceevent(priv, I2CEVENT_STARTRESTART, priv->msgc);
+              imxrt_lpi2c_traceevent(priv, I2CEVENT_STARTRESTART,
+                                     priv->msgc);
               imxrt_lpi2c_sendstart(priv, priv->msgv->addr);
             }
           else

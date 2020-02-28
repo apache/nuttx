@@ -116,4 +116,3 @@ FAR sigq_t *nxsig_alloc_pendingsigaction(void)
 
   return sigq;
 }
-

@@ -71,4 +71,3 @@ void up_mdelay(unsigned int milliseconds)
     }
 }
 #endif /* CONFIG_BOARD_LOOPSPERMSEC */
-

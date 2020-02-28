@@ -173,7 +173,7 @@
 #  define BOARD_PHY_NAME        "TJA1100"
 #  define BOARD_PHYID1          MII_PHYID1_TJA1100
 #  define BOARD_PHYID2          MII_PHYID2_TJA1100
-#  define BOARD_PHY_STATUS      MII_TJA1100_BSR
+#  define BOARD_PHY_STATUS      MII_TJA110X_BSR
 #  define BOARD_PHY_10BASET(s)  0 /* PHY only supports 100BASE-T1 */
 #  define BOARD_PHY_100BASET(s) 1 /* PHY only supports 100BASE-T1 */
 #  define BOARD_PHY_ISDUPLEX(s) 1 /* PHY only supports fullduplex */
@@ -223,8 +223,9 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* The kinetis_driver_s encapsulates all state information for a single hardware
- * interface
+
+/* The kinetis_driver_s encapsulates all state information for a single
+ * hardware interface.
  */
 
 struct kinetis_driver_s
@@ -349,7 +350,7 @@ static void kinetis_reset(struct kinetis_driver_s *priv);
  *
  * Description:
  *   The descriptors are represented by structures  Unfortunately, when the
- *   structures are overlayed on the data, the bytes are reversed because
+ *   structures are overlaid on the data, the bytes are reversed because
  *   the underlying hardware writes the data in big-endian byte order.
  *
  * Input Parameters:
@@ -600,8 +601,8 @@ static int kinetis_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -664,7 +665,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
           ipv4_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, the field d_len will set to a value > 0
            */
 
           if (priv->dev.d_len > 0)
@@ -702,7 +703,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
           ipv6_input(&priv->dev);
 
           /* If the above function invocation resulted in data that should be
-           * sent out on the network, the field  d_len will set to a value > 0.
+           * sent out on the network, the field d_len will set to a value > 0
            */
 
           if (priv->dev.d_len > 0)
@@ -736,7 +737,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
           arp_arpin(&priv->dev);
 
           /* If the above function invocation resulted in data that should
-           * be sent out on the network, the field  d_len will set to a
+           * be sent out on the network, the field d_len will set to a
            * value > 0.
            */
 
@@ -751,10 +752,11 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
           NETDEV_RXDROPPED(&priv->dev);
         }
 
-      /* Point the packet buffer back to the next TX buffer, which will be used
-       * during the next write.  If the write queue is full, then this will
-       * point at an active buffer, which must not be written to.  This is OK
-       * because devif_poll won't be called unless the queue is not full.
+      /* Point the packet buffer back to the next TX buffer, which will be
+       * used during the next write.  If the write queue is full, then this
+       * will point at an active buffer, which must not be written to.
+       * This is OK because devif_poll won't be called unless the queue is
+       * not full.
        */
 
       priv->dev.d_buf =
@@ -997,7 +999,7 @@ static void kinetis_txtimeout_work(FAR void *arg)
   net_lock();
   NETDEV_TXTIMEOUTS(&priv->dev);
 
-  /* Take the interface down and bring it back up.  The is the most agressive
+  /* Take the interface down and bring it back up.  The is the most aggressive
    * hardware reset.
    */
 
@@ -1071,16 +1073,17 @@ static void kinetis_poll_work(FAR void *arg)
 {
   FAR struct kinetis_driver_s *priv = (FAR struct kinetis_driver_s *)arg;
 
-  /* Check if there is there is a transmission in progress.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
+  /* Check if there is there is a transmission in progress.  We cannot
+   * perform the TX poll if he are unable to accept another packet for
+   * transmission.
    */
 
   net_lock();
   if (!kinetis_txringfull(priv))
     {
       /* If so, update TCP timing states and poll the network for new XMIT
-       * data. Hmmm..might be bug here.  Does this mean if there is a transmit
-       * in progress, we will missing TCP time state updates?
+       * data. Hmmm..might be bug here.  Does this mean if there is a
+       * transmit in progress, we will missing TCP time state updates?
        */
 
       devif_timer(&priv->dev, KINETIS_WDDELAY, kinetis_txpoll);
@@ -1343,8 +1346,8 @@ static void kinetis_txavail_work(FAR void *arg)
 
       if (!kinetis_txringfull(priv))
         {
-          /* No, there is space for another transfer.  Poll the network for new
-           * XMIT data.
+          /* No, there is space for another transfer.  Poll the network for
+           * new XMIT data.
            */
 
           devif_poll(&priv->dev, kinetis_txpoll);
@@ -1473,7 +1476,8 @@ static int kinetis_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int kinetis_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
+static int kinetis_ioctl(struct net_driver_s *dev, int cmd,
+                         unsigned long arg)
 {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
   FAR struct kinetis_driver_s *priv =
@@ -1497,7 +1501,8 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret = kinetis_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
+          ret = kinetis_readmii(priv, req->phy_id, req->reg_num,
+                                &req->val_out);
         }
         break;
 
@@ -1505,7 +1510,8 @@ static int kinetis_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret = kinetis_writemii(priv, req->phy_id, req->reg_num, req->val_in);
+          ret = kinetis_writemii(priv, req->phy_id, req->reg_num,
+                                 req->val_in);
         }
         break;
 #endif /* ifdef CONFIG_NETDEV_PHY_IOCTL */
@@ -1797,7 +1803,7 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
     }
   else
     {
-      /* TODO: Autonegotitation has right now failed. Maybe the Eth cable is
+      /* TODO: Autonegotiation has right now failed. Maybe the Eth cable is
        * not connected. PHY chip have mechanisms to configure link OK.
        * We should leave autconf on, and find a way to re-configure the
        * MCU whenever the link is ready.
@@ -1882,40 +1888,40 @@ static inline int kinetis_initphy(struct kinetis_driver_s *priv)
     }
 
 #if defined(CONFIG_ETH0_PHY_TJA1100)
-/* The NXP TJA1100 PHY is an automotive 100BASE-T1 PHY
+/* The NXP TJA110X PHY is an automotive 100BASE-T1 PHY
  * Which requires additional initialization
  */
 
-  /* select mode TJA1100 */
+  /* select mode TJA110X */
 
-  kinetis_writemii(priv, phyaddr, MII_TJA1100_EXT_CNTRL,
+  kinetis_writemii(priv, phyaddr, MII_TJA110X_EXT_CNTRL,
                   (MII_EXT_CNTRL_NORMAL | MII_EXT_CNTRL_CONFIG_EN |
                   MII_EXT_CNTRL_CONFIG_INH));
 
 #  if defined(CONFIG_PHY_100BASE_T1_MASTER)
-  /* Set TJA1100 in master mode */
+  /* Set TJA110X in master mode */
 
-  kinetis_writemii(priv, phyaddr, MII_TJA1100_CONFIG1,
+  kinetis_writemii(priv, phyaddr, MII_TJA110X_CONFIG1,
                   (MII_CONFIG1_MASTER | MII_CONFIG1_TX_1250MV |
                   MII_CONFIG1_RMII_25MHZ | MII_CONFIG1_LED_EN));
 #  else
-  /* Set TJA1100 in slave mode */
+  /* Set TJA110X in slave mode */
 
-  kinetis_writemii(priv, phyaddr, MII_TJA1100_CONFIG1,
+  kinetis_writemii(priv, phyaddr, MII_TJA110X_CONFIG1,
                   (MII_CONFIG1_TX_1250MV | MII_CONFIG1_RMII_25MHZ |
                   MII_CONFIG1_LED_EN));
 #  endif
 
-  kinetis_writemii(priv, phyaddr, MII_TJA1100_CONFIG2,
+  kinetis_writemii(priv, phyaddr, MII_TJA110X_CONFIG2,
                   (MII_CONFIG2_SNR_AV64 | MII_CONFIG2_WLIM_D |
                    MII_CONFIG2_SNR_F_NL | MII_CONFIG2_SLP_T_1));
 
-  /* Select normal mode TJA1100 */
+  /* Select normal mode TJA110X */
 
-  kinetis_writemii(priv, phyaddr, MII_TJA1100_EXT_CNTRL,
+  kinetis_writemii(priv, phyaddr, MII_TJA110X_EXT_CNTRL,
                   (MII_EXT_CNTRL_NORMAL | MII_EXT_CNTRL_CONFIG_INH));
 
-  kinetis_writemii(priv, phyaddr, MII_TJA1100_EXT_CNTRL,
+  kinetis_writemii(priv, phyaddr, MII_TJA110X_EXT_CNTRL,
                   (MII_EXT_CNTRL_LINK_CNTRL | MII_EXT_CNTRL_NORMAL |
                   MII_EXT_CNTRL_CONFIG_INH));
 #endif
@@ -2217,8 +2223,8 @@ int kinetis_netinitialize(int intf)
 #ifdef CONFIG_NET_ETHERNET
   /* Determine a semi-unique MAC address from MCU UID
    * We use UID Low and Mid Low registers to get 64 bits, from which we keep
-   * 48 bits.  We then force unicast and locally administered bits (b0 and b1,
-   * 1st octet)
+   * 48 bits.  We then force unicast and locally administered bits (b0 and
+   * b1, 1st octet)
    */
 
   uidl   = getreg32(KINETIS_SIM_UIDL);
@@ -2230,10 +2236,10 @@ int kinetis_netinitialize(int intf)
 
   mac[0] = (uidml & 0x0000ff00) >> 8;
   mac[1] = (uidml & 0x000000ff);
-  mac[2] = (uidl &  0xff000000) >> 24;
-  mac[3] = (uidl &  0x00ff0000) >> 16;
-  mac[4] = (uidl &  0x0000ff00) >> 8;
-  mac[5] = (uidl &  0x000000ff);
+  mac[2] = (uidl  & 0xff000000) >> 24;
+  mac[3] = (uidl  & 0x00ff0000) >> 16;
+  mac[4] = (uidl  & 0x0000ff00) >> 8;
+  mac[5] = (uidl  & 0x000000ff);
 #endif
 
   /* Put the interface in the down state.  This usually amounts to resetting

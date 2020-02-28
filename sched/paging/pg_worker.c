@@ -72,7 +72,7 @@ pid_t g_pgworker;
 
 /* The page fill worker thread maintains a static variable called g_pftcb.
  * If no fill is in progress, g_pftcb will be NULL. Otherwise, g_pftcb will
- * point to the TCB of the task which is receiving the fill that is in progess.
+ * point to the TCB of the task which is receiving the fill that is in progress.
  *
  * NOTE: I think that this is the only state in which a TCB does not reside
  * in some list.  Here is it in limbo, outside of the normally queuing while
@@ -381,8 +381,8 @@ static inline bool pg_startfill(void)
       DEBUGASSERT(result == OK);
 #else
       /* If CONFIG_PAGING_BLOCKINGFILL is defined, then up_fillpage is non-blocking
-       * call. In this case up_fillpage() will accept an additional argument: The page
-       * fill worker thread will provide a callback function, pg_callback.
+       * call. In this case up_fillpage() will accept an additional argument:  The
+       * page fill worker thread will provide a callback function, pg_callback.
        *
        * Calling up_fillpage will start an asynchronous page fill. pg_callback
        * ill be called when the page fill is finished (or an error occurs). This

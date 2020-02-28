@@ -195,7 +195,7 @@
 #  endif
 #endif
 
-/* Check if we have the prequisites for an HCI UART */
+/* Check if we have the prerequisites for an HCI UART */
 
 #if !defined(CONFIG_STM32_HCIUART) || !defined(CONFIG_BLUETOOTH_UART)
 #  undef HAVE_HCIUART
@@ -242,6 +242,13 @@
 
 #define GPIO_CS43L22_RESET  (GPIO_OUTPUT|GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN4)
 
+/* LoRa SX127x */
+
+#define GPIO_SX127X_DIO0    (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTD|GPIO_PIN0)
+
+#define GPIO_SX127X_RESET   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_OUTPUT_CLEAR|\
+                             GPIO_SPEED_50MHz|GPIO_PORTD|GPIO_PIN4)
+
 /* PWM
  *
  * The STM32F4 Discovery has no real on-board PWM devices, but the board can be
@@ -262,6 +269,9 @@
 #define GPIO_MAX6675_CS   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN8)
 
+#define GPIO_SX127X_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN8)
+
 #define GPIO_MAX7219_CS   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN3)
 
@@ -275,6 +285,15 @@
 
 #define GPIO_CS_XEN1210   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+
+#define GPIO_ENC28J60_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                             GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+
+#define GPIO_ENC28J60_RESET (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                             GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN1)
+
+#define GPIO_ENC28J60_INTR  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|\
+                             GPIO_OPENDRAIN|GPIO_PORTE|GPIO_PIN4)
 
 /* USB OTG FS
  *
@@ -397,7 +416,7 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -475,6 +494,17 @@ int stm32_bmp180initialize(FAR const char *devpath);
 
 #ifdef CONFIG_STM32F4DISCO_LIS3DSH
 int stm32_lis3dshinitialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: stm32_lpwaninitialize
+ *
+ * Description:
+ *   Initialize SX127X LPWAN interaface.
+ ****************************************************************************/
+
+#ifdef CONFIG_LPWAN_SX127X
+int stm32_lpwaninitialize(void);
 #endif
 
 /****************************************************************************

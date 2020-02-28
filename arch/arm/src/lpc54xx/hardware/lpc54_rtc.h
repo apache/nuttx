@@ -47,7 +47,7 @@
  * Pre-processor Definitions
  ********************************************************************************************/
 
-#define LPC54_RTC_NGPREGS          8       /* Nubmer of general purpose registers */
+#define LPC54_RTC_NGPREGS          8       /* Number of general purpose registers */
 
 /* Register offsets *************************************************************************/
 

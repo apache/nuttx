@@ -60,4 +60,3 @@
 #endif
 
 #endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM_MEMORYMAP_H */
-

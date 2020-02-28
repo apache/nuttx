@@ -8,6 +8,7 @@ menu "UDP Networking"
 config NET_UDP
 	bool "UDP Networking"
 	default n
+	select NET_READAHEAD if !NET_UDP_NO_STACK
 	depends on NET
 	---help---
 		Enable or disable UDP networking support.
@@ -59,17 +60,10 @@ config NET_UDP_NPOLLWAITERS
 	int "Number of UDP poll waiters"
 	default 1
 
-config NET_UDP_READAHEAD
-	bool "Enable UDP/IP read-ahead buffering"
-	default y
-	select NET_READAHEAD
-	select MM_IOB
-
 config NET_UDP_WRITE_BUFFERS
 	bool "Enable UDP/IP write buffering"
 	default n
 	select NET_WRITE_BUFFERS
-	select MM_IOB
 	---help---
 		Write buffers allows buffering of ongoing UDP/IP packets, providing
 		for higher performance, streamed output.

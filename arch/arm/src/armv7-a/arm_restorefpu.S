@@ -101,4 +101,3 @@ up_restorefpu:
 	.size	up_restorefpu, .-up_restorefpu
 #endif /* CONFIG_ARCH_FPU */
 	.end
-

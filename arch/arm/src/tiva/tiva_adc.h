@@ -514,7 +514,7 @@ void tiva_adc_sse_int_enable(uint8_t adc, uint8_t sse, bool state);
  * Name: tiva_adc_sse_int_status
  *
  * Description:
- *   Returns interrupt status for the specificed SSE
+ *   Returns interrupt status for the specified SSE
  *
  * Input Parameters:
  *   adc - which ADC peripherals' interrupt status to retrieve

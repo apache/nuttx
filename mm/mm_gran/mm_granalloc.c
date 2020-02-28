@@ -105,8 +105,6 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
 
       /* Now search the granule allocation table for that number of contiguous */
 
-      alloc = priv->heapstart;
-
       for (granidx = 0; granidx < priv->ngranules; granidx += 32)
         {
           /* Get the GAT index associated with the granule table entry */
@@ -118,7 +116,6 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
 
           if (curr == 0xffffffff)
             {
-              alloc += (32 << priv->log2gran);
               continue;
             }
 
@@ -146,6 +143,8 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
            * examined (bitidx >= 32), or until there are insufficient
            * granules left to satisfy the allocation.
            */
+
+          alloc = priv->heapstart + (granidx << priv->log2gran);
 
           for (bitidx = 0;
                bitidx < 32 && (granidx + bitidx + ngranules) <= priv->ngranules;
@@ -214,7 +213,8 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
                 }
 
               /* We know that the first free bit is now within the lower 4 bits
-               * of 'curr'.  Check if we have the allocation at this bit position.
+               * of 'curr'.  Check if we have the allocation at this bit
+               * position.
                */
 
               else if ((curr & mask) == 0)

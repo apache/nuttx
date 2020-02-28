@@ -62,7 +62,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Terminology.  In the flat build (CONFIG_BUILD_FLAT=y), there is only a
  * single heap access with the standard allocations (malloc/free).  This
  * heap is referred to as the user heap.  In the protected build
@@ -81,10 +83,9 @@
  * Primary RAM:  The Linker script positions the system BLOB's .data and
  * .bss in some RAM.  We refer to that RAM as the primary RAM.  It also
  * holds the IDLE threads stack and any remaining portion of the primary
- * RAM is automatically added to the heap.  The start and size of the
- * primary RAM are provided by CONFIG_RAM_START and CONFIG_RAM_SIZE.  The
- * linker provided address, ... .sbss, .ebss, .sdat, etc. ...  are expected
- * to lie in the the region defined by those configuration settings.
+ * OCRAM is automatically added to the heap.  The linker provided address,
+ * ... .sbss, .ebss, .sdat, etc. ...  are expected to lie in the the region
+ * defined by the OCRAM configuration settings.
  *
  * Other RAM regions must be selected use configuration options and the
  * start and end of those RAM regions must also be provided in the
@@ -110,22 +111,29 @@
  */
 
 /* There there then several memory configurations with a one primary memory
- * region and up to two additional memory regions which may be OCRAM,
+ * region and up to two additional memory regions which may be OCRAM, DTCM
  * external SDRAM, or external SRAM.
  */
 
 #undef IMXRT_OCRAM_ASSIGNED
+#undef IMXRT_DCTM_ASSIGNED
 #undef IMXRT_SDRAM_ASSIGNED
 #undef IMXRT_SRAM_ASSIGNED
 
-/* REVISIT: Assume that if OCRAM is the primary RAM, then DTCM and ITCM are
- * not being used.
- * When configured DTCM and ITCM consume OCRAM from the address space
+/* When configured DTCM and ITCM consume OCRAM from the address space
  * labeled IMXRT_OCRAM_BASE that uses the FlexRAM controller to allocate
  * the function of OCRAM.
  *
  * The 1 MB version of the SOC have a second 512Kib of OCRAM that can not
  * be consumed by the DTCM or ITCM.
+ *
+ * If we order the memory with the FlexRAM controller from high to low banks
+ * as ITCM DTCM OCRAM we can achieve an continuous RAM layout of
+ *
+ * High  OCRAM-(DTCM Size, ITCM Size)
+ * Low   OCRAM2
+ *
+ * The pieces of the OCRAM used for DTCM and ITCM DTCM and ITCM memory spaces
  */
 
 #if defined(IMXRT_OCRAM2_BASE)
@@ -133,9 +141,34 @@
 #else
 # define _IMXRT_OCRAM_BASE IMXRT_OCRAM_BASE
 #endif
+
+#define CONFIG_ITCM_USED 0
+#if defined(CONFIG_IMXRT_ITCM)
+#  if (CONFIG_IMXRT_ITCM % 32) != 0
+#    error IMXRT_ITCM must be divisible by 32
+#  endif
+#  undef CONFIG_ITCM_USED
+#  define CONFIG_ITCM_USED (CONFIG_IMXRT_ITCM * 1024)
+#else
+#  define CONFIG_IMXRT_ITCM 0
+#endif
+
+#define CONFIG_DTCM_USED 0
+#if defined(CONFIG_IMXRT_DTCM)
+#  if (CONFIG_IMXRT_DTCM % 32) != 0
+#    error CONFIG_IMXRT_DTCM must be divisible by 32
+#  endif
+#  undef CONFIG_DTCM_USED
+#  define CONFIG_DTCM_USED (CONFIG_IMXRT_DTCM * 1024)
+#else
+#  define IMXRT_DTCM 0
+#endif
+
+#define FLEXRAM_REMAINING_K ((IMXRT_OCRAM_SIZE / 1024) - (CONFIG_IMXRT_DTCM + CONFIG_IMXRT_DTCM))
+
 #if defined(CONFIG_IMXRT_OCRAM_PRIMARY)
-#  define PRIMARY_RAM_START    _IMXRT_OCRAM_BASE        /* CONFIG_RAM_START */
-#  define PRIMARY_RAM_SIZE     IMXRT_OCRAM_SIZE         /* CONFIG_RAM_SIZE */
+#  define PRIMARY_RAM_START    _IMXRT_OCRAM_BASE
+#  define PRIMARY_RAM_SIZE     IMXRT_OCRAM_SIZE - (CONFIG_ITCM_USED + CONFIG_DTCM_USED)
 #  define IMXRT_OCRAM_ASSIGNED 1
 #elif defined(CONFIG_IMXRT_SDRAM_PRIMARY)
 #  define PRIMARY_RAM_START    CONFIG_IMXRT_SDRAM_START /* CONFIG_RAM_START */
@@ -151,23 +184,13 @@
 
 #define PRIMARY_RAM_END        (PRIMARY_RAM_START + PRIMARY_RAM_SIZE)
 
-/* REVISIT:  I am not sure how this works.  But I am assuming that if DTCM
- * is enabled, then ITCM is not and we can just use the DTCM base address to
- * access OCRAM.
- *
- * The FlexRAM controller manages the allocation of DTCM and ITCM from the
+/* The FlexRAM controller manages the allocation of DTCM and ITCM from the
  * OCRAM. The amount allocated it 2^n KiB where n is 2-9 and is configured in
  * the GPR register space.
  */
 
-#ifdef CONFIG_IMXRT_DTCM
-#  define IMXRT_OCRAM_START    IMXRT_DTCM_BASE
-#else
-#  define IMXRT_OCRAM_START    _IMXRT_OCRAM_BASE
-#endif
-
 #if CONFIG_MM_REGIONS > 1
-/* Pick the first region to add to the heap could be any one of OCRAM,
+/* Pick the first region to add to the heap could be any one of OCRAM, DTCM,
  * SDRAM, or SRAM depending upon which are enabled and which has not
  * already been assigned as the primary RAM.
  */
@@ -176,6 +199,10 @@
 #  define REGION1_RAM_START    IMXRT_OCRAM_START
 #  define REGION1_RAM_SIZE     IMXRT_OCRAM_SIZE
 #  define IMXRT_OCRAM_ASSIGNED 1
+#elif defined(CONFIG_IMXRT_DTCM_HEAP) && !defined(IMXRT_DCTM_ASSIGNED)
+#  define REGION1_RAM_START    IMXRT_DTCM_BASE
+#  define REGION1_RAM_SIZE     CONFIG_DTCM_USED
+#  define IMXRT_DCTM_ASSIGNED 1
 #elif defined(CONFIG_IMXRT_SDRAM_HEAP) && !defined(IMXRT_SDRAM_ASSIGNED)
 #  define REGION1_RAM_START    (CONFIG_IMXRT_SDRAM_START + CONFIG_IMXRT_SDRAM_HEAPOFFSET)
 #  define REGION1_RAM_SIZE     (CONFIG_IMXRT_SDRAM_SIZE  - CONFIG_IMXRT_SDRAM_HEAPOFFSET)

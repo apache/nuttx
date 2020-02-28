@@ -122,7 +122,7 @@ _vector_table:
 .Lfiqhandler:
 	.long	up_vectorfiq
 	.size	_vector_table, . - _vector_table
-	
+
 /****************************************************************************
  * OS Entry Point
  ****************************************************************************/
@@ -142,17 +142,17 @@ __start:
 	ldr	r0, =ConfigurePLL
 	mov	lr, pc
 	bx	r0
-	
+
 	/* First, setup initial processor mode */
-	
+
 	mov	r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT )
 	msr	cpsr, r0
-	
+
 /* Configure the uart so that we can get debug output as soon
  * as possible.  Modifies r0, r1, r2, and r14.
  */
 	bl	up_lowsetup
-	
+
 	showprogress 'A'
 
 	/* Setup system stack (and get the BSS range) */
@@ -202,7 +202,7 @@ __start:
 
 	/* Variables:
 	 * _sbss is the start of the BSS region (see ld.script)
-	 * _ebss is the end of the BSS regsion (see ld.script)
+	 * _ebss is the end of the BSS region (see ld.script)
 	 * The idle task stack starts at the end of BSS and is
 	 * of size CONFIG_IDLETHREAD_STACKSIZE.  The heap continues
 	 * from there until the end of memory.  See g_idle_topstack
@@ -230,5 +230,5 @@ LC2:	.long	_eronly	/* Where .data defaults are stored in FLASH */
 g_idle_topstack:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 	.size	g_idle_topstack, .-g_idle_topstack
-	
+
 	.end

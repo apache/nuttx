@@ -85,4 +85,3 @@ void nxgl_rgb2yuv(uint8_t r, uint8_t g, uint8_t b,
   *u = (uint8_t)b16toi(b16_128P0 - b16muli(b16_P1687, r) - b16muli(b16_P3313, g) + b16muli(b16_P5000, b));
   *v = (uint8_t)b16toi(b16_128P0 + b16muli(b16_P5000, r) - b16muli(b16_P4187, g) - b16muli(b16_P0813, b));
 }
-

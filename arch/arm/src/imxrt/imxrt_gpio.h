@@ -78,7 +78,7 @@
 #  define GPIO_PERIPH          (2 << GPIO_MODE_SHIFT) /* Peripheral */
 #  define GPIO_INTERRUPT       (3 << GPIO_MODE_SHIFT) /* Interrupt input */
 
-/* Initial Ouptut Value:
+/* Initial Output Value:
  *
  *   GPIO OUTPUT 01V. .... .... ....  .... .... .... ....
  */
@@ -368,4 +368,4 @@ int imxrt_dump_gpio(uint32_t pinset, const char *msg);
 #if defined(__cplusplus)
 }
 #endif
-#endif  /* __ARCH_ARM_SRC_IMXRT_IMXRT_GPIO_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_GPIO_H */

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_sendto.c
  *
- *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2019-2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -86,9 +85,7 @@
 struct icmpv6_sendto_s
 {
   FAR struct devif_callback_s *snd_cb; /* Reference to callback instance */
-  FAR struct socket *snd_sock; /* IPPROTO_ICMP6 socket structure */
   sem_t snd_sem;               /* Use to manage the wait for send complete */
-  clock_t snd_time;            /* Start time for determining timeouts */
   struct in6_addr snd_toaddr;  /* The peer to send the request to */
   FAR const uint8_t *snd_buf;  /* ICMPv6 header + data payload */
   uint16_t snd_buflen;         /* Size of the ICMPv6 header + data payload */
@@ -98,46 +95,6 @@ struct icmpv6_sendto_s
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sendto_timeout
- *
- * Description:
- *   Check for send timeout.
- *
- * Input Parameters:
- *   pstate - Reference to instance ot sendto state structure
- *
- * Returned Value:
- *   true: timeout false: no timeout
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_SOCKOPTS
-static inline int sendto_timeout(FAR struct icmpv6_sendto_s *pstate)
-{
-  FAR struct socket *psock;
-
-  /* Check for a timeout configured via setsockopts(SO_SNDTIMEO).
-   * If none... we will let the send wait forever.
-   */
-
-  psock = pstate->snd_sock;
-  if (psock != NULL && psock->s_sndtimeo != 0)
-    {
-      /* Check if the configured timeout has elapsed */
-
-      return net_timeo(pstate->snd_time, psock->s_sndtimeo);
-    }
-
-  /* No timeout */
-
-  return false;
-}
-#endif /* CONFIG_NET_SOCKOPTS */
 
 /****************************************************************************
  * Name: sendto_request
@@ -279,41 +236,6 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
           goto end_wait;
         }
 
-#ifdef CONFIG_NET_SOCKOPTS
-      /* Check if the selected timeout has elapsed */
-
-      if (sendto_timeout(pstate))
-        {
-          int failcode;
-
-          /* Check if this device is on the same network as the destination
-           * device.
-           */
-
-          if (!net_ipv6addr_maskcmp(pstate->snd_toaddr.s6_addr16,
-                                    dev->d_ipv6addr, dev->d_ipv6netmask))
-            {
-              /* Destination address was not on the local network served by this
-               * device.  If a timeout occurs, then the most likely reason is
-               * that the destination address is not reachable.
-               */
-
-              nerr("ERROR:  Not reachable\n");
-              failcode = -ENETUNREACH;
-            }
-          else
-            {
-              nerr("ERROR:  sendto() timeout\n");
-              failcode = -ETIMEDOUT;
-            }
-
-          /* Report the failure */
-
-          pstate->snd_result = failcode;
-          goto end_wait;
-        }
-#endif
-
       /* Continue waiting */
     }
 
@@ -400,7 +322,7 @@ ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
   /* If we are no longer processing the same ping ID, then flush any pending
    * packets from the read-ahead buffer.
    *
-   * REVISIT:  How to we free up any lingering reponses if there are no
+   * REVISIT:  How to we free up any lingering responses if there are no
    * further pings?
    */
 
@@ -436,7 +358,6 @@ ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
   nxsem_init(&state.snd_sem, 0, 0);
   nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
 
-  state.snd_sock   = psock;             /* The IPPROTO_ICMP6 socket instance */
   state.snd_result = -ENOMEM;           /* Assume allocation failure */
   state.snd_buf    = buf;               /* ICMPv6 header + data payload */
   state.snd_buflen = len;               /* Size of the ICMPv6 header+data payload */
@@ -445,7 +366,6 @@ ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
                     inaddr->sin6_addr.s6_addr16);
 
   net_lock();
-  state.snd_time   = clock_systimer();
 
   /* Set up the callback */
 
@@ -455,7 +375,6 @@ ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
       state.snd_cb->flags   = (ICMPv6_POLL | NETDEV_DOWN);
       state.snd_cb->priv    = (FAR void *)&state;
       state.snd_cb->event   = sendto_eventhandler;
-      state.snd_result      = -EINTR; /* Assume sem-wait interrupted by signal */
 
       /* Setup to receive ICMPv6 ECHO replies */
 
@@ -465,18 +384,39 @@ ssize_t icmpv6_sendto(FAR struct socket *psock, FAR const void *buf, size_t len,
           conn->nreqs = 1;
         }
 
-        conn->dev     = dev;
+      conn->dev       = dev;
 
       /* Notify the device driver of the availability of TX data */
 
       netdev_txnotify_dev(dev);
 
       /* Wait for either the send to complete or for timeout to occur.
-       * net_lockedwait will also terminate if a signal is received.
+       * net_timedwait will also terminate if a signal is received.
        */
 
-      ninfo("Start time: 0x%08x\n", state.snd_time);
-      net_lockedwait(&state.snd_sem);
+      ret = net_timedwait(&state.snd_sem, _SO_TIMEOUT(psock->s_sndtimeo));
+      if (ret < 0)
+        {
+          if (ret == -ETIMEDOUT)
+            {
+              /* Check if this device is on the same network as the destination
+               * device.
+               */
+
+              if (!net_ipv6addr_maskcmp(state.snd_toaddr.s6_addr16,
+                                        dev->d_ipv6addr, dev->d_ipv6netmask))
+                {
+                  /* Destination address was not on the local network served by
+                   * this device.  If a timeout occurs, then the most likely
+                   * reason is that the destination address is not reachable.
+                   */
+
+                  ret = -ENETUNREACH;
+                }
+            }
+
+          state.snd_result = ret;
+        }
 
       icmpv6_callback_free(dev, conn, state.snd_cb);
     }

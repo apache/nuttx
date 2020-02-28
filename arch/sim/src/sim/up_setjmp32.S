@@ -46,7 +46,11 @@
 #ifdef __CYGWIN__
 # define SYMBOL(s) _##s
 #else
+#ifdef __ELF__
 # define SYMBOL(s) s
+#else
+# define SYMBOL(s) _##s
+#endif
 #endif
 
 /**************************************************************************
@@ -55,7 +59,7 @@
 
 	.text
 	.globl	SYMBOL(up_setjmp)
-#ifndef __CYGWIN__
+#ifdef __ELF__
 	.type	SYMBOL(up_setjmp), @function
 #endif
 SYMBOL(up_setjmp):
@@ -86,11 +90,11 @@ SYMBOL(up_setjmp):
 
 	xorl	%eax, %eax
 	ret
-#ifndef __CYGWIN__
+#ifdef __ELF__
 	.size	SYMBOL(up_setjmp), . - SYMBOL(up_setjmp)
 #endif
 	.globl	SYMBOL(up_longjmp)
-#ifndef __CYGWIN__
+#ifdef __ELF__
 	.type	SYMBOL(up_longjmp), @function
 #endif
 SYMBOL(up_longjmp):
@@ -112,7 +116,6 @@ SYMBOL(up_longjmp):
 	/* Jump to saved PC.  */
 
 	jmp		*%edx
-#ifndef __CYGWIN__
+#ifdef __ELF__
 	.size SYMBOL(up_longjmp), . - SYMBOL(up_longjmp)
 #endif
-

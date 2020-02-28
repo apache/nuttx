@@ -292,7 +292,7 @@ static void init_lcd_backlight(void)
 
   putreg16(0, STM32_TIM3_PSC);
 
-  /* Generate an update event to reload the Prescaler value immediatly */
+  /* Generate an update event to reload the Prescaler value immediately */
 
   putreg16(ATIM_EGR_UG, STM32_TIM3_EGR);
 

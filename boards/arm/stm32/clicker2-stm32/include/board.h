@@ -319,7 +319,7 @@
 #define GPIO_TIM1_CH1OUT GPIO_TIM1_CH1OUT_2 /* PE9 */
 #define GPIO_TIM4_CH1OUT GPIO_TIM4_CH1OUT_2 /* PD12 */
 
-/* DMA Channl/Stream Selections *********************************************/
+/* DMA Channel/Stream Selections *********************************************/
 
 /* Stream selections are arbitrary for now but might become important in the future
  * if we set aside more DMA channels/streams.
@@ -331,4 +331,4 @@
 
 #define DMAMAP_SDIO      DMAMAP_SDIO_1
 
-#endif  /* __BOARDS_ARM_STM32_CLICKER2_STM32_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_CLICKER2_STM32_INCLUDE_BOARD_H */

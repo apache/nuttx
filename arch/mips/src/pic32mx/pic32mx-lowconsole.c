@@ -363,4 +363,3 @@ void up_lowputc(char ch)
                  (uint32_t)ch);
 #endif
 }
-

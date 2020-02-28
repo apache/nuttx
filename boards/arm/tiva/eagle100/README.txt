@@ -281,5 +281,3 @@ Configuration Sub-Directories
   By default, all of these examples are built to be used with the Luminary
   Ethernet Bootloader (you can change the ld.script file in any of these
   sub-directories to change that configuration).
-
-

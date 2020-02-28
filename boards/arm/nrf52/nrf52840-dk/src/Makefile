@@ -52,4 +52,24 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += nrf52_buttons.c
 endif
 
+ifeq ($(CONFIG_NRF52_SPI_MASTER),y)
+CSRCS += nrf52_spi.c
+endif
+
+ifeq ($(CONFIG_SENSORS_LSM6DSL),y)
+CSRCS += nrf52_lsm6dsl.c
+endif
+
+ifeq ($(CONFIG_SENSORS_LSM303AGR),y)
+CSRCS += nrf52_lsm303agr.c
+endif
+
+ifeq ($(CONFIG_SENSORS_HTS221),y)
+CSRCS += nrf52_hts221.c
+endif
+
+ifeq ($(CONFIG_LPWAN_SX127X),y)
+CSRCS += nrf52_sx127x.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

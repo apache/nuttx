@@ -35,7 +35,7 @@
 
 # Include serial drivers
 
-CSRCS += serial.c serial_io.c lowconsole.c
+CSRCS += serial.c serial_io.c
 
 ifeq ($(CONFIG_SERIAL_RXDMA),y)
   CSRCS += serial_dma.c
@@ -70,4 +70,3 @@ endif
 
 DEPPATH += --dep-path serial
 VPATH += :serial
-

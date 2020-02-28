@@ -175,7 +175,7 @@
 #define ADC_CON2_BUFS              (1 << 7)  /* Bit 7:  Buffer fill status */
 #define ADC_CON2_CSCNA             (1 << 10) /* Bit 10: Scan input selections */
 #define ADC_CON2_OFFCAL            (1 << 12) /* Bit 12: Input offset calibration mode select */
-#define ADC_CON2_VCFG_SHIFT        (13)      /* Bits 13-15: Voltage reference configuation */
+#define ADC_CON2_VCFG_SHIFT        (13)      /* Bits 13-15: Voltage reference configuration */
 #define ADC_CON2_VCFG_MASK         (15 << ADC_CON2_VCFG_SHIFT)
 #  define ADC_CON2_VCFG_AVDDAVSS   (0 << ADC_CON2_VCFG_SHIFT) /* VR+=AVdd  VR-=AVss */
 #  define ADC_CON2_VCFG_VREFAVSS   (1 << ADC_CON2_VCFG_SHIFT) /* VR+=VREF+ VR-=AVss */

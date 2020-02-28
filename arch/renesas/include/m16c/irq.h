@@ -348,4 +348,3 @@ static inline irqstate_t up_irq_enable(void)
 #endif
 
 #endif /* __ARCH_RENESAS_INCLUDE_M16C_IRQ_H */
-

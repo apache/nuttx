@@ -148,4 +148,3 @@ FAR struct dac_dev_s *stm32_dacinitialize(int intf);
 #endif /* __ASSEMBLY__ */
 
 #endif /* __ARCH_ARM_SRC_STM32_STM32_DAC_H */
-

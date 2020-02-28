@@ -121,11 +121,11 @@
 
 #define ADC_VAL_MAX     4095
 
-/* Input voltage convertion ratio - 6.8k/(6.8k + 27k) */
+/* Input voltage conversion ratio - 6.8k/(6.8k + 27k) */
 
 #define V_IN_RATIO (float)((float)(6800+27000)/(float)6800)
 
-/* Output voltage convertion ratio - 3.3k/(3.3k + 13.3k) */
+/* Output voltage conversion ratio - 3.3k/(3.3k + 13.3k) */
 
 #define V_OUT_RATIO (float)((float)(3300+13300)/(float)3300)
 
@@ -145,11 +145,11 @@
 #  error "Input voltage limit greater than absolute limit!"
 #endif
 
-/* Maximum output voltage for boost conveter in float */
+/* Maximum output voltage for boost converter in float */
 
 #define BOOST_VOLT_MAX ((float)CONFIG_EXAMPLES_SMPS_OUT_VOLTAGE_LIMIT/1000.0)
 
-/* Current limit table dimmension */
+/* Current limit table dimension */
 
 #define SMPS_CURRENT_LIMIT_TAB_DIM 15
 
@@ -171,7 +171,7 @@
 #define PID_KI                ((float)0.1)
 #define PID_KD                ((float)0.0)
 
-/* Converter frequncies:
+/* Converter frequencies:
  *   - TIMA_PWM_FREQ - buck converter 250kHz
  *   - TIMB_PWM_FREQ - boost converter 250kHz
  */
@@ -514,7 +514,7 @@ static int smps_start(FAR struct smps_dev_s *dev)
 
   ADC_INT_ENABLE(adc, ADC_INT_JEOS);
 
-  /* Enable ADC12 interrups */
+  /* Enable ADC12 interrupts */
 
   up_enable_irq(STM32_IRQ_ADC12);
 
@@ -546,7 +546,7 @@ static int smps_stop(FAR struct smps_dev_s *dev)
 
   ADC_INT_DISABLE(adc, ADC_INT_JEOS);
 
-  /* Disable ADC12 interrups */
+  /* Disable ADC12 interrupts */
 
   up_disable_irq(STM32_IRQ_ADC12);
 
@@ -637,7 +637,7 @@ static int smps_limits_set(FAR struct smps_dev_s *dev,
     {
       limits->v_out = (float)CONFIG_EXAMPLES_SMPS_OUT_VOLTAGE_LIMIT/1000.0;
       pwrwarn("WARNING: "
-              "SMPS output voltage limiit > SMPS absoulute output voltage limit."
+              "SMPS output voltage limiit > SMPS absolute output voltage limit."
               " Set output voltage limit to %.2f.\n",
               limits->v_out);
     }
@@ -646,7 +646,7 @@ static int smps_limits_set(FAR struct smps_dev_s *dev,
     {
       limits->v_in = (float)CONFIG_EXAMPLES_SMPS_IN_VOLTAGE_LIMIT/1000.0;
       pwrwarn("WARNING: "
-              "SMPS input voltage limiit > SMPS absoulute input voltage limit."
+              "SMPS input voltage limiit > SMPS absolute input voltage limit."
               " Set input voltage limit to %.2f.\n",
               limits->v_in);
     }
@@ -655,7 +655,7 @@ static int smps_limits_set(FAR struct smps_dev_s *dev,
     {
       limits->i_out = (float)CONFIG_EXAMPLES_SMPS_OUT_CURRENT_LIMIT/1000.0;
       pwrwarn("WARNING: "
-              "SMPS output current limiit > SMPS absoulute output current limit."
+              "SMPS output current limiit > SMPS absolute output current limit."
               " Set output current limit to %.2f.\n",
               limits->i_out);
     }
@@ -966,7 +966,7 @@ static void adc12_handler(void)
 
       if (smps->param.v_out > (priv->v_in+SMPS_BUCKBOOST_RANGE))
         {
-          /* Desired output voltage greather than input voltage - set boost converter */
+          /* Desired output voltage greater than input voltage - set boost converter */
 
           mode = CONVERTER_MODE_BOOST;
         }
@@ -992,7 +992,7 @@ static void adc12_handler(void)
           smps_conv_mode_set(priv, lower, mode);
         }
 
-      /* Get regualtor error */
+      /* Get regulator error */
 
       err = smps->param.v_out - priv->v_out;
 

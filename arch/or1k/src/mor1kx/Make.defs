@@ -92,4 +92,3 @@ endif
 ifeq ($(CONFIG_ARCH_IRQPRIO),y)
 #CHIP_CSRCS += sam_irqprio.c
 endif
-

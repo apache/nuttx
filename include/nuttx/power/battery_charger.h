@@ -43,9 +43,9 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/semaphore.h>
 
 #include <stdbool.h>
-#include <semaphore.h>
 
 #ifdef CONFIG_BATTERY_CHARGER
 
@@ -220,7 +220,7 @@ int battery_charger_register(FAR const char *devpath,
  *
  *   CONFIG_BATTERY_CHARGER - Upper half battery charger driver support
  *   CONFIG_I2C - I2C support
- *   CONFIG_I2C_BQ2425X - And the driver must be explictly selected.
+ *   CONFIG_I2C_BQ2425X - And the driver must be explicitly selected.
  *
  * Input Parameters:
  *   i2c       - An instance of the I2C interface to use to communicate with
@@ -269,7 +269,7 @@ FAR struct battery_charger_dev_s *bq2425x_initialize(FAR struct i2c_master_s *i2
  *
  *   CONFIG_BATTERY_CHARGER - Upper half battery charger driver support
  *   CONFIG_I2C - I2C support
- *   CONFIG_I2C_BQ2429X - And the driver must be explictly selected.
+ *   CONFIG_I2C_BQ2429X - And the driver must be explicitly selected.
  *
  * Input Parameters:
  *   i2c       - An instance of the I2C interface to use to communicate with

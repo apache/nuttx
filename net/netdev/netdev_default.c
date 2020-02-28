@@ -99,4 +99,3 @@ FAR struct net_driver_s *netdev_default(void)
   net_unlock();
   return ret;
 }
-

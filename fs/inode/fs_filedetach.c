@@ -39,12 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 
 #include "inode/inode.h"
 
@@ -152,4 +152,3 @@ int file_detach(int fd, FAR struct file *filep)
   _files_semgive(list);
   return OK;
 }
-

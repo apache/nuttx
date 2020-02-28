@@ -1073,8 +1073,24 @@ ssize_t nx_read(int fd, FAR void *buf, size_t nbytes);
  *
  * Description:
  *   Equivalent to the standard write() function except that is accepts a
- *   struct file instance instead of a file descriptor.  Currently used
- *   only by aio_write();
+ *   struct file instance instead of a file descriptor.  It is functionally
+ *   equivalent to write() except that in addition to the differences in
+ *   input parameters:
+ *
+ *  - It does not modify the errno variable,
+ *  - It is not a cancellation point, and
+ *  - It does not handle socket descriptors.
+ *
+ * Input Parameters:
+ *   filep  - Instance of struct file to use with the write
+ *   buf    - Data to write
+ *   nbytes - Length of data to write
+ *
+ * Returned Value:
+ *  On success, the number of bytes written are returned (zero indicates
+ *  nothing was written).  On any failure, a negated errno value is returned
+ *  (see comments withwrite() for a description of the appropriate errno
+ *  values).
  *
  ****************************************************************************/
 
@@ -1202,7 +1218,7 @@ int file_ioctl(FAR struct file *filep, int req, unsigned long arg);
  *
  * Input Parameters:
  *   filep - Instance for struct file for the opened file.
- *   cmd   - Indentifies the operation to be performed.
+ *   cmd   - Identifies the operation to be performed.
  *   ap    - Variable argument following the command.
  *
  * Returned Value:

@@ -169,4 +169,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_TMS570_TMS570LS04X03X_IRQ_H */
-

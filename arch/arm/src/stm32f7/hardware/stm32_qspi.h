@@ -236,6 +236,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32L4_QSPI_H */
-
-
+#endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F7_QSPI_H */

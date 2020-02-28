@@ -49,7 +49,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -476,7 +475,7 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
   volatile uint32_t regVal, regVal2, regVal3;
 
-  /* Verify that an interrupt has actually occured */
+  /* Verify that an interrupt has actually occurred */
 
   regVal2 = getreg32(LPC17_40_ADC_STAT);  /* Read ADSTAT will clear the interrupt flag */
   if ((regVal2) & (1 << 16))

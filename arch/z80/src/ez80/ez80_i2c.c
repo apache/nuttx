@@ -43,11 +43,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/kmalloc.h>
 #include <arch/io.h>
@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 #define EZ80_NOSTOP    (1 << 0)   /* Bit 0: No STOP on this transfer */
-#define EZ80_NOSTART   (1 << 1)   /* Bit 1: No address or START on this tranfers */
+#define EZ80_NOSTART   (1 << 1)   /* Bit 1: No address or START on this transfers */
 
 /****************************************************************************
  * Private Types
@@ -378,7 +378,7 @@ static void ez80_i2c_stop(void)
 
  *   Or <0: Negated error value.  IFLG is cleared.
  *
- *   -EIO: Irrecoverable (or unexpected) error occured
+ *   -EIO: Irrecoverable (or unexpected) error occurred
  *   -EAGAIN: And
  *
  ****************************************************************************/

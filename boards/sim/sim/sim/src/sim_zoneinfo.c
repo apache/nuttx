@@ -98,11 +98,11 @@
  *   - First, a ROM disk device must be created.  This is done by calling
  *     the function romdisk_register() as described in
  *     nuttx/include/nuttx/drivers/ramdisk.h.  This is an OS level operation
- *     and must be done in the board-level logic before your appliction
+ *     and must be done in the board-level logic before your application
  *     starts.
  *
  *     romdisk_register() will create a block driver at /dev/ramN where N
- *     is the device minor number that was provdied to romdisk_regsiter.
+ *     is the device minor number that was provided to romdisk_register.
  *
  *   - The second step is to mount the file system.  This step can be
  *     performed either in your board configuration logic or by your
@@ -150,4 +150,3 @@ int sim_zoneinfo(int minor)
 }
 
 #endif /* CONFIG_LIB_ZONEINFO_ROMFS */
-

@@ -46,7 +46,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -1176,7 +1175,7 @@ static int stm32can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
  *
  *    Byte 0:      Bits 0-7: Bits 3-10 of the 11-bit CAN identifier
  *    Byte 1:      Bits 5-7: Bits 0-2 of the 11-bit CAN identifier
- *                 Bit 4:    Remote Tranmission Request (RTR)
+ *                 Bit 4:    Remote Transmission Request (RTR)
  *                 Bits 0-3: Data Length Code (DLC)
  *    Bytes 2-10: CAN data
  *
@@ -1957,7 +1956,7 @@ static int stm32can_cellinit(FAR struct stm32_can_s *priv)
  *   (but reserves CAN_NFILTERS/2 through CAN_NFILTERS-1).
  *
  *   32-bit IdMask mode is configured.  However, both the ID and the MASK
- *   are set to zero thus supressing all filtering because anything masked
+ *   are set to zero thus suppressing all filtering because anything masked
  *   with zero matches zero.
  *
  * Input Parameters:

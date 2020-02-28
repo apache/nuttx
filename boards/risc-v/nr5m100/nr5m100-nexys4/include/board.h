@@ -121,7 +121,7 @@
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-#endif  /* 0 */
+#endif /* 0 */
 
 /****************************************************************************
  * Public Data
@@ -166,4 +166,3 @@ void nr5_setleds(uint8_t ledset);
 #endif
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_RISC-V_NR5M100_NR5M100_NEXYS4_INCLUDE_BOARD_H */
-

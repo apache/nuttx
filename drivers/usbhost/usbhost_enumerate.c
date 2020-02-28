@@ -125,7 +125,7 @@ static inline int usbhost_devdesc(FAR const struct usb_devdesc_s *devdesc,
   id->subclass = devdesc->subclass;
   id->proto    = devdesc->protocol;
 
-  /* Pick off the VID and PID as well (for vendor specfic devices) */
+  /* Pick off the VID and PID as well (for vendor specific devices) */
 
   id->vid = usbhost_getle16(devdesc->vendor);
   id->pid = usbhost_getle16(devdesc->product);

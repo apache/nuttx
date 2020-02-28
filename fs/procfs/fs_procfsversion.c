@@ -320,4 +320,3 @@ static int version_stat(FAR const char *relpath, FAR struct stat *buf)
 
 #endif /* CONFIG_FS_PROCFS_EXCLUDE_PROCESS */
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */
-

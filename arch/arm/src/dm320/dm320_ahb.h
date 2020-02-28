@@ -48,7 +48,7 @@
 
 #define DM320_AHB_SDRAMSA    (DM320_AHB_VADDR+0x0f00) /* SDRAM start address */
 #define DM320_AHB_SDRAMEA    (DM320_AHB_VADDR+0x0f04) /* SDRAM end address */
-#define DM320_AHB_BUSCONTROL (DM320_AHB_VADDR+0x0f08) /* Bus endianess control */
+#define DM320_AHB_BUSCONTROL (DM320_AHB_VADDR+0x0f08) /* Bus endianness control */
 #define DM320_AHB_RSV1       (DM320_AHB_VADDR+0x0f0c) /* Reserved */
 #define DM320_AHB_USBCTL     (DM320_AHB_VADDR+0x0f10) /* USB control register (ES1.1) */
 
@@ -56,4 +56,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_DM320_DM320_AHB_H */
+#endif /* __ARCH_ARM_SRC_DM320_DM320_AHB_H */

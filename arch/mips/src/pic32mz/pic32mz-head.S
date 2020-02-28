@@ -81,25 +81,27 @@
  *
  * 5) Idle thread stack:
  *    Start:   _ebss
- *    End(+1): _ebss+CONFIG_IDLETHREAD_STACKSIZE
+ *    End(+1): _ebss + CONFIG_IDLETHREAD_STACKSIZE
  * 6) Optional interrupt stack
- *    Start:   _ebss+CONFIG_IDLETHREAD_STACKSIZE
- *    End(+1): _ebss+CONFIG_IDLETHREAD_STACKSIZE+(CONFIG_ARCH_INTERRUPTSTACK & ~3)
+ *    Start:   _ebss + CONFIG_IDLETHREAD_STACKSIZE
+ *    End(+1): _ebss + CONFIG_IDLETHREAD_STACKSIZE + 
+               (CONFIG_ARCH_INTERRUPTSTACK & ~3)
  * 6a) Heap (without interrupt stack)
- *    Start:   _ebss+CONFIG_IDLETHREAD_STACKSIZE
+ *    Start:   _ebss + CONFIG_IDLETHREAD_STACKSIZE
  *    End(+1): to the end of memory
  * 6b) Heap (with interrupt stack)
- *    Start:   _ebss+CONFIG_IDLETHREAD_STACKSIZE+(CONFIG_ARCH_INTERRUPTSTACK & ~3)
+ *    Start: _ebss + CONFIG_IDLETHREAD_STACKSIZE + 
+             (CONFIG_ARCH_INTERRUPTSTACK & ~3)
  *    End(+1): to the end of memory
  */
 
 #define PIC32MZ_STACK_BASE      _ebss
-#define PIC32MZ_STACK_TOP       _ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+#define PIC32MZ_STACK_TOP       _ebss + CONFIG_IDLETHREAD_STACKSIZE - 4
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 #  define PIC32MZ_INTSTACK_BASE PIC32MZ_STACK_TOP
 #  define PIC32MZ_INTSTACK_SIZE (CONFIG_ARCH_INTERRUPTSTACK & ~3)
-#  define PIC32MZ_INTSTACK_TOP  PIC32MZ_STACK_TOP+PIC32MZ_INTSTACK_SIZE
+#  define PIC32MZ_INTSTACK_TOP  PIC32MZ_STACK_TOP + PIC32MZ_INTSTACK_SIZE
 #  define PIC32MZ_HEAP_BASE     PIC32MZ_INTSTACK_TOP
 #else
 #  define PIC32MZ_HEAP_BASE     PIC32MZ_STACK_TOP
@@ -146,6 +148,28 @@
 #endif
 
 /****************************************************************************
+ * Assembly Language Macros
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: showprogress
+ *
+ * Description:
+ *   Print a character on the UART to show boot status. This macro will
+ *   modify t0 and a0.
+ *
+ ****************************************************************************/
+
+	.macro	showprogress, code
+#ifdef CONFIG_DEBUG_FEATURES
+  la   t0, up_lowputc
+  la   a0, \code
+	jalr ra, t0
+	nop
+#endif
+	.endm
+
+/****************************************************************************
  * Public Symbols
  ****************************************************************************/
 
@@ -170,8 +194,14 @@
 	.global nx_start
 	.global	pic32mz_exception
 	.global pic32mz_decodeirq
+  .global pic32mz_lowinit
 #ifdef CONFIG_PIC32MZ_NMIHANDLER
 	.global	pic32mz_donmi
+#endif
+
+#ifdef CONFIG_DEBUG_FEATURES
+  .global pic32mz_consoleinit
+  .global up_lowputc
 #endif
 
 	/* This file contains 32-bit assembly code */
@@ -441,6 +471,12 @@ __start:
 	mtc0	t3, PIC32MZ_CP0_SRSCTL	/* Restore SRSCtl */
 	ehb
 
+  la   t0, pic32mz_consoleinit
+  jalr ra, t0 
+  nop
+
+  showprogress 'A'
+
 #if defined (CONFIG_MIPS32_ICACHE) || defined (CONFIG_MIPS32_DCACHE)
   /* Initialize K0 Cache. The cache resets in an indeterminate state.
    * We need to clear the tags and invalidate any data.
@@ -456,7 +492,7 @@ __start:
   mtc0 zero, PIC32MZ_CP0_TAGLO
   ehb
 
-#ifdef CONFIG_MIPS32_ICACHE
+#  ifdef CONFIG_MIPS32_ICACHE
   /* Init I-Cache (Copy content of TagLo) */
 
   li t0, PIC32MZ_KSEG0_IBASE
@@ -465,9 +501,9 @@ __start:
   addu t0, t0, PIC32MZ_ILINE_SIZE
   bne t0, t1, .icacheloop
   cache PIC32MZ_INDEXSTORETAG_I, -4(t0)
-#endif
+#  endif
 
-#ifdef CONFIG_MIPS32_DCACHE
+#  ifdef CONFIG_MIPS32_DCACHE
   /* Init D-Cache (Copy content of TagLo) */
 
   li t0, PIC32MZ_KSEG0_DBASE
@@ -476,16 +512,18 @@ __start:
   addu t0, t0, PIC32MZ_DLINE_SIZE
   bne t0, t1, .dcacheloop
   cache PIC32MZ_INDEXSTORETAG_D, -4(t0)
-#endif
+#  endif
 
   /* Force memory synchronization */
 
   sync
 
+  showprogress 'B'
+
 #endif /* CONFIG_MIPS32_ICACHE || CONFIG_MIPS32_DCACHE */
 
   /* Set the cache algorithm.
-   * If the cache was enable, then it has already been initiliazed and
+   * If the cache was enable, then it has already been initialized and
    * the cache algorithm will be set to write-back with write allocation.
    * if not, just set the algorithm to uncached.
    */
@@ -496,6 +534,8 @@ __start:
   ori  t0, K0_CACHE_ALGORITHM
   mtc0 t0, PIC32MZ_CP0_CONFIG
 
+  showprogress 'C'
+
 	/* Clear uninitialized data sections */
 
 	la		t0, _sbss
@@ -503,7 +543,7 @@ __start:
 	b		.Lbsscheck
 	nop
 
-.Lbssloop:	
+.Lbssloop:
 	sw		zero, 0x0(t0)
 	sw		zero, 0x4(t0)
 	sw		zero, 0x8(t0)
@@ -514,6 +554,8 @@ __start:
 	bltu	t0, t1, .Lbssloop
 	nop
 
+  showprogress 'D'
+
 	/* Copy initialized data from program flash to data memory */
 
 	la		t0, _data_loaddr
@@ -522,7 +564,7 @@ __start:
 	b		.Ldatacheck
 	nop
 
-.Ldataloop:	
+.Ldataloop:
 	lw		t3, (t0)
 	sw		t3, (t1)
 	addu	t0, 4
@@ -531,6 +573,8 @@ __start:
 .Ldatacheck:
 	bltu	t1, t2, .Ldataloop
 	nop
+
+  showprogress 'E'
 
 	/* If there are no RAM functions, skip the next two sections --
 	 * copying RAM functions from program flash to data memory and
@@ -570,6 +614,9 @@ __start:
 	la		t1, _bmxdupba_address
 	la		t2, PIC32MZ_BMX_DUPBA
 	sw		t1, 0(t2)
+
+  showprogress 'F'
+
 .Lnoramfuncs:
 #endif
 
@@ -612,7 +659,7 @@ __start:
 	 * - Preserve soft reset (SR) and non-maskable interrupt (NMI)
 	 * - CorExtend enabled based on whether CorExtend User Defined
 	 *   Instructions have been implemented (CEE = Config(UDI))
-	 * - Disable any pending interrups (IM7..IM2 = 0, IM1..IM0 = 0)
+	 * - Disable any pending interrupts (IM7..IM2 = 0, IM1..IM0 = 0)
 	 * - Disable hardware interrupts (IPL7:IPL2 = 0)
 	 * - Base mode is Kernel mode (UM = 0)
 	 * - Error level is normal (ERL = 0)
@@ -643,6 +690,9 @@ __start:
 	or		t0, t0, CP0_CONFIG3_ISAONEXC	/* Specify microMIPS mode on exceptions */
 	mtc0	t0, MIPS32_CP0_CONFIG3		/* Update CONFIG3 register */
 #endif
+  showprogress 'G'
+
+  showprogress '\n'
 
 	/* Start NuttX. We do this via a thunk in the text section so that
 	 * a normal jump and link can be used, enabling the startup code
@@ -768,7 +818,7 @@ __start_nuttx:
 	/* Perform low level initialization */
 
 	la		t0, pic32mz_lowinit
-	jalr    ra, t0
+	jalr  ra, t0
 	nop
 
 	/* Call nx_start */

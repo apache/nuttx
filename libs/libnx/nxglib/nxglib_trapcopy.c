@@ -60,4 +60,3 @@ void nxgl_trapcopy(FAR struct nxgl_trapezoid_s *dest,
   nxgl_runcopy(&dest->top, &src->top);
   nxgl_runcopy(&dest->bot, &src->bot);
 }
-

@@ -97,7 +97,7 @@
 
 /* LED definitions **********************************************************/
 
-/* The NuTiny has a single green LED that can be controlled from sofware.
+/* The NuTiny has a single green LED that can be controlled from software.
  * This LED is connected to PIN17.
  * It is pulled high so a low value will illuminate the LED.
  */
@@ -138,4 +138,4 @@
 
 #define NUM_BUTTONS        0
 
-#endif  /* __BOARDS_ARM_NUC1XX_NUTINY_NUC12_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_NUC1XX_NUTINY_NUC12_INCLUDE_BOARD_H */

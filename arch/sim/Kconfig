@@ -26,7 +26,7 @@ endchoice # Host CPU Type
 
 config ARCH_CHIP
 	string
-	default "sim" if ARCH_SIM
+	default "sim"
 
 config SIM_M32
 	bool "Build 32-bit simulation on 64-bit machine"
@@ -39,7 +39,7 @@ config SIM_M32
 
 		The workaround on 64-bit machines for now is to build for a 32-bit target on the
 		64-bit machine.  The workaround for this issue has been included in NuttX 6.15 and
-		beyond.  For thoses versions, you must add SIM_M32=y to the .config file in
+		beyond.  For those versions, you must add SIM_M32=y to the .config file in
 		order to enable building a 32-bit image on a 64-bit platform.
 
 config SIM_CYGWIN_DECORATED
@@ -113,8 +113,10 @@ config SIM_WALLTIME
 config SIM_NETDEV
 	bool "Simulated Network Device"
 	default y
-	depends on NET
+	depends on NET_ETHERNET
 	select ARCH_HAVE_NETDEV_STATISTICS
+	select SCHED_LPWORK
+	select SIM_WALLTIME
 	---help---
 		Build in support for a simulated network device using a TAP device on Linux or
 		WPCAP on Windows.
@@ -154,7 +156,7 @@ config SIM_NET_BRIDGE_DEVICE
 endif
 
 config SIM_RPTUN_MASTER
-	bool "Remote Processer Tunneling Role"
+	bool "Remote Processor Tunneling Role"
 	depends on RPTUN
 
 config SIM_LCDDRIVER
@@ -176,6 +178,8 @@ if SIM_FRAMEBUFFER
 config SIM_X11FB
 	bool "Use X11 window"
 	default n
+	select SCHED_LPWORK
+	select SIM_WALLTIME
 	---help---
 		Use an X11 graphics window to simulate the graphics device"
 

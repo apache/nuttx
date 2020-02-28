@@ -19,9 +19,8 @@ config NET_ARCH_CHKSUM
 		Define if you architecture provided an optimized version of
 		functions with the following prototypes:
 
+			uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
 			uint16_t net_chksum(FAR uint16_t *data, uint16_t len)
 			uint16_t ipv4_chksum(FAR struct net_driver_s *dev)
-			uint16_t tcp_ipv4_chksum(FAR struct net_driver_s *dev);
-			uint16_t tcp_ipv6_chksum(FAR struct net_driver_s *dev);
-			uint16_t udp_ipv4_chksum(FAR struct net_driver_s *dev);
-			uint16_t udp_ipv6_chksum(FAR struct net_driver_s *dev);
+			uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
+			uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto, unsigned int iplen)

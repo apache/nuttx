@@ -43,7 +43,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -70,6 +69,7 @@
  ****************************************************************************/
 
 /* Some sanity checks *******************************************************/
+
 /* DMA configuration */
 
 /* If DMA is enabled on any USART, then very that other pre-requisites
@@ -148,6 +148,7 @@
  * When streaming data, the generic serial layer will be called
  * every time the FIFO receives half this number of bytes.
  */
+
 #  if !defined(CONFIG_STM32_HCIUART_RXDMA_BUFSIZE)
 #    define CONFIG_STM32_HCIUART_RXDMA_BUFSIZE 32
 #  endif
@@ -968,7 +969,7 @@ static uint16_t hciuart_rxinuse(const struct hciuart_config_s *config)
 
 static void hciuart_rxflow_enable(const struct hciuart_config_s *config)
 {
-#ifdef  CONFIG_STM32_HCIUART_SW_RXFLOW
+#ifdef CONFIG_STM32_HCIUART_SW_RXFLOW
   struct hciuart_state_s *state;
 
   DEBUGASSERT(config != NULL && config->state != NULL);
@@ -1005,7 +1006,7 @@ static void hciuart_rxflow_enable(const struct hciuart_config_s *config)
 
 static void hciuart_rxflow_disable(const struct hciuart_config_s *config)
 {
-#ifdef  CONFIG_STM32_HCIUART_SW_RXFLOW
+#ifdef CONFIG_STM32_HCIUART_SW_RXFLOW
   struct hciuart_state_s *state;
 
   DEBUGASSERT(config != NULL && config->state != NULL);
@@ -1070,7 +1071,7 @@ static ssize_t hciuart_copytorxbuffer(const struct hciuart_config_s *config)
            * incremented tail index would make the Rx buffer appear empty,
            * then we must stop the copy.  If there is data pending in the Rx
            * DMA buffer, this could be very bad because a data overrun
-           condition is likely to occur.
+           * condition is likely to occur.
            */
 
           rxnext = rxtail + 1;
@@ -1296,7 +1297,7 @@ static ssize_t hciuart_copytotxfifo(const struct hciuart_config_s *config)
  *
  *   Per "Specification of the Bluetooth System, Wireless connections made
  *   easy, Host Controller Interface [Transport Layer]", Volume 4, Revision
- *   1.2 or later, 1 January 2006, HCI UART tranport uses these settings:
+ *   1.2 or later, 1 January 2006, HCI UART transport uses these settings:
  *
  *     8 data bits, no parity, 1 stop, RTS/CTS flow control
  *
@@ -1342,7 +1343,7 @@ static void hciuart_line_configure(const struct hciuart_config_s *config)
    *   usartdiv8 = 2 * fCK / baud
    */
 
-   usartdiv8 = ((config->apbclock << 1) + (baud >> 1)) / baud;
+  usartdiv8 = ((config->apbclock << 1) + (baud >> 1)) / baud;
 
   /* Baud rate for standard USART (SPI mode included):
    *
@@ -1560,7 +1561,7 @@ static void hciuart_apbclock_enable(const struct hciuart_config_s *config)
  *
  *   Per "Specification of the Bluetooth System, Wireless connections made
  *   easy, Host Controller Interface [Transport Layer]", Volume 4, Revision
- *   1.2 or later, 1 January 2006, HCI UART tranport uses these settings:
+ *   1.2 or later, 1 January 2006, HCI UART transport uses these settings:
  *
  *     8 data bits, no parity, 1 stop, RTS/CTS flow control
  *
@@ -1608,7 +1609,9 @@ static int hciuart_configure(const struct hciuart_config_s *config)
   stm32_configgpio(pinset);
 
   /* Configure CR2 */
+
   /* Clear STOP, CLKEN, CPOL, CPHA, LBCL, and interrupt enable bits */
+
   /* HCI UART spec:  1 stop bit */
 
   regval  = hciuart_getreg32(config, STM32_USART_CR2_OFFSET);
@@ -1617,6 +1620,7 @@ static int hciuart_configure(const struct hciuart_config_s *config)
   hciuart_putreg32(config, STM32_USART_CR2_OFFSET, regval);
 
   /* Configure CR1 */
+
   /* Clear TE, REm and all interrupt enable bits */
 
   regval  = hciuart_getreg32(config, STM32_USART_CR1_OFFSET);
@@ -1625,6 +1629,7 @@ static int hciuart_configure(const struct hciuart_config_s *config)
   hciuart_putreg32(config, STM32_USART_CR1_OFFSET, regval);
 
   /* Configure CR3 */
+
   /* Clear CTSE, RTSE, and all interrupt enable bits */
 
   regval  = hciuart_getreg32(config, STM32_USART_CR3_OFFSET);
@@ -1737,7 +1742,7 @@ static int hciuart_interrupt(int irq, void *context, void *arg)
        * USART_CR1_IDLEIE   USART_SR_IDLE   Idle Line Detected              (not used)
        * USART_CR1_RXNEIE   USART_SR_RXNE   Received Data Ready to be Read
        * "              "   USART_SR_ORE    Overrun Error Detected
-       * USART_CR1_TCIE     USART_SR_TC     Transmission Complete           (used only for RS-485)
+       * USART_CR1_TCIE     USART_SR_TC     Transmission Complete           (only for RS-485)
        * USART_CR1_TXEIE    USART_SR_TXE    Transmit Data Register Empty
        * USART_CR1_PEIE     USART_SR_PE     Parity Error                    (No parity)
        *
@@ -1983,8 +1988,8 @@ static void hciuart_rxenable(const struct btuart_lowerhalf_s *lower,
       flags = spin_lock_irqsave();
       if (enable)
         {
-          /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-           * timeout occurs).
+          /* Receive an interrupt when their is anything in the Rx data
+           * register (or an Rx timeout occurs).
            */
 
           intset = USART_CR1_RXNEIE | USART_CR3_EIE;
@@ -2180,11 +2185,11 @@ static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
   /* Make sure that the Tx Interrupts are disabled.
    * USART transmit interrupts:
    *
-   * Enable             Status          Meaning                      Usage
-   * ------------------ --------------- ---------------------------- ----------
-   * USART_CR1_TCIE     USART_SR_TC     Transmission Complete        (used only for RS-485)
-   * USART_CR1_TXEIE    USART_SR_TXE    Transmit Data Register Empty
-   * USART_CR3_CTSIE    USART_SR_CTS    CTS flag                     (not used)
+   * Enable           Status        Meaning                      Usage
+   * ---------------- ------------- ---------------------------- ----------
+   * USART_CR1_TCIE   USART_SR_TC   Transmission Complete        (only for RS-485)
+   * USART_CR1_TXEIE  USART_SR_TXE  Transmit Data Register Empty
+   * USART_CR3_CTSIE  USART_SR_CTS  CTS flag                     (not used)
    */
 
   flags = spin_lock_irqsave();
@@ -2199,6 +2204,7 @@ static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
   while (remaining > 0)
     {
       /* Copy bytes to the tail of the Tx buffer */
+
       /* Get a copy of the rxhead and rxtail indices of the Tx buffer */
 
       txhead = state->txhead;
@@ -2410,28 +2416,24 @@ static void hciuart_pm_notify(struct pm_callback_s *cb, int domain,
       case(PM_NORMAL):
         {
           /* Logic for PM_NORMAL goes here */
-
         }
         break;
 
       case(PM_IDLE):
         {
           /* Logic for PM_IDLE goes here */
-
         }
         break;
 
       case(PM_STANDBY):
         {
           /* Logic for PM_STANDBY goes here */
-
         }
         break;
 
       case(PM_SLEEP):
         {
           /* Logic for PM_SLEEP goes here */
-
         }
         break;
 
@@ -2547,12 +2549,6 @@ const struct btuart_lowerhalf_s *hciuart_instantiate(enum hciuart_devno_e uart)
  *   Performs the low-level, one-time USART initialization.  This must be
  *   called before hciuart_instantiate.
  *
- * Input Paramters:
- *   None
- *
- * Returned Value:
- *   None
- *
  ****************************************************************************/
 
 void hciuart_initialize(void)
@@ -2609,12 +2605,6 @@ void hciuart_initialize(void)
  *
  *   This function should be called from a timer or other periodic context.
  *
- * Input Paramters:
- *   None
- *
- * Returned Value:
- *   None
- *
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_HCIUART_RXDMA
@@ -2659,7 +2649,9 @@ void stm32_serial_dma_poll(void)
 #ifdef CONFIG_STM32_HCIUART7_RXDMA
   if (g_hciuart7_config.state->rxdmastream != NULL)
     {
-      hciuart_dma_rxcallback(g_hciuart7_config.state->rxdmastream, 0, &g_hciuart7_config);
+      hciuart_dma_rxcallback(g_hciuart7_config.state->rxdmastream,
+                             0,
+                             &g_hciuart7_config);
     }
 #endif
 

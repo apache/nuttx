@@ -46,10 +46,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 
 #include <nuttx/arch.h>
-
 #include <nuttx/wireless/ieee802154/ieee802154_radio.h>
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 

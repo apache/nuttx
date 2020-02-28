@@ -101,12 +101,12 @@ void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask)
           else
             {
               /* Eg. preflen = 38, bit = {32}
-               *     bit - preflen = 6
+               *     preflen - bit = 6
                *     mask = 0xffff << (16-6)
                *          = 0xfc00
                */
 
-              mask[i]  = 0xffff << (16 - (bit - preflen));
+              mask[i] = 0xffff << (16 - (preflen - bit));
             }
         }
       else

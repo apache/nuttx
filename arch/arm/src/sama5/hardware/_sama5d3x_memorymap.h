@@ -64,7 +64,7 @@
  *  Section MMU Flags
  *  SAMA5 Virtual (mapped) Memory Map
  *  - Peripheral virtual base addresses
- *  - NuttX vitual base address
+ *  - NuttX virtual base address
  *  MMU Page Table Location
  *  Page table start addresses
  *  Base address of the interrupt vector table
@@ -325,7 +325,7 @@
 /* SAMA5 Virtual (mapped) Memory Map
  *
  * board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location becaue it depends
+ * memory map is used.  It is included in this odd location because it depends
  * on some the virtual address definitions provided above.
  */
 
@@ -445,7 +445,7 @@
 #define SAM_GPBR_VBASE           (SAM_SYSC_VADDR+SAM_GPBR_OFFSET)
 #define SAM_RTCC_VBASE           (SAM_SYSC_VADDR+SAM_RTCC_OFFSET)
 
-/* NuttX vitual base address
+/* NuttX virtual base address
  *
  * The boot logic will create a temporarily mapping based on where NuttX is
  * executing in memory.  In this case, NuttX could be running from NOR FLASH,

@@ -195,7 +195,7 @@ struct float_sat_s
 
 typedef struct float_sat_s float_sat_t;
 
-/* PI/PID controler state structure */
+/* PI/PID controller state structure */
 
 struct pid_controller_s
 {
@@ -313,7 +313,7 @@ struct motor_sobserver_pll_s
 struct motor_observer_smo_s
 {
   float k_slide;        /* Bang-bang controller gain */
-  float err_max;        /* Linear mode threashold */
+  float err_max;        /* Linear mode threshold */
   float F_gain;         /* Current observer F gain (1-Ts*R/L) */
   float G_gain;         /* Current observer G gain (Ts/L) */
   float emf_lp_filter1; /* Adaptive first low pass EMF filter */

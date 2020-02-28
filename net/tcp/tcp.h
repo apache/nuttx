@@ -208,7 +208,6 @@ struct tcp_conn_s
 
   FAR struct net_driver_s *dev;
 
-#ifdef CONFIG_NET_TCP_READAHEAD
   /* Read-ahead buffering.
    *
    *   readahead - A singly linked list of type struct iob_qentry_s
@@ -216,7 +215,6 @@ struct tcp_conn_s
    */
 
   struct iob_queue_s readahead;   /* Read-ahead buffering */
-#endif
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Write buffering
@@ -444,7 +442,7 @@ int tcp_local_ipv4_device(FAR struct tcp_conn_s *conn);
  *   on the remotely connected IPv4 address
  *
  * Input Parameters:
- *   conn - TCP connection structure.  The remotely conected address, raddr,
+ *   conn - TCP connection structure.  The remotely connected address, raddr,
  *     should be set to a non-zero value in this structure.
  *
  * Returned Value:
@@ -668,6 +666,22 @@ void tcp_close_monitor(FAR struct socket *psock);
 
 void tcp_lost_connection(FAR struct socket *psock,
                          FAR struct devif_callback_s *cb, uint16_t flags);
+
+/****************************************************************************
+ * Name: tcp_close
+ *
+ * Description:
+ *   Break any current TCP connection
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *
+ * Assumptions:
+ *   Called from normal user-level logic
+ *
+ ****************************************************************************/
+
+int tcp_close(FAR struct socket *psock);
 
 /****************************************************************************
  * Name: tcp_ipv4_select
@@ -1109,10 +1123,8 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP_READAHEAD
 uint16_t tcp_datahandler(FAR struct tcp_conn_s *conn, FAR uint8_t *buffer,
                          uint16_t nbytes);
-#endif
 
 /****************************************************************************
  * Name: tcp_backlogcreate
@@ -1181,7 +1193,7 @@ int tcp_backlogadd(FAR struct tcp_conn_s *conn,
  *   call this API to see if there are pending connections in the backlog.
  *
  * Assumptions:
- *   Thne network is locked.
+ *   The network is locked.
  *
  ****************************************************************************/
 
@@ -1256,6 +1268,32 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                      FAR socklen_t *addrlen, FAR void **newconn);
 
 /****************************************************************************
+ * Name: psock_tcp_recvfrom
+ *
+ * Description:
+ *   Perform the recvfrom operation for a TCP/IP SOCK_STREAM
+ *
+ * Input Parameters:
+ *   psock    Pointer to the socket structure for the SOCK_DRAM socket
+ *   buf      Buffer to receive data
+ *   len      Length of buffer
+ *   flags    Receive flags
+ *   from     INET address of source (may be NULL)
+ *   fromlen  The length of the address structure
+ *
+ * Returned Value:
+ *   On success, returns the number of characters received.  On  error,
+ *   -errno is returned (see recvfrom for list of errnos).
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
+                           size_t len, int flags, FAR struct sockaddr *from,
+                           FAR socklen_t *fromlen);
+
+/****************************************************************************
  * Name: psock_tcp_send
  *
  * Description:
@@ -1266,6 +1304,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
+ *   flags    Send flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -1314,7 +1353,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
 struct socket;
 ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
-                       size_t len);
+                       size_t len, int flags);
 
 /****************************************************************************
  * Name: tcp_setsockopt
@@ -1459,7 +1498,6 @@ void tcp_wrbuffer_initialize(void);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 struct tcp_wrbuffer_s;
-
 FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void);
 
 /****************************************************************************
@@ -1708,7 +1746,7 @@ int tcp_notifier_teardown(int key);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NET_TCP_READAHEAD) && defined(CONFIG_NET_TCP_NOTIFIER)
+#ifdef CONFIG_NET_TCP_NOTIFIER
 void tcp_readahead_signal(FAR struct tcp_conn_s *conn);
 #endif
 
@@ -1764,7 +1802,7 @@ void tcp_disconnect_signal(FAR struct tcp_conn_s *conn);
  *
  * Input Parameters:
  *   psock   - An instance of the internal socket structure.
- *   abstime - The absolute time when the timeout will occur
+ *   timeout - The relative time when the timeout will occur
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
@@ -1773,11 +1811,9 @@ void tcp_disconnect_signal(FAR struct tcp_conn_s *conn);
  ****************************************************************************/
 
 #if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_NET_TCP_NOTIFIER)
-struct timespec;
-int tcp_txdrain(FAR struct socket *psock,
-                FAR const struct timespec *abstime);
+int tcp_txdrain(FAR struct socket *psock, unsigned int timeout);
 #else
-#  define tcp_txdrain(conn, abstime) (0)
+#  define tcp_txdrain(conn, timeout) (0)
 #endif
 
 #undef EXTERN

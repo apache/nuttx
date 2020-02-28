@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_analog.h
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_analog.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_ANALOG_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_ANALOG_H
+#ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_ANALOG_H
+#define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_ANALOG_H
 
 /***************************************************************************
  * Included Files
@@ -73,4 +73,4 @@ CXD56_AUDIO_ECODE cxd56_audio_analog_disable_output(void);
 CXD56_AUDIO_ECODE cxd56_audio_analog_set_micgain(FAR cxd56_audio_mic_gain_t *gain);
 CXD56_AUDIO_ECODE cxd56_audio_analog_wait_input_standby(void);
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_ANALOG_H */
+#endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_ANALOG_H */

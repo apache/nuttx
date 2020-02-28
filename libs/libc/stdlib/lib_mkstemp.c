@@ -45,7 +45,6 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 
 #include <nuttx/semaphore.h>

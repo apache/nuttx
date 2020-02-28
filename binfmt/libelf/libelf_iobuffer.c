@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libelf/libelf_iobuffer.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,8 +120,8 @@ int elf_reallocbuffer(FAR struct elf_loadinfo_s *loadinfo, size_t increment)
 
   /* And perform the reallocation */
 
-   buffer = kmm_realloc((FAR void *)loadinfo->iobuffer, newsize);
-   if (!buffer)
+  buffer = kmm_realloc((FAR void *)loadinfo->iobuffer, newsize);
+  if (!buffer)
     {
       berr("Failed to reallocate the I/O buffer\n");
       return -ENOMEM;
@@ -133,4 +133,3 @@ int elf_reallocbuffer(FAR struct elf_loadinfo_s *loadinfo, size_t increment)
   loadinfo->buflen   = newsize;
   return OK;
 }
-

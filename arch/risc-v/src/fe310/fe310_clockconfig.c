@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/fe310/fe310_clockconfig.c
+ * arch/risc-v/src/fe310/fe310_clockconfig.c
  *
  *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>
@@ -56,8 +56,8 @@
 #define EXT_OSC 16000000
 
 #define PLL_64M  (1 + (31 << 4) + (3 << 10)) /* R:2 F:64 Q:8 8M/512M/64M  */
-#define PLL_128M (1 + (31 << 4) + (2 << 10)) /* R:2 F:64 Q:8 8M/512M/128M */
-#define PLL_256M (1 + (31 << 4) + (1 << 10)) /* R:2 F:64 Q:8 8M/512M/256M */
+#define PLL_128M (1 + (31 << 4) + (2 << 10)) /* R:2 F:64 Q:4 8M/512M/128M */
+#define PLL_256M (1 + (31 << 4) + (1 << 10)) /* R:2 F:64 Q:2 8M/512M/256M */
 
 /****************************************************************************
  * Public Functions

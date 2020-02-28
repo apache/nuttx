@@ -133,7 +133,9 @@ static int work_lpthread(int argc, char *argv[])
         {
           /* Perform garbage collection.  This cleans-up memory de-allocations
            * that were queued because they could not be freed in that execution
-           * context (for example, if the memory was freed from an interrupt handler).
+           * context (for example, if the memory was freed from an interrupt
+           * handler).
+           *
            * NOTE: If the work thread is disabled, this clean-up is performed by
            * the IDLE thread (at a very, very low priority).
            *

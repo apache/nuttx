@@ -50,7 +50,7 @@ Nucleo-64 Boards
 LEDs
 ====
 
-  The Nucleo-64 board has one user controlable LED, User LD2.  This green
+  The Nucleo-64 board has one user controllable LED, User LD2.  This green
   LED is a user LED connected to Arduino signal D13 corresponding to STM32
   I/O PA5 (PB13 on other some other Nucleo-64 boards).
 
@@ -266,4 +266,3 @@ Configurations
 
     Configures the NuttShell (nsh) located at examples/nsh.  This
     configuration is focused on low level, command-line driver testing.
-

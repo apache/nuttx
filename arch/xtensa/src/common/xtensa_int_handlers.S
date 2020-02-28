@@ -698,7 +698,7 @@ _xtensa_level2_handler:
 	rfi		2
 
 #endif
-#endif  /* XCHAL_INT_NLEVELS >=2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL !=2 */
+#endif /* XCHAL_INT_NLEVELS >=2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL !=2 */
 
 #if XCHAL_INT_NLEVELS >=3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL !=3
 	.section	HANDLER_SECTION, "ax"

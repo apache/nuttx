@@ -66,7 +66,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -805,12 +804,12 @@ static int spi_interrupt(int irq, void *context, void *arg)
  * Name: spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -868,7 +867,7 @@ static void spi0_select(struct spi_dev_s *dev, uint32_t devid, bool selected)
   DEBUGASSERT(dev != NULL);
   max326_spi0select(dev, devid, selected);
 
-  /* The hardware requires that the SPI block be disabled and renabled at
+  /* The hardware requires that the SPI block be disabled and re-enabled at
    * end of each transaction to cancel the on ongoing transaction (while
    * chip select is inactive).
    */

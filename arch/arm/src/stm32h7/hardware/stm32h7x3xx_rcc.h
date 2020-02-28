@@ -494,7 +494,7 @@
 #define RCC_PLL3FRACR_FRACN3_MASK       (0x1FFFul << RCC_PLL3FRACR_FRACN3_SHIFT) /* 0x0000FFF8 */
 #define RCC_PLL3FRACR_FRACN3             RCC_PLL3FRACR_FRACN3_MASK
 
-/* Bit definitions for RCC_D1CCIPR reigster */
+/* Bit definitions for RCC_D1CCIPR register */
 
 #define RCC_D1CCIPR_FMCSEL_SHIFT        (0) /* Bits 0-1: */
 #define RCC_D1CCIPR_FMCSEL_MASK         (3 << RCC_D1CCIPR_FMCSEL_SHIFT)
@@ -524,7 +524,7 @@
                                                                           /* 11: Reserved */
                                              /* Bits 30-31: Reserved */
 
-/* Bit definitions for RCC_D2CCIP1R reigster */
+/* Bit definitions for RCC_D2CCIP1R register */
 
 #define RCC_D2CCIP1R_SAI1SEL_SHIFT      (0)  /* Bits 0-2 */
 #define RCC_D2CCIP1R_SAI1SEL_MASK       (7 << RCC_D2CCIP1R_SAI1SEL_MASK)

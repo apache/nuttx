@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/cxd56xx/common/src/cxd56_ak09912.c
+ * boards/arm/cxd56xx/common/src/cxd56_ak09912_i2c.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -49,6 +49,14 @@
 
 #include "cxd56_i2c.h"
 
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_AK09912)
 
 int board_ak09912_initialize(FAR const char *devpath, int bus)
@@ -58,7 +66,7 @@ int board_ak09912_initialize(FAR const char *devpath, int bus)
 
   sninfo("Initializing AK09912...\n");
 
-  /* Initialize i2c deivce */
+  /* Initialize i2c device */
 
   i2c = cxd56_i2cbus_initialize(bus);
   if (!i2c)

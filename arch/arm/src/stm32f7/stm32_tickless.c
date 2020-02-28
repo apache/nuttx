@@ -41,7 +41,7 @@
  * is suppressed and the platform specific code is expected to provide the
  * following custom functions.
  *
- *   void arm_timer_initialize(void): Initializes the timer facilities.
+ *   void up_timer_initialize(void): Initializes the timer facilities.
  *     Called early in the initialization sequence (by up_initialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
@@ -398,7 +398,7 @@ static int stm32_tickless_handler(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_timer_initialize
+ * Name: up_timer_initialize
  *
  * Description:
  *   Initializes all platform-specific timer facilities.  This function is
@@ -422,7 +422,7 @@ static int stm32_tickless_handler(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-void arm_timer_initialize(void)
+void up_timer_initialize(void)
 {
   switch (CONFIG_STM32F7_TICKLESS_TIMER)
     {
@@ -604,7 +604,7 @@ void arm_timer_initialize(void)
  *
  * Description:
  *   Return the elapsed time since power-up (or, more correctly, since
- *   arm_timer_initialize() was called).  This function is functionally
+ *   up_timer_initialize() was called).  This function is functionally
  *   equivalent to:
  *
  *      int clock_gettime(clockid_t clockid, FAR struct timespec *ts);

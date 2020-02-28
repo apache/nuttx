@@ -69,4 +69,3 @@ int board_reset(int mode)
 }
 
 #endif /* CONFIG_BOARDCTL_RESET */
-

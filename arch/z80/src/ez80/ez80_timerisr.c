@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_timerisr.c
  *
- *   Copyright (C) 2008-2009, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2017, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@ static int ez80_timerisr(int irq, chipreg_t *regs, void *arg)
 {
   /* Read the appropriate timer0 register to clear the interrupt */
 
-#ifdef _EZ80F91
+#ifdef CONFIGS_ARCH_CHIP_EZ80F91
   inp(EZ80_TMR0_IIR);
 #else
   /* _EZ80190, _EZ80L92, _EZ80F92, _EZ80F93 */
@@ -78,9 +78,9 @@ static int ez80_timerisr(int irq, chipreg_t *regs, void *arg)
 
   nxsched_process_timer();
 
+#ifdef CONFIG_ARCH_TIMERHOOK
   /* Architecture specific hook into the timer interrupt handler */
 
-#ifdef CONFIG_ARCH_TIMERHOOK
   up_timerhook();
 #endif
 
@@ -92,7 +92,7 @@ static int ez80_timerisr(int irq, chipreg_t *regs, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  z80_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -100,7 +100,7 @@ static int ez80_timerisr(int irq, chipreg_t *regs, void *arg)
  *
  ****************************************************************************/
 
-void z80_timer_initialize(void)
+void up_timer_initialize(void)
 {
   uint16_t reload;
 
@@ -137,9 +137,10 @@ void z80_timer_initialize(void)
 
   /* Clear any pending timer interrupts */
 
-#if defined(_EZ80F91)
+#if defined(CONFIGS_ARCH_CHIP_EZ80F91)
   inp(EZ80_TMR0_IIR);
-#elif defined(_EZ80L92) || defined(_EZ80F92) ||defined(_EZ80F93)
+#elif defined(CONFIGS_ARCH_CHIP_EZ80L92) || defined(CONFIGS_ARCH_CHIP_EZ80F92) || \
+      defined(CONFIGS_ARCH_CHIP_EZ80F93)
   inp(EZ80_TMR0_CTL);
 #endif
 
@@ -147,15 +148,16 @@ void z80_timer_initialize(void)
 
 #if defined(_EZ80190)
   outp(EZ80_TMR0_CTL, 0x5f);
-#elif defined(_EZ80F91)
+#elif defined(CONFIGS_ARCH_CHIP_EZ80F91)
   outp(EZ80_TMR0_CTL, (EZ80_TMRCLKDIV_16|EZ80_TMRCTL_TIMCONT|EZ80_TMRCTL_RLD|EZ80_TMRCTL_TIMEN));
-#elif defined(_EZ80L92) || defined(_EZ80F92) ||defined(_EZ80F93)
+#elif defined(CONFIGS_ARCH_CHIP_EZ80L92) || defined(CONFIGS_ARCH_CHIP_EZ80F92) || \
+      defined(CONFIGS_ARCH_CHIP_EZ80F93)
   outp(EZ80_TMR0_CTL, 0x57);
 #endif
 
 /* Enable timer end-of-count interrupts */
 
-#if defined(_EZ80F91)
+#if defined(CONFIGS_ARCH_CHIP_EZ80F91)
   outp(EZ80_TMR0_IER, EZ80_TMRIER_EOCEN);
 #endif
 }

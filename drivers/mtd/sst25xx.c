@@ -94,7 +94,7 @@
 #endif
 
 /* SST25 Registers *******************************************************************/
-/* Indentification register values */
+/* Identification register values */
 
 #define SST25_MANUFACTURER         CONFIG_SST25XX_MANUFACTURER
 #define SST25_MEMORY_TYPE          CONFIG_SST25XX_MEMORY_TYPE
@@ -219,19 +219,19 @@ static int sst25xx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 static void sst25xx_lock(FAR struct spi_dev_s *dev)
 {
-  /* On SPI busses where there are multiple devices, it will be necessary to
-   * lock SPI to have exclusive access to the busses for a sequence of
+  /* On SPI buses where there are multiple devices, it will be necessary to
+   * lock SPI to have exclusive access to the buses for a sequence of
    * transfers.  The bus should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusiv access to
-   * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
+   * This is a blocking call and will not return until we have exclusive access to
+   * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
    */
 
   SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
-   * If the SPI buss is being shared, then it may have been left in an incompatible
+   * If the SPI bus is being shared, then it may have been left in an incompatible
    * state.
    */
 
@@ -623,7 +623,7 @@ static int sst25xx_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
       sectorboundry = (startblock + blkper - 1) / blkper;
       sectorboundry *= blkper;
 
-      /* If we are on a sector boundry and have at least a full sector
+      /* If we are on a sector boundary and have at least a full sector
        * of blocks left to erase, then we can do a full sector erase.
        */
 

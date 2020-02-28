@@ -106,7 +106,7 @@ static void cxd56_putreg(uint32_t regval, uintptr_t regaddr);
 #  define cxd56_putreg(regval, regaddr) putreg32(regval, regaddr)
 #endif
 
-/* Interrupt hanlding *******************************************************/
+/* Interrupt handling *******************************************************/
 
 #ifdef CONFIG_CXD56_WDT_INTERRUPT
 static int cxd56_wdtinterrupt(int irq, FAR void *context, FAR void *arg);
@@ -175,7 +175,7 @@ static uint32_t cxd56_getreg(uintptr_t regaddr)
 
   uint32_t regval = getreg32(regaddr);
 
-  /* Is this the same value that we read from the same registe last time?  Are
+  /* Is this the same value that we read from the same register last time?  Are
    * we polling the register?  If so, suppress some of the output.
    */
 
@@ -400,7 +400,7 @@ static int cxd56_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 
   status->timeout = priv->timeout;
 
-  /* Get the time remaining until the watchdog expires (in miliseconds) */
+  /* Get the time remaining until the watchdog expires (in milliseconds) */
 
   remain           = (uint64_t)cxd56_getreg(CXD56_WDT_WDOGVALUE);
   status->timeleft = (uint32_t)(remain * 1000 / cxd56_get_cpu_baseclk());
@@ -448,7 +448,7 @@ static int cxd56_settimeout(FAR struct watchdog_lowerhalf_s *lower,
       return -EINVAL;
     }
 
-  /* Calculate the reload value to achiee this (appoximate) timeout. */
+  /* Calculate the reload value to achiee this (approximate) timeout. */
 
   freq = cxd56_get_cpu_baseclk();
 
@@ -481,7 +481,7 @@ static int cxd56_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   priv->reload = reload;
 
-  wdinfo("reload=%u timout: %d->%d\n", reload, timeout, priv->timeout);
+  wdinfo("reload=%u timeout: %d->%d\n", reload, timeout, priv->timeout);
 
   /* Set the WDT register according to calculated value */
 

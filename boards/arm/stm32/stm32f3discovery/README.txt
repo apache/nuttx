@@ -526,7 +526,7 @@ Where <subdir> is one of the following:
          CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
          CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : USART2 will be /dev/ttyS0
 
-       However, there is nothing to generate SYLOG output in the default
+       However, there is nothing to generate SYSLOG output in the default
        configuration so nothing should appear on USART2 unless you enable
        some debug output or enable the USB monitor.
 
@@ -539,8 +539,8 @@ Where <subdir> is one of the following:
     4. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
        device will save encoded trace output in in-memory buffer; if the
        USB monitor is enabled, that trace buffer will be periodically
-       emptied and dumped to the system loggin device (USART2 in this
-       configuraion):
+       emptied and dumped to the system logging device (USART2 in this
+       configuration):
 
         Device Drivers -> "USB Device Driver Support:
           CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature

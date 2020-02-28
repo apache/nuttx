@@ -379,4 +379,3 @@ irqstate_t up_irq_enable(void);
 #endif
 
 #endif /* __ARCH_Z80_INCLUDE_Z8_IRQ_H */
-

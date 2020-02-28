@@ -62,7 +62,7 @@
 
 #if defined(CONFIG_SIG_SIGUSR1_ACTION) || defined(CONFIG_SIG_SIGUSR2_ACTION) || \
     defined(CONFIG_SIG_SIGALRM_ACTION) || defined(CONFIG_SIG_SIGPOLL_ACTION) || \
-    defined(CONFIG_SIG_SIGKILL_ACTION)
+    defined(CONFIG_SIG_SIGKILL_ACTION) || defined(CONFIG_SIG_SIGPIPE_ACTION)
 #  define HAVE_NXSIG_ABNORMAL_TERMINANTION 1
 #endif
 
@@ -217,13 +217,13 @@ static void nxsig_abnormal_termination(int signo)
       /* Then we cannot cancel the thread now.  Here is how this is
        * supposed to work:
        *
-       * "When cancelability is disabled, all cancels are held pending
-       *  in the target thread until the thread changes the cancelability.
-       *  When cancelability is deferred, all cancels are held pending in
-       *  the target thread until the thread changes the cancelability,
+       * "When cancellability is disabled, all cancels are held pending
+       *  in the target thread until the thread changes the cancellability.
+       *  When cancellability is deferred, all cancels are held pending in
+       *  the target thread until the thread changes the cancellability,
        *  calls a function which is a cancellation point or calls
        *  pthread_testcancel(), thus creating a cancellation point.  When
-       *  cancelability is asynchronous, all cancels are acted upon
+       *  cancellability is asynchronous, all cancels are acted upon
        *  immediately, interrupting the thread with its processing."
        *
        * REVISIT:  Does this rule apply to equally to both SIGKILL and
@@ -539,7 +539,7 @@ bool nxsig_iscatchable(int signo)
  *
  * Description:
  *   If 'defaction' is true, then return the default signal handler action
- *   for the specified signal and mark that the default signal hander is
+ *   for the specified signal and mark that the default signal handler is
  *   in place (it is not yet).
  *
  *   If 'defaction' is false, then mark that the default signal handler is

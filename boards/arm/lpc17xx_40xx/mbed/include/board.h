@@ -323,4 +323,4 @@ void lpc17_40_led(int lednum, int state);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_LPC17XX_40XX_MBED_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_LPC17XX_40XX_MBED_INCLUDE_BOARD_H */

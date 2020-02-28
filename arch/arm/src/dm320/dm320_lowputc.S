@@ -108,8 +108,8 @@ up_lowputc:
 
 	strh	r0, [r2, #UART_DTRR]
 
-	/* Wait for the tranmsit regiser to be emptied. This is
-	 * detemined when TX register empty bit of the SR is zero.
+	/* Wait for the tranmsit register to be emptied. This is
+	 * determined when TX register empty bit of the SR is zero.
 	 */
 
 2:	ldrh	r1, [r2, #UART_SR]
@@ -127,4 +127,3 @@ up_lowputc:
 	/* And return */
 
 	mov     pc, lr
-

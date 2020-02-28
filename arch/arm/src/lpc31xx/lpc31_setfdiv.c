@@ -89,7 +89,7 @@ void lpc31_setfdiv(enum lpc31_domainid_e dmnid,
 
   fdcndx = lpc31_fdcndx(clkid, dmnid);
 
-  /* Does this clock have a frequency divicer? */
+  /* Does this clock have a frequency divider? */
 
   if (fdcndx != FDCNDX_INVALID)
     {

@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <sys/time.h>
 #include <stdint.h>
 #include <errno.h>
 #include <assert.h>
@@ -47,7 +46,6 @@
 
 #include <netinet/udp.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/udp.h>
 
@@ -170,4 +168,3 @@ int udp_setsockopt(FAR struct socket *psock, int option,
 }
 
 #endif /* CONFIG_NET_UDPPROTO_OPTIONS */
-

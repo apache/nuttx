@@ -3,6 +3,17 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config ARCH_HAVE_CAN_ERRORS
+	bool
+	default n
+
+menuconfig CAN
+	bool "CAN Driver Support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" CAN driver.
+		See include/nuttx/can/can.h for further CAN driver information.
+
 if CAN
 
 config CAN_EXTID
@@ -11,10 +22,6 @@ config CAN_EXTID
 	---help---
 		Enables support for the 29-bit extended ID.  Default Standard 11-bit
 		IDs.
-
-config ARCH_HAVE_CAN_ERRORS
-	bool
-	default n
 
 config CAN_ERRORS
 	bool "CAN error reporting"
@@ -49,7 +56,7 @@ config CAN_TXREADY
 	default n
 	---help---
 		This selection enables the can_txready() interface.  This interface
-		is needed only for CAN hardware that supports queing of outgoing
+		is needed only for CAN hardware that supports queueing of outgoing
 		messages in a H/W FIFO.
 
 		The CAN upper half driver also supports a queue of output messages
@@ -73,7 +80,7 @@ config CAN_TXREADY
 		that the hardware is ready to accept another transfer.
 
 		If the CAN hardware supports a H/W FIFO, can_txdone() is not
-		called when the tranfer is complete, but rather when the
+		called when the transfer is complete, but rather when the
 		transfer is queued in the H/W FIFO.  When the H/W FIFO becomes
 		full, then dev_txready() will report false and the number of
 		queued messages in the S/W FIFO will grow.
@@ -179,4 +186,5 @@ config MCP2515_SPI_SCK_FREQUENCY
 	range 100000 10000000
 
 endif # CAN_MCP2515
-endif # CAN
+
+endif

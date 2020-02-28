@@ -36,7 +36,7 @@ config IEEE802154_XBEE_FREQUENCY
 		SPI SLCK frequency in Hz
 
 config XBEE_NETDEV_RECVRPRIO
-	int "Priority of frame receiver registerd with the MAC layer"
+	int "Priority of frame receiver registered with the MAC layer"
 	default 1
 	---help---
 		When the MAC layer receives an incoming data frame, it passes the frame

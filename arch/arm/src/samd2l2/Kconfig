@@ -903,4 +903,3 @@ config SAMD2L2_USB_REGDEBUG
 		CONFIG_DEBUG_USB_INFO.
 
 endmenu # USB options
-

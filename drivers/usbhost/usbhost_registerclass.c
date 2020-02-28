@@ -114,4 +114,3 @@ int usbhost_registerclass(struct usbhost_registry_s *usbclass)
   leave_critical_section(flags);
   return OK;
 }
-

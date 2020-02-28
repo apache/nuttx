@@ -188,4 +188,3 @@ NXTERM nxtool_register(NXTKWINDOW hfwnd, FAR struct nxterm_window_s *wndo, int m
 {
   return nxterm_register((NXTERM)hfwnd, wndo, &g_nxtoolops, minor);
 }
-

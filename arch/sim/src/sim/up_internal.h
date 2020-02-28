@@ -89,16 +89,15 @@
 
 #ifndef CONFIG_DEV_CONSOLE
 #  undef USE_DEVCONSOLE
-#  undef CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE) ||  defined(CONFIG_SYSLOG_RPMSG)
+#  ifdef CONFIG_SYSLOG_RPMSG
 #    undef USE_DEVCONSOLE
 #  else
 #    define USE_DEVCONSOLE 1
 #  endif
 #endif
 
-/* Context Switching Definitions ******************************************/
+/* Context Switching Definitions ********************************************/
 
 #if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
   /* Storage order: %rbx, %rsp, %rbp, %r12, %r13, %r14, %r15, %rip */
@@ -155,7 +154,7 @@
 #  define JB_PC 9
 #endif
 
-/* Simulated Heap Definitions **********************************************/
+/* Simulated Heap Definitions ***********************************************/
 
 /* Size of the simulated heap */
 
@@ -197,17 +196,6 @@
 
 #ifndef __ASSEMBLY__
 
-#ifdef CONFIG_SIM_X11FB
-extern int g_x11initialized;
-#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK)
-extern volatile int g_eventloop;
-#endif
-#endif
-
-#ifdef USE_DEVCONSOLE
-extern volatile int g_uart_data_available;
-#endif
-
 #ifdef CONFIG_SMP
 /* These spinlocks are used in the SMP configuration in order to implement
  * up_cpu_pause().  The protocol for CPUn to pause CPUm is as follows
@@ -231,83 +219,64 @@ volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
  * Public Function Prototypes
  ****************************************************************************/
 
-/* up_setjmp32.S **********************************************************/
+/* up_setjmp32.S ************************************************************/
 
 int  up_setjmp(xcpt_reg_t *jb);
 void up_longjmp(xcpt_reg_t *jb, int val) noreturn_function;
 
-/* up_hostusleep.c ********************************************************/
+/* up_hosttime.c ************************************************************/
 
-int up_hostusleep(unsigned int usec);
+uint64_t host_gettime(bool rtc);
+void host_sleepuntil(uint64_t nsec);
 
-/* up_simsmp.c ************************************************************/
+/* up_simsmp.c **************************************************************/
 
 #ifdef CONFIG_SMP
-int  sim_cpu0_initialize(void);
 void sim_cpu0_start(void);
 #endif
 
-/* up_smpsignal.c *********************************************************/
+/* up_smpsignal.c ***********************************************************/
 
 #ifdef CONFIG_SMP
-void sim_cpu_pause(int cpu, FAR volatile spinlock_t *wait,
-                   FAR volatile unsigned char *paused);
+void up_cpu_started(void);
 #endif
 
-/* up_smphook.c ***********************************************************/
+/* up_oneshot.c *************************************************************/
 
-#ifdef CONFIG_SMP
-void sim_smp_hook(void);
-#endif
-
-/* up_tickless.c **********************************************************/
-
-#ifdef CONFIG_SCHED_TICKLESS
+#ifdef CONFIG_ONESHOT
 void up_timer_update(void);
 #endif
 
-/* rpmsg_serialinit *******************************************************/
+/* rpmsg_serialinit *********************************************************/
 
 #ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
-#else
-#  define rpmsg_serialinit()
 #endif
 
-/* up_devconsole.c ********************************************************/
+/* up_devconsole.c **********************************************************/
 
 void up_devconsole(void);
-void up_registerblockdevice(void);
+void up_devconloop(void);
 
-/* up_simuart.c ***********************************************************/
+/* up_simuart.c *************************************************************/
 
 void simuart_start(void);
 int  simuart_putc(int ch);
-int  simuart_getc(bool block);
+int  simuart_getc(void);
 bool simuart_checkc(void);
 
-/* up_uartwait.c **********************************************************/
-
-void simuart_initialize(void);
-void simuart_post(void);
-void simuart_wait(void);
-
-/* up_deviceimage.c *******************************************************/
+/* up_deviceimage.c *********************************************************/
 
 char *up_deviceimage(void);
+void up_registerblockdevice(void);
 
-/* up_netdev.c ************************************************************/
-
-#ifdef CONFIG_NET
-unsigned long up_getwalltime(void);
-#endif
-
-/* up_x11framebuffer.c ****************************************************/
+/* up_x11framebuffer.c ******************************************************/
 
 #ifdef CONFIG_SIM_X11FB
 int up_x11initialize(unsigned short width, unsigned short height,
-                     void **fbmem, unsigned int *fblen, unsigned char *bpp,
+                     void **fbmem, size_t *fblen, unsigned char *bpp,
                      unsigned short *stride);
+void up_x11update(void);
 #ifdef CONFIG_FB_CMAP
 int up_x11cmap(unsigned short first, unsigned short len,
                unsigned char *red, unsigned char *green,
@@ -315,90 +284,83 @@ int up_x11cmap(unsigned short first, unsigned short len,
 #endif
 #endif
 
-/* up_touchscreen.c *******************************************************/
+/* up_touchscreen.c *********************************************************/
 
+#ifdef CONFIG_SIM_TOUCHSCREEN
 int  sim_tsc_initialize(int minor);
 void sim_tsc_uninitialize(void);
-
-/* up_pminitialize.c ******************************************************/
-
-#ifdef CONFIG_PM
-void up_pminitialize(void);
 #endif
 
-/* up_eventloop.c *********************************************************/
+/* up_eventloop.c ***********************************************************/
 
 #if defined(CONFIG_SIM_X11FB) && \
    (defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK))
 void up_x11events(void);
+void up_buttonevent(int x, int y, int buttons);
 #endif
 
-/* up_eventloop.c *********************************************************/
-
-#if defined(CONFIG_SIM_X11FB) && \
-   (defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK))
-int up_buttonevent(int x, int y, int buttons);
-#endif
-
-/* up_ajoystick.c *********************************************************/
+/* up_ajoystick.c ***********************************************************/
 
 #ifdef CONFIG_SIM_AJOYSTICK
 int sim_ajoy_initialize(void);
 #endif
 
-/* up_ioexpander.c ********************************************************/
+/* up_ioexpander.c **********************************************************/
 
 #ifdef CONFIG_SIM_IOEXPANDER
 struct ioexpander_dev_s;
 FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void);
 #endif
 
-/* up_tapdev.c ************************************************************/
+/* up_tapdev.c **************************************************************/
 
-#if defined(CONFIG_NET_ETHERNET) && !defined(__CYGWIN__)
+#if defined(CONFIG_SIM_NETDEV) && !defined(__CYGWIN__)
 void tapdev_init(void);
+int tapdev_avail(void);
 unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
 void tapdev_send(unsigned char *buf, unsigned int buflen);
 void tapdev_ifup(in_addr_t ifaddr);
 void tapdev_ifdown(void);
 
 #  define netdev_init()           tapdev_init()
+#  define netdev_avail()          tapdev_avail()
 #  define netdev_read(buf,buflen) tapdev_read(buf,buflen)
 #  define netdev_send(buf,buflen) tapdev_send(buf,buflen)
 #  define netdev_ifup(ifaddr)     tapdev_ifup(ifaddr)
 #  define netdev_ifdown()         tapdev_ifdown()
 #endif
 
-/* up_wpcap.c *************************************************************/
+/* up_wpcap.c ***************************************************************/
 
-#if defined(CONFIG_NET_ETHERNET) && defined(__CYGWIN__)
+#if defined(CONFIG_SIM_NETDEV) && defined(__CYGWIN__)
 void wpcap_init(void);
 unsigned int wpcap_read(unsigned char *buf, unsigned int buflen);
 void wpcap_send(unsigned char *buf, unsigned int buflen);
 
 #  define netdev_init()           wpcap_init()
+#  define netdev_avail()          1
 #  define netdev_read(buf,buflen) wpcap_read(buf,buflen)
 #  define netdev_send(buf,buflen) wpcap_send(buf,buflen)
 #  define netdev_ifup(ifaddr)     {}
 #  define netdev_ifdown()         {}
 #endif
 
-/* up_netdriver.c *********************************************************/
+/* up_netdriver.c ***********************************************************/
 
-#ifdef CONFIG_NET_ETHERNET
+#ifdef CONFIG_SIM_NETDEV
 int netdriver_init(void);
-int netdriver_setmacaddr(unsigned char *macaddr);
+void netdriver_setmacaddr(unsigned char *macaddr);
 void netdriver_loop(void);
 #endif
 
 #ifdef CONFIG_RPTUN
 
-/* up_shmem.c *************************************************************/
+/* up_shmem.c ***************************************************************/
 
 void *shmem_open(const char *name, size_t size, int master);
 void shmem_close(void *mem);
 
-/* up_rptun.c *************************************************************/
+/* up_rptun.c ***************************************************************/
 
 int up_rptun_init(void);
 void up_rptun_loop(void);

@@ -1,7 +1,8 @@
 ############################################################################
 # arch/z80/src/Makefile.zdsiiw
 #
-#   Copyright (C) 2008, 2011-2012, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2011-2012, 2014, 2020 Gregory Nutt. All rights
+#     reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -115,7 +116,7 @@ ifeq ($(CONFIG_ARCH_CHIP_Z8F642X),y)
 	@echo   "$(ZDSZILOGLIBDIR)\csioLDD$(LIBEXT)", \>>nuttx.linkcmd
 	@echo   "$(ZDSZILOGLIBDIR)\zsldevinitdummy$(LIBEXT)">>nuttx.linkcmd
 endif
-ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
+ifeq ($(CONFIG_ARCH_CHIP_EZ80),y)  # EZ80F91 and EZ80F92
 	@echo   "$(ZDSSTDLIBDIR)\chelp$(LIBEXT)", \>>nuttx.linkcmd
 	@echo   "$(ZDSSTDLIBDIR)\crt$(LIBEXT)", \>>nuttx.linkcmd
 	@echo   "$(ZDSSTDLIBDIR)\fplib$(LIBEXT)", \>>nuttx.linkcmd

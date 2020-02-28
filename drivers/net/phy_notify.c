@@ -51,12 +51,13 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
+#include <net/if.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 #include <nuttx/net/phy.h>
 
@@ -104,7 +105,7 @@
 struct phy_notify_s
 {
   bool assigned;
-  char intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN + 1];
+  char intf[IFNAMSIZ + 1];
   pid_t pid;
   struct sigevent event;
   struct sigwork_s work;
@@ -200,7 +201,7 @@ static FAR struct phy_notify_s *phy_find_assigned(FAR const char *intf,
     {
       client = &g_notify_clients[i];
       if (client->assigned && client->pid == pid &&
-          strncmp(client->intf, intf, CONFIG_PHY_NOTIFICATION_MAXINTFLEN) == 0)
+          strncmp(client->intf, intf, IFNAMSIZ) == 0)
         {
           /* Return the matching client entry to the caller */
 
@@ -262,8 +263,6 @@ static int phy_handler(int irq, FAR void *context, FAR void *arg)
  *
  * Input Parameters:
  *   intf  - Provides the name of the network interface, for example, "eth0".
- *           The length of intf must not exceed 4 bytes (excluding NULL
- *           terminator).  Configurable with CONFIG_PHY_NOTIFICATION_MAXINTFLEN.
  *   pid   - Identifies the task to receive the signal.  The special value
  *           of zero means to use the pid of the current task.
  *   event - Describes the way a task is to be notified
@@ -315,8 +314,8 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid,
 
       client->pid   = pid;
       client->event = *event;
-      strncpy(client->intf, intf, CONFIG_PHY_NOTIFICATION_MAXINTFLEN + 1);
-      client->intf[CONFIG_PHY_NOTIFICATION_MAXINTFLEN] = '\0';
+      strncpy(client->intf, intf, IFNAMSIZ + 1);
+      client->intf[IFNAMSIZ] = '\0';
 
       /* Attach/re-attach the PHY interrupt */
 
@@ -343,8 +342,6 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid,
  *
  * Input Parameters:
  *   intf  - Provides the name of the network interface, for example, "eth0".
- *           The length of 'intf' must not exceed 4 bytes (excluding NULL
- *           terminator).  Configurable with CONFIG_PHY_NOTIFICATION_MAXINTFLEN.
  *   pid   - Identifies the task that was receiving notifications.
  *
  * Returned Value:

@@ -57,7 +57,7 @@
  *
  * Description:
  *   modhandle() returns the module handle for the installed module with the
- *   provided name.  A secondary use of this function is to determin if a
+ *   provided name.  A secondary use of this function is to determine if a
  *   module has been loaded or not.
  *
  * Input Parameters:

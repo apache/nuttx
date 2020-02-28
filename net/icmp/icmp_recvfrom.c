@@ -71,7 +71,6 @@ struct icmp_recvfrom_s
   FAR struct devif_callback_s *recv_cb; /* Reference to callback instance */
   FAR struct socket *recv_sock; /* IPPROTO_ICMP socket structure */
   sem_t recv_sem;               /* Use to manage the wait for the response */
-  clock_t recv_time;            /* Start time for determining timeouts */
   in_addr_t recv_from;          /* The peer we received the request from */
   FAR uint8_t *recv_buf;        /* Location to return the response */
   uint16_t recv_buflen;         /* Size of the response */
@@ -82,46 +81,6 @@ struct icmp_recvfrom_s
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: recvfrom_timeout
- *
- * Description:
- *   Check for send timeout.
- *
- * Input Parameters:
- *   pstate - Reference to instance ot recvfrom state structure
- *
- * Returned Value:
- *   true: timeout false: no timeout
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_SOCKOPTS
-static inline int recvfrom_timeout(FAR struct icmp_recvfrom_s *pstate)
-{
-  FAR struct socket *psock;
-
-  /* Check for a timeout configured via setsockopts(SO_SNDTIMEO).
-   * If none... we will let the send wait forever.
-   */
-
-  psock = pstate->recv_sock;
-  if (psock != NULL && psock->s_rcvtimeo != 0)
-    {
-      /* Check if the configured timeout has elapsed */
-
-      return net_timeo(pstate->recv_time, psock->s_rcvtimeo);
-    }
-
-  /* No timeout */
-
-  return false;
-}
-#endif /* CONFIG_NET_SOCKOPTS */
 
 /****************************************************************************
  * Name: recvfrom_eventhandler
@@ -224,7 +183,7 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
           ipv4 = IPv4BUF;
           net_ipv4addr_hdrcopy(&pstate->recv_from, ipv4->srcipaddr);
 
-          /* Decrement the count of oustanding requests.  I suppose this
+          /* Decrement the count of outstanding requests.  I suppose this
            * could have already been decremented of there were multiple
            * threads calling sendto() or recvfrom().  If there finds, we
            * may have to beef up the design.
@@ -238,17 +197,6 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
           flags &= ~ICMP_NEWDATA;
           goto end_wait;
         }
-
-#ifdef CONFIG_NET_SOCKOPTS
-      /* Check if the selected timeout has elapsed */
-
-      if (recvfrom_timeout(pstate))
-        {
-          nerr("ERROR:  recvfrom() timeout\n");
-          pstate->recv_result = -ETIMEDOUT;
-          goto end_wait;
-        }
-#endif
 
       /* Continue waiting */
     }
@@ -283,7 +231,7 @@ end_wait:
  *   pstate   recvfrom state structure
  *
  * Returned Value:
- *   Nunber of bytes copied to the user buffer
+ *   Number of bytes copied to the user buffer
  *
  * Assumptions:
  *   The network is locked.
@@ -452,7 +400,7 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     }
 
   /* Check if there is buffered read-ahead data for this socket.  We may have
-   * already received the reponse to previous command.
+   * already received the response to previous command.
    */
 
   if (!IOB_QEMPTY(&conn->readahead))
@@ -477,9 +425,6 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   state.recv_buf    = buf;      /* Location to return the response */
   state.recv_buflen = len;      /* Size of the response */
 
-  net_lock();
-  state.recv_time   = clock_systimer();
-
   /* Get the device that was used to send the ICMP request. */
 
   dev = conn->dev;
@@ -490,6 +435,8 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       goto errout;
     }
 
+  net_lock();
+
   /* Set up the callback */
 
   state.recv_cb = icmp_callback_alloc(dev, conn);
@@ -498,14 +445,16 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       state.recv_cb->flags = (ICMP_NEWDATA | NETDEV_DOWN);
       state.recv_cb->priv  = (FAR void *)&state;
       state.recv_cb->event = recvfrom_eventhandler;
-      state.recv_result    = -EINTR; /* Assume sem-wait interrupted by signal */
 
       /* Wait for either the response to be received or for timeout to
-       * occur. net_lockedwait will also terminate if a signal is received.
+       * occur. net_timedwait will also terminate if a signal is received.
        */
 
-      ninfo("Start time: 0x%08x\n", state.recv_time);
-      net_lockedwait(&state.recv_sem);
+      ret = net_timedwait(&state.recv_sem, _SO_TIMEOUT(psock->s_rcvtimeo));
+      if (ret < 0)
+        {
+          state.recv_result = ret;
+        }
 
       icmp_callback_free(dev, conn, state.recv_cb);
     }

@@ -51,4 +51,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif  /* __ARCH_Z80_SRC_Z180_CHIP_H */
+#endif /* __ARCH_Z80_SRC_Z180_CHIP_H */

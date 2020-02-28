@@ -213,7 +213,7 @@ extern "C"
  *
  * Description:
  *   Get Raw Interrupt Status register. And furthermore, if status is set,
- *   then clear the interrupt. Register's decription is below:
+ *   then clear the interrupt. Register's description is below:
  *
  *     7   6   5   4    3     2     1     0
  *   +---------------+-----+-----+-----+-----+
@@ -235,7 +235,7 @@ int cxd56_pmic_get_interrupt_status(FAR uint8_t *status);
  * Name: cxd56_pmic_set_gpo_reg
  *
  * Description:
- *   Set GPO register. Register's decription is below:
+ *   Set GPO register. Register's description is below:
  *
  *     7   6   5   4   3   2   1   0
  *   +---+---+---+---+---+---+---+---+
@@ -313,7 +313,7 @@ bool cxd56_pmic_get_gpo(uint8_t chset);
  * Name: cxd56_pmic_set_loadswitch_reg
  *
  * Description:
- *   Set LoadSwitch register. Register's decription is below:
+ *   Set LoadSwitch register. Register's description is below:
  *
  *     7   6   5   4   3   2   1   0
  *   +---+---+---+---+---+---+---+---+
@@ -371,7 +371,7 @@ bool cxd56_pmic_get_loadswitch(uint8_t chset);
  * Name: cxd56_pmic_set_ddc_ldo_reg
  *
  * Description:
- *   Set DDC/LDO register. Register's decription is below:
+ *   Set DDC/LDO register. Register's description is below:
  *
  *      7    6    5    4    3    2    1    0
  *   +----+----+----+----+----+----+----+----+
@@ -457,7 +457,55 @@ int cxd56_pmic_get_gauge(FAR struct pmic_gauge_s *gauge);
  *
  ****************************************************************************/
 
-int cxd56_pmic_getlowervol(FAR int *vol);
+int cxd56_pmic_getlowervol(FAR int *voltage);
+
+/****************************************************************************
+ * Name: cxd56_pmic_setlowervol
+ *
+ * Description:
+ *   Set lower limit of voltage for system to be running.
+ *
+ * Input Parameter:
+ *   voltage - Lower limit voltage (mV)
+ *
+ * Returned Value:
+ *   Return 0 on success. Otherwise, return a negated errno.
+ *
+ ****************************************************************************/
+
+int cxd56_pmic_setlowervol(int voltage);
+
+/****************************************************************************
+ * Name: cxd56_pmic_getnotifyvol
+ *
+ * Description:
+ *   Get voltage for the low battery notification
+ *
+ * Input Parameter:
+ *   voltage - Low battery voltage (mV)
+ *
+ * Returned Value:
+ *   Return 0 on success. Otherwise, return a negated errno.
+ *
+ ****************************************************************************/
+
+int cxd56_pmic_getnotifyvol(FAR int *voltage);
+
+/****************************************************************************
+ * Name: cxd56_pmic_setnotifyvol
+ *
+ * Description:
+ *   Set voltage for the low battery notification
+ *
+ * Input Parameter:
+ *   voltage - Low battery voltage (mV)
+ *
+ * Returned Value:
+ *   Return 0 on success. Otherwise, return a negated errno.
+ *
+ ****************************************************************************/
+
+int cxd56_pmic_setnotifyvol(int voltage);
 
 /****************************************************************************
  * Name: cxd56_pmic_getchargevol
@@ -482,7 +530,7 @@ int cxd56_pmic_getchargevol(FAR int *voltage);
  *   Set charge voltage
  *
  * Input Parameter:
- *   voltage - Avalable values are every 50 between 4000 to 4400 (mV)
+ *   voltage - Available values are every 50 between 4000 to 4400 (mV)
  *
  * Returned Value:
  *   Return 0 on success. Otherwise, return a negated errno.

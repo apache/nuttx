@@ -284,4 +284,4 @@ int tiva_tmp100_initialize(FAR const char *devpath);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_TIVA_DK_TM4C129X_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_TIVA_DK_TM4C129X_INCLUDE_BOARD_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/platform/sensors/kx022_scu.c
+ * boards/arm/cxd56xx/drivers/sensors/kx022_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -44,7 +44,6 @@
 #include <fixedmath.h>
 #include <errno.h>
 #include <debug.h>
-#include <semaphore.h>
 #include <arch/types.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -278,6 +277,7 @@ static int kx022_seqinit(FAR struct kx022_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_seq;
 
   seq_setaddress(priv->seq, priv->addr);

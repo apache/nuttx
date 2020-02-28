@@ -58,7 +58,7 @@ int board_bh1745nuc_initialize(FAR const char *devpath, int bus)
 
   sninfo("Initializing BH1745NUC...\n");
 
-  /* Initialize i2c deivce */
+  /* Initialize i2c device */
 
   i2c = cxd56_i2cbus_initialize(bus);
   if (!i2c)

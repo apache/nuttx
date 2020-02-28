@@ -581,4 +581,3 @@ int sam_dumpport(uint32_t pinset, const char *msg)
   return OK;
 }
 #endif
-

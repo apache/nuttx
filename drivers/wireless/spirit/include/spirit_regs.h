@@ -312,7 +312,7 @@
  *               13    |       1/96
  *               14    |       1/128
  *               15    |       1/256
- *   0   RCO_RATIO: Specifies the divsion ratio when RC oscillator is the clock source
+ *   0   RCO_RATIO: Specifies the division ratio when RC oscillator is the clock source
  *                0 - Division Ratio equal to 0
  *                1 - Division Ratio equal to 1/128
  */
@@ -654,7 +654,7 @@
  *
  *   Read Write
  *   Default value: 0x1a
- *   7  CW:              1 - CW Mode enabled - enables the generation of a continous wave
+ *   7  CW:              1 - CW Mode enabled - enables the generation of a continuous wave
  *                           carrier without any modulation
  *                       0 - CW Mode disabled
  *
@@ -694,7 +694,7 @@
 #define MOD0_BT_SEL_BT_MASK             ((uint8_t)0x00)  /* Select the BT = 1 or BT = 0.5
                                                           * valid only for GFSK or GMSK
                                                           * modulation */
-#define MOD0_CW                         ((uint8_t)0x80)  /* Set the Continous Wave (no
+#define MOD0_CW                         ((uint8_t)0x80)  /* Set the Continuous Wave (no
                                                           * modulation) transmit mode */
 
 /* FDEV0 register
@@ -713,16 +713,16 @@
 #define FDEV0_BASE                      ((uint8_t)0x1c)  /* Sets the Mantissa and exponent of
                                                           * frequency deviation (frequency
                                                           * separation/2) and PLL or DLL
-                                                          * alogrithm from clock
+                                                          * algorithm from clock
                                                           * recovery in RX digital demod */
 
 #define FDEV0_CLOCK_REG_ALGO_SEL_MASK   ((uint8_t)0x08)  /* Can be DLL or PLL algorithm for
                                                           * clock recovery in RX digital demod
                                                           * (see CLOCKREC reg) */
-#define FDEV0_CLOCK_REG_ALGO_SEL_PLL    ((uint8_t)0x00)  /* Sets PLL alogrithm for clock
+#define FDEV0_CLOCK_REG_ALGO_SEL_PLL    ((uint8_t)0x00)  /* Sets PLL algorithm for clock
                                                           * recovery in RX digital demod (see
                                                           * CLOCKREC reg) */
-#define FDEV0_CLOCK_REG_ALGO_SEL_DLL    ((uint8_t)0x08)  /* Sets DLL alogrithm for clock
+#define FDEV0_CLOCK_REG_ALGO_SEL_DLL    ((uint8_t)0x08)  /* Sets DLL algorithm for clock
                                                           * recovery in RX digital demod (see
                                                           * CLOCKREC reg) */
 
@@ -941,7 +941,7 @@
 
 #define AGCCTRL2_FREEZE_ON_STEADY_MASK  ((uint8_t)0x40)  /* The attenuation settings will be
                                                           * frozen as soon as signal level is
-                                                          * betweeen min and max threshold (see
+                                                          * between min and max threshold (see
                                                           * AGCCTRL1) */
 #define AGCCTRL2_FREEZE_ON_SYNC_MASK    ((uint8_t)0x20)  /* The attenuation settings will be
                                                           * frozen as soon sync word is detected */
@@ -1024,7 +1024,7 @@
  *   2:0   control_len[2:0]: length of control field in bytes
  */
 
-#define PCKTCTRL4_BASE                  ((uint8_t)0x30)  /* lenghts of address and control field */
+#define PCKTCTRL4_BASE                  ((uint8_t)0x30)  /* lengths of address and control field */
 
 #define PCKTCTRL4_ADDRESS_LEN_MASK      ((uint8_t)0x18)
 #define PCKTCTRL4_CONTROL_LEN_MASK      ((uint8_t)0x07)
@@ -1134,7 +1134,7 @@
  *   Read Write
  *   Default value: 0x00
  *
- *   7:0   pktlen1[7:0]: length of packet in bytes (upper field) LENGHT/256
+ *   7:0   pktlen1[7:0]: length of packet in bytes (upper field) LENGTH/256
  */
 
 #define PCKTLEN1_BASE                   ((uint8_t)0x34)  /* length of packet in bytes (upper field) */
@@ -1144,7 +1144,7 @@
  *   Read Write
  *   Default value: 0x14
  *
- *   7:0   pktlen0[7:0]: length of packet in bytes (lower field) LENGHT%256
+ *   7:0   pktlen0[7:0]: length of packet in bytes (lower field) LENGTH%256
  */
 
 #define PCKTLEN0_BASE                   ((uint8_t)0x35)  /* length of packet in bytes (lower field)

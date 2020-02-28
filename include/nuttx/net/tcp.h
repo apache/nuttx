@@ -56,7 +56,7 @@
 #include <stdint.h>
 
 #include <nuttx/net/netconfig.h>
-#include <nuttx/net/arp.h>
+#include <nuttx/net/ethernet.h>
 #include <nuttx/net/ip.h>
 
 /****************************************************************************
@@ -125,11 +125,11 @@
  * These defaults correspond to the minimum MTU values:
  *
  *   IPv4:  MTU=576;  MSS=536  (MTU - IPv4_HDRLEN - TCP_HDRLEN)
- *   IPv6:  MTU=1280; MSS=1200 (MTU - IPv5_HDRLEN - TCP_HDRLEN)
+ *   IPv6:  MTU=1280; MSS=1220 (MTU - IPv6_HDRLEN - TCP_HDRLEN)
  */
 
 #define TCP_DEFAULT_IPv4_MSS  536
-#define TCP_DEFAULT_IPv6_MSS  1200
+#define TCP_DEFAULT_IPv6_MSS  1220
 
 /* However, we do need to make allowance for certain links such as SLIP that
  * have unusually small MTUs.
@@ -142,16 +142,16 @@
 #  define MIN_IPv4_TCP_INITIAL_MSS \
      (__MIN_TCP_MSS(IPv4_HDRLEN) > 536 ? 536 : __MIN_TCP_MSS(IPv4_HDRLEN))
 #  define MAX_IPv4_TCP_INITIAL_MSS  \
-     (__MAX_TCP_MSS(IPv4_HDRLEN) > 536 ? 536 : __MAX_TCP_MSS(h))
+     (__MAX_TCP_MSS(IPv4_HDRLEN) > 536 ? 536 : __MAX_TCP_MSS(IPv4_HDRLEN))
 #endif
 
 #ifdef CONFIG_NET_IPv6
 #  define TCP_IPv6_INITIAL_MSS(d) \
-     (TCP_MSS(d,IPv6_HDRLEN) > 1200 ? 1200 : TCP_MSS(d,IPv6_HDRLEN))
+     (TCP_MSS(d,IPv6_HDRLEN) > 1220 ? 1220 : TCP_MSS(d,IPv6_HDRLEN))
 #  define MIN_IPv6_TCP_INITIAL_MSS \
-     (__MIN_TCP_MSS(IPv6_HDRLEN) > 1200 ? 1200 : __MIN_TCP_MSS(IPv6_HDRLEN))
+     (__MIN_TCP_MSS(IPv6_HDRLEN) > 1220 ? 1220 : __MIN_TCP_MSS(IPv6_HDRLEN))
 #  define MAX_IPv6_TCP_INITIAL_MSS  \
-     (__MAX_TCP_MSS(IPv6_HDRLEN) > 1200 ? 1200 : __MAX_TCP_MSS(IPv6_HDRLEN))
+     (__MAX_TCP_MSS(IPv6_HDRLEN) > 1220 ? 1220 : __MAX_TCP_MSS(IPv6_HDRLEN))
 #endif
 
 /****************************************************************************

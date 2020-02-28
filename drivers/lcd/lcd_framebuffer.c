@@ -66,7 +66,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure describes the LCD frambuffer */
+/* This structure describes the LCD framebuffer */
 
 struct lcdfb_dev_s
 {
@@ -232,7 +232,7 @@ static int lcdfb_update(FAR struct lcdfb_dev_s *priv,
 
   for (row = starty; row <= endy; row++)
     {
-      /* REVISIT: Some LCD hardware certain aligment requirements on DMA
+      /* REVISIT: Some LCD hardware certain alignment requirements on DMA
        * memory.
        */
 
@@ -503,7 +503,7 @@ int up_fbinitialize(int display)
   priv->vtable.setcursor    = lcdfb_setcursor,
 #endif
 
-#ifdef  CONFIG_LCD_EXTERNINIT
+#ifdef CONFIG_LCD_EXTERNINIT
   /* Use external graphics driver initialization */
 
   lcd = board_graphics_setup(display);
@@ -680,7 +680,7 @@ void up_fbuninitialize(int display)
               g_lcdfb = priv->flink;
             }
 
-#ifndef  CONFIG_LCD_EXTERNINIT
+#ifndef CONFIG_LCD_EXTERNINIT
           /* Uninitialize the LCD */
 
           board_lcd_uninitialize();

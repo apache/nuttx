@@ -85,4 +85,3 @@ void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
 }
 
 #endif /* CONFIG_MM_IOB */
-

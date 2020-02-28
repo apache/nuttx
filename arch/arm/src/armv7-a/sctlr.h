@@ -261,7 +261,7 @@
 /* TODO: To be provided */
 
 /************************************************************************************
- * Assemby Macros
+ * Assembly Macros
  ************************************************************************************/
 
 #ifdef __ASSEMBLY__
@@ -416,4 +416,4 @@ extern "C"
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_A_SCTLR_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_A_SCTLR_H */

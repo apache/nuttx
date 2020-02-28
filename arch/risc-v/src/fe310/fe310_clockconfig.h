@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/fe310/fe310_clockconfig.h
+ * arch/risc-v/src/fe310/fe310_clockconfig.h
  *
  *   Copyright (C) 2019 Masayuki Ishikawa. All rights reserved.
  *   Author: Masayuki Ishikawa <masayuki.ishikawa@gmail.com>

@@ -44,7 +44,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -1831,7 +1830,7 @@ static int up_interrupt(int irq, void *context, void *arg)
        * "           "      USART_SR_ORE    Overrun Error Detected
        * USART_CR3_CTSIE    USART_SR_CTS    CTS flag                        (not used)
        *
-       * NOTE: Some of these status bits must be cleared by explicity writing zero
+       * NOTE: Some of these status bits must be cleared by explicitly writing zero
        * to the SR register: USART_SR_CTS, USART_SR_LBD. Note of those are currently
        * being used.
        */

@@ -55,7 +55,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_IMXRT_LPSPI1 
+#ifndef CONFIG_IMXRT_LPSPI1
 #  error "SD driver requires CONFIG_IMXRT_LPSPI1 to be enabled"
 #endif
 

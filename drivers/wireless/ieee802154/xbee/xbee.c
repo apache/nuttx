@@ -45,11 +45,9 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
-#include <semaphore.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
 
 #include "xbee.h"
@@ -386,7 +384,7 @@ static void xbee_attnworker(FAR void *arg)
       xbee_process_apiframes(priv, iobhead);
     }
 
-  /* If an interrupt occured while the worker was running, it was not
+  /* If an interrupt occurred while the worker was running, it was not
    * scheduled since there is a good chance this function has already handled
    * it as part of the previous ATTN assertion. Therefore, if the ATTN
    * line is asserted again reschedule the work.
@@ -1173,7 +1171,7 @@ static void xbee_lockupcheck_reschedule(FAR struct xbee_priv_s *priv)
   wd_cancel(priv->lockup_wd);
 
   /* Kickoff the watchdog timer that will query the XBee periodically (if naturally
-   * occuring queries do not occur). We query periodically to make sure the XBee
+   * occurring queries do not occur). We query periodically to make sure the XBee
    * is still responsive. If during any query, the XBee does not respond after
    * multiple attempts, we restart the XBee to get it back in a working state
    */

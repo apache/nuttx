@@ -130,7 +130,7 @@ exception_common:
   addi s0, sp, XCPTCONTEXT_SIZE
   sw   s0,  2*4(sp)   /* original SP */
 
-  /* Setup arg0(exeption cause), arg1(context) */
+  /* Setup arg0(exception cause), arg1(context) */
 
   csrr a0, mcause  /* exception cause */
   csrr s0, mepc

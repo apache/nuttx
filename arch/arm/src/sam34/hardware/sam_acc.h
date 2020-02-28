@@ -94,7 +94,7 @@
 #  define ACC_MR_SELMINUS_AD3      (7 << ACC_MR_SELMINUS_SHIFT) /* Select AD3 */
 #define ACC_MR_SELPLUS_SHIFT       (4)       /* Bits 4-6: Selection for plus comparator input */
 #define ACC_MR_SELPLUS_MASK        (7 << ACC_MR_SELPLUS_SHIFT)
-#  define ACC_MR_SELPLUS_AD(n)     ((uint32_t)(n) << ACC_MR_SELPLUS_SHIFT) /* Select ADn, n=0-7 */
+#  define ACC_MR_SELPLUS_AD(n)     ((uint32_t)(n) << ACC_MR_SELPLUS_SHIFT) /* Select and, n=0-7 */
 #  define ACC_MR_SELPLUS_AD0       (0 << ACC_MR_SELPLUS_SHIFT) /* Select AD0 */
 #  define ACC_MR_SELPLUS_AD1       (1 << ACC_MR_SELPLUS_SHIFT) /* Select AD1 */
 #  define ACC_MR_SELPLUS_AD2       (2 << ACC_MR_SELPLUS_SHIFT) /* Select AD2 */

@@ -55,7 +55,7 @@
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
- ****************************************************c*******************************/
+ ************************************************************************************/
 
 /************************************************************************************
  * Included Files
@@ -67,7 +67,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -1084,12 +1083,12 @@ static void spi_modifycr2(FAR struct stm32_spidev_s *priv, uint16_t setbits,
  * Name: spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -1925,7 +1924,7 @@ static void spi_bus_initialize(struct stm32_spidev_s *priv)
    *   Mode 0:                        CR1.CPHA=0 and CR1.CPOL=0
    *   Master:                        CR1.MSTR=1
    *   8-bit:                         CR2.DS=7
-   *   MSB tranmitted first:          CR1.LSBFIRST=0
+   *   MSB transmitted first:          CR1.LSBFIRST=0
    *   Replace NSS with SSI & SSI=1:  CR1.SSI=1 CR1.SSM=1 (prevents MODF error)
    *   Two lines full duplex:         CR1.BIDIMODE=0 CR1.BIDIOIE=(Don't care) and CR1.RXONLY=0
    */
@@ -2179,7 +2178,6 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus)
 #endif
     {
       spierr("ERROR: Unsupported SPI bus: %d\n", bus);
-      return NULL;
     }
 
   leave_critical_section(flags);

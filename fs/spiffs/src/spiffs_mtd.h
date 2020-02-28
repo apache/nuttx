@@ -161,4 +161,4 @@ ssize_t spiffs_mtd_erase(FAR struct spiffs_s *fs, off_t offset, size_t len);
 }
 #endif
 
-#endif  /* __FS_SPIFFS_SRC_SPIFFS_MTD_H */
+#endif /* __FS_SPIFFS_SRC_SPIFFS_MTD_H */

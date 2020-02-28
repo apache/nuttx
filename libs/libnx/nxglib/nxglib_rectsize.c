@@ -59,4 +59,3 @@ void nxgl_rectsize(FAR struct nxgl_size_s *size,
   size->w = rect->pt2.x - rect->pt1.x + 1;
   size->h = rect->pt2.y - rect->pt1.y + 1;
 }
-

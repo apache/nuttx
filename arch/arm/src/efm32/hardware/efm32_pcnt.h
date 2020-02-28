@@ -69,7 +69,7 @@
 #include "hardware/efm32_memorymap.h"
 
 #if !defined(CONFIG_EFM32_EFM32GG)
-#  warning This is the EFM32GG header file; Review/modification needed for this archtecture
+#  warning This is the EFM32GG header file; Review/modification needed for this architecture
 #endif
 
 /*******************************************************************************************************************************
@@ -90,7 +90,7 @@
 #define EFM32_PCNT_ROUTE_OFFSET           0x0028  /* I/O Routing Register */
 #define EFM32_PCNT_FREEZE_OFFSET          0x002c  /* Freeze Register */
 #define EFM32_PCNT_SYNCBUSY_OFFSET        0x0030  /* Synchronization Busy Register */
-#define EFM32_PCNT_AUXCNT_OFFSET          0x0038  /* Auxillary Counter Value Register */
+#define EFM32_PCNT_AUXCNT_OFFSET          0x0038  /* Auxiliary Counter Value Register */
 #define EFM32_PCNT_INPUT_OFFSET           0x003c  /* PCNT Input Register */
 
 /* PCNT Register Addresses *****************************************************************************************************/

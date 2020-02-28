@@ -33,6 +33,18 @@ rem ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 rem POSSIBILITY OF SUCH DAMAGE.
 rem
 
+if exist tools goto :GoToolDir
+if exist ..\tools goto :SetToolDir
+
+echo Cannot find tools\ directory
+goto End
+
+:GoToolDir
+cd tools
+
+:SetTooldir
+set tooldir=%CD%
+
 rem Parse command line arguments
 
 set debug=
@@ -86,6 +98,7 @@ if exist configure.exe goto :HaveConfigureExe
 
 set cc=mingw32-gcc.exe
 set cflags=-Wall -Wstrict-prototypes -Wshadow -g -pipe -I. -DCONFIG_WINDOWS_NATIVE=y
+echo %cc% %cflags% -o configure.exe configure.c cfgparser.c
 %cc% %cflags% -o configure.exe configure.c cfgparser.c
 if errorlevel 1 (
   echo ERROR: %cc% failed
@@ -94,15 +107,16 @@ if errorlevel 1 (
 )
 
 :HaveConfigureExe
-configure.exe %debug% %fmt% %hostopt% %appdir% %config%
+cd ..
+tools\configure.exe %debug% %fmt% %hostopt% %appdir% %config%
 if errorlevel 1 echo configure.exe failed
 goto End
 
 :NoConfig
-echo Missing ^<board-name^>\configs\^<config-name^> argument
+echo Missing ^<board-name^>:^<config-name^> argument
 
 :ShowUsage
-echo USAGE: %0 [-d] [-b|f] [-a ^<app-dir^>] ^<board-name^>\configs\^<config-name^>
+echo USAGE: %0 [-d] [-b|f] [-a ^<app-dir^>] ^<board-name^>:^<config-name^>
 echo        %0 [-h]
 echo\nWhere:
 echo  -d:
@@ -115,10 +129,10 @@ echo  -f:
 echo    Informs the tool that it should use POSIX style paths like /usr/local/bin.
 echo    By default, Windows style paths like C:\\Program Files are used.
 echo  -l selects the Linux (l) host environment.  The [-c^|u^|n] options
-echo     select one of the Windows environments.  Default:  Use host setup
-echo     in the defconfig file
+echo    select one of the Windows environments.  Default:  Use host setup
+echo    in the defconfig file
 echo  [-c^|u^|n] selects the Windows host and a Windows environment:  Cygwin (c),
-echo     Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin
+echo    Ubuntu under Windows 10 (u), or Windows native (n).  Default Cygwin
 echo  -a ^<app-dir^>:
 echo    Informs the configuration tool where the application build
 echo    directory.  This is a relative path from the top-level NuttX
@@ -129,7 +143,7 @@ echo  ^<board-name^>:
 echo    Identifies the board.  This must correspond to a board directory
 echo    under nuttx/boards/.
 echo  ^<config-name^>:
-echo    Identifies the specific configuratin for the selected ^<board-name^>.
+echo    Identifies the specific configuration for the selected ^<board-name^>.
 echo    This must correspond to a sub-directory under the board directory at
 echo    under nuttx/boards/^<board-name^>/configs/.
 echo  -h:

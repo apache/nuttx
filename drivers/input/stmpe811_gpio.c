@@ -179,7 +179,7 @@ int stmpe811_gpioconfig(STMPE811_HANDLE handle, uint8_t pinconfig)
       /* Set its initial output value */
       if ((pinconfig & STMPE811_GPIO_VALUE) != STMPE811_GPIO_ZERO)
         {
-          /* Set the output valu(s)e by writing to the SET register */
+          /* Set the output value(s)e by writing to the SET register */
           stmpe811_putreg8(priv, STMPE811_GPIO_SETPIN, (1 << pin));
         }
       else
@@ -273,7 +273,7 @@ void stmpe811_gpiowrite(STMPE811_HANDLE handle, uint8_t pinconfig, bool value)
 
   if (value)
     {
-      /* Set the output valu(s)e by writing to the SET register */
+      /* Set the output value(s)e by writing to the SET register */
 
       stmpe811_putreg8(priv, STMPE811_GPIO_SETPIN, (1 << pin));
     }
@@ -456,4 +456,3 @@ void stmpe811_gpioworker(FAR struct stmpe811_dev_s *priv)
 #endif
 
 #endif /* CONFIG_INPUT && CONFIG_INPUT_STMPE811 && !CONFIG_STMPE811_GPIO_DISABLE */
-

@@ -147,4 +147,4 @@ void ez80_spidev_initialize(void);
 }
 #endif
 
-#endif  /* __BOARDS_Z80_EZ80_MAKERLISP_SRC_MAKERLISP_H */
+#endif /* __BOARDS_Z80_EZ80_MAKERLISP_SRC_MAKERLISP_H */

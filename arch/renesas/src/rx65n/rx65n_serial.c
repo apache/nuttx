@@ -43,7 +43,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -1047,7 +1046,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   up_setbrr(priv, priv->baud);
 
-  /* Then enable the transmitter and reciever */
+  /* Then enable the transmitter and receiver */
 
   priv->scr |= (RX_SCISCR_TE | RX_SCISCR_RE);
   up_serialout(priv, RX_SCI_SCR_OFFSET, priv->scr);
@@ -1246,7 +1245,7 @@ static int up_rcvinterrupt(int irq, void *context, void *arg)
  *   when an interrupt received on the 'irq'  It should call
  *   uart_transmitchars or uart_receivechar to perform the
  *   appropriate data transfers.  The interrupt handling logic\
- *   must be able to map the 'irq' number into the approprite
+ *   must be able to map the 'irq' number into the appropriate
  *   up_dev_s structure in order to call these functions.
  *
  ****************************************************************************/

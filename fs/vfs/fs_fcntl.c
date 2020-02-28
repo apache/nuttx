@@ -65,7 +65,7 @@
  *
  * Input Parameters:
  *   filep - Instance for struct file for the opened file.
- *   cmd   - Indentifies the operation to be performed.
+ *   cmd   - Identifies the operation to be performed.
  *   ap    - Variable argument following the command.
  *
  * Returned Value:
@@ -113,15 +113,37 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * that refer to the same file.
          */
 
+        {
+          ret = filep->f_oflags & O_CLOEXEC ? FD_CLOEXEC : 0;
+        }
+        break;
+
       case F_SETFD:
-        /* Set the file descriptor flags defined in <fcntl.h>, that are associated
-         * with fd, to the third argument, arg, taken as type int. If the
-         * FD_CLOEXEC flag in the third argument is 0, the file shall remain open
-         * across the exec functions; otherwise, the file shall be closed upon
-         * successful execution of one  of  the  exec  functions.
+        /* Set the file descriptor flags defined in <fcntl.h>, that are
+         * associated with fd, to the third argument, arg, taken as type int.
+         * If the FD_CLOEXEC flag in the third argument is 0, the file shall
+         * remain open across the exec functions; otherwise, the file shall
+         * be closed upon successful execution of one of the exec functions.
          */
 
-        ret = -ENOSYS;
+        {
+          int oflags = va_arg(ap, int);
+
+          if (oflags & ~FD_CLOEXEC)
+            {
+              ret = -ENOSYS;
+              break;
+            }
+
+          if (oflags & FD_CLOEXEC)
+            {
+              filep->f_oflags |= O_CLOEXEC;
+            }
+          else
+            {
+              filep->f_oflags &= ~O_CLOEXEC;
+            }
+        }
         break;
 
       case F_GETFL:

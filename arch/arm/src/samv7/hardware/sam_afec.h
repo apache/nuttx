@@ -244,8 +244,8 @@
 #define AFEC_EMR_SIGNMODE_MASK       (3 << AFEC_EMR_SIGNMODE_SHIFT)
 #  define AFEC_EMR_SIGNMODE_SEUNSG   (0 << AFEC_EMR_SIGNMODE_SHIFT) /* Single ended channels unsigned */
 #  define AFEC_EMR_SIGNMODE_DFSIGN   (0 << AFEC_EMR_SIGNMODE_SHIFT) /* Differential channels signed */
-#  define AFEC_EMR_SIGNMODE_SESIGN   (1 << AFEC_EMR_SIGNMODE_SHIFT) /* Singed ended channels signed */
-#  define AFEC_EMR_SIGNMODE_DFUNSG   (1 << AFEC_EMR_SIGNMODE_SHIFT) /* Differential channels unsiged */
+#  define AFEC_EMR_SIGNMODE_SESIGN   (1 << AFEC_EMR_SIGNMODE_SHIFT) /* Single ended channels signed */
+#  define AFEC_EMR_SIGNMODE_DFUNSG   (1 << AFEC_EMR_SIGNMODE_SHIFT) /* Differential channels unsigned */
 #  define AFEC_EMR_SIGNMODE_UNSIGNED (2 << AFEC_EMR_SIGNMODE_SHIFT) /* All channels unsigned */
 #  define AFEC_EMR_SIGNMODE_SIGNED   (2 << AFEC_EMR_SIGNMODE_SHIFT) /* All channels signed */
 

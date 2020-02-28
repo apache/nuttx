@@ -91,6 +91,3 @@ void stm32_deselectsram(void)
 }
 
 #endif /* CONFIG_STM32_FSMC */
-
-
-

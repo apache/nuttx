@@ -589,7 +589,7 @@ typedef struct
 #define SPIM_CMD_WAIT_EVENT_ID_SHIFT              (0U)
 #define SPIM_CMD_WAIT_EVENT_ID(x)                 (((uint32_t)(x) /*<< SPIM_CMD_WAIT_EVENT_ID_SHIFT*/) & SPIM_CMD_WAIT_EVENT_ID_MASK)
 
-/* CMD_TX_DATA - SPIM send datas */
+/* CMD_TX_DATA - SPIM send data */
 
 #define SPIM_CMD_TX_DATA_SIZE_MASK                (0xFFFFU)
 #define SPIM_CMD_TX_DATA_SIZE_SHIFT               (0U)
@@ -601,7 +601,7 @@ typedef struct
 #define SPIM_CMD_TX_DATA_QPI_SHIFT                (27U)
 #define SPIM_CMD_TX_DATA_QPI(x)                   (((uint32_t)(x) << SPIM_CMD_TX_DATA_QPI_SHIFT) & SPIM_CMD_TX_DATA_QPI_MASK)
 
-/* CMD_RX_DATA - SPIM receive datas */
+/* CMD_RX_DATA - SPIM receive data */
 
 #define SPIM_CMD_RX_DATA_SIZE_MASK                (0xFFFFU)
 #define SPIM_CMD_RX_DATA_SIZE_SHIFT               (0U)
@@ -652,7 +652,7 @@ typedef struct
 #define SPIM_CMD_RX_CHECK_BYTE_ALIGN_SHIFT          (26U)
 #define SPIM_CMD_RX_CHECK_BYTE_ALIGN(x)             (((uint32_t)(x) << SPIM_CMD_RX_CHECK_BYTE_ALIGN_SHIFT) & SPIM_CMD_RX_CHECK_BYTE_ALIGN_MASK)
 
-/* The check bits trnsfered by QPI or not */
+/* The check bits transferred by QPI or not */
 
 #define SPIM_CMD_RX_CHECK_QPI_MASK                  (0x8000000U)
 #define SPIM_CMD_RX_CHECK_QPI_SHIFT                 (27U)
@@ -2025,4 +2025,4 @@ typedef struct
 
 #endif
 
-#endif  /* __ARCH_RISC_V_SRC_GAP8_GAP8_H */
+#endif /* __ARCH_RISC_V_SRC_GAP8_GAP8_H */

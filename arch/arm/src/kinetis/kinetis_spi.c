@@ -68,7 +68,6 @@
 #include <stdint.h>
 #include <limits.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -120,15 +119,18 @@ struct kinetis_spidev_s
 
 /* Helpers */
 
-static inline uint32_t spi_getreg(FAR struct kinetis_spidev_s *priv, uint8_t offset);
-static inline void     spi_putreg(FAR struct kinetis_spidev_s *priv, uint8_t offset,
-                              uint32_t value);
-static inline uint16_t spi_getreg16(FAR struct kinetis_spidev_s *priv, uint8_t offset);
-static inline void     spi_putreg16(FAR struct kinetis_spidev_s *priv, uint8_t offset,
-                                    uint16_t value);
-static inline uint8_t  spi_getreg8(FAR struct kinetis_spidev_s *priv, uint8_t offset);
-static inline void     spi_putreg8(FAR struct kinetis_spidev_s *priv, uint8_t offset,
-                                   uint8_t value);
+static inline uint32_t spi_getreg(FAR struct kinetis_spidev_s *priv,
+                                  uint8_t offset);
+static inline void     spi_putreg(FAR struct kinetis_spidev_s *priv,
+                                  uint8_t offset, uint32_t value);
+static inline uint16_t spi_getreg16(FAR struct kinetis_spidev_s *priv,
+                                    uint8_t offset);
+static inline void     spi_putreg16(FAR struct kinetis_spidev_s *priv,
+                                    uint8_t offset, uint16_t value);
+static inline uint8_t  spi_getreg8(FAR struct kinetis_spidev_s *priv,
+                                   uint8_t offset);
+static inline void     spi_putreg8(FAR struct kinetis_spidev_s *priv,
+                                   uint8_t offset, uint8_t value);
 static inline uint16_t spi_readword(FAR struct kinetis_spidev_s *priv);
 static inline void     spi_writeword(FAR struct kinetis_spidev_s *priv,
                                      uint16_t word);
@@ -137,28 +139,31 @@ static inline void     spi_run(FAR struct kinetis_spidev_s *priv, bool enable);
 static inline void     spi_write_control(FAR struct kinetis_spidev_s *priv,
                                          uint32_t control);
 static inline void     spi_write_status(FAR struct kinetis_spidev_s *priv,
-                                         uint32_t status);
+                                        uint32_t status);
 static inline void     spi_wait_status(FAR struct kinetis_spidev_s *priv,
-                                         uint32_t status);
-static uint16_t        spi_send_data(FAR struct kinetis_spidev_s *priv, uint16_t wd,
-                                     bool last);
+                                       uint32_t status);
+static uint16_t        spi_send_data(FAR struct kinetis_spidev_s *priv,
+                                     uint16_t wd, bool last);
 
 /* SPI methods */
 
 static int         spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
-static void        spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
+static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev,
+                                    uint32_t frequency);
+static void        spi_setmode(FAR struct spi_dev_s *dev,
+                               enum spi_mode_e mode);
 static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 #ifdef CONFIG_SPI_HWFEATURES
 static int         spi_hwfeatures(FAR struct spi_dev_s *dev,
                                   spi_hwfeatures_t features);
 #endif
 static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
-static void        spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+static void        spi_exchange(FAR struct spi_dev_s *dev,
+                                FAR const void *txbuffer,
                                 FAR void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
-static void        spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                                size_t nwords);
+static void        spi_sndblock(FAR struct spi_dev_s *dev,
+                                FAR const void *txbuffer, size_t nwords);
 static void        spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
                                  size_t nwords);
 #endif
@@ -348,7 +353,8 @@ static inline void spi_putreg(FAR struct kinetis_spidev_s *priv, uint8_t offset,
  *
  ************************************************************************************/
 
-static inline uint16_t spi_getreg16(FAR struct kinetis_spidev_s *priv, uint8_t offset)
+static inline uint16_t spi_getreg16(FAR struct kinetis_spidev_s *priv,
+                                    uint8_t offset)
 {
   return getreg16(priv->spibase + offset);
 }
@@ -432,9 +438,9 @@ static inline void spi_putreg8(FAR struct kinetis_spidev_s *priv, uint8_t offset
  *
  ************************************************************************************/
 
-static inline void spi_write_status(FAR struct kinetis_spidev_s *priv, uint32_t status)
+static inline void spi_write_status(FAR struct kinetis_spidev_s *priv,
+                                    uint32_t status)
 {
-
   /* Write the SR Register */
 
   spi_putreg(priv, KINETIS_SPI_SR_OFFSET, status);
@@ -455,9 +461,9 @@ static inline void spi_write_status(FAR struct kinetis_spidev_s *priv, uint32_t 
  *
  ************************************************************************************/
 
-static inline void spi_wait_status(FAR struct kinetis_spidev_s *priv, uint32_t status)
+static inline void spi_wait_status(FAR struct kinetis_spidev_s *priv,
+                                   uint32_t status)
 {
-
   while (status != (spi_getreg(priv, KINETIS_SPI_SR_OFFSET) & status));
 }
 
@@ -476,9 +482,9 @@ static inline void spi_wait_status(FAR struct kinetis_spidev_s *priv, uint32_t s
  *
  ************************************************************************************/
 
-static inline void spi_write_control(FAR struct kinetis_spidev_s *priv, uint32_t control)
+static inline void spi_write_control(FAR struct kinetis_spidev_s *priv,
+                                     uint32_t control)
 {
-
   /* Write the control word to the SPI Data Register */
 
   spi_putreg16(priv, KINETIS_SPI_PUSHR_OFFSET + 2, (uint16_t) (control >> 16));
@@ -521,7 +527,7 @@ static inline void spi_writeword(FAR struct kinetis_spidev_s *priv, uint16_t wor
  *
  * Returned Value:
  *   The 8-bit value from the FIFO
-  *
+ *
  ************************************************************************************/
 
 static inline uint16_t spi_readword(FAR struct kinetis_spidev_s *priv)
@@ -530,7 +536,7 @@ static inline uint16_t spi_readword(FAR struct kinetis_spidev_s *priv)
 
   spi_wait_status(priv, SPI_SR_RFDF | SPI_SR_TCF);
 
-   /* Return the data */
+  /* Return the data */
 
   return spi_getreg16(priv, KINETIS_SPI_POPR_OFFSET);
 }
@@ -564,12 +570,12 @@ void inline spi_run(FAR struct kinetis_spidev_s *priv, bool enable)
  * Name: spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -804,7 +810,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
       regval = spi_getreg(priv, priv->ctarsel);
       regval &= ~(SPI_CTARM_FMSZ_MASK);
-      regval |= SPI_CTARM_FMSZ(nbits-1);
+      regval |= SPI_CTARM_FMSZ(nbits - 1);
       spi_putreg(priv, priv->ctarsel, regval);
 
       /* Save the selection so the subsequence re-configurations will be faster */
@@ -951,7 +957,8 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *   nwords   - the length of data to be exchaned in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits > 8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1002,7 +1009,6 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     }
   else
     {
-
       /* 8-bit mode */
 
       while (nwords-- > 0)
@@ -1020,7 +1026,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
           /* Exchange one word */
 
-          byte = (uint8_t) spi_send_data(priv, (uint16_t)byte, nwords ? false : true);
+          byte = (uint8_t) spi_send_data(priv, (uint16_t)byte,
+                                         nwords ? false : true);
 
           /* Is there a buffer to receive the return value? */
 
@@ -1031,6 +1038,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
         }
     }
 }
+
 /************************************************************************************
  * Name: spi_sndblock
  *
@@ -1043,7 +1051,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  *   nwords   - the length of data to send from the buffer in number of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1071,7 +1080,8 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  *   nwords   - the length of data that can be received in the buffer in number
  *              of words.  The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1079,7 +1089,8 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  ************************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t nwords)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
+                          size_t nwords)
 {
   spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
   return spi_exchange(dev, NULL, rxbuffer, nwords);
@@ -1183,6 +1194,15 @@ FAR struct spi_dev_s *kinetis_spibus_initialize(int port)
 
   spi_run(priv, false);
 
+  /* Read MCR register and clear MDIS (to Enable module clock)
+   * It is necessary because to disable RX and TX FIFO the MDIS
+   * bit should be cleared first.
+   */
+
+  regval  = spi_getreg(priv, KINETIS_SPI_MCR_OFFSET);
+  regval &= ~(SPI_MCR_MDIS);
+  spi_putreg(priv, KINETIS_SPI_MCR_OFFSET, regval);
+
   /* Configure master mode:
    *   Master Mode                      - Enabled
    *   Continuous SCK                   - Disabled
@@ -1202,9 +1222,10 @@ FAR struct spi_dev_s *kinetis_spibus_initialize(int port)
    *
    */
 
-  spi_putreg(priv, KINETIS_SPI_MCR_OFFSET, SPI_MCR_MSTR | SPI_MCR_DCONF_SPI |
-                   SPI_MCR_SMPL_PT_0CLKS | SPI_MCR_PCSIS_MASK | SPI_MCR_HALT|
-                   SPI_MCR_DIS_RXF | SPI_MCR_DIS_TXF);
+  regval |= SPI_MCR_MSTR | SPI_MCR_DCONF_SPI | SPI_MCR_SMPL_PT_0CLKS |
+            SPI_MCR_PCSIS_MASK | SPI_MCR_HALT | SPI_MCR_DIS_RXF |
+            SPI_MCR_DIS_TXF;
+  spi_putreg(priv, KINETIS_SPI_MCR_OFFSET, regval);
 
   /* Set the initial SPI configuration */
 

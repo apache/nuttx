@@ -31,7 +31,7 @@
  ****************************************************************************/
 
 #ifndef __ARCH_XTENSA_SRC_ESP32_CHIP_MACROS_H
-#define __ARCH_XTENSA_SRC_ESP32_CHIP_MACROS_H 1
+#define __ARCH_XTENSA_SRC_ESP32_CHIP_MACROS_H
 
 /****************************************************************************
  * Included Files

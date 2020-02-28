@@ -602,7 +602,7 @@ void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
  *
  * Returned Value:
  *   On success, the positive, non-zero length of the return note is
- *   provided.  Zero is returned only if ther circular buffer is empty.  A
+ *   provided.  Zero is returned only if the circular buffer is empty.  A
  *   negated errno value is returned in the event of any failure.
  *
  ****************************************************************************/

@@ -40,6 +40,8 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <cstddef>
+
 #include "libxx.hxx"
 
 #ifdef CONFIG_HAVE_CXX14
@@ -52,12 +54,7 @@
 // Name: delete[]
 //***************************************************************************
 
-//void operator delete[](void *ptr std::size_t size)
-#ifdef CONFIG_CXX_NEWLONG
-void operator delete[](FAR void *ptr, unsigned long size)
-#else
-void operator delete[](FAR void *ptr, unsigned int size)
-#endif
+void operator delete[](FAR void *ptr, std::size_t size)
 {
   lib_free(ptr);
 }

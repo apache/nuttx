@@ -203,7 +203,7 @@ void up_lowputc(char ch)
 #ifdef HAVE_CONSOLE
   uint8_t ssr;
 
-  /* Wait until the TDR is avaible */
+  /* Wait until the TDR is available */
 
   while (!up_txready());
 
@@ -224,7 +224,7 @@ void up_lowputc(char ch)
  *
  * Description:
  *   This performs basic initialization of the UART used for the serial
- *   console.  Its purpose is to get the console output availabe as soon
+ *   console.  Its purpose is to get the console output available as soon
  *   as possible.
  *
  ****************************************************************************/
@@ -257,7 +257,7 @@ void up_lowsetup(void)
   scr &= ~RX_SCISCR_CKEMASK;
   putreg8(scr, RX_SCI_BASE + RX_SCI_SCR_OFFSET);
 
-  /* Then enable the transmitter and reciever */
+  /* Then enable the transmitter and receiver */
 
   scr |= (RX_SCISCR_TE | RX_SCISCR_RE);
   putreg8(scr, RX_SCI_BASE + RX_SCI_SCR_OFFSET);

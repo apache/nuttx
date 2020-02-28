@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libelf/libelf_ctors.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@
 
 int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
 {
-  FAR Elf32_Shdr *shdr;
+  FAR Elf_Shdr *shdr;
   size_t ctorsize;
   int ctoridx;
   int ret;
@@ -200,7 +200,6 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
         }
       else
         {
-
           /* Save the address of the .ctors (actually, .init_array) where it was
            * loaded into memory.  Since the .ctors lie in allocated memory, they
            * will be relocated via the normal mechanism.

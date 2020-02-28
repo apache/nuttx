@@ -41,7 +41,6 @@
 
 #include <unistd.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
@@ -122,7 +121,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
         }
 
       /* pthread_mutex_trytake failed.  Did it fail because the semaphore
-       * was not avaialable?
+       * was not available?
        */
 
       else if (status == EAGAIN)
@@ -183,7 +182,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
               /* A thread holds the mutex, but there is no such thread.
                * POSIX requires that the 'robust' mutex return EOWNERDEAD
                * in this case. It is then the caller's responsibility to
-               * call pthread_mutx_consistent() fo fix the mutex.
+               * call pthread_mutx_consistent() to fix the mutex.
                */
 
               mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;

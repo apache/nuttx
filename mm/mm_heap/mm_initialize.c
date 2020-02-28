@@ -85,7 +85,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
    * crazy.
    */
 
-  DEBUGASSERT(heapsize <= MMSIZE_MAX+1);
+  DEBUGASSERT(heapsize <= MMSIZE_MAX + 1);
 #endif
 
   /* Adjust the provide heap start and size so that they are both aligned
@@ -96,7 +96,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   heapend  = MM_ALIGN_DOWN((uintptr_t)heapstart + (uintptr_t)heapsize);
   heapsize = heapend - heapbase;
 
-  minfo("Region %d: base=%p size=%u\n", IDX+1, heapstart, heapsize);
+  minfo("Region %d: base=%p size=%u\n", IDX + 1, heapstart, heapsize);
 
   /* Add the size of this region to the total size of the heap */
 
@@ -114,11 +114,13 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   heap->mm_heapstart[IDX]->size      = SIZEOF_MM_ALLOCNODE;
   heap->mm_heapstart[IDX]->preceding = MM_ALLOC_BIT;
 
-  node                        = (FAR struct mm_freenode_s *)(heapbase + SIZEOF_MM_ALLOCNODE);
-  node->size                  = heapsize - 2*SIZEOF_MM_ALLOCNODE;
-  node->preceding             = SIZEOF_MM_ALLOCNODE;
+  node                               = (FAR struct mm_freenode_s *)
+                                       (heapbase + SIZEOF_MM_ALLOCNODE);
+  node->size                         = heapsize - 2*SIZEOF_MM_ALLOCNODE;
+  node->preceding                    = SIZEOF_MM_ALLOCNODE;
 
-  heap->mm_heapend[IDX]              = (FAR struct mm_allocnode_s *)(heapend - SIZEOF_MM_ALLOCNODE);
+  heap->mm_heapend[IDX]              = (FAR struct mm_allocnode_s *)
+                                       (heapend - SIZEOF_MM_ALLOCNODE);
   heap->mm_heapend[IDX]->size        = SIZEOF_MM_ALLOCNODE;
   heap->mm_heapend[IDX]->preceding   = node->size | MM_ALLOC_BIT;
 
@@ -168,6 +170,8 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
   CHECK_ALLOCNODE_SIZE;
   CHECK_FREENODE_SIZE;
 #endif
+  DEBUGASSERT(MM_MIN_CHUNK >= SIZEOF_MM_FREENODE);
+  DEBUGASSERT(MM_MIN_CHUNK >= SIZEOF_MM_ALLOCNODE);
 
   /* Set up global variables */
 
@@ -182,8 +186,8 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
   memset(heap->mm_nodelist, 0, sizeof(struct mm_freenode_s) * MM_NNODES);
   for (i = 1; i < MM_NNODES; i++)
     {
-      heap->mm_nodelist[i-1].flink = &heap->mm_nodelist[i];
-      heap->mm_nodelist[i].blink   = &heap->mm_nodelist[i-1];
+      heap->mm_nodelist[i - 1].flink = &heap->mm_nodelist[i];
+      heap->mm_nodelist[i].blink     = &heap->mm_nodelist[i - 1];
     }
 
   /* Initialize the malloc semaphore to one (to support one-at-

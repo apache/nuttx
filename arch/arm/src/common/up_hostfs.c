@@ -46,8 +46,6 @@
 #include <syscall.h>
 #include <unistd.h>
 
-#ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -328,5 +326,3 @@ int host_stat(const char *path, struct stat *buf)
 
   return ret;
 }
-
-#endif

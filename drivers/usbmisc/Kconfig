@@ -3,7 +3,13 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-comment "USB Miscellaneous drivers"
+menuconfig USBMISC
+	bool "USB Miscellaneous drivers"
+	default n
+	---help---
+		USB Miscellaneous drivers.
+
+if USBMISC
 
 config FUSB301
 	bool "On Semiconductor FUSB301 USB Type-C controller support"
@@ -60,3 +66,5 @@ config FUSB303_NPOLLWAITERS
 		Maximum number of threads that can be waiting on poll()
 
 endif
+
+endif # USBMISC

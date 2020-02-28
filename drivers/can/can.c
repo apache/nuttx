@@ -48,7 +48,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <poll.h>
@@ -57,7 +56,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/can/can.h>
 #include <nuttx/kmalloc.h>
@@ -333,7 +331,7 @@ static uint8_t can_bytes2dlc(FAR struct sam_can_s *priv, uint8_t nbytes)
  *
  * Description:
  *   This function performs deferred processing from can_txready.  See the
- *   discription of can_txready below for additionla information.
+ *   description of can_txready below for additionla information.
  *
  ****************************************************************************/
 
@@ -390,7 +388,7 @@ static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
   reader->fifo.rx_tail  = 0;
 
   nxsem_init(&reader->fifo.rx_sem, 0, 1);
-  reader->filep = filep;
+  filep->f_priv = reader;
 
   return reader;
 }
@@ -509,13 +507,16 @@ static int can_close(FAR struct file *filep)
 
   list_for_every_safe(&dev->cd_readers, node, tmp)
     {
-      if (((FAR struct can_reader_s *)node)->filep == filep)
+      if (((FAR struct can_reader_s *)node) ==
+          ((FAR struct can_reader_s *)filep->f_priv))
         {
           list_delete(node);
           kmm_free(node);
           break;
         }
     }
+
+  filep->f_priv = NULL;
 
   /* Decrement the references to the driver.  If the reference count will
    * decrement to 0, then uninitialize the driver.
@@ -574,7 +575,6 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
   FAR struct inode         *inode = filep->f_inode;
   FAR struct can_dev_s     *dev = inode->i_private;
   FAR struct can_reader_s  *reader = NULL;
-  FAR struct list_node     *node;
   FAR struct can_rxfifo_s  *fifo;
   size_t                    nread;
   irqstate_t                flags;
@@ -630,16 +630,8 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
         }
 #endif /* CONFIG_CAN_ERRORS */
 
-      list_for_every(&dev->cd_readers, node)
-        {
-          if (((FAR struct can_reader_s *) node)->filep == filep)
-            {
-              reader = (FAR struct can_reader_s *)node;
-              break;
-            }
-        }
-
-      DEBUGASSERT(reader != NULL);
+      DEBUGASSERT(filep->f_priv != NULL);
+      reader = (FAR struct can_reader_s *)filep->f_priv;
 
       fifo = &reader->fifo;
 
@@ -670,31 +662,31 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
        * in the user buffer.
        */
 
-    nread = 0;
-    do
-      {
-        /* Will the next message in the FIFO fit into the user buffer? */
+      nread = 0;
+      do
+        {
+          /* Will the next message in the FIFO fit into the user buffer? */
 
-        FAR struct can_msg_s *msg = &fifo->rx_buffer[fifo->rx_head];
-        int nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
-        int msglen = CAN_MSGLEN(nbytes);
+          FAR struct can_msg_s *msg = &fifo->rx_buffer[fifo->rx_head];
+          int nbytes = can_dlc2bytes(msg->cm_hdr.ch_dlc);
+          int msglen = CAN_MSGLEN(nbytes);
 
-        if (nread + msglen > buflen)
-          {
-            break;
-          }
+          if (nread + msglen > buflen)
+            {
+              break;
+            }
 
-        /* Copy the message to the user buffer */
+          /* Copy the message to the user buffer */
 
-        memcpy(&buffer[nread], msg, msglen);
-        nread += msglen;
+          memcpy(&buffer[nread], msg, msglen);
+          nread += msglen;
 
-        /* Increment the head of the circular message buffer */
+          /* Increment the head of the circular message buffer */
 
-        if (++fifo->rx_head >= CONFIG_CAN_FIFOSIZE)
-          {
-            fifo->rx_head = 0;
-          }
+          if (++fifo->rx_head >= CONFIG_CAN_FIFOSIZE)
+            {
+              fifo->rx_head = 0;
+            }
         }
       while (fifo->rx_head != fifo->rx_tail);
 
@@ -1027,7 +1019,6 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct inode *inode = (FAR struct inode *)filep->f_inode;
   FAR struct can_dev_s *dev = (FAR struct can_dev_s *)inode->i_private;
   FAR struct can_reader_s *reader = NULL;
-  FAR struct list_node *node;
   pollevent_t eventset;
   int ndx;
   int ret;
@@ -1042,16 +1033,8 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 #endif
 
-  list_for_every(&dev->cd_readers, node)
-    {
-      if (((FAR struct can_reader_s *)node)->filep == filep)
-        {
-          reader = (FAR struct can_reader_s *)node;
-          break;
-        }
-    }
-
-  DEBUGASSERT(reader != NULL);
+  DEBUGASSERT(filep->f_priv != NULL);
+  reader = (FAR struct can_reader_s *)filep->f_priv;
 
   /* Get exclusive access to the poll structures */
 
@@ -1514,7 +1497,7 @@ int can_txdone(FAR struct can_dev_s *dev)
  * Description:
  *   Called from the CAN interrupt handler at the completion of a send
  *   operation.  This interface is needed only for CAN hardware that
- *   supports queing of outgoing messages in a H/W FIFO.
+ *   supports queueing of outgoing messages in a H/W FIFO.
  *
  *   The CAN upper half driver also supports a queue of output messages in a
  *   S/W FIFO.  Messages are added to that queue when when can_write() is
@@ -1536,7 +1519,7 @@ int can_txdone(FAR struct can_dev_s *dev)
  *   another transfer.
  *
  *   If the CAN hardware supports a H/W FIFO, can_txdone() is not called
- *   when the tranfer is complete, but rather when the transfer is queued in
+ *   when the transfer is complete, but rather when the transfer is queued in
  *   the H/W FIFO.  When the H/W FIFO becomes full, then dev_txready() will
  *   report false and the number of queued messages in the S/W FIFO will grow.
  *

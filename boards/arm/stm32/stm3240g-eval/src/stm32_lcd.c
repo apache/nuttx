@@ -274,7 +274,7 @@ struct lcd_regs_s
 
 struct stm3240g_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 
@@ -609,7 +609,7 @@ static int stm3240g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
     }
 #elif defined(CONFIG_LCD_PORTRAIT)
   /* Convert coordinates.  In this configuration, the top of the display is to the left
-   * of the buttons (if the board is held so that the buttons are at the botton of the
+   * of the buttons (if the board is held so that the buttons are at the bottom of the
    * board).
    */
 
@@ -631,7 +631,7 @@ static int stm3240g_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *bu
     }
 #else /* CONFIG_LCD_RPORTRAIT */
   /* Convert coordinates.  In this configuration, the top of the display is to the right
-   * of the buttons (if the board is held so that the buttons are at the botton of the
+   * of the buttons (if the board is held so that the buttons are at the bottom of the
    * board).
    */
 
@@ -745,7 +745,7 @@ static int stm3240g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
     }
 #elif defined(CONFIG_LCD_PORTRAIT)
   /* Convert coordinates.  In this configuration, the top of the display is to the left
-   * of the buttons (if the board is held so that the buttons are at the botton of the
+   * of the buttons (if the board is held so that the buttons are at the bottom of the
    * board).
    */
 
@@ -768,7 +768,7 @@ static int stm3240g_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
     }
 #else /* CONFIG_LCD_RPORTRAIT */
   /* Convert coordinates.  In this configuration, the top of the display is to the right
-   * of the buttons (if the board is held so that the buttons are at the botton of the
+   * of the buttons (if the board is held so that the buttons are at the bottom of the
    * board).
    */
 
@@ -1150,7 +1150,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
  * Name:  board_lcd_uninitialize
  *
  * Description:
- *   Unitialize the LCD support
+ *   Uninitialize the LCD support
  *
  ****************************************************************************/
 

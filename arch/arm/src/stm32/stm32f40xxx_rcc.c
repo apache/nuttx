@@ -224,7 +224,7 @@ static inline void rcc_enableahb1(void)
 
   regval |= RCC_AHB1ENR_OTGHSEN;
 #endif
-#endif  /* CONFIG_STM32_OTGHS */
+#endif /* CONFIG_STM32_OTGHS */
 
 #ifdef CONFIG_STM32_DMA2D
   /* DMA2D clock */

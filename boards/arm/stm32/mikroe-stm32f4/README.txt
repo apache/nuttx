@@ -428,7 +428,7 @@ Mikroe-STM32F4-specific Configuration Options
 
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
-    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt priority.  Default: 128
     CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
@@ -492,7 +492,7 @@ Where <subdir> is one of the following:
     This configuration directory, performs a simple OS test using
     apps/examples/ostest with NuttX build as a kernel-mode monolithic
     module and the user applications are built separately.  Is
-    is recommened to use a special make command; not just 'make' but
+    is recommended to use a special make command; not just 'make' but
     make with the following two arguments:
 
         make pass1 pass2
@@ -661,15 +661,15 @@ Where <subdir> is one of the following:
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
        CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART2 will be /dev/ttyS0
 
-       However, there is nothing to generate SYLOG output in the default
+       However, there is nothing to generate SYSLOG output in the default
        configuration so nothing should appear on UART2 unless you enable
        some debug output or enable the USB monitor.
 
     4. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
        device will save encoded trace output in in-memory buffer; if the
        USB monitor is enabled, that trace buffer will be periodically
-       emptied and dumped to the system loggin device (UART2 in this
-       configuraion):
+       emptied and dumped to the system logging device (UART2 in this
+       configuration):
 
        CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
        CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
@@ -698,4 +698,3 @@ Where <subdir> is one of the following:
       CONFIG_CDCACM_CONSOLE=y       : The CDC/ACM serial device is NOT the console
       CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
       CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
-

@@ -1170,7 +1170,7 @@ int nxffs_close(FAR struct file *filep)
           ret = nxffs_wrclose(volume, (FAR struct nxffs_wrfile_s *)ofile);
         }
 
-      /* Release all resouces held by the open file */
+      /* Release all resources held by the open file */
 
       nxffs_freeofile(volume, ofile);
     }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libnxflat/libnxflat_bind.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -287,9 +287,10 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
       result = OK;
       switch (NXFLAT_RELOC_TYPE(reloc.r_info))
         {
-        /* NXFLAT_RELOC_TYPE_REL32I  Meaning: Object file contains a 32-bit offset
-         *                                    into I-Space at the offset.
-         *                           Fixup:   Add mapped I-Space address to the offset.
+        /* NXFLAT_RELOC_TYPE_REL32I  Meaning: Object file contains a 32-bit
+         *                                    offset into I-Space at the offset.
+         *                           Fixup:   Add mapped I-Space address to the
+         *                                    offset.
          */
 
         case NXFLAT_RELOC_TYPE_REL32I:
@@ -322,14 +323,16 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
 #ifdef NXFLAT_RELOC_TYPE_REL32ID
         case NXFLAT_RELOC_TYPE_REL32ID:
           {
-            result = nxflat_bindrel32id(loadinfo, NXFLAT_RELOC_OFFSET(reloc.r_info));
+            result = nxflat_bindrel32id(loadinfo,
+                                        NXFLAT_RELOC_OFFSET(reloc.r_info));
           }
           break;
 #endif
 
         default:
           {
-            berr("ERROR: Unrecognized relocation type: %d\n", NXFLAT_RELOC_TYPE(reloc.r_info));
+            berr("ERROR: Unrecognized relocation type: %d\n",
+                 NXFLAT_RELOC_TYPE(reloc.r_info));
             result = -EINVAL;
           }
           break;
@@ -348,8 +351,10 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
 #ifdef CONFIG_NXFLAT_DUMPBUFFER
   if (ret == OK && nrelocs > 0)
     {
-      relocs = (FAR struct nxflat_reloc_s *)(offset - loadinfo->isize + loadinfo->dspace->region);
-      nxflat_dumpbuffer("GOT", (FAR const uint8_t *)relocs, nrelocs * sizeof(struct nxflat_reloc_s));
+      relocs = (FAR struct nxflat_reloc_s *)
+        (offset - loadinfo->isize + loadinfo->dspace->region);
+      nxflat_dumpbuffer("GOT", (FAR const uint8_t *)relocs,
+                        nrelocs * sizeof(struct nxflat_reloc_s));
     }
 #endif
 
@@ -462,7 +467,8 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
           offset = imports[i].i_funcname;
           DEBUGASSERT(offset < loadinfo->isize);
 
-          symname = (FAR char *)(offset + loadinfo->ispace + sizeof(struct nxflat_hdr_s));
+          symname = (FAR char *)
+            (offset + loadinfo->ispace + sizeof(struct nxflat_hdr_s));
 
           /* Find the exported symbol value for this this symbol name. */
 
@@ -494,7 +500,8 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
 #ifdef CONFIG_NXFLAT_DUMPBUFFER
   if (nimports > 0)
     {
-      nxflat_dumpbuffer("Imports", (FAR const uint8_t *)imports, nimports * sizeof(struct nxflat_import_s));
+      nxflat_dumpbuffer("Imports", (FAR const uint8_t *)imports,
+                        nimports * sizeof(struct nxflat_import_s));
     }
 #endif
 
@@ -549,8 +556,8 @@ static inline int nxflat_clearbss(FAR struct nxflat_loadinfo_s *loadinfo)
 
   /* Zero the BSS area */
 
-   memset((FAR void *)(loadinfo->dspace->region + loadinfo->datasize), 0,
-          loadinfo->bsssize);
+  memset((FAR void *)(loadinfo->dspace->region + loadinfo->datasize), 0,
+         loadinfo->bsssize);
 
   /* Restore the original address environment */
 
@@ -612,4 +619,3 @@ int nxflat_bind(FAR struct nxflat_loadinfo_s *loadinfo,
 
   return ret;
 }
-

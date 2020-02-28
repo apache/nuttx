@@ -92,7 +92,7 @@ void imx_cpu_disable(void);
  *
  * Description:
  *   Called from CPU0 to enable all other CPUs.  The enabled CPUs will start
- *   execution at __cpuN_start and, after very low-level CPU initialzation
+ *   execution at __cpuN_start and, after very low-level CPU initialization
  *   has been performed, will branch to arm_cpu_boot()
  *   (see arch/arm/src/armv7-a/smp.h)
  *

@@ -41,11 +41,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <semaphore.h>
 #include <fcntl.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 

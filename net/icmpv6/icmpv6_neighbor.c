@@ -41,8 +41,6 @@
 
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
-#include <time.h>
 #include <debug.h>
 
 #include <netinet/in.h>
@@ -62,15 +60,6 @@
 #include "icmpv6/icmpv6.h"
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define CONFIG_ICMPv6_NEIGHBOR_DELAYSEC  \
-  (CONFIG_ICMPv6_NEIGHBOR_DELAYMSEC / 1000)
-#define CONFIG_ICMPv6_NEIGHBOR_DELAYNSEC \
-  ((CONFIG_ICMPv6_NEIGHBOR_DELAYMSEC - 1000*CONFIG_ICMPv6_NEIGHBOR_DELAYSEC) * 1000000)
 
 /****************************************************************************
  * Private Types
@@ -199,7 +188,6 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
 {
   FAR struct net_driver_s *dev;
   struct icmpv6_notify_s notify;
-  struct timespec delay;
   struct icmpv6_neighbor_s state;
   net_ipv6addr_t lookup;
   int ret;
@@ -295,11 +283,6 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
    * re-sending the Neighbor Solicitation if it is not.
    */
 
-  /* The optimal delay would be the worst case round trip time. */
-
-  delay.tv_sec  = CONFIG_ICMPv6_NEIGHBOR_DELAYSEC;
-  delay.tv_nsec = CONFIG_ICMPv6_NEIGHBOR_DELAYNSEC;
-
   ret = -ETIMEDOUT; /* Assume a timeout failure */
 
   while (state.snd_retries < CONFIG_ICMPv6_NEIGHBOR_MAXTRIES)
@@ -348,7 +331,7 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
 
       /* Now wait for response to the Neighbor Advertisement to be received. */
 
-      ret = icmpv6_wait(&notify, &delay);
+      ret = icmpv6_wait(&notify, CONFIG_ICMPv6_NEIGHBOR_DELAYMSEC);
 
       /* icmpv6_wait will return OK if and only if the matching Neighbor
        * Advertisement is received.  Otherwise, it will return -ETIMEDOUT.
@@ -359,9 +342,8 @@ int icmpv6_neighbor(const net_ipv6addr_t ipaddr)
           break;
         }
 
-      /* Increment the retry count and double the delay time */
+      /* Increment the retry count */
 
-      clock_timespec_add(&delay, &delay, &delay);
       state.snd_retries++;
     }
 

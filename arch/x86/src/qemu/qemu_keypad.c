@@ -44,7 +44,6 @@
 #include <nuttx/fs/fs.h>
 
 #include <stdint.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sched.h>

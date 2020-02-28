@@ -43,6 +43,7 @@
 
 #include <nuttx/syslog/ramlog.h>
 #include <nuttx/syslog/syslog.h>
+#include <nuttx/syslog/syslog_rpmsg.h>
 
 #include "syslog.h"
 
@@ -71,7 +72,7 @@
  *   as a minimum a call to syslog_channel() to use the device.
  *
  * Input Parameters:
- *   phase - One of {SYSLOG_INIT_EARLY, SYSLOG_INIT_LATE}
+ *  None
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -79,41 +80,30 @@
  *
  ****************************************************************************/
 
-int syslog_initialize(enum syslog_init_e phase)
+int syslog_initialize(void)
 {
   int ret = OK;
 
 #if defined(CONFIG_SYSLOG_CHAR)
-  if (phase == SYSLOG_INIT_LATE)
-    {
-      /* Enable use of a character device as the SYSLOG device */
+  /* Enable use of a character device as the SYSLOG device */
 
-      ret = syslog_dev_channel();
-    }
-
-#elif defined(CONFIG_RAMLOG_SYSLOG)
-  if (phase == SYSLOG_INIT_EARLY)
-    {
-      /* Use the RAMLOG as the SYSLOG device */
-
-      ret = ramlog_syslog_channel();
-    }
-
+  ret = syslog_dev_channel();
 #elif defined(CONFIG_SYSLOG_CONSOLE)
-  if (phase == SYSLOG_INIT_LATE)
-    {
-      /* Use the console device as the SYSLOG device */
+  /* Use the console device as the SYSLOG device */
 
-      ret = syslog_console_channel();
-    }
+  ret = syslog_console_channel();
+#endif
 
+#ifdef CONFIG_RAMLOG_SYSLOG
+  ramlog_syslog_register();
 #endif
 
 #ifdef CONFIG_SYSLOG_CHARDEV
-  if (phase == SYSLOG_INIT_EARLY)
-    {
-      syslog_register();
-    }
+  syslog_register();
+#endif
+
+#ifdef CONFIG_SYSLOG_CHARDEV
+  syslog_rpmsg_init();
 #endif
 
   return ret;

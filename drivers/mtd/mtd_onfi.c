@@ -215,7 +215,7 @@ bool onfi_have_embeddedecc(FAR struct onfi_pgparam_s *onfi)
  *
  * Description:
  *   This function read an the ONFI signature at address of 20h to detect
- *   if the device is ONFI compatiable.
+ *   if the device is ONFI compatible.
  *
  * Input Parameters:
  *   cmdaddr  - NAND command address base

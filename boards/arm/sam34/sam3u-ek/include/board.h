@@ -157,4 +157,4 @@
 #define BUTTON1                    1 /* Bit 0: Button 1 */
 #define BUTTON2                    2 /* Bit 1: Button 2 */
 
-#endif  /* __BOARDS_ARM_SAM34_SAM3U_EK_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_SAM34_SAM3U_EK_INCLUDE_BOARD_H */

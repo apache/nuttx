@@ -1,9 +1,9 @@
 /****************************************************************************
  * boards/arm/lpc43xx/bambino-200e/src/lpc43_appinit.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2016, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Alan Carvalho de Assis acassis@gmail.com [nuttx] <nuttx@googlegroups.com>
+ *           Alan Carvalho de Assis acassis@gmail.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -135,8 +135,6 @@ static int nsh_spifi_initialize(void)
 
   return OK;
 }
-#else
-#  define nsh_spifi_initialize() (OK)
 #endif
 
 /****************************************************************************
@@ -173,9 +171,15 @@ int board_app_initialize(uintptr_t arg)
 #endif
   int ret = 0;
 
+#ifdef CONFIG_LPC43_SPIFI
   /* Initialize the SPIFI block device */
 
-  nsh_spifi_initialize();
+  ret = nsh_spifi_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: nsh_spifi_initialize() failed: %d\n", ret);
+    }
+#endif
 
 #ifdef HAVE_MMCSD
   /* Get an instance of the SDIO interface */

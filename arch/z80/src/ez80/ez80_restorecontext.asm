@@ -107,4 +107,3 @@ noinrestore:
 	ex	af, af'			; Restore AF
 	ret				; Return with interrupts disabled
 	end
-

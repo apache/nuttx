@@ -2,7 +2,7 @@
  * net/tcp/tcp_timer.c
  * Poll for the availability of TCP TX data
  *
- *   Copyright (C) 2007-2010, 2015-2016, 2018 Gregory Nutt. All rights
+ *   Copyright (C) 2007-2010, 2015-2016, 2018, 2020 Gregory Nutt. All rights
  *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -426,6 +426,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                            *
                            * Get the size of the IP header and the TCP header.
                            */
+
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
                           if (conn->domain == PF_INET)

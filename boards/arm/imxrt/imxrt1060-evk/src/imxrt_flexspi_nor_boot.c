@@ -64,4 +64,3 @@ const struct boot_data_s g_boot_data =
   PLUGIN_FLAG,                        /* Plugin flag */
   0xffffffff                          /* empty - extra data word */
 };
-

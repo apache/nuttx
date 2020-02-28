@@ -84,5 +84,3 @@ int clock_daysbeforemonth(int month, bool leapyear)
 
   return retval;
 }
-
-

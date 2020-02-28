@@ -138,4 +138,3 @@ void lc823450_mpu_uheap(uintptr_t start, size_t size)
 }
 
 #endif /* CONFIG_ARM_MPU */
-

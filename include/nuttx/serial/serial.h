@@ -45,13 +45,13 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #ifdef CONFIG_SERIAL_TERMIOS
 #  include <termios.h>
 #endif
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -499,8 +499,8 @@ void uart_recvchars_done(FAR uart_dev_t *dev);
  * Name: uart_reset_sem
  *
  * Description:
- *   This function is called when need reset uart semphore, this may used in kill one
- *   process, but this process was reading/writing with the semphore.
+ *   This function is called when need reset uart semaphore, this may used in kill one
+ *   process, but this process was reading/writing with the semaphore.
  *
  ************************************************************************************/
 

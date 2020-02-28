@@ -236,21 +236,21 @@
 #define AD_ADGDR_OFFSET             0x04  /* A/D Global Data Register (only one common register!) */
 //~ #define AD_ADGSR_OFFSET         0x08  /* A/D Global Start Register */
 #define AD_ADINTEN_OFFSET           0x0c  /* A/D Interrupt Enable Register */
-#define AD_ADDR0_OFFSET             0x10  /* A/D Chanel 0 Data Register */
-#define AD_ADDR1_OFFSET             0x14  /* A/D Chanel 0 Data Register */
-#define AD_ADDR2_OFFSET             0x18  /* A/D Chanel 0 Data Register */
-#define AD_ADDR3_OFFSET             0x1c  /* A/D Chanel 0 Data Register */
-#define AD_ADDR4_OFFSET             0x20  /* A/D Chanel 0 Data Register */
-#define AD_ADDR5_OFFSET             0x24  /* A/D Chanel 0 Data Register */
-#define AD_ADDR6_OFFSET             0x28  /* A/D Chanel 0 Data Register */
-#define AD_ADDR7_OFFSET             0x2c  /* A/D Chanel 0 Data Register */
+#define AD_ADDR0_OFFSET             0x10  /* A/D Channel 0 Data Register */
+#define AD_ADDR1_OFFSET             0x14  /* A/D Channel 0 Data Register */
+#define AD_ADDR2_OFFSET             0x18  /* A/D Channel 0 Data Register */
+#define AD_ADDR3_OFFSET             0x1c  /* A/D Channel 0 Data Register */
+#define AD_ADDR4_OFFSET             0x20  /* A/D Channel 0 Data Register */
+#define AD_ADDR5_OFFSET             0x24  /* A/D Channel 0 Data Register */
+#define AD_ADDR6_OFFSET             0x28  /* A/D Channel 0 Data Register */
+#define AD_ADDR7_OFFSET             0x2c  /* A/D Channel 0 Data Register */
 #define AD_ADSTAT_OFFSET            0x30  /* A/D Status Register */
 
 /* Digital to Analog (DAC) Base Address */
 
 #define DAC_BASE_ADDR               0xE006C000
 
-/* Digital to Analog  (DAC) reister offset */
+/* Digital to Analog  (DAC) register offset */
 
 //#define DACR_OFFSET               0x00
 
@@ -547,7 +547,7 @@
 
 #define SCB_BASE_ADDR               0xE01FC000
 
-/* Memory Accelerator Module (MAM) Regiser */
+/* Memory Accelerator Module (MAM) Register */
 
 #define SCB_MAMCR                   (*(volatile uint32_t*)(0xE01FC000))
 #define SCB_MAMTIM                  (*(volatile uint32_t*)(0xE01FC004))
@@ -1003,4 +1003,4 @@ are for LPC24xx only. */
  * Public Function Prototypes
  ****************************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_LPC2378_CHIP_H */
+#endif /* __ARCH_ARM_SRC_LPC2378_CHIP_H */

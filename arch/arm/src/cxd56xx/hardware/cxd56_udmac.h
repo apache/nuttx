@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_UDMAC_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_UDMAC_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_UDMAC_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_UDMAC_H
 
 /****************************************************************************
  * Included Files
@@ -148,7 +148,8 @@
  * Public Types
  ****************************************************************************/
 
-struct dma_descriptor_s {
+struct dma_descriptor_s
+{
     volatile void * volatile srcend;
     volatile void * volatile dstend;
     volatile uint32_t        ctrl;
@@ -163,4 +164,4 @@ struct dma_descriptor_s {
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_UDMAC_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_UDMAC_H */

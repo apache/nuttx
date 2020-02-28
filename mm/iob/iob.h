@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __MM_IOB_IOB_H
-#define __MM_IOB_IOB_H 1
+#define __MM_IOB_IOB_H
 
 /****************************************************************************
  * Included Files
@@ -42,10 +42,10 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <debug.h>
 
 #include <nuttx/mm/iob.h>
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_MM_IOB
 

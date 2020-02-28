@@ -98,7 +98,7 @@ void net_lockinitialize(void);
 int net_breaklock(FAR unsigned int *count);
 
 /****************************************************************************
- * Name: net_breaklock
+ * Name: net_restorelock
  *
  * Description:
  *   Restore the locked state
@@ -234,9 +234,7 @@ void net_ipv6_pref2mask(uint8_t preflen, net_ipv6addr_t mask);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NET_ARCH_CHKSUM
 uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len);
-#endif
 
 /****************************************************************************
  * Name: net_chksum
@@ -263,9 +261,7 @@ uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NET_ARCH_CHKSUM
 uint16_t net_chksum(FAR uint16_t *data, uint16_t len);
-#endif
 
 /****************************************************************************
  * Name: ipv4_upperlayer_chksum
@@ -284,7 +280,7 @@ uint16_t net_chksum(FAR uint16_t *data, uint16_t len);
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_NET_ARCH_CHKSUM) && defined(CONFIG_NET_IPv4)
+#ifdef CONFIG_NET_IPv4
 uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto);
 #endif
 
@@ -308,7 +304,7 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto);
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_NET_ARCH_CHKSUM) && defined(CONFIG_NET_IPv6)
+#ifdef CONFIG_NET_IPv6
 uint16_t ipv6_upperlayer_chksum(FAR struct net_driver_s *dev,
                                 uint8_t proto, unsigned int iplen);
 #endif
@@ -337,8 +333,6 @@ uint16_t tcp_ipv4_chksum(FAR struct net_driver_s *dev);
 #endif
 
 #ifdef CONFIG_NET_IPv6
-/* REVIST: Is this used? */
-
 uint16_t tcp_ipv6_chksum(FAR struct net_driver_s *dev);
 #endif
 

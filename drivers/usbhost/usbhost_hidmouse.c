@@ -44,7 +44,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <poll.h>
-#include <semaphore.h>
 #include <signal.h>
 #include <fcntl.h>
 #include <assert.h>
@@ -936,9 +935,9 @@ static bool usbhost_threshold(FAR struct usbhost_state_s *priv)
       diff = pos - priv->xlast;
     }
   else
-   {
+    {
       diff = priv->xlast - pos;
-   }
+    }
 
   /* Check if the X difference exceeds the report threshold */
 
@@ -973,9 +972,9 @@ static bool usbhost_threshold(FAR struct usbhost_state_s *priv)
       diff = pos - priv->wlast;
     }
   else
-   {
+    {
       diff = priv->wlast - pos;
-   }
+    }
 
   /* Check if the X difference exceeds the report threshold */
 
@@ -1286,11 +1285,12 @@ static int usbhost_sample(FAR struct usbhost_state_s *priv,
           priv->sample.valid = false;
         }
       else if (sample->event == BUTTON_PRESSED)
-       {
+        {
           /* First report -- next report will be a movement */
 
-         priv->sample.event = BUTTON_MOVE;
-       }
+          priv->sample.event = BUTTON_MOVE;
+        }
+
 #endif
 
       /* The sample has been reported and is no longer valid */
@@ -1354,10 +1354,6 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
 
       if (ret < 0)
         {
-          /* If we are awakened by a signal, then we need to return
-           * the failure now.
-           */
-
           ierr("ERROR: nxsem_wait: %d\n", ret);
           goto errout;
         }
@@ -1778,7 +1774,7 @@ static void usbhost_putle32(uint8_t *dest, uint32_t val)
   /* Little endian means LS halfword first in byte stream */
 
   usbhost_putle16(dest, (uint16_t)(val & 0xffff));
-  usbhost_putle16(dest+2, (uint16_t)(val >> 16));
+  usbhost_putle16(dest + 2, (uint16_t)(val >> 16));
 }
 #endif
 
@@ -1889,7 +1885,7 @@ static FAR struct usbhost_class_s *
 
       if (usbhost_allocdevno(priv) == OK)
         {
-         /* Initialize class method function pointers */
+          /* Initialize class method function pointers */
 
           priv->usbclass.hport        = hport;
           priv->usbclass.connect      = usbhost_connect;
@@ -1931,6 +1927,7 @@ static FAR struct usbhost_class_s *
 /****************************************************************************
  * struct usbhost_class_s methods
  ****************************************************************************/
+
 /****************************************************************************
  * Name: usbhost_connect
  *
@@ -2083,6 +2080,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 /****************************************************************************
  * Character driver methods
  ****************************************************************************/
+
 /****************************************************************************
  * Name: usbhost_open
  *
@@ -2207,7 +2205,7 @@ static int usbhost_close(FAR struct file *filep)
        *    but there is still an outstanding open reference.
        */
 
-     if (priv->crefs == 0 || (priv->crefs == 1 && priv->polling))
+      if (priv->crefs == 0 || (priv->crefs == 1 && priv->polling))
         {
           /* Yes.. In either case, then the driver is no longer open */
 

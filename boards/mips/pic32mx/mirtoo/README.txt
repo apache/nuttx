@@ -387,7 +387,7 @@ Toolchains
 
   Another option is the mips-elf toolchain used with the Pinguino project.  This
   is a relatively current mips-elf GCC and should provide free C++ support as
-  well. This toolchain can be downloded from the Pinguino website:
+  well. This toolchain can be downloaded from the Pinguino website:
   http://wiki.pinguino.cc/index.php/Main_Page#Download .
 
   Support for the Pinguino mips-elf toolchain has been included in the Mirtoo
@@ -479,7 +479,7 @@ Loading NuttX with ICD3
       cd tools/pic32mx
       make
 
-    Now you will have an excecutable file call mkpichex (or mkpichex.exe on
+    Now you will have an executable file call mkpichex (or mkpichex.exe on
     Cygwin).  This program will take the nutt.hex file as an input, it will
     convert all of the KSEG0 and KSEG1 addresses to physical address, and
     it will write the modified file, replacing the original nuttx.hex.
@@ -837,7 +837,7 @@ Where <subdir> is one of the following:
 
   nsh
 
-    This configuration directory holds configuration files tht can
+    This configuration directory holds configuration files that can
     be used to support the NuttShell (NSH).  This configuration use
     UART1 which is available on FUNC 4 and 5 on connector X3:
 

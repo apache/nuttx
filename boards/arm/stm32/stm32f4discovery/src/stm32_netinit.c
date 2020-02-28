@@ -52,4 +52,3 @@ void up_netinitialize(void)
 {
 }
 #endif
-

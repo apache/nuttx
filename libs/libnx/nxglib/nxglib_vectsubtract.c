@@ -60,4 +60,3 @@ void nxgl_vectsubtract(FAR struct nxgl_point_s *dest,
   dest->x = v1->x - v2->x;
   dest->y = v1->y - v2->y;
 }
-

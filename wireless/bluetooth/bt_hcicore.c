@@ -56,7 +56,6 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/kthread.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/bluetooth.h>
 #include <nuttx/wireless/bluetooth/bt_core.h>
@@ -1759,7 +1758,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, FAR struct bt_buf_s *buf,
            * released while we are waiting.
            */
 
-          nxsem_timedwait_uninterruptible(&sync_sem, &abstime);
+          ret = nxsem_timedwait_uninterruptible(&sync_sem, &abstime);
         }
 
       sched_unlock();

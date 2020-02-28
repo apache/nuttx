@@ -1000,10 +1000,10 @@ config LPC54_LCD_CLKIN_FREQUENCY
 	depends on LPC54_LCD_USE_CLKIN
 
 config LPC54_LCD_REFRESH_FREQ
-	int "LCD refesh rate (Hz)"
+	int "LCD refresh rate (Hz)"
 	default 50
 	---help---
-		LCD refesh rate (Hz)
+		LCD refresh rate (Hz)
 
 config LPC54_LCD_BACKLIGHT
 	bool "Enable backlight"

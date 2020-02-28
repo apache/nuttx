@@ -77,7 +77,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -1852,7 +1851,7 @@ static int stm32_i2c_isr_process(struct stm32_i2c_priv_s *priv)
        * N, N-1, N-2 will be read with BTF:
        */
 
-#ifndef  CONFIG_I2C_POLLED
+#ifndef CONFIG_I2C_POLLED
       if (priv->dcnt < 5)
         {
           stm32_i2c_modifyreg(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_ITBUFEN, 0);

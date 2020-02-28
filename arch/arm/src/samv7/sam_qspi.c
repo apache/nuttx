@@ -44,7 +44,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -1504,7 +1503,7 @@ static int qspi_command(struct qspi_dev_s *dev,
       MEMORY_SYNC();
 
       /* If the insruction frame does not include data, writing to the IFR
-       * tiggers sending of the instruction frame. Fall through to INSTRE
+       * triggers sending of the instruction frame. Fall through to INSTRE
        * wait.
        */
     }
@@ -1576,14 +1575,14 @@ static int qspi_memory(struct qspi_dev_s *dev,
  *   buflen - Buffer length to allocate in bytes
  *
  * Returned Value:
- *   Address of tha allocated memory on success; NULL is returned on any
+ *   Address of the allocated memory on success; NULL is returned on any
  *   failure.
  *
  ****************************************************************************/
 
 static FAR void *qspi_alloc(FAR struct qspi_dev_s *dev, size_t buflen)
 {
-  /* Here we exploit the internal knowlege the kmm_malloc() will return memory
+  /* Here we exploit the internal knowledge the kmm_malloc() will return memory
    * aligned to 64-bit addresses.  The buffer length must be large enough to
    * hold the rested buflen in units a 32-bits.
    */

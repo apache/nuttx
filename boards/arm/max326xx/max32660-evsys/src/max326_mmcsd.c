@@ -40,7 +40,6 @@
 
 #include <unistd.h>
 #include <sched.h>
-#include <semaphore.h>
 #include <time.h>
 #include <debug.h>
 

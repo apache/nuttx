@@ -148,12 +148,12 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 
     1. Install Cygwin (http://www.cygwin.com/).  My recommendation is to install
        everything.  There are many tools you will need and it is best just to
-       waste a little disk space and have everthing you need.  Everything will
+       waste a little disk space and have everything you need.  Everything will
        require a couple of gigbytes of disk space.
 
     2. Create a directory /home/OpenOCD.
 
-    3. Get the FT2232 drivr from http://www.ftdichip.com/Drivers/D2XX.htm and
+    3. Get the FT2232 driver from http://www.ftdichip.com/Drivers/D2XX.htm and
        extract it into /home/OpenOCD/ftd2xx
 
        $ pwd
@@ -343,4 +343,3 @@ Configurations:
       a lot has changed since 2012, but I cannot see any change to either this
       configuration, to the LCD driver, or to the LPC2148 support that would
       affect the operation of the LCD.  The nsh configuration is still functional.
-

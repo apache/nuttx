@@ -445,4 +445,3 @@ unsigned int arp_snapshot(FAR struct arp_entry_s *snapshot,
 
 #endif /* CONFIG_NET_ARP */
 #endif /* CONFIG_NET */
-

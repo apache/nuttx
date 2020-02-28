@@ -181,4 +181,3 @@ const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id
   leave_critical_section(flags);
   return NULL;
 }
-

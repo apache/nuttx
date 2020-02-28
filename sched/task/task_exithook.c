@@ -647,7 +647,7 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
    *    a bug.
    * 2. We cannot call the exit functions if nonblocking is requested:  These
    *    functions might block.
-   * 3. This function will only be called with with non-blocking == true
+   * 3. This function will only be called with non-blocking == true
    *    only when called through _exit(). _exit() behaviors requires that
    *    the exit functions *not* be called.
    */
@@ -682,7 +682,7 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
    * NOTES:
    * 1. We cannot flush the buffered I/O if nonblocking is requested.
    *    that might cause this logic to block.
-   * 2. This function will only be called with with non-blocking == true
+   * 2. This function will only be called with non-blocking == true
    *    only when called through _exit(). _exit() behavior does not
    *    require that the streams be flushed
    */

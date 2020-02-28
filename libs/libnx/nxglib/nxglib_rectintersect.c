@@ -62,4 +62,3 @@ void nxgl_rectintersect(FAR struct nxgl_rect_s *dest,
   dest->pt2.x = ngl_min(src1->pt2.x, src2->pt2.x);
   dest->pt2.y = ngl_min(src1->pt2.y, src2->pt2.y);
 }
-

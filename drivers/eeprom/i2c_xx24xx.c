@@ -240,11 +240,6 @@ static const struct file_operations at24cs_uuid_fops =
  *
  * Use ACK polling to detect the completion of the write operation.
  * Returns TRUE if write is complete (device replies to ACK).
- * Note: The device always replies an ACK for the control byte, the polling
- * shall be done using the ACK for the memory address byte. Read or write does
- * not matter.
- * Note: We should sleep a bit between retries, the write time is around 5 ms,
- * but the bus is slow, so, a few retries at most will happen.
  *
  ****************************************************************************/
 
@@ -253,7 +248,7 @@ static int ee24xx_waitwritecomplete(FAR struct ee24xx_dev_s *eedev,
 {
   struct i2c_msg_s msgs[1];
   int ret;
-  int retries = 100;
+  int retries = 500;
   uint8_t adr;
   uint32_t addr_hi = (memaddr >> (eedev->addrlen << 3));
 

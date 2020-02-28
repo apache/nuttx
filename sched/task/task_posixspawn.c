@@ -120,7 +120,7 @@ static int nxposix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
 
   /* Start the task */
 
-  pid = exec(path, (FAR char * const *)argv, symtab, nsymbols);
+  pid = exec_spawn(path, (FAR char * const *)argv, symtab, nsymbols, attr);
   if (pid < 0)
     {
       ret = get_errno();

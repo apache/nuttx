@@ -62,7 +62,6 @@
 #include <debug.h>
 
 #include <arch/irq.h>
-#include <nuttx/clock.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>
@@ -887,6 +886,7 @@ static inline void send_txnotify(FAR struct socket *psock,
  *   psock    An instance of the internal socket structure.
  *   buf      Data to send
  *   len      Length of data to send
+ *   flags    Send flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
@@ -932,11 +932,12 @@ static inline void send_txnotify(FAR struct socket *psock,
  ****************************************************************************/
 
 ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
-                       size_t len)
+                       size_t len, int flags)
 {
   FAR struct tcp_conn_s *conn;
   FAR struct tcp_wrbuffer_s *wrb;
   ssize_t    result = 0;
+  bool       nonblock;
   int        ret = OK;
 
   if (psock == NULL || psock->s_crefs <= 0)
@@ -991,6 +992,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 
+  nonblock = _SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0;
+
   /* Dump the incoming buffer */
 
   BUF_DUMP("psock_tcp_send", buf, len);
@@ -1002,7 +1005,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
        */
 
       net_lock();
-      if (_SS_ISNONBLOCK(psock->s_flags))
+      if (nonblock)
         {
           wrb = tcp_wrbuffer_tryalloc();
         }
@@ -1016,7 +1019,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
           /* A buffer allocation error occurred */
 
           nerr("ERROR: Failed to allocate write buffer\n");
-          ret = _SS_ISNONBLOCK(psock->s_flags) ? -EAGAIN : -ENOMEM;
+          ret = nonblock ? -EAGAIN : -ENOMEM;
           goto errout_with_lock;
         }
 
@@ -1034,7 +1037,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
           /* A buffer allocation error occurred */
 
           nerr("ERROR: Failed to allocate callback\n");
-          ret = _SS_ISNONBLOCK(psock->s_flags) ? -EAGAIN : -ENOMEM;
+          ret = nonblock ? -EAGAIN : -ENOMEM;
           goto errout_with_wrb;
         }
 
@@ -1054,7 +1057,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
        * buffer space if the socket was opened non-blocking.
        */
 
-      if (_SS_ISNONBLOCK(psock->s_flags))
+      if (nonblock)
         {
           /* The return value from TCP_WBTRYCOPYIN is either OK or
            * -ENOMEM if less than the entire data chunk could be allocated.

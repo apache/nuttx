@@ -174,4 +174,3 @@ int netdev_nextindex(int ifindex)
   return -ENODEV;
 }
 #endif
-

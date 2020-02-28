@@ -483,7 +483,7 @@ arm_data_initialize:
 	/* .text Data:
 	 *
 	 *   _sbss is the start of the BSS region (see linker script)
-	 *   _ebss is the end of the BSS regsion (see linker script)
+	 *   _ebss is the end of the BSS region (see linker script)
 	 *
 	 * Typical Configuration:
 	 *   The idle task stack starts at the end of BSS and is of size

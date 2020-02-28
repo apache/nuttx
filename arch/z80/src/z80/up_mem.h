@@ -72,4 +72,4 @@
 
 extern const uint16_t g_heapbase;
 
-#endif  /* __ARCH_Z80_SRC_COMMON_UP_MEM_H */
+#endif /* __ARCH_Z80_SRC_COMMON_UP_MEM_H */

@@ -162,4 +162,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_IMX1_IRQ_H */
-

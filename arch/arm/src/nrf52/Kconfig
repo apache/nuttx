@@ -118,6 +118,18 @@ config NRF52_SPI3_MASTER
 	select NRF52_SPI_MASTER
 	depends on NRF52_HAVE_SPI3_MASTER
 
+if NRF52_SPI_MASTER
+
+config NRF52_SPI_MASTER_INTERRUPTS
+	bool "SPI Master interrupts support"
+	default n
+
+endif
+
+config NRF52_GPIOTE
+	bool "GPIOTE (GPIO interrupts)"
+	default n
+
 config NRF52_UART0
 	bool "UART0"
 	default n
@@ -219,9 +231,5 @@ config NRF52_PROGMEM
 		Enable support FLASH interfaces as defined in include/nuttx/progmem.h
 
 menu "GPIO Interrupt Configuration"
-
-config NRF52_GPIOIRQ
-	bool "Support GPIO Interrupts"
-	default n
 
 endmenu # GPIO Interrupt Configuration

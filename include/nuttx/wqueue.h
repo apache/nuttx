@@ -45,7 +45,6 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <semaphore.h>
 #include <queue.h>
 
 #include <nuttx/clock.h>
@@ -291,7 +290,7 @@ enum work_evtype_e
   WORK_TCP_DISCONNECT,   /* Notify loss of TCP connection */
   WORK_UDP_READAHEAD,    /* Notify that UDP read-ahead data is available */
   WORK_UDP_WRITEBUFFER,  /* Notify that UDP write buffer is empty */
-  WORK_NETLINK_RESPONSE  /* Notify thtat Netlink response is available */
+  WORK_NETLINK_RESPONSE  /* Notify that Netlink response is available */
 };
 
 /* This structure describes one notification and is provided as input to

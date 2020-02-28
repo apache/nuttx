@@ -205,4 +205,3 @@ uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISCV_INCLUDE_RV32IM_SYSCALL_H */
-

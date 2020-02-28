@@ -61,11 +61,11 @@
 
 #define CRS_CR_SYNCOKIE            (1 << 0)  /* Bit 0: SYNC event OK interrupt enable */
 #define CRS_CR_SYNCWARNIE          (1 << 1)  /* Bit 1: SYNC warning interrupt enable */
-#define CRS_CR_ERRIE               (1 << 2)  /* Bit 2: Syncronization or Trimming error interrupt enabled */
+#define CRS_CR_ERRIE               (1 << 2)  /* Bit 2: Synchronization or Trimming error interrupt enabled */
 #define CRS_CR_ESYNCIE             (1 << 3)  /* Bit 3: Expected SYNC interrupt enable */
 #define CRS_CR_CEN                 (1 << 5)  /* Bit 5: Frequency error counter enable */
 #define CRS_CR_AUTOTRIMEN          (1 << 6)  /* Bit 6: Automatic trimming enabled */
-#define CRS_CR_SWSYNC              (1 << 7)  /* Bit 7: Generate sofware SYNC event */
+#define CRS_CR_SWSYNC              (1 << 7)  /* Bit 7: Generate software SYNC event */
 #define CRS_CR_TRIM_SHIFT          8         /* Bits 8-13: HSI48 oscillator smooth trimming */
 #define CRS_CR_TRIM_MASK           (0x3f << CRS_CR_TRIM_SHIFT)
 
@@ -108,7 +108,7 @@
 /* CRS interrupt flag clear register */
 
 #define CRS_ICR_SYNCOKC            (1 << 0)  /* Bit 0: SYNC event OK clear flag */
-#define CRS_ICR_SYNCWARNC          (1 << 1)  /* Bit 1: SYNC waring clear flag */
+#define CRS_ICR_SYNCWARNC          (1 << 1)  /* Bit 1: SYNC warning clear flag */
 #define CRS_ICR_ERRC               (1 << 2)  /* Bit 2: Error clear flag */
 #define CRS_ICR_ESYNCC             (1 << 3)  /* Bit 3: Expected SYNC clear flag */
 

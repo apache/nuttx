@@ -116,5 +116,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_M_EXC_RETURN_H */
-
+#endif /* __ARCH_ARM_SRC_ARMV7_M_EXC_RETURN_H */

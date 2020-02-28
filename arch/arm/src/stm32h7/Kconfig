@@ -304,6 +304,10 @@ config STM32H7_OTG_USBREGEN
 	bool "Enable USB voltage regulator"
 	default n
 
+config STM32H7_QUADSPI
+	bool "QuadSPI"
+	default n
+
 config STM32H7_USBDEV_REGDEBUG
 	bool "OTG USBDEV REGDEBUG"
 	default n
@@ -938,7 +942,7 @@ config STM32H7_FLOWCONTROL_BROKEN
 		Enable UART RTS flow control using Software. Because STM
 		Current STM32 have broken HW based RTS behavior (they assert
 		nRTS after every byte received)  Enable this setting workaround
-		this issue by useing software based management of RTS
+		this issue by using software based management of RTS
 
 config STM32H7_USART_BREAKS
 	bool "Add TIOxSBRK to support sending Breaks"
@@ -1164,6 +1168,8 @@ config STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
 
 endif # STM32H7_RTC_LSECLOCK
 
+endmenu # RTC Configuration
+
 config STM32H7_EXTERNAL_RAM
     bool "External RAM on FMC"
     default n
@@ -1172,7 +1178,139 @@ config STM32H7_EXTERNAL_RAM
     ---help---
         In addition to internal SDRAM, external RAM may be available through the FMC.
 
-endmenu # RTC Configuration
+menu "QuadSPI Configuration"
+	depends on STM32H7_QUADSPI
+
+config STM32H7_QSPI_FLASH_SIZE
+	int "Size of attached serial flash, bytes"
+	default 16777216
+	range 1 2147483648
+	---help---
+		The STM32H7 QSPI peripheral requires the size of the Flash be specified
+
+config STM32H7_QSPI_FIFO_THESHOLD
+	int "Number of bytes before asserting FIFO threshold flag"
+	default 4
+	range 1 16
+	---help---
+		The STM32H7 QSPI peripheral requires that the FIFO threshold be specified
+		I would leave it at the default value of 4 unless you know what you are doing.
+
+config STM32H7_QSPI_CSHT
+	int "Number of cycles Chip Select must be inactive between transactions"
+	default 1
+	range 1 8
+	---help---
+		The STM32H7 QSPI peripheral requires that it be specified the minimum number
+		of AHB cycles that Chip Select be held inactive between transactions.
+
+choice
+	prompt "Transfer technique"
+	default STM32H7_QSPI_DMA
+	---help---
+		You can choose between using polling, interrupts, or DMA to transfer data
+		over the QSPI interface.
+
+config STM32H7_QSPI_POLLING
+	bool "Polling"
+	---help---
+		Use conventional register I/O with status polling to transfer data.
+
+config STM32H7_QSPI_INTERRUPTS
+	bool "Interrupts"
+	---help---
+		User interrupt driven I/O transfers.
+
+config STM32H7_QSPI_DMA
+	bool "DMA"
+	depends on STM32H7_DMA
+	---help---
+		Use DMA to improve QSPI transfer performance.
+
+endchoice
+
+choice
+	prompt "Bank selection"
+	default STM32H7_QSPI_MODE_BANK1
+	---help---
+		You can choose between using polling, interrupts, or DMA to transfer data
+		over the QSPI interface.
+
+config STM32H7_QSPI_MODE_BANK1
+	bool "Bank 1"
+
+config STM32H7_QSPI_MODE_BANK2
+	bool "Bank 2"
+
+config STM32H7_QSPI_MODE_DUAL
+	bool "Dual Bank"
+
+endchoice
+
+choice
+	prompt "DMA Priority"
+	default STM32H7_QSPI_DMAPRIORITY_MEDIUM
+	depends on STM32H7_DMA
+	---help---
+		The DMA controller supports priority levels.  You are probably fine
+		with the default of 'medium' except for special cases.  In the event
+		of contention between to channels at the same priority, the lower
+		numbered channel has hardware priority over the higher numbered one.
+
+config STM32H7_QSPI_DMAPRIORITY_VERYHIGH
+	bool "Very High priority"
+	depends on STM32H7_DMA
+	---help---
+		'Highest' priority.
+
+config STM32H7_QSPI_DMAPRIORITY_HIGH
+	bool "High priority"
+	depends on STM32H7_DMA
+	---help---
+		'High' priority.
+
+config STM32H7_QSPI_DMAPRIORITY_MEDIUM
+	bool "Medium priority"
+	depends on STM32H7_DMA
+	---help---
+		'Medium' priority.
+
+config STM32H7_QSPI_DMAPRIORITY_LOW
+	bool "Low priority"
+	depends on STM32H7_DMA
+	---help---
+		'Low' priority.
+
+endchoice
+
+config STM32H7_QSPI_DMATHRESHOLD
+	int "QSPI DMA threshold"
+	default 4
+	depends on STM32H7_QSPI_DMA
+	---help---
+		When QSPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  This value is the threshold below which transfers
+		will still be performed by conventional register status polling.
+
+config STM32H7_QSPI_DMADEBUG
+	bool "QSPI DMA transfer debug"
+	depends on STM32H7_QSPI_DMA && DEBUG_SPI && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation to analyze QSPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config STM32H7_QSPI_REGDEBUG
+	bool "QSPI Register level debug"
+	depends on DEBUG_SPI_INFO
+	default n
+	---help---
+		Output detailed register-level QSPI device debug information.
+		Requires also CONFIG_DEBUG_SPI_INFO.
+
+endmenu
 
 config STM32H7_CUSTOM_CLOCKCONFIG
 	bool "Custom clock configuration"

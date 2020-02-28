@@ -56,7 +56,7 @@
  *   of a signal handler.
  *
  *   The System V sigset function is very similar to the (obsolete) POSIX
- *   signal() function except that it includes additional managment of the
+ *   signal() function except that it includes additional management of the
  *   tasks' signal mask.  This function is then simply a wrapper around
  *   signal() with this additional signal mask logic added.
  *
@@ -82,7 +82,7 @@
  *     if (func == SIG_HOLD)
  *       {
  *          Set mask
- *          if (mask successfuly set)
+ *          if (mask successfully set)
  *            {
  *              return SIG_HOLD
  *            }
@@ -93,7 +93,7 @@
  *     else
  *       {
  *         Set disposition
- *          if (disposition successfuly set)
+ *          if (disposition successfully set)
  *            {
  *              return old disposition
  *            }

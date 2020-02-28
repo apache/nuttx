@@ -778,7 +778,7 @@ cs43l22_configure(FAR struct audio_lowerhalf_s *dev,
               }
            }
           break;
-#endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
         case AUDIO_FU_BASS:
@@ -820,7 +820,7 @@ cs43l22_configure(FAR struct audio_lowerhalf_s *dev,
               }
           }
           break;
-#endif  /* CONFIG_AUDIO_EXCLUDE_TONE */
+#endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
         default:
           auderr("    ERROR: Unrecognized feature unit\n");

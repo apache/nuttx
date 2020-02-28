@@ -43,13 +43,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/timers/oneshot.h>
 
 #ifdef CONFIG_ONESHOT
@@ -228,7 +228,7 @@ static int oneshot_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       /* OSIOC_MAXDELAY - Return the maximum delay that can be supported
        *                  by this timer.
-       *                  Argument: A referenct to a struct timespec in
+       *                  Argument: A reference to a struct timespec in
        *                  which the maximum time will be returned.
        */
 

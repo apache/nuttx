@@ -210,4 +210,3 @@ void net_initialize(void)
 }
 
 #endif /* CONFIG_NET */
-

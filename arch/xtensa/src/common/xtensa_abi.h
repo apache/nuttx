@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 #ifndef __ARCH_XTENSA_SRC_COMMON_XTENSA_ABI_H
-#define __ARCH_XTENSA_SRC_COMMON_XTENSA_ABI_H 1
+#define __ARCH_XTENSA_SRC_COMMON_XTENSA_ABI_H
 
 /* Windowed ABI
  *
@@ -107,7 +107,7 @@
  */
 
 /****************************************************************************
- * Pre-processor Defintions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* MACROS TO HANDLE ABI SPECIFICS OF FUNCTION ENTRY AND RETURN
@@ -160,6 +160,6 @@
 
 #define LOCAL_OFFSET(n) ((n) << 2)  /* n = 1 .. ((size >> 2) - 1) */
 
-#endif /*  __ASSEMBLY_ */
+#endif /* __ASSEMBLY_ */
 
 #endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_ABI_H */

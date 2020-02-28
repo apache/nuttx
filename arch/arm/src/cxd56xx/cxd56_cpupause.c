@@ -441,7 +441,7 @@ void up_send_irqreq(int idx, int irq, int cpu)
 
   putreg32(1, CXD56_CPU_P2_INT + (4 * cpu));
 
-  /* Wait for the handler is excecuted on cpu */
+  /* Wait for the handler is executed on cpu */
 
   spin_lock(&g_cpu_paused[cpu]);
   spin_unlock(&g_cpu_paused[cpu]);

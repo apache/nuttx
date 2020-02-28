@@ -64,7 +64,7 @@
  *
  * Parameters:
  *   psock   - Pointer to the socket structure instance
- *   abstime - The absolute time when the timeout will occur
+ *   timeout - The relative time when the timeout will occur
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated error value is returned on
@@ -72,8 +72,7 @@
  *
  ****************************************************************************/
 
-int inet_txdrain(FAR struct socket *psock,
-                 FAR const struct timespec *abstime)
+int inet_txdrain(FAR struct socket *psock, unsigned int timeout)
 {
   int ret = OK;
 
@@ -86,7 +85,7 @@ int inet_txdrain(FAR struct socket *psock,
 #if defined(NET_TCP_HAVE_STACK)
       case SOCK_STREAM:
         {
-          ret = tcp_txdrain(psock, abstime);
+          ret = tcp_txdrain(psock, timeout);
         }
         break;
 #endif
@@ -94,7 +93,7 @@ int inet_txdrain(FAR struct socket *psock,
 #if defined(NET_UDP_HAVE_STACK)
       case SOCK_DGRAM:
         {
-          ret = udp_txdrain(psock, abstime);
+          ret = udp_txdrain(psock, timeout);
         }
         break;
 #endif

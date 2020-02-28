@@ -2,7 +2,7 @@
  * arch/renesas/src/rx65n/rx65n_irq.c
  *
  *   Copyright (C) 2008-2019 Gregory Nutt. All rights reserved.
- *   Author: Anjana <anjana@tataelxsi.co.in> 
+ *   Author: Anjana <anjana@tataelxsi.co.in>
  *          Surya <surya.prakash@tataelxsi.co.in>
  *
  * Redistribution and use in source and binary forms, with or without

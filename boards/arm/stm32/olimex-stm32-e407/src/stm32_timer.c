@@ -75,4 +75,3 @@ int stm32_timer_driver_setup(FAR const char *devpath, int timer)
 }
 
 #endif
-

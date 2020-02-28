@@ -59,7 +59,7 @@ int mm_size2ndx(size_t size)
 
   if (size >= MM_MAX_CHUNK)
     {
-       return MM_NNODES-1;
+      return MM_NNODES - 1;
     }
 
   size >>= MM_MIN_SHIFT;

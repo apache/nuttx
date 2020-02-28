@@ -41,7 +41,6 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <semaphore.h>
 #include <debug.h>
 
 #include <nuttx/serial/serial.h>

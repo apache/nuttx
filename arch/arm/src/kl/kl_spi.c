@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -217,12 +216,12 @@ static inline void spi_putreg(FAR struct kl_spidev_s *priv, uint8_t offset,
  * Name: spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -518,7 +517,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       spi_putreg(priv, KL_SPI_D_OFFSET, data);
 
-      /* Wait for the read data to be available in the data regiter */
+      /* Wait for the read data to be available in the data register */
 
       while ((spi_getreg(priv, KL_SPI_S_OFFSET) & SPI_S_SPRF) == 0);
 

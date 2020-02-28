@@ -51,7 +51,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The Olimex board has two buttons, one labled "BUT" and the other "WAKEUP"
+/* The Olimex board has two buttons, one labeled "BUT" and the other "WAKEUP"
  *
  * P0.15: WAKEUP button
  * P1.13: BUT button

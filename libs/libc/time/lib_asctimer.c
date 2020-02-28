@@ -42,11 +42,10 @@
 #include <stdio.h>
 #include <time.h>
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Note: These strings duplicate other definitions in other files.  These
  * definitions could be combined to save a little FLASH space.
  */
@@ -93,5 +92,3 @@ FAR char *asctime_r(FAR const struct tm *tp, FAR char *buf)
 
   return buf;
 }
-
-#endif /* CONFIG_LIBC_LOCALTIME || CONFIG_TIME_EXTENDED */

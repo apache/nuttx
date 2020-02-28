@@ -156,7 +156,7 @@ int stm32_bringup(void)
    */
 
   (void)ccm_procfs_register();
-#endif  /* CONFIG_STM32_CCM_PROCFS */
+#endif /* CONFIG_STM32_CCM_PROCFS */
 
   /* Mount the procfs file system */
 
@@ -167,7 +167,7 @@ int stm32_bringup(void)
              "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
              ret, errno);
     }
-#endif  /* CONFIG_FS_PROCFS */
+#endif /* CONFIG_FS_PROCFS */
 
 #ifdef HAVE_RTC_DRIVER
   /* Instantiate the STM32 lower-half RTC driver */
@@ -203,7 +203,7 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
     }
-#endif  /* CONFIG_BUTTONS */
+#endif /* CONFIG_BUTTONS */
 
 #ifdef CONFIG_ADC
   /* Initialize ADC and register the ADC driver. */
@@ -213,8 +213,7 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
     }
-#endif  /* CONFIG_ADC */
+#endif /* CONFIG_ADC */
 
   return OK;
 }
-

@@ -52,7 +52,7 @@
 /* Table 14: Communication Device Class Code (see definition USB_CLASS_CDC in usb.h) */
 /* Table 18: Data Interface Class Code  (see definition USB_CLASS_CDC_DATA in usb.h) */
 
-/* Communication Inteface Class Codes *******************************************************/
+/* Communication Interface Class Codes ******************************************************/
 /* Table 15: Communication Interface Class Code */
 
 #define CDC_CLASS_COMM          0x02 /* Communication Interface Class */
@@ -379,7 +379,7 @@
                                               * transmission
                                               */
 #define ECMCAP_XMIT_LATE_COLLS     (1 << 28) /* Late collisions detected */
-                                             /* Bits 29-31 Resrved, Must be set to zero */
+                                             /* Bits 29-31 Reserved, Must be set to zero */
 
 /* Table 47: Communication Feature Selector Codes */
 
@@ -830,7 +830,7 @@ struct cdc_ecm_funcdesc_s
   uint8_t size;      /* bFunctionLength, Size of this descriptor */
   uint8_t type;      /* bDescriptorType, USB_DESC_TYPE_CSINTERFACE */
   uint8_t subtype;   /* bDescriptorSubType, CDC_DSUBTYPE_ECM as defined in Table 25 */
-  uint8_t mac;       /* iMACAddress, Index of teh 48bit Ethernet MAC address string descriptor */
+  uint8_t mac;       /* iMACAddress, Index of the 48bit Ethernet MAC address string descriptor */
   uint8_t stats[4];  /* bmEthernetStatistics, Indicates which Ethernet statistics functions
                       * the device collects.  See Table 42.
                       */

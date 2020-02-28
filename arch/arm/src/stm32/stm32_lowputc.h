@@ -77,4 +77,3 @@ void stm32_lowsetup(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_LOWPUTC_H */
-

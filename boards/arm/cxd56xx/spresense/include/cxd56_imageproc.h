@@ -1,5 +1,5 @@
 /***************************************************************************
- * boards/arm/cxd56xx/include/cxd56_imageproc.h
+ * boards/arm/cxd56xx/spresense/include/cxd56_imageproc.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -32,8 +32,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_CXD56XX_INCLUDE_CXD56_IMAGEPROC_H__
-#define __BOARDS_ARM_CXD56XX_INCLUDE_CXD56_IMAGEPROC_H__
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_IMAGEPROC_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_IMAGEPROC_H
 
 #include <stdint.h>
 
@@ -43,7 +43,7 @@ extern "C"
 #endif
 
 /* Structure of rectangle coordinates from left top point to
- * right buttom point.
+ * right bottom point.
  */
 
   struct imageproc_rect_s
@@ -148,4 +148,4 @@ extern "C"
 }
 #endif
 
-#endif  /* __BOARDS_ARM_CXD56XX_INCLUDE_CXD56_IMAGEPROC_H__ */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_IMAGEPROC_H */

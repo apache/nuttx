@@ -147,4 +147,3 @@ endif
 ifeq ($(CONFIG_LPC54_SDMMC),y)
 CHIP_CSRCS += lpc54_sdmmc.c
 endif
-

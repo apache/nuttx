@@ -44,11 +44,10 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
-
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/sensors/adxl345.h>
 
 #if defined(CONFIG_SENSORS_ADXL345)

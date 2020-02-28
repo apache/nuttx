@@ -41,7 +41,6 @@
 
 #include <stdint.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <time.h>
 #include <errno.h>
 #include <debug.h>
@@ -50,7 +49,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/wdog.h>
-#include <nuttx/semaphore.h>
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"

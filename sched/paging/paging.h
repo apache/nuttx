@@ -82,7 +82,7 @@ extern pid_t g_pgworker;
 /* The page fill worker thread maintains a static variable called g_pftcb.
  * If no page fill is in progress, g_pftcb will be NULL. Otherwise, g_pftcb
  * will point to the TCB of the task which is receiving the fill that is
- * in progess.
+ * in progress.
  *
  * NOTE: I think that this is the only state in which a TCB does not reside
  * in some list.  Here is it in limbo, outside of the normally queuing while

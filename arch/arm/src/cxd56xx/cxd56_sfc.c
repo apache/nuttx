@@ -37,7 +37,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/mtd/mtd.h>
-#include <semaphore.h>
+
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>

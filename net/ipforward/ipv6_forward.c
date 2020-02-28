@@ -75,7 +75,7 @@
  *
  * Input Parameters:
  *   ipv6  - A pointer to the IPv6 header in within the IPv6 packet.  This
- *           is immeidately followed by the L3 header which may be TCP, UDP,
+ *           is immediately followed by the L3 header which may be TCP, UDP,
  *           or ICMPv6.
  *
  * Returned Value:
@@ -191,7 +191,7 @@ static int ipv6_decr_ttl(FAR struct ipv6_hdr_s *ipv6)
  * Returned Value:
  *   PACKET_FORWARDED     - Packet was forwarded
  *   PACKET_NOT_FORWARDED - Packet was not forwarded
- *   < 0                  - And error occurred (and packet not fowarded).
+ *   < 0                  - And error occurred (and packet not forwarded).
  *
  ****************************************************************************/
 
@@ -606,7 +606,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
         }
     }
   else
-#if defined(CONFIG_NET_6LOWPAN) /* REVISIT:  Currently only suport for 6LoWPAN */
+#if defined(CONFIG_NET_6LOWPAN) /* REVISIT:  Currently only support for 6LoWPAN */
     {
       /* Single network device.  The use case here is where an endpoint acts
        * as a hub in a star configuration.  This is typical for a wireless star
@@ -631,7 +631,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
 #ifdef CONFIG_NET_ETHERNET
           /* REVISIT:  For Ethernet we may have to fix up the Ethernet header:
            * - source MAC, the MAC of the current device.
-           * - dest MAC, the MAC associated with the destination IPv6 adress.
+           * - dest MAC, the MAC associated with the destination IPv6 address.
            *   This  will involve ICMPv6 and Neighbor Discovery.
            */
 
@@ -642,7 +642,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
           /* Nothing other 6LoWPAN forwarding is currently handled and that
            * case was dealt with in ipv6_packet_conversion().
            *
-           * REVISIT: Is tht an issue?  Do other use cases make sense?
+           * REVISIT: Is the an issue?  Do other use cases make sense?
            */
 
           nwarn("WARNING: Packet forwarding supported only for 6LoWPAN\n");

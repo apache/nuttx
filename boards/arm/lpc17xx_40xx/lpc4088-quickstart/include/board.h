@@ -203,7 +203,7 @@
  * LED3 : Connected to P1[13]
  * LED4 : Connected to P2[19]
  *
- * These LEDs are connecte to ground so a high output value will illuminate
+ * These LEDs are connected to ground so a high output value will illuminate
  * them.
  */
 
@@ -384,4 +384,4 @@
 #define GPIO_SSP1_SCK    GPIO_SSP1_SCK_2
 
 #endif
-#endif  /* __BOARDS_ARM_LPC17XX_40XX_LPC4088_QUICKSTART_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_LPC17XX_40XX_LPC4088_QUICKSTART_INCLUDE_BOARD_H */

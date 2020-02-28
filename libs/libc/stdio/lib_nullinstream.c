@@ -76,4 +76,3 @@ void lib_nullinstream(FAR struct lib_instream_s *nullinstream)
   nullinstream->get  = nullinstream_getc;
   nullinstream->nget = 0;
 }
-

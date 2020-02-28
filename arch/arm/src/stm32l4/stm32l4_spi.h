@@ -177,4 +177,3 @@ int stm32l4_spi3register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_SPI_H */
-

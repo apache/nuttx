@@ -139,4 +139,3 @@ else
   # Linux/Cygwin-native host tools
   MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkdeps$(HOSTEXEEXT)
 endif
-

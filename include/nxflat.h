@@ -92,7 +92,7 @@ struct nxflat_hdr_s
    * The size of the data/bss segment includes (as a minimum) the data
    * and bss regions (bss_end - data_start) as well as the size of the
    * stack.  At run time, this region will also include program arguments
-   * and environement variables.
+   * and environment variables.
    *
    * The bss segment is data_end through bss_end.
    */
@@ -130,7 +130,7 @@ struct nxflat_hdr_s
 
   /* 16-bit counts
    *
-   * h_reloccount  - The number of relocation records in the arry
+   * h_reloccount  - The number of relocation records in the array
    * h_importcount - The number of records in the h_importsymbols array.
    */
 

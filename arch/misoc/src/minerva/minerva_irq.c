@@ -60,10 +60,10 @@ volatile uint32_t *g_current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: minerva_irq_initialize
+ * Name: up_irqinitialize
  ****************************************************************************/
 
-void minerva_irq_initialize(void)
+void up_irqinitialize(void)
 {
   /* currents_regs is non-NULL only while processing an interrupt */
 

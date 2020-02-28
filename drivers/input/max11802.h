@@ -48,12 +48,12 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <semaphore.h>
 #include <poll.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/input/max11802.h>
 
@@ -168,4 +168,3 @@ extern "C" {
 #endif
 
 #endif /* __DRIVERS_INPUT_ADS7843E_H */
-

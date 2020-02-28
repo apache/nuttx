@@ -151,7 +151,7 @@ void nuc_clockconfig(void)
    * Power down mode (PD)       = Normal mode (0)
    * Bypass (BP)                = Normal mode (0)
    * FOUT enable (OE)           = PLL FOUT enabled (0)
-   * PLL srouce clock (PLL_SRC) = External high speed crystal (0)
+   * PLL source clock (PLL_SRC) = External high speed crystal (0)
    */
 
   regval = getreg32(NUC_CLK_PLLCON);

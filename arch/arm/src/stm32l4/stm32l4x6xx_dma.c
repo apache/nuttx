@@ -43,13 +43,13 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <arch/irq.h>
+#include <nuttx/semaphore.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -78,7 +78,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure descibes one DMA channel */
+/* This structure describes one DMA channel */
 
 struct stm32l4_dma_s
 {
@@ -529,7 +529,7 @@ void stm32l4_dmastart(DMA_HANDLE handle, dma_callback_t callback,
 
   DEBUGASSERT(handle != NULL);
 
-  /* Save the callback info.  This will be invoked when the DMA commpletes */
+  /* Save the callback info.  This will be invoked when the DMA completes */
 
   dmach->callback = callback;
   dmach->arg      = arg;

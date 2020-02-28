@@ -54,9 +54,18 @@
 
 __start:
 
+  /* Load mhartid (cpuid) */
+
+  csrr a0, mhartid
+
   /* Set stack pointer to the idle thread stack */
 
-  la  sp, K210_IDLESTACK_TOP
+  bnez a0, 1f
+  la   sp, K210_IDLESTACK0_TOP
+  j    2f
+1:
+  la   sp, K210_IDLESTACK1_TOP
+2:
 
   /* Disable all interrupts (i.e. timer, external) in mie */
 
@@ -67,9 +76,9 @@ __start:
   la   t0, __trap_vec
   csrw mtvec, t0
 
-  /* Jump to __k210_start */
+  /* Jump to __k210_start with mhartid */
 
-  jal  x1, __k210_start
+  j    __k210_start
 
   /* We shouldn't return from __k210_start */
 
@@ -88,6 +97,16 @@ _fini:
  ****************************************************************************/
 
 exception_common:
+
+#if 0
+  csrr gp, mcause   /* exception cause */
+  addi tp, zero, 10 /* 10 = machine ecall */
+  bgtu gp, tp, normal_irq
+  ld   sp, g_fstack_top /* Set sp to fault stack */
+
+normal_irq:
+  addi gp, zero, 0  /* clear  */
+#endif
 
   addi sp, sp, -XCPTCONTEXT_SIZE
 
@@ -128,7 +147,7 @@ exception_common:
   addi s0, sp, XCPTCONTEXT_SIZE
   sd   s0,  2*8(sp)   /* original SP */
 
-  /* Setup arg0(exeption cause), arg1(context) */
+  /* Setup arg0(exception cause), arg1(context) */
 
   csrr a0, mcause  /* exception cause */
   csrr s0, mepc
@@ -137,9 +156,20 @@ exception_common:
   mv   a1, sp      /* context = sp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
+  /* Load mhartid (cpuid) */
+
+  csrr s0, mhartid
+
   /* Switch to interrupt stack */
 
+  bnez s0, 3f
   la   sp, g_intstackbase
+  j    4f
+3:
+  la   sp, g_intstackbase
+  addi sp, sp, -((CONFIG_ARCH_INTERRUPTSTACK) & ~7)
+4:
+
 #endif
 
   /* Call interrupt handler in C */
@@ -205,9 +235,9 @@ exception_common:
   .type   g_intstackalloc, object
   .type   g_intstackbase, object
 g_intstackalloc:
-  .skip  ((CONFIG_ARCH_INTERRUPTSTACK & ~7))
+  .skip  (((CONFIG_ARCH_INTERRUPTSTACK * 2) & ~7))
 g_intstackbase:
   .skip  8
   .size  g_intstackbase, 8
-  .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~7)
+  .size  g_intstackalloc, ((CONFIG_ARCH_INTERRUPTSTACK * 2) & ~7)
 #endif

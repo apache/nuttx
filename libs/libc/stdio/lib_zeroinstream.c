@@ -76,4 +76,3 @@ void lib_zeroinstream(FAR struct lib_instream_s *zeroinstream)
   zeroinstream->get  = zeroinstream_getc;
   zeroinstream->nget = 0;
 }
-

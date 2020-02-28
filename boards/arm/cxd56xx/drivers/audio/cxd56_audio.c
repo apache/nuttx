@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio.c
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -65,10 +65,6 @@
 
 #define AUDIO_DNC_ID_NUM      (CXD56_AUDIO_DNC_ID_FF + 1)
 #define AUDIO_VOL_ID_NUM      (CXD56_AUDIO_VOLID_MIXER_OUT + 1)
-
-/***************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
 
 /***************************************************************************
  * Private Types
@@ -505,6 +501,7 @@ CXD56_AUDIO_ECODE cxd56_audio_en_deq(FAR cxd56_audio_deq_coef_t *coef)
     {
       g_pwon_param.deq.coef = coef;
     }
+
   if (g_status == CXD56_AUDIO_POWER_STATE_OFF)
     {
       return ret;
@@ -673,6 +670,7 @@ CXD56_AUDIO_ECODE cxd56_audio_dis_output(void)
           return ret;
         }
     }
+
 #endif
   return ret;
 }
@@ -989,6 +987,7 @@ CXD56_AUDIO_ECODE cxd56_audio_set_datapath(cxd56_audio_signal_t sig,
           return ret;
         }
     }
+
   return ret;
 }
 

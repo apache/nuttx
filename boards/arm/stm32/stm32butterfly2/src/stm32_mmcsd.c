@@ -40,13 +40,13 @@
 
 #include <pthread.h>
 #include <sched.h>
-#include <semaphore.h>
 #include <time.h>
 #include <unistd.h>
 #include <debug.h>
 
 #include <nuttx/mmcsd.h>
 #include <nuttx/signal.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include "stm32.h"
@@ -98,7 +98,7 @@ static sem_t g_cdsem;
 
 static void *stm32_cd_thread(void *arg)
 {
-  spiinfo("INFO: Runnig card detect thread\n");
+  spiinfo("INFO: Running card detect thread\n");
   while (1)
     {
       nxsem_wait(&g_cdsem);
@@ -107,7 +107,7 @@ static void *stm32_cd_thread(void *arg)
       if (g_chmediaclbk)
         {
           /* Card doesn't seem to initialize properly without letting it to
-           * rest for a millsecond or so.
+           * rest for a millisecond or so.
            */
 
           nxsig_usleep(1 * 1000);

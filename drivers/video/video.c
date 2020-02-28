@@ -1169,7 +1169,7 @@ static int video_g_ext_ctrls(FAR struct video_mng_s *priv,
 
       if (ret < 0)
         {
-          /* Set cnt in that error occured */
+          /* Set cnt in that error occurred */
 
           ctrls->error_idx = cnt;
           return ret;
@@ -1199,7 +1199,7 @@ static int video_s_ext_ctrls(FAR struct video_mng_s *priv,
 
       if (ret < 0)
         {
-          /* Set cnt in that error occured */
+          /* Set cnt in that error occurred */
 
           ctrls->error_idx = cnt;
           return ret;

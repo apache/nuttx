@@ -52,5 +52,3 @@ VPATH += :mmcsd
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)mmcsd}
 
 endif
-
-

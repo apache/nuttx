@@ -159,7 +159,7 @@ void board_early_initialize(void);
  *   specific device drivers for which board_early_initialize() is not
  *   suitable.
  *
- *   Waiting for events, use of I2C, SPI, etc are permissable in the context
+ *   Waiting for events, use of I2C, SPI, etc are permissible in the context
  *   of board_late_initialize().  That is because board_late_initialize()
  *   will run on a temporary, internal kernel thread.
  *
@@ -282,7 +282,7 @@ int board_reset(int status);
  *     length.
  *
  * Returned Value:
- *   Zero (OK) is returned on success.  Otherwize a negated errno value is
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
  *   returned indicating the nature of the failure.
  *
  ****************************************************************************/
@@ -541,9 +541,9 @@ void board_autoled_off(int led);
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
  *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then this interfaces may be
  *   available to control the LEDs directly from user board logic or
- *   indirectly user applications (via the common LED charater driver).
+ *   indirectly user applications (via the common LED character driver).
  *
- *   Most boards have only a few LEDs and in thoses cases all LEDs may be
+ *   Most boards have only a few LEDs and in those cases all LEDs may be
  *   used by the NuttX LED logic exclusively and may not be available for
  *   use by user logic if CONFIG_ARCH_LEDS=y.
  *
@@ -567,9 +567,9 @@ void board_userled_initialize(void);
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
  *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then this interfaces may be
  *   available to control the LEDs directly from user board logic or
- *   indirectly user applications (via the common LED charater driver).
+ *   indirectly user applications (via the common LED character driver).
  *
- *   Most boards have only a few LEDs and in thoses cases all LEDs may be
+ *   Most boards have only a few LEDs and in those cases all LEDs may be
  *   used by the NuttX LED logic exclusively and may not be available for
  *   use by user logic if CONFIG_ARCH_LEDS=y.
  *
@@ -593,9 +593,9 @@ void board_userled(int led, bool ledon);
  *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
  *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then this interfaces may be
  *   available to control the LEDs directly from user board logic or
- *   indirectly user applications (via the common LED charater driver).
+ *   indirectly user applications (via the common LED character driver).
  *
- *   Most boards have only a few LEDs and in thoses cases all LEDs may be
+ *   Most boards have only a few LEDs and in those cases all LEDs may be
  *   used by the NuttX LED logic exclusively and may not be available for
  *   use by user logic if CONFIG_ARCH_LEDS=y.
  *
@@ -701,7 +701,7 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
  * Description:
  *   If CONFIG_BOARD_INITRNGSEED is selected then board_init_rngseed is
  *   called at up_randompool_initialize() to feed initial random seed
- *   to RNG. Implemenation of this functions should feed at least
+ *   to RNG. Implementation of this functions should feed at least
  *   MIN_SEED_NEW_ENTROPY_WORDS 32-bit random words to entropy-pool using
  *   up_rngaddentropy() or up_rngaddint().
  *

@@ -481,7 +481,7 @@
 
 /* RXADDRESSES Register */
 
-#define RADIO_RXADDRESSES_ADDR(i)         (1 << (i)) /* Bits 0-7: Enable or disable reception on logical addres i */
+#define RADIO_RXADDRESSES_ADDR(i)         (1 << (i)) /* Bits 0-7: Enable or disable reception on logical address i */
 
 /* CRCCNF Register */
 

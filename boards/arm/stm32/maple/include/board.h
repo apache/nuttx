@@ -162,4 +162,4 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 */
 #define LED_PANIC         7  /* LED1 / LED2 blinking */
 
-#endif  /* __BOARDS_ARM_STM32_MAPLE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_MAPLE_INCLUDE_BOARD_H */

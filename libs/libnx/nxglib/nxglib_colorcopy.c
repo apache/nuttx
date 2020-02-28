@@ -65,4 +65,3 @@ void nxgl_colorcopy(nxgl_mxpixel_t dest[CONFIG_NX_NPLANES],
       dest[i] = src[i];
     }
 }
-

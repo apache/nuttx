@@ -49,7 +49,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -407,7 +406,7 @@ static bool pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data)
 
       if (priv->nchannels != 1 && priv->nchannels != 2)
         {
-          auderr("ERROR: Cannot support number of channles of %d in this mode\n",
+          auderr("ERROR: Cannot support number of channels of %d in this mode\n",
                  priv->nchannels);
           return -EINVAL;
         }
@@ -1439,4 +1438,3 @@ FAR struct audio_lowerhalf_s *
 }
 
 #endif /* CONFIG_AUDIO && CONFIG_AUDIO_FORMAT_PCM */
-

@@ -125,7 +125,7 @@
 
 #define N25QXXX_MTD_MINOR 0
 
-/* This is the on-chip progmem memroy driver minor number */
+/* This is the on-chip progmem memory driver minor number */
 
 #define PROGMEM_MTD_MINOR 1
 

@@ -52,7 +52,6 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/semaphore.h>
 
 #include <nuttx/mm/iob.h>
 
@@ -147,7 +146,7 @@ static void mac802154_resetqueues(FAR struct ieee802154_privmac_s *priv)
  * Description:
  *   This function allocates a tx descriptor and the dependent primitive (data
  *   confirmation) from the free list. The primitive and tx descriptor must be
- *   freed seperately.
+ *   freed separately.
  *
  * Assumptions:
  *   priv MAC struct is locked when calling.

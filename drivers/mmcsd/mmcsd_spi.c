@@ -1108,7 +1108,7 @@ static int mmcsd_close(FAR struct inode *inode)
 /****************************************************************************
  * Name: mmcsd_read
  *
- * Description:  Read the specified numer of sectors
+ * Description:  Read the specified number of sectors
  *
  ****************************************************************************/
 
@@ -1912,7 +1912,7 @@ static void mmcsd_mediachanged(void *arg)
  *     architectures that support multiple MMC/SD slots.  This value must be
  *     in the range {0, ..., CONFIG_MMCSD_NSLOTS}.
  *   spi - And instance of an SPI interface obtained by called the
- *     approprite xyz_spibus_initialize() function for the MCU "xyz" with
+ *     appropriate xyz_spibus_initialize() function for the MCU "xyz" with
  *     the appropriate port number.
  *
  ****************************************************************************/

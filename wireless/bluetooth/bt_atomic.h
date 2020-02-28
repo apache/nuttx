@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 #ifndef __WIRELESS_BLUETOOTH_BT_ATOMIC_H
-#define __WIRELESS_BLUETOOTH_BT_ATOMIC_H 1
+#define __WIRELESS_BLUETOOTH_BT_ATOMIC_H
 
 /****************************************************************************
  * Included Files

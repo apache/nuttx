@@ -57,7 +57,7 @@
  * Name: nxbe_flush
  *
  * Description:
- *   After per-window frambuffer has been updated, the modified region must
+ *   After per-window framebuffer has been updated, the modified region must
  *   be written to device graphics memory.  That function is managed by this
  *   simple function.  It does the following:
  *
@@ -94,7 +94,7 @@ void nxbe_flush(FAR struct nxbe_window_s *wnd,
 
   if (!NXBE_ISHIDDEN(wnd))
     {
-      /* Copy the modified per-window frambuffer into device memory. */
+      /* Copy the modified per-window framebuffer into device memory. */
 
       nxbe_bitmap_dev(wnd, dest, src, origin, stride);
 
@@ -108,5 +108,4 @@ void nxbe_flush(FAR struct nxbe_window_s *wnd,
     }
 }
 
-#endif  /* CONFIG_NX_RAMBACKED */
-
+#endif /* CONFIG_NX_RAMBACKED */

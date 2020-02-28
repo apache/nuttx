@@ -79,4 +79,3 @@ void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream)
   nulloutstream->flush = lib_noflush;
   nulloutstream->nput  = 0;
 }
-

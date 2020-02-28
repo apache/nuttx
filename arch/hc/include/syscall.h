@@ -80,4 +80,3 @@ extern "C"
 #endif
 
 #endif /* _ARCH_HC_INCLUDE_SYSCALL_H */
-

@@ -82,6 +82,8 @@ void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
   sinfo("entry %p arg %p\n", entrypt, arg);
 
   sys_call2(SYS_pthread_start, (uintptr_t)entrypt, (uintptr_t)arg);
+
+  PANIC();
 }
 
 #endif /* (CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) && !CONFIG_DISABLE_PTHREAD */

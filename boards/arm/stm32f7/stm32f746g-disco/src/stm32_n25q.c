@@ -130,4 +130,3 @@ int stm32_n25qxxx_setup(void)
 
   return 0;
 }
-

@@ -58,7 +58,7 @@
 	jmp.w	_m16c_commonvector
 	.endm
 
-/* Special page vectors. This macro puts the jump address of	
+/* Special page vectors. This macro puts the jump address of
  * functions defined as special page into the special page vector table.
  * See example calls below and see the M16C Software Manual or NC30
  * manual for more information on special page vectors.
@@ -190,7 +190,7 @@
 
 /* Fixed vector section
  *
- * The fixed vector table begins at address ffe00.  The firt portion
+ * The fixed vector table begins at address ffe00.  The first portion
  * of the fixed vector table is the special page table.  This table
  * is not currently used.
  */
@@ -381,7 +381,7 @@ _m16c_commonvector:
 	fset	u				/* Switch to User stack */
 	ldc	r0, sp				/* Restore the user stack pointer */
 	fclr	u				/* Back to interrupt stack */
- 	
+
 /* Recover all registers and return */
 
 	fclr	b				/* Switch back to Bank 0 */
@@ -454,7 +454,7 @@ _m16c_contextsave:
 	mov.w	#0, r0				/* Return zero */
 	reit					/* Return from interrupt */
 	.size	_up_saveusercontext, .-_up_saveusercontext
-	
+
 /************************************************************************************
  * Name: void up_fullcontextrestore(uint32_t *regs)
  *
@@ -503,7 +503,7 @@ _m16c_contextrestore:
  	fset	b				/* Switch to bank 1 */
  	pop.w	r0				/* R0 = saved user stack pointer */
 	fclr	b				/* Back to bank 0 */
- 	
+
 /* Recover all registers */
 
 	popm	fb,sb,a1,a0,r3,r2,r1,r0		/* Restore from registers from user stack */

@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -50,8 +49,6 @@
 #include <nuttx/ioexpander/ioexpander.h>
 
 #include "up_internal.h"
-
-#ifdef CONFIG_SIM_IOEXPANDER
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -88,29 +85,33 @@
 
 struct sim_callback_s
 {
-   ioe_pinset_t pinset;              /* Set of pin interrupts that will generate
-                                      * the callback. */
-   ioe_callback_t cbfunc;            /* The saved callback function pointer */
-   FAR void *cbarg;                  /* Callback argument */
+  ioe_pinset_t pinset;              /* Set of pin interrupts that will generate
+                                     * the callback. */
+  ioe_callback_t cbfunc;            /* The saved callback function pointer */
+  FAR void *cbarg;                  /* Callback argument */
 };
 
 /* This structure represents the state of the I/O Expander driver */
 
 struct sim_dev_s
 {
-  struct ioexpander_dev_s dev;       /* Nested structure to allow casting as public gpio
-                                      * expander. */
+  struct ioexpander_dev_s dev;       /* Nested structure to allow casting as
+                                      * public GPIO expander. */
   ioe_pinset_t inpins;               /* Pins select as inputs */
   ioe_pinset_t invert;               /* Pin value inversion */
   ioe_pinset_t outval;               /* Value of output pins */
   ioe_pinset_t inval;                /* Simulated input register */
   ioe_pinset_t intenab;              /* Interrupt enable */
-  ioe_pinset_t last;                 /* Last pin inputs (for detection of changes) */
+  ioe_pinset_t last;                 /* Last pin inputs (for detection of
+                                      * changes) */
   ioe_pinset_t trigger;              /* Bit encoded: 0=level 1=edge */
-  ioe_pinset_t level[2];             /* Bit encoded: 01=high/rising, 10 low/falling, 11 both */
+  ioe_pinset_t level[2];             /* Bit encoded: 01=high/rising,
+                                      * 10 low/falling, 11 both */
 
-  WDOG_ID wdog;                      /* Timer used to poll for interrupt simulation */
-  struct work_s work;                /* Supports the interrupt handling "bottom half" */
+  WDOG_ID wdog;                      /* Timer used to poll for interrupt
+                                      * simulation */
+  struct work_s work;                /* Supports the interrupt handling
+                                      * "bottom half" */
 
   /* Saved callback information for each I/O expander client */
 
@@ -565,18 +566,18 @@ static FAR void *sim_attach(FAR struct ioexpander_dev_s *dev,
 
   for (i = 0; i < CONFIG_SIM_INT_NCALLBACKS; i++)
     {
-       /* Is this entry available (i.e., no callback attached) */
+      /* Is this entry available (i.e., no callback attached) */
 
-       if (priv->cb[i].cbfunc == NULL)
-         {
-           /* Yes.. use this entry */
+      if (priv->cb[i].cbfunc == NULL)
+        {
+          /* Yes.. use this entry */
 
-           priv->cb[i].pinset = pinset;
-           priv->cb[i].cbfunc = callback;
-           priv->cb[i].cbarg  = arg;
-           handle             = &priv->cb[i];
-           break;
-         }
+          priv->cb[i].pinset = pinset;
+          priv->cb[i].cbfunc = callback;
+          priv->cb[i].cbarg  = arg;
+          handle             = &priv->cb[i];
+          break;
+        }
     }
 
   return handle;
@@ -606,7 +607,7 @@ static int sim_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
 
   DEBUGASSERT(priv != NULL && cb != NULL);
   DEBUGASSERT((uintptr_t)cb >= (uintptr_t)&priv->cb[0] &&
-              (uintptr_t)cb <= (uintptr_t)&priv->cb[CONFIG_SIM_INT_NCALLBACKS-1]);
+              (uintptr_t)cb <= (uintptr_t)&priv->cb[CONFIG_SIM_INT_NCALLBACKS - 1]);
   UNUSED(priv);
 
   cb->pinset = 0;
@@ -693,7 +694,7 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
               /* Set interrupt as a function of edge type */
 
               if ((!pinval && SIM_EDGE_FALLING(priv, pin)) ||
-                  ( pinval && SIM_EDGE_RISING(priv, pin)))
+                  (pinval && SIM_EDGE_RISING(priv, pin)))
                 {
                   intstat |= 1 << pin;
                 }
@@ -862,5 +863,3 @@ FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void)
 
   return &priv->dev;
 }
-
-#endif /* CONFIG_SIM_IOEXPANDER */

@@ -42,6 +42,7 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -60,9 +61,10 @@
  ******************************************************************************/
 
 /* Configuration **************************************************************/
+
 /* PWM
  *
- * The STM3240G-Eval has no real on-board PWM devices, but the board can be
+ * The nucleo-l432kc has no real on-board PWM devices, but the board can be
  * configured to output a pulse train using variously unused pins on the board
  * for PWM output (see board.h for details of pins).
  */
@@ -136,8 +138,8 @@ int stm32l4_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM3_PWM)
-      pwm = stm32l4_pwminitialize(3);
+#if defined(CONFIG_STM32L4_TIM15_PWM)
+      pwm = stm32l4_pwminitialize(15);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -154,8 +156,8 @@ int stm32l4_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM4_PWM)
-      pwm = stm32l4_pwminitialize(4);
+#if defined(CONFIG_STM32L4_TIM16_PWM)
+      pwm = stm32l4_pwminitialize(16);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -172,8 +174,8 @@ int stm32l4_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM5_PWM)
-      pwm = stm32l4_pwminitialize(5);
+#if defined(CONFIG_STM32L4_LPTIM1_PWM)
+      pwm = stm32l4_lp_pwminitialize(1);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -190,8 +192,8 @@ int stm32l4_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM8_PWM)
-      pwm = stm32l4_pwminitialize(8);
+#if defined(CONFIG_STM32L4_LPTIM2_PWM)
+      pwm = stm32l4_lp_pwminitialize(2);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -208,59 +210,6 @@ int stm32l4_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM15_PWM)
-      pwm = stm32l4_pwminitialize(15);
-      if (!pwm)
-        {
-          aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
-          return -ENODEV;
-        }
-
-      /* Register the PWM driver at "/dev/pwm6" */
-
-      ret = pwm_register("/dev/pwm6", pwm);
-      if (ret < 0)
-        {
-          aerr("ERROR: pwm_register failed: %d\n", ret);
-          return ret;
-        }
-#endif
-
-#if defined(CONFIG_STM32L4_TIM16_PWM)
-      pwm = stm32l4_pwminitialize(16);
-      if (!pwm)
-        {
-          aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
-          return -ENODEV;
-        }
-
-      /* Register the PWM driver at "/dev/pwm7" */
-
-      ret = pwm_register("/dev/pwm7", pwm);
-      if (ret < 0)
-        {
-          aerr("ERROR: pwm_register failed: %d\n", ret);
-          return ret;
-        }
-#endif
-
-#if defined(CONFIG_STM32L4_TIM17_PWM)
-      pwm = stm32l4_pwminitialize(17);
-      if (!pwm)
-        {
-          aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
-          return -ENODEV;
-        }
-
-      /* Register the PWM driver at "/dev/pwm8" */
-
-      ret = pwm_register("/dev/pwm8", pwm);
-      if (ret < 0)
-        {
-          aerr("ERROR: pwm_register failed: %d\n", ret);
-          return ret;
-        }
-#endif
       /* Now we are initialized */
 
       initialized = true;

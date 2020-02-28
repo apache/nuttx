@@ -19,6 +19,10 @@ config ARCH_CHIP_FE310
 config ARCH_CHIP_K210
 	bool "Kendryte K210"
 	select ARCH_RV64GC
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_TESTSET
+	select ARCH_HAVE_MULTICPU
+	select ARCH_GLOBAL_IRQDISABLE
 	---help---
 		Kendryte K210 processor (RISC-V 64bit core with GC extensions)
 

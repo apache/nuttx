@@ -74,16 +74,6 @@ SECTIONS
         _einit = ABSOLUTE(.);
     } > progmem
 
-    .ARM.extab : ALIGN(4) {
-        *(.ARM.extab*)
-    } > progmem
-
-    .ARM.exidx : ALIGN(4) {
-        __exidx_start = ABSOLUTE(.);
-        *(.ARM.exidx*)
-        __exidx_end = ABSOLUTE(.);
-    } > progmem
-
     _eronly = ABSOLUTE(.);
 
     .data : ALIGN(4) {

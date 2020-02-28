@@ -60,7 +60,7 @@
 #  define CHAR_BYTE  4
 #  define CHAR_SHIFT 2
 #else
-#  error unsupport CHAR_BIT value
+#  error unsupported CHAR_BIT value
 #endif
 
 /* Macros convert between chars and bytes */

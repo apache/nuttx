@@ -258,7 +258,7 @@
 #define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
 
 /* This was really something to find out! But the GPIOA Port was causing
- * conflicts with the nsh console.  So thats why I have chosen GPIOB
+ * conflicts with the nsh console.  So that's why I have chosen GPIOB
  *
  * Author: Ben vd Veen (DisruptiveNL) -- www.nuttx.nl
  * https://www.youtube.com/watch?v=VXsTLzI6idA -- Original video GPIO

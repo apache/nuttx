@@ -245,7 +245,7 @@ struct fs_dirent_s
   off_t fd_position;
 
   /* Retained control information depends on the type of file system that
-   * provides is provides the mountpoint.  Ideally this information should
+   * provides the mountpoint.  Ideally this information should
    * be hidden behind an opaque, file-system-dependent void *, but we put
    * the private definitions in line here for now to reduce allocations.
    */
@@ -332,4 +332,3 @@ extern "C"
 #endif
 
 #endif /* __INCLUDE_NUTTX_FS_DIRENT_H */
-

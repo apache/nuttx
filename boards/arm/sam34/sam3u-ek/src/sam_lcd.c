@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * The SAM3U-EK developement board features a TFT/Transmissive color LCD
+ * The SAM3U-EK development board features a TFT/Transmissive color LCD
  * module with touch-screen, FTM280C12D, with integratd driver IC HX8346.
  * The LCD display size is 2.8 inches, with a native resolution of 240 x 320
  * pixels.
@@ -285,7 +285,7 @@
 
 struct sam_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 
@@ -359,7 +359,7 @@ static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
 /* This is working memory allocated by the LCD driver for each LCD device
  * and for each color plane.  This memory will hold one raster line of data.
- * The size of the allocated run buffer must therefor be at least
+ * The size of the allocated run buffer must therefore be at least
  * (bpp * xres / 8).  Actual alignment of the buffer must conform to the
  * bitwidth of the underlying pixel type.
  *
@@ -626,7 +626,7 @@ static int sam_putrun(fb_coord_t row, fb_coord_t col,
     }
 #else
   /* Write the run to GRAM.
-   * Because rows and colums are swapped, we need to reset
+   * Because rows and columns are swapped, we need to reset
    * the cursor position for every pixel.  We could do this much faster if we
    * adapted to the strange device aspect ratio.
    */
@@ -693,7 +693,7 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       *run++ = sam_rdram();
     }
 #else
-  /* Read the run from GRAM  Because rows and colums are swapped, we need to
+  /* Read the run from GRAM  Because rows and columns are swapped, we need to
    * reset the cursor position for every pixel.
    * We could do this much faster if we adapted to the strange device aspect
    * ratio.
@@ -1075,7 +1075,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
  * Name:  board_lcd_uninitialize
  *
  * Description:
- *   Unitialize the framebuffer support.
+ *   Uninitialize the framebuffer support.
  *
  ****************************************************************************/
 

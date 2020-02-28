@@ -120,7 +120,7 @@ int sam_sdinitialize(int port, int minor)
       return ret;
     }
 
-  finfo("Successfuly bound SPI%d to MMC/SD slot %d\n",
+  finfo("Successfully bound SPI%d to MMC/SD slot %d\n",
         port, SAMD2L2_MMCSDSLOTNO);
 
   return OK;

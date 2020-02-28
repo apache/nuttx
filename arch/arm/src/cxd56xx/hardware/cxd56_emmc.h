@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_EMMC_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_EMMC_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_EMMC_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_EMMC_H
 
 #define EMMC_CTRL           (CXD56_EMMC_BASE + 0x00u)
 #define EMMC_PWREN          (CXD56_EMMC_BASE + 0x04u)
@@ -287,7 +287,7 @@
 
 /* 4bit: Reserved.
  * 3-2bit: Reserved for application specific command
- * 1-0bit: Reserved for manifacturer testmode
+ * 1-0bit: Reserved for manufacturer testmode
  */
 
 #define R1STATUS_ALL_ERR                        \
@@ -343,4 +343,4 @@
 #define EXTCSD_PON_POWERED_ON       (0x01u)
 #define EXTCSD_PON_POWERED_OFF_LONG (0x03u)
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_EMMC_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_EMMC_H */

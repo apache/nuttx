@@ -43,7 +43,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <queue.h>
@@ -56,6 +55,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
+#include <nuttx/semaphore.h>
 
 #include "stm32l4_dma.h"
 #include "stm32l4_gpio.h"
@@ -144,7 +144,7 @@ struct stm32l4_sai_s
 {
   struct i2s_dev_s dev;        /* Externally visible I2S interface */
   uintptr_t base;              /* SAI block register base address */
-  sem_t exclsem;               /* Assures mutually exclusive acess to SAI */
+  sem_t exclsem;               /* Assures mutually exclusive access to SAI */
   uint32_t frequency;          /* SAI clock frequency */
   uint32_t syncen;             /* Synchronization setting */
 #ifdef CONFIG_STM32L4_SAI_DMA
@@ -728,7 +728,7 @@ static void sai_worker(void *arg)
   while (sq_peek(&priv->done) != NULL)
     {
       /* Remove the buffer container from the done queue.  NOTE that
-       * interupts must be enabled to do this because the done queue is
+       * interrupts must be enabled to do this because the done queue is
        * also modified from the interrupt level.
        */
 
@@ -1011,7 +1011,7 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   flags = enter_critical_section();
   sq_addlast((sq_entry_t *)bfcontainer, &priv->pend);
 
-  /* Then start the next transfer.  If there is already a transfer in progess,
+  /* Then start the next transfer.  If there is already a transfer in progress,
    * then this will do nothing.
    */
 
@@ -1111,7 +1111,7 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   flags = enter_critical_section();
   sq_addlast((sq_entry_t *)bfcontainer, &priv->pend);
 
-  /* Then start the next transfer.  If there is already a transfer in progess,
+  /* Then start the next transfer.  If there is already a transfer in progress,
    * then this will do nothing.
    */
 

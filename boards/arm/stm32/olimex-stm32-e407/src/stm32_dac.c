@@ -108,4 +108,3 @@ int stm32_dac_setup(void)
 }
 
 #endif
-

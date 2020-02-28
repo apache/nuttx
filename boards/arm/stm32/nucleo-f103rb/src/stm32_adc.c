@@ -130,7 +130,7 @@ static const uint32_t g_pinlist1[3] =
   GPIO_ADC123_IN10,              /* PC0/A5 */
 };
 
-#endif  /* DEV1_PORT == 1 */
+#endif /* DEV1_PORT == 1 */
 
 #ifdef DEV2_PORT
 
@@ -158,8 +158,8 @@ static const uint32_t g_pinlist2[3] =
   GPIO_ADC123_IN10,              /* PC0/A5 */
 };
 
-#endif  /* DEV2_PORT == 2 */
-#endif  /* DEV2_PORT */
+#endif /* DEV2_PORT == 2 */
+#endif /* DEV2_PORT */
 
 /****************************************************************************
  * Private Functions

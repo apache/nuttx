@@ -184,4 +184,3 @@ int imxrt_lpspi4register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_LPSPI_H */
-

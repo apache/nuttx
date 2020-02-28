@@ -58,7 +58,7 @@ int board_lt1pa01_initialize(int bus)
 
   sninfo("Initializing LT1PA01...\n");
 
-  /* Initialize i2c deivce */
+  /* Initialize i2c device */
 
   i2c = cxd56_i2cbus_initialize(bus);
   if (!i2c)

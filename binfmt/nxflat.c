@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/nxflat.c
  *
- *   Copyright (C) 2009, 2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2019-2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -119,11 +119,13 @@ static void nxflat_dumploadinfo(FAR struct nxflat_loadinfo_s *loadinfo)
 
   binfo("  DSPACE:\n");
   binfo("    dspace:       %08lx\n", loadinfo->dspace);
+
   if (loadinfo->dspace != NULL)
     {
       binfo("      crefs:      %d\n",    loadinfo->dspace->crefs);
       binfo("      region:     %08lx\n", loadinfo->dspace->region);
     }
+
   binfo("    datasize:     %08lx\n", loadinfo->datasize);
   binfo("    bsssize:      %08lx\n", loadinfo->bsssize);
   binfo("      (pad):      %08lx\n", loadinfo->dsize - dsize);
@@ -196,7 +198,7 @@ static int nxflat_loadbinary(FAR struct binary_s *binp)
   binp->stacksize = loadinfo.stacksize;
 
   /* Add the ELF allocation to the alloc[] only if there is no address
-   * enironment.  If there is an address environment, it will automatically
+   * environment.  If there is an address environment, it will automatically
    * be freed when the function exits
    *
    * REVISIT:  If the module is loaded then unloaded, wouldn't this cause
@@ -265,7 +267,7 @@ static int nxflat_unloadbinary(FAR struct binary_s *binp)
        */
     }
 
- return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -299,6 +301,7 @@ int nxflat_initialize(void)
     {
       berr("Failed to register binfmt: %d\n", ret);
     }
+
   return ret;
 }
 
@@ -319,4 +322,3 @@ void nxflat_uninitialize(void)
 }
 
 #endif /* CONFIG_NXFLAT */
-

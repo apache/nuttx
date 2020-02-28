@@ -6,4 +6,3 @@ config FS_LITTLEFS
 	depends on !DISABLE_MOUNTPOINT
 	---help---
 		Build the LITTLEFS file system. https://github.com/ARMmbed/littlefs.
-

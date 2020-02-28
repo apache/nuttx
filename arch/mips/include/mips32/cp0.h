@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/chip/chip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -127,7 +128,7 @@
  * Compliance Level: Required for TLB-based MMUs; Optional otherwise.
  */
 
-#define CP0_CONTEXT_BADVPN2_SHIFT   (4)       /* Bits 4-22: Virtual address that cause an excpetion */
+#define CP0_CONTEXT_BADVPN2_SHIFT   (4)       /* Bits 4-22: Virtual address that cause an exception */
 #define CP0_CONTEXT_BADVPN2_MASK    (0x0007ffff << CP0_CONTEXT_BADVPN2_SHIFT)
 #define CP0_CONTEXT_PTEBASE_SHIFT   (23)      /* Bits 23-31: Page table base address */
 #define CP0_CONTEXT_PTEBASE_MASK    (0x000001ff << CP0_CONTEXT_PTEBASE_SHIFT)
@@ -213,20 +214,27 @@
 #define CP0_STATUS_UX               (1 << 5)  /* Bit 5: Enables 64-bit user address space (Not MIPS32) */
 #define CP0_STATUS_SX               (1 << 6)  /* Bit 6: Enables 64-bit supervisor address space (Not MIPS32) */
 #define CP0_STATUS_KX               (1 << 7)  /* Bit 7: Enables 64-bit kernel address space (Not MIPS32) */
-#define CP0_STATUS_IM_SHIFT         (8)       /* Bits 8-15: Interrupt Mask */
-#define CP0_STATUS_IM_MASK          (0xff << CP0_STATUS_IM_SHIFT)
-#  define CP0_STATUS_IM_SWINTS      (0x03 << CP0_STATUS_IM_SHIFT) /* IM0-1 = Software interrupts */
-#  define CP0_STATUS_IM0            (0x01 << CP0_STATUS_IM_SHIFT)
-#  define CP0_STATUS_IM1            (0x02 << CP0_STATUS_IM_SHIFT)
-#  define CP0_STATUS_IM_HWINTS      (0x7c << CP0_STATUS_IM_SHIFT) /* IM2-6 = Hardware interrupts */
-#  define CP0_STATUS_IM2            (0x04 << CP0_STATUS_IM_SHIFT)
-#  define CP0_STATUS_IM3            (0x08 << CP0_STATUS_IM_SHIFT)
-#  define CP0_STATUS_IM4            (0x10 << CP0_STATUS_IM_SHIFT)
-#  define CP0_STATUS_IM5            (0x20 << CP0_STATUS_IM_SHIFT)
-#  define CP0_STATUS_IM6            (0x40 << CP0_STATUS_IM_SHIFT)
-#  define CP0_STATUS_IM_TIMER       (0x80 << CP0_STATUS_IM_SHIFT) /* IM7 = Hardware/Timer/Perf interrupts */
-#  define CP0_STATUS_IM7            (0x80 << CP0_STATUS_IM_SHIFT)
-#  define CP0_STATUS_IM_ALL         (0xff << CP0_STATUS_IM_SHIFT)
+#ifdef CONFIG_ARCH_HAVE_EIC
+#  define CP0_STATUS_IPL_SHIFT      (10)       /* Bits 10-16+18: Interrupt Mask */
+#  define CP0_STATUS_IPL_MASK       (0x17f << CP0_STATUS_IPL_SHIFT)
+#    define CP0_STATUS_IPL_ENALL    (0x00  << CP0_STATUS_IPL_SHIFT)
+#    define CP0_STATUS_IPL_SW0      ((CHIP_SW0_PRIORITY - 1) << CP0_STATUS_IPL_SHIFT)
+#    define CP0_STATUS_IPL_DISALL   (CHIP_MAX_PRIORITY << CP0_STATUS_IPL_SHIFT)
+#      define CP0_STATUS_INT_ENALL  CP0_STATUS_IPL_ENALL
+#      define CP0_STATUS_INT_SW0    CP0_STATUS_IPL_SW0
+#      define CP0_STATUS_INT_MASK   CP0_STATUS_IPL_MASK
+#      define CP0_STATUS_INT_DISALL CP0_STATUS_IPL_DISALL
+#else
+#  define CP0_STATUS_IM_SHIFT       (8)       /* Bits 8-15: Interrupt Mask */
+#  define CP0_STATUS_IM_MASK        (0xff << CP0_STATUS_IM_SHIFT)
+#    define CP0_STATUS_IM_DISALL    (0x00 << CP0_STATUS_IM_SHIFT)
+#    define CP0_STATUS_IM_SW0       (0x03 << CP0_STATUS_IM_SHIFT) /* IM0-1 = Software interrupts */
+#    define CP0_STATUS_IM_ALL       (0xff << CP0_STATUS_IM_SHIFT)
+#      define CP0_STATUS_INT_ENALL  CP0_STATUS_IM_ALL
+#      define CP0_STATUS_INT_SW0    CP0_STATUS_IM_SW0
+#      define CP0_STATUS_INT_MASK   CP0_STATUS_IM_MASK
+#      define CP0_STATUS_INT_DISALL CP0_STATUS_IM_DISALL
+#endif
 #define CP0_STATUS_IMPL_SHIFT       (16)      /* Bits 16-17: Implementation dependent */
 #define CP0_STATUS_IMPL_MASK        (3 << CP0_STATUS_IMPL_SHIFT)
 #define CP0_STATUS_NMI              (1 << 19) /* Bit 19: Reset exception due to an NMI */
@@ -483,7 +491,7 @@
 #define CP0_WATCHHI_MASK_MASK       (0x1ff << CP0_WATCHHI_MASK_SHIFT)
 #define CP0_WATCHHI_ASID_SHIFT      (16)       /* Bits 16-23:  ASID value which to match that in the EntryHi register */
 #define CP0_WATCHHI_ASID_MASK       (0xff << CP0_WATCHHI_ASID_SHIFT)
-#define CP0_WATCHHI_G               (1 << 30) /* Bit 30: Any address matcing the WatchLo addr will cause an exception */
+#define CP0_WATCHHI_G               (1 << 30) /* Bit 30: Any address matching the WatchLo addr will cause an exception */
 #define CP0_WATCHHI_M               (1 << 31) /* Bit 30: Another pair of WatchHi/WatchLo registers at select n+1 */
 
 /* Register Number: 20 Sel: 0 Name: XContext

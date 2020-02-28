@@ -304,7 +304,7 @@ static int powerled_start(FAR struct powerled_dev_s *dev)
 
   if (powerled->opmode == POWERLED_OPMODE_CONTINUOUS)
     {
-      /* Average curent set to max */
+      /* Average current set to max */
 
       current_av_mA = (uint16_t)(current_max_mA);
 
@@ -493,7 +493,7 @@ static int powerled_limits_set(FAR struct powerled_dev_s *dev,
     {
       limits->current = (float)LED_ABSOLUTE_CURRENT_LIMIT_mA/1000.0;
       pwrwarn("WARNING: "
-              "LED current limiit > LED absoulute current limit."
+              "LED current limiit > LED absolute current limit."
               " Set current limit to %d.\n",
               limits->current);
     }
@@ -522,7 +522,7 @@ static int powerled_state_get(FAR struct powerled_dev_s *dev,
 
 static int powerled_fault_set(FAR struct powerled_dev_s *dev, uint8_t fault)
 {
-  /* Do nothin */
+  /* Do nothing */
 
   return -1;
 }

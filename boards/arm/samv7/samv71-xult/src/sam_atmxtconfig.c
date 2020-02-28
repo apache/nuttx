@@ -253,4 +253,3 @@ const struct atmxt_config_s g_atmxt_config[] =
 };
 
 #endif
-

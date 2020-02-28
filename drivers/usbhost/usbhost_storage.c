@@ -43,7 +43,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -55,6 +54,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/scsi.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
@@ -1340,7 +1340,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
   /* Decrement the reference count.  We incremented the reference count
    * above so that usbhost_destroy() could not be called.  We now have to
    * be concerned about asynchronous modification of crefs because the block
-   * driver has been registerd.
+   * driver has been registered.
    */
 
   usbhost_takesem(&priv->exclsem);
@@ -1627,7 +1627,7 @@ static FAR struct usbmsc_cbw_s *usbhost_cbwalloc(FAR struct usbhost_state_s *pri
 
   DEBUGASSERT(priv->tbuffer && priv->tbuflen >= sizeof(struct usbmsc_cbw_s));
 
-  /* Initialize the CBW sructure */
+  /* Initialize the CBW structure */
 
   cbw = (FAR struct usbmsc_cbw_s *)priv->tbuffer;
   memset(cbw, 0, sizeof(struct usbmsc_cbw_s));
@@ -1960,7 +1960,7 @@ static int usbhost_close(FAR struct inode *inode)
  * Name: usbhost_read
  *
  * Description:
- *   Read the specified numer of sectors from the read-ahead buffer or from
+ *   Read the specified number of sectors from the read-ahead buffer or from
  *   the physical device.
  *
  ****************************************************************************/
@@ -2303,5 +2303,4 @@ int usbhost_msc_initialize(void)
   return usbhost_registerclass(&g_storage);
 }
 
-#endif  /* CONFIG_USBHOST && !CONFIG_USBHOST_BULK_DISABLE && !CONFIG_DISABLE_MOUNTPOINT */
-
+#endif /* CONFIG_USBHOST && !CONFIG_USBHOST_BULK_DISABLE && !CONFIG_DISABLE_MOUNTPOINT */

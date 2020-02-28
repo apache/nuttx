@@ -85,4 +85,3 @@ enum
 #endif
 
 #endif /* __INCLUDE_NUTTX_INPUT_XBOX_CONTROLLER_H */
-

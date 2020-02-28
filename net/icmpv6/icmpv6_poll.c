@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/icmpv6/icmpv6_poll.c
  *
- *   Copyright (C) 2015, 2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2019, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET_ICMPv6_SOCKET) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 
-#include <semaphore.h>
 #include <debug.h>
 
 #include <nuttx/net/netconfig.h>

@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SPRESENSE_INCLUDE_CXD56_GS2200M_H
-#define __BOARDS_ARM_SPRESENSE_INCLUDE_CXD56_GS2200M_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_GS2200M_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_GS2200M_H
 
 /****************************************************************************
  * Included Files
@@ -82,4 +82,4 @@ int board_gs2200m_initialize(FAR const char *devpath, int bus);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SPRESENSE_INCLUDE_CXD56_GS2200M_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_GS2200M_H */

@@ -40,16 +40,16 @@ ifneq ($(CONFIG_NET_UDP_NO_STACK),y)
 
 # Socket layer
 
-SOCK_CSRCS += udp_psock_send.c
+SOCK_CSRCS += udp_recvfrom.c
 
 ifeq ($(CONFIG_NET_UDPPROTO_OPTIONS),y)
 SOCK_CSRCS += udp_setsockopt.c
 endif
 
 ifeq ($(CONFIG_NET_UDP_WRITE_BUFFERS),y)
-SOCK_CSRCS += udp_psock_sendto_buffered.c
+SOCK_CSRCS += udp_sendto_buffered.c
 else
-SOCK_CSRCS += udp_psock_sendto_unbuffered.c
+SOCK_CSRCS += udp_sendto_unbuffered.c
 endif
 
 ifeq ($(CONFIG_NET_UDP_NOTIFIER),y)
@@ -62,7 +62,7 @@ endif
 # Transport layer
 
 NET_CSRCS += udp_conn.c udp_devpoll.c udp_send.c udp_input.c udp_finddev.c
-NET_CSRCS += udp_callback.c udp_ipselect.c udp_netpoll.c
+NET_CSRCS += udp_close.c udp_callback.c udp_ipselect.c udp_netpoll.c
 
 # UDP write buffering
 

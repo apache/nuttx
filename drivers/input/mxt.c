@@ -52,7 +52,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <poll.h>
 #include <errno.h>
 #include <assert.h>
@@ -1357,7 +1356,7 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
     {
       FAR struct touch_sample_s *report = (FAR struct touch_sample_s *)buffer;
 
-      /* Yes, copy the sample data into the user bufer */
+      /* Yes, copy the sample data into the user buffer */
 
       memset(report, 0, SIZEOF_TOUCH_SAMPLE_S(ncontacts));
       report->npoints = ncontacts;
@@ -1582,7 +1581,7 @@ static int mxt_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_MXT_NPOLLWAITERS)
         {
-          ierr("ERROR: No availabled slot found: %d\n", i);
+          ierr("ERROR: No available slot found: %d\n", i);
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout;

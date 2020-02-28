@@ -43,7 +43,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
@@ -118,6 +117,7 @@ static inline void accept_tcpsender(FAR struct socket *psock,
           inaddr->sin_family = AF_INET;
           inaddr->sin_port   = conn->rport;
           net_ipv4addr_copy(inaddr->sin_addr.s_addr, conn->u.ipv4.raddr);
+          memset(inaddr->sin_zero, 0, sizeof(inaddr->sin_zero));
 
           *addrlen = sizeof(struct sockaddr_in);
         }

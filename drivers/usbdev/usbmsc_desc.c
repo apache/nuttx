@@ -55,6 +55,7 @@
  ****************************************************************************/
 
 /* Descriptors **************************************************************/
+
 /* Device descriptor.  If the USB mass storage device is configured as part
  * of a composite device, then the device descriptor will be provided by the
  * composite device logic.
@@ -88,7 +89,6 @@ static const struct usb_devdesc_s g_devdesc =
 };
 #endif
 
-
 #ifdef CONFIG_USBDEV_DUALSPEED
 #ifndef CONFIG_USBMSC_COMPOSITE
 static const struct usb_qualdesc_s g_qualdesc =
@@ -112,6 +112,7 @@ static const struct usb_qualdesc_s g_qualdesc =
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* Strings ******************************************************************/
 
 #ifndef CONFIG_USBMSC_COMPOSITE
@@ -170,7 +171,8 @@ int usbmsc_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
       break;
 #endif
 
- /* case USBMSC_CONFIGSTRID: */
+  /* case USBMSC_CONFIGSTRID: */
+
     case USBMSC_INTERFACESTRID:
       str = CONFIG_USBMSC_CONFIGSTR;
       break;
@@ -179,25 +181,25 @@ int usbmsc_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
       return -EINVAL;
     }
 
-   /* The string is utf16-le.  The poor man's utf-8 to utf16-le
-    * conversion below will only handle 7-bit en-us ascii
-    */
+  /* The string is utf16-le.  The poor man's utf-8 to utf16-le
+   * conversion below will only handle 7-bit en-us ascii
+   */
 
-   len = strlen(str);
-   if (len > (USBMSC_MAXSTRLEN / 2))
-     {
-       len = (USBMSC_MAXSTRLEN / 2);
-     }
+  len = strlen(str);
+  if (len > (USBMSC_MAXSTRLEN / 2))
+    {
+      len = (USBMSC_MAXSTRLEN / 2);
+    }
 
-   for (i = 0, ndata = 0; i < len; i++, ndata += 2)
-     {
-       strdesc->data[ndata]   = str[i];
-       strdesc->data[ndata+1] = 0;
-     }
+  for (i = 0, ndata = 0; i < len; i++, ndata += 2)
+    {
+      strdesc->data[ndata]   = str[i];
+      strdesc->data[ndata + 1] = 0;
+    }
 
-   strdesc->len  = ndata+2;
-   strdesc->type = USB_DESC_TYPE_STRING;
-   return strdesc->len;
+  strdesc->len  = ndata + 2;
+  strdesc->type = USB_DESC_TYPE_STRING;
+  return strdesc->len;
 }
 
 /****************************************************************************
@@ -339,14 +341,18 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf,
 #ifndef CONFIG_USBMSC_COMPOSITE
   {
     /* Configuration descriptor  If the USB mass storage device is configured as part
-     * of a composite device, then the configuration descriptor will be provided by the
-     * composite device logic.
+     * of a composite device, then the configuration descriptor will be provided
+     * by the composite device logic.
      */
 
     FAR struct usb_cfgdesc_s *dest = (FAR struct usb_cfgdesc_s *)buf;
 
     dest->len         = USB_SIZEOF_CFGDESC;               /* Descriptor length */
+#ifdef CONFIG_USBDEV_DUALSPEED
+    dest->type        = type;                             /* Descriptor type */
+#else
     dest->type        = USB_DESC_TYPE_CONFIG;             /* Descriptor type */
+#endif
     dest->totallen[0] = LSBYTE(SIZEOF_USBMSC_CFGDESC);    /* LS Total length */
     dest->totallen[1] = MSBYTE(SIZEOF_USBMSC_CFGDESC);    /* MS Total length */
     dest->ninterfaces = USBMSC_NINTERFACES;               /* Number of interfaces */

@@ -112,4 +112,3 @@ void board_late_initialize(void)
   (void)sam_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */
-

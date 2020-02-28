@@ -122,7 +122,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This is our private version of the MAC callback stucture */
+/* This is our private version of the MAC callback structure */
 
 struct xbeenet_callback_s
 {
@@ -1236,7 +1236,7 @@ static int xbeenet_req_data(FAR struct radio_driver_s *netdev,
  *
  * Input Parameters:
  *   netdev     - The network device to be queried
- *   properties - Location where radio properities will be returned.
+ *   properties - Location where radio properties will be returned.
  *
  * Returned Value:
  *   Zero (OK) returned on success; a negated errno value is returned on
@@ -1373,7 +1373,7 @@ int xbee_netdev_register(XBEEHANDLE xbee)
 
   radio->r_get_mhrlen = xbeenet_get_mhrlen;  /* Get MAC header length */
   radio->r_req_data   = xbeenet_req_data;    /* Enqueue frame for transmission */
-  radio->r_properties = xbeenet_properties;  /* Return radio properies */
+  radio->r_properties = xbeenet_properties;  /* Return radio properties */
 
   /* Initialize fields related to MAC event handling */
 

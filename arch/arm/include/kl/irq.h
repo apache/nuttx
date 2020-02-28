@@ -116,7 +116,7 @@
 
 /* Note that the total number of IRQ numbers supported is equal to the number of
  * valid interrupt vectors.  This is wasteful in that certain tables are sized by
- * this value.  There are only 94 valid interrupts so, potentially the numver of
+ * this value.  There are only 94 valid interrupts so, potentially the number of
  * IRQs to could be reduced to 94.  However, equating IRQ numbers with vector numbers
  * also simplifies operations on NVIC registers and (at least in my state of mind
  * now) seems to justify the waste.
@@ -161,7 +161,7 @@
 
 /* Note that the total number of IRQ numbers supported is equal to the number of
  * valid interrupt vectors.  This is wasteful in that certain tables are sized by
- * this value.  There are only 94 valid interrupts so, potentially the numver of
+ * this value.  There are only 94 valid interrupts so, potentially the number of
  * IRQs to could be reduced to 94.  However, equating IRQ numbers with vector numbers
  * also simplifies operations on NVIC registers and (at least in my state of mind
  * now) seems to justify the waste.
@@ -207,4 +207,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_KL_IRQ_H */
-

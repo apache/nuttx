@@ -62,7 +62,7 @@
 #include "usrsock/usrsock.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #ifndef CONFIG_NET_USRSOCKDEV_NPOLLWAITERS
@@ -961,7 +961,6 @@ static int usrsockdev_close(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct usrsockdev_s *dev;
   FAR struct usrsock_conn_s *conn;
-  struct timespec abstime;
   int ret;
 
   DEBUGASSERT(inode);
@@ -1004,17 +1003,7 @@ static int usrsockdev_close(FAR struct file *filep)
        * requests.
        */
 
-      DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
-
-      abstime.tv_sec += 0;
-      abstime.tv_nsec += 10 * NSEC_PER_MSEC;
-      if (abstime.tv_nsec >= NSEC_PER_SEC)
-        {
-          abstime.tv_sec++;
-          abstime.tv_nsec -= NSEC_PER_SEC;
-        }
-
-      ret = net_timedwait(&dev->req.sem, &abstime);
+      ret = net_timedwait(&dev->req.sem, 10);
       if (ret < 0)
         {
           if (ret != -ETIMEDOUT && ret != -EINTR)
@@ -1166,7 +1155,6 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 {
   FAR struct usrsockdev_s *dev = conn->dev;
   FAR struct usrsock_request_common_s *req_head = iov[0].iov_base;
-  int ret;
 
   if (!dev)
     {
@@ -1218,7 +1206,6 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
     {
       ninfo("usockid=%d; daemon abruptly closed /dev/usrsock.\n",
             conn->usockid);
-      ret = -ESHUTDOWN;
     }
 
   /* Free request line for next command. */
@@ -1227,7 +1214,7 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 
   --dev->req.nbusy; /* net_lock held. */
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************

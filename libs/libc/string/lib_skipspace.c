@@ -65,5 +65,3 @@ void lib_skipspace(const char **pptr)
    while (isspace(*ptr)) ptr++;
    *pptr = ptr;
 }
-
-

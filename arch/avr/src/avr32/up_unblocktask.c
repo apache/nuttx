@@ -160,4 +160,3 @@ void up_unblock_task(struct tcb_s *tcb)
         }
     }
 }
-

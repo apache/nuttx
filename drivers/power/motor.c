@@ -43,13 +43,11 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/power/motor.h>
 
@@ -229,7 +227,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case PWRIOC_START:
         {
           /* Allow motor start only when some limits available
-           * and strucutre is locked.
+           * and structure is locked.
            */
 
           if ((motor->limits.lock == false) ||

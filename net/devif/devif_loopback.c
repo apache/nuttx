@@ -159,4 +159,3 @@ int devif_loopback(FAR struct net_driver_s *dev)
 
   return 1;
 }
-

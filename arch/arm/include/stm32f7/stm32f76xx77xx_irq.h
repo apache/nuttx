@@ -179,7 +179,6 @@
 #define STM32_IRQ_MDIOS       (STM32_IRQ_FIRST + 109) /* 109: MDIO slave global interrupt */
 
 #define STM32_IRQ_NEXTINTS    110
-#define STM32_IRQ_NIRQS       (STM32_IRQ_FIRST + 110)
 
 /* EXTI interrupts (Do not use IRQ numbers) */
 

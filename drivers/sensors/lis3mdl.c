@@ -43,13 +43,12 @@
 #include <errno.h>
 #include <debug.h>
 #include <string.h>
-#include <semaphore.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
-
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/sensors/lis3mdl.h>
 
 #if defined(CONFIG_SPI) && defined(CONFIG_SENSORS_LIS3MDL)
@@ -233,12 +232,12 @@ static void lis3mdl_read_measurement_data(FAR struct lis3mdl_dev_s *dev)
 
   lis3mdl_read_temperature(dev, &temperature);
 
-  /* Aquire the semaphore before the data is copied */
+  /* Acquire the semaphore before the data is copied */
 
   int ret = nxsem_wait(&dev->datasem);
   if (ret != OK)
     {
-      snerr("ERROR: Could not aquire dev->datasem: %d\n", ret);
+      snerr("ERROR: Could not acquire dev->datasem: %d\n", ret);
       return;
     }
 
@@ -438,7 +437,7 @@ static int lis3mdl_open(FAR struct file *filep)
 
   lis3mdl_write_register(priv, LIS3MDL_CTRL_REG_5, LIS3MDL_CTRL_REG_5_BDU_bm);
 
-  /* Enable continous conversion mode - the device starts measuring now. */
+  /* Enable continuous conversion mode - the device starts measuring now. */
 
   lis3mdl_write_register(priv, LIS3MDL_CTRL_REG_3, 0);
 
@@ -503,12 +502,12 @@ static ssize_t lis3mdl_read(FAR struct file *filep, FAR char *buffer,
       return -ENOSYS;
     }
 
-  /* Aquire the semaphore before the data is copied */
+  /* Acquire the semaphore before the data is copied */
 
   ret = nxsem_wait(&priv->datasem);
   if (ret < 0)
     {
-      snerr("ERROR: Could not aquire priv->datasem: %d\n", ret);
+      snerr("ERROR: Could not acquire priv->datasem: %d\n", ret);
       return ret;
     }
 

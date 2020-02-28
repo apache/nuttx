@@ -48,7 +48,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -3478,11 +3477,11 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
               canerr("ERROR: RX %08x\n", pending & MCAN_RXERR_INTS);
 
               /* To prevent Interrupt-Flooding the current active
-               * RX error interupts are disabled. After successfully
+               * RX error interrupts are disabled. After successfully
                * receiving at least one CAN packet all RX error interrupts
                * are turned back on.
                *
-               * The Interrupt-Flooding can for example occure if the
+               * The Interrupt-Flooding can for example occur if the
                * configured CAN speed does not match the speed of the other
                * CAN nodes in the network.
                */

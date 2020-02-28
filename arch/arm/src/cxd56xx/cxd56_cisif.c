@@ -91,7 +91,7 @@
 
 #define YUV_SIZE(v, h) (v * h * 2)
 
-/* Check Buffer address alignement */
+/* Check Buffer address alignment */
 
 #define CISIF_BUFADDR_ALIGNMENT            (32)
 #define ILLEGAL_BUFADDR_ALIGNMENT(addr)    (((addr) == NULL) ||  \
@@ -216,6 +216,7 @@ static uint64_t cisif_get_msec_time(void)
     {
       return 0;
     }
+
   return (((uint64_t)tp.tv_sec) * 1000 + tp.tv_nsec / 1000000);
 }
 
@@ -318,6 +319,7 @@ static void cisif_callback_for_intlev(uint8_t code)
 /****************************************************************************
  * cisif_ycc_axi_trdn_int
  ****************************************************************************/
+
 static void cisif_ycc_axi_trdn_int(uint8_t code)
 {
   uint32_t size;
@@ -329,7 +331,7 @@ static void cisif_ycc_axi_trdn_int(uint8_t code)
 
   if (g_errint_receive)
     {
-      /* In error occured case in the same frame, ignore */
+      /* In error occurred case in the same frame, ignore */
 
       cisif_reg_write(CISIF_YCC_DREAD_CONT, 0);
       return;
@@ -359,7 +361,7 @@ static void cisif_ycc_nstorage_int(uint8_t code)
   uint32_t size;
 
   size = cisif_reg_read(CISIF_YCC_DSTRG_CONT);
-  g_ycc_notify_callback_func (0, size, g_storage_addr);
+  g_ycc_notify_callback_func(0, size, g_storage_addr);
   cisif_reg_write(CISIF_YCC_DREAD_CONT, size);
 }
 
@@ -378,7 +380,7 @@ static void cisif_jpg_axi_trdn_int(uint8_t code)
 
   if (g_errint_receive)
     {
-      /* In error occured case in the same frame, ignore */
+      /* In error occurred case in the same frame, ignore */
 
       cisif_reg_write(CISIF_JPG_DREAD_CONT, 0);
       return;

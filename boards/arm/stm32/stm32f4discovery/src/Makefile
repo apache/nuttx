@@ -74,15 +74,23 @@ CSRCS += stm32_bmp180.c
 endif
 
 ifeq ($(CONFIG_SENSORS_MLX90614),y)
-  CSRCS += stm32_mlx90614.c
+CSRCS += stm32_mlx90614.c
 endif
 
 ifeq ($(CONFIG_LCD_ST7567),y)
-  CSRCS += stm32_st7567.c
+CSRCS += stm32_st7567.c
+endif
+
+ifeq ($(CONFIG_ENC28J60),y)
+CSRCS += stm32_enc28j60.c
+endif
+
+ifeq ($(CONFIG_LPWAN_SX127X),y)
+CSRCS += stm32_sx127x.c
 endif
 
 ifeq ($(CONFIG_INPUT_NUNCHUCK),y)
-  CSRCS += stm32_nunchuck.c
+CSRCS += stm32_nunchuck.c
 endif
 
 ifeq ($(CONFIG_SENSORS_MAX31855),y)
@@ -98,11 +106,11 @@ CSRCS += stm32_max6675.c
 endif
 
 ifeq ($(CONFIG_LCD_MAX7219),y)
-  CSRCS += stm32_max7219.c
+CSRCS += stm32_max7219.c
 endif
 
 ifeq ($(CONFIG_LCD_ST7032),y)
-  CSRCS += stm32_st7032.c
+CSRCS += stm32_st7032.c
 endif
 
 ifeq ($(CONFIG_PCA9635PW),y)
@@ -118,7 +126,7 @@ CSRCS += stm32_ethernet.c
 endif
 
 ifeq ($(CONFIG_LEDS_MAX7219),y)
-  CSRCS += stm32_max7219_leds.c
+CSRCS += stm32_max7219_leds.c
 endif
 
 ifeq ($(CONFIG_RGBLED),y)

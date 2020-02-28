@@ -3,18 +3,25 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "General Ethernet MAC Driver Options"
-
-config NETDEV_LOOPBACK
-	bool
-	default n if !NET_LOOPBACK
-	default y if NET_LOOPBACK
-	select ARCH_HAVE_NETDEV_STATISTICS
+menuconfig NETDEVICES
+	bool "Network Device/PHY Support"
+	default n if !ARCH_HAVE_PHY
+	default y if ARCH_HAVE_PHY
+	depends on NET
 	---help---
-		Add support for the local network loopback device, lo.
+		Network interface driver and PHY selections.  This options enables
+		selection of drivers for external Ethernet MAC chips.  The majority
+		of MCUs, however, have built-in, internal Ethernet MAC peripherals
+		and that Ethernet support is selected in the MCU-specific
+		configuration menus.
 
-if NETDEV_LOOPBACK
-endif # NETDEV_LOOPBACK
+		Most Ethernet MAC drivers, whether internal or external, will
+		require configuration of an external PHY device.  That external PHY
+		device is also selected via this menu.
+
+if NETDEVICES
+
+comment "General Ethernet MAC Driver Options"
 
 config NET_RPMSG_DRV
 	bool "RPMSG net driver"
@@ -93,10 +100,6 @@ config TELNET_DUMPBUFFER
 	depends on DEBUG_NET
 
 endif # NETDEV_TELNET
-
-config ARCH_HAVE_NETDEV_STATISTICS
-	bool
-	default n
 
 config NETDEV_STATISTICS
 	bool "Network device driver statistics"
@@ -288,7 +291,7 @@ config ENCX24J600_NRXDESCR
 		Defines how many descriptors are preallocated for the
 		transmission and reception queues.
 		The ENC has a relative large packet buffer of 24kB which can
-		be used to buffer multiple packets simutaneously
+		be used to buffer multiple packets simultaneously
 
 config ENCX24J600_DUMPPACKET
 	bool "Dump Packets"
@@ -306,35 +309,6 @@ config ENCX24J600_REGDEBUG
 		CONFIG_DEBUG_FEATURES and CONFIG_DEBUG_NET.
 
 endif # ENCX24J600
-
-menuconfig NET_SLIP
-	bool "SLIP (serial line) support"
-	default n
-	select ARCH_HAVE_NETDEV_STATISTICS
-	---help---
-		Reference: RFC 1055
-
-if NET_SLIP
-
-config NET_SLIP_STACKSIZE
-	int "Daemon stack size"
-	default 2048
-	---help---
-		Provides the stack size for SLIP RX and TX.
-
-config NET_SLIP_DEFPRIO
-	int "Daemon priority"
-	default 128
-	---help---
-		Provides the priority for SLIP RX and TX threads.
-
-config NET_SLIP_NINTERFACES
-	int "Number of SLIP interfaces"
-	default 1
-	---help---
-		Determines the number of physical interfaces that will be supported.
-
-endif
 
 menuconfig NET_FTMAC100
 	bool "Faraday 10/100 Ethernet"
@@ -381,10 +355,6 @@ if ARCH_HAVE_PHY
 
 comment "External Ethernet PHY Device Support"
 
-config ARCH_PHY_INTERRUPT
-	bool
-	default n
-
 choice
 	prompt "Board PHY Selection (ETH0)"
 	default ETH0_PHY_NONE
@@ -421,6 +391,11 @@ config ETH0_PHY_DP83848C
 
 config ETH0_PHY_TJA1100
 	bool "NXP TJA1100 PHY"
+	select ARCH_PHY_100BASE_T1
+
+config ETH0_PHY_TJA1101
+	bool "NXP TJA1101 PHY"
+	select ARCH_PHY_100BASE_T1
 
 config ETH0_PHY_LAN8720
 	bool "SMSC LAN8720 PHY"
@@ -472,6 +447,11 @@ config ETH1_PHY_DP83848C
 
 config ETH1_PHY_TJA1100
 	bool "NXP TJA1100 PHY"
+	select ARCH_PHY_100BASE_T1
+
+config ETH1_PHY_TJA1101
+	bool "NXP TJA1101 PHY"
+	select ARCH_PHY_100BASE_T1
 
 config ETH1_PHY_LAN8720
 	bool "SMSC LAN8720 PHY"
@@ -481,7 +461,11 @@ config ETH1_PHY_DM9161
 
 endchoice
 
-if (ETH0_PHY_TJA1100 || ETH1_PHY_TJA1100)
+config ARCH_PHY_100BASE_T1
+	bool
+	default n
+
+if (ARCH_PHY_100BASE_T1)
 
 choice
 	prompt "Automotive Ethernet 100BASE-T1 master/slave mode"
@@ -513,3 +497,5 @@ config NETDEV_PHY_DEBUG
 		the NSH network initialization logic.
 
 endif # ARCH_HAVE_PHY
+
+endif # NETDEVICES

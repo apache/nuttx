@@ -68,4 +68,3 @@ endif
 ifeq ($(CONFIG_QEMU_VGA),y)
 CHIP_CSRCS += qemu_vga.c
 endif
-

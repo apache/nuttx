@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libnxflat/libnxflat_unload.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,6 +82,7 @@
 int nxflat_unload(FAR struct nxflat_loadinfo_s *loadinfo)
 {
   /* Release the memory segments */
+
   /* Release the I-Space mmap'ed file */
 
   if (loadinfo->ispace)

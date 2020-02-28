@@ -88,4 +88,3 @@ off_t telldir(FAR DIR *dirp)
 
   return idir->fd_position;
 }
-

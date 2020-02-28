@@ -3571,7 +3571,7 @@ choice
 config SAMA5_ADC_SWTRIG
 	bool "Software trigger"
 	---help---
-		A-to-D Conversion is initiated only by sofware via an ioctl()
+		A-to-D Conversion is initiated only by software via an ioctl()
 
 config SAMA5_ADC_ADTRG
 	bool "External trigger via the ADTRG pin"
@@ -3952,7 +3952,7 @@ config SAMA5_PWM_CLKA_FREQUENCY
 	depends on SAMA5_PWM_CLKA
 	---help---
 		If the CLKA source is enabled, then you must also provide the
-		frequency of the CLKA.  This frequency will be derived from from MCK
+		frequency of the CLKA.  This frequency will be derived from MCK
 		using a prescaler and divider.  Therefore, a wide range of
 		frequencies are possible.
 
@@ -3968,7 +3968,7 @@ config SAMA5_PWM_CLKB_FREQUENCY
 	depends on SAMA5_PWM_CLKB
 	---help---
 		If the CLKB source is enabled, then you must also provide the
-		frequency of the CLKB.  This frequency will be derived from from MCK
+		frequency of the CLKB.  This frequency will be derived from MCK
 		using a prescaler and divider.  Therefore, a wide range of
 		frequencies are possible.
 

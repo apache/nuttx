@@ -146,7 +146,7 @@ int mq_close(mqd_t mqdes)
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)sched_self();
   int ret;
 
-  /* Lock the scheduler to prevent any asynchrounous task delete operation
+  /* Lock the scheduler to prevent any asynchronous task delete operation
    * (unlikely).
    */
 

@@ -34,12 +34,12 @@ Strict POSIX compliance
   o The portable interface must never be compromised only for the sake of
     expediency.
   o Expediency or even improved performance are not justifications for
-    violation of the strict POSIX interface
+    violation of the strict POSIX interface.
 
 Modular Architecture
 --------------------
 
-  o The internal modular architecture of the OS must maintained.
+  o The internal modular architecture of the OS must be maintained.
   o This means formalizing and documenting all internal interfaces (in the
     porting guide), minimal use of global variables at the interface, and
     only well defined functional interfaces.
@@ -62,8 +62,8 @@ Open and Unencumbered License
 -----------------------------
 
   o Currently BSD 3-clause or compatible:  BSD 3-clause with constraints,
-    BSD 3 and 4 clause, MIT, public domain
-  o Other unencumbered licenses such as Apache may be considered
+    BSD 3 and 4 clause, MIT, public domain.
+  o Other unencumbered licenses such as Apache may be considered.
     NuttX will never be licensed under a restrictive, "Copyleft" license.
 
 All Users Matter
@@ -74,7 +74,7 @@ All Users Matter
     Windows native, macOS, Solaris, and FreeBSD.  No tool/environment
     solutions will be considered that limit the usage of NuttX on any of
     the supported platforms.
-  o Inclusive rather than exclusive
+  o Inclusive rather than exclusive.
   o Hobbyists are valued users of the OS including retro computing hobbyists
     * and DIY “Maker” hobbyists.
   o Supported toolchains:  GCC, Clang, SDCC, ZiLOG ZDS-II (c89), IAR.
@@ -89,9 +89,9 @@ All Users Matter
 NuttX Branding
 --------------
 
-  o The official name of authentic Nuttx will always be "NuttX"
+  o The official name of authentic Nuttx will always be "NuttX".
   o This name is trademarked and may not be used by other OSs or forks of
-    NuttX
+    NuttX.
 
 The Enemies
 ===========
@@ -101,7 +101,7 @@ No Short Cuts
 
   o Doing things the easy way instead of the correct way.
   o Reducing effort at the expense of Quality, Portability, or
-    Consistency
+    Consistency.
   o Focus on the values of the organization, not the values of the Open
     Source project.  Need to support both.
   o It takes work to support the Inviolables.  There are no shortcuts.
@@ -109,17 +109,17 @@ No Short Cuts
 Sometimes Code Duplication is OK
 --------------------------------
 
-  o Sometimes is better to duplicate some logic than to introduce coupling
+  o Sometimes is better to duplicate some logic than to introduce coupling.
 
 Keep the Big Picture
 --------------------
 
-  o Too much focus on solving the problem in hand, loss of the Big Picture
+  o Too much focus on solving the problem in hand, loss of the Big Picture.
   o Insufficient understanding of the architectural principles.
 
 Conform to Standards
 --------------------
 
-  o Changing things only to suite a personal or organizational preference
-  o Inflexibility, Inability to adapt
-  o Not Invented Here (NIH) syndrome
+  o Changing things only to suite a personal or organizational preference.
+  o Inflexibility, Inability to adapt.
+  o Not Invented Here (NIH) syndrome.

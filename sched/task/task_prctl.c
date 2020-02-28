@@ -63,7 +63,7 @@
  *   the specific command.
  *
  * Returned Value:
- *   The returned value may depend on the specific commnand.  For PR_SET_NAME
+ *   The returned value may depend on the specific command.  For PR_SET_NAME
  *   and PR_GET_NAME, the returned value of 0 indicates successful operation.
  *   On any failure, -1 is retruend and the errno value is set appropriately.
  *

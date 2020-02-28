@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __DRIVERS_CAN_MCP2514_H
-#define __DRIVERS_CAN_MCP2514_H 1
+#define __DRIVERS_CAN_MCP2514_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -305,7 +305,7 @@
 
 #define RXBEID0_EID_MASK     0xff     /* Bits 0-7: Extended Identifier bits <7:0> */
 
-/* RXBnDLC – RECEIVE BUFFER n DATA LENGHT CODE */
+/* RXBnDLC – RECEIVE BUFFER n DATA LENGTH CODE */
 
 #define RXBDLC_DLC_SHIFT     (0)      /* Bits 0-3: Data Length Code <3:0> bits */
 #define RXBDLC_DLC_MASK      (0xf << RXBDLC_DLC_SHIFT)

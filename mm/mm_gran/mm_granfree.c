@@ -115,9 +115,9 @@ void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size)
       /* Clear bits in the second GAT entry */
 
       gatmask = 0xffffffff >> (32 - ngranules);
-      DEBUGASSERT((priv->gat[gatidx+1] & gatmask) == gatmask);
+      DEBUGASSERT((priv->gat[gatidx + 1] & gatmask) == gatmask);
 
-      priv->gat[gatidx+1] &= ~gatmask;
+      priv->gat[gatidx + 1] &= ~gatmask;
     }
 
   /* Handle the case where where all of the granules came from one entry */

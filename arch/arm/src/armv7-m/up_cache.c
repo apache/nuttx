@@ -283,7 +283,7 @@ void up_enable_dcache(void)
   ARM_DSB();
   ARM_ISB();
 }
-#endif  /* CONFIG_ARMV7M_DCACHE */
+#endif /* CONFIG_ARMV7M_DCACHE */
 
 /****************************************************************************
  * Name: up_disable_dcache
@@ -356,7 +356,7 @@ void up_disable_dcache(void)
   ARM_DSB();
   ARM_ISB();
 }
-#endif  /* CONFIG_ARMV7M_DCACHE */
+#endif /* CONFIG_ARMV7M_DCACHE */
 
 /****************************************************************************
  * Name: up_invalidate_dcache
@@ -427,7 +427,7 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
   ARM_DSB();
   ARM_ISB();
 }
-#endif  /* CONFIG_ARMV7M_DCACHE */
+#endif /* CONFIG_ARMV7M_DCACHE */
 
 /****************************************************************************
  * Name: up_invalidate_dcache_all
@@ -493,7 +493,7 @@ void up_invalidate_dcache_all(void)
   ARM_DSB();
   ARM_ISB();
 }
-#endif  /* CONFIG_ARMV7M_DCACHE */
+#endif /* CONFIG_ARMV7M_DCACHE */
 
 /****************************************************************************
  * Name: up_clean_dcache

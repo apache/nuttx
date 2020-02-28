@@ -322,7 +322,7 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
     }
 #endif
 
-  /* Enable the open drain driver if requrested */
+  /* Enable the open drain driver if requested */
 
   if ((cfgset & GPIO_CFG_OPENDRAIN) != 0)
     {

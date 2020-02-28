@@ -91,4 +91,3 @@ void stm32_deselectnor(void)
 }
 
 #endif /* CONFIG_STM32_FSMC */
-

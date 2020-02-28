@@ -54,7 +54,7 @@
 
 /* Determine which (if any) console driver to use.  NOTE that the naming
  * implies that the console is a serial driver.  That is usually the case,
- * however, if no UARTs are enabled, the console could als be provided
+ * however, if no UARTs are enabled, the console could also be provided
  * through some other device, such as an LCD.  Architecture-specific logic
  * will have to detect that case.
  *
@@ -65,14 +65,8 @@
 #ifndef CONFIG_DEV_CONSOLE
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
-#  undef  CONFIG_DEV_LOWCONSOLE
-#  undef  CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  USE_EARLYSERIALINIT
-#    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_DEV_LOWCONSOLE)
+#  if defined(CONFIG_CONSOLE_SYSLOG)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #  else
@@ -94,7 +88,7 @@
 /* Check if an interrupt stack size is configured */
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
-# define CONFIG_ARCH_INTERRUPTSTACK 0
+#  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
 /****************************************************************************
@@ -143,7 +137,6 @@ void up_dataabort(uint32_t *regs);
 void up_decodeirq(uint32_t *regs);
 uint32_t *up_doirq(int irq, uint32_t *regs);
 void up_fullcontextrestore(uint32_t *regs) noreturn_function;
-void up_irqinitialize(void);
 void up_prefetchabort(uint32_t *regs);
 int  up_saveusercontext(uint32_t *regs);
 void up_sigdeliver(void);
@@ -165,30 +158,21 @@ void up_vectorfiq(void);
 
 /* Defined in xyz_serial.c */
 
+#ifdef USE_EARLYSERIALINIT
 void up_earlyconsoleinit(void);
+#endif
+
+#ifdef USE_SERIALDRIVER
 void up_consoleinit(void);
+#endif
 
 #ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
-#else
-#  define rpmsg_serialinit()
-#endif
-
-/* Defined in drivers/lowconsole.c */
-
-#ifdef CONFIG_DEV_LOWCONSOLE
-void lowconsole_init(void);
-#else
-# define lowconsole_init()
 #endif
 
 /* Defined in xyz_watchdog.c */
 
 void up_wdtinit(void);
-
-/* Defined in xyz_timerisr.c */
-
-void renesas_timer_initialize(void);
 
 /* Defined in board/xyz_lcd.c */
 
@@ -227,4 +211,4 @@ void up_dumpstate(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* ___ARCH_RENESAS_SRC_COMMON_UP_INTERNAL_H */
+#endif /* ___ARCH_RENESAS_SRC_COMMON_UP_INTERNAL_H */

@@ -41,7 +41,6 @@
 
 #include <sys/types.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 

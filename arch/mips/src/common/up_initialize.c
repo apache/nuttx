@@ -44,13 +44,11 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/crypto/crypto.h>
@@ -86,21 +84,11 @@ void up_initialize(void)
 {
   /* Initialize global variables */
 
-  g_current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* Add any extra memory fragments to the memory manager */
 
   up_addregion();
-
-  /* Initialize the interrupt subsystem */
-
-  up_irqinitialize();
-
-  /* Initialize the system timer interrupt */
-
-#if !defined(CONFIG_SUPPRESS_INTERRUPTS) && !defined(CONFIG_SUPPRESS_TIMER_INTS)
-  mips_timer_initialize();
-#endif
 
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
@@ -123,12 +111,6 @@ void up_initialize(void)
     {
       up_dma_initialize();
     }
-#endif
-
-#ifdef CONFIG_MM_IOB
-  /* Initialize IO buffering */
-
-  iob_initialize();
 #endif
 
   /* Register devices */
@@ -172,12 +154,8 @@ void up_initialize(void)
    * serial driver).
    */
 
-#if defined(CONFIG_DEV_LOWCONSOLE)
-  lowconsole_init();
-#elif defined(CONFIG_CONSOLE_SYSLOG)
+#if defined(CONFIG_CONSOLE_SYSLOG)
   syslog_console_init();
-#elif defined(CONFIG_RAMLOG_CONSOLE)
-  ramlog_consoleinit();
 #endif
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1
@@ -185,13 +163,6 @@ void up_initialize(void)
 
   ptmx_register();
 #endif
-
-  /* Early initialization of the system logging device.  Some SYSLOG channel
-   * can be initialized early in the initialization sequence because they
-   * depend on only minimal OS initialization.
-   */
-
-  syslog_initialize(SYSLOG_INIT_EARLY);
 
 #if defined(CONFIG_CRYPTO)
   /* Initialize the HW crypto and /dev/crypto */
@@ -209,7 +180,7 @@ void up_initialize(void)
   up_netinitialize();
 #endif
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
   /* Initialize the local loopback device */
 
   localhost_initialize();

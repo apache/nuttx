@@ -36,7 +36,7 @@
  ****************************************************************************/
 
 #ifndef __DRIVERS_CONTACTLESS_PN532_H
-#define __DRIVERS_CONTACTLESS_PN532_H 1
+#define __DRIVERS_CONTACTLESS_PN532_H
 
 /****************************************************************************
  * Included Files
@@ -127,7 +127,7 @@ begin_packed_struct struct pn532_frame
                          * the data field */
   uint8_t  lcs;         /* 1 Packet Length Checksum LCS byte that satisfies
                          * the relation:  Lower byte of [LEN + LCS] = 00h */
-  uint8_t  tfi;         /* Frame idenfifier 0xD4, 0xD5 */
+  uint8_t  tfi;         /* Frame identifier 0xD4, 0xD5 */
   uint8_t  data[];      /* LEN-1 bytes of Packet Data Information.
                          * The first byte PD0 is the Command Code */
 } end_packed_struct;

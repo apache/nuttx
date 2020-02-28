@@ -79,7 +79,7 @@
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
  *      - Configuration of environment variables
- *      - Setup the intput parameters for the task.
+ *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state()
  *   4) up_vfork() provides any additional operating context. up_vfork must:
  *      - Allocate and initialize the stack

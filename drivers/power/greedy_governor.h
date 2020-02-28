@@ -78,5 +78,4 @@ FAR const struct pm_governor_s *pm_greedy_governor_initialize(void);
 }
 #endif
 
-#endif  /* __DRIVERS_POWER_GREEDY_GOVERNER_H */
-
+#endif /* __DRIVERS_POWER_GREEDY_GOVERNER_H */

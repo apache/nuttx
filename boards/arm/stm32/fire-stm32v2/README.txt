@@ -144,9 +144,9 @@ PIN NAME   SIGNAL         NOTES
 92  PB6    PB6-I2C1-SCL   2.4" TFT + Touchscreen, AT24C02
 93  PB7    PB7-I2C1-SDA   2.4" TFT + Touchscreen, AT24C02
 94  BOOT0  SW3            3V3 or DGND
-95  PB8    PB8-CAN-RX     CAN tranceiver, Header 2H
+95  PB8    PB8-CAN-RX     CAN transceiver, Header 2H
            PB8-C-DO_0     Camera (P9)
-96  PB9    PB9-CAN-TX     CAN tranceiver, Header 2H
+96  PB9    PB9-CAN-TX     CAN transceiver, Header 2H
            PB9-C-DO_1     Camera (P9)
 97  PE0    PE0-C-RRST     Camera (P9)
 98  PE1    PE1-FSMC_NBL1  2.4" TFT + Touchscreen
@@ -188,7 +188,7 @@ DFU and JTAG
   3. Run the DFU SE program to load nuttx.dfu into FLASH.
 
   What if the DFU loader is not in FLASH?  The loader code is available
-  inside of the Demo dirctory of the USBLib ZIP file that can be downloaded
+  inside of the Demo directory of the USBLib ZIP file that can be downloaded
   from the STMicro Website.  You can build it using RIDE (or other toolchains);
   you will need a JTAG emulator to burn it into FLASH the first time.
 
@@ -280,7 +280,7 @@ RTC
     CONFIG_RTC_HIRES - The typical RTC keeps time to resolution of 1
       second, usually supporting a 32-bit time_t value.  In this case,
       the RTC is used to &quot;seed&quot; the normal NuttX timer and the
-      NuttX timer provides for higher resoution time. If CONFIG_RTC_HIRES
+      NuttX timer provides for higher resolution time. If CONFIG_RTC_HIRES
       is enabled in the NuttX configuration, then the RTC provides higher
       resolution time and completely replaces the system timer for purpose of
       date and time.
@@ -494,7 +494,7 @@ M3 Wildfire-specific Configuration Options
 
     CONFIG_STM32_SDIO_DMA - Support DMA data transfers.  Requires
       CONFIG_STM32_SDIO and CONFIG_STM32_DMA2.
-    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt priority.  Default: 128
     CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
@@ -596,4 +596,3 @@ Where <subdir> is one of the following:
     SPI FLASH and the ENC28J60 shared the same SPI chip select signal (PA4-SPI1-NSS).
     In order to finish the debug of the ENC28J60, it may be necessary to lift
     the SPI FLASH chip select pin from the board.
-

@@ -260,7 +260,7 @@ arm_vectorirq:
 
 	/* Call arm_decodeirq() on the interrupt stack */
 
-	setirqstack r1, r5				/* SP = IRQ stack top */
+	setirqstack r1, r3				/* SP = IRQ stack top */
 	str		r0, [sp]				/* Save the user stack pointer */
 	mov		r4, sp					/* Save the SP in a preserved register */
 	bic		sp, sp, #7				/* Force 8-byte alignment */

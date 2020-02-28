@@ -119,7 +119,7 @@ Configurations
   mrf24j40-mac:
   ------------
     This configuration set the proper configuration to set the 802.15.4
-    communication layer with the MRF24J40 radio. This radio works wit
+    communication layer with the MRF24J40 radio. This radio works with
     SPI, you need to do the next connections:
 
     MRF24J40 VCC  -> Board 3.3V
@@ -194,4 +194,3 @@ Configurations
 
    If you execute the command "ifconfig", you will be able to see the info of the WPAN0 interface
    and see the assigned IP. This interface can be use with an UDP or TCP server/client application.
-

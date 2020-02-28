@@ -217,7 +217,7 @@ static int cxd56_pmsendmsg(int mid, uint32_t data)
   iccmsg_t msg;
 
   msg.cpuid     = 0;
-  msg.msgid     = 0; /* Power manger message does not used this field. */
+  msg.msgid     = 0; /* Power manager message does not used this field. */
   msg.protodata = mid;
   msg.data      = data;
   return cxd56_iccsend(CXD56_PROTO_PM, &msg, 0);
@@ -869,7 +869,7 @@ uint32_t up_pm_get_bootmask(void)
  *   Enable the boot cause of the specified bit.
  *
  * Parameter:
- *   mask - OR of Boot mask definied as PM_BOOT_XXX
+ *   mask - OR of Boot mask defined as PM_BOOT_XXX
  *
  * Return:
  *   Updated boot mask
@@ -908,7 +908,7 @@ uint32_t up_pm_set_bootmask(uint32_t mask)
  *   Disable the boot cause of the specified bit.
  *
  * Parameter:
- *   mask - OR of Boot mask definied as PM_BOOT_XXX
+ *   mask - OR of Boot mask defined as PM_BOOT_XXX
  *
  * Return:
  *   Updated boot mask

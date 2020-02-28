@@ -60,4 +60,3 @@ void stm32_get_uniqueid(uint8_t uniqueid[12])
 }
 
 #endif /* STM32_SYSMEM_UID */
-

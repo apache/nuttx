@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SPI_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SPI_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SPI_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SPI_H
 
 /****************************************************************************
  * Included Files
@@ -187,7 +187,7 @@
 #define SPI_INT_ROR             (1 << 0)  /* Bit 0: RX FIFO overrun */
 #define SPI_INT_RT              (1 << 1)  /* Bit 1: RX FIFO timeout */
 #define SPI_INT_RX              (1 << 2)  /* Bit 2: RX FIFO at least half full */
-#define SPI_INT_TX              (1 << 3 ) /* Bit 3: TX FIFO at least half empy */
+#define SPI_INT_TX              (1 << 3 ) /* Bit 3: TX FIFO at least half empty */
                                           /* Bits 4-31: Reserved */
 
 /* DMA Control Register */
@@ -208,4 +208,4 @@
  * Public Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD56_SPI_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SPI_H */

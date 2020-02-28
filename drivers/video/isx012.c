@@ -231,7 +231,7 @@ struct isx012_dev_s
   isx012_state_t          state;       /* ISX012 status */
   bool                    dma_state;   /* true means "in DMA" */
   uint8_t                 mode;        /* ISX012 mode */
-  isx012_param_t          param;       /* ISX012 paramerters */
+  isx012_param_t          param;       /* ISX012 parameters */
   void                    *video_priv; /* pointer to video private data */
 };
 
@@ -1093,7 +1093,7 @@ static int isx012_change_device_state(isx012_dev_t *priv,
               return ret;
             }
         }
-#endif  /* ISX012_FRAME_SKIP_EN */
+#endif /* ISX012_FRAME_SKIP_EN */
     }
 
   priv->mode = REGVAL_MODESEL_MON;
@@ -1132,7 +1132,7 @@ int init_isx012(FAR struct isx012_dev_s *priv)
                              DEVICE_STATE_WAIT_TIME, DEVICE_STATE_TIMEOUT);
   if (ret != OK)
     {
-      imagererr("OM_CHANGED_STS(PreSleep) is Not occured: %d\n", ret);
+      imagererr("OM_CHANGED_STS(PreSleep) is Not occurred: %d\n", ret);
       return ret;
     }
 
@@ -1156,7 +1156,7 @@ int init_isx012(FAR struct isx012_dev_s *priv)
                              DEVICE_STATE_WAIT_TIME, DEVICE_STATE_TIMEOUT);
   if (ret != OK)
     {
-      imagererr("OM_CHANGED_STS(Sleep) is Not occured: %d\n", ret);
+      imagererr("OM_CHANGED_STS(Sleep) is Not occurred: %d\n", ret);
       return ret;
     }
 #endif

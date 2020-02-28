@@ -104,4 +104,3 @@ int stm32_bmp180initialize(FAR const char *devpath)
 }
 
 #endif /* CONFIG_I2C && CONFIG_SENSORS_BMP180 && CONFIG_STM32_I2C1 */
-

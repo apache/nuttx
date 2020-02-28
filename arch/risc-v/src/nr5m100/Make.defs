@@ -71,4 +71,3 @@ CHIP_CSRCS += nr5_timerisr.c nr5_irq.c nr5_irq_dispatch.c
 ifeq ($(CONFIG_TIMER),y)
 CHIP_CSRCS += nr5_tim_lowerhalf.c
 endif
-

@@ -77,7 +77,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* TOPREG VBUS regsiter */
+/* TOPREG VBUS register */
 
 #define CLR_EDGE (1 << 9)
 #define CLR_EN   (1 << 8)
@@ -379,7 +379,7 @@ struct cxd56_usbdev_s
    *   the SETUP command can be processed.
    *
    * ep0datlen
-   *   Lenght of OUT DATA received in ep0data[]
+   *   Length of OUT DATA received in ep0data[]
    */
 
   struct usb_ctrlreq_s ctrl; /* Last EP0 request */
@@ -3031,7 +3031,7 @@ static int cxd56_vbusninterrupt(int irq, FAR void *context, FAR void *arg)
   up_disable_irq(CXD56_IRQ_USB_INT);
   up_disable_irq(CXD56_IRQ_USB_SYS);
 
-  /* Notify dettach signal */
+  /* Notify detach signal */
 
   priv->power = 0;
   cxd56_notify_signal(USBDEV_STATE_DETACH, priv->power);

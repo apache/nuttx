@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_bca_reg.c
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_bca_reg.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -69,14 +69,6 @@ enum dma_i2s_out_sel_e
 };
 
 #define BCA_REG_MAX_BIT 32
-
-/***************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/***************************************************************************
- * Private Data
- ****************************************************************************/
 
 /***************************************************************************
  * Public Data
@@ -249,7 +241,7 @@ const struct audio_bca_reg_s g_bca_reg[BCA_REG_MAX_ENTRY] =
   {0x11fc,  0,  8, 0x00000064},  /* Mclk_Mon_thresh (0x64)            */
   {0x1730,  0, 32, 0x00000000},  /* AHB MASTER MIC MASK (0x00)        */
   {0x1f30,  0, 32, 0x00000000},  /* AHB MASTER I2S1 MASK (0x00)       */
-  {0x2730,  0, 32, 0x00000000}   /* AHB MASTER I2S2 MASK (0x00)       */
+  {0x2730,  0, 32, 0x00000000},  /* AHB MASTER I2S2 MASK (0x00)       */
 };
 
 /***************************************************************************
@@ -323,19 +315,19 @@ void enable_mic_in_fmt24(uint8_t mic_num)
 
   BCA_REG_ID mic_ch_sell[TRANS_CH_NUM_MAX] =
     {
-      BCA_Mic_In_ch1_sel,
-      BCA_Mic_In_ch2_sel,
-      BCA_Mic_In_ch3_sel,
-      BCA_Mic_In_ch4_sel,
-      BCA_Mic_In_ch5_sel,
-      BCA_Mic_In_ch6_sel,
-      BCA_Mic_In_ch7_sel,
-      BCA_Mic_In_ch8_sel
+      BCA_MIC_IN_CH1_SEL,
+      BCA_MIC_IN_CH2_SEL,
+      BCA_MIC_IN_CH3_SEL,
+      BCA_MIC_IN_CH4_SEL,
+      BCA_MIC_IN_CH5_SEL,
+      BCA_MIC_IN_CH6_SEL,
+      BCA_MIC_IN_CH7_SEL,
+      BCA_MIC_IN_CH8_SEL
     };
 
   mic_num = (mic_num > TRANS_CH_NUM_24BIT) ? TRANS_CH_NUM_24BIT : mic_num;
 
-  write_bca_reg(BCA_Mic_In_bitwt, 0);
+  write_bca_reg(BCA_MIC_IN_BITWT, 0);
 
   for (i = 0; i < mic_num; i++)
     {
@@ -347,9 +339,9 @@ void enable_mic_in_fmt24(uint8_t mic_num)
       write_bca_reg(mic_ch_sell[i], TRANS_CH_NO_SELECT);
     }
 
-  write_bca_reg(BCA_Clk_En_ahbmstr_mic_en, 1);
-  write_bca_reg(BCA_Mic_In_start_adr,      0x00000000);
-  write_bca_reg(BCA_Mic_In_sample_no,      0);
+  write_bca_reg(BCA_CLK_EN_AHBMASTER_MIC_EN, 1);
+  write_bca_reg(BCA_MIC_IN_START_ADR,      0x00000000);
+  write_bca_reg(BCA_MIC_IN_SAMPLE_NO,      0);
 }
 
 void enable_mic_in_fmt16(uint8_t mic_num)
@@ -358,20 +350,20 @@ void enable_mic_in_fmt16(uint8_t mic_num)
 
   BCA_REG_ID mic_ch_sell[TRANS_CH_NUM_MAX] =
     {
-      BCA_Mic_In_ch1_sel,
-      BCA_Mic_In_ch2_sel,
-      BCA_Mic_In_ch3_sel,
-      BCA_Mic_In_ch4_sel,
-      BCA_Mic_In_ch5_sel,
-      BCA_Mic_In_ch6_sel,
-      BCA_Mic_In_ch7_sel,
-      BCA_Mic_In_ch8_sel
+      BCA_MIC_IN_CH1_SEL,
+      BCA_MIC_IN_CH2_SEL,
+      BCA_MIC_IN_CH3_SEL,
+      BCA_MIC_IN_CH4_SEL,
+      BCA_MIC_IN_CH5_SEL,
+      BCA_MIC_IN_CH6_SEL,
+      BCA_MIC_IN_CH7_SEL,
+      BCA_MIC_IN_CH8_SEL
     };
 
   mic_num = (mic_num > (TRANS_CH_NUM_16BIT * 2)) ?
               TRANS_CH_NUM_16BIT : (mic_num + 1) / 2;
 
-  write_bca_reg(BCA_Mic_In_bitwt, 1);
+  write_bca_reg(BCA_MIC_IN_BITWT, 1);
 
   for (i = 0; i < mic_num; i++)
     {
@@ -383,49 +375,49 @@ void enable_mic_in_fmt16(uint8_t mic_num)
       write_bca_reg(mic_ch_sell[i], TRANS_CH_NO_SELECT);
     }
 
-  write_bca_reg(BCA_Clk_En_ahbmstr_mic_en, 1);
-  write_bca_reg(BCA_Mic_In_start_adr,      0x00000000);
-  write_bca_reg(BCA_Mic_In_sample_no,      0);
+  write_bca_reg(BCA_CLK_EN_AHBMASTER_MIC_EN, 1);
+  write_bca_reg(BCA_MIC_IN_START_ADR,      0x00000000);
+  write_bca_reg(BCA_MIC_IN_SAMPLE_NO,      0);
 }
 
 void enable_i2s1_out_fmt24(void)
 {
-  write_bca_reg(BCA_I2s1_Out_sd1_l_sel,     I2S_OUT_SEL_SD1L);
-  write_bca_reg(BCA_I2s1_Out_sd1_r_sel,     I2S_OUT_SEL_SD1R);
-  write_bca_reg(BCA_I2s1_Out_bitwt,         0);
-  write_bca_reg(BCA_Clk_En_ahbmstr_I2s1_en, 1);
-  write_bca_reg(BCA_I2s1_Out_start_adr,     0x00000000);
-  write_bca_reg(BCA_I2s1_Out_sample_no,     0);
+  write_bca_reg(BCA_I2S1_OUT_SD1_L_SEL,     I2S_OUT_SEL_SD1L);
+  write_bca_reg(BCA_I2S1_OUT_SD1_R_SEL,     I2S_OUT_SEL_SD1R);
+  write_bca_reg(BCA_I2S1_OUT_BITWT,         0);
+  write_bca_reg(BCA_CLK_EN_AHBMASTER_I2S1_EN, 1);
+  write_bca_reg(BCA_I2S1_OUT_START_ADR,     0x00000000);
+  write_bca_reg(BCA_I2S2_OUT_SAMPLE_NO,     0);
 }
 
 void enable_i2s1_out_fmt16(void)
 {
-  write_bca_reg(BCA_I2s1_Out_sd1_l_sel,     I2S_OUT_SEL_SD1L);
-  write_bca_reg(BCA_I2s1_Out_sd1_r_sel,     I2S_OUT_SEL_SD1R);
-  write_bca_reg(BCA_I2s1_Out_bitwt,         1);
-  write_bca_reg(BCA_Clk_En_ahbmstr_I2s1_en, 1);
-  write_bca_reg(BCA_I2s1_Out_start_adr,     0x00000000);
-  write_bca_reg(BCA_I2s1_Out_sample_no,     0);
+  write_bca_reg(BCA_I2S1_OUT_SD1_L_SEL,     I2S_OUT_SEL_SD1L);
+  write_bca_reg(BCA_I2S1_OUT_SD1_R_SEL,     I2S_OUT_SEL_SD1R);
+  write_bca_reg(BCA_I2S1_OUT_BITWT,         1);
+  write_bca_reg(BCA_CLK_EN_AHBMASTER_I2S1_EN, 1);
+  write_bca_reg(BCA_I2S1_OUT_START_ADR,     0x00000000);
+  write_bca_reg(BCA_I2S2_OUT_SAMPLE_NO,     0);
 }
 
 void enable_i2s2_out_fmt24(void)
 {
-  write_bca_reg(BCA_I2s2_Out_sd1_l_sel,     I2S_OUT_SEL_SD1L);
-  write_bca_reg(BCA_I2s2_Out_sd1_r_sel,     I2S_OUT_SEL_SD1R);
-  write_bca_reg(BCA_I2s2_Out_bitwt,         0);
-  write_bca_reg(BCA_Clk_En_ahbmstr_I2s2_en, 1);
-  write_bca_reg(BCA_I2s2_Out_start_adr,     0x00000000);
-  write_bca_reg(BCA_I2s2_Out_sample_no,     0);
+  write_bca_reg(BCA_I2S2_OUT_SD1_L_SEL,     I2S_OUT_SEL_SD1L);
+  write_bca_reg(BCA_I2S2_OUT_SD1_R_SEL,     I2S_OUT_SEL_SD1R);
+  write_bca_reg(BCA_I2S2_OUT_BITWT,         0);
+  write_bca_reg(BCA_CLK_EN_AHBMASTER_I2S2_EN, 1);
+  write_bca_reg(BCA_I2S2_OUT_START_ADR,     0x00000000);
+  write_bca_reg(BCA_I2S2_OUT_SAMPLE_NO,     0);
 }
 
 void enable_i2s2_out_fmt16(void)
 {
-  write_bca_reg(BCA_I2s2_Out_sd1_l_sel,     I2S_OUT_SEL_SD1L);
-  write_bca_reg(BCA_I2s2_Out_sd1_r_sel,     I2S_OUT_SEL_SD1R);
-  write_bca_reg(BCA_I2s2_Out_bitwt,         1);
-  write_bca_reg(BCA_Clk_En_ahbmstr_I2s2_en, 1);
-  write_bca_reg(BCA_I2s2_Out_start_adr,     0x00000000);
-  write_bca_reg(BCA_I2s2_Out_sample_no,     0);
+  write_bca_reg(BCA_I2S2_OUT_SD1_L_SEL,     I2S_OUT_SEL_SD1L);
+  write_bca_reg(BCA_I2S2_OUT_SD1_R_SEL,     I2S_OUT_SEL_SD1R);
+  write_bca_reg(BCA_I2S2_OUT_BITWT,         1);
+  write_bca_reg(BCA_CLK_EN_AHBMASTER_I2S2_EN, 1);
+  write_bca_reg(BCA_I2S2_OUT_START_ADR,     0x00000000);
+  write_bca_reg(BCA_I2S2_OUT_SAMPLE_NO,     0);
 }
 
 /***************************************************************************
@@ -434,14 +426,14 @@ void enable_i2s2_out_fmt16(void)
 
 void cxd56_audio_bca_reg_clear_bck_err_int(void)
 {
-  write_bca_reg(BCA_Int_m_i2s1_bck_err1, 0);
-  write_bca_reg(BCA_Int_m_i2s1_bck_err2, 0);
+  write_bca_reg(BCA_INT_M_I2S1_BCL_ERR1, 0);
+  write_bca_reg(BCA_INT_M_I2S1_BCL_ERR2, 0);
 }
 
 void cxd56_audio_bca_reg_set_smaster(void)
 {
-  write_bca_reg(BCA_Int_m_ovf_smasl, 0);
-  write_bca_reg(BCA_Int_m_ovf_smasr, 0);
+  write_bca_reg(BCA_INT_M_OVF_SMASL, 0);
+  write_bca_reg(BCA_INT_M_OVF_SMASR, 0);
 }
 
 void cxd56_audio_bca_reg_set_datarate(uint8_t clk_mode)
@@ -450,13 +442,13 @@ void cxd56_audio_bca_reg_set_datarate(uint8_t clk_mode)
     {
       /* Set 4fs. */
 
-      write_bca_reg(BCA_I2s_ensel, 1);
+      write_bca_reg(BCA_I2S_ENSEL, 1);
     }
   else
     {
       /* Set 1fs. */
 
-      write_bca_reg(BCA_I2s_ensel, 0);
+      write_bca_reg(BCA_I2S_ENSEL, 0);
     }
 }
 
@@ -502,21 +494,22 @@ void cxd56_audio_bca_reg_get_dma_mstate(cxd56_audio_dma_t handle,
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id_start  = BCA_Mic_In_start;
-        reg_id_error  = BCA_Mic_In_error_setting;
-        reg_id_monbuf = BCA_Mic_In_monbuf;
+        reg_id_start  = BCA_MIC_IN_START;
+        reg_id_error  = BCA_MIC_IN_ERROR_SETTING;
+        reg_id_monbuf = BCA_MIC_IN_MONBUF;
         break;
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id_start  = BCA_I2s1_Out_Mon_start;
-        reg_id_error  = BCA_I2s1_Out_Mon_error_setting;
-        reg_id_monbuf = BCA_I2s1_Out_Mon_monbuf;
+        reg_id_start  = BCA_I2S1_OUT_MON_START;
+        reg_id_error  = BCA_I2S1_OUT_MON_ERROR_SETTING;
+        reg_id_monbuf = BCA_I2S1_OUT_MON_MONBUF;
         break;
       default:
-        reg_id_start  = BCA_I2s2_Out_Mon_start;
-        reg_id_error  = BCA_I2s2_Out_Mon_error_setting;
-        reg_id_monbuf = BCA_I2s2_Out_Mon_monbuf;
+        reg_id_start  = BCA_I2S2_OUT_MON_START;
+        reg_id_error  = BCA_I2S2_OUT_MON_ERROR_SETTING;
+        reg_id_monbuf = BCA_I2S2_OUT_MON_MONBUF;
         break;
     }
+
   state->start       = (uint8_t)read_bca_reg(reg_id_start);
   state->err_setting = (uint8_t)read_bca_reg(reg_id_error);
   state->buf_state   = (uint8_t)read_bca_reg(reg_id_monbuf);
@@ -524,19 +517,19 @@ void cxd56_audio_bca_reg_get_dma_mstate(cxd56_audio_dma_t handle,
 
 void cxd56_audio_bca_reg_en_bus_err_int(void)
 {
-  write_bca_reg(BCA_Int_m_hresp_err, 0);
+  write_bca_reg(BCA_INT_M_HRESP_ERR, 0);
 }
 
 void cxd56_audio_bca_reg_dis_bus_err_int(void)
 {
-  write_bca_reg(BCA_Int_m_hresp_err, 1);
+  write_bca_reg(BCA_INT_M_HRESP_ERR, 1);
 }
 
 uint32_t cxd56_audio_bca_reg_get_dma_done_state_mic(void)
 {
   uint32_t int_ac =
-    read32_bca_reg(g_bca_reg[BCA_Mic_Int_Ctrl_done_mic].addr)
-    & ~(read32_bca_reg(g_bca_reg[BCA_Mic_Int_Mask_done_mic].addr))
+    read32_bca_reg(g_bca_reg[BCA_MIC_INT_CTRL_DONE_MIC].addr)
+    & ~(read32_bca_reg(g_bca_reg[BCA_MIC_INT_MASK_DONE_MIC].addr))
     & 0x0f;
 
   return int_ac;
@@ -545,8 +538,8 @@ uint32_t cxd56_audio_bca_reg_get_dma_done_state_mic(void)
 uint32_t cxd56_audio_bca_reg_get_dma_done_state_i2s1(void)
 {
   uint32_t int_i2s =
-    read32_bca_reg(g_bca_reg[BCA_I2s1_Int_Ctrl_done_i2so].addr)
-    & ~(read32_bca_reg(g_bca_reg[BCA_I2s1_Int_Mask_done_i2so].addr))
+    read32_bca_reg(g_bca_reg[BCA_I2S1_INT_CTRL_DONE_I2SO].addr)
+    & ~(read32_bca_reg(g_bca_reg[BCA_I2S1_INT_MASK_DONE_I2SO].addr))
     & 0x3f;
 
   return int_i2s;
@@ -555,8 +548,8 @@ uint32_t cxd56_audio_bca_reg_get_dma_done_state_i2s1(void)
 uint32_t cxd56_audio_bca_reg_get_dma_done_state_i2s2(void)
 {
   uint32_t int_i2s2 =
-    read32_bca_reg(g_bca_reg[BCA_I2s2_Int_Ctrl_done_i2so].addr)
-    & ~(read32_bca_reg(g_bca_reg[BCA_I2s2_Int_Mask_done_i2so].addr))
+    read32_bca_reg(g_bca_reg[BCA_I2S2_INT_CTRL_DONE_I2SO].addr)
+    & ~(read32_bca_reg(g_bca_reg[BCA_I2S2_INT_MASK_DONE_I2SO].addr))
     & 0x3f;
 
   return int_i2s2;
@@ -564,17 +557,17 @@ uint32_t cxd56_audio_bca_reg_get_dma_done_state_i2s2(void)
 
 void cxd56_audio_bca_reg_clear_dma_done_state_mic(uint32_t value)
 {
-  write32_bca_reg(g_bca_reg[BCA_Mic_Int_Ctrl_done_mic].addr, value);
+  write32_bca_reg(g_bca_reg[BCA_MIC_INT_CTRL_DONE_MIC].addr, value);
 }
 
 void cxd56_audio_bca_reg_clear_dma_done_state_i2s1(uint32_t value)
 {
-  write32_bca_reg(g_bca_reg[BCA_I2s1_Int_Ctrl_done_i2so].addr, value);
+  write32_bca_reg(g_bca_reg[BCA_I2S1_INT_CTRL_DONE_I2SO].addr, value);
 }
 
 void cxd56_audio_bca_reg_clear_dma_done_state_i2s2(uint32_t value)
 {
-  write32_bca_reg(g_bca_reg[BCA_I2s2_Int_Ctrl_done_i2so].addr, value);
+  write32_bca_reg(g_bca_reg[BCA_I2S2_INT_CTRL_DONE_I2SO].addr, value);
 }
 
 void cxd56_audio_bca_reg_mask_done_int(cxd56_audio_dma_t handle)
@@ -584,15 +577,15 @@ void cxd56_audio_bca_reg_mask_done_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Mask_done_mic;
+        reg_id = BCA_MIC_INT_MASK_DONE_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Mask_done_i2so;
+        reg_id = BCA_I2S1_INT_MASK_DONE_I2SO;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Mask_done_i2so;
+        reg_id = BCA_I2S2_INT_MASK_DONE_I2SO;
         break;
     }
 
@@ -606,15 +599,15 @@ void cxd56_audio_bca_reg_unmask_done_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Mask_done_mic;
+        reg_id = BCA_MIC_INT_MASK_DONE_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Mask_done_i2so;
+        reg_id = BCA_I2S1_INT_MASK_DONE_I2SO;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Mask_done_i2so;
+        reg_id = BCA_I2S2_INT_MASK_DONE_I2SO;
         break;
     }
 
@@ -627,15 +620,15 @@ void cxd56_audio_bca_reg_clear_done_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Ctrl_done_mic;
+        reg_id = BCA_MIC_INT_CTRL_DONE_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Ctrl_done_i2so;
+        reg_id = BCA_I2S1_INT_CTRL_DONE_I2SO;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Ctrl_done_i2so;
+        reg_id = BCA_I2S2_INT_CTRL_DONE_I2SO;
         break;
     }
 
@@ -648,22 +641,23 @@ bool cxd56_audio_bca_reg_is_dma_fifo_empty(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_I2s1_In_rtd_trg;
+        reg_id = BCA_I2S1_IN_RTD_TRG;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_In_rtd_trg;
+        reg_id = BCA_I2S1_IN_RTD_TRG;
         break;
 
       default:
-        reg_id = BCA_I2s2_Out_rtd_trg;
+        reg_id = BCA_I2S2_OUT_RTF_TRG;
         break;
     }
 
-  if(1 == read_bca_reg(reg_id))
+  if (1 == read_bca_reg(reg_id))
     {
       return true;
     }
+
   return false;
 }
 
@@ -673,15 +667,15 @@ void cxd56_audio_bca_reg_mask_err_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Mask_err_mic;
+        reg_id = BCA_MIC_INT_MASK_ERR_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Mask_err_i2so;
+        reg_id = BCA_I2S1_INT_MASK_ERR_I2SO;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Mask_err_i2so;
+        reg_id = BCA_I2S2_INT_MASK_ERR_I2SO;
         break;
     }
 
@@ -694,15 +688,15 @@ void cxd56_audio_bca_reg_unmask_err_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Mask_err_mic;
+        reg_id = BCA_MIC_INT_MASK_ERR_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Mask_err_i2so;
+        reg_id = BCA_I2S1_INT_MASK_ERR_I2SO;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Mask_err_i2so;
+        reg_id = BCA_I2S2_INT_MASK_ERR_I2SO;
         break;
     }
 
@@ -715,15 +709,15 @@ void cxd56_audio_bca_reg_clear_err_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Ctrl_err_mic;
+        reg_id = BCA_MIC_INT_CTRL_ERR_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Ctrl_err_i2so;
+        reg_id = BCA_I2S1_INT_CTRL_ERR_I2SO;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Mask_err_i2so;
+        reg_id = BCA_I2S2_INT_MASK_ERR_I2SO;
         break;
     }
 
@@ -736,15 +730,15 @@ void cxd56_audio_bca_reg_mask_cmb_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Mask_cmb_mic;
+        reg_id = BCA_MIC_INT_MASK_CMB_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Mask_cmb_i2s;
+        reg_id = BCA_I2S1_INT_MASK_CMB_I2S;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Mask_cmb_i2s;
+        reg_id = BCA_I2S2_INT_MASK_CMB_I2S;
         break;
     }
 
@@ -757,15 +751,15 @@ void cxd56_audio_bca_reg_unmask_cmb_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Mask_cmb_mic;
+        reg_id = BCA_MIC_INT_MASK_CMB_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Mask_cmb_i2s;
+        reg_id = BCA_I2S1_INT_MASK_CMB_I2S;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Mask_cmb_i2s;
+        reg_id = BCA_I2S2_INT_MASK_CMB_I2S;
         break;
     }
 
@@ -778,15 +772,15 @@ void cxd56_audio_bca_reg_clear_cmb_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Ctrl_cmb_mic;
+        reg_id = BCA_MIC_INT_CTRL_CMB_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Ctrl_cmb_i2s;
+        reg_id = BCA_I2S1_INT_CTRL_CMB_I2S;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Ctrl_cmb_i2s;
+        reg_id = BCA_I2S2_INT_CTRL_CMB_I2S;
         break;
     }
 
@@ -795,12 +789,12 @@ void cxd56_audio_bca_reg_clear_cmb_int(cxd56_audio_dma_t handle)
 
 uint32_t cxd56_audio_bca_reg_get_int_status(void)
 {
-  return read32_bca_reg(g_bca_reg[BCA_Int_hresp_err].addr);
+  return read32_bca_reg(g_bca_reg[BCA_INT_HRESP_ERR].addr);
 }
 
 void cxd56_audio_bca_reg_clear_int_status(uint32_t int_au)
 {
-  write32_bca_reg(g_bca_reg[BCA_Int_clr_hresp_err].addr, int_au);
+  write32_bca_reg(g_bca_reg[BCA_INT_CLR_HRESP_ERR].addr, int_au);
 }
 
 void cxd56_audio_bca_reg_mask_bus_int(cxd56_audio_dma_t handle)
@@ -809,17 +803,18 @@ void cxd56_audio_bca_reg_mask_bus_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = AHB_Master_Mic_Mask;
+        reg_id = AHB_MASTER_MIC_MASK;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = AHB_Master_I2s1_Mask;
+        reg_id = AHB_MASTER_I2S1_MASK;
         break;
 
       default:
-        reg_id = AHB_Master_I2s2_Mask;
+        reg_id = AHB_MASTER_I2S2_MASK;
         break;
     }
+
   write_bca_reg(reg_id, 0);
 }
 
@@ -830,20 +825,21 @@ void cxd56_audio_bca_reg_unmask_bus_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = AHB_Master_Mic_Mask;
+        reg_id = AHB_MASTER_MIC_MASK;
         val    = 0x00000303;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = AHB_Master_I2s1_Mask;
+        reg_id = AHB_MASTER_I2S1_MASK;
         val    = 0x00000202;
         break;
 
       default:
-        reg_id = AHB_Master_I2s2_Mask;
+        reg_id = AHB_MASTER_I2S2_MASK;
         val    = 0x00000202;
         break;
     }
+
   write_bca_reg(reg_id, val);
 }
 
@@ -855,15 +851,15 @@ void cxd56_audio_bca_reg_set_start_addr(cxd56_audio_dma_t handle,
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_In_start_adr;
+        reg_id = BCA_MIC_IN_START_ADR;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Out_start_adr;
+        reg_id = BCA_I2S1_OUT_START_ADR;
         break;
 
       default:
-        reg_id = BCA_I2s2_Out_start_adr;
+        reg_id = BCA_I2S2_OUT_START_ADR;
         break;
     }
 
@@ -878,15 +874,15 @@ void cxd56_audio_bca_reg_set_sample_no(cxd56_audio_dma_t handle,
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_In_sample_no;
+        reg_id = BCA_MIC_IN_SAMPLE_NO;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Out_sample_no;
+        reg_id = BCA_I2S2_OUT_SAMPLE_NO;
         break;
 
       default:
-        reg_id = BCA_I2s2_Out_sample_no;
+        reg_id = BCA_I2S2_OUT_SAMPLE_NO;
         break;
     }
 
@@ -902,15 +898,15 @@ void cxd56_audio_bca_reg_start_dma(cxd56_audio_dma_t handle,
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_In_rtd_trg;
+        reg_id = BCA_MIC_IN_RTD_TRG;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Out_rtd_trg;
+        reg_id = BCA_I2S1_OUT_RTF_TRG;
         break;
 
       default:
-        reg_id = BCA_I2s2_Out_rtd_trg;
+        reg_id = BCA_I2S2_OUT_RTF_TRG;
         break;
     }
 
@@ -924,15 +920,15 @@ void cxd56_audio_bca_reg_stop_dma(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_In_rtd_trg;
+        reg_id = BCA_MIC_IN_RTD_TRG;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Out_rtd_trg;
+        reg_id = BCA_I2S1_OUT_RTF_TRG;
         break;
 
       default:
-        reg_id = BCA_I2s2_Out_rtd_trg;
+        reg_id = BCA_I2S2_OUT_RTF_TRG;
         break;
     }
 
@@ -946,15 +942,15 @@ bool cxd56_audio_bca_reg_is_done_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Ctrl_done_mic;
+        reg_id = BCA_MIC_INT_CTRL_DONE_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Ctrl_done_i2so;
+        reg_id = BCA_I2S1_INT_CTRL_DONE_I2SO;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Ctrl_done_i2so;
+        reg_id = BCA_I2S2_INT_CTRL_DONE_I2SO;
         break;
     }
 
@@ -973,15 +969,15 @@ bool cxd56_audio_bca_reg_is_err_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Ctrl_err_mic;
+        reg_id = BCA_MIC_INT_CTRL_ERR_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Ctrl_err_i2so;
+        reg_id = BCA_I2S1_INT_CTRL_ERR_I2SO;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Ctrl_err_i2so;
+        reg_id = BCA_I2S2_INT_CTRL_ERR_I2SO;
         break;
     }
 
@@ -1000,15 +996,15 @@ bool cxd56_audio_bca_reg_is_smp_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Ctrl_smp_mic;
+        reg_id = BCA_MIC_INT_CTRL_SMP_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Ctrl_smp_i2s;
+        reg_id = BCA_I2S1_INT_CTRL_SMP_I2S;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Ctrl_smp_i2s;
+        reg_id = BCA_I2S2_INT_CTRL_SMP_I2S;
         break;
     }
 
@@ -1026,17 +1022,18 @@ void cxd56_audio_bca_reg_mask_smp_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Mask_smp_mic;
+        reg_id = BCA_MIC_INT_MASK_SMP_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Mask_smp_i2s;
+        reg_id = BCA_I2S1_INT_MASK_SMP_I2S;
         break;
 
       default:
-        reg_id = BCA_I2s1_Int_Mask_smp_i2s;
+        reg_id = BCA_I2S1_INT_MASK_SMP_I2S;
         break;
     }
+
   write_bca_reg(reg_id, 1);
 }
 
@@ -1046,15 +1043,15 @@ void cxd56_audio_bca_reg_unmask_smp_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Mask_smp_mic;
+        reg_id = BCA_MIC_INT_MASK_SMP_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Mask_smp_i2s;
+        reg_id = BCA_I2S1_INT_MASK_SMP_I2S;
         break;
 
       default:
-        reg_id = BCA_I2s1_Int_Mask_smp_i2s;
+        reg_id = BCA_I2S1_INT_MASK_SMP_I2S;
         break;
     }
 
@@ -1067,15 +1064,15 @@ void cxd56_audio_bca_reg_clear_smp_int(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_Int_Ctrl_smp_mic;
+        reg_id = BCA_MIC_INT_CTRL_SMP_MIC;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Int_Ctrl_smp_i2s;
+        reg_id = BCA_I2S1_INT_CTRL_SMP_I2S;
         break;
 
       default:
-        reg_id = BCA_I2s2_Int_Ctrl_smp_i2s;
+        reg_id = BCA_I2S2_INT_CTRL_SMP_I2S;
         break;
     }
 
@@ -1088,15 +1085,15 @@ uint32_t cxd56_audio_bca_reg_get_mon_state_err(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_In_error_setting;
+        reg_id = BCA_MIC_IN_ERROR_SETTING;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Out_Mon_error_setting;
+        reg_id = BCA_I2S1_OUT_MON_ERROR_SETTING;
         break;
 
       default:
-        reg_id = BCA_I2s2_Out_Mon_error_setting;
+        reg_id = BCA_I2S2_OUT_MON_ERROR_SETTING;
         break;
     }
 
@@ -1109,15 +1106,15 @@ uint32_t cxd56_audio_bca_reg_get_mon_state_start(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_In_start;
+        reg_id = BCA_MIC_IN_START;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Out_Mon_start;
+        reg_id = BCA_I2S1_OUT_MON_START;
         break;
 
       default:
-        reg_id = BCA_I2s2_Out_Mon_start;
+        reg_id = BCA_I2S2_OUT_MON_START;
         break;
     }
 
@@ -1130,15 +1127,15 @@ uint32_t cxd56_audio_bca_reg_get_mon_state_buf(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_In_monbuf;
+        reg_id = BCA_MIC_IN_MONBUF;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Out_Mon_monbuf;
+        reg_id = BCA_I2S1_OUT_MON_MONBUF;
         break;
 
       default:
-        reg_id = BCA_I2s2_Out_Mon_monbuf;
+        reg_id = BCA_I2S2_OUT_MON_MONBUF;
         break;
     }
 
@@ -1151,15 +1148,15 @@ uint32_t cxd56_audio_bca_reg_get_dma_state(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_In_rtd_trg;
+        reg_id = BCA_MIC_IN_RTD_TRG;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Out_rtd_trg;
+        reg_id = BCA_I2S1_OUT_RTF_TRG;
         break;
 
       default:
-        reg_id = BCA_I2s2_Out_rtd_trg;
+        reg_id = BCA_I2S2_OUT_RTF_TRG;
         break;
     }
 
@@ -1173,15 +1170,15 @@ void cxd56_audio_bca_reg_reset_chsel(cxd56_audio_dma_t handle)
   switch (handle)
     {
       case CXD56_AUDIO_DMAC_MIC:
-        reg_id = BCA_Mic_In_ch8_sel;
+        reg_id = BCA_MIC_IN_CH8_SEL;
         break;
 
       case CXD56_AUDIO_DMAC_I2S0_DOWN:
-        reg_id = BCA_I2s1_Out_sd1_r_sel;
+        reg_id = BCA_I2S1_OUT_SD1_R_SEL;
         break;
 
       default:
-        reg_id = BCA_I2s2_Out_sd1_r_sel;
+        reg_id = BCA_I2S2_OUT_SD1_R_SEL;
         break;
     }
 

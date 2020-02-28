@@ -98,7 +98,7 @@ struct stm32_lower_s
 {
   const struct enc_lower_s lower;    /* Low-level MCU interface */
   xcpt_t                   handler;  /* ENCX24J600 interrupt handler */
-  FAR void                *arg;      /* Arguement that accompanies the handler */
+  FAR void                *arg;      /* Argument that accompanies the handler */
 };
 
 /****************************************************************************

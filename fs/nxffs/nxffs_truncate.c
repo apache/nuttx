@@ -46,8 +46,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
-
 #include "nxffs.h"
 
 #ifdef __NO_TRUNCATE_SUPPORT__

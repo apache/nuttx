@@ -91,7 +91,7 @@ Change Log:
    module.
 2. Added support for S25FL129P (256kB sectors).
 3. Verified S25FL129P 64kB sectors variant.
-4. Renamed familes to indicate functionality in place of root device.
+4. Renamed families to indicate functionality in place of root device.
    (This was done to avoid confusion over where devices reside).
 5. Family cleanup to aid in comparison.
 6. Removed Chip.h dependency.
@@ -100,7 +100,7 @@ Change Log:
 9. LPCXpresso XML projects added.
 10. M0 Library added.
 11. Sub-block erase fixed for devices with full capability.
-12. IAR libarary renamed to match Keil library
+12. IAR library renamed to match Keil library
 13. Moved project files into proj directory
 
 Known issues: (carried forward)

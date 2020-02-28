@@ -72,7 +72,7 @@
  *   must be undefined or defined to be 1.
  * CONFIG_UG9664HSWAG01_POWER
  *   If the hardware supports a controllable OLED a power supply, this
- *   configuration shold be defined.  (See ug_power() below).
+ *   configuration should be defined.  (See ug_power() below).
  *
  * Required LCD driver settings:
  * CONFIG_LCD_UG9664HSWAG01 - Enable UG-9664HSWAG01 support
@@ -85,7 +85,7 @@
 
 /* Verify that all configuration requirements have been met */
 
-/* The UG-9664HSWAG01 spec says that is supports SPI mode 0,0 only.  However, somtimes
+/* The UG-9664HSWAG01 spec says that is supports SPI mode 0,0 only.  However, sometimes
  * you need to tinker with these things.
  */
 
@@ -213,7 +213,7 @@
 
 struct ug_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 

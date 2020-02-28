@@ -58,7 +58,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <poll.h>
 #include <errno.h>
 #include <assert.h>
@@ -73,7 +72,6 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/ads7843e.h>
 
@@ -96,6 +94,7 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Low-level SPI helpers */
 
 static void ads7843e_lock(FAR struct spi_dev_s *spi);
@@ -230,7 +229,7 @@ static void ads7843e_unlock(FAR struct spi_dev_s *spi)
  *                                 DFR
  *   START      CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
  *   CMD
- *   Aquisition                    AAAAAAAAAAA
+ *   Acquisition                    AAAAAAAAAAA
  *   TIME
  *   BUSY                                     BBBBBBBB
  *   Reported
@@ -268,7 +267,7 @@ static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
 
   /* Wait a tiny amount to make sure that the acquisition time is complete */
 
-   up_udelay(3); /* 3 microseconds */
+  up_udelay(3); /* 3 microseconds */
 
   /* Read the 12-bit data (LS 4 bits will be padded with zero) */
 
@@ -361,11 +360,11 @@ static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
           priv->id++;
         }
       else if (sample->contact == CONTACT_DOWN)
-       {
+        {
           /* First report -- next report will be a movement */
 
-         priv->sample.contact = CONTACT_MOVE;
-       }
+          priv->sample.contact = CONTACT_MOVE;
+        }
 
       priv->penchange = false;
       ret = OK;
@@ -418,10 +417,6 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
 
       if (ret < 0)
         {
-          /* If we are awakened by a signal, then we need to return
-           * the failure now.
-           */
-
           ierr("ERROR: nxsem_wait: %d\n", ret);
           goto errout;
         }
@@ -588,9 +583,9 @@ static void ads7843e_worker(FAR void *arg)
        * later.
        */
 
-       wd_start(priv->wdog, ADS7843E_WDOG_DELAY, ads7843e_wdog, 1,
-                (uint32_t)priv);
-       goto ignored;
+      wd_start(priv->wdog, ADS7843E_WDOG_DELAY, ads7843e_wdog, 1,
+               (uint32_t)priv);
+      goto ignored;
     }
   else
     {
@@ -877,7 +872,7 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
         {
           ret = -EAGAIN;
           goto errout;
-       }
+        }
 
       /* Wait for sample data */
 

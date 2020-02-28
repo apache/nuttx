@@ -201,7 +201,7 @@ static uint16_t sixlowpan_protosize(FAR const struct ipv6_hdr_s *ipv6hdr,
  *   meta    - Location to return the final metadata.
  *
  * Returned Value:
- *   OK is returned on success; Othewise a negated errno value is returned.
+ *   OK is returned on success; Otherwise a negated errno value is returned.
  *
  ****************************************************************************/
 
@@ -300,7 +300,7 @@ static int sixlowpan_ieee802154_metadata(FAR struct radio_driver_s *radio,
  *   meta    - Location to return the final metadata.
  *
  * Returned Value:
- *   OK is returned on success; Othewise a negated errno value is returned.
+ *   OK is returned on success; Otherwise a negated errno value is returned.
  *
  ****************************************************************************/
 
@@ -359,7 +359,7 @@ static int sixlowpan_pktradio_metadata(FAR struct radio_driver_s *radio,
  *   destmac - The IEEE802.15.4 MAC address of the destination
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   Ok is returned on success; Otherwise a negated errno value is returned.
  *   This function is expected to fail if the driver is not an IEEE802.15.4
  *   MAC network driver.  In that case, the UDP/TCP will fall back to normal
  *   IPv4/IPv6 formatting.

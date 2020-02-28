@@ -95,4 +95,3 @@ up_switchcontext:
 	bx		lr
 	.size	up_switchcontext, .-up_switchcontext
 	.end
-

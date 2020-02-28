@@ -59,4 +59,3 @@ config RV32IM_CUSTOM_IRQ_SUPPORT
 		Allows overriding the standard IRQ processing as described
 		in the RISC-V architecture documents.  This allows architecture
 		specific code to support non-standard IRQ processing in the core.
-

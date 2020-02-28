@@ -97,7 +97,7 @@ _z80_saveusercontext:
 
 	; Save IX at offset 3
 
-	ld	l, FRAME_IX(ix)		; HL = Saved alue of IX
+	ld	l, FRAME_IX(ix)		; HL = Saved value of IX
 	ld	h, FRAME_IX+1(ix)	;
 	ld	XCPT_IX(iy), l		; Offset 3: IX
 	ld	XCPT_IX+1(iy), h	;

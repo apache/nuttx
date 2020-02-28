@@ -44,6 +44,9 @@
 #include <nuttx/config.h>
 #include <nuttx/spi/spi.h>
 #include "hardware/cxd56_spi.h"
+#ifdef CONFIG_CXD56_DMAC
+#include "cxd56_dmac.h"
+#endif
 
 #if defined(CONFIG_CXD56_SPI0) || defined(CONFIG_CXD56_SPI3) || \
     defined(CONFIG_CXD56_SPI4) || defined(CONFIG_CXD56_SPI5)
@@ -51,6 +54,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* This header file defines interfaces to common SPI logic.
  * To use this common SPI logic on your board:
  *
@@ -67,6 +71,9 @@
  *    SPI driver to higher level logic (e.g., calling  mmcsd_spislotinitialize(),
  *    for example, will bind the SPI driver to the SPI MMC/SD driver).
  */
+
+#define CXD56_SPI_DMAC_CHTYPE_TX (0)
+#define CXD56_SPI_DMAC_CHTYPE_RX (1)
 
 /****************************************************************************
  * Public Types
@@ -106,6 +113,28 @@ extern "C"
  ****************************************************************************/
 
 FAR struct spi_dev_s *cxd56_spibus_initialize(int port);
+
+/****************************************************************************
+ * Name: cxd56_spi_dmaconfig
+ *
+ * Description:
+ *   Enable DMA configuration.
+ *
+ * Input Parameter:
+ *   port   - Port number
+ *   chtype - Channel type(TX or RX)
+ *   handle - DMA channel handle
+ *   conf   - DMA configuration
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CXD56_DMAC
+void cxd56_spi_dmaconfig(int port, int chtype, DMA_HANDLE handle,
+                         FAR dma_config_t *conf);
+#endif
 
 /****************************************************************************
  * Name:  cxd56_spiXselect, cxd56_spiXstatus, and cxd56_spiXcmddata

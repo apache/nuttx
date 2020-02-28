@@ -60,7 +60,7 @@
  * Name: file_read
  *
  * Description:
- *   file_read() is an interanl OS interface.  It is functionally similar to
+ *   file_read() is an internal OS interface.  It is functionally similar to
  *   the standard read() interface except:
  *
  *    - It does not modify the errno variable,

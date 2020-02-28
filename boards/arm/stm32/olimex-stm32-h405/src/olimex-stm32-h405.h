@@ -112,5 +112,5 @@ int stm32_adc_setup(void);
 int stm32_can_setup(void);
 #endif
 
-#endif  /* __ASSEMBLY__ */
+#endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_H405_SRC_H */

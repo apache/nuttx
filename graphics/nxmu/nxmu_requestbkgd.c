@@ -97,4 +97,3 @@ void nxmu_requestbkgd(FAR struct nxmu_conn_s *conn,
   nxmu_mousereport(&be->bkgd);
 #endif
 }
-

@@ -205,7 +205,7 @@ static ssize_t lib_copystring(FAR FILE *stream, FAR char *ptr,
 
       if (isspace(ch) || ch == EOF)
         {
-          /* Remeber what terminated the string */
+          /* Remember what terminated the string */
 
           *terminator = ch;
 

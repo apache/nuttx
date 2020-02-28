@@ -108,7 +108,7 @@
  *   .... .... ...V .... ....
  */
 
-#define GPIO_OUTPUT_SET            (1 << 8)    /* Bit 8: Inital value of output */
+#define GPIO_OUTPUT_SET            (1 << 8)    /* Bit 8: Initial value of output */
 #define GPIO_OUTPUT_CLEAR          (0)
 
 /* This identifies the GPIO port:

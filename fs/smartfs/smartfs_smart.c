@@ -46,7 +46,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -225,7 +224,7 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
     }
 
   sf->bflags = 0;
-#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
 
   sf->entry.name = NULL;
   ret = smartfs_finddirentry(fs, &sf->entry, relpath, &parentdirsector,
@@ -383,6 +382,9 @@ errout_with_buffer:
       sf->entry.name = NULL;
     }
 
+#ifdef CONFIG_SMARTFS_USE_SECTOR_BUFFER
+  kmm_free(sf->buffer);
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
   kmm_free(sf);
 
 errout_with_semaphore:
@@ -540,7 +542,7 @@ static ssize_t smartfs_read(FAR struct file *filep, char *buffer, size_t buflen)
           break;
         }
 
-      /* Read the curent sector into our buffer */
+      /* Read the current sector into our buffer */
 
       readwrite.logsector = sf->currsector;
       readwrite.offset = 0;
@@ -813,7 +815,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
             }
         }
 
-#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
 
       /* Update our control variables */
 
@@ -923,7 +925,7 @@ static ssize_t smartfs_write(FAR struct file *filep, const char *buffer,
               sf->curroffset = sizeof(struct smartfs_chain_header_s);
             }
         }
-#endif  /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
+#endif /* CONFIG_SMARTFS_USE_SECTOR_BUFFER */
     }
 
   ret = byteswritten;
@@ -1669,7 +1671,7 @@ static int smartfs_mkdir(struct inode *mountpt, const char *relpath, mode_t mode
 
       if (parentdirsector == 0xffff)
         {
-          /* Invalid entry in the path (non-existant dir segment) */
+          /* Invalid entry in the path (non-existent dir segment) */
 
           goto errout_with_semaphore;
         }
@@ -1746,7 +1748,7 @@ int smartfs_rmdir(struct inode *mountpt, const char *relpath)
 
       /* TODO:  Need to check permissions?  */
 
-      /* Check if the directory is emtpy */
+      /* Check if the directory is empty */
 
       ret = smartfs_countdirentries(fs, &entry);
       if (ret < 0)

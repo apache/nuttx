@@ -79,7 +79,7 @@
 #  define CONFIG_LPC31_USBDEV_EP0_MAXSIZE 64
 #endif
 
-#ifndef  CONFIG_USBDEV_MAXPOWER
+#ifndef CONFIG_USBDEV_MAXPOWER
 #  define CONFIG_USBDEV_MAXPOWER 100  /* mA */
 #endif
 
@@ -173,7 +173,7 @@
 
 struct lpc31_dtd_s
 {
-  volatile uint32_t       nextdesc;      /* Address of the next DMA descripto in RAM */
+  volatile uint32_t       nextdesc;      /* Address of the next DMA descriptor in RAM */
   volatile uint32_t       config;        /* Misc. bit encoded configuration information */
   uint32_t                buffer0;       /* Buffer start address */
   uint32_t                buffer1;       /* Buffer start address */
@@ -244,7 +244,7 @@ struct lpc31_dqh_s
 #define LPC31_EP0MAXPACKET           (64)         /* EP0 max packet size (1-64) */
 #define LPC31_BULKMAXPACKET          (512)        /* Bulk endpoint max packet (8/16/32/64/512) */
 #define LPC31_INTRMAXPACKET          (1024)       /* Interrupt endpoint max packet (1 to 1024) */
-#define LPC31_ISOCMAXPACKET          (512)        /* Acutally 1..1023 */
+#define LPC31_ISOCMAXPACKET          (512)        /* Actually 1..1023 */
 
 /* The address of the endpoint control register */
 #define LPC31_USBDEV_ENDPTCTRL(epphy) (LPC31_USBDEV_ENDPTCTRL0 + ((epphy)>>1)*4)
@@ -491,7 +491,7 @@ static uint32_t lpc31_getreg(uint32_t addr)
 
   uint32_t val = getreg32(addr);
 
-  /* Is this the same value that we read from the same registe last time?  Are
+  /* Is this the same value that we read from the same register last time?  Are
    * we polling the register?  If so, suppress some of the output.
    */
 
@@ -1105,7 +1105,7 @@ static void lpc31_usbreset(struct lpc31_usbdev_s *priv)
   /* Set USB address to 0 */
   lpc31_set_address (priv, 0);
 
-  /* Initialise the Enpoint List Address */
+  /* Initialise the Endpoint List Address */
   lpc31_putreg ((uint32_t)g_qh, LPC31_USBDEV_ENDPOINTLIST);
 
   /* EndPoint 0 initialization */

@@ -52,13 +52,11 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mtd/nand.h>
@@ -1375,7 +1373,7 @@ static int nand_dma_write(struct sam_nandcs_s *priv,
 
   /* Setup the Memory-to-Memory DMA.  The semantics of the DMA module are
    * awkward here.  We will treat the NAND (dest) as the peripheral destination
-   * and memory as the source.  Internally, the DMA module will realize taht
+   * and memory as the source.  Internally, the DMA module will realize that
    * this is a memory to memory transfer and should do the right thing.
    */
 
@@ -1511,7 +1509,7 @@ static int nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
 #ifdef CONFIG_SAMA5_NAND_DMA
   /* Then perform the transfer via memory-to-memory DMA or not, depending
    * on if we have a DMA channel assigned and if the transfer is
-   * sufficiently large.  Small DMAs (e.g., for spare data) are not peformed
+   * sufficiently large.  Small DMAs (e.g., for spare data) are not performed
    * because the DMA context switch can take more time that the DMA itself.
    */
 
@@ -1580,7 +1578,7 @@ static int nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
  *   data  - Buffer where the data area will be stored.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -1747,7 +1745,7 @@ static int nand_nfcsram_write(struct sam_nandcs_s *priv, uint8_t *buffer,
 #ifdef CONFIG_SAMA5_NAND_DMA
   /* Then perform the transfer via memory-to-memory DMA or not, depending
    * on if we have a DMA channel assigned and if the transfer is
-   * sufficiently large.  Small DMAs (e.g., for spare data) are not peformed
+   * sufficiently large.  Small DMAs (e.g., for spare data) are not performed
    * because the DMA context switch can take more time that the DMA itself.
    */
 
@@ -1815,7 +1813,7 @@ static int nand_write(struct sam_nandcs_s *priv, uint8_t *buffer,
 #ifdef CONFIG_SAMA5_NAND_DMA
   /* Then perform the transfer via memory-to-memory DMA or not, depending
    * on if we have a DMA channel assigned and if the transfer is
-   * sufficiently large.  Small DMAs (e.g., for spare data) are not peformed
+   * sufficiently large.  Small DMAs (e.g., for spare data) are not performed
    * because the DMA context switch can take more time that the DMA itself.
    */
 
@@ -1882,7 +1880,7 @@ static int nand_write(struct sam_nandcs_s *priv, uint8_t *buffer,
  *   spare - Buffer where the spare area will be stored.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -1966,7 +1964,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
 
   /* Read the spare area if so requested.  If there is no data, then the
    * spare data will appear at offset 0; If there is data, thenthe spare data
-   * will appear followign the data at offset pagesize.
+   * will appear following the data at offset pagesize.
    */
 
   if (spare)
@@ -1997,7 +1995,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
  *   data  - Buffer where the data area will be stored.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2114,11 +2112,11 @@ errout:
  *   priv  - Lower-half, private NAND FLASH device state
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
- *   data  - Buffer containing the data to be writting
- *   spare - Buffer conatining the spare data to be written.
+ *   data  - Buffer containing the data to be writing
+ *   spare - Buffer containing the spare data to be written.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2268,10 +2266,10 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
  *   priv  - Lower-half, private NAND FLASH device state
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
- *   data  - Buffer containing the data to be writting
+ *   data  - Buffer containing the data to be writing
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2483,7 +2481,7 @@ errout:
  *   block  - Number of the physical block to erase.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2566,7 +2564,7 @@ static int nand_eraseblock(struct nand_raw_s *raw, off_t block)
  *   spare - Buffer where the spare area will be stored.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2599,11 +2597,11 @@ static int nand_rawread(struct nand_raw_s *raw, off_t block,
  *   raw   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
- *   data  - Buffer containing the data to be writting
+ *   data  - Buffer containing the data to be writing
  *   spare - Buffer containing the spare data to be written.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2642,7 +2640,7 @@ static int nand_rawwrite(struct nand_raw_s *raw, off_t block,
  *   spare - Buffer where the spare area will be stored.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -2700,11 +2698,11 @@ static int nand_readpage(struct nand_raw_s *raw, off_t block,
  *   raw   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
- *   data  - Buffer containing the data to be writting
- *   spare - Buffer conatining the spare data to be written.
+ *   data  - Buffer containing the data to be writing
+ *   spare - Buffer containing the spare data to be written.
  *
  * Returned Value:
- *   OK is returned in succes; a negated errno value is returned on failure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
@@ -3087,4 +3085,3 @@ bool nand_checkreg(bool wr, uintptr_t regaddr, uint32_t regval)
   return true;
 }
 #endif
-

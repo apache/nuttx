@@ -737,15 +737,15 @@
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
   </li>
-  <p>NOTE: In principle, this user mode port should run in any POSIX environement.
-    This target will probably not run &quot;out-of-the-box&quot; in unverified POSIX environments due to the many host environemnt dependencies.
+  <p>NOTE: In principle, this user mode port should run in any POSIX environment.
+    This target will probably not run &quot;out-of-the-box&quot; in unverified POSIX environments due to the many host environment dependencies.
   </p>
 
   <li><code>arch/arm</code>:
     This directory holds common ARM architectures.
   </li>
 
-  <li><code>arch/arm</code>:
+  <li><code>arch/avr</code>:
     This directory holds common AVR and AVR32 architectures.
   </li>
 
@@ -2296,7 +2296,7 @@ The specific environmental definitions are unique for each board but should incl
   There are many interfaces exported from board- to architecture-specific logic.
   But there are only a few exported from board-specific logic to common NuttX logic.
   Those few of those related to initialization will be discussed in this paragraph.
-  There are others, like those used by <a href="#boardctl"><code>boardctl()</code></a> that will be dicussed in other paragraphs.
+  There are others, like those used by <a href="#boardctl"><code>boardctl()</code></a> that will be discussed in other paragraphs.
 </p>
 <p>
   All of the board-specific interfaces used by the NuttX OS logic are for controlled board initialization.
@@ -2339,7 +2339,7 @@ The specific environmental definitions are unique for each board but should incl
   This additional initialization phase may be used, for example, to initialize more complex, board-specific device drivers.
 </p>
 <p>
-  Waiting for events, use of I2C, SPI, etc are permissable in the context of board_late_initialize().
+  Waiting for events, use of I2C, SPI, etc are permissible in the context of board_late_initialize().
   That is because <code>board_late_initialize()</code> will run on a temporary, internal kernel thread.
 </p>
 
@@ -2573,7 +2573,7 @@ config ARCH_SIM
    bool "Simulation"
    select ARCH_HAVE_TICKLESS
    ---help---
-       Linux/Cywgin user-mode simulation.
+       Linux/Cygwin user-mode simulation.
 </pre></ul>
     <p>
       When the simulation platform is selected, <code>ARCH_HAVE_TICKLESS</code> is automatically selected, informing the configuration system that <i>Tickless OS</i> options can be selected.
@@ -4055,7 +4055,7 @@ void nxsched_timer_expiration(void);
     </p>
   <li>
     <p><b>Cancellation Points</b>:
-      Many of the application OS interfaces are <i>cancellation points</i>, i.e., when the task is operating in <i>defferred cancellation</i> state, it cannot be deleted or cancelled until it calls an application OS interface that is a cancellation point.
+      Many of the application OS interfaces are <i>cancellation points</i>, i.e., when the task is operating in <i>deferred cancellation</i> state, it cannot be deleted or cancelled until it calls an application OS interface that is a cancellation point.
     </p>
     <p>
       The POSIX specification is very specific about this, specific both in identifying which application OS interfaces are cancellation points and specific in the fact that it is prohibited for any OS operation other than those listed in the specification to generate cancellation points.
@@ -4600,7 +4600,7 @@ This objectives of this feature are:
   <dt><code>CONFIG_IOB_NBUFFERS</code>
   <dd>Number of pre-allocated I/O buffers.  Each packet is represented by a series of small I/O buffers in a chain.  This setting determines the number of preallocated I/O buffers available for packet data.
 
-  The default value is setup for network support.  The default is 8 buffers if neither TCP read-ahead or TCP write buffering is enabled (neither <code>CONFIG_NET_TCP_WRITE_BUFFERS</code> nor <code>CONFIG_NET_TCP_READAHEAD</code>), 24 if only write buffering is enabled, and 36 if both read-ahead and write buffering are enabled.
+  The default value is setup for network support.  The default is 8 buffers if neither TCP/UDP or write buffering is enabled (neither <code>CONFIG_NET_TCP_WRITE_BUFFERS</code> nor <code>CONFIG_NET_TCP</code>), 24 if only TCP/UDP is enabled, and 36 if both TCP/UDP and write buffering are enabled.
 
   <dt><code>CONFIG_IOB_BUFSIZE</code>
   <dd>Payload size of one I/O buffer.  Each packet is represented by a series of small I/O buffers in a chain.  This setting determines the data payload each preallocated I/O buffer.  The default value is 196 bytes.
@@ -4610,7 +4610,7 @@ This objectives of this feature are:
 
   <dd>These generic I/O buffer chain containers are not currently used by any logic in NuttX.  That is because their other other specialized I/O buffer chain containers that also carry a payload of usage specific information.
 
-  The default value is zero if nether TCP nor UDP read-ahead buffering is enabled (i.e., neither <code>CONFIG_NET_TCP_READAHEAD</code> && !<code>CONFIG_NET_UDP_READAHEAD</code> or eight if either is enabled.
+  The default value is zero if nether TCP nor UDP is enabled (i.e., neither <code>CONFIG_NET_TCP</code> && !<code>CONFIG_NET_UDP</code> or eight if either is enabled.
 
   <dt><code>CONFIG_IOB_THROTTLE</code>
   <dd>I/O buffer throttle value.  TCP write buffering and read-ahead buffer use the same pool of free I/O buffers.  In order to prevent uncontrolled incoming TCP packets from hogging all of the available, pre-allocated I/O buffers, a throttling value is required.  This throttle value assures that I/O buffers will be denied to the read-ahead logic before TCP writes are halted.
@@ -6668,9 +6668,9 @@ int syslog_channel(FAR const struct syslog_channel_s *channel);
 <ul><pre>
 #include &lt;nuttx/syslog/syslog.h&gt;
 #ifndef CONFIG_ARCH_SYSLOG
-int syslog_initialize(enum syslog_init_e phase);
+int syslog_initialize(void);
 #else
-#  define syslog_initialize(phase)
+#  define syslog_initialize()
 #endif
 </ul></pre>
 <p><b>Description:</b>
@@ -6693,13 +6693,6 @@ int syslog_initialize(enum syslog_init_e phase);
       If <code>CONFIG_ARCH_SYSLOG</code> is selected, then the architecture-specific logic will provide its own SYSLOG device initialize which must include as a minimum a call to <code>syslog_channel()</code> to use the device.
   </li>
 </ul>
-<p><b>Input Parameters:</b>
-<ul>
-  <li>
-    <p>
-      <code>phase</code>: One of {<code>SYSLOG_INIT_EARLY</code>, <code>SYSLOG_INIT_LATE</code>}
-  </li>
-</ul>
 <p><b>Returned Value:</b>
   Zero (<code>OK</code>) is returned on success; a negated <code>errno</code> value is returned on any failure.
 </p>
@@ -6707,19 +6700,8 @@ int syslog_initialize(enum syslog_init_e phase);
   Different types of SYSLOG devices have different OS initialization
   requirements.  Some are available immediately at reset, some are available
   after some basic OS initialization, and some only after OS is fully
-  initialized.  In order to satisfy these different initialization
-  requirements, <code>syslog_initialize()</code> is called twice from the boot-up logic:
+  initialized.
 </p>
-<ul>
-  <li>
-    <p>
-      <code>syslog_initialize()</code> is called from the architecture-specific <code>up_initialize()</code> function as some as basic hardware resources have been initialized: Timers, interrupts, etc.  In this case, <code>syslog_initialize()</code> is called with the argument <code>SYSLOG_INIT_EARLY</code>.
-  </li>
-  <li>
-    <p>
-      <code>syslog_initialize()</code> is called again from <code>nx_start()</code> when the full OS initialization has completed, just before the application main entry point is spawned.  In this case, <code>syslog_initialize()</code> is called with the argument <code>SYSLOG_INIT_LATE</code>.
-  </li>
-</ul>
 <p>
   There are other types of SYSLOG channel devices that may require even further initialization.  For example, the file SYSLOG channel (described below) cannot be initialized until the necessary file systems have been mounted.
 </p>
@@ -6734,7 +6716,7 @@ int syslog_initialize(enum syslog_init_e phase);
 <ol>
   <li>
     <p><b>Low-Level Serial Output</b>.
-      If you are using a SYSLOG console channel (<code>CONFIG_SYSLOG_CONSOLE</code>) with a serial console (<code>CONFIG_SYSLOG_SERIAL_CONSOLE</code>) and if the underlying architecture supports the low-level <code>up_putc()</code> interface(<code>CONFIG_ARCH_LOWPUTC</code>), then the SYLOG logic will direct the output to <code>up_putc()</code> which is capable of generating the serial output within the context of an interrupt handler.
+      If you are using a SYSLOG console channel (<code>CONFIG_SYSLOG_CONSOLE</code>) and if the underlying architecture supports the low-level <code>up_putc()</code> interface(<code>CONFIG_ARCH_LOWPUTC</code>), then the SYSLOG logic will direct the output to <code>up_putc()</code> which is capable of generating the serial output within the context of an interrupt handler.
     </p>
     <p>
       There are a few issues in doing this however:
@@ -6770,7 +6752,7 @@ int syslog_initialize(enum syslog_init_e phase);
     </li>
     <li>
       <p>
-        Later, when the next normal syslog output is generated, it will first empty the content of the interrupt buffer to the SYSLOG device in the proper context.  It will then be followed by the normal syslog output.  In this case, the interrupt level SYSLOG output will interrupt the normal output stream and the interrupt level SYSLOG output will be inserted into the correct position in the SYSLOG output when the next normal SYLOG output is generated.
+        Later, when the next normal syslog output is generated, it will first empty the content of the interrupt buffer to the SYSLOG device in the proper context.  It will then be followed by the normal syslog output.  In this case, the interrupt level SYSLOG output will interrupt the normal output stream and the interrupt level SYSLOG output will be inserted into the correct position in the SYSLOG output when the next normal SYSLOG output is generated.
       </p>
     </li>
   </ul>
@@ -6799,15 +6781,11 @@ int syslog_initialize(enum syslog_init_e phase);
   </li>
   <li>
     <p>
-      <code>CONFIG_SYSLOG_CONSOLE</code>.  This configuration option is manually selected from the SYSLOG menu.  This is the option that actually enables the SYSLOG console device.  It depends on <code>CONFIG_DEV_CONSOLE</code> and it will automatically select <code>CONFIG_SYSLOG_SERIAL_CONSOLE</code> if <code>CONFIG_SERIAL_CONSOLE</code> is selected.
+      <code>CONFIG_SYSLOG_CONSOLE</code>.  This configuration option is manually selected from the SYSLOG menu.  This is the option that actually enables the SYSLOG console device.  It depends on <code>CONFIG_DEV_CONSOLE</code>.
   </li>
   <li>
     <p>
       <code>CONFIG_ARCH_LOWPUTC</code>.  This is an indication from the architecture configuration that the platform supports the <code>up_putc()</code> interface.  <code>up_putc()</code> is a very low level UART interface that can even be used from interrupt handling.
-  </li>
-  <li>
-    <p>
-      <code>CONFIG_SYSLOG_SERIAL_CONSOLE</code>.  This enables certain features of the SYSLOG operation that depend on a serial console.  If <code>CONFIG_ARCH_LOWPUTC</code> is also selected, for example, then <code>up_putc()</code> will be used for the forced SYSLOG output.
   </li>
 </ul>
 <p>
@@ -6931,10 +6909,6 @@ int syslog_file_channel(FAR const char *devpath);
   </li>
   <li>
     <p>
-      <code>CONFIG_RAMLOG_CONSOLE</code>: Use the RAM logging device as a system console. If this feature is enabled (along with <code>CONFIG_DEV_CONSOLE</code>), then all console output will be re-directed to a circular buffer in RAM.  This might be useful, for example, if the only console is a Telnet console.  Then in that case, console output from non-Telnet threads will go to the circular buffer and can be viewed using the NSH <code>dmesg</code> command.  This optional is not useful in other scenarios.
-  </li>
-  <li>
-    <p>
       <code>CONFIG_RAMLOG_SYSLOG</code>: Use the RAM logging device for the SYSLOG interface.  If this feature is enabled, then all debug output will be re-directed to the circular  buffer in RAM.  This RAM log can be viewed from NSH using the <code>dmesg</code>  command.  NOTE:  Unlike the limited, generic character driver SYSLOG device, the RAMLOG <i>can</i> be used to capture debug output from
       interrupt level handlers.
   </li>
@@ -6943,9 +6917,6 @@ int syslog_file_channel(FAR const char *devpath);
       <code>CONFIG_RAMLOG_NPOLLWAITERS</code>: The number of threads than can be waiting for this driver on <code>poll()</code>.  Default: 4
   </li>
 </ul>
-<p>
-  If <code>CONFIG_RAMLOG_CONSOLE</code> or <code>CONFIG_RAMLOG_SYSLOG</code> is selected, then the following must also be provided:
-</p>
 <ul>
   <li>
     <p>
@@ -7323,5 +7294,3 @@ void (*notify)(FAR struct pm_callback_s *cb, int domain, enum pm_state_e pmstate
 
 </body>
 </html>
-
-

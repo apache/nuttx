@@ -144,7 +144,7 @@ REVISIT: Unverified, cloned text from the SAMA5D4-EK README.txt
   0x0000:0000 - 0x0003:ffff: AT91BootStrap
   0x0004:0000 - 0x000b:ffff: U-Boot
   0x000c:0000 - 0x000f:ffff: U-Boot environment
-  0x0010:0000 - 0x0017:ffff: U-Boot environement redundant
+  0x0010:0000 - 0x0017:ffff: U-Boot environment redundant
   0x0018:0000 - 0x001f:ffff: Device tree (DTB)
   0x0020:0000 - 0x007f:ffff: NuttX
   0x0080:0000 - end:         Available for use as a NAND file system
@@ -834,7 +834,6 @@ Configurations
 
        Device Drivers:
        CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
-       CONFIG_RAMLOG_CONSOLE=n     : (We don't use the RAMLOG console)
        CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the
                                      system logger.
        CONFIG_RAMLOG_NONBLOCKING=y : Needs to be non-blocking for dmesg

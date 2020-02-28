@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef  __INCLUDE_NETPACKET_BLUETOOTH_H
-#define  __INCLUDE_NETPACKET_BLUETOOTH_H
+#ifndef __INCLUDE_NETPACKET_BLUETOOTH_H
+#define __INCLUDE_NETPACKET_BLUETOOTH_H
 
 /****************************************************************************
  * Included Files
@@ -76,7 +76,7 @@
  * BTPROTO_L2CAP
  *   L2CAP sockets give sequential packet access over channels to other
  *   Bluetooth devices and make use of the bt_psm field in the sockaddr_bt_s
- *   structure to select the Protocol/Sevice Multiplexer to specify when
+ *   structure to select the Protocol/Service Multiplexer to specify when
  *   making connections.  If the special value of L2CAP_PSM_ANY is bound
  *   when the listen() call is made, the next available PSM from the
  *   dynamic range above 0x1001 will be selected and may be discovered
@@ -290,4 +290,4 @@ struct sockaddr_bt_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /*  __INCLUDE_NETPACKET_BLUETOOTH_H */
+#endif /* __INCLUDE_NETPACKET_BLUETOOTH_H */

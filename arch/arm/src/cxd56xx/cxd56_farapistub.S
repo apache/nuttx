@@ -177,9 +177,9 @@ PM_LoadImage:
     nop
     nop
 
-    .global	PM_PmicControl
+    .global	pm_pmic_control
     .thumb_func
-PM_PmicControl:
+pm_pmic_control:
     mov     r12, pc
     b       1b
 
@@ -563,9 +563,9 @@ _modulelist_gnss_pwr:
     .align	2
 3:
 
-    .global	AS_AcaControl
+    .global	as_aca_control
     .thumb_func
-AS_AcaControl:
+as_aca_control:
     mov     r12, pc
     b       1b
 

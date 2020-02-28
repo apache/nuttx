@@ -239,14 +239,14 @@ irq_common:
 .Lreturn:
 	add		$4, %esp
 
-	/* EAX may possibly hold a pointer to a different regiser save area on
+	/* EAX may possibly hold a pointer to a different register save area on
 	 * return.  Are we switching to a new context?
 	 */
 
 	cmp		%eax, %esp
 	je		.Lnoswitch
 
-	/* A context swith will be performed. EAX holds the address of the new
+	/* A context switch will be performed. EAX holds the address of the new
 	 * register save structure.
 	 *
 	 * Jump to up_fullcontextrestore().  We perform a call here, but that function

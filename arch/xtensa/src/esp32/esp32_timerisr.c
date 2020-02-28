@@ -69,7 +69,7 @@ static uint32_t g_tick_divisor;
  *
  ****************************************************************************/
 
-/* Return the current value of the cyle count register */
+/* Return the current value of the cycle count register */
 
 static inline uint32_t xtensa_getcount(void)
 {
@@ -160,7 +160,7 @@ static int esp32_timerisr(int irq, uint32_t *regs, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  xtensa_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -168,7 +168,7 @@ static int esp32_timerisr(int irq, uint32_t *regs, FAR void *arg)
  *
  ****************************************************************************/
 
-void xtensa_timer_initialize(void)
+void up_timer_initialize(void)
 {
   uint32_t divisor;
   uint32_t count;

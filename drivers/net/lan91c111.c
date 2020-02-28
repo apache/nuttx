@@ -1584,7 +1584,7 @@ int lan91c111_initialize(uintptr_t base, int irq)
 
   if ((macrev >> 4 & 0x0f) != CHIP_91111FD || phyid != PHY_LAN83C183)
     {
-      nerr("ERROR: Unsupport LAN91C111's MAC/PHY\n");
+      nerr("ERROR: Unsupported LAN91C111's MAC/PHY\n");
       ret = -ENODEV;
       goto err;
     }

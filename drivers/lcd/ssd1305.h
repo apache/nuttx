@@ -63,7 +63,7 @@
 #  define SSD1305_COLH_MASK         0x0f
 #define SSD1305_ADDRMODE            0x20 /* 0x20: Set memory address mode */
 #  define SSD1305_ADDRMODE_HOR      0x00 /*   Data 1: Set horizontal address mode */
-#  define SSD1305_ADDRMODE_VIRT     0x01 /*   Data 1: Set virtal address mode */
+#  define SSD1305_ADDRMODE_VIRT     0x01 /*   Data 1: Set virtual address mode */
 #  define SSD1305_ADDRMODE_PAGE     0x02 /*   Data 1: Set page address mode */
 #define SSD1305_SETCOLADDR          0x21 /* 0x21: Set column address */
                                          /*   Data 1: Column start address: 0-131 */
@@ -127,7 +127,7 @@
 #define SSD1305_SETMUX              0xa8 /* 0xa8: Set Multiplex Ratio*/
                                          /*   Data 1: MUX ratio -1: 15-63 */
 #define SSD1305_DIMMODE             0xab /* 0xab: Dim mode setting */
-                                         /*   Data 1: Reserverd, must be zero */
+                                         /*   Data 1: Reserved, must be zero */
                                          /*   Data 2: Contrast for bank1: 0-255 */
                                          /*   Data 3: Brightness for color bank: 0-255 */
 #define SSD1305_MSTRCONFIG          0xad /* 0xad: Master configuration */

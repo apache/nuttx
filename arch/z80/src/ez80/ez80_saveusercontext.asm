@@ -135,7 +135,7 @@ _ez80_saveusercontext:
 
 	; Save IX at offset 3
 
-	ld	hl, (ix + FRAME_IX)	; HL = Saved alue of IX
+	ld	hl, (ix + FRAME_IX)	; HL = Saved value of IX
 	ld	(iy + XCPT_IX), hl	; Index 3: IX
 
 	; Save IY at index 4
@@ -169,4 +169,3 @@ _ez80_saveusercontext:
 	pop	ix
 	ret
 	end
-	

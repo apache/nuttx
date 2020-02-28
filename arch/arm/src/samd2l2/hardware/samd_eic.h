@@ -92,7 +92,7 @@
 
 /* Status register */
 
-#define EIC_STATUS_SYNCBUSY          (1 << 7)  /* Bit 7:  Syncronization busy */
+#define EIC_STATUS_SYNCBUSY          (1 << 7)  /* Bit 7:  Synchronization busy */
 
 /* Non-maskable interrupt control register */
 

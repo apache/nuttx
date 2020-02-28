@@ -46,7 +46,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -220,7 +219,7 @@ static void hostfs_mkpath(FAR struct hostfs_mountpt_s  *fs,
 
   while (relpath[x] != '\0')
     {
-      /* Test for ".." occurance */
+      /* Test for ".." occurrence */
 
       if (strncmp(&relpath[x], "..", 2) == 0)
         {
@@ -929,7 +928,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       return -ENOMEM;
     }
 
-  /* The options we suppor are:
+  /* The options we support are:
    *  "fs=whatever", remote dir
    */
 

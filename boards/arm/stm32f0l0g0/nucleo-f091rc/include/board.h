@@ -169,7 +169,7 @@
 
 /* LEDs
  *
- * The Nucleo-64 board has one user controlable LED, User LD2.  This green
+ * The Nucleo-64 board has one user controllable LED, User LD2.  This green
  * LED is a user LED connected to Arduino signal D13 corresponding to STM32
  * I/O PA5 (PB13 on other some other Nucleo-64 boards).
  *
@@ -253,4 +253,4 @@
 #define GPIO_USART2_TX           GPIO_USART2_TX_3
 #define GPIO_USART2_RX           GPIO_USART2_RX_3
 
-#endif  /* __BOARDS_ARM_STM32F0L0G0_NUCLEO_F091RC_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32F0L0G0_NUCLEO_F091RC_INCLUDE_BOARD_H */

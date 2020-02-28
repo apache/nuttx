@@ -85,7 +85,7 @@ int stm32_lcd_backpack_init(FAR const char *devpath)
    * Note: We are using the LCD_I2C_BACKPACK_CFG_SAINSMART config that
    *       defined the I2C Address to 0x27 to PCF8574. Double check if all
    *       the bits (pins) from PCF8574 connected to the LCD controller
-   *       are correct with with this LCD CFG definition.
+   *       are correct with this LCD CFG definition.
    */
 
   cfg.rows = 2;

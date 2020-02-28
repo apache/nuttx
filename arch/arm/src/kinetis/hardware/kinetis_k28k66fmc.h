@@ -160,7 +160,7 @@
 #define KINETIS_FMC_PFB01CR             (KINETIS_FMC_BASE+KINETIS_FMC_PFB01CR_OFFSET)
 #define KINETIS_FMC_PFB23CR             (KINETIS_FMC_BASE+KINETIS_FMC_PFB23CR_OFFSET)
 
-/*  Cache Directory Storage for way=w and set=s, w=0..3, s=0..7 */
+/* Cache Directory Storage for way=w and set=s, w=0..3, s=0..7 */
 
 #define KINETIS_FMC_TAGVD(w,s)          (KINETIS_FMC_BASE+KINETIS_FMC_TAGVD_OFFSET(w,s))
 

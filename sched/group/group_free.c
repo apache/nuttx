@@ -92,4 +92,4 @@ void group_free(FAR struct task_group_s *group, FAR void *mem)
     }
 }
 
-#endif  /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) && CONFIG_MM_KERNEL_HEAP */
+#endif /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) && CONFIG_MM_KERNEL_HEAP */

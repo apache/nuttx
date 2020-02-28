@@ -46,7 +46,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 

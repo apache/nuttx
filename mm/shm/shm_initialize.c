@@ -68,7 +68,7 @@ struct shm_info_s g_shminfo;
  * Name: shm_initialize
  *
  * Description:
- *   Perform one time, start-up initialization of the shared memor logic.
+ *   Perform one time, start-up initialization of the shared memory logic.
  *
  * Input Parameters:
  *   None

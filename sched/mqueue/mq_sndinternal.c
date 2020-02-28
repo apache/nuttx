@@ -262,7 +262,7 @@ int nxmq_wait_send(mqd_t mqdes)
         }
 
       /* Yes... We will not return control until the message queue is
-       * available or we receive a signal or at timout occurs.
+       * available or we receive a signal or at timeout occurs.
        */
 
       else
@@ -423,7 +423,7 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
     {
       /* Find the highest priority task that is waiting for
        * this queue to be non-empty in g_waitingformqnotempty
-       * list. sched_lock() should give us sufficent protection since
+       * list. sched_lock() should give us sufficient protection since
        * interrupts should never cause a change in this list
        */
 

@@ -493,7 +493,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   nxsem_post(&g_rptun_sem);
 
-  /* Register callback to mbox for receving remote message */
+  /* Register callback to mbox for receiving remote message */
 
   RPTUN_REGISTER_CALLBACK(priv->dev, rptun_callback, priv);
 

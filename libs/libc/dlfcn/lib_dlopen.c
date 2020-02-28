@@ -98,7 +98,7 @@ static void dldump_loadinfo(FAR struct mod_loadinfo_s *loadinfo)
     {
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
-          FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
+          FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
           binfo("Sections %d:\n", i);
           binfo("  sh_name:      %08x\n", shdr->sh_name);
           binfo("  sh_type:      %08x\n", shdr->sh_type);

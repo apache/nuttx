@@ -138,7 +138,7 @@
 
 /* LFCLKSRC Register */
 
-#define CLOCK_LFCLKSRC_SRC_SHIFT        (0)       /* Bits 0-1: LFRC clock soruce */
+#define CLOCK_LFCLKSRC_SRC_SHIFT        (0)       /* Bits 0-1: LFRC clock source */
 #define CLOCK_LFCLKSRC_SRC_MASK         (3 << CLOCK_LFCLKSRC_SRC_SHIFT)
 #  define CLOCK_LFCLKSRC_SRC_RC         (0 << CLOCK_LFCLKSRC_SRC_SHIFT)
 #  define CLOCK_LFCLKSRC_SRC_RC         (1 << CLOCK_LFCLKSRC_SRC_SHIFT)

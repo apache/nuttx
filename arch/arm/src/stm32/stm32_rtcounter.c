@@ -91,7 +91,7 @@
  *
  * WARNING:  Overflow interrupts are lost whenever the STM32 is powered down.  The
  * overflow interrupt may be lost even if the STM32 is powered down only momentarily.
- * Therefor  hi-res solution is only useful in systems where the power is always on.
+ * Therefore hi-res solution is only useful in systems where the power is always on.
  */
 
 #ifdef CONFIG_RTC_HIRES

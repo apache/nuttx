@@ -195,4 +195,3 @@ ssize_t bchlib_write(FAR void *handle, FAR const char *buffer, size_t offset,
 
   return byteswritten;
 }
-

@@ -58,7 +58,7 @@
  *   must be undefined or defined to be 1.
  * CONFIG_UG9664HSWAG01_POWER
  *   If the hardware supports a controllable OLED a power supply, this
- *   configuration shold be defined.  (See ug_power() below).
+ *   configuration should be defined.  (See ug_power() below).
  *
  * Required LCD driver settings:
  * CONFIG_LCD_UG9664HSWAG01 - Enable UG-9664HSWAG01 support
@@ -132,7 +132,7 @@ FAR struct lcd_dev_s *ug_initialize(FAR struct spi_dev_s *spi, unsigned int devn
  *
  * Input Parameters:
  *
- *   devno - A value in the range of 0 throuh CONFIG_UG9664HSWAG01_NINTERFACES-1.
+ *   devno - A value in the range of 0 through CONFIG_UG9664HSWAG01_NINTERFACES-1.
  *     This allows support for multiple OLED devices.
  *   on - true:turn power on, false: turn power off.
  *

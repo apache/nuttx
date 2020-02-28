@@ -45,27 +45,8 @@
 #ifdef CONFIG_WATCHDOG
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define NRF_WDT_RR_VALUE         0x6E524635UL /* Fixed value, don't modify it */
-#define NRF_WDT_TASK_SET         1
-#define WDT_CONFIG_HALT_POS      3
-#define WDT_CONFIG_SLEEP_POS     0
-#define NRF_WDT_INT_TIMEOUT_MASK 1
-
-/****************************************************************************
  * Public Types
  ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
 
 enum wdt_behaviour_e
 {
@@ -76,6 +57,15 @@ enum wdt_behaviour_e
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Name: nrf52_wdt_initialize

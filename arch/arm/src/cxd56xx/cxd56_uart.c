@@ -172,7 +172,7 @@ static uint32_t g_cr;
  *   Configure the UART pin
  *
  * Input Parameter:
- *   ch - channel numer
+ *   ch - channel number
  *   on - true: enable pin, false: disable pin
  *
  ****************************************************************************/

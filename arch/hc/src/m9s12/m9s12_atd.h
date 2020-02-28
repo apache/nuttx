@@ -189,7 +189,7 @@
 
 /* ATD control register 2 */
 
-#define ATD_CTL2_ASCIF                  (1 << 0)  /* Bit 0: ATD Sequence Complete Interrup */
+#define ATD_CTL2_ASCIF                  (1 << 0)  /* Bit 0: ATD Sequence Complete Interrupt */
 #define ATD_CTL2_ASCIE                  (1 << 1)  /* Bit 1: ATD Sequence Complete Interrupt Enable */
 #define ATD_CTL2_ETRIG                  (1 << 1)  /* Bit 2: External Trigger Mode Enable */
 #define ATD_CTL2_ETRIG_SHIFT            (3)       /* Bits 3-4: External Trigger Mode */

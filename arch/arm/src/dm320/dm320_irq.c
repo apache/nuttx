@@ -216,7 +216,7 @@ void up_enable_irq(int irq)
 
 void up_ack_irq(int irq)
 {
-  /* Acknowlege the interrupt by setting the corresponding bit in the
+  /* Acknowledge the interrupt by setting the corresponding bit in the
    * IRQ status register.
    */
 

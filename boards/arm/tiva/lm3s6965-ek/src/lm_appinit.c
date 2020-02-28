@@ -39,63 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <syslog.h>
-#include <errno.h>
-
-#include <nuttx/board.h>
-#include <nuttx/spi/spi.h>
-#include <nuttx/mmcsd.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Configuration ************************************************************/
-
-#undef NSH_HAVEUSBDEV
-#define NSH_HAVEMMCSD  1
-
-/* Can't support USB features if USB is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef NSH_HAVEUSBDEV
-#endif
-
-/* Can't support MMC/SD features if mountpoints or MMC/SPI are disabled */
-
-#if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef NSH_HAVEMMCSD
-#endif
-
-#ifndef CONFIG_CONFIG_MMCSD_SPI
-#  undef NSH_HAVEMMCSD
-#endif
-
-/* PORT and SLOT number depend on the board configuration */
-
-#ifdef CONFIG_NSH_ARCHINIT
-#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
-#    error "The LM3S6965 Eval Kit MMC/SD is on SSI0"
-#    undef CONFIG_NSH_MMCSDSPIPORTNO
-#    define CONFIG_NSH_MMCSDSPIPORTNO 0
-#  endif
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "The LM3S6965 Eval Kit MMC/SD is on SSI0 slot 0"
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
-#  ifndef CONFIG_NSH_MMCSDMINOR
-#    define CONFIG_NSH_MMCSDMINOR 0
-#  endif
-#else
-#  undef  CONFIG_NSH_MMCSDSPIPORTNO
-#  define CONFIG_NSH_MMCSDSPIPORTNO 0
-#  undef  CONFIG_NSH_MMCSDSLOTNO
-#  define CONFIG_NSH_MMCSDSLOTNO 0
-#  undef  CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
-#endif
+#include "lm3s6965-ek.h"
 
 /****************************************************************************
  * Public Functions
@@ -126,43 +70,9 @@
 
 int board_app_initialize(uintptr_t arg)
 {
-#ifdef NSH_HAVEMMCSD
-  FAR struct spi_dev_s *spi;
-  int ret;
-
-  /* Get the SPI port */
-
-  syslog(LOG_INFO, "Initializing SPI port %d\n",
-         CONFIG_NSH_MMCSDSPIPORTNO);
-
-  spi = tiva_ssibus_initialize(CONFIG_NSH_MMCSDSPIPORTNO);
-  if (!spi)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",
-             CONFIG_NSH_MMCSDSPIPORTNO);
-      return -ENODEV;
-    }
-
-  syslog(LOG_INFO, "Successfully initialized SPI port %d\n",
-         CONFIG_NSH_MMCSDSPIPORTNO);
-
-  /* Bind the SPI port to the slot */
-
-  syslog(LOG_INFO, "Binding SPI port %d to MMC/SD slot %d\n",
-         CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
-
-  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR,
-                                CONFIG_NSH_MMCSDSLOTNO, spi);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
-             CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
-      return ret;
-    }
-
-  syslog(LOG_INFO, "Successfully bound SPI port %d to MMC/SD slot %d\n",
-         CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
-#endif
+#ifndef CONFIG_BOARD_LATE_INITIALIZE
+  return lm_bringup();
+#else
   return OK;
+#endif
 }

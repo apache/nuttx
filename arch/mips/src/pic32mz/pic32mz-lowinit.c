@@ -83,12 +83,12 @@
 
 #define CALC_SYSCLOCK  (((BOARD_PLL_INPUT / BOARD_PLL_IDIV) * BOARD_PLL_MULT) / BOARD_PLL_ODIV)
 #if CALC_SYSCLOCK != BOARD_CPU_CLOCK
-#  error "Bad BOARD_CPU_CLOCK calculcation in board.h"
+#  error "Bad BOARD_CPU_CLOCK calculation in board.h"
 #endif
 
 #define CALC_PBCLK1  (CALC_SYSCLOCK / BOARD_PB1DIV)
 #if CALC_PBCLK1 != BOARD_PBCLK1
-#  error "Bad BOARD_PBCLK1 calculcation in board.h"
+#  error "Bad BOARD_PBCLK1 calculation in board.h"
 #endif
 
 #if CALC_PBCLK1 > MAX_PBCLK
@@ -98,7 +98,7 @@
 #ifdef BOARD_PBCLK2_ENABLE
 #  define CALC_PBCLK2  (CALC_SYSCLOCK / BOARD_PB2DIV)
 #  if CALC_PBCLK2 != BOARD_PBCLK2
-#    error "Bad BOARD_PBCLK2 calculcation in board.h"
+#    error "Bad BOARD_PBCLK2 calculation in board.h"
 #  endif
 
 #  if CALC_PBCLK2 > MAX_PBCLK
@@ -109,7 +109,7 @@
 #ifdef BOARD_PBCLK3_ENABLE
 #  define CALC_PBCLK3  (CALC_SYSCLOCK / BOARD_PB3DIV)
 #  if CALC_PBCLK3 != BOARD_PBCLK3
-#    error "Bad BOARD_PBCLK3 calculcation in board.h"
+#    error "Bad BOARD_PBCLK3 calculation in board.h"
 #  endif
 
 #  if CALC_PBCLK3 > MAX_PBCLK
@@ -120,7 +120,7 @@
 #ifdef BOARD_PBCLK4_ENABLE
 #  define CALC_PBCLK4  (CALC_SYSCLOCK / BOARD_PB4DIV)
 #  if CALC_PBCLK4 != BOARD_PBCLK4
-#    error "Bad BOARD_PBCLK4 calculcation in board.h"
+#    error "Bad BOARD_PBCLK4 calculation in board.h"
 #  endif
 
 #  if CALC_PBCLK4 > MAX_PBCLK
@@ -131,7 +131,7 @@
 #ifdef BOARD_PBCLK5_ENABLE
 #  define CALC_PBCLK5  (CALC_SYSCLOCK / BOARD_PB5DIV)
 #  if CALC_PBCLK5 != BOARD_PBCLK5
-#    error "Bad BOARD_PBCLK5 calculcation in board.h"
+#    error "Bad BOARD_PBCLK5 calculation in board.h"
 #  endif
 
 #  if CALC_PBCLK5 > MAX_PBCLK
@@ -142,7 +142,7 @@
 #ifdef BOARD_PBCLK6_ENABLE
 #  define CALC_PBCLK6  (CALC_SYSCLOCK / BOARD_PB6DIV)
 #  if CALC_PBCLK6 != BOARD_PBCLK6
-#    error "Bad BOARD_PBCLK6 calculcation in board.h"
+#    error "Bad BOARD_PBCLK6 calculation in board.h"
 #  endif
 
 #  if CALC_PBCLK6 > MAX_PBCLK
@@ -153,7 +153,7 @@
 #ifdef BOARD_PBCLK7_ENABLE
 #  define CALC_PBCLK7  (CALC_SYSCLOCK / BOARD_PB7DIV)
 #  if CALC_PBCLK7 != BOARD_PBCLK7
-#    error "Bad BOARD_PBCLK7 calculcation in board.h"
+#    error "Bad BOARD_PBCLK7 calculation in board.h"
 #  endif
 
 #  if CALC_PBCLK7 > MAX_PBCLK7
@@ -164,7 +164,7 @@
 #ifdef BOARD_PBCLK8_ENABLE
 #  define CALC_PBCLK8  (CALC_SYSCLOCK / BOARD_PB8DIV)
 #  if CALC_PBCLK8 != BOARD_PBCLK8
-#    error "Bad BOARD_PBCLK8 calculcation in board.h"
+#    error "Bad BOARD_PBCLK8 calculation in board.h"
 #  endif
 
 #  if CALC_PBCLK8 > MAX_PBCLK

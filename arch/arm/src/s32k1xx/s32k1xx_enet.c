@@ -207,6 +207,15 @@
 #  define BOARD_PHY_10BASET(s)  (((s)&MII_LAN8720_SPSCR_10MBPS) != 0)
 #  define BOARD_PHY_100BASET(s) (((s)&MII_LAN8720_SPSCR_100MBPS) != 0)
 #  define BOARD_PHY_ISDUPLEX(s) (((s)&MII_LAN8720_SPSCR_DUPLEX) != 0)
+#elif defined(CONFIG_ETH0_PHY_TJA1101)
+#  define BOARD_PHY_NAME        "TJA1101"
+#  define BOARD_PHYID1          MII_PHYID1_TJA1101
+#  define BOARD_PHYID2          MII_PHYID2_TJA1101
+#  define BOARD_PHY_STATUS      MII_TJA110X_BSR
+#  define BOARD_PHY_ADDR        (0)
+#  define BOARD_PHY_10BASET(s)  0 /* PHY only supports 100BASE-T1 */
+#  define BOARD_PHY_100BASET(s) 1 /* PHY only supports 100BASE-T1 */
+#  define BOARD_PHY_ISDUPLEX(s) 1 /* PHY only supports fullduplex */
 #else
 #  error "Unrecognized or missing PHY selection"
 #endif
@@ -222,7 +231,7 @@
  *             = 23
  */
 
-#define S32K1XX_MII_SPEED  0x38 /* 100Mbs. Revisit and remove hardcoded value */
+#define S32K1XX_MII_SPEED  0x0f /* 100Mbs. Revisit and remove hardcoded value */
 #if S32K1XX_MII_SPEED > 63
 #  error "S32K1XX_MII_SPEED is out-of-range"
 #endif
@@ -251,8 +260,8 @@
  * Private Types
  ****************************************************************************/
 
-/* The s32k1xx_driver_s encapsulates all state information for a single hardware
- * interface
+/* The s32k1xx_driver_s encapsulates all state information for a single
+ * hardware interface
  */
 
 struct s32k1xx_driver_s
@@ -328,7 +337,8 @@ static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv);
 static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv);
 
 static void s32k1xx_enet_interrupt_work(FAR void *arg);
-static int  s32k1xx_enet_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  s32k1xx_enet_interrupt(int irq, FAR void *context,
+                                   FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -387,7 +397,7 @@ static void s32k1xx_reset(struct s32k1xx_driver_s *priv);
  *
  * Description:
  *   The descriptors are represented by structures  Unfortunately, when the
- *   structures are overlayed on the data, the bytes are reversed because
+ *   structures are overlaid on the data, the bytes are reversed because
  *   the underlying hardware writes the data in big-endian byte order.
  *
  * Input Parameters:
@@ -537,13 +547,13 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
   buf = (uint8_t *)s32k1xx_swap32((uint32_t)priv->dev.d_buf);
   if (priv->rxdesc[priv->rxtail].data == buf)
     {
-       struct enet_desc_s *rxdesc = &priv->rxdesc[priv->rxtail];
+      struct enet_desc_s *rxdesc = &priv->rxdesc[priv->rxtail];
 
-       /* Data was written into the RX buffer, so swap the TX and RX buffers */
+      /* Data was written into the RX buffer, so swap the TX and RX buffers */
 
-       DEBUGASSERT((rxdesc->status1 & RXDESC_E) == 0);
-       rxdesc->data = txdesc->data;
-       txdesc->data = buf;
+      DEBUGASSERT((rxdesc->status1 & RXDESC_E) == 0);
+      rxdesc->data = txdesc->data;
+      txdesc->data = buf;
     }
   else
     {
@@ -647,11 +657,11 @@ static int s32k1xx_txpoll(struct net_driver_s *dev)
             {
               return -EBUSY;
             }
-       }
+        }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -684,7 +694,7 @@ static inline void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv)
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the packet tap */
 
-   pkt_input(&priv->dev);
+  pkt_input(&priv->dev);
 #endif
 
 #ifdef CONFIG_NET_IPv4
@@ -842,7 +852,8 @@ static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv)
            */
 
           priv->dev.d_len = s32k1xx_swap16(rxdesc->length);
-          priv->dev.d_buf = (uint8_t *)s32k1xx_swap32((uint32_t)rxdesc->data);
+          priv->dev.d_buf =
+            (uint8_t *)s32k1xx_swap32((uint32_t)rxdesc->data);
 
           /* Invalidate the buffer so that the correct packet will be re-read
            * from memory when the packet content is accessed.
@@ -1080,7 +1091,8 @@ static void s32k1xx_enet_interrupt_work(FAR void *arg)
 #if 0
   up_enable_irq(S32K1XX_IRQ_EMACTMR);
 #endif
-  up_enable_irq(S32K1XX_IRQ_ENET);
+  up_enable_irq(S32K1XX_IRQ_ENET_TXDONE);
+  up_enable_irq(S32K1XX_IRQ_ENET_RXDONE);
 }
 
 /****************************************************************************
@@ -1112,7 +1124,8 @@ static int s32k1xx_enet_interrupt(int irq, FAR void *context, FAR void *arg)
    * condition here.
    */
 
-  up_disable_irq(S32K1XX_IRQ_ENET);
+  up_disable_irq(S32K1XX_IRQ_ENET_TXDONE);
+  up_disable_irq(S32K1XX_IRQ_ENET_RXDONE);
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -1188,7 +1201,8 @@ static void s32k1xx_txtimeout_expiry(int argc, uint32_t arg, ...)
    * condition with interrupt work that is already queued and in progress.
    */
 
-  up_disable_irq(S32K1XX_IRQ_ENET);
+  up_disable_irq(S32K1XX_IRQ_ENET_TXDONE);
+  up_disable_irq(S32K1XX_IRQ_ENET_RXDONE);
 
   /* Schedule to perform the TX timeout processing on the worker thread,
    * canceling any pending interrupt work.
@@ -1218,8 +1232,9 @@ static void s32k1xx_poll_work(FAR void *arg)
 {
   FAR struct s32k1xx_driver_s *priv = (FAR struct s32k1xx_driver_s *)arg;
 
-  /* Check if there is there is a transmission in progress.  We cannot perform
-   * the TX poll if he are unable to accept another packet for transmission.
+  /* Check if there is there is a transmission in progress.  We cannot
+   * perform the TX poll if he are unable to accept another packet for
+   * transmission.
    */
 
   net_lock();
@@ -1372,7 +1387,8 @@ static int s32k1xx_ifup_action(struct net_driver_s *dev, bool resetphy)
 
   /* Clear all pending ENET interrupt */
 
-  putreg32(RX_INTERRUPTS | ERROR_INTERRUPTS | TX_INTERRUPTS, S32K1XX_ENET_EIR);
+  putreg32(RX_INTERRUPTS | ERROR_INTERRUPTS | TX_INTERRUPTS,
+           S32K1XX_ENET_EIR);
 
   /* Enable RX and error interrupts at the controller (TX interrupts are
    * still disabled).
@@ -1388,7 +1404,8 @@ static int s32k1xx_ifup_action(struct net_driver_s *dev, bool resetphy)
 #if 0
   up_enable_irq(S32K1XX_IRQ_EMACTMR);
 #endif
-  up_enable_irq(S32K1XX_IRQ_ENET);
+  up_enable_irq(S32K1XX_IRQ_ENET_TXDONE);
+  up_enable_irq(S32K1XX_IRQ_ENET_RXDONE);
 
   return OK;
 }
@@ -1447,7 +1464,8 @@ static int s32k1xx_ifdown(struct net_driver_s *dev)
 
   flags = enter_critical_section();
 
-  up_disable_irq(S32K1XX_IRQ_ENET);
+  up_disable_irq(S32K1XX_IRQ_ENET_TXDONE);
+  up_disable_irq(S32K1XX_IRQ_ENET_RXDONE);
   putreg32(0, S32K1XX_ENET_EIMR);
 
   /* Cancel the TX poll timer and TX timeout timers */
@@ -1550,6 +1568,7 @@ static int s32k1xx_txavail(struct net_driver_s *dev)
 
   return OK;
 }
+
 /****************************************************************************
  * Function: s32k1xx_calcethcrc
  *
@@ -1597,7 +1616,7 @@ static uint32_t s32k1xx_calcethcrc(const uint8_t *data, size_t length)
     }
 
   return crc;
- }
+}
 #endif
 
 /****************************************************************************
@@ -1747,7 +1766,8 @@ static int s32k1xx_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int s32k1xx_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
+static int s32k1xx_ioctl(struct net_driver_s *dev, int cmd,
+                         unsigned long arg)
 {
 #ifdef CONFIG_NETDEV_PHY_IOCTL
   FAR struct s32k1xx_driver_s *priv =
@@ -1788,7 +1808,8 @@ static int s32k1xx_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret = s32k1xx_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
+          ret =
+            s32k1xx_readmii(priv, req->phy_id, req->reg_num, &req->val_out);
         }
         break;
 
@@ -1796,7 +1817,8 @@ static int s32k1xx_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
         {
           struct mii_ioctl_data_s *req =
             (struct mii_ioctl_data_s *)((uintptr_t)arg);
-          ret = s32k1xx_writemii(priv, req->phy_id, req->reg_num, req->val_in);
+          ret =
+            s32k1xx_writemii(priv, req->phy_id, req->reg_num, req->val_in);
         }
         break;
 #endif /* CONFIG_NETDEV_PHY_IOCTL */
@@ -1880,8 +1902,7 @@ static void s32k1xx_initmii(struct s32k1xx_driver_s *priv)
    * clock.  This hold time value may need to be increased on some platforms
    */
 
-  putreg32(ENET_MSCR_HOLDTIME_2CYCLES |
-           S32K1XX_MII_SPEED << ENET_MSCR_MII_SPEED_SHIFT,
+  putreg32(S32K1XX_MII_SPEED << ENET_MSCR_MII_SPEED_SHIFT,
            S32K1XX_ENET_MSCR);
 }
 
@@ -2025,7 +2046,8 @@ static int s32k1xx_readmii(struct s32k1xx_driver_s *priv, uint8_t phyaddr,
  *
  ****************************************************************************/
 
-static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv, bool renogphy)
+static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv,
+                                  bool renogphy)
 {
   uint32_t rcr;
   uint32_t tcr;
@@ -2037,9 +2059,10 @@ static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv, bool renogphy)
 
   if (renogphy)
     {
-      /* Loop (potentially infinitely?) until we successfully communicate with
-       * the PHY. This is 'standard stuff' that should work for any PHY - we
-       * are not communicating with it's 'special' registers at this point.
+      /* Loop (potentially infinitely?) until we successfully communicate
+       * with the PHY. This is 'standard stuff' that should work for any PHY
+       * - we are not communicating with it's 'special' registers at this
+       * point.
        */
 
       ninfo("%s: Try phyaddr: %u\n", BOARD_PHY_NAME, phyaddr);
@@ -2061,7 +2084,8 @@ static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv, bool renogphy)
 
       if (retries >= 3)
         {
-          nerr("ERROR: Failed to read %s PHYID1 at address %d\n", BOARD_PHY_NAME, phyaddr);
+          nerr("ERROR: Failed to read %s PHYID1 at address %d\n",
+               BOARD_PHY_NAME, phyaddr);
           return -ENOENT;
         }
 
@@ -2145,15 +2169,15 @@ static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv, bool renogphy)
 
 #elif defined (CONFIG_ETH0_PHY_LAN8720)
 
-        /* Make sure that PHY comes up in correct mode when it's reset */
+      /* Make sure that PHY comes up in correct mode when it's reset */
 
-        s32k1xx_writemii(priv, phyaddr, MII_LAN8720_MODES,
-               MII_LAN8720_MODES_RESV | MII_LAN8720_MODES_ALL |
-               MII_LAN8720_MODES_PHYAD(BOARD_PHY_ADDR));
+      s32k1xx_writemii(priv, phyaddr, MII_LAN8720_MODES,
+             MII_LAN8720_MODES_RESV | MII_LAN8720_MODES_ALL |
+             MII_LAN8720_MODES_PHYAD(BOARD_PHY_ADDR));
 
-        /* ...and reset PHY */
+      /* ...and reset PHY */
 
-        s32k1xx_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
+      s32k1xx_writemii(priv, phyaddr, MII_MCR, MII_MCR_RESET);
 #endif
 
       /* Start auto negotiation */
@@ -2227,17 +2251,17 @@ static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv, bool renogphy)
     {
       if (renogphy == false)
         {
-           /* Give things one more chance with renegociation turned on */
+          /* Give things one more chance with renegotiation turned on */
 
           return s32k1xx_initphy(priv, true);
         }
       else
         {
-           /* That didn't end well, just give up */
+          /* That didn't end well, just give up */
 
-           nerr("ERROR: Failed to read %s BOARD_PHY_STATUS[%02x]: %d\n",
-                BOARD_PHY_NAME, BOARD_PHY_STATUS, ret);
-           return ret;
+          nerr("ERROR: Failed to read %s BOARD_PHY_STATUS[%02x]: %d\n",
+               BOARD_PHY_NAME, BOARD_PHY_STATUS, ret);
+          return ret;
         }
     }
 
@@ -2261,12 +2285,12 @@ static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv, bool renogphy)
   putreg32(rcr, S32K1XX_ENET_RCR);
   putreg32(tcr, S32K1XX_ENET_TCR);
 
-  /* Enable Discard Of Frames With MAC Layer Errors.
+  /* Do not Discard Of Frames With MAC Layer Errors.
    * Enable Discard Of Frames With Wrong Protocol Checksum.
    * Bit 1: Enable discard of frames with wrong IPv4 header checksum.
    */
 
-  racc = ENET_RACC_PRODIS | ENET_RACC_LINEDIS | ENET_RACC_IPDIS;
+  racc = ENET_RACC_PRODIS | ENET_RACC_IPDIS;
   putreg32(racc, S32K1XX_ENET_RACC);
 
   /* Setup half or full duplex */
@@ -2307,6 +2331,45 @@ static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv, bool renogphy)
            phydata);
       return -EIO;
     }
+
+#if defined(CONFIG_ETH0_PHY_TJA1101)
+/* The NXP TJA110X PHY is an automotive 100BASE-T1 PHY
+ * Which requires additional initialization
+ */
+
+  /* select mode TJA110X */
+
+  s32k1xx_writemii(priv, phyaddr, MII_TJA110X_EXT_CNTRL,
+                  (MII_EXT_CNTRL_NORMAL | MII_EXT_CNTRL_CONFIG_EN |
+                  MII_EXT_CNTRL_CONFIG_INH));
+
+#  if defined(CONFIG_PHY_100BASE_T1_MASTER)
+  /* Set TJA110X in master mode */
+
+  s32k1xx_writemii(priv, phyaddr, MII_TJA110X_CONFIG1,
+                  (MII_CONFIG1_MASTER | MII_CONFIG1_TX_1250MV |
+                  MII_CONFIG1_RMII_25MHZ | MII_CONFIG1_LED_EN));
+#  else
+  /* Set TJA110X in slave mode */
+
+  s32k1xx_writemii(priv, phyaddr, MII_TJA110X_CONFIG1,
+                  (MII_CONFIG1_TX_1250MV | MII_CONFIG1_RMII_25MHZ |
+                  MII_CONFIG1_LED_EN));
+#  endif
+
+  s32k1xx_writemii(priv, phyaddr, MII_TJA110X_CONFIG2,
+                  (MII_CONFIG2_SNR_AV64 | MII_CONFIG2_WLIM_D |
+                   MII_CONFIG2_SNR_F_NL | MII_CONFIG2_SLP_T_1));
+
+  /* Select normal mode TJA110X */
+
+  s32k1xx_writemii(priv, phyaddr, MII_TJA110X_EXT_CNTRL,
+                  (MII_EXT_CNTRL_NORMAL | MII_EXT_CNTRL_CONFIG_INH));
+
+  s32k1xx_writemii(priv, phyaddr, MII_TJA110X_EXT_CNTRL,
+                  (MII_EXT_CNTRL_LINK_CNTRL | MII_EXT_CNTRL_NORMAL |
+                  MII_EXT_CNTRL_CONFIG_INH));
+#endif
 
   putreg32(rcr, S32K1XX_ENET_RCR);
   putreg32(tcr, S32K1XX_ENET_TCR);
@@ -2453,7 +2516,6 @@ int s32k1xx_netinitialize(int intf)
   uint32_t uidml;
   uint8_t *mac;
 #endif
-  uint32_t regval;
   int ret;
 
   /* Get the interface structure associated with this interface number. */
@@ -2471,11 +2533,12 @@ int s32k1xx_netinitialize(int intf)
   s32k1xx_pinconfig(PIN_RMII_MDIO);
   s32k1xx_pinconfig(PIN_RMII_RX_DV);
   s32k1xx_pinconfig(PIN_RMII_RX_ER);
-  s32k1xx_pinconfig(PIN_RMII_RX_EN);
-  s32k1xx_pinconfig(PIN_RMII_RXD);
+  s32k1xx_pinconfig(PIN_RMII_RXD0);
+  s32k1xx_pinconfig(PIN_RMII_RXD1);
   s32k1xx_pinconfig(PIN_RMII_TX_CLK);
   s32k1xx_pinconfig(PIN_RMII_TX_EN);
-  s32k1xx_pinconfig(PIN_RMII_TXD);
+  s32k1xx_pinconfig(PIN_RMII_TXD0);
+  s32k1xx_pinconfig(PIN_RMII_TXD1);
 
 #if 0
   /* Configure all ENET/MII pins */
@@ -2512,11 +2575,19 @@ int s32k1xx_netinitialize(int intf)
 
   /* Attach the Ethernet interrupt handler */
 
-  if (irq_attach(S32K1XX_IRQ_ENET, s32k1xx_enet_interrupt, NULL))
+  if (irq_attach(S32K1XX_IRQ_ENET_TXDONE, s32k1xx_enet_interrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 
       nerr("ERROR: Failed to attach EMACTX IRQ\n");
+      return -EAGAIN;
+    }
+
+  if (irq_attach(S32K1XX_IRQ_ENET_RXDONE, s32k1xx_enet_interrupt, NULL))
+    {
+      /* We could not attach the ISR to the interrupt */
+
+      nerr("ERROR: Failed to attach EMACRX IRQ\n");
       return -EAGAIN;
     }
 
@@ -2543,14 +2614,14 @@ int s32k1xx_netinitialize(int intf)
 #ifdef CONFIG_NET_ETHERNET
   /* Determine a semi-unique MAC address from MCU UID
    * We use UID Low and Mid Low registers to get 64 bits, from which we keep
-   * 48 bits.  We then force unicast and locally administered bits (b0 and b1,
-   * 1st octet)
+   * 48 bits.  We then force unicast and locally administered bits (b0 and
+   * b1, 1st octet)
    */
 
   /* hardcoded offset: todo: need proper header file */
 
-  uidl   = getreg32(S32K1XX_OCOTP_BASE + 0x410);
-  uidml  = getreg32(S32K1XX_OCOTP_BASE + 0x420);
+  uidl   = getreg32(S32K1XX_SIM_BASE + 0x60);
+  uidml  = getreg32(S32K1XX_SIM_BASE + 0x5c);
   mac    = priv->dev.d_mac.ether.ether_addr_octet;
 
   uidml |= 0x00000200;

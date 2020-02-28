@@ -44,7 +44,6 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>

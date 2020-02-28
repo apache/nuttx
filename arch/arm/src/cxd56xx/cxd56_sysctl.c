@@ -38,11 +38,12 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/semaphore.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
-#include <semaphore.h>
 
 #include "cxd56_icc.h"
 #include "cxd56_sysctl.h"

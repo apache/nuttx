@@ -41,7 +41,6 @@
 
 #include <stdbool.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"

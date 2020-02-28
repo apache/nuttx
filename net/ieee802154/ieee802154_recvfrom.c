@@ -49,7 +49,6 @@
 
 #include <arch/irq.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
@@ -138,7 +137,7 @@ static ssize_t ieee802154_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
   size_t copylen;
   int ret = -EAGAIN;
 
-  /* Check if there is anyting in in the RX input queue */
+  /* Check if there is anything in in the RX input queue */
 
   DEBUGASSERT(pstate != NULL && pstate->ir_sock != NULL);
   conn = (FAR struct ieee802154_conn_s *)pstate->ir_sock->s_conn;
@@ -182,7 +181,7 @@ static ssize_t ieee802154_recvfrom_rxqueue(FAR struct radio_driver_s *radio,
       ninfo("Received %d bytes\n", (int)copylen);
       ret = copylen;
 
-      /* If a 'from' address poiner was supplied, copy the source address
+      /* If a 'from' address pointer was supplied, copy the source address
        * in the container there.
        */
 

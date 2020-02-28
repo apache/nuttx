@@ -355,7 +355,7 @@ static void init_lcd_backlight(void)
 
   putreg16(0, STM32_TIM3_PSC);
 
-  /* Generate an update event to reload the Prescaler value immediatly */
+  /* Generate an update event to reload the Prescaler value immediately */
 
   putreg16(ATIM_EGR_UG, STM32_TIM3_EGR);
 
@@ -546,7 +546,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
  * Name:  board_lcd_uninitialize
  *
  * Description:
- *   Unitialize the LCD support
+ *   Uninitialize the LCD support
  *
  ****************************************************************************/
 

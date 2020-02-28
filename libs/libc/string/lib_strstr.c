@@ -103,4 +103,3 @@ FAR char *strstr(FAR const char *str, FAR const char *substr)
 
   return NULL;
 }
-

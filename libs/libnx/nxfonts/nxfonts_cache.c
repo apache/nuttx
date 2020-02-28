@@ -41,7 +41,6 @@
 
 #include <sys/types.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -548,7 +547,7 @@ static inline FAR struct nxfonts_glyph_s *
 
   if (glyph != NULL)
     {
-      /* Save the character code, dimensions, and physcial width of the glyph */
+      /* Save the character code, dimensions, and physical width of the glyph */
 
       glyph->code   = ch;
       glyph->width  = width;
@@ -755,7 +754,7 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
 
       /* Initialize the mutual exclusion semaphore */
 
-      nxsem_init(&priv->fsem, 0, 1);
+      _SEM_INIT(&priv->fsem, 0, 1);
 
       /* Add the new font cache to the list of font caches */
 
@@ -855,7 +854,7 @@ void nxf_cache_disconnect(FCACHE fhandle)
 
       _SEM_DESTROY(&priv->fsem);
 
-      /* Finally, free the font cache stucture itself */
+      /* Finally, free the font cache structure itself */
 
       lib_free(priv);
     }

@@ -321,7 +321,7 @@ bool pic32mz_gpioread(pinset_t pinset)
 
       base = g_gpiobase[port];
 
-      /* Get ane return the input value */
+      /* Get and return the input value */
 
       return (getreg32(base + PIC32MZ_IOPORT_PORT_OFFSET) & (1 << pin)) != 0;
     }

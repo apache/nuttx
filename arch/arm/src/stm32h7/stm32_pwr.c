@@ -278,14 +278,14 @@ void stm32_pwr_disablepvd(void)
  *   This function needs to be called after stm32_pwr_enablebkp(true) has been called.
  *
  * Input Parameters:
- *   regon - state to set it to
+ *   region - state to set it to
  *
  * Returned Value:
  *   None
  *
  ************************************************************************************/
 
-void stm32_pwr_enablebreg(bool regon)
+void stm32_pwr_enablebreg(bool region)
 {
   irqstate_t flags;
   uint32_t regval;
@@ -295,7 +295,7 @@ void stm32_pwr_enablebreg(bool regon)
 
   regval      = stm32_pwr_getreg(STM32_PWR_CR2_OFFSET);
 
-  if (regon)
+  if (region)
     {
       /* Request to turn on, if it was off we have wait */
 

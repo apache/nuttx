@@ -52,7 +52,11 @@ CHIP_ASRCS  = ez80_startup.asm ez80_io.asm ez80_irqsave.asm
 CHIP_ASRCS += ez80_saveusercontext.asm ez80_restorecontext.asm
 
 ifeq ($(CONFIG_ARCH_CHIP_EZ80F91),y)
-CHIP_ASRCS += ez80f91_init.asm
+CHIP_ASRCS += ez80f91_init.asm ez80f91_handlers.asm
+endif
+
+ifeq ($(CONFIG_ARCH_CHIP_EZ80F92),y)
+CHIP_ASRCS += ez80f92_init.asm ez80f92_handlers.asm
 endif
 
 ifeq ($(CONFIG_ARCH_STACKDUMP),y)
@@ -61,7 +65,7 @@ endif
 
 CHIP_SSRCS  =
 CHIP_CSRCS  = ez80_clock.c ez80_initialstate.c ez80_irq.c ez80_copystate.c
-CHIP_CSRCS += ez80_schedulesigaction.c ez80_sigdeliver.c ez80_lowuart.c
+CHIP_CSRCS += ez80_schedulesigaction.c ez80_sigdeliver.c
 CHIP_CSRCS += ez80_timerisr.c ez80_serial.c
 
 ifeq ($(CONFIG_ARCH_STACKDUMP),y)

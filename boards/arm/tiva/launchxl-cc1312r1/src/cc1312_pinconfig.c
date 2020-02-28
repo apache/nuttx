@@ -132,4 +132,4 @@ const struct cc13xx_pinconfig_s g_gpio_sw2 =
   .gpio = GPIO_DIO(15),
   .ioc  = IOC_IOCFG_PORTID(IOC_IOCFG_PORTID_GPIO) | IOC_CC1312_BUTTON_OUTPUT
 };
-#endif  /* CONFIG_ARCH_BUTTONS */
+#endif /* CONFIG_ARCH_BUTTONS */

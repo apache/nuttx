@@ -224,4 +224,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_IMX1_CHIP_IMX_UART_H */
+#endif /* __ARCH_ARM_SRC_IMX1_CHIP_IMX_UART_H */

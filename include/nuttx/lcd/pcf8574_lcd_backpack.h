@@ -149,7 +149,7 @@ struct slcd_createchar_s
  *  based LCDs via I2C instead of parallel (saving a bunch of gpio lines).
  *
  *  There are a multitude of these available from various sources (e.g. ebay).
- *  They typically vary by gpio-to-lcd pin mapping, and I2C addresss, but
+ *  They typically vary by gpio-to-lcd pin mapping, and I2C address, but
  *  otherwise are functionally identical.
  *
  *  The characters presented for codes depend on the masked rom of the

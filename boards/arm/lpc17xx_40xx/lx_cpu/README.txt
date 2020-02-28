@@ -24,7 +24,7 @@ LEDs
     LED2 : Connected to P0[16]  GREEN
 
   If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
-  any way using the defitions provided in the board.h header file.
+  any way using the definitions provided in the board.h header file.
 
   If CONFIG_ARCH_LEDs is defined, then NuttX will control the 2 LEDs on the
   WaveShare Open1788K.  The following definitions describe how NuttX controls
@@ -68,7 +68,7 @@ Serial Console
   In this configuration using UART1, it is necessary to disable LED support
   on the board.  That is because UART1 RXD is set for pin p0.16, but so is
   LED2.  If you do not disable LED support then no incoming serial data will
-  be recevied.
+  be received.
 
     Common Board Options
       CONFIG_ARCH_LEDS=n             : Disable LED support
@@ -78,7 +78,7 @@ Serial Console
   data receipt).
 
   NOTE:  If you intend to use LEDs with UART1, then you might want to
-  redesign some ofthe LED logic in the src/ subdirectory so that it does not
+  redesign some of the LED logic in the src/ subdirectory so that it does not
   attempt to use LED2.
 
 ETHERNET
@@ -315,7 +315,7 @@ CONFIGURATION
           Library Support:
             CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
 
-          Applicaton Configuration:
+          Application Configuration:
             CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
 
           Defaults should be okay for related touchscreen settings.  Touchscreen

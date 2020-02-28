@@ -1100,7 +1100,7 @@ static int stm32_transmit(FAR struct stm32_ethmac_s *priv)
 
               txdesc->tdes0 |= (ETH_TDES0_LS | ETH_TDES0_IC);
 
-              /* This segement is, most likely, of fractional buffersize */
+              /* This segment is, most likely, of fractional buffersize */
 
               txdesc->tdes1  = lastsize;
               buffer        += lastsize;
@@ -1492,7 +1492,7 @@ static void stm32_freesegment(FAR struct stm32_ethmac_s *priv,
       rxdesc = (struct eth_rxdesc_s *)rxdesc->rdes3;
     }
 
-  /* Reset the segment managment logic */
+  /* Reset the segment management logic */
 
   priv->rxcurr   = NULL;
   priv->segments = 0;
@@ -1637,7 +1637,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
               dev->d_buf    = (uint8_t *)rxcurr->rdes2;
               rxcurr->rdes2 = (uint32_t)buffer;
 
-              /* Return success, remebering where we should re-start scanning
+              /* Return success, remembering where we should re-start scanning
                * and resetting the segment scanning logic
                */
 
@@ -1905,7 +1905,7 @@ static void stm32_freeframe(FAR struct stm32_ethmac_s *priv)
 
           txdesc->tdes2 = 0;
 
-          /* Check if this is the last segement of a TX frame */
+          /* Check if this is the last segment of a TX frame */
 
           if ((txdesc->tdes0 & ETH_TDES0_LS) != 0)
             {
@@ -2748,7 +2748,7 @@ static void stm32_txdescinit(FAR struct stm32_ethmac_s *priv)
         }
     }
 
-  /* Set Transmit Desciptor List Address Register */
+  /* Set Transmit Descriptor List Address Register */
 
   stm32_putreg((uint32_t)priv->txtable, STM32_ETH_DMATDLAR);
 }
@@ -3210,7 +3210,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
     }
 #endif
 
-  /* Perform auto-negotion if so configured */
+  /* Perform auto-negotiation if so configured */
 
 #ifdef CONFIG_STM32_AUTONEG
   /* Wait for link status */
@@ -3328,7 +3328,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
     }
 #endif
 
-#else /* Auto-negotion not selected */
+#else /* Auto-negotiation not selected */
 
   phyval = 0;
 #ifdef CONFIG_STM32_ETHFD
@@ -3367,7 +3367,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
  * Name: stm32_selectmii
  *
  * Description:
- *   Selects the MII inteface.
+ *   Selects the MII interface.
  *
  * Input Parameters:
  *   None
@@ -3398,7 +3398,7 @@ static inline void stm32_selectmii(void)
  * Name: stm32_selectrmii
  *
  * Description:
- *   Selects the RMII inteface.
+ *   Selects the RMII interface.
  *
  * Input Parameters:
  *   None

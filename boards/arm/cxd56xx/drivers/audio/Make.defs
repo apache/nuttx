@@ -1,5 +1,5 @@
 ############################################################################
-# drivers/platform/audio/Make.defs
+# boards/arm/cxd56xx/drivers/audio/Make.defs
 #
 #   Copyright 2018 Sony Semiconductor Solutions Corporation
 #

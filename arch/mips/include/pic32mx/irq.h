@@ -212,4 +212,3 @@ extern "C"
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_MIPS_INCLUDE_PIC32MX_IRQ_H */
-

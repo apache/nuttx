@@ -44,7 +44,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <string.h>
 #include <sched.h>
 #include <errno.h>

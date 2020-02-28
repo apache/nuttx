@@ -2,7 +2,7 @@
  * arch/renesas/src/rx65n/rx65n_vector.S
  *
  *   Copyright (C) 2008-2019 Gregory Nutt. All rights reserved.
- *   Author: Anjana <anjana@tataelxsi.co.in> 
+ *   Author: Anjana <anjana@tataelxsi.co.in>
  *           Surya <surya.prakash@tataelxsi.co.in>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@
 
 #include <nuttx/config.h>        /* NuttX configuration settings */
 #include <arch/board/board.h>   /* Board-specific settings */
-#include <arch/irq.h>           /* IRQ definitons */
+#include <arch/irq.h>           /* IRQ definitions */
 #include "up_internal.h"
 #include "rx65n/iodefine.h"
 #include "rx65n_definitions.h"
@@ -131,7 +131,7 @@ _up_num_irq:
  *     registers : USP, ACC0LO, ACC0,HI, ACC0GU, ACC1LO, ACC1,HI, ACC1GU,
  *                 FPSW, R1, R2, ..., R15
  ***************************************************************************/
- 
+
  .macro  POPREGS
   POPC    USP
   POP     R15
@@ -196,13 +196,13 @@ _up_num_irq:
 _up_vector:
   SETPSW I               /* Re-enable interrupts. */
   PUSHREGS
-#ifdef  RX65N_INTERRUPT_IPL
+#ifdef RX65N_INTERRUPT_IPL
 
   /* Ensure the interrupt mask is set to the syscall priority while the kernel
    * structures are being accessed.
    */
 
-  SETPSW  I          /* Enable Inerrupt */
+  SETPSW  I          /* Enable Interrupt */
   MVTIPL  RX65N_INTERRUPT_IPL  /* configMAX_SYSCALL_INTERRUPT_PRIORITY */
 #endif
   MOV.L   #_up_num_irq, R2
@@ -220,11 +220,11 @@ _up_vector:
   SMOVF      /* while(R3 > 0) {*R1++ = *R2++; R3--; } */
   NOP
 .lint_contextswitch:
-#ifdef  RX65N_INTERRUPT_IPL
+#ifdef RX65N_INTERRUPT_IPL
 
   /* Reset the interrupt mask as no more data structure access is required. */
 
-  CLRPSW  I     /* Disable Inerrupt */
+  CLRPSW  I     /* Disable Interrupt */
   MVTIPL  #15   /* configKERNEL_INTERRUPT_PRIORITY */
 #endif
   POPREGS
@@ -345,7 +345,7 @@ _uprx65_swint2_handler:
 
 _uprx65n_start_handler:
   trampoline NR_IRQS, _uprx65_invalid_handler
-  
+
 #ifdef CONFIG_BSC
   trampoline RX65N_BUSERR_IRQ, _uprx65_buserr_handler
 #endif
@@ -492,7 +492,7 @@ _uprx65_groupbe0_handler:
 /* TODO: Please write the others with
  * definition RX65N_XXX_IRQ in irq.h as IRQ number
  */
- 
+
   RTE
   NOP
 _uprx65_groupbl2_handler:
@@ -500,7 +500,7 @@ _uprx65_groupbl2_handler:
 /* TODO: Please write the others with
  * definition RX65N_XXX_IRQ in irq.h as IRQ number
  */
- 
+
   RTE
   NOP
 #endif
@@ -550,7 +550,7 @@ _uprx65_groupbl0_handler:
 /* TODO: Please write the others with
  * definition RX65N_XXX_IRQ in irq.h as IRQ number
  */
- 
+
   RTE
   NOP
 _uprx65_groupbl1_handler:
@@ -567,7 +567,7 @@ _uprx65_groupbl1_handler:
 /* TODO: Please write the others with
  * definition RX65N_XXX_IRQ in irq.h as IRQ number
  */
- 
+
   RTE
   NOP
 _uprx65_groupal0_handler:
@@ -584,7 +584,7 @@ _uprx65_groupal0_handler:
 /* TODO: Please write the others with
  * definition RX65N_XXX_IRQ in irq.h as IRQ number
  */
- 
+
   RTE
   NOP
 _uprx65_groupal1_handler:
@@ -592,12 +592,12 @@ _uprx65_groupal1_handler:
   multi_switching RX65N_GRPAL1_ADDR, RX65N_GENAL1_ADDR, 4, RX65N_ETH_IRQ
 #endif /* CONFIG_RX65N_EMAC0 */
 
-/* TODO: Please write the others with definition RX65N_XXX_IRQ in 
+/* TODO: Please write the others with definition RX65N_XXX_IRQ in
  * irq.h as IRQ number */
 
     RTE
     NOP
-#endif  /* CONFIG_RX65N_IRQ_GROUP */
+#endif /* CONFIG_RX65N_IRQ_GROUP */
 
 #ifdef CONFIG_RX65N_SCI11
   trampoline RX65N_RXI11_IRQ, _uprx65_rxi11_handler
@@ -1148,7 +1148,7 @@ __int_vector_table:
   .long   _uprx65_invalid_handler
 #endif
 
-#ifdef CONFIG_RX65N_PERIB 
+#ifdef CONFIG_RX65N_PERIB
   .long   _uprx65_intb128_handler
   .long   _uprx65_intb129_handler
   .long   _uprx65_intb130_handler

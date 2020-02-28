@@ -331,4 +331,3 @@ FAR struct mtd_dev_s *skel_initialize(void)
 
   return (FAR struct mtd_dev_s *)&g_skeldev;
 }
-

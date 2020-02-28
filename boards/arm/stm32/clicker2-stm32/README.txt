@@ -59,7 +59,7 @@ LEDs
 
   Thus is LD1 is illuminated, the Clicker2 has completed boot-up.  IF LD2
   is glowly softly, then interrupts are being taken; the level of illumination
-  depends amount of time processing interupts.  If LD1 is off and LD2 is
+  depends amount of time processing interrupts.  If LD1 is off and LD2 is
   blinking at about 2Hz, then the system has crashed.
 
 Buttons
@@ -122,7 +122,7 @@ Using JTAG
     Option bytes updated successfully.
 
   NOTE:
-  1. You can get the ST-Link Utilies here:
+  1. You can get the ST-Link Utilities here:
      http://www.st.com/en/embedded-software/stsw-link004.html
   2. The ST-LINK Utility command line interface is located at:
      [Install_Directory]\STM32 ST-LINK Utility\ST-LINK Utility\ST-LINK_CLI.exe
@@ -356,14 +356,14 @@ Configurations
        sure that you are familiar with the content of that README.txt file.
 
        Here is a quick "cheat sheet" for associated to setting up a
-       coordinator and associating wth the WPAN:
+       coordinator and associating with the WPAN:
 
        1. Configure the Coordinator.  On coordinator device do:
 
           nsh> i8 /dev/ieee0 startpan cd:ab
           nsh> i8 acceptassoc
 
-       2. Assocate an endpoint device with the WPAN.  On the endpoint
+       2. Associate an endpoint device with the WPAN.  On the endpoint
           device:
 
           nsh> i8 /dev/ieee0 assoc
@@ -406,7 +406,6 @@ Configurations
 
        Device Drivers:
        CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
-       CONFIG_RAMLOG_CONSOLE=n     : (We don't use the RAMLOG console)
        CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the
                                      system logger.
        CONFIG_RAMLOG_NONBLOCKING=y : Needs to be non-blocking for dmesg
@@ -435,7 +434,7 @@ Configurations
        interface name 'wpan0'. This tells the i8sak app to use a socket
        instead of a character device to perform the IOCTL operations with the
        MAC. Additionally, after the PAN has been configured with the i8sak
-       utility, you must explicity bring the network up on each node:
+       utility, you must explicitly bring the network up on each node:
 
          nsh> ifup wpan0
 
@@ -503,7 +502,7 @@ Configurations
        The nsh> dmesg command can be use at any time on any node to see
        any debug output that you have selected.
 
-    9. The NSH Telnet deamon (server) is enabled.  However, it cannot be
+    9. The NSH Telnet daemon (server) is enabled.  However, it cannot be
        started automatically.  Rather, it must be started AFTER the network
        has been brought up using the NSH 'telnetd' command.  You would want
        to start the Telent daemon only if you want the node to serve Telent
@@ -523,7 +522,7 @@ Configurations
          nsh> telnet <server-ip>
 
        Where <server-ip> is the IP address of the server that you got for
-       the ifconfig commna on the remote node.  Once the telnet session
+       the ifconfig comma on the remote node.  Once the telnet session
        has been started, you can end the session with:
 
          nsh> exit
@@ -744,7 +743,7 @@ Configurations
        CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
        CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : USART3 will be /dev/ttyS0
 
-       However, there is nothing to generate SYLOG output in the default
+       However, there is nothing to generate SYSLOG output in the default
        configuration so nothing should appear on USART3 unless you enable
        some debug output or enable the USB monitor.
 
@@ -778,4 +777,3 @@ Configurations
       CONFIG_CDCACM_CONSOLE=n       : The CDC/ACM serial device is NOT the console
       CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
       CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
-

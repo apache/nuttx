@@ -205,7 +205,7 @@ reset_handler:
   li a0, 0x1C000000 /* Set MTVEC */
   csrw mtvec, a0
 
-  /* Stack initilization */
+  /* Stack initialization */
 
   la  x2, _idle_stack_end
 

@@ -412,8 +412,8 @@ int xmc4_uart_configure(enum usic_channel_e channel,
 
   /* Set service request for UART protocol, receiver, and transmitter events.
    *
-   *   Set channel 0 events on sevice request 0
-   *   Set channel 1 events on sevice request 1
+   *   Set channel 0 events on service request 0
+   *   Set channel 1 events on service request 1
    */
 
   regval  = getreg32(base + XMC4_USIC_INPR_OFFSET);

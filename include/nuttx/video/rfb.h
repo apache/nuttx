@@ -1190,4 +1190,4 @@ extern "C"
 }
 #endif
 
-#endif  /* __INCLUDE_NUTTX_VIDEO_RFB_H */
+#endif /* __INCLUDE_NUTTX_VIDEO_RFB_H */

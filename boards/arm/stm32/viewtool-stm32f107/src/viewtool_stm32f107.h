@@ -511,5 +511,5 @@ int stm32_ft80x_setup(void);
 int stm32_max3421e_setup(void);
 #endif
 
-#endif  /* __ASSEMBLY__ */
+#endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_SRC_H */

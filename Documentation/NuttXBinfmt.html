@@ -469,7 +469,7 @@ void envpath_release(ENVPATH_HANDLE handle);
 struct symtab_s
 {
   FAR const char *sym_name;          /* A pointer to the symbol name string */
-  FAR const void *sym_value;         /* The value associated witht the string */
+  FAR const void *sym_value;         /* The value associated with the string */
 };
 </pre></ul>
 
@@ -484,7 +484,7 @@ struct symtab_s
   </li>
   <li>
     Fixed size arrays.
-    There is no explicit provisional for dyanamically adding or removing entries from the symbol table (realloc might be used for that purpose if needed).
+    There is no explicit provisional for dynamically adding or removing entries from the symbol table (realloc might be used for that purpose if needed).
     The intention is to support only fixed size arrays completely defined at compilation or link time.
   </li>
 </ol>

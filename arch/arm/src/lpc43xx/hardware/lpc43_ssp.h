@@ -148,7 +148,7 @@
 #define SSP_INT_ROR             (1 << 0)  /* Bit 0: RX FIFO overrun */
 #define SSP_INT_RT              (1 << 1)  /* Bit 1: RX FIFO timeout */
 #define SSP_INT_RX              (1 << 2)  /* Bit 2: RX FIFO at least half full (not ICR) */
-#define SSP_INT_TX              (1 << 3 ) /* Bit 3: TX FIFO at least half empy (not ICR) */
+#define SSP_INT_TX              (1 << 3 ) /* Bit 3: TX FIFO at least half empty (not ICR) */
                                           /* Bits 4-31: Reserved */
 /* DMA Control Register */
 

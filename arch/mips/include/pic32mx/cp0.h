@@ -140,17 +140,15 @@
 #undef CP0_STATUS_PX
 #undef CP0_STATUS_MX
 
-/*   2. The following field is of a different width.  Apparently, it
- *      excludes the software interrupt bits.
+/*   2. The following field is of a different width.
  *
- *      CP0_STATUS_IM   Bits 8-15: Interrupt Mask
- *      Vs.
- *      CP0_STATUS_IPL  Bits 10-15: Interrupt priority level
+ *      CP0_STATUS_IPL  Bits 10-12: Interrupt priority level
  *                      Bitss 8-9 reserved
  */
 
-#define CP0_STATUS_IPL_SHIFT        (10)   /*  Bits 10-15: Interrupt priority level */
-#define CP0_STATUS_IPL_MASK         (0x3f << CP0_STATUS_IPL_SHIFT)
+#undef CP0_STATUS_IPL_MASK
+
+#define CP0_STATUS_IPL_MASK         (0x07 << CP0_STATUS_IPL_SHIFT)
 
 /*   3. Supervisor mode not supported
  *       CP0_STATUS_KSU Bits 3-4: Operating mode (with supervisor mode)

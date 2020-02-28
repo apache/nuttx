@@ -212,7 +212,8 @@ void nxmq_alloc_desblock(void)
 
   /* Allocate a block of message descriptors */
 
-  mqdesblock = (FAR struct mq_des_block_s *)kmm_malloc(sizeof(struct mq_des_block_s));
+  mqdesblock = (FAR struct mq_des_block_s *)
+    kmm_malloc(sizeof(struct mq_des_block_s));
   if (mqdesblock)
     {
       int i;
@@ -231,4 +232,3 @@ void nxmq_alloc_desblock(void)
         }
     }
 }
-

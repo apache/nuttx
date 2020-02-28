@@ -46,7 +46,7 @@
  * and the Cortex-M4 starts the boot loader. By default the JTAG access to the
  * chip is disabled at reset.  The boot ROM determines the boot mode based on
  * the OTP BOOT_SRC value or reset state pins.  For flash-based parts, the part
- * boots from internal flash by default.  Otherwse, the boot ROM copies the
+ * boots from internal flash by default.  Otherwise, the boot ROM copies the
  * image to internal SRAM at location 0x1000 0000, sets the ARM's shadow
  * pointer to 0x1000 0000, and jumps to that location.
  *

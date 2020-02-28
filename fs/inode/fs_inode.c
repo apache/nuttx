@@ -41,11 +41,11 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 
 #include "inode/inode.h"
 

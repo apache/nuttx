@@ -152,4 +152,3 @@ uint32_t * irq_dispatch_all(uint32_t *regs, uint32_t irqmask)
 
   return regs;
 }
-

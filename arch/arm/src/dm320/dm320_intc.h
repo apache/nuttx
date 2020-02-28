@@ -98,4 +98,4 @@
 
 #endif
 
-#endif  /* __ARCH_ARM_SRC_DM320_DM320_INTC_H */
+#endif /* __ARCH_ARM_SRC_DM320_DM320_INTC_H */

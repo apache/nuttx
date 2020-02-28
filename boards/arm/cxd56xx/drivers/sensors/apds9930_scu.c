@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/platform/sensors/apds9930_scu.c
+ * boards/arm/cxd56xx/drivers/sensors/apds9930_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -44,7 +44,6 @@
 #include <fixedmath.h>
 #include <errno.h>
 #include <debug.h>
-#include <semaphore.h>
 #include <arch/types.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -149,6 +148,7 @@
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
+
 /**
  * @brief Structure for apds9930 device
  */
@@ -359,7 +359,7 @@ static void apds9930_putreg16(FAR struct apds9930_dev_s *priv,
  * Name: apds9930_intclr
  *
  * Description:
- *   APDS9930 Inerrupt clear
+ *   APDS9930 Interrupt clear
  *
  ****************************************************************************/
 
@@ -471,6 +471,7 @@ static void apds9930_setenable(FAR struct apds9930_dev_s *priv,
           val = APDS9930_ENABLE_STANDBY;
         }
     }
+
   apds9930_putreg8(priv, APDS9930_ENABLE, val);
 
   leave_critical_section(flags);
@@ -495,6 +496,7 @@ static int apds9930als_seqinit(FAR struct apds9930_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_als_seq;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -528,6 +530,7 @@ static int apds9930ps_seqinit(FAR struct apds9930_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_ps_seq;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -602,6 +605,7 @@ static int apds9930_open_ps(FAR struct file *filep)
         {
           return ret;
         }
+
       apds9930_setenable(priv, SETENABLE_TYPE_PS, true);
     }
   else
@@ -841,7 +845,7 @@ static int apds9930_ioctl_ps(FAR struct file *filep, int cmd,
 
               ret = seq_ioctl(priv->seq, priv->minor, cmd, arg);
 #else
-              snerr("Unregisted SCU sequencer cmd: %d\n", cmd);
+              snerr("Unregistered SCU sequencer cmd: %d\n", cmd);
               ret = - ENOTTY;
 #endif
             }
@@ -925,6 +929,7 @@ int apds9930_init(FAR struct i2c_master_s *i2c, int port)
   apds9930_putreg8(priv, APDS9930_PPULSE, val);
 
   /* Control */
+
   val = APDS9930_CONTROL_PDRIVE_100MA | APDS9930_CONTROL_PDIODE_CH1 |
         APDS9930_CONTROL_PGAIN_X1 | APDS9930_CONTROL_AGAIN_X1;
   apds9930_putreg8(priv, APDS9930_CONTROL, val);

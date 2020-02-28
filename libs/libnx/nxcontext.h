@@ -46,7 +46,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <limits.h>
-#include <semaphore.h>
 
 #include <nuttx/streams.h>
 

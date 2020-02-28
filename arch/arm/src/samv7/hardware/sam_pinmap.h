@@ -51,4 +51,3 @@
 #endif
 
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_PINMAP_H */
-

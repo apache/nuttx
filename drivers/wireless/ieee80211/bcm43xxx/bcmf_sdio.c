@@ -46,7 +46,6 @@
 #include <debug.h>
 #include <errno.h>
 #include <queue.h>
-#include <semaphore.h>
 #include <assert.h>
 
 #include <nuttx/kmalloc.h>

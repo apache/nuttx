@@ -115,4 +115,3 @@ int i2c_writeread(FAR struct i2c_master_s *dev,
   ret = I2C_TRANSFER(dev, msg, 2);
   return (ret >= 0) ? OK : ret;
 }
-

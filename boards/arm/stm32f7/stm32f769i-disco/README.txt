@@ -137,5 +137,3 @@ Configuration Directories
   ---
     Same as above but a lot more hardware peripherals enabled,
     in particular ethernet, as well as networking stuff.
-
-

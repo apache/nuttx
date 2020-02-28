@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/timers/watchog.h
+ * include/nuttx/timers/watchdog.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -93,7 +93,7 @@
 /* Bit settings for the struct watchdog_status_s flags field */
 
 #define WDFLAGS_ACTIVE   (1 << 0) /* 1=The watchdog timer is running */
-#define WDFLAGS_RESET    (1 << 1) /* 1=Reset when the watchog timer expires */
+#define WDFLAGS_RESET    (1 << 1) /* 1=Reset when the watchdog timer expires */
 #define WDFLAGS_CAPTURE  (1 << 2) /* 1=Call the user function when the
                                    *   watchdog timer expires */
 
@@ -258,4 +258,4 @@ void watchdog_unregister(FAR void *handle);
 #endif
 
 #endif /* CONFIG_WATCHDOG */
-#endif  /* __INCLUDE_NUTTX_TIMERS_WATCHDOG_H */
+#endif /* __INCLUDE_NUTTX_TIMERS_WATCHDOG_H */

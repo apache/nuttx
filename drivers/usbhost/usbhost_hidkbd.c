@@ -46,7 +46,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <poll.h>
-#include <semaphore.h>
 #include <signal.h>
 #include <time.h>
 #include <fcntl.h>
@@ -131,7 +130,7 @@
 #  endif
 #endif
 
-/* We cant support encoding of special characters of unless the Keyboard
+/* We can't support encoding of special characters of unless the Keyboard
  * CODEC is enabled.
  */
 

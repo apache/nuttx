@@ -39,10 +39,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
-
-#include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 
 #include "utils/utils.h"
@@ -72,7 +68,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_NET_ARCH_CHKSUM
 #ifdef CONFIG_NET_IPv4
 uint16_t tcp_ipv4_chksum(FAR struct net_driver_s *dev)
 {
@@ -86,7 +81,6 @@ uint16_t tcp_ipv6_chksum(FAR struct net_driver_s *dev)
   return ipv6_upperlayer_chksum(dev, IP_PROTO_TCP, IPv6_HDRLEN);
 }
 #endif /* CONFIG_NET_IPv6 */
-#endif /* !CONFIG_NET_ARCH_CHKSUM */
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
 uint16_t tcp_chksum(FAR struct net_driver_s *dev)

@@ -190,4 +190,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_STM32L4_STM32L4XRXX_IRQ_H */
-

@@ -214,7 +214,7 @@ static sockcaps_t ieee802154_sockcaps(FAR struct socket *psock)
  * Name: ieee802154_addref
  *
  * Description:
- *   Increment the refernce count on the underlying connection structure.
+ *   Increment the reference count on the underlying connection structure.
  *
  * Input Parameters:
  *   psock - Socket structure of the socket whose reference count will be
@@ -264,7 +264,7 @@ static void ieee802154_addref(FAR struct socket *psock)
  *   addrlen   Length of actual 'addr'
  *
  * Returned Value:
- *   0 on success; a negated errno value on failue.  See connect() for the
+ *   0 on success; a negated errno value on failure.  See connect() for the
  *   list of appropriate errno values to be returned.
  *
  ****************************************************************************/
@@ -275,7 +275,7 @@ static int ieee802154_connect(FAR struct socket *psock,
 {
   FAR struct ieee802154_conn_s *conn;
   FAR struct sockaddr_ieee802154_s *ieeeaddr;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(psock != NULL || addr != NULL);
   conn = (FAR struct ieee802154_conn_s *)psock->s_conn;
@@ -290,11 +290,6 @@ static int ieee802154_connect(FAR struct socket *psock,
       ieeeaddr = (FAR struct sockaddr_ieee802154_s *)addr;
       memcpy(&conn->raddr, &ieeeaddr->sa_addr,
              sizeof(struct ieee802154_saddr_s));
-
-      /* Mark the socket as connected. */
-
-      psock->s_flags |= _SF_CONNECTED;
-      ret = OK;
     }
   else
     {
@@ -344,7 +339,7 @@ static int ieee802154_connect(FAR struct socket *psock,
  *
  * Returned Value:
  *   Returns 0 (OK) on success.  On failure, it returns a negated errno
- *   value.  See accept() for a desrciption of the approriate error value.
+ *   value.  See accept() for a desrciption of the appropriate error value.
  *
  * Assumptions:
  *   The network is locked.
@@ -419,7 +414,7 @@ static int ieee802154_bind(FAR struct socket *psock,
 
   /* Very that some address was provided.
    *
-   * REVISIT: Currently and explict address must be assigned.  Should we
+   * REVISIT: Currently and explicit address must be assigned.  Should we
    * support some moral equivalent to INADDR_ANY?
    */
 
@@ -444,9 +439,6 @@ static int ieee802154_bind(FAR struct socket *psock,
 
   memcpy(&conn->laddr, &iaddr->sa_addr, sizeof(struct ieee802154_saddr_s));
 
-  /* Mark the socket bound */
-
-  psock->s_flags |= _SF_BOUND;
   return OK;
 }
 

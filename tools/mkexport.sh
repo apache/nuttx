@@ -45,97 +45,97 @@ WINTOOL=n
 LIBEXT=.a
 
 while [ ! -z "$1" ]; do
-	case $1 in
-		-a )
-			shift
-			APPDIR="$1"
-			;;
-		-d )
-			set -x
-			;;
-		-l )
-			shift
-			LIBLIST=$1
-			;;
-		-m )
-			shift
-			MAKE="$1"
-			;;
-		-wy )
-			WINTOOL=y
-			;;
-		-w | -wn )
-			WINTOOL=n
-			;;
-		-t )
-			shift
-			TOPDIR=$1
-			;;
-		-u )
-			USRONLY=y
-			;;
-		-x )
-			shift
-			LIBEXT=$1
-			;;
-		-z )
-			TGZ=y
-			;;
-		-h )
-			echo $USAGE
-			exit 0
-			;;
-		* )
-			echo "Unrecognized argument: $1"
-			echo $USAGE
-			exit 1
-			;;
-		esac
-	shift
+  case $1 in
+  -a )
+    shift
+    APPDIR="$1"
+    ;;
+  -d )
+    set -x
+    ;;
+  -l )
+    shift
+    LIBLIST=$1
+    ;;
+  -m )
+    shift
+    MAKE="$1"
+    ;;
+  -wy )
+    WINTOOL=y
+    ;;
+  -w | -wn )
+    WINTOOL=n
+    ;;
+  -t )
+    shift
+    TOPDIR=$1
+    ;;
+  -u )
+    USRONLY=y
+    ;;
+  -x )
+    shift
+    LIBEXT=$1
+    ;;
+  -z )
+    TGZ=y
+    ;;
+  -h )
+    echo $USAGE
+    exit 0
+    ;;
+  * )
+    echo "Unrecognized argument: $1"
+    echo $USAGE
+    exit 1
+    ;;
+  esac
+  shift
 done
 
 # Check arguments
 
 if [ -z "${TOPDIR}" -o -z "${LIBLIST}" ]; then
-	echo "MK: Missing required arguments"
-	echo $USAGE
-	exit 1
+  echo "MK: Missing required arguments"
+  echo $USAGE
+  exit 1
 fi
 
 if [ ! -d "${TOPDIR}" ]; then
-	echo "MK: Directory ${TOPDIR} does not exist"
-	exit 1
+  echo "MK: Directory ${TOPDIR} does not exist"
+  exit 1
 fi
 
 # Check configuration
 # Verify that we have Make.defs, .config, and .version files.
 
 if [ ! -f "${TOPDIR}/Make.defs" ]; then
-	echo "MK: Directory ${TOPDIR}/Make.defs does not exist"
-	exit 1
+  echo "MK: Directory ${TOPDIR}/Make.defs does not exist"
+  exit 1
 fi
 
 if [ ! -f "${TOPDIR}/.config" ]; then
-	echo "MK: Directory ${TOPDIR}/.config does not exist"
-	exit 1
+  echo "MK: Directory ${TOPDIR}/.config does not exist"
+  exit 1
 fi
 
 if [ ! -f "${TOPDIR}/.version" ]; then
-	echo "MK: File ${TOPDIR}/.version does not exist"
-	exit 1
+  echo "MK: File ${TOPDIR}/.version does not exist"
+  exit 1
 fi
 
 # Check if the make environment variable has been defined
 
 if [ -z "${MAKE}" ]; then
-	MAKE=`which make`
+  MAKE=`which make`
 fi
 
 # Get the version string
 
 source "${TOPDIR}/.version"
 if [ ! -z "${CONFIG_VERSION_STRING}" -a "${CONFIG_VERSION_STRING}" != "0.0" ]; then
-	VERSION="-${CONFIG_VERSION_STRING}"
+  VERSION="-${CONFIG_VERSION_STRING}"
 fi
 
 # Create the export directory
@@ -146,8 +146,8 @@ EXPORTDIR="${TOPDIR}/${EXPORTSUBDIR}"
 # If the export directory already exists, then remove it and create a new one
 
 if [ -d "${EXPORTDIR}" ]; then
-	echo "MK: Removing old export directory"
-	rm -rf "${EXPORTDIR}"
+  echo "MK: Removing old export directory"
+  rm -rf "${EXPORTDIR}"
 fi
 
 # Remove any possible previous results
@@ -187,8 +187,8 @@ rm -f "${EXPORTDIR}/Make.defs"
 # Verify the build info that we got from makeinfo.sh
 
 if [ ! -d "${ARCHDIR}" ]; then
-	echo "MK: Directory ${ARCHDIR} does not exist"
-	exit 1
+  echo "MK: Directory ${ARCHDIR} does not exist"
+  exit 1
 fi
 
 # Copy the default linker script
@@ -198,27 +198,27 @@ cp -f "${TOPDIR}/binfmt/libelf/gnu-elf.ld" "${EXPORTDIR}/scripts/."
 # Is there a linker script in this configuration?
 
 if [ "X${USRONLY}" != "Xy" ]; then
-	if [ ! -z "${LDPATH}" ]; then
+  if [ ! -z "${LDPATH}" ]; then
 
-		# Apparently so.  Verify that the script exists
+    # Apparently so.  Verify that the script exists
 
-		if [ ! -f "${LDPATH}" ]; then
-			echo "MK: File ${LDPATH} does not exist"
-			exit 1
-		fi
+    if [ ! -f "${LDPATH}" ]; then
+      echo "MK: File ${LDPATH} does not exist"
+      exit 1
+    fi
 
-		# Copy the linker script
+    # Copy the linker script
 
-		cp -p "${LDPATH}" "${EXPORTDIR}/scripts/." || \
-			{ echo "MK: cp ${LDPATH} failed"; exit 1; }
+    cp -p "${LDPATH}" "${EXPORTDIR}/scripts/." || \
+      { echo "MK: cp ${LDPATH} failed"; exit 1; }
 
-		# Copy addtional ld scripts
+    # Copy additional ld scripts
 
-		LDDIR="$(dirname "${LDPATH}")"
-		for f in "${LDDIR}"/*.ld ; do
-			[ -f "${f}" ] && cp -f "${f}" "${EXPORTDIR}/scripts/."
-		done
-	fi
+    LDDIR="$(dirname "${LDPATH}")"
+    for f in "${LDDIR}"/*.ld ; do
+      [ -f "${f}" ] && cp -f "${f}" "${EXPORTDIR}/scripts/."
+    done
+  fi
 fi
 
 # Save the compilation options
@@ -258,20 +258,20 @@ echo "LDSCRIPT         = ${LDSCRIPT}" >>"${EXPORTDIR}/scripts/Make.defs"
 # Additional compilation options when the kernel is built
 
 if [ "X${USRONLY}" != "Xy" ]; then
-	echo "LDFLAGS      = ${LDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
-	echo "HEAD_OBJ     = ${HEAD_OBJ}" >>"${EXPORTDIR}/scripts/Make.defs"
-	echo "EXTRA_OBJS   = ${EXTRA_OBJS}" >>"${EXPORTDIR}/scripts/Make.defs"
-	echo "LDSTARTGROUP = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
-	echo "LDLIBS       = ${LDLIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
-	echo "EXTRA_LIBS   = ${EXTRA_LIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
-	echo "LIBGCC       = ${LIBGCC}" >>"${EXPORTDIR}/scripts/Make.defs"
-	echo "LDENDGROUP   = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LDFLAGS      = ${LDFLAGS}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "HEAD_OBJ     = ${HEAD_OBJ}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "EXTRA_OBJS   = ${EXTRA_OBJS}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LDSTARTGROUP = ${LDSTARTGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LDLIBS       = ${LDLIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "EXTRA_LIBS   = ${EXTRA_LIBS}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LIBGCC       = ${LIBGCC}" >>"${EXPORTDIR}/scripts/Make.defs"
+  echo "LDENDGROUP   = ${LDENDGROUP}" >>"${EXPORTDIR}/scripts/Make.defs"
 fi
 
 # Copy the system map file(s)
 
 if [ -r ${TOPDIR}/System.map ]; then
-	cp -a "${TOPDIR}/System.map" "${EXPORTDIR}/."
+  cp -a "${TOPDIR}/System.map" "${EXPORTDIR}/."
 fi
 
 if [ -r ${TOPDIR}/User.map ]; then
@@ -281,7 +281,7 @@ fi
 # Copy the NuttX include directory (retaining attributes and following symbolic links)
 
 cp -LR -p "${TOPDIR}/include" "${EXPORTDIR}/." || \
-	{ echo "MK: 'cp ${TOPDIR}/include' failed"; exit 1; }
+  { echo "MK: 'cp ${TOPDIR}/include' failed"; exit 1; }
 
 # Copy the startup object file(s)
 
@@ -303,112 +303,112 @@ cp -f "${ARCHDIR}"/*.h "${EXPORTDIR}"/arch/. 2>/dev/null
 # those directories into the EXPORTDIR
 
 if [ "X${USRONLY}" != "Xy" ]; then
-	ARCH_HDRDIRS="arm armv7-m avr avr32 board common chip mips32"
-	for hdir in $ARCH_HDRDIRS; do
+  ARCH_HDRDIRS="arm armv7-m avr avr32 board common chip mips32"
+  for hdir in $ARCH_HDRDIRS; do
 
-		# Does the directory (or symbolic link) exist?
+    # Does the directory (or symbolic link) exist?
 
-		if [ -d "${ARCHDIR}/${hdir}" -o -h "${ARCHDIR}/${hdir}" ]; then
+    if [ -d "${ARCHDIR}/${hdir}" -o -h "${ARCHDIR}/${hdir}" ]; then
 
-			# Yes.. create a export sub-directory of the same name
+      # Yes.. create a export sub-directory of the same name
 
-			mkdir "${EXPORTDIR}/arch/${hdir}" || \
-				{ echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}' failed"; exit 1; }
+      mkdir "${EXPORTDIR}/arch/${hdir}" || \
+        { echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}' failed"; exit 1; }
 
-			# Then copy the header files (only) into the new directory
+      # Then copy the header files (only) into the new directory
 
-			cp -f "${ARCHDIR}"/${hdir}/*.h "${EXPORTDIR}"/arch/${hdir}/. 2>/dev/null
+      cp -f "${ARCHDIR}"/${hdir}/*.h "${EXPORTDIR}"/arch/${hdir}/. 2>/dev/null
 
-			# Most architectures have low directory called "hardware" that
-			# holds the header files
+      # Most architectures have low directory called "hardware" that
+      # holds the header files
 
-			if [ -d "${ARCHDIR}/${hdir}/hardware" ]; then
+      if [ -d "${ARCHDIR}/${hdir}/hardware" ]; then
 
-				# Yes.. create a export sub-directory of the same name
+        # Yes.. create a export sub-directory of the same name
 
-				mkdir "${EXPORTDIR}/arch/${hdir}/hardware" || \
-					{ echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}/hardware' failed"; exit 1; }
+        mkdir "${EXPORTDIR}/arch/${hdir}/hardware" || \
+          { echo "MK: 'mkdir ${EXPORTDIR}/arch/${hdir}/hardware' failed"; exit 1; }
 
-				# Then copy the header files (only) into the new directory
+        # Then copy the header files (only) into the new directory
 
-				cp -f "${ARCHDIR}"/${hdir}/hardware/*.h "${EXPORTDIR}"/arch/${hdir}/hardware/. 2>/dev/null
-			fi
-		fi
-	done
+        cp -f "${ARCHDIR}"/${hdir}/hardware/*.h "${EXPORTDIR}"/arch/${hdir}/hardware/. 2>/dev/null
+      fi
+    fi
+  done
 
-	# Copy OS internal header files as well.  They are used by some architecture-
-	# specific header files.
+  # Copy OS internal header files as well.  They are used by some architecture-
+  # specific header files.
 
-	mkdir "${EXPORTDIR}/arch/os" || \
-		{ echo "MK: 'mkdir ${EXPORTDIR}/arch/os' failed"; exit 1; }
+  mkdir "${EXPORTDIR}/arch/os" || \
+    { echo "MK: 'mkdir ${EXPORTDIR}/arch/os' failed"; exit 1; }
 
-	OSDIRS="clock environ errno group init irq mqueue paging pthread sched semaphore signal task timer wdog"
+  OSDIRS="clock environ errno group init irq mqueue paging pthread sched semaphore signal task timer wdog"
 
-	for dir in ${OSDIRS}; do
-		mkdir "${EXPORTDIR}/arch/os/${dir}" || \
-			{ echo "MK: 'mkdir ${EXPORTDIR}/arch/os/${dir}' failed"; exit 1; }
-		cp -f "${TOPDIR}"/sched/${dir}/*.h "${EXPORTDIR}"/arch/os/${dir}/. 2>/dev/null
-	done
+  for dir in ${OSDIRS}; do
+    mkdir "${EXPORTDIR}/arch/os/${dir}" || \
+      { echo "MK: 'mkdir ${EXPORTDIR}/arch/os/${dir}' failed"; exit 1; }
+    cp -f "${TOPDIR}"/sched/${dir}/*.h "${EXPORTDIR}"/arch/os/${dir}/. 2>/dev/null
+  done
 
-	# Add the board library to the list of libraries
+  # Add the board library to the list of libraries
 
-	if [ -f "${ARCHDIR}/board/libboard${LIBEXT}" ]; then
-		LIBLIST="${LIBLIST} ${ARCHSUBDIR}/board/libboard${LIBEXT}"
-	fi
+  if [ -f "${ARCHDIR}/board/libboard${LIBEXT}" ]; then
+    LIBLIST="${LIBLIST} ${ARCHSUBDIR}/board/libboard${LIBEXT}"
+  fi
 fi
 
 # Then process each library
 
 AR=${CROSSDEV}ar
 for lib in ${LIBLIST}; do
-	if [ ! -f "${TOPDIR}/${lib}" ]; then
-		echo "MK: Library ${TOPDIR}/${lib} does not exist"
-		exit 1
-	fi
+  if [ ! -f "${TOPDIR}/${lib}" ]; then
+    echo "MK: Library ${TOPDIR}/${lib} does not exist"
+    exit 1
+  fi
 
-	# Get some shorter names for the library
+  # Get some shorter names for the library
 
-	libname=`basename ${lib} ${LIBEXT}`
-	shortname=`echo ${libname} | sed -e "s/^lib//g"`
+  libname=`basename ${lib} ${LIBEXT}`
+  shortname=`echo ${libname} | sed -e "s/^lib//g"`
 
-	# Copy the application library unmodified
+  # Copy the application library unmodified
 
-	if [ "X${libname}" = "Xlibapps" ]; then
-		cp -p "${TOPDIR}/${lib}" "${EXPORTDIR}/libs/." || \
-			{ echo "MK: cp ${TOPDIR}/${lib} failed"; exit 1; }
-	else
+  if [ "X${libname}" = "Xlibapps" ]; then
+    cp -p "${TOPDIR}/${lib}" "${EXPORTDIR}/libs/." || \
+      { echo "MK: cp ${TOPDIR}/${lib} failed"; exit 1; }
+  else
 
-		# Create a temporary directory and extract all of the objects there
-		# Hmmm.. this probably won't work if the archiver is not 'ar'
+    # Create a temporary directory and extract all of the objects there
+    # Hmmm.. this probably won't work if the archiver is not 'ar'
 
-		mkdir "${EXPORTDIR}/tmp" || \
-			{ echo "MK: 'mkdir ${EXPORTDIR}/tmp' failed"; exit 1; }
-		cd "${EXPORTDIR}/tmp" || \
-			{ echo "MK: 'cd ${EXPORTDIR}/tmp' failed"; exit 1; }
-		if [ "X${WINTOOL}" = "Xy" ]; then
-			WLIB=`cygpath -w "${TOPDIR}/${lib}"`
-			${AR} x "${WLIB}"
-		else
-			${AR} x "${TOPDIR}/${lib}"
-		fi
+    mkdir "${EXPORTDIR}/tmp" || \
+      { echo "MK: 'mkdir ${EXPORTDIR}/tmp' failed"; exit 1; }
+    cd "${EXPORTDIR}/tmp" || \
+      { echo "MK: 'cd ${EXPORTDIR}/tmp' failed"; exit 1; }
+    if [ "X${WINTOOL}" = "Xy" ]; then
+      WLIB=`cygpath -w "${TOPDIR}/${lib}"`
+      ${AR} x "${WLIB}"
+    else
+      ${AR} x "${TOPDIR}/${lib}"
+    fi
 
-		# Rename each object file (to avoid collision when they are combined)
-		# and add the file to libnuttx
+    # Rename each object file (to avoid collision when they are combined)
+    # and add the file to libnuttx
 
-		for file in `ls`; do
-			mv "${file}" "${shortname}-${file}"
-			if [ "X${WINTOOL}" = "Xy" ]; then
-				WLIB=`cygpath -w "${EXPORTDIR}/libs/libnuttx${LIBEXT}"`
-				${AR} rcs "${WLIB}" "${shortname}-${file}"
-			else
-				${AR} rcs "${EXPORTDIR}/libs/libnuttx${LIBEXT}" "${shortname}-${file}"
-			fi
-		done
+    for file in `ls`; do
+      mv "${file}" "${shortname}-${file}"
+      if [ "X${WINTOOL}" = "Xy" ]; then
+        WLIB=`cygpath -w "${EXPORTDIR}/libs/libnuttx${LIBEXT}"`
+        ${AR} rcs "${WLIB}" "${shortname}-${file}"
+      else
+        ${AR} rcs "${EXPORTDIR}/libs/libnuttx${LIBEXT}" "${shortname}-${file}"
+      fi
+    done
 
-		cd "${TOPDIR}" || \
-			{ echo "MK: 'cd ${TOPDIR}' failed"; exit 1; }
-		rm -rf "${EXPORTDIR}/tmp"
-	fi
+    cd "${TOPDIR}" || \
+      { echo "MK: 'cd ${TOPDIR}' failed"; exit 1; }
+    rm -rf "${EXPORTDIR}/tmp"
+  fi
 done
 
 # Copy the essential build script file(s)
@@ -427,18 +427,18 @@ cp -f "${TOPDIR}/tools/unlink.sh" "${EXPORTDIR}/tools/"
 # Now tar up the whole export directory
 
 cd "${TOPDIR}" || \
-	{ echo "MK: 'cd ${TOPDIR}' failed"; exit 1; }
+  { echo "MK: 'cd ${TOPDIR}' failed"; exit 1; }
 
 if [ -e "${APPDIR}/Makefile" ]; then
-	"${MAKE}" -C "${TOPDIR}/${APPDIR}" EXPORTDIR="$(cd "${EXPORTSUBDIR}" ; pwd )" TOPDIR="${TOPDIR}" export || \
-			{ echo "MK: call make export for APPDIR not supported"; }
+  "${MAKE}" -C "${TOPDIR}/${APPDIR}" EXPORTDIR="$(cd "${EXPORTSUBDIR}" ; pwd )" TOPDIR="${TOPDIR}" export || \
+      { echo "MK: call make export for APPDIR not supported"; }
 fi
 
 if [ "X${TGZ}" = "Xy" ]; then
-	tar cvf "${EXPORTSUBDIR}.tar" "${EXPORTSUBDIR}" 1>/dev/null 2>&1
-	gzip -f "${EXPORTSUBDIR}.tar"
+  tar cvf "${EXPORTSUBDIR}.tar" "${EXPORTSUBDIR}" 1>/dev/null 2>&1
+  gzip -f "${EXPORTSUBDIR}.tar"
 else
-	zip -r "${EXPORTSUBDIR}.zip" "${EXPORTSUBDIR}" 1>/dev/null 2>&1
+  zip -r "${EXPORTSUBDIR}.zip" "${EXPORTSUBDIR}" 1>/dev/null 2>&1
 fi
 
 # Clean up after ourselves

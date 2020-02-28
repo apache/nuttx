@@ -43,7 +43,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -572,7 +571,7 @@ void up_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud)
   uint32_t cdivadd;  /* Candidate FDR DIVADDVAL value */
   uint32_t errval;   /* Error value associated with the candidate */
 
-  /* The UART buad is given by:
+  /* The UART baud is given by:
    *
    * Fbaud =  Fbase * mul / (mul + divadd) / (16 * dl)
    * dl    =  Fbase * mul / (mul + divadd) / Fbaud / 16
@@ -1577,7 +1576,7 @@ static bool up_txempty(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************

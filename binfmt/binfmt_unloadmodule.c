@@ -198,4 +198,3 @@ int unload_module(FAR struct binary_s *binp)
 }
 
 #endif /* CONFIG_BINFMT_DISABLE */
-

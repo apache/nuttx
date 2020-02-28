@@ -279,4 +279,4 @@ void spiffs_cache_page_release(FAR struct spiffs_s *fs,
 }
 #endif
 
-#endif  /* __FS_SPIFFS_SRC_SPIFFS_CACHE_H */
+#endif /* __FS_SPIFFS_SRC_SPIFFS_CACHE_H */

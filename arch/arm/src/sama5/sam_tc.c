@@ -53,12 +53,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -523,7 +523,7 @@ static void sam_regdump(struct sam_chan_s *chan, const char *msg)
  * Input Parameters:
  *   tc      - The timer/counter peripheral state
  *   wr      - True:write access false:read access
- *   regval  - The regiser value associated with the access
+ *   regval  - The register value associated with the access
  *   regaddr - The address of the register being accessed
  *
  * Returned Value:

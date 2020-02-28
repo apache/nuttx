@@ -82,4 +82,3 @@ FAR char *strpbrk(FAR const char *str, FAR const char *charset)
 
   return NULL;
 }
-
