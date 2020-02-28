@@ -76,17 +76,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-#define NS_PER_USEC		1000UL
-#define NS_PER_MSEC		1000000UL
-#define NS_PER_SEC		1000000000UL
-
-#define IA32_TSC_DEADLINE	0x6e0
-
-#define X2APIC_LVTT		0x832
-#define LVTT_TSC_DEADLINE	(1 << 18)
-#define X2APIC_TMICT		0x838
-#define X2APIC_TMCCT		0x839
-#define X2APIC_TDCR		0x83e
+#define NS_PER_USEC       1000UL
+#define NS_PER_MSEC       1000000UL
+#define NS_PER_SEC        1000000000UL
 
 #define TMR_IRQ IRQ14
 
@@ -96,7 +88,7 @@
  * Private Data
  ****************************************************************************/
 
-unsigned long tsc_freq;
+unsigned long x86_64_timer_freq;
 
 static struct timespec g_goal_time_ts;
 static uint64_t g_last_stop_time;
@@ -113,7 +105,11 @@ static irqstate_t g_tmr_flags;
 void up_mask_tmr(void)
 {
   /* Disable TSC Deadline interrupt */
-  write_msr(X2APIC_LVTT, TMR_IRQ | LVTT_TSC_DEADLINE | (1 << 16));
+#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
+  write_msr(MSR_X2APIC_LVTT, TMR_IRQ | MSR_X2APIC_LVTT_TSC_DEADLINE | (1 << 16));
+#else
+  write_msr(MSR_X2APIC_LVTT, TMR_IRQ | (1 << 16));
+#endif
   /* Required when using TSC deadline mode. */
   asm volatile("mfence" : : : "memory");
 }
@@ -121,7 +117,11 @@ void up_mask_tmr(void)
 void up_unmask_tmr(void)
 {
   /* Enable TSC Deadline interrupt */
-  write_msr(X2APIC_LVTT, TMR_IRQ | LVTT_TSC_DEADLINE);
+#ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
+  write_msr(MSR_X2APIC_LVTT, TMR_IRQ | MSR_X2APIC_LVTT_TSC_DEADLINE);
+#else
+  write_msr(MSR_X2APIC_LVTT, TMR_IRQ);
+#endif
   /* Required when using TSC deadline mode. */
   asm volatile("mfence" : : : "memory");
 }
@@ -147,13 +147,13 @@ void up_timer_initialize(void)
 
 static inline uint64_t up_ts2tick(FAR const struct timespec *ts)
 {
-  return ROUND_INT_DIV((uint64_t)ts->tv_nsec * tsc_freq, NS_PER_SEC) + (uint64_t)ts->tv_sec * tsc_freq;
+  return ROUND_INT_DIV((uint64_t)ts->tv_nsec * x86_64_timer_freq, NS_PER_SEC) + (uint64_t)ts->tv_sec * x86_64_timer_freq;
 }
 
 static inline void up_tick2ts(uint64_t tick, FAR struct timespec *ts)
 {
-  ts->tv_sec  = (tick / tsc_freq);
-  ts->tv_nsec = (uint64_t)(ROUND_INT_DIV((tick % tsc_freq) * NSEC_PER_SEC, tsc_freq));
+  ts->tv_sec  = (tick / x86_64_timer_freq);
+  ts->tv_nsec = (uint64_t)(ROUND_INT_DIV((tick % x86_64_timer_freq) * NSEC_PER_SEC, x86_64_timer_freq));
 }
 
 static inline void up_tmr_sync_up(void)
@@ -312,7 +312,7 @@ int up_timer_start(FAR const struct timespec *ts)
 
   g_timer_active = 1;
 
-  write_msr(IA32_TSC_DEADLINE, ticks);
+  write_msr(MSR_IA32_TSC_DEADLINE, ticks);
 
   g_goal_time = ticks;
 
@@ -432,7 +432,7 @@ int up_alarm_start(FAR const struct timespec *ts)
 
   ticks = up_ts2tick(ts) + g_start_tsc;
 
-  write_msr(IA32_TSC_DEADLINE, ticks);
+  write_msr(MSR_IA32_TSC_DEADLINE, ticks);
 
   g_timer_active = 1;
 
