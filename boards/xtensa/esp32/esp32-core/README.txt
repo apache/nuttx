@@ -239,7 +239,7 @@ SMP
 
   Open Issues:
 
-  1. Cache Issues.  I have not though about this yet, but certainly caching is
+  1. Cache Issues.  I have not thought about this yet, but certainly caching is
      an issue in an SMP system:
 
      - Cache coherency.  Are there separate caches for each CPU?  Or a single
