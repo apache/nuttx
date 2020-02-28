@@ -268,8 +268,8 @@ static int mcp9844_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           uint16_t raw_temperature = 0;
           ret = mcp9844_read_u16(priv, MCP9844_TEMP_REG, &raw_temperature);
 
-          /* Convert from the proprietary sensor temperature data representation
-           * to a more user friendly version.
+          /* Convert from the proprietary sensor temperature data
+           * representation to a more user-friendly version.
            */
 
           if (ret == OK)
@@ -308,8 +308,8 @@ static int mcp9844_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = mcp9844_write_u16(priv, MCP9844_RESO_REG, (uint16_t)(arg));
           if (ret != OK)
             {
-              snerr("ERROR: ioctl::SNIOC_SETRESOLUTION - mcp9844_write_u16 failed"
-                    " - no resolution set\n");
+              snerr("ERROR: ioctl::SNIOC_SETRESOLUTION - mcp9844_write_u16"
+                  "failed - no resolution set\n");
             }
         }
         break;
