@@ -121,18 +121,19 @@ endif
 # Optimization level
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHASMOPTIMIZATION = -debug -NOsdiopt
+  ARCHASMOPTIMIZATION = -debug
   ARCHOPTIMIZATION = -debug
 else
-  ARCHASMOPTIMIZATION = -nodebug -sdiopt
+  ARCHASMOPTIMIZATION = -NOdebug
   ARCHOPTIMIZATION = -NOdebug
 endif
 
 ifeq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += -reduceopt
-#else
-#  ARCHOPTIMIZATION += -promote -NOreduceopt -optsize
-  ARCHOPTIMIZATION += -promote -NOreduceopt
+#  ARCHOPTIMIZATION += -promote -reduceopt -NOsdiopt
+  ARCHOPTIMIZATION += -NOsdiopt
+else
+#  ARCHOPTIMIZATION += -NOpromote -NOreduceopt -sdiopt -optsize
+  ARCHOPTIMIZATION += -sdiopt
 endif
 
 # Tool names/paths.

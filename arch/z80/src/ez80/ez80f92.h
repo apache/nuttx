@@ -25,7 +25,7 @@
  * Included Files
  ************************************************************************************/
 
-#include "ez80f91_emac.h"
+#include "nuttx/config.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -33,11 +33,19 @@
 
 /* Memory map ***********************************************************************/
 
-#define EZ80_ONCHIPFLASH       0x000000 /* CS0: 128Kb of on-chip flash */
+#define EZ80_ONCHIPFLASH       0x000000 /* CS0: 64-128Kb of on-chip flash */
 #define EZ80_OFFCHIPCS0        0x400000 /* CS0: Off chip use (usually flash) */
 #define EZ80_OFFCHIPCS2        0x800000 /* CS2: Off chip use (e.g. memory mapped I/O) */
 #define EZ80_OFFCHIPCS1        0xc00000 /* CS1: Off chip use (usually SRAM) */
-#define EZ80_ONCHIPSRAM        0xffe000 /* On-chip SRAM (8Kb) on reset */
+#define EZ80_ONCHIPSRAM        0xffe000 /* On-chip SRAM (4-8Kb) on reset */
+
+#if defined(CONFIGS_ARCH_CHIP_EZ80L92)
+#  define EZ80_FLASH_SIZE      0x020000 /* 128Kb on-chip flash */
+#  define EZ80_SRAM_SIZE       0x002000 /* 8Kb on-chip sram */
+#elif defined(CONFIGS_ARCH_CHIP_EZ80L93)
+#  define EZ80_FLASH_SIZE      0x010000 /* 64Kb on-chip flash */
+#  define EZ80_SRAM_SIZE       0x001000 /* 4Kb on-chip sram */
+#endif
 
 /* Product ID Registers  ************************************************************/
 

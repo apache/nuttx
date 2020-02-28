@@ -55,6 +55,9 @@
 #define EZ80_EMACSRAM     0xffc000 /* On-chip EMAC SRAM (8Kb) on reset*/
 #define EZ80_ONCHIPSRAM   0xffe000 /* On-chip SRAM (8Kb) on reset */
 
+#define EZ80_FLASH_SIZE   0x040000 /* 256Kb on-chip flash */
+#define EZ80_SRAM_SIZE    0x002000 /* 8Kb on-chip sram */
+
 /* Product ID Registers  ************************************************************/
 
 #define EZ80_ZDI_ID_L          0x00

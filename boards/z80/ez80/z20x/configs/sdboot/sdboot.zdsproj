@@ -110,7 +110,7 @@
 <option name="linkconfig" type="string" change-action="build">Standard</option>
 <option name="flashinfo" type="string" change-action="build">000000-0000FF</option>
 <option name="ram" type="string" change-action="build">040000-0FFFFF</option>
-<option name="rom" type="string" change-action="build">000000-03FFFF</option>
+<option name="rom" type="string" change-action="build">000000-01FFFF</option>
 <option name="extio" type="string" change-action="build">000000-00FFFF</option>
 <option name="intio" type="string" change-action="build">000000-0000FF</option>
 </options>
@@ -230,7 +230,7 @@
 <option name="linkconfig" type="string" change-action="build">Standard</option>
 <option name="flashinfo" type="string" change-action="build">000000-0000FF</option>
 <option name="ram" type="string" change-action="build">040000-0BFFFF</option>
-<option name="rom" type="string" change-action="build">000000-03FFFF</option>
+<option name="rom" type="string" change-action="build">000000-01FFFF</option>
 <option name="extio" type="string" change-action="build">000000-00FFFF</option>
 <option name="intio" type="string" change-action="build">000000-0000FF</option>
 </options>

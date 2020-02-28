@@ -133,17 +133,6 @@ _ez80_init:
 	ld		a, __CS3_CTL_INIT_PARAM
 	out0	(CS3_CTL), a
 
-	; Enable internal memory
-
-	ld		a, __FLASH_ADDR_U_INIT_PARAM
-	out0	(FLASH_ADDR_U), a
-	ld		a, __FLASH_CTL_INIT_PARAM
-	out0	(FLASH_CTRL), a
-
-	ld		a, __RAM_ADDR_U_INIT_PARAM
-	out0	(RAM_ADDR_U), a
-	ld		a, __RAM_CTL_INIT_PARAM
-	out0	(RAM_CTL), a
 	ret
 
 ;*****************************************************************************
