@@ -327,12 +327,14 @@ static int mcp9844_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               ret = mcp9844_write_u16(priv, MCP9844_CONF_REG, config_reg);
               if (ret != OK)
                 {
-                  snerr("ERROR: ioctl::SNIOC_SHUTDOWN - mcp9844_write_u16 failed\n");
+                  snerr("ERROR: ioctl::SNIOC_SHUTDOWN - "
+                        "mcp9844_write_u16 failed\n");
                 }
             }
           else
             {
-              snerr("ERROR: ioctl::SNIOC_SHUTDOWN - mcp9844_read_u16 failed\n");
+              snerr("ERROR: ioctl::SNIOC_SHUTDOWN - "
+                    "mcp9844_read_u16 failed\n");
             }
         }
         break;
@@ -350,12 +352,14 @@ static int mcp9844_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               ret = mcp9844_write_u16(priv, MCP9844_CONF_REG, config_reg);
               if (ret != OK)
                 {
-                  snerr("ERROR: ioctl::SNIOC_SHUTDOWN - mcp9844_write_u16 failed\n");
+                  snerr("ERROR: ioctl::SNIOC_POWERUP - "
+                        "mcp9844_write_u16 failed\n");
                 }
             }
           else
             {
-              snerr("ERROR: ioctl::SNIOC_SHUTDOWN - mcp9844_read_u16 failed\n");
+              snerr("ERROR: ioctl::SNIOC_POWERUP - "
+                    "mcp9844_read_u16 failed\n");
             }
         }
         break;
