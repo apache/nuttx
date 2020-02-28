@@ -1124,6 +1124,8 @@ static bool flexus_txempty(struct uart_dev_s *dev)
  * Public Functions
  ****************************************************************************/
 
+#ifdef USE_EARLYSERIALINIT
+
 /****************************************************************************
  * Name: flexus_earlyserialinit
  *
@@ -1195,6 +1197,7 @@ void flexus_earlyserialinit(void)
   flexus_setup(&CONSOLE_DEV);
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: flexus_serialinit

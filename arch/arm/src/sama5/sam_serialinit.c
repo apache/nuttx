@@ -49,6 +49,8 @@
  * Public Functions
  ****************************************************************************/
 
+#ifdef USE_EARLYSERIALINIT
+
 /****************************************************************************
  * Name: sam_earlyserialinit
  *
@@ -77,6 +79,7 @@ void sam_earlyserialinit(void)
   flexus_earlyserialinit();
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: up_serialinit
