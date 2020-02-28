@@ -34,7 +34,7 @@
  **************************************************************************************/
 
 #ifndef __DRIVERS_LCD_SSD1306_H
-#define __DRIVERS_LCD_SSD1306_H 1
+#define __DRIVERS_LCD_SSD1306_H
 
 /**************************************************************************************
  * Included Files
@@ -319,4 +319,3 @@ void ssd1306_configspi(FAR struct spi_dev_s *spi);
 #endif
 
 #endif /* __DRIVERS_LCD_SSD1306_H */
-

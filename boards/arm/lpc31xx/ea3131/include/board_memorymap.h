@@ -115,4 +115,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_LPC31XX_EA3131_MEMORYMAP_H */
+#endif /* __BOARDS_ARM_LPC31XX_EA3131_MEMORYMAP_H */

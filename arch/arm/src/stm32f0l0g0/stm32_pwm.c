@@ -228,7 +228,7 @@ static int stm32pwm_tim1interrupt(int irq, void *context, FAR void *arg);
 static int stm32pwm_tim8interrupt(int irq, void *context, FAR void *arg);
 #  endif
 static uint8_t stm32pwm_pulsecount(uint32_t count);
-#endif  /* CONFIG_PWM_PULSECOUNT && CONFIG_STM32F0L0G0_TIM{1,8}_PWM */
+#endif /* CONFIG_PWM_PULSECOUNT && CONFIG_STM32F0L0G0_TIM{1,8}_PWM */
 
 /* PWM driver methods */
 
@@ -821,8 +821,8 @@ static int stm32pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
 
       ccer &= ~(ATIM_CCER_CC1NP << ((channel - 1) * 4));
     }
-#endif  /* HAVE_PWM_COMPLEMENTARY */
-#endif  /* HAVE_ADVTIM */
+#endif /* HAVE_PWM_COMPLEMENTARY */
+#endif /* HAVE_ADVTIM */
 
   stm32pwm_modifyreg(priv, STM32_GTIM_CR2_OFFSET, 0, cr2);
   stm32pwm_modifyreg(priv, STM32_GTIM_CCER_OFFSET, 0, ccer);
@@ -1064,7 +1064,7 @@ static int stm32pwm_timer(FAR struct stm32_pwmtimer_s *priv,
   if (priv->timtype == TIMTYPE_ADVANCED)
     {
       /* If a non-zero repetition count has been selected, then set the
-       * repitition counter to the count-1 (stm32pwm_start() has already
+       * repetition counter to the count-1 (stm32pwm_start() has already
        * assured us that the count value is within range).
        */
 
@@ -1545,7 +1545,7 @@ static int stm32pwm_interrupt(struct stm32_pwmtimer_s *priv)
       regval &= ~ATIM_BDTR_MOE;
       stm32pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, regval);
 
-      /* Disable first interrtups, stop and reset the timer */
+      /* Disable first interrupts, stop and reset the timer */
 
       stm32pwm_stop((FAR struct pwm_lowerhalf_s *)priv);
 
@@ -1671,7 +1671,7 @@ static uint8_t stm32pwm_pulsecount(uint32_t count)
  *   dev - A reference to the lower half PWM driver state structure
  *   on  - Enable clock if 'on' is 'true' and disable if 'false'
  *
- * Returnd Value:
+ * Returned Value:
  *   None
  *
  ****************************************************************************/

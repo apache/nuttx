@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/cxd56xx/cxd56_ge2d.h
+ * arch/arm/include/cxd56xx/ge2d.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *

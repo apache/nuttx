@@ -44,6 +44,10 @@ ifeq ($(CONFIG_IOEXPANDER_PCA9555),y)
   CSRCS += pca9555.c
 endif
 
+ifeq ($(CONFIG_IOEXPANDER_PCA9538),y)
+  CSRCS += pca9538.c
+endif
+
 ifeq ($(CONFIG_IOEXPANDER_TCA64XX),y)
   CSRCS += tca64xx.c
 endif
@@ -63,7 +67,7 @@ ifeq ($(CONFIG_GPIO_LOWER_HALF),y)
 endif
 endif
 
-# The folling implements an awkward OR
+# The following implements an awkward OR
 
 ifeq ($(CONFIG_IOEXPANDER),y)
 

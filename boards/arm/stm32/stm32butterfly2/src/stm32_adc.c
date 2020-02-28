@@ -81,6 +81,6 @@ int stm32_adc_setup(void)
     }
 
   initialized = true;
-  ainfo("INFO: ADC12_IN10 initialized succesfully\n");
+  ainfo("INFO: ADC12_IN10 initialized successfully\n");
   return OK;
 }

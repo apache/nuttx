@@ -47,7 +47,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* FLEXSPI memory config block related defintions */
+/* FLEXSPI memory config block related definitions */
 
 #define FLEXSPI_CFG_BLK_TAG         (0x42464346ul)
 #define FLEXSPI_CFG_BLK_VERSION     (0x56010400ul)
@@ -57,7 +57,7 @@
 
 #define FLEXSPI_FEATURE_HAS_PARALLEL_MODE 1
 
-/* Lookup table related defintions */
+/* Lookup table related definitions */
 
 #define CMD_INDEX_READ              0
 #define CMD_INDEX_READSTATUS        1
@@ -253,7 +253,7 @@ enum flash_flash_type_e
   FLEXSPI_DEVICE_TYPE_SERIAL_NAND = 2,             /* Flash devices are Serial NAND */
   FLEXSPI_DEVICE_TYPE_SERIAL_RAM = 3,              /* Flash devices are Serial RAM/HyperFLASH */
   FLEXSPI_DEVICE_TYPE_MCP_NOR_NAND = 0x12,         /* Flash device is MCP device, A1 is Serial NOR, A2 is Serial NAND */
-  FLEXSPI_DEVICE_TYPE_MCP_NOR_RAM = 0x13,          /* Flash deivce is MCP device, A1 is Serial NOR, A2 is Serial RAMs */
+  FLEXSPI_DEVICE_TYPE_MCP_NOR_RAM = 0x13,          /* Flash device is MCP device, A1 is Serial NOR, A2 is Serial RAMs */
 };
 
 /* Flash Pad Definitions */

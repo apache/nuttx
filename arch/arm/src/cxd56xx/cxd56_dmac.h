@@ -39,7 +39,7 @@
 
 #include <stdint.h>
 
-#include "hardware/cxd56_dmac_common.h"
+#include "cxd56_dmac_common.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -96,7 +96,7 @@ extern "C"
  *
  * Input parameters:
  *   ch      - DMA channel to use
- *   maxsize - Max size to be transfered in bytes
+ *   maxsize - Max size to be transferred in bytes
  *
  * Returned Value:
  *   This function ALWAYS returns a non-NULL, void* DMA channel handle.

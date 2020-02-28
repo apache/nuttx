@@ -67,4 +67,3 @@ void dq_addfirst(FAR dq_entry_t *node, dq_queue_t *queue)
       queue->head = node;
     }
 }
-

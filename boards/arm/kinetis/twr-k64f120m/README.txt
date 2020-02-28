@@ -76,7 +76,7 @@ Accelerometer        I2C SDA                   PTC11    I2C1_SDA
 
 SDHC important notice: on TWR-K64F120M, R521 (close to the SD card holder) is not placed,
 hence WRPROTEC is always ON. Either place a 4.7KOhm resistor or change PIN config
-to PULLDOWN, loosing Write Protect function. See twrk64.h.
+to PULLDOWN, losing Write Protect function. See twrk64.h.
 
 Connections via the General Purpose Tower Plug-in (TWRPI) Socket
 -------------------- ------------------------- -------- -------------------
@@ -118,12 +118,12 @@ Networking Support
 
   U2 is a 25 MHz oscillator (which may be disabled by setting J4), which clock is sent to U1.
   U1 has two clock output banks: 25MHz (CLKBx) and 50MHz (CLKAx).
-  J2 (ser board) is used to select the PHY clock source: 50MHz, 25MHz or CLCKOUT0 from K64. Set it to 25MHz.
+  J2 (set board) is used to select the PHY clock source: 50MHz, 25MHz or CLCKOUT0 from K64. Set it to 25MHz.
   In order to keep synchornized the PHY clock with the K64 clock, one can set J3 (default is open)
   to route CLOCKIN0 either from 25MHz or 50Mhz lines. In that case, J33 (main board) will have to be removed
-  and J32 (main board set) set to disable its 50MHz_OSC and use CLKIN0 provided by ser board.
+  and J32 (main board set) set to disable its 50MHz_OSC and use CLKIN0 provided by set board.
   J12 is by default set to RMII mode. In this case J2 should be placed to 50MHz clock
-  Note that in MII mode, MII0_TXER is required by kinetis driver, but not connected on ser board
+  Note that in MII mode, MII0_TXER is required by kinetis driver, but not connected on set board
 
   Ethernet MAC/KSZ8041NL PHY
   --------------------------
@@ -134,9 +134,9 @@ Networking Support
    9  REFCLK   CLK_SEL J2: CLOCKOUT0/25MHz/50MHz, PHY clock input         PTC3/CLKOUT                    ---            direct to PHY
   11  MDIO     FEC_MDIO                                                   PTB0/RMII0_MDIO/MII0_MDIO      PIN_MII0_MDIO  PIN_RMII0_MDIO
   12  MDC      FEC_MDC                                                    PTB1/RMII0_MDC/MII0_MDC        PIN_MII0_MDC   PIN_RMII0_MDC
-  13  PHYAD0   FEC_RXD3 J12: PHY Adress select (pull-down if set)         PTA9/MII0_RXD3                 PIN_RMII0_RXD3 ---
-  14  PHYAD1   FEC_RXD2 J12: PHY Adress select (pull-up if set)           PTA10/MII0_RXD2                PIN_RMII0_RXD2 ---
-  15  PHYAD2   FEC_RXD1 J12: PHY Adress select (pull-up if set)           PTA12/RMII0_RXD1/MII0_RXD1     PIN_MII0_RXD1  PIN_RMII0_RXD1
+  13  PHYAD0   FEC_RXD3 J12: PHY Address select (pull-down if set)         PTA9/MII0_RXD3                 PIN_RMII0_RXD3 ---
+  14  PHYAD1   FEC_RXD2 J12: PHY Address select (pull-up if set)           PTA10/MII0_RXD2                PIN_RMII0_RXD2 ---
+  15  PHYAD2   FEC_RXD1 J12: PHY Address select (pull-up if set)           PTA12/RMII0_RXD1/MII0_RXD1     PIN_MII0_RXD1  PIN_RMII0_RXD1
   16  DUPLEX   FEC_RXD0 J12: Half-duplex (pull-down if set)               PTA13/RMII0_RXD0/MII0_RXD0     PIN_MII0_RXD0  PIN_RMII0_RXD0
   18  CONFIG2  FEC_RXDV J12: Loopback select (pull-up if set)             PTA14/RMII0_CRS_DV/MII0_RXDV   PIN_MII0_RXDV  PIN_RMII0_CRS_DV
   19  RXC      FEC_RXCLK                                                  PTA11/MII0_RXCLK               PIN_MII0_RXCLK ---
@@ -178,11 +178,9 @@ Networking Support
     CONFIG_NET_ARP_IPIN=y               : Enable ARP address harvesting
     CONFIG_NET_ARP_SEND=y               : Send ARP request before sending data
     CONFIG_NET_TCP=y                    : Enable TCP/IP networking
-    CONFIG_NET_TCP_READAHEAD=y          : Support TCP read-ahead
     CONFIG_NET_TCP_WRITE_BUFFERS=y      : Support TCP write-buffering
     CONFIG_NET_TCPBACKLOG=y             : Support TCP/IP backlog
     CONFIG_NET_MAX_LISTENPORTS=20       :
-    CONFIG_NET_TCP_READAHEAD_BUFSIZE=536  Read-ahead buffer size
     CONFIG_NET_UDP=y                    : Enable UDP networking
     CONFIG_NET_BROADCAST=y              : Needed for DNS name resolution
     CONFIG_NET_ICMP=y                   : Enable ICMP networking
@@ -345,7 +343,7 @@ Networking Support
       need to provide some custom logic in the Freedcom K64F
       configuration to set up that PHY interrupt.
 
-    - In addtion to the PHY interrupt, the Network Monitor also requires the
+    - In addition to the PHY interrupt, the Network Monitor also requires the
       following setting:
 
         CONFIG_NETDEV_PHY_IOCTL. Enable PHY IOCTL commands in the Ethernet
@@ -410,7 +408,7 @@ as follows:
 TWR-K64F120M-specific Configuration Options
 ==========================================
 
-    CONFIG_ARCH - Identifies the arch/ subdirectory.  This sould
+    CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
 
        CONFIG_ARCH=arm
@@ -613,4 +611,3 @@ Where <subdir> is one of the following:
     2. The PHY link negotiation is done at boot time only. If no link is then
        available, a fallback mode is used at 10Mbs/half-duplex. Please make sure
        your ethernet cable and switches are on before booting.
-

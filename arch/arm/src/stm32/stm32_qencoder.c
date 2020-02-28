@@ -1082,7 +1082,7 @@ static int stm32_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
 
   do
     {
-      /* Don't let another task pre-empt us until we get the measurement.  The timer
+      /* Don't let another task preempt us until we get the measurement.  The timer
        * interrupt may still be processed
        */
 

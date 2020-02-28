@@ -127,7 +127,7 @@ void kinetis_mpu_uheap(uintptr_t start, size_t size)
  * Name: kinetis_mpudisable
  *
  * Description:
- *   Configure the MPU to permit All buss masters access to all resources.
+ *   Configure the MPU to permit All bus masters access to all resources.
  *
  ****************************************************************************/
 
@@ -141,4 +141,3 @@ void kinetis_mpudisable(void)
 }
 
 #endif /* CONFIG_BUILD_PROTECTED && CONFIG_ARM_MPU */
-

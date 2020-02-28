@@ -49,7 +49,7 @@
  * chip is disabled at reset.  The boot ROM determines the boot mode based on
  * the OTP BOOT_SRC value or reset state pins.  For flash-based parts,
  * the part boots from internal flash by default.
- * Otherwse, the boot ROM copies the image to internal SRAM at location
+ * Otherwise, the boot ROM copies the image to internal SRAM at location
  * 0x1000:0000, sets the ARM's shadow pointer to 0x1000:0000,
  *  and jumps to that location.
  *
@@ -319,6 +319,12 @@ void __start(void)
   /* Initialize the FPU (if configured) */
 
   fpuconfig();
+
+#ifdef CONFIG_ARMV7M_ITMSYSLOG
+  /* Perform ARMv7-M ITM SYSLOG initialization */
+
+  itm_syslog_initialize();
+#endif
 
   /* Perform early serial initialization */
 

@@ -75,7 +75,7 @@
  *           may be used later in a call to tcp_notifier_teardown().
  *   == 0  - There is already buffered read-ahead data.  No notification
  *           will be provided.
- *   < 0   - An unexpected error occurred and notification will ocur.  The
+ *   < 0   - An unexpected error occurred and notification will occur.  The
  *           returned value is a negated errno value that indicates the
  *           nature of the failure.
  *
@@ -85,7 +85,6 @@ int tcp_readahead_notifier_setup(worker_t worker,
                                  FAR struct tcp_conn_s *conn,
                                  FAR void *arg)
 {
-#ifdef CONFIG_NET_TCP_READAHEAD
   struct work_notifier_s info;
 
   DEBUGASSERT(worker != NULL);
@@ -108,9 +107,6 @@ int tcp_readahead_notifier_setup(worker_t worker,
   info.worker    = worker;
 
   return work_notifier_setup(&info);
-#else
-  return 0;
-#endif
 }
 
 /****************************************************************************
@@ -229,7 +225,7 @@ int tcp_disconnect_notifier_setup(worker_t worker,
  *   Eliminate a TCP read-ahead notification previously setup by
  *   tcp_readahead_notifier_setup().  This function should only be called
  *   if the notification should be aborted prior to the notification.  The
- *   notification will automatically be torn down after the notifcation.
+ *   notification will automatically be torn down after the notification.
  *
  * Input Parameters:
  *   key - The key value returned from a previous call to
@@ -269,14 +265,12 @@ int tcp_notifier_teardown(int key)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP_READAHEAD
 void tcp_readahead_signal(FAR struct tcp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_TCP_READAHEAD, conn);
+  work_notifier_signal(WORK_TCP_READAHEAD, conn);
 }
-#endif
 
 /****************************************************************************
  * Name: tcp_writebuffer_signal
@@ -304,7 +298,7 @@ void tcp_writebuffer_signal(FAR struct tcp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_TCP_WRITEBUFFER, conn);
+  work_notifier_signal(WORK_TCP_WRITEBUFFER, conn);
 }
 #endif
 
@@ -327,7 +321,7 @@ void tcp_disconnect_signal(FAR struct tcp_conn_s *conn)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_TCP_DISCONNECT, conn);
+  work_notifier_signal(WORK_TCP_DISCONNECT, conn);
 }
 
 #endif /* CONFIG_NET_TCP_NOTIFIER */

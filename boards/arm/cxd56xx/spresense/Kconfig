@@ -59,12 +59,16 @@ choice
 config LCD_ON_EXTENSION_BOARD
 	bool "Extension board: SPI4"
 	select CXD56_SPI4
+	select CXD56_DMAC_SPI4_TX
+	select CXD56_DMAC_SPI4_RX
 	---help---
 		Display connected to extension board.
 
 config LCD_ON_MAIN_BOARD
 	bool "Main board: SPI5"
 	select CXD56_SPI5
+	select CXD56_DMAC_SPI5_TX
+	select CXD56_DMAC_SPI5_RX
 	---help---
 		Display connected to main board.
 
@@ -75,7 +79,7 @@ config CXD56_IMAGEPROC
 	default n
 	select CXD56_GE2D
 	---help---
-		Enable support for accelerated format convertor, rotation and so on.
+		Enable support for accelerated format converter, rotation and so on.
 		using the CXD5602 image processing accelerator.
 
 comment "LTE Options"

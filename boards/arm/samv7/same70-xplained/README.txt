@@ -395,7 +395,6 @@ Selecting the GMAC peripheral
     CONFIG_NET_ARP_SEND=y                : Use ARP to get peer address before sending
     CONFIG_NET_TCP=y                     : Enable TCP/IP networking
     CONFIG_NET_TCPBACKLOG=y              : Support TCP/IP backlog
-    CONFIG_NET_TCP_READAHEAD=y           : Enable TCP read-ahead buffering
     CONFIG_NET_TCP_WRITE_BUFFERS=y       : Enable TCP write buffering
     CONFIG_NET_UDP=y                     : Enable UDP networking
     CONFIG_NET_BROADCAST=y               : Support UDP broadcast packets
@@ -634,7 +633,7 @@ serial device class:
 
   Device Drivers -> USB Device Driver Support
     CONFIG_CDCACM=y                           : USB Modem (CDC ACM) support
-    CONFIG_CDCACM_EP0MAXPACKET=64             : Enpoint 0 packet size
+    CONFIG_CDCACM_EP0MAXPACKET=64             : Endpoint 0 packet size
     CONFIG_CDCACM_EPINTIN=1                   : Interrupt IN endpoint number
     CONFIG_CDCACM_EPINTIN_FSSIZE=64           : Full speed packet size
     CONFIG_CDCACM_EPINTIN_HSSIZE=64           : High speed packet size
@@ -1411,7 +1410,6 @@ Configuration sub-directories
          CONFIG_PTHREAD_STACK_DEFAULT=2048
          CONFIG_POSIX_SPAWN_PROXY_STACKSIZE=1024
          CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE=2048
-         CONFIG_BUILTIN_PROXY_STACKSIZE=1024
          CONFIG_NSH_TELNETD_DAEMONSTACKSIZE=2048
          CONFIG_NSH_TELNETD_CLIENTSTACKSIZE=2048
 
@@ -1581,7 +1579,7 @@ Configuration sub-directories
          Where <cmd> is one of:
 
            Show help     : ?
-           List busses   : bus
+           List buses   : bus
            List devices  : dev [OPTIONS] <first> <last>
            Read register : get [OPTIONS] [<repititions>]
            Show help     : help
@@ -1694,4 +1692,3 @@ Configuration sub-directories
          most of the issues.  Things look good on real, local hardware
          (see boards/lpcxpresso-lpc54628/twm4nx).  VNC is just not mature
          enough for this kind of usage at this time.
-

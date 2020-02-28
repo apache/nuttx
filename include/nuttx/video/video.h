@@ -191,7 +191,7 @@ extern "C"
 
 /* RGB565 */
 
-#define V4L2_PIX_FMT_RGB565 v4l2_fourcc('R', 'G', 'B', 'P') 
+#define V4L2_PIX_FMT_RGB565 v4l2_fourcc('R', 'G', 'B', 'P')
 
 /* JFIF JPEG */
 
@@ -361,7 +361,7 @@ struct v4l2_fmtdesc
 enum v4l2_frmsizetypes
 {
   V4L2_FRMSIZE_TYPE_DISCRETE      = 1,   /* Discrete value */
-  V4L2_FRMSIZE_TYPE_CONTINUOUS    = 2,   /* Continous value */
+  V4L2_FRMSIZE_TYPE_CONTINUOUS    = 2,   /* Continuous value */
   V4L2_FRMSIZE_TYPE_STEPWISE      = 3,   /* Step value */
 };
 
@@ -610,12 +610,12 @@ struct v4l2_ext_controls
 {
   union
   {
-    uint16_t              ctrl_class;  /* camera control class        */
+    uint16_t              ctrl_class;  /* camera control class         */
     uint16_t              which;
   };
-  uint16_t                count;       /* number of requests          */
-  uint16_t                error_idx;   /* index in that error occured */
-  struct v4l2_ext_control *controls;   /* each control information    */
+  uint16_t                count;       /* number of requests           */
+  uint16_t                error_idx;   /* index in that error occurred */
+  struct v4l2_ext_control *controls;   /* each control information     */
 };
 
 FAR const struct video_devops_s *g_video_devops;

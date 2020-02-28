@@ -414,4 +414,3 @@ void __start(void)
   for (;;);
 #endif
 }
-

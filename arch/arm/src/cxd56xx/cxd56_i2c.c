@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -93,7 +94,7 @@ struct cxd56_i2cdev_s
   unsigned int     base;       /* Base address of registers */
   uint16_t         irqid;      /* IRQ for this device */
   int8_t           port;       /* Port number */
-  uint32_t         baseFreq;   /* branch frequency */
+  uint32_t         base_freq;   /* branch frequency */
 
   sem_t            mutex;      /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for transfer completion */
@@ -266,37 +267,37 @@ static void cxd56_i2c_setfrequency(struct cxd56_i2cdev_s *priv,
   uint64_t lcnt64;
   uint64_t hcnt64;
   uint64_t speed;
-  uint64_t tLow;
-  uint64_t tHigh;
+  uint64_t t_low;
+  uint64_t t_high;
   uint32_t base = cxd56_get_i2c_baseclock(priv->port);
   uint32_t spklen;
 
   ASSERT(base);
 
-  if ((priv->frequency == frequency) && (priv->baseFreq == base))
+  if ((priv->frequency == frequency) && (priv->base_freq == base))
     {
       return;
     }
 
   priv->frequency = frequency;
-  priv->baseFreq = base;
+  priv->base_freq = base;
 
   base /= 1000;
 
   if (frequency <= 100000)
     {
-      tLow  = 4700000;
-      tHigh = 4000000;
+      t_low  = 4700000;
+      t_high = 4000000;
     }
   else if (frequency <= 400000)
     {
-      tLow  = 1300000;
-      tHigh = 600000;
+      t_low  = 1300000;
+      t_high = 600000;
     }
   else
     {
-      tLow  = 500000;
-      tHigh = 260000;
+      t_low  = 500000;
+      t_high = 260000;
     }
 
   if (frequency > 100000)
@@ -319,11 +320,11 @@ static void cxd56_i2c_setfrequency(struct cxd56_i2cdev_s *priv,
       spklen = 1;
     }
 
-  lcnt64 = (tLow + 6500ull / 20000ull) * base;
+  lcnt64 = (t_low + 6500ull / 20000ull) * base;
   lcnt   = ((lcnt64 + 999999999ull) / 1000000000ull) - 1; /* ceil */
   lcnt   = lcnt < 8 ? 8 : lcnt;
 
-  hcnt64 = (tHigh - 6500ull) * base;
+  hcnt64 = (t_high - 6500ull) * base;
   hcnt   = ((hcnt64 + 999999999ull) / 1000000000ull) - 6 - spklen; /* ceil */
   hcnt   = hcnt < 6 ? 6 : hcnt;
 
@@ -541,7 +542,7 @@ static int cxd56_i2c_receive(struct cxd56_i2cdev_s *priv, int last)
         {
           break;
         }
-  }
+    }
 
   return 0;
 }
@@ -739,39 +740,35 @@ static int cxd56_i2c_scurecv(int port, int addr, uint8_t *buf, ssize_t buflen)
       return OK;
     }
 
-  rem = buflen;
-  while (rem)
+  if (buflen > 16)
     {
-      len0 = rem > 8 ? 8 : rem;
-      rem -= len0;
-      len1 = rem > 8 ? 8 : rem;
-      rem -= len1;
+      return -EINVAL;
+    }
 
-      inst[0] = SCU_INST_RECV(len0);
-      if (len1)
-        {
-          inst[1] = SCU_INST_RECV(len1);
-          instn = 2;
-        }
-      else
-        {
-          instn = 1;
-        }
+  rem = buflen;
+  len0 = rem > 8 ? 8 : rem;
+  rem -= len0;
+  len1 = rem > 8 ? 8 : rem;
+  rem -= len1;
 
-      if (rem == 0)
-        {
-          inst[instn - 1] |= SCU_INST_LAST;
-        }
+  inst[0] = SCU_INST_RECV(len0);
+  if (len1)
+    {
+      inst[1] = SCU_INST_RECV(len1);
+      instn = 2;
+    }
+  else
+    {
+      instn = 1;
+    }
 
-      ret = scu_i2ctransfer(port, addr, inst, instn, buf, len0 + len1);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "I2C receive failed. port %d addr %d\n",
-                 port, addr);
-          break;
-        }
+  inst[instn - 1] |= SCU_INST_LAST;
 
-      buf += len0 + len1;
+  ret = scu_i2ctransfer(port, addr, inst, instn, buf, buflen);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "I2C receive failed. port %d addr %d\n",
+             port, addr);
     }
 
   return ret;
@@ -1002,7 +999,7 @@ struct i2c_master_s *cxd56_i2cbus_initialize(int port)
   priv->frequency = 0;
 
   cxd56_i2c_clock_enable(priv->port);
-  priv->baseFreq = cxd56_get_i2c_baseclock(priv->port);
+  priv->base_freq = cxd56_get_i2c_baseclock(priv->port);
 
   cxd56_i2c_disable(priv);
 

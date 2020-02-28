@@ -206,7 +206,7 @@
 
 /* S25FL1 JEDIC IDs */
 
-#define S25FL1_JEDEC_DEVICE_TYPE   0x40  /* S25FL1 memory devuce type */
+#define S25FL1_JEDEC_DEVICE_TYPE   0x40  /* S25FL1 memory device type */
 #define S25FL116K_JEDEC_CAPACITY   0x15  /* S25FL116K memory capacity */
 #define S25FL132K_JEDEC_CAPACITY   0x16  /* S25FL132K memory capacity */
 #define S25FL164K_JEDEC_CAPACITY   0x17  /* S25FL164K memory capacity */
@@ -406,19 +406,19 @@ static int  s25fl1_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 static void s25fl1_lock(FAR struct qspi_dev_s *qspi)
 {
-  /* On QuadSPI busses where there are multiple devices, it will be necessary to
-   * lock QuadSPI to have exclusive access to the busses for a sequence of
+  /* On QuadSPI buses where there are multiple devices, it will be necessary to
+   * lock QuadSPI to have exclusive access to the buses for a sequence of
    * transfers.  The bus should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusiv access to
-   * the QuadSPI buss.  We will retain that exclusive access until the bus is unlocked.
+   * This is a blocking call and will not return until we have exclusive access to
+   * the QuadSPI bus.  We will retain that exclusive access until the bus is unlocked.
    */
 
   QSPI_LOCK(qspi, true);
 
   /* After locking the QuadSPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the QuadSPI is properly configured for the device.
-   * If the QuadSPI buss is being shared, then it may have been left in an incompatible
+   * If the QuadSPI bus is being shared, then it may have been left in an incompatible
    * state.
    */
 

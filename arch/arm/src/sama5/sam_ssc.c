@@ -44,7 +44,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <queue.h>
@@ -59,6 +58,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
+#include <nuttx/semaphore.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -452,7 +452,7 @@ struct sam_ssc_s
 {
   struct i2s_dev_s dev;        /* Externally visible I2S interface */
   uintptr_t base;              /* SSC controller register base address */
-  sem_t exclsem;               /* Assures mutually exclusive acess to SSC */
+  sem_t exclsem;               /* Assures mutually exclusive access to SSC */
   uint8_t datalen;             /* Data width (8, 16, or 32) */
 #ifdef CONFIG_DEBUG_FEATURES
   uint8_t align;               /* Log2 of data width (0, 1, or 3) */
@@ -2228,9 +2228,9 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   flags = enter_critical_section();
   sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.pend);
-  ssc_dump_rxqueues(priv, "Receving");
+  ssc_dump_rxqueues(priv, "Receiving");
 
-  /* Then start the next transfer.  If there is already a transfer in progess,
+  /* Then start the next transfer.  If there is already a transfer in progress,
    * then this will do nothing.
    */
 
@@ -2324,7 +2324,7 @@ static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
       return 0;
     }
 
-  /* Upate the DMA flags */
+  /* Update the DMA flags */
 
   ret = ssc_dma_flags(priv, &dmaflags);
   if (ret < 0)
@@ -2447,7 +2447,7 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.pend);
   ssc_dump_txqueues(priv, "Transmitting");
 
-  /* Then start the next transfer.  If there is already a transfer in progess,
+  /* Then start the next transfer.  If there is already a transfer in progress,
    * then this will do nothing.
    */
 
@@ -2563,7 +2563,7 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
   /* RFMR settings. Some of these settings will need to be configurable as well.
    * Currently hardcoded to:
    *
-   *  SSC_RFMR_DATLEN(n)    'n' deterimined by configuration
+   *  SSC_RFMR_DATLEN(n)    'n' determined by configuration
    *  SSC_RFMR_LOOP         Determined by configuration
    *  SSC_RFMR_MSBF         Most significant bit first
    *  SSC_RFMR_DATNB(n)     Data number 'n' per frame (hard-coded)

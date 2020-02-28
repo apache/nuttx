@@ -70,4 +70,3 @@ bool nxgl_colorcmp(const nxgl_mxpixel_t color1[CONFIG_NX_NPLANES],
 
   return true;
 }
-

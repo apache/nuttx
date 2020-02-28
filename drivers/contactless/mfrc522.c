@@ -472,7 +472,7 @@ int mfrc522_comm_picc(FAR struct mfrc522_dev_s *dev, uint8_t command,
       tstart.tv_nsec -= 1000 * 1000 * 1000;
     }
 
-  /* If it is a Transceive command, then start transmittion */
+  /* If it is a Transceive command, then start transmission */
 
   if (command == MFRC522_TRANSCV_CMD)
     {

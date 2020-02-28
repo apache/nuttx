@@ -98,7 +98,7 @@
 #  define GCLK_GENCTRL_SRC_XOSC0     (0 << GCLK_GENCTRL_SRC_SHIFT) /* XOSC 0 oscillator input */
 #  define GCLK_GENCTRL_SRC_XOSC1     (1 << GCLK_GENCTRL_SRC_SHIFT) /* XOSC 1 oscillator input */
 #  define GCLK_GENCTRL_SRC_GCLK_IN   (2 << GCLK_GENCTRL_SRC_SHIFT) /* Generator input pad */
-#  define GCLK_GENCTRL_SRC_GCLK_GEN1 (3 << GCLK_GENCTRL_SRC_SHIFT) /* Generic clock generater 1 output */
+#  define GCLK_GENCTRL_SRC_GCLK_GEN1 (3 << GCLK_GENCTRL_SRC_SHIFT) /* Generic clock generator 1 output */
 #  define GCLK_GENCTRL_SRC_OSCULP32K (4 << GCLK_GENCTRL_SRC_SHIFT) /* OSCULP32K oscillator output */
 #  define GCLK_GENCTRL_SRC_XOSC32K   (5 << GCLK_GENCTRL_SRC_SHIFT) /* XOSC32K oscillator output */
 #  define GCLK_GENCTRL_SRC_DFLL      (6 << GCLK_GENCTRL_SRC_SHIFT) /* DFLL oscillator output */

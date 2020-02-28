@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __DRIVERS_CONTACTLESS_MFRC522_H
-#define __DRIVERS_CONTACTLESS_MFRC522_H 1
+#define __DRIVERS_CONTACTLESS_MFRC522_H
 
 /****************************************************************************
  * Included Files
@@ -369,7 +369,7 @@
 
 /* Section 9.3.2.14 MfRxReg register */
 
-#define MFRC522_MF_RX_PARITY_DIS   (1 << 4 ) /* disable parity bit to transmittion and reception */
+#define MFRC522_MF_RX_PARITY_DIS   (1 << 4 ) /* disable parity bit to transmission and reception */
 
 /* Section 9.3.2.16: SerialSpeedReg register */
 

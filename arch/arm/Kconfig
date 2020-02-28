@@ -80,6 +80,7 @@ config ARCH_CHIP_IMX6
 	select BOOT_RUNFROMSDRAM
 	select ARCH_HAVE_ADDRENV
 	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_GLOBAL_IRQDISABLE
 	---help---
 		Freescale iMX.6 architectures (Cortex-A9)
 
@@ -816,6 +817,9 @@ config ARM_SEMIHOSTING_HOSTFS
 	---help---
 		Mount HostFS through semihosting.
 
+		This doesn't support some directory operations like readdir because
+		of the limitations of semihosting mechanism.
+
 config ARM_LWL_CONSOLE
 	bool "Lightweight Link Console Support"
 	default n
@@ -826,7 +830,7 @@ config ARM_LWL_CONSOLE
 		for openocd as the debugger is available in tools/ocdconsole.py.
 
 		Currently only available for STM32 architectures, but easily
-		added to other ARM architectures be addd up_low_console.c to the
+		added to other ARM architectures be add up_low_console.c to the
 		architecture Make.defs file.
 
 if ARCH_CORTEXM0

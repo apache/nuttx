@@ -54,15 +54,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/*
-#define VERBOSE
-#define DBG
-*/
+#if 0
+#  define VERBOSE
+#  define DBG
+#endif
 
-// BDF Specification Version 2.2:
-// This version lifts the restriction on line length. In this version, the new
-// maximum length of a value of the type string is 65535 characters, and hence
-// lines may now be at least this long.
+/* BDF Specification Version 2.2:
+ * This version lifts the restriction on line length. In this version, the new
+ * maximum length of a value of the type string is 65535 characters, and hence
+ * lines may now be at least this long.
+ */
 
 #define BDF_MAX_LINE_LENGTH 65535
 
@@ -75,7 +76,7 @@
 #define NXFONT_MAX8BIT 255
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
 
 /* This structure holds information about a glyph */

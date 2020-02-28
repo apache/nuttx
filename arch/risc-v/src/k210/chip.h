@@ -42,4 +42,3 @@
 #include "k210_memorymap.h"
 
 #endif /* __ARCH_RISCV_SRC_K210_CHIP_H */
-

@@ -160,7 +160,7 @@
 #define TAnMR_MR_PMSFLAG   0x00       /*   x0x0 : Trigger select one-shot start flag */
 #define TAnMR_MR_PMTRIG    0x10       /*   x1x0 : Trigger Selected by event/trigger select bits */
 #define TAnMR_MR_PM16BIT   0x00       /*   0xx0 : Functions as a 16-bit pulse width modulator */
-#define TAnMR_MR_PM8BIT    0x20       /*   1xx0 : Functions as an 8-bit pulse width modul */
+#define TAnMR_MR_PM8BIT    0x20       /*   1xx0 : Functions as an 8-bit pulse width module */
 #define TAnMR_TCK_MASK     0xc0       /* Bits 6-7: Count source select */
                                       /* Timer Mode: */
 #define TAnMR_TCK_TMF1     0x00       /*   00: f1 or f2 */

@@ -45,7 +45,7 @@
 
 /* The OUTPUT_ARCH command specifies the machine architecture where the
  * argument is one of the names used in the BFD library. More
- * specifically one of the entires in bfd/cpu-mips.c
+ * specifically one of the entries in bfd/cpu-mips.c
  */
 
 OUTPUT_ARCH( "riscv" )
@@ -107,14 +107,14 @@ GROUP( -lc )
  *  PROVIDE( etext = . );
  *
  * This will set the global symbol _ftext to the current location. If we
- * wrap this in a PROVIDE commad, the symbol will only be set if it is
+ * wrap this in a PROVIDE command, the symbol will only be set if it is
  * not defined. We do this with symbols which don't begin with an
  * underscore since technically in ansi C someone might have a function
  * with the same name (eg. etext).
  *
  * If we need to label the beginning of a section we need to make sure
- * that the linker doesn't insert an orphan section inbetween where we
- * set the symbol and the actual begining of the section. We can do that
+ * that the linker doesn't insert an orphan section between where we
+ * set the symbol and the actual beginning of the section. We can do that
  * by assigning the location dot to itself.
  *
  *  . = .
@@ -147,7 +147,7 @@ SECTIONS
   /* Code and read-only segment                                         */
   /*--------------------------------------------------------------------*/
 
-  /* Begining of code and text segment */
+  /* Beginning of code and text segment */
 
   . = 0x20000030;
 
@@ -195,7 +195,7 @@ SECTIONS
   _etext = .;
 
   /*--------------------------------------------------------------------*/
-  /* Global constructor/destructor segement                             */
+  /* Global constructor/destructor segment                             */
   /*--------------------------------------------------------------------*/
 
   .preinit_array     :

@@ -130,7 +130,7 @@
 #  error "CONFIG_PAGING_NPPAGED must be less than CONFIG_PAGING_NVPAGED"
 #endif
 
-/* The size of physical and virutal paged address regions will then be: */
+/* The size of physical and virtual paged address regions will then be: */
 
 #define PG_PAGED_PSIZE             (CONFIG_PAGING_NPPAGED << PAGESHIFT)
 #define PG_PAGED_VSIZE             (CONFIG_PAGING_NVPAGED << PAGESHIFT)

@@ -44,7 +44,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
@@ -64,7 +63,7 @@
  *
  * Input Parameters:
  *   sockfd - Socket descriptor of the socket to operate on
- *   bug    - Caller-provided location in which to return the fstat data
+ *   buf    - Caller-provided location in which to return the fstat data
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on

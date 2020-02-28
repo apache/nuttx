@@ -33,7 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * This header file is only accessible from the src directory.
- * For /arch/arm/src accessibilty use ../include/board.h instead.
+ * For /arch/arm/src accessibility use ../include/board.h instead.
  ****************************************************************************/
 
 #ifndef __BOARDS_ARM_KINETIS_TWR_K64F120M_SRC_TWRK64_H
@@ -228,7 +228,7 @@
 /* SDHC
  * important notice: on TWR-K64F120M, R521 (close to the SD card holder) is
  * not placed, hence WRPROTEC is always ON. Either place a 4.7KOhm resistor
- * or change PIN config to PULLDOWN, loosing Write Protect function
+ * or change PIN config to PULLDOWN, losing Write Protect function
  */
 
 #define GPIO_SD_CARDDETECT (GPIO_PULLUP | PIN_INT_BOTH | PIN_PORTB | PIN20)

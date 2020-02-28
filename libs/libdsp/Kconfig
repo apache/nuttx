@@ -24,7 +24,7 @@ config LIBDSP_PRECISION
 	int "Libdsp precision [0/1/2]"
 	default 0
 	---help---
-		Whith this option we can select libdsp precision for
+		With this option we can select libdsp precision for
 		some of calculations. There are 3 available options:
 		0 - the fastest calculation but the lowest precision
 		1 - a little better precision than above, but slowest

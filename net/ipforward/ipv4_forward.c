@@ -68,7 +68,7 @@
  *
  * Input Parameters:
  *   ipv4  - A pointer to the IPv4 header in within the IPv4 packet.  This
- *           is immeidately followed by the L3 header which may be TCP, UDP
+ *           is immediately followed by the L3 header which may be TCP, UDP
  *           or ICMP.
  *
  * Returned Value:
@@ -484,7 +484,7 @@ int ipv4_forward(FAR struct net_driver_s *dev, FAR struct ipv4_hdr_s *ipv4)
 #ifdef CONFIG_NET_ETHERNET
       /* REVISIT:  For Ethernet we may have to fix up the Ethernet header:
        * - source MAC, the MAC of the current device.
-       * - dest MAC, the MAC associated with the destination IPv4 adress.
+       * - dest MAC, the MAC associated with the destination IPv4 address.
        *   This  will involve ICMP.
        */
 

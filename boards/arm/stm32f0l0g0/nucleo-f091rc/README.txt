@@ -44,7 +44,7 @@ Nucleo-64 Boards
 LEDs
 ====
 
-  The Nucleo-64 board has one user controlable LED, User LD2.  This green
+  The Nucleo-64 board has one user controllable LED, User LD2.  This green
   LED is a user LED connected to Arduino signal D13 corresponding to STM32
   I/O PA5 (PB13 on other some other Nucleo-64 boards).
 
@@ -294,7 +294,6 @@ Configurations
          CONFIG_ARCH_IRQBUTTONS=y
 
          CONFIG_BUILTIN=y
-         CONFIG_BUILTIN_PROXY_STACKSIZE=1024
 
          CONFIG_FS_PROCFS=y
          CONFIG_NSH_PROC_MOUNTPOINT="/proc"

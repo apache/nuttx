@@ -66,7 +66,7 @@ endif
 # This define is passed as EXTRADEFINES for kernel-mode builds.  It is also passed
 # during PASS1 (but not PASS2) context and depend targets.
 
-KDEFINE = ${shell $(TOPDIR)\tools\define.bat "$(CC)" __KERNEL__}
+KDEFINE = ${shell $(DEFINE) "$(CC)" __KERNEL__}
 
 # Process architecture and board-specific directories
 
@@ -171,13 +171,15 @@ ifeq ($(V),2)
 MKEXPORT_ARGS += -d
 endif
 
-# This is the name of the final target (relative to the top level directorty)
+# This is the name of the final target (relative to the top level directory)
 
 NUTTXNAME = nuttx
 BIN       = $(NUTTXNAME)$(EXEEXT)
 
 all: $(BIN)
 .PHONY: dirlinks context clean_context check_context configenv config oldconfig menuconfig nconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
+.PHONY: pass1 pass1deps pass1dep
+.PHONY: pass2 pass2deps pass2dep
 
 # Target used to copy include\nuttx\math.h.  If CONFIG_ARCH_MATH_H is
 # defined, then there is an architecture specific math.h header file
@@ -335,7 +337,7 @@ ifeq ($(CONFIG_WINDOWS_MKLINK),y)
 	$(Q) /user:administrator mklink /d $(TOPDIR)\drivers\platform $(BOARD_DIR)\drivers
 else
 	$(Q) xcopy $(BOARD_DIR)\drivers $(TOPDIR)\drivers\platform /c /q /s /e /y /i
-	$(Q) echo FAKELNK > $(TOPDIR)\drivers\platform .fakelnk
+	$(Q) echo FAKELNK > $(TOPDIR)\drivers\platform\.fakelnk
 endif
 
 ifeq ($(COMMON_DIR),y)
@@ -424,13 +426,6 @@ clean_context:
 	$(call DELFILE, include\math.h)
 	$(call DELFILE, include\stdarg.h)
 	$(call DELFILE, include\setjmp.h)
-	$(call DELDIR, include\arch\board)
-	$(call DELDIR, include\arch\chip)
-	$(call DELDIR, include\arch)
-	$(call DELDIR, $(ARCH_SRC)\board\board)
-	$(call DELDIR, $(ARCH_SRC)\board)
-	$(call DELDIR, $(ARCH_SRC)\chip)
-	$(call DELDIR, $(TOPDIR)\drivers\platform)
 
 # check_context
 #
@@ -645,6 +640,13 @@ endif
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
+	$(call DELDIR, include\arch\board)
+	$(call DELDIR, include\arch\chip)
+	$(call DELDIR, include\arch)
+	$(call DELDIR, $(ARCH_SRC)\board\board)
+	$(call DELDIR, $(ARCH_SRC)\board)
+	$(call DELDIR, $(ARCH_SRC)\chip)
+	$(call DELDIR, $(TOPDIR)\drivers\platform)
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
 # application directory.  A sample apps\ directory is included with NuttX,

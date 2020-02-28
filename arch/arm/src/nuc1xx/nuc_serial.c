@@ -43,7 +43,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -681,8 +680,8 @@ static int up_interrupt(int irq, void *context,  void *arg)
         {
           /* We are receiving data and the RX timeout is not enabled.
            * Set the RX FIFO threshold so that RX interrupts will only be
-           * generated after several bytes have been recevied and enable
-           * the RX timout.
+           * generated after several bytes have been received and enable
+           * the RX timeout.
            */
 
           up_rxto_enable(priv);
@@ -712,7 +711,7 @@ static int up_interrupt(int irq, void *context,  void *arg)
       if ((isr & UART_ISR_RLS_INT) != 0 ||
           (isr & UART_ISR_BUF_ERR_INT) != 0)
         {
-          /* Both errors are cleared by reseting the RX FIFO */
+          /* Both errors are cleared by resetting the RX FIFO */
 
           regval = up_serialin(priv, NUC_UART_FCR_OFFSET);
           up_serialout(priv, NUC_UART_FCR_OFFSET, regval | UART_FCR_RFR);
@@ -875,8 +874,8 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
       else
         {
           /* Otherwise, set the RX FIFO threshold so that RX interrupts will
-           * only be generated after several bytes have been recevied and
-           * enable* the RX timout.
+           * only be generated after several bytes have been received and
+           * enable* the RX timeout.
            */
 
           up_rxto_enable(priv);
@@ -995,11 +994,13 @@ static bool up_txempty(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
+#ifdef USE_EARLYSERIALINIT
+
 /****************************************************************************
- * Name: up_serialinit
+ * Name: up_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
@@ -1020,6 +1021,7 @@ void up_earlyserialinit(void)
   up_setup(&CONSOLE_DEV);
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: up_serialinit

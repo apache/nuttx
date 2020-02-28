@@ -1,5 +1,5 @@
 ############################################################################
-# Makefile.host
+# tools/Makefile.host
 #
 #   Copyright (C) 2007, 2008, 2011-2012, 2015, 2017-2018 Gregory Nutt. All
 #     rights reserved.
@@ -43,22 +43,23 @@ include ${TOPDIR}/tools/Config.mk
 # Define HOSTCC on the make command line if it differs from these defaults
 # Define HOSTCFLAGS with -g on the make command line to build debug versions
 
-HOSTOS = ${shell uname -o 2>/dev/null || echo "Other"}
+HOSTOS = ${shell uname -o 2>/dev/null || uname -s 2>/dev/null || echo "Other"}
 
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+ifeq ($(HOSTOS),MinGW)
 
-# In the Windows native environment, the MinGW GCC compiler is assumed
+# In the Windows native environment, the MinGW GCC compiler is used
 
-HOSTCC ?= mingw-gcc.exe
+HOSTCC ?= mingw32-gcc.exe
 HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I. -DCONFIG_WINDOWS_NATIVE=y
 
 else
 
-# GCC is assumed in the POSIX environment (Linux or Cygwin).
+# GCC or clang is assumed in all other POSIX environments
+# (Linux, Cygwin, MSYS2, macOS).
 # strtok_r is used in some tools, but does not seem to be available in
 # the MinGW environment.
 
-HOSTCC ?= gcc
+HOSTCC ?= cc
 HOSTCFLAGS ?= -O2 -Wall -Wstrict-prototypes -Wshadow -I.
 HOSTCFLAGS += -DHAVE_STRTOK_C=1
 

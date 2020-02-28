@@ -88,7 +88,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <sched.h>
-#include <semaphore.h>
 #include <termios.h>
 #include <stdio.h>
 #include <string.h>
@@ -546,7 +545,7 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
                *
                * REVISIT: Should not block if the oflags include O_NONBLOCK.
                * How would we ripple the O_NONBLOCK characteristic to the
-               * contained soruce pipe?  file_vfcntl()?  Or FIONREAD? See the
+               * contained source pipe?  file_vfcntl()?  Or FIONREAD? See the
                * TODO comment at the top of this file.
                */
 

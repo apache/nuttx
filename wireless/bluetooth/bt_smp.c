@@ -1238,7 +1238,7 @@ static void bt_smp_encrypt_change(FAR FAR struct bt_conn_s *conn,
 }
 
 #if defined(CONFIG_BLUETOOTH_SMP_SELFTEST)
-/* spaw octets for LE encrypt */
+/* spawn octets for LE encrypt */
 
 static void swap_buf(FAR const uint8_t *src, FAR uint8_t *dst, uint16_t len)
 {

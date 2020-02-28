@@ -269,14 +269,14 @@ avr32_common:
     /* Disable interrupts in the current SR.  This is necessary because the */
 	/* AVR32 permits nested interrupts (if they are of higher priority).    */
 	/* We can support nested interrupts without some effort because:        */
-	/* - The global variable g_current_regs permits only one interrupt,       */
+	/* - The global variable g_current_regs permits only one interrupt,     */
 	/* - If CONFIG_ARCH_INTERRUPTSTACK is defined, then there is a single   */
 	/*   interrupt stack, and                                               */
 	/* - Probably other things.                                             */
 
 	ssrf	AVR32_SR_GM_SHIFT
 
-	/* Save the SP (as it was before the interrupt) in the conext save      */
+	/* Save the SP (as it was before the interrupt) in the context save     */
 	/* structure.                                                           */
 	/*     xx xx xx xx xx xx xx xx SP SR PC LR 12 11 10 09 08               */
 	/*                             ^sp                                      */
@@ -296,7 +296,7 @@ avr32_common:
 
 	mov		r11, sp
 
-	/* Switch to the interrupt stack if so configured.  Move the current   */
+	/* Switch to the interrupt stack if so configured.  Move the current    */
 	/* stack pointer into a preserved register (r7) and set the interrupt   */
 	/* stack pointer.                                                       */
 
@@ -370,4 +370,3 @@ up_interruptstack:
 	.size	up_interruptstack, .-up_interruptstack
 #endif
 	.end
-

@@ -437,7 +437,7 @@ Toolchains
 
   Another option is the mips-elf toolchain used with the Pinguino project.  This
   is a relatively current mips-elf GCC and should provide free C++ support as
-  well. This toolchain can be downloded from the Pinguino website:
+  well. This toolchain can be downloaded from the Pinguino website:
   http://wiki.pinguino.cc/index.php/Main_Page#Download .
 
   See also boards/mirtoo/README.txt.  There is an experimental (untested)
@@ -556,7 +556,7 @@ Creating Compatible NuttX HEX files
       cd tools/pic32mx
       make
 
-    Now you will have an excecutable file call mkpichex (or mkpichex.exe on
+    Now you will have an executable file call mkpichex (or mkpichex.exe on
     Cygwin).  This program will take the nutt.hex file as an input, it will
     convert all of the KSEG0 and KSEG1 addresses to physical address, and
     it will write the modified file, replacing the original nuttx.hex.
@@ -973,7 +973,7 @@ PIC32MX specific PHY/Ethernet device driver settings
     CONFIG_ETH0_PHY_KS8721 - Selects the Micrel KS8721 PHY
     CONFIG_ETH0_PHY_DP83848C - Selects the National Semiconductor DP83848C PHY
     CONFIG_ETH0_PHY_LAN8720 - Selects the SMSC LAN8720 PHY
-    CONFIG_PIC32MX_PHY_AUTONEG - Enable auto-negotion
+    CONFIG_PIC32MX_PHY_AUTONEG - Enable auto-negotiation
     CONFIG_PIC32MX_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
     CONFIG_PIC32MX_PHY_FDUPLEX - Select full (vs. half) duplex
     CONFIG_PIC32MX_ETH_NTXDESC - Configured number of Tx descriptors. Default: 2
@@ -1111,7 +1111,6 @@ Where <subdir> is one of the following:
     3. The RAM log is enabled"
 
       CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
-      CONFIG_RAMLOG_CONSOLE=n     : (there is no default console device)
       CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the
                                     system logger.
 

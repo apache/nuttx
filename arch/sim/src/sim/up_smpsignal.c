@@ -40,12 +40,11 @@
 #include <nuttx/config.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/sched_note.h>
 #include <nuttx/spinlock.h>
 
 #include "sched/sched.h"
 #include "up_internal.h"
-
-#ifdef CONFIG_SMP
 
 /****************************************************************************
  * Public Functions
@@ -158,4 +157,21 @@ int up_cpu_paused(int cpu)
   return OK;
 }
 
-#endif /* CONFIG_SMP */
+/****************************************************************************
+ * Name: up_cpu_started
+ *
+ * Description:
+ *   Notify the current cpu start successfully.
+ *
+ ****************************************************************************/
+
+void up_cpu_started(void)
+{
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  FAR struct tcb_s *tcb = this_task();
+
+  /* Announce that the IDLE task has started */
+
+  sched_note_start(tcb);
+#endif
+}

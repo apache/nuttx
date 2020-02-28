@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/arm_schedulesigaction.c
+ * arch/xtensa/src/common/xtensa_schedulesigaction.c
  *
  *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -181,8 +181,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            */
 
           tcb->xcp.sigdeliver   = sigdeliver;
-          tcb->xcp.saved_pc     = CURRENT_REGS[REG_PC];
-          tcb->xcp.saved_ps     = CURRENT_REGS[REG_PS];
+          tcb->xcp.saved_pc     = tcb->xcp.regs[REG_PC];
+          tcb->xcp.saved_ps     = tcb->xcp.regs[REG_PS];
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
@@ -362,8 +362,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            */
 
           tcb->xcp.sigdeliver   = sigdeliver;
-          tcb->xcp.saved_pc     = CURRENT_REGS[REG_PC];
-          tcb->xcp.saved_ps     = CURRENT_REGS[REG_PS];
+          tcb->xcp.saved_pc     = tcb->xcp.regs[REG_PC];
+          tcb->xcp.saved_ps     = tcb->xcp.regs[REG_PS];
 
           /* Increment the IRQ lock count so that when the task is restarted,
            * it will hold the IRQ spinlock.

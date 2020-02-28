@@ -137,7 +137,7 @@ enum kbd_keycode_e
   KEYCODE_MEMCLEAR,            /* Memory clear */
   KEYCODE_MEMRECALL,           /* Memory recall */
   KEYCODE_MEMADD,              /* Memory add */
-  KEYCODE_MEMSUB,              /* Memory substract */
+  KEYCODE_MEMSUB,              /* Memory subtract */
   KEYCODE_MEMMUL,              /* Memory multiply */
   KEYCODE_MEMDIV,              /* Memory divide */
 
@@ -344,4 +344,3 @@ int kbd_decode(FAR struct lib_instream_s *stream,
 
 #endif /* CONFIG_LIB_KBDCODEC */
 #endif /* __INCLUDE_NUTTX_INPUT_KBD_CODEC_H */
-

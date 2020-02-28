@@ -173,4 +173,4 @@
 
 #endif
 
-#endif  /* __DM320_DM320_GIO_H */
+#endif /* __DM320_DM320_GIO_H */

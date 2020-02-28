@@ -64,4 +64,4 @@ EXTERN char z80_lowgetc(void) __naked;
 }
 #endif
 
-#endif  /* __BOARDS_Z80_Z80_Z80SIM_INCLUDE_BOARD_H */
+#endif /* __BOARDS_Z80_Z80_Z80SIM_INCLUDE_BOARD_H */

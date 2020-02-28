@@ -41,12 +41,12 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -80,7 +80,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure descibes one DMA channel */
+/* This structure describes one DMA channel */
 
 struct stm32_dma_s
 {
@@ -299,7 +299,7 @@ static inline FAR struct stm32_dma_s *stm32_dmamap(unsigned long dmamap)
 
   unsigned int controller = STM32_DMA_CONTROLLER(dmamap);
 
-  /* Extact the stream number from the bit encoded value */
+  /* Extract the stream number from the bit encoded value */
 
   unsigned int stream = STM32_DMA_STREAM(dmamap);
 
@@ -734,7 +734,7 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool 
 
   DEBUGASSERT(handle != NULL);
 
-  /* Save the callback info.  This will be invoked whent the DMA commpletes */
+  /* Save the callback info.  This will be invoked whent the DMA completes */
 
   dmast->callback = callback;
   dmast->arg      = arg;
@@ -1105,4 +1105,4 @@ uint8_t stm32_dma_intget(unsigned int controller, uint8_t stream)
 
   return (uint8_t)regval;
 }
-#endif  /* CONFIG_ARCH_HIPRI_INTERRUPT */
+#endif /* CONFIG_ARCH_HIPRI_INTERRUPT */

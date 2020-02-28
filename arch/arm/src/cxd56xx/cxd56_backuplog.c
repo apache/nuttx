@@ -183,7 +183,7 @@ static int allocate_memory(size_t size)
  *
  * Description:
  *   Initialize the log header where the address and size of each log area
- *   are decribed. If the log header has been already configured in a wakeup
+ *   are described. If the log header has been already configured in a wakeup
  *   from sleeping or reboot case, then do nothing and return OK.
  *
  * Returned Value:

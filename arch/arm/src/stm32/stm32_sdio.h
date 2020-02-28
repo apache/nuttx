@@ -146,4 +146,3 @@ void sdio_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_SDIO_H */
-

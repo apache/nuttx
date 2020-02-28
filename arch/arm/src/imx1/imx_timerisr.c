@@ -92,7 +92,7 @@ static int imx_timerisr(int irq, uint32_t *regs, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  arm_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize the timer
@@ -100,7 +100,7 @@ static int imx_timerisr(int irq, uint32_t *regs, FAR void *arg)
  *
  ****************************************************************************/
 
-void arm_timer_initialize(void)
+void up_timer_initialize(void)
 {
   uint32_t tctl;
 
@@ -153,4 +153,3 @@ void arm_timer_initialize(void)
   irq_attach(IMX_IRQ_SYSTIMER, (xcpt_t)imx_timerisr, NULL);
   up_enable_irq(IMX_IRQ_SYSTIMER);
 }
-

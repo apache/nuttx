@@ -80,63 +80,19 @@
 
 /* Clocking ****************************************************************/
 
-#define BOARD_XTAL_FREQUENCY        (26000000)  /* XTAL oscillator frequency */
-#define BOARD_RTCCLK_FREQUENCY      (32768)     /* RTC oscillator frequency */
-#define BOARD_INTRCOSC_FREQUENCY    (8192000)   /* Internal RC oscillator frequency */
-
 #ifdef CONFIG_CXD56_80MHz
 #  define BOARD_FCLKOUT_FREQUENCY   (80000000)
 #else
-#  define BOARD_FCLKOUT_FREQUENCY   (97500000)
-#endif
-
-#define CXD56_CCLK                  BOARD_FCLKOUT_FREQUENCY
-
-/* USB0 ********************************************************************/
-
-#define BOARD_USB0_CLKSRC           PLL0USB_CLKSEL_XTAL
-#define BOARD_USB0_MDIV             0x06167ffa /* Table 149 datsheet, valid for 12Mhz Fclkin */
-#define BOARD_USB0_NP_DIV           0x00302062 /* Table 149 datsheet, valid for 12Mhz Fclkin */
-
-/* SPIFI clocking **********************************************************/
-
-/* The SPIFI will receive clocking from a divider per the settings provided
- * in this file.  The NuttX code will configure PLL1 as the input clock
- * for the selected divider
- */
-
-#undef  BOARD_SPIFI_PLL1                        /* No division */
-#undef  BOARD_SPIFI_DIVA                        /* Supports division by 1-4 */
-#undef  BOARD_SPIFI_DIVB                        /* Supports division by 1-16 */
-#undef  BOARD_SPIFI_DIVC                        /* Supports division by 1-16 */
-#undef  BOARD_SPIFI_DIVD                        /* Supports division by 1-16 */
-#undef  BOARD_SPIFI_DIVE                        /* Supports division by 1-256 */
-
-#if BOARD_FCLKOUT_FREQUENCY < 20000000
-#  define BOARD_SPIFI_PLL1          1           /* Use PLL1 directly */
-#else
-#  define BOARD_SPIFI_DIVB          1           /* Use IDIVB */
-#endif
-
-/* We need to configure the divider so that its output is as close to the
- * desired SCLK value.  The peak data transfer rate will be about half of
- * this frequency in bytes per second.
- */
-
-#if BOARD_FCLKOUT_FREQUENCY < 20000000
-#  define BOARD_SPIFI_FREQUENCY     BOARD_FCLKOUT_FREQUENCY  /* 72Mhz? */
-#else
-#  define BOARD_SPIFI_DIVIDER       (14)        /* 204MHz / 14 = 14.57MHz */
-#  define BOARD_SPIFI_FREQUENCY     (102000000) /* 204MHz / 14 = 14.57MHz */
+#  define BOARD_FCLKOUT_FREQUENCY   (100000000)
 #endif
 
 /* UART clocking ***********************************************************/
 
 /* Configure all UARTs to use the XTAL input frequency */
 
-#define BOARD_UART0_BASEFREQ        BOARD_XTAL_FREQUENCY
-#define BOARD_UART1_BASEFREQ        48750000
-#define BOARD_UART2_BASEFREQ        BOARD_XTAL_FREQUENCY
+#define BOARD_UART0_BASEFREQ        CONFIG_CXD56_XOSC_CLOCK
+#define BOARD_UART1_BASEFREQ        BOARD_FCLKOUT_FREQUENCY
+#define BOARD_UART2_BASEFREQ        CONFIG_CXD56_XOSC_CLOCK
 
 /* LED definitions *********************************************************/
 
@@ -175,19 +131,24 @@
 
 /* Power Control definitions ***********************************************/
 
-/*     Switch    Device
+/*   For SPRESENSE board:
+ *
+ *     Switch    Device
  *     --------- -------------------------------
- *     LSW2      AcaPulco Audio Digital VDD
- *     LSW3      SPI-Flash & TCXO
- *     LSW4      GNSS LNA
- *     GPO0      AcaPulco Audio Analog VDD
- *     GPO1      Sensor 1.8V
- *     GPO2      Sensor 3.3V
- *     GPO3      Bluetooth/Bluetooth Low Energy
- *     GPO4      Image Sensor 1.2V
- *     GPO5      Image Sensor 3.3V
- *     GPO6      eMMC 3.3V/1.8V
- *     GPO7      Image Sensor 1.8V
+ *     LDO_EMMC  GNSS A-ANT
+ *     DDC_ANA   N/A
+ *     LDO_PERI  N/A
+ *     LSW2      CXD5247 Audio Digital VDD
+ *     LSW3      SPI-Flash
+ *     LSW4      TCXO & GNSS LNA
+ *     GPO0
+ *     GPO1      CXD5247 Audio Analog VDD
+ *     GPO2
+ *     GPO3
+ *     GPO4      Camera
+ *     GPO5      Camera
+ *     GPO6      Audio External Amp.
+ *     GPO7      Camera
  *
  */
 
@@ -223,16 +184,12 @@ enum board_power_device
 
   POWER_AUDIO_AVDD      = PMIC_GPO(1),
   POWER_AUDIO_MUTE      = PMIC_GPO(6),
-  POWER_SENSOR_18V      = PMIC_GPO(1),
-  POWER_SENSOR_33V      = PMIC_GPO(2),
-  POWER_BMI160          = POWER_SENSOR_18V,
-  POWER_SENSOR          = POWER_SENSOR_18V | POWER_SENSOR_33V,
-  POWER_BTBLE           = PMIC_GPO(3),
-  POWER_EINK            = PMIC_NONE,
-  POWER_EMMC            = PMIC_GPO(6),
-  POWER_LFOUR           = PMIC_NONE,
-  POWER_LTE             = PMIC_NONE,
   POWER_IMAGE_SENSOR    = PMIC_GPO(4) | PMIC_GPO(5) | PMIC_GPO(7),
+
+  POWER_BTBLE           = PMIC_NONE,
+  POWER_SENSOR          = PMIC_NONE,
+  POWER_EMMC            = PMIC_NONE,
+  POWER_LTE             = PMIC_GPO(2),
 };
 
 /* CXD5247 audio control definitions ***************************************/
@@ -254,12 +211,26 @@ enum board_power_device
 
 #define DISPLAY_SPI     5
 
+#define DISPLAY_DMA_TXCH       (4)
+#define DISPLAY_DMA_RXCH       (5)
+#define DISPLAY_DMA_TXCH_CFG   CXD56_DMA_PERIPHERAL_SPI5_TX
+#define DISPLAY_DMA_RXCH_CFG   CXD56_DMA_PERIPHERAL_SPI5_RX
+#define DISPLAY_DMA_TX_MAXSIZE (192000)
+#define DISPLAY_DMA_RX_MAXSIZE (192000)
+
 #else /* Display is connected through extension board. */
 
 #define DISPLAY_RST     PIN_SPI2_MISO
 #define DISPLAY_DC      PIN_PWM2
 
 #define DISPLAY_SPI     4
+
+#define DISPLAY_DMA_TXCH       (2)
+#define DISPLAY_DMA_RXCH       (3)
+#define DISPLAY_DMA_TXCH_CFG   CXD56_DMA_PERIPHERAL_SPI4_TX
+#define DISPLAY_DMA_RXCH_CFG   CXD56_DMA_PERIPHERAL_SPI4_RX
+#define DISPLAY_DMA_TX_MAXSIZE (192000)
+#define DISPLAY_DMA_RX_MAXSIZE (192000)
 
 #endif
 
@@ -322,4 +293,4 @@ void cxd56_boardinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_H */

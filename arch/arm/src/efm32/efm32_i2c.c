@@ -65,7 +65,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -1326,7 +1325,7 @@ static int efm32_i2c_init(FAR struct efm32_i2c_priv_s *priv)
 
   modifyreg32(EFM32_CMU_HFPERCLKEN0, 0, priv->config->clk_bit);
 
-  /* Eeset all resgister */
+  /* Eeset all register */
 
   efm32_i2c_hwreset(priv);
 

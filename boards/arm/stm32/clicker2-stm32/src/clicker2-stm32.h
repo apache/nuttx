@@ -247,7 +247,7 @@
  *   mikroBUS2 Interrupt: PE14-MB2_INT
  *
  * I assume that the interrupt lines are active low.  No pull-ups are provided on
- * board so pull-ups ar provided in the pin configurations.
+ * board so pull-ups are provided in the pin configurations.
  */
 
 #define GPIO_MB1_INT     (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTE|GPIO_PIN10)
@@ -429,5 +429,5 @@ int stm32_automount_initialize(void);
 void stm32_automount_event(int slotno, bool inserted);
 #endif
 
-#endif  /* __ASSEMBLY__ */
+#endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_CLICKER2_STM32_SRC_CLICKER2_H */

@@ -56,7 +56,7 @@
  * Input Parameters:
  *   ruid - Real user identity to set.  The special value (uid_t)-1
  *          indicates that the real user ID should not be changed.
- *   ruid - Effective user identity to set.  The special value (uid_t)-1 
+ *   ruid - Effective user identity to set.  The special value (uid_t)-1
  *          indicates that the effective user ID should not be changed.
  *
  * Returned Value:

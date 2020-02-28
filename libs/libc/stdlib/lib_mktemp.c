@@ -78,4 +78,3 @@ int mktemp(FAR char *path_template)
 }
 
 #endif /* CONFIG_FS_WRITABLE */
-

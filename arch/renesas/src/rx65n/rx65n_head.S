@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>               /* NuttX configuration settings */
 #include <arch/board/board.h>          /* Board-specific settings */
-#include <arch/irq.h>                  /* IRQ definitons */
+#include <arch/irq.h>                  /* IRQ definitions */
 #include "chip.h"                      /* Chip-specific settings */
 #include "up_internal.h"
 #include "up_arch.h"
@@ -83,7 +83,7 @@
 /*****************************************************************************
  * Macros
  *****************************************************************************/
- 
+
 /*****************************************************************************
  * Name: showprogress
  *

@@ -44,12 +44,12 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include "up_arch.h"
@@ -347,7 +347,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   modifyreg32(LC823450_SPI_SMD, 0, SPI_SMD_SSTR);
 
-  /* Wait for Tranfer done */
+  /* Wait for Transfer done */
 
   while ((getreg32(LC823450_SPI_ISR) & SPI_ISR_SPIF) == 0)
     ;

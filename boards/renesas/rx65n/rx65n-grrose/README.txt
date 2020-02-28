@@ -36,9 +36,9 @@ Status/Open Issues
 ==================
 Ethernet
 ---------
-1.Observed instability in Link Management, due to difference in hardware design.(No Seperate Interrupt line for PHY) 
+1.Observed instability in Link Management, due to difference in hardware design.(No Separate Interrupt line for PHY)
 2.Currently tested only ping and udpblaster application.
-3. Executed long run ping and udpblaster stress test for 12 hrs. Code is able to execute for 12hrs without any breakage. 
+3. Executed long run ping and udpblaster stress test for 12 hrs. Code is able to execute for 12hrs without any breakage.
 
 Serial Console
 ==============
@@ -47,74 +47,74 @@ SCI5 & SCI6).
 
 Please find the pin configurations for SCI0, SCI1, SCI2, SCI5 & SCI6
 
-SCI0 Pin Configuration : 
+SCI0 Pin Configuration :
 
------------ 
-RX65N GRROSE
-  Function    
 -----------
-  P21   RXD0  
-  P20   TXD0  
+RX65N GRROSE
+  Function
+-----------
+  P21   RXD0
+  P20   TXD0
 ------------
 
-SCI1 Pin Configuration : 
+SCI1 Pin Configuration :
 
------------ 
-RX65N GRROSE
-  Function    
 -----------
-  P30   RXD1  
-  P26   TXD1  
+RX65N GRROSE
+  Function
+-----------
+  P30   RXD1
+  P26   TXD1
 ------------
 
-SCI2 Pin Configuration : 
+SCI2 Pin Configuration :
 
------------ 
-RX65N GRROSE
-  Function    
 -----------
-  P12   RXD2  
-  P13   TXD2  
+RX65N GRROSE
+  Function
+-----------
+  P12   RXD2
+  P13   TXD2
 ------------
 
 SCI3 Pin Configuration :
 
------------ 
-RX65N GRROSE
-  Function    (connected to WiFi module)  
 -----------
-  P25   RXD3 
+RX65N GRROSE
+  Function    (connected to WiFi module)
+-----------
+  P25   RXD3
   P23   TXD3
 ------------
-  
-SCI5 Pin Configuration : 
 
------------ 
-RX65N GRROSE
-  Function    
+SCI5 Pin Configuration :
+
 -----------
-  PC2   RXD5  
-  PC3   TXD5  
+RX65N GRROSE
+  Function
+-----------
+  PC2   RXD5
+  PC3   TXD5
 ------------
 
-SCI6 Pin Configuration : 
+SCI6 Pin Configuration :
 
------------ 
-RX65N GRROSE
-  Function    
 -----------
-  P33   RXD6  
-  P32   TXD6  
+RX65N GRROSE
+  Function
+-----------
+  P33   RXD6
+  P32   TXD6
 ------------
 
 SCI8 Pin Configuration :
 
------------ 
-RX65N GRROSE
-  Function   (Half duplication mode with RS485 driver)  
 -----------
-  PC6   RXD8 
-  PC7   TXD8 
+RX65N GRROSE
+  Function   (Half duplication mode with RS485 driver)
+-----------
+  PC6   RXD8
+  PC7   TXD8
   PC5   Direction (L=TX, H=RX)
 
 Serial Connection Configuration
@@ -139,22 +139,22 @@ Networking
 Ethernet Connections
 -----------
 
-  ------        --------- 
-  RX65N 
-  GRROSE        Ethernet  
+  ------        ---------
+  RX65N
+  GRROSE        Ethernet
   Pin           Function
-  ------        --------- 
-  PA4           ET0_MDC   
+  ------        ---------
+  PA4           ET0_MDC
   PA3           ET0_MDIO
   PB2           REF50CK0
   PB7           RMII0_CRS_DV
-  PB1           RMII0_RXD0    
-  PB0           RMII0_RXD1      
-  PB3           RMII0_RX_ER      
-  PB5           RMII0_ETXD0      
-  PB6           RMII0_ETXD1       
+  PB1           RMII0_RXD0
+  PB0           RMII0_RXD1
+  PB3           RMII0_RX_ER
+  PB5           RMII0_ETXD0
+  PB6           RMII0_ETXD1
   PB4           RMII0_TXD_EN
-  PA5           ET0_LINKSTA 
+  PA5           ET0_LINKSTA
   PA6_ET_RST    ETHER reset
   ------         ---------
 NuttX Configurations
@@ -179,9 +179,9 @@ CONFIG_SCHED_LPWORK=y    :  Low Priority Work queue support
 
 Using the network with NSH
 --------------------------
-The IP address is configured using DHCP, using the below mentioned configurations : 
+The IP address is configured using DHCP, using the below mentioned configurations :
 
-The IP address is configured using DHCP, using the below mentioned configurations : 
+The IP address is configured using DHCP, using the below mentioned configurations :
 
 CONFIG_NETUTILS_DHCPC=y
 CONFIG_NETUTILS_DHCPD=y
@@ -209,16 +209,16 @@ target side, you can:
   56 bytes from 10.75.24.250: icmp_seq=9 time=0 ms
   56 bytes from 10.75.24.250: icmp_seq=10 time=0 ms
   10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
-  
+
 On the host side, you should also be able to ping the RX65N-GRROSE:
 
   $ ping 10.75.24.53
 
-Configure UDP blaster application as mentioned below : 
+Configure UDP blaster application as mentioned below :
 
 CONFIG_EXAMPLES_UDPBLASTER_HOSTIP=0x0a4b1801  (10.75.24.1) ------> Gateway IP
 CONFIG_EXAMPLES_UDPBLASTER_NETMASK=0xfffffe00 (255.255.254.0) --------> Netmask
-CONFIG_EXAMPLES_UDPBLASTER_TARGETIP=0x0a4b189b (10.75.24.155) ---------> Target IP 
+CONFIG_EXAMPLES_UDPBLASTER_TARGETIP=0x0a4b189b (10.75.24.155) ---------> Target IP
 Debugging
 ==========
 
@@ -238,17 +238,17 @@ CONFIG_DEBUG_SYMBOLS = y (Set this option, using menuconfig only, DO NOT Enable 
 
 Flashing NuttX
 ===============
-Alternativly, NuttX binary can be flashed using Renesas flash programmer tool without using e2 studio/Cygwin
+Alternatively, NuttX binary can be flashed using Renesas flash programmer tool without using e2 studio/Cygwin
 
 Below are the steps mentioned to flash NuttX binary using Renesas flash programmer tool(RFP).
 
 1.In order to flash using Renesas flash programmer tool, nuttx.mot file should be generated.
-2. Add the following lines in tools/Makefile.unix file : 
+2. Add the following lines in tools/Makefile.unix file :
 ifeq ($(CONFIG_MOTOROLA_SREC),y)
 	@echo "CP: $(NUTTXNAME).mot"
 	$(Q) $(OBJCOPY) $(OBJCOPYARGS) $(BIN) -O srec -I elf32-rx-be-ns $(NUTTXNAME).mot
 endif
-3. Add CONFIG_MOTOROLA_SREC=y in defconfig file or choose make menucofig->Build Setup-> Binary Output Format-> 
+3. Add CONFIG_MOTOROLA_SREC=y in defconfig file or choose make menucofig->Build Setup-> Binary Output Format->
    Select Motorola SREC format.
 4. Download Renesas flash programmer tool from https://www.renesas.com/in/en/products/software-tools/tools/programmer/renesas-flash-programmer-programming-gui.html#downloads
 5. Refer to the user manual document, for steps to flash NuttX binary using RFP tool.

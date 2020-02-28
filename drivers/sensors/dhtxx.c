@@ -48,10 +48,9 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/signal.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/time.h>
 #include <nuttx/clock.h>
-
+#include <nuttx/semaphore.h>
 #include <nuttx/sensors/dhtxx.h>
 
 /*****************************************************************************

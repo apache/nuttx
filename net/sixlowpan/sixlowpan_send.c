@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/sixlowpan/sixlowpan_send.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2017, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,12 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/radiodev.h>
@@ -81,8 +79,6 @@ struct sixlowpan_send_s
   FAR struct devif_callback_s *s_cb;      /* Reference to callback instance */
   sem_t                        s_waitsem; /* Supports waiting for driver events */
   int                          s_result;  /* The result of the transfer */
-  uint16_t                     s_timeout; /* Send timeout in deciseconds */
-  clock_t                      s_time;    /* Last send time for determining timeout */
   FAR const struct ipv6_hdr_s *s_ipv6hdr; /* IPv6 header, followed by UDP or ICMP header. */
   FAR const struct netdev_varaddr_s *s_destmac; /* Destination MAC address */
   FAR const void              *s_buf;     /* Data to send */
@@ -92,47 +88,6 @@ struct sixlowpan_send_s
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: send_timeout
- *
- * Description:
- *   Check for send timeout.
- *
- * Input Parameters:
- *   sinfo - Send state structure reference
- *
- * Returned Value:
- *   TRUE:timeout FALSE:no timeout
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
-{
-  /* Check for a timeout.  Zero means none and, in that case, we will let
-   * the send wait forever.
-   */
-
-  if (sinfo->s_timeout != 0)
-    {
-      /* Check if the configured timeout has elapsed */
-
-      clock_t timeo_ticks =  DSEC2TICK(sinfo->s_timeout);
-      clock_t elapsed     =  clock_systimer() - sinfo->s_time;
-
-      if (elapsed >= timeo_ticks)
-        {
-          return true;
-        }
-    }
-
-  /* No timeout */
-
-  return false;
-}
 
 /****************************************************************************
  * Name: send_eventhandler
@@ -203,18 +158,6 @@ static uint16_t send_eventhandler(FAR struct net_driver_s *dev,
       goto end_wait;
     }
 
-  /* Check for a timeout. */
-
-  if (send_timeout(sinfo))
-    {
-      /* Yes.. report the timeout */
-
-      nwarn("WARNING: SEND timeout\n");
-      sinfo->s_result = -ETIMEDOUT;
-      neighbor_notreachable(dev);
-      goto end_wait;
-    }
-
   /* Continue waiting */
 
   return flags;
@@ -257,10 +200,10 @@ end_wait:
  *   buf     - Data to send
  *   len     - Length of data to send
  *   destmac - The IEEE802.15.4 MAC address of the destination
- *   timeout - Send timeout in deciseconds
+ *   timeout - Send timeout in milliseconds
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   Ok is returned on success; Otherwise a negated errno value is returned.
  *   This function is expected to fail if the driver is not an IEEE802.15.4
  *   MAC network driver.  In that case, the logic will fall back to normal
  *   IPv4/IPv6 formatting.
@@ -286,8 +229,6 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
   nxsem_setprotocol(&sinfo.s_waitsem, SEM_PRIO_NONE);
 
   sinfo.s_result  = -EBUSY;
-  sinfo.s_timeout = timeout;
-  sinfo.s_time    = clock_systimer();
   sinfo.s_ipv6hdr = ipv6hdr;
   sinfo.s_destmac = destmac;
   sinfo.s_buf     = buf;
@@ -318,14 +259,19 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
           netdev_txnotify_dev(dev);
 
           /* Wait for the send to complete or an error to occur.
-           * net_lockedwait will also terminate if a signal is received.
+           * net_timedwait will also terminate if a signal is received.
            */
 
           ninfo("Wait for send complete\n");
 
-          ret = net_lockedwait(&sinfo.s_waitsem);
+          ret = net_timedwait(&sinfo.s_waitsem, timeout);
           if (ret < 0)
             {
+              if (ret == -ETIMEDOUT)
+                {
+                  neighbor_notreachable(dev);
+                }
+
               sinfo.s_result = ret;
             }
 

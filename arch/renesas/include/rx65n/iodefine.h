@@ -18045,6 +18045,5 @@ typedef struct st_cmtw
 
 #pragma pack()
 
-#endif  /* __ASSEMBLER__ */
+#endif /* __ASSEMBLER__ */
 #endif
-

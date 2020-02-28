@@ -78,4 +78,3 @@ int sigismember(FAR const sigset_t *set, int signo)
 
   return ret;
 }
-

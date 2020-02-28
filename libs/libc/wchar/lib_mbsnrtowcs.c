@@ -88,4 +88,3 @@ size_t mbsnrtowcs(FAR wchar_t *dst, FAR const char **src, size_t nms,
 }
 
 #endif /* CONFIG_LIBC_WCHAR */
-

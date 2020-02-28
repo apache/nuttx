@@ -61,21 +61,13 @@
  * assumed.
  */
 
-#if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC) || \
-    defined(CONFIG_DEV_LOWCONSOLE)
-#  define USE_LOWCONSOLE 1
+#if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC)
 #  define USE_LOWUARTINIT 1
 #elif !defined(CONFIG_DEV_CONSOLE)
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
-#  undef  CONFIG_DEV_LOWCONSOLE
-#  undef  CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  USE_EARLYSERIALINIT
-#    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_DEV_LOWCONSOLE)
+#  if defined(CONFIG_CONSOLE_SYSLOG)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #  else
@@ -135,7 +127,6 @@ extern volatile FAR chipreg_t *g_current_regs;
 void up_copystate(FAR chipreg_t *dest, FAR chipreg_t *src);
 FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs);
 void up_restoreusercontext(FAR chipreg_t *regs);
-void up_irqinitialize(void);
 int  up_saveusercontext(FAR chipreg_t *regs);
 void up_sigdeliver(void);
 
@@ -154,23 +145,16 @@ void up_addregion(void);
 /* Defined in xyz_serial.c */
 
 #ifdef USE_SERIALDRIVER
-void up_earlyserialinit(void);
 void up_serialinit(void);
+#endif
+
+#ifdef USE_EARLYSERIALINIT
+void up_earlyserialinit(void);
 #endif
 
 #ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
-#else
-#  define rpmsg_serialinit()
 #endif
-
-#ifdef USE_LOWCONSOLE
-void lowconsole_init(void);
-#endif
-
-/* Defined in xyz_timerisr.c */
-
-void z16_timer_initialize(void);
 
 /* Defined in xyz_irq.c */
 
@@ -200,4 +184,4 @@ void up_registerdump(void);
 
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_Z16_SRC_COMMON_UP_INTERNAL_H */
+#endif /* __ARCH_Z16_SRC_COMMON_UP_INTERNAL_H */

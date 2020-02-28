@@ -69,7 +69,7 @@
 #define OPAMP_MUX_DISABLE 0
 #define OPAMP_MUX_ENABLE 1
 
-/* User callibration  */
+/* User calibration  */
 
 #define OPAMP_USERCAL_DISABLE 0
 #define OPAMP_USERCAL_ENABLE  1
@@ -227,5 +227,5 @@ FAR struct opamp_dev_s* stm32_opampinitialize(int intf);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* CONFIG_STM32_OPAMP */
+#endif /* CONFIG_STM32_OPAMP */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_OPAMP_H */

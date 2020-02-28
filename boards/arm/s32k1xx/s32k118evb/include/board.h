@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F4DISCOVERY_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32F4DISCOVERY_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_S32K118EVB_INCLUDE_BOARD_H
+#define __BOARDS_ARM_S32K118EVB_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -89,9 +89,8 @@
 #define BOARD_LED_B_BIT   (1 << BOARD_LED_B)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LEDs on board
- * the s32k118evb.  The following definitions describe how NuttX controls the
+ * the S32K118EVB.  The following definitions describe how NuttX controls the
  * LEDs:
- *
  *
  *   SYMBOL                Meaning                      LED state
  *                                                      RED   GREEN  BLUE
@@ -106,7 +105,7 @@
 #define LED_SIGNAL        0 /* In a signal handler      (no change)       */
 #define LED_ASSERTION     0 /* An assertion failed      (no change)       */
 #define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
-#undef  LED_IDLE            /* S32K118EVN in sleep mode (Not used)        */
+#undef  LED_IDLE            /* S32K118EVB in sleep mode (Not used)        */
 
 /* Button definitions *******************************************************/
 
@@ -134,7 +133,4 @@
 #define PIN_LPUART0_RX    PIN_LPUART0_RX_1  /* PTB0 */
 #define PIN_LPUART0_TX    PIN_LPUART0_TX_1  /* PTB1 */
 
-/* DMA Channel/Stream Selections ********************************************/
-
-
-#endif  /* __BOARDS_ARM_STM32F4DISCOVERY_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_S32K118EVB_INCLUDE_BOARD_H */

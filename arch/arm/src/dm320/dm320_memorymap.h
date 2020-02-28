@@ -53,7 +53,7 @@
 
 /* DM320 Physical Memory Map, where:
  *
- *   CW = cachable with write buffering
+ *   CW = cacheable with write buffering
  *   -W = Write buffering only
  *   -- = Neither
  *
@@ -73,7 +73,7 @@
  *    so that physical memory regions is in the board-specific files.
  */
 
-/* Section/Region Name             Phys Address    Size  TLB Enty        CW */
+/* Section/Region Name             Phys Address    Size  TLB Entry       CW */
 #define DM320_PERIPHERALS_PSECTION   0x00000000 /*   1Mb   1 section     -- */
 #define   DM320_IRAM_PADDR           0x00000000 /*  16Kb   1 large page  CW */
 #define   DM320_PERIPHERALS_PADDR    0x00030000 /*   4Kb   1 small pages -- */
@@ -261,4 +261,4 @@
 
 #endif
 
-#endif  /* __ARCH_ARM_SRC_DM320_DM320_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_DM320_DM320_MEMORYMAP_H */

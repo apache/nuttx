@@ -91,7 +91,7 @@
 
 /* CONFIG_REG1 */
 
-#define CONFIG_REG1_IIR_SHIFT        (0) /* Bits 2:0 - Configure IIR Coeficients */
+#define CONFIG_REG1_IIR_SHIFT        (0) /* Bits 2:0 - Configure IIR Coefficients */
 #define CONFIG_REG1_IIR_MASK         (7 << CONFIG_REG1_IIR_SHIFT)
 #define CONFIG_REG1_IIR_0p5_0p5      (0 << CONFIG_REG1_IIR_SHIFT) /* a1 = 0.5 and b1 = 0.5 */
 #define CONFIG_REG1_IIR_0p57_0p42    (7 << CONFIG_REG1_IIR_SHIFT) /* a1 = 0.571428571 and b1 = 0.428571428 */
@@ -130,7 +130,7 @@
 
 /* MLX90614 Read Flags */
 
-#define MLX90614_EEBUSY              (1 << 15) /* Previos write/erase EEPROM access is still in progress */
+#define MLX90614_EEBUSY              (1 << 15) /* Previous write/erase EEPROM access is still in progress */
 #define MLX90614_EEDEAD              (1 << 13) /* EEPROM double error has occurred */
 #define MLX90614_INIT                (1 << 12) /* POR initialization routine is still ongoing */
 
@@ -185,4 +185,3 @@ int mlx90614_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 #endif /* CONFIG_I2C && CONFIG_SENSORS_MLX90614 */
 
 #endif /* __INCLUDE_NUTTX_SENSORS_MLX90614_H */
-

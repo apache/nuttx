@@ -280,7 +280,7 @@ int sam_sdinitialize(int minor)
       return ret;
     }
 
-  finfo("Successfuly bound  bit bang SPI device to MMC/SD slot %d\n",
+  finfo("Successfully bound  bit bang SPI device to MMC/SD slot %d\n",
         SAM34_MMCSDSLOTNO);
 
   return OK;

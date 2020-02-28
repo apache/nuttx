@@ -83,4 +83,3 @@ void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits)
   putreg16(regval, addr);
   leave_critical_section(flags);
 }
-

@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_flash.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -33,10 +33,10 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Provides standard flash access functions, to be used by the flash mtd driver.
- * The interface is defined in the include/nuttx/progmem.h
+/* Provides standard flash access functions, to be used by the flash mtd
+ * driver.  The interface is defined in the include/nuttx/progmem.h
  *
  * Notes about this implementation:
  *  - HSI16 is automatically turned ON by MCU, if not enabled beforehand
@@ -44,15 +44,15 @@
  *  - Low Power Modes are not permitted during write/erase
  */
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 #include <nuttx/progmem.h>
+#include <nuttx/semaphore.h>
 
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
@@ -72,9 +72,9 @@
 #  warning "Flash Configuration has been overridden - make sure it is correct"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define FLASH_KEY1         0x45670123
 #define FLASH_KEY2         0xCDEF89AB
@@ -107,16 +107,16 @@
 #  define MIN(a, b)        ((a) < (b) ? (a) : (b))
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static sem_t g_sem = SEM_INITIALIZER(1);
 static uint32_t g_page_buffer[FLASH_PAGE_WORDS];
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void sem_lock(void)
 {
@@ -176,7 +176,21 @@ static inline void flash_erase(size_t page)
   finfo("erase page %u\n", page);
 
   modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_PAGE_ERASE);
-  modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PNB_MASK, FLASH_CR_PNB(page));
+  modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PNB_MASK, FLASH_CR_PNB(page & 0xff));
+
+#if defined(CONFIG_STM32L4_STM32L4X5) || \
+    defined(CONFIG_STM32L4_STM32L4X6) || \
+    defined(CONFIG_STM32L4_STM32L4XR)
+  if (page <= 0xff)
+    {
+      modifyreg32(STM32L4_FLASH_CR, FLASH_CR_BKER, 0);
+    }
+  else
+    {
+      modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_BKER);
+    }
+#endif
+
   modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_START);
 
   while (getreg32(STM32L4_FLASH_SR) & FLASH_SR_BSY)
@@ -187,9 +201,27 @@ static inline void flash_erase(size_t page)
   modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PAGE_ERASE, 0);
 }
 
-/************************************************************************************
+#if defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+static void data_cache_disable(void)
+{
+  modifyreg32(STM32L4_FLASH_ACR, FLASH_ACR_DCEN, 0);
+}
+
+static void data_cache_enable(void)
+{
+  /* Reset data cache */
+
+  modifyreg32(STM32L4_FLASH_ACR, 0, FLASH_ACR_DCRST);
+
+  /* Enable data cache */
+
+  modifyreg32(STM32L4_FLASH_ACR, 0, FLASH_ACR_DCEN);
+}
+#endif /* defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW) */
+
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32l4_flash_unlock(void)
 {
@@ -370,6 +402,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
   size_t xfrsize;
   size_t offset;
   size_t page;
+  bool set_pg_bit = false;
   int i;
   int ret = OK;
 
@@ -447,7 +480,12 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
 
       /* Write the page. Must be with double-words. */
 
+#if defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+      data_cache_disable();
+#endif
+
       modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_PG);
+      set_pg_bit = true;
 
       for (i = 0; i < FLASH_PAGE_WORDS; i += 2)
         {
@@ -463,20 +501,24 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
 
           if (getreg32(STM32L4_FLASH_SR) & FLASH_SR_WRITE_PROTECTION_ERROR)
             {
-              modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PG, 0);
               ret = -EROFS;
               goto out;
             }
 
-          if (getreg32(dest-1) != *(src-1) || getreg32(dest-2) != *(src-2))
+          if (getreg32(dest -1) != *(src - 1) ||
+              getreg32(dest - 2) != *(src - 2))
             {
-              modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PG, 0);
               ret = -EIO;
               goto out;
             }
         }
 
       modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PG, 0);
+      set_pg_bit = false;
+
+#if defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+      data_cache_enable();
+#endif
 
       /* Adjust pointers and counts for the next time through the loop */
 
@@ -489,14 +531,23 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
     }
 
 out:
-  /* If there was an error, clear all error flags in status
-   * register (rc_w1 register so do this by writing the
-   * error bits).
+  if (set_pg_bit)
+    {
+      modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PG, 0);
+#if defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+      data_cache_enable();
+#endif
+    }
+
+  /* If there was an error, clear all error flags in status register (rc_w1
+   * register so do this by writing the error bits).
    */
 
   if (ret != OK)
     {
-      ferr("flash write error: %d, status: 0x%x\n", ret, getreg32(STM32L4_FLASH_SR));
+      ferr("flash write error: %d, status: 0x%x\n",
+           ret, getreg32(STM32L4_FLASH_SR));
+
       modifyreg32(STM32L4_FLASH_SR, 0, FLASH_SR_ALLERRS);
     }
 

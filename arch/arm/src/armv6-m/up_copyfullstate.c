@@ -83,4 +83,3 @@ void up_copyfullstate(uint32_t *dest, uint32_t *src)
         }
     }
 }
-

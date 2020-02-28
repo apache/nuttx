@@ -382,7 +382,7 @@ static int ajoy_open(FAR struct file *filep)
   opriv = (FAR struct ajoy_open_s *)kmm_zalloc(sizeof(struct ajoy_open_s));
   if (!opriv)
     {
-      ierr("ERROR: Failled to allocate open structure\n");
+      ierr("ERROR: Failed to allocate open structure\n");
       ret = -ENOMEM;
       goto errout_with_sem;
     }

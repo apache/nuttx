@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>	/* NuttX configuration settings */
 #include <arch/board/board.h>	/* Board-specific settings */
-#include <arch/irq.h>		/* IRQ definitons */
+#include <arch/irq.h>		/* IRQ definitions */
 
 #include "chip.h"		/* Chip-specific settings */
 #include "up_internal.h"
@@ -343,7 +343,7 @@ __vector_table:
 __start:
 	/* Initialize stack pointer to the preallocated stack */
 	mov.l	.Lstack, r15
-	
+
 	/* set up the bus controller for the EVB */
 
 	mov.l	.Lwcr1, r0
@@ -356,7 +356,7 @@ __start:
 	mov.w	.Lbas, r1
 	bra		__start0
 	mov.w	r1, @r0
-	
+
 	.align 2
 .Lstack:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
@@ -382,12 +382,12 @@ __start0:
 	bt		1b							/* Continue looping until all copied */
 	nop									/* Delay slot */
 
-	/* Update the VBR to show new adddress of vector table */
+	/* Update the VBR to show new address of vector table */
 
 	mov.l	.Lsvect, r0					/* R0: Address of SRAM vector table */
 	ldc		r0, vbr						/* Set VBR to start of SRAM vector table */
 
-	/* Initialize data segement */
+	/* Initialize data segment */
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 	mov.l	.Lsdata, r0					/* R0: Start of .data segment */

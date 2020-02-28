@@ -3,6 +3,19 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menuconfig DRIVERS_AUDIO
+	bool "Audio Device Support"
+	default n
+	---help---
+		Enable support for audio device drivers.  This includes drivers for
+		MP3, WMA and Ogg Vorbis encoding, decoding, as well as drivers for
+		interfacing with external DSP chips to perform custom audio functions.
+
+		NOTE: All of these drivers depend on support from the audio subsystem
+		enabled with the AUDIO selection.
+
+if DRIVERS_AUDIO
+
 config AUDIO_TONE
 	bool "Audio Tone Generator using PWM"
 	default n
@@ -119,7 +132,7 @@ config CS43L22_CLKDEBUG
 	bool "CS43L22 clock analysis"
 	default n
 	---help---
-		Enable logic to analyze CS43L22 clock configuation.
+		Enable logic to analyze CS43L22 clock configuration.
 
 endif # AUDIO_CS43L22
 
@@ -208,7 +221,7 @@ config WM8904_CLKDEBUG
 	bool "WM8904 clock analysis"
 	default n
 	---help---
-		Enable logic to analyze WM8904 clock configuation.
+		Enable logic to analyze WM8904 clock configuration.
 
 endif # AUDIO_WM8904
 
@@ -245,3 +258,4 @@ config AUDIO_I2S
 	depends on AUDIO
 	depends on I2S
 
+endif # DRIVERS_AUDIO

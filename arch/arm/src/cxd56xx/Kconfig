@@ -46,7 +46,7 @@ config CXD56_RESET_ON_CRASH
 	default n
 	---help---
 		If selected the board_crashdump should reset the machine after
-		saveing the state of the machine
+		saving the state of the machine
 
 comment "Basic Options"
 
@@ -92,7 +92,7 @@ config CXD56_FARAPI_VERSION_CHECK
 	default y
 	---help---
 		Enable the Far API version compatibility check. If the version
-		mismatch is deteced during system bootup, the target system shows
+		mismatch is detected during system bootup, the target system shows
 		the message to update the loader and gnssfw firmwares.
 
 if CXD56_FARAPI_VERSION_CHECK
@@ -1026,7 +1026,7 @@ config CXD56_SFC_VERIFY_WRITE
 	bool "Enable write with verify"
 	default n
 	---help---
-		Enalbe SPI flash write function with verify.
+		Enable SPI flash write function with verify.
 
 endif # CXD56_SFC
 

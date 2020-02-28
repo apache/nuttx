@@ -1,7 +1,7 @@
 Using the Binaries:
 ==================
 
-Prequisites:
+Prerequisites:
 ===========
 
 1. SAMA5D3x-EK board and power supply
@@ -21,7 +21,7 @@ Procedure:
 
 4. Set the boot jumper to boot from NOR FLASH
 
-5. NSH shouls start
+5. NSH should start
 
     NuttShell (NSH) NuttX-7.3
     nsh>

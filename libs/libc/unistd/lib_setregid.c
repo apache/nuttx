@@ -56,7 +56,7 @@
  * Input Parameters:
  *   rgid - Real group identity to set.  The special value (gid_t)-1
  *          indicates that the real group ID should not be changed.
- *   rgid - Effective group identity to set.  The special value (gid_t)-1 
+ *   rgid - Effective group identity to set.  The special value (gid_t)-1
  *          indicates that the effective group ID should not be changed.
  *
  * Returned Value:

@@ -139,13 +139,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
   if (to == NULL || tolen <= 0)
     {
-#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_LOCAL_STREAM) || \
-    defined(CONFIG_NET_USRSOCK)
       return psock_send(psock, buf, len, flags);
-#else
-      nerr("ERROR: No 'to' address\n");
-      return -EINVAL;
-#endif
     }
 
   /* Verify that the psock corresponds to valid, allocated socket */
@@ -190,8 +184,8 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
  *   tolen    The length of the address structure
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On any failure, a
- *   negated errno value is returned.  One of:
+ *   On success, returns the number of characters sent.  On error,
+ *   -1 is returned, and errno is set appropriately:
  *
  *   EAGAIN or EWOULDBLOCK
  *     The socket is marked non-blocking and the requested operation

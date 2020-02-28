@@ -641,8 +641,8 @@ struct usbhid_descriptor_s
                       /* Optional descriptors may follow */
 };
 
-/* The HID descriptior is can be variable length.  It may be include an
- * arbitray number of optional descriptors.
+/* The HID descriptor is can be variable length.  It may be include an
+ * arbitrary number of optional descriptors.
  */
 
 struct usbhid_optdesc_s

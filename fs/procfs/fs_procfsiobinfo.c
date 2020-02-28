@@ -136,13 +136,13 @@ static FAR const char *g_iob_user_names[] =
 #ifdef CONFIG_NET_BLUETOOTH
   "bluetooth_sock",
 #endif
-#ifdef CONFIG_NET_UDP_READAHEAD
+#if defined(CONFIG_NET_UDP) && !defined(NET_UDP_NO_STACK)
   "udp_readahead",
 #endif
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
   "udp_writebuffer",
 #endif
-#ifdef CONFIG_NET_TCP_READAHEAD
+#if defined(CONFIG_NET_TCP) && !defined(NET_TCP_NO_STACK)
   "tcp_readahead",
 #endif
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS

@@ -4,7 +4,7 @@
  *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Includes some logic from TI sample which has a compatibile three-clause
+ * Includes some logic from TI sample which has a compatible three-clause
  * BSD license and:
  *
  *   Copyright (c) 2012, Texas Instruments Incorporated

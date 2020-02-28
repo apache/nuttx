@@ -68,10 +68,10 @@ irqstate_t up_irq_save(void)
 
   status  = cp0_getstatus();       /* Get CP0 status */
   ret     = status;                /* Save the status */
-  status &= ~CP0_STATUS_IM_MASK;   /* Clear all interrupt mask bits */
-  status |= CP0_STATUS_IM_SWINTS;  /* Keep S/W interrupts enabled */
-  cp0_putstatus(status);           /* Disable interrupts */
-  return ret;                      /* Return status before interrupts disabled */
+  status &= ~CP0_STATUS_INT_MASK;  /* Clear all interrupt mask bits */
+  status |= CP0_STATUS_INT_SW0;    /* Enable only the SW0 interrupt */
+  cp0_putstatus(status);           /* Disable the rest of interrupts */
+  return ret;                      /* Return saved status */
 }
 
 /****************************************************************************
@@ -93,12 +93,11 @@ void up_irq_restore(irqstate_t irqstate)
 {
   register irqstate_t status;
 
-  status    = cp0_getstatus();      /* Get CP0 status */
-  status   &= ~CP0_STATUS_IM_MASK;  /* Clear all interrupt mask bits */
-  irqstate &= CP0_STATUS_IM_MASK;   /* Retain interrupt mask bits only */
-  status   |= irqstate;             /* Set new interrupt mask bits */
-  status   |= CP0_STATUS_IM_SWINTS; /* Make sure that S/W interrupts enabled */
-  cp0_putstatus(status);            /* Restore interrupt state */
+  status    = cp0_getstatus();       /* Get CP0 status */
+  status   &= ~CP0_STATUS_INT_MASK;  /* Clear all interrupt mask bits */
+  irqstate &= CP0_STATUS_INT_MASK;   /* Retain interrupt mask bits only */
+  status   |= irqstate;              /* Set new interrupt mask bits */
+  cp0_putstatus(status);             /* Restore interrupt state */
 }
 
 /****************************************************************************
@@ -125,13 +124,13 @@ void up_irq_enable(void)
    * 1. Clear the BEV bit (This bit should already be clear)
    * 2. Clear the UM bit so that the task executes in kernel mode
    *   (This bit should already be clear)
-   * 3. Make sure the IE is set
-   * 4. Make sure the S/W interrupts are enabled
-   * 5. Set the interrupt mask bits
+   * 3. Clear all the Interrupt mask bits.
+   * 4. Make sure the IE is set
    */
 
   status  = cp0_getstatus();
   status &= ~(CP0_STATUS_BEV | CP0_STATUS_UM);
-  status |=  (CP0_STATUS_IE | CP0_STATUS_IM_SWINTS | CP0_STATUS_IM_ALL);
+  status &= ~CP0_STATUS_INT_MASK;
+  status |=  CP0_STATUS_IE;
   cp0_putstatus(status);
 }

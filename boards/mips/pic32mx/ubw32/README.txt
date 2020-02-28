@@ -62,8 +62,8 @@ PIC32MX460F512L Pin Out
   ---- ----------------------------  -------------------------------------------------------
   PIN  NAME                          Board Connection (omitting pins brought to J3 and J4)
   ---- ----------------------------  -------------------------------------------------------
-   26  PGEC2/AN6/OCFA/RB6            PGC    ICSP/Debug/IO (J5) pin 5 (labled PGC)
-   27  PGED2/AN7/RB7                 PGD    ICSP/Debug/IO (J5) pin 4 (labled PGD)
+   26  PGEC2/AN6/OCFA/RB6            PGC    ICSP/Debug/IO (J5) pin 5 (labeled PGC)
+   27  PGED2/AN7/RB7                 PGD    ICSP/Debug/IO (J5) pin 4 (labeled PGD)
    28  VREF-/CVREF-/PMA7/RA9
    29  VREF+/CVREF+/PMA6/RA10
    30  AVdd
@@ -230,7 +230,7 @@ Toolchains
 
   Another option is the mips-elf toolchain used with the Pinguino project.  This
   is a relatively current mips-elf GCC and should provide free C++ support as
-  well. This toolchain can be downloded from the Pinguino website:
+  well. This toolchain can be downloaded from the Pinguino website:
   http://wiki.pinguino.cc/index.php/Main_Page#Download .
 
   See also boards/mirtoo/README.txt.  There is an experimental (untested)
@@ -316,7 +316,7 @@ Loading NuttX with PICkit2
       cd tools/pic32mx
       make
 
-    Now you will have an excecutable file call mkpichex (or mkpichex.exe on
+    Now you will have an executable file call mkpichex (or mkpichex.exe on
     Cygwin).  This program will take the nutt.hex file as an input, it will
     convert all of the KSEG0 and KSEG1 addresses to physical address, and
     it will write the modified file, replacing the original nuttx.hex.
@@ -585,7 +585,7 @@ Where <subdir> is one of the following:
        GND -- J4 pin 40: GND
        Vcc -- J4 pin 39: 5V
 
-    3. USB Configuations
+    3. USB Configurations
 
        Several USB device configurations can be enabled and included
        as NSH built-in built in functions.

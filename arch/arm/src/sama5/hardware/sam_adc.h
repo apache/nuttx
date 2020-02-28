@@ -113,7 +113,7 @@
 #define SAM_ADC_WPSR_OFFSET        0x00e8 /* Write Protect Status Register */
                                           /* 0x00ec-fc Reserved */
 
-/* ADC register adresses ***************************************************************/
+/* ADC register addresses **************************************************************/
 
 #define SAM_ADC_CR                 (SAM_TSADC_VBASE+SAM_ADC_CR_OFFSET)
 #define SAM_ADC_MR                 (SAM_TSADC_VBASE+SAM_ADC_MR_OFFSET)

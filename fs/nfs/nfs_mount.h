@@ -49,6 +49,7 @@
  ****************************************************************************/
 
 #include <sys/socket.h>
+#include <nuttx/semaphore.h>
 
 #include "rpc.h"
 
@@ -124,7 +125,7 @@ struct nfsmount
 
 #define SIZEOF_nfsmount(n) (sizeof(struct nfsmount) + ((n + 3) & ~3) - sizeof(uint32_t))
 
-/* Mount parameters structure. This structure is use in nfs_decode_args funtion before one
+/* Mount parameters structure. This structure is use in nfs_decode_args function before one
  * mount structure is allocated in each NFS mount.
  */
 

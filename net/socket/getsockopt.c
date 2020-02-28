@@ -101,13 +101,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
       return -EINVAL;
     }
 
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (psock == NULL || psock->s_crefs <= 0)
-    {
-      return -EBADF;
-    }
-
 #ifdef CONFIG_NET_USRSOCK
   if (psock->s_type == SOCK_USRSOCK_TYPE)
     {
@@ -138,6 +131,16 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
   switch (option)
     {
+      case SO_ACCEPTCONN: /* Reports whether socket listening is enabled */
+        if (*value_len < sizeof(int))
+          {
+            return -EINVAL;
+          }
+
+        *(FAR int *)value = _SS_ISLISTENING(psock->s_flags);
+        *value_len        = sizeof(int);
+        break;
+
       /* The following options take a point to an integer boolean value.
        * We will blindly report the bit here although the implementation
        * is outside of the scope of getsockopt.
@@ -275,7 +278,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
       /* The following are not yet implemented (return values other than {0,1) */
 
-      case SO_ACCEPTCONN: /* Reports whether socket listening is enabled */
       case SO_LINGER:     /* Lingers on a close() if data is present */
       case SO_RCVBUF:     /* Sets receive buffer size */
       case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */
@@ -341,6 +343,13 @@ int psock_getsockopt(FAR struct socket *psock, int level, int option,
                      FAR void *value, FAR socklen_t *value_len)
 {
   int ret;
+
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (psock == NULL || psock->s_crefs <= 0)
+    {
+      return -EBADF;
+    }
 
   /* Handle retrieval of the socket option according to the level at which
    * option should be applied.
@@ -436,7 +445,7 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
   ret = psock_getsockopt(psock, level, option, value, value_len);
   if (ret < 0)
     {
-      set_errno(-ret);
+      _SO_SETERRNO(psock, -ret);
       return ERROR;
     }
 

@@ -117,10 +117,10 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
-#include <semaphore.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mm/iob.h>
@@ -1288,7 +1288,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       if (priv->state != DRIVER_STATE_RECEIVING)
         {
-          /* As a race condition, the TX state, but overriden by concurrent
+          /* As a race condition, the TX state, but overridden by concurrent
            * RX activity?  This assertion here *does* fire:
            *
            *   DEBUGASSERT(priv->state == DRIVER_STATE_IDLE);
@@ -1351,7 +1351,7 @@ static void spirit_interrupt_work(FAR void *arg)
 #else
       offset = 0;
 #endif
-      /* Get the number of bytes avaialable in the RX FIFO */
+      /* Get the number of bytes available in the RX FIFO */
 
       count = spirit_fifo_get_rxcount(spirit);
       wlinfo("Receiving %u bytes (%u total)\n", count, count + offset);
@@ -1505,7 +1505,7 @@ static void spirit_interrupt_work(FAR void *arg)
 
       if (iob != NULL)
         {
-          /* Get the number of bytes avaialable in the RX FIFO */
+          /* Get the number of bytes available in the RX FIFO */
 
           count = spirit_fifo_get_rxcount(spirit);
           wlinfo("Receiving %u bytes (%u so far)\n", count, count + offset);
@@ -1665,7 +1665,7 @@ static void spirit_txtimeout_work(FAR void *arg)
   wlwarn("WARNING: TX Timeout.  state=%u\n", priv->state);
 
   /* Are we in the sending state?  If not, then this must be a spurious
-   * timout.
+   * timeout.
    */
 
   if (priv->state == DRIVER_STATE_SENDING)
@@ -1844,7 +1844,7 @@ static void spirit_txpoll_expiry(int argc, wdparm_t arg, ...)
  *
  * Assumptions:
  *   Called from the network layer and running on the LP working thread.
- *   This interracts with the spirit hardware, but does so while the network
+ *   This interacts with the spirit hardware, but does so while the network
  *   is down and with Spirit interrupts disabled.
  *
  ****************************************************************************/
@@ -1961,7 +1961,7 @@ error_with_ifalmostup:
  *
  * Assumptions:
  *   Called from the network layer and running on the LP working thread.
- *   This interracts with the spirit hardware, but does so with Spirit
+ *   This interacts with the spirit hardware, but does so with Spirit
  *   interrupts disabled.
  *
  ****************************************************************************/
@@ -2320,7 +2320,7 @@ static int spirit_req_data(FAR struct radio_driver_s *netdev,
        * the we got from the network, be we will copy it so that we can
        * control the life of the container.
        *
-       * REVISIT:  To bad we cound not just simply allocate the structure
+       * REVISIT:  To bad we could not just simply allocate the structure
        * on the network side.  But that behavior is incompatible with how
        * IEEE 802.15.4 works.
        */
@@ -2362,7 +2362,7 @@ static int spirit_req_data(FAR struct radio_driver_s *netdev,
       spirit_txunlock(priv);
 
       /* If are no transmissions or receptions in progress, then schedule
-       * tranmission of the frame in the IOB at the head of the IOB queue.
+       * transmission of the frame in the IOB at the head of the IOB queue.
        */
 
       spirit_schedule_transmit_work(priv);
@@ -2382,7 +2382,7 @@ static int spirit_req_data(FAR struct radio_driver_s *netdev,
  *
  * Input Parameters:
  *   netdev     - The network device to be queried
- *   properties - Location where radio properities will be returned.
+ *   properties - Location where radio properties will be returned.
  *
  * Returned Value:
  *   Zero (OK) returned on success; a negated errno value is returned on
@@ -2475,7 +2475,7 @@ int spirit_hw_initialize(FAR struct spirit_driver_s *priv,
 
   /* Perform VCO calibration WA when the radio is initialized */
 
-  wlinfo("Peform VCO calibration\n");
+  wlinfo("Perform VCO calibration\n");
   spirit_radio_enable_wavco_calibration(spirit, S_ENABLE);
 
   /* Configure the Spirit1 radio part */

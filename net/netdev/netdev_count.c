@@ -75,4 +75,3 @@ int netdev_count(void)
   net_unlock();
   return ndev;
 }
-

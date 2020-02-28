@@ -153,4 +153,3 @@ bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)
 
   return ret;
 }
-

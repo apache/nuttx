@@ -52,9 +52,9 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
+#include <nuttx/semaphore.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -143,7 +143,7 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
       odata = getreg32(SAM_TRNG_ODATA);
 
       /* Verify that sample data is available (DATARDY is cleared when the
-       * interrupt status regiser is read)
+       * interrupt status register is read)
        */
 
       if ((getreg32(SAM_TRNG_ISR) & TRNG_INT_DATRDY) == 0)
@@ -197,7 +197,7 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
           g_trngdev.first      = false;
         }
 
-      /* Yes.. the first sample has been dicarded */
+      /* Yes.. the first sample has been discarded */
 
       else
         {

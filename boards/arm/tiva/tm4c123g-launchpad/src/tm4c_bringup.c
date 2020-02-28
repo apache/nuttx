@@ -109,4 +109,3 @@ int tm4c_bringup(void)
   UNUSED(ret);
   return ret;
 }
-

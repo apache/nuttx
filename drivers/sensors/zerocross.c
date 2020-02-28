@@ -45,7 +45,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
@@ -55,6 +54,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/sensors/zerocross.h>
 
 #include <nuttx/irq.h>
@@ -236,7 +236,7 @@ static int zc_open(FAR struct file *filep)
   opriv = (FAR struct zc_open_s *)kmm_zalloc(sizeof(struct zc_open_s));
   if (!opriv)
     {
-      snerr("ERROR: Failled to allocate open structure\n");
+      snerr("ERROR: Failed to allocate open structure\n");
       ret = -ENOMEM;
       goto errout_with_sem;
     }

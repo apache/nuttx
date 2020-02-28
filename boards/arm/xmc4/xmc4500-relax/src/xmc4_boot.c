@@ -93,4 +93,3 @@ void board_late_initialize(void)
   xmc4_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */
-

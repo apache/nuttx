@@ -64,16 +64,6 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Name: misoc_timer_initialize
- *
- * Description:
- *   Initialize and start the system timer.
- *
- ****************************************************************************/
-
-void misoc_timer_initialize(void);
-
-/****************************************************************************
  * Name: flush_cpu_dcache
  *
  * Description:

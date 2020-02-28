@@ -40,7 +40,8 @@ USAGE="
 USAGE: ${0} [-d] [-s] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>
 
 Where:
-  -s Skip the .config/Make.defs existence check
+  -d enables script debug output
+  -s skip the .config/Make.defs existence check
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
   -c selects the Windows host and Cygwin (c) environment.
@@ -49,10 +50,10 @@ Where:
   -n selects the Windows host and Windows native (n) environment.
   Default: Use host setup in the defconfig file
   Default Windows: Cygwin
+  -a <app-dir> is the path to the apps/ directory, relative to the nuttx
+     directory
   <board-name> is the name of the board in the boards directory
   configs/<config-name> is the name of the board configuration sub-directory
-  <app-dir> is the path to the apps/ directory, relative to the nuttx
-     directory
 
 "
 
@@ -67,60 +68,46 @@ OPTFILES="\
 # Parse command arguments
 
 unset boardconfig
+unset winnative
 unset appdir
 unset host
-unset wenv
-debug=n
+unset debug
 skip=0
 
 while [ ! -z "$1" ]; do
   case "$1" in
-    -a )
-      shift
-      appdir=$1
-      ;;
-    -c )
-      host=windows
-      wenv=cygwin
-      ;;
-    -d )
-      debug=y
-      set -x
-      ;;
-    -g )
-      host=windows
-      wenv=msys
-      ;;
-    -h )
+  -a )
+    shift
+    appdir=$1
+    ;;
+  -c | -g | -l | -m | -u )
+    winnative=n
+    host+=" $1"
+    ;;
+  -n )
+    winnative=y
+    host+=" $1"
+    ;;
+  -d )
+    debug=-d
+    set -x
+    ;;
+  -h )
+    echo "$USAGE"
+    exit 0
+    ;;
+  -s )
+    skip=1
+    ;;
+  *)
+    if [ ! -z "${boardconfig}" ]; then
+      echo ""
+      echo "<board/config> defined twice"
       echo "$USAGE"
-      exit 0
-      ;;
-    -l )
-      host=linux
-      ;;
-    -m )
-      host=macos
-      ;;
-    -n )
-      host=windows
-      wenv=native
-      ;;
-    -s )
-      skip=1
-      ;;
-    -u )
-      host=windows
-      wenv=ubuntu
-      ;;
-    *)
-      if [ ! -z "${boardconfig}" ]; then
-        echo ""
-        echo "<board/config> defined twice"
-        echo "$USAGE"
-        exit 1
-      fi
-      boardconfig=$1
-      ;;
+      exit 1
+    fi
+    boardconfig=$1
+    ;;
   esac
   shift
 done
@@ -142,33 +129,12 @@ else
   boarddir=`echo ${boardconfig} | cut -d':' -f1`
 fi
 
-# Detect the architecture of this board.
-
-archs="arm avr hc mips misoc or1k renesas risc-v sim x86 xtensa z16 z80"
-chips="a1x am335x c5471 cxd56xx dm320 efm32 imx6 imxrt kinetis kl lc823450
- lpc17xx_40xx lpc214x lpc2378 lpc31xx lpc43xx lpc54xx max326xx moxart nrf52
- nuc1xx rx65n s32k1xx sam34 sama5 samd2l2 samd5e5 samv7 stm32 stm32f0l0g0 stm32f7 stm32h7
- stm32l4 str71x tiva tms570 xmc4 at32uc3 at90usb atmega mcs92s12ne64 pic32mx
- pic32mz lm32 mor1kx m32262f8 sh7032 fe310 k210 gap8 nr5m100 sim qemu esp32 z16f2811
- ez80 z180 z8 z80"
-
-for arc in ${archs}; do
-for chip in ${chips}; do
-  if [ -f ${TOPDIR}/boards/${arc}/${chip}/${boarddir}/Kconfig ]; then
-    archdir=${arc}
-    chipdir=${chip}
-    echo "  Detected ${archdir} Architecture"
-    echo "  Detected ${chipdir} Chip"
-  fi
-done
-done
-
-configpath=${TOPDIR}/boards/${archdir}/${chipdir}/${boarddir}/configs/${configdir}
-if [ ! -d "${configpath}" ]; then
+configpath=${TOPDIR}/boards/*/*/${boarddir}/configs/${configdir}
+if [ ! -d ${configpath} ]; then
   # Try direct path used with custom configurations.
 
   configpath=${TOPDIR}/${boardconfig}
-  if [ ! -d "${configpath}" ]; then
+  if [ ! -d ${configpath} ]; then
     echo "Directory for ${boardconfig} does not exist.  Options are:"
     echo ""
     echo "Select one of the following options for <board-name>:"
@@ -185,26 +151,26 @@ if [ ! -d "${configpath}" ]; then
   fi
 fi
 
-src_makedefs="${TOPDIR}/boards/${archdir}/${chipdir}/${boarddir}/configs/${configdir}/Make.defs"
+src_makedefs=${TOPDIR}/boards/*/*/${boarddir}/configs/${configdir}/Make.defs
 dest_makedefs="${TOPDIR}/Make.defs"
 
-if [ ! -r "${src_makedefs}" ]; then
-  src_makedefs="${TOPDIR}/boards/${archdir}/${chipdir}/${boarddir}/scripts/Make.defs"
+if [ ! -r ${src_makedefs} ]; then
+  src_makedefs=${TOPDIR}/boards/*/*/${boarddir}/scripts/Make.defs
 
-  if [ ! -r "${src_makedefs}" ]; then
-    src_makedefs="${TOPDIR}/${boardconfig}/Make.defs"
-    if [ ! -r "${src_makedefs}" ]; then
+  if [ ! -r ${src_makedefs} ]; then
+    src_makedefs=${TOPDIR}/${boardconfig}/Make.defs
+    if [ ! -r ${src_makedefs} ]; then
       echo "File Make.defs could not be found"
       exit 4
     fi
   fi
 fi
 
-src_config="${configpath}/defconfig"
+src_config=${configpath}/defconfig
 dest_config="${TOPDIR}/.config"
 
-if [ ! -r "${src_config}" ]; then
-  echo "File \"${src_config}\" does not exist"
+if [ ! -r ${src_config} ]; then
+  echo "File ${src_config} does not exist"
   exit 5
 fi
 
@@ -223,15 +189,12 @@ fi
 # If we are going to some host other then windows native or to a windows
 # native host, then don't even check what is in the defconfig file.
 
-oldnative=`grep CONFIG_WINDOWS_NATIVE= "${src_config}" | cut -d'=' -f2`
-if [ "X$host" != "Xwindows" -o "X$wenv" != "Xnative" ]; then
-  unset winnative
-else
-  if [ "X$host" == "Xwindows" -a "X$wenv" == "Xnative" ]; then
-    winnative=y
-  else
-    winnative=$oldnative
-  fi
+oldnative=`grep CONFIG_WINDOWS_NATIVE= ${src_config} | cut -d'=' -f2`
+if [ -z "${oldnative}" ]; then
+  oldnative=n
+fi
+if [ -z "${winnative}" ]; then
+  winnative=$oldnative
 fi
 
 # If no application directory was provided on the command line and we are
@@ -241,7 +204,7 @@ fi
 
 defappdir=y
 if [ -z "${appdir}" -a "X$oldnative" = "$winnative" ]; then
-  quoted=`grep "^CONFIG_APPS_DIR=" "${src_config}" | cut -d'=' -f2`
+  quoted=`grep "^CONFIG_APPS_DIR=" ${src_config} | cut -d'=' -f2`
   if [ ! -z "${quoted}" ]; then
     appdir=`echo ${quoted} | sed -e "s/\"//g"`
     defappdir=n
@@ -288,15 +251,15 @@ fi
 # Okay... Everything looks good.  Setup the configuration
 
 echo "  Copy files"
-install -m 644 "${src_makedefs}" "${dest_makedefs}" || \
-  { echo "Failed to copy \"${src_makedefs}\"" ; exit 8 ; }
-install -m 644 "${src_config}" "${dest_config}" || \
-  { echo "Failed to copy \"${src_config}\"" ; exit 9 ; }
+install -m 644 ${src_makedefs} "${dest_makedefs}" || \
+  { echo "Failed to copy ${src_makedefs}" ; exit 8 ; }
+install -m 644 ${src_config} "${dest_config}" || \
+  { echo "Failed to copy ${src_config}" ; exit 9 ; }
 
 # Install any optional files
 
 for opt in ${OPTFILES}; do
-  test -f "${configpath}/${opt}" && install "${configpath}/${opt}" "${TOPDIR}/"
+  test -f ${configpath}/${opt} && install ${configpath}/${opt} "${TOPDIR}/"
 done
 
 # If we did not use the CONFIG_APPS_DIR that was in the defconfig config file,
@@ -316,73 +279,9 @@ if [ "X${defappdir}" = "Xy" ]; then
   fi
 fi
 
-if [ ! -z "$host" ]; then
-  sed -i -e "/CONFIG_HOST_LINUX/d" ${dest_config}
-  sed -i -e "/CONFIG_HOST_WINDOWS/d" ${dest_config}
-  sed -i -e "/CONFIG_HOST_MACOS/d" ${dest_config}
-  sed -i -e "/CONFIG_HOST_OTHER/d" ${dest_config}
-  sed -i -e "/CONFIG_WINDOWS_NATIVE/d" ${dest_config}
-  sed -i -e "/CONFIG_WINDOWS_CYGWIN/d" ${dest_config}
-  sed -i -e "/CONFIG_WINDOWS_MSYS/d" ${dest_config}
-  sed -i -e "/CONFIG_WINDOWS_UBUNTU/d" ${dest_config}
-  sed -i -e "/CONFIG_WINDOWS_OTHER/d" ${dest_config}
-  sed -i -e "/CONFIG_SIM_X8664_MICROSOFT/d" ${dest_config}
-  sed -i -e "/CONFIG_SIM_X8664_SYSTEMV/d" ${dest_config}
-
-  case "$host" in
-    "linux")
-      echo "  Select CONFIG_HOST_LINUX=y"
-      echo "CONFIG_HOST_LINUX=y" >> "${dest_config}"
-      echo "CONFIG_SIM_X8664_SYSTEMV=y" >> "${dest_config}"
-      ;;
-
-    "macos")
-      echo "  Select CONFIG_HOST_MACOS=y"
-      echo "CONFIG_HOST_MACOS=y" >> "${dest_config}"
-      ;;
-
-    "windows")
-      echo "  Select CONFIG_HOST_WINDOWS=y"
-      echo "CONFIG_HOST_WINDOWS=y" >> "${dest_config}"
-      echo "CONFIG_SIM_X8664_MICROSOFT=y" >> "${dest_config}"
-
-      case "$wenv" in
-          "cygwin")
-            echo "  Select CONFIG_WINDOWS_CYGWIN=y"
-            echo "CONFIG_WINDOWS_CYGWIN=y" >> "${dest_config}"
-            ;;
-
-          "msys")
-            echo "  Select CONFIG_WINDOWS_MSYS=y"
-            echo "CONFIG_WINDOWS_MSYS=y" >> "${dest_config}"
-            ;;
-
-          "ubuntu")
-            echo "  Select CONFIG_WINDOWS_UBUNTU=y"
-            echo "CONFIG_WINDOWS_UBUNTU=y" >> "${dest_config}"
-            ;;
-
-          *)
-            echo "  Select CONFIG_WINDOWS_NATIVE=y"
-            echo "CONFIG_WINDOWS_NATIVE=y" >> "${dest_config}"
-            ;;
-      esac
-  esac
-fi
-
 # The saved defconfig files are all in compressed format and must be
 # reconstitued before they can be used.
 
-echo "  Refreshing..."
 cd ${TOPDIR} || { echo "Failed to cd to ${TOPDIR}"; exit 10; }
 
-MAKE_BIN=make
-if [ ! -z `which gmake 2>/dev/null` ]; then
-  MAKE_BIN=gmake
-fi
-
-if [ "X${debug}" = "Xy" ]; then
-  ${MAKE_BIN} olddefconfig V=1
-else
-  ${MAKE_BIN} olddefconfig 1>/dev/null
-fi
+./tools/sethost.sh $debug $host

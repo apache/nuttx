@@ -15,9 +15,6 @@ config DEV_ZERO
 	bool "Enable /dev/zero"
 	default n
 
-source drivers/crypto/Kconfig
-source drivers/loop/Kconfig
-
 config DRVR_MKRD
 	bool "RAM disk wrapper (mkrd)"
 	default n
@@ -77,368 +74,38 @@ endif # DRVR_WRITEBUFFER || DRVR_READAHEAD
 
 endmenu # Buffering
 
-config RAMDISK
-	bool "RAM Disk Support"
-	default n
-	---help---
-		Can be used to set up a block of memory or (read-only) FLASH as
-		a block driver that can be mounted as a files system.  See
-		include/nuttx/drivers/ramdisk.h.
-
-menuconfig CAN
-	bool "CAN Driver Support"
-	default n
-	---help---
-		This selection enables building of the "upper-half" CAN driver.
-		See include/nuttx/can/can.h for further CAN driver information.
-
-if CAN
+source drivers/crypto/Kconfig
+source drivers/loop/Kconfig
 source drivers/can/Kconfig
-endif
-
-config ARCH_HAVE_PWM_PULSECOUNT
-	bool
-	default n
-
-config ARCH_HAVE_PWM_MULTICHAN
-	bool
-	default n
-
-config ARCH_HAVE_I2CRESET
-	bool
-	default n
-
-menuconfig I2C
-	bool "I2C Driver Support"
-	default n
-	---help---
-		This selection enables building of the "upper-half" I2C driver.
-		See include/nuttx/i2c/i2c_master.h for further I2C driver information.
-
-if I2C
 source drivers/i2c/Kconfig
-endif
-
 source drivers/spi/Kconfig
-
-menuconfig I2S
-	bool "I2S Driver Support"
-	default n
-	---help---
-		This selection enables selection of common I2S options.  This option
-		should be enabled by all platforms that support I2S interfaces.
-		See include/nuttx/audio/i2s.h for further I2S driver information.
-
-if I2S
 source drivers/i2s/Kconfig
-endif # I2S
-
 source drivers/timers/Kconfig
-
-menuconfig ANALOG
-	bool "Analog Device(ADC/DAC) Support"
-	default n
-	---help---
-		This directory holds implementations of analog device drivers.
-		This includes drivers for Analog to Digital Conversion (ADC) as
-		well as drivers for Digital to Analog Conversion (DAC).
-		See include/nuttx/analog/*.h for registration information.
-
-if ANALOG
 source drivers/analog/Kconfig
-endif # ANALOG
-
-menuconfig DRIVERS_AUDIO
-	bool "Audio Device Support"
-	default n
-	---help---
-		Enable support for audio device drivers.  This includes drivers for
-		MP3, WMA and Ogg Vorbis encoding, decoding, as well as drivers for
-		interfacing with external DSP chips to perform custom audio functions.
-
-		NOTE: All of these drivers depend on support from the audio subsystem
-		enabled with the AUDIO selection.
-
-if DRIVERS_AUDIO
 source drivers/audio/Kconfig
-endif # DRIVERS_AUDIO
-
-config FB_CMAP
-	bool
-	default n
-	---help---
-		Set by driver-specific configuration to indicate support for color
-		mapping.  Not directly user selectable.
-
-config FB_TRANSPARENCY
-	bool
-	default n
-	---help---
-		Set by driver-specific configuration to indicate support for color
-		transparency.  Not directly user selectable.
-
-menuconfig DRIVERS_VIDEO
-	bool "Video Device Support"
-	default n
-	---help---
-		Enable support for video device drivers.
-
-if DRIVERS_VIDEO
 source drivers/video/Kconfig
-endif # DRIVERS_VIDEO
-
-menuconfig BCH
-	bool "Block-to-Character (BCH) Support"
-	default n
-	---help---
-		Contains logic that may be used to convert a block driver into
-		a character driver.  This is the complementary conversion as that
-		performed by loop.c.  See include/nuttx/drivers/drivers.h for
-		registration information.
-
-if BCH
 source drivers/bch/Kconfig
-endif # BCH
-
-menuconfig INPUT
-	bool "Input Device Support"
-	default n
-	---help---
-		This directory holds implementations of input device drivers.
-		This includes such things as touchscreen and keypad drivers.
-		See include/nuttx/input/*.h for registration information.
-
-if INPUT
 source drivers/input/Kconfig
-endif # INPUT
-
 source drivers/ioexpander/Kconfig
 source drivers/lcd/Kconfig
 source drivers/leds/Kconfig
-
-# MMC/SD-related platform capabilities
-
-config ARCH_HAVE_SDIO
-	bool
-	default n
-
-config ARCH_HAVE_SDIOWAIT_WRCOMPLETE
-	bool
-	default n
-
-config ARCH_HAVE_SDIO_PREFLIGHT
-	bool
-	default n
-
-config ARCH_HAVE_SDIO_DELAYED_INVLDT
-	bool
-	default n
-
-menuconfig MMCSD
-	bool "MMC/SD Driver Support"
-	default n
-	---help---
-		Support for MMC/SD block drivers.  MMC/SD block drivers based on
-		SPI and SDIO/MCI interfaces are supported.  See include/nuttx/mmcsd.h
-		and include/nuttx/sdio.h for further information.
-
-if MMCSD
 source drivers/mmcsd/Kconfig
-endif # MMCSD
-
-menuconfig MODEM
-	bool "Modem Support"
-	default n
-	---help---
-		Enable modem support.
-
-if MODEM
 source drivers/modem/Kconfig
-endif # MODEM
-
-menuconfig MTD
-	bool "Memory Technology Device (MTD) Support"
-	default n
-	---help---
-		Memory Technology Device (MTD) drivers.  Some simple drivers for
-		memory technologies like FLASH, EEPROM, NVRAM, etc.  See
-		include/nuttx/mtd/mtd.h
-
-		(Note: This is a simple memory interface and should not be
-		confused with the "real" MTD developed at infradead.org.  This
-		logic is unrelated; I just used the name MTD because I am not
-		aware of any other common way to refer to this class of devices).
-
-if MTD
 source drivers/mtd/Kconfig
-endif # MTD
-
-menuconfig EEPROM
-	bool "EEPROM support"
-	default n
-	---help---
-		This directory holds implementations of EEPROM drivers.
-
-if EEPROM
 source drivers/eeprom/Kconfig
-endif
-
-menuconfig NETDEVICES
-	bool "Network Device/PHY Support"
-	default n if !ARCH_HAVE_PHY
-	default y if ARCH_HAVE_PHY
-	depends on NET
-	---help---
-		Network interface driver and PHY selections.  This options enables
-		selection of drivers for external Ethernet MAC chips.  The majority
-		of MCUs, however, have built-in, internal Ethernet MAC peripherals
-		and that Ethernet support is selected in the MCU-specific
-		configuration menus.
-
-		Most Ethernet MAC drivers, whether internal or external, will
-		require configuration of an external PHY device.  That external PHY
-		device is also selected via this menu.
-
-if NETDEVICES
 source drivers/net/Kconfig
-endif # NETDEVICES
-
-menuconfig PIPES
-	bool "FIFO and named pipe drivers"
-	default n
-	---help---
-		FIFO and named pipe drivers.  Standard interfaces are declared
-		in include/unistd.h
-
-if PIPES
 source drivers/pipes/Kconfig
-endif # PIPES
-
 source drivers/power/Kconfig
-
-menuconfig RPTUN
-	bool "Remote Proc Tunnel Driver Support"
-	default n
-	depends on OPENAMP
-	---help---
-		RPTUN driver is used for multi-cores' communication.
-
-if RPTUN
 source drivers/rptun/Kconfig
-endif # RPTUN
-
-menuconfig SENSORS
-	bool "Sensor Device Support"
-	default n
-	---help---
-		Drivers for various sensors
-
-if SENSORS
 source drivers/sensors/Kconfig
-endif # SENSORS
-
-menuconfig SERIAL
-	bool "Serial Driver Support"
-	default y
-	---help---
-		Front-end character drivers for chip-specific UARTs.  This provide
-		some TTY-like functionality and are commonly used (but not required
-		for) the NuttX system console.  See also include/nuttx/serial/serial.h
-
-if SERIAL
 source drivers/serial/Kconfig
-endif # SERIAL
-
-menuconfig USBDEV
-	bool "USB Device Driver Support"
-	default n
-	---help---
-		USB device drivers.  See also include/nuttx/usb/usbdev.h
-
-if USBDEV
 source drivers/usbdev/Kconfig
-endif # USBDEV
-
-menuconfig USBHOST
-	bool "USB Host Driver Support"
-	default n
-	---help---
-		USB host drivers.  See also include/nuttx/usb/usbhost.h
-
-if USBHOST
 source drivers/usbhost/Kconfig
-endif # USBHOST
-
-menuconfig USBMISC
-	bool "USB Miscellaneous drivers"
-	default n
-	---help---
-		USB Miscellaneous drivers.
-
-if USBMISC
 source drivers/usbmisc/Kconfig
-endif # USBMISC
-
-config HAVE_USBTRACE
-	bool
-	default n
-
-menuconfig USBMONITOR
-	bool "USB Monitor"
-	default n
-	depends on HAVE_USBTRACE
-	---help---
-		If USB device tracing (USBDEV_TRACE) AND/OR USB host tracing
-		(USBHOST_TRACE) are enabled then this option will select the USB
-		monitor.  The USB monitor is a daemon that will periodically collect
-		the buffered USB trace data and dump it to the SYSLOG device.
-
-if USBMONITOR
 source drivers/usbmonitor/Kconfig
-endif # USBMONITOR
-
-menuconfig DRIVERS_WIRELESS
-	bool "Wireless Device Support"
-	default n
-	---help---
-		Drivers for various wireless devices.
-
 source drivers/wireless/Kconfig
-
-menuconfig DRIVERS_CONTACTLESS
-	bool "Contactless Device Support"
-	default n
-	---help---
-		Drivers for various contactless devices.
-
 source drivers/contactless/Kconfig
-
-menuconfig 1WIRE
-	bool "1wire Device Support"
-	default n
-	---help---
-		Drivers for various 1wire devices.
-
 source drivers/1wire/Kconfig
-
 source drivers/syslog/Kconfig
-
-menuconfig SPECIFIC_DRIVERS
-	bool "Board specific drivers"
-	default n
-	---help---
-		Board specific drivers located in each board/driver folder.
-
-if SPECIFIC_DRIVERS
 source drivers/platform/Kconfig
-endif # SPECIFIC_DRIVERS
-
-menuconfig DRIVERS_RF
-	bool "RF Device Support"
-	default n
-	---help---
-		Drivers for various RF devices
-
-if DRIVERS_RF
 source drivers/rf/Kconfig
-endif # DRIVERS_RF

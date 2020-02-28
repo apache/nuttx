@@ -183,14 +183,14 @@
 #define LPC214X_AD_ADGDR_OFFSET         0x04   /* A/D Global Data Register (only one common register!) */
 #define LPC214X_AD_ADGSR_OFFSET         0x08   /* A/D Global Start Register */
 #define LPC214X_AD_ADINTEN_OFFSET       0x0c   /* A/D Interrupt Enable Register */
-#define LPC214X_AD_ADDR0_OFFSET         0x10   /* A/D Chanel 0 Data Register */
-#define LPC214X_AD_ADDR1_OFFSET         0x14   /* A/D Chanel 0 Data Register */
-#define LPC214X_AD_ADDR2_OFFSET         0x18   /* A/D Chanel 0 Data Register */
-#define LPC214X_AD_ADDR3_OFFSET         0x1c   /* A/D Chanel 0 Data Register */
-#define LPC214X_AD_ADDR4_OFFSET         0x20   /* A/D Chanel 0 Data Register */
-#define LPC214X_AD_ADDR5_OFFSET         0x24   /* A/D Chanel 0 Data Register */
-#define LPC214X_AD_ADDR6_OFFSET         0x28   /* A/D Chanel 0 Data Register */
-#define LPC214X_AD_ADDR7_OFFSET         0x2c   /* A/D Chanel 0 Data Register */
+#define LPC214X_AD_ADDR0_OFFSET         0x10   /* A/D Channel 0 Data Register */
+#define LPC214X_AD_ADDR1_OFFSET         0x14   /* A/D Channel 0 Data Register */
+#define LPC214X_AD_ADDR2_OFFSET         0x18   /* A/D Channel 0 Data Register */
+#define LPC214X_AD_ADDR3_OFFSET         0x1c   /* A/D Channel 0 Data Register */
+#define LPC214X_AD_ADDR4_OFFSET         0x20   /* A/D Channel 0 Data Register */
+#define LPC214X_AD_ADDR5_OFFSET         0x24   /* A/D Channel 0 Data Register */
+#define LPC214X_AD_ADDR6_OFFSET         0x28   /* A/D Channel 0 Data Register */
+#define LPC214X_AD_ADDR7_OFFSET         0x2c   /* A/D Channel 0 Data Register */
 #define LPC214X_AD_ADSTAT_OFFSET        0x30   /* A/D Status Register */
 
 /* SPI0 register offsets */
@@ -258,7 +258,7 @@
 #define LPC214X_FIO_SET_OFFSET          0x18   /* Fast GPIO Port Output Set Register */
 #define LPC214X_FIO_CLR_OFFSET          0x1c   /* Fast GPIO Port Output Clear Register */
 
-/* Memory Accelerator Module (MAM) Regiser Offsets */
+/* Memory Accelerator Module (MAM) Register Offsets */
 
 #define LPC214X_MAM_CR_OFFSET           0x00   /* MAM Control Offset*/
 #define LPC214x_MAM_TIM_OFFSET          0x04   /* MAM Timing Offset */
@@ -346,4 +346,4 @@
  * Public Function Prototypes
  ****************************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_LPC214X_CHIP_H */
+#endif /* __ARCH_ARM_SRC_LPC214X_CHIP_H */

@@ -53,6 +53,7 @@
 #include <nuttx/compiler.h>
 
 #include <nuttx/power/power_ioctl.h>
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_DRIVERS_POWERLED
 
@@ -133,7 +134,7 @@ struct powerled_params_s
                                     */
 };
 
-/* Powerled private data strucutre  */
+/* Powerled private data structure  */
 
 struct powerled_s
 {

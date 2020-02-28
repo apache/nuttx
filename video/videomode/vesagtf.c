@@ -93,7 +93,7 @@
 
 #define CELL_GRAN            8    /* Assumed character cell granularity */
 
-/* c' and m' are part of the Blanking Duty Cycle computation 
+/* c' and m' are part of the Blanking Duty Cycle computation
  *
  * #define C_PRIME           (((c - j) * k/256.0) + j)
  * #define M_PRIME           (k/256.0 * m)

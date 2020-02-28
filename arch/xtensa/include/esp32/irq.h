@@ -196,7 +196,7 @@
 #define XTENSA_NIRQ_INTERNAL        4  /* Number of dispatch internal interrupts */
 #define XTENSA_IRQ_FIRSTPERIPH      4  /* First peripheral IRQ number */
 
-/* IRQ numbers for peripheral interrupts coming throught the Interrupt
+/* IRQ numbers for peripheral interrupts coming through the Interrupt
  * Matrix.
  */
 

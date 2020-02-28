@@ -5,4 +5,3 @@
 
 if ARCH_BOARD_AVR32DEV1
 endif
-

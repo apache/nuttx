@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <pthread.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 

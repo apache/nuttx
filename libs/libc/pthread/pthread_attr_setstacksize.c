@@ -83,4 +83,3 @@ int pthread_attr_setstacksize(FAR pthread_attr_t *attr, size_t stacksize)
   linfo("Returning %d\n", ret);
   return ret;
 }
-

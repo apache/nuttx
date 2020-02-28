@@ -81,7 +81,7 @@ endif
 # This define is passed as EXTRADEFINES for kernel-mode builds.  It is also passed
 # during PASS1 (but not PASS2) context and depend targets.
 
-KDEFINE = ${shell $(TOPDIR)/tools/define.sh "$(CC)" __KERNEL__}
+KDEFINE = ${shell $(DEFINE) "$(CC)" __KERNEL__}
 
 # Process architecture and board-specific directories
 
@@ -186,13 +186,15 @@ ifeq ($(V),2)
 MKEXPORT_ARGS += -d
 endif
 
-# This is the name of the final target (relative to the top level directorty)
+# This is the name of the final target (relative to the top level directory)
 
 NUTTXNAME = nuttx
 BIN       = $(NUTTXNAME)$(EXEEXT)
 
 all: $(BIN)
 .PHONY: dirlinks context clean_context check_context config oldconfig menuconfig nconfig qconfig gconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
+.PHONY: pass1 pass1deps pass1dep
+.PHONY: pass2 pass2deps pass2dep
 ifeq ($(GIT_DIR),y)
 .PHONY: $(TOPDIR)/.version
 endif
@@ -406,13 +408,6 @@ clean_context:
 	$(call DELFILE, include/math.h)
 	$(call DELFILE, include/stdarg.h)
 	$(call DELFILE, include/setjmp.h)
-	$(Q) $(DIRUNLINK) include/arch/board
-	$(Q) $(DIRUNLINK) include/arch/chip
-	$(Q) $(DIRUNLINK) include/arch
-	$(Q) $(DIRUNLINK) $(ARCH_SRC)/board/board
-	$(Q) $(DIRUNLINK) $(ARCH_SRC)/board
-	$(Q) $(DIRUNLINK) $(ARCH_SRC)/chip
-	$(Q) $(DIRUNLINK) $(TOPDIR)/drivers/platform
 
 # check_context
 #
@@ -668,6 +663,13 @@ endif
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
 	$(call DELFILE, .gdbinit)
+	$(Q) $(DIRUNLINK) include/arch/board
+	$(Q) $(DIRUNLINK) include/arch/chip
+	$(Q) $(DIRUNLINK) include/arch
+	$(Q) $(DIRUNLINK) $(ARCH_SRC)/board/board
+	$(Q) $(DIRUNLINK) $(ARCH_SRC)/board
+	$(Q) $(DIRUNLINK) $(ARCH_SRC)/chip
+	$(Q) $(DIRUNLINK) $(TOPDIR)/drivers/platform
 
 # Application housekeeping targets.  The APPDIR variable refers to the user
 # application directory.  A sample apps/ directory is included with NuttX,

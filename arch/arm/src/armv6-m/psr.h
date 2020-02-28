@@ -74,4 +74,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_COMMON_ARMV6_M_PSR_H */
+#endif /* __ARCH_ARM_SRC_COMMON_ARMV6_M_PSR_H */

@@ -59,7 +59,7 @@
 #define SAM_SUPC_WUIR_OFFSET            0x10 /* Supply Controller Wake Up Inputs Register */
 #define SAM_SUPC_SR_OFFSET              0x14 /* Supply Controller Status Register */
 
-/* SUPC register adresses ***************************************************************/
+/* SUPC register addresses **************************************************************/
 
 #define SAM_SUPC_CR                     (SAM_SUPC_BASE+SAM_SUPC_CR_OFFSET)
 #define SAM_SUPC_SMMR                   (SAM_SUPC_BASE+SAM_SUPC_SMMR_OFFSET)

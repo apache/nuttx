@@ -77,20 +77,51 @@ typedef unsigned long long _uint64_t;
 #define __INT64_DEFINED
 
 #ifdef __LP64__
-/* A pointer is 8 bytes */
+/* A size is 8 bytes */
 
-typedef signed long         _intptr_t;
-typedef unsigned long       _uintptr_t;
+#if defined(__SIZE_TYPE__)
+/* If __SIZE_TYPE__ is defined we define ssize_t based on size_t.
+ * We simply change "unsigned" to "signed" for this single definition
+ * to make sure ssize_t and size_t only differ by their signedness.
+ */
+
+#define unsigned signed
+typedef __SIZE_TYPE__      _ssize_t;
+#undef unsigned
+typedef __SIZE_TYPE__      _size_t;
 #else
-/* A pointer is 4 bytes */
+typedef signed long        _ssize_t;
+typedef unsigned long      _size_t;
+#endif
 
-typedef signed int         _intptr_t;
-typedef unsigned int       _uintptr_t;
+/* This is the size of the interrupt state save returned by irqsave().  */
+
+typedef unsigned long long  irqstate_t;
+#else
+/* A size is 4 bytes */
+
+#if defined(__SIZE_TYPE__)
+/* If __SIZE_TYPE__ is defined we define ssize_t based on size_t.
+ * We simply change "unsigned" to "signed" for this single definition
+ * to make sure ssize_t and size_t only differ by their signedness.
+ */
+
+#define unsigned signed
+typedef __SIZE_TYPE__      _ssize_t;
+#undef unsigned
+typedef __SIZE_TYPE__      _size_t;
+#elif defined(CONFIG_ARCH_SIZET_LONG)
+typedef signed long        _ssize_t;
+typedef unsigned long      _size_t;
+#else
+typedef signed int         _ssize_t;
+typedef unsigned int       _size_t;
 #endif
 
 /* This is the size of the interrupt state save returned by irqsave().  */
 
 typedef unsigned int       irqstate_t;
+#endif
 
 #endif /* __ASSEMBLY__ */
 

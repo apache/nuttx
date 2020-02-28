@@ -95,7 +95,7 @@ extern int PM_SleepCpu(int cpuid, int mode);
 #endif
 
 #define CXD56_GNSS_GPS_CPUID                  1
-#ifdef  CONFIG_CXD56_GNSS_FW_RTK
+#ifdef CONFIG_CXD56_GNSS_FW_RTK
 #  define CXD56_GNSS_FWNAME                   "gnssfwrtk"
 #else
 #  define CXD56_GNSS_FWNAME                   "gnssfw"
@@ -379,7 +379,7 @@ static int (*g_cmdlist[CXD56_GNSS_IOCTL_MAX])(FAR struct file *filep,
  * Description:
  *   Process CXD56_GNSS_IOCTL_START command.
  *   Start a positioning
- *   begining to search the satellites and measure the receiver position
+ *   beginning to search the satellites and measure the receiver position
  *
  * Input Parameters:
  *   filep - File structure pointer

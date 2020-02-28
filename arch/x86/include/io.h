@@ -84,4 +84,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_X86_INCLUDE_IO_H */
-

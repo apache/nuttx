@@ -132,4 +132,3 @@ void posix_spawn_file_actions_dump(FAR posix_spawn_file_actions_t *file_actions)
 }
 
 #endif /* CONFIG_DEBUG_FEATURES */
-

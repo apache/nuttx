@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <semaphore.h>
 #include <errno.h>
 
 #include <nuttx/semaphore.h>

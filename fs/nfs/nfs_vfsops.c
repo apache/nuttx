@@ -59,7 +59,6 @@
 #include <string.h>
 #include <fcntl.h>
 #include <time.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -514,7 +513,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
 
   if ((oflags & O_WRONLY) != 0)
     {
-      /* Check if anyone has priveleges to write to the file -- owner,
+      /* Check if anyone has privileges to write to the file -- owner,
        * group, or other (we are probably "other" and may still not be
        * able to write).
        */
@@ -740,7 +739,7 @@ static int nfs_close(FAR struct file *filep)
    * free up all resources associated with the open file.
    *
    * First, find our file structure in the list of file structures
-   * containted in the mount structure.
+   * contained in the mount structure.
    */
 
   else
@@ -1126,7 +1125,7 @@ static ssize_t nfs_write(FAR struct file *filep, const char *buffer,
 
       writesize = tmp;
 
-      /* Determine the lowest committment level obtained by any of the RPCs. */
+      /* Determine the lowest commitment level obtained by any of the RPCs. */
 
       commit = *ptr++;
       if (committed == NFSV3WRITE_FILESYNC)
@@ -1567,7 +1566,7 @@ static int nfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
    *
    *    File ID (8 bytes)
    *    Name length (4 bytes)
-   *    Name string (varaiable size but in multiples of 4 bytes)
+   *    Name string (variable size but in multiples of 4 bytes)
    *    Cookie (8 bytes)
    *    next entry (4 bytes)
    */
@@ -1660,7 +1659,7 @@ errout_with_semaphore:
  * Name: nfs_rewinddir
  *
  * Description:
- *  Reset the directory traveral logic to the first entry in the open
+ *  Reset the directory traversal logic to the first entry in the open
  *  directory.
  *
  * Returned Value:

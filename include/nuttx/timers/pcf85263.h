@@ -87,4 +87,4 @@ int pcf85263_rtc_initialize(FAR struct i2c_master_s *i2c);
 #endif
 
 #endif /* CONFIG_RTC_PCF85263 */
-#endif  /* __INCLUDE_NUTTX_TIMERS_PCF85263_H */
+#endif /* __INCLUDE_NUTTX_TIMERS_PCF85263_H */

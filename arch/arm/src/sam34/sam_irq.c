@@ -369,7 +369,7 @@ void up_irqinitialize(void)
    *
    *  0 -> 32 interrupt lines, 1 enable register,   8 priority registers
    *  1 -> 64 "       " "   ", 2 enable registers, 16 priority registers
-   *  2 -> 96 "       " "   ", 3 enable regsiters, 24 priority registers
+   *  2 -> 96 "       " "   ", 3 enable registers, 24 priority registers
    *  ...
    */
 

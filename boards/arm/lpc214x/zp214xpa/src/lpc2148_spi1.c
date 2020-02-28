@@ -67,13 +67,13 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include "up_internal.h"
@@ -160,12 +160,12 @@ static sem_t g_exclsem = SEM_INITIALIZER(1);  /* For mutually exclusive access *
  * Name: spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -454,7 +454,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
   FAR const uint8_t *ptr = (FAR const uint8_t *)buffer;
   uint8_t sr;
 
-  /* Loop while thre are bytes remaining to be sent */
+  /* Loop while there are bytes remaining to be sent */
 
   spiinfo("nwords: %d\n", nwords);
   while (nwords > 0)
@@ -649,7 +649,7 @@ FAR struct spi_dev_s *lpc214x_spibus_initialize(int port)
   putreg8(0, LPC214X_SPI1_CR1);
   putreg8(0, LPC214X_SPI1_IMSC);
 
-  /* Set the initial clock frequency for indentification mode < 400kHz */
+  /* Set the initial clock frequency for identification mode < 400kHz */
 
   spi_setfrequency(NULL, 400000);
 

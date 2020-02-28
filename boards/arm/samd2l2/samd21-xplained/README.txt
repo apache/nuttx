@@ -83,7 +83,7 @@ Modules
     ----------------- ---------------------- ---------------------- ------------------------------------
     2  GND            2       GND            2  GND
     ----------------- ---------------------- ---------------------- ------------------------------------
-    3  LIGHTSENSOR    3  PB00 AIN[8]         3  PA10 AIN[18]
+    3  LIGHT_SENSOR   3  PB00 AIN[8]         3  PA10 AIN[18]
     ----------------- ---------------------- ---------------------- ------------------------------------
     4  LP_OUT         4  PB01 AIN[9]         4  PA11 AIN[19]
     ----------------- ---------------------- ---------------------- ------------------------------------
@@ -530,7 +530,7 @@ Configurations
 
      Build Setup:
        CONFIG_HOST_WINDOWS=y   : Windows Host
-       CONFIG_WINDOWS_CYGWIN=y : Cygwin environment on windoes
+       CONFIG_WINDOWS_CYGWIN=y : Cygwin environment on windows
 
   4. These configurations use the CodeSourcery toolchain.  But
      that is easily reconfigured:
@@ -588,7 +588,7 @@ Configuration sub-directories
        Sometimes NuttX and your toolchain will disagree on the underlying
        type of size_t; sometimes it is an 'unsigned int' and sometimes it is
        an 'unsigned long int'.  If this error occurs, then you may need to
-       toggle the value of CONFIG_CXX_NEWLONG.
+       toggle the value of CONFIG_ARCH_SIZET_LONG.
 
     4. If the I/O1 module is connected to the SAMD21 Xplained Pro, then
        support for the SD card slot can be enabled by making the following

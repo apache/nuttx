@@ -110,7 +110,7 @@ time_t clock_calendar2utc(int year, int month, int day)
 
   /* Correct year & month ranges.  Shift month into range 1-12 */
 
-  dyear = (month-1) / 12;	
+  dyear = (month-1) / 12;
   month -= 12 * dyear;
   year += dyear;
 
@@ -192,4 +192,3 @@ time_t clock_calendar2utc(int year, int month, int day)
   return days;
 }
 #endif /* CONFIG_GREGORIAN_TIME */
-

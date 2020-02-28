@@ -188,17 +188,6 @@ _ez80_init:
 	ld		a, __CS3_CTL_INIT_PARAM
 	out0	(CS3_CTL), a
 
-	; Enable internal memory
-
-	ld		a, __FLASH_ADDR_U_INIT_PARAM
-	out0	(FLASH_ADDR_U), a
-	ld		a, __FLASH_CTL_INIT_PARAM
-	out0	(FLASH_CTRL), a
-
-	ld		a, __RAM_ADDR_U_INIT_PARAM
-	out0	(RAM_ADDR_U), a
-	ld		a, __RAM_CTL_INIT_PARAM
-	out0	(RAM_CTL), a
 	ret
 
 ;*****************************************************************************
@@ -218,7 +207,7 @@ _ez80_initsysclk:
 	out0	(PLL_DIV_L), a
 	ld		a, (_ez80_oscfreqmult+1)
 	out0	(PLL_DIV_H), a
-	
+
 	; Set charge pump and lock criteria
 
 	ld		a, __PLL_CTL0_INIT_PARAM

@@ -44,7 +44,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -1954,7 +1953,7 @@ static ssize_t stm32_in_transfer(FAR struct stm32_usbhost_s *priv, int chidx,
                   /* Wait for the next polling interval.  For interrupt and
                    * isochronous endpoints, this is necessaryto assure the
                    * polling interval.  It is used in other cases only to
-                   * prevent the polling from consuming too much CPU bandwith.
+                   * prevent the polling from consuming too much CPU bandwidth.
                    *
                    * Small delays could require more resolution than is provided
                    * by the system timer.  For example, if the system timer
@@ -3240,7 +3239,7 @@ static inline void stm32_gint_ptxfeisr(FAR struct stm32_usbhost_s *priv)
   chan->xfrd    += chan->inflight;
   chan->inflight = 0;
 
-  /* If we have now transfered the entire buffer, then this transfer is
+  /* If we have now transferred the entire buffer, then this transfer is
    * complete (this case really should never happen because we disable
    * the PTXFE interrupt on the final packet).
    */
@@ -3776,7 +3775,7 @@ static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx)
   uint32_t regval;
 
   /* Disable all interrupts so that we have exclusive access to the GINTMSK
-   * (it would be sufficent just to disable the GINT interrupt).
+   * (it would be sufficient just to disable the GINT interrupt).
    */
 
   flags = enter_critical_section();
@@ -5051,7 +5050,7 @@ static void stm32_vbusdrive(FAR struct stm32_usbhost_s *priv, bool state)
  * Description:
  *   Initialize/re-initialize hardware for host mode operation.  At present,
  *   this function is called only from stm32_hw_initialize().  But if OTG mode
- *   were supported, this function would also be called to swtich between
+ *   were supported, this function would also be called to switch between
  *   host and device modes on a connector ID change interrupt.
  *
  * Input Parameters:
@@ -5111,7 +5110,7 @@ static void stm32_host_initialize(FAR struct stm32_usbhost_s *priv)
              (CONFIG_STM32_OTGHS_PTXFIFO_SIZE << OTGHS_HPTXFSIZ_PTXFD_SHIFT));
   stm32_putreg(STM32_OTGHS_HPTXFSIZ, regval);
 
-  /* If OTG were supported, we sould need to clear HNP enable bit in the
+  /* If OTG were supported, we should need to clear HNP enable bit in the
    * USB_OTG control register about here.
    */
 

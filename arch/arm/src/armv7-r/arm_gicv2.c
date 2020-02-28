@@ -128,6 +128,7 @@ void arm_gic0_initialize(void)
    */
 
   /* Enable GIC distributor */
+
   putreg32(0x3, GIC_ICDDCR);
 
   /* Registers with 1-bit per interrupt */
@@ -183,12 +184,12 @@ void arm_gic_initialize(void)
 
   /* Registers with 1-bit per interrupt */
 
-  putreg32(0x00000000, GIC_ICDISR(0));	/* SGIs and PPIs secure */
-  putreg32(0xf8000000, GIC_ICDICER(0));	/* PPIs disabled */
+  putreg32(0x00000000, GIC_ICDISR(0));  /* SGIs and PPIs secure */
+  putreg32(0xf8000000, GIC_ICDICER(0)); /* PPIs disabled */
 
   /* Registers with 8-bits per interrupt */
 
-  putreg32(0x80808080, GIC_ICDIPR(0));	/* SGI[3:0] priority */
+  putreg32(0x80808080, GIC_ICDIPR(0));  /* SGI[3:0] priority */
   putreg32(0x80808080, GIC_ICDIPR(4));	/* SGI[4:7] priority */
   putreg32(0x80808080, GIC_ICDIPR(8));	/* SGI[8:11] priority */
   putreg32(0x80808080, GIC_ICDIPR(12));	/* SGI[12:15] priority */
@@ -219,12 +220,25 @@ void arm_gic_initialize(void)
 #if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Clear secure state ICCICR bits to be configured below */
 
-  iccicr &= ~(GIC_ICCICRS_FIQEN | GIC_ICCICRS_ACKTCTL | GIC_ICCICRS_CBPR | GIC_ICCICRS_EOIMODES | GIC_ICCICRS_EOIMODENS | GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_ENABLEGRP1 | GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 | GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
+  iccicr &= ~(GIC_ICCICRS_FIQEN         |
+              GIC_ICCICRS_ACKTCTL       |
+              GIC_ICCICRS_CBPR          |
+              GIC_ICCICRS_EOIMODES      |
+              GIC_ICCICRS_EOIMODENS     |
+              GIC_ICCICRS_ENABLEGRP0    |
+              GIC_ICCICRS_ENABLEGRP1    |
+              GIC_ICCICRS_FIQBYPDISGRP0 |
+              GIC_ICCICRS_IRQBYPDISGRP0 |
+              GIC_ICCICRS_FIQBYPDISGRP1 |
+              GIC_ICCICRS_IRQBYPDISGRP1);
 
 #elif defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
   /* Clear non-secure state ICCICR bits to be configured below */
 
-  iccicr &= ~(GIC_ICCICRS_EOIMODENS | GIC_ICCICRU_ENABLEGRP1 | GIC_ICCICRU_FIQBYPDISGRP1 | GIC_ICCICRU_IRQBYPDISGRP1);
+  iccicr &= ~(GIC_ICCICRS_EOIMODENS     |
+              GIC_ICCICRU_ENABLEGRP1    |
+              GIC_ICCICRU_FIQBYPDISGRP1 |
+              GIC_ICCICRU_IRQBYPDISGRP1);
 
 #endif
 
@@ -247,7 +261,7 @@ void arm_gic_initialize(void)
    * REVISIT: I don't yet fully understand this setting.
    */
 
-  // iccicr |= GIC_ICCICRS_ACKTCTL;
+  /* iccicr |= GIC_ICCICRS_ACKTCTL; */
 
   /* Program the SBPR bit to select the required binary pointer behavior.
    *
@@ -256,7 +270,8 @@ void arm_gic_initialize(void)
    * REVISIT: I don't yet fully understand this setting.
    */
 
-  // iccicr |= GIC_ICCICRS_CBPR;
+  /* iccicr |= GIC_ICCICRS_CBPR; */
+
 #endif
 
 #if defined(CONFIG_ARCH_TRUSTZONE_SECURE) || defined(CONFIG_ARCH_TRUSTZONE_BOTH)
@@ -307,19 +322,30 @@ void arm_gic_initialize(void)
    * bypass.
    */
 
-  iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 | GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
+  iccicr |= (GIC_ICCICRS_ENABLEGRP0    |
+             GIC_ICCICRS_FIQBYPDISGRP0 |
+             GIC_ICCICRS_IRQBYPDISGRP0 |
+             GIC_ICCICRS_FIQBYPDISGRP1 |
+             GIC_ICCICRS_IRQBYPDISGRP1);
 
 #elif defined(CONFIG_ARCH_TRUSTZONE_BOTH)
   /* Enable the Group 0/1 interrupts, FIQEn and disable Group 0/1
    * bypass.
    */
 
-  iccicr |= (GIC_ICCICRS_ENABLEGRP0 | GIC_ICCICRS_ENABLEGRP1 | GIC_ICCICRS_FIQBYPDISGRP0 | GIC_ICCICRS_IRQBYPDISGRP0 | GIC_ICCICRS_FIQBYPDISGRP1 | GIC_ICCICRS_IRQBYPDISGRP1);
+  iccicr |= (GIC_ICCICRS_ENABLEGRP0    |
+             GIC_ICCICRS_ENABLEGRP1    |
+             GIC_ICCICRS_FIQBYPDISGRP0 |
+             GIC_ICCICRS_IRQBYPDISGRP0 |
+             GIC_ICCICRS_FIQBYPDISGRP1 |
+             GIC_ICCICRS_IRQBYPDISGRP1);
 
-#else							/* defined(CONFIG_ARCH_TRUSTZONE_NONSECURE) */
+#else              /* defined(CONFIG_ARCH_TRUSTZONE_NONSECURE) */
   /* Enable the Group 1 interrupts and disable Group 1 bypass. */
 
-  iccicr |= (GIC_ICCICRU_ENABLEGRP1 | GIC_ICCICRU_FIQBYPDISGRP1 | GIC_ICCICRU_IRQBYPDISGRP1);
+  iccicr |= (GIC_ICCICRU_ENABLEGRP1    |
+             GIC_ICCICRU_FIQBYPDISGRP1 |
+             GIC_ICCICRU_IRQBYPDISGRP1);
 
 #endif
 
@@ -503,7 +529,7 @@ int up_prioritize_irq(int irq, int priority)
  *   If CONFIG_SMP is not selected, the cpuset is ignored and SGI is sent
  *   only to the current CPU.
  *
- * Input Paramters
+ * Input Parameters
  *   sgi    - The SGI interrupt ID (0-15)
  *   cpuset - The set of CPUs to receive the SGI
  *
@@ -517,9 +543,13 @@ int arm_cpu_sgi(int sgi, unsigned int cpuset)
   uint32_t regval;
 
 #ifdef CONFIG_SMP
-  regval = GIC_ICDSGIR_INTID(sgi) | GIC_ICDSGIR_CPUTARGET(cpuset) | GIC_ICDSGIR_TGTFILTER_LIST;
+  regval = GIC_ICDSGIR_INTID(sgi)        |
+           GIC_ICDSGIR_CPUTARGET(cpuset) |
+           GIC_ICDSGIR_TGTFILTER_LIST;
 #else
-  regval = GIC_ICDSGIR_INTID(sgi) | GIC_ICDSGIR_CPUTARGET(0) | GIC_ICDSGIR_TGTFILTER_THIS;
+  regval = GIC_ICDSGIR_INTID(sgi)   |
+           GIC_ICDSGIR_CPUTARGET(0) |
+           GIC_ICDSGIR_TGTFILTER_THIS;
 #endif
 
   putreg32(regval, GIC_ICDSGIR);

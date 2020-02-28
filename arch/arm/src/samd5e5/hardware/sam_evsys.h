@@ -63,7 +63,7 @@
 
 #define SAM_EVSYS_CHOFFSET(n)              (0x0020 + ((n) << 3)) /* Channel registers */
 #  define SAM_EVSYS_CHANNEL_OFFSET         0x0000  /* Channel control register */
-#  define SAM_EVSYS_CHINTENCLR_OFFSET      0x0004  /* Channl interrupt clear register */
+#  define SAM_EVSYS_CHINTENCLR_OFFSET      0x0004  /* Channel interrupt clear register */
 #  define SAM_EVSYS_CHINTENSET_OFFSET      0x0005  /* Channel interrupt enable register */
 #  define SAM_EVSYS_CHINTFLAG_OFFSET       0x0006  /* Channel interrupt status register */
 #  define SAM_EVSYS_CHSTATUS_OFFSET        0x0007  /* Channel status register */

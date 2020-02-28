@@ -209,4 +209,4 @@ void vnc_mouseout(FAR void *arg, nxgl_coord_t x, nxgl_coord_t y,
 }
 #endif
 
-#endif  /* __INCLUDE_NUTTX_VIDEO_VNC_H */
+#endif /* __INCLUDE_NUTTX_VIDEO_VNC_H */

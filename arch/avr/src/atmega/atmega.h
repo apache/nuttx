@@ -85,7 +85,7 @@ extern "C"
  * Name: up_clkinit
  *
  * Description:
- *   Initialiaze clock/PLL settings per the definitions in the board.h file.
+ *   Initialize clock/PLL settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 
@@ -211,4 +211,3 @@ void gpio_irqdisable(int irq);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_AVR_SRC_ATMEGA_ATMEGA_H */
-

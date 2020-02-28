@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F4DISCOVERY_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32F4DISCOVERY_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_S32K146EVB_INCLUDE_BOARD_H
+#define __BOARDS_ARM_S32K146EVB_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -89,9 +89,8 @@
 #define BOARD_LED_B_BIT   (1 << BOARD_LED_B)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LEDs on board
- * the s32k146evb.  The following definitions describe how NuttX controls the
+ * the S32K146EVB.  The following definitions describe how NuttX controls the
  * LEDs:
- *
  *
  *   SYMBOL                Meaning                      LED state
  *                                                      RED   GREEN  BLUE
@@ -106,7 +105,7 @@
 #define LED_SIGNAL        0 /* In a signal handler      (no change)       */
 #define LED_ASSERTION     0 /* An assertion failed      (no change)       */
 #define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
-#undef  LED_IDLE            /* S32K146EVN in sleep mode (Not used)        */
+#undef  LED_IDLE            /* S32K146EVB in sleep mode (Not used)        */
 
 /* Button definitions *******************************************************/
 
@@ -131,10 +130,35 @@
  *   OpenSDA UART RX  PTC6 (LPUART1_RX)
  */
 
+#define PIN_LPUART0_RX    PIN_LPUART0_RX_1  /* PTB0 */
+#define PIN_LPUART0_TX    PIN_LPUART0_TX_1  /* PTB1 */
+
 #define PIN_LPUART1_RX    PIN_LPUART1_RX_1  /* PTC6 */
 #define PIN_LPUART1_TX    PIN_LPUART1_TX_1  /* PTC7 */
 
-/* DMA Channel/Stream Selections ********************************************/
+#define PIN_LPUART2_RX    PIN_LPUART2_RX_1  /* PTA8 */
+#define PIN_LPUART2_TX    PIN_LPUART2_TX_1  /* PTA9 */
 
+/* SPI selections ***********************************************************/
 
-#endif  /* __BOARDS_ARM_STM32F4DISCOVERY_INCLUDE_BOARD_H */
+#define PIN_LPSPI0_SCK   PIN_LPSPI0_SCK_2   /* PTB2 */
+#define PIN_LPSPI0_MISO  PIN_LPSPI0_SIN_2   /* PTB3 */
+#define PIN_LPSPI0_MOSI  PIN_LPSPI0_SOUT_3  /* PTB4 */
+#define PIN_LPSPI0_PCS   PIN_LPSPI0_PCS0_1  /* PTB0 */
+
+#define PIN_LPSPI1_SCK   PIN_LPSPI1_SCK_1   /* PTB14 */
+#define PIN_LPSPI1_MISO  PIN_LPSPI1_SIN_1   /* PTB15 */
+#define PIN_LPSPI1_MOSI  PIN_LPSPI1_SOUT_1  /* PTB16 */
+#define PIN_LPSPI1_PCS   PIN_LPSPI1_PCS3	/* PTB17 */
+
+#define PIN_LPSPI2_SCK   PIN_LPSPI2_SCK_2   /* PTE15 */
+#define PIN_LPSPI2_MISO  PIN_LPSPI2_SIN_2   /* PTE16 */
+#define PIN_LPSPI2_MOSI  PIN_LPSPI2_SOUT_1  /* PTA8  */
+#define PIN_LPSPI2_PCS   PIN_LPSPI2_PCS0_2	/* PTA9  */
+
+/* I2C selections ***********************************************************/
+
+#define PIN_LPI2C0_SCL   PIN_LPI2C0_SCL_2   /* PTA3 */				
+#define PIN_LPI2C0_SDA	 PIN_LPI2C0_SDA_2   /* PTA2 */
+
+#endif  /* __BOARDS_ARM_S32K146EVB_INCLUDE_BOARD_H */

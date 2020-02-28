@@ -42,12 +42,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <arch/samv7/chip.h>
 
 #include "up_arch.h"
@@ -1620,7 +1620,7 @@ void weak_function up_dma_initialize(void)
  *   gives the caller exclusive access to the DMA channel.
  *
  *   The naming convention in all of the DMA interfaces is that one side is
- *   the 'peripheral' and the other is 'memory'.  Howerver, the interface
+ *   the 'peripheral' and the other is 'memory'.  However, the interface
  *   could still be used if, for example, both sides were memory although
  *   the naming would be awkward.
  *

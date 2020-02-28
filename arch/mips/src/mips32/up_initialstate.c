@@ -63,7 +63,7 @@
  *   the processor specific portions of the new TCB.
  *
  *   This function must setup the initial architecture registers
- *   and/or  stack so that execution will begin at tcb->start
+ *   and/or stack so that execution will begin at tcb->start
  *   on the next context switch.
  *
  ****************************************************************************/
@@ -80,7 +80,7 @@ void up_initial_state(struct tcb_s *tcb)
   /* Save the initial stack pointer.  Hmmm.. the stack is set to the very
    * beginning of the stack region.  Some functions may want to store data on
    * the caller's stack and it might be good to reserve some space.  However,
-   * only the start function would do that and we have control over that one
+   * only the start function would do that and we have control over that one.
    */
 
   xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
@@ -125,12 +125,12 @@ void up_initial_state(struct tcb_s *tcb)
 
   regval  = cp0_getstatus();
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  regval &= ~(CP0_STATUS_IM_ALL | CP0_STATUS_BEV | CP0_STATUS_UM);
-  regval |=  (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_IM_SWINTS);
+  regval &= ~(CP0_STATUS_INT_MASK | CP0_STATUS_BEV | CP0_STATUS_UM);
+  regval |=  (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_INT_SW0);
 #else
   regval &= ~(CP0_STATUS_BEV | CP0_STATUS_UM);
-  regval |=  (CP0_STATUS_IE | CP0_STATUS_EXL | CP0_STATUS_IM_ALL);
+  regval &= ~CP0_STATUS_INT_MASK;
+  regval |=  (CP0_STATUS_IE | CP0_STATUS_EXL);
 #endif
   xcp->regs[REG_STATUS] = regval;
 }
-

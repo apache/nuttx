@@ -55,4 +55,3 @@
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_PWR_H */
-

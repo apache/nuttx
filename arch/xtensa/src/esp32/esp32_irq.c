@@ -132,10 +132,10 @@ static inline void xtensa_attach_fromcpu1_interrupt(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_irq_initialize
+ * Name: up_irqinitialize
  ****************************************************************************/
 
-void xtensa_irq_initialize(void)
+void up_irqinitialize(void)
 {
   /* Initialize CPU interrupts */
 
@@ -147,7 +147,7 @@ void xtensa_irq_initialize(void)
 #warning Missing logic
 #endif
 
-  /* Attach and emable internal interrupts */
+  /* Attach and enable internal interrupts */
 
 #ifdef CONFIG_SMP
   /* Attach and enable the inter-CPU interrupt */

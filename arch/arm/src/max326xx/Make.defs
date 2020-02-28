@@ -190,4 +190,3 @@ endif
 ifeq ($(CONFIG_ARCH_FAMILY_MAX32660),y)
 VPATH += chip/max32660
 endif
-

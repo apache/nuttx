@@ -52,8 +52,6 @@
 #include "sched/sched.h"
 #include "up_internal.h"
 
-#ifdef CONFIG_STACK_COLORATION
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -207,5 +205,3 @@ ssize_t up_check_stack_remain(void)
 {
   return up_check_tcbstack_remain(this_task());
 }
-
-#endif /* CONFIG_STACK_COLORATION */

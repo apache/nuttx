@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_config.c
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_config.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -48,10 +48,6 @@
 #define MIC_CH_BITMAP  0xf
 
 /****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -64,6 +60,7 @@ struct cxd56_audio_cfg_s
   cxd56_audio_clkmode_t clk_mode;
   cxd56_audio_sp_drv_t  sp_driver;
 };
+
 static struct cxd56_audio_cfg_s g_audio_cfg =
 {
   1,
@@ -73,10 +70,6 @@ static struct cxd56_audio_cfg_s g_audio_cfg =
   CXD56_AUDIO_CLKMODE_NORMAL,
   CXD56_AUDIO_CFG_SP_DRIVER
 };
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -114,7 +107,7 @@ static void set_miccfg(void)
 
   if (is_amic)
     {
-      if(is_dmic)
+      if (is_dmic)
         {
           g_audio_cfg.mic_dev  = CXD56_AUDIO_CFG_MIC_DEV_ANADIG;
           g_audio_cfg.mic_mode = CXD56_AUDIO_CFG_MIC_MODE_64FS;
@@ -127,7 +120,7 @@ static void set_miccfg(void)
     }
   else
     {
-      if(is_dmic)
+      if (is_dmic)
         {
           g_audio_cfg.mic_dev  = CXD56_AUDIO_CFG_MIC_DEV_DIGITAL;
           g_audio_cfg.mic_mode = CXD56_AUDIO_CFG_MIC_MODE_64FS;

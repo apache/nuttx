@@ -213,7 +213,7 @@
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-#endif  /* 0 */
+#endif /* 0 */
 
 /* Alternate function pin selections ************************************************/
 
@@ -257,4 +257,4 @@
 #define GPIO_TIM8_CH1IN  GPIO_TIM8_CH1IN_1
 #define GPIO_TIM8_CH2IN  GPIO_TIM8_CH2IN_1
 
-#endif  /* __BOARDS_ARM_STM32_MIKROE_STM32F4_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32_MIKROE_STM32F4_INCLUDE_BOARD_H */

@@ -254,7 +254,7 @@ static int wdt_interrupt(int irq, void *context, FAR void *arg)
 
 static ssize_t wdt_read(struct file *filep, char *buffer, size_t buflen)
 {
-  /* We are going to return "NNNNNNNN NNNNNNNN."  The followig logic will
+  /* We are going to return "NNNNNNNN NNNNNNNN."  The following logic will
    * not work if the user provides a buffer smaller than 18 bytes.
    */
 

@@ -417,7 +417,7 @@ void bluetooth_container_initialize(void);
  * Name: bluetooth_container_allocate
  *
  * Description:
- *   The bluetooth_container_allocate function will get a free continer
+ *   The bluetooth_container_allocate function will get a free container
  *   for use by the recvfrom() logic.
  *
  *   This function will first attempt to allocate from the g_free_container

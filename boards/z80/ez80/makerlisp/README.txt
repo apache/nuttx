@@ -35,9 +35,14 @@ Contents
 ZDS-II Compiler Versions
 ========================
 
+Version 5.3.3
+
+  As of this writing, this is the latest version available.  This is the
+  default configured for all ez80 boards.
+
 Version 5.3.0
 
-  I verified compilation using 5.30 on June 2, 2019.  To use this version,
+  I verified compilation using 5.3.0 on June 2, 2019.  To use this version,
   I had to make spurious modification to the implementation of gmtimer() to
   work around an internal compiler error.  I have still not verified that
   are no errors in the compiled code.
@@ -46,7 +51,7 @@ Other Versions
   If you use any version of ZDS-II other than 5.3.0 or if you install ZDS-II
   at any location other than the default location, you will have to modify
   three files:  (1) arch/arm/z80/src/ez80/Kconfig, (2)
-  boards/makerlisp/scripts/Make.defs and, perhaps, (3)
+  boards/z80/ez80/makerlisp/scripts/Make.defs and, perhaps, (3)
   arch/z80/src/ez80/Toolchain.defs.
 
 Serial Console

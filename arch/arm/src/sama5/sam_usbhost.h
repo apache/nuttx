@@ -117,7 +117,7 @@ enum usbhost_trace1codes_e
   EHCI_TRACE1_QTDSTATUS_FAILED,     /* EHCI ERROR: sam_qtd_statusphase failed */
   EHCI_TRACE1_TRANSFER_FAILED,      /* EHCI ERROR: Transfer failed */
   EHCI_TRACE1_QHFOREACH_FAILED,     /* EHCI ERROR: sam_qh_foreach failed: */
-  EHCI_TRACE1_SYSERR_INTR,          /* EHCI: Host System Error Interrup */
+  EHCI_TRACE1_SYSERR_INTR,          /* EHCI: Host System Error Interrupt */
   EHCI_TRACE1_USBERR_INTR,          /* EHCI: USB Error Interrupt (USBERRINT) Interrupt */
   EHCI_TRACE1_EPALLOC_FAILED,       /* EHCI ERROR: Failed to allocate EP info structure */
   EHCI_TRACE1_BADXFRTYPE,           /* EHCI ERROR: Support for transfer type not implemented */

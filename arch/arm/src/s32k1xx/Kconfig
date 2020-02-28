@@ -79,6 +79,9 @@ config ARCH_CHIP_S32K14X
 config S32K1XX_HAVE_ENET
 	bool
 	default n
+	select ARCH_HAVE_PHY
+	select ARCH_PHY_INTERRUPT
+	select ARCH_HAVE_NETDEV_STATISTICS
 
 config S32K1XX_HAVE_EWM
 	bool
@@ -183,18 +186,26 @@ config S32K1XX_LPUART0
 	default n
 	select S32K1XX_LPUART
 	select LPUART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config S32K1XX_LPUART1
 	bool "LPUART1"
 	default n
 	select S32K1XX_LPUART
 	select LPUART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config S32K1XX_LPUART2
 	bool "LPUART2"
 	default n
 	select S32K1XX_LPUART
 	select LPUART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config S32K1XX_RTC
+	bool "RTC"
+	default n
+
 
 endmenu # S32K1XX Peripheral Selection
 
@@ -267,14 +278,14 @@ config S32K1XX_FLASHCFG_FPROT
 
 config S32K1XX_FLASHCFG_FSEC
 	hex "Flash security byte"
-	default 0xff
+	default 0xfe
 	---help---
 		Refer to the S32K1xx reference manual or to hardware/s32k1xx_flashcfg.h
 		for a description of the FSEC bitfields.
 
 config S32K1XX_FLASHCFG_FOPT
 	hex "Flash nonvolatile option byte"
-	default 0xff
+	default 0x7f
 	---help---
 		Refer to the S32K1xx reference manual or to hardware/s32k1xx_flashcfg.h
 		for a description of the FOPT bitfields.

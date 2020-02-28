@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/platform/sensors/bmi160_scu.c
+ * boards/arm/cxd56xx/drivers/sensors/bmi160_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -279,16 +279,22 @@ static int     bmi160_close_gyro(FAR struct file *filep);
 static int     bmi160_close_accel(FAR struct file *filep);
 static ssize_t bmi160_read(FAR struct file *filep, FAR char *buffer,
                            size_t len);
-static int     bmi160_ioctl(FAR struct file *filep,int cmd,unsigned long arg);
+static int     bmi160_ioctl(FAR struct file *filep, int cmd,
+                            unsigned long arg);
 
 static int     bmi160_checkid(FAR struct bmi160_dev_s *priv);
 
 #ifdef CONFIG_SENSORS_BMI160_I2C
-static int bmi160_devregister(FAR const char *devpath, FAR struct i2c_master_s *dev,
-                              int minor, const struct file_operations *fops, int port);
+static int bmi160_devregister(FAR const char *devpath,
+		              FAR struct i2c_master_s *dev,
+                              int minor,
+			      const struct file_operations *fops,
+			      int port);
 #else /* CONFIG_SENSORS_BMI160_SPI */
-static int bmi160_devregister(FAR const char *devpath, FAR struct spi_dev_s *dev,
-                              int minor, const struct file_operations *fops);
+static int bmi160_devregister(FAR const char *devpath,
+		              FAR struct spi_dev_s *dev,
+                              int minor,
+			      const struct file_operations *fops);
 #endif
 
 static int     bmi160_set_accel_pm(FAR struct bmi160_dev_s *priv, int pm);
@@ -474,6 +480,7 @@ static int bmi160_seqinit_gyro(FAR struct bmi160_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_seq_gyro;
 
 #ifdef CONFIG_SENSORS_BMI160_I2C
@@ -506,6 +513,7 @@ static int bmi160_seqinit_accel(FAR struct bmi160_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_seq_accel;
 
 #ifdef CONFIG_SENSORS_BMI160_I2C
@@ -800,6 +808,7 @@ static int bmi160_devregister(FAR const char *devpath, FAR struct spi_dev_s *dev
       snerr("Failed to allocate instance\n");
       return -ENOMEM;
     }
+
 #ifdef CONFIG_SENSORS_BMI160_I2C
   priv->i2c = dev;
   priv->seq = NULL;
@@ -978,7 +987,8 @@ int bmi160_init(FAR struct i2c_master_s *dev, int port)
 int bmi160_init(FAR struct spi_dev_s *dev)
 #endif
 {
-  FAR struct bmi160_dev_s tmp, *priv = &tmp;
+  struct bmi160_dev_s tmp;
+  struct bmi160_dev_s *priv = &tmp;
   int ret;
 
 #ifdef CONFIG_SENSORS_BMI160_I2C

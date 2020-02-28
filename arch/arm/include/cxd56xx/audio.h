@@ -35,10 +35,10 @@
 
 /* audioutils Audio Utility */
 
-#ifndef __ARCH_ARM_INCLUDE_CXD56XX_CXD56_AUDIO_H
-#define __ARCH_ARM_INCLUDE_CXD56XX_CXD56_AUDIO_H
+#ifndef __ARCH_ARM_INCLUDE_CXD56XX_AUDIO_H
+#define __ARCH_ARM_INCLUDE_CXD56XX_AUDIO_H
 
-/* API Documents creater with Doxgen */
+/* API Documents created with Doxygen */
 
 /* cxd56_audio_api Audio Driver API
  *
@@ -742,7 +742,7 @@ CXD56_AUDIO_ECODE cxd56_audio_free_dmahandle(FAR cxd56_audio_dma_t handle);
 
 /* Set internal data path
  *
- *  sig: Internal singal type
+ *  sig: Internal signal type
  *  sel: Internal selector type
  *
  * CXD56_AUDIO_ECODE return code
@@ -945,7 +945,7 @@ uint32_t cxd56_audio_get_micmap(void);
 bool board_audio_tone_generator(bool en, int16_t vol, uint16_t freq);
 
 #ifdef __cplusplus
-} /* end of extern "C" */
+}
 #endif /* __cplusplus */
 
-#endif /* __ARCH_ARM_INCLUDE_CXD56XX_CXD56_AUDIO_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_AUDIO_H */

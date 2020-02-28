@@ -345,7 +345,7 @@
 
 #define SPIFFS_PH_FLAG_NDXDELE (1<<6)
 
-/* Check objid, only visit matching objec ids */
+/* Check objid, only visit matching object ids */
 
 #define SPIFFS_VIS_CHECK_ID     (1<<0)
 

@@ -54,7 +54,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -1105,7 +1104,7 @@ static off_t fat_seek(FAR struct file *filep, off_t offset, int whence)
       goto errout_with_semaphore;
     }
 
-  /* Attempts to set the position beyound the end of file will
+  /* Attempts to set the position beyond the end of file will
    * work if the file is open for write access.
    */
 
@@ -1496,7 +1495,7 @@ static int fat_dup(FAR const struct file *oldp, FAR struct file *newp)
    *    the opened file will be unknown to the other.  That is a lurking
    *    bug!
    *
-   *    One good solution to this might be to add a refernce count to the
+   *    One good solution to this might be to add a reference count to the
    *    file structure.  Then, instead of dup'ing the whole structure
    *    as is done here, just increment the reference count on the
    *    structure.  The would have to be integrated with open logic as

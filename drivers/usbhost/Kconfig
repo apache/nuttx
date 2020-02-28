@@ -3,6 +3,18 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config USBHOST_HAVE_ASYNCH
+	bool
+	default n
+
+menuconfig USBHOST
+	bool "USB Host Driver Support"
+	default n
+	---help---
+		USB host drivers.  See also include/nuttx/usb/usbhost.h
+
+if USBHOST
+
 config USBHOST_NPREALLOC
 	int "Number of pre-allocated class instances"
 	default 4
@@ -29,10 +41,6 @@ config USBHOST_ISOC_DISABLE
 	---help---
 		On some architectures, selecting this setting will reduce driver size
 		by disabling isochronous endpoint support
-
-config USBHOST_HAVE_ASYNCH
-	bool
-	default n
 
 config USBHOST_ASYNCH
 	bool "Asynchronous transfer support"
@@ -163,7 +171,7 @@ config USBHOST_CDCACM_BULKONLY
 		By default, both the CDC/ACM compliant protocol and the reduced
 		protocol are supported.  This option is then most useful for testing
 		purposes.  The interrupt IN control interface will not be used even
-		if it is available; nor will EP0 class requestes.
+		if it is available; nor will EP0 class requests.
 
 endchoice # CDC/ACM Protocol
 
@@ -250,7 +258,7 @@ config USBHOST_CDCACM_TXBUFSIZE
 	default 128
 	---help---
 		This is the size of the serial buffer that will be used to hold
-		data waiting for tranmission.
+		data waiting for transmission.
 
 endif # USBHOST_CDCACM
 
@@ -592,3 +600,4 @@ config USBHOST_TRACE_VERBOSE
 
 endif
 
+endif # USBHOST

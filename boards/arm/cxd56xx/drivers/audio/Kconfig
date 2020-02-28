@@ -168,7 +168,7 @@ choice
 	prompt "HPADC mic bias selection"
 	default CXD56_AUDIO_HPADC_MIC_BIAS_OFF
 	---help---
-		This setting depends on a circuit board configration.
+		This setting depends on a circuit board configuration.
 		Set "Microphone bias is enabled" when a microphone connected to
 		HPADC should be applied with voltage from the CXD5247.
 		Otherwise, set "Microphone bias is disabled".

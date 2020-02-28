@@ -176,7 +176,7 @@ struct lifreq
 #define lifr_mii_val_in       lifr_ifru.lifru_mii_data.val_in  /* PHY input data */
 #define lifr_mii_val_out      lifr_ifru.lifru_mii_data.val_out /* PHY output data */
 
-/* Used only with the SIOCGLIFCONF IOCTL commnd*/
+/* Used only with the SIOCGLIFCONF IOCTL command */
 
 struct lifconf
 {
@@ -221,13 +221,12 @@ struct ifreq
 #define ifr_flags             ifr_ifru.ifru_flags       /* interface flags */
 #define ifr_mii_notify_pid    ifr_ifru.ifru_mii_notify.pid   /* PID to be notified */
 #define ifr_mii_notify_event  ifr_ifru.ifru_mii_notify.event /* Describes notification */
-#define ifr_mii_notify_arg    ifr_ifru.ifru_mii_notify.arg   /* sigval argument */
 #define ifr_mii_phy_id        ifr_ifru.ifru_mii_data.phy_id  /* PHY device address */
 #define ifr_mii_reg_num       ifr_ifru.ifru_mii_data.reg_num /* PHY register address */
 #define ifr_mii_val_in        ifr_ifru.ifru_mii_data.val_in  /* PHY input data */
 #define ifr_mii_val_out       ifr_ifru.ifru_mii_data.val_out /* PHY output data */
 
-/* Used only with the SIOCGIFCONF IOCTL commnd*/
+/* Used only with the SIOCGIFCONF IOCTL command*/
 
 struct ifconf
 {

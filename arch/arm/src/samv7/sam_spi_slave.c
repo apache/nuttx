@@ -42,7 +42,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -50,6 +49,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/slave.h>
 
 #include "up_arch.h"
@@ -409,7 +409,7 @@ static int spi_interrupt(int irq, void *context, FAR void *arg)
           return OK;
         }
 
-      /* TThe SPI waits until NSS goes active before receiving the serial
+      /* The SPI waits until NSS goes active before receiving the serial
        * clock from an external master. When NSS falls, the clock is
        * validated and the data is loaded in the SPI_RDR depending on the
        * BITS field configured in the SPI_CSR0.  These bits are processed
@@ -564,7 +564,7 @@ static uint16_t spi_dequeue(struct sam_spidev_s *priv)
 
   if (priv->head != priv->tail)
     {
-      /* No, take the oldest value from the tail of the cicular buffer */
+      /* No, take the oldest value from the tail of the circular buffer */
 
       ret = priv->outq[priv->tail];
 

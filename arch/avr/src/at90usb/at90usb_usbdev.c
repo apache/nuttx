@@ -68,6 +68,7 @@
  ****************************************************************************/
 
 /* Configuration ***************************************************************/
+
 /* PLL Settings are based on F_CPU frequency which is defined in the board.h file */
 
 #if (BOARD_CPU_CLOCK == 8000000)
@@ -79,7 +80,7 @@
 #    define USB_PLL_PSC                   ((1 << PLLP2) | (1 << PLLP0))
 #  endif
 #else
-#  error "Unsuppored CPU clock"
+#  error "Unsupported CPU clock"
 #endif
 
 /* Debug ***********************************************************************/
@@ -181,7 +182,7 @@
 #define AVR_EPSIZE_128                    (4 << EPSIZE0)
 #define AVR_EPSIZE_256                    (5 << EPSIZE0)
 
-/* General endpoint defintions */
+/* General endpoint definitions */
 
 #define AVR_EP0                           (0)
 #define AVR_NENDPOINTS                    (7)
@@ -214,7 +215,8 @@ struct avr_ep_s
 {
   /* Common endpoint fields.  This must be the first thing defined in the
    * structure so that it is possible to simply cast from struct usbdev_ep_s
-   * to struct avr_ep_s. */
+   * to struct avr_ep_s.
+   */
 
   struct usbdev_ep_s ep;      /* Standard endpoint structure */
 
@@ -233,7 +235,8 @@ struct avr_usbdev_s
 {
   /* Common device fields.  This must be the first thing defined in the
    * structure so that it is possible to simply cast from struct usbdev_s to
-   * struct avr_usbdev_s. */
+   * struct avr_usbdev_s.
+   */
 
   struct usbdev_s usbdev;
 
@@ -277,12 +280,12 @@ static inline void avr_rqenqueue(FAR struct avr_ep_s *privep,
 static void avr_txready(void);
 static int avr_fifoready(int timeout);
 static void avr_ep0send(FAR const uint8_t *buffer, uint16_t buflen);
-static inline int avr_epNsend(FAR struct avr_ep_s *privep,
+static inline int avr_ep_nsend(FAR struct avr_ep_s *privep,
                               FAR struct avr_req_s *privreq);
-static inline int avr_epNrecv(FAR struct avr_ep_s *privep,
+static inline int avr_ep_nrecv(FAR struct avr_ep_s *privep,
                               FAR struct usbdev_req_s *req);
-static int avr_epINqueue(FAR struct avr_ep_s *privep);
-static int avr_epOUTqueue(FAR struct avr_ep_s *privep);
+static int avr_ep_in_queue(FAR struct avr_ep_s *privep);
+static int avr_ep_out_queue(FAR struct avr_ep_s *privep);
 static void avr_reqcomplete(FAR struct avr_ep_s *privep, FAR struct avr_req_s *privreq,
                             int result);
 static void avr_cancelrequests(FAR struct avr_ep_s *privep, int status);
@@ -477,13 +480,15 @@ static int avr_fifoready(int timeout)
           return -EAGAIN;
         }
 
-      /* Timeing is driven by the start of frame (SOF) interrupt which we
-       * assume here to be at a one millisecond rate. */
+      /* Timing is driven by the start of frame (SOF) interrupt which we
+       * assume here to be at a one millisecond rate.
+       */
 
       if ((UDINT & (1 << SOFI)) != 0)
         {
           /* Clear the SOF interrupt decrement the count of elapsed
-           * milliseconds */
+           * milliseconds
+           */
 
           UDINT &= ~(1 << SOFI);
 
@@ -579,14 +584,14 @@ static void avr_ep0send(FAR const uint8_t *buffer, uint16_t buflen)
 }
 
 /****************************************************************************
- * Name: avr_epNsend
+ * Name: avr_ep_nsend
  *
  * Description:
  *   Perform a TX transfer for Endpoint N
  *
  ****************************************************************************/
 
-static inline int avr_epNsend(FAR struct avr_ep_s *privep,
+static inline int avr_ep_nsend(FAR struct avr_ep_s *privep,
                               FAR struct avr_req_s *privreq)
 {
   FAR struct usbdev_req_s *req;
@@ -724,7 +729,8 @@ static inline int avr_epNsend(FAR struct avr_ep_s *privep,
         {
           /* If the endpoint simply did not become ready within the timeout,
            * then handle the remainder of the transfer asynchronously in the
-           * TXINI interrupt handler. */
+           * TXINI interrupt handler.
+           */
 
           if (ret == -ETIME)
             {
@@ -746,14 +752,14 @@ static inline int avr_epNsend(FAR struct avr_ep_s *privep,
 }
 
 /****************************************************************************
- * Name: avr_epNrecv
+ * Name: avr_ep_nrecv
  *
  * Description:
  *   Perform an RX transfer for Endpoint N
  *
  ****************************************************************************/
 
-static inline int avr_epNrecv(FAR struct avr_ep_s *privep,
+static inline int avr_ep_nrecv(FAR struct avr_ep_s *privep,
                               FAR struct usbdev_req_s *req)
 {
   FAR uint8_t *buffer;
@@ -779,7 +785,8 @@ static inline int avr_epNrecv(FAR struct avr_ep_s *privep,
   while (req->xfrd < req->len)
     {
       /* RWAL will be de-asserted when everything has been read from the
-       * receive FIFO */
+       * receive FIFO
+       */
 
       if (((UEINTX & (1 << RWAL)) == 0))
         {
@@ -828,7 +835,7 @@ static inline int avr_epNrecv(FAR struct avr_ep_s *privep,
 }
 
 /****************************************************************************
- * Name: avr_epINqueue
+ * Name: avr_ep_in_queue
  *
  * Description:
  *   This is part of the IN endpoint interrupt handling logic.  It is called
@@ -838,7 +845,7 @@ static inline int avr_epNrecv(FAR struct avr_ep_s *privep,
  *
  ****************************************************************************/
 
-static int avr_epINqueue(FAR struct avr_ep_s *privep)
+static int avr_ep_in_queue(FAR struct avr_ep_s *privep)
 {
   FAR struct avr_req_s *privreq;
   int ret = OK;
@@ -867,7 +874,7 @@ static int avr_epINqueue(FAR struct avr_ep_s *privep)
     {
       /* Yes.. perform the IN transfer */
 
-      ret = avr_epNsend(privep, privreq);
+      ret = avr_ep_nsend(privep, privreq);
 
       /* The return value of -ETIME means that the transfer was not
        * finished within this interrupt.  We just need to exit with the
@@ -885,11 +892,12 @@ static int avr_epINqueue(FAR struct avr_ep_s *privep)
           avr_reqcomplete(privep, privreq, ret);
         }
     }
+
   return ret;
 }
 
 /****************************************************************************
- * Name: avr_epOUTqueue
+ * Name: avr_ep_out_queue
  *
  * Description:
  *   This is part of the OUT endpointeinterrupt handling logic.  It is called
@@ -898,7 +906,7 @@ static int avr_epINqueue(FAR struct avr_ep_s *privep)
  *
  ****************************************************************************/
 
-static int avr_epOUTqueue(FAR struct avr_ep_s *privep)
+static int avr_ep_out_queue(FAR struct avr_ep_s *privep)
 {
   FAR struct avr_req_s *privreq;
   int ret = OK;
@@ -915,7 +923,7 @@ static int avr_epOUTqueue(FAR struct avr_ep_s *privep)
     {
       /* Yes.. perform the OUT transfer */
 
-      ret = avr_epNrecv(privep, &privreq->req);
+      ret = avr_ep_nrecv(privep, &privreq->req);
 
       /* The transfer has completed, perhaps with an error.  Return the request
        * to the class driver.
@@ -924,6 +932,7 @@ static int avr_epOUTqueue(FAR struct avr_ep_s *privep)
       usbtrace(TRACE_COMPLETE(privep->ep.eplog), privreq->req.xfrd);
       avr_reqcomplete(privep, privreq, ret);
     }
+
   return ret;
 }
 
@@ -939,7 +948,8 @@ static void avr_reqcomplete(FAR struct avr_ep_s *privep, FAR struct avr_req_s *p
                             int result)
 {
   /* If endpoint 0, temporarily reflect the state of protocol stalled in the
-   * callback. */
+   * callback.
+   */
 
   bool stalled = privep->stalled;
   if (privep->ep.eplog == AVR_EP0)
@@ -1212,7 +1222,8 @@ static void avr_usbreset(void)
     }
 
   /* Tell the class driver that we are disconnected. The class driver should
-   * then accept any new configurations. */
+   * then accept any new configurations.
+   */
 
   if (g_usbdev.driver)
     {
@@ -1278,7 +1289,7 @@ static void avr_usbreset(void)
  * Name: avr_usbshutdown
  *
  * Description:
- *   Shutdown the USB interface and put the hardare in a known state
+ *   Shutdown the USB interface and put the hardware in a known state
  *
  ****************************************************************************/
 
@@ -1453,6 +1464,7 @@ static inline void avr_ep0setup(void)
                             {
                               g_usbdev.ep0buf[0] = 0; /* Not stalled */
                             }
+
                           g_usbdev.ep0buf[1] = 0;
 
                           /* And send the response */
@@ -1469,6 +1481,7 @@ static inline void avr_ep0setup(void)
                           usbtrace(TRACE_INTDECODE(AVR_TRACEINTID_DEVGETSTATUS), 0);
 
                           /* Features: Remote Wakeup=YES; selfpowered=? */
+
                           /* Return self-powered status */
 
 #ifdef CONFIG_USBDEV_SELFPOWERED
@@ -1484,6 +1497,7 @@ static inline void avr_ep0setup(void)
                               status |= (1 << USB_FEATURE_REMOTEWAKEUP);
                             }
 #endif
+
                           g_usbdev.ep0buf[1] = 0;
 
                           /* And send the response */
@@ -1798,14 +1812,14 @@ static inline void avr_ep0interrupt(void)
 }
 
 /****************************************************************************
- * Name: avr_epNinterrupt
+ * Name: avr_ep_ninterrupt
  *
  * Description:
  *   USB endpoint/pipe IN interrupt handler
  *
  ****************************************************************************/
 
-static inline void avr_epNinterrupt(void)
+static inline void avr_ep_ninterrupt(void)
 {
   struct avr_ep_s *privep;
   uint8_t ueint = UEINT & (g_usbdev.epoutset | g_usbdev.epinset);
@@ -1845,7 +1859,7 @@ static inline void avr_epNinterrupt(void)
 
                   /* Handle the IN request queue */
 
-                  avr_epINqueue(privep);
+                  avr_ep_in_queue(privep);
                 }
             }
           else
@@ -1862,7 +1876,7 @@ static inline void avr_epNinterrupt(void)
 
                   /* Handle the OUT request queue */
 
-                  avr_epOUTqueue(privep);
+                  avr_ep_out_queue(privep);
                 }
             }
         }
@@ -1887,7 +1901,7 @@ static int avr_epinterrupt(int irq, FAR void *context, FAR void *arg)
 
   /* Handle opther endpoint interrupts (N=1,2,..6 */
 
-  avr_epNinterrupt();
+  avr_ep_ninterrupt();
 
   usbtrace(TRACE_INTEXIT(AVR_TRACEINTID_EPINT), irq);
   return OK;
@@ -1921,6 +1935,7 @@ static void avr_genvbus(void)
   else if (g_usbdev.connected && !vbus)
     {
       /* We were connected, but now we are not */
+
       /* Cancel all pending and queue requests */
 
       avr_cancelall(-ENODEV);
@@ -1930,7 +1945,8 @@ static void avr_genvbus(void)
       UDCON |= (1 << DETACH);
 
       /* Disable the clock inputs (the ”Resume Detection” is still active).
-       * This reduces the power consumption. Clear to enable the clock inputs. */
+       * This reduces the power consumption. Clear to enable the clock inputs.
+       */
 
       USBCON |= (1 << FRZCLK);
 
@@ -2201,6 +2217,7 @@ static int avr_epconfigure(FAR struct usbdev_ep_s *ep,
             uecfg1x |= AVR_EPSIZE_8;
             break;
           }
+
       default:
         usbtrace(TRACE_DEVERROR(AVR_TRACEERR_PKTSIZE), maxpacket);
         return -EINVAL;
@@ -2254,6 +2271,7 @@ static int avr_epdisable(FAR struct usbdev_ep_s *ep)
       return -EINVAL;
     }
 #endif
+
   usbtrace(TRACE_EPDISABLE, privep->ep.eplog);
 
   flags = enter_critical_section();
@@ -2286,6 +2304,7 @@ static FAR struct usbdev_req_s *avr_epallocreq(FAR struct usbdev_ep_s *ep)
       return NULL;
     }
 #endif
+
   usbtrace(TRACE_EPALLOCREQ, ((FAR struct avr_ep_s *)ep)->ep.eplog);
 
   privreq = (FAR struct avr_req_s *)kmm_malloc(sizeof(struct avr_req_s));
@@ -2448,7 +2467,7 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
             {
               /* No, then start the next IN transfer */
 
-              ret = avr_epINqueue(privep);
+              ret = avr_ep_in_queue(privep);
             }
         }
       else
@@ -2457,11 +2476,11 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
 
           usbtrace(TRACE_OUTREQQUEUED(privep->ep.eplog), privreq->req.len);
 
-          /* If there is something avaible in the fifo now, then go get it */
+          /* If there is something available in the fifo now, then go get it */
 
           if (avr_fifoready(AVR_TIMEOUT_NONE) == OK)
             {
-              ret = avr_epOUTqueue(privep);
+              ret = avr_ep_out_queue(privep);
             }
         }
     }
@@ -2496,7 +2515,8 @@ static int avr_epcancel(FAR struct usbdev_ep_s *ep,
 
   /* FIXME: if the request is the first, then we need to flush the EP otherwise
    * just remove it from the list but ... all other implementations cancel all
-   * requests ... */
+   * requests ...
+   */
 
   flags = enter_critical_section();
   avr_cancelrequests(privep, -ESHUTDOWN);
@@ -2534,6 +2554,7 @@ static int avr_epstall(FAR struct usbdev_ep_s *ep, bool resume)
       UECONX       |= (1 << STALLRQ);
       g_usbdev.stalled = true;
     }
+
   leave_critical_section(flags);
   return OK;
 }
@@ -2592,7 +2613,8 @@ static FAR struct usbdev_ep_s *avr_allocep(FAR struct usbdev_s *dev,
 
       /* Convert the logical address to a physical OUT endpoint address and
        * remove all of the candidate endpoints from the bitset except for the
-       * the IN/OUT pair for this logical address. */
+       * the IN/OUT pair for this logical address.
+       */
 
       epset &= (1 << epno);
     }
@@ -2906,10 +2928,12 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
        * after the class has bound to us... GEN: This bug is really in the
        * class driver.  It should make the soft connect when it is ready to be
        * enumerated.  I have added that logic to the class drivers but left
-       * this logic here. */
+       * this logic here.
+       */
 
       avr_pullup(&g_usbdev.usbdev, true);
     }
+
   return ret;
 }
 
@@ -2968,4 +2992,3 @@ void avr_pollvbus(void)
   leave_critical_section(flags);
 }
 #endif
-

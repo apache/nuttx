@@ -64,7 +64,7 @@
 #define SAM_RXLP_WPMR_OFFSET         0x00e4 /* Write Protect Mode Register (4) */
                                             /* 0x00e8-0xfc: Reserved */
 
-/* RXLP register adresses ***********************************************************************/
+/* RXLP register addresses **********************************************************************/
 
 #define SAM_RXLP0_CR                 (SAM_RXLP_VBASE+SAM_RXLP_CR_OFFSET)
 #define SAM_RXLP0_MR                 (SAM_RXLP_VBASE+SAM_RXLP_MR_OFFSET)

@@ -43,10 +43,10 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <semaphore.h>
 
 #include <arch/types.h>
 #include <nuttx/mm/gran.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions

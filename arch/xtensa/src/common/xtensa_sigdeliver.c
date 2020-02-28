@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/arm_sigdeliver.c
+ * arch/xtensa/src/common/xtensa_sigdeliver.c
  *
  *   Copyright (C) 2016, 2018-2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

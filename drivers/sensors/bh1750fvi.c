@@ -436,12 +436,12 @@ int bh1750fvi_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       return ret;
     }
 
-  /* Set Continuosly H-Resolution Mode */
+  /* Set Continuously H-Resolution Mode */
 
   ret = bh1750fvi_write8(priv, BH1750FVI_CONTINUOUS_HRM);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to enable the Continuosly H-Resolution Mode!\n");
+      snerr("ERROR: Failed to enable the Continuously H-Resolution Mode!\n");
       return ret;
     }
 

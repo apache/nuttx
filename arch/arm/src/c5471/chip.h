@@ -53,7 +53,7 @@
 #define EIM_CPU_TXBA           0xffff0008 /* CPU TX descriptors base address */
 #define EIM_CPU_RXBA           0xffff000c /* CPU RX descriptors base address */
 #define EIM_BUFSIZE            0xffff0010 /* Packet buffer size register */
-#define EIM_CPU_FILTER         0xffff0014 /* CPU filtering contol registers */
+#define EIM_CPU_FILTER         0xffff0014 /* CPU filtering control registers */
 #define EIM_CPU_DAHI           0xffff0018 /* CPU destination address (HI) */
 #define EIM_CPU_DALO           0xffff001c /* CPU destination address (LO) */
 #define EIM_MFVHI              0xffff0020 /* Multicast filter valid (HI) */
@@ -368,4 +368,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_C5471_CHIP_H */
+#endif /* __ARCH_ARM_SRC_C5471_CHIP_H */

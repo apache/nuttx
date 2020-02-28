@@ -96,7 +96,7 @@
 #define XMC4_ETH_MMC_CONTROL_OFFSET                          0x0100    /* MMC Control Register */
 #define XMC4_ETH_MMC_RECEIVE_INTERRUPT_OFFSET                0x0104    /* MMC Receive Interrupt Register */
 #define XMC4_ETH_MMC_TRANSMIT_INTERRUPT_OFFSET               0x0108    /* MMC Transmit Interrupt Register */
-#define XMC4_ETH_MMC_RECEIVE_INTERRUPT_MASK_OFFSET           0x010c    /* MMC Reveive Interrupt Mask Register */
+#define XMC4_ETH_MMC_RECEIVE_INTERRUPT_MASK_OFFSET           0x010c    /* MMC Receive Interrupt Mask Register */
 #define XMC4_ETH_MMC_TRANSMIT_INTERRUPT_MASK_OFFSET          0x0110    /* MMC Transmit Interrupt Mask Register */
 #define XMC4_ETH_TX_OCTET_OODBAD_COUNT_GOFFSET               0x0114    /* Transmit Octet Count for Good and Bad Frames Register */
 #define XMC4_ETH_TX_FRAME_GOODBAD_COUNT_OFFSET               0x0118    /* Transmit Frame Count for Good and Bad Frames Register */
@@ -418,7 +418,7 @@
 #define ETH_MMC_RECEIVE_INTERRUPT_
 /* MMC Transmit Interrupt Register */
 #define ETH_MMC_TRANSMIT_INTERRUPT_
-/* MMC Reveive Interrupt Mask Register */
+/* MMC Receive Interrupt Mask Register */
 #define ETH_MMC_RECEIVE_INTERRUPT_MASK_
 /* MMC Transmit Interrupt Mask Register */
 #define ETH_MMC_TRANSMIT_INTERRUPT_MASK_

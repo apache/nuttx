@@ -41,7 +41,7 @@
 #include <arch/irq.h>
 
 /****************************************************************************
- * Pre-processor Defintions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define MINERVA_STACK_BASE    _ebss

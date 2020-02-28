@@ -70,7 +70,7 @@
 void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
-  uint32_t regval;
+  uint64_t regval;
 
   /* Initialize the initial exception register context structure */
 
@@ -88,25 +88,6 @@ void up_initial_state(struct tcb_s *tcb)
 
   xcp->regs[REG_EPC]     = (uintptr_t)tcb->start;
 
-  /* If this task is running PIC, then set the PIC base register to the
-   * address of the allocated D-Space region.
-   */
-
-#ifdef CONFIG_PIC
-#  warning "Missing logic"
-#endif
-
-  /* Set privileged- or unprivileged-mode, depending on how NuttX is
-   * configured and what kind of thread is being started.
-   *
-   * If the kernel build is not selected, then all threads run in
-   * privileged thread mode.
-   */
-
-#ifdef CONFIG_BUILD_KERNEL
-#  warning "Missing logic"
-#endif
-
   /* Set the initial value of the interrupt context register.
    *
    * Since various RISC-V platforms use different interrupt
@@ -118,4 +99,3 @@ void up_initial_state(struct tcb_s *tcb)
   regval = up_get_newintctx();
   xcp->regs[REG_INT_CTX] = regval;
 }
-

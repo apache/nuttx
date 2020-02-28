@@ -127,4 +127,3 @@ bool nxbe_isvisible(FAR struct nxbe_window_s *wnd,
 
   return info.visible;
 }
-

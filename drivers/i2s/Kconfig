@@ -3,6 +3,16 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menuconfig I2S
+	bool "I2S Driver Support"
+	default n
+	---help---
+		This selection enables selection of common I2S options.  This option
+		should be enabled by all platforms that support I2S interfaces.
+		See include/nuttx/audio/i2s.h for further I2S driver information.
+
+if I2S
+
 config AUDIO_I2SCHAR
 	bool "I2S character driver (for testing only)"
 	default n
@@ -33,3 +43,5 @@ config AUDIO_I2SCHAR_TXTIMEOUT
 		The special value of zero disables RX timeouts.  Default: 0
 
 endif # AUDIO_I2SCHAR
+
+endif # I2S

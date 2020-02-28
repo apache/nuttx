@@ -231,7 +231,7 @@ struct getroute_recvfrom_ipv6resplist_s
   struct getroute_recvfrom_ipv6response_s payload;
 };
 
-/* netdev_foreach() callabck */
+/* netdev_foreach() callback */
 
 struct nlroute_devinfo_s
 {
@@ -318,8 +318,8 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 #endif
 
 #ifdef CONFIG_NET_IPv6
-        /* Should have devinfo->psock->s_domain == PF_INET6 but d_lltype could be
-         * several things.
+        /* Should have devinfo->psock->s_domain == PF_INET6 but d_lltype
+         * could be several things.
          */
 
       case AF_INET6:
@@ -335,8 +335,8 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 #endif
 
 #ifdef CONFIG_NET_BLUETOOTH
-        /* Should have devinfo->psock->s_domain == PF_PACKET and d_lltype should be
-         * NET_LL_BLUETOOTH.
+        /* Should have devinfo->psock->s_domain == PF_PACKET and d_lltype
+         * should be NET_LL_BLUETOOTH.
          */
 
       case AF_BLUETOOTH:
@@ -419,11 +419,11 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
   resp->iface.ifi_pid    = devinfo->req->hdr.nlmsg_pid;
   resp->iface.ifi_type   = devinfo->req->hdr.nlmsg_type;
 #ifdef CONFIG_NETDEV_IFINDEX
-  resp->iface.ifi_index  = dev->dd_ifindex;
+  resp->iface.ifi_index  = dev->d_ifindex;
 #else
   resp->iface.ifi_index  = 0;
 #endif
-  resp->iface.ifi_flags  = devinfo->req->hdr.nlmsg_flags;
+  resp->iface.ifi_flags  = dev->d_flags;
   resp->iface.ifi_change = 0xffffffff;
 
   resp->attr.rta_len     = RTA_LENGTH(strnlen(dev->d_ifname, IFNAMSIZ));
@@ -679,8 +679,9 @@ static int netlink_get_nbtable(FAR struct socket *psock,
  ****************************************************************************/
 
 #ifndef CONFIG_NETLINK_DISABLE_GETROUTE
-static int netlink_route_terminator(FAR struct socket *psock,
-                                    FAR const struct getroute_sendto_request_s *req)
+static int
+  netlink_route_terminator(FAR struct socket *psock,
+                           FAR const struct getroute_sendto_request_s *req)
 {
   FAR struct nlroute_msgdone_rsplist_s *alloc;
   FAR struct nlroute_msgdone_response_s *resp;
@@ -1058,7 +1059,7 @@ ssize_t netlink_route_recvfrom(FAR struct socket *psock,
        * select Netlink non-blocking sockets.
        */
 
-      if (_SS_ISNONBLOCK(psock->s_flags))
+      if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
         {
           return -EAGAIN;
         }

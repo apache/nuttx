@@ -210,7 +210,7 @@
  *   Otherwise CONFIG_BOARD_LATE_INITIALIZE=y:
  *     Called from board_late_initialize().
  *
- *   Otherise, bad news:  Never called
+ *   Otherwise, bad news:  Never called
  *
  ****************************************************************************/
 
@@ -265,5 +265,5 @@ int stm32_adc_setup(void);
 int stm32_can_setup(void);
 #endif
 
-#endif  /* __ASSEMBLY__ */
+#endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_H407_SRC_INTERNAL_H */

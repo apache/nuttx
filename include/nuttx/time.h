@@ -116,9 +116,7 @@ int clock_daysbeforemonth(int month, bool leapyear);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_TIME_EXTENDED)
 int clock_dayoftheweek(int mday, int month, int year);
-#endif
 
 /****************************************************************************
  * Name:  clock_calendar2utc

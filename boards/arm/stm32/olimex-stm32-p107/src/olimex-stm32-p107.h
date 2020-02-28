@@ -97,5 +97,5 @@ void weak_function stm32_spidev_initialize(void);
 int stm32_can_setup(void);
 #endif
 
-#endif  /* __ASSEMBLY__ */
+#endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_P107_SRC_H */

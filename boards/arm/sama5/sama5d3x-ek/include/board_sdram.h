@@ -182,4 +182,4 @@ extern "C"
 #endif
 
 #endif /* !__ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_SAMA5_SAMA5D3X_EK_INCLUDE_BOARD_SDRAM_H */
+#endif /* __BOARDS_ARM_SAMA5_SAMA5D3X_EK_INCLUDE_BOARD_SDRAM_H */

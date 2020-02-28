@@ -55,10 +55,10 @@
 #undef HAVE_GETLINE
 #if defined(CONFIG_EOL_IS_CR)
 #  define HAVE_GETLINE 1
-#  define EOLCH        '/r'
+#  define EOLCH        '\r'
 #elif defined(CONFIG_EOL_IS_LF)
 #  define HAVE_GETLINE 1
-#  define EOLCH        '/n'
+#  define EOLCH        '\n'
 #endif
 
 #define BUFSIZE_INIT   64

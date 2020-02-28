@@ -147,7 +147,7 @@ AT24 Serial EEPROM
   2014-12-12:  I was unsuccessful getting my AT24 module to work on the TM4C123G
     LaunchPad.  I was unable to successuflly communication with the AT24 via
     I2C.  I did verify I2C using the I2C tool and other I2C devices and I now
-    belive that my AT24 module is not fully functional.
+    believe that my AT24 module is not fully functional.
 
 I2C Tool
 ========
@@ -184,7 +184,7 @@ I2C Tool
     Where <cmd> is one of:
 
       Show help     : ?
-      List busses   : bus
+      List buses   : bus
       List devices  : dev [OPTIONS] <first> <last>
       Read register : get [OPTIONS] [<repititions>]
       Show help     : help
@@ -385,7 +385,7 @@ Serial Console
     UART1_CTS - PF.1 or PC.5
 
   NOTE: board.h currently selects PB.0, PB.1, PF.0 and PF.1 for UART1, but
-  that can be changed by editting board.h
+  that can be changed by editing board.h
 
   UART2-5, 7 are also available, UART2 is not recommended because it shares
   some pin usage with USB device mode.  UART6 is not available because its

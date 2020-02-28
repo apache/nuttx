@@ -835,7 +835,7 @@
 #define OTG_DOEPCTL_MPSIZ_MASK        (0x7ff << OTG_DOEPCTL_MPSIZ_SHIFT)
                                                 /* Bits 11-14: Reserved, must be kept at reset value */
 #define OTG_DOEPCTL_USBAEP            (1 << 15) /* Bit 15: USB active endpoint */
-#define OTG_DOEPCTL_DPID              (1 << 16) /* Bit 16: Endpoint data PID (interrupt/buld) */
+#define OTG_DOEPCTL_DPID              (1 << 16) /* Bit 16: Endpoint data PID (interrupt/bulk) */
 #  define OTG_DOEPCTL_DATA0           (0)
 #  define OTG_DOEPCTL_DATA1           OTG_DOEPCTL_DPID
 #define OTG_DOEPCTL_EONUM             (1 << 16) /* Bit 16: Even/odd frame (isochronous) */

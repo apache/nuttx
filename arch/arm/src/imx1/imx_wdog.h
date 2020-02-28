@@ -78,4 +78,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_IMX_WDOG_H */
+#endif /* __ARCH_ARM_IMX_WDOG_H */

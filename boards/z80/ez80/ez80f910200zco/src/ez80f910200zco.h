@@ -115,7 +115,7 @@
  *   The Data Terminal Ready (DTR) signal at D3 informs the modem that the PC
  *   is ready.
  * TX:
- *   The TX signal at D4 indicates that data is tranmitted to the modem.
+ *   The TX signal at D4 indicates that data is transmitted to the modem.
  */
 
 /* Push buttons:
@@ -148,4 +148,4 @@ extern "C"
 }
 #endif
 
-#endif  /* __BOARDS_Z80_EZ80_EZ80F910200ZCO_SRC_EZ80F910200ZCO_H */
+#endif /* __BOARDS_Z80_EZ80_EZ80F910200ZCO_SRC_EZ80F910200ZCO_H */

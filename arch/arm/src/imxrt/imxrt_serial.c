@@ -43,7 +43,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -258,6 +257,7 @@
  * UART 5-8 could be the console.  One of UART5-8 has already been
  * assigned to ttys0, 1, 2, 3, or 4.
  */
+
 #if defined(CONFIG_IMXRT_LPUART5) && !defined(UART5_ASSIGNED)
 #  define TTYS5_DEV           g_uart5port /* LPUART5 is ttyS5 */
 #  define UART5_ASSIGNED      1
@@ -541,7 +541,7 @@ static struct uart_dev_s g_uart2port =
   {
     .size       = CONFIG_LPUART2_TXBUFSIZE,
     .buffer     = g_uart2txbuffer,
-   },
+  },
   .ops          = &g_uart_ops,
   .priv         = &g_uart2priv,
 };
@@ -922,11 +922,11 @@ static int imxrt_setup(struct uart_dev_s *dev)
 {
   struct imxrt_uart_s *priv = (struct imxrt_uart_s *)dev->priv;
 #ifndef CONFIG_SUPPRESS_LPUART_CONFIG
+  int ret;
   struct uart_config_s config =
   {
     0
   };
-  int ret;
 
   /* Configure the UART */
 
@@ -1121,6 +1121,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 #if defined(CONFIG_SERIAL_TIOCSERGSTRUCT) || defined(CONFIG_SERIAL_TERMIOS)
   struct inode *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
+  irqstate_t flags;
 #endif
   int ret   = OK;
 
@@ -1196,9 +1197,11 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
             termiosp->c_cflag |= CS8;
             break;
 
+#if defined(CS9)
           case 9:
-            termiosp->c_cflag |= CS8 /* CS9 */;
+            termiosp->c_cflag |= CS9;
             break;
+#endif
           }
       }
       break;
@@ -1250,7 +1253,8 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
           case CS8:
             nbits = 8;
             break;
-#if 0
+
+#if defined(CS9)
           case CS9:
             nbits = 9;
             break;
@@ -1295,6 +1299,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
              * implement TCSADRAIN / TCSAFLUSH
              */
 
+            flags  = spin_lock_irqsave();
             imxrt_disableuartint(priv, &ie);
             ret = imxrt_setup(dev);
 
@@ -1302,6 +1307,7 @@ static int imxrt_ioctl(struct file *filep, int cmd, unsigned long arg)
 
             imxrt_restoreuartint(priv, ie);
             priv->ie = ie;
+            spin_unlock_irqrestore(flags);
           }
       }
       break;
@@ -1552,32 +1558,29 @@ static void up_pm_notify(struct pm_callback_s *cb, int domain,
       case(PM_NORMAL):
         {
           /* Logic for PM_NORMAL goes here */
-
         }
         break;
 
       case(PM_IDLE):
         {
           /* Logic for PM_IDLE goes here */
-
         }
         break;
 
       case(PM_STANDBY):
         {
           /* Logic for PM_STANDBY goes here */
-
         }
         break;
 
       case(PM_SLEEP):
         {
           /* Logic for PM_SLEEP goes here */
-
         }
         break;
 
       default:
+
         /* Should not get here */
 
         break;

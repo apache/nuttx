@@ -162,7 +162,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
   child = group_removechild(ogrp, chpid);
   if (child)
     {
-      /* Has the new parent's task group supressed child exit status? */
+      /* Has the new parent's task group suppressed child exit status? */
 
       if ((pgrp->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0)
         {
@@ -195,7 +195,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 
   DEBUGASSERT(ogrp->tg_nchildren > 0);
 
-  ogrp->tg_nchildren--;  /* The orignal parent now has one few children */
+  ogrp->tg_nchildren--;  /* The original parent now has one few children */
   pgrp->tg_nchildren++;  /* The new parent has one additional child */
   ret = OK;
 
@@ -275,7 +275,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
   child = group_removechild(otcb->group, chpid);
   if (child)
     {
-      /* Has the new parent's task group supressed child exit status? */
+      /* Has the new parent's task group suppressed child exit status? */
 
       if ((ptcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0)
         {
@@ -308,7 +308,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 
   DEBUGASSERT(otcb->group != NULL && otcb->group->tg_nchildren > 0);
 
-  otcb->group->tg_nchildren--;  /* The orignal parent now has one few children */
+  otcb->group->tg_nchildren--;  /* The original parent now has one few children */
   ptcb->group->tg_nchildren++;  /* The new parent has one additional child */
   ret = OK;
 

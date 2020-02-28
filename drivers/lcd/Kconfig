@@ -43,7 +43,7 @@ config LCD_FRAMEBUFFER
 		standard, NuttX frame buffer driver.
 
 		NOTE: Some LCD drivers implement an internal framebuffer for
-		effeciency reasons but do not export a framebuffer interface.  So
+		efficiency reasons but do not export a framebuffer interface.  So
 		those LCD cannot be used as framebuffer drivers.  If the option is
 		available, then such internal framebuffer support should be
 		disabled because this external common framebuffer interface will
@@ -67,7 +67,7 @@ config LCD_NOGETRUN
 	default n
 	---help---
 		Many LCD hardware interfaces provide only minimal graphics capability.  In
-		particulary, many simple LCD interfaces are write only.  That is we, can
+		particularly, many simple LCD interfaces are write only.  That is we, can
 		write graphics data to the LCD device memory, but we cannot read it back.
 		If the LCD hardware does not support reading the graphics memory, then
 		this option should be defined so that the NX layer can taking alternative
@@ -94,7 +94,7 @@ config LCD_MAXPOWER
 	range 1 255
 	---help---
 		Maximum value of LCD power setting.  This normally equates to brightness:
-		The brighter the screen, the hight the power usage.
+		The brighter the screen, the high the power usage.
 
 		On LCDs that have a backlight, this value corresponds directly to that
 		backlight setting.  Board-specific logic may place restrictions on this
@@ -145,7 +145,7 @@ config P14201_FRAMEBUFFER
 		Reading graphics memory cannot be supported, and
 
 		All pixel writes must be aligned to byte boundaries.
-		The latter limitation effectively reduces the 128x96 disply to 64x96.
+		The latter limitation effectively reduces the 128x96 display to 64x96.
 
 		NOTE: This option should not be used if CONFIG_LCD_FRAMBEBUFFER is
 		enabled.  That options provides for a more generalized, external
@@ -1134,6 +1134,23 @@ config LCD_ILI9341_IFACE1_RGB565
 endchoice
 endif
 
+config LCD_LCDDRV_SPIIF
+	bool "Generic SPI Interface Driver (for ILI9341 or others)"
+	default n
+	depends on LCD_ILI9341
+	---help---
+		SPI Interface shim to allow LCD and ePaper to be bound to
+		a normal SPI port.
+
+config LCD_LCDDRV_SPEED
+        int "Generic SPI Interface speed"
+	default 10000000
+	depends on LCD_LCDDRV_SPIIF
+	---help---
+		SPI Interface speed. According to the specification this is generally
+		quite limited, but people have had success with much faster
+		speeds than the spec sheets say. YMMV.
+
 config LCD_RA8875
 	bool "RA8875 LCD Display Controller"
 	default n
@@ -1283,7 +1300,7 @@ menuconfig SLCD
 	bool "Alphanumeric/Segment LCD Devices"
 	default n
 	---help---
-		Drivers for Alphanumeric ans Segment LCDs (SLCDs).  These
+		Drivers for Alphanumeric and Segment LCDs (SLCDs).  These
 		drivers support interfaces as defined in include/nuttx/lcd/slcd_ioctl.h
 		amd slcd_codec.h
 

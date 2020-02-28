@@ -173,7 +173,7 @@ int pthread_spin_destroy(pthread_spinlock_t *lock)
  *
  * Returned Value:
  *   Zero is returned if the lock was successfully acquired.  Otherwise one
- *   of the following errno values are retured:
+ *   of the following errno values are returned:
  *
  *   EINVAL    - 'lock' does not refer to a valid spinlock object
  *   EDEADLOCK - The caller already holds the spinlock
@@ -238,7 +238,7 @@ int pthread_spin_lock(pthread_spinlock_t *lock)
  *
  * Returned Value:
  *   Zero is returned if the lock was successfully acquired.  Otherwise one
- *   of the following errno values are retured:
+ *   of the following errno values are returned:
  *
  *   EINVAL - 'lock' does not refer to a valid spinlock object
  *   EBUSY  - The spinlock is held by another thread
@@ -305,11 +305,11 @@ int pthread_spin_trylock(pthread_spinlock_t *lock)
  *   lock - A reference to the spinlock object to unlock.
  *
  * Returned Value:
- *   Zero is returned if the lock was successfully acquired.  Otherwise one
- *   of the following errno values are retured:
+ *   Zero is returned if the lock was successfully released.  Otherwise one
+ *   of the following errno values are returned:
  *
  *   EINVAL    - 'lock' does not refer to a valid spinlock object
- *   EDEADLOCK - The caller already holds the spinlock
+ *   EPERM     - The caller does not hold the spinlock or it is not locked
  *
  ****************************************************************************/
 
@@ -337,4 +337,4 @@ int pthread_spin_unlock(pthread_spinlock_t *lock)
   return OK;
 }
 
-#endif  /* CONFIG_PTHREAD_SPINLOCKS */
+#endif /* CONFIG_PTHREAD_SPINLOCKS */

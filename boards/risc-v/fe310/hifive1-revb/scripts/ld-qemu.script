@@ -67,16 +67,6 @@ SECTIONS
         _einit = ABSOLUTE(.);
     } > flash
 
-    .ARM.extab : ALIGN(4) {
-        *(.ARM.extab*)
-    } > flash
-
-    .ARM.exidx : ALIGN(4) {
-        __exidx_start = ABSOLUTE(.);
-        *(.ARM.exidx*)
-        __exidx_end = ABSOLUTE(.);
-    } > flash
-
     _eronly = ABSOLUTE(.);
 
     .data : ALIGN(4) {

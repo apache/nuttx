@@ -43,7 +43,6 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <semaphore.h>
 #include <pthread.h>
 #include <queue.h>
 
@@ -53,16 +52,13 @@
 #include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/net/net.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration */
-
-#ifndef CONFIG_NET_TCP_READAHEAD
-#  error CONFIG_NET_TCP_READAHEAD must be set to use VNC
-#endif
 
 #ifndef CONFIG_NX_UPDATE
 #  error CONFIG_NX_UPDATE must be set to use VNC
@@ -218,7 +214,7 @@ enum vnc_server_e
   VNCSERVER_INITIALIZED,       /* State structured initialized, but not connected */
   VNCSERVER_CONNECTED,         /* Connect to a client, but not yet configured */
   VNCSERVER_CONFIGURED,        /* Configured and ready to transfer graphics */
-  VNCSERVER_RUNNING,           /* Running and activly transferring graphics */
+  VNCSERVER_RUNNING,           /* Running and actively transferring graphics */
   VNCSERVER_STOPPING,          /* The updater has been asked to stop */
   VNCSERVER_STOPPED            /* The updater has stopped */
 };
@@ -375,7 +371,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session);
  *
  * Input Parameters:
  *   session - An instance of the session structure.
- *   pixelfmt - The pixel from from the received SetPixelFormat message
+ *   pixelfmt - The pixel from the received SetPixelFormat message
  *
  * Returned Value:
  *   Returns zero (OK) on success; a negated errno value on failure.

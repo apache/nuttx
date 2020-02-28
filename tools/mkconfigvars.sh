@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# mkconfivars.sh
+# tools/mkconfivars.sh
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,37 +38,37 @@ ADVICE="Try '$0 -h' for more information"
 unset VERSION
 
 while [ ! -z "$1" ]; do
-    case $1 in
-    -v )
-        shift
-        VERSION=$1
-        ;;
-    -d )
-        set -x
-        ;;
-    -h )
-        echo "$0 is a tool for generation of configuration variable documentation"
-        echo ""
-        echo $USAGE
-        echo ""
-        echo "Where:"
-        echo "  -v <major.minor>"
-        echo "     The NuttX version number expressed as a major and minor number separated"
-        echo "     by a period"
-        echo "  -d"
-        echo "     Enable script debug"
-        echo "  -h"
-        echo "     show this help message and exit"
-        exit 0
-        ;;
-    * )
-        echo "Unrecognized option: ${1}"
-        echo $USAGE
-        echo $ADVICE
-        exit 1
-        ;;
-    esac
+  case $1 in
+  -v )
     shift
+    VERSION=$1
+    ;;
+  -d )
+    set -x
+    ;;
+  -h )
+    echo "$0 is a tool for generation of configuration variable documentation"
+    echo ""
+    echo $USAGE
+    echo ""
+    echo "Where:"
+    echo "  -v <major.minor>"
+    echo "     The NuttX version number expressed as a major and minor number separated"
+    echo "     by a period"
+    echo "  -d"
+    echo "     Enable script debug"
+    echo "  -h"
+    echo "     show this help message and exit"
+    exit 0
+    ;;
+  * )
+    echo "Unrecognized option: ${1}"
+    echo $USAGE
+    echo $ADVICE
+    exit 1
+    ;;
+  esac
+  shift
 done
 
 # Find the directory we were executed from and were we expect to
@@ -84,12 +84,12 @@ HTMLFILE=Documentation/NuttXConfigVariables.html
 BKUPFILE=Documentation/NuttXConfigVariables.bkp
 
 if [ -x ./${MYNAME} ] ; then
-   cd .. || { echo "ERROR: cd .. failed" ; exit 1 ; }
+  cd .. || { echo "ERROR: cd .. failed" ; exit 1 ; }
 fi
 
 if [ ! -x tools/${MYNAME} ] ; then
-   echo "ERROR:  This file must be executed from the top-level NuttX directory: $PWD"
-   exit 1
+  echo "ERROR:  This file must be executed from the top-level NuttX directory: $PWD"
+  exit 1
 fi
 
 WD=${PWD}

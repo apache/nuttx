@@ -1,4 +1,4 @@
-/*****************************************************************************************************
+/****************************************************************************
  * arch/arm/src/nrf52/hardware/nrf52_uarte.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,23 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************************************/
+ ***************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_UARTE_H
 #define __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_UARTE_H
 
-/*****************************************************************************************************
+/****************************************************************************
  * Included Files
- *****************************************************************************************************/
+ ***************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/nrf52_memorymap.h"
 
-/*****************************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************************************/
+ ***************************************************************************/
 
-/* UART/UARTE Register Offsets ***********************************************************************/
+/* UART/UARTE Register Offsets *********************************************/
 
 #define NRF52_UARTE_TASKS_STARTRX_OFFSET    0x0000  /* Start UART receiver */
 #define NRF52_UARTE_TASKS_STOPRX_OFFSET     0x0004  /* Stop UART receiver */
@@ -109,7 +109,7 @@
 #define NRF52_UART_BAUDRATE_OFFSET          0x0524 /* Baud rate */
 #define NRF52_UART_CONFIG_OFFSET            0x056c /* Configuration of parity and hardware flow control */
 
-/* UART/UARTE Register Addresses *********************************************************************/
+/* UART/UARTE Register Addresses *******************************************/
 
 #define NRF52_UARTE0_TASKS_STARTRX          (NRF52_UARTE0_BASE + NRF52_UARTE_TASKS_STARTRX_OFFSET)
 #define NRF52_UARTE0_TASKS_STOPRX           (NRF52_UARTE0_BASE + NRF52_UARTE_TASKS_STOPRX_OFFSET)
@@ -233,39 +233,43 @@
 #  define NRF52_UART1_CONFIG                (NRF52_UART1_BASE + NRF52_UART_CONFIG_OFFSET)
 #endif
 
-/* UART Register Bitfield Definitions ****************************************************************/
+/* UART Register Bitfield Definitions **************************************/
 
 /* PSELRTS Register */
 
 #define UART_PSELRTS_PIN_SHIFT              (0)       /* Bits 0-4: Pin number*/
-#define UART_PSELRTS_PIN_MASK               (0xf << UART_PSELRTS_PIN_SHIFT)
+#define UART_PSELRTS_PIN_MASK               (0x1f << UART_PSELRTS_PIN_SHIFT)
 #define UART_PSELRTS_PORT_SHIFT             (5)       /* Bit 5: Port number */
 #define UART_PSELRTS_PORT_MASK              (0x1 << UART_PSELRTS_PORT_SHIFT)
 #define UART_PSELRTS_CONNECT                (1 << 31) /* Bit 31: Connection */
+#define UART_PSELRTS_RESET                  (0xffffffff)
 
 /* PSELTXD Register */
 
 #define UART_PSELTXD_PIN_SHIFT              (0)       /* Bits 0-4: Pin number*/
-#define UART_PSELTXD_PIN_MASK               (0xf << UART_PSELTXD_PIN_SHIFT)
+#define UART_PSELTXD_PIN_MASK               (0x1f << UART_PSELTXD_PIN_SHIFT)
 #define UART_PSELTXD_PORT_SHIFT             (5)       /* Bit 5: Port number */
 #define UART_PSELTXD_PORT_MASK              (0x1 << UART_PSELTXD_PORT_SHIFT)
 #define UART_PSELTXD_CONNECT                (1 << 31) /* Bit 31: Connection */
+#define UART_PSELTXD_RESET                  (0xffffffff)
 
 /* PSELCTS Register */
 
 #define UART_PSELCTS_PIN_SHIFT              (0)       /* Bits 0-4: Pin number*/
-#define UART_PSELCTS_PIN_MASK               (0xf << UART_PSELCTS_PIN_SHIFT)
+#define UART_PSELCTS_PIN_MASK               (0x1f << UART_PSELCTS_PIN_SHIFT)
 #define UART_PSELCTS_PORT_SHIFT             (5)       /* Bit 5: Port number */
 #define UART_PSELCTS_PORT_MASK              (0x1 << UART_PSELCTS_PORT_SHIFT)
 #define UART_PSELCTS_CONNECT                (1 << 31) /* Bit 31: Connection */
+#define UART_PSELCTS_RESET                  (0xffffffff)
 
 /* PSELRXD Register */
 
 #define UART_PSELRXD_PIN_SHIFT              (0)       /* Bits 0-4: Pin number*/
-#define UART_PSELRXD_PIN_MASK               (0xf << UART_PSELRXD_PIN_SHIFT)
+#define UART_PSELRXD_PIN_MASK               (0x1f << UART_PSELRXD_PIN_SHIFT)
 #define UART_PSELRXD_PORT_SHIFT             (5)       /* Bit 5: Port number */
 #define UART_PSELRXD_PORT_MASK              (0x1 << UART_PSELRXD_PORT_SHIFT)
 #define UART_PSELRXD_CONNECT                (1 << 31) /* Bit 31: Connection */
+#define UART_PSELRXD_RESET                  (0xffffffff)
 
 /* ENABLE Register */
 

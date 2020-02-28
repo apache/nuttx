@@ -85,7 +85,7 @@
 
 extern "C"
 {
-  int up_init_exidx(Elf32_Addr start, Elf32_Word size)
+  int up_init_exidx(Elf_Addr start, Elf_Word size)
   {
     __exidx_start_elf = (__EIT_entry *) start;
     __exidx_end_elf   = __exidx_start_elf + size;

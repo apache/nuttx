@@ -786,4 +786,3 @@ int spirit_pktbasic_set_varlen(FAR struct spirit_library_s *spirit,
 
   return ret;
 }
-

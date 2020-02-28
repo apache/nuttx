@@ -58,7 +58,7 @@
  *
  * Description:
  *    The sbrk() function is used to change the amount of space allocated
- *    for the calling process. The change is made by resetting the process'
+ *    for the calling process. The change is made by resetting the process's
  *    break value and allocating the appropriate amount of space.  The amount
  *    of allocated space increases as the break value increases.
  *

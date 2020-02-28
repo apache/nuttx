@@ -69,6 +69,6 @@ echo Missing Argument
 :ShowUsage
 echo USAGE: %0 ^<link^>
 echo Where:
-echo   ^<link^> is the linked (or copied) directory to be removed
+echo  ^<link^> is the linked (or copied) directory to be removed
 
 :End

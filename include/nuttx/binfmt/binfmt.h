@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include <spawn.h>
+
 #include <sys/types.h>
 
 #include <nuttx/arch.h>
@@ -314,6 +316,39 @@ int exec(FAR const char *filename, FAR char * const *argv,
          FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************
+ * Name: exec_spawn
+ *
+ * Description:
+ *   exec() configurable version, delivery the spawn attribute if this
+ *   process has special customization.
+ *
+ * Input Parameters:
+ *   filename - The path to the program to be executed. If
+ *              CONFIG_LIB_ENVPATH is defined in the configuration, then
+ *              this may be a relative path from the current working
+ *              directory. Otherwise, path must be the absolute path to the
+ *              program.
+ *   argv     - A pointer to an array of string arguments. The end of the
+ *              array is indicated with a NULL entry.
+ *   exports  - The address of the start of the caller-provided symbol
+ *              table. This symbol table contains the addresses of symbols
+ *              exported by the caller and made available for linking the
+ *              module into the system.
+ *   nexports - The number of symbols in the exports table.
+ *   attr     - The spawn attributes.
+ *
+ * Returned Value:
+ *   This is an end-user function, so it follows the normal convention:
+ *   It returns the PID of the exec'ed module.  On failure, it returns
+ *   -1 (ERROR) and sets errno appropriately.
+ *
+ ****************************************************************************/
+
+int exec_spawn(FAR const char *filename, FAR char * const *argv,
+               FAR const struct symtab_s *exports, int nexports,
+               FAR const posix_spawnattr_t *attr);
+
+/****************************************************************************
  * Name: binfmt_exit
  *
  * Description:
@@ -342,4 +377,3 @@ int binfmt_exit(FAR struct binary_s *bin);
 #endif
 
 #endif /* __INCLUDE_NUTTX_BINFMT_BINFMT_H */
-

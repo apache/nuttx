@@ -390,7 +390,7 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case FBIOPUT_CURSOR:     /* Set cursor attibutes */
+      case FBIOPUT_CURSOR:     /* Set cursor attributes */
         {
           FAR struct fb_setcursor_s *cursor =
             (FAR struct fb_setcursor_s *)((uintptr_t)arg);

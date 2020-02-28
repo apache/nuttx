@@ -116,4 +116,3 @@ extern "C" {
 #endif
 
 #endif /* __ARCH_RISCV_INCLUDE_ARCH_H */
-

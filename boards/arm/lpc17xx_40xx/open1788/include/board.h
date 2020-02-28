@@ -229,7 +229,7 @@
  * LED3 -- Connected to P1[13]
  * LED4 -- Connected to P4[27]
  *
- * These LEDs are connecte to ground so a high output value will illuminate
+ * These LEDs are connected to ground so a high output value will illuminate
  * them.
  */
 
@@ -324,7 +324,7 @@
 
 /* UART1:
  *
- * All pin options are controlled by older briges on the bottom of the board.
+ * All pin options are controlled by older bridges on the bottom of the board.
  * There are the default settings on my board as it came out of the box:
  *
  * RTS   --- Connected to P0[22]
@@ -442,4 +442,4 @@
 #define GPIO_SSP1_MOSI   GPIO_SSP1_MOSI_2
 #define GPIO_SSP1_SCK    GPIO_SSP1_SCK_2
 
-#endif  /* __BOARDS_ARM_LPC17XX_40XX_OPEN1788_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_LPC17XX_40XX_OPEN1788_INCLUDE_BOARD_H */

@@ -1,6 +1,5 @@
 /************************************************************************************
  * arch/z80/src/ez80/ez80f91_emac.h
- * arch/z80/src/chip/ez80f91_emac.h
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -79,7 +78,7 @@
 #define EMAC_CFG4_TXFC         0x04  /* Bit 2: 1=Transmit pause control frames */
 #define EMAC_CFG4_RXFC         0x08  /* Bit 3: 1=Act on receive pause control frames */
 #define EMAC_CFG4_PARF         0x10  /* Bit 4: 1=Receive all frames */
-#define EMAC_CFG4_THDF         0x20  /* Bit 5: 1=Asser back-pressure */
+#define EMAC_CFG4_THDF         0x20  /* Bit 5: 1=Assert back-pressure */
 #define EMAC_CFG4_TPCF         0x40  /* Bit 6: 1=Transmit pause control frame. */
                                      /* Bit 7: reserved */
 
@@ -102,7 +101,7 @@
 #  define EMAC_MDC_DIV20       0x06  /*        MDC = SCLK / 20 */
 #  define EMAC_MDC_DIV28       0x07  /*        MDC = SCLK / 28 */
 #define EMAC_MIIMGMT_SPRE      0x08  /* Bit 3: 1=Suppress MDO preamble */
-#define EMAC_MIIMGMT_SCAN      0x10  /* Bit 4: 1=Perform continus read cycles */
+#define EMAC_MIIMGMT_SCAN      0x10  /* Bit 4: 1=Perform continuous read cycles */
 #define EMAC_MIIMGMT_SCINC     0x20  /* Bit 5: 1=Increment PHY address on scan cycle */
 #define EMAC_MIIMGMT_RSTAT     0x40  /* Bit 6: 1=Read status from PHY (via PRSD) */
 #define EMAC_MIIMGMT_LCTLD     0x80  /* Bit 7: 1=Send CTLD control data to PHY */
@@ -158,7 +157,7 @@
 
 /* EMAC MII status register bit settings ********************************************/
 
-#define EMAC_MIISTAT_RDADRMK  0x1f  /* Bits 0-4: PHY addressed in current scan cyle */
+#define EMAC_MIISTAT_RDADRMK  0x1f  /* Bits 0-4: PHY addressed in current scan cycle */
 #define EMAC_MIISTAT_NVALID   0x20  /* Bit 5: 1=PRSD is valid */
 #define EMAC_MIISTAT_MIILF    0x40  /* Bit 6: 1=PHY link OK */
 #define EMAC_MIISTAT_BUSY     0x80  /* Bit 7: 1=MII management in progress */
@@ -286,4 +285,4 @@ extern "C"
 #endif /* __cplusplus */
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_Z80_SRC_EZ80_EZ80F91_EMAC_H */
+#endif /* __ARCH_Z80_SRC_EZ80_EZ80F91_EMAC_H */

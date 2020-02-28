@@ -392,7 +392,7 @@ struct scufifo_wm_s
 {
   int                    signo; /*< Signal number (0 - 31, except system reserved) */
 
-  /* Pointer to memomry to be timestamp stored */
+  /* Pointer to memory to be timestamp stored */
 
   FAR struct scutimestamp_s *ts;
 
@@ -503,7 +503,7 @@ void seq_setaddress(FAR struct seq_s *seq, uint32_t slave_addr);
  *
  * This function use 'oneshot' feature on SCU. So user unnecessary to specify
  * any opened sequencer.
- * This function usefull for accessing register directly.
+ * This function useful for accessing register directly.
  *
  * param [in]  slavesel : Slave select
  * param [in]  inst     : Sequencer instruction
@@ -523,7 +523,7 @@ int scu_spitransfer(int slavesel, uint16_t *inst, uint32_t nr_insts,
  *
  * This function use 'oneshot' feature on SCU. So user unnecessary to
  * specify any opened sequencer.
- * This function usefull for accessing register directly.
+ * This function useful for accessing register directly.
  *
  * param [in]  port     : I2C port (0 or 1)
  * param [in]  slave    : Slave address
@@ -557,4 +557,4 @@ void scu_initialize(void);
 
 void scu_uninitialize(void);
 
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_SCU_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_SCU_H */

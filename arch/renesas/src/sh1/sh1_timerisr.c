@@ -70,7 +70,7 @@
  *
  * These must be selected so that the frequency of interrupt generation is
  * CLK_TCK.  Ideally, we would like to use the full range of GRA0 for better
- * timing acuracy:
+ * timing accuracy:
  */
 
 #define DESIRED_GRA0     65535
@@ -147,7 +147,7 @@ static int sh1_timerisr(int irq, uint32_t *regs, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  renesas_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -155,7 +155,7 @@ static int sh1_timerisr(int irq, uint32_t *regs, void *arg)
  *
  ****************************************************************************/
 
-void renesas_timer_initialize(void)
+void up_timer_initialize(void)
 {
   uint8_t reg8;
 

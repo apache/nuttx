@@ -284,7 +284,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
     }
 
   /* Allocate .bss/.data space pages.  NOTE that a configurable offset is
-   * added to the allocted size.  This is matched by the offset that is
+   * added to the allocated size.  This is matched by the offset that is
    * used when reporting the virtual data address in up_addrenv_vdata().
    */
 

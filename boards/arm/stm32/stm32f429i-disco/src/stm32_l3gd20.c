@@ -139,4 +139,4 @@ errout:
   return ret;
 }
 
-#endif  /* CONFIG_SPI && CONFIG_SENSORS_L3GD20 */
+#endif /* CONFIG_SPI && CONFIG_SENSORS_L3GD20 */

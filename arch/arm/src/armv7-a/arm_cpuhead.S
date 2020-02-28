@@ -494,5 +494,14 @@ g_cpu3_idlestack:
 #endif /* CONFIG_SMP_NCPUS > 3 */
 #endif /* CONFIG_SMP_NCPUS > 2 */
 #endif /* CONFIG_SMP_NCPUS > 1 */
-#endif
+
+	.align	8
+	.globl	g_idle_topstack
+	.type	g_idle_topstack, object
+
+g_idle_topstack:
+	.long	_enoinit
+	.size	g_idle_topstack, .-g_idle_topstack
+
+#endif /* CONFIG_SMP */
 	.end

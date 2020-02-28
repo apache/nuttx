@@ -90,4 +90,3 @@ unsigned _vectors[] __attribute__((section(".vectors"))) =
 
   [2 ... (15 + ARMV7M_PERIPHERAL_INTERRUPTS)] = (unsigned)&exception_common
 };
-

@@ -127,8 +127,8 @@ struct vs1053_struct_s
   int16_t                 volume;            /* Current volume level */
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
   int16_t                 balance;           /* Current balance level */
-#endif  /* CONFIG_AUDIO_EXCLUDE_BALANCE */
-#endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_BALANCE */
+#endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
   uint8_t                 bass;              /* Bass level */
   uint8_t                 treble;            /* Bass level */
@@ -165,7 +165,7 @@ static int     vs1053_pause(FAR struct audio_lowerhalf_s *lower,
                  FAR void *session);
 static int     vs1053_resume(FAR struct audio_lowerhalf_s *lower,
                  FAR void *session);
-#endif  /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
 static int     vs1053_reserve(FAR struct audio_lowerhalf_s *lower,
                  FAR void** ppContext);
 static int     vs1053_release(FAR struct audio_lowerhalf_s *lower,
@@ -180,7 +180,7 @@ static int     vs1053_stop(FAR struct audio_lowerhalf_s *lower);
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 static int     vs1053_pause(FAR struct audio_lowerhalf_s *lower);
 static int     vs1053_resume(FAR struct audio_lowerhalf_s *lower);
-#endif  /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
 static int     vs1053_reserve(FAR struct audio_lowerhalf_s *lower);
 static int     vs1053_release(FAR struct audio_lowerhalf_s *lower);
 #endif /* CONFIG_AUDIO_MULTI_SESION */
@@ -221,7 +221,7 @@ static const struct audio_ops_s g_audioops =
 
 /* Volume control log table.  This table is in increments of 2% of
  * requested volume level and is the register value that should be
- * programmed to the VS1053 to achieve that volume pecentage.
+ * programmed to the VS1053 to achieve that volume percentage.
  */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
@@ -251,19 +251,19 @@ static const uint8_t   g_logtable [] =
 
 static void vs1053_spi_lock(FAR struct spi_dev_s *dev, unsigned long freq_mhz)
 {
-  /* On SPI busses where there are multiple devices, it will be necessary to
-   * lock SPI to have exclusive access to the busses for a sequence of
+  /* On SPI buses where there are multiple devices, it will be necessary to
+   * lock SPI to have exclusive access to the buses for a sequence of
    * transfers.  The bus should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusiv access to
-   * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
+   * This is a blocking call and will not return until we have exclusive access to
+   * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
    */
 
   SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
-   * If the SPI buss is being shared, then it may have been left in an incompatible
+   * If the SPI bus is being shared, then it may have been left in an incompatible
    * state.
    */
 
@@ -784,7 +784,7 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
               vs1053_setvolume(dev);
 
               break;
-#endif  /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+#endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
 #if !defined(CONFIG_AUDIO_EXCLUDE_TONE) && !defined(CONFIG_AUDIO_EXCLUDE_VOLUME)
             case AUDIO_FU_BALANCE:
@@ -820,7 +820,7 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
               vs1053_setbass(dev);
 
               break;
-#endif  /* CONFIG_AUDIO_EXCLUDE_TONE */
+#endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
             default:
               /* Others we don't support */
@@ -1142,7 +1142,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
                       continue;
                     }
                   else
-#endif  /* CONFIG_AUDIO_EXCLUDE_STOP */
+#endif /* CONFIG_AUDIO_EXCLUDE_STOP */
                     {
                       dev->endfillbytes = 0;
                     }

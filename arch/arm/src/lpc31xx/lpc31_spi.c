@@ -43,11 +43,11 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
@@ -423,12 +423,12 @@ static inline void spi_writeword(FAR struct lpc31_spidev_s *priv, uint16_t word)
  * Name: spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -685,7 +685,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   /* FIXME: is there anyway to determine this
-   *        it should probably be board dependant anyway */
+   *        it should probably be board dependent anyway */
 
   return SPI_STATUS_PRESENT;
 }

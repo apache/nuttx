@@ -53,7 +53,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint64_t * g_current_regs;
+extern void up_fault(int irq, uint64_t *regs);
 
 /****************************************************************************
  * Public Functions
@@ -68,54 +68,72 @@ void *k210_dispatch_irq(uint64_t vector, uint64_t *regs)
   uint32_t  irq = (vector >> (27 + 32)) | (vector & 0xf);
   uint64_t *mepc = regs;
 
+  /* Check if fault happened */
+
+  if (vector < K210_IRQ_ECALLU)
+    {
+      up_fault((int)irq, regs);
+    }
+
+  /* Firstly, check if the irq is machine external interrupt */
+
   if (K210_IRQ_MEXT == irq)
     {
-      /* Read & write K210_PLIC_CLAIM to clear pending */
-
       uint32_t val = getreg32(K210_PLIC_CLAIM);
-      putreg32(val, K210_PLIC_CLAIM);
+
+      /* Add the value to nuttx irq which is offset to the mext */
 
       irq += val;
     }
 
   /* NOTE: In case of ecall, we need to adjust mepc in the context */
 
-  if (K210_IRQ_ECALLM == irq)
+  if (K210_IRQ_ECALLM == irq || K210_IRQ_ECALLU == irq)
     {
       *mepc += 4;
     }
 
+  /* Acknowledge the interrupt */
+
+  up_ack_irq(irq);
+
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
-  /* Nested interrupts are not supported */
-
-  DEBUGASSERT(g_current_regs == NULL);
-
   /* Current regs non-zero indicates that we are processing an interrupt;
    * CURRENT_REGS is also used to manage interrupt level context switches.
+   *
+   * Nested interrupts are not supported
    */
 
-  g_current_regs = regs;
+  ASSERT(CURRENT_REGS == NULL);
+  CURRENT_REGS = regs;
 
-  /* Deliver the IRQ */
+  /* MEXT means no interrupt */
 
-  irq_dispatch(irq, regs);
+  if (K210_IRQ_MEXT != irq)
+    {
+      /* Deliver the IRQ */
+
+      irq_dispatch(irq, regs);
+    }
+
+  if (K210_IRQ_MEXT <= irq)
+    {
+      /* Then write PLIC_CLAIM to clear pending in PLIC */
+
+      putreg32(irq - K210_IRQ_MEXT, K210_PLIC_CLAIM);
+    }
 #endif
 
   /* If a context switch occurred while processing the interrupt then
-   * g_current_regs may have change value.  If we return any value different
+   * CURRENT_REGS may have change value.  If we return any value different
    * from the input regs, then the lower level will know that a context
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint64_t *)g_current_regs;
-  g_current_regs = NULL;
-
-  /* Set machine previous privilege mode to machine mode */
-
-  *(regs + REG_INT_CTX_NDX) |= 0x3 << 11;
+  regs = (uint64_t *)CURRENT_REGS;
+  CURRENT_REGS = NULL;
 
   return regs;
 }
-

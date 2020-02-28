@@ -838,4 +838,3 @@ struct eth_rxdesc_s
 #endif /* __ASSEMBLY__ */
 #endif /* STM32_NETHERNET > 0 */
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_ETH_H */
-

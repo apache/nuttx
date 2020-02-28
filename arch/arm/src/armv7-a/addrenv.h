@@ -121,5 +121,5 @@ void arm_addrenv_destroy_region(FAR uintptr_t **list, unsigned int listlen,
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* CONFIG_ARCH_ADDRENV */
-#endif  /* __ARCH_ARM_SRC_ARMV7_A_ADDRENV_H */
+#endif /* CONFIG_ARCH_ADDRENV */
+#endif /* __ARCH_ARM_SRC_ARMV7_A_ADDRENV_H */

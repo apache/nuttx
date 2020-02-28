@@ -22,10 +22,23 @@ about this board.
 Configuration sub-directories
 -----------------------------
 
+  elf
+
+    This is a configuration to test apps/examples/elf.
+
+  module
+
+    This is a configuration to test apps/examples/module.
+
+  posix_spawn
+
+    This is a configuration to test apps/examples/posix_spawn.
+
   smp
 
     This is a configuration to run Spresense in SMP mode. To use this
-    configuration, new boot loader which will be released later must be used.
+    configuration, bootloader for Spresense SDK 1.5.0 or later must be
+    installed.
 
   wifi
 
@@ -79,7 +92,7 @@ Configuration sub-directories
       nsh> date
       Jul 30 06:42:13 2019
 
-    (2) Acess Point (AP) mode
+    (2) Access Point (AP) mode
 
     To run the module in AP mode, you need to specify SSID to advertise and
     WEP-key. (NOTE: in AP mode, you can also specify channel number to use)

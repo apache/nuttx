@@ -68,7 +68,7 @@
 #define GPIO_MODE_SHIFT            (12)        /* Bits 12-15: Port mode */
 #define GPIO_MODE_MASK             (15 << GPIO_MODE_SHIFT)
 
-#define GPIO_MODE_DOUT_SHIFT       (11)        /* Bit 11: Input mode modifer */
+#define GPIO_MODE_DOUT_SHIFT       (11)        /* Bit 11: Input mode modifier */
 #define GPIO_MODE_DOUT_MASK        (1 << GPIO_MODE_DOUT_SHIFT)
 #  define GPIO_MODE_DOUT           GPIO_MODE_DOUT_MASK
 

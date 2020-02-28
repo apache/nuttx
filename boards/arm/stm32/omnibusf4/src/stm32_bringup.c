@@ -79,22 +79,6 @@
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef CONFIG_SENSORS_MPU60X0
-/* Initialize the MPU6000 device. */
-
-int stm32_mpu6000_initialize(void);
-#endif
-
-#ifdef CONFIG_VIDEO_MAX7456
-/* Initialize the MAX7456 OSD device. */
-
-int stm32_max7456_initialize(void);
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 

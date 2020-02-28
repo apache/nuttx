@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <sched.h>
 #include <errno.h>
@@ -48,6 +47,7 @@
 
 #include <nuttx/net/net.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 
 #include "socket/socket.h"
 
@@ -192,30 +192,19 @@ void psock_release(FAR struct socket *psock)
 {
   if (psock != NULL)
     {
-      /* Take the list semaphore so that there will be no accesses
-       * to this socket structure.
+      /* Decrement the count if there the socket will persist
+       * after this.
        */
 
-      FAR struct socketlist *list = sched_getsockets();
-      if (list)
+      if (psock->s_crefs > 1)
         {
-          /* Decrement the count if there the socket will persist
-           * after this.
-           */
+          psock->s_crefs--;
+        }
+      else
+        {
+          /* The socket will not persist... reset it */
 
-          _net_semtake(list);
-          if (psock->s_crefs > 1)
-            {
-              psock->s_crefs--;
-            }
-          else
-            {
-              /* The socket will not persist... reset it */
-
-              memset(psock, 0, sizeof(struct socket));
-            }
-
-          _net_semgive(list);
+          memset(psock, 0, sizeof(struct socket));
         }
     }
 }
@@ -240,11 +229,19 @@ void sockfd_release(int sockfd)
 
   FAR struct socket *psock = sockfd_socket(sockfd);
 
-  /* Get the socket structure for this sockfd */
-
   if (psock)
     {
-      psock_release(psock);
+      /* Take the list semaphore so that there will be no accesses
+       * to this socket structure.
+       */
+
+      FAR struct socketlist *list = sched_getsockets();
+      if (list)
+        {
+          _net_semtake(list);
+          psock_release(psock);
+          _net_semgive(list);
+        }
     }
 }
 
@@ -255,7 +252,7 @@ void sockfd_release(int sockfd)
  *   Given a socket descriptor, return the underlying socket structure.
  *
  * Input Parameters:
- *   sockfd - The socket descriptor index o use.
+ *   sockfd - The socket descriptor index to use.
  *
  * Returned Value:
  *   On success, a reference to the socket structure associated with the
@@ -279,4 +276,3 @@ FAR struct socket *sockfd_socket(int sockfd)
 
   return NULL;
 }
-

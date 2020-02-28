@@ -143,7 +143,7 @@ void iob_notifier_signal(void)
 {
   /* This is just a simple wrapper around work_notifier_signal(). */
 
-  return work_notifier_signal(WORK_IOB_AVAIL, NULL);
+  work_notifier_signal(WORK_IOB_AVAIL, NULL);
 }
 
 #endif /* CONFIG_IOB_NOTIFIER */

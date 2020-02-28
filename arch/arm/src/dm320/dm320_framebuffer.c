@@ -514,7 +514,7 @@ static int dm320_putcmap(FAR struct fb_vtable_s *vtable, FAR const struct fb_cma
 #endif
 #ifdef CONFIG_FB_HWCURSOR
 static int dm320_getcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_cursorattrib_s *attrib);
-static int dm320_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcursor_s *setttings);
+static int dm320_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcursor_s *settings);
 #endif
 
 /****************************************************************************
@@ -941,7 +941,7 @@ static void dm320_hwinitialize(void)
    * Bits 113: Vertical line height: {1,2,4,6,8,10,12,14}  CONFIG_DM320_CURSORLINEHEIGHT
    * 4:6: Horizontal line width: {1,4,8,16,20,24,28}       CONFIG_DM320_CURSORLINEWIDTH
    * 7: 0=ROM lookup table, 1=RAM lookup table             0
-   * 8:15: Rectangular cursor color pallette address       CONFIG_DM320_CURSORCLUT
+   * 8:15: Rectangular cursor color palette address       CONFIG_DM320_CURSORCLUT
    */
 
   putreg16(DM320_RECTCURSOR_SETUP, DM320_OSD_RECTCUR);

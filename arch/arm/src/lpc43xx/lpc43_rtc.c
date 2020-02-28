@@ -65,6 +65,7 @@
  ************************************************************************************/
 
 /* Configuration ********************************************************************/
+
 /* This RTC implementation supports only date/time RTC hardware */
 
 #ifndef CONFIG_RTC_DATETIME
@@ -310,11 +311,8 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   tp->tm_mday = ((getreg32(LPC43_RTC_DOM) & RTC_DOM_MASK));
   tp->tm_mon  = ((getreg32(LPC43_RTC_MONTH) & RTC_MONTH_MASK)) - 1;
   tp->tm_year = ((getreg32(LPC43_RTC_YEAR) & RTC_YEAR_MASK)-1900);
-
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   tp->tm_wday = ((getreg32(LPC43_RTC_DOW) & RTC_DOW_MASK));
   tp->tm_yday = ((getreg32(LPC43_RTC_DOY) & RTC_DOY_MASK));
-#endif
 
   rtc_dumptime(tp, "Returning");
   return OK;
@@ -352,11 +350,8 @@ int up_rtc_settime(FAR const struct timespec *tp)
   putreg32(((newtime.tm_mday) & RTC_DOM_MASK), LPC43_RTC_DOM);
   putreg32((((newtime.tm_mon)+1) & RTC_MONTH_MASK), LPC43_RTC_MONTH);
   putreg32(((newtime.tm_year) & RTC_YEAR_MASK)+1900, LPC43_RTC_YEAR);
-
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   putreg32(((newtime.tm_wday) & RTC_DOW_MASK), LPC43_RTC_DOW);
   putreg32(((newtime.tm_yday) & RTC_DOY_MASK), LPC43_RTC_DOY);
-#endif
 
   return OK;
 }
@@ -390,13 +385,16 @@ int lpc43_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
       g_alarmcb = callback;
 
       /* Break out the time values */
+
 #warning "Missing logic"
 
       /* The set the alarm */
+
 #warning "Missing logic"
 
       ret = OK;
     }
+
   return ret;
 }
 #endif

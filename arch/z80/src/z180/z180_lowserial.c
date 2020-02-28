@@ -63,24 +63,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z80_lowserial_initialize
- *
- * Description:
- *   Called early in the boot sequence to initialize the serial ports
- *
- ****************************************************************************/
-
-#ifdef USE_LOWSERIALINIT
-void z80_lowserial_initialize(void)
-{
-  /* Initialize UART and [E]SCC serial devices */
-
-  z180_uart_lowinit();
-  z180_scc_lowinit();
-}
-#endif
-
-/****************************************************************************
  * Name: up_putc/up_lowputc
  *
  * Description:

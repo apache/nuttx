@@ -44,13 +44,13 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <poll.h>
 #include <debug.h>
 #include <time.h>
 #include <fcntl.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 #include <nuttx/wqueue.h>
 
@@ -58,7 +58,7 @@
 #include "sx127x.h"
 
 /* TODO:
- *   - OOK communication (RX+TX) deosnt work yet
+ *   - OOK communication (RX+TX) doesn't work yet
  *   - Channel Activity Detection (CAD) for LORA
  *   - frequency hopping for LORA and FSK/OOK
  *   - modulation shaping for FSK/OOK
@@ -98,12 +98,12 @@
 
 /* FSK/OOK bandwidth default */
 
-#define SX127X_FSKOOK_RXBW_DEFAULT    FSKOOK_BANDWIDTH_15p6kHz
-#define SX127X_FSKOOK_AFCBW_DEFAULT   FSKOOK_BANDWIDTH_20p8kHz
+#define SX127X_FSKOOK_RXBW_DEFAULT    FSKOOK_BANDWIDTH_15P6KHZ
+#define SX127X_FSKOOK_AFCBW_DEFAULT   FSKOOK_BANDWIDTH_20P8KHZ
 
 /* Default LORA bandwidth */
 
-#define SX127X_LRM_BW_DEFAULT         LORA_BANDWIDTH_7p8kHz
+#define SX127X_LRM_BW_DEFAULT         LORA_BANDWIDTH_7P8KHZ
 
 /* Default SF for LORA */
 
@@ -144,7 +144,7 @@
 /* Some assertions */
 
 #ifdef CONFIG_LPWAN_SX127X_FSKOOK
-#  warning OOK support is not complete, RX+TX doesnt work yet!
+#  warning OOK support is not complete, RX+TX doesn't work yet!
 #  if CONFIG_LPWAN_SX127X_RXFIFO_DATA_LEN > SX127X_FOM_FIFO_LEN
 #    warning RX data length limited by chip RX FIFO size (FSK/OOK = 64, LORA = 256)
 #  endif
@@ -245,7 +245,7 @@ struct sx127x_lora_s
   uint8_t  bw;                  /* LORA banwidth */
   uint8_t  sf;                  /* Spreading factor */
   uint8_t  cr;                  /* Coding rate */
-  bool     implicthdr;          /* Implict header mode ON */
+  bool     implicthdr;          /* Implicit header mode ON */
   bool     invert_iq;           /* Invert I and Q signals */
 };
 #endif
@@ -1186,7 +1186,7 @@ static int sx127x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int sx127x_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup)
 {
-#ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
+#ifndef CONFIG_LPWAN_SX127X_RXSUPPORT
   return -ENOSYS;
 #else
 
@@ -1203,7 +1203,7 @@ static int sx127x_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Exclusive access */
 
-  ret = nxsem_wait(&dev->devsem);
+  ret = nxsem_wait(&dev->dev_sem);
   if (ret < 0)
     {
       return ret;
@@ -1255,7 +1255,7 @@ static int sx127x_poll(FAR struct file *filep, FAR struct pollfd *fds,
     }
 
 errout:
-  nxsem_post(&dev->devsem);
+  nxsem_post(&dev->dev_sem);
   return ret;
 #endif
 }
@@ -1303,7 +1303,7 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
           irq = SX127X_LRM_IRQ_TXDONE;
           break;
         }
-#endif  /* CONFIG_LPWAN_SX127X_TXSUPPORT */
+#endif /* CONFIG_LPWAN_SX127X_TXSUPPORT */
 
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
       /* RX DONE */
@@ -1360,7 +1360,7 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
                  SX127X_LRM_IRQ_VALIDHDR);
           break;
         }
-#endif  /* CONFIG_LPWAN_SX127X_RXSUPPORT */
+#endif /* CONFIG_LPWAN_SX127X_RXSUPPORT */
 
       /* Only LORA - CAD DONE */
 
@@ -1378,7 +1378,8 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
 
       default:
         {
-          wlwarn("WARNING: Interrupt not processed, opmode=%d\n", dev->opmode);
+          wlwarn("WARNING: Interrupt not processed, opmode=%d\n",
+                 dev->opmode);
           ret = -EINVAL;
           break;
         }
@@ -1392,7 +1393,7 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
 
   return ret;
 }
-#endif  /* CONFIG_LPWAN_SX127X_LORA */
+#endif /* CONFIG_LPWAN_SX127X_LORA */
 
 /****************************************************************************
  * Name: sx127x_fskook_isr0_process
@@ -1436,7 +1437,7 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
           nxsem_post(&dev->tx_sem);
           break;
         }
-#endif  /* CONFIG_LPWAN_SX127X_TXSUPPORT */
+#endif /* CONFIG_LPWAN_SX127X_TXSUPPORT */
 
 #ifdef CONFIG_LPWAN_SX127X_RXSUPPORT
       /* RX DONE */
@@ -1483,7 +1484,7 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
 
           break;
         }
-#endif  /* CONFIG_LPWAN_SX127X_RXSUPPORT */
+#endif /* CONFIG_LPWAN_SX127X_RXSUPPORT */
 
       default:
         {
@@ -1506,7 +1507,7 @@ static int sx127x_fskook_isr0_process(FAR struct sx127x_dev_s *dev)
 
   return ret;
 }
-#endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK */
 
 /****************************************************************************
  * Name: sx127x_isr0_process
@@ -1637,7 +1638,7 @@ errout:
 
   return len;
 }
-#endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK */
 
 /****************************************************************************
  * Name: sx127x_lora_rxhandle
@@ -1717,7 +1718,7 @@ errout:
 
   return len;
 }
-#endif  /* CONFIG_LPWAN_SX127X_LORA */
+#endif /* CONFIG_LPWAN_SX127X_LORA */
 
 /****************************************************************************
  * Name: sx127x_rxfifo_get
@@ -1884,7 +1885,7 @@ static int sx127x_fskook_send(FAR struct sx127x_dev_s *dev,
 
   if (dev->fskook.fixlen == true)
     {
-      /* Write payload length reigster (only LSB for now) */
+      /* Write payload length register (only LSB for now) */
 
       sx127x_writeregbyte(dev, SX127X_FOM_PAYLOADLEN, datalen);
     }
@@ -1906,7 +1907,7 @@ static int sx127x_fskook_send(FAR struct sx127x_dev_s *dev,
 errout:
   return ret;
 }
-#endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK */
 
 /****************************************************************************
  * Name: sx127x_lora_send
@@ -1952,8 +1953,8 @@ static int sx127x_lora_send(FAR struct sx127x_dev_s *dev,
 errout:
   return ret;
 }
-#endif  /* CONFIG_LPWAN_SX127X_LORA */
-#endif  /* CONFIG_LPWAN_SX127X_TXSUPPORT */
+#endif /* CONFIG_LPWAN_SX127X_LORA */
+#endif /* CONFIG_LPWAN_SX127X_TXSUPPORT */
 
 /****************************************************************************
  * Name: sx127x_opmode_init
@@ -2217,27 +2218,27 @@ static int sx127x_fskook_rxbw_set(FAR struct sx127x_dev_s *dev, uint8_t rx_bw)
 
   switch (rx_bw)
     {
-      case FSKOOK_BANDWIDTH_2p6kHz:
-      case FSKOOK_BANDWIDTH_3p1kHz:
-      case FSKOOK_BANDWIDTH_3p9kHz:
-      case FSKOOK_BANDWIDTH_5p2kHz:
-      case FSKOOK_BANDWIDTH_6p3kHz:
-      case FSKOOK_BANDWIDTH_7p8kHz:
-      case FSKOOK_BANDWIDTH_10p4kHz:
-      case FSKOOK_BANDWIDTH_12p5kHz:
-      case FSKOOK_BANDWIDTH_15p6kHz:
-      case FSKOOK_BANDWIDTH_20p8kHz:
-      case FSKOOK_BANDWIDTH_25kHz:
-      case FSKOOK_BANDWIDTH_31p3kHz:
-      case FSKOOK_BANDWIDTH_41p7kHz:
-      case FSKOOK_BANDWIDTH_50kHz:
-      case FSKOOK_BANDWIDTH_62p5kHz:
-      case FSKOOK_BANDWIDTH_83p3kHz:
-      case FSKOOK_BANDWIDTH_100kHz:
-      case FSKOOK_BANDWIDTH_125kHz:
-      case FSKOOK_BANDWIDTH_166p7kHz:
-      case FSKOOK_BANDWIDTH_200kHz:
-      case FSKOOK_BANDWIDTH_250kHz:
+      case FSKOOK_BANDWIDTH_2P6KHZ:
+      case FSKOOK_BANDWIDTH_3P1KHZ:
+      case FSKOOK_BANDWIDTH_3P9KHZ:
+      case FSKOOK_BANDWIDTH_5P2KHZ:
+      case FSKOOK_BANDWIDTH_6P3KHZ:
+      case FSKOOK_BANDWIDTH_7P8KHZ:
+      case FSKOOK_BANDWIDTH_10P4KHZ:
+      case FSKOOK_BANDWIDTH_12P5KHZ:
+      case FSKOOK_BANDWIDTH_15P6KHZ:
+      case FSKOOK_BANDWIDTH_20P8KHZ:
+      case FSKOOK_BANDWIDTH_25KHZ:
+      case FSKOOK_BANDWIDTH_31P3KHZ:
+      case FSKOOK_BANDWIDTH_41P7KHZ:
+      case FSKOOK_BANDWIDTH_50KHZ:
+      case FSKOOK_BANDWIDTH_62P5KHZ:
+      case FSKOOK_BANDWIDTH_83P3KHZ:
+      case FSKOOK_BANDWIDTH_100KHZ:
+      case FSKOOK_BANDWIDTH_125KHZ:
+      case FSKOOK_BANDWIDTH_166P7KHZ:
+      case FSKOOK_BANDWIDTH_200KHZ:
+      case FSKOOK_BANDWIDTH_250KHZ:
         {
           /* Lock SPI */
 
@@ -2293,27 +2294,27 @@ static int sx127x_fskook_afcbw_set(FAR struct sx127x_dev_s *dev,
 
   switch (afc_bw)
     {
-      case FSKOOK_BANDWIDTH_2p6kHz:
-      case FSKOOK_BANDWIDTH_3p1kHz:
-      case FSKOOK_BANDWIDTH_3p9kHz:
-      case FSKOOK_BANDWIDTH_5p2kHz:
-      case FSKOOK_BANDWIDTH_6p3kHz:
-      case FSKOOK_BANDWIDTH_7p8kHz:
-      case FSKOOK_BANDWIDTH_10p4kHz:
-      case FSKOOK_BANDWIDTH_12p5kHz:
-      case FSKOOK_BANDWIDTH_15p6kHz:
-      case FSKOOK_BANDWIDTH_20p8kHz:
-      case FSKOOK_BANDWIDTH_25kHz:
-      case FSKOOK_BANDWIDTH_31p3kHz:
-      case FSKOOK_BANDWIDTH_41p7kHz:
-      case FSKOOK_BANDWIDTH_50kHz:
-      case FSKOOK_BANDWIDTH_62p5kHz:
-      case FSKOOK_BANDWIDTH_83p3kHz:
-      case FSKOOK_BANDWIDTH_100kHz:
-      case FSKOOK_BANDWIDTH_125kHz:
-      case FSKOOK_BANDWIDTH_166p7kHz:
-      case FSKOOK_BANDWIDTH_200kHz:
-      case FSKOOK_BANDWIDTH_250kHz:
+      case FSKOOK_BANDWIDTH_2P6KHZ:
+      case FSKOOK_BANDWIDTH_3P1KHZ:
+      case FSKOOK_BANDWIDTH_3P9KHZ:
+      case FSKOOK_BANDWIDTH_5P2KHZ:
+      case FSKOOK_BANDWIDTH_6P3KHZ:
+      case FSKOOK_BANDWIDTH_7P8KHZ:
+      case FSKOOK_BANDWIDTH_10P4KHZ:
+      case FSKOOK_BANDWIDTH_12P5KHZ:
+      case FSKOOK_BANDWIDTH_15P6KHZ:
+      case FSKOOK_BANDWIDTH_20P8KHZ:
+      case FSKOOK_BANDWIDTH_25KHZ:
+      case FSKOOK_BANDWIDTH_31P3KHZ:
+      case FSKOOK_BANDWIDTH_41P7KHZ:
+      case FSKOOK_BANDWIDTH_50KHZ:
+      case FSKOOK_BANDWIDTH_62P5KHZ:
+      case FSKOOK_BANDWIDTH_83P3KHZ:
+      case FSKOOK_BANDWIDTH_100KHZ:
+      case FSKOOK_BANDWIDTH_125KHZ:
+      case FSKOOK_BANDWIDTH_166P7KHZ:
+      case FSKOOK_BANDWIDTH_200KHZ:
+      case FSKOOK_BANDWIDTH_250KHZ:
         {
           /* Lock SPI */
 
@@ -2805,7 +2806,7 @@ static int sx127x_fskook_preamble_get(FAR struct sx127x_dev_s *dev)
   return 0;
 }
 
-#endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK */
 
 #ifdef CONFIG_LPWAN_SX127X_LORA
 
@@ -3036,15 +3037,15 @@ static int sx127x_lora_bw_set(FAR struct sx127x_dev_s *dev, uint8_t bw)
 
   switch (bw)
     {
-      case LORA_BANDWIDTH_7p8kHz:
-      case LORA_BANDWIDTH_10p4kHz:
-      case LORA_BANDWIDTH_15p6kHz:
-      case LORA_BANDWIDTH_20p8kHz:
-      case LORA_BANDWIDTH_31p2kHz:
-      case LORA_BANDWIDTH_41p4kHz:
-      case LORA_BANDWIDTH_62p5kHz:
-      case LORA_BANDWIDTH_125kHz:
-      case LORA_BANDWIDTH_250kHz:
+      case LORA_BANDWIDTH_7P8KHZ:
+      case LORA_BANDWIDTH_10P4KHZ:
+      case LORA_BANDWIDTH_15P6KHZ:
+      case LORA_BANDWIDTH_20P8KHZ:
+      case LORA_BANDWIDTH_31P2KHZ:
+      case LORA_BANDWIDTH_41P4KHZ:
+      case LORA_BANDWIDTH_62P5KHZ:
+      case LORA_BANDWIDTH_125KHZ:
+      case LORA_BANDWIDTH_250KHZ:
         {
           /* Lock SPI */
 
@@ -3491,7 +3492,7 @@ static int sx127x_lora_preamble_get(FAR struct sx127x_dev_s *dev)
   return 0;
 }
 
-#endif  /* CONFIG_LPWAN_SX127X_LORA */
+#endif /* CONFIG_LPWAN_SX127X_LORA */
 
 /****************************************************************************
  * Name: sx127x_syncword_get
@@ -3575,7 +3576,7 @@ static void sx127x_ops_set(FAR struct sx127x_dev_s *dev, uint8_t modulation)
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
       dev->ops.dumpregs     = sx127x_fskook_dumpregs;
 #endif
-#endif  /* CONFIG_LPWAN_SX127X_FSKOOK */
+#endif /* CONFIG_LPWAN_SX127X_FSKOOK */
     }
 
 #ifdef CONFIG_LPWAN_SX127X_LORA
@@ -3597,7 +3598,7 @@ static void sx127x_ops_set(FAR struct sx127x_dev_s *dev, uint8_t modulation)
       dev->ops.dumpregs     = sx127x_lora_dumpregs;
 #endif
     }
-#endif  /* CONFIG_LPWAN_SX127X_LORA */
+#endif /* CONFIG_LPWAN_SX127X_LORA */
 }
 
 /****************************************************************************
@@ -3901,6 +3902,9 @@ errout:
 
 static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power)
 {
+#ifndef CONFIG_LPWAN_SX127X_TXSUPPORT
+  return -ENOSYS;
+#else
   bool pa_select  = false;
   bool pa_dac     = false;
   uint8_t setbits = 0;
@@ -3965,7 +3969,8 @@ static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power)
         }
     }
 
-  wlinfo("power %d->%d, pa=%d, dac=%d\n", dev->power, power, pa_select, pa_dac);
+  wlinfo("power %d->%d, pa=%d, dac=%d\n",
+         dev->power, power, pa_select, pa_dac);
 
   sx127x_lock(dev->spi);
 
@@ -3988,7 +3993,8 @@ static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power)
         {
           /* Disable high power on PA_BOOST */
 
-          sx127x_writeregbyte(dev, SX127X_CMN_PADAC, SX127X_CMN_PADAC_DEFAULT);
+          sx127x_writeregbyte(dev, SX127X_CMN_PADAC,
+                              SX127X_CMN_PADAC_DEFAULT);
 
           /* Configure output power */
 
@@ -4008,7 +4014,8 @@ static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power)
 
       setbits = ((power + 1) << SX127X_CMN_PACFG_OUTPOWER_SHIFT);
       setbits |= (5 << SX127X_CMN_PACFG_MAXPOWER_SHIFT);
-      clrbits = (SX127X_CMN_PACFG_OUTPOWER_MASK | SX127X_CMN_PACFG_MAXPOWER_SHIFT);
+      clrbits = (SX127X_CMN_PACFG_OUTPOWER_MASK |
+                 SX127X_CMN_PACFG_MAXPOWER_SHIFT);
 
       sx127x_modregbyte(dev, SX127X_CMN_PACFG, setbits, clrbits);
 
@@ -4033,6 +4040,7 @@ static int sx127x_power_set(FAR struct sx127x_dev_s *dev, int8_t power)
 
 errout:
   return ret;
+#endif
 }
 
 /****************************************************************************
@@ -4041,7 +4049,11 @@ errout:
 
 static int8_t sx127x_power_get(FAR struct sx127x_dev_s *dev)
 {
+#ifndef CONFIG_LPWAN_SX127X_TXSUPPORT
+  return 0;
+#else
   return dev->power;
+#endif
 }
 
 /****************************************************************************
@@ -4291,63 +4303,117 @@ static void sx127x_lora_dumpregs(FAR struct sx127x_dev_s *dev)
 {
   sx127x_lock(dev->spi);
   wlinfo("LORA dump:\n");
-  wlinfo("FIFO:         %02x\n", sx127x_readregbyte(dev, SX127X_CMN_FIFO));
-  wlinfo("OPMODE:       %02x\n", sx127x_readregbyte(dev, SX127X_CMN_OPMODE));
-  wlinfo("FRFMSB:       %02x\n", sx127x_readregbyte(dev, SX127X_CMN_FRFMSB));
-  wlinfo("FRFMID:       %02x\n", sx127x_readregbyte(dev, SX127X_CMN_FRFMID));
-  wlinfo("FRFLSB:       %02x\n", sx127x_readregbyte(dev, SX127X_CMN_FRFLSB));
-  wlinfo("PACFG:        %02x\n", sx127x_readregbyte(dev, SX127X_CMN_PACFG));
-  wlinfo("PARAMP:       %02x\n", sx127x_readregbyte(dev, SX127X_CMN_PARAMP));
-  wlinfo("OCP:          %02x\n", sx127x_readregbyte(dev, SX127X_CMN_OCP));
-  wlinfo("LNA:          %02x\n", sx127x_readregbyte(dev, SX127X_CMN_LNA));
-  wlinfo("ADDRPTR:      %02x\n", sx127x_readregbyte(dev, SX127X_LRM_ADDRPTR));
-  wlinfo("TXBASE:       %02x\n", sx127x_readregbyte(dev, SX127X_LRM_TXBASE));
-  wlinfo("RXBASE:       %02x\n", sx127x_readregbyte(dev, SX127X_LRM_RXBASE));
-  wlinfo("RXCURR:       %02x\n", sx127x_readregbyte(dev, SX127X_LRM_RXCURR));
-  wlinfo("IRQMASK:      %02x\n", sx127x_readregbyte(dev, SX127X_LRM_IRQMASK));
-  wlinfo("IRQ:          %02x\n", sx127x_readregbyte(dev, SX127X_LRM_IRQ));
-  wlinfo("RXBYTES:      %02x\n", sx127x_readregbyte(dev, SX127X_LRM_RXBYTES));
-  wlinfo("RXHDRMSB:     %02x\n", sx127x_readregbyte(dev, SX127X_LRM_RXHDRMSB));
-  wlinfo("RXHDRLSB:     %02x\n", sx127x_readregbyte(dev, SX127X_LRM_RXHDRLSB));
-  wlinfo("RXPKTMSB:     %02x\n", sx127x_readregbyte(dev, SX127X_LRM_RXPKTMSB));
-  wlinfo("RXPKTLSB:     %02x\n", sx127x_readregbyte(dev, SX127X_LRM_RXPKTLSB));
-  wlinfo("MODSTAT:      %02x\n", sx127x_readregbyte(dev, SX127X_LRM_MODSTAT));
-  wlinfo("PKTSNR:       %02x\n", sx127x_readregbyte(dev, SX127X_LRM_PKTSNR));
-  wlinfo("PKTRSSI:      %02x\n", sx127x_readregbyte(dev, SX127X_LRM_PKTRSSI));
-  wlinfo("RSSI:         %02x\n", sx127x_readregbyte(dev, SX127X_LRM_RSSIVAL));
-  wlinfo("HOPCHAN:      %02x\n", sx127x_readregbyte(dev, SX127X_LRM_HOPCHAN));
-  wlinfo("MDMCFG1:      %02x\n", sx127x_readregbyte(dev, SX127X_LRM_MDMCFG1));
-  wlinfo("MDMCFG2:      %02x\n", sx127x_readregbyte(dev, SX127X_LRM_MDMCFG2));
-  wlinfo("RXTIMEOUTLSB: %02x\n", sx127x_readregbyte(dev, SX127X_LRM_RXTIMEOUTLSB));
-  wlinfo("PREMSB:       %02x\n", sx127x_readregbyte(dev, SX127X_LRM_PREMSB));
-  wlinfo("PRELSB:       %02x\n", sx127x_readregbyte(dev, SX127X_LRM_PRELSB));
-  wlinfo("PAYLOADLEN:   %02x\n", sx127x_readregbyte(dev, SX127X_LRM_PAYLOADLEN));
-  wlinfo("PAYLOADMAX:   %02x\n", sx127x_readregbyte(dev, SX127X_LRM_PAYLOADMAX));
-  wlinfo("HOPPER:       %02x\n", sx127x_readregbyte(dev, SX127X_LRM_HOPPER));
-  wlinfo("RXFIFOADDR:   %02x\n", sx127x_readregbyte(dev, SX127X_LRM_RXFIFOADDR));
-  wlinfo("MODEMCFG3:    %02x\n", sx127x_readregbyte(dev, SX127X_LRM_MODEMCFG3));
-  wlinfo("FEIMSB:       %02x\n", sx127x_readregbyte(dev, SX127X_LRM_FEIMSB));
-  wlinfo("FEIMID:       %02x\n", sx127x_readregbyte(dev, SX127X_LRM_FEIMID));
-  wlinfo("FEILSB:       %02x\n", sx127x_readregbyte(dev, SX127X_LRM_FEILSB));
-  wlinfo("RSSIWIDEBAND: %02x\n", sx127x_readregbyte(dev, SX127X_LRM_RSSIWIDEBAND));
-  wlinfo("DETECTOPT:    %02x\n", sx127x_readregbyte(dev, SX127X_LRM_DETECTOPT));
-  wlinfo("INVERTIQ:     %02x\n", sx127x_readregbyte(dev, SX127X_LRM_INVERTIQ));
-  wlinfo("DETECTTHR:    %02x\n", sx127x_readregbyte(dev, SX127X_LRM_DETECTTHR));
-  wlinfo("SYNCWORD:     %02x\n", sx127x_readregbyte(dev, SX127X_LRM_SYNCWORD));
-  wlinfo("DIOMAP1:      %02x\n", sx127x_readregbyte(dev, SX127X_CMN_DIOMAP1));
-  wlinfo("DIOMAP2:      %02x\n", sx127x_readregbyte(dev, SX127X_CMN_DIOMAP2));
-  wlinfo("VERSION:      %02x\n", sx127x_readregbyte(dev, SX127X_CMN_VERSION));
-  wlinfo("TCXO:         %02x\n", sx127x_readregbyte(dev, SX127X_CMN_TCXO));
-  wlinfo("PADAC:        %02x\n", sx127x_readregbyte(dev, SX127X_CMN_PADAC));
-  wlinfo("FTEMP:        %02x\n", sx127x_readregbyte(dev, SX127X_CMN_FTEMP));
-  wlinfo("AGCREF:       %02x\n", sx127x_readregbyte(dev, SX127X_CMN_AGCREF));
-  wlinfo("AGCTHR1:      %02x\n", sx127x_readregbyte(dev, SX127X_CMN_AGCTHR1));
-  wlinfo("AGCTHR2:      %02x\n", sx127x_readregbyte(dev, SX127X_CMN_AGCTHR2));
-  wlinfo("AGCTHR3:      %02x\n", sx127x_readregbyte(dev, SX127X_CMN_AGCTHR3));
-  wlinfo("PLL:          %02x\n", sx127x_readregbyte(dev, SX127X_CMN_PLL));
+  wlinfo("FIFO:         %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_FIFO));
+  wlinfo("OPMODE:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_OPMODE));
+  wlinfo("FRFMSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_FRFMSB));
+  wlinfo("FRFMID:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_FRFMID));
+  wlinfo("FRFLSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_FRFLSB));
+  wlinfo("PACFG:        %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_PACFG));
+  wlinfo("PARAMP:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_PARAMP));
+  wlinfo("OCP:          %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_OCP));
+  wlinfo("LNA:          %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_LNA));
+  wlinfo("ADDRPTR:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_ADDRPTR));
+  wlinfo("TXBASE:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_TXBASE));
+  wlinfo("RXBASE:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_RXBASE));
+  wlinfo("RXCURR:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_RXCURR));
+  wlinfo("IRQMASK:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_IRQMASK));
+  wlinfo("IRQ:          %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_IRQ));
+  wlinfo("RXBYTES:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_RXBYTES));
+  wlinfo("RXHDRMSB:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_RXHDRMSB));
+  wlinfo("RXHDRLSB:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_RXHDRLSB));
+  wlinfo("RXPKTMSB:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_RXPKTMSB));
+  wlinfo("RXPKTLSB:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_RXPKTLSB));
+  wlinfo("MODSTAT:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_MODSTAT));
+  wlinfo("PKTSNR:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_PKTSNR));
+  wlinfo("PKTRSSI:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_PKTRSSI));
+  wlinfo("RSSI:         %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_RSSIVAL));
+  wlinfo("HOPCHAN:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_HOPCHAN));
+  wlinfo("MDMCFG1:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_MDMCFG1));
+  wlinfo("MDMCFG2:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_MDMCFG2));
+  wlinfo("RXTIMEOUTLSB: %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_RXTIMEOUTLSB));
+  wlinfo("PREMSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_PREMSB));
+  wlinfo("PRELSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_PRELSB));
+  wlinfo("PAYLOADLEN:   %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_PAYLOADLEN));
+  wlinfo("PAYLOADMAX:   %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_PAYLOADMAX));
+  wlinfo("HOPPER:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_HOPPER));
+  wlinfo("RXFIFOADDR:   %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_RXFIFOADDR));
+  wlinfo("MODEMCFG3:    %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_MODEMCFG3));
+  wlinfo("FEIMSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_FEIMSB));
+  wlinfo("FEIMID:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_FEIMID));
+  wlinfo("FEILSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_FEILSB));
+  wlinfo("RSSIWIDEBAND: %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_RSSIWIDEBAND));
+  wlinfo("DETECTOPT:    %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_DETECTOPT));
+  wlinfo("INVERTIQ:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_INVERTIQ));
+  wlinfo("DETECTTHR:    %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_DETECTTHR));
+  wlinfo("SYNCWORD:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_LRM_SYNCWORD));
+  wlinfo("DIOMAP1:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_DIOMAP1));
+  wlinfo("DIOMAP2:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_DIOMAP2));
+  wlinfo("VERSION:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_VERSION));
+  wlinfo("TCXO:         %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_TCXO));
+  wlinfo("PADAC:        %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_PADAC));
+  wlinfo("FTEMP:        %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_FTEMP));
+  wlinfo("AGCREF:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_AGCREF));
+  wlinfo("AGCTHR1:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_AGCTHR1));
+  wlinfo("AGCTHR2:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_AGCTHR2));
+  wlinfo("AGCTHR3:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_AGCTHR3));
+  wlinfo("PLL:          %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_PLL));
   sx127x_unlock(dev->spi);
 }
-#endif  /* CONFIG_LPWAN_SX127X_LORA */
+#endif /* CONFIG_LPWAN_SX127X_LORA */
 
 /****************************************************************************
  * Name: sx127x_fskook_dumpregs
@@ -4362,76 +4428,146 @@ static void sx127x_fskook_dumpregs(FAR struct sx127x_dev_s *dev)
 {
   sx127x_lock(dev->spi);
   wlinfo("FSK/OOK dump:\n");
-  wlinfo("FIFO:         %02x\n", sx127x_readregbyte(dev, SX127X_CMN_FIFO));
-  wlinfo("OPMODE:       %02x\n", sx127x_readregbyte(dev, SX127X_CMN_OPMODE));
-  wlinfo("FRFMSB:       %02x\n", sx127x_readregbyte(dev, SX127X_CMN_FRFMSB));
-  wlinfo("FRFMID:       %02x\n", sx127x_readregbyte(dev, SX127X_CMN_FRFMID));
-  wlinfo("FRFLSB:       %02x\n", sx127x_readregbyte(dev, SX127X_CMN_FRFLSB));
-  wlinfo("PACFG:        %02x\n", sx127x_readregbyte(dev, SX127X_CMN_PACFG));
-  wlinfo("PARAMP:       %02x\n", sx127x_readregbyte(dev, SX127X_CMN_PARAMP));
-  wlinfo("OCP:          %02x\n", sx127x_readregbyte(dev, SX127X_CMN_OCP));
-  wlinfo("LNA:          %02x\n", sx127x_readregbyte(dev, SX127X_CMN_LNA));
-  wlinfo("BITRATEMSB:   %02x\n", sx127x_readregbyte(dev, SX127X_FOM_BITRATEMSB));
-  wlinfo("BITRATELSM:   %02x\n", sx127x_readregbyte(dev, SX127X_FOM_BITRATELSB));
-  wlinfo("FDEVMSB:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_FDEVMSB));
-  wlinfo("FDEVLSB:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_FDEVLSB));
-  wlinfo("RXCFG:        %02x\n", sx127x_readregbyte(dev, SX127X_FOM_RXCFG));
-  wlinfo("RSSICFG:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_RSSICFG));
-  wlinfo("RSSICOLL:     %02x\n", sx127x_readregbyte(dev, SX127X_FOM_RSSICOLL));
-  wlinfo("RSSITHR:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_RSSITHR));
-  wlinfo("RSSIVAL:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_RSSIVAL));
-  wlinfo("RXBW:         %02x\n", sx127x_readregbyte(dev, SX127X_FOM_RXBW));
-  wlinfo("AFCBW:        %02x\n", sx127x_readregbyte(dev, SX127X_FOM_AFCBW));
-  wlinfo("OOKPEAK:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_OOKPEAK));
-  wlinfo("OOKFIX:       %02x\n", sx127x_readregbyte(dev, SX127X_FOM_OOKFIX));
-  wlinfo("AFCFEI:       %02x\n", sx127x_readregbyte(dev, SX127X_FOM_AFCFEI));
-  wlinfo("AFCMSB:       %02x\n", sx127x_readregbyte(dev, SX127X_FOM_AFCMSB));
-  wlinfo("AFCLSB:       %02x\n", sx127x_readregbyte(dev, SX127X_FOM_AFCLSB));
-  wlinfo("FEIMSB:       %02x\n", sx127x_readregbyte(dev, SX127X_FOM_FEIMSB));
-  wlinfo("FEILSB:       %02x\n", sx127x_readregbyte(dev, SX127X_FOM_FEILSB));
-  wlinfo("PREDET:       %02x\n", sx127x_readregbyte(dev, SX127X_FOM_PREDET));
-  wlinfo("RXTIMEOUT1:   %02x\n", sx127x_readregbyte(dev, SX127X_FOM_RXTIMEOUT1));
-  wlinfo("RXTIMEOUT2:   %02x\n", sx127x_readregbyte(dev, SX127X_FOM_RXTIMEOUT1));
-  wlinfo("RXTIMEOUT3:   %02x\n", sx127x_readregbyte(dev, SX127X_FOM_RXTIMEOUT1));
-  wlinfo("RXDELAY:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_RXDELAY));
-  wlinfo("OSC:          %02x\n", sx127x_readregbyte(dev, SX127X_FOM_OSC));
-  wlinfo("PREMSB:       %02x\n", sx127x_readregbyte(dev, SX127X_FOM_PREMSB));
-  wlinfo("PRELSB:       %02x\n", sx127x_readregbyte(dev, SX127X_FOM_PRELSB));
-  wlinfo("SYNCCFG:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_SYNCCFG));
-  wlinfo("SYNCVAL1:     %02x\n", sx127x_readregbyte(dev, SX127X_FOM_SYNCVAL1));
-  wlinfo("SYNCVAL2:     %02x\n", sx127x_readregbyte(dev, SX127X_FOM_SYNCVAL2));
-  wlinfo("SYNCVAL3:     %02x\n", sx127x_readregbyte(dev, SX127X_FOM_SYNCVAL3));
-  wlinfo("SYNCVAL4:     %02x\n", sx127x_readregbyte(dev, SX127X_FOM_SYNCVAL4));
-  wlinfo("SYNCVAL5:     %02x\n", sx127x_readregbyte(dev, SX127X_FOM_SYNCVAL5));
-  wlinfo("PKTCFG1:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_PKTCFG1));
-  wlinfo("PKTCFG2:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_PKTCFG2));
-  wlinfo("PAYLOADLEN:   %02x\n", sx127x_readregbyte(dev, SX127X_FOM_PAYLOADLEN));
-  wlinfo("NODEADDR:     %02x\n", sx127x_readregbyte(dev, SX127X_FOM_NODEADDR));
-  wlinfo("BROADCAST:    %02x\n", sx127x_readregbyte(dev, SX127X_FOM_BROADCAST));
-  wlinfo("FIFOTHR:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_FIFOTHR));
-  wlinfo("SEQCFG1:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_SEQCFG1));
-  wlinfo("SEQCFG2:      %02x\n", sx127x_readregbyte(dev, SX127X_FOM_SEQCFG2));
-  wlinfo("TIMRES:       %02x\n", sx127x_readregbyte(dev, SX127X_FOM_TIMRES));
-  wlinfo("TIMER1COEF:   %02x\n", sx127x_readregbyte(dev, SX127X_FOM_TIMER1COEF));
-  wlinfo("TIMER2COEF:   %02x\n", sx127x_readregbyte(dev, SX127X_FOM_TIMER2COEF));
-  wlinfo("IMAGECAL:     %02x\n", sx127x_readregbyte(dev, SX127X_FOM_IMAGECAL));
-  wlinfo("TEMP:         %02x\n", sx127x_readregbyte(dev, SX127X_FOM_TEMP));
-  wlinfo("LOWBAT:       %02x\n", sx127x_readregbyte(dev, SX127X_FOM_LOWBAT));
-  wlinfo("IRQ1:         %02x\n", sx127x_readregbyte(dev, SX127X_FOM_IRQ1));
-  wlinfo("IRQ2:         %02x\n", sx127x_readregbyte(dev, SX127X_FOM_IRQ2));
-  wlinfo("PLLHOP:       %02x\n", sx127x_readregbyte(dev, SX127X_FOM_PLLHOP));
-  wlinfo("BITRATEFRAC:  %02x\n", sx127x_readregbyte(dev, SX127X_FOM_BITRATEFRAC));
-  wlinfo("DIOMAP1:      %02x\n", sx127x_readregbyte(dev, SX127X_CMN_DIOMAP1));
-  wlinfo("DIOMAP2:      %02x\n", sx127x_readregbyte(dev, SX127X_CMN_DIOMAP2));
-  wlinfo("VERSION:      %02x\n", sx127x_readregbyte(dev, SX127X_CMN_VERSION));
-  wlinfo("TCXO:         %02x\n", sx127x_readregbyte(dev, SX127X_CMN_TCXO));
-  wlinfo("PADAC:        %02x\n", sx127x_readregbyte(dev, SX127X_CMN_PADAC));
-  wlinfo("FTEMP:        %02x\n", sx127x_readregbyte(dev, SX127X_CMN_FTEMP));
-  wlinfo("AGCREF:       %02x\n", sx127x_readregbyte(dev, SX127X_CMN_AGCREF));
-  wlinfo("AGCTHR1:      %02x\n", sx127x_readregbyte(dev, SX127X_CMN_AGCTHR1));
-  wlinfo("AGCTHR2:      %02x\n", sx127x_readregbyte(dev, SX127X_CMN_AGCTHR2));
-  wlinfo("AGCTHR3:      %02x\n", sx127x_readregbyte(dev, SX127X_CMN_AGCTHR3));
-  wlinfo("PLL:          %02x\n", sx127x_readregbyte(dev, SX127X_CMN_PLL));
+  wlinfo("FIFO:         %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_FIFO));
+  wlinfo("OPMODE:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_OPMODE));
+  wlinfo("FRFMSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_FRFMSB));
+  wlinfo("FRFMID:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_FRFMID));
+  wlinfo("FRFLSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_FRFLSB));
+  wlinfo("PACFG:        %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_PACFG));
+  wlinfo("PARAMP:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_PARAMP));
+  wlinfo("OCP:          %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_OCP));
+  wlinfo("LNA:          %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_LNA));
+  wlinfo("BITRATEMSB:   %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_BITRATEMSB));
+  wlinfo("BITRATELSM:   %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_BITRATELSB));
+  wlinfo("FDEVMSB:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_FDEVMSB));
+  wlinfo("FDEVLSB:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_FDEVLSB));
+  wlinfo("RXCFG:        %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_RXCFG));
+  wlinfo("RSSICFG:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_RSSICFG));
+  wlinfo("RSSICOLL:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_RSSICOLL));
+  wlinfo("RSSITHR:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_RSSITHR));
+  wlinfo("RSSIVAL:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_RSSIVAL));
+  wlinfo("RXBW:         %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_RXBW));
+  wlinfo("AFCBW:        %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_AFCBW));
+  wlinfo("OOKPEAK:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_OOKPEAK));
+  wlinfo("OOKFIX:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_OOKFIX));
+  wlinfo("AFCFEI:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_AFCFEI));
+  wlinfo("AFCMSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_AFCMSB));
+  wlinfo("AFCLSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_AFCLSB));
+  wlinfo("FEIMSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_FEIMSB));
+  wlinfo("FEILSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_FEILSB));
+  wlinfo("PREDET:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_PREDET));
+  wlinfo("RXTIMEOUT1:   %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_RXTIMEOUT1));
+  wlinfo("RXTIMEOUT2:   %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_RXTIMEOUT1));
+  wlinfo("RXTIMEOUT3:   %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_RXTIMEOUT1));
+  wlinfo("RXDELAY:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_RXDELAY));
+  wlinfo("OSC:          %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_OSC));
+  wlinfo("PREMSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_PREMSB));
+  wlinfo("PRELSB:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_PRELSB));
+  wlinfo("SYNCCFG:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_SYNCCFG));
+  wlinfo("SYNCVAL1:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_SYNCVAL1));
+  wlinfo("SYNCVAL2:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_SYNCVAL2));
+  wlinfo("SYNCVAL3:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_SYNCVAL3));
+  wlinfo("SYNCVAL4:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_SYNCVAL4));
+  wlinfo("SYNCVAL5:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_SYNCVAL5));
+  wlinfo("PKTCFG1:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_PKTCFG1));
+  wlinfo("PKTCFG2:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_PKTCFG2));
+  wlinfo("PAYLOADLEN:   %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_PAYLOADLEN));
+  wlinfo("NODEADDR:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_NODEADDR));
+  wlinfo("BROADCAST:    %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_BROADCAST));
+  wlinfo("FIFOTHR:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_FIFOTHR));
+  wlinfo("SEQCFG1:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_SEQCFG1));
+  wlinfo("SEQCFG2:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_SEQCFG2));
+  wlinfo("TIMRES:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_TIMRES));
+  wlinfo("TIMER1COEF:   %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_TIMER1COEF));
+  wlinfo("TIMER2COEF:   %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_TIMER2COEF));
+  wlinfo("IMAGECAL:     %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_IMAGECAL));
+  wlinfo("TEMP:         %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_TEMP));
+  wlinfo("LOWBAT:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_LOWBAT));
+  wlinfo("IRQ1:         %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_IRQ1));
+  wlinfo("IRQ2:         %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_IRQ2));
+  wlinfo("PLLHOP:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_PLLHOP));
+  wlinfo("BITRATEFRAC:  %02x\n",
+         sx127x_readregbyte(dev, SX127X_FOM_BITRATEFRAC));
+  wlinfo("DIOMAP1:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_DIOMAP1));
+  wlinfo("DIOMAP2:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_DIOMAP2));
+  wlinfo("VERSION:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_VERSION));
+  wlinfo("TCXO:         %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_TCXO));
+  wlinfo("PADAC:        %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_PADAC));
+  wlinfo("FTEMP:        %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_FTEMP));
+  wlinfo("AGCREF:       %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_AGCREF));
+  wlinfo("AGCTHR1:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_AGCTHR1));
+  wlinfo("AGCTHR2:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_AGCTHR2));
+  wlinfo("AGCTHR3:      %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_AGCTHR3));
+  wlinfo("PLL:          %02x\n",
+         sx127x_readregbyte(dev, SX127X_CMN_PLL));
   sx127x_unlock(dev->spi);
 }
 #endif
@@ -4472,7 +4608,7 @@ static void sx127x_dumpregs(FAR struct sx127x_dev_s *dev)
         }
     }
 }
-#endif  /* CONFIG_DEBUG_WIRELESS_INFO */
+#endif /* CONFIG_DEBUG_WIRELESS_INFO */
 
 /****************************************************************************
  * Name: sx127x_unregister
@@ -4546,7 +4682,9 @@ int sx127x_register(FAR struct spi_dev_s *spi,
   /* Initlaize configuration */
 
   dev->idle             = SX127X_IDLE_OPMODE;
+#ifdef CONFIG_LPWAN_SX127X_TXSUPPORT
   dev->pa_force         = lower->pa_force;
+#endif
   dev->crcon            = CONFIG_LPWAN_SX127X_CRCON;
 #ifdef CONFIG_LPWAN_SX127X_FSKOOK
   dev->fskook.fixlen    = false;

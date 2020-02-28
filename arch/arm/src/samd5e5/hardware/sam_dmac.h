@@ -70,7 +70,7 @@
 #  define SAM_DMAC_CHCTRLA_OFFSET        0x0000  /* Channel Control A Register */
 #  define SAM_DMAC_CHCTRLB_OFFSET        0x0004  /* Channel Control B Register */
 #  define SAM_DMAC_CHPRILVL_OFFSET       0x0005  /* Channel Priority Level */
-#  define SAM_DMAC_CHEVCTRL_OFFSET       0x0006  /* Channel Event Contol Register */
+#  define SAM_DMAC_CHEVCTRL_OFFSET       0x0006  /* Channel Event Control Register */
 #  define SAM_DMAC_CHINTENCLR_OFFSET     0x000c  /* Channel Interrupt Enable Clear Register */
 #  define SAM_DMAC_CHINTENSET_OFFSET     0x000d  /* Channel Interrupt Enable Set Register */
 #  define SAM_DMAC_CHINTFLAG_OFFSET      0x000e  /* Channel Interrupt Flag Status and Clear Register */
@@ -406,7 +406,7 @@
 
 /* Channel Status Register */
 
-#define DMAC_CHSTATUS_PEND               (1 << 0)  /* Bit 0:  Chennel pending */
+#define DMAC_CHSTATUS_PEND               (1 << 0)  /* Bit 0:  Channel pending */
 #define DMAC_CHSTATUS_BUSY               (1 << 1)  /* Bit 1:  Channel busy */
 #define DMAC_CHSTATUS_FERR               (1 << 2)  /* Bit 2:  Channel fetch error */
 #define DMAC_CHSTATUS_CRCERR             (1 << 3)  /* Bit 3:  CRC error */

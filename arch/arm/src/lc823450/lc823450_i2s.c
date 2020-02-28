@@ -40,7 +40,6 @@
 #include <arch/board/board.h>
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 

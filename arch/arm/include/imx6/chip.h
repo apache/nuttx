@@ -61,7 +61,7 @@
 #  undef  IMX_HAVE_DDR32                /* 32-bit DDR3 */
 #  define IMX_HAVE_DDR32x2 1            /* Two channel 32-bit DDR3 */
 #  define IMX_HAVE_SATAII  1            /* Integrated SATA-II */
-#  undef  IMX_HAVE_EPD                  /* No interated EPD controller */
+#  undef  IMX_HAVE_EPD                  /* No integrated EPD controller */
 #elif defined(CONFIG_ARCH_CHIP_IMX6_6DUAL)
 #  define IMX_OCRAM_SIZE   (256*1024)   /* Size of the On-Chip RAM (OCRAM) */
 #  define IMX_L2CACHE_SIZE (1024*1024)  /* 1MB L2 Cache */
@@ -73,7 +73,7 @@
 #  undef  IMX_HAVE_DDR32                /* 32-bit DDR3 */
 #  define IMX_HAVE_DDR32x2 1            /* Two channel 32-bit DDR3 */
 #  define IMX_HAVE_SATAII  1            /* Integrated SATA-II */
-#  undef  IMX_HAVE_EPD                  /* No interated EPD controller */
+#  undef  IMX_HAVE_EPD                  /* No integrated EPD controller */
 #elif defined(CONFIG_ARCH_CHIP_IMX6_6DUALLITE)
 #  define IMX_OCRAM_SIZE   (256*1024)   /* Size of the On-Chip RAM (OCRAM) */
 #  define IMX_L2CACHE_SIZE (512*1024)   /* 512KB L2 Cache */
@@ -85,7 +85,7 @@
 #  undef  IMX_HAVE_DDR32                /* No 32-bit DDR3 */
 #  define IMX_HAVE_DDR32x2 1            /* Two channel 32-bit DDR3 */
 #  undef  IMX_HAVE_SATAII               /* No integrated SATA-II */
-#  define IMX_HAVE_EPD     1            /* Interated EPD controller */
+#  define IMX_HAVE_EPD     1            /* Integrated EPD controller */
 #elif defined(CONFIG_ARCH_CHIP_IMX6_6SOLO)
 #  define IMX_OCRAM_SIZE   (256*1024)   /* Size of the On-Chip RAM (OCRAM) */
 #  define IMX_L2CACHE_SIZE (512*1024)   /* 512KB L2 Cache */
@@ -97,7 +97,7 @@
 #  define IMX_HAVE_DDR32   1            /* 32-bit DDR3 */
 #  undef  IMX_HAVE_DDR32x2              /* No two channel 32-bit DDR3 */
 #  undef  IMX_HAVE_SATAII               /* No integrated SATA-II */
-#  define IMX_HAVE_EPD     1            /* Interated EPD controller */
+#  define IMX_HAVE_EPD     1            /* Integrated EPD controller */
 #elif defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
 #  define IMX_OCRAM_SIZE   (256*1024)   /* Size of the On-Chip RAM (OCRAM) */
 #  define IMX_L2CACHE_SIZE (256*1024)   /* 256KB L2 Cache */
@@ -109,7 +109,7 @@
 #  define IMX_HAVE_DDR32   1            /* 32-bit DDR3 */
 #  undef  IMX_HAVE_DDR32x2              /* No two channel 32-bit DDR3 */
 #  undef  IMX_HAVE_SATAII               /* No integrated SATA-II */
-#  define IMX_HAVE_EPD     1            /* Interated EPD controller */
+#  define IMX_HAVE_EPD     1            /* Integrated EPD controller */
 #else
 #  error Unspecified i.MX6 chip
 #endif

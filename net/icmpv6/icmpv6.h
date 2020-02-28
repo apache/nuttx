@@ -44,13 +44,13 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <semaphore.h>
 #include <queue.h>
 #include <assert.h>
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/semaphore.h>
 
 #if defined(CONFIG_NET_ICMPv6) && !defined(CONFIG_NET_ICMPv6_NO_STACK)
 
@@ -71,7 +71,6 @@
  * Public Type Definitions
  ****************************************************************************/
 
-struct timespec;     /* Forward reference */
 struct net_driver_s; /* Forward reference */
 struct socket;       /* Forward reference */
 struct sockaddr;     /* Forward reference */
@@ -399,8 +398,7 @@ int icmpv6_wait_cancel(FAR struct icmpv6_notify_s *notify);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
-int icmpv6_wait(FAR struct icmpv6_notify_s *notify,
-                FAR struct timespec *timeout);
+int icmpv6_wait(FAR struct icmpv6_notify_s *notify, unsigned int timeout);
 #else
 #  define icmpv6_wait(n,t) (0)
 #endif
@@ -503,8 +501,7 @@ int icmpv6_rwait_cancel(FAR struct icmpv6_rnotify_s *notify);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify,
-                 FAR struct timespec *timeout);
+int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout);
 #else
 #  define icmpv6_rwait(n,t) (0)
 #endif
@@ -754,4 +751,3 @@ void icmpv6_linkipaddr(FAR struct net_driver_s *dev, net_ipv6addr_t ipaddr);
 
 #endif /* CONFIG_NET_ICMPv6 && !CONFIG_NET_ICMPv6_NO_STACK */
 #endif /* __NET_ICMPv6_ICMPv6_H */
-

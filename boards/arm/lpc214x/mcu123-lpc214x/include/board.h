@@ -76,4 +76,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif  /* __BOARDS_ARM_LPC214X_MCU123_LPC214X_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_LPC214X_MCU123_LPC214X_INCLUDE_BOARD_H */

@@ -538,7 +538,7 @@ static uint16_t sam_txfree(struct sam_gmac_s *priv)
  *
  * Description:
  *   Allocate aligned TX and RX descriptors and buffers.  For the case of
- *   pre-allocated structures, the function degenerates to a few assignements.
+ *   pre-allocated structures, the function degenerates to a few assignments.
  *
  * Input Parameters:
  *   priv - The GMAC driver state
@@ -712,7 +712,7 @@ static int sam_transmit(struct sam_gmac_s *priv)
       return -EBUSY;
     }
 
-  /* Setup/Copy data to transmition buffer */
+  /* Setup/Copy data to transmission buffer */
 
   if (dev->d_len > 0)
     {
@@ -752,8 +752,8 @@ static int sam_transmit(struct sam_gmac_s *priv)
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, SAM_TXTIMEOUT, sam_txtimeout_expiry, 1,
-                 (uint32_t)priv);
+  wd_start(priv->txtimeout, SAM_TXTIMEOUT, sam_txtimeout_expiry, 1,
+          (uint32_t)priv);
 
   /* Set d_len to zero meaning that the d_buf[] packet buffer is again
    * available.
@@ -895,7 +895,7 @@ static void sam_dopoll(struct sam_gmac_s *priv)
     {
       /* If we have the descriptor, then poll the network for new XMIT data. */
 
-      (void)devif_poll(dev, sam_txpoll);
+      devif_poll(dev, sam_txpoll);
     }
 }
 
@@ -1764,12 +1764,12 @@ static void sam_poll_work(FAR void *arg)
     {
       /* Update TCP timing states and poll the network for new XMIT data. */
 
-      (void)devif_timer(dev, sam_txpoll);
+      devif_timer(dev, sam_txpoll);
     }
 
   /* Setup the watchdog poll timer again */
 
-  (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, priv);
+  wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, priv);
   net_unlock();
 }
 
@@ -1871,7 +1871,7 @@ static int sam_ifup(struct net_driver_s *dev)
 
   /* Set and activate a timer process */
 
-  (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (uint32_t)priv);
+  wd_start(priv->txpoll, SAM_WDDELAY, sam_poll_expiry, 1, (uint32_t)priv);
 
   /* Enable the GMAC interrupt */
 
@@ -2959,7 +2959,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 
   ninfo(" MCR: 0x%X\n", phyval);
 
-  /* Wait for autonegotion to complete */
+  /* Wait for autonegotiation to complete */
 
   timeout = 0;
   for (; ; )
@@ -3576,7 +3576,7 @@ static void sam_ipv6multicast(struct sam_gmac_s *priv)
   ninfo("IPv6 Multicast: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
-  (void)sam_addmac(dev, mac);
+  sam_addmac(dev, mac);
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
   /* Add the IPv6 all link-local nodes Ethernet address.  This is the
@@ -3584,7 +3584,7 @@ static void sam_ipv6multicast(struct sam_gmac_s *priv)
    * packets.
    */
 
-  (void)sam_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
+  sam_addmac(dev, g_ipv6_ethallnodes.ether_addr_octet);
 
 #endif /* CONFIG_NET_ICMPv6_AUTOCONF */
 #ifdef CONFIG_NET_ICMPv6_ROUTER
@@ -3593,7 +3593,7 @@ static void sam_ipv6multicast(struct sam_gmac_s *priv)
    * packets.
    */
 
-  (void)sam_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
+  sam_addmac(dev, g_ipv6_ethallrouters.ether_addr_octet);
 
 #endif /* CONFIG_NET_ICMPv6_ROUTER */
 }
@@ -3645,7 +3645,7 @@ static int sam_gmac_configure(struct sam_gmac_s *priv)
 
   /* Clear any pending interrupts */
 
-  (void)sam_getreg(priv, SAM_GMAC_ISR);
+  sam_getreg(priv, SAM_GMAC_ISR);
 
   /* Initial configuration:
    *

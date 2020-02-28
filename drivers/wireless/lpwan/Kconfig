@@ -85,4 +85,3 @@ config LPWAN_SX127X_FSKOOK
 endif # WL_SX127X
 
 endif # DRIVERS_LPWAN
-

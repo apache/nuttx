@@ -89,8 +89,8 @@
  * Name: up_enableosc32
  *
  * Description:
- *   Initialiaze the 32KHz oscillaor.  This oscillaor is used by the RTC
- *   logic to provide the sysem timer.
+ *   Initialize the 32KHz oscillaor.  This oscillaor is used by the RTC
+ *   logic to provide the system timer.
  *
  ****************************************************************************/
 
@@ -119,7 +119,7 @@ static inline void up_enableosc32(void)
  * Name: up_enableosc0
  *
  * Description:
- *   Initialiaze OSC0 settings per the definitions in the board.h file.
+ *   Initialize OSC0 settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 
@@ -168,7 +168,7 @@ static inline void up_enableosc0(void)
  * Name: up_enableosc1
  *
  * Description:
- *   Initialiaze OSC0 settings per the definitions in the board.h file.
+ *   Initialize OSC0 settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 
@@ -217,7 +217,7 @@ static inline void up_enableosc1(void)
  * Name: up_enablepll0
  *
  * Description:
- *   Initialiaze PLL0 settings per the definitions in the board.h file.
+ *   Initialize PLL0 settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 
@@ -267,7 +267,7 @@ static inline void up_enablepll0(void)
  * Name: up_enablepll1
  *
  * Description:
- *   Initialiaze PLL1 settings per the definitions in the board.h file.
+ *   Initialize PLL1 settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 
@@ -437,7 +437,7 @@ static inline void up_usbclock(void)
  * Name: up_clkinit
  *
  * Description:
- *   Initialiaze clock/PLL settings per the definitions in the board.h
+ *   Initialize clock/PLL settings per the definitions in the board.h
  *   file.
  *
  ****************************************************************************/
@@ -500,6 +500,3 @@ void up_clkinitialize(void)
   void up_usbclock();
 #endif
 }
-
-
-

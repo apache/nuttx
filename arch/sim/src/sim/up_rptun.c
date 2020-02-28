@@ -41,7 +41,6 @@
 #include <nuttx/fs/hostfs_rpmsg.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/serial/uart_rpmsg.h>
-#include <nuttx/syslog/syslog_rpmsg.h>
 
 #include "up_internal.h"
 
@@ -94,7 +93,8 @@ static const char *sim_rptun_get_firmware(struct rptun_dev_s *dev)
   return NULL;
 }
 
-static const struct rptun_addrenv_s *sim_rptun_get_addrenv(struct rptun_dev_s *dev)
+static const struct rptun_addrenv_s *
+  sim_rptun_get_addrenv(struct rptun_dev_s *dev)
 {
   return NULL;
 }
@@ -244,10 +244,6 @@ int up_rptun_init(void)
       shmem_close(g_dev.shmem);
       return ret;
     }
-
-#ifdef CONFIG_SYSLOG_RPMSG
-  syslog_rpmsg_init();
-#endif
 
 #ifdef CONFIG_SYSLOG_RPMSG_SERVER
   syslog_rpmsg_server_init();

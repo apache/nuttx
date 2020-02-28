@@ -769,7 +769,7 @@ config STM32F7_STM32F765XX
 	select ARMV7M_HAVE_DTCM
 	select STM32F7_HAVE_FMC
 	select STM32F7_HAVE_ETHRNET
-	select STM32F7_HAVE_RNG # data sheet says yes, Product matix says no
+	select STM32F7_HAVE_RNG # data sheet says yes, Product matrix says no
 	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
 	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
 	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_V
@@ -806,7 +806,7 @@ config STM32F7_STM32F767XX
 	select STM32F7_HAVE_CAN2
 	select STM32F7_HAVE_SPI4
 
-config STM32F7_STM32F768XX # Revisit Wehn parts released
+config STM32F7_STM32F768XX # Revisit When parts released
 	bool
 	default n
 	select STM32F7_STM32F76XX
@@ -1124,7 +1124,7 @@ config STM32F7_PROGMEM
 	bool "Flash progmem support"
 	default n
 	---help---
-		Add progmem support, start block and end block options are provided to 
+		Add progmem support, start block and end block options are provided to
 		obtain an uniform flash memory mapping.
 
 if STM32F7_PROGMEM
@@ -2050,7 +2050,7 @@ config STM32F7_FLOWCONTROL_BROKEN
 		Enable UART RTS flow control using Software. Because STM
 		Current STM32 have broken HW based RTS behavior (they assert
 		nRTS after every byte received)  Enable this setting workaround
-		this issue by useing software based management of RTS
+		this issue by using software based management of RTS
 
 config STM32F7_USART_BREAKS
 	bool "Add TIOxSBRK to support sending Breaks"
@@ -2396,7 +2396,7 @@ config STM32F7_SDMMC1_DMAPRIO
 	hex "SDMMC1 DMA priority"
 	default 0x00010000
 	---help---
-		Select SDMMC1 DMA prority.
+		Select SDMMC1 DMA priority.
 
 		Options are: 0x00000000 low, 0x00010000 medium,
 		0x00020000 high, 0x00030000 very high.  Default: medium.
@@ -2432,7 +2432,7 @@ config STM32F7_SDMMC2_DMAPRIO
 	hex "SDMMC2 DMA priority"
 	default 0x00010000
 	---help---
-		Select SDMMC2 DMA prority.
+		Select SDMMC2 DMA priority.
 
 		Options are: 0x00000000 low, 0x00010000 medium,
 		0x00020000 high, 0x00030000 very high.  Default: medium.

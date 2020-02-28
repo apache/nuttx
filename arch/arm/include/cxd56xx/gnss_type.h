@@ -46,7 +46,8 @@
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -95,7 +96,7 @@ extern "C" {
 #define CXD56_GNSS_PVT_VELFIX_1D       5 /* 1D fix */
 #define CXD56_GNSS_PVT_VELFIX_PRED     6 /* Prediction */
 
-/* GNSS oribital infomation data type, almanac & ephemeris */
+/* GNSS oribital information data type, almanac & ephemeris */
 
 #define CXD56_GNSS_DATA_GPS      0 /* GPS data type */
 #define CXD56_GNSS_DATA_GLONASS  1 /* Glonass data type */
@@ -707,4 +708,4 @@ struct cxd56_gnss_status_s
 }
 #endif /* __cplusplus */
 
-#endif /* ARCH_ARM_INCLUDE_CXD56XX_GNSS_TYPE_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_GNSS_TYPE_H */

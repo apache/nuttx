@@ -52,13 +52,13 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/mtd/nand_model.h>
 #include <nuttx/mtd/nand_scheme.h>
+#include <nuttx/semaphore.h>
 
 #include "sam_pmecc.h"
 #include "sam_nand.h"
@@ -184,7 +184,7 @@ static const uint8_t g_correctability[5] = {2, 4, 8, 12, 24};
  *   Build the pseudo syndromes table
  *
  * Input Parameters:
- *   sector - Targetted sector.
+ *   sector - Targeted sector.
  *
  * Returned Value:
  *   None
@@ -1420,7 +1420,7 @@ void pmecc_buildgf(uint32_t mm, int16_t *indexof, int16_t *alphato)
 
   /* First
    *
-   * build alpha ^ mm it will help to generate the field (primitiv)
+   * build alpha ^ mm it will help to generate the field (primitive)
    */
 
   alphato[mm] = 0;

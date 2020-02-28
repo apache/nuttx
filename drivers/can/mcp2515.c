@@ -4,7 +4,7 @@
  *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
  *   Copyright (C) 2017 Alan Carvalho de Assis. All rights reserved.
  *   Author: Alan Carvalho de Assis <acassis@gmail.com>
- *   Modfied: Ben <disruptivesolutionsnl@gmail.com>
+ *   Modified: Ben <disruptivesolutionsnl@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,7 +46,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 #include <strings.h>
@@ -169,9 +168,9 @@
 
 /* TXn buffer interrupts
  *
- *   MCP2515_INT_TX0  - Transmmit Buffer 0 Empty Interrupt
- *   MCP2515_INT_TX1  - Transmmit Buffer 1 Empty Interrupt
- *   MCP2515_INT_TX2  - Transmmit Buffer 2 Empty Interrupt
+ *   MCP2515_INT_TX0  - Transmit Buffer 0 Empty Interrupt
+ *   MCP2515_INT_TX1  - Transmit Buffer 1 Empty Interrupt
+ *   MCP2515_INT_TX2  - Transmit Buffer 2 Empty Interrupt
  */
 
 #define MCP2515_TXBUFFER_INTS  (MCP2515_INT_TX0 | MCP2515_INT_TX1 | MCP2515_INT_TX2)

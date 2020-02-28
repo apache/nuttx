@@ -41,7 +41,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
@@ -533,7 +532,7 @@ static inline void lpc17_40_setclock(uint32_t clkcr)
  * Name: lpc17_40_configwaitints
  *
  * Description:
- *   Enable/disable SD card interrupts needed to suport the wait function
+ *   Enable/disable SD card interrupts needed to support the wait function
  *
  * Input Parameters:
  *   priv       - A reference to the SD card device state structure
@@ -1971,7 +1970,7 @@ static int lpc17_40_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
  *
  * Returned Value:
  *   Number of bytes sent on success; a negated errno on failure.  Here a
- *   failure means only a faiure to obtain the requested reponse (due to
+ *   failure means only a faiure to obtain the requested response (due to
  *   transport problem -- timeout, CRC, etc.).  The implementation only
  *   assures that the response is returned intacta and does not check errors
  *   within the response itself.
@@ -2350,7 +2349,7 @@ errout:
  *
  *   Events are automatically disabled once the callback is performed and no
  *   further callback events will occur until they are again enabled by
- *   calling this methos.
+ *   calling this method.
  *
  * Input Parameters:
  *   dev      - An instance of the SD card device interface
@@ -2388,7 +2387,7 @@ static void lpc17_40_callbackenable(FAR struct sdio_dev_s *dev,
  *
  * Input Parameters:
  *   dev -      Device-specific state data
- *   callback - The funtion to call on the media change
+ *   callback - The function to call on the media change
  *   arg -      A caller provided value to return with the callback
  *
  * Returned Value:

@@ -1,0 +1,6 @@
+sdboot.hex
+sdboot.map
+sdboot.lod
+sdboot.wsp
+*.asm
+Debug

@@ -34,7 +34,7 @@
  ************************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_INPUT_IOCTL_H
-#define __INCLUDE_NUTTX_INPUT_IOCTL_H 1
+#define __INCLUDE_NUTTX_INPUT_IOCTL_H
 
 /****************************************************************************
  * Included Files
@@ -73,4 +73,3 @@
 #define _NUNCHUCKIOC(nr)     _IOC(_NUNCKIOCBASE,nr)
 
 #endif /* __INCLUDE_NUTTX_INPUT_IOCTL_H */
-

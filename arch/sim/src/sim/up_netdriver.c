@@ -44,15 +44,11 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_NET_ETHERNET
-
-#include <stdint.h>
-#include <stdbool.h>
+#include <debug.h>
 #include <string.h>
-#include <sched.h>
-#include <nuttx/net/net.h>
 
-#include <net/ethernet.h>
+#include <nuttx/wqueue.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
 
@@ -63,26 +59,14 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define BUF ((struct eth_hdr_s *)g_sim_dev.d_buf)
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-struct timer
-{
-  uint32_t interval;
-  uint32_t start;
-};
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct timer g_periodic_timer;
+/* Net driver worker */
+
+static struct work_s g_timer_work;
+static struct work_s g_avail_work;
+static struct work_s g_recv_work;
 
 /* A single packet buffer is used */
 
@@ -96,29 +80,13 @@ static struct net_driver_s g_sim_dev;
  * Private Functions
  ****************************************************************************/
 
-static void timer_set(struct timer *t, unsigned int interval)
+static void netdriver_reply(FAR struct net_driver_s *dev)
 {
-  t->interval = interval;
-  t->start    = up_getwalltime();
-}
-
-static bool timer_expired(struct timer *t)
-{
-  return (up_getwalltime() - t->start) >= t->interval;
-}
-
-void timer_reset(struct timer *t)
-{
-  t->start += t->interval;
-}
-
-static int sim_txpoll(struct net_driver_s *dev)
-{
-  /* If the polling resulted in data that should be sent out on the network,
+  /* If the receiving resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
    */
 
-  if (g_sim_dev.d_len > 0)
+  if (dev->d_len > 0)
     {
       /* Look up the destination MAC address and add it to the Ethernet
        * header.
@@ -126,10 +94,10 @@ static int sim_txpoll(struct net_driver_s *dev)
 
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
-      if (IFF_IS_IPv4(g_sim_dev.d_flags))
+      if (IFF_IS_IPv4(dev->d_flags))
 #endif
         {
-          arp_out(&g_sim_dev);
+          arp_out(dev);
         }
 #endif /* CONFIG_NET_IPv4 */
 
@@ -138,16 +106,155 @@ static int sim_txpoll(struct net_driver_s *dev)
       else
 #endif
         {
-          neighbor_out(&g_sim_dev);
+          neighbor_out(dev);
         }
 #endif /* CONFIG_NET_IPv6 */
 
-      if (!devif_loopback(&g_sim_dev))
+      /* Send the packet */
+
+      NETDEV_TXPACKETS(dev);
+      netdev_send(dev->d_buf, dev->d_len);
+      NETDEV_TXDONE(dev);
+    }
+}
+
+static void netdriver_recv_work(FAR void *arg)
+{
+  FAR struct net_driver_s *dev = arg;
+  FAR struct eth_hdr_s *eth;
+
+  net_lock();
+
+  /* netdev_read will return 0 on a timeout event and >0 on a data received event */
+
+  dev->d_len = netdev_read((FAR unsigned char *)dev->d_buf,
+                           CONFIG_NET_ETH_PKTSIZE);
+  if (dev->d_len > 0)
+    {
+      NETDEV_RXPACKETS(dev);
+
+      /* Data received event.  Check for valid Ethernet header with
+       * destination == our MAC address
+       */
+
+      eth = (FAR struct eth_hdr_s *)dev->d_buf;
+      if (dev->d_len > ETH_HDRLEN)
+        {
+#ifdef CONFIG_NET_PKT
+          /* When packet sockets are enabled, feed the frame into the packet
+           * tap.
+           */
+
+          pkt_input(dev);
+#endif /* CONFIG_NET_PKT */
+
+          /* We only accept IP packets of the configured type and ARP packets */
+
+#ifdef CONFIG_NET_IPv4
+          if (eth->type == HTONS(ETHTYPE_IP))
+            {
+              ninfo("IPv4 frame\n");
+              NETDEV_RXIPV4(dev);
+
+              /* Handle ARP on input then give the IPv4 packet to the network
+               * layer
+               */
+
+              arp_ipin(dev);
+              ipv4_input(dev);
+
+              /* Check for a reply to the IPv4 packet */
+
+              netdriver_reply(dev);
+            }
+          else
+#endif /* CONFIG_NET_IPv4 */
+#ifdef CONFIG_NET_IPv6
+          if (eth->type == HTONS(ETHTYPE_IP6))
+            {
+              ninfo("Iv6 frame\n");
+              NETDEV_RXIPV6(dev);
+
+              /* Give the IPv6 packet to the network layer */
+
+              ipv6_input(dev);
+
+              /* Check for a reply to the IPv6 packet */
+
+              netdriver_reply(dev);
+            }
+          else
+#endif/* CONFIG_NET_IPv6 */
+#ifdef CONFIG_NET_ARP
+          if (eth->type == htons(ETHTYPE_ARP))
+            {
+              ninfo("ARP frame\n");
+              NETDEV_RXARP(dev);
+
+              arp_arpin(dev);
+
+              /* If the above function invocation resulted in data that
+               * should be sent out on the network, the global variable
+               * d_len is set to a value > 0.
+               */
+
+              if (dev->d_len > 0)
+                {
+                  netdev_send(dev->d_buf, dev->d_len);
+                }
+            }
+          else
+#endif
+            {
+              NETDEV_RXDROPPED(dev);
+              nwarn("WARNING: Unsupported Ethernet type %u\n", eth->type);
+            }
+        }
+      else
+        {
+          NETDEV_RXERRORS(dev);
+        }
+    }
+
+  net_unlock();
+}
+
+static int netdriver_txpoll(FAR struct net_driver_s *dev)
+{
+  /* If the polling resulted in data that should be sent out on the network,
+   * the field d_len is set to a value > 0.
+   */
+
+  if (dev->d_len > 0)
+    {
+      /* Look up the destination MAC address and add it to the Ethernet
+       * header.
+       */
+
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+      if (IFF_IS_IPv4(dev->d_flags))
+#endif
+        {
+          arp_out(dev);
+        }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+      else
+#endif
+        {
+          neighbor_out(dev);
+        }
+#endif /* CONFIG_NET_IPv6 */
+
+      if (!devif_loopback(dev))
         {
           /* Send the packet */
 
           NETDEV_TXPACKETS(dev);
-          netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
+          netdev_send(dev->d_buf, dev->d_len);
           NETDEV_TXDONE(dev);
         }
     }
@@ -159,211 +266,90 @@ static int sim_txpoll(struct net_driver_s *dev)
   return 0;
 }
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-void netdriver_loop(void)
+static void netdriver_timer_work(FAR void *arg)
 {
-  FAR struct eth_hdr_s *eth;
-
-  /* Check for new frames.  If so, then poll the network for new XMIT data */
+  FAR struct net_driver_s *dev = arg;
 
   net_lock();
-  devif_poll(&g_sim_dev, sim_txpoll);
+  if (IFF_IS_UP(dev->d_flags))
+    {
+      work_queue(LPWORK, &g_timer_work, netdriver_timer_work, dev, CLK_TCK);
+      devif_timer(dev, CLK_TCK, netdriver_txpoll);
+    }
+
   net_unlock();
-
-  /* netdev_read will return 0 on a timeout event and >0 on a data received event */
-
-  g_sim_dev.d_len = netdev_read((FAR unsigned char *)g_sim_dev.d_buf,
-                                CONFIG_NET_ETH_PKTSIZE);
-
-  /* Disable preemption through to the following so that it behaves a little more
-   * like an interrupt (otherwise, the following logic gets pre-empted an behaves
-   * oddly.
-   */
-
-  sched_lock();
-  if (g_sim_dev.d_len > 0)
-    {
-      NETDEV_RXPACKETS(&g_sim_dev);
-
-      /* Data received event.  Check for valid Ethernet header with destination == our
-       * MAC address
-       */
-
-      eth = BUF;
-      if (g_sim_dev.d_len > ETH_HDRLEN)
-        {
-#ifdef CONFIG_NET_PKT
-          /* When packet sockets are enabled, feed the frame into the packet
-           * tap.
-           */
-
-          pkt_input(&g_sim_dev);
-#endif /* CONFIG_NET_PKT */
-
-          /* We only accept IP packets of the configured type and ARP packets */
-
-#ifdef CONFIG_NET_IPv4
-          if (eth->type == HTONS(ETHTYPE_IP))
-            {
-              ninfo("IPv4 frame\n");
-              NETDEV_RXIPV4(&g_sim_dev);
-
-              /* Handle ARP on input then give the IPv4 packet to the network
-               * layer
-               */
-
-              arp_ipin(&g_sim_dev);
-              ipv4_input(&g_sim_dev);
-
-              /* If the above function invocation resulted in data that
-               * should be sent out on the network, the global variable
-               * d_len is set to a value > 0.
-               */
-
-              if (g_sim_dev.d_len > 0)
-                {
-                  /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv6
-                  if (IFF_IS_IPv4(g_sim_dev.d_flags))
-#endif
-                    {
-                      arp_out(&g_sim_dev);
-                    }
-#ifdef CONFIG_NET_IPv6
-                  else
-                    {
-                      neighbor_out(&g_sim_dev);
-                    }
-#endif
-
-                  /* And send the packet */
-
-                  netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
-                }
-            }
-          else
-#endif /* CONFIG_NET_IPv4 */
-#ifdef CONFIG_NET_IPv6
-          if (eth->type == HTONS(ETHTYPE_IP6))
-            {
-              ninfo("Iv6 frame\n");
-              NETDEV_RXIPV6(&g_sim_dev);
-
-              /* Give the IPv6 packet to the network layer */
-
-              ipv6_input(&g_sim_dev);
-
-              /* If the above function invocation resulted in data that
-               * should be sent out on the network, the global variable
-               * d_len is set to a value > 0.
-               */
-
-              if (g_sim_dev.d_len > 0)
-                {
-                  /* Update the Ethernet header with the correct MAC address */
-
-#ifdef CONFIG_NET_IPv4
-                  if (IFF_IS_IPv4(g_sim_dev.d_flags))
-                    {
-                      arp_out(&g_sim_dev);
-                    }
-                  else
-#endif
-#ifdef CONFIG_NET_IPv6
-                    {
-                      neighbor_out(&g_sim_dev);
-                    }
-#endif /* CONFIG_NET_IPv6 */
-
-                  /* And send the packet */
-
-                  netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
-                }
-            }
-          else
-#endif/* CONFIG_NET_IPv6 */
-#ifdef CONFIG_NET_ARP
-          if (eth->type == htons(ETHTYPE_ARP))
-            {
-              ninfo("ARP frame\n");
-              NETDEV_RXARP(&g_sim_dev);
-
-              arp_arpin(&g_sim_dev);
-
-              /* If the above function invocation resulted in data that
-               * should be sent out on the network, the global variable
-               * d_len is set to a value > 0.
-               */
-
-              if (g_sim_dev.d_len > 0)
-                {
-                  netdev_send(g_sim_dev.d_buf, g_sim_dev.d_len);
-                }
-            }
-          else
-#endif
-            {
-              NETDEV_RXDROPPED(&g_sim_dev);
-              nwarn("WARNING: Unsupported Ethernet type %u\n", eth->type);
-            }
-        }
-      else
-        {
-          NETDEV_RXERRORS(&g_sim_dev);
-        }
-    }
-
-  /* Otherwise, it must be a timeout event */
-
-  else if (timer_expired(&g_periodic_timer))
-    {
-      timer_reset(&g_periodic_timer);
-      devif_timer(&g_sim_dev, MSEC2TICK(g_periodic_timer.interval), sim_txpoll);
-    }
-
-  sched_unlock();
 }
 
-int netdriver_ifup(struct net_driver_s *dev)
+static int netdriver_ifup(FAR struct net_driver_s *dev)
 {
   netdev_ifup(dev->d_ipaddr);
+  work_queue(LPWORK, &g_timer_work, netdriver_timer_work, dev, CLK_TCK);
   return OK;
 }
 
-int netdriver_ifdown(struct net_driver_s *dev)
+static int netdriver_ifdown(FAR struct net_driver_s *dev)
 {
+  work_cancel(LPWORK, &g_timer_work);
   netdev_ifdown();
   return OK;
 }
 
+static void netdriver_txavail_work(FAR void *arg)
+{
+  FAR struct net_driver_s *dev = arg;
+
+  net_lock();
+  if (IFF_IS_UP(dev->d_flags))
+    {
+      devif_poll(dev, netdriver_txpoll);
+    }
+
+  net_unlock();
+}
+
+static int netdriver_txavail(FAR struct net_driver_s *dev)
+{
+  if (work_available(&g_avail_work))
+    {
+      work_queue(LPWORK, &g_avail_work, netdriver_txavail_work, dev, 0);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 int netdriver_init(void)
 {
+  FAR struct net_driver_s *dev = &g_sim_dev;
+
   /* Internal initialization */
 
-  timer_set(&g_periodic_timer, 500);
   netdev_init();
 
   /* Set callbacks */
 
-  g_sim_dev.d_buf    = g_pktbuf;         /* Single packet buffer */
-  g_sim_dev.d_ifup   = netdriver_ifup;
-  g_sim_dev.d_ifdown = netdriver_ifdown;
+  dev->d_buf     = g_pktbuf;         /* Single packet buffer */
+  dev->d_ifup    = netdriver_ifup;
+  dev->d_ifdown  = netdriver_ifdown;
+  dev->d_txavail = netdriver_txavail;
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  netdev_register(&g_sim_dev, NET_LL_ETHERNET);
-  return OK;
+  return netdev_register(dev, NET_LL_ETHERNET);
 }
 
-int netdriver_setmacaddr(unsigned char *macaddr)
+void netdriver_setmacaddr(unsigned char *macaddr)
 {
   memcpy(g_sim_dev.d_mac.ether.ether_addr_octet, macaddr, IFHWADDRLEN);
-  return 0;
 }
 
-#endif /* CONFIG_NET_ETHERNET */
-
+void netdriver_loop(void)
+{
+  if (work_available(&g_recv_work) && netdev_avail())
+    {
+      work_queue(LPWORK, &g_recv_work, netdriver_recv_work, &g_sim_dev, 0);
+    }
+}

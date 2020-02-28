@@ -130,4 +130,4 @@ int spiffs_gc_check(FAR struct spiffs_s *fs, off_t len);
 }
 #endif
 
-#endif  /* __FS_SPIFFS_SRC_SPIFFS_GC_H */
+#endif /* __FS_SPIFFS_SRC_SPIFFS_GC_H */

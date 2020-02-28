@@ -682,10 +682,10 @@
 
 /* Common */
 
-#define BUFFER_R0_EXTID_SHIFT      (0)       /* Bits 0-28: Extended identifer */
+#define BUFFER_R0_EXTID_SHIFT      (0)       /* Bits 0-28: Extended identifier */
 #define BUFFER_R0_EXTID_MASK       (0x1fffffff << BUFFER_R0_EXTID_SHIFT)
 #  define BUFFER_R0_EXTID(n)       ((uint32_t)(n) << BUFFER_R0_EXTID_SHIFT)
-#define BUFFER_R0_STDID_SHIFT      (18)      /* Bits 18-28: Standard idendifier */
+#define BUFFER_R0_STDID_SHIFT      (18)      /* Bits 18-28: Standard identifier */
 #define BUFFER_R0_STDID_MASK       (0x7ff << BUFFER_R0_STDID_SHIFT)
 #  define BUFFER_R0_STDID(n)       ((uint32_t)(n) << BUFFER_R0_STDID_SHIFT)
 #define BUFFER_R0_RTR              (1 << 29) /* Bit 29: Remote Transmission Request */

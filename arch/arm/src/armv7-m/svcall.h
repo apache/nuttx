@@ -142,4 +142,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_M_SVCALL_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_M_SVCALL_H */

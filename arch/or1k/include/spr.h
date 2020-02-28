@@ -248,7 +248,7 @@
 
 /* IMMU Register Bits */
 
-/* Data Cache Configurtion Register Bits */
+/* Data Cache Configuration Register Bits */
 
 #define SPR_DCCFGR_NCW_SHIFT    (0)
 #define SPR_DCCFGR_NCW_MASK     (0x7 << SPR_DCCFGR_NCW_SHIFT)

@@ -12,9 +12,13 @@ ZDSVERSION (if present) and ZDSINSTALLDIR.
 NOTE:  Different versions of the ZDS-II compiler may also require
 different versions of .linkcmd and .zdsproj files as well.
 
+Version 5.3.3
+
+  As of this writing, this is the latest version available.
+
 Version 4.11.0
 
-  The 5.1.1 version of the ZDS-II tools are currently configured for
+  The 5.3.3 version of the ZDS-II tools is the default configured for
   all ez80 boards.  However, it is the older version 4.11.0 that this code
   has been verified against.
 
@@ -68,10 +72,10 @@ Version 5.3.0
   are no errors in the compiled code.
 
 Other Versions
-  If you use any version of ZDS-II other than 5.1.1, 5.2.1, or 5.3.0 or
+  If you use any version of ZDS-II other than 5.1.1, 5.2.1, or 5.3.0/3 or
   if you install ZDS-II at any location other than the default location,
   you will have to modify three files:  (1) arch/arm/z80/src/ez80/Kconfig,
-  (2) boards/ez80f910200zco/scripts/Make.defs and, perhaps, (3)
+  (2) boards/z80/ez80/ez80f910200zco/scripts/Make.defs and, perhaps, (3)
   arch/z80/src/ez80/Toolchain.defs.
 
 Configurations
@@ -112,7 +116,7 @@ Configuration Subdirectories
 ----------------------------
 
   dhcpd:
-    This builds the DCHP server using the examples/dhcpd application
+    This builds the DHCP server using the examples/dhcpd application
     (for execution from FLASH.) See apps/examples/README.txt for information
     about the dhcpd example.
 

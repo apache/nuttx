@@ -127,15 +127,15 @@ FAR struct iob_s *iob_pack(FAR struct iob_s *iob,
               next->io_offset += ncopy;
             }
 
-         /* Have we consumed all of the data in the next entry? */
+          /* Have we consumed all of the data in the next entry? */
 
-         if (next->io_len <= 0)
-           {
-             /* Yes.. free the next entry in I/O buffer chain */
+          if (next->io_len <= 0)
+            {
+              /* Yes.. free the next entry in I/O buffer chain */
 
-             next          = iob_free(next, producerid);
-             iob->io_flink = next;
-           }
+              next          = iob_free(next, producerid);
+              iob->io_flink = next;
+            }
         }
 
       /* Set up to pack the next entry in the chain */

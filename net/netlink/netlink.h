@@ -44,11 +44,11 @@
 
 #include <sys/types.h>
 #include <queue.h>
-#include <semaphore.h>
 #include <poll.h>
 
 #include <netpacket/netlink.h>
 #include <nuttx/net/netlink.h>
+#include <nuttx/semaphore.h>
 
 #include "devif/devif.h"
 #include "socket/socket.h"

@@ -77,7 +77,7 @@
 #  define TSC2007_CMD_FUNC_XPOS   (12 << TSC2007_CMD_FUNC_SHIFT) /* Measure X position */
 #  define TSC2007_CMD_FUNC_YPOS   (13 << TSC2007_CMD_FUNC_SHIFT) /* Measure Y position */
 #  define TSC2007_CMD_FUNC_Z1POS  (14 << TSC2007_CMD_FUNC_SHIFT) /* Measure Z1 position */
-#  define TSC2007_CMD_FUNC_Z2POS  (15 << TSC2007_CMD_FUNC_SHIFT) /* Measure Z2 positionn */
+#  define TSC2007_CMD_FUNC_Z2POS  (15 << TSC2007_CMD_FUNC_SHIFT) /* Measure Z2 position */
 #define TSC2007_CMD_PWRDN_SHIFT   (2)       /* Bits 2-3: Power-down bits */
 #define TSC2007_CMD_PWRDN_MASK    (3 << TSC2007_CMD_PWRDN_SHIFT)
 #  define TSC2007_CMD_PWRDN_IRQEN (0 << TSC2007_CMD_PWRDN_SHIFT)  /* 00: Power down between cycles; PENIRQ enabled */

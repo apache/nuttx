@@ -48,6 +48,7 @@
 #
 
 CROSSDEV = xtensa-esp32-elf-
+ARCROSSDEV = xtensa-esp32-elf-
 
 ARCHCPUFLAGS =
 

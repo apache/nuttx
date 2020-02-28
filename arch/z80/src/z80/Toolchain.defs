@@ -71,5 +71,3 @@ ifeq ($(CONFIG_AVR_TOOLCHAIN),SDCCWIN32)
     WINTOOL = y
   endif
 endif
-
-

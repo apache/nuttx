@@ -48,9 +48,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <queue.h>
-#include <semaphore.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/usb/storage.h>
 #include <nuttx/usb/usbdev.h>
 
@@ -59,6 +59,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* If the USB mass storage device is configured as part of a composite device
  * then both CONFIG_USBDEV_COMPOSITE and CONFIG_USBMSC_COMPOSITE must be
  * defined.
@@ -69,7 +70,7 @@
 #endif
 
 #if defined(CONFIG_USBMSC_COMPOSITE) && !defined(CONFIG_USBMSC_STRBASE)
-#  define CONFIG_USBMSC_STRBASE (4)
+#  define CONFIG_USBMSC_STRBASE (0)
 #endif
 
 /* Interface IDs.  If the mass storage driver is built as a component of a
@@ -223,7 +224,7 @@
 #  define USBMSC_SELFPOWERED (0)
 #endif
 
-#ifdef  CONFIG_USBDEV_REMOTEWAKEUP
+#ifdef CONFIG_USBDEV_REMOTEWAKEUP
 #  define USBMSC_REMOTEWAKEUP USB_CONFIG_ATTR_WAKEUP
 #else
 #  define USBMSC_REMOTEWAKEUP (0)
@@ -360,6 +361,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* Endpoint descriptors */
 
 enum usbmsc_epdesc_e
@@ -676,7 +678,7 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
  *   2. USB_REQ_SETINTERFACE, or
  *   3. USBMSC_REQ_MSRESET
  *
- *   In all cases, the success reponse is a zero-length packet; the failure
+ *   In all cases, the success response is a zero-length packet; the failure
  *   response is an EP0 stall.
  *
  * Input Parameters:

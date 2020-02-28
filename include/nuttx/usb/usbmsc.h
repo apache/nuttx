@@ -56,7 +56,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Informations about the device needed in usbdev_devinfo_s */
+/* Information about the device needed in usbdev_devinfo_s */
 
 #define USBMSC_CONFIGID        (1) /* The only supported configuration ID */
 #define USBMSC_NENDPOINTS      (2) /* Number of endpoints in the interface  */

@@ -168,7 +168,7 @@ static inline void nxbe_fill_pwfb(FAR struct nxbe_window_s *wnd,
 
   DEBUGASSERT(wnd->be->plane[0].pwfb.fillrectangle != NULL);
 
-  /* The rectangle that we receive here is in abolute device coordinates.  We
+  /* The rectangle that we receive here is in absolute device coordinates.  We
    * need to restore this to windows relative coordinates.
    */
 

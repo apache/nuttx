@@ -32,4 +32,5 @@
   PLL setting (currently CPU clock freq is assumed to be 416MHz)
   Boot from SPI-Flash
   Support peripherals such as GPIO/SPI/I2C/...
+  Support FPU
   Support RISC-V User mode

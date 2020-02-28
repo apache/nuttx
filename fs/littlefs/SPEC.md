@@ -309,7 +309,7 @@ Here's an example of a file entry:
 (32 bits)  file size        = 256 KB   (0x00040000)
 (12 bytes) name             = largeavacado
 
-00000000: 11 08 00 0c 1f 02 00 00 00 00 04 00 6c 61 72 67  ............larg
+00000000: 11 08 00 0c 1f 02 00 00 00 00 04 00 6c 61 72 67  ............large
 00000010: 65 61 76 61 63 61 64 6f                          eavacado
 ```
 

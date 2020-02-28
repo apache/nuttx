@@ -114,4 +114,4 @@
 
 /* Button definitions *******************************************************/
 
-#endif  /* __BOARDS_ARM_LPC31XX_EA3152_INCLUDE__BOARD_H */
+#endif /* __BOARDS_ARM_LPC31XX_EA3152_INCLUDE__BOARD_H */

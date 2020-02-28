@@ -94,10 +94,10 @@
 
 #  define I2C_STAT_MXSTART       (0 << I2C_STAT_SHIFT)  /* Start transmitted */
 #  define I2C_STAT_MXRSTART      (2 << I2C_STAT_SHIFT)  /* Repeated start transmitted */
-#  define I2C_STAT_MXSLAWACK     (3 << I2C_STAT_SHIFT)  /* SLA+W tranmitted + ACK received */
-#  define I2C_STAT_MXSLAWNAK     (4 << I2C_STAT_SHIFT)  /* SLA+W tranmitted + NAK received */
-#  define I2C_STAT_MXDATAACK     (5 << I2C_STAT_SHIFT)  /* Data tranmitted + ACK received */
-#  define I2C_STAT_MXDATANAK     (6 << I2C_STAT_SHIFT)  /* Data tranmitted + NAK received */
+#  define I2C_STAT_MXSLAWACK     (3 << I2C_STAT_SHIFT)  /* SLA+W transmitted + ACK received */
+#  define I2C_STAT_MXSLAWNAK     (4 << I2C_STAT_SHIFT)  /* SLA+W transmitted + NAK received */
+#  define I2C_STAT_MXDATAACK     (5 << I2C_STAT_SHIFT)  /* Data transmitted + ACK received */
+#  define I2C_STAT_MXDATANAK     (6 << I2C_STAT_SHIFT)  /* Data transmitted + NAK received */
 #  define I2C_STAT_MXARBLOST     (7 << I2C_STAT_SHIFT)  /* Abritration lost in SLA+W or data */
 
 /* Master receive mode */
@@ -105,8 +105,8 @@
 #  define I2C_STAT_MRSTART       (0 << I2C_STAT_SHIFT)  /* Start transmitted */
 #  define I2C_STAT_MRRSTART      (2 << I2C_STAT_SHIFT)  /* Repeated start transmitted */
 #  define I2C_STAT_MRARBLOST     (7 << I2C_STAT_SHIFT)  /* Abritration lost in NAK bit */
-#  define I2C_STAT_MRSLARACK     (8 << I2C_STAT_SHIFT)  /* SLA+R tranmitted + ACK received */
-#  define I2C_STAT_MRSLARNAK     (9 << I2C_STAT_SHIFT)  /* SLA+R tranmitted + NAK received */
+#  define I2C_STAT_MRSLARACK     (8 << I2C_STAT_SHIFT)  /* SLA+R transmitted + ACK received */
+#  define I2C_STAT_MRSLARNAK     (9 << I2C_STAT_SHIFT)  /* SLA+R transmitted + NAK received */
 #  define I2C_STAT_MRDATAACK     (10 << I2C_STAT_SHIFT) /* Data received + send ACK */
 #  define I2C_STAT_MRDATANAK     (11 << I2C_STAT_SHIFT) /* Data received + send NAK */
 
@@ -138,4 +138,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_SRC_LPC214X_LPC214X_I2C_H */
+#endif /* __ARCH_ARM_SRC_LPC214X_LPC214X_I2C_H */

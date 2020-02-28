@@ -421,7 +421,7 @@ struct stm32_hrtim_capture_s
 
 struct stm32_hrtim_timcmn_s
 {
-  uint32_t base;                 /* The base adress of the timer */
+  uint32_t base;                 /* The base address of the timer */
   uint64_t fclk;                 /* The frequency of the peripheral clock
                                   * that drives the timer module.
                                   */
@@ -520,7 +520,7 @@ struct stm32_hrtim_eev_cfg_s
   uint8_t filter:4;             /* External Event filter */
   uint8_t src:4;                /* External Event source */
   uint8_t pol:1;                /* External Event polarity */
-  uint8_t sen:1;                /* External Event sensivity */
+  uint8_t sen:1;                /* External Event ssensitivit */
   uint8_t mode:1;               /* External Event mode */
   uint8_t _res:5;
 };
@@ -597,7 +597,7 @@ struct stm32_hrtim_burst_s
 
 struct stm32_hrtim_s
 {
-  uint32_t base;                     /* Base adress of HRTIM block */
+  uint32_t base;                     /* Base address of HRTIM block */
   struct stm32_hrtim_tim_s *master;  /* Master Timer */
 #ifdef CONFIG_STM32_HRTIM_TIMA
   struct stm32_hrtim_tim_s *tima;    /* HRTIM Timer A */
@@ -803,7 +803,7 @@ static const struct file_operations hrtim_fops =
   , NULL              /* unlink */
 #endif
 };
-#endif  /* CONFIG_STM32_HRTIM_DISABLE_CHARDRV */
+#endif /* CONFIG_STM32_HRTIM_DISABLE_CHARDRV */
 
 /* Master Timer data */
 
@@ -1880,7 +1880,7 @@ static FAR struct stm32_hrtim_slave_priv_s *
       goto errout;
     }
 
-  /* Get Timer data strucutre */
+  /* Get Timer data structure */
 
   tim = hrtim_tim_get(priv, timer);
   if (tim == NULL)
@@ -1902,14 +1902,14 @@ errout:
  * Name: hrtim_base_get
  *
  * Description:
- *   Get base adress offset for given HRTIM Timer index
+ *   Get base address offset for given HRTIM Timer index
  *
  * Input Parameters:
  *   priv    - A reference to the HRTIM block
  *   timer   - An HRTIM Timer index to get
  *
  * Returned Value:
- *   Base adress offset for given Timer index
+ *   Base address offset for given Timer index
  *
  ****************************************************************************/
 
@@ -2595,7 +2595,7 @@ static int hrtim_gpios_config(FAR struct stm32_hrtim_s *priv)
  * Input Parameters:
  *   priv    - A reference to the HRTIM block
  *   timer   - HRTIM Timer index
- *   capture - capture trigers configuration
+ *   capture - capture triggers configuration
  *
  * Returned Value:
  *   0 on success, a negated errno value on failure
@@ -3198,7 +3198,7 @@ static int hrtim_output_set_set(FAR struct hrtim_dev_s *dev, uint16_t output,
 
   timer = output_tim_index_get(output);
 
-  /* Get Slave Timer data strucutre */
+  /* Get Slave Timer data structure */
 
   slave = hrtim_slave_get(priv, timer);
   if (slave == NULL)
@@ -3252,7 +3252,7 @@ static int hrtim_output_rst_set(FAR struct hrtim_dev_s *dev, uint16_t output,
 
   timer = output_tim_index_get(output);
 
-  /* Get Salve Timer data strucutre */
+  /* Get Salve Timer data structure */
 
   slave = hrtim_slave_get(priv, timer);
   if (slave == NULL)
@@ -3517,7 +3517,7 @@ static int hrtim_dma_cfg(FAR struct stm32_hrtim_s *priv)
 
   return OK;
 }
-#endif  /* CONFIG_STM32_HRTIM_DAM */
+#endif /* CONFIG_STM32_HRTIM_DAM */
 
 #ifdef CONFIG_STM32_HRTIM_DEADTIME
 /****************************************************************************
@@ -3644,7 +3644,7 @@ static int hrtim_tim_deadtime_cfg(FAR struct stm32_hrtim_s *priv, uint8_t timer)
       goto errout;
     }
 
-  /* Get Slave Timer data strucutre */
+  /* Get Slave Timer data structure */
 
   slave = hrtim_slave_get(priv, timer);
   if (slave == NULL)
@@ -3755,7 +3755,7 @@ static int hrtim_deadtime_config(FAR struct stm32_hrtim_s *priv)
 
   return OK;
 }
-#endif  /* CONFIG_STM32_HRTIM_DEADTIME */
+#endif /* CONFIG_STM32_HRTIM_DEADTIME */
 
 #ifdef CONFIG_STM32_HRTIM_CHOPPER
 /****************************************************************************
@@ -3844,7 +3844,7 @@ static int hrtim_tim_chopper_cfg(FAR struct stm32_hrtim_s *priv,
       goto errout;
     }
 
-  /* Get Slave Timer data strucutre */
+  /* Get Slave Timer data structure */
 
   slave = hrtim_slave_get(priv, timer);
   if (slave == NULL)
@@ -4608,7 +4608,7 @@ static int hrtim_events_config(FAR struct stm32_hrtim_s *priv)
 
   return OK;
 }
-#endif  /* CONFIG_STM32_HRTIM_FAULTS */
+#endif /* CONFIG_STM32_HRTIM_FAULTS */
 
 #ifdef CONFIG_STM32_HRTIM_INTERRUPTS
 
@@ -4727,7 +4727,7 @@ static uint16_t hrtim_irq_get(FAR struct hrtim_dev_s *dev, uint8_t timer)
 
   return (uint16_t)regval;
 }
-#endif  /* CONFIG_STM32_HRTIM_INTERRUPTS */
+#endif /* CONFIG_STM32_HRTIM_INTERRUPTS */
 
 /****************************************************************************
  * Name: hrtim_tim_mode_set
@@ -4831,7 +4831,7 @@ static void hrtim_mode_config(FAR struct stm32_hrtim_s *priv)
  *
  * Description:
  *   This function returns not significant bits in counter/capture
- *   regsiters for given HRTIM Timer index.
+ *   registers for given HRTIM Timer index.
  *
  * Input Parameters:
  *   priv   - A reference to the HRTIM structure
@@ -4848,7 +4848,7 @@ static uint8_t hrtim_cmpcap_mask_get(FAR struct stm32_hrtim_s *priv,
   FAR struct stm32_hrtim_tim_s *tim;
   uint8_t mask = 0;
 
-  /* Get Timer data strucutre */
+  /* Get Timer data structure */
 
   tim = hrtim_tim_get(priv, timer);
   if (tim == NULL)
@@ -5783,7 +5783,7 @@ static int stm32_hrtimconfig(FAR struct stm32_hrtim_s *priv)
   regval |= HRTIM_MCR_TECEN;
 #  endif
 
-#endif  /* CONFIG_STM32_HRTIM_NO_ENABLE_TIMERS */
+#endif /* CONFIG_STM32_HRTIM_NO_ENABLE_TIMERS */
 
   /* Write enable bits at once */
 
@@ -5904,7 +5904,7 @@ int hrtim_register(FAR const char *path, FAR struct hrtim_dev_s *dev)
 
   return ret;
 }
-#endif  /* CONFIG_STM32_HRTIM_DISABLE_CHARDRV */
+#endif /* CONFIG_STM32_HRTIM_DISABLE_CHARDRV */
 
-#endif  /* CONFIG_STM32_STM32F33XX */
-#endif  /* CONFIG_STM32_HRTIM1 */
+#endif /* CONFIG_STM32_STM32F33XX */
+#endif /* CONFIG_STM32_HRTIM1 */

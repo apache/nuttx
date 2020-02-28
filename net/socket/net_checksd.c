@@ -83,4 +83,3 @@ int net_checksd(int sd, int oflags)
 
   return OK;
 }
-

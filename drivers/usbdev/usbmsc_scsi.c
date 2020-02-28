@@ -430,8 +430,10 @@ static inline int usbmsc_cmdtestunitready(FAR struct usbmsc_dev_s *priv)
 static inline int usbmsc_cmdrequestsense(FAR struct usbmsc_dev_s *priv,
                                          FAR uint8_t *buf)
 {
-  FAR struct scsicmd_requestsense_s *request = (FAR struct scsicmd_requestsense_s *)priv->cdb;
-  FAR struct scsiresp_fixedsensedata_s *response = (FAR struct scsiresp_fixedsensedata_s *)buf;
+  FAR struct scsicmd_requestsense_s *request =
+             (FAR struct scsicmd_requestsense_s *)priv->cdb;
+  FAR struct scsiresp_fixedsensedata_s *response =
+             (FAR struct scsiresp_fixedsensedata_s *)buf;
   FAR struct usbmsc_lun_s *lun;
   uint32_t sd;
   uint32_t sdinfo;
@@ -482,7 +484,8 @@ static inline int usbmsc_cmdrequestsense(FAR struct usbmsc_dev_s *priv,
 
       memset(response, 0, SCSIRESP_FIXEDSENSEDATA_SIZEOF);
 
-      response->code  = SCSIRESP_SENSEDATA_RESPVALID | SCSIRESP_SENSEDATA_CURRENTFIXED;
+      response->code  = SCSIRESP_SENSEDATA_RESPVALID |
+                        SCSIRESP_SENSEDATA_CURRENTFIXED;
       response->flags = (uint8_t)(sd >> 16);
       usbmsc_putbe32(response->info, sdinfo);
       response->len   = SCSIRESP_FIXEDSENSEDATA_SIZEOF - 7;
@@ -586,7 +589,8 @@ static inline int usbmsc_cmdwrite6(FAR struct usbmsc_dev_s *priv)
 
       /* Get the Logical Block Address (LBA) from cdb[] as the starting sector */
 
-      priv->sector = (uint32_t)(write6->mslba & SCSICMD_WRITE6_MSLBAMASK) << 16 | (uint32_t)usbmsc_getbe16(write6->lslba);
+      priv->sector = (uint32_t)(write6->mslba & SCSICMD_WRITE6_MSLBAMASK) << 16 |
+                     (uint32_t)usbmsc_getbe16(write6->lslba);
 
       /* Verify that a block driver has been bound to the LUN */
 
@@ -619,7 +623,8 @@ static inline int usbmsc_cmdwrite6(FAR struct usbmsc_dev_s *priv)
 
       else
         {
-          usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDWRITE6), priv->cdb[0]);
+          usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDWRITE6),
+                   priv->cdb[0]);
           priv->thstate = USBMSC_STATE_CMDWRITE;
         }
     }
@@ -651,8 +656,9 @@ static inline int usbmsc_cmdinquiry(FAR struct usbmsc_dev_s *priv,
     {
       if (!priv->lun)
         {
-          response->qualtype = SCSIRESP_INQUIRYPQ_NOTCAPABLE | SCSIRESP_INQUIRYPD_UNKNOWN;
-         }
+          response->qualtype = SCSIRESP_INQUIRYPQ_NOTCAPABLE |
+                               SCSIRESP_INQUIRYPD_UNKNOWN;
+        }
       else if ((inquiry->flags != 0) || (inquiry->pagecode != 0))
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_INQUIRYFLAGS), 0);
@@ -673,7 +679,7 @@ static inline int usbmsc_cmdinquiry(FAR struct usbmsc_dev_s *priv,
 
           /* Strings */
 
-          memset(response->vendorid, ' ', 8+16+4);
+          memset(response->vendorid, ' ', 8 + 16 + 4);
 
           len = strlen(g_mscvendorstr);
           if (len > 8)
@@ -714,7 +720,8 @@ static inline int usbmsc_cmdinquiry(FAR struct usbmsc_dev_s *priv,
 
 static inline int usbmsc_cmdmodeselect6(FAR struct usbmsc_dev_s *priv)
 {
-  FAR struct scsicmd_modeselect6_s *modeselect = (FAR struct scsicmd_modeselect6_s *)priv->cdb;
+  FAR struct scsicmd_modeselect6_s *modeselect =
+             (FAR struct scsicmd_modeselect6_s *)priv->cdb;
 
   priv->u.alloclen = modeselect->plen;
   usbmsc_setupcmd(priv, SCSICMD_MODESELECT6_SIZEOF,
@@ -737,7 +744,8 @@ static inline int usbmsc_cmdmodeselect6(FAR struct usbmsc_dev_s *priv)
 static int usbmsc_modepage(FAR struct usbmsc_dev_s *priv, FAR uint8_t *buf,
                            uint8_t pcpgcode, int *mdlen)
 {
-  FAR struct scsiresp_cachingmodepage_s *cmp = (FAR struct scsiresp_cachingmodepage_s *)buf;
+  FAR struct scsiresp_cachingmodepage_s *cmp =
+             (FAR struct scsiresp_cachingmodepage_s *)buf;
 
   /* Saving parms not supported */
 
@@ -750,8 +758,10 @@ static int usbmsc_modepage(FAR struct usbmsc_dev_s *priv, FAR uint8_t *buf,
 
   /* Only the caching mode page is supported: */
 
-  if ((pcpgcode & SCSICMD_MODESENSE_PGCODEMASK) == SCSIRESP_MODESENSE_PGCCODE_CACHING ||
-      (pcpgcode & SCSICMD_MODESENSE_PGCODEMASK) == SCSIRESP_MODESENSE_PGCCODE_RETURNALL)
+  if ((pcpgcode & SCSICMD_MODESENSE_PGCODEMASK) ==
+       SCSIRESP_MODESENSE_PGCCODE_CACHING ||
+      (pcpgcode & SCSICMD_MODESENSE_PGCODEMASK) ==
+       SCSIRESP_MODESENSE_PGCCODE_RETURNALL)
     {
       memset(cmp, 0, 12);
       cmp->pgcode = SCSIRESP_MODESENSE_PGCCODE_CACHING;
@@ -770,7 +780,7 @@ static int usbmsc_modepage(FAR struct usbmsc_dev_s *priv, FAR uint8_t *buf,
           cmp->maxpfc[1] = 0xff;
         }
 
-       /* Return the mode data length */
+      /* Return the mode data length */
 
       *mdlen = 12; /* Only the first 12-bytes of caching mode page sent */
       return OK;
@@ -794,8 +804,10 @@ static int usbmsc_modepage(FAR struct usbmsc_dev_s *priv, FAR uint8_t *buf,
 static int inline usbmsc_cmdmodesense6(FAR struct usbmsc_dev_s *priv,
                                        FAR uint8_t *buf)
 {
-  FAR struct scsicmd_modesense6_s *modesense = (FAR struct scsicmd_modesense6_s *)priv->cdb;
-  FAR struct scsiresp_modeparameterhdr6_s *mph = (FAR struct scsiresp_modeparameterhdr6_s *)buf;
+  FAR struct scsicmd_modesense6_s *modesense =
+             (FAR struct scsicmd_modesense6_s *)priv->cdb;
+  FAR struct scsiresp_modeparameterhdr6_s *mph =
+             (FAR struct scsiresp_modeparameterhdr6_s *)buf;
   int mdlen;
   int ret;
 
@@ -804,7 +816,8 @@ static int inline usbmsc_cmdmodesense6(FAR struct usbmsc_dev_s *priv,
                         USBMSC_FLAGS_DIRDEVICE2HOST);
   if (ret == OK)
     {
-      if ((modesense->flags & ~SCSICMD_MODESENSE6_DBD) != 0 || modesense->subpgcode != 0)
+      if ((modesense->flags & ~SCSICMD_MODESENSE6_DBD) != 0 ||
+           modesense->subpgcode != 0)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_MODESENSE6FLAGS), 0);
           priv->lun->sd = SCSI_KCQIR_INVALIDFIELDINCBA;
@@ -825,13 +838,14 @@ static int inline usbmsc_cmdmodesense6(FAR struct usbmsc_dev_s *priv,
 
           /* There are no block descriptors, only the following mode page: */
 
-          ret = usbmsc_modepage(priv, &buf[SCSIRESP_MODEPARAMETERHDR6_SIZEOF], modesense->pcpgcode, &mdlen);
+          ret = usbmsc_modepage(priv, &buf[SCSIRESP_MODEPARAMETERHDR6_SIZEOF],
+                                modesense->pcpgcode, &mdlen);
           if (ret == OK)
             {
-               /* Store the mode data length and return the total message size */
+              /* Store the mode data length and return the total message size */
 
-               mph->mdlen      = mdlen + SCSIRESP_MODEPARAMETERHDR6_SIZEOF - 1;
-               priv->nreqbytes = mdlen + SCSIRESP_MODEPARAMETERHDR6_SIZEOF;
+              mph->mdlen      = mdlen + SCSIRESP_MODEPARAMETERHDR6_SIZEOF - 1;
+              priv->nreqbytes = mdlen + SCSIRESP_MODEPARAMETERHDR6_SIZEOF;
             }
         }
     }
@@ -881,7 +895,8 @@ static inline int usbmsc_cmdstartstopunit(FAR struct usbmsc_dev_s *priv)
 static inline int usbmsc_cmdpreventmediumremoval(FAR struct usbmsc_dev_s *priv)
 {
 #ifdef CONFIG_USBMSC_REMOVABLE
-  FAR struct scsicmd_preventmediumremoval_s *pmr = (FAR struct scsicmd_preventmediumremoval_s *)priv->cdb;
+  FAR struct scsicmd_preventmediumremoval_s *pmr =
+             (FAR struct scsicmd_preventmediumremoval_s *)priv->cdb;
 #endif
   FAR struct usbmsc_lun_s *lun;
   int ret;
@@ -922,7 +937,8 @@ static inline int usbmsc_cmdpreventmediumremoval(FAR struct usbmsc_dev_s *priv)
 static inline int usbmsc_cmdreadformatcapacity(FAR struct usbmsc_dev_s *priv,
                                                FAR uint8_t *buf)
 {
-  FAR struct scsicmd_readformatcapcacities_s *rfc = (FAR struct scsicmd_readformatcapcacities_s *)priv->cdb;
+  FAR struct scsicmd_readformatcapcacities_s *rfc =
+             (FAR struct scsicmd_readformatcapcacities_s *)priv->cdb;
   FAR struct scsiresp_readformatcapacities_s *hdr;
   FAR struct usbmsc_lun_s *lun;
   int ret;
@@ -960,8 +976,10 @@ static inline int usbmsc_cmdreadformatcapacity(FAR struct usbmsc_dev_s *priv,
 static int inline usbmsc_cmdreadcapacity10(FAR struct usbmsc_dev_s *priv,
                                            FAR uint8_t *buf)
 {
-  FAR struct scsicmd_readcapacity10_s *rcc = (FAR struct scsicmd_readcapacity10_s *)priv->cdb;
-  FAR struct scsiresp_readcapacity10_s *rcr = (FAR struct scsiresp_readcapacity10_s *)buf;
+  FAR struct scsicmd_readcapacity10_s *rcc =
+             (FAR struct scsicmd_readcapacity10_s *)priv->cdb;
+  FAR struct scsiresp_readcapacity10_s *rcr =
+             (FAR struct scsiresp_readcapacity10_s *)buf;
   FAR struct usbmsc_lun_s *lun;
   uint32_t lba;
   int ret;
@@ -1044,13 +1062,14 @@ static inline int usbmsc_cmdread10(FAR struct usbmsc_dev_s *priv)
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_READ10LBARANGE), 0);
           lun->sd = SCSI_KCQIR_LBAOUTOFRANGE;
           ret     = -EINVAL;
-       }
+        }
 
       /* Looks like we are good to go */
 
       else
         {
-          usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDREAD10), priv->cdb[0]);
+          usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDREAD10),
+                   priv->cdb[0]);
           priv->thstate = USBMSC_STATE_CMDREAD;
         }
     }
@@ -1085,7 +1104,8 @@ static inline int usbmsc_cmdwrite10(FAR struct usbmsc_dev_s *priv)
 
       /* Verify that we can support this write command */
 
-      if ((write10->flags & ~(SCSICMD_WRITE10FLAGS_DPO | SCSICMD_WRITE10FLAGS_FUA)) != 0)
+      if ((write10->flags & ~(SCSICMD_WRITE10FLAGS_DPO |
+                              SCSICMD_WRITE10FLAGS_FUA)) != 0)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRITE10FLAGS), 0);
           lun->sd = SCSI_KCQIR_INVALIDFIELDINCBA;
@@ -1110,20 +1130,21 @@ static inline int usbmsc_cmdwrite10(FAR struct usbmsc_dev_s *priv)
           ret     = -EINVAL;
         }
 
-     /* Verify that LBA lies in the range supported by the block driver */
+      /* Verify that LBA lies in the range supported by the block driver */
 
-     else if (priv->sector >= lun->nsectors)
+      else if (priv->sector >= lun->nsectors)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRITE10LBARANGE), 0);
           lun->sd = SCSI_KCQIR_LBAOUTOFRANGE;
           ret     = -EINVAL;
-       }
+        }
 
       /* Looks like we are good to go */
 
       else
         {
-          usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDWRITE10), priv->cdb[0]);
+          usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDWRITE10),
+                   priv->cdb[0]);
           priv->thstate = USBMSC_STATE_CMDWRITE;
         }
     }
@@ -1253,7 +1274,8 @@ static inline int usbmsc_cmdsynchronizecache10(FAR struct usbmsc_dev_s *priv)
 
 static inline int usbmsc_cmdmodeselect10(FAR struct usbmsc_dev_s *priv)
 {
-  FAR struct scsicmd_modeselect10_s *modeselect = (FAR struct scsicmd_modeselect10_s *)priv->cdb;
+  FAR struct scsicmd_modeselect10_s *modeselect =
+             (FAR struct scsicmd_modeselect10_s *)priv->cdb;
 
   priv->u.alloclen = usbmsc_getbe16(modeselect->parmlen);
   usbmsc_setupcmd(priv, SCSICMD_MODESELECT10_SIZEOF,
@@ -1276,8 +1298,10 @@ static inline int usbmsc_cmdmodeselect10(FAR struct usbmsc_dev_s *priv)
 static int inline usbmsc_cmdmodesense10(FAR struct usbmsc_dev_s *priv,
                                         FAR uint8_t *buf)
 {
-  FAR struct scsicmd_modesense10_s *modesense = (FAR struct scsicmd_modesense10_s *)priv->cdb;
-  FAR struct scsiresp_modeparameterhdr10_s *mph = (FAR struct scsiresp_modeparameterhdr10_s *)buf;
+  FAR struct scsicmd_modesense10_s *modesense =
+             (FAR struct scsicmd_modesense10_s *)priv->cdb;
+  FAR struct scsiresp_modeparameterhdr10_s *mph =
+             (FAR struct scsiresp_modeparameterhdr10_s *)buf;
   int mdlen;
   int ret;
 
@@ -1307,10 +1331,11 @@ static int inline usbmsc_cmdmodesense10(FAR struct usbmsc_dev_s *priv,
 
           /* There are no block descriptors, only the following mode page: */
 
-          ret = usbmsc_modepage(priv, &buf[SCSIRESP_MODEPARAMETERHDR10_SIZEOF], modesense->pcpgcode, &mdlen);
+          ret = usbmsc_modepage(priv, &buf[SCSIRESP_MODEPARAMETERHDR10_SIZEOF],
+                                modesense->pcpgcode, &mdlen);
           if (ret == OK)
             {
-               /* Store the mode data length and return the total message size */
+              /* Store the mode data length and return the total message size */
 
               usbmsc_putbe16(mph->mdlen, mdlen - 2);
               priv->nreqbytes = mdlen + SCSIRESP_MODEPARAMETERHDR10_SIZEOF;
@@ -1377,7 +1402,8 @@ static inline int usbmsc_cmdread12(FAR struct usbmsc_dev_s *priv)
 
       else
         {
-          usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDREAD12), priv->cdb[0]);
+          usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDREAD12),
+                   priv->cdb[0]);
           priv->thstate = USBMSC_STATE_CMDREAD;
         }
     }
@@ -1412,7 +1438,8 @@ static inline int usbmsc_cmdwrite12(FAR struct usbmsc_dev_s *priv)
 
       /* Verify that we can support this write command */
 
-      if ((write12->flags & ~(SCSICMD_WRITE12FLAGS_DPO | SCSICMD_WRITE12FLAGS_FUA)) != 0)
+      if ((write12->flags & ~(SCSICMD_WRITE12FLAGS_DPO |
+                              SCSICMD_WRITE12FLAGS_FUA)) != 0)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRITE12FLAGS), 0);
           lun->sd = SCSI_KCQIR_INVALIDFIELDINCBA;
@@ -1447,7 +1474,8 @@ static inline int usbmsc_cmdwrite12(FAR struct usbmsc_dev_s *priv)
 
       else
         {
-          usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDWRITE12), priv->cdb[0]);
+          usbtrace(TRACE_CLASSSTATE(USBMSC_CLASSSTATE_CMDPARSECMDWRITE12),
+                   priv->cdb[0]);
           priv->thstate = USBMSC_STATE_CMDWRITE;
           return OK;
         }
@@ -1544,7 +1572,7 @@ static int inline usbmsc_setupcmd(FAR struct usbmsc_dev_s *priv,
       /* Clip to the length in the CBW and declare a phase error */
 
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_PHASEERROR1), priv->cdb[0]);
-      if ((flags & USBMSC_FLAGS_BLOCKXFR) != 0)
+      if ((flags & USBMSC_FLAGS_BLOCKXFR) == 0)
         {
           priv->u.alloclen = priv->cbwlen;
         }
@@ -1613,7 +1641,7 @@ static int inline usbmsc_setupcmd(FAR struct usbmsc_dev_s *priv,
    * must be zero
    */
 
-  if (priv->cdb[cdblen-1] != 0)
+  if (priv->cdb[cdblen - 1] != 0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_SCSICMDCONTROL), 0);
       if (lun)
@@ -1672,7 +1700,8 @@ static int usbmsc_idlestate(FAR struct usbmsc_dev_s *priv)
 
   /* Handle the CBW */
 
-  usbmsc_dumpdata("SCSCI CBW", (FAR uint8_t *)cbw, USBMSC_CBW_SIZEOF - USBMSC_MAXCDBLEN);
+  usbmsc_dumpdata("SCSCI CBW", (FAR uint8_t *)cbw, USBMSC_CBW_SIZEOF -
+                  USBMSC_MAXCDBLEN);
   usbmsc_dumpdata("      CDB", cbw->cdb, MIN(cbw->cdblen, USBMSC_MAXCDBLEN));
 
   /* Check for properly formatted CBW? */
@@ -1750,7 +1779,7 @@ static int usbmsc_idlestate(FAR struct usbmsc_dev_s *priv)
       /* Return the read request to the bulk out endpoint for re-filling */
 
       req           = privreq->req;
-      req->len      = CONFIG_USBMSC_BULKOUTREQLEN;
+      req->len      = priv->epbulkout->maxpacket;
       req->priv     = privreq;
       req->callback = usbmsc_rdcomplete;
 
@@ -1832,158 +1861,171 @@ static int usbmsc_cmdparsestate(FAR struct usbmsc_dev_s *priv)
   usbmsc_scsi_lock(priv);
   switch (priv->cdb[0])
     {
-    case SCSI_CMD_TESTUNITREADY:                  /* 0x00 Mandatory */
+    case SCSI_CMD_TESTUNITREADY:                     /* 0x00 Mandatory */
       ret = usbmsc_cmdtestunitready(priv);
       break;
 
- /* case SCSI_CMD_REZEROUNIT:                      * 0x01 Obsolete
-  *                                                * 0x02 Vendor-specific */
+    /* case SCSI_CMD_REZEROUNIT:                      * 0x01 Obsolete
+     *                                                * 0x02 Vendor-specific
+     */
 
-    case SCSI_CMD_REQUESTSENSE:                   /* 0x03 Mandatory */
+    case SCSI_CMD_REQUESTSENSE:                      /* 0x03 Mandatory */
       ret = usbmsc_cmdrequestsense(priv, buf);
       break;
 
- /* case SCSI_CMD_FORMAT_UNIT:                     * 0x04 Mandatory, but not implemented
-  *                                                * 0x05 Vendor specific
-  *                                                * 0x06 Vendor specific
-  * case SCSI_CMD_REASSIGNBLOCKS:                  * 0x07 Optional */
+    /* case SCSI_CMD_FORMAT_UNIT:                     * 0x04 Mandatory, but not impl.
+     *                                                * 0x05 Vendor specific
+     *                                                * 0x06 Vendor specific
+     * case SCSI_CMD_REASSIGNBLOCKS:                  * 0x07 Optional
+     */
 
-    case SCSI_CMD_READ6:                          /* 0x08 Mandatory */
+    case SCSI_CMD_READ6:                             /* 0x08 Mandatory */
       ret = usbmsc_cmdread6(priv);
       break;
 
- /*                                                * 0x09 Vendor specific */
+    /*                                                * 0x09 Vendor specific */
 
-    case SCSI_CMD_WRITE6:                         /* 0x0a Optional */
+    case SCSI_CMD_WRITE6:                            /* 0x0a Optional */
       ret = usbmsc_cmdwrite6(priv);
       break;
 
- /* case SCSI_CMD_SEEK6:                           * 0x0b Obsolete
-  *                                                * 0x0c-0x10 Vendor specific
-  * case SCSI_CMD_SPACE6:                          * 0x11 Vendor specific */
+    /* case SCSI_CMD_SEEK6:                           * 0x0b Obsolete
+     *                                                * 0x0c-0x10 Vendor specific
+     * case SCSI_CMD_SPACE6:                          * 0x11 Vendor specific
+     */
 
-    case SCSI_CMD_INQUIRY:                        /* 0x12 Mandatory */
+    case SCSI_CMD_INQUIRY:                           /* 0x12 Mandatory */
       ret = usbmsc_cmdinquiry(priv, buf);
       break;
 
- /*                                                * 0x13-0x14 Vendor specific */
+    /*                                                * 0x13-0x14 Vendor specific */
 
-    case SCSI_CMD_MODESELECT6:                    /* 0x15 Optional */
+    case SCSI_CMD_MODESELECT6:                       /* 0x15 Optional */
       ret = usbmsc_cmdmodeselect6(priv);
       break;
 
- /* case SCSI_CMD_RESERVE6:                        * 0x16 Obsolete
-  * case SCSI_CMD_RELEASE6:                        * 0x17 Obsolete
-  * case SCSI_CMD_COPY:                            * 0x18 Obsolete
-  *                                                * 0x19 Vendor specific */
+    /* case SCSI_CMD_RESERVE6:                        * 0x16 Obsolete
+     * case SCSI_CMD_RELEASE6:                        * 0x17 Obsolete
+     * case SCSI_CMD_COPY:                            * 0x18 Obsolete
+     *                                                * 0x19 Vendor specific
+     */
 
-    case SCSI_CMD_MODESENSE6:                     /* 0x1a Optional */
+    case SCSI_CMD_MODESENSE6:                        /* 0x1a Optional */
       ret = usbmsc_cmdmodesense6(priv, buf);
       break;
 
-    case SCSI_CMD_STARTSTOPUNIT:                  /* 0x1b Optional */
+    case SCSI_CMD_STARTSTOPUNIT:                     /* 0x1b Optional */
       ret = usbmsc_cmdstartstopunit(priv);
       break;
 
- /* case SCSI_CMD_RECEIVEDIAGNOSTICRESULTS:        * 0x1c Optional
-  * case SCSI_CMD_SENDDIAGNOSTIC:                  * 0x1d Mandatory, but not implemented */
+    /* case SCSI_CMD_RECEIVEDIAGNOSTICRESULTS:        * 0x1c Optional
+     * case SCSI_CMD_SENDDIAGNOSTIC:                  * 0x1d Mandatory, but not impl.
+     */
 
-    case SCSI_CMD_PREVENTMEDIAREMOVAL:            /* 0x1e Optional */
+    case SCSI_CMD_PREVENTMEDIAREMOVAL:               /* 0x1e Optional */
       ret = usbmsc_cmdpreventmediumremoval(priv);
       break;
 
- /*                                                * 0x20-22 Vendor specific */
-    case SCSI_CMD_READFORMATCAPACITIES:           /* 0x23 Vendor-specific (defined in MMC spec) */
+    /*                                                * 0x20-22 Vendor specific */
+
+    case SCSI_CMD_READFORMATCAPACITIES:              /* 0x23 Vend-spec (def. MMC spec) */
       ret = usbmsc_cmdreadformatcapacity(priv, buf);
       break;
- /*                                                * 0x24 Vendor specific */
 
-    case SCSI_CMD_READCAPACITY10:                 /* 0x25 Mandatory */
+    /*                                                * 0x24 Vendor specific */
+
+    case SCSI_CMD_READCAPACITY10:                    /* 0x25 Mandatory */
       ret = usbmsc_cmdreadcapacity10(priv, buf);
       break;
 
- /*                                                * 0x26-27 Vendor specific */
-    case SCSI_CMD_READ10:                         /* 0x28 Mandatory */
+    /*                                                * 0x26-27 Vendor specific */
+
+    case SCSI_CMD_READ10:                            /* 0x28 Mandatory */
       ret = usbmsc_cmdread10(priv);
       break;
 
- /*                                                * 0x29 Vendor specific */
+    /*                                                * 0x29 Vendor specific */
 
-    case SCSI_CMD_WRITE10:                        /* 0x2a Optional */
+    case SCSI_CMD_WRITE10:                           /* 0x2a Optional */
       ret = usbmsc_cmdwrite10(priv);
       break;
 
- /* case SCSI_CMD_SEEK10:                          * 0x2b Obsolete
-  *                                                * 0x2c-2d Vendor specific
-  * case SCSI_CMD_WRITEANDVERIFY:                  * 0x2e Optional */
+    /* case SCSI_CMD_SEEK10:                          * 0x2b Obsolete
+     *                                                * 0x2c-2d Vendor specific
+     * case SCSI_CMD_WRITEANDVERIFY:                  * 0x2e Optional
+     */
 
-    case SCSI_CMD_VERIFY10:                       /* 0x2f Optional, but needed my MS Windows */
+    case SCSI_CMD_VERIFY10:                          /* 0x2f Opt, excpt Windows */
       ret = usbmsc_cmdverify10(priv);
       break;
 
- /* case SCSI_CMD_SEARCHDATAHIGH:                  * 0x30 Obsolete
-  * case SCSI_CMD_SEARCHDATAEQUAL:                 * 0x31 Obsolete
-  * case SCSI_CMD_SEARCHDATALOW:                   * 0x32 Obsolete
-  * case SCSI_CMD_SETLIMITS10:                     * 0x33 Obsolete
-  * case SCSI_CMD_PREFETCH10:                      * 0x34 Optional */
+    /* case SCSI_CMD_SEARCHDATAHIGH:                  * 0x30 Obsolete
+     * case SCSI_CMD_SEARCHDATAEQUAL:                 * 0x31 Obsolete
+     * case SCSI_CMD_SEARCHDATALOW:                   * 0x32 Obsolete
+     * case SCSI_CMD_SETLIMITS10:                     * 0x33 Obsolete
+     * case SCSI_CMD_PREFETCH10:                      * 0x34 Optional
+     */
 
-    case SCSI_CMD_SYNCHCACHE10:                   /* 0x35 Optional */
+    case SCSI_CMD_SYNCHCACHE10:                      /* 0x35 Optional */
       ret = usbmsc_cmdsynchronizecache10(priv);
       break;
 
- /* case SCSI_CMD_LOCKCACHE:                       * 0x36 Obsolete
-  * case SCSI_CMD_READDEFECTDATA10:                * 0x37 Optional
-  * case SCSI_CMD_COMPARE:                         * 0x39 Obsolete
-  * case SCSI_CMD_COPYANDVERIFY:                   * 0x3a Obsolete
-  * case SCSI_CMD_WRITEBUFFER:                     * 0x3b Optional
-  * case SCSI_CMD_READBUFFER:                      * 0x3c Optional
-  * case SCSI_CMD_READLONG10:                      * 0x3e Optional
-  * case SCSI_CMD_WRITELONG10:                     * 0x3f Optional
-  * case SCSI_CMD_CHANGEDEFINITION:                * 0x40 Obsolete
-  * case SCSI_CMD_WRITESAME10:                     * 0x41 Optional
-  * case SCSI_CMD_LOGSELECT:                       * 0x4c Optional
-  * case SCSI_CMD_LOGSENSE:                        * 0x4d Optional
-  * case SCSI_CMD_XDWRITE10:                       * 0x50 Optional
-  * case SCSI_CMD_XPWRITE10:                       * 0x51 Optional
-  * case SCSI_CMD_XDREAD10:                        * 0x52 Optional */
+    /* case SCSI_CMD_LOCKCACHE:                       * 0x36 Obsolete
+     * case SCSI_CMD_READDEFECTDATA10:                * 0x37 Optional
+     * case SCSI_CMD_COMPARE:                         * 0x39 Obsolete
+     * case SCSI_CMD_COPYANDVERIFY:                   * 0x3a Obsolete
+     * case SCSI_CMD_WRITEBUFFER:                     * 0x3b Optional
+     * case SCSI_CMD_READBUFFER:                      * 0x3c Optional
+     * case SCSI_CMD_READLONG10:                      * 0x3e Optional
+     * case SCSI_CMD_WRITELONG10:                     * 0x3f Optional
+     * case SCSI_CMD_CHANGEDEFINITION:                * 0x40 Obsolete
+     * case SCSI_CMD_WRITESAME10:                     * 0x41 Optional
+     * case SCSI_CMD_LOGSELECT:                       * 0x4c Optional
+     * case SCSI_CMD_LOGSENSE:                        * 0x4d Optional
+     * case SCSI_CMD_XDWRITE10:                       * 0x50 Optional
+     * case SCSI_CMD_XPWRITE10:                       * 0x51 Optional
+     * case SCSI_CMD_XDREAD10:                        * 0x52 Optional
+     */
 
-    case SCSI_CMD_MODESELECT10:                   /* 0x55 Optional */
+    case SCSI_CMD_MODESELECT10:                      /* 0x55 Optional */
       ret = usbmsc_cmdmodeselect10(priv);
       break;
 
- /* case SCSI_CMD_RESERVE10:                       * 0x56 Obsolete
-  * case SCSI_CMD_RELEASE10:                       * 0x57 Obsolete */
+    /* case SCSI_CMD_RESERVE10:                       * 0x56 Obsolete
+     * case SCSI_CMD_RELEASE10:                       * 0x57 Obsolete
+     */
 
     case SCSI_CMD_MODESENSE10:                    /* 0x5a Optional */
       ret = usbmsc_cmdmodesense10(priv, buf);
       break;
 
- /* case SCSI_CMD_PERSISTENTRESERVEIN:             * 0x5e Optional
-  * case SCSI_CMD_PERSISTENTRESERVEOUT:            * 0x5f Optional
-  * case SCSI_CMD_32:                              * 0x7f Optional
-  * case SCSI_CMD_XDWRITEEXTENDED:                 * 0x80 Obsolete
-  * case SCSI_CMD_REBUILD:                         * 0x81 Obsolete
-  * case SCSI_CMD_REGENERATE:                      * 0x82 Obsolete
-  * case SCSI_CMD_EXTENDEDCOPY:                    * 0x83 Optional
-  * case SCSI_CMD_COPYRESULTS:                     * 0x84 Optional
-  * case SCSI_CMD_ACCESSCONTROLIN:                 * 0x86 Optional
-  * case SCSI_CMD_ACCESSCONTROLOUT:                * 0x87 Optional
-  * case SCSI_CMD_READ16:                          * 0x88 Optional
-  * case SCSI_CMD_WRITE16:                         * 0x8a Optional
-  * case SCSI_CMD_READATTRIBUTE:                   * 0x8c Optional
-  * case SCSI_CMD_WRITEATTRIBUTE:                  * 0x8d Optional
-  * case SCSI_CMD_WRITEANDVERIFY16:                * 0x8e Optional
-  * case SCSI_CMD_SYNCHCACHE16:                    * 0x91 Optional
-  * case SCSI_CMD_LOCKUNLOCKACACHE:                * 0x92 Optional
-  * case SCSI_CMD_WRITESAME16:                     * 0x93 Optional
-  * case SCSI_CMD_READCAPACITY16:                  * 0x9e Optional
-  * case SCSI_CMD_READLONG16:                      * 0x9e Optional
-  * case SCSI_CMD_WRITELONG16                      * 0x9f Optional
-  * case SCSI_CMD_REPORTLUNS:                      * 0xa0 Mandatory, but not implemented
-  * case SCSI_CMD_MAINTENANCEIN:                   * 0xa3 Optional (SCCS==0)
-  * case SCSI_CMD_MAINTENANCEOUT:                  * 0xa4 Optional (SCCS==0)
-  * case SCSI_CMD_MOVEMEDIUM:                      * 0xa5 ?
-  * case SCSI_CMD_MOVEMEDIUMATTACHED:              * 0xa7 Optional (MCHNGR==0) */
+    /* case SCSI_CMD_PERSISTENTRESERVEIN:             * 0x5e Optional
+     * case SCSI_CMD_PERSISTENTRESERVEOUT:            * 0x5f Optional
+     * case SCSI_CMD_32:                              * 0x7f Optional
+     * case SCSI_CMD_XDWRITEEXTENDED:                 * 0x80 Obsolete
+     * case SCSI_CMD_REBUILD:                         * 0x81 Obsolete
+     * case SCSI_CMD_REGENERATE:                      * 0x82 Obsolete
+     * case SCSI_CMD_EXTENDEDCOPY:                    * 0x83 Optional
+     * case SCSI_CMD_COPYRESULTS:                     * 0x84 Optional
+     * case SCSI_CMD_ACCESSCONTROLIN:                 * 0x86 Optional
+     * case SCSI_CMD_ACCESSCONTROLOUT:                * 0x87 Optional
+     * case SCSI_CMD_READ16:                          * 0x88 Optional
+     * case SCSI_CMD_WRITE16:                         * 0x8a Optional
+     * case SCSI_CMD_READATTRIBUTE:                   * 0x8c Optional
+     * case SCSI_CMD_WRITEATTRIBUTE:                  * 0x8d Optional
+     * case SCSI_CMD_WRITEANDVERIFY16:                * 0x8e Optional
+     * case SCSI_CMD_SYNCHCACHE16:                    * 0x91 Optional
+     * case SCSI_CMD_LOCKUNLOCKACACHE:                * 0x92 Optional
+     * case SCSI_CMD_WRITESAME16:                     * 0x93 Optional
+     * case SCSI_CMD_READCAPACITY16:                  * 0x9e Optional
+     * case SCSI_CMD_READLONG16:                      * 0x9e Optional
+     * case SCSI_CMD_WRITELONG16                      * 0x9f Optional
+     * case SCSI_CMD_REPORTLUNS:                      * 0xa0 Mandatory, but no-impl
+     * case SCSI_CMD_MAINTENANCEIN:                   * 0xa3 Optional (SCCS==0)
+     * case SCSI_CMD_MAINTENANCEOUT:                  * 0xa4 Optional (SCCS==0)
+     * case SCSI_CMD_MOVEMEDIUM:                      * 0xa5 ?
+     * case SCSI_CMD_MOVEMEDIUMATTACHED:              * 0xa7 Optional (MCHNGR==0)
+     */
 
     case SCSI_CMD_READ12:                         /* 0xa8 Optional */
       ret = usbmsc_cmdread12(priv);
@@ -1993,27 +2035,26 @@ static int usbmsc_cmdparsestate(FAR struct usbmsc_dev_s *priv)
       ret = usbmsc_cmdwrite12(priv);
       break;
 
- /* case SCSI_CMD_READMEDIASERIALNUMBER:           * 0xab Optional
-  * case SCSI_CMD_WRITEANDVERIFY12:                * 0xae Optional
-  * case SCSI_CMD_VERIFY12:                        * 0xaf Optional
-  * case SCSI_CMD_SETLIMITS12                      * 0xb3 Obsolete
-  * case SCSI_CMD_READELEMENTSTATUS:               * 0xb4 Optional (MCHNGR==0)
-  * case SCSI_CMD_READDEFECTDATA12:                * 0xb7 Optional
-  * case SCSI_CMD_REDUNDANCYGROUPIN:               * 0xba Optional
-  * case SCSI_CMD_REDUNDANCYGROUPOUT:              * 0xbb Optional
-  * case SCSI_CMD_SPAREIN:                         * 0xbc Optional (SCCS==0)
-  * case SCSI_CMD_SPAREOUT:                        * 0xbd Optional (SCCS==0)
-  * case SCSI_CMD_VOLUMESETIN:                     * 0xbe Optional (SCCS==0)
-  * case SCSI_CMD_VOLUMESETOUT:                    * 0xbe Optional (SCCS==0)
-  *                                                * 0xc0-0xff Vendor specific */
+    /* case SCSI_CMD_READMEDIASERIALNUMBER:           * 0xab Optional
+     * case SCSI_CMD_WRITEANDVERIFY12:                * 0xae Optional
+     * case SCSI_CMD_VERIFY12:                        * 0xaf Optional
+     * case SCSI_CMD_SETLIMITS12                      * 0xb3 Obsolete
+     * case SCSI_CMD_READELEMENTSTATUS:               * 0xb4 Optional (MCHNGR==0)
+     * case SCSI_CMD_READDEFECTDATA12:                * 0xb7 Optional
+     * case SCSI_CMD_REDUNDANCYGROUPIN:               * 0xba Optional
+     * case SCSI_CMD_REDUNDANCYGROUPOUT:              * 0xbb Optional
+     * case SCSI_CMD_SPAREIN:                         * 0xbc Optional (SCCS==0)
+     * case SCSI_CMD_SPAREOUT:                        * 0xbd Optional (SCCS==0)
+     * case SCSI_CMD_VOLUMESETIN:                     * 0xbe Optional (SCCS==0)
+     * case SCSI_CMD_VOLUMESETOUT:                    * 0xbe Optional (SCCS==0)
+     *                                                * 0xc0-0xff Vendor specific
+     */
 
     default:
       priv->u.alloclen = 0;
-      if (ret == OK)
-        {
-          priv->lun->sd = SCSI_KCQIR_INVALIDCOMMAND;
-          ret = -EINVAL;
-        }
+      priv->residue = priv->cbwlen;
+      priv->lun->sd = SCSI_KCQIR_INVALIDCOMMAND;
+      ret = -EINVAL;
       break;
     }
 
@@ -2179,7 +2220,7 @@ static int usbmsc_cmdreadstate(FAR struct usbmsc_dev_s *priv)
       src    = &priv->iobuffer[lun->sectorsize - priv->nsectbytes];
       dest   = &req->buf[priv->nreqbytes];
 
-      nbytes = MIN(CONFIG_USBMSC_BULKINREQLEN - priv->nreqbytes, priv->nsectbytes);
+      nbytes = MIN(priv->epbulkin->maxpacket - priv->nreqbytes, priv->nsectbytes);
 
       /* Copy the data from the sector buffer to the USB request and update counts */
 
@@ -2187,15 +2228,16 @@ static int usbmsc_cmdreadstate(FAR struct usbmsc_dev_s *priv)
       priv->nreqbytes  += nbytes;
       priv->nsectbytes -= nbytes;
 
-      /* If (1) the request buffer is full OR (2) this is the final request full of data,
+      /* If (1) the request buffer is full OR (2) this is the final request
+       * full of data,
        * then submit the request
        */
 
-      if (priv->nreqbytes >= CONFIG_USBMSC_BULKINREQLEN ||
+      if (priv->nreqbytes >= priv->epbulkin->maxpacket ||
           (priv->u.xfrlen <= 0 && priv->nsectbytes <= 0))
         {
-          /* Remove the request that we just filled from wrreqlist (we've already checked
-           * that is it not NULL
+          /* Remove the request that we just filled from wrreqlist (we've
+           * already checked that is it not NULL
            */
 
           flags = enter_critical_section();
@@ -2331,7 +2373,8 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
               nwritten = USBMSC_DRVR_WRITE(lun, priv->iobuffer, priv->sector, 1);
               if (nwritten < 0)
                 {
-                  usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDWRITEWRITEFAIL), -nwritten);
+                  usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDWRITEWRITEFAIL),
+                           -nwritten);
                   lun->sd     = SCSI_KCQME_WRITEFAULTAUTOREALLOCFAILED;
                   lun->sdinfo = priv->sector;
                   goto errout;
@@ -2349,7 +2392,7 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
        * to get the next read request.
        */
 
-      req->len      = CONFIG_USBMSC_BULKOUTREQLEN;
+      req->len      = priv->epbulkout->maxpacket;
       req->priv     = privreq;
       req->callback = usbmsc_rdcomplete;
 
@@ -2361,7 +2404,7 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
 
       /* Did the host decide to stop early? */
 
-      if (xfrd != CONFIG_USBMSC_BULKOUTREQLEN)
+      if (xfrd != priv->epbulkout->maxpacket)
         {
           priv->shortpacket = 1;
           goto errout;
@@ -2450,7 +2493,8 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
               ret           = EP_SUBMIT(priv->epbulkin, privreq->req);
               if (ret < 0)
                 {
-                  usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHSUBMIT), (uint16_t)-ret);
+                  usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHSUBMIT),
+                           (uint16_t)-ret);
                 }
              }
 
@@ -2458,7 +2502,8 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
 
           if (priv->residue > 0)
             {
-              usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHRESIDUE), (uint16_t)priv->residue);
+              usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHRESIDUE),
+                       (uint16_t)priv->residue);
 
 #ifdef USBMSC_STALL_RACEWAR
               /* (See description of the workaround at the top of the file).
@@ -2488,16 +2533,18 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
           flags = enter_critical_section();
           if (priv->shortpacket)
             {
-              usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHSHORTPKT), (uint16_t)priv->residue);
+              usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHSHORTPKT),
+                       (uint16_t)priv->residue);
             }
 
           /* Unprocessed incoming data: STALL and cancel requests. */
 
           else
             {
-              usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINSHSUBMIT), (uint16_t)priv->residue);
+              usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINSHSUBMIT),
+                       (uint16_t)priv->residue);
               EP_STALL(priv->epbulkout);
-           }
+            }
 
            priv->theventset |= USBMSC_EVENT_ABORTBULKOUT;
            leave_critical_section(flags);
@@ -2723,16 +2770,10 @@ int usbmsc_scsi_main(int argc, char *argv[])
        * drive the state machine.
        */
 
-      if ((eventset & (USBMSC_EVENT_DISCONNECT | USBMSC_EVENT_RESET | USBMSC_EVENT_CFGCHANGE |
-                       USBMSC_EVENT_IFCHANGE | USBMSC_EVENT_ABORTBULKOUT)) != 0)
+      if ((eventset & (USBMSC_EVENT_DISCONNECT | USBMSC_EVENT_RESET |
+                       USBMSC_EVENT_CFGCHANGE | USBMSC_EVENT_IFCHANGE |
+                       USBMSC_EVENT_ABORTBULKOUT)) != 0)
         {
-          /* These events require that the current configuration be reset */
-
-          if ((eventset & USBMSC_EVENT_IFCHANGE) != 0)
-            {
-              usbmsc_resetconfig(priv);
-            }
-
           /* These events require that a new configuration be established */
 
           if ((eventset & (USBMSC_EVENT_CFGCHANGE)) != 0)
@@ -2742,7 +2783,8 @@ int usbmsc_scsi_main(int argc, char *argv[])
 
           /* These events required that we send a deferred EP0 setup response */
 
-          if ((eventset & (USBMSC_EVENT_RESET | USBMSC_EVENT_CFGCHANGE | USBMSC_EVENT_IFCHANGE)) != 0)
+          if ((eventset & (USBMSC_EVENT_RESET | USBMSC_EVENT_CFGCHANGE |
+                           USBMSC_EVENT_IFCHANGE)) != 0)
             {
               usbmsc_deferredresponse(priv, false);
             }

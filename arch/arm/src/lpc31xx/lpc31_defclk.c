@@ -116,4 +116,3 @@ bool lpc31_defclk(enum lpc31_clockid_e clkid)
   putreg32(regval, regaddr);
   return enable;
 }
-

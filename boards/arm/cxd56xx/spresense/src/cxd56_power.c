@@ -45,9 +45,9 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
-#include <semaphore.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 
 #include "chip.h"
 #include "up_arch.h"

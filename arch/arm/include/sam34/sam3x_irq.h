@@ -428,4 +428,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_SAM34_SAM3X_IRQ_H */
-

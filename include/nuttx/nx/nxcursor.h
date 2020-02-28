@@ -98,7 +98,7 @@ extern "C"
  * is used to provide the cursor image.
  *
  * The image is provided a a 2-bits-per-pixel image.  The two bit incoding
- * is as followings:
+ * is as following:
  *
  * 00 - The transparent background
  * 01 - Color1:  The main color of the cursor
@@ -193,7 +193,7 @@ int nxcursor_setposition(NXHANDLE hnd, FAR const struct nxgl_point_s *pos);
  *   CAUTION:  The current cursor position is not updated until the display
  *   is actually changed.  Due to asynchronies caused by queue, the new
  *   current cursor position may not match the cursor position set until
- *   the client and server are syncrhonized.
+ *   the client and server are synchronized.
  *
  * Input Parameters:
  *   hnd - The server handle returned by nx_connect()
@@ -213,4 +213,3 @@ int nxcursor_get_position(NXHANDLE hnd, FAR struct nxgl_point_s *pos);
 
 #endif /* CONFIG_NX_SWCURSOR || CONFIG_NX_HWCURSOR */
 #endif /* __INCLUDE_NUTTX_NX_NXCURSOR_H */
-

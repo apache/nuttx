@@ -36,18 +36,18 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CHIP_CXD5602_PINCONFIG_H
-#define __ARCH_ARM_SRC_CXD56XX_CHIP_CXD5602_PINCONFIG_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_PINCONFIG_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_PINCONFIG_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
 /* Set the standard pinconf macro Definitions
  *  - If it's used as input pin, then set 1. Otherwise set 0 (default).
@@ -201,6 +201,7 @@
  *                                                  i                   d  Z  m  l
  *                                                  n                   e  I  A  l
  */
+
 #define PINCONF_I2C4_BCK_GPIO               PINCONF(PIN_I2C4_BCK,       0, 0, 0, 0)
 #define PINCONF_I2C4_BCK                    PINCONF(PIN_I2C4_BCK,       1, 1, 0, 0)
 #define PINCONF_I2C4_BDT_GPIO               PINCONF(PIN_I2C4_BDT,       0, 0, 0, 0)
@@ -491,6 +492,7 @@
 /* Reference set of multiple pinconfigs
  *
  */
+
 #define PINCONFS_I2C4_GPIO                  { PINCONF_I2C4_BCK_GPIO, PINCONF_I2C4_BDT_GPIO }
 #define PINCONFS_I2C4                       { PINCONF_I2C4_BCK,      PINCONF_I2C4_BDT      }
 #define PINCONFS_PMIC_INT_GPIO              { PINCONF_PMIC_INT_GPIO }
@@ -656,4 +658,4 @@
 
 #endif /* CONFIG_CXD56_CUSTOM_PINCONFIG */
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CHIP_CXD5602_PINCONFIG_H */
+#endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD5602_PINCONFIG_H */

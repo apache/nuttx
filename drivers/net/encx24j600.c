@@ -259,7 +259,7 @@ struct enc_driver_s
 
   sq_queue_t            txfreedescr;   /* Free inititialized TX descriptors */
   sq_queue_t            rxfreedescr;   /* Free RX descriptors */
-  sq_queue_t            txqueue;       /* Enqueued descriptors waiting for transmition */
+  sq_queue_t            txqueue;       /* Enqueued descriptors waiting for transmission */
   sq_queue_t            rxqueue;       /* Unhandled incoming packets waiting for reception */
 
   /* This is the contained SPI driver intstance */
@@ -1408,7 +1408,7 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv,
   ninfo("free descr: %p\n", descr);
 
   /* If it is the last descriptor in the queue, advance ERXTAIL.
-   * This way it is possible that gaps occcur. Maybe pending packets
+   * This way it is possible that gaps occur. Maybe pending packets
    * can be reordered th enc's DMA to free RX space?
    */
 
@@ -2098,7 +2098,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
   int ret;
 
-  /* In complex environments, we cannot do SPI transfers from the timout
+  /* In complex environments, we cannot do SPI transfers from the timeout
    * handler because semaphores are probably used to lock the SPI bus.  In
    * this case, we will defer processing to the worker thread.  This is also
    * much kinder in the use of system resources and is, therefore, probably
@@ -2192,7 +2192,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)arg;
   int ret;
 
-  /* In complex environments, we cannot do SPI transfers from the timout
+  /* In complex environments, we cannot do SPI transfers from the timeout
    * handler because semaphores are probably used to lock the SPI bus.  In
    * this case, we will defer processing to the worker thread.  This is also
    * much kinder in the use of system resources and is, therefore, probably
@@ -2663,7 +2663,7 @@ static void enc_resetbuffers(FAR struct enc_driver_s *priv)
   sq_init(&priv->txqueue);
   sq_init(&priv->rxqueue);
 
-  /* For transmition we preinitialize the descriptors to aligned NET_BUFFSIZE */
+  /* For transmission we preinitialize the descriptors to aligned NET_BUFFSIZE */
 
   for (i = 0; i < ENC_NTXDESCR; i++)
     {
@@ -2769,7 +2769,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
     }
   while ((regval & PHSTAT1_ANDONE) != 0);
 
-  ninfo("Auto-negotation completed\n");
+  ninfo("Auto-negotiation completed\n");
 
 #endif
 

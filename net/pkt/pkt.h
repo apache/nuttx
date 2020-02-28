@@ -289,8 +289,8 @@ void pkt_poll(FAR struct net_driver_s *dev, FAR struct pkt_conn_s *conn);
  * Name: psock_pkt_send
  *
  * Description:
- *   The psock_pkt_send() call may be used only when the packet socket is in a
- *   connected state (so that the intended recipient is known).
+ *   The psock_pkt_send() call may be used only when the packet socket is in
+ *   a connected state (so that the intended recipient is known).
  *
  * Input Parameters:
  *   psock    An instance of the internal socket structure.

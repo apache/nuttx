@@ -47,7 +47,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -455,21 +454,7 @@ static inline void am335x_i2c_modifyreg(FAR struct am335x_i2c_priv_s *priv,
 
 static inline void am335x_i2c_sem_wait(FAR struct am335x_i2c_priv_s *priv)
 {
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(&priv->sem_excl);
-
-      /* The only case that an error should occur here is if the wait was
-       * awakened by a signal.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -EINTR);
-    }
-  while (ret == -EINTR);
+  nxsem_wait_uninterruptible(&priv->sem_excl);
 }
 
 /****************************************************************************
@@ -559,7 +544,7 @@ static inline int am335x_i2c_sem_waitdone(FAR struct am335x_i2c_priv_s *priv)
     {
       /* Get the current time */
 
-      (void)clock_gettime(CLOCK_REALTIME, &abstime);
+      clock_gettime(CLOCK_REALTIME, &abstime);
 
       /* Calculate a time in the future */
 
@@ -1226,7 +1211,7 @@ static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
                * and wake it up
                */
 
-              sem_post(&priv->sem_isr);
+              nxsem_post(&priv->sem_isr);
               priv->intstate = INTSTATE_DONE;
             }
 #else
@@ -1261,7 +1246,7 @@ static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
            * and wake it up
            */
 
-          sem_post(&priv->sem_isr);
+          nxsem_post(&priv->sem_isr);
           priv->intstate = INTSTATE_DONE;
         }
 #else
@@ -1309,8 +1294,8 @@ static int am335x_i2c_init(FAR struct am335x_i2c_priv_s *priv)
 
   /* Configure pins */
 
-  (void)am335x_gpio_config(priv->config->scl_pin);
-  (void)am335x_gpio_config(priv->config->sda_pin);
+  am335x_gpio_config(priv->config->scl_pin);
+  am335x_gpio_config(priv->config->sda_pin);
 
   /* Disable I2C module */
 

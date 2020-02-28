@@ -65,4 +65,3 @@ void freeaddrinfo(FAR struct addrinfo *ai)
     }
   while (ai != NULL);
 }
-

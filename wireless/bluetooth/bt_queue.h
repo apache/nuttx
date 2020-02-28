@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 #ifndef __WIRELESS_BLUETOOTH_BT_QUEUE_H
-#define __WIRELESS_BLUETOOTH_BT_QUEUE_H 1
+#define __WIRELESS_BLUETOOTH_BT_QUEUE_H
 
 /****************************************************************************
  * Included Files

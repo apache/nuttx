@@ -3,6 +3,14 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menuconfig USBDEV
+	bool "USB Device Driver Support"
+	default n
+	---help---
+		USB device drivers.  See also include/nuttx/usb/usbdev.h
+
+if USBDEV
+
 comment "USB Device Controller Driver Options"
 
 config USBDEV_ISOCHRONOUS
@@ -843,7 +851,7 @@ menuconfig NET_CDCECM
 		References:
 		- "Universal Serial Bus - Communications Class - Subclass
 		   Specification for Ethernet Control Model Devices,
-		   Revision 1.2, Feburary 9, 2007"
+		   Revision 1.2, February 9, 2007"
 
 		This option may require CONFIG_NETDEV_LATEINIT=y, otherwise the
 		power-up initialization may call the non-existent up_netinitialize().
@@ -882,7 +890,7 @@ config CDCECM_EPINTIN
 endif # !CDCECM_COMPOSITE
 
 config CDCECM_EPINTIN_FSSIZE
-	int "Interupt IN full speed MAXPACKET size"
+	int "Interrupt IN full speed MAXPACKET size"
 	default 16
 	---help---
 		Max package size for the interrupt IN endpoint if full speed mode.
@@ -891,7 +899,7 @@ config CDCECM_EPINTIN_FSSIZE
 if USBDEV_DUALSPEED
 
 config CDCECM_EPINTIN_HSSIZE
-	int "Interupt IN high speed MAXPACKET size"
+	int "Interrupt IN high speed MAXPACKET size"
 	default 64
 	---help---
 		Max package size for the interrupt IN endpoint if high speed mode.
@@ -995,3 +1003,5 @@ config CDCECM_PRODUCTSTR
 
 endif # !CDCECM_COMPOSITE
 endif # CDCECM
+
+endif # USBDEV

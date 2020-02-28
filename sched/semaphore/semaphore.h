@@ -42,10 +42,10 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/semaphore.h>
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <sched.h>
 #include <queue.h>
 

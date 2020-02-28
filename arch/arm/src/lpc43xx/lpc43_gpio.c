@@ -252,6 +252,3 @@ bool lpc43_gpio_read(uint16_t gpiocfg)
 
   return (getreg8(LPC43_GPIO_B(port, pin)) & GPIO_B) != 0;
 }
-
-
-

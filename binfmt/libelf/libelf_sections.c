@@ -75,9 +75,9 @@
  ****************************************************************************/
 
 static inline int elf_sectname(FAR struct elf_loadinfo_s *loadinfo,
-                               FAR const Elf32_Shdr *shdr)
+                               FAR const Elf_Shdr *shdr)
 {
-  FAR Elf32_Shdr *shstr;
+  FAR Elf_Shdr *shstr;
   FAR uint8_t *buffer;
   off_t  offset;
   size_t readlen;
@@ -204,13 +204,13 @@ int elf_loadshdrs(FAR struct elf_loadinfo_s *loadinfo)
   shdrsize = (size_t)loadinfo->ehdr.e_shentsize * (size_t)loadinfo->ehdr.e_shnum;
   if (loadinfo->ehdr.e_shoff + shdrsize > loadinfo->filelen)
     {
-      berr("Insufficent space in file for section header table\n");
+      berr("Insufficient space in file for section header table\n");
       return -ESPIPE;
     }
 
   /* Allocate memory to hold a working copy of the sector header table */
 
-  loadinfo->shdr = (FAR FAR Elf32_Shdr *)kmm_malloc(shdrsize);
+  loadinfo->shdr = (FAR FAR Elf_Shdr *)kmm_malloc(shdrsize);
   if (!loadinfo->shdr)
     {
       berr("Failed to allocate the section header table. Size: %ld\n",
@@ -249,7 +249,7 @@ int elf_loadshdrs(FAR struct elf_loadinfo_s *loadinfo)
 int elf_findsection(FAR struct elf_loadinfo_s *loadinfo,
                     FAR const char *sectname)
 {
-  FAR const Elf32_Shdr *shdr;
+  FAR const Elf_Shdr *shdr;
   int ret;
   int i;
 

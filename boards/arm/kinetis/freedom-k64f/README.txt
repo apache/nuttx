@@ -2,7 +2,7 @@ README.txt
 ==========
 
 This is the README file for the port of NuttX to the Freescale Freedom-K64F
-develoment board.
+development board.
 
 Contents
 ========
@@ -71,7 +71,7 @@ Serial Console
   ---------------------
   An alternative serial port might use a standard serial shield mounted
   on the Freedom Board.  In this case, Arduino pin D1 provides UART TX and
-  pin D0 privides UART RX.
+  pin D0 provides UART RX.
 
   The I/O headers on the FRDM-K64F board are arranged to enable
   compatibility with Arduino shield. The outer rows of pins (even numbered
@@ -200,11 +200,9 @@ Networking Support
     CONFIG_NET_ARP_IPIN=y               : Enable ARP address harvesting
     CONFIG_NET_ARP_SEND=y               : Send ARP request before sending data
     CONFIG_NET_TCP=y                    : Enable TCP/IP networking
-    CONFIG_NET_TCP_READAHEAD=y          : Support TCP read-ahead
     CONFIG_NET_TCP_WRITE_BUFFERS=y      : Support TCP write-buffering
     CONFIG_NET_TCPBACKLOG=y             : Support TCP/IP backlog
     CONFIG_NET_MAX_LISTENPORTS=20       :
-    CONFIG_NET_TCP_READAHEAD_BUFSIZE=536  Read-ahead buffer size
     CONFIG_NET_UDP=y                    : Enable UDP networking
     CONFIG_NET_BROADCAST=y              : Needed for DNS name resolution
     CONFIG_NET_ICMP=y                   : Enable ICMP networking
@@ -374,7 +372,7 @@ f Application Configuration -> Network Utilities
       need to provide some custom logic in the Freedcom K64F
       configuration to set up that PHY interrupt.
 
-    - In addtion to the PHY interrupt, the Network Monitor also requires the
+    - In addition to the PHY interrupt, the Network Monitor also requires the
       following setting:
 
         CONFIG_NETDEV_PHY_IOCTL. Enable PHY IOCTL commands in the Ethernet
@@ -566,7 +564,7 @@ USB Device Controller Support
 
     Device Drivers -> USB Device Driver Support
       CONFIG_CDCACM=y                           : USB Modem (CDC ACM) support
-      CONFIG_CDCACM_EP0MAXPACKET=64             : Enpoint 0 packet size
+      CONFIG_CDCACM_EP0MAXPACKET=64             : Endpoint 0 packet size
       CONFIG_CDCACM_EPINTIN=1                   : Interrupt IN endpoint number
       CONFIG_CDCACM_EPINTIN_FSSIZE=64           : Full speed packet size
       CONFIG_CDCACM_EPINTIN_HSSIZE=64           : High speed packet size
@@ -651,7 +649,7 @@ GNU Toolchain Options
 Freedom K64F Configuration Options
 ==================================
 
-    CONFIG_ARCH - Identifies the arch/ subdirectory.  This sould
+    CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
 
        CONFIG_ARCH=arm
@@ -963,4 +961,3 @@ Status
   2017-02-10:  These have been numerous SDHC fixes submitted by Marc Rechte'.
     These may or may not have fixed the SDHC issues mentioned about.  You
     would have to retest to verify the SDHC functionality.
-

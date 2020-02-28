@@ -69,7 +69,7 @@
 #  define GPIO_OUTPUT          (1 << GPIO_MODE_SHIFT) /* GPIO output */
 #  define GPIO_PERIPH          (2 << GPIO_MODE_SHIFT) /* Peripheral */
 
-/* Initial Ouptut Value:
+/* Initial Output Value:
  *
  *   GPIO OUTPUT 01V. .... .... ....  .... .... .... ....
  */
@@ -298,4 +298,4 @@ int imx_dump_gpio(uint32_t pinset, const char *msg);
 #if defined(__cplusplus)
 }
 #endif
-#endif  /* __ARCH_ARM_SRC_IMX6_IMX_GPIO_H */
+#endif /* __ARCH_ARM_SRC_IMX6_IMX_GPIO_H */

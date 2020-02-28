@@ -30,19 +30,21 @@ config ARCH_CHIP_MIMXRT1021DAG5A
 
 config ARCH_CHIP_MIMXRT1051DVL6A
 	bool "MIMXRT1051DVL6A"
-	select ARCH_FAMILY_MXRT105xDVL6A
+	select ARCH_FAMILY_MIMXRT105xDVL6A
 
 config ARCH_CHIP_MIMXRT1051CVL5A
 	bool "MIMXRT1051CVL5A"
-	select ARCH_FAMILY_IMIMXRT105xCVL5A
+	select ARCH_FAMILY_MIMXRT105xCVL5A
 
 config ARCH_CHIP_MIMXRT1052DVL6A
 	bool "MIMXRT1052DVL6A"
-	select ARCH_FAMILY_MXRT105xDVL6A
+	select ARCH_FAMILY_MIMXRT105xDVL6A
+	select IMXRT_HAVE_LCD
 
 config ARCH_CHIP_MIMXRT1052CVL5A
-	bool "MIMXRT1052DVL5A"
-	select ARCH_FAMILY_MIMXRT1052CVL5A
+	bool "MIMXRT1052CVL5A"
+	select ARCH_FAMILY_MIMXRT105xCVL5A
+	select IMXRT_HAVE_LCD
 
 config ARCH_CHIP_MIMXRT1061DVL6A
 	bool "MIMXRT1061DVL6A"
@@ -50,15 +52,17 @@ config ARCH_CHIP_MIMXRT1061DVL6A
 
 config ARCH_CHIP_MIMXRT1061CVL5A
 	bool "MIMXRT1061CVL5A"
-	select ARCH_FAMILY_IMIMXRT106xCVL5A
+	select ARCH_FAMILY_MIMXRT106xCVL5A
 
 config ARCH_CHIP_MIMXRT1062DVL6A
 	bool "MIMXRT1062DVL6A"
 	select ARCH_FAMILY_MXRT106xDVL6A
+	select IMXRT_HAVE_LCD
 
 config ARCH_CHIP_MIMXRT1062CVL5A
 	bool "MIMXRT1062DVL6A"
-	select ARCH_FAMILY_MIMXRT1062CVL5A
+	select ARCH_FAMILY_MIMXRT106xCVL5A
+	select IMXRT_HAVE_LCD
 
 endchoice # i.MX RT Chip Selection
 
@@ -88,14 +92,14 @@ config ARCH_FAMILY_IMXRT102x
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
 
-config ARCH_FAMILY_MXRT105xDVL6A
+config ARCH_FAMILY_MIMXRT105xDVL6A
 	bool
 	default n
 	select ARCH_FAMILY_IMXRT105x
 	---help---
 		i.MX RT1050 Crossover Processors for Consumer Products
 
-config ARCH_FAMILY_MIMXRT1052CVL5A
+config ARCH_FAMILY_MIMXRT105xCVL5A
 	bool
 	default n
 	select ARCH_FAMILY_IMXRT105x
@@ -111,7 +115,6 @@ config ARCH_FAMILY_IMXRT105x
 	select ARMV7M_HAVE_DCACHE
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
-	select IMXRT_HAVE_LCD
 
 config ARCH_FAMILY_MXRT106xDVL6A
 	bool
@@ -120,7 +123,7 @@ config ARCH_FAMILY_MXRT106xDVL6A
 	---help---
 		i.MX RT1060 Crossover Processors for Consumer Products
 
-config ARCH_FAMILY_MIMXRT1062CVL5A
+config ARCH_FAMILY_MIMXRT106xCVL5A
 	bool
 	default n
 	select ARCH_FAMILY_IMXRT106x
@@ -137,11 +140,14 @@ config ARCH_FAMILY_IMXRT106x
 	select ARMV7M_HAVE_ITCM
 	select ARMV7M_HAVE_DTCM
 	select IMXRT_HIGHSPEED_GPIO
-	select IMXRT_HAVE_LCD
 
 # Peripheral support
 
 config IMXRT_USDHC
+	bool
+	default n
+
+config IMXRT_FLEXIO
 	bool
 	default n
 
@@ -183,7 +189,7 @@ config IMXRT_EDMA
 config IMXRT_USBOTG
 	bool "USB EHCI"
 	default n
-	select USBHOST_HAVE_ASYNCH
+	select USBHOST_HAVE_ASYNCH if USBHOST
 	select USBHOST_ASYNCH
 
 config IMXRT_ENET
@@ -199,6 +205,128 @@ config IMXRT_LCD
 	depends on IMXRT_HAVE_LCD
 
 menu "FlexIO Peripherals"
+
+config IMXRT_FLEXIO1
+	bool "FLEXIO1"
+	default n
+	select IMXRT_FLEXIO
+
+if IMXRT_FLEXIO1
+
+choice
+	prompt "FLEXIO1 Clock Source"
+	default FLEXIO1_CLK_PLL3_SW
+	---help---
+		The clock source that drives the FLEXIO.
+		Used to set FLEXIO1_CLK_SEL.
+
+config FLEXIO1_CLK_PLL4
+	bool "PLL4"
+
+config FLEXIO1_CLK_PLL3_PFD2
+	bool "PLL3_PFD2"
+
+if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+
+config FLEXIO1_CLK_PLL5
+	bool "PLL5"
+
+endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+
+config FLEXIO1_CLK_PLL3_SW
+	bool "PLL3_SW_CLK"
+
+endchoice # FLEXIO1 Clock Source
+
+config FLEXIO1_CLK
+	int
+	default 0 if FLEXIO1_CLK_PLL4
+	default 1 if FLEXIO1_CLK_PLL3_PFD2
+	default 2 if FLEXIO1_CLK_PLL5
+	default 3 if FLEXIO1_CLK_PLL3_SW
+
+config FLEXIO1_PRED_DIVIDER
+	int "FLEXIO1 Predivider"
+	range 1 8
+	default 2
+	---help---
+		The clock source predivider value (FLEXIO1_PRED). [1-8]
+
+config FLEXIO1_PODF_DIVIDER
+	int "FLEXIO1 Divider"
+	range 1 8
+	default 8
+	---help---
+		The clock source divider value (FLEXIO1_PODF). [1-8]
+
+endif # IMXRT_FLEXIO1
+
+if ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
+
+config IMXRT_FLEXIO2
+	bool "FLEXIO2"
+	default n
+	select IMXRT_FLEXIO
+
+if IMXRT_FLEXIO2 || IMXRT_FLEXIO3
+
+choice
+	prompt "FLEXIO2 Clock Source"
+	default FLEXIO2_CLK_PLL3_SW
+	---help---
+		The clock source that drives the FLEXIO.
+		Used to set FLEXIO2_CLK_SEL.
+
+config FLEXIO2_CLK_PLL4
+	bool "PLL4"
+
+config FLEXIO2_CLK_PLL3_PFD2
+	bool "PLL3_PFD2"
+
+config FLEXIO2_CLK_PLL5
+	bool "PLL5"
+
+config FLEXIO2_CLK_PLL3_SW
+	bool "PLL3_SW_CLK"
+
+endchoice # FLEXIO2 Clock Source
+
+config FLEXIO2_CLK
+	int
+	default 0 if FLEXIO2_CLK_PLL4
+	default 1 if FLEXIO2_CLK_PLL3_PFD2
+	default 2 if FLEXIO2_CLK_PLL5
+	default 3 if FLEXIO2_CLK_PLL3_SW
+
+config FLEXIO2_PRED_DIVIDER
+	int
+	prompt "FLEXIO2 Predivider"
+	range 1 8
+	default 2
+	---help---
+		The clock source predivider value (FLEXIO2_PRED). [1-8]
+
+config FLEXIO2_PODF_DIVIDER
+	int
+	prompt "FLEXIO2 Divider"
+	range 1 8
+	default 8
+	---help---
+		The clock source divider value (FLEXIO2_PODF). [1-8]
+
+endif # IMXRT_FLEXIO2 || IMXRT_FLEXIO3
+
+if ARCH_FAMILY_IMXRT106x
+
+config IMXRT_FLEXIO3
+	bool "FLEXIO3"
+	default n
+	select IMXRT_FLEXIO
+    ---help---
+		FLEXIO3 uses the FLEXIO2 clock settings.
+
+endif # ARCH_FAMILY_IMXRT106x
+endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
 
 endmenu # FlexIO Peripherals
 
@@ -369,17 +497,17 @@ menuconfig IMXRT_LPSPI1
 	default n
 	select IMXRT_LPSPI
 
-config IMXRT_LPSPI2
+menuconfig IMXRT_LPSPI2
 	bool "LPSPI2"
 	default n
 	select IMXRT_LPSPI
 
-config IMXRT_LPSPI3
+menuconfig IMXRT_LPSPI3
 	bool "LPSPI3"
 	default n
 	select IMXRT_LPSPI
 
-config IMXRT_LPSPI4
+menuconfig IMXRT_LPSPI4
 	bool "LPSPI4"
 	default n
 	select IMXRT_LPSPI
@@ -719,7 +847,7 @@ endif # DEBUG_SENSORS
 
 endif # IMXRT_ENC4
 
-endif # ARCH_FAMILY_IMXRT105x | ARCH_FAMILY_IMXRT106x
+endif # ARCH_FAMILY_IMXRT105x || ARCH_FAMILY_IMXRT106x
 
 endmenu # ENC Peripherals
 
@@ -848,14 +976,14 @@ endmenu # IMXRT_ENET
 menu "Memory Configuration"
 
 config IMXRT_DTCM
-	bool "Enable DTCM"
-	default n
-	depends on !IMXRT_OCRAM_PRIMARY && EXPERIMENTAL
+	int "FLEXRAM DTCM Size in K"
+	default 128
+	depends on ARMV7M_HAVE_DTCM
 
 config IMXRT_ITCM
-	bool "Enable ITCM"
-	default n
-	depends on !IMXRT_OCRAM_PRIMARY && EXPERIMENTAL
+	int "FLEXRAM ITCM Size in K"
+	default 128
+	depends on ARMV7M_HAVE_ITCM
 
 config IMXRT_SEMC_SDRAM
 	bool "External SDRAM installed"
@@ -957,6 +1085,12 @@ config IMXRT_OCRAM_HEAP
 	depends on !IMXRT_OCRAM_PRIMARY
 	---help---
 		Select to add the entire OCRAM to the heap
+
+config IMXRT_DTCM_HEAP
+	bool "Add DTCM to heap"
+	depends on IMXRT_DTCM > 0
+	---help---
+		Select to add the entire DTCM to the heap
 
 config IMXRT_SDRAM_HEAP
 	bool "Add SDRAM to heap"
@@ -1229,10 +1363,10 @@ config IMXRT_LCD_VRAMBASE
 		Default: SDRAM
 
 config IMXRT_LCD_REFRESH_FREQ
-	int "LCD refesh rate (Hz)"
+	int "LCD refresh rate (Hz)"
 	default 60
 	---help---
-		LCD refesh rate (Hz)
+		LCD refresh rate (Hz)
 
 config IMXRT_LCD_BACKLIGHT
 	bool "Enable backlight"
@@ -1394,4 +1528,3 @@ endmenu # USB host controller driver (HCD) options
 endif # IMXRT_USBOTG && USBHOST
 
 endif # ARCH_CHIP_IMXRT
-

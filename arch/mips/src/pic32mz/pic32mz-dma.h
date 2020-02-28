@@ -101,7 +101,7 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 
 enum pic32mz_dma_chmode_e
 {
-  PIC32MZ_DMA_MODE_BASIC   = 1 << 0U, /* Basic transfert mode */
+  PIC32MZ_DMA_MODE_BASIC   = 1 << 0U, /* Basic transfer mode */
   PIC32MZ_DMA_MODE_AUTOEN  = 1 << 1U, /* Channel Auto-Enable mode */
   PIC32MZ_DMA_MODE_PMATCH  = 1 << 2U, /* Pattern Match termination mode */
   PIC32MZ_DMA_MODE_CHCHAIN = 1 << 3U, /* Channel chaining mode */
@@ -117,7 +117,7 @@ enum pic32mz_dma_event_e
   PIC32MZ_DMA_INT_ABORT     = 1 << 1U,  /* Transfer abort interrupt */
   PIC32MZ_DMA_INT_CELLDONE  = 1 << 2U,  /* Cell transfer complete interrupt */
   PIC32MZ_DMA_INT_BLOCKDONE = 1 << 3U,  /* Block transfer complete interrupt */
-  PIC32MZ_DMA_INT_DESTHALF  = 1 << 4U,  /* Destination half full interrup t*/
+  PIC32MZ_DMA_INT_DESTHALF  = 1 << 4U,  /* Destination half full interrupt */
   PIC32MZ_DMA_INT_DESTDONE  = 1 << 5U,  /* Destination done interrupt */
   PIC32MZ_DMA_INT_SRCHALF   = 1 << 6U,  /* Source half full interrupt */
   PIC32MZ_DMA_INT_SRCDONE   = 1 << 7U   /* Source done interrupt */
@@ -333,4 +333,3 @@ void pic32mz_dma_dump(DMA_HANDLE handle, const struct pic32mz_dmaregs_s *regs,
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_MIPS_SRC_PIC32MZ_PIC32MZ_DMA_H */
-

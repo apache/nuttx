@@ -46,10 +46,10 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_ARCH_CHIP_S32K11X)
-#  include <arch/chip/s32k11x_irq.h>
-#elif defined(CONFIG_ARCH_CHIP_S32K14X)
+#if defined(CONFIG_ARCH_CHIP_S32K14X)
 #  include <arch/chip/s32k14x_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_S32K11X)
+#  include <arch/chip/s32k11x_irq.h>
 #else
 #  error Unrecognized S32K1XX part
 #endif

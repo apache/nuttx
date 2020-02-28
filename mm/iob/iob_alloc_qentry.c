@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -133,9 +132,9 @@ static FAR struct iob_qentry_s *iob_allocwait_qentry(void)
       ret = nxsem_wait_uninterruptible(&g_qentry_sem);
       if (ret >= 0)
         {
-          /* When we wake up from wait successfully, an I/O buffer chain container was
-           * freed and we hold a count for one IOB.  Unless somehting
-           * failed, we should have an IOB waiting for us in the
+          /* When we wake up from wait successfully, an I/O buffer chain
+           * container was freed and we hold a count for one IOB.  Unless
+           * something failed, we should have an IOB waiting for us in the
            * committed list.
            */
 

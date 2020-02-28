@@ -8,6 +8,7 @@ chdir          NXchdir
 clearenv       NXclearenv
 clock          NXclock
 clock_gettime  NXclock_gettime
+clock_settime  NXclock_settime
 close          NXclose
 closedir       NXclosedir
 connect        NXconnect
@@ -94,10 +95,13 @@ sched_setparam NXsched_setparam
 sched_yield    NXsched_yield
 seekdir        NXseekdir
 select         NXselect
+sem_destroy    NXsem_destroy
 sem_getvalue   NXsem_getvalue
 sem_init       NXsem_init
 sem_post       NXsem_post
 sem_wait       NXsem_wait
+sem_timedwait  NXsem_timedwait
+sem_trywait    NXsem_trywait
 send           NXsend
 sendto         NXsendto
 setenv         NXsetenv
@@ -131,6 +135,7 @@ strlen         NXstrlen
 strncasecmp    NXstrncasecmp
 strncmp        NXstrncmp
 strncpy        NXstrncpy
+strnlen        NXstrnlen
 strrchr        NXstrrchr
 strtok_r       NXstrtok_r
 strtol         NXstrtol
@@ -148,5 +153,8 @@ usleep         NXusleep
 vasprintf      NXvasprintf
 vfork          NXvfork
 vfprintf       NXvfprintf
+vsyslog        NXvsyslog
+vsnprintf      NXvsnprintf
 write          NXwrite
+waitpid        NXwaitpid
 zmalloc        NXzmalloc

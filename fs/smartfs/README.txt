@@ -68,7 +68,7 @@ General operation
   Only physical sectors that are in use will have a logical assignment.
 
   Also contained in the sector header is a flags byte and a sequence number.
-  When a sector is allocated, the COMMITED flag will be "set" (changed from
+  When a sector is allocated, the COMMITTED flag will be "set" (changed from
   erase state to non-erase state) to indicate the sector data is valid.  When
   a sector's data needs to be deleted, the RELEASED flag will be "set" to
   indicate the sector is no longer in use.  This is done because the erase

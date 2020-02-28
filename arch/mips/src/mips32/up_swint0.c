@@ -113,7 +113,7 @@ static void dispatch_syscall(void)
     Get the offset of the stub for this syscall
     Load the entry of the stub for this syscall
     Call the stub
-    Restore regsisters
+    Restore registers
     Return from the syscall
   );
 #  endif
@@ -138,7 +138,7 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
   uint32_t *regs = (uint32_t *)context;
   uint32_t cause;
 
-  DEBUGASSERT(regs && regs == g_current_regs);
+  DEBUGASSERT(regs && regs == CURRENT_REGS);
 
   /* Software interrupt 0 is invoked with REG_A0 (REG_R4) = system call
    * command and REG_A1-3 and REG_T0-2 (REG_R5-10) = variable number of
@@ -173,7 +173,7 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
       case SYS_restore_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0);
-          g_current_regs = (uint32_t *)regs[REG_A1];
+          CURRENT_REGS = (uint32_t *)regs[REG_A1];
         }
         break;
 
@@ -197,7 +197,7 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
         {
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
           up_copystate((uint32_t *)regs[REG_A1], regs);
-          g_current_regs = (uint32_t *)regs[REG_A2];
+          CURRENT_REGS = (uint32_t *)regs[REG_A2];
         }
         break;
 
@@ -227,7 +227,7 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
            * the original mode.
            */
 
-          g_current_regs[REG_EPC] = rtcb->xcp.syscall[index].sysreturn;
+          CURRENT_REGS[REG_EPC] = rtcb->xcp.syscall[index].sysreturn;
 #error "Missing logic -- need to restore the original mode"
           rtcb->xcp.nsyscalls     = index;
 
@@ -254,7 +254,7 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
 
           /* Verify that the SYS call number is within range */
 
-          DEBUGASSERT(g_current_regs[REG_A0] < SYS_maxsyscall);
+          DEBUGASSERT(CURRENT_REGS[REG_A0] < SYS_maxsyscall);
 
           /* Make sure that we got here that there is a no saved syscall
            * return address.  We cannot yet handle nested system calls.
@@ -273,7 +273,7 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
 
           /* Offset R0 to account for the reserved values */
 
-          g_current_regs[REG_R0] -= CONFIG_SYS_RESERVED;
+          CURRENT_REGS[REG_R0] -= CONFIG_SYS_RESERVED;
 
           /* Indicate that we are in a syscall handler. */
 
@@ -288,10 +288,10 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
   /* Report what happened.  That might difficult in the case of a context switch */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-  if (regs != g_current_regs)
+  if (regs != CURRENT_REGS)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      up_registerdump((const uint32_t *)g_current_regs);
+      up_registerdump((const uint32_t *)CURRENT_REGS);
     }
   else
     {
@@ -299,15 +299,9 @@ int up_swint0(int irq, FAR void *context, FAR void *arg)
     }
 #endif
 
-  /* Clear the pending software interrupt 0 in the PIC32 interrupt block.
-   * REVISIT:  Does this PIC32 logic really have to be in the MIPS32 code?
-   */
+  /* Clear the pending software interrupt 0 */
 
-#if defined(CONFIG_ARCH_CHIP_PIC32MX)
-  up_clrpend_irq(PIC32MX_IRQSRC_CS0);
-#elif defined(CONFIG_ARCH_CHIP_PIC32MZ)
-  up_clrpend_irq(PIC32MZ_IRQ_CS0);
-#endif
+  up_clrpend_sw0();
 
   /* And reset the software interrupt bit in the MIPS CAUSE register */
 

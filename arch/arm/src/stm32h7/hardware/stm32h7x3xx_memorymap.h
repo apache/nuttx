@@ -234,8 +234,8 @@
 #define STM32_SYSMEM_UID       0x1ff1e800
 
 /* The DBGMCU registers are accessible to the debugger via the APB-D bus
- * at base address 0xe00e1000. They are also accessible by the processor 
- * core at base address 0x5c001000. 
+ * at base address 0xe00e1000. They are also accessible by the processor
+ * core at base address 0x5c001000.
  */
 
 #define STM32_DEBUGMCU_BASE    0x5c001000

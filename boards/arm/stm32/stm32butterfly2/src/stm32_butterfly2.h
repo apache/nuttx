@@ -33,7 +33,7 @@
  ****************************************************************************/
 
 #ifndef __BOARDS_ARM_STM32_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H
-#define __BOARDS_ARM_STM32_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H 1
+#define __BOARDS_ARM_STM32_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H
 
 /*****************************************************************************
  * Included Files
@@ -142,4 +142,3 @@ static inline int stm32_adc_setup(void) { return 0; }
 #endif
 
 #endif /* __BOARDS_ARM_STM32_STM32_BUTTERFLY2_SRC_STM32_BUTTERFLY2_H */
-

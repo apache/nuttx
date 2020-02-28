@@ -51,4 +51,3 @@ DEPPATH += --dep-path wchar
 VPATH += :wchar
 
 endif
-

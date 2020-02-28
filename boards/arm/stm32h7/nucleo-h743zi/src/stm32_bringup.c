@@ -157,7 +157,7 @@ int stm32_bringup(void)
    */
 
   ccm_procfs_register();
-#endif  /* CONFIG_STM32_CCM_PROCFS */
+#endif /* CONFIG_STM32_CCM_PROCFS */
 
   /* Mount the procfs file system */
 
@@ -168,7 +168,7 @@ int stm32_bringup(void)
              "ERROR: Failed to mount the PROC filesystem: %d (%d)\n",
              ret, errno);
     }
-#endif  /* CONFIG_FS_PROCFS */
+#endif /* CONFIG_FS_PROCFS */
 
 #ifdef HAVE_RTC_DRIVER
   /* Instantiate the STM32 lower-half RTC driver */
@@ -204,7 +204,7 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
     }
-#endif  /* CONFIG_BUTTONS */
+#endif /* CONFIG_BUTTONS */
 
 #ifdef CONFIG_ADC
   /* Initialize ADC and register the ADC driver. */
@@ -214,7 +214,7 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
     }
-#endif  /* CONFIG_ADC */
+#endif /* CONFIG_ADC */
 
 #ifdef CONFIG_DEV_GPIO
   /* Register the GPIO driver */
@@ -233,7 +233,7 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize LSM6DSL driver: %d\n", ret);
     }
-#endif  /* CONFIG_SENSORS_LSM6DSL */
+#endif /* CONFIG_SENSORS_LSM6DSL */
 
 #ifdef CONFIG_SENSORS_LSM9DS1
   ret = stm32_lsm9ds1_initialize();
@@ -241,7 +241,7 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize LSM9DS1 driver: %d\n", ret);
     }
-#endif  /* CONFIG_SENSORS_LSM6DSL */
+#endif /* CONFIG_SENSORS_LSM6DSL */
 
 #ifdef CONFIG_SENSORS_LSM303AGR
   ret = stm32_lsm303agr_initialize("/dev/lsm303mag0");
@@ -249,7 +249,7 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize LSM303AGR driver: %d\n", ret);
     }
-#endif  /* CONFIG_SENSORS_LSM303AGR */
+#endif /* CONFIG_SENSORS_LSM303AGR */
 
 #ifdef CONFIG_PCA9635PW
   /* Initialize the PCA9635 chip */
@@ -267,7 +267,7 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize wireless driver: %d\n", ret);
     }
-#endif  /* CONFIG_WL_NRF24L01 */
+#endif /* CONFIG_WL_NRF24L01 */
 
 #if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_CONSOLE)
   /* Initialize CDCACM */
@@ -279,7 +279,17 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: cdcacm_initialize failed: %d\n", ret);
     }
-#endif  /* CONFIG_CDCACM & !CONFIG_CDCACM_CONSOLE */
+#endif /* CONFIG_CDCACM & !CONFIG_CDCACM_CONSOLE */
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
 
   return OK;
 }

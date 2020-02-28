@@ -51,7 +51,6 @@
 #include <string.h>
 #include <fcntl.h>
 #include <dirent.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <queue.h>

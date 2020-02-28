@@ -82,7 +82,7 @@ extern "C"
 #define CXD56_SDHCI_FEVT_OFFSET       (0x0050) /* Force Event Register */
 #define CXD56_SDHCI_ADMAES_OFFSET     (0x0054) /* ADMA Error Status Register */
 #define CXD56_SDHCI_ADSADDR_OFFSET    (0x0058) /* ADMA System Address Register */
-#define CXD56_SDHCI_VENDSPEC_OFFSET   (0x0110) /* Vender Specific Control */
+#define CXD56_SDHCI_VENDSPEC_OFFSET   (0x0110) /* Vendor Specific Control */
 #define CXD56_SDHCI_OTHERIOLL_OFFSET  (0x021C) /* IO Pin Control       */
 #define CXD56_SDHCI_USERDEF1CTL_OFFSET (0x0270) /* User Define1 Control Register */
 #define CXD56_SDHCI_USERDEF2CTL_OFFSET (0x0274) /* User Define2 Control Register */

@@ -113,8 +113,8 @@
 #define SOSC_STABILIZATION_TIMEOUT 3205000
 #define SPLL_STABILIZATION_TIMEOUT 1000
 
-/* System PLL reference clock after SCG_SPLLCFG[PREDIV] should be in the range of
- * SCG_SPLL_REF_MIN to SCG_SPLL_REF_MAX.
+/* System PLL reference clock after SCG_SPLLCFG[PREDIV] should be in the
+ * range of SCG_SPLL_REF_MIN to SCG_SPLL_REF_MAX.
  */
 
 #define SCG_SPLL_REF_MIN 8000000
@@ -221,7 +221,7 @@ static uint32_t g_tclkfreq[NUMBER_OF_TCLK_INPUTS];  /* TCLKx clocks */
  * Returned Value:
  *   The current system clock source.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t s32k1xx_get_scgclk_source(void)
 {
@@ -240,7 +240,7 @@ static inline uint32_t s32k1xx_get_scgclk_source(void)
  * Returned Value:
  *   The current running mode.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static enum scg_system_clock_mode_e s32k1xx_get_runmode(void)
 {
@@ -262,7 +262,7 @@ static enum scg_system_clock_mode_e s32k1xx_get_runmode(void)
         mode = SCG_SYSTEM_CLOCK_MODE_VLPR;
         break;
 
-      /* Hight speed run mode */
+      /* High speed run mode */
 
       case SMC_PMSTAT_PMSTAT_HSRUN:
         mode = SCG_SYSTEM_CLOCK_MODE_HSRUN;
@@ -293,7 +293,7 @@ static enum scg_system_clock_mode_e s32k1xx_get_runmode(void)
  * Returned Value:
  *   The SOSC frequency.  Zero is returned if the SOSC is invalid.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static uint32_t s32k1xx_get_soscfreq(void)
 {
@@ -321,7 +321,7 @@ static uint32_t s32k1xx_get_soscfreq(void)
  * Returned Value:
  *   The SIRC frequency.  Zero is returned if the SIRC is invalid.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static uint32_t s32k1xx_get_sircfreq(void)
 {
@@ -333,7 +333,7 @@ static uint32_t s32k1xx_get_sircfreq(void)
 
       if ((getreg32(S32K1XX_SCG_SIRCCFG) & SCG_SIRCCFG_RANGE) != 0)
         {
-          return SCG_SIRQ_HIGHRANGE_FREQUENCY;
+          return SCG_SIRC_HIGHRANGE_FREQUENCY;
         }
     }
 
@@ -352,7 +352,7 @@ static uint32_t s32k1xx_get_sircfreq(void)
  * Returned Value:
  *   The FIRC frequency.  Zero is returned if the FIRC is invalid.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static uint32_t s32k1xx_get_fircfreq(void)
 {
@@ -360,7 +360,7 @@ static uint32_t s32k1xx_get_fircfreq(void)
 
   if ((getreg32(S32K1XX_SCG_FIRCCSR) & SCG_FIRCCSR_FIRCVLD) != 0)
     {
-      return SCG_FIRQ_FREQUENCY0;
+      return SCG_FIRC_FREQUENCY0;
     }
   else
     {
@@ -380,7 +380,7 @@ static uint32_t s32k1xx_get_fircfreq(void)
  * Returned Value:
  *   The SPLL frequency.  Zero is returned if the SPLL is invalid.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_HAVE_SPLL
 static uint32_t s32k1xx_get_spllfreq(void)
@@ -429,7 +429,7 @@ static uint32_t s32k1xx_get_spllfreq(void)
  * Returned Values:
  *   The requested clock source frequency.  Zero is returned on any error.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static uint32_t s32k1xx_get_srcfreq(enum scg_system_clock_src_e src)
 {
@@ -476,7 +476,7 @@ static uint32_t s32k1xx_get_srcfreq(enum scg_system_clock_src_e src)
  *   Zero (OK) is returned a success;  A negated errno value is returned on
  *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int
 s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
@@ -546,7 +546,7 @@ s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
           break;
 
 #ifdef CONFIG_S32K1XX_HAVE_HSRUN
-        case SCG_SYSTEM_CLOCK_MODE_HSRUN:     /*!< High Speed Run mode.     */
+        case SCG_SYSTEM_CLOCK_MODE_HSRUN:     /* High Speed Run mode. */
           DEBUGASSERT(SCG_SYSTEM_CLOCK_SRC_FIRC == config->src ||
                       SCG_SYSTEM_CLOCK_SRC_SYS_PLL == config->src);
 
@@ -574,6 +574,7 @@ s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
           break;
 #endif
         default:
+
           /* Invalid mode */
 
           DEBUGPANIC();
@@ -596,7 +597,7 @@ s32k1xx_set_sysclk_configuration(enum scg_system_clock_mode_e mode,
  *   Zero (OK) is returned a success;  A negated errno value is returned on
  *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int
 s32k1xx_transition_systemclock(const struct scg_system_clock_config_s *cfg)
@@ -621,7 +622,7 @@ s32k1xx_transition_systemclock(const struct scg_system_clock_config_s *cfg)
   if (ret == OK)
     {
       /* Wait for system clock to transition.
-      *
+       *
        * e10777: The SCG_RCCR[SCS] and SCG_HCCR[SCS] may have a corrupted
        * status during the interval when the system clock is switching.
        * Workaround: The SCS field should be read twice by the software to
@@ -662,7 +663,7 @@ s32k1xx_transition_systemclock(const struct scg_system_clock_config_s *cfg)
  *   Zero (OK) is returned a success;  A negated errno value is returned on
  *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int s32k1xx_firc_config(bool enable,
                                const struct scg_firc_config_s *firccfg)
@@ -690,7 +691,7 @@ static int s32k1xx_firc_config(bool enable,
       regval &= ~SCG_FIRCCSR_LK;
       putreg32(regval, S32K1XX_SCG_FIRCCSR);
 
-     /* Disable monitor, disable clock and clear error. */
+      /* Disable monitor, disable clock and clear error. */
 
       putreg32(SCG_FIRCCSR_FIRCERR, S32K1XX_SCG_FIRCCSR);
     }
@@ -766,7 +767,7 @@ static int s32k1xx_firc_config(bool enable,
  *   Zero (OK) is returned a success;  A negated errno value is returned on
  *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int s32k11_firc_clocksource(void)
 {
@@ -817,7 +818,7 @@ static int s32k11_firc_clocksource(void)
  *   Zero (OK) is returned a success;  A negated errno value is returned on
  *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int s32k1xx_sirc_config(bool enable,
                                const struct scg_sirc_config_s *sirccfg)
@@ -928,7 +929,7 @@ static int s32k1xx_sirc_config(bool enable,
  *   Zero (OK) is returned a success;  A negated errno value is returned on
  *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int s32k1xx_sosc_config(bool enable,
                                const struct scg_sosc_config_s *sosccfg)
@@ -1058,7 +1059,7 @@ static int s32k1xx_sosc_config(bool enable,
  *   Zero (OK) is returned a success;  A negated errno value is returned on
  *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_HAVE_SPLL
 static int s32k1xx_spll_config(bool enable,
@@ -1151,6 +1152,7 @@ static int s32k1xx_spll_config(bool enable,
             break;
 
           default:
+
             /* Invalid monitor mode */
 
             DEBUGPANIC();
@@ -1188,7 +1190,7 @@ static int s32k1xx_spll_config(bool enable,
  *   Zero (OK) is returned a success;  A negated errno value is returned on
  *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int s32k1xx_configure_scgmodules(const struct scg_config_s *scgcfg)
 {
@@ -1203,12 +1205,12 @@ static int s32k1xx_configure_scgmodules(const struct scg_config_s *scgcfg)
   ret = s32k1xx_sirc_config(scgcfg->sirc.initialize, &scgcfg->sirc);
   if (ret == OK)
     {
-        ret = s32k1xx_sosc_config(scgcfg->sosc.initialize, &scgcfg->sosc);
+      ret = s32k1xx_sosc_config(scgcfg->sosc.initialize, &scgcfg->sosc);
 #ifdef CONFIG_S32K1XX_HAVE_SPLL
-        if (ret == OK)
-          {
-            ret = s32k1xx_spll_config(scgcfg->spll.initialize, &scgcfg->spll);
-          }
+      if (ret == OK)
+        {
+          ret = s32k1xx_spll_config(scgcfg->spll.initialize, &scgcfg->spll);
+        }
 #endif
     }
 
@@ -1298,7 +1300,8 @@ static int s32k1xx_configure_scgmodules(const struct scg_config_s *scgcfg)
             {
               /* Configure the remaining clock source (FIRC). */
 
-              ret = s32k1xx_firc_config(scgcfg->firc.initialize, &scgcfg->firc);
+              ret = s32k1xx_firc_config(scgcfg->firc.initialize,
+                                        &scgcfg->firc);
               if (ret == OK)
                 {
                   /* Transition to the next system clock source. */
@@ -1325,7 +1328,8 @@ static int s32k1xx_configure_scgmodules(const struct scg_config_s *scgcfg)
             {
               /* Configure the remaining clock source (FIRC) */
 
-              ret = s32k1xx_firc_config(scgcfg->firc.initialize, &scgcfg->firc);
+              ret = s32k1xx_firc_config(scgcfg->firc.initialize,
+                                        &scgcfg->firc);
             }
         }
     }
@@ -1346,7 +1350,7 @@ static int s32k1xx_configure_scgmodules(const struct scg_config_s *scgcfg)
  *   Zero (OK) is returned a success;  A negated errno value is returned on
  *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static int s32k1xx_scg_config(const struct scg_config_s *scgcfg)
 {
@@ -1414,7 +1418,7 @@ static int s32k1xx_scg_config(const struct scg_config_s *scgcfg)
         }
     }
 
-    return ret;
+  return ret;
 }
 
 /****************************************************************************
@@ -1429,7 +1433,7 @@ static int s32k1xx_scg_config(const struct scg_config_s *scgcfg)
  * Returned Value:
  *   None.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void s32k1xx_sim_config(const struct sim_clock_config_s *simcfg)
 {
@@ -1590,7 +1594,7 @@ static void s32k1xx_sim_config(const struct sim_clock_config_s *simcfg)
  * Returned Value:
  *   None.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 static void s32k1xx_pmc_config(const struct pmc_config_s *pmccfg)
 {
@@ -1643,7 +1647,7 @@ static void s32k1xx_pmc_config(const struct pmc_config_s *pmccfg)
  *   Zero (OK) is returned a success;  A negated errno value is returned on
  *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 int s32k1xx_clockconfig(const struct clock_configuration_s *clkcfg)
 {
@@ -1685,7 +1689,7 @@ int s32k1xx_clockconfig(const struct clock_configuration_s *clkcfg)
  *   The current value of the CORE clock frequency.  Zero is returned on any
  *   failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint32_t s32k1xx_get_coreclk(void)
 {
@@ -1722,7 +1726,7 @@ uint32_t s32k1xx_get_coreclk(void)
 
         /* Slow IRC high range clock (8 MHz ) */
 
-        coreclk = SCG_SIRQ_HIGHRANGE_FREQUENCY;
+        coreclk = SCG_SIRC_HIGHRANGE_FREQUENCY;
         break;
 
       case SCG_CSR_SCS_FIRC:  /* Fast IRC */
@@ -1734,7 +1738,7 @@ uint32_t s32k1xx_get_coreclk(void)
 
         /* Fast IRC is trimmed to 48 MHz */
 
-        coreclk = SCG_FIRQ_FREQUENCY0;
+        coreclk = SCG_FIRC_FREQUENCY0;
         break;
 
 #ifdef CONFIG_S32K1XX_HAVE_SPLL
@@ -1767,10 +1771,10 @@ uint32_t s32k1xx_get_coreclk(void)
  *   type - Identifies the system clock of interest
  *
  * Returned Values:
- *   The current value of the system clock frequency.  Zero is returned on any
- *   failure.
+ *   The current value of the system clock frequency.  Zero is returned on
+ *   any failure.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 uint32_t s32k1xx_get_sysclk(enum scg_system_clock_type_e type)
 {
@@ -1937,6 +1941,7 @@ uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
         break;
 
       default:
+
           /* Invalid async clock source */
 
           freq = 0;
@@ -1955,4 +1960,3 @@ uint32_t s32k1xx_get_asnchfreq(enum clock_names_e clksrc,
 
   return freq;
 }
-

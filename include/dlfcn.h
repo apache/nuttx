@@ -44,7 +44,7 @@
 #include <sys/types.h>
 
 /****************************************************************************
- * Pre-processor Definitons
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* The dlfcn.h header defines at least the following macros for use in the
@@ -109,7 +109,7 @@ extern "C"
  *
  * Description:
  *   dlsymtab() is a non-standard shared library interface.  It selects the
- *   symbol table to use when binding a shared libary to the base firmware
+ *   symbol table to use when binding a shared library to the base firmware
  *   which may be in FLASH memory.
  *
  * Input Parameters:

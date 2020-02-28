@@ -49,7 +49,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -180,7 +179,7 @@ struct sam_spics_s
 #endif
 };
 
-/* Type of board-specific SPI status fuction */
+/* Type of board-specific SPI status function */
 
 typedef void (*select_t)(uint32_t devid, bool selected);
 
@@ -191,7 +190,7 @@ typedef void (*select_t)(uint32_t devid, bool selected);
 struct sam_spidev_s
 {
   uint32_t base;               /* SPI controller register base address */
-  sem_t spisem;                /* Assures mutually exclusive acess to SPI */
+  sem_t spisem;                /* Assures mutually exclusive access to SPI */
   select_t select;             /* SPI select callout */
   bool initialized;            /* TRUE: Controller has been initialized */
 #ifdef CONFIG_SAMA5_SPI_DMA
@@ -569,7 +568,7 @@ static inline void spi_flush(struct sam_spidev_s *spi)
  *   Map the chip select number to the bit-set PCS field used in the SPI
  *   registers.  A chip select number is used for indexing and identifying
  *   chip selects.  However, the chip select information is represented by
- *   a bit set in the SPI regsisters.  This function maps those chip select
+ *   a bit set in the SPI registers.  This function maps those chip select
  *   numbers to the correct bit set:
  *
  *    CS  Returned   Spec    Effective
@@ -844,12 +843,12 @@ static inline uintptr_t spi_physregaddr(struct sam_spics_s *spics,
  * Name: spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -1213,7 +1212,7 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
  *   that performs DMA SPI transfers, but only when a larger block of
  *   data is being transferred.  And (2) another version that does polled
  *   SPI transfers.  When CONFIG_SAMA5_SPI_DMA=n the latter is the only
- *   version avaialable; when CONFIG_SAMA5_SPI_DMA=y, this version is only
+ *   version available; when CONFIG_SAMA5_SPI_DMA=y, this version is only
  *   used for short SPI transfers and gets renamed as spi_exchange_nodma).
  *
  * Input Parameters:
@@ -1492,7 +1491,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   spi_txdma_sample(spics, DMA_AFTER_START);
 
-  /* Wait for DMA completion.  This is done in a loop becaue there my be
+  /* Wait for DMA completion.  This is done in a loop because there my be
    * false alarm semaphore counts that cause sam_wait() not fail to wait
    * or to wake-up prematurely (for example due to the receipt of a signal).
    * We know that the DMA has completed when the result is anything other
@@ -1528,7 +1527,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       /* Not that we might be awkened before the wait is over due to
        * residual counts on the semaphore.  So, to handle, that case,
-       * we loop until somthing changes the DMA result to any value other
+       * we loop until something changes the DMA result to any value other
        * than -EBUSY.
        */
     }

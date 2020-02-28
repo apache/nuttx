@@ -67,7 +67,7 @@
 
 #define TPID_8021QVLAN   0x8100
 
-/* These are some of the types then associated with withe QVLAN tagged
+/* These are some of the types associated with QVLAN tagged
  * Ethernet packets.
  */
 

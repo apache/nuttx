@@ -46,7 +46,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -492,7 +491,7 @@ static int lc823450_i2c_reset(FAR struct i2c_master_s *dev)
   modifyreg32(priv->config->base + I2CCTL, I2C_CTL_FMODE, I2C_CTL_FMODE);
   return OK;
 }
-#endif  /* CONFIG_I2C_RESET */
+#endif /* CONFIG_I2C_RESET */
 
 /****************************************************************************
  * Name: lc823450_i2c_enableirq
@@ -744,7 +743,7 @@ static int lc823450_i2c_poll(FAR struct lc823450_i2c_priv_s *priv)
             }
           else
             {
-              /* We need restart from START conditon. If transfer direction is different
+              /* We need restart from START condition. If transfer direction is different
                * between current message and next message, restart is necessary.
                */
 

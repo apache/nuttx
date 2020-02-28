@@ -8385,4 +8385,3 @@ static const struct imxrt_daisy_t g_daisy_select[] =
     },
   },
 };
-

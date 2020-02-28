@@ -1026,7 +1026,7 @@ enum stm32_pwm_output_e
 
 #ifdef CONFIG_STM32_PWM_LL_OPS
 
-/* This structure provides the publicly visable representation of the
+/* This structure provides the publicly visible representation of the
  * "lower-half" PWM driver structure.
  */
 
@@ -1042,7 +1042,7 @@ struct stm32_pwm_dev_s
 
   FAR const struct stm32_pwm_ops_s *llops;
 
-  /* Require cast-compatibility with private "lower-half" PWM strucutre */
+  /* Require cast-compatibility with private "lower-half" PWM structure */
 };
 
 /* Low-level operations for PWM */
@@ -1107,7 +1107,7 @@ struct stm32_pwm_ops_s
 #endif
 };
 
-#endif  /* CONFIG_STM32_PWM_LL_OPS */
+#endif /* CONFIG_STM32_PWM_LL_OPS */
 
 /************************************************************************************
  * Public Data

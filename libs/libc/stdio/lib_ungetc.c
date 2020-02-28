@@ -89,4 +89,3 @@ int ungetc(int c, FAR FILE *stream)
       return EOF;
     }
 }
-

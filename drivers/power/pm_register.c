@@ -96,4 +96,3 @@ int pm_register(FAR struct pm_callback_s *callbacks)
 }
 
 #endif /* CONFIG_PM */
-

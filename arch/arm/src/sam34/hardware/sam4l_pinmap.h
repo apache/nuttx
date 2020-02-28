@@ -118,7 +118,7 @@
 #define GPIO_ADCIFE_AD14       (GPIO_FUNCA | GPIO_PORTC | GPIO_PIN14)
 #define GPIO_ADCIFE_TRIGGER    (GPIO_FUNCE | GPIO_PORTA | GPIO_PIN5)
 
-/*  Capacitive Touch Module B */
+/* Capacitive Touch Module B */
 
 #define GPIO_CATB_DIS_1        (GPIO_FUNCG | GPIO_PORTA | GPIO_PIN12)
 #define GPIO_CATB_DIS_2        (GPIO_FUNCG | GPIO_PORTA | GPIO_PIN2)

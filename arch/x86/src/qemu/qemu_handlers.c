@@ -224,4 +224,3 @@ uint32_t *irq_handler(uint32_t *regs)
   return ret;
 #endif
 }
-

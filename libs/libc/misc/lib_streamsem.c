@@ -42,7 +42,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <semaphore.h>
 #include <errno.h>
 
 #include <nuttx/semaphore.h>

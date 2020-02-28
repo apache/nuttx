@@ -96,4 +96,3 @@ SECTIONS
 }
 
 PROVIDE(_fstack = ORIGIN(main_ram) + LENGTH(main_ram) - 4);
-

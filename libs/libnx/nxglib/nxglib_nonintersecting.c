@@ -127,4 +127,3 @@ void nxgl_nonintersecting(FAR struct nxgl_rect_s result[4],
   result[NX_RIGHT_NDX].pt2.x  = rect1->pt2.x;
   result[NX_RIGHT_NDX].pt2.y  = intersection.pt2.y;
 }
-

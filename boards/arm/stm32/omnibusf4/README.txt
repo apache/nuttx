@@ -79,4 +79,3 @@ Build Instructions
 The boards/arm/stm32/omnibusf4/nsh/defconfig file creates a basic setup, and
 includes drivers for all supported onboard chips. The console and
 command prompt are sent to USART3.
-

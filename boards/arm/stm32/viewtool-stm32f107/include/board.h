@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_INCLUDE_BOARD_H 1
+#define __BOARDS_ARM_STM32_VIEWTOOL_STM32F107_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -61,7 +61,7 @@
 #elif defined(CONFIG_ARCH_CHIP_STM32F103VC)
 # include <arch/board/board-stm32f103vct6.h>
 #else
-#  error Unregnized STM32 chip
+#  error Unrecognized STM32 chip
 #endif
 
 /* LED definitions ******************************************************************/

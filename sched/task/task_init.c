@@ -155,4 +155,3 @@ errout:
   set_errno(errcode);
   return ERROR;
 }
-

@@ -547,7 +547,7 @@ struct READDIR3args
  *
  *  File ID (8 bytes)
  *  Name length (4 bytes)
- *  Name string (varaiable size but in multiples of 4 bytes)
+ *  Name string (variable size but in multiples of 4 bytes)
  *  Cookie (8 bytes)
  *  next entry (4 bytes)
  */
@@ -571,4 +571,3 @@ struct FS3args
 };
 
 #endif /* __FS_NFS_NFS_PROTO_H */
-

@@ -130,4 +130,4 @@ void arm_data_initialize(void);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_A_ARM_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_A_ARM_H */

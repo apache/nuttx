@@ -323,7 +323,7 @@ struct lcd_regs_s
 
 struct stm3210e_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 
@@ -625,7 +625,7 @@ static uint16_t stm3210e_readshift(FAR uint16_t *accum)
 
   value = red | green | blue;
 
-  /* This is wierd... If blue is zero, then red+green values are off by 0x20.
+  /* This is weird... If blue is zero, then red+green values are off by 0x20.
    * Except that both 0x0000 and 0x0020 can map to 0x0000.  Need to revisit
    * this!!!!!!!!!!!  I might be misinterpreting some of the data that I have.
    */
@@ -894,7 +894,7 @@ static int stm3210e_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
     }
 #else /* CONFIG_LCD_RPORTRAIT */
   /* Convert coordinates.  (Swap row and column.  This is done implicitly).
-   * Whic edge of the display is the "top"?
+   * Which edge of the display is the "top"?
    */
 
   col = (STM3210E_XRES-1) - col;
@@ -1655,7 +1655,7 @@ static void stm3210e_backlight(void)
 
   putreg16(prescaler-1, STM32_TIM1_PSC);
 
-  /* Generate an update event to reload the Prescaler value immediatly */
+  /* Generate an update event to reload the Prescaler value immediately */
 
   putreg16(ATIM_EGR_UG, STM32_TIM1_EGR);
 
@@ -1816,7 +1816,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
  * Name:  board_lcd_uninitialize
  *
  * Description:
- *   Unitialize the LCD support
+ *   Uninitialize the LCD support
  *
  ****************************************************************************/
 
@@ -1833,7 +1833,7 @@ void board_lcd_uninitialize(void)
  *   This is a non-standard LCD interface just for the STM3210E-EVAL board.  Because
  *   of the various rotations, clearing the display in the normal way by writing a
  *   sequences of runs that covers the entire display can be very slow.  Here the
- *   dispaly is cleared by simply setting all GRAM memory to the specified color.
+ *   display is cleared by simply setting all GRAM memory to the specified color.
  *
  ****************************************************************************/
 
@@ -1848,4 +1848,3 @@ void stm3210e_lcdclear(uint16_t color)
       LCD->value = color;
     }
 }
-

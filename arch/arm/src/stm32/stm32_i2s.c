@@ -51,7 +51,7 @@
  *   4. The handle returned by stm32_i2sdev_initialize() may then be used to
  *     bind the I2S driver to higher level logic
  *
- ****************************************************c***********************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -64,13 +64,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <queue.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
@@ -286,7 +286,7 @@ struct stm32_i2s_s
 {
   struct i2s_dev_s  dev;          /* Externally visible I2S interface */
   uintptr_t         base;         /* I2S controller register base address */
-  sem_t             exclsem;      /* Assures mutually exclusive acess to I2S */
+  sem_t             exclsem;      /* Assures mutually exclusive access to I2S */
   bool              initialized;  /* Has I2S interface been initialized */
   uint8_t           datalen;      /* Data width (8 or 16) */
 #ifdef CONFIG_DEBUG_FEATURES
@@ -1553,7 +1553,7 @@ static void i2s_tx_worker(void *arg)
   while (sq_peek(&priv->tx.done) != NULL)
     {
       /* Remove the buffer container from the tx.done queue.  NOTE that
-       * interupts must be enabled to do this because the tx.done queue is
+       * interrupts must be enabled to do this because the tx.done queue is
        * also modified from the interrupt level.
        */
 
@@ -1906,7 +1906,7 @@ static int stm32_i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   flags = enter_critical_section();
   sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.pend);
 
-  /* Then start the next transfer.  If there is already a transfer in progess,
+  /* Then start the next transfer.  If there is already a transfer in progress,
    * then this will do nothing.
    */
 
@@ -2011,7 +2011,7 @@ static uint32_t stm32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
       return 0;
     }
 
-  /* Upate the DMA flags */
+  /* Update the DMA flags */
 
   ret = i2s_dma_flags(priv);
   if (ret < 0)
@@ -2112,7 +2112,7 @@ static int stm32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   flags = enter_critical_section();
   sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.pend);
 
-  /* Then start the next transfer.  If there is already a transfer in progess,
+  /* Then start the next transfer.  If there is already a transfer in progress,
    * then this will do nothing.
    */
 

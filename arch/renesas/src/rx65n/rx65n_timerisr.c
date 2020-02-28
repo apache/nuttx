@@ -71,7 +71,7 @@
  *
  * These must be selected so that the frequency of interrupt generation is
  * CLK_TCK.  Ideally, we would like to use the full range of GRA0 for better
- * timing acuracy:
+ * timing accuracy:
  */
 
 /* The ideal divider would be one that generates exactly 65535 ticks in
@@ -111,7 +111,7 @@ static int rx65n_timerisr(int irq, uint32_t *regs, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  renesas_timer_initialize
+ * Function:  up_timer_initialize
  *
  * Description:
  *   This function is called during start-up to initialize
@@ -119,7 +119,7 @@ static int rx65n_timerisr(int irq, uint32_t *regs, void *arg)
  *
  ****************************************************************************/
 
-void renesas_timer_initialize(void)
+void up_timer_initialize(void)
 {
   uint16_t reg16;
   uint32_t reg32;

@@ -384,5 +384,3 @@ int s32k1xx_get_pclkfreq(enum clock_names_e clkname, uint32_t *frequency)
 
   return ret;
 }
-
-

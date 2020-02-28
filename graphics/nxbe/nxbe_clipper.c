@@ -275,4 +275,3 @@ void nxbe_clipnull(FAR struct nxbe_clipops_s *cops,
                    FAR const struct nxgl_rect_s *rect)
 {
 }
-

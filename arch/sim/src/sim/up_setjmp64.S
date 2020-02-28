@@ -81,7 +81,11 @@
 //# define SYMBOL(s) _##s
 # define SYMBOL(s) s
 #else
+#ifdef __ELF__
 # define SYMBOL(s) s
+#else
+# define SYMBOL(s) _##s
+#endif
 #endif
 
 /**************************************************************************
@@ -91,7 +95,7 @@
 	.text
 	.align	4
 	.globl	SYMBOL(up_setjmp)
-#ifndef __CYGWIN__
+#ifdef __ELF__
 	.type	SYMBOL(up_setjmp), @function
 #endif
 SYMBOL(up_setjmp):
@@ -128,13 +132,13 @@ SYMBOL(up_setjmp):
 
 	ret
 
-#ifndef __CYGWIN__
+#ifdef __ELF__
 	.size	SYMBOL(up_setjmp), . - SYMBOL(up_setjmp)
 #endif
 
 	.align	4
 	.globl	SYMBOL(up_longjmp)
-#ifndef __CYGWIN__
+#ifdef __ELF__
 	.type	SYMBOL(up_longjmp), @function
 #endif
 SYMBOL(up_longjmp):
@@ -157,7 +161,6 @@ SYMBOL(up_longjmp):
 
 	jmp		*JB_RSI(REGS)	/* Save 8: rsi */
 
-#ifndef __CYGWIN__
+#ifdef __ELF__
 	.size SYMBOL(up_longjmp), . - SYMBOL(up_longjmp)
 #endif
-

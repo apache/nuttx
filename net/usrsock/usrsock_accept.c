@@ -44,7 +44,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/usrsock.h>
 
@@ -240,10 +239,6 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   socklen_t inaddrlen = 0;
   socklen_t outaddrlen = 0;
   int ret;
-#ifdef CONFIG_NET_SOCKOPTS
-  struct timespec abstime;
-#endif
-  struct timespec *ptimeo = NULL;
 
   DEBUGASSERT(conn);
 
@@ -307,25 +302,6 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
       goto errout_unlock;
     }
 
-#ifdef CONFIG_NET_SOCKOPTS
-  if (psock->s_rcvtimeo != 0)
-    {
-      DEBUGVERIFY(clock_gettime(CLOCK_REALTIME, &abstime));
-
-      /* Prepare timeout value for accept. */
-
-      abstime.tv_sec += psock->s_rcvtimeo / DSEC_PER_SEC;
-      abstime.tv_nsec += (psock->s_rcvtimeo % DSEC_PER_SEC) * NSEC_PER_DSEC;
-      if (abstime.tv_nsec >= NSEC_PER_SEC)
-        {
-          abstime.tv_sec++;
-          abstime.tv_nsec -= NSEC_PER_SEC;
-        }
-
-      ptimeo = &abstime;
-    }
-#endif
-
   do
     {
       /* Check if remote end has closed connection. */
@@ -364,7 +340,8 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
           /* Wait for receive-avail (or abort, or timeout, or signal). */
 
-          ret = net_timedwait(&state.reqstate.recvsem, ptimeo);
+          ret = net_timedwait(&state.reqstate.recvsem,
+                              _SO_TIMEOUT(psock->s_rcvtimeo));
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)

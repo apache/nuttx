@@ -76,7 +76,7 @@
  */
 
 #define __IPv4_HDRLEN 20  /* Must match IPv4_HDRLEN in include/nuttx/net/ip.h */
-#define __IPv6_HDRLEN 40  /* Must match IPv4_HDRLEN in include/nuttx/net/ip.h */
+#define __IPv6_HDRLEN 40  /* Must match IPv6_HDRLEN in include/nuttx/net/ip.h */
 #define __UDP_HDRLEN  8   /* Must match UDP_HDRLEN in include/nuttx/net/udp.h */
 #define __TCP_HDRLEN  20  /* Must match TCP_HDRLEN in include/nuttx/net/tcp.h */
                           /* REVISIT: Not really a constant */
@@ -150,8 +150,8 @@
 #endif
 
 #ifdef CONFIG_NET_LOOPBACK
-#  define _MIN_LO_PKTSIZE      MIN(_MIN_ETH_PKTSIZE,  1518)
-#  define _MAX_LO_PKTSIZE      MAX(_MAX_ETH_PKTSIZE, 574)
+#  define _MIN_LO_PKTSIZE      MIN(_MIN_ETH_PKTSIZE, 574)
+#  define _MAX_LO_PKTSIZE      MAX(_MAX_ETH_PKTSIZE, 1518)
 #else
 #  define _MIN_LO_PKTSIZE      _MIN_ETH_PKTSIZE
 #  define _MAX_LO_PKTSIZE      _MAX_ETH_PKTSIZE
@@ -184,9 +184,21 @@
 #define MIN_NETDEV_PKTSIZE      _MIN_6LOWPAN_PKTSIZE
 #define MAX_NETDEV_PKTSIZE      _MAX_6LOWPAN_PKTSIZE
 
-/* For the loopback device, we will use the largest MTU */
+/* The loopback driver packet buffer should be quite large.  The larger the
+ * loopback packet buffer, the better will be TCP performance of the loopback
+ * transfers.  The Linux loopback device historically used packet buffers of
+ * size 16Kb, but that was increased in recent Linux versions to 64Kb.  Those
+ * sizes may be excessive for resource constrained MCUs, however.
+ *
+ * For the loopback driver, we enforce a lower limit that is the maximum
+ * packet size of all enabled link layer protocols.
+ */
 
+#if CONFIG_NET_LOOPBACK_PKTSIZE < MAX_NETDEV_PKTSIZE
 #  define NET_LO_PKTSIZE        MAX_NETDEV_PKTSIZE
+#else
+#  define NET_LO_PKTSIZE        CONFIG_NET_LOOPBACK_PKTSIZE
+#endif
 
 /* Layer 3/4 Configuration Options ******************************************/
 
@@ -206,7 +218,7 @@
    * of the timer is 8-bits.
    */
 
-#    define CONFIG_NET_TCP_REASS_MAXAGE (20*10) /* 20 seconds */
+#    define CONFIG_NET_TCP_REASS_MAXAGE (20 * 10) /* 20 seconds */
 #  endif
 #endif
 
@@ -344,6 +356,9 @@
 #  undef  MIN_UDP_MSS
 #  define MIN_IPv6_UDP_MSS      __MIN_UDP_MSS(__IPv6_HDRLEN)
 #  define MIN_UDP_MSS           __MIN_UDP_MSS(__IPv6_HDRLEN)
+#  ifndef MAX_UDP_MSS
+#    define MAX_UDP_MSS         __MAX_UDP_MSS(__IPv6_HDRLEN)
+#  endif
 #endif
 
 /* TCP configuration options */
@@ -584,20 +599,6 @@
 #    define CONFIG_NET_USRSOCK_CONNS 6
 #  else
 #    define CONFIG_NET_USRSOCK_CONNS 0
-#  endif
-#endif
-
-/* General configuration options */
-
-/* Delay after receive to catch a following packet.  No delay should be
- * required if TCP/IP read-ahead buffering is enabled.
- */
-
-#ifndef CONFIG_NET_TCP_RECVDELAY
-#  ifdef CONFIG_NET_TCP_READAHEAD
-#    define CONFIG_NET_TCP_RECVDELAY 0
-#  else
-#    define CONFIG_NET_TCP_RECVDELAY 5
 #  endif
 #endif
 

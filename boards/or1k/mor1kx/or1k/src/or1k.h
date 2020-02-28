@@ -56,4 +56,4 @@
 
 int or1k_bringup(void);
 
-#endif  /* __BOARDS_OR1K_MOR1KX_OR1K_SRC_OR1K_H */
+#endif /* __BOARDS_OR1K_MOR1KX_OR1K_SRC_OR1K_H */

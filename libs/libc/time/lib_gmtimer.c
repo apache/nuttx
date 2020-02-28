@@ -46,14 +46,7 @@
 #include <debug.h>
 
 #include <nuttx/time.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define SEC_PER_MIN  ((time_t)60)
-#define SEC_PER_HOUR ((time_t)60 * SEC_PER_MIN)
-#define SEC_PER_DAY  ((time_t)24 * SEC_PER_HOUR)
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Private Function Prototypes
@@ -122,7 +115,7 @@ static void clock_utc2gregorian(time_t jd, FAR int *year, FAR int *month,
 
   l = jd + 68569;
   n = (4 * l) / 146097;
-  l = l - (146097 * n + 3)/4;
+  l = l - (146097 * n + 3) / 4;
   i = (4000 * (l + 1)) / 1461001;
   l = l - (1461 * i) / 4 + 31;
   j = (80 * l) / 2447;
@@ -156,7 +149,7 @@ static void clock_utc2julian(time_t jd, FAR int *year, FAR int *month,
   n = (l - 1) / 365 - l / 1461;
   i = l - 365 * n + 30;
   j = (80 * i) / 2447;
-  d = i - (2447 * j)/80;
+  d = i - (2447 * j) / 80;
   i = j / 11;
   m = j + 2 - 12 * i;
   y = 4 * k + n + i - 4716;
@@ -267,9 +260,9 @@ static void clock_utc2calendar(time_t days, FAR int *year, FAR int *month,
         }
       else
         {
-           /* No... The one we want is somwhere between value+1 and max */
+          /* No... The one we want is somewhere between value+1 and max */
 
-           min = value + 1;
+          min = value + 1;
         }
 
       /* If we break out of the loop because min == max, then we want value
@@ -356,13 +349,11 @@ FAR struct tm *gmtime_r(FAR const time_t *timer, FAR struct tm *result)
   result->tm_min   = (int)min;
   result->tm_sec   = (int)sec;
 
-#if defined(CONFIG_TIME_EXTENDED)
   result->tm_wday  = clock_dayoftheweek(day, month, year);
   result->tm_yday  = day +
                      clock_daysbeforemonth(result->tm_mon,
                                            clock_isleapyear(year));
   result->tm_isdst = 0;
-#endif
 
   return result;
 }

@@ -48,6 +48,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/time.h>
 
 #include "up_arch.h"
 
@@ -65,6 +66,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* This RTC implementation supports
  *  - date/time RTC hardware
  *  - extended functions Alarm A and B for STM32F4xx and onwards
@@ -198,7 +200,7 @@ static void rtc_dumpregs(FAR const char *msg)
     ((getreg32(STM32_EXTI_FTSR) & EXTI_RTC_ALARM) ? 0x0100 : 0) |
     ((getreg32(STM32_EXTI_IMR)  & EXTI_RTC_ALARM) ? 0x0010 : 0) |
     ((getreg32(STM32_EXTI_EMR)  & EXTI_RTC_ALARM) ? 0x0001 : 0);
-  rtcinfo("EXTI (RTSR FTSR ISR EVT): %01x\n",rtc_state);
+  rtcinfo("EXTI (RTSR FTSR ISR EVT): %01x\n", rtc_state);
 }
 #else
 #  define rtc_dumpregs(msg)
@@ -852,7 +854,8 @@ static inline void rtc_enable_alarm(void)
 #ifdef CONFIG_RTC_ALARM
 static int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg, FAR struct tm *tp)
 {
-  uint32_t data, tmp;
+  uint32_t data;
+  uint32_t tmp;
 
   DEBUGASSERT(tp != NULL);
 
@@ -915,6 +918,7 @@ int up_rtc_initialize(void)
    */
 
   /* Select the clock source */
+
   /* Save the token before losing it when resetting */
 
   regval = getreg32(RTC_MAGIC_REG);
@@ -1085,7 +1089,7 @@ int up_rtc_initialize(void)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_rtc_irqinitialize
  *
  * Description:
@@ -1098,7 +1102,7 @@ int up_rtc_initialize(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int stm32_rtc_irqinitialize(void)
 {
@@ -1162,6 +1166,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
           continue;
         }
 #endif
+
       tmp = getreg32(STM32_RTC_DR);
       if (tmp == dr)
         {
@@ -1204,12 +1209,12 @@ int up_rtc_getdatetime(FAR struct tm *tp)
   tmp = (dr & (RTC_DR_YU_MASK | RTC_DR_YT_MASK)) >> RTC_DR_YU_SHIFT;
   tp->tm_year = rtc_bcd2bin(tmp) + 100;
 
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
   tmp = (dr & RTC_DR_WDU_MASK) >> RTC_DR_WDU_SHIFT;
   tp->tm_wday = tmp % 7;
-  tp->tm_yday = tp->tm_mday + clock_daysbeforemonth(tp->tm_mon, clock_isleapyear(tp->tm_year + 1900));
+  tp->tm_yday = tp->tm_mday +
+                clock_daysbeforemonth(tp->tm_mon,
+                                      clock_isleapyear(tp->tm_year + 1900));
   tp->tm_isdst = 0;
-#endif
 
 #ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
   /* Return RTC sub-seconds if no configured and if a non-NULL value
@@ -1318,9 +1323,7 @@ int stm32_rtc_setdatetime(FAR const struct tm *tp)
 
   dr = (rtc_bin2bcd(tp->tm_mday) << RTC_DR_DU_SHIFT) |
        ((rtc_bin2bcd(tp->tm_mon + 1))  << RTC_DR_MU_SHIFT) |
-#if defined(CONFIG_LIBC_LOCALTIME) || defined(CONFIG_TIME_EXTENDED)
        ((tp->tm_wday == 0 ? 7 : (tp->tm_wday & 7))  << RTC_DR_WDU_SHIFT) |
-#endif
        ((rtc_bin2bcd(tp->tm_year - 100)) << RTC_DR_YU_SHIFT);
 
   dr &= ~RTC_DR_RESERVED_BITS;
@@ -1632,4 +1635,3 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
 #endif
 
 #endif /* CONFIG_STM32_RTC */
-

@@ -701,7 +701,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 
   modifyreg32(priv->trcc_enr, 0, priv->trcc_en);
 
-  /* Caculate optimal values for the timer prescaler and for the timer
+  /* Calculate optimal values for the timer prescaler and for the timer
    * reload register.  If freq is the desired frequency, then
    *
    *   reload = timclk / freq

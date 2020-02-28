@@ -44,7 +44,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxmu.h>
 

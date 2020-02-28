@@ -46,7 +46,6 @@
 #include <sys/types.h>
 #include <stdarg.h>
 #include <sched.h>
-#include <semaphore.h>
 #include <time.h>
 
 #include <nuttx/fs/fs.h>

@@ -219,7 +219,7 @@
 #define DM9X_IMRRXDISABLE  (DM9X_INT_PT | DM9X_INT_LNKCHG | DM9X_IMR_PAR)
 #define DM9X_IMRDISABLE    (DM9X_IMR_PAR)
 
-/* EEPROM/PHY control regiser bits */
+/* EEPROM/PHY control register bits */
 
 #define DM9X_EEPHYC_ERRE   (1 << 0) /* EEPROM (vs PHY) access status */
 #define DM9X_EEPHYC_ERPRW  (1 << 1) /* EEPROM/PHY write access */
@@ -259,7 +259,7 @@
 
 #define DM9X_CRXTHRES 10
 
-/* All access is via an index register and a data regist.  Select accecss
+/* All access is via an index register and a data register.  Select accecss
  * according to user supplied base address and bus width.
  */
 
@@ -1221,7 +1221,7 @@ static void dm9x_interrupt_work(FAR void *arg)
 
   if (priv->ncrxpackets >= DM9X_CRXTHRES)
     {
-      /* Eanble all DM90x0 interrupts EXCEPT for RX */
+      /* Enable all DM90x0 interrupts EXCEPT for RX */
 
       putreg(DM9X_IMR, DM9X_IMRRXDISABLE);
     }
@@ -1524,7 +1524,7 @@ static int dm9x_ifup(FAR struct net_driver_s *dev)
         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
-  /* Initilize DM90x0 chip */
+  /* Initialize DM90x0 chip */
 
   dm9x_bringup(priv);
 
@@ -1997,4 +1997,3 @@ int dm9x_initialize(void)
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_DM90x0 */
-

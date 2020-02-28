@@ -144,4 +144,3 @@ void up_release_pending(void)
         }
     }
 }
-

@@ -51,7 +51,6 @@
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/ip.h>
-#include <nuttx/net/tcp.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -205,7 +204,7 @@ struct icmpv6_neighbor_advertise_s
   uint8_t  opttype;          /* Option Type: ICMPv6_OPT_TGTLLADDR */
   uint8_t  optlen;           /* Option length in octets */
   uint8_t  tgtlladdr[6];     /* Options: Target link layer address */
-                             /* Actual size detemined by optlen */
+                             /* Actual size determined by optlen */
 };
 
 #define SIZEOF_ICMPV6_NEIGHBOR_ADVERTISE_S(n) \

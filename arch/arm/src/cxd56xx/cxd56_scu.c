@@ -34,18 +34,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * include files
+ * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/irq.h>
+#include <nuttx/semaphore.h>
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -334,8 +334,8 @@ struct cxd56_scudev_s g_scudev;
 
 /* SCU firmware (iSoP) */
 
-extern const unsigned long scuIsopProgArray[];
-extern const unsigned long sizeOfscuIsopProgArray;
+extern const unsigned long scu_isopprog_array[];
+extern const unsigned long sizeof_scu_isopprog_array;
 
 /* XXX: Convert coefficiencies register address. */
 
@@ -368,6 +368,7 @@ static const struct coeff_addr_s g_caddrs[3][2] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: seq_semtake
  ****************************************************************************/
@@ -503,6 +504,7 @@ static inline int8_t deci_alloc(void)
 
       seq_inhibitrequest(REQ_SLEEP, true);
     }
+
   return ret;
 }
 
@@ -1033,6 +1035,7 @@ static int seq_oneshot(int bustype, int slave, FAR uint16_t *inst,
       leave_critical_section(flags);
       return -ENOENT;
     }
+
   leave_critical_section(flags);
 
   /* Remake last instruction, if needed. */
@@ -1046,6 +1049,7 @@ static int seq_oneshot(int bustype, int slave, FAR uint16_t *inst,
     {
       putreg16(inst[i], SCUSEQ_INSTRUCTION(istart + i));
     }
+
   putreg16(lastinst, SCUSEQ_INSTRUCTION(istart + nr_insts - 1));
 
   /* Setup sequencer as oneshot mode
@@ -1133,6 +1137,7 @@ static void seq_offsetgainenable(int sid, bool enable)
     {
       val &= ~(1 << n);
     }
+
   putreg32(val, SCU_OFST_GAIN_EN);
 }
 
@@ -1419,6 +1424,7 @@ static int seq_setsamplingrate(FAR struct seq_s *seq, uint8_t samplingrate)
     {
       return -EINVAL;
     }
+
   seq->rate = samplingrate;
 
   return OK;
@@ -1569,6 +1575,7 @@ static void seq_handlemathfintr(FAR struct cxd56_scudev_s *priv,
                 getreg32(SCU_EVENT_TIMESTAMP0_R_LSB + (i * 8));
               notify->arg->type = SCU_EV_RISE;
             }
+
           detected = 1;
 #endif
         }
@@ -1590,6 +1597,7 @@ static void seq_handlemathfintr(FAR struct cxd56_scudev_s *priv,
                 getreg32(SCU_EVENT_TIMESTAMP0_F_LSB + (i * 8));
               notify->arg->type = SCU_EV_FALL;
             }
+
           detected = 1;
 #endif
         }
@@ -1750,6 +1758,7 @@ static int seq_scuirqhandler(int irq, FAR void *context, FAR void *arg)
               seq_stopseq(i);
             }
         }
+
       putreg32(0x03ff, SCU_INT_CLEAR_ERR_2);
     }
 
@@ -1782,6 +1791,7 @@ static FAR struct seq_s *seq_new(void)
       leave_critical_section(flags);
       return NULL;
     }
+
   leave_critical_section(flags);
 
   seq = (FAR struct seq_s *)kmm_malloc(sizeof(struct seq_s));
@@ -1790,6 +1800,7 @@ static FAR struct seq_s *seq_new(void)
       seq_free(sid);
       return NULL;
     }
+
   memset(seq, 0, sizeof(struct seq_s));
 
   seq->id = sid;
@@ -1823,6 +1834,7 @@ static FAR struct seq_s *deci_new(void)
       leave_critical_section(flags);
       return NULL;
     }
+
   leave_critical_section(flags);
 
   deci = (FAR struct decimator_s *)kmm_malloc(sizeof(struct decimator_s));
@@ -1831,6 +1843,7 @@ static FAR struct seq_s *deci_new(void)
       deci_free(sid);
       return NULL;
     }
+
   memset(deci, 0, sizeof(struct decimator_s));
 
   deci->seq.id = sid;
@@ -2163,7 +2176,7 @@ static int seq_setadjustment(FAR struct seq_s *seq,
  * Description:
  *   Set MATHFUNC IIR filter feature
  *
- * Input Paramters:
+ * Input Parameters:
  *   fifo - An instance of FIFO
  *   pos  - Where to IIR filter inserted
  *   iir  - IIR filter coefficiencies
@@ -2241,6 +2254,7 @@ static int seq_seteventnotifier(FAR struct scufifo_s *fifo,
     {
       return -ENOENT;
     }
+
   mid = fifo->mid;
 
 #ifndef CONFIG_DISABLE_SIGNAL
@@ -2521,6 +2535,7 @@ static void seq_setfifomode(FAR struct seq_s *seq, int fifoid, int enable)
     {
       val |= (0x1 << 4);
     }
+
   putreg32(val, SCUFIFO_W_CTRL1(fifo->wid));
 
   if (enable)
@@ -2563,6 +2578,7 @@ static void seq_setfifomode(FAR struct seq_s *seq, int fifoid, int enable)
         }
 #endif
     }
+
   leave_critical_section(flags);
 }
 
@@ -2616,6 +2632,7 @@ static void scu_hwinit(void)
       putreg32(0x08000000, SCUSEQ_MATH_PROC_OFST_GAIN_Y(i));
       putreg32(0x08000000, SCUSEQ_MATH_PROC_OFST_GAIN_Z(i));
     }
+
   putreg32(0, SCU_OFST_GAIN_EN);
 
   putreg32(0x0f0f0f00, SCU_DECIMATION_PARAM0);
@@ -2646,6 +2663,7 @@ static void scu_hwinit(void)
       putreg32(0x00010000, SCUFIFO_W_CTRL1(i));
       putreg32(0, SCUFIFO_W_CTRL1(i));
     }
+
   for (i = 0; i < 14; i++)
     {
       putreg32(0x00010003, SCUFIFO_R_CTRL1(i));
@@ -2740,6 +2758,7 @@ FAR struct seq_s *seq_open(int type, int bustype)
     {
       seq = seq_new();
     }
+
   if (!seq)
     {
       return NULL;
@@ -2798,6 +2817,7 @@ int seq_setinstruction(FAR struct seq_s *seq, const uint16_t *inst,
     {
       putreg16(inst[i], SCUSEQ_INSTRUCTION(istart + i));
     }
+
   putreg16(lastinst, SCUSEQ_INSTRUCTION(istart + nr_insts - 1));
 
   /* Set instruction parameters */
@@ -2937,7 +2957,7 @@ int seq_read(FAR struct seq_s *seq, int fifoid, FAR char *buffer, int length)
   int maxlen = 1024;
   int dmalen;
   int rest;
-  int need_wakelock=0;
+  int need_wakelock = 0;
   struct pm_cpu_wakelock_s wlock;
   wlock.info = PM_CPUWAKELOCK_TAG('S', 'C', 0);
   wlock.count = 0;
@@ -2971,6 +2991,7 @@ int seq_read(FAR struct seq_s *seq, int fifoid, FAR char *buffer, int length)
 
 #ifdef CONFIG_CXD56_UDMAC
   /* Get sensor data from FIFO by uDMAC (PL230) */
+
   /* TODO: Check DMA transfer limit or restart DMA to get all data. */
 
   config.channel_cfg = CXD56_UDMA_SINGLE;
@@ -2999,12 +3020,14 @@ int seq_read(FAR struct seq_s *seq, int fifoid, FAR char *buffer, int length)
       config.channel_cfg |= CXD56_UDMA_XFERSIZE_WORD;
       maxlen = 4096;
     }
-  if (((uint32_t)dst >= CXD56_RAM_BASE)
-   && ((uint32_t)dst <= (CXD56_RAM_BASE + CXD56_RAM_SIZE)))
+
+  if (((uint32_t)dst >= CXD56_RAM_BASE) &&
+      ((uint32_t)dst <= (CXD56_RAM_BASE + CXD56_RAM_SIZE)))
     {
       need_wakelock = 1;
       up_pm_acquire_wakelock(&wlock);
     }
+
   rest = length;
   while (rest > 0)
     {
@@ -3022,13 +3045,15 @@ int seq_read(FAR struct seq_s *seq, int fifoid, FAR char *buffer, int length)
           length = length - rest;
           break;
         }
+
       dst += dmalen;
       rest -= dmalen;
     }
-    if (need_wakelock)
-      {
-        up_pm_release_wakelock(&wlock);
-      }
+
+  if (need_wakelock)
+    {
+      up_pm_release_wakelock(&wlock);
+    }
 #else
   /* Get sensor data from FIFO by PIO */
 
@@ -3145,6 +3170,7 @@ int seq_ioctl(FAR struct seq_s *seq, int fifoid, int cmd, unsigned long arg)
               fifo = seq->fifo;
               seq->fifo = NULL;
             }
+
           seq_fifofree(fifo);
         }
         break;
@@ -3444,8 +3470,8 @@ void scu_initialize(void)
 
       /* Load firmware & clear data RAM */
 
-      memcpy((void *)CXD56_SCU_SEQ_IRAM_BASE, scuIsopProgArray,
-             sizeOfscuIsopProgArray);
+      memcpy((void *)CXD56_SCU_SEQ_IRAM_BASE, scu_isopprog_array,
+             sizeof_scu_isopprog_array);
       memset((void *)CXD56_SCU_SEQ_DRAM_BASE, 0, 0x324);
 
       /* Release SCU reset to bring up SCU firmware */

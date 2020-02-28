@@ -557,7 +557,7 @@ errout:
  *   2. All dots except the last deleted
  *   3. First 6 (uppercase) characters used as a base
  *   4. Then ~1.  The number is increased if the file already exists in the
- *      directory. If the number exeeds >10, then character stripped off the
+ *      directory. If the number exceeds >10, then character stripped off the
  *       base.
  *   5. The extension is the first 3 uppercase chars of extension.
  *
@@ -1084,7 +1084,7 @@ static int fat_findsfnentry(struct fat_mountpt_s *fs,
  * Name: fat_cmplfnchunk
  *
  * Description:  There are 13 characters per LFN entry, broken up into three
- *   chunks for characts 1-5, 6-11, and 12-13.  This function will perform
+ *   chunks for characters 1-5, 6-11, and 12-13.  This function will perform
  *   the comparison of a single chunk.
  *
  ****************************************************************************/
@@ -1376,7 +1376,7 @@ static inline int fat_findlfnentry(struct fat_mountpt_s *fs,
                 }
 
               /* Bad news.. reset and continue with this entry (which is
-               * probably not an LFN entry unless the file systen is
+               * probably not an LFN entry unless the file system is
                * seriously corrupted.
                */
 
@@ -1679,7 +1679,7 @@ static inline int fat_getsfname(uint8_t *direntry, char *buffer,
 
       /* In this version, we never write 0xe5 in the directory filenames
        * (because we do not handle any character sets where 0xe5 is valid
-       * in a filaname), but we could encounted this in a filesystem
+       * in a filaname), but we could eencounter this in a filesystem
        * written by some other system
        */
 
@@ -1760,7 +1760,7 @@ static inline int fat_getsfname(uint8_t *direntry, char *buffer,
  * Name: fat_getlfnchunk
  *
  * Description:  There are 13 characters per LFN entry, broken up into three
- *   chunks for characts 1-5, 6-11, and 12-13.  This function will get the
+ *   chunks for characters 1-5, 6-11, and 12-13.  This function will get the
  *   file name characters from one chunk.
  *
  ****************************************************************************/
@@ -1977,7 +1977,7 @@ static int fat_putsfname(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo
  * Name: fat_initlfname
  *
  * Description:  There are 13 characters per LFN entry, broken up into three
- *   chunks for characts 1-5, 6-11, and 12-13.  This function will put the
+ *   chunks for characters 1-5, 6-11, and 12-13.  This function will put the
  *   0xffff characters into one chunk.
  *
  ****************************************************************************/
@@ -2003,7 +2003,7 @@ static void fat_initlfname(uint8_t *chunk, int nchunk)
  * Name: fat_putlfnchunk
  *
  * Description:  There are 13 characters per LFN entry, broken up into three
- *   chunks for characts 1-5, 6-11, and 12-13.  This function will put the
+ *   chunks for characters 1-5, 6-11, and 12-13.  This function will put the
  *   file name characters into one chunk.
  *
  ****************************************************************************/
@@ -2394,7 +2394,7 @@ int fat_finddirentry(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
 
       if (ret < 0)
         {
-          /* A return value of -ENOENT would mean that the path segement
+          /* A return value of -ENOENT would mean that the path segment
            * was not found.  Let's distinguish two cases:  (1) the final
            * file was not found in the directory (-ENOENT), or (2) one
            * of the directory path segments does not exist (-ENOTDIR)
@@ -2769,7 +2769,7 @@ int fat_dirnamewrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo)
     }
 
   /* On return, fat_lfsfname() will leave the short file name entry in the
-   * cache.  So we can just fall throught to write that directory entry, perhaps
+   * cache.  So we can just fall through to write that directory entry, perhaps
    * using the short file name alias for the long file name.
    */
 
@@ -2814,7 +2814,7 @@ int fat_dirwrite(struct fat_mountpt_s *fs, struct fat_dirinfo_s *dirinfo,
     }
 
   /* On return, fat_lfsfname() will leave the short file name entry in the
-   * cache.  So we can just fall throught to write that directory entry, perhaps
+   * cache.  So we can just fall through to write that directory entry, perhaps
    * using the short file name alias for the long file name.
    */
 
@@ -2955,7 +2955,7 @@ int fat_remove(struct fat_mountpt_s *fs, const char *relpath, bool directory)
           subdirindex = (dirinfo.dir.fd_index & DIRSEC_NDXMASK(fs)) * DIR_SIZE;
           subdirentry = &fs->fs_buffer[subdirindex];
 
-          /* Is this the last entry in the direcory? */
+          /* Is this the last entry in the directory? */
 
           if (subdirentry[DIR_NAME] == DIR0_ALLEMPTY)
             {

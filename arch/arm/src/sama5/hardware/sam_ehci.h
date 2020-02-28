@@ -62,7 +62,7 @@
  * the 'caplength' byte of the Host Controller Capability Registers.
  *
  * However, for the case of the SAMA5 EHCI, we know apriori that the value
- * of 'caplength' is 0x10.  We keep this structure, however, to faciltate
+ * of 'caplength' is 0x10.  We keep this structure, however, to facilitate
  * porting this driver to other environments where, perhaps, such knowledge
  * is not available.
  */

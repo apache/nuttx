@@ -162,4 +162,4 @@
   .macro config_sdram
   .endm
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARDS_ARM_A1X_PCDUINO_A10_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_A1X_PCDUINO_A10_INCLUDE_BOARD_H */

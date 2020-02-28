@@ -261,7 +261,7 @@ Configurations
        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
 
      Library Routines ->
-       CONFIG_CXX_NEWLONG=n                : size_t is an unsigned int, not long
+       CONFIG_ARCH_SIZET_LONG=n            : size_t is an unsigned int, not long
 
      This re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building
@@ -368,7 +368,7 @@ Configurations
        Binary Formats:
          CONFIG_BUILTIN=y                    : Enable support for built-in programs
 
-       Applicaton Configuration:
+       Application Configuration:
          CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
 
     2. This configuration has been used for verifying the touchscreen on
@@ -400,7 +400,7 @@ Configurations
           Library Support:
             CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
 
-          Applicaton Configuration:
+          Application Configuration:
             CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
 
           Defaults should be okay for related touchscreen settings.  Touchscreen
@@ -462,7 +462,7 @@ Configurations
     The NxWM window manager is a tiny window manager tailored for use
     with smaller LCDs.  It supports a toolchain, a start window, and
     multiple application windows.  However, to make the best use of
-    the visible LCD space, only one application window is visiable at
+    the visible LCD space, only one application window is visible at
     at time.
 
     The NxWM window manager can be found here:
@@ -488,4 +488,3 @@ Configurations
        beginning of FLASH, trashing the FLASH images.
 
        Bottom line:  Still untested.
-

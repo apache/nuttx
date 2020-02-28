@@ -224,4 +224,3 @@
 #define NR_IRQS                    S32K1XX_IRQ_NIRQS
 
 #endif /* __ARCH_ARM_INCLUDE_S32K1XX_S32K14XX_IRQ_H */
-

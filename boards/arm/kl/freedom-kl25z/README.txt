@@ -354,7 +354,7 @@ Where <subdir> is one of the following:
          applications. Most of the memory used at runtime is allocated I/O
          buffers and the stack for the NSH main thread (1.5KB).
 
-       There is probably enough free memroy to support 3 or 4 application
+       There is probably enough free memory to support 3 or 4 application
        threads in addition to NSH.
 
     5. This configurations has support for NSH built-in applications.  However,

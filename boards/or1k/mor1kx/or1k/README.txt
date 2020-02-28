@@ -20,7 +20,7 @@ STATUS
     looks like there is some problem with my Kubuntu package manager.  The
     Qemu configuration gives:
 
-      ERROR:  glib-2.22 gthread-2.0 is requred to compile QEMU.
+      ERROR:  glib-2.22 gthread-2.0 is required to compile QEMU.
 
     But it looks like to do have a later version of gthread-2.0 installed.
 

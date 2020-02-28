@@ -106,7 +106,7 @@ endif
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = sam_start.c sam_clockconfig.c sam_irq.c sam_allocateheap.c
-CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_gpio.c sam_pck.c
+CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_gpio.c sam_pck.c sam_uid.c
 
 # Configuration-dependent SAMV7 files
 
@@ -199,7 +199,7 @@ CHIP_CSRCS += sam_trng.c
 endif
 
 ifeq ($(CONFIG_SAMV7_PROGMEM),y)
-CHIP_CSRCS += sam_progmem.c
+CHIP_CSRCS += sam_progmem.c sam_eefc.c
 endif
 
 ifeq ($(CONFIG_SAMV7_DAC),y)

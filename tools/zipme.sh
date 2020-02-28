@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# zipme.sh
+# tools/zipme.sh
 #
 #   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,38 +50,38 @@ unset BUILD
 unset DEBUG
 
 while [ ! -z "$1" ]; do
-    case $1 in
-    -b )
-        shift
-        BUILD="-b ${1}"
-        ;;
-    -d )
-        set -x
-        DEBUG=-d
-        ;;
-    -h )
-        echo "$0 is a tool for generation of release versions of NuttX"
-        echo ""
-        echo $USAGE
-        echo ""
-        echo "Where:"
-        echo "  -b <build>"
-        echo "     Use this build identification string.  Default: use GIT build ID"
-        echo "     NOTE: GIT build information may not be available in a snapshot"
-        echo "  -d"
-        echo "     Enable script debug"
-        echo "  -h"
-        echo "     show this help message and exit"
-        echo "  <major.minor>"
-        echo "     The NuttX version number expressed as a major and minor number separated"
-        echo "     by a period"
-        exit 0
-        ;;
-    * )
-        break;
-        ;;
-    esac
+  case $1 in
+  -b )
     shift
+    BUILD="-b ${1}"
+    ;;
+  -d )
+    set -x
+    DEBUG=-d
+    ;;
+  -h )
+    echo "$0 is a tool for generation of release versions of NuttX"
+    echo ""
+    echo $USAGE
+    echo ""
+    echo "Where:"
+    echo "  -b <build>"
+    echo "     Use this build identification string.  Default: use GIT build ID"
+    echo "     NOTE: GIT build information may not be available in a snapshot"
+    echo "  -d"
+    echo "     Enable script debug"
+    echo "  -h"
+    echo "     show this help message and exit"
+    echo "  <major.minor>"
+    echo "     The NuttX version number expressed as a major and minor number separated"
+    echo "     by a period"
+    exit 0
+    ;;
+  * )
+    break;
+    ;;
+  esac
+  shift
 done
 
 # The last thing on the command line is the version number
@@ -92,21 +92,21 @@ VERSIONOPT="-v ${VERSION}"
 # Make sure we know what is going on
 
 if [ -z ${VERSION} ] ; then
-   echo "You must supply a version like xx.yy as a parameter"
-   echo $USAGE
-   echo $ADVICE
-   exit 1;
+  echo "You must supply a version like xx.yy as a parameter"
+  echo $USAGE
+  echo $ADVICE
+  exit 1;
 fi
 
 if [ -z "${BUILD}" ]; then
-    GITINFO=`git log 2>/dev/null | head -1`
-    if [ -z "${GITINFO}" ]; then
-        echo "GIT version information is not available. Use the -b option"
-        echo $USAGE
-        echo $ADVICE
-        exit 1;
-    fi
-    echo "GIT: ${GITINFO}"
+  GITINFO=`git log 2>/dev/null | head -1`
+  if [ -z "${GITINFO}" ]; then
+    echo "GIT version information is not available. Use the -b option"
+    echo $USAGE
+    echo $ADVICE
+    exit 1;
+  fi
+  echo "GIT: ${GITINFO}"
 fi
 
 
@@ -116,18 +116,18 @@ fi
 MYNAME=`basename $0`
 
 if [ -x ${WD}/${MYNAME} ] ; then
-   TRUNKDIR="${WD}/../.."
+  TRUNKDIR="${WD}/../.."
 else
-   if [ -x ${WD}/tools/${MYNAME} ] ; then
-     TRUNKDIR="${WD}/.."
-   else
-     if [ -x ${WD}/nuttx-${VERSION}/tools/${MYNAME} ] ; then
-       TRUNKDIR="${WD}"
-     else
-       echo "You must cd into the NUTTX directory to execute this script."
-       exit 1
-     fi
-   fi
+  if [ -x ${WD}/tools/${MYNAME} ] ; then
+    TRUNKDIR="${WD}/.."
+  else
+    if [ -x ${WD}/nuttx-${VERSION}/tools/${MYNAME} ] ; then
+      TRUNKDIR="${WD}"
+    else
+      echo "You must cd into the NUTTX directory to execute this script."
+      exit 1
+    fi
+  fi
 fi
 
 # Get the NuttX directory names and the path to the parent directory
@@ -138,21 +138,21 @@ APPDIR=${TRUNKDIR}/apps-${VERSION}
 # Make sure that the versioned directory exists
 
 if [ ! -d ${TRUNKDIR} ]; then
-   echo "Directory ${TRUNKDIR} does not exist"
-   exit 1
+  echo "Directory ${TRUNKDIR} does not exist"
+  exit 1
 fi
 
 cd ${TRUNKDIR} || \
-   { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
+  { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
 
 if [ ! -d nuttx-${VERSION} ] ; then
-   echo "Directory ${TRUNKDIR}/nuttx-${VERSION} does not exist!"
-   exit 1
+  echo "Directory ${TRUNKDIR}/nuttx-${VERSION} does not exist!"
+  exit 1
 fi
 
 if [ ! -d apps-${VERSION} ] ; then
-   echo "Directory ${TRUNKDIR}/apps-${VERSION} does not exist!"
-   exit 1
+  echo "Directory ${TRUNKDIR}/apps-${VERSION} does not exist!"
+  exit 1
 fi
 
 # Create the versioned tarball names
@@ -179,8 +179,8 @@ cd ${NUTTX}/Documentation || \
 
 VERSIONSH=${NUTTX}/tools/version.sh
 if [ ! -x "${VERSIONSH}" ]; then
-    echo "No executable script was found at: ${VERSIONSH}"
-    exit 1
+  echo "No executable script was found at: ${VERSIONSH}"
+  exit 1
 fi
 
 ${VERSIONSH} ${DEBUG} ${BUILD} ${VERSIONOPT} ${NUTTX}/.version || \
@@ -216,27 +216,27 @@ make -C ${NUTTX} distclean
 # Remove any previous tarballs
 
 if [ -f ${NUTTX_TARNAME} ] ; then
-   echo "Removing ${TRUNKDIR}/${NUTTX_TARNAME}"
-   rm -f ${NUTTX_TARNAME} || \
-      { echo "rm ${NUTTX_TARNAME} failed!" ; exit 1 ; }
+  echo "Removing ${TRUNKDIR}/${NUTTX_TARNAME}"
+  rm -f ${NUTTX_TARNAME} || \
+     { echo "rm ${NUTTX_TARNAME} failed!" ; exit 1 ; }
 fi
 
 if [ -f ${NUTTX_ZIPNAME} ] ; then
-   echo "Removing ${TRUNKDIR}/${NUTTX_ZIPNAME}"
-   rm -f ${NUTTX_ZIPNAME} || \
-      { echo "rm ${NUTTX_ZIPNAME} failed!" ; exit 1 ; }
+  echo "Removing ${TRUNKDIR}/${NUTTX_ZIPNAME}"
+  rm -f ${NUTTX_ZIPNAME} || \
+     { echo "rm ${NUTTX_ZIPNAME} failed!" ; exit 1 ; }
 fi
 
 if [ -f ${APPS_TARNAME} ] ; then
-   echo "Removing ${TRUNKDIR}/${APPS_TARNAME}"
-   rm -f ${APPS_TARNAME} || \
-      { echo "rm ${APPS_TARNAME} failed!" ; exit 1 ; }
+  echo "Removing ${TRUNKDIR}/${APPS_TARNAME}"
+  rm -f ${APPS_TARNAME} || \
+     { echo "rm ${APPS_TARNAME} failed!" ; exit 1 ; }
 fi
 
 if [ -f ${APPS_ZIPNAME} ] ; then
-   echo "Removing ${TRUNKDIR}/${APPS_ZIPNAME}"
-   rm -f ${APPS_ZIPNAME} || \
-      { echo "rm ${APPS_ZIPNAME} failed!" ; exit 1 ; }
+  echo "Removing ${TRUNKDIR}/${APPS_ZIPNAME}"
+  rm -f ${APPS_ZIPNAME} || \
+     { echo "rm ${APPS_ZIPNAME} failed!" ; exit 1 ; }
 fi
 
 # Then tar and zip-up the directories
@@ -255,4 +255,3 @@ ${ZIP} ${APPS_TARNAME} || \
       { echo "zip of ${APPS_TARNAME} failed!" ; exit 1 ; }
 
 cd ${NUTTX}
-

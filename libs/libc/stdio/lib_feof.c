@@ -74,4 +74,3 @@ int feof(FILE *stream)
 }
 
 #endif /* CONFIG_NFILE_STREAMS */
-

@@ -29,7 +29,7 @@ config PHOTON_IWDG_TIMEOUT
 
 if PHOTON_WDG
 config PHOTON_WDG_THREAD
-	bool "Watchdog Deamon Thread"
+	bool "Watchdog Daemon Thread"
 
 if PHOTON_WDG_THREAD
 config PHOTON_WDG_THREAD_NAME

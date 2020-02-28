@@ -49,7 +49,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -1029,7 +1028,7 @@ static void sdadc_shutdown(FAR struct adc_dev_s *dev)
 
   sdadc_enable(priv, false);
 
-  /* Disable intrerrupt / dma  */
+  /* Disable interrupt / dma  */
 
   sdadc_rxint(dev, false);
 
@@ -1303,7 +1302,7 @@ static int sdadc_interrupt(int irq, FAR void *context, FAR void *arg)
  *   structure and return the corresponding adc device structure.
  *
  *   Each SDADC will convert the channels indicated each
- *   time a conversion is triggered either by sofware, timer or external event.
+ *   time a conversion is triggered either by software, timer or external event.
  *   Channels are numbered from 0 - 8 and must be given in order (contrarily
  *   to what says ST RM0313 doc !!!).
  *

@@ -39,12 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <queue.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/semaphore.h>
 
 #include "aio/aio.h"
 

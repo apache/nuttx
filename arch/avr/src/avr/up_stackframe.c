@@ -123,4 +123,3 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   return (FAR void *)(topaddr + sizeof(uint8_t));
 }
-

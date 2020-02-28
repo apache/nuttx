@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libnxflat/libnxflat_read.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -138,32 +138,31 @@ int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer,
 
       /* Read the file data at offset into the user buffer */
 
-       nbytes = nx_read(loadinfo->filfd, bufptr, bytesleft);
-       if (nbytes < 0)
-         {
-           if (nbytes != -EINTR)
-             {
-               berr("Read from offset %d failed: %d\n",
-                    offset, (int)nbytes);
-               return nbytes;
-             }
-         }
-       else if (nbytes == 0)
-         {
-           berr("Unexpected end of file\n");
-           return -ENODATA;
-         }
-       else
-         {
-           bytesread += nbytes;
-           bytesleft -= nbytes;
-           bufptr    += nbytes;
-           offset    += nbytes;
-         }
+      nbytes = nx_read(loadinfo->filfd, bufptr, bytesleft);
+      if (nbytes < 0)
+        {
+          if (nbytes != -EINTR)
+            {
+              berr("Read from offset %d failed: %d\n",
+                   offset, (int)nbytes);
+              return nbytes;
+            }
+        }
+      else if (nbytes == 0)
+        {
+          berr("Unexpected end of file\n");
+          return -ENODATA;
+        }
+      else
+        {
+          bytesread += nbytes;
+          bytesleft -= nbytes;
+          bufptr    += nbytes;
+          offset    += nbytes;
+        }
     }
   while (bytesread < readsize);
 
   nxflat_dumpreaddata(buffer, readsize);
   return OK;
 }
-

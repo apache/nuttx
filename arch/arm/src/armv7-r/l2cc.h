@@ -255,4 +255,4 @@ void l2cc_flush(uint32_t startaddr, uint32_t endaddr);
 #  define l2cc_flush(s,e)
 
 #endif /* CONFIG_ARCH_L2CACHE */
-#endif  /* __ARCH_ARM_SRC_ARMV7_R_L2CC_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_R_L2CC_H */

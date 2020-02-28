@@ -642,14 +642,18 @@
 #define PIN_RMII_MDIO             (PIN_ALT5   | PIN_PORTB | PIN4)
 #define PIN_RMII_RX_DV            (PIN_ALT5   | PIN_PORTC | PIN17)
 #define PIN_RMII_RX_ER            (PIN_ALT5   | PIN_PORTC | PIN16)
-#define PIN_RMII_RXD_1            (PIN_ALT5   | PIN_PORTC | PIN0)
-#define PIN_RMII_RXD_2            (PIN_ALT5   | PIN_PORTC | PIN1)
-#define PIN_RMII_RXD_3            (PIN_ALT4   | PIN_PORTC | PIN0)
-#define PIN_RMII_RXD_4            (PIN_ALT4   | PIN_PORTC | PIN1)
+#define PIN_RMII_RXD0_1           (PIN_ALT5   | PIN_PORTC | PIN1)
+#define PIN_RMII_RXD1_1           (PIN_ALT4   | PIN_PORTC | PIN0)
+#define PIN_RMII_RXD0_2           (PIN_ALT5   | PIN_PORTC | PIN0)
+#define PIN_RMII_RXD1_2           (PIN_ALT4   | PIN_PORTC | PIN1)
 #define PIN_RMII_TX_CLK           (PIN_ALT5   | PIN_PORTD | PIN11)
 #define PIN_RMII_TX_EN            (PIN_ALT5   | PIN_PORTD | PIN12)
-#define PIN_RMII_TXD_1            (PIN_ALT5   | PIN_PORTC | PIN2)
-#define PIN_RMII_TXD_2            (PIN_ALT5   | PIN_PORTD | PIN7)
+#define PIN_RMII_TXD0             (PIN_ALT5   | PIN_PORTC | PIN2)
+#define PIN_RMII_TXD1             (PIN_ALT5   | PIN_PORTD | PIN7)
+
+#define PIN_RMII_MDC              PIN_RMII_MDC_2
+#define PIN_RMII_RXD0             PIN_RMII_RXD0_1
+#define PIN_RMII_RXD1             PIN_RMII_RXD1_1
 
 /* NMI */
 

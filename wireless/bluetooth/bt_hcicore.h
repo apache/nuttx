@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 #ifndef __WIRELESS_BLUETOOTH_BT_HDICORE_H
-#define __WIRELESS_BLUETOOTH_BT_HDICORE_H 1
+#define __WIRELESS_BLUETOOTH_BT_HDICORE_H
 
 /****************************************************************************
  * Included Files
@@ -49,9 +49,9 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <semaphore.h>
 #include <mqueue.h>
 
+#include <nuttx/semaphore.h>
 #include <nuttx/wireless/bluetooth/bt_driver.h>
 
 /****************************************************************************

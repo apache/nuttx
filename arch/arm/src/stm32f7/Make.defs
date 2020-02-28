@@ -244,4 +244,3 @@ endif
 ifeq ($(CONFIG_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
-

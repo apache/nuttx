@@ -147,4 +147,3 @@ FAR struct task_group_s *group_findbypid(pid_t pid)
   return NULL;
 }
 #endif
-

@@ -1,6 +1,6 @@
 /**************************************************************************************
  * drivers/lcd/p14201.c
- * Driver for RiT P14201 series display (wih SD1329 IC controller)
+ * Driver for RiT P14201 series display (with SD1329 IC controller)
  *
  *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -78,7 +78,7 @@
  *   - Reading graphics memory cannot be supported, and
  *   - All pixel writes must be aligned to byte boundaries.
  *
- *   The latter limitation effectively reduces the 128x96 disply to 64x96.
+ *   The latter limitation effectively reduces the 128x96 display to 64x96.
  *
  * Required LCD driver settings:
  * CONFIG_LCD_P14201 - Enable P14201 support
@@ -94,7 +94,7 @@
 #endif
 
 /* The P14201 spec says that is supports SPI mode 0,0 only.  However,
- * somtimes you need to tinker with these things.
+ * sometimes you need to tinker with these things.
  */
 
 #ifndef CONFIG_P14201_SPIMODE
@@ -191,7 +191,7 @@
 
 struct rit_dev_s
 {
-  struct lcd_dev_s       dev;      /* Publically visible device structure */
+  struct lcd_dev_s       dev;      /* Publicly visible device structure */
   FAR struct spi_dev_s  *spi;      /* Cached SPI device reference */
   uint8_t                contrast; /* Current contrast setting */
   bool                   on;       /* true: display is on */
@@ -1142,7 +1142,7 @@ static int rit_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
  *
  * Input Parameters:
  *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 throuh CONFIG_P14201_NINTERFACES-1.  This allows
+ *   devno - A value in the range of 0 through CONFIG_P14201_NINTERFACES-1.  This allows
  *   support for multiple OLED devices.
  *
  * Returned Value:

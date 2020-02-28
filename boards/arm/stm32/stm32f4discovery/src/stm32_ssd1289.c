@@ -382,7 +382,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
  * Name:  board_lcd_uninitialize
  *
  * Description:
- *   Unitialize the LCD support
+ *   Uninitialize the LCD support
  *
  ****************************************************************************/
 
@@ -394,5 +394,3 @@ void board_lcd_uninitialize(void)
 }
 
 #endif /* CONFIG_LCD_SSD1289 */
-
-

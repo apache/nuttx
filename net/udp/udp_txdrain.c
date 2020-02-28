@@ -40,11 +40,11 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <semaphore.h>
 #include <sched.h>
-#include <time.h>
 #include <assert.h>
 #include <errno.h>
+
+#include <nuttx/semaphore.h>
 
 #include "udp/udp.h"
 
@@ -91,7 +91,7 @@ static void txdrain_worker(FAR void *arg)
  *
  * Input Parameters:
  *   psock   - An instance of the internal socket structure.
- *   abstime - The absolute time when the timeout will occur
+ *   timeout - The relative time when the timeout will occur
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
@@ -99,8 +99,7 @@ static void txdrain_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-int udp_txdrain(FAR struct socket *psock,
-                FAR const struct timespec *abstime)
+int udp_txdrain(FAR struct socket *psock, unsigned int timeout)
 {
   FAR struct udp_conn_s *conn;
   sem_t waitsem;
@@ -126,7 +125,7 @@ int udp_txdrain(FAR struct socket *psock,
 
       /* There is pending write data.. wait for it to drain. */
 
-      ret = net_timedwait_uninterruptible(&waitsem, abstime);
+      ret = net_timedwait_uninterruptible(&waitsem, timeout);
 
       /* Tear down the notifier (in case we timed out or were canceled) */
 

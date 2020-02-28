@@ -40,7 +40,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <semaphore.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -50,6 +49,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/clock.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/timers/rtc.h>
 
 /****************************************************************************

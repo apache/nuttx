@@ -40,33 +40,40 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <arch/samv7/chip.h>
 
 #include "up_arch.h"
+#include "up_internal.h"
 #include "barriers.h"
 
 #include "hardware/sam_memorymap.h"
 
+#include "sam_eefc.h"
 #include "sam_progmem.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SAMV7_PROGMEM_NSECTORS
 #  error CONFIG_SAMV7_PROGMEM_NSECTORS is not defined
 #endif
 
+#ifndef CONFIG_ARCH_RAMFUNCS
+#   error "Flashing function should executed in ram"
+#endif
+
 /* Chip dependencies */
 
 #if defined(CONFIG_ARCH_CHIP_SAMV71) || defined(CONFIG_ARCH_CHIP_SAME70)
 /* All sectors are 128KB and are uniform in size.
- * The only execption is sector 0 which is subdivided into two small sectors
+ * The only exception is sector 0 which is subdivided into two small sectors
  * of 8KB and one larger sector of 112KB.
  * The page size is 512 bytes.  However, the smallest thing that can be
  * erased is four pages.  We will refer to this as a "cluster".
@@ -120,11 +127,6 @@
 #define SAMV7_SEC2BYTE(s)        ((s) << SAMV7_SECTOR_SHIFT)
 #define SAMV7_SEC2PAGE(s)        ((s) << SAMV7_PAGE2SEC_SHIFT)
 #define SAMV7_SEC2CLUST(s)       ((s) << SAMV7_CLUST2SECT_SHIFT)
-
-/* Lock region */
-
-#define SAMV7_LOCK_REGION_SIZE   (1 << SAMV7_LOCK_REGION_SHIFT)
-#define SAMV7_LOCK_REGION_MASK   (SAMV7_LOCK_REGION_SIZE - 1)
 
 /* Total FLASH sizes */
 
@@ -193,135 +195,6 @@ static void page_buffer_lock(void)
 #define page_buffer_unlock() nxsem_post(&g_page_sem)
 
 /****************************************************************************
- * Name: efc_command
- *
- * Description:
- *   Send a FLASH command
- *
- * Input Parameters:
- *   cmd - The FLASH command to be sent
- *   arg - The argument to accompany the command
- *
- * Returned Value:
- *   Zero is returned on success; a negated errno value is returned on any
- *   failure.
- *
- ****************************************************************************/
-
-static int efc_command(uint32_t cmd, uint32_t arg)
-{
-  uint32_t regval;
-
-  /* Write the command to the flash command register */
-
-  regval = EEFC_FCR_FCMD(cmd) |  EEFC_FCR_FARG(arg) | EEFC_FCR_FKEY_PASSWD;
-  putreg32(regval, SAM_EEFC_FCR);
-
-  /* Wait for the FLASH to become ready again */
-
-  do
-    {
-      regval = getreg32(SAM_EEFC_FSR);
-    }
-  while ((regval & EEFC_FSR_FRDY) == 0);
-
-  /* Check for errors */
-
-  if ((regval & (EEFC_FSR_FLOCKE | EEFC_FSR_FCMDE | EEFC_FSR_FLERR)) != 0)
-    {
-      return -EIO;
-    }
-  else
-    {
-      return OK;
-    }
-}
-
-/****************************************************************************
- * Name: efc_lock
- *
- * Description:
- *   Lock a region of FLASH
- *
- * Input Parameters:
- *   page  - The first page to unlock
- *   npages - The number of consecutive pages to unlock
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#if 0 /* Not used */
-static int efc_lock(size_t page, size_t npages)
-{
-  size_t start_page;
-  size_t end_page;
-  size_t lockpage;
-  int ret;
-
-  /* Align the page to the lock region */
-
-  end_page   = page + npages;
-  start_page = page & SAMV7_LOCK_REGION_MASK;
-
-  for (lockpage = start_page;
-       lockpage < end_page;
-       lockpage += SAMV7_LOCK_REGION_SIZE)
-    {
-      ret = efc_command(FCMD_SLB, lockpage);
-      if (ret < 0)
-        {
-          return ret;
-        }
-    }
-
-  return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: efc_unlock
- *
- * Description:
- *   Make sure that the FLASH is unlocked
- *
- * Input Parameters:
- *   page  - The first page to unlock
- *   npages - The number of consecutive pages to unlock
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int efc_unlock(size_t page, size_t npages)
-{
-  size_t start_page;
-  size_t end_page;
-  size_t lockpage;
-  int ret;
-
-  /* Align the page to the lock region */
-
-  end_page   = page + npages;
-  start_page = page & SAMV7_LOCK_REGION_MASK;
-
-  for (lockpage = start_page;
-       lockpage < end_page;
-       lockpage += SAMV7_LOCK_REGION_SIZE)
-    {
-      ret = efc_command(FCMD_CLB, lockpage);
-      if (ret < 0)
-        {
-          return ret;
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -343,11 +216,15 @@ void sam_progmem_initialize(void)
 {
   uint32_t regval;
 
+  /* Set flash access mode to 128bit and wait status to 4 */
+
+  sam_eefc_initaccess(SAM_EFC_ACCESS_MODE_128, 4);
+
   /* Make sure that the read interrupt is disabled */
 
   regval  = getreg32(SAM_EEFC_FMR);
   regval &= ~EEFC_FMR_FRDY;
-  putreg32(regval, SAM_EEFC_FMR);
+  sam_eefc_writefmr(regval);
 
   /* Initialize the semaphore that manages exclusive access to the global
    * page buffer.
@@ -504,7 +381,7 @@ ssize_t up_progmem_eraseblock(size_t cluster)
 
   /* Erase all pages in the cluster */
 
-  efc_unlock(page, SAMV7_PAGE_PER_CLUSTER);
+  sam_eefc_unlock(page, SAMV7_PAGE_PER_CLUSTER);
 
   /* Get FARG field for EPA command:
    *
@@ -521,16 +398,16 @@ ssize_t up_progmem_eraseblock(size_t cluster)
 #elif SAMV7_PAGE_PER_CLUSTER == 16
     arg   = page | 2;
 #elif SAMV7_PAGE_PER_CLUSTER == 8
-#  error Cluster size of 8 not suportted
-    arg   = page | 1;   /* 0nly valid for small 8 KB sectors */
+#  error Cluster size of 8 not supported
+    arg   = page | 1;   /* Only valid for small 8 KB sectors */
 #elif SAMV7_PAGE_PER_CLUSTER == 4
-#  error Cluster size of 4 not suportted
-    arg   = page | 0;   /* 0nly valid for small 8 KB sectors */
+#  error Cluster size of 4 not supported
+    arg   = page | 0;   /* Only valid for small 8 KB sectors */
 #else
 #  error Unsupported/undefined pages-per-cluster size
 #endif
 
-  ret = efc_command(FCMD_EPA, arg);
+  ret = sam_eefc_command(FCMD_EPA, arg);
   if (ret < 0)
     {
       return ret;
@@ -666,7 +543,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
   /* Make sure that the FLASH is unlocked */
 
-  efc_unlock(page, SAMV7_BYTE2PAGE(buflen + SAMV7_PAGE_MASK));
+  sam_eefc_unlock(page, SAMV7_BYTE2PAGE(buflen + SAMV7_PAGE_MASK));
 
   /* Loop until all of the data has been written */
 
@@ -722,7 +599,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
       /* Send the write command */
 
-      ret = efc_command(FCMD_WP, page);
+      ret = sam_eefc_command(FCMD_WP, page);
       if (ret >= 0)
         {
           written += xfrsize;

@@ -418,7 +418,7 @@ static void ramtron_lock(FAR struct ramtron_dev_s *priv)
    * transfers.  The bus should be locked before the chip is selected.
    *
    * This is a blocking call and will not return until we have exclusive access to
-   * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
+   * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
    */
 
   SPI_LOCK(dev, true);

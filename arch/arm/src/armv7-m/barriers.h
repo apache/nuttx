@@ -54,4 +54,4 @@
 #define ARM_ISB()  arm_isb(15)
 #define ARM_DMB()  arm_dmb(15)
 
-#endif  /* __ARCH_ARM_SRC_COMMON_ARMV7_M_BARRIERS_H */
+#endif /* __ARCH_ARM_SRC_COMMON_ARMV7_M_BARRIERS_H */

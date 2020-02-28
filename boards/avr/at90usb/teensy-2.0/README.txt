@@ -163,7 +163,7 @@ SD-ADP Pinout / SD Connection
  -- ---- ----------- -------------------------------------------------------
  J2 NAME SD CARD     DESCRIPTION
  -- ---- ----------- -------------------------------------------------------
-  1 VIN   (reguator) Input power to the SD card (3.3V to 6.0V)
+  1 VIN   (regulator)Input power to the SD card (3.3V to 6.0V)
   2 GND   3,6,12,13  Common (Connects to the housing of the SD socket)
   3 3V3   4 3.3V     Output voltage from the on-board 3.3V regulator (250mA)
   4 NC    9 NC       Connect to pin 9 on the SD card (not used in SPI mode)
@@ -566,4 +566,3 @@ Configuration Sub-Directories
     much SRAM for the system to behave sanely.  A lower memory footprint
     version of the mass storage driver will be required before this can
     be debugged.
-

@@ -818,7 +818,7 @@ FAR struct mtd_dev_s *sst39vf_initialize(void)
   sst39vf_writeseq(g_swid_exit, 3);
   up_udelay(10);
 
-  /* Now see if we can suport the part */
+  /* Now see if we can support the part */
 
   finfo("Manufacturer: %02x\n", manufacturer);
   finfo("Chip ID:      %04x\n", chipid);

@@ -63,4 +63,3 @@ int sigfillset(FAR sigset_t *set)
   *set = ALL_SIGNAL_SET;
   return OK;
 }
-

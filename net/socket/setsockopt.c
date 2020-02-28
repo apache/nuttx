@@ -1,8 +1,8 @@
 /****************************************************************************
  * net/socket/setsockopt.c
  *
- *   Copyright (C) 2007, 2008, 2011-2012, 2014-2015, 2017-2018 Gregory Nutt.
- *     All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011-2012, 2014-2015, 2017-2018, 2020 Gregory
+ *     Nutt.  All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,13 +94,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
   if (!_SO_SETVALID(option) || !value)
     {
       return -EINVAL;
-    }
-
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (psock == NULL || psock->s_crefs <= 0)
-    {
-      return -EBADF;
     }
 
 #ifdef CONFIG_NET_USRSOCK
@@ -362,6 +355,13 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
 {
   int ret;
 
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (psock == NULL || psock->s_crefs <= 0)
+    {
+      return -EBADF;
+    }
+
   /* Handle setting of the socket option according to the level at which
    * option should be applied.
    */
@@ -383,10 +383,6 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
         ret = udp_setsockopt(psock, option, value, value_len);
         break;
 #endif
-
-      /* These levels are defined in sys/socket.h, but are not yet
-       * implemented.
-       */
 
 #ifdef CONFIG_NET_IPv4
       case SOL_IP:     /* TCP protocol socket options (see include/netinet/in.h) */
@@ -459,7 +455,8 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
  *
  ****************************************************************************/
 
-int setsockopt(int sockfd, int level, int option, const void *value, socklen_t value_len)
+int setsockopt(int sockfd, int level, int option, const void *value,
+               socklen_t value_len)
 {
   FAR struct socket *psock;
   int ret;
@@ -473,7 +470,7 @@ int setsockopt(int sockfd, int level, int option, const void *value, socklen_t v
   ret = psock_setsockopt(psock, level, option, value, value_len);
   if (ret < 0)
     {
-      set_errno(-ret);
+      _SO_SETERRNO(psock, -ret);
       return ERROR;
     }
 

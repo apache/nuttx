@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_CXD56XX_SPRESENCE_INCLUDE_BOARD_PINCONFIG_H
-#define __BOARDS_ARM_CXD56XX_SPRESENCE_INCLUDE_BOARD_PINCONFIG_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_PINCONFIG_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_PINCONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -46,21 +46,27 @@
 
 /* Customize from default to the board specific pin configuration
  * The default pin configurations are defined in
- * boards/arm/cxd56xx/spresense/inclue/board_pinconfig.h.
+ * boards/arm/cxd56xx/spresense/include/board_pinconfig.h.
  *
  *   Mode: shared pin function mode
  *   ENZI: 1=Input Enable, 0=Input Disable
  *   4mA : Drive Current 1=4mA, 0=2mA
  *   Pull: 0=HiZ floating, PINCONF_PULLUP, PINCONF_PULLDOWN
  *
- *                       M  E     P
- *   P                   o  N  4  u
- *   i                   d  Z  m  l
- *   n                   e  I  A  l
+ *                                                            M  E     P
+ *                                        P                   o  N  4  u
+ *                                        i                   d  Z  m  l
+ *                                        n                   e  I  A  l
  */
 
+#undef PINCONF_UART2_TXD
+#undef PINCONF_UART2_RXD
 #undef PINCONF_UART2_CTS
-#define PINCONF_UART2_CTS          PINCONF(PIN_UART2_CTS,      1, 1, 0, PINCONF_PULLDOWN)
+#undef PINCONF_UART2_RTS
+#define PINCONF_UART2_TXD          PINCONF(PIN_UART2_TXD,      1, 0, 1, 0)
+#define PINCONF_UART2_RXD          PINCONF(PIN_UART2_RXD,      1, 1, 1, 0)
+#define PINCONF_UART2_CTS          PINCONF(PIN_UART2_CTS,      1, 1, 1, PINCONF_PULLDOWN)
+#define PINCONF_UART2_RTS          PINCONF(PIN_UART2_RTS,      1, 0, 1, 0)
 
 #undef PINCONF_SPI4_CS_X
 #undef PINCONF_SPI4_SCK
@@ -68,6 +74,19 @@
 #define PINCONF_SPI4_CS_X          PINCONF(PIN_SPI4_CS_X,      1, 0, 1, 0)
 #define PINCONF_SPI4_SCK           PINCONF(PIN_SPI4_SCK,       1, 0, 1, 0)
 #define PINCONF_SPI4_MOSI          PINCONF(PIN_SPI4_MOSI,      1, 0, 1, 0)
+
+#undef PINCONF_SPI3_CS0_X
+#undef PINCONF_SPI3_CS1_X
+#undef PINCONF_SPI3_CS2_X
+#undef PINCONF_SPI3_SCK
+#undef PINCONF_SPI3_MOSI
+#undef PINCONF_SPI3_MISO
+#define PINCONF_SPI3_CS0_X         PINCONF(PIN_SPI3_CS0_X,     1, 0, 1, 0)
+#define PINCONF_SPI3_CS1_X         PINCONF(PIN_SPI3_CS1_X,     1, 0, 1, 0)
+#define PINCONF_SPI3_CS2_X         PINCONF(PIN_SPI3_CS2_X,     1, 0, 1, 0)
+#define PINCONF_SPI3_SCK           PINCONF(PIN_SPI3_SCK,       1, 0, 1, 0)
+#define PINCONF_SPI3_MOSI          PINCONF(PIN_SPI3_MOSI,      1, 0, 1, 0)
+#define PINCONF_SPI3_MISO          PINCONF(PIN_SPI3_MISO,      1, 1, 1, 0)
 
 #undef PINCONF_PWM0
 #undef PINCONF_PWM1
@@ -99,4 +118,4 @@
 #undef PINCONF_SDIO_CD_GPIO
 #define PINCONF_SDIO_CD_GPIO       PINCONF(PIN_SDIO_CD,        0, 0, 0, PINCONF_PULLUP)
 
-#endif  /* __BOARDS_ARM_CXD56XX_SPRESENCE_INCLUDE_BOARD_PINCONFIG_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_BOARD_PINCONFIG_H */

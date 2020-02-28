@@ -58,6 +58,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifdef CONFIG_PIC32MX_MVEC
@@ -68,7 +69,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *g_current_regs;
+volatile uint32_t *g_current_regs[1];
 
 /****************************************************************************
  * Private Data
@@ -109,6 +110,10 @@ void up_irqinitialize(void)
     {
       up_prioritize_irq(irq, (INT_IPC_MID_PRIORITY << 2));
     }
+
+  /* Set the Software Interrupt0 to a special priority */
+
+  up_prioritize_irq(PIC32MX_IRQSRC_CS0, (CHIP_SW0_PRIORITY << 2));
 
   /* Set the BEV bit in the STATUS register */
 
@@ -159,7 +164,7 @@ void up_irqinitialize(void)
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
-  g_current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* And finally, enable interrupts */
 
@@ -171,11 +176,11 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then enable all interrupt levels */
 
-  up_irq_restore(CP0_STATUS_IM_ALL);
+  up_irq_restore(CP0_STATUS_INT_ENALL);
 #else
   /* Enable only software interrupts */
 
-  up_irq_restore(CP0_STATUS_IM_SWINTS);
+  up_irq_restore(CP0_STATUS_INT_SW0);
 #endif
 }
 
@@ -409,6 +414,19 @@ void up_clrpend_irq(int irq)
 
       putreg32((1 << bitno), regaddr);
     }
+}
+
+/****************************************************************************
+ * Name: up_clrpend_sw0
+ *
+ * Description:
+ *   Clear a pending Software Interrupt.
+ *
+ ****************************************************************************/
+
+void up_clrpend_sw0(void)
+{
+  up_clrpend_irq(PIC32MX_IRQSRC_CS0);
 }
 
 /****************************************************************************

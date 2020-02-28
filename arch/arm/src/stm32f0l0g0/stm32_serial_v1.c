@@ -44,7 +44,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -67,7 +66,7 @@
 #include "stm32_rcc.h"
 #include "hardware/stm32_pinmap.h"
 
-/* board.h should be included last.  It may depend on defintions from
+/* board.h should be included last.  It may depend on definitions from
  * previous header files and it may, in certain cases, override definitions
  * provided in previous header files.
  */
@@ -1494,7 +1493,7 @@ static int up_interrupt(int irq, FAR void *context, FAR void *arg)
        * "           "      USART_ISR_ORE    Overrun Error Detected
        * USART_CR3_CTSIE    USART_ISR_CTS    CTS flag                        (not used)
        *
-       * NOTE: Some of these status bits must be cleared by explicity writing zero
+       * NOTE: Some of these status bits must be cleared by explicitly writing zero
        * to the SR register: USART_ISR_CTS, USART_ISR_LBD. Note of those are currently
        * being used.
        */

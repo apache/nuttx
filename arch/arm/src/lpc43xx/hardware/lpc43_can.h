@@ -403,22 +403,22 @@
                                                /* Bits 16-31: Reserved */
 /* Interrupt pending 1 */
 
-#define CAN_IR1_MASK                 0xffff    /* Bits 0-15: Interrup pending msg 1-16 */
+#define CAN_IR1_MASK                 0xffff    /* Bits 0-15: Interrupt pending msg 1-16 */
 #define CAN_IR1(n)                   (1 << ((n)-1)
                                                /* Bits 16-31: Reserved */
 /* Interrupt pending 2 */
 
-#define CAN_IR2_MASK                 0xffff    /* Bits 0-15: Interrup pending msg 17-32 */
+#define CAN_IR2_MASK                 0xffff    /* Bits 0-15: Interrupt pending msg 17-32 */
 #define CAN_IR2(n)                   (1 << ((n)-17)
                                                /* Bits 16-31: Reserved */
 /* Message valid 1 */
 
-#define CAN_MSGV1_MASK               0xffff    /* Bits 0-15: Interrup pending msg 1-16 */
+#define CAN_MSGV1_MASK               0xffff    /* Bits 0-15: Interrupt pending msg 1-16 */
 #define CAN_MSGV1(n)                 (1 << ((n)-1)
                                                /* Bits 16-31: Reserved */
 /* Message valid 2 */
 
-#define CAN_MSGV2_MASK               0xffff    /* Bits 0-15: Interrup pending msg 17-32 */
+#define CAN_MSGV2_MASK               0xffff    /* Bits 0-15: Interrupt pending msg 17-32 */
 #define CAN_MSGV2(n)                 (1 << ((n)-17)
                                                /* Bits 16-31: Reserved */
 /* CAN clock divider register */

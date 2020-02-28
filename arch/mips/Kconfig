@@ -11,6 +11,7 @@ choice
 config ARCH_CHIP_PIC32MX
 	bool "PIC32MX"
 	select ARCH_MIPS32
+	select ARCH_HAVE_EIC
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_RAMFUNCS
@@ -21,6 +22,7 @@ config ARCH_CHIP_PIC32MX
 config ARCH_CHIP_PIC32MZ
 	bool "PIC32MZ"
 	select ARCH_MIPS32
+	select ARCH_HAVE_EIC
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_RAMFUNCS
@@ -35,14 +37,23 @@ config ARCH_MIPS32
 	default n
 	select ARCH_HAVE_VFORK
 
-config ARCH_MIPS_24KC
+config ARCH_MIPS_M4K
 	bool
 	default n
 
-config ARCH_MIPS_M14K
+config ARCH_MIPS_MICROAPTIV
 	bool
 	default n
 	select ARCH_HAVE_MICROMIPS
+
+config ARCH_MIPS_M5150
+	bool
+	default n
+	select ARCH_HAVE_MICROMIPS
+
+config ARCH_HAVE_EIC
+  bool
+  default n
 
 config ARCH_HAVE_MICROMIPS
 	bool

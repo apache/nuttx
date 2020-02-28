@@ -179,7 +179,7 @@ struct ipv6icmp_hdr_s
  * destination node.
  *
  * The following structure is used to summarize those per-packet
- * customizations and, along, with the fixed configuratoin settings,
+ * customizations and, along, with the fixed configuration settings,
  * determines the full form of that meta data.
  */
 
@@ -267,10 +267,10 @@ struct iob_s;               /* Forward reference */
  *   buf     - Data to send
  *   len     - Length of data to send
  *   destmac - The IEEE802.15.4 MAC address of the destination
- *   timeout - Send timeout in deciseconds
+ *   timeout - Send timeout in milliseconds
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   Ok is returned on success; Otherwise a negated errno value is returned.
  *   This function is expected to fail if the driver is not an IEEE802.15.4
  *   MAC network driver.  In that case, the logic will fall back to normal
  *   IPv4/IPv6 formatting.
@@ -300,7 +300,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
  *             (obfuscated).
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   Ok is returned on success; Otherwise a negated errno value is returned.
  *
  * Assumptions:
  *   Called with the network locked.
@@ -326,7 +326,7 @@ int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
  *   meta  - obfuscated meta data that describes the MAC header
  *
  * Returned Value:
- *   The frame header length is returnd on success; otherwise, a negated
+ *   The frame header length is returned on success; otherwise, a negated
  *   errno value is return on failure.
  *
  ****************************************************************************/
@@ -362,7 +362,7 @@ int sixlowpan_frame_submit(FAR struct radio_driver_s *radio,
  *
  * Description:
  *   Process an outgoing UDP or TCP packet.  This function is called from
- *   the send event handler when a TX poll is received.  It formates the
+ *   the send event handler when a TX poll is received.  It formats the
  *   list of frames to be sent by the IEEE802.15.4 MAC driver.
  *
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
@@ -379,7 +379,7 @@ int sixlowpan_frame_submit(FAR struct radio_driver_s *radio,
  *   destmac - The IEEE802.15.4 MAC address of the destination
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   Ok is returned on success; Otherwise a negated errno value is returned.
  *   This function is expected to fail if the driver is not an IEEE802.15.4
  *   MAC network driver.  In that case, the UDP/TCP will fall back to normal
  *   IPv4/IPv6 formatting.
@@ -629,7 +629,7 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  * Name: sixlowpan_radio_framelen
  *
  * Description:
- *   Get the maximum frame length supported by radio network drvier.
+ *   Get the maximum frame length supported by radio network driver.
  *
  * Input Parameters:
  *   radio - Reference to a radio network driver state instance.

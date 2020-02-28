@@ -40,4 +40,3 @@ void up_puts(const char *p)
       up_lowputc(*(p++));
    up_lowputc('\n');
 }
-

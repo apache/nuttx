@@ -57,4 +57,3 @@ Configurations
 
     At the moment, the waveform parameters are hardcoded, but it should be easy to
     modify this example and make it more functional.
-

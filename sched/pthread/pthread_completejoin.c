@@ -286,4 +286,3 @@ void pthread_destroyjoin(FAR struct task_group_s *group,
 
   sched_kfree(pjoin);
 }
-

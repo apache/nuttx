@@ -65,4 +65,3 @@ FAR char *strrchr(FAR const char *s, int c)
 
   return NULL;
 }
-

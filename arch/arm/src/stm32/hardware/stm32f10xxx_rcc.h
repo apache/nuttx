@@ -188,7 +188,7 @@
 #  define RCC_CFGR_EXTCLK           (6 << RCC_CFGR_MCO_SHIFT)  /* 0110: External 1-25 MHz oscillator clock selected */
 #  define RCC_CFGR_PLLCLKd2         (7 << RCC_CFGR_MCO_SHIFT)  /* 0111: PLL clock divided by 2 selected */
 #  define RCC_CFGR_PLL2CLK          (8 << RCC_CFGR_MCO_SHIFT)  /* 1000: PLL2 clock selected */
-#  define RCC_CFGR_PLL3CLKd2        (9 << RCC_CFGR_MCO_SHIFT)  /* 1001: PLL3 clock devided by 2 selected */
+#  define RCC_CFGR_PLL3CLKd2        (9 << RCC_CFGR_MCO_SHIFT)  /* 1001: PLL3 clock divided by 2 selected */
 #  define RCC_CFGR_XT1              (10 << RCC_CFGR_MCO_SHIFT) /* 1010: external 3-25 MHz oscillator clock selected (for Ethernet) */
 #  define RCC_CFGR_PLL3CLK          (11 << RCC_CFGR_MCO_SHIFT) /* 1011: PLL3 clock selected (for Ethernet) */
 
@@ -476,4 +476,3 @@
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F10XXX_RCC_H */
-

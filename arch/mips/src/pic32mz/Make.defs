@@ -115,4 +115,3 @@ endif
 ifeq ($(CONFIG_PIC32MZ_DMA),y)
 CHIP_CSRCS += pic32mz-dma.c
 endif
-

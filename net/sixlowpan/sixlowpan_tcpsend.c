@@ -44,10 +44,10 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "nuttx/semaphore.h"
-#include "nuttx/net/netdev.h"
-#include "nuttx/net/radiodev.h"
-#include "nuttx/net/netstats.h"
+#include <nuttx/semaphore.h>
+#include <nuttx/net/netdev.h>
+#include <nuttx/net/radiodev.h>
+#include <nuttx/net/netstats.h>
 
 #include "netdev/netdev.h"
 #include "devif/devif.h"
@@ -94,8 +94,6 @@ struct sixlowpan_send_s
   FAR struct devif_callback_s *s_cb;      /* Reference to callback instance */
   sem_t                        s_waitsem; /* Supports waiting for driver events */
   int                          s_result;  /* The result of the transfer */
-  uint16_t                     s_timeout; /* Send timeout in deciseconds */
-  clock_t                      s_time;    /* Last send time for determining timeout */
   FAR const struct netdev_varaddr_s *s_destmac; /* Destination MAC address */
   FAR const uint8_t           *s_buf;     /* Data to send */
   size_t                       s_buflen;  /* Length of data in buf */
@@ -288,47 +286,6 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
 }
 
 /****************************************************************************
- * Name: send_timeout
- *
- * Description:
- *   Check for send timeout.
- *
- * Input Parameters:
- *   sinfo - Send state structure reference
- *
- * Returned Value:
- *   TRUE:timeout FALSE:no timeout
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-static inline bool send_timeout(FAR struct sixlowpan_send_s *sinfo)
-{
-  /* Check for a timeout.  Zero means none and, in that case, we will let
-   * the send wait forever.
-   */
-
-  if (sinfo->s_timeout != 0)
-    {
-      /* Check if the configured timeout has elapsed */
-
-      clock_t timeo_ticks =  DSEC2TICK(sinfo->s_timeout);
-      clock_t elapsed     =  clock_systimer() - sinfo->s_time;
-
-      if (elapsed >= timeo_ticks)
-        {
-          return true;
-        }
-    }
-
-  /* No timeout */
-
-  return false;
-}
-
-/****************************************************************************
  * Name: tcp_send_eventhandler
  *
  * Description:
@@ -397,12 +354,6 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
   if ((flags & TCP_ACKDATA) != 0)
     {
       FAR struct tcp_hdr_s *tcp = TCPBUF(dev);
-
-#ifdef CONFIG_NET_SOCKOPTS
-      /* Update the timeout */
-
-      sinfo->s_time = clock_systimer();
-#endif
 
       /* The current acknowledgement number number is the (relative) offset
        * of the of the next byte needed by the receiver.  The s_isn is the
@@ -568,7 +519,7 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
           conn->tx_unacked += sndlen;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-          /* For compability with buffered send logic */
+          /* For compatibility with buffered send logic */
 
           conn->sndseq_max = tcp_addsequence(conn->sndseq, conn->tx_unacked);
 #endif
@@ -582,21 +533,6 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
                 conn->tx_unacked);
         }
     }
-
-#ifdef CONFIG_NET_SOCKOPTS
-  /* All data has been sent and we are just waiting for ACK or re-transmit
-   * indications to complete the send.  Check for a timeout.
-   */
-
-  if (send_timeout(sinfo))
-    {
-      /* Yes.. report the timeout */
-
-      nwarn("WARNING: SEND timeout\n");
-      sinfo->s_sent = -ETIMEDOUT;
-      goto end_wait;
-    }
-#endif /* CONFIG_NET_SOCKOPTS */
 
   /* Continue waiting */
 
@@ -640,10 +576,10 @@ end_wait:
  *   buf     - Data to send
  *   len     - Length of data to send
  *   destmac - The IEEE802.15.4 MAC address of the destination
- *   timeout - Send timeout in deciseconds
+ *   timeout - Send timeout in milliseconds
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   Ok is returned on success; Otherwise a negated errno value is returned.
  *   This function is expected to fail if the driver is not an IEEE802.15.4
  *   MAC network driver.  In that case, the logic will fall back to normal
  *   IPv4/IPv6 formatting.
@@ -689,8 +625,6 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
 
           sinfo.s_sock      = psock;
           sinfo.s_result    = -EBUSY;
-          sinfo.s_timeout   = timeout;
-          sinfo.s_time      = clock_systimer();
           sinfo.s_destmac   = destmac;
           sinfo.s_buf       = buf;
           sinfo.s_buflen    = len;
@@ -717,12 +651,22 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
           netdev_txnotify_dev(dev);
 
           /* Wait for the send to complete or an error to occur.
-           * net_lockedwait will also terminate if a signal is received.
+           * net_timedwait will also terminate if a signal is received.
            */
 
           ninfo("Wait for send complete\n");
 
-          ret = net_lockedwait(&sinfo.s_waitsem);
+          for (; ; )
+            {
+              uint32_t acked = sinfo.s_acked;
+
+              ret = net_timedwait(&sinfo.s_waitsem, timeout);
+              if (ret != -ETIMEDOUT || acked == sinfo.s_acked)
+                {
+                  break; /* Timeout without any progress */
+                }
+            }
+
           if (ret < 0)
             {
               sinfo.s_result = ret;
@@ -773,7 +717,6 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
   FAR struct tcp_conn_s *conn;
   FAR struct net_driver_s *dev;
   struct netdev_varaddr_s destmac;
-  uint16_t timeout;
   int ret;
 
   ninfo("buflen %lu\n", (unsigned long)buflen);
@@ -859,14 +802,8 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
    * packet buffer.
    */
 
-#ifdef CONFIG_NET_SOCKOPTS
-  timeout = psock->s_sndtimeo;
-#else
-  timeout = 0;
-#endif
-
   ret = sixlowpan_send_packet(psock, dev, conn, buf, buflen, &destmac,
-                              timeout);
+                              _SO_TIMEOUT(psock->s_sndtimeo));
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send_packet() failed: %d\n", ret);
@@ -941,7 +878,7 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
 
       if (ipv6hdr->ipv6.proto != IP_PROTO_TCP)
         {
-          nwarn("WARNING: Expected TCP protoype: %u vs %s\n",
+          nwarn("WARNING: Expected TCP prototype: %u vs %s\n",
                 ipv6hdr->ipv6.proto, IP_PROTO_TCP);
         }
       else

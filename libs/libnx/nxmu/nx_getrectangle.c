@@ -116,7 +116,7 @@ int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
    * priority inheritance enabled.
    */
 
-  nxsem_setprotocol(&sem_done, SEM_PRIO_NONE);
+  _SEM_SETPROTOCOL(&sem_done, SEM_PRIO_NONE);
 
   /* Forward the fill command to the server */
 

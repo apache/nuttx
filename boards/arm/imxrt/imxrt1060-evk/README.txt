@@ -110,7 +110,7 @@ LEDs and buttons
     - SW2: ON/OFF Button
     - SW3: Power-on Reset button state forces to reset the system power except
            SNVS domain
-    - SW9: Reset button 
+    - SW9: Reset button
     - SW8: User button GPIO5-00
 
   Only the user button is available to the software.  It is sensed on the
@@ -322,7 +322,7 @@ Configuration sub-directories
     capacitive touchscreen sensor FT5336GQQ connected to the LPI2C1 bus,
     address 0x38. Nuttx support such touchscreen device via the driver
     ft5x06 (drivers/input/ft5x06.c). At the moment only the polling
-    method is available, the board features an interrupt line connecetd
+    method is available, the board features an interrupt line connected
     to the touchscreen sensor IC.
 
     IMXRT1062 MCU provides the integrated LCD driver.

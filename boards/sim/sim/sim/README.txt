@@ -10,7 +10,7 @@ Contents
   o Debugging
   o Issues
     - 64-bit Issues
-    - Compiler differences
+    - Compiler Differences
     - Stack Size Issues
     - Symbol Collisions
     - Networking Issues
@@ -25,21 +25,21 @@ Overview
 
 Description
 -----------
-This README file describes the contents of the build configurations
-available for the NuttX "sim" target.  The sim target is a NuttX port that
-runs as a user-space program under Linux or Cygwin.  It is a very "low
-fidelity" embedded system simulation:  This environment does not support
-any kind of asynchronous events -- there are nothing like interrupts in this
-context.  Therefore, there can be no pre-empting events.
+This README file describes the contents of the build configurations available
+for the NuttX "sim" target.  The sim target is a NuttX port that runs as a
+user-space program under Linux or Cygwin.  It is a very "low fidelity"
+embedded system simulation:  This environment does not support any kind of
+asynchronous events -- there are nothing like interrupts in this context.
+Therefore, there can be no pre-empting events.
 
 Fake Interrupts
 ---------------
-In order to get timed behavior, the system timer "interrupt handler" is
-called from the sim target's IDLE loop.  The IDLE runs whenever there is no
-other task running.  So, for example, if a task calls sleep(), then that
-task will suspend wanting for the time to elapse.  If nothing else is
-available to run, then the IDLE loop runs and the timer increments,
-eventually re-awakening the sleeping task.
+In order to get timed behavior, the system timer "interrupt handler" is called
+from the sim target's IDLE loop.  The IDLE runs whenever there is no other
+task running.  So, for example, if a task calls sleep(), then that task will
+suspend wanting for the time to elapse.  If nothing else is available to run,
+then the IDLE loop runs and the timer increments, eventually re-awakening the
+sleeping task.
 
 Context switching is based on logic similar to setjmp() and longjmp().
 
@@ -54,16 +54,15 @@ default, calls the system "interrupt handler" as fast as possible.  As a
 result, there really are no noticeable delays when a task sleeps.  However,
 the task really does sleep -- but the time scale is wrong.  If you want
 behavior that is closer to normal timing, then you can define
-CONFIG_SIM_WALLTIME=y in your configuration file.  This configuration
-setting will cause the sim target's IDLE loop to delay on each call so that
-the system "timer interrupt" is called at a rate approximately correct for
-
-the system timer tick rate.  With this definition in the configuration,
-sleep() behavior is more or less normal.
+CONFIG_SIM_WALLTIME=y in your configuration file.  This configuration setting
+will cause the sim target's IDLE loop to delay on each call so that the system
+"timer interrupt" is called at a rate approximately correct for the system
+timer tick rate.  With this definition in the configuration, sleep() behavior
+is more or less normal.
 
 Debugging
 ^^^^^^^^^
-One of the best reasons to use the simulation is that is supports great, Linux-
+One of the best reasons to use the simulation is that is supports great Linux-
 based debugging.  Here are the steps that I following to use the Linux ddd
 graphical front-end to GDB:
 
@@ -86,7 +85,7 @@ graphical front-end to GDB:
    gdb> r
 
 NOTE:  This above steps work fine on both Linux and Cygwin.  On Cygwin, you
-will need to start the Cywin-X server before running ddd.
+will need to start the Cygwin-X server before running ddd.
 
 Issues
 ^^^^^^
@@ -94,18 +93,18 @@ Issues
 64-Bit Issues
 -------------
 As mentioned above, context switching is based on logic like setjmp() and
-longjmp().  This context switching is available for 32-bit and 64-bit
-targets.  You must, however, set the correct target in the configuration
-before you build: CONFIG_HOST_X86_64 or CONFIG_HOST_X86 for 64- and 32-bit
-targets, respectively.  On a 64-bit machine, you can also force the 32-bit
-build with CONFIG_SIM_M32=y (which does not seem to be supported by more
-contemporary x86_64 compilers).
+longjmp().  This context switching is available for 32-bit and 64-bit targets.
+You must, however, set the correct target in the configuration before you
+build: CONFIG_HOST_X86_64 or CONFIG_HOST_X86 for 64- and 32-bit targets,
+respectively.  On a 64-bit machine, you can also force the 32-bit build with
+CONFIG_SIM_M32=y (which does not seem to be supported by more contemporary
+x86_64 compilers).
 
 There are other 64-bit issues as well.  For example, addresses are retained in
-32-bit unsigned integer types in a few places.  On a 64-bit machine, the 32-bit
-address storage may corrupt 64-bit addressing.  NOTE:  This is really a bug --
-addresses should not be retained in uint32_t types but rather in uintptr_t types
-to avoid issues just like this.
+32-bit unsigned integer types in a few places.  On a 64-bit machine, the 32-
+bit address storage may corrupt 64-bit addressing.  NOTE:  This is really a
+bug -- addresses should not be retained in uint32_t types but rather in
+uintptr_t types to avoid issues just like this.
 
 Compiler differences
 --------------------
@@ -119,7 +118,7 @@ Stack Size Issues
 -----------------
 When you run the NuttX simulation, it uses stacks allocated by NuttX from the
 NuttX heap.  The memory management model is exactly the same in the simulation
-as it is real, target system.  This is good because this produces a higher
+as in a real, target system.  This is good because this produces a higher
 fidelity simulation.
 
 However, when the simulation calls into Linux/Cygwin libraries, it will still
@@ -129,16 +128,16 @@ make x11 calls into the system.  The programming model within those libraries
 will assume a Linux/Cygwin environment where the stack size grows dynamically
 and not the small, limited stacks of a deeply embedded system.
 
-As a consequence, those system libraries may allocate large data structures
-on the stack and overflow the small NuttX stacks.  X11, in particular,
-requires large stacks.  If you are using X11 in the simulation, make sure
-that you set aside a "lot" of stack for the X11 system calls (maybe 8 or 16Kb).
-The stack size for the thread that begins with user start is controlled
-by the configuration setting CONFIG_USERMAIN_STACKSIZE; you may need to
-increase this value to larger number to survive the X11 system calls.
+As a consequence, those system libraries may allocate large data structures on
+the stack and overflow the small NuttX stacks.  X11, in particular, requires
+large stacks.  If you are using X11 in the simulation, make sure that you set
+aside a "lot" of stack for the X11 system calls (maybe 8 or 16Kb). The stack
+size for the thread that begins with user start is controlled by the
+configuration setting CONFIG_USERMAIN_STACKSIZE; you may need to increase this
+value to larger number to survive the X11 system calls.
 
-If you are running X11 applications as NSH add-on programs, then the stack
-size of the add-on program is controlled in another way.  Here are the
+If you are running X11 applications such as NSH add-on programs, then the
+stack size of the add-on program is controlled in another way.  Here are the
 steps for increasing the stack size in that case:
 
   cd ../apps/builtin    # Go to the builtin apps directory
@@ -150,58 +149,72 @@ Symbol Collisions
 The simulation build is a two pass build:
 
   1. On the first pass, an intermediate, partially relocatable object is
-    created called nuttx.rel.  This includes all of the files that are part
-    of the NuttX "domain."
+     created called nuttx.rel.  This includes all of the files that are part
+     of the NuttX "domain."
 
-  2. On the second pass, the files are are in the host OS domain are build
+  2. On the second pass, the files which are in the host OS domain are built
      and then linked with nuttx.rel to generate the simulation program.
 
-NuttX is a POSIX compliant RTOS and is normally build on a POSIX compliant
+NuttX is a POSIX compliant RTOS and is normally built on a POSIX compliant
 host environment (like Linux or Cygwin).  As a result, the same symbols are
-exported by both the NuttX doman and the host domain.  How can we keep them
+exported by both the NuttX domain and the host domain.  How can we keep them
 separate?
 
-This is done using the special file nuttx-name.dat.  This file just contains
-a list of original function names and a new function name.  For example
-the NuttX printf() will get the new name NXprintf().
+This is done using the special file nuttx-name.dat.  This file just contains a
+mapping of original function names to new function names.  For example, the
+NuttX printf() will get the new name NXprintf().
 
 This nuttx-names.dat file is used by the objcopy program between pass1 and
-pass2 to rename all of the symbols in the nuttx.rel object so that they do
-not collide with names provided by the host OS in the host PC domain.
+pass2 to rename all of the symbols in the nuttx.rel object so that they do not
+collide with names provided by the host OS in the host PC domain.
 
 Occasionally, as you test new functionality, you will find that you need to
 add more names to the nuttx-names.dat file.  If there is a missing name
 mapping in nuttx-name.dat, the symptoms may be very obscure and difficult to
-debug.  What happens in this case is that when logic in nuttx.rel intended
-to call the NuttX domain function, it instead calls into the host OS
-function of the same name.
+debug.  What happens in this case is that when logic in nuttx.rel intended to
+call the NuttX domain function, it instead calls into the host OS function of
+the same name.
 
 Often you can survive such events.  For example, it really should not matter
 which version of strlen() you call.  Other times, it can cause subtle,
 mysterious errors.  Usually, however, callng the wrong function in the wrong
 OS results in a fatal crash.
 
+On macOS, instead of objcopy, -unexported_symbols_list linker option is used
+to hide symbols in the NuttX domain, using the same list of symbols from
+nuttx-name.dat.
+
 Networking Issues
 -----------------
-I never did get networking to work on the sim target.  It tries to use the
-tap device (/dev/net/tun) to emulate an Ethernet NIC, but I never got it
-correctly integrated with the NuttX networking (I probably should try using
-raw sockets instead).
+I never did get networking to work on the sim target.  It tries to use the tap
+device (/dev/net/tun) to emulate an Ethernet NIC, but I never got it correctly
+integrated with the NuttX networking. (I probably should try using raw sockets
+instead.)
 
 Update:  Max Holtzberg reports to me that the tap device actually does work
-properly, but not in an NSH configuration because of stdio operations freeze
-the simulation.
+properly, but not in an NSH configuration because stdio operations freeze the
+simulation.
 
 REVISIT: This may not long be an issue even with NSH because of the recent
 redesign of how the stdio devices are handled in the simulation (they should
 no longer freeze the simulation).
 
+Update: Please issue these commands to setup the reliable network on Ubuntu:
+
+  sudo apt-get -y install net-tools
+  sudo nuttx/tools/simbridge.sh eth0 on
+
+Here is some tips you may need:
+  1.Must launch the executable with the root permission
+  2.Have to use virtual machine if host is in corporation network
+  3.Configure the network adapter in NAT mode if virtual machine is used
+
 X11 Issues
 ----------
-There is an X11-based framebuffer driver that you can use exercise the NuttX
-graphics subsystem on the simulator (see the sim/nx11 configuration below).
-This may require a lot of tinkering to get working, depending upon where
-your X11 installation stores libraries and header files and how it names
+There is an X11-based framebuffer driver that you can use to exercise the
+NuttX graphics subsystem on the simulator (see the sim/nx11 configuration
+below). This may require a lot of tinkering to get working, depending upon
+where your X11 installation stores libraries and header files and how it names
 libraries.
 
 For example, on Ubuntu 9.09, I had to do the following to get a clean build:
@@ -209,19 +222,23 @@ For example, on Ubuntu 9.09, I had to do the following to get a clean build:
     cd /usr/lib/
     sudo ln -s libXext.so.6.4.0 libXext.so
 
-(I also get a segmentation fault at the conclusion of the NX test -- that
-will need to get looked into as well).
+(I also get a segmentation fault at the conclusion of the NX test -- that will
+need to get looked into as well.)
 
 The X11 examples builds on Cygwin, but does not run.  The last time I tried
-it, XOpenDisplay() aborted the program.  UPDATE:  This was caused by the
-small stack size and can be fixed by increasing the size of the NuttX stack
-that calls into X11.  See the discussion "Stack Size Issues" above.
+it, XOpenDisplay() aborted the program.  UPDATE:  This was caused by the small
+stack size and can be fixed by increasing the size of the NuttX stack that
+calls into X11.  See the discussion "Stack Size Issues" above.
+
+Update: You may need issue this command with the latest Ubuntu before launch:
+
+  sudo xhost +
 
 Cygwin64 Issues
 ---------------
-There are some additional issues using the simulator with Cygwin64.  Below
-is the summary of the changes that I had to make to get the simulator
-working in that environment:
+There are some additional issues using the simulator with Cygwin64.  Below is
+the summary of the changes that I had to make to get the simulator working in
+that environment:
 
   CONFIG_HOST_X86_64=y
   CONFIG_SIM_M32=n
@@ -229,11 +246,11 @@ working in that environment:
     to build a 32-bit target.
 
   CONFIG_SIM_CYGWIN_DECORATED=n
-    Older versions of Cygwin toolsdecorated C symbol names by adding an
-    underscore to the beginning of the symbol name.  Newer versions of
-    Cygwin do not seem to do this.  Deselecting CONFIG_SIM_CYGWIN_DECORATED
-    will select the symbols without the leading underscore as needed by
-    the Cygwin64 toolchain.
+    Older versions of Cygwin tools decorated C symbol names by adding an
+    underscore to the beginning of the symbol name.  Newer versions of Cygwin
+    do not seem to do this.  Deselecting CONFIG_SIM_CYGWIN_DECORATED will
+    select the symbols without the leading underscore as needed by the
+    Cygwin64 toolchain.
 
     How do you know if you need this option?  You could look at the generated
     symbol tables to see if there are underscore characters at the beginning
@@ -242,7 +259,7 @@ working in that environment:
     allocate memory.
 
     In this case, when I tried to run nutt.exe from the command line, it
-    exited silently.  Running with GDB I get following (before hitting a
+    exited silently.  Running with GDB I get the following (before hitting a
     breakpoint at main()):
 
       (gdb) r
@@ -256,33 +273,37 @@ working in that environment:
 
   CONFIG_SIM_X8664_SYSTEMV=n
   CONFIG_SIM_X8664_MICROSOFT=y
-    Selet Microsoft x64 calling convention.
+    Select Microsoft x64 calling convention.
 
     The Microsoft x64 calling convention is followed on Microsoft Windows and
     pre-boot UEFI (for long mode on x86-64). It uses registers RCX, RDX, R8,
     R9 for the first four integer or pointer arguments (in that order), and
     XMM0, XMM1, XMM2, XMM3 are used for floating point arguments. Additional
-    arguments are pushed onto the stack (right to left). Integer return
-    values (similar to x86) are returned in RAX if 64 bits or less. Floating
-    point return values are returned in XMM0. Parameters less than 64 bits
-    long are not zero extended; the high bits are not zeroed.
+    arguments are pushed onto the stack (right to left). Integer return values
+    (similar to x86) are returned in RAX if 64 bits or less. Floating point
+    return values are returned in XMM0. Parameters less than 64 bits long are
+    not zero extended; the high bits are not zeroed.
 
 SMP
 ---
-  This configuration has basic support for SMP testing.  The simulation supports
-  the emulation of multiple CPUs by creating multiple pthreads, each run a
-  copy of the simulation in the same process address space.
+  This configuration has basic support for SMP testing.  The simulation
+  supports the emulation of multiple CPUs by creating multiple pthreads, each
+  running a copy of the simulation in the same process address space.
 
-  At present, the SMP simulation is not fully functional:  It does operate
-  on the simulated CPU threads for a few context switches then fails during
-  a setjmp() operation.  I suspect that this is not an issue with the NuttX
-  SMP logic but more likely some chaos in the pthread controls. I have seen
+  At present, the SMP simulation is not fully functional:  It does operate on
+  the simulated CPU threads for a few context switches then fails during a
+  setjmp() operation.  I suspect that this is not an issue with the NuttX SMP
+  logic but more likely some chaos in the pthread controls. I have seen
   similar such strange behavior other times that I have tried to use
   setjmp/longmp from a signal handler! Like when I tried to implement
   simulated interrupts using signals.
 
-  Apparently, if longjmp is invoked from the context of a signal handler,
-  the result is undefined: http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1318.htm
+  Apparently, if longjmp is invoked from the context of a signal handler, the
+  result is undefined:
+  http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1318.htm
+
+  Update: The dead lock is due to up_testset call pthread API for synchronization
+  inside the signal handler. After switching to atomic API, the problem get resolved.
 
   You can enable SMP for ostest configuration by enabling:
 
@@ -291,8 +312,8 @@ SMP
     +CONFIG_SMP_NCPUS=2
     +CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
 
-  You also must enable near-realtime-performance otherwise even long
-  timeouts will expire before a CPU thread even has a chance to execute.
+  You also must enable near-realtime-performance otherwise even long timeouts
+  will expire before a CPU thread even has a chance to execute.
 
     -# CONFIG_SIM_WALLTIME is not set
     +CONFIG_SIM_WALLTIME=y
@@ -310,35 +331,48 @@ SMP
     CONFIG_SMP_NCPUS=1
 
   In this case there is, of course, no multi-CPU processing, but this does
-  verify the correctness of some the basic SMP logic.
+  verify the correctness of some of the basic SMP logic.
 
-  The NSH configuration can also be forced to run SMP, but suffers from
-  the same quirky behavior.  It can be made reliable if you modify
-  arch/sim/src/up_idle.c so that the IDLE loop only runs for CPU0.
-  Otherwise, often simuart_post() will be called from CPU1 and it will
-  try to restart NSH on CPU0 and, again, the same quirkiness occurs.
+  The NSH configuration can also be forced to run SMP, but suffers from the
+  same quirky behavior.  It can be made reliable if you modify
+  arch/sim/src/up_idle.c so that the IDLE loop only runs for CPU0. Otherwise,
+  often simuart_post() will be called from CPU1 and it will try to restart NSH
+  on CPU0 and, again, the same quirkiness occurs.
+
+  Update: Only CPU0 call up_idle now, other CPUs have a simple idle loop:
+
+    /* The idle Loop */
+
+    for (; ; )
+      {
+        /* Give other pthreads/CPUs a shot */
+
+        pthread_yield();
+      }
+
+  So it isn't a problem any more.
 
   But for example, this command:
 
     nsh> sleep 1 &
 
-  will execute the sleep command on CPU1 which has worked every time
-  that I have tried it (which is not too many times).
+  will execute the sleep command on CPU1 which has worked every time that I
+  have tried it (which is not too many times).
 
 BASIC
 ^^^^^
 
-  I have used the sim/nsh configuration to test Michael Haardt's BASIC interpreter
-  that you can find at apps/interpreters/bas.
+  I have used the sim/nsh configuration to test Michael Haardt's BASIC
+  interpreter that you can find at apps/interpreters/bas.
 
     Bas is an interpreter for the classic dialect of the programming language
-    BASIC.  It is pretty compatible to typical BASIC interpreters of the 1980s,
-    unlike some other UNIX BASIC interpreters, that implement a different
-    syntax, breaking compatibility to existing programs.  Bas offers many ANSI
-    BASIC statements for structured programming, such as procedures, local
-    variables and various loop types.  Further there are matrix operations,
-    automatic LIST indentation and many statements and functions found in
-    specific classic dialects.  Line numbers are not required.
+    BASIC.  It is pretty compatible to typical BASIC interpreters of the
+    1980s, unlike some other UNIX BASIC interpreters, that implement a
+    different syntax, breaking compatibility to existing programs.  Bas offers
+    many ANSI BASIC statements for structured programming, such as procedures,
+    local variables and various loop types.  Further there are matrix
+    operations, automatic LIST indentation and many statements and functions
+    found in specific classic dialects.  Line numbers are not required.
 
   There is also a test suite for the interpreter that can be found at
   apps/examples/bastest.
@@ -366,8 +400,8 @@ BASIC
 
   Usage
   -----
-  This setup will initialize the BASIC test (optional):  This will mount
-  a ROMFS file system at /mnt/romfs that contains the BASIC test files:
+  This setup will initialize the BASIC test (optional):  This will mount a
+  ROMFS file system at /mnt/romfs that contains the BASIC test files:
 
   nsh> bastest
   Registering romdisk at /dev/ram6
@@ -426,16 +460,17 @@ Common Configuration Information
 
      Where <subdir> is one of the following sub-directories.
 
-  2. All configurations uses the mconf-based configuration tool.  To
-     change this configuration using that tool, you should:
+  2. All configurations uses the mconf-based configuration tool.  To change
+     this configuration using that tool, you should:
 
-     a. Build and install the kconfig mconf tool.  See nuttx/README.txt
+     a. Build and install the kconfig mconf tool.  See nuttx/README.txt and
         see additional README.txt files in the NuttX tools repository.
 
      b. Execute 'make menuconfig' in nuttx/ in order to start the
         reconfiguration process.
 
-  3. Before building, make sure that the configuration is correct for you host platform:
+  3. Before building, make sure that the configuration is correct for your
+     host platform:
 
      a. Linux, 32-bit CPU
 
@@ -487,14 +522,26 @@ Common Configuration Information
         CONFIG_SIM_X8664_SYSTEMV=n
         CONFIG_SIM_M32=n
 
+     g. macOS, 64-bit, 64-bit build
+
+        CONFIG_HOST_LINUX=n
+        CONFIG_HOST_MACOS=y
+        CONFIG_HOST_WINDOWS=n
+        CONFIG_HOST_X86=n
+        CONFIG_HOST_X86_64=y
+        CONFIG_SIM_X8664_MICROSOFT=n
+        CONFIG_SIM_X8664_SYSTEMV=y
+        CONFIG_SIM_M32=n
+
 Configuration Sub-Directories
 -----------------------------
 
 bluetooth
 
-  Supports some very limited, primitive, low-level debug of the Bluetoot
-  stack using the Bluetooth "Swiss Army Knife" at apps/wireless/bluetooth/btsak
-  and the NULL Bluetooth device at drivers/wireless/bluetooth/bt_null.c
+  Supports some very limited, primitive, low-level debug of the Bluetooth
+  stack using the Bluetooth "Swiss Army Knife" at
+  apps/wireless/bluetooth/btsak and the NULL Bluetooth device at
+  drivers/wireless/bluetooth/bt_null.c
 
 configdata
 
@@ -502,30 +549,29 @@ configdata
 
 cxxtest
 
-  The C++ standard libary test at apps/testing/cxxtest configuration.  This
+  The C++ standard library test at apps/testing/cxxtest configuration.  This
   test is used to verify the uClibc++ port to NuttX.
 
   NOTES
   -----
-  1. Before you can use this example, you must first install the uClibc++
-     C++ library.  This is located outside of the NuttX source tree in the
-     NuttX uClibc++ GIT repository.  See the README.txt file there for
-     instructions on how to install uClibc++
+  1. Before you can use this example, you must first install the uClibc++ C++
+     library.  This is located outside of the NuttX source tree in the NuttX
+     uClibc++ GIT repository.  See the README.txt file there for instructions
+     on how to install uClibc++
 
   2. At present (2012/11/02), exceptions are disabled in this example
-     CONFIG_UCLIBCXX_EXCEPTION=n).  It is probably not necessary to
-     disable exceptions.
+     (CONFIG_UCLIBCXX_EXCEPTION=n).  It is probably not necessary to disable
+     exceptions.
 
   3. Unfortunately, this example will not run now.
 
-     The reason that the example will not run on the simulator has
-     to do with when static constructors are enabled:  In the simulator
-     it will attempt to execute the static constructors before main()
-     starts. BUT... NuttX is not initialized and this results in a crash.
+     The reason that the example will not run on the simulator has to do with
+     when static constructors are enabled:  In the simulator it will attempt
+     to execute the static constructors before main() starts. BUT... NuttX is
+     not initialized and this results in a crash.
 
-     To really use this example, I will have to think of some way to
-     postpone running C++ static initializers until NuttX has been
-     initialized.
+     To really use this example, I will have to think of some way to postpone
+     running C++ static initializers until NuttX has been initialized.
 
 fb
 
@@ -534,20 +580,19 @@ fb
 
 ipforward
 
-  This is an NSH configuration that includes a simple test of the NuttX
-  IP forwarding logic using apps/examples/ipforward.  That example uses
-  two TUN network devices to represent two networks.  The test then sends
-  packets from one network destined for the other network.  The NuttX IP
-  forwarding logic will recognize that the received packets are not destined
-  for it and will forward the logic to the other TUN network.  The
-  application logic then both sends the packets on one network and receives
-  and verifies the forwarded packet received on the other network.  The
-  received packets differ from the sent packets only in that the hop limit
-  (TTL) has been decremented.
+  This is an NSH configuration that includes a simple test of the NuttX IP
+  forwarding logic using apps/examples/ipforward.  That example uses two TUN
+  network devices to represent two networks.  The test then sends packets from
+  one network destined for the other network.  The NuttX IP forwarding logic
+  will recognize that the received packets are not destined for it and will
+  forward the logic to the other TUN network.  The application logic then both
+  sends the packets on one network and receives and verifies the forwarded
+  packet received on the other network.  The received packets differ from the
+  sent packets only in that the hop limit (TTL) has been decremented.
 
-  Be default, this test will forward TCP packets.  The test can be modified
-  to support forwarding of ICMPv6 multicast packets with these changes to
-  the .config file:
+  Be default, this test will forward TCP packets.  The test can be modified to
+  support forwarding of ICMPv6 multicast packets with these changes to the
+  .config file:
 
     -CONFIG_EXAMPLES_IPFORWARD_TCP=y
     +CONFIG_EXAMPLES_IPFORWARD_ICMPv6=y
@@ -557,14 +602,14 @@ ipforward
     +CONFIG_NET_ETHERNET=y
     +CONFIG_NET_IPFORWARD_BROADCAST=y
 
-  Additional required settings will also be selected when you manually
-  select the above via 'make menuconfig'.
+  Additional required settings will also be selected when you manually select
+  the above via 'make menuconfig'.
 
 loadable
 
-  This configuration provides an example of loadable apps.  It cannot used
-  with any Windows configuration, however, because Windows does not use
-  the ELF format.
+  This configuration provides an example of loadable apps.  It cannot be used
+  with any Windows configuration, however, because Windows does not use the
+  ELF format.
 
 minibasic
 
@@ -587,30 +632,29 @@ mtdrwb
 
 nettest
 
-  Configures to use apps/examples/nettest.  This configuration
-  enables networking using the network TAP device.
+  Configures to use apps/examples/nettest.  This configuration enables
+  networking using the network TAP device.
 
   NOTES:
 
-  1. The NuttX network is not, however, functional on the Linux TAP
-     device yet.
+  1. The NuttX network is not, however, functional on the Linux TAP device
+     yet.
 
-     UPDATE:  The TAP device does apparently work according to a NuttX
-     user (provided that it is not used with NSH: NSH waits on readline()
-     for console input.  When it calls readline(), the whole system blocks
-     waiting from input from the host OS).  My failure to get the TAP
-     device working appears to have been a cockpit error.
+     UPDATE:  The TAP device does apparently work according to a NuttX user
+     (provided that it is not used with NSH: NSH waits on readline() for
+     console input.  When it calls readline(), the whole system blocks waiting
+     from input from the host OS).  My failure to get the TAP device working
+     appears to have been a cockpit error.
 
-  2. As of NuttX-5.18, when built on Windows, this test does not try
-     to use the TAP device (which is not available on Cygwin anyway),
-     but inside will try to use the Cygwin WPCAP library.  Only the
-     most preliminary testing has been performed with the Cygwin WPCAP
-     library, however.
+  2. As of NuttX-5.18, when built on Windows, this test does not try to use
+     the TAP device (which is not available on Cygwin anyway), but inside will
+     try to use the Cygwin WPCAP library.  Only the most preliminary testing
+     has been performed with the Cygwin WPCAP library, however.
 
-     NOTE that the IP address is hard-coded in arch/sim/src/up_wpcap.c.
-     You will either need to edit your configuration files to use 10.0.0.1
-     on the "target" (CONFIG_EXAMPLES_NETTEST_*) or edit up_wpcap.c to
-     select the IP address that you want to use.
+     NOTE that the IP address is hard-coded in arch/sim/src/up_wpcap.c. You
+     will either need to edit your configuration files to use 10.0.0.1 on the
+     "target" (CONFIG_EXAMPLES_NETTEST_*) or edit up_wpcap.c to select the IP
+     address that you want to use.
 
 nsh
 
@@ -630,9 +674,9 @@ nsh
      you will find this annoying.  You can disable the password protection
      by de-selecting CONFIG_NSH_CONSOLE_LOGIN=y.
 
-  3. This configuration has BINFS enabled so that the builtin applications
-     can be made visible in the file system.  Because of that, the
-     build in applications do not work as other examples.
+  3. This configuration has BINFS enabled so that the builtin applications can
+     be made visible in the file system.  Because of that, the builtin
+     applications do not work as other examples.
 
      The binfs filesystem will be mounted at /bin when the system starts up.
 
@@ -651,9 +695,9 @@ nsh
 
 nsh2
 
-  This is another example that configures to use the NuttShell at apps/examples/nsh.
-  Like nsh, this version uses NSH built-in functions:  The nx, nxhello, and
-  nxlines examples are included as built-in functions.
+  This is another example that configures to use the NuttShell at
+  apps/examples/nsh. Like nsh, this version uses NSH built-in functions:  The
+  nx, nxhello, and nxlines examples are included as built-in functions.
 
   NOTES:
 
@@ -661,11 +705,11 @@ nsh2
 
      This configuration uses an X11-based framebuffer driver.  Of course, this
      configuration can only be used in environments that support X11!  (And it
-     may not even be usable in all of those environments without some "tweaking"
-     See discussion below under the nx11 configuration).
+     may not even be usable in all of those environments without some
+     "tweaking" See discussion below under the nx11 configuration).
 
-     For examples, it expects to be able to include X11/Xlib.h.  That currently
-     fails on my Linux box.
+     For examples, it expects to be able to include X11/Xlib.h.  That
+     currently fails on my Linux box.
 
 nx
 
@@ -683,10 +727,10 @@ nx
 
   2. No Display!
 
-     This version has NO DISPLAY and is only useful for debugging NX
-     internals in environments where X11 is not supported.  There is
-     and additional configuration that may be added to include an X11-
-     based simulated framebuffer driver:
+     This version has NO DISPLAY and is only useful for debugging NX internals
+     in environments where X11 is not supported.  There is an additional
+     configuration that may be added to include an X11-based simulated
+     framebuffer driver:
 
        CONFIG_SIM_X11FB    - Use X11 window for framebuffer
 
@@ -694,11 +738,11 @@ nx
 
 nx11
 
-  Configures to use apps/examples/nx.  This configuration is similar
-  to the nx configuration except that it adds support for an X11-
-  based framebuffer driver.  Of course, this configuration can only
-  be used in environments that support X11!  (And it may not even
-  be usable in all of those environments without some "tweaking").
+  Configures to use apps/examples/nx.  This configuration is similar to the nx
+  configuration except that it adds support for an X11-based framebuffer
+  driver.  Of course, this configuration can only be used in environments that
+  support X11!  (And it may not even be usable in all of those environments
+  without some "tweaking").
 
   1. Special Framebuffer Configuration
 
@@ -718,53 +762,50 @@ nx11
        CONFIG_SIM_FBBPP (must match the resolution of the display).
        CONFIG_FB_CMAP=y
 
-     My system has 24-bit color, but packed into 32-bit words so
-     the correct setting of CONFIG_SIM_FBBPP is 32.
+     My system has 24-bit color, but packed into 32-bit words so the correct
+     setting of CONFIG_SIM_FBBPP is 32.
 
-     For whatever value of CONFIG_SIM_FBBPP is selected, the
-     corresponding CONFIG_NX_DISABLE_*BPP setting must not be
-     disabled.
+     For whatever value of CONFIG_SIM_FBBPP is selected, the corresponding
+     CONFIG_NX_DISABLE_*BPP setting must not be disabled.
 
   3. Touchscreen Support
 
-     A X11 mouse-based touchscreen simulation can also be enabled
-     by setting:
+     A X11 mouse-based touchscreen simulation can also be enabled by setting:
 
        CONFIG_INPUT=y
        CONFIG_SIM_TOUCHSCREEN=y
 
      NOTES:
 
-     a. If you do not have the call to sim_tcinitialize(0), the build
-        will mysteriously fail claiming that is can't find up_tcenter()
-        and up_tcleave().  That is a consequence of the crazy way that
-        the simulation is built and can only be eliminated by calling
+     a. If you do not have the call to sim_tcinitialize(0), the build will
+        mysteriously fail claiming that it can't find up_tcenter() and
+        up_tcleave().  That is a consequence of the crazy way that the
+        simulation is built and can only be eliminated by calling
         up_simtouchscreen(0) from your application.
 
      b. You must first call up_fbinitialize(0) before calling
         up_simtouchscreen() or you will get a crash.
 
-     c. Call sim_tcunininitializee() when you are finished with the
-        simulated touchscreen.
+     c. Call sim_tcunininitializee() when you are finished with the simulated
+        touchscreen.
 
      d. Enable CONFIG_DEBUG_INPUT=y for touchscreen debug output.
 
   4. X11 Build Issues
 
-     To get the system to compile under various X11 installations
-     you may have to modify a few things.  For example, in order
-     to find libXext, I had to make the following change under
-     Ubuntu 9.09:
+     To get the system to compile under various X11 installations you may have
+     to modify a few things.  For example, in order to find libXext, I had to
+     make the following change under Ubuntu 9.09:
 
        cd /usr/lib/
        sudo ln -s libXext.so.6.4.0 libXext.so
 
    5. apps/examples/nxterm
 
-      This configuration is also set up to use the apps/examples/nxterm
-      test instead of apps/examples/nx.  To enable this configuration,
-      First, select Multi-User mode as described above.  Then add the
-      following definitions to the defconfig file:
+      This configuration is also set up to use the apps/examples/nxterm test
+      instead of apps/examples/nx.  To enable this configuration, First,
+      select Multi-User mode as described above.  Then, add the following
+      definitions to the defconfig file:
 
        -CONFIG_NXTERM=n
        +CONFIG_NXTERM=y
@@ -779,8 +820,8 @@ nx11
 
 nxffs
 
-  This is a test of the NXFFS file system using the apps/testing/nxffs
-  test with an MTD RAM driver to simulate the FLASH part.
+  This is a test of the NXFFS file system using the apps/testing/nxffs test
+  with an MTD RAM driver to simulate the FLASH part.
 
 nxlines
 
@@ -788,8 +829,8 @@ nxlines
 
 nxwm
 
-  This is a special configuration setup for the NxWM window manager
-  UnitTest.  The NxWM window manager can be found here:
+  This is a special configuration setup for the NxWM window manager UnitTest.
+  The NxWM window manager can be found here:
 
     apps/graphics/NxWidgets/nxwm
 
@@ -799,12 +840,11 @@ nxwm
 
   NOTES
 
-  1. There is an issue with running this example under the
-     simulation.  In the default configuration, this example will
-     run the NxTerm example which waits on readline() for console
-     input.  When it calls readline(), the whole system blocks
-     waiting from input from the host OS.  So, in order to get
-     this example to run, you must comment out the readline call in
+  1. There is an issue with running this example under the simulation:  In the
+     default configuration, this example will run the NxTerm example which
+     waits on readline() for console input.  When it calls readline(), the
+     whole system blocks waiting from input from the host OS.  So, in order to
+     get this example to run, you must comment out the readline() call in
      apps/nshlib/nsh_consolemain.c like:
 
      Index: nsh_consolemain.c
@@ -840,16 +880,16 @@ nxwm
 
         /* Clean up */
 
-     UPDATE:  I recently implemented a good UART simulation to driver
-     the serial console.  So I do not believe that problem exists and
-     I think that the above workaround should no longer be necessary.
-     However, I will leave the above text in place until I get then
-     opportunity to verify that the new UART simulation fixes the problem.
+     UPDATE:  I recently implemented a good UART simulation to drive the
+     serial console.  So I do not believe that problem exists and I think that
+     the above workaround should no longer be necessary. However, I will leave
+     the above text in place until I get the opportunity to verify that the
+     new UART simulation fixes the problem.
 
-  2019-05-04:  Something has changed.  Today this configuration failed
-    to build because is requires CONFIG_NX_XYINPUT=y in the configuration.
-    That indicates mouse or touchscreen support.  Apparently, the current
-    NxWM will not build without this support.
+  2019-05-04:  Something has changed.  Today this configuration failed to
+     build because is requires CONFIG_NX_XYINPUT=y in the configuration. That
+     indicates mouse or touchscreen support.  Apparently, the current NxWM
+     will not build without this support.
 
 ostest
 
@@ -857,10 +897,9 @@ ostest
 
 pf_ieee802154
 
-  This is the configuration that used for unit level test of the
-  socket support for the PF_IEEE802154 address family.  It uses
-  the IEEE 802.15.4 loopback network driver and the test at
-  apps/examples/pf_ieee802154.
+  This is the configuration that used for unit level test of the socket
+  support for the PF_IEEE802154 address family.  It uses the IEEE 802.15.4
+  loopback network driver and the test at apps/examples/pf_ieee802154.
 
   Basic usage example:
 
@@ -869,9 +908,8 @@ pf_ieee802154
 
 pktradio
 
-  This configuration is identical to the 'sixlowpan configuration
-  described below EXCEPT that is uses the generic packet radio
-  loopback network device.
+  This configuration is identical to the 'sixlowpan configuration described
+  below EXCEPT that it uses the generic packet radio loopback network device.
 
 rpproxy
 rpserver
@@ -1063,44 +1101,58 @@ rpserver
 
 sixlowpan
 
-  This configuration was intended only for unit-level testing of the
-  6LoWPAN stack.  It enables networking with 6LoWPAN support and uses
-  only a IEEE802.15.4 MAC loopback network device to supported testing.
+  This configuration was intended only for unit-level testing of the 6LoWPAN
+  stack.  It enables networking with 6LoWPAN support and uses only a
+  IEEE802.15.4 MAC loopback network device to supported testing.
 
-  This configuration includes apps/examples/nettest and apps/examples/udpblaster.
-  Neither are truly functional.  The only intent of this configuration
-  is to verify that the 6LoWPAN stack correctly encodes IEEE802.15.4
-  packets on output to the loopback device and correctly decodes the
-  returned packet.
+  This configuration includes apps/examples/nettest and
+  apps/examples/udpblaster. Neither are truly functional.  The only intent of
+  this configuration is to verify that the 6LoWPAN stack correctly encodes
+  IEEE802.15.4 packets on output to the loopback device and correctly decodes
+  the returned packet.
 
   See also the 'pktradio' configuration.
 
 spiffs
 
-  This is a test of the SPIFFS file system using the apps/testing/fstest
-  test with an MTD RAM driver to simulate the FLASH part.
+  This is a test of the SPIFFS file system using the apps/testing/fstest test
+  with an MTD RAM driver to simulate the FLASH part.
+
+tcploop
+
+  This configuration performs a TCP "performance" test using
+  apps/examples/tcpblaster and the IPv6 local loopback device.  Performance
+  is in quotes because, while that is the intent of the tcpblaster example,
+  this is not an appropriate configuration for TCP performance testing.
+  Rather, this configurat is useful only for verifying TCP transfers over
+  the loopback device.
+
+  To use IPv4, modify these settings in the defconfig file:
+
+    -# CONFIG_NET_IPv4 is not set
+    -CONFIG_NET_IPv6=y
+    -CONFIG_NET_IPv6_NCONF_ENTRIES=4
 
 touchscreen
 
   This configuration uses the simple touchscreen test at
-  apps/examples/touchscreen.  This test will create an empty X11 window
-  and will print the touchscreen output as it is received from the
-  simulated touchscreen driver.
+  apps/examples/touchscreen.  This test will create an empty X11 window and
+  will print the touchscreen output as it is received from the simulated
+  touchscreen driver.
 
-  Since this example uses the simulated frame buffer driver, the
-  most of the configuration settings discussed for the "nx11"
-  configuration also apply here.  See that discussion above.
+  Since this example uses the simulated frame buffer driver, most of the
+  configuration settings discussed for the "nx11" configuration also apply
+  here.  See that discussion above.
 
   See apps/examples/README.txt for further information about build
   requirements and configuration settings.
 
 udgram
 
-  This is the same as the nsh configuration except that it includes
-  two addition build in applications:  server and client.  These
-  applications are provided by the test at apps/examples/udgram.
-  This configuration enables local, Unix domain sockets and supports
-  the test of the datagram sockets.
+  This is the same as the nsh configuration except that it includes two
+  additional built in applications:  server and client.  These applications
+  are provided by the test at apps/examples/udgram. This configuration enables
+  local, Unix domain sockets and supports the test of the datagram sockets.
 
   To use the test:
 
@@ -1109,12 +1161,11 @@ udgram
 
 unionfs
 
-  This is a version of NSH dedicated to performing the simple test
-  of the Union File System at apps/exmaples/uniofs.  The command
-  'unionfs' will mount the Union File System at /mnt/unionfs.  You
-  can than compare what you see at /mnt/unionfs with the content
-  of the ROMFS file systems at apps/examples/unionfs/atestdir and
-  btestdir.
+  This is a version of NSH dedicated to performing the simple test of the
+  Union File System at apps/examples/uniofs.  The command 'unionfs' will mount
+  the Union File System at /mnt/unionfs.  You can than compare what you see at
+  /mnt/unionfs with the content of the ROMFS file systems at
+  apps/examples/unionfs/atestdir and btestdir.
 
   Here is some sample output from the test:
 
@@ -1128,14 +1179,13 @@ unionfs
      afile.txt
      offset/
 
-   When unionfs was created, file system was joined with and offset called
-   offset".  Therefore, all of the file system 2 root contents will appear
-   to reside under a directory called offset/ (although there is no
-   directory called offset/ on file system 2).  Fie system 1 on the other
-   hand does have an actual directory called offset/.  If we list the
-   contents of the offset/ directory in the unified file system, we see
-   he merged content of the file system 1 offset/ directory and the file
-   system 2 root directory:
+   When unionfs was created, file system was joined with an offset called
+   "offset".  Therefore, all of the file system 2 root contents will appear to
+   reside under a directory called offset/ (although there is no directory
+   called offset/ on file system 2).  File system 1 on the other hand does
+   have an actual directory called offset/.  If we list the contents of the
+   offset/ directory in the unified file system, we see the merged contents of
+   the file system 1 offset/ directory and the file system 2 root directory:
 
     nsh> cat /mnt/unionfs/afile.txt
     This is a file in the root directory on file system 1
@@ -1153,8 +1203,8 @@ unionfs
     nsh> cat /mnt/unionfs/offset/bfile.txt
     This is another file in the root directory on file system 2
 
-  The directory offset/adir exists on file system 1 and the directory\
-  adir/ exists on file system 2.  You can see that these also overlap:
+  The directory offset/adir exists on file system 1 and the directory adir/
+  exists on file system 2.  You can see that these also overlap:
 
     nsh> ls /mnt/unionfs/offset/adir
     /mnt/unionfs/offset/adir:
@@ -1166,17 +1216,17 @@ unionfs
      .
 
   The unified directory listing is showing files from both file systems in
-  their respective offset adir/ subdirectories.  The file adirfile.txt
-  exists in both file system 1 and file system 2 but the version if file
-  system 2 is occluded by the version in file system 1.  The only way
-  that you can which are looking at is by cat'ing the file:
+  their respective offset adir/ subdirectories.  The file adirfile.txt exists
+  in both file system 1 and file system 2 but the version in file system 2 is
+  occluded by the version in file system 1.  The only way that you can know
+  which you are looking at is by cat'ing the file:
 
     nsh> cat /mnt/unionfs/offset/adir/adirfile.txt
     This is a file in directory offset/adir on file system 1
 
-  The file on file system 1 has correctly occluded the file with the same
-  name on file system 2.  bdirfile.txt, however, only exists on file
-  system 2, so it is not occluded:
+  The file on file system 1 has correctly occluded the file with the same name
+  on file system 2.  bdirfile.txt, however, only exists on file system 2, so
+  it is not occluded:
 
     nsh> cat /mnt/unionfs/offset/adir/bdirfile.txt
     This is another file in directory adir on file system 2
@@ -1186,7 +1236,9 @@ unionfs
 
 userfs
 
-  This is another NSH configuration that includes the built-in application of apps/examples/userfs to support test of the UserFS on the simulation platform.
+  This is another NSH configuration that includes the built-in application of
+  apps/examples/userfs to support test of the UserFS on the simulation
+  platform.
 
   To use the test:
 
@@ -1200,17 +1252,15 @@ userfs
 
 ustream
 
-  This is the same as the nsh configuration except that it includes
-  two addition built in applications:  server and client.  These
-  applications are provided by the test at apps/examples/ustream.
-  This configuration enables local, Unix domain sockets and supports
-  the test of the stream sockets.
+  This is the same as the nsh configuration except that it includes two
+  addition built in applications:  server and client.  These applications are
+  provided by the test at apps/examples/ustream. This configuration enables
+  local, Unix domain sockets and supports the test of the stream sockets.
 
   To use the test:
 
     nsh> server &
     nsh> client
 
-  Note that the binfs file system is mounted at /bin when the system
-  starts up.
-
+  Note that the binfs file system is mounted at /bin when the system starts
+  up.

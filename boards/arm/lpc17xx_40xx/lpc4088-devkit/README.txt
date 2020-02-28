@@ -26,7 +26,7 @@ LEDs
     LED2 : Connected to P2[27]
 
   If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
-  any way using the defitions provided in the board.h header file.
+  any way using the definitions provided in the board.h header file.
 
   If CONFIG_ARCH_LEDs is defined, then NuttX will control the 2 LEDs on the
   LPC4088 OEM board.  The following definitions describe how NuttX controls
@@ -280,7 +280,7 @@ Configuration Directories
   ----
     This is identical to the nsh configuration below except that NuttX
     is built as a kernel-mode, monolithic module and the user applications
-    are built separately.  Is is recommened to use a special make command;
+    are built separately.  Is is recommended to use a special make command;
     not just 'make' but make with the following two arguments:
 
         make pass1 pass2
@@ -381,4 +381,3 @@ Configuration Directories
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables both the serial NSH interface as well as the
     telnet interface over ethernet, with an IP address assigned via DHCP.
-

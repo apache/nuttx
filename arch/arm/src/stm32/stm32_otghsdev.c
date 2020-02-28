@@ -252,7 +252,7 @@
 
 #define EP0                          (0)
 
-/* The set of all enpoints available to the class implementation (1-3) */
+/* The set of all endpoints available to the class implementation (1-3) */
 
 #define STM32_EP_AVAILABLE           (0x0e)       /* All available endpoints */
 
@@ -2521,7 +2521,7 @@ static inline void stm32_ep0out_setup(struct stm32_usbdev_s *priv)
       stm32_ep0_stall(priv);
     }
 
-  /* Reset state/data associated with thie SETUP request */
+  /* Reset state/data associated with the SETUP request */
 
    priv->ep0datlen = 0;
 }
@@ -2655,7 +2655,7 @@ static inline void stm32_epout_interrupt(FAR struct stm32_usbdev_s *priv)
           doepint  = stm32_getreg(STM32_OTGHS_DOEPINT(epno));
           doepint &= stm32_getreg(STM32_OTGHS_DOEPMSK);
 
-          /* Transfer completed interrupt.  This interrupt is trigged when
+          /* Transfer completed interrupt.  This interrupt is triggered when
            * stm32_rxinterrupt() removes the last packet data from the RxFIFO.
            * In this case, core internally sets the NAK bit for this endpoint to
            * prevent it from receiving any more packets.
@@ -4018,7 +4018,7 @@ static void stm32_ep0_configure(FAR struct stm32_usbdev_s *priv)
  * Name: stm32_epout_disable
  *
  * Description:
- *   Diable an OUT endpoint will no longer be used
+ *   Disable an OUT endpoint will no longer be used
  *
  ****************************************************************************/
 

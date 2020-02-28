@@ -135,4 +135,3 @@ bool kinetis_gpioread(uint32_t pinset)
     }
   return ret;
 }
-

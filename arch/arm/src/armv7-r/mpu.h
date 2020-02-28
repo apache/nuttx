@@ -216,7 +216,7 @@ static inline unsigned int mpu_get_mpuir(void)
  * Name: mpu_set_drbar
  *
  * Description:
- *   Wrtie to the DRBAR register
+ *   Write to the DRBAR register
  *
  ****************************************************************************/
 
@@ -235,7 +235,7 @@ static inline void mpu_set_drbar(unsigned int drbar)
  * Name: mpu_set_drsr
  *
  * Description:
- *   Wrtie to the DRSR register
+ *   Write to the DRSR register
  *
  ****************************************************************************/
 
@@ -254,7 +254,7 @@ static inline void mpu_set_drsr(unsigned int drsr)
  * Name: mpu_set_dracr
  *
  * Description:
- *   Wrtie to the DRACR register
+ *   Write to the DRACR register
  *
  ****************************************************************************/
 
@@ -273,7 +273,7 @@ static inline void mpu_set_dracr(unsigned int dracr)
  * Name: mpu_set_irbar
  *
  * Description:
- *   Wrtie to the IRBAR register
+ *   Write to the IRBAR register
  *
  ****************************************************************************/
 
@@ -294,7 +294,7 @@ static inline void mpu_set_irbar(unsigned int irbar)
  * Name: mpu_set_irsr
  *
  * Description:
- *   Wrtie to the IRSR register
+ *   Write to the IRSR register
  *
  ****************************************************************************/
 
@@ -315,7 +315,7 @@ static inline void mpu_set_irsr(unsigned int irsr)
  * Name: mpu_set_iracr
  *
  * Description:
- *   Wrtie to the IRCR register
+ *   Write to the IRCR register
  *
  ****************************************************************************/
 
@@ -336,7 +336,7 @@ static inline void mpu_set_iracr(unsigned int iracr)
  * Name: mpu_set_rgnr
  *
  * Description:
- *   Wrtie to the IRCR register
+ *   Write to the IRCR register
  *
  ****************************************************************************/
 
@@ -828,5 +828,5 @@ static inline void mpu_user_intsram_wb(uintptr_t base, size_t size)
 }
 #endif
 
-#endif  /* __ASSEMBLY__ */
-#endif  /* __ARCH_ARM_SRC_ARMV7R_MPU_H */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_ARMV7R_MPU_H */

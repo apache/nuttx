@@ -45,10 +45,10 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/smart.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -138,7 +138,7 @@
  * 2. Garbage collection can occur when a new sector is allocated or when
  *    existing sector data is overwritten with new data. Thus, occasionally,
  *    file writing may take longer than other times.
- * 3. The implementation curently does not track bad blocks on the device.
+ * 3. The implementation currently does not track bad blocks on the device.
  * 4. There is no true wear-leveling implemented yet, though provesion have
  *    been made to reserve logical sectors to allow it to be added using
  *    a "sector aging" tracking mechanism.
@@ -146,7 +146,7 @@
 
 /* Values for SMART inode state.
  *
- * SMART_STATE_FILE    - The inode is a valid usuable, file
+ * SMART_STATE_FILE    - The inode is a valid usable, file
  * INODE_STATE_DELETED - The inode has been deleted.
  * Other values        - The inode is bad and has an invalid state.
  *

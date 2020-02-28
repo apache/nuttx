@@ -86,7 +86,7 @@
 #define IMXRT_CCM_CCGR5_OFFSET                   0x007c  /* CCM Clock Gating Register 5 */
 #define IMXRT_CCM_CCGR6_OFFSET                   0x0080  /* CCM Clock Gating Register 6 */
                                               /* 0x0084  Reserved */
-#define IMXRT_CCM_CMEOR_OFFSET                   0x0088  /* CCM Module Enable Overide Register */
+#define IMXRT_CCM_CMEOR_OFFSET                   0x0088  /* CCM Module Enable Override Register */
 
 /* Analog */
 
@@ -155,6 +155,7 @@
 /* Helper Macros *************************************************************/
 
 #define CCM_PODF_FROM_DIVISOR(n)                   ((n)-1)  /* PODF Values are divisor-1 */
+#define CCM_PRED_FROM_DIVISOR(n)                   ((n)-1)  /* PRED Values are divisor-1 */
 
 /* Register bit definitions **************************************************/
 
@@ -313,12 +314,13 @@
 #  define CCM_CSCMR2_CAN_CLK_SEL_OSC_CLK         ((uint32_t)(1) << CCM_CSCMR2_CAN_CLK_SEL_SHIFT)
 #  define CCM_CSCMR2_CAN_CLK_SEL_PLL3_SW_80      ((uint32_t)(2) << CCM_CSCMR2_CAN_CLK_SEL_SHIFT)
                                                            /* Bits 10-18: Reserved */
-#define CCM_CSCMR2_FLEXIO2_CLK_SEL_SHIFT         (19)      /* Bits 19-20: Selector for flexio2 clock multiplexer */
-#define CCM_CSCMR2_FLEXIO2_CLK_SEL_MASK          (0x3 << CCM_CSCMR2_FLEXIO2_CLK_SEL_SHIFT)
-#  define CCM_CSCMR2_FLEXIO2_CLK_SEL(n)          ((uint32_t)(n) << CCM_CSCMR2_FLEXIO2_CLK_SEL_SHIFT)
-#  define CCM_CSCMR2_FLEXIO2_CLK_SEL_PLL4        ((uint32_t)(0) << CCM_CSCMR2_FLEXIO2_CLK_SEL_SHIFT)
-#  define CCM_CSCMR2_FLEXIO2_CLK_SEL_PLL3_PFD2   ((uint32_t)(1) << CCM_CSCMR2_FLEXIO2_CLK_SEL_SHIFT)
-#  define CCM_CSCMR2_FLEXIO2_CLK_SEL_PLL3_SW     ((uint32_t)(3) << CCM_CSCMR2_FLEXIO2_CLK_SEL_SHIFT)
+
+#define CCM_CSCMR2_FLEXIO1_CLK_SEL_SHIFT         (19)      /* Bits 19-20: Selector for flexio2 clock multiplexer */
+#define CCM_CSCMR2_FLEXIO1_CLK_SEL_MASK          (0x3 << CCM_CSCMR2_FLEXIO1_CLK_SEL_SHIFT)
+#  define CCM_CSCMR2_FLEXIO1_CLK_SEL(n)          ((uint32_t)(n) << CCM_CSCMR2_FLEXIO1_CLK_SEL_SHIFT)
+#  define CCM_CSCMR2_FLEXIO1_CLK_SEL_PLL4        ((uint32_t)(0) << CCM_CSCMR2_FLEXIO1_CLK_SEL_SHIFT)
+#  define CCM_CSCMR2_FLEXIO1_CLK_SEL_PLL3_PFD2   ((uint32_t)(1) << CCM_CSCMR2_FLEXIO1_CLK_SEL_SHIFT)
+#  define CCM_CSCMR2_FLEXIO1_CLK_SEL_PLL3_SW     ((uint32_t)(3) << CCM_CSCMR2_FLEXIO1_CLK_SEL_SHIFT)
                                                            /* Bits 21-31: Reserved */
 
 /* Serial Clock Divider Register 1 */
@@ -343,7 +345,7 @@
                                                            /* Bits 27-31: Reserved */
 #  define CCM_CSCDR1_TRACE_PODF(n)               ((uint32_t)(n) << CCM_CSCDR1_TRACE_PODF_SHIFT)
 
-/*  Clock Divider Register 1 */
+/* Clock Divider Register 1 */
 
 #define CCM_CS1CDR_SAI1_CLK_PODF_SHIFT           (0)       /* Bits 0-5:   Divider for sai1 clock podf */
 #define CCM_CS1CDR_SAI1_CLK_PODF_MASK            (0x3f << CCM_CS1CDR_SAI1_CLK_PODF_SHIFT)
@@ -351,21 +353,23 @@
 #define CCM_CS1CDR_SAI1_CLK_PRED_SHIFT           (6)       /* Bits 6-8:   Divider for sai1 clock pred */
 #define CCM_CS1CDR_SAI1_CLK_PRED_MASK            (0x7 << CCM_CS1CDR_SAI1_CLK_PRED_SHIFT)
 #  define CCM_CS1CDR_SAI1_CLK_PRED(n)            ((uint32_t)(n) << CCM_CS1CDR_SAI1_CLK_PRED_SHIFT)
-#define CCM_CS1CDR_FLEXIO2_CLK_PRED_SHIFT        (9)       /* Bits 9-11:  Divider for flexio2 clock */
-#define CCM_CS1CDR_FLEXIO2_CLK_PRED_MASK         (0x7 << CCM_CS1CDR_FLEXIO2_CLK_PRED_SHIFT)
-#  define CCM_CS1CDR_FLEXIO2_CLK_PRED(n)         ((uint32_t)(n) << CCM_CS1CDR_FLEXIO2_CLK_PRED_SHIFT)
+#define CCM_CS1CDR_FLEXIO1_CLK_PRED_SHIFT        (9)       /* Bits 9-11:  Divider for flexio2 clock */
+#define CCM_CS1CDR_FLEXIO1_CLK_PRED_MASK         (0x7 << CCM_CS1CDR_FLEXIO1_CLK_PRED_SHIFT)
+#  define CCM_CS1CDR_FLEXIO1_CLK_PRED(n)         ((uint32_t)(n) << CCM_CS1CDR_FLEXIO1_CLK_PRED_SHIFT)
                                                            /* Bits 12-15: Reserved */
+
 #define CCM_CS1CDR_SAI3_CLK_PODF_SHIFT           (16)      /* Bits 16-21: Divider for sai3 clock podf */
 #define CCM_CS1CDR_SAI3_CLK_PODF_MASK            (0x3f << CCM_CS1CDR_SAI3_CLK_PODF_SHIFT)
 #  define CCM_CS1CDR_SAI3_CLK_PODF(n)            ((uint32_t)(n) << CCM_CS1CDR_SAI3_CLK_PODF_SHIFT)
 #define CCM_CS1CDR_SAI3_CLK_PRED_SHIFT           (22)      /* Bits 22-24:   Divider for sai3 clock pred */
 #define CCM_CS1CDR_SAI3_CLK_PRED_MASK            (0x7 << CCM_CS1CDR_SAI3_CLK_PRED_SHIFT)
 #  define CCM_CS1CDR_SAI3_CLK_PRED(n)            ((uint32_t)(n) << CCM_CS1CDR_SAI3_CLK_PRED_SHIFT)
-#define CCM_CS1CDR_FLEXIO2_CLK_PODF_SHIFT        (25)      /* Bits 25-27:  Divider for flexio2 clock */
-#define CCM_CS1CDR_FLEXIO2_CLK_PODF_MASK         (0x7 << CCM_CS1CDR_FLEXIO2_CLK_PODF_SHIFT)
-#  define CCM_CS1CDR_FLEXIO2_CLK_PODF(n)         ((uint32_t)(n) << CCM_CS1CDR_FLEXIO2_CLK_PODF_SHIFT)
+#define CCM_CS1CDR_FLEXIO1_CLK_PODF_SHIFT        (25)      /* Bits 25-27:  Divider for flexio2 clock */
+#define CCM_CS1CDR_FLEXIO1_CLK_PODF_MASK         (0x7 << CCM_CS1CDR_FLEXIO1_CLK_PODF_SHIFT)
+#  define CCM_CS1CDR_FLEXIO1_CLK_PODF(n)         ((uint32_t)(n) << CCM_CS1CDR_FLEXIO1_CLK_PODF_SHIFT)
                                                            /* Bits 28-31: Reserved */
-/*  Clock Divider Register 2 */
+
+/* Clock Divider Register 2 */
 
 #define CCM_CS2CDR_SAI2_CLK_PODF_SHIFT           (0)       /* Bits 0-5:   Divider for sai2 clock podf */
 #define CCM_CS2CDR_SAI2_CLK_PODF_MASK            (0x3f << CCM_CS2CDR_SAI2_CLK_PODF_SHIFT)
@@ -471,7 +475,7 @@
 #define CCM_CIMR_MASK_ARM_PODF_LOADED            (1 << 26) /* Bit 26:     mask interrupt generation due to frequency change of arm_podf */
                                                            /* Bits 27-31: Reserved */
 
-/*  Clock Output Source Register */
+/* Clock Output Source Register */
 
 #define CCM_CCOSR_CLKO1_SEL_SHIFT                (0)       /* Bits 0-3:   Selection of the clock to be generated on CCM_CLKO1 */
 #define CCM_CCOSR_CLKO1_SEL_MASK                 (0xF << CCM_CCOSR_CLKO1_SEL_SHIFT)
@@ -516,7 +520,7 @@
 
 #define CCM_CGPR_PMIC_DELAY_SCALER               (1 << 0)  /* Bit 0:      Defines clock division of clock for stby_count */
                                                            /* Bits 1-3:   Reserved */
-#define CCM_CGPR_EFUSE_PROG_SUPPLY_GATE          (1 << 4)  /* Bit 4:      allow fuse programing */
+#define CCM_CGPR_EFUSE_PROG_SUPPLY_GATE          (1 << 4)  /* Bit 4:      allow fuse programming */
                                                            /* Bits 5-13:  Reserved */
 #define CCM_CGPR_SYS_MEM_DS_CTRL_SHIFT           (14)      /* Bits 14-15: System memory DS control */
 #define CCM_CGPR_SYS_MEM_DS_CTRL_MASK            (0x7 << CCM_CGPR_SYS_MEM_DS_CTRL_SHIFT)
@@ -708,16 +712,16 @@
 /* Module Enable Override Register */
 
                                                            /* Bits 0-4: Reserved */
-#define CCM_CMEOR_MOD_EN_OV_GPT                  (1 << 5)  /* Bit 5:      Overide clock enable signal from GPT */
-#define CCM_CMEOR_MOD_EN_OV_PIT                  (1 << 6)  /* Bit 6:      Overide clock enable signal from PIT */
-#define CCM_CMEOR_MOD_EN_OV_USDHC                (1 << 7)  /* Bit 7:      Overide clock enable signal from USDHC */
-#define CCM_CMEOR_MOD_EN_OV_TRNG                 (1 << 9)  /* Bit 9:      Overide clock enable signal from TRNG */
+#define CCM_CMEOR_MOD_EN_OV_GPT                  (1 << 5)  /* Bit 5:      Override clock enable signal from GPT */
+#define CCM_CMEOR_MOD_EN_OV_PIT                  (1 << 6)  /* Bit 6:      Override clock enable signal from PIT */
+#define CCM_CMEOR_MOD_EN_OV_USDHC                (1 << 7)  /* Bit 7:      Override clock enable signal from USDHC */
+#define CCM_CMEOR_MOD_EN_OV_TRNG                 (1 << 9)  /* Bit 9:      Override clock enable signal from TRNG */
                                                            /* Bits 10-27: Reserved */
-#define CCM_CMEOR_MOD_EN_OV_CAN2_CPI             (1 << 28) /* Bit 28:     Overide clock enable signal from CAN2 */
-#define CCM_CMEOR_MOD_EN_OV_CAN1_CPI             (1 << 30) /* Bit 30:     Overide clock enable signal from CAN1 */
+#define CCM_CMEOR_MOD_EN_OV_CAN2_CPI             (1 << 28) /* Bit 28:     Override clock enable signal from CAN2 */
+#define CCM_CMEOR_MOD_EN_OV_CAN1_CPI             (1 << 30) /* Bit 30:     Override clock enable signal from CAN1 */
                                                            /* Bit 31:     Reserved */
 
-/*  Analog System PLL (2) Control Register **********************************/
+/*  Analog System PLL (2) Control Register ***********************************/
 
 #define CCM_ANALOG_PLL_SYS_DIV_SELECT_SHIFT             (0)       /* Bits 0:   This field controls the PLL loop divider 20 or 22 */
 #define CCM_ANALOG_PLL_SYS_DIV_SELECT_MASK              (0x3 << CCM_ANALOG_PLL_SYS_DIV_SELECT_SHIFT)
@@ -735,7 +739,7 @@
                                                                   /* Bits 17-30  Reserved */
 #define CCM_ANALOG_PLL_SYS_LOCK                         (1 << 31) /* Bit 31:     PLL is currently locked */
 
-/* Analog USB1 480MHz PLL (3) Control Register **********************************/
+/* Analog USB1 480MHz PLL (3) Control Register *******************************/
                                                                   /* Bit 0: Reserved */
 #define CCM_ANALOG_PLL_USB1_DIV_SELECT_SHIFT            (1)       /* Bit 1:   This field controls the PLL loop divider 20 or 22 */
 #define CCM_ANALOG_PLL_USB1_DIV_SELECT(n)               ((uint32_t)(n) << CCM_ANALOG_PLL_USB1_DIV_SELECT_SHIFT)

@@ -44,7 +44,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
@@ -56,6 +55,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/input/touchscreen.h>
+#include <nuttx/semaphore.h>
 
 #include <arch/board/board.h>
 #include "up_arch.h"
@@ -461,7 +461,7 @@ static void tc_adc_init(void)
  * Name: tc_adc_start_sample
  *
  * Description:
- *   Perform A/D sampling.    Time must be allowed betwen the start of sampling
+ *   Perform A/D sampling.    Time must be allowed between the start of sampling
  *   and conversion (approx. 100Ms).
  *
  ****************************************************************************/
@@ -493,12 +493,12 @@ static void tc_adc_start_sample(int channel)
  * Name: tc_adc_read_sample
  *
  * Description:
- *   Begin A/D conversion.  Time must be allowed betwen the start of sampling
+ *   Begin A/D conversion.  Time must be allowed between the start of sampling
  *   and conversion (approx. 100Ms).
  *
  * Assumptions:
  * 1) All output pins configured as outputs:
- * 2) Approprite pins are driven high and low
+ * 2) Appropriate pins are driven high and low
  *
  ****************************************************************************/
 
@@ -691,7 +691,7 @@ static int tc_waitsample(FAR struct tc_dev_s *priv,
   nxsem_post(&priv->devsem);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
-   * that is posted when new sample data is availble.
+   * that is posted when new sample data is available.
    */
 
   while (tc_sample(priv, sample) < 0)
@@ -1406,7 +1406,7 @@ static int tc_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_TOUCHSCREEN_NPOLLWAITERS)
         {
-          ierr("ERROR: No availabled slot found: %d\n", i);
+          ierr("ERROR: No available slot found: %d\n", i);
           fds->priv    = NULL;
           ret          = -EBUSY;
           goto errout;

@@ -42,7 +42,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -51,6 +50,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/usb/usb.h>
@@ -642,7 +642,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   /* Check if we successfully initialized. We now have to be concerned
    * about asynchronous modification of crefs because the block
-   * driver has been registerd.
+   * driver has been registered.
    */
 
   if (ret >= 0)

@@ -54,6 +54,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/loopback.h>
@@ -62,13 +63,13 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#ifdef CONFIG_NETDEV_LOOPBACK
+#ifdef CONFIG_NET_LOOPBACK
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* We need to have the work queue to handle SPI interrupts */
+/* We need to have the work queue to handle interrupts */
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
 #  error Worker thread support is required (CONFIG_SCHED_WORKQUEUE)
@@ -78,7 +79,7 @@
 
 #define LO_WDDELAY   (1*CLK_TCK)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing the contents of the IP header */
 
 #define IPv4BUF ((FAR struct ipv4_hdr_s *)priv->lo_dev.d_buf)
 #define IPv6BUF ((FAR struct ipv6_hdr_s *)priv->lo_dev.d_buf)
@@ -108,7 +109,7 @@ struct lo_driver_s
  ****************************************************************************/
 
 static struct lo_driver_s g_loopback;
-static uint8_t g_iobuffer[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
+static uint8_t g_iobuffer[NET_LO_PKTSIZE + CONFIG_NET_GUARDSIZE];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -552,4 +553,4 @@ int localhost_initialize(void)
   return lo_ifup(&priv->lo_dev);
 }
 
-#endif /* CONFIG_NETDEV_LOOPBACK */
+#endif /* CONFIG_NET_LOOPBACK */

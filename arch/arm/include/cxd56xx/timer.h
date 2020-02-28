@@ -63,4 +63,4 @@ struct timer_sethandler_s
   CODE tccb_t handler;         /* The timer interrupt handler */
 };
 
-#endif  /* __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H */

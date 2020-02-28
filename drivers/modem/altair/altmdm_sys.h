@@ -43,7 +43,7 @@
  ****************************************************************************/
 
 #include <time.h>
-#include <semaphore.h>
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -116,7 +116,7 @@ int altmdm_sys_lock(FAR struct altmdm_sys_lock_s *handle);
  * Name: altmdm_sys_unlock
  *
  * Description:
- *   Relese lock.
+ *   Release lock.
  *
  ****************************************************************************/
 

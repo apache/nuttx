@@ -84,7 +84,7 @@ static const char g_elfmagic[EI_MAGIC_SIZE] =
  *
  ****************************************************************************/
 
-int elf_verifyheader(FAR const Elf32_Ehdr *ehdr)
+int elf_verifyheader(FAR const Elf_Ehdr *ehdr)
 {
   if (!ehdr)
     {
@@ -121,4 +121,3 @@ int elf_verifyheader(FAR const Elf32_Ehdr *ehdr)
 
   return OK;
 }
-

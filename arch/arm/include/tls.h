@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 #ifndef __ARCH_ARM_INCLUDE_TLS_H
-#define __ARCH_ARM_INCLUDE_TLS_H 1
+#define __ARCH_ARM_INCLUDE_TLS_H
 
 /****************************************************************************
  * Included Files

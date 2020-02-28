@@ -49,7 +49,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -224,7 +223,7 @@ static int nand_checkblock(FAR struct nand_dev_s *nand, off_t block)
  * Description:
  *   Scans the device to retrieve or create block status information.
  *
- *   Currently, this functin does nothing but scan the NAND and eat up time.
+ *   Currently, this function does nothing but scan the NAND and eat up time.
  *   This is a goot thing to do if you are debugging NAND, but otherwise,
  *   just a waste of time.  This logic could, however, be integrated into
  *   some bad block checking logic at sometime in the future.

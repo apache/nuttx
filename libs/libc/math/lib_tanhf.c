@@ -40,5 +40,5 @@ float tanhf(float x)
   float x0 = expf(x);
   float x1 = 1.0F / x0;
 
-  return ((x0 + x1) / (x0 - x1));
+  return ((x0 - x1) / (x0 + x1));
 }

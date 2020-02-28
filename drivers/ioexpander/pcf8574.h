@@ -42,11 +42,9 @@
 
 #include <nuttx/config.h>
 
-#include <semaphore.h>
-
 #include <nuttx/wdog.h>
 #include <nuttx/clock.h>
-
+#include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/ioexpander/pcf8574.h>
@@ -154,7 +152,7 @@ struct pcf8574_dev_s
   WDOG_ID wdog;                        /* Timer used to poll for missed interrupts */
 #endif
 
-  uint8_t input;                       /* Last input registeres */
+  uint8_t input;                       /* Last input registers */
   uint8_t intstat;                     /* Pending interrupts */
   uint8_t trigger;                     /* Bit encoded: 0=level 1=edge */
   uint8_t level[2];                    /* Bit encoded: 01=high/rising, 10 low/falling, 11 both */

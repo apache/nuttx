@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/libelf/libelf_load.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/addrenv.h>
+#include <nuttx/elf.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/binfmt/elf.h>
 
@@ -105,7 +106,7 @@ static void elf_elfsize(struct elf_loadinfo_s *loadinfo)
 
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {
-      FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
+      FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
 
       /* SHF_ALLOC indicates that the section requires memory during
        * execution.
@@ -163,10 +164,11 @@ static inline int elf_loadfile(FAR struct elf_loadinfo_s *loadinfo)
 
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {
-      FAR Elf32_Shdr *shdr = &loadinfo->shdr[i];
+      FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
 
       /* SHF_ALLOC indicates that the section requires memory during
-       * execution */
+       * execution.
+       */
 
       if ((shdr->sh_flags & SHF_ALLOC) == 0)
         {
@@ -284,7 +286,8 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
 
   /* Allocate (and zero) memory for the ELF file. */
 
-  ret = elf_addrenv_alloc(loadinfo, loadinfo->textsize, loadinfo->datasize, heapsize);
+  ret = elf_addrenv_alloc(loadinfo, loadinfo->textsize, loadinfo->datasize,
+                          heapsize);
   if (ret < 0)
     {
       berr("ERROR: elf_addrenv_alloc() failed: %d\n", ret);
@@ -375,4 +378,3 @@ errout_with_buffers:
   elf_unload(loadinfo);
   return ret;
 }
-

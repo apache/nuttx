@@ -74,8 +74,9 @@ static int        pkt_getpeername(FAR struct socket *psock,
 static int        pkt_listen(FAR struct socket *psock, int backlog);
 static int        pkt_connect(FAR struct socket *psock,
                     FAR const struct sockaddr *addr, socklen_t addrlen);
-static int        pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-                   FAR socklen_t *addrlen, FAR struct socket *newsock);
+static int        pkt_accept(FAR struct socket *psock,
+                   FAR struct sockaddr *addr, FAR socklen_t *addrlen,
+                   FAR struct socket *newsock);
 static int        pkt_poll_local(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
 static ssize_t    pkt_send(FAR struct socket *psock, FAR const void *buf,
@@ -211,7 +212,7 @@ static sockcaps_t pkt_sockcaps(FAR struct socket *psock)
  * Name: pkt_addref
  *
  * Description:
- *   Increment the refernce count on the underlying connection structure.
+ *   Increment the reference count on the underlying connection structure.
  *
  * Input Parameters:
  *   psock - Socket structure of the socket whose reference count will be
@@ -303,12 +304,13 @@ static int pkt_connect(FAR struct socket *psock,
  * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr', Return: returned size of
+ *            'addr'
  *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:
  *   Returns 0 (OK) on success.  On failure, it returns a negated errno
- *   value.  See accept() for a desrciption of the approriate error value.
+ *   value.  See accept() for a desrciption of the appropriate error value.
  *
  * Assumptions:
  *   The network is locked.
@@ -341,8 +343,8 @@ static int pkt_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
-                    socklen_t addrlen)
+static int pkt_bind(FAR struct socket *psock,
+                    FAR const struct sockaddr *addr, socklen_t addrlen)
 {
   int ifindex;
 
@@ -376,7 +378,8 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
 
       /* Only Ethernet is supported */
 
-      if (dev->d_lltype != NET_LL_ETHERNET)
+      if (dev->d_lltype != NET_LL_ETHERNET &&
+          dev->d_lltype != NET_LL_IEEE80211)
         {
           return -EAFNOSUPPORT;
         }
@@ -386,9 +389,6 @@ static int pkt_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
       conn->ifindex = ifindex;
       memcpy(conn->lmac, dev->d_mac.ether.ether_addr_octet, 6);
 
-      /* Mark the socket bound */
-
-      psock->s_flags |= _SF_BOUND;
       return OK;
     }
   else
@@ -435,10 +435,10 @@ static int pkt_getsockname(FAR struct socket *psock,
  * Name: pkt_getpeername
  *
  * Description:
- *   The pkt_getpeername() function retrieves the remote-connected name of the
- *   specified packet socket, stores this address in the sockaddr structure
- *   pointed to by the 'addr' argument, and stores the length of this
- *   address in the object pointed to by the 'addrlen' argument.
+ *   The pkt_getpeername() function retrieves the remote-connected name of
+ *   the specified packet socket, stores this address in the sockaddr
+ *   structure pointed to by the 'addr' argument, and stores the length of
+ *   this address in the object pointed to by the 'addrlen' argument.
  *
  *   If the actual length of the address is greater than the length of the
  *   supplied sockaddr structure, the stored address will be truncated.
@@ -553,8 +553,8 @@ static ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf,
     }
   else
     {
-      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and no peer
-       * address is set.
+      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
+       * no peer address is set.
        */
 
       ret = -EDESTADDRREQ;
@@ -585,8 +585,8 @@ static ssize_t pkt_send(FAR struct socket *psock, FAR const void *buf,
  ****************************************************************************/
 
 static ssize_t pkt_sendto(FAR struct socket *psock, FAR const void *buf,
-                          size_t len, int flags, FAR const struct sockaddr *to,
-                          socklen_t tolen)
+                          size_t len, int flags,
+                          FAR const struct sockaddr *to, socklen_t tolen)
 {
   nerr("ERROR: sendto() not supported for raw packet sockets\n");
   return -EAFNOSUPPORT;

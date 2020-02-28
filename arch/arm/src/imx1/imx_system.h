@@ -69,7 +69,7 @@
 #define PLL_MPCTL1_OFFSET       0x0008 /* MCU PLL & System Clock Control Register 1 */
 #define PLL_SPCTL0_OFFSET       0x000c /* System PLL Control Register 0 */
 #define PLL_SPCTL1_OFFSET       0x0010 /* System PLL Control Register 1 */
-#define PLL_PCDR_OFFSET         0x0020 /* Peripherial Clock Divider Register */
+#define PLL_PCDR_OFFSET         0x0020 /* Peripheral Clock Divider Register */
 
 /* PLL Register Addresses ***********************************************************/
 
@@ -145,7 +145,7 @@
 #define SC_RSR_OFFSET           0x0000 /* Reset Source Register */
 #define SC_SIDR_OFFSET          0x0004 /* Silicon ID Register */
 #define SC_FMCR_OFFSET          0x0008 /* Function Muxing Control Register */
-#define SC_GPCR_OFFSET          0x000c /* Global Peripheral Control Regiser */
+#define SC_GPCR_OFFSET          0x000c /* Global Peripheral Control Register */
 
 /* SC Register Addresses ************************************************************/
 
@@ -184,4 +184,4 @@
  * Inline Functions
  ************************************************************************************/
 
-#endif  /* __ARCH_ARM_IMX_SYSTEM_H */
+#endif /* __ARCH_ARM_IMX_SYSTEM_H */

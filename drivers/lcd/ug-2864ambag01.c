@@ -1,6 +1,6 @@
 /**************************************************************************************
  * drivers/lcd/ug-2864ambag01.c
- * Driver for Univision UG-2864AMBAG01 OLED display (wih SH1101A controller) in SPI
+ * Driver for Univision UG-2864AMBAG01 OLED display (with SH1101A controller) in SPI
  * mode
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
@@ -268,7 +268,7 @@
 
 struct ug2864ambag01_dev_s
 {
-  struct lcd_dev_s       dev;      /* Publically visible device structure */
+  struct lcd_dev_s       dev;      /* Publicly visible device structure */
 
   /* Private LCD-specific information follows */
 

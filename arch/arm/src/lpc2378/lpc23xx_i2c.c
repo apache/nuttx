@@ -185,7 +185,7 @@ static void lpc2378_i2c_setfrequency(struct lpc2378_i2cdev_s *priv,
     {
       if (frequency > 100000)
         {
-          /* Asymetric per 400Khz I2C spec */
+          /* Asymmetric per 400Khz I2C spec */
 
           putreg32(LPC23XX_CCLK / (83 + 47) * 47 / frequency,
                    priv->base + I2C_SCLH_OFFSET);

@@ -130,4 +130,3 @@ void up_udelay(useconds_t microseconds)
     }
 }
 #endif /* CONFIG_BOARD_LOOPSPERMSEC */
-

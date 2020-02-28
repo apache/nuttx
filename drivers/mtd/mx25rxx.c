@@ -252,12 +252,12 @@ static int  mx25rxx_write_cache(FAR struct mx25rxx_dev_s *priv,
 
 void mx25rxx_lock(FAR struct qspi_dev_s *qspi, bool read)
 {
-  /* On SPI busses where there are multiple devices, it will be necessary to
-   * lock SPI to have exclusive access to the busses for a sequence of
+  /* On SPI buses where there are multiple devices, it will be necessary to
+   * lock SPI to have exclusive access to the buses for a sequence of
    * transfers.  The bus should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusiv access
-   * to the SPI buss.  We will retain that exclusive access until the bus is
+   * This is a blocking call and will not return until we have exclusive access
+   * to the SPI bus.  We will retain that exclusive access until the bus is
    * unlocked.
    */
 
@@ -265,7 +265,7 @@ void mx25rxx_lock(FAR struct qspi_dev_s *qspi, bool read)
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits
    * and setmode methods to make sure that the SPI is properly configured for
-   * the device.  If the SPI buss is being shared, then it may have been left
+   * the device.  If the SPI bus is being shared, then it may have been left
    * in an incompatible state.
    */
 
@@ -359,7 +359,7 @@ int mx25rxx_read_byte(FAR struct mx25rxx_dev_s *dev, FAR uint8_t *buffer,
   meminfo.flags   = QSPIMEM_READ | QSPIMEM_QUADIO;
   meminfo.addrlen = 3;
 
-  /* Ignore performace enhanced mode => 2+4 dummies */
+  /* Ignore performance enhanced mode => 2+4 dummies */
 
   meminfo.dummies = 6;
   meminfo.buflen  = buflen;

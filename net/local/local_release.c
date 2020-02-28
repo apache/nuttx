@@ -40,12 +40,10 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
 
-#include <semaphore.h>
 #include <errno.h>
 #include <queue.h>
 #include <assert.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
 #include <arch/irq.h>

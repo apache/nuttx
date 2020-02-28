@@ -50,7 +50,7 @@
  ************************************************************************************/
 
 /* Setting the bit corresponding in the PDRUNCFGSET0/1 register powers down the
- * selected component;  clearling the bit enables it.
+ * selected component;  clearing the bit enables it.
  */
 
 #define lpc54_powerup0(s)          putreg32((s), LPC54_SYSCON_PDRUNCFGCLR0)

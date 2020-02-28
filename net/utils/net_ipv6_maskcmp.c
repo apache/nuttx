@@ -41,8 +41,6 @@
 
 #include <nuttx/net/ip.h>
 
-#include "utils/utils.h"
-
 #ifdef CONFIG_NET_IPv6
 
 /****************************************************************************
@@ -93,4 +91,3 @@ bool net_ipv6addr_maskcmp(const net_ipv6addr_t addr1,
 }
 
 #endif /* CONFIG_NET_IPv6 */
-

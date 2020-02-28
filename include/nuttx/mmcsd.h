@@ -85,7 +85,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev);
  *     that support multiple MMC/SD slots.  This value must be in the range
  *     {0, ..., CONFIG_MMCSD_NSLOTS}.
  *   spi - And instance of an SPI interface obtained by called the
- *     approprite xyz_spibus_initialize() function for the MCU "xyz" with
+ *     appropriate xyz_spibus_initialize() function for the MCU "xyz" with
  *     the appropriate port number.
  *
  ****************************************************************************/

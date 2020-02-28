@@ -127,4 +127,3 @@ void stm32_wlinitialize(void)
       return;
     }
 }
-

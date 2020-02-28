@@ -84,4 +84,3 @@ void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v,
   *g = (uint8_t)b16toi(itob16(y) - b16muli(b16_P3441, um128) - b16muli(b16_P7141, vm128));
   *b = (uint8_t)b16toi(itob16(y) + b16muli(b16_1P772, um128));
 }
-

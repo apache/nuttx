@@ -42,13 +42,12 @@
 #include <errno.h>
 #include <debug.h>
 #include <string.h>
-#include <semaphore.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
-
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/sensors/lis3dh.h>
 #include <nuttx/sensors/ioctl.h>
 
@@ -287,7 +286,7 @@ static void lis3dh_queue_lock(FAR struct lis3dh_dev_s *dev)
  * Name: lis3dh_queue_unlock
  *
  * Description:
- *   Unlocks exclusive acccess to the ring buffer queue
+ *   Unlocks exclusive access to the ring buffer queue
  *
  * Input Parameters:
  *   dev - Pointer to device driver instance

@@ -182,7 +182,7 @@ static inline void nxsched_kcleanup(void)
  * Name: nxsched_have_kgarbage
  *
  * Description:
- *   Return TRUE if there is kernal heap garbage to be collected.
+ *   Return TRUE if there is kernel heap garbage to be collected.
  *
  * Input Parameters:
  *   None
@@ -256,7 +256,7 @@ void sched_garbage_collection(void)
  *
  *   Certainly there is a race condition involved in sampling the garbage
  *   state.  The looping nature of the IDLE loops should catch any missed
- *   garbage from the test on the next time arround.
+ *   garbage from the test on the next time around.
  *
  * Input Parameters:
  *   None

@@ -167,7 +167,7 @@
 #  define TIMERA_TACCTL_RESET_SET         (7 << TIMERA_TACCTL_OUTMOD_SHIFT)
 #define TIMERA_TACCTL_CAP                 (1 << 8)    /* Bit 8: Capture mode select  */
 #define TIMERA_TACCTL_SCCI                (1 << 10)   /* Bit 10: Synchronized capture input */
-#define TIMERA_TACCTL_SCS                 (1 << 11)   /* Bit 11: Syncronize capture source */
+#define TIMERA_TACCTL_SCS                 (1 << 11)   /* Bit 11: Synchronize capture source */
 #define TIMERA_TACCTL_CCIS_SHIFT          12          /* Bits 12-13: Capture Input Select */
 #  define TIMERA_TACCTL_CCIS_CCIA         (0 << TIMERA_TACCTL_CCIS_SHIFT)
 #  define TIMERA_TACCTL_CCIS_CCIB         (1 << TIMERA_TACCTL_CCIS_SHIFT)
@@ -186,5 +186,4 @@
 #  define TIMERA_TAIV_TACCR2              (2 << TIMERA_TAIV_TAIV_SHIFT)
 #  define TIMERA_TAIV_TAIFG               (5 << TIMERA_TAIV_TAIV_SHIFT)
 
-#endif  /* _ARCH_RISCV_SRC_NR5M100_CHIP_NR5M1XX_TIMERA_H */
-
+#endif /* _ARCH_RISCV_SRC_NR5M100_CHIP_NR5M1XX_TIMERA_H */

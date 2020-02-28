@@ -48,8 +48,14 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define NRF52_GPIO_PORT0            0
-#define NRF52_GPIO_NPORTS           1
+#ifdef CONFIG_ARCH_CHIP_NRF52840
+#  define NRF52_GPIO_NPORTS         2
+#  define NRF52_GPIO_PORT0          0
+#  define NRF52_GPIO_PORT1          1
+#else
+#  define NRF52_GPIO_PORT0          0
+#  define NRF52_GPIO_NPORTS         1
+#endif
 
 /* Register offsets *****************************************************************/
 
@@ -89,10 +95,12 @@
 
 /* Register bit definitions *********************************************************/
 
-#define NRF52_GPIO_CNF_PULL_SHIFT       (2)
-#define NRF52_GPIO_CNF_PULL_MASK        (0x3 << NRF52_GPIO_CNF_PULL_SHIFT)
-#  define NRF52_GPIO_CNF_PULL_DISABLED  (0 << NRF52_GPIO_CNF_PULL_SHIFT)
-#  define NRF52_GPIO_CNF_PULL_DOWN      (1 << NRF52_GPIO_CNF_PULL_SHIFT)
-#  define NRF52_GPIO_CNF_PULL_UP        (3 << NRF52_GPIO_CNF_PULL_SHIFT)
+#define GPIO_CNF_DIR                    (1 << 0) /* Bit 0: Pin direction */
+#define GPIO_CNF_INPUT                  (1 << 1) /* Bit 1: Input buffer disconnect */
+#define GPIO_CNF_PULL_SHIFT             (2)
+#define GPIO_CNF_PULL_MASK              (0x3 << GPIO_CNF_PULL_SHIFT)
+#  define GPIO_CNF_PULL_DISABLED        (0 << GPIO_CNF_PULL_SHIFT)
+#  define GPIO_CNF_PULL_DOWN            (1 << GPIO_CNF_PULL_SHIFT)
+#  define GPIO_CNF_PULL_UP              (3 << GPIO_CNF_PULL_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_GPIO_H */

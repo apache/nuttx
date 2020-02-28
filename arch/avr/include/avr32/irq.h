@@ -243,4 +243,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_AVR_INCLUDE_AVR32_IRQ_H */
-

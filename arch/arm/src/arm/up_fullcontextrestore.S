@@ -109,4 +109,3 @@ up_fullcontextrestore:
 
 	ldmia	sp!, {r0-r1, r15}
 	.size up_fullcontextrestore, . - up_fullcontextrestore
-

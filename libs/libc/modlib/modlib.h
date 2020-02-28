@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-int modlib_verifyheader(FAR const Elf32_Ehdr *header);
+int modlib_verifyheader(FAR const Elf_Ehdr *header);
 
 /****************************************************************************
  * Name: modlib_findsymtab
@@ -98,7 +98,7 @@ int modlib_findsymtab(FAR struct mod_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
-                   FAR Elf32_Sym *sym);
+                   FAR Elf_Sym *sym);
 
 /****************************************************************************
  * Name: modlib_symvalue
@@ -125,7 +125,7 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  ****************************************************************************/
 
 int modlib_symvalue(FAR struct module_s *modp,
-                    FAR struct mod_loadinfo_s *loadinfo, FAR Elf32_Sym *sym);
+                    FAR struct mod_loadinfo_s *loadinfo, FAR Elf_Sym *sym);
 
 /****************************************************************************
  * Name: modlib_loadshdrs

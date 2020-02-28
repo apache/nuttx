@@ -3,6 +3,16 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menuconfig INPUT
+	bool "Input Device Support"
+	default n
+	---help---
+		This directory holds implementations of input device drivers.
+		This includes such things as touchscreen and keypad drivers.
+		See include/nuttx/input/*.h for registration information.
+
+if INPUT
+
 config MOUSE
 	bool "Enable mouse support"
 	default n
@@ -135,7 +145,7 @@ config INPUT_ADS7843E
 	select SPI
 	---help---
 		Enable support for the TI/Burr-Brown ADS7842 touchscreen controller.  I believe
-		that driver should be compatibile with the TI/Burr-Brown TSC2046 and XPT2046
+		that driver should be compatible with the TI/Burr-Brown TSC2046 and XPT2046
 		touchscreen controllers as well.
 
 if INPUT_ADS7843E
@@ -510,3 +520,5 @@ config NUNCHUCK_NPOLLWAITERS
 	default 2
 
 endif # INPUT_NUNCHUCK
+
+endif # INPUT

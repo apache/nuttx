@@ -242,7 +242,7 @@ int esp32_alloc_cpuint(uint32_t intmask)
   int cpuint;
   int ret = -ENOMEM;
 
-  /* Check if there are is CPU interrupts with the requrested properties
+  /* Check if there are is CPU interrupts with the requested properties
    * available.
    */
 
@@ -311,7 +311,7 @@ int esp32_alloc_cpuint(uint32_t intmask)
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failre.
+ *   any failure.
  *
  ****************************************************************************/
 
@@ -366,7 +366,7 @@ int esp32_cpuint_initialize(void)
       intmap = g_cpu0_intmap;
     }
 
-  /* Indiate that no peripheral interrupts are assigned to CPU interrupts */
+  /* Indicate that no peripheral interrupts are assigned to CPU interrupts */
 
   memset(intmap, CPUINT_UNASSIGNED, ESP32_NCPUINTS);
 
@@ -547,7 +547,7 @@ void esp32_free_cpuint(int cpuint)
  * Name:  esp32_attach_peripheral
  *
  * Description:
- *   Attach a peripheral interupt to a CPU interrupt.
+ *   Attach a peripheral interrupt to a CPU interrupt.
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU
@@ -593,7 +593,7 @@ void esp32_attach_peripheral(int cpu, int periphid, int cpuint)
  * Name:  esp32_detach_peripheral
  *
  * Description:
- *   Detach a peripheral interupt from a CPU interrupt.
+ *   Detach a peripheral interrupt from a CPU interrupt.
  *
  * Input Parameters:
  *   cpu      - The CPU to receive the interrupt 0=PRO CPU 1=APP CPU

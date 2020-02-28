@@ -470,10 +470,10 @@ static uint64_t up_get_timer_fraction(void)
 }
 
 /****************************************************************************
- * Name: arm_timer_initialize
+ * Name: up_timer_initialize
  ****************************************************************************/
 
-void arm_timer_initialize(void)
+void up_timer_initialize(void)
 {
 #ifdef CHECK_INTERVAL
   lc823450_gpio_config(TIMER_PIN |

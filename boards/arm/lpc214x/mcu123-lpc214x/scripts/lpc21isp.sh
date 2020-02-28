@@ -62,4 +62,3 @@ osckhz=12000
 # Do it!
 
 sudo $lpc21isp $options $hxfile $tty $baud $osckhz
-

@@ -45,7 +45,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -1270,7 +1269,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
   if (nbits != spics->nbits)
     {
-      /* Yes... Configure the new word lenght */
+      /* Yes... Configure the new word length */
 
       regval  = spi_getreg(spi, XMC4_USIC_SCTR_OFFSET);
       regval &= ~(USIC_SCTR_WLE_MASK);
@@ -1420,7 +1419,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       spi_putreg(spi, data, XMC4_USIC_TBUF_OFFSET);
 
-      /* Wait until the last bit be transfered */
+      /* Wait until the last bit be transferred */
 
       while ((spi_getreg(spi, XMC4_USIC_PSR_OFFSET) &
              (USIC_PSR_TSIF)) == 0)
@@ -2055,7 +2054,7 @@ struct spi_dev_s *xmc4_spibus_initialize(int channel)
                USIC_PCR_SSCMODE_FEM | USIC_PCR_SSCMODE_SELINV;
       spi_putreg(spi, regval, XMC4_USIC_PCR_OFFSET);
 
-      /* Define SPI Mode 0 by defaul */
+      /* Define SPI Mode 0 by default */
 
       regval  = spi_getreg(spi, XMC4_USIC_BRG_OFFSET);
       regval &= ~(USIC_BRG_SCLKCFG_MASK);

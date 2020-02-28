@@ -307,7 +307,7 @@
 <p>
   The page fill worker thread will maintain a static variable called <code>struct tcb_s *g_pftcb</code>.
   If no fill is in progress, <code>g_pftcb</code> will be NULL.
-  Otherwise, it will point to the TCB of the task which is receiving the fill that is in progess.
+  Otherwise, it will point to the TCB of the task which is receiving the fill that is in progress.
 </p>
 <ul><small>
   <b>NOTE</b>:
@@ -336,7 +336,7 @@
     </li>
     <li>
       Call the architecture-specific function <code>up_fillpage()</code>.
-      Two versions of the up_fillpage function are supported -- a blocking and a non-blocking version based upon the configuratin setting <code>CONFIG_PAGING_BLOCKINGFILL</code>.
+      Two versions of the up_fillpage function are supported -- a blocking and a non-blocking version based upon the configuration setting <code>CONFIG_PAGING_BLOCKINGFILL</code>.
       <ul>
         <li>
           If <code>CONFIG_PAGING_BLOCKINGFILL</code> is defined, then up_fillpage is blocking call.
@@ -472,7 +472,7 @@
   Chip specific logic will map the virtual and physical address spaces into three general regions:
   <ol>
     <li>
-      A .text region containing &quot;<a href="#MemoryOrg">locked-in-memory</a>&quot; code that is always avaialable and will never cause a page fault.
+      A .text region containing &quot;<a href="#MemoryOrg">locked-in-memory</a>&quot; code that is always available and will never cause a page fault.
       This locked memory is loaded at boot time and remains resident for all time.
       This memory regions must include:
       <ul>
@@ -670,4 +670,3 @@
 </dl></ul>
 </body>
 </html>
-

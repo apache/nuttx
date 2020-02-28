@@ -214,7 +214,7 @@ excpt_common:
 	EXCPT_PROLOGUE
 
 	/* Call up_doirq with r24 = IRQ number, r22-23 = Pointer to the save structure.  The stack
-	 * pointer currently points to the save structure (or maybe the save struture -1 since
+	 * pointer currently points to the save structure (or maybe the save structure -1 since
 	 * the push operation post-decrements -- need to REVISIT this).
 	 */
 

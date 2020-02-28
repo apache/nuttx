@@ -43,7 +43,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -52,6 +51,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/init.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/serial/serial.h>
 
 #include "chip.h"
@@ -188,7 +188,7 @@
 #  define UART5_ASSIGNED      1
 #endif
 
-/* UART, if avaialble, should have been assigned to ttyS0-4. */
+/* UART, if available, should have been assigned to ttyS0-4. */
 
 #if defined(CONFIG_IMX6_UART5) && !defined(UART5_ASSIGNED)
 #  errnor UART5 was not assigned to a TTY.
@@ -880,7 +880,7 @@ static bool imx_txempty(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -896,7 +896,7 @@ static bool imx_txempty(struct uart_dev_s *dev)
 void imx_earlyserialinit(void)
 {
   /* NOTE: This function assumes that low level hardware configuration
-   * -- including all clocking and pin configuration -- was perfomed by the
+   * -- including all clocking and pin configuration -- was performed by the
    * function imx_lowsetup() earlier in the boot sequence.
    */
 

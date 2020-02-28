@@ -5,6 +5,14 @@
 
 menu "Timer Driver Support"
 
+config ARCH_HAVE_PWM_PULSECOUNT
+	bool
+	default n
+
+config ARCH_HAVE_PWM_MULTICHAN
+	bool
+	default n
+
 config PWM
 	bool "PWM Driver Support"
 	default n
@@ -307,7 +315,7 @@ config WATCHDOG_AUTOMONITOR
 	bool "Auto-monitor"
 	---help---
 		The auto-monitor provides an OS-internal mechanism for automatically
-		start and repeatly reset the counting after the watchdog is register.
+		start and repeatedly reset the counting after the watchdog is register.
 
 if WATCHDOG_AUTOMONITOR
 

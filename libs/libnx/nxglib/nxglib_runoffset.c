@@ -63,4 +63,3 @@ void nxgl_runoffset(FAR struct nxgl_run_s *dest,
   dest->x2    = src->x2 + b16dx;
   dest->y     = src->y  + dy;
 }
-

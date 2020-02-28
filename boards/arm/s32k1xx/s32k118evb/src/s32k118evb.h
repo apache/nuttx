@@ -80,7 +80,6 @@
 
 /* SPI chip selects */
 
-
 /* Count of peripheral clock user configurations */
 
 #define NUM_OF_PERIPHERAL_CLOCKS_0 10
@@ -90,7 +89,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public data
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -100,11 +99,11 @@
 extern const struct peripheral_clock_config_s g_peripheral_clockconfig0[];
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: s32k118_bringup
+ * Name: s32k1xx_bringup
  *
  * Description:
  *   Perform architecture-specific initialization
@@ -117,19 +116,19 @@ extern const struct peripheral_clock_config_s g_peripheral_clockconfig0[];
  *
  ****************************************************************************/
 
-int s32k118_bringup(void);
+int s32k1xx_bringup(void);
 
 /****************************************************************************
- * Name: s32k118_spidev_initialize
+ * Name: s32k1xx_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the s32k118evb
+ *   Called to configure SPI chip select GPIO pins for the S32K118EVB
  *   board.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_SPI
-void s32k118_spidev_initialize(void);
+void s32k1xx_spidev_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

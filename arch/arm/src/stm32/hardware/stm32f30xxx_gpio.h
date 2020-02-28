@@ -329,4 +329,3 @@
 #define GPIO_BRR(n)                (1 << (n))
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F30XXX_GPIO_H */
-

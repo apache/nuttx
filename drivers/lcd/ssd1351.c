@@ -75,7 +75,7 @@
  * CONFIG_SSD1351_VDDEXT       - external VDD
  * CONFIG_SSD1351_TRST         - reset period
  * CONFIG_SSD1351_TPRECHG1     - first pre-charge period
- * CONFIG_SSD1351_PERFENHANCE  - enhace display performance
+ * CONFIG_SSD1351_PERFENHANCE  - enhance display performance
  * CONFIG_SSD1351_CLKDIV       - clock divider
  * CONFIG_SSD1351_OSCFREQ      - oscillator frequency
  * CONFIG_SSD1351_TPRECHG2     - second pre-charge period
@@ -360,7 +360,7 @@
 
 struct ssd1351_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s          dev;
 

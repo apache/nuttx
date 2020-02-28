@@ -57,7 +57,7 @@ namespace std
   using ::usleep;
   using ::pause;
 
-  // File descriptor opertions
+  // File descriptor operations
 
   using ::close;
   using ::dup;

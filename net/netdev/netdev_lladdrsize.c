@@ -121,6 +121,7 @@ int netdev_lladdrsize(FAR struct net_driver_s *dev)
     {
 #ifdef CONFIG_NET_ETHERNET
       case NET_LL_ETHERNET:
+      case NET_LL_IEEE80211:
         {
           /* Size of the Ethernet MAC address */
 

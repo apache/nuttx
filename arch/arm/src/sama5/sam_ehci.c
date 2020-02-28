@@ -42,7 +42,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -438,7 +437,7 @@ static int sam_reset(void);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-/* In this driver implementation, support is provided for only a single a single
+/* In this driver implementation, support is provided for only a single
  * USB device.  All status information can be simply retained in a single global
  * instance.
  */
@@ -1438,7 +1437,7 @@ static int sam_ioc_wait(struct sam_epinfo_s *epinfo)
  * Name: sam_qh_enqueue
  *
  * Description:
- *   Add a new, ready-to-go QH w/attached qTDs to the asynchonous queue.
+ *   Add a new, ready-to-go QH w/attached qTDs to the asynchronous queue.
  *
  * Assumptions:  The caller holds the EHCI exclsem
  *
@@ -2105,7 +2104,7 @@ static int sam_async_setup(struct sam_rhport_s *rhport,
       physaddr = sam_physramaddr((uintptr_t)qtd);
       *flink = sam_swap32(physaddr);
 
-      /* In an IN data qTD was also enqueued, then linke the data qTD's
+      /* In an IN data qTD was also enqueued, then linked the data qTD's
        * alternate pointer to this STATUS phase qTD in order to handle short
        * transfers.
        */
@@ -3055,7 +3054,7 @@ static void sam_ehci_bottomhalf(FAR void *arg)
    *   underflow). If the TD on which the error interrupt occurred also
    *   had its IOC bit set, both this bit and USBINT bit are set. ..."
    *
-   * We do the same thing in either case:  Traverse the asynchonous queue
+   * We do the same thing in either case:  Traverse the asynchronous queue
    * and remove all of the transfers that are no longer active.
    */
 
@@ -4924,18 +4923,18 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   /* "In order to initialize the host controller, software should perform the
    *  following steps:
    *
-   *  • "Program the CTRLDSSEGMENT register with 4-Gigabyte segment where all
+   *  - "Program the CTRLDSSEGMENT register with 4-Gigabyte segment where all
    *     of the interface data structures are allocated. [64-bit mode]
-   *  • "Write the appropriate value to the USBINTR register to enable the
+   *  - "Write the appropriate value to the USBINTR register to enable the
    *     appropriate interrupts.
-   *  • "Write the base address of the Periodic Frame List to the PERIODICLIST
+   *  - "Write the base address of the Periodic Frame List to the PERIODICLIST
    *     BASE register. If there are no work items in the periodic schedule,
    *     all elements of the Periodic Frame List should have their T-Bits set
    *     to a one.
-   *  • "Write the USBCMD register to set the desired interrupt threshold,
+   *  - "Write the USBCMD register to set the desired interrupt threshold,
    *     frame list size (if applicable) and turn the host controller ON via
    *     setting the Run/Stop bit.
-   *  •  Write a 1 to CONFIGFLAG register to route all ports to the EHCI controller
+   *  -  Write a 1 to CONFIGFLAG register to route all ports to the EHCI controller
    *     ...
    *
    * "At this point, the host controller is up and running and the port registers
@@ -5064,7 +5063,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   sam_putreg(regval, &HCOR->usbcmd);
 
-  /* Start the host controller by setting the RUN bit in the USBCMD regsiter. */
+  /* Start the host controller by setting the RUN bit in the USBCMD register. */
 
   regval  = sam_getreg(&HCOR->usbcmd);
   regval |= EHCI_USBCMD_RUN;

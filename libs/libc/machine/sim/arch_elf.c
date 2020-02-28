@@ -127,6 +127,7 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
        break;
 
      default:
+       berr("ERROR: Unsupported type %u\n", ELF32_R_TYPE(rel->r_info));
        return -EINVAL;
     }
 
@@ -139,4 +140,3 @@ int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
   berr("ERROR: Not supported\n");
   return -ENOSYS;
 }
-

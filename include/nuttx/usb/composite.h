@@ -54,7 +54,7 @@
  *   Enables USB composite device support
  */
 
-#define COMPOSITE_NSTRIDS             (5)  /* The numer of String-IDs to
+#define COMPOSITE_NSTRIDS             (5)  /* The number of String-IDs to
                                             * reserve for the composite device */
 #define COMPOSITE_NCONFIGS            (1)  /* The number of configurations
                                             * supported */
@@ -81,7 +81,7 @@ extern "C"
  ****************************************************************************/
 
 struct composite_devdesc_s;
-  
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

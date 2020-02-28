@@ -43,7 +43,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <semaphore.h>
 #include <debug.h>
 #include <errno.h>
 #include <assert.h>

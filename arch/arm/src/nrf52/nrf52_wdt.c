@@ -65,7 +65,7 @@
 
 /* Clocking *****************************************************************/
 
-/* The watchdog is alway running under 32.768KHz:
+/* The watchdog is always running under 32.768KHz:
  *
  *  Fmin = Flsi / 32768
  *
@@ -192,7 +192,7 @@ static void nrf52_wdt_int_enable(uint32_t int_mask)
 
 static void nrf52_wdt_task_trigger(void)
 {
-  putreg32(NRF_WDT_TASK_SET, NRF52_WDT_TASKS_START);
+  putreg32(1, NRF52_WDT_TASKS_START);
 }
 
 /****************************************************************************
@@ -213,7 +213,7 @@ static void nrf52_wdt_reload_request_set(int rr_register)
 {
   /* Each register is 32-bit (4 bytes), then multiply by 4 to get offset */
 
-  putreg32(NRF_WDT_RR_VALUE, NRF52_WDT_RR0 + (4 * rr_register));
+  putreg32(WDT_RR_VALUE, NRF52_WDT_RR0 + (4 * rr_register));
 }
 
 /****************************************************************************
@@ -261,8 +261,8 @@ static void nrf52_wdt_reload_value_set(uint32_t reload_value)
  *   Start the watchdog timer, resetting the time to the current timeout,
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Values:
  *   Zero on success; a negated errno value on failure.
@@ -285,7 +285,7 @@ static int nrf52_start(FAR struct watchdog_lowerhalf_s *lower)
       flags = enter_critical_section();
       priv->lastreset = clock_systimer();
       priv->started   = true;
-      nrf52_wdt_int_enable(NRF_WDT_INT_TIMEOUT_MASK);
+      nrf52_wdt_int_enable(WDT_INT_TIMEOUT);
       nrf52_wdt_task_trigger();
       leave_critical_section(flags);
     }
@@ -300,8 +300,8 @@ static int nrf52_start(FAR struct watchdog_lowerhalf_s *lower)
  *   Stop the watchdog timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Values:
  *   Zero on success; a negated errno value on failure.
@@ -325,8 +325,8 @@ static int nrf52_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   the watchdog timer or "petting the dog".
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Values:
  *   Zero on success; a negated errno value on failure.
@@ -460,7 +460,8 @@ static int nrf52_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   up_enable_irq(NRF52_IRQ_WDT);
 
-  wdinfo(" mode=%d  priority=%d\n", WDT_CONFIG_MODE, WDT_CONFIG_IRQ_PRIORITY);
+  wdinfo(" mode=%d  priority=%d\n", WDT_CONFIG_MODE,
+         WDT_CONFIG_IRQ_PRIORITY);
 
   return OK;
 }
@@ -503,8 +504,8 @@ int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
 
   priv->ops     = &g_wdtops;
   priv->started = false;
-  priv->mode = (mode_halt << WDT_CONFIG_HALT_POS) |
-                (mode_sleep << WDT_CONFIG_SLEEP_POS);
+  priv->mode = (mode_halt << WDT_CONFIG_HALT) |
+                (mode_sleep << WDT_CONFIG_SLEEP);
 
 #if 0
   /* Request LSECLK firstly */

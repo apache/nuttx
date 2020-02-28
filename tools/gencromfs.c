@@ -4,7 +4,7 @@
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * The function lzf_compress() comes from the file lzf_c.c (wich substantial
+ * The function lzf_compress() comes from the file lzf_c.c (which substantial
  * modification):
  *
  *   Copyright (c) 2000-2010 Marc Alexander Lehmann <schmorp@schmorp.de>

@@ -63,7 +63,7 @@ config PM_GOVERNOR_EXPLICIT_RELAX
 	---help---
 		If you boot into NSH, when using the greedy PM governor, since NuttX will
 		almost immediately go idle (when waiting for a prompt), he lowest possible
-		run-level will be selected, which may not be desireable.
+		run-level will be selected, which may not be desirable.
 		This is not a problem if you directly run you application at boot, which
 		can hold off power levels using pm_stay() (via boardctl).
 
@@ -435,7 +435,7 @@ endif # BQ2429X
 config BATTERY_GAUGE
 	bool "Battery Fuel Gauge support"
 	default n
-	
+
 config MAX1704X
 	bool "MAX1704X Battery fuel gauge support"
 	default n

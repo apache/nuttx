@@ -264,7 +264,7 @@
  * LED1 -- Connected to P1[29]  RED
  * LED2 -- Connected to P0[16]  GREEN
  *
- * These LEDs are connecte to ground so a high output value will illuminate them.
+ * These LEDs are connected to ground so a high output value will illuminate them.
  */
 
 /* LED index values for use with board_userled() */
@@ -352,7 +352,7 @@
 
 /* UART1:
  *
- * All pin options are controlled by older briges on the bottom of the board.  There
+ * All pin options are controlled by older bridges on the bottom of the board.  There
  * are the default settings on my board as it came out of the box:
  *
  * RTS   --- Connected to P0[22]
@@ -489,4 +489,4 @@ struct nuttx_ulan_chip_data_s
 
 int nuttx_ulan_get_chip_data(int minor, struct nuttx_ulan_chip_data_s *chip_data);
 
-#endif  /* __BOARDS_ARM_LX_CPU_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_LX_CPU_INCLUDE_BOARD_H */

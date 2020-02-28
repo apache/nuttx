@@ -83,7 +83,7 @@
 #define IMX_CCM_CCGR4_OFFSET       0x0078  /* CCM Clock Gating Register 4 */
 #define IMX_CCM_CCGR5_OFFSET       0x007c  /* CCM Clock Gating Register 5 */
 #define IMX_CCM_CCGR6_OFFSET       0x0080  /* CCM Clock Gating Register 6 */
-#define IMX_CCM_CMEOR_OFFSET       0x0088  /* CCM Module Enable Overide Register */
+#define IMX_CCM_CMEOR_OFFSET       0x0088  /* CCM Module Enable Override Register */
 
 /* CCM Register Addresses ***********************************************************/
 
@@ -1019,17 +1019,17 @@
 #define CCM_CCGR6_CG15_MASK             (3 << CCM_CCGR6_CG15_SHIFT)
 #  define CCM_CCGR6_CG15(n)             ((uint32_t)(n) << CCM_CCGR6_CG15_SHIFT)
 
-/* CCM Module Enable Overide Register */
+/* CCM Module Enable Override Register */
 
-#define CCM_CMEOR_MOD_EN_OV_VDOA        (1 << 4)  /* Bit 4:  Overide clock enable signal from vdoa */
-#define CCM_CMEOR_MOD_EN_OV_GPT         (1 << 5)  /* Bit 5:  Overide clock enable signal from GPT */
-#define CCM_CMEOR_MOD_EN_OV_EPIT        (1 << 6)  /* Bit 6:  Overide clock enable signal from EPIT */
-#define CCM_CMEOR_MOD_EN_USDHC          (1 << 7)  /* Bit 7:  Overide clock enable signal from USDHC */
-#define CCM_CMEOR_MOD_EN_OV_DAP         (1 << 8)  /* Bit 8:  Overide clock enable signal from DAP */
-#define CCM_CMEOR_MOD_EN_OV_VPU         (1 << 9)  /* Bit 9:  Overide clock enable signal from VPU */
-#define CCM_CMEOR_MOD_EN_OV_GPU2D       (1 << 10) /* Bit 10: Overide clock enable signal from GPU2D */
-#define CCM_CMEOR_MOD_EN_OV_GPU3D       (1 << 11) /* Bit 11: Overide clock enable signal from GPU3D */
-#define CCM_CMEOR_MOD_EN_OV_CAN2_CPI    (1 << 28) /* Bit 28: Overide clock enable signal from CAN2 */
-#define CCM_CMEOR_MOD_EN_OV_CAN1_CPI    (1 << 30) /* Bit 30: Overide clock enable signal from CAN1 */
+#define CCM_CMEOR_MOD_EN_OV_VDOA        (1 << 4)  /* Bit 4:  Override clock enable signal from vdoa */
+#define CCM_CMEOR_MOD_EN_OV_GPT         (1 << 5)  /* Bit 5:  Override clock enable signal from GPT */
+#define CCM_CMEOR_MOD_EN_OV_EPIT        (1 << 6)  /* Bit 6:  Override clock enable signal from EPIT */
+#define CCM_CMEOR_MOD_EN_USDHC          (1 << 7)  /* Bit 7:  Override clock enable signal from USDHC */
+#define CCM_CMEOR_MOD_EN_OV_DAP         (1 << 8)  /* Bit 8:  Override clock enable signal from DAP */
+#define CCM_CMEOR_MOD_EN_OV_VPU         (1 << 9)  /* Bit 9:  Override clock enable signal from VPU */
+#define CCM_CMEOR_MOD_EN_OV_GPU2D       (1 << 10) /* Bit 10: Override clock enable signal from GPU2D */
+#define CCM_CMEOR_MOD_EN_OV_GPU3D       (1 << 11) /* Bit 11: Override clock enable signal from GPU3D */
+#define CCM_CMEOR_MOD_EN_OV_CAN2_CPI    (1 << 28) /* Bit 28: Override clock enable signal from CAN2 */
+#define CCM_CMEOR_MOD_EN_OV_CAN1_CPI    (1 << 30) /* Bit 30: Override clock enable signal from CAN1 */
 
 #endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_CCM_H */

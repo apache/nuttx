@@ -74,4 +74,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_Z80_INCLUDE_EZ80_ARCH_H */
-

@@ -63,4 +63,3 @@ void z8_board_initialize(void)
 {
   z8_gpioinit();
 }
-

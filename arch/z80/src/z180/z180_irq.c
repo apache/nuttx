@@ -160,14 +160,14 @@ irqstate_t up_irq_enable(void) __naked
 }
 
 /****************************************************************************
- * Name: z80_irq_initialize
+ * Name: up_irqinitialize
  *
  * Description:
  *   Initialize and enable interrupts
  *
  ****************************************************************************/
 
-void z80_irq_initialize(void)
+void up_irqinitialize(void)
 {
   uint16_t vectaddr = (uint16_t)up_vectors;
   uint8_t regval;

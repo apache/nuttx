@@ -60,14 +60,8 @@
 #ifndef CONFIG_DEV_CONSOLE
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
-#  undef  CONFIG_DEV_LOWCONSOLE
-#  undef  CONFIG_RAMLOG_CONSOLE
 #else
-#  if defined(CONFIG_RAMLOG_CONSOLE)
-#    undef  USE_SERIALDRIVER
-#    undef  USE_EARLYSERIALINIT
-#    undef  CONFIG_DEV_LOWCONSOLE
-#  elif defined(CONFIG_DEV_LOWCONSOLE)
+#  if defined(CONFIG_CONSOLE_SYSLOG)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
 #  else
@@ -83,13 +77,13 @@
  */
 
 #if !defined(USE_SERIALDRIVER) && defined(CONFIG_STANDARD_SERIAL)
-#    define USE_SERIALDRIVER 1
+#  define USE_SERIALDRIVER 1
 #endif
 
 /* Check if an interrupt stack size is configured */
 
 #ifndef CONFIG_ARCH_INTERRUPTSTACK
-# define CONFIG_ARCH_INTERRUPTSTACK 0
+#  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
 /* Macros to handle saving and restore interrupt state.  In the current CPU12
@@ -144,7 +138,6 @@ extern uint32_t g_intstackbase;
 
 void up_copystate(uint8_t *dest, uint8_t *src);
 void up_decodeirq(uint8_t *regs);
-void up_irqinitialize(void);
 int  up_saveusercontext(uint8_t *saveregs);
 void up_fullcontextrestore(uint8_t *restoreregs) noreturn_function;
 void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
@@ -157,25 +150,18 @@ uint8_t *up_doirq(int irq, uint8_t *regs);
 
 void up_sigdeliver(void);
 
-/* System timer initialization */
-
-void hc_timer_initialize(void);
-
 /* Debug output */
 
+#ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void);
+#endif
+
+#ifdef USE_SERIALDRIVER
 void up_serialinit(void);
+#endif
 
 #ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
-#else
-#  define rpmsg_serialinit()
-#endif
-
-#ifdef CONFIG_DEV_LOWCONSOLE
-void lowconsole_init(void);
-#else
-# define lowconsole_init()
 #endif
 
 void up_lowputc(char ch);
@@ -214,4 +200,4 @@ void up_usbuninitialize(void);
 
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __UP_INTERNAL_H */
+#endif /* __UP_INTERNAL_H */

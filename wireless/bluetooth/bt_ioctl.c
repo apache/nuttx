@@ -59,7 +59,7 @@
 #ifdef CONFIG_NETDEV_IOCTL  /* Not optional! */
 
 /****************************************************************************
- * Public Types
+ * Private Types
  ****************************************************************************/
 
 /* These structures encapsulate all globals used by the IOCTL logic. */

@@ -232,7 +232,7 @@ Using MSYS
     4. mklink /j programfiles86 "C:/Program\ Files\ \(x86\)"
 
   They then show up as /programfiles and /programfiles86 with the MSYS2
-  sandbox.  Thos paths can then be used with the PATH variable.  I had
+  sandbox.  Those paths can then be used with the PATH variable.  I had
   to do something similar for the path to the GNU Tools "ARM Embedded
   Toolchain" which also has spaces in the path name.
 
@@ -795,9 +795,10 @@ NuttX Configuration Tool
   An automated tool has been incorporated to support re-configuration
   of NuttX.  This tool is based on the kconfig-frontends application available
   at https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends/.  (This
-  is a snapshot of http://ymorin.is-a-geek.org/projects/kconfig-frontends.)
-  This application provides a tool called 'kconfig-mconf' that is used by the
-  NuttX top-level Makefile. The following make target is provided:
+  is a snapshot of the old http://ymorin.is-a-geek.org/projects/kconfig-frontends
+  which is no longer available.)  This application provides a tool called
+  'kconfig-mconf' that is used by the NuttX top-level Makefile. The following
+  make target is provided:
 
     make menuconfig
 
@@ -963,7 +964,7 @@ Make Sure that You are on the Right Platform
 
   For a Linux host or for a Windows/Cygwin host:
 
-    tools/configure.sh -h board:configuration
+    tools/configure.sh -c board:configuration
 
   Other options are available from the help option built into the
   script.  You can see all options with:
@@ -1466,9 +1467,18 @@ Native Windows Build
   instead if you know what you are doing and want a faster download (No, I
   can't tell you which packages you should or should not download).
 
+  NOTE:  It should be possible to use Cygwin or MSYS2 in place of the GNUWin32
+  tools.  There are, however, complexities in doing that because those tools
+  depend on the shell environment and use DLLs that are not found (at least
+  not without the correct setup).
+
   Host Compiler:  I use the MingGW GCC compiler which can be downloaded from
   http://www.mingw.org/.  If you are using GNUWin32, then it is recommended
   the you not install the optional MSYS components as there may be conflicts.
+
+  Kconfig-frontends:  See the section entitled "NuttX Configuration Tool
+  under DOS" for information about installing the kconfig-frontend tools to
+  run natively under Windows.
 
   This capability should still be considered a work in progress because:
 
@@ -1541,6 +1551,17 @@ Installing GNUWin32
   more than you will ever need.  If disc space is a problem for you, you might
   need to perform a manual installation of the individual ZIP files that you
   will find in the <this directory>/GetGNUWin32/packages directory.
+
+  9. Make sure that you add the GNUWin32 tools to your path variable:
+
+    set PATH=C:\gnuwin32\bin;%PATH%
+
+  WARNING:  Make sure you have C:\MinGW\bin in your path before any other
+  directory that contains libiconv-2.dll. Apparently the as.exe in some
+  MinGW distributions are dependent on that DLL, and having an old
+  version of it in the path somewhere (for example GnuWin32 tools) will
+  cause as.exe to pick up the older version that doesn't have the entry
+  point it's looking for.
 
 CYGWIN BUILD PROBLEMS
 ^^^^^^^^^^^^^^^^^^^^^
@@ -2100,7 +2121,7 @@ nuttx/
  |   |       `- moteino-mega/
  |   |           `- README.txt
  |   |- hc/
- |   |   `- mcs92s12ne64/
+ |   |   `- m9s12/
  |   |       |- demo9s12ne64/
  |   |       |   `- README.txt
  |   |       `- ne64badge/
@@ -2131,10 +2152,10 @@ nuttx/
  |   |       `- or1k/
  |   |           `- README.txt
  |   |- renesas/
- |   |   |- m32262f8/
+ |   |   |- m16c/
  |   |   |   `- skp16c26/
  |   |   |       `- README.txt
- |   |   `-sh7032/
+ |   |   `-sh1/
  |   |       `- us7032evb1/
  |   |           `- README.txt
  |   |- risc-v/
@@ -2158,7 +2179,7 @@ nuttx/
  |   |       `- esp32-core/
  |   |           `- README.txt
  |   |- z16/
- |   |   `- z16f2811/
+ |   |   `- z16f/
  |   |       `- z16f2800100zcog/
  |   |           |- configs/nsh/README.txt
  |   |           |- configs/ostest/README.txt
@@ -2176,7 +2197,12 @@ nuttx/
  |   |   |   |   |- configs/nsh/README.txt
  |   |   |   |   |- configs/poll/README.txt
  |   |   |   |   `- README.txt
- |   |   |   `- makerlisp/
+ |   |   |   |- makerlisp/
+ |   |   |   |   |- configs/nsh_flash/README.txt
+ |   |   |   |   |- configs/nsh_ram/README.txt
+ |   |   |   |   |- configs/sdboot/README.txt
+ |   |   |   |   `- README.txt
+ |   |   |   `- z80x/
  |   |   |       |- configs/nsh_flash/README.txt
  |   |   |       |- configs/nsh_ram/README.txt
  |   |   |       |- configs/sdboot/README.txt
@@ -2342,4 +2368,3 @@ tools/
 
 uClibc++/
  `- README.txt
-

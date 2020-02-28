@@ -3,6 +3,14 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+menuconfig MODEM
+	bool "Modem Support"
+	default n
+	---help---
+		Enable modem support.
+
+if MODEM
+
 config MODEM_U_BLOX
 	bool "Enable u-blox modem driver"
 	default n
@@ -20,3 +28,5 @@ config MODEM_U_BLOX_DEBUG
 
 
 source "drivers/modem/altair/Kconfig"
+
+endif # MODEM

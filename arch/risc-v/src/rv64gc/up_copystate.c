@@ -83,4 +83,3 @@ void up_copystate(uint64_t *dest, uint64_t *src)
         }
     }
 }
-

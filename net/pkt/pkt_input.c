@@ -2,7 +2,7 @@
  * net/pkt/pkt_input.c
  * Handling incoming packet input
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -58,7 +58,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PKTBUF ((struct eth_hdr_s *)&dev->d_buf)
+#define PKTBUF ((FAR struct eth_hdr_s *)&dev->d_buf)
 
 /****************************************************************************
  * Public Functions
@@ -87,7 +87,7 @@
 int pkt_input(struct net_driver_s *dev)
 {
   FAR struct pkt_conn_s *conn;
-  FAR struct eth_hdr_s  *pbuf = (struct eth_hdr_s *)dev->d_buf;
+  FAR struct eth_hdr_s  *pbuf = (FAR struct eth_hdr_s *)dev->d_buf;
   int ret = OK;
 
   conn = pkt_active(pbuf);

@@ -138,7 +138,7 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
                * behavior is like PTHREAD_MUTEX_ERRORCHECK)
                *
                * NOTE: This is the correct behavior for a 'robust', NORMAL
-               * mutex.  Compiant behavior for non-robust mutex should not
+               * mutex.  Compliant behavior for non-robust mutex should not
                * include these checks.  In that case, it the deadlock
                * condition should not be detected and the thread should be
                * permitted to deadlock.

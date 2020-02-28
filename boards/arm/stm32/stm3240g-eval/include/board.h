@@ -459,7 +459,7 @@
 #define GPIO_I2C1_SCL       GPIO_I2C1_SCL_1
 #define GPIO_I2C1_SDA       GPIO_I2C1_SDA_2
 
-/* DMA Channl/Stream Selections *****************************************************/
+/* DMA Channel/Stream Selections *****************************************************/
 /* Stream selections are arbitrary for now but might become important in the future
  * if we set aside more DMA channels/streams.
  *
@@ -496,7 +496,7 @@ extern "C"
  *   This is a non-standard LCD interface just for the STM3210E-EVAL board.  Because
  *   of the various rotations, clearing the display in the normal way by writing a
  *   sequences of runs that covers the entire display can be very slow.  Here the
- *   dispaly is cleared by simply setting all GRAM memory to the specified color.
+ *   display is cleared by simply setting all GRAM memory to the specified color.
  *
  ****************************************************************************/
 
@@ -510,4 +510,4 @@ void stm3240g_lcdclear(uint16_t color);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __BOARD_ARM_STM32_STM3240G_EVAL_INCLUDE_BOARD_H */
+#endif /* __BOARD_ARM_STM32_STM3240G_EVAL_INCLUDE_BOARD_H */

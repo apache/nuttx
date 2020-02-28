@@ -44,7 +44,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
 
 #include <nuttx/wqueue.h>
 #include <nuttx/spi/spi.h>
@@ -170,7 +169,7 @@ int xbee_req_data(XBEEHANDLE xbee, FAR const struct ieee802154_frame_meta_s *met
  *   attribute.
  *
  *   NOTE: The standard specifies that the attribute value should be returned
- *   via the asynchronous MLME-GET.confirm primitve.  However, in our
+ *   via the asynchronous MLME-GET.confirm primitive.  However, in our
  *   implementation, we synchronously return the value immediately.Therefore, we
  *   merge the functionality of the MLME-GET.request and MLME-GET.confirm
  *   primitives together.
@@ -188,7 +187,7 @@ int xbee_req_get(XBEEHANDLE xbee, enum ieee802154_attr_e attr,
  *   indicated MAC PIB attribute.
  *
  *   NOTE: The standard specifies that confirmation should be indicated via
- *   the asynchronous MLME-SET.confirm primitve.  However, in our implementation
+ *   the asynchronous MLME-SET.confirm primitive.  However, in our implementation
  *   we synchronously return the status from the request. Therefore, we do merge
  *   the functionality of the MLME-SET.request and MLME-SET.confirm primitives
  *   together.

@@ -61,7 +61,7 @@
  * Input Parameters:
  *   path - The path to the inode to create
  *   bops - The block driver operations structure
- *   mode - inmode priviledges (not used)
+ *   mode - inmode privileges (not used)
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -111,4 +111,3 @@ int register_blockdriver(FAR const char *path,
 }
 
 #endif /* !CONFIG_DISABLE_MOUNTPOINT */
-

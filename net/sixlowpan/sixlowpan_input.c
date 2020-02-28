@@ -265,7 +265,7 @@ static uint16_t sixlowpan_uncompress_ipv6proto(FAR uint8_t *fptr,
  *     INPUT_PARTIAL  Frame processed successful, packet incomplete
  *     INPUT_COMPLETE Frame processed successful, packet complete
  *
- *   Othewise a negated errno value is returned to indicate the nature of the
+ *   Otherwise a negated errno value is returned to indicate the nature of the
  *   failure.
  *
  * Assumptions:
@@ -288,7 +288,7 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
   uint8_t fragoffset = 0;     /* Offset of the fragment in the IP packet */
   uint8_t protosize  = 0;     /* Length of the protocol header (treated like payload) */
   bool isfrag        = false; /* true: Frame is a fragment */
-  bool isfrag1       = false; /* true: Frame is the first fragement of the series */
+  bool isfrag1       = false; /* true: Frame is the first fragment of the series */
   int reqsize;                /* Required buffer size */
   int hdrsize;                /* Size of the IEEE802.15.4 header */
   int ret;
@@ -311,7 +311,7 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
 
   /* Since we don't support the mesh and broadcast header, the first header
    * we look for is the fragmentation header.  NOTE that g_frame_hdrlen
-   * already includes the fragementation header, if presetn.
+   * already includes the fragmentation header, if presetn.
    */
 
   fragptr = fptr + hdrsize;
@@ -677,7 +677,7 @@ static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
  *
  *   After each frame is processed into d_buf, the IOB is deallocated.  If
  *   reassembly is incomplete, the partially reassembled packet must be
- *   preserved by the radio network drvier and provided again when the next
+ *   preserved by the radio network driver and provided again when the next
  *   frame is received.
  *
  *   When the packet in the d_buf is fully reassembled, it will be provided
@@ -710,7 +710,7 @@ static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
  *               must apply to all of the frames in the list.
  *
  * Returned Value:
- *   Zero (OK) is returned if the the frame was consumed; Othewise a negated
+ *   Zero (OK) is returned if the the frame was consumed; Otherwise a negated
  *   errno value is returned.
  *
  ****************************************************************************/
@@ -837,7 +837,7 @@ int sixlowpan_input(FAR struct radio_driver_s *radio,
 #endif
                       default:
                         {
-                          nwarn("WARNING: Unsupported protoype: %u\n",
+                          nwarn("WARNING: Unsupported prototype: %u\n",
                                 ipv6hdr->proto);
                           goto drop;
                         }

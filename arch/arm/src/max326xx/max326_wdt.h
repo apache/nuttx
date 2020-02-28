@@ -72,7 +72,7 @@ extern "C"
  * Input Parameters:
  *   devpath - The full path to the watchdog.  This should be of the form
  *              /dev/watchdog0
- 
+
  * Returned Values:
  *   Zero (OK) is returned on success; a negated errno value is returned on
  *   any failure.

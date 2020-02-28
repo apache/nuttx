@@ -101,5 +101,3 @@ bool lib_isbasedigit(int ch, int base, int *value)
     }
   return ret;
 }
-
-

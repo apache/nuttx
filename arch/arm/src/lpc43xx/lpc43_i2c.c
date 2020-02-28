@@ -4,7 +4,7 @@
  *   Copyright (C) 2012, 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Ported from from the LPC17 version:
+ * Ported from the LPC17 version:
  *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
@@ -102,7 +102,7 @@ struct lpc43_i2cdev_s
   struct i2c_master_s dev;     /* Generic I2C device */
   unsigned int     base;       /* Base address of registers */
   uint16_t         irqid;      /* IRQ for this device */
-  uint32_t         baseFreq;   /* branch frequency */
+  uint32_t         base_freq;   /* branch frequency */
 
   sem_t            mutex;      /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for state machine completion */
@@ -167,20 +167,20 @@ static void lpc43_i2c_setfrequency(struct lpc43_i2cdev_s *priv,
     {
       if (frequency > 100000)
         {
-          /* asymetric per 400Khz I2C spec */
+          /* asymmetric per 400Khz I2C spec */
 
-          putreg32(priv->baseFreq / (83 + 47) * 47 / frequency,
+          putreg32(priv->base_freq / (83 + 47) * 47 / frequency,
                    priv->base + LPC43_I2C_SCLH_OFFSET);
-          putreg32(priv->baseFreq / (83 + 47) * 83 / frequency,
+          putreg32(priv->base_freq / (83 + 47) * 83 / frequency,
                    priv->base + LPC43_I2C_SCLL_OFFSET);
         }
       else
         {
           /* 50/50 mark space ratio */
 
-          putreg32(priv->baseFreq / 100 * 50 / frequency,
+          putreg32(priv->base_freq / 100 * 50 / frequency,
                    priv->base + LPC43_I2C_SCLH_OFFSET);
-          putreg32(priv->baseFreq / 100 * 50 / frequency,
+          putreg32(priv->base_freq / 100 * 50 / frequency,
                    priv->base + LPC43_I2C_SCLL_OFFSET);
         }
 
@@ -295,7 +295,6 @@ static int lpc43_i2c_interrupt(int irq, FAR void *context, FAR void *arg)
   state &= 0xf8;  /* state mask, only 0xX8 is possible */
   switch (state)
     {
-
     case 0x08:     /* A START condition has been transmitted. */
     case 0x10:     /* A Repeated START condition has been transmitted. */
       /* Set address */
@@ -450,7 +449,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
 
   if (port > 1)
     {
-      i2cerr("ERROR: lpc I2C Only suppors ports 0 and 1\n");
+      i2cerr("ERROR: lpc I2C only supports ports 0 and 1\n");
       return NULL;
     }
 
@@ -465,7 +464,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
       priv           = &g_i2c0dev;
       priv->base     = LPC43_I2C0_BASE;
       priv->irqid    = LPC43M4_IRQ_I2C0;
-      priv->baseFreq = BOARD_ABP1_FREQUENCY;
+      priv->base_freq = BOARD_ABP1_FREQUENCY;
 
       /* Enable, set mode */
 
@@ -498,7 +497,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
       priv        = &g_i2c1dev;
       priv->base  = LPC43_I2C1_BASE;
       priv->irqid = LPC43M4_IRQ_I2C1;
-      priv->baseFreq = BOARD_ABP3_FREQUENCY;
+      priv->base_freq = BOARD_ABP3_FREQUENCY;
 
       /* No need to enable */
 

@@ -519,7 +519,7 @@ __start:
 
 	configpinsel2	r0, r1
 
-	/* Setup the External Memory Controllor (EMC) as configured */
+	/* Setup the External Memory Controller (EMC) as configured */
 
 	configemc	r0, r1
 
@@ -541,7 +541,7 @@ __start:
 	configmemmap	r0, r1
 
 	/* Configure the DAC and ADC */
-	
+
 	configdac	r0, r1
 
 	/* Configure Fast GPIO Port */
@@ -601,7 +601,7 @@ __start:
 
 	/* Variables:
 	 * _sbss is the start of the BSS region (see ld.script)
-	 * _ebss is the end of the BSS regsion (see ld.script)
+	 * _ebss is the end of the BSS region (see ld.script)
 	 * The idle task stack starts at the end of BSS and is
 	 * of size CONFIG_IDLETHREAD_STACKSIZE.  The heap continues
 	 * from there until the end of memory.  See g_idle_topstack
@@ -631,4 +631,3 @@ g_idle_topstack:
 	.size	g_idle_topstack, .-g_idle_topstack
 
 	.end
-

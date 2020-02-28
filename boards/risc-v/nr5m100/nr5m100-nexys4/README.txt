@@ -60,7 +60,7 @@ Development Environment
 
   The reason NR5M100 is "low performance" is that it is a state machine based core (like the
   picorv32) and not a multi-stage pipeline core.  This means that it requires an average of
-  4.5 clock cycles to execute each instruction.  On a multi-stage pipeline architecure, this
+  4.5 clock cycles to execute each instruction.  On a multi-stage pipeline architecture, this
   average would be closer to 1 clock cycle per instruction (though a bit higher due to
   pipeline branch misses).  The tradeoff for lower performance is a simpler design.  There
   is a single memory bus interface for both instructions and data.  Multi-stage pipeline
@@ -140,7 +140,7 @@ Debugger
      git clone --recursive https://github.com/sifive/openocd.git
 
   3. Configure and build OpenOCD.  The x86_64 GCC compilers will give errors because of
-     shadowed variable warnings, so diable the -Werror flag also:
+     shadowed variable warnings, so disable the -Werror flag also:
 
      cd openocd
      sed -i 's/ -Werror//g' configure.ac
@@ -182,7 +182,7 @@ IDEs
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/risc-v/src/rv32im,
+  3) Set up include paths:  You will need include/, arch/risc-v/src/rv32im,
      arch/risc-v/src/common, arch/risc-v/src/nr5m100, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.
@@ -240,4 +240,3 @@ Where <subdir> is one of the following:
   ---
   This is an NSH example that uses UART1 as the console.  UART1 is connected
   to the USB UART bridge on the FPGA board.
-

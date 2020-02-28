@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/platform/sensors/bmp280_scu.c
+ * boards/arm/cxd56xx/drivers/sensors/bmp280_scu.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -322,31 +322,31 @@ static int bmp280_get_calib_param_press(FAR struct bmp280_dev_s *priv)
 {
   /* Read calibration values */
 
-  g_press_adj.dig_P1 =
+  g_press_adj.dig_p1 =
         ((uint16_t)bmp280_getreg8(priv, BMP280_DIG_P1_MSB) << 8) |
          bmp280_getreg8(priv, BMP280_DIG_P1_LSB);
-  g_press_adj.dig_P2 =
+  g_press_adj.dig_p2 =
         ((int16_t)bmp280_getreg8(priv, BMP280_DIG_P2_MSB) << 8) |
         bmp280_getreg8(priv, BMP280_DIG_P2_LSB);
-  g_press_adj.dig_P3 =
+  g_press_adj.dig_p3 =
         ((int16_t)bmp280_getreg8(priv, BMP280_DIG_P3_MSB) << 8) |
         bmp280_getreg8(priv, BMP280_DIG_P3_LSB);
-  g_press_adj.dig_P4 =
+  g_press_adj.dig_p4 =
         ((int16_t)bmp280_getreg8(priv, BMP280_DIG_P4_MSB) << 8) |
         bmp280_getreg8(priv, BMP280_DIG_P4_LSB);
-  g_press_adj.dig_P5 =
+  g_press_adj.dig_p5 =
         ((int16_t)bmp280_getreg8(priv, BMP280_DIG_P5_MSB) << 8) |
         bmp280_getreg8(priv, BMP280_DIG_P5_LSB);
-  g_press_adj.dig_P6 =
+  g_press_adj.dig_p6 =
         ((int16_t)bmp280_getreg8(priv, BMP280_DIG_P6_MSB) << 8) |
         bmp280_getreg8(priv, BMP280_DIG_P6_LSB);
-  g_press_adj.dig_P7 =
+  g_press_adj.dig_p7 =
         ((int16_t)bmp280_getreg8(priv, BMP280_DIG_P7_MSB) << 8) |
         bmp280_getreg8(priv, BMP280_DIG_P7_LSB);
-  g_press_adj.dig_P8 =
+  g_press_adj.dig_p8 =
         ((int16_t)bmp280_getreg8(priv, BMP280_DIG_P8_MSB) << 8) |
         bmp280_getreg8(priv, BMP280_DIG_P8_LSB);
-  g_press_adj.dig_P9 =
+  g_press_adj.dig_p9 =
         ((int16_t)bmp280_getreg8(priv, BMP280_DIG_P9_MSB) << 8) |
         bmp280_getreg8(priv, BMP280_DIG_P9_LSB);
 
@@ -365,18 +365,19 @@ static int bmp280_get_calib_param_temp(FAR struct bmp280_dev_s *priv)
 {
   /* Read calibration values */
 
-  g_temp_adj.dig_T1 =
+  g_temp_adj.dig_t1 =
         ((uint16_t)bmp280_getreg8(priv, BMP280_DIG_T1_MSB) << 8) |
         bmp280_getreg8(priv, BMP280_DIG_T1_LSB);
-  g_temp_adj.dig_T2 =
+  g_temp_adj.dig_t2 =
         ((int16_t)bmp280_getreg8(priv, BMP280_DIG_T2_MSB) << 8) |
         bmp280_getreg8(priv, BMP280_DIG_T2_LSB);
-  g_temp_adj.dig_T3 =
+  g_temp_adj.dig_t3 =
         ((int16_t)bmp280_getreg8(priv, BMP280_DIG_T3_MSB) << 8) |
         bmp280_getreg8(priv, BMP280_DIG_T3_LSB);
 
   return OK;
 }
+
 /****************************************************************************
  * Name: bmp280_set_power_mode
  *
@@ -496,6 +497,7 @@ static int bmp280_seqinit_press(FAR struct bmp280_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_seq_press;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -521,6 +523,7 @@ static int bmp280_seqinit_temp(FAR struct bmp280_dev_s *priv)
     {
       return -ENOENT;
     }
+
   priv->seq = g_seq_temp;
 
   seq_setaddress(priv->seq, priv->addr);
@@ -549,7 +552,7 @@ static int bmp280_open_press(FAR struct file *filep)
   FAR struct bmp280_dev_s *priv  = inode->i_private;
   int ret;
 
-  /* first pressure device initilize */
+  /* first pressure device initialize */
 
   if (g_refcnt_press == 0)
     {
@@ -596,7 +599,7 @@ static int bmp280_open_temp(FAR struct file *filep)
   FAR struct bmp280_dev_s *priv  = inode->i_private;
   int ret;
 
-  /* first temperature device initilize */
+  /* first temperature device initialize */
 
   if (g_refcnt_temp == 0)
     {
@@ -764,17 +767,18 @@ static int bmp280_ioctl_press(FAR struct file *filep, int cmd,
 
       case SNIOC_GETADJ:
         {
-          struct bmp280_press_adj_s *user = (struct bmp280_press_adj_s *)(uintptr_t)arg;
+          struct bmp280_press_adj_s *user = (struct bmp280_press_adj_s *)
+                                            (uintptr_t)arg;
 
-          user->dig_P1 = g_press_adj.dig_P1;
-          user->dig_P2 = g_press_adj.dig_P2;
-          user->dig_P3 = g_press_adj.dig_P3;
-          user->dig_P4 = g_press_adj.dig_P4;
-          user->dig_P5 = g_press_adj.dig_P5;
-          user->dig_P6 = g_press_adj.dig_P6;
-          user->dig_P7 = g_press_adj.dig_P7;
-          user->dig_P8 = g_press_adj.dig_P8;
-          user->dig_P9 = g_press_adj.dig_P9;
+          user->dig_p1 = g_press_adj.dig_p1;
+          user->dig_p2 = g_press_adj.dig_p2;
+          user->dig_p3 = g_press_adj.dig_p3;
+          user->dig_p4 = g_press_adj.dig_p4;
+          user->dig_p5 = g_press_adj.dig_p5;
+          user->dig_p6 = g_press_adj.dig_p6;
+          user->dig_p7 = g_press_adj.dig_p7;
+          user->dig_p8 = g_press_adj.dig_p8;
+          user->dig_p9 = g_press_adj.dig_p9;
         }
         break;
 
@@ -825,9 +829,9 @@ static int bmp280_ioctl_temp(FAR struct file *filep, int cmd,
         {
           struct bmp280_temp_adj_s *user = (struct bmp280_temp_adj_s *)(uintptr_t)arg;
 
-          user->dig_T1 = g_temp_adj.dig_T1;
-          user->dig_T2 = g_temp_adj.dig_T2;
-          user->dig_T3 = g_temp_adj.dig_T3;
+          user->dig_t1 = g_temp_adj.dig_t1;
+          user->dig_t2 = g_temp_adj.dig_t2;
+          user->dig_t3 = g_temp_adj.dig_t3;
         }
         break;
 
@@ -873,7 +877,8 @@ static int bmp280_ioctl_temp(FAR struct file *filep, int cmd,
 
 int bmp280_init(FAR struct i2c_master_s *i2c, int port)
 {
-  FAR struct bmp280_dev_s tmp, *priv = &tmp;
+  struct bmp280_dev_s tmp;
+  struct *priv = &tmp;
   int ret;
 
   /* Setup temporary device structure for initialization */

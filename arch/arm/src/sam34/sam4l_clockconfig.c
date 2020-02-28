@@ -390,7 +390,7 @@
  * 0: 80MHz  < fvco < 180MHz
  * 1: 160MHz < fvco < 240MHz
  *
- * Select the correct frequncy range using the recommended threshold
+ * Select the correct frequency range using the recommended threshold
  * value.
  */
 
@@ -461,7 +461,7 @@
  * Name: sam_picocache
  *
  * Description:
- *   Initialiaze the PICOCACHE.
+ *   Initialize the PICOCACHE.
  *
  ****************************************************************************/
 
@@ -486,7 +486,7 @@ static inline void sam_picocache(void)
  * Name: sam_enableosc0
  *
  * Description:
- *   Initialiaze OSC0 settings per the definitions in the board.h file.
+ *   Initialize OSC0 settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 
@@ -513,7 +513,7 @@ static inline void sam_enableosc0(void)
  * Name: sam_enableosc32
  *
  * Description:
- *   Initialiaze the 32KHz oscillator per settings in the board.h header
+ *   Initialize the 32KHz oscillator per settings in the board.h header
  *   file.
  *
  ****************************************************************************/
@@ -545,7 +545,7 @@ static inline void sam_enableosc32(void)
  * Name: sam_enablerc80m
  *
  * Description:
- *   Initialiaze the 80 MHz RC oscillator per settings in the board.h header
+ *   Initialize the 80 MHz RC oscillator per settings in the board.h header
  *   file.
  *
  ****************************************************************************/
@@ -572,7 +572,7 @@ static inline void sam_enablerc80m(void)
  * Name: sam_enablerc80m
  *
  * Description:
- *   Initialiaze the 12/8/4 RC fast oscillator per settings in the board.h
+ *   Initialize the 12/8/4 RC fast oscillator per settings in the board.h
  *   header file.
  *
  ****************************************************************************/
@@ -602,7 +602,7 @@ static inline void sam_enablercfast(void)
  * Name: sam_enablerc1m
  *
  * Description:
- *   Initialiaze the 1M RC oscillator per settings in the board.h header
+ *   Initialize the 1M RC oscillator per settings in the board.h header
  *   file.
  *
  ****************************************************************************/
@@ -632,7 +632,7 @@ static inline void sam_enablerc1m(void)
  * Name: sam_enablerc32k
  *
  * Description:
- *   Initialiaze the 23KHz RC oscillator per settings in the board.h header
+ *   Initialize the 23KHz RC oscillator per settings in the board.h header
  *   file.
  *
  ****************************************************************************/
@@ -679,7 +679,7 @@ static inline void sam_enableglck9(void)
  * Name: sam_enablepll0 (and its helper sam_pll0putreg())
  *
  * Description:
- *   Initialiaze PLL0 settings per the definitions in the board.h file.
+ *   Initialize PLL0 settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 
@@ -732,7 +732,7 @@ static inline void sam_enablepll0(void)
  * Name: sam_enabledfll0 (and its helper sam_dfll0_putreg32())
  *
  * Description:
- *   Initialiaze DFLL0 settings per the definitions in the board.h file.
+ *   Initialize DFLL0 settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 
@@ -1163,7 +1163,7 @@ static inline void sam_setpsm(uint32_t psm)
 {
   uint32_t regval;
 
-  /* Setup the PMCON register content fo the new power scaling mode */
+  /* Setup the PMCON register content for the new power scaling mode */
 
   regval  = getreg32(SAM_BPM_PMCON);
   regval &= ~BPM_PMCON_PS_MASK;

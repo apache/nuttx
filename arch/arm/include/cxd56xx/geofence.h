@@ -212,7 +212,7 @@ struct cxd56_geofence_trans_s
   uint8_t status;
 };
 
-/* Geofence output data structer. */
+/* Geofence output data structure. */
 
 struct cxd56_geofence_status_s
 {
@@ -220,7 +220,7 @@ struct cxd56_geofence_status_s
 
   uint8_t update;
 
-  /* The detail data od updated region ID */
+  /* The detail data of updated region ID */
 
   struct cxd56_geofence_trans_s status[CXD56_GEOFENCE_REGION_CAPACITY];
 };
@@ -230,4 +230,4 @@ struct cxd56_geofence_status_s
 }
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_ARCH_CXD56XX_GEOFENCE_H */
+#endif /* __ARCH_ARM_INCLUDE_CXD56XX_GEOFENCE_H */

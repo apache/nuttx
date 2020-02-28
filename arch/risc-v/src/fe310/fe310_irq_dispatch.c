@@ -131,10 +131,5 @@ void *fe310_dispatch_irq(uint32_t vector, uint32_t *regs)
   regs = (uint32_t *)g_current_regs;
   g_current_regs = NULL;
 
-  /* Set machine previous privilege mode to machine mode */
-
-  *(regs + REG_INT_CTX_NDX) |= 0x3 << 11;
-
   return regs;
 }
-

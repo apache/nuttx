@@ -55,7 +55,3 @@ ${OPENOCD_EXE} ${OPENOCD_ARGS} &
 echo "OpenOCD daemon started"
 ps -ef | grep openocd
 echo "In GDB: target remote localhost:3333"
-
-
-
-

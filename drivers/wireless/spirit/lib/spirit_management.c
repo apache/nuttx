@@ -457,7 +457,7 @@ int spirit_management_txstrobe(FAR struct spirit_library_s *spirit)
       uint8_t tmp;
       int ret;
 
-      /* To achive the max output power */
+      /* To achieve the max output power */
 
       if (spirit->commfrequency >= 150000000 &&
           spirit->commfrequency <= 470000000)

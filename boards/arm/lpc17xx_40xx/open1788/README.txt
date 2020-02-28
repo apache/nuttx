@@ -26,7 +26,7 @@ LEDs
     LED4 : Connected to P4[27]
 
   If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
-  any way using the defitions provided in the board.h header file.
+  any way using the definitions provided in the board.h header file.
 
   If CONFIG_ARCH_LEDs is defined, then NuttX will control the 3 LEDs on the
   WaveShare Open1788K.  The following definitions describe how NuttX controls
@@ -90,7 +90,7 @@ Serial Console
   In this configuration using UART1, it is necessary to disable LED support
   on the board.  That is because UART1 RXD is set for pin p0.16, but so is
   LED2.  If you do not disable LED support then no incoming serial data will
-  be recevied.
+  be received.
 
     Common Board Options
       CONFIG_ARCH_LEDS=n             : Disable LED support
@@ -100,7 +100,7 @@ Serial Console
   data receipt).
 
   NOTE:  If you intend to use LEDs with UART1, then you might want to
-  redesign some ofthe LED logic in the src/ subdirectory so that it does not
+  redesign some of the LED logic in the src/ subdirectory so that it does not
   attempt to use LED2.
 
 Using OpenOCD with the Olimex ARM-USB-OCD
@@ -301,7 +301,7 @@ Configuration Directories
   ----
     This is identical to the nsh configuration below except that NuttX
     is built as a kernel-mode, monolithic module and the user applications
-    are built separately.  Is is recommened to use a special make command;
+    are built separately.  Is is recommended to use a special make command;
     not just 'make' but make with the following two arguments:
 
         make pass1 pass2
@@ -471,7 +471,7 @@ Configuration Directories
           Library Support:
             CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
 
-          Applicaton Configuration:
+          Application Configuration:
             CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
 
           Defaults should be okay for related touchscreen settings.  Touchscreen
@@ -559,8 +559,8 @@ Configuration Directories
 
        In NuttX naming that is called a discrete joystick djoystick.  There
        is a well defined djoystick interface in include/nuttx/input/djoystick.h.
-       Note that there are dscrete joystick buttons on the Open1788 board so
-       would be a natural interace in this case.
+       Note that there are discrete joystick buttons on the Open1788 board so
+       would be a natural interface in this case.
 
        A discrete joystick driver was added to pdcurses configuration.  It
        has been verified that the pdcurses demos that require menu
@@ -577,7 +577,7 @@ Configuration Directories
     position.  The windows are being updated from the per-winidow
     framebuffers automatically.
 
-    This example is reminescent of Pong:  Each window travels in straight
+    This example is reminiscent of Pong:  Each window travels in straight
     line until it hits an edge, then it bounces off.  The window is also
     raised when it hits the edge (gets "focus").  This tests all
     combinations of overap.

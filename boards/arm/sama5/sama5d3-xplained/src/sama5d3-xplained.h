@@ -480,9 +480,9 @@
    * KSZ9021/31) operating at 10/100/1000 Mbps.
    * The board supports RGMII interface mode.
    * The Ethernet interface consists of 4 pairs of low voltage differential
-   * pair signals designated from GRX± and GTx± plus control signals for link
-   * activity indicators. These signals can be used to connect to a
-   * 10/100/1000 BaseT RJ45 connector integrated on the main board.
+   * pair signals designated from TXRXP_A/TXRXM_A to TXRXP_D/TXRXM_D plus control
+   * signals for link activity indicators. These signals can be used to connect
+   * to a 10/100/1000 BaseT RJ45 connector integrated on the main board.
    *
    * The KSZ9021/31 interrupt is available on PB35 INT_GETH0.  The sense of
    * the interrupt is configurable but is, by default, active low.
@@ -802,6 +802,16 @@ int sam_can_setup(void);
 #ifdef HAVE_NETWORK
 void weak_function sam_netinitialize(void);
 #endif
+
+/****************************************************************************
+ * Name: sam_bringup
+ *
+ * Description:
+ *   Bring up board features
+ *
+ ****************************************************************************/
+
+int sam_bringup(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_SAMA5_SAMA5D3_XPLAINED_SRC_SAMA5D3_XPLAINED_H */

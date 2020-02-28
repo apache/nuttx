@@ -42,13 +42,13 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi_transfer.h>
 
 #ifdef CONFIG_SPI_DRIVER

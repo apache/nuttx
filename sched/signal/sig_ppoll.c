@@ -151,4 +151,3 @@ int ppoll(FAR struct pollfd *fds, nfds_t nfds,
 
   return ret;
 }
-

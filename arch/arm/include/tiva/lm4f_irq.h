@@ -373,4 +373,3 @@ extern "C"
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_TIVA_LM4F_IRQ_H */
-

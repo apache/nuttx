@@ -97,7 +97,7 @@ int dump_module(FAR const struct binary_s *bin);
  *
  * Description:
  *   In the kernel build, the argv list will likely lie in the caller's
- *   address environment and, hence, by inaccessible when we swith to the
+ *   address environment and, hence, by inaccessible when we switch to the
  *   address environment of the new process address environment.  So we
  *   do not have any real option other than to copy the callers argv[] list.
  *
@@ -171,4 +171,3 @@ void builtin_uninitialize(void);
 #endif
 
 #endif /* __BINFMT_BINFMT_H */
-

@@ -128,7 +128,7 @@ void up_sigdeliver(void)
 
   /* Then restore the correct state for this thread of execution. This is an
    * unusual case that must be handled by up_fullcontextresore. This case is
-   * unusal in two ways:
+   * unusual in two ways:
    *
    *   1. It is not a context switch between threads.  Rather, up_fullcontextrestore
    *      must behave more it more like a longjmp within the same task, using

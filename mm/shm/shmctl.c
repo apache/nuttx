@@ -43,7 +43,6 @@
 #include <sys/ipc.h>
 #include <unistd.h>
 #include <string.h>
-#include <semaphore.h>
 #include <time.h>
 #include <errno.h>
 #include <assert.h>

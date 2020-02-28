@@ -322,7 +322,7 @@ static int lo_loopback(FAR struct net_driver_s *dev)
   memcpy(pktmeta.pm_dest.pa_addr, g_mac_addr, CONFIG_PKTRADIO_ADDRLEN);
 
   /* Loop while there framelist to be sent, i.e., while the freme list is not
-   * emtpy.  Sending, of course, just means relaying back through the network
+   * empty.  Sending, of course, just means relaying back through the network
    * for this driver.
    */
 
@@ -944,7 +944,7 @@ static int lo_req_data(FAR struct radio_driver_s *netdev,
  *
  * Input Parameters:
  *   netdev     - The network device to be queried
- *   properties - Location where radio properities will be returned.
+ *   properties - Location where radio properties will be returned.
  *
  * Returned Value:
  *   Zero (OK) returned on success; a negated errno value is returned on

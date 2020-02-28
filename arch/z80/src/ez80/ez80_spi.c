@@ -42,13 +42,13 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 #include <arch/io.h>
 
@@ -56,13 +56,16 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "ez80f91_spi.h"
+
+#if defined(CONFIG_ARCH_CHIP_EZ80F91) || defined(CONFIG_ARCH_CHIP_EZ80F92)
+#  include "ez80f91_spi.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_EZ80F91
+#if defined(CONFIG_ARCH_CHIP_EZ80F91) || defined(CONFIG_ARCH_CHIP_EZ80F92)
 #  define GPIOB_SPI_SS      (1 << 2)  /* Pin 2: /SS (not used by driver) */
 #  define GPIOB_SPI_SCK     (1 << 3)  /* Pin 3: SCK */
 #  define GPIOB_SPI_MISO    (1 << 6)  /* Pin 6: MISO */
@@ -159,7 +162,7 @@ static sem_t g_exclsem = SEM_INITIALIZER(1);
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -614,7 +617,7 @@ FAR struct spi_dev_s *ez80_spibus_initialize(int port)
    * Select the alternate function for PB2-3,6-7:
    */
 
-#ifdef CONFIG_ARCH_CHIP_EZ80F91
+#if defined(CONFIG_ARCH_CHIP_EZ80F91) || defined(CONFIG_ARCH_CHIP_EZ80F92)
   regval  = inp(EZ80_PB_DDR);
   regval |= GPIOB_SPI_PINSET;
   outp(EZ80_PB_DDR, regval);

@@ -42,7 +42,6 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <semaphore.h>
 #include <string.h>
 #include <errno.h>
 #include <debug.h>
@@ -50,6 +49,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_I2C_DRIVER
 
@@ -340,7 +340,7 @@ static int i2cdrvr_unlink(FAR struct inode *inode)
       return OK;
     }
 
-  /* No... just mark the driver as unlinked and free the resouces when the
+  /* No... just mark the driver as unlinked and free the resources when the
    * last client closes their reference to the driver.
    */
 

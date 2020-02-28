@@ -310,7 +310,7 @@ a directory entry?
 
 One way to find the overhead per block is to look at the data structure as
 multiple layers of linked-lists. Each linked-list skips twice as many blocks
-as the previous linked-list. Another way of looking at it is that each 
+as the previous linked-list. Another way of looking at it is that each
 linked-list uses half as much storage per block as the previous linked-list.
 As we approach infinity, the number of pointers per block forms a geometric
 series. Solving this geometric series gives us an average of only 2 pointers
@@ -326,14 +326,14 @@ results in more pointers, and a larger word width results in larger pointers.
 
 ![maximum overhead](https://latex.codecogs.com/svg.latex?B%20%3D%20%5Cfrac%7Bw%7D%7B8%7D%5Cleft%5Clceil%5Clog_2%5Cleft%28%5Cfrac%7B2%5Ew%7D%7BB-2%5Cfrac%7Bw%7D%7B8%7D%7D%5Cright%29%5Cright%5Crceil)
 
-where:  
-B = block size in bytes  
-w = word width in bits  
+where:
+B = block size in bytes
+w = word width in bits
 
 Solving the equation for B gives us the minimum block size for various word
-widths:  
-32 bit CTZ skip-list = minimum block size of 104 bytes  
-64 bit CTZ skip-list = minimum block size of 448 bytes  
+widths:
+32 bit CTZ skip-list = minimum block size of 104 bytes
+64 bit CTZ skip-list = minimum block size of 448 bytes
 
 Since littlefs uses a 32 bit word size, we are limited to a minimum block
 size of 104 bytes. This is a perfectly reasonable minimum block size, with most
@@ -356,11 +356,11 @@ file size. We can write this equation as a summation:
 
 ![summation1](https://latex.codecogs.com/svg.latex?N%20%3D%20%5Csum_i%5En%5Cleft%5BB-%5Cfrac%7Bw%7D%7B8%7D%5Cleft%28%5Ctext%7Bctz%7D%28i%29&plus;1%5Cright%29%5Cright%5D)
 
-where:  
-B = block size in bytes  
-w = word width in bits  
-n = block index in skip-list  
-N = file size in bytes  
+where:
+B = block size in bytes
+w = word width in bits
+n = block index in skip-list
+N = file size in bytes
 
 And this works quite well, but is not trivial to calculate. This equation
 requires O(n) to compute, which brings the entire runtime of reading a file
@@ -380,9 +380,9 @@ unintuitive property:
 
 ![mindblown](https://latex.codecogs.com/svg.latex?%5Csum_i%5En%5Cleft%28%5Ctext%7Bctz%7D%28i%29&plus;1%5Cright%29%20%3D%202n-%5Ctext%7Bpopcount%7D%28n%29)
 
-where:  
-ctz(x) = the number of trailing bits that are 0 in x  
-popcount(x) = the number of bits that are 1 in x  
+where:
+ctz(x) = the number of trailing bits that are 0 in x
+popcount(x) = the number of bits that are 1 in x
 
 It's a bit bewildering that these two seemingly unrelated bitwise instructions
 are related by this property. But if we start to dissect this equation we can
@@ -516,9 +516,9 @@ However, this approach had several issues:
 
 Actually, to simplify, this approach had one massive glaring issue: complexity.
 
-> Complexity leads to fallibility.  
-> Fallibility leads to unmaintainability.  
-> Unmaintainability leads to suffering.  
+> Complexity leads to fallibility.
+> Fallibility leads to unmaintainability.
+> Unmaintainability leads to suffering.
 
 Or at least, complexity leads to increased code size, which is a problem
 for embedded systems.
@@ -1223,4 +1223,3 @@ So, to summarize:
    by a deorphan step that occurs on the first allocation after boot
 
 That's the little filesystem. Thanks for reading!
-

@@ -26,3 +26,11 @@ config K210_UART0
 	select K210_UART
 
 endmenu
+
+menu "K210 Others"
+
+config K210_WITH_QEMU
+	bool "qemu support"
+	default n
+
+endmenu

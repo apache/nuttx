@@ -105,7 +105,7 @@ static FAR void *g_irq_arg = NULL;
 
 static int gs2200m_irq_attach(xcpt_t handler, FAR void *arg)
 {
-  /* NOTE: Just save the hander and arg here */
+  /* NOTE: Just save the handler and arg here */
 
   g_irq_handler = handler;
   g_irq_arg = arg;
@@ -244,7 +244,7 @@ int stm32_gs2200m_initialize(FAR const char *devpath, int bus)
 
       _config_pin();
 
-      /* Initialize spi deivce */
+      /* Initialize spi device */
 
       spi = stm32_spibus_initialize(bus);
 

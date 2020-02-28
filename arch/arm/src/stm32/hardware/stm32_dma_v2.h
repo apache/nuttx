@@ -285,7 +285,7 @@
 #define DMA_STREAM_HTIF_BIT       (1 << 4)  /* Bit 4: Stream Half Transfer flag */
 #define DMA_STREAM_TCIF_BIT       (1 << 5)  /* Bit 5: Stream Transfer Complete flag */
 
-/* DMA interrupt status register and interrupt flag clear register field defintions */
+/* DMA interrupt status register and interrupt flag clear register field definitions */
 
 #define DMA_INT_STREAM0_SHIFT     (0)       /* Bits 0-5:   DMA Stream 0 interrupt */
 #define DMA_INT_STREAM0_MASK      (DMA_STREAM_MASK <<  DMA_INT_STREAM0_SHIFT)

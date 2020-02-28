@@ -144,17 +144,17 @@ static inline void nrf52_gpio_mode(nrf52_pinset_t cfgset,
   mode = cfgset & GPIO_MODE_MASK;
 
   regval = getreg32(offset);
-  regval &= NRF52_GPIO_CNF_PULL_MASK;
+  regval &= GPIO_CNF_PULL_MASK;
 
   if (mode == GPIO_PULLUP)
     {
-      regval &= NRF52_GPIO_CNF_PULL_MASK;
-      regval |= NRF52_GPIO_CNF_PULL_UP;
+      regval &= GPIO_CNF_PULL_MASK;
+      regval |= GPIO_CNF_PULL_UP;
     }
   else if (mode == GPIO_PULLDOWN)
     {
-      regval &= NRF52_GPIO_CNF_PULL_MASK;
-      regval |= NRF52_GPIO_CNF_PULL_DOWN;
+      regval &= GPIO_CNF_PULL_MASK;
+      regval |= GPIO_CNF_PULL_DOWN;
     }
 
   putreg32(regval, offset);
@@ -186,7 +186,7 @@ int nrf52_gpio_config(nrf52_pinset_t cfgset)
        * that pin.
        */
 
-      pin = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+      pin = GPIO_PIN_DECODE(cfgset);
 
       /* First, configure the port as a generic input so that we have a
        * known starting point and consistent behavior during the re-
@@ -206,16 +206,6 @@ int nrf52_gpio_config(nrf52_pinset_t cfgset)
         case GPIO_INPUT:   /* GPIO input pin */
           break;           /* Already configured */
 
-#ifdef CONFIG_NRF52_GPIOIRQ
-        case GPIO_INTFE:   /* GPIO interrupt falling edge */
-        case GPIO_INTRE:   /* GPIO interrupt rising edge */
-        case GPIO_INTBOTH: /* GPIO interrupt both edges */
-        case GPIO_INTLOW:  /* GPIO interrupt low level */
-        case GPIO_INTHIGH: /* GPIO interrupt high level */
-          nrf52_gpio_interrupt(cfgset);
-          break;
-#endif
-
         case GPIO_OUTPUT:  /* GPIO outpout pin */
           nrf52_gpio_output(cfgset, port, pin);
           break;
@@ -224,6 +214,36 @@ int nrf52_gpio_config(nrf52_pinset_t cfgset)
           return -EINVAL;
         }
     }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nrf52_gpio_unconfig
+ *
+ * Description:
+ *   Unconfigure a GPIO pin based on bit-encoded description of the pin.
+ *
+ ****************************************************************************/
+
+int nrf52_gpio_unconfig(nrf52_pinset_t cfgset)
+{
+  unsigned int pin;
+  unsigned int port;
+  uint32_t offset;
+
+  /* Get port and pin number */
+
+  pin  = GPIO_PIN_DECODE(cfgset);
+  port = GPIO_PORT_DECODE(cfgset);
+
+  /* Get address offset */
+
+  offset = nrf52_gpio_regget(port, NRF52_GPIO_PIN_CNF_OFFSET(pin));
+
+  /* Configure as input and disconnect input buffer */
+
+  putreg32(GPIO_CNF_INPUT, offset);
 
   return OK;
 }
@@ -244,8 +264,8 @@ void nrf52_gpio_write(nrf52_pinset_t pinset, bool value)
 
   /* Get port and pin number */
 
-  pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pin  = GPIO_PIN_DECODE(pinset);
+  port = GPIO_PORT_DECODE(pinset);
 
   /* Get register address */
 
@@ -280,8 +300,8 @@ bool nrf52_gpio_read(nrf52_pinset_t pinset)
 
   /* Get port and pin number */
 
-  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  pin  = GPIO_PIN_DECODE(pinset);
+  port = GPIO_PORT_DECODE(pinset);
 
   /* Get register address */
 

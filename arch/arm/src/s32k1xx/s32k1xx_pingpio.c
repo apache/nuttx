@@ -132,4 +132,3 @@ bool s32k1xx_gpioread(uint32_t pinset)
     }
   return ret;
 }
-

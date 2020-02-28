@@ -79,9 +79,6 @@ static int lsm303agr_readreg8(FAR struct lsm303agr_dev_s *priv,
                               uint8_t regaddr, FAR uint8_t * regval);
 static int lsm303agr_writereg8(FAR struct lsm303agr_dev_s *priv,
                                uint8_t regaddr, uint8_t regval);
-static int lsm303agr_modifyreg8(FAR struct lsm303agr_dev_s *priv,
-                                uint8_t regaddr,
-                                uint8_t clearbits, uint8_t setbits);
 
 /* Other Helpers */
 
@@ -95,7 +92,7 @@ static int lsm303agr_sensor_config(FAR struct lsm303agr_dev_s *priv);
 static int lsm303agr_sensor_start(FAR struct lsm303agr_dev_s *priv);
 static int lsm303agr_sensor_stop(FAR struct lsm303agr_dev_s *priv);
 static int lsm303agr_sensor_read(FAR struct lsm303agr_dev_s *priv,
-                                 FAR struct lsm303agr_sensor_data_s *sensor_data);
+                                 FAR struct lsm303agr_sensor_data_s *sdata);
 static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
                               uint32_t mode);
 
@@ -264,45 +261,6 @@ static int lsm303agr_writereg8(FAR struct lsm303agr_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: lsm303agr_modifyreg8
- *
- * Description:
- *   Modify an 8-bit register.
- *
- ****************************************************************************/
-
-static int lsm303agr_modifyreg8(FAR struct lsm303agr_dev_s *priv,
-                                uint8_t regaddr,
-                                uint8_t clearbits, uint8_t setbits)
-{
-  int ret;
-  uint8_t regval;
-
-  /* Sanity check */
-
-  DEBUGASSERT(priv != NULL);
-
-  ret = lsm303agr_readreg8(priv, regaddr, &regval);
-  if (ret < 0)
-    {
-      snerr("ERROR: lsm303agr_readreg8 failed: %d\n", ret);
-      return ret;
-    }
-
-  regval &= ~clearbits;
-  regval |= setbits;
-
-  ret = lsm303agr_writereg8(priv, regaddr, regval);
-  if (ret < 0)
-    {
-      snerr("ERROR: lsm303agr_writereg8 failed: %d\n", ret);
-      return ret;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
  * Name: lsm303agr_find_minimum
  *
  * Description:
@@ -424,8 +382,6 @@ static int lsm303agr_sensor_start(FAR struct lsm303agr_dev_s *priv)
 {
   /* readreg8 is not necessary to modify. Clearbits can be 0x00 or 0xff */
 
-  uint8_t value;
-
   /* Enable the accelerometer */
 
   /* Reset values */
@@ -485,7 +441,8 @@ static int lsm303agr_sensor_stop(FAR struct lsm303agr_dev_s *priv)
  *
  ****************************************************************************/
 
-static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
+static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
+                              uint32_t mode)
 {
   int samples = 5;
   int i;
@@ -513,13 +470,6 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
   int16_t OUTY_ST[samples];
   int16_t OUTZ_ST[samples];
 
-  int16_t AVR_OUTX_NOST[samples];
-  int16_t AVR_OUTY_NOST[samples];
-  int16_t AVR_OUTZ_NOST[samples];
-  int16_t AVR_OUTX_ST[samples];
-  int16_t AVR_OUTY_ST[samples];
-  int16_t AVR_OUTZ_ST[samples];
-
   int16_t avr_x   = 0;
   int16_t avr_y   = 0;
   int16_t avr_z   = 0;
@@ -540,11 +490,6 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
   int16_t max_xst = 0;
   int16_t max_yst = 0;
   int16_t max_zst = 0;
-
-  int16_t ltemp;
-  int16_t htemp;
-  int16_t tempi;
-  int16_t temp = 0;
 
   int16_t raw_xst = 0;
   int16_t raw_yst = 0;
@@ -606,14 +551,26 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
 
   /* Read OUT registers Gyro is starting at 22h and Accelero at 28h */
 
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_X_L_A + registershift, &lox);
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_X_H_A + registershift, &hix);
+  lsm303agr_readreg8(priv,
+                     LSM303AGR_OUT_X_L_A + registershift,
+                     (FAR uint8_t *)&lox);
+  lsm303agr_readreg8(priv,
+                     LSM303AGR_OUT_X_H_A + registershift,
+                     (FAR uint8_t *)&hix);
 
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_Y_L_A + registershift, &loy);
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_Y_H_A + registershift, &hiy);
+  lsm303agr_readreg8(priv,
+                     LSM303AGR_OUT_Y_L_A + registershift,
+                     (FAR uint8_t *)&loy);
+  lsm303agr_readreg8(priv,
+                     LSM303AGR_OUT_Y_H_A + registershift,
+                     (FAR uint8_t *)&hiy);
 
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_Z_L_A + registershift, &loz);
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_Z_H_A + registershift, &hiz);
+  lsm303agr_readreg8(priv,
+                     LSM303AGR_OUT_Z_L_A + registershift,
+                     (FAR uint8_t *)&loz);
+  lsm303agr_readreg8(priv,
+                     LSM303AGR_OUT_Z_H_A + registershift,
+                     (FAR uint8_t *)&hiz);
 
   /* check XLDA 5 times */
 
@@ -634,16 +591,28 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
        * http://ozzmaker.com/accelerometer-to-g/
        */
 
-      lsm303agr_readreg8(priv, LSM303AGR_OUT_X_L_A + registershift, &lox);
-      lsm303agr_readreg8(priv, LSM303AGR_OUT_X_H_A + registershift, &hix);
+      lsm303agr_readreg8(priv,
+                         LSM303AGR_OUT_X_L_A + registershift,
+                         (FAR uint8_t *)&lox);
+      lsm303agr_readreg8(priv,
+                         LSM303AGR_OUT_X_H_A + registershift,
+                         (FAR uint8_t *)&hix);
       raw_x = (int16_t) (((uint16_t) hix << 8U) | (uint16_t) lox);
 
-      lsm303agr_readreg8(priv, LSM303AGR_OUT_Y_L_A + registershift, &loy);
-      lsm303agr_readreg8(priv, LSM303AGR_OUT_Y_H_A + registershift, &hiy);
+      lsm303agr_readreg8(priv,
+                         LSM303AGR_OUT_Y_L_A + registershift,
+                         (FAR uint8_t *)&loy);
+      lsm303agr_readreg8(priv,
+                         LSM303AGR_OUT_Y_H_A + registershift,
+                         (FAR uint8_t *)&hiy);
       raw_y = (int16_t) (((uint16_t) hiy << 8U) | (uint16_t) loy);
 
-      lsm303agr_readreg8(priv, LSM303AGR_OUT_Z_L_A + registershift, &loz);
-      lsm303agr_readreg8(priv, LSM303AGR_OUT_Z_H_A + registershift, &hiz);
+      lsm303agr_readreg8(priv,
+                         LSM303AGR_OUT_Z_L_A + registershift,
+                         (FAR uint8_t *)&loz);
+      lsm303agr_readreg8(priv,
+                         LSM303AGR_OUT_Z_H_A + registershift,
+                         (FAR uint8_t *)&hiz);
       raw_z = (int16_t) (((uint16_t) hiz << 8U) | (uint16_t) loz);
 
       /* selftest only uses raw values */
@@ -685,14 +654,26 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
 
   /* Now do all the ST values */
 
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_X_L_A + registershift, &loxst);
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_X_H_A + registershift, &hixst);
+  lsm303agr_readreg8(priv,
+                     LSM303AGR_OUT_X_L_A + registershift,
+                     (FAR uint8_t *)&loxst);
+  lsm303agr_readreg8(priv,
+                     LSM303AGR_OUT_X_H_A + registershift,
+                     (FAR uint8_t *)&hixst);
 
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_Y_L_A + registershift, &loyst);
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_Y_H_A + registershift, &hiyst);
+  lsm303agr_readreg8(priv,
+                     LSM303AGR_OUT_Y_L_A + registershift,
+                     (FAR uint8_t *)&loyst);
+  lsm303agr_readreg8(priv,
+                     LSM303AGR_OUT_Y_H_A + registershift,
+                     (FAR uint8_t *)&hiyst);
 
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_Z_L_A + registershift, &lozst);
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_Z_H_A + registershift, &hizst);
+  lsm303agr_readreg8(priv,
+                     LSM303AGR_OUT_Z_L_A + registershift,
+                     (FAR uint8_t *)&lozst);
+  lsm303agr_readreg8(priv,
+                     LSM303AGR_OUT_Z_H_A + registershift,
+                     (FAR uint8_t *)&hizst);
 
   for (i2 = 0; i2 < samples; i2++)
     {
@@ -709,16 +690,28 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
 
       nxsig_usleep(100000);    /* 100ms */
 
-      lsm303agr_readreg8(priv, LSM303AGR_OUT_X_L_A + registershift, &loxst);
-      lsm303agr_readreg8(priv, LSM303AGR_OUT_X_H_A + registershift, &hixst);
+      lsm303agr_readreg8(priv,
+                         LSM303AGR_OUT_X_L_A + registershift,
+                         (FAR uint8_t *)&loxst);
+      lsm303agr_readreg8(priv,
+                         LSM303AGR_OUT_X_H_A + registershift,
+                         (FAR uint8_t *)&hixst);
       raw_xst = (int16_t) (((uint16_t) hixst << 8U) | (uint16_t) loxst);
 
-      lsm303agr_readreg8(priv, LSM303AGR_OUT_Y_L_A + registershift, &loyst);
-      lsm303agr_readreg8(priv, LSM303AGR_OUT_Y_H_A + registershift, &hiyst);
+      lsm303agr_readreg8(priv,
+                         LSM303AGR_OUT_Y_L_A + registershift,
+                         (FAR uint8_t *)&loyst);
+      lsm303agr_readreg8(priv,
+                         LSM303AGR_OUT_Y_H_A + registershift,
+                         (FAR uint8_t *)&hiyst);
       raw_yst = (int16_t) (((uint16_t) hiyst << 8U) | (uint16_t) loyst);
 
-      lsm303agr_readreg8(priv, LSM303AGR_OUT_Z_L_A + registershift, &lozst);
-      lsm303agr_readreg8(priv, LSM303AGR_OUT_Z_H_A + registershift, &hizst);
+      lsm303agr_readreg8(priv,
+                         LSM303AGR_OUT_Z_L_A + registershift,
+                         (FAR uint8_t *)&lozst);
+      lsm303agr_readreg8(priv,
+                         LSM303AGR_OUT_Z_H_A + registershift,
+                         (FAR uint8_t *)&hizst);
       raw_zst = (int16_t) (((uint16_t) hizst << 8U) | (uint16_t) lozst);
 
       /* Selftest only uses raw values */
@@ -876,42 +869,18 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv, uint32_t mode)
  ****************************************************************************/
 
 static int lsm303agr_sensor_read(FAR struct lsm303agr_dev_s *priv,
-                                 FAR struct lsm303agr_sensor_data_s *sensor_data)
+                                 FAR struct lsm303agr_sensor_data_s *sdata)
 {
-  int16_t lo    = 0;
-  int16_t lox   = 0;
   int16_t loxg  = 0;
-  int16_t hi    = 0;
-  int16_t hix   = 0;
   int16_t hixg  = 0;
-  int16_t loy   = 0;
   int16_t loyg  = 0;
-  int16_t hiy   = 0;
   int16_t hiyg  = 0;
-  int16_t loz   = 0;
   int16_t lozg  = 0;
-  int16_t hiz   = 0;
   int16_t hizg  = 0;
 
   int16_t templ = 0;
   int16_t temph = 0;
 
-  uint8_t status1 = 0;
-  uint8_t status2 = 0;
-  uint8_t status3 = 0;
-  uint8_t status4 = 0;
-  uint8_t value   = 0;
-
-  uint8_t tstamp0 = 0;
-  uint8_t tstamp1 = 0;
-  uint8_t tstamp2 = 0;
-  uint8_t tstamp3 = 0;
-
-  uint32_t ts = 0;
-
-  int16_t x_val = 0;
-  int16_t y_val = 0;
-  int16_t z_val = 0;
   int16_t tempi = 0;
   int16_t temp_val = 0;
 
@@ -921,19 +890,19 @@ static int lsm303agr_sensor_read(FAR struct lsm303agr_dev_s *priv,
 
   /* Magneto */
 
-  lsm303agr_readreg8(priv, LSM303AGR_OUTX_L_REG_M, &loxg);
-  lsm303agr_readreg8(priv, LSM303AGR_OUTX_H_REG_M, &hixg);
+  lsm303agr_readreg8(priv, LSM303AGR_OUTX_L_REG_M, (FAR uint8_t *)&loxg);
+  lsm303agr_readreg8(priv, LSM303AGR_OUTX_H_REG_M, (FAR uint8_t *)&hixg);
 
-  lsm303agr_readreg8(priv, LSM303AGR_OUTY_L_REG_M, &loyg);
-  lsm303agr_readreg8(priv, LSM303AGR_OUTY_H_REG_M, &hiyg);
+  lsm303agr_readreg8(priv, LSM303AGR_OUTY_L_REG_M, (FAR uint8_t *)&loyg);
+  lsm303agr_readreg8(priv, LSM303AGR_OUTY_H_REG_M, (FAR uint8_t *)&hiyg);
 
-  lsm303agr_readreg8(priv, LSM303AGR_OUTZ_L_REG_M, &lozg);
-  lsm303agr_readreg8(priv, LSM303AGR_OUTZ_H_REG_M, &hizg);
+  lsm303agr_readreg8(priv, LSM303AGR_OUTZ_L_REG_M, (FAR uint8_t *)&lozg);
+  lsm303agr_readreg8(priv, LSM303AGR_OUTZ_H_REG_M, (FAR uint8_t *)&hizg);
 
   /* Temperature */
 
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_TEMP_L_A, &templ);
-  lsm303agr_readreg8(priv, LSM303AGR_OUT_TEMP_H_A, &temph);
+  lsm303agr_readreg8(priv, LSM303AGR_OUT_TEMP_L_A, (FAR uint8_t *)&templ);
+  lsm303agr_readreg8(priv, LSM303AGR_OUT_TEMP_H_A, (FAR uint8_t *)&temph);
 
   tempi = (int16_t) ((((int16_t) temph << 8) | (int16_t) templ));
 
@@ -941,19 +910,22 @@ static int lsm303agr_sensor_read(FAR struct lsm303agr_dev_s *priv,
 
   sninfo("Data 16-bit TEMP--->: %d Celsius\n", temp_val);
 
-  sensor_data->temperature = temp_val;
+  sdata->temperature = temp_val;
 
   x_valg = (int16_t) (((hixg) << 8) | loxg);
   y_valg = (int16_t) (((hiyg) << 8) | loyg);
   z_valg = (int16_t) (((hizg) << 8) | lozg);
 
-  sninfo("Data 16-bit M_X--->: %d mguass\n", (short)(x_valg * g_magnetofactor));
-  sninfo("Data 16-bit M_Y--->: %d mguass\n", (short)(y_valg * g_magnetofactor));
-  sninfo("Data 16-bit M_Z--->: %d mguass\n", (short)(z_valg * g_magnetofactor));
+  sninfo("Data 16-bit M_X--->: %d mguass\n",
+         (short)(x_valg * g_magnetofactor));
+  sninfo("Data 16-bit M_Y--->: %d mguass\n",
+         (short)(y_valg * g_magnetofactor));
+  sninfo("Data 16-bit M_Z--->: %d mguass\n",
+         (short)(z_valg * g_magnetofactor));
 
-  sensor_data->m_x_data = x_valg;
-  sensor_data->m_y_data = y_valg;
-  sensor_data->m_z_data = z_valg;
+  sdata->m_x_data = x_valg;
+  sdata->m_y_data = y_valg;
+  sdata->m_z_data = z_valg;
 
   return OK;
 }
@@ -1126,7 +1098,8 @@ static ssize_t lsm303agr_write(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static int lsm303agr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int lsm303agr_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg)
 {
   FAR struct inode *inode;
   FAR struct lsm303agr_dev_s *priv;
@@ -1148,30 +1121,43 @@ static int lsm303agr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       /* Start converting. Arg: None. */
 
-    case SNIOC_START:
-      ret = priv->ops->start(priv);
-      break;
+      case SNIOC_START:
+        {
+          ret = priv->ops->start(priv);
+          break;
+        }
 
       /* Stop converting. Arg: None. */
 
-    case SNIOC_STOP:
-      ret = priv->ops->stop(priv);
-      break;
+      case SNIOC_STOP:
+        {
+          ret = priv->ops->stop(priv);
+          break;
+        }
 
-    case SNIOC_LSM303AGRSENSORREAD:
-      ret = priv->ops->sensor_read(priv, (FAR struct lsm303agr_sensor_data_s *) arg);
-      break;
+      case SNIOC_LSM303AGRSENSORREAD:
+        {
+          FAR struct lsm303agr_sensor_data_s *d =
+            (FAR struct lsm303agr_sensor_data_s *)arg;
 
-    case SNIOC_START_SELFTEST:
-      ret = priv->ops->selftest(priv, (uint32_t) arg);
-      break;
+          ret = priv->ops->sensor_read(priv, d);
+          break;
+        }
+
+      case SNIOC_START_SELFTEST:
+        {
+          ret = priv->ops->selftest(priv, (uint32_t)arg);
+          break;
+        }
 
       /* Unrecognized commands */
 
-    default:
-      snerr("ERROR: Unrecognized cmd: %d arg: %lu\n", cmd, arg);
-      ret = -ENOTTY;
-      break;
+      default:
+        {
+          snerr("ERROR: Unrecognized cmd: %d arg: %lu\n", cmd, arg);
+          ret = -ENOTTY;
+          break;
+        }
     }
 
   return ret;
@@ -1184,8 +1170,8 @@ static int lsm303agr_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *   Register the LSM303AGR accelerometer, gyroscope device as 'devpath'.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register, e.g., "/dev/lsm303agr0",
- *             "/dev/gyro0" or "/dev/mag0".
+ *   devpath - The full path to the driver to register, e.g.
+ *             "/dev/lsm303agr0", "/dev/gyro0" or "/dev/mag0".
  *   i2c     - An I2C driver instance.
  *   addr    - The I2C address of the LSM303AGR accelerometer, gyroscope or
  *             magnetometer.
@@ -1263,7 +1249,8 @@ static int lsm303agr_register(FAR const char *devpath,
  *   Register the LSM303AGR accelerometer character device as 'devpath'.
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register, e.g., "/dev/lsm303agr0".
+ *   devpath - The full path to the driver to register,
+ *             e.g. "/dev/lsm303agr0".
  *   i2c     - An I2C driver instance.
  *   addr    - The I2C address of the LSM303AGR accelerometer.
  *
@@ -1277,7 +1264,8 @@ int lsm303agr_sensor_register(FAR const char *devpath,
 {
   struct lsm303agr_sensor_data_s sensor_data;
 
-  DEBUGASSERT(addr == LSM303AGRACCELERO_ADDR || addr == LSM303AGRMAGNETO_ADDR);
+  DEBUGASSERT(addr == LSM303AGRACCELERO_ADDR ||
+              addr == LSM303AGRMAGNETO_ADDR);
 
   sninfo("Trying to register accel\n");
 
@@ -1285,4 +1273,4 @@ int lsm303agr_sensor_register(FAR const char *devpath,
                             LSM303AGR_OUTX_L_A_SHIFT, sensor_data);
 }
 
-#endif  /* CONFIG_I2C && CONFIG_SENSORS_LSM303AGR */
+#endif /* CONFIG_I2C && CONFIG_SENSORS_LSM303AGR */

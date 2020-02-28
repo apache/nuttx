@@ -46,7 +46,6 @@
 #include <queue.h>
 #include <debug.h>
 
-#include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
@@ -234,6 +233,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
             {
               /* Setup the client socket structure */
 
+              newsock->s_crefs  = 1;
               newsock->s_domain = psock->s_domain;
               newsock->s_type   = SOCK_STREAM;
               newsock->s_sockif = psock->s_sockif;

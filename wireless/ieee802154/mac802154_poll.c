@@ -142,7 +142,7 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
                               txdesc);
     }
 
-  /* Save a copy of the destination addressing infromation into the tx descriptor.
+  /* Save a copy of the destination addressing information into the tx descriptor.
    * We only do this for commands to help with handling their progession.
    */
 

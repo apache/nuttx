@@ -1,5 +1,5 @@
 /***************************************************************************
- * arch/arm/src/cxd56xx/cxd56_audio_aca.h
+ * boards/arm/cxd56xx/drivers/audio/cxd56_audio_aca.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
  *
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_ACA_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_ACA_H
+#ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_ACA_H
+#define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_ACA_H
 
 /***************************************************************************
  * Included Files
@@ -80,4 +80,4 @@ CXD56_AUDIO_ECODE cxd56_audio_aca_disable_output(void);
 CXD56_AUDIO_ECODE cxd56_audio_aca_set_micgain(FAR cxd56_audio_mic_gain_t *gain);
 CXD56_AUDIO_ECODE cxd56_audio_aca_notify_micbootdone(void);
 
-#endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_AUDIO_ACA_H */
+#endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_ACA_H */

@@ -105,7 +105,7 @@ struct memlcd_priv_s
  * Input Parameters:
  *
  *   spi - A reference to the SPI driver instance.
- *   devno - A value in the range of 0 throuh CONFIG_MEMLCD_NINTERFACES-1.
+ *   devno - A value in the range of 0 through CONFIG_MEMLCD_NINTERFACES-1.
  *   This allows support for multiple devices.
  *   memlcd_priv_s - Board specific structure
  *

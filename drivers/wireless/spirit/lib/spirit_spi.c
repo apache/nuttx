@@ -310,7 +310,7 @@ int spirit_reg_read(FAR struct spirit_library_s *spirit, uint8_t regaddr,
  *   Read single or multiple SPIRIT1 register.
  *
  * Input Parameters:
- *   spirit  - Reference to an instance of the driver state stucture.
+ *   spirit  - Reference to an instance of the driver state structure.
  *   regaddr - Base register's address to write
  *   buffer  - Pointer to the buffer of register values to write
  *   buflen  - Number of registers values to be written.
@@ -364,10 +364,10 @@ int spirit_reg_write(FAR struct spirit_library_s *spirit, uint8_t regaddr,
  *   Perform atomic read/modify/write on a single SPIRIT1 register.
  *
  * Input Parameters:
- *   spirit  - Reference to an instance of the driver state stucture.
+ *   spirit  - Reference to an instance of the driver state structure.
  *   regaddr - Base register's address to write
  *   clrbits - Bits to clear in the register
- *   setbits - Bits to set in the regiser
+ *   setbits - Bits to set in the register
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  A negated errno value is returned on
@@ -443,7 +443,7 @@ int spirit_reg_modify(FAR struct spirit_library_s *spirit, uint8_t regaddr,
  *   Send a command
  *
  * Input Parameters:
- *   spirit - Reference to an instance of the driver state stucture.
+ *   spirit - Reference to an instance of the driver state structure.
  *   cmd    - Command code to be sent
  *
  * Returned Value:
@@ -490,7 +490,7 @@ int spirit_command(FAR struct spirit_library_s *spirit, uint8_t cmd)
  *   Read data from RX FIFO
  *
  * Input Parameters:
- *   spirit - Reference to an instance of the driver state stucture.
+ *   spirit - Reference to an instance of the driver state structure.
  *   buffer - Pointer to the buffer of data values to write
  *   buflen - Number of bytes to be written
  *
@@ -544,7 +544,7 @@ int spirit_fifo_read(FAR struct spirit_library_s *spirit, FAR uint8_t *buffer,
  *   Write data into TX FIFO.
  *
  * Input Parameters:
- *   spirit  - Reference to an instance of the driver state stucture.
+ *   spirit  - Reference to an instance of the driver state structure.
  *   buffer  - Pointer to the buffer of data values to write
  *   buflen  - Number of data values to be written.
  *
@@ -598,7 +598,7 @@ int spirit_fifo_write(FAR struct spirit_library_s *spirit,
  *   register of SPIRIT.
  *
  * Input Parameters:
- *   spirit - Reference to an instance of the driver state stucture.
+ *   spirit - Reference to an instance of the driver state structure.
  *
  * Returned Value:
  *   Zero (OK) is returned on success.  A negated errno value is returned on

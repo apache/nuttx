@@ -558,7 +558,7 @@ int board_lcd_initialize(void)
  *
  * Description:
  *   Return a a reference to the LCD object for the specified LCD.  This allows
- *   suport for multiple LCD devices.
+ *   support for multiple LCD devices.
  *
  ****************************************************************************/
 
@@ -573,7 +573,7 @@ FAR struct lcd_dev_s *board_lcd_getdev(int lcddev)
  * Name:  board_lcd_uninitialize
  *
  * Description:
- *   Unitialize the LCD support
+ *   Uninitialize the LCD support
  *
  ****************************************************************************/
 
