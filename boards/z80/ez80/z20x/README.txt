@@ -95,6 +95,13 @@ Memory Constaints
   you enable assertions, debug outputs, or even debug symbols.  It is very
   unlikely that the nsh_flash configuration will fit into FLASH at all!
 
+  I believe that there is some issue with the optimization CFLAGS used with
+  the ZDS-II compiler.  The size of the FLASH images that are generated are
+  larger than you would see with, say, an equivalent Cortex-M compilation.
+  I reviewed the individual object files.  There is not one thing that is
+  causing the large size.  Rather, the ZDS-II compiler is simply generating
+  larger CODE sections in the object files.
+
 Serial Console
 ==============
 
@@ -212,12 +219,13 @@ Configuration Subdirectories
     information see:  apps/system/nsh/README.txt and
     Documentation/NuttShell.html.
 
-    UNVERIFIED!  I doubt that the nsh_flash program will fit into the
-    smaller FLASH memory of the eZ80F92 part.
-
     NOTES:
 
-    1. The two configurations different only in that one builds for
+    1. UNVERIFIED!  I doubt that the nsh_flash program will fit into the
+       smaller FLASH memory of the eZ80F92 part.  See discusssion under
+       "Memory Constraints" above.
+
+    2. The two configurations different only in that one builds for
        execution entirely from FLASH and the other for execution entirely
        from RAM.  A bootloader of some kind is required to support such
        execution from RAM!  This difference is reflected in a single
@@ -237,7 +245,7 @@ Configuration Subdirectories
        Why execute from SRAM at all?  Because you will get MUCH better
        performance because of the zero wait state SRAM implementation.
 
-    2. The eZ80 RTC, the procFS file system, and SD card support in included.
+    3. The eZ80 RTC, the procFS file system, and SD card support in included.
        The procFS file system will be auto-mounted at /proc when the board
        boots.
 
@@ -304,7 +312,7 @@ Configuration Subdirectories
        NOTE:  The is no card detect signal so the microSD card must be
        placed in the card slot before the system is started.
 
-    3. Debugging the RAM version
+    4. Debugging the RAM version
 
        You can debug the all RAM version using ZDS-II as follows:
 
@@ -315,7 +323,7 @@ Configuration Subdirectories
        d. Single step a few times to make sure things look good, then
        e. Go
 
-    4. Optimizations:
+    5. Optimizations:
 
        - The stack sizes have not been tuned and, hence, are probably too
          large.
@@ -331,3 +339,13 @@ Configuration Subdirectories
     SRAM.
 
     The boot loader source is located at boards/z20x/src/sd_main.c.
+
+    NOTES:
+
+    1. This version of the eZ80 bootloader is not usable in its current
+       state.  That is because the the eZ80F92 Interrupt Controller is
+       not as robust as the eZ80F91 Interrupt Controller.  A consequence
+       is that the interrupt vectors must always reside within the first
+       64Kb of FLASH memory.  It will not be possible to run programs in
+       SRAM *unless* some mechanism is developed to redirect interrupts
+       from ROM and into loaded SRAM logic.
