@@ -1,4 +1,4 @@
-/***************************************************************************
+/********************************************************************************************
  * arch/arm/src/imxrt/hardware/imxrt_usbotg.h
  *
  *   Copyright (C) 2009-2011, 2019 Gregory Nutt. All rights reserved.
@@ -32,24 +32,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ***************************************************************************/
+ ********************************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USBOTG_H
 #define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USBOTG_H
 
-/***************************************************************************
+/********************************************************************************************
  * Included Files
- ***************************************************************************/
+ ********************************************************************************************/
 
 #include <nuttx/config.h>
 
-/***************************************************************************
+/********************************************************************************************
  * Pre-processor Definitions
- ***************************************************************************/
+ ********************************************************************************************/
 
 #define IMXRT_EHCI_NRHPORT                 1     /* There is only a single root hub port */
 
-/* USBOTG register offsets (with respect to IMXRT_USB_BASE) *************************************/
+/* USBOTG register offsets (with respect to IMXRT_USB_BASE) *********************************/
 
                                                  /* 0x000 - 0x0ff: Reserved */
 
@@ -135,7 +135,7 @@
 #define IMXRT_USBNC_USB_OTG1_CTRL_OFFSET        0x0800 /* OTG1 Control Register */
 #define IMXRT_USBNC_USB_OTG1_PHY_CTRL_0_OFFSET  0x0818 /* OTG1 Phy Control Register */
 
-/* USBOTG register (virtual) addresses **********************************************************/
+/* USBOTG register (virtual) addresses ******************************************************/
 
 /* Device/host capability registers */
 
@@ -217,7 +217,7 @@
 #define IMXRT_USBNC_USB_OTG1_CTRL            (IMXRT_USB_BASE + IMXRT_USBNC_USB_OTG1_CTRL_OFFSET)
 #define IMXRT_USBNC_USB_OTG1_PHY_CTRL_0      (IMXRT_USB_BASE + IMXRT_USBNC_USB_OTG1_PHY_CTRL_0_OFFSET)
 
-/* USBOTG register bit definitions ******************************************/
+/* USBOTG register bit definitions **********************************************************/
 
 /* Device/host capability registers */
 
@@ -729,17 +729,5 @@
 #define USBNC_WKUP_DPDM_EN                   (1 << 29) /* Bit 29: Wakeup on DPDM change enable */
                                                        /* Bit 30: Reserved */
 #define USBNC_WIR                            (1 << 31) /* Bit 31: Wake up interrupt request */
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USBOTG_H */
