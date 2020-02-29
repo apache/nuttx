@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_ethernet.h
+ * arch/arm/src/stm32h7/stm32_wdg.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2015, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H
-#define __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_WDG_H
+#define __ARCH_ARM_SRC_STM32_STM32_WDG_H
 
 /****************************************************************************
  * Included Files
@@ -42,14 +42,16 @@
 
 #include <nuttx/config.h>
 
-#include "hardware/stm32_ethernet.h"
+#include "chip.h"
+#include "hardware/stm32_wdg.h"
 
-#if STM32H7_NETHERNET > 0
-#ifndef __ASSEMBLY__
+#ifdef CONFIG_WATCHDOG
 
 /****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -61,52 +63,50 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Function: stm32_ethinitialize
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_iwdginitialize
  *
  * Description:
- *   Initialize the Ethernet driver for one interface.  If the STM32 chip
- *   supports multiple Ethernet controllers, then board specific logic must
- *   implement up_netinitialize() and call this function to initialize the
- *   desired interfaces.
+ *   Initialize the IWDG watchdog time.  The watchdog timer is initialized
+ *   and registers as 'devpath'.  The initial state of the watchdog time is
+ *   disabled.
  *
- * Parameters:
- *   intf - In the case where there are multiple EMACs, this value identifies
- *          which EMAC is to be initialized.
+ * Input Parameters:
+ *   devpath - The full path to the watchdog.  This should be of the form
+ *     /dev/watchdog0
+ *   lsifreq - The calibrated LSI clock frequency
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
+ *   None
  *
  ****************************************************************************/
 
-#if STM32H7_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
-int stm32_ethinitialize(int intf);
+#ifdef CONFIG_STM32H7_IWDG
+void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq);
 #endif
 
 /****************************************************************************
- * Function: stm32_phy_boardinitialize
+ * Name: stm32_wwdginitialize
  *
  * Description:
- *   Some boards require specialized initialization of the PHY before it can
- *   be used.  This may include such things as configuring GPIOs, resetting
- *   the PHY, etc.  If CONFIG_STM32H7_PHYINIT is defined in the configuration
- *   then the board specific logic must provide stm32_phyinitialize();  The
- *   STM32 Ethernet driver will call this function one time before it first
- *   uses the PHY.
+ *   Initialize the WWDG watchdog time.  The watchdog timer is initialized
+ *   and registers as 'devpath'.  The initial state of the watchdog time is
+ *   disabled.
  *
- * Parameters:
- *   intf - Always zero for now.
+ * Input Parameters:
+ *   devpath - The full path to the watchdog.  This should be of the form
+ *     /dev/watchdog0
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
+ *   None
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_PHYINIT
-int stm32_phy_boardinitialize(int intf);
+#ifdef CONFIG_STM32H7_WWDG
+void stm32_wwdginitialize(FAR const char *devpath);
 #endif
 
 #undef EXTERN
@@ -115,5 +115,5 @@ int stm32_phy_boardinitialize(int intf);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* STM32H7_NETHERNET > 0 */
-#endif /* __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H */
+#endif /* CONFIG_WATCHDOG */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_WDG_H */

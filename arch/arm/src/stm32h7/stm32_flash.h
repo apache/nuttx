@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_ethernet.h
+ * arch/arm/src/stm32h7/stm32_flash.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2020 Gregory Nutt. All rights reserved.
+ *   Author: Joshua Lange <jlange@2g-eng.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H
-#define __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H
+#ifndef __ARCH_ARM_SRC_STM32H7_STM32_FLASH_H
+#define __ARCH_ARM_SRC_STM32H7_STM32_FLASH_H
 
 /****************************************************************************
  * Included Files
@@ -42,14 +42,14 @@
 
 #include <nuttx/config.h>
 
-#include "hardware/stm32_ethernet.h"
-
-#if STM32H7_NETHERNET > 0
-#ifndef __ASSEMBLY__
+#include "chip.h"
+#include "hardware/stm32_flash.h"
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -61,53 +61,35 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Function: stm32_ethinitialize
+ * Name: stm32h7_flash_getopt
  *
  * Description:
- *   Initialize the Ethernet driver for one interface.  If the STM32 chip
- *   supports multiple Ethernet controllers, then board specific logic must
- *   implement up_netinitialize() and call this function to initialize the
- *   desired interfaces.
- *
- * Parameters:
- *   intf - In the case where there are multiple EMACs, this value identifies
- *          which EMAC is to be initialized.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
+ *   Returns the current flash option bytes from the FLASH_OPTSR_CR register.
  *
  ****************************************************************************/
 
-#if STM32H7_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
-int stm32_ethinitialize(int intf);
-#endif
+uint32_t stm32h7_flash_getopt(void);
 
 /****************************************************************************
- * Function: stm32_phy_boardinitialize
+ * Name: stm32h7_flash_optmodify
  *
  * Description:
- *   Some boards require specialized initialization of the PHY before it can
- *   be used.  This may include such things as configuring GPIOs, resetting
- *   the PHY, etc.  If CONFIG_STM32H7_PHYINIT is defined in the configuration
- *   then the board specific logic must provide stm32_phyinitialize();  The
- *   STM32 Ethernet driver will call this function one time before it first
- *   uses the PHY.
- *
- * Parameters:
- *   intf - Always zero for now.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
+ *   Modifies the current flash option bytes, given bits to set and clear.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_PHYINIT
-int stm32_phy_boardinitialize(int intf);
-#endif
+void stm32h7_flash_optmodify(uint32_t clear, uint32_t set);
+
+/****************************************************************************
+ * Name: stm32h7_flash_swapbanks
+ *
+ * Description:
+ *   Swaps banks 1 and 2 in the processor's memory map.  Takes effect
+ *   the next time the system is reset.
+ *
+ ****************************************************************************/
+
+void stm32h7_flash_swapbanks(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -115,5 +97,4 @@ int stm32_phy_boardinitialize(int intf);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* STM32H7_NETHERNET > 0 */
-#endif /* __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H */
+#endif /* __ARCH_ARM_SRC_STM32H7_STM32_FLASH_H */

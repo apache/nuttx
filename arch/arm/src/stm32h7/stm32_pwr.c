@@ -50,6 +50,7 @@
 #include "barriers.h"
 #include "up_arch.h"
 #include "stm32_pwr.h"
+#include "stm32_gpio.h"
 
 #if defined(CONFIG_STM32H7_PWR)
 
@@ -269,12 +270,13 @@ void stm32_pwr_disablepvd(void)
  * Description:
  *   Enables the Backup regulator, the Backup regulator (used to maintain backup
  *   SRAM content in Standby and VBAT modes) is enabled. If BRE is reset, the backup
- *   regulator is switched off. The backup SRAM can still be used but its content will
- *   be lost in the Standby and VBAT modes. Once set, the application must wait that
- *   the Backup Regulator Ready flag (BRR) is set to indicate that the data written
- *   into the RAM will be maintained in the Standby and VBAT modes.
+ *   regulator is switched off. The backup SRAM can still be used but its content
+ *   will be lost in the Standby and VBAT modes. Once set, the application must wait
+ *   that the Backup Regulator Ready flag (BRR) is set to indicate that the data
+ *   written into the RAM will be maintained in the Standby and VBAT modes.
  *
- *   This function need to be called after stm32_pwr_enablebkp(true) has ben called.
+ *   This function needs to be called after stm32_pwr_enablebkp(true) has been
+ *   called.
  *
  * Input Parameters:
  *   region - state to set it to
@@ -313,6 +315,124 @@ void stm32_pwr_enablebreg(bool region)
     {
       up_udelay(1);
     }
+
+  leave_critical_section(flags);
+}
+
+/************************************************************************************
+ * Name: stm32_pwr_configurewkup
+ *
+ * Description:
+ *   Configures the external wakeup (WKUP) signals for wakeup from standby mode.
+ *   Sets rising/falling edge sensitivity and pull state.
+ *
+ *
+ * Input Parameters:
+ *   pin    - WKUP pin number (0-5) to work on
+ *   en     - Enables the specified WKUP pin if true
+ *   rising - If true, wakeup is triggered on rising edge, otherwise,
+ *            it is triggered on the falling edge.
+ *   pull   - Specifies the WKUP pin pull resistor configuration
+ *            (GPIO_FLOAT, GPIO_PULLUP, or GPIO_PULLDOWN)
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void stm32_pwr_configurewkup(uint32_t pin, bool en, bool rising, uint32_t pull)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  DEBUGASSERT(pin < 6);
+
+  flags = enter_critical_section();
+
+  regval      = stm32_pwr_getreg(STM32_PWR_WKUPEPR_OFFSET);
+
+  if (en)
+    {
+      regval     |= STM32_PWR_WKUPEN(pin);
+    }
+  else
+    {
+      regval     &= ~STM32_PWR_WKUPEN(pin);
+    }
+
+  if (rising)
+    {
+      regval     &= ~STM32_PWR_WKUPP(pin);
+    }
+  else
+    {
+      regval     |= STM32_PWR_WKUPP(pin);
+    }
+
+  /* Set to the no pull-up state by default*/
+
+  regval &= ~ (STM32_PWR_WKUPPUPD_MASK << STM32_PWR_WKUPPUPD_SHIFT(pin));
+
+  if (pull == GPIO_PULLUP)
+    {
+      regval     |= STM32_PWR_WKUPPUPD_PULLUP << STM32_PWR_WKUPPUPD_SHIFT(pin);
+    }
+  else if (pull == GPIO_PULLDOWN)
+    {
+      regval     |= STM32_PWR_WKUPPUPD_PULLDN << STM32_PWR_WKUPPUPD_SHIFT(pin);
+    }
+
+  stm32_pwr_putreg(STM32_PWR_WKUPEPR_OFFSET, regval);
+
+  leave_critical_section(flags);
+}
+
+/************************************************************************************
+ * Name: stm32_pwr_setvbatcharge
+ *
+ * Description:
+ *   Configures the internal charge resistor to charge a battery attached to
+ *   the VBAT pin.
+ *
+ *
+ * Input Parameters:
+ *   enable    - Enables the charge resistor if true, disables it if false
+ *   resistor  - Sets charge resistor to 1.5 KOhm if true,
+ *               sets it to 5 KOhm if false.
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void stm32_pwr_setvbatcharge(bool enable, bool resistor)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  flags = enter_critical_section();
+
+  regval      = stm32_pwr_getreg(STM32_PWR_CR3_OFFSET);
+
+  if (enable)
+    {
+      regval |= STM32_PWR_CR3_VBE;
+    }
+  else
+    {
+      regval &= ~STM32_PWR_CR3_VBE;
+    }
+
+  if (resistor)
+    {
+      regval |= STM32_PWR_CR3_VBRS;
+    }
+  else
+    {
+      regval &= ~STM32_PWR_CR3_VBRS;
+    }
+
+  stm32_pwr_putreg(STM32_PWR_CR3_OFFSET, regval);
 
   leave_critical_section(flags);
 }

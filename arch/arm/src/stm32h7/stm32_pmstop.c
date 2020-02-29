@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_ethernet.h
+ * arch/arm/src/stm32h7/stm32_pmstop.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Haltian Ltd. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,87 +33,95 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H
-#define __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include "hardware/stm32_ethernet.h"
+#include <stdbool.h>
 
-#if STM32H7_NETHERNET > 0
-#ifndef __ASSEMBLY__
+#include "up_arch.h"
+#include "nvic.h"
+#include "stm32_pwr.h"
+#include "stm32_pm.h"
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Name: stm32_pmstop
+ *
+ * Description:
+ *   Enter STOP mode.
+ *
+ * Input Parameters:
+ *   lpds - true: To further reduce power consumption in Stop mode, put the
+ *          internal voltage regulator in low-power under-drive mode using
+ *          the LPDS and LPUDS bits of the Power control register (PWR_CR1).
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void stm32_pmstop(bool lpds)
 {
+  uint32_t regval;
+
+  /* Clear the Low Power Deep Sleep (LPDS) bit in the CPU power control
+   * register.
+   */
+
+  regval  = getreg32(STM32_PWR_CR1);
+  regval &= ~(PWR_CR1_LPDS | PWR_CR1_SVOS_MASK);
+
+  /* Set low-power regulator mode and voltage scaling.  */
+
+  if (lpds)
+    {
+      regval |= PWR_CR1_LPDS | PWR_CR1_SVOS_S5;
+    }
+  else
+    {
+      /* Set regulator to normal (S3) mode */
+
+      regval |= PWR_CR1_SVOS_S3;
+    }
+
+  putreg32(regval, STM32_PWR_CR1);
+
+  /* Clear the domain standby bits so D1, D2 and D3 remain in DStop mode */
+
+  regval  = getreg32(STM32_PWR_CPUCR);
+  regval &= ~(STM32_PWR_CPUCR_PDDS_D1 | STM32_PWR_CPUCR_PDDS_D2 |
+              STM32_PWR_CPUCR_PDDS_D3);
+  putreg32(regval, STM32_PWR_CPUCR);
+
+  /* Set SLEEPDEEP bit of Cortex System Control Register */
+
+  regval  = getreg32(NVIC_SYSCON);
+  regval |= NVIC_SYSCON_SLEEPDEEP;
+  putreg32(regval, NVIC_SYSCON);
+
+  /* Sleep until the wakeup interrupt or event occurs */
+
+#ifdef CONFIG_PM_WFE
+  /* Mode: SLEEP + Entry with WFE */
+
+  asm volatile ("wfe");
 #else
-#define EXTERN extern
+  /* Mode: SLEEP + Entry with WFI */
+
+  asm volatile ("wfi");
 #endif
 
-/****************************************************************************
- * Function: stm32_ethinitialize
- *
- * Description:
- *   Initialize the Ethernet driver for one interface.  If the STM32 chip
- *   supports multiple Ethernet controllers, then board specific logic must
- *   implement up_netinitialize() and call this function to initialize the
- *   desired interfaces.
- *
- * Parameters:
- *   intf - In the case where there are multiple EMACs, this value identifies
- *          which EMAC is to be initialized.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
+  /* Clear deep sleep bits, so that MCU does not go into deep sleep in idle. */
 
-#if STM32H7_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
-int stm32_ethinitialize(int intf);
-#endif
+  /* Clear SLEEPDEEP bit of Cortex System Control Register */
 
-/****************************************************************************
- * Function: stm32_phy_boardinitialize
- *
- * Description:
- *   Some boards require specialized initialization of the PHY before it can
- *   be used.  This may include such things as configuring GPIOs, resetting
- *   the PHY, etc.  If CONFIG_STM32H7_PHYINIT is defined in the configuration
- *   then the board specific logic must provide stm32_phyinitialize();  The
- *   STM32 Ethernet driver will call this function one time before it first
- *   uses the PHY.
- *
- * Parameters:
- *   intf - Always zero for now.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32H7_PHYINIT
-int stm32_phy_boardinitialize(int intf);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
+  regval  = getreg32(NVIC_SYSCON);
+  regval &= ~NVIC_SYSCON_SLEEPDEEP;
+  putreg32(regval, NVIC_SYSCON);
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* STM32H7_NETHERNET > 0 */
-#endif /* __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H */

@@ -828,7 +828,25 @@
 
 /* TODO: D3 Autonomous mode register */
 
-/* TODO: RCC Reset Status register */
+/* RCC Reset Status register */
+
+                                                    /* Bits 0-15: Reserved */
+#define RCC_RSR_RMVF                    (1 << 16)   /* Bit 16: Remove reset flag */
+#define RCC_RSR_CPURSTF                 (1 << 17)   /* Bit 17: CPU reset flag */
+                                                    /* Bit 18: Reserved */
+#define RCC_RSR_D1RSTF                  (1 << 19)   /* Bit 19: D1 domain power switch reset flag */
+#define RCC_RSR_D2RSTF                  (1 << 20)   /* Bit 20: D2 domain power switch reset flag */
+#define RCC_RSR_BORRSTF                 (1 << 21)   /* Bit 21: BOR reset flag */
+#define RCC_RSR_PINRSTF                 (1 << 22)   /* Bit 22: Pin reset flag */
+#define RCC_RSR_PORRSTF                 (1 << 23)   /* Bit 23: POR/PDR reset flag */
+#define RCC_RSR_SFTRSTF                 (1 << 24)   /* Bit 24: System reset from CPU flag */
+                                                    /* Bit 25: Reserved */
+#define RCC_RSR_IWDG1RSTF               (1 << 26)   /* Bit 26: Independent watchdog reset flag */
+                                                    /* Bit 27: Reserved */
+#define RCC_RSR_WWDG1RSTF               (1 << 28)   /* Bit 28: Window watchdog reset flag */
+                                                    /* Bit 29: Reserved */
+#define RCC_RSR_LPWRRSTF                (1 << 30)   /* Bit 30: Reset due to illegal D1 DStandby or CPU Cstop flag */
+                                                    /* Bit 31: Reserved */
 
 /* AHB3 Peripheral Clock enable register */
 

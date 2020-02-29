@@ -341,6 +341,16 @@ config STM32H7_SDMMC2
 	select ARCH_HAVE_SDIO_PREFLIGHT
 	select SDIO_BLOCKSETUP
 
+config STM32H7_IWDG
+	bool "IWDG"
+	default n
+	select WATCHDOG
+
+config STM32H7_WWDG
+	bool "WWDG"
+	default n
+	select WATCHDOG
+
 menu "STM32H7 I2C Selection"
 
 config STM32H7_I2C1

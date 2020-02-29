@@ -210,3 +210,18 @@ endif
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CHIP_CSRCS += stm32_qencoder.c
 endif
+
+ifeq ($(CONFIG_PM),y)
+CHIP_CSRCS += stm32_pmsleep.c stm32_pmstandby.c stm32_pmstop.c
+ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+CHIP_CSRCS += stm32_pminitialize.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32H7_IWDG),y)
+CHIP_CSRCS += stm32_iwdg.c
+endif
+
+ifeq ($(CONFIG_STM32H7_WWDG),y)
+CHIP_CSRCS += stm32_wwdg.c
+endif

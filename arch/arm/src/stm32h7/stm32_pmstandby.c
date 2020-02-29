@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_ethernet.h
+ * arch/arm/src/stm32h7/stm32_pmstandby.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Haltian Ltd. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,87 +33,68 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H
-#define __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include "hardware/stm32_ethernet.h"
+#include <stdbool.h>
 
-#if STM32H7_NETHERNET > 0
-#ifndef __ASSEMBLY__
+#include "up_arch.h"
+#include "nvic.h"
+#include "stm32_rcc.h"
+#include "stm32_pwr.h"
+#include "stm32_pm.h"
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Name: stm32_pmstandby
+ *
+ * Description:
+ *   Enter STANDBY mode.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void stm32_pmstandby(void)
 {
-#else
-#define EXTERN extern
-#endif
+  uint32_t regval;
 
-/****************************************************************************
- * Function: stm32_ethinitialize
- *
- * Description:
- *   Initialize the Ethernet driver for one interface.  If the STM32 chip
- *   supports multiple Ethernet controllers, then board specific logic must
- *   implement up_netinitialize() and call this function to initialize the
- *   desired interfaces.
- *
- * Parameters:
- *   intf - In the case where there are multiple EMACs, this value identifies
- *          which EMAC is to be initialized.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
+  /* Clear the wake-up flags before reseting. */
 
-#if STM32H7_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
-int stm32_ethinitialize(int intf);
-#endif
+  modifyreg32(STM32_PWR_CPUCR, 0, STM32_PWR_CPUCR_CSSF);
+  modifyreg32(STM32_PWR_WKUPCR, 0, STM32_PWR_WKUPC1 | STM32_PWR_WKUPC2 |
+                                   STM32_PWR_WKUPC3 | STM32_PWR_WKUPC4 |
+                                   STM32_PWR_WKUPC5 | STM32_PWR_WKUPC6);
 
-/****************************************************************************
- * Function: stm32_phy_boardinitialize
- *
- * Description:
- *   Some boards require specialized initialization of the PHY before it can
- *   be used.  This may include such things as configuring GPIOs, resetting
- *   the PHY, etc.  If CONFIG_STM32H7_PHYINIT is defined in the configuration
- *   then the board specific logic must provide stm32_phyinitialize();  The
- *   STM32 Ethernet driver will call this function one time before it first
- *   uses the PHY.
- *
- * Parameters:
- *   intf - Always zero for now.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
+  /* Clear reset flags. */
 
-#ifdef CONFIG_STM32H7_PHYINIT
-int stm32_phy_boardinitialize(int intf);
-#endif
+  modifyreg32(STM32_RCC_CSR, 0, RCC_RSR_RMVF);
 
-#undef EXTERN
-#if defined(__cplusplus)
+  /* Set the domain Power Down Deep Sleep (PDDS) bits in the power control
+   * register so that D1, D2, and D3 will go into the DStop state.
+   */
+
+  modifyreg32(STM32_PWR_CPUCR, 0, STM32_PWR_CPUCR_PDDS_D1 |
+                                  STM32_PWR_CPUCR_PDDS_D2 |
+                                  STM32_PWR_CPUCR_PDDS_D3);
+
+  /* Set SLEEPDEEP bit of Cortex System Control Register */
+
+  regval  = getreg32(NVIC_SYSCON);
+  regval |= NVIC_SYSCON_SLEEPDEEP;
+  putreg32(regval, NVIC_SYSCON);
+
+  /* Sleep until the wakeup reset occurs */
+
+  asm("wfi");
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* STM32H7_NETHERNET > 0 */
-#endif /* __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H */

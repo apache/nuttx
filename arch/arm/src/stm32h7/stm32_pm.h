@@ -1,8 +1,8 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_ethernet.h
+ * arch/arm/src/stm32h7/stm32_pm.h
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2018 Haltian Ltd. All rights reserved.
+ *   Author: Juha Niskanen <juha.niskanen@haltian.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H
-#define __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H
+#ifndef __ARCH_ARM_SRC_STM32H7_STM32_PM_H
+#define __ARCH_ARM_SRC_STM32H7_STM32_PM_H
 
 /****************************************************************************
  * Included Files
@@ -42,17 +42,17 @@
 
 #include <nuttx/config.h>
 
-#include "hardware/stm32_ethernet.h"
+#include <stdbool.h>
 
-#if STM32H7_NETHERNET > 0
-#ifndef __ASSEMBLY__
+#include "chip.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
+#ifndef __ASSEMBLY__
+#ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
 {
@@ -61,59 +61,62 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Function: stm32_ethinitialize
+ * Name: stm32_pmstop
  *
  * Description:
- *   Initialize the Ethernet driver for one interface.  If the STM32 chip
- *   supports multiple Ethernet controllers, then board specific logic must
- *   implement up_netinitialize() and call this function to initialize the
- *   desired interfaces.
+ *   Enter STOP mode.
  *
- * Parameters:
- *   intf - In the case where there are multiple EMACs, this value identifies
- *          which EMAC is to be initialized.
+ * Input Parameters:
+ *   lpds - true: To further reduce power consumption in Stop mode, put the
+ *          internal voltage regulator in low-power under-drive mode using
+ *          the LPDS and LPUDS bits of the Power control register (PWR_CR1).
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
+ *   None
  *
  ****************************************************************************/
 
-#if STM32H7_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
-int stm32_ethinitialize(int intf);
-#endif
+void stm32_pmstop(bool lpds);
 
 /****************************************************************************
- * Function: stm32_phy_boardinitialize
+ * Name: stm32_pmstandby
  *
  * Description:
- *   Some boards require specialized initialization of the PHY before it can
- *   be used.  This may include such things as configuring GPIOs, resetting
- *   the PHY, etc.  If CONFIG_STM32H7_PHYINIT is defined in the configuration
- *   then the board specific logic must provide stm32_phyinitialize();  The
- *   STM32 Ethernet driver will call this function one time before it first
- *   uses the PHY.
+ *   Enter STANDBY mode.
  *
- * Parameters:
- *   intf - Always zero for now.
+ * Input Parameters:
+ *   None
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
+ *   None
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_PHYINIT
-int stm32_phy_boardinitialize(int intf);
-#endif
+void stm32_pmstandby(void);
+
+/****************************************************************************
+ * Name: stm32_pmsleep
+ *
+ * Description:
+ *   Enter SLEEP mode.
+ *
+ * Input Parameters:
+ *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
+ *                        executed, the MCU enters Sleep mode as soon as it
+ *                        exits the lowest priority ISR.
+ *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep
+ *                        mode as soon as WFI or WFE instruction is executed.
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void stm32_pmsleep(bool sleeponexit);
 
 #undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
 #endif
-
 #endif /* __ASSEMBLY__ */
-#endif /* STM32H7_NETHERNET > 0 */
-#endif /* __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H */
+
+#endif /* __ARCH_ARM_SRC_STM32H7_STM32_PM_H */

@@ -786,6 +786,7 @@ static int  stm32_ethconfig(struct stm32_ethmac_s *priv);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: stm32_getreg
  *
@@ -834,14 +835,14 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   else
     {
-        /* Did we print "..." for the previous value? */
+      /* Did we print "..." for the previous value? */
 
-        if (count > 3)
-          {
-            /* Yes.. then show how many times the value repeated */
+      if (count > 3)
+        {
+          /* Yes.. then show how many times the value repeated */
 
-            ninfo("[repeats %d more times]\n", count - 3);
-          }
+          ninfo("[repeats %d more times]\n", count - 3);
+        }
 
       /* Save the new address, value, and count */
 
@@ -1038,6 +1039,7 @@ static inline bool stm32_isfreebuffer(struct stm32_ethmac_s *priv)
  *   pointer to the next tx descriptor for the current interface
  *
  ****************************************************************************/
+
 static struct eth_desc_s *stm32_get_next_txdesc(struct stm32_ethmac_s *priv,
                                                 struct eth_desc_s * curr)
 {
@@ -1081,8 +1083,8 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
   struct eth_desc_s *txdesc;
   struct eth_desc_s *txfirst;
 
-  /* The internal (optimal) network buffer size may be configured to be larger
-   * than the Ethernet buffer size.
+  /* The internal (optimal) network buffer size may be configured to be
+   * larger than the Ethernet buffer size.
    */
 
 #if OPTIMAL_ETH_BUFSIZE > ALIGNED_BUFSIZE
@@ -1116,24 +1118,24 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
 #if OPTIMAL_ETH_BUFSIZE > ALIGNED_BUFSIZE
   if (priv->dev.d_len > ALIGNED_BUFSIZE)
-  {
-    /* Yes... how many buffers will be need to send the packet? */
+    {
+      /* Yes... how many buffers will be need to send the packet? */
 
-    bufcount = (priv->dev.d_len + (ALIGNED_BUFSIZE - 1)) / ALIGNED_BUFSIZE;
-    lastsize = priv->dev.d_len - (bufcount - 1) * ALIGNED_BUFSIZE;
+      bufcount = (priv->dev.d_len + (ALIGNED_BUFSIZE - 1)) / ALIGNED_BUFSIZE;
+      lastsize = priv->dev.d_len - (bufcount - 1) * ALIGNED_BUFSIZE;
 
-    ninfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
+      ninfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
-    /* Set the first segment bit in the first TX descriptor */
+      /* Set the first segment bit in the first TX descriptor */
 
-    txdesc->des3 = ETH_TDES3_RD_FD;
+      txdesc->des3 = ETH_TDES3_RD_FD;
 
-    /* Set up all but the last TX descriptor */
+      /* Set up all but the last TX descriptor */
 
-    buffer = priv->dev.d_buf;
+      buffer = priv->dev.d_buf;
 
-    for (i = 0; i < bufcount; i++)
-      {
+      for (i = 0; i < bufcount; i++)
+        {
           /* This could be a normal event but the design does not handle it */
 
           DEBUGASSERT((txdesc->des3 & ETH_TDES3_RD_OWN) == 0);
@@ -1541,6 +1543,7 @@ static void stm32_disableint(struct stm32_ethmac_s *priv, uint32_t ierbit)
  *   pointer to the next rx descriptor for the current interface
  *
  ****************************************************************************/
+
 static struct eth_desc_s *stm32_get_next_rxdesc(struct stm32_ethmac_s *priv,
                                                 struct eth_desc_s * curr)
 {
@@ -1660,7 +1663,7 @@ static void stm32_freesegment(struct stm32_ethmac_s *priv,
 static int stm32_recvframe(struct stm32_ethmac_s *priv)
 {
   struct eth_desc_s *rxdesc;
-  struct eth_desc_s *rxcurr;
+  struct eth_desc_s *rxcurr = NULL;
   uint8_t *buffer;
   int i;
 
@@ -1818,6 +1821,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
         {
           /* Drop the context descriptors, we are not interested */
 
+          DEBUGASSERT(rxcurr != NULL);
           stm32_freesegment(priv, rxcurr, 1);
         }
 
@@ -2886,7 +2890,6 @@ static int stm32_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 
 static void stm32_txdescinit(struct stm32_ethmac_s *priv,
                              union stm32_desc_u *txtable)
-
 {
   struct eth_desc_s *txdesc;
   int i;
@@ -4285,18 +4288,18 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
   ninfo("Initialize the PHY\n");
   ret = stm32_phyinit(priv);
   if (ret < 0)
-  {
-    return ret;
-  }
+    {
+      return ret;
+    }
 
   /* Initialize the MAC and DMA */
 
   ninfo("Initialize the MAC and DMA\n");
   ret = stm32_macconfig(priv);
   if (ret < 0)
-  {
-    return ret;
-  }
+    {
+      return ret;
+    }
 
   /* Enable normal MAC operation */
 
@@ -4328,11 +4331,11 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#if STM32H7_NETHERNET == 1 || defined(CONFIG_NETDEV_LATEINIT)
-static inline
-#endif
-
+#if STM32H7_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
 int stm32_ethinitialize(int intf)
+#else
+static inline int stm32_ethinitialize(int intf)
+#endif
 {
   struct stm32_ethmac_s *priv;
 
@@ -4371,11 +4374,11 @@ int stm32_ethinitialize(int intf)
   /* Attach the IRQ to the driver */
 
   if (irq_attach(STM32_IRQ_ETH, stm32_interrupt, NULL))
-  {
-    /* We could not attach the ISR to the interrupt */
+    {
+      /* We could not attach the ISR to the interrupt */
 
-    return -EAGAIN;
-  }
+      return -EAGAIN;
+    }
 
   /* Put the interface in the down state. */
 

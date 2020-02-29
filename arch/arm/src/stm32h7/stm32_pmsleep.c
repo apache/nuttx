@@ -1,8 +1,9 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_ethernet.h
+ * arch/arm/src/stm32h7/stm32_pmsleep.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2012, 2017, 2020 Gregory Nutt. All rights reserved.
+ *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,87 +34,68 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H
-#define __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include "hardware/stm32_ethernet.h"
+#include <stdbool.h>
 
-#if STM32H7_NETHERNET > 0
-#ifndef __ASSEMBLY__
+#include "up_arch.h"
+#include "nvic.h"
+#include "stm32_pwr.h"
+#include "stm32_pm.h"
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+/****************************************************************************
+ * Name: stm32_pmsleep
+ *
+ * Description:
+ *   Enter SLEEP mode.
+ *
+ * Input Parameters:
+ *   sleeponexit - true:  SLEEPONEXIT bit is set when the WFI instruction is
+ *                        executed, the MCU enters Sleep mode as soon as it
+ *                        exits the lowest priority ISR.
+ *               - false: SLEEPONEXIT bit is cleared, the MCU enters Sleep
+ *                        mode as soon as WFI or WFE instruction is executed.
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void stm32_pmsleep(bool sleeponexit)
 {
+  uint32_t regval;
+
+  /* Clear SLEEPDEEP bit of Cortex System Control Register */
+
+  regval  = getreg32(NVIC_SYSCON);
+  regval &= ~NVIC_SYSCON_SLEEPDEEP;
+  if (sleeponexit)
+    {
+      regval |= NVIC_SYSCON_SLEEPONEXIT;
+    }
+  else
+    {
+      regval &= ~NVIC_SYSCON_SLEEPONEXIT;
+    }
+
+  putreg32(regval, NVIC_SYSCON);
+
+  /* Sleep until the wakeup interrupt or event occurs */
+
+#ifdef CONFIG_PM_WFE
+  /* Mode: SLEEP + Entry with WFE */
+
+  asm("wfe");
 #else
-#define EXTERN extern
+  /* Mode: SLEEP + Entry with WFI */
+
+  asm("wfi");
 #endif
-
-/****************************************************************************
- * Function: stm32_ethinitialize
- *
- * Description:
- *   Initialize the Ethernet driver for one interface.  If the STM32 chip
- *   supports multiple Ethernet controllers, then board specific logic must
- *   implement up_netinitialize() and call this function to initialize the
- *   desired interfaces.
- *
- * Parameters:
- *   intf - In the case where there are multiple EMACs, this value identifies
- *          which EMAC is to be initialized.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#if STM32H7_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
-int stm32_ethinitialize(int intf);
-#endif
-
-/****************************************************************************
- * Function: stm32_phy_boardinitialize
- *
- * Description:
- *   Some boards require specialized initialization of the PHY before it can
- *   be used.  This may include such things as configuring GPIOs, resetting
- *   the PHY, etc.  If CONFIG_STM32H7_PHYINIT is defined in the configuration
- *   then the board specific logic must provide stm32_phyinitialize();  The
- *   STM32 Ethernet driver will call this function one time before it first
- *   uses the PHY.
- *
- * Parameters:
- *   intf - Always zero for now.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32H7_PHYINIT
-int stm32_phy_boardinitialize(int intf);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* STM32H7_NETHERNET > 0 */
-#endif /* __ARCH_ARM_SRC_STM32H7_STM32_ETHERNET_H */
