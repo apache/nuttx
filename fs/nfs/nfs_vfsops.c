@@ -978,14 +978,13 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Now loop until we send the entire user buffer */
 
-  writesize = 0;
   for (byteswritten = 0; byteswritten < buflen; )
     {
       /* Make sure that the attempted write size does not exceed the RPC
        * maximum.
        */
 
-      writesize = buflen;
+      writesize = buflen - byteswritten;
       if (writesize > nmp->nm_wsize)
         {
           writesize = nmp->nm_wsize;
@@ -1027,13 +1026,13 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
 
       /* Copy the count and stable values */
 
-      *ptr++  = txdr_unsigned(buflen);
+      *ptr++  = txdr_unsigned(writesize);
       *ptr++  = txdr_unsigned(committed);
       reqlen += 2*sizeof(uint32_t);
 
       /* Copy a chunk of the user data into the I/O buffer */
 
-      *ptr++  = txdr_unsigned(buflen);
+      *ptr++  = txdr_unsigned(writesize);
       reqlen += sizeof(uint32_t);
       memcpy(ptr, buffer, writesize);
       reqlen += uint32_alignup(writesize);
@@ -1110,7 +1109,7 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
     }
 
   nfs_semgive(nmp);
-  return writesize;
+  return byteswritten;
 
 errout_with_semaphore:
   nfs_semgive(nmp);
@@ -1153,15 +1152,6 @@ static int nfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   /* And save this as the file data for the new node */
 
   newp->f_priv = np;
-
-  /* Then insert the new instance at the head of the list in the mountpoint
-   * tructure. It needs to be there (1) to handle error conditions that effect
-   * all files, and (2) to inform the umount logic that we are busy.  We
-   * cannot unmount the file system if this list is not empty!
-   */
-
-  np->n_next   = nmp->nm_head;
-  nmp->nm_head = np;
 
   nfs_semgive(nmp);
   return OK;
@@ -1310,7 +1300,7 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   dir->u.nfs.nfs_fhsize = (uint8_t)fhandle.length;
   DEBUGASSERT(fhandle.length <= DIRENT_NFS_MAXHANDLE);
 
-  memcpy(dir->u.nfs.nfs_fhandle, &fhandle.handle, DIRENT_NFS_MAXHANDLE);
+  memcpy(dir->u.nfs.nfs_fhandle, &fhandle.handle, fhandle.length);
   error = OK;
 
 errout_with_semaphore:
@@ -1511,7 +1501,7 @@ static int nfs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
    */
 
   fhandle.length = (uint32_t)dir->u.nfs.nfs_fhsize;
-  memcpy(&fhandle.handle, dir->u.nfs.nfs_fhandle, DIRENT_NFS_MAXHANDLE);
+  memcpy(&fhandle.handle, dir->u.nfs.nfs_fhandle, fhandle.length);
 
   error = nfs_lookup(nmp, dir->fd_dir.d_name, &fhandle, &obj_attributes, NULL);
   if (error != OK)
@@ -2130,7 +2120,7 @@ static int nfs_statfs(FAR struct inode *mountpt, FAR struct statfs *sbp)
 
   fsstat = &nmp->nm_msgbuffer.fsstat;
   fsstat->fs.fsroot.length = txdr_unsigned(nmp->nm_fhsize);
-  memcpy(&fsstat->fs.fsroot.handle, &nmp->nm_fh, sizeof(nfsfh_t));
+  memcpy(&fsstat->fs.fsroot.handle, &nmp->nm_fh, nmp->nm_fhsize);
 
   nfs_statistics(NFSPROC_FSSTAT);
   error = nfs_request(nmp, NFSPROC_FSSTAT,
@@ -2478,7 +2468,7 @@ static int nfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
       goto errout_with_semaphore;
     }
 
-  /* Find the NFS node of the directory containing the 'from' object */
+  /* Find the NFS node of the directory containing the 'to' object */
 
   error = nfs_finddir(nmp, newrelpath, &to_handle, &fattr, to_name);
   if (error != OK)
