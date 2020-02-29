@@ -102,22 +102,6 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/* Use to pass file information to nfs_stat_common() */
-
-struct nfs_statinfo_s
-{
-  uint16_t ns_mode;    /* File access mode */
-  uint8_t  ns_type;    /* File type */
-  uint64_t ns_size;    /* File size */
-  time_t   ns_atime;   /* Time of last access */
-  time_t   ns_mtime;   /* Time of last modification */
-  time_t   ns_ctime;   /* Time of last status change */
-};
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -172,8 +156,7 @@ static int     nfs_rmdir(FAR struct inode *mountpt,
                    FAR const char *relpath);
 static int     nfs_rename(FAR struct inode *mountpt,
                    FAR const char *oldrelpath, FAR const char *newrelpath);
-static void    nfs_stat_common(FAR struct nfs_statinfo_s *info,
-                   FAR struct stat *buf);
+static mode_t  nfs_stat_mode(unsigned int mode, unsigned int type);
 static int     nfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
                    FAR struct stat *buf);
 
@@ -330,8 +313,10 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
       *ptr++  = nfs_true; /* True: mode value follows */
       reqlen += sizeof(uint32_t);
 
-      tmp = mode & (NFSMODE_IWOTH | NFSMODE_IROTH | NFSMODE_IWGRP |
-                    NFSMODE_IRGRP | NFSMODE_IWUSR | NFSMODE_IRUSR);
+      tmp = mode & (NFSMODE_IXOTH | NFSMODE_IWOTH | NFSMODE_IROTH |
+                    NFSMODE_IXGRP | NFSMODE_IWGRP | NFSMODE_IRGRP |
+                    NFSMODE_IXUSR | NFSMODE_IWUSR | NFSMODE_IRUSR |
+                    NFSMODE_SAVETEXT | NFSMODE_ISGID | NFSMODE_ISUID);
       *ptr++  = txdr_unsigned(tmp);
       reqlen += sizeof(uint32_t);
 
@@ -425,11 +410,10 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
 }
 
 /****************************************************************************
- * Name: nfs_fileopen
+ * Name: nfs_filetruncate
  *
  * Description:
- *   Truncate an open file to zero length.  This is part of the file open
- *   logic.
+ *   Truncate an open file to length.  This is part of the file open logic.
  *
  * Returned Value:
  *   0 on success; a negative errno value on failure.
@@ -465,8 +449,8 @@ static int nfs_filetruncate(FAR struct nfsmount *nmp,
   *ptr++  = nfs_false;                        /* Don't change uid */
   *ptr++  = nfs_false;                        /* Don't change gid */
   *ptr++  = nfs_true;                         /* Use the following size */
-  *ptr++  = length;                           /* Truncate to the specified length */
   *ptr++  = 0;
+  *ptr++  = txdr_unsigned(length);            /* Truncate to the specified length */
   *ptr++  = HTONL(NFSV3SATTRTIME_TOSERVER);   /* Use the server's time */
   *ptr++  = HTONL(NFSV3SATTRTIME_TOSERVER);   /* Use the server's time */
   *ptr++  = nfs_false;                        /* No guard value */
@@ -484,9 +468,29 @@ static int nfs_filetruncate(FAR struct nfsmount *nmp,
       return error;
     }
 
-  /* Indicate that the file now has zero length */
+  /* Get a pointer to the SETATTR reply data */
 
-  np->n_size = 0;
+  ptr = (FAR uint32_t *)&((FAR struct rpc_reply_setattr *)
+    nmp->nm_iobuffer)->setattr;
+
+  /* Parse file_wcc.  First, check if WCC attributes follow. */
+
+  if (*ptr++ != 0)
+    {
+      /* Yes.. WCC attributes follow.  But we just skip over them. */
+
+      ptr += uint32_increment(sizeof(struct wcc_attr));
+    }
+
+  /* Check if normal file attributes follow */
+
+  if (*ptr++ != 0)
+    {
+      /* Yes.. Update the cached file status in the file structure. */
+
+      nfs_attrupdate(np, (FAR struct nfs_fattr *)ptr);
+    }
+
   return OK;
 }
 
@@ -910,10 +914,11 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
       /* Check if attributes are included in the responses */
 
       tmp = *ptr++;
-      if (*ptr != 0)
+      if (tmp != 0)
         {
-          /* Yes... just skip over the attributes for now */
+          /* Yes.. Update the cached file status in the file structure. */
 
+          nfs_attrupdate(np, (FAR struct nfs_fattr *)ptr);
           ptr += uint32_increment(sizeof(struct nfs_fattr));
         }
 
@@ -1212,10 +1217,6 @@ static int nfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
   FAR struct nfsmount *nmp;
   FAR struct nfsnode *np;
-  struct nfs_statinfo_s info;
-  struct timespec ts;
-  int error;
-  int ret;
 
   finfo("Buf %p\n", buf);
   DEBUGASSERT(filep != NULL && buf != NULL);
@@ -1228,41 +1229,25 @@ static int nfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   nmp = (FAR struct nfsmount *)filep->f_inode->i_private;
   DEBUGASSERT(nmp != NULL);
 
+  memset(buf, 0, sizeof(*buf));
+
   nfs_semtake(nmp);
 
   /* Extract the file mode, file type, and file size from the nfsnode
    * structure.
    */
 
-  info.ns_mode  = np->n_mode;
-  info.ns_type  = np->n_type;
-  info.ns_size  = (off_t)np->n_size;
+  buf->st_mode  = nfs_stat_mode(np->n_mode, np->n_type);
+  buf->st_size  = (off_t)np->n_size;
 
   /* Extract time values as type time_t in units of seconds. */
 
-  info.ns_mtime = np->n_mtime;
-  info.ns_ctime = np->n_ctime;
+  buf->st_atime = np->n_atime;
+  buf->st_mtime = np->n_mtime;
+  buf->st_ctime = np->n_ctime;
 
-  /* Use the current time for the time of last access. */
-
-  ret = clock_gettime(CLOCK_REALTIME, &ts);
-  if (ret < 0)
-    {
-      error = -get_errno();
-      ferr("ERROR: clock_gettime failed: %d\n", error);
-      goto errout_with_semaphore;
-    }
-
-  info.ns_atime = ts.tv_sec;
-
-  /* Then update the stat buffer with this information */
-
-  nfs_stat_common(&info, buf);
-  ret = OK;
-
-errout_with_semaphore:
   nfs_semgive(nmp);
-  return error;
+  return OK;
 }
 
 /****************************************************************************
@@ -1579,8 +1564,14 @@ static int nfs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
     {
     default:
     case NFNON:        /* Unknown type */
+      break;
+
     case NFSOCK:       /* Socket */
+      dir->fd_dir.d_type = DTYPE_SOCK;
+      break;
+
     case NFLNK:        /* Symbolic link */
+      dir->fd_dir.d_type = DTYPE_LINK;
       break;
 
     case NFREG:        /* Regular file */
@@ -1596,6 +1587,9 @@ static int nfs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
       break;
 
     case NFFIFO:       /* Named FIFO */
+      dir->fd_dir.d_type = DTYPE_FIFO;
+      break;
+
     case NFCHR:        /* Character special device file */
       dir->fd_dir.d_type = DTYPE_CHR;
       break;
@@ -2354,7 +2348,8 @@ static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath, mode_t 
 
   tmp = mode & (NFSMODE_IXOTH | NFSMODE_IWOTH | NFSMODE_IROTH |
                 NFSMODE_IXGRP | NFSMODE_IWGRP | NFSMODE_IRGRP |
-                NFSMODE_IXUSR | NFSMODE_IWUSR | NFSMODE_IRUSR);
+                NFSMODE_IXUSR | NFSMODE_IWUSR | NFSMODE_IRUSR |
+                NFSMODE_SAVETEXT | NFSMODE_ISGID | NFSMODE_ISUID);
   *ptr++  = txdr_unsigned(tmp);
   reqlen += sizeof(uint32_t);
 
@@ -2584,45 +2579,30 @@ errout_with_semaphore:
 }
 
 /****************************************************************************
- * Name: nfs_stat_common
+ * Name: nfs_stat_mode
  *
  * Description:
- *   Return information about the file system object described by 'info'
+ *   Convert NFSv3's type and mode to NuttX's mode
  *
  * Returned Value:
- *   None
+ *   Return NuttX's mode
  *
  ****************************************************************************/
 
-static void nfs_stat_common(FAR struct nfs_statinfo_s *info,
-                            FAR struct stat *buf)
+static mode_t nfs_stat_mode(unsigned int mode, unsigned int type)
 {
-  mode_t mode;
-
-  /* Here we exploit the fact that most mode bits are the same in NuttX
+  /* Here we exploit the fact all mode bits are the same in NuttX
    * as in the NFSv3 spec.
    */
 
-  mode = info->ns_mode &
-           (NFSMODE_IXOTH | NFSMODE_IWOTH | NFSMODE_IROTH |
-            NFSMODE_IXGRP | NFSMODE_IWGRP | NFSMODE_IRGRP |
-            NFSMODE_IXUSR | NFSMODE_IWUSR | NFSMODE_IRUSR);
-
-  /* Handle the cases that are not the same */
-
-  if ((info->ns_mode & NFSMODE_ISGID) != 0)
-    {
-      mode |= S_ISGID;
-    }
-
-  if ((info->ns_mode & NFSMODE_ISUID) != 0)
-    {
-      mode |= S_ISUID;
-    }
+  mode &= (NFSMODE_IXOTH | NFSMODE_IWOTH | NFSMODE_IROTH |
+           NFSMODE_IXGRP | NFSMODE_IWGRP | NFSMODE_IRGRP |
+           NFSMODE_IXUSR | NFSMODE_IWUSR | NFSMODE_IRUSR |
+           NFSMODE_SAVETEXT | NFSMODE_ISGID | NFSMODE_ISUID);
 
   /* Now OR in the file type */
 
-  switch (info->ns_type)
+  switch (type)
     {
     default:
     case NFNON:   /* Unknown type */
@@ -2653,17 +2633,11 @@ static void nfs_stat_common(FAR struct nfs_statinfo_s *info,
       break;
 
     case NFFIFO:  /* Named pipe */
-      mode |= S_IFMT;
+      mode |= S_IFIFO;
       break;
     }
 
-  buf->st_mode    = mode;
-  buf->st_size    = (off_t)info->ns_size;
-  buf->st_blksize = 0;
-  buf->st_blocks  = 0;
-  buf->st_mtime   = info->ns_mtime;
-  buf->st_atime   = info->ns_atime;
-  buf->st_ctime   = info->ns_ctime;
+  return mode;
 }
 
 /****************************************************************************
@@ -2682,8 +2656,7 @@ static int nfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 {
   FAR struct nfsmount *nmp;
   struct file_handle fhandle;
-  struct nfs_fattr obj_attributes;
-  struct nfs_statinfo_s info;
+  struct nfs_fattr attributes;
   struct timespec ts;
   int error;
 
@@ -2696,11 +2669,13 @@ static int nfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   nmp = (FAR struct nfsmount *)mountpt->i_private;
   DEBUGASSERT(nmp && buf);
 
+  memset(buf, 0, sizeof(*buf));
+
   nfs_semtake(nmp);
 
   /* Get the file handle attributes of the requested node */
 
-  error = nfs_findnode(nmp, relpath, &fhandle, &obj_attributes, NULL);
+  error = nfs_findnode(nmp, relpath, &fhandle, &attributes, NULL);
   if (error != OK)
     {
       ferr("ERROR: nfs_findnode failed: %d\n", error);
@@ -2709,24 +2684,20 @@ static int nfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Extract the file mode, file type, and file size. */
 
-  info.ns_mode  = fxdr_unsigned(uint16_t, obj_attributes.fa_mode);
-  info.ns_type  = fxdr_unsigned(uint8_t, obj_attributes.fa_type);
-  info.ns_size  = fxdr_hyper(&obj_attributes.fa_size);
+  buf->st_mode  = nfs_stat_mode(fxdr_unsigned(uint16_t, attributes.fa_mode),
+                                fxdr_unsigned(uint8_t, attributes.fa_type));
+  buf->st_size  = fxdr_hyper(&attributes.fa_size);
 
   /* Extract time values as type time_t in units of seconds */
 
-  fxdr_nfsv3time(&obj_attributes.fa_mtime, &ts);
-  info.ns_mtime = ts.tv_sec;
+  fxdr_nfsv3time(&attributes.fa_mtime, &ts);
+  buf->st_mtime = ts.tv_sec;
 
-  fxdr_nfsv3time(&obj_attributes.fa_atime, &ts);
-  info.ns_atime = ts.tv_sec;
+  fxdr_nfsv3time(&attributes.fa_atime, &ts);
+  buf->st_atime = ts.tv_sec;
 
-  fxdr_nfsv3time(&obj_attributes.fa_ctime, &ts);
-  info.ns_ctime = ts.tv_sec;
-
-  /* Then update the stat buffer with this information */
-
-  nfs_stat_common(&info, buf);
+  fxdr_nfsv3time(&attributes.fa_ctime, &ts);
+  buf->st_ctime = ts.tv_sec;
 
 errout_with_semaphore:
   nfs_semgive(nmp);

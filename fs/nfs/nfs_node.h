@@ -65,6 +65,7 @@ struct nfsnode
   uint8_t             n_type;       /* File type */
   uint8_t             n_fhsize;     /* Size in bytes of the file handle */
   uint16_t            n_mode;       /* File mode for fstat() */
+  time_t              n_atime;      /* File access time */
   time_t              n_mtime;      /* File modification time */
   time_t              n_ctime;      /* File creation time */
   nfsfh_t             n_fhandle;    /* NFS File Handle */

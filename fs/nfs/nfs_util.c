@@ -515,6 +515,9 @@ void nfs_attrupdate(FAR struct nfsnode *np, FAR struct nfs_fattr *attributes)
   np->n_mode   = fxdr_unsigned(uint16_t, attributes->fa_mode);
   np->n_size   = fxdr_hyper(&attributes->fa_size);
 
+  fxdr_nfsv3time(&attributes->fa_atime, &ts);
+  np->n_atime  = ts.tv_sec;
+
   fxdr_nfsv3time(&attributes->fa_mtime, &ts);
   np->n_mtime  = ts.tv_sec;
 
