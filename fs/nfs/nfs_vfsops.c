@@ -1752,8 +1752,6 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   FAR struct nfs_args        *argp = (FAR struct nfs_args *)data;
   FAR struct nfsmount        *nmp;
   FAR struct rpcclnt         *rpc;
-  struct rpc_call_fs          getattr;
-  struct rpc_reply_getattr    resok;
   struct nfs_mount_parameters nprmt;
   uint32_t                    buflen;
   uint32_t                    tmp;
@@ -1879,23 +1877,14 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   nmp->nm_fhsize         = nmp->nm_rpcclnt->rc_fhsize;
   memcpy(&nmp->nm_fh, &nmp->nm_rpcclnt->rc_fh, sizeof(nfsfh_t));
 
-  /* Get the file attributes */
+  /* Get the file sytem info */
 
-  getattr.fs.fsroot.length = txdr_unsigned(nmp->nm_fhsize);
-  memcpy(&getattr.fs.fsroot.handle, &nmp->nm_fh, sizeof(nfsfh_t));
-
-  error = nfs_request(nmp, NFSPROC_GETATTR,
-                      (FAR void *)&getattr, sizeof(struct FS3args),
-                      (FAR void *)&resok, sizeof(struct rpc_reply_getattr));
+  error = nfs_fsinfo(nmp);
   if (error)
     {
-      ferr("ERROR: nfs_request failed: %d\n", error);
+      ferr("ERROR: nfs_fsinfo failed: %d\n", error);
       goto bad;
     }
-
-  /* Save the file attributes */
-
-  memcpy(&nmp->nm_fattr, &resok.attr, sizeof(struct nfs_fattr));
 
   /* Mounted! */
 
@@ -2015,21 +2004,23 @@ errout_with_semaphore:
 
 static int nfs_fsinfo(FAR struct nfsmount *nmp)
 {
-  struct rpc_call_fs fsinfo;
-  struct rpc_reply_fsinfo fsp;
+  FAR struct rpc_call_fs *fsinfo;
+  FAR struct rpc_reply_getattr *attr;
+  FAR uint32_t *ptr;
   uint32_t pref;
   uint32_t max;
   int error = 0;
 
-  fsinfo.fs.fsroot.length = txdr_unsigned(nmp->nm_fhsize);
-  fsinfo.fs.fsroot.handle = nmp->nm_fh;
+  fsinfo = &nmp->nm_msgbuffer.fsinfo;
+  fsinfo->fs.fsroot.length = txdr_unsigned(nmp->nm_fhsize);
+  memcpy(&fsinfo->fs.fsroot.handle, &nmp->nm_fh, nmp->nm_fhsize);
 
   /* Request FSINFO from the server */
 
   nfs_statistics(NFSPROC_FSINFO);
   error = nfs_request(nmp, NFSPROC_FSINFO,
-                      (FAR void *)&fsinfo, sizeof(struct FS3args),
-                      (FAR void *)&fsp, sizeof(struct rpc_reply_fsinfo));
+                      (FAR void *)fsinfo, sizeof(struct FS3args),
+                      (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
   if (error)
     {
       return error;
@@ -2037,33 +2028,21 @@ static int nfs_fsinfo(FAR struct nfsmount *nmp)
 
   /* Save the root file system attributes */
 
-#if 0
-  memcpy(&nmp->nm_fattr. &fsp.obj_attributes, sizeof(struct nfs_fattr));
-#endif
-
-  pref = fxdr_unsigned(uint32_t, fsp.fsinfo.fs_wtpref);
-  if (pref < nmp->nm_wsize)
+  ptr = (FAR uint32_t *)&((FAR struct rpc_reply_fsinfo *)nmp->nm_iobuffer)->fsinfo;
+  if (*ptr++ != 0)
     {
-      nmp->nm_wsize = (pref + NFS_FABLKSIZE - 1) & ~(NFS_FABLKSIZE - 1);
+      memcpy(&nmp->nm_fattr, ptr, sizeof(struct nfs_fattr));
+      ptr += uint32_increment(sizeof(struct nfs_fattr));
     }
 
-  max = fxdr_unsigned(uint32_t, fsp.fsinfo.fs_wtmax);
-  if (max < nmp->nm_wsize)
-    {
-      nmp->nm_wsize = max & ~(NFS_FABLKSIZE - 1);
-      if (nmp->nm_wsize == 0)
-        {
-          nmp->nm_wsize = max;
-        }
-    }
+  max  = fxdr_unsigned(uint32_t, *ptr++);
+  pref = fxdr_unsigned(uint32_t, *ptr++);
+  ptr += 1; /* Skip fs_rtmult */
 
-  pref = fxdr_unsigned(uint32_t, fsp.fsinfo.fs_rtpref);
   if (pref < nmp->nm_rsize)
     {
       nmp->nm_rsize = (pref + NFS_FABLKSIZE - 1) & ~(NFS_FABLKSIZE - 1);
     }
-
-  max = fxdr_unsigned(uint32_t, fsp.fsinfo.fs_rtmax);
   if (max < nmp->nm_rsize)
     {
       nmp->nm_rsize = max & ~(NFS_FABLKSIZE - 1);
@@ -2073,19 +2052,44 @@ static int nfs_fsinfo(FAR struct nfsmount *nmp)
         }
     }
 
-  pref = fxdr_unsigned(uint32_t, fsp.fsinfo.fs_dtpref);
+  max  = fxdr_unsigned(uint32_t, *ptr++);
+  pref = fxdr_unsigned(uint32_t, *ptr++);
+  ptr += 1; /* Skip fs_wtmult */
+
+  if (pref < nmp->nm_wsize)
+    {
+      nmp->nm_wsize = (pref + NFS_FABLKSIZE - 1) & ~(NFS_FABLKSIZE - 1);
+    }
+  if (max < nmp->nm_wsize)
+    {
+      nmp->nm_wsize = max & ~(NFS_FABLKSIZE - 1);
+      if (nmp->nm_wsize == 0)
+        {
+          nmp->nm_wsize = max;
+        }
+    }
+
+  pref = fxdr_unsigned(uint32_t, *ptr++);
   if (pref < nmp->nm_readdirsize)
     {
       nmp->nm_readdirsize = (pref + NFS_DIRBLKSIZ - 1) & ~(NFS_DIRBLKSIZ - 1);
     }
 
-  if (max < nmp->nm_readdirsize)
+  /* Get the file attributes if needed */
+
+  if (nmp->nm_fattr.fa_type == 0)
     {
-      nmp->nm_readdirsize = max & ~(NFS_DIRBLKSIZ - 1);
-      if (nmp->nm_readdirsize == 0)
+      nfs_statistics(NFSPROC_GETATTR);
+      error = nfs_request(nmp, NFSPROC_GETATTR,
+                          (FAR void *)fsinfo, sizeof(struct FS3args),
+                          (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
+      if (error)
         {
-          nmp->nm_readdirsize = max;
+          return error;
         }
+
+      attr = (FAR struct rpc_reply_getattr *)nmp->nm_iobuffer;
+      memcpy(&nmp->nm_fattr, &attr->attr, sizeof(struct nfs_fattr));
     }
 
   return OK;
@@ -2123,8 +2127,6 @@ static int nfs_statfs(FAR struct inode *mountpt, FAR struct statfs *sbp)
   /* Fill in the statfs info */
 
   sbp->f_type = NFS_SUPER_MAGIC;
-
-  nfs_fsinfo(nmp);
 
   fsstat = &nmp->nm_msgbuffer.fsstat;
   fsstat->fs.fsroot.length = txdr_unsigned(nmp->nm_fhsize);
