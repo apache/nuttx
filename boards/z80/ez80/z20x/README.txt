@@ -95,13 +95,6 @@ Memory Constaints
   you enable assertions, debug outputs, or even debug symbols.  It is very
   unlikely that the nsh_flash configuration will fit into FLASH at all!
 
-  I believe that there is some issue with the optimization CFLAGS used with
-  the ZDS-II compiler.  The size of the FLASH images that are generated are
-  larger than you would see with, say, an equivalent Cortex-M compilation.
-  I reviewed the individual object files.  There is not one thing that is
-  causing the large size.  Rather, the ZDS-II compiler is simply generating
-  larger CODE sections in the object files.
-
 Serial Console
 ==============
 
@@ -222,8 +215,11 @@ Configuration Subdirectories
     NOTES:
 
     1. UNVERIFIED!  I doubt that the nsh_flash program will fit into the
-       smaller FLASH memory of the eZ80F92 part.  See discusssion under
+       smaller FLASH memory of the eZ80F92 part.  See discussion under
        "Memory Constraints" above.
+
+       The nsh_ram configuration, of course, depends on the sdboot
+       bootloader to load that program into RAM.
 
     2. The two configurations different only in that one builds for
        execution entirely from FLASH and the other for execution entirely
@@ -349,3 +345,17 @@ Configuration Subdirectories
        64Kb of FLASH memory.  It will not be possible to run programs in
        SRAM *unless* some mechanism is developed to redirect interrupts
        from ROM and into loaded SRAM logic.
+
+       For example, it might be possible to implement this kind of
+       vectoring to get to a RAM based interrupt handler:
+
+       a. The initial 16-bit address in the interrupt vector table can
+          transfer the interrupt to a larger jump table also in lower
+          flash memory.
+       b. That jump table could vector to another jump table at a known
+          location RAM.
+       c. The RAM jump table could then jump to the final RAM-based
+          interrupt handler.
+
+       This would effect the logic in arch/z80/src/ez80/ez80f92_handlers.am
+       and possible the z20x *.linkcmd files.
