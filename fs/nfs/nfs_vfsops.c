@@ -1343,6 +1343,7 @@ static int nfs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
 
   nfs_semtake(nmp);
 
+read_dir:
   /* Request a block directory entries, copying directory information from
    * the dirent structure.
    */
@@ -1421,6 +1422,7 @@ static int nfs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
   memcpy(dir->u.nfs.nfs_verifier, ptr, DIRENT_NFS_VERFLEN);
   ptr += uint32_increment(DIRENT_NFS_VERFLEN);
 
+next_entry:
   /* Check if values follow.  If no values follow, then the EOF indication
    * will appear next.
    */
@@ -1437,6 +1439,7 @@ static int nfs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
         {
           finfo("End of directory\n");
           error = -ENOENT;
+          goto errout_with_semaphore;
         }
 
       /* What would it mean if there were not data and we not at the end of
@@ -1446,10 +1449,8 @@ static int nfs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
        else
         {
           finfo("No data but not end of directory???\n");
-          error = -EAGAIN;
+          goto read_dir;
         }
-
-      goto errout_with_semaphore;
     }
 
   /* If we are not at the end of the directory listing, then a set of entries
@@ -1483,8 +1484,6 @@ static int nfs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
   dir->u.nfs.nfs_cookie[0] = *ptr++;
   dir->u.nfs.nfs_cookie[1] = *ptr++;
 
-  ptr++; /* Just skip over the nextentry for now */
-
   /* Return the name of the node to the caller */
 
   if (length > NAME_MAX)
@@ -1495,6 +1494,12 @@ static int nfs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
   memcpy(dir->fd_dir.d_name, name, length);
   dir->fd_dir.d_name[length] = '\0';
   finfo("name: \"%s\"\n", dir->fd_dir.d_name);
+
+  if (strcmp(dir->fd_dir.d_name, ".") == 0 ||
+      strcmp(dir->fd_dir.d_name, "..") == 0)
+    {
+      goto next_entry; /* Skip . and .. */
+    }
 
   /* Get the file attributes associated with this name and return
    * the file type.
