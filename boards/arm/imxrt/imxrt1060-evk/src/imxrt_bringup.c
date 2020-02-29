@@ -58,6 +58,10 @@
 #  include <nuttx/usb/usbmonitor.h>
 #endif
 
+#ifdef CONFIG_PL2303
+#  include <nuttx/usb/pl2303.h>
+#endif
+
 #include "imxrt1060-evk.h"
 
 #include <arch/board/board.h>  /* Must always be included last */
@@ -242,6 +246,10 @@ int imxrt_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
     }
+#endif
+
+#ifdef CONFIG_PL2303
+  usbdev_serialinitialize(0);
 #endif
 
   UNUSED(ret);
