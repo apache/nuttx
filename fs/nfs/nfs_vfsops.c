@@ -85,10 +85,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The V3 EXCLUSIVE file creation logic is not fully supported. */
-
-#define USE_GUARDED_CREATE    1
-
 /* include/nuttx/fs/dirent.h has its own version of these lengths.  They must
  * match the NFS versions.
  */
@@ -282,86 +278,54 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
 
   /* Set the creation mode */
 
-  if ((mode & O_CREAT) != 0)
-    {
-#ifdef USE_GUARDED_CREATE
-      *ptr++  = HTONL(NFSV3CREATE_GUARDED);
-#else
-      *ptr++  = HTONL(NFSV3CREATE_EXCLUSIVE);
-#endif
-    }
-  else
-    {
-      *ptr++  = HTONL(NFSV3CREATE_UNCHECKED);
-    }
-
+  *ptr++  = HTONL(NFSV3CREATE_GUARDED);
   reqlen += sizeof(uint32_t);
 
-  /* Mode information is not provided if EXCLUSIVE creation is used.
-   * in this case, we must call SETATTR after successfully creating
-   * the file.
+  /* Set the mode.  NOTE: Here we depend on the fact that the NuttX and NFS
+   * bit settings are the same (at least for the bits of interest).
    */
 
-#ifndef USE_GUARDED_CREATE
-  if ((mode & O_CREAT) == 0)
-#endif
-    {
-      /* Set the mode.  NOTE: Here we depend on the fact that the NuttX and NFS
-       * bit settings are the same (at least for the bits of interest).
-       */
+  *ptr++  = nfs_true; /* True: mode value follows */
+  reqlen += sizeof(uint32_t);
 
-      *ptr++  = nfs_true; /* True: mode value follows */
-      reqlen += sizeof(uint32_t);
+  tmp = mode & (NFSMODE_IXOTH | NFSMODE_IWOTH | NFSMODE_IROTH |
+                NFSMODE_IXGRP | NFSMODE_IWGRP | NFSMODE_IRGRP |
+                NFSMODE_IXUSR | NFSMODE_IWUSR | NFSMODE_IRUSR |
+                NFSMODE_SAVETEXT | NFSMODE_ISGID | NFSMODE_ISUID);
+  *ptr++  = txdr_unsigned(tmp);
+  reqlen += sizeof(uint32_t);
 
-      tmp = mode & (NFSMODE_IXOTH | NFSMODE_IWOTH | NFSMODE_IROTH |
-                    NFSMODE_IXGRP | NFSMODE_IWGRP | NFSMODE_IRGRP |
-                    NFSMODE_IXUSR | NFSMODE_IWUSR | NFSMODE_IRUSR |
-                    NFSMODE_SAVETEXT | NFSMODE_ISGID | NFSMODE_ISUID);
-      *ptr++  = txdr_unsigned(tmp);
-      reqlen += sizeof(uint32_t);
+  /* Set the user ID to zero */
 
-      /* Set the user ID to zero */
+  *ptr++  = nfs_true;             /* True: Uid value follows */
+  *ptr++  = 0;                    /* UID = 0 (nobody) */
+  reqlen += 2*sizeof(uint32_t);
 
-      *ptr++  = nfs_true;             /* True: Uid value follows */
-      *ptr++  = 0;                    /* UID = 0 (nobody) */
-      reqlen += 2*sizeof(uint32_t);
+  /* Set the group ID to one */
 
-      /* Set the group ID to one */
+  *ptr++  = nfs_true;            /* True: Gid value follows */
+  *ptr++  = HTONL(1);            /* GID = 1 (nogroup) */
+  reqlen += 2*sizeof(uint32_t);
 
-      *ptr++  = nfs_true;            /* True: Gid value follows */
-      *ptr++  = HTONL(1);            /* GID = 1 (nogroup) */
-      reqlen += 2*sizeof(uint32_t);
+  /* Set the size to zero */
 
-      /* Set the size to zero */
+  *ptr++  = nfs_true;            /* True: Size value follows */
+  *ptr++  = 0;                   /* Size = 0 */
+  *ptr++  = 0;
+  reqlen += 3*sizeof(uint32_t);
 
-      *ptr++  = nfs_true;            /* True: Size value follows */
-      *ptr++  = 0;                   /* Size = 0 */
-      *ptr++  = 0;
-      reqlen += 3*sizeof(uint32_t);
+  /* Don't change times */
 
-      /* Don't change times */
+  *ptr++  = HTONL(NFSV3SATTRTIME_DONTCHANGE); /* Don't change atime */
+  *ptr++  = HTONL(NFSV3SATTRTIME_DONTCHANGE); /* Don't change mtime */
+  reqlen += 2*sizeof(uint32_t);
 
-      *ptr++  = HTONL(NFSV3SATTRTIME_DONTCHANGE); /* Don't change atime */
-      *ptr++  = HTONL(NFSV3SATTRTIME_DONTCHANGE); /* Don't change mtime */
-      reqlen += 2*sizeof(uint32_t);
-    }
+  /* Send the NFS request. */
 
-  /* Send the NFS request.  Note there is special logic here to handle version 3
-   * exclusive open semantics.
-   */
-
-  do
-    {
-      nfs_statistics(NFSPROC_CREATE);
-      error = nfs_request(nmp, NFSPROC_CREATE,
-                          (FAR void *)&nmp->nm_msgbuffer.create, reqlen,
-                          (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
-    }
-#ifdef USE_GUARDED_CREATE
-  while (0);
-#else
-  while (((mode & O_CREAT) != 0) && error == -EOPNOTSUPP);
-#endif
+  nfs_statistics(NFSPROC_CREATE);
+  error = nfs_request(nmp, NFSPROC_CREATE,
+                      (FAR void *)&nmp->nm_msgbuffer.create, reqlen,
+                      (FAR void *)nmp->nm_iobuffer, nmp->nm_buflen);
 
   /* Check for success */
 
@@ -391,7 +355,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
 
       /* Save the attributes in the file data structure */
 
-      tmp = *ptr;  /* handle_follows */
+      tmp = *ptr;  /* attributes_follows */
       if (!tmp)
         {
           fwarn("WARNING: no file attributes\n");
@@ -645,7 +609,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
 
       if (error != -ENOENT)
         {
-          ferr("ERROR: nfs_findnode failed: %d\n", error);
+          ferr("ERROR: nfs_fileopen failed: %d\n", error);
           goto errout_with_semaphore;
         }
 
@@ -661,7 +625,6 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
            */
 
           ferr("ERROR: File does not exist\n");
-           error = -ENOENT;
           goto errout_with_semaphore;
         }
 
