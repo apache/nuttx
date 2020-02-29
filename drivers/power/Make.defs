@@ -166,6 +166,32 @@ POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$
 
 endif
 
+# Add battery monitor drivers
+
+ifeq ($(CONFIG_BATTERY_MONITOR),y)
+
+CSRCS += battery_monitor.c
+
+# Add I2C-based battery monitor drivers
+
+ifeq ($(CONFIG_I2C),y)
+
+# Add the BQ769x0 I2C-based battery monitor driver
+
+ifeq ($(CONFIG_I2C_BQ769X0),y)
+CSRCS += bq769x0.c
+endif
+
+endif
+
+# Include battery suport in the build
+
+POWER_DEPPATH := --dep-path power
+POWER_VPATH := :power
+POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+
+endif
+
 # Include power management in the build
 
 DEPPATH += $(POWER_DEPPATH)

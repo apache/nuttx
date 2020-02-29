@@ -1,6 +1,7 @@
 /****************************************************************************
  * drivers/sensors/mcp9844.c
  * Character driver for the MCP9844 Temperature Sensor
+ * Also supports the MCP9808 Temperature Sensor
  *
  *   Copyright (C) 2015 DS-Automotion GmbH. All rights reserved.
  *   Author: Alexander Entinger <a.entinger@ds-automotion.com>
@@ -267,8 +268,8 @@ static int mcp9844_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           uint16_t raw_temperature = 0;
           ret = mcp9844_read_u16(priv, MCP9844_TEMP_REG, &raw_temperature);
 
-          /* Convert from the proprietary sensor temperature data representation
-           * to a more user friendly version.
+          /* Convert from the proprietary sensor temperature data
+           * representation to a more user-friendly version.
            */
 
           if (ret == OK)
@@ -307,8 +308,58 @@ static int mcp9844_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           ret = mcp9844_write_u16(priv, MCP9844_RESO_REG, (uint16_t)(arg));
           if (ret != OK)
             {
-              snerr("ERROR: ioctl::SNIOC_SETRESOLUTION - mcp9844_write_u16 failed"
-                    " - no resolution set\n");
+              snerr("ERROR: ioctl::SNIOC_SETRESOLUTION - mcp9844_write_u16"
+                  "failed - no resolution set\n");
+            }
+        }
+        break;
+
+      case SNIOC_SHUTDOWN:
+        {
+          uint16_t config_reg;
+
+          /* Perform a read-modify-write cycle on the config register */
+
+          ret = mcp9844_read_u16(priv, MCP9844_CONF_REG, &config_reg);
+          if (ret == OK)
+            {
+              config_reg |= MCP9844_CONF_REG_SHDN;
+              ret = mcp9844_write_u16(priv, MCP9844_CONF_REG, config_reg);
+              if (ret != OK)
+                {
+                  snerr("ERROR: ioctl::SNIOC_SHUTDOWN - "
+                        "mcp9844_write_u16 failed\n");
+                }
+            }
+          else
+            {
+              snerr("ERROR: ioctl::SNIOC_SHUTDOWN - "
+                    "mcp9844_read_u16 failed\n");
+            }
+        }
+        break;
+
+      case SNIOC_POWERUP:
+        {
+          uint16_t config_reg;
+
+          /* Perform a read-modify-write cycle on the config register */
+
+          ret = mcp9844_read_u16(priv, MCP9844_CONF_REG, &config_reg);
+          if (ret == OK)
+            {
+              config_reg &= ~MCP9844_CONF_REG_SHDN;
+              ret = mcp9844_write_u16(priv, MCP9844_CONF_REG, config_reg);
+              if (ret != OK)
+                {
+                  snerr("ERROR: ioctl::SNIOC_POWERUP - "
+                        "mcp9844_write_u16 failed\n");
+                }
+            }
+          else
+            {
+              snerr("ERROR: ioctl::SNIOC_POWERUP - "
+                    "mcp9844_read_u16 failed\n");
             }
         }
         break;
@@ -349,7 +400,7 @@ int mcp9844_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   DEBUGASSERT(i2c != NULL);
 
-  /* Initialize the LM-75 device structure */
+  /* Initialize the MCP9844 device structure */
 
   FAR struct mcp9844_dev_s *priv =
     (FAR struct mcp9844_dev_s *)kmm_malloc(sizeof(struct mcp9844_dev_s));
