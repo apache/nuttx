@@ -35,9 +35,20 @@
 
 /* Configuration */
 
-#define HAVE_MMCSD 1
+#define HAVE_SPIFLASH 1
+#define HAVE_MMCSD    1
+#define HAVE_XPT2046  1
+
+#if !defined(CONFIG_MTD_W25) || !defined(CONFIG_EZ80_SPI)
+#  undef HAVE_SPIFLASH
+#endif
+
 #if !defined(CONFIG_MMCSD_SPI) || !defined(CONFIG_EZ80_SPI)
 #  undef HAVE_MMCSD
+#endif
+
+#if !defined(CONFIG_INPUT_ADS7843E) || !defined(CONFIG_EZ80_SPI)
+#  undef HAVE_XPT2046
 #endif
 
 /* Helpers for accessing memory mapped registers */

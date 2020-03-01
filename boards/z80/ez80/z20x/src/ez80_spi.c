@@ -55,25 +55,46 @@
 
 void ez80_spidev_initialize(void)
 {
-#ifdef HAVE_MMCSD
+#if defined(HAVE_MMCSD) || defined(HAVE_XPT2046)
   uint8_t regval;
+  uint8_t pins;
 
-  /* MMC/SD CS: Port PB2/nSS as output */
+  /* SPI Devices on the z20x main board:
+   *
+   *   W25Q32JV CS: Port PB5 as output
+   *
+   * SPI Devices on LCD card:
+   *
+   *   MMC/SD CS: Port PB2/nSS as output
+   *   XPT2046 CS: PB1/T1_IN as output
+   *   SST25VF016 CS: Pulled high
+   */
+
+  pins    = 0;
+#ifdef HAVE_SPIFLASH
+  pins   |= EZ80_GPIOD5;
+#endif
+#ifdef HAVE_XPT2046
+  pins   |= EZ80_GPIOD1;
+#endif
+#ifdef HAVE_MMCSD
+  pins   |= EZ80_GPIOD2;
+#endif
 
   regval  = inp(EZ80_PB_DR);
-  regval |= EZ80_GPIOD2;
+  regval |= pins;
   outp(EZ80_PB_DR, regval);
 
   regval  = inp(EZ80_PB_ALT1);
-  regval &= ~EZ80_GPIOD2;
+  regval &= ~pins;
   outp(EZ80_PB_ALT1, regval);
 
   regval  = inp(EZ80_PB_ALT2);
-  regval &= ~EZ80_GPIOD2;
+  regval &= ~pins;
   outp(EZ80_PB_ALT2, regval);
 
   regval  = inp(EZ80_PB_DDR);
-  regval &= ~EZ80_GPIOD2;
+  regval &= ~pins;
   outp(EZ80_PB_DDR, regval);
 #endif
 }
@@ -104,6 +125,52 @@ void ez80_spidev_initialize(void)
 
 void ez80_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
+#ifdef HAVE_SPIFLASH
+  if (devid == SPIDEV_FLASH(0))
+    {
+      uint8_t regval;
+
+      /* Set PB5 output */
+
+      regval  = inp(EZ80_PB_DR);
+
+      if (selected)
+        {
+          regval &= ~EZ80_GPIOD5;
+        }
+      else
+        {
+          regval |= EZ80_GPIOD5;
+        }
+
+      outp(EZ80_PB_DR, regval);
+      return;
+    }
+#endif
+
+#ifdef HAVE_XPT2046
+  if (devid == SPIDEV_TOUCHSCREEN(0))
+    {
+      uint8_t regval;
+
+      /* Set PB1/T1_IN output */
+
+      regval  = inp(EZ80_PB_DR);
+
+      if (selected)
+        {
+          regval &= ~EZ80_GPIOD1;
+        }
+      else
+        {
+          regval |= EZ80_GPIOD1;
+        }
+
+      outp(EZ80_PB_DR, regval);
+      return;
+    }
+#endif
+
 #ifdef HAVE_MMCSD
   if (devid == SPIDEV_MMCSD(0))
     {
@@ -123,6 +190,7 @@ void ez80_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
         }
 
       outp(EZ80_PB_DR, regval);
+      return;
     }
 #endif
 }
