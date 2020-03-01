@@ -53,7 +53,7 @@ source arch/x86_64/src/qemu/Kconfig
 
 config ARCH_BOARD
 	string
-	default "qemu"
+	default "qemu-intel64"
 
 endif # ARCH_CHIP_QEMU
 
