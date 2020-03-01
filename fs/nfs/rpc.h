@@ -146,7 +146,6 @@
 
 /* RPC definitions for the portmapper. */
 
-#define PMAPPORT         111
 #define PMAPPROG         100000
 #define PMAPVERS         2
 
@@ -450,12 +449,13 @@ struct rpcclnt
   uint8_t   rc_fhsize;        /* File size of the root directory */
   FAR char *rc_path;          /* Server's path of the mounted directory */
 
-  FAR struct sockaddr *rc_name;
+  FAR struct sockaddr_storage *rc_name;
   struct socket rc_so;        /* RPC socket */
 
   uint8_t   rc_sotype;        /* Type of socket */
   uint8_t   rc_timeo;         /* Timeout value (in deciseconds) */
   uint8_t   rc_retry;         /* Max retries */
+  uint32_t  rc_xid;           /* Transaction id */
 };
 
 /****************************************************************************
@@ -465,7 +465,6 @@ struct rpcclnt
 void rpcclnt_init(void);
 int  rpcclnt_connect(FAR struct rpcclnt *rpc);
 void rpcclnt_disconnect(FAR struct rpcclnt *rpc);
-int  rpcclnt_umount(FAR struct rpcclnt *rpc);
 int  rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
                      int version, FAR void *request, size_t reqlen,
                      FAR void *response, size_t resplen);

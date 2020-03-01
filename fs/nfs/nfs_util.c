@@ -149,18 +149,9 @@ int nfs_request(FAR struct nfsmount *nmp, int procnum,
 
   if (replyh.nfs_status != 0)
     {
-      if (fxdr_unsigned(uint32_t, replyh.nfs_status) > 32)
-        {
-          error = -EOPNOTSUPP;
-        }
-      else
-        {
-          /* NFS_ERRORS are the same as NuttX errno values */
+      /* NFS_ERRORS are the same as NuttX errno values */
 
-          error = -fxdr_unsigned(uint32_t, replyh.nfs_status);
-        }
-
-      return error;
+      return -fxdr_unsigned(uint32_t, replyh.nfs_status);
     }
 
   if (replyh.rh.rpc_verfi.authtype != 0)
