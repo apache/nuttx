@@ -61,7 +61,7 @@
 #define NFS_RETRANS        10             /* Num of retrans for soft mounts */
 #define NFS_WSIZE          8192           /* Def. write data size <= 8192 */
 #define NFS_RSIZE          8192           /* Def. read data size <= 8192 */
-#define NFS_READDIRSIZE    8192           /* Def. readdir size */
+#define NFS_READDIRSIZE    1024           /* Def. readdir size */
 
 /* Ideally, NFS_DIRBLKSIZ should be bigger, but I've seen servers with
  * broken NFS/ethernet drivers that won't work with anything bigger (Linux..)
