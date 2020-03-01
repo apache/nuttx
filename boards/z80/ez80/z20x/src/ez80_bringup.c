@@ -59,13 +59,14 @@ int ez80_bringup(void)
   if (ret < 0)
     {
       ferr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      return ret;
     }
 #endif
 
 #ifdef HAVE_SPIFLASH
   /* Initialize and register the W25 FLASH file system. */
 
-  ret = ez80_w25_initialize(0);
+  ret = ez80_w25_initialize(CONFIG_Z20X_W25_MINOR);
   if (ret < 0)
     {
       ferr("ERROR: Failed to initialize W25 minor %d: %d\n", 0, ret);
@@ -80,9 +81,10 @@ int ez80_bringup(void)
   if (ret < 0)
     {
       mcerr("ERROR: Failed to initialize SD card: %d\n", ret);
+      return ret;
     }
 #endif
 
   UNUSED(ret);
-  return ret;
+  return OK;
 }

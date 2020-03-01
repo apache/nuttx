@@ -57,19 +57,17 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_ARCH_CHIP_EZ80F91) || defined(CONFIG_ARCH_CHIP_EZ80F92)
-#  include "ez80f91_spi.h"
-#endif
+#include "ez80_spi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_EZ80F91) || defined(CONFIG_ARCH_CHIP_EZ80F92)
-#  define GPIOB_SPI_SS      (1 << 2)  /* Pin 2: /SS (not used by driver) */
-#  define GPIOB_SPI_SCK     (1 << 3)  /* Pin 3: SCK */
-#  define GPIOB_SPI_MISO    (1 << 6)  /* Pin 6: MISO */
-#  define GPIOB_SPI_MOSI    (1 << 7)  /* Pin 7: MOSI */
+#  define GPIOB_SPI_SS      (1 << 2)  /* PB2: /SS (not used by driver) */
+#  define GPIOB_SPI_SCK     (1 << 3)  /* PB3: SCK */
+#  define GPIOB_SPI_MISO    (1 << 6)  /* PB6: MISO */
+#  define GPIOB_SPI_MOSI    (1 << 7)  /* PB7: MOSI */
 
 #  define GPIOB_SPI_PINSET  (GPIOB_SPI_SS | GPIOB_SPI_SCK | GPIOB_SPI_MISO | \
                              GPIOB_SPI_MOSI)
