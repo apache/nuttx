@@ -152,6 +152,18 @@ int ez80_mmcsd_initialize(void);
 void ez80_spidev_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: ez80_w25_initialize
+ *
+ * Description:
+ *   Called to initialize Winbond W25 memory
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_SPIFLASH
+int ez80_w25_initialize(int minor);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

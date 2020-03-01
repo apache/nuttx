@@ -38,4 +38,8 @@ ifeq ($(CONFIG_Z20X_SDBOOT),y)
 CSRCS += sd_main.c
 endif
 
+ifeq ($(CONFIG_MTD_W25),y)
+CSRCS += ez80_w25.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
