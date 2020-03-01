@@ -1,6 +1,6 @@
 /*****************************************************************************/
-/* boards/z80/ez80/z20x/scripts/z20x_ram.linkcmd                             */
-/* For configurations running entirely out of RAM with nothing in FLASH      */
+/* boards/z80/ez80/z20x/scripts/z20x_loader.linkcmd                          */
+/* For bootloader configurations running entirely out of FLASH               */
 /*                                                                           */
 /* Licensed to the Apache Software Foundation (ASF) under one or more        */
 /* contributor license agreements.  See the NOTICE file distributed with     */
@@ -23,18 +23,15 @@
 -map -maxhexlen=64 -quiet -warnoverlap -xref -unresolved=fatal
 -sort NAME=ascending -warn -debug -NOigcase
 
-RANGE ROM $000000 : $01FFFF
-RANGE RAM $040000 : $0BFFFF
-RANGE EXTIO $000000 : $00FFFF
-RANGE INTIO $000000 : $0000FF
+RANGE ROM $000000 : $01ffff
+RANGE RAM $040000 : $04ffff
+RANGE EXTIO $000000 : $00ffff
+RANGE INTIO $000000 : $0000ff
 
-CHANGE .RESET is RAM
-CHANGE .STARTUP is RAM
-CHANGE TEXT is CODE
-CHANGE CODE is RAM
-CHANGE STRSECT is CODE
+CHANGE STRSECT is ROM
 
 ORDER .RESET,.IVECTS,.STARTUP,CODE,DATA
+COPY DATA ROM
 
 DEFINE __low_romdata = copy base of DATA
 DEFINE __low_data = base of DATA
@@ -49,6 +46,12 @@ DEFINE __low_code = base of CODE
 DEFINE __len_code = length of CODE
 DEFINE __copy_code_to_ram = 0
 DEFINE __crtl = 1
+
+DEFINE __vecstart = $040000
+DEFINE __loaderstart = $040400
+DEFINE __loaderend = $04ffff
+DEFINE __progstart = $050000
+DEFINE __progend = $0bffff
 
 DEFINE __CS0_LBR_INIT_PARAM = $04
 DEFINE __CS0_UBR_INIT_PARAM = $0b

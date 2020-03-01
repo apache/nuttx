@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/z80/src/ez80/ez80f91_spi.h
+ * arch/z80/src/ez80/ez80_spi.h
  *
- *   Copyright (C) 2009-2010, 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2015, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_Z80_SRC_EZ80_EZ80F91_SPI_H
-#define __ARCH_Z80_SRC_EZ80_EZ80F91_SPI_H
+#ifndef __ARCH_Z80_SRC_EZ80_EZ80_SPI_H
+#define __ARCH_Z80_SRC_EZ80_EZ80_SPI_H
 
 /************************************************************************************
  * Included Files
@@ -51,7 +51,7 @@
 
 /* SPIC Registers  ******************************************************************/
 
-/* Provided in ez80f91.h */
+/* Provided in ez80f9x.h */
 
 /* SPIC Register Bit Definitions  ***************************************************/
 
@@ -63,6 +63,7 @@
 /* SPI Control (CTL) Register Definitions */
 
 #define SPI_CTL_IRQEN    (1 << 7) /* Bit 7: 1=SPI system interrupt is enabled */
+                                  /* Bit 6: Reserved */
 #define SPI_CTL_SPIEN    (1 << 5) /* Bit 5: 1=SPI is enabled */
 #define SPI_CTL_MASTEREN (1 << 4) /* Bit 4: 1=SPI operates as a master */
 #define SPI_CTL_CPOL     (1 << 3) /* Bit 3: 1=Master SCK pin idles in a high (1) state */
@@ -73,7 +74,9 @@
 
 #define SPI_SR_SPIF      (1 << 7) /* Bit 7: 1=SPI data transfer is finished */
 #define SPI_SR_WCOL      (1 << 6) /* Bit 6: 1=SPI write collision is detected*/
+                                  /* Bit 5: Reserved */
 #define SPI_SR_MODF      (1 << 4) /* Bit 4: 1=Mode fault (multimaster conflict) is detected */
+                                  /* Bits 0-3: Reserved */
 
 /* RBR/TSR Register Definitions */
 
@@ -155,4 +158,4 @@ int ez80_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif /* __cplusplus */
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_Z80_SRC_EZ80_EZ80F91_SPI_H */
+#endif /* __ARCH_Z80_SRC_EZ80_EZ80_SPI_H */

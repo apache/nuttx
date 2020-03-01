@@ -35,7 +35,7 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/drivers/drivers.h>
 
-#include "ez80f91_spi.h"
+#include "ez80_spi.h"
 #include "z20x.h"
 
 /****************************************************************************
@@ -54,10 +54,6 @@ int ez80_w25_initialize(int minor)
 {
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
-#ifdef CONFIG_Z20X_W25_CHARDEV
-  char blockdev[18];
-  char chardev[12];
-#endif
   int ret;
 
   /* Get the SPI port */
@@ -98,17 +94,12 @@ int ez80_w25_initialize(int minor)
       return ret;
     }
 
-  /* Use the minor number to create device paths */
+  /* Create a character device on the block device */
 
-  snprintf(blockdev, 18, "/dev/mtdblock%d", minor);
-  snprintf(chardev, 12, "/dev/mtd%d", minor);
-
-  /* Now create a character device on the block device */
-
-  ret = bchdev_register(blockdev, chardev, false);
+  ret = bchdev_register(W25_BLOCKDEV, W25_CHARDEV, false);
   if (ret < 0)
     {
-      ferr("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
+      ferr("ERROR: bchdev_register %s failed: %d\n", W25_CHARDEV, ret);
       return ret;
     }
 #endif

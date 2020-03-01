@@ -86,6 +86,45 @@
  * Chip select 3 is not used
  */
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* RAM Memory map
+ *
+ * 040000              Beginning of RAM
+ * 040000 _vecstart    Beginning of Vector information.  Used to hand off
+ *                     to RAM-based handlers for interrupts caught by
+ *                     FLASH interrupt vectors. 1Kb is set aside for RAM-
+ *                     based interrupt handling information.
+ * 040400 _loaderstart Start of RAM used exclusively by the bootloader.
+ *                     This memory region an be recovered by the RAM-based
+ *                     program.
+ * 04ffff _loaderend
+ * 050000 _progstart   Start of CODE for the RAM-based program.  The
+ *                     program can freely use the memory region from
+ *                     050000-0bffff and can recover the memory for
+ *                     40400-04ffff for heap usage.
+ * 0bffff _progend     End of RAM
+ */
+
+extern unsigned long _vecstart;
+#define VECSTART     ((uintptr_t)&_vecstart)
+
+extern unsigned long _loaderstart;
+#define LOADERSTART  ((uintptr_t)&_loaderstart)
+
+extern unsigned long _loaderend;
+#define LOADEREND    ((uintptr_t)&_loaderend)
+
+extern unsigned long _progstart;
+#define PROGSTART    ((uintptr_t)&_progstart)
+
+extern unsigned long _progend;
+#define PROGEND      ((uintptr_t)&_progend)
+
+#define PROGSIZE     (PROGEND - PROGSTART + 1)
+
 /* LED and port emulation memory register addresses */
 
 /* GPIO data bit definitions */
@@ -99,8 +138,20 @@
 #define EZ80_GPIOD6       (1 << 6)
 #define EZ80_GPIOD7       (1 << 7)
 
+/* Winbond W25 SPI FLASH */
+
+#ifndef CONFIG_Z20X_W25_MINOR
+#  define CONFIG_Z20X_W25_MINOR 0
+#endif
+
+#define __STR(s) #s
+#define __XSTR(s) __STR(s)
+
+#define W25_CHARDEV  "/dev/mtd" __XSTR(CONFIG_Z20X_W25_MINOR)
+#define W25_BLOCKDEV "/dev/mtdblock" __XSTR(CONFIG_Z20X_W25_MINOR)
+
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN
@@ -128,7 +179,7 @@ extern "C"
 
 int ez80_bringup(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: ez80_mmcsd_initialize
  *
  * Description:

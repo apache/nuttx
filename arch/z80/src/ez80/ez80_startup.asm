@@ -102,6 +102,7 @@ _ez80_startup:
 
 	; Position the IDLE task stack point at an offset of 1Kb in on-chip SRAM
 	; On-chip SRAM resides at an offset of %00e000 from the RAM base address.
+	; REVISIT:  CONFIG_IDLETHREAD_STACKSIZE is not used!
 
 	ld		sp, __RAM_ADDR_U_INIT_PARAM << 16 + %00e400
 
