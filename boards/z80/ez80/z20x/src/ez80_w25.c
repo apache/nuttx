@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/z80/ez80/z20x/src/ez80_bringup.c
+ * boards/z80/ez80/z20x/src/ez80_w25.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,10 +24,18 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <sys/mount.h>
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <errno.h>
 #include <debug.h>
 
+#include <nuttx/spi/spi.h>
+#include <nuttx/mtd/mtd.h>
+#include <nuttx/drivers/drivers.h>
+
+#include "ez80f91_spi.h"
 #include "z20x.h"
 
 /****************************************************************************
@@ -35,54 +43,75 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ez80_bringup
+ * Name: ez80_w25_initialize
  *
  * Description:
- *   Perform architecture-specific initialization
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
+ *   Initialize and register the W25 FLASH file system.
  *
  ****************************************************************************/
 
-int ez80_bringup(void)
+int ez80_w25_initialize(int minor)
 {
-  int ret = OK;
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
-    }
+  FAR struct spi_dev_s *spi;
+  FAR struct mtd_dev_s *mtd;
+#ifdef CONFIG_Z20X_W25_CHARDEV
+  char blockdev[18];
+  char chardev[12];
 #endif
+  int ret;
 
-#ifdef HAVE_SPIFLASH
-  /* Initialize and register the W25 FLASH file system. */
+  /* Get the SPI port */
 
-  ret = ez80_w25_initialize(0);
+  spi = ez80_spibus_initialize(0);
+  if (!spi)
+    {
+      ferr("ERROR: Failed to initialize SPI port %d\n", 0);
+      return -ENODEV;
+    }
+
+  /* Now bind the SPI interface to the W25 SPI FLASH driver */
+
+  mtd = w25_initialize(spi);
+  if (!mtd)
+    {
+      ferr("ERROR: Failed to bind SPI port %d to the W25 FLASH driver\n", 0);
+      return -ENODEV;
+    }
+
+#if defined(CONFIG_Z20X_W25_BLOCKDEV)
+  /* Use the FTL layer to wrap the MTD driver as a block driver. */
+
+  ret = ftl_initialize(minor, mtd);
   if (ret < 0)
     {
-      ferr("ERROR: Failed to initialize W25 minor %d: %d\n", 0, ret);
+      ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+      return ret;
+    }
+
+#elif defined(CONFIG_Z20X_W25_CHARDEV)
+  /* Use the FTL layer to wrap the MTD driver as a block driver */
+
+  ret = ftl_initialize(minor, mtd);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+      return ret;
+    }
+
+  /* Use the minor number to create device paths */
+
+  snprintf(blockdev, 18, "/dev/mtdblock%d", minor);
+  snprintf(chardev, 12, "/dev/mtd%d", minor);
+
+  /* Now create a character device on the block device */
+
+  ret = bchdev_register(blockdev, chardev, false);
+  if (ret < 0)
+    {
+      ferr("ERROR: bchdev_register %s failed: %d\n", chardev, ret);
       return ret;
     }
 #endif
 
-#ifdef HAVE_MMCSD
-  /* Initialize SPI-based SD card slot */
-
-  ret = ez80_mmcsd_initialize();
-  if (ret < 0)
-    {
-      mcerr("ERROR: Failed to initialize SD card: %d\n", ret);
-    }
-#endif
-
-  UNUSED(ret);
-  return ret;
+  return OK;
 }
