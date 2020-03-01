@@ -64,6 +64,7 @@
  ****************************************************************************/
 
 /* Memory Map ***************************************************************/
+
 /* 0x2020:0000 - Start of on-chip RAM (OCRAM) and start of .data (_sdata)
  *             - End of .data (_edata) and start of .bss (_sbss)
  *             - End of .bss (_ebss) and bottom of idle stack
@@ -157,7 +158,7 @@ static inline void imxrt_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -187,7 +188,7 @@ static inline void imxrt_fpuconfig(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -305,6 +306,10 @@ void __start(void)
   /* Set the stack limit before we attempt to call any functions */
 
   __asm__ volatile ("sub r10, sp, %0" : : "r" (CONFIG_IDLETHREAD_STACKSIZE - 64) : );
+#endif
+
+#ifdef CONFIG_BOOT_RUNFROMISRAM
+    imxrt_ocram_initialize();
 #endif
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be

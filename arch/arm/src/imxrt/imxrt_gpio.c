@@ -348,7 +348,7 @@ static const uint8_t g_gpio5_padmux[IMXRT_GPIO_NPINS] =
   IMXRT_PADMUX_INVALID                        /* GPIO5 Pin 31 */
 };
 
-static FAR const uint8_t *g_gpio_padmux[IMXRT_GPIO_NPORTS + 1] =
+static const uint8_t * const g_gpio_padmux[IMXRT_GPIO_NPORTS + 1] =
 {
   g_gpio1_padmux,                             /* GPIO1 */
   g_gpio2_padmux,                             /* GPIO2 */
@@ -375,7 +375,7 @@ static FAR const uint8_t *g_gpio_padmux[IMXRT_GPIO_NPORTS + 1] =
 
 /* Look-up table that maps GPIO1..GPIOn indexes into GPIO register base addresses */
 
-uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS] =
+const uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS] =
 {
   IMXRT_GPIO1_BASE
 #if IMXRT_GPIO_NPORTS > 1
