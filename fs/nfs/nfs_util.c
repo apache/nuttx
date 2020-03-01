@@ -323,7 +323,7 @@ int nfs_findnode(FAR struct nfsmount *nmp, FAR const char *relpath,
   /* Start with the file handle of the root directory.  */
 
   fhandle->length = nmp->nm_fhsize;
-  memcpy(&fhandle->handle, &nmp->nm_fh, nmp->nm_fhsize);
+  memcpy(&fhandle->handle, nmp->nm_fh, nmp->nm_fhsize);
 
   /* If no path was provided, then the root directory must be exactly what
    * the caller is looking for.
@@ -437,7 +437,7 @@ int nfs_finddir(FAR struct nfsmount *nmp, FAR const char *relpath,
   /* Start with the file handle of the root directory.  */
 
   fhandle->length = nmp->nm_fhsize;
-  memcpy(&fhandle->handle, &nmp->nm_fh, nmp->nm_fhsize);
+  memcpy(&fhandle->handle, nmp->nm_fh, nmp->nm_fhsize);
   memcpy(attributes, &nmp->nm_fattr, sizeof(struct nfs_fattr));
 
   /* Loop until the directory entry containing the path is found. */

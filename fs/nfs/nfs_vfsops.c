@@ -1828,7 +1828,6 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   nmp->nm_wsize       = nprmt.wsize;
   nmp->nm_rsize       = nprmt.rsize;
   nmp->nm_readdirsize = nprmt.readdirsize;
-  nmp->nm_fhsize      = NFSX_V3FHMAX;
 
   strncpy(nmp->nm_path, argp->path, 90);
   memcpy(&nmp->nm_nam, &argp->addr, argp->addrlen);
@@ -1868,9 +1867,8 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
         }
     }
 
-  nmp->nm_so             = nmp->nm_rpcclnt->rc_so;
   nmp->nm_fhsize         = nmp->nm_rpcclnt->rc_fhsize;
-  memcpy(&nmp->nm_fh, &nmp->nm_rpcclnt->rc_fh, sizeof(nfsfh_t));
+  nmp->nm_fh             = &nmp->nm_rpcclnt->rc_fh;
 
   /* Get the file sytem info */
 
@@ -1894,21 +1892,15 @@ bad:
     {
       /* Disconnect from the server */
 
-      rpcclnt_disconnect(nmp->nm_rpcclnt);
+      if (nmp->nm_rpcclnt)
+        {
+          rpcclnt_disconnect(nmp->nm_rpcclnt);
+          kmm_free(nmp->nm_rpcclnt);
+        }
 
       /* Free connection-related resources */
 
       nxsem_destroy(&nmp->nm_sem);
-      if (nmp->nm_so)
-        {
-          kmm_free(nmp->nm_so);
-        }
-
-      if (nmp->nm_rpcclnt)
-        {
-          kmm_free(nmp->nm_rpcclnt);
-        }
-
       kmm_free(nmp);
     }
 
@@ -1972,7 +1964,6 @@ static int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
   /* And free any allocated resources */
 
   nxsem_destroy(&nmp->nm_sem);
-  kmm_free(nmp->nm_so);
   kmm_free(nmp->nm_rpcclnt);
   kmm_free(nmp);
 
@@ -2008,7 +1999,7 @@ static int nfs_fsinfo(FAR struct nfsmount *nmp)
 
   fsinfo = &nmp->nm_msgbuffer.fsinfo;
   fsinfo->fs.fsroot.length = txdr_unsigned(nmp->nm_fhsize);
-  memcpy(&fsinfo->fs.fsroot.handle, &nmp->nm_fh, nmp->nm_fhsize);
+  memcpy(&fsinfo->fs.fsroot.handle, nmp->nm_fh, nmp->nm_fhsize);
 
   /* Request FSINFO from the server */
 
@@ -2125,7 +2116,7 @@ static int nfs_statfs(FAR struct inode *mountpt, FAR struct statfs *sbp)
 
   fsstat = &nmp->nm_msgbuffer.fsstat;
   fsstat->fs.fsroot.length = txdr_unsigned(nmp->nm_fhsize);
-  memcpy(&fsstat->fs.fsroot.handle, &nmp->nm_fh, nmp->nm_fhsize);
+  memcpy(&fsstat->fs.fsroot.handle, nmp->nm_fh, nmp->nm_fhsize);
 
   nfs_statistics(NFSPROC_FSSTAT);
   error = nfs_request(nmp, NFSPROC_FSSTAT,

@@ -75,6 +75,8 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <nuttx/net/net.h>
+
 #include "nfs_proto.h"
 
 /****************************************************************************
@@ -449,7 +451,7 @@ struct rpcclnt
   FAR char *rc_path;          /* Server's path of the mounted directory */
 
   FAR struct sockaddr *rc_name;
-  FAR struct socket *rc_so;   /* RPC socket */
+  struct socket rc_so;        /* RPC socket */
 
   uint8_t   rc_sotype;        /* Type of socket */
   uint8_t   rc_timeo;         /* Timeout value (in deciseconds) */

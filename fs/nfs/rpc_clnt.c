@@ -89,7 +89,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <debug.h>
-#include <nuttx/kmalloc.h>
 
 #include "xdr_subs.h"
 #include "nfs_proto.h"
@@ -181,7 +180,7 @@ static int rpcclnt_send(FAR struct rpcclnt *rpc,
    * On failure, it returns a negated errno value.
    */
 
-  nbytes = psock_send(rpc->rc_so, call, reqlen, 0);
+  nbytes = psock_send(&rpc->rc_so, call, reqlen, 0);
 
   if (nbytes < 0)
     {
@@ -208,7 +207,7 @@ static int rpcclnt_receive(FAR struct rpcclnt *rpc,
   ssize_t nbytes;
   int error = 0;
 
-  nbytes = psock_recv(rpc->rc_so, reply, resplen, 0);
+  nbytes = psock_recv(&rpc->rc_so, reply, resplen, 0);
   if (nbytes < 0)
     {
       error = nbytes;
@@ -357,7 +356,6 @@ void rpcclnt_init(void)
 
 int rpcclnt_connect(FAR struct rpcclnt *rpc)
 {
-  FAR struct socket *so;
   int error;
   FAR struct sockaddr *saddr;
   struct sockaddr_in sin;
@@ -384,23 +382,12 @@ int rpcclnt_connect(FAR struct rpcclnt *rpc)
 
   saddr = rpc->rc_name;
 
-  /* Create an instance of the socket state structure */
-
-  so = (FAR struct socket *)kmm_zalloc(sizeof(struct socket));
-  if (!so)
-    {
-      ferr("ERROR: Failed to allocate socket structure\n");
-      return -ENOMEM;
-    }
-
-  error = psock_socket(saddr->sa_family, rpc->rc_sotype, IPPROTO_UDP, so);
+  error = psock_socket(saddr->sa_family, rpc->rc_sotype, IPPROTO_UDP, &rpc->rc_so);
   if (error < 0)
     {
       ferr("ERROR: psock_socket failed: %d", error);
       return error;
     }
-
-  rpc->rc_so = so;
 
   /* Always set receive timeout to detect server crash and reconnect.
    * Otherwise, we can get stuck in psock_receive forever.
@@ -409,7 +396,7 @@ int rpcclnt_connect(FAR struct rpcclnt *rpc)
   tv.tv_sec  = rpc->rc_timeo / 10;
   tv.tv_usec = (rpc->rc_timeo % 10) * 100000;
 
-  error = psock_setsockopt(rpc->rc_so, SOL_SOCKET, SO_RCVTIMEO,
+  error = psock_setsockopt(&rpc->rc_so, SOL_SOCKET, SO_RCVTIMEO,
                           (FAR const void *)&tv, sizeof(tv));
   if (error < 0)
     {
@@ -431,7 +418,7 @@ int rpcclnt_connect(FAR struct rpcclnt *rpc)
       tport--;
       sin.sin_port = htons(tport);
 
-      error = psock_bind(rpc->rc_so, (struct sockaddr *)&sin, sizeof(sin));
+      error = psock_bind(&rpc->rc_so, (struct sockaddr *)&sin, sizeof(sin));
       if (error < 0)
         {
           ferr("ERROR: psock_bind failed: %d\n", error);
@@ -450,7 +437,7 @@ int rpcclnt_connect(FAR struct rpcclnt *rpc)
    * the NFS_PORT.
    */
 
-  error = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
+  error = psock_connect(&rpc->rc_so, saddr, sizeof(*saddr));
   if (error < 0)
     {
       ferr("ERROR: psock_connect to PMAP port failed: %d", error);
@@ -478,7 +465,7 @@ int rpcclnt_connect(FAR struct rpcclnt *rpc)
   sa = (FAR struct sockaddr_in *)saddr;
   sa->sin_port = htons(fxdr_unsigned(uint32_t, response.rdata.pmap.port));
 
-  error = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
+  error = psock_connect(&rpc->rc_so, saddr, sizeof(*saddr));
   if (error < 0)
     {
       ferr("ERROR: psock_connect MOUNTD port failed: %d\n", error);
@@ -517,7 +504,7 @@ int rpcclnt_connect(FAR struct rpcclnt *rpc)
 
   sa->sin_port = htons(PMAPPORT);
 
-  error = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
+  error = psock_connect(&rpc->rc_so, saddr, sizeof(*saddr));
   if (error < 0)
     {
       ferr("ERROR: psock_connect PMAP port failed: %d\n", error);
@@ -542,7 +529,7 @@ int rpcclnt_connect(FAR struct rpcclnt *rpc)
 
   sa->sin_port = htons(fxdr_unsigned(uint32_t, response.rdata.pmap.port));
 
-  error = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
+  error = psock_connect(&rpc->rc_so, saddr, sizeof(*saddr));
   if (error < 0)
     {
       ferr("ERROR: psock_connect NFS port returns %d\n", error);
@@ -566,10 +553,7 @@ bad:
 
 void rpcclnt_disconnect(FAR struct rpcclnt *rpc)
 {
-  if (rpc->rc_so != NULL)
-    {
-      psock_close(rpc->rc_so);
-    }
+  psock_close(&rpc->rc_so);
 }
 
 /****************************************************************************
@@ -608,7 +592,7 @@ int rpcclnt_umount(FAR struct rpcclnt *rpc)
 
   sa->sin_port = htons(PMAPPORT);
 
-  error = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
+  error = psock_connect(&rpc->rc_so, saddr, sizeof(*saddr));
   if (error < 0)
     {
       ferr("ERROR: psock_connect failed [port=%d]: %d\n",
@@ -634,7 +618,7 @@ int rpcclnt_umount(FAR struct rpcclnt *rpc)
 
   sa->sin_port = htons(fxdr_unsigned(uint32_t, response.rdata.pmap.port));
 
-  error = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
+  error = psock_connect(&rpc->rc_so, saddr, sizeof(*saddr));
   if (error < 0)
     {
       ferr("ERROR: psock_connect failed [port=%d]: %d\n",

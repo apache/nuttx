@@ -69,11 +69,10 @@ struct nfsmount
 {
   FAR struct nfsnode       *nm_head;          /* A list of all files opened on this mountpoint */
   sem_t                     nm_sem;           /* Used to assure thread-safe access */
-  nfsfh_t                   nm_fh;            /* File handle of root dir */
+  nfsfh_t                  *nm_fh;            /* File handle of root dir */
   char                      nm_path[90];      /* server's path of the directory being mounted */
   struct nfs_fattr          nm_fattr;         /* nfs file attribute cache */
   FAR struct rpcclnt       *nm_rpcclnt;       /* RPC state */
-  FAR struct socket        *nm_so;            /* RPC socket */
   struct sockaddr           nm_nam;           /* Addr of server */
   uint8_t                   nm_fhsize;        /* Size of root file handle (host order) */
   uint16_t                  nm_rsize;         /* Max size of read RPC */
