@@ -218,7 +218,7 @@ struct rpc_auth_info
   uint32_t authlen;           /* auth length */
 };
 
-struct auth_unix
+struct rpc_auth_unix
 {
   uint32_t stamp;
   uint32_t hostname;          /* null */
@@ -236,6 +236,7 @@ struct rpc_call_header
   uint32_t rp_vers;           /* version */
   uint32_t rp_proc;           /* procedure */
   struct rpc_auth_info rpc_auth;
+  struct rpc_auth_unix rpc_unix;
   struct rpc_auth_info rpc_verf;
 };
 
