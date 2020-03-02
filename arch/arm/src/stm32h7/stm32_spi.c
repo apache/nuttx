@@ -1716,6 +1716,31 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
   DEBUGASSERT(priv != NULL);
 
+#ifdef CONFIG_STM32H7_SPI_DMATHRESHOLD
+  /* Convert the number of word to a number of bytes */
+
+  size_t nbytes = (priv->nbits > 8) ? nwords << 1 : nwords;
+
+  /* If this is a small SPI transfer, then let spi_exchange_nodma() do the work. */
+
+  if (nbytes <= CONFIG_STM32H7_SPI_DMATHRESHOLD)
+    {
+      spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
+      return;
+    }
+#endif
+
+  if ((priv->rxdma == NULL) || (priv->txdma == NULL) ||
+      up_interrupt_context())
+    {
+      /* Invalid DMA channels, or interrupt context, fall
+       * back to non-DMA method.
+       */
+
+      spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
+      return;
+    }
+
 #ifdef CONFIG_STM32H7_DMACAPABLE
   stm32_dmacfg_t dmacfg1;
   stm32_dmacfg_t dmacfg2;
@@ -1735,7 +1760,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   if ((txbuffer && !stm32_dmacapable(priv->txdma, &dmacfg1)) ||
       (rxbuffer && !stm32_dmacapable(priv->rxdma, &dmacfg2)))
     {
-      /* Unsupported memory region, fall back to non-DMA method. */
+      /* Unsupported memory region fall back to non-DMA method. */
 
       spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
     }
