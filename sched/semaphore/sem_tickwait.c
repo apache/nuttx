@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_tickwait.c
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2017, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -176,3 +176,44 @@ errout_with_irqdisabled:
   rtcb->waitdog = NULL;
   return ret;
 }
+/****************************************************************************
+ * Name: nxsem_tickwait_uninterruptible
+ *
+ * Description:
+ *   This function is wrapped version of nxsem_tickwait(), which is
+ *   uninterruptible and convenient for use.
+ *
+ * Input Parameters:
+ *   sem     - Semaphore object
+ *   start   - The system time that the delay is relative to.  If the
+ *             current time is not the same as the start time, then the
+ *             delay will be adjust so that the end time will be the same
+ *             in any event.
+ *   delay   - Ticks to wait from the start time until the semaphore is
+ *             posted.  If ticks is zero, then this function is equivalent
+ *             to sem_trywait().
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned
+ *   on failure. -ETIMEDOUT is returned on the timeout condition.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_HAVE_INLINE
+int nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start,
+                                   uint32_t delay)
+{
+  int ret;
+
+  do
+    {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_tickwait(sem, start, delay);
+    }
+  while (ret == -EINTR || ret == -ECANCELED);
+
+  return ret;
+}
+#endif
+

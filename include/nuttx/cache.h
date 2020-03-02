@@ -83,9 +83,7 @@ extern "C"
 #ifdef CONFIG_ARCH_ICACHE
 void up_enable_icache(void);
 #else
-static inline void up_enable_icache(void)
-{
-}
+#  define up_enable_icache()
 #endif
 
 /****************************************************************************
@@ -105,9 +103,7 @@ static inline void up_enable_icache(void)
 #ifdef CONFIG_ARCH_ICACHE
 void up_disable_icache(void);
 #else
-static inline void up_disable_icache(void)
-{
-}
+#  define up_disable_icache()
 #endif
 
 /****************************************************************************
@@ -128,9 +124,7 @@ static inline void up_disable_icache(void)
 #ifdef CONFIG_ARCH_ICACHE
 void up_invalidate_icache(uintptr_t start, uintptr_t end);
 #else
-static inline void up_invalidate_icache(uintptr_t start, uintptr_t end)
-{
-}
+#  define up_invalidate_icache()
 #endif
 
 /****************************************************************************
@@ -150,9 +144,7 @@ static inline void up_invalidate_icache(uintptr_t start, uintptr_t end)
 #ifdef CONFIG_ARCH_ICACHE
 void up_invalidate_icache_all(void);
 #else
-static inline void up_invalidate_icache_all(void)
-{
-}
+#  define up_invalidate_icache_all()
 #endif
 
  /****************************************************************************
@@ -175,9 +167,7 @@ static inline void up_invalidate_icache_all(void)
 #ifdef CONFIG_ARCH_DCACHE
 void up_enable_dcache(void);
 #else
-static inline void up_enable_dcache(void)
-{
-}
+#  define up_enable_dcache()
 #endif
 
 /****************************************************************************
