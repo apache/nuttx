@@ -129,6 +129,7 @@ static uint32_t rpc_reply;
 static uint32_t rpc_call;
 static uint32_t rpc_vers;
 static uint32_t rpc_auth_null;
+static uint32_t rpc_auth_unix;
 
 /* Global statics for all client instances.  Cleared by NuttX on boot-up. */
 
@@ -444,10 +445,16 @@ static void rpcclnt_fmtheader(FAR struct rpc_call_header *ch,
   ch->rp_vers           = txdr_unsigned(vers);
   ch->rp_proc           = txdr_unsigned(procid);
 
-  /* rpc_auth part (auth_null) */
+  /* rpc_auth part (auth_unix) */
 
-  ch->rpc_auth.authtype = rpc_auth_null;
-  ch->rpc_auth.authlen  = 0;
+  ch->rpc_auth.authtype = rpc_auth_unix;
+  ch->rpc_auth.authlen  = txdr_unsigned(sizeof(ch->rpc_unix));
+
+  ch->rpc_unix.stamp    = 0;
+  ch->rpc_unix.hostname = 0;
+  ch->rpc_unix.uid      = 0;
+  ch->rpc_unix.gid      = 0;
+  ch->rpc_unix.gidlist  = 0;
 
   /* rpc_verf part (auth_null) */
 
@@ -475,6 +482,7 @@ void rpcclnt_init(void)
   rpc_vers = txdr_unsigned(RPC_VER2);
   rpc_call = txdr_unsigned(RPC_CALL);
   rpc_auth_null = txdr_unsigned(RPCAUTH_NULL);
+  rpc_auth_unix = txdr_unsigned(RPCAUTH_UNIX);
 
   finfo("RPC initialized\n");
 }

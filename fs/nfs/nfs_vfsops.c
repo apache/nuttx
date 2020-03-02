@@ -302,7 +302,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
   /* Set the group ID to one */
 
   *ptr++  = nfs_true;            /* True: Gid value follows */
-  *ptr++  = HTONL(1);            /* GID = 1 (nogroup) */
+  *ptr++  = 0;                   /* GID = 0 (nogroup) */
   reqlen += 2*sizeof(uint32_t);
 
   /* Set the size to zero */
@@ -2287,7 +2287,7 @@ static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath, mode_t 
   /* Set the group ID to one */
 
   *ptr++  = nfs_true;            /* True: Gid value follows */
-  *ptr++  = HTONL(1);            /* GID = 1 (nogroup) */
+  *ptr++  = 0;                   /* GID = 0 (nogroup) */
   reqlen += 2*sizeof(uint32_t);
 
   /* No size */
