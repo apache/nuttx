@@ -920,13 +920,9 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
         }
     }
 
-  finfo("Read %d bytes\n", bytesread);
-  nfs_semgive(nmp);
-  return bytesread;
-
 errout_with_semaphore:
   nfs_semgive(nmp);
-  return error;
+  return bytesread > 0 ? bytesread : error;
 }
 
 /****************************************************************************
@@ -1108,12 +1104,9 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
       buffer       += writesize;
     }
 
-  nfs_semgive(nmp);
-  return byteswritten;
-
 errout_with_semaphore:
   nfs_semgive(nmp);
-  return error;
+  return byteswritten > 0 ? byteswritten : error;
 }
 
 /****************************************************************************
@@ -1301,7 +1294,6 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   DEBUGASSERT(fhandle.length <= DIRENT_NFS_MAXHANDLE);
 
   memcpy(dir->u.nfs.nfs_fhandle, &fhandle.handle, fhandle.length);
-  error = OK;
 
 errout_with_semaphore:
   nfs_semgive(nmp);
