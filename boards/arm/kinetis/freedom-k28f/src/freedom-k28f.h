@@ -47,7 +47,94 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Application Configuration ************************************************/
+
+/* Assume we have everything */
+
+#define HAVE_MMCSD       1
+#define HAVE_AUTOMOUNTER 1
+
+/* SD card support */
+
+#define MMCSD_SLOTNO 0
+
+/* Can't support MMC/SD features if mountpoints are disabled or if SDHC
+ * support is not enabled.
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_KINETIS_SDHC)
+#  undef HAVE_MMCSD
+#endif
+
+#ifdef HAVE_MMCSD
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#    error Only one MMC/SD slot, slot 0
+#  endif
+
+#  ifdef CONFIG_NSH_MMCSDMINOR
+#    define MMSCD_MINOR CONFIG_NSH_MMCSDMINOR
+#  else
+#    define MMSCD_MINOR 0
+#  endif
+
+/* We expect to receive GPIO interrupts for card insertion events */
+
+#  ifndef CONFIG_KINETIS_GPIOIRQ
+#    error "CONFIG_KINETIS_GPIOIRQ required for card detect interrupt"
+#  endif
+
+#  ifndef CONFIG_KINETIS_PORTBINTS
+#    error "CONFIG_KINETIS_PORTBINTS required for card detect interrupt"
+#  endif
+
+#endif
+
+/* Automounter */
+
+#if !defined(CONFIG_FS_AUTOMOUNTER) || !defined(HAVE_MMCSD)
+#  undef HAVE_AUTOMOUNTER
+#  undef CONFIG_FRDMK28F_SDHC_AUTOMOUNT
+#endif
+
+#ifndef CONFIG_FRDMK28F_SDHC_AUTOMOUNT
+#  undef HAVE_AUTOMOUNTER
+#endif
+
+/* Automounter defaults */
+
+#ifdef HAVE_AUTOMOUNTER
+
+#  ifndef CONFIG_FRDMK28F_SDHC_AUTOMOUNT_FSTYPE
+#    define CONFIG_FRDMK28F_SDHC_AUTOMOUNT_FSTYPE "vfat"
+#  endif
+
+#  ifndef CONFIG_FRDMK28F_SDHC_AUTOMOUNT_BLKDEV
+#    define CONFIG_FRDMK28F_SDHC_AUTOMOUNT_BLKDEV "/dev/mmcds0"
+#  endif
+
+#  ifndef CONFIG_FRDMK28F_SDHC_AUTOMOUNT_MOUNTPOINT
+#    define CONFIG_FRDMK28F_SDHC_AUTOMOUNT_MOUNTPOINT "/mnt/sdcard"
+#  endif
+
+#  ifndef CONFIG_FRDMK28F_SDHC_AUTOMOUNT_DDELAY
+#    define CONFIG_FRDMK28F_SDHC_AUTOMOUNT_DDELAY 1000
+#  endif
+
+#  ifndef CONFIG_FRDMK28F_SDHC_AUTOMOUNT_UDELAY
+#    define CONFIG_FRDMK28F_SDHC_AUTOMOUNT_UDELAY 2000
+#  endif
+#endif /* HAVE_AUTOMOUNTER */
+
 /* Freedom-K28F GPIOs *******************************************************/
+
+/* A micro Secure Digital (SD) card slot is available on the FRDM-K28F
+ * connected to the SD Host Controller (SDHC) signals of the MCU.
+ * This slot will accept micro format SD memory cards.
+ * The SD card detect pin (PTB5) is an open switch that shorts with VDD when
+ * card is inserted.
+ */
+
+#define GPIO_SD_CARDDETECT (GPIO_INPUT | PIN_INT_BOTH | PIN_PORTB | PIN5)
 
 /* An RGB LED is connected through GPIO as shown below:
  *
@@ -90,14 +177,14 @@
 struct i2c_master_s;  /* Forward reference */
 
 #ifdef CONFIG_KINETIS_I2C0
-extern FAR struct i2c_master_s* g_i2c0_dev;
+extern FAR struct i2c_master_s *g_i2c0_dev;
 #endif
 #ifdef CONFIG_KINETIS_I2C1
-extern FAR struct i2c_master_s* g_i2c1_dev;
+extern FAR struct i2c_master_s *g_i2c1_dev;
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -133,7 +220,7 @@ void weak_function k28_spidev_initialize(void);
  * Description:
  *   Called to configure I2C
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void k28_i2cdev_initialize(void);
 
@@ -146,6 +233,90 @@ void k28_i2cdev_initialize(void);
  ****************************************************************************/
 
 extern void weak_function k28_usbdev_initialize(void);
+
+/****************************************************************************
+ * Name: k28_sdhc_initialize
+ *
+ * Description:
+ *   Inititialize the SDHC SD card slot
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_MMCSD
+int k28_sdhc_initialize(void);
+#else
+#  define k28_sdhc_initialize() (OK)
+#endif
+
+/****************************************************************************
+ * Name: k28_cardinserted
+ *
+ * Description:
+ *   Check if a card is inserted into the SDHC slot
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+bool k28_cardinserted(void);
+#else
+#  define k28_cardinserted() (false)
+#endif
+
+/****************************************************************************
+ * Name: k28_writeprotected
+ *
+ * Description:
+ *   Check if the card in the MMC/SD slot is write protected
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+bool k28_writeprotected(void);
+#else
+#  define k28_writeprotected() (false)
+#endif
+
+/****************************************************************************
+ * Name:  k28_automount_initialize
+ *
+ * Description:
+ *   Configure auto-mounter for the configured SDHC slot
+ *
+ * Input Parameters:
+ *   None
+ *
+ *  Returned Value:
+ *    None
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+void k28_automount_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name:  k28_automount_event
+ *
+ * Description:
+ *   The SDHC card detection logic has detected an insertion or removal event.
+ *   It has already scheduled the MMC/SD block driver operations.
+ *   Now we need to schedule the auto-mount event which will occur with a
+ *   substantial delay to make sure that everything has settle down.
+ *
+ * Input Parameters:
+ *   inserted - True if the card is inserted in the slot.  False otherwise.
+ *
+ *  Returned Value:
+ *    None
+ *
+ *  Assumptions:
+ *    Interrupts are disabled.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_AUTOMOUNTER
+void k28_automount_event(bool inserted);
+#endif
 
 /****************************************************************************
  * Name: k28_pwm_setup

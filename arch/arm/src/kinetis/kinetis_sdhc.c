@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_sdhc.c
  *
- *   Copyright (C) 2011-2012, 2014, 2016-2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -174,6 +159,7 @@ struct kinetis_dev_s
   struct sdio_dev_s  dev;        /* Standard, base SDIO interface */
 
   /* Kinetis-specific extensions */
+
   /* Event support */
 
   sem_t              waitsem;    /* Implements event waiting */
@@ -267,16 +253,18 @@ static void kinetis_showregs(struct kinetis_dev_s *priv, const char *msg);
 /* Data Transfer Helpers ****************************************************/
 
 static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
-                               unsigned int blocksize, unsigned int nblocks,
-                               unsigned int timeout);
+              unsigned int blocksize, unsigned int nblocks,
+              unsigned int timeout);
 static void kinetis_datadisable(void);
 #ifndef CONFIG_KINETIS_SDHC_DMA
 static void kinetis_transmit(struct kinetis_dev_s *priv);
 static void kinetis_receive(struct kinetis_dev_s *priv);
 #endif
 static void kinetis_eventtimeout(int argc, uint32_t arg);
-static void kinetis_endwait(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent);
-static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent);
+static void kinetis_endwait(struct kinetis_dev_s *priv,
+              sdio_eventset_t wkupevent);
+static void kinetis_endtransfer(struct kinetis_dev_s *priv,
+              sdio_eventset_t wkupevent);
 
 /* Interrupt Handling *******************************************************/
 
@@ -307,12 +295,19 @@ static int  kinetis_attach(FAR struct sdio_dev_s *dev);
 
 static int  kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
+
+#ifdef CONFIG_SDIO_BLOCKSETUP
+static void  kinetis_blocksetup(FAR struct sdio_dev_s *dev,
+              unsigned int blocksize, unsigned int nblocks);
+#endif
+
 #ifndef CONFIG_KINETIS_SDHC_DMA
 static int  kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
               size_t nbytes);
 static int  kinetis_sendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, uint32_t nbytes);
 #endif
+
 static int  kinetis_cancel(FAR struct sdio_dev_s *dev);
 
 static int  kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
@@ -367,6 +362,9 @@ struct kinetis_dev_s g_sdhcdev =
     .clock            = kinetis_clock,
     .attach           = kinetis_attach,
     .sendcmd          = kinetis_sendcmd,
+#ifdef CONFIG_SDIO_BLOCKSETUP
+    .blocksetup       = kinetis_blocksetup,
+#endif
 #ifndef CONFIG_KINETIS_SDHC_DMA
     .recvsetup        = kinetis_recvsetup,
     .sendsetup        = kinetis_sendsetup,
@@ -409,9 +407,6 @@ static struct kinetis_sdhcregs_s g_sampleregs[DEBUG_NSAMPLES];
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Low-level Helpers
- ****************************************************************************/
 /****************************************************************************
  * Name: kinetis_takesem
  *
@@ -495,10 +490,6 @@ static void kinetis_configxfrints(struct kinetis_dev_s *priv, uint32_t xfrints)
            KINETIS_SDHC_IRQSIGEN);
   leave_critical_section(flags);
 }
-
-/****************************************************************************
- * DMA Helpers
- ****************************************************************************/
 
 /****************************************************************************
  * Name: kinetis_sampleinit
@@ -615,9 +606,12 @@ static void kinetis_dumpsample(struct kinetis_dev_s *priv,
 #ifdef CONFIG_SDIO_XFRDEBUG
 static void  kinetis_dumpsamples(struct kinetis_dev_s *priv)
 {
-  kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP], "Before setup");
-  kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_AFTER_SETUP], "After setup");
-  kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER], "End of transfer");
+  kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP],
+                     "Before setup");
+  kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_AFTER_SETUP],
+                     "After setup");
+  kinetis_dumpsample(priv, &g_sampleregs[SAMPLENDX_END_TRANSFER],
+                     "End of transfer");
 }
 #endif
 
@@ -638,10 +632,6 @@ static void kinetis_showregs(struct kinetis_dev_s *priv, const char *msg)
   kinetis_dumpsample(priv, &regs, msg);
 }
 #endif
-
-/****************************************************************************
- * Data Transfer Helpers
- ****************************************************************************/
 
 /****************************************************************************
  * Name: kinetis_dataconfig
@@ -970,7 +960,8 @@ static void kinetis_eventtimeout(int argc, uint32_t arg)
  *
  ****************************************************************************/
 
-static void kinetis_endwait(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent)
+static void kinetis_endwait(struct kinetis_dev_s *priv,
+                            sdio_eventset_t wkupevent)
 {
   /* Cancel the watchdog timeout */
 
@@ -1005,7 +996,8 @@ static void kinetis_endwait(struct kinetis_dev_s *priv, sdio_eventset_t wkupeven
  *
  ****************************************************************************/
 
-static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkupevent)
+static void kinetis_endtransfer(struct kinetis_dev_s *priv,
+                                sdio_eventset_t wkupevent)
 {
 #ifdef CONFIG_KINETIS_SDHC_DMA
   uint32_t regval;
@@ -1052,10 +1044,6 @@ static void kinetis_endtransfer(struct kinetis_dev_s *priv, sdio_eventset_t wkup
       kinetis_endwait(priv, wkupevent);
     }
 }
-
-/****************************************************************************
- * Interrupt Handling
- ****************************************************************************/
 
 /****************************************************************************
  * Name: kinetis_interrupt
@@ -1143,7 +1131,8 @@ static int kinetis_interrupt(int irq, void *context, FAR void *arg)
         {
           /* Terminate the transfer with an error */
 
-          mcerr("ERROR: Data block CRC failure, remaining: %d\n", priv->remaining);
+          mcerr("ERROR: Data block CRC failure, remaining: %d\n",
+                priv->remaining);
           kinetis_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
         }
 
@@ -1192,15 +1181,11 @@ static int kinetis_interrupt(int irq, void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * SDIO Interface Methods
- ****************************************************************************/
-
-/****************************************************************************
  * Name: kinetis_lock
  *
  * Description:
  *   Locks the bus. Function calls low-level multiplexed bus routines to
- *   resolve bus requests and acknowledgement issues.
+ *   resolve bus requests and acknowledgment issues.
  *
  * Input Parameters:
  *   dev    - An instance of the SDIO device interface
@@ -1379,6 +1364,7 @@ static void kinetis_widebus(FAR struct sdio_dev_s *dev, bool wide)
     {
       regval |= SDHC_PROCTL_DTW_1BIT;
     }
+
   putreg32(regval, KINETIS_SDHC_PROCTL);
 }
 
@@ -1690,7 +1676,6 @@ static int kinetis_attach(FAR struct sdio_dev_s *dev)
   ret = irq_attach(KINETIS_IRQ_SDHC, kinetis_interrupt, NULL);
   if (ret == OK)
     {
-
       /* Disable all interrupts at the SDIO controller and clear all pending
        * interrupts.
        */
@@ -1871,6 +1856,40 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
 }
 
 /****************************************************************************
+ * Name: kinetis_blocksetup
+ *
+ * Description:
+ *   Configure block size and the number of blocks for next transfer
+ *
+ * Input Parameters:
+ *   dev       - An instance of the SDIO device interface
+ *   blocksize  - The selected block size.
+ *   nblocklen - The number of blocks to transfer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SDIO_BLOCKSETUP
+static void kinetis_blocksetup(FAR struct sdio_dev_s *dev,
+                             unsigned int blocksize,
+                             unsigned int nblocks)
+{
+  uint32_t regval;
+
+  mcinfo("blocksize=%ld, total transfer=%ld (%ld blocks)\n", blocksize,
+         blocksize * nblocks, nblocks);
+
+  /* Configure block size for next transfer */
+
+  regval = blocksize << SDHC_BLKATTR_SIZE_SHIFT |
+           nblocks   << SDHC_BLKATTR_CNT_SHIFT;
+  putreg32(regval, KINETIS_SDHC_BLKATTR);
+}
+#endif
+
+/****************************************************************************
  * Name: kinetis_recvsetup
  *
  * Description:
@@ -1943,8 +1962,8 @@ static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  ****************************************************************************/
 
 #ifndef CONFIG_KINETIS_SDHC_DMA
-static int kinetis_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
-                           size_t nbytes)
+static int kinetis_sendsetup(FAR struct sdio_dev_s *dev,
+                             FAR const uint8_t *buffer, size_t nbytes)
 {
   struct kinetis_dev_s *priv = (struct kinetis_dev_s *)dev;
 
@@ -2170,7 +2189,6 @@ static int kinetis_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
    *     0         1               End bit
    */
 
-
 #ifdef CONFIG_DEBUG_FEATURES
   if (!rshort)
     {
@@ -2331,7 +2349,8 @@ static int kinetis_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
 /* MMC responses not supported */
 
-static int kinetis_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rnotimpl)
+static int kinetis_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                               uint32_t *rnotimpl)
 {
   /* Just return an error */
 
@@ -2685,9 +2704,6 @@ static int kinetis_dmasendsetup(FAR struct sdio_dev_s *dev,
 #endif
 
 /****************************************************************************
- * Initialization/uninitialization/reset
- ****************************************************************************/
-/****************************************************************************
  * Name: kinetis_callback
  *
  * Description:
@@ -2752,8 +2768,10 @@ static void kinetis_callback(void *arg)
         {
           /* Yes.. queue it */
 
-           mcinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
-          work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback, priv->cbarg, 0);
+          mcinfo("Queuing callback to %p(%p)\n",
+                 priv->callback, priv->cbarg);
+          work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
+                     priv->cbarg, 0);
         }
       else
         {
@@ -2793,6 +2811,7 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
   DEBUGASSERT(slotno == 0);
 
   /* Initialize the SDHC slot structure data structure */
+
   /* Initialize semaphores */
 
   nxsem_init(&priv->waitsem, 0, 0);
@@ -2832,7 +2851,6 @@ FAR struct sdio_dev_s *sdhc_initialize(int slotno)
   regval |= SIM_SCGC3_SDHC;
   putreg32(regval, KINETIS_SIM_SCGC3);
   mcinfo("SIM_SCGC3: %08x\n", regval);
-
 
   /* Configure pins for 1 or 4-bit, wide-bus operation (the chip is capable
    * of 8-bit wide bus operation but D4-D7 are not configured).
