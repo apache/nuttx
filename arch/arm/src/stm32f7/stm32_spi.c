@@ -1533,7 +1533,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *
  ************************************************************************************/
 
-#if !defined(CONFIG_STM32F7_SPI_DMA) || defined(CONFIG_STM32F7_DMACAPABLE)
+#if !defined(CONFIG_STM32F7_SPI_DMA) || defined(CONFIG_STM32F7_DMACAPABLE) || defined(CONFIG_STM32F7_SPI_DMATHRESHOLD)
 #if !defined(CONFIG_STM32F7_SPI_DMA)
 static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
@@ -1616,7 +1616,7 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
         }
     }
 }
-#endif /* !CONFIG_STM32F7_SPI_DMA || CONFIG_STM32F7_DMACAPABLE */
+#endif /* !CONFIG_STM32F7_SPI_DMA || CONFIG_STM32F7_DMACAPABLE || CONFIG_STM32F7_SPI_DMATHRESHOLD */
 
 /****************************************************************************
  * Name: spi_exchange (with DMA capability)
