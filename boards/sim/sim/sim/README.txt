@@ -124,17 +124,17 @@ fidelity simulation.
 However, when the simulation calls into Linux/Cygwin libraries, it will still
 use these small simulation stacks.  This happens, for example, when you call
 into the system to get and put characters to the console window or when you
-make x11 calls into the system.  The programming model within those libraries
+make X11 calls into the system.  The programming model within those libraries
 will assume a Linux/Cygwin environment where the stack size grows dynamically
 and not the small, limited stacks of a deeply embedded system.
 
 As a consequence, those system libraries may allocate large data structures on
 the stack and overflow the small NuttX stacks.  X11, in particular, requires
 large stacks.  If you are using X11 in the simulation, make sure that you set
-aside a "lot" of stack for the X11 system calls (maybe 8 or 16Kb). The stack
+aside a "lot" of stack for the X11 library calls (maybe 8 or 16Kb). The stack
 size for the thread that begins with user start is controlled by the
 configuration setting CONFIG_USERMAIN_STACKSIZE; you may need to increase this
-value to larger number to survive the X11 system calls.
+value to larger number to survive the X11 library calls.
 
 If you are running X11 applications such as NSH add-on programs, then the
 stack size of the add-on program is controlled in another way.  Here are the
@@ -170,7 +170,7 @@ collide with names provided by the host OS in the host PC domain.
 
 Occasionally, as you test new functionality, you will find that you need to
 add more names to the nuttx-names.dat file.  If there is a missing name
-mapping in nuttx-name.dat, the symptoms may be very obscure and difficult to
+mapping in nuttx-names.dat, the symptoms may be very obscure and difficult to
 debug.  What happens in this case is that when logic in nuttx.rel intended to
 call the NuttX domain function, it instead calls into the host OS function of
 the same name.
@@ -204,10 +204,10 @@ Update: Please issue these commands to setup the reliable network on Ubuntu:
   sudo apt-get -y install net-tools
   sudo nuttx/tools/simbridge.sh eth0 on
 
-Here is some tips you may need:
-  1.Must launch the executable with the root permission
-  2.Have to use virtual machine if host is in corporation network
-  3.Configure the network adapter in NAT mode if virtual machine is used
+Here are some tips you may need:
+  1. Must launch the executable with the root permission
+  2. Have to use virtual machine if host is in corporation network
+  3. Configure the network adapter in NAT mode if virtual machine is used
 
 X11 Issues
 ----------
@@ -1068,7 +1068,7 @@ rpserver
           3     3 224 FIFO     Kthread --- Waiting  Signal    00000002 002000 rptun proxy 0x56634fa0
          12     3  80 FIFO     Task    --- Waiting  Semaphore 00000000 002032 usrsock
 
-      cu to proxy and start the rpmsg ursock client:
+      cu to proxy and start the rpmsg usrsock client:
 
       server> cu
       proxy> usrsock server &
@@ -1162,7 +1162,7 @@ udgram
 unionfs
 
   This is a version of NSH dedicated to performing the simple test of the
-  Union File System at apps/examples/uniofs.  The command 'unionfs' will mount
+  Union File System at apps/examples/unionfs.  The command 'unionfs' will mount
   the Union File System at /mnt/unionfs.  You can than compare what you see at
   /mnt/unionfs with the content of the ROMFS file systems at
   apps/examples/unionfs/atestdir and btestdir.

@@ -1988,7 +1988,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          ninfo("Iv6 frame\n");
+          ninfo("IPv6 frame\n");
           NETDEV_RXIPV6(&priv->dev);
 
           /* Give the IPv6 packet to the network layer */

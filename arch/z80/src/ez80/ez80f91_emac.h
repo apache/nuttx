@@ -174,7 +174,7 @@
 
 /* EMAC Transmit Descriptor Status **************************************************/
 
-#define EMAC_TXDESC_NCOLL     0x0001 /* Bits 0-3: Bumber of collisions that occurred
+#define EMAC_TXDESC_NCOLL     0x0001 /* Bits 0-3: Number of collisions that occurred
                                       * while transmitting the packet. */
 #define EMAC_TXDESC_MXCOLL    0x0010 /* Bit 4: 1=maximum number of collisions.
                                       * number > CFG3[3:0]. packet aborted */

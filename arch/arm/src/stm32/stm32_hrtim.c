@@ -520,7 +520,7 @@ struct stm32_hrtim_eev_cfg_s
   uint8_t filter:4;             /* External Event filter */
   uint8_t src:4;                /* External Event source */
   uint8_t pol:1;                /* External Event polarity */
-  uint8_t sen:1;                /* External Event ssensitivit */
+  uint8_t sen:1;                /* External Event sensitivity */
   uint8_t mode:1;               /* External Event mode */
   uint8_t _res:5;
 };

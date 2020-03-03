@@ -661,7 +661,7 @@ static int net_rpmsg_drv_transfer_handler(FAR struct rpmsg_endpoint *ept,
 #ifdef CONFIG_NET_IPv6
   if (net_rpmsg_drv_is_ipv6(dev))
     {
-      ninfo("Iv6 frame\n");
+      ninfo("IPv6 frame\n");
       NETDEV_RXIPV6(dev);
 
       /* Dispatch IPv6 packet to the network layer */

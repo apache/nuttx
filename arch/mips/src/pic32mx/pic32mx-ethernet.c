@@ -1509,7 +1509,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
-              ninfo("Iv6 frame\n");
+              ninfo("IPv6 frame\n");
               NETDEV_RXIPV6(&priv->pd_dev);
 
               /* Give the IPv6 packet to the network layer */

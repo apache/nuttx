@@ -593,7 +593,7 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
 #ifdef CONFIG_NET_IPv6
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
-      ninfo("Iv6 frame\n");
+      ninfo("IPv6 frame\n");
       NETDEV_RXIPV6(&priv->dev);
 
       /* Give the IPv6 packet to the network layer. */
@@ -704,7 +704,7 @@ static void tun_net_receive_tun(FAR struct tun_device_s *priv)
 #if defined(CONFIG_NET_IPv6)
   if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
     {
-      ninfo("Iv6 frame\n");
+      ninfo("IPv6 frame\n");
       NETDEV_RXIPV6(&priv->dev);
 
       /* Give the IPv6 packet to the network layer. */

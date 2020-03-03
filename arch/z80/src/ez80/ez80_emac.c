@@ -1427,7 +1427,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (ETHBUF->type == HTONS(ETHTYPE_IP6))
         {
-          ninfo("Iv6 frame\n");
+          ninfo("IPv6 frame\n");
 
           /* Give the IPv6 packet to the network layer */
 

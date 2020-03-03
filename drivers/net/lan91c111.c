@@ -720,7 +720,7 @@ static void lan91c111_receive(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
   if (eth->type == HTONS(ETHTYPE_IP6))
     {
-      ninfo("Iv6 frame\n");
+      ninfo("IPv6 frame\n");
       NETDEV_RXIPV6(dev);
 
       /* Dispatch IPv6 packet to the network layer */

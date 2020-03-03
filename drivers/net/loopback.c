@@ -191,7 +191,7 @@ static int lo_txpoll(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
       if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
         {
-          ninfo("Iv6 frame\n");
+          ninfo("IPv6 frame\n");
           NETDEV_RXIPV6(&priv->lo_dev);
           ipv6_input(&priv->lo_dev);
         }
