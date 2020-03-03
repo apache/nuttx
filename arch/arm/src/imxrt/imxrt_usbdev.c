@@ -2180,6 +2180,8 @@ static int imxrt_epconfigure(FAR struct usbdev_ep_s *ep,
             cfg |= USBDEV_ENDPTCTRL_RXT_ISOC; break;
           case USB_EP_ATTR_XFER_BULK:
             cfg |= USBDEV_ENDPTCTRL_RXT_BULK; break;
+          case USB_EP_ATTR_XFER_INT:
+            cfg |= USBDEV_ENDPTCTRL_RXT_INTR; break;
         }
 
       imxrt_chgbits (0x0000ffff, cfg,
