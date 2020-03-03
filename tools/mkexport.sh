@@ -198,27 +198,31 @@ cp -f "${TOPDIR}/binfmt/libelf/gnu-elf.ld" "${EXPORTDIR}/scripts/."
 # Is there a linker script in this configuration?
 
 if [ "X${USRONLY}" != "Xy" ]; then
-  if [ ! -z "${LDPATH}" ]; then
+
+  # LDPATH can contain multiple files.
+  # The "Copy additional ld scripts" step might copy a file multiple times.
+
+  for LDSCRIPT in ${LDPATH}; do
 
     # Apparently so.  Verify that the script exists
 
-    if [ ! -f "${LDPATH}" ]; then
-      echo "MK: File ${LDPATH} does not exist"
+    if [ ! -f "${LDSCRIPT}" ]; then
+      echo "MK: File ${LDSCRIPT} does not exist"
       exit 1
     fi
 
     # Copy the linker script
 
-    cp -p "${LDPATH}" "${EXPORTDIR}/scripts/." || \
-      { echo "MK: cp ${LDPATH} failed"; exit 1; }
+    cp -p "${LDSCRIPT}" "${EXPORTDIR}/scripts/." || \
+      { echo "MK: cp ${LDSCRIPT} failed"; exit 1; }
 
     # Copy additional ld scripts
 
-    LDDIR="$(dirname "${LDPATH}")"
+    LDDIR="$(dirname "${LDSCRIPT}")"
     for f in "${LDDIR}"/*.ld ; do
       [ -f "${f}" ] && cp -f "${f}" "${EXPORTDIR}/scripts/."
     done
-  fi
+  done
 fi
 
 # Save the compilation options
