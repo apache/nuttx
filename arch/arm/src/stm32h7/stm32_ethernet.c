@@ -3476,17 +3476,6 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   stm32_phyregdump();
 #endif
 
-  /* Perform any necessary, board-specific PHY initialization */
-
-#ifdef CONFIG_STM32H7_PHYINIT
-  ret = stm32_phy_boardinitialize(0);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
-      return ret;
-    }
-#endif
-
   /* Special workaround for the Davicom DM9161 PHY is required. */
 
 #ifdef CONFIG_ETH0_PHY_DM9161
@@ -4263,6 +4252,17 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
    * sequence in stm32_rcc.c.
    */
 
+#ifdef CONFIG_STM32H7_PHYINIT
+  /* Perform any necessary, board-specific PHY initialization */
+
+  ret = stm32_phy_boardinitialize(0);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+      return ret;
+    }
+#endif
+
   /* Initialize the free buffer list */
 
   stm32_initbuffer(priv, &g_txbuffer[priv->intf * TXBUFFER_SIZE]);
@@ -4379,6 +4379,17 @@ static inline int stm32_ethinitialize(int intf)
 
       return -EAGAIN;
     }
+
+#ifdef CONFIG_STM32H7_PHYINIT
+  /* Perform any necessary, board-specific PHY initialization */
+
+  ret = stm32_phy_boardinitialize(0);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+      return ret;
+    }
+#endif
 
   /* Put the interface in the down state. */
 
