@@ -27,6 +27,7 @@
 #include <stdbool.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/mm/mm.h>
 #include <arch/chip/io.h>
 

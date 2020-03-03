@@ -72,6 +72,23 @@ config EZ80_ZDSII_V533
 
 endchoice # ZDS-II Toolchain version
 
+config EZ80_BOOTLOADER
+	bool
+	default n
+	select BOOT_RUNFROMFLASH
+	---help---
+		Binary image is a bootloader that may require special properties
+		such as re-direction of interrupts (eZ80F92)
+
+config EZ80_PROGRAM
+	bool
+	default n
+	select CONFIG_BOOT_RUNFROMEXTSRAM
+	---help---
+		Binary image is a RAM-resident program loaded by a bootloader and
+		may require special properties such as re-direction of interrupts
+		(eZ80F92)
+
 menu "ez80 Peripheral Support"
 
 config EZ80_UART0

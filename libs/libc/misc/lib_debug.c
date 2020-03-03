@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/misc/lib_err.c
+ * libs/libc/misc/lib_debug.c
  *
  *   Copyright (C) 2007-2009, 2011-2012, 2016, 2018-2019 Gregory Nutt.  All
  *     rights reserved.

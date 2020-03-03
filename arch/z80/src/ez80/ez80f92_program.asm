@@ -19,17 +19,11 @@
 ;**************************************************************************
 
 ;**************************************************************************
-; Constants
-;**************************************************************************
-
-; The IRQ number to use for unused vectors
-
-EZ80_UNUSED		EQU	40h
-
-;**************************************************************************
 ; Global Symbols Imported
 ;**************************************************************************
 
+	xref	__vecstart
+	xref	__vecend
 	xref	_ez80_irq_common
 
 ;**************************************************************************
@@ -42,7 +36,26 @@ EZ80_UNUSED		EQU	40h
 ; Constants
 ;**************************************************************************
 
-NVECTORS	EQU	64		; max possible interrupt vectors
+NVECTORS	EQU	64		; Max possible interrupt vectors
+EZ80_UNUSED	EQU	64		; Denotes an unused vector
+
+; RAM Memory map
+;
+; __vecstart    Beginning of Interrupt Redirection information.  This is
+;               used to hand off to RAM-based handlers for interrupts
+;               caught by FLASH interrupt vectors.
+; __vecend      End of the Interrupt Redirection information.
+; __loaderstart Start of RAM used exclusively by the bootloader.  This
+;               memory region an be recovered by the RAM-based program.
+; __loaderend   End of the bootloader RAM.
+; __progstart   Start of CODE for the RAM-based program.  The program can
+;               freely use the memory region from _progstart-_progend and
+;               can recover the memory for _loaderstart-_loaderend for heap
+;               usage.
+; __progend     End of RAM/End of the RAM-based program
+
+VECSTART	EQU	__vecstart				; Start of interrupt redirection area
+VECSIZE		EQU	__vecend - __vecstart	; Size of interrupt redirection area
 
 ;**************************************************************************
 ; Macros
@@ -60,99 +73,22 @@ irqhandler: macro vectno
 	endmac	irqhandler
 
 ;**************************************************************************
-; Vector Table
-;**************************************************************************
-
-; This segment must be aligned on a 256 byte boundary anywhere in RAM
-; Each entry will be a 2-byte address in a 2-byte space
-
-	define	.IVECTS, space = RAM, align = 100h
-	segment	.IVECTS
-
-; Vector table is a 2-bit address.  The MSB is the I register; the LSB is
-; the vector number.  The vector table lies in FLASH.  The addresses
-; contained in the refers to an entry in the handler table that re-
-; directs the interrupt to common interrupt handling logic.
-
-_ez80_vectable:
-	dw	_ez80_handlers + 0*_handlersize
-	dw	_ez80_handlers + 1*_handlersize
-	dw	_ez80_handlers + 2*_handlersize
-	dw	_ez80_handlers + 3*_handlersize
-	dw	_ez80_handlers + 4*_handlersize
-	dw	_ez80_handlers + 5*_handlersize
-	dw	_ez80_handlers + 6*_handlersize
-	dw	_ez80_handlers + 7*_handlersize
-	dw	_ez80_handlers + 8*_handlersize
-	dw	_ez80_handlers + 9*_handlersize
-	dw	_ez80_handlers + 10*_handlersize
-	dw	_ez80_handlers + 11*_handlersize
-	dw	_ez80_handlers + 12*_handlersize
-	dw	_ez80_handlers + 13*_handlersize
-	dw	_ez80_handlers + 14*_handlersize
-	dw	_ez80_handlers + 15*_handlersize
-	dw	_ez80_handlers + 16*_handlersize
-	dw	_ez80_handlers + 17*_handlersize
-	dw	_ez80_handlers + 18*_handlersize
-	dw	_ez80_handlers + 19*_handlersize
-	dw	_ez80_handlers + 20*_handlersize
-	dw	_ez80_handlers + 21*_handlersize
-	dw	_ez80_handlers + 22*_handlersize
-	dw	_ez80_handlers + 23*_handlersize
-	dw	_ez80_handlers + 24*_handlersize
-	dw	_ez80_handlers + 25*_handlersize
-	dw	_ez80_handlers + 26*_handlersize
-	dw	_ez80_handlers + 27*_handlersize
-	dw	_ez80_handlers + 28*_handlersize
-	dw	_ez80_handlers + 29*_handlersize
-	dw	_ez80_handlers + 30*_handlersize
-	dw	_ez80_handlers + 31*_handlersize
-	dw	_ez80_handlers + 32*_handlersize
-	dw	_ez80_handlers + 33*_handlersize
-	dw	_ez80_handlers + 34*_handlersize
-	dw	_ez80_handlers + 35*_handlersize
-	dw	_ez80_handlers + 36*_handlersize
-	dw	_ez80_handlers + 37*_handlersize
-	dw	_ez80_handlers + 38*_handlersize
-	dw	_ez80_handlers + 39*_handlersize
-	dw	_ez80_handlers + 40*_handlersize
-	dw	_ez80_handlers + 41*_handlersize
-	dw	_ez80_handlers + 42*_handlersize
-	dw	_ez80_handlers + 43*_handlersize
-	dw	_ez80_handlers + 44*_handlersize
-	dw	_ez80_handlers + 45*_handlersize
-	dw	_ez80_handlers + 46*_handlersize
-	dw	_ez80_handlers + 47*_handlersize
-	dw	_ez80_handlers + 48*_handlersize
-	dw	_ez80_handlers + 49*_handlersize
-	dw	_ez80_handlers + 50*_handlersize
-	dw	_ez80_handlers + 51*_handlersize
-	dw	_ez80_handlers + 52*_handlersize
-	dw	_ez80_handlers + 53*_handlersize
-	dw	_ez80_handlers + 54*_handlersize
-	dw	_ez80_handlers + 55*_handlersize
-	dw	_ez80_handlers + 56*_handlersize
-	dw	_ez80_handlers + 57*_handlersize
-	dw	_ez80_handlers + 58*_handlersize
-	dw	_ez80_handlers + 59*_handlersize
-	dw	_ez80_handlers + 60*_handlersize
-	dw	_ez80_handlers + 61*_handlersize
-	dw	_ez80_handlers + 62*_handlersize
-	dw	_ez80_handlers + 63*_handlersize
-
-;**************************************************************************
 ; Interrupt Vector Handlers
 ;**************************************************************************
 
-; Still in .IVECTS section
-
+	define .STARTUP, space = ROM
+	segment .STARTUP
 	.assume ADL=1
+
+; This is a copy of the handler table that will be copied into RAM at the
+; address given by VECSTART by _ez80_initvectors.  FLASH based interrupt
+; handling will vector here to support interrupts in the RAM-based program.
 
 						; Symbol           Val VecNo Addr
 						;----------------- --- ----- -----
 _ez80_handlers:
 	irqhandler	EZ80_UNUSED		;                0   0x040
-	_handlersize equ $-_ez80_handlers
+	_handlersize EQU $-_ez80_handlers
 	irqhandler	EZ80_UNUSED+1	;                1   0x044
 	irqhandler	EZ80_UNUSED+2	;                2   0x045
 	irqhandler	EZ80_UNUSED+3	;                3   0x04c
@@ -216,27 +152,32 @@ _ez80_handlers:
 	irqhandler	EZ80_UNUSED+25	;               61   0x134
 	irqhandler	EZ80_UNUSED+26	;               62   0x138
 	irqhandler	EZ80_UNUSED+27	;               63   0x13c
+	_copysize EQU $-_ez80_handlers
 
 ;**************************************************************************
 ; Vector Setup Logic
 ;**************************************************************************
 
-	define .STARTUP, space = ROM
-	segment .STARTUP
-	.assume ADL=1
+; Still in the .STARTUP segment.
 
 _ez80_initvectors:
 
-	; We don't need to do much here.  The interrupt vectors and handlers
-	; are all in FLASH.
+	; The interrupt vector and redirection tables reside in FLASH, but the
+	; handlers must be copied to into the VECSTART region in RAM.  This
+	; is necessary to support interrupt hand-off from FLASH-based interrupt
+	; vectors to RAM-based programs.
 
-	; Select interrupt mode 2
+	; Copy the initialized data section
 
-	im		2					; Interrupt mode 2
+	ld		bc, _copysize		; [bc] = data length
+	ld		hl, _ez80_handlers	; [hl] = data source
+	ld		de, VECSTART		; [de] = data destination
+	ldir						; Copy the interrupt handlers
 
-	; Write the address of the vector table into the interrupt vector base
+	; REVISIT:  We must assume that the bootloader has configured the
+	; interrupt mode correctly.  The IM register should be set to 2(i.e,
+	; interrupt mode 2) and the I register should be set according to the
+	; location of the 1st level interrupt vectors in FLASH.
 
-	ld		a, _ez80_vectable >> 8 & 0ffh
-	ld		i, a
 	ret
 	end

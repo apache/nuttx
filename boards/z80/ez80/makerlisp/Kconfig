@@ -27,6 +27,7 @@ config MAKERLISP_COPYTORAM
 config MAKERLISP_SDBOOT
 	bool "Build SD boot loader"
 	default n
+	select EZ80_BOOTLOADER
 	---help---
 		Select this option only with the boards/makerlisp/sdboot
 		configuration.  This will enable the components needed only by the

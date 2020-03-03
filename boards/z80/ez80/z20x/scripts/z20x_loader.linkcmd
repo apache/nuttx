@@ -48,7 +48,8 @@ DEFINE __copy_code_to_ram = 0
 DEFINE __crtl = 1
 
 DEFINE __vecstart = $040000
-DEFINE __loaderstart = $040400
+DEFINE __vecend = $0401ff
+DEFINE __loaderstart = $040200
 DEFINE __loaderend = $04ffff
 DEFINE __progstart = $050000
 DEFINE __progend = $0bffff
