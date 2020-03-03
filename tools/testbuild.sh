@@ -131,8 +131,8 @@ fi
 
 export APPSDIR
 
-testlist=`grep -v "^-" $testfile`
-blacklist=`grep "^-" $testfile`
+testlist=`grep -v "^-" $testfile || true`
+blacklist=`grep "^-" $testfile || true`
 
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
