@@ -5,11 +5,6 @@
 
 if ARCH_BOARD_Z20X
 
-config Z20X_BOOTLOADER
-	bool
-	default n
-	select BOOT_RUNFROMFLASH
-
 choice
 	prompt "Build selection"
 	default Z20X_PROGRAM
@@ -17,7 +12,7 @@ choice
 config Z20X_SDBOOT
 	bool "SD boot loader"
 	select LIB_HEX2BIN
-	select Z20X_BOOTLOADER
+	select EZ80_BOOTLOADER
 	depends on EZ80_SPI && MMCSD_SPI
 	---help---
 		Select this option only with the boards/z20x/sdboot
@@ -28,7 +23,7 @@ config Z20X_W25BOOT
 	bool "W25 boot loader"
 	select Z20X_W25_CHARDEV
 	select LIB_HEX2BIN
-	select Z20X_BOOTLOADER
+	select EZ80_BOOTLOADER
 	depends on EZ80_SPI && MTD_W25
 	---help---
 		Select this option only with the boards/z20x/w25boot
@@ -37,7 +32,7 @@ config Z20X_W25BOOT
 
 config Z20X_PROGRAM
 	bool "Loadable program"
-	select CONFIG_BOOT_RUNFROMEXTSRAM
+	select EZ80_PROGRAM
 	---help---
 		Normal program that resides on SD card or in W25 FLASH and is
 		loaded into RAM by a bootloader.

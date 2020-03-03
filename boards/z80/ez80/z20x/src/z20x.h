@@ -93,11 +93,13 @@
 /* RAM Memory map
  *
  * 040000              Beginning of RAM
- * 040000 _vecstart    Beginning of Vector information.  Used to hand off
- *                     to RAM-based handlers for interrupts caught by
- *                     FLASH interrupt vectors. 1Kb is set aside for RAM-
- *                     based interrupt handling information.
- * 040400 _loaderstart Start of RAM used exclusively by the bootloader.
+ * 040000 _vecstart    Beginning of Interrupt Redirection information.  This
+ *                     is used to hand off to RAM-based handlers for
+ *                     interrupts caught by FLASH interrupt vectors. 512b is
+ *                     set aside for RAM-based interrupt handling
+ *                     information.
+ * 0401ff _vecend      End of the Interrupt Redirection information.
+ * 040200 _loaderstart Start of RAM used exclusively by the bootloader.
  *                     This memory region an be recovered by the RAM-based
  *                     program.
  * 04ffff _loaderend
@@ -111,11 +113,18 @@
 extern unsigned long _vecstart;
 #define VECSTART     ((uintptr_t)&_vecstart)
 
+extern unsigned long _vecend;
+#define VECEND       ((uintptr_t)&_vecend)
+
+#define VECSIZE      (VECEND - VECSTART + 1)
+
 extern unsigned long _loaderstart;
 #define LOADERSTART  ((uintptr_t)&_loaderstart)
 
 extern unsigned long _loaderend;
 #define LOADEREND    ((uintptr_t)&_loaderend)
+
+#define LOADERSIZE   (LOADEREND - LOADERSTART + 1)
 
 extern unsigned long _progstart;
 #define PROGSTART    ((uintptr_t)&_progstart)

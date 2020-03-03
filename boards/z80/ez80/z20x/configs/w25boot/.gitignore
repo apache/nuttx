@@ -1,6 +1,6 @@
-sdboot.hex
-sdboot.map
-sdboot.lod
-sdboot.wsp
+w25boot.hex
+w25boot.map
+w25boot.lod
+w25boot.wsp
 *.asm
 Debug

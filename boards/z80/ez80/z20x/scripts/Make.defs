@@ -68,12 +68,12 @@ ARFLAGS = -quiet -warn
 #
 # Possible configurations
 #
-# 1. FLASH-resident bootloader (CONFIG_Z20X_BOOTLOADER)
+# 1. FLASH-resident bootloader (CONFIG_EZ80_BOOTLOADER)
 # 2. RAM-resident applications loaded by bootloader (CONFIG_Z20X_PROGRAM)
 # 3. FLASH-resident, standalone program (CONFIG_Z20X_STANDALONE)
 # 4. FLASH-resident, standalone copy-to-RAM program (CONFIG_Z20X_COPYTORAM)
 
-ifeq ($(CONFIG_Z20X_BOOTLOADER),y)
+ifeq ($(CONFIG_EZ80_BOOTLOADER),y)
   LDSCRIPT = z20x_loader.linkcmd
 else ifeq ($(CONFIG_Z20X_PROGRAM),y)
   LDSCRIPT = z20x_program.linkcmd
