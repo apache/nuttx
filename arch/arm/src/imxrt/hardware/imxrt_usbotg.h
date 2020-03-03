@@ -710,6 +710,7 @@
 #  define USBDEV_ENDPTCTRL_RXT_CTRL          (0 << USBDEV_ENDPTCTRL_RXT_SHIFT) /* Control */
 #  define USBDEV_ENDPTCTRL_RXT_ISOC          (1 << USBDEV_ENDPTCTRL_RXT_SHIFT) /* Isochronous */
 #  define USBDEV_ENDPTCTRL_RXT_BULK          (2 << USBDEV_ENDPTCTRL_RXT_SHIFT) /* Bulk */
+#  define USBDEV_ENDPTCTRL_RXT_INTR          (3 << USBDEV_ENDPTCTRL_RXT_SHIFT) /* Interrupt */
 #define USBDEV_ENDPTCTRL_RXS                 (1 << 0)  /* Bit 0:  Rx endpoint stall */
 
 /* Device non-core registers */
