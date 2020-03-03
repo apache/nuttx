@@ -374,7 +374,9 @@ struct kinetis_dev_s g_sdhcdev =
     .clock            = kinetis_clock,
     .attach           = kinetis_attach,
     .sendcmd          = kinetis_sendcmd,
+#ifdef CONFIG_SDIO_BLOCKSETUP
     .blocksetup       = kinetis_blocksetup,
+#endif
 #ifndef CONFIG_KINETIS_SDHC_DMA
     .recvsetup        = kinetis_recvsetup,
     .sendsetup        = kinetis_sendsetup,
