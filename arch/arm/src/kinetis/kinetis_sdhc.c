@@ -307,12 +307,19 @@ static int  kinetis_attach(FAR struct sdio_dev_s *dev);
 
 static int  kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
+
+#ifdef CONFIG_SDIO_BLOCKSETUP
+static void  kinetis_blocksetup(FAR struct sdio_dev_s *dev,
+              unsigned int blocksize, unsigned int nblocks);
+#endif
+
 #ifndef CONFIG_KINETIS_SDHC_DMA
 static int  kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
               size_t nbytes);
 static int  kinetis_sendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, uint32_t nbytes);
 #endif
+
 static int  kinetis_cancel(FAR struct sdio_dev_s *dev);
 
 static int  kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
@@ -367,6 +374,7 @@ struct kinetis_dev_s g_sdhcdev =
     .clock            = kinetis_clock,
     .attach           = kinetis_attach,
     .sendcmd          = kinetis_sendcmd,
+    .blocksetup       = kinetis_blocksetup,
 #ifndef CONFIG_KINETIS_SDHC_DMA
     .recvsetup        = kinetis_recvsetup,
     .sendsetup        = kinetis_sendsetup,
@@ -1869,6 +1877,40 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
   putreg32(regval, KINETIS_SDHC_XFERTYP);
   return OK;
 }
+
+/****************************************************************************
+ * Name: kinetis_blocksetup
+ *
+ * Description:
+ *   Configure block size and the number of blocks for next transfer
+ *
+ * Input Parameters:
+ *   dev       - An instance of the SDIO device interface
+ *   blocksize  - The selected block size.
+ *   nblocklen - The number of blocks to transfer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SDIO_BLOCKSETUP
+static void kinetis_blocksetup(FAR struct sdio_dev_s *dev,
+                             unsigned int blocksize,
+                             unsigned int nblocks)
+{
+  uint32_t regval;
+
+  mcinfo("blocksize=%ld, total transfer=%ld (%ld blocks)\n", blocksize,
+		  blocksize * nblocks, nblocks);
+
+  /* Configure block size for next transfer */
+
+  regval = blocksize << SDHC_BLKATTR_SIZE_SHIFT |
+           nblocks   << SDHC_BLKATTR_CNT_SHIFT;
+  putreg32(regval, KINETIS_SDHC_BLKATTR);
+}
+#endif
 
 /****************************************************************************
  * Name: kinetis_recvsetup

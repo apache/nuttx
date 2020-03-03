@@ -52,6 +52,13 @@ CSRCS += k28_userleds.c
 endif
 endif
 
+ifeq ($(CONFIG_KINETIS_SDHC),y)
+CSRCS += k28_sdhc.c
+ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
+CSRCS += k28_automount.c
+endif
+endif
+
 ifeq ($(CONFIG_PWM),y)
 CSRCS += k28_pwm.c
 endif

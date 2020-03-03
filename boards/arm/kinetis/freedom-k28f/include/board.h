@@ -415,6 +415,17 @@
 #endif
 #endif
 
+/* SDHC */
+
+#ifdef CONFIG_KINETIS_SDHC
+#  define PIN_SDHC0_CMD     PIN_SDHC0_CMD_1
+#  define PIN_SDHC0_D0      PIN_SDHC0_D0_1
+#  define PIN_SDHC0_D1      PIN_SDHC0_D1_1
+#  define PIN_SDHC0_D2      PIN_SDHC0_D2_1
+#  define PIN_SDHC0_D3      PIN_SDHC0_D3_1
+#  define PIN_SDHC0_DCLK    PIN_SDHC0_DCLK_1
+#endif
+
 /* LED definitions **********************************************************/
 
 /* The Freedom K28F has a single RGB LED driven by the K28F as follows:
