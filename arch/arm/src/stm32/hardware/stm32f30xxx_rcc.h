@@ -1,35 +1,20 @@
 /************************************************************************************
  * arch/arm/src/stm32/hardware/stm32f30xx_rcc.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ************************************************************************************/
 
@@ -357,14 +342,18 @@
 #  define RCC_CFGR2_ADC34PRESd128   (26 << RCC_CFGR2_ADC34PRES_SHIFT) /* 11010: PLL clock divided by 128 */
 #  define RCC_CFGR2_ADC34PRESd256   (27 << RCC_CFGR2_ADC34PRES_SHIFT) /* 11011: PLL clock divided by 256 */
 
-/* Clock configuration register 2 */
+/* Clock configuration register 3 */
 
-#define RCC_CFGR3_USART1SW_SHIFT    (9)       /* Bits 0-1: USART1 clock source selection */
+/* otmar.goerlitz@hexagon.com, 2020-02-21: bit shift for USART1SW is 0;
+ * HSI bit pattern for all USARTxSW is 3
+ */
+
+#define RCC_CFGR3_USART1SW_SHIFT    (0)       /* Bits 0-1: USART1 clock source selection */
 #define RCC_CFGR3_USART1SW_MASK     (3 << RCC_CFGR3_USART1SW_SHIFT)
 #  define RCC_CFGR3_USART1SW_PCLK   (0 << RCC_CFGR3_USART1SW_SHIFT) /* PCLK */
 #  define RCC_CFGR3_USART1SW_SYSCLK (1 << RCC_CFGR3_USART1SW_SHIFT) /* System clock (SYSCLK) */
 #  define RCC_CFGR3_USART1SW_LSE    (2 << RCC_CFGR3_USART1SW_SHIFT) /* LSE clock */
-#  define RCC_CFGR3_USART1SW_HSI    (0 << RCC_CFGR3_USART1SW_SHIFT) /* HSI clock */
+#  define RCC_CFGR3_USART1SW_HSI    (3 << RCC_CFGR3_USART1SW_SHIFT) /* HSI clock */
 #define RCC_CFGR3_I2C1SW            (1 << 4)  /* Bit 4: I2C1 clock source selection */
 #define RCC_CFGR3_I2C2SW            (1 << 5)  /* Bit 5: I2C2 clock source selection */
 #define RCC_CFGR3_TIM1SW            (1 << 8)  /* Bit 8: Timer1 clock source selection */
@@ -374,24 +363,25 @@
 #  define RCC_CFGR3_USART2SW_PCLK   (0 << RCC_CFGR3_USART2SW_SHIFT) /* PCLK */
 #  define RCC_CFGR3_USART2SW_SYSCLK (1 << RCC_CFGR3_USART2SW_SHIFT) /* System clock (SYSCLK) */
 #  define RCC_CFGR3_USART2SW_LSE    (2 << RCC_CFGR3_USART2SW_SHIFT) /* LSE clock */
-#  define RCC_CFGR3_USART2SW_HSI    (0 << RCC_CFGR3_USART2SW_SHIFT) /* HSI clock */
+#  define RCC_CFGR3_USART2SW_HSI    (3 << RCC_CFGR3_USART2SW_SHIFT) /* HSI clock */
 #define RCC_CFGR3_USART3SW_SHIFT    (18)      /* Bits 18-19: USART3 clock source selection */
 #define RCC_CFGR3_USART3SW_MASK     (3 << RCC_CFGR3_USART3SW_SHIFT)
 #  define RCC_CFGR3_USART3SW_PCLK   (0 << RCC_CFGR3_USART3SW_SHIFT) /* PCLK */
 #  define RCC_CFGR3_USART3SW_SYSCLK (1 << RCC_CFGR3_USART3SW_SHIFT) /* System clock (SYSCLK) */
 #  define RCC_CFGR3_USART3SW_LSE    (2 << RCC_CFGR3_USART3SW_SHIFT) /* LSE clock */
-#  define RCC_CFGR3_USART3SW_HSI    (0 << RCC_CFGR3_USART3SW_SHIFT) /* HSI clock */
+#  define RCC_CFGR3_USART3SW_HSI    (3 << RCC_CFGR3_USART3SW_SHIFT) /* HSI clock */
 #define RCC_CFGR3_UART4SW_SHIFT     (20)      /* Bits 20-21: UART4 clock source selection */
 #define RCC_CFGR3_UART4SW_MASK      (3 << RCC_CFGR3_UART4SW_SHIFT)
 #  define RCC_CFGR3_UART4SW_PCLK    (0 << RCC_CFGR3_UART4SW_SHIFT) /* PCLK */
 #  define RCC_CFGR3_UART4SW_SYSCLK  (1 << RCC_CFGR3_UART4SW_SHIFT) /* System clock (SYSCLK) */
 #  define RCC_CFGR3_UART4SW_LSE     (2 << RCC_CFGR3_UART4SW_SHIFT) /* LSE clock */
-#  define RCC_CFGR3_UART4SW_HSI     (0 << RCC_CFGR3_UART4SW_SHIFT) /* HSI clock */
+#  define RCC_CFGR3_UART4SW_HSI     (3 << RCC_CFGR3_UART4SW_SHIFT) /* HSI clock */
 #define RCC_CFGR3_UART5SW_SHIFT     (22)      /* Bits 22-23: UART5 clock source selection */
 #define RCC_CFGR3_UART5SW_MASK      (3 << RCC_CFGR3_UART5SW_SHIFT)
 #  define RCC_CFGR3_UART5SW_PCLK    (0 << RCC_CFGR3_UART5SW_SHIFT) /* PCLK */
 #  define RCC_CFGR3_UART5SW_SYSCLK  (1 << RCC_CFGR3_UART5SW_SHIFT) /* System clock (SYSCLK) */
 #  define RCC_CFGR3_UART5SW_LSE     (2 << RCC_CFGR3_UART5SW_SHIFT) /* LSE clock */
-#  define RCC_CFGR3_UART5SW_HSI     (0 << RCC_CFGR3_UART5SW_SHIFT) /* HSI clock */
+#  define RCC_CFGR3_UART5SW_HSI     (3 << RCC_CFGR3_UART5SW_SHIFT) /* HSI clock */
 
 #endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F30XXX_RCC_H */
+
