@@ -1,0 +1,55 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_INTEL64
+comment "intel64 Configuration Options"
+
+config ARCH_INTEL64_HAVE_TSC_DEADLINE
+    bool "TSC DEADLINE timer support"
+    default y
+	---help---
+		Select to enable the use of TSC DEADLINE timer of x86_64
+
+if ARCH_INTEL64_HAVE_TSC_DEADLINE
+
+config ARCH_INTEL64_CORE_FREQ_KHZ
+    int "CPU Core frequency in kHz"
+    default 2000000
+	---help---
+		The CPU Core frequency (without Turbo boost). This is used
+		to set the TSC deadline timer frequency.
+
+endif
+
+if !ARCH_INTEL64_HAVE_TSC_DEADLINE
+
+config ARCH_INTEL64_APIC_FREQ_KHZ
+    int "APIC timer frequency in kHz"
+    default 2000000
+	---help---
+		The APIC timer frequency. This is used to set the APIC timer
+		frequency in case of no TSC DEADLINE timer is available.
+
+endif
+
+config ARCH_INTEL64_HAVE_SSE3
+    bool "SSE3 support"
+    default y
+	---help---
+		Select to enable the use of SSE3 and FPU functions of x86_64
+
+config ARCH_INTEL64_HAVE_PCID
+    bool "PCID support"
+    default y
+	---help---
+		Select to enable the use of PCID to reduce TLB flush
+
+config ARCH_INTEL64_HAVE_RDRAND
+    bool "RDRAND support"
+    default y
+	---help---
+		Select to enable the use of RDRAND for /dev/random
+
+endif

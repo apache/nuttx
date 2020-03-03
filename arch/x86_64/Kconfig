@@ -1,0 +1,67 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_X86_64
+comment "x86_64 Configuration Options"
+
+config ARCH
+	string
+	default "x86_64"
+
+choice
+	prompt "x86_64 arch selection"
+	default ARCH_INTEL64
+
+config ARCH_INTEL64
+	bool "Intel x86_64"
+	select ARCH_HAVE_MPU
+	select ARCH_USE_MPU
+    select ARCH_HAVE_TICKLESS
+    select ARCH_HAVE_STACKCHECK
+	select ARCH_HAVE_RNG
+	---help---
+		Intel x86_64 architecture
+
+endchoice
+
+choice
+	prompt "x86_64 system selection"
+	default ARCH_BOARD_QEMU
+
+config ARCH_BOARD_QEMU
+	bool "Qemu envrionment"
+	---help---
+		Targeting virtualized qemu environment
+
+endchoice
+
+source arch/x86_64/src/common/Kconfig
+
+if ARCH_INTEL64
+source arch/x86_64/src/intel64/Kconfig
+
+config ARCH_CHIP
+	string
+	default "intel64"
+
+endif # ARCH_INTEL64
+
+if ARCH_BOARD_QEMU
+source arch/x86_64/src/qemu/Kconfig
+
+config ARCH_BOARD
+	string
+	default "qemu-intel64"
+
+endif # ARCH_CHIP_QEMU
+
+config ARCH_EXCLUDE_MULTIBOOT
+	bool "Don't append multiboot2 header"
+	default n
+    ---help---
+        Some platforms, e.g. jailhouse, do not like to have a multiboot header
+
+
+endif # ARCH_X86_64
