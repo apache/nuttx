@@ -263,18 +263,19 @@
 #  define RCC_CFGR_MCO1_HSI             (0 << RCC_CFGR_MCO1_SHIFT) /* 000: HSI clock selected */
 #  define RCC_CFGR_MCO1_LSE             (1 << RCC_CFGR_MCO1_SHIFT) /* 001: LSE oscillator selected */
 #  define RCC_CFGR_MCO1_HSE             (2 << RCC_CFGR_MCO1_SHIFT) /* 010: HSE oscillator clock selected */
-#  define RCC_CFGR_MCO1_PLL             (3 << RCC_CFGR_MCO1_SHIFT) /* 011: PLL clock selected */
+#  define RCC_CFGR_MCO1_PLL1Q           (3 << RCC_CFGR_MCO1_SHIFT) /* 011: PLL clock selected */
 #  define RCC_CFGR_MCO1_HSI48           (4 << RCC_CFGR_MCO1_SHIFT) /* 100: HSI48 clock selected */
 #define RCC_CFGR_MCO2PRE_SHIFT          (25) /* Bits 25-28: MCO2 prescaler */
 #define RCC_CFGR_MCO2PRE_MASK           (0xf << RCC_CFGR_MCO2PRE_SHIFT)
 #  define RCC_CFGR_MCO2PRE(x)           (((uint32_t)(x)) << RCC_CFGR_MCO2PRE_SHIFT)
 #define RCC_CFGR_MCO2_SHIFT             (29) /* Bits 29-31: Microcontroller Clock Output 2 */
-#define RCC_CFGR_MCO2_MASK              (7 << RCC_CFGR_MCO1_SHIFT)
-#  define RCC_CFGR_MCO2_HSI             (0 << RCC_CFGR_MCO1_SHIFT) /* 000: HSI clock selected */
-#  define RCC_CFGR_MCO2_LSE             (1 << RCC_CFGR_MCO1_SHIFT) /* 001: LSE oscillator selected */
-#  define RCC_CFGR_MCO2_HSE             (2 << RCC_CFGR_MCO1_SHIFT) /* 010: HSE oscillator clock selected */
-#  define RCC_CFGR_MCO2_PLL             (3 << RCC_CFGR_MCO1_SHIFT) /* 011: PLL clock selected */
-#  define RCC_CFGR_MCO2_HSI48           (4 << RCC_CFGR_MCO1_SHIFT) /* 100: HSI48 clock selected */
+#define RCC_CFGR_MCO2_MASK              (7 << RCC_CFGR_MCO2_SHIFT)
+#  define RCC_CFGR_MCO2_SYS             (0 << RCC_CFGR_MCO2_SHIFT) /* 000: HSI clock selected */
+#  define RCC_CFGR_MCO2_PLL2P           (1 << RCC_CFGR_MCO2_SHIFT) /* 001: PLL2 peripheral clock selected */
+#  define RCC_CFGR_MCO2_HSE             (2 << RCC_CFGR_MCO2_SHIFT) /* 010: HSE oscillator clock selected */
+#  define RCC_CFGR_MCO2_PLL1P           (3 << RCC_CFGR_MCO2_SHIFT) /* 011: PLL1 peripheral clock selected */
+#  define RCC_CFGR_MCO2_CSI             (4 << RCC_CFGR_MCO2_SHIFT) /* 100: CSI clock selected */
+#  define RCC_CFGR_MCO2_LSI             (5 << RCC_CFGR_MCO2_SHIFT) /* 101: LSI clock selected */
 
 /* Bit definitions for RCC_D1CFGR */
 
