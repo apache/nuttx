@@ -1,37 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_ethernet.c
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *   Author: Jukka Laitinen <jukka.laitinen@iki.fi>
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -216,7 +199,7 @@
 #endif
 
 #if ETH_BUFSIZE != OPTIMAL_ETH_BUFSIZE
-#  warning "You using an incomplete/untested configuration"
+#  warning "You are using an incomplete/untested configuration"
 #endif
 
 #ifndef CONFIG_STM32H7_ETH_NRXDESC
@@ -230,7 +213,7 @@
 
 #define STM32_ETH_NFREEBUFFERS (CONFIG_STM32H7_ETH_NTXDESC+1)
 
-/* Buffers use for DMA access must begin on an address aligned with the
+/* Buffers used for DMA access must begin on an address aligned with the
  * D-Cache line and must be an even multiple of the D-Cache line size.
  * These size/alignment requirements are necessary so that D-Cache flush
  * and invalidate operations will not have any additional effects.
@@ -600,8 +583,8 @@ union stm32_desc_u
   struct eth_desc_s   desc;
 };
 
-/* The stm32_ethmac_s encapsulates all state information for a single hardware
- * interface
+/* The stm32_ethmac_s encapsulates all state information for a single
+ * hardware interface
  */
 
 struct stm32_ethmac_s
@@ -1224,7 +1207,7 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
        */
 
       up_clean_dcache((uintptr_t)txdesc,
-                        (uintptr_t)txdesc + sizeof(struct eth_desc_s));
+                      (uintptr_t)txdesc + sizeof(struct eth_desc_s));
 
       /* Point to the next available TX descriptor */
 
@@ -1389,8 +1372,8 @@ static int stm32_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
@@ -1595,7 +1578,8 @@ static void stm32_freesegment(struct stm32_ethmac_s *priv,
     {
       /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
 
-      rxdesc->des3 = ETH_RDES3_RD_OWN | ETH_RDES3_RD_IOC | ETH_RDES3_RD_BUF1V;
+      rxdesc->des3 = ETH_RDES3_RD_OWN | ETH_RDES3_RD_IOC |
+                     ETH_RDES3_RD_BUF1V;
 
       /* Make sure that the modified RX descriptor is written to physical
        * memory.
@@ -1604,15 +1588,15 @@ static void stm32_freesegment(struct stm32_ethmac_s *priv,
       up_clean_dcache((uintptr_t)rxdesc,
                       (uintptr_t)rxdesc + sizeof(struct eth_desc_s));
 
-      /* Update the tail pointer */
-
-      stm32_putreg((uintptr_t)rxdesc, STM32_ETH_DMACRXDTPR);
-
       /* Get the next RX descriptor in the chain (cache coherency should not
        * be an issue because the link address is constant.
        */
 
       rxdesc = stm32_get_next_rxdesc(priv, rxdesc);
+
+      /* Update the tail pointer */
+
+      stm32_putreg((uintptr_t)rxdesc, STM32_ETH_DMACRXDTPR);
     }
 
   /* Reset the segment management logic */
@@ -1624,7 +1608,9 @@ static void stm32_freesegment(struct stm32_ethmac_s *priv,
 
   if ((stm32_getreg(STM32_ETH_DMACSR) & ETH_DMACSR_RBU) != 0)
     {
-      /* TODO: This is probably not needed at all? */
+      /* Clear the RBU flag */
+
+      stm32_putreg(ETH_DMACSR_RBU, STM32_ETH_DMACSR);
 
       nerr("ETH_DMACSR_RBU\n");
 
@@ -1697,7 +1683,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
   /* Forces the first RX descriptor to be re-read from physical memory */
 
   up_invalidate_dcache((uintptr_t)rxdesc,
-                         (uintptr_t)rxdesc + sizeof(struct eth_desc_s));
+                       (uintptr_t)rxdesc + sizeof(struct eth_desc_s));
 
   for (i = 0;
        (rxdesc->des3 & ETH_RDES3_WB_OWN) == 0 &&
@@ -2027,7 +2013,8 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
  * Function: stm32_freeframe
  *
  * Description:
- *   Scans the TX descriptors and frees the buffers of completed TX transfers.
+ *   Scans the TX descriptors and frees the buffers of completed TX
+ *   transfers.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -2072,14 +2059,9 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
 
           DEBUGASSERT(txdesc->des0 != 0);
 
-          /* Check if this is the first segment of a TX frame. */
+          /* Yes.. Free the buffer */
 
-          if ((txdesc->des3 & ETH_TDES3_RD_FD) != 0)
-            {
-              /* Yes.. Free the buffer */
-
-              stm32_freebuffer(priv, (uint8_t *)txdesc->des0);
-            }
+          stm32_freebuffer(priv, (uint8_t *)txdesc->des0);
 
           /* In any event, make sure that des0-3 are nullified. */
 
@@ -2105,7 +2087,7 @@ static void stm32_freeframe(struct stm32_ethmac_s *priv)
               priv->inflight--;
 
               /* If all of the TX descriptors were in-flight, then RX
-               * interruptsmay have been disabled... we can re-enable them
+               * interrupts may have been disabled... we can re-enable them
                * now.
                */
 
@@ -2443,15 +2425,15 @@ static void stm32_poll_work(void *arg)
   struct stm32_ethmac_s *priv = (struct stm32_ethmac_s *)arg;
   struct net_driver_s *dev  = &priv->dev;
 
-  /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
-   * cannot perform the timer poll if we are unable to accept another packet
-   * for transmission.  Hmmm.. might be bug here.  Does this mean if there is
-   * a transmit in progress, we will miss TCP time state updates?
+  /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.
+   * We cannot perform the timer poll if we are unable to accept another
+   * packet for transmission.  Hmmm.. might be bug here.  Does this mean if
+   * there is a transmit in progress, we will miss TCP time state updates?
    *
-   * In a race condition, ETH_TDES3_OWN may be cleared BUT still not available
-   * because stm32_freeframe() has not yet run.  If stm32_freeframe() has run,
-   * the buffer1 pointer (des2) will be nullified (and inflight should be <
-   * CONFIG_STM32H7_ETH_NTXDESC).
+   * In a race condition, ETH_TDES3_OWN may be cleared BUT still not
+   * available because stm32_freeframe() has not yet run.  If
+   * stm32_freeframe() has run, the buffer1 pointer (des2) will be nullified
+   * (and inflight should be < CONFIG_STM32H7_ETH_NTXDESC).
    */
 
   net_lock();
@@ -3732,8 +3714,8 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 
   /* Provide clocking via MCO, MCO1 or MCO2:
    *
-   * "MCO1 (microcontroller clock output), used to output HSI, LSE, HSE or PLL
-   *  clock (through a configurable prescaler) on PA8 pin."
+   * "MCO1 (microcontroller clock output), used to output HSI, LSE, HSE or
+   *  PLL clock (through a configurable prescaler) on PA8 pin."
    *
    * "MCO2 (microcontroller clock output), used to output HSE, PLL, SYSCLK or
    *  PLLI2S clock (through a configurable prescaler) on PC9 pin."
@@ -3764,8 +3746,8 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 
   /* MII interface pins (17):
    *
-   * MII_TX_CLK, MII_TXD[3:0], MII_TX_EN, MII_RX_CLK, MII_RXD[3:0], MII_RX_ER,
-   * MII_RX_DV, MII_CRS, MII_COL, MDC, MDIO
+   * MII_TX_CLK, MII_TXD[3:0], MII_TX_EN, MII_RX_CLK, MII_RXD[3:0],
+   * MII_RX_ER, MII_RX_DV, MII_CRS, MII_COL, MDC, MDIO
    */
 
   stm32_configgpio(GPIO_ETH_MII_COL);
@@ -3794,8 +3776,8 @@ static inline void stm32_ethgpioconfig(struct stm32_ethmac_s *priv)
 
   /* Provide clocking via MCO, MCO1 or MCO2:
    *
-   * "MCO1 (microcontroller clock output), used to output HSI, LSE, HSE or PLL
-   *  clock (through a configurable prescaler) on PA8 pin."
+   * "MCO1 (microcontroller clock output), used to output HSI, LSE, HSE or
+   *  PLL clock (through a configurable prescaler) on PA8 pin."
    *
    * "MCO2 (microcontroller clock output), used to output HSE, PLL, SYSCLK or
    *  PLLI2S clock (through a configurable prescaler) on PC9 pin."
@@ -3885,8 +3867,9 @@ static void stm32_ethreset(struct stm32_ethmac_s *priv)
   regval |= ETH_DMAMR_SWR;
   stm32_putreg(regval, STM32_ETH_DMAMR);
 
-  /* Wait for software reset to complete. The SR bit is cleared automatically
-   * after the reset operation has completed in all of the core clock domains.
+  /* Wait for software reset to complete. The SR bit is cleared
+   * automatically after the reset operation has completed in all of the
+   * core clock domains.
    */
 
   while ((stm32_getreg(STM32_ETH_DMAMR) & ETH_DMAMR_SWR) != 0);

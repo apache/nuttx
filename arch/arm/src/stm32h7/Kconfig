@@ -4478,6 +4478,18 @@ config STM32H7_AUTONEG
 	---help---
 		Use PHY autonegotiation to determine speed and mode
 
+config STM32H7_ETH_NRXDESC
+	int "Number of RX descriptors"
+	default 8
+	---help---
+		Number of RX DMA descriptors to use.
+
+config STM32H7_ETH_NTXDESC
+	int "Number of TX descriptors"
+	default 4
+	---help---
+		Number of TX DMA descriptors to use.
+
 config STM32H7_ETHFD
 	bool "Full duplex"
 	default n
