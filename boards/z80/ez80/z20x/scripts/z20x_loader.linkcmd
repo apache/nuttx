@@ -24,7 +24,7 @@
 -sort NAME=ascending -warn -debug -NOigcase
 
 RANGE ROM $000000 : $01ffff
-RANGE RAM $040000 : $04ffff
+RANGE RAM $040200 : $04ffff
 RANGE EXTIO $000000 : $00ffff
 RANGE INTIO $000000 : $0000ff
 
