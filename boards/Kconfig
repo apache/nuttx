@@ -2838,7 +2838,7 @@ if ARCH_BOARD_QEMU_I486
 source "boards/x86/qemu/qemu-i486/Kconfig"
 endif
 if ARCH_BOARD_INTEL64_QEMU
-source "boards/x86_64/intel64/qemu/Kconfig"
+source "boards/x86_64/intel64/qemu-intel64/Kconfig"
 endif
 if ARCH_BOARD_RX65N
 source "boards/renesas/rx65n/rx65n/Kconfig"
