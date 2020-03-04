@@ -23,10 +23,10 @@
 -map -maxhexlen=64 -quiet -warnoverlap -xref -unresolved=fatal
 -sort NAME=ascending -warn -debug -NOigcase
 
-RANGE ROM $000000 : $01FFFF
-RANGE RAM $050000 : $0BFFFF
-RANGE EXTIO $000000 : $00FFFF
-RANGE INTIO $000000 : $0000FF
+RANGE ROM $000000 : $01ffff
+RANGE RAM $050000 : $0bffff
+RANGE EXTIO $000000 : $00ffff
+RANGE INTIO $000000 : $0000ff
 
 CHANGE .RESET is RAM
 CHANGE .STARTUP is RAM
