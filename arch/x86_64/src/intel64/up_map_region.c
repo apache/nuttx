@@ -57,7 +57,7 @@ int up_map_region(void *base, int size, int flags)
   /* Increase size if the base address is rounded off */
 
   size += (uint64_t)base - bb;
-  uint64_t num_of_pages = (size + PAGE_SIZE - 1) / PAGE_SIZE;
+  num_of_pages = (size + PAGE_SIZE - 1) / PAGE_SIZE;
 
   if (bb > 0xffffffff)
     {

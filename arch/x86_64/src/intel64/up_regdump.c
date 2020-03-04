@@ -37,7 +37,7 @@
  * Name: up_registerdump
  ****************************************************************************/
 
-void print_mem(void *sp, size_t size
+void print_mem(void *sp, size_t size)
 {
   char buf[9];
   int i;
