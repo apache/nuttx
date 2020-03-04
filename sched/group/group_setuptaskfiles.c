@@ -47,7 +47,6 @@
 #include <nuttx/net/net.h>
 
 #include "sched/sched.h"
-#include "socket/socket.h"
 #include "group/group.h"
 
 /****************************************************************************
