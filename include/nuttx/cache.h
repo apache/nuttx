@@ -210,7 +210,7 @@ void up_disable_dcache(void);
 #ifdef CONFIG_ARCH_DCACHE
 void up_invalidate_dcache(uintptr_t start, uintptr_t end);
 #else
-#  define up_disable_dcache(start, end)
+#  define up_invalidate_dcache(start, end)
 #endif
 
 /****************************************************************************
