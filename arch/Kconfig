@@ -79,10 +79,10 @@ config ARCH_SIM
 	---help---
 		Linux/Cygwin user-mode simulation.
 
-config arch_x86
+config ARCH_X86
 	bool "x86"
 	---help---
-		intel x86 architectures.
+		Intel x86 architectures.
 
 config ARCH_X86_64
 	bool "x86_64"
