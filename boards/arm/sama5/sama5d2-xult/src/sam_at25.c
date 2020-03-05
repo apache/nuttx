@@ -1,7 +1,7 @@
 /****************************************************************************
- * boards/arm/sama5/sama5d2-xult/src/sam_boot.c
+ * boards/arm/sama5/sama5d3-xplained/src/sam_at25.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,18 +39,24 @@
 
 #include <nuttx/config.h>
 
+#include <sys/mount.h>
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/mtd/mtd.h>
+#include <nuttx/fs/nxffs.h>
 
+#include "sam_spi.h"
 #include "sama5d2-xult.h"
+
+#ifdef HAVE_AT25
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -58,56 +64,80 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_boardinitialize
+ * Name: sam_at25_automount
  *
  * Description:
- *   All SAMA5 architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
+ *   Initialize and configure the AT25 serial FLASH
  *
  ****************************************************************************/
 
-void sam_boardinitialize(void)
+int sam_at25_automount(int minor)
 {
-  /* Initialize USB if the 1) the HS host or device controller is in the
-   * configuration and 2) the weak function sam_usbinitialize() has been
-   * brought into the build.
-   * Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
-   */
+  FAR struct spi_dev_s *spi;
+  FAR struct mtd_dev_s *mtd;
+  static bool initialized = false;
+  int ret;
 
-#if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
-  if (sam_usbinitialize)
+  /* Have we already initialized? */
+
+  if (!initialized)
     {
-      sam_usbinitialize();
+      /* No.. Get the SPI port driver */
+
+      spi = sam_spibus_initialize(AT25_PORT);
+      if (!spi)
+        {
+          ferr("ERROR: Failed to initialize SPI port %d\n", AT25_PORT);
+          return -ENODEV;
+        }
+
+      /* Now bind the SPI interface to the AT25 SPI FLASH driver */
+
+      mtd = at25_initialize(spi);
+      if (!mtd)
+        {
+          ferr("ERROR: Failed to bind SPI port %d to the AT25 FLASH driver\n");
+          return -ENODEV;
+        }
+
+#if defined(CONFIG_SAMA5D3XPLAINED_AT25_FTL)
+
+      /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+
+      ret = ftl_initialize(AT25_MINOR, mtd);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          return ret;
+        }
+
+#elif defined(CONFIG_SAMA5D3XPLAINED_AT25_NXFFS)
+
+      /* Initialize to provide NXFFS on the MTD interface */
+
+      ret = nxffs_initialize(mtd);
+      if (ret < 0)
+        {
+          ferr("ERROR: NXFFS initialization failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Mount the file system at /mnt/at25 */
+
+      ret = mount(NULL, "/mnt/at25", "nxffs", 0, NULL);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          return ret;
+        }
+#endif
+
+      /* Now we are initializeed */
+
+      initialized = true;
     }
-#endif
 
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
-
-  board_autoled_initialize();
-#endif
+  return OK;
 }
 
-/****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize(). board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
-  /* Perform board initialization */
-
-  sam_bringup();
-}
-#endif /* CONFIG_BOARD_LATE_INITIALIZE */
+#endif /* HAVE_AT25 */

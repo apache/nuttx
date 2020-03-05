@@ -46,6 +46,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Decimal configuration values may exceed 2Gb and, hence, overflow to negative
  * values unless we force them to unsigned long:
  */
@@ -80,6 +81,7 @@
 #define SAM_EBICS3_PSECTION      0x60000000 /* 0x60000000-0x6fffffff: EBI Chip select 2 */
 #define SAM_NFCCR_PSECTION       0x70000000 /* 0x70000000-0x7fffffff: NFC Command Registers */
                                             /* 0x80000000-0xefffffff: Undefined */
+
 #define SAM_PERIPH_PSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
 
 /* SAMA5 Internal Memories */
@@ -97,6 +99,7 @@
 #define SAM_AXIMX_PSECTION       0x00800000 /* 0x00800000-0x008fffff: AXI Matr */
 #define SAM_DAP_PSECTION         0x00900000 /* 0x00900000-0x009fffff: DAP */
                                             /* 0x00a00000-0x0fffffff: Undefined */
+
 /* SAMA5 Internal Peripheral Offsets */
 
 #define SAM_PERIPHA_PSECTION     0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
@@ -136,8 +139,9 @@
 #  define SAM_TDES_OFFSET        0x0003c000 /* 0x0003c000-0x0003ffff: TDES */
 #  define SAM_TRNG_OFFSET        0x00040000 /* 0x00040000-0x00043fff: TRNG */
                                             /* 0x00044000-0x00ffbfff: Reserved */
-#define SAM_SYSC_PSECTION        0xfff00000 /* 0xfff00000-0xffffffff: System Controller */
-#define SAM_SYSC_PADDR           0xffffc000 /* 0xffffc000-0xffffffff: System Controller */
+
+#  define SAM_SYSC_PSECTION      0xfff00000 /* 0xfff00000-0xffffbfff: System Controller */
+#  define SAM_SYSC_PADDR         0xffffc000 /* 0xffffc000-0xffffffff: System Controller */
 #  define SAM_SYSC_OFFSET        0x00000000 /* 0x0fffc000-0x0fffffff: System Controller */
 
 /* System Controller Peripheral Offsets.  All relative to the beginning of the
@@ -146,6 +150,7 @@
 
 #define SAM_HSMC_OFFSET          0x00000000 /* 0x00000000-0x00000fff: HSMC */
                                             /* 0x00001000-0x000023ff: Reserved */
+
 #define SAM_FUSE_OFFSET          0x00002400 /* 0x00002400-0x000025ff: FUSE */
 #define SAM_DMAC0_OFFSET         0x00002600 /* 0x00002600-0x000027ff: DMAC0 */
 #define SAM_DMAC1_OFFSET         0x00002800 /* 0x00002800-0x000029ff: DMAC1 */
@@ -163,12 +168,14 @@
 #define SAM_RSTC_OFFSET          0x00003e00 /* 0x00003e00-0x00003e0f: RSTC */
 #define SAM_SHDC_OFFSET          0x00003e10 /* 0x00003e10-0x00003e1f: SHDC */
                                             /* 0x00003e20-0x00003e2f: Reserved */
+
 #define SAM_PITC_OFFSET          0x00003e30 /* 0x00003e30-0x00003e3f: PITC */
 #define SAM_WDT_OFFSET           0x00003e40 /* 0x00003e40-0x00003e4f: WDT */
 #define SAM_SCKCR_OFFSET         0x00003e50 /* 0x00003e50-0x00003e53: SCKCR */
 #define SAM_BSC_OFFSET           0x00003e54 /* 0x00003e54-0x00003e5f: BSC */
 #define SAM_GPBR_OFFSET          0x00003e60 /* 0x00003e60-0x00003e6f: GPBR */
                                             /* 0x00003e70-0x00003eaf: Reserved */
+
 #define SAM_RTCC_OFFSET          0x00003eb0 /* 0x00003eb0-0x00003edf: RTCC */
                                             /* 0x00003ee0-0x00003fff: Reserved */
 
@@ -178,11 +185,14 @@
  * region.  The implemented sizes of the EBI CS0-3 and DDRCS regions
  * are not known apriori and must be specified with configuration settings.
  */
+
                                                  /* 0x00000000-0x0fffffff: Internal Memories */
+
 #define SAM_BOOTMEM_SIZE         (1*1024*1024)   /* 0x00000000-0x000fffff: Boot memory */
 #define SAM_ROM_SIZE             (1*1024*1024)   /* 0x00100000-0x001fffff: ROM */
 #define SAM_NFCSRAM_SIZE         (1*1024*1024)   /* 0x00200000-0x002fffff: NFC SRAM */
                                                  /* 0x00300000-0x003fffff: SRAM0 and SRAM1 */
+
 #define SAM_ISRAM_SIZE           (64*1024 + SAM_ISRAM1_SIZE)
 #define SAM_SMD_SIZE             (1*1024*1024)   /* 0x00400000-0x004fffff: SMD */
 #define SAM_UDPHSRAM_SIZE        (1*1024*1024)   /* 0x00500000-0x005fffff: UDPH SRAM */
@@ -192,6 +202,7 @@
 #define SAM_DAP_SIZE             (1*1024*1024)   /* 0x00900000-0x009fffff: DAP */
 #define SAM_NFCCR_SIZE           (256*1024*1024) /* 0x70000000-0x7fffffff: NFC Command Registers */
                                                  /* 0xf0000000-0xffffffff: Internal Peripherals */
+
 #define SAM_PERIPHA_SIZE         (240*1024)      /* 0xf0000000-0xf003bfff: Internal Peripherals */
 #define SAM_PERIPHB_SIZE         (272*1024)      /* 0xf8000000-0xf8043fff: Internal Peripherals */
 #define SAM_SYSC_SIZE            (1*1024*1024)   /* 0xfff00000-0x0ffffedf: Internal Peripherals */
@@ -374,8 +385,8 @@
 #define SAM_PERIPH_VSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
 #  define SAM_PERIPHA_VSECTION   0xf0000000 /* 0xf0000000-0xf7ffffff: Internal Peripherals A */
 #  define SAM_PERIPHB_VSECTION   0xf8000000 /* 0xf8000000-0xffefffff: Internal Peripherals B */
-#  define SAM_SYSC_VSECTION      0xfff00000 /* 0xfff00000-0xffffbfff: System Controller */
-#  define SAM_SYSC_VADDR         0xffffc000 /* 0xffffc000-0xffffffff: System Controller */
+#  define SAM_SYSC_VSECTION      0xf8048000 /* 0xf8048000-0xf8048fff: System Controller */
+#  define SAM_SYSC_VADDR         0xf80fc000 /* 0xf8048000-0xf8048fff: System Controller */
 #else
 #define SAM_PERIPH_VSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
 #  define SAM_PERIPHA_VSECTION   0xf0000000 /* 0xf0000000-0xf00fffff: Internal Peripherals A */
@@ -802,10 +813,6 @@
 
 /************************************************************************************
  * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
  ************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D3X_MEMORYMAP_H */

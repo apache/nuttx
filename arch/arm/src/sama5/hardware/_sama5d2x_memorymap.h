@@ -88,6 +88,7 @@
 #define SAM_QSPI0_PSECTION       0xd0000000 /* 0xd0000000-0xd7ffffff: QSPI0 Memory */
 #define SAM_QSPI1_PSECTION       0xd8000000 /* 0xd8000000-0xdfffffff: QSPI1 Memory */
                                             /* 0xe0000000-0xefffffff: Undefined */
+
 #define SAM_PERIPH_PSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
 
 /* SAMA5D2 Internal Memories */
@@ -105,6 +106,7 @@
 #define SAM_AXIMX_PSECTION       0x00600000 /* 0x00600000-0x006fffff: AXI Matrix */
 #define SAM_DAP_PSECTION         0x00700000 /* 0x00700000-0x007fffff: DAP */
                                             /* 0x00800000-0x009fffff: Reserved */
+
 #define SAM_L2CC_PSECTION        0x00a00000 /* 0x00a00000-0x00bfffff: L2CC */
                                             /* 0x00c00000-0x00ffffff: Undefined (Abort) */
 
@@ -154,9 +156,12 @@
 #  define SAM_RXLP_OFFSET        0x00049000 /* 0x00049000-0x00049fff: RXLP */
 #  define SAM_ACC_OFFSET         0x0004a000 /* 0x0004a000-0x0004afff: ACC */
                                             /* 0x0004b000-0x0004bfff: Reserved */
+
 #  define SAM_SFC_OFFSET         0x0004c000 /* 0x0004c000-0x0004ffff: SFC */
 #  define SAM_I2SC0_OFFSET       0x00050000 /* 0x00050000-0x00053fff: I2SC0 */
 #  define SAM_CAN0_OFFSET        0x00054000 /* 0x00054000-0x00057fff: CAN0 */
+#  define SAM_SYSC_PSECTION      0xf8048000 /* 0xf8048000-0xf8048fff: System Controller */
+#  define SAM_SYSC_PADDR         0xf8048000 /* 0xf8048000-0xf8048fff: System Controller */
 
 #define SAM_PERIPHC_PSECTION     0xfc000000 /* 0xfc000000-0xffffffff: Internal Peripherals C */
 #  define SAM_SPI1_OFFSET        0x00000000 /* 0x00000000-0x00003fff: SPI1 */
@@ -169,10 +174,12 @@
 #  define SAM_TRNG_OFFSET        0x0001c000 /* 0x0001c000-0x0001ffff: TRNG */
 #  define SAM_AIC_OFFSET         0x00020000 /* 0x00020000-0x00023fff: AIC */
                                             /* 0x00024000-0x00027fff: Reserved */
+
 #  define SAM_TWI1_OFFSET        0x00028000 /* 0x00028000-0x0002bfff: TWIHS1 */
 #  define SAM_UDPHS_OFFSET       0x0002c000 /* 0x0002c000-0x0002ffff: UDPHS */
 #  define SAM_ADC_OFFSET         0x00030000 /* 0x00030000-0x00033fff: ADC */
                                             /* 0x00034000-0x00037fff: Reserved */
+
 #  define SAM_PIO_OFFSET         0x00038000 /* 0x00038000-0x0003bfff: PIOA-D */
 #  define SAM_MATRIX1_OFFSET     0x0003c000 /* 0x0003c000-0x0003ffff: MATRIX1 */
 #  define SAM_SECUMOD_OFFSET     0x00040000 /* 0x00040000-0x00043fff: SECUMOD */
@@ -182,8 +189,10 @@
 #  define SAM_CAN1_OFFSET        0x00050000 /* 0x00050000-0x00053fff: CAN1 */
 #  define SAM_UTMI_OFFSET        0x00054000 /* 0x00054000-0x00057fff: UTMI */
                                             /* 0x00058000-0x0005bfff: Reserved */
+
 #  define SAM_SFRBU_OFFSET       0x0005c000 /* 0x0005c000-0x0005ffff: SFRBU */
                                             /* 0x00060000-0x00068fff: Reserved */
+
 #  define SAM_CHIPID_OFFSET      0x00069000 /* 0x00069000-0x0006bfff: SFRBU */
                                             /* 0x0006a000-0xffffffff: Reserved */
 
@@ -193,7 +202,9 @@
  * region.  The implemented sizes of the EBI CS0-3 and DDRCS regions
  * are not known apriori and must be specified with configuration settings.
  */
+
                                                  /* 0x00000000-0x0fffffff: Internal Memories */
+
 #define SAM_ROM_SIZE             (256*1024)      /* 0x00000000-0x0003ffff: ROM */
 #ifdef CONFIG_ARMV7A_L2CC_PL310
 #  define SAM_SRAMREMAP_SIZE     (128*1024)      /* 0x00000000-0x0001ffff: Remapped ISRAM0 */
@@ -215,9 +226,11 @@
 #define SAM_L2CC_SIZE            (1*1024*1024)   /* 0x00a00000-0x00bfffff: L2CC */
 #define SAM_NFCCR_SIZE           (256*1024*1024) /* 0xc0000000-0xcfffffff: NFC Command Registers */
                                                  /* 0xf0000000-0xffffffff: Internal Peripherals */
+
 #define SAM_PERIPHA_SIZE         (192*1024)      /* 0xf0000000-0xf002ffff: Internal Peripherals A */
 #define SAM_PERIPHB_SIZE         (352*1024)      /* 0xf8000000-0xf8057fff: Internal Peripherals B */
 #define SAM_PERIPHC_SIZE         (431*1024)      /* 0xfc000000-0xfc06bfff: Internal Peripherals C */
+#define SAM_SYSC_SIZE            (1*1024*1024)   /* 0xf8048000-0xf8048fff: Internal Peripherals */
 
 /* Force configured sizes that might exceed 2GB to be unsigned long */
 
@@ -444,11 +457,15 @@
 #  define SAM_PERIPHA_VSECTION   0xf0000000 /* 0xf0000000-0xf7ffffff: Internal Peripherals A */
 #  define SAM_PERIPHB_VSECTION   0xf8000000 /* 0xf8000000-0xfbffffff: Internal Peripherals B */
 #  define SAM_PERIPHC_VSECTION   0xfc000000 /* 0xfc000000-0xffffffff: Internal Peripherals C */
+#  define SAM_SYSC_VSECTION      0xfff00000 /* 0xfff00000-0xffffbfff: System Controller */
+#  define SAM_SYSC_VADDR         0xffffc000 /* 0xffffc000-0xffffffff: System Controller */
 #else
 #define SAM_PERIPH_VSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
 #  define SAM_PERIPHA_VSECTION   0xf0000000 /* 0xf0000000-0xf00fffff: Internal Peripherals A */
 #  define SAM_PERIPHB_VSECTION   0xf1000000 /* 0xf1000000-0xf10fffff: Internal Peripherals B */
 #  define SAM_PERIPHC_VSECTION   0xf2000000 /* 0xf2000000-0xf20fffff: Internal Peripherals C */
+#  define SAM_SYSC_VSECTION      0xf2000000 /* 0xf2000000-0xf20fffff: System Controller */
+#  define SAM_SYSC_VADDR         0xf20fc000 /* 0xf20fc000-0xf20fffff: System Controller */
 #endif
 #endif
 
@@ -520,6 +537,10 @@
 #define SAM_UTMI_VBASE           (SAM_PERIPHC_VSECTION+SAM_UTMI_OFFSET)
 #define SAM_SFRBU_VBASE          (SAM_PERIPHC_VSECTION+SAM_SFRBU_OFFSET)
 #define SAM_CHIPID_VBASE         (SAM_PERIPHC_VSECTION+SAM_CHIPID_OFFSET)
+
+#define SAM_PIOA_VBASE           (SAM_PERIPHA_VSECTION+SAM_PIO_OFFSET)
+#define SAM_PIOB_VBASE           (SAM_PERIPHB_VSECTION+SAM_PIO_OFFSET)
+#define SAM_PIOC_VBASE           (SAM_PERIPHC_VSECTION+SAM_PIO_OFFSET)
 
 /* NuttX virtual base address
  *
@@ -878,10 +899,6 @@
 
 /************************************************************************************
  * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
  ************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D2X_MEMORYMAP_H */

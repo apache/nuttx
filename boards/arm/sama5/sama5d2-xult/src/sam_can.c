@@ -1,7 +1,7 @@
 /****************************************************************************
- * boards/arm/sama5/sama5d2-xult/src/sam_boot.c
+ * boards/arm/sama5/sama5d3-xplained/src/sam_can.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,75 +39,77 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
+#include <nuttx/can/can.h>
+#include <arch/board/board.h>
 
+#include "chip.h"
+#include "up_arch.h"
+
+#include "sam_can.h"
 #include "sama5d2-xult.h"
+
+#ifdef CONFIG_CAN
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+/* Configuration ************************************************************/
+
+#if defined(CONFIG_SAMA5_CAN0) && defined(CONFIG_SAMA5_CAN1)
+#  warning "Both CAN0 and CAN1 are enabled.  Assuming only CAN0."
+#  undef CONFIG_SAMA5_CAN1
+#endif
+
+#ifdef CONFIG_SAMA5_CAN0
+#  define CAN_PORT 0
+#else
+#  define CAN_PORT 1
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_boardinitialize
+ * Name: sam_can_setup
  *
  * Description:
- *   All SAMA5 architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
+ *  Initialize CAN and register the CAN device
  *
  ****************************************************************************/
 
-void sam_boardinitialize(void)
+int sam_can_setup(void)
 {
-  /* Initialize USB if the 1) the HS host or device controller is in the
-   * configuration and 2) the weak function sam_usbinitialize() has been
-   * brought into the build.
-   * Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
-   */
+#if defined(CONFIG_SAMA5_CAN0) || defined(CONFIG_SAMA5_CAN1)
+  struct can_dev_s *can;
+  int ret;
 
-#if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
-  if (sam_usbinitialize)
+  /* Call stm32_caninitialize() to get an instance of the CAN interface */
+
+  can = sam_caninitialize(CAN_PORT);
+  if (can == NULL)
     {
-      sam_usbinitialize();
+      canerr("ERROR:  Failed to get CAN interface\n");
+      return -ENODEV;
     }
-#endif
 
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
+  /* Register the CAN driver at "/dev/can0" */
 
-  board_autoled_initialize();
+  ret = can_register("/dev/can0", can);
+  if (ret < 0)
+    {
+      canerr("ERROR: can_register failed: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+#else
+  return -ENODEV;
 #endif
 }
 
-/****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize(). board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
-  /* Perform board initialization */
-
-  sam_bringup();
-}
-#endif /* CONFIG_BOARD_LATE_INITIALIZE */
+#endif /* CONFIG_CAN */
