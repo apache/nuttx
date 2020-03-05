@@ -74,17 +74,7 @@ ARCH_DIR = arch\$(CONFIG_ARCH)
 ARCH_SRC = $(ARCH_DIR)\src
 ARCH_INC = $(ARCH_DIR)\include
 
-ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
-ifeq ($(CONFIG_ARCH_BOARD_CUSTOM_DIR_RELPATH),y)
-BOARD_DIR = $(TOPDIR)$(DELIM)$(CONFIG_ARCH_BOARD_CUSTOM_DIR)
-else
-BOARD_DIR = $(CONFIG_ARCH_BOARD_CUSTOM_DIR)
-endif
-else
-BOARD_DIR = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)
-endif
-
-COMMON_DIR = $(if $(wildcard $(BOARD_DIR)$(DELIM)common$(DELIM)Makefile),y,)
+COMMON_DIR = $(if $(wildcard $(CHIP_DIR)$(DELIM)common$(DELIM)Makefile),y,)
 
 # CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.
 # The default value of CONFIG_APPS_DIR is ..\apps.  Ultimately, the application
@@ -321,22 +311,22 @@ endif
 # Link the boards\<arch>\<chip>\<board>\include directory to include\arch\board
 
 include\arch\board: include\arch
-	@echo LN: include\arch\board to $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\include
+	@echo LN: include\arch\board to $(BOARD_DIR)\include
 ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d include\arch\board $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\include
+	$(Q) /user:administrator mklink /d include\arch\board $(BOARD_DIR)\include
 else
-	$(Q) xcopy $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\include include\arch\board /c /q /s /e /y /i
+	$(Q) xcopy $(BOARD_DIR)\include include\arch\board /c /q /s /e /y /i
 	$(Q) echo FAKELNK > include\arch\board\.fakelnk
 endif
 
 # Link the boards\<arch>\<chip>\drivers dir to drivers\platform
 
 $(ARCH_SRC)\drivers: .config
-	@echo LN: $(TOPDIR)\drivers\platform to $(BOARD_DIR)\drivers
+	@echo LN: $(TOPDIR)\drivers\platform to $(CHIP_DIR)\drivers
 ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d $(TOPDIR)\drivers\platform $(BOARD_DIR)\drivers
+	$(Q) /user:administrator mklink /d $(TOPDIR)\drivers\platform $(CHIP_DIR)\drivers
 else
-	$(Q) xcopy $(BOARD_DIR)\drivers $(TOPDIR)\drivers\platform /c /q /s /e /y /i
+	$(Q) xcopy $(CHIP_DIR)\drivers $(TOPDIR)\drivers\platform /c /q /s /e /y /i
 	$(Q) echo FAKELNK > $(TOPDIR)\drivers\platform\.fakelnk
 endif
 
@@ -345,30 +335,30 @@ ifeq ($(COMMON_DIR),y)
 # Link the boards\<arch>\<chip>\<board>\src dir to arch\<arch-name>\src\board\board
 
 $(ARCH_SRC)\board: .config
-	@echo "LN: $(ARCH_SRC)\board to $(BOARD_DIR)\common"
+	@echo "LN: $(ARCH_SRC)\board to $(CHIP_DIR)\common"
 ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d $(ARCH_SRC)\board $(BOARD_DIR)\common
+	$(Q) /user:administrator mklink /d $(ARCH_SRC)\board $(CHIP_DIR)\common
 else
-	$(Q) xcopy $(BOARD_DIR)\common $(ARCH_SRC)\board /c /q /s /e /y /i
+	$(Q) xcopy $(CHIP_DIR)\common $(ARCH_SRC)\board /c /q /s /e /y /i
 	$(Q) echo FAKELNK > $(ARCH_SRC)\board\.fakelnk
 endif
-	@echo "LN: $(ARCH_SRC)\board\board to $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src"
-	$(Q) $(DIRLINK) $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src $(ARCH_SRC)\board\board
+	@echo "LN: $(ARCH_SRC)\board\board to $(BOARD_DIR)\src"
+	$(Q) $(DIRLINK) $(BOARD_DIR)\src $(ARCH_SRC)\board\board
 ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d $(ARCH_SRC)\board\board $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src
+	$(Q) /user:administrator mklink /d $(ARCH_SRC)\board\board $(BOARD_DIR)\src
 else
-	$(Q) xcopy $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src $(ARCH_SRC)\board\board /c /q /s /e /y /i
+	$(Q) xcopy $(BOARD_DIR)\src $(ARCH_SRC)\board\board /c /q /s /e /y /i
 	$(Q) echo FAKELNK > $(ARCH_SRC)\board\board\.fakelnk
 endif
 else
 # Link the boards\<arch>\<chip>\<board>\src dir to arch\<arch-name>\src\board
 
 $(ARCH_SRC)\board: .config
-	@echo LN: $(ARCH_SRC)\board to $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src
+	@echo LN: $(ARCH_SRC)\board to $(BOARD_DIR)\src
 ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d $(ARCH_SRC)\board $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src
+	$(Q) /user:administrator mklink /d $(ARCH_SRC)\board $(BOARD_DIR)\src
 else
-	$(Q) xcopy $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src $(ARCH_SRC)\board /c /q /s /e /y /i
+	$(Q) xcopy $(BOARD_DIR)\src $(ARCH_SRC)\board /c /q /s /e /y /i
 	$(Q) echo FAKELNK > $(ARCH_SRC)\board\.fakelnk
 endif
 endif

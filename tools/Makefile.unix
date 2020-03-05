@@ -89,17 +89,7 @@ ARCH_DIR = arch/$(CONFIG_ARCH)
 ARCH_SRC = $(ARCH_DIR)/src
 ARCH_INC = $(ARCH_DIR)/include
 
-ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
-ifeq ($(CONFIG_ARCH_BOARD_CUSTOM_DIR_RELPATH),y)
-BOARD_DIR = $(TOPDIR)$(DELIM)$(CONFIG_ARCH_BOARD_CUSTOM_DIR)
-else
-BOARD_DIR = $(CONFIG_ARCH_BOARD_CUSTOM_DIR)
-endif
-else
-BOARD_DIR = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)
-endif
-
-COMMON_DIR = $(if $(wildcard $(BOARD_DIR)/common/Makefile),y,)
+COMMON_DIR = $(if $(wildcard $(CHIP_DIR)/common/Makefile),y,)
 
 # CONFIG_APPS_DIR can be over-ridden from the command line or in the .config file.
 # The default value of CONFIG_APPS_DIR is ../apps.  Ultimately, the application
@@ -335,31 +325,31 @@ include/arch: .config
 # Link the boards/<arch>/<chip>/<board>/include directory to include/arch/board
 
 include/arch/board: include/arch
-	@echo "LN: include/arch/board to $(BOARD_DIR)/$(CONFIG_ARCH_BOARD)/include"
-	$(Q) $(DIRLINK) $(BOARD_DIR)/$(CONFIG_ARCH_BOARD)/include include/arch/board
+	@echo "LN: include/arch/board to $(BOARD_DIR)/include"
+	$(Q) $(DIRLINK) $(BOARD_DIR)/include include/arch/board
 
 ifeq ($(COMMON_DIR),y)
 # Link the boards/<arch>/<chip>/common dir to arch/<arch-name>/src/board
 # Link the boards/<arch>/<chip>/<board>/src dir to arch/<arch-name>/src/board/board
 
 $(ARCH_SRC)/board: .config
-	@echo "LN: $(ARCH_SRC)/board to $(BOARD_DIR)/common"
-	$(Q) $(DIRLINK) $(BOARD_DIR)/common $(ARCH_SRC)/board
-	@echo "LN: $(ARCH_SRC)/board/board to $(BOARD_DIR)/$(CONFIG_ARCH_BOARD)/src"
-	$(Q) $(DIRLINK) $(BOARD_DIR)/$(CONFIG_ARCH_BOARD)/src $(ARCH_SRC)/board/board
+	@echo "LN: $(ARCH_SRC)/board to $(CHIP_DIR)/common"
+	$(Q) $(DIRLINK) $(CHIP_DIR)/common $(ARCH_SRC)/board
+	@echo "LN: $(ARCH_SRC)/board/board to $(BOARD_DIR)/src"
+	$(Q) $(DIRLINK) $(BOARD_DIR)/src $(ARCH_SRC)/board/board
 else
 # Link the boards/<arch>/<chip>/<board>/src dir to arch/<arch-name>/src/board
 
 $(ARCH_SRC)/board: .config
-	@echo "LN: $(ARCH_SRC)/board to $(BOARD_DIR)/$(CONFIG_ARCH_BOARD)/src"
-	$(Q) $(DIRLINK) $(BOARD_DIR)/$(CONFIG_ARCH_BOARD)/src $(ARCH_SRC)/board
+	@echo "LN: $(ARCH_SRC)/board to $(BOARD_DIR)/src"
+	$(Q) $(DIRLINK) $(BOARD_DIR)/src $(ARCH_SRC)/board
 endif
 
 # Link the boards/<arch>/<chip>/drivers dir to drivers/platform
 
 $(ARCH_SRC)/drivers: .config
-	@echo "LN: $(TOPDIR)/drivers/platform to $(BOARD_DIR)/drivers"
-	$(Q) $(DIRLINK) $(BOARD_DIR)/drivers $(TOPDIR)/drivers/platform
+	@echo "LN: $(TOPDIR)/drivers/platform to $(CHIP_DIR)/drivers"
+	$(Q) $(DIRLINK) $(CHIP_DIR)/drivers $(TOPDIR)/drivers/platform
 
 # Link arch/<arch-name>/src/<chip-name> to arch/<arch-name>/src/chip
 

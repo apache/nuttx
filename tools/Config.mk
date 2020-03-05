@@ -350,3 +350,44 @@ define TESTANDREPLACEFILE
 	fi
 endef
 endif
+
+# BOARD_DIR - Directory where board-specific files are located.
+# This can be either boards/<arch>/<chip>/<board> or
+# $(CONFIG_ARCH_BOARD_CUSTOM_DIR) if using an out-of-tree board directory.
+ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
+ifeq ($(CONFIG_ARCH_BOARD_CUSTOM_DIR_RELPATH),y)
+BOARD_DIR = $(TOPDIR)/$(CONFIG_ARCH_BOARD_CUSTOM_DIR)
+else
+BOARD_DIR = $(CONFIG_ARCH_BOARD_CUSTOM_DIR)
+endif
+else
+BOARD_DIR = $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)
+endif
+
+# CHIP_DIR - Chip-specific directory tree.
+# These are always located in kernel tree, even when using
+# out-of-tree board directory.
+CHIP_DIR = $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)
+
+# Detect default values for tools
+ifeq ($(WINTOOL),y)
+  # Windows-native toolchains
+  DIRLINK = $(TOPDIR)/tools/copydir.sh
+  DIRUNLINK = $(TOPDIR)/tools/unlink.sh
+  MKDEP = $(TOPDIR)/tools/mkwindeps.sh
+else
+  # Linux/Cygwin-native toolchain
+  MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
+  # DIRLINK and DIRUNLINK, if not set, will be set to default values in Makefile.unix
+endif
+
+# Arch-dependent include flags; board Make.defs may override these to its taste
+ifeq ($(WINTOOL),y)
+  ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
+  ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)/scripts/$(LDSCRIPT)}"
+else
+  ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
+  ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
+  ARCHSCRIPT = -T$(BOARD_DIR)/scripts/$(LDSCRIPT)
+endif
