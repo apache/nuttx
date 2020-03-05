@@ -53,21 +53,6 @@
 #ifdef CONFIG_SMP
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* Single parameter passed with the inter-CPU interrupt */
-
-static volatile uint8_t g_intcode[CONFIG_SMP_NCPUS] SP_SECTION;
-
-/* Spinlock protects parameter array */
-
-static volatile spinlock_t g_intercpu_spin[CONFIG_SMP_NCPUS] SP_SECTION =
-{
-  SP_UNLOCKED, SP_UNLOCKED
-};
-
-/****************************************************************************
  * Private Function
  ****************************************************************************/
 
@@ -82,10 +67,9 @@ static volatile spinlock_t g_intercpu_spin[CONFIG_SMP_NCPUS] SP_SECTION =
 static int esp32_fromcpu_interrupt(int fromcpu)
 {
   uintptr_t regaddr;
-  int intcode;
-  int tocpu;
 
   DEBUGASSERT((unsigned)fromcpu < CONFIG_SMP_NCPUS);
+  DEBUGASSERT(fromcpu != up_cpu_index());
 
   /* Clear the interrupt from the other CPU */
 
@@ -93,29 +77,9 @@ static int esp32_fromcpu_interrupt(int fromcpu)
                              DPORT_CPU_INTR_FROM_CPU_1_REG;
   putreg32(0, regaddr);
 
-  /* Get the inter-CPU interrupt code */
+  /* Call pause handler */
 
-  tocpu            = up_cpu_index();
-  intcode          = g_intcode[tocpu];
-  g_intcode[tocpu] = CPU_INTCODE_NONE;
-
-  spin_unlock(&g_intercpu_spin[tocpu]);
-
-  /* Dispatch the inter-CPU interrupt based on the intcode value */
-
-  switch (intcode)
-    {
-      case CPU_INTCODE_NONE:
-        break;
-
-      case CPU_INTCODE_PAUSE:
-        xtensa_pause_handler();
-        break;
-
-      default:
-        DEBUGPANIC();
-        break;
-    }
+  xtensa_pause_handler();
 
   return OK;
 }
@@ -157,27 +121,10 @@ int xtensa_intercpu_interrupt(int tocpu, int intcode)
   DEBUGASSERT((unsigned)tocpu < CONFIG_SMP_NCPUS &&
               (unsigned)intcode <= UINT8_MAX);
 
-  /* Make sure that each inter-cpu event is atomic.  The spinlock should
-   * only be locked if we just completed sending an interrupt to this
-   * CPU but the other CPU has not yet processed it.
-   */
-
-  spin_lock(&g_intercpu_spin[tocpu]);
-
-  /* Save the passed parameter.  The previous interrupt code should be
-   * CPU_INTCODE_NONE or we have overrun the other CPU.
-   */
-
-  DEBUGASSERT(g_intcode[tocpu] == CPU_INTCODE_NONE);
-  g_intcode[tocpu] = intcode;
-
-  /* Interrupt the other CPU (tocpu) form this CPU.  NOTE: that this logic
-   * fails in numerous ways if fromcpu == tocpu (for example because non-
-   * reentrant spinlocks are used).
-   */
-
   fromcpu = up_cpu_index();
   DEBUGASSERT(fromcpu != tocpu);
+
+  /* Generate an Inter-Processor Interrupt */
 
   if (fromcpu == 0)
     {
