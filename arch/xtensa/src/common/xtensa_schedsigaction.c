@@ -284,11 +284,11 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * disabled
                    */
 
-                  CURRENT_REGS[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
+                  tcb->xcp.regs[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
 #ifdef __XTENSA_CALL0_ABI__
-                  CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
+                  tcb->xcp.regs[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
-                  CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+                  tcb->xcp.regs[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
                 }
               else
