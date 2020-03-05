@@ -281,9 +281,13 @@ config STM32H7_ETHMAC
 	select ARCH_HAVE_PHY
 
 config STM32H7_FMC
-    bool "FMC"
-    default n
-    depends on STM32H7_HAVE_FMC
+        bool "FMC"
+        default n
+        depends on STM32H7_HAVE_FMC
+        ---help---
+                Enable Flexible Memory Controller.
+                To correctly configure FMC for your hardware, you will have to define
+                a number of macros in your board.h file. See stm32_fmc.c for directions.
 
 config STM32H7_OTGFS
 	bool "OTG FS"

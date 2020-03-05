@@ -298,6 +298,12 @@ static inline void rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_SDMMC1EN;
 #endif
 
+#ifdef CONFIG_STM32H7_FMC
+  /* Flexible static memory controller module clock enable */
+
+  regval |= RCC_AHB3ENR_FMCEN;
+#endif
+
   /* TODO: ... */
 
   putreg32(regval, STM32_RCC_AHB3ENR);   /* Enable peripherals */
