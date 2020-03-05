@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libc/machine/Make.defs
+# libs/libc/machine/arm/armv6-m/Make.defs
 #
 #   Copyright (C) 2017 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,18 +33,11 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ARCH_ARM),y)
-include ${TOPDIR}/libs/libc/machine/arm/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_RISCV),y)
-include ${TOPDIR}/libs/libc/machine/risc-v/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_SIM),y)
-include ${TOPDIR}/libs/libc/machine/sim/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_X86),y)
-include ${TOPDIR}/libs/libc/machine/x86/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_XTENSA),y)
-include ${TOPDIR}/libs/libc/machine/xtensa/Make.defs
+ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
+
+CSRCS += arch_elf.c
+
+DEPPATH += --dep-path machine/xtensa
+VPATH += :machine/xtensa
+
 endif
