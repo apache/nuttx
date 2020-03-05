@@ -117,7 +117,6 @@ static int sam_irqbase(int irq, uint32_t *base, int *pin)
   if (irq >= SAM_IRQ_NINT)
     {
 #ifdef CONFIG_SAMA5_PIOA_IRQ
-
       if (irq <= SAM_IRQ_PA31)
         {
           *base = SAM_PIOA_VBASE;
@@ -125,8 +124,8 @@ static int sam_irqbase(int irq, uint32_t *base, int *pin)
           return OK;
         }
 #endif
-#ifdef CONFIG_SAMA5_PIOB_IRQ
 
+#ifdef CONFIG_SAMA5_PIOB_IRQ
       if (irq <= SAM_IRQ_PB31)
         {
           *base = SAM_PIOB_VBASE;
@@ -134,8 +133,8 @@ static int sam_irqbase(int irq, uint32_t *base, int *pin)
           return OK;
         }
 #endif
-#ifdef CONFIG_SAMA5_PIOC_IRQ
 
+#ifdef CONFIG_SAMA5_PIOC_IRQ
       if (irq <= SAM_IRQ_PC31)
         {
           *base = SAM_PIOC_VBASE;
@@ -143,8 +142,8 @@ static int sam_irqbase(int irq, uint32_t *base, int *pin)
           return OK;
         }
 #endif
-#ifdef CONFIG_SAMA5_PIOD_IRQ
 
+#ifdef CONFIG_SAMA5_PIOD_IRQ
       if (irq <= SAM_IRQ_PD31)
         {
           *base = SAM_PIOD_VBASE;
@@ -152,8 +151,8 @@ static int sam_irqbase(int irq, uint32_t *base, int *pin)
           return OK;
         }
 #endif
-#ifdef CONFIG_SAMA5_PIOE_IRQ
 
+#ifdef CONFIG_SAMA5_PIOE_IRQ
       if (irq <= SAM_IRQ_PE31)
         {
           *base = SAM_PIOE_VBASE;
@@ -161,8 +160,8 @@ static int sam_irqbase(int irq, uint32_t *base, int *pin)
           return OK;
         }
 #endif
-#ifdef CONFIG_SAMA5_PIOF_IRQ
 
+#ifdef CONFIG_SAMA5_PIOF_IRQ
       if (irq <= SAM_IRQ_PF31)
         {
           *base = SAM_PIOF_VBASE;
