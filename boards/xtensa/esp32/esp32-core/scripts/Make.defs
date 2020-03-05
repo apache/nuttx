@@ -104,7 +104,7 @@ LDNXFLATFLAGS = -e main -s 2048
 
 # Loadable module definitions
 
-CMODULEFLAGS = $(CFLAGS)
+CMODULEFLAGS = $(CFLAGS) -mtext-section-literals
 
 LDMODULEFLAGS = -r -e module_initialize
 ifeq ($(WINTOOL),y)
@@ -115,8 +115,8 @@ endif
 
 # ELF module definitions
 
-CELFFLAGS = $(CFLAGS)
-CXXELFFLAGS = $(CXXFLAGS)
+CELFFLAGS = $(CFLAGS) -mtext-section-literals
+CXXELFFLAGS = $(CXXFLAGS) -mtext-section-literals
 
 LDELFFLAGS = -r -e main
 ifeq ($(WINTOOL),y)
