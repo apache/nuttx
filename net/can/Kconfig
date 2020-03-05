@@ -8,6 +8,8 @@ menu "SocketCAN Support"
 config NET_CAN
 	bool "SocketCAN support"
 	default n
+	select NET_READAHEAD
+	depends on NET
 	---help---
 		Enable support for SocketCAN sockets that will permit.
 

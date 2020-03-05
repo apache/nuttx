@@ -196,7 +196,7 @@ uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
   if (ret < 0)
     {
       nerr("ERROR: Failed to queue the I/O buffer chain: %d\n", ret);
-      iob_free_chain(iob, IOBUSER_NET_TCP_READAHEAD);
+      iob_free_chain(iob, IOBUSER_NET_CAN_READAHEAD);
       return 0;
     }
 
