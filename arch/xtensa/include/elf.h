@@ -27,6 +27,9 @@
 
 /* Relocation codes */
 
-#define R_XTENSA_NONE 0
+#define R_XTENSA_NONE       0
+#define R_XTENSA_32         1
+#define R_XTENSA_ASM_EXPAND 11
+#define R_XTENSA_SLOT0_OP   20
 
 #endif /* __ARCH_XTENSA_INCLUDE_ELF_H */
