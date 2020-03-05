@@ -172,8 +172,7 @@ static inline void sched_dupsockets(FAR struct task_tcb_s *tcb)
        * reference count.
        */
 
-      if (parent[i].s_crefs > 0 &&
-          !_SS_ISCLOEXEC(parent[i].s_flags))
+      if (parent[i].s_crefs > 0)
         {
           /* Yes... duplicate it for the child */
 
