@@ -75,6 +75,13 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   uintptr_t heapend;
 #if CONFIG_MM_REGIONS > 1
   int IDX = heap->mm_nregions;
+
+  /* Writing past CONFIG_MM_REGIONS would have catastrophic consequences */
+  DEBUGASSERT(IDX < CONFIG_MM_REGIONS);
+  if (IDX >= CONFIG_MM_REGIONS)
+    {
+      return;
+    }
 #else
 # define IDX 0
 #endif
