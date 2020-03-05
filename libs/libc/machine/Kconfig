@@ -162,5 +162,8 @@ endif
 if ARCH_X86
 source libs/libc/machine/x86/Kconfig
 endif
+if ARCH_XTENSA
+source libs/libc/machine/xtensa/Kconfig
+endif
 
 endmenu # Architecture-Specific Support
