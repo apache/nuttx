@@ -72,6 +72,8 @@
 #endif
 
 #define SGP30_I2C_RETRIES 3
+#define SGP30_INIT_RETRIES 5
+#define SGP30_INIT_LIMIT_MS 10
 
 /****************************************************************************
  * Private
@@ -375,6 +377,29 @@ static uint8_t sgp30_crc_word(uint16_t word)
 }
 
 /****************************************************************************
+ * Name: sgp30_soft_reset
+ ****************************************************************************/
+
+static int sgp30_soft_reset(FAR struct sgp30_dev_s *priv)
+{
+  struct i2c_msg_s msg[1];
+  uint8_t buf[1];
+  int ret = 0;
+
+  buf[0] = CONFIG_SGP30_RESET_SECOND_BYTE;
+
+  msg[0].frequency = CONFIG_SGP30_I2C_FREQUENCY;
+  msg[0].addr = CONFIG_SGP30_RESET_ADDR;
+  msg[0].flags = 0;
+  msg[0].buffer = buf;
+  msg[0].length = 1;
+
+  ret = sgp30_do_transfer(priv->i2c, msg, 1);
+
+  return (ret >= 0) ? OK : ret;
+}
+
+/****************************************************************************
  * Name: sgp30_set_command_param
  ****************************************************************************/
 
@@ -424,16 +449,39 @@ static int sgp30_check_data_crc(FAR const struct sgp30_word_s *words,
  *
  ****************************************************************************/
 
-static bool has_time_passed(struct timespec curr,
-                            struct timespec start,
+static bool has_time_passed(FAR struct timespec *curr,
+                            FAR struct timespec *start,
                             unsigned int secs_since_start)
 {
-  if ((long)((start.tv_sec + secs_since_start) - curr.tv_sec) == 0)
+  if ((long)((start->tv_sec + secs_since_start) - curr->tv_sec) == 0)
     {
-      return start.tv_nsec <= curr.tv_nsec;
+      return start->tv_nsec <= curr->tv_nsec;
     }
 
-  return (long)((start.tv_sec + secs_since_start) - curr.tv_sec) <= 0;
+  return (long)((start->tv_sec + secs_since_start) - curr->tv_sec) <= 0;
+}
+
+/****************************************************************************
+ * Name: time_has_passed_ms
+ *
+ * Description:
+ *   Return true if curr >= start + msecs_since_start
+ *
+ ****************************************************************************/
+
+static bool time_has_passed_ms(FAR struct timespec *curr,
+                               FAR struct timespec *start,
+                               unsigned int msecs_since_start)
+{
+  uint32_t start_msec = start->tv_nsec / (1000 * 1000);
+  uint32_t curr_msec = curr->tv_nsec / (1000 * 1000);
+
+  if (start->tv_sec < curr->tv_sec)
+    {
+      curr_msec += 1000 * ((long)(curr->tv_sec - start->tv_sec));
+    }
+
+  return (start_msec + msecs_since_start) <= curr_msec;
 }
 
 /****************************************************************************
@@ -536,6 +584,7 @@ static int sgp30_open(FAR struct file *filep)
           sgp30_read_cmd(priv, SGP30_CMD_GET_FEATURE_SET_VERSION, buf, 1) >= 0
           && sgp30_check_data_crc(buf, 1) >= 0)
         {
+          struct timespec start, curr;
           sgp30_dbg("serial id: %04x-%04x-%04x\n",
                     sgp30_data_word_to_uint16(serial + 0),
                     sgp30_data_word_to_uint16(serial + 1),
@@ -546,11 +595,45 @@ static int sgp30_open(FAR struct file *filep)
           add_sensor_randomness((buf[0].crc << 24) ^ (serial[0].crc << 16) ^
                                 (serial[1].crc << 8) ^ (serial[2].crc << 0));
 
+          clock_gettime(CLOCK_REALTIME, &start);
           ret = sgp30_write_cmd(priv, SGP30_CMD_INIT_AIR_QUALITY, NULL, 0);
           if (ret < 0)
             {
               sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY) failed, %d\n",
                         ret);
+            }
+          else
+            {
+              uint32_t repeat = SGP30_INIT_RETRIES;
+              clock_gettime(CLOCK_REALTIME, &curr);
+              sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY)\n");
+              while (repeat-- && time_has_passed_ms(&curr, &start, SGP30_INIT_LIMIT_MS))
+                {
+                  /* Infrequently the SGP30_CMD_INIT_AIR_QUALITY message delivery
+                   * takes suspiciously long time (SGP30_INIT_LIMIT_MS or more) and
+                   * in these cases the TVOC values will never reach the correct
+                   * level (not even after 24 hours).
+                   * If this delay is detected, the sensor is given a "General Call"
+                   * soft reset as described in the SGP30 datasheet and initialization
+                   * is tried again after CONFIG_SGP30_RESET_DELAY_US.
+                   */
+
+                  ret = sgp30_soft_reset(priv);
+                  if (ret < 0)
+                    {
+                      sgp30_dbg("sgp30_soft_reset failed, %d\n", ret);
+                      return ret;
+                    }
+                  nxsig_usleep(CONFIG_SGP30_RESET_DELAY_US);
+
+                  clock_gettime(CLOCK_REALTIME, &start);
+                  ret = sgp30_write_cmd(priv, SGP30_CMD_INIT_AIR_QUALITY, NULL, 0);
+                  clock_gettime(CLOCK_REALTIME, &curr);
+                  if (ret < 0)
+                    {
+                      sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY) failed, %d\n", ret);
+                    }
+                }
             }
         }
       else
@@ -646,7 +729,7 @@ static ssize_t sgp30_read(FAR struct file *filep, FAR char *buffer,
 
   clock_gettime(CLOCK_REALTIME, &ts);
 
-  while (!has_time_passed(ts, priv->last_update, 1))
+  while (!has_time_passed(&ts, &priv->last_update, 1))
     {
       if (filep->f_oflags & O_NONBLOCK)
         {

@@ -47,6 +47,11 @@
 
 #define CONFIG_SGP30_ADDR 0x58
 
+#define CONFIG_SGP30_RESET_ADDR 0x00
+#define CONFIG_SGP30_RESET_SECOND_BYTE 0x06
+
+#define CONFIG_SGP30_RESET_DELAY_US 300000
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
