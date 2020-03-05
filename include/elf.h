@@ -71,6 +71,7 @@
 #define EM_CRIS            76     /* Axis Communications 32-bit embedded processor */
 #define EM_V850            87     /* NEC v850 */
 #define EM_M32R            88     /* Renesas M32R */
+#define EM_XTENSA          94     /* Tensilca Xtensa */
 #define EM_RISCV           243    /* RISC-V */
 #define EM_ALPHA           0x9026
 #define EM_CYGNUS_V850     0x9080
