@@ -149,7 +149,7 @@ ssize_t nx_write(int fd, FAR const void *buf, size_t nbytes)
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-#ifdef CONFIG_NET_TCP
+#if defined(CONFIG_NET_TCP) || defined(CONFIG_NET_CAN)
       /* Write to a socket descriptor is equivalent to send with flags == 0. */
 
       ret = nx_send(fd, buf, nbytes, 0);

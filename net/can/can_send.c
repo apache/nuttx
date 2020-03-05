@@ -119,7 +119,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Copy the packet data into the device packet buffer and send it */
           //FIXME potentialy wrong function do we have a header??
-    	  devif_pkt_send(dev, pstate->snd_buffer, pstate->snd_buflen);
+    	  devif_can_send(dev, pstate->snd_buffer, pstate->snd_buflen);
           pstate->snd_sent = pstate->snd_buflen;
         }
 
