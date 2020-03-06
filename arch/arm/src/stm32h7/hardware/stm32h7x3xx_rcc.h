@@ -382,15 +382,15 @@
 #define RCC_PLLCFGR_PLL1RGE_4_8_MHZ     (0x2ul << RCC_PLLCFGR_PLL1RGE_SHIFT) /* The PLL input clock range frequency is between 4 and 8 MHz */
 #define RCC_PLLCFGR_PLL1RGE_8_16_MHZ    (0x3ul << RCC_PLLCFGR_PLL1RGE_SHIFT) /* The PLL input clock range frequency is between 8 and 16 MHz */
 
-#define RCC_PLLCFGR_PLL2FRACEN_SHIFT    (0ul)
+#define RCC_PLLCFGR_PLL2FRACEN_SHIFT    (4ul)
 #define RCC_PLLCFGR_PLL2FRACEN_MASK     (0x1ul << RCC_PLLCFGR_PLL2FRACEN_SHIFT)
 #define RCC_PLLCFGR_PLL2FRACEN          RCC_PLLCFGR_PLL2FRACEN_MASK       /* Fractional latch enable */
-#define RCC_PLLCFGR_PLL2VCOSEL_SHIFT    (1ul)
+#define RCC_PLLCFGR_PLL2VCOSEL_SHIFT    (5ul)
 #define RCC_PLLCFGR_PLL2VCOSEL_MASK     (0x1ul << RCC_PLLCFGR_PLL2VCOSEL_SHIFT)
 #define RCC_PLLCFGR_PLL2VCOSEL          RCC_PLLCFGR_PLL2VCOSEL_MASK       /* VCO frequency range: 1 = Medium VCO range: 150 to 420 MHz, 0 = Wide VCO range: 192 to 836 MHz */
 #define RCC_PLLCFGR_PLL2VCOSEL_WIDE     (0ul)                             /* VCO frequency range: Wide VCO range: 192 to 836 MHz, input clock >= 2 MHz */
 #define RCC_PLLCFGR_PLL2VCOSEL_MEDIUM   RCC_PLLCFGR_PLL3VCOSEL            /* VCO frequency range: Medium VCO range: 150 to 420 MHz, input clock <= 2 MHz */
-#define RCC_PLLCFGR_PLL2RGE_SHIFT       (2ul)
+#define RCC_PLLCFGR_PLL2RGE_SHIFT       (6ul)
 #define RCC_PLLCFGR_PLL2RGE_MASK        (0x3ul << RCC_PLLCFGR_PLL2RGE_SHIFT)
 #define RCC_PLLCFGR_PLL2RGE             RCC_PLLCFGR_PLL2RGE_MASK
 #define RCC_PLLCFGR_PLL2RGE_1_2_MHZ     (0x0ul << RCC_PLLCFGR_PLL2RGE_SHIFT) /* The PLL input clock range frequency is between 1 and 2 MHz */
@@ -398,15 +398,15 @@
 #define RCC_PLLCFGR_PLL2RGE_4_8_MHZ     (0x2ul << RCC_PLLCFGR_PLL2RGE_SHIFT) /* The PLL input clock range frequency is between 4 and 8 MHz */
 #define RCC_PLLCFGR_PLL2RGE_8_16_MHZ    (0x3ul << RCC_PLLCFGR_PLL2RGE_SHIFT) /* The PLL input clock range frequency is between 8 and 16 MHz */
 
-#define RCC_PLLCFGR_PLL3FRACEN_SHIFT    (0ul)
+#define RCC_PLLCFGR_PLL3FRACEN_SHIFT    (8ul)
 #define RCC_PLLCFGR_PLL3FRACEN_MASK     (0x1ul << RCC_PLLCFGR_PLL3FRACEN_SHIFT)
 #define RCC_PLLCFGR_PLL3FRACEN          RCC_PLLCFGR_PLL3FRACEN_MASK       /* Fractional latch enable */
-#define RCC_PLLCFGR_PLL3VCOSEL_SHIFT    (1ul)
+#define RCC_PLLCFGR_PLL3VCOSEL_SHIFT    (9ul)
 #define RCC_PLLCFGR_PLL3VCOSEL_MASK     (0x1ul << RCC_PLLCFGR_PLL3VCOSEL_SHIFT)
 #define RCC_PLLCFGR_PLL3VCOSEL          RCC_PLLCFGR_PLL3VCOSEL_MASK       /* VCO frequency range: 1 = Medium VCO range: 150 to 420 MHz, 0 = Wide VCO range: 192 to 836 MHz */
 #define RCC_PLLCFGR_PLL3VCOSEL_WIDE     (0ul)                             /* VCO frequency range: Wide VCO range: 192 to 836 MHz, input clock >= 2 MHz */
 #define RCC_PLLCFGR_PLL3VCOSEL_MEDIUM   RCC_PLLCFGR_PLL3VCOSEL            /* VCO frequency range: Medium VCO range: 150 to 420 MHz, input clock <= 2 MHz */
-#define RCC_PLLCFGR_PLL3RGE_SHIFT       (2ul)
+#define RCC_PLLCFGR_PLL3RGE_SHIFT       (10ul)
 #define RCC_PLLCFGR_PLL3RGE_MASK        (0x3ul << RCC_PLLCFGR_PLL3RGE_SHIFT)
 #define RCC_PLLCFGR_PLL3RGE             RCC_PLLCFGR_PLL3RGE_MASK
 #define RCC_PLLCFGR_PLL3RGE_1_2_MHZ     (0x0ul << RCC_PLLCFGR_PLL3RGE_SHIFT) /* The PLL input clock range frequency is between 1 and 2 MHz */
