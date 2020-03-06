@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_spi.c
  *
- *   Copyright (C) 2009-2010, 2016-2017, 2019 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -64,13 +48,18 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_EZ80F91) || defined(CONFIG_ARCH_CHIP_EZ80F92)
+
+/* PB2/#SS is controlled by board specific logic and is not used by this
+ * driver.  This permits supporting multiple, different devices with
+ * different chip selects on the bus.
+ */
+
 #  define GPIOB_SPI_SS      (1 << 2)  /* PB2: /SS (not used by driver) */
 #  define GPIOB_SPI_SCK     (1 << 3)  /* PB3: SCK */
 #  define GPIOB_SPI_MISO    (1 << 6)  /* PB6: MISO */
 #  define GPIOB_SPI_MOSI    (1 << 7)  /* PB7: MOSI */
 
-#  define GPIOB_SPI_PINSET  (GPIOB_SPI_SS | GPIOB_SPI_SCK | GPIOB_SPI_MISO | \
-                             GPIOB_SPI_MOSI)
+#  define GPIOB_SPI_PINSET  (GPIOB_SPI_SCK | GPIOB_SPI_MISO | GPIOB_SPI_MOSI)
 #else
 #  error "Check GPIO initialization for this chip"
 #endif
@@ -206,6 +195,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
                                  uint32_t frequency)
 {
+  uint32_t actual;
   uint32_t brg;
 
   spiinfo("frequency: %lu\n", (unsigned long)frequency);
@@ -239,7 +229,10 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   outp(EZ80_SPI_BRG_L, brg & 0xff);
   outp(EZ80_SPI_BRG_H, (brg >> 8) & 0xff);
 
-  return ((EZ80_SYS_CLK_FREQ + 1) / 2 + brg - 1) / brg;
+  actual = ((EZ80_SYS_CLK_FREQ + 1) / 2 + brg - 1) / brg;
+
+  finfo("BRG=%lu Actual=%lu\n", (unsigned long)brg, (unsigned long)actual);
+  return actual;
 }
 
 /****************************************************************************
@@ -334,6 +327,7 @@ static int spi_waitspif(void)
         }
     }
 
+  spierr("ERROR: SPI timed out\n");
   return -ETIMEDOUT;
 }
 
@@ -405,7 +399,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   ret = spi_transfer((uint8_t)wd, &response);
   if (ret < 0)
     {
-      spierr("ERROR: spi_waitspif returned %d\n", ret);
+      spierr("ERROR: spi_transfer returned %d\n", ret);
       return (uint16_t)0xff;
     }
 
@@ -460,7 +454,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev,
       ret = spi_transfer(outword, outptr);
       if (ret < 0)
         {
-          spierr("ERROR: spi_waitspif returned %d\n", ret);
+          spierr("ERROR: spi_transfer returned %d\n", ret);
           break;
         }
 
@@ -510,7 +504,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
       ret = spi_transfer(*ptr++, NULL);
       if (ret < 0)
         {
-          spierr("ERROR: spi_waitspif returned %d\n", ret);
+          spierr("ERROR: spi_transfer returned %d\n", ret);
           break;
         }
     }
@@ -552,7 +546,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
       ret = spi_transfer(0xff, ptr++);
       if (ret < 0)
         {
-          spierr("ERROR: spi_waitspif returned %d\n", ret);
+          spierr("ERROR: spi_transfer returned %d\n", ret);
           break;
         }
     }
