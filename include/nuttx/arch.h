@@ -160,6 +160,7 @@ EXTERN volatile bool g_rtc_enabled;
  */
 
 /* EXTERN const irq_mapped_t g_irqmap[NR_IRQS]; */
+
 #endif
 
 /****************************************************************************
@@ -730,6 +731,42 @@ void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size);
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \
     defined(CONFIG_ARCH_USE_MMU)
 uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
+#endif
+
+/****************************************************************************
+ * Name: up_module_text_init
+ *
+ * Description:
+ *   Initialize the module text allocator
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+void up_module_text_init(void);
+#endif
+
+/****************************************************************************
+ * Name: up_module_text_alloc
+ *
+ * Description:
+ *   Allocate memory for module text.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+FAR void *up_module_text_alloc(size_t size);
+#endif
+
+/****************************************************************************
+ * Name: up_module_text_free
+ *
+ * Description:
+ *   Free memory for module text.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+void up_module_text_free(FAR void *p);
 #endif
 
 /****************************************************************************
