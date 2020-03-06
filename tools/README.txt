@@ -94,6 +94,13 @@ gencromfs.c
       be compiled in order to generate the binary CROMFS file system
       image.
 
+git-hooks/pre-commit
+--------------------
+
+  This is a sample git pre-commit hook. It runs nxstyle on every staged
+  files. Copy it under .git/hooks directory to use it. Also make sure
+  nxstyle command is in your PATH.
+
 initialconfig.c
 ---------------
 
