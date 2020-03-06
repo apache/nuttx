@@ -404,11 +404,11 @@ static int block_comment_width(char *line)
 static int get_line_width(FILE *instream)
 {
   char line[LINE_SIZE]; /* The current line being examined */
-  int max = 0;
-  int min = INT_MAX;
-  int lineno = 0;
-  int lineno_max;
-  int lineno_min;
+  int max        = 0;
+  int min        = INT_MAX;
+  int lineno     = 0;
+  int lineno_max = 0;
+  int lineno_min = 0;
   int len;
 
   while (fgets(line, LINE_SIZE, instream))
