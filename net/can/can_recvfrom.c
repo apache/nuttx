@@ -231,6 +231,8 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
   /* Check there is any CAN data already buffered in a read-ahead
    * buffer.
    */
+  
+  pstate->pr_recvlen = -1;
 
   if ((iob = iob_peek_queue(&conn->readahead)) != NULL &&
       pstate->pr_buflen > 0)
@@ -463,10 +465,27 @@ ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf,
 
   ret = can_readahead(&state);
   if (ret > 0)
+    {      
+      goto errout_with_state;
+    }
+    
+  ret = state.pr_recvlen;
+
+  /* Handle non-blocking CAN sockets */
+
+  if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
     {
-      net_unlock();
-      nxsem_destroy(&state.pr_sem);
-      return ret;
+      /* Return the number of bytes read from the read-ahead buffer if
+       * something was received (already in 'ret'); EAGAIN if not.
+       */
+
+      if (ret < 0)
+        {
+          /* Nothing was received */
+
+          ret = -EAGAIN;          
+          goto errout_with_state;
+        }
     }
 
   /* Get the device driver that will service this transfer */

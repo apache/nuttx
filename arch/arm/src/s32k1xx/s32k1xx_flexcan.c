@@ -113,6 +113,7 @@
 #define CAN_FIFO_NE                 (1 << 5)
 #define CAN_FIFO_OV                 (1 << 6)
 #define CAN_FIFO_WARN               (1 << 7)
+#define CAN_EFF_FLAG                0x80000000 /* EFF/SFF is set in the MSB */
 
 #define POOL_SIZE                   1
 
@@ -463,7 +464,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
     {
 	  struct can_frame *frame = (struct can_frame *)priv->dev.d_buf;
 
-	  if (0) /* FIXME detect Std or Ext id */
+	  if (frame->can_id & CAN_EFF_FLAG)
 	    {
 	      cs.ide = 1;
 	      mb->id.ext = frame->can_id & MASKEXTID;
@@ -489,7 +490,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
   	  cs.edl = 1; /* CAN FD Frame */
 
-  	  if (0) /* FIXME detect Std or Ext id */
+  	  if (frame->can_id & CAN_EFF_FLAG)
   	    {
   	      cs.ide = 1;
   	      mb->id.ext = frame->can_id & MASKEXTID;
