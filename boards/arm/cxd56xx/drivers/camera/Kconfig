@@ -3,6 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-source "drivers/platform/audio/Kconfig"
-source "drivers/platform/sensors/Kconfig"
-source "drivers/platform/camera/Kconfig"
+config VIDEO_ISX012
+	bool "ISX012 Image sensor"
+	default n
+	select I2C
