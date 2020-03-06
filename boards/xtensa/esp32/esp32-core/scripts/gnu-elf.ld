@@ -1,5 +1,5 @@
 /****************************************************************************
- * binfmt/libelf/gnu-elf.ld
+ * boards/xtensa/esp32/esp32-core/scripts/gnu-elf.ld
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
