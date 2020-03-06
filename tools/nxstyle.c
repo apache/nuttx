@@ -406,21 +406,27 @@ static int get_line_width(FILE *instream)
   char line[LINE_SIZE]; /* The current line being examined */
   int max = 0;
   int min = INT_MAX;
+  int lineno = 0;
+  int lineno_max;
+  int lineno_min;
   int len;
 
   while (fgets(line, LINE_SIZE, instream))
     {
+      lineno++;
       len = block_comment_width(line);
       if (len > 0)
         {
           if (len > max)
             {
               max = len;
+              lineno_max = lineno;
             }
 
           if (len < min)
             {
               min = len;
+              lineno_min = lineno_min;
             }
         }
     }
@@ -432,7 +438,8 @@ static int get_line_width(FILE *instream)
     }
   else if (max != min)
     {
-      ERRORFL("Block comments have different lengths", g_file_name);
+      ERROR("Block comments have different lengths", lineno_max, max);
+      ERROR("Block comments have different lengths", lineno_min, min);
       return DEFAULT_WIDTH;
     }
 
