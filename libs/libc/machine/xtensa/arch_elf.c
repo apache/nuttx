@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm/armv6-m/arch_elf.c
+ * libs/libc/machine/xtensa/arch_elf.c
  *
  *   Copyright (C) 2013-2014, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
