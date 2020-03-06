@@ -571,18 +571,6 @@ int main(int argc, char **argv, char **envp)
     }
 
   g_file_name = argv[optind];
-  instream = fopen(g_file_name, "r");
-
-  if (!instream)
-    {
-      FATALFL("Failed to open", g_file_name);
-      return 1;
-    }
-
-  /* Determine the line width */
-
-  g_maxline = get_line_width(instream) + excess;
-  rewind(instream);
 
   /* Are we parsing a header file? */
 
@@ -606,6 +594,19 @@ int main(int argc, char **argv, char **envp)
       INFOFL("Unknown file extension", g_file_name);
       return 0;
     }
+
+  instream = fopen(g_file_name, "r");
+
+  if (!instream)
+    {
+      FATALFL("Failed to open", g_file_name);
+      return 1;
+    }
+
+  /* Determine the line width */
+
+  g_maxline = get_line_width(instream) + excess;
+  rewind(instream);
 
   btabs          = false; /* True: TAB characters found on the line */
   bcrs           = false; /* True: Carriage return found on the line */
