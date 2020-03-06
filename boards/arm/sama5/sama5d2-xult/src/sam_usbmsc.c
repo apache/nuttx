@@ -1,5 +1,5 @@
 /****************************************************************************
- *  boards/arm/sama5/sama5d2-xult/src/sam_appinit.c
+ *  boards/arm/sama5/sama5d2-xult/src/sam_usbmsc.c
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -24,54 +24,68 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
+
 #include <nuttx/board.h>
 
 #include "sama5d2-xult.h"
 
-#ifndef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_USBMSC
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#ifndef HAVE_AT25
+#  error AT25 Serial FLASH not supported
+#endif
+
+#ifndef CONFIG_SAMA5D3XPLAINED_AT25_FTL
+#  error AT25 FTL support required (CONFIG_SAMA5D3XPLAINED_AT25_FTL)
+#  undef HAVE_AT25
+#endif
+
+#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
+#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
+#endif
+
+#if CONFIG_SYSTEM_USBMSC_DEVMINOR1 != AT25_MINOR
+#  error Confusion in the assignment of minor device numbers
+#  undef HAVE_AT25
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: board_usbmsc_initialize
  *
  * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
- *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initialization logic and the
- *         matching application logic.  The value cold be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
+ *   Perform architecture specific initialization as needed to establish
+ *   the mass storage device that will be exported by the USB MSC device.
  *
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
+int board_usbmsc_initialize(int port)
 {
-#ifndef CONFIG_BOARD_LATE_INITIALIZE
-  /* Perform board initialization */
+  /* Initialize the AT25 MTD driver */
 
-  return sam_bringup();
+#ifdef HAVE_AT25
+  int ret = sam_at25_automount(AT25_MINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_at25_automount failed: %d\n", ret);
+    }
+
+  return ret;
 #else
-  return OK;
+  return -ENODEV;
 #endif
 }
 
-#endif /* CONFIG_BUILD_KERNEL */
+#endif /* CONFIG_USBMSC */

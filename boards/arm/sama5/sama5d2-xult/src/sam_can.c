@@ -1,5 +1,5 @@
 /****************************************************************************
- *  boards/arm/sama5/sama5d2-xult/src/sam_appinit.c
+ *  boards/arm/sama5/sama5d2-xult/src/sam_can.c
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -24,54 +24,77 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/board.h>
+#include <errno.h>
+#include <debug.h>
 
+#include <nuttx/can/can.h>
+#include <arch/board/board.h>
+
+#include "chip.h"
+#include "up_arch.h"
+
+#include "sam_can.h"
 #include "sama5d2-xult.h"
 
-#ifndef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_CAN
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+#if defined(CONFIG_SAMA5_CAN0) && defined(CONFIG_SAMA5_CAN1)
+#  warning "Both CAN0 and CAN1 are enabled.  Assuming only CAN0."
+#  undef CONFIG_SAMA5_CAN1
+#endif
+
+#ifdef CONFIG_SAMA5_CAN0
+#  define CAN_PORT 0
+#else
+#  define CAN_PORT 1
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: sam_can_setup
  *
  * Description:
- *   Perform application specific initialization.  This function is never
- *   called directly from application code, but only indirectly via the
- *   (non-standard) boardctl() interface using the command BOARDIOC_INIT.
- *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initialization logic and the
- *         matching application logic.  The value cold be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
+ *  Initialize CAN and register the CAN device
  *
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
+int sam_can_setup(void)
 {
-#ifndef CONFIG_BOARD_LATE_INITIALIZE
-  /* Perform board initialization */
+#if defined(CONFIG_SAMA5_CAN0) || defined(CONFIG_SAMA5_CAN1)
+  struct can_dev_s *can;
+  int ret;
 
-  return sam_bringup();
-#else
+  /* Call stm32_caninitialize() to get an instance of the CAN interface */
+
+  can = sam_caninitialize(CAN_PORT);
+  if (can == NULL)
+    {
+      canerr("ERROR:  Failed to get CAN interface\n");
+      return -ENODEV;
+    }
+
+  /* Register the CAN driver at "/dev/can0" */
+
+  ret = can_register("/dev/can0", can);
+  if (ret < 0)
+    {
+      canerr("ERROR: can_register failed: %d\n", ret);
+      return ret;
+    }
+
   return OK;
+#else
+  return -ENODEV;
 #endif
 }
 
-#endif /* CONFIG_BUILD_KERNEL */
+#endif /* CONFIG_CAN */

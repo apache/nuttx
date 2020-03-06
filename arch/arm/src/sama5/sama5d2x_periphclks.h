@@ -48,6 +48,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Helper macros */
 
 #define sam_enableperiph0(s)       putreg32((1 << (s)), SAM_PMC_PCER0)
@@ -74,7 +75,7 @@
 #define sam_matrix0_enableclk()    sam_enableperiph0(SAM_PID_MATRIX0)
 #define sam_secumod_enableclk()    sam_enableperiph0(SAM_PID_SECUMOD)
 #define sam_hsmc_enableclk()       sam_enableperiph0(SAM_PID_HSMC)
-#define sam_pio_enableclk()        sam_enableperiph0(SAM_PID_PIO)
+#define sam_pioa_enableclk()       sam_enableperiph0(SAM_PID_PIOA)
 #define sam_flexcom0_enableclk()   sam_enableperiph0(SAM_PID_FLEXCOM0)
 #define sam_flexcom1_enableclk()   sam_enableperiph0(SAM_PID_FLEXCOM1)
 #define sam_flexcom2_enableclk()   sam_enableperiph0(SAM_PID_FLEXCOM2)
@@ -144,7 +145,7 @@
 #define sam_matrix0_disableclk()   sam_disableperiph0(SAM_PID_MATRIX0)
 #define sam_secumod_disableclk()   sam_disableperiph0(SAM_PID_SECUMOD)
 #define sam_hsmc_disableclk()      sam_disableperiph0(SAM_PID_HSMC)
-#define sam_pio_disableclk()       sam_disableperiph0(SAM_PID_PIO)
+#define sam_pio_disableclk()       sam_disableperiph0(SAM_PID_PIOA)
 #define sam_flexcom0_disableclk()  sam_disableperiph0(SAM_PID_FLEXCOM0)
 #define sam_flexcom1_disableclk()  sam_disableperiph0(SAM_PID_FLEXCOM1)
 #define sam_flexcom2_disableclk()  sam_disableperiph0(SAM_PID_FLEXCOM2)
@@ -214,7 +215,7 @@
 #define sam_matrix0_isenabled()    sam_isenabled0(SAM_PID_MATRIX0)
 #define sam_secumod_isenabled()    sam_isenabled0(SAM_PID_SECUMOD)
 #define sam_hsmc_isenabled()       sam_isenabled0(SAM_PID_HSMC)
-#define sam_pio_isenabled()        sam_isenabled0(SAM_PID_PIO)
+#define sam_pio_isenabled()        sam_isenabled0(SAM_PID_PIOA)
 #define sam_flexcom0_isenabled()   sam_isenabled0(SAM_PID_FLEXCOM0)
 #define sam_flexcom1_isenabled()   sam_isenabled0(SAM_PID_FLEXCOM1)
 #define sam_flexcom2_isenabled()   sam_isenabled0(SAM_PID_FLEXCOM2)

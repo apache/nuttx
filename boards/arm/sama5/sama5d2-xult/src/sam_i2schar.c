@@ -1,5 +1,5 @@
 /****************************************************************************
- *  boards/arm/sama5/sama5d2-xult/src/sam_boot.c
+ *  boards/arm/sama5/sama5d2-xult/src/sam_i2schar.c
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
  *  contributor license agreements.  See the NOTICE file distributed with
@@ -24,15 +24,33 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/board.h>
+#include <nuttx/audio/i2s.h>
 
+#include "sam_ssc.h"
 #include "sama5d2-xult.h"
+
+#if defined(CONFIG_AUDIO_I2SCHAR) && \
+   (defined(CONFIG_SAMA5_SSC0) || defined(CONFIG_SAMA5_SSC1))
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef CONFIG_SAMA5D3XPLAINED_SSC_PORT
+#  if defined(CONFIG_SAMA5_SSC0)
+#    define CONFIG_SAMA5D3XPLAINED_SSC_PORT 0
+#  elif defined(CONFIG_SAMA5_SSC1)
+#    define CONFIG_SAMA5D3XPLAINED_SSC_PORT 1
+#  endif
+#endif
+
+#ifndef CONFIG_SAMA5D3XPLAINED_I2SCHAR_MINOR
+#  define CONFIG_SAMA5D3XPLAINED_I2SCHAR_MINOR 0
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -43,56 +61,51 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_boardinitialize
+ * Name: i2schar_devinit
  *
  * Description:
- *   All SAMA5 architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
+ *   All architectures must provide the following interface in order to work
+ *   with apps/examples/i2schar.
  *
  ****************************************************************************/
 
-void sam_boardinitialize(void)
+int i2schar_devinit(void)
 {
-  /* Initialize USB if the 1) the HS host or device controller is in the
-   * configuration and 2) the weak function sam_usbinitialize() has been
-   * brought into the build.
-   * Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
-   */
+  static bool initialized = false;
+  struct i2s_dev_s *i2s;
+  int ret;
 
-#if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
-  if (sam_usbinitialize)
+  /* Have we already initialized? */
+
+  if (!initialized)
     {
-      sam_usbinitialize();
+      /* Call sam_ssc_initialize() to get an instance of the SSC/I2S
+       * interface
+       */
+
+      i2s = sam_ssc_initialize(CONFIG_SAMA5D3XPLAINED_SSC_PORT);
+      if (!i2s)
+        {
+          _err("ERROR: Failed to get the SAMA5 SSC/I2S driver for SSC%d\n",
+              CONFIG_SAMA5D3XPLAINED_SSC_PORT);
+          return -ENODEV;
+        }
+
+      /* Register the I2S character driver at "/dev/i2schar0" */
+
+      ret = i2schar_register(i2s, CONFIG_SAMA5D3XPLAINED_I2SCHAR_MINOR);
+      if (ret < 0)
+        {
+          aerr("ERROR: i2schar_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
     }
-#endif
 
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
-
-  board_autoled_initialize();
-#endif
+  return OK;
 }
 
-/****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize(). board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
-  /* Perform board initialization */
-
-  sam_bringup();
-}
-#endif /* CONFIG_BOARD_LATE_INITIALIZE */
+#endif /* CONFIG_AUDIO_I2SCHAR && (CONFIG_SAMA5_SSC0 || CONFIG_SAMA5_SSC1) */
