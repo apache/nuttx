@@ -478,6 +478,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);
  *   disable interrupts before performing scheduling operations.
  *
  ****************************************************************************/
+
 /* Prototype is in unistd.h */
 
 /****************************************************************************
@@ -487,6 +488,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);
  *   Assertions may be handled in an architecture-specific way.
  *
  ****************************************************************************/
+
 /* Prototype is in assert.h */
 
 /****************************************************************************
@@ -2169,7 +2171,7 @@ size_t  up_check_intstack_remain(void);
 int up_rtc_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_time
  *
  * Description:
@@ -2185,13 +2187,13 @@ int up_rtc_initialize(void);
  * Returned Value:
  *   The current time in seconds.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC) && !defined(CONFIG_RTC_HIRES)
 time_t up_rtc_time(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_gettime
  *
  * Description:
@@ -2205,13 +2207,13 @@ time_t up_rtc_time(void);
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC) && defined(CONFIG_RTC_HIRES)
 int up_rtc_gettime(FAR struct timespec *tp);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_getdatetime
  *
  * Description:
@@ -2232,13 +2234,13 @@ int up_rtc_gettime(FAR struct timespec *tp);
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC) && defined(CONFIG_RTC_DATETIME)
 int up_rtc_getdatetime(FAR struct tm *tp);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_getdatetime_with_subseconds
  *
  * Description:
@@ -2260,14 +2262,14 @@ int up_rtc_getdatetime(FAR struct tm *tp);
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC) && defined(CONFIG_RTC_DATETIME) && \
     defined(CONFIG_ARCH_HAVE_RTC_SUBSECONDS)
 int up_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
@@ -2280,7 +2282,7 @@ int up_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC
 int up_rtc_settime(FAR const struct timespec *tp);
@@ -2377,7 +2379,7 @@ int up_putc(int ch);
 
 void up_puts(FAR const char *str);
 
-/********************************************************************************
+/****************************************************************************
  * Name: arch_sporadic_*
  *
  * Description:
@@ -2391,7 +2393,7 @@ void up_puts(FAR const char *str);
  * Returned Value:
  *   None
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SPORADIC_INSTRUMENTATION
 void arch_sporadic_start(FAR struct tcb_s *tcb);
@@ -2400,7 +2402,7 @@ void arch_sporadic_suspend(FAR struct tcb_s *tcb);
 void arch_sporadic_resume(FAR struct tcb_s *tcb);
 #endif
 
-/********************************************************************************
+/****************************************************************************
  * Name: up_critmon_*
  *
  * Description:
@@ -2417,7 +2419,7 @@ void arch_sporadic_resume(FAR struct tcb_s *tcb);
  *
  *   The second interface simple converts an elapsed time into well known
  *   units.
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SCHED_CRITMONITOR
 uint32_t up_critmon_gettime(void);
