@@ -73,10 +73,22 @@ int modlib_unload(struct mod_loadinfo_s *loadinfo)
 
   /* Release memory holding the relocated ELF image */
 
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+  if (loadinfo->textalloc != 0)
+    {
+      up_module_text_free((FAR void *)loadinfo->textalloc);
+    }
+
+  if (loadinfo->datastart != 0)
+    {
+      lib_free((FAR void *)loadinfo->datastart);
+    }
+#else
   if (loadinfo->textalloc != 0)
     {
       lib_free((FAR void *)loadinfo->textalloc);
     }
+#endif
 
   /* Clear out all indications of the allocated address environment */
 
