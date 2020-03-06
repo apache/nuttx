@@ -136,6 +136,12 @@ static struct spi_dev_s g_spidev =
 
 static sem_t g_exclsem = SEM_INITIALIZER(1);
 
+/* These are used to perform reconfigurations only when necessary. */
+
+static uint32_t g_spi_frequency;
+static uint32_t g_spi_actual;
+static enum spi_mode_e g_spi_mode = SPIDEV_MODE3;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -195,44 +201,48 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
                                  uint32_t frequency)
 {
-  uint32_t actual;
-  uint32_t brg;
-
-  spiinfo("frequency: %lu\n", (unsigned long)frequency);
-
-  /* We want select divisor to provide the highest frequency (SPIR) that does
-   * NOT exceed the requested frequency.:
-   *
-   *   SPIR <= System Clock Frequency / (2 * BRG)
-   *
-   * So
-   *
-   *   BRG >= System Clock Frequency / (2 * SPIR)
-   */
-
-  brg = ((EZ80_SYS_CLK_FREQ + 1) / 2 + frequency - 1) / frequency;
-
-  /* "When configured as a Master, the 16-bit divisor value must be between
-   * 0003h and FFFFh, inclusive. When configured as a Slave, the 16-bit
-   * divisor value must be between 0004h and FFFFh, inclusive."
-   */
-
-  if (brg < 3)
+  if (frequency != g_spi_frequency)
     {
-      brg = 3;
+     uint32_t brg;
+
+     spiinfo("frequency: %lu\n", (unsigned long)frequency);
+
+      /* We want select divisor to provide the highest frequency (SPIR) that
+       * does NOT exceed the requested frequency.:
+       *
+       *   SPIR <= System Clock Frequency / (2 * BRG)
+       *
+       * So
+       *
+       *   BRG >= System Clock Frequency / (2 * SPIR)
+       */
+
+      brg = ((EZ80_SYS_CLK_FREQ + 1) / 2 + frequency - 1) / frequency;
+
+      /* "When configured as a Master, the 16-bit divisor value must be
+       * between 0003h and FFFFh, inclusive. When configured as a Slave, the
+       * 16-bit divisor value must be between 0004h and FFFFh, inclusive."
+       */
+
+      if (brg < 3)
+        {
+          brg = 3;
+        }
+      else if (brg > 0xffff)
+        {
+          brg = 0xffff;
+        }
+
+      outp(EZ80_SPI_BRG_L, brg & 0xff);
+      outp(EZ80_SPI_BRG_H, (brg >> 8) & 0xff);
+
+      g_spi_actual = ((EZ80_SYS_CLK_FREQ + 1) / 2 + brg - 1) / brg;
+
+      finfo("BRG=%lu Actual=%lu\n",
+            (unsigned long)brg, (unsigned long)g_spi_actual);
     }
-  else if (brg > 0xffff)
-    {
-      brg = 0xffff;
-    }
 
-  outp(EZ80_SPI_BRG_L, brg & 0xff);
-  outp(EZ80_SPI_BRG_H, (brg >> 8) & 0xff);
-
-  actual = ((EZ80_SYS_CLK_FREQ + 1) / 2 + brg - 1) / brg;
-
-  finfo("BRG=%lu Actual=%lu\n", (unsigned long)brg, (unsigned long)actual);
-  return actual;
+  return g_spi_actual;
 }
 
 /****************************************************************************
@@ -252,41 +262,46 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
-  uint8_t modebits;
-  uint8_t regval;
-
-  spiinfo("mode: %d\n", (int)mode);
-
-  /* Select the CTL register bits based on the selected mode */
-
-  switch (mode)
+  if (mode != g_spi_mode)
     {
-      case SPIDEV_MODE0: /* CPOL=0 CHPHA=0 */
-        modebits = 0;
-        break;
+      uint8_t modebits;
+      uint8_t regval;
 
-      case SPIDEV_MODE1: /* CPOL=0 CHPHA=1 */
-        modebits = SPI_CTL_CPHA;
-        break;
+      spiinfo("mode: %d\n", (int)mode);
 
-      case SPIDEV_MODE2: /* CPOL=1 CHPHA=0 */
-        modebits = SPI_CTL_CPOL;
-        break;
+      /* Select the CTL register bits based on the selected mode */
 
-      case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
-        modebits = (SPI_CTL_CPOL | SPI_CTL_CPHA);
-        break;
+      switch (mode)
+        {
+          case SPIDEV_MODE0: /* CPOL=0 CHPHA=0 */
+            modebits = 0;
+            break;
 
-      default:
-        return;
+          case SPIDEV_MODE1: /* CPOL=0 CHPHA=1 */
+            modebits = SPI_CTL_CPHA;
+            break;
+
+          case SPIDEV_MODE2: /* CPOL=1 CHPHA=0 */
+            modebits = SPI_CTL_CPOL;
+            break;
+
+          case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
+            modebits = (SPI_CTL_CPOL | SPI_CTL_CPHA);
+            break;
+
+          default:
+            return;
+        }
+
+      /* Then set those bits in the CTL register */
+
+      regval  = inp(EZ80_SPI_CTL);
+      regval &= ~(SPI_CTL_CPOL | SPI_CTL_CPHA);
+      regval |= modebits;
+      outp(EZ80_SPI_CTL, regval);
+
+      g_spi_mode = mode;
     }
-
-  /* Then set those bits in the CTL register */
-
-  regval  = inp(EZ80_SPI_CTL);
-  regval &= ~(SPI_CTL_CPOL | SPI_CTL_CPHA);
-  regval |= modebits;
-  outp(EZ80_SPI_CTL, regval);
 }
 
 /****************************************************************************
@@ -394,8 +409,6 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   uint8_t response;
   int ret;
 
-  spiinfo("ch: %04x\n", wd);
-
   ret = spi_transfer((uint8_t)wd, &response);
   if (ret < 0)
     {
@@ -403,6 +416,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
       return (uint16_t)0xff;
     }
 
+  spiinfo("ch: %04x response: %02x\n", wd, response);
   return (uint16_t)response;
 }
 
@@ -625,9 +639,12 @@ FAR struct spi_dev_s *ez80_spibus_initialize(int port)
 #  error "Check GPIO initialization for this chip"
 #endif
 
-  /* Set the initial clock frequency for identification mode < 400kHz */
+  /* Set the initial clock frequency for identification mode < 400kHz
+   * and Mode 0.
+   */
 
   spi_setfrequency(NULL, 400000);
+  spi_setmode(NULL, SPIDEV_MODE0);
 
   /* Enable the SPI.
    * NOTE 1: Interrupts are not used in this driver version.

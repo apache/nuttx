@@ -51,7 +51,7 @@ static int ez80_timerisr(int irq, chipreg_t *regs, void *arg)
 {
   /* Read the appropriate timer0 register to clear the interrupt */
 
-#ifdef CONFIGS_ARCH_CHIP_EZ80F91
+#ifdef CONFIG_ARCH_CHIP_EZ80F91
   inp(EZ80_TMR0_IIR);
 #else
   /* _EZ80190, _EZ80L92, _EZ80F92, _EZ80F93:  PRT_IRQ, is set to 1 when the
@@ -134,37 +134,41 @@ void up_timer_initialize(void)
   outp(EZ80_TMR0_RRH, (uint8_t)(reload >> 8));
   outp(EZ80_TMR0_RRL, (uint8_t)(reload));
 
-#if defined(CONFIGS_ARCH_CHIP_EZ80F91)
+#if defined(CONFIG_ARCH_CHIP_EZ80F91)
   /* Clear any pending timer interrupts by reading the IIR register */
 
   inp(EZ80_TMR0_IIR);
-#elif defined(CONFIGS_ARCH_CHIP_EZ80L92) || defined(CONFIGS_ARCH_CHIP_EZ80F92) || \
-      defined(CONFIGS_ARCH_CHIP_EZ80F93)
+
+#elif defined(CONFIG_ARCH_CHIP_EZ80L92) || defined(CONFIG_ARCH_CHIP_EZ80F92) || \
+      defined(CONFIG_ARCH_CHIP_EZ80F93)
   /* Clear any pending timer interrupts by reading the CTL register */
 
   inp(EZ80_TMR0_CTL);
+
 #endif
 
   /* Configure and enable the timer */
 
 #if defined(_EZ80190)
+
   outp(EZ80_TMR0_CTL, 0x5f);
-#elif defined(CONFIGS_ARCH_CHIP_EZ80F91)
+
+#elif defined(CONFIG_ARCH_CHIP_EZ80F91)
   /* EZ80_TMRCTL_TIMEN:   Bit 0: The programmable reload timer is enabled
    * EZ80_TMRCTL_RLD:     Bit 1: Force reload
    * EZ80_TMRCTL_TIMCONT: Bit 2: The timer operates in CONTINUOUS mode.
    * EZ80_TMRCLKDIV_16:   Bits 3-4: System clock divider = 16
    */
 
-  outp(EZ80_TMR0_CTL, (EZ80_TMRCLKDIV_16 | EZ80_TMRCTL_TIMCONT |
-                       EZ80_TMRCTL_RLD | EZ80_TMRCTL_TIMEN));
+  outp(EZ80_TMR0_CTL, (EZ80_TMRCTL_TIMEN | EZ80_TMRCTL_RLD |
+                       EZ80_TMRCTL_TIMCONT | EZ80_TMRCLKDIV_16));
 
   /* Enable timer end-of-count interrupts */
 
   outp(EZ80_TMR0_IER, EZ80_TMRIER_EOCEN);
 
-#elif defined(CONFIGS_ARCH_CHIP_EZ80L92) || defined(CONFIGS_ARCH_CHIP_EZ80F92) || \
-      defined(CONFIGS_ARCH_CHIP_EZ80F93)
+#elif defined(CONFIG_ARCH_CHIP_EZ80L92) || defined(CONFIG_ARCH_CHIP_EZ80F92) || \
+      defined(CONFIG_ARCH_CHIP_EZ80F93)
   /* EZ80_TMRCTL_TIMEN:   Bit 0: Programmable reload timer enabled.
    * EZ80_TMRCTL_RSTEN:   Bit 1: Reload and start function enabled.
    * EZ80_TMRCLKDIV_4:    Bits 2-3: Timer input clock divided by 4 (5Mhz)
@@ -172,8 +176,9 @@ void up_timer_initialize(void)
    * EZ80_TMRCTL_EN:      Bit 6: Enable timer interrupt requests
    */
 
-  outp(EZ80_TMR0_CTL, (EZ80_TMRCTL_TIMEN | EZ80_TMRCTL_RSTEN |
+  outp(EZ80_TMR0_CTL, (EZ80_TMRCTL_TIMEN | : |
                        EZ80_TMRCLKDIV_4 | EZ80_TMRCTL_TIMCONT |
-                       EZ80_TMRCTL_EN);
+                       EZ80_TMRCTL_EN));
+
 #endif
 }

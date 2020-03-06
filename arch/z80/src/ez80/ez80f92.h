@@ -39,10 +39,10 @@
 #define EZ80_OFFCHIPCS1        0xc00000 /* CS1: Off chip use (usually SRAM) */
 #define EZ80_ONCHIPSRAM        0xffe000 /* On-chip SRAM (4-8Kb) on reset */
 
-#if defined(CONFIGS_ARCH_CHIP_EZ80L92)
+#if defined(CONFIG_ARCH_CHIP_EZ80L92)
 #  define EZ80_FLASH_SIZE      0x020000 /* 128Kb on-chip flash */
 #  define EZ80_SRAM_SIZE       0x002000 /* 8Kb on-chip sram */
-#elif defined(CONFIGS_ARCH_CHIP_EZ80L93)
+#elif defined(CONFIG_ARCH_CHIP_EZ80L93)
 #  define EZ80_FLASH_SIZE      0x010000 /* 64Kb on-chip flash */
 #  define EZ80_SRAM_SIZE       0x001000 /* 4Kb on-chip sram */
 #endif
