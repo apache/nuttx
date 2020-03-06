@@ -700,7 +700,7 @@ int main(int argc, char **argv, char **envp)
                * preceding line has no comment.
                */
 
-              if (line[n] != '}' /* && line[n] != '#' */ && !prevbrhcmt)
+              if (line[n] != '}' && line[n] != '#' && !prevbrhcmt)
                 {
                    ERROR("Missing blank line after comment", comment_lineno,
                          1);
