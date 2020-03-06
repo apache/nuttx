@@ -103,7 +103,6 @@
 #  define SAM_ISI_OFFSET         0x00034000 /* 0x00034000-0x00037fff: ISI */
 #  define SAM_SFR_OFFSET         0x00038000 /* 0x00038000-0x0003bfff: SFR */
                                             /* 0x0003c000-0x07ffffff: Reserved */
-
 #define SAM_PERIPHB_PSECTION     0xf8000000 /* 0xf8000000-0xffffbfff: Internal Peripherals B */
 #  define SAM_HSMCI1_OFFSET      0x00000000 /* 0x00000000-0x00000fff: HSMCI1 */
 #  define SAM_HSMCI2_OFFSET      0x00004000 /* 0x00004000-0x00007fff: HSMCI2 */
