@@ -283,9 +283,8 @@ struct lfs_info_s
 
   /* Name of the file stored as a null-terminated string */
 
-  char name[LFS_NAME_MAX+1];
+  char name[LFS_NAME_MAX + 1];
 };
-
 
 /* littlefs data structures */
 
@@ -308,7 +307,7 @@ typedef struct lfs_entry_s
       } file;
       lfs_block_t dir[2];
     } u;
- } d;
+  } d;
 } lfs_entry_t;
 
 typedef struct lfs_cache_s
@@ -554,7 +553,8 @@ lfs_soff_t lfs_file_seek(FAR lfs_t *lfs, FAR lfs_file_t *file,
  * Returns a negative error code on failure.
  */
 
-int lfs_file_truncate(FAR FAR lfs_t *lfs, FAR lfs_file_t *file, lfs_off_t size);
+int lfs_file_truncate(FAR lfs_t *lfs, FAR lfs_file_t *file,
+                      lfs_off_t size);
 
 /* Return the position of the file
  *
@@ -629,7 +629,7 @@ int lfs_dir_seek(FAR lfs_t *lfs, FAR lfs_dir_t *dir, lfs_off_t off);
  * The returned offset is only meant to be consumed by seek and may not make
  * sense, but does indicate the current position in the directory iteration.
  *
- * Returns the position of the directory, or a negative error code on failure.
+ * Returns the position of the directory, or a negative error code on failure
  */
 
 lfs_soff_t lfs_dir_tell(FAR lfs_t *lfs, FAR lfs_dir_t *dir);
@@ -667,7 +667,7 @@ int lfs_traverse(FAR lfs_t *lfs, CODE int (*cb)(FAR void *, lfs_block_t),
 int lfs_deorphan(FAR lfs_t *lfs);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}
 #endif
 
 #endif /* __FS_LITTLEFS_LFS_H */
