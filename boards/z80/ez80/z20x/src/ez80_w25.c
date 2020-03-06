@@ -58,7 +58,7 @@ int ez80_w25_initialize(int minor)
 
   /* Get the SPI port */
 
-  spi = ez80_spibus_initialize(0);
+  spi = ez80_spibus_initialize(1);
   if (!spi)
     {
       ferr("ERROR: Failed to initialize SPI port %d\n", 0);
