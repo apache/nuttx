@@ -1283,6 +1283,13 @@ int main(int argc, char **argv, char **envp)
                       /* No error */
                     }
 
+                  /* Ignore ELF stuff like Elf32_Ehdr. */
+
+                  else if ((strncmp(&line[ident_index], "Elf", 3) == 0))
+                    {
+                      /* No error */
+                    }
+
                   /* Special case hex constants.  These will look like
                    * identifiers starting with 'x' or 'X' but preceded
                    * with '0'
