@@ -599,6 +599,10 @@ void nx_start(void)
       kmm_initialize(heap_start, heap_size);
 #endif
 
+#ifdef CONFIG_ARCH_USE_MODULE_TEXT
+    up_module_text_init();
+#endif
+
 #ifdef CONFIG_MM_PGALLOC
       /* If there is a page allocator in the configuration, then get the page
        * heap information from the platform-specific code and configure the

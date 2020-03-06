@@ -1572,6 +1572,7 @@ config MODULE
 	bool "Enable loadable OS modules"
 	default n
 	select LIBC_MODLIB
+	select ARCH_USE_MODULE_TEXT if ARCH_HAVE_MODULE_TEXT
 	---help---
 		Enable support for loadable OS modules.  Default: n
 

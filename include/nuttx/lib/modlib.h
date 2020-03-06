@@ -172,7 +172,12 @@ struct module_s
   mod_initializer_t initializer;       /* Module initializer function */
 #endif
   struct mod_info_s modinfo;           /* Module information */
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+  FAR void *textalloc;                 /* Allocated kernel text memory */
+  FAR void *dataalloc;                 /* Allocated kernel memory */
+#else
   FAR void *alloc;                     /* Allocated kernel memory */
+#endif
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   size_t textsize;                     /* Size of the kernel .text memory allocation */
   size_t datasize;                     /* Size of the kernel .bss/.data memory allocation */

@@ -237,7 +237,12 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
 
   /* Save the load information */
 
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+  modp->textalloc   = (FAR void *)loadinfo.textalloc;
+  modp->dataalloc   = (FAR void *)loadinfo.datastart;
+#else
   modp->alloc       = (FAR void *)loadinfo.textalloc;
+#endif
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   modp->textsize    = loadinfo.textsize;
   modp->datasize    = loadinfo.datasize;
