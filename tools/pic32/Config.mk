@@ -24,17 +24,17 @@
 
 # POSTBUILD -- Perform post build operations
 
+
+ifeq ($(CONFIG_INTELHEX_BINARY),y)
+
 define POSTBUILD
 	$(Q)echo "Converting the hex file"; 
 
 	$(Q) if [ ! -f "tools/pic32/mkpichex" ] ; then \
-		echo "mkpichex tool doesn't exist"; \
-		echo "Please run the following command to build the tool"; \
-		echo "make -C tools$(DELIM)pic32 -f Makefile.host"; \
-		echo "then run make again."; \
-	else \
-		tools$(DELIM)pic32$(DELIM)mkpichex$(HOSTEXEEXT) $(PWD); \
-		([ $$? -eq 0 ] && echo "Done."); \
+		$(MAKE) -C $(TOPDIR)$(DELIM)tools$(DELIM)pic32 -f Makefile.host; \
 	fi
-
+	tools$(DELIM)pic32$(DELIM)mkpichex$(HOSTEXEEXT) $(PWD)
+	$(Q)([ $$? -eq 0 ] && echo "Done.")
 endef
+
+endif
