@@ -47,6 +47,10 @@
 
 #include "freedom-k28f.h"
 
+#ifdef CONFIG_PL2303
+#  include <nuttx/usb/pl2303.h>
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -128,6 +132,17 @@ int k28_bringup(void)
   /* Initialize the auto-mounter */
 
   k28_automount_initialize();
+#endif
+
+#if defined(CONFIG_USBDEV) && defined(CONFIG_KINETIS_USBOTG)
+  if (k28_usbdev_initialize)
+    {
+      k28_usbdev_initialize();
+    }
+#endif
+
+#ifdef CONFIG_PL2303
+  usbdev_serialinitialize(0);
 #endif
 
   UNUSED(ret);
