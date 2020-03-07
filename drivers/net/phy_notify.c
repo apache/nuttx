@@ -290,6 +290,13 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid,
       phyinfo("Actual PID=%d\n", pid);
     }
 
+  /* Unsubscribe if sigev_notify field equals SIGEV_NONE */
+
+  if (event->sigev_notify == SIGEV_NONE)
+    {
+      return phy_notify_unsubscribe(intf, pid);
+    }
+
   /* Check if this client already exists */
 
   client = phy_find_assigned(intf, pid);
