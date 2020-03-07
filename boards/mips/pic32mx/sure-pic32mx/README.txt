@@ -384,12 +384,14 @@ Loading NuttX with PICkit2
 
     To use this file, you need to do the following things:
 
-                       # Add the NuttX tools/pic32 directory to your
-                       # PATH variable
-      make             # Build nuttx and nuttx.hex
-      mkpichex $PWD    # Convert addresses in nuttx.hex.  $PWD is the path
-                       # to the top-level build directory.  It is the only
-                       # required input to mkpichex.
+      export PATH = ??? # Add the NuttX tools/pic32 directory to your
+                        # PATH variable
+      make              # Build nuttx and nuttx.hex
+      mkpichex $PWD     # Convert addresses in nuttx.hex.  $PWD is the path
+                        # to the top-level build directory.  It is the only
+                        # required input to mkpichex.
+
+      This procedure is automatically performed at the end of a build.
 
 LCD1602
 =======
