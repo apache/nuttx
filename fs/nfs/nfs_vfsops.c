@@ -939,7 +939,7 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct nfsnode    *np;
   ssize_t                writesize;
   ssize_t                bufsize;
-  ssize_t                byteswritten;
+  ssize_t                byteswritten = 0;
   size_t                 reqlen;
   FAR uint32_t          *ptr;
   uint32_t               tmp;
