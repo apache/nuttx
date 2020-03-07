@@ -1,6 +1,7 @@
 /************************************************************************************
  * drivers/mtd/w25.c
  * Driver for SPI-based W25x16, x32, and x64 and W25q16, q32, q64, and q128 FLASH
+ * from Winbond (and work-alike parts from AMIC)
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -66,8 +67,7 @@
 #endif
 
 /* W25 Instructions *****************************************************************/
-/*      Command                    Value      Description                           */
-/*                                                                                  */
+
 #define W25_WREN                   0x06    /* Write enable                          */
 #define W25_WRDI                   0x04    /* Write Disable                         */
 #define W25_RDSR                   0x05    /* Read status register                  */
@@ -95,7 +95,9 @@
 
 /* JEDEC Read ID register values */
 
-#define W25_JEDEC_MANUFACTURER     0xef  /* SST manufacturer ID */
+#define W25_JEDEC_WINBOND          0xef  /* Winbond manufacturer ID */
+#define W25_JEDEC_AMIC             0x37  /* AMIC manufacturer ID */
+
 #define W25X_JEDEC_MEMORY_TYPE     0x30  /* W25X memory type */
 #define W25Q_JEDEC_MEMORY_TYPE_A   0x40  /* W25Q memory type */
 #define W25Q_JEDEC_MEMORY_TYPE_B   0x60  /* W25Q memory type */
@@ -356,7 +358,8 @@ static inline int w25_readid(struct w25_dev_s *priv)
 
   /* Check for a valid manufacturer and memory type */
 
-  if (manufacturer == W25_JEDEC_MANUFACTURER &&
+  if ((manufacturer == W25_JEDEC_WINBOND  ||
+       manufacturer == W25_JEDEC_AMIC)    &&
       (memory == W25X_JEDEC_MEMORY_TYPE   ||
        memory == W25Q_JEDEC_MEMORY_TYPE_A ||
        memory == W25Q_JEDEC_MEMORY_TYPE_B ||
@@ -861,9 +864,9 @@ static inline void w25_bytewrite(struct w25_dev_s *priv, FAR const uint8_t *buff
 #if defined(CONFIG_W25_SECTOR512) && !defined(CONFIG_W25_READONLY)
 static void w25_cacheflush(struct w25_dev_s *priv)
 {
-  /* If the cached is dirty (meaning that it no longer matches the old FLASH contents)
-   * or was erased (with the cache containing the correct FLASH contents), then write
-   * the cached erase block to FLASH.
+  /* If the cached is dirty (meaning that it no longer matches the old FLASH
+   * contents) or was erased (with the cache containing the correct FLASH contents),
+   * then write the cached erase block to FLASH.
    */
 
   if (IS_DIRTY(priv) || IS_ERASED(priv))
@@ -1099,8 +1102,8 @@ static ssize_t w25_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nbl
  * Name: w25_bwrite
  ************************************************************************************/
 
-static ssize_t w25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                            FAR const uint8_t *buffer)
+static ssize_t w25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                          size_t nblocks, FAR const uint8_t *buffer)
 {
 #ifdef CONFIG_W25_READONLY
   return -EACCESS;
