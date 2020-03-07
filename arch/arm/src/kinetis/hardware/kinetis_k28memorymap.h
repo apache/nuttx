@@ -144,7 +144,7 @@
 #  define KINETIS_OSC_BASE           0x40065000 /* System oscillator (OSC) */
 #  define KINETIS_I2C0_BASE          0x40066000 /* I2C 0 */
 #  define KINETIS_I2C1_BASE          0x40067000 /* I2C 1 */
-#  define KINETIS_USBOTGFS_BASE      0x40072000 /* USB OTG FS/LS */
+#  define KINETIS_USB0_BASE          0x40072000 /* USB OTG FS/LS */
 #  define KINETIS_2C2D_BASE          0x40073000 /* 2C2D (Analog comparator (CMP) /
                                                  * 6-bit digital-to-analog converter (DAC)) */
 #  define KINETIS_VREF_BASE          0x40074000 /* Voltage reference (VREF) */
