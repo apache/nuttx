@@ -176,7 +176,7 @@ void up_timer_initialize(void)
    * EZ80_TMRCTL_EN:      Bit 6: Enable timer interrupt requests
    */
 
-  outp(EZ80_TMR0_CTL, (EZ80_TMRCTL_TIMEN | : |
+  outp(EZ80_TMR0_CTL, (EZ80_TMRCTL_TIMEN | EZ80_TMRCTL_RSTEN |
                        EZ80_TMRCLKDIV_4 | EZ80_TMRCTL_TIMCONT |
                        EZ80_TMRCTL_EN));
 
