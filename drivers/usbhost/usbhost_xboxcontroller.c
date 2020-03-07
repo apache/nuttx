@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 #include <fcntl.h>
+#include <poll.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
@@ -185,6 +186,13 @@ struct usbhost_state_s
   pid_t                                pollpid;      /* PID of the poll task */
   size_t                               out_seq_num;  /* The sequence number for outgoing packets */
   struct xbox_controller_buttonstate_s rpt;          /* The latest report out of the controller. */
+
+  /* The following is a list if poll structures of threads waiting for
+   * driver events. The 'struct pollfd' reference for each open is also
+   * retained in the f_priv field of the 'struct file'.
+   */
+
+  struct pollfd *fds[CONFIG_XBOXCONTROLLER_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -211,7 +219,10 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
 /* Worker thread actions */
 
 static void usbhost_destroy(FAR void *arg);
-static void usbhost_notify(FAR struct usbhost_state_s *priv);
+
+/* Polling support */
+
+static void usbhost_pollnotify(FAR struct usbhost_state_s *dev);
 static int usbhost_xboxcontroller_poll(int argc, char *argv[]);
 
 /* Helpers for usbhost_connect() */
@@ -514,7 +525,7 @@ static void usbhost_destroy(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: usbhost_notify
+ * Name: usbhost_pollnotify
  *
  * Description:
  *   Wake any threads waiting for controller data
@@ -527,7 +538,7 @@ static void usbhost_destroy(FAR void *arg)
  *
  ****************************************************************************/
 
-static void usbhost_notify(FAR struct usbhost_state_s *priv)
+static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
 {
   int i;
 
@@ -723,7 +734,7 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
 
               /* Notify any waiters that new controller data is available */
 
-              usbhost_notify(priv);
+              usbhost_pollnotify(priv);
 
               /* Release our lock on the state structure */
 
@@ -803,7 +814,7 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
 
                   /* Notify any waiters that new controller data is available */
 
-                  usbhost_notify(priv);
+                  usbhost_pollnotify(priv);
 
                   /* Release our lock on the state structure */
 
