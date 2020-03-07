@@ -114,7 +114,7 @@ Creating Compatible NuttX HEX files
       cd tools/pic32
       make -f Makefile.host
 
-    Now you will have an executable file call mkpichex (or mkpichex.exe on
+    Now you will have an executable file called mkpichex (or mkpichex.exe on
     Cygwin).  This program will take the nutt.hex file as an input, it will
     convert all of the KSEG0 and KSEG1 addresses to physical address, and
     it will write the modified file, replacing the original nuttx.hex.
@@ -127,6 +127,8 @@ Creating Compatible NuttX HEX files
       mkpichex $PWD    #  Convert addresses in nuttx.hex.  $PWD is the path
                        # to the top-level build directory.  It is the only
                        # required input to mkpichex.
+
+      This procedure is automatically performed at the end of a build.
 
 Tool Issues
 ===========

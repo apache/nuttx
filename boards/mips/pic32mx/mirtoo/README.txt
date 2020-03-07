@@ -493,6 +493,8 @@ Loading NuttX with ICD3
                        # to the top-level build directory.  It is the only
                        # required input to mkpichex.
 
+      This procedure is automatically performed at the end of a build.
+
 LED Usage
 =========
 
