@@ -429,7 +429,7 @@ static int get_line_width(FILE *instream)
           if (len < min)
             {
               min = len;
-              lineno_min = lineno_min;
+              lineno_min = lineno;
             }
         }
     }
@@ -923,14 +923,16 @@ int main(int argc, char **argv, char **envp)
                   lptr += 2;
                   if (*lptr == '\n')
                     {
-                      ERROR("C comment opening on separate line", lineno, n);
+                      ERROR("C comment opening on separate line",
+                          lineno, lptr - &line[0]);
                     }
                   else if (!isspace((int)*lptr))
                     {
-                      ERROR("Missing space after opening C comment", lineno, n);
+                      ERROR("Missing space after opening C comment",
+                          lineno, lptr - &line[0]);
                     }
 
-                  if (strstr(line, "*/") == NULL)
+                  if (strstr(lptr, "*/") == NULL)
                     {
                       /* Increment the count of nested comments */
 
