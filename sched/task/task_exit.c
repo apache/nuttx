@@ -64,9 +64,9 @@
  *   never be called from normal user code, but only from the architecture-
  *   specific implementation of exit.
  *
- *   Threads/tasks could also be terminated via pthread_cancel, task_delete(),
- *   and task_restart().  In the last two cases, the task will be terminated
- *   as though exit() were called.
+ *   Threads/tasks could also be terminated via pthread_cancel,
+ *   task_delete(), and task_restart().  In the last two cases, the
+ *   task will be terminated as though exit() were called.
  *
  * Input Parameters:
  *   None
@@ -100,12 +100,12 @@ int nxtask_exit(void)
   dtcb = this_task();
 #endif
 
-  /* Remove the TCB of the current task from the ready-to-run list.  A context
-   * switch will definitely be necessary -- that must be done by the
-   * architecture-specific logic.
+  /* Remove the TCB of the current task from the ready-to-run list.  A
+   * context switch will definitely be necessary -- that must be done
+   * by the architecture-specific logic.
    *
-   * sched_removereadytorun will mark the task at the head of the ready-to-run
-   * with state == TSTATE_TASK_RUNNING
+   * sched_removereadytorun will mark the task at the head of the
+   * ready-to-run with state == TSTATE_TASK_RUNNING
    */
 
   sched_removereadytorun(dtcb);
@@ -147,9 +147,10 @@ int nxtask_exit(void)
   rtcb->task_state = TSTATE_TASK_READYTORUN;
 
   /* Move the TCB to the specified blocked task list and delete it.  Calling
-   * nxtask_terminate with non-blocking true will suppress atexit() and on-exit()
-   * calls and will cause buffered I/O to fail to be flushed.  The former
-   * is required _exit() behavior; the latter is optional _exit() behavior.
+   * nxtask_terminate with non-blocking true will suppress atexit() and
+   * on-exit() calls and will cause buffered I/O to fail to be flushed.  The
+   * former is required _exit() behavior; the latter is optional _exit()
+   * behavior.
    */
 
   sched_addblocked(dtcb, TSTATE_TASK_INACTIVE);
