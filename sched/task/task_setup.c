@@ -639,8 +639,8 @@ static inline int nxtask_stackargsetup(FAR struct task_tcb_s *tcb,
  *
  ****************************************************************************/
 
-int nxtask_schedsetup(FAR struct task_tcb_s *tcb, int priority, start_t start,
-                      main_t main, uint8_t ttype)
+int nxtask_schedsetup(FAR struct task_tcb_s *tcb, int priority,
+                      start_t start, main_t main, uint8_t ttype)
 {
   /* Perform common thread setup */
 
