@@ -90,7 +90,8 @@
  *   The non-standard binfmt function 'exec()' needs to have (1) a symbol
  *   table that provides the list of symbols exported by the base code, and
  *   (2) the number of symbols in that table.  This information is currently
- *   provided to 'exec()' from 'exec[l|v]()' via NuttX configuration settings:
+ *   provided to 'exec()' from 'exec[l|v]()' via NuttX configuration
+ *   settings:
  *
  *     CONFIG_LIBC_EXECFUNCS          : Enable exec[l|v] support
  *     CONFIG_EXECFUNCS_HAVE_SYMTAB   : Defined if there is a pre-defined
@@ -145,8 +146,8 @@ int execv(FAR const char *path, FAR char * const argv[])
   exit(0);
 
   /* We should not get here, but might be needed by some compilers.  Other,
-   * smarter compilers might complain that this code is unreachable.  You just
-   * can't win.
+   * smarter compilers might complain that this code is unreachable.  You
+   * just can't win.
    */
 
   return ERROR;
