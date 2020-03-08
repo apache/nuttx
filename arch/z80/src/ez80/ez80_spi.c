@@ -417,7 +417,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
       return (uint16_t)0xff;
     }
 
-  spiinfo("ch: %04x response: %02x\n", wd, response);
+  spiinfo("cmd: %04x resp: %02x\n", wd, response);
   return (uint16_t)response;
 }
 

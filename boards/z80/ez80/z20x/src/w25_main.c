@@ -212,9 +212,8 @@ static int w25_write_binary(FAR const struct prog_header_s *hdr)
   /* Write the hdr to the W25 */
 
   ret = w25_write(fd, hdr, sizeof(struct prog_header_s));
-  if (fd < 0)
+  if (ret < 0)
     {
-      ret = -get_errno();
       fprintf(stderr, "ERROR: Failed write program header: %d\n", ret);
       goto errout;
     }
@@ -225,7 +224,6 @@ static int w25_write_binary(FAR const struct prog_header_s *hdr)
   ret = w25_write(fd, (FAR const void *)PROGSTART, hdr->len);
   if (ret < 0)
     {
-      ret = -get_errno();
       fprintf(stderr, "ERROR: Failed write program header: %d\n", ret);
     }
 
@@ -289,8 +287,6 @@ static int w25_read_binary(FAR struct prog_header_s *hdr)
   fd = open(W25_CHARDEV, O_RDONLY);
   if (fd < 0)
     {
-      ret = -get_errno();
-      fprintf(stderr, "ERROR: Failed to open %s: %d\n", W25_CHARDEV, ret);
       return ret;
     }
 
@@ -299,7 +295,6 @@ static int w25_read_binary(FAR struct prog_header_s *hdr)
   ret = w25_read(fd, hdr, sizeof(hdr));
   if (ret < 0)
     {
-      ret = -get_errno();
       fprintf(stderr, "ERROR: Failed read program header: %d\n", ret);
       goto errout;
     }
@@ -308,7 +303,6 @@ static int w25_read_binary(FAR struct prog_header_s *hdr)
 
   if (hdr->magic != PROG_MAGIC)
     {
-      fprintf(stderr, "ERROR: No program in FLASH\n");
       ret = -ENOENT;
       goto errout;
     }
@@ -325,7 +319,6 @@ static int w25_read_binary(FAR struct prog_header_s *hdr)
   ret = w25_read(fd, (FAR void *)PROGSTART, hdr->len);
   if (ret < 0)
     {
-      ret = -get_errno();
       fprintf(stderr, "ERROR: Failed read program header: %d\n", ret);
     }
 
@@ -389,8 +382,6 @@ static int w25_read_verify(void)
   ret = w25_read_binary(&hdr);
   if (ret < 0)
     {
-      ret = -get_errno();
-      fprintf(stderr, "ERROR: Failed to read binary: %d\n", ret);
       return ret;
     }
 
@@ -477,6 +468,9 @@ static int w25_boot_program(void)
 {
   int ret;
 
+  printf("Booting...\n");
+  fflush(stdout);
+
   /* Load the program into memory and verify it. */
 
   ret = w25_read_verify();
@@ -489,7 +483,7 @@ static int w25_boot_program(void)
   /* Start the successfully loaded program */
 
   SRAM_ENTRY();
-  return ret;
+  return ret;    /* Should not get here */
 }
 
 /****************************************************************************
@@ -505,18 +499,36 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
 {
   char ch = '\0';
   ssize_t nread;
+  int count = 0;
+  int oflags;
   int ret;
   int fd;
   int i;
   int j;
 
-  /* Open stdin read-only, nonblocking */
+  /* Duplicate the file descriptor associated with stdin. */
 
-  fd = open(0, O_WRONLY | O_NONBLOCK);
+  fd = dup(0);
   if (fd < 0)
     {
       ret = -get_errno();
-      fprintf(stderr, "ERROR: Failed to open stdin: %d\n", ret);
+      fprintf(stderr, "ERROR: Failed to dup stdin: %d\n", ret);
+      return ret;
+    }
+
+  /* Make the duplicated file descriptor non-blocking. */
+
+  ret = fcntl(fd, F_GETFL, 0);
+  if (ret >= 0)
+    {
+      ret = fcntl(fd, F_SETFL, ret | O_NONBLOCK);
+    }
+
+  if (ret < 0)
+    {
+      ret = -get_errno();
+      fprintf(stderr, "ERROR: fcnt() failed: %d\n", ret);
+      close(fd) ;
       return ret;
     }
 
@@ -599,17 +611,19 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
 
           usleep(50 * 1000);
 
-          /* Output a dot to stdout every 200 milliseconds */
+          /* Output a dot to stdout every 10 * 50 = 500 milliseconds */
 
-          if ((j & 3) == 3)
+          if (++count == 10)
             {
               putchar('.');
+              count = 0;
             }
         }
     }
 
 errout:
   close(fd);
+  putchar('\n');
   return ch;
 }
 
@@ -635,6 +649,7 @@ errout:
 
 int w25_main(int argc, char *argv)
 {
+  bool disable = false;
   int ret;
 
 #ifndef CONFIG_BOARD_LATE_INITIALIZE
@@ -650,27 +665,74 @@ int w25_main(int argc, char *argv)
     }
 #endif
 
+  /* Verify the program in FLASH. */
+
+  ret = w25_read_verify();
+  if (ret < 0)
+    {
+      printf("No valid program in FLASH: %d\n", ret);
+      disable = true;
+    }
+
+  /* Now loop, providing the user with options to load a new program into
+   * FLASH or to boot from an existing program in FLASH.
+   */
+
   for (; ; )
     {
-      /* Wait up to 5 seconds for (L)oad or (B) keys. */
+      /* Disable booting if there is nothing valid in the FLASH */
 
-      ret = w25_wait_keypress("LB", 5);
-      if (ret < 0)
-        {
-          return EXIT_FAILURE;
-        }
-      else if (ret == 'L')
+      if (disable)
         {
           ret = w25_write_program();
+          if (ret >= 0)
+            {
+              /* There is now a valid program in FLASH */
+
+              disable = false;
+            }
         }
-      else /* if (ret == 'B' || ret == '\0') */
+
+      /* Both booting from FLASH and loading to flash are possible */
+
+      else
         {
-          ret = w25_boot_program();
+          /* Wait up to 5 seconds for (L)oad or (B) keys. */
+
+          printf("[L]oad [B]oot\n");
+          fflush(stdout);
+
+          ret = w25_wait_keypress("LlBb", 5);
+          if (ret < 0)
+            {
+              return EXIT_FAILURE;
+            }
+          else if (ret == 'L' || ret == 'l')
+            {
+              ret = w25_write_program();
+              if (ret < 0)
+                {
+                  /* Assume that the program in FLASH has been corrupted. */
+
+                  disable = true;
+                }
+            }
+          else /* if (ret == 'B' || ret == 'b' || ret == '\0') */
+            {
+              ret = w25_boot_program();
+
+              /* Shouldn't get here unless the FLASH content is bad */
+
+              UNUSED(ret);
+              disable = true;
+            }
         }
+
+      /* Check for a failure */
 
       if (ret < 0)
         {
-          fprintf(stderr, "ERROR:  Operation failed: %d\n", ret);
+          fprintf(stderr, "ERROR: Operation failed: %d\n", ret);
         }
     }
 
