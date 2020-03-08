@@ -74,10 +74,10 @@ struct z16f_spi_s
   /* Debug stuff */
 
 #ifdef CONFIG_Z16F_ESPI_REGDEBUG
-   bool wr;                    /* Last was a write */
-   uint16_t regval;            /* Last value */
-   int ntimes;                 /* Number of times */
-   uintptr_t regaddr;          /* Last address */
+  bool wr;                    /* Last was a write */
+  uint16_t regval;            /* Last value */
+  int ntimes;                 /* Number of times */
+  uintptr_t regaddr;          /* Last address */
 #endif
 };
 
@@ -112,17 +112,19 @@ static void     spi_flush(FAR struct z16f_spi_s *priv);
 /* SPI methods */
 
 static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency);
 static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
-static void     spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                   FAR void *rxbuffer, size_t nwords);
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
+static void     spi_exchange(FAR struct spi_dev_s *dev,
+                             FAR const void *txbuffer, FAR void *rxbuffer,
+                             size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
 static void     spi_sndblock(FAR struct spi_dev_s *dev,
-                   FAR const void *buffer, size_t nwords);
+                             FAR const void *buffer, size_t nwords);
 static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
-                   size_t nwords);
+                              size_t nwords);
 #endif
 
 /****************************************************************************
@@ -185,8 +187,8 @@ static struct z16f_spi_s g_espi;
  ****************************************************************************/
 
 #ifdef CONFIG_Z16F_ESPI_REGDEBUG
-static bool spi_checkreg(FAR struct z16f_spi_s *priv, bool wr, uint16_t regval,
-                         uintptr_t regaddr)
+static bool spi_checkreg(FAR struct z16f_spi_s *priv, bool wr,
+                         uint16_t regval, uintptr_t regaddr)
 {
   if (wr      == priv->wr &&      /* Same kind of access? */
       regval  == priv->regval &&  /* Same value? */
@@ -398,7 +400,8 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency)
 {
   FAR struct z16f_spi_s *priv = (FAR struct z16f_spi_s *)dev;
   uint32_t actual;
@@ -580,7 +583,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   uint8_t txbyte;
   uint8_t rxbyte;
@@ -595,7 +598,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   spi_exchange(dev, &txbyte, &rxbyte, 1);
 
   spiinfo("Sent %02x received %02x\n", txbyte, rxbyte);
-  return (uint16_t)rxbyte;
+  return (uint32_t)rxbyte;
 }
 
 /****************************************************************************
@@ -663,7 +666,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
    *   Save the final byte.
    */
 
-  for ( ; nwords > 0; nwords--)
+  for (; nwords > 0; nwords--)
     {
       /* Get the data to send (0xff if there is no data source). */
 
@@ -745,10 +748,10 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into
- *            uint16_t's
+ *            of words.  The wordsize is determined by the number of
+ *            bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *            the data is packed into uint8_t's; if nbits >8, the data is
+ *            packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -803,8 +806,8 @@ FAR struct spi_dev_s *z16_spibus_initialize(int port)
       priv->spi.ops = &g_epsiops;
       nxsem_init(&priv->exclsem, 0, 1);
 
-      /* Set up the SPI pin configuration (board-specific logic is required to
-       * configure and manage all chip selects).
+      /* Set up the SPI pin configuration (board-specific logic is required
+       * to configure and manage all chip selects).
        *
        *   SCK  - PC3, Alternate function 1
        *   MOSI - PC4, Alternate function 1
@@ -824,14 +827,16 @@ FAR struct spi_dev_s *z16_spibus_initialize(int port)
       spi_putreg8(priv, 0x00, Z16F_ESPI_CTL);    /* Disabled the ESPI */
       spi_putreg8(priv, 0x00, Z16F_ESPI_DCR);    /* Disabled slave select; clear TEOF */
 
-      regval = Z16F_ESPI_MODE_SSIO | Z16F_ESPI_MODE_NUMBITS_8BITS | Z16F_ESPI_MODE_SSMD_SPI;
+      regval = Z16F_ESPI_MODE_SSIO | Z16F_ESPI_MODE_NUMBITS_8BITS |
+               Z16F_ESPI_MODE_SSMD_SPI;
       spi_putreg8(priv, regval, Z16F_ESPI_MODE); /* SPI mode, 8-bit */
 
-      regval = Z16F_ESPI_CTL_ESPIEN0 | Z16F_ESPI_CTL_MMEN | Z16F_ESPI_CTL_ESPIEN1;
+      regval = Z16F_ESPI_CTL_ESPIEN0 | Z16F_ESPI_CTL_MMEN |
+               Z16F_ESPI_CTL_ESPIEN1;
       spi_putreg8(priv, 0x00, Z16F_ESPI_CTL);    /* TX/RX mode, Master mode */
 
-      /* Make sure that we are all in agreement about the configuration and set
-       * the BRG for 400KHz operation.
+      /* Make sure that we are all in agreement about the configuration and
+       * set the BRG for 400KHz operation.
        */
 
       spi_setfrequency(&priv->spi, 400000);

@@ -74,7 +74,7 @@ static int    spi_lock(FAR struct spi_dev_s *dev, bool lock);
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
                 uint32_t frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
 static void   spi_exchange(FAR struct spi_dev_s *dev,
                 FAR const void *txbuffer, FAR void *rxbuffer,
@@ -405,7 +405,7 @@ static int spi_transfer(uint8_t chout, FAR uint8_t *chin)
  *
  ****************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   uint8_t response;
   int ret;
@@ -414,11 +414,11 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   if (ret < 0)
     {
       spierr("ERROR: spi_transfer returned %d\n", ret);
-      return (uint16_t)0xff;
+      return (uint32_t)0xff;
     }
 
   spiinfo("cmd: %04x resp: %02x\n", wd, response);
-  return (uint16_t)response;
+  return (uint32_t)response;
 }
 
 /****************************************************************************

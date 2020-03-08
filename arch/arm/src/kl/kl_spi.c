@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/kl/kl_spi.c
  *
- *   Copyright (C) 2013, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,35 +75,38 @@ struct kl_spidev_s
   uint8_t          mode;       /* Mode 0,1,2,3 */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Helpers */
 
-static inline uint8_t spi_getreg(FAR struct kl_spidev_s *priv, uint8_t offset);
+static inline uint8_t spi_getreg(FAR struct kl_spidev_s *priv,
+                                 uint8_t offset);
 static inline void spi_putreg(FAR struct kl_spidev_s *priv, uint8_t offset,
                               uint8_t value);
 
 /* SPI methods */
 
-static int         spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
-static void        spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
-static void        spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                                FAR void *rxbuffer, size_t nwords);
+static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency);
+static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
+static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
+static void     spi_exchange(FAR struct spi_dev_s *dev,
+                             FAR const void *txbuffer, FAR void *rxbuffer,
+                             size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
-static void        spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                                size_t nwords);
-static void        spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
-                                 size_t nwords);
+static void     spi_sndblock(FAR struct spi_dev_s *dev,
+                             FAR const void *txbuffer, size_t nwords);
+static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
+                              size_t nwords);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_KL_SPI0
 static const struct spi_ops_s g_spi0ops =
@@ -132,7 +135,10 @@ static const struct spi_ops_s g_spi0ops =
 
 static struct kl_spidev_s g_spi0dev =
 {
-  .spidev            = { &g_spi0ops },
+  .spidev            =
+    {
+      &g_spi0ops
+    },
   .spibase           = KL_SPI0_BASE,
 };
 #endif
@@ -161,7 +167,10 @@ static const struct spi_ops_s g_spi1ops =
 
 static struct kl_spidev_s g_spi1dev =
 {
-  .spidev            = { &g_spi1ops },
+  .spidev            =
+    {
+      &g_spi1ops
+    },
   .spibase           = KL_SPI1_BASE,
 };
 #endif
@@ -170,7 +179,7 @@ static struct kl_spidev_s g_spi1dev =
  * Private Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_getreg
  *
  * Description:
@@ -183,14 +192,15 @@ static struct kl_spidev_s g_spi1dev =
  * Returned Value:
  *   The contents of the 16-bit register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline uint8_t spi_getreg(FAR struct kl_spidev_s *priv, uint8_t offset)
+static inline uint8_t spi_getreg(FAR struct kl_spidev_s *priv,
+                                 uint8_t offset)
 {
   return getreg8(priv->spibase + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_putreg
  *
  * Description:
@@ -204,7 +214,7 @@ static inline uint8_t spi_getreg(FAR struct kl_spidev_s *priv, uint8_t offset)
  * Returned Value:
  *   The contents of the 16-bit register
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void spi_putreg(FAR struct kl_spidev_s *priv, uint8_t offset,
                               uint8_t value)
@@ -212,7 +222,7 @@ static inline void spi_putreg(FAR struct kl_spidev_s *priv, uint8_t offset,
   putreg8(value, priv->spibase + offset);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_lock
  *
  * Description:
@@ -231,7 +241,7 @@ static inline void spi_putreg(FAR struct kl_spidev_s *priv, uint8_t offset,
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
@@ -250,7 +260,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_setfrequency
  *
  * Description:
@@ -263,9 +273,10 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  * Returned Value:
  *   Returns the actual frequency selected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency)
 {
   FAR struct kl_spidev_s *priv = (FAR struct kl_spidev_s *)dev;
   uint32_t divisor;
@@ -287,19 +298,23 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
    * divisor in the range {2, 4, 8, 16, 32, 64, 128, 256, or 512).
    *
    *
-   * BaudRateDivisor = (SPPR + 1) × 2^(SPR + 1)
+   * BaudRateDivisor = (SPPR + 1) Ã— 2^(SPR + 1)
    * BaudRate = BusClock / BaudRateDivisor
    *
    * The strategy is to pick the smallest divisor that yields an in-range
-   * solution.  I am not sure if this *always* results in an optimal solution.
-   * But consider, for example, with a 24Mhz bus clock and a target of 400KHz
+   * solution.  I am not sure if this *always* results in an optimal
+   * solution.  But consider, for example, with a 24Mhz bus clock and a
+   * target of 400KHz
    *
    *   target divisor is 24,000,000 / 400,000 = 60
    *   spr = 1 -> sppr = 60 / (1 << 1) = 30 -> out of range
    *   spr = 2 -> sppr = 60 / (1 << 2) = 15 -> out of range
-   *   spr = 3 -> sppr = 60 / (1 << 3) = 7  -> actual = 24000000 / 7 * 8 = 428571
-   *   spr = 4 -> sppr = 60 / (1 << 4) = 3  -> actual = 24000000 / 3 * 16 = 500000
-   *   spr = 5 -> sppr = 60 / (1 << 5) = 1  -> actual = 24000000 / 1 * 32 = 750000
+   *   spr = 3 -> sppr = 60 / (1 << 3) = 7  -> actual = 24000000 / 7 * 8
+   *       = 428571
+   *   spr = 4 -> sppr = 60 / (1 << 4) = 3  -> actual = 24000000 / 3 * 16
+   *       = 500000
+   *   spr = 5 -> sppr = 60 / (1 << 5) = 1  -> actual = 24000000 / 1 * 32
+   *       = 750000
    */
 
   divisor = BOARD_BUSCLK_FREQ / frequency;
@@ -323,7 +338,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
   /* Write the new dividers to the BR register */
 
-  spi_putreg(priv, KL_SPI_BR_OFFSET, SPI_BR_SPR_DIV(spr) | SPI_BR_SPPR(sppr));
+  spi_putreg(priv, KL_SPI_BR_OFFSET, SPI_BR_SPR_DIV(spr) |
+             SPI_BR_SPPR(sppr));
 
   /* Calculate the actual divisor and frequency */
 
@@ -339,7 +355,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   return actual;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_setmode
  *
  * Description:
@@ -352,7 +368,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
  * Returned Value:
  *   Returns the actual frequency selected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
@@ -400,7 +416,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_setbits
  *
  * Description:
@@ -413,7 +429,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
@@ -422,7 +438,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   DEBUGASSERT(nbits == 8);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_send
  *
  * Description:
@@ -436,9 +452,9 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  * Returned Value:
  *   response
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   FAR struct kl_spidev_s *priv = (FAR struct kl_spidev_s *)dev;
 
@@ -450,19 +466,19 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   spi_putreg(priv, KL_SPI_D_OFFSET, (uint8_t)wd);
 
-  /* Wait for the SPRF bit in the SPI Status Register to be set to 1. SPRF is set
-   * at the completion of an SPI transfer to indicate that received data may be read
-   * from the SPI data registr
+  /* Wait for the SPRF bit in the SPI Status Register to be set to 1. SPRF
+   * is set at the completion of an SPI transfer to indicate that received
+   * data may be read from the SPI data register
    */
 
   while ((spi_getreg(priv, KL_SPI_S_OFFSET) & SPI_S_SPRF) == 0);
 
   /* Return the data */
 
-  return (uint16_t)spi_getreg(priv, KL_SPI_D_OFFSET);
+  return (uint32_t)spi_getreg(priv, KL_SPI_D_OFFSET);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_exchange
  *
  * Description:
@@ -475,12 +491,13 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *   nwords   - the length of data to be exchaned in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
@@ -542,15 +559,16 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  * Input Parameters:
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
- *   nwords   - the length of data to send from the buffer in number of words.
- *              The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *   nwords   - the length of data to send from the buffer in number of
+ *              words.  The wordsize is determined by the number of
+ *              bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *              the data is packed into uint8_t's; if nbits >8, the data is
+ *              packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
@@ -561,7 +579,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_recvblock
  *
  * Description:
@@ -570,18 +588,20 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  * Input Parameters:
  *   dev      - Device-specific state data
  *   rxbuffer - A pointer to the buffer in which to receive data
- *   nwords   - the length of data that can be received in the buffer in number
- *              of words.  The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *   nwords   - the length of data that can be received in the buffer in
+ *              number of words.  The wordsize is determined by the number of
+ *              bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *              the data is packed into uint8_t's; if nbits >8, the data is
+ *              packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t nwords)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
+                          size_t nwords)
 {
   spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
   return spi_exchange(dev, NULL, rxbuffer, nwords);

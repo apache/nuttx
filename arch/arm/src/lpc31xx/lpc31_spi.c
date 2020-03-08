@@ -1,9 +1,9 @@
-/************************************************************************************
- * arm/arm/src/lpc31xx/lpc31_spi.c
+/****************************************************************************
+ * arch/arm/src/lpc31xx/lpc31_spi.c
  *
- *   Copyright (C) 2009-2010, 2012, 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: David Hewson, deriving in part from other SPI drivers originally by
- *           Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2009-2017 Gregory Nutt. All rights reserved.
+ *   Author: David Hewson, deriving in part from other SPI drivers
+ *           originally by Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,11 +32,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -55,13 +55,14 @@
 #include "lpc31_spi.h"
 #include "lpc31_ioconfig.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
 
-/* Debug ****************************************************************************/
+/* Debug ********************************************************************/
+
 /* CONFIG_LPC31_SPI_REGDEBUG enabled very low, register-level debug output.
  * CONFIG_DEBUG_FEATURES must also be defined
  */
@@ -70,18 +71,18 @@
 #  undef CONFIG_LPC31_SPI_REGDEBUG
 #endif
 
-/* FIFOs ****************************************************************************/
+/* FIFOs ********************************************************************/
 
 #define SPI_FIFO_DEPTH  64    /* 64 words deep (8- or 16-bit words) */
 
-/* Timing ***************************************************************************/
+/* Timing *******************************************************************/
 
 #define SPI_MAX_DIVIDER 65024 /* = 254 * (255 + 1) */
 #define SPI_MIN_DIVIDER 2
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 struct lpc31_spidev_s
 {
@@ -96,9 +97,9 @@ struct lpc31_spidev_s
   uint32_t         slv2;
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_LPC31_SPI_REGDEBUG
 static bool        spi_checkreg(bool wr, uint32_t value, uint32_t address);
@@ -109,31 +110,37 @@ static uint32_t    spi_getreg(uint32_t address);
 #  define spi_getreg(a)   getreg32(a)
 #endif
 
-static inline void spi_drive_cs(FAR struct lpc31_spidev_s *priv, uint8_t slave, uint8_t val);
-static inline void spi_select_slave(FAR struct lpc31_spidev_s *priv, uint8_t slave);
-static inline uint16_t spi_readword(FAR struct lpc31_spidev_s *priv);
-static inline void spi_writeword(FAR struct lpc31_spidev_s *priv, uint16_t word);
+static inline void spi_drive_cs(FAR struct lpc31_spidev_s *priv,
+                                uint8_t slave, uint8_t val);
+static inline void spi_select_slave(FAR struct lpc31_spidev_s *priv,
+                                    uint8_t slave);
+static inline uint32_t spi_readword(FAR struct lpc31_spidev_s *priv);
+static inline void spi_writeword(FAR struct lpc31_spidev_s *priv,
+                                 uint32_t word);
 
 static int         spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void        spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
-static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
-static void        spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
+static void        spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+                              bool selected);
+static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev,
+                                    uint32_t frequency);
+static void        spi_setmode(FAR struct spi_dev_s *dev,
+                               enum spi_mode_e mode);
 static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint8_t     spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
-static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t word);
-static void        spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                                FAR void *rxbuffer, size_t nwords);
-#ifndef CONFIG_SPI_EXCHANGE
-static void        spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+static uint32_t    spi_send(FAR struct spi_dev_s *dev, uint32_t word);
+static void        spi_exchange(FAR struct spi_dev_s *dev,
+                                FAR const void *txbuffer, FAR void *rxbuffer,
                                 size_t nwords);
-static void        spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
-                                 size_t nwords);
+#ifndef CONFIG_SPI_EXCHANGE
+static void        spi_sndblock(FAR struct spi_dev_s *dev,
+                                FAR const void *txbuffer, size_t nwords);
+static void        spi_recvblock(FAR struct spi_dev_s *dev,
+                                 FAR void *rxbuffer, size_t nwords);
 #endif
 
-
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 static const struct spi_ops_s g_spiops =
 {
@@ -161,7 +168,10 @@ static const struct spi_ops_s g_spiops =
 
 static struct lpc31_spidev_s g_spidev =
 {
-  .spidev            = { &g_spiops },
+  .spidev            =
+    {
+      &g_spiops
+    },
 };
 
 #ifdef CONFIG_LPC31_SPI_REGDEBUG
@@ -171,13 +181,13 @@ static uint32_t g_valuelast;
 static int      g_ntimes;
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: spi_checkreg
@@ -215,6 +225,7 @@ static bool spi_checkreg(bool wr, uint32_t value, uint32_t address)
       g_addresslast = address;
       g_ntimes      = 0;
     }
+
   return true;
 }
 #endif
@@ -241,6 +252,7 @@ static void spi_putreg(uint32_t value, uint32_t address)
     {
       spiinfo("%08x<-%08x\n", address, value);
     }
+
   putreg32(value, address);
 }
 #endif
@@ -267,6 +279,7 @@ static uint32_t spi_getreg(uint32_t address)
     {
       spiinfo("%08x->%08x\n", address, value);
     }
+
   return value;
 }
 #endif
@@ -287,7 +300,8 @@ static uint32_t spi_getreg(uint32_t address)
  *
  ****************************************************************************/
 
-static inline void spi_drive_cs(FAR struct lpc31_spidev_s *priv, uint8_t slave, uint8_t val)
+static inline void spi_drive_cs(FAR struct lpc31_spidev_s *priv,
+                                uint8_t slave, uint8_t val)
 {
   switch (slave)
     {
@@ -300,31 +314,40 @@ static inline void spi_drive_cs(FAR struct lpc31_spidev_s *priv, uint8_t slave, 
         {
           spi_putreg(IOCONFIG_SPI_CSOUT0, LPC31_IOCONFIG_SPI_MODE0SET);
         }
+
       spi_putreg(IOCONFIG_SPI_CSOUT0, LPC31_IOCONFIG_SPI_MODE1SET);
       break;
 
     case 1:
       if (val == 0)
         {
-          spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN, LPC31_IOCONFIG_EBII2STX0_MODE0RESET);
+          spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN,
+                     LPC31_IOCONFIG_EBII2STX0_MODE0RESET);
         }
       else
         {
-          spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN, LPC31_IOCONFIG_EBII2STX0_MODE0SET);
+          spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN,
+                     LPC31_IOCONFIG_EBII2STX0_MODE0SET);
         }
-      spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN, LPC31_IOCONFIG_EBII2STX0_MODE1SET);
+
+      spi_putreg(IOCONFIG_EBII2STX0_MUARTCTSN,
+                 LPC31_IOCONFIG_EBII2STX0_MODE1SET);
       break;
 
     case 2:
       if (val == 0)
         {
-          spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN, LPC31_IOCONFIG_EBII2STX0_MODE0RESET);
+          spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN,
+                     LPC31_IOCONFIG_EBII2STX0_MODE0RESET);
         }
       else
         {
-          spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN, LPC31_IOCONFIG_EBII2STX0_MODE0SET);
+          spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN,
+                     LPC31_IOCONFIG_EBII2STX0_MODE0SET);
         }
-      spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN, LPC31_IOCONFIG_EBII2STX0_MODE1SET);
+
+      spi_putreg(IOCONFIG_EBII2STX0_MUARTRTSN,
+                 LPC31_IOCONFIG_EBII2STX0_MODE1SET);
       break;
     }
 }
@@ -344,7 +367,8 @@ static inline void spi_drive_cs(FAR struct lpc31_spidev_s *priv, uint8_t slave, 
  *
  ****************************************************************************/
 
-static inline void spi_select_slave(FAR struct lpc31_spidev_s *priv, uint8_t slave)
+static inline void spi_select_slave(FAR struct lpc31_spidev_s *priv,
+                                    uint8_t slave)
 {
   switch (slave)
     {
@@ -368,7 +392,7 @@ static inline void spi_select_slave(FAR struct lpc31_spidev_s *priv, uint8_t sla
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_readword
  *
  * Description:
@@ -380,9 +404,9 @@ static inline void spi_select_slave(FAR struct lpc31_spidev_s *priv, uint8_t sla
  * Returned Value:
  *   Byte as read
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline uint16_t spi_readword(FAR struct lpc31_spidev_s *priv)
+static inline uint32_t spi_readword(FAR struct lpc31_spidev_s *priv)
 {
   /* Wait until the RX FIFO is not empty */
 
@@ -390,10 +414,10 @@ static inline uint16_t spi_readword(FAR struct lpc31_spidev_s *priv)
 
   /* Then return the received word */
 
-  return (uint16_t)spi_getreg(LPC31_SPI_FIFODATA);
+  return spi_getreg(LPC31_SPI_FIFODATA);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_writeword
  *
  * Description:
@@ -406,9 +430,10 @@ static inline uint16_t spi_readword(FAR struct lpc31_spidev_s *priv)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static inline void spi_writeword(FAR struct lpc31_spidev_s *priv, uint16_t word)
+static inline void spi_writeword(FAR struct lpc31_spidev_s *priv,
+                                 uint32_t word)
 {
   /* Wait until the TX FIFO is not full */
 
@@ -475,13 +500,16 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
+static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+                       bool selected)
 {
   struct lpc31_spidev_s *priv = (struct lpc31_spidev_s *) dev;
   uint8_t slave = 0;
 
   /* FIXME: map the devid to the SPI slave - this should really
-   * be in board specific code..... */
+   * be in board specific code.....
+   */
+
   switch (devid)
     {
     case SPIDEV_FLASH(0):
@@ -513,7 +541,9 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
 
       /* Enable SPI as master and notify of slave enables change */
 
-      spi_putreg((1 << SPI_CONFIG_INTERSLVDELAY_SHIFT) | SPI_CONFIG_UPDENABLE | SPI_CONFIG_SPIENABLE, LPC31_SPI_CONFIG);
+      spi_putreg((1 << SPI_CONFIG_INTERSLVDELAY_SHIFT) |
+                 SPI_CONFIG_UPDENABLE | SPI_CONFIG_SPIENABLE,
+                 LPC31_SPI_CONFIG);
   }
   else
   {
@@ -529,7 +559,7 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
   }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_setfrequency
  *
  * Description:
@@ -542,17 +572,22 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected)
  * Returned Value:
  *   Returns the actual frequency selected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency)
 {
   FAR struct lpc31_spidev_s *priv = (FAR struct lpc31_spidev_s *)dev;
-  uint32_t spi_clk, div, div1, div2;
+  uint32_t spi_clk;
+  uint32_t div;
+  uint32_t div1;
+  uint32_t div2;
 
   if (priv->frequency != frequency)
     {
       /* The SPI clock is derived from the (main system oscillator / 2),
-       * so compute the best divider from that clock */
+       * so compute the best divider from that clock
+       */
 
       spi_clk = lpc31_clkfreq(CLKID_SPICLK, DOMAINID_SPI);
 
@@ -569,10 +604,13 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
           div = SPI_MIN_DIVIDER;
         }
 
-      div2 = (((div-1) / 512) + 2) * 2;
+      div2 = (((div - 1) / 512) + 2) * 2;
       div1 = ((((div + div2 / 2) / div2) - 1));
 
-      priv->slv1 = (priv->slv1 & ~(SPI_SLV_1_CLKDIV2_MASK | SPI_SLV_1_CLKDIV1_MASK)) | (div2 << SPI_SLV_1_CLKDIV2_SHIFT) | (div1 << SPI_SLV_1_CLKDIV1_SHIFT);
+      priv->slv1 = (priv->slv1 & ~(SPI_SLV_1_CLKDIV2_MASK |
+                    SPI_SLV_1_CLKDIV1_MASK)) |
+                    (div2 << SPI_SLV_1_CLKDIV2_SHIFT) |
+                    (div1 << SPI_SLV_1_CLKDIV1_SHIFT);
 
       priv->frequency = frequency;
       priv->actual    = frequency;                /* FIXME */
@@ -581,7 +619,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   return priv->actual;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_setmode
  *
  * Description:
@@ -594,7 +632,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
  * Returned Value:
  *   Returns the actual frequency selected
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
@@ -639,7 +677,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_setbits
  *
  * Description:
@@ -652,7 +690,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
@@ -662,7 +700,8 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 
   if (nbits != priv->nbits)
     {
-      priv->slv2  = (priv->slv2 & ~SPI_SLV_2_WDSIZE_MASK) | ((nbits-1) << SPI_SLV_2_WDSIZE_SHIFT);
+      priv->slv2  = (priv->slv2 & ~SPI_SLV_2_WDSIZE_MASK) |
+                    ((nbits - 1) << SPI_SLV_2_WDSIZE_SHIFT);
       priv->nbits = nbits;
     }
 }
@@ -685,12 +724,13 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   /* FIXME: is there anyway to determine this
-   *        it should probably be board dependent anyway */
+   *        it should probably be board dependent anyway
+   */
 
   return SPI_STATUS_PRESENT;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_send
  *
  * Description:
@@ -704,9 +744,9 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
  * Returned Value:
  *   response
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t word)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t word)
 {
   FAR struct lpc31_spidev_s *priv = (FAR struct lpc31_spidev_s *)dev;
   DEBUGASSERT(priv);
@@ -728,12 +768,13 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t word)
  *   nwords   - the length of data to be exchaned in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
@@ -767,8 +808,9 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
               /* Then send the word */
 
-              spi_writeword(priv, word);
+              spi_writeword(priv, (uint32_t)word);
             }
+
           nwords -= maxtx;
 
           /* Then empty the RX FIFO */
@@ -807,8 +849,9 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
               /* Then send the word */
 
-              spi_writeword(priv, (uint16_t)word);
+              spi_writeword(priv, (uint32_t)word);
             }
+
           nwords -= maxtx;
 
           /* Then empty the RX FIFO */
@@ -837,24 +880,26 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  * Input Parameters:
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
- *   nwords   - the length of data to send from the buffer in number of words.
- *              The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *   nwords   - the length of data to send from the buffer in number of
+ *              words.  The wordsize is determined by the number of
+ *              bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *              the data is packed into uint8_t's; if nbits >8, the data is
+ *              packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, size_t nwords)
+static void spi_sndblock(FAR struct spi_dev_s *dev,
+                         FAR const void *txbuffer, size_t nwords)
 {
   return spi_exchange(dev, txbuffer, NULL, nwords);
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: spi_recvblock
  *
  * Description:
@@ -863,28 +908,30 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer, si
  * Input Parameters:
  *   dev      - Device-specific state data
  *   rxbuffer - A pointer to the buffer in which to receive data
- *   nwords   - the length of data that can be received in the buffer in number
- *              of words.  The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *   nwords   - the length of data that can be received in the buffer in
+ *              number of words.  The wordsize is determined by the number of
+ *              bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *              the data is packed into uint8_t's; if nbits >8, the data is
+ *              packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t nwords)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
+                          size_t nwords)
 {
   return spi_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc31_spibus_initialize
  *
  * Description:
@@ -896,7 +943,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t 
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct spi_dev_s *lpc31_spibus_initialize(int port)
 {
