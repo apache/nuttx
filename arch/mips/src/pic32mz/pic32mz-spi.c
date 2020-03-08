@@ -228,7 +228,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
                    uint32_t frequency);
 static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 static void     spi_exchange(FAR struct spi_dev_s *dev,
                              FAR const void *txbuffer, FAR void *rxbuffer,
                              size_t nwords);
@@ -1058,8 +1058,8 @@ static void spi_exchange8(FAR struct pic32mz_dev_s *priv,
       spi_putreg(priv, PIC32MZ_SPI_BUF_OFFSET, (uint32_t)data);
 
 #ifdef CONFIG_PIC32MZ_SPI_ENHBUF
-      /* Wait for the SPIRBE bit in the SPI Status Register to be set to 0. In
-       * enhanced buffer mode, the SPIRBE bit will be cleared in  when the
+      /* Wait for the SPIRBE bit in the SPI Status Register to be set to 0.
+       * In enhanced buffer mode, the SPIRBE bit will be cleared in  when the
        * receive buffer is not empty.
        */
 
@@ -1132,8 +1132,8 @@ static void spi_exchange16(FAR struct pic32mz_dev_s *priv,
       spi_putreg(priv, PIC32MZ_SPI_BUF_OFFSET, (uint32_t)data);
 
 #ifdef CONFIG_PIC32MZ_SPI_ENHBUF
-      /* Wait for the SPIRBE bit in the SPI Status Register to be set to 0. In
-       * enhanced buffer mode, the SPIRBE bit will be cleared in  when the
+      /* Wait for the SPIRBE bit in the SPI Status Register to be set to 0.
+       * In enhanced buffer mode, the SPIRBE bit will be cleared in  when the
        * receive buffer is not empty.
        */
 
@@ -1308,10 +1308,10 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
        *
        *   CPOL=0: The inactive value of the clock is zero
        *   CPOL=1: The inactive value of the clock is one
-       *   CPHA=0: Data is captured on the clock's inactive-to-active edge and
-       *           data is propagated on a active-to-inactive edge.
-       *   CPHA=1: Data is captured on the clock's active-to-inactive edge and
-       *           data is propagated on a active-to-inactive edge.
+       *   CPHA=0: Data is captured on the clock's inactive-to-active edge
+       *           and data is propagated on a active-to-inactive edge.
+       *   CPHA=1: Data is captured on the clock's active-to-inactive edge
+       *           and data is propagated on a active-to-inactive edge.
        *
        * CON Register mapping:
        *   CPOL=0 corresponds to CON:CKP=0; CPOL=1 corresponds to CON:CKP=1
@@ -1434,7 +1434,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   FAR struct pic32mz_dev_s *priv = (FAR struct pic32mz_dev_s *)dev;
 
@@ -1456,7 +1456,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
       spi_exchange16(priv, &txword, &rxword, 1);
 
       spiinfo("Sent %04x received %04x\n", txword, rxword);
-      return rxword;
+      return (uint32_t)rxword;
     }
   else
     {
@@ -1470,7 +1470,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
       spi_exchange8(priv, &txbyte, &rxbyte, 1);
 
       spiinfo("Sent %02x received %02x\n", txbyte, rxbyte);
-      return (uint16_t)rxbyte;
+      return (uint32_t)rxbyte;
     }
 }
 
@@ -1837,8 +1837,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     }
   else
     {
-      up_invalidate_dcache((uintptr_t)dummy,
-                           (uintptr_t)dummy + CONFIG_PIC32MZ_SPI_DMABUFFSIZE);
+      up_invalidate_dcache((uintptr_t)dummy, (uintptr_t)dummy +
+                           CONFIG_PIC32MZ_SPI_DMABUFFSIZE);
     }
 }
 #endif /* CONFIG_PIC32MZ_SPI_DMA */

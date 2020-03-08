@@ -1,5 +1,5 @@
-/***************************************************************************
- * arm/arm/src/stm32h7/stm32_tim.c
+/****************************************************************************
+ * arch/arm/src/stm32h7/stm32_tim.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
@@ -64,9 +64,9 @@
 #include "stm32_gpio.h"
 #include "stm32_tim.h"
 
-/***************************************************************************
+/****************************************************************************
  * Private Types
- ***************************************************************************/
+ ****************************************************************************/
 
 /* Configuration ************************************************************/
 
@@ -274,19 +274,23 @@ struct stm32_tim_priv_s
 
 /* Timer methods */
 
-static int  stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t mode);
-static int  stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev, uint32_t freq);
+static int  stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev,
+                              stm32_tim_mode_t mode);
+static int  stm32_tim_setclock(FAR struct stm32_tim_dev_s *dev,
+                               uint32_t freq);
 static void stm32_tim_setperiod(FAR struct stm32_tim_dev_s *dev,
                                 uint32_t period);
-static int  stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
-                                 stm32_tim_channel_t mode);
-static int  stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
-                                 uint32_t compare);
-static int  stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev, uint8_t channel);
+static int  stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev,
+                                 uint8_t channel, stm32_tim_channel_t mode);
+static int  stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev,
+                                 uint8_t channel, uint32_t compare);
+static int  stm32_tim_getcapture(FAR struct stm32_tim_dev_s *dev,
+                                 uint8_t channel);
 static int  stm32_tim_setisr(FAR struct stm32_tim_dev_s *dev, xcpt_t handler,
                              void *arg, int source);
 static void stm32_tim_enableint(FAR struct stm32_tim_dev_s *dev, int source);
-static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev, int source);
+static void stm32_tim_disableint(FAR struct stm32_tim_dev_s *dev,
+                                 int source);
 static void stm32_tim_ackint(FAR struct stm32_tim_dev_s *dev, int source);
 
 /****************************************************************************
@@ -1219,6 +1223,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev,
         break;
 #endif
     }
+
   return OK;
 }
 

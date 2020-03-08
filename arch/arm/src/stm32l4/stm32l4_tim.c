@@ -1,5 +1,5 @@
 /************************************************************************************
- * arm/arm/src/stm32l4/stm32l4_tim.c
+ * arch/arm/src/stm32l4/stm32l4_tim.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
@@ -68,6 +68,7 @@
  ************************************************************************************/
 
 /* Configuration ********************************************************************/
+
 /* Timer devices may be used for different purposes.  Such special purposes include:
  *
  * - To generate modulated outputs for such things as motor control.  If
@@ -208,8 +209,8 @@
 #endif
 #endif
 
-/* This module then only compiles if there are enabled timers that are not intended for
- * some other purpose.
+/* This module then only compiles if there are enabled timers that are not
+ * intended for some other purpose.
  */
 
 #if defined(CONFIG_STM32L4_TIM1)  || defined(CONFIG_STM32L4_TIM2)  || \
@@ -604,7 +605,9 @@ static int stm32l4_tim_setmode(FAR struct stm32l4_tim_dev_s *dev,
 
       case STM32L4_TIM_MODE_UPDOWN:
         val |= ATIM_CR1_CENTER1;
-        // Our default: Interrupts are generated on compare, when counting down
+
+        /* Our default: Interrupts are generated on compare, when counting down */
+
         break;
 
       case STM32L4_TIM_MODE_PULSE:
@@ -892,10 +895,10 @@ static uint32_t stm32l4_tim_getcounter(FAR struct stm32l4_tim_dev_s *dev)
         return counter;
 
       default:
-        return counter & 0x0000FFFF;
+        return counter & 0x0000ffff;
     }
 #else
-  return counter & 0x0000FFFF;
+  return counter & 0x0000ffff;
 #endif
 }
 
@@ -951,7 +954,8 @@ static int stm32l4_tim_setchannel(FAR struct stm32l4_tim_dev_s *dev,
         break;
 
       case STM32L4_TIM_CH_OUTPWM:
-        ccmr_val  =  (ATIM_CCMR_MODE_PWM1 << ATIM_CCMR1_OC1M_SHIFT) + ATIM_CCMR1_OC1PE;
+        ccmr_val  =  (ATIM_CCMR_MODE_PWM1 << ATIM_CCMR1_OC1M_SHIFT) +
+                     ATIM_CCMR1_OC1PE;
         ccer_val |= ATIM_CCER_CC1E << (channel << 2);
         break;
 

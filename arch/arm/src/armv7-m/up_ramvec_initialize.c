@@ -1,5 +1,5 @@
 /****************************************************************************
- * arm/arm/src/armv7-m/up_ramvec_initialize.c
+ * arch/arm/src/armv7-m/up_ramvec_initialize.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -81,14 +81,15 @@
 #endif
 
 /* Alignment ****************************************************************/
+
 /* Per the ARMv7M Architecture reference manual, the NVIC vector table
  * requires 7-bit address alignment (i.e, bits 0-6 of the address of the
  * vector table must be zero).  In this case alignment to a 128 byte address
  * boundary is sufficient.
  *
- * Some parts, such as the LPC17xx/LPC40xx family, require alignment to a 256 byte
- * address boundary.  Any other unusual alignment requirements for the vector
- * can be specified for a given architecture be redefining
+ * Some parts, such as the LPC17xx/LPC40xx family, require alignment to a 256
+ * byte address boundary.  Any other unusual alignment requirements for the
+ * vector can be specified for a given architecture be redefining
  * NVIC_VECTAB_TBLOFF_MASK in the chip-specific chip.h header file for the
  * appropriate mask.
  */

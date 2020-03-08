@@ -96,7 +96,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 static void     spi_setmode(FAR struct spi_dev_s *dev,
                   enum spi_mode_e mode);
 static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 static void     spi_exchange(FAR struct spi_dev_s *dev,
                    FAR const void *txbuffer, FAR void *rxbuffer,
                    size_t nwords);
@@ -308,12 +308,12 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
   DEBUGASSERT(priv && priv->low && priv->low->exchange);
 
-  return priv->low->exchange(priv, wd);
+  return priv->low->exchange(priv, (uint16_t)wd);
 }
 
 /****************************************************************************
@@ -528,7 +528,8 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *spi_create_bitbang(FAR const struct spi_bitbang_ops_s *low)
+FAR struct spi_dev_s *spi_create_bitbang(FAR const struct
+                                         spi_bitbang_ops_s *low)
 {
   FAR struct spi_bitbang_s *priv;
 
