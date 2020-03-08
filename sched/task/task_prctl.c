@@ -92,8 +92,8 @@ int prctl(int option, ...)
           int pid  = va_arg(ap, int);
           FAR struct tcb_s *tcb;
 
-          /* Get the TCB associated with the PID (handling the special case of
-           * pid==0 meaning "this thread")
+          /* Get the TCB associated with the PID (handling the special case
+           * of pid==0 meaning "this thread")
            */
 
           if (pid == 0)
