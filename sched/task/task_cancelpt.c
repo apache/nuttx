@@ -56,8 +56,8 @@
  * mq_timedreceive() putmsg()                 sigsuspend()
  *
  * Each of the above function must call enter_cancellation_point() on entry
- * in order to establish the cancellation point and leave_cancellation_point()
- * on exit.  These functions are described below.
+ * in order to establish the cancellation point and
+ * leave_cancellation_point() on exit.  These functions are described below.
  *
  ****************************************************************************/
 
@@ -151,7 +151,8 @@ bool enter_cancellation_point(void)
           if (tcb->cpcount == 0)
             {
 #ifndef CONFIG_DISABLE_PTHREAD
-              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
+                  TCB_FLAG_TTYPE_PTHREAD)
                 {
                   pthread_exit(PTHREAD_CANCELED);
                 }
@@ -237,7 +238,8 @@ void leave_cancellation_point(void)
           if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
             {
 #ifndef CONFIG_DISABLE_PTHREAD
-              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
+                  TCB_FLAG_TTYPE_PTHREAD)
                 {
                   pthread_exit(PTHREAD_CANCELED);
                 }
