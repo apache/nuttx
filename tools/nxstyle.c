@@ -941,12 +941,15 @@ int main(int argc, char **argv, char **envp)
                       ncomment++;
                     }
 
-                  rhcomment = n;
-                  if (prevrhcmt != 0 && n != prevrhcmt)
+                  if (!strncmp(&line[ii], "define", 6))
                     {
-                      rhcomment = prevrhcmt;
-                      WARN("Wrong column position of comment right of code",
-                          lineno, n);
+                      rhcomment = n;
+                      if (prevrhcmt != 0 && n != prevrhcmt)
+                        {
+                          rhcomment = prevrhcmt;
+                          WARN("Wrong column position of comment right of code",
+                              lineno, n);
+                        }
                     }
                 }
             }
