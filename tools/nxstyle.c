@@ -505,8 +505,8 @@ int main(int argc, char **argv, char **envp)
   bool bblank;          /* Used to verify block comment terminator */
   bool ppline;          /* True: The next line the continuation of a pre-processor command */
   bool bexternc;        /* True: Within 'extern "C"' */
-  int rhcomment;       /* Indentation of Comment to the right of code */
-  int prevrhcmt;       /* Indentation of previous Comment to the right of code */
+  int rhcomment;        /* Indentation of Comment to the right of code */
+  int prevrhcmt;        /* Indentation of previous Comment to the right of code */
   int lineno;           /* Current line number */
   int indent;           /* Indentation level */
   int ncomment;         /* Comment nesting level on this line */
@@ -625,8 +625,8 @@ int main(int argc, char **argv, char **envp)
   bstring        = false; /* True: Within a string */
   ppline         = false; /* True: Continuation of a pre-processor line */
   bexternc       = false; /* True: Within 'extern "C"' */
-  rhcomment     = 0;     /* Indentation of Comment to the right of code */
-  prevrhcmt     = 0;     /* Indentation of previous Comment to the right
+  rhcomment      = 0;     /* Indentation of Comment to the right of code */
+  prevrhcmt      = 0;     /* Indentation of previous Comment to the right
                            * of code */
   lineno         = 0;     /* Current line number */
   ncomment       = 0;     /* Comment nesting level on this line */
@@ -658,7 +658,7 @@ int main(int argc, char **argv, char **envp)
        * comment.
        */
 
-      prevrhcmt   = rhcomment;
+      prevrhcmt = rhcomment;
       if (ncomment <= 0)
         {
           rhcomment = 0;
