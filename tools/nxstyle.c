@@ -505,8 +505,8 @@ int main(int argc, char **argv, char **envp)
   bool bblank;          /* Used to verify block comment terminator */
   bool ppline;          /* True: The next line the continuation of a pre-processor command */
   bool bexternc;        /* True: Within 'extern "C"' */
-  bool brhcomment;      /* True: Comment to the right of code */
-  bool prevbrhcmt;      /* True: previous line had comment to the right of code */
+  int rhcomment;       /* Indentation of Comment to the right of code */
+  int prevrhcmt;       /* Indentation of previous Comment to the right of code */
   int lineno;           /* Current line number */
   int indent;           /* Indentation level */
   int ncomment;         /* Comment nesting level on this line */
@@ -625,8 +625,8 @@ int main(int argc, char **argv, char **envp)
   bstring        = false; /* True: Within a string */
   ppline         = false; /* True: Continuation of a pre-processor line */
   bexternc       = false; /* True: Within 'extern "C"' */
-  brhcomment     = false; /* True: Comment to the right of code */
-  prevbrhcmt     = false; /* True: Previous line had comment to the right
+  rhcomment     = 0;     /* Indentation of Comment to the right of code */
+  prevrhcmt     = 0;     /* Indentation of previous Comment to the right
                            * of code */
   lineno         = 0;     /* Current line number */
   ncomment       = 0;     /* Comment nesting level on this line */
@@ -658,10 +658,10 @@ int main(int argc, char **argv, char **envp)
        * comment.
        */
 
-      prevbrhcmt   = brhcomment;
+      prevrhcmt   = rhcomment;
       if (ncomment <= 0)
         {
-          brhcomment = false;
+          rhcomment = 0;
         }
 
       /* Check for a blank line */
@@ -707,7 +707,7 @@ int main(int argc, char **argv, char **envp)
                * a comment.  Generally it is acceptable for one comment to
                * follow another with no space separation.
                *
-               * REVISIT: prevbrhcmt is tested to case the preceding line
+               * REVISIT: prevrhcmt is tested to case the preceding line
                * contained comments to the right of the code.  In such cases,
                * the comments are normally aligned and do not follow normal
                * indentation rules.  However, this code will generate a false
@@ -715,7 +715,7 @@ int main(int argc, char **argv, char **envp)
                * preceding line has no comment.
                */
 
-              if (line[n] != '}' && line[n] != '#' && !prevbrhcmt)
+              if (line[n] != '}' && line[n] != '#' && !prevrhcmt)
                 {
                    ERROR("Missing blank line after comment", comment_lineno,
                          1);
@@ -915,21 +915,23 @@ int main(int argc, char **argv, char **envp)
 
           ppline = (line[len] == '\\');
 
+          /* Propagate rhcomment over preprocessor lines Issue #120 */
+
+          rhcomment = prevrhcmt;
+
           if (!ppline)
             {
               lptr = strstr(line, "/*");
               if (lptr != NULL)
                 {
-                  lptr += 2;
-                  if (*lptr == '\n')
+                  n = lptr - &line[0];
+                  if (line[n + 2] == '\n')
                     {
-                      ERROR("C comment opening on separate line",
-                          lineno, lptr - &line[0]);
+                      ERROR("C comment opening on separate line", lineno, n);
                     }
-                  else if (!isspace((int)*lptr))
+                  else if (!isspace((int)line[n + 2]) && line[n + 2] != '*')
                     {
-                      ERROR("Missing space after opening C comment",
-                          lineno, lptr - &line[0]);
+                       ERROR("Missing space after opening C comment", lineno, n);
                     }
 
                   if (strstr(lptr, "*/") == NULL)
@@ -937,7 +939,14 @@ int main(int argc, char **argv, char **envp)
                       /* Increment the count of nested comments */
 
                       ncomment++;
-                      brhcomment = true;
+                    }
+
+                  rhcomment = n;
+                  if (prevrhcmt != 0 && n != prevrhcmt)
+                    {
+                      rhcomment = prevrhcmt;
+                      WARN("Wrong column position of comment right of code",
+                          lineno, n);
                     }
                 }
             }
@@ -956,11 +965,11 @@ int main(int argc, char **argv, char **envp)
             {
               /* If preceding comments were to the right of code, then we can
                * assume that there is a columnar alignment of columns that do
-               * no follow the usual alignment.  So the brhcomment flag
+               * no follow the usual alignment.  So the rhcomment flag
                * should propagate.
                */
 
-              brhcomment = prevbrhcmt;
+              rhcomment = prevrhcmt;
 
               /* Check if there should be a blank line before the comment */
 
@@ -968,7 +977,7 @@ int main(int argc, char **argv, char **envp)
                   comment_lineno != lineno - 1 &&
                   blank_lineno   != lineno - 1 &&
                   noblank_lineno != lineno - 1 &&
-                  !brhcomment)
+                  rhcomment == 0)
                 {
                   /* TODO:  This generates a false alarm if preceded
                    * by a label.
@@ -1388,11 +1397,27 @@ int main(int argc, char **argv, char **envp)
                    * this must be a comment to the right of code.
                    * Also if preceding comments were to the right of code, then
                    * we can assume that there is a columnar alignment of columns
-                   * that do no follow the usual alignment.  So the brhcomment
+                   * that do no follow the usual alignment.  So the rhcomment
                    * flag should propagate.
                    */
 
-                  brhcomment = ((n != indent) || prevbrhcmt);
+                  if (prevrhcmt == 0)
+                    {
+                      if (n != indent)
+                        {
+                          rhcomment = n;
+                        }
+                    }
+                  else
+                    {
+                      rhcomment = n;
+                      if (n != prevrhcmt)
+                        {
+                          rhcomment = prevrhcmt;
+                          WARN("Wrong column position of comment right of code",
+                              lineno, n);
+                        }
+                    }
 
                   n++;
                   continue;
@@ -1418,7 +1443,7 @@ int main(int argc, char **argv, char **envp)
                    * not blank up to the point where the comment was closed.
                    */
 
-                  if (prevncomment > 0 && !bblank && !brhcomment)
+                  if (prevncomment > 0 && !bblank && rhcomment == 0)
                     {
                        ERROR("Block comment terminator must be on a "
                               "separate line", lineno, n);
@@ -1453,7 +1478,7 @@ int main(int argc, char **argv, char **envp)
 
                           comment_lineno = lineno;
 
-                          /* Note that brhcomment must persist to support a
+                          /* Note that rhcomment must persist to support a
                            * later test for comment alignment.  We will fix
                            * that at the top of the loop when ncomment == 0.
                            */
@@ -1461,7 +1486,7 @@ int main(int argc, char **argv, char **envp)
                     }
                   else
                     {
-                      /* Note that brhcomment must persist to support a later
+                      /* Note that rhcomment must persist to support a later
                        * test for comment alignment.  We will will fix that
                        * at the top of the loop when ncomment == 0.
                        */
@@ -2211,7 +2236,7 @@ int main(int argc, char **argv, char **envp)
                * already incremented above.
                */
 
-              if (ncomment > 1 || !brhcomment)
+              if (ncomment > 1 || rhcomment == 0)
                 {
                   ERROR("No indentation line", lineno, indent);
                 }
@@ -2244,7 +2269,7 @@ int main(int argc, char **argv, char **envp)
                    * aligned to the right of the code.
                    */
 
-                  if ((indent & 3) != 2 && !brhcomment)
+                  if ((indent & 3) != 2 && rhcomment == 0)
                     {
                        ERROR("Bad comment alignment", lineno, indent);
                     }
@@ -2271,7 +2296,7 @@ int main(int argc, char **argv, char **envp)
                    */
 
                   if ((indent & 3) != 3 && bfunctions && dnest == 0 &&
-                      !brhcomment)
+                      rhcomment == 0)
                     {
                        ERROR("Bad comment block alignment", lineno, indent);
                     }
