@@ -914,6 +914,32 @@ int main(int argc, char **argv, char **envp)
             }
 
           ppline = (line[len] == '\\');
+
+          if (!ppline)
+            {
+              lptr = strstr(line, "/*");
+              if (lptr != NULL)
+                {
+                  lptr += 2;
+                  if (*lptr == '\n')
+                    {
+                      ERROR("C comment opening on separate line", lineno, n);
+                    }
+                  else if (!isspace((int)*lptr))
+                    {
+                      ERROR("Missing space after opening C comment", lineno, n);
+                    }
+
+                  if (strstr(line, "*/") == NULL)
+                    {
+                      /* Increment the count of nested comments */
+
+                      ncomment++;
+                      brhcomment = true;
+                    }
+                }
+            }
+
           continue;
         }
 
