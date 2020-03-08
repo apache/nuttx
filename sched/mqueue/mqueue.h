@@ -1,13 +1,13 @@
-/****************************************************************************
+/********************************************************************************
  *  sched/mqueue/mqueue.h
- *
+ **
  *   Copyright (C) 2007, 2009, 2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
+ **
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- *
+ **
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
@@ -17,7 +17,7 @@
  * 3. Neither the name NuttX nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
- *
+ **
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -30,15 +30,15 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************/
+ **
+ ********************************************************************************/
 
 #ifndef __SCHED_MQUEUE_MQUEUE_H
 #define __SCHED_MQUEUE_MQUEUE_H
 
-/****************************************************************************
+/********************************************************************************
  * Included Files
- ****************************************************************************/
+ ********************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
@@ -54,9 +54,9 @@
 
 #if CONFIG_MQ_MAXMSGSIZE > 0
 
-/****************************************************************************
+/********************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
+ ********************************************************************************/
 
 #define MQ_MAX_BYTES   CONFIG_MQ_MAXMSGSIZE
 #define MQ_MAX_MSGS    16
@@ -64,45 +64,45 @@
 
 /* This defines the number of messages descriptors to allocate at each
  * "gulp."
- */
+ **/
 
 #define NUM_MSG_DESCRIPTORS 24
 
 /* This defines the number of messages to set aside for exclusive use by
  * interrupt handlers
- */
+ **/
 
 #define NUM_INTERRUPT_MSGS   8
 
-/****************************************************************************
+/********************************************************************************
  * Public Type Definitions
- ****************************************************************************/
+ ********************************************************************************/
 
 enum mqalloc_e
 {
-  MQ_ALLOC_FIXED = 0,  /* Pre-allocated; never freed */
-  MQ_ALLOC_DYN,        /* Dynamically allocated; free when unused */
-  MQ_ALLOC_IRQ         /* Preallocated, reserved for interrupt handling */
+  MQ_ALLOC_FIXED = 0,  /* Pre-allocated; never freed **/
+  MQ_ALLOC_DYN,        /* Dynamically allocated; free when unused **/
+  MQ_ALLOC_IRQ         /* Preallocated, reserved for interrupt handling **/
 };
 
-/* This structure describes one buffered POSIX message. */
+/* This structure describes one buffered POSIX message. **/
 
 struct mqueue_msg_s
 {
-  FAR struct mqueue_msg_s *next;  /* Forward link to next message */
-  uint8_t type;                   /* (Used to manage allocations) */
-  uint8_t priority;               /* priority of message */
+  FAR struct mqueue_msg_s *next;  /* Forward link to next message **/
+  uint8_t type;                   /* (Used to manage allocations) **/
+  uint8_t priority;               /* priority of message **/
 #if MQ_MAX_BYTES < 256
-  uint8_t msglen;                 /* Message data length */
+  uint8_t msglen;                 /* Message data length **/
 #else
-  uint16_t msglen;                /* Message data length */
+  uint16_t msglen;                /* Message data length **/
 #endif
-  char mail[MQ_MAX_BYTES];        /* Message data */
+  char mail[MQ_MAX_BYTES];        /* Message data **/
 };
 
-/****************************************************************************
+/********************************************************************************
  * Public Data
- ****************************************************************************/
+ ********************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -114,48 +114,48 @@ extern "C"
 
 /* The g_msgfree is a list of messages that are available for general use.
  * The number of messages in this list is a system configuration item.
- */
+ **/
 
 EXTERN sq_queue_t  g_msgfree;
 
 /* The g_msgfreeInt is a list of messages that are reserved for use by
  * interrupt handlers.
- */
+ **/
 
 EXTERN sq_queue_t  g_msgfreeirq;
 
 /* The g_desfree data structure is a list of message descriptors available
  * to the operating system for general use. The number of messages in the
  * pool is a constant.
- */
+ **/
 
 EXTERN sq_queue_t  g_desfree;
 
-/****************************************************************************
+/********************************************************************************
  * Public Function Prototypes
- ****************************************************************************/
+ ********************************************************************************/
 
-struct tcb_s;        /* Forward reference */
-struct task_group_s; /* Forward reference */
+struct tcb_s;        /* Forward reference **/
+struct task_group_s; /* Forward reference **/
 
-/* Functions defined in mq_initialize.c ************************************/
+/* Functions defined in mq_initialize.c *****************************************/
 
 void weak_function nxmq_initialize(void);
 void nxmq_alloc_desblock(void);
 void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg);
 
-/* mq_waitirq.c ************************************************************/
+/* mq_waitirq.c *****************************************************************/
 
 void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 
-/* mq_rcvinternal.c ********************************************************/
+/* mq_rcvinternal.c *************************************************************/
 
 int nxmq_verify_receive(mqd_t mqdes, FAR char *msg, size_t msglen);
 int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg);
 ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
                         FAR char *ubuffer, FAR unsigned int *prio);
 
-/* mq_sndinternal.c ********************************************************/
+/* mq_sndinternal.c *************************************************************/
 
 int nxmq_verify_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
                      unsigned int prio);
@@ -164,11 +164,11 @@ int nxmq_wait_send(mqd_t mqdes);
 int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
                  FAR const char *msg, size_t msglen, unsigned int prio);
 
-/* mq_release.c ************************************************************/
+/* mq_release.c *****************************************************************/
 
 void nxmq_release(FAR struct task_group_s *group);
 
-/* mq_recover.c ************************************************************/
+/* mq_recover.c *****************************************************************/
 
 void nxmq_recover(FAR struct tcb_s *tcb);
 
@@ -177,5 +177,5 @@ void nxmq_recover(FAR struct tcb_s *tcb);
 }
 #endif
 
-#endif /* CONFIG_MQ_MAXMSGSIZE > 0 */
-#endif /* __SCHED_MQUEUE_MQUEUE_H */
+#endif /* CONFIG_MQ_MAXMSGSIZE > 0 **/
+#endif /* __SCHED_MQUEUE_MQUEUE_H **/
