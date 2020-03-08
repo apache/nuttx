@@ -371,7 +371,7 @@
  */
 
 #define PIN_LPUART0_RX      PIN_LPUART0_RX_5  /* PTC25 */
-#define PIN_LPUART0_TX      PIN_LPUART0_TX_5  /* PTC24
+#define PIN_LPUART0_TX      PIN_LPUART0_TX_5  /* PTC24 */
 
 /*  Arduino RS-232 Shield
  *  ---------------------
