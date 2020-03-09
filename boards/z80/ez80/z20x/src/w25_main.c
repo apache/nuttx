@@ -209,7 +209,7 @@ static int w25_write_binary(FAR const struct prog_header_s *hdr)
       return ret;
     }
 
-  /* Write the hdr to the W25 */
+  /* Write the header to the W25 */
 
   ret = w25_write(fd, hdr, sizeof(struct prog_header_s));
   if (ret < 0)
@@ -292,7 +292,7 @@ static int w25_read_binary(FAR struct prog_header_s *hdr)
 
   /* Read the header at the beginning of the partition */
 
-  ret = w25_read(fd, hdr, sizeof(hdr));
+  ret = w25_read(fd, hdr, sizeof(struct prog_header_s));
   if (ret < 0)
     {
       fprintf(stderr, "ERROR: Failed read program header: %d\n", ret);
@@ -301,20 +301,26 @@ static int w25_read_binary(FAR struct prog_header_s *hdr)
 
   /* Check for a valid program header */
 
+  /* A valid program should have a MAGIC number */
+
   if (hdr->magic != PROG_MAGIC)
     {
       ret = -ENOENT;
       goto errout;
     }
 
-  if (hdr->len != PROGSIZE)
+  /* A valid program should fit in RAM */
+
+  if (hdr->len >= PROGSIZE)
     {
       fprintf(stderr, "ERROR: Program too big\n");
       ret = -E2BIG;
       goto errout;
     }
 
-  /* Read the program binary */
+  /* Read the program binary.  A valid program should also have a matching
+   * CRC after loaded to memory.
+   */
 
   ret = w25_read(fd, (FAR void *)PROGSTART, hdr->len);
   if (ret < 0)
