@@ -968,6 +968,12 @@ int main(int argc, char **argv, char **envp)
                   /* Signal rhcomment, but ignore position */
 
                   rhcomment = -1;
+
+                  if (ncomment > 0 && !strncmp(&line[ii], "if", 2))
+                    {
+                      ERROR("No multiline comment right of code allowed here",
+                          lineno, n);
+                    }
                 }
             }
 
