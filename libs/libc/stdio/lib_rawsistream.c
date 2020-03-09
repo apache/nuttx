@@ -43,15 +43,15 @@
 static int rawsistream_getc(FAR struct lib_sistream_s *this)
 {
   FAR struct lib_rawsistream_s *rthis = (FAR struct lib_rawsistream_s *)this;
-  int nwritten;
+  int nread;
   char ch;
 
   DEBUGASSERT(this && rthis->fd >= 0);
 
   /* Attempt to read one character */
 
-  nwritten = _NX_READ(rthis->fd, &ch, 1);
-  if (nwritten == 1)
+  nread = _NX_READ(rthis->fd, &ch, 1);
+  if (nread == 1)
     {
       this->nget++;
       return ch;

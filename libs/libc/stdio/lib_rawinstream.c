@@ -43,15 +43,15 @@
 static int rawinstream_getc(FAR struct lib_instream_s *this)
 {
   FAR struct lib_rawinstream_s *rthis = (FAR struct lib_rawinstream_s *)this;
-  int nwritten;
+  int nread;
   char ch;
 
   DEBUGASSERT(this && rthis->fd >= 0);
 
   /* Attempt to read one character */
 
-  nwritten = _NX_READ(rthis->fd, &ch, 1);
-  if (nwritten == 1)
+  nread = _NX_READ(rthis->fd, &ch, 1);
+  if (nread == 1)
     {
       this->nget++;
       return ch;
@@ -59,8 +59,8 @@ static int rawinstream_getc(FAR struct lib_instream_s *this)
 
   /* Return EOF on any failure to read from the incoming byte stream. The
    * only expected error is EINTR meaning that the read was interrupted
-   * by a signal.  A Zero return value would indicated an end-of-file
-   * confition.
+   * by a signal.  A Zero return value would indicate an end-of-file
+   * condition.
    */
 
   return EOF;
