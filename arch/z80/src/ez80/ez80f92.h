@@ -166,6 +166,7 @@
 #define EZ80_IR_CTL            0xbf        /* Infrared Encoder/Decoder Control */
 
 /* UART Register Offsets ************************************************************/
+
                                            /* DLAB=0: */
 #define EZ80_UART_THR          0x00        /*    W: UART Transmit holding register */
 #define EZ80_UART_RBR          0x00        /*   R : UART Receive buffer register */
@@ -222,8 +223,8 @@
 #  define EZ80_UARTTRIG_8      0x80         /*   10: Receive FIFO trigger level=8 */
 #  define EZ80_UARTTRIG_14     0xc0         /*   11: Receive FIFO trigger level=14 */
                                             /* Bit 3-5: Reserved */
-#define EZ80_UARTFCTL_CLRTxF   0x04         /* Bit 2: Transmit enable */
-#define EZ80_UARTFCTL_CLRRxF   0x02         /* Bit 1: Receive enable */
+#define EZ80_UARTFCTL_CLRTXF   0x04         /* Bit 2: Transmit enable */
+#define EZ80_UARTFCTL_CLRRXF   0x02         /* Bit 1: Receive enable */
 #define EZ80_UARTFCTL_FIFOEN   0x01         /* Bit 0: Enable receive/transmit FIFOs */
 
 /* UART0/1 LCTL register bits *******************************************************/
