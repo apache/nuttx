@@ -1,36 +1,20 @@
 /****************************************************************************
  * sched/semaphore/sem_holder.c
  *
- *   Copyright (C) 2009-2011, 2013, 2016-2019 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -240,7 +224,8 @@ static inline void nxsem_freeholder(sem_t *sem,
  * Name: nxsem_findandfreeholder
  ****************************************************************************/
 
-static inline void nxsem_findandfreeholder(sem_t *sem, FAR struct tcb_s *htcb)
+static inline void nxsem_findandfreeholder(sem_t *sem,
+                                           FAR struct tcb_s *htcb)
 {
   FAR struct semholder_s *pholder = nxsem_findholder(sem, htcb);
 
@@ -373,7 +358,8 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
 
               if (htcb->npend_reprio < CONFIG_SEM_NNESTPRIO)
                 {
-                  htcb->pend_reprios[htcb->npend_reprio] = htcb->sched_priority;
+                  htcb->pend_reprios[htcb->npend_reprio] =
+                    htcb->sched_priority;
                   htcb->npend_reprio++;
                 }
               else
@@ -442,8 +428,11 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
 static int nxsem_verifyholder(FAR struct semholder_s *pholder,
                               FAR sem_t *sem, FAR void *arg)
 {
-#if 0 /* Need to revisit this, but these assumptions seem to be untrue -- \
-       * OR there is a bug??? */
+  /* Need to revisit this, but these assumptions seem to be untrue -- OR
+   * there is a bug???
+   */
+
+#if 0
   FAR struct tcb_s *htcb = (FAR struct tcb_s *)pholder->htcb;
 
   /* Called after a semaphore has been released (incremented), the semaphore
@@ -641,15 +630,15 @@ static int nxsem_restoreholderprioall(FAR struct semholder_s *pholder,
 }
 
 /****************************************************************************
- * Name: nxsem_restoreholderprioA
+ * Name: nxsem_restoreholderprio_others
  *
  * Description:
  *   Reprioritize all holders except the currently executing task
  *
  ****************************************************************************/
 
-static int nxsem_restoreholderprioA(FAR struct semholder_s *pholder,
-                                    FAR sem_t *sem, FAR void *arg)
+static int nxsem_restoreholderprio_others(FAR struct semholder_s *pholder,
+                                          FAR sem_t *sem, FAR void *arg)
 {
   FAR struct tcb_s *rtcb = this_task();
   if (pholder->htcb != rtcb)
@@ -661,15 +650,15 @@ static int nxsem_restoreholderprioA(FAR struct semholder_s *pholder,
 }
 
 /****************************************************************************
- * Name: nxsem_restoreholderprioB
+ * Name: nxsem_restoreholderprio_self
  *
  * Description:
  *   Reprioritize only the currently executing task
  *
  ****************************************************************************/
 
-static int nxsem_restoreholderprioB(FAR struct semholder_s *pholder,
-                                    FAR sem_t *sem, FAR void *arg)
+static int nxsem_restoreholderprio_self(FAR struct semholder_s *pholder,
+                                        FAR sem_t *sem, FAR void *arg)
 {
   FAR struct tcb_s *rtcb = this_task();
 
@@ -809,11 +798,11 @@ static inline void nxsem_restorebaseprio_task(FAR struct tcb_s *stcb,
        * except for the running thread.
        */
 
-      nxsem_foreachholder(sem, nxsem_restoreholderprioA, stcb);
+      nxsem_foreachholder(sem, nxsem_restoreholderprio_others, stcb);
 
       /* Now, find an reprioritize only the ready to run task */
 
-      nxsem_foreachholder(sem, nxsem_restoreholderprioB, stcb);
+      nxsem_foreachholder(sem, nxsem_restoreholderprio_self, stcb);
     }
 
   /* If there are no tasks waiting for available counts, then all holders
@@ -963,8 +952,8 @@ void nxsem_addholder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
       pholder = nxsem_findorallocateholder(sem, htcb);
       if (pholder != NULL)
         {
-          /* Then set the holder and increment the number of counts held by this
-           * holder
+          /* Then set the holder and increment the number of counts held by
+           * this holder
            */
 
           pholder->htcb = htcb;
@@ -1122,10 +1111,10 @@ void nxsem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem)
  * Name: nxsem_canceled
  *
  * Description:
- *   Called from nxsem_wait_irq() after a thread that was waiting for a semaphore
- *   count was awakened because of a signal and the semaphore wait has been
- *   cancelled.  This function restores the correct thread priority of each
- *   holder of the semaphore.
+ *   Called from nxsem_wait_irq() after a thread that was waiting for a
+ *   semaphore count was awakened because of a signal and the semaphore wait
+ *   has been canceled.  This function restores the correct thread priority
+ *   of each holder of the semaphore.
  *
  * Input Parameters:
  *   sem - A reference to the semaphore no longer being waited for
