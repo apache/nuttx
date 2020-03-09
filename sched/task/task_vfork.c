@@ -335,7 +335,7 @@ FAR struct task_tcb_s *nxtask_vforksetup(start_t retaddr, size_t *argsize)
   /* Get the priority of the parent task */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  priority = parent->base_priority;  /* "Normal," unboosted priority */
+  priority = parent->base_priority;   /* "Normal," unboosted priority */
 #else
   priority = parent->sched_priority;  /* Current priority */
 #endif
