@@ -88,20 +88,32 @@ int can_setsockopt(FAR struct socket *psock, int option,
   switch (option)
     {
       case CAN_RAW_FILTER:
-        if (value_len % sizeof(struct can_filter) != 0)
+    	if (value_len == 0)
+    	  {
+    		conn->filter_count = 0;
+    	    ret = OK;
+    	  }
+    	else if (value_len % sizeof(struct can_filter) != 0)
           {
             ret = -EINVAL;
           }
-
-        if (value_len > CAN_RAW_FILTER_MAX * sizeof(struct can_filter))
+        else if (value_len > CONFIG_NET_CAN_RAW_FILTER_MAX * sizeof(struct can_filter))
           {
             ret = -EINVAL;
           }
+        else
+          {
+		    count = value_len / sizeof(struct can_filter);
 
-        count = value_len / sizeof(struct can_filter);
+		    for(int i = 0; i < count; i++)
+		      {
+				conn->filters[i] = ((struct can_filter *)value)[i];
+		      }
 
-        /* FIXME pass filter to driver */
+		    conn->filter_count = count;
 
+            ret = OK;
+          }
         break;
 
       case CAN_RAW_ERR_FILTER:

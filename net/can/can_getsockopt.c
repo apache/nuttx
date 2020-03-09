@@ -98,16 +98,29 @@ int can_getsockopt(FAR struct socket *psock, int option,
           {
             ret = -EINVAL;
           }
-
-        if (value_len > CAN_RAW_FILTER_MAX * sizeof(struct can_filter))
+        else if (*value_len > CONFIG_NET_CAN_RAW_FILTER_MAX * sizeof(struct can_filter))
           {
             ret = -EINVAL;
           }
+        else
+          {
+            int count = conn->filter_count;
 
-        count = *value_len / sizeof(struct can_filter);
+        	if (*value_len < count * sizeof(struct can_filter))
+              {
+                count = *value_len / sizeof(struct can_filter);
+              }
+        	else
+        	  {
+        	    *value_len = count * sizeof(struct can_filter);
+        	  }
 
-        /* FIXME pass filter to driver */
-
+            for(int i = 0; i < count; i++)
+              {
+            	((struct can_filter *)value)[i] = conn->filters[i];
+              }
+            ret = OK;
+          }
         break;
 
       case CAN_RAW_ERR_FILTER:

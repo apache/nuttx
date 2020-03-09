@@ -109,6 +109,8 @@ struct can_conn_s
   int32_t loopback;
   int32_t recv_own_msgs;
   int32_t fd_frames;
+  struct can_filter filters[CONFIG_NET_CAN_RAW_FILTER_MAX];
+  int32_t filter_count;
   
   /* TODO add filter support */
 #endif

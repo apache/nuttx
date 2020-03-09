@@ -31,6 +31,13 @@ config NET_CAN_SOCK_OPTS
 	---help---
 		Enable support for the CAN socket options
 		
+config NET_CAN_RAW_FILTER_MAX
+	int "CAN_RAW_FILTER max filter count"
+	default 32
+	depends on NET_CAN_SOCK_OPTS
+	---help---
+		Maximum number of CAN_RAW filters that can be set per CAN connection.
+		
 config NET_CAN_NOTIFIER
 	bool "Support CAN notifications"
 	default n

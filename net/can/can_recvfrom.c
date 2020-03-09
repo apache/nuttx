@@ -294,6 +294,33 @@ static inline int can_readahead(struct can_recvfrom_s *pstate)
   return 0;
 }
 
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+static int can_recv_filter(struct can_conn_s *conn, canid_t id)
+{
+  for(int i = 0; i < conn->filter_count; i++)
+    {
+	  if (conn->filters[i].can_id & CAN_INV_FILTER)
+	    {
+		  if((id & conn->filters[i].can_mask) !=
+				  ((conn->filters[i].can_id & ~CAN_INV_FILTER)
+						  & conn->filters[i].can_mask))
+		    {
+			  return 1;
+		    }
+	    }
+	  else
+	    {
+		  if((id & conn->filters[i].can_mask) ==
+				  (conn->filters[i].can_id & conn->filters[i].can_mask))
+		    {
+			  return 1;
+		    }
+	    }
+    }
+  return 0;
+}
+#endif
+
 static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
                                           FAR void *pvconn,
                                           FAR void *pvpriv, uint16_t flags)
@@ -305,14 +332,22 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
   if (pstate)
     {
-      /* If a new packet is available, then complete the read action. */
-
       if ((flags & CAN_NEWDATA) != 0)
         {
+    	  /* If a new packet is available, check receive filters
+    	   * when is valid then complete the read action. */
+#ifdef CONFIG_NET_CANPROTO_OPTIONS
+    	  if(can_recv_filter(conn,(canid_t)*dev->d_appdata) == 0)
+    	    {
+    		  flags &= ~CAN_NEWDATA;
+    	  	  return flags;
+    		}
+#endif
+
     	  /* do not pass frames with DLC > 8 to a legacy socket */
     	  if (!conn->fd_frames)
     	    {
-    		  struct canfd_frame *cfd = (struct canfd_frame *)dev->d_appdata;
+    		  struct canfd_frame *cfd = (struct canfd_frame*)dev->d_appdata;
     	      if (cfd->len > CAN_MAX_DLEN)
     	      {
     	    	/* DO WE NEED TO CLEAR FLAGS?? */
@@ -332,12 +367,6 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
           pstate->pr_cb->flags   = 0;
           pstate->pr_cb->priv    = NULL;
           pstate->pr_cb->event   = NULL;
-
-#if 0
-          /* Save the sender's address in the caller's 'from' location */
-
-          pkt_recvfrom_sender(dev, pstate);
-#endif
 
           /* indicate that the data has been consumed */
 
