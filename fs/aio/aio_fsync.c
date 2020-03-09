@@ -165,17 +165,18 @@ static void aio_fsync_worker(FAR void *arg)
  *   referenced by aiocbp becomes an illegal address prior to asynchronous
  *   I/O completion, then the behavior is undefined.
  *
- *   If the aio_fsync() function fails or aiocbp indicates an error condition,
- *   data is not guaranteed to have been successfully transferred.
+ *   If the aio_fsync() function fails or aiocbp indicates an error
+ *   condition, data is not guaranteed to have been successfully transferred.
  *
  * Input Parameters:
- *   op     - Should be either O_SYNC or O_DSYNC.  Ignored in this implementation.
+ *   op     - Should be either O_SYNC or O_DSYNC.  Ignored in this
+ *            implementation.
  *   aiocbp - A pointer to an instance of struct aiocb
  *
  * Returned Value:
  *   The aio_fsync() function will return the value 0 if the I/O operation is
- *   successfully queued; otherwise, the function will return the value -1 and
- *   set errno to indicate the error.
+ *   successfully queued; otherwise, the function will return the value -1
+ *   and set errno to indicate the error.
  *
  *   The aio_fsync() function will fail if:
  *
@@ -193,8 +194,8 @@ static void aio_fsync_worker(FAR void *arg)
  *   operation, which can be retrieved using aio_error().
  *
  * POSIX Compliance
- * - NuttX does not currently make any distinction between O_DYSNC and O_SYNC.
- *   Hence, the 'op' argument is ignored altogether.
+ * - NuttX does not currently make any distinction between O_DYSNC and
+ *   O_SYNC. Hence, the 'op' argument is ignored altogether.
  * - Most errors required in the standard are not detected at this point.
  *   There are no pre-queuing checks for the validity of the operation.
  *
@@ -205,7 +206,7 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
   FAR struct aio_container_s *aioc;
   int ret;
 
-  DEBUGASSERT(op == O_SYNC /* || op == O_DSYNC */);
+  DEBUGASSERT(op == O_SYNC); /* || op == O_DSYNC */
   DEBUGASSERT(aiocbp);
 
   /* The result -EINPROGRESS means that the transfer has not yet completed */
