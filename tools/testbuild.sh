@@ -190,7 +190,16 @@ function configure {
 function build {
   echo "  Building NuttX..."
   echo "------------------------------------------------------------------------------------"
-  makefunc ${JOPTION} ${MAKE_FLAGS} 1>/dev/null
+
+  elf=`grep CONFIG_ELF=y $nuttx/.config || true`
+
+  # NOTE: workaround to avoid errors in parallel build
+
+  if [ ! -z "${elf}" ]; then
+      makefunc ${MAKE_FLAGS} 1>/dev/null
+  else
+      makefunc ${JOPTION} ${MAKE_FLAGS} 1>/dev/null
+  fi
 }
 
 # Coordinate the steps for the next build test
