@@ -112,6 +112,13 @@ enum section_s
   PUBLIC_FUNCTION_PROTOTYPES
 };
 
+enum pptype_e
+{
+  PPLINE_NONE = 0,
+  PPLINE_DEFINE,
+  PPLINE_OTHER
+};
+
 struct file_section_s
 {
   const char *name;   /* File section name */
@@ -503,10 +510,13 @@ int main(int argc, char **argv, char **envp)
   bool bstring;         /* True: Within a string */
   bool bquote;          /* True: Backslash quoted character next */
   bool bblank;          /* Used to verify block comment terminator */
-  bool ppline;          /* True: The next line the continuation of a pre-processor command */
   bool bexternc;        /* True: Within 'extern "C"' */
-  int rhcomment;        /* Indentation of Comment to the right of code */
-  int prevrhcmt;        /* Indentation of previous Comment to the right of code */
+  enum pptype_e ppline; /* > 0: The next line the continuation of a
+                         * pre-processor command */
+  int rhcomment;        /* Indentation of Comment to the right of code
+                         * (-1 -> don't check position) */
+  int prevrhcmt;        /* Indentation of previous Comment to the right
+                         * of code (-1 -> don't check position) */
   int lineno;           /* Current line number */
   int indent;           /* Indentation level */
   int ncomment;         /* Comment nesting level on this line */
@@ -618,27 +628,29 @@ int main(int argc, char **argv, char **envp)
   g_maxline = get_line_width(instream) + excess;
   rewind(instream);
 
-  btabs          = false; /* True: TAB characters found on the line */
-  bcrs           = false; /* True: Carriage return found on the line */
-  bfunctions     = false; /* True: In private or public functions */
-  bswitch        = false; /* True: Within a switch statement */
-  bstring        = false; /* True: Within a string */
-  ppline         = false; /* True: Continuation of a pre-processor line */
-  bexternc       = false; /* True: Within 'extern "C"' */
-  rhcomment      = 0;     /* Indentation of Comment to the right of code */
-  prevrhcmt      = 0;     /* Indentation of previous Comment to the right
-                           * of code */
-  lineno         = 0;     /* Current line number */
-  ncomment       = 0;     /* Comment nesting level on this line */
-  bnest          = 0;     /* Brace nesting level on this line */
-  dnest          = 0;     /* Data declaration nesting level on this line */
-  pnest          = 0;     /* Parenthesis nesting level on this line */
-  comment_lineno = -1;    /* Line on which the last comment was closed */
-  blank_lineno   = -1;    /* Line number of the last blank line */
-  noblank_lineno = -1;    /* A blank line is not needed after this line */
-  lbrace_lineno  = -1;    /* Line number of last left brace */
-  rbrace_lineno  = -1;    /* Last line containing a right brace */
-  externc_lineno = -1;    /* Last line where 'extern "C"' declared */
+  btabs          = false;       /* True: TAB characters found on the line */
+  bcrs           = false;       /* True: Carriage return found on the line */
+  bfunctions     = false;       /* True: In private or public functions */
+  bswitch        = false;       /* True: Within a switch statement */
+  bstring        = false;       /* True: Within a string */
+  bexternc       = false;       /* True: Within 'extern "C"' */
+  ppline         = PPLINE_NONE; /* > 0: The next line the continuation of a
+                                 * pre-processor command */
+  rhcomment      = 0;           /* Indentation of Comment to the right of code
+                                 * (-1 -> don't check position) */
+  prevrhcmt      = 0;           /* Indentation of previous Comment to the right
+                                 * of code (-1 -> don't check position) */
+  lineno         = 0;           /* Current line number */
+  ncomment       = 0;           /* Comment nesting level on this line */
+  bnest          = 0;           /* Brace nesting level on this line */
+  dnest          = 0;           /* Data declaration nesting level on this line */
+  pnest          = 0;           /* Parenthesis nesting level on this line */
+  comment_lineno = -1;          /* Line on which the last comment was closed */
+  blank_lineno   = -1;          /* Line number of the last blank line */
+  noblank_lineno = -1;          /* A blank line is not needed after this line */
+  lbrace_lineno  = -1;          /* Line number of last left brace */
+  rbrace_lineno  = -1;          /* Last line containing a right brace */
+  externc_lineno = -1;          /* Last line where 'extern "C"' declared */
 
   /* Process each line in the input stream */
 
@@ -827,7 +839,7 @@ int main(int argc, char **argv, char **envp)
        * lines as indicated by ppline)
        */
 
-      if (line[indent] == '#' || ppline)
+      if (line[indent] == '#' || ppline != PPLINE_NONE)
         {
           int len;
           int ii;
@@ -840,7 +852,7 @@ int main(int argc, char **argv, char **envp)
            * line.
            */
 
-          if (!ppline)
+          if (ppline == PPLINE_NONE)
             {
               /* Skip to the pre-processor command following the '#' */
 
@@ -856,8 +868,12 @@ int main(int argc, char **argv, char **envp)
                     * the pre-processor definitions section.
                     */
 
+                   ppline = PPLINE_OTHER;
+
                    if (strncmp(&line[ii], "define", 6) == 0)
                      {
+                       ppline = PPLINE_DEFINE;
+
                        if (g_section != PRE_PROCESSOR_DEFINITIONS)
                          {
                            /* A complication is the header files always have
@@ -913,44 +929,51 @@ int main(int argc, char **argv, char **envp)
               len--;
             }
 
-          ppline = (line[len] == '\\');
-
           /* Propagate rhcomment over preprocessor lines Issue #120 */
 
           rhcomment = prevrhcmt;
 
-          if (!ppline)
+          lptr = strstr(line, "/*");
+          if (lptr != NULL)
             {
-              lptr = strstr(line, "/*");
-              if (lptr != NULL)
+              n = lptr - &line[0];
+              if (line[n + 2] == '\n')
                 {
-                  n = lptr - &line[0];
-                  if (line[n + 2] == '\n')
-                    {
-                      ERROR("C comment opening on separate line", lineno, n);
-                    }
-                  else if (!isspace((int)line[n + 2]) && line[n + 2] != '*')
-                    {
-                       ERROR("Missing space after opening C comment", lineno, n);
-                    }
+                  ERROR("C comment opening on separate line", lineno, n);
+                }
+              else if (!isspace((int)line[n + 2]) && line[n + 2] != '*')
+                {
+                   ERROR("Missing space after opening C comment", lineno, n);
+                }
 
-                  if (strstr(lptr, "*/") == NULL)
-                    {
-                      /* Increment the count of nested comments */
+              if (strstr(lptr, "*/") == NULL)
+                {
+                  /* Increment the count of nested comments */
 
-                      ncomment++;
-                    }
+                  ncomment++;
+                }
 
+              if (ppline == PPLINE_DEFINE)
+                {
                   rhcomment = n;
-
-                  if (!strncmp(&line[ii], "define", 6)
-                      && prevrhcmt != 0 && n != prevrhcmt)
+                  if (prevrhcmt > 0 && n != prevrhcmt)
                     {
                       rhcomment = prevrhcmt;
                       WARN("Wrong column position of comment right of code",
                           lineno, n);
                     }
                 }
+              else
+                {
+                  /* Signal rhcomment, but ignore position */
+
+                  rhcomment = -1;
+                }
+            }
+
+          if (line[len] != '\\' || ncomment > 0)
+            {
+              ppline = PPLINE_NONE;
             }
 
           continue;
@@ -1413,7 +1436,7 @@ int main(int argc, char **argv, char **envp)
                   else
                     {
                       rhcomment = n;
-                      if (n != prevrhcmt)
+                      if (prevrhcmt > 0 && n != prevrhcmt)
                         {
                           rhcomment = prevrhcmt;
                           WARN("Wrong column position of comment right of code",
