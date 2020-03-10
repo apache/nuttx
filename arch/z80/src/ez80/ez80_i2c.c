@@ -86,14 +86,6 @@ static int      ez80_i2c_transfer(FAR struct i2c_master_s *dev,
                   FAR struct i2c_msg_s *msgs, int count);
 
 /****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/* This function is normally prototyped int the ZiLOG header file sio.h */
-
-extern uint32_t get_freq(void);
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 

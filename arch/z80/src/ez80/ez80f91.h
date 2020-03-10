@@ -32,15 +32,15 @@
 
 /* Memory map ***********************************************************************/
 
-#define EZ80_ONCHIPFLASH  0x000000 /* CS0: 256Kb of on-chip flash */
-#define EZ80_OFFCHIPCS0   0x400000 /* CS0: Off chip use (usually flash) */
-#define EZ80_OFFCHIPCS2   0x800000 /* CS2: Off chip use (e.g. memory mapped I/O) */
-#define EZ80_OFFCHIPCS1   0xc00000 /* CS1: Off chip use (usually SRAM) */
-#define EZ80_EMACSRAM     0xffc000 /* On-chip EMAC SRAM (8Kb) on reset*/
-#define EZ80_ONCHIPSRAM   0xffe000 /* On-chip SRAM (8Kb) on reset */
+#define EZ80_ONCHIPFLASH  0x000000  /* CS0: 256Kb of on-chip flash */
+#define EZ80_OFFCHIPCS0   0x400000  /* CS0: Off chip use (usually flash) */
+#define EZ80_OFFCHIPCS2   0x800000  /* CS2: Off chip use (e.g. memory mapped I/O) */
+#define EZ80_OFFCHIPCS1   0xc00000  /* CS1: Off chip use (usually SRAM) */
+#define EZ80_EMACSRAM     0xffc000  /* On-chip EMAC SRAM (8Kb) on reset*/
+#define EZ80_ONCHIPSRAM   0xffe000  /* On-chip SRAM (8Kb) on reset */
 
-#define EZ80_FLASH_SIZE   0x040000 /* 256Kb on-chip flash */
-#define EZ80_SRAM_SIZE    0x002000 /* 8Kb on-chip sram */
+#define EZ80_FLASH_SIZE   0x040000  /* 256Kb on-chip flash */
+#define EZ80_SRAM_SIZE    0x002000  /* 8Kb on-chip sram */
 
 /* Product ID Registers  ************************************************************/
 
