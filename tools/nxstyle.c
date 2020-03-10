@@ -598,7 +598,6 @@ int main(int argc, char **argv, char **envp)
 
   if (ext == 0)
     {
-      INFOFL("No file extension", g_file_name);
     }
   else if (strcmp(ext, ".h") == 0)
     {
@@ -611,7 +610,6 @@ int main(int argc, char **argv, char **envp)
 
   if (g_file_type == UNKNOWN)
     {
-      INFOFL("Unknown file extension", g_file_name);
       return 0;
     }
 
