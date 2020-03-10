@@ -167,13 +167,30 @@ int up_relocateadd(FAR const Elf32_Rela *rel, FAR const Elf32_Sym *sym,
   unsigned char *p;
   uint32_t value;
 
+  /* All relocations except NONE depend upon having valid symbol
+   * information.
+   */
+
   relotype = ELF32_R_TYPE(rel->r_info);
-  value = sym->st_value + rel->r_addend;
+  if (sym == NULL)
+    {
+      if (relotype != R_XTENSA_NONE)
+        {
+          return -EINVAL;
+        }
+    }
+  else
+    {
+      value = sym->st_value + rel->r_addend;
+    }
 
   /* Handle the relocation by relocation type */
 
   switch (relotype)
     {
+    case R_XTENSA_NONE:
+      break;
+
     case R_XTENSA_32:
       (*(FAR uint32_t *)addr) += value;
       break;
