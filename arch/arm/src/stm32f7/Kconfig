@@ -2136,6 +2136,14 @@ endchoice #"ULPI Selection"
 
 endmenu # OTG_HS Config
 
+config STM32F7_EXTERNAL_RAM
+    bool "External RAM on FMC"
+    default n
+    depends on STM32F7_FMC
+    select ARCH_HAVE_HEAP2
+    ---help---
+        In addition to internal SDRAM, external RAM may be available through the FMC.
+
 menu "QuadSPI Configuration"
 	depends on STM32F7_QUADSPI
 
