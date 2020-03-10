@@ -142,8 +142,8 @@ static inline void rcc_reset(void)
   putreg32(regval, STM32_RCC_CR);
 
 #if defined(CONFIG_STM32H7_AXI_SRAM_CORRUPTION_WAR)
-  /* Errata 2.2.9 Enable workaround for Reading from AXI SRAM may lead to data
-   * read corruption. See ES0392 Rev 6.
+  /* Errata 2.2.9 Enable workaround for Reading from AXI SRAM may lead to
+   * data read corruption. See ES0392 Rev 6.
    */
 
   putreg32(AXI_TARG_READ_ISS_OVERRIDE, STM32_AXI_TARG7_FN_MOD);
@@ -781,16 +781,16 @@ static void stm32_stdclockconfig(void)
         }
 #endif
 
-      /* Ww must write the lower byte of the PWR_CR3 register is written once
-       * after POR and it shall be written before changing VOS level or ck_sys
-       * clock frequency. No limitation applies to the upper bytes.
+      /* We must write the lower byte of the PWR_CR3 register is written once
+       * after POR and it shall be written before changing VOS level or
+       * ck_sys clock frequency. No limitation applies to the upper bytes.
        *
        * Programming data corresponding to an invalid combination of
        * LDOEN and BYPASS bits will be ignored: data will not be written,
        * the written-once mechanism will lock the register and any further
        * write access will be ignored. The default supply configuration will
-       * be kept and the ACTVOSRDY bit in PWR control status register 1 (PWR_CSR1)
-       * will go on indicating invalid voltage levels.
+       * be kept and the ACTVOSRDY bit in PWR control status register 1
+       * (PWR_CSR1) will go on indicating invalid voltage levels.
        *
        * N.B. The system shall be power cycled before writing a new value.
        */

@@ -781,7 +781,7 @@ static void stm32_stdclockconfig(void)
         }
 #endif
 
-      /* Ww must write the lower byte of the PWR_CR3 register is written once
+      /* We must write the lower byte of the PWR_CR3 register is written once
        * after POR and it shall be written before changing VOS level or
        * ck_sys clock frequency. No limitation applies to the upper bytes.
        *
