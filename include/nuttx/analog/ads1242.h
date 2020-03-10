@@ -93,7 +93,7 @@
 #define ADS1242_REG_MUX_BIT_NSEL1       (1 << 1)
 #define ADS1242_REG_MUX_BIT_NSEL0       (1 << 0)
 /* ACR */
-#define ADS1242_REG_ACR_BIT_nDRDY       (1 << 7)
+#define ADS1242_REG_ACR_BIT_NDRDY       (1 << 7)
 #define ADS1242_REG_ACR_BIT_UnB         (1 << 6)
 #define ADS1242_REG_ACR_BIT_SPEED       (1 << 5)
 #define ADS1242_REG_ACR_BIT_BUFEN       (1 << 4)

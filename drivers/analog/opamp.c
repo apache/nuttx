@@ -58,7 +58,8 @@
 
 static int     opamp_open(FAR struct file *filep);
 static int     opamp_close(FAR struct file *filep);
-static int     opamp_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int     opamp_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -103,8 +104,8 @@ static int opamp_open(FAR struct file *filep)
   if (ret >= 0)
     {
       /* Increment the count of references to the device.  If this the first
-       * time that the driver has been opened for this device, then initialize
-       * the device.
+       * time that the driver has been opened for this device, then
+       * initialize the device.
        */
 
       tmp = dev->ad_ocount + 1;

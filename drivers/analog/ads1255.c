@@ -250,8 +250,8 @@ static void adc_unlock(FAR struct spi_dev_s *spi)
  * Name: adc_bind
  *
  * Description:
- *   Bind the upper-half driver callbacks to the lower-half implementation.  This
- *   must be called early in order to receive ADC event notifications.
+ *   Bind the upper-half driver callbacks to the lower-half implementation.
+ *   This must be called early in order to receive ADC event notifications.
  *
  ****************************************************************************/
 
@@ -286,7 +286,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   nxsig_usleep(1000);
 
   SPI_SELECT(spi, priv->devno, true);
-  SPI_SEND(spi, ADS125X_WREG + 0x03);    /* WRITE SPS REG */
+  SPI_SEND(spi, ADS125X_WREG + 0x03);  /* WRITE SPS REG */
   SPI_SEND(spi, 0x00);                 /* count=1 */
   SPI_SEND(spi, 0x63);
   SPI_SELECT(spi, priv->devno, false);
@@ -300,7 +300,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
  * Description:
  *   Configure the ADC. This method is called the first time that the ADC
  *   device is opened.  This will occur when the port is first opened.
- *   This setup includes configuring and attaching ADC interrupts.  Interrupts
+ *   This setup includes configuring and attaching ADC interrupts. Interrupts
  *   are all disabled upon return.
  *
  ****************************************************************************/
@@ -477,7 +477,8 @@ static void adc_worker(FAR void *arg)
 
 static int adc_interrupt(int irq, void *context, FAR void *arg)
 {
-  FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;
+  FAR struct ads1255_dev_s *priv =
+    (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;
 
   DEBUGASSERT(priv != NULL);
 
@@ -514,7 +515,8 @@ static int adc_interrupt(int irq, void *context, FAR void *arg)
 FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi,
                                            unsigned int devno)
 {
-  FAR struct ads1255_dev_s *priv = (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;
+  FAR struct ads1255_dev_s *priv =
+    (FAR struct ads1255_dev_s *)g_adcdev.ad_priv;
 
   DEBUGASSERT(spi != NULL);
 
