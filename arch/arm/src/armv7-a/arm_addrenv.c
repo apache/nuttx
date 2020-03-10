@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Address Environment Interfaces
  *
@@ -96,7 +97,8 @@
  * If CONFIG_ARCH_KERNEL_STACK=y is selected then the platform specific
  * code must export these additional interfaces:
  *
- *   up_addrenv_kstackalloc  - Create a stack in the kernel address environment
+ *   up_addrenv_kstackalloc  - Create a stack in the kernel address
+ *                             environment
  *   up_addrenv_kstackfree   - Destroy the kernel stack.
  *
  ****************************************************************************/
@@ -128,6 +130,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration */
 
 #if (CONFIG_ARCH_TEXT_VBASE & SECTION_MASK) != 0
@@ -267,9 +270,9 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 
   memset(addrenv, 0, sizeof(group_addrenv_t));
 
-  /* Back the allocation up with physical pages and set up the level 2 mapping
-   * (which of course does nothing until the L2 page table is hooked into
-   * the L1 page table).
+  /* Back the allocation up with physical pages and set up the level 2
+   * mapping (which of course does nothing until the L2 page table is hooked
+   * into the L1 page table).
    */
 
   /* Allocate .text space pages */
@@ -303,7 +306,8 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
    * region.
    */
 
-  ret = up_addrenv_initdata((uintptr_t)addrenv->data[0] & PMD_PTE_PADDR_MASK);
+  ret = up_addrenv_initdata((uintptr_t)addrenv->data[0] &
+                            PMD_PTE_PADDR_MASK);
   if (ret < 0)
     {
       berr("ERROR: Failed to initialize .bss/.data region: %d\n", ret);
@@ -484,8 +488,8 @@ ssize_t up_addrenv_heapsize(FAR const group_addrenv_t *addrenv)
  *   After an address environment has been established for a task group (via
  *   up_addrenv_create().  This function may be called to instantiate
  *   that address environment in the virtual address space.  this might be
- *   necessary, for example, to load the code for the task group from a file or
- *   to access address environment private data.
+ *   necessary, for example, to load the code for the task group from a file
+ *   or to access address environment private data.
  *
  * Input Parameters:
  *   addrenv - The representation of the task address environment previously
