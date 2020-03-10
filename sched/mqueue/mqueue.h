@@ -49,13 +49,13 @@
 
 /* This defines the number of messages descriptors to allocate at each
  * "gulp."
- **/
+ */
 
 #define NUM_MSG_DESCRIPTORS 24
 
 /* This defines the number of messages to set aside for exclusive use by
  * interrupt handlers
- **/
+ */
 
 #define NUM_INTERRUPT_MSGS   8
 
@@ -65,24 +65,24 @@
 
 enum mqalloc_e
 {
-  MQ_ALLOC_FIXED = 0,  /* Pre-allocated; never freed **/
-  MQ_ALLOC_DYN,        /* Dynamically allocated; free when unused **/
-  MQ_ALLOC_IRQ         /* Preallocated, reserved for interrupt handling **/
+  MQ_ALLOC_FIXED = 0,  /* Pre-allocated; never freed */
+  MQ_ALLOC_DYN,        /* Dynamically allocated; free when unused */
+  MQ_ALLOC_IRQ         /* Preallocated, reserved for interrupt handling */
 };
 
-/* This structure describes one buffered POSIX message. **/
+/* This structure describes one buffered POSIX message. */
 
 struct mqueue_msg_s
 {
-  FAR struct mqueue_msg_s *next;  /* Forward link to next message **/
-  uint8_t type;                   /* (Used to manage allocations) **/
-  uint8_t priority;               /* priority of message **/
+  FAR struct mqueue_msg_s *next;  /* Forward link to next message */
+  uint8_t type;                   /* (Used to manage allocations) */
+  uint8_t priority;               /* priority of message */
 #if MQ_MAX_BYTES < 256
-  uint8_t msglen;                 /* Message data length **/
+  uint8_t msglen;                 /* Message data length */
 #else
-  uint16_t msglen;                /* Message data length **/
+  uint16_t msglen;                /* Message data length */
 #endif
-  char mail[MQ_MAX_BYTES];        /* Message data **/
+  char mail[MQ_MAX_BYTES];        /* Message data */
 };
 
 /********************************************************************************
@@ -99,20 +99,20 @@ extern "C"
 
 /* The g_msgfree is a list of messages that are available for general use.
  * The number of messages in this list is a system configuration item.
- **/
+ */
 
 EXTERN sq_queue_t  g_msgfree;
 
 /* The g_msgfreeInt is a list of messages that are reserved for use by
  * interrupt handlers.
- **/
+ */
 
 EXTERN sq_queue_t  g_msgfreeirq;
 
 /* The g_desfree data structure is a list of message descriptors available
  * to the operating system for general use. The number of messages in the
  * pool is a constant.
- **/
+ */
 
 EXTERN sq_queue_t  g_desfree;
 
@@ -120,8 +120,8 @@ EXTERN sq_queue_t  g_desfree;
  * Public Function Prototypes
  ********************************************************************************/
 
-struct tcb_s;        /* Forward reference **/
-struct task_group_s; /* Forward reference **/
+struct tcb_s;        /* Forward reference */
+struct task_group_s; /* Forward reference */
 
 /* Functions defined in mq_initialize.c *****************************************/
 
@@ -162,5 +162,5 @@ void nxmq_recover(FAR struct tcb_s *tcb);
 }
 #endif
 
-#endif /* CONFIG_MQ_MAXMSGSIZE > 0 **/
-#endif /* __SCHED_MQUEUE_MQUEUE_H **/
+#endif /* CONFIG_MQ_MAXMSGSIZE > 0 */
+#endif /* __SCHED_MQUEUE_MQUEUE_H */
