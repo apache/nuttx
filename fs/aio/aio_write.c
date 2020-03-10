@@ -204,12 +204,12 @@ errout:
  *
  *   If O_APPEND is not set for the file descriptor aio_fildes, then the
  *   requested operation will take place at the absolute position in the file
- *   as given by aio_offset, as if lseek() were called immediately prior to the
- *   operation with an offset equal to aio_offset and a whence equal to SEEK_SET.
- *   If O_APPEND is set for the file descriptor, write operations append to the
- *   file in the same order as the calls were made. After a successful call to
- *   enqueue an asynchronous I/O operation, the value of the file offset for the
- *   file is unspecified.
+ *   as given by aio_offset, as if lseek() were called immediately prior to
+ *   the operation with an offset equal to aio_offset and a whence equal to
+ *   SEEK_SET. If O_APPEND is set for the file descriptor, write operations
+ *   append to the file in the same order as the calls were made. After a
+ *   successful call to enqueue an asynchronous I/O operation, the value of
+ *   the file offset for the file is unspecified.
  *
  *   The aiocbp->aio_lio_opcode field will be ignored by aio_write().
  *

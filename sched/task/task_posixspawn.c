@@ -276,9 +276,9 @@ static int nxposix_spawn_proxy(int argc, FAR char *argv[])
  *       value.
  *     - POSIX_SPAWN_SETSCHEDULER: Set the new task's scheduler policy to
  *       the sched_policy value.
- *     - POSIX_SPAWN_RESETIDS: Resetting of the effective user ID of the child
- *       process is not supported.  NuttX does not support effective user
- *       IDs.
+ *     - POSIX_SPAWN_RESETIDS: Resetting of the effective user ID of the
+ *       child process is not supported.  NuttX does not support effective
+ *       user IDs.
  *     - POSIX_SPAWN_SETSIGMASK: Set the new task's signal mask.
  *     - POSIX_SPAWN_SETSIGDEF:  Resetting signal default actions is not
  *       supported.  NuttX does not support default signal actions.
@@ -358,10 +358,10 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
       return nxposix_spawn_exec(pid, path, attr, argv);
     }
 
-  /* Otherwise, we will have to go through an intermediary/proxy task in order
-   * to perform the I/O redirection.  This would be a natural place to fork().
-   * However, true fork() behavior requires an MMU and most implementations
-   * of vfork() are not capable of these operations.
+  /* Otherwise, we will have to go through an intermediary/proxy task in
+   * order to perform the I/O redirection.  This would be a natural place
+   * to fork().  However, true fork() behavior requires an MMU and most
+   * implementations of vfork() are not capable of these operations.
    *
    * Even without fork(), we can still do the job, but parameter passing is
    * messier.  Unfortunately, there is no (clean) way to pass binary values

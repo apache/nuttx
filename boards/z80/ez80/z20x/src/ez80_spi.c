@@ -55,7 +55,7 @@
 
 void ez80_spidev_initialize(void)
 {
-#if defined(HAVE_MMCSD) || defined(HAVE_XPT2046)
+#if defined(HAVE_SPIFLASH) || defined(HAVE_MMCSD) || defined(HAVE_XPT2046)
   uint8_t regval;
   uint8_t pins;
 

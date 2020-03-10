@@ -1042,28 +1042,6 @@ static int tun_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Name: tun_ipv6multicast
- *
- * Description:
- *   Configure the IPv6 multicast MAC address.
- *
- * Input Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_ICMPv6
-static void tun_ipv6multicast(FAR struct tun_device_s *priv)
-{
-}
-#endif /* CONFIG_NET_ICMPv6 */
-
-/****************************************************************************
  * Name: tun_dev_init
  *
  * Description:

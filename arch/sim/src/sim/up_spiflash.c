@@ -178,7 +178,7 @@ struct sim_spiflashdev_s
   FAR char *        name;       /* Name of the flash type (m25p, w25, etc.) */
   int               wren;
   int               state;
-  uint16_t          read_data;
+  uint32_t          read_data;
   uint8_t           last_cmd;
   uint8_t           capacity;
   uint8_t           manuf;
@@ -194,27 +194,30 @@ struct sim_spiflashdev_s
 /* SPI methods */
 
 static int         spiflash_lock(FAR struct spi_dev_s *dev, bool lock);
-static uint32_t    spiflash_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
+static uint32_t    spiflash_setfrequency(FAR struct spi_dev_s *dev,
+                                         uint32_t frequency);
 static void        spiflash_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void        spiflash_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint16_t    spiflash_send(FAR struct spi_dev_s *dev, uint16_t wd);
-static void        spiflash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                                FAR void *rxbuffer, size_t nwords);
+static uint32_t    spiflash_send(FAR struct spi_dev_s *dev, uint32_t wd);
+static void        spiflash_exchange(FAR struct spi_dev_s *dev,
+                                     FAR const void *txbuffer, FAR void *rxbuffer,
+                                     size_t nwords);
 static void        spiflash_select(FAR struct spi_dev_s *dev, uint32_t devid,
-                     bool selected);
+                                   bool selected);
 static uint8_t     spiflash_status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int         spiflash_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+static int         spiflash_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
+                                    bool cmd);
 #endif
 #ifndef CONFIG_SPI_EXCHANGE
-static void        spiflash_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                                size_t nwords);
+static void        spiflash_sndblock(FAR struct spi_dev_s *dev,
+                                     FAR const void *txbuffer, size_t nwords);
 static void        spiflash_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
-                                 size_t nwords);
+                                      size_t nwords);
 #endif
 
 static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data);
-static uint16_t spiflash_readword(FAR struct sim_spiflashdev_s *priv);
+static uint32_t spiflash_readword(FAR struct sim_spiflashdev_s *priv);
 
 /************************************************************************************
  * Private Data
@@ -500,10 +503,10 @@ static uint8_t spiflash_status(FAR struct spi_dev_s *dev, uint32_t devid)
  *
  ************************************************************************************/
 
-static uint16_t spiflash_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spiflash_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   FAR struct sim_spiflashdev_s *priv = (FAR struct sim_spiflashdev_s *)dev;
-  uint16_t ret;
+  uint32_t ret;
 
   if (priv->selected)
     {
@@ -897,7 +900,7 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
  *
  ************************************************************************************/
 
-static uint16_t spiflash_readword(FAR struct sim_spiflashdev_s *priv)
+static uint32_t spiflash_readword(FAR struct sim_spiflashdev_s *priv)
 {
   return priv->read_data;
 }

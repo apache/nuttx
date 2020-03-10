@@ -66,12 +66,12 @@
 
 /* SPI Clocking.
  *
- * The CPU clock by 1, 2, 4, or 8 to get the SPI peripheral clock (SPI_CLOCK).
- * SPI_CLOCK may be further divided by 8-254 to get the SPI clock.  If we
- * want a usable range of 4KHz to 25MHz for the SPI, then:
+ * The CPU clock by 1, 2, 4, or 8 to get the SPI peripheral clock
+ * (SPI_CLOCK).  SPI_CLOCK may be further divided by 8-254 to get the SPI
+ * clock.  If we want a usable range of 4KHz to 25MHz for the SPI, then:
  *
- * 1. SPICLK must be greater than (8*25MHz) = 200MHz (so we can't reach 25MHz),
- *    and
+ * 1. SPICLK must be greater than (8*25MHz) = 200MHz (so we can't reach
+ *    25MHz), and
  * 2. SPICLK must be less than (254*40Khz) = 101.6MHz.
  *
  * If we assume that CCLK less than or equal to 100MHz, we can just
@@ -103,13 +103,17 @@ struct lpc43_spidev_s
 /* SPI methods */
 
 static int      spi_lock(FAR struct spi_dev_s *dev, bool lock);
-static void     spi_select(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
+static void     spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+                           bool selected);
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency);
 static void     spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
-static void     spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords);
-static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords);
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
+static void     spi_sndblock(FAR struct spi_dev_s *dev,
+                             FAR const void *buffer, size_t nwords);
+static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                              size_t nwords);
 
 /****************************************************************************
  * Private Data
@@ -141,7 +145,10 @@ static const struct spi_ops_s g_spiops =
 
 static struct lpc43_spidev_s g_spidev =
 {
-  .spidev            = { &g_spiops },
+  .spidev            =
+    {
+      &g_spiops
+    },
 };
 
 /****************************************************************************
@@ -205,7 +212,8 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
-static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency)
 {
   FAR struct lpc43_spidev_s *priv = (FAR struct lpc43_spidev_s *)dev;
   uint32_t divisor;
@@ -371,11 +379,11 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   /* Write the data to transmitted to the SPI Data Register */
 
-  putreg32((uint32_t)wd, LPC43_SPI_DR);
+  putreg32(wd, LPC43_SPI_DR);
 
   /* Wait for the SPIF bit in the SPI Status Register to be set to 1. The
    * SPIF bit will be set after the last sampling clock edge of the SPI
@@ -387,7 +395,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
   /* Read the SPI Status Register again to clear the status bit */
 
   getreg32(LPC43_SPI_SR);
-  return (uint16_t)getreg32(LPC43_SPI_DR);
+  return getreg32(LPC43_SPI_DR);
 }
 
 /****************************************************************************
@@ -402,14 +410,16 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size_t nwords)
+static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
+                         size_t nwords)
 {
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
   uint8_t data;
@@ -446,16 +456,18 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer, size
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            of words.  The wordsize is determined by the number of
+ *            bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *            the data is packed into uint8_t's; if nbits >8, the data is
+ *            packed into uint16_t's
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nwords)
+static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
+                          size_t nwords)
 {
   FAR uint8_t *ptr = (FAR uint8_t *)buffer;
 

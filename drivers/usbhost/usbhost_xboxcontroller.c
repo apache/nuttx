@@ -47,6 +47,7 @@
 #include <errno.h>
 #include <debug.h>
 #include <fcntl.h>
+#include <poll.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
@@ -185,6 +186,13 @@ struct usbhost_state_s
   pid_t                                pollpid;      /* PID of the poll task */
   size_t                               out_seq_num;  /* The sequence number for outgoing packets */
   struct xbox_controller_buttonstate_s rpt;          /* The latest report out of the controller. */
+
+  /* The following is a list if poll structures of threads waiting for
+   * driver events. The 'struct pollfd' reference for each open is also
+   * retained in the f_priv field of the 'struct file'.
+   */
+
+  struct pollfd *fds[CONFIG_XBOXCONTROLLER_NPOLLWAITERS];
 };
 
 /****************************************************************************
@@ -211,7 +219,10 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
 /* Worker thread actions */
 
 static void usbhost_destroy(FAR void *arg);
-static void usbhost_notify(FAR struct usbhost_state_s *priv);
+
+/* Polling support */
+
+static void usbhost_pollnotify(FAR struct usbhost_state_s *dev);
 static int usbhost_xboxcontroller_poll(int argc, char *argv[]);
 
 /* Helpers for usbhost_connect() */
@@ -254,7 +265,7 @@ static ssize_t usbhost_read(FAR struct file *filep,
                             FAR char *buffer, size_t len);
 static ssize_t usbhost_write(FAR struct file *filep,
                              FAR const char *buffer, size_t len);
-static int usbhost_ioctl(FAR struct file* filep, int cmd, unsigned long arg);
+static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
 
@@ -269,6 +280,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
 static const struct usbhost_id_s g_xboxcontroller_id[] =
 {
   /* XBox One classic controller */
+
   {
     USB_CLASS_VENDOR_SPEC,  /* base -- Must be one of the USB_CLASS_* definitions in usb.h */
     0x0047,  /* subclass -- depends on the device */
@@ -514,7 +526,7 @@ static void usbhost_destroy(FAR void *arg)
 }
 
 /****************************************************************************
- * Name: usbhost_notify
+ * Name: usbhost_pollnotify
  *
  * Description:
  *   Wake any threads waiting for controller data
@@ -527,7 +539,7 @@ static void usbhost_destroy(FAR void *arg)
  *
  ****************************************************************************/
 
-static void usbhost_notify(FAR struct usbhost_state_s *priv)
+static void usbhost_pollnotify(FAR struct usbhost_state_s *priv)
 {
   int i;
 
@@ -637,7 +649,7 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
                   uerr("  Too many errors... aborting: %d\n", nerrors);
                   ret = (int)nbytes;
                   break;
-               }
+                }
             }
         }
 
@@ -681,6 +693,7 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
               break;
 
             case USBHOST_GUIDE_BUTTON_STATUS:
+
               /* Get exclusive access to the controller state data */
 
               usbhost_takesem(&priv->exclsem);
@@ -723,7 +736,7 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
 
               /* Notify any waiters that new controller data is available */
 
-              usbhost_notify(priv);
+              usbhost_pollnotify(priv);
 
               /* Release our lock on the state structure */
 
@@ -732,6 +745,7 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
               break;
 
             case USBHOST_BUTTON_DATA:
+
               /* Ignore the controller data if no task has opened the driver. */
 
               if (priv->open)
@@ -787,23 +801,23 @@ static int usbhost_xboxcontroller_poll(int argc, char *argv[])
                     XBOX_BUTTON_SET(priv->tbuffer, XBOX_BUTTON_STICK_RIGHT_INDEX,
                                     XBOX_BUTTON_STICK_RIGHT_MASK);
                   priv->rpt.trigger_left =
-                    ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_TRIGGER_LEFT];
+                    ((int16_t *)(priv->tbuffer))[XBOX_BUTTON_TRIGGER_LEFT];
                   priv->rpt.trigger_right =
-                    ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_TRIGGER_RIGHT];
+                    ((int16_t *)(priv->tbuffer))[XBOX_BUTTON_TRIGGER_RIGHT];
                   priv->rpt.stick_left_x =
-                    ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_X];
+                    ((int16_t *)(priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_X];
                   priv->rpt.stick_left_y =
-                    ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_Y];
+                    ((int16_t *)(priv->tbuffer))[XBOX_BUTTON_STICK_LEFT_Y];
                   priv->rpt.stick_right_x =
-                    ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_X];
+                    ((int16_t *)(priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_X];
                   priv->rpt.stick_right_y =
-                    ((int16_t*)(priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_Y];
+                    ((int16_t *)(priv->tbuffer))[XBOX_BUTTON_STICK_RIGHT_Y];
 
                   priv->valid = true;
 
                   /* Notify any waiters that new controller data is available */
 
-                  usbhost_notify(priv);
+                  usbhost_pollnotify(priv);
 
                   /* Release our lock on the state structure */
 
@@ -1434,7 +1448,7 @@ static void usbhost_putle32(uint8_t *dest, uint32_t val)
   /* Little endian means LS halfword first in byte stream */
 
   usbhost_putle16(dest, (uint16_t)(val & 0xffff));
-  usbhost_putle16(dest+2, (uint16_t)(val >> 16));
+  usbhost_putle16(dest + 2, (uint16_t)(val >> 16));
 }
 #endif
 
@@ -1544,7 +1558,7 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_hubport_s *
 
       if (usbhost_allocdevno(priv) == OK)
         {
-         /* Initialize class method function pointers */
+          /* Initialize class method function pointers */
 
           priv->usbclass.hport        = hport;
           priv->usbclass.connect      = usbhost_connect;
@@ -1584,6 +1598,7 @@ static FAR struct usbhost_class_s *usbhost_create(FAR struct usbhost_hubport_s *
 /****************************************************************************
  * struct usbhost_class_s methods
  ****************************************************************************/
+
 /****************************************************************************
  * Name: usbhost_connect
  *
@@ -1727,6 +1742,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 /****************************************************************************
  * Character driver methods
  ****************************************************************************/
+
 /****************************************************************************
  * Name: usbhost_open
  *
@@ -2000,7 +2016,7 @@ static ssize_t usbhost_write(FAR struct file *filep, FAR const char *buffer,
  *
  ****************************************************************************/
 
-static int usbhost_ioctl(FAR struct file* filep, int cmd, unsigned long arg)
+static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode            *inode;
   FAR struct usbhost_state_s  *priv;
@@ -2038,7 +2054,6 @@ static int usbhost_ioctl(FAR struct file* filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-
     case XBOX_CONTROLLER_IOCTL_RUMBLE:
 
       /* The least significant byte is the weak actuator strength.
@@ -2047,8 +2062,8 @@ static int usbhost_ioctl(FAR struct file* filep, int cmd, unsigned long arg)
 
       memcpy(priv->obuffer, rumble_cmd, sizeof(rumble_cmd));
       priv->obuffer[2] = priv->out_seq_num++;
-      priv->obuffer[8] = (arg >> 1) & 0xff; // Strong (left actuator)
-      priv->obuffer[9] = arg & 0xff; // Weak (right actuator)
+      priv->obuffer[8] = (arg >> 1) & 0xff; /* Strong (left actuator) */
+      priv->obuffer[9] = arg & 0xff;        /* Weak (right actuator)  */
 
       /* Perform the transfer. */
 
@@ -2190,7 +2205,6 @@ errout:
 
 int usbhost_xboxcontroller_init(void)
 {
-
   /* Perform any one-time initialization of the class implementation */
 
   nxsem_init(&g_exclsem, 0, 1);

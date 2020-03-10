@@ -557,10 +557,11 @@ struct spi_ops_s
   CODE int      (*lock)(FAR struct spi_dev_s *dev, bool lock);
   CODE void     (*select)(FAR struct spi_dev_s *dev, uint32_t devid,
                   bool selected);
-  CODE uint32_t (*setfrequency)(FAR struct spi_dev_s *dev, uint32_t frequency);
+  CODE uint32_t (*setfrequency)(FAR struct spi_dev_s *dev,
+                  uint32_t frequency);
 #ifdef CONFIG_SPI_CS_DELAY_CONTROL
-  CODE int      (*setdelay)(FAR struct spi_dev_s *dev, uint32_t a, uint32_t b,
-                  uint32_t c);
+  CODE int      (*setdelay)(FAR struct spi_dev_s *dev, uint32_t a,
+                  uint32_t b, uint32_t c);
 #endif
   CODE void     (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
   CODE void     (*setbits)(FAR struct spi_dev_s *dev, int nbits);
@@ -573,7 +574,7 @@ struct spi_ops_s
   CODE int      (*cmddata)(FAR struct spi_dev_s *dev, uint32_t devid,
                   bool cmd);
 #endif
-  CODE uint16_t (*send)(FAR struct spi_dev_s *dev, uint16_t wd);
+  CODE uint32_t (*send)(FAR struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
   CODE void     (*exchange)(FAR struct spi_dev_s *dev,
                   FAR const void *txbuffer, FAR void *rxbuffer,
@@ -600,10 +601,6 @@ struct spi_dev_s
 {
   FAR const struct spi_ops_s *ops;
 };
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 #undef EXTERN
 #if defined(__cplusplus)

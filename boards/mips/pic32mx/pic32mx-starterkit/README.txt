@@ -546,15 +546,15 @@ Creating Compatible NuttX HEX files
     file to contain physical addresses.  But the nuttx.hex file generated from the
     top-level make will have address in the KSEG0 and KSEG1 regions.
 
-  tools/pic32mx/mkpichex:
+  tools/pic32/mkpichex:
   ----------------------
 
-    There is a simple tool in the NuttX tools/pic32mx directory that can be
+    There is a simple tool in the NuttX tools/pic32 directory that can be
     used to solve both issues with the nuttx.hex file.  But, first, you must
     build the tool:
 
-      cd tools/pic32mx
-      make
+      cd tools/pic32
+      make -f Makefile.host
 
     Now you will have an executable file call mkpichex (or mkpichex.exe on
     Cygwin).  This program will take the nutt.hex file as an input, it will
@@ -563,12 +563,14 @@ Creating Compatible NuttX HEX files
 
     To use this file, you need to do the following things:
 
-      export PATH=???  # Add the NuttX tools/pic32mx directory to your
+      export PATH=???  # Add the NuttX tools/pic32 directory to your
                        # PATH variable
       make             # Build nuttx and nuttx.hex
       mkpichex $PWD    #  Convert addresses in nuttx.hex.  $PWD is the path
                        # to the top-level build directory.  It is the only
                        # required input to mkpichex.
+
+      This procedure is automatically performed at the end of a build.
 
 Serial Console: MEB
 ===================

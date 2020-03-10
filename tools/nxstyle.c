@@ -1,4 +1,4 @@
-/****************************************************************************
+/********************************************************************************
  * tools/nxstyle.c
  *
  *   Copyright (C) 2015, 2018-2020 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ********************************************************************************/
 
-/****************************************************************************
+/********************************************************************************
  * Included Files
- ****************************************************************************/
+ ********************************************************************************/
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -48,9 +48,9 @@
 #include <unistd.h>
 #include <libgen.h>
 
-/****************************************************************************
+/********************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
+ ********************************************************************************/
 
 #define NXSTYLE_VERSION "0.01"
 
@@ -69,9 +69,9 @@
 #define INFO(m, l, o)  message(INFO, (m), (l), (o))
 #define INFOFL(m, s)   message(INFO, (m), -1, -1)
 
-/****************************************************************************
+/********************************************************************************
  * Private types
- ****************************************************************************/
+ ********************************************************************************/
 
 enum class_e
 {
@@ -112,15 +112,22 @@ enum section_s
   PUBLIC_FUNCTION_PROTOTYPES
 };
 
+enum pptype_e
+{
+  PPLINE_NONE = 0,
+  PPLINE_DEFINE,
+  PPLINE_OTHER
+};
+
 struct file_section_s
 {
   const char *name;   /* File section name */
   uint8_t     ftype;  /* File type where section found */
 };
 
-/****************************************************************************
+/********************************************************************************
  * Private data
- ****************************************************************************/
+ ********************************************************************************/
 
 static char *g_file_name        = "";
 static enum file_e g_file_type  = UNKNOWN;
@@ -184,16 +191,16 @@ static const struct file_section_s g_section_info[] =
   }
 };
 
-/****************************************************************************
+/********************************************************************************
  * Private Functions
- ****************************************************************************/
+ ********************************************************************************/
 
-/****************************************************************************
+/********************************************************************************
  * Name: show_usage
  *
  * Description:
  *
- ****************************************************************************/
+ ********************************************************************************/
 
 static void show_usage(char *progname, int exitcode, char *what)
 {
@@ -203,22 +210,24 @@ static void show_usage(char *progname, int exitcode, char *what)
       fprintf(stderr, "%s\n", what);
     }
 
-  fprintf(stderr, "Usage:  %s [-m <excess>] [-v <level>] [-r <start,count>] <filename>\n",
+  fprintf(stderr, "Usage:  %s [-m <excess>] [-v <level>] "
+                  "[-r <start,count>] <filename>\n",
           basename(progname));
   fprintf(stderr, "        %s -h this help\n", basename(progname));
-  fprintf(stderr, "        %s -v <level> where level is\n", basename(progname));
+  fprintf(stderr, "        %s -v <level> where level is\n",
+          basename(progname));
   fprintf(stderr, "                   0 - no output\n");
   fprintf(stderr, "                   1 - PASS/FAIL\n");
   fprintf(stderr, "                   2 - output each line (default)\n");
   exit(exitcode);
 }
 
-/****************************************************************************
+/********************************************************************************
  * Name: skip
  *
  * Description:
  *
- ****************************************************************************/
+ ********************************************************************************/
 
 static int skip(int lineno)
 {
@@ -226,7 +235,8 @@ static int skip(int lineno)
 
   for (i = 0; i < g_rangenumber; i++)
     {
-      if (lineno >= g_rangestart[i] && lineno < g_rangestart[i] + g_rangecount[i])
+      if (lineno >= g_rangestart[i] && lineno < g_rangestart[i] +
+          g_rangecount[i])
         {
           return 0;
         }
@@ -235,12 +245,12 @@ static int skip(int lineno)
   return g_rangenumber != 0;
 }
 
-/****************************************************************************
+/********************************************************************************
  * Name: message
  *
  * Description:
  *
- ****************************************************************************/
+ ********************************************************************************/
 
 static int message(enum class_e class, const char *text, int lineno, int ndx)
 {
@@ -273,12 +283,12 @@ static int message(enum class_e class, const char *text, int lineno, int ndx)
   return g_status;
 }
 
-/****************************************************************************
+/********************************************************************************
  * Name: check_spaces_left
  *
  * Description:
  *
- ****************************************************************************/
+ ********************************************************************************/
 
 static void check_spaces_left(char *line, int lineno, int ndx)
 {
@@ -294,12 +304,12 @@ static void check_spaces_left(char *line, int lineno, int ndx)
     }
 }
 
-/****************************************************************************
+/********************************************************************************
  * Name: check_spaces_leftright
  *
  * Description:
  *
- ****************************************************************************/
+ ********************************************************************************/
 
 static void check_spaces_leftright(char *line, int lineno, int ndx1, int ndx2)
 {
@@ -316,13 +326,13 @@ static void check_spaces_leftright(char *line, int lineno, int ndx1, int ndx2)
     }
 }
 
-/****************************************************************************
+/********************************************************************************
  * Name: block_comment_width
  *
  * Description:
  *   Get the width of a block comment
  *
- ****************************************************************************/
+ ********************************************************************************/
 
 static int block_comment_width(char *line)
 {
@@ -393,34 +403,40 @@ static int block_comment_width(char *line)
   return 0;
 }
 
-/****************************************************************************
+/********************************************************************************
  * Name: get_line_width
  *
  * Description:
  *   Get the maximum line width by examining the width of the block comments.
  *
- ****************************************************************************/
+ ********************************************************************************/
 
 static int get_line_width(FILE *instream)
 {
   char line[LINE_SIZE]; /* The current line being examined */
-  int max = 0;
-  int min = INT_MAX;
+  int max        = 0;
+  int min        = INT_MAX;
+  int lineno     = 0;
+  int lineno_max = 0;
+  int lineno_min = 0;
   int len;
 
   while (fgets(line, LINE_SIZE, instream))
     {
+      lineno++;
       len = block_comment_width(line);
       if (len > 0)
         {
           if (len > max)
             {
               max = len;
+              lineno_max = lineno;
             }
 
           if (len < min)
             {
               min = len;
+              lineno_min = lineno;
             }
         }
     }
@@ -432,20 +448,21 @@ static int get_line_width(FILE *instream)
     }
   else if (max != min)
     {
-      ERRORFL("Block comments have different lengths", g_file_name);
+      ERROR("Block comments have different lengths", lineno_max, max);
+      ERROR("Block comments have different lengths", lineno_min, min);
       return DEFAULT_WIDTH;
     }
 
   return min;
 }
 
-/****************************************************************************
+/********************************************************************************
  * Name:  check_section_header
  *
  * Description:
  *   Check if the current line holds a section header
  *
- ****************************************************************************/
+ ********************************************************************************/
 
 static bool check_section_header(const char *line, int lineno)
 {
@@ -473,9 +490,9 @@ static bool check_section_header(const char *line, int lineno)
   return false;
 }
 
-/****************************************************************************
+/********************************************************************************
  * Public Functions
- ****************************************************************************/
+ ********************************************************************************/
 
 int main(int argc, char **argv, char **envp)
 {
@@ -493,10 +510,13 @@ int main(int argc, char **argv, char **envp)
   bool bstring;         /* True: Within a string */
   bool bquote;          /* True: Backslash quoted character next */
   bool bblank;          /* Used to verify block comment terminator */
-  bool ppline;          /* True: The next line the continuation of a pre-processor command */
   bool bexternc;        /* True: Within 'extern "C"' */
-  bool brhcomment;      /* True: Comment to the right of code */
-  bool prevbrhcmt;      /* True: previous line had comment to the right of code */
+  enum pptype_e ppline; /* > 0: The next line the continuation of a
+                         * pre-processor command */
+  int rhcomment;        /* Indentation of Comment to the right of code
+                         * (-1 -> don't check position) */
+  int prevrhcmt;        /* Indentation of previous Comment to the right
+                         * of code (-1 -> don't check position) */
   int lineno;           /* Current line number */
   int indent;           /* Indentation level */
   int ncomment;         /* Comment nesting level on this line */
@@ -571,18 +591,6 @@ int main(int argc, char **argv, char **envp)
     }
 
   g_file_name = argv[optind];
-  instream = fopen(g_file_name, "r");
-
-  if (!instream)
-    {
-      FATALFL("Failed to open", g_file_name);
-      return 1;
-    }
-
-  /* Determine the line width */
-
-  g_maxline = get_line_width(instream) + excess;
-  rewind(instream);
 
   /* Are we parsing a header file? */
 
@@ -607,26 +615,42 @@ int main(int argc, char **argv, char **envp)
       return 0;
     }
 
-  btabs          = false; /* True: TAB characters found on the line */
-  bcrs           = false; /* True: Carriage return found on the line */
-  bfunctions     = false; /* True: In private or public functions */
-  bswitch        = false; /* True: Within a switch statement */
-  bstring        = false; /* True: Within a string */
-  ppline         = false; /* True: Continuation of a pre-processor line */
-  bexternc       = false; /* True: Within 'extern "C"' */
-  brhcomment     = false; /* True: Comment to the right of code */
-  prevbrhcmt     = false; /* True: Previous line had comment to the right of code */
-  lineno         = 0;     /* Current line number */
-  ncomment       = 0;     /* Comment nesting level on this line */
-  bnest          = 0;     /* Brace nesting level on this line */
-  dnest          = 0;     /* Data declaration nesting level on this line */
-  pnest          = 0;     /* Parenthesis nesting level on this line */
-  comment_lineno = -1;    /* Line on which the last comment was closed */
-  blank_lineno   = -1;    /* Line number of the last blank line */
-  noblank_lineno = -1;    /* A blank line is not needed after this line */
-  lbrace_lineno  = -1;    /* Line number of last left brace */
-  rbrace_lineno  = -1;    /* Last line containing a right brace */
-  externc_lineno = -1;    /* Last line where 'extern "C"' declared */
+  instream = fopen(g_file_name, "r");
+
+  if (!instream)
+    {
+      FATALFL("Failed to open", g_file_name);
+      return 1;
+    }
+
+  /* Determine the line width */
+
+  g_maxline = get_line_width(instream) + excess;
+  rewind(instream);
+
+  btabs          = false;       /* True: TAB characters found on the line */
+  bcrs           = false;       /* True: Carriage return found on the line */
+  bfunctions     = false;       /* True: In private or public functions */
+  bswitch        = false;       /* True: Within a switch statement */
+  bstring        = false;       /* True: Within a string */
+  bexternc       = false;       /* True: Within 'extern "C"' */
+  ppline         = PPLINE_NONE; /* > 0: The next line the continuation of a
+                                 * pre-processor command */
+  rhcomment      = 0;           /* Indentation of Comment to the right of code
+                                 * (-1 -> don't check position) */
+  prevrhcmt      = 0;           /* Indentation of previous Comment to the right
+                                 * of code (-1 -> don't check position) */
+  lineno         = 0;           /* Current line number */
+  ncomment       = 0;           /* Comment nesting level on this line */
+  bnest          = 0;           /* Brace nesting level on this line */
+  dnest          = 0;           /* Data declaration nesting level on this line */
+  pnest          = 0;           /* Parenthesis nesting level on this line */
+  comment_lineno = -1;          /* Line on which the last comment was closed */
+  blank_lineno   = -1;          /* Line number of the last blank line */
+  noblank_lineno = -1;          /* A blank line is not needed after this line */
+  lbrace_lineno  = -1;          /* Line number of last left brace */
+  rbrace_lineno  = -1;          /* Last line containing a right brace */
+  externc_lineno = -1;          /* Last line where 'extern "C"' declared */
 
   /* Process each line in the input stream */
 
@@ -635,17 +659,21 @@ int main(int argc, char **argv, char **envp)
       lineno++;
       indent       = 0;
       prevbnest    = bnest;    /* Brace nesting level on the previous line */
-      prevdnest    = dnest;    /* Data declaration nesting level on the previous line */
+      prevdnest    = dnest;    /* Data declaration nesting level on the
+                                * previous line */
       prevncomment = ncomment; /* Comment nesting level on the previous line */
-      bstatm       = false;    /* True: This line is beginning of a statement */
+      bstatm       = false;    /* True: This line is beginning of a
+                                * statement */
       bfor         = false;    /* REVISIT: Implies for() is all on one line */
 
-      /* If we are not in a comment, then this certainly is not a right-hand comment. */
+      /* If we are not in a comment, then this certainly is not a right-hand
+       * comment.
+       */
 
-      prevbrhcmt   = brhcomment;
+      prevrhcmt = rhcomment;
       if (ncomment <= 0)
         {
-          brhcomment = false;
+          rhcomment = 0;
         }
 
       /* Check for a blank line */
@@ -691,7 +719,7 @@ int main(int argc, char **argv, char **envp)
                * a comment.  Generally it is acceptable for one comment to
                * follow another with no space separation.
                *
-               * REVISIT: prevbrhcmt is tested to case the preceding line
+               * REVISIT: prevrhcmt is tested to case the preceding line
                * contained comments to the right of the code.  In such cases,
                * the comments are normally aligned and do not follow normal
                * indentation rules.  However, this code will generate a false
@@ -699,7 +727,7 @@ int main(int argc, char **argv, char **envp)
                * preceding line has no comment.
                */
 
-              if (line[n] != '}' /* && line[n] != '#' */ && !prevbrhcmt)
+              if (line[n] != '}' && line[n] != '#' && prevrhcmt == 0)
                 {
                    ERROR("Missing blank line after comment", comment_lineno,
                          1);
@@ -811,7 +839,7 @@ int main(int argc, char **argv, char **envp)
        * lines as indicated by ppline)
        */
 
-      if (line[indent] == '#' || ppline)
+      if (line[indent] == '#' || ppline != PPLINE_NONE)
         {
           int len;
           int ii;
@@ -824,7 +852,7 @@ int main(int argc, char **argv, char **envp)
            * line.
            */
 
-          if (!ppline)
+          if (ppline == PPLINE_NONE)
             {
               /* Skip to the pre-processor command following the '#' */
 
@@ -840,8 +868,12 @@ int main(int argc, char **argv, char **envp)
                     * the pre-processor definitions section.
                     */
 
+                   ppline = PPLINE_OTHER;
+
                    if (strncmp(&line[ii], "define", 6) == 0)
                      {
+                       ppline = PPLINE_DEFINE;
+
                        if (g_section != PRE_PROCESSOR_DEFINITIONS)
                          {
                            /* A complication is the header files always have
@@ -897,7 +929,59 @@ int main(int argc, char **argv, char **envp)
               len--;
             }
 
-          ppline = (line[len] == '\\');
+          /* Propagate rhcomment over preprocessor lines Issue #120 */
+
+          rhcomment = prevrhcmt;
+
+          lptr = strstr(line, "/*");
+          if (lptr != NULL)
+            {
+              n = lptr - &line[0];
+              if (line[n + 2] == '\n')
+                {
+                  ERROR("C comment opening on separate line", lineno, n);
+                }
+              else if (!isspace((int)line[n + 2]) && line[n + 2] != '*')
+                {
+                   ERROR("Missing space after opening C comment", lineno, n);
+                }
+
+              if (strstr(lptr, "*/") == NULL)
+                {
+                  /* Increment the count of nested comments */
+
+                  ncomment++;
+                }
+
+              if (ppline == PPLINE_DEFINE)
+                {
+                  rhcomment = n;
+                  if (prevrhcmt > 0 && n != prevrhcmt)
+                    {
+                      rhcomment = prevrhcmt;
+                      WARN("Wrong column position of comment right of code",
+                          lineno, n);
+                    }
+                }
+              else
+                {
+                  /* Signal rhcomment, but ignore position */
+
+                  rhcomment = -1;
+
+                  if (ncomment > 0 && !strncmp(&line[ii], "if", 2))
+                    {
+                      ERROR("No multiline comment right of code allowed here",
+                          lineno, n);
+                    }
+                }
+            }
+
+          if (line[len] != '\\' || ncomment > 0)
+            {
+              ppline = PPLINE_NONE;
+            }
+
           continue;
         }
 
@@ -912,11 +996,11 @@ int main(int argc, char **argv, char **envp)
             {
               /* If preceding comments were to the right of code, then we can
                * assume that there is a columnar alignment of columns that do
-               * no follow the usual alignment.  So the brhcomment flag
+               * no follow the usual alignment.  So the rhcomment flag
                * should propagate.
                */
 
-              brhcomment = prevbrhcmt;
+              rhcomment = prevrhcmt;
 
               /* Check if there should be a blank line before the comment */
 
@@ -924,9 +1008,11 @@ int main(int argc, char **argv, char **envp)
                   comment_lineno != lineno - 1 &&
                   blank_lineno   != lineno - 1 &&
                   noblank_lineno != lineno - 1 &&
-                  !brhcomment)
+                  rhcomment == 0)
                 {
-                  /* TODO:  This generates a false alarm if preceded by a label. */
+                  /* TODO:  This generates a false alarm if preceded
+                   * by a label.
+                   */
 
                    ERROR("Missing blank line before comment found", lineno, 1);
                 }
@@ -1282,6 +1368,13 @@ int main(int argc, char **argv, char **envp)
                       /* No error */
                     }
 
+                  /* Ignore ELF stuff like Elf32_Ehdr. */
+
+                  else if ((strncmp(&line[ident_index], "Elf", 3) == 0))
+                    {
+                      /* No error */
+                    }
+
                   /* Special case hex constants.  These will look like
                    * identifiers starting with 'x' or 'X' but preceded
                    * with '0'
@@ -1335,11 +1428,27 @@ int main(int argc, char **argv, char **envp)
                    * this must be a comment to the right of code.
                    * Also if preceding comments were to the right of code, then
                    * we can assume that there is a columnar alignment of columns
-                   * that do no follow the usual alignment.  So the brhcomment
+                   * that do no follow the usual alignment.  So the rhcomment
                    * flag should propagate.
                    */
 
-                  brhcomment = ((n != indent) || prevbrhcmt);
+                  if (prevrhcmt == 0)
+                    {
+                      if (n != indent)
+                        {
+                          rhcomment = n;
+                        }
+                    }
+                  else
+                    {
+                      rhcomment = n;
+                      if (prevrhcmt > 0 && n != prevrhcmt)
+                        {
+                          rhcomment = prevrhcmt;
+                          WARN("Wrong column position of comment right of code",
+                              lineno, n);
+                        }
+                    }
 
                   n++;
                   continue;
@@ -1365,7 +1474,7 @@ int main(int argc, char **argv, char **envp)
                    * not blank up to the point where the comment was closed.
                    */
 
-                  if (prevncomment > 0 && !bblank && !brhcomment)
+                  if (prevncomment > 0 && !bblank && rhcomment == 0)
                     {
                        ERROR("Block comment terminator must be on a "
                               "separate line", lineno, n);
@@ -1400,7 +1509,7 @@ int main(int argc, char **argv, char **envp)
 
                           comment_lineno = lineno;
 
-                          /* Note that brhcomment must persist to support a
+                          /* Note that rhcomment must persist to support a
                            * later test for comment alignment.  We will fix
                            * that at the top of the loop when ncomment == 0.
                            */
@@ -1408,7 +1517,7 @@ int main(int argc, char **argv, char **envp)
                     }
                   else
                     {
-                      /* Note that brhcomment must persist to support a later
+                      /* Note that rhcomment must persist to support a later
                        * test for comment alignment.  We will will fix that
                        * at the top of the loop when ncomment == 0.
                        */
@@ -2158,7 +2267,7 @@ int main(int argc, char **argv, char **envp)
                * already incremented above.
                */
 
-              if (ncomment > 1 || !brhcomment)
+              if (ncomment > 1 || rhcomment == 0)
                 {
                   ERROR("No indentation line", lineno, indent);
                 }
@@ -2191,7 +2300,7 @@ int main(int argc, char **argv, char **envp)
                    * aligned to the right of the code.
                    */
 
-                  if ((indent & 3) != 2 && !brhcomment)
+                  if ((indent & 3) != 2 && rhcomment == 0)
                     {
                        ERROR("Bad comment alignment", lineno, indent);
                     }
@@ -2209,15 +2318,16 @@ int main(int argc, char **argv, char **envp)
                 {
                   /* REVISIT: Generates false alarms on comments at the end of
                    * the line if there is nothing preceding (such as the aligned
-                   * comments with a structure field definition).  So disabled for
-                   * comments before beginning of function definitions.
+                   * comments with a structure field definition).  So disabled
+                   * for comments before beginning of function definitions.
                    *
-                   * Suppress this error if this is a comment to the right of code.
+                   * Suppress this error if this is a comment to the right of
+                   * code.
                    * Those may be unaligned.
                    */
 
                   if ((indent & 3) != 3 && bfunctions && dnest == 0 &&
-                      !brhcomment)
+                      rhcomment == 0)
                     {
                        ERROR("Bad comment block alignment", lineno, indent);
                     }

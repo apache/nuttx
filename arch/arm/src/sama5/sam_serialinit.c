@@ -49,6 +49,8 @@
  * Public Functions
  ****************************************************************************/
 
+#ifdef USE_EARLYSERIALINIT
+
 /****************************************************************************
  * Name: sam_earlyserialinit
  *
@@ -68,7 +70,7 @@ void sam_earlyserialinit(void)
 #if defined(SAMA5_HAVE_UART) || defined(SAMA5_HAVE_USART)
   /* Initialize UART/USART drivers */
 
-   uart_earlyserialinit();
+  uart_earlyserialinit();
 #endif
 
 #ifdef SAMA5_HAVE_FLEXCOM_USART
@@ -77,6 +79,7 @@ void sam_earlyserialinit(void)
   flexus_earlyserialinit();
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: up_serialinit

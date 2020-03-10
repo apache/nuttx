@@ -232,7 +232,7 @@ static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static int         spi_hwfeatures(FAR struct spi_dev_s *dev,
                                   spi_hwfeatures_t features);
 #endif
-static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
+static uint32_t    spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 static void        spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                                 FAR void *rxbuffer, size_t nwords);
 #ifdef CONFIG_SPI_TRIGGER
@@ -1508,16 +1508,16 @@ static int spi_hwfeatures(FAR struct spi_dev_s *dev, spi_hwfeatures_t features)
  *
  ************************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
   uint32_t regval;
-  uint16_t ret;
+  uint32_t ret;
 
   DEBUGASSERT(priv && priv->spibase);
 
-  spi_writeword(priv, wd);
-  ret = spi_readword(priv);
+  spi_writeword(priv, (uint32_t)(wd & 0xffff));
+  ret = (uint32_t)spi_readword(priv);
 
   /* Check and clear any error flags (Reading from the SR clears the error flags) */
 
@@ -1545,7 +1545,8 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *   nwords   - the length of data to be exchaned in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1592,7 +1593,7 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
 
           /* Exchange one word */
 
-          word = spi_send(dev, word);
+          word = (uint16_t)spi_send(dev, (uint32_t)word);
 
           /* Is there a buffer to receive the return value? */
 
@@ -1625,7 +1626,7 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
 
           /* Exchange one word */
 
-          word = (uint8_t)spi_send(dev, (uint16_t)word);
+          word = (uint8_t)spi_send(dev, (uint32_t)word);
 
           /* Is there a buffer to receive the return value? */
 
@@ -1651,7 +1652,8 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
  *   nwords   - the length of data to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1797,7 +1799,8 @@ static int spi_trigger(FAR struct spi_dev_s *dev)
  *   nwords   - the length of data to send from the buffer in number of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1826,7 +1829,8 @@ static void spi_sndblock(FAR struct spi_dev_s *dev,
  *   nwords   - the length of data that can be received in the buffer in number
  *              of words.  The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None

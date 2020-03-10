@@ -1,40 +1,28 @@
 /****************************************************************************
  * libs/libc/hex2bin/hex2bin.c
  *
- *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
  * References:
  *   - http://en.wikipedia.org/wiki/Intel_HEX
  *   - Hexadecimal Object File Format Specification, Revision A January 6,
  *     1988, Intel
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -208,7 +196,7 @@ static int word2bin(FAR const char *ascii)
  * Name: data2bin
  ****************************************************************************/
 
-int data2bin(FAR uint8_t* dest, FAR const uint8_t *src, int nsrcbytes)
+int data2bin(FAR uint8_t *dest, FAR const uint8_t *src, int nsrcbytes)
 {
   int byte;
 
@@ -220,7 +208,8 @@ int data2bin(FAR uint8_t* dest, FAR const uint8_t *src, int nsrcbytes)
     }
 
   /* Convert src bytes in groups of 2, writing one byte to the output on each
-   * pass through the loop. */
+   * pass through the loop.
+   */
 
   while (nsrcbytes > 0)
     {
@@ -270,7 +259,7 @@ static int readstream(FAR struct lib_instream_s *instream,
 
   /* Then read, verify, and buffer until the end of line is encountered */
 
-  while (ch != EOF && nbytes < (MAXRECORD_ASCSIZE-1))
+  while (ch != EOF && nbytes < (MAXRECORD_ASCSIZE - 1))
     {
 #if defined(CONFIG_EOL_IS_LF)
       if (ch == '\n')
@@ -289,12 +278,14 @@ static int readstream(FAR struct lib_instream_s *instream,
           *line = '\0';
           return nbytes;
         }
+
 #elif defined(CONFIG_EOL_IS_CR)
       if (ch == '\r')
         {
           *line = '\0';
           return nbytes;
         }
+
 #elif defined(CONFIG_EOL_IS_EITHER_CRLF)
       if (ch == '\n' || ch == '\r')
         {
@@ -302,6 +293,7 @@ static int readstream(FAR struct lib_instream_s *instream,
           return nbytes;
         }
 #endif
+
       /* Only hex data goes into the line buffer */
 
       else if (isxdigit(ch))
@@ -387,8 +379,8 @@ static inline void writedata(FAR struct lib_sostream_s *outstream,
  *   the binary to the seek-able serial OUT stream.
  *
  *   These streams may be files or, in another usage example, the IN stream
- *   could be a serial port and the OUT stream could be a memory stream.  This
- *   would decode and write the serial input to memory.
+ *   could be a serial port and the OUT stream could be a memory stream.
+ *   This would decode and write the serial input to memory.
  *
  * Input Parameters:
  *   instream  - The incoming stream from which Intel HEX data will be
@@ -443,6 +435,10 @@ int hex2bin(FAR struct lib_instream_s *instream,
   extension = 0;
   expected = 0;
   lineno = 0;
+
+  /* Read and process the HEX input stream stream until the end of file
+   * record is received (or until an error occurs)
+   */
 
   while ((nbytes = readstream(instream, line, lineno)) != EOF)
     {
@@ -518,7 +514,7 @@ int hex2bin(FAR struct lib_instream_s *instream,
       /* Get the 16-bit (unextended) address from the record */
 
       address16 = (uint16_t)bin[ADDRESS_BINNDX] << 8 |
-                  (uint16_t)bin[ADDRESS_BINNDX+1];
+                  (uint16_t)bin[ADDRESS_BINNDX + 1];
 
       /* Handle the record by its record type */
 
@@ -537,7 +533,8 @@ int hex2bin(FAR struct lib_instream_s *instream,
                 {
                   if ((bytecount & 1) != 0)
                     {
-                      lerr("Line %d ERROR: Byte count %d is not a multiple of 2\n",
+                      lerr("Line %d ERROR: Byte count %d is not a multiple "
+                           "of 2\n",
                            lineno, bytecount);
                        goto errout_with_einval;
                     }
@@ -552,7 +549,8 @@ int hex2bin(FAR struct lib_instream_s *instream,
                 {
                   if ((bytecount & 3) != 0)
                     {
-                      lerr("Line %d ERROR: Byte count %d is not a multiple of 4\n",
+                      lerr("Line %d ERROR: Byte count %d is not a multiple "
+                           "of 4\n",
                            lineno, bytecount);
                        goto errout_with_einval;
                     }
@@ -577,7 +575,8 @@ int hex2bin(FAR struct lib_instream_s *instream,
 
             if (address < baseaddr || (endpaddr != 0 && endaddr >= endpaddr))
               {
-                lerr("Line %d ERROR: Extended address %08lx is out of range\n",
+                lerr("Line %d ERROR: Extended address %08lx is out of "
+                     "range\n",
                      lineno, (unsigned long)address);
                 goto errout_with_einval;
               }
@@ -588,7 +587,8 @@ int hex2bin(FAR struct lib_instream_s *instream,
 
             if (address != expected)
               {
-                off_t pos = outstream->seek(outstream, address - baseaddr, SEEK_SET);
+                off_t pos = outstream->seek(outstream,
+                                            address - baseaddr, SEEK_SET);
                 if (pos == (off_t)-1)
                   {
                     lerr("Line %u ERROR: Seek to address %08lu failed\n",
@@ -609,6 +609,7 @@ int hex2bin(FAR struct lib_instream_s *instream,
           break;
 
         case RECORD_EOF: /* End of file */
+
           /*  End Of File record.  Must occur exactly once per file in the
            * last line of the file. The byte count is 00 and the data field
            * is empty. Usually the address field is also 0000.
@@ -625,6 +626,7 @@ int hex2bin(FAR struct lib_instream_s *instream,
           goto errout_with_einval;
 
         case RECORD_EXT_SEGADDR: /* Extended segment address record */
+
           /* The address specified by the data field is multiplied by 16
            * (shifted 4 bits left) and added to the subsequent data record
            * addresses. This allows addressing of up to a megabyte of
@@ -634,12 +636,12 @@ int hex2bin(FAR struct lib_instream_s *instream,
            * 0.
            */
 
-          if (bytecount != 2 || address16 != 0 || bin[DATA_BINNDX+1] != 0)
+          if (bytecount != 2 || address16 != 0 || bin[DATA_BINNDX + 1] != 0)
             {
               lerr("Line %u ERROR: Invalid segment address\n", lineno);
               lerr("  bytecount=%d address=%04x segment=%02x%02x\n",
                    bytecount, address16, bin[DATA_BINNDX],
-                   bin[DATA_BINNDX+1]);
+                   bin[DATA_BINNDX + 1]);
               goto errout_with_einval;
             }
 
@@ -647,6 +649,7 @@ int hex2bin(FAR struct lib_instream_s *instream,
           break;
 
         case RECORD_START_SEGADDR: /* Start segment address record */
+
           /* For 80x86 processors, it specifies the initial content of
            * the CS:IP registers. The address field is 0000, the byte
            * count is 04, the first two bytes are the CS value, the
@@ -656,6 +659,7 @@ int hex2bin(FAR struct lib_instream_s *instream,
           break;
 
         case RECORD_EXT_LINADDR: /* Extended linear address record */
+
           /* The address field is 0000, the byte count is 02. The two
            * data bytes (two hex digit pairs in big endian order)
            * represent the upper 16 bits of the 32 bit address for
@@ -675,10 +679,11 @@ int hex2bin(FAR struct lib_instream_s *instream,
             }
 
           extension = (uint16_t)bin[DATA_BINNDX] << 8 |
-                      (uint16_t)bin[DATA_BINNDX+1];
+                      (uint16_t)bin[DATA_BINNDX + 1];
           break;
 
         case RECORD_START_LINADDR: /* Start linear address record */
+
           /* The address field is 0000, the byte count is 04. The 4
            * data bytes represent the 32-bit value loaded into the EIP
            * register of the 80386 and higher CPU.

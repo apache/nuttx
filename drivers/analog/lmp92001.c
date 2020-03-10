@@ -215,7 +215,7 @@ struct lmp92001_dev_s
 static int lmp92001_i2c_write(FAR struct lmp92001_dev_s *priv,
                               FAR const uint8_t *buffer, int buflen);
 static int lmp92001_i2c_read(FAR struct lmp92001_dev_s *priv,
-                              uint8_t reg, FAR uint8_t *buffer, int buflen);
+                             uint8_t reg, FAR uint8_t *buffer, int buflen);
 
 static int lmp92001_dac_setref(FAR struct lmp92001_dev_s *priv,
                                enum lmp92001_ref_e ref);
@@ -241,9 +241,9 @@ static int  lmp92001_dac_setup(FAR struct dac_dev_s *dev);
 static void lmp92001_dac_shutdown(FAR struct dac_dev_s *dev);
 static void lmp92001_dac_txint(FAR struct dac_dev_s *dev, bool enable);
 static int  lmp92001_dac_send(FAR struct dac_dev_s *dev,
-                               FAR struct dac_msg_s *msg);
+                              FAR struct dac_msg_s *msg);
 static int  lmp92001_dac_ioctl(FAR struct dac_dev_s *dev, int cmd,
-                                unsigned long arg);
+                               unsigned long arg);
 #endif
 
 /* ADC Interface. */
@@ -256,7 +256,7 @@ static int  lmp92001_adc_setup(FAR struct adc_dev_s *dev);
 static void lmp92001_adc_shutdown(FAR struct adc_dev_s *dev);
 static void lmp92001_adc_rxint(FAR struct adc_dev_s *dev, bool enable);
 static int  lmp92001_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
-                                unsigned long arg);
+                               unsigned long arg);
 #endif
 
 /* I/O Expander Interface. */
@@ -264,8 +264,8 @@ static int  lmp92001_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
 #ifdef CONFIG_IOEXPANDER
 static int lmp92001_gpio_direction(FAR struct ioexpander_dev_s *dev,
                                    uint8_t pin, int dir);
-static int lmp92001_gpio_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                                int opt, void *regval);
+static int lmp92001_gpio_option(FAR struct ioexpander_dev_s *dev,
+                                uint8_t pin, int opt, void *regval);
 static int lmp92001_gpio_writepin(FAR struct ioexpander_dev_s *dev,
                                   uint8_t pin, bool value);
 static int lmp92001_gpio_readpin(FAR struct ioexpander_dev_s *dev,
@@ -281,7 +281,8 @@ static int lmp92001_gpio_multireadpin(FAR struct ioexpander_dev_s *dev,
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static FAR void *lmp92001_gpio_attach(FAR struct ioexpander_dev_s *dev,
                                       ioe_pinset_t pinset,
-                                      ioe_callback_t callback, FAR void *arg);
+                                      ioe_callback_t callback,
+                                      FAR void *arg);
 static int lmp92001_gpio_detach(FAR struct ioexpander_dev_s *dev,
                                 FAR void *handle);
 #endif
@@ -523,14 +524,15 @@ static void lmp92001_dac_reset(FAR struct dac_dev_s *dev)
  * Description:
  *   Configure the DAC. This method is called the first time that the DAC
  *   device is opened.  This will occur when the port is first opened.
- *   This setup includes configuring and attaching DAC interrupts.  Interrupts
+ *   This setup includes configuring and attaching DAC interrupts. Interrupts
  *   are all disabled upon return.
  *
  ****************************************************************************/
 
 static int lmp92001_dac_setup(FAR struct dac_dev_s *dev)
 {
-  FAR struct lmp92001_dev_s *priv = (FAR struct lmp92001_dev_s *)dev->ad_priv;
+  FAR struct lmp92001_dev_s *priv =
+    (FAR struct lmp92001_dev_s *)dev->ad_priv;
 
   uint8_t const BUFFER_SIZE = 2u;
   uint8_t buffer[BUFFER_SIZE];
@@ -587,7 +589,8 @@ static void lmp92001_dac_txint(FAR struct dac_dev_s *dev, bool enable)
 static int lmp92001_dac_send(FAR struct dac_dev_s *dev,
                              FAR struct dac_msg_s *msg)
 {
-  FAR struct lmp92001_dev_s *priv = (FAR struct lmp92001_dev_s *)dev->ad_priv;
+  FAR struct lmp92001_dev_s *priv =
+    (FAR struct lmp92001_dev_s *)dev->ad_priv;
 
   uint8_t const BUFFER_SIZE = 3u;
   uint8_t buffer[BUFFER_SIZE];
@@ -632,7 +635,8 @@ static int lmp92001_dac_send(FAR struct dac_dev_s *dev,
 static int lmp92001_dac_ioctl(FAR struct dac_dev_s *dev, int cmd,
                                unsigned long arg)
 {
-  FAR struct lmp92001_dev_s *priv = (FAR struct lmp92001_dev_s *)dev->ad_priv;
+  FAR struct lmp92001_dev_s *priv =
+    (FAR struct lmp92001_dev_s *)dev->ad_priv;
   int ret = OK;
 
   switch (cmd)
@@ -769,7 +773,8 @@ static int lmp92001_adc_enablechannel(FAR struct lmp92001_dev_s *priv,
 
   int ret = OK;
 
-  if (priv->adc_channels_enabled < LMP92001_ADC_MAX_CHANNELS && channels != 0)
+  if (priv->adc_channels_enabled < LMP92001_ADC_MAX_CHANNELS &&
+      channels != 0)
     {
       lmp92001_adc_extractchannel(priv, channels);
 
@@ -1007,7 +1012,8 @@ static int lmp92001_adc_readchannel(FAR struct lmp92001_dev_s *priv,
 static int lmp92001_adc_bind(FAR struct adc_dev_s *dev,
                               FAR const struct adc_callback_s *callback)
 {
-  FAR struct lmp92001_dev_s *priv = (FAR struct lmp92001_dev_s *)dev->ad_priv;
+  FAR struct lmp92001_dev_s *priv =
+    (FAR struct lmp92001_dev_s *)dev->ad_priv;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1259,8 +1265,8 @@ static int lmp92001_gpio_direction(FAR struct ioexpander_dev_s *dev,
  *
  ****************************************************************************/
 
-static int lmp92001_gpio_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                                int opt, void *regval)
+static int lmp92001_gpio_option(FAR struct ioexpander_dev_s *dev,
+                                uint8_t pin, int opt, void *regval)
 {
   return OK;
 }
@@ -1434,7 +1440,8 @@ static int lmp92001_gpio_multireadpin(FAR struct ioexpander_dev_s *dev,
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static FAR void *lmp92001_gpio_attach(FAR struct ioexpander_dev_s *dev,
                                        ioe_pinset_t pinset,
-                                       ioe_callback_t callback, FAR void *arg)
+                                       ioe_callback_t callback,
+                                       FAR void *arg)
 {
 }
 

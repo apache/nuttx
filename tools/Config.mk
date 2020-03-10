@@ -2,7 +2,7 @@
 # tools/Config.mk
 # Global build rules and macros.
 #
-#   Copyright (C) 2011, 2013-2014, 2018-2019 Gregory Nutt. All rights
+#   Copyright (C) 2011, 2013-2014, 2018-2019, 2020 Gregory Nutt. All rights
 #     reserved.
 #   Author: Richard Cochran
 #           Gregory Nutt <gnutt@nuttx.org>
@@ -238,6 +238,15 @@ define PRELINK
 	$(Q) $(LD) -Ur -o $1 $2 && $(OBJCOPY) --localize-hidden $1
 endef
 endif
+
+# POSTBUILD -- Perform post build operations
+# Some architectures require the use of special tools and special handling
+# AFTER building the NuttX binary.  Make.defs files for thos architectures
+# should override the following define with the correct operations for
+# that platform
+
+define POSTBUILD
+endef
 
 # DELFILE - Delete one file
 

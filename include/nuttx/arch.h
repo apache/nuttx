@@ -132,10 +132,11 @@ extern "C"
  * then that limit must be respected.
  *
  * If CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP is defined, then use a 32-bit
- * global variable called g_oneshot_maxticks variable is enabled. This variable
- * is initialized by platform-specific logic at runtime to the maximum delay
- * that the timer can wait (in configured clock ticks).  The RTOS tickless
- * logic will then limit all requested delays to this value (in ticks).
+ * global variable called g_oneshot_maxticks variable is enabled. This
+ * variable is initialized by platform-specific logic at runtime to the
+ * maximum delay that the timer can wait (in configured clock ticks).
+ * The RTOS tickless logic will then limit all requested delays to this
+ * value (in ticks).
  */
 
 EXTERN uint32_t g_oneshot_maxticks;
@@ -478,6 +479,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);
  *   disable interrupts before performing scheduling operations.
  *
  ****************************************************************************/
+
 /* Prototype is in unistd.h */
 
 /****************************************************************************
@@ -487,6 +489,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);
  *   Assertions may be handled in an architecture-specific way.
  *
  ****************************************************************************/
+
 /* Prototype is in assert.h */
 
 /****************************************************************************
@@ -828,7 +831,8 @@ void up_sched_garbage_collection(void);
  * If CONFIG_ARCH_KERNEL_STACK=y is selected then the platform specific
  * code must export these additional interfaces:
  *
- *   up_addrenv_kstackalloc  - Create a stack in the kernel address environment
+ *   up_addrenv_kstackalloc  - Create a stack in the kernel address
+ *                             environment
  *   up_addrenv_kstackfree   - Destroy the kernel stack.
  *
  ****************************************************************************/
@@ -1177,10 +1181,10 @@ int up_addrenv_vustack(FAR const struct tcb_s *tcb, FAR void **vstack);
  *
  * Description:
  *   After an address environment has been established for a task's stack
- *   (via up_addrenv_ustackalloc().  This function may be called to instantiate
- *   that address environment in the virtual address space.  This is a
- *   necessary step before each context switch to the newly created thread
- *   (including the initial thread startup).
+ *   (via up_addrenv_ustackalloc().  This function may be called to
+ *   instantiate that address environment in the virtual address space.
+ *   This is a necessary step before each context switch to the newly created
+ *   thread (including the initial thread startup).
  *
  * Input Parameters:
  *   tcb - The TCB of the thread with the stack address environment to be
@@ -1266,7 +1270,8 @@ FAR void *up_addrenv_pa_to_va(uintptr_t pa);
  *   architecture-specific support?
  *
  * Input Parameters:
- *   va - The virtual address to be mapped.  Not supported by all architectures.
+ *   va - The virtual address to be mapped.  Not supported by all
+ *        architectures.
  *
  * Returned Value:
  *   Phy address on success; NULL on failure.
@@ -1358,8 +1363,8 @@ bool up_interrupt_context(void);
  *
  *   This function implements enabling of the device specified by 'irq'
  *   at the interrupt controller level if supported by the architecture
- *   (up_irq_restore() supports the global level, the device level is hardware
- *   specific).
+ *   (up_irq_restore() supports the global level, the device level is
+ *   hardware specific).
  *
  *   Since this API is not supported on all architectures, it should be
  *   avoided in common implementations where possible.
@@ -1440,9 +1445,9 @@ void up_timer_initialize(void);
  *     time from the platform specific time source.
  *
  * The tickless option can be supported either via a simple interval timer
- * (plus elapsed time) or via an alarm.  The interval timer allows programming
- * events to occur after an interval.  With the alarm, you can set a time in
- * the future and get an event when that alarm goes off.
+ * (plus elapsed time) or via an alarm.  The interval timer allows
+ * programming events to occur after an interval.  With the alarm, you can
+ * set a time in the future and get an event when that alarm goes off.
  *
  *   int up_alarm_cancel(void):  Cancel the alarm.
  *   int up_alarm_start(FAR const struct timespec *ts): Enable (or re-anable
@@ -1557,7 +1562,8 @@ int up_alarm_cancel(FAR struct timespec *ts);
  *
  * Input Parameters:
  *   ts - The time in the future at the alarm is expected to occur.  When
- *        the alarm occurs the timer logic will call nxsched_alarm_expiration().
+ *        the alarm occurs the timer logic will call
+ *        nxsched_alarm_expiration().
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -1987,8 +1993,8 @@ int up_cpu_resume(int cpu);
  *   lie in FLASH (string arguments for %s are still assumed to reside in
  *   SRAM). And (2), the string argument to puts and fputs is assumed to
  *   reside in FLASH.  Clearly, these assumptions may have to modified for
- *   the particular needs of your environment.  There is no "one-size-fits-all"
- *   solution for this problem.
+ *   the particular needs of your environment.  There is no
+ *   "one-size-fits-all" solution for this problem.
  *
  ****************************************************************************/
 
@@ -2011,7 +2017,7 @@ void up_mdelay(unsigned int milliseconds);
 void up_udelay(useconds_t microseconds);
 
 /****************************************************************************
- * These are standard interfaces that are exported by the OS for use by thecd .
+ * These are standard interfaces that are exported by the OS for use by the.
  * architecture specific logic
  ****************************************************************************/
 
@@ -2169,15 +2175,15 @@ size_t  up_check_intstack_remain(void);
 int up_rtc_initialize(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_time
  *
  * Description:
  *   Get the current time in seconds.  This is similar to the standard time()
- *   function.  This interface is only required if the low-resolution RTC/counter
- *   hardware implementation selected.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC is set but neither
- *   CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
+ *   function.  This interface is only required if the low-resolution
+ *   RTC/counter hardware implementation selected.  It is only used by the
+ *   RTOS during initialization to set up the system time when CONFIG_RTC is
+ *   set but neither CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
  *
  * Input Parameters:
  *   None
@@ -2185,18 +2191,19 @@ int up_rtc_initialize(void);
  * Returned Value:
  *   The current time in seconds.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC) && !defined(CONFIG_RTC_HIRES)
 time_t up_rtc_time(void);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_gettime
  *
  * Description:
- *   Get the current time from the high resolution RTC clock/counter.  This interface
- *   is only supported by the high-resolution RTC/counter hardware implementation.
+ *   Get the current time from the high resolution RTC clock/counter.  This
+ *   interface is only supported by the high-resolution RTC/counter hardware
+ *   implementation.
  *   It is used to replace the system timer.
  *
  * Input Parameters:
@@ -2205,26 +2212,26 @@ time_t up_rtc_time(void);
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC) && defined(CONFIG_RTC_HIRES)
 int up_rtc_gettime(FAR struct timespec *tp);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_getdatetime
  *
  * Description:
  *   Get the current date and time from the date/time RTC.  This interface
  *   is only supported by the date/time RTC hardware implementation.
- *   It is used to replace the system timer.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
- *   are selected (and CONFIG_RTC_HIRES is not).
+ *   It is used to replace the system timer.  It is only used by the RTOS
+ *   during initialization to set up the system time when CONFIG_RTC and
+ *   CONFIG_RTC_DATETIME are selected (and CONFIG_RTC_HIRES is not).
  *
- *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.  That
- *   sub-second accuracy is lost in this interface.  However, since the system time
- *   is reinitialized on each power-up/reset, there will be no timing inaccuracy in
- *   the long run.
+ *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.
+ *   That sub-second accuracy is lost in this interface.  However, since the
+ *   system time is reinitialized on each power-up/reset, there will be no
+ *   timing inaccuracy in the long run.
  *
  * Input Parameters:
  *   tp - The location to return the high resolution time value.
@@ -2232,26 +2239,26 @@ int up_rtc_gettime(FAR struct timespec *tp);
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC) && defined(CONFIG_RTC_DATETIME)
 int up_rtc_getdatetime(FAR struct tm *tp);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_getdatetime_with_subseconds
  *
  * Description:
  *   Get the current date and time from the date/time RTC.  This interface
  *   is only supported by the date/time RTC hardware implementation.
- *   It is used to replace the system timer.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
- *   are selected (and CONFIG_RTC_HIRES is not).
+ *   It is used to replace the system timer.  It is only used by the RTOS
+ *   during initialization to set up the system time when CONFIG_RTC and
+ *   CONFIG_RTC_DATETIME are selected (and CONFIG_RTC_HIRES is not).
  *
- *   NOTE: This interface exposes sub-second accuracy capability of RTC hardware.
- *   This interface allow maintaining timing accuracy when system time needs constant
- *   resynchronization with RTC, for example on MCU with low-power state that
- *   stop system timer.
+ *   NOTE: This interface exposes sub-second accuracy capability of RTC
+ *   hardware. This interface allow maintaining timing accuracy when system
+ *   time needs constant resynchronization with RTC, for example on MCU with
+ *   low-power state that stop system timer.
  *
  * Input Parameters:
  *   tp - The location to return the high resolution time value.
@@ -2260,19 +2267,19 @@ int up_rtc_getdatetime(FAR struct tm *tp);
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_RTC) && defined(CONFIG_RTC_DATETIME) && \
     defined(CONFIG_ARCH_HAVE_RTC_SUBSECONDS)
 int up_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
- *   Set the RTC to the provided time.  All RTC implementations must be able to
- *   set their time based on a standard timespec.
+ *   Set the RTC to the provided time.  All RTC implementations must be able
+ *   to set their time based on a standard timespec.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -2280,7 +2287,7 @@ int up_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec);
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC
 int up_rtc_settime(FAR const struct timespec *tp);
@@ -2377,7 +2384,7 @@ int up_putc(int ch);
 
 void up_puts(FAR const char *str);
 
-/********************************************************************************
+/****************************************************************************
  * Name: arch_sporadic_*
  *
  * Description:
@@ -2391,7 +2398,7 @@ void up_puts(FAR const char *str);
  * Returned Value:
  *   None
  *
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SPORADIC_INSTRUMENTATION
 void arch_sporadic_start(FAR struct tcb_s *tcb);
@@ -2400,7 +2407,7 @@ void arch_sporadic_suspend(FAR struct tcb_s *tcb);
 void arch_sporadic_resume(FAR struct tcb_s *tcb);
 #endif
 
-/********************************************************************************
+/****************************************************************************
  * Name: up_critmon_*
  *
  * Description:
@@ -2417,7 +2424,7 @@ void arch_sporadic_resume(FAR struct tcb_s *tcb);
  *
  *   The second interface simple converts an elapsed time into well known
  *   units.
- ********************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_SCHED_CRITMONITOR
 uint32_t up_critmon_gettime(void);

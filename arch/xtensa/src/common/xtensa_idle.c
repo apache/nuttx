@@ -92,4 +92,11 @@ void up_idle(void)
   leave_critical_section(flags);
 #endif
 #endif
+
+  /* This would be an appropriate place to put some MCU-specific logic to
+   * sleep in a reduced power mode until an interrupt occurs to save power
+   */
+
+  asm("waiti 0");
+
 }

@@ -80,8 +80,8 @@ void nxtask_recover(FAR struct tcb_s *tcb)
 
   wd_recover(tcb);
 
-  /* If the thread holds semaphore counts or is waiting for a semaphore count,
-   * then release the counts.
+  /* If the thread holds semaphore counts or is waiting for a semaphore
+   *  count, then release the counts.
    */
 
   nxsem_recover(tcb);

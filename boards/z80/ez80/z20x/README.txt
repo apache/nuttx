@@ -306,44 +306,43 @@ Configuration Subdirectories
        - The stack sizes have not been tuned and, hence, are probably too
          large.
 
-  sdboot
+  w25boot
 
     This configuration implements a very simple boot loader.  In runs from
-    FLASH and simply initializes the external SRAM, mounts the FAT file
-    system on the SD card, and checks to see if there is a file called
-    nuttx.hex on the SD card.  If so, it will load the Intel HEX file into
-    memory and jump to address 0x040000.  This, of course, assumes that
-    the application's reset vector resides at address 0x040000 in external
-    SRAM.
+    FLASH and simply initializes the external SRAM, mounts the W25 FLASH
+    and checks to see if there is a valid binary image at the beginning of
+    FLASH.  If so, it will load the binary into RAM, verify it and jump to
+    0x50000.  This, of course, assumes that the application's entry point
+    vector resides at address 0x050000 in external SRAM.
 
-    The boot loader source is located at boards/z20x/src/sd_main.c.
+    The boot loader source is located at boards/z20x/src/w25_main.c.
 
     NOTES:
 
-    1. This version of the eZ80 bootloader is not usable in its current
-       state.  That is because the the eZ80F92 Interrupt Controller is
-       not as robust as the eZ80F91 Interrupt Controller.  A consequence
-       is that the interrupt vectors must always reside within the first
-       64Kb of FLASH memory.  It will not be possible to run programs in
-       SRAM *unless* some mechanism is developed to redirect interrupts
-       from ROM and into loaded SRAM logic.
+    1. A large UART1 Rx buffer (4Kb), a slow UART1 BAUD (2400), and a very
+       low Rx FIFO trigger are used to avoid serial data overruns.  Running
+       at only 20MHz, the eZ80F92 is unable to process 115200 BAUD Intel Hex
+       at speed.  It is likely that a usable BAUD higher than 2400 could be
+       found through experimentation; it could also be possible to implement
+       some software handshake to protect the eZ80f92 from overrun (the
+       eZ80F92 does not support hardware flow control)
 
-       For example, it might be possible to implement this kind of
-       vectoring to get to a RAM based interrupt handler:
+       At 2400 BAUD the download takes a considerable amount of time but
+       seems to be reliable
 
-       a. The initial 16-bit address in the interrupt vector table can
-          transfer the interrupt to a larger jump table also in lower
-          flash memory.
-       b. That jump table could vector to another jump table at a known
-          location RAM.
-       c. The RAM jump table could then jump to the final RAM-based
-          interrupt handler.
+       Massive data loss occurs due to overruns at 115200 BAUD.  I have
+       tried the bootloader at 9600 with maybe 30-40% data loss, too much
+       data loss to be usable.  At 9600 baud, the Rx data overrun appears
+       to be in the Rx FIFO; the data loss symptom is small sequences of
+       around 8-10 bytes often missing in the data.  Apparently, the Rx FIFO
+       overflows before the poor little  eZ80F92 can service the Rx
+       interrupt and clear the FIFO.
 
-       This would effect the logic in arch/z80/src/ez80/ez80f92_handlers.am
-       and possible the z20x *.linkcmd files.
+       The Rx FIFO trigger is set at 1 so that the ez80F92 will respond as
+       quickly to receipt of Rx data is possible and clear out the Rx FIFO.
+       The Rx FIFO trigger level is a trade-off be fast responsiveness and
+       reduced chance of Rx FIFO overrun (low) versus reduced Rx interrupt
+       overhead (high).
 
-    2. Another thing that would have to be done before this configuration
-       would be usable is to partition the external in some way so that
-       there is no collision between the bootloader's use of SRAM and the
-       SRAM required by the newly loaded program.
-
+       Things worth trying:  4800 BAUD, smaller Rx buffer, large Rx FIFO
+       trigger level.

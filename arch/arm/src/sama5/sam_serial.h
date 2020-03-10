@@ -127,7 +127,7 @@ void flexus_earlyserialinit(void);
  *
  ****************************************************************************/
 
-#if defined(SAMA5_HAVE_UART) || defined(SAMA5_HAVE_USART)
+#if defined(USE_SERIALDRIVER) && (defined(SAMA5_HAVE_UART) || defined(SAMA5_HAVE_USART))
 void uart_serialinit(void);
 #endif
 
@@ -140,7 +140,7 @@ void uart_serialinit(void);
  *
  ****************************************************************************/
 
-#if defined(USE_EARLYSERIALINIT) && defined(SAMA5_HAVE_FLEXCOM_USART)
+#if defined(USE_SERIALDRIVER) && defined(SAMA5_HAVE_FLEXCOM_USART)
 void flexus_serialinit(void);
 #endif
 

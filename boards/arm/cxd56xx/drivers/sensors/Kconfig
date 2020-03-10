@@ -174,5 +174,4 @@ config RPR0521RS_PROXIMITY_INTERRUPT
 		In this case, SCU sequencer is not used.
 
 endif # SENSORS_RPR0521RS_SCU
-
 endif # SCU_SENSORS

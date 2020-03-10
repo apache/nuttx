@@ -615,9 +615,9 @@ static inline void nxtask_flushstreams(FAR struct tcb_s *tcb)
 
 void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
 {
-  /* Under certain conditions, nxtask_exithook() can be called multiple times.
-   * A bit in the TCB was set the first time this function was called.  If
-   * that bit is set, then just exit doing nothing more..
+  /* Under certain conditions, nxtask_exithook() can be called multiple
+   * times.  A bit in the TCB was set the first time this function was
+   * called.  If that bit is set, then just exit doing nothing more..
    */
 
   if ((tcb->flags & TCB_FLAG_EXIT_PROCESSING) != 0)
