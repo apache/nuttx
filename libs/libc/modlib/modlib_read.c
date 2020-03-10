@@ -127,31 +127,31 @@ int modlib_read(FAR struct mod_loadinfo_s *loadinfo, FAR uint8_t *buffer,
 
       /* Read the file data at offset into the user buffer */
 
-       nbytes = _NX_READ(loadinfo->filfd, buffer, readsize);
-       if (nbytes < 0)
-         {
-           int errval = _NX_GETERRNO(nbytes);
+      nbytes = _NX_READ(loadinfo->filfd, buffer, readsize);
+      if (nbytes < 0)
+        {
+          int errval = _NX_GETERRNO(nbytes);
 
-           /* EINTR just means that we received a signal */
+          /* EINTR just means that we received a signal */
 
-           if (errval != EINTR)
-             {
-               berr("ERROR: Read from offset %lu failed: %d\n",
-                    (unsigned long)offset, errval);
-               return -errval;
-             }
-         }
-       else if (nbytes == 0)
-         {
-           berr("ERROR: Unexpected end of file\n");
-           return -ENODATA;
-         }
-       else
-         {
-           readsize -= nbytes;
-           buffer   += nbytes;
-           offset   += nbytes;
-         }
+          if (errval != EINTR)
+            {
+              berr("ERROR: Read from offset %lu failed: %d\n",
+                   (unsigned long)offset, errval);
+              return -errval;
+            }
+        }
+      else if (nbytes == 0)
+        {
+          berr("ERROR: Unexpected end of file\n");
+          return -ENODATA;
+        }
+      else
+        {
+          readsize -= nbytes;
+          buffer   += nbytes;
+          offset   += nbytes;
+        }
     }
 
   modlib_dumpreaddata(buffer, readsize);

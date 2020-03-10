@@ -72,7 +72,8 @@ int modlib_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
     {
       /* No.. allocate one now */
 
-      loadinfo->iobuffer = (FAR uint8_t *)lib_malloc(CONFIG_MODLIB_BUFFERSIZE);
+      loadinfo->iobuffer = (FAR uint8_t *)
+                           lib_malloc(CONFIG_MODLIB_BUFFERSIZE);
       if (!loadinfo->iobuffer)
         {
           berr("ERROR: Failed to allocate an I/O buffer\n");
@@ -97,7 +98,8 @@ int modlib_allocbuffer(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment)
+int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo,
+                         size_t increment)
 {
   FAR void *buffer;
   size_t newsize;
@@ -108,8 +110,8 @@ int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment)
 
   /* And perform the reallocation */
 
-   buffer = lib_realloc((FAR void *)loadinfo->iobuffer, newsize);
-   if (!buffer)
+  buffer = lib_realloc((FAR void *)loadinfo->iobuffer, newsize);
+  if (!buffer)
     {
       berr("ERROR: Failed to reallocate the I/O buffer\n");
       return -ENOMEM;

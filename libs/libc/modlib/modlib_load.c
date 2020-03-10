@@ -160,7 +160,8 @@ static inline int modlib_loadfile(FAR struct mod_loadinfo_s *loadinfo)
       FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
 
       /* SHF_ALLOC indicates that the section requires memory during
-       * execution */
+       * execution
+       */
 
       if ((shdr->sh_flags & SHF_ALLOC) == 0)
         {
@@ -261,7 +262,8 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Allocate memory to hold the ELF image */
 
-  loadinfo->textalloc = (uintptr_t)lib_malloc(loadinfo->textsize + loadinfo->datasize);
+  loadinfo->textalloc = (uintptr_t)lib_malloc(loadinfo->textsize +
+                                              loadinfo->datasize);
   if (!loadinfo->textalloc)
     {
       berr("ERROR: Failed to allocate memory for the module\n");
