@@ -92,7 +92,8 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
 
   if (ehdr->e_ident[EI_CLASS] != ELFCLASS32)
     {
-      berr("ERROR: Need 32-bit objects: e_ident[EI_CLASS]=%02x\n", ehdr->e_ident[EI_CLASS]);
+      berr("ERROR: Need 32-bit objects: e_ident[EI_CLASS]=%02x\n",
+           ehdr->e_ident[EI_CLASS]);
       return false;
     }
 
@@ -104,7 +105,8 @@ bool up_checkarch(FAR const Elf32_Ehdr *ehdr)
   if (ehdr->e_ident[EI_DATA] != ELFDATA2LSB)
 #endif
     {
-      berr("ERROR: Wrong endian-ness: e_ident[EI_DATA]=%02x\n", ehdr->e_ident[EI_DATA]);
+      berr("ERROR: Wrong endian-ness: e_ident[EI_DATA]=%02x\n",
+           ehdr->e_ident[EI_DATA]);
       return false;
     }
 
