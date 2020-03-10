@@ -441,4 +441,4 @@ bool stm32_gpioread(uint32_t pinset)
   return 0;
 }
 
-#endif /* CONFIG_STM32H7_STM32H7X3XX */
+#endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX */

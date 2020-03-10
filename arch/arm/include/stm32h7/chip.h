@@ -62,7 +62,7 @@
  * with CONFIG_STM32H7_FLASH_OVERRIDE_x
  */
 
-#if defined(CONFIG_ARCH_CHIP_STM32H743ZI)
+#if defined(CONFIG_ARCH_CHIP_STM32H743ZI) || defined(CONFIG_ARCH_CHIP_STM32H753II)
 #elif defined(CONFIG_ARCH_CHIP_STM32H747XI)
 #else
 #  error STM32 H7 chip not identified
