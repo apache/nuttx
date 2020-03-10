@@ -60,20 +60,21 @@
  *   The address supplied in cp can have one of the following forms:
  *
  *   a.b.c.d Each of the four numeric parts specifies a byte of the address;
- *           the bytes are assigned in left-to-right order to produce the binary address.
+ *           the bytes are assigned in left-to-right order to produce the
+ *           binary address.
  *
  *   a.b.c   Parts a and b specify the first two bytes of the binary address.
- *           Part c is interpreted as a 16-bit value that defines the rightmost
- *           two bytes of the binary address. This notation is suitable for specifying
- *           (outmoded) Class B network addresses.
+ *           Part c is interpreted as a 16-bit value that defines the
+ *           rightmost two bytes of the binary address. This notation is
+ *           suitable for specifying (outmoded) Class B network addresses.
  *
  *   a.b     Part a specifies the first byte of the binary address. Part b is
- *           interpreted as a 24-bit value that defines the rightmost three bytes
- *           of the binary address. This notation is suitable for specifying
- *           (outmoded) Class A network addresses.
+ *           interpreted as a 24-bit value that defines the rightmost three
+ *           bytes of the binary address. This notation is suitable for
+ *           specifying (outmoded) Class A network addresses.
  *
- *   a       The value a is interpreted as a 32-bit value that is stored directly
- *           into the binary address without any byte rearrangement.
+ *   a       The value a is interpreted as a 32-bit value that is stored
+ *           directly into the binary address without any byte rearrangement.
  *
  * Returned Value:
  *   If input string cannot be recognized as a valid IPv4 number, function
@@ -83,7 +84,10 @@
 
 in_addr_t inet_addr(FAR const char *cp)
 {
-  unsigned int a, b, c, d;
+  unsigned int a;
+  unsigned int b;
+  unsigned int c;
+  unsigned int d;
   uint32_t result = 0;
 
   switch (sscanf(cp, "%u.%u.%u.%u", &a, &b, &c, &d))
