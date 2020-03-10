@@ -969,8 +969,11 @@ int main(int argc, char **argv, char **envp)
 
                   rhcomment = -1;
 
-                  if (ncomment > 0 && !strncmp(&line[ii], "if", 2))
+                  if (ncomment > 0 && (!strncmp(&line[ii], "if", 2)
+                      || !strncmp(&line[ii], "el", 2)))
                     {
+                      /* in #if...  and #el.. */
+
                       ERROR("No multiline comment right of code allowed here",
                           lineno, n);
                     }
@@ -1445,8 +1448,16 @@ int main(int argc, char **argv, char **envp)
                       if (prevrhcmt > 0 && n != prevrhcmt)
                         {
                           rhcomment = prevrhcmt;
-                          WARN("Wrong column position of comment right of code",
-                              lineno, n);
+                          if (n != indent)
+                            {
+                              WARN("Wrong column position of "
+                                  "comment right of code", lineno, n);
+                            }
+                          else
+                            {
+                              ERROR("Wrong column position or missing "
+                                  "blank line before comment", lineno, n);
+                            }
                         }
                     }
 
