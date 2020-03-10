@@ -148,7 +148,8 @@ int rmmod(FAR void *handle)
   ret = modlib_registry_del(modp);
   if (ret < 0)
     {
-      berr("ERROR: Failed to remove the module from the registry: %d\n", ret);
+      berr("ERROR: Failed to remove the module from the registry: %d\n",
+           ret);
       goto errout_with_lock;
     }
 
