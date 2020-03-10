@@ -194,7 +194,8 @@ int modlib_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Get the total size of the section header table */
 
-  shdrsize = (size_t)loadinfo->ehdr.e_shentsize * (size_t)loadinfo->ehdr.e_shnum;
+  shdrsize = (size_t)loadinfo->ehdr.e_shentsize *
+             (size_t)loadinfo->ehdr.e_shnum;
   if (loadinfo->ehdr.e_shoff + shdrsize > loadinfo->filelen)
     {
       berr("ERROR: Insufficent space in file for section header table\n");

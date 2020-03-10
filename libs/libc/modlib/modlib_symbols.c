@@ -82,8 +82,8 @@ struct mod_exportinfo_s
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
- *   EINVAL - There is something inconsistent in the symbol table (should only
- *            happen if the file is corrupted).
+ *   EINVAL - There is something inconsistent in the symbol table (should
+ *            only happen if the file is corrupted).
  *   ESRCH - Symbol has no name
  *
  ****************************************************************************/
@@ -169,9 +169,9 @@ static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
  * Name: modlib_symcallback
  *
  * Description:
- *   modlib_registry_foreach() callback function.  Test if the provided module,
- *   modp, exports the symbol of interest.  If so, return that symbol value
- *   and setup the module dependency relationship.
+ *   modlib_registry_foreach() callback function.  Test if the provided
+ *   module, modp, exports the symbol of interest.  If so, return that symbol
+ *   value and setup the module dependency relationship.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -181,7 +181,8 @@ static int modlib_symname(FAR struct mod_loadinfo_s *loadinfo,
 
 static int modlib_symcallback(FAR struct module_s *modp, FAR void *arg)
 {
-  FAR struct mod_exportinfo_s *exportinfo = (FAR struct mod_exportinfo_s *)arg;
+  FAR struct mod_exportinfo_s *exportinfo = (FAR struct mod_exportinfo_s *)
+                                            arg;
   int ret;
 
   /* Check if this module exports a symbol of that name */
@@ -196,23 +197,23 @@ static int modlib_symcallback(FAR struct module_s *modp, FAR void *arg)
                                          modp->modinfo.nexports);
 #endif
 
-   if (exportinfo->symbol != NULL)
-     {
-       /* Yes.. save the dependency relationship and return SYM_FOUND to
-        * stop the traversal.
-        */
+  if (exportinfo->symbol != NULL)
+    {
+      /* Yes.. save the dependency relationship and return SYM_FOUND to
+       * stop the traversal.
+       */
 
-       ret = modlib_depend(exportinfo->modp, modp);
-       if (ret < 0)
-         {
-           berr("ERROR: modlib_depend failed: %d\n", ret);
-           return ret;
-         }
+      ret = modlib_depend(exportinfo->modp, modp);
+      if (ret < 0)
+        {
+          berr("ERROR: modlib_depend failed: %d\n", ret);
+          return ret;
+        }
 
-       return SYM_FOUND;
-     }
+      return SYM_FOUND;
+    }
 
-   return SYM_NOT_FOUND;
+  return SYM_NOT_FOUND;
 }
 
 /****************************************************************************
@@ -314,8 +315,8 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
- *   EINVAL - There is something inconsistent in the symbol table (should only
- *            happen if the file is corrupted).
+ *   EINVAL - There is something inconsistent in the symbol table (should
+ *            only happen if the file is corrupted).
  *   ENOSYS - Symbol lies in common
  *   ESRCH  - Symbol has no name
  *   ENOENT - Symbol undefined and not provided via a symbol table
@@ -376,7 +377,8 @@ int modlib_symvalue(FAR struct module_s *modp,
         exportinfo.modp   = modp;
         exportinfo.symbol = NULL;
 
-        ret = modlib_registry_foreach(modlib_symcallback, (FAR void *)&exportinfo);
+        ret = modlib_registry_foreach(modlib_symcallback,
+                                      (FAR void *)&exportinfo);
         if (ret < 0)
           {
             berr("ERROR: modlib_symcallback failed: \n", ret);

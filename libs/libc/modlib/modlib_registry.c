@@ -120,7 +120,8 @@ void modlib_registry_lock(void)
            * the wait was awakened by a signal.
            */
 
-          DEBUGASSERT(_SEM_ERRNO(ret) == EINTR || _SEM_ERRNO(ret) == ECANCELED);
+          DEBUGASSERT(_SEM_ERRNO(ret) == EINTR ||
+                      _SEM_ERRNO(ret) == ECANCELED);
           UNUSED(ret);
         }
 
