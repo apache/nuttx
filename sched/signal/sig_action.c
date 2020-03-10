@@ -145,7 +145,8 @@ static FAR sigactq_t *nxsig_alloc_action(void)
  *     on failure
  *   sigaction:
  *     Zero (OK) is returned on success; -1 (ERROR) is returned on any
- *     failure if the signal number is invalid with the errno set appropriately
+ *     failure if the signal number is invalid with the errno set
+ *     appropriately
  *
  * Assumptions:
  *
@@ -153,8 +154,9 @@ static FAR sigactq_t *nxsig_alloc_action(void)
  * - If CONFIG_SIG_DEFAULT is not defined, then there are no default actions
  *   so the special value SIG_DFL is treated like SIG_IGN.
  * - All sa_flags in struct sigaction of act input are ignored (all
- *   treated like SA_SIGINFO). The one exception is if CONFIG_SCHED_CHILD_STATUS
- *   is defined; then SA_NOCLDWAIT is supported but only for SIGCHLD
+ *   treated like SA_SIGINFO). The one exception is if
+ *   CONFIG_SCHED_CHILD_STATUS is defined; then SA_NOCLDWAIT is supported but
+ *   only for SIGCHLD
  *
  ****************************************************************************/
 

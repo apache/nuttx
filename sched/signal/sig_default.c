@@ -101,7 +101,8 @@ static void nxsig_stop_task(int signo);
 
 static _sa_handler_t nxsig_default_action(int signo);
 static void nxsig_setup_default_action(FAR struct task_group_s *group,
-                                       FAR const struct nxsig_defaction_s *info);
+                                       FAR const struct nxsig_defaction_s *
+                                           info);
 
 /****************************************************************************
  * Private Data
@@ -240,8 +241,8 @@ static void nxsig_abnormal_termination(int signo)
 
   if ((rtcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
     {
-      /* Then we cannot cancel the task asynchronously.  Mark the cancellation
-       * as pending.
+      /* Then we cannot cancel the task asynchronously.
+       * Mark the cancellation as pending.
        */
 
       rtcb->flags |= TCB_FLAG_CANCEL_PENDING;
@@ -437,7 +438,8 @@ static _sa_handler_t nxsig_default_action(int signo)
  ****************************************************************************/
 
 static void nxsig_setup_default_action(FAR struct task_group_s *group,
-                                       FAR const struct nxsig_defaction_s *info)
+                                       FAR const struct nxsig_defaction_s *
+                                           info)
 {
   /* Get the address of the handler for this signals default action. */
 
