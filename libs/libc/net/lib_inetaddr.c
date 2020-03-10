@@ -101,21 +101,27 @@ in_addr_t inet_addr(FAR const char *cp)
       case 2:
         {
           if ((a < 0x100) && (b < 0x1000000))
-            result = (a << 24) | b;
+            {
+              result = (a << 24) | b;
+            }
           break;
         }
 
       case 3:
         {
           if ((a < 0x100) && (b < 0x100) && (c < 0x10000))
-            result = (a << 24) | (b << 16) | c;
+            {
+              result = (a << 24) | (b << 16) | c;
+            }
           break;
         }
 
       case 4:
         {
           if ((a < 0x100) && (b < 0x100) && (c < 0x100) && (d < 0x100))
-          result = (a << 24) | (b << 16) | (c << 8) | d;
+            {
+              result = (a << 24) | (b << 16) | (c << 8) | d;
+            }
           break;
         }
     }
