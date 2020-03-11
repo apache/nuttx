@@ -122,7 +122,8 @@ static int     nfs_fileopen(FAR struct nfsmount *nmp,
 static int     nfs_open(FAR struct file *filep, FAR const char *relpath,
                    int oflags, mode_t mode);
 static int     nfs_close(FAR struct file *filep);
-static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
+static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
+                        size_t buflen);
 static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
                    size_t buflen);
 static int     nfs_dup(FAR const struct file *oldp, FAR struct file *newp);
@@ -131,7 +132,8 @@ static int     nfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
 static int     nfs_truncate(FAR struct file *filep, off_t length);
 static int     nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                    FAR struct fs_dirent_s *dir);
-static int     nfs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
+static int     nfs_readdir(FAR struct inode *mountpt,
+                           FAR struct fs_dirent_s *dir);
 static int     nfs_rewinddir(FAR struct inode *mountpt,
                    FAR struct fs_dirent_s *dir);
 static void    nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
@@ -611,9 +613,9 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
           goto errout_with_semaphore;
         }
 
-      /* The file does not exist. Check if we were asked to create the file.  If
-       * the O_CREAT bit is set in the oflags then we should create the file if it
-       * does not exist.
+      /* The file does not exist. Check if we were asked to create the file.
+       * If the O_CREAT bit is set in the oflags then we should create the
+       * file if it does not exist.
        */
 
       if ((oflags & O_CREAT) == 0)
@@ -647,9 +649,9 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
   filep->f_priv = np;
 
   /* Then insert the new instance at the head of the list in the mountpoint
-   * structure. It needs to be there (1) to handle error conditions that effect
-   * all files, and (2) to inform the umount logic that we are busy.  We
-   * cannot unmount the file system if this list is not empty!
+   * structure. It needs to be there (1) to handle error conditions that
+   * effect all files, and (2) to inform the umount logic that we are busy.
+   * We cannot unmount the file system if this list is not empty!
    */
 
   np->n_next   = nmp->nm_head;
@@ -771,7 +773,8 @@ static int nfs_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
+                        size_t buflen)
 {
   FAR struct nfsmount       *nmp;
   FAR struct nfsnode        *np;
@@ -939,7 +942,7 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct nfsnode    *np;
   ssize_t                writesize;
   ssize_t                bufsize;
-  ssize_t                byteswritten;
+  ssize_t                byteswritten = 0;
   size_t                 reqlen;
   FAR uint32_t          *ptr;
   uint32_t               tmp;
@@ -1562,7 +1565,8 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-static int nfs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
+static int nfs_rewinddir(FAR struct inode *mountpt,
+                         FAR struct fs_dirent_s *dir)
 {
   finfo("Entry\n");
 
@@ -1873,6 +1877,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   return OK;
 
 bad:
+
   /* Disconnect from the server */
 
   if (nmp->nm_rpcclnt)
@@ -2003,6 +2008,7 @@ static int nfs_fsinfo(FAR struct nfsmount *nmp)
     {
       nmp->nm_rsize = (pref + NFS_FABLKSIZE - 1) & ~(NFS_FABLKSIZE - 1);
     }
+
   if (max < nmp->nm_rsize)
     {
       nmp->nm_rsize = max & ~(NFS_FABLKSIZE - 1);
@@ -2020,6 +2026,7 @@ static int nfs_fsinfo(FAR struct nfsmount *nmp)
     {
       nmp->nm_wsize = (pref + NFS_FABLKSIZE - 1) & ~(NFS_FABLKSIZE - 1);
     }
+
   if (max < nmp->nm_wsize)
     {
       nmp->nm_wsize = max & ~(NFS_FABLKSIZE - 1);
@@ -2032,7 +2039,8 @@ static int nfs_fsinfo(FAR struct nfsmount *nmp)
   pref = fxdr_unsigned(uint32_t, *ptr++);
   if (pref < nmp->nm_readdirsize)
     {
-      nmp->nm_readdirsize = (pref + NFS_DIRBLKSIZ - 1) & ~(NFS_DIRBLKSIZ - 1);
+      nmp->nm_readdirsize = (pref + NFS_DIRBLKSIZ - 1) &
+                             ~(NFS_DIRBLKSIZ - 1);
     }
 
   /* Get the file attributes if needed */
@@ -2208,7 +2216,8 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath, mode_t mode)
+static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
+                     mode_t mode)
 {
   FAR struct nfsmount   *nmp;
   struct file_handle     fhandle;

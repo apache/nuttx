@@ -1,5 +1,5 @@
 /************************************************************************************
- * arm/arm/src/s32k1xx/s32k1xx_lpspi.c
+ * arch/arm/src/s32k1xx/s32k1xx_lpspi.c
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Authors: Teodora Kireva
@@ -149,14 +149,14 @@ static inline uint32_t s32k1xx_lpspi_getreg32(FAR struct s32k1xx_lpspidev_s *pri
               uint8_t offset);
 static inline void s32k1xx_lpspi_putreg32(FAR struct s32k1xx_lpspidev_s *priv,
               uint8_t offset, uint32_t value);
-static inline uint16_t s32k1xx_lpspi_readword(FAR struct s32k1xx_lpspidev_s *priv);
+static inline uint32_t s32k1xx_lpspi_readword(FAR struct s32k1xx_lpspidev_s *priv);
 static inline void s32k1xx_lpspi_writeword(FAR struct s32k1xx_lpspidev_s *priv,
               uint16_t byte);
 static inline bool s32k1xx_lpspi_9to16bitmode(FAR struct s32k1xx_lpspidev_s *priv);
 static uint32_t s32k1xx_lpspi_pckfreq(uintptr_t base);
-static inline void s32k1xx_lpspi_master_set_delays(FAR struct s32k1xx_lpspidev_s
+static inline void s32k1xx_lpspi_set_delays(FAR struct s32k1xx_lpspidev_s
               *priv, uint32_t delay_ns, enum s32k1xx_delay_e type);
-static inline void s32k1xx_lpspi_master_set_delay_scaler(FAR struct
+static inline void s32k1xx_lpspi_set_delay_scaler(FAR struct
               s32k1xx_lpspidev_s *priv, uint32_t scaler, enum s32k1xx_delay_e type);
 
 /* SPI methods */
@@ -171,7 +171,7 @@ static void s32k1xx_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static int s32k1xx_lpspi_hwfeatures(FAR struct spi_dev_s *dev,
               s32k1xx_lpspi_hwfeatures_t features);
 #endif
-static uint16_t s32k1xx_lpspi_send(FAR struct spi_dev_s *dev, uint16_t wd);
+static uint32_t s32k1xx_lpspi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 static void s32k1xx_lpspi_exchange(FAR struct spi_dev_s *dev,
               FAR const void *txbuffer, FAR void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
@@ -428,7 +428,7 @@ static inline void s32k1xx_lpspi_putreg32(FAR struct s32k1xx_lpspidev_s *priv,
  *
  ************************************************************************************/
 
-static inline uint16_t s32k1xx_lpspi_readword(FAR struct s32k1xx_lpspidev_s *priv)
+static inline uint32_t s32k1xx_lpspi_readword(FAR struct s32k1xx_lpspidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
@@ -438,7 +438,7 @@ static inline uint16_t s32k1xx_lpspi_readword(FAR struct s32k1xx_lpspidev_s *pri
 
   /* Then return the received byte */
 
-  return (uint16_t) s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_RDR_OFFSET);
+  return (uint32_t) s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_RDR_OFFSET);
 }
 
 /************************************************************************************
@@ -640,7 +640,7 @@ static uint32_t s32k1xx_lpspi_pckfreq(uintptr_t base)
 }
 
 /************************************************************************************
- * Name: s32k1xx_lpspi_master_set_delays
+ * Name: s32k1xx_lpspi_set_delays
  *
  * Description:
  *   SET LPSPI Delay times
@@ -655,9 +655,10 @@ static uint32_t s32k1xx_lpspi_pckfreq(uintptr_t base)
  *
  ************************************************************************************/
 
-static inline void s32k1xx_lpspi_master_set_delay_scaler(FAR struct s32k1xx_lpspidev_s *priv,
-                                                         uint32_t scaler,
-                                                         enum s32k1xx_delay_e type)
+static inline void s32k1xx_lpspi_set_delay_scaler(FAR struct
+                                                  s32k1xx_lpspidev_s *priv,
+                                                  uint32_t scaler,
+                                                  enum s32k1xx_delay_e type)
 {
   switch (type)
     {
@@ -685,7 +686,7 @@ static inline void s32k1xx_lpspi_master_set_delay_scaler(FAR struct s32k1xx_lpsp
 }
 
 /************************************************************************************
- * Name: s32k1xx_lpspi_master_set_delays
+ * Name: s32k1xx_lpspi_set_delays
  *
  * Description:
  *   SET LPSPI Delay times
@@ -700,7 +701,7 @@ static inline void s32k1xx_lpspi_master_set_delay_scaler(FAR struct s32k1xx_lpsp
  *
  ************************************************************************************/
 
-static inline void s32k1xx_lpspi_master_set_delays(FAR struct s32k1xx_lpspidev_s *priv,
+static inline void s32k1xx_lpspi_set_delays(FAR struct s32k1xx_lpspidev_s *priv,
                                                    uint32_t delay_ns,
                                                    enum s32k1xx_delay_e type)
 {
@@ -785,7 +786,7 @@ static inline void s32k1xx_lpspi_master_set_delays(FAR struct s32k1xx_lpspidev_s
 
   if (initial_delay_ns >= delay_ns)
     {
-      s32k1xx_lpspi_master_set_delay_scaler(priv, 0, type);
+      s32k1xx_lpspi_set_delay_scaler(priv, 0, type);
     }
   else
     {
@@ -822,7 +823,7 @@ static inline void s32k1xx_lpspi_master_set_delays(FAR struct s32k1xx_lpspidev_s
             }
         }
 
-      s32k1xx_lpspi_master_set_delay_scaler(priv, best_scaler, type);
+      s32k1xx_lpspi_set_delay_scaler(priv, best_scaler, type);
     }
 }
 
@@ -959,11 +960,11 @@ static uint32_t s32k1xx_lpspi_setfrequency(FAR struct spi_dev_s *dev,
       priv->frequency = frequency;
       priv->actual = best_frequency;
 
-      s32k1xx_lpspi_master_set_delays(priv, 1000000000 / best_frequency,
+      s32k1xx_lpspi_set_delays(priv, 1000000000 / best_frequency,
                                     LPSPI_PCS_TO_SCK);
-      s32k1xx_lpspi_master_set_delays(priv, 1000000000 / best_frequency,
+      s32k1xx_lpspi_set_delays(priv, 1000000000 / best_frequency,
                                     LPSPI_LAST_SCK_TO_PCS);
-      s32k1xx_lpspi_master_set_delays(priv, 1000000000 / best_frequency,
+      s32k1xx_lpspi_set_delays(priv, 1000000000 / best_frequency,
                                     LPSPI_BETWEEN_TRANSFER);
 
       /* Re-enable LPSPI if it was enabled previously */
@@ -1192,15 +1193,15 @@ static int s32k1xx_lpspi_hwfeatures(FAR struct spi_dev_s *dev,
  *
  ************************************************************************************/
 
-static uint16_t s32k1xx_lpspi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t s32k1xx_lpspi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   FAR struct s32k1xx_lpspidev_s *priv = (FAR struct s32k1xx_lpspidev_s *)dev;
   uint32_t regval;
-  uint16_t ret;
+  uint32_t ret;
 
   DEBUGASSERT(priv && priv->spibase);
 
-  s32k1xx_lpspi_writeword(priv, (uint32_t) wd);
+  s32k1xx_lpspi_writeword(priv, wd);
 
   while ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_SR_OFFSET) & LPSPI_SR_RDF) !=
          LPSPI_SR_RDF);
@@ -1281,7 +1282,7 @@ static void s32k1xx_lpspi_exchange_nodma(FAR struct spi_dev_s *dev,
 
           /* Exchange one word */
 
-          word = s32k1xx_lpspi_send(dev, word);
+          word = (uint16_t) s32k1xx_lpspi_send(dev, (uint32_t) word);
 
           /* Is there a buffer to receive the return value? */
 
@@ -1314,7 +1315,7 @@ static void s32k1xx_lpspi_exchange_nodma(FAR struct spi_dev_s *dev,
 
           /* Exchange one word */
 
-          word = (uint8_t) s32k1xx_lpspi_send(dev, (uint16_t) word);
+          word = (uint8_t) s32k1xx_lpspi_send(dev, (uint32_t) word);
 
           /* Is there a buffer to receive the return value? */
 
@@ -1488,7 +1489,8 @@ FAR struct spi_dev_s *s32k1xx_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_CR_OFFSET) & LPSPI_CR_MEN) == 0)
+      if ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_CR_OFFSET) &
+          LPSPI_CR_MEN) == 0)
         {
           /* Configure SPI0 pins: SCK, MISO, and MOSI */
 
@@ -1512,7 +1514,8 @@ FAR struct spi_dev_s *s32k1xx_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_CR_OFFSET) & LPSPI_CR_MEN) == 0)
+      if ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_CR_OFFSET) &
+          LPSPI_CR_MEN) == 0)
         {
           /* Configure SPI1 pins: SCK, MISO, and MOSI */
 
@@ -1536,7 +1539,8 @@ FAR struct spi_dev_s *s32k1xx_lpspibus_initialize(int bus)
 
       /* Only configure if the bus is not already configured */
 
-      if ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_CR_OFFSET) & LPSPI_CR_MEN) == 0)
+      if ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_CR_OFFSET) &
+          LPSPI_CR_MEN) == 0)
         {
           /* Configure SPI2 pins: SCK, MISO, and MOSI */
 

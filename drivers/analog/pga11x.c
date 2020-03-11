@@ -58,8 +58,9 @@
 
 /* The PGA112/PGA113 have a three-wire SPI digital interface; the
  * PGA116/PGA117 have a four-wire SPI digital interface. The PGA116/117 also
- * have daisy-chain capability (The PGA112/PGA113 can be used as the last device
- * in a daisy-chain as shown if write-only communication is acceptable).
+ * have daisy-chain capability (The PGA112/PGA113 can be used as the last
+ * device in a daisy-chain as shown if write-only communication is
+ * acceptable).
  */
 
 /* PGA11x commands (PGA112/PGA113) */
@@ -82,11 +83,11 @@
 /* Write command Gain Selection Bits (PGA112/PGA113)
  *
  * the PGA112 and PGA116 provide binary gain selections (1, 2, 4, 8, 16, 32,
- * 64, 128); the PGA113 and PGA117 provide scope gain selections (1, 2, 5, 10,
- * 20, 50, 100, 200).
+ * 64, 128); the PGA113 and PGA117 provide scope gain selections (1, 2, 5,
+ * 10, 20, 50, 100, 200).
  */
 
-#define PGA11X_GAIN_SHIFT        (4)      /* Bits 4-7: Gain Selection Bits */
+#define PGA11X_GAIN_SHIFT        (4)   /* Bits 4-7: Gain Selection Bits */
 #define PGA11X_GAIN_MASK         (15 << PGA11X_GAIN_SHIFT)
 
 /* Write command Mux Channel Selection Bits
@@ -95,10 +96,10 @@
  * 10-channel input MUX.
  */
 
-#define PGA11X_CHAN_SHIFT        (0)      /* Bits 0-3: Channel Selection Bits */
+#define PGA11X_CHAN_SHIFT        (0)   /* Bits 0-3: Channel Selection Bits */
 #define PGA11X_CHAN_MASK         (15 << PGA11X_CHAN_SHIFT)
 
-/* Other definitions ********************************************************/
+/* Other definitions */
 
 #define SPI_DUMMY 0xff
 
@@ -149,18 +150,19 @@ static void pga11x_lock(FAR struct spi_dev_s *spi)
 
   /* On SPI busses where there are multiple devices, it will be necessary to
    * lock SPI to have exclusive access to the busses for a sequence of
-   * transfers.  The bus should be locked before the chip is selected.
+   * transfers. The bus should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusiv access to
-   * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
+   * This is a blocking call and will not return until we have exclusive
+   * access to the SPI bus. We will retain that exclusive access until the
+   * bus is unlocked.
    */
 
   SPI_LOCK(spi, true);
 
-  /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
-   * setmode methods to make sure that the SPI is properly configured for the device.
-   * If the SPI buss is being shared, then it may have been left in an incompatible
-   * state.
+  /* After locking the SPI bus, the we also need call the setfrequency,
+   * setbits, and setmode methods to make sure that the SPI is properly
+   * configured for the device. If the SPI buss is being shared, then it may
+   * have been left in an incompatible state.
    */
 
   pga11x_configure(spi);
@@ -285,12 +287,13 @@ static void pga11x_write(FAR struct spi_dev_s *spi, uint16_t cmd)
   pga11x_unlock(spi);
 }
 #else
-static void pga11x_write(FAR struct spi_dev_s *spi, uint16_t u1cmd, uint16_t u2cmd)
+static void pga11x_write(FAR struct spi_dev_s *spi, uint16_t u1cmd,
+                         uint16_t u2cmd)
 {
   spiinfo("U1 cmd: %04x U2 cmd: %04x\n", u1cmd, u2cmd);
 
-  /* Lock, select, send the U2 16-bit command, the U1 16-bit command, de-select,
-   * and un-lock.
+  /* Lock, select, send the U2 16-bit command, the U1 16-bit command,
+   * de-select, and un-lock.
    */
 
   pga11x_lock(spi);
@@ -379,8 +382,10 @@ int pga11x_select(PGA11X_HANDLE handle,
   uint16_t u2cmd;
 
   DEBUGASSERT(handle && settings);
-  spiinfo("U1 channel: %d gain: %d\n", settings->u1.channel, settings->u1.gain);
-  spiinfo("U1 channel: %d gain: %d\n", settings->u1.channel, settings->u1.gain);
+  spiinfo("U1 channel: %d gain: %d\n", settings->u1.channel,
+          settings->u1.gain);
+  spiinfo("U1 channel: %d gain: %d\n", settings->u1.channel,
+          settings->u1.gain);
 
   /* Format the commands */
 
@@ -508,10 +513,14 @@ int pga11x_read(PGA11X_HANDLE handle, FAR struct pga11x_settings_s *settings)
   /* Decode the returned value */
 
   spiinfo("Returning %04x %04x\n", u2value, u1value);
-  settings->u1.channel = (uint8_t)((u1value & PGA11X_CHAN_MASK) >> PGA11X_CHAN_SHIFT);
-  settings->u1.gain    = (uint8_t)((u1value & PGA11X_GAIN_MASK) >> PGA11X_GAIN_SHIFT);
-  settings->u2.channel = (uint8_t)((u2value & PGA11X_CHAN_MASK) >> PGA11X_CHAN_SHIFT);
-  settings->u2.gain    = (uint8_t)((u2value & PGA11X_GAIN_MASK) >> PGA11X_GAIN_SHIFT);
+  settings->u1.channel =
+    (uint8_t)((u1value & PGA11X_CHAN_MASK) >> PGA11X_CHAN_SHIFT);
+  settings->u1.gain    =
+    (uint8_t)((u1value & PGA11X_GAIN_MASK) >> PGA11X_GAIN_SHIFT);
+  settings->u2.channel =
+    (uint8_t)((u2value & PGA11X_CHAN_MASK) >> PGA11X_CHAN_SHIFT);
+  settings->u2.gain    =
+    (uint8_t)((u2value & PGA11X_GAIN_MASK) >> PGA11X_GAIN_SHIFT);
   return OK;
 #else
   FAR struct spi_dev_s *spi = (FAR struct spi_dev_s *)handle;
@@ -524,8 +533,8 @@ int pga11x_read(PGA11X_HANDLE handle, FAR struct pga11x_settings_s *settings)
 
   pga11x_lock(spi);
 
-  /* Select, send the 16-bit PGA11X_CMD_READ command, and de-select.  I do
-   * not know if de-selection between word transfers is required.  However,
+  /* Select, send the 16-bit PGA11X_CMD_READ command, and de-select. I do
+   * not know if de-selection between word transfers is required. However,
    * it is shown in the timing diagrams for the part.
    */
 
@@ -543,8 +552,10 @@ int pga11x_read(PGA11X_HANDLE handle, FAR struct pga11x_settings_s *settings)
   /* Decode the returned value */
 
   spiinfo("Returning: %04x\n", value);
-  settings->channel = (uint8_t)((value & PGA11X_CHAN_MASK) >> PGA11X_CHAN_SHIFT);
-  settings->gain    = (uint8_t)((value & PGA11X_GAIN_MASK) >> PGA11X_GAIN_SHIFT);
+  settings->channel =
+    (uint8_t)((value & PGA11X_CHAN_MASK) >> PGA11X_CHAN_SHIFT);
+  settings->gain    =
+    (uint8_t)((value & PGA11X_GAIN_MASK) >> PGA11X_GAIN_SHIFT);
   return OK;
 #endif
 }

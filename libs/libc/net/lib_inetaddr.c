@@ -56,19 +56,75 @@
  *   standard IPv4 dotted decimal notation, to an integer value suitable for
  *   use as an Internet address.
  *
+ *   inet_aton() returns nonzero if the address is valid, zero if not.
+ *   The address supplied in cp can have one of the following forms:
+ *
+ *   a.b.c.d Each of the four numeric parts specifies a byte of the address;
+ *           the bytes are assigned in left-to-right order to produce the
+ *           binary address.
+ *
+ *   a.b.c   Parts a and b specify the first two bytes of the binary address.
+ *           Part c is interpreted as a 16-bit value that defines the
+ *           rightmost two bytes of the binary address. This notation is
+ *           suitable for specifying (outmoded) Class B network addresses.
+ *
+ *   a.b     Part a specifies the first byte of the binary address. Part b is
+ *           interpreted as a 24-bit value that defines the rightmost three
+ *           bytes of the binary address. This notation is suitable for
+ *           specifying (outmoded) Class A network addresses.
+ *
+ *   a       The value a is interpreted as a 32-bit value that is stored
+ *           directly into the binary address without any byte rearrangement.
+ *
+ * Returned Value:
+ *   If input string cannot be recognized as a valid IPv4 number, function
+ *   returns zero.
+ *
  ****************************************************************************/
 
 in_addr_t inet_addr(FAR const char *cp)
 {
-  unsigned int a, b, c, d;
-  uint32_t result;
+  unsigned int a;
+  unsigned int b;
+  unsigned int c;
+  unsigned int d;
+  uint32_t result = 0;
 
-  sscanf(cp, "%u.%u.%u.%u", &a, &b, &c, &d);
-  result   = a << 8;
-  result  |= b;
-  result <<= 8;
-  result  |= c;
-  result <<= 8;
-  result  |= d;
+  switch (sscanf(cp, "%u.%u.%u.%u", &a, &b, &c, &d))
+    {
+      case 1:
+        {
+          result = a;
+          break;
+        }
+
+      case 2:
+        {
+          if ((a < 0x100) && (b < 0x1000000))
+            {
+              result = (a << 24) | b;
+            }
+          break;
+        }
+
+      case 3:
+        {
+          if ((a < 0x100) && (b < 0x100) && (c < 0x10000))
+            {
+              result = (a << 24) | (b << 16) | c;
+            }
+          break;
+        }
+
+      case 4:
+        {
+          if ((a < 0x100) && (b < 0x100) && (c < 0x100) && (d < 0x100))
+            {
+              result = (a << 24) | (b << 16) | (c << 8) | d;
+            }
+          break;
+        }
+    }
+
   return HTONL(result);
 }

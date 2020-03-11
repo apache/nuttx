@@ -250,13 +250,14 @@ static inline size_t nxvfork_argsize(FAR struct tcb_s *parent)
  *   or one of the exec family of functions.
  *
  *   This function provides one step in the overall vfork() sequence:  It
- *   Allocates and initializes the child task's TCB.  The overall sequence is:
+ *   Allocates and initializes the child task's TCB.  The overall sequence
+ *   is:
  *
- *   1) User code calls vfork().  vfork() is provided in architecture-specific
- *      code.
+ *   1) User code calls vfork().  vfork() is provided in
+ *      architecture-specific code.
  *   2) vfork()and calls nxtask_vforksetup().
- *   3) nxtask_vforksetup() allocates and configures the child task's TCB.  This
- *      consists of:
+ *   3) nxtask_vforksetup() allocates and configures the child task's TCB.
+ *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
  *      - Configuration of environment variables
@@ -334,7 +335,7 @@ FAR struct task_tcb_s *nxtask_vforksetup(start_t retaddr, size_t *argsize)
   /* Get the priority of the parent task */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  priority = parent->base_priority;  /* "Normal," unboosted priority */
+  priority = parent->base_priority;   /* "Normal," unboosted priority */
 #else
   priority = parent->sched_priority;  /* Current priority */
 #endif
@@ -342,7 +343,8 @@ FAR struct task_tcb_s *nxtask_vforksetup(start_t retaddr, size_t *argsize)
   /* Initialize the task control block.  This calls up_initial_state() */
 
   sinfo("Child priority=%d start=%p\n", priority, retaddr);
-  ret = nxtask_schedsetup(child, priority, retaddr, parent->entry.main, ttype);
+  ret = nxtask_schedsetup(child, priority, retaddr, parent->entry.main,
+                          ttype);
   if (ret < OK)
     {
       goto errout_with_tcb;

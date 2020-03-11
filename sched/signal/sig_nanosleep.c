@@ -213,10 +213,11 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
  *   suspended from execution until either the time value of the clock
  *   specified by clock_id reaches the absolute time specified by the rqtp
  *   argument, or a signal is delivered to the calling thread and its action
- *   is to invoke a signal-catching function, or the process is terminated. If,
- *   at the time of the call, the time value specified by rqtp is less than
- *   or equal to the time value of the specified clock, then clock_nanosleep()
- *   will return immediately and the calling process will not be suspended.
+ *   is to invoke a signal-catching function, or the process is terminated.
+ *   If, at the time of the call, the time value specified by rqtp is less
+ *   than or equal to the time value of the specified clock, then
+ *   clock_nanosleep() will return immediately and the calling process will
+ *   not be suspended.
  *
  *   The suspension time caused by this function may be longer than requested
  *   because the argument value is rounded up to an integer multiple of the
@@ -250,12 +251,12 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
  *   If the clock_nanosleep() function returns because the requested time has
  *   elapsed, its return value is zero.
  *
- *   If the clock_nanosleep() function returns because it has been interrupted by
- *   a signal, the function returns a value of -1 and sets errno to indicate
- *   the interruption. If the rmtp argument is non-NULL, the timespec
- *   structure referenced by it is updated to contain the amount of time
- *   remaining in the interval (the requested time minus the time actually
- *   slept). If the rmtp argument is NULL, the remaining time is not
+ *   If the clock_nanosleep() function returns because it has been
+ *   interrupted by a signal, the function returns a value of -1 and sets
+ *   errno to indicate the interruption. If the rmtp argument is non-NULL,
+ *   the timespec structure referenced by it is updated to contain the amount
+ *   of time remaining in the interval (the requested time minus the time
+ *   actually slept). If the rmtp argument is NULL, the remaining time is not
  *   returned.
  *
  *   If clock_nanosleep() fails, it returns a value of -1 and sets errno to

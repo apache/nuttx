@@ -1,5 +1,5 @@
 /****************************************************************************
- * arm/arm/src/stm32/stm32_i2s.c
+ * arch/arm/src/stm32/stm32_i2s.c
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
  *   Author: Taras Drozdovskiy <t.drozdovskiy@gmail.com>
@@ -41,11 +41,12 @@
  * up_spiinitialize()) are provided by common STM32 logic.  To use this
  * common SPI logic on your board:
  *
- *   1. Provide logic in stm32_boardinitialize() to configure I2S chip select
- *      pins.
- *   2. Provide stm32_i2s2/3select() and stm32_i2s2/3status() functions in your
- *      board-specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
+ *   1. Provide logic in stm32_boardinitialize() to configure I2S chip
+ *      select pins.
+ *   2. Provide stm32_i2s2/3select() and stm32_i2s2/3status() functions in
+ *      your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board
+ *      is configured.
  *   3. Add a calls to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by stm32_i2sdev_initialize() may then be used to
@@ -136,7 +137,8 @@
 
 #  endif
 
-/* Configuration ********************************************************************/
+/* Configuration ************************************************************/
+
 /* I2S interrupts */
 
 #ifdef CONFIG_STM32_SPI_INTERRUPTS
@@ -202,7 +204,8 @@
 #  error "Unknown STM32 DMA"
 #endif
 
-/* Debug *******************************************************************/
+/* Debug ********************************************************************/
+
 /* Check if SSC debug is enabled (non-standard.. no support in
  * include/debug.h
  */
@@ -316,10 +319,10 @@ struct stm32_i2s_s
   /* Debug stuff */
 
 #ifdef CONFIG_STM32_I2S_REGDEBUG
-   bool     wr;                /* Last was a write */
-   uint32_t regaddr;           /* Last address */
-   uint16_t regval;            /* Last value */
-   int      count;             /* Number of times */
+  bool     wr;                /* Last was a write */
+  uint32_t regaddr;           /* Last address */
+  uint16_t regval;            /* Last value */
+  int      count;             /* Number of times */
 #endif /* CONFIG_STM32_I2S_REGDEBUG */
 };
 
@@ -330,8 +333,8 @@ struct stm32_i2s_s
 /* Register helpers */
 
 #ifdef CONFIG_STM32_I2S_REGDEBUG
-static bool     i2s_checkreg(struct stm32_i2s_s *priv, bool wr, uint16_t regval,
-                  uint32_t regaddr);
+static bool     i2s_checkreg(struct stm32_i2s_s *priv, bool wr,
+                             uint16_t regval, uint32_t regaddr);
 #else
 # define        i2s_checkreg(priv,wr,regval,regaddr) (false)
 #endif
@@ -406,14 +409,16 @@ static void     i2s_rxdma_timeout(int argc, uint32_t arg);
 static int      i2s_rxdma_setup(struct stm32_i2s_s *priv);
 static void     i2s_rx_worker(void *arg);
 static void     i2s_rx_schedule(struct stm32_i2s_s *priv, int result);
-static void     i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result, void *arg);
+static void     i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result,
+                                   void *arg);
 #endif
 #ifdef I2S_HAVE_TX
 static void     i2s_txdma_timeout(int argc, uint32_t arg);
 static int      i2s_txdma_setup(struct stm32_i2s_s *priv);
 static void     i2s_tx_worker(void *arg);
 static void     i2s_tx_schedule(struct stm32_i2s_s *priv, int result);
-static void     i2s_txdma_callback(DMA_HANDLE handle, uint8_t result, void *arg);
+static void     i2s_txdma_callback(DMA_HANDLE handle, uint8_t result,
+                                   void *arg);
 #endif
 
 /* I2S methods (and close friends) */
@@ -422,13 +427,16 @@ static int      i2s_checkwidth(struct stm32_i2s_s *priv, int bits);
 
 static uint32_t stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
 static uint32_t stm32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits);
-static int      stm32_i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
-                  i2s_callback_t callback, void *arg, uint32_t timeout);
+static int      stm32_i2s_receive(struct i2s_dev_s *dev,
+                                  struct ap_buffer_s *apb,
+                                  i2s_callback_t callback,
+                                  void *arg, uint32_t timeout);
 static uint32_t stm32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
 static uint32_t stm32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
-static int      stm32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
-                  i2s_callback_t callback, void *arg,
-                  uint32_t timeout);
+static int      stm32_i2s_send(struct i2s_dev_s *dev,
+                               struct ap_buffer_s *apb,
+                               i2s_callback_t callback, void *arg,
+                               uint32_t timeout);
 
 /* Initialization */
 
@@ -714,7 +722,8 @@ static struct stm32_buffer_s *i2s_buf_allocate(struct stm32_i2s_s *priv)
  *
  ****************************************************************************/
 
-static void i2s_buf_free(struct stm32_i2s_s *priv, struct stm32_buffer_s *bfcontainer)
+static void i2s_buf_free(struct stm32_i2s_s *priv,
+                         struct stm32_buffer_s *bfcontainer)
 {
   irqstate_t flags;
 
@@ -814,6 +823,7 @@ static void i2s_rxdma_sampledone(struct stm32_i2s_s *priv, int result)
   stm32_dmasample(priv->rx.dma, &priv->rx.dmaregs[DMA_END_TRANSFER]);
 
   /* Then dump the sampled DMA registers */
+
   /* Initial register values */
 
   stm32_dmadump(priv->rx.dma, &priv->rx.dmaregs[DMA_INITIAL],
@@ -879,6 +889,7 @@ static void i2s_txdma_sampledone(struct stm32_i2s_s *priv, int result)
   stm32_dmasample(priv->tx.dma, &priv->tx.dmaregs[DMA_END_TRANSFER]);
 
   /* Then dump the sampled DMA registers */
+
   /* Initial register values */
 
   stm32_dmadump(priv->tx.dma, &priv->tx.dmaregs[DMA_INITIAL],
@@ -1115,9 +1126,9 @@ static void i2s_rx_worker(void *arg)
   DEBUGASSERT(priv);
 
   /* When the transfer was started, the active buffer containers were removed
-   * from the rx.pend queue and saved in the rx.act queue.  We get here when the
-   * DMA is finished... either successfully, with a DMA error, or with a DMA
-   * timeout.
+   * from the rx.pend queue and saved in the rx.act queue.  We get here when
+   * the DMA is finished... either successfully, with a DMA error, or with a
+   * DMA timeout.
    *
    * In any case, the buffer containers in rx.act will be moved to the end
    * of the rx.done queue and rx.act queue will be emptied before this worker
@@ -1302,7 +1313,8 @@ static void i2s_rxdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
 
   /* REVISIT:  We would like to the next DMA started here so that we do not
    * get audio glitches at the boundaries between DMA transfers.
-   * Unfortunately, we cannot call stm32_dmasetup() from an interrupt handler!
+   * Unfortunately, we cannot call stm32_dmasetup() from an interrupt
+   * handler!
    */
 
   /* Then schedule completion of the transfer to occur on the worker thread */
@@ -1424,9 +1436,10 @@ static int i2s_txdma_setup(struct stm32_i2s_s *priv)
       /* Configure DMA stream */
 
       stm32_dmasetup(priv->tx.dma, priv->base + STM32_SPI_DR_OFFSET,
-                     (uint32_t)samp, nbytes/2, priv->txccr);
+                     (uint32_t)samp, nbytes / 2, priv->txccr);
 
       /* Increment the DMA timeout */
+
       if (bfcontainer->timeout > 0)
         {
           timeout += bfcontainer->timeout;
@@ -1458,7 +1471,8 @@ static int i2s_txdma_setup(struct stm32_i2s_s *priv)
 
   /* Enable the transmitter */
 
-  i2s_putreg(priv, STM32_SPI_CR2_OFFSET, i2s_getreg(priv, STM32_SPI_CR2_OFFSET) | SPI_CR2_TXDMAEN);
+  i2s_putreg(priv, STM32_SPI_CR2_OFFSET,
+             i2s_getreg(priv, STM32_SPI_CR2_OFFSET) | SPI_CR2_TXDMAEN);
 
   /* Start a watchdog to catch DMA timeouts */
 
@@ -1507,9 +1521,9 @@ static void i2s_tx_worker(void *arg)
   DEBUGASSERT(priv);
 
   /* When the transfer was started, the active buffer containers were removed
-   * from the tx.pend queue and saved in the tx.act queue.  We get here when the
-   * DMA is finished... either successfully, with a DMA error, or with a DMA
-   * timeout.
+   * from the tx.pend queue and saved in the tx.act queue.  We get here when
+   * the DMA is finished... either successfully, with a DMA error, or with a
+   * DMA timeout.
    *
    * In any case, the buffer containers in tx.act will be moved to the end
    * of the tx.done queue and tx.act will be emptied before this worker is
@@ -1682,7 +1696,8 @@ static void i2s_txdma_callback(DMA_HANDLE handle, uint8_t result, void *arg)
 
   /* REVISIT:  We would like to the next DMA started here so that we do not
    * get audio glitches at the boundaries between DMA transfers.
-   * Unfortunately, we cannot call stm32_dmasetup() from an interrupt handler!
+   * Unfortunately, we cannot call stm32_dmasetup() from an interrupt
+   * handler!
    */
 
   /* Then schedule completion of the transfer to occur on the worker thread */
@@ -1906,8 +1921,8 @@ static int stm32_i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   flags = enter_critical_section();
   sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.pend);
 
-  /* Then start the next transfer.  If there is already a transfer in progress,
-   * then this will do nothing.
+  /* Then start the next transfer.  If there is already a transfer in
+   * progress, then this will do nothing.
    */
 
   ret = i2s_rxdma_setup(priv);
@@ -1930,12 +1945,12 @@ errout_with_exclsem:
 
 static int roundf(float num)
 {
-    if (((int)(num + 0.5f)) > num)
-      {
-        return num + 1;
-      }
+  if (((int)(num + 0.5f)) > num)
+    {
+      return num + 1;
+    }
 
-    return num;
+  return num;
 }
 
 /****************************************************************************
@@ -1999,7 +2014,7 @@ static uint32_t stm32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
   int ret;
 
-  i2sinfo("Data width bits of tx = %d\n",bits);
+  i2sinfo("Data width bits of tx = %d\n", bits);
   DEBUGASSERT(priv && bits > 1);
 
   /* Check if this is a bit width that we are configured to handle */
@@ -2112,8 +2127,8 @@ static int stm32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   flags = enter_critical_section();
   sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.pend);
 
-  /* Then start the next transfer.  If there is already a transfer in progress,
-   * then this will do nothing.
+  /* Then start the next transfer.  If there is already a transfer in
+   * progress, then this will do nothing.
    */
 
   ret = i2s_txdma_setup(priv);
@@ -2156,7 +2171,10 @@ static uint32_t i2s_mckdivider(struct stm32_i2s_s *priv)
   uint32_t bitrate;
   uint32_t regval;
 
-  uint16_t pllr = 5, plln = 256, div = 12, odd = 1;
+  uint16_t pllr = 5;
+  uint16_t plln = 256;
+  uint16_t div = 12;
+  uint16_t odd = 1;
 
   DEBUGASSERT(priv && priv->samplerate >= 0 && priv->datalen > 0);
 
@@ -2169,39 +2187,43 @@ static uint32_t i2s_mckdivider(struct stm32_i2s_s *priv)
     }
   else
     {
-      int R, n, Od;
-      int Napprox;
+      int R;
+      int n;
+      int od;
+      int napprox;
       int diff;
       int diff_min = 500000000;
 
-      for (Od = 0; Od <= 1; ++Od)
+      for (od = 0; od <= 1; ++od)
         {
           for (R = 2; R <= 7; ++R)
             {
               for (n = 2; n <= 256; ++n)
                 {
-                   Napprox = roundf(priv->samplerate / 1000000.0f * (8 * 32 * R * (2 * n + Od)));
-                   if ((Napprox > 432) || (Napprox < 50))
-                     {
-                       continue;
-                     }
+                  napprox = roundf(priv->samplerate / 1000000.0f *
+                                   (8 * 32 * R * (2 * n + od)));
+                  if ((napprox > 432) || (napprox < 50))
+                    {
+                      continue;
+                    }
 
-                   diff = abs(priv->samplerate - 1000000 * Napprox / (8 * 32 * R * (2 * n + Od)));
-                   if (diff_min > diff)
-                     {
-                       diff_min = diff;
-                       plln = Napprox;
-                       pllr = R;
-                       div = n;
-                       odd = Od;
-                     }
+                  diff = abs(priv->samplerate - 1000000 * napprox /
+                             (8 * 32 * R * (2 * n + od)));
+                  if (diff_min > diff)
+                    {
+                      diff_min = diff;
+                      plln = napprox;
+                      pllr = R;
+                      div = n;
+                      odd = od;
+                    }
                 }
             }
         }
 
-        /* Calculate the new bitrate in Hz */
+      /* Calculate the new bitrate in Hz */
 
-        bitrate = priv->samplerate * priv->datalen;
+      bitrate = priv->samplerate * priv->datalen;
     }
 
   /* Configure MCK divider */
@@ -2216,7 +2238,8 @@ static uint32_t i2s_mckdivider(struct stm32_i2s_s *priv)
 
   /* PLLI2S clock used as I2S clock source */
 
-  putreg32(((getreg32(STM32_RCC_CFGR)) & (~RCC_CFGR_I2SSRC)), STM32_RCC_CFGR);
+  putreg32(((getreg32(STM32_RCC_CFGR)) & (~RCC_CFGR_I2SSRC)),
+           STM32_RCC_CFGR);
   regval = (pllr << 28) | (plln << 6);
   putreg32(regval, STM32_RCC_PLLI2SCFGR);
 
@@ -2230,8 +2253,9 @@ static uint32_t i2s_mckdivider(struct stm32_i2s_s *priv)
   i2s_putreg(priv, STM32_SPI_I2SCFGR_OFFSET,
              SPI_I2SCFGR_I2SMOD | SPI_I2SCFGR_I2SCFG_MTX | SPI_I2SCFGR_I2SE);
 
-  putreg32(((getreg32(STM32_DMA1_HIFCR)) | 0x80000000 /* DMA_HIFCR_CTCIF7 */),
-           STM32_DMA1_HIFCR);
+  /* putreg32((getreg32(STM32_DMA1_HIFCR) | DMA_HIFCR_CTCIF7), STM32_DMA1_HIFCR); */
+
+  putreg32((getreg32(STM32_DMA1_HIFCR) | 0x80000000), STM32_DMA1_HIFCR);
 
   return bitrate;
 #else
@@ -2258,7 +2282,9 @@ static int i2s_dma_flags(struct stm32_i2s_s *priv)
   switch (priv->datalen)
     {
     case 8:
+
       /* Reconfigure the RX DMA (and TX DMA if applicable) */
+
       priv->rxccr = SPI_RXDMA8_CONFIG;
       priv->txccr = SPI_TXDMA8_CONFIG;
       break;
@@ -2429,7 +2455,7 @@ static void i2s2_configure(struct stm32_i2s_s *priv)
    * select pins must be selected by board-specific logic.
    */
 
-   priv->base  = STM32_I2S2_BASE;
+  priv->base  = STM32_I2S2_BASE;
 
 #ifdef CONFIG_STM32_I2S2_RX
   priv->rxenab = true;
@@ -2541,7 +2567,7 @@ static void i2s3_configure(struct stm32_i2s_s *priv)
  * Public Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_i2sdev_initialize
  *
  * Description:
@@ -2553,7 +2579,7 @@ static void i2s3_configure(struct stm32_i2s_s *priv)
  * Returned Value:
  *   Valid I2S device structure reference on success; a NULL on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 FAR struct i2s_dev_s *stm32_i2sdev_initialize(int port)
 {

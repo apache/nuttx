@@ -269,7 +269,8 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
        * pending.
        */
 
-      sigpend = nxsig_remove_pendingsignal(rtcb, nxsig_lowest(&intersection));
+      sigpend = nxsig_remove_pendingsignal(rtcb,
+                                           nxsig_lowest(&intersection));
       DEBUGASSERT(sigpend);
 
       /* Return the signal info to the caller if so requested */
@@ -325,7 +326,8 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
 #ifdef CONFIG_HAVE_LONG_LONG
           uint64_t waitticks64 = ((uint64_t)timeout->tv_sec * NSEC_PER_SEC +
-                                  (uint64_t)timeout->tv_nsec + NSEC_PER_TICK - 1) /
+                                  (uint64_t)timeout->tv_nsec +
+                                  NSEC_PER_TICK - 1) /
                                  NSEC_PER_TICK;
           DEBUGASSERT(waitticks64 <= UINT32_MAX);
           waitticks = (uint32_t)waitticks64;
@@ -400,8 +402,8 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
       if (GOOD_SIGNO(rtcb->sigunbinfo.si_signo))
         {
-          /* We were awakened by a signal... but is it one of the signals that
-           * we were waiting for?
+          /* We were awakened by a signal... but is it one of the signals
+           * that we were waiting for?
            */
 
           if (sigismember(set, rtcb->sigunbinfo.si_signo))

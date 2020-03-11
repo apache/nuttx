@@ -300,7 +300,8 @@ int task_reparent(pid_t ppid, pid_t chpid)
        * suppressed child exit status.
        */
 
-      ret = ((otcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0) ? -ENOENT : OK;
+      ret = ((otcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0) ?
+              -ENOENT : OK;
     }
 
 #else /* CONFIG_SCHED_CHILD_STATUS */

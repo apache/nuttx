@@ -577,38 +577,38 @@ void nx_start(void)
     defined(CONFIG_MM_PGALLOC)
   /* Initialize the memory manager */
 
-  {
-    FAR void *heap_start;
-    size_t heap_size;
+    {
+      FAR void *heap_start;
+      size_t heap_size;
 
 #ifdef MM_KERNEL_USRHEAP_INIT
-    /* Get the user-mode heap from the platform specific code and configure
-     * the user-mode memory allocator.
-     */
+      /* Get the user-mode heap from the platform specific code and configure
+       * the user-mode memory allocator.
+       */
 
-    up_allocate_heap(&heap_start, &heap_size);
-    kumm_initialize(heap_start, heap_size);
+      up_allocate_heap(&heap_start, &heap_size);
+      kumm_initialize(heap_start, heap_size);
 #endif
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-    /* Get the kernel-mode heap from the platform specific code and configure
-     * the kernel-mode memory allocator.
-     */
+      /* Get the kernel-mode heap from the platform specific code and
+       * configure the kernel-mode memory allocator.
+       */
 
-    up_allocate_kheap(&heap_start, &heap_size);
-    kmm_initialize(heap_start, heap_size);
+      up_allocate_kheap(&heap_start, &heap_size);
+      kmm_initialize(heap_start, heap_size);
 #endif
 
 #ifdef CONFIG_MM_PGALLOC
-    /* If there is a page allocator in the configuration, then get the page
-     * heap information from the platform-specific code and configure the
-     * page allocator.
-     */
+      /* If there is a page allocator in the configuration, then get the page
+       * heap information from the platform-specific code and configure the
+       * page allocator.
+       */
 
-    up_allocate_pgheap(&heap_start, &heap_size);
-    mm_pginitialize(heap_start, heap_size);
+      up_allocate_pgheap(&heap_start, &heap_size);
+      mm_pginitialize(heap_start, heap_size);
 #endif
-  }
+    }
 #endif
 
 #ifdef CONFIG_MM_IOB

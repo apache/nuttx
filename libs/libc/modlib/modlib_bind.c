@@ -162,7 +162,6 @@ static inline int modlib_readrelas(FAR struct mod_loadinfo_s *loadinfo,
 
 static int modlib_relocate(FAR struct module_s *modp,
                            FAR struct mod_loadinfo_s *loadinfo, int relidx)
-
 {
   FAR Elf_Shdr *relsec = &loadinfo->shdr[relidx];
   FAR Elf_Shdr *dstsec = &loadinfo->shdr[relsec->sh_info];
@@ -202,13 +201,15 @@ static int modlib_relocate(FAR struct module_s *modp,
 
       if (!(i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT))
         {
-          ret = modlib_readrels(loadinfo, relsec, i, rels, CONFIG_MODLIB_RELOCATION_BUFFERCOUNT);
+          ret = modlib_readrels(loadinfo, relsec, i, rels,
+                                CONFIG_MODLIB_RELOCATION_BUFFERCOUNT);
           if (ret < 0)
-          {
-              berr("ERROR: Section %d reloc %d: Failed to read relocation entry: %d\n",
+            {
+              berr("ERROR: Section %d reloc %d: "
+                   "Failed to read relocation entry: %d\n",
                    relidx, i, ret);
               break;
-          }
+            }
         }
 
       /* Get the symbol table index for the relocation.  This is contained
@@ -247,6 +248,7 @@ static int modlib_relocate(FAR struct module_s *modp,
                   ret = -ENOMEM;
                   break;
                 }
+
               j++;
             }
           else
@@ -261,7 +263,8 @@ static int modlib_relocate(FAR struct module_s *modp,
           ret = modlib_readsym(loadinfo, symidx, sym);
           if (ret < 0)
             {
-              berr("ERROR: Section %d reloc %d: Failed to read symbol[%d]: %d\n",
+              berr("ERROR: Section %d reloc %d: "
+                   "Failed to read symbol[%d]: %d\n",
                    relidx, i, symidx, ret);
               lib_free(cache);
               break;
@@ -272,8 +275,8 @@ static int modlib_relocate(FAR struct module_s *modp,
           ret = modlib_symvalue(modp, loadinfo, sym);
           if (ret < 0)
             {
-              /* The special error -ESRCH is returned only in one condition:  The
-               * symbol has no name.
+              /* The special error -ESRCH is returned only in one condition:
+               * The symbol has no name.
                *
                * There are a few relocations for a few architectures that do
                * no depend upon a named symbol.  We don't know if that is the
@@ -284,13 +287,15 @@ static int modlib_relocate(FAR struct module_s *modp,
 
               if (ret == -ESRCH)
                 {
-                  berr("ERROR: Section %d reloc %d: Undefined symbol[%d] has no name: %d\n",
-                      relidx, i, symidx, ret);
+                  berr("ERROR: Section %d reloc %d: "
+                       "Undefined symbol[%d] has no name: %d\n",
+                       relidx, i, symidx, ret);
                 }
               else
                 {
-                  berr("ERROR: Section %d reloc %d: Failed to get value of symbol[%d]: %d\n",
-                      relidx, i, symidx, ret);
+                  berr("ERROR: Section %d reloc %d: "
+                       "Failed to get value of symbol[%d]: %d\n",
+                       relidx, i, symidx, ret);
                   lib_free(cache);
                   break;
                 }
@@ -307,9 +312,11 @@ static int modlib_relocate(FAR struct module_s *modp,
 
       /* Calculate the relocation address. */
 
-      if (rel->r_offset < 0 || rel->r_offset > dstsec->sh_size - sizeof(uint32_t))
+      if (rel->r_offset < 0 ||
+          rel->r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
-          berr("ERROR: Section %d reloc %d: Relocation address out of range, offset %d size %d\n",
+          berr("ERROR: Section %d reloc %d: "
+               "Relocation address out of range, offset %d size %d\n",
                relidx, i, rel->r_offset, dstsec->sh_size);
           ret = -EINVAL;
           break;
@@ -322,7 +329,8 @@ static int modlib_relocate(FAR struct module_s *modp,
       ret = up_relocate(rel, sym, addr);
       if (ret < 0)
         {
-          berr("ERROR: Section %d reloc %d: Relocation failed: %d\n", relidx, i, ret);
+          berr("ERROR: Section %d reloc %d: Relocation failed: %d\n",
+               relidx, i, ret);
           break;
         }
     }
@@ -354,7 +362,8 @@ static int modlib_relocateadd(FAR struct module_s *modp,
   int             i;
   int             j;
 
-  relas = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT * sizeof(Elf_Rela));
+  relas = lib_malloc(CONFIG_MODLIB_RELOCATION_BUFFERCOUNT *
+                     sizeof(Elf_Rela));
   if (!relas)
     {
       berr("Failed to allocate memory for elf relocation relas\n");
@@ -378,13 +387,15 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 
       if (!(i % CONFIG_MODLIB_RELOCATION_BUFFERCOUNT))
         {
-          ret = modlib_readrelas(loadinfo, relsec, i, relas, CONFIG_MODLIB_RELOCATION_BUFFERCOUNT);
+          ret = modlib_readrelas(loadinfo, relsec, i, relas,
+                                 CONFIG_MODLIB_RELOCATION_BUFFERCOUNT);
           if (ret < 0)
-          {
-              berr("ERROR: Section %d reloc %d: Failed to read relocation entry: %d\n",
+            {
+              berr("ERROR: Section %d reloc %d: "
+                   "Failed to read relocation entry: %d\n",
                    relidx, i, ret);
               break;
-          }
+            }
         }
 
       /* Get the symbol table index for the relocation.  This is contained
@@ -423,6 +434,7 @@ static int modlib_relocateadd(FAR struct module_s *modp,
                   ret = -ENOMEM;
                   break;
                 }
+
               j++;
             }
           else
@@ -437,7 +449,8 @@ static int modlib_relocateadd(FAR struct module_s *modp,
           ret = modlib_readsym(loadinfo, symidx, sym);
           if (ret < 0)
             {
-              berr("ERROR: Section %d reloc %d: Failed to read symbol[%d]: %d\n",
+              berr("ERROR: Section %d reloc %d: "
+                   "Failed to read symbol[%d]: %d\n",
                    relidx, i, symidx, ret);
               lib_free(cache);
               break;
@@ -448,8 +461,8 @@ static int modlib_relocateadd(FAR struct module_s *modp,
           ret = modlib_symvalue(modp, loadinfo, sym);
           if (ret < 0)
             {
-              /* The special error -ESRCH is returned only in one condition:  The
-               * symbol has no name.
+              /* The special error -ESRCH is returned only in one condition:
+               * The symbol has no name.
                *
                * There are a few relocations for a few architectures that do
                * no depend upon a named symbol.  We don't know if that is the
@@ -460,13 +473,15 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 
               if (ret == -ESRCH)
                 {
-                  berr("ERROR: Section %d reloc %d: Undefined symbol[%d] has no name: %d\n",
-                      relidx, i, symidx, ret);
+                  berr("ERROR: Section %d reloc %d: "
+                       "Undefined symbol[%d] has no name: %d\n",
+                       relidx, i, symidx, ret);
                 }
               else
                 {
-                  berr("ERROR: Section %d reloc %d: Failed to get value of symbol[%d]: %d\n",
-                      relidx, i, symidx, ret);
+                  berr("ERROR: Section %d reloc %d: "
+                       "Failed to get value of symbol[%d]: %d\n",
+                       relidx, i, symidx, ret);
                   lib_free(cache);
                   break;
                 }
@@ -483,9 +498,11 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 
       /* Calculate the relocation address. */
 
-      if (rela->r_offset < 0 || rela->r_offset > dstsec->sh_size - sizeof(uint32_t))
+      if (rela->r_offset < 0 ||
+          rela->r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
-          berr("ERROR: Section %d reloc %d: Relocation address out of range, offset %d size %d\n",
+          berr("ERROR: Section %d reloc %d: "
+               "Relocation address out of range, offset %d size %d\n",
                relidx, i, rela->r_offset, dstsec->sh_size);
           ret = -EINVAL;
           break;
@@ -498,7 +515,8 @@ static int modlib_relocateadd(FAR struct module_s *modp,
       ret = up_relocateadd(rela, sym, addr);
       if (ret < 0)
         {
-          berr("ERROR: Section %d reloc %d: Relocation failed: %d\n", relidx, i, ret);
+          berr("ERROR: Section %d reloc %d: Relocation failed: %d\n",
+               relidx, i, ret);
           break;
         }
     }
@@ -522,7 +540,8 @@ static int modlib_relocateadd(FAR struct module_s *modp,
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
- *   'loadinfo' using the exported symbol values provided by modlib_setsymtab().
+ *   'loadinfo' using the exported symbol values provided by
+ *   modlib_setsymtab().
  *
  * Input Parameters:
  *   modp     - Module state information
@@ -534,7 +553,8 @@ static int modlib_relocateadd(FAR struct module_s *modp,
  *
  ****************************************************************************/
 
-int modlib_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo)
+int modlib_bind(FAR struct module_s *modp,
+                FAR struct mod_loadinfo_s *loadinfo)
 {
   int ret;
   int i;

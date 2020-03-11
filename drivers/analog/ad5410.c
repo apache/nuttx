@@ -39,6 +39,10 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <stdio.h>
@@ -52,6 +56,10 @@
 #include <nuttx/arch.h>
 #include <nuttx/analog/dac.h>
 #include <nuttx/spi/spi.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #if defined(CONFIG_DAC_AD5410)
 
@@ -72,7 +80,7 @@
 #define AD5410_CMD_024MA      0x07
 
 /****************************************************************************
- * ad_private Types
+ * Private Types
  ****************************************************************************/
 
 struct up_dev_s
@@ -82,7 +90,7 @@ struct up_dev_s
 };
 
 /****************************************************************************
- * ad_private Function Prototypes
+ * Private Function Prototypes
  ****************************************************************************/
 
 static void dac_lock(FAR struct spi_dev_s *spi);
@@ -99,7 +107,7 @@ static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg);
 static int  dac_interrupt(int irq, void *context, FAR void *arg);
 
 /****************************************************************************
- * ad_private Data
+ * Private Data
  ****************************************************************************/
 
 static const struct dac_ops_s g_dacops =
@@ -121,7 +129,7 @@ static struct dac_dev_s g_dacdev =
 };
 
 /****************************************************************************
- * ad_private Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -173,7 +181,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
  * Description:
  *   Configure the DAC. This method is called the first time that the DAC
  *   device is opened.  This will occur when the port is first opened.
- *   This setup includes configuring and attaching DAC interrupts.  Interrupts
+ *   This setup includes configuring and attaching DAC interrupts. Interrupts
  *   are all disabled upon return.
  *
  ****************************************************************************/

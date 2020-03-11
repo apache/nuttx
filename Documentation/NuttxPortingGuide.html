@@ -1751,7 +1751,7 @@ The specific environmental definitions are unique for each board but should incl
       The definitions in that header file provide the common interface between NuttX and the architecture-specific implementation in <code>arch/</code>.
     </p>
     <blockquote><small>
-      <code>up_</code> is supposed to stand for microprocessor; the <code>u</code> is like the Greek letter micron: <i>µ</i>.    So it would be <code>µP</code> which is a common shortening of the word microprocessor.  I don't like that name very much.  I wish I would have used a more obvious prefix like <code>arch_</code> instead -- then I would not have to answer this question so often.
+      <code>up_</code> is supposed to stand for microprocessor; the <code>u</code> is like the Greek letter micron: <i>Ä¾</i>.    So it would be <code>Ä¾P</code> which is a common shortening of the word microprocessor.  I don't like that name very much.  I wish I would have used a more obvious prefix like <code>arch_</code> instead -- then I would not have to answer this question so often.
     </small></blockquote>
   </li>
   <li>
@@ -5865,7 +5865,7 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
      <code>void setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);</code><br>
      <code>void setbits(FAR struct spi_dev_s *dev, int nbits);</code><br>
      <code>uint8_t status(FAR struct spi_dev_s *dev, uint32_t devid);</code><br>
-     <code>uint16_t send(FAR struct spi_dev_s *dev, uint16_t wd);</code><br>
+     <code>uint32_t send(FAR struct spi_dev_s *dev, uint32_t wd);</code><br>
      <code>void exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer, FAR void *rxbuffer, size_t nwords);</code><br>
      <p><code>int registercallback(FAR struct spi_dev_s *dev, mediachange_t callback, void *arg);</code></p>
     </ul>

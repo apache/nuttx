@@ -1666,6 +1666,26 @@ config STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW
 		from one flash bank while writing on other flash bank.  See your STM32
 		errata to check if your STM32 is affected by this problem.
 
+choice
+	prompt "JTAG Configuration"
+	default STM32L4_JTAG_DISABLE
+	---help---
+		JTAG Enable settings (by default JTAG-DP and SW-DP are disabled)
+
+config STM32L4_JTAG_DISABLE
+	bool "Disable all JTAG clocking"
+
+config STM32L4_JTAG_FULL_ENABLE
+	bool "Enable full SWJ (JTAG-DP + SW-DP)"
+
+config STM32L4_JTAG_NOJNTRST_ENABLE
+	bool "Enable full SWJ (JTAG-DP + SW-DP) but without JNTRST"
+
+config STM32L4_JTAG_SW_ENABLE
+	bool "Set JTAG-DP disabled and SW-DP enabled"
+
+endchoice
+
 config STM32L4_DISABLE_IDLE_SLEEP_DURING_DEBUG
 	bool "Disable IDLE Sleep (WFI) in debug mode"
 	default n

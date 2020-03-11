@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_spi.c
  *
- *   Copyright (C) 2013-2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2017 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * This derives from SAM3/4 SPI driver:
@@ -80,7 +80,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* When SPI DMA is enabled, small DMA transfers will still be performed by
  * polling logic.  But we need a threshold value to determine what is small.
  * That value is provided by CONFIG_SAMA5_SPI_DMATHRESHOLD.
@@ -114,6 +116,7 @@
 #endif
 
 /* Clocking *****************************************************************/
+
 /* Select MCU-specific settings
  *
  * SPI is driven by the main clock.
@@ -128,7 +131,8 @@
 #define DMA_TIMEOUT_MS    (800)
 #define DMA_TIMEOUT_TICKS MSEC2TICK(DMA_TIMEOUT_MS)
 
-/* Debug *******************************************************************/
+/* Debug ********************************************************************/
+
 /* Check if SPI debug is enabled */
 
 #ifndef CONFIG_DEBUG_DMA
@@ -200,10 +204,10 @@ struct sam_spidev_s
   /* Debug stuff */
 
 #ifdef CONFIG_SAMA5_SPI_REGDEBUG
-   bool     wrlast;            /* Last was a write */
-   uint32_t addresslast;       /* Last address */
-   uint32_t valuelast;         /* Last value */
-   int      ntimes;            /* Number of times */
+  bool     wrlast;            /* Last was a write */
+  uint32_t addresslast;       /* Last address */
+  uint32_t valuelast;         /* Last value */
+  int      ntimes;            /* Number of times */
 #endif
 };
 
@@ -267,7 +271,7 @@ static void     spi_select(struct spi_dev_s *dev, uint32_t devid,
 static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency);
 static void     spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(struct spi_dev_s *dev, int nbits);
-static uint16_t spi_send(struct spi_dev_s *dev, uint16_t ch);
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SAMA5_SPI_DMA
 static void     spi_exchange_nodma(struct spi_dev_s *dev,
                    const void *txbuffer, void *rxbuffer, size_t nwords);
@@ -611,8 +615,10 @@ static void spi_dma_sampleinit(struct sam_spics_s *spics)
 {
   /* Put contents of register samples into a known state */
 
-  memset(spics->rxdmaregs, 0xff, DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
-  memset(spics->txdmaregs, 0xff, DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
+  memset(spics->rxdmaregs, 0xff,
+         DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
+  memset(spics->txdmaregs, 0xff,
+         DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
 
   /* Then get the initial samples */
 
@@ -644,6 +650,7 @@ static void spi_dma_sampledone(struct sam_spics_s *spics)
   sam_dmasample(spics->txdma, &spics->txdmaregs[DMA_END_TRANSFER]);
 
   /* Then dump the sampled DMA registers */
+
   /* Initial register values */
 
   sam_dmadump(spics->txdma, &spics->txdmaregs[DMA_INITIAL],
@@ -767,13 +774,13 @@ static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 
   spi_rxdma_sample(spics, DMA_CALLBACK);
 
-  /* Report the result of the transfer only if the TX callback has not already
-   * reported an error.
+  /* Report the result of the transfer only if the TX callback has not
+   * already reported an error.
    */
 
   if (spics->result == -EBUSY)
     {
-      /* Save the result of the transfer if no error was previuosly reported */
+      /* Save the result of the transfer if no error was previously reported */
 
       spics->result = result;
     }
@@ -910,8 +917,8 @@ static void spi_select(struct spi_dev_s *dev, uint32_t devid,
     {
       spiinfo("cs=%d\n", spics->cs);
 
-      /* Before writing the TDR, the PCS field in the SPI_MR register must be set
-       * in order to select a slave.
+      /* Before writing the TDR, the PCS field in the SPI_MR register must be
+       * set in order to select a slave.
        */
 
       regval  = spi_getreg(spi, SAM_SPI_MR_OFFSET);
@@ -974,7 +981,8 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
       return spics->actual;
     }
 
-  /* Configure SPI to a frequency as close as possible to the requested frequency.
+  /* Configure SPI to a frequency as close as possible to the requested
+   * frequency.
    *
    *   SPCK frequency = SPI_CLK / SCBR, or SCBR = SPI_CLK / frequency
    */
@@ -999,10 +1007,10 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   regval &= ~(SPI_CSR_SCBR_MASK | SPI_CSR_DLYBS_MASK | SPI_CSR_DLYBCT_MASK);
   regval |= scbr << SPI_CSR_SCBR_SHIFT;
 
-  /* DLYBS: Delay Before SPCK.  This field defines the delay from NPCS valid to the
-   * first valid SPCK transition. When DLYBS equals zero, the NPCS valid to SPCK
-   * transition is 1/2 the SPCK clock period. Otherwise, the following equations
-   * determine the delay:
+  /* DLYBS: Delay Before SPCK.  This field defines the delay from NPCS valid
+   * to the first valid SPCK transition. When DLYBS equals zero, the NPCS
+   * valid to SPCK transition is 1/2 the SPCK clock period. Otherwise, the
+   * following equations determine the delay:
    *
    *   Delay Before SPCK = DLYBS / SPI_CLK
    *
@@ -1014,10 +1022,10 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   dlybs   = SAM_SPI_CLOCK / 500000;
   regval |= dlybs << SPI_CSR_DLYBS_SHIFT;
 
-  /* DLYBCT: Delay Between Consecutive Transfers.  This field defines the delay
-   * between two consecutive transfers with the same peripheral without removing
-   * the chip select. The delay is always inserted after each transfer and
-   * before removing the chip select if needed.
+  /* DLYBCT: Delay Between Consecutive Transfers.  This field defines the
+   * delay between two consecutive transfers with the same peripheral without
+   * removing the chip select. The delay is always inserted after each
+   * transfer and before removing the chip select if needed.
    *
    *  Delay Between Consecutive Transfers = (32 x DLYBCT) / SPI_CLK
    *
@@ -1185,7 +1193,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   uint8_t txbyte;
   uint8_t rxbyte;
@@ -1200,7 +1208,7 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
   spi_exchange(dev, &txbyte, &rxbyte, 1);
 
   spiinfo("Sent %02x received %02x\n", txbyte, rxbyte);
-  return (uint16_t)rxbyte;
+  return (uint32_t)rxbyte;
 }
 
 /****************************************************************************
@@ -1566,7 +1574,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
@@ -1574,7 +1583,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_sndblock(struct spi_dev_s *dev, const void *buffer, size_t nwords)
+static void spi_sndblock(struct spi_dev_s *dev, const void *buffer,
+                         size_t nwords)
 {
   /* spi_exchange can do this. */
 
@@ -1592,9 +1602,10 @@ static void spi_sndblock(struct spi_dev_s *dev, const void *buffer, size_t nword
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            of words.  The wordsize is determined by the number of
+ *            bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *            the data is packed into uint8_t's; if nbits >8, the data is
+ *            packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -1602,7 +1613,8 @@ static void spi_sndblock(struct spi_dev_s *dev, const void *buffer, size_t nword
  ****************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
+static void spi_recvblock(struct spi_dev_s *dev, void *buffer,
+                          size_t nwords)
 {
   /* spi_exchange can do this. */
 

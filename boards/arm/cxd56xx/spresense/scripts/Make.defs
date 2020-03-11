@@ -35,6 +35,7 @@
 
 include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
+include ${TOPDIR}/boards/arm/cxd56xx/scripts/Config.mk
 include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 
 # Setup for the kind of memory that we are executing from

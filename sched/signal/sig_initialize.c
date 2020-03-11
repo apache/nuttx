@@ -124,7 +124,8 @@ static sigpendq_t *g_sigpendingirqsignalalloc;
 static sigq_t     *nxsig_alloc_block(sq_queue_t *siglist, uint16_t nsigs,
                                      uint8_t sigtype);
 static sigpendq_t *nxsig_alloc_pendingsignalblock(sq_queue_t *siglist,
-                                                  uint16_t nsigs, uint8_t sigtype);
+                                                  uint16_t nsigs,
+                                                  uint8_t sigtype);
 
 /****************************************************************************
  * Private Functions
@@ -172,7 +173,8 @@ static FAR sigq_t *nxsig_alloc_block(sq_queue_t *siglist, uint16_t nsigs,
  ****************************************************************************/
 
 static sigpendq_t *nxsig_alloc_pendingsignalblock(sq_queue_t *siglist,
-                                                  uint16_t nsigs, uint8_t sigtype)
+                                                  uint16_t nsigs,
+                                                  uint8_t sigtype)
 {
   FAR sigpendq_t *sigpendalloc;
   FAR sigpendq_t *sigpend;

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/tiva/common/tiva_ssi.c
  *
- *   Copyright (C) 2009-2010, 2014, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,8 +75,8 @@
 #endif
 
 /* How many SSI modules does this chip support? The LM3S6918 supports 2 SSI
- * modules, the LM3S6965 and LM3S8962 support 1 module (others may support more than 2-- in
- * such case, the following must be expanded).
+ * modules, the LM3S6965 and LM3S8962 support 1 module (others may support
+ * more than 2-- in such case, the following must be expanded).
  */
 
 #if TIVA_NSSI < 1
@@ -229,9 +229,9 @@ struct tiva_ssidev_s
 /* SSI register access */
 
 static inline uint32_t ssi_getreg(struct tiva_ssidev_s *priv,
-              unsigned int offset);
-static inline void ssi_putreg(struct tiva_ssidev_s *priv, unsigned int offset,
-              uint32_t value);
+                                  unsigned int offset);
+static inline void ssi_putreg(struct tiva_ssidev_s *priv,
+                              unsigned int offset, uint32_t value);
 
 /* Misc helpers */
 
@@ -281,7 +281,7 @@ static void ssi_setmodeinternal(struct tiva_ssidev_s *priv,
 static void ssi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void ssi_setbitsinternal(struct tiva_ssidev_s *priv, int nbits);
 static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint16_t ssi_send(FAR struct spi_dev_s *dev, uint16_t wd);
+static uint32_t ssi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
 static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords);
@@ -434,8 +434,8 @@ static inline void ssi_putreg(struct tiva_ssidev_s *priv,
  * Name: ssi_disable
  *
  * Description:
- *   Disable SSI operation.  NOTE: The SSI must be disabled before any control
- *   registers can be re-programmed.
+ *   Disable SSI operation.  NOTE: The SSI must be disabled before any
+ *   control registers can be re-programmed.
  *
  * Input Parameters:
  *   priv   - Device-specific state data
@@ -511,10 +511,10 @@ static void ssi_semtake(sem_t *sem)
  * Name: ssi_txnull, ssi_txuint16, and ssi_txuint8
  *
  * Description:
- *   Transfer all ones, a uint8_t, or uint16_t to Tx FIFO and update the txbuffer
- *   pointer appropriately.  The selected function dependes on (1) if there
- *   is a source txbuffer provided, and (2) if the number of bits per
- *   word is <=8 or >8.
+ *   Transfer all ones, a uint8_t, or uint16_t to Tx FIFO and update the
+ *   txbuffer pointer appropriately.  The selected function dependes on (1)
+ *   if there is a source txbuffer provided, and (2) if the number of bits
+ *   per word is <=8 or >8.
  *
  * Input Parameters:
  *   priv   - Device-specific state data
@@ -656,6 +656,7 @@ static inline int ssi_performtx(struct tiva_ssidev_s *priv)
       priv->ntxwords--;
       return 1;
     }
+
   return 0;
 }
 
@@ -684,7 +685,9 @@ static int ssi_performtx(struct tiva_ssidev_s *priv)
            * FIFO to CONFIG_SSI_TXLIMIT.  Otherwise, we could
            * overrun the Rx FIFO on a very fast SSI bus.
            */
-          for (; ntxd < priv->ntxwords && ntxd < CONFIG_SSI_TXLIMIT && !ssi_txfifofull(priv); ntxd++)
+
+          for (; ntxd < priv->ntxwords && ntxd < CONFIG_SSI_TXLIMIT &&
+               !ssi_txfifofull(priv); ntxd++)
 #else
           for (; ntxd < priv->ntxwords && !ssi_txfifofull(priv); ntxd++)
 #endif
@@ -721,9 +724,11 @@ static int ssi_performtx(struct tiva_ssidev_s *priv)
 
           regval &= ~(SSI_IM_TX | SSI_RIS_ROR);
         }
+
       ssi_putreg(priv, TIVA_SSI_IM_OFFSET, regval);
 #endif /* CONFIG_SSI_POLLWAIT */
     }
+
   return ntxd;
 }
 
@@ -794,6 +799,7 @@ static inline void ssi_performrx(struct tiva_ssidev_s *priv)
 
       regval &= ~(SSI_IM_RX | SSI_IM_RT);
     }
+
   ssi_putreg(priv, TIVA_SSI_IM_OFFSET, regval);
 #endif /* CONFIG_SSI_POLLWAIT */
 }
@@ -809,9 +815,9 @@ static inline void ssi_performrx(struct tiva_ssidev_s *priv)
  *   txbuffer - The buffer of data to send to the device (may be NULL).
  *   rxbuffer - The buffer to receive data from the device (may be NULL).
  *   nwords   - The total number of words to be exchanged.  If the interface
- *              uses <= 8 bits per word, then this is the number of uint8_t's;
- *              if the interface uses >8 bits per word, then this is the
- *              number of uint16_t's
+ *              uses <= 8 bits per word, then this is the number of
+ *              uint8_t's; if the interface uses >8 bits per word, then this
+ *              is the number of uint16_t's
  *
  * Returned Value:
  *   0: success, <0:Negated error number on failure
@@ -987,9 +993,9 @@ static inline struct tiva_ssidev_s *ssi_mapirq(int irq)
  *   txbuffer - The buffer of data to send to the device (may be NULL).
  *   rxbuffer - The buffer to receive data from the device (may be NULL).
  *   nwords   - The total number of words to be exchanged.  If the interface
- *              uses <= 8 bits per word, then this is the number of uint8_t's;
- *              if the interface uses >8 bits per word, then this is the
- *              number of uint16_t's
+ *              uses <= 8 bits per word, then this is the number of
+ *              uint8_t's; if the interface uses >8 bits per word, then this
+ *              is the number of uint16_t's
  *
  * Returned Value:
  *   0: success, <0:Negated error number on failure
@@ -1127,25 +1133,25 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
     {
       /* "The serial bit rate is derived by dividing down the input clock
        *  (FSysClk). The clock is first divided by an even prescale value
-       *  CPSDVSR from 2 to 254, which is programmed in the SSI Clock Prescale
-       *  (SSI_CPSR) register ... The clock is further divided by a value
-       *  from 1 to 256, which is 1 + SCR, where SCR is the value programmed
-       *  i n the SSI Control0 (SSICR0) register ...
+       *  CPSDVSR from 2 to 254, which is programmed in the SSI Clock
+       *  Prescale (SSI_CPSR) register ... The clock is further divided by
+       *  a value from 1 to 256, which is 1 + SCR, where SCR is the value
+       *  programmed in the SSI Control0 (SSICR0) register ...
        *
        * "The frequency of the output clock SSIClk is defined by:
        *
        *    "SSIClk = FSysClk / (CPSDVSR * (1 + SCR))
        *
-       * "Note: Although the SSIClk transmit clock can theoretically be 25 MHz,
-       *  the module may not be able to operate at that speed. For master mode,
-       *  the system clock must be at least two times faster than the SSIClk.
-       *  For slave mode, the system clock must be at least 12 times faster
-       *  than the SSIClk."
+       * "Note: Although the SSIClk transmit clock can theoretically be
+       *  25 MHz, the module may not be able to operate at that speed. For
+       *  master mode, the system clock must be at least two times faster
+       *  than the SSIClk.  For slave mode, the system clock must be at
+       *  least 12 times faster than the SSIClk."
        */
 
-      if (frequency > SYSCLK_FREQUENCY/2)
+      if (frequency > SYSCLK_FREQUENCY / 2)
         {
-          frequency = SYSCLK_FREQUENCY/2;
+          frequency = SYSCLK_FREQUENCY / 2;
         }
 
       /* Find optimal values for CPSDVSR and SCR.  This loop is inefficient,
@@ -1194,8 +1200,8 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
 
       actual = SYSCLK_FREQUENCY / (cpsdvsr * (scr + 1));
 
-      /* Save the frequency selection so that subsequent reconfigurations will be
-       * faster.
+      /* Save the frequency selection so that subsequent reconfigurations
+       * will be faster.
        */
 
       priv->frequency = frequency;
@@ -1205,7 +1211,8 @@ static uint32_t ssi_setfrequencyinternal(struct tiva_ssidev_s *priv,
   return priv->actual;
 }
 
-static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev,
+                                 uint32_t frequency)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
   uint32_t enable;
@@ -1237,7 +1244,8 @@ static uint32_t ssi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
  *
  ****************************************************************************/
 
-static void ssi_setmodeinternal(struct tiva_ssidev_s *priv, enum spi_mode_e mode)
+static void ssi_setmodeinternal(struct tiva_ssidev_s *priv,
+                                enum spi_mode_e mode)
 {
   uint32_t modebits;
   uint32_t regval;
@@ -1363,10 +1371,10 @@ static void ssi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint16_t ssi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t ssi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
-  uint16_t response = 0;
+  uint32_t response = 0;
 
   ssi_transfer(priv, &wd, &response, 1);
   return response;
@@ -1385,7 +1393,8 @@ static uint16_t ssi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *   nwords   - the length of data that to be exchanged in units of words.
  *              The wordsize is determined by the number of bits-per-word
  *              selected for the SPI interface.  If nbits <= 8, the data is
- *              packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *              packed into uint8_t's; if nbits >8, the data is packed into
+ *              uint16_t's
  *
  * Returned Value:
  *   None
@@ -1413,7 +1422,8 @@ static void ssi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
  *   nwords - the length of data to send from the buffer in number of words.
  *            The wordsize is determined by the number of bits-per-word
  *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            packed into uint8_t's; if nbits >8, the data is packed into
+ *            uint16_t's
  *
  * Returned Value:
  *   None
@@ -1439,9 +1449,10 @@ static void ssi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  *   dev -    Device-specific state data
  *   buffer - A pointer to the buffer in which to receive data
  *   nwords - the length of data that can be received in the buffer in number
- *            of words.  The wordsize is determined by the number of bits-per-word
- *            selected for the SPI interface.  If nbits <= 8, the data is
- *            packed into uint8_t's; if nbits >8, the data is packed into uint16_t's
+ *            of words.  The wordsize is determined by the number of
+ *            bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *            the data is packed into uint8_t's; if nbits >8, the data is
+ *            packed into uint16_t's
  *
  * Returned Value:
  *   None
@@ -1470,10 +1481,10 @@ static void ssi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *   prior to calling this function.  Specifically:  GPIOs should have
  *   been configured for output, and all chip selects disabled.
  *
- *   One GPIO, SS (PB2 on the eZ8F091) is reserved as a chip select.  However,
- *   If multiple devices on on the bus, then multiple chip selects will be
- *   required.  Therefore, all GPIO chip management is deferred to board-
- *   specific logic.
+ *   One GPIO, SS (PB2 on the eZ8F091) is reserved as a chip select.
+ *   However, if multiple devices on on the bus, then multiple chip selects
+ *   will be required.  Therefore, all GPIO chip management is deferred to
+ *   board-specific logic.
  *
  * Input Parameters:
  *   Port number (for hardware that has multiple SSI interfaces)
@@ -1497,6 +1508,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
     {
 #ifdef CONFIG_TIVA_SSI0
     case 0:
+
       /* Select SSI0 */
 
       priv = &g_ssidev[SSI0_NDX];
@@ -1520,7 +1532,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
        */
 
       tiva_configgpio(GPIO_SSI0_CLK);  /* PA2: SSI0 clock (SSI0Clk) */
-   /* tiva_configgpio(GPIO_SSI0_FSS);     PA3: SSI0 frame (SSI0Fss) */
+      /* tiva_configgpio(GPIO_SSI0_FSS);     PA3: SSI0 frame (SSI0Fss) */
       tiva_configgpio(GPIO_SSI0_RX);   /* PA4: SSI0 receive (SSI0Rx) */
       tiva_configgpio(GPIO_SSI0_TX);   /* PA5: SSI0 transmit (SSI0Tx) */
       break;
@@ -1528,6 +1540,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
 
 #ifdef CONFIG_TIVA_SSI1
     case 1:
+
       /* Select SSI1 */
 
       priv = &g_ssidev[SSI1_NDX];
@@ -1549,7 +1562,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
       /* Configure SSI1 GPIOs */
 
       tiva_configgpio(GPIO_SSI1_CLK);  /* PE0: SSI1 clock (SSI1Clk) */
-   /* tiva_configgpio(GPIO_SSI1_FSS);     PE1: SSI1 frame (SSI1Fss) */
+      /* tiva_configgpio(GPIO_SSI1_FSS);     PE1: SSI1 frame (SSI1Fss) */
       tiva_configgpio(GPIO_SSI1_RX);   /* PE2: SSI1 receive (SSI1Rx) */
       tiva_configgpio(GPIO_SSI1_TX);   /* PE3: SSI1 transmit (SSI1Tx) */
       break;
@@ -1557,6 +1570,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
 
 #ifdef CONFIG_TIVA_SSI2
     case 2:
+
       /* Select SSI2 */
 
       priv = &g_ssidev[SSI2_NDX];
@@ -1578,7 +1592,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
       /* Configure SSI2 GPIOs */
 
       tiva_configgpio(GPIO_SSI2_CLK);  /* PE0: SSI2 clock (SSI2Clk) */
-   /* tiva_configgpio(GPIO_SSI2_FSS);     PE1: SSI2 frame (SSI2Fss) */
+      /* tiva_configgpio(GPIO_SSI2_FSS);     PE1: SSI2 frame (SSI2Fss) */
       tiva_configgpio(GPIO_SSI2_RX);   /* PE2: SSI2 receive (SSI2Rx) */
       tiva_configgpio(GPIO_SSI2_TX);   /* PE3: SSI2 transmit (SSI2Tx) */
       break;
@@ -1586,6 +1600,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
 
 #ifdef CONFIG_TIVA_SSI3
     case 3:
+
       /* Select SSI3 */
 
       priv = &g_ssidev[SSI3_NDX];
@@ -1607,7 +1622,7 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
       /* Configure SSI3 GPIOs */
 
       tiva_configgpio(GPIO_SSI3_CLK);  /* PE0: SSI3 clock (SSI3Clk) */
-   /* tiva_configgpio(GPIO_SSI3_FSS);     PE1: SSI3 frame (SSI3Fss) */
+      /* tiva_configgpio(GPIO_SSI3_FSS);     PE1: SSI3 frame (SSI3Fss) */
       tiva_configgpio(GPIO_SSI3_RX);   /* PE2: SSI3 receive (SSI3Rx) */
       tiva_configgpio(GPIO_SSI3_TX);   /* PE3: SSI3 transmit (SSI3Tx) */
       break;
