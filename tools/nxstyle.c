@@ -1974,7 +1974,7 @@ int main(int argc, char **argv, char **envp)
 
                 case '/':
 
-                  /* C comment terminator*/
+                  /* C comment terminator */
 
                   if (line[n - 1] == '*')
                     {
