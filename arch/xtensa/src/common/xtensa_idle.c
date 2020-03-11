@@ -98,5 +98,5 @@ void up_idle(void)
    * sleep in a reduced power mode until an interrupt occurs to save power
    */
 
-  asm("waiti 0");
+  __asm__ __volatile__ ("waiti 0");
 }
