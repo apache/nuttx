@@ -145,7 +145,8 @@ static inline unsigned int note_next(unsigned int ndx, unsigned int offset)
  *
  ****************************************************************************/
 
-static void note_common(FAR struct tcb_s *tcb, FAR struct note_common_s *note,
+static void note_common(FAR struct tcb_s *tcb,
+                        FAR struct note_common_s *note,
                         uint8_t length, uint8_t type)
 {
   uint32_t systime    = (uint32_t)clock_systimer();
@@ -163,7 +164,7 @@ static void note_common(FAR struct tcb_s *tcb, FAR struct note_common_s *note,
 
   /* Save the LS 32-bits of the system timer in little endian order */
 
-  note->nc_systime[0] = (uint8_t)( systime        & 0xff);
+  note->nc_systime[0] = (uint8_t)(systime         & 0xff);
   note->nc_systime[1] = (uint8_t)((systime >> 8)  & 0xff);
   note->nc_systime[2] = (uint8_t)((systime >> 16) & 0xff);
   note->nc_systime[3] = (uint8_t)((systime >> 24) & 0xff);
@@ -185,7 +186,8 @@ static void note_common(FAR struct tcb_s *tcb, FAR struct note_common_s *note,
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void note_spincommon(FAR struct tcb_s *tcb, FAR volatile spinlock_t *spinlock,
+void note_spincommon(FAR struct tcb_s *tcb,
+                     FAR volatile spinlock_t *spinlock,
                      int type)
 {
   struct note_spinlock_s note;
@@ -419,7 +421,8 @@ void sched_note_suspend(FAR struct tcb_s *tcb)
 
   /* Format the note */
 
-  note_common(tcb, &note.nsu_cmn, sizeof(struct note_suspend_s), NOTE_SUSPEND);
+  note_common(tcb, &note.nsu_cmn, sizeof(struct note_suspend_s),
+              NOTE_SUSPEND);
   note.nsu_state           = tcb->task_state;
 
   /* Add the note to circular buffer */
@@ -573,12 +576,14 @@ void sched_note_spinlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCK);
 }
 
-void sched_note_spinlocked(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
+void sched_note_spinlocked(FAR struct tcb_s *tcb,
+                           FAR volatile void *spinlock)
 {
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCKED);
 }
 
-void sched_note_spinunlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
+void sched_note_spinunlock(FAR struct tcb_s *tcb,
+                           FAR volatile void *spinlock)
 {
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_UNLOCK);
 }

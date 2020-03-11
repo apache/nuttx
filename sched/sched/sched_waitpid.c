@@ -67,27 +67,27 @@
  *   execution of the calling thread until status information for one of the
  *   terminated child processes of the calling process is available, or until
  *   delivery of a signal whose action is either to execute a signal-catching
- *   function or to terminate the process. If more than one thread is suspended
- *   in waitpid() awaiting termination of the same process, exactly one thread
- *   will return the process status at the time of the target process
- *   termination. If status information is available prior to the call to
- *   waitpid(), return will be immediate.
+ *   function or to terminate the process. If more than one thread is
+ *   suspended in waitpid() awaiting termination of the same process, exactly
+ *   one thread will return the process status at the time of the target
+ *   process termination. If status information is available prior to the
+ *   call to waitpid(), return will be immediate.
  *
  *   The pid argument specifies a set of child processes for which status is
  *   requested. The waitpid() function will only return the status of a child
  *   process from this set:
  *
- *   - If pid is equal to (pid_t)-1, status is requested for any child process.
- *     In this respect, waitpid() is then equivalent to wait().
- *   - If pid is greater than 0, it specifies the process ID of a single child
- *     process for which status is requested.
+ *   - If pid is equal to (pid_t)-1, status is requested for any child
+ *     process. In this respect, waitpid() is then equivalent to wait().
+ *   - If pid is greater than 0, it specifies the process ID of a single
+ *     child process for which status is requested.
  *   - If pid is 0, status is requested for any child process whose process
  *     group ID is equal to that of the calling process.
- *   - If pid is less than (pid_t)-1, status is requested for any child process
- *     whose process group ID is equal to the absolute value of pid.
+ *   - If pid is less than (pid_t)-1, status is requested for any child
+ *     process whose process group ID is equal to the absolute value of pid.
  *
- *   The options argument is constructed from the bitwise-inclusive OR of zero
- *   or more of the following flags, defined in the <sys/wait.h> header:
+ *   The options argument is constructed from the bitwise-inclusive OR of
+ *   zero or more of the following flags, defined in the <sys/wait.h> header:
  *
  *   WCONTINUED - The waitpid() function will report the status of any
  *     continued child process specified by pid whose status has not been
@@ -101,21 +101,22 @@
  *
  *   If the calling process has SA_NOCLDWAIT set or has SIGCHLD set to
  *   SIG_IGN, and the process has no unwaited-for children that were
- *   transformed into zombie processes, the calling thread will block until all
- *   of the children of the process containing the calling thread terminate, and
- *   waitpid() will fail and set errno to ECHILD.
+ *   transformed into zombie processes, the calling thread will block until
+ *   all of the children of the process containing the calling thread
+ *   terminate, and waitpid() will fail and set errno to ECHILD.
  *
  *   If waitpid() returns because the status of a child process is available,
  *   these functions will return a value equal to the process ID of the child
  *   process. In this case, if the value of the argument stat_loc is not a
  *   null pointer, information will be stored in the location pointed to by
- *   stat_loc. The value stored at the location pointed to by stat_loc will be
- *   0 if and only if the status returned is from a terminated child process
- *   that terminated by one of the following means:
+ *   stat_loc. The value stored at the location pointed to by stat_loc will
+ *   be 0 if and only if the status returned is from a terminated child
+ *   process that terminated by one of the following means:
  *
  *   1. The process returned 0 from main().
  *   2. The process called _exit() or exit() with a status argument of 0.
- *   3. The process was terminated because the last thread in the process terminated.
+ *   3. The process was terminated because the last thread in the process
+ *      terminated.
  *
  *   Regardless of its value, this information may be interpreted using the
  *   following macros, which are defined in <sys/wait.h> and evaluate to
@@ -140,7 +141,8 @@
  *     this macro evaluates to the number of the signal that caused the child
  *     process to stop.
  *   WIFCONTINUED(stat_val) - Evaluates to a non-zero value if status was
- *    returned for a child process that has continued from a job control stop.
+ *    returned for a child process that has continued from a job control
+ *    stop.
  *
  * Input Parameters:
  *   pid - The task ID of the thread to waid for
@@ -156,16 +158,19 @@
  *   process, -1 will be returned and errno set to EINTR.
  *
  *   If waitpid() was invoked with WNOHANG set in options, it has at least
- *   one child process specified by pid for which status is not available, and
- *   status is not available for any process specified by pid, 0 is returned.
+ *   one child process specified by pid for which status is not available,
+ *   and status is not available for any process specified by pid, 0 is
+ *   returned.
  *
- *   Otherwise, (pid_t)-1 will be returned, and errno set to indicate the error:
+ *   Otherwise, (pid_t)-1 will be returned, and errno set to indicate the
+ *   error:
  *
- *   ECHILD - The process specified by pid does not exist or is not a child of
- *     the calling process, or the process group specified by pid does not exist
- *     or does not have any member process that is a child of the calling process.
- *   EINTR - The function was interrupted by a signal. The value of the location
- *     pointed to by stat_loc is undefined.
+ *   ECHILD - The process specified by pid does not exist or is not a child
+ *            of the calling process, or the process group specified by pid
+ *            does not exist does not have any member process that is a child
+ *            of the calling process.
+ *   EINTR - The function was interrupted by a signal. The value of the
+ *           location pointed to by stat_loc is undefined.
  *   EINVAL - The options argument is not valid.
  *
  * Assumptions:
@@ -214,10 +219,10 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
   group_addwaiter(group);
 
-  /* "If more than one thread is suspended in waitpid() awaiting termination of
-   * the same process, exactly one thread will return the process status at the
-   * time of the target process termination."  Hmmm.. what do we return to the
-   * others?
+  /* "If more than one thread is suspended in waitpid() awaiting termination
+   * of the same process, exactly one thread will return the process status
+   * at the time of the target process termination."  Hmmm.. what do we
+   * return to the others?
    */
 
   if (group->tg_waitflags == 0)
@@ -260,9 +265,9 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
       if (ret < 0)
         {
-          /* Unlock pre-emption and return the ERROR (nxsem_wait has already set
-           * the errno).  Handle the awkward case of whether or not we need to
-           * nullify the stat_loc value.
+          /* Unlock pre-emption and return the ERROR (nxsem_wait has already
+           * set the errno).  Handle the awkward case of whether or not we
+           * need to nullify the stat_loc value.
            */
 
           if (mystat)

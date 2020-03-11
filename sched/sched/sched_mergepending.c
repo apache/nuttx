@@ -236,7 +236,8 @@ bool sched_mergepending(void)
         {
           /* Remove the task from the pending task list */
 
-          tcb = (FAR struct tcb_s *)dq_remfirst((FAR dq_queue_t *)&g_pendingtasks);
+          tcb = (FAR struct tcb_s *)
+                dq_remfirst((FAR dq_queue_t *)&g_pendingtasks);
 
           /* Add the pending task to the correct ready-to-run list. */
 
@@ -268,7 +269,8 @@ bool sched_mergepending(void)
 
           /* Set up for the next time through the loop */
 
-          ptcb = (FAR struct tcb_s *)dq_peek((FAR dq_queue_t *)&g_pendingtasks);
+          ptcb = (FAR struct tcb_s *)
+                 dq_peek((FAR dq_queue_t *)&g_pendingtasks);
           if (ptcb == NULL)
             {
               /* The pending task list is empty */

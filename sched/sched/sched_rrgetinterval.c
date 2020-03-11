@@ -129,7 +129,8 @@ int sched_rr_get_interval(pid_t pid, struct timespec *interval)
       /* Convert the timeslice value from ticks to a timespec */
 
       interval->tv_sec  =  CONFIG_RR_INTERVAL / MSEC_PER_SEC;
-      interval->tv_nsec = (CONFIG_RR_INTERVAL % MSEC_PER_SEC) * NSEC_PER_MSEC;
+      interval->tv_nsec = (CONFIG_RR_INTERVAL % MSEC_PER_SEC) *
+                          NSEC_PER_MSEC;
     }
   else
 #endif
