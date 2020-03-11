@@ -137,11 +137,12 @@ typedef enum
 
   /* MODES: */
 
-  STM32_TIM_CH_MODE_MASK      = 0x06,
+  STM32_TIM_CH_MODE_MASK      = 0x0e,
 
   /* Output Compare Modes */
 
   STM32_TIM_CH_OUTPWM         = 0x04,    /* Enable standard PWM mode, active high when counter < compare */
+  STM32_TIM_CH_OUTTOGGLE      = 0x08,    /* Toggle TIM_CHx output on UEV */
 #if 0
   STM32_TIM_CH_OUTCOMPARE     = 0x06,
 
@@ -181,7 +182,7 @@ struct stm32_tim_ops_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /* Power-up timer and get its structure */
