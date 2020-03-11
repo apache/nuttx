@@ -32,23 +32,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************************************************* */
+ ********************************************************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_USBHS_H
 #define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_USBHS_H
 
 /********************************************************************************************************************
  * Included Files
- ******************************************************************************************************************* */
+ ********************************************************************************************************************/
 
 #include <nuttx/config.h>
 #include "chip.h"
 
 /********************************************************************************************************************
  * Pre-processor Definitions
- ******************************************************************************************************************* */
+ ********************************************************************************************************************/
 
-/* Register Offsets ************************************************************************************************ */
+/* Register Offsets *************************************************************************************************/
 
 #define KINETIS_USBHS_ID_OFFSET                           0x0000  /* Identification Register */
 #define KINETIS_USBHS_HWGENERAL_OFFSET                    0x0004  /* General Hardware Parameters */
@@ -158,7 +158,7 @@
 #define KINETIS_USBHSDCD_TIMER2_BC11_OFFSET               0x0018  /*  TIMER2_BC11 register */
 #define KINETIS_USBHSDCD_TIMER2_BC12_OFFSET               0x001c  /* TIMER2_BC12 register */
 
-/* Register Addresses ********************************************************************************************** */
+/* Register Addresses ***********************************************************************************************/
 
 #define KINETIS_USBHS_ID                                  (KINETIS_USBHS_BASE + KINETIS_USBHS_ID_OFFSET)
 #define KINETIS_USBHS_HWGENERAL                           (KINETIS_USBHS_BASE + KINETIS_USBHS_HWGENERAL_OFFSET)
@@ -268,7 +268,8 @@
 #define KINETIS_USBHSDCD_TIMER2_BC11                      (KINETIS_USBHSDCD_BASE + KINETIS_USBHSDCD_TIMER2_BC11_OFFSET)
 #define KINETIS_USBHSDCD_TIMER2_BC12                      (KINETIS_USBHSDCD_BASE + KINETIS_USBHSDCD_TIMER2_BC12_OFFSET)
 
-/* Register Bit-Field Definitions ********************************************************************************** */
+/* Register Bit-Field Definitions ***********************************************************************************/
+
 /* Identification Register */
 
 #define USBHS_ID_VERSIONID_SHIFT                          (29)      /* Bits 29-31: Version ID */
@@ -336,8 +337,8 @@
 
 /* General Purpose Timer n Load Register */
 
-                                                                     /* Bits 24-31: Reserved */
-#define USBHS_GPTIMERnLD_GPTLD_SHIFT                      (0)        /* Bits 0-23: Value to be loaded into the countdown timer on reset */
+                                                                    /* Bits 24-31: Reserved */
+#define USBHS_GPTIMERnLD_GPTLD_SHIFT                      (0)       /* Bits 0-23: Value to be loaded into the countdown timer on reset */
 #define USBHS_GPTIMERnLD_GPTLD_MASK                       (0xffffff << USBHS_GPTIMERnLD_GPTLD_SHIFT)
 
 /* General Purpose Timer n Control Register */
@@ -798,7 +799,7 @@
 #define USBPHY_DEBUGn_SQUELCHRESETLENGTH_MASK             (0xf << USBPHY_DEBUGn_SQUELCHRESETLENGTH_SHIFT)
 #define USBPHY_DEBUGn_ENSQUELCHRESET                      (1 << 24) /* Bit 24: Set bit to allow squelch to reset high-speed receive */
                                                                     /* Bits 21-23: Reserved */
-#define USBPHY_DEBUGn_SQUELCHRESETCOUNT_SHIFT             (16)       /* Bits 16-20: Delay in between the detection of squelch to the reset of high-speed RX */
+#define USBPHY_DEBUGn_SQUELCHRESETCOUNT_SHIFT             (16)      /* Bits 16-20: Delay in between the detection of squelch to the reset of high-speed RX */
 #define USBPHY_DEBUGn_SQUELCHRESETCOUNT_MASK              (0x1f << USBPHY_DEBUGn_SQUELCHRESETCOUNT_SHIFT)
                                                                     /* Bits 13-15: Reserved */
 #define USBPHY_DEBUGn_ENTX2RXCOUNT                        (1 << 12) /* Bit 12: Allow a countdown to transition in between TX and RX */
@@ -830,9 +831,9 @@
 
 /* UTMI RTL Version */
 
-#define USBPHY_VERSION_MAJOR_SHIFT                        (24)       /* Bits 24-31: Fixed read-only value reflecting the MAJOR field of the RTL version */
+#define USBPHY_VERSION_MAJOR_SHIFT                        (24)      /* Bits 24-31: Fixed read-only value reflecting the MAJOR field of the RTL version */
 #define USBPHY_VERSION_MAJOR_MASK                         (0xff << USBPHY_VERSION_MAJOR_SHIFT)
-#define USBPHY_VERSION_MINOR_SHIFT                        (16)       /* Bits 16-23: Fixed read-only value reflecting the MINOR field of the RTL version */
+#define USBPHY_VERSION_MINOR_SHIFT                        (16)      /* Bits 16-23: Fixed read-only value reflecting the MINOR field of the RTL version */
 #define USBPHY_VERSION_MINOR_MASK                         (0xff << USBPHY_VERSION_MINOR_SHIFT)
 #define USBPHY_VERSION_STEP_SHIFT                         (0)       /* Bits 0-15: Fixed read-only value reflecting the stepping of the RTL version */
 #define USBPHY_VERSION_STEP_MASK                          (0xffff << USBPHY_VERSION_STEP_SHIFT)
@@ -927,9 +928,9 @@
 
 /* USB PHY Loopback Packet Number Select Register */
 
-#define USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_FS_NUMBER_SHIFT  (16)       /* Bits 16-31: Full speed packet number */
+#define USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_FS_NUMBER_SHIFT  (16)    /* Bits 16-31: Full speed packet number */
 #define USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_FS_NUMBER_MASK   (0xffff << USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_FS_NUMBER_SHIFT)
-#define USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_HS_NUMBER_SHIFT  (0)       /* Bits 0-15: High speed packet number */
+#define USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_HS_NUMBER_SHIFT  (0)     /* Bits 0-15: High speed packet number */
 #define USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_HS_NUMBER_MASK   (0xffff << USBPHY_USB1_LOOPBACK_HSFSCNTn_TSTI_HS_NUMBER_SHIFT)
 
 /* USB PHY Trim Override Enable Register */
