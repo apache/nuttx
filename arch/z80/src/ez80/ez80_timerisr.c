@@ -29,10 +29,55 @@
 
 #include <arch/io.h>
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 
 #include "chip.h"
 #include "clock/clock.h"
 #include "z80_internal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Select a clock divider.  Choices are 4, 16, 64, or 256 */
+
+#define CLOCK_DIVIDER  16
+
+/* Given that:
+ *
+ *   reload_value = (timer_period * system_clock_frequency) / clock_divider
+ *                = system_clock_frequency / DENOMINATOR
+ *
+ * Where:
+ *
+ *   DENOMINATOR  = clock_divider / timer_period
+ *
+ * The system timer period is given by CONFIG_USEC_PER_TICK which is usually
+ * 10,000 corresponding to 100Hz.
+ *
+ *
+ *   DENOMINATOR  = clock_divider / CONFIG_USEC_PER_TICK / USEC_PER_SEC
+ *                = (USEC_PER_SEC * clock_divider) / CONFIG_USEC_PER_TICK
+ *
+ * So for the usual value of CONFIG_USEC_PER_TICK (10,000) and a divider of
+ * 16, the DENOMINATOR would be 1,600
+ */
+
+#define DENOMINATOR ((USEC_PER_SEC * CLOCK_DIVIDER) / CONFIG_USEC_PER_TICK)
+
+/* Pick clock divider register setting */
+
+#if CLOCK_DIVIDER == 4
+#  define EZ80_TMRCLKDIV EZ80_TMRCLKDIV_4
+#elif CLOCK_DIVIDER == 16
+#  define EZ80_TMRCLKDIV EZ80_TMRCLKDIV_16
+#elif CLOCK_DIVIDER == 64
+#  define EZ80_TMRCLKDIV EZ80_TMRCLKDIV_64
+#elif CLOCK_DIVIDER == 256
+#  define EZ80_TMRCLKDIV EZ80_TMRCLKDIV_256
+#else
+#  error Invalid clock divider
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -108,29 +153,30 @@ void up_timer_initialize(void)
    * In continuous mode:
    *
    *   timer_period = reload_value x clock_divider / system_clock_frequency
+   *
    * or
+   *
    *   reload_value = (timer_period * system_clock_frequency) / clock_divider
+   *                = system_clock_frequency / DENOMINATOR
+   *
+   * Where:
+   *
+   *   DENOMINATOR  = clock_divider / timer_period
    *
    * eZ80F91:
-   *   For timer_period=10mS, and clock_divider=16, that would yield:
-   *
-   *     reload_value = system_clock_frequency / 1600
-   *
-   *   For a system timer of 50,000,000, that would result in a reload value
-   *   of 31,250.
+   *   For timer_period=10mS, and clock_divider=16, that would yield a
+   *   DENOMINATOR of 1600.  For a system timer of 50,000,000, that would
+   *   result in a reload value of 31,250.
    *
    * eZ80F92:
-   *   For timer_period=10mS, and clock_divider=4, that would yield:
-   *
-   *     reload_value = system_clock_frequency / 400
-   *
-   *   For a system timer of 20,000,000, * divider of 4, that would result
-   *   in a reload value of 50,000.
+   *   For timer_period=10mS, and clock_divider=4, that would yield a
+   *   DENOMINATOR of 1600.  For a system timer of 20,000,000, that would
+   *   result in a reload value of 50,000.
    *
    * NOTE: The system clock frequency value is defined in the board.h file
    */
 
-  reload = (uint16_t)(ez80_systemclock / 1600);
+  reload = (uint16_t)(ez80_systemclock / DENOMINATOR);
   outp(EZ80_TMR0_RRH, (uint8_t)(reload >> 8));
   outp(EZ80_TMR0_RRL, (uint8_t)(reload));
 
@@ -157,11 +203,11 @@ void up_timer_initialize(void)
   /* EZ80_TMRCTL_TIMEN:   Bit 0: The programmable reload timer is enabled
    * EZ80_TMRCTL_RLD:     Bit 1: Force reload
    * EZ80_TMRCTL_TIMCONT: Bit 2: The timer operates in CONTINUOUS mode.
-   * EZ80_TMRCLKDIV_16:   Bits 3-4: System clock divider = 16
+   * EZ80_TMRCLKDIV:      Bits 2-3: Timer input clock divider
    */
 
   outp(EZ80_TMR0_CTL, (EZ80_TMRCTL_TIMEN | EZ80_TMRCTL_RLD |
-                       EZ80_TMRCTL_TIMCONT | EZ80_TMRCLKDIV_16));
+                       EZ80_TMRCTL_TIMCONT | EZ80_TMRCLKDIV));
 
   /* Enable timer end-of-count interrupts */
 
@@ -171,13 +217,13 @@ void up_timer_initialize(void)
       defined(CONFIG_ARCH_CHIP_EZ80F93)
   /* EZ80_TMRCTL_TIMEN:   Bit 0: Programmable reload timer enabled.
    * EZ80_TMRCTL_RSTEN:   Bit 1: Reload and start function enabled.
-   * EZ80_TMRCLKDIV_4:    Bits 2-3: Timer input clock divided by 4 (5Mhz)
+   * EZ80_TMRCLKDIV:      Bits 2-3: Timer input clock divider
    * EZ80_TMRCTL_TIMCONT: Bit 4: Continuous mode
    * EZ80_TMRCTL_EN:      Bit 6: Enable timer interrupt requests
    */
 
   outp(EZ80_TMR0_CTL, (EZ80_TMRCTL_TIMEN | EZ80_TMRCTL_RSTEN |
-                       EZ80_TMRCLKDIV_4 | EZ80_TMRCTL_TIMCONT |
+                       EZ80_TMRCLKDIV | EZ80_TMRCTL_TIMCONT |
                        EZ80_TMRCTL_EN));
 
 #endif

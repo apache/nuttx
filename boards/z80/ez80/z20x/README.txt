@@ -317,6 +317,31 @@ Configuration Subdirectories
 
     The boot loader source is located at boards/z20x/src/w25_main.c.
 
+    When starting, you may see one of two things, depending upon whether or
+    not there is a valid, bootable image in the W25 FLASH partition:
+
+    1. If there is a bootable image in FLASH, you should see something like:
+
+        Verifying 203125 bytes in the W25 Serial FLASH
+        Successfully verified 203125 bytes in the W25 Serial FLASH
+        [L]oad [B]oot
+        .........
+
+       The program will wait up to 5 seconds for you to provide a response:
+       B to load the program program from the W25 and start it, or L to
+       download a new program from serial and write it to FLASH.
+
+       If nothing is pressed in within the 5 second delay, the program will
+       continue to boot the program just as though B were pressed.
+
+       If L is pressed, then you should see the same dialog as for the case
+       where there is no valid binary image in FLASH.
+
+    2. If there is no valid program in FLASH (or if L is pressed), you will
+       be asked to :
+
+         Send HEX file now.
+
     NOTES:
 
     1. A large UART1 Rx buffer (4Kb), a slow UART1 BAUD (2400), and a very
@@ -346,3 +371,8 @@ Configuration Subdirectories
 
        Things worth trying:  4800 BAUD, smaller Rx buffer, large Rx FIFO
        trigger level.
+
+    2. Booting large programs from the serial FLASH is unbearably slow;
+       you will think that the system is simply not booting at all.  There
+       is probably some bug contributing to this probably (maybe the timer
+       interrupt rate?)
