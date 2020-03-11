@@ -93,6 +93,9 @@ const struct sock_intf_s g_can_sockif =
   NULL,             /* si_sendfile */
 #endif
   can_recvfrom,     /* si_recvfrom */
+#ifdef CONFIG_NET_RECVMSG_CMSG
+  can_recvmsg,      /* si_recvmsg */
+#endif
   can_close         /* si_close */
 };
 
@@ -105,7 +108,7 @@ const struct sock_intf_s g_can_sockif =
  *
  * Description:
  *   This function is called to perform the actual CAN receive operation
- *   via the device interface layer.
+ *   via the device interface layer. from can_input()
  *
  * Input Parameters:
  *   dev      The structure of the network driver that caused the event
@@ -228,6 +231,11 @@ static int can_setup(FAR struct socket *psock, int protocol)
 
           return -ENOMEM;
         }
+
+#ifdef CONFIG_NET_TIMESTAMP
+      /* Store psock in conn se we can read the SO_TIMESTAMP value */
+      conn->psock = psock;
+#endif
 
       /* Initialize the connection instance */
 

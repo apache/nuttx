@@ -212,6 +212,10 @@ struct sock_intf_s
   CODE ssize_t    (*si_recvfrom)(FAR struct socket *psock, FAR void *buf,
                     size_t len, int flags, FAR struct sockaddr *from,
                     FAR socklen_t *fromlen);
+#ifdef CONFIG_NET_RECVMSG_CMSG
+  CODE ssize_t    (*si_recvmsg)(FAR struct socket *psock,
+		            FAR struct msghdr *msg, int flags);
+#endif
   CODE int        (*si_close)(FAR struct socket *psock);
 #ifdef CONFIG_NET_USRSOCK
   CODE int        (*si_ioctl)(FAR struct socket *psock, int cmd,
@@ -267,6 +271,9 @@ struct socket
   socktimeo_t   s_sndtimeo;  /* Send timeout value (in deciseconds) */
 #ifdef CONFIG_NET_SOLINGER
   socktimeo_t   s_linger;    /* Linger timeout value (in deciseconds) */
+#endif
+#ifdef CONFIG_NET_TIMESTAMP
+  int32_t       s_timestamp; /* Socket timestamp enabled/disabled */
 #endif
 #endif
 

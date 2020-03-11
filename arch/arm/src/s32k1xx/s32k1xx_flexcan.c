@@ -59,9 +59,14 @@
  * is required.
  */
 
+
+/* FIXME A workqueue is required for enet but for FLEXCAN it increased the
+ * transmit latency by ~ 40us from 24 to 67us
+ * Therefore for now its configurable by the WORK_QUEUE define
+ * If we know for sure that a workqueue isn't required
+ * Then all WORK_QUEUE related code will be removed */
 #if !defined(CONFIG_SCHED_WORKQUEUE)
-#  error Work queue support is required
-   //FIXME maybe for enet not sure for FLEXCAN
+//#  error Work queue support is required
 #else
 
   /* Select work queue.  Always use the LP work queue if available.  If not,
@@ -72,27 +77,13 @@
    * processing that never suspends.  Suspending the high priority work queue
    * may bring the system to its knees!
    */
-
-#  define ETHWORK LPWORK
+//#  define WORK_QUEUE
+#  define CANWORK LPWORK
 #endif
 
 /* CONFIG_S32K1XX_FLEXCAN_NETHIFS determines the number of physical interfaces
  * that will be supported.
  */
-
-#if 0
-#if CONFIG_S32K1XX_FLEXCAN_NETHIFS != 1
-#  error "CONFIG_S32K1XX_FLEXCAN_NETHIFS must be one for now"
-#endif
-
-#if CONFIG_S32K1XX_FLEXCAN_NTXBUFFERS < 1
-#  error "Need at least one TX buffer"
-#endif
-
-#if CONFIG_S32K1XX_FLEXCAN_NRXBUFFERS < 1
-#  error "Need at least one RX buffer"
-#endif
-#endif
 
 #define MASKSTDID                   0x000007ff
 #define MASKEXTID                   0x1fffffff
@@ -122,45 +113,13 @@
 
 static int peak_tx_mailbox_index_ = 0;
 
-/* Normally you would clean the cache after writing new values to the DMA
- * memory so assure that the dirty cache lines are flushed to memory
- * before the DMA occurs.  And you would invalid the cache after a data is
- * received via DMA so that you fetch the actual content of the data from
- * the cache.
- *
- * These conditions are not fully supported here.  If the write-throuch
- * D-Cache is enabled, however, then many of these issues go away:  The
- * cache clean operation does nothing (because there are not dirty cache
- * lines) and the cache invalid operation is innocuous (because there are
- * never dirty cache lines to be lost; valid data will always be reloaded).
- *
- * At present, we simply insist that write through cache be enabled.
- */
-
-#if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
-#  error Write back D-Cache not yet supported
-#endif
-
+#ifdef WORK_QUEUE
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
  * second.
  */
 
 #define S32K1XX_WDDELAY     (1*CLK_TCK)
-
-/* Align assuming that the D-Cache is enabled (probably 32-bytes).
- *
- * REVISIT: The size of descriptors and buffers must also be in even units
- * of the cache line size  That is because the operations to clean and
- * invalidate the cache will operate on a full 32-byte cache line.  If
- * CONFIG_FLEXCAN_ENHANCEDBD is selected, then the size of the descriptor is
- * 32-bytes (and probably already the correct size for the cache line);
- * otherwise, the size of the descriptors much smaller, only 8 bytes.
- */
-
-#define FLEXCAN_ALIGN        ARMV7M_DCACHE_LINESIZE
-#define FLEXCAN_ALIGN_MASK   (FLEXCAN_ALIGN - 1)
-#define FLEXCAN_ALIGN_UP(n)  (((n) + FLEXCAN_ALIGN_MASK) & ~FLEXCAN_ALIGN_MASK)
-
+#endif
 
 /****************************************************************************
  * Private Types
@@ -235,8 +194,10 @@ struct s32k1xx_driver_s
   uint8_t txhead;              /* The next TX descriptor to use */
   uint8_t rxtail;              /* The next RX descriptor to use */
   uint8_t phyaddr;             /* Selected PHY address */
+#ifdef WORK_QUEUE
   WDOG_ID txpoll;              /* TX poll timer */
   WDOG_ID txtimeout;           /* TX timeout timer */
+#endif
   struct work_s irqwork;       /* For deferring interrupt work to the work queue */
   struct work_s pollwork;      /* For deferring poll work to the work queue */
 #ifdef CAN_FD
@@ -276,21 +237,6 @@ static uint8_t g_rx_pool[sizeof(struct can_frame)*POOL_SIZE]
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Utility functions */
-
-#ifndef S32K1XX_BUFFERS_SWAP
-#  define s32k1xx_swap32(value) (value)
-#  define s32k1xx_swap16(value) (value)
-#else
-#if 0 /* Use builtins if the compiler supports them */
-static inline uint32_t s32k1xx_swap32(uint32_t value);
-static inline uint16_t s32k1xx_swap16(uint16_t value);
-#else
-#  define s32k1xx_swap32 __builtin_bswap32
-#  define s32k1xx_swap16 __builtin_bswap16
-#endif
-#endif
-
 /****************************************************************************
  * Name: arm_clz
  *
@@ -328,21 +274,17 @@ static uint32_t s32k1xx_waitmcr_change(uint32_t mask,
 
 /* Interrupt handling */
 
-static void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv);
 static void s32k1xx_receive(FAR struct s32k1xx_driver_s *priv, uint32_t flags);
 static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv, uint32_t flags);
 
-static void s32k1xx_flexcan_interrupt_work(FAR void *arg);
 static int  s32k1xx_flexcan_interrupt(int irq, FAR void *context,
                                       FAR void *arg);
 
 /* Watchdog timer expirations */
-
-static void s32k1xx_txtimeout_work(FAR void *arg);
-static void s32k1xx_txtimeout_expiry(int argc, uint32_t arg, ...);
-
+#ifdef WORK_QUEUE
 static void s32k1xx_poll_work(FAR void *arg);
 static void s32k1xx_polltimer_expiry(int argc, uint32_t arg, ...);
+#endif
 
 /* NuttX callback functions */
 
@@ -359,7 +301,6 @@ static int  s32k1xx_ioctl(struct net_driver_s *dev, int cmd,
 
 /* Initialization */
 
-static void s32k1xx_initbuffers(struct s32k1xx_driver_s *priv);
 static int  s32k1xx_initialize(struct s32k1xx_driver_s *priv);
 static void s32k1xx_reset(struct s32k1xx_driver_s *priv);
 
@@ -632,28 +573,6 @@ static int s32k1xx_txpoll(struct net_driver_s *dev)
   return 0;
 }
 
-/****************************************************************************
- * Function: s32k1xx_dispatch
- *
- * Description:
- *   A new Rx packet was received; dispatch that packet to the network layer
- *   as necessary.
- *
- * Input Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by interrupt handling logic.
- *
- ****************************************************************************/
-
-static inline void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv)
-{
-  #warning Missing logic
-}
 
 /****************************************************************************
  * Function: s32k1xx_receive
@@ -841,7 +760,9 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv, uint32_t flags)
    * canceled.
    */
 
+#ifdef WORK_QUEUE
   wd_cancel(priv->txtimeout);
+#endif
 
   /* FIXME process aborts */
 
@@ -854,7 +775,7 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv, uint32_t flags)
         {
           putreg32(mb_bit, S32K1XX_CAN0_IFLAG1);
           flags &= ~mb_bit;
-#if 0
+#if 0 //FIXME TB ABORT SUPPORT
           const bool txok = priv->tx[mbi].cs.code != CAN_TXMB_ABORT;
           handleTxMailboxInterrupt(mbi, txok, utc_usec);
 #endif
@@ -872,27 +793,6 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv, uint32_t flags)
   devif_poll(&priv->dev, s32k1xx_txpoll);
 }
 
-/****************************************************************************
- * Function: s32k1xx_flexcan_interrupt_work
- *
- * Description:
- *   Perform interrupt related work from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() was called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *   The network is locked.
- *
- ****************************************************************************/
-
-static void s32k1xx_flexcan_interrupt_work(FAR void *arg)
-{
-  #warning Missing logic
-}
 
 /****************************************************************************
  * Function: s32k1xx_flexcan_interrupt
@@ -937,53 +837,6 @@ static int s32k1xx_flexcan_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * Function: s32k1xx_txtimeout_work
- *
- * Description:
- *   Perform TX timeout related work from the worker thread
- *
- * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
- *
- * Returned Value:
- *   OK on success
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static void s32k1xx_txtimeout_work(FAR void *arg)
-{
-  #warning Missing logic
-  ninfo("FLEXCAN: tx timeout work\r\n");
-}
-
-/****************************************************************************
- * Function: s32k1xx_txtimeout_expiry
- *
- * Description:
- *   Our TX watchdog timed out.  Called from the timer interrupt handler.
- *   The last TX never completed.  Reset the hardware and start again.
- *
- * Input Parameters:
- *   argc - The number of available arguments
- *   arg  - The first argument
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by the watchdog logic.
- *
- ****************************************************************************/
-
-static void s32k1xx_txtimeout_expiry(int argc, uint32_t arg, ...)
-{
-  #warning Missing logic
-  ninfo("FLEXCAN: tx timeout expiry\r\n");
-}
-
-/****************************************************************************
  * Function: s32k1xx_poll_work
  *
  * Description:
@@ -999,7 +852,7 @@ static void s32k1xx_txtimeout_expiry(int argc, uint32_t arg, ...)
  *   The network is locked.
  *
  ****************************************************************************/
-
+#ifdef WORK_QUEUE
 static void s32k1xx_poll_work(FAR void *arg)
 {
   #warning Missing logic
@@ -1027,6 +880,7 @@ static void s32k1xx_poll_work(FAR void *arg)
            1, (wdparm_t)priv);
   net_unlock();
 }
+#endif
 
 /****************************************************************************
  * Function: s32k1xx_polltimer_expiry
@@ -1046,6 +900,7 @@ static void s32k1xx_poll_work(FAR void *arg)
  *
  ****************************************************************************/
 
+#ifdef WORK_QUEUE
 static void s32k1xx_polltimer_expiry(int argc, uint32_t arg, ...)
 {
   #warning Missing logic
@@ -1053,8 +908,9 @@ static void s32k1xx_polltimer_expiry(int argc, uint32_t arg, ...)
 
   /* Schedule to perform the poll processing on the worker thread. */
 
-  work_queue(ETHWORK, &priv->pollwork, s32k1xx_poll_work, priv, 0);
+  work_queue(CANWORK, &priv->pollwork, s32k1xx_poll_work, priv, 0);
 }
+#endif
 
 static void s32k1xx_setenable(uint32_t enable)
 {
@@ -1140,7 +996,6 @@ static int s32k1xx_ifup(struct net_driver_s *dev)
 {
   FAR struct s32k1xx_driver_s *priv =
     (FAR struct s32k1xx_driver_s *)dev->d_private;
-  uint32_t regval;
 
   #warning Missing logic
 
@@ -1150,10 +1005,12 @@ static int s32k1xx_ifup(struct net_driver_s *dev)
       return -1;
     }
 
-  /* Set and activate a timer process */
+#ifdef WORK_QUEUE
 
+  /* Set and activate a timer process */
   wd_start(priv->txpoll, S32K1XX_WDDELAY, s32k1xx_polltimer_expiry, 1,
            (wdparm_t)priv);
+#endif
 
   priv->bifup = true;
 
@@ -1270,10 +1127,10 @@ static int s32k1xx_txavail(struct net_driver_s *dev)
     {
       /* Schedule to serialize the poll on the worker thread. */
 
-#ifdef WORK_QUEUE_BYPASS
-      s32k1xx_txavail_work(priv);
+#ifdef WORK_QUEUE
+      work_queue(CANWORK, &priv->pollwork, s32k1xx_txavail_work, priv, 0);
 #else
-      work_queue(ETHWORK, &priv->pollwork, s32k1xx_txavail_work, priv, 0);
+      s32k1xx_txavail_work(priv);
 #endif
     }
 
@@ -1413,6 +1270,7 @@ static int s32k1xx_initialize(struct s32k1xx_driver_s *priv)
   for (i = TXMBCOUNT; i < TOTALMBCOUNT; i++)
     {
       priv->rx[i].id.w = 0x0;
+      //FIXME sometimes we get a hard fault here
     }
 
   putreg32(0x0, S32K1XX_CAN0_RXFGMASK);
@@ -1447,27 +1305,6 @@ static int s32k1xx_initialize(struct s32k1xx_driver_s *priv)
     }
 
   return 1;
-}
-
-/****************************************************************************
- * Function: s32k1xx_initbuffers
- *
- * Description:
- *   Initialize FLEXCAN buffers and descriptors
- *
- * Input Parameters:
- *   priv - Reference to the private FLEXCAN driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static void s32k1xx_initbuffers(struct s32k1xx_driver_s *priv)
-{
-  #warning Missing logic
 }
 
 /****************************************************************************
@@ -1621,14 +1458,15 @@ int s32k1xx_netinitialize(int intf)
   priv->dev.d_ifdown  = s32k1xx_ifdown;    /* I/F down callback */
   priv->dev.d_txavail = s32k1xx_txavail;   /* New TX data callback */
 #ifdef CONFIG_NETDEV_IOCTL
-  priv->dev.d_ioctl   = s32k1xx_ioctl;     /* Support PHY ioctl() calls */
+  priv->dev.d_ioctl   = s32k1xx_ioctl;     /* Support CAN ioctl() calls */
 #endif
   priv->dev.d_private = (void *)g_flexcan; /* Used to recover private state from dev */
 
+#ifdef WORK_QUEUE
   /* Create a watchdog for timing polling for and timing of transmissions */
-
   priv->txpoll        = wd_create();       /* Create periodic poll timer */
   priv->txtimeout     = wd_create();       /* Create TX timeout timer */
+#endif
   priv->rx            = (struct mb_s *)(S32K1XX_CAN0_MB);
   priv->tx            = (struct mb_s *)(S32K1XX_CAN0_MB +
                           (sizeof(struct mb_s) * RXMBCOUNT));

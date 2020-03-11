@@ -80,7 +80,7 @@
 
 /* This is the largest option value.  REVISIT: belongs in sys/socket.h */
 
-#define _SO_MAXOPT       (15)
+#define _SO_MAXOPT       (29)
 
 /* Macros to set, test, clear options */
 

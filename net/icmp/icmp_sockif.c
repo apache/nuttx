@@ -102,6 +102,9 @@ const struct sock_intf_s g_icmp_sockif =
   NULL,             /* si_sendfile */
 #endif
   icmp_recvfrom,    /* si_recvfrom */
+#ifdef CONFIG_NET_RECVMSG_CMSG
+  NULL,             /* si_recvmsg */
+#endif
   icmp_close        /* si_close */
 };
 

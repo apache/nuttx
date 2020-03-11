@@ -107,6 +107,9 @@ const struct sock_intf_s g_ieee802154_sockif =
   NULL,                   /* si_sendfile */
 #endif
   ieee802154_recvfrom,    /* si_recvfrom */
+#ifdef CONFIG_NET_RECVMSG_CMSG
+  NULL,                   /* si_recvmsg */
+#endif
   ieee802154_close        /* si_close */
 };
 

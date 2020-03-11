@@ -115,6 +115,10 @@ struct can_conn_s
   /* TODO add filter support */
 #endif
   
+#ifdef CONFIG_NET_TIMESTAMP
+  FAR struct socket *psock; /* Needed to get SO_TIMESTAMP value */
+#endif
+
   
 };
 
@@ -254,9 +258,33 @@ uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
+
 ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                      int flags, FAR struct sockaddr *from,
                      FAR socklen_t *fromlen);
+
+/****************************************************************************
+ * Name: can_recvmsg
+ *
+ * Description:
+ *   recvmsg() receives messages from a socket, and may be used to receive
+ *   data on a socket whether or not it is connection-oriented.
+ *
+ *   If from is not NULL, and the underlying protocol provides the source
+ *   address, this source address is filled in. The argument 'fromlen'
+ *   initialized to the size of the buffer associated with from, and modified
+ *   on return to indicate the actual size of the address stored there.
+ *
+ * Input Parameters:
+ *   psock    A pointer to a NuttX-specific, internal socket structure
+ *   msg      Buffer to receive msg
+ *   flags    Receive flags (ignored)
+ *
+ ****************************************************************************/
+#ifdef CONFIG_NET_RECVMSG_CMSG
+ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                    size_t len, int flags);
+#endif
 
 /****************************************************************************
  * Name: can_poll

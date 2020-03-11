@@ -276,6 +276,30 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
         }
         break;
 #endif
+
+#ifdef CONFIG_NET_TIMESTAMP
+      case SO_TIMESTAMP:  /* Generates a timestamp for each incoming packet */
+        {
+
+          /* Verify that option is at least the size of an integer. */
+
+          if (value_len < sizeof(FAR int32_t))
+            {
+              return -EINVAL;
+            }
+
+          /* Lock the network so that we have exclusive access to the socket
+           * options.
+           */
+
+          net_lock();
+
+          psock->s_timestamp = *((FAR int32_t*)value);
+
+          net_unlock();
+        }
+        break;
+#endif
       /* The following are not yet implemented */
 
       case SO_RCVBUF:     /* Sets receive buffer size */

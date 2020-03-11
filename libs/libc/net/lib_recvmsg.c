@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_NET
+#if defined(CONFIG_NET) && !defined(CONFIG_NET_RECVMSG_CMSG)
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -86,4 +86,4 @@ ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
     }
 }
 
-#endif /* CONFIG_NET */
+#endif /* CONFIG_NET && !CONFIG_NET_RECVMSG_CMSG */

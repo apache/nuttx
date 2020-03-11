@@ -35,6 +35,10 @@
 #include "devif/devif.h"
 #include "can/can.h"
 
+#ifdef CONFIG_NET_TIMESTAMP
+#include <sys/time.h>
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -114,6 +118,18 @@ uint16_t can_callback(FAR struct net_driver_s *dev,
 
   if (conn)
     {
+#ifdef CONFIG_NET_TIMESTAMP
+  /* TIMESTAMP sockopt is activated, create timestamp and copy to iob */
+	  if(conn->psock->s_timestamp)
+	    {
+		  struct timespec *ts = (struct timespec*)&dev->d_appdata[dev->d_len];
+		  struct timeval *tv = (struct timeval*)&dev->d_appdata[dev->d_len];
+		  dev->d_len += sizeof(struct timeval);
+		  clock_systimespec(ts);
+		  tv->tv_usec = ts->tv_nsec / 1000;
+	    }
+#endif
+
       /* Perform the callback */
 
       flags = devif_conn_event(dev, conn, flags, conn->list);

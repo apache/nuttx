@@ -110,6 +110,9 @@ const struct sock_intf_s g_netlink_sockif =
   NULL,                 /* si_sendfile */
 #endif
   netlink_recvfrom,     /* si_recvfrom */
+#ifdef CONFIG_NET_RECVMSG_CMSG
+  NULL,                 /* si_recvmsg */
+#endif
   netlink_close         /* si_close */
 };
 
