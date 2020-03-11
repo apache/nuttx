@@ -48,9 +48,11 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* GPIO IRQs ****************************************************************/
 
 /* UARTs ********************************************************************/
+
 /* Don't enable UARTs not supported by the chip. */
 
 #if ESP32_NUARTS < 1
@@ -85,6 +87,7 @@
 #endif
 
 /* Serial Console ***********************************************************/
+
 /* Is there a serial console?  There should be no more than one defined.  It
  * could be on any UARTn, n=1,..,ESP32_NUART, or USARTn, n=1,.., ESP32_NUSART
  */
@@ -108,7 +111,8 @@
 #  undef CONFIG_UART2_SERIAL_CONSOLE
 #endif
 
-/* SPI ******************************************************************************/
+/* SPI **********************************************************************/
+
 /* Don't enable SPI peripherals not supported by the chip. */
 
 #if ESP32_NSPI < 1

@@ -57,22 +57,22 @@ static const uint32_t g_protected_pages[] =
 
 static inline void xtensa_write_dtlb(uint32_t vpn, unsigned int attr)
 {
-   __asm__ __volatile__
-   (
-     "wdtlb  %1, %0\n"
-     "dsync\n"
-     : : "r" (vpn), "r" (attr)
-   );
+  __asm__ __volatile__
+  (
+    "wdtlb  %1, %0\n"
+    "dsync\n"
+    : : "r" (vpn), "r" (attr)
+  );
 }
 
 static inline void xtensa_write_itlb(unsigned vpn, unsigned int attr)
 {
-   __asm__ __volatile__
-   (
-     "witlb  %1, %0\n"
-     "isync\n"
-     : : "r" (vpn), "r" (attr)
-   );
+  __asm__ __volatile__
+  (
+    "witlb  %1, %0\n"
+    "isync\n"
+    : : "r" (vpn), "r" (attr)
+  );
 }
 
 /****************************************************************************

@@ -53,8 +53,9 @@
 /* Interrupt Matrix
  *
  * The Interrupt Matrix embedded in the ESP32 independently allocates
- * peripheral interrupt sources to the two CPUs’ peripheral interrupts. This
- * configuration is highly flexible in order to meet many different needs.
+ * peripheral interrupt sources to the two CPUs’ peripheral interrupts.
+ * This configuration is highly flexible in order to meet many different
+ * needs.
  *
  * Features
  * - Accepts 71 peripheral interrupt sources as input.
@@ -291,9 +292,9 @@
 
 #define ESP32_NIRQ_PERIPH           ESP32_NPERIPHERALS
 
-/* Second level GPIO interrupts.  GPIO interrupts are decoded and dispatched as
- * a second level of decoding:  The first level dispatches to the GPIO interrupt
- * handler.  The second to the decoded GPIO interrupt handler.
+/* Second level GPIO interrupts.  GPIO interrupts are decoded and dispatched
+ * as a second level of decoding:  The first level dispatches to the GPIO
+ * interrupt handler.  The second to the decoded GPIO interrupt handler.
  */
 
 #ifdef CONFIG_ESP32_GPIO_IRQ

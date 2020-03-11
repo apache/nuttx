@@ -52,7 +52,8 @@
 
 /* Forces data into RTC slow memory
  * Any variable marked with this attribute will keep its value
- * during a deep sleep / wake cycle. */
+ * during a deep sleep / wake cycle.
+ */
 
 #define RTC_DATA_ATTR __attribute__((section(".rtc.data")))
 

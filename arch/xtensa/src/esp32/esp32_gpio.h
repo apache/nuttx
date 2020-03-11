@@ -199,11 +199,6 @@ void esp32_gpioirqdisable(int irq);
 #  define esp32_gpioirqdisable(irq)
 #endif
 
-int digitalRead(uint8_t pin);
-
-void attachInterrupt(uint8_t pin, void (*)(void), int mode);
-void detachInterrupt(uint8_t pin);
-
 #ifdef __cplusplus
 }
 #endif
