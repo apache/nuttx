@@ -265,7 +265,7 @@
 
 /* GCC supports inlined functions for C++ and for C version C99 and above */
 
-#  if defined(__cplusplus) || !defined(__STDC_VERSION__) || __STDC_VERSION__ >= 199901L
+#  if defined(__cplusplus) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
 #    define CONFIG_HAVE_INLINE 1
 #  else
 #    undef CONFIG_HAVE_INLINE
