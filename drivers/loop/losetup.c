@@ -351,8 +351,8 @@ static int loop_geometry(FAR struct inode *inode,
  * Name: losetup
  *
  * Description:
- *   Setup the loop device so that it exports the file referenced by 'filename'
- *   as a block device.
+ *   Setup the loop device so that it exports the file referenced by
+ *   'filename' as a block device.
  *
  ****************************************************************************/
 
@@ -477,8 +477,8 @@ int loteardown(FAR const char *devname)
     }
 #endif
 
-  /* Open the block driver associated with devname so that we can get the inode
-   * reference.
+  /* Open the block driver associated with devname so that we can get the
+   * inode reference.
    */
 
   ret = open_blockdriver(devname, MS_RDONLY, &inode);
