@@ -197,8 +197,9 @@ static void nxsched_readytorun_setpriority(FAR struct tcb_s *tcb,
   int cpu;
 
   /* CASE 2a. The task is ready-to-run (but not running) but not assigned to
-   * a CPU. An increase in priority could cause a context switch may be caused
-   * by the re-prioritization.  The task is not assigned and may run on any CPU.
+   * a CPU. An increase in priority could cause a context switch may be
+   * caused by the re-prioritization.  The task is not assigned and may run
+   * on any CPU.
    */
 
   if (tcb->task_state == TSTATE_TASK_READYTORUN)

@@ -95,7 +95,8 @@ int sched_cpu_select(cpu_set_t affinity)
 
       if ((affinity & (1 << i)) != 0)
         {
-          FAR struct tcb_s *rtcb = (FAR struct tcb_s *)g_assignedtasks[i].head;
+          FAR struct tcb_s *rtcb = (FAR struct tcb_s *)
+                                   g_assignedtasks[i].head;
 
           /* If this thread is executing its IDLE task, the use it.  The
            * IDLE task is always the last task in the assigned task list.

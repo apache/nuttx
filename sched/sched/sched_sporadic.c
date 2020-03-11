@@ -530,7 +530,8 @@ static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
                * replenishment.
                */
 
-              DEBUGVERIFY(sporadic_replenish_delay(repl, period, unrealized));
+              DEBUGVERIFY(sporadic_replenish_delay(repl, period,
+                                                   unrealized));
             }
         }
     }

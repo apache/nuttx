@@ -73,9 +73,9 @@ FAR struct tcb_s *this_task(void)
 #if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
   irqstate_t flags;
 
-  /* If the CPU supports suppression of interprocessor interrupts, then simple
-   * disabling interrupts will provide sufficient protection for the following
-   * operations.
+  /* If the CPU supports suppression of interprocessor interrupts, then
+   * simple disabling interrupts will provide sufficient protection for
+   * the following operations.
    */
 
   flags = up_irq_save();
