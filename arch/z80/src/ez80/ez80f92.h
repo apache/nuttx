@@ -101,9 +101,9 @@
 #define EZ80_TMRCTL_TIMCONT    0x10        /* Bit 4: Continuous mode */
 #define EZ80_TMRCTL_CLKDIV     0x18        /* Bits 2-3: Timer input clock divider */
 #  define EZ80_TMRCLKDIV_4     0x00        /*   00:   4 */
-#  define EZ80_TMRCLKDIV_16    0x08        /*   01:  16 */
-#  define EZ80_TMRCLKDIV_64    0x10        /*   10:  64 */
-#  define EZ80_TMRCLKDIV_256   0x18        /*   11: 256 */
+#  define EZ80_TMRCLKDIV_16    0x04        /*   01:  16 */
+#  define EZ80_TMRCLKDIV_64    0x08        /*   10:  64 */
+#  define EZ80_TMRCLKDIV_256   0x0c        /*   11: 256 */
 #define EZ80_TMRCTL_RSTEN      0x02        /* Bit 1: Reload and start function enabled */
 #define EZ80_TMRCTL_TIMEN      0x01        /* Bit 0: Programmable reload timer enabled */
 

@@ -287,6 +287,7 @@ static int w25_read_binary(FAR struct prog_header_s *hdr)
   fd = open(W25_CHARDEV, O_RDONLY);
   if (fd < 0)
     {
+      ret = -get_errno();
       return ret;
     }
 
@@ -342,17 +343,21 @@ errout:
  *
  ****************************************************************************/
 
-uint24_t w25_crc24(uint32_t len)
+static uint24_t w25_crc24(uint32_t len)
 {
   FAR const uint8_t *src = (FAR const uint8_t *)PROGSTART;
   uint32_t crc = 0;
   int i;
   int j;
 
+  /* Loop for each byte in the binary image */
+
   for (i = 0; i < len; i++)
     {
       uint8_t val = *src++;
       crc ^= (uint32_t)val << 16;
+
+      /* Loop for each bit in each byte */
 
       for (j = 0; j < 8; j++)
         {
@@ -548,7 +553,7 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
         {
           char tmpch;
 
-          /* Read handling retries.  We get out of this loop if a key is press*/
+          /* Read handling retries.  We get out of this loop if a key is press. */
 
           for (; ; )
             {
