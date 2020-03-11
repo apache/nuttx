@@ -1471,7 +1471,7 @@ int main(int argc, char **argv, char **envp)
                     {
                       ERROR("Closing C comment not indented", lineno, n);
                     }
-                  else if (!isspace((int)line[n + 1]) && line[n - 2] != '*')
+                  else if (!isspace((int)line[n - 2]) && line[n - 2] != '*')
                     {
                        ERROR("Missing space before closing C comment", lineno,
                              n);
