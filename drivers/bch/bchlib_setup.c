@@ -93,7 +93,8 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
       goto errout_with_bch;
     }
 
-  DEBUGASSERT(bch->inode && bch->inode->u.i_bops && bch->inode->u.i_bops->geometry);
+  DEBUGASSERT(bch->inode && bch->inode->u.i_bops &&
+              bch->inode->u.i_bops->geometry);
 
   ret = bch->inode->u.i_bops->geometry(bch->inode, &geo);
   if (ret < 0)
