@@ -188,14 +188,14 @@ extern uint32_t g_intstack[INTERRUPT_STACKWORDS];
 
 extern uint32_t g_idlestack[IDLETHREAD_STACKWORDS];
 
-/* These 'addresses' of these values are setup by the linker script.  They are
- * not actual uint32_t storage locations! They are only used meaningfully in the
- * following way:
+/* These 'addresses' of these values are setup by the linker script.  They
+ * are not actual uint32_t storage locations! They are only used meaningfully
+ * in the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
  *  - The declaration extern uint32_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32_t variable _data (it is
- *    not!).
+ *    that the value _sdata is the address of a uint32_t variable _data (it
+ *    is not!).
  *  - We can recoved the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
@@ -217,10 +217,11 @@ extern uint32_t _eheap;             /* End+1 of heap */
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /* Common Functions *********************************************************/
+
 /* Common functions defined in arch/xtensa/src/common.  These may be replaced
  * with chip-specific functions of the same name if needed.  See also
  * functions prototyped in include/nuttx/arch.h.
@@ -250,6 +251,7 @@ void xtensa_dumpstate(void);
 #endif
 
 /* Common XTENSA functions */
+
 /* Initialization */
 
 #if XCHAL_CP_NUM > 0
@@ -291,7 +293,9 @@ void _xtensa_sig_trampoline(void);
 void xtensa_sig_deliver(void);
 
 /* Chip-specific functions **************************************************/
+
 /* Chip specific functions defined in arch/xtensa/src/<chip> */
+
 /* IRQs */
 
 bool xtensa_pending_irq(int irq);

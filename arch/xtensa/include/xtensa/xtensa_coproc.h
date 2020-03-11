@@ -91,23 +91,26 @@
  *   When a thread solicits a context-swtich, its CPENABLE is cleared - the
  *   compiler has saved the (caller-saved) co-proc state if it needs to.
  *   When a non-running thread loses ownership of a CP, its bit is cleared.
- *   When a thread runs, it's XTENSA_CPENABLE is loaded into the CPENABLE reg.
- *   Avoids co-processor exceptions when no change of ownership is needed.
+ *   When a thread runs, it's XTENSA_CPENABLE is loaded into the CPENABLE
+ *   reg. Avoids co-processor exceptions when no change of ownership is
+ *   needed.
  *
  * XTENSA_CPSTORED
  *   A bitmask with the same layout as CPENABLE, a bit per co-processor.
  *   Indicates whether the state of each co-processor is saved in the state
- *   save area. When the state of a thread is saved, only the state of co-procs
- *   still enabled in CPENABLE is saved. When the co-processor state is
- *   is restored, the state is only resotred for a co-processor if this bit
- *   is set.  This bist set is cleared after after co-processor state has
- *   been restored.
+ *   save area. When the state of a thread is saved, only the state of
+ *   co-procs still enabled in CPENABLE is saved. When the co-processor
+ *   state is restored, the state is only resotred for a co-processor if
+ *   this bit is set.  This bist set is cleared after after co-processor
+ *   state has been restored.
  *
  * XTENSA_CPASA
  *   Pointer to the aligned save area.  Allows it to be aligned more than
- *   the overall save area (which might only be stack-aligned or TCB-aligned).
+ *   the overall save area (which might only be stack-aligned or
+ *   TCB-aligned).
  *   Especially relevant for Xtensa cores configured with a very large data
- *   path that requires alignment greater than 16 bytes (ABI stack alignment).
+ *   path that requires alignment greater than 16 bytes (ABI stack
+ *   alignment).
  */
 
 /* Offsets of each coprocessor save area within the 'aligned save area': */

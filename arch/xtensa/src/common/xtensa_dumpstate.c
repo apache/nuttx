@@ -216,7 +216,7 @@ void xtensa_dumpstate(void)
 
   if (rtcb->pid == 0) /* Check for CPU0 IDLE thread */
     {
-      ustackbase = (uint32_t)&g_idlestack[IDLETHREAD_STACKWORDS-1];
+      ustackbase = (uint32_t)&g_idlestack[IDLETHREAD_STACKWORDS - 1];
       ustacksize = IDLETHREAD_STACKSIZE;
     }
   else
@@ -229,7 +229,7 @@ void xtensa_dumpstate(void)
 
 #warning REVISIT interrupt stack
 #ifdef HAVE_INTERRUPTSTACK
-  istackbase = (uint32_t)&g_intstack[INTERRUPT_STACKWORDS-1];
+  istackbase = (uint32_t)&g_intstack[INTERRUPT_STACKWORDS - 1];
   istacksize = INTERRUPTSTACK_SIZE;
 
   /* Show interrupt stack info */
