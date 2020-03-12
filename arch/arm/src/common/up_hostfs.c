@@ -155,6 +155,7 @@ ssize_t host_read(int fd, void *buf, size_t count)
     .buf = buf,
     .count = count,
   };
+
   ssize_t ret = host_call(HOST_READ, &read);
   return ret < 0 ? ret : count - ret;
 }
@@ -172,6 +173,7 @@ ssize_t host_write(int fd, const void *buf, size_t count)
     .buf = buf,
     .count = count,
   };
+
   ssize_t ret = host_call(HOST_WRITE, &write);
   return ret < 0 ? ret : count - ret;
 }
@@ -201,6 +203,7 @@ off_t host_lseek(int fd, off_t offset, int whence)
         .fd = fd,
         .pos = offset,
       };
+
       ret = host_call(HOST_SEEK, &seek);
       if (ret >= 0)
         {
@@ -319,6 +322,7 @@ int host_stat(const char *path, struct stat *buf)
   if (ret < 0)
     {
       /* Since semihosting doesn't support directory yet, */
+
       ret = 0; /* we have to assume it's a directory here. */
       memset(buf, 0, sizeof(*buf));
       buf->st_mode = S_IFDIR | 0777;
