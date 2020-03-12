@@ -62,14 +62,6 @@
 #include "s32k118evb.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -80,73 +72,80 @@
 const struct peripheral_clock_config_s g_peripheral_clockconfig0[] =
 {
   {
-    .clkname    = ADC0_CLK,
-    .clkgate    = true,
-    .clksrc     = CLK_SRC_SIRC_DIV2,
-    .frac       = MULTIPLY_BY_ONE,
-    .divider    = 1,
+    .clkname = FLEXCAN0_CLK,
+#ifdef CONFIG_S32K1XX_FLEXCAN
+    .clkgate = true,
+#else
+    .clkgate = false,
+#endif
   },
   {
-    .clkname    = DMAMUX0_CLK,
-    .clkgate    = true,
-    .clksrc     = CLK_SRC_OFF,
-    .frac       = MULTIPLY_BY_ONE,
-    .divider    = 1,
+    .clkname = LPI2C0_CLK,
+#ifdef CONFIG_S32K1XX_LPI2C0
+    .clkgate = true,
+#else
+    .clkgate = false,
+#endif
+    .clksrc  = CLK_SRC_SIRC_DIV2,
   },
   {
-    .clkname    = LPTMR0_CLK,
-    .clkgate    = true,
-    .clksrc     = CLK_SRC_SIRC_DIV2,
-    .frac       = MULTIPLY_BY_ONE,
-    .divider    = 1,
+    .clkname = LPSPI0_CLK,
+#ifdef CONFIG_S32K1XX_LPSPI0
+    .clkgate = true,
+#else
+    .clkgate = false,
+#endif
+    .clksrc  = CLK_SRC_SIRC_DIV2,
   },
   {
-    .clkname    = LPUART0_CLK,
-    .clkgate    = true,
-    .clksrc     = CLK_SRC_SIRC_DIV2,
-    .frac       = MULTIPLY_BY_ONE,
-    .divider    = 1,
+    .clkname = LPSPI1_CLK,
+#ifdef CONFIG_S32K1XX_LPSPI1
+    .clkgate = true,
+#else
+    .clkgate = false,
+#endif
+    .clksrc  = CLK_SRC_SIRC_DIV2,
   },
   {
-    .clkname    = LPUART1_CLK,
-    .clkgate    = true,
-    .clksrc     = CLK_SRC_SIRC_DIV2,
-    .frac       = MULTIPLY_BY_ONE,
-    .divider    = 1,
+    .clkname = LPUART0_CLK,
+#ifdef CONFIG_S32K1XX_LPUART0
+    .clkgate = true,
+#else
+    .clkgate = false,
+#endif
+    .clksrc  = CLK_SRC_SIRC_DIV2,
   },
   {
-    .clkname    = PORTA_CLK,
-    .clkgate    = true,
-    .clksrc     = CLK_SRC_OFF,
-    .frac       = MULTIPLY_BY_ONE,
-    .divider    = 1,
+    .clkname = LPUART1_CLK,
+#ifdef CONFIG_S32K1XX_LPUART1
+    .clkgate = true,
+#else
+    .clkgate = false,
+#endif
+    .clksrc  = CLK_SRC_SIRC_DIV2,
   },
   {
-    .clkname    = PORTB_CLK,
-    .clkgate    = true,
-    .clksrc     = CLK_SRC_OFF,
-    .frac       = MULTIPLY_BY_ONE,
-    .divider    = 1,
+    .clkname = PORTA_CLK,
+    .clkgate = true,
   },
   {
-    .clkname    = PORTC_CLK,
-    .clkgate    = true,
-    .clksrc     = CLK_SRC_OFF,
-    .frac       = MULTIPLY_BY_ONE,
-    .divider    = 1,
+    .clkname = PORTB_CLK,
+    .clkgate = true,
   },
   {
-    .clkname    = PORTD_CLK,
-    .clkgate    = true,
-    .clksrc     = CLK_SRC_OFF,
-    .frac       = MULTIPLY_BY_ONE,
-    .divider    = 1,
+    .clkname = PORTC_CLK,
+    .clkgate = true,
   },
   {
-    .clkname    = PORTE_CLK,
-    .clkgate    = true,
-    .clksrc     = CLK_SRC_OFF,
-    .frac       = MULTIPLY_BY_ONE,
-    .divider    = 1,
+    .clkname = PORTD_CLK,
+    .clkgate = true,
+  },
+  {
+    .clkname = PORTE_CLK,
+    .clkgate = true,
   },
 };
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
