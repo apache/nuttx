@@ -58,14 +58,6 @@
 #    error CONFIG_RTC_PERIODIC should not be selected with this driver
 #  endif
 
-/* REVISIT: This is probably supportable.  The 47 bit timer does have
- * accuracy greater than 1 second.
- */
-
-#  ifdef CONFIG_RTC_HIRES
-#    error CONFIG_RTC_PERIODIC should not be selected with this driver
-#  endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

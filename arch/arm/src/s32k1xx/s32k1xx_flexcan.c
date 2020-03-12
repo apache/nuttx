@@ -49,6 +49,10 @@
 #include "s32k1xx_pin.h"
 #include "s32k1xx_flexcan.h"
 
+#ifdef CONFIG_NET_TIMESTAMP
+#include <sys/time.h>
+#endif
+
 #ifdef CONFIG_S32K1XX_FLEXCAN
 
 /****************************************************************************
@@ -107,6 +111,12 @@
 #define CAN_EFF_FLAG                0x80000000 /* EFF/SFF is set in the MSB */
 
 #define POOL_SIZE                   1
+
+#ifdef CONFIG_NET_TIMESTAMP
+#define MSG_DATA                    sizeof(struct timeval)
+#else
+#define MSG_DATA                    0
+#endif
 
 /* Interrupt flags for RX fifo */
 #define IFLAG1_RXFIFO               (CAN_FIFO_NE | CAN_FIFO_WARN | CAN_FIFO_OV)
@@ -223,8 +233,8 @@ struct s32k1xx_driver_s
 static struct s32k1xx_driver_s g_flexcan[CONFIG_S32K1XX_ENET_NETHIFS];
 
 #ifdef CAN_FD
-static uint8_t g_tx_pool[sizeof(struct canfd_frame)*POOL_SIZE];
-static uint8_t g_rx_pool[sizeof(struct canfd_frame)*POOL_SIZE];
+static uint8_t g_tx_pool[(sizeof(struct canfd_frame)+MSG_DATA)*POOL_SIZE];
+static uint8_t g_rx_pool[(sizeof(struct canfd_frame)+MSG_DATA)*POOL_SIZE];
 #else
 static uint8_t g_tx_pool[sizeof(struct can_frame)*POOL_SIZE]
                __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));

@@ -157,11 +157,11 @@ int up_rtc_initialize(void)
 
   putreg32(regval, S32K1XX_RTC_CR);
 
-  /* Set LPO_1KHZ clock source */
+  /* Increment on 32.768Khz clock */
 
   regval  = getreg32(S32K1XX_RTC_CR);
 
-  regval |= RTC_CR_LPOS;
+  regval &= ~RTC_CR_LPOS;
 
   putreg32(regval, S32K1XX_RTC_CR);
 
@@ -180,6 +180,16 @@ int up_rtc_initialize(void)
   regval &= ~(RTC_CR_SUP);
 
   putreg32(regval, S32K1XX_RTC_CR);
+
+  regval  = getreg32(S32K1XX_RTC_SR);
+
+  if(regval & RTC_SR_TIF)
+    {
+	  regval &= ~RTC_SR_TCE;
+	  putreg32(regval, S32K1XX_RTC_SR);
+      /* Write TSR register to clear invalid */
+	  putreg32(0x0, S32K1XX_RTC_TSR);
+    }
 
   /* Enable the rtc */
 
@@ -207,7 +217,7 @@ int up_rtc_initialize(void)
  *   The current time in seconds
  *
  ****************************************************************************/
-
+#ifndef CONFIG_RTC_HIRES
 time_t up_rtc_time(void)
 {
   uint32_t regval;
@@ -217,6 +227,55 @@ time_t up_rtc_time(void)
 
   return (uint32_t) (regval);
 }
+#endif
+
+/****************************************************************************
+ * Name: up_rtc_gettime
+ *
+ * Description:
+ *   Get the current time from the high resolution RTC clock/counter.  This
+ *   interface is only supported by the high-resolution RTC/counter hardware
+ *   implementation. It is used to replace the system timer.
+ *
+ * Input Parameters:
+ *   tp - The location to return the high resolution time value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_HIRES
+int up_rtc_gettime(FAR struct timespec *tp)
+{
+  irqstate_t flags;
+  uint32_t seconds;
+  uint32_t prescaler;
+  uint32_t prescaler2;
+
+  /* Get prescaler and seconds register. this is in a loop which ensures that
+   * registers will be re-read if during the reads the prescaler has
+   * wrapped-around.
+   */
+
+  flags = enter_critical_section();
+  do
+    {
+      prescaler = getreg32(S32K1XX_RTC_TPR);
+      seconds = getreg32(S32K1XX_RTC_TSR);
+      prescaler2 = getreg32(S32K1XX_RTC_TPR);
+    }
+  while (prescaler > prescaler2);
+
+  leave_critical_section(flags);
+
+  /* Build seconds + nanoseconds from seconds and prescaler register */
+
+  tp->tv_sec = seconds;
+  tp->tv_nsec = prescaler * (1000000000 / CONFIG_RTC_FREQUENCY);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: up_rtc_settime
@@ -236,12 +295,24 @@ time_t up_rtc_time(void)
 int up_rtc_settime(FAR const struct timespec *ts)
 {
   DEBUGASSERT(ts != NULL);
+  
+  irqstate_t flags;
+  uint32_t seconds;
+  uint32_t prescaler;
+  
+  seconds = ts->tv_sec;
+  prescaler = ts->tv_nsec * (CONFIG_RTC_FREQUENCY / 1000000000);
+
+  flags = enter_critical_section();
 
   s32k1xx_rtc_disable();
 
-  putreg32((uint32_t)ts->tv_sec, S32K1XX_RTC_TSR);
+  putreg32(prescaler, S32K1XX_RTC_TPR); /* Always write prescaler first */
+  putreg32(seconds, S32K1XX_RTC_TSR);
 
   s32k1xx_rtc_enable();
+
+  leave_critical_section(flags);
 
   return OK;
 }
