@@ -751,7 +751,8 @@ int main(int argc, char **argv, char **envp)
                * another right brace, or a pre-processor directive like #endif
                */
 
-              if (strchr(line, '}') == NULL && line[n] != '#' &&
+              if (dnest == 0 &&
+                  strchr(line, '}') == NULL && line[n] != '#' &&
                   strncmp(&line[n], "else", 4) != 0 &&
                   strncmp(&line[n], "while", 5) != 0 &&
                   strncmp(&line[n], "break", 5) != 0)
@@ -967,8 +968,8 @@ int main(int argc, char **argv, char **envp)
 
                   rhcomment = -1;
 
-                  if (ncomment > 0 && (!strncmp(&line[ii], "if", 2)
-                      || !strncmp(&line[ii], "el", 2)))
+                  if (ncomment > 0 && (strncmp(&line[ii], "if", 2) == 0 ||
+                      strncmp(&line[ii], "el", 2) == 0))
                     {
                       /* in #if...  and #el.. */
 
@@ -1608,7 +1609,7 @@ int main(int argc, char **argv, char **envp)
                       {
                         /* REVISIT: dnest is always > 0 here if bfunctions == false */
 
-                        if (dnest == 0 || !bfunctions)
+                        if (dnest == 0 || !bfunctions || lineno == rbrace_lineno)
                           {
                              ERROR("Left bracket not on separate line", lineno,
                                    n);
@@ -1753,6 +1754,13 @@ int main(int argc, char **argv, char **envp)
                                      ERROR("Space precedes semi-colon",
                                            lineno, endx);
                                   }
+                              }
+                            else if (line[endx] == '=')
+                              {
+                                /* There's a struct initialization following */
+
+                                check_spaces_leftright(line, lineno, endx, endx);
+                                dnest = 1;
                               }
                             else
                               {
