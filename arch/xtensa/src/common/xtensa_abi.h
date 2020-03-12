@@ -58,18 +58,20 @@
  *   CALL8, or CALL12 instructions to save 4, 8, or 12 live registers. Calls
  *   to routines that use a2..a7 for parameters may use only CALL8 or CALL12.
  *
- *   Arguments are passed in both registers and memory. The first six incoming
- *   arguments are stored in registers a2 through a7, and additional arguments
- *   are stored on the stack starting at the current stack pointer a1.  Because
- *   Xtensa uses register windows that rotate during a function call, outgoing
- *   arguments that will become the incoming arguments must be stored to
- *   different register numbers. Depending on the call instruction and, thus,
- *   the rotation of the register window, the arguments are passed starting
- *   starting with register a(2+N), where N is the size of the window rotation.
- *   Therefore, the first argument in case of a call4 instruction is placed into
- *   a6, and for a call8 instruction into a10. Large arguments (8-bytes) are
- *   always passed in an even/odd register pair even if that means to omit a
- *   register for alignment. The return values are stored in a2 through a7.
+ *   Arguments are passed in both registers and memory. The first six
+ *   incoming arguments are stored in registers a2 through a7, and additional
+ *   arguments are stored on the stack starting at the current stack pointer
+ *   a1.  Because Xtensa uses register windows that rotate during a function
+ *   call, outgoing arguments that will become the incoming arguments must be
+ *   stored to different register numbers. Depending on the call instruction
+ *   and, thus, the rotation of the register window, the arguments are passed
+ *   starting starting with register a(2+N), where N is the size of the
+ *   window rotation.
+ *   Therefore, the first argument in case of a call4 instruction is placed
+ *   into a6, and for a call8 instruction into a10. Large arguments (8-bytes)
+ *   are always passed in an even/odd register pair even if that means to
+ *   omit a register for alignment. The return values are stored in a2
+ *   through a7.
  *
  *          return addr  stack ptr  arg0, arg1, arg2, arg3, arg4, arg5
  *          -----------  ---------  ----------------------------------
@@ -119,9 +121,10 @@
  * where size = size of stack frame in bytes (must be >0 and aligned to 16).
  * For framed functions the frame is created and the return address saved at
  * base of frame (Call0 ABI) or as determined by hardware (Windowed ABI).
- * For frameless functions, there is no frame and return address remains in a0.
- * Note: Because CPP macros expand to a single line, macros requiring multi-line
- * expansions are implemented as assembler macros.
+ * For frameless functions, there is no frame and return address remains in
+ * a0.
+ * Note: Because CPP macros expand to a single line, macros requiring
+ * multi-line expansions are implemented as assembler macros.
  */
 
 #ifdef __ASSEMBLY__
@@ -130,16 +133,16 @@
 #ifdef __XTENSA_CALL0_ABI__
   /* Call0 */
 
-	.macro	entry1 size=0x10
-	addi	sp, sp, -\size
-	s32i	a0, sp, 0
-	.endm
+    .macro	entry1 size=0x10
+    addi	sp, sp, -\size
+    s32i	a0, sp, 0
+    .endm
 
-	.macro	ret1 size=0x10
-	l32i	a0, sp, 0
-	addi	sp, sp, \size
-	ret
-	.endm
+    .macro	ret1 size=0x10
+    l32i	a0, sp, 0
+    addi	sp, sp, \size
+    ret
+    .endm
 
 #  define ENTRY(sz)     entry1  sz
 #  define ENTRY0
