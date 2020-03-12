@@ -149,23 +149,28 @@ s32k1xx_set_pclkctrl(const struct peripheral_clock_config_s *pclk)
 
   DEBUGASSERT(ctrlp != NULL);
 
-   /* Configure the peripheral clock source, the fractional clock divider
-    * and the clock gate.
-    */
+  /* Configure the peripheral clock source, the fractional clock divider and
+   * the clock gate.
+   */
 
-   regval =  PCC_PCS(pclk->clksrc) | PCC_PCD(pclk->divider);
+  regval =  PCC_PCS(pclk->clksrc);
 
-   if (pclk->frac == MULTIPLY_BY_TWO)
-     {
-       regval |= PCC_FRAC;
-     }
+  if (pclk->divider > 1)
+    {
+      regval |= PCC_PCD(pclk->divider);
+    }
 
-   if (pclk->clkgate)
-     {
-       regval |= PCC_CGC;
-     }
+  if (pclk->frac == MULTIPLY_BY_TWO)
+    {
+      regval |= PCC_FRAC;
+    }
 
-   *ctrlp = regval;
+  if (pclk->clkgate)
+    {
+      regval |= PCC_CGC;
+    }
+
+  *ctrlp = regval;
 }
 
 /****************************************************************************
@@ -186,14 +191,14 @@ s32k1xx_set_pclkctrl(const struct peripheral_clock_config_s *pclk)
 static uint32_t s32k1xx_get_pclkfreq_divided(enum clock_names_e clkname,
                                              enum scg_async_clock_type_e divider)
 {
- uint32_t *ctrlp;
- uint32_t frequency = 0;
- uint32_t frac;
- uint32_t div;
+  uint32_t *ctrlp;
+  uint32_t frequency = 0;
+  uint32_t frac;
+  uint32_t div;
 
- ctrlp = s32k1xx_get_pclkctrl(clkname);
- frac  = ((*ctrlp & PCC_FRAC) == 0) ? 0 : 1;
- div   = (*ctrlp & PCC_PCD_MASK) >> PCC_PCD_SHIFT;
+  ctrlp = s32k1xx_get_pclkctrl(clkname);
+  frac  = ((*ctrlp & PCC_FRAC) == 0) ? 0 : 1;
+  div   = (*ctrlp & PCC_PCD_MASK) >> PCC_PCD_SHIFT;
 
   /* Check division factor */
 
@@ -240,7 +245,6 @@ static uint32_t s32k1xx_get_pclkfreq_divided(enum clock_names_e clkname,
 
   return frequency;
 }
-
 
 /****************************************************************************
  * Public Functions
