@@ -117,7 +117,7 @@ enum clock_names_e
   QSPI_MODULE_SFIF_CLK_HYP      = 40, /* QSPI module SFIF clock source */
   QSPI_MODULE_CLK               = 41, /* QSPI module clock source */
   QSPI_MODULE_CLK_SFIF          = 42, /* QSPI module clock source SFIF */
-  QSPI_MODULE_CLK_2XSFIF        = 43, /* QSPI module clock source 2XSFIF*/
+  QSPI_MODULE_CLK_2XSFIF        = 43, /* QSPI module clock source 2XSFIF */
   SIM_END_OF_CLOCKS             = 44, /* End of SIM clocks */
 
   CMP0_CLK                      = 45, /* CMP0 clock source */
