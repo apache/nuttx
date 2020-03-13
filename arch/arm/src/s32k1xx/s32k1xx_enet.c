@@ -745,7 +745,7 @@ static inline void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv)
 
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
-      ninfo("Iv6 frame\n");
+      ninfo("IPv6 frame\n");
       NETDEV_RXIPV6(&priv->dev);
 
       /* Give the IPv6 packet to the network layer */

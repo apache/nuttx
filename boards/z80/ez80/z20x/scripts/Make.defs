@@ -21,7 +21,7 @@
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include ${TOPDIR}/arch/z80/src/ez80/Toolchain.defs
-include $(TOPDIR)/tools/zds/zds_Config.mk
+include $(TOPDIR)/tools/zds/Config.mk
 
 # CFLAGS
 
@@ -65,13 +65,22 @@ CPPFLAGS = $(CPPDEFINES) $(CPPINCLUDES)
 ARFLAGS = -quiet -warn
 
 # Linker definitions
+#
+# Possible configurations
+#
+# 1. FLASH-resident bootloader (CONFIG_EZ80_BOOTLOADER)
+# 2. RAM-resident applications loaded by bootloader (CONFIG_Z20X_PROGRAM)
+# 3. FLASH-resident, standalone program (CONFIG_Z20X_STANDALONE)
+# 4. FLASH-resident, standalone copy-to-RAM program (CONFIG_Z20X_COPYTORAM)
 
-ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
+ifeq ($(CONFIG_EZ80_BOOTLOADER),y)
+  LDSCRIPT = z20x_loader.linkcmd
+else ifeq ($(CONFIG_Z20X_PROGRAM),y)
+  LDSCRIPT = z20x_program.linkcmd
+else ifeq ($(CONFIG_Z20X_STANDALONE),y)
   LDSCRIPT = z20x_flash.linkcmd
 else ifeq ($(CONFIG_Z20X_COPYTORAM),y)
   LDSCRIPT = z20x_copytoram.linkcmd
-else # ifeq ($(CONFIG_BOOT_RUNFROMEXTSRAM),y)
-  LDSCRIPT = z20x_ram.linkcmd
 endif
 
 LINKCMDTEMPLATE = $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)$(LDSCRIPT)

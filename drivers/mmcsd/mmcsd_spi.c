@@ -265,7 +265,7 @@ static struct mmcsd_slot_s g_mmcsdslot[CONFIG_MMCSD_NSLOTS];
 
 static const uint32_t g_transpeedru[8] =
 {
-     10000,   /*  0:   10 Kbit/sec / 10 */
+     10000,   /*  0:  100 Kbit/sec / 10 */
     100000,   /*  1:    1 Mbit/sec / 10 */
    1000000,   /*  2:   10 Mbit/sec / 10 */
   10000000,   /*  3:  100 Mbit/sec / 10 */

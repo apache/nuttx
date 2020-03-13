@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+
 /****************************************************************************
  * Address Environment Interfaces
  *
@@ -110,6 +111,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration */
 
 #if (CONFIG_ARCH_STACK_VBASE & SECTION_MASK) != 0
@@ -151,9 +153,9 @@ int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize)
 
   memset(tcb->xcp.ustack, 0, ARCH_STACK_NSECTS * sizeof(uintptr_t *));
 
-  /* Back the allocation up with physical pages and set up the level 2 mapping
-   * (which of course does nothing until the L2 page table is hooked into
-   * the L1 page table).
+  /* Back the allocation up with physical pages and set up the level 2
+   * mapping (which of course does nothing until the L2 page table is hooked
+   * into the L1 page table).
    */
 
   /* Allocate .text space pages */
@@ -235,10 +237,10 @@ int up_addrenv_vustack(FAR const struct tcb_s *tcb, FAR void **vstack)
  *
  * Description:
  *   After an address environment has been established for a task's stack
- *   (via up_addrenv_ustackalloc().  This function may be called to instantiate
- *   that address environment in the virtual address space.  This is a
- *   necessary step before each context switch to the newly created thread
- *   (including the initial thread startup).
+ *   (via up_addrenv_ustackalloc().  This function may be called to
+ *   instantiate that address environment in the virtual address space.
+ *   This is a necessary step before each context switch to the newly created
+ *   thread (including the initial thread startup).
  *
  * Input Parameters:
  *   tcb - The TCB of the thread with the stack address environment to be

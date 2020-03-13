@@ -167,7 +167,8 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           /* Copy the exception context into the TCB at the (old) head of the
            * ready-to-run Task list. if up_saveusercontext returns a non-zero
-           * value, then this is really the previously running task restarting!
+           * value, then this is really the previously running task
+           * restarting!
            */
 
           else if (!xtensa_context_save(rtcb->xcp.regs))

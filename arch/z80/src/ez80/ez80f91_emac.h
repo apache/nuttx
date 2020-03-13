@@ -1,35 +1,20 @@
 /************************************************************************************
  * arch/z80/src/ez80/ez80f91_emac.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ************************************************************************************/
 
@@ -131,7 +116,7 @@
 #  define EMAC_BUFSZ_128b      0x40  /*   EMAC Rx/Tx buffer size = 128 bytes */
 #  define EMAC_BUFSZ_64b       0x80  /*   EMAC Rx/Tx buffer size = 64 bytes */
 #  define EMAC_BUFSZ_32b       0xc0  /*   EMAC Rx/Tx buffer size = 32 bytes */
-#define EMAC_BUFSZ_TPCFLMASK   0x3f /* Bits 0-5: Tranmsit pause frame level */
+#define EMAC_BUFSZ_TPCFLMASK   0x3f  /* Bits 0-5: Tranmsit pause frame level */
 
 /* EMAC interrupt enable register bit settings **************************************/
 
@@ -174,13 +159,14 @@
 
 /* EMAC Transmit Descriptor Status **************************************************/
 
-#define EMAC_TXDESC_NCOLL     0x0001 /* Bits 0-3: Bumber of collisions that occurred
+#define EMAC_TXDESC_NCOLL     0x0001 /* Bits 0-3: Number of collisions that occurred
                                       * while transmitting the packet. */
 #define EMAC_TXDESC_MXCOLL    0x0010 /* Bit 4: 1=maximum number of collisions.
                                       * number > CFG3[3:0]. packet aborted */
 #define EMAC_TXDESC_LATECOLL  0x0020 /* Bit 5: 1=late collision. Collision is detected
-                                      * at a byte count > CFG2[5:0]. Collisions detected
-                                      * before the byte count reaches CFG2[5:0] are early
+                                      * at a byte count > CFG2[5:0]. Collisions
+                                      * detected before the byte count reaches
+                                      * CFG2[5:0] are early
                                       * collisions and retried. */
 #define EMAC_TXDESC_FIFOUNDR  0x0040 /* Bit 6: TxFIFO Underrun. Check the TxAbort
                                       * bit to see if the packet is aborted or retried. */
@@ -203,26 +189,30 @@
 
 /* Receive Descriptor Status ********************************************************/
 
-#define EMAC_RXDESC_OVR       0x0001 /* Bit 0: 1=A Receive Overrun occurs in this packet. An
-                                      * overrun occurs when all of the EMAC Receive
-                                      * buffers are in use and the Receive FIFO is full.
-                                      * The hardware ignores all incoming packets until the
-                                      * ISTAT Register [RXOVR] bit is cleared by the software.
-                                      * There is no indication as to how many packets are
-                                      * ignored. */
-#define EMAC_RXDESC_DVEVENT   0x0002 /* Bit 1: 1=Receive data (RxDV) event is previously seen.
-                                      * Indicates that the last Receive event is not long
-                                      * enough to be a valid packet. */
-#define EMAC_RXDESC_CEVENT    0x0004 /* Bit 2: 1=Carrier event is previously seen. This event is
-                                      * defined as Rx error RxER = 1, receive data valid
-                                      * (RxDV) = 0 and receive data (RxD) = Eh */
-#define EMAC_RXDESC_CODEV     0x0008 /* Bit 3: 1=A code violation is detected. The PHY asserts
-                                      * Rx error (RxER). */
-#define EMAC_RXDESC_LCERROR   0x0010 /* Bit 4 1=Type/Length field is not a Type field and it does
-                                      * not match the actual data byte length of the
-                                      * Ethernet packet. The data byte length is the
-                                      * number of bytes of data in the Ethernet packet
-                                      * between the Type/Length field and the FCS. */
+#define EMAC_RXDESC_OVR       0x0001 /* Bit 0: 1=A Receive Overrun occurs in this
+                                      * packet.  An overrun occurs when all of the
+                                      * EMAC Receive buffers are in use and the
+                                      * Receive FIFO is full.  The hardware ignores
+                                      * all incoming packets until the ISTAT Register
+                                      * [RXOVR] bit is cleared by the software.
+                                      * There is no indication as to how many packets
+                                      * are ignored. */
+#define EMAC_RXDESC_DVEVENT   0x0002 /* Bit 1: 1=Receive data (RxDV) event is
+                                      * previously seen.  Indicates that the last
+                                      * Receive event is not long enough to be a
+                                      * valid packet. */
+#define EMAC_RXDESC_CEVENT    0x0004 /* Bit 2: 1=Carrier event is previously seen.
+                                      * This event is defined as Rx error RxER = 1,
+                                      * receive data valid (RxDV) = 0 and receive
+                                      * data (RxD) = Eh */
+#define EMAC_RXDESC_CODEV     0x0008 /* Bit 3: 1=A code violation is detected. The
+                                      * PHY asserts Rx error (RxER). */
+#define EMAC_RXDESC_LCERROR   0x0010 /* Bit 4 1=Type/Length field is not a Type field
+                                      * and it does not match the actual data byte
+                                      * length of the Ethernet packet. The data byte
+                                      * length is the number of bytes of data in the
+                                      * Ethernet packet between the Type/Length field
+                                      * and the FCS. */
 #define EMAC_RXDESC_LOOR      0x0020 /* Bit 5: 1=Type/Length field is out of range (larger
                                       * than 1518 bytes). */
 #define EMAC_RXDESC_UOPCODE   0x0040 /* Bit 6: 1=Unsupported Op Code is indicated in the Op
@@ -232,12 +222,13 @@
 #define EMAC_RXDESC_MCPKT     0x0200 /* Bit 9: 1=The packet contains a multicast address */
 #define EMAC_RXDESC_CR        0x0400 /* Bit 10: 1=The packet is a control frame */
 #define EMAC_RXDESC_PCF       0x0800 /* Bit 11: 1=The packet is a pause control frame */
-#define EMAC_RXDESC_LONGEVNT  0x1000 /* Bit 12: 1= A Long or Dropped Event occurs. A Long Event is
-                                      * when a packet over 50,000 bit times occurs. A
-                                      * Dropped Packet can occur if the minimum interpacket
-                                      * gap is not met, the preamble is not pure, and
-                                      * the CFG3[PUREP] bit is set, or if a preamble over
-                                      * 11 bytes in length is detected and the CFG3[LONGP]
+#define EMAC_RXDESC_LONGEVNT  0x1000 /* Bit 12: 1= A Long or Dropped Event occurs. A
+                                      * Long Event is when a packet over 50,000 bit
+                                      * times occurs. A Dropped Packet can occur if
+                                      * the minimum interpacket gap is not met, the
+                                      * preamble is not pure, and the CFG3[PUREP]
+                                      * bit is set, or if a preamble over 11 bytes
+                                      * in length is detected and the CFG3[LONGP]
                                       * bit is set to 1. */
 #define EMAC_RXDESC_CRCERR    0x2000 /* Bit 13: 1=The CRC (FCS) is in error */
 #define EMAC_RXDESC_ALGNERR   0x4000 /* Bit 14: 1=An odd number of nibbles is received. */
@@ -276,7 +267,7 @@ extern "C"
 #endif /* __cplusplus */
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 #undef EXTERN

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arm/arm/src/stm32f7/stm32_tim.c
+ * arch/arm/src/stm32f7/stm32_tim.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>
@@ -712,6 +712,7 @@ static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t m
         break;
 
       case STM32_TIM_MODE_UPDOWN:
+
         /* Our default: Interrupts are generated on compare, when counting down */
 
         val |= ATIM_CR1_CENTER1;
@@ -1165,6 +1166,7 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
         break;
 #endif
     }
+
   return OK;
 }
 
@@ -1190,6 +1192,7 @@ static int stm32_tim_setcompare(FAR struct stm32_tim_dev_s *dev, uint8_t channel
       default:
         return -EINVAL;
     }
+
   return OK;
 }
 
@@ -1248,6 +1251,7 @@ struct stm32_tim_priv_s stm32_tim1_priv =
   .base       = STM32_TIM1_BASE,
 };
 #endif
+
 #ifdef CONFIG_STM32F7_TIM2
 struct stm32_tim_priv_s stm32_tim2_priv =
 {

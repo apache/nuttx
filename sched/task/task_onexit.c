@@ -105,10 +105,10 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
     {
       sched_lock();
 
-      /* Search for the first available slot.  on_exit() functions are registered
-       * from lower to higher array indices; they must be called in the reverse
-       * order of registration when task exists, i.e., from higher to lower
-       * indices.
+      /* Search for the first available slot.  on_exit() functions are
+       * registered from lower to higher array indices; they must be called
+       * in the reverse order of registration when task exists, i.e.,
+       * from higher to lower indices.
        */
 
       for (index = 0; index < CONFIG_SCHED_ONEXIT_MAX; index++)

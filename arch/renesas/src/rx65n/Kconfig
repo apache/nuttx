@@ -182,6 +182,13 @@ config RX65N_EMAC0
 	select NETDEVICES
 	select ARCH_HAVE_PHY
 
+config RX65N_RTC
+	bool "RTC"
+	default y
+
+config RX65N_CARRY
+	bool "RTC"
+	default y
 endmenu # RX65N Peripheral Selections
 endif
 
@@ -529,4 +536,11 @@ config RX65N_EMAC_REGDEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_NET.
 
+config RX65N_RTC
+	bool "RTC"
+	default y
+
+config RX65N_CARRY
+	bool "RTC"
+	default y
 endmenu # EMAC0 device driver options

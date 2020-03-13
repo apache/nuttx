@@ -3,5 +3,14 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
+config SPECIFIC_DRIVERS
+       bool "Board specific drivers"
+       default n
+       ---help---
+               Board specific drivers located in each board/driver folder.
+
+if SPECIFIC_DRIVERS
 source "drivers/platform/audio/Kconfig"
 source "drivers/platform/sensors/Kconfig"
+source "drivers/platform/camera/Kconfig"
+endif

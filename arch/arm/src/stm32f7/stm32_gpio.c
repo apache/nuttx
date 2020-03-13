@@ -118,7 +118,7 @@ const uint32_t g_gpiobase[STM32F7_NGPIO] =
  *
  * Returned Value:
  *   OK on success
- *   A negated errono value on invalid port, or when pin is locked as ALT
+ *   A negated errno value on invalid port, or when pin is locked as ALT
  *   function.
  *
  * To-Do: Auto Power Enable

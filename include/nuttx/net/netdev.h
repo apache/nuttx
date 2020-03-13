@@ -189,7 +189,7 @@ struct netdev_statistics_s
 
   /* Other status */
 
-  uint32_t errors;         /* Total umber of errors */
+  uint32_t errors;         /* Total number of errors */
 };
 #endif
 
@@ -585,7 +585,7 @@ void neighbor_out(FAR struct net_driver_s *dev);
  *
  * Returned Value:
  *   Zero is returned if the packet don't loop back to ourself, otherwise
- *   a no zero value is returned.
+ *   a non-zero value is returned.
  *
  ****************************************************************************/
 

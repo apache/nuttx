@@ -170,8 +170,8 @@ int sched_unlock(void)
             {
               /* Yes.. that is the situation.  But one more thing.  The call
                * to up_release_pending() above may have actually replaced
-               * the task at the head of the ready-to-run list.  In that case,
-               * we need only to reset the timeslice value back to the
+               * the task at the head of the ready-to-run list.  In that
+               * case, we need only to reset the timeslice value back to the
                * maximum.
                */
 
@@ -199,8 +199,8 @@ int sched_unlock(void)
            * for the next time slice.
            */
 
-          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC &&
-              rtcb->timeslice < 0)
+          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC
+              && rtcb->timeslice < 0)
             {
               /* Yes.. that is the situation.  Force the low-priority state
                * now
@@ -301,8 +301,8 @@ int sched_unlock(void)
             {
               /* Yes.. that is the situation.  But one more thing.  The call
                * to up_release_pending() above may have actually replaced
-               * the task at the head of the ready-to-run list.  In that case,
-               * we need only to reset the timeslice value back to the
+               * the task at the head of the ready-to-run list.  In that
+               * case, we need only to reset the timeslice value back to the
                * maximum.
                */
 
@@ -330,8 +330,8 @@ int sched_unlock(void)
            * for the next time slice.
            */
 
-          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC &&
-              rtcb->timeslice < 0)
+          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC
+              && rtcb->timeslice < 0)
             {
               /* Yes.. that is the situation.  Force the low-priority state
                * now

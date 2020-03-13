@@ -134,15 +134,17 @@
 /*  Tensilica-defined user registers:  */
 
 #if 0
-/*#define ...     21..24 */  /* (545CK) */
-/*#define ...    140..143 */ /* (545CK) */
+#if 0
+#define ...           21..24 /* (545CK) */
+#define ...         140..143 /* (545CK) */
+#endif
 #define EXPSTATE      230    /* Diamond */
 #define THREADPTR     231    /* threadptr option */
 #define FCR           232    /* FPU */
 #define FSR           233    /* FPU */
 #define AE_OVF_SAR    240    /* HiFi2 */
 #define AE_BITHEAD    241    /* HiFi2 */
-#define AE_TS_FTS_BU_BP 242 /* HiFi2 */
+#define AE_TS_FTS_BU_BP 242  /* HiFi2 */
 #define AE_SD_NO      243    /* HiFi2 */
 #define VSAR          240    /* VectraLX */
 #define ROUND_LO      242    /* VectraLX */

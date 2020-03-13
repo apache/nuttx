@@ -154,9 +154,11 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               CURRENT_REGS[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
 #ifdef __XTENSA_CALL0_ABI__
-              CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
+              CURRENT_REGS[REG_PS] = (uint32_t)
+                  (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
-              CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+              CURRENT_REGS[REG_PS] = (uint32_t)
+                  (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
 
               /* And make sure that the saved context in the TCB is the same
@@ -190,9 +192,11 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.regs[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
 #ifdef __XTENSA_CALL0_ABI__
-          tcb->xcp.regs[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
+          tcb->xcp.regs[REG_PS] = (uint32_t)
+              (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
-          tcb->xcp.regs[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+          tcb->xcp.regs[REG_PS] = (uint32_t)
+              (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
         }
     }
@@ -270,8 +274,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
                   /* Now tcb on the other CPU can be accessed safely */
 
-                  /* Copy tcb->xcp.regs to tcp.xcp.saved. These will be restored
-                   * by the signal trampoline after the signal has been delivered.
+                  /* Copy tcb->xcp.regs to tcp.xcp.saved. These will be
+                   * restored by the signal trampoline after the signal has
+                   * been delivered.
                    *
                    * NOTE: that hi-priority interrupts are not disabled.
                    */
@@ -284,19 +289,22 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * disabled
                    */
 
-                  CURRENT_REGS[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
+                  tcb->xcp.regs[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
 #ifdef __XTENSA_CALL0_ABI__
-                  CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
+                  tcb->xcp.regs[REG_PS] = (uint32_t)
+                      (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
-                  CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+                  tcb->xcp.regs[REG_PS] = (uint32_t)
+                      (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
                 }
               else
                 {
                   /* tcb is running on the same CPU */
 
-                  /* Copy tcb->xcp.regs to tcp.xcp.saved. These will be restored
-                   * by the signal trampoline after the signal has been delivered.
+                  /* Copy tcb->xcp.regs to tcp.xcp.saved. These will be
+                   * restored by the signal trampoline after the signal has
+                   * been delivered.
                    *
                    * NOTE: that hi-priority interrupts are not disabled.
                    */
@@ -311,19 +319,21 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
                   CURRENT_REGS[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
 #ifdef __XTENSA_CALL0_ABI__
-                  CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
+                  CURRENT_REGS[REG_PS] = (uint32_t)
+                      (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
-                  CURRENT_REGS[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+                  CURRENT_REGS[REG_PS] = (uint32_t)
+                      (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
-                  /* And make sure that the saved context in the TCB is the same
-                   * as the interrupt return context.
+                  /* And make sure that the saved context in the TCB is the
+                   * same as the interrupt return context.
                    */
 
                   xtensa_savestate(tcb->xcp.regs);
                 }
 
-              /* Increment the IRQ lock count so that when the task is restarted,
-               * it will hold the IRQ spinlock.
+              /* Increment the IRQ lock count so that when the task is
+               * restarted, it will hold the IRQ spinlock.
                */
 
               DEBUGASSERT(tcb->irqcount < INT16_MAX);
@@ -331,7 +341,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               /* In an SMP configuration, the interrupt disable logic also
                * involves spinlocks that are configured per the TCB irqcount
-               * field.  This is logically equivalent to enter_critical_section().
+               * field.  This is logically equivalent to
+               * enter_critical_section().
                * The matching call to leave_critical_section() will be
                * performed in up_sigdeliver().
                */
@@ -378,9 +389,11 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.regs[REG_PC] = (uint32_t)_xtensa_sig_trampoline;
 #ifdef __XTENSA_CALL0_ABI__
-          tcb->xcp.regs[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
+          tcb->xcp.regs[REG_PS] = (uint32_t)
+              (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM);
 #else
-          tcb->xcp.regs[REG_PS] = (uint32_t)(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
+          tcb->xcp.regs[REG_PS] = (uint32_t)
+              (PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
         }
     }

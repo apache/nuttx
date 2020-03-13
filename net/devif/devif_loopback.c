@@ -94,7 +94,7 @@ static bool is_loopback(FAR struct net_driver_s *dev)
  *
  * Returned Value:
  *   Zero is returned if the packet don't loop back to ourself, otherwise
- *   a no zero value is returned.
+ *   a non-zero value is returned.
  *
  ****************************************************************************/
 
@@ -135,7 +135,7 @@ int devif_loopback(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
       if ((IPv6BUF->vtc & IP_VERSION_MASK) == IPv6_VERSION)
         {
-          ninfo("Iv6 frame\n");
+          ninfo("IPv6 frame\n");
 
           NETDEV_RXIPV6(dev);
           ipv6_input(dev);

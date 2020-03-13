@@ -28,13 +28,17 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- *******************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_XTENSA_SRC_COMMON_XTENSA_TIMER_H
 #define __ARCH_XTENSA_SRC_COMMON_XTENSA_TIMER_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #ifdef __ASSEMBLER__
-//#  include <xtensa/coreasm.h>
+/* #  include <xtensa/coreasm.h> */
 #endif
 
 #include <arch/xtensa/core.h>
@@ -44,8 +48,10 @@
 /* Select timer to use for periodic tick, and determine its interrupt number
  * and priority. User may specify a timer by defining XT_TIMER_INDEX with -D,
  * in which case its validity is checked (it must exist in this core and must
- * not be on a high priority interrupt - an error will be reported in invalid).
- * Otherwise select the first low or medium priority interrupt timer available.
+ * not be on a high priority interrupt - an error will be reported in
+ * invalid).
+ * Otherwise select the first low or medium priority interrupt timer
+ * available.
  */
 
 #if XCHAL_NUM_TIMERS == 0

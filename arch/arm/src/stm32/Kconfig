@@ -8820,6 +8820,15 @@ config STM32_SPI1_DMA
 	---help---
 		Use DMA to improve SPI1 transfer performance.
 
+config STM32_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on STM32_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
 config STM32_SPI2_DMA
 	bool "SPI2 DMA"
 	default n

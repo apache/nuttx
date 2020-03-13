@@ -1,45 +1,29 @@
 /****************************************************************************
  * arch/renesas/src/rx65n/rx65n_definitions.h
  *
- *   Copyright (C) 2008-2019 Gregory Nutt. All rights reserved.
- *   Author: Anjana <anjana@tataelxsi.co.in>
- *            Surya <surya.prakash@tataelxsi.co.in>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ***************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_RENESAS_SRC_RX65N_RX65N_DEFINITIONS_H
 #define __ARCH_RENESAS_SRC_RX65N_RX65N_DEFINITIONS_H
 
 /****************************************************************************
  * Included Files
- ***************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "rx65n/iodefine.h"
@@ -47,9 +31,9 @@
 
 /****************************************************************************
  * Pre-processor Definitions
- ***************************************************************************/
+ ****************************************************************************/
 
-/* Memory-mapped register addresses ****************************************/
+/* Memory-mapped register addresses *****************************************/
 
 #define RX65N_SCI0_BASE       (uint32_t)&SCI0
 #define RX65N_SCI1_BASE       (uint32_t)&SCI1
@@ -468,13 +452,98 @@
 #define SET_BYTE_HIGH   (0xff)
 #define SET_BYTE_LOW    (0x00)
 
+/* RTC Register Offsets */
+
+#define RX65N_RTC_R64CNT_OFFSET    (0x0000)
+#define RX65N_RTC_RSECCNT_OFFSET   (0x0002)
+#define RX65N_RTC_RMINCNT_OFFSET   (0x0004)
+#define RX65N_RTC_RHRCNT_OFFSET    (0x0006)
+#define RX65N_RTC_RWKCNT_OFFSET    (0x0008)
+#define RX65N_RTC_RDAYCNT_OFFSET   (0x000a)
+#define RX65N_RTC_RMONCNT_OFFSET   (0x000c)
+#define RX65N_RTC_RYRCNT_OFFSET    (0x000e)
+#define RX65N_RTC_RSECAR_OFFSET    (0x0010)
+#define RX65N_RTC_RMINAR_OFFSET    (0x0012)
+#define RX65N_RTC_RHRAR_OFFSET     (0x0014)
+#define RX65N_RTC_RWKAR_OFFSET     (0x0016)
+#define RX65N_RTC_RDAYAR_OFFSET    (0x0018)
+#define RX65N_RTC_RMONAR_OFFSET    (0x001a)
+#define RX65N_RTC_RYRAR_OFFSET     (0x001c)
+#define RX65N_RTC_RYRAREN_OFFSET   (0x001e)
+#define RX65N_RTC_RCR1_OFFSET      (0x0022)
+#define RX65N_RTC_RCR2_OFFSET      (0x0024)
+#define RX65N_RTC_RCR3_OFFSET      (0x0026)
+#define RX65N_RTC_RCR4_OFFSET      (0x0028)
+#define RX65N_RTC_RADJ_OFFSET      (0x002e)
+
+#define RX65N_RTC_BASE      (0x0008c400)
+#define RX65N_RTC_R64CNT    (RX65N_RTC_BASE + RX65N_RTC_R64CNT_OFFSET)
+#define RX65N_RTC_RSECCNT   (RX65N_RTC_BASE + RX65N_RTC_RSECCNT_OFFSET)
+#define RX65N_RTC_RMINCNT   (RX65N_RTC_BASE + RX65N_RTC_RMINCNT_OFFSET)
+#define RX65N_RTC_RHRCNT    (RX65N_RTC_BASE + RX65N_RTC_RHRCNT_OFFSET)
+#define RX65N_RTC_RWKCNT    (RX65N_RTC_BASE + RX65N_RTC_RWKCNT_OFFSET)
+#define RX65N_RTC_RDAYCNT   (RX65N_RTC_BASE + RX65N_RTC_RDAYCNT_OFFSET)
+#define RX65N_RTC_RMONCNT   (RX65N_RTC_BASE + RX65N_RTC_RMONCNT_OFFSET)
+#define RX65N_RTC_RYRCNT    (RX65N_RTC_BASE + RX65N_RTC_RYRCNT_OFFSET)
+#define RX65N_RTC_RSECAR    (RX65N_RTC_BASE + RX65N_RTC_RSECAR_OFFSET)
+#define RX65N_RTC_RMINAR    (RX65N_RTC_BASE + RX65N_RTC_RMINAR_OFFSET)
+#define RX65N_RTC_RHRAR     (RX65N_RTC_BASE + RX65N_RTC_RHRAR_OFFSET)
+#define RX65N_RTC_RWKAR     (RX65N_RTC_BASE + RX65N_RTC_RWKAR_OFFSET)
+#define RX65N_RTC_RDAYAR    (RX65N_RTC_BASE + RX65N_RTC_RDAYAR_OFFSET)
+#define RX65N_RTC_RMONAR    (RX65N_RTC_BASE + RX65N_RTC_RMONAR_OFFSET)
+#define RX65N_RTC_RYRAR     (RX65N_RTC_BASE + RX65N_RTC_RYRAR_OFFSET)
+#define RX65N_RTC_RYRAREN   (RX65N_RTC_BASE + RX65N_RTC_RYRAREN_OFFSET)
+#define RX65N_RTC_RCR1      (RX65N_RTC_BASE + RX65N_RTC_RCR1_OFFSET)
+#define RX65N_RTC_RCR2      (RX65N_RTC_BASE + RX65N_RTC_RCR2_OFFSET)
+#define RX65N_RTC_RCR3      (RX65N_RTC_BASE + RX65N_RTC_RCR3_OFFSET)
+#define RX65N_RTC_RCR4      (RX65N_RTC_BASE + RX65N_RTC_RCR4_OFFSET)
+#define RX65N_RTC_RADJ      (RX65N_RTC_BASE + RX65N_RTC_RADJ_OFFSET)
+
+#define RTC_RTC_ALRDIS    (0x00)
+#define RTC_RCR4_RCKSEL   (0x00)
+#define RTC_RCR3_RTCEN    (0x01)
+#define RTC_RCR3_RTCDV    (0x02)
+#define RTC_RCR2_START    (0x01)
+#define RTC_RCR2_CNTMD    (0x00)
+#define RTC_RCR2_RESET    (0x01)
+#define RTC_ALARM_INT_ENABLE (0x01)
+#define RTC_CARRY_INT_ENABLE (0x02)
+#define RTC_PERIOD_INT_ENABLE (0x04)
+#define RTC_PERIODIC_INT_PERIOD_1 (0xe0)
+#define _04_FOUR_READ_COUNT (0x04)
+#define RTC_1_64_SEC_CYCLE (0x0005b8d9)
+#define _0F_RTC_PRIORITY_LEVEL15 (0x0f)
+#define  RTC_RCR1_CUP            (0x02)
+#define RX65N_SUBCLKOSC_SOSCCR  (0x00080033)
+#define SUBCLKOSC_SOSCCR_SOSTP  (0x01)
+#define RX65N_SUBCLKOSC_SOSCWTCR (0x0008c293)
+#define RTC_SOSCWTCR_VALUE      (0x21)
+#define RTC_DUMMY_READ          (3)
+#define _00_RTC_PRIORITY_LEVEL0 (0)
+#define _04_RTC_PERIOD_INT_ENABLE  (0x04)
+#define RTC_RTC_CARRYDIS     (0xe5)
+#define RTC_RTC_PERDIS       (0xe3)
+#define RTC_RADJ_INITVALUE   (0x0)
+#define RTC_RCR2_AADJE       (0x10)
+#define RTC_RCR2_AADJP       (0x20)
+
+#if defined(CONFIG_RTC) || defined(CONFIG_RTC_DRIVER)
+
+#define HAVE_RTC_DRIVER       1
+
+#endif
+
+#define RX65N_RTC_WAIT_PERIOD 184
+#define RTC_RCR2_HR24         (0x40)
+#define RTC_PERIODIC_INTERRUPT_2_SEC (0xf)
+
 /****************************************************************************
  * Public Types
- ***************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Data
- ***************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLER__
 /* Serial Communications interface (SCI) */

@@ -163,7 +163,7 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
   uint32_t cntrl;
   unsigned int pinmode;
 
-  DEBUGASSERT(pin >=0 && pin <= ESP32_NIRQ_GPIO);
+  DEBUGASSERT(pin >= 0 && pin <= ESP32_NIRQ_GPIO);
 
   /* Handle input pins */
 
@@ -250,7 +250,7 @@ int esp32_configgpio(int pin, gpio_pinattr_t attr)
 
 void esp32_gpiowrite(int pin, bool value)
 {
-  DEBUGASSERT(pin >=0 && pin <= ESP32_NIRQ_GPIO);
+  DEBUGASSERT(pin >= 0 && pin <= ESP32_NIRQ_GPIO);
 
   if (value)
     {
@@ -288,7 +288,7 @@ bool esp32_gpioread(int pin)
 {
   uint32_t regval;
 
-  DEBUGASSERT(pin >=0 && pin <= ESP32_NIRQ_GPIO);
+  DEBUGASSERT(pin >= 0 && pin <= ESP32_NIRQ_GPIO);
 
   if (pin < 32)
     {

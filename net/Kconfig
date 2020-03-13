@@ -269,7 +269,7 @@ config NETDEV_LATEINIT
 		Examples of this latter situation includes such things as network
 		drivers that required some setup via an I2C I/O expander, or network
 		drivers that depend on USB, SPI, I2C, PCI, serial, or other
-		interfaces that may not be ready when up_netiniailize() is normally
+		interfaces that may not be ready when up_netinitialize() is normally
 		called.
 
 endmenu # Link layer support

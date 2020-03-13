@@ -1,0 +1,49 @@
+############################################################################
+# arch/x86_64/src/intel64/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Common x86_64 and intel64 files
+
+CMN_CSRCS += up_allocateheap.c up_assert.c up_blocktask.c up_copystate.c up_restore_auxstate.c
+CMN_CSRCS += up_createstack.c up_mdelay.c up_udelay.c up_exit.c
+CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
+CMN_CSRCS += up_irq.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
+CMN_CSRCS += up_regdump.c up_releasepending.c up_releasestack.c
+CMN_CSRCS += up_reprioritizertr.c up_savestate.c up_sigdeliver.c
+CMN_CSRCS += up_schedulesigaction.c up_stackframe.c up_unblocktask.c
+CMN_CSRCS += up_usestack.c
+CMN_CSRCS += up_rtc.c
+CMN_CSRCS += up_map_region.c
+
+# Required Intel64 files
+
+CHIP_ASRCS  = intel64_saveusercontext.S intel64_fullcontextrestore.S intel64_vectors.S intel64_head.S
+CHIP_CSRCS  = intel64_handlers.c intel64_idle.c intel64_lowsetup.c 
+CHIP_CSRCS += intel64_serial.c intel64_rng.c intel64_check_capability.c
+
+# Configuration-dependent intel64 files
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += intel64_timerisr.c
+endif
+
+ifeq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += intel64_tickless.c
+endif
+

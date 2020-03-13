@@ -11,6 +11,7 @@ Contents
   - Serial Console
   - LEDs
   - Networking
+  - RTC
   - Debugging
 
 Board Features
@@ -177,6 +178,22 @@ Configure UDP blaster application as mentioned below :
 CONFIG_EXAMPLES_UDPBLASTER_HOSTIP=0x0a4b1801  (10.75.24.1) ------> Gateway IP
 CONFIG_EXAMPLES_UDPBLASTER_NETMASK=0xfffffe00 (255.255.254.0) --------> Netmask
 CONFIG_EXAMPLES_UDPBLASTER_TARGETIP=0x0a4b189b (10.75.24.155) ---------> Target IP
+RTC
+==========
+
+NuttX Configurations
+---------------
+The configurations listed in Renesas_RX65N_NuttX_RTC_Design.doc need to be enabled.
+
+RTC Testing
+------------------
+The test cases mentioned in Renesas_RX65N_RTC_Test_Cases.xls are to be executed
+as part of RTC testing.
+
+The following configurations are to be enabled as part of testing RTC examples.
+CONFIG_EXAMPLES_ALARM
+CONFIG_EXAMPLES_PERIODIC
+CONFIG_EXAMPLES_CARRY
 
 Debugging
 ==========
@@ -210,3 +227,8 @@ endif
    Select Motorola SREC format.
 4. Download Renesas flash programmer tool from https://www.renesas.com/in/en/products/software-tools/tools/programmer/renesas-flash-programmer-programming-gui.html#downloads
 5. Refer to the user manual document, for steps to flash NuttX binary using RFP tool.
+Changes Made in NuttX 8.2 Code
+================================
+1. In wd_start.c file, in function wd_expiration(), typecasting is done when the signal handler nxsig_timeout() is invoked.
+2. In rtc.c, (drivers/timers/rtc.c) file, in function rtc_periodic_callback(), alarminfo->active = false is commented.
+The reason being, periodic interrupt should not be disabled. Uncommenting the above mentioned line (alarminfo->active = false), will make the periodic interrupt come only once.

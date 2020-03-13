@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/sched_removereadytorun.c
  *
- *   Copyright (C) 2007-2009, 2012, 2016-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012, 2016-2017 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -223,9 +224,9 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 
       /* Did we find a task in the g_readytorun list?  Which task should
        * we use?  We decide strictly by the priority of the two tasks:
-       * Either (1) the task currently at the head of the g_assignedtasks[cpu]
-       * list (nexttcb) or (2) the highest priority task from the
-       * g_readytorun list with matching affinity (rtrtcb).
+       * Either (1) the task currently at the head of the
+       * g_assignedtasks[cpu] list (nexttcb) or (2) the highest priority
+       * task from the g_readytorun list with matching affinity (rtrtcb).
        */
 
       if (rtrtcb != NULL && rtrtcb->sched_priority >= nxttcb->sched_priority)

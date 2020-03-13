@@ -971,7 +971,7 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
 #ifdef CONFIG_NET_IPv6
   if (ETHBUF->type == HTONS(ETHTYPE_IP6))
     {
-      ninfo("Iv6 packet\n");
+      ninfo("IPv6 packet\n");
       NETDEV_RXIPV6(&priv->eth_dev);
 
       /* Dispatch IPv6 packet to the network layer */

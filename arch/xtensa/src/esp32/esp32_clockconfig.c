@@ -99,7 +99,9 @@ void esp32_clockconfig(void)
       break;
     default:
       freq_mhz = 80;
+
       /* no break */
+
     case 80:
       freq = CPU_80M;
       break;

@@ -45,6 +45,12 @@
 #include <debug.h>
 #include <errno.h>
 
+#include "freedom-k28f.h"
+
+#ifdef CONFIG_PL2303
+#  include <nuttx/usb/pl2303.h>
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -91,6 +97,52 @@ int k28_bringup(void)
   /* Initialize I2C buses */
 
   k28_i2cdev_initialize();
+#endif
+
+#ifdef HAVE_MMCSD
+  /* Initialize the SDHC driver */
+
+  ret = k28_sdhc_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: k28_sdhc_initialize() failed: %d\n", ret);
+    }
+
+#ifdef CONFIG_FRDMK28F_SDHC_MOUNT
+  else
+    {
+      /* Mount the volume on HSMCI0 */
+
+      ret = mount(CONFIG_FRDMK28F_SDHC_MOUNT_BLKDEV,
+                  CONFIG_FRDMK28F_SDHC_MOUNT_MOUNTPOINT,
+                  CONFIG_FRDMK28F_SDHC_MOUNT_FSTYPE,
+                  0, NULL);
+
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to mount %s: %d\n",
+                 CONFIG_FRDMK28F_SDHC_MOUNT_MOUNTPOINT, errno);
+        }
+    }
+
+#endif /* CONFIG_FRDMK28F_SDHC_MOUNT */
+#endif /* HAVE_MMCSD */
+
+#ifdef HAVE_AUTOMOUNTER
+  /* Initialize the auto-mounter */
+
+  k28_automount_initialize();
+#endif
+
+#if defined(CONFIG_USBDEV) && defined(CONFIG_KINETIS_USBOTG)
+  if (k28_usbdev_initialize)
+    {
+      k28_usbdev_initialize();
+    }
+#endif
+
+#ifdef CONFIG_PL2303
+  usbdev_serialinitialize(0);
 #endif
 
   UNUSED(ret);

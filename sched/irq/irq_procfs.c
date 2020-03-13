@@ -95,7 +95,7 @@ struct irq_file_s
   size_t remaining;           /* Number of available characters in buffer */
   size_t ncopied;             /* Number of characters in buffer */
   off_t offset;               /* Current file offset */
-  char line[IRQ_LINELEN];    /* Pre-allocated buffer for formatted lines */
+  char line[IRQ_LINELEN];     /* Pre-allocated buffer for formatted lines */
 };
 
 /****************************************************************************

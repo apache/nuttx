@@ -72,7 +72,8 @@
 /* GCC 4.x have __builtin_ctz(|l|ll) and __builtin_clz(|l|ll). These count
  * trailing/leading zeros of input number and typically will generate few
  * fast bit-counting instructions. Inputting zero to these functions is
- * undefined and needs to be taken care of by the caller. */
+ * undefined and needs to be taken care of by the caller.
+ */
 
 #if __GNUC__ >= 4
 #  define CONFIG_HAVE_BUILTIN_CTZ 1
@@ -140,8 +141,8 @@
 #  define naked_function __attribute__ ((naked,no_instrument_function))
 
 /* The inline_function attribute informs GCC that the function should always
- * be inlined, regardless of the level of optimization.  The noinline_function
- * indicates that the function should never be inlined.
+ * be inlined, regardless of the level of optimization.  The
+ * noinline_function indicates that the function should never be inlined.
  */
 
 #  define inline_function __attribute__ ((always_inline,no_instrument_function))
@@ -264,7 +265,7 @@
 
 /* GCC supports inlined functions for C++ and for C version C99 and above */
 
-#  if defined(__cplusplus) || !defined(__STDC_VERSION__) || __STDC_VERSION__ >= 199901L
+#  if defined(__cplusplus) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
 #    define CONFIG_HAVE_INLINE 1
 #  else
 #    undef CONFIG_HAVE_INLINE
@@ -277,8 +278,8 @@
  * may support them).
  *
  * CAREFUL: This can cause issues for shared data structures shared between
- * C and C++ if the two versions do not support the same features.  Structures
- * and unions can lose binary compatibility!
+ * C and C++ if the two versions do not support the same features.
+ * Structures and unions can lose binary compatibility!
  *
  * NOTE: The NuttX coding standard forbids the use of unnamed structures and
  * unions within the OS.
@@ -328,7 +329,8 @@
 
 /* Pragmas
  *
- * Disable warnings for unused function arguments */
+ * Disable warnings for unused function arguments
+ */
 
 # pragma disable_warning 85
 
@@ -338,7 +340,8 @@
 
 /* Attributes
  *
- * SDCC does not support weak symbols */
+ * SDCC does not support weak symbols
+ */
 
 #  undef  CONFIG_HAVE_WEAKFUNCTIONS
 #  define weak_alias(name, aliasname)
@@ -347,6 +350,7 @@
 #  define restrict /* REVISIT */
 
 /* SDCC does not support the noreturn or packed attributes */
+
 /* Current SDCC supports noreturn via C11 _Noreturn keyword (see
  * stdnoreturn.h).
  */
@@ -519,8 +523,8 @@
  * Z8Encore!:  Far is 16-bits; near is 8-bits of address.
  *             The supported model is (1) all code on ROM, and (2) all data
  *             and stacks in internal (far) RAM.
- * Z8Acclaim:  In Z80 mode, all pointers are 16-bits.  In ADL mode, all pointers
- *             are 24 bits.
+ * Z8Acclaim:  In Z80 mode, all pointers are 16-bits.  In ADL mode, all
+ *             pointers are 24 bits.
  */
 
 #  if defined(__ZNEO__)
@@ -565,9 +569,9 @@
 #  undef CONFIG_HAVE_ANONYMOUS_STRUCT
 #  undef  CONFIG_HAVE_ANONYMOUS_UNION
 
-/* Older Zilog compilers support both types double and long long, but the size
- * is 32-bits (same as long and single precision) so it is safer to say that
- * they are not supported.  Later versions are more ANSII compliant and
+/* Older Zilog compilers support both types double and long long, but the
+ * size is 32-bits (same as long and single precision) so it is safer to say
+ * that they are not supported.  Later versions are more ANSII compliant and
  * simply do not support long long or double.
  */
 
@@ -584,12 +588,12 @@
 
 #  define UNUSED(a) ((void)(a))
 
-/* ICCARM-specific definitions ***********************************************/
+/* ICCARM-specific definitions **********************************************/
 
 #elif defined(__ICCARM__)
 
 #  define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
-#  define CONFIG_HAVE_FILENAME 1 /* Has __FILE__ */
+#  define CONFIG_HAVE_FILENAME 1    /* Has __FILE__ */
 #  define CONFIG_HAVE_FLOAT 1
 
 /* Indicate that a local variable is not used */

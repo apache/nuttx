@@ -208,9 +208,10 @@ DFU and JTAG
   configuration options to enable JTAG in various different ways.
 
   These configurations effect the setting of the SWJ_CFG[2:0] bits in the AFIO
-  MAPR register.  These bits are used to configure the SWJ and trace alternate function I/Os. The SWJ (SerialWire JTAG) supports JTAG or SWD access to the
+  MAPR register.  These bits are used to configure the SWJ and trace alternate
+  function I/Os. The SWJ (SerialWire JTAG) supports JTAG or SWD access to the
   Cortex debug port.  The default state in this port is for all JTAG support
-  to be disable.
+  to be disabled.
 
   CONFIG_STM32_JTAG_FULL_ENABLE - sets SWJ_CFG[2:0] to 000 which enables full
     SWJ (JTAG-DP + SW-DP)
@@ -219,7 +220,7 @@ DFU and JTAG
     full SWJ (JTAG-DP + SW-DP) but without JNTRST.
 
   CONFIG_STM32_JTAG_SW_ENABLE - sets SWJ_CFG[2:0] to 010 which would set JTAG-DP
-    disabled and SW-DP enabled
+    disabled and SW-DP enabled.
 
   The default setting (none of the above defined) is SWJ_CFG[2:0] set to 100
   which disable JTAG-DP and SW-DP.
@@ -284,11 +285,11 @@ RTC
       is enabled in the NuttX configuration, then the RTC provides higher
       resolution time and completely replaces the system timer for purpose of
       date and time.
-      CONFIG_RTC_FREQUENCY - If CONFIG_RTC_HIRES is defined, then the
+    CONFIG_RTC_FREQUENCY - If CONFIG_RTC_HIRES is defined, then the
       frequency of the high resolution RTC must be provided.  If CONFIG_RTC_HIRES
       is not defined, CONFIG_RTC_FREQUENCY is assumed to be one.
     CONFIG_RTC_ALARM - Enable if the RTC hardware supports setting of an alarm.
-      A callback function will be executed when the alarm goes off
+      A callback function will be executed when the alarm goes off.
 
   In hi-res mode, the STM32 RTC operates only at 16384Hz.  Overflow interrupts
   are handled when the 32-bit RTC counter overflows every 3 days and 43 minutes.
@@ -296,7 +297,7 @@ RTC
   a 48-bit RTC counter.
 
   In the lo-res mode, the RTC operates at 1Hz.  Overflow interrupts are not handled
-  (because the next overflow is not expected until the year 2106.
+  (because the next overflow is not expected until the year 2106).
 
    WARNING:  Overflow interrupts are lost whenever the STM32 is powered down.  The
    overflow interrupt may be lost even if the STM32 is powered down only momentarily.
@@ -445,7 +446,7 @@ M3 Wildfire-specific Configuration Options
 
   Alternate pin mappings.  The M3 Wildfire board requires only CAN1 remapping
   On the M3 Wildfire board pin PB9 is wired as TX and pin PB8 is wired as RX.
-  Which then makes the proper connection through the CAN transiver SN65HVD230
+  Which then makes the proper connection through the CAN transceiver SN65HVD230
   out to the CAN D-type 9-pn male connector where pin 2 is CANL and pin 7 is CANH.
 
     CONFIG_STM32_TIM1_FULL_REMAP

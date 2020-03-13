@@ -131,8 +131,8 @@ fi
 
 export APPSDIR
 
-testlist=`grep -v "^-" $testfile`
-blacklist=`grep "^-" $testfile`
+testlist=`grep -v "^-" $testfile || true`
+blacklist=`grep "^-" $testfile || true`
 
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
@@ -160,7 +160,7 @@ function configure {
   ./tools/configure.sh ${HOPTION} $config
 
   if [ "X$toolchain" != "X" ]; then
-    setting=`grep _TOOLCHAIN_ $nuttx/.config | grep -v CONFIG_ARCH_TOOLCHAIN_*=y | grep =y`
+    setting=`grep _TOOLCHAIN_ $nuttx/.config | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
     varname=`echo $setting | cut -d'=' -f1`
     if [ ! -z "$varname" ]; then
       echo "  Disabling $varname"
@@ -168,6 +168,7 @@ function configure {
     fi
 
     echo "  Enabling $toolchain"
+    sed -i -e "/$toolchain/d" $nuttx/.config
     echo "$toolchain=y" >> $nuttx/.config
 
     if [ "X$sizet" == "Xuint" ]; then

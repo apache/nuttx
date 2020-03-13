@@ -61,15 +61,15 @@
  * simply checking bit 1: it's 1 on the APP and 0 on the PRO processor.
  */
 
-	.macro		getcoreid reg
-	rsr.prid	\reg
-	bbci		\reg, 1, 1f
-	movi		\reg, 1
-	j			2f
+    .macro      getcoreid reg
+    rsr.prid    \reg
+    bbci        \reg, 1, 1f
+    movi        \reg, 1
+    j           2f
 1:
-	movi		\reg, 0
+    movii       \reg, 0
 2:
-	.endm
+    .endm
 
 #endif /* __ASSEMBLY */
 #endif /* __ARCH_XTENSA_SRC_ESP32_CHIP_MACROS_H */

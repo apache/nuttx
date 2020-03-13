@@ -72,7 +72,7 @@
 #if !defined(CONFIG_SAMA5_EHCI) && !defined(CONFIG_SAMA5_OHCI) && \
     !defined(CONFIG_SAMA5_UDPHS)
 
-   /* No... ignore the board setup */
+/* No... ignore the board setup */
 
 #  undef BOARD_USE_UPLL
 #endif
@@ -438,9 +438,9 @@ static inline void sam_usbclockconfig(void)
 
   /* The USB Host High Speed requires a 480 MHz clock (UPLLCK) for the
    * embedded High-speed transceivers. UPLLCK is the output of the 480 MHz
-   * UTMI PLL (UPLL).  The source clock of the UTMI PLL is the Main OSC output:
-   * Either the 12MHz internal oscillator on a 12MHz crystal.  The Main OSC
-   * must be 12MHz because the UPLL has a built-in 40x multiplier.
+   * UTMI PLL (UPLL).  The source clock of the UTMI PLL is the Main OSC
+   * output: either the 12MHz internal oscillator or a 12MHz crystal. The
+   * Main OSC must be 12MHz because the UPLL has a built-in 40x multiplier.
    *
    * For High-speed operations, the user has to perform the following:
    *
@@ -500,7 +500,7 @@ static inline void sam_usbclockconfig(void)
    * No idea why?  Let the board.h file decide which to use.
    */
 
-  regval |= PMC_USB_USBDIV(BOARD_UPLL_OHCI_DIV-1);
+  regval |= PMC_USB_USBDIV(BOARD_UPLL_OHCI_DIV - 1);
   putreg32(regval, SAM_PMC_USB);
 
 #else /* BOARD_USE_UPLL */
@@ -537,10 +537,10 @@ static inline void sam_usbclockconfig(void)
  * Description:
  *   Called to initialize the SAM3/4.  This does whatever setup is needed to
  *   put the SoC in a usable state.  This includes the initialization of
- *   clocking using the settings in board.h.  (After power-on reset, the SAMA5
- *   is initially running on a 12MHz internal RC clock).  This function also
- *   performs other low-level chip initialization of the chip including master
- *   clock, IRQ & watchdog configuration.
+ *   clocking using the settings in board.h. (After power-on reset, the SAMA5
+ *   is initially running on a 12MHz internal RC clock). This function also
+ *   performs other low-level chip initialization of the chip including
+ *   master clock, IRQ & watchdog configuration.
  *
  * Boot Sequence
  *
@@ -627,8 +627,8 @@ void __ramfunc__ sam_clockconfig(void)
        * frequency:
        *
        *   - Enable the 32768 Hz oscillator if best accuracy is needed
-       *   - Reprogram the SMC setup, cycle, hold, mode timing registers for EBI
-       *     CS0, to adapt them to the new clock.
+       *   - Reprogram the SMC setup, cycle, hold, mode timing registers for
+       *     EBI CS0, to adapt them to the new clock.
        *
        * Then below:
        *
@@ -638,6 +638,7 @@ void __ramfunc__ sam_clockconfig(void)
        */
 
       /* Enable the 32768 Hz oscillator */
+
       /* REVISIT! */
 
       /* Reprogram the SMC setup, cycle, hold, mode timing registers for EBI
@@ -705,7 +706,7 @@ void __ramfunc__ sam_clockconfig(void)
 #ifdef ATSAMA5D2
   /* Enable clocking to the PIO module */
 
-  sam_pio_enableclk();
+  sam_pioa_enableclk();
 #endif
 
   /* Setup USB clocking */

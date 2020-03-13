@@ -183,9 +183,9 @@
 #  define AT25_MINOR  _AT25_MINOR
 #endif
 
-/* MMC/SD minor numbers:  The NSH device minor extended is extended to support
- * two devices.  If CONFIG_NSH_MMCSDMINOR is zero, these will be:  /dev/mmcsd0
- * and /dev/mmcsd1.
+/* MMC/SD minor numbers:  The NSH device minor extended is extended to
+ * support two devices.  If CONFIG_NSH_MMCSDMINOR is zero, these will be:
+ * /dev/mmcsd0 and /dev/mmcsd1.
  */
 
 #ifndef CONFIG_NSH_MMCSDMINOR
@@ -319,12 +319,12 @@
 
 /* HSMCI Card Slots *********************************************************/
 
-/* The SAMA5D3-Xplained provides a two SD memory card slots:
+/* The SAMA5D3-Xplained provides two SD memory card slots:
  *  (1) a full size SD card slot (J10), and
  *  (2) a microSD memory card slot (J11).
  *
  * The full size SD card slot connects via HSMCI0.  The card detect discrete
- * is available on PD17 (pulled high).  The write protect descrete is tied to
+ * is available on PD17 (pulled high).  The write protect discrete is tied to
  * ground (via PP6) and not available to software.  The slot supports 8-bit
  * wide transfer mode, but the NuttX driver currently uses only the 4-bit
  * wide transfer mode
@@ -476,13 +476,14 @@
 #ifdef CONFIG_SAMA5_GMAC
   /* ETH0: Tri-Speed Ethernet PHY
    *
-   * The SAMA5D3 series-CM board is equipped with a MICREL PHY devices (MICREL
-   * KSZ9021/31) operating at 10/100/1000 Mbps.
+   * The SAMA5D3 series-CM board is equipped with a MICREL PHY devices
+   * (MICREL KSZ9021/31) operating at 10/100/1000 Mbps.
    * The board supports RGMII interface mode.
    * The Ethernet interface consists of 4 pairs of low voltage differential
-   * pair signals designated from TXRXP_A/TXRXM_A to TXRXP_D/TXRXM_D plus control
-   * signals for link activity indicators. These signals can be used to connect
-   * to a 10/100/1000 BaseT RJ45 connector integrated on the main board.
+   * pair signals designated from TXRXP_A/TXRXM_A to TXRXP_D/TXRXM_D plus
+   * control signals for link activity indicators. These signals can be used
+   * to connect to a 10/100/1000 BaseT RJ45 connector integrated on the main
+   * board.
    *
    * The KSZ9021/31 interrupt is available on PB35 INT_GETH0.  The sense of
    * the interrupt is configurable but is, by default, active low.
@@ -614,7 +615,7 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************

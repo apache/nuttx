@@ -1,4 +1,4 @@
-/****************************************************************************
+/********************************************************************************
  * boards/arm/kinetis/freedom-k28f/include/board.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ********************************************************************************/
 
 #ifndef __BOARDS_ARM_KINETIS_FREEDOM_K28F_INCLUDE_BOARD_H
 #define __BOARDS_ARM_KINETIS_FREEDOM_K28F_INCLUDE_BOARD_H
 
-/****************************************************************************
+/********************************************************************************
  * Included Files
- ****************************************************************************/
+ ********************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -49,11 +49,11 @@
 # include <arch/chip/kinetis_mcg.h>
 #endif
 
-/****************************************************************************
+/********************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
+ ********************************************************************************/
 
-/* Clocking *****************************************************************/
+/* Clocking *********************************************************************/
 
 /* The Freedom K28F uses a 12MHz external Oscillator.
  * The Kinetis MCU startup from an internal digitally-controlled oscillator
@@ -76,15 +76,15 @@
  * reference clock to the PLL.
  *
  * PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 12 MHz  / 1  = 12 MHz
- * PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 12 MHz  * 25 = 300 MHz
- * MCG Frequency:         PLLOUT = 150 MHz = 300 MHz /
+ * PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 12 MHz  * 24 = 288 MHz
+ * MCG Frequency:         PLLOUT = 144 MHz = 288 MHz /
  *                                           KINETIS_MCG_PLL_INTERNAL_DIVBY
  * PRDIV register value is the divider minus KINETIS_MCG_C5_PRDIV_BASE.
  * VDIV  register value is offset by KINETIS_MCG_C6_VDIV_BASE.
  */
 
 #define BOARD_PRDIV          1        /* PLL External Reference Divider */
-#define BOARD_VDIV           25       /* PLL VCO Divider (frequency multiplier) */
+#define BOARD_VDIV           24       /* PLL VCO Divider (frequency multiplier) */
 
 /* Define additional MCG_C2 Setting */
 
@@ -97,10 +97,10 @@
 
 /* SIM CLKDIV1 dividers */
 
-#define BOARD_OUTDIV1        1              /* Core        = MCG,    180   MHz */
-#define BOARD_OUTDIV2        3              /* Bus         = MCG / 3, 60   MHz */
-#define BOARD_OUTDIV3        3              /* FlexBus     = MCG / 3, 60   MHz */
-#define BOARD_OUTDIV4        7              /* Flash clock = MCG / 7, 25.7 MHz */
+#define BOARD_OUTDIV1        1              /* Core        = MCG,    144   MHz */
+#define BOARD_OUTDIV2        2              /* Bus         = MCG / 2, 72   MHz */
+#define BOARD_OUTDIV3        2              /* FlexBus     = MCG / 2, 72   MHz */
+#define BOARD_OUTDIV4        6              /* Flash clock = MCG / 6, 24   MHz */
 
 #define BOARD_CORECLK_FREQ   (BOARD_MCG_FREQ / BOARD_OUTDIV1)
 #define BOARD_BUS_FREQ       (BOARD_MCG_FREQ / BOARD_OUTDIV2)
@@ -115,24 +115,24 @@
 #define BOARD_SOPT2_FREQ        BOARD_MCG_FREQ
 
 /* N.B. The above BOARD_SOPT2_FREQ precludes use of USB with a 12 MHz Xtal
- * Divider output clock = Divider input clock × [ (USBFRAC+1) / (USBDIV+1) ]
- *     SIM_CLKDIV2_FREQ = BOARD_SOPT2_FREQ × [ (USBFRAC+1) / (USBDIV+1) ]
- *                48MHz = 168MHz X [(1 + 1) / (6 + 1)]
- *                48MHz = 168MHz / (6 + 1) * (1 + 1)
+ * Divider output clock = Divider input clock * ((USBFRAC+1) / (USBDIV+1))
+ *     SIM_CLKDIV2_FREQ = BOARD_SOPT2_FREQ * ((USBFRAC+1) / (USBDIV+1))
+ *     SIM_CLKDIV2_FREQ = BOARD_SOPT2_FREQ / (USBDIV+1)* (USBFRAC+1)
+ *                48MHz = 144MHz / (2 + 1) * (1 + 0)
  */
 
-#if (BOARD_MCG_FREQ == 168000000L)
-#  define BOARD_SIM_CLKDIV2_USBFRAC     2
-#  define BOARD_SIM_CLKDIV2_USBDIV      7
+#if (BOARD_SOPT2_FREQ == 144000000L)
+#  define BOARD_SIM_CLKDIV2_USBFRAC     1
+#  define BOARD_SIM_CLKDIV2_USBDIV      3
 #  define BOARD_SIM_CLKDIV2_FREQ        (BOARD_SOPT2_FREQ / \
                                          BOARD_SIM_CLKDIV2_USBDIV * \
                                          BOARD_SIM_CLKDIV2_USBFRAC)
 #endif
 
 /* Divider output clock = Divider input clock * ((PLLFLLFRAC+1)/(PLLFLLDIV+1))
- *  SIM_CLKDIV3_FREQ = BOARD_SOPT2_FREQ × [ (PLLFLLFRAC+1) / (PLLFLLDIV+1)]
- *            90 MHz = 180 MHz X [(0 + 1) / (1 + 1)]
- *            90 MHz = 180 MHz / (1 + 1) * (0 + 1)
+ *  SIM_CLKDIV3_FREQ = BOARD_SOPT2_FREQ * ((PLLFLLFRAC+1) / (PLLFLLDIV+1))
+ *  SIM_CLKDIV3_FREQ = BOARD_SOPT2_FREQ / (PLLFLLDIV+1) * (PLLFLLFRAC+1)
+ *                72MHz = 144MHz / (1 + 1) * (1 + 0)
  */
 
 #define BOARD_SIM_CLKDIV3_PLLFLLFRAC  1
@@ -147,7 +147,7 @@
 #define BOARD_TPM_CLKSRC     SIM_SOPT2_TPMSRC_MCGCLK
 #define BOARD_TPM_FREQ       BOARD_SIM_CLKDIV3_FREQ
 
-/* SDHC clocking ************************************************************/
+/* SDHC clocking ****************************************************************/
 
 /* SDCLK configurations corresponding to various modes of operation.
  *   Formula is:
@@ -163,38 +163,38 @@
  */
 
 /* Identification mode:
- *  Optimal 400KHz, Actual 180MHz / (32 * 15) = 375 Khz
+ *  Optimal 400KHz, Actual 144MHz / (32 * 12) = 375 Khz
  */
 
 #define BOARD_SDHC_IDMODE_PRESCALER    SDHC_SYSCTL_SDCLKFS_DIV32
-#define BOARD_SDHC_IDMODE_DIVISOR      SDHC_SYSCTL_DVS_DIV(15)
+#define BOARD_SDHC_IDMODE_DIVISOR      SDHC_SYSCTL_DVS_DIV(12)
 
 /* MMC normal mode:
- * Optimal 20MHz, Actual 180MHz / (2 * 5) = 18 MHz
+ * Optimal 20MHz, Actual 144MHz / (2 * 4) = 18 MHz
  */
 
 #define BOARD_SDHC_MMCMODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV2
-#define BOARD_SDHC_MMCMODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(5)
+#define BOARD_SDHC_MMCMODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(4)
 
 /* SD normal mode (1-bit):
- * Optimal 20MHz, Actual 180MHz / (2 * 5) = 18 MHz
+ * Optimal 20MHz, Actual 144MHz / (2 * 4) = 18 MHz
  */
 
 #define BOARD_SDHC_SD1MODE_PRESCALER   SDHC_SYSCTL_SDCLKFS_DIV2
-#define BOARD_SDHC_SD1MODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(5)
+#define BOARD_SDHC_SD1MODE_DIVISOR     SDHC_SYSCTL_DVS_DIV(4)
 
 /* SD normal mode (4-bit):
- * Optimal 25MHz, Actual 180MHz / (2 * 4) = 22.5 MHz (with DMA)
+ * Optimal 25MHz, Actual 144MHz / (2 * 3) = 24 MHz (with DMA)
  * SD normal mode (4-bit):
- * Optimal 20MHz, Actual 180MHz / (2 * 4) = 22.5 MHz (no DMA)
+ * Optimal 25MHz, Actual 144MHz / (2 * 3) = 24 MHz (no DMA)
  */
 
 #ifdef CONFIG_SDIO_DMA
 #  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
-#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(4)
+#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3)
 #else
 #  define BOARD_SDHC_SD4MODE_PRESCALER SDHC_SYSCTL_SDCLKFS_DIV2
-#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(4)
+#  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(3)
 #endif
 
 /* Use the output of SIM_SOPT2[PLLFLLSEL] as the USB clock source */
@@ -229,7 +229,7 @@
 #define GPIO_FTM2_CH0OUT PIN_FTM2_CH0    /* Pin 25: PTB18 */
 #define GPIO_FTM2_CH1OUT PIN_FTM2_CH1    /* Pin 32: PTB19 */
 
-/* LED definitions **********************************************************/
+/* LED definitions **************************************************************/
 
 /* A single LED is available driven by PTC5.  The LED is grounded so bringing
  * PTC5 high will illuminate the LED.
@@ -261,11 +261,11 @@
 #define LED_ASSERTION                3 /* STATUS LED=no change */
 #define LED_PANIC                    3 /* STATUS LED=flashing */
 
-/* Button definitions *******************************************************/
+/* Button definitions ***********************************************************/
 
 /* The freedom-k28f board has no standard GPIO contact buttons */
 
-/* Alternative pin resolution ***********************************************/
+/* Alternative pin resolution ***************************************************/
 
 /* The Freedom K28F has five LPUARTs with pin availability as follows:
  *
@@ -371,7 +371,7 @@
  */
 
 #define PIN_LPUART0_RX      PIN_LPUART0_RX_5  /* PTC25 */
-#define PIN_LPUART0_TX      PIN_LPUART0_TX_5  /* PTC24
+#define PIN_LPUART0_TX      PIN_LPUART0_TX_5  /* PTC24 */
 
 /*  Arduino RS-232 Shield
  *  ---------------------
@@ -415,7 +415,18 @@
 #endif
 #endif
 
-/* LED definitions **********************************************************/
+/* SDHC */
+
+#ifdef CONFIG_KINETIS_SDHC
+#  define PIN_SDHC0_CMD     PIN_SDHC0_CMD_1
+#  define PIN_SDHC0_D0      PIN_SDHC0_D0_1
+#  define PIN_SDHC0_D1      PIN_SDHC0_D1_1
+#  define PIN_SDHC0_D2      PIN_SDHC0_D2_1
+#  define PIN_SDHC0_D3      PIN_SDHC0_D3_1
+#  define PIN_SDHC0_DCLK    PIN_SDHC0_DCLK_1
+#endif
+
+/* LED definitions **************************************************************/
 
 /* The Freedom K28F has a single RGB LED driven by the K28F as follows:
  *
@@ -461,7 +472,7 @@
 #define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
 #undef  LED_IDLE            /* K28 is in sleep mode     (Not used)        */
 
-/* Button definitions *******************************************************/
+/* Button definitions ***********************************************************/
 
 /* Two push buttons, SW2 and SW3, are available on FRDM-K28F board,
  * where SW2 is connected to PTA4 and SW3 is connected to PTD0.

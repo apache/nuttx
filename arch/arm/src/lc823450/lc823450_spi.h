@@ -58,7 +58,7 @@
 #define LC823450_SPI_BRG    (LC823450_SPI_REGBASE + 0x10) /* Baudrate Generator */
 #define LC823450_SPI_ISR    (LC823450_SPI_REGBASE + 0x14) /* Interrupt Factor */
 #define LC823450_SPI_DREQ   (LC823450_SPI_REGBASE + 0x18) /* DMA Request */
-#define LC823450_SPI_TxFF   (LC823450_SPI_REGBASE + 0x1C) /* Transfer FIFO */
+#define LC823450_SPI_TXFF   (LC823450_SPI_REGBASE + 0x1C) /* Transfer FIFO */
 #define LC823450_SPI_RxFF   (LC823450_SPI_REGBASE + 0x20) /* Receive FIFO */
 #define LC823450_SPI_FFCTL  (LC823450_SPI_REGBASE + 0x24) /* FIFO Control */
 #define LC823450_SPI_MSK    (LC823450_SPI_REGBASE + 0x28) /* Interrupt Mask */
@@ -93,28 +93,28 @@
 
 #define SPI_ISR_CS_END      (1 << 14)  /* Bit 14: CS completion (not supported) */
 #define SPI_ISR_BURST_END   (1 << 13)  /* Bit 13: Burst transfer completion */
-#define SPI_ISR_RxORE       (1 << 12)  /* Bit 12: Rx FIFO overread */
-#define SPI_ISR_TxORE       (1 << 11)  /* Bit 11: Tx FIFO overread */
-#define SPI_ISR_RxOWE       (1 << 10)  /* Bit 10: Rx FIFO overwrite */
-#define SPI_ISR_TxOWE       (1 << 9)   /* Bit  9: Tx FIFO overwrite */
-#define SPI_ISR_RxFULL      (1 << 8)   /* Bit  8: Rx FIFO full */
-#define SPI_ISR_TxFULL      (1 << 7)   /* Bit  7: Tx FIFO full */
-#define SPI_ISR_RxEMP       (1 << 6)   /* Bit  6: Rx FIFO empty */
-#define SPI_ISR_TxEMP       (1 << 5)   /* Bit  5: Tx FIFO empty */
-#define SPI_ISR_RxWLM       (1 << 4)   /* Bit  4: Rx FIFO water level match */
-#define SPI_ISR_TxWLM       (1 << 3)   /* Bit  3: Tx FIFO water level match */
+#define SPI_ISR_RXORE       (1 << 12)  /* Bit 12: Rx FIFO overread */
+#define SPI_ISR_TXORE       (1 << 11)  /* Bit 11: Tx FIFO overread */
+#define SPI_ISR_RXOWE       (1 << 10)  /* Bit 10: Rx FIFO overwrite */
+#define SPI_ISR_TXOWE       (1 << 9)   /* Bit  9: Tx FIFO overwrite */
+#define SPI_ISR_RXFULL      (1 << 8)   /* Bit  8: Rx FIFO full */
+#define SPI_ISR_TXFULL      (1 << 7)   /* Bit  7: Tx FIFO full */
+#define SPI_ISR_RXEMP       (1 << 6)   /* Bit  6: Rx FIFO empty */
+#define SPI_ISR_TXEMP       (1 << 5)   /* Bit  5: Tx FIFO empty */
+#define SPI_ISR_RXWLM       (1 << 4)   /* Bit  4: Rx FIFO water level match */
+#define SPI_ISR_TXWLM       (1 << 3)   /* Bit  3: Tx FIFO water level match */
 #define SPI_ISR_ROWE        (1 << 2)   /* Bit  2: SRR register overwrite */
 #define SPI_ISR_OVE         (1 << 1)   /* Bit  1: overrun */
 #define SPI_ISR_SPIF        (1 << 0)   /* Bit  0: Frame transfer completion */
 
 /* SPI FIFO contorl Register */
 
-#define SPI_TxFF_EN         (1 << 0)
-#define SPI_TxFF_WL2        (0 << 4)
-#define SPI_TxFF_WL4        (1 << 4)
-#define SPI_TxFF_WL8        (2 << 4)
-#define SPI_TxFF_WL12       (3 << 4)
-#define SPI_TxFF_WL14       (4 << 4)
+#define SPI_TXFF_EN         (1 << 0)
+#define SPI_TXFF_WL2        (0 << 4)
+#define SPI_TXFF_WL4        (1 << 4)
+#define SPI_TXFF_WL8        (2 << 4)
+#define SPI_TXFF_WL12       (3 << 4)
+#define SPI_TXFF_WL14       (4 << 4)
 
 /* SPI Interrupt Mask Register */
 
@@ -166,13 +166,10 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
 FAR struct spi_dev_s *lc823450_spibus_initialize(int bus);
 void lc823450_spiinitialize(void);
-void lc823450_spiselect(FAR struct spi_dev_s *dev, uint32_t devid, bool selected);
+void lc823450_spiselect(FAR struct spi_dev_s *dev, uint32_t devid,
+                        bool selected);
 uint8_t lc823450_spistatus(FAR struct spi_dev_s *dev, uint32_t devid);
 
 #ifdef CONFIG_SPI_CMDDATA

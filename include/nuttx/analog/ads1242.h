@@ -51,6 +51,7 @@
  ****************************************************************************/
 
 /* IOCTL Commands ***********************************************************/
+
 /* Cmd: ANIOC_ADS2142_READ                    Arg: uint32_t *value
  * Cmd: ANIOC_ADS2142_SET_GAIN                Arg: uint8_t value
  * Cmd: ANIOC_ADS2142_SET_POSITIVE_INPUT      Arg: uint8_t value
@@ -93,7 +94,7 @@
 #define ADS1242_REG_MUX_BIT_NSEL1       (1 << 1)
 #define ADS1242_REG_MUX_BIT_NSEL0       (1 << 0)
 /* ACR */
-#define ADS1242_REG_ACR_BIT_nDRDY       (1 << 7)
+#define ADS1242_REG_ACR_BIT_NDRDY       (1 << 7)
 #define ADS1242_REG_ACR_BIT_UnB         (1 << 6)
 #define ADS1242_REG_ACR_BIT_SPEED       (1 << 5)
 #define ADS1242_REG_ACR_BIT_BUFEN       (1 << 4)
@@ -130,14 +131,14 @@
 
 typedef enum
 {
-  ADS1242_x1     = 0,
-  ADS1242_x2     = ADS1242_REG_SETUP_BIT_PGA0,
-  ADS1242_x4     = ADS1242_REG_SETUP_BIT_PGA1,
-  ADS1242_x8     = ADS1242_REG_SETUP_BIT_PGA1 | ADS1242_REG_SETUP_BIT_PGA0,
-  ADS1242_x16    = ADS1242_REG_SETUP_BIT_PGA2,
-  ADS1242_x32    = ADS1242_REG_SETUP_BIT_PGA2 | ADS1242_REG_SETUP_BIT_PGA0,
-  ADS1242_x64    = ADS1242_REG_SETUP_BIT_PGA2 | ADS1242_REG_SETUP_BIT_PGA1,
-  ADS1242_x128   = ADS1242_REG_SETUP_BIT_PGA2 | ADS1242_REG_SETUP_BIT_PGA1 |
+  ADS1242_X1     = 0,
+  ADS1242_X2     = ADS1242_REG_SETUP_BIT_PGA0,
+  ADS1242_X4     = ADS1242_REG_SETUP_BIT_PGA1,
+  ADS1242_X8     = ADS1242_REG_SETUP_BIT_PGA1 | ADS1242_REG_SETUP_BIT_PGA0,
+  ADS1242_X16    = ADS1242_REG_SETUP_BIT_PGA2,
+  ADS1242_X32    = ADS1242_REG_SETUP_BIT_PGA2 | ADS1242_REG_SETUP_BIT_PGA0,
+  ADS1242_X64    = ADS1242_REG_SETUP_BIT_PGA2 | ADS1242_REG_SETUP_BIT_PGA1,
+  ADS1242_X128   = ADS1242_REG_SETUP_BIT_PGA2 | ADS1242_REG_SETUP_BIT_PGA1 |
                    ADS1242_REG_SETUP_BIT_PGA0
 } ADS1242_GAIN_SELECTION;
 
@@ -187,10 +188,11 @@ extern "C"
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/ads1242"
- *   spi - An instance of the SPI interface to use to communicate with ADS1242
- *   osc_freq_hz - The frequency of the ADS1242 oscillator in Hz. Required for
- *   calculating the minimum delay periods when accessing the device via SPI.
- *
+ *   spi - An instance of the SPI interface to use to communicate with
+ *         ADS1242
+ *   osc_freq_hz - The frequency of the ADS1242 oscillator in Hz. Required
+ *                 for calculating the minimum delay periods when accessing
+ *                 the device via SPI.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.

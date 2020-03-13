@@ -152,15 +152,16 @@ static void adc_unlock(FAR struct spi_dev_s *spi)
  * Name: adc_bind
  *
  * Description:
- *   Bind the upper-half driver callbacks to the lower-half implementation.  This
- *   must be called early in order to receive ADC event notifications.
+ *   Bind the upper-half driver callbacks to the lower-half implementation.
+ *   This must be called early in order to receive ADC event notifications.
  *
  ****************************************************************************/
 
 static int adc_bind(FAR struct adc_dev_s *dev,
                     FAR const struct adc_callback_s *callback)
 {
-  FAR struct ltc1867l_dev_s *priv = (FAR struct ltc1867l_dev_s *)dev->ad_priv;
+  FAR struct ltc1867l_dev_s *priv =
+    (FAR struct ltc1867l_dev_s *)dev->ad_priv;
   priv->cb = callback;
   return OK;
 }
@@ -184,7 +185,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
  * Description:
  *   Configure the ADC. This method is called the first time that the ADC
  *   device is opened.  This will occur when the port is first opened.
- *   This setup includes configuring and attaching ADC interrupts.  Interrupts
+ *   This setup includes configuring and attaching ADC interrupts. Interrupts
  *   are all disabled upon return.
  *
  ****************************************************************************/
@@ -229,7 +230,8 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 
 static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
-  FAR struct ltc1867l_dev_s *priv = (FAR struct ltc1867l_dev_s *)dev->ad_priv;
+  FAR struct ltc1867l_dev_s *priv =
+    (FAR struct ltc1867l_dev_s *)dev->ad_priv;
   FAR struct spi_dev_s *spi = priv->spi;
   int i;
   uint16_t command;
@@ -335,7 +337,8 @@ int ltc1867l_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Initialize the LTC1867L device structure */
 
-  adcpriv = (FAR struct ltc1867l_dev_s *)kmm_malloc(sizeof(struct ltc1867l_dev_s));
+  adcpriv =
+    (FAR struct ltc1867l_dev_s *)kmm_malloc(sizeof(struct ltc1867l_dev_s));
   if (adcpriv == NULL)
     {
       aerr("ERROR: Failed to allocate ltc1867l_dev_s instance\n");

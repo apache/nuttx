@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/semaphore/sem_timedwait.c
  *
- *   Copyright (C) 2011, 2013-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013-201, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -212,6 +212,46 @@ errout_with_irqdisabled:
   rtcb->waitdog = NULL;
   return ret;
 }
+
+/****************************************************************************
+ * Name: nxsem_timedwait_uninterruptible
+ *
+ * Description:
+ *   This function is wrapped version of nxsem_timedwait(), which is
+ *   uninterruptible and convenient for use.
+ *
+ * Input Parameters:
+ *   sem     - Semaphore object
+ *   abstime - The absolute time to wait until a timeout is declared.
+ *
+ * Returned Value:
+ *   EINVAL    The sem argument does not refer to a valid semaphore.  Or the
+ *             thread would have blocked, and the abstime parameter specified
+ *             a nanoseconds field value less than zero or greater than or
+ *             equal to 1000 million.
+ *   ETIMEDOUT The semaphore could not be locked before the specified timeout
+ *             expired.
+ *   EDEADLK   A deadlock condition was detected.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_HAVE_INLINE
+int nxsem_timedwait_uninterruptible(FAR sem_t *sem,
+                                    FAR const struct timespec *abstime)
+{
+  int ret;
+
+  do
+    {
+      /* Take the semaphore (perhaps waiting) */
+
+      ret = nxsem_timedwait(sem, abstime);
+    }
+  while (ret == -EINTR || ret == -ECANCELED);
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: sem_timedwait

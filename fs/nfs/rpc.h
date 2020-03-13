@@ -146,7 +146,6 @@
 
 /* RPC definitions for the portmapper. */
 
-#define PMAPPORT         111
 #define PMAPPROG         100000
 #define PMAPVERS         2
 
@@ -219,7 +218,7 @@ struct rpc_auth_info
   uint32_t authlen;           /* auth length */
 };
 
-struct auth_unix
+struct rpc_auth_unix
 {
   uint32_t stamp;
   uint32_t hostname;          /* null */
@@ -237,6 +236,7 @@ struct rpc_call_header
   uint32_t rp_vers;           /* version */
   uint32_t rp_proc;           /* procedure */
   struct rpc_auth_info rpc_auth;
+  struct rpc_auth_unix rpc_unix;
   struct rpc_auth_info rpc_verf;
 };
 
@@ -450,12 +450,13 @@ struct rpcclnt
   uint8_t   rc_fhsize;        /* File size of the root directory */
   FAR char *rc_path;          /* Server's path of the mounted directory */
 
-  FAR struct sockaddr *rc_name;
+  FAR struct sockaddr_storage *rc_name;
   struct socket rc_so;        /* RPC socket */
 
   uint8_t   rc_sotype;        /* Type of socket */
   uint8_t   rc_timeo;         /* Timeout value (in deciseconds) */
   uint8_t   rc_retry;         /* Max retries */
+  uint32_t  rc_xid;           /* Transaction id */
 };
 
 /****************************************************************************
@@ -465,7 +466,6 @@ struct rpcclnt
 void rpcclnt_init(void);
 int  rpcclnt_connect(FAR struct rpcclnt *rpc);
 void rpcclnt_disconnect(FAR struct rpcclnt *rpc);
-int  rpcclnt_umount(FAR struct rpcclnt *rpc);
 int  rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
                      int version, FAR void *request, size_t reqlen,
                      FAR void *response, size_t resplen);

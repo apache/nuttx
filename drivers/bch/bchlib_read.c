@@ -72,12 +72,13 @@
  * Name: bchlib_read
  *
  * Description:
- *   Read from the block device set-up by bchlib_setup as if it were a character
- *   device.
+ *   Read from the block device set-up by bchlib_setup as if it were a
+ *   character device.
  *
  ****************************************************************************/
 
-ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset, size_t len)
+ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset,
+                    size_t len)
 {
   FAR struct bchlib_s *bch = (FAR struct bchlib_s *)handle;
   size_t   nsectors;

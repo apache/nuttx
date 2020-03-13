@@ -1,36 +1,20 @@
 /****************************************************************************
  * arch/z80/src/ez80/ez80_spi.c
  *
- *   Copyright (C) 2009-2010, 2016-2017, 2019 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -57,22 +41,25 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_ARCH_CHIP_EZ80F91) || defined(CONFIG_ARCH_CHIP_EZ80F92)
-#  include "ez80f91_spi.h"
-#endif
+#include "ez80_spi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_EZ80F91) || defined(CONFIG_ARCH_CHIP_EZ80F92)
-#  define GPIOB_SPI_SS      (1 << 2)  /* Pin 2: /SS (not used by driver) */
-#  define GPIOB_SPI_SCK     (1 << 3)  /* Pin 3: SCK */
-#  define GPIOB_SPI_MISO    (1 << 6)  /* Pin 6: MISO */
-#  define GPIOB_SPI_MOSI    (1 << 7)  /* Pin 7: MOSI */
 
-#  define GPIOB_SPI_PINSET  (GPIOB_SPI_SS | GPIOB_SPI_SCK | GPIOB_SPI_MISO | \
-                             GPIOB_SPI_MOSI)
+/* PB2/#SS is controlled by board specific logic and is not used by this
+ * driver.  This permits supporting multiple, different devices with
+ * different chip selects on the bus.
+ */
+
+#  define GPIOB_SPI_SS      (1 << 2)  /* PB2: /SS (not used by driver) */
+#  define GPIOB_SPI_SCK     (1 << 3)  /* PB3: SCK */
+#  define GPIOB_SPI_MISO    (1 << 6)  /* PB6: MISO */
+#  define GPIOB_SPI_MOSI    (1 << 7)  /* PB7: MOSI */
+
+#  define GPIOB_SPI_PINSET  (GPIOB_SPI_SCK | GPIOB_SPI_MISO | GPIOB_SPI_MOSI)
 #else
 #  error "Check GPIO initialization for this chip"
 #endif
@@ -87,7 +74,7 @@ static int    spi_lock(FAR struct spi_dev_s *dev, bool lock);
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
                 uint32_t frequency);
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
 static void   spi_exchange(FAR struct spi_dev_s *dev,
                 FAR const void *txbuffer, FAR void *rxbuffer,
@@ -149,6 +136,12 @@ static struct spi_dev_s g_spidev =
 
 static sem_t g_exclsem = SEM_INITIALIZER(1);
 
+/* These are used to perform reconfigurations only when necessary. */
+
+static uint32_t g_spi_frequency;
+static uint32_t g_spi_actual;
+static enum spi_mode_e g_spi_mode = SPIDEV_MODE3;
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -208,40 +201,49 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
                                  uint32_t frequency)
 {
-  uint32_t brg;
-
-  spiinfo("frequency: %lu\n", (unsigned long)frequency);
-
-  /* We want select divisor to provide the highest frequency (SPIR) that does
-   * NOT exceed the requested frequency.:
-   *
-   *   SPIR <= System Clock Frequency / (2 * BRG)
-   *
-   * So
-   *
-   *   BRG >= System Clock Frequency / (2 * SPIR)
-   */
-
-  brg = ((EZ80_SYS_CLK_FREQ + 1) / 2 + frequency - 1) / frequency;
-
-  /* "When configured as a Master, the 16-bit divisor value must be between
-   * 0003h and FFFFh, inclusive. When configured as a Slave, the 16-bit
-   * divisor value must be between 0004h and FFFFh, inclusive."
-   */
-
-  if (brg < 3)
+  if (frequency != g_spi_frequency)
     {
-      brg = 3;
-    }
-  else if (brg > 0xffff)
-    {
-      brg = 0xffff;
+     uint32_t brg;
+
+     spiinfo("frequency: %lu\n", (unsigned long)frequency);
+
+      /* We want select divisor to provide the highest frequency (SPIR) that
+       * does NOT exceed the requested frequency.:
+       *
+       *   SPIR <= System Clock Frequency / (2 * BRG)
+       *
+       * So
+       *
+       *   BRG >= System Clock Frequency / (2 * SPIR)
+       */
+
+      brg = ((EZ80_SYS_CLK_FREQ + 1) / 2 + frequency - 1) / frequency;
+
+      /* "When configured as a Master, the 16-bit divisor value must be
+       * between 0003h and FFFFh, inclusive. When configured as a Slave, the
+       * 16-bit divisor value must be between 0004h and FFFFh, inclusive."
+       */
+
+      if (brg < 3)
+        {
+          brg = 3;
+        }
+      else if (brg > 0xffff)
+        {
+          brg = 0xffff;
+        }
+
+      outp(EZ80_SPI_BRG_L, brg & 0xff);
+      outp(EZ80_SPI_BRG_H, (brg >> 8) & 0xff);
+
+      g_spi_frequency = frequency;
+      g_spi_actual    = ((EZ80_SYS_CLK_FREQ + 1) / 2 + brg - 1) / brg;
+
+      finfo("BRG=%lu Actual=%lu\n",
+            (unsigned long)brg, (unsigned long)g_spi_actual);
     }
 
-  outp(EZ80_SPI_BRG_L, brg & 0xff);
-  outp(EZ80_SPI_BRG_H, (brg >> 8) & 0xff);
-
-  return ((EZ80_SYS_CLK_FREQ + 1) / 2 + brg - 1) / brg;
+  return g_spi_actual;
 }
 
 /****************************************************************************
@@ -261,41 +263,46 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
-  uint8_t modebits;
-  uint8_t regval;
-
-  spiinfo("mode: %d\n", (int)mode);
-
-  /* Select the CTL register bits based on the selected mode */
-
-  switch (mode)
+  if (mode != g_spi_mode)
     {
-      case SPIDEV_MODE0: /* CPOL=0 CHPHA=0 */
-        modebits = 0;
-        break;
+      uint8_t modebits;
+      uint8_t regval;
 
-      case SPIDEV_MODE1: /* CPOL=0 CHPHA=1 */
-        modebits = SPI_CTL_CPHA;
-        break;
+      spiinfo("mode: %d\n", (int)mode);
 
-      case SPIDEV_MODE2: /* CPOL=1 CHPHA=0 */
-        modebits = SPI_CTL_CPOL;
-        break;
+      /* Select the CTL register bits based on the selected mode */
 
-      case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
-        modebits = (SPI_CTL_CPOL | SPI_CTL_CPHA);
-        break;
+      switch (mode)
+        {
+          case SPIDEV_MODE0: /* CPOL=0 CHPHA=0 */
+            modebits = 0;
+            break;
 
-      default:
-        return;
+          case SPIDEV_MODE1: /* CPOL=0 CHPHA=1 */
+            modebits = SPI_CTL_CPHA;
+            break;
+
+          case SPIDEV_MODE2: /* CPOL=1 CHPHA=0 */
+            modebits = SPI_CTL_CPOL;
+            break;
+
+          case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
+            modebits = (SPI_CTL_CPOL | SPI_CTL_CPHA);
+            break;
+
+          default:
+            return;
+        }
+
+      /* Then set those bits in the CTL register */
+
+      regval  = inp(EZ80_SPI_CTL);
+      regval &= ~(SPI_CTL_CPOL | SPI_CTL_CPHA);
+      regval |= modebits;
+      outp(EZ80_SPI_CTL, regval);
+
+      g_spi_mode = mode;
     }
-
-  /* Then set those bits in the CTL register */
-
-  regval  = inp(EZ80_SPI_CTL);
-  regval &= ~(SPI_CTL_CPOL | SPI_CTL_CPHA);
-  regval |= modebits;
-  outp(EZ80_SPI_CTL, regval);
 }
 
 /****************************************************************************
@@ -336,6 +343,7 @@ static int spi_waitspif(void)
         }
     }
 
+  spierr("ERROR: SPI timed out\n");
   return -ETIMEDOUT;
 }
 
@@ -397,21 +405,20 @@ static int spi_transfer(uint8_t chout, FAR uint8_t *chin)
  *
  ****************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   uint8_t response;
   int ret;
 
-  spiinfo("ch: %04x\n", wd);
-
   ret = spi_transfer((uint8_t)wd, &response);
   if (ret < 0)
     {
-      spierr("ERROR: spi_waitspif returned %d\n", ret);
-      return (uint16_t)0xff;
+      spierr("ERROR: spi_transfer returned %d\n", ret);
+      return (uint32_t)0xff;
     }
 
-  return (uint16_t)response;
+  spiinfo("cmd: %04x resp: %02x\n", wd, response);
+  return (uint32_t)response;
 }
 
 /****************************************************************************
@@ -462,7 +469,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev,
       ret = spi_transfer(outword, outptr);
       if (ret < 0)
         {
-          spierr("ERROR: spi_waitspif returned %d\n", ret);
+          spierr("ERROR: spi_transfer returned %d\n", ret);
           break;
         }
 
@@ -512,7 +519,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
       ret = spi_transfer(*ptr++, NULL);
       if (ret < 0)
         {
-          spierr("ERROR: spi_waitspif returned %d\n", ret);
+          spierr("ERROR: spi_transfer returned %d\n", ret);
           break;
         }
     }
@@ -554,7 +561,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
       ret = spi_transfer(0xff, ptr++);
       if (ret < 0)
         {
-          spierr("ERROR: spi_waitspif returned %d\n", ret);
+          spierr("ERROR: spi_transfer returned %d\n", ret);
           break;
         }
     }
@@ -574,10 +581,10 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
  *   prior to calling this function.  Specifically:  GPIOs should have
  *   been configured for output, and all chip selects disabled.
  *
- *   One GPIO, SS (PB2 on the eZ8F091) is reserved as a chip select.  However,
- *   If multiple devices on on the bus, then multiple chip selects will be
- *   required.  Therefore, all GPIO chip management is deferred to board-
- *   specific logic.
+ *   One GPIO, SS (PB2 on the eZ8F091) is reserved as a chip select.
+ *   However, if multiple devices on on the bus, then multiple chip
+ *   selects will be required.  Therefore, all GPIO chip management is
+ *   deferred to board-specific logic.
  *
  * Input Parameters:
  *   Port number (for hardware that has multiple SPI interfaces)
@@ -633,9 +640,12 @@ FAR struct spi_dev_s *ez80_spibus_initialize(int port)
 #  error "Check GPIO initialization for this chip"
 #endif
 
-  /* Set the initial clock frequency for identification mode < 400kHz */
+  /* Set the initial clock frequency for identification mode < 400kHz
+   * and Mode 0.
+   */
 
   spi_setfrequency(NULL, 400000);
+  spi_setmode(NULL, SPIDEV_MODE0);
 
   /* Enable the SPI.
    * NOTE 1: Interrupts are not used in this driver version.

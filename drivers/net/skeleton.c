@@ -443,7 +443,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
 
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          ninfo("Iv6 frame\n");
+          ninfo("IPv6 frame\n");
           NETDEV_RXIPV6(&priv->sk_dev);
 
           /* Dispatch IPv6 packet to the network layer */

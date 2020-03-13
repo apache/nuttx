@@ -1,0 +1,93 @@
+############################################################################
+# boards/x86_64/intel64/qemu/scripts/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include ${TOPDIR}/.config
+include ${TOPDIR}/tools/Config.mk
+
+HOSTOS = ${shell uname -o 2>/dev/null || echo "Other"}
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION = -g
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -O2 -fno-optimize-sibling-calls -fno-omit-frame-pointer -fno-crossjumping -fno-delete-null-pointer-checks
+
+endif
+
+ifeq ($(WINTOOL),y)
+  # Windows-native toolchains
+  DIRLINK = $(TOPDIR)/tools/copydir.sh
+  DIRUNLINK = $(TOPDIR)/tools/unlink.sh
+  MKDEP = $(TOPDIR)/tools/mkwindeps.sh
+  ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
+  ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
+  ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/qemu.ld}"
+  MAXOPTIMIZATION = -O2
+else
+  # Linux/Cygwin-native toolchain
+  MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
+  ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
+  ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
+  ARCHSCRIPT = -T$(TOPDIR)/boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/$(CONFIG_ARCH_BOARD)/scripts/qemu.ld
+endif
+
+ARCHCPUFLAGS = -fPIC -fno-builtin -fno-stack-protector -mno-red-zone -mrdrnd
+ARCHPICFLAGS = -fPIC
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHDEFINES =
+
+# We have to use a cross-development toolchain under Cygwin because the native
+# Cygwin toolchains don't generate ELF binaries.
+
+ifeq ($(HOSTOS),Cygwin)
+CROSSDEV = i486-nuttx-elf-
+else
+CROSSDEV =
+endif
+
+CC = $(CROSSDEV)gcc
+CPP = $(CROSSDEV)gcc -E
+LD = $(CROSSDEV)ld
+STRIP = $(CROSSDEV)strip --strip-unneeded
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
+OBJCOPY = $(CROSSDEV)objcopy
+OBJDUMP = $(CROSSDEV)objdump
+
+CFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES) -pipe
+CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRADEFINES)
+AFLAGS = $(CFLAGS) -D__ASSEMBLY__
+
+ASMEXT = .S
+OBJEXT = .o
+LIBEXT = .a
+EXEEXT = .elf
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  LDFLAGS += -g
+endif
+
+MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
+
+HOSTCC = gcc
+HOSTINCLUDESv = -I.
+HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
+HOSTLDFLAGS =

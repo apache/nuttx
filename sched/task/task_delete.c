@@ -146,11 +146,11 @@ int task_delete(pid_t pid)
        * "When cancellability is disabled, all cancels are held pending
        *  in the target thread until the thread changes the cancellability.
        *  When cancellability is deferred, all cancels are held pending in
-       *  the target thread until the thread changes the cancellability, calls
-       *  a function which is a cancellation point or calls pthread_testcancel(),
-       *  thus creating a cancellation point. When cancellability is asynchronous,
-       *  all cancels are acted upon immediately, interrupting the thread with its
-       *  processing."
+       *  the target thread until the thread changes the cancellability,
+       *  calls a function which is a cancellation point or calls
+       *  pthread_testcancel(), thus creating a cancellation point. When
+       *  cancellability is asynchronous, all cancels are acted upon
+       *  immediately, interrupting the thread with its processing."
        */
 
       dtcb->flags |= TCB_FLAG_CANCEL_PENDING;
@@ -163,8 +163,8 @@ int task_delete(pid_t pid)
 
   if ((dtcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
     {
-      /* Then we cannot cancel the task asynchronously.  Mark the cancellation
-       * as pending.
+      /* Then we cannot cancel the task asynchronously.  Mark the
+       * cancellation as pending.
        */
 
       dtcb->flags |= TCB_FLAG_CANCEL_PENDING;

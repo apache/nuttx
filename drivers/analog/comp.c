@@ -61,7 +61,8 @@ static int     comp_open(FAR struct file *filep);
 static int     comp_close(FAR struct file *filep);
 static ssize_t comp_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
-static int     comp_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int     comp_ioctl(FAR struct file *filep, int cmd,
+                          unsigned long arg);
 static int     comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup);
 static int     comp_notify(FAR struct comp_dev_s *dev, uint8_t val);
@@ -255,8 +256,8 @@ static int comp_open(FAR struct file *filep)
   if (ret >= 0)
     {
       /* Increment the count of references to the device.  If this the first
-       * time that the driver has been opened for this device, then initialize
-       * the device.
+       * time that the driver has been opened for this device, then
+       * initialize the device.
        */
 
       tmp = dev->ad_ocount + 1;
@@ -344,7 +345,8 @@ static int comp_close(FAR struct file *filep)
  * Name: comp_read
  ****************************************************************************/
 
-static ssize_t comp_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t comp_read(FAR struct file *filep, FAR char *buffer,
+                         size_t buflen)
 {
   FAR struct inode      *inode = filep->f_inode;
   FAR struct comp_dev_s *dev   = inode->i_private;

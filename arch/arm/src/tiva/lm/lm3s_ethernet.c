@@ -852,7 +852,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 #ifdef CONFIG_NET_IPv6
       if (ETHBUF->type == HTONS(ETHTYPE_IP6))
         {
-          ninfo("Iv6 frame\n");
+          ninfo("IPv6 frame\n");
           NETDEV_RXIPV6(&priv->ld_dev);
 
           /* Give the IPv6 packet to the network layer */

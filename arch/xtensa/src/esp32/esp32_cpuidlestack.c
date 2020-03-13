@@ -43,8 +43,7 @@
 /* Address of the CPU0 IDLE thread */
 
 uint32_t g_cpu1_idlestack[CPU1_IDLETHREAD_STACKWORDS]
-  __attribute__((aligned(16) section(".noinit")));
-
+  __attribute__((aligned(16), section(".noinit")));
 
 /****************************************************************************
  * Public Functions
@@ -105,14 +104,16 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
 
   /* Save information about pre-allocated IDLE thread stack */
 
-
   tcb->stack_alloc_ptr = g_cpu1_idlestack;
   tcb->adj_stack_size  = CPU1_IDLETHREAD_STACKSIZE;
-  topofstack           = (uintptr_t)g_cpu1_idlestack + CPU1_IDLETHREAD_STACKSIZE;
+  topofstack           = (uintptr_t)g_cpu1_idlestack +
+                         CPU1_IDLETHREAD_STACKSIZE;
   tcb->adj_stack_ptr   = (uint32_t *)topofstack;
 
 #if XCHAL_CP_NUM > 0
-  /* REVISIT: Does it make since to have co-processors enabled on the IDLE thread? */
+  /* REVISIT: Does it make since to have co-processors enabled on the IDLE
+   * thread?
+   */
 #endif
 
   return OK;

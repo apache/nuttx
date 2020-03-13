@@ -5,6 +5,8 @@
 
 if ARCH_CHIP_EZ80
 
+# Chip capabilities
+
 config ARCH_EZ80_HAVE_PLL
 	bool
 	default n
@@ -20,6 +22,8 @@ config ARCH_EZ80_HAVE_UART2
 config ARCH_EZ80_HAVE_TIMER_INTREGS
 	bool
 	default n
+
+# Chip selection
 
 choice
 	prompt "eZ80 Chip Selection"
@@ -72,20 +76,48 @@ config EZ80_ZDSII_V533
 
 endchoice # ZDS-II Toolchain version
 
+# Build type selection
+
+config EZ80_BOOTLOADER
+	bool
+	default n
+	select BOOT_RUNFROMFLASH
+	---help---
+		Binary image is a bootloader that may require special properties
+		such as re-direction of interrupts (eZ80F92)
+
+config EZ80_PROGRAM
+	bool
+	default n
+	select CONFIG_BOOT_RUNFROMEXTSRAM
+	---help---
+		Binary image is a RAM-resident program loaded by a bootloader and
+		may require special properties such as re-direction of interrupts
+		(eZ80F92)
+
+# Peripheral selection
+
+config EZ80_UART
+	bool
+	default n
+
 menu "ez80 Peripheral Support"
 
 config EZ80_UART0
 	bool "UART0"
+	select EZ80_UART
 	select UART0_SERIALDRIVER
 	default n
 
 config EZ80_UART1
 	bool "UART1"
+	select EZ80_UART
 	select UART1_SERIALDRIVER
 	default n
 
 config EZ80_UART2
 	bool "UART2"
+	select EZ80_UART
 	select UART2_SERIALDRIVER
 	default n
 	depends on ARCH_EZ80_HAVE_UART2
@@ -115,6 +147,30 @@ config EZ80_EMAC
 
 endmenu # ez80 Peripheral Support
 
+# UART Configuration
+
+choice
+	prompt "UART Rx FIFO depth"
+	default EZ80_UART_RXFIFO_1 if ARCH_CHIP_EZ80F92 || ARCH_CHIP_EZ80F93
+	default EZ80_UART_RXFIFO_4 if ARCH_CHIP_EZ80F91
+	depends on EZ80_UART
+
+config EZ80_UART_RXFIFO_1
+	bool "1"
+
+config EZ80_UART_RXFIFO_4
+	bool "4"
+
+config EZ80_UART_RXFIFO_8
+	bool "8"
+
+config EZ80_UART_RXFIFO_14
+	bool "14"
+
+endchoice
+
+# RTC/Crystal Configuration
+
 config EZ80_RTC_32KHZ
 	bool "32KHz crystal present"
 	default y
@@ -131,10 +187,12 @@ config EZ80_RTC_LINEFREQ50
 		If there is no 32Hz crystal, the RTC will fall back to use the line
 		frequency, either 50 or 60Hz.
 
+# EMAC Configuration
+
 if EZ80_EMAC
 
 config EZ80_FIAD
-hex "PHY Address"
+	hex "PHY Address"
 	range 0x00 0x1f
 	default 0x1f
 	---help---
@@ -190,6 +248,8 @@ config ARCH_MCFILTER
 		Enables multicast MAC address filtering (not fully implemented)
 
 endif # EZ80_EMAC
+
+# System integration
 
 config ARCH_TIMERHOOK
 	bool "Timer Hook"

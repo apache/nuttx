@@ -19,18 +19,10 @@
 ;**************************************************************************
 
 ;**************************************************************************
-; Constants
-;**************************************************************************
-
-; The IRQ number to use for unused vectors
-
-EZ80_UNUSED		EQU	40h
-
-;**************************************************************************
 ; Global Symbols Imported
 ;**************************************************************************
 
-	xref	_ez80_rstcommon
+	xref	_ez80_irq_common
 
 ;**************************************************************************
 ; Global Symbols Exported
@@ -42,7 +34,8 @@ EZ80_UNUSED		EQU	40h
 ; Constants
 ;**************************************************************************
 
-NVECTORS	EQU	64		; max possible interrupt vectors
+NVECTORS	EQU	64		; Max possible interrupt vectors
+EZ80_UNUSED	EQU	64		; Denotes an unused vector
 
 ;**************************************************************************
 ; Macros
@@ -56,7 +49,7 @@ irqhandler: macro vectno
 								; Offset 8: Return PC is already on the stack
 	push	af					; Offset 7: AF (retaining flags)
 	ld		a, #vectno			; A = vector number
-	jp		_ez80_rstcommon		; Remaining RST handling is common
+	jp		_ez80_irq_common	; Remaining RST handling is common
 	endmac	irqhandler
 
 ;**************************************************************************

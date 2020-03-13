@@ -68,7 +68,8 @@
  *
  *   The waitpid() function will behave identically to wait(), if the pid
  *   argument is (pid_t)-1 and the options argument is 0. Otherwise, its
- *   behaviour will be modified by the values of the pid and options arguments.
+ *   behaviour will be modified by the values of the pid and options
+ *   arguments.
  *
  * Input Parameters:
  *   stat_loc - The location to return the exit status

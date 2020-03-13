@@ -795,6 +795,11 @@ Configurations
 
   Now for the gory details:
 
+  netnsh:
+
+    This is a network enabled configuration based on the NuttShell (NSH)
+    REVISIT:  More to be provided.
+
   nsh:
 
     This configuration directory provide the NuttShell (NSH).  This is a

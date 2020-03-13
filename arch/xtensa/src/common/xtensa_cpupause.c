@@ -111,57 +111,50 @@ bool up_cpu_pausereq(int cpu)
 
 int up_cpu_paused(int cpu)
 {
-  FAR struct tcb_s *otcb = this_task();
-  FAR struct tcb_s *ntcb;
+  FAR struct tcb_s *tcb = this_task();
 
   /* Update scheduler parameters */
 
-  sched_suspend_scheduler(otcb);
+  sched_suspend_scheduler(tcb);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that we are paused */
 
-  sched_note_cpu_paused(otcb);
+  sched_note_cpu_paused(tcb);
 #endif
 
   /* Copy the CURRENT_REGS into the OLD TCB (otcb).  The co-processor state
    * will be saved as part of the return from xtensa_irq_dispatch().
    */
 
-  xtensa_savestate(otcb->xcp.regs);
+  xtensa_savestate(tcb->xcp.regs);
 
   /* Wait for the spinlock to be released */
 
   spin_unlock(&g_cpu_paused[cpu]);
   spin_lock(&g_cpu_wait[cpu]);
 
-  /* Upon return, we will restore the exception context of the new TCB
-   * (ntcb) at the head of the ready-to-run task list.
+  /* Restore the exception context of the tcb at the (new) head of the
+   * assigned task list.
    */
 
-  ntcb = this_task();
+  tcb = this_task();
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that we have resumed */
 
-  sched_note_cpu_resumed(ntcb);
+  sched_note_cpu_resumed(tcb);
 #endif
 
   /* Reset scheduler parameters */
 
-  sched_resume_scheduler(ntcb);
+  sched_resume_scheduler(tcb);
 
-  /* Did the task at the head of the list change? */
+  /* Then switch contexts.  Any necessary address environment changes
+   * will be made when the interrupt returns.
+   */
 
-  if (otcb != ntcb)
-    {
-      /* Set CURRENT_REGS to the context save are of the new TCB to start.
-       * This will inform the return-from-interrupt logic that a context
-       * switch must be performed.
-       */
-
-      xtensa_restorestate(ntcb->xcp.regs);
-    }
+  xtensa_restorestate(tcb->xcp.regs);
 
   spin_unlock(&g_cpu_wait[cpu]);
   return OK;
@@ -190,7 +183,17 @@ int up_cpu_paused(int cpu)
 
 void xtensa_pause_handler(void)
 {
-  up_cpu_paused(up_cpu_index());
+  int cpu = up_cpu_index();
+
+  /* Check for false alarms.  Such false could occur as a consequence of
+   * some deadlock breaking logic that might have already serviced the SG2
+   * interrupt by calling up_cpu_paused.
+   */
+
+  if (spin_islocked(&g_cpu_paused[cpu]))
+    {
+      up_cpu_paused(cpu);
+    }
 }
 
 /****************************************************************************
@@ -262,7 +265,7 @@ int up_cpu_pause(int cpu)
    * called.  g_cpu_paused will be unlocked in any case.
    */
 
- return ret;
+  return ret;
 }
 
 /****************************************************************************

@@ -48,10 +48,10 @@
  * Pre-processor Definitions
  ****************************************************************************************/
 
-/* SAMA5D3 Peripheral Identifiers */
+/* SAMA5D2 Peripheral Identifiers */
 
 #define SAM_PID_FIQ            (0)  /* Advanced Interrupt Controller FIQ */
-                                    /* 2 Reserved */
+                                    /* 1 Reserved */
 #define SAM_PID_ARM            (2)  /* Performance Monitor Unit */
 #define SAM_PID_PIT            (3)  /* Periodic Interval Timer Interrupt */
 #define SAM_PID_WDT            (4)  /* Watchdog timer Interrupt */
@@ -69,7 +69,7 @@
 #define SAM_PID_MATRIX0        (15) /* H64MX, 64-bit AHB Matrix */
 #define SAM_PID_SECUMOD        (16) /* Secure Module */
 #define SAM_PID_HSMC           (17) /* Multi-bit ECC Interrupt */
-#define SAM_PID_PIO            (18) /* Parallel I/O Controller */
+#define SAM_PID_PIOA           (18) /* Parallel I/O Controller */
 #define SAM_PID_FLEXCOM0       (19) /* FLEXCOM 0 */
 
 #define SAM_PID_FLEXCOM1       (20) /* FLEXCOM 1 */
@@ -131,6 +131,7 @@
 #define SAM_PID_SDMMC0T        (71) /* Secure Data Memory Card Controller 0 */
 #define SAM_PID_SDMMC1T        (72) /* Secure Data Memory Card Controller 1 */
                                     /* 73 Reserved */
+
 #define SAM_PID_SYS            (74) /* System Controller Interrupt PMC, RTC, RSTC */
 #define SAM_PID_ACC            (75) /* Analog Comparator */
 #define SAM_PID_RXLP           (76) /* UART Low-Power */
@@ -159,7 +160,7 @@
 #define SAM_IRQ_MATRIX0        SAM_PID_MATRIX0   /* H64MX, 64-bit AHB Matrix */
 #define SAM_IRQ_SECUMOD        SAM_PID_SECUMOD   /* Secure Module */
 #define SAM_IRQ_HSMC           SAM_PID_HSMC      /* Multi-bit ECC Interrupt */
-#define SAM_IRQ_PIO            SAM_PID_PIO       /* Parallel I/O Controller */
+#define SAM_IRQ_PIOA           SAM_PID_PIOA      /* Parallel I/O Controller */
 #define SAM_IRQ_FLEXCOM0       SAM_PID_FLEXCOM0  /* FLEXCOM 0 */
 
 #define SAM_IRQ_FLEXCOM1       SAM_PID_FLEXCOM1  /* FLEXCOM 1 */
@@ -204,8 +205,11 @@
 #define SAM_IRQ_CLASSD         SAM_PID_CLASSD    /* Audio Class D Amplifier */
 
                                                  /* Special Function Register (no interrupt) */
+
                                                  /* Secured Advanced Interrupt Controller (no interrupt) */
+
                                                  /* Advanced Interrupt Controller (no interrupt) */
+
 #define SAM_IRQ_L2CC           SAM_PID_L2CC      /* L2 Cache Controller */
 #define SAM_IRQ_MCAN01         SAM_PID_MCAN01    /* MCAN controller 0, Interrupt 1 */
 #define SAM_IRQ_MCAN11         SAM_PID_MCAN11    /* MCAN controller 1, Interrupt 1 */
@@ -220,7 +224,9 @@
 #define SAM_IRQ_SYS            SAM_PID_SYS       /* System Controller Interrupt PMC, RTC, RSTC */
 #define SAM_IRQ_ACC            SAM_PID_ACC       /* Analog Comparator */
 #define SAM_IRQ_RXLP           SAM_PID_RXLP      /* UART Low-Power */
+
                                                  /* Special Function Register BackUp (no interrupt) */
+
                                                  /* Chip ID (no interrupt) */
 
 #define SAM_IRQ_NINT           (SAM_PID_RXLP + 1)

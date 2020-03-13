@@ -46,6 +46,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Decimal configuration values may exceed 2Gb and, hence, overflow to negative
  * values unless we force them to unsigned long:
  */
@@ -97,6 +98,7 @@
 #define SAM_AXIMX_PSECTION       0x00800000 /* 0x00800000-0x008fffff: AXI Matr */
 #define SAM_DAP_PSECTION         0x00900000 /* 0x00900000-0x009fffff: DAP */
                                             /* 0x00a00000-0x0fffffff: Undefined */
+
 /* SAMA5 Internal Peripheral Offsets */
 
 #define SAM_PERIPHA_PSECTION     0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
@@ -116,7 +118,6 @@
 #  define SAM_ISI_OFFSET         0x00034000 /* 0x00034000-0x00037fff: ISI */
 #  define SAM_SFR_OFFSET         0x00038000 /* 0x00038000-0x0003bfff: SFR */
                                             /* 0x0003c000-0x07ffffff: Reserved */
-
 #define SAM_PERIPHB_PSECTION     0xf8000000 /* 0xf8000000-0xffffbfff: Internal Peripherals B */
 #  define SAM_HSMCI1_OFFSET      0x00000000 /* 0x00000000-0x00000fff: HSMCI1 */
 #  define SAM_HSMCI2_OFFSET      0x00004000 /* 0x00004000-0x00007fff: HSMCI2 */
@@ -137,7 +138,7 @@
 #  define SAM_TRNG_OFFSET        0x00040000 /* 0x00040000-0x00043fff: TRNG */
                                             /* 0x00044000-0x00ffbfff: Reserved */
 #define SAM_SYSC_PSECTION        0xfff00000 /* 0xfff00000-0xffffffff: System Controller */
-#define SAM_SYSC_PADDR           0xffffc000 /* 0xffffc000-0xffffffff: System Controller */
+#  define SAM_SYSC_PADDR         0xffffc000 /* 0xffffc000-0xffffffff: System Controller */
 #  define SAM_SYSC_OFFSET        0x00000000 /* 0x0fffc000-0x0fffffff: System Controller */
 
 /* System Controller Peripheral Offsets.  All relative to the beginning of the
@@ -178,11 +179,13 @@
  * region.  The implemented sizes of the EBI CS0-3 and DDRCS regions
  * are not known apriori and must be specified with configuration settings.
  */
+
                                                  /* 0x00000000-0x0fffffff: Internal Memories */
 #define SAM_BOOTMEM_SIZE         (1*1024*1024)   /* 0x00000000-0x000fffff: Boot memory */
 #define SAM_ROM_SIZE             (1*1024*1024)   /* 0x00100000-0x001fffff: ROM */
 #define SAM_NFCSRAM_SIZE         (1*1024*1024)   /* 0x00200000-0x002fffff: NFC SRAM */
                                                  /* 0x00300000-0x003fffff: SRAM0 and SRAM1 */
+
 #define SAM_ISRAM_SIZE           (64*1024 + SAM_ISRAM1_SIZE)
 #define SAM_SMD_SIZE             (1*1024*1024)   /* 0x00400000-0x004fffff: SMD */
 #define SAM_UDPHSRAM_SIZE        (1*1024*1024)   /* 0x00500000-0x005fffff: UDPH SRAM */
@@ -802,10 +805,6 @@
 
 /************************************************************************************
  * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
  ************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE__SAMA5D3X_MEMORYMAP_H */

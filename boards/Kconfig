@@ -1200,6 +1200,13 @@ config ARCH_BOARD_QEMU_I486
 		Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
 		hardwared (Google the Bifferboard).
 
+config ARCH_BOARD_INTEL64_QEMU
+	bool "Intel64 for Qemu simulator"
+	depends on ARCH_X86_64 || ARCH_INTEL64
+	---help---
+		Port of NuttX to QEMU in intel64 mode.  This port will also run on real 
+		generic Intel64 hardware.
+
 config ARCH_BOARD_RX65N
 	bool "RX65N renesas board"
 	depends on ARCH_CHIP_R5F565NEDDFC
@@ -2164,6 +2171,7 @@ config ARCH_BOARD
 	default "pic32mx7mmb"              if ARCH_BOARD_PIC32MX7MMB
 	default "pic32mz-starterkit"       if ARCH_BOARD_PIC32MZ_STARTERKIT
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
+	default "intel64-qemu"             if ARCH_BOARD_INTEL64_QEMU
 	default "rx65n"                    if ARCH_BOARD_RX65N
 	default "rx65n-rsk1mb"             if ARCH_BOARD_RX65N_RSK1MB
 	default "rx65n-rsk2mb"             if ARCH_BOARD_RX65N_RSK2MB
@@ -2828,6 +2836,9 @@ source "boards/sim/sim/sim/Kconfig"
 endif
 if ARCH_BOARD_QEMU_I486
 source "boards/x86/qemu/qemu-i486/Kconfig"
+endif
+if ARCH_BOARD_INTEL64_QEMU
+source "boards/x86_64/intel64/qemu-intel64/Kconfig"
 endif
 if ARCH_BOARD_RX65N
 source "boards/renesas/rx65n/rx65n/Kconfig"

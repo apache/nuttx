@@ -139,6 +139,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* Constant properties of the UART.  Other configuration setting may be
  * changeable via Termios IOCTL calls.
  */
@@ -165,14 +166,14 @@ struct esp32_config_s
 struct esp32_dev_s
 {
   const struct esp32_config_s *config; /* Constant configuration */
-  uint32_t baud;                /* Configured baud */
-  uint32_t status;              /* Saved status bits */
-  uint8_t  cpuint;              /* CPU interrupt assigned to this UART */
-  uint8_t  parity;              /* 0=none, 1=odd, 2=even */
-  uint8_t  bits;                /* Number of bits (5-9) */
-  bool     stopbits2;           /* true: Configure with 2 stop bits instead of 1 */
+  uint32_t baud;                       /* Configured baud */
+  uint32_t status;                     /* Saved status bits */
+  uint8_t  cpuint;                     /* CPU interrupt assigned to this UART */
+  uint8_t  parity;                     /* 0=none, 1=odd, 2=even */
+  uint8_t  bits;                       /* Number of bits (5-9) */
+  bool     stopbits2;                  /* true: Configure with 2 stop bits instead of 1 */
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
-  bool     flowc;               /* Input flow control (RTS) enabled */
+  bool     flowc;                      /* Input flow control (RTS) enabled */
 #endif
 };
 
@@ -474,7 +475,7 @@ static int esp32_setup(struct uart_dev_s *dev)
 
   if (priv->bits == 5)
     {
-                                       /* 0=5 bits */
+      /* 0=5 bits */
     }
   else if (priv->bits == 6)
     {
@@ -760,26 +761,27 @@ static int esp32_interrupt(int cpuint, void *context, FAR void *arg)
        * data, possibly resulting in an overrun error.
        */
 
-     if ((enabled & (UART_RXFIFO_FULL_INT_ENA |
+      if ((enabled & (UART_RXFIFO_FULL_INT_ENA |
                      UART_RXFIFO_TOUT_INT_ENA)) != 0)
-       {
-         /* Is there any data waiting in the Rx FIFO? */
+        {
+          /* Is there any data waiting in the Rx FIFO? */
 
-         nfifo = (status & UART_RXFIFO_CNT_M) >> UART_RXFIFO_CNT_S;
-         if (nfifo > 0)
+          nfifo = (status & UART_RXFIFO_CNT_M) >> UART_RXFIFO_CNT_S;
+          if (nfifo > 0)
             {
               /* Received data in the RXFIFO! ... Process incoming bytes */
 
               uart_recvchars(dev);
               handled = true;
             }
-       }
+        }
 
       /* Are Tx interrupts enabled?  The upper layer will disable Tx
        * interrupts when it has nothing to send.
        */
 
-      if ((enabled & (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA)) != 0)
+      if ((enabled & (UART_TX_DONE_INT_ENA | UART_TXFIFO_EMPTY_INT_ENA))
+          != 0)
         {
           nfifo = (status & UART_TXFIFO_CNT_M) >> UART_TXFIFO_CNT_S;
           if (nfifo < 0x7f)
@@ -881,7 +883,7 @@ static int esp32_ioctl(struct file *filep, int cmd, unsigned long arg)
             break;
 
           case 9:
-            termiosp->c_cflag |= CS8 /* CS9 */;
+            termiosp->c_cflag |= CS8 /* CS9 */ ;
             break;
           }
       }
@@ -1075,7 +1077,8 @@ static bool esp32_rxavailable(struct uart_dev_s *dev)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
 
-  return ((esp32_serialin(priv, UART_STATUS_OFFSET) & UART_RXFIFO_CNT_M) > 0);
+  return ((esp32_serialin(priv, UART_STATUS_OFFSET)
+          & UART_RXFIFO_CNT_M) > 0);
 }
 
 /****************************************************************************

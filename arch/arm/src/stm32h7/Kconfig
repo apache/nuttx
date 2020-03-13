@@ -28,6 +28,14 @@ config ARCH_CHIP_STM32H747XI
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 2048 FLASH, 1024K Kb SRAM
 
+config ARCH_CHIP_STM32H753II
+	bool "STM32H753II"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_I
+# TODO: IO_CONFIG
+	---help---
+		STM32 H7 Cortex M7, 2048 FLASH, 1024K Kb SRAM
+
 endchoice # STM32 H7 Chip Selection
 
 config STM32H7_STM32H7X3XX
@@ -611,6 +619,15 @@ config STM32H7_SPI_DMA
 	default n
 	---help---
 		Use DMA to improve SPI transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT.
+
+config STM32H7_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on STM32H7_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
 
 endmenu # "SPI Configuration"
 
@@ -4468,6 +4485,18 @@ config STM32H7_AUTONEG
 	default y
 	---help---
 		Use PHY autonegotiation to determine speed and mode
+
+config STM32H7_ETH_NRXDESC
+	int "Number of RX descriptors"
+	default 8
+	---help---
+		Number of RX DMA descriptors to use.
+
+config STM32H7_ETH_NTXDESC
+	int "Number of TX descriptors"
+	default 4
+	---help---
+		Number of TX DMA descriptors to use.
 
 config STM32H7_ETHFD
 	bool "Full duplex"

@@ -13914,7 +13914,7 @@ Additional new features and extended functionality:
 
       - Added support for set [{+|-}{e|x|xe|ex}] [<name> <value>].  Set the
         'exit on error control' and/or 'print a trace' of commands when
-        parsing scripts in NSH.  The settinngs are in effect from the point
+        parsing scripts in NSH.  The settings are in effect from the point
         of execution, until they are changed again, or in the case of the init
         script, the settings are returned to the default settings when it
         exits.  Included child scripts will run with the parents settings and

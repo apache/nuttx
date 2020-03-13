@@ -135,7 +135,8 @@ int task_setcancelstate(int state, FAR int *oldstate)
               tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
 
 #ifndef CONFIG_DISABLE_PTHREAD
-              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
+                  TCB_FLAG_TTYPE_PTHREAD)
                 {
                   pthread_exit(PTHREAD_CANCELED);
                 }

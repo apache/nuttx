@@ -27,13 +27,16 @@ usage() {
   echo ""
   echo "Options:"
   echo "-h"
-  echo "-c spell check with codespell(install with: pip install codespell"
-  echo "-r range check only (used with -p and -g)"
-  echo "-p <patch list> (default)"
+  echo "-c spell check with codespell(install with: pip install codespell)"
+  echo "-r range check only (coupled with -p or -g)"
+  echo "-p <patch file names> (default)"
   echo "-g <commit list>"
   echo "-f <file list>"
   echo "-  read standard input mainly used by git pre-commit hook as below:"
   echo "   git diff --cached | ./tools/checkpatch.sh -"
+  echo "Where a <commit list> is any syntax supported by git for specifying git revision, see GITREVISIONS(7)"
+  echo "Where a <patch file names> is a space separated list of patch file names or wildcard. or *.patch"
+ 
 }
 
 check_file() {

@@ -66,8 +66,6 @@
 #include <nuttx/fs/dirent.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nfs.h>
-#include <nuttx/net/udp.h>
-#include <nuttx/net/arp.h>
 #include <nuttx/net/netconfig.h>
 
 #include <net/if.h>
@@ -124,7 +122,8 @@ static int     nfs_fileopen(FAR struct nfsmount *nmp,
 static int     nfs_open(FAR struct file *filep, FAR const char *relpath,
                    int oflags, mode_t mode);
 static int     nfs_close(FAR struct file *filep);
-static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
+static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
+                        size_t buflen);
 static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
                    size_t buflen);
 static int     nfs_dup(FAR const struct file *oldp, FAR struct file *newp);
@@ -133,7 +132,8 @@ static int     nfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
 static int     nfs_truncate(FAR struct file *filep, off_t length);
 static int     nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                    FAR struct fs_dirent_s *dir);
-static int     nfs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir);
+static int     nfs_readdir(FAR struct inode *mountpt,
+                           FAR struct fs_dirent_s *dir);
 static int     nfs_rewinddir(FAR struct inode *mountpt,
                    FAR struct fs_dirent_s *dir);
 static void    nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
@@ -304,7 +304,7 @@ static int nfs_filecreate(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
   /* Set the group ID to one */
 
   *ptr++  = nfs_true;            /* True: Gid value follows */
-  *ptr++  = HTONL(1);            /* GID = 1 (nogroup) */
+  *ptr++  = 0;                   /* GID = 0 (nogroup) */
   reqlen += 2*sizeof(uint32_t);
 
   /* Set the size to zero */
@@ -613,9 +613,9 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
           goto errout_with_semaphore;
         }
 
-      /* The file does not exist. Check if we were asked to create the file.  If
-       * the O_CREAT bit is set in the oflags then we should create the file if it
-       * does not exist.
+      /* The file does not exist. Check if we were asked to create the file.
+       * If the O_CREAT bit is set in the oflags then we should create the
+       * file if it does not exist.
        */
 
       if ((oflags & O_CREAT) == 0)
@@ -649,9 +649,9 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
   filep->f_priv = np;
 
   /* Then insert the new instance at the head of the list in the mountpoint
-   * structure. It needs to be there (1) to handle error conditions that effect
-   * all files, and (2) to inform the umount logic that we are busy.  We
-   * cannot unmount the file system if this list is not empty!
+   * structure. It needs to be there (1) to handle error conditions that
+   * effect all files, and (2) to inform the umount logic that we are busy.
+   * We cannot unmount the file system if this list is not empty!
    */
 
   np->n_next   = nmp->nm_head;
@@ -773,7 +773,8 @@ static int nfs_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
+                        size_t buflen)
 {
   FAR struct nfsmount       *nmp;
   FAR struct nfsnode        *np;
@@ -920,13 +921,9 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
         }
     }
 
-  finfo("Read %d bytes\n", bytesread);
-  nfs_semgive(nmp);
-  return bytesread;
-
 errout_with_semaphore:
   nfs_semgive(nmp);
-  return error;
+  return bytesread > 0 ? bytesread : error;
 }
 
 /****************************************************************************
@@ -945,7 +942,7 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
   FAR struct nfsnode    *np;
   ssize_t                writesize;
   ssize_t                bufsize;
-  ssize_t                byteswritten;
+  ssize_t                byteswritten = 0;
   size_t                 reqlen;
   FAR uint32_t          *ptr;
   uint32_t               tmp;
@@ -1108,12 +1105,9 @@ static ssize_t nfs_write(FAR struct file *filep, FAR const char *buffer,
       buffer       += writesize;
     }
 
-  nfs_semgive(nmp);
-  return byteswritten;
-
 errout_with_semaphore:
   nfs_semgive(nmp);
-  return error;
+  return byteswritten > 0 ? byteswritten : error;
 }
 
 /****************************************************************************
@@ -1301,7 +1295,6 @@ static int nfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   DEBUGASSERT(fhandle.length <= DIRENT_NFS_MAXHANDLE);
 
   memcpy(dir->u.nfs.nfs_fhandle, &fhandle.handle, fhandle.length);
-  error = OK;
 
 errout_with_semaphore:
   nfs_semgive(nmp);
@@ -1572,7 +1565,8 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-static int nfs_rewinddir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
+static int nfs_rewinddir(FAR struct inode *mountpt,
+                         FAR struct fs_dirent_s *dir)
 {
   finfo("Entry\n");
 
@@ -1642,14 +1636,18 @@ static void nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
 
   /* Get the maximum amount of data that can be transferred in one packet */
 
-  if ((argp->sotype == SOCK_DGRAM) != 0)
+  if (argp->sotype == SOCK_DGRAM)
     {
       maxio = NFS_MAXDGRAMDATA;
     }
   else
     {
-      ferr("ERROR: Only SOCK_DRAM is supported\n");
       maxio = NFS_MAXDATA;
+    }
+
+  if (maxio > MAXBSIZE)
+    {
+      maxio = MAXBSIZE;
     }
 
   /* Get the maximum amount of data that can be transferred in one write transfer */
@@ -1672,11 +1670,6 @@ static void nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
       nprmt->wsize = maxio;
     }
 
-  if (nprmt->wsize > MAXBSIZE)
-    {
-      nprmt->wsize = MAXBSIZE;
-    }
-
   /* Get the maximum amount of data that can be transferred in one read transfer */
 
   if ((argp->flags & NFSMNT_RSIZE) != 0 && argp->rsize > 0)
@@ -1695,11 +1688,6 @@ static void nfs_decode_args(FAR struct nfs_mount_parameters *nprmt,
   if (nprmt->rsize > maxio)
     {
       nprmt->rsize = maxio;
-    }
-
-  if (nprmt->rsize > MAXBSIZE)
-    {
-      nprmt->rsize = MAXBSIZE;
     }
 
   /* Get the maximum amount of data that can be transferred in directory transfer */
@@ -1780,6 +1768,14 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
       buflen = tmp;
     }
 
+  /* And consider the maximum size of a read dir transfer too */
+
+  tmp = SIZEOF_rpc_reply_readdir(nprmt.readdirsize);
+  if (tmp > buflen)
+    {
+      buflen = tmp;
+    }
+
   /* But don't let the buffer size exceed the MSS of the socket type.
    *
    * In the case where there are multiple network devices with different
@@ -1788,9 +1784,9 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
    * that case.
    */
 
-  if (buflen > MIN_IPv4_UDP_MSS)
+  if (argp->sotype == SOCK_DGRAM && buflen > MIN_UDP_MSS)
     {
-      buflen = MIN_IPv4_UDP_MSS;
+      buflen = MIN_UDP_MSS;
     }
 
   /* Create an instance of the mountpt state structure */
@@ -1832,43 +1828,36 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   strncpy(nmp->nm_path, argp->path, 90);
   memcpy(&nmp->nm_nam, &argp->addr, argp->addrlen);
 
-  /* Set up the sockets and per-host congestion */
+  /* Create an instance of the rpc state structure */
 
-  if (argp->sotype == SOCK_DGRAM)
+  rpc = (FAR struct rpcclnt *)kmm_zalloc(sizeof(struct rpcclnt));
+  if (!rpc)
     {
-      /* Connection-less... connect now */
-
-      /* Create an instance of the rpc state structure */
-
-      rpc = (FAR struct rpcclnt *)kmm_zalloc(sizeof(struct rpcclnt));
-      if (!rpc)
-        {
-          ferr("ERROR: Failed to allocate rpc structure\n");
-          return -ENOMEM;
-        }
-
-      finfo("Connecting\n");
-
-      /* Translate nfsmnt flags -> rpcclnt flags */
-
-      rpc->rc_path       = nmp->nm_path;
-      rpc->rc_name       = &nmp->nm_nam;
-      rpc->rc_sotype     = argp->sotype;
-      rpc->rc_timeo      = nprmt.timeo;
-      rpc->rc_retry      = nprmt.retry;
-
-      nmp->nm_rpcclnt    = rpc;
-
-      error = rpcclnt_connect(nmp->nm_rpcclnt);
-      if (error != OK)
-        {
-          ferr("ERROR: nfs_connect failed: %d\n", error);
-          goto bad;
-        }
+      ferr("ERROR: Failed to allocate rpc structure\n");
+      return -ENOMEM;
     }
 
-  nmp->nm_fhsize         = nmp->nm_rpcclnt->rc_fhsize;
-  nmp->nm_fh             = &nmp->nm_rpcclnt->rc_fh;
+  finfo("Connecting\n");
+
+  /* Translate nfsmnt flags -> rpcclnt flags */
+
+  rpc->rc_path        = nmp->nm_path;
+  rpc->rc_name        = &nmp->nm_nam;
+  rpc->rc_sotype      = argp->sotype;
+  rpc->rc_timeo       = nprmt.timeo;
+  rpc->rc_retry       = nprmt.retry;
+
+  nmp->nm_rpcclnt     = rpc;
+
+  error = rpcclnt_connect(nmp->nm_rpcclnt);
+  if (error != OK)
+    {
+      ferr("ERROR: nfs_connect failed: %d\n", error);
+      goto bad;
+    }
+
+  nmp->nm_fhsize      = nmp->nm_rpcclnt->rc_fhsize;
+  nmp->nm_fh          = &nmp->nm_rpcclnt->rc_fh;
 
   /* Get the file sytem info */
 
@@ -1888,21 +1877,19 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   return OK;
 
 bad:
-  if (nmp)
+
+  /* Disconnect from the server */
+
+  if (nmp->nm_rpcclnt)
     {
-      /* Disconnect from the server */
-
-      if (nmp->nm_rpcclnt)
-        {
-          rpcclnt_disconnect(nmp->nm_rpcclnt);
-          kmm_free(nmp->nm_rpcclnt);
-        }
-
-      /* Free connection-related resources */
-
-      nxsem_destroy(&nmp->nm_sem);
-      kmm_free(nmp);
+      rpcclnt_disconnect(nmp->nm_rpcclnt);
+      kmm_free(nmp->nm_rpcclnt);
     }
+
+  /* Free connection-related resources */
+
+  nxsem_destroy(&nmp->nm_sem);
+  kmm_free(nmp);
 
   return error;
 }
@@ -1949,14 +1936,6 @@ static int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
       goto errout_with_semaphore;
     }
 
-  /* No open file... Umount the file system. */
-
-  error = rpcclnt_umount(nmp->nm_rpcclnt);
-  if (error)
-    {
-      ferr("ERROR: rpcclnt_umount failed: %d\n", error);
-    }
-
   /* Disconnect from the server */
 
   rpcclnt_disconnect(nmp->nm_rpcclnt);
@@ -1967,7 +1946,7 @@ static int nfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
   kmm_free(nmp->nm_rpcclnt);
   kmm_free(nmp);
 
-  return error;
+  return OK;
 
 errout_with_semaphore:
   nfs_semgive(nmp);
@@ -2029,6 +2008,7 @@ static int nfs_fsinfo(FAR struct nfsmount *nmp)
     {
       nmp->nm_rsize = (pref + NFS_FABLKSIZE - 1) & ~(NFS_FABLKSIZE - 1);
     }
+
   if (max < nmp->nm_rsize)
     {
       nmp->nm_rsize = max & ~(NFS_FABLKSIZE - 1);
@@ -2046,6 +2026,7 @@ static int nfs_fsinfo(FAR struct nfsmount *nmp)
     {
       nmp->nm_wsize = (pref + NFS_FABLKSIZE - 1) & ~(NFS_FABLKSIZE - 1);
     }
+
   if (max < nmp->nm_wsize)
     {
       nmp->nm_wsize = max & ~(NFS_FABLKSIZE - 1);
@@ -2058,7 +2039,8 @@ static int nfs_fsinfo(FAR struct nfsmount *nmp)
   pref = fxdr_unsigned(uint32_t, *ptr++);
   if (pref < nmp->nm_readdirsize)
     {
-      nmp->nm_readdirsize = (pref + NFS_DIRBLKSIZ - 1) & ~(NFS_DIRBLKSIZ - 1);
+      nmp->nm_readdirsize = (pref + NFS_DIRBLKSIZ - 1) &
+                             ~(NFS_DIRBLKSIZ - 1);
     }
 
   /* Get the file attributes if needed */
@@ -2234,7 +2216,8 @@ errout_with_semaphore:
  *
  ****************************************************************************/
 
-static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath, mode_t mode)
+static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
+                     mode_t mode)
 {
   FAR struct nfsmount   *nmp;
   struct file_handle     fhandle;
@@ -2313,7 +2296,7 @@ static int nfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath, mode_t 
   /* Set the group ID to one */
 
   *ptr++  = nfs_true;            /* True: Gid value follows */
-  *ptr++  = HTONL(1);            /* GID = 1 (nogroup) */
+  *ptr++  = 0;                   /* GID = 0 (nogroup) */
   reqlen += 2*sizeof(uint32_t);
 
   /* No size */
