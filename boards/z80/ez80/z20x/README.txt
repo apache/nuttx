@@ -204,7 +204,25 @@ Common Configuration Notes
 Configuration Subdirectories
 ----------------------------
 
-  nsh_ram:
+  hello:
+
+    This is a minimal "Hello, World!" program that runs out of RAM.  It is
+    a small program that is really useful only for testing the bootloader.
+
+    NOTES:
+
+    1. Debugging from RAM
+
+       You can debug from RAM version using ZDS-II as follows:
+
+       a. Connect to the debugger,
+       b. Reset, Go, and Break.  This will initialize the external RAM
+       c. Break and Load the nuttx.lod file
+       c. Set the PC to 0x050000
+       d. Single step a few times to make sure things look good, then
+       e. Go
+
+  nsh:
 
     This configuration builds the NuttShell (NSH).  That code can be
     found in apps/system/nsh and apps/system/nshlib..  For more
@@ -290,14 +308,14 @@ Configuration Subdirectories
        NOTE:  The is no card detect signal so the microSD card must be
        placed in the card slot before the system is started.
 
-    3. Debugging the RAM version
+    3. Debugging from RAM
 
-       You can debug the all RAM version using ZDS-II as follows:
+       You can debug from RAM version using ZDS-II as follows:
 
        a. Connect to the debugger,
        b. Reset, Go, and Break.  This will initialize the external RAM
        c. Break and Load the nuttx.lod file
-       c. Set the PC to 0x040000
+       c. Set the PC to 0x050000
        d. Single step a few times to make sure things look good, then
        e. Go
 
