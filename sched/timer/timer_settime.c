@@ -43,7 +43,7 @@
 static inline void timer_signotify(FAR struct posix_timer_s *timer);
 static inline void timer_restart(FAR struct posix_timer_s *timer,
                                  wdparm_t itimer);
-static void timer_timeout(int argc, wdparm_t itimer);
+static void timer_timeout(int argc, wdparm_t itimer, ...);
 
 /****************************************************************************
  * Private Functions
@@ -99,7 +99,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
     {
       timer->pt_last = timer->pt_delay;
       wd_start(timer->pt_wdog, timer->pt_delay,
-               (wdentry_t)timer_timeout, 1, itimer);
+               timer_timeout, 1, itimer);
     }
 }
 
@@ -123,7 +123,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
  *
  ****************************************************************************/
 
-static void timer_timeout(int argc, wdparm_t itimer)
+static void timer_timeout(int argc, wdparm_t itimer, ...)
 {
 #ifndef CONFIG_CAN_PASS_STRUCTS
   /* On many small machines, pointers are encoded and cannot be simply cast
@@ -355,7 +355,7 @@ int timer_settime(timer_t timerid, int flags,
        */
 
       timer->pt_last = delay;
-      ret = wd_start(timer->pt_wdog, delay, (wdentry_t)timer_timeout,
+      ret = wd_start(timer->pt_wdog, delay, timer_timeout,
                      1, (wdparm_t)timer);
       if (ret < 0)
         {
