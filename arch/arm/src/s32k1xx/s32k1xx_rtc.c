@@ -183,12 +183,14 @@ int up_rtc_initialize(void)
 
   regval  = getreg32(S32K1XX_RTC_SR);
 
-  if(regval & RTC_SR_TIF)
+  if (regval & RTC_SR_TIF)
     {
-	  regval &= ~RTC_SR_TCE;
-	  putreg32(regval, S32K1XX_RTC_SR);
+      regval &= ~RTC_SR_TCE;
+      putreg32(regval, S32K1XX_RTC_SR);
+
       /* Write TSR register to clear invalid */
-	  putreg32(0x0, S32K1XX_RTC_TSR);
+
+      putreg32(0x0, S32K1XX_RTC_TSR);
     }
 
   /* Enable the rtc */
@@ -295,11 +297,11 @@ int up_rtc_gettime(FAR struct timespec *tp)
 int up_rtc_settime(FAR const struct timespec *ts)
 {
   DEBUGASSERT(ts != NULL);
-  
+
   irqstate_t flags;
   uint32_t seconds;
   uint32_t prescaler;
-  
+
   seconds = ts->tv_sec;
   prescaler = ts->tv_nsec * (CONFIG_RTC_FREQUENCY / 1000000000);
 
