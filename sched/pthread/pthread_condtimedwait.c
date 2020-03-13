@@ -26,6 +26,7 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <signal.h>
@@ -67,61 +68,73 @@
  *
  ****************************************************************************/
 
-static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
+static void pthread_condtimedout(int argc, wdparm_t arg1, ...)
 {
+  pid_t pid = (pid_t)arg1;
+  int signo;
+  va_list ap;
+
+  /* Retrieve the variadic argument */
+
+  va_start(ap, arg1);
+  signo = (int)va_arg(ap, wdparm_t);
+  va_end(ap);
+
 #ifdef HAVE_GROUP_MEMBERS
-
-  FAR struct tcb_s *tcb;
-  siginfo_t info;
-
-  /* The logic below if equivalent to nxsig_queue(), but uses
-   * nxsig_tcbdispatch() instead of nxsig_dispatch().  This avoids the group
-   * signal deliver logic and assures, instead, that the signal is delivered
-   * specifically to this thread that is known to be waiting on the signal.
-   */
-
-  /* Get the waiting TCB.  sched_gettcb() might return NULL if the task has
-   * exited for some reason.
-   */
-
-  tcb = sched_gettcb((pid_t)pid);
-  if (tcb)
     {
-      /* Create the siginfo structure */
+      FAR struct tcb_s *tcb;
+      siginfo_t info;
 
-      info.si_signo           = signo;
-      info.si_code            = SI_QUEUE;
-      info.si_errno           = ETIMEDOUT;
-      info.si_value.sival_ptr = NULL;
-#ifdef CONFIG_SCHED_HAVE_PARENT
-      info.si_pid             = (pid_t)pid;
-      info.si_status          = OK;
-#endif
-
-      /* Process the receipt of the signal.  The scheduler is not locked as
-       * is normally the case when this function is called because we are in
-       * a watchdog timer interrupt handler.
+      /* The logic below if equivalent to nxsig_queue(), but uses
+       * nxsig_tcbdispatch() instead of nxsig_dispatch().  This avoids the
+       * group signal deliver logic and assures, instead, that the signal is
+       * delivered specifically to this thread that is known to be waiting on
+       * the signal.
        */
 
-      nxsig_tcbdispatch(tcb, &info);
+      /* Get the waiting TCB.  sched_gettcb() might return NULL if the task
+       * has exited for some reason.
+       */
+
+      tcb = sched_gettcb(pid);
+      if (tcb)
+        {
+          /* Create the siginfo structure */
+
+          info.si_signo           = signo;
+          info.si_code            = SI_QUEUE;
+          info.si_errno           = ETIMEDOUT;
+          info.si_value.sival_ptr = NULL;
+#ifdef CONFIG_SCHED_HAVE_PARENT
+          info.si_pid             = pid;
+          info.si_status          = OK;
+#endif
+
+          /* Process the receipt of the signal.  The scheduler is not locked
+           * as is normally the case when this function is called because we
+           * are in a watchdog timer interrupt handler.
+           */
+
+          nxsig_tcbdispatch(tcb, &info);
+        }
     }
-
 #else /* HAVE_GROUP_MEMBERS */
-
-  /* Things are a little easier if there are not group members.  We can just
-   * use nxsig_queue().
-   */
+    {
+      /* Things are a little easier if there are not group members.  We can
+       *  just use nxsig_queue().
+       */
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-  union sigval value;
+      union sigval value;
 
-  /* Send the specified signal to the specified task. */
+      /* Send the specified signal to the specified task. */
 
-  value.sival_ptr = NULL;
-  nxsig_queue((int)pid, (int)signo, value);
+      value.sival_ptr = NULL;
+      nxsig_queue((int)pid, signo, value);
 #else
-  nxsig_queue((int)pid, (int)signo, NULL);
+      nxsig_queue((int)pid, signo, NULL);
 #endif
+    }
 
 #endif /* HAVE_GROUP_MEMBERS */
 }
@@ -276,9 +289,9 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond,
                       /* Start the watchdog */
 
                       wd_start(rtcb->waitdog, ticks,
-                               (wdentry_t)pthread_condtimedout,
-                               2, (uint32_t)mypid,
-                               (uint32_t)SIGCONDTIMEDOUT);
+                               pthread_condtimedout,
+                               2, (wdparm_t)mypid,
+                               (wdparm_t)SIGCONDTIMEDOUT);
 
                       /* Take the condition semaphore.  Do not restore
                        * interrupts until we return from the wait.  This is

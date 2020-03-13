@@ -71,7 +71,7 @@
  *
  ****************************************************************************/
 
-void nxsem_timeout(int argc, wdparm_t pid)
+void nxsem_timeout(int argc, wdparm_t pid, ...)
 {
   FAR struct tcb_s *wtcb;
   irqstate_t flags;
