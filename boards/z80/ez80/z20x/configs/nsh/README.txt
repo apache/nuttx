@@ -9,5 +9,5 @@ nsh.zfpproj is a simple project that will allow you to use the Smart Flash
   in the upper README.txt file
 nsh_ram.ztgt is the target file that accompanies the project files.  This
   one is identical to boards/scripts/z20x_ram.ztgt.
-nsh_ram.ztgt is the target file that accompanies the project files.  This
+nsh_flash.ztgt is the target file that accompanies the project files.  This
   one is identical to boards/scripts/z20x_flash.ztgt.
