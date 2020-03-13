@@ -111,7 +111,8 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
         {
           FAR struct sockaddr_in *in4 = (FAR struct sockaddr_in *)addr;
 
-          if (inet_ntop(AF_INET, &in4->sin_addr, addrstr, DNS_MAX_ADDRSTR) == NULL)
+          if (inet_ntop(AF_INET, &in4->sin_addr, addrstr,
+                        DNS_MAX_ADDRSTR) == NULL)
             {
               ret = -errno;
               nerr("ERROR: inet_ntop failed: %d\n", errcode);
@@ -143,7 +144,8 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
         {
           FAR struct sockaddr_in6 *in6 = (FAR struct sockaddr_in6 *)addr;
 
-          if (inet_ntop(AF_INET6, &in6->sin6_addr, addrstr, DNS_MAX_ADDRSTR) == NULL)
+          if (inet_ntop(AF_INET6, &in6->sin6_addr, addrstr,
+                        DNS_MAX_ADDRSTR) == NULL)
             {
               ret = -errno;
               nerr("ERROR: inet_ntop failed: %d\n", errcode);
