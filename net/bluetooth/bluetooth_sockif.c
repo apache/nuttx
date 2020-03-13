@@ -106,7 +106,7 @@ const struct sock_intf_s g_bluetooth_sockif =
   bluetooth_send,        /* si_send */
   bluetooth_sendto,      /* si_sendto */
 #ifdef CONFIG_NET_SENDFILE
-  NULL,                   /* si_sendfile */
+  NULL,                  /* si_sendfile */
 #endif
   bluetooth_recvfrom,    /* si_recvfrom */
 #ifdef CONFIG_NET_RECVMSG_CMSG
@@ -246,10 +246,10 @@ static void bluetooth_addref(FAR struct socket *psock)
  * Name: bluetooth_connect
  *
  * Description:
- *   bluetooth_connect() connects the local socket referred to by the structure
- *   'psock' to the address specified by 'addr'. The addrlen argument
- *   specifies the size of 'addr'.  The format of the address in 'addr' is
- *   determined by the address space of the socket 'psock'.
+ *   bluetooth_connect() connects the local socket referred to by the
+ *   structure 'psock' to the address specified by 'addr'. The addrlen
+ *   argument specifies the size of 'addr'.  The format of the address in
+ *   'addr' is determined by the address space of the socket 'psock'.
  *
  *   Generally, connection-based protocol sockets may successfully
  *   bluetooth_connect() only once; connectionless protocol sockets may use
@@ -333,7 +333,8 @@ static int bluetooth_connect(FAR struct socket *psock,
  * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr',
+ *            Return: returned size of 'addr'
  *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:
@@ -375,7 +376,7 @@ static int bluetooth_accept(FAR struct socket *psock,
  ****************************************************************************/
 
 static int bluetooth_bind(FAR struct socket *psock,
-                           FAR const struct sockaddr *addr, socklen_t addrlen)
+                          FAR const struct sockaddr *addr, socklen_t addrlen)
 {
   FAR const struct sockaddr_bt_s *iaddr;
   FAR struct radio_driver_s *radio;
@@ -442,10 +443,10 @@ static int bluetooth_bind(FAR struct socket *psock,
  * Name: bluetooth_getsockname
  *
  * Description:
- *   The bluetooth_getsockname() function retrieves the locally-bound name of the
- *   specified packet socket, stores this address in the sockaddr structure
- *   pointed to by the 'addr' argument, and stores the length of this
- *   address in the object pointed to by the 'addrlen' argument.
+ *   The bluetooth_getsockname() function retrieves the locally-bound name of
+ *   the specified packet socket, stores this address in the sockaddr
+ *   structure pointed to by the 'addr' argument, and stores the length of
+ *   this address in the object pointed to by the 'addrlen' argument.
  *
  *   If the actual length of the address is greater than the length of the
  *   supplied sockaddr structure, the stored address will be truncated.
@@ -504,8 +505,8 @@ static int bluetooth_getsockname(FAR struct socket *psock,
  * Name: bluetooth_getpeername
  *
  * Description:
- *   The bluetooth_getpeername() function retrieves the remote-connected name of
- *   the specified local socket, stores this address in the sockaddr
+ *   The bluetooth_getpeername() function retrieves the remote-connected name
+ *   of the specified local socket, stores this address in the sockaddr
  *   structure pointed to by the 'addr' argument, and stores the length of
  *   this address in the object pointed to by the 'addrlen' argument.
  *
@@ -708,9 +709,10 @@ static ssize_t bluetooth_send(FAR struct socket *psock, FAR const void *buf,
  *
  ****************************************************************************/
 
-static ssize_t bluetooth_sendto(FAR struct socket *psock, FAR const void *buf,
-                                 size_t len, int flags,
-                                 FAR const struct sockaddr *to, socklen_t tolen)
+static ssize_t bluetooth_sendto(FAR struct socket *psock,
+                                FAR const void *buf, size_t len, int flags,
+                                FAR const struct sockaddr *to,
+                                socklen_t tolen)
 {
   ssize_t ret;
 

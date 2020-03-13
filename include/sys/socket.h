@@ -48,8 +48,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The socket()domain parameter specifies a communication domain; this selects
- * the protocol family which will be used for communication.
+/* The socket()domain parameter specifies a communication domain; this
+ * selects the protocol family which will be used for communication.
  */
 
 /* Supported Protocol Families */
@@ -88,24 +88,24 @@
  * the communication semantics.
  */
 
-#define SOCK_UNSPEC    0 /* Unspecified socket type */
-#define SOCK_STREAM    1 /* Provides sequenced, reliable, two-way,
-                          * connection-based byte streams. An out-of-band data
-                          * transmission mechanism may be supported.
-                          */
-#define SOCK_DGRAM     2 /* Supports  datagrams (connectionless, unreliable
-                          * messages of a fixed maximum length).
-                          */
-#define SOCK_RAW       3 /* Provides raw network protocol access. */
-#define SOCK_RDM       4 /* Provides a reliable datagram layer that does not
-                          * guarantee ordering.
-                          */
-#define SOCK_SEQPACKET 5 /* Provides a sequenced, reliable, two-way
-                          * connection-based data transmission path for
-                          * datagrams of fixed maximum length; a consumer is
-                          * required to read an entire packet with each read
-                          * system call.
-                          */
+#define SOCK_UNSPEC    0  /* Unspecified socket type */
+#define SOCK_STREAM    1  /* Provides sequenced, reliable, two-way,
+                           * connection-based byte streams. An out-of-band
+                           * data transmission mechanism may be supported.
+                           */
+#define SOCK_DGRAM     2  /* Supports  datagrams (connectionless, unreliable
+                           * messages of a fixed maximum length).
+                           */
+#define SOCK_RAW       3  /* Provides raw network protocol access. */
+#define SOCK_RDM       4  /* Provides a reliable datagram layer that does not
+                           * guarantee ordering.
+                           */
+#define SOCK_SEQPACKET 5  /* Provides a sequenced, reliable, two-way
+                           * connection-based data transmission path for
+                           * datagrams of fixed maximum length; a consumer is
+                           * required to read an entire packet with each read
+                           * system call.
+                           */
 #define SOCK_PACKET    10 /* Obsolete and should not be used in new programs */
 
 /* Bits in the FLAGS argument to `send', `recv', et al. These are the bits
@@ -157,10 +157,10 @@
 #define SO_ERROR         4 /* Reports and clears error status (get only).
                             * arg: returns an integer value
                             */
-#define SO_KEEPALIVE     5 /* Keeps connections active by enabling the periodic
-                            * transmission of messages (get/set).
-                            * arg:  pointer to integer containing a boolean int
-                            * value
+#define SO_KEEPALIVE     5 /* Keeps connections active by enabling the
+                            * periodic transmission of messages (get/set).
+                            * arg:  pointer to integer containing a boolean
+                            * int value
                             */
 #define SO_LINGER        6 /* Lingers on a close() if data is present (get/set)
                             * arg: struct linger
@@ -194,8 +194,9 @@
                             * arg: integer value
                             */
 #define SO_SNDTIMEO     14 /* Sets the timeout value specifying the amount of
-                            * time that an output function blocks because flow
-                            * control prevents data from being sent(get/set).
+                            * time that an output function blocks because
+                            * flow control prevents data from being sent
+                            * (get/set).
                             * arg: struct timeval
                             */
 #define SO_TYPE         15 /* Reports the socket type (get only).

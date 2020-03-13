@@ -53,7 +53,8 @@
  * Function: recvmsg
  *
  * Description:
- *   The recvmsg() call is identical to recvfrom() with a NULL from parameter.
+ *   The recvmsg() call is identical to recvfrom() with a NULL from
+ *   parameter.
  *
  * Parameters:
  *   sockfd   Socket descriptor of socket
