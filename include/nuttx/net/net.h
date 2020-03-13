@@ -121,9 +121,9 @@
 
 /* Connection state encoding:
  *
- *  _SF_CONNECTED==1 && _SF_CLOSED==0 - the socket is connected
- *  _SF_CONNECTED==0 && _SF_CLOSED==1 - the socket was gracefully disconnected
- *  _SF_CONNECTED==0 && _SF_CLOSED==0 - the socket was rudely disconnected
+ *  _SF_CONNECTED==1 && _SF_CLOSED==0 - socket is connected
+ *  _SF_CONNECTED==0 && _SF_CLOSED==1 - socket was gracefully disconnected
+ *  _SF_CONNECTED==0 && _SF_CLOSED==0 - socket was rudely disconnected
  */
 
 /* Macro to manage the socket state and flags */
@@ -214,7 +214,7 @@ struct sock_intf_s
                     FAR socklen_t *fromlen);
 #ifdef CONFIG_NET_RECVMSG_CMSG
   CODE ssize_t    (*si_recvmsg)(FAR struct socket *psock,
-		            FAR struct msghdr *msg, int flags);
+                FAR struct msghdr *msg, int flags);
 #endif
   CODE int        (*si_close)(FAR struct socket *psock);
 #ifdef CONFIG_NET_USRSOCK
@@ -504,9 +504,9 @@ FAR struct iob_s *net_ioballoc(bool throttled, enum iob_user_e consumerid);
  * Description:
  *   Check if the socket descriptor is valid for the provided TCB and if it
  *   supports the requested access.  This trivial operation is part of the
- *   fdopen() operation when the fdopen() is performed on a socket descriptor.
- *   It simply performs some sanity checking before permitting the socket
- *   descriptor to be wrapped as a C FILE stream.
+ *   fdopen() operation when the fdopen() is performed on a socket
+ *   descriptor.  It simply performs some sanity checking before permitting
+ *   the socket descriptor to be wrapped as a C FILE stream.
  *
  ****************************************************************************/
 
@@ -739,7 +739,7 @@ int psock_listen(FAR struct socket *psock, int backlog);
  * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of addr, Return: returned size of addr
  *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:
@@ -1563,7 +1563,7 @@ int net_vfcntl(int sockfd, int cmd, va_list ap);
  *
  * Input Parameters:
  *   dev    - The device driver structure to be registered.
- *   lltype - Link level protocol used by the driver (Ethernet, SLIP, TUN, ...
+ *   lltype - Link level protocol used by driver (Ethernet, SLIP, TUN, ...
  *
  * Returned Value:
  *   0:Success; negated errno on failure

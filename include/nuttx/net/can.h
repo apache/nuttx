@@ -53,14 +53,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CAN_HDRLEN 4 //FIXME standard id vs extended
-#define NET_CAN_PKTSIZE sizeof(struct canfd_frame) // max size we can send through socket
-//FIXME think about can & canfd support
+#define CAN_HDRLEN 4                               /* FIXME standard id vs extended */
+#define NET_CAN_PKTSIZE sizeof(struct canfd_frame) /* max size we can send through socket*/
+
+/* FIXME think about can & canfd support */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
 
 /****************************************************************************
  * Public Data
@@ -73,8 +73,6 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
-
-
 
 /****************************************************************************
  * Public Function Prototypes

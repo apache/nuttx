@@ -252,7 +252,8 @@ void iob_initialize(void);
  * Name: iob_alloc
  *
  * Description:
- *   Allocate an I/O buffer by taking the buffer at the head of the free list.
+ *   Allocate an I/O buffer by taking the buffer at the head of the free
+ *   list.
  *
  ****************************************************************************/
 
@@ -590,7 +591,8 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
  * Name: iob_getuserstats
  *
  * Description:
- *   Return a reference to the IOB usage statistics for the IOB consumer/producer
+ *   Return a reference to the IOB usage statistics for the IOB
+ *   consumer/producer
  *
  * Input Parameters:
  *   userid - id representing the IOB producer/consumer

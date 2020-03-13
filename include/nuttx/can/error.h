@@ -60,7 +60,8 @@
 
 /* arbitration lost in bit ... / data[0] */
 #define CAN_ERR_LOSTARB_UNSPEC   0x00 /* unspecified */
-				      /* else bit number in bitstream */
+
+/* else bit number in bitstream */
 
 /* error status of CAN-controller / data[1] */
 #define CAN_ERR_CRTL_UNSPEC      0x00 /* unspecified */
@@ -70,8 +71,8 @@
 #define CAN_ERR_CRTL_TX_WARNING  0x08 /* reached warning level for TX errors */
 #define CAN_ERR_CRTL_RX_PASSIVE  0x10 /* reached error passive status RX */
 #define CAN_ERR_CRTL_TX_PASSIVE  0x20 /* reached error passive status TX */
-				      /* (at least one error counter exceeds */
-				      /* the protocol-defined level of 127)  */
+                                      /* (at least one error counter exceeds */
+                                      /* the protocol-defined level of 127)  */
 #define CAN_ERR_CRTL_ACTIVE      0x40 /* recovered to error active state */
 
 /* error in CAN protocol (type) / data[2] */
@@ -108,7 +109,8 @@
 #define CAN_ERR_PROT_LOC_INTERM  0x12 /* intermission */
 
 /* error status of CAN-transceiver / data[4] */
-/*                                             CANH CANL */
+
+                                            /* CANH CANL */
 #define CAN_ERR_TRX_UNSPEC             0x00 /* 0000 0000 */
 #define CAN_ERR_TRX_CANH_NO_WIRE       0x04 /* 0000 0100 */
 #define CAN_ERR_TRX_CANH_SHORT_TO_BAT  0x05 /* 0000 0101 */

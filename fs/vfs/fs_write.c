@@ -86,7 +86,8 @@
  *
  ****************************************************************************/
 
-ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes)
+ssize_t file_write(FAR struct file *filep, FAR const void *buf,
+                   size_t nbytes)
 {
   FAR struct inode *inode;
 

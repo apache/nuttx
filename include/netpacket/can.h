@@ -102,37 +102,37 @@ struct sockaddr_can
   sa_family_t can_family;
   int16_t     can_ifindex;
   union
+  {
+    /* Transport protocol class address information */
+
+    struct
     {
-      /* Transport protocol class address information */
+      canid_t rx_id;
+      canid_t tx_id;
+    } tp;
 
-      struct
-      {
-        canid_t rx_id;
-        canid_t tx_id;
-      } tp;
+    /* J1939 address information */
 
-      /* J1939 address information */
+    struct
+    {
+      /* 8 byte name when using dynamic addressing */
 
-      struct
-      {
-        /* 8 byte name when using dynamic addressing */
+      uint64_t name;
 
-        uint64_t name;
+      /* pgn:
+       *   8 bit: PS in PDU2 case, else 0
+       *   8 bit: PF
+       *   1 bit: DP
+       *   1 bit: reserved
+       */
 
-        /* pgn:
-         *   8 bit: PS in PDU2 case, else 0
-         *   8 bit: PF
-         *   1 bit: DP
-         *   1 bit: reserved
-         */
+      uint32_t pgn;
 
-        uint32_t pgn;
+      /* 1 byte address */
 
-        /* 1 byte address */
-
-        uint8_t addr;
-      } j1939;
-    } can_addr;
+      uint8_t addr;
+    } j1939;
+  } can_addr;
 };
 
 #endif /* __INCLUDE_NETPACKET_CAN_H */
