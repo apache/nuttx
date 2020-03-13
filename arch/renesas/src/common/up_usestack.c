@@ -124,7 +124,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->adj_stack_size = top_of_stack;
+  tcb->adj_stack_ptr = top_of_stack;
   tcb->adj_stack_size = size_of_stack;
 
   return OK;
