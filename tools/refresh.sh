@@ -95,6 +95,7 @@ done
 
 MYNAME=`basename $0`
 
+cd $WD
 if [ -x ./${MYNAME} ] ; then
   cd .. || { echo "ERROR: cd .. failed" ; exit 1 ; }
 fi
