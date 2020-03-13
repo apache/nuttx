@@ -154,7 +154,8 @@ static uint16_t can_poll_eventhandler(FAR struct net_driver_s *dev,
 #if 0
       /* A poll is a sign that we are free to send data. */
 
-      else if ((flags & CAN_POLL) != 0 && psock_udp_cansend(info->psock) >= 0)
+      else if ((flags & CAN_POLL) != 0 &&
+                 psock_udp_cansend(info->psock) >= 0)
         {
           eventset |= (POLLOUT & info->fds->events);
         }
@@ -234,6 +235,7 @@ static int can_setup(FAR struct socket *psock, int protocol)
 
 #ifdef CONFIG_NET_TIMESTAMP
       /* Store psock in conn se we can read the SO_TIMESTAMP value */
+
       conn->psock = psock;
 #endif
 
@@ -486,7 +488,8 @@ static int can_listen(FAR struct socket *psock, int backlog)
  *   Perform a can connection
  *
  * Input Parameters:
- *   psock   A reference to the socket structure of the socket to be connected
+ *   psock   A reference to the socket structure of the socket
+ *           to be connected
  *   addr    The address of the remote server to connect to
  *   addrlen Length of address buffer
  *
@@ -615,8 +618,8 @@ static int can_poll_local(FAR struct socket *psock, FAR struct pollfd *fds,
       info->cb     = cb;
 
       /* Initialize the callback structure.  Save the reference to the info
-       * structure as callback private data so that it will be available during
-       * callback processing.
+       * structure as callback private data so that it will be available
+       * during callback processing.
        */
 
       cb->flags    = NETDEV_DOWN;
@@ -747,7 +750,8 @@ static ssize_t can_send(FAR struct socket *psock, FAR const void *buf,
  *   returned when the socket was not actually connected.
  *
  * Input Parameters:
- *   psock    A reference to the socket structure of the socket to be connected
+ *   psock    A reference to the socket structure of the socket
+ *            to be connected
  *   buf      Data to send
  *   len      Length of data to send
  *   flags    Send flags (ignored)

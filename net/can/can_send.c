@@ -118,8 +118,10 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       else
         {
           /* Copy the packet data into the device packet buffer and send it */
-          //FIXME potentialy wrong function do we have a header??
-    	  devif_can_send(dev, pstate->snd_buffer, pstate->snd_buflen);
+
+          /* FIXME potentialy wrong function do we have a header?? */
+
+          devif_can_send(dev, pstate->snd_buffer, pstate->snd_buflen);
           pstate->snd_sent = pstate->snd_buflen;
         }
 
@@ -164,10 +166,10 @@ ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len)
 {
   FAR struct net_driver_s *dev;
-  FAR struct can_conn_s *conn; 
+  FAR struct can_conn_s *conn;
   struct send_s state;
   int ret = OK;
-  
+
   conn = (FAR struct can_conn_s *)psock->s_conn;
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
@@ -184,20 +186,20 @@ ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
     {
       return -ENODEV;
     }
-    
-  if(conn->fd_frames)
+
+  if (conn->fd_frames)
     {
-        if(len != CANFD_MTU && len != CAN_MTU)
-          {
-              return -EINVAL;
-          } 
+      if (len != CANFD_MTU && len != CAN_MTU)
+        {
+          return -EINVAL;
+        }
     }
-    else 
+  else
     {
-        if(len != CAN_MTU)
-          {
-              return -EINVAL;
-          }
+      if (len != CAN_MTU)
+        {
+          return -EINVAL;
+        }
     }
 
   /* Perform the send operation */
@@ -236,8 +238,8 @@ ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
       netdev_txnotify_dev(dev);
 
       /* Wait for the send to complete or an error to occur.
-      * net_lockedwait will also terminate if a signal is received.
-      */
+       * net_lockedwait will also terminate if a signal is received.
+       */
 
       ret = net_lockedwait(&state.snd_sem);
 

@@ -138,9 +138,8 @@ FAR struct can_conn_s *can_alloc(void)
       /* Make sure that the connection is marked as uninitialized */
 
       memset(conn, 0, sizeof(*conn));
-      
+
       /* FIXME SocketCAN default behavior enables loopback */
-      
 
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
       /* By default the filter is configured to catch all,
@@ -158,7 +157,6 @@ FAR struct can_conn_s *can_alloc(void)
       conn->filter_count = 1;
 #endif
 
-
       /* Enqueue the connection into the active list */
 
       dq_addlast(&conn->node, &g_active_can_connections);
@@ -172,8 +170,8 @@ FAR struct can_conn_s *can_alloc(void)
  * Name: can_free()
  *
  * Description:
- *   Free a NetLink connection structure that is no longer in use. This should
- *   be done by the implementation of close().
+ *   Free a NetLink connection structure that is no longer in use. This
+ *   should be done by the implementation of close().
  *
  ****************************************************************************/
 
