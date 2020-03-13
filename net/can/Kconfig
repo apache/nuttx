@@ -18,6 +18,10 @@ config NET_CAN
 
 if NET_CAN
 
+config NET_CAN_HAVE_TX_DEADLINE
+	bool
+	default n
+
 config CAN_CONNS
 	int "Number of CAN connections"
 	default 4
@@ -27,9 +31,25 @@ config CAN_CONNS
 config NET_CAN_SOCK_OPTS
 	bool "sockopt support"
 	default n
+	select NET_SOCKOPTS
 	select NET_CANPROTO_OPTIONS
 	---help---
 		Enable support for the CAN socket options
+				
+config NET_CAN_RAW_TX_DEADLINE
+	bool "TX deadline sockopt"
+	default n
+	depends on NET_CAN_SOCK_OPTS && NET_CAN_HAVE_TX_DEADLINE
+	select NET_CMSG
+	---help---
+	    Note: Non-standard SocketCAN sockopt, but this options helps us in
+	    real-time use cases.
+	    
+		When the CAN_RAW_TX_DEADLINE sockopt is enabled. The user can send 
+		CAN frames using sendmsg() function and add a deadline timespec 
+		value in the CMSG data. When the deadline has been passed and the
+		CAN frame is still in the HW TX mailbox then the CAN driver will 
+		discard the CAN frame automatically.
 		
 config NET_CAN_RAW_FILTER_MAX
 	int "CAN_RAW_FILTER max filter count"

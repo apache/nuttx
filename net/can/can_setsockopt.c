@@ -147,6 +147,16 @@ int can_setsockopt(FAR struct socket *psock, int option,
       case CAN_RAW_JOIN_FILTERS:
         break;
 
+#ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
+      case CAN_RAW_TX_DEADLINE:
+  		if (value_len != sizeof(conn->tx_deadline))
+  			return -EINVAL;
+
+  		conn->tx_deadline = *(FAR int32_t *)value;
+
+  		break;
+#endif
+
       default:
         nerr("ERROR: Unrecognized CAN option: %d\n", option);
         ret = -ENOPROTOOPT;

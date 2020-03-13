@@ -76,6 +76,10 @@ struct send_s
   sem_t                   snd_sem;     /* Used to wake up the waiting thread */
   FAR const uint8_t      *snd_buffer;  /* Points to the buffer of data to send */
   size_t                  snd_buflen;  /* Number of bytes in the buffer to send */
+#ifdef CONFIG_NET_CMSG
+  size_t                  pr_msglen;   /* Length of msg buffer */
+  FAR uint8_t            *pr_msgbuf;   /* Pointer to msg buffer */
+#endif
   ssize_t                 snd_sent;    /* The number of bytes sent */
 };
 

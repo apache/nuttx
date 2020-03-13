@@ -75,6 +75,8 @@
                                  /* allow CAN FD frames (default:off) */
 #define CAN_RAW_JOIN_FILTERS   (__SO_PROTOCOL + 5)     
                                  /* all filters must match to trigger */
+#define CAN_RAW_TX_DEADLINE    (__SO_PROTOCOL + 6)
+                                 /* Abort frame when deadline has been passed */
 
 /****************************************************************************
  * Public Types

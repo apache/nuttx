@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/socket/recvmsg.c
+ * net/socket/sendmsg.c
  *
  *   Copyright (C) 2007-2009, 2011-2017, 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,13 +54,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: psock_recvmsg
+ * Name: psock_sendmsg
  *
  * Description:
- *   psock_recvfrom() receives messages from a socket, and may be used to
- *   receive data on a socket whether or not it is connection-oriented.
+ *   psock_sendfrom() sends messages to a socket, and may be used to
+ *   send data on a socket whether or not it is connection-oriented.
  *   This is an internal OS interface.  It is functionally equivalent to
- *   recvfrom() except that:
+ *   sendfrom() except that:
  *
  *   - It is not a cancellation point,
  *   - It does not modify the errno variable, and
@@ -69,20 +69,20 @@
  *
  * Input Parameters:
  *   psock   - A pointer to a NuttX-specific, internal socket structure
- *   msg      Buffer to receive msg
+ *   msg     - Buffer to of the msg
  *   len     - Length of buffer
  *   flags   - Receive flags
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on any failure, a negated errno value
+ *   send() will return 0.  Otherwise, on any failure, a negated errno value
  *   is returned (see comments with send() for a list of appropriate errno
  *   values).
  *
  ****************************************************************************/
 
-ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+ssize_t psock_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                        int flags)
 {
   /* Verify that non-NULL pointers were passed */
@@ -103,38 +103,38 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       return -EBADF;
     }
 
-  /* Let logic specific to this address family handle the recvfrom()
+  /* Let logic specific to this address family handle the sendfrom()
    * operation.
    */
 
   DEBUGASSERT(psock->s_sockif != NULL &&
-              (psock->s_sockif->si_recvmsg != NULL ||
-               psock->s_sockif->si_recvfrom != NULL));
+              (psock->s_sockif->si_sendmsg != NULL ||
+               psock->s_sockif->si_sendto != NULL));
 
-  if(psock->s_sockif->si_recvmsg != NULL)
+  if(psock->s_sockif->si_sendmsg != NULL)
     {
-	  return psock->s_sockif->si_recvmsg(psock, msg, flags);
+	  return psock->s_sockif->si_sendmsg(psock, msg, flags);
     }
   else
     {
-	  /* Socket doesn't implement si_recvmsg fallback to si_recvfrom */
-	  FAR void *buf             = msg->msg_iov->iov_base;
-	  FAR struct sockaddr *from = msg->msg_name;
-	  FAR socklen_t *fromlen    = (FAR socklen_t *)&msg->msg_namelen;
-	  size_t len                = msg->msg_iov->iov_len;
-	  return psock->s_sockif->si_recvfrom(psock, buf, len, flags, from, fromlen);
+	  /* Socket doesn't implement si_sendmsg fallback to si_sendto */
+	  FAR void *buf           = msg->msg_iov->iov_base;
+	  FAR struct sockaddr *to = msg->msg_name;
+	  socklen_t tolen         = msg->msg_namelen;
+	  size_t len              = msg->msg_iov->iov_len;
+	  return psock->s_sockif->si_sendto(psock, buf, len, flags, to, tolen);
     }
 
 }
 
 /****************************************************************************
- * Name: nx_recvfrom
+ * Name: nx_sendfrom
  *
  * Description:
- *   nx_recvfrom() receives messages from a socket, and may be used to
+ *   nx_sendfrom() receives messages from a socket, and may be used to
  *   receive data on a socket whether or not it is connection-oriented.
  *   This is an internal OS interface.  It is functionally equivalent to
- *   recvfrom() except that:
+ *   sendfrom() except that:
  *
  *   - It is not a cancellation point, and
  *   - It does not modify the errno variable.
@@ -148,13 +148,13 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  * Returned Value:
  *   On success, returns the number of characters sent.  If no data is
  *   available to be received and the peer has performed an orderly shutdown,
- *   recv() will return 0.  Otherwise, on any failure, a negated errno value
+ *   send() will return 0.  Otherwise, on any failure, a negated errno value
  *   is returned (see comments with send() for a list of appropriate errno
  *   values).
  *
  ****************************************************************************/
 
-ssize_t nx_recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
+ssize_t nx_sendmsg(int sockfd, FAR struct msghdr *msg, int flags)
 {
   FAR struct socket *psock;
 
@@ -162,16 +162,16 @@ ssize_t nx_recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
 
   psock = sockfd_socket(sockfd);
 
-  /* Then let psock_recvmsg() do all of the work */
+  /* Then let psock_sendmsg() do all of the work */
 
-  return psock_recvmsg(psock, msg, flags);
+  return psock_sendmsg(psock, msg, flags);
 }
 
 /****************************************************************************
- * Function: recvmsg
+ * Function: sendmsg
  *
  * Description:
- *   The recvmsg() call is identical to recvfrom() with a NULL from parameter.
+ *   The sendmsg() call is identical to sendfrom() with a NULL from parameter.
  *
  * Parameters:
  *   sockfd   Socket descriptor of socket
@@ -209,12 +209,12 @@ ssize_t nx_recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
  *
  ****************************************************************************/
 
-ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
+ssize_t sendmsg(int sockfd, FAR struct msghdr *msg, int flags)
 {
   FAR struct socket *psock;
   ssize_t ret;
 
-  /* recvfrom() is a cancellation point */
+  /* sendfrom() is a cancellation point */
 
   enter_cancellation_point();
 
@@ -222,9 +222,9 @@ ssize_t recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
 
   psock = sockfd_socket(sockfd);
 
-  /* Let psock_recvfrom() do all of the work */
+  /* Let psock_sendfrom() do all of the work */
 
-  ret = psock_recvmsg(psock, msg, flags);
+  ret = psock_sendmsg(psock, msg, flags);
   if (ret < 0)
     {
       _SO_SETERRNO(psock, -ret);

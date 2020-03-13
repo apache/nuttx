@@ -188,6 +188,27 @@ int can_getsockopt(FAR struct socket *psock, int option,
       case CAN_RAW_JOIN_FILTERS:
         break;
 
+#ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
+      case CAN_RAW_TX_DEADLINE:
+        if (*value_len < sizeof(conn->tx_deadline))
+          {
+            /* REVISIT: POSIX says that we should truncate the value if it
+             * is larger than value_len.   That just doesn't make sense
+             * to me in this case.
+             */
+
+            ret              = -EINVAL;
+          }
+        else
+          {
+            FAR int *tx_deadline = (FAR int32_t *)value;
+            *tx_deadline         = conn->tx_deadline;
+            *value_len         = sizeof(conn->tx_deadline);
+            ret                = OK;
+          }
+        break;
+#endif
+
       default:
         nerr("ERROR: Unrecognized RAW CAN socket option: %d\n", option);
         ret = -ENOPROTOOPT;

@@ -102,8 +102,9 @@ const struct sock_intf_s g_icmpv6_sockif =
   NULL,               /* si_sendfile */
 #endif
   icmpv6_recvfrom,    /* si_recvfrom */
-#ifdef CONFIG_NET_RECVMSG_CMSG
+#ifdef CONFIG_NET_CMSG
   NULL,               /* si_recvmsg */
+  NULL,               /* si_sendmsg */
 #endif
   icmpv6_close        /* si_close */
 };

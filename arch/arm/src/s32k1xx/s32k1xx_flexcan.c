@@ -433,10 +433,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
           mb->id.std = frame->can_id & MASKSTDID;
         }
 
-  #if 0
-      /* cs.rtr = frame.isRemoteTransmissionRequest(); */
-  #endif
-
+      cs.rtr = frame->can_id & FLAGRTR ? 1 : 0;
       cs.dlc = frame->can_dlc;
 
       mb->data[0].w00 = __builtin_bswap32(*(uint32_t *)&frame->data[0]);
@@ -458,9 +455,7 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
           mb->id.std = frame->can_id & MASKSTDID;
         }
 
-#if 0
-      /* cs.rtr = frame.isRemoteTransmissionRequest(); */
-#endif
+      cs.rtr = frame->can_id & FLAGRTR ? 1 : 0;
 
       if (frame->len < 9)
         {

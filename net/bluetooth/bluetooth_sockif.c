@@ -109,8 +109,9 @@ const struct sock_intf_s g_bluetooth_sockif =
   NULL,                  /* si_sendfile */
 #endif
   bluetooth_recvfrom,    /* si_recvfrom */
-#ifdef CONFIG_NET_RECVMSG_CMSG
+#ifdef CONFIG_NET_CMSG
   NULL,                  /* si_recvmsg */
+  NULL,                  /* si_sendmsg */
 #endif
   bluetooth_close        /* si_close */
 };

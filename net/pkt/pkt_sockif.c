@@ -108,8 +108,9 @@ const struct sock_intf_s g_pkt_sockif =
   NULL,            /* si_sendfile */
 #endif
   pkt_recvfrom,    /* si_recvfrom */
-#ifdef CONFIG_NET_RECVMSG_CMSG
+#ifdef CONFIG_NET_CMSG
   NULL,            /* si_recvmsg */
+  NULL,            /* si_sendmsg */
 #endif
   pkt_close        /* si_close */
 };

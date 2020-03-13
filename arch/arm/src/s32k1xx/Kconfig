@@ -152,6 +152,7 @@ config S32K1XX_ENET
 
 config S32K1XX_FLEXCAN
 	bool "FLEXCAN"
+	select NET_CAN_HAVE_TX_DEADLINE
 	default n
 
 menuconfig S32K1XX_LPI2C0

@@ -69,6 +69,10 @@ static ssize_t can_send(FAR struct socket *psock,
 static ssize_t can_sendto(FAR struct socket *psock, FAR const void *buf,
               size_t len, int flags, FAR const struct sockaddr *to,
               socklen_t tolen);
+#ifdef CONFIG_NET_CMSG
+static ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                    size_t len, int flags);
+#endif
 static int can_close(FAR struct socket *psock);
 
 /****************************************************************************
@@ -93,8 +97,9 @@ const struct sock_intf_s g_can_sockif =
   NULL,             /* si_sendfile */
 #endif
   can_recvfrom,     /* si_recvfrom */
-#ifdef CONFIG_NET_RECVMSG_CMSG
+#ifdef CONFIG_NET_CMSG
   can_recvmsg,      /* si_recvmsg */
+  can_sendmsg,      /* si_sendmsg */
 #endif
   can_close         /* si_close */
 };
@@ -772,6 +777,50 @@ static ssize_t can_sendto(FAR struct socket *psock, FAR const void *buf,
   nerr("ERROR: sendto() not supported for raw packet sockets\n");
   return -EAFNOSUPPORT;
 }
+
+/****************************************************************************
+ * Name: can_sendmsg
+ *
+ * Description:
+ *   The can_sendmsg() send a CAN frame to psock
+ *
+ * Input Parameters:
+ *   psock - An instance of the internal socket structure.
+ *   msg   - CAN frame and optional CMSG
+ *   flags - Send flags (ignored)
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error, a negated
+ *   errno value is returned (see send() for the list of appropriate error
+ *   values.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_NET_CMSG
+static ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                    size_t len, int flags);
+{
+  ssize_t ret;
+
+  /* Only SOCK_RAW is supported */
+
+  if (psock->s_type == SOCK_RAW)
+    {
+      /* Raw packet send */
+
+      ret = psock_can_send(psock, buf, len);
+    }
+  else
+    {
+      /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and
+       * no peer address is set.
+       */
+
+      ret = -EDESTADDRREQ;
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: can_close
