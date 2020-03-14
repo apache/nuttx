@@ -68,6 +68,7 @@ static volatile spinlock_t g_appcpu_interlock SP_SECTION;
 
 /****************************************************************************
  * ROM function prototypes
+ * <nxs whitelist="Cache_Flush, Cache_Read_Enable" />
  ****************************************************************************/
 
 void Cache_Flush(int cpu);
@@ -184,7 +185,7 @@ void xtensa_appcpu_start(void)
   sched_note_cpu_started(tcb);
 #endif
 
-  /* Handle interlock*/
+  /* Handle interlock */
 
   g_appcpu_started = true;
   spin_unlock(&g_appcpu_interlock);

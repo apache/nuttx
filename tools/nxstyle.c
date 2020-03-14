@@ -54,9 +54,10 @@
 
 #define NXSTYLE_VERSION "0.01"
 
-#define LINE_SIZE      512
-#define RANGE_NUMBER   4096
-#define DEFAULT_WIDTH  78
+#define LINE_SIZE        512
+#define RANGE_NUMBER     4096
+#define DEFAULT_WIDTH    78
+#define WHITELIST_NUMBER 4096
 
 #define FIRST_SECTION  INCLUDED_FILES
 #define LAST_SECTION   PUBLIC_FUNCTION_PROTOTYPES
@@ -142,6 +143,9 @@ static int g_verbose            = 2;
 static int g_rangenumber        = 0;
 static int g_rangestart[RANGE_NUMBER];
 static int g_rangecount[RANGE_NUMBER];
+
+static int g_wlistnumber        = 0;
+static char *g_wlist[WHITELIST_NUMBER];
 
 static const struct file_section_s g_section_info[] =
 {
@@ -492,6 +496,58 @@ static bool check_section_header(const char *line, int lineno)
     }
 
   return false;
+}
+
+/********************************************************************************
+ * Name:  check_control_header
+ *
+ * Description:
+ *   Check if the current line holds a section header
+ *
+ ********************************************************************************/
+
+static void check_control_header(const char *line, int lineno)
+{
+  if (strncmp(line, " * <nxs ", 8) == 0)
+    {
+      line += 8;
+
+      if (strncmp(line, "whitelist=\"", 11) == 0)
+        {
+          const char * begin;
+
+          line += 11;
+
+          while (g_wlistnumber < WHITELIST_NUMBER)
+            {
+              while (isspace(*line))
+                {
+                  line++;
+                }
+
+                begin = line;
+
+              while (*line != ',' && *line != '"' && *line != '\0')
+                {
+                  line++;
+                }
+
+              if (line - begin)
+                {
+                  g_wlist[g_wlistnumber] = (char *)calloc((line - begin) + 1,
+                      sizeof(char));
+                  memcpy(g_wlist[g_wlistnumber++], begin, line - begin);
+                }
+
+              if (*line != ',')
+                {
+                  break;
+                }
+
+              line++;
+            }
+        }
+    }
 }
 
 /********************************************************************************
@@ -1114,6 +1170,10 @@ int main(int argc, char **argv, char **envp)
             }
         }
 
+      /* Check for nxstyle control block. */
+
+      check_control_header(line, lineno);
+
       /* Check for the comment block indicating the beginning of a new file
        * section.
        */
@@ -1351,138 +1411,161 @@ int main(int argc, char **argv, char **envp)
               bool have_upper = false;
               bool have_lower = false;
               int ident_index = n;
+              int wlist_index;
 
-              /* Parse over the identifier.  Check if it contains mixed upper-
-               * and lower-case characters.
-               */
+              /* Check whitelist from inside file */
 
-              do
+              for (wlist_index = 0; wlist_index < g_wlistnumber; wlist_index++)
                 {
-                  have_upper |= isupper(line[n]);
+                  int wlentry_len;
 
-                  /* The coding standard provides for some exceptions of lower
-                   * case characters in pre-processor strings:
-                   *
-                   *   IPv[4|6]    as an IP version number
-                   *   ICMPv6      as an ICMP version number
-                   *   IGMPv2      as an IGMP version number
-                   *   [0-9]p[0-9] as a decimal point
-                   *   d[0-9]      as a divisor
-                   */
+                  wlentry_len = strlen(g_wlist[wlist_index]);
 
-                   if (!have_lower && islower(line[n]))
-                     {
-                       switch (line[n])
-                       {
-                         /* A sequence containing 'v' may occur at the
-                          * beginning of the identifier.
-                          */
-
-                         case 'v':
-                           if (n > 1 &&
-                               line[n - 2] == 'I' &&
-                               line[n - 1] == 'P' &&
-                               (line[n + 1] == '4' ||
-                                line[n + 1] == '6'))
-                             {
-                             }
-                           else if (n > 3 &&
-                                    line[n - 4] == 'I' &&
-                                    line[n - 3] == 'C' &&
-                                    line[n - 2] == 'M' &&
-                                    line[n - 1] == 'P' &&
-                                    line[n + 1] == '6')
-                             {
-                             }
-                           else if (n > 3 &&
-                                    line[n - 4] == 'I' &&
-                                    line[n - 3] == 'G' &&
-                                    line[n - 2] == 'M' &&
-                                    line[n - 1] == 'P' &&
-                                    line[n + 1] == '2')
-                             {
-                             }
-                           else
-                             {
-                               have_lower = true;
-                             }
-                           break;
-
-                         /* Sequences containing 'p' or 'd' must have been
-                          * preceded by upper case characters.
-                          */
-
-                         case 'p':
-                           if (!have_upper || n < 1 ||
-                               !isdigit(line[n - 1]) ||
-                               !isdigit(line[n + 1]))
-                             {
-                               have_lower = true;
-                             }
-                             break;
-
-                         case 'd':
-                           if (!have_upper || !isdigit(line[n + 1]))
-                             {
-                               have_lower = true;
-                             }
-                             break;
-
-                         default:
-                           have_lower = true;
-                           break;
-                       }
-                     }
-
-                  n++;
+                  if (strncmp(g_wlist[wlist_index], &line[n], wlentry_len) == 0)
+                    {
+                      if (line[n + wlentry_len] != '_' &&
+                          !isalnum(line[n + wlentry_len]))
+                        {
+                          n += wlentry_len;
+                          break;
+                        }
+                    }
                 }
-              while (line[n] == '_' || isalnum(line[n]));
 
-              /* Check for mixed upper and lower case */
-
-              if (have_upper && have_lower)
+              if (wlist_index == g_wlistnumber)
                 {
-                  /* REVISIT:  Although pre-processor definitions are
-                   * supposed to be all upper-case, there are exceptions
-                   * such as using 'p' for a decimal point or 'MHz'.
-                   * Those will be reported here, but probably should be
-                   * considered false alarms.
+                  /* Nothing found. Parse over the identifier.
+                   * Check if it contains mixed upper- and lower-case characters.
                    */
 
-                  /* Ignore inttype.h strings beginning with PRIx and
-                   * system calls beginning with SYS_
-                   */
-
-                  if ((strncmp(&line[ident_index], "PRIx", 4) == 0) ||
-                      (strncmp(&line[ident_index], "SYS_", 4) == 0))
+                  do
                     {
-                      /* No error */
+                      have_upper |= isupper(line[n]);
+
+                      /* The coding standard provides for some exceptions of
+                       * lower case characters in pre-processor strings:
+                       *
+                       *   IPv[4|6]    as an IP version number
+                       *   ICMPv6      as an ICMP version number
+                       *   IGMPv2      as an IGMP version number
+                       *   [0-9]p[0-9] as a decimal point
+                       *   d[0-9]      as a divisor
+                       */
+
+                       if (!have_lower && islower(line[n]))
+                         {
+                           switch (line[n])
+                           {
+                             /* A sequence containing 'v' may occur at the
+                              * beginning of the identifier.
+                              */
+
+                             case 'v':
+                               if (n > 1 &&
+                                   line[n - 2] == 'I' &&
+                                   line[n - 1] == 'P' &&
+                                   (line[n + 1] == '4' ||
+                                    line[n + 1] == '6'))
+                                 {
+                                 }
+                               else if (n > 3 &&
+                                        line[n - 4] == 'I' &&
+                                        line[n - 3] == 'C' &&
+                                        line[n - 2] == 'M' &&
+                                        line[n - 1] == 'P' &&
+                                        line[n + 1] == '6')
+                                 {
+                                 }
+                               else if (n > 3 &&
+                                        line[n - 4] == 'I' &&
+                                        line[n - 3] == 'G' &&
+                                        line[n - 2] == 'M' &&
+                                        line[n - 1] == 'P' &&
+                                        line[n + 1] == '2')
+                                 {
+                                 }
+                               else
+                                 {
+                                   have_lower = true;
+                                 }
+                               break;
+
+                             /* Sequences containing 'p' or 'd' must have been
+                              * preceded by upper case characters.
+                              */
+
+                             case 'p':
+                               if (!have_upper || n < 1 ||
+                                   !isdigit(line[n - 1]) ||
+                                   !isdigit(line[n + 1]))
+                                 {
+                                   have_lower = true;
+                                 }
+                                 break;
+
+                             case 'd':
+                               if (!have_upper || !isdigit(line[n + 1]))
+                                 {
+                                   have_lower = true;
+                                 }
+                                 break;
+
+                             default:
+                               have_lower = true;
+                               break;
+                           }
+                         }
+
+                      n++;
                     }
+                  while (line[n] == '_' || isalnum(line[n]));
 
-                  /* Ignore ELF stuff like Elf32_Ehdr. */
+                  /* Check for mixed upper and lower case */
 
-                  else if ((strncmp(&line[ident_index], "Elf", 3) == 0))
+                  if (have_upper && have_lower)
                     {
-                      /* No error */
-                    }
+                      /* REVISIT:  Although pre-processor definitions are
+                       * supposed to be all upper-case, there are exceptions
+                       * such as using 'p' for a decimal point or 'MHz'.
+                       * Those will be reported here, but probably should be
+                       * considered false alarms.
+                       */
 
-                  /* Special case hex constants.  These will look like
-                   * identifiers starting with 'x' or 'X' but preceded
-                   * with '0'
-                   */
+                      /* Ignore inttype.h strings beginning with PRIx and
+                       * system calls beginning with SYS_
+                       */
 
-                  else if (ident_index < 1 ||
-                           (line[ident_index] != 'x' &&
-                            line[ident_index] != 'X') ||
-                           line[ident_index - 1] != '0')
-                    {
-                       ERROR("Mixed case identifier found",
-                             lineno, ident_index);
-                    }
-                  else if (have_upper)
-                    {
-                       ERROR("Upper case hex constant found",
-                             lineno, ident_index);
+                      if ((strncmp(&line[ident_index], "PRIx", 4) == 0) ||
+                          (strncmp(&line[ident_index], "SYS_", 4) == 0))
+                        {
+                          /* No error */
+                        }
+
+                      /* Ignore ELF stuff like Elf32_Ehdr. */
+
+                      else if ((strncmp(&line[ident_index], "Elf", 3) == 0))
+                        {
+                          /* No error */
+                        }
+
+                      /* Special case hex constants.  These will look like
+                       * identifiers starting with 'x' or 'X' but preceded
+                       * with '0'
+                       */
+
+                      else if (ident_index < 1 ||
+                               (line[ident_index] != 'x' &&
+                                line[ident_index] != 'X') ||
+                               line[ident_index - 1] != '0')
+                        {
+                           ERROR("Mixed case identifier found",
+                                 lineno, ident_index);
+                        }
+                      else if (have_upper)
+                        {
+                           ERROR("Upper case hex constant found",
+                                 lineno, ident_index);
+                        }
                     }
                 }
 
