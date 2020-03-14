@@ -229,6 +229,10 @@ Configuration Subdirectories
     information see:  apps/system/nsh/README.txt and
     Documentation/NuttShell.html.
 
+    To be usable, this configuration should:  (1) Use the same BAUD
+    as the bootloader and (2) switch from the MMC/SD card to the second
+    partition in the W25 part.
+
     NOTES:
 
     1. This configuration builds for execution entirely from RAM.  A

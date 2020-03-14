@@ -30,6 +30,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <termios.h>
 #include <errno.h>
 #include <debug.h>
 #include <hex2bin.h>
@@ -544,6 +545,20 @@ static int w25_boot_program(void)
       return ret;
     }
 
+#ifdef CONFIG_SERIAL_TERMIOS
+  /* Drain all pending Tx output in stdout. "Booting..." message will be
+   * lost if the outgoing Tx bytes are not drained.
+   */
+
+  ret = tcdrain(1);
+  if (ret < 0)
+    {
+      ret = -get_errno();
+      fprintf(stderr, "ERROR: tcdrain() failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
   /* Start the successfully loaded program */
 
   SRAM_ENTRY();
@@ -680,6 +695,7 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
           if (++count == 10)
             {
               putchar('.');
+              fflush(stdout);
               count = 0;
             }
         }
@@ -771,6 +787,9 @@ int w25_main(int argc, char *argv)
             {
               return EXIT_FAILURE;
             }
+
+          /* Load HEX command */
+
           else if (ret == 'L' || ret == 'l')
             {
               ret = w25_write_program();
@@ -781,8 +800,15 @@ int w25_main(int argc, char *argv)
                   disable = true;
                 }
             }
-          else /* if (ret == 'B' || ret == 'b' || ret == '\0') */
+
+          /* Boot from FLASH or timeout */
+
+          else /* if (ret == 'B' || ret == 'b' || ret == 0) */
             {
+              /* REVISIT:  The program is probably already in RAM.  We may
+               * not have to reload and verify it.
+               */
+
               ret = w25_boot_program();
 
               /* Shouldn't get here unless the FLASH content is bad */
