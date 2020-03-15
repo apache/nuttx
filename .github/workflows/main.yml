@@ -18,7 +18,7 @@ on:
 jobs:
   check:
     runs-on: ubuntu-18.04
-    container: liuguo09/ubuntu-nuttx:18.04
+    container: ubuntu:19.04
 
     steps:
     - name: Checkout nuttx repo
@@ -38,7 +38,7 @@ jobs:
 
   build:
     runs-on: ubuntu-18.04
-    container: liuguo09/ubuntu-nuttx:18.04
+    container: docker.pkg.github.com/btashton/nuttx-build-containers/nuttx-github-ci
 
     strategy:
       matrix:
