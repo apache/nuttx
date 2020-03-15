@@ -1,0 +1,7 @@
+name: ci-container
+runs:
+  using: 'docker'
+  image: 'docker.pkg.github.com/apache/incubator-nuttx-testing/nuttx-ci-linux'
+  args:
+    - "-c"
+    - ${{ inputs.run }}
