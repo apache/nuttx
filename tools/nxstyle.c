@@ -147,6 +147,8 @@ static int g_rangecount[RANGE_NUMBER];
 static int g_wlistnumber        = 0;
 static char *g_wlist[WHITELIST_NUMBER];
 
+static int g_bignore = 0;
+
 static const struct file_section_s g_section_info[] =
 {
   {
@@ -264,7 +266,7 @@ static int message(enum class_e class, const char *text, int lineno, int ndx)
 {
   FILE *out = stdout;
 
-  if (skip(lineno))
+  if (skip(lineno) || g_bignore)
     {
       return g_status;
     }
@@ -499,18 +501,30 @@ static bool check_section_header(const char *line, int lineno)
 }
 
 /********************************************************************************
- * Name:  check_control_header
+ * Name:  check_control_comment
  *
  * Description:
- *   Check if the current line holds a section header
+ *   Check if the current line holds a control comment
  *
  ********************************************************************************/
 
 static void check_control_header(const char *line, int lineno)
 {
-  if (strncmp(line, " * <nxs ", 8) == 0)
+  if (*line == '/')
     {
-      line += 8;
+      /* It is a single line comment */
+
+      line++;
+    }
+
+  if (strncmp(line, "* <nxs ", 7) == 0)
+    {
+      line += 7;
+
+      while (isspace(*line))
+        {
+          line++;
+        }
 
       if (strncmp(line, "whitelist=\"", 11) == 0)
         {
@@ -545,6 +559,19 @@ static void check_control_header(const char *line, int lineno)
                 }
 
               line++;
+            }
+        }
+      else if (strncmp(line, "ignore=", 7) == 0)
+        {
+          line += 7;
+
+          if (strncmp(line, "\"0\"", 3) == 0)
+            {
+              g_bignore = 0;
+            }
+          else if (strncmp(line, "\"1\"", 3) == 0)
+            {
+              g_bignore = 1;
             }
         }
     }
@@ -1172,7 +1199,7 @@ int main(int argc, char **argv, char **envp)
 
       /* Check for nxstyle control block. */
 
-      check_control_header(line, lineno);
+      check_control_header(&line[indent], lineno);
 
       /* Check for the comment block indicating the beginning of a new file
        * section.
