@@ -156,7 +156,7 @@
  *
  * This is only important when compiling libraries (libc or libnx) that are
  * used both by the OS (libkc.a and libknx.a) or by the applications
- * (libuc.a and libunx.a).  The that case, the correct interface must be
+ * (libuc.a and libunx.a).  In that case, the correct interface must be
  * used for the build context.
  *
  * REVISIT:  In the flat build, the same functions must be used both by

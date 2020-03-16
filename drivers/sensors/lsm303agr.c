@@ -356,7 +356,7 @@ static int lsm303agr_sensor_config(FAR struct lsm303agr_dev_s *priv)
  * Name: lsm303agr_isbitset
  *
  * Description:
- *   Check if bit it set from mask, not bit number.
+ *   Check if bit is set from mask, not bit number.
  *
  ****************************************************************************/
 

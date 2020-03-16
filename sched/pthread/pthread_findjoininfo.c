@@ -55,7 +55,7 @@
  *   Find a join structure in a local data set.
  *
  * Input Parameters:
- *   group - The that the pid is (or was) a member of of
+ *   group - The group that the pid is (or was) a member of
  *   pid - The ID of the pthread
  *
  * Returned Value:

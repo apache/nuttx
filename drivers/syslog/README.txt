@@ -262,7 +262,7 @@ SYSLOG Channels
 
   3. Serialization Buffer
   -----------------------
-  A final option is the use the an "interrupt buffer" to buffer the
+  A final option is the use of an "interrupt buffer" to buffer the
   interrupt level SYSLOG output.  In this case:
 
     * SYSLOG output generated from interrupt level process in not sent to

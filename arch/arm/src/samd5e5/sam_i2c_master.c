@@ -1477,7 +1477,7 @@ int sam_i2c_reset(FAR struct i2c_master_s *dev)
 
   i2c_putreg32(priv, ctrla & ~I2C_CTRLA_ENABLE, SAM_I2C_CTRLA_OFFSET);
 
-  /* Wait it get sync */
+  /* Wait to get sync */
 
   i2c_wait_synchronization(priv);
 

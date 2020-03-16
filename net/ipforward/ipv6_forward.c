@@ -642,7 +642,7 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
           /* Nothing other 6LoWPAN forwarding is currently handled and that
            * case was dealt with in ipv6_packet_conversion().
            *
-           * REVISIT: Is the an issue?  Do other use cases make sense?
+           * REVISIT: Is this an issue?  Do other use cases make sense?
            */
 
           nwarn("WARNING: Packet forwarding supported only for 6LoWPAN\n");

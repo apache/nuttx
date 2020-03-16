@@ -2069,11 +2069,10 @@ The specific environmental definitions are unique for each board but should incl
 <p><b>Input Parameters:</b></p>
 <ul>
   <li><code>tcb</code>: Refers to a task in the ready-to-run list (normally
-    the task at the head of the list).  It most be
-    stopped, its context saved and moved into one of the
-    waiting task lists.  It it was the task at the head
-    of the ready-to-run list, then a context to the new
-    ready to run task must be performed.
+    the task at the head of the list).  It must be stopped, its context saved
+    and moved into one of the waiting task lists.  If it was the task at the
+    head of the ready-to-run list, then a context switch to the new ready to
+    run task must be performed.
   </li>
   <li><code>task_state</code>: Specifies which waiting task list should be
     hold the blocked task TCB.
@@ -6742,7 +6741,7 @@ int syslog_initialize(void);
 </li>
 <li>
   <p><b>Serialization Buffer</b>.
-    A final option is the use the an <i>interrupt buffer</i> to buffer the interrupt level SYSLOG output.  In this case:
+    A final option is the use of an <i>interrupt buffer</i> to buffer the interrupt level SYSLOG output.  In this case:
   </p>
   <ul>
     <li>

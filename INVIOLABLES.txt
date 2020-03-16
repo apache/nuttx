@@ -81,7 +81,7 @@ All Users Matter
     Others?
   o No changes to build system should limit use of NuttX by any user.
   o Simplifying things for one user does not justify excluding another user.
-  o We should seek to expand the the NuttX user base, not to limit it for
+  o We should seek to expand the NuttX user base, not to limit it for
     reasons of preference or priority.
   o We must resist the pull to make NuttX into a Linux-only, GCC-only, and
     ARM-only solution.
