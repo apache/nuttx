@@ -107,7 +107,7 @@
  * PERIPH_RXTRIG    - The RX ID of the peripheral that provides the DMA trigger.  This
  *                    is one of the DMA_TRIGSRC_*[_RX] definitions.  This trigger source
  *                    is selected when sam_dmarxsetup() is called.
- * PERIPH_INCREMENT - Indicates the that peripheral address should be incremented on
+ * PERIPH_INCREMENT - Indicates that the peripheral address should be incremented on
  *                    each "beat"
  * PERIPH_QOS       - Quality of service for peripheral accesses
  */
@@ -128,7 +128,7 @@
 
 /* Memory endpoint characteristics
  *
- * MEM_INCREMENT - Indicates the that memory address should be incremented on each
+ * MEM_INCREMENT - Indicates that the memory address should be incremented on each
  *                 "beat"
  * MEM_QOS       - Quality of service for memory accesses
  */

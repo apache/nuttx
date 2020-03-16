@@ -741,7 +741,7 @@ void weak_function up_dma_initialize(void)
 
   nxsem_setprotocol(&g_edma.dsem, SEM_PRIO_NONE);
 
-  /* Initialize the list of of free TCDs from the pool of pre-allocated TCDs. */
+  /* Initialize the list of free TCDs from the pool of pre-allocated TCDs. */
 
   s32k1xx_tcd_initialize();
 #endif

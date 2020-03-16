@@ -289,7 +289,7 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev);
  *      number of pulses is required, the 'count' value will be nonzero.
  *   2. The lower half driver's start() method must verify that it can
  *      support the request pulse train (frequency, duty, AND pulse count).
- *      It it cannot, it should return an error.  If the pulse count is
+ *      If it cannot, it should return an error.  If the pulse count is
  *      non-zero, it should set up the hardware for that number of pulses
  *      and return success.  NOTE:  That is CONFIG_PWM_PULSECOUNT is
  *      defined, the start() method receives an additional parameter

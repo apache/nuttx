@@ -70,7 +70,7 @@ config NET_ETH_PKTSIZE
 		590.
 
 		IPv6 hosts are required to be able to handle an MSS of 1220 octets,
-		resulting in a minimum buffer size of of 1220+20+40+14 = 1294
+		resulting in a minimum buffer size of 1220+20+40+14 = 1294
 
 		To get an MTU of 1500, for example, you would need packet buffer of
 		size 1514.

@@ -256,8 +256,8 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
         {
           /* The worker thread has been boosted to a higher priority than the
            * waiter task.  The pending priority should be in the list (unless
-           * it was lost because of of list overflow or because the worker
-           * was reprioritized again unbeknownst to the priority inheritance
+           * it was lost because of list overflow or because the worker was
+           * reprioritized again unbeknownst to the priority inheritance
            * logic).
            *
            * Search the list for the matching priority.

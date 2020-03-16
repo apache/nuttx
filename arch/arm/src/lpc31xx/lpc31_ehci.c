@@ -2120,7 +2120,7 @@ static int lpc31_async_setup(struct lpc31_rhport_s *rhport,
   toggle = (uint32_t)epinfo->toggle << QTD_TOKEN_TOGGLE_SHIFT;
   ret    = -EIO;
 
-  /* Is the an EP0 SETUP request?  If so, req will be non-NULL and we will
+  /* Is there an EP0 SETUP request?  If so, req will be non-NULL and we will
    * queue two or three qTDs:
    *
    *   1) One for the SETUP phase,
@@ -2787,7 +2787,7 @@ static int lpc31_qh_ioccheck(struct lpc31_qh_s *qh, uint32_t **bp, void *arg)
           if ((token & (QH_TOKEN_BABBLE | QH_TOKEN_HALTED)) == QH_TOKEN_HALTED &&
               (token & QH_TOKEN_CERR_MASK) != 0)
             {
-              /* It is a stall,  Note the that the data toggle is reset
+              /* It is a stall,  Note that the data toggle is reset
                * after the stall.
                */
 
