@@ -36,6 +36,28 @@ jobs:
         echo "./tools/checkpatch.sh -g $commits"
         ./tools/checkpatch.sh -g $commits
 
+  docs:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        path: nuttx
+        fetch-depth: 1
+    - name: Generate Inlined Docs
+      run: |
+        echo "Inline Docs"
+        npm install --no-audit inliner
+        inliner=`pwd`/node_modules/inliner/cli/index.js
+        build_output=`pwd`/build
+        mkdir $build_output
+        cd nuttx/Documentation
+        find ./ -type f -name "*.html" -exec  script -e -c "$inliner {} > $build_output/{}" \;
+        ls -l $build_output/
+    - uses: actions/upload-artifact@v1
+      with:
+        name: htmldocs
+        path: ./build/
+
   build:
     runs-on: ubuntu-18.04
     container: liuguo09/ubuntu-nuttx:18.04
