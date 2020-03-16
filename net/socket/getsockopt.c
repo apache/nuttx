@@ -92,7 +92,8 @@
  ****************************************************************************/
 
 static int psock_socketlevel_option(FAR struct socket *psock, int option,
-                                    FAR void *value, FAR socklen_t *value_len)
+                                    FAR void *value,
+                                    FAR socklen_t *value_len)
 {
   /* Verify that the socket option if valid (but might not be supported ) */
 

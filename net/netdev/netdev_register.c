@@ -241,8 +241,8 @@ static int get_ifindex(void)
  *
  * Input Parameters:
  *   dev    - The device driver structure to be registered.
- *   lltype - Link level protocol used by the driver (Ethernet, SLIP, TUN, ...
- *              ...
+ *   lltype - Link level protocol used by the driver
+ *            (Ethernet, SLIP, TUN, ...)
  *
  * Returned Value:
  *   0:Success; negated errno on failure
@@ -303,7 +303,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 #endif
 
 #ifdef CONFIG_NET_BLUETOOTH
-          case NET_LL_BLUETOOTH:  /* Bluetooth */
+        case NET_LL_BLUETOOTH:                      /* Bluetooth */
             dev->d_llhdrlen = BLUETOOTH_MAX_HDRLEN; /* Determined at runtime */
 #ifdef CONFIG_NET_6LOWPAN
             dev->d_pktsize  = CONFIG_NET_6LOWPAN_PKTSIZE;

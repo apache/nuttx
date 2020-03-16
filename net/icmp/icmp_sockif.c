@@ -284,7 +284,8 @@ static int icmp_connect(FAR struct socket *psock,
  * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr',
+ *            Return: returned size of 'addr'
  *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:
@@ -322,7 +323,8 @@ static int icmp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-static int icmp_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
+static int icmp_bind(FAR struct socket *psock,
+                     FAR const struct sockaddr *addr,
                      socklen_t addrlen)
 {
   /* An ICMP socket cannot be bound to a local address */
@@ -368,10 +370,10 @@ static int icmp_getsockname(FAR struct socket *psock,
  * Name: icmp_getpeername
  *
  * Description:
- *   The icmp_getpeername() function retrieves the remote-connected name of the
- *   specified packet socket, stores this address in the sockaddr structure
- *   pointed to by the 'addr' argument, and stores the length of this
- *   address in the object pointed to by the 'addrlen' argument.
+ *   The icmp_getpeername() function retrieves the remote-connected name of
+ *   the specified packet socket, stores this address in the sockaddr
+ *   structure pointed to by the 'addr' argument, and stores the length of
+ *   this address in the object pointed to by the 'addrlen' argument.
  *
  *   If the actual length of the address is greater than the length of the
  *   supplied sockaddr structure, the stored address will be truncated.

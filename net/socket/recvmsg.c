@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/socket/recvmsg.c
  *
- *   Copyright (C) 2007-2009, 2011-2017, 2019 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2017, 2019 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,6 +87,7 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                        int flags)
 {
   /* Verify that non-NULL pointers were passed */
+
   if (msg == NULL)
     {
       return -EINVAL;
@@ -111,20 +113,22 @@ ssize_t psock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
               (psock->s_sockif->si_recvmsg != NULL ||
                psock->s_sockif->si_recvfrom != NULL));
 
-  if(psock->s_sockif->si_recvmsg != NULL)
+  if (psock->s_sockif->si_recvmsg != NULL)
     {
-	  return psock->s_sockif->si_recvmsg(psock, msg, flags);
+      return psock->s_sockif->si_recvmsg(psock, msg, flags);
     }
   else
     {
-	  /* Socket doesn't implement si_recvmsg fallback to si_recvfrom */
-	  FAR void *buf             = msg->msg_iov->iov_base;
-	  FAR struct sockaddr *from = msg->msg_name;
-	  FAR socklen_t *fromlen    = (FAR socklen_t *)&msg->msg_namelen;
-	  size_t len                = msg->msg_iov->iov_len;
-	  return psock->s_sockif->si_recvfrom(psock, buf, len, flags, from, fromlen);
-    }
+      /* Socket doesn't implement si_recvmsg fallback to si_recvfrom */
 
+      FAR void *buf             = msg->msg_iov->iov_base;
+      FAR struct sockaddr *from = msg->msg_name;
+      FAR socklen_t *fromlen    = (FAR socklen_t *)&msg->msg_namelen;
+      size_t len                = msg->msg_iov->iov_len;
+
+      return psock->s_sockif->si_recvfrom(psock, buf, len, flags, from,
+                                          fromlen);
+    }
 }
 
 /****************************************************************************
@@ -171,7 +175,8 @@ ssize_t nx_recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
  * Function: recvmsg
  *
  * Description:
- *   The recvmsg() call is identical to recvfrom() with a NULL from parameter.
+ *   The recvmsg() call is identical to recvfrom() with a NULL from
+ *   parameter.
  *
  * Parameters:
  *   sockfd   Socket descriptor of socket
@@ -184,19 +189,20 @@ ssize_t nx_recvmsg(int sockfd, FAR struct msghdr *msg, int flags)
  *   -1 is returned, and errno is set appropriately:
  *
  *   EAGAIN
- *     The socket is marked non-blocking and the receive operation would block,
- *     or a receive timeout had been set and the timeout expired before data
- *     was received.
+ *     The socket is marked non-blocking and the receive operation would
+ *     block, or a receive timeout had been set and the timeout expired
+ *     before data was received.
  *   EBADF
  *     The argument sockfd is an invalid descriptor.
  *   ECONNREFUSED
- *     A remote host refused to allow the network connection (typically because
- *     it is not running the requested service).
+ *     A remote host refused to allow the network connection (typically
+ *     because it is not running the requested service).
  *   EFAULT
- *     The receive buffer pointer(s) point outside the process's address space.
+ *     The receive buffer pointer(s) point outside the process's address
+ *     space.
  *   EINTR
- *     The receive was interrupted by delivery of a signal before any data were
- *     available.
+ *     The receive was interrupted by delivery of a signal before any data
+ *     were available.
  *   EINVAL
  *     Invalid argument passed.
  *   ENOMEM

@@ -74,8 +74,9 @@ static int  netlink_getpeername(FAR struct socket *psock,
 static int  netlink_listen(FAR struct socket *psock, int backlog);
 static int  netlink_connect(FAR struct socket *psock,
               FAR const struct sockaddr *addr, socklen_t addrlen);
-static int  netlink_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
-              FAR socklen_t *addrlen, FAR struct socket *newsock);
+static int  netlink_accept(FAR struct socket *psock,
+              FAR struct sockaddr *addr, FAR socklen_t *addrlen,
+              FAR struct socket *newsock);
 static int  netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
               bool setup);
 static ssize_t netlink_send(FAR struct socket *psock,
@@ -420,7 +421,8 @@ static int netlink_listen(FAR struct socket *psock, int backlog)
  *   Perform a netlink connection
  *
  * Input Parameters:
- *   psock   A reference to the socket structure of the socket to be connected
+ *   psock   A reference to the socket structure of the socket
+ *           to be connected
  *   addr    The address of the remote server to connect to
  *   addrlen Length of address buffer
  *
@@ -483,7 +485,8 @@ static int netlink_connect(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static int netlink_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
+static int netlink_accept(FAR struct socket *psock,
+                          FAR struct sockaddr *addr,
                           FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
 #warning Missing logic for NETLINK accept
@@ -623,7 +626,8 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
           conn->pollsem    = fds->sem;
           conn->pollevent  = &fds->revents;
 
-          ret = netlink_notifier_setup(netlink_response_available, conn, conn);
+          ret = netlink_notifier_setup(netlink_response_available, conn,
+                                       conn);
           if (ret < 0)
             {
               nerr("ERROR: netlink_notifier_setup() failed: %d\n", ret);
@@ -751,7 +755,8 @@ static ssize_t netlink_send(FAR struct socket *psock, FAR const void *buf,
  *   returned when the socket was not actually connected.
  *
  * Input Parameters:
- *   psock    A reference to the socket structure of the socket to be connected
+ *   psock    A reference to the socket structure of the socket
+ *            to be connected
  *   buf      Data to send
  *   len      Length of data to send
  *   flags    Send flags (ignored)

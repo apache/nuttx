@@ -121,40 +121,48 @@ int can_setsockopt(FAR struct socket *psock, int option,
         break;
 
       case CAN_RAW_LOOPBACK:
-    if (value_len != sizeof(conn->loopback))
-      return -EINVAL;
+        if (value_len != sizeof(conn->loopback))
+          {
+            return -EINVAL;
+          }
 
-    conn->loopback = *(FAR int32_t *)value;
+        conn->loopback = *(FAR int32_t *)value;
 
-    break;
+        break;
 
       case CAN_RAW_RECV_OWN_MSGS:
-    if (value_len != sizeof(conn->recv_own_msgs))
-      return -EINVAL;
+        if (value_len != sizeof(conn->recv_own_msgs))
+          {
+            return -EINVAL;
+          }
 
-    conn->recv_own_msgs = *(FAR int32_t *)value;
+        conn->recv_own_msgs = *(FAR int32_t *)value;
 
-    break;
+        break;
 
       case CAN_RAW_FD_FRAMES:
-    if (value_len != sizeof(conn->fd_frames))
-      return -EINVAL;
+        if (value_len != sizeof(conn->fd_frames))
+          {
+            return -EINVAL;
+          }
 
-    conn->fd_frames = *(FAR int32_t *)value;
+          conn->fd_frames = *(FAR int32_t *)value;
 
-    break;
+          break;
 
       case CAN_RAW_JOIN_FILTERS:
         break;
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
       case CAN_RAW_TX_DEADLINE:
-  		if (value_len != sizeof(conn->tx_deadline))
-  			return -EINVAL;
+        if (value_len != sizeof(conn->tx_deadline))
+          {
+            return -EINVAL;
+          }
 
-  		conn->tx_deadline = *(FAR int32_t *)value;
+        conn->tx_deadline = *(FAR int32_t *)value;
 
-  		break;
+        break;
 #endif
 
       default:

@@ -284,7 +284,8 @@ static int icmpv6_connect(FAR struct socket *psock,
  * Input Parameters:
  *   psock    Reference to the listening socket structure
  *   addr     Receives the address of the connecting client
- *   addrlen  Input: allocated size of 'addr', Return: returned size of 'addr'
+ *   addrlen  Input: allocated size of 'addr',
+ *            Return: returned size of 'addr'
  *   newsock  Location to return the accepted socket information.
  *
  * Returned Value:
@@ -322,8 +323,9 @@ static int icmpv6_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-static int icmpv6_bind(FAR struct socket *psock, FAR const struct sockaddr *addr,
-                     socklen_t addrlen)
+static int icmpv6_bind(FAR struct socket *psock,
+                       FAR const struct sockaddr *addr,
+                       socklen_t addrlen)
 {
   /* An ICMPv6 socket cannot be bound to a local address */
 
@@ -334,10 +336,10 @@ static int icmpv6_bind(FAR struct socket *psock, FAR const struct sockaddr *addr
  * Name: icmpv6_getsockname
  *
  * Description:
- *   The icmpv6_getsockname() function retrieves the locally-bound name of the
- *   specified packet socket, stores this address in the sockaddr structure
- *   pointed to by the 'addr' argument, and stores the length of this
- *   address in the object pointed to by the 'addrlen' argument.
+ *   The icmpv6_getsockname() function retrieves the locally-bound name of
+ *   the specified packet socket, stores this address in the sockaddr
+ *   structure pointed to by the 'addr' argument, and stores the length of
+ *   this address in the object pointed to by the 'addrlen' argument.
  *
  *   If the actual length of the address is greater than the length of the
  *   supplied sockaddr structure, the stored address will be truncated.
@@ -368,10 +370,10 @@ static int icmpv6_getsockname(FAR struct socket *psock,
  * Name: icmpv6_getpeername
  *
  * Description:
- *   The icmpv6_getpeername() function retrieves the remote-connected name of the
- *   specified packet socket, stores this address in the sockaddr structure
- *   pointed to by the 'addr' argument, and stores the length of this
- *   address in the object pointed to by the 'addrlen' argument.
+ *   The icmpv6_getpeername() function retrieves the remote-connected name of
+ *   the specified packet socket, stores this address in the sockaddr
+ *   structure pointed to by the 'addr' argument, and stores the length of
+ *   this address in the object pointed to by the 'addrlen' argument.
  *
  *   If the actual length of the address is greater than the length of the
  *   supplied sockaddr structure, the stored address will be truncated.
@@ -487,8 +489,8 @@ static int icmpv6_netpoll(FAR struct socket *psock, FAR struct pollfd *fds,
 static ssize_t icmpv6_send(FAR struct socket *psock, FAR const void *buf,
                         size_t len, int flags)
 {
-  /* ICMPv6 sockets cannot be bound and, hence, cannot support any connection-
-   * oriented data transfer.
+  /* ICMPv6 sockets cannot be bound and, hence, cannot support any
+   * connection-oriented data transfer.
    */
 
   return -EDESTADDRREQ;

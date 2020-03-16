@@ -173,15 +173,17 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
                 }
               else
                 {
-                  nerr("ERROR: ICMPv6 protocol error: %u...  Packet dropped\n",
-                       ipv6->proto);
+                  nerr(
+                    "ERROR: ICMPv6 protocol error: %u...  Packet dropped\n",
+                    ipv6->proto);
                 }
             }
           else
 #endif
             {
-              nerr("ERROR: Unhandled packet dropped.  pkttype=%u protocol=%u\n",
-                    pkttype, ipv6->proto);
+              nerr(
+                "ERROR: Unhandled packet dropped.  pkttype=%u protocol=%u\n",
+                pkttype, ipv6->proto);
             }
 
           UNUSED(ipv6);
@@ -396,14 +398,16 @@ static inline int devif_poll_icmpv6(FAR struct net_driver_s *dev,
   FAR struct icmpv6_conn_s *conn = NULL;
   int bstop = 0;
 
-  /* Traverse all of the allocated ICMPV6 connections and perform the poll action */
+  /* Traverse all of the allocated ICMPV6 connections and perform
+   * the poll action
+   */
 
   do
     {
       /* Perform the ICMPV6 poll
-       * Note: conn equal NULL in the first iteration means poll dev's callback list
-       * since icmpv6_autoconfig and icmpv6_neighbor still append it's callback into
-       * this list.
+       * Note: conn equal NULL in the first iteration means poll dev's
+       * callback list since icmpv6_autoconfig and icmpv6_neighbor still
+       * append it's callback into this list.
        */
 
       icmpv6_poll(dev, conn);
@@ -654,9 +658,9 @@ static inline int devif_poll_tcp_timer(FAR struct net_driver_s *dev,
  *   should do only if it cannot accept further write data).
  *
  *   When the callback function is called, there may be an outbound packet
- *   waiting for service in the device packet buffer, and if so the d_len field
- *   is set to a value larger than zero. The device driver should then send
- *   out the packet.
+ *   waiting for service in the device packet buffer, and if so the d_len
+ *   field is set to a value larger than zero. The device driver should then
+ *   send out the packet.
  *
  * Assumptions:
  *   This function is called from the MAC device driver with the network
@@ -690,6 +694,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 #ifdef CONFIG_NET_CAN
     {
       /* Check for pending packet socket transfer */
+
       bstop = devif_poll_can_connections(dev, callback);
     }
 
@@ -791,8 +796,8 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
  * Name: devif_timer
  *
  * Description:
- *   These function will traverse each active network connection structure and
- *   perform network timer operations. The Ethernet driver MUST implement
+ *   These function will traverse each active network connection structure
+ *   and perform network timer operations. The Ethernet driver MUST implement
  *   logic to periodically call devif_timer().
  *
  *   This function will call the provided callback function for every active
@@ -801,9 +806,9 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
  *   should do only if it cannot accept further write data).
  *
  *   When the callback function is called, there may be an outbound packet
- *   waiting for service in the device packet buffer, and if so the d_len field
- *   is set to a value larger than zero. The device driver should then send
- *   out the packet.
+ *   waiting for service in the device packet buffer, and if so the d_len
+ *   field is set to a value larger than zero. The device driver should then
+ *   send out the packet.
  *
  * Assumptions:
  *   This function is called from the MAC device driver with the network
