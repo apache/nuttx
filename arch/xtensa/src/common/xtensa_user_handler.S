@@ -337,7 +337,7 @@ _xtensa_syscall_handler:
 	mov		a3, sp							/* Argument 2: Top of stack = register save area */
 	call0	xtensa_irq_dispatch				/* Call xtensa_int_decode */
 
-	/* On return from xtensa_irq_dispatch, a2 will contain the address of the new
+	/* On return from xtensa_irq_dispatch, A2 will contain the address of the new
 	 * register save area.  Usually this would be the same as the current SP.
 	 * But in the event of a context switch, A2 will instead refer to the TCB
 	 * register save area.
@@ -348,9 +348,9 @@ _xtensa_syscall_handler:
 	mov		a7, sp							/* Argument 2: Top of stack = register save area */
 	call4	xtensa_irq_dispatch				/* Call xtensa_int_decode */
 
-	/* On return from xtensa_irq_dispatch, a5 will contain the address of the new
+	/* On return from xtensa_irq_dispatch, A6 will contain the address of the new
 	 * register save area.  Usually this would be the same as the current SP.
-	 * But in the event of a context switch, A2 will instead refer to the TCB
+	 * But in the event of a context switch, A6 will instead refer to the TCB
 	 * register save area.
 	 */
 
