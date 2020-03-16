@@ -488,6 +488,11 @@ OpenOCD for the ESP32
   See https://github.com/espressif/esp-idf/tree/master/components/bootloader
   and https://github.com/espressif/esp-idf/tree/master/components/partition_table .
 
+  The secondary boot loader by default programs a RTC watchdog timer.
+  As NuttX doesn't know the timer, it reboots every ~9 seconds. You can
+  disable the timer by tweaking sdkconfig CONFIG_BOOTLOADER_WDT_ENABLE
+  and rebuild the boot loader.
+
   Running from IRAM with OpenOCD
   ------------------------------
   Running from IRAM is a good debug option.  You should be able to load the
