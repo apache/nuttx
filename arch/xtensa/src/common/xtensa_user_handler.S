@@ -224,6 +224,7 @@ _xtensa_user_handler:
 	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
 #endif
 	wsr		a0, PS
+	rsync
 
 	/* Call xtensa_user, passing both the EXCCAUSE and a pointer to the
 	 * beginning of the register save area.
