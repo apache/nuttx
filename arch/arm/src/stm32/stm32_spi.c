@@ -389,7 +389,7 @@ static const struct spi_ops_s g_sp2iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi2register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
 
@@ -454,7 +454,7 @@ static const struct spi_ops_s g_sp3iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi3register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
 
@@ -519,7 +519,7 @@ static const struct spi_ops_s g_sp4iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi4register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
 
@@ -584,7 +584,7 @@ static const struct spi_ops_s g_sp5iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi5register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
 
@@ -649,7 +649,7 @@ static const struct spi_ops_s g_sp6iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi6register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
 
