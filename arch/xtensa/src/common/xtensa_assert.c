@@ -314,7 +314,7 @@ void xtensa_panic(int xptcode, uint32_t *regs)
  *
  ****************************************************************************/
 
-void xtensa_user(int exccause, uint32_t *regs)
+void xtensa_user_panic(int exccause, uint32_t *regs)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = running_task();
