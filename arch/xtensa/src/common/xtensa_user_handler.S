@@ -231,11 +231,11 @@ _xtensa_user_handler:
 
 #ifdef __XTENSA_CALL0_ABI__
 	rsr		a2, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
-	mov		a3, sp							/* Argument 2 (a2) = pointer to register save area */
+	mov		a3, sp							/* Argument 2 (a3) = pointer to register save area */
 	calx0	xtensa_user						/* Call xtensa_user */
 #else
-	rsr		a6, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
-	mov		a7, sp							/* Argument 2 (a2) = pointer to register save area */
+	rsr		a6, EXCCAUSE					/* Argument 1 (a6) = EXCCAUSE */
+	mov		a7, sp							/* Argument 2 (a7) = pointer to register save area */
 	call4	xtensa_user						/* Call xtensa_user */
 #endif
 
