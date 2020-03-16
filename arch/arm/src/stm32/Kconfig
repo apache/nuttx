@@ -8820,6 +8820,13 @@ config STM32_SPI1_DMA
 	---help---
 		Use DMA to improve SPI1 transfer performance.
 
+config STM32_SPI1_DMA_BUFFER
+	int "SPI1 DMA buffer size"
+	default 0
+	depends on STM32_SPI1_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI1.
+
 config STM32_SPI_DMATHRESHOLD
 	int "SPI DMA threshold"
 	default 4
@@ -8836,12 +8843,26 @@ config STM32_SPI2_DMA
 	---help---
 		Use DMA to improve SPI2 transfer performance.
 
+config STM32_SPI2_DMA_BUFFER
+	int "SPI2 DMA buffer size"
+	default 0
+	depends on STM32_SPI2_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI2.
+
 config STM32_SPI3_DMA
 	bool "SPI3 DMA"
 	default n
 	depends on STM32_SPI3 && STM32_SPI_DMA
 	---help---
 		Use DMA to improve SPI3 transfer performance.
+
+config STM32_SPI3_DMA_BUFFER
+	int "SPI3 DMA buffer size"
+	default 0
+	depends on STM32_SPI3_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI3.
 
 config STM32_SPI4_DMA
 	bool "SPI4 DMA"
@@ -8850,6 +8871,13 @@ config STM32_SPI4_DMA
 	---help---
 		Use DMA to improve SPI4 transfer performance.
 
+config STM32_SPI4_DMA_BUFFER
+	int "SPI4 DMA buffer size"
+	default 0
+	depends on STM32_SPI4_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI4.
+
 config STM32_SPI5_DMA
 	bool "SPI5 DMA"
 	default n
@@ -8857,12 +8885,26 @@ config STM32_SPI5_DMA
 	---help---
 		Use DMA to improve SPI5 transfer performance.
 
+config STM32_SPI5_DMA_BUFFER
+	int "SPI5 DMA buffer size"
+	default 0
+	depends on STM32_SPI5_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI5.
+
 config STM32_SPI6_DMA
 	bool "SPI6 DMA"
 	default n
 	depends on STM32_SPI6 && STM32_SPI_DMA
 	---help---
 		Use DMA to improve SPI6 transfer performance.
+
+config STM32_SPI5_DMA_BUFFER
+	int "SPI5 DMA buffer size"
+	default 0
+	depends on STM32_SPI5_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI6.
 
 endmenu # SPI Configuration
 
