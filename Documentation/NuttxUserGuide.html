@@ -951,7 +951,7 @@ int execv(FAR const char *path, FAR char *const argv[]);
   </li>
   <li>
      <code>CONFIG_EXECFUNCS_SYMTAB_ARRAY</code>:
-     Name of the ymbol table used by <code>execv()</code> or <code>execl()</code>.
+     Name of the symbol table used by <code>execv()</code> or <code>execl()</code>.
   </li>
   <li>
      <code>CONFIG_EXECFUNCS_NSYMBOLS_VAR</code>:
@@ -1149,7 +1149,7 @@ int posix_spawnp(FAR pid_t *pid, FAR const char *file,
     The value specified by <code>file_actions</code> or <code>attr</code> is invalid.
   </li>
   <li>
-     Any errors that might have been return if <code>vfork()</code> and <code>excec[l|v]()</code> had been called.
+     Any errors that might have been return if <code>vfork()</code> and <code>exec[l|v]()</code> had been called.
   </li>
 </ul>
 <p>
@@ -1969,7 +1969,7 @@ int sched_setscheduler (pid_t pid, int policy, const struct sched_param *param);
 </pre></ul>
 <p>
   <b>Description:</b>
-  <code>sched_setscheduler()</code>  sets both the scheduling policyand the priority for the task identified by <code>pid</code>.
+  <code>sched_setscheduler()</code>  sets both the scheduling policy and the priority for the task identified by <code>pid</code>.
   If <code>pid</code> equals zero, the scheduler of the calling thread will be set.
   The parameter <code>param</code> holds the priority of the thread under the new policy.
 </p>
@@ -2438,7 +2438,7 @@ on this thread of execution.
   <b>Input Parameters:</b>
 </p>
 <ul>
-<li><code>pid</code>. The task ID of the thread to waid for</li>
+<li><code>pid</code>. The task ID of the thread to wait for</li>
 <li><code>stat_loc</code>. The location to return the exit status</li>
 <li><code>options</code>. ignored</li>
 </ul>
@@ -3478,7 +3478,7 @@ interface of the same name.
 <p>
   Semaphores are the preferred mechanism for gaining exclusive access to a
   resource.  sched_lock() and sched_unlock() can also be used for this purpose.
-  However, sched_lock() and sched_unlock() have other undesirable side-affects
+  However, sched_lock() and sched_unlock() have other undesirable side-effects
   in the operation of the system:  sched_lock() also prevents higher-priority
   tasks from running that do not depend upon the semaphore-managed resource
   and, as a result, can adversely affect system response times.
@@ -3565,8 +3565,8 @@ interface of the same name.
     In addition, there may be multiple threads of various priorities that
     need to wait for a count from the semaphore.
     These, the lower priority thread holding the semaphore may have to
-    be boosted numerous time and, to make things more complex, will have
-    to keep track of all of the boost priorities values in in order to
+    be boosted numerous times and, to make things more complex, will have
+    to keep track of all of the boost priorities values in order to
     correctly restore the priorities after a count has been handed out
     to the higher priority thread.
     The <code>CONFIG_SEM_NNESTPRIO</code> defines the size of an array,
@@ -3598,14 +3598,14 @@ interface of the same name.
   Semaphores (and mutexes) may be used for many different purposes.
   One typical use is for mutual exclusion and locking of resources:
   In this usage, the thread that needs exclusive access to a resources takes the semaphore to get access to the resource.
-  The same thread subsequently releases the seamphore count when it no longer needs exclusive access.
+  The same thread subsequently releases the semaphore count when it no longer needs exclusive access.
   Priority inheritance is intended just for this usage case.
 </p>
 <p>
   In a different usage case, a semaphore may to be used to signal an event:
   One thread A waits on a semaphore for an event to occur.
   When the event occurs, another thread B will post the semaphore waking the waiting thread A.
-  This is a completely different usage model; notice that in the mutual exclusion case, the same thread takes and posts the semaphore.  In the signaling case, one thread takes the seamphore and a different thread posts the samphore.  Priority inheritance should <i>never</i> be used in this signaling case.
+  This is a completely different usage model; notice that in the mutual exclusion case, the same thread takes and posts the semaphore.  In the signaling case, one thread takes the semaphore and a different thread posts the semaphore.  Priority inheritance should <i>never</i> be used in this signaling case.
   Subtle, strange behaviors may result.
 </p>
 <p>
@@ -4859,7 +4859,7 @@ interface of the same name.
 <p>
   <b>Tasks and Signals</b>.
   NuttX provides signal interfaces for tasks and pthreads.
-  Signals are used toalter the flow control of tasks by communicating asynchronous events within or between task contexts.
+  Signals are used to alter the flow control of tasks by communicating asynchronous events within or between task contexts.
   Any task or interrupt handler can post (or send) a signal to a particular task using its task ID.
   The task being signaled will execute task-specified signal handler function the next time that the task has priority.
   The signal handler is a user-supplied function that is bound to a specific signal and performs whatever actions are necessary whenever the signal is received.
@@ -6333,8 +6333,8 @@ The target thread's cancellability state, enabled, or disabled, determines when 
 When cancellability is disabled, all cancellations are held pending in the target thread until the thread re-enables cancellability.</p>
 
 <p>The target thread's cancellability state determines how the cancellation is acted on:
-Either asychronrously or deferred.
-Asynchronous cancellations we be acted upon immediately (when enabled), interrupting the thread with its processing in an abritray state.</p>
+Either asynchronously or deferred.
+Asynchronous cancellations will be acted upon immediately (when enabled), interrupting the thread with its processing in an arbitrary state.</p>
 
 <p>When cancellability is deferred, all cancellations are held pending in the target thread until the thread changes the cancellability type or a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> function such as <a href="#pthreadtestcancel"><code>pthread_testcancel()</code></a> is entered.</p>
 
@@ -9874,7 +9874,7 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
   the size of the option value is greater than <code>value_len</code>, the value
   stored in the object pointed to by the <code>value</code> argument will be silently
   truncated. Otherwise, the length pointed to by the <code>value_len</code> argument
-  will be modified to indicate the actual length of the<code>value</code>.
+  will be modified to indicate the actual length of the <code>value</code>.
 </p>
 <p>
   The <code>level</code> argument specifies the protocol level of the option. To
