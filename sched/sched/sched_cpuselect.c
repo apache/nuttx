@@ -52,7 +52,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IMPOSSIBLE_CPU 0xff
+#  define IMPOSSIBLE_CPU 0xff
 
 /****************************************************************************
  * Public Functions
@@ -79,8 +79,8 @@
 int sched_cpu_select(cpu_set_t affinity)
 {
   uint8_t minprio;
-  int cpu;
-  int i;
+  int     cpu;
+  int     i;
 
   /* Otherwise, find the CPU that is executing the lowest priority task
    * (possibly its IDLE task).
@@ -96,7 +96,8 @@ int sched_cpu_select(cpu_set_t affinity)
       if ((affinity & (1 << i)) != 0)
         {
           FAR struct tcb_s *rtcb = (FAR struct tcb_s *)
-                                   g_assignedtasks[i].head;
+                                   g_assignedtasks[i]
+                                   .head;
 
           /* If this thread is executing its IDLE task, the use it.  The
            * IDLE task is always the last task in the assigned task list.
@@ -115,7 +116,7 @@ int sched_cpu_select(cpu_set_t affinity)
             {
               DEBUGASSERT(rtcb->sched_priority > 0);
               minprio = rtcb->sched_priority;
-              cpu = i;
+              cpu     = i;
             }
         }
     }

@@ -83,8 +83,8 @@
 int nxsig_usleep(useconds_t usec)
 {
   struct timespec rqtp;
-  time_t sec;
-  int ret = 0;
+  time_t          sec;
+  int             ret = 0;
 
   if (usec)
     {

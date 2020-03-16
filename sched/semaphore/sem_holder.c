@@ -40,9 +40,9 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_SEM_PREALLOCHOLDERS
-#  define CONFIG_SEM_PREALLOCHOLDERS 0
-#endif
+#  ifndef CONFIG_SEM_PREALLOCHOLDERS
+#    define CONFIG_SEM_PREALLOCHOLDERS 0
+#  endif
 
 /****************************************************************************
  * Private Type Declarations
@@ -57,10 +57,10 @@ typedef int (*holderhandler_t)(FAR struct semholder_s *pholder,
 
 /* Preallocated holder structures */
 
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
-static struct semholder_s g_holderalloc[CONFIG_SEM_PREALLOCHOLDERS];
+#  if CONFIG_SEM_PREALLOCHOLDERS > 0
+static struct semholder_s      g_holderalloc[CONFIG_SEM_PREALLOCHOLDERS];
 static FAR struct semholder_s *g_freeholders;
-#endif
+#  endif
 
 /****************************************************************************
  * Name: nxsem_allocholder
@@ -75,7 +75,7 @@ static inline FAR struct semholder_s *nxsem_allocholder(sem_t *sem)
    * used to implement mutexes.
    */
 
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
+#  if CONFIG_SEM_PREALLOCHOLDERS > 0
   pholder = g_freeholders;
   if (pholder != NULL)
     {
@@ -83,30 +83,30 @@ static inline FAR struct semholder_s *nxsem_allocholder(sem_t *sem)
        * holder list
        */
 
-      g_freeholders    = pholder->flink;
-      pholder->flink   = sem->hhead;
-      sem->hhead       = pholder;
+      g_freeholders  = pholder->flink;
+      pholder->flink = sem->hhead;
+      sem->hhead     = pholder;
 
       /* Make sure the initial count is zero */
 
-      pholder->counts  = 0;
+      pholder->counts = 0;
     }
-#else
+#  else
   if (sem->holder[0].htcb == NULL)
     {
-      pholder          = &sem->holder[0];
-      pholder->counts  = 0;
+      pholder         = &sem->holder[0];
+      pholder->counts = 0;
     }
   else if (sem->holder[1].htcb == NULL)
     {
-      pholder          = &sem->holder[1];
-      pholder->counts  = 0;
+      pholder         = &sem->holder[1];
+      pholder->counts = 0;
     }
-#endif
+#  endif
   else
     {
       serr("ERROR: Insufficient pre-allocated holders\n");
-      pholder          = NULL;
+      pholder = NULL;
     }
 
   DEBUGASSERT(pholder != NULL);
@@ -117,12 +117,12 @@ static inline FAR struct semholder_s *nxsem_allocholder(sem_t *sem)
  * Name: nxsem_findholder
  ****************************************************************************/
 
-static FAR struct semholder_s *nxsem_findholder(sem_t *sem,
+static FAR struct semholder_s *nxsem_findholder(sem_t *           sem,
                                                 FAR struct tcb_s *htcb)
 {
   FAR struct semholder_s *pholder;
 
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
+#  if CONFIG_SEM_PREALLOCHOLDERS > 0
   /* Try to find the holder in the list of holders associated with this
    * semaphore
    */
@@ -136,7 +136,7 @@ static FAR struct semholder_s *nxsem_findholder(sem_t *sem,
           return pholder;
         }
     }
-#else
+#  else
   int i;
   pholder = NULL;
 
@@ -152,7 +152,7 @@ static FAR struct semholder_s *nxsem_findholder(sem_t *sem,
           return pholder;
         }
     }
-#endif
+#  endif
 
   /* The holder does not appear in the list */
 
@@ -179,25 +179,26 @@ nxsem_findorallocateholder(sem_t *sem, FAR struct tcb_s *htcb)
  * Name: nxsem_freeholder
  ****************************************************************************/
 
-static inline void nxsem_freeholder(sem_t *sem,
+static inline void nxsem_freeholder(sem_t *                 sem,
                                     FAR struct semholder_s *pholder)
 {
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
+#  if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *curr;
   FAR struct semholder_s *prev;
-#endif
+#  endif
 
   /* Release the holder and counts */
 
   pholder->htcb   = NULL;
   pholder->counts = 0;
 
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
+#  if CONFIG_SEM_PREALLOCHOLDERS > 0
   /* Search the list for the matching holder */
 
   for (prev = NULL, curr = sem->hhead;
        curr && curr != pholder;
-       prev = curr, curr = curr->flink);
+       prev = curr, curr = curr->flink)
+    ;
 
   if (curr != NULL)
     {
@@ -217,14 +218,14 @@ static inline void nxsem_freeholder(sem_t *sem,
       pholder->flink = g_freeholders;
       g_freeholders  = pholder;
     }
-#endif
+#  endif
 }
 
 /****************************************************************************
  * Name: nxsem_findandfreeholder
  ****************************************************************************/
 
-static inline void nxsem_findandfreeholder(sem_t *sem,
+static inline void nxsem_findandfreeholder(sem_t *           sem,
                                            FAR struct tcb_s *htcb)
 {
   FAR struct semholder_s *pholder = nxsem_findholder(sem, htcb);
@@ -247,9 +248,9 @@ static int nxsem_foreachholder(FAR sem_t *sem, holderhandler_t handler,
                                FAR void *arg)
 {
   FAR struct semholder_s *pholder;
-  int ret = 0;
+  int                     ret = 0;
 
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
+#  if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *next;
 
   for (pholder = sem->hhead; pholder && ret == 0; pholder = next)
@@ -269,7 +270,7 @@ static int nxsem_foreachholder(FAR sem_t *sem, holderhandler_t handler,
           ret = handler(pholder, sem, arg);
         }
     }
-#else
+#  else
   int i;
 
   /* We have two hard-allocated holder structures in sem_t */
@@ -287,7 +288,7 @@ static int nxsem_foreachholder(FAR sem_t *sem, holderhandler_t handler,
           ret = handler(pholder, sem, arg);
         }
     }
-#endif
+#  endif
 
   return ret;
 }
@@ -296,14 +297,14 @@ static int nxsem_foreachholder(FAR sem_t *sem, holderhandler_t handler,
  * Name: nxsem_recoverholders
  ****************************************************************************/
 
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
+#  if CONFIG_SEM_PREALLOCHOLDERS > 0
 static int nxsem_recoverholders(FAR struct semholder_s *pholder,
                                 FAR sem_t *sem, FAR void *arg)
 {
   nxsem_freeholder(sem, pholder);
   return 0;
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name: nxsem_boostholderprio
@@ -323,14 +324,14 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
 
   if (!sched_verifytcb(htcb))
     {
-#if 0  /* DSA: sometimes crashes when Telnet calls external cmd (i.e. 'i2c') */
+#  if 0 /* DSA: sometimes crashes when Telnet calls external cmd (i.e. 'i2c') */
       serr("ERROR: TCB 0x%08x is a stale handle, counts lost\n", htcb);
       DEBUGPANIC();
-#endif
+#  endif
       nxsem_freeholder(sem, pholder);
     }
 
-#if CONFIG_SEM_NNESTPRIO > 0
+#  if CONFIG_SEM_NNESTPRIO > 0
   /* If the priority of the thread that is waiting for a count is greater
    * than the base priority of the thread holding a count, then we may need
    * to adjust the holder's priority now or later to that priority.
@@ -359,7 +360,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
               if (htcb->npend_reprio < CONFIG_SEM_NNESTPRIO)
                 {
                   htcb->pend_reprios[htcb->npend_reprio] =
-                    htcb->sched_priority;
+                  htcb->sched_priority;
                   htcb->npend_reprio++;
                 }
               else
@@ -399,7 +400,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
         }
     }
 
-#else
+#  else
   /* If the priority of the thread that is waiting for a count is less than
    * of equal to the priority of the thread holding a count, then do nothing
    * because the thread is already running at a sufficient priority.
@@ -415,7 +416,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
 
       nxsched_setpriority(htcb, rtcb->sched_priority);
     }
-#endif
+#  endif
 
   return 0;
 }
@@ -424,7 +425,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
  * Name: nxsem_verifyholder
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_ASSERTIONS
+#  ifdef CONFIG_DEBUG_ASSERTIONS
 static int nxsem_verifyholder(FAR struct semholder_s *pholder,
                               FAR sem_t *sem, FAR void *arg)
 {
@@ -432,7 +433,7 @@ static int nxsem_verifyholder(FAR struct semholder_s *pholder,
    * there is a bug???
    */
 
-#if 0
+#    if 0
   FAR struct tcb_s *htcb = (FAR struct tcb_s *)pholder->htcb;
 
   /* Called after a semaphore has been released (incremented), the semaphore
@@ -440,32 +441,32 @@ static int nxsem_verifyholder(FAR struct semholder_s *pholder,
    * In this case, the priority of the holder should not be boosted.
    */
 
-#if CONFIG_SEM_NNESTPRIO > 0
+#      if CONFIG_SEM_NNESTPRIO > 0
   DEBUGASSERT(htcb->npend_reprio == 0);
-#endif
+#      endif
   DEBUGASSERT(htcb->sched_priority == htcb->base_priority);
-#endif
+#    endif
   return 0;
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name: nxsem_dumpholder
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_SEM_PHDEBUG)
+#  if defined(CONFIG_DEBUG_INFO) && defined(CONFIG_SEM_PHDEBUG)
 static int nxsem_dumpholder(FAR struct semholder_s *pholder, FAR sem_t *sem,
                             FAR void *arg)
 {
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
+#    if CONFIG_SEM_PREALLOCHOLDERS > 0
   _info("  %08x: %08x %08x %04x\n",
         pholder, pholder->flink, pholder->htcb, pholder->counts);
-#else
+#    else
   _info("  %08x: %08x %04x\n", pholder, pholder->htcb, pholder->counts);
-#endif
+#    endif
   return 0;
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name: nxsem_restoreholderprio
@@ -475,12 +476,12 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
                                    FAR sem_t *sem, FAR void *arg)
 {
   FAR struct semholder_s *pholder = 0;
-#if CONFIG_SEM_NNESTPRIO > 0
+#  if CONFIG_SEM_NNESTPRIO > 0
   FAR struct tcb_s *stcb = (FAR struct tcb_s *)arg;
-  int rpriority;
-  int i;
-  int j;
-#endif
+  int               rpriority;
+  int               i;
+  int               j;
+#  endif
 
   /* Make sure that the holder thread is still active.  If it exited without
    * releasing its counts, then that would be a bad thing.  But we can take
@@ -505,7 +506,7 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
 
   else if (htcb->sched_priority != htcb->base_priority)
     {
-#if CONFIG_SEM_NNESTPRIO > 0
+#  if CONFIG_SEM_NNESTPRIO > 0
       /* Are there other, pending priority levels to revert to? */
 
       if (htcb->npend_reprio < 1)
@@ -522,7 +523,7 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
            */
 
           DEBUGASSERT(/* htcb->sched_priority == stcb->sched_priority && */
-            htcb->npend_reprio == 0);
+                      htcb->npend_reprio == 0);
 
           /* Reset the holder's priority back to the base priority. */
 
@@ -556,7 +557,7 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
           /* Remove the highest priority pending priority from the list */
 
           rpriority = htcb->pend_reprios[j];
-          i = htcb->npend_reprio - 1;
+          i         = htcb->npend_reprio - 1;
           if (i > 0)
             {
               htcb->pend_reprios[j] = htcb->pend_reprios[i];
@@ -602,14 +603,14 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
                 }
             }
         }
-#else
+#  else
       /* There is no alternative restore priorities, drop the priority
        * of the holder thread all the way back to the threads "base"
        * priority.
        */
 
       nxsched_reprioritize(htcb, htcb->base_priority);
-#endif
+#  endif
     }
 
   return 0;
@@ -666,7 +667,7 @@ static int nxsem_restoreholderprio_self(FAR struct semholder_s *pholder,
     {
       /* The running task has given up a count on the semaphore */
 
-#if CONFIG_SEM_PREALLOCHOLDERS == 0
+#  if CONFIG_SEM_PREALLOCHOLDERS == 0
       /* In the case where there are only 2 holders. This step
        * is necessary to insure we have space. Release the holder
        * if all counts have been given up. before reprioritizing
@@ -674,7 +675,7 @@ static int nxsem_restoreholderprio_self(FAR struct semholder_s *pholder,
        */
 
       nxsem_findandfreeholder(sem, rtcb);
-#endif
+#  endif
       nxsem_restoreholderprio(rtcb, sem, arg);
       return 1;
     }
@@ -731,16 +732,16 @@ static inline void nxsem_restorebaseprio_irq(FAR struct tcb_s *stcb,
       nxsem_foreachholder(sem, nxsem_restoreholderprioall, stcb);
     }
 
-  /* If there are no tasks waiting for available counts, then all holders
+    /* If there are no tasks waiting for available counts, then all holders
    * should be at their base priority.
    */
 
-#ifdef CONFIG_DEBUG_ASSERTIONS
+#  ifdef CONFIG_DEBUG_ASSERTIONS
   else
     {
       nxsem_foreachholder(sem, nxsem_verifyholder, NULL);
     }
-#endif
+#  endif
 }
 
 /****************************************************************************
@@ -805,16 +806,16 @@ static inline void nxsem_restorebaseprio_task(FAR struct tcb_s *stcb,
       nxsem_foreachholder(sem, nxsem_restoreholderprio_self, stcb);
     }
 
-  /* If there are no tasks waiting for available counts, then all holders
+    /* If there are no tasks waiting for available counts, then all holders
    * should be at their base priority.
    */
 
-#ifdef CONFIG_DEBUG_ASSERTIONS
+#  ifdef CONFIG_DEBUG_ASSERTIONS
   else
     {
       nxsem_foreachholder(sem, nxsem_verifyholder, NULL);
     }
-#endif
+#  endif
 
   /* In any case, the currently executing task should have an entry in the
    * list.  Its counts were previously decremented; if it now holds no
@@ -846,7 +847,7 @@ static inline void nxsem_restorebaseprio_task(FAR struct tcb_s *stcb,
 
 void nxsem_initholders(void)
 {
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
+#  if CONFIG_SEM_PREALLOCHOLDERS > 0
   int i;
 
   /* Put all of the pre-allocated holder structures into the free list */
@@ -858,7 +859,7 @@ void nxsem_initholders(void)
     }
 
   g_holderalloc[CONFIG_SEM_PREALLOCHOLDERS - 1].flink = NULL;
-#endif
+#  endif
 }
 
 /****************************************************************************
@@ -896,7 +897,7 @@ void nxsem_destroyholder(FAR sem_t *sem)
    * any stranded holders and hope the task knows what it is doing.
    */
 
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
+#  if CONFIG_SEM_PREALLOCHOLDERS > 0
   if (sem->hhead != NULL)
     {
       /* There may be an issue if there are multiple holders of
@@ -907,14 +908,14 @@ void nxsem_destroyholder(FAR sem_t *sem)
       nxsem_foreachholder(sem, nxsem_recoverholders, NULL);
     }
 
-#else
+#  else
   /* There may be an issue if there are multiple holders of the semaphore. */
 
   DEBUGASSERT(sem->holder[0].htcb == NULL || sem->holder[1].htcb == NULL);
 
   sem->holder[0].htcb = NULL;
   sem->holder[1].htcb = NULL;
-#endif
+#  endif
 }
 
 /****************************************************************************
@@ -1031,7 +1032,7 @@ void nxsem_boostpriority(FAR sem_t *sem)
 
 void nxsem_releaseholder(FAR sem_t *sem)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *      rtcb = this_task();
   FAR struct semholder_s *pholder;
 
   /* Find the container for this holder */
@@ -1082,12 +1083,12 @@ void nxsem_releaseholder(FAR sem_t *sem)
 
 void nxsem_restorebaseprio(FAR struct tcb_s *stcb, FAR sem_t *sem)
 {
-#if 0  /* DSA: sometimes crashes when Telnet calls external cmd (i.e. 'i2c') */
+#  if 0 /* DSA: sometimes crashes when Telnet calls external cmd (i.e. 'i2c') */
   /* Check our assumptions */
 
   DEBUGASSERT((sem->semcount > 0  && stcb == NULL) ||
               (sem->semcount <= 0 && stcb != NULL));
-#endif
+#  endif
 
   /* Handler semaphore counts posed from an interrupt handler differently
    * from interrupts posted from threads.  The primary difference is that
@@ -1153,14 +1154,14 @@ void nxsem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SEM_PHDEBUG)
+#  if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SEM_PHDEBUG)
 void sem_enumholders(FAR sem_t *sem)
 {
-#ifdef CONFIG_DEBUG_INFO
+#    ifdef CONFIG_DEBUG_INFO
   nxsem_foreachholder(sem, nxsem_dumpholder, NULL);
-#endif
+#    endif
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name: nxsem_nfreeholders
@@ -1179,12 +1180,12 @@ void sem_enumholders(FAR sem_t *sem)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SEM_PHDEBUG)
+#  if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_SEM_PHDEBUG)
 int nxsem_nfreeholders(void)
 {
-#if CONFIG_SEM_PREALLOCHOLDERS > 0
+#    if CONFIG_SEM_PREALLOCHOLDERS > 0
   FAR struct semholder_s *pholder;
-  int n;
+  int                     n;
 
   for (pholder = g_freeholders, n = 0; pholder; pholder = pholder->flink)
     {
@@ -1192,10 +1193,10 @@ int nxsem_nfreeholders(void)
     }
 
   return n;
-#else
+#    else
   return 0;
-#endif
+#    endif
 }
-#endif
+#  endif
 
 #endif /* CONFIG_PRIORITY_INHERITANCE */

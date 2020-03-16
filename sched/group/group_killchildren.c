@@ -73,7 +73,7 @@
 static int group_killchildren_handler(pid_t pid, FAR void *arg)
 {
   FAR struct tcb_s *rtcb;
-  int ret;
+  int               ret;
 
   /* Cancel all threads except for the one specified by the argument */
 
@@ -152,7 +152,7 @@ int group_killchildren(FAR struct task_tcb_s *tcb)
 
   sched_lock();
   ret = group_foreachchild(tcb->cmn.group, group_killchildren_handler,
-                          (FAR void *)((uintptr_t)tcb->cmn.pid));
+                           (FAR void *)((uintptr_t)tcb->cmn.pid));
   sched_unlock();
   return ret;
 }

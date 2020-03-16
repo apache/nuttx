@@ -117,15 +117,15 @@ volatile spinlock_t g_cpu_schedlock SP_SECTION = SP_UNLOCKED;
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
 volatile spinlock_t g_cpu_locksetlock SP_SECTION;
-volatile cpu_set_t g_cpu_lockset SP_SECTION;
+volatile cpu_set_t g_cpu_lockset      SP_SECTION;
 
-#if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+#  if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
 /* This is part of the sched_lock() logic to handle atomic operations when
  * locking the scheduler.
  */
 
 volatile int16_t g_global_lockcount;
-#endif
+#  endif
 #endif /* CONFIG_SMP */
 
 /****************************************************************************
@@ -155,16 +155,16 @@ volatile int16_t g_global_lockcount;
 int sched_lock(void)
 {
   FAR struct tcb_s *rtcb;
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+#  if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
   irqstate_t flags;
-#endif
+#  endif
   int cpu;
 
   /* The following operation is non-atomic unless
    * CONFIG_ARCH_GLOBAL_IRQDISABLE or CONFIG_ARCH_HAVE_FETCHADD is defined.
    */
 
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+#  if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
   /* If the CPU supports suppression of interprocessor interrupts, then
    * simple disabling interrupts will provide sufficient protection for
    * the following operation.
@@ -172,14 +172,14 @@ int sched_lock(void)
 
   flags = up_irq_save();
 
-#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
+#  elif defined(CONFIG_ARCH_HAVE_FETCHADD)
   /* If the CPU supports an atomic fetch add operation, then we can use the
    * global lockcount to assure that the following operation is atomic.
    */
 
   DEBUGASSERT((uint16_t)g_global_lockcount < INT16_MAX); /* Not atomic! */
   up_fetchadd16(&g_global_lockcount, 1);
-#endif
+#  endif
 
   /* This operation is safe if CONFIG_ARCH_HAVE_FETCHADD is defined.  NOTE
    * we cannot use this_task() because it calls sched_lock().
@@ -195,12 +195,12 @@ int sched_lock(void)
 
   if (rtcb == NULL || up_interrupt_context())
     {
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+#  if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
       up_irq_restore(flags);
-#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
+#  elif defined(CONFIG_ARCH_HAVE_FETCHADD)
       DEBUGASSERT(g_global_lockcount > 0);
       up_fetchsub16(&g_global_lockcount, 1);
-#endif
+#  endif
     }
   else
     {
@@ -243,29 +243,29 @@ int sched_lock(void)
 
       rtcb->lockcount++;
 
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+#  if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
       up_irq_restore(flags);
-#elif defined(CONFIG_ARCH_HAVE_FETCHADD)
+#  elif defined(CONFIG_ARCH_HAVE_FETCHADD)
       DEBUGASSERT(g_global_lockcount > 0);
       up_fetchsub16(&g_global_lockcount, 1);
-#endif
+#  endif
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION) || \
-    defined(CONFIG_SCHED_CRITMONITOR)
+#  if defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION) || \
+  defined(CONFIG_SCHED_CRITMONITOR)
       /* Check if we just acquired the lock */
 
       if (rtcb->lockcount == 1)
         {
           /* Note that we have pre-emption locked */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#    ifdef CONFIG_SCHED_CRITMONITOR
           sched_critmon_preemption(rtcb, true);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+#    endif
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, true);
-#endif
+#    endif
         }
-#endif
+#  endif
 
       /* Move any tasks in the ready-to-run list to the pending task list
        * where they will not be available to run until the scheduler is
@@ -305,22 +305,22 @@ int sched_lock(void)
 
       rtcb->lockcount++;
 
-#if defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION) || \
-    defined(CONFIG_SCHED_CRITMONITOR)
+#  if defined(CONFIG_SCHED_INSTRUMENTATION_PREEMPTION) || \
+  defined(CONFIG_SCHED_CRITMONITOR)
       /* Check if we just acquired the lock */
 
       if (rtcb->lockcount == 1)
         {
           /* Note that we have pre-emption locked */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#    ifdef CONFIG_SCHED_CRITMONITOR
           sched_critmon_preemption(rtcb, true);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+#    endif
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, true);
-#endif
+#    endif
         }
-#endif
+#  endif
     }
 
   return OK;

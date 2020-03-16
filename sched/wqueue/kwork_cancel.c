@@ -62,10 +62,10 @@
  ****************************************************************************/
 
 static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
-                        FAR struct work_s *work)
+                        FAR struct work_s *        work)
 {
   irqstate_t flags;
-  int ret = -ENOENT;
+  int        ret = -ENOENT;
 
   DEBUGASSERT(work != NULL);
 
@@ -90,7 +90,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
 
       dq_rem((FAR dq_entry_t *)work, &wqueue->q);
       work->worker = NULL;
-      ret = OK;
+      ret          = OK;
     }
 
   leave_critical_section(flags);
@@ -124,7 +124,7 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
 
 int work_cancel(int qid, FAR struct work_s *work)
 {
-#ifdef CONFIG_SCHED_HPWORK
+#  ifdef CONFIG_SCHED_HPWORK
   if (qid == HPWORK)
     {
       /* Cancel high priority work */
@@ -132,8 +132,8 @@ int work_cancel(int qid, FAR struct work_s *work)
       return work_qcancel((FAR struct kwork_wqueue_s *)&g_hpwork, work);
     }
   else
-#endif
-#ifdef CONFIG_SCHED_LPWORK
+#  endif
+#  ifdef CONFIG_SCHED_LPWORK
   if (qid == LPWORK)
     {
       /* Cancel low priority work */
@@ -141,7 +141,7 @@ int work_cancel(int qid, FAR struct work_s *work)
       return work_qcancel((FAR struct kwork_wqueue_s *)&g_lpwork, work);
     }
   else
-#endif
+#  endif
     {
       return -EINVAL;
     }

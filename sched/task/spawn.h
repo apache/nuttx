@@ -63,7 +63,7 @@ struct spawn_parms_s
   FAR pid_t *pid;
   FAR const posix_spawn_file_actions_t *file_actions;
   FAR const posix_spawnattr_t *attr;
-  FAR char * const *argv;
+  FAR char *const *            argv;
 
   /* Parameters that differ for posix_spawn[p] and task_spawn */
 
@@ -76,7 +76,7 @@ struct spawn_parms_s
     struct
     {
       FAR const char *name;
-      main_t entry;
+      main_t          entry;
     } task;
   } u;
 };

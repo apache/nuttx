@@ -85,11 +85,11 @@
 
 static int nxthread_create(FAR const char *name, uint8_t ttype,
                            int priority, int stack_size, main_t entry,
-                           FAR char * const argv[])
+                           FAR char *const argv[])
 {
   FAR struct task_tcb_s *tcb;
-  pid_t pid;
-  int ret;
+  pid_t                  pid;
+  int                    ret;
 
   /* Allocate a TCB for the new task. */
 
@@ -118,13 +118,13 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
 
   if (ttype != TCB_FLAG_TTYPE_KERNEL)
 #endif
-    {
-      ret = group_setuptaskfiles(tcb);
-      if (ret < OK)
-        {
-          goto errout_with_tcb;
-        }
-    }
+  {
+    ret = group_setuptaskfiles(tcb);
+    if (ret < OK)
+      {
+        goto errout_with_tcb;
+      }
+  }
 
   /* Allocate the stack for the TCB */
 
@@ -222,7 +222,7 @@ errout_with_tcb:
  ****************************************************************************/
 
 int nxtask_create(FAR const char *name, int priority,
-                  int stack_size, main_t entry, FAR char * const argv[])
+                  int stack_size, main_t entry, FAR char *const argv[])
 {
   return nxthread_create(name, TCB_FLAG_TTYPE_TASK, priority, stack_size,
                          entry, argv);
@@ -262,7 +262,7 @@ int nxtask_create(FAR const char *name, int priority,
 
 #ifndef CONFIG_BUILD_KERNEL
 int task_create(FAR const char *name, int priority,
-                int stack_size, main_t entry, FAR char * const argv[])
+                int stack_size, main_t entry, FAR char *const argv[])
 {
   int ret = nxtask_create(name, priority, stack_size, entry, argv);
   if (ret < 0)

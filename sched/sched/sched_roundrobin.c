@@ -55,13 +55,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
+#  ifndef MIN
+#    define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#  endif
 
-#ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
-#endif
+#  ifndef MAX
+#    define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#  endif
 
 /****************************************************************************
  * Public Functions
@@ -100,7 +100,7 @@ uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
                                   bool noswitches)
 {
   uint32_t ret;
-  int decr;
+  int      decr;
 
   /* How much can we decrement the timeslice delay?  If 'ticks' is greater
    * than the timeslice value, then we ignore any excess amount.
@@ -143,7 +143,7 @@ uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
           /* Reset the timeslice. */
 
           tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
-          ret = tcb->timeslice;
+          ret            = tcb->timeslice;
 
           /* We know we are at the head of the ready to run prioritized
            * list.  We must be the highest priority task eligible for

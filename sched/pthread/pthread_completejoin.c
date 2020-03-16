@@ -124,7 +124,7 @@ static bool pthread_notifywaiters(FAR struct join_s *pjoin)
  ****************************************************************************/
 
 static void pthread_removejoininfo(FAR struct task_group_s *group,
-                                   pid_t pid)
+                                   pid_t                    pid)
 {
   FAR struct join_s *prev;
   FAR struct join_s *join;
@@ -133,7 +133,8 @@ static void pthread_removejoininfo(FAR struct task_group_s *group,
 
   for (prev = NULL, join = group->tg_joinhead;
        (join && (pid_t)join->thread != pid);
-       prev = join, join = join->next);
+       prev = join, join = join->next)
+    ;
 
   /* Remove it from the data set. */
 
@@ -164,7 +165,7 @@ static void pthread_removejoininfo(FAR struct task_group_s *group,
       else if (!join->next)
         {
           group->tg_jointail = prev;
-          prev->next = NULL;
+          prev->next         = NULL;
         }
 
       /* No, remove it from the middle of the list. */
@@ -203,7 +204,7 @@ static void pthread_removejoininfo(FAR struct task_group_s *group,
 int pthread_completejoin(pid_t pid, FAR void *exit_value)
 {
   FAR struct task_group_s *group = task_getgroup(pid);
-  FAR struct join_s *pjoin;
+  FAR struct join_s *      pjoin;
 
   sinfo("pid=%d exit_value=%p group=%p\n", pid, exit_value, group);
   DEBUGASSERT(group);
@@ -269,7 +270,7 @@ int pthread_completejoin(pid_t pid, FAR void *exit_value)
  ****************************************************************************/
 
 void pthread_destroyjoin(FAR struct task_group_s *group,
-                         FAR struct join_s *pjoin)
+                         FAR struct join_s *      pjoin)
 {
   sinfo("pjoin=0x%p\n", pjoin);
 

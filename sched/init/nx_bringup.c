@@ -59,10 +59,10 @@
 #include <nuttx/binfmt/binfmt.h>
 
 #ifdef CONFIG_PAGING
-# include "paging/paging.h"
+#  include "paging/paging.h"
 #endif
-# include "wqueue/wqueue.h"
-# include "init/init.h"
+#include "wqueue/wqueue.h"
+#include "init/init.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -71,13 +71,13 @@
 /* Configuration */
 
 #if defined(CONFIG_INIT_NONE)
-  /* Kconfig logic will set CONFIG_INIT_NONE if dependencies are not met */
+/* Kconfig logic will set CONFIG_INIT_NONE if dependencies are not met */
 
 #  error No initialization mechanism selected (CONFIG_INIT_NONE)
 
 #else
 #  if !defined(CONFIG_INIT_ENTRYPOINT) && !defined(CONFIG_INIT_FILEPATH)
-  /* For backward compatibility with older defconfig files when this was
+/* For backward compatibility with older defconfig files when this was
    * the way things were done.
    */
 
@@ -85,33 +85,33 @@
 #  endif
 
 #  if defined(CONFIG_INIT_ENTRYPOINT)
-  /* Initialize by starting a task at an entry point */
+/* Initialize by starting a task at an entry point */
 
 #    ifndef CONFIG_USER_ENTRYPOINT
-  /* Entry point name must have been provided */
+/* Entry point name must have been provided */
 
 #      error CONFIG_USER_ENTRYPOINT must be defined
 #    endif
 
 #  elif defined(CONFIG_INIT_FILEPATH)
-  /* Initialize by running an initialization program in the file system.
+/* Initialize by running an initialization program in the file system.
    * Presumably the user has configured a board initialization function
    * that will mount the file system containing the initialization
    * program.
    */
 
 #    ifndef CONFIG_USER_INITPATH
-  /* Path to the initialization program must have been provided */
+/* Path to the initialization program must have been provided */
 
 #      error CONFIG_USER_INITPATH must be defined
 #    endif
 
 #    if !defined(CONFIG_INIT_SYMTAB) || !defined(CONFIG_INIT_NEXPORTS)
-  /* No symbol information... assume no symbol table is available */
+/* No symbol information... assume no symbol table is available */
 
 #      undef CONFIG_INIT_SYMTAB
 #      undef CONFIG_INIT_NEXPORTS
-#      define CONFIG_INIT_SYMTAB NULL
+#      define CONFIG_INIT_SYMTAB   NULL
 #      define CONFIG_INIT_NEXPORTS 0
 #    else
 extern const struct symtab_s CONFIG_INIT_SYMTAB[];
@@ -162,7 +162,7 @@ static inline void nx_pgworker(void)
 
   g_pgworker = kthread_create("pgfill", CONFIG_PAGING_DEFPRIO,
                               CONFIG_PAGING_STACKSIZE,
-                              (main_t)pg_worker, (FAR char * const *)NULL);
+                              (main_t)pg_worker, (FAR char *const *)NULL);
   DEBUGASSERT(g_pgworker > 0);
 }
 
@@ -188,36 +188,36 @@ static inline void nx_pgworker(void)
 #ifdef CONFIG_SCHED_WORKQUEUE
 static inline void nx_workqueues(void)
 {
-#ifdef CONFIG_LIB_USRWORK
+#  ifdef CONFIG_LIB_USRWORK
   pid_t pid;
-#endif
+#  endif
 
-#ifdef CONFIG_SCHED_HPWORK
+#  ifdef CONFIG_SCHED_HPWORK
   /* Start the high-priority worker thread to support device driver lower
    * halves.
    */
 
   work_hpstart();
 
-#endif /* CONFIG_SCHED_HPWORK */
+#  endif /* CONFIG_SCHED_HPWORK */
 
-#ifdef CONFIG_SCHED_LPWORK
+#  ifdef CONFIG_SCHED_LPWORK
   /* Start the low-priority worker thread for other, non-critical continuation
    * tasks
    */
 
   work_lpstart();
 
-#endif /* CONFIG_SCHED_LPWORK */
+#  endif /* CONFIG_SCHED_LPWORK */
 
-#ifdef CONFIG_LIB_USRWORK
+#  ifdef CONFIG_LIB_USRWORK
   /* Start the user-space work queue */
 
   DEBUGASSERT(USERSPACE->work_usrstart != NULL);
   pid = USERSPACE->work_usrstart();
   DEBUGASSERT(pid > 0);
   UNUSED(pid);
-#endif
+#  endif
 }
 
 #else /* CONFIG_SCHED_WORKQUEUE */
@@ -245,13 +245,13 @@ static inline void nx_start_application(void)
 {
   int pid;
 
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
+#  ifdef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform any last-minute, board-specific initialization, if so
    * configured.
    */
 
   board_late_initialize();
-#endif
+#  endif
 
   /* Start the application initialization task.  In a flat build, this is
    * entrypoint is given by the definitions, CONFIG_USER_ENTRYPOINT.  In
@@ -261,17 +261,17 @@ static inline void nx_start_application(void)
 
   sinfo("Starting init thread\n");
 
-#ifdef CONFIG_BUILD_PROTECTED
+#  ifdef CONFIG_BUILD_PROTECTED
   DEBUGASSERT(USERSPACE->us_entrypoint != NULL);
   pid = nxtask_create("init", CONFIG_USERMAIN_PRIORITY,
                       CONFIG_USERMAIN_STACKSIZE, USERSPACE->us_entrypoint,
-                      (FAR char * const *)NULL);
-#else
+                      (FAR char *const *)NULL);
+#  else
   pid = nxtask_create("init", CONFIG_USERMAIN_PRIORITY,
                       CONFIG_USERMAIN_STACKSIZE,
                       (main_t)CONFIG_USER_ENTRYPOINT,
-                      (FAR char * const *)NULL);
-#endif
+                      (FAR char *const *)NULL);
+#  endif
   DEBUGASSERT(pid > 0);
   UNUSED(pid);
 }
@@ -281,15 +281,15 @@ static inline void nx_start_application(void)
 {
   int ret;
 
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
+#  ifdef CONFIG_BOARD_LATE_INITIALIZE
   /* Perform any last-minute, board-specific initialization, if so
    * configured.
    */
 
   board_late_initialize();
-#endif
+#  endif
 
-#ifdef CONFIG_INIT_MOUNT
+#  ifdef CONFIG_INIT_MOUNT
   /* Mount the file system containing the init program. */
 
   ret = mount(CONFIG_INIT_MOUNT_SOURCE, CONFIG_INIT_MOUNT_TARGET,
@@ -297,7 +297,7 @@ static inline void nx_start_application(void)
               CONFIG_INIT_MOUNT_DATA);
   DEBUGASSERT(ret >= 0);
   UNUSED(ret);
-#endif
+#  endif
 
   /* Start the application initialization program from a program in a
    * mounted file system.  Presumably the file system was mounted as part
@@ -373,8 +373,8 @@ static inline void nx_create_initthread(void)
    */
 
   pid = kthread_create("AppBringUp", CONFIG_BOARD_INITTHREAD_PRIORITY,
-                      CONFIG_BOARD_INITTHREAD_STACKSIZE,
-                      (main_t)nx_start_task, (FAR char * const *)NULL);
+                       CONFIG_BOARD_INITTHREAD_STACKSIZE,
+                       (main_t)nx_start_task, (FAR char *const *)NULL);
   DEBUGASSERT(pid > 0);
   UNUSED(pid);
 #else
@@ -432,13 +432,13 @@ int nx_bringup(void)
    * by all of the threads created by the IDLE task.
    */
 
-#ifdef CONFIG_PATH_INITIAL
+#  ifdef CONFIG_PATH_INITIAL
   setenv("PATH", CONFIG_PATH_INITIAL, 1);
-#endif
+#  endif
 
-#ifdef CONFIG_LDPATH_INITIAL
+#  ifdef CONFIG_LDPATH_INITIAL
   setenv("LD_LIBRARY_PATH", CONFIG_LDPATH_INITIAL, 1);
-#endif
+#  endif
 #endif
 
   /* Start the page fill worker kernel thread that will resolve page faults.
@@ -462,7 +462,7 @@ int nx_bringup(void)
   nx_create_initthread();
 
 #if !defined(CONFIG_DISABLE_ENVIRON) && (defined(CONFIG_PATH_INITIAL) || \
-     defined(CONFIG_LDPATH_INITIAL))
+                                         defined(CONFIG_LDPATH_INITIAL))
   /* We an save a few bytes by discarding the IDLE thread's environment. */
 
   clearenv();

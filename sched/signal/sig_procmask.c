@@ -104,9 +104,9 @@
 int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 {
   FAR struct tcb_s *rtcb = this_task();
-  sigset_t   oldsigprocmask;
-  irqstate_t flags;
-  int        ret = OK;
+  sigset_t          oldsigprocmask;
+  irqstate_t        flags;
+  int               ret = OK;
 
   sched_lock();
 
@@ -132,7 +132,7 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
 
       switch (how)
         {
-          /* The resulting set is the union of the current set and the
+            /* The resulting set is the union of the current set and the
            * signal set pointed to by set.
            */
 
@@ -140,7 +140,7 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
             rtcb->sigprocmask |= *set;
             break;
 
-          /* The resulting set is the intersection of the current set and
+            /* The resulting set is the intersection of the current set and
            * the complement of the signal set pointed to by _set.
            */
 
@@ -148,7 +148,7 @@ int nxsig_procmask(int how, FAR const sigset_t *set, FAR sigset_t *oset)
             rtcb->sigprocmask &= ~(*set);
             break;
 
-          /* The resulting set is the signal set pointed to by set. */
+            /* The resulting set is the signal set pointed to by set. */
 
           case SIG_SETMASK:
             rtcb->sigprocmask = *set;

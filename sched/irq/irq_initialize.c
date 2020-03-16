@@ -90,14 +90,14 @@ void irq_initialize(void)
       g_irqvector[i].handler = irq_unexpected_isr;
       g_irqvector[i].arg     = NULL;
 #ifdef CONFIG_SCHED_IRQMONITOR
-      g_irqvector[i].start   = 0;
-#ifdef CONFIG_HAVE_LONG_LONG
-      g_irqvector[i].count   = 0;
-#else
+      g_irqvector[i].start = 0;
+#  ifdef CONFIG_HAVE_LONG_LONG
+      g_irqvector[i].count = 0;
+#  else
       g_irqvector[i].mscount = 0;
       g_irqvector[i].lscount = 0;
-#endif
-      g_irqvector[i].time    = 0;
+#  endif
+      g_irqvector[i].time = 0;
 #endif
     }
 

@@ -56,11 +56,11 @@
 #ifdef HAVE_GROUP_MEMBERS
 struct group_signal_s
 {
-  FAR siginfo_t *siginfo; /* Signal to be dispatched */
-  FAR struct tcb_s *dtcb; /* Default, valid TCB */
-  FAR struct tcb_s *utcb; /* TCB with this signal unblocked */
-  FAR struct tcb_s *atcb; /* This TCB was awakened */
-  FAR struct tcb_s *ptcb; /* This TCB received the signal */
+  FAR siginfo_t *   siginfo; /* Signal to be dispatched */
+  FAR struct tcb_s *dtcb;    /* Default, valid TCB */
+  FAR struct tcb_s *utcb;    /* TCB with this signal unblocked */
+  FAR struct tcb_s *atcb;    /* This TCB was awakened */
+  FAR struct tcb_s *ptcb;    /* This TCB received the signal */
 };
 #endif
 
@@ -87,9 +87,9 @@ struct group_signal_s
 static int group_signal_handler(pid_t pid, FAR void *arg)
 {
   FAR struct group_signal_s *info = (FAR struct group_signal_s *)arg;
-  FAR struct tcb_s *tcb;
+  FAR struct tcb_s *         tcb;
   FAR sigactq_t *sigact;
-  int ret;
+  int            ret;
 
   /* Get the TCB associated with the group member */
 
@@ -208,16 +208,16 @@ int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo)
 {
 #ifdef HAVE_GROUP_MEMBERS
   struct group_signal_s info;
-  FAR struct tcb_s *tcb;
-  int ret;
+  FAR struct tcb_s *    tcb;
+  int                   ret;
 
   DEBUGASSERT(group && siginfo);
 
   info.siginfo = siginfo;
-  info.dtcb    = NULL;     /* Default, valid TCB */
-  info.utcb    = NULL;     /* TCB with this signal unblocked */
-  info.atcb    = NULL;     /* This TCB was awakened */
-  info.ptcb    = NULL;     /* This TCB received the signal */
+  info.dtcb    = NULL; /* Default, valid TCB */
+  info.utcb    = NULL; /* TCB with this signal unblocked */
+  info.atcb    = NULL; /* This TCB was awakened */
+  info.ptcb    = NULL; /* This TCB received the signal */
 
   /* Make sure that pre-emption is disabled to that we signal all of the
    * members of the group before any of them actually run. (This does

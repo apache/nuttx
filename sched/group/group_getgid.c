@@ -64,7 +64,7 @@
 
 gid_t getgid(void)
 {
-  FAR struct tcb_s *rtcb          = this_task();
+  FAR struct tcb_s *       rtcb   = this_task();
   FAR struct task_group_s *rgroup = rtcb->group;
 
   /* Set the task group's group identity. */

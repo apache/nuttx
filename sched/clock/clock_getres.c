@@ -60,7 +60,7 @@
 
 int clock_getres(clockid_t clock_id, struct timespec *res)
 {
-  int      ret = OK;
+  int ret = OK;
 
   sinfo("clock_id=%d\n", clock_id);
 

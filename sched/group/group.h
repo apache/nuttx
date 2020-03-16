@@ -57,7 +57,7 @@
 
 /* Any negative GRPID is invalid. */
 
-#define INVALID_GROUP_ID        (pid_t)-1
+#define INVALID_GROUP_ID        (pid_t) - 1
 #define IS_INVALID_GRPID(grpid) ((int)(grpid) < 0)
 
 /****************************************************************************
@@ -97,11 +97,11 @@ void weak_function task_initialize(void);
 
 /* Task group data structure management */
 
-int  group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype);
-int  group_initialize(FAR struct task_tcb_s *tcb);
+int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype);
+int group_initialize(FAR struct task_tcb_s *tcb);
 #ifndef CONFIG_DISABLE_PTHREAD
-int  group_bind(FAR struct pthread_tcb_s *tcb);
-int  group_join(FAR struct pthread_tcb_s *tcb);
+int group_bind(FAR struct pthread_tcb_s *tcb);
+int group_join(FAR struct pthread_tcb_s *tcb);
 #endif
 void group_leave(FAR struct tcb_s *tcb);
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
@@ -115,13 +115,13 @@ FAR struct task_group_s *group_findby_grpid(grpid_t grpid);
 
 #ifdef HAVE_GROUP_MEMBERS
 FAR struct task_group_s *group_findbypid(pid_t pid);
-int group_foreachchild(FAR struct task_group_s *group,
-                       foreachchild_t handler, FAR void *arg);
-int group_killchildren(FAR struct task_tcb_s *tcb);
-#ifdef CONFIG_SIG_SIGSTOP_ACTION
+int                      group_foreachchild(FAR struct task_group_s *group,
+                                            foreachchild_t handler, FAR void *arg);
+int                      group_killchildren(FAR struct task_tcb_s *tcb);
+#  ifdef CONFIG_SIG_SIGSTOP_ACTION
 int group_suspendchildren(FAR struct tcb_s *tcb);
 int group_continue(FAR struct tcb_s *tcb);
-#endif
+#  endif
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -143,27 +143,27 @@ int group_signal(FAR struct task_group_s *group, FAR siginfo_t *siginfo);
 #ifdef CONFIG_SCHED_HAVE_PARENT
 int task_reparent(pid_t ppid, pid_t chpid);
 
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#  ifdef CONFIG_SCHED_CHILD_STATUS
 FAR struct child_status_s *group_allocchild(void);
-void group_freechild(FAR struct child_status_s *status);
-void group_addchild(FAR struct task_group_s *group,
-                    FAR struct child_status_s *child);
+void                       group_freechild(FAR struct child_status_s *status);
+void                       group_addchild(FAR struct task_group_s *  group,
+                                          FAR struct child_status_s *child);
 FAR struct child_status_s *group_exitchild(FAR struct task_group_s *group);
 FAR struct child_status_s *group_findchild(FAR struct task_group_s *group,
-                                           pid_t pid);
+                                           pid_t                    pid);
 FAR struct child_status_s *group_removechild(FAR struct task_group_s *group,
-                                             pid_t pid);
-void group_removechildren(FAR struct task_group_s *group);
+                                             pid_t                    pid);
+void                       group_removechildren(FAR struct task_group_s *group);
 
-#endif /* CONFIG_SCHED_CHILD_STATUS */
-#endif /* CONFIG_SCHED_HAVE_PARENT */
+#  endif /* CONFIG_SCHED_CHILD_STATUS */
+#endif   /* CONFIG_SCHED_HAVE_PARENT */
 
 /* Group data resource configuration */
 
-int  group_setupidlefiles(FAR struct task_tcb_s *tcb);
-int  group_setuptaskfiles(FAR struct task_tcb_s *tcb);
+int group_setupidlefiles(FAR struct task_tcb_s *tcb);
+int group_setuptaskfiles(FAR struct task_tcb_s *tcb);
 #if CONFIG_NFILE_STREAMS > 0
-int  group_setupstreams(FAR struct task_tcb_s *tcb);
+int group_setupstreams(FAR struct task_tcb_s *tcb);
 #endif
 
 #endif /* __SCHED_GROUP_GROUP_H */

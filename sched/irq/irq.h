@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_MINIMAL_VECTORTABLE) && \
-   !defined(CONFIG_ARCH_NUSER_INTERRUPTS)
+!defined(CONFIG_ARCH_NUSER_INTERRUPTS)
 #  error CONFIG_ARCH_NUSER_INTERRUPTS is not defined
 #endif
 
@@ -72,17 +72,17 @@
 
 struct irq_info_s
 {
-  xcpt_t handler;    /* Address of the interrupt handler */
+  xcpt_t    handler; /* Address of the interrupt handler */
   FAR void *arg;     /* The argument provided to the interrupt handler. */
 #ifdef CONFIG_SCHED_IRQMONITOR
-  clock_t start;     /* Time interrupt attached */
-#ifdef CONFIG_HAVE_LONG_LONG
-  uint64_t count;    /* Number of interrupts on this IRQ */
-#else
-  uint32_t mscount;  /* Number of interrupts on this IRQ (MS) */
-  uint32_t lscount;  /* Number of interrupts on this IRQ (LS) */
-#endif
-  uint32_t time;     /* Maximum execution time on this IRQ */
+  clock_t start; /* Time interrupt attached */
+#  ifdef CONFIG_HAVE_LONG_LONG
+  uint64_t count; /* Number of interrupts on this IRQ */
+#  else
+  uint32_t mscount; /* Number of interrupts on this IRQ (MS) */
+  uint32_t lscount; /* Number of interrupts on this IRQ (LS) */
+#  endif
+  uint32_t time; /* Maximum execution time on this IRQ */
 #endif
 };
 
@@ -131,7 +131,7 @@ extern volatile spinlock_t g_cpu_irqlock SP_SECTION;
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
 extern volatile spinlock_t g_cpu_irqsetlock SP_SECTION;
-extern volatile cpu_set_t g_cpu_irqset SP_SECTION;
+extern volatile cpu_set_t g_cpu_irqset      SP_SECTION;
 
 /* Handles nested calls to enter_critical section from interrupt handlers */
 
@@ -143,11 +143,10 @@ extern volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
+#  define EXTERN extern "C"
+extern "C" {
 #else
-#define EXTERN extern
+#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -231,7 +230,7 @@ int irq_foreach(irq_foreach_t callback, FAR void *arg);
 #ifdef CONFIG_IRQCHAIN
 void irqchain_initialize(void);
 bool is_irqchain(int ndx, xcpt_t isr);
-int irqchain_attach(int ndx, xcpt_t isr, FAR void *arg);
+int  irqchain_attach(int ndx, xcpt_t isr, FAR void *arg);
 #endif
 
 #undef EXTERN

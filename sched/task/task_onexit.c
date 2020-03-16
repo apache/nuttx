@@ -91,11 +91,11 @@
 
 int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
 {
-#if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
-  FAR struct tcb_s *tcb = this_task();
+#  if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
+  FAR struct tcb_s *       tcb   = this_task();
   FAR struct task_group_s *group = tcb->group;
-  int   index;
-  int   ret = ENOSPC;
+  int                      index;
+  int                      ret = ENOSPC;
 
   DEBUGASSERT(group);
 
@@ -117,7 +117,7 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
             {
               group->tg_onexitfunc[index] = func;
               group->tg_onexitarg[index]  = arg;
-              ret = OK;
+              ret                         = OK;
               break;
             }
         }
@@ -126,10 +126,10 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
     }
 
   return ret;
-#else
-  FAR struct tcb_s *tcb = this_task();
+#  else
+  FAR struct tcb_s *       tcb   = this_task();
   FAR struct task_group_s *group = tcb->group;
-  int   ret = ENOSPC;
+  int                      ret   = ENOSPC;
 
   DEBUGASSERT(group);
 
@@ -140,12 +140,12 @@ int on_exit(CODE void (*func)(int, FAR void *), FAR void *arg)
     {
       group->tg_onexitfunc = func;
       group->tg_onexitarg  = arg;
-      ret = OK;
+      ret                  = OK;
     }
 
   sched_unlock();
   return ret;
-#endif
+#  endif
 }
 
 #endif /* CONFIG_SCHED_ONEXIT */

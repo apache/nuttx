@@ -81,11 +81,11 @@
 
 int task_restart(pid_t pid)
 {
-  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *     rtcb;
   FAR struct task_tcb_s *tcb;
   FAR dq_queue_t *tasklist;
-  irqstate_t flags;
-  int errcode;
+  irqstate_t      flags;
+  int             errcode;
 #ifdef CONFIG_SMP
   int cpu;
 #endif
@@ -116,7 +116,7 @@ int task_restart(pid_t pid)
   tcb = (FAR struct task_tcb_s *)sched_gettcb(pid);
 #ifndef CONFIG_DISABLE_PTHREAD
   if (!tcb || (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) ==
-      TCB_FLAG_TTYPE_PTHREAD)
+              TCB_FLAG_TTYPE_PTHREAD)
 #else
   if (!tcb)
 #endif
@@ -161,8 +161,8 @@ int task_restart(pid_t pid)
 
   /* Deallocate anything left in the TCB's signal queues */
 
-  nxsig_cleanup((FAR struct tcb_s *)tcb);  /* Deallocate Signal lists */
-  tcb->cmn.sigprocmask = NULL_SIGNAL_SET;  /* Reset sigprocmask */
+  nxsig_cleanup((FAR struct tcb_s *)tcb); /* Deallocate Signal lists */
+  tcb->cmn.sigprocmask = NULL_SIGNAL_SET; /* Reset sigprocmask */
 
   /* Reset the current task priority  */
 
@@ -174,7 +174,7 @@ int task_restart(pid_t pid)
 
   tcb->cmn.lockcount = 0;
 #ifdef CONFIG_SMP
-  tcb->cmn.irqcount  = 0;
+  tcb->cmn.irqcount = 0;
 #endif
 
   /* Reset the base task priority and the number of pending reprioritizations */

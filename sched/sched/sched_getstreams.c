@@ -65,17 +65,17 @@
 
 FAR struct streamlist *sched_getstreams(void)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *       rtcb  = this_task();
   FAR struct task_group_s *group = rtcb->group;
 
   DEBUGASSERT(group);
 
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+#  if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+  defined(CONFIG_MM_KERNEL_HEAP)
   return group->tg_streamlist;
-#else
+#  else
   return &group->tg_streamlist;
-#endif
+#  endif
 }
 
 #endif /* CONFIG_NFILE_STREAMS */

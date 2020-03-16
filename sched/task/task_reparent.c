@@ -70,20 +70,20 @@
  *
  ****************************************************************************/
 
-#ifdef HAVE_GROUP_MEMBERS
+#  ifdef HAVE_GROUP_MEMBERS
 int task_reparent(pid_t ppid, pid_t chpid)
 {
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#    ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *child;
-#endif
+#    endif
   FAR struct task_group_s *chgrp;
   FAR struct task_group_s *ogrp;
   FAR struct task_group_s *pgrp;
-  FAR struct tcb_s *tcb;
-  grpid_t ogrpid;
-  grpid_t pgrpid;
-  irqstate_t flags;
-  int ret;
+  FAR struct tcb_s *       tcb;
+  grpid_t                  ogrpid;
+  grpid_t                  pgrpid;
+  irqstate_t               flags;
+  int                      ret;
 
   /* Disable interrupts so that nothing can change in the relationship of
    * the three task:  Child, current parent, and new parent.
@@ -126,7 +126,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
       /* Get the grandparent task's task group (pgrp) */
 
       pgrpid = ogrp->tg_pgrpid;
-      pgrp = group_findby_grpid(pgrpid);
+      pgrp   = group_findby_grpid(pgrpid);
     }
   else
     {
@@ -139,7 +139,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
           goto errout_with_ints;
         }
 
-      pgrp = tcb->group;
+      pgrp   = tcb->group;
       pgrpid = pgrp->tg_grpid;
     }
 
@@ -156,7 +156,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 
   chgrp->tg_pgrpid = pgrpid;
 
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#    ifdef CONFIG_SCHED_CHILD_STATUS
   /* Remove the child status entry from old parent task group */
 
   child = group_removechild(ogrp, chpid);
@@ -190,33 +190,33 @@ int task_reparent(pid_t ppid, pid_t chpid)
       ret = ((ogrp->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0) ? -ENOENT : OK;
     }
 
-#else /* CONFIG_SCHED_CHILD_STATUS */
+#    else /* CONFIG_SCHED_CHILD_STATUS */
   /* Child task exit status is not retained */
 
   DEBUGASSERT(ogrp->tg_nchildren > 0);
 
-  ogrp->tg_nchildren--;  /* The original parent now has one few children */
-  pgrp->tg_nchildren++;  /* The new parent has one additional child */
+  ogrp->tg_nchildren--; /* The original parent now has one few children */
+  pgrp->tg_nchildren++; /* The new parent has one additional child */
   ret = OK;
 
-#endif /* CONFIG_SCHED_CHILD_STATUS */
+#    endif /* CONFIG_SCHED_CHILD_STATUS */
 
 errout_with_ints:
   leave_critical_section(flags);
   return ret;
 }
-#else
+#  else
 int task_reparent(pid_t ppid, pid_t chpid)
 {
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#    ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *child;
-#endif
-  FAR struct tcb_s *ptcb;
-  FAR struct tcb_s *chtcb;
-  FAR struct tcb_s *otcb;
-  pid_t opid;
-  irqstate_t flags;
-  int ret;
+#    endif
+  FAR struct tcb_s *         ptcb;
+  FAR struct tcb_s *         chtcb;
+  FAR struct tcb_s *         otcb;
+  pid_t                      opid;
+  irqstate_t                 flags;
+  int                        ret;
 
   /* Disable interrupts so that nothing can change in the relationship of
    * the three task:  Child, current parent, and new parent.
@@ -269,7 +269,7 @@ int task_reparent(pid_t ppid, pid_t chpid)
 
   chtcb->group->tg_ppid = ppid;
 
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#    ifdef CONFIG_SCHED_CHILD_STATUS
   /* Remove the child status entry from old parent TCB */
 
   child = group_removechild(otcb->group, chpid);
@@ -300,24 +300,23 @@ int task_reparent(pid_t ppid, pid_t chpid)
        * suppressed child exit status.
        */
 
-      ret = ((otcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0) ?
-              -ENOENT : OK;
+      ret = ((otcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0) ? -ENOENT : OK;
     }
 
-#else /* CONFIG_SCHED_CHILD_STATUS */
+#    else /* CONFIG_SCHED_CHILD_STATUS */
   /* Child task exit status is not retained */
 
   DEBUGASSERT(otcb->group != NULL && otcb->group->tg_nchildren > 0);
 
-  otcb->group->tg_nchildren--;  /* The original parent now has one few children */
-  ptcb->group->tg_nchildren++;  /* The new parent has one additional child */
+  otcb->group->tg_nchildren--; /* The original parent now has one few children */
+  ptcb->group->tg_nchildren++; /* The new parent has one additional child */
   ret = OK;
 
-#endif /* CONFIG_SCHED_CHILD_STATUS */
+#    endif /* CONFIG_SCHED_CHILD_STATUS */
 
 errout_with_ints:
   leave_critical_section(flags);
   return ret;
 }
-#endif
+#  endif
 #endif /* CONFIG_SCHED_HAVE_PARENT */

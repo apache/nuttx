@@ -75,7 +75,7 @@ bool sched_mergepending(void)
   FAR struct tcb_s *pnext;
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *rprev;
-  bool ret = false;
+  bool              ret = false;
 
   /* Initialize the inner search loop */
 
@@ -100,7 +100,8 @@ bool sched_mergepending(void)
 
       for (;
            (rtcb && ptcb->sched_priority <= rtcb->sched_priority);
-           rtcb = rtcb->flink);
+           rtcb = rtcb->flink)
+        ;
 
       /* Add the ptcb to the spot found in the list.  Check if the
        * ptcb goes at the ends of the ready-to-run list. This would be
@@ -129,11 +130,11 @@ bool sched_mergepending(void)
         {
           /* Insert in the middle of the list */
 
-          ptcb->flink       = rtcb;
-          ptcb->blink       = rprev;
-          rprev->flink      = ptcb;
-          rtcb->blink       = ptcb;
-          ptcb->task_state  = TSTATE_TASK_READYTORUN;
+          ptcb->flink      = rtcb;
+          ptcb->blink      = rprev;
+          rprev->flink     = ptcb;
+          rtcb->blink      = ptcb;
+          ptcb->task_state = TSTATE_TASK_READYTORUN;
         }
 
       /* Set up for the next time through */
@@ -178,9 +179,9 @@ bool sched_mergepending(void)
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *ptcb;
   FAR struct tcb_s *tcb;
-  bool ret = false;
-  int cpu;
-  int me;
+  bool              ret = false;
+  int               cpu;
+  int               me;
 
   /* Lock the tasklist before accessing */
 
@@ -222,7 +223,7 @@ bool sched_mergepending(void)
           /* Remove the task from the pending task list */
 
           tcb = (FAR struct tcb_s *)
-            dq_remfirst((FAR dq_queue_t *)&g_pendingtasks);
+          dq_remfirst((FAR dq_queue_t *)&g_pendingtasks);
 
           /* Add the pending task to the correct ready-to-run list. */
 
@@ -255,7 +256,7 @@ bool sched_mergepending(void)
           /* Set up for the next time through the loop */
 
           ptcb = (FAR struct tcb_s *)
-            dq_peek((FAR dq_queue_t *)&g_pendingtasks);
+          dq_peek((FAR dq_queue_t *)&g_pendingtasks);
           if (ptcb == NULL)
             {
               /* The pending task list is empty */

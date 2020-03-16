@@ -85,8 +85,8 @@ unsigned int nxsig_sleep(unsigned int seconds)
 {
   struct timespec rqtp;
   struct timespec rmtp;
-  unsigned int remaining = 0;
-  int ret;
+  unsigned int    remaining = 0;
+  int             ret;
 
   /* Don't sleep if seconds == 0 */
 

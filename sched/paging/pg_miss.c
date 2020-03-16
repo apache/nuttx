@@ -49,8 +49,8 @@
 
 #ifdef CONFIG_PAGING
 
-#include "sched/sched.h"
-#include "paging/paging.h"
+#  include "sched/sched.h"
+#  include "paging/paging.h"
 
 /****************************************************************************
  * Public Functions

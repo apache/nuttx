@@ -74,7 +74,7 @@ static inline void nxsched_kucleanup(void)
 
 #else
   irqstate_t flags;
-  FAR void *address;
+  FAR void * address;
 
   /* Test if the delayed deallocation queue is empty.  No special protection
    * is needed because this is an atomic test.
@@ -86,7 +86,7 @@ static inline void nxsched_kucleanup(void)
        * we must disable interrupts around the queue operation.
        */
 
-      flags = enter_critical_section();
+      flags   = enter_critical_section();
       address = (FAR void *)sq_remfirst((FAR sq_queue_t *)&g_delayed_kufree);
       leave_critical_section(flags);
 
@@ -142,11 +142,11 @@ static inline bool nxsched_have_kugarbage(void)
  ****************************************************************************/
 
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+defined(CONFIG_MM_KERNEL_HEAP)
 static inline void nxsched_kcleanup(void)
 {
   irqstate_t flags;
-  FAR void *address;
+  FAR void * address;
 
   /* Test if the delayed deallocation queue is empty.  No special protection
    * is needed because this is an atomic test.
@@ -158,7 +158,7 @@ static inline void nxsched_kcleanup(void)
        * we must disable interrupts around the queue operation.
        */
 
-      flags = enter_critical_section();
+      flags   = enter_critical_section();
       address = (FAR void *)sq_remfirst((FAR sq_queue_t *)&g_delayed_kfree);
       leave_critical_section(flags);
 
@@ -193,7 +193,7 @@ static inline void nxsched_kcleanup(void)
  ****************************************************************************/
 
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+defined(CONFIG_MM_KERNEL_HEAP)
 static inline bool nxsched_have_kgarbage(void)
 {
   return (g_delayed_kfree.head != NULL);

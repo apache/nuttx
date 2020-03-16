@@ -95,7 +95,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
       DEBUGASSERT(nxttcb != NULL);
 
       nxttcb->task_state = TSTATE_TASK_RUNNING;
-      doswitch = true;
+      doswitch           = true;
     }
 
   /* Remove the TCB from the ready-to-run list.  In the non-SMP case, this
@@ -137,8 +137,8 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 {
   FAR dq_queue_t *tasklist;
-  bool doswitch = false;
-  int cpu;
+  bool            doswitch = false;
+  int             cpu;
 
   /* Lock the tasklists before accessing */
 
@@ -172,7 +172,7 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
     {
       FAR struct tcb_s *nxttcb;
       FAR struct tcb_s *rtrtcb = NULL;
-      int me;
+      int               me;
 
       /* There must always be at least one task in the list (the IDLE task)
        * after the TCB being removed.
@@ -219,7 +219,8 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
 
           for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
                rtrtcb != NULL && !CPU_ISSET(cpu, &rtrtcb->affinity);
-               rtrtcb = (FAR struct tcb_s *)rtrtcb->flink);
+               rtrtcb = (FAR struct tcb_s *)rtrtcb->flink)
+            ;
         }
 
       /* Did we find a task in the g_readytorun list?  Which task should
@@ -239,12 +240,12 @@ bool sched_removereadytorun(FAR struct tcb_s *rtcb)
            */
 
           tmptcb = (FAR struct tcb_s *)
-            dq_remfirst((FAR dq_queue_t *)&g_readytorun);
+          dq_remfirst((FAR dq_queue_t *)&g_readytorun);
 
           dq_addfirst((FAR dq_entry_t *)tmptcb, tasklist);
 
           tmptcb->cpu = cpu;
-          nxttcb = tmptcb;
+          nxttcb      = tmptcb;
         }
 
       /* Will pre-emption be disabled after the switch?  If the lockcount is

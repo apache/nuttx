@@ -86,7 +86,7 @@ static void group_remove(FAR struct task_group_s *group)
 {
   FAR struct task_group_s *curr;
   FAR struct task_group_s *prev;
-  irqstate_t flags;
+  irqstate_t               flags;
 
   /* Let's be especially careful while access the global task group list.
    * This is probably un-necessary.
@@ -98,7 +98,8 @@ static void group_remove(FAR struct task_group_s *group)
 
   for (prev = NULL, curr = g_grouphead;
        curr && curr != group;
-       prev = curr, curr = curr->flink);
+       prev = curr, curr = curr->flink)
+    ;
 
   /* Did we find it?  If so, remove it from the list. */
 
@@ -223,7 +224,7 @@ static inline void group_release(FAR struct task_group_s *group)
 #endif
 
 #if CONFIG_NFILE_STREAMS > 0 && defined(CONFIG_MM_KERNEL_HEAP)
-  /* In a flat, single-heap build.  The stream list is part of the
+    /* In a flat, single-heap build.  The stream list is part of the
    * group structure and, hence will be freed when the group structure
    * is freed.  Otherwise, it is separately allocated an must be
    * freed here.
@@ -314,7 +315,7 @@ static inline void group_release(FAR struct task_group_s *group)
 static inline void group_removemember(FAR struct task_group_s *group, pid_t pid)
 {
   irqstate_t flags;
-  int i;
+  int        i;
 
   DEBUGASSERT(group);
 
@@ -331,7 +332,7 @@ static inline void group_removemember(FAR struct task_group_s *group, pid_t pid)
            * interrupt handlers (read-only).
            */
 
-          flags = enter_critical_section();
+          flags                = enter_critical_section();
           group->tg_members[i] = group->tg_members[group->tg_nmembers - 1];
           group->tg_nmembers--;
           leave_critical_section(flags);

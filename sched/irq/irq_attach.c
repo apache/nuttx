@@ -67,9 +67,9 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
   if ((unsigned)irq < NR_IRQS)
     {
       irqstate_t flags;
-      int ndx;
+      int        ndx;
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+#  ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
       /* Is there a mapping for this IRQ number? */
 
       ndx = g_irqmap[irq];
@@ -79,9 +79,9 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
 
           return ret;
         }
-#else
+#  else
       ndx = irq;
-#endif
+#  endif
 
       /* If the new ISR is NULL, then the ISR is being detached.
        * In this case, disable the ISR and direct any interrupts
@@ -101,9 +101,9 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
            * sources before detaching from the interrupt vector.
            */
 
-#if !defined(CONFIG_ARCH_NOINTC) && !defined(CONFIG_ARCH_VECNOTIRQ)
+#  if !defined(CONFIG_ARCH_NOINTC) && !defined(CONFIG_ARCH_VECNOTIRQ)
           up_disable_irq(irq);
-#endif
+#  endif
           /* Detaching the ISR really means re-attaching it to the
            * unexpected exception handler.
            */
@@ -112,7 +112,7 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
           arg = NULL;
         }
 
-#ifdef CONFIG_IRQCHAIN
+#  ifdef CONFIG_IRQCHAIN
       /* Save the new ISR and its argument in the table.
        * If there is only one ISR on this irq, then .handler point to the ISR
        * and .arg point to the ISR parameter; Otherwise, .handler point to
@@ -125,21 +125,21 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
           leave_critical_section(flags);
           return ret;
         }
-#endif
+#  endif
 
       /* Save the new ISR and its argument in the table. */
 
       g_irqvector[ndx].handler = isr;
       g_irqvector[ndx].arg     = arg;
-#ifdef CONFIG_SCHED_IRQMONITOR
-      g_irqvector[ndx].start   = clock_systimer();
-#ifdef CONFIG_HAVE_LONG_LONG
-      g_irqvector[ndx].count   = 0;
-#else
+#  ifdef CONFIG_SCHED_IRQMONITOR
+      g_irqvector[ndx].start = clock_systimer();
+#    ifdef CONFIG_HAVE_LONG_LONG
+      g_irqvector[ndx].count = 0;
+#    else
       g_irqvector[ndx].mscount = 0;
       g_irqvector[ndx].lscount = 0;
-#endif
-#endif
+#    endif
+#  endif
 
       leave_critical_section(flags);
       ret = OK;

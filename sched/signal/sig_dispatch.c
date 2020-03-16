@@ -74,9 +74,9 @@
 static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
 {
   FAR sigactq_t *sigact;
-  FAR sigq_t    *sigq;
-  irqstate_t     flags;
-  int            ret = OK;
+  FAR sigq_t *sigq;
+  irqstate_t  flags;
+  int         ret = OK;
 
   sched_lock();
   DEBUGASSERT(stcb != NULL && stcb->group != NULL);
@@ -106,7 +106,7 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
           /* Populate the new signal queue element */
 
           sigq->action.sighandler = sigact->act.sa_u._sa_sigaction;
-          sigq->mask = sigact->act.sa_mask;
+          sigq->mask              = sigact->act.sa_mask;
           memcpy(&sigq->info, info, sizeof(siginfo_t));
 
           /* Put it at the end of the pending signals list */
@@ -160,7 +160,7 @@ static FAR sigpendq_t *nxsig_alloc_pendingsignal(void)
     {
       /* Try to get the pending signal structure from the free list */
 
-      flags = enter_critical_section();
+      flags   = enter_critical_section();
       sigpend = (FAR sigpendq_t *)sq_remfirst(&g_sigpendingsignal);
       leave_critical_section(flags);
 
@@ -172,7 +172,7 @@ static FAR sigpendq_t *nxsig_alloc_pendingsignal(void)
 
           if (!sigpend)
             {
-              sigpend = (FAR sigpendq_t *)kmm_malloc((sizeof (sigpendq_t)));
+              sigpend = (FAR sigpendq_t *)kmm_malloc((sizeof(sigpendq_t)));
             }
 
           /* Check if we got an allocated message */
@@ -196,10 +196,10 @@ static FAR sigpendq_t *nxsig_alloc_pendingsignal(void)
  ****************************************************************************/
 
 static FAR sigpendq_t *
-  nxsig_find_pendingsignal(FAR struct task_group_s *group, int signo)
+nxsig_find_pendingsignal(FAR struct task_group_s *group, int signo)
 {
   FAR sigpendq_t *sigpend = NULL;
-  irqstate_t flags;
+  irqstate_t      flags;
 
   DEBUGASSERT(group != NULL);
 
@@ -211,7 +211,8 @@ static FAR sigpendq_t *
 
   for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (sigpend && sigpend->info.si_signo != signo);
-       sigpend = sigpend->flink);
+       sigpend = sigpend->flink)
+    ;
 
   leave_critical_section(flags);
   return sigpend;
@@ -233,7 +234,7 @@ static void nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
 {
   FAR struct task_group_s *group;
   FAR sigpendq_t *sigpend;
-  irqstate_t flags;
+  irqstate_t      flags;
 
   DEBUGASSERT(stcb != NULL && stcb->group != NULL);
   group = stcb->group;
@@ -301,8 +302,8 @@ static void nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
 int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 {
   irqstate_t flags;
-  bool masked;
-  int ret = OK;
+  bool       masked;
+  int        ret = OK;
 
   sinfo("TCB=0x%08x signo=%d code=%d value=%d mask=%08x\n",
         stcb, info->si_signo, info->si_code,
@@ -457,11 +458,11 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
       if (stcb->task_state == TSTATE_TASK_STOPPED &&
           info->si_signo == SIGCONT)
         {
-#ifdef HAVE_GROUP_MEMBERS
+#  ifdef HAVE_GROUP_MEMBERS
           group_continue(stcb);
-#else
+#  else
           sched_continue(stcb);
-#endif
+#  endif
         }
 #endif
     }
@@ -500,7 +501,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 int nxsig_dispatch(pid_t pid, FAR siginfo_t *info)
 {
 #ifdef HAVE_GROUP_MEMBERS
-  FAR struct tcb_s *stcb;
+  FAR struct tcb_s *       stcb;
   FAR struct task_group_s *group;
 
   /* Get the TCB associated with the pid */

@@ -66,7 +66,7 @@
 static void nxmq_sndtimeout(int argc, wdparm_t pid)
 {
   FAR struct tcb_s *wtcb;
-  irqstate_t flags;
+  irqstate_t        flags;
 
   /* Disable interrupts.  This is necessary because an interrupt handler may
    * attempt to send a message while we are doing this.
@@ -145,13 +145,13 @@ static void nxmq_sndtimeout(int argc, wdparm_t pid)
 int nxmq_timedsend(mqd_t mqdes, FAR const char *msg, size_t msglen,
                    unsigned int prio, FAR const struct timespec *abstime)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *         rtcb = this_task();
   FAR struct mqueue_inode_s *msgq;
-  FAR struct mqueue_msg_s *mqmsg = NULL;
-  irqstate_t flags;
-  sclock_t ticks;
-  int result;
-  int ret;
+  FAR struct mqueue_msg_s *  mqmsg = NULL;
+  irqstate_t                 flags;
+  sclock_t                   ticks;
+  int                        result;
+  int                        ret;
 
   DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
 

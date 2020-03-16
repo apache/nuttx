@@ -58,9 +58,9 @@ struct tcb_s; /* Forward reference */
 
 void nxtask_start(void);
 int  nxtask_schedsetup(FAR struct task_tcb_s *tcb, int priority,
-       start_t start, main_t main, uint8_t ttype);
+                       start_t start, main_t main, uint8_t ttype);
 int  nxtask_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name,
-       FAR char * const argv[]);
+                     FAR char *const argv[]);
 
 /* Task exit */
 

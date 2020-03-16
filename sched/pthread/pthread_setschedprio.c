@@ -80,7 +80,7 @@
 int pthread_setschedprio(pthread_t thread, int prio)
 {
   struct sched_param param;
-  int ret;
+  int                ret;
 
 #ifdef CONFIG_SCHED_SPORADIC
   /* Get the current sporadic scheduling parameters.  Those will not be
@@ -97,7 +97,7 @@ int pthread_setschedprio(pthread_t thread, int prio)
   /* Call nxsched_setparam() to change the priority */
 
   param.sched_priority = prio;
-  ret = nxsched_setparam((pid_t)thread, &param);
+  ret                  = nxsched_setparam((pid_t)thread, &param);
   if (ret < 0)
     {
       return -ret;

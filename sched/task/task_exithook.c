@@ -86,7 +86,7 @@ static inline void nxtask_atexit(FAR struct tcb_s *tcb)
 
   if (group && group->tg_nmembers == 1)
     {
-#if defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
+#  if defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
       int index;
 
       /* Call each atexit function in reverse order of registration atexit()
@@ -103,7 +103,7 @@ static inline void nxtask_atexit(FAR struct tcb_s *tcb)
 
               /* Nullify the atexit function to prevent its reuse. */
 
-              func = group->tg_atexitfunc[index];
+              func                        = group->tg_atexitfunc[index];
               group->tg_atexitfunc[index] = NULL;
 
               /* Call the atexit function */
@@ -111,21 +111,21 @@ static inline void nxtask_atexit(FAR struct tcb_s *tcb)
               (*func)();
             }
         }
-#else
+#  else
       if (group->tg_atexitfunc)
         {
           atexitfunc_t func;
 
           /* Nullify the atexit function to prevent its reuse. */
 
-          func = group->tg_atexitfunc;
+          func                 = group->tg_atexitfunc;
           group->tg_atexitfunc = NULL;
 
           /* Call the atexit function */
 
           (*func)();
         }
-#endif
+#  endif
     }
 }
 #else
@@ -160,7 +160,7 @@ static inline void nxtask_onexit(FAR struct tcb_s *tcb, int status)
 
   if (group && group->tg_nmembers == 1)
     {
-#if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
+#  if defined(CONFIG_SCHED_ONEXIT_MAX) && CONFIG_SCHED_ONEXIT_MAX > 1
       int index;
 
       /* Call each on_exit function in reverse order of registration.
@@ -177,7 +177,7 @@ static inline void nxtask_onexit(FAR struct tcb_s *tcb, int status)
 
               /* Nullify the on_exit function to prevent its reuse. */
 
-              func = group->tg_onexitfunc[index];
+              func                        = group->tg_onexitfunc[index];
               group->tg_onexitfunc[index] = NULL;
 
               /* Call the on_exit function */
@@ -185,25 +185,25 @@ static inline void nxtask_onexit(FAR struct tcb_s *tcb, int status)
               (*func)(status, group->tg_onexitarg[index]);
             }
         }
-#else
+#  else
       if (group->tg_onexitfunc)
         {
           onexitfunc_t func;
 
           /* Nullify the on_exit function to prevent its reuse. */
 
-          func = group->tg_onexitfunc;
+          func                 = group->tg_onexitfunc;
           group->tg_onexitfunc = NULL;
 
           /* Call the on_exit function */
 
           (*func)(status, group->tg_onexitarg);
         }
-#endif
+#  endif
     }
 }
 #else
-#  define nxtask_onexit(tcb,status)
+#  define nxtask_onexit(tcb, status)
 #endif
 
 /****************************************************************************
@@ -216,7 +216,7 @@ static inline void nxtask_onexit(FAR struct tcb_s *tcb, int status)
 
 #ifdef CONFIG_SCHED_CHILD_STATUS
 static inline void nxtask_exitstatus(FAR struct task_group_s *group,
-                                     int status)
+                                     int                      status)
 {
   FAR struct child_status_s *child;
 
@@ -231,11 +231,11 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
       child = group_findchild(group, getpid());
       if (child)
         {
-#ifndef HAVE_GROUP_MEMBERS
+#  ifndef HAVE_GROUP_MEMBERS
           /* No group members? Save the exit status */
 
           child->ch_status = status;
-#endif
+#  endif
           /* Save the exit status..  For the case of HAVE_GROUP_MEMBERS,
            * the child status will be as exited until the last member
            * of the task group exits.
@@ -247,7 +247,7 @@ static inline void nxtask_exitstatus(FAR struct task_group_s *group,
 }
 #else
 
-#  define nxtask_exitstatus(group,status)
+#  define nxtask_exitstatus(group, status)
 
 #endif /* CONFIG_SCHED_CHILD_STATUS */
 
@@ -297,13 +297,13 @@ static inline void nxtask_groupexit(FAR struct task_group_s *group)
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
-#ifdef HAVE_GROUP_MEMBERS
+#  ifdef HAVE_GROUP_MEMBERS
 static inline void nxtask_sigchild(grpid_t pgrpid, FAR struct tcb_s *ctcb,
                                    int status)
 {
   FAR struct task_group_s *chgrp = ctcb->group;
   FAR struct task_group_s *pgrp;
-  siginfo_t info;
+  siginfo_t                info;
 
   DEBUGASSERT(chgrp);
 
@@ -323,14 +323,14 @@ static inline void nxtask_sigchild(grpid_t pgrpid, FAR struct tcb_s *ctcb,
       return;
     }
 
-  /* Save the exit status now if this is the main thread of the task group
+    /* Save the exit status now if this is the main thread of the task group
    * that is exiting. Only the exiting main task of a task group carries
    * interpretable exit  Check if this is the main task that is exiting.
    */
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#    ifndef CONFIG_DISABLE_PTHREAD
   if ((ctcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
-#endif
+#    endif
     {
       nxtask_exitstatus(pgrp, status);
     }
@@ -354,12 +354,12 @@ static inline void nxtask_sigchild(grpid_t pgrpid, FAR struct tcb_s *ctcb,
       info.si_code            = CLD_EXITED;
       info.si_errno           = OK;
       info.si_value.sival_ptr = NULL;
-#ifndef CONFIG_DISABLE_PTHREAD
-      info.si_pid             = chgrp->tg_task;
-#else
-      info.si_pid             = ctcb->pid;
-#endif
-      info.si_status          = status;
+#    ifndef CONFIG_DISABLE_PTHREAD
+      info.si_pid = chgrp->tg_task;
+#    else
+      info.si_pid = ctcb->pid;
+#    endif
+      info.si_status = status;
 
       /* Send the signal to one thread in the group */
 
@@ -367,7 +367,7 @@ static inline void nxtask_sigchild(grpid_t pgrpid, FAR struct tcb_s *ctcb,
     }
 }
 
-#else /* HAVE_GROUP_MEMBERS */
+#  else /* HAVE_GROUP_MEMBERS */
 
 static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
                                    FAR struct tcb_s *ctcb, int status)
@@ -379,40 +379,40 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
    * that are still running.
    */
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#    ifndef CONFIG_DISABLE_PTHREAD
   if ((ctcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
-#endif
+#    endif
     {
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#    ifdef CONFIG_SCHED_CHILD_STATUS
       /* Save the exit status now of the main thread */
 
       nxtask_exitstatus(ptcb->group, status);
 
-#else /* CONFIG_SCHED_CHILD_STATUS */
-      /* Exit status is not retained.  Just decrement the number of
+#    else /* CONFIG_SCHED_CHILD_STATUS */
+    /* Exit status is not retained.  Just decrement the number of
        * children from this parent.
        */
 
-      DEBUGASSERT(ptcb->group != NULL && ptcb->group->tg_nchildren > 0);
-      ptcb->group->tg_nchildren--;
+    DEBUGASSERT(ptcb->group != NULL && ptcb->group->tg_nchildren > 0);
+    ptcb->group->tg_nchildren--;
 
-#endif /* CONFIG_SCHED_CHILD_STATUS */
+#    endif /* CONFIG_SCHED_CHILD_STATUS */
 
       /* Create the siginfo structure.  We don't actually know the cause.
        * That is a bug. Let's just say that the child task just exited
        * for now.
        */
 
-      info.si_signo           = SIGCHLD;
-      info.si_code            = CLD_EXITED;
-      info.si_errno           = OK;
+      info.si_signo = SIGCHLD;
+      info.si_code = CLD_EXITED;
+      info.si_errno = OK;
       info.si_value.sival_ptr = NULL;
-#ifndef CONFIG_DISABLE_PTHREAD
-      info.si_pid             = ctcb->group->tg_task;
-#else
-      info.si_pid             = ctcb->pid;
-#endif
-      info.si_status          = status;
+#    ifndef CONFIG_DISABLE_PTHREAD
+      info.si_pid = ctcb->group->tg_task;
+#    else
+    info.si_pid = ctcb->pid;
+#    endif
+      info.si_status = status;
 
       /* Send the signal.  We need to use this internal interface so that we
        * can provide the correct si_code value with the signal.
@@ -422,10 +422,10 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
     }
 }
 
-#endif /* HAVE_GROUP_MEMBERS */
-#else /* CONFIG_SCHED_HAVE_PARENT */
+#  endif /* HAVE_GROUP_MEMBERS */
+#else    /* CONFIG_SCHED_HAVE_PARENT */
 
-#  define nxtask_sigchild(x,ctcb,status)
+#  define nxtask_sigchild(x, ctcb, status)
 
 #endif /* CONFIG_SCHED_HAVE_PARENT */
 
@@ -440,7 +440,7 @@ static inline void nxtask_sigchild(FAR struct tcb_s *ptcb,
 #ifdef CONFIG_SCHED_HAVE_PARENT
 static inline void nxtask_signalparent(FAR struct tcb_s *ctcb, int status)
 {
-#ifdef HAVE_GROUP_MEMBERS
+#  ifdef HAVE_GROUP_MEMBERS
   DEBUGASSERT(ctcb && ctcb->group);
 
   /* Keep things stationary throughout the following */
@@ -451,7 +451,7 @@ static inline void nxtask_signalparent(FAR struct tcb_s *ctcb, int status)
 
   nxtask_sigchild(ctcb->group->tg_pgrpid, ctcb, status);
   sched_unlock();
-#else
+#  else
   FAR struct tcb_s *ptcb;
 
   /* Keep things stationary throughout the following */
@@ -479,10 +479,10 @@ static inline void nxtask_signalparent(FAR struct tcb_s *ctcb, int status)
 
   nxtask_sigchild(ptcb, ctcb, status);
   sched_unlock();
-#endif
+#  endif
 }
 #else
-#  define nxtask_signalparent(ctcb,status)
+#  define nxtask_signalparent(ctcb, status)
 #endif
 
 /****************************************************************************
@@ -507,9 +507,9 @@ static inline void nxtask_exitwakeup(FAR struct tcb_s *tcb, int status)
        * be executing.
        */
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#  ifndef CONFIG_DISABLE_PTHREAD
       if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
-#endif
+#  endif
         {
           /* Report the exit status.  We do not nullify tg_statloc here
            * because we want to prevent other tasks from registering for
@@ -570,12 +570,12 @@ static inline void nxtask_flushstreams(FAR struct tcb_s *tcb)
 
   if (group && group->tg_nmembers == 1)
     {
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+#  if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+  defined(CONFIG_MM_KERNEL_HEAP)
       lib_flushall(tcb->group->tg_streamlist);
-#else
+#  else
       lib_flushall(&tcb->group->tg_streamlist);
-#endif
+#  endif
     }
 }
 #else
@@ -631,8 +631,8 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking)
    * actions taken during exit processing.
    */
 
-  tcb->flags  |= TCB_FLAG_NONCANCELABLE;
-  tcb->flags  &= ~TCB_FLAG_CANCEL_PENDING;
+  tcb->flags |= TCB_FLAG_NONCANCELABLE;
+  tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
   tcb->cpcount = 0;
 #endif
 

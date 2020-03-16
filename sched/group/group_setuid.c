@@ -73,7 +73,7 @@
 
 int setuid(uid_t uid)
 {
-  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *       rtcb;
   FAR struct task_group_s *rgroup;
 
   /* Verify that the UID is in the valid range of 0 through INT16_MAX.

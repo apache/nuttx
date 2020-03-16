@@ -54,11 +54,10 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
+#  define EXTERN extern "C"
+extern "C" {
 #else
-#define EXTERN extern
+#  define EXTERN extern
 #endif
 
 /* Common semaphore logic */
@@ -98,11 +97,11 @@ void nxsem_canceled(FAR struct tcb_s *stcb, FAR sem_t *sem);
 #  define nxsem_initholders()
 #  define nxsem_destroyholder(sem)
 #  define nxsem_addholder(sem)
-#  define nxsem_addholder_tcb(htcb,sem)
+#  define nxsem_addholder_tcb(htcb, sem)
 #  define nxsem_boostpriority(sem)
 #  define nxsem_releaseholder(sem)
-#  define nxsem_restorebaseprio(stcb,sem)
-#  define nxsem_canceled(stcb,sem)
+#  define nxsem_restorebaseprio(stcb, sem)
+#  define nxsem_canceled(stcb, sem)
 #endif
 
 #undef EXTERN

@@ -74,7 +74,7 @@
 void pthread_mutex_inconsistent(FAR struct pthread_tcb_s *tcb)
 {
   FAR struct pthread_mutex_s *mutex;
-  irqstate_t flags;
+  irqstate_t                  flags;
 
   DEBUGASSERT(tcb != NULL);
 

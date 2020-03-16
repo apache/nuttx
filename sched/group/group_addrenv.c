@@ -98,9 +98,9 @@ int group_addrenv(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
   FAR struct task_group_s *oldgroup;
-  irqstate_t flags;
-  grpid_t grpid;
-  int ret;
+  irqstate_t               flags;
+  grpid_t                  grpid;
+  int                      ret;
 
   /* NULL for the tcb means to use the TCB of the task at the head of the
    * ready to run list.

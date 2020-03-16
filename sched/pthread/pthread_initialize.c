@@ -140,7 +140,7 @@ int pthread_sem_trytake(sem_t *sem)
       /* Try to take the semaphore */
 
       int status = nxsem_trywait(sem);
-      ret = status < 0 ? -status : OK;
+      ret        = status < 0 ? -status : OK;
     }
 
   return ret;

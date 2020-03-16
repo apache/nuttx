@@ -55,76 +55,76 @@
 
 /* Configuration ************************************************************/
 
-#if !defined(CONFIG_SCHED_CPULOAD) || !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
-#  error CONFIG_SCHED_CPULOAD and CONFIG_SCHED_CPULOAD_EXTCLK must be defined
-#endif
+#  if !defined(CONFIG_SCHED_CPULOAD) || !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
+#    error CONFIG_SCHED_CPULOAD and CONFIG_SCHED_CPULOAD_EXTCLK must be defined
+#  endif
 
 /* CONFIG_SCHED_CPULOAD_TICKSPERSEC is the frequency of the external clock
  * source.
  */
 
-#ifndef CONFIG_SCHED_CPULOAD_TICKSPERSEC
-#  error CONFIG_SCHED_CPULOAD_TICKSPERSEC not defined
-#endif
+#  ifndef CONFIG_SCHED_CPULOAD_TICKSPERSEC
+#    error CONFIG_SCHED_CPULOAD_TICKSPERSEC not defined
+#  endif
 
 /* CONFIG_CPULOAD_ENTROPY determines that amount of random "jitter"
  * that will be added to the nominal sample interval.  Specified as a number
  * bits.
  */
 
-#ifndef CONFIG_CPULOAD_ENTROPY
-#  warning CONFIG_CPULOAD_ENTROPY not defined
-#  define CONFIG_CPULOAD_ENTROPY 0
-#endif
+#  ifndef CONFIG_CPULOAD_ENTROPY
+#    warning CONFIG_CPULOAD_ENTROPY not defined
+#    define CONFIG_CPULOAD_ENTROPY 0
+#  endif
 
 /* Calculate the nominal sample interval in microseconds:
  *
  * nominal = (1,000,000 usec/sec) / Frequency cycles/sec) = Period usec/cycle
  */
 
-#define CPULOAD_PERIOD_NOMINAL       (1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
+#  define CPULOAD_PERIOD_NOMINAL (1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
 
-#if CPULOAD_PERIOD_NOMINAL < 1 || CPULOAD_PERIOD_NOMINAL > 0x7fffffff
-#  error CPULOAD_PERIOD_NOMINAL is out of range
-#endif
+#  if CPULOAD_PERIOD_NOMINAL < 1 || CPULOAD_PERIOD_NOMINAL > 0x7fffffff
+#    error CPULOAD_PERIOD_NOMINAL is out of range
+#  endif
 
 /* Convert the entropy from number of bits to a numeric value */
 
-#define CPULOAD_PERIOD_ENTROPY       (1 << CONFIG_CPULOAD_ENTROPY)
+#  define CPULOAD_PERIOD_ENTROPY (1 << CONFIG_CPULOAD_ENTROPY)
 
-#if CPULOAD_PERIOD_NOMINAL < CPULOAD_PERIOD_ENTROPY
-#  error CPULOAD_PERIOD_NOMINAL too small for CONFIG_CPULOAD_ENTROPY
-#endif
+#  if CPULOAD_PERIOD_NOMINAL < CPULOAD_PERIOD_ENTROPY
+#    error CPULOAD_PERIOD_NOMINAL too small for CONFIG_CPULOAD_ENTROPY
+#  endif
 
-#define CPULOAD_PERIOD_ENTROPY_MASK  (CPULOAD_PERIOD_ENTROPY - 1)
+#  define CPULOAD_PERIOD_ENTROPY_MASK (CPULOAD_PERIOD_ENTROPY - 1)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-#if CONFIG_CPULOAD_ENTROPY > 0
+#  if CONFIG_CPULOAD_ENTROPY > 0
 struct sched_period_s
 {
   struct xorshift128_state_s prng;
-  uint32_t maxtimeout;
-  int32_t error;
+  uint32_t                   maxtimeout;
+  int32_t                    error;
 };
-#endif
+#  endif
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
 static bool nxsched_period_callback(FAR uint32_t *next_interval_us,
-                                    FAR void *arg);
+                                    FAR void *    arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-#if CONFIG_CPULOAD_ENTROPY > 0
+#  if CONFIG_CPULOAD_ENTROPY > 0
 static struct sched_period_s g_sched_period;
-#endif
+#  endif
 
 /****************************************************************************
  * Private Functions
@@ -147,11 +147,11 @@ static struct sched_period_s g_sched_period;
  ****************************************************************************/
 
 static bool nxsched_period_callback(FAR uint32_t *next_interval_us,
-                                    FAR void *arg)
+                                    FAR void *    arg)
 {
   /* Get the next delay */
 
-#if CONFIG_CPULOAD_ENTROPY > 0
+#  if CONFIG_CPULOAD_ENTROPY > 0
   /* The period timer will be set to this interval:
    *
    *  CPULOAD_PERIOD_NOMINAL - (CPULOAD_PERIOD_ENTROPY / 2) + error
@@ -180,13 +180,13 @@ static bool nxsched_period_callback(FAR uint32_t *next_interval_us,
 
   g_sched_period.error = CPULOAD_PERIOD_NOMINAL +
                          g_sched_period.error - *next_interval_us;
-#endif
+#  endif
 
   /* Perform CPU load measurements */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+#  ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (nxsched_process_cpuload != NULL)
-#endif
+#  endif
     {
       nxsched_process_cpuload();
     }
@@ -224,7 +224,7 @@ void sched_period_extclk(FAR struct timer_lowerhalf_s *lower)
   DEBUGASSERT(lower->ops->settimeout != NULL);
   DEBUGASSERT(lower->ops->start != NULL);
 
-#if CONFIG_CPULOAD_ENTROPY > 0
+#  if CONFIG_CPULOAD_ENTROPY > 0
   DEBUGASSERT(lower->ops->maxtimeout != NULL);
 
   /* Get the maximum timeout */
@@ -239,7 +239,7 @@ void sched_period_extclk(FAR struct timer_lowerhalf_s *lower)
   g_sched_period.prng.x = 101;
   g_sched_period.prng.y = g_sched_period.prng.w << 17;
   g_sched_period.prng.z = g_sched_period.prng.x << 25;
-#endif
+#  endif
 
   /* Then start the period timer */
 

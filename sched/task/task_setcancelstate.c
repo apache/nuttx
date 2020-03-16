@@ -77,7 +77,7 @@
 int task_setcancelstate(int state, FAR int *oldstate)
 {
   FAR struct tcb_s *tcb = this_task();
-  int ret = OK;
+  int               ret = OK;
 
   /* Suppress context changes for a bit so that the flags are stable. (the
    * flags should not change in interrupt handling).

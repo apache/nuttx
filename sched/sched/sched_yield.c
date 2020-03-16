@@ -67,7 +67,7 @@
 int sched_yield(void)
 {
   FAR struct tcb_s *rtcb = this_task();
-  int ret;
+  int               ret;
 
   /* This equivalent to just resetting the task priority to its current value
    * since this will cause the task to be rescheduled behind any other tasks

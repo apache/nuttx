@@ -71,16 +71,17 @@ FAR sigpendq_t *nxsig_remove_pendingsignal(FAR struct tcb_s *stcb, int signo)
   FAR struct task_group_s *group = stcb->group;
   FAR sigpendq_t *currsig;
   FAR sigpendq_t *prevsig;
-  irqstate_t  flags;
+  irqstate_t      flags;
 
   DEBUGASSERT(group);
 
   flags = enter_critical_section();
 
   for (prevsig = NULL,
-       currsig = (FAR sigpendq_t *)group->tg_sigpendingq.head;
+      currsig  = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (currsig && currsig->info.si_signo != signo);
-       prevsig = currsig, currsig = currsig->flink);
+       prevsig = currsig, currsig = currsig->flink)
+    ;
 
   if (currsig)
     {

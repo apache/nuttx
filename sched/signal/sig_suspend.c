@@ -93,8 +93,8 @@
 int sigsuspend(FAR const sigset_t *set)
 {
   FAR struct tcb_s *rtcb = this_task();
-  sigset_t saved_sigprocmask;
-  irqstate_t flags;
+  sigset_t          saved_sigprocmask;
+  irqstate_t        flags;
 
   /* sigsuspend() is a cancellation point */
 
@@ -106,7 +106,7 @@ int sigsuspend(FAR const sigset_t *set)
    * can only be eliminated by disabling interrupts!
    */
 
-  sched_lock();  /* Not necessary */
+  sched_lock(); /* Not necessary */
   flags = enter_critical_section();
 
   /* Save a copy of the old sigprocmask and install

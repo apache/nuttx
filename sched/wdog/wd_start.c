@@ -44,11 +44,11 @@
  ****************************************************************************/
 
 #ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#  define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifndef MAX
-#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#  define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
 /****************************************************************************
@@ -166,15 +166,15 @@ static inline void wd_expiration(void)
  *
  ****************************************************************************/
 
-int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
+int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry, int argc, ...)
 {
-  va_list ap;
+  va_list            ap;
   FAR struct wdog_s *curr;
   FAR struct wdog_s *prev;
   FAR struct wdog_s *next;
-  int32_t now;
-  irqstate_t flags;
-  int i;
+  int32_t            now;
+  irqstate_t         flags;
+  int                i;
 
   /* Verify the wdog and setup parameters */
 
@@ -197,7 +197,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
 
   /* Save the data in the watchdog structure */
 
-  wdog->func = wdentry;         /* Function to execute when delay expires */
+  wdog->func = wdentry; /* Function to execute when delay expires */
   up_getpicbase(&wdog->picbase);
   wdog->argc = argc;
 
@@ -256,7 +256,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
 
   else
     {
-      now = 0;
+      now  = 0;
       prev = curr = (FAR struct wdog_s *)g_wdactivelist.head;
 
       /* Advance to positive time */
@@ -374,13 +374,13 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
 unsigned int wd_timer(int ticks)
 {
   FAR struct wdog_s *wdog;
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   irqstate_t flags;
-#endif
+#  endif
   unsigned int ret;
-  int decr;
+  int          decr;
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   /* We are in an interrupt handler as, as a consequence, interrupts are
    * disabled.  But in the SMP case, interrupts MAY be disabled only on
    * the local CPU since most architectures do not permit disabling
@@ -391,7 +391,7 @@ unsigned int wd_timer(int ticks)
    */
 
   flags = enter_critical_section();
-#endif
+#  endif
 
   /* Check if there are any active watchdogs to process */
 
@@ -401,22 +401,22 @@ unsigned int wd_timer(int ticks)
 
       wdog = (FAR struct wdog_s *)g_wdactivelist.head;
 
-#ifndef CONFIG_SCHED_TICKLESS_ALARM
+#  ifndef CONFIG_SCHED_TICKLESS_ALARM
       /* There is logic to handle the case where ticks is greater than
        * the watchdog lag, but if the scheduling is working properly
        * that should never happen.
        */
 
       DEBUGASSERT(ticks <= wdog->lag);
-#endif
+#  endif
       /* Decrement the lag for this watchdog. */
 
       decr = MIN(wdog->lag, ticks);
 
       /* There are.  Decrement the lag counter */
 
-      wdog->lag    -= decr;
-      ticks        -= decr;
+      wdog->lag -= decr;
+      ticks -= decr;
       g_wdtickbase += decr;
 
       /* Check if the watchdog at the head of the list is ready to run */
@@ -430,12 +430,11 @@ unsigned int wd_timer(int ticks)
 
   /* Return the delay for the next watchdog to expire */
 
-  ret = g_wdactivelist.head ?
-          ((FAR struct wdog_s *)g_wdactivelist.head)->lag : 0;
+  ret = g_wdactivelist.head ? ((FAR struct wdog_s *)g_wdactivelist.head)->lag : 0;
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   leave_critical_section(flags);
-#endif
+#  endif
 
   /* Return the delay for the next watchdog to expire */
 
@@ -445,7 +444,7 @@ unsigned int wd_timer(int ticks)
 #else
 void wd_timer(void)
 {
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   irqstate_t flags;
 
   /* We are in an interrupt handler as, as a consequence, interrupts are
@@ -458,7 +457,7 @@ void wd_timer(void)
    */
 
   flags = enter_critical_section();
-#endif
+#  endif
 
   /* Check if there are any active watchdogs to process */
 
@@ -473,8 +472,8 @@ void wd_timer(void)
       wd_expiration();
     }
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   leave_critical_section(flags);
-#endif
+#  endif
 }
 #endif /* CONFIG_SCHED_TICKLESS */

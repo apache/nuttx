@@ -84,7 +84,7 @@
 int nxsched_getscheduler(pid_t pid)
 {
   FAR struct tcb_s *tcb;
-  int policy;
+  int               policy;
 
   /* Verify that the PID corresponds to a real task */
 

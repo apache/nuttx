@@ -98,13 +98,13 @@ static void work_qqueue(FAR struct kwork_wqueue_s *wqueue,
 
   /* Initialize the work structure. */
 
-  work->worker = worker;           /* Work callback. non-NULL means queued */
-  work->arg    = arg;              /* Callback argument */
-  work->delay  = delay;            /* Delay until work performed */
+  work->worker = worker; /* Work callback. non-NULL means queued */
+  work->arg    = arg;    /* Callback argument */
+  work->delay  = delay;  /* Delay until work performed */
 
   /* Now, time-tag that entry and put it in the work queue */
 
-  work->qtime  = clock_systimer(); /* Time work queued */
+  work->qtime = clock_systimer(); /* Time work queued */
 
   dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
 
@@ -150,7 +150,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 {
   /* Queue the new work */
 
-#ifdef CONFIG_SCHED_HPWORK
+#  ifdef CONFIG_SCHED_HPWORK
   if (qid == HPWORK)
     {
       /* Queue high priority work */
@@ -160,8 +160,8 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
       return work_signal(HPWORK);
     }
   else
-#endif
-#ifdef CONFIG_SCHED_LPWORK
+#  endif
+#  ifdef CONFIG_SCHED_LPWORK
   if (qid == LPWORK)
     {
       /* Queue low priority work */
@@ -171,7 +171,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
       return work_signal(LPWORK);
     }
   else
-#endif
+#  endif
     {
       return -EINVAL;
     }

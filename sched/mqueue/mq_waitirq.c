@@ -60,7 +60,7 @@
 void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
   FAR struct mqueue_inode_s *msgq;
-  irqstate_t flags;
+  irqstate_t                 flags;
 
   /* Disable interrupts.  This is necessary because an interrupt handler may
    * attempt to send a message while we are doing this.

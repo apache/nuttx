@@ -133,7 +133,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
               else
                 {
                   status = nxsem_destroy((FAR sem_t *)&mutex->sem);
-                  ret = (status < 0) ? -status : OK;
+                  ret    = (status < 0) ? -status : OK;
                 }
             }
           else
@@ -150,7 +150,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
            */
 
           status = nxsem_destroy((FAR sem_t *)&mutex->sem);
-          ret = ((status < 0) ? -status : OK);
+          ret    = ((status < 0) ? -status : OK);
         }
 
       sched_unlock();

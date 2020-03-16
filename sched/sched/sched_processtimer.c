@@ -78,7 +78,7 @@ static inline void nxsched_cpu_scheduler(int cpu)
 {
   FAR struct tcb_s *rtcb = current_task(cpu);
 
-#if CONFIG_RR_INTERVAL > 0
+#  if CONFIG_RR_INTERVAL > 0
   /* Check if the currently executing task uses round robin scheduling. */
 
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
@@ -89,9 +89,9 @@ static inline void nxsched_cpu_scheduler(int cpu)
 
       sched_roundrobin_process(rtcb, 1, false);
     }
-#endif
+#  endif
 
-#ifdef CONFIG_SCHED_SPORADIC
+#  ifdef CONFIG_SCHED_SPORADIC
   /* Check if the currently executing task uses sporadic scheduling. */
 
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
@@ -102,7 +102,7 @@ static inline void nxsched_cpu_scheduler(int cpu)
 
       sched_sporadic_process(rtcb, 1, false);
     }
-#endif
+#  endif
 }
 #endif
 
@@ -124,9 +124,9 @@ static inline void nxsched_cpu_scheduler(int cpu)
 #if CONFIG_RR_INTERVAL > 0 || defined(CONFIG_SCHED_SPORADIC)
 static inline void nxsched_process_scheduler(void)
 {
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   irqstate_t flags;
-  int i;
+  int        i;
 
   /* If we are running on a single CPU architecture, then we know interrupts
    * a disabled an there is no need to explicitly call
@@ -147,11 +147,11 @@ static inline void nxsched_process_scheduler(void)
 
   leave_critical_section(flags);
 
-#else
+#  else
   /* Perform scheduler operations on the single CPUs */
 
   nxsched_cpu_scheduler(0);
-#endif
+#  endif
 }
 #else
 #  define nxsched_process_scheduler()
@@ -205,13 +205,13 @@ void nxsched_process_timer(void)
     }
 
 #if defined(CONFIG_SCHED_CPULOAD) && !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
-  /* Perform CPU load measurements (before any timer-initiated context
+    /* Perform CPU load measurements (before any timer-initiated context
    * switches can occur)
    */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+#  ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (nxsched_process_cpuload != NULL)
-#endif
+#  endif
     {
       nxsched_process_cpuload();
     }

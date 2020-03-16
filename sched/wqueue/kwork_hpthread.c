@@ -80,10 +80,10 @@ struct hp_wqueue_s g_hpwork;
 
 static int work_hpthread(int argc, char *argv[])
 {
-#if CONFIG_SCHED_HPNTHREADS > 1
-  int wndx;
+#  if CONFIG_SCHED_HPNTHREADS > 1
+  int   wndx;
   pid_t me = getpid();
-  int i;
+  int   i;
 
   /* Find out thread index by search the workers in g_hpwork */
 
@@ -97,13 +97,13 @@ static int work_hpthread(int argc, char *argv[])
     }
 
   DEBUGASSERT(i < CONFIG_SCHED_HPNTHREADS);
-#endif
+#  endif
 
   /* Loop forever */
 
-  for (; ; )
+  for (;;)
     {
-#if CONFIG_SCHED_HPNTHREADS > 1
+#  if CONFIG_SCHED_HPNTHREADS > 1
       /* Thread 0 is special.  Only thread 0 performs period garbage collection */
 
       if (wndx > 0)
@@ -115,9 +115,9 @@ static int work_hpthread(int argc, char *argv[])
           work_process((FAR struct kwork_wqueue_s *)&g_hpwork, wndx);
         }
       else
-#endif
+#  endif
         {
-#ifndef CONFIG_SCHED_LPWORK
+#  ifndef CONFIG_SCHED_LPWORK
           /* First, perform garbage collection.  This cleans-up memory
            * de-allocations that were queued because they could not be freed
            * in that execution context (for example, if the memory was freed
@@ -130,7 +130,7 @@ static int work_hpthread(int argc, char *argv[])
            */
 
           sched_garbage_collection();
-#endif
+#  endif
 
           /* Then process queued work.  work_process will not return until:
            * (1) there is no further work in the work queue, and (2) signal
@@ -166,7 +166,7 @@ static int work_hpthread(int argc, char *argv[])
 int work_hpstart(void)
 {
   pid_t pid;
-  int wndx;
+  int   wndx;
 
   /* Don't permit any of the threads to run until we have fully initialized
    * g_hpwork.
@@ -183,7 +183,7 @@ int work_hpstart(void)
       pid = kthread_create(HPWORKNAME, CONFIG_SCHED_HPWORKPRIORITY,
                            CONFIG_SCHED_HPWORKSTACKSIZE,
                            (main_t)work_hpthread,
-                           (FAR char * const *)NULL);
+                           (FAR char *const *)NULL);
 
       DEBUGASSERT(pid > 0);
       if (pid < 0)

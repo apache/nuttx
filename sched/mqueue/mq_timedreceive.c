@@ -67,7 +67,7 @@
 static void nxmq_rcvtimeout(int argc, wdparm_t pid)
 {
   FAR struct tcb_s *wtcb;
-  irqstate_t flags;
+  irqstate_t        flags;
 
   /* Disable interrupts.  This is necessary because an interrupt handler may
    * attempt to send a message while we are doing this.
@@ -135,13 +135,13 @@ static void nxmq_rcvtimeout(int argc, wdparm_t pid)
  ****************************************************************************/
 
 ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
-                          FAR unsigned int *prio,
+                          FAR unsigned int *         prio,
                           FAR const struct timespec *abstime)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *       rtcb = this_task();
   FAR struct mqueue_msg_s *mqmsg;
-  irqstate_t flags;
-  int ret;
+  irqstate_t               flags;
+  int                      ret;
 
   DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
 
@@ -311,7 +311,7 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
  ****************************************************************************/
 
 ssize_t mq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
-                        FAR unsigned int *prio,
+                        FAR unsigned int *         prio,
                         FAR const struct timespec *abstime)
 {
   int ret;

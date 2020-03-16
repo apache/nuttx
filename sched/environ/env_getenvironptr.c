@@ -41,11 +41,11 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <sched.h>
-#include <stdlib.h>
-#include "sched/sched.h"
+#  include <sched.h>
+#  include <stdlib.h>
+#  include "sched/sched.h"
 
-#undef get_environ_ptr
+#  undef get_environ_ptr
 
 /****************************************************************************
  * Public Functions
@@ -69,7 +69,7 @@
 
 FAR char **get_environ_ptr(void)
 {
-#if 1
+#  if 1
 
   /* Type of internal representation of environment is incompatible with
    * char ** return value.
@@ -77,7 +77,7 @@ FAR char **get_environ_ptr(void)
 
   return NULL;
 
-#else
+#  else
 
   /* Return a reference to the thread-private environ in the TCB. */
 
@@ -91,7 +91,7 @@ FAR char **get_environ_ptr(void)
       return NULL;
     }
 
-#endif
+#  endif
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */

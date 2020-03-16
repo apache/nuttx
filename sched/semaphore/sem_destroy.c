@@ -71,7 +71,7 @@
  *
  ****************************************************************************/
 
-int nxsem_destroy (FAR sem_t *sem)
+int nxsem_destroy(FAR sem_t *sem)
 {
   /* Assure a valid semaphore is specified */
 
@@ -125,7 +125,7 @@ int nxsem_destroy (FAR sem_t *sem)
  *
  ****************************************************************************/
 
-int sem_destroy (FAR sem_t *sem)
+int sem_destroy(FAR sem_t *sem)
 {
   int ret;
 

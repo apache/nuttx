@@ -89,10 +89,10 @@
 void nxtask_start(void)
 {
   FAR struct task_tcb_s *tcb = (FAR struct task_tcb_s *)this_task();
-  int exitcode;
-  int argc;
+  int                    exitcode;
+  int                    argc;
 
-  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != \
+  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) !=
               TCB_FLAG_TTYPE_PTHREAD);
 
 #ifdef CONFIG_SIG_DEFAULT
@@ -129,7 +129,7 @@ void nxtask_start(void)
         }
     }
 
-  /* Call the 'main' entry point passing argc and argv.  In the kernel build
+    /* Call the 'main' entry point passing argc and argv.  In the kernel build
    * this has to be handled differently if we are starting a user-space task;
    * we have to switch to user-mode before calling the task.
    */

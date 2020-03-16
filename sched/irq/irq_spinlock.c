@@ -45,8 +45,8 @@
 
 #include "sched/sched.h"
 
-#if defined(CONFIG_SMP) && defined (CONFIG_SPINLOCK_IRQ) && \
-    defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+#if defined(CONFIG_SMP) && defined(CONFIG_SPINLOCK_IRQ) && \
+defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
 
 /****************************************************************************
  * Public Data

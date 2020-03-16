@@ -88,11 +88,11 @@
 
 int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
               FAR uint32_t *stack, uint32_t stack_size,
-              main_t entry, FAR char * const argv[])
+              main_t entry, FAR char *const argv[])
 {
   FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
-  int errcode;
-  int ret;
+  int                    errcode;
+  int                    ret;
 
   /* Only tasks and kernel threads can be initialized in this way */
 

@@ -104,10 +104,10 @@
 int nxsem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
-  irqstate_t flags;
-  sclock_t ticks;
-  int status;
-  int ret = ERROR;
+  irqstate_t        flags;
+  sclock_t          ticks;
+  int               status;
+  int               ret = ERROR;
 
   DEBUGASSERT(up_interrupt_context() == false && rtcb->waitdog == NULL);
 
@@ -236,7 +236,7 @@ errout_with_irqdisabled:
  ****************************************************************************/
 
 #ifndef CONFIG_HAVE_INLINE
-int nxsem_timedwait_uninterruptible(FAR sem_t *sem,
+int nxsem_timedwait_uninterruptible(FAR sem_t *                sem,
                                     FAR const struct timespec *abstime)
 {
   int ret;

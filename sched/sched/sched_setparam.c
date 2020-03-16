@@ -94,7 +94,7 @@ int nxsched_setparam(pid_t pid, FAR const struct sched_param *param)
 {
   FAR struct tcb_s *rtcb;
   FAR struct tcb_s *tcb;
-  int ret;
+  int               ret;
 
   /* Verify that the requested priority is in the valid range */
 
@@ -137,9 +137,9 @@ int nxsched_setparam(pid_t pid, FAR const struct sched_param *param)
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
       FAR struct sporadic_s *sporadic;
-      irqstate_t flags;
-      sclock_t repl_ticks;
-      sclock_t budget_ticks;
+      irqstate_t             flags;
+      sclock_t               repl_ticks;
+      sclock_t               budget_ticks;
 
       if (param->sched_ss_max_repl < 1 ||
           param->sched_ss_max_repl > CONFIG_SCHED_SPORADIC_MAXREPL)
@@ -165,19 +165,19 @@ int nxsched_setparam(pid_t pid, FAR const struct sched_param *param)
           budget_ticks = 1;
         }
 
-      /* The replenishment period must be greater than or equal to the
+        /* The replenishment period must be greater than or equal to the
        * budget period.
        */
 
-#if 1
+#  if 1
       /* REVISIT: In the current implementation, the budget cannot exceed
        * half the duty.
        */
 
       if (repl_ticks < (2 * budget_ticks))
-#else
+#  else
       if (repl_ticks < budget_ticks)
-#endif
+#  endif
         {
           ret = -EINVAL;
           goto errout_with_lock;
@@ -186,14 +186,14 @@ int nxsched_setparam(pid_t pid, FAR const struct sched_param *param)
       /* Stop/reset current sporadic scheduling */
 
       flags = enter_critical_section();
-      ret = sched_sporadic_reset(tcb);
+      ret   = sched_sporadic_reset(tcb);
       if (ret >= 0)
         {
           /* Save the sporadic scheduling parameters and reset to the
            * beginning to the replenishment interval.
            */
 
-          tcb->timeslice         = budget_ticks;
+          tcb->timeslice = budget_ticks;
 
           sporadic = rtcb->sporadic;
           DEBUGASSERT(sporadic != NULL);

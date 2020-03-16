@@ -151,7 +151,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
        *   2. CONFIG_PTHREAD_MUTEX_BOTH is defined and the robust flag is set
        */
 
-#if defined(CONFIG_PTHREAD_MUTEX_ROBUST)
+#  if defined(CONFIG_PTHREAD_MUTEX_ROBUST)
       /* Not that error checking is always performed if the configuration has
        * CONFIG_PTHREAD_MUTEX_ROBUST defined.  Just check if the calling
        * thread owns the semaphore.
@@ -159,7 +159,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 
       if (mutex->pid != (int)getpid())
 
-#elif defined(CONFIG_PTHREAD_MUTEX_UNSAFE) && defined(CONFIG_PTHREAD_MUTEX_TYPES)
+#  elif defined(CONFIG_PTHREAD_MUTEX_UNSAFE) && defined(CONFIG_PTHREAD_MUTEX_TYPES)
       /* If mutex types are not supported, then all mutexes are NORMAL (or
        * DEFAULT).  Error checking should never be performed for the
        * non-robust NORMAL mutex type.
@@ -167,20 +167,20 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 
       if (mutex->type != PTHREAD_MUTEX_NORMAL && mutex->pid != (int)getpid())
 
-#else /* CONFIG_PTHREAD_MUTEX_BOTH */
+#  else /* CONFIG_PTHREAD_MUTEX_BOTH */
       /* Skip the error check if this is a non-robust NORMAL mutex */
 
       bool errcheck = ((mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0);
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
-      errcheck     |= (mutex->type != PTHREAD_MUTEX_NORMAL);
-#endif
+#    ifdef CONFIG_PTHREAD_MUTEX_TYPES
+      errcheck |= (mutex->type != PTHREAD_MUTEX_NORMAL);
+#    endif
 
       /* Does the calling thread own the semaphore?  If not should we report
        * the EPERM error?
        */
 
       if (errcheck && mutex->pid != (int)getpid())
-#endif
+#  endif
         {
           /* No... return an EPERM error.
            *
@@ -216,7 +216,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
 
 #endif /* CONFIG_PTHREAD_MUTEX_TYPES */
 
-      /* This is either a non-recursive mutex or is the outermost unlock of
+        /* This is either a non-recursive mutex or is the outermost unlock of
        * a recursive mutex.
        *
        * In the case where the calling thread is NOT the holder of the thread,
@@ -228,7 +228,7 @@ int pthread_mutex_unlock(FAR pthread_mutex_t *mutex)
         {
           /* Nullify the pid and lock count then post the semaphore */
 
-          mutex->pid    = -1;
+          mutex->pid = -1;
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
           mutex->nlocks = 0;
 #endif

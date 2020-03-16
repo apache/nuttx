@@ -104,12 +104,12 @@
  ****************************************************************************/
 
 int nxsig_nanosleep(FAR const struct timespec *rqtp,
-                    FAR struct timespec *rmtp)
+                    FAR struct timespec *      rmtp)
 {
   irqstate_t flags;
-  clock_t starttick;
-  sigset_t set;
-  int ret;
+  clock_t    starttick;
+  sigset_t   set;
+  int        ret;
 
   /* Sanity check */
 
@@ -156,8 +156,8 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
 
   if (rmtp)
     {
-      clock_t elapsed;
-      clock_t remaining;
+      clock_t  elapsed;
+      clock_t  remaining;
       sclock_t ticks;
 
       /* REVISIT: The conversion from time to ticks and back could
@@ -272,7 +272,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
 
 int clock_nanosleep(clockid_t clockid, int flags,
                     FAR const struct timespec *rqtp,
-                    FAR struct timespec *rmtp)
+                    FAR struct timespec *      rmtp)
 {
   int ret;
 
@@ -286,7 +286,7 @@ int clock_nanosleep(clockid_t clockid, int flags,
     {
       struct timespec reltime;
       struct timespec now;
-      irqstate_t irqstate;
+      irqstate_t      irqstate;
 
       /* Calculate the relative time delay.  We need to enter a critical
        * section early to assure the relative time is valid from this
@@ -294,7 +294,7 @@ int clock_nanosleep(clockid_t clockid, int flags,
        */
 
       irqstate = enter_critical_section();
-      ret = clock_gettime(clockid, &now);
+      ret      = clock_gettime(clockid, &now);
       if (ret < 0)
         {
           /* clock_gettime() sets the errno variable */

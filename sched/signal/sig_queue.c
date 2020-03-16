@@ -90,7 +90,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-int nxsig_queue (int pid, int signo, union sigval value)
+int nxsig_queue(int pid, int signo, union sigval value)
 #else
 int nxsig_queue(int pid, int signo, void *sival_ptr)
 #endif
@@ -99,7 +99,7 @@ int nxsig_queue(int pid, int signo, void *sival_ptr)
   FAR struct tcb_s *rtcb = this_task();
 #endif
   siginfo_t info;
-  int ret;
+  int       ret;
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
   sinfo("pid=0x%08x signo=%d value=%d\n", pid, signo, value.sival_int);
@@ -116,17 +116,17 @@ int nxsig_queue(int pid, int signo, void *sival_ptr)
 
   /* Create the siginfo structure */
 
-  info.si_signo           = signo;
-  info.si_code            = SI_QUEUE;
-  info.si_errno           = OK;
+  info.si_signo = signo;
+  info.si_code  = SI_QUEUE;
+  info.si_errno = OK;
 #ifdef CONFIG_CAN_PASS_STRUCTS
-  info.si_value           = value;
+  info.si_value = value;
 #else
   info.si_value.sival_ptr = sival_ptr;
 #endif
 #ifdef CONFIG_SCHED_HAVE_PARENT
-  info.si_pid             = rtcb->pid;
-  info.si_status          = OK;
+  info.si_pid    = rtcb->pid;
+  info.si_status = OK;
 #endif
 
   /* Send the signal */
@@ -171,7 +171,7 @@ int nxsig_queue(int pid, int signo, void *sival_ptr)
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_PASS_STRUCTS
-int sigqueue (int pid, int signo, union sigval value)
+int sigqueue(int pid, int signo, union sigval value)
 #else
 int sigqueue(int pid, int signo, void *sival_ptr)
 #endif

@@ -65,10 +65,10 @@
 
 void clock_timespec_add(FAR const struct timespec *ts1,
                         FAR const struct timespec *ts2,
-                        FAR struct timespec *ts3)
+                        FAR struct timespec *      ts3)
 {
-  time_t sec = ts1->tv_sec + ts2->tv_sec;
-  long nsec  = ts1->tv_nsec + ts2->tv_nsec;
+  time_t sec  = ts1->tv_sec + ts2->tv_sec;
+  long   nsec = ts1->tv_nsec + ts2->tv_nsec;
 
   if (nsec >= NSEC_PER_SEC)
     {

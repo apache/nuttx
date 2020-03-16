@@ -54,10 +54,10 @@
  *
  ****************************************************************************/
 
-WDOG_ID wd_create (void)
+WDOG_ID wd_create(void)
 {
   FAR struct wdog_s *wdog;
-  irqstate_t flags;
+  irqstate_t         flags;
 
   /* These actions must be atomic with respect to other tasks and also with
    * respect to interrupt handlers that may be allocating or freeing watchdog

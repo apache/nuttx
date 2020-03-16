@@ -77,7 +77,7 @@
 int pause(void)
 {
   sigset_t set;
-  int ret;
+  int      ret;
 
   /* pause() is a cancellation point */
 

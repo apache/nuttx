@@ -182,14 +182,14 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SCHED_HAVE_PARENT
+#  ifndef CONFIG_SCHED_HAVE_PARENT
 pid_t waitpid(pid_t pid, int *stat_loc, int options)
 {
-  FAR struct tcb_s *ctcb;
+  FAR struct tcb_s *       ctcb;
   FAR struct task_group_s *group;
-  bool mystat = false;
-  int errcode;
-  int ret;
+  bool                     mystat = false;
+  int                      errcode;
+  int                      ret;
 
   DEBUGASSERT(stat_loc);
 
@@ -308,19 +308,19 @@ errout_with_errno:
  *
  ****************************************************************************/
 
-#else
+#  else
 pid_t waitpid(pid_t pid, int *stat_loc, int options)
 {
-  FAR struct tcb_s *rtcb = this_task();
-  FAR struct tcb_s *ctcb;
-#ifdef CONFIG_SCHED_CHILD_STATUS
+  FAR struct tcb_s *         rtcb = this_task();
+  FAR struct tcb_s *         ctcb;
+#    ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *child = NULL;
-  bool retains;
-#endif
-  FAR struct siginfo info;
-  sigset_t set;
-  int errcode;
-  int ret;
+  bool                       retains;
+#    endif
+  FAR struct siginfo         info;
+  sigset_t                   set;
+  int                        errcode;
+  int                        ret;
 
   DEBUGASSERT(stat_loc);
 
@@ -341,7 +341,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
    * is actually a child of this task.
    */
 
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#    ifdef CONFIG_SCHED_CHILD_STATUS
   /* Does this task retain child status? */
 
   retains = ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0);
@@ -362,11 +362,11 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
         {
           /* Make sure that the thread it is our child. */
 
-#ifdef HAVE_GROUP_MEMBERS
+#      ifdef HAVE_GROUP_MEMBERS
           if (ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
-#else
+#      else
           if (ctcb->group->tg_ppid != rtcb->pid)
-#endif
+#      endif
             {
               errcode = ECHILD;
               goto errout_with_errno;
@@ -389,7 +389,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
         }
     }
 
-#else /* CONFIG_SCHED_CHILD_STATUS */
+#    else /* CONFIG_SCHED_CHILD_STATUS */
 
   if (rtcb->group->tg_nchildren == 0)
     {
@@ -406,24 +406,24 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
 
       ctcb = sched_gettcb(pid);
 
-#ifdef HAVE_GROUP_MEMBERS
+#      ifdef HAVE_GROUP_MEMBERS
       if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
-#else
+#      else
       if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
-#endif
+#      endif
         {
           errcode = ECHILD;
           goto errout_with_errno;
         }
     }
 
-#endif /* CONFIG_SCHED_CHILD_STATUS */
+#    endif /* CONFIG_SCHED_CHILD_STATUS */
 
   /* Loop until the child that we are waiting for dies */
 
-  for (; ; )
+  for (;;)
     {
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#    ifdef CONFIG_SCHED_CHILD_STATUS
       /* Check if the task has already died. Signals are not queued in
        * NuttX.  So a possibility is that the child has died and we
        * missed the death of child signal (we got some other signal
@@ -500,7 +500,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
             }
         }
 
-#else  /* CONFIG_SCHED_CHILD_STATUS */
+#    else /* CONFIG_SCHED_CHILD_STATUS */
 
       /* Check if the task has already died. Signals are not queued in
        * NuttX.  So a possibility is that the child has died and we
@@ -520,7 +520,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
           goto errout_with_errno;
         }
 
-#endif /* CONFIG_SCHED_CHILD_STATUS */
+#    endif /* CONFIG_SCHED_CHILD_STATUS */
 
       /* Wait for any death-of-child signal */
 
@@ -536,14 +536,14 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
        */
 
       if (info.si_signo == SIGCHLD &&
-         (pid == (pid_t)-1 || info.si_pid == pid))
+          (pid == (pid_t)-1 || info.si_pid == pid))
         {
           /* Yes... return the status and PID (in the event it was -1) */
 
           *stat_loc = info.si_status << 8;
-          pid = info.si_pid;
+          pid       = info.si_pid;
 
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#    ifdef CONFIG_SCHED_CHILD_STATUS
           if (retains)
             {
               /* Recover the exiting child */
@@ -559,7 +559,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
                   group_freechild(child);
                 }
             }
-#endif /* CONFIG_SCHED_CHILD_STATUS */
+#    endif /* CONFIG_SCHED_CHILD_STATUS */
 
           break;
         }
@@ -576,6 +576,6 @@ errout_with_errno:
   sched_unlock();
   return ERROR;
 }
-#endif /* CONFIG_SCHED_HAVE_PARENT */
+#  endif   /* CONFIG_SCHED_HAVE_PARENT */
 
 #endif /* CONFIG_SCHED_WAITPID */

@@ -80,8 +80,8 @@
 int nxsem_trywait(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
-  irqstate_t flags;
-  int ret;
+  irqstate_t        flags;
+  int               ret;
 
   /* This API should not be called from interrupt handlers */
 
@@ -103,7 +103,7 @@ int nxsem_trywait(FAR sem_t *sem)
 
           sem->semcount--;
           rtcb->waitsem = NULL;
-          ret = OK;
+          ret           = OK;
         }
       else
         {

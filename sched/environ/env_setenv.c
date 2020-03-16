@@ -41,16 +41,16 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sched.h>
-#include <string.h>
-#include <errno.h>
+#  include <stdio.h>
+#  include <stdlib.h>
+#  include <sched.h>
+#  include <string.h>
+#  include <errno.h>
 
-#include <nuttx/kmalloc.h>
+#  include <nuttx/kmalloc.h>
 
-#include "sched/sched.h"
-#include "environ/environ.h"
+#  include "sched/sched.h"
+#  include "environ/environ.h"
 
 /****************************************************************************
  * Public Functions
@@ -81,13 +81,13 @@
 
 int setenv(FAR const char *name, FAR const char *value, int overwrite)
 {
-  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *       rtcb;
   FAR struct task_group_s *group;
-  FAR char *pvar;
-  FAR char *newenvp;
-  int newsize;
-  int varlen;
-  int ret = OK;
+  FAR char *               pvar;
+  FAR char *               newenvp;
+  int                      newsize;
+  int                      varlen;
+  int                      ret = OK;
 
   /* Verify input parameter */
 

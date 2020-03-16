@@ -91,7 +91,7 @@
 clock_t clock_systimer(void)
 {
 #ifdef CONFIG_SCHED_TICKLESS
-# ifdef CONFIG_SYSTEM_TIME64
+#  ifdef CONFIG_SYSTEM_TIME64
 
   struct timespec ts;
 
@@ -103,10 +103,10 @@ clock_t clock_systimer(void)
 
   return USEC2TICK(1000000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000);
 
-# else /* CONFIG_SYSTEM_TIME64 */
+#  else /* CONFIG_SYSTEM_TIME64 */
 
   struct timespec ts;
-  uint64_t tmp;
+  uint64_t        tmp;
 
   /* Get the time from the platform specific hardware */
 
@@ -117,9 +117,9 @@ clock_t clock_systimer(void)
   tmp = USEC2TICK(1000000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000);
   return (clock_t)(tmp & TIMER_MASK32);
 
-# endif /* CONFIG_SYSTEM_TIME64 */
-#else /* CONFIG_SCHED_TICKLESS */
-# ifdef CONFIG_SYSTEM_TIME64
+#  endif /* CONFIG_SYSTEM_TIME64 */
+#else    /* CONFIG_SCHED_TICKLESS */
+#  ifdef CONFIG_SYSTEM_TIME64
 
   clock_t sample;
   clock_t verify;
@@ -140,17 +140,17 @@ clock_t clock_systimer(void)
       verify = g_system_timer;
       sample = g_system_timer;
     }
-  while ((sample &  TIMER_MASK32)  < (verify &  TIMER_MASK32) ||
+  while ((sample & TIMER_MASK32) < (verify & TIMER_MASK32) ||
          (sample & ~TIMER_MASK32) != (verify & ~TIMER_MASK32));
 
   return sample;
 
-# else /* CONFIG_SYSTEM_TIME64 */
+#  else /* CONFIG_SYSTEM_TIME64 */
 
   /* Return the current system time */
 
   return g_system_timer;
 
-# endif /* CONFIG_SYSTEM_TIME64 */
-#endif /* CONFIG_SCHED_TICKLESS */
+#  endif /* CONFIG_SYSTEM_TIME64 */
+#endif   /* CONFIG_SCHED_TICKLESS */
 }

@@ -79,10 +79,10 @@ struct lp_wqueue_s g_lpwork;
 
 static int work_lpthread(int argc, char *argv[])
 {
-#if CONFIG_SCHED_LPNTHREADS > 1
-  int wndx;
+#  if CONFIG_SCHED_LPNTHREADS > 1
+  int   wndx;
   pid_t me = getpid();
-  int i;
+  int   i;
 
   /* Find out thread index by search the workers in g_lpwork */
 
@@ -96,13 +96,13 @@ static int work_lpthread(int argc, char *argv[])
     }
 
   DEBUGASSERT(i < CONFIG_SCHED_LPNTHREADS);
-#endif
+#  endif
 
   /* Loop forever */
 
-  for (; ; )
+  for (;;)
     {
-#if CONFIG_SCHED_LPNTHREADS > 1
+#  if CONFIG_SCHED_LPNTHREADS > 1
       /* Thread 0 is special.  Only thread 0 performs period garbage collection */
 
       if (wndx > 0)
@@ -114,7 +114,7 @@ static int work_lpthread(int argc, char *argv[])
           work_process((FAR struct kwork_wqueue_s *)&g_lpwork, wndx);
         }
       else
-#endif
+#  endif
         {
           /* Perform garbage collection.  This cleans-up memory de-
            * allocations that were queued because they could not be freed in
@@ -164,7 +164,7 @@ static int work_lpthread(int argc, char *argv[])
 int work_lpstart(void)
 {
   pid_t pid;
-  int wndx;
+  int   wndx;
 
   /* Don't permit any of the threads to run until we have fully initialized
    * g_lpwork.
@@ -181,7 +181,7 @@ int work_lpstart(void)
       pid = kthread_create(LPWORKNAME, CONFIG_SCHED_LPWORKPRIORITY,
                            CONFIG_SCHED_LPWORKSTACKSIZE,
                            (main_t)work_lpthread,
-                           (FAR char * const *)NULL);
+                           (FAR char *const *)NULL);
 
       DEBUGASSERT(pid > 0);
       if (pid < 0)

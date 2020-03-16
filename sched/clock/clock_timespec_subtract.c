@@ -66,10 +66,10 @@
 
 void clock_timespec_subtract(FAR const struct timespec *ts1,
                              FAR const struct timespec *ts2,
-                             FAR struct timespec *ts3)
+                             FAR struct timespec *      ts3)
 {
   time_t sec;
-  long nsec;
+  long   nsec;
 
   if (ts1->tv_sec < ts2->tv_sec)
     {
@@ -95,6 +95,6 @@ void clock_timespec_subtract(FAR const struct timespec *ts1,
         }
     }
 
-  ts3->tv_sec = sec;
+  ts3->tv_sec  = sec;
   ts3->tv_nsec = nsec;
 }

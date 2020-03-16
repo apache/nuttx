@@ -65,14 +65,14 @@
 struct join_s
 {
   FAR struct join_s *next;       /* Implements link list */
-  uint8_t        crefs;          /* Reference count */
-  bool           started;        /* true: pthread started. */
-  bool           detached;       /* true: pthread_detached'ed */
-  bool           terminated;     /* true: detach'ed+exit'ed */
-  pthread_t      thread;         /* Includes pid */
-  sem_t          exit_sem;       /* Implements join */
-  sem_t          data_sem;       /* Implements join */
-  pthread_addr_t exit_value;     /* Returned data */
+  uint8_t            crefs;      /* Reference count */
+  bool               started;    /* true: pthread started. */
+  bool               detached;   /* true: pthread_detached'ed */
+  bool               terminated; /* true: detach'ed+exit'ed */
+  pthread_t          thread;     /* Includes pid */
+  sem_t              exit_sem;   /* Implements join */
+  sem_t              data_sem;   /* Implements join */
+  pthread_addr_t     exit_value; /* Returned data */
 };
 
 /****************************************************************************
@@ -80,11 +80,10 @@ struct join_s
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
+#  define EXTERN extern "C"
+extern "C" {
 #else
-#define EXTERN extern
+#  define EXTERN extern
 #endif
 
 /****************************************************************************
@@ -95,19 +94,19 @@ struct pthread_tcb_s; /* Forward reference */
 struct task_group_s;  /* Forward reference */
 
 void weak_function pthread_initialize(void);
-int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority,
-                       start_t start, pthread_startroutine_t entry);
+int                pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority,
+                                      start_t start, pthread_startroutine_t entry);
 
 #ifdef CONFIG_PTHREAD_CLEANUP
 void pthread_cleanup_popall(FAR struct pthread_tcb_s *tcb);
 #endif
 
-int pthread_completejoin(pid_t pid, FAR void *exit_value);
-void pthread_destroyjoin(FAR struct task_group_s *group,
-                         FAR struct join_s *pjoin);
+int                pthread_completejoin(pid_t pid, FAR void *exit_value);
+void               pthread_destroyjoin(FAR struct task_group_s *group,
+                                       FAR struct join_s *      pjoin);
 FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
-                                        pid_t pid);
-void pthread_release(FAR struct task_group_s *group);
+                                        pid_t                    pid);
+void               pthread_release(FAR struct task_group_s *group);
 
 int pthread_sem_take(FAR sem_t *sem, FAR const struct timespec *abs_timeout,
                      bool intr);
@@ -117,15 +116,15 @@ int pthread_sem_trytake(sem_t *sem);
 int pthread_sem_give(sem_t *sem);
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
-int pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
-                       FAR const struct timespec *abs_timeout, bool intr);
-int pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex);
-int pthread_mutex_give(FAR struct pthread_mutex_s *mutex);
+int  pthread_mutex_take(FAR struct pthread_mutex_s *mutex,
+                        FAR const struct timespec *abs_timeout, bool intr);
+int  pthread_mutex_trytake(FAR struct pthread_mutex_s *mutex);
+int  pthread_mutex_give(FAR struct pthread_mutex_s *mutex);
 void pthread_mutex_inconsistent(FAR struct pthread_tcb_s *tcb);
 #else
-#  define pthread_mutex_take(m,abs_timeout,i)  pthread_sem_take(&(m)->sem,(abs_timeout),(i))
-#  define pthread_mutex_trytake(m)             pthread_sem_trytake(&(m)->sem)
-#  define pthread_mutex_give(m)                pthread_sem_give(&(m)->sem)
+#  define pthread_mutex_take(m, abs_timeout, i) pthread_sem_take(&(m)->sem, (abs_timeout), (i))
+#  define pthread_mutex_trytake(m)              pthread_sem_trytake(&(m)->sem)
+#  define pthread_mutex_give(m)                 pthread_sem_give(&(m)->sem)
 #endif
 
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES

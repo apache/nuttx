@@ -90,9 +90,9 @@
 int pthread_setspecific(pthread_key_t key, FAR const void *value)
 {
 #if CONFIG_NPTHREAD_KEYS > 0
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *       rtcb  = this_task();
   FAR struct task_group_s *group = rtcb->group;
-  int ret = EINVAL;
+  int                      ret   = EINVAL;
 
   DEBUGASSERT(group != NULL && (unsigned)key < CONFIG_NPTHREAD_KEYS);
 

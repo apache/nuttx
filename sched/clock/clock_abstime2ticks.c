@@ -125,14 +125,14 @@ int clock_abstime2ticks(clockid_t clockid, FAR const struct timespec *abstime,
   /* The relative time to wait is the absolute time minus the current time. */
 
   reltime.tv_nsec = (abstime->tv_nsec - currtime.tv_nsec);
-  reltime.tv_sec  = (abstime->tv_sec  - currtime.tv_sec);
+  reltime.tv_sec  = (abstime->tv_sec - currtime.tv_sec);
 
   /* Check if we were supposed to borrow from the seconds. */
 
   if (reltime.tv_nsec < 0)
     {
       reltime.tv_nsec += NSEC_PER_SEC;
-      reltime.tv_sec  -= 1;
+      reltime.tv_sec -= 1;
     }
 
   /* Convert this relative time into clock ticks. */

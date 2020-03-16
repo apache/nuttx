@@ -38,11 +38,11 @@
  * Included Files
  ****************************************************************************/
 
-#include  <nuttx/config.h>
+#include <nuttx/config.h>
 
-#include  <sched.h>
+#include <sched.h>
 
-#include  "sched/sched.h"
+#include "sched/sched.h"
 
 #include "signal/signal.h"
 #include "task/task.h"
@@ -83,7 +83,7 @@ int nxtask_exit(void)
 {
   FAR struct tcb_s *dtcb;
   FAR struct tcb_s *rtcb;
-  int ret;
+  int               ret;
 #ifdef CONFIG_SMP
   int cpu;
 
@@ -154,7 +154,7 @@ int nxtask_exit(void)
    */
 
   sched_addblocked(dtcb, TSTATE_TASK_INACTIVE);
-  ret = nxtask_terminate(dtcb->pid, true);
+  ret              = nxtask_terminate(dtcb->pid, true);
   rtcb->task_state = TSTATE_TASK_RUNNING;
 
   /* Decrement the lockcount on rctb. */

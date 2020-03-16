@@ -51,20 +51,20 @@ struct mq_des_block_s
  * item.
  */
 
-sq_queue_t  g_msgfree;
+sq_queue_t g_msgfree;
 
 /* The g_msgfreeInt is a list of messages that are reserved for use by
  * interrupt handlers.
  */
 
-sq_queue_t  g_msgfreeirq;
+sq_queue_t g_msgfreeirq;
 
 /* The g_desfree data structure is a list of message descriptors available
  * to the operating system for general use. The number of messages in the
  * pool is a constant.
  */
 
-sq_queue_t  g_desfree;
+sq_queue_t g_desfree;
 
 /****************************************************************************
  * Private Data
@@ -74,13 +74,13 @@ sq_queue_t  g_desfree;
  * messages.
  */
 
-static struct mqueue_msg_s  *g_msgalloc;
+static struct mqueue_msg_s *g_msgalloc;
 
 /* g_msgfreeirqalloc is a pointer to the start of the allocated block of
  * messages.
  */
 
-static struct mqueue_msg_s  *g_msgfreeirqalloc;
+static struct mqueue_msg_s *g_msgfreeirqalloc;
 
 /* g_desalloc is a list of allocated block of message queue descriptors. */
 
@@ -112,12 +112,12 @@ mq_msgblockalloc(FAR sq_queue_t *queue, uint16_t nmsgs,
    */
 
   mqmsgblock = (FAR struct mqueue_msg_s *)
-    kmm_malloc(sizeof(struct mqueue_msg_s) * nmsgs);
+  kmm_malloc(sizeof(struct mqueue_msg_s) * nmsgs);
 
   if (mqmsgblock)
     {
       struct mqueue_msg_s *mqmsg = mqmsgblock;
-      int      i;
+      int                  i;
 
       for (i = 0; i < nmsgs; i++)
         {
@@ -160,16 +160,16 @@ void nxmq_initialize(void)
   /* Allocate a block of messages for general use */
 
   g_msgalloc =
-    mq_msgblockalloc(&g_msgfree, CONFIG_PREALLOC_MQ_MSGS,
-                     MQ_ALLOC_FIXED);
+  mq_msgblockalloc(&g_msgfree, CONFIG_PREALLOC_MQ_MSGS,
+                   MQ_ALLOC_FIXED);
 
   /* Allocate a block of messages for use exclusively by
    * interrupt handlers
    */
 
   g_msgfreeirqalloc =
-    mq_msgblockalloc(&g_msgfreeirq, NUM_INTERRUPT_MSGS,
-                     MQ_ALLOC_IRQ);
+  mq_msgblockalloc(&g_msgfreeirq, NUM_INTERRUPT_MSGS,
+                   MQ_ALLOC_IRQ);
 
   /* Allocate a block of message queue descriptors */
 
@@ -198,7 +198,7 @@ void nxmq_alloc_desblock(void)
   /* Allocate a block of message descriptors */
 
   mqdesblock = (FAR struct mq_des_block_s *)
-    kmm_malloc(sizeof(struct mq_des_block_s));
+  kmm_malloc(sizeof(struct mq_des_block_s));
   if (mqdesblock)
     {
       int i;

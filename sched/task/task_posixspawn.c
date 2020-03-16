@@ -98,12 +98,12 @@
 
 static int nxposix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
                               FAR const posix_spawnattr_t *attr,
-                              FAR char * const argv[])
+                              FAR char *const              argv[])
 {
   FAR const struct symtab_s *symtab;
-  int nsymbols;
-  int pid;
-  int ret = OK;
+  int                        nsymbols;
+  int                        pid;
+  int                        ret = OK;
 
   DEBUGASSERT(path);
 
@@ -120,7 +120,7 @@ static int nxposix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
 
   /* Start the task */
 
-  pid = exec_spawn(path, (FAR char * const *)argv, symtab, nsymbols, attr);
+  pid = exec_spawn(path, (FAR char *const *)argv, symtab, nsymbols, attr);
   if (pid < 0)
     {
       ret = get_errno();
@@ -336,7 +336,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
 #endif
 {
   struct sched_param param;
-  pid_t proxy;
+  pid_t              proxy;
 #ifdef CONFIG_SCHED_WAITPID
   int status;
 #endif
@@ -392,7 +392,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
       return -ret;
     }
 
-  /* Disable pre-emption so that the proxy does not run until waitpid
+    /* Disable pre-emption so that the proxy does not run until waitpid
    * is called.  This is probably unnecessary since the nxposix_spawn_proxy
    * has the same priority as this thread; it should be schedule behind
    * this task in the ready-to-run list.
@@ -409,7 +409,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
   proxy = kthread_create("nxposix_spawn_proxy", param.sched_priority,
                          CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
                          (main_t)nxposix_spawn_proxy,
-                         (FAR char * const *)NULL);
+                         (FAR char *const *)NULL);
   if (proxy < 0)
     {
       ret = -proxy;
@@ -417,7 +417,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
       goto errout_with_lock;
     }
 
-  /* Wait for the proxy to complete its job */
+    /* Wait for the proxy to complete its job */
 
 #ifdef CONFIG_SCHED_WAITPID
   ret = waitpid(proxy, &status, 0);

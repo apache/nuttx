@@ -72,7 +72,7 @@
 
 int setgid(gid_t gid)
 {
-  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *       rtcb;
   FAR struct task_group_s *rgroup;
 
   /* Verify that the GID is in the valid range of 0 through INT16_MAX.

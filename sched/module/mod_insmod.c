@@ -57,9 +57,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef MIN
-#  define MIN(a,b) (a < b ? a : b)
-#endif
+#  ifndef MIN
+#    define MIN(a, b) (a < b ? a : b)
+#  endif
 
 /****************************************************************************
  * Private Functions
@@ -69,7 +69,7 @@
  * Name: mod_dumploadinfo
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_BINFMT_INFO
+#  ifdef CONFIG_DEBUG_BINFMT_INFO
 static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
 {
   int i;
@@ -77,30 +77,30 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
   binfo("LOAD_INFO:\n");
   binfo("  textalloc:    %08lx\n", (long)loadinfo->textalloc);
   binfo("  datastart:    %08lx\n", (long)loadinfo->datastart);
-  binfo("  textsize:     %ld\n",   (long)loadinfo->textsize);
-  binfo("  datasize:     %ld\n",   (long)loadinfo->datasize);
-  binfo("  filelen:      %ld\n",   (long)loadinfo->filelen);
-  binfo("  filfd:        %d\n",    loadinfo->filfd);
-  binfo("  symtabidx:    %d\n",    loadinfo->symtabidx);
-  binfo("  strtabidx:    %d\n",    loadinfo->strtabidx);
+  binfo("  textsize:     %ld\n", (long)loadinfo->textsize);
+  binfo("  datasize:     %ld\n", (long)loadinfo->datasize);
+  binfo("  filelen:      %ld\n", (long)loadinfo->filelen);
+  binfo("  filfd:        %d\n", loadinfo->filfd);
+  binfo("  symtabidx:    %d\n", loadinfo->symtabidx);
+  binfo("  strtabidx:    %d\n", loadinfo->strtabidx);
 
   binfo("ELF Header:\n");
   binfo("  e_ident:      %02x %02x %02x %02x\n",
         loadinfo->ehdr.e_ident[0], loadinfo->ehdr.e_ident[1],
         loadinfo->ehdr.e_ident[2], loadinfo->ehdr.e_ident[3]);
-  binfo("  e_type:       %04x\n",  loadinfo->ehdr.e_type);
-  binfo("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
-  binfo("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
+  binfo("  e_type:       %04x\n", loadinfo->ehdr.e_type);
+  binfo("  e_machine:    %04x\n", loadinfo->ehdr.e_machine);
+  binfo("  e_version:    %08x\n", loadinfo->ehdr.e_version);
   binfo("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
-  binfo("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
-  binfo("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
-  binfo("  e_flags:      %08x\n",  loadinfo->ehdr.e_flags);
-  binfo("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
-  binfo("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
-  binfo("  e_phnum:      %d\n",    loadinfo->ehdr.e_phnum);
-  binfo("  e_shentsize:  %d\n",    loadinfo->ehdr.e_shentsize);
-  binfo("  e_shnum:      %d\n",    loadinfo->ehdr.e_shnum);
-  binfo("  e_shstrndx:   %d\n",    loadinfo->ehdr.e_shstrndx);
+  binfo("  e_phoff:      %d\n", loadinfo->ehdr.e_phoff);
+  binfo("  e_shoff:      %d\n", loadinfo->ehdr.e_shoff);
+  binfo("  e_flags:      %08x\n", loadinfo->ehdr.e_flags);
+  binfo("  e_ehsize:     %d\n", loadinfo->ehdr.e_ehsize);
+  binfo("  e_phentsize:  %d\n", loadinfo->ehdr.e_phentsize);
+  binfo("  e_phnum:      %d\n", loadinfo->ehdr.e_phnum);
+  binfo("  e_shentsize:  %d\n", loadinfo->ehdr.e_shentsize);
+  binfo("  e_shnum:      %d\n", loadinfo->ehdr.e_shnum);
+  binfo("  e_shstrndx:   %d\n", loadinfo->ehdr.e_shstrndx);
 
   if (loadinfo->shdr && loadinfo->ehdr.e_shnum > 0)
     {
@@ -112,33 +112,33 @@ static void mod_dumploadinfo(FAR struct mod_loadinfo_s *loadinfo)
           binfo("  sh_type:      %08x\n", shdr->sh_type);
           binfo("  sh_flags:     %08x\n", shdr->sh_flags);
           binfo("  sh_addr:      %08x\n", shdr->sh_addr);
-          binfo("  sh_offset:    %d\n",   shdr->sh_offset);
-          binfo("  sh_size:      %d\n",   shdr->sh_size);
-          binfo("  sh_link:      %d\n",   shdr->sh_link);
-          binfo("  sh_info:      %d\n",   shdr->sh_info);
-          binfo("  sh_addralign: %d\n",   shdr->sh_addralign);
-          binfo("  sh_entsize:   %d\n",   shdr->sh_entsize);
+          binfo("  sh_offset:    %d\n", shdr->sh_offset);
+          binfo("  sh_size:      %d\n", shdr->sh_size);
+          binfo("  sh_link:      %d\n", shdr->sh_link);
+          binfo("  sh_info:      %d\n", shdr->sh_info);
+          binfo("  sh_addralign: %d\n", shdr->sh_addralign);
+          binfo("  sh_entsize:   %d\n", shdr->sh_entsize);
         }
     }
 }
-#else
-# define mod_dumploadinfo(i)
-#endif
+#  else
+#    define mod_dumploadinfo(i)
+#  endif
 
 /****************************************************************************
  * Name: mod_dumpinitializer
  ****************************************************************************/
 
-#ifdef CONFIG_MODLIB_DUMPBUFFER
-static void mod_dumpinitializer(mod_initializer_t initializer,
+#  ifdef CONFIG_MODLIB_DUMPBUFFER
+static void mod_dumpinitializer(mod_initializer_t          initializer,
                                 FAR struct mod_loadinfo_s *loadinfo)
 {
   modlib_dumpbuffer("Initializer code", (FAR const uint8_t *)initializer,
                     MIN(loadinfo->textsize - loadinfo->ehdr.e_entry, 512));
 }
-#else
-# define mod_dumpinitializer(b,l)
-#endif
+#  else
+#    define mod_dumpinitializer(b, l)
+#  endif
 
 /****************************************************************************
  * Public Functions
@@ -173,9 +173,9 @@ static void mod_dumpinitializer(mod_initializer_t initializer,
 FAR void *insmod(FAR const char *filename, FAR const char *modname)
 {
   struct mod_loadinfo_s loadinfo;
-  FAR struct module_s *modp;
-  mod_initializer_t initializer;
-  int ret;
+  FAR struct module_s * modp;
+  mod_initializer_t     initializer;
+  int                   ret;
 
   DEBUGASSERT(filename != NULL && modname != NULL);
   binfo("Loading file: %s\n", filename);
@@ -235,26 +235,26 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
       goto errout_with_load;
     }
 
-  /* Save the load information */
+    /* Save the load information */
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
-  modp->textalloc   = (FAR void *)loadinfo.textalloc;
-  modp->dataalloc   = (FAR void *)loadinfo.datastart;
-#else
-  modp->alloc       = (FAR void *)loadinfo.textalloc;
-#endif
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-  modp->textsize    = loadinfo.textsize;
-  modp->datasize    = loadinfo.datasize;
-#endif
+#  if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+  modp->textalloc = (FAR void *)loadinfo.textalloc;
+  modp->dataalloc = (FAR void *)loadinfo.datastart;
+#  else
+  modp->alloc = (FAR void *)loadinfo.textalloc;
+#  endif
+#  if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+  modp->textsize = loadinfo.textsize;
+  modp->datasize = loadinfo.datasize;
+#  endif
 
   /* Get the module initializer entry point */
 
   initializer = (mod_initializer_t)(loadinfo.textalloc +
                                     loadinfo.ehdr.e_entry);
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+#  if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   modp->initializer = initializer;
-#endif
+#  endif
   mod_dumpinitializer(initializer, &loadinfo);
 
   /* Call the module initializer */

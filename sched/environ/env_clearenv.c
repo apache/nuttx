@@ -41,10 +41,10 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <sched.h>
-#include <stdlib.h>
-#include "sched/sched.h"
-#include "environ/environ.h"
+#  include <sched.h>
+#  include <stdlib.h>
+#  include "sched/sched.h"
+#  include "environ/environ.h"
 
 /****************************************************************************
  * Public Functions

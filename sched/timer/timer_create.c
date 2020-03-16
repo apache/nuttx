@@ -53,15 +53,15 @@
 static FAR struct posix_timer_s *timer_allocate(void)
 {
   FAR struct posix_timer_s *ret;
-  irqstate_t flags;
-  uint8_t pt_flags;
+  irqstate_t                flags;
+  uint8_t                   pt_flags;
 
   /* Try to get a preallocated timer from the free list */
 
-#if CONFIG_PREALLOC_TIMERS > 0
+#  if CONFIG_PREALLOC_TIMERS > 0
   flags = enter_critical_section();
   ret   = (FAR struct posix_timer_s *)
-    sq_remfirst((FAR sq_queue_t *)&g_freetimers);
+  sq_remfirst((FAR sq_queue_t *)&g_freetimers);
   leave_critical_section(flags);
 
   /* Did we get one? */
@@ -71,12 +71,12 @@ static FAR struct posix_timer_s *timer_allocate(void)
       pt_flags = PT_FLAGS_PREALLOCATED;
     }
   else
-#endif
+#  endif
     {
       /* Allocate a new timer from the heap */
 
       ret = (FAR struct posix_timer_s *)
-        kmm_malloc(sizeof(struct posix_timer_s));
+      kmm_malloc(sizeof(struct posix_timer_s));
       pt_flags = 0;
     }
 
@@ -156,7 +156,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
                  FAR timer_t *timerid)
 {
   FAR struct posix_timer_s *ret;
-  WDOG_ID wdog;
+  WDOG_ID                   wdog;
 
   /* Sanity checks.  Also, we support only CLOCK_REALTIME */
 
@@ -209,14 +209,14 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
        *  timer ID."
        */
 
-      ret->pt_event.sigev_notify            = SIGEV_SIGNAL;
-      ret->pt_event.sigev_signo             = SIGALRM;
-      ret->pt_event.sigev_value.sival_ptr   = ret;
+      ret->pt_event.sigev_notify          = SIGEV_SIGNAL;
+      ret->pt_event.sigev_signo           = SIGALRM;
+      ret->pt_event.sigev_value.sival_ptr = ret;
 
-#ifdef CONFIG_SIG_EVTHREAD
+#  ifdef CONFIG_SIG_EVTHREAD
       ret->pt_event.sigev_notify_function   = NULL;
       ret->pt_event.sigev_notify_attributes = NULL;
-#endif
+#  endif
     }
 
   /* Return the timer */

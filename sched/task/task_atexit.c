@@ -89,7 +89,7 @@
 
 int atexit(void (*func)(void))
 {
-#if defined(CONFIG_SCHED_ONEXIT)
+#  if defined(CONFIG_SCHED_ONEXIT)
   /* atexit is equivalent to on_exit() with no argument (Assuming that the
    * ABI can handle a callback function that receives more parameters than
    * it expects).
@@ -97,11 +97,11 @@ int atexit(void (*func)(void))
 
   return on_exit((onexitfunc_t)func, NULL);
 
-#elif defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
-  FAR struct tcb_s *tcb = this_task();
+#  elif defined(CONFIG_SCHED_ATEXIT_MAX) && CONFIG_SCHED_ATEXIT_MAX > 1
+  FAR struct tcb_s *       tcb   = this_task();
   FAR struct task_group_s *group = tcb->group;
-  int index;
-  int ret = ERROR;
+  int                      index;
+  int                      ret = ERROR;
 
   DEBUGASSERT(group);
 
@@ -122,7 +122,7 @@ int atexit(void (*func)(void))
           if (!group->tg_atexitfunc[index])
             {
               group->tg_atexitfunc[index] = func;
-              ret = OK;
+              ret                         = OK;
               break;
             }
         }
@@ -131,10 +131,10 @@ int atexit(void (*func)(void))
     }
 
   return ret;
-#else
-  FAR struct tcb_s *tcb = this_task();
+#  else
+  FAR struct tcb_s *       tcb   = this_task();
   FAR struct task_group_s *group = tcb->group;
-  int ret = ERROR;
+  int                      ret   = ERROR;
 
   DEBUGASSERT(group);
 
@@ -144,12 +144,12 @@ int atexit(void (*func)(void))
   if (func && !group->tg_atexitfunc)
     {
       group->tg_atexitfunc = func;
-      ret = OK;
+      ret                  = OK;
     }
 
   sched_unlock();
   return ret;
-#endif
+#  endif
 }
 
 #endif /* CONFIG_SCHED_ATEXIT */

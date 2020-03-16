@@ -79,7 +79,7 @@ static volatile uint8_t g_tasklist_lock_count[CONFIG_SMP_NCPUS];
 
 irqstate_t sched_tasklist_lock(void)
 {
-  int me;
+  int        me;
   irqstate_t ret;
 
   ret = up_irq_save();

@@ -55,7 +55,7 @@
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
 /* This is the spinlock that enforces critical sections when interrupts are
  * disabled.
  */
@@ -65,12 +65,12 @@ volatile spinlock_t g_cpu_irqlock SP_SECTION = SP_UNLOCKED;
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
 volatile spinlock_t g_cpu_irqsetlock SP_SECTION;
-volatile cpu_set_t g_cpu_irqset SP_SECTION;
+volatile cpu_set_t g_cpu_irqset      SP_SECTION;
 
 /* Handles nested calls to enter_critical section from interrupt handlers */
 
 volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
-#endif
+#  endif
 
 /****************************************************************************
  * Private Functions
@@ -119,16 +119,16 @@ volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
 static inline bool irq_waitlock(int cpu)
 {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   FAR struct tcb_s *tcb = current_task(cpu);
 
   /* Notify that we are waiting for a spinlock */
 
   sched_note_spinlock(tcb, &g_cpu_irqlock);
-#endif
+#    endif
 
   /* Duplicate the spin_lock() logic from spinlock.c, but adding the check
    * for the deadlock condition.
@@ -144,27 +144,27 @@ static inline bool irq_waitlock(int cpu)
            * Abort the wait and return false.
            */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
           /* Notify that we are waiting for a spinlock */
 
           sched_note_spinabort(tcb, &g_cpu_irqlock);
-#endif
+#    endif
 
           return false;
         }
     }
 
-  /* We have g_cpu_irqlock! */
+    /* We have g_cpu_irqlock! */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we have the spinlock */
 
   sched_note_spinlocked(tcb, &g_cpu_irqlock);
-#endif
+#    endif
 
   return true;
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Public Functions
@@ -180,12 +180,12 @@ static inline bool irq_waitlock(int cpu)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
 irqstate_t enter_critical_section(void)
 {
   FAR struct tcb_s *rtcb;
-  irqstate_t ret;
-  int cpu;
+  irqstate_t        ret;
+  int               cpu;
 
   /* Disable interrupts.
    *
@@ -375,12 +375,12 @@ try_again:
 
               /* Note that we have entered the critical section */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#    ifdef CONFIG_SCHED_CRITMONITOR
               sched_critmon_csection(rtcb, true);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+#    endif
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
               sched_note_csection(rtcb, true);
-#endif
+#    endif
             }
         }
     }
@@ -390,7 +390,7 @@ try_again:
   return ret;
 }
 
-#else
+#  else
 
 irqstate_t enter_critical_section(void)
 {
@@ -418,12 +418,12 @@ irqstate_t enter_critical_section(void)
         {
           /* Note that we have entered the critical section */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#    ifdef CONFIG_SCHED_CRITMONITOR
           sched_critmon_csection(rtcb, true);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+#    endif
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
           sched_note_csection(rtcb, true);
-#endif
+#    endif
         }
     }
 
@@ -431,7 +431,7 @@ irqstate_t enter_critical_section(void)
 
   return ret;
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name: leave_critical_section
@@ -442,7 +442,7 @@ irqstate_t enter_critical_section(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
 void leave_critical_section(irqstate_t flags)
 {
   int cpu;
@@ -525,12 +525,12 @@ void leave_critical_section(irqstate_t flags)
             {
               /* No.. Note that we have left the critical section */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#    ifdef CONFIG_SCHED_CRITMONITOR
               sched_critmon_csection(rtcb, false);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+#    endif
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
               sched_note_csection(rtcb, false);
-#endif
+#    endif
               /* Decrement our count on the lock.  If all CPUs have
                * released, then unlock the spinlock.
                */
@@ -583,7 +583,7 @@ void leave_critical_section(irqstate_t flags)
   up_irq_restore(flags);
 }
 
-#else
+#  else
 
 void leave_critical_section(irqstate_t flags)
 {
@@ -603,12 +603,12 @@ void leave_critical_section(irqstate_t flags)
         {
           /* Note that we have left the critical section */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#    ifdef CONFIG_SCHED_CRITMONITOR
           sched_critmon_csection(rtcb, false);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+#    endif
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
           sched_note_csection(rtcb, false);
-#endif
+#    endif
         }
     }
 
@@ -616,7 +616,7 @@ void leave_critical_section(irqstate_t flags)
 
   up_irq_restore(flags);
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name:  irq_cpu_locked
@@ -641,7 +641,7 @@ void leave_critical_section(irqstate_t flags)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
 bool irq_cpu_locked(int cpu)
 {
   cpu_set_t irqset;
@@ -657,14 +657,14 @@ bool irq_cpu_locked(int cpu)
       return false;
     }
 
-#if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+#    if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
   /* If the global lockcount has been incremented then simply return true */
 
   if (g_global_lockcount > 0)
     {
       return true;
     }
-#endif
+#    endif
 
   /* Test if g_cpu_irqlock is locked.  We don't really need to use check
    * g_cpu_irqlock to do this, we can use the g_cpu_set.
@@ -699,6 +699,6 @@ bool irq_cpu_locked(int cpu)
       return false;
     }
 }
-#endif
+#  endif
 
 #endif /* CONFIG_IRQCOUNT */

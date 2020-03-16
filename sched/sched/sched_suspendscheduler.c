@@ -74,23 +74,23 @@
 
 void sched_suspend_scheduler(FAR struct tcb_s *tcb)
 {
-#ifdef CONFIG_SCHED_SPORADIC
+#  ifdef CONFIG_SCHED_SPORADIC
   /* Perform sporadic schedule operations */
 
   if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
       DEBUGVERIFY(sched_sporadic_suspend(tcb));
     }
-#endif
+#  endif
 
-  /* Indicate that the task has been suspended */
+    /* Indicate that the task has been suspended */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#  ifdef CONFIG_SCHED_CRITMONITOR
   sched_critmon_suspend(tcb);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION
+#  endif
+#  ifdef CONFIG_SCHED_INSTRUMENTATION
   sched_note_suspend(tcb);
-#endif
+#  endif
 }
 
 #endif /* CONFIG_SCHED_SUSPENDSCHEDULER */

@@ -41,13 +41,13 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <sched.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
+#  include <sched.h>
+#  include <string.h>
+#  include <stdlib.h>
+#  include <errno.h>
 
-#include "sched/sched.h"
-#include "environ/environ.h"
+#  include "sched/sched.h"
+#  include "environ/environ.h"
 
 /****************************************************************************
  * Public Functions
@@ -73,11 +73,11 @@
 
 FAR char *getenv(FAR const char *name)
 {
-  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *       rtcb;
   FAR struct task_group_s *group;
-  FAR char *pvar;
-  FAR char *pvalue = NULL;
-  int ret = OK;
+  FAR char *               pvar;
+  FAR char *               pvalue = NULL;
+  int                      ret    = OK;
 
   /* Verify that a string was passed */
 

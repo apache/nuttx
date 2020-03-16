@@ -64,7 +64,7 @@ int wd_gettime(WDOG_ID wdog)
        */
 
       FAR struct wdog_s *curr;
-      int delay = 0;
+      int                delay = 0;
 
       for (curr = (FAR struct wdog_s *)g_wdactivelist.head;
            curr != NULL;

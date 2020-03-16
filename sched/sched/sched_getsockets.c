@@ -65,7 +65,7 @@
 #ifdef CONFIG_NET
 FAR struct socketlist *sched_getsockets(void)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *       rtcb  = this_task();
   FAR struct task_group_s *group = rtcb->group;
 
   DEBUGASSERT(group);

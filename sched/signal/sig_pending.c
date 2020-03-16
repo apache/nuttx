@@ -72,12 +72,12 @@
 int sigpending(FAR sigset_t *set)
 {
   FAR struct tcb_s *rtcb = this_task();
-  int ret = ERROR;
+  int               ret  = ERROR;
 
   if (set)
     {
       *set = nxsig_pendingset(rtcb);
-      ret = OK;
+      ret  = OK;
     }
 
   return ret;
@@ -94,16 +94,16 @@ int sigpending(FAR sigset_t *set)
 sigset_t nxsig_pendingset(FAR struct tcb_s *stcb)
 {
   FAR struct task_group_s *group = stcb->group;
-  sigset_t sigpendset;
+  sigset_t                 sigpendset;
   FAR sigpendq_t *sigpend;
-  irqstate_t flags;
+  irqstate_t      flags;
 
   DEBUGASSERT(group);
 
   sigpendset = NULL_SIGNAL_SET;
 
   flags = enter_critical_section();
-  for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
+  for (sigpend            = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (sigpend); sigpend = sigpend->flink)
     {
       sigaddset(&sigpendset, sigpend->info.si_signo);

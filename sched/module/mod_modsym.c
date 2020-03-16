@@ -82,10 +82,10 @@
 
 FAR const void *modsym(FAR void *handle, FAR const char *name)
 {
-  FAR struct module_s *modp = (FAR struct module_s *)handle;
+  FAR struct module_s *      modp = (FAR struct module_s *)handle;
   FAR const struct symtab_s *symbol;
-  int err;
-  int ret;
+  int                        err;
+  int                        ret;
 
   /* Verify that the module is in the registry */
 

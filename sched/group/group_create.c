@@ -107,7 +107,7 @@ FAR struct task_group_s *g_grouphead;
 static void group_assign_grpid(FAR struct task_group_s *group)
 {
   irqstate_t flags;
-  grpid_t grpid;
+  grpid_t    grpid;
 
   /* Pre-emption should already be disabled, but let's be paranoid careful */
 
@@ -115,7 +115,7 @@ static void group_assign_grpid(FAR struct task_group_s *group)
 
   /* Loop until we create a unique ID */
 
-  for (; ; )
+  for (;;)
     {
       /* Increment the ID counter.  This is global data so be extra paranoid. */
 
@@ -126,7 +126,7 @@ static void group_assign_grpid(FAR struct task_group_s *group)
 
       if (grpid <= 0)
         {
-          g_grpid_counter = 1;            /* One is the IDLE group */
+          g_grpid_counter = 1; /* One is the IDLE group */
           leave_critical_section(flags);
         }
       else
@@ -168,7 +168,7 @@ static void group_assign_grpid(FAR struct task_group_s *group)
 #ifdef CONFIG_SCHED_USER_IDENTITY
 static inline void group_inherit_identity(FAR struct task_group_s *group)
 {
-  FAR struct tcb_s *rtcb          = this_task();
+  FAR struct tcb_s *       rtcb   = this_task();
   FAR struct task_group_s *rgroup = rtcb->group;
 
   /* Inherit the user identity from the parent task group. */
@@ -213,7 +213,7 @@ static inline void group_inherit_identity(FAR struct task_group_s *group)
 int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 {
   FAR struct task_group_s *group;
-  int ret;
+  int                      ret;
 
   DEBUGASSERT(tcb && !tcb->cmn.group);
 
@@ -225,8 +225,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
       return -ENOMEM;
     }
 
-#if CONFIG_NFILE_STREAMS > 0 && (defined(CONFIG_BUILD_PROTECTED) || \
-    defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
+#if CONFIG_NFILE_STREAMS > 0 && (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
   /* If this group is being created for a privileged thread, then all elements
    * of the group must be created for privileged access.
    */
@@ -245,7 +244,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
    */
 
   group->tg_streamlist = (FAR struct streamlist *)
-    group_zalloc(group, sizeof(struct streamlist));
+  group_zalloc(group, sizeof(struct streamlist));
 
   if (!group->tg_streamlist)
     {
@@ -276,8 +275,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
   ret = env_dup(group);
   if (ret < 0)
     {
-#if CONFIG_NFILE_STREAMS > 0 && (defined(CONFIG_BUILD_PROTECTED) || \
-    defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
+#if CONFIG_NFILE_STREAMS > 0 && (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && defined(CONFIG_MM_KERNEL_HEAP)
       group_free(group, group->tg_streamlist);
 #endif
       kmm_free(group);
@@ -355,16 +353,16 @@ int group_initialize(FAR struct task_tcb_s *tcb)
    * the tcb.
    */
 
-  group->tg_mxmembers  = GROUP_INITIAL_MEMBERS; /* Number of members in allocation */
+  group->tg_mxmembers = GROUP_INITIAL_MEMBERS; /* Number of members in allocation */
 
 #endif
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
   /* Add the initialized entry to the list of groups */
 
-  flags = enter_critical_section();
+  flags        = enter_critical_section();
   group->flink = g_grouphead;
-  g_grouphead = group;
+  g_grouphead  = group;
   leave_critical_section(flags);
 
 #endif

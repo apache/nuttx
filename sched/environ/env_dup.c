@@ -41,15 +41,15 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <sys/types.h>
-#include <sched.h>
-#include <string.h>
-#include <errno.h>
+#  include <sys/types.h>
+#  include <sched.h>
+#  include <string.h>
+#  include <errno.h>
 
-#include <nuttx/kmalloc.h>
+#  include <nuttx/kmalloc.h>
 
-#include "sched/sched.h"
-#include "environ/environ.h"
+#  include "sched/sched.h"
+#  include "environ/environ.h"
 
 /****************************************************************************
  * Public Functions
@@ -78,9 +78,9 @@
 int env_dup(FAR struct task_group_s *group)
 {
   FAR struct tcb_s *ptcb = this_task();
-  FAR char *envp = NULL;
-  size_t envlen;
-  int ret = OK;
+  FAR char *        envp = NULL;
+  size_t            envlen;
+  int               ret = OK;
 
   DEBUGASSERT(group != NULL && ptcb != NULL && ptcb->group != NULL);
 

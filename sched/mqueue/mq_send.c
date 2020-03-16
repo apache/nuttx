@@ -22,18 +22,18 @@
  * Included Files
  ****************************************************************************/
 
-#include  <nuttx/config.h>
+#include <nuttx/config.h>
 
-#include  <sys/types.h>
-#include  <mqueue.h>
-#include  <errno.h>
-#include  <debug.h>
+#include <sys/types.h>
+#include <mqueue.h>
+#include <errno.h>
+#include <debug.h>
 
-#include  <nuttx/irq.h>
-#include  <nuttx/arch.h>
-#include  <nuttx/cancelpt.h>
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <nuttx/cancelpt.h>
 
-#include  "mqueue/mqueue.h"
+#include "mqueue/mqueue.h"
 
 /****************************************************************************
  * Public Functions
@@ -70,10 +70,10 @@
 int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
               unsigned int prio)
 {
-  FAR struct mqueue_inode_s  *msgq;
-  FAR struct mqueue_msg_s *mqmsg = NULL;
-  irqstate_t flags;
-  int ret;
+  FAR struct mqueue_inode_s *msgq;
+  FAR struct mqueue_msg_s *  mqmsg = NULL;
+  irqstate_t                 flags;
+  int                        ret;
 
   /* Verify the input parameters -- setting errno appropriately
    * on any failures to verify.
@@ -101,7 +101,7 @@ int nxmq_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
   flags = enter_critical_section();
   ret   = OK;
 
-  if (!up_interrupt_context())           /* In an interrupt handler? */
+  if (!up_interrupt_context()) /* In an interrupt handler? */
     {
       /* No.. Not in an interrupt handler.  Is the message queue FULL? */
 

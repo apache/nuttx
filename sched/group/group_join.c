@@ -59,7 +59,7 @@
 
 /* Is this worth making a configuration option? */
 
-#define GROUP_REALLOC_MEMBERS 4
+#  define GROUP_REALLOC_MEMBERS 4
 
 /****************************************************************************
  * Private Functions
@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-#ifdef HAVE_GROUP_MEMBERS
+#  ifdef HAVE_GROUP_MEMBERS
 static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
 {
   irqstate_t flags;
@@ -95,7 +95,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
 
   if (group->tg_nmembers >= group->tg_mxmembers)
     {
-      FAR pid_t *newmembers;
+      FAR pid_t *  newmembers;
       unsigned int newmax;
 
       /* Yes... reallocate the array of members */
@@ -107,7 +107,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
         }
 
       newmembers = (FAR pid_t *)
-        kmm_realloc(group->tg_members, sizeof(pid_t) * newmax);
+      kmm_realloc(group->tg_members, sizeof(pid_t) * newmax);
 
       if (!newmembers)
         {
@@ -120,7 +120,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
        * may be traversed from an interrupt handler (read-only).
        */
 
-      flags = enter_critical_section();
+      flags               = enter_critical_section();
       group->tg_members   = newmembers;
       group->tg_mxmembers = newmax;
       leave_critical_section(flags);
@@ -133,7 +133,7 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
   group->tg_members[group->tg_nmembers] = pid;
   return OK;
 }
-#endif /* HAVE_GROUP_MEMBERS */
+#  endif /* HAVE_GROUP_MEMBERS */
 
 /****************************************************************************
  * Public Functions
@@ -204,9 +204,9 @@ int group_bind(FAR struct pthread_tcb_s *tcb)
 int group_join(FAR struct pthread_tcb_s *tcb)
 {
   FAR struct task_group_s *group;
-#ifdef HAVE_GROUP_MEMBERS
+#  ifdef HAVE_GROUP_MEMBERS
   int ret;
-#endif
+#  endif
 
   DEBUGASSERT(tcb && tcb->cmn.group &&
               tcb->cmn.group->tg_nmembers < UINT8_MAX);
@@ -215,7 +215,7 @@ int group_join(FAR struct pthread_tcb_s *tcb)
 
   group = tcb->cmn.group;
 
-#ifdef HAVE_GROUP_MEMBERS
+#  ifdef HAVE_GROUP_MEMBERS
   /* Add the member to the group */
 
   ret = group_addmember(group, tcb->cmn.pid);
@@ -223,7 +223,7 @@ int group_join(FAR struct pthread_tcb_s *tcb)
     {
       return ret;
     }
-#endif
+#  endif
 
   group->tg_nmembers++;
   return OK;

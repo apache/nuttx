@@ -105,8 +105,8 @@ int setitimer(int which, FAR const struct itimerval *value,
   FAR struct tcb_s *rtcb = this_task();
   struct itimerspec spec;
   struct itimerspec ospec;
-  irqstate_t flags;
-  int ret = OK;
+  irqstate_t        flags;
+  int               ret = OK;
 
   if (which != ITIMER_REAL || !value)
     {

@@ -73,8 +73,8 @@ ssize_t nxmq_receive(mqd_t mqdes, FAR char *msg, size_t msglen,
                      FAR unsigned int *prio)
 {
   FAR struct mqueue_msg_s *mqmsg;
-  irqstate_t flags;
-  ssize_t ret;
+  irqstate_t               flags;
+  ssize_t                  ret;
 
   DEBUGASSERT(up_interrupt_context() == false);
 

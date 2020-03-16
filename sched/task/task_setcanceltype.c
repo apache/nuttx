@@ -70,7 +70,7 @@
 int task_setcanceltype(int type, FAR int *oldtype)
 {
   FAR struct tcb_s *tcb = this_task();
-  int ret = OK;
+  int               ret = OK;
 
   /* Suppress context changes for a bit so that the flags are stable. (the
    * flags should not change in interrupt handling).
@@ -112,13 +112,13 @@ int task_setcanceltype(int type, FAR int *oldtype)
 
           /* Exit according to the type of the thread */
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#  ifndef CONFIG_DISABLE_PTHREAD
           if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
             {
               pthread_exit(PTHREAD_CANCELED);
             }
           else
-#endif
+#  endif
             {
               exit(EXIT_FAILURE);
             }

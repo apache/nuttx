@@ -58,48 +58,48 @@
 
 /* Configuration ************************************************************/
 
-#if !defined(CONFIG_SCHED_CPULOAD) || !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
-#  error CONFIG_SCHED_CPULOAD and CONFIG_SCHED_CPULOAD_EXTCLK must be defined
-#endif
+#  if !defined(CONFIG_SCHED_CPULOAD) || !defined(CONFIG_SCHED_CPULOAD_EXTCLK)
+#    error CONFIG_SCHED_CPULOAD and CONFIG_SCHED_CPULOAD_EXTCLK must be defined
+#  endif
 
 /* CONFIG_SCHED_CPULOAD_TICKSPERSEC is the frequency of the external clock
  * source.
  */
 
-#ifndef CONFIG_SCHED_CPULOAD_TICKSPERSEC
-#  error CONFIG_SCHED_CPULOAD_TICKSPERSEC not defined
-#endif
+#  ifndef CONFIG_SCHED_CPULOAD_TICKSPERSEC
+#    error CONFIG_SCHED_CPULOAD_TICKSPERSEC not defined
+#  endif
 
 /* CONFIG_CPULOAD_ENTROPY determines that amount of random "jitter"
  * that will be added to the nominal sample interval.  Specified as a number
  * bits.
  */
 
-#ifndef CONFIG_CPULOAD_ENTROPY
-#  warning CONFIG_CPULOAD_ENTROPY not defined
-#  define CONFIG_CPULOAD_ENTROPY 0
-#endif
+#  ifndef CONFIG_CPULOAD_ENTROPY
+#    warning CONFIG_CPULOAD_ENTROPY not defined
+#    define CONFIG_CPULOAD_ENTROPY 0
+#  endif
 
 /* Calculate the nominal sample interval in microseconds:
  *
  * nominal = (1,000,000 usec/sec) / Frequency cycles/sec) = Period usec/cycle
  */
 
-#define CPULOAD_ONESHOT_NOMINAL      (1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
+#  define CPULOAD_ONESHOT_NOMINAL (1000000 / CONFIG_SCHED_CPULOAD_TICKSPERSEC)
 
-#if CPULOAD_ONESHOT_NOMINAL < 1 || CPULOAD_ONESHOT_NOMINAL > 0x7fffffff
-#  error CPULOAD_ONESHOT_NOMINAL is out of range
-#endif
+#  if CPULOAD_ONESHOT_NOMINAL < 1 || CPULOAD_ONESHOT_NOMINAL > 0x7fffffff
+#    error CPULOAD_ONESHOT_NOMINAL is out of range
+#  endif
 
 /* Convert the entropy from number of bits to a numeric value */
 
-#define CPULOAD_ONESHOT_ENTROPY      (1 << CONFIG_CPULOAD_ENTROPY)
+#  define CPULOAD_ONESHOT_ENTROPY (1 << CONFIG_CPULOAD_ENTROPY)
 
-#if CPULOAD_ONESHOT_NOMINAL < CPULOAD_ONESHOT_ENTROPY
-#  error CPULOAD_ONESHOT_NOMINAL too small for CONFIG_CPULOAD_ENTROPY
-#endif
+#  if CPULOAD_ONESHOT_NOMINAL < CPULOAD_ONESHOT_ENTROPY
+#    error CPULOAD_ONESHOT_NOMINAL too small for CONFIG_CPULOAD_ENTROPY
+#  endif
 
-#define CPULOAD_ONESHOT_ENTROPY_MASK (CPULOAD_ONESHOT_ENTROPY - 1)
+#  define CPULOAD_ONESHOT_ENTROPY_MASK (CPULOAD_ONESHOT_ENTROPY - 1)
 
 /****************************************************************************
  * Private Types
@@ -108,11 +108,11 @@
 struct sched_oneshot_s
 {
   FAR struct oneshot_lowerhalf_s *oneshot;
-#if CONFIG_CPULOAD_ENTROPY > 0
+#  if CONFIG_CPULOAD_ENTROPY > 0
   struct xorshift128_state_s prng;
-  int32_t maxdelay;
-  int32_t error;
-#endif
+  int32_t                    maxdelay;
+  int32_t                    error;
+#  endif
 };
 
 /****************************************************************************
@@ -121,7 +121,7 @@ struct sched_oneshot_s
 
 static void nxsched_oneshot_start(void);
 static void nxsched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
-                                     FAR void *arg);
+                                     FAR void *                      arg);
 
 /****************************************************************************
  * Private Data
@@ -152,28 +152,28 @@ static struct sched_oneshot_s g_sched_oneshot;
 static void nxsched_oneshot_start(void)
 {
   struct timespec ts;
-#if CONFIG_CPULOAD_ENTROPY > 0
+#  if CONFIG_CPULOAD_ENTROPY > 0
   uint32_t entropy;
-#endif
+#  endif
   int32_t secs;
   int32_t usecs;
 
   /* Get the next delay */
 
-#if CONFIG_CPULOAD_ENTROPY > 0
+#  if CONFIG_CPULOAD_ENTROPY > 0
   /* The one shot will be set to this interval:
    *
    *  CPULOAD_ONESHOT_NOMINAL - (CPULOAD_ONESHOT_ENTROPY / 2) + error
    *    + nrand(CPULOAD_ONESHOT_ENTROPY)
    */
 
-  usecs   = (CPULOAD_ONESHOT_NOMINAL - CPULOAD_ONESHOT_ENTROPY / 2) +
-            g_sched_oneshot.error;
+  usecs = (CPULOAD_ONESHOT_NOMINAL - CPULOAD_ONESHOT_ENTROPY / 2) +
+          g_sched_oneshot.error;
 
   /* Add the random value in the range 0..(CPULOAD_ONESHOT_ENTRY - 1) */
 
   entropy = xorshift128(&g_sched_oneshot.prng);
-  usecs  += (int32_t)(entropy & CPULOAD_ONESHOT_ENTROPY_MASK);
+  usecs += (int32_t)(entropy & CPULOAD_ONESHOT_ENTROPY_MASK);
 
   DEBUGASSERT(usecs > 0); /* Check for overflow to negative or zero */
 
@@ -189,16 +189,16 @@ static void nxsched_oneshot_start(void)
 
   g_sched_oneshot.error = CPULOAD_ONESHOT_NOMINAL +
                           g_sched_oneshot.error - usecs;
-#else
+#  else
   /* No entropy */
 
   usecs = CPULOAD_ONESHOT_NOMINAL;
-#endif
+#  endif
 
   /* Then re-start the oneshot timer */
 
-  secs       = usecs / 1000000;
-  usecs     -= 100000 * secs;
+  secs = usecs / 1000000;
+  usecs -= 100000 * secs;
 
   ts.tv_sec  = secs;
   ts.tv_nsec = 1000 * usecs;
@@ -224,13 +224,13 @@ static void nxsched_oneshot_start(void)
  ****************************************************************************/
 
 static void nxsched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
-                                     FAR void *arg)
+                                     FAR void *                      arg)
 {
   /* Perform CPU load measurements */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+#  ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (nxsched_process_cpuload != NULL)
-#endif
+#  endif
     {
       nxsched_process_cpuload();
     }
@@ -263,14 +263,14 @@ static void nxsched_oneshot_callback(FAR struct oneshot_lowerhalf_s *lower,
 
 void sched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower)
 {
-#if CONFIG_CPULOAD_ENTROPY > 0
+#  if CONFIG_CPULOAD_ENTROPY > 0
   struct timespec ts;
-#endif
+#  endif
 
   DEBUGASSERT(lower != NULL && lower->ops != NULL);
   DEBUGASSERT(lower->ops->start != NULL);
 
-#if CONFIG_CPULOAD_ENTROPY > 0
+#  if CONFIG_CPULOAD_ENTROPY > 0
   DEBUGASSERT(lower->ops->max_delay != NULL);
 
   /* Get the maximum delay */
@@ -294,7 +294,7 @@ void sched_oneshot_extclk(FAR struct oneshot_lowerhalf_s *lower)
   g_sched_oneshot.prng.x = 101;
   g_sched_oneshot.prng.y = g_sched_oneshot.prng.w << 17;
   g_sched_oneshot.prng.z = g_sched_oneshot.prng.x << 25;
-#endif
+#  endif
 
   /* Then start the oneshot */
 

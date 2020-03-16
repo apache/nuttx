@@ -61,9 +61,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef MIN
-#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
+#  ifndef MIN
+#    define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#  endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -80,7 +80,7 @@ static int sporadic_budget_start(FAR struct replenishment_s *mrepl);
 static int sporadic_interval_start(FAR struct replenishment_s *mrepl);
 static int sporadic_replenish_start(FAR struct replenishment_s *repl);
 static int sporadic_replenish_delay(FAR struct replenishment_s *repl,
-  uint32_t period, uint32_t replenish);
+                                    uint32_t period, uint32_t replenish);
 
 /* Timer expiration handlers */
 
@@ -93,7 +93,7 @@ static void sporadic_delay_expire(int argc, wdparm_t arg1, ...);
 
 static void sporadic_timer_cancel(FAR struct tcb_s *tcb);
 FAR struct replenishment_s *
-  sporadic_alloc_repl(FAR struct sporadic_s *sporadic);
+sporadic_alloc_repl(FAR struct sporadic_s *sporadic);
 
 /****************************************************************************
  * Private Functions
@@ -116,18 +116,18 @@ FAR struct replenishment_s *
 static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
-  int ret;
+  int                    ret;
 
   DEBUGASSERT(tcb != NULL && tcb->sporadic != NULL);
   sporadic = tcb->sporadic;
 
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+#  ifdef CONFIG_SPORADIC_INSTRUMENTATION
   /* Inform the monitor of this event */
 
   arch_sporadic_lowpriority(tcb);
-#endif
+#  endif
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
+#  ifdef CONFIG_PRIORITY_INHERITANCE
   /* If the priority was boosted above the higher priority, than just
    * reset the base priority and continue to run at the boosted priority.
    *
@@ -153,7 +153,7 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
       tcb->base_priority = tcb->low_priority;
     }
   else
-#endif
+#  endif
     {
       /* Otherwise drop the priority of thread, possible causing a context
        * switch.
@@ -187,18 +187,18 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
 static int sporadic_set_hipriority(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
-  int ret;
+  int                    ret;
 
   DEBUGASSERT(tcb != NULL && tcb->sporadic != NULL);
   sporadic = tcb->sporadic;
 
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+#  ifdef CONFIG_SPORADIC_INSTRUMENTATION
   /* Inform the monitor of this event */
 
   arch_sporadic_start(tcb);
-#endif
+#  endif
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
+#  ifdef CONFIG_PRIORITY_INHERITANCE
   /* If the priority was boosted above the higher priority, than just
    * reset the base priority.
    *
@@ -229,12 +229,12 @@ static int sporadic_set_hipriority(FAR struct tcb_s *tcb)
         }
     }
 
-  /* The thread priority has not been boosted or it has been boosted to a
+    /* The thread priority has not been boosted or it has been boosted to a
    * lower priority than the high priority.  So, in either case, we need to
    * reset the priority.
    */
 
-#endif
+#  endif
 
   /* Then reprioritize to the higher priority */
 
@@ -269,11 +269,11 @@ static int sporadic_set_hipriority(FAR struct tcb_s *tcb)
 static int sporadic_budget_start(FAR struct replenishment_s *mrepl)
 {
   FAR struct sporadic_s *sporadic;
-  FAR struct tcb_s *tcb;
+  FAR struct tcb_s *     tcb;
 
   DEBUGASSERT(mrepl->tcb != NULL);
-  tcb              = mrepl->tcb;
-  sporadic         = tcb->sporadic;
+  tcb      = mrepl->tcb;
+  sporadic = tcb->sporadic;
   DEBUGASSERT(sporadic);
 
   /* Start the next replenishment interval */
@@ -281,7 +281,7 @@ static int sporadic_budget_start(FAR struct replenishment_s *mrepl)
   tcb->timeslice   = sporadic->budget;
   sporadic->active = mrepl;
   mrepl->budget    = sporadic->budget;
-  mrepl->flags    &= ~SPORADIC_FLAG_REPLENISH;
+  mrepl->flags &= ~SPORADIC_FLAG_REPLENISH;
 
   /* Save the time that the budget was started */
 
@@ -315,8 +315,8 @@ static int sporadic_budget_start(FAR struct replenishment_s *mrepl)
 static int sporadic_interval_start(FAR struct replenishment_s *mrepl)
 {
   FAR struct sporadic_s *sporadic;
-  FAR struct tcb_s *tcb;
-  uint32_t remainder;
+  FAR struct tcb_s *     tcb;
+  uint32_t               remainder;
 
   DEBUGASSERT(mrepl != NULL && mrepl->tcb != NULL);
   tcb      = mrepl->tcb;
@@ -327,7 +327,7 @@ static int sporadic_interval_start(FAR struct replenishment_s *mrepl)
 
   tcb->timeslice   = 0;
   sporadic->active = mrepl;
-  mrepl->flags    &= ~SPORADIC_FLAG_REPLENISH;
+  mrepl->flags &= ~SPORADIC_FLAG_REPLENISH;
 
   /* Calculate the remainder of the replenishment interval.  This is
    * permitted to be zero, in which case we just restart the budget
@@ -349,7 +349,7 @@ static int sporadic_interval_start(FAR struct replenishment_s *mrepl)
    */
 
   DEBUGVERIFY(wd_start(&mrepl->timer, remainder, sporadic_interval_expire,
-              1, (wdentry_t)mrepl));
+                       1, (wdentry_t)mrepl));
 
   /* Drop the priority of thread, possible causing a context switch. */
 
@@ -375,18 +375,18 @@ static int sporadic_interval_start(FAR struct replenishment_s *mrepl)
 static int sporadic_replenish_start(FAR struct replenishment_s *repl)
 {
   FAR struct sporadic_s *sporadic;
-  FAR struct tcb_s *tcb;
+  FAR struct tcb_s *     tcb;
 
   DEBUGASSERT(repl->tcb != NULL);
-  tcb              = repl->tcb;
-  sporadic         = tcb->sporadic;
+  tcb      = repl->tcb;
+  sporadic = tcb->sporadic;
   DEBUGASSERT(sporadic);
 
   /* Start the replenishment interval */
 
   tcb->timeslice   = repl->budget;
   sporadic->active = repl;
-  repl->flags     |= SPORADIC_FLAG_REPLENISH;
+  repl->flags |= SPORADIC_FLAG_REPLENISH;
 
   /* And start the timer for the budget interval */
 
@@ -459,8 +459,8 @@ static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
 {
   FAR struct replenishment_s *mrepl = (FAR struct replenishment_s *)arg1;
   FAR struct replenishment_s *repl;
-  FAR struct sporadic_s *sporadic;
-  FAR struct tcb_s *tcb;
+  FAR struct sporadic_s *     sporadic;
+  FAR struct tcb_s *          tcb;
 
   DEBUGASSERT(argc == 1 && mrepl != NULL && mrepl->tcb != NULL);
   tcb = mrepl->tcb;
@@ -600,19 +600,18 @@ static void sporadic_interval_expire(int argc, wdparm_t arg1, ...)
 static void sporadic_replenish_expire(int argc, wdparm_t arg1, ...)
 {
   FAR struct replenishment_s *repl = (FAR struct replenishment_s *)arg1;
-  FAR struct sporadic_s *sporadic;
-  FAR struct tcb_s *tcb;
+  FAR struct sporadic_s *     sporadic;
+  FAR struct tcb_s *          tcb;
 
   DEBUGASSERT(argc == 1 && repl != NULL && repl->tcb != NULL);
-  tcb      = repl->tcb;
+  tcb = repl->tcb;
 
   sporadic = tcb->sporadic;
   DEBUGASSERT(sporadic != NULL);
 
   /* This should not be the main timer */
 
-  DEBUGASSERT((repl->flags & (SPORADIC_FLAG_MAIN | SPORADIC_FLAG_REPLENISH))
-              == SPORADIC_FLAG_REPLENISH);
+  DEBUGASSERT((repl->flags & (SPORADIC_FLAG_MAIN | SPORADIC_FLAG_REPLENISH)) == SPORADIC_FLAG_REPLENISH);
 
   /* As a special case, we can do nothing here if scheduler has been locked.
    * We cannot drop the priority because that might cause a context switch,
@@ -693,9 +692,9 @@ static void sporadic_delay_expire(int argc, wdparm_t arg1, ...)
 
 static void sporadic_timer_cancel(FAR struct tcb_s *tcb)
 {
-  FAR struct sporadic_s *sporadic;
+  FAR struct sporadic_s *     sporadic;
   FAR struct replenishment_s *repl;
-  int i;
+  int                         i;
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
@@ -731,10 +730,10 @@ static void sporadic_timer_cancel(FAR struct tcb_s *tcb)
  ****************************************************************************/
 
 FAR struct replenishment_s *
-  sporadic_alloc_repl(FAR struct sporadic_s *sporadic)
+sporadic_alloc_repl(FAR struct sporadic_s *sporadic)
 {
   FAR struct replenishment_s *repl = NULL;
-  int i;
+  int                         i;
 
   if (sporadic->nrepls < sporadic->max_repl)
     {
@@ -784,7 +783,7 @@ FAR struct replenishment_s *
 int sched_sporadic_initialize(FAR struct tcb_s *tcb)
 {
   FAR struct sporadic_s *sporadic;
-  int i;
+  int                    i;
 
   DEBUGASSERT(tcb != NULL && tcb->sporadic == NULL);
 
@@ -843,7 +842,7 @@ int sched_sporadic_initialize(FAR struct tcb_s *tcb)
 
 int sched_sporadic_start(FAR struct tcb_s *tcb)
 {
-  FAR struct sporadic_s *sporadic;
+  FAR struct sporadic_s *     sporadic;
   FAR struct replenishment_s *mrepl;
 
   DEBUGASSERT(tcb && tcb->sporadic);
@@ -931,9 +930,9 @@ int sched_sporadic_stop(FAR struct tcb_s *tcb)
 
 int sched_sporadic_reset(FAR struct tcb_s *tcb)
 {
-  FAR struct sporadic_s *sporadic;
+  FAR struct sporadic_s *     sporadic;
   FAR struct replenishment_s *repl;
-  int i;
+  int                         i;
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
@@ -950,9 +949,9 @@ int sched_sporadic_reset(FAR struct tcb_s *tcb)
 
       /* Re-initialize replenishment data */
 
-      repl->tcb          = tcb;
-      repl->budget       = 0;
-      repl->flags        = 0;
+      repl->tcb    = tcb;
+      repl->budget = 0;
+      repl->flags  = 0;
     }
 
   /* Reset sporadic scheduling parameters and state data */
@@ -997,11 +996,11 @@ int sched_sporadic_reset(FAR struct tcb_s *tcb)
 
 int sched_sporadic_resume(FAR struct tcb_s *tcb)
 {
-  FAR struct sporadic_s *sporadic;
+  FAR struct sporadic_s *     sporadic;
   FAR struct replenishment_s *repl;
-  clock_t now;
-  uint32_t unrealized;
-  uint32_t last;
+  clock_t                     now;
+  uint32_t                    unrealized;
+  uint32_t                    last;
 
   DEBUGASSERT(tcb && tcb->sporadic);
   sporadic = tcb->sporadic;
@@ -1017,11 +1016,11 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 
   sporadic->suspended = false;
 
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+#  ifdef CONFIG_SPORADIC_INSTRUMENTATION
   /* Inform the monitor of this event */
 
   arch_sporadic_resume(tcb);
-#endif
+#  endif
 
   /* Get the time that the thread was [re-]started */
 
@@ -1144,11 +1143,11 @@ int sched_sporadic_suspend(FAR struct tcb_s *tcb)
 
       sporadic->suspended = true;
 
-#ifdef CONFIG_SPORADIC_INSTRUMENTATION
+#  ifdef CONFIG_SPORADIC_INSTRUMENTATION
       /* Inform the monitor of this event */
 
       arch_sporadic_suspend(tcb);
-#endif
+#  endif
 
       /* Save the time that the thread was suspended */
 
@@ -1234,7 +1233,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
            */
 
           sporadic_timer_cancel(tcb);
-          tcb->timeslice    = -1;
+          tcb->timeslice = -1;
           return 0;
         }
 
@@ -1309,7 +1308,7 @@ uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
 
 void sched_sporadic_lowpriority(FAR struct tcb_s *tcb)
 {
-  FAR struct sporadic_s *sporadic;
+  FAR struct sporadic_s *     sporadic;
   FAR struct replenishment_s *mrepl;
 
   DEBUGASSERT(tcb && tcb->sporadic);
@@ -1332,8 +1331,8 @@ void sched_sporadic_lowpriority(FAR struct tcb_s *tcb)
   tcb->timeslice   = 0;
   sporadic->active = mrepl;
 
-  mrepl->flags    |= SPORADIC_FLAG_MAIN;
-  mrepl->budget    = sporadic->budget;
+  mrepl->flags |= SPORADIC_FLAG_MAIN;
+  mrepl->budget = sporadic->budget;
 
   /* Drop the priority of thread, possible causing a context switch. */
 

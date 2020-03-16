@@ -102,7 +102,7 @@ static void nxsig_timeout(int argc, wdparm_t itcb)
   union
   {
     FAR struct tcb_s *wtcb;
-    wdparm_t itcb;
+    wdparm_t          itcb;
   } u;
 
   u.itcb = itcb;
@@ -132,8 +132,8 @@ static void nxsig_timeout(int argc, wdparm_t itcb)
       u.wtcb->sigunbinfo.si_errno           = ETIMEDOUT;
       u.wtcb->sigunbinfo.si_value.sival_int = 0;
 #ifdef CONFIG_SCHED_HAVE_PARENT
-      u.wtcb->sigunbinfo.si_pid             = 0;  /* Not applicable */
-      u.wtcb->sigunbinfo.si_status          = OK;
+      u.wtcb->sigunbinfo.si_pid    = 0; /* Not applicable */
+      u.wtcb->sigunbinfo.si_status = OK;
 #endif
       up_unblock_task(u.wtcb);
     }
@@ -159,7 +159,7 @@ static void nxsig_timeout(int argc, wdparm_t itcb)
 #ifdef CONFIG_CANCELLATION_POINTS
 void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
 {
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   irqstate_t flags;
 
   /* We must be in a critical section in order to call up_unblock_task()
@@ -172,7 +172,7 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
    */
 
   flags = enter_critical_section();
-#endif
+#  endif
 
   /* There may be a race condition -- make sure the task is
    * still waiting for a signal
@@ -184,16 +184,16 @@ void nxsig_wait_irq(FAR struct tcb_s *wtcb, int errcode)
       wtcb->sigunbinfo.si_code            = SI_USER;
       wtcb->sigunbinfo.si_errno           = errcode;
       wtcb->sigunbinfo.si_value.sival_int = 0;
-#ifdef CONFIG_SCHED_HAVE_PARENT
-      wtcb->sigunbinfo.si_pid             = 0;  /* Not applicable */
-      wtcb->sigunbinfo.si_status          = OK;
-#endif
+#  ifdef CONFIG_SCHED_HAVE_PARENT
+      wtcb->sigunbinfo.si_pid    = 0; /* Not applicable */
+      wtcb->sigunbinfo.si_status = OK;
+#  endif
       up_unblock_task(wtcb);
     }
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   leave_critical_section(flags);
-#endif
+#  endif
 }
 #endif /* CONFIG_CANCELLATION_POINTS */
 
@@ -241,11 +241,11 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                     FAR const struct timespec *timeout)
 {
   FAR struct tcb_s *rtcb = this_task();
-  sigset_t intersection;
+  sigset_t          intersection;
   FAR sigpendq_t *sigpend;
-  irqstate_t flags;
-  int32_t waitticks;
-  int ret;
+  irqstate_t      flags;
+  int32_t         waitticks;
+  int             ret;
 
   DEBUGASSERT(set != NULL && rtcb->waitdog == NULL);
 

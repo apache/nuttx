@@ -93,9 +93,9 @@
 
 int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
 {
-  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *         rtcb;
   FAR struct mqueue_inode_s *msgq;
-  int errval;
+  int                        errval;
 
   /* Was a valid message queue descriptor provided? */
 

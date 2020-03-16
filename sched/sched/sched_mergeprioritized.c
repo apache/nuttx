@@ -78,7 +78,7 @@
 void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
                             uint8_t task_state)
 {
-  FAR dq_queue_t clone;
+  FAR dq_queue_t    clone;
   FAR struct tcb_s *tcb1;
   FAR struct tcb_s *tcb2;
   FAR struct tcb_s *tmp;
@@ -113,9 +113,9 @@ void sched_mergeprioritized(FAR dq_queue_t *list1, FAR dq_queue_t *list2,
    * in a list with the wrong state.
    */
 
-  for (tmp  = tcb1;
+  for (tmp = tcb1;
        tmp != NULL;
-       tmp  = (FAR struct tcb_s *)dq_next((FAR dq_entry_t *)tmp))
+       tmp = (FAR struct tcb_s *)dq_next((FAR dq_entry_t *)tmp))
     {
       tmp->task_state = task_state;
     }

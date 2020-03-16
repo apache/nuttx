@@ -109,7 +109,7 @@ static const char g_pthreadname[] = "<pthread>";
  ****************************************************************************/
 
 static inline void pthread_argsetup(FAR struct pthread_tcb_s *tcb,
-                                    pthread_addr_t arg)
+                                    pthread_addr_t            arg)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   /* Copy the pthread name into the TCB */
@@ -143,7 +143,7 @@ static inline void pthread_argsetup(FAR struct pthread_tcb_s *tcb,
  ****************************************************************************/
 
 static inline void pthread_addjoininfo(FAR struct task_group_s *group,
-                                       FAR struct join_s *pjoin)
+                                       FAR struct join_s *      pjoin)
 {
   pjoin->next = NULL;
   if (!group->tg_jointail)
@@ -171,10 +171,10 @@ static inline void pthread_addjoininfo(FAR struct task_group_s *group,
 
 static void pthread_start(void)
 {
-  FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)this_task();
-  FAR struct task_group_s *group = ptcb->cmn.group;
-  FAR struct join_s *pjoin = (FAR struct join_s *)ptcb->joininfo;
-  pthread_addr_t exit_status;
+  FAR struct pthread_tcb_s *ptcb  = (FAR struct pthread_tcb_s *)this_task();
+  FAR struct task_group_s * group = ptcb->cmn.group;
+  FAR struct join_s *       pjoin = (FAR struct join_s *)ptcb->joininfo;
+  pthread_addr_t            exit_status;
 
   DEBUGASSERT(group && pjoin);
 
@@ -199,7 +199,7 @@ static void pthread_start(void)
       DEBUGVERIFY(nxsched_setpriority(&ptcb->cmn, ptcb->cmn.init_priority));
     }
 
-  /* Pass control to the thread entry point. In the kernel build this has to
+    /* Pass control to the thread entry point. In the kernel build this has to
    * be handled differently if we are starting a user-space pthread; we have
    * to switch to user-mode before calling into the pthread.
    */
@@ -243,13 +243,13 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
                    pthread_startroutine_t start_routine, pthread_addr_t arg)
 {
   FAR struct pthread_tcb_s *ptcb;
-  FAR struct join_s *pjoin;
-  struct sched_param param;
-  int policy;
-  int errcode;
-  pid_t pid;
-  int ret;
-  bool group_joined = false;
+  FAR struct join_s *       pjoin;
+  struct sched_param        param;
+  int                       policy;
+  int                       errcode;
+  pid_t                     pid;
+  int                       ret;
+  bool                      group_joined = false;
 
   /* If attributes were not supplied, use the default attributes */
 
@@ -351,8 +351,8 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
     {
       /* Use the scheduler policy and policy the attributes */
 
-      policy                             = attr->policy;
-      param.sched_priority               = attr->priority;
+      policy               = attr->policy;
+      param.sched_priority = attr->priority;
 
 #ifdef CONFIG_SCHED_SPORADIC
       param.sched_ss_low_priority        = attr->low_priority;
@@ -368,8 +368,8 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   if (policy == SCHED_SPORADIC)
     {
       FAR struct sporadic_s *sporadic;
-      sclock_t repl_ticks;
-      sclock_t budget_ticks;
+      sclock_t               repl_ticks;
+      sclock_t               budget_ticks;
 
       /* Convert timespec values to system clock ticks */
 
@@ -391,7 +391,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       ret = sched_sporadic_initialize(&ptcb->cmn);
       if (ret >= 0)
         {
-          sporadic               = ptcb->cmn.sporadic;
+          sporadic = ptcb->cmn.sporadic;
           DEBUGASSERT(sporadic != NULL);
 
           /* Save the sporadic scheduling parameters */
@@ -470,19 +470,19 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
       default:
         DEBUGPANIC();
       case SCHED_FIFO:
-        ptcb->cmn.flags    |= TCB_FLAG_SCHED_FIFO;
+        ptcb->cmn.flags |= TCB_FLAG_SCHED_FIFO;
         break;
 
 #if CONFIG_RR_INTERVAL > 0
       case SCHED_RR:
-        ptcb->cmn.flags    |= TCB_FLAG_SCHED_RR;
+        ptcb->cmn.flags |= TCB_FLAG_SCHED_RR;
         ptcb->cmn.timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
         break;
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
       case SCHED_SPORADIC:
-        ptcb->cmn.flags    |= TCB_FLAG_SCHED_SPORADIC;
+        ptcb->cmn.flags |= TCB_FLAG_SCHED_SPORADIC;
         break;
 #endif
 
@@ -504,7 +504,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
    * as well.
    */
 
-  pid = (int)ptcb->cmn.pid;
+  pid           = (int)ptcb->cmn.pid;
   pjoin->thread = (pthread_t)pid;
 
   /* Initialize the semaphores in the join structure to zero. */

@@ -94,11 +94,11 @@ int pthread_key_create(FAR pthread_key_t *key,
                        CODE void (*destructor)(FAR void *))
 {
 #if CONFIG_NPTHREAD_KEYS > 0
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *       rtcb  = this_task();
   FAR struct task_group_s *group = rtcb->group;
-  irqstate_t flags;
-  int candidate;
-  int ret = EAGAIN;
+  irqstate_t               flags;
+  int                      candidate;
+  int                      ret = EAGAIN;
 
   DEBUGASSERT(key != NULL && group != NULL);
 

@@ -68,8 +68,8 @@
 FAR struct tcb_s *sched_gettcb(pid_t pid)
 {
   FAR struct tcb_s *ret = NULL;
-  irqstate_t flags;
-  int hash_ndx;
+  irqstate_t        flags;
+  int               hash_ndx;
 
   /* Verify that the PID is within range */
 

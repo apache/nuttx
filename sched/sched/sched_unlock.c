@@ -70,7 +70,7 @@
 int sched_unlock(void)
 {
   FAR struct tcb_s *rtcb;
-  int cpu;
+  int               cpu;
 
   /* This operation is safe because the scheduler is locked and no context
    * switch may occur.
@@ -105,12 +105,12 @@ int sched_unlock(void)
         {
           /* Note that we no longer have pre-emption disabled. */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#  ifdef CONFIG_SCHED_CRITMONITOR
           sched_critmon_preemption(rtcb, false);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+#  endif
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, false);
-#endif
+#  endif
 
           /* Set the lock count to zero */
 
@@ -157,7 +157,7 @@ int sched_unlock(void)
               up_release_pending();
             }
 
-#if CONFIG_RR_INTERVAL > 0
+#  if CONFIG_RR_INTERVAL > 0
           /* If (1) the task that was running supported round-robin
            * scheduling and (2) if its time slice has already expired, but
            * (3) it could not slice out because pre-emption was disabled,
@@ -179,19 +179,19 @@ int sched_unlock(void)
                 {
                   rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
                 }
-#ifdef CONFIG_SCHED_TICKLESS
+#    ifdef CONFIG_SCHED_TICKLESS
               else
                 {
                   sched_timer_reassess();
                 }
-#endif
+#    endif
             }
-#endif
+#  endif
 
-#ifdef CONFIG_SCHED_SPORADIC
-#if CONFIG_RR_INTERVAL > 0
+#  ifdef CONFIG_SCHED_SPORADIC
+#    if CONFIG_RR_INTERVAL > 0
           else
-#endif
+#    endif
           /* If (1) the task that was running supported sporadic scheduling
            * and (2) if its budget slice has already expired, but (3) it
            * could not slice out because pre-emption was disabled, then we
@@ -199,8 +199,7 @@ int sched_unlock(void)
            * for the next time slice.
            */
 
-          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC
-              && rtcb->timeslice < 0)
+          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC && rtcb->timeslice < 0)
             {
               /* Yes.. that is the situation.  Force the low-priority state
                * now
@@ -208,7 +207,7 @@ int sched_unlock(void)
 
               sched_sporadic_lowpriority(rtcb);
 
-#ifdef CONFIG_SCHED_TICKLESS
+#    ifdef CONFIG_SCHED_TICKLESS
               /* Make sure that the call to up_release_pending() did not
                * change the currently active task.
                */
@@ -217,9 +216,9 @@ int sched_unlock(void)
                 {
                   sched_timer_reassess();
                 }
-#endif
+#    endif
             }
-#endif
+#  endif
         }
 
       leave_critical_section(flags);
@@ -260,12 +259,12 @@ int sched_unlock(void)
         {
           /* Note that we no longer have pre-emption disabled. */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#  ifdef CONFIG_SCHED_CRITMONITOR
           sched_critmon_preemption(rtcb, false);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+#  endif
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
           sched_note_premption(rtcb, false);
-#endif
+#  endif
 
           /* Set the lock count to zero */
 
@@ -288,7 +287,7 @@ int sched_unlock(void)
               up_release_pending();
             }
 
-#if CONFIG_RR_INTERVAL > 0
+#  if CONFIG_RR_INTERVAL > 0
           /* If (1) the task that was running supported round-robin
            * scheduling and (2) if its time slice has already expired, but
            * (3) it could not slice out because pre-emption was disabled,
@@ -310,19 +309,19 @@ int sched_unlock(void)
                 {
                   rtcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
                 }
-#ifdef CONFIG_SCHED_TICKLESS
+#    ifdef CONFIG_SCHED_TICKLESS
               else
                 {
                   sched_timer_reassess();
                 }
-#endif
+#    endif
             }
-#endif
+#  endif
 
-#ifdef CONFIG_SCHED_SPORADIC
-#if CONFIG_RR_INTERVAL > 0
+#  ifdef CONFIG_SCHED_SPORADIC
+#    if CONFIG_RR_INTERVAL > 0
           else
-#endif
+#    endif
           /* If (1) the task that was running supported sporadic scheduling
            * and (2) if its budget slice has already expired, but (3) it
            * could not slice out because pre-emption was disabled, then we
@@ -330,8 +329,7 @@ int sched_unlock(void)
            * for the next time slice.
            */
 
-          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC
-              && rtcb->timeslice < 0)
+          if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC && rtcb->timeslice < 0)
             {
               /* Yes.. that is the situation.  Force the low-priority state
                * now
@@ -339,7 +337,7 @@ int sched_unlock(void)
 
               sched_sporadic_lowpriority(rtcb);
 
-#ifdef CONFIG_SCHED_TICKLESS
+#    ifdef CONFIG_SCHED_TICKLESS
               /* Make sure that the call to up_release_pending() did not
                * change the currently active task.
                */
@@ -348,9 +346,9 @@ int sched_unlock(void)
                 {
                   sched_timer_reassess();
                 }
-#endif
+#    endif
             }
-#endif
+#  endif
         }
 
       leave_critical_section(flags);

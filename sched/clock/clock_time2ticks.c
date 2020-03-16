@@ -94,11 +94,11 @@ int clock_time2ticks(FAR const struct timespec *reltime,
    * seconds
    */
 
-#if 0 // overkill
+#  if 0 // overkill
   DEBUGASSERT(reltime->tv_sec  <  2147487 ||
               reltime->tv_sec  == 2147487 &&
               reltime->tv_nsec <= 647 * NSEC_PER_MSEC);
-#endif
+#  endif
 
   /* Convert the relative time into microseconds, rounding up to the smallest
    * value that is greater than or equal to the exact number of microseconds.

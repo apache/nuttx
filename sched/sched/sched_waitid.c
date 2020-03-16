@@ -65,8 +65,8 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_CHILD_STATUS
-static void exited_child(FAR struct tcb_s *rtcb,
+#  ifdef CONFIG_SCHED_CHILD_STATUS
+static void exited_child(FAR struct tcb_s *         rtcb,
                          FAR struct child_status_s *child,
                          FAR siginfo_t *info)
 {
@@ -86,7 +86,7 @@ static void exited_child(FAR struct tcb_s *rtcb,
   group_removechild(rtcb->group, child->ch_pid);
   group_freechild(child);
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Public Functions
@@ -159,13 +159,13 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct tcb_s *ctcb;
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#  ifdef CONFIG_SCHED_CHILD_STATUS
   FAR struct child_status_s *child;
-  bool retains;
-#endif
+  bool                       retains;
+#  endif
   sigset_t set;
-  int errcode;
-  int ret;
+  int      errcode;
+  int      ret;
 
   /* MISSING LOGIC:   If WNOHANG is provided in the options, then this
    * function should returned immediately.  However, there is no mechanism
@@ -174,7 +174,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
    * remember their children.
    */
 
-#ifdef CONFIG_DEBUG_FEATURES
+#  ifdef CONFIG_DEBUG_FEATURES
   /* Only ID types P_PID and P_ALL are supported */
 
   if (idtype != P_PID && idtype != P_ALL)
@@ -193,7 +193,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
       set_errno(ENOSYS);
       return ERROR;
     }
-#endif
+#  endif
 
   /* waitid() is a cancellation point */
 
@@ -212,7 +212,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
    * TCB is actually a child of this task.
    */
 
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#  ifdef CONFIG_SCHED_CHILD_STATUS
   /* Does this task retain child status? */
 
   retains = ((rtcb->group->tg_flags & GROUP_FLAG_NOCLDWAIT) == 0);
@@ -232,11 +232,11 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
       ctcb = sched_gettcb((pid_t)id);
 
-#ifdef HAVE_GROUP_MEMBERS
+#    ifdef HAVE_GROUP_MEMBERS
       if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
-#else
+#    else
       if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
-#endif
+#    endif
         {
           errcode = ECHILD;
           goto errout_with_errno;
@@ -257,7 +257,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
             }
         }
     }
-#else
+#  else
   /* Child status is not retained. */
 
   if (rtcb->group->tg_nchildren == 0)
@@ -275,23 +275,23 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
 
       ctcb = sched_gettcb((pid_t)id);
 
-#ifdef HAVE_GROUP_MEMBERS
+#    ifdef HAVE_GROUP_MEMBERS
       if (ctcb == NULL || ctcb->group->tg_pgrpid != rtcb->group->tg_grpid)
-#else
+#    else
       if (ctcb == NULL || ctcb->group->tg_ppid != rtcb->pid)
-#endif
+#    endif
         {
           errcode = ECHILD;
           goto errout_with_errno;
         }
     }
-#endif
+#  endif
 
   /* Loop until the child that we are waiting for dies */
 
-  for (; ; )
+  for (;;)
     {
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#  ifdef CONFIG_SCHED_CHILD_STATUS
       /* Check if the task has already died. Signals are not queued in
        * NuttX.  So a possibility is that the child has died and we
        * missed the death of child signal (we got some other signal
@@ -355,7 +355,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
               goto errout_with_errno;
             }
         }
-#else
+#  else
       /* Check if the task has already died. Signals are not queued in
        * NuttX.  So a possibility is that the child has died and we
        * missed the death of child signal (we got some other signal
@@ -373,7 +373,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
           errcode = ECHILD;
           goto errout_with_errno;
         }
-#endif
+#  endif
 
       /* Wait for any death-of-child signal */
 

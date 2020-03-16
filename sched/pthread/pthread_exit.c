@@ -77,8 +77,8 @@
 void pthread_exit(FAR void *exit_value)
 {
   FAR struct tcb_s *tcb = this_task();
-  sigset_t set = ALL_SIGNAL_SET;
-  int status;
+  sigset_t          set = ALL_SIGNAL_SET;
+  int               status;
 
   sinfo("exit_value=%p\n", exit_value);
 
@@ -97,8 +97,8 @@ void pthread_exit(FAR void *exit_value)
    * kicked off by actions taken during pthread_exit processing.
    */
 
-  tcb->flags  |=  TCB_FLAG_NONCANCELABLE;
-  tcb->flags  &= ~TCB_FLAG_CANCEL_PENDING;
+  tcb->flags |= TCB_FLAG_NONCANCELABLE;
+  tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
   tcb->cpcount = 0;
 #endif
 

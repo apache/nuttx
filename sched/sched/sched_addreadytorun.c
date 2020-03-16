@@ -83,7 +83,7 @@
 bool sched_addreadytorun(FAR struct tcb_s *btcb)
 {
   FAR struct tcb_s *rtcb = this_task();
-  bool ret;
+  bool              ret;
 
   /* Check if pre-emption is disabled for the current running task and if
    * the new ready-to-run task would cause the current running task to be
@@ -99,7 +99,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       sched_addprioritized(btcb, (FAR dq_queue_t *)&g_pendingtasks);
       btcb->task_state = TSTATE_TASK_PENDING;
-      ret = false;
+      ret              = false;
     }
 
   /* Otherwise, add the new task to the ready-to-run task list */
@@ -112,16 +112,16 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       DEBUGASSERT(rtcb->lockcount == 0 && btcb->flink != NULL);
 
-      btcb->task_state = TSTATE_TASK_RUNNING;
+      btcb->task_state        = TSTATE_TASK_RUNNING;
       btcb->flink->task_state = TSTATE_TASK_READYTORUN;
-      ret = true;
+      ret                     = true;
     }
   else
     {
       /* The new btcb was added in the middle of the ready-to-run list */
 
       btcb->task_state = TSTATE_TASK_READYTORUN;
-      ret = false;
+      ret              = false;
     }
 
   return ret;
@@ -168,11 +168,11 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 {
   FAR struct tcb_s *rtcb;
   FAR dq_queue_t *tasklist;
-  bool switched;
-  bool doswitch;
-  int task_state;
-  int cpu;
-  int me;
+  bool            switched;
+  bool            doswitch;
+  int             task_state;
+  int             cpu;
+  int             me;
 
   /* Lock the tasklists before accessing */
 
@@ -184,7 +184,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
     {
       /* Yes.. that that is the CPU we must use */
 
-      cpu  = btcb->cpu;
+      cpu = btcb->cpu;
     }
   else
     {
@@ -217,7 +217,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
   else if ((btcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
     {
       task_state = TSTATE_TASK_ASSIGNED;
-      cpu = btcb->cpu;
+      cpu        = btcb->cpu;
     }
 
   /* Otherwise, it will be ready-to-run, but not not yet running */
@@ -225,7 +225,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
   else
     {
       task_state = TSTATE_TASK_READYTORUN;
-      cpu = 0;  /* CPU does not matter */
+      cpu        = 0; /* CPU does not matter */
     }
 
   /* If the selected state is TSTATE_TASK_RUNNING, then we would like to
@@ -251,7 +251,7 @@ bool sched_addreadytorun(FAR struct tcb_s *btcb)
 
       sched_addprioritized(btcb, (FAR dq_queue_t *)&g_pendingtasks);
       btcb->task_state = TSTATE_TASK_PENDING;
-      doswitch = false;
+      doswitch         = false;
     }
   else if (task_state == TSTATE_TASK_READYTORUN)
     {

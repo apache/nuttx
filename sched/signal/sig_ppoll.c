@@ -84,9 +84,9 @@ int ppoll(FAR struct pollfd *fds, nfds_t nfds,
           FAR const sigset_t *sigmask)
 {
   FAR struct tcb_s *rtcb = this_task();
-  sigset_t saved_sigprocmask;
-  irqstate_t flags;
-  int ret = ERROR;
+  sigset_t          saved_sigprocmask;
+  irqstate_t        flags;
+  int               ret = ERROR;
 
   /* Several operations must be performed below:  We must determine if any
    * signal is pending and, if not, wait for the signal.  Since signals can

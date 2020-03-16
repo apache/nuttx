@@ -122,7 +122,7 @@ int group_suspendchildren(FAR struct tcb_s *tcb)
 
   sched_lock();
   ret = group_foreachchild(tcb->group, group_suspendchildren_handler,
-                          (FAR void *)((uintptr_t)tcb->pid));
+                           (FAR void *)((uintptr_t)tcb->pid));
   sched_unlock();
   return ret;
 }

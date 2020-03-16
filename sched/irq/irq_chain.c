@@ -49,7 +49,7 @@ struct irqchain_s
 {
   FAR struct irqchain_s *next;
 
-  xcpt_t handler;    /* Address of the interrupt handler */
+  xcpt_t    handler; /* Address of the interrupt handler */
   FAR void *arg;     /* The argument provided to the interrupt handler. */
 };
 
@@ -93,8 +93,8 @@ static int irqchain_dispatch(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct irqchain_s *curr;
   FAR struct irqchain_s *prev;
-  int ndx;
-  int ret = 0;
+  int                    ndx;
+  int                    ret = 0;
 
 #ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
   ndx = g_irqmap[irq];
@@ -120,7 +120,7 @@ static int irqchain_dispatch(int irq, FAR void *context, FAR void *arg)
 void irqchain_initialize(void)
 {
   FAR struct irqchain_s *irqchain = g_irqchainpool;
-  int i;
+  int                    i;
 
   /* Initialize irqchain free lists */
 
@@ -210,14 +210,14 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
   FAR struct irqchain_s *prev;
   FAR struct irqchain_s *curr;
   FAR struct irqchain_s *first;
-  int ret = -EINVAL;
+  int                    ret = -EINVAL;
 
   if ((unsigned)irq < NR_IRQS)
     {
       irqstate_t flags;
-      int ndx;
+      int        ndx;
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+#  ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
       /* Is there a mapping for this IRQ number? */
 
       ndx = g_irqmap[irq];
@@ -227,9 +227,9 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
 
           return ret;
         }
-#else
+#  else
       ndx = irq;
-#endif
+#  endif
 
       flags = enter_critical_section();
 

@@ -73,11 +73,11 @@
 int pthread_key_delete(pthread_key_t key)
 {
 #if CONFIG_NPTHREAD_KEYS > 0
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *       rtcb  = this_task();
   FAR struct task_group_s *group = rtcb->group;
-  pthread_keyset_t mask;
-  irqstate_t flags;
-  int ret = EINVAL;
+  pthread_keyset_t         mask;
+  irqstate_t               flags;
+  int                      ret = EINVAL;
 
   DEBUGASSERT((unsigned)key < PTHREAD_KEYS_MAX && group != NULL);
   if ((unsigned)key < PTHREAD_KEYS_MAX)

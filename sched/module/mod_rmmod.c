@@ -71,7 +71,7 @@
 int rmmod(FAR void *handle)
 {
   FAR struct module_s *modp = (FAR struct module_s *)handle;
-  int ret;
+  int                  ret;
 
   DEBUGASSERT(modp != NULL);
 
@@ -88,7 +88,7 @@ int rmmod(FAR void *handle)
       goto errout_with_lock;
     }
 
-#if CONFIG_MODLIB_MAXDEPEND > 0
+#  if CONFIG_MODLIB_MAXDEPEND > 0
   /* Refuse to remove any module that other modules may depend upon. */
 
   if (modp->dependents > 0)
@@ -97,7 +97,7 @@ int rmmod(FAR void *handle)
       ret = -EBUSY;
       goto errout_with_lock;
     }
-#endif
+#  endif
 
   /* Is there an uninitializer? */
 
@@ -118,39 +118,39 @@ int rmmod(FAR void *handle)
       /* Nullify so that the uninitializer cannot be called again */
 
       modp->modinfo.uninitializer = NULL;
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->initializer           = NULL;
-      modp->modinfo.arg           = NULL;
-      modp->modinfo.exports       = NULL;
-      modp->modinfo.nexports      = 0;
-#endif
+#  if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+      modp->initializer      = NULL;
+      modp->modinfo.arg      = NULL;
+      modp->modinfo.exports  = NULL;
+      modp->modinfo.nexports = 0;
+#  endif
     }
 
-  /* Release resources held by the module */
+    /* Release resources held by the module */
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+#  if defined(CONFIG_ARCH_USE_MODULE_TEXT)
   if (modp->textalloc != NULL || modp->dataalloc != NULL)
-#else
+#  else
   if (modp->alloc != NULL)
-#endif
+#  endif
     {
       /* Free the module memory
        * and nullify so that the memory cannot be freed again
        */
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+#  if defined(CONFIG_ARCH_USE_MODULE_TEXT)
       up_module_text_free((FAR void *)modp->textalloc);
       kmm_free((FAR void *)modp->dataalloc);
       modp->textalloc = NULL;
       modp->dataalloc = NULL;
-#else
+#  else
       kmm_free((FAR void *)modp->alloc);
       modp->alloc = NULL;
-#endif
-#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
-      modp->textsize  = 0;
-      modp->datasize  = 0;
-#endif
+#  endif
+#  if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
+      modp->textsize = 0;
+      modp->datasize = 0;
+#  endif
     }
 
   /* Remove the module from the registry */
@@ -163,11 +163,11 @@ int rmmod(FAR void *handle)
       goto errout_with_lock;
     }
 
-#if CONFIG_MODLIB_MAXDEPEND > 0
+#  if CONFIG_MODLIB_MAXDEPEND > 0
   /* Eliminate any dependencies that this module has on other modules */
 
   modlib_undepend(modp);
-#endif
+#  endif
   modlib_registry_unlock();
 
   /* And free the registry entry */

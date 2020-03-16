@@ -66,7 +66,7 @@
  * list is not properly terminated.
  */
 
-#define MAX_VFORK_ARGS 256
+#  define MAX_VFORK_ARGS 256
 
 /****************************************************************************
  * Private Functions
@@ -87,17 +87,17 @@
  *
  ****************************************************************************/
 
-#if CONFIG_TASK_NAME_SIZE > 0
-static inline void nxvfork_namesetup(FAR struct tcb_s *parent,
+#  if CONFIG_TASK_NAME_SIZE > 0
+static inline void nxvfork_namesetup(FAR struct tcb_s *     parent,
                                      FAR struct task_tcb_s *child)
 {
   /* Copy the name from the parent into the child TCB */
 
   strncpy(child->cmn.name, parent->name, CONFIG_TASK_NAME_SIZE);
 }
-#else
-#  define nxvfork_namesetup(p,c)
-#endif /* CONFIG_TASK_NAME_SIZE */
+#  else
+#    define nxvfork_namesetup(p, c)
+#  endif /* CONFIG_TASK_NAME_SIZE */
 
 /****************************************************************************
  * Name: nxvfork_stackargsetup
@@ -115,7 +115,7 @@ static inline void nxvfork_namesetup(FAR struct tcb_s *parent,
  *
  ****************************************************************************/
 
-static inline int nxvfork_stackargsetup(FAR struct tcb_s *parent,
+static inline int nxvfork_stackargsetup(FAR struct tcb_s *     parent,
                                         FAR struct task_tcb_s *child)
 {
   /* Is the parent a task? or a pthread?  Only tasks (and kernel threads)
@@ -126,8 +126,8 @@ static inline int nxvfork_stackargsetup(FAR struct tcb_s *parent,
   if ((parent->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
     {
       FAR struct task_tcb_s *ptcb = (FAR struct task_tcb_s *)parent;
-      uintptr_t offset;
-      int argc;
+      uintptr_t              offset;
+      int                    argc;
 
       /* Get the address correction */
 
@@ -183,7 +183,7 @@ static inline int nxvfork_stackargsetup(FAR struct tcb_s *parent,
  *
  ****************************************************************************/
 
-static inline int nxvfork_argsetup(FAR struct tcb_s *parent,
+static inline int nxvfork_argsetup(FAR struct tcb_s *     parent,
                                    FAR struct task_tcb_s *child)
 {
   /* Clone the task name */
@@ -213,9 +213,9 @@ static inline size_t nxvfork_argsize(FAR struct tcb_s *parent)
 {
   if ((parent->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
     {
-      FAR struct task_tcb_s *ptcb = (FAR struct task_tcb_s *)parent;
-      size_t strtablen = 0;
-      int argc = 0;
+      FAR struct task_tcb_s *ptcb      = (FAR struct task_tcb_s *)parent;
+      size_t                 strtablen = 0;
+      int                    argc      = 0;
 
       while (ptcb->argv[argc])
         {
@@ -283,11 +283,11 @@ static inline size_t nxvfork_argsize(FAR struct tcb_s *parent)
 
 FAR struct task_tcb_s *nxtask_vforksetup(start_t retaddr, size_t *argsize)
 {
-  FAR struct tcb_s *parent = this_task();
+  FAR struct tcb_s *     parent = this_task();
   FAR struct task_tcb_s *child;
-  uint8_t ttype;
-  int priority;
-  int ret;
+  uint8_t                ttype;
+  int                    priority;
+  int                    ret;
 
   DEBUGASSERT(retaddr != NULL && argsize != NULL);
 
@@ -332,13 +332,13 @@ FAR struct task_tcb_s *nxtask_vforksetup(start_t retaddr, size_t *argsize)
       goto errout_with_tcb;
     }
 
-  /* Get the priority of the parent task */
+    /* Get the priority of the parent task */
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  priority = parent->base_priority;   /* "Normal," unboosted priority */
-#else
-  priority = parent->sched_priority;  /* Current priority */
-#endif
+#  ifdef CONFIG_PRIORITY_INHERITANCE
+  priority = parent->base_priority; /* "Normal," unboosted priority */
+#  else
+  priority = parent->sched_priority; /* Current priority */
+#  endif
 
   /* Initialize the task control block.  This calls up_initial_state() */
 
@@ -410,9 +410,9 @@ errout_with_tcb:
 pid_t nxtask_vforkstart(FAR struct task_tcb_s *child)
 {
   FAR struct tcb_s *parent = this_task();
-  pid_t pid;
-  int rc;
-  int ret;
+  pid_t             pid;
+  int               rc;
+  int               ret;
 
   sinfo("Starting Child TCB=%p, parent=%p\n", child, this_task());
   DEBUGASSERT(child);
@@ -476,15 +476,15 @@ pid_t nxtask_vforkstart(FAR struct task_tcb_s *child)
 
   rc = 0;
 
-#ifdef CONFIG_DEBUG_FEATURES
+#  ifdef CONFIG_DEBUG_FEATURES
   ret = waitpid(pid, &rc, 0);
   if (ret < 0)
     {
       serr("ERROR: waitpid failed: %d\n", errno);
     }
-#else
+#  else
   waitpid(pid, &rc, 0);
-#endif
+#  endif
 
   sched_unlock();
   return pid;

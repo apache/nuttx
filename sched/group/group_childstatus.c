@@ -62,14 +62,14 @@
  * status reaped, then you have a memory leak!
  */
 
-#if !defined(CONFIG_PREALLOC_CHILDSTATUS) || CONFIG_PREALLOC_CHILDSTATUS == 0
-#  undef  CONFIG_PREALLOC_CHILDSTATUS
-#  define CONFIG_PREALLOC_CHILDSTATUS (2*CONFIG_MAX_TASKS)
-#endif
+#  if !defined(CONFIG_PREALLOC_CHILDSTATUS) || CONFIG_PREALLOC_CHILDSTATUS == 0
+#    undef CONFIG_PREALLOC_CHILDSTATUS
+#    define CONFIG_PREALLOC_CHILDSTATUS (2 * CONFIG_MAX_TASKS)
+#  endif
 
-#ifndef CONFIG_DEBUG_INFO
-#  undef CONFIG_DEBUG_CHILDSTATUS
-#endif
+#  ifndef CONFIG_DEBUG_INFO
+#    undef CONFIG_DEBUG_CHILDSTATUS
+#  endif
 
 /****************************************************************************
  * Private Types
@@ -79,7 +79,7 @@
 
 struct child_pool_s
 {
-  struct child_status_s alloc[CONFIG_PREALLOC_CHILDSTATUS];
+  struct child_status_s      alloc[CONFIG_PREALLOC_CHILDSTATUS];
   FAR struct child_status_s *freelist;
 };
 
@@ -110,12 +110,12 @@ static struct child_pool_s g_child_pool;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEBUG_CHILDSTATUS
+#  ifdef CONFIG_DEBUG_CHILDSTATUS
 static void group_dumpchildren(FAR struct task_group_s *group,
-                               FAR const char *msg)
+                               FAR const char *         msg)
 {
   FAR struct child_status_s *child;
-  int i;
+  int                        i;
 
   _info("Task group=%p: %s\n", group, msg);
   for (i = 0, child = group->tg_children; child; i++, child = child->flink)
@@ -124,9 +124,9 @@ static void group_dumpchildren(FAR struct task_group_s *group,
             i, child->ch_flags, child->ch_pid, child->ch_status);
     }
 }
-#else
-#  define group_dumpchildren(t,m)
-#endif
+#  else
+#    define group_dumpchildren(t, m)
+#  endif
 
 /****************************************************************************
  * Public Functions
@@ -154,11 +154,11 @@ void task_initialize(void)
 {
   FAR struct child_status_s *curr;
   FAR struct child_status_s *prev;
-  int i;
+  int                        i;
 
   /* Save all of the child status structures in a free list */
 
-  prev = &g_child_pool.alloc[0];
+  prev                  = &g_child_pool.alloc[0];
   g_child_pool.freelist = prev;
   for (i = 0; i < CONFIG_PREALLOC_CHILDSTATUS; i++)
     {
@@ -252,12 +252,12 @@ void group_freechild(FAR struct child_status_s *child)
  *
  ****************************************************************************/
 
-void group_addchild(FAR struct task_group_s *group,
+void group_addchild(FAR struct task_group_s *  group,
                     FAR struct child_status_s *child)
 {
   /* Add the entry into the TCB list of children */
 
-  child->flink  = group->tg_children;
+  child->flink       = group->tg_children;
   group->tg_children = child;
 
   group_dumpchildren(group, "group_addchild");
@@ -286,7 +286,7 @@ void group_addchild(FAR struct task_group_s *group,
  ****************************************************************************/
 
 FAR struct child_status_s *group_findchild(FAR struct task_group_s *group,
-                                           pid_t pid)
+                                           pid_t                    pid)
 {
   FAR struct child_status_s *child;
 
@@ -364,7 +364,7 @@ FAR struct child_status_s *group_exitchild(FAR struct task_group_s *group)
  ****************************************************************************/
 
 FAR struct child_status_s *group_removechild(FAR struct task_group_s *group,
-                                             pid_t pid)
+                                             pid_t                    pid)
 {
   FAR struct child_status_s *curr;
   FAR struct child_status_s *prev;

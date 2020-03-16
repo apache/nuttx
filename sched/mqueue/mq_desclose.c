@@ -50,7 +50,7 @@
  *
  ****************************************************************************/
 
-#define mq_desfree(mqdes) sq_addlast((FAR sq_entry_t*)mqdes, &g_desfree)
+#define mq_desfree(mqdes) sq_addlast((FAR sq_entry_t *)mqdes, &g_desfree)
 
 /****************************************************************************
  * Public Functions
@@ -96,7 +96,7 @@ int nxmq_desclose_group(mqd_t mqdes, FAR struct task_group_s *group)
     {
       if (mq_ptr == mqdes)
         {
-           break;
+          break;
         }
 
       mq_ptr = (mqd_t)sq_next(mq_ptr);

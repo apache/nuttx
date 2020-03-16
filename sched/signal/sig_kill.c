@@ -93,7 +93,7 @@ int nxsig_kill(pid_t pid, int signo)
   FAR struct tcb_s *rtcb = this_task();
 #endif
   siginfo_t info;
-  int ret;
+  int       ret;
 
   /* We do not support sending signals to process groups */
 
@@ -120,8 +120,8 @@ int nxsig_kill(pid_t pid, int signo)
   info.si_errno           = EINTR;
   info.si_value.sival_ptr = NULL;
 #ifdef CONFIG_SCHED_HAVE_PARENT
-  info.si_pid             = rtcb->pid;
-  info.si_status          = OK;
+  info.si_pid    = rtcb->pid;
+  info.si_status = OK;
 #endif
 
   /* Send the signal */

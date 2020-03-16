@@ -84,10 +84,9 @@
 int getitimer(int which, FAR struct itimerval *value)
 {
   FAR struct tcb_s *rtcb = this_task();
-  struct itimerspec spec =
-  {
-    {0, 0},
-    {0, 0}
+  struct itimerspec spec = {
+    { 0, 0 },
+    { 0, 0 }
   };
 
   int ret = OK;

@@ -67,8 +67,8 @@
 int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
 {
   struct timespec bias;
-  irqstate_t flags;
-  int ret = OK;
+  irqstate_t      flags;
+  int             ret = OK;
 
   sinfo("clock_id=%d\n", clock_id);
   DEBUGASSERT(tp != NULL);
@@ -112,16 +112,16 @@ int clock_settime(clockid_t clock_id, FAR const struct timespec *tp)
       /* Result could be negative seconds */
 
       g_basetime.tv_nsec -= bias.tv_nsec;
-      g_basetime.tv_sec  -= bias.tv_sec;
+      g_basetime.tv_sec -= bias.tv_sec;
 
       /* Setup the RTC (lo- or high-res) */
 
-#ifdef CONFIG_RTC
+#  ifdef CONFIG_RTC
       if (g_rtc_enabled)
         {
           up_rtc_settime(tp);
         }
-#endif
+#  endif
 
       leave_critical_section(flags);
 

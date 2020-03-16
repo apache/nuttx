@@ -41,12 +41,12 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <sched.h>
-#include <errno.h>
+#  include <sched.h>
+#  include <errno.h>
 
-#include <nuttx/kmalloc.h>
+#  include <nuttx/kmalloc.h>
 
-#include "environ/environ.h"
+#  include "environ/environ.h"
 
 /****************************************************************************
  * Public Functions
@@ -91,7 +91,7 @@ void env_release(FAR struct task_group_s *group)
    */
 
   group->tg_envsize = 0;
-  group->tg_envp = NULL;
+  group->tg_envp    = NULL;
 }
 
 #endif /* CONFIG_DISABLE_ENVIRON */

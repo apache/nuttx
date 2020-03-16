@@ -42,14 +42,14 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <sched.h>
-#include <string.h>
-#include <errno.h>
+#  include <sched.h>
+#  include <string.h>
+#  include <errno.h>
 
-#include <nuttx/kmalloc.h>
+#  include <nuttx/kmalloc.h>
 
-#include "sched/sched.h"
-#include "environ/environ.h"
+#  include "sched/sched.h"
+#  include "environ/environ.h"
 
 /****************************************************************************
  * Public Functions
@@ -74,12 +74,12 @@
 
 int unsetenv(FAR const char *name)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *       rtcb  = this_task();
   FAR struct task_group_s *group = rtcb->group;
-  FAR char *pvar;
-  FAR char *newenvp;
-  int newsize;
-  int ret = OK;
+  FAR char *               pvar;
+  FAR char *               newenvp;
+  int                      newsize;
+  int                      ret = OK;
 
   DEBUGASSERT(name && group);
 

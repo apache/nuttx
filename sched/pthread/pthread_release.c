@@ -84,7 +84,7 @@ void pthread_release(FAR struct task_group_s *group)
     {
       /* Remove the join from the head of the list. */
 
-      join = group->tg_joinhead;
+      join               = group->tg_joinhead;
       group->tg_joinhead = join->next;
 
       /* Destroy the join semaphores */

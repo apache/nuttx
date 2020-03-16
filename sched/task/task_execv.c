@@ -122,11 +122,11 @@
  *
  ****************************************************************************/
 
-int execv(FAR const char *path, FAR char * const argv[])
+int execv(FAR const char *path, FAR char *const argv[])
 {
   FAR const struct symtab_s *symtab;
-  int nsymbols;
-  int ret;
+  int                        nsymbols;
+  int                        ret;
 
   /* Get the current symbol table selection */
 
@@ -134,7 +134,7 @@ int execv(FAR const char *path, FAR char * const argv[])
 
   /* Start the task */
 
-  ret = exec(path, (FAR char * const *)argv, symtab, nsymbols);
+  ret = exec(path, (FAR char *const *)argv, symtab, nsymbols);
   if (ret < 0)
     {
       serr("ERROR: exec failed: %d\n", errno);

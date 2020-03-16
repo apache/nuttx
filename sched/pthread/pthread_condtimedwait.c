@@ -87,7 +87,7 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
 #ifdef HAVE_GROUP_MEMBERS
 
   FAR struct tcb_s *tcb;
-  siginfo_t info;
+  siginfo_t         info;
 
   /* The logic below if equivalent to nxsig_queue(), but uses
    * nxsig_tcbdispatch() instead of nxsig_dispatch().  This avoids the group
@@ -108,10 +108,10 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
       info.si_code            = SI_QUEUE;
       info.si_errno           = ETIMEDOUT;
       info.si_value.sival_ptr = NULL;
-#ifdef CONFIG_SCHED_HAVE_PARENT
-      info.si_pid             = (pid_t)pid;
-      info.si_status          = OK;
-#endif
+#  ifdef CONFIG_SCHED_HAVE_PARENT
+      info.si_pid    = (pid_t)pid;
+      info.si_status = OK;
+#  endif
 
       /* Process the receipt of the signal.  The scheduler is not locked as
        * is normally the case when this function is called because we are in
@@ -127,16 +127,16 @@ static void pthread_condtimedout(int argc, uint32_t pid, uint32_t signo)
    * use nxsig_queue().
    */
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
+#  ifdef CONFIG_CAN_PASS_STRUCTS
   union sigval value;
 
   /* Send the specified signal to the specified task. */
 
   value.sival_ptr = NULL;
   nxsig_queue((int)pid, (int)signo, value);
-#else
+#  else
   nxsig_queue((int)pid, (int)signo, NULL);
-#endif
+#  endif
 
 #endif /* HAVE_GROUP_MEMBERS */
 }
@@ -168,11 +168,11 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                            FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
-  irqstate_t flags;
-  sclock_t ticks;
-  int mypid = (int)getpid();
-  int ret = OK;
-  int status;
+  irqstate_t        flags;
+  sclock_t          ticks;
+  int               mypid = (int)getpid();
+  int               ret   = OK;
+  int               status;
 
   sinfo("cond=0x%p mutex=0x%p abstime=0x%p\n", cond, mutex, abstime);
 
@@ -261,7 +261,7 @@ int pthread_cond_timedwait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex,
                   /* Give up the mutex */
 
                   mutex->pid = -1;
-                  ret = pthread_mutex_give(mutex);
+                  ret        = pthread_mutex_give(mutex);
                   if (ret != 0)
                     {
                       /* Restore interrupts  (pre-emption will be enabled when

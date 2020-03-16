@@ -202,7 +202,7 @@ void spawn_semtake(FAR sem_t *sem)
 int spawn_execattrs(pid_t pid, FAR const posix_spawnattr_t *attr)
 {
   struct sched_param param;
-  int ret;
+  int                ret;
 
   DEBUGASSERT(attr);
 
@@ -311,7 +311,7 @@ int spawn_proxyattrs(FAR const posix_spawnattr_t *attr,
                      FAR const posix_spawn_file_actions_t *file_actions)
 {
   FAR struct spawn_general_file_action_s *entry;
-  int ret = OK;
+  int                                     ret = OK;
 
   /* Check if we need to change the signal mask */
 

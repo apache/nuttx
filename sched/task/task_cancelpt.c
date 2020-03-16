@@ -112,7 +112,7 @@
 bool enter_cancellation_point(void)
 {
   FAR struct tcb_s *tcb = this_task();
-  bool ret = false;
+  bool              ret = false;
 
   /* Disabling pre-emption should provide sufficient protection.  We only
    * need the TCB to be stationary (no interrupt level modification is
@@ -150,14 +150,14 @@ bool enter_cancellation_point(void)
 
           if (tcb->cpcount == 0)
             {
-#ifndef CONFIG_DISABLE_PTHREAD
+#  ifndef CONFIG_DISABLE_PTHREAD
               if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
                   TCB_FLAG_TTYPE_PTHREAD)
                 {
                   pthread_exit(PTHREAD_CANCELED);
                 }
               else
-#endif
+#  endif
                 {
                   exit(EXIT_FAILURE);
                 }
@@ -237,14 +237,14 @@ void leave_cancellation_point(void)
 
           if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
             {
-#ifndef CONFIG_DISABLE_PTHREAD
+#  ifndef CONFIG_DISABLE_PTHREAD
               if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
                   TCB_FLAG_TTYPE_PTHREAD)
                 {
                   pthread_exit(PTHREAD_CANCELED);
                 }
               else
-#endif
+#  endif
                 {
                   exit(EXIT_FAILURE);
                 }
@@ -285,7 +285,7 @@ void leave_cancellation_point(void)
 bool check_cancellation_point(void)
 {
   FAR struct tcb_s *tcb = this_task();
-  bool ret = false;
+  bool              ret = false;
 
   /* Disabling pre-emption should provide sufficient protection.  We only
    * need the TCB to be stationary (no interrupt level modification is
@@ -370,7 +370,7 @@ void nxnotify_cancellation(FAR struct tcb_s *tcb)
           nxsig_wait_irq(tcb, ECANCELED);
         }
 
-#ifndef CONFIG_DISABLE_MQUEUE
+#  ifndef CONFIG_DISABLE_MQUEUE
       /* If the thread is blocked waiting on a message queue, then the
        * thread must be unblocked to handle the cancellation.
        */
@@ -380,7 +380,7 @@ void nxnotify_cancellation(FAR struct tcb_s *tcb)
         {
           nxmq_wait_irq(tcb, ECANCELED);
         }
-#endif
+#  endif
     }
 
   leave_critical_section(flags);

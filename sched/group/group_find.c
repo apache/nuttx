@@ -83,7 +83,7 @@
 FAR struct task_group_s *group_findby_grpid(grpid_t grpid)
 {
   FAR struct task_group_s *group;
-  irqstate_t flags;
+  irqstate_t               flags;
 
   /* Find the status structure with the matching GID  */
 
@@ -129,7 +129,7 @@ FAR struct task_group_s *group_findby_grpid(grpid_t grpid)
 FAR struct task_group_s *group_findbypid(pid_t pid)
 {
   FAR struct task_group_s *group;
-  irqstate_t flags;
+  irqstate_t               flags;
 
   /* Find the status structure with the matching PID  */
 

@@ -86,11 +86,11 @@ static void nxsig_notification_worker(FAR void *arg)
 
   /* Perform the callback */
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
+#  ifdef CONFIG_CAN_PASS_STRUCTS
   work->func(work->value);
-#else
+#  else
   work->func(work->value.sival_ptr);
-#endif
+#  endif
 }
 
 #endif /* CONFIG_SIG_EVTHREAD */
@@ -126,7 +126,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
                        int code, FAR struct sigwork_s *work)
 {
   sinfo("pid=%p signo=%d code=%d sival_ptr=%p\n",
-         pid, event->sigev_signo, code, event->sigev_value.sival_ptr);
+        pid, event->sigev_signo, code, event->sigev_value.sival_ptr);
 
   /* Notify client via a signal? */
 
@@ -139,9 +139,9 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 
       /* Yes.. Create the siginfo structure */
 
-      info.si_signo  = event->sigev_signo;
-      info.si_code   = code;
-      info.si_errno  = OK;
+      info.si_signo = event->sigev_signo;
+      info.si_code  = code;
+      info.si_errno = OK;
 #ifdef CONFIG_SCHED_HAVE_PARENT
       info.si_pid    = rtcb->pid;
       info.si_status = OK;
@@ -167,11 +167,11 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
     {
       /* Initialize the work information */
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
+#  ifdef CONFIG_CAN_PASS_STRUCTS
       work->value = event->sigev_value;
-#else
+#  else
       work->value.sival_ptr = event->sigev_value.sival_ptr;
-#endif
+#  endif
       work->func = event->sigev_notify_function;
 
       /* Then queue the work */

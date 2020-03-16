@@ -42,8 +42,8 @@
 
 static inline void timer_signotify(FAR struct posix_timer_s *timer);
 static inline void timer_restart(FAR struct posix_timer_s *timer,
-                                 wdparm_t itimer);
-static void timer_timeout(int argc, wdparm_t itimer);
+                                 wdparm_t                  itimer);
+static void        timer_timeout(int argc, wdparm_t itimer);
 
 /****************************************************************************
  * Private Functions
@@ -91,7 +91,7 @@ static inline void timer_signotify(FAR struct posix_timer_s *timer)
  ****************************************************************************/
 
 static inline void timer_restart(FAR struct posix_timer_s *timer,
-                                 wdparm_t itimer)
+                                 wdparm_t                  itimer)
 {
   /* If this is a repetitive timer, then restart the watchdog */
 
@@ -125,7 +125,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
 
 static void timer_timeout(int argc, wdparm_t itimer)
 {
-#ifndef CONFIG_CAN_PASS_STRUCTS
+#  ifndef CONFIG_CAN_PASS_STRUCTS
   /* On many small machines, pointers are encoded and cannot be simply cast
    * from wdparm_t to struct tcb_s *.  The following union works around this
    * (see wdogparm_t).
@@ -157,7 +157,7 @@ static void timer_timeout(int argc, wdparm_t itimer)
 
       timer_restart(u.timer, itimer);
     }
-#else
+#  else
   FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)itimer;
 
   /* Send the specified signal to the specified task.   Increment the
@@ -178,7 +178,7 @@ static void timer_timeout(int argc, wdparm_t itimer)
 
       timer_restart(timer, itimer);
     }
-#endif
+#  endif
 }
 
 /****************************************************************************
@@ -251,12 +251,12 @@ static void timer_timeout(int argc, wdparm_t itimer)
 
 int timer_settime(timer_t timerid, int flags,
                   FAR const struct itimerspec *value,
-                  FAR struct itimerspec *ovalue)
+                  FAR struct itimerspec *      ovalue)
 {
   FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)timerid;
-  irqstate_t intflags;
-  sclock_t delay;
-  int ret = OK;
+  irqstate_t                intflags;
+  sclock_t                  delay;
+  int                       ret = OK;
 
   /* Some sanity checks */
 
@@ -355,7 +355,7 @@ int timer_settime(timer_t timerid, int flags,
        */
 
       timer->pt_last = delay;
-      ret = wd_start(timer->pt_wdog, delay, (wdentry_t)timer_timeout,
+      ret            = wd_start(timer->pt_wdog, delay, (wdentry_t)timer_timeout,
                      1, (wdparm_t)timer);
       if (ret < 0)
         {

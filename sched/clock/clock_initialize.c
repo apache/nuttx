@@ -64,15 +64,15 @@
  ****************************************************************************/
 
 #ifndef CONFIG_SCHED_TICKLESS
-#ifdef CONFIG_SYSTEM_TIME64
+#  ifdef CONFIG_SYSTEM_TIME64
 volatile uint64_t g_system_timer = INITIAL_SYSTEM_TIMER_TICKS;
-#else
+#  else
 volatile uint32_t g_system_timer = INITIAL_SYSTEM_TIMER_TICKS;
-#endif
+#  endif
 #endif
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
-struct timespec   g_basetime;
+struct timespec g_basetime;
 #endif
 
 /****************************************************************************
@@ -88,22 +88,22 @@ struct timespec   g_basetime;
  ****************************************************************************/
 
 #ifdef CONFIG_RTC
-#if defined(CONFIG_RTC_DATETIME)
+#  if defined(CONFIG_RTC_DATETIME)
 /* Initialize the system time using a broken out date/time structure */
 
 int clock_basetime(FAR struct timespec *tp)
 {
   struct tm rtctime;
-  long nsecs = 0;
-  int ret;
+  long      nsecs = 0;
+  int       ret;
 
   /* Get the broken-out time from the date/time RTC. */
 
-#ifdef CONFIG_ARCH_HAVE_RTC_SUBSECONDS
+#    ifdef CONFIG_ARCH_HAVE_RTC_SUBSECONDS
   ret = up_rtc_getdatetime_with_subseconds(&rtctime, &nsecs);
-#else
+#    else
   ret = up_rtc_getdatetime(&rtctime);
-#endif
+#    endif
   if (ret >= 0)
     {
       /* And use the broken-out time to initialize the system time */
@@ -115,7 +115,7 @@ int clock_basetime(FAR struct timespec *tp)
   return ret;
 }
 
-#elif defined(CONFIG_RTC_HIRES)
+#  elif defined(CONFIG_RTC_HIRES)
 
 /* Initialize the system time using a high-resolution structure */
 
@@ -126,7 +126,7 @@ int clock_basetime(FAR struct timespec *tp)
   return up_rtc_gettime(tp);
 }
 
-#else
+#  else
 
 /* Initialize the system time using seconds only */
 
@@ -139,8 +139,8 @@ int clock_basetime(FAR struct timespec *tp)
   return OK;
 }
 
-#endif /* CONFIG_RTC_HIRES */
-#else /* CONFIG_RTC */
+#  endif /* CONFIG_RTC_HIRES */
+#else    /* CONFIG_RTC */
 
 int clock_basetime(FAR struct timespec *tp)
 {
@@ -175,7 +175,7 @@ static void clock_inittime(void)
 {
   /* (Re-)initialize the time value to match the RTC */
 
-#ifndef CONFIG_CLOCK_TIMEKEEPING
+#  ifndef CONFIG_CLOCK_TIMEKEEPING
   struct timespec ts;
 
   clock_basetime(&g_basetime);
@@ -183,16 +183,16 @@ static void clock_inittime(void)
 
   /* Adjust base time to hide initial timer ticks. */
 
-  g_basetime.tv_sec  -= ts.tv_sec;
+  g_basetime.tv_sec -= ts.tv_sec;
   g_basetime.tv_nsec -= ts.tv_nsec;
   while (g_basetime.tv_nsec < 0)
     {
       g_basetime.tv_nsec += NSEC_PER_SEC;
       g_basetime.tv_sec--;
     }
-#else
+#  else
   clock_inittimekeeping();
-#endif
+#  endif
 }
 #endif
 
@@ -211,8 +211,8 @@ static void clock_inittime(void)
 void clock_initialize(void)
 {
 #if !defined(CONFIG_SUPPRESS_INTERRUPTS) && \
-    !defined(CONFIG_SUPPRESS_TIMER_INTS) && \
-    !defined(CONFIG_SYSTEMTICK_EXTCLK)
+!defined(CONFIG_SUPPRESS_TIMER_INTS) && \
+!defined(CONFIG_SYSTEMTICK_EXTCLK)
   /* Initialize the system timer interrupt */
 
   up_timer_initialize();
@@ -305,9 +305,9 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
   struct timespec bias;
   struct timespec curr_ts;
   struct timespec rtc_diff_tmp;
-  irqstate_t flags;
-  int32_t carry;
-  int ret;
+  irqstate_t      flags;
+  int32_t         carry;
+  int             ret;
 
   if (rtc_diff == NULL)
     {
@@ -327,7 +327,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
 
       sinfo("rtc error %d, skip resync\n", ret);
 
-      rtc_diff->tv_sec = 0;
+      rtc_diff->tv_sec  = 0;
       rtc_diff->tv_nsec = 0;
       goto skip;
     }
@@ -350,8 +350,8 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
 
   if (curr_ts.tv_nsec >= NSEC_PER_SEC)
     {
-      carry            = curr_ts.tv_nsec / NSEC_PER_SEC;
-      curr_ts.tv_sec  += carry;
+      carry = curr_ts.tv_nsec / NSEC_PER_SEC;
+      curr_ts.tv_sec += carry;
       curr_ts.tv_nsec -= (carry * NSEC_PER_SEC);
     }
 
@@ -366,14 +366,14 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
 
       sinfo("skip resync\n");
 
-      rtc_diff->tv_sec = 0;
+      rtc_diff->tv_sec  = 0;
       rtc_diff->tv_nsec = 0;
     }
   else
     {
       /* Output difference between time at entry and new current time. */
 
-      rtc_diff->tv_sec  = rtc_time.tv_sec  - curr_ts.tv_sec;
+      rtc_diff->tv_sec  = rtc_time.tv_sec - curr_ts.tv_sec;
       rtc_diff->tv_nsec = rtc_time.tv_nsec - curr_ts.tv_nsec;
 
       /* Handle carry to seconds. */
@@ -393,7 +393,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
 
       if (carry != 0)
         {
-          rtc_diff->tv_sec  += carry;
+          rtc_diff->tv_sec += carry;
           rtc_diff->tv_nsec -= (carry * NSEC_PER_SEC);
         }
 

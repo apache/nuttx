@@ -41,22 +41,22 @@
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
 
-#include <sys/time.h>
-#include <stdint.h>
-#include <time.h>
-#include <errno.h>
-#include <debug.h>
+#  include <sys/time.h>
+#  include <stdint.h>
+#  include <time.h>
+#  include <errno.h>
+#  include <debug.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
+#  include <nuttx/irq.h>
+#  include <nuttx/arch.h>
 
-#include "clock/clock.h"
+#  include "clock/clock.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NTP_MAX_ADJUST 500
+#  define NTP_MAX_ADJUST 500
 
 /****************************************************************************
  * Private Data
@@ -79,11 +79,11 @@ static int clock_get_current_time(FAR struct timespec *ts,
                                   FAR struct timespec *base)
 {
   irqstate_t flags;
-  uint64_t counter;
-  uint64_t offset;
-  uint64_t nsec;
-  time_t sec;
-  int ret;
+  uint64_t   counter;
+  uint64_t   offset;
+  uint64_t   nsec;
+  time_t     sec;
+  int        ret;
 
   flags = enter_critical_section();
 
@@ -95,18 +95,18 @@ static int clock_get_current_time(FAR struct timespec *ts,
 
   offset = (counter - g_clock_last_counter) & g_clock_mask;
   nsec   = offset * NSEC_PER_TICK;
-  sec    = nsec   / NSEC_PER_SEC;
-  nsec  -= sec    * NSEC_PER_SEC;
+  sec    = nsec / NSEC_PER_SEC;
+  nsec -= sec * NSEC_PER_SEC;
 
-  nsec  += base->tv_nsec;
+  nsec += base->tv_nsec;
   if (nsec >= NSEC_PER_SEC)
     {
       nsec -= NSEC_PER_SEC;
-      sec  += 1;
+      sec += 1;
     }
 
   ts->tv_nsec = nsec;
-  ts->tv_sec = base->tv_sec + sec;
+  ts->tv_sec  = base->tv_sec + sec;
 
 errout_in_critical_section:
   leave_critical_section(flags);
@@ -133,8 +133,8 @@ int clock_timekeeping_get_wall_time(FAR struct timespec *ts)
 int clock_timekeeping_set_wall_time(FAR struct timespec *ts)
 {
   irqstate_t flags;
-  uint64_t counter;
-  int ret;
+  uint64_t   counter;
+  int        ret;
 
   flags = enter_critical_section();
 
@@ -192,7 +192,7 @@ errout_in_critical_section:
 int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
 {
   irqstate_t flags;
-  long adjust_usec;
+  long       adjust_usec;
 
   if (!delta)
     {
@@ -223,11 +223,11 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
 void clock_update_wall_time(void)
 {
   irqstate_t flags;
-  uint64_t counter;
-  uint64_t offset;
-  int64_t nsec;
-  time_t sec;
-  int ret;
+  uint64_t   counter;
+  uint64_t   offset;
+  int64_t    nsec;
+  time_t     sec;
+  int        ret;
 
   flags = enter_critical_section();
 
@@ -243,15 +243,15 @@ void clock_update_wall_time(void)
       goto errout_in_critical_section;
     }
 
-  nsec  = offset * NSEC_PER_TICK;
-  sec   = nsec / NSEC_PER_SEC;
+  nsec = offset * NSEC_PER_TICK;
+  sec  = nsec / NSEC_PER_SEC;
   nsec -= sec * NSEC_PER_SEC;
 
   nsec += g_clock_wall_time.tv_nsec;
   if (nsec >= NSEC_PER_SEC)
     {
       nsec -= NSEC_PER_SEC;
-      sec  += 1;
+      sec += 1;
     }
 
   if (g_clock_adjust != 0 && sec > 0)
@@ -267,13 +267,13 @@ void clock_update_wall_time(void)
       while (nsec < 0)
         {
           nsec += NSEC_PER_SEC;
-          sec  -= 1;
+          sec -= 1;
         }
 
       while (nsec >= NSEC_PER_SEC)
         {
           nsec -= NSEC_PER_SEC;
-          sec  += 1;
+          sec += 1;
         }
     }
 

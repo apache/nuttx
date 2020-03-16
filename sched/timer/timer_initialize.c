@@ -42,19 +42,19 @@
 
 /* These are the preallocated times */
 
-#if CONFIG_PREALLOC_TIMERS > 0
+#  if CONFIG_PREALLOC_TIMERS > 0
 static struct posix_timer_s g_prealloctimers[CONFIG_PREALLOC_TIMERS];
-#endif
+#  endif
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#if CONFIG_PREALLOC_TIMERS > 0
+#  if CONFIG_PREALLOC_TIMERS > 0
 /* This is a list of free, preallocated timer structures */
 
 volatile sq_queue_t g_freetimers;
-#endif
+#  endif
 
 /* This is a list of instantiated timer structures -- active and inactive.
  * The timers are place on this list by timer_create() and removed from the
@@ -83,7 +83,7 @@ volatile sq_queue_t g_alloctimers;
 
 void weak_function timer_initialize(void)
 {
-#if CONFIG_PREALLOC_TIMERS > 0
+#  if CONFIG_PREALLOC_TIMERS > 0
   int i;
 
   /* Place all of the pre-allocated timers into the free timer list */
@@ -96,7 +96,7 @@ void weak_function timer_initialize(void)
       sq_addlast((FAR sq_entry_t *)&g_prealloctimers[i],
                  (FAR sq_queue_t *)&g_freetimers);
     }
-#endif
+#  endif
 
   /* Initialize the list of allocated timers */
 
@@ -126,7 +126,7 @@ void weak_function timer_deleteall(pid_t pid)
 {
   FAR struct posix_timer_s *timer;
   FAR struct posix_timer_s *next;
-  irqstate_t flags;
+  irqstate_t                flags;
 
   flags = enter_critical_section();
   for (timer = (FAR struct posix_timer_s *)g_alloctimers.head;

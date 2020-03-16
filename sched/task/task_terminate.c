@@ -100,7 +100,7 @@ int nxtask_terminate(pid_t pid, bool nonblocking)
 {
   FAR struct tcb_s *dtcb;
   FAR dq_queue_t *tasklist;
-  irqstate_t flags;
+  irqstate_t      flags;
 #ifdef CONFIG_SMP
   int cpu;
 #endif
@@ -124,7 +124,7 @@ int nxtask_terminate(pid_t pid, bool nonblocking)
       goto errout_with_lock;
     }
 
-  /* Verify our internal sanity */
+    /* Verify our internal sanity */
 
 #ifdef CONFIG_SMP
   DEBUGASSERT(dtcb->task_state < NUM_TASK_STATES);

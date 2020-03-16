@@ -57,13 +57,12 @@
  * Public Data
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+#  ifdef __cplusplus
+#    define EXTERN extern "C"
+extern "C" {
+#  else
+#    define EXTERN extern
+#  endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -159,10 +158,10 @@ FAR char *env_findvar(FAR struct task_group_s *group, FAR const char *pname);
 
 int env_removevar(FAR struct task_group_s *group, FAR char *pvar);
 
-#undef EXTERN
-#ifdef __cplusplus
+#  undef EXTERN
+#  ifdef __cplusplus
 }
-#endif
+#  endif
 
 #endif /* !CONFIG_DISABLE_ENVIRON */
 #endif /* __SCHED_ENVIRON_ENVIRON_H */

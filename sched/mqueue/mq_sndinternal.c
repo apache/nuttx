@@ -124,7 +124,7 @@ int nxmq_verify_send(mqd_t mqdes, FAR const char *msg, size_t msglen,
 FAR struct mqueue_msg_s *nxmq_alloc_msg(void)
 {
   FAR struct mqueue_msg_s *mqmsg;
-  irqstate_t flags;
+  irqstate_t               flags;
 
   /* If we were called from an interrupt handler, then try to get the message
    * from generally available list of messages. If this fails, then try the
@@ -163,7 +163,7 @@ FAR struct mqueue_msg_s *nxmq_alloc_msg(void)
       if (mqmsg == NULL)
         {
           mqmsg = (FAR struct mqueue_msg_s *)
-            kmm_malloc((sizeof (struct mqueue_msg_s)));
+          kmm_malloc((sizeof(struct mqueue_msg_s)));
 
           /* Check if we allocated the message */
 
@@ -208,9 +208,9 @@ FAR struct mqueue_msg_s *nxmq_alloc_msg(void)
 
 int nxmq_wait_send(mqd_t mqdes)
 {
-  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *         rtcb;
   FAR struct mqueue_inode_s *msgq;
-  int ret;
+  int                        ret;
 
 #ifdef CONFIG_CANCELLATION_POINTS
   /* nxmq_wait_send() is not a cancellation point, but may be called via
@@ -326,11 +326,11 @@ int nxmq_wait_send(mqd_t mqdes)
 int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
                  FAR const char *msg, size_t msglen, unsigned int prio)
 {
-  FAR struct tcb_s *btcb;
+  FAR struct tcb_s *         btcb;
   FAR struct mqueue_inode_s *msgq;
-  FAR struct mqueue_msg_s *next;
-  FAR struct mqueue_msg_s *prev;
-  irqstate_t flags;
+  FAR struct mqueue_msg_s *  next;
+  FAR struct mqueue_msg_s *  prev;
+  irqstate_t                 flags;
 
   /* Get a pointer to the message queue */
 
@@ -356,7 +356,8 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
 
   for (prev = NULL, next = (FAR struct mqueue_msg_s *)msgq->msglist.head;
        next && prio <= next->priority;
-       prev = next, next = next->next);
+       prev = next, next = next->next)
+    ;
 
   /* Add the message at the right place */
 
@@ -382,7 +383,7 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
   if (msgq->ntmqdes)
     {
       struct sigevent event;
-      pid_t pid;
+      pid_t           pid;
 
       /* Remove the message notification data from the message queue. */
 
@@ -414,7 +415,8 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
 
       for (btcb = (FAR struct tcb_s *)g_waitingformqnotempty.head;
            btcb && btcb->msgwaitq != msgq;
-           btcb = btcb->flink);
+           btcb = btcb->flink)
+        ;
 
       /* If one was found, unblock it */
 

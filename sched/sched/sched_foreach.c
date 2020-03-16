@@ -73,7 +73,7 @@
 void sched_foreach(sched_foreach_t handler, FAR void *arg)
 {
   irqstate_t flags;
-  int ndx;
+  int        ndx;
 
   /* Visit each active task */
 

@@ -93,12 +93,12 @@ int pthread_kill(pthread_t thread, int signo)
    * thread ID it is requested to use.
    */
 
-#ifdef CONFIG_SCHED_HAVE_PARENT
+#  ifdef CONFIG_SCHED_HAVE_PARENT
   FAR struct tcb_s *rtcb = this_task();
-#endif
+#  endif
   FAR struct tcb_s *stcb;
-  siginfo_t info;
-  int ret;
+  siginfo_t         info;
+  int               ret;
 
   /* Make sure that the signal is valid */
 
@@ -118,10 +118,10 @@ int pthread_kill(pthread_t thread, int signo)
   info.si_code            = SI_USER;
   info.si_errno           = EINTR;
   info.si_value.sival_ptr = NULL;
-#ifdef CONFIG_SCHED_HAVE_PARENT
-  info.si_pid             = rtcb->pid;
-  info.si_status          = OK;
-#endif
+#  ifdef CONFIG_SCHED_HAVE_PARENT
+  info.si_pid    = rtcb->pid;
+  info.si_status = OK;
+#  endif
 
   /* Get the TCB associated with the thread */
 

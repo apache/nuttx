@@ -61,9 +61,9 @@
 bool nxsig_unmask_pendingsignal(void)
 {
   FAR struct tcb_s *rtcb = this_task();
-  sigset_t unmaskedset;
+  sigset_t          unmaskedset;
   FAR sigpendq_t *pendingsig;
-  int signo;
+  int             signo;
 
   /* Prohibit any context switches until we are done with this.
    * We may still be performing signal operations from interrupt

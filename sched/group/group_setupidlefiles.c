@@ -125,7 +125,7 @@ int group_setupidlefiles(FAR struct task_tcb_s *tcb)
     }
 #endif
 
-  /* Allocate file/socket streams for the TCB */
+    /* Allocate file/socket streams for the TCB */
 
 #if CONFIG_NFILE_STREAMS > 0
   return group_setupstreams(tcb);

@@ -77,19 +77,19 @@
 int prctl(int option, ...)
 {
   va_list ap;
-  int errcode;
+  int     errcode;
 
   va_start(ap, option);
   switch (option)
     {
       case PR_SET_NAME:
-      case PR_GET_NAME:
+        case PR_GET_NAME:
 #if CONFIG_TASK_NAME_SIZE > 0
         {
           /* Get the prctl arguments */
 
-          FAR char *name = va_arg(ap, FAR char *);
-          int pid  = va_arg(ap, int);
+          FAR char *        name = va_arg(ap, FAR char *);
+          int               pid  = va_arg(ap, int);
           FAR struct tcb_s *tcb;
 
           /* Get the TCB associated with the PID (handling the special case
@@ -159,7 +159,7 @@ int prctl(int option, ...)
         goto errout;
     }
 
-  /* Not reachable unless CONFIG_TASK_NAME_SIZE is > 0.  NOTE: This might
+      /* Not reachable unless CONFIG_TASK_NAME_SIZE is > 0.  NOTE: This might
    * change if additional commands are supported.
    */
 

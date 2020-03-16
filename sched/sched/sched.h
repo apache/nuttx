@@ -67,8 +67,8 @@
 #  error CONFIG_MAX_TASKS must be power of 2
 #endif
 
-#define MAX_TASKS_MASK           (CONFIG_MAX_TASKS-1)
-#define PIDHASH(pid)             ((pid) & MAX_TASKS_MASK)
+#define MAX_TASKS_MASK (CONFIG_MAX_TASKS - 1)
+#define PIDHASH(pid)   ((pid)&MAX_TASKS_MASK)
 
 /* These are macros to access the current CPU and the current task on a CPU.
  * These macros are intended to support a future SMP implementation.
@@ -78,15 +78,15 @@
  */
 
 #ifdef CONFIG_SMP
-#  define current_task(cpu)      ((FAR struct tcb_s *)g_assignedtasks[cpu].head)
-#  define this_cpu()             up_cpu_index()
+#  define current_task(cpu) ((FAR struct tcb_s *)g_assignedtasks[cpu].head)
+#  define this_cpu()        up_cpu_index()
 #  if !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE) && !defined(CONFIG_ARCH_HAVE_FETCHADD)
-#    define this_task()          (current_task(this_cpu()))
+#    define this_task() (current_task(this_cpu()))
 #  endif
 #else
-#  define current_task(cpu)      ((FAR struct tcb_s *)g_readytorun.head)
-#  define this_cpu()             (0)
-#  define this_task()            (current_task(this_cpu()))
+#  define current_task(cpu) ((FAR struct tcb_s *)g_readytorun.head)
+#  define this_cpu()        (0)
+#  define this_task()       (current_task(this_cpu()))
 #endif
 
 /* This macro returns the running task which may different from this_task()
@@ -98,25 +98,25 @@
 
 /* List attribute flags */
 
-#define TLIST_ATTR_PRIORITIZED   (1 << 0) /* Bit 0: List is prioritized */
-#define TLIST_ATTR_INDEXED       (1 << 1) /* Bit 1: List is indexed by CPU */
-#define TLIST_ATTR_RUNNABLE      (1 << 2) /* Bit 2: List includes running tasks */
+#define TLIST_ATTR_PRIORITIZED (1 << 0) /* Bit 0: List is prioritized */
+#define TLIST_ATTR_INDEXED     (1 << 1) /* Bit 1: List is indexed by CPU */
+#define TLIST_ATTR_RUNNABLE    (1 << 2) /* Bit 2: List includes running tasks */
 
-#define __TLIST_ATTR(s)          g_tasklisttable[s].attr
-#define TLIST_ISPRIORITIZED(s)   ((__TLIST_ATTR(s) & TLIST_ATTR_PRIORITIZED) != 0)
-#define TLIST_ISINDEXED(s)       ((__TLIST_ATTR(s) & TLIST_ATTR_INDEXED) != 0)
-#define TLIST_ISRUNNABLE(s)      ((__TLIST_ATTR(s) & TLIST_ATTR_RUNNABLE) != 0)
+#define __TLIST_ATTR(s)        g_tasklisttable[s].attr
+#define TLIST_ISPRIORITIZED(s) ((__TLIST_ATTR(s) & TLIST_ATTR_PRIORITIZED) != 0)
+#define TLIST_ISINDEXED(s)     ((__TLIST_ATTR(s) & TLIST_ATTR_INDEXED) != 0)
+#define TLIST_ISRUNNABLE(s)    ((__TLIST_ATTR(s) & TLIST_ATTR_RUNNABLE) != 0)
 
-#define __TLIST_HEAD(s)          (FAR dq_queue_t *)g_tasklisttable[s].list
-#define __TLIST_HEADINDEXED(s,c) (&(__TLIST_HEAD(s))[c])
+#define __TLIST_HEAD(s)           (FAR dq_queue_t *)g_tasklisttable[s].list
+#define __TLIST_HEADINDEXED(s, c) (&(__TLIST_HEAD(s))[c])
 
 #ifdef CONFIG_SMP
-#  define TLIST_HEAD(s,c) \
-  ((TLIST_ISINDEXED(s)) ? __TLIST_HEADINDEXED(s,c) : __TLIST_HEAD(s))
-#  define TLIST_BLOCKED(s)       __TLIST_HEAD(s)
+#  define TLIST_HEAD(s, c) \
+    ((TLIST_ISINDEXED(s)) ? __TLIST_HEADINDEXED(s, c) : __TLIST_HEAD(s))
+#  define TLIST_BLOCKED(s) __TLIST_HEAD(s)
 #else
-#  define TLIST_HEAD(s)          __TLIST_HEAD(s)
-#  define TLIST_BLOCKED(s)       __TLIST_HEAD(s)
+#  define TLIST_HEAD(s)    __TLIST_HEAD(s)
+#  define TLIST_BLOCKED(s) __TLIST_HEAD(s)
 #endif
 
 /****************************************************************************
@@ -136,10 +136,10 @@
 
 struct pidhash_s
 {
-  FAR struct tcb_s *tcb;       /* TCB assigned to this PID */
-  pid_t pid;                   /* The full PID value */
+  FAR struct tcb_s *tcb; /* TCB assigned to this PID */
+  pid_t             pid; /* The full PID value */
 #ifdef CONFIG_SCHED_CPULOAD
-  uint32_t ticks;              /* Number of ticks on this thread */
+  uint32_t ticks; /* Number of ticks on this thread */
 #endif
 };
 
@@ -150,7 +150,7 @@ struct pidhash_s
 struct tasklist_s
 {
   DSEG volatile dq_queue_t *list; /* Pointer to the task list */
-  uint8_t attr;                   /* List attribute flags */
+  uint8_t                   attr; /* List attribute flags */
 };
 
 /****************************************************************************
@@ -272,7 +272,7 @@ extern volatile dq_queue_t g_inactivetasks;
  */
 
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+defined(CONFIG_MM_KERNEL_HEAP)
 extern volatile sq_queue_t g_delayed_kfree;
 #endif
 
@@ -385,19 +385,19 @@ extern volatile spinlock_t g_cpu_schedlock SP_SECTION;
 /* Used to keep track of which CPU(s) hold the IRQ lock. */
 
 extern volatile spinlock_t g_cpu_locksetlock SP_SECTION;
-extern volatile cpu_set_t g_cpu_lockset SP_SECTION;
+extern volatile cpu_set_t g_cpu_lockset      SP_SECTION;
 
 /* Used to lock tasklist to prevent from concurrent access */
 
 extern volatile spinlock_t g_cpu_tasklistlock SP_SECTION;
 
-#if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+#  if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
 /* This is part of the sched_lock() logic to handle atomic operations when
  * locking the scheduler.
  */
 
 extern volatile int16_t g_global_lockcount;
-#endif
+#  endif
 
 #endif /* CONFIG_SMP */
 
@@ -420,18 +420,18 @@ int  nxsched_setpriority(FAR struct tcb_s *tcb, int sched_priority);
 /* Priority inheritance support */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-int  nxsched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
+int nxsched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
 #else
-#  define nxsched_reprioritize(tcb,sched_priority) \
-     nxsched_setpriority(tcb,sched_priority)
+#  define nxsched_reprioritize(tcb, sched_priority) \
+    nxsched_setpriority(tcb, sched_priority)
 #endif
 
 /* Support for tickless operation */
 
 #ifdef CONFIG_SCHED_TICKLESS
 unsigned int sched_timer_cancel(void);
-void sched_timer_resume(void);
-void sched_timer_reassess(void);
+void         sched_timer_resume(void);
+void         sched_timer_reassess(void);
 #else
 #  define sched_timer_cancel() (0)
 #  define sched_timer_resume()
@@ -446,15 +446,15 @@ uint32_t sched_roundrobin_process(FAR struct tcb_s *tcb, uint32_t ticks,
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
-int  sched_sporadic_initialize(FAR struct tcb_s *tcb);
-int  sched_sporadic_start(FAR struct tcb_s *tcb);
-int  sched_sporadic_stop(FAR struct tcb_s *tcb);
-int  sched_sporadic_reset(FAR struct tcb_s *tcb);
-int  sched_sporadic_resume(FAR struct tcb_s *tcb);
-int  sched_sporadic_suspend(FAR struct tcb_s *tcb);
+int      sched_sporadic_initialize(FAR struct tcb_s *tcb);
+int      sched_sporadic_start(FAR struct tcb_s *tcb);
+int      sched_sporadic_stop(FAR struct tcb_s *tcb);
+int      sched_sporadic_reset(FAR struct tcb_s *tcb);
+int      sched_sporadic_resume(FAR struct tcb_s *tcb);
+int      sched_sporadic_suspend(FAR struct tcb_s *tcb);
 uint32_t sched_sporadic_process(FAR struct tcb_s *tcb, uint32_t ticks,
                                 bool noswitches);
-void sched_sporadic_lowpriority(FAR struct tcb_s *tcb);
+void     sched_sporadic_lowpriority(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
@@ -463,29 +463,29 @@ void sched_continue(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SMP
-#if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE) || defined(CONFIG_ARCH_HAVE_FETCHADD)
+#  if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE) || defined(CONFIG_ARCH_HAVE_FETCHADD)
 FAR struct tcb_s *this_task(void);
-#endif
+#  endif
 
-int  sched_cpu_select(cpu_set_t affinity);
-int  sched_cpu_pause(FAR struct tcb_s *tcb);
+int sched_cpu_select(cpu_set_t affinity);
+int sched_cpu_pause(FAR struct tcb_s *tcb);
 
 irqstate_t sched_tasklist_lock(void);
-void sched_tasklist_unlock(irqstate_t lock);
+void       sched_tasklist_unlock(irqstate_t lock);
 
-#if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
-#  define sched_islocked_global() \
-     (spin_islocked(&g_cpu_schedlock) || g_global_lockcount > 0)
-#else
-#  define sched_islocked_global() \
-     spin_islocked(&g_cpu_schedlock)
-#endif
+#  if defined(CONFIG_ARCH_HAVE_FETCHADD) && !defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
+#    define sched_islocked_global() \
+      (spin_islocked(&g_cpu_schedlock) || g_global_lockcount > 0)
+#  else
+#    define sched_islocked_global() \
+      spin_islocked(&g_cpu_schedlock)
+#  endif
 
 #  define sched_islocked_tcb(tcb) sched_islocked_global()
 
 #else
 #  define sched_cpu_select(a)     (0)
-#  define sched_cpu_pause(t)      (-38)  /* -ENOSYS */
+#  define sched_cpu_pause(t)      (-38) /* -ENOSYS */
 #  define sched_islocked_tcb(tcb) ((tcb)->lockcount > 0)
 #endif
 

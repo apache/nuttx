@@ -96,7 +96,7 @@ static void pthread_cleanup_pop_tcb(FAR struct pthread_tcb_s *tcb, int execute)
            * mode!  See also on_exit() and atexit() callbacks.
            */
 
-          cb  = &tcb->stack[ndx];
+          cb = &tcb->stack[ndx];
           cb->pc_cleaner(cb->pc_arg);
         }
 
@@ -180,7 +180,7 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
 
       tcb->tos++;
       tcb->stack[ndx].pc_cleaner = routine;
-      tcb->stack[ndx].pc_arg = arg;
+      tcb->stack[ndx].pc_arg     = arg;
     }
 
   sched_unlock();

@@ -86,8 +86,8 @@
 int nxsem_post(FAR sem_t *sem)
 {
   FAR struct tcb_s *stcb = NULL;
-  irqstate_t flags;
-  int ret = -EINVAL;
+  irqstate_t        flags;
+  int               ret = -EINVAL;
 
   /* Make sure we were supplied with a valid semaphore. */
 
@@ -146,7 +146,8 @@ int nxsem_post(FAR sem_t *sem)
 
           for (stcb = (FAR struct tcb_s *)g_waitingforsemaphore.head;
                (stcb && stcb->waitsem != sem);
-               stcb = stcb->flink);
+               stcb = stcb->flink)
+            ;
 
           if (stcb != NULL)
             {
@@ -174,7 +175,7 @@ int nxsem_post(FAR sem_t *sem)
 #endif
         }
 
-      /* Check if we need to drop the priority of any threads holding
+        /* Check if we need to drop the priority of any threads holding
        * this semaphore.  The priority could have been boosted while they
        * held the semaphore.
        */

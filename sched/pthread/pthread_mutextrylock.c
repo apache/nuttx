@@ -153,8 +153,8 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
            * where the holder of the mutex has exitted without unlocking it.
            */
 
-#ifdef CONFIG_PTHREAD_MUTEX_BOTH
-#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+#  ifdef CONFIG_PTHREAD_MUTEX_BOTH
+#    ifdef CONFIG_PTHREAD_MUTEX_TYPES
           /* Check if this NORMAL mutex is robust */
 
           if (mutex->pid > 0 &&
@@ -162,19 +162,19 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
                mutex->type != PTHREAD_MUTEX_NORMAL) &&
               sched_gettcb(mutex->pid) == NULL)
 
-#else /* CONFIG_PTHREAD_MUTEX_TYPES */
+#    else /* CONFIG_PTHREAD_MUTEX_TYPES */
           /* Check if this NORMAL mutex is robust */
 
           if (mutex->pid > 0 &&
               (mutex->flags & _PTHREAD_MFLAGS_ROBUST) != 0 &&
               sched_gettcb(mutex->pid) == NULL)
 
-#endif /* CONFIG_PTHREAD_MUTEX_TYPES */
-#else /* CONFIG_PTHREAD_MUTEX_ROBUST */
+#    endif /* CONFIG_PTHREAD_MUTEX_TYPES */
+#  else    /* CONFIG_PTHREAD_MUTEX_ROBUST */
           /* This mutex is always robust, whatever type it is. */
 
           if (mutex->pid > 0 && sched_gettcb(mutex->pid) == NULL)
-#endif
+#  endif
             {
               DEBUGASSERT(mutex->pid != 0); /* < 0: available, >0 owned, ==0 error */
               DEBUGASSERT((mutex->flags & _PTHREAD_MFLAGS_INCONSISTENT) != 0);
@@ -186,7 +186,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
                */
 
               mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;
-              ret           = EOWNERDEAD;
+              ret = EOWNERDEAD;
             }
 
           /* The mutex is locked by another, active thread */

@@ -80,8 +80,8 @@ bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)
 {
   FAR struct tcb_s *next;
   FAR struct tcb_s *prev;
-  uint8_t sched_priority = tcb->sched_priority;
-  bool ret = false;
+  uint8_t           sched_priority = tcb->sched_priority;
+  bool              ret            = false;
 
   /* Lets do a sanity check before we get started. */
 
@@ -93,7 +93,8 @@ bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)
 
   for (next = (FAR struct tcb_s *)list->head;
        (next && sched_priority <= next->sched_priority);
-       next = next->flink);
+       next = next->flink)
+    ;
 
   /* Add the tcb to the spot found in the list.  Check if the tcb
    * goes at the end of the list. NOTE:  This could only happen if list
@@ -113,16 +114,16 @@ bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)
           tcb->blink = NULL;
           list->head = (FAR dq_entry_t *)tcb;
           list->tail = (FAR dq_entry_t *)tcb;
-          ret = true;
+          ret        = true;
         }
       else
         {
           /* The tcb goes at the end of a non-empty list */
 
-          tcb->flink = NULL;
-          tcb->blink = prev;
+          tcb->flink  = NULL;
+          tcb->blink  = prev;
           prev->flink = tcb;
-          list->tail = (FAR dq_entry_t *)tcb;
+          list->tail  = (FAR dq_entry_t *)tcb;
         }
     }
   else
@@ -138,14 +139,14 @@ bool sched_addprioritized(FAR struct tcb_s *tcb, DSEG dq_queue_t *list)
           tcb->blink  = NULL;
           next->blink = tcb;
           list->head  = (FAR dq_entry_t *)tcb;
-          ret = true;
+          ret         = true;
         }
       else
         {
           /* Insert in the middle of the list */
 
-          tcb->flink = next;
-          tcb->blink = prev;
+          tcb->flink  = next;
+          tcb->blink  = prev;
           prev->flink = tcb;
           next->blink = tcb;
         }

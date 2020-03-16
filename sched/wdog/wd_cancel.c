@@ -59,8 +59,8 @@ int wd_cancel(WDOG_ID wdog)
 {
   FAR struct wdog_s *curr;
   FAR struct wdog_s *prev;
-  irqstate_t flags;
-  int ret = -EINVAL;
+  irqstate_t         flags;
+  int                ret = -EINVAL;
 
   /* Prohibit timer interactions with the timer queue until the
    * cancellation is complete

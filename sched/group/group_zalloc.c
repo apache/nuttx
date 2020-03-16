@@ -44,7 +44,7 @@
 #include "group/group.h"
 
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+defined(CONFIG_MM_KERNEL_HEAP)
 
 /****************************************************************************
  * Public Functions

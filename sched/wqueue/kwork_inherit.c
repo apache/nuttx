@@ -33,7 +33,7 @@
 #include "wqueue/wqueue.h"
 
 #if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_LPWORK) && \
-    defined(CONFIG_PRIORITY_INHERITANCE)
+defined(CONFIG_PRIORITY_INHERITANCE)
 
 /****************************************************************************
  * Private Functions
@@ -64,7 +64,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
   wtcb = sched_gettcb(wpid);
   DEBUGASSERT(wtcb);
 
-#if CONFIG_SEM_NNESTPRIO > 0
+#  if CONFIG_SEM_NNESTPRIO > 0
   /* If the priority of the client thread that is greater than the base
    * priority of the worker thread, then we may need to adjust the worker
    * thread's priority now or later to that priority.
@@ -93,7 +93,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
               if (wtcb->npend_reprio < CONFIG_SEM_NNESTPRIO)
                 {
                   wtcb->pend_reprios[wtcb->npend_reprio] =
-                    wtcb->sched_priority;
+                  wtcb->sched_priority;
                   wtcb->npend_reprio++;
                 }
               else
@@ -132,7 +132,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
             }
         }
     }
-#else
+#  else
   /* If the priority of the client thread that is less than of equal to the
    * priority of the worker thread, then do nothing because the thread is
    * already running at a sufficient priority.
@@ -148,7 +148,7 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
 
       nxsched_setpriority(wtcb, reqprio);
     }
-#endif
+#  endif
 }
 
 /****************************************************************************
@@ -172,11 +172,11 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
 static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
 {
   FAR struct tcb_s *wtcb;
-#if CONFIG_SEM_NNESTPRIO > 0
+#  if CONFIG_SEM_NNESTPRIO > 0
   uint8_t wpriority;
-  int index;
-  int selected;
-#endif
+  int     index;
+  int     selected;
+#  endif
 
   /* Get the TCB of the low priority worker thread from the process ID. */
 
@@ -189,7 +189,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
 
   if (wtcb->sched_priority != wtcb->base_priority)
     {
-#if CONFIG_SEM_NNESTPRIO > 0
+#  if CONFIG_SEM_NNESTPRIO > 0
       /* Are there other, pending priority levels to revert to? */
 
       if (wtcb->npend_reprio < 1)
@@ -238,7 +238,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
           /* Remove the highest priority pending priority from the list */
 
           wpriority = wtcb->pend_reprios[selected];
-          index = wtcb->npend_reprio - 1;
+          index     = wtcb->npend_reprio - 1;
           if (index > 0)
             {
               wtcb->pend_reprios[selected] = wtcb->pend_reprios[index];
@@ -277,7 +277,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
                   if (selected > 0)
                     {
                       wtcb->pend_reprios[index] =
-                        wtcb->pend_reprios[selected];
+                      wtcb->pend_reprios[selected];
                     }
 
                   wtcb->npend_reprio = selected;
@@ -285,14 +285,14 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
                 }
             }
         }
-#else
+#  else
       /* There is no alternative restore priorities, drop the priority
        * of the worker thread all the way back to the threads "base"
        * priority.
        */
 
       nxsched_reprioritize(wtcb, wtcb->base_priority);
-#endif
+#  endif
     }
 }
 
@@ -319,7 +319,7 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
 void lpwork_boostpriority(uint8_t reqprio)
 {
   irqstate_t flags;
-  int wndx;
+  int        wndx;
 
   /* Clip to the configured maximum priority */
 
@@ -365,7 +365,7 @@ void lpwork_boostpriority(uint8_t reqprio)
 void lpwork_restorepriority(uint8_t reqprio)
 {
   irqstate_t flags;
-  int wndx;
+  int        wndx;
 
   /* Clip to the configured maximum priority */
 

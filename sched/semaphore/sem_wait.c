@@ -85,8 +85,8 @@
 int nxsem_wait(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
-  irqstate_t flags;
-  int ret = -EINVAL;
+  irqstate_t        flags;
+  int               ret = -EINVAL;
 
   /* This API should not be called from interrupt handlers */
 
@@ -112,7 +112,7 @@ int nxsem_wait(FAR sem_t *sem)
           sem->semcount--;
           nxsem_addholder(sem);
           rtcb->waitsem = NULL;
-          ret = OK;
+          ret           = OK;
         }
 
       /* The semaphore is NOT available, We will have to block the

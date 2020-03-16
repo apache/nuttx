@@ -83,7 +83,7 @@
 #ifdef CONFIG_SMP
 /* This set of all CPUs */
 
-#  define SCHED_ALL_CPUS         ((1 << CONFIG_SMP_NCPUS) - 1)
+#  define SCHED_ALL_CPUS ((1 << CONFIG_SMP_NCPUS) - 1)
 #endif /* CONFIG_SMP */
 
 /****************************************************************************
@@ -205,7 +205,7 @@ volatile dq_queue_t g_stoppedtasks;
 volatile dq_queue_t g_inactivetasks;
 
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+defined(CONFIG_MM_KERNEL_HEAP)
 /* These are lists of delayed memory deallocations that need to be handled
  * within the IDLE loop or worker thread.  These deallocations get queued
  * by sched_kufree and sched_kfree() if the OS needs to deallocate memory
@@ -250,74 +250,61 @@ struct pidhash_s g_pidhash[CONFIG_MAX_TASKS];
  * ordered list or not.
  */
 
-const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
-{
-  {                                              /* TSTATE_TASK_INVALID */
+const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] = {
+  { /* TSTATE_TASK_INVALID */
     NULL,
-    0
-  },
-  {                                              /* TSTATE_TASK_PENDING */
+    0 },
+  { /* TSTATE_TASK_PENDING */
     &g_pendingtasks,
-    TLIST_ATTR_PRIORITIZED
-  },
+    TLIST_ATTR_PRIORITIZED },
 #ifdef CONFIG_SMP
-  {                                              /* TSTATE_TASK_READYTORUN */
+  { /* TSTATE_TASK_READYTORUN */
     &g_readytorun,
-    TLIST_ATTR_PRIORITIZED
-  },
-  {                                              /* TSTATE_TASK_ASSIGNED */
+    TLIST_ATTR_PRIORITIZED },
+  { /* TSTATE_TASK_ASSIGNED */
     g_assignedtasks,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED | TLIST_ATTR_RUNNABLE
-  },
-  {                                              /* TSTATE_TASK_RUNNING */
+    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED | TLIST_ATTR_RUNNABLE },
+  { /* TSTATE_TASK_RUNNING */
     g_assignedtasks,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED | TLIST_ATTR_RUNNABLE
-  },
+    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_INDEXED | TLIST_ATTR_RUNNABLE },
 #else
-  {                                              /* TSTATE_TASK_READYTORUN */
+  { /* TSTATE_TASK_READYTORUN */
     &g_readytorun,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_RUNNABLE
-  },
-  {                                              /* TSTATE_TASK_RUNNING */
+    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_RUNNABLE },
+  { /* TSTATE_TASK_RUNNING */
     &g_readytorun,
-    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_RUNNABLE
-  },
+    TLIST_ATTR_PRIORITIZED | TLIST_ATTR_RUNNABLE },
 #endif
-  {                                              /* TSTATE_TASK_INACTIVE */
+  { /* TSTATE_TASK_INACTIVE */
     &g_inactivetasks,
-    0
-  },
-  {                                              /* TSTATE_WAIT_SEM */
+    0 },
+  { /* TSTATE_WAIT_SEM */
     &g_waitingforsemaphore,
-    TLIST_ATTR_PRIORITIZED
-  },
-  {                                              /* TSTATE_WAIT_SIG */
+    TLIST_ATTR_PRIORITIZED },
+  { /* TSTATE_WAIT_SIG */
     &g_waitingforsignal,
-    0
-  }
+    0 }
 #ifndef CONFIG_DISABLE_MQUEUE
   ,
-  {                                              /* TSTATE_WAIT_MQNOTEMPTY */
+  { /* TSTATE_WAIT_MQNOTEMPTY */
     &g_waitingformqnotempty,
-    TLIST_ATTR_PRIORITIZED
-  },
-  {                                              /* TSTATE_WAIT_MQNOTFULL */
+    TLIST_ATTR_PRIORITIZED },
+  { /* TSTATE_WAIT_MQNOTFULL */
     &g_waitingformqnotfull,
-    TLIST_ATTR_PRIORITIZED
-  }
+    TLIST_ATTR_PRIORITIZED }
 #endif
 #ifdef CONFIG_PAGING
   ,
-  {                                              /* TSTATE_WAIT_PAGEFILL */
+  { /* TSTATE_WAIT_PAGEFILL */
     &g_waitingforfill,
-    TLIST_ATTR_PRIORITIZED
-  }
+    TLIST_ATTR_PRIORITIZED }
 #endif
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
   ,
-  {                                              /* TSTATE_TASK_STOPPED */
-    &g_stoppedtasks,
-    0                                            /* See tcb->prev_state */
+  {
+  /* TSTATE_TASK_STOPPED */
+  &g_stoppedtasks,
+  0 /* See tcb->prev_state */
   },
 #endif
 };
@@ -327,7 +314,7 @@ const struct tasklist_s g_tasklisttable[NUM_TASK_STATES] =
  * hardware resources may not yet be available to the kernel logic.
  */
 
-uint8_t g_nx_initstate;  /* See enum nx_initstate_e */
+uint8_t g_nx_initstate; /* See enum nx_initstate_e */
 
 /****************************************************************************
  * Private Data
@@ -350,11 +337,11 @@ static struct task_tcb_s g_idletcb[1];
 /* This is the name of the idle task */
 
 #if CONFIG_TASK_NAME_SIZE <= 0 || !defined(CONFIG_SMP)
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
 static const char g_idlename[] = "CPU Idle";
-#else
+#  else
 static const char g_idlename[] = "Idle Task";
-#endif
+#  endif
 #endif
 
 /* This the IDLE idle threads argument list.  NOTE: Normally the argument
@@ -365,7 +352,7 @@ static const char g_idlename[] = "Idle Task";
 #ifdef CONFIG_SMP
 static FAR char *g_idleargv[CONFIG_SMP_NCPUS][2];
 #else
-static FAR char *g_idleargv[1][2];
+static FAR char *        g_idleargv[1][2];
 #endif
 
 /****************************************************************************
@@ -419,7 +406,7 @@ void nx_start(void)
 #endif
   dq_init(&g_inactivetasks);
 #if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+defined(CONFIG_MM_KERNEL_HEAP)
   sq_init(&g_delayed_kfree);
 #endif
 #ifndef CONFIG_BUILD_KERNEL
@@ -442,14 +429,14 @@ void nx_start(void)
       g_pidhash[i].pid = INVALID_PROCESS_ID;
     }
 
-  /* Initialize the IDLE task TCB *******************************************/
+    /* Initialize the IDLE task TCB *******************************************/
 
 #ifdef CONFIG_SMP
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++, g_lastpid++)
 #endif
     {
       FAR dq_queue_t *tasklist;
-      int hashndx;
+      int             hashndx;
 
       /* Assign the process ID(s) of ZERO to the idle task(s) */
 
@@ -487,7 +474,7 @@ void nx_start(void)
           g_idletcb[cpu].cmn.entry.main = (main_t)nx_start;
         }
 
-      /* Set the task flags to indicate that this is a kernel thread and, if
+        /* Set the task flags to indicate that this is a kernel thread and, if
        * configured for SMP, that this task is locked to this CPU.
        */
 
@@ -497,8 +484,8 @@ void nx_start(void)
                                   TCB_FLAG_CPU_LOCKED);
       g_idletcb[cpu].cmn.cpu   = cpu;
 #else
-      g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
-                                  TCB_FLAG_NONCANCELABLE);
+    g_idletcb[cpu].cmn.flags = (TCB_FLAG_TTYPE_KERNEL |
+                                TCB_FLAG_NONCANCELABLE);
 #endif
 
 #ifdef CONFIG_SMP
@@ -534,9 +521,9 @@ void nx_start(void)
        */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-      g_idleargv[cpu][0]  = g_idletcb[cpu].cmn.name;
+      g_idleargv[cpu][0] = g_idletcb[cpu].cmn.name;
 #else
-      g_idleargv[cpu][0]  = (FAR char *)g_idlename;
+    g_idleargv[cpu][0]       = (FAR char *)g_idlename;
 #endif /* CONFIG_TASK_NAME_SIZE */
       g_idleargv[cpu][1]  = NULL;
       g_idletcb[cpu].argv = &g_idleargv[cpu][0];
@@ -548,7 +535,7 @@ void nx_start(void)
 #ifdef CONFIG_SMP
       tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING, cpu);
 #else
-      tasklist = TLIST_HEAD(TSTATE_TASK_RUNNING);
+    tasklist                 = TLIST_HEAD(TSTATE_TASK_RUNNING);
 #endif
       dq_addfirst((FAR dq_entry_t *)&g_idletcb[cpu], tasklist);
 
@@ -574,45 +561,45 @@ void nx_start(void)
   nxsem_initialize();
 
 #if defined(MM_KERNEL_USRHEAP_INIT) || defined(CONFIG_MM_KERNEL_HEAP) || \
-    defined(CONFIG_MM_PGALLOC)
+defined(CONFIG_MM_PGALLOC)
   /* Initialize the memory manager */
 
-    {
-      FAR void *heap_start;
-      size_t heap_size;
+  {
+    FAR void *heap_start;
+    size_t    heap_size;
 
-#ifdef MM_KERNEL_USRHEAP_INIT
-      /* Get the user-mode heap from the platform specific code and configure
+#  ifdef MM_KERNEL_USRHEAP_INIT
+    /* Get the user-mode heap from the platform specific code and configure
        * the user-mode memory allocator.
        */
 
-      up_allocate_heap(&heap_start, &heap_size);
-      kumm_initialize(heap_start, heap_size);
-#endif
+    up_allocate_heap(&heap_start, &heap_size);
+    kumm_initialize(heap_start, heap_size);
+#  endif
 
-#ifdef CONFIG_MM_KERNEL_HEAP
-      /* Get the kernel-mode heap from the platform specific code and
+#  ifdef CONFIG_MM_KERNEL_HEAP
+    /* Get the kernel-mode heap from the platform specific code and
        * configure the kernel-mode memory allocator.
        */
 
-      up_allocate_kheap(&heap_start, &heap_size);
-      kmm_initialize(heap_start, heap_size);
-#endif
+    up_allocate_kheap(&heap_start, &heap_size);
+    kmm_initialize(heap_start, heap_size);
+#  endif
 
-#ifdef CONFIG_ARCH_USE_MODULE_TEXT
+#  ifdef CONFIG_ARCH_USE_MODULE_TEXT
     up_module_text_init();
-#endif
+#  endif
 
-#ifdef CONFIG_MM_PGALLOC
-      /* If there is a page allocator in the configuration, then get the page
+#  ifdef CONFIG_MM_PGALLOC
+    /* If there is a page allocator in the configuration, then get the page
        * heap information from the platform-specific code and configure the
        * page allocator.
        */
 
-      up_allocate_pgheap(&heap_start, &heap_size);
-      mm_pginitialize(heap_start, heap_size);
-#endif
-    }
+    up_allocate_pgheap(&heap_start, &heap_size);
+    mm_pginitialize(heap_start, heap_size);
+#  endif
+  }
 #endif
 
 #ifdef CONFIG_MM_IOB
@@ -628,15 +615,15 @@ void nx_start(void)
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   /* Initialize tasking data structures */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+#  ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (task_initialize != NULL)
-#endif
+#  endif
     {
       task_initialize();
     }
 #endif
 
-  /* Initialize the interrupt handling subsystem (if included) */
+    /* Initialize the interrupt handling subsystem (if included) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (irq_initialize != NULL)
@@ -645,7 +632,7 @@ void nx_start(void)
       irq_initialize();
     }
 
-  /* Initialize the watchdog facility (if included in the link) */
+    /* Initialize the watchdog facility (if included in the link) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (wd_initialize != NULL)
@@ -654,7 +641,7 @@ void nx_start(void)
       wd_initialize();
     }
 
-  /* Initialize the POSIX timer facility (if included in the link) */
+    /* Initialize the POSIX timer facility (if included in the link) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (clock_initialize != NULL)
@@ -664,15 +651,15 @@ void nx_start(void)
     }
 
 #ifndef CONFIG_DISABLE_POSIX_TIMERS
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+#  ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (timer_initialize != NULL)
-#endif
+#  endif
     {
       timer_initialize();
     }
 #endif
 
-  /* Initialize the signal facility (if in link) */
+    /* Initialize the signal facility (if in link) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (nxsig_initialize != NULL)
@@ -682,22 +669,22 @@ void nx_start(void)
     }
 
 #ifndef CONFIG_DISABLE_MQUEUE
-  /* Initialize the named message queue facility (if in link) */
+    /* Initialize the named message queue facility (if in link) */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+#  ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (nxmq_initialize != NULL)
-#endif
+#  endif
     {
       nxmq_initialize();
     }
 #endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
-  /* Initialize the thread-specific data facility (if in link) */
+    /* Initialize the thread-specific data facility (if in link) */
 
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
+#  ifdef CONFIG_HAVE_WEAKFUNCTIONS
   if (pthread_initialize != NULL)
-#endif
+#  endif
     {
       pthread_initialize();
     }
@@ -848,7 +835,7 @@ void nx_start(void)
   /* When control is return to this point, the system is idle. */
 
   sinfo("CPU0: Beginning Idle Loop\n");
-  for (; ; )
+  for (;;)
     {
       /* Perform garbage collection (if it is not being done by the worker
        * thread).  This cleans-up memory de-allocations that were queued

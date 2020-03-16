@@ -79,13 +79,13 @@
 
 void nx_idle_trampoline(void)
 {
-#ifdef CONFIG_SCHED_INSTRUMENTATION
+#  ifdef CONFIG_SCHED_INSTRUMENTATION
   FAR struct tcb_s *tcb = this_task();
 
   /* Announce that the IDLE task has started */
 
   sched_note_start(tcb);
-#endif
+#  endif
 
   /* Then transfer control to the IDLE task */
 
@@ -117,7 +117,7 @@ int nx_idle_task(int argc, FAR char *argv[])
 
   sinfo("CPU%d: Beginning Idle Loop\n", this_cpu());
 
-  for (; ; )
+  for (;;)
     {
       /* Perform garbage collection (if it is not being done by the worker
        * thread).  This cleans-up memory de-allocations that were queued
@@ -125,7 +125,7 @@ int nx_idle_task(int argc, FAR char *argv[])
        * example, if the memory was freed from an interrupt handler).
        */
 
-#ifndef CONFIG_SCHED_WORKQUEUE
+#  ifndef CONFIG_SCHED_WORKQUEUE
       /* We must have exclusive access to the memory manager to do this
        * BUT the idle task cannot wait on a semaphore.  So we only do
        * the cleanup now if we can get the semaphore -- this should be
@@ -143,7 +143,7 @@ int nx_idle_task(int argc, FAR char *argv[])
           sched_garbage_collection();
           kmm_givesemaphore();
         }
-#endif
+#  endif
 
       /* Perform any processor-specific idle state operations */
 

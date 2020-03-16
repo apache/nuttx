@@ -84,7 +84,7 @@
 int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
 {
   FAR struct tcb_s *tcb;
-  int ret;
+  int               ret;
 
   DEBUGASSERT(cpusetsize == sizeof(cpu_set_t) && mask != NULL);
 
@@ -109,7 +109,7 @@ int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask)
       /* Return the affinity mask from the TCB. */
 
       *mask = tcb->affinity;
-      ret = OK;
+      ret   = OK;
     }
 
   sched_unlock();

@@ -81,9 +81,9 @@ int pselect(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
             FAR const sigset_t *sigmask)
 {
   FAR struct tcb_s *rtcb = this_task();
-  sigset_t saved_sigprocmask;
-  irqstate_t flags;
-  int ret = ERROR;
+  sigset_t          saved_sigprocmask;
+  irqstate_t        flags;
+  int               ret = ERROR;
 
   /* Several operations must be performed below:  We must determine if any
    * signal is pending and, if not, wait for the signal.  Since signals can
@@ -122,7 +122,7 @@ int pselect(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
   else
     {
       FAR struct timeval *timeval = NULL;
-      struct timeval timeval_buf;
+      struct timeval      timeval_buf;
 
       /* And call select to do the real work */
 
@@ -130,7 +130,7 @@ int pselect(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
         {
           timeval_buf.tv_sec  = timeout->tv_sec;
           timeval_buf.tv_usec = timeout->tv_nsec / 1000;
-          timeval = &timeval_buf;
+          timeval             = &timeval_buf;
         }
 
       ret = select(nfds, readfds, writefds, exceptfds, timeval);

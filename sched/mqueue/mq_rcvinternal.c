@@ -119,13 +119,13 @@ int nxmq_verify_receive(mqd_t mqdes, FAR char *msg, size_t msglen)
 
 int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
 {
-  FAR struct tcb_s *rtcb;
+  FAR struct tcb_s *         rtcb;
   FAR struct mqueue_inode_s *msgq;
-  FAR struct mqueue_msg_s *newmsg;
-  int ret;
+  FAR struct mqueue_msg_s *  newmsg;
+  int                        ret;
 
   DEBUGASSERT(rcvmsg != NULL);
-  *rcvmsg = NULL;  /* Assume failure */
+  *rcvmsg = NULL; /* Assume failure */
 
 #ifdef CONFIG_CANCELLATION_POINTS
   /* nxmq_wait_receive() is not a cancellation point, but it may be called
@@ -148,8 +148,7 @@ int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
 
   /* Get the message from the head of the queue */
 
-  while ((newmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&msgq->msglist))
-          == NULL)
+  while ((newmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&msgq->msglist)) == NULL)
     {
       /* The queue is empty!  Should we block until there the above condition
        * has been satisfied?
@@ -169,8 +168,8 @@ int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
            * conditions.
            */
 
-          saved_errno    = rtcb->pterrno;
-          rtcb->pterrno  = OK;
+          saved_errno   = rtcb->pterrno;
+          rtcb->pterrno = OK;
 
           /* Make sure this is not the idle task, descheduling that
            * isn't going to end well.
@@ -185,8 +184,8 @@ int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
            * errno value (should be either EINTR or ETIMEDOUT).
            */
 
-          ret            = rtcb->pterrno;
-          rtcb->pterrno  = saved_errno;
+          ret           = rtcb->pterrno;
+          rtcb->pterrno = saved_errno;
 
           if (ret != OK)
             {
@@ -248,10 +247,10 @@ int nxmq_wait_receive(mqd_t mqdes, FAR struct mqueue_msg_s **rcvmsg)
 ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
                         FAR char *ubuffer, unsigned int *prio)
 {
-  FAR struct tcb_s *btcb;
-  irqstate_t flags;
+  FAR struct tcb_s *         btcb;
+  irqstate_t                 flags;
   FAR struct mqueue_inode_s *msgq;
-  ssize_t rcvmsglen;
+  ssize_t                    rcvmsglen;
 
   /* Get the length of the message (also the return value) */
 
@@ -286,7 +285,8 @@ ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
       flags = enter_critical_section();
       for (btcb = (FAR struct tcb_s *)g_waitingformqnotfull.head;
            btcb && btcb->msgwaitq != msgq;
-           btcb = btcb->flink);
+           btcb = btcb->flink)
+        ;
 
       /* If one was found, unblock it.  NOTE:  There is a race
        * condition here:  the queue might be full again by the

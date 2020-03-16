@@ -73,7 +73,7 @@ static FAR struct tcb_s *nxsched_nexttcb(FAR struct tcb_s *tcb)
 {
   FAR struct tcb_s *nxttcb = (FAR struct tcb_s *)tcb->flink;
   FAR struct tcb_s *rtrtcb;
-  int cpu = this_cpu();
+  int               cpu = this_cpu();
 
   /* Which task should run next?  It will be either the next tcb in the
    * assigned task list (nxttcb) or a TCB in the g_readytorun list.  We can
@@ -90,7 +90,8 @@ static FAR struct tcb_s *nxsched_nexttcb(FAR struct tcb_s *tcb)
 
       for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
            rtrtcb != NULL && !CPU_ISSET(cpu, &rtrtcb->affinity);
-           rtrtcb = (FAR struct tcb_s *)rtrtcb->flink);
+           rtrtcb = (FAR struct tcb_s *)rtrtcb->flink)
+        ;
 
       /* Return the TCB from the readyt-to-run list if it is the next
        * highest priority task.
@@ -135,7 +136,7 @@ static FAR struct tcb_s *nxsched_nexttcb(FAR struct tcb_s *tcb)
  ****************************************************************************/
 
 static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
-                                               int sched_priority)
+                                               int               sched_priority)
 {
   FAR struct tcb_s *nxttcb;
 
@@ -189,7 +190,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
  ****************************************************************************/
 
 static void nxsched_readytorun_setpriority(FAR struct tcb_s *tcb,
-                                           int sched_priority)
+                                           int               sched_priority)
 {
   FAR struct tcb_s *rtcb;
 
@@ -279,10 +280,10 @@ static void nxsched_readytorun_setpriority(FAR struct tcb_s *tcb,
  ****************************************************************************/
 
 static inline void nxsched_blocked_setpriority(FAR struct tcb_s *tcb,
-                                               int sched_priority)
+                                               int               sched_priority)
 {
   FAR dq_queue_t *tasklist;
-  tstate_t task_state = tcb->task_state;
+  tstate_t        task_state = tcb->task_state;
 
   /* CASE 3a. The task resides in a prioritized list. */
 
@@ -363,7 +364,7 @@ int nxsched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
 
   switch (tcb->task_state)
     {
-      /* CASE 1. The task is running and a context switch may be caused by
+        /* CASE 1. The task is running and a context switch may be caused by
        * the re-prioritization
        */
 
@@ -371,7 +372,7 @@ int nxsched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
         nxsched_running_setpriority(tcb, sched_priority);
         break;
 
-      /* CASE 2. The task is ready-to-run (but not running) and a context
+        /* CASE 2. The task is ready-to-run (but not running) and a context
        * switch may be caused by the re-prioritization
        */
 
@@ -382,7 +383,7 @@ int nxsched_setpriority(FAR struct tcb_s *tcb, int sched_priority)
         nxsched_readytorun_setpriority(tcb, sched_priority);
         break;
 
-      /* CASE 3. The task is not in the ready to run list.  Changing its
+        /* CASE 3. The task is not in the ready to run list.  Changing its
        * Priority cannot effect the currently executing task.
        */
 

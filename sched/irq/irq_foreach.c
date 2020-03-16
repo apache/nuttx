@@ -54,11 +54,11 @@
 
 /* This is the number of entries in the interrupt vector table */
 
-#ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
-#  define TAB_SIZE CONFIG_ARCH_NUSER_INTERRUPTS
-#else
-#  define TAB_SIZE NR_IRQS
-#endif
+#  ifdef CONFIG_ARCH_MINIMAL_VECTORTABLE
+#    define TAB_SIZE CONFIG_ARCH_NUSER_INTERRUPTS
+#  else
+#    define TAB_SIZE NR_IRQS
+#  endif
 
 /****************************************************************************
  * Public Functions

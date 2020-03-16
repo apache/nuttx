@@ -41,11 +41,11 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <stdbool.h>
-#include <string.h>
-#include <sched.h>
+#  include <stdbool.h>
+#  include <string.h>
+#  include <sched.h>
 
-#include "environ/environ.h"
+#  include "environ/environ.h"
 
 /****************************************************************************
  * Private Functions
@@ -111,7 +111,8 @@ FAR char *env_findvar(FAR struct task_group_s *group, FAR const char *pname)
   end = &group->tg_envp[group->tg_envsize];
   for (ptr = group->tg_envp;
        ptr < end && !env_cmpname(pname, ptr);
-       ptr += (strlen(ptr) + 1));
+       ptr += (strlen(ptr) + 1))
+    ;
 
   /* Check for success */
 

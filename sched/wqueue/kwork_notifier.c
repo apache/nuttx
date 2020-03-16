@@ -57,15 +57,15 @@ struct work_notifier_entry_s
    * struct dq_entry_s.
    */
 
-  struct work_s work;           /* Used for scheduling the work */
+  struct work_s work; /* Used for scheduling the work */
 
   /* User notification information */
 
-  struct work_notifier_s info;  /* The notification info */
+  struct work_notifier_s info; /* The notification info */
 
   /* Additional payload needed to manage the notification */
 
-  int16_t key;                  /* Unique ID for the notification */
+  int16_t key; /* Unique ID for the notification */
 };
 
 /****************************************************************************
@@ -116,15 +116,15 @@ static FAR struct work_notifier_entry_s *work_notifier_find(int16_t key)
 
   /* Find the entry matching this key in the g_notifier_pending list. */
 
-  for (entry  = dq_peek(&g_notifier_pending);
+  for (entry = dq_peek(&g_notifier_pending);
        entry != NULL;
-       entry  = dq_next(entry))
+       entry = dq_next(entry))
     {
       notifier = (FAR struct work_notifier_entry_s *)entry;
 
       /* Is this the one we were looking for? */
 
-      if (notifier->key ==  key)
+      if (notifier->key == key)
         {
           /* Yes.. return a reference to it */
 
@@ -174,7 +174,7 @@ static int16_t work_notifier_key(void)
 static void work_notifier_worker(FAR void *arg)
 {
   FAR struct work_notifier_entry_s *notifier =
-    (FAR struct work_notifier_entry_s *)arg;
+  (FAR struct work_notifier_entry_s *)arg;
 
   /* Forward to the real worker */
 
@@ -213,7 +213,7 @@ static void work_notifier_worker(FAR void *arg)
 int work_notifier_setup(FAR struct work_notifier_s *info)
 {
   FAR struct work_notifier_entry_s *notifier;
-  int ret;
+  int                               ret;
 
   DEBUGASSERT(info != NULL && info->worker != NULL);
   DEBUGASSERT(info->qid == HPWORK || info->qid == LPWORK);
@@ -229,7 +229,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
   /* Try to get the entry from the free list */
 
   notifier = (FAR struct work_notifier_entry_s *)
-    dq_remfirst(&g_notifier_free);
+  dq_remfirst(&g_notifier_free);
 
   if (notifier == NULL)
     {
@@ -294,7 +294,7 @@ int work_notifier_setup(FAR struct work_notifier_s *info)
 int work_notifier_teardown(int key)
 {
   FAR struct work_notifier_entry_s *notifier;
-  int ret;
+  int                               ret;
 
   DEBUGASSERT(key > 0 && key <= INT16_MAX);
 
@@ -355,7 +355,7 @@ int work_notifier_teardown(int key)
  ****************************************************************************/
 
 void work_notifier_signal(enum work_evtype_e evtype,
-                          FAR void *qualifier)
+                          FAR void *         qualifier)
 {
   FAR struct work_notifier_entry_s *notifier;
   FAR dq_entry_t *entry;

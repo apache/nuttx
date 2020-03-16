@@ -67,7 +67,7 @@
  ****************************************************************************/
 
 FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
-                                        pid_t pid)
+                                        pid_t                    pid)
 {
   FAR struct join_s *pjoin;
 
@@ -77,7 +77,8 @@ FAR struct join_s *pthread_findjoininfo(FAR struct task_group_s *group,
 
   for (pjoin = group->tg_joinhead;
        (pjoin && (pid_t)pjoin->thread != pid);
-       pjoin = pjoin->next);
+       pjoin = pjoin->next)
+    ;
 
   /* and return it */
 

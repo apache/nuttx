@@ -77,9 +77,9 @@
 
 int group_exitinfo(pid_t pid, FAR struct binary_s *bininfo)
 {
-  FAR struct tcb_s *tcb;
+  FAR struct tcb_s *       tcb;
   FAR struct task_group_s *group;
-  irqstate_t flags;
+  irqstate_t               flags;
 
   DEBUGASSERT(bininfo != NULL);
   flags = spin_lock_irqsave();

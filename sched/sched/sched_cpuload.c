@@ -57,30 +57,30 @@
  * of the sampling in ticks per second for the selected timer.
  */
 
-#ifdef CONFIG_SCHED_CPULOAD_EXTCLK
-#  ifndef CONFIG_SCHED_CPULOAD_TICKSPERSEC
-#    error CONFIG_SCHED_CPULOAD_TICKSPERSEC is not defined
+#  ifdef CONFIG_SCHED_CPULOAD_EXTCLK
+#    ifndef CONFIG_SCHED_CPULOAD_TICKSPERSEC
+#      error CONFIG_SCHED_CPULOAD_TICKSPERSEC is not defined
+#    endif
+#    define CPULOAD_TICKSPERSEC CONFIG_SCHED_CPULOAD_TICKSPERSEC
+#  else
+#    define CPULOAD_TICKSPERSEC CLOCKS_PER_SEC
 #  endif
-#  define CPULOAD_TICKSPERSEC CONFIG_SCHED_CPULOAD_TICKSPERSEC
-#else
-#  define CPULOAD_TICKSPERSEC CLOCKS_PER_SEC
-#endif
 
 /* When g_cpuload_total exceeds the following time constant, the load and
  * the counts will be scaled back by two.  In the CONFIG_SMP, g_cpuload_total
  * will be incremented multiple times per tick.
  */
 
-#ifdef CONFIG_SMP
-#  define CPULOAD_TIMECONSTANT \
-     (CONFIG_SMP_NCPUS * \
-      CONFIG_SCHED_CPULOAD_TIMECONSTANT * \
-      CPULOAD_TICKSPERSEC)
-#else
-#  define CPULOAD_TIMECONSTANT \
-     (CONFIG_SCHED_CPULOAD_TIMECONSTANT * \
-      CPULOAD_TICKSPERSEC)
-#endif
+#  ifdef CONFIG_SMP
+#    define CPULOAD_TIMECONSTANT \
+      (CONFIG_SMP_NCPUS * \
+       CONFIG_SCHED_CPULOAD_TIMECONSTANT * \
+       CPULOAD_TICKSPERSEC)
+#  else
+#    define CPULOAD_TIMECONSTANT \
+      (CONFIG_SCHED_CPULOAD_TIMECONSTANT * \
+       CPULOAD_TICKSPERSEC)
+#  endif
 
 /****************************************************************************
  * Private Data
@@ -125,8 +125,8 @@ volatile uint32_t g_cpuload_total;
 
 static inline void nxsched_cpu_process_cpuload(int cpu)
 {
-  FAR struct tcb_s *rtcb  = current_task(cpu);
-  int hash_index;
+  FAR struct tcb_s *rtcb = current_task(cpu);
+  int               hash_index;
 
   /* Increment the count on the currently executing thread
    *
@@ -176,7 +176,7 @@ void weak_function nxsched_process_cpuload(void)
 {
   int i;
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   irqstate_t flags;
 
   /* Perform scheduler operations on all CPUs. */
@@ -187,12 +187,12 @@ void weak_function nxsched_process_cpuload(void)
       nxsched_cpu_process_cpuload(i);
     }
 
-#else
+#  else
   /* Perform scheduler operations on the single CPU. */
 
   nxsched_cpu_process_cpuload(0);
 
-#endif
+#  endif
 
   /* If the accumulated tick value exceed a time constant, then shift the
    * accumulators and recalculate the total.
@@ -217,9 +217,9 @@ void weak_function nxsched_process_cpuload(void)
       g_cpuload_total = total;
     }
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   leave_critical_section(flags);
-#endif
+#  endif
 }
 
 /****************************************************************************
@@ -245,8 +245,8 @@ void weak_function nxsched_process_cpuload(void)
 int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
 {
   irqstate_t flags;
-  int hash_index = PIDHASH(pid);
-  int ret = -ESRCH;
+  int        hash_index = PIDHASH(pid);
+  int        ret        = -ESRCH;
 
   DEBUGASSERT(cpuload);
 
@@ -274,7 +274,7 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
     {
       cpuload->total  = g_cpuload_total;
       cpuload->active = g_pidhash[hash_index].ticks;
-      ret = OK;
+      ret             = OK;
     }
 
   leave_critical_section(flags);

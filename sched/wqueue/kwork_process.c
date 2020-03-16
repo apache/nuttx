@@ -47,21 +47,21 @@
  * delays if the time is changed.
  */
 
-#ifdef CONFIG_CLOCK_MONOTONIC
-#  define WORK_CLOCK CLOCK_MONOTONIC
-#else
-#  define WORK_CLOCK CLOCK_REALTIME
-#endif
+#  ifdef CONFIG_CLOCK_MONOTONIC
+#    define WORK_CLOCK CLOCK_MONOTONIC
+#  else
+#    define WORK_CLOCK CLOCK_REALTIME
+#  endif
 
-#ifdef CONFIG_SYSTEM_TIME64
-#  define WORK_DELAY_MAX UINT64_MAX
-#else
-#  define WORK_DELAY_MAX UINT32_MAX
-#endif
+#  ifdef CONFIG_SYSTEM_TIME64
+#    define WORK_DELAY_MAX UINT64_MAX
+#  else
+#    define WORK_DELAY_MAX UINT32_MAX
+#  endif
 
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
+#  ifndef MIN
+#    define MIN(a, b) ((a) < (b) ? (a) : (b))
+#  endif
 
 /****************************************************************************
  * Public Functions
@@ -87,14 +87,14 @@
 void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
 {
   volatile FAR struct work_s *work;
-  worker_t  worker;
-  irqstate_t flags;
-  FAR void *arg;
-  clock_t elapsed;
-  clock_t remaining;
-  clock_t stick;
-  clock_t ctick;
-  clock_t next;
+  worker_t                    worker;
+  irqstate_t                  flags;
+  FAR void *                  arg;
+  clock_t                     elapsed;
+  clock_t                     remaining;
+  clock_t                     stick;
+  clock_t                     ctick;
+  clock_t                     next;
 
   /* Then process queued work.  We need to keep interrupts disabled while
    * we process items in the work list.

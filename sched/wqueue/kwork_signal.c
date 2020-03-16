@@ -57,27 +57,27 @@
 int work_signal(int qid)
 {
   FAR struct kwork_wqueue_s *work;
-  int threads;
-  int i;
+  int                        threads;
+  int                        i;
 
   /* Get the process ID of the worker thread */
 
-#ifdef CONFIG_SCHED_HPWORK
+#  ifdef CONFIG_SCHED_HPWORK
   if (qid == HPWORK)
     {
-      work = (FAR struct kwork_wqueue_s *)&g_hpwork;
+      work    = (FAR struct kwork_wqueue_s *)&g_hpwork;
       threads = CONFIG_SCHED_HPNTHREADS;
     }
   else
-#endif
-#ifdef CONFIG_SCHED_LPWORK
+#  endif
+#  ifdef CONFIG_SCHED_LPWORK
   if (qid == LPWORK)
     {
-      work = (FAR struct kwork_wqueue_s *)&g_lpwork;
+      work    = (FAR struct kwork_wqueue_s *)&g_lpwork;
       threads = CONFIG_SCHED_LPNTHREADS;
     }
   else
-#endif
+#  endif
     {
       return -EINVAL;
     }

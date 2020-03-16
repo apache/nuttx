@@ -88,8 +88,8 @@ int nxsched_setaffinity(pid_t pid, size_t cpusetsize,
                         FAR const cpu_set_t *mask)
 {
   FAR struct tcb_s *tcb;
-  irqstate_t flags;
-  int ret = OK;
+  irqstate_t        flags;
+  int               ret = OK;
 
   DEBUGASSERT(cpusetsize == sizeof(cpu_set_t) && mask != NULL);
 

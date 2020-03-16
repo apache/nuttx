@@ -68,8 +68,8 @@
 int clock_gettime(clockid_t clock_id, struct timespec *tp)
 {
   struct timespec ts;
-  uint32_t carry;
-  int ret = OK;
+  uint32_t        carry;
+  int             ret = OK;
 
   sinfo("clock_id=%d\n", clock_id);
   DEBUGASSERT(tp != NULL);
@@ -127,7 +127,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
           flags = spin_lock_irqsave();
 
-          ts.tv_sec  += (uint32_t)g_basetime.tv_sec;
+          ts.tv_sec += (uint32_t)g_basetime.tv_sec;
           ts.tv_nsec += (uint32_t)g_basetime.tv_nsec;
 
           spin_unlock_irqrestore(flags);
@@ -136,8 +136,8 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
           if (ts.tv_nsec >= NSEC_PER_SEC)
             {
-              carry       = ts.tv_nsec / NSEC_PER_SEC;
-              ts.tv_sec  += carry;
+              carry = ts.tv_nsec / NSEC_PER_SEC;
+              ts.tv_sec += carry;
               ts.tv_nsec -= (carry * NSEC_PER_SEC);
             }
 

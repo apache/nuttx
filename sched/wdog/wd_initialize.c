@@ -96,7 +96,7 @@ static struct wdog_s g_wdpool[CONFIG_PREALLOC_WDOGS];
 void wd_initialize(void)
 {
   FAR struct wdog_s *wdog = g_wdpool;
-  int i;
+  int                i;
 
   /* Initialize watchdog lists */
 

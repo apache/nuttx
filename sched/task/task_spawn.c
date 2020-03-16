@@ -100,12 +100,12 @@
 
 static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
                              main_t entry, FAR const posix_spawnattr_t *attr,
-                             FAR char * const *argv)
+                             FAR char *const *argv)
 {
   size_t stacksize;
-  int priority;
-  int pid;
-  int ret = OK;
+  int    priority;
+  int    pid;
+  int    ret = OK;
 
   /* Disable pre-emption so that we can modify the task parameters after
    * we start the new task; the new task will not actually begin execution
@@ -227,7 +227,7 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
                               g_spawn_parms.u.task.entry, g_spawn_parms.attr,
                               g_spawn_parms.argv);
 
-#ifdef CONFIG_SCHED_HAVE_PARENT
+#  ifdef CONFIG_SCHED_HAVE_PARENT
       if (ret == OK)
         {
           /* Change of the parent of the task we just spawned to our parent.
@@ -240,7 +240,7 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
               serr("ERROR: task_reparent() failed: %d\n", tmp);
             }
         }
-#endif
+#  endif
     }
 
   /* Post the semaphore to inform the parent task that we have completed
@@ -248,9 +248,9 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
    */
 
   g_spawn_parms.result = ret;
-#ifndef CONFIG_SCHED_WAITPID
+#  ifndef CONFIG_SCHED_WAITPID
   spawn_semgive(&g_spawn_execsem);
-#endif
+#  endif
   return OK;
 }
 
@@ -329,10 +329,10 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
                FAR char *const argv[], FAR char *const envp[])
 {
   struct sched_param param;
-  pid_t proxy;
-#ifdef CONFIG_SCHED_WAITPID
+  pid_t              proxy;
+#  ifdef CONFIG_SCHED_WAITPID
   int status;
-#endif
+#  endif
   int ret;
 
   sinfo("pid=%p name=%s entry=%p file_actions=%p attr=%p argv=%p\n",
@@ -384,7 +384,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
       return -ret;
     }
 
-#ifdef CONFIG_SCHED_WAITPID
+#  ifdef CONFIG_SCHED_WAITPID
   /* Disable pre-emption so that the proxy does not run until waitpid
    * is called.  This is probably unnecessary since the nxtask_spawn_proxy
    * has the same priority as this thread; it should be schedule behind
@@ -394,7 +394,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
    */
 
   sched_lock();
-#endif
+#  endif
 
   /* Start the intermediary/proxy task at the same priority as the parent
    * task.
@@ -403,7 +403,7 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
   proxy = nxtask_create("nxtask_spawn_proxy", param.sched_priority,
                         CONFIG_POSIX_SPAWN_PROXY_STACKSIZE,
                         (main_t)nxtask_spawn_proxy,
-                        (FAR char * const *)NULL);
+                        (FAR char *const *)NULL);
   if (proxy < 0)
     {
       ret = -proxy;
@@ -411,27 +411,27 @@ int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
       goto errout_with_lock;
     }
 
-  /* Wait for the proxy to complete its job */
+    /* Wait for the proxy to complete its job */
 
-#ifdef CONFIG_SCHED_WAITPID
+#  ifdef CONFIG_SCHED_WAITPID
   ret = waitpid(proxy, &status, 0);
   if (ret < 0)
     {
       serr("ERROR: waitpid() failed: %d\n", errno);
       goto errout_with_lock;
     }
-#else
+#  else
   spawn_semtake(&g_spawn_execsem);
-#endif
+#  endif
 
   /* Get the result and relinquish our access to the parameter structure */
 
   ret = g_spawn_parms.result;
 
 errout_with_lock:
-#ifdef CONFIG_SCHED_WAITPID
+#  ifdef CONFIG_SCHED_WAITPID
   sched_unlock();
-#endif
+#  endif
   spawn_semgive(&g_spawn_parmsem);
   return ret;
 }
@@ -458,7 +458,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_PROTECTED
+#  ifdef CONFIG_BUILD_PROTECTED
 int nx_task_spawn(FAR const struct spawn_syscall_parms_s *parms)
 {
   DEBUGASSERT(parms != NULL);
@@ -466,6 +466,6 @@ int nx_task_spawn(FAR const struct spawn_syscall_parms_s *parms)
                     parms->file_actions, parms->attr,
                     parms->argv, parms->envp);
 }
-#endif
+#  endif
 
 #endif /* CONFIG_BUILD_KERNEL */

@@ -41,13 +41,13 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <stdbool.h>
-#include <string.h>
-#include <sched.h>
+#  include <stdbool.h>
+#  include <string.h>
+#  include <sched.h>
 
-#include <nuttx/environ.h>
+#  include <nuttx/environ.h>
 
-#include "environ/environ.h"
+#  include "environ/environ.h"
 
 /****************************************************************************
  * Public Functions
@@ -79,7 +79,7 @@ int env_foreach(FAR struct task_group_s *group, env_foreach_t cb, FAR void *arg)
 {
   FAR char *ptr;
   FAR char *end;
-  int ret = OK;
+  int       ret = OK;
 
   /* Verify input parameters */
 

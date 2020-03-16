@@ -61,8 +61,8 @@
 
 FAR sigq_t *nxsig_alloc_pendingsigaction(void)
 {
-  FAR sigq_t    *sigq;
-  irqstate_t flags;
+  FAR sigq_t *sigq;
+  irqstate_t  flags;
 
   /* Check if we were called from an interrupt handler. */
 
@@ -91,7 +91,7 @@ FAR sigq_t *nxsig_alloc_pendingsigaction(void)
       /* Try to get the pending signal action structure from the free list */
 
       flags = enter_critical_section();
-      sigq = (FAR sigq_t *)sq_remfirst(&g_sigpendingaction);
+      sigq  = (FAR sigq_t *)sq_remfirst(&g_sigpendingaction);
       leave_critical_section(flags);
 
       /* Check if we got one. */
@@ -102,7 +102,7 @@ FAR sigq_t *nxsig_alloc_pendingsigaction(void)
 
           if (!sigq)
             {
-              sigq = (FAR sigq_t *)kmm_malloc((sizeof (sigq_t)));
+              sigq = (FAR sigq_t *)kmm_malloc((sizeof(sigq_t)));
             }
 
           /* Check if we got an allocated message */

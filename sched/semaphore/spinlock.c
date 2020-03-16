@@ -80,22 +80,22 @@
 
 void spin_lock(FAR volatile spinlock_t *lock)
 {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we are waiting for a spinlock */
 
   sched_note_spinlock(this_task(), lock);
-#endif
+#  endif
 
   while (up_testset(lock) == SP_LOCKED)
     {
       SP_DSB();
     }
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we have the spinlock */
 
   sched_note_spinlocked(this_task(), lock);
-#endif
+#  endif
   SP_DMB();
 }
 
@@ -152,28 +152,28 @@ void spin_lock_wo_note(FAR volatile spinlock_t *lock)
 
 spinlock_t spin_trylock(FAR volatile spinlock_t *lock)
 {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we are waiting for a spinlock */
 
   sched_note_spinlock(this_task(), lock);
-#endif
+#  endif
 
   if (up_testset(lock) == SP_LOCKED)
     {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
       /* Notify that we abort for a spinlock */
 
       sched_note_spinabort(this_task(), &lock);
-#endif
+#  endif
       SP_DSB();
       return SP_LOCKED;
     }
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we have the spinlock */
 
   sched_note_spinlocked(this_task(), lock);
-#endif
+#  endif
   SP_DMB();
   return SP_UNLOCKED;
 }
@@ -229,20 +229,20 @@ spinlock_t spin_trylock_wo_note(FAR volatile spinlock_t *lock)
  *
  ****************************************************************************/
 
-#ifdef __SP_UNLOCK_FUNCTION
+#  ifdef __SP_UNLOCK_FUNCTION
 void spin_unlock(FAR volatile spinlock_t *lock)
 {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   /* Notify that we are unlocking the spinlock */
 
   sched_note_spinunlock(this_task(), lock);
-#endif
+#    endif
 
   SP_DMB();
   *lock = SP_UNLOCKED;
   SP_DSB();
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name: spin_unlock_wo_note
@@ -288,14 +288,14 @@ void spin_unlock_wo_note(FAR volatile spinlock_t *lock)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
 void spin_setbit(FAR volatile cpu_set_t *set, unsigned int cpu,
                  FAR volatile spinlock_t *setlock,
                  FAR volatile spinlock_t *orlock)
 {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   cpu_set_t prev;
-#endif
+#    endif
   irqstate_t flags;
 
   /* Disable local interrupts to prevent being re-entered from an interrupt
@@ -310,27 +310,27 @@ void spin_setbit(FAR volatile cpu_set_t *set, unsigned int cpu,
 
   /* Then set the bit and mark the 'orlock' as locked */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-  prev    = *set;
-#endif
-  *set   |= (1 << cpu);
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  prev = *set;
+#    endif
+  *set |= (1 << cpu);
   *orlock = SP_LOCKED;
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   if (prev == 0)
     {
       /* Notify that we have locked the spinlock */
 
       sched_note_spinlocked(this_task(), orlock);
     }
-#endif
+#    endif
 
   /* Release the 'setlock' and restore local interrupts */
 
   spin_unlock(setlock);
   up_irq_restore(flags);
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name: spin_clrbit
@@ -349,14 +349,14 @@ void spin_setbit(FAR volatile cpu_set_t *set, unsigned int cpu,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
 void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
                  FAR volatile spinlock_t *setlock,
                  FAR volatile spinlock_t *orlock)
 {
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   cpu_set_t prev;
-#endif
+#    endif
   irqstate_t flags;
 
   /* Disable local interrupts to prevent being re-entered from an interrupt
@@ -373,26 +373,26 @@ void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
    * upon the resulting state of the CPU set.
    */
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-  prev    = *set;
-#endif
-  *set   &= ~(1 << cpu);
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+  prev = *set;
+#    endif
+  *set &= ~(1 << cpu);
   *orlock = (*set != 0) ? SP_LOCKED : SP_UNLOCKED;
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#    ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   if (prev != 0 && *set == 0)
     {
       /* Notify that we have unlocked the spinlock */
 
       sched_note_spinunlock(this_task(), orlock);
     }
-#endif
+#    endif
 
   /* Release the 'setlock' and restore local interrupts */
 
   spin_unlock(setlock);
   up_irq_restore(flags);
 }
-#endif
+#  endif
 
 #endif /* CONFIG_SPINLOCK */

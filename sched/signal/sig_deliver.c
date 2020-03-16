@@ -76,7 +76,7 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
 
   /* Loop while there are signals to be delivered */
 
-  for (; ; )
+  for (;;)
     {
       /* Test if this task is already handling a signal (we don't permit
        * nested signals on the same thread).
@@ -93,7 +93,7 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
 
       /* Remove the signal structure from the head of the sigpendactionq. */
 
-      sigq  = (FAR sigq_t *)sq_remfirst(&stcb->sigpendactionq);
+      sigq = (FAR sigq_t *)sq_remfirst(&stcb->sigpendactionq);
       if (sigq == NULL)
         {
           /* All queued signal actions have been dispatched */
@@ -123,7 +123,7 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
        * was reawakened by a signal must be retained.
        */
 
-      saved_errno       = stcb->pterrno;
+      saved_errno = stcb->pterrno;
 
       /* Save a copy of the old sigprocmask and install the new
        * (temporary) sigprocmask.  The new sigprocmask is the union
@@ -131,9 +131,9 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
        * delivered plus the signal being delivered.
        */
 
-      savesigprocmask   = stcb->sigprocmask;
-      newsigprocmask    = savesigprocmask | sigq->mask |
-                          SIGNO2SET(sigq->info.si_signo);
+      savesigprocmask = stcb->sigprocmask;
+      newsigprocmask  = savesigprocmask | sigq->mask |
+                       SIGNO2SET(sigq->info.si_signo);
       stcb->sigprocmask = newsigprocmask;
 
 #if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
@@ -142,7 +142,7 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
        * have to switch to user-mode before calling the task.
        */
 
-#ifdef CONFIG_SIG_DEFAULT
+#  ifdef CONFIG_SIG_DEFAULT
       /* The default signal action handlers, however always reside in the
        * kernel address space, regardless of configuration.
        */
@@ -156,7 +156,7 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
                                      NULL);
         }
       else
-#endif
+#  endif
       if ((stcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
         {
           siginfo_t info;
@@ -189,12 +189,12 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
 
       /* Indicate that a signal has been delivered */
 
-      flags             = enter_critical_section();
-      stcb->flags       &= ~TCB_FLAG_SIGNAL_ACTION;
+      flags = enter_critical_section();
+      stcb->flags &= ~TCB_FLAG_SIGNAL_ACTION;
 
       /* Restore the original errno value and sigprocmask. */
 
-      stcb->pterrno     = saved_errno;
+      stcb->pterrno = saved_errno;
 
       /* What if the signal handler changed the sigprocmask?  Try to retain
        * any such changes here.

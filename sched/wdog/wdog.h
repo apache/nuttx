@@ -60,11 +60,10 @@
  ****************************************************************************/
 
 #ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
+#  define EXTERN extern "C"
+extern "C" {
 #else
-#define EXTERN extern
+#  define EXTERN extern
 #endif
 
 /* The g_wdfreelist data structure is a singly linked list of watchdogs

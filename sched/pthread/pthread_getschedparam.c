@@ -120,7 +120,7 @@ int pthread_getschedparam(pthread_t thread, FAR int *policy,
           else
             {
               *policy = ret;
-              ret = OK;
+              ret     = OK;
             }
         }
     }

@@ -72,39 +72,39 @@
 
 void sched_resume_scheduler(FAR struct tcb_s *tcb)
 {
-#if CONFIG_RR_INTERVAL > 0
-#ifdef CONFIG_SCHED_SPORADIC
+#  if CONFIG_RR_INTERVAL > 0
+#    ifdef CONFIG_SCHED_SPORADIC
   if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
-#endif
+#    endif
     {
       /* Reset the task's timeslice. */
 
       tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
     }
-#endif
+#  endif
 
-#ifdef CONFIG_SCHED_SPORADIC
-#if CONFIG_RR_INTERVAL > 0
+#  ifdef CONFIG_SCHED_SPORADIC
+#    if CONFIG_RR_INTERVAL > 0
   else
-#endif
+#    endif
   if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
       /* Reset the replenishment cycle if it is appropriate to do so */
 
       DEBUGVERIFY(sched_sporadic_resume(tcb));
     }
-#endif
+#  endif
 
-  /* Indicate the task has been resumed */
+    /* Indicate the task has been resumed */
 
-#ifdef CONFIG_SCHED_CRITMONITOR
+#  ifdef CONFIG_SCHED_CRITMONITOR
   sched_critmon_resume(tcb);
-#endif
-#ifdef CONFIG_SCHED_INSTRUMENTATION
+#  endif
+#  ifdef CONFIG_SCHED_INSTRUMENTATION
   sched_note_resume(tcb);
-#endif
+#  endif
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   /* NOTE: The following logic for adjusting global IRQ controls were
    * derived from sched_addreadytorun() and sched_removedreadytorun()
    * Here, we only handles clearing logic to defer unlocking IRQ lock
@@ -139,7 +139,7 @@ void sched_resume_scheduler(FAR struct tcb_s *tcb)
       spin_clrbit(&g_cpu_irqset, me, &g_cpu_irqsetlock,
                   &g_cpu_irqlock);
     }
-#endif /* CONFIG_SMP */
+#  endif /* CONFIG_SMP */
 }
 
 #endif /* CONFIG_RR_INTERVAL > 0 || CONFIG_SCHED_RESUMESCHEDULER */

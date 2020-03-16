@@ -85,9 +85,9 @@
 int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
 {
   FAR struct tcb_s *rtcb = this_task();
-  irqstate_t flags;
-  clock_t elapsed;
-  int ret;
+  irqstate_t        flags;
+  clock_t           elapsed;
+  int               ret;
 
   DEBUGASSERT(sem != NULL && up_interrupt_context() == false &&
               rtcb->waitdog == NULL);
@@ -216,4 +216,3 @@ int nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start,
   return ret;
 }
 #endif
-

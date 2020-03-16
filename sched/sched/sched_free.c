@@ -94,10 +94,10 @@ void sched_ufree(FAR void *address)
        */
 
       flags = enter_critical_section();
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+#  if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
+  defined(CONFIG_MM_KERNEL_HEAP)
       DEBUGASSERT(!kmm_heapmember(address));
-#endif
+#  endif
 
       /* Delay the deallocation until a more appropriate time. */
 

@@ -68,7 +68,7 @@
 ssize_t pthread_get_stacksize_np(pthread_t thread)
 {
   FAR struct pthread_tcb_s *tcb =
-    (FAR struct pthread_tcb_s *)sched_gettcb((pid_t)thread);
+  (FAR struct pthread_tcb_s *)sched_gettcb((pid_t)thread);
 
   if (tcb == NULL)
     {

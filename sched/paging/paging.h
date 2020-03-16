@@ -55,23 +55,23 @@
  * configuration items are omitted.
  */
 
-#ifndef CONFIG_PAGING_DEFPRIO
-#  define CONFIG_PAGING_DEFPRIO 50
-#endif
+#  ifndef CONFIG_PAGING_DEFPRIO
+#    define CONFIG_PAGING_DEFPRIO 50
+#  endif
 
-#ifndef CONFIG_PAGING_WORKPERIOD
-#  define CONFIG_PAGING_WORKPERIOD (500*1000) /* 1/2 second */
-#endif
+#  ifndef CONFIG_PAGING_WORKPERIOD
+#    define CONFIG_PAGING_WORKPERIOD (500 * 1000) /* 1/2 second */
+#  endif
 
-#ifndef CONFIG_PAGING_STACKSIZE
-#  define CONFIG_PAGING_STACKSIZE  CONFIG_IDLETHREAD_STACKSIZE
-#endif
+#  ifndef CONFIG_PAGING_STACKSIZE
+#    define CONFIG_PAGING_STACKSIZE CONFIG_IDLETHREAD_STACKSIZE
+#  endif
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifndef __ASSEMBLY
+#  ifndef __ASSEMBLY
 
 /* This is the task IDof the page fill worker thread.  This value was set in
  * nx_start when the page fill worker thread was started.
@@ -113,6 +113,6 @@ extern FAR struct tcb_s *g_pftcb;
 
 int pg_worker(int argc, char *argv[]);
 
-#endif /* __ASSEMBLY__ */
-#endif /* CONFIG_PAGING */
-#endif /* __SCHED_PAGING_PAGING_H */
+#  endif /* __ASSEMBLY__ */
+#endif   /* CONFIG_PAGING */
+#endif   /* __SCHED_PAGING_PAGING_H */

@@ -75,11 +75,11 @@ void nxtask_starthook(FAR struct task_tcb_s *tcb, starthook_t starthook,
    * task is started (or restarted).
    */
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#  ifndef CONFIG_DISABLE_PTHREAD
   DEBUGASSERT(tcb &&
               (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) !=
-               TCB_FLAG_TTYPE_PTHREAD);
-#endif
+              TCB_FLAG_TTYPE_PTHREAD);
+#  endif
 
   /* Set up the start hook */
 

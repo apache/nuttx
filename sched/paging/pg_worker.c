@@ -86,7 +86,7 @@ FAR struct tcb_s *g_pftcb;
  * Private Data
  ****************************************************************************/
 
-#ifndef CONFIG_PAGING_BLOCKINGFILL
+#  ifndef CONFIG_PAGING_BLOCKINGFILL
 
 /* When a page fill completes, the result of the fill is stored here.  The
  * value -EBUSY means that the page fill callback has not yet been received.
@@ -98,10 +98,10 @@ static int g_fillresult;
  * page fill failures.
  */
 
-#ifdef CONFIG_PAGING_TIMEOUT_TICKS
+#    ifdef CONFIG_PAGING_TIMEOUT_TICKS
 static clock_t g_starttime;
-#endif
-#endif
+#    endif
+#  endif
 
 /****************************************************************************
  * Private Functions
@@ -143,7 +143,7 @@ static clock_t g_starttime;
  *
  ****************************************************************************/
 
-#ifndef CONFIG_PAGING_BLOCKINGFILL
+#  ifndef CONFIG_PAGING_BLOCKINGFILL
 static void pg_callback(FAR struct tcb_s *tcb, int result)
 {
   /* Verify that g_pftcb is non-NULL */
@@ -194,7 +194,7 @@ static void pg_callback(FAR struct tcb_s *tcb, int result)
   pginfo("Signaling worker. PID: %d\n", g_pgworker);
   nxsig_kill(g_pgworker, SIGWORK);
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name: pg_dequeue
@@ -342,7 +342,7 @@ static inline bool pg_dequeue(void)
 static inline bool pg_startfill(void)
 {
   FAR void *vpage;
-  int result;
+  int       result;
 
   /* Remove the TCB at the head of the g_waitfor fill list and check if there
    * is any task waiting for a page fill. pg_dequeue will handle this (plus
@@ -367,7 +367,7 @@ static inline bool pg_startfill(void)
        * a blocking or a non-blocking call?
        */
 
-#ifdef CONFIG_PAGING_BLOCKINGFILL
+#  ifdef CONFIG_PAGING_BLOCKINGFILL
       /* If CONFIG_PAGING_BLOCKINGFILL is defined, then up_fillpage is blocking
        * call. In this case, up_fillpage() will accept only (1) a reference to
        * the TCB that requires the fill. Architecture-specific context information
@@ -379,7 +379,7 @@ static inline bool pg_startfill(void)
       pginfo("Call up_fillpage(%p)\n", g_pftcb);
       result = up_fillpage(g_pftcb, vpage);
       DEBUGASSERT(result == OK);
-#else
+#  else
       /* If CONFIG_PAGING_BLOCKINGFILL is defined, then up_fillpage is non-blocking
        * call. In this case up_fillpage() will accept an additional argument:  The
        * page fill worker thread will provide a callback function, pg_callback.
@@ -397,9 +397,9 @@ static inline bool pg_startfill(void)
        * timeouts.
        */
 
-#ifdef CONFIG_PAGING_TIMEOUT_TICKS
+#    ifdef CONFIG_PAGING_TIMEOUT_TICKS
       g_starttime = clock_systimer();
-#endif
+#    endif
 
       /* Return and wait to be signaled for the next event -- the fill completion
        * event. While the fill is in progress, other tasks may execute. If
@@ -412,7 +412,7 @@ static inline bool pg_startfill(void)
        * task must still be available to run.
        */
 
-#endif /* CONFIG_PAGING_BLOCKINGFILL */
+#  endif /* CONFIG_PAGING_BLOCKINGFILL */
 
       return true;
     }
@@ -448,7 +448,7 @@ static inline bool pg_startfill(void)
 static inline void pg_alldone(void)
 {
   FAR struct tcb_s *wtcb = this_task();
-  g_pftcb = NULL;
+  g_pftcb                = NULL;
   pginfo("New worker priority. %d->%d\n",
          wtcb->sched_priority, CONFIG_PAGING_DEFPRIO);
   nxsched_setpriority(wtcb, CONFIG_PAGING_DEFPRIO);
@@ -530,7 +530,7 @@ int pg_worker(int argc, char *argv[])
 
   pginfo("Started\n");
   up_irq_save();
-  for (; ; )
+  for (;;)
     {
       /* Wait awhile.  We will wait here until either the configurable timeout
        * elapses or until we are awakened by a signal (which terminates the
@@ -555,7 +555,7 @@ int pg_worker(int argc, char *argv[])
        * Interrupts are still disabled.
        */
 
-#ifndef CONFIG_PAGING_BLOCKINGFILL
+#  ifndef CONFIG_PAGING_BLOCKINGFILL
       /* For the non-blocking up_fillpage(), the page fill worker thread will detect
        * that the page fill is complete when it is awakened with g_pftcb non-NULL
        * and fill completion status from pg_callback.
@@ -598,18 +598,18 @@ int pg_worker(int argc, char *argv[])
                 }
             }
 
-          /* If a configurable timeout period expires with no page fill completion
+            /* If a configurable timeout period expires with no page fill completion
            * event, then declare a failure.
            */
 
-#ifdef CONFIG_PAGING_TIMEOUT_TICKS
+#    ifdef CONFIG_PAGING_TIMEOUT_TICKS
           else
             {
               pgerr("ERROR: Timeout!\n");
               DEBUGASSERT(clock_systimer() - g_starttime <
                           CONFIG_PAGING_TIMEOUT_TICKS);
             }
-#endif
+#    endif
         }
 
       /* Otherwise, this might be a page fill initiation event.  When
@@ -627,12 +627,12 @@ int pg_worker(int argc, char *argv[])
           pginfo("Calling pg_startfill\n");
           pg_startfill();
         }
-#else
+#  else
       /* Are there tasks blocked and waiting for a fill?  Loop until all
        * pending fills have been processed.
        */
 
-      for (; ; )
+      for (;;)
         {
           /* Yes .. Start the fill and block until the fill completes.
            * Check the return value to see a fill was actually performed.
@@ -662,7 +662,7 @@ int pg_worker(int argc, char *argv[])
 
       pginfo("Call pg_alldone()\n");
       pg_alldone();
-#endif
+#  endif
     }
 
   return OK; /* To keep some compilers happy */

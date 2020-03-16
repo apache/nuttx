@@ -101,7 +101,7 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
 
       sched_lock();
       mutex->pid = -1;
-      ret = pthread_mutex_give(mutex);
+      ret        = pthread_mutex_give(mutex);
 
       /* Take the semaphore */
 

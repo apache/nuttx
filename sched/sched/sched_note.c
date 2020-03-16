@@ -65,22 +65,22 @@ struct note_info_s
 {
   volatile unsigned int ni_head;
   volatile unsigned int ni_tail;
-  uint8_t ni_buffer[CONFIG_SCHED_NOTE_BUFSIZE];
+  uint8_t               ni_buffer[CONFIG_SCHED_NOTE_BUFSIZE];
 };
 
 struct note_startalloc_s
 {
   struct note_common_s nsa_cmn; /* Common note parameters */
-#if CONFIG_TASK_NAME_SIZE > 0
+#  if CONFIG_TASK_NAME_SIZE > 0
   char nsa_name[CONFIG_TASK_NAME_SIZE + 1];
-#endif
+#  endif
 };
 
-#if CONFIG_TASK_NAME_SIZE > 0
-#  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s) + (n) - 1)
-#else
-#  define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s))
-#endif
+#  if CONFIG_TASK_NAME_SIZE > 0
+#    define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s) + (n)-1)
+#  else
+#    define SIZEOF_NOTE_START(n) (sizeof(struct note_start_s))
+#  endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -94,9 +94,9 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen);
 
 static struct note_info_s g_note_info;
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
 static volatile spinlock_t g_note_lock;
-#endif
+#  endif
 
 /****************************************************************************
  * Private Functions
@@ -145,27 +145,27 @@ static inline unsigned int note_next(unsigned int ndx, unsigned int offset)
  *
  ****************************************************************************/
 
-static void note_common(FAR struct tcb_s *tcb,
+static void note_common(FAR struct tcb_s *        tcb,
                         FAR struct note_common_s *note,
                         uint8_t length, uint8_t type)
 {
-  uint32_t systime    = (uint32_t)clock_systimer();
+  uint32_t systime = (uint32_t)clock_systimer();
 
   /* Save all of the common fields */
 
-  note->nc_length     = length;
-  note->nc_type       = type;
-  note->nc_priority   = tcb->sched_priority;
-#ifdef CONFIG_SMP
-  note->nc_cpu        = tcb->cpu;
-#endif
-  note->nc_pid[0]     = (uint8_t)(tcb->pid & 0xff);
-  note->nc_pid[1]     = (uint8_t)((tcb->pid >> 8) & 0xff);
+  note->nc_length   = length;
+  note->nc_type     = type;
+  note->nc_priority = tcb->sched_priority;
+#  ifdef CONFIG_SMP
+  note->nc_cpu = tcb->cpu;
+#  endif
+  note->nc_pid[0] = (uint8_t)(tcb->pid & 0xff);
+  note->nc_pid[1] = (uint8_t)((tcb->pid >> 8) & 0xff);
 
   /* Save the LS 32-bits of the system timer in little endian order */
 
-  note->nc_systime[0] = (uint8_t)(systime         & 0xff);
-  note->nc_systime[1] = (uint8_t)((systime >> 8)  & 0xff);
+  note->nc_systime[0] = (uint8_t)(systime & 0xff);
+  note->nc_systime[1] = (uint8_t)((systime >> 8) & 0xff);
   note->nc_systime[2] = (uint8_t)((systime >> 16) & 0xff);
   note->nc_systime[3] = (uint8_t)((systime >> 24) & 0xff);
 }
@@ -185,10 +185,10 @@ static void note_common(FAR struct tcb_s *tcb,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-void note_spincommon(FAR struct tcb_s *tcb,
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+void note_spincommon(FAR struct tcb_s *       tcb,
                      FAR volatile spinlock_t *spinlock,
-                     int type)
+                     int                      type)
 {
   struct note_spinlock_s note;
 
@@ -202,7 +202,7 @@ void note_spincommon(FAR struct tcb_s *tcb,
 
   note_add((FAR const uint8_t *)&note, sizeof(struct note_spinlock_s));
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name: note_length
@@ -218,7 +218,7 @@ void note_spincommon(FAR struct tcb_s *tcb,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_NOTE_GET) || defined(CONFIG_DEBUG_ASSERTIONS)
+#  if defined(CONFIG_SCHED_NOTE_GET) || defined(CONFIG_DEBUG_ASSERTIONS)
 static unsigned int note_length(void)
 {
   unsigned int head = g_note_info.ni_head;
@@ -231,7 +231,7 @@ static unsigned int note_length(void)
 
   return head - tail;
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name: note_remove
@@ -253,8 +253,8 @@ static unsigned int note_length(void)
 static void note_remove(void)
 {
   FAR struct note_common_s *note;
-  unsigned int tail;
-  unsigned int length;
+  unsigned int              tail;
+  unsigned int              length;
 
   /* Get the tail index of the circular buffer */
 
@@ -296,7 +296,7 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
   unsigned int head;
   unsigned int next;
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   /* Ignore notes that are not in the set of monitored CPUs */
 
   if ((CONFIG_SCHED_INSTRUMENTATION_CPUSET & (1 << this_cpu())) == 0)
@@ -305,12 +305,12 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
 
       return;
     }
-#endif
+#  endif
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   irqstate_t flags = up_irq_save();
   spin_lock_wo_note(&g_note_lock);
-#endif
+#  endif
 
   /* Get the index to the head of the circular buffer */
 
@@ -343,10 +343,10 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
 
   g_note_info.ni_head = head;
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
   spin_unlock_wo_note(&g_note_lock);
   up_irq_restore(flags);
-#endif
+#  endif
 }
 
 /****************************************************************************
@@ -375,23 +375,23 @@ static void note_add(FAR const uint8_t *note, uint8_t notelen)
 void sched_note_start(FAR struct tcb_s *tcb)
 {
   struct note_startalloc_s note;
-  unsigned int length;
-#if CONFIG_TASK_NAME_SIZE > 0
+  unsigned int             length;
+#  if CONFIG_TASK_NAME_SIZE > 0
   int namelen;
-#endif
+#  endif
 
   /* Copy the task name (if possible) and get the length of the note */
 
-#if CONFIG_TASK_NAME_SIZE > 0
+#  if CONFIG_TASK_NAME_SIZE > 0
   namelen = strlen(tcb->name);
 
   DEBUGASSERT(namelen <= CONFIG_TASK_NAME_SIZE);
   strncpy(note.nsa_name, tcb->name, CONFIG_TASK_NAME_SIZE + 1);
 
   length = SIZEOF_NOTE_START(namelen + 1);
-#else
+#  else
   length = SIZEOF_NOTE_START(0)
-#endif
+#  endif
 
   /* Finish formatting the note */
 
@@ -423,7 +423,7 @@ void sched_note_suspend(FAR struct tcb_s *tcb)
 
   note_common(tcb, &note.nsu_cmn, sizeof(struct note_suspend_s),
               NOTE_SUSPEND);
-  note.nsu_state           = tcb->task_state;
+  note.nsu_state = tcb->task_state;
 
   /* Add the note to circular buffer */
 
@@ -443,7 +443,7 @@ void sched_note_resume(FAR struct tcb_s *tcb)
   note_add((FAR const uint8_t *)&note, sizeof(struct note_resume_s));
 }
 
-#ifdef CONFIG_SMP
+#  ifdef CONFIG_SMP
 void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_start_s note;
@@ -530,9 +530,9 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 
   note_add((FAR const uint8_t *)&note, sizeof(struct note_cpu_resumed_s));
 }
-#endif
+#  endif
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
 void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 {
   struct note_preempt_s note;
@@ -548,9 +548,9 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 
   note_add((FAR const uint8_t *)&note, sizeof(struct note_preempt_s));
 }
-#endif
+#  endif
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
 void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 {
   struct note_csection_s note;
@@ -559,30 +559,30 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 
   note_common(tcb, &note.ncs_cmn, sizeof(struct note_csection_s),
               enter ? NOTE_CSECTION_ENTER : NOTE_CSECTION_LEAVE);
-#ifdef CONFIG_SMP
+#    ifdef CONFIG_SMP
   note.ncs_count[0] = (uint8_t)(tcb->irqcount & 0xff);
   note.ncs_count[1] = (uint8_t)((tcb->irqcount >> 8) & 0xff);
-#endif
+#    endif
 
   /* Add the note to circular buffer */
 
   note_add((FAR const uint8_t *)&note, sizeof(struct note_csection_s));
 }
-#endif
+#  endif
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
 void sched_note_spinlock(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
 {
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCK);
 }
 
-void sched_note_spinlocked(FAR struct tcb_s *tcb,
+void sched_note_spinlocked(FAR struct tcb_s * tcb,
                            FAR volatile void *spinlock)
 {
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_LOCKED);
 }
 
-void sched_note_spinunlock(FAR struct tcb_s *tcb,
+void sched_note_spinunlock(FAR struct tcb_s * tcb,
                            FAR volatile void *spinlock)
 {
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_UNLOCK);
@@ -592,7 +592,7 @@ void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
 {
   note_spincommon(tcb, spinlock, NOTE_SPINLOCK_ABORT);
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name: sched_note_get
@@ -612,15 +612,15 @@ void sched_note_spinabort(FAR struct tcb_s *tcb, FAR volatile void *spinlock)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_NOTE_GET
+#  ifdef CONFIG_SCHED_NOTE_GET
 ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen)
 {
   FAR struct note_common_s *note;
-  irqstate_t flags;
-  unsigned int remaining;
-  unsigned int tail;
-  ssize_t notelen;
-  size_t circlen;
+  irqstate_t                flags;
+  unsigned int              remaining;
+  unsigned int              tail;
+  ssize_t                   notelen;
+  size_t                    circlen;
 
   DEBUGASSERT(buffer != NULL);
   flags = enter_critical_section();
@@ -636,7 +636,7 @@ ssize_t sched_note_get(FAR uint8_t *buffer, size_t buflen)
 
   /* Get the index to the tail of the circular buffer */
 
-  tail    = g_note_info.ni_tail;
+  tail = g_note_info.ni_tail;
   DEBUGASSERT(tail < CONFIG_SCHED_NOTE_BUFSIZE);
 
   /* Get the length of the note at the tail index */
@@ -680,7 +680,7 @@ errout_with_csection:
   leave_critical_section(flags);
   return notelen;
 }
-#endif
+#  endif
 
 /****************************************************************************
  * Name: sched_note_size
@@ -697,14 +697,14 @@ errout_with_csection:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_NOTE_GET
+#  ifdef CONFIG_SCHED_NOTE_GET
 ssize_t sched_note_size(void)
 {
   FAR struct note_common_s *note;
-  irqstate_t flags;
-  unsigned int tail;
-  ssize_t notelen;
-  size_t circlen;
+  irqstate_t                flags;
+  unsigned int              tail;
+  ssize_t                   notelen;
+  size_t                    circlen;
 
   flags = enter_critical_section();
 
@@ -732,6 +732,6 @@ errout_with_csection:
   leave_critical_section(flags);
   return notelen;
 }
-#endif
+#  endif
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION_BUFFER */

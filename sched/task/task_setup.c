@@ -129,8 +129,8 @@ static int nxtask_assignpid(FAR struct tcb_s *tcb)
         {
           /* Assign this PID to the task */
 
-          g_pidhash[hash_ndx].tcb   = tcb;
-          g_pidhash[hash_ndx].pid   = next_pid;
+          g_pidhash[hash_ndx].tcb = tcb;
+          g_pidhash[hash_ndx].pid = next_pid;
 #ifdef CONFIG_SCHED_CPULOAD
           g_pidhash[hash_ndx].ticks = 0;
 #endif
@@ -175,7 +175,7 @@ static int nxtask_assignpid(FAR struct tcb_s *tcb)
 static inline void nxtask_inherit_affinity(FAR struct tcb_s *tcb)
 {
   FAR struct tcb_s *rtcb = this_task();
-  tcb->affinity = rtcb->affinity;
+  tcb->affinity          = rtcb->affinity;
 }
 #else
 #  define nxtask_inherit_affinity(tcb)
@@ -212,9 +212,9 @@ static inline void nxtask_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
    * parent and share that same child/parent relationships.
    */
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#  ifndef CONFIG_DISABLE_PTHREAD
   if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
-#endif
+#  endif
     {
       /* Get the TCB of the parent task.  In this case, the calling task. */
 
@@ -222,7 +222,7 @@ static inline void nxtask_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
 
       DEBUGASSERT(rtcb != NULL && rtcb->group != NULL);
 
-#ifdef HAVE_GROUP_MEMBERS
+#  ifdef HAVE_GROUP_MEMBERS
       /* Save the ID of the parent tasks' task group in the child's task
        * group.  Copy the ID from the parent's task group structure to
        * child's task group.
@@ -230,13 +230,13 @@ static inline void nxtask_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
 
       tcb->group->tg_pgrpid = rtcb->group->tg_grpid;
 
-#else
-      /* Save the parent task's ID in the child task's group. */
+#  else
+    /* Save the parent task's ID in the child task's group. */
 
-      tcb->group->tg_ppid = rtcb->pid;
-#endif
+    tcb->group->tg_ppid = rtcb->pid;
+#  endif
 
-#ifdef CONFIG_SCHED_CHILD_STATUS
+#  ifdef CONFIG_SCHED_CHILD_STATUS
       /* Tasks can also suppress retention of their child status by applying
        * the SA_NOCLDWAIT flag with sigaction().
        */
@@ -275,19 +275,19 @@ static inline void nxtask_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
             }
         }
 
-#else /* CONFIG_SCHED_CHILD_STATUS */
-      /* Child status is not retained.  Simply keep track of the number
+#  else /* CONFIG_SCHED_CHILD_STATUS */
+    /* Child status is not retained.  Simply keep track of the number
        * child tasks created.
        */
 
-      DEBUGASSERT(rtcb->group->tg_nchildren < UINT16_MAX);
-      rtcb->group->tg_nchildren++;
+    DEBUGASSERT(rtcb->group->tg_nchildren < UINT16_MAX);
+    rtcb->group->tg_nchildren++;
 
-#endif /* CONFIG_SCHED_CHILD_STATUS */
+#  endif /* CONFIG_SCHED_CHILD_STATUS */
     }
 }
 #else
-#  define nxtask_saveparent(tcb,ttype)
+#  define nxtask_saveparent(tcb, ttype)
 #endif
 
 /****************************************************************************
@@ -370,23 +370,23 @@ static int nxthread_schedsetup(FAR struct tcb_s *tcb, int priority,
       tcb->sched_priority = (uint8_t)priority;
       tcb->init_priority  = (uint8_t)priority;
 #ifdef CONFIG_PRIORITY_INHERITANCE
-      tcb->base_priority  = (uint8_t)priority;
+      tcb->base_priority = (uint8_t)priority;
 #endif
-      tcb->start          = start;
-      tcb->entry.main     = (main_t)entry;
+      tcb->start      = start;
+      tcb->entry.main = (main_t)entry;
 
       /* Save the thread type.  This setting will be needed in
        * up_initial_state() is called.
        */
 
-      ttype              &= TCB_FLAG_TTYPE_MASK;
-      tcb->flags         &= ~TCB_FLAG_TTYPE_MASK;
-      tcb->flags         |= ttype;
+      ttype &= TCB_FLAG_TTYPE_MASK;
+      tcb->flags &= ~TCB_FLAG_TTYPE_MASK;
+      tcb->flags |= ttype;
 
 #ifdef CONFIG_CANCELLATION_POINTS
       /* Set the deferred cancellation type */
 
-      tcb->flags         |= TCB_FLAG_CANCEL_DEFERRED;
+      tcb->flags |= TCB_FLAG_CANCEL_DEFERRED;
 #endif
 
       /* Save the task ID of the parent task in the TCB and allocate
@@ -457,7 +457,7 @@ static int nxthread_schedsetup(FAR struct tcb_s *tcb, int priority,
 
 #if CONFIG_TASK_NAME_SIZE > 0
 static void nxtask_namesetup(FAR struct task_tcb_s *tcb,
-                             FAR const char *name)
+                             FAR const char *       name)
 {
   /* Give a name to the unnamed tasks */
 
@@ -472,7 +472,7 @@ static void nxtask_namesetup(FAR struct task_tcb_s *tcb,
   tcb->cmn.name[CONFIG_TASK_NAME_SIZE] = '\0';
 }
 #else
-#  define nxtask_namesetup(t,n)
+#  define nxtask_namesetup(t, n)
 #endif /* CONFIG_TASK_NAME_SIZE */
 
 /****************************************************************************
@@ -497,16 +497,16 @@ static void nxtask_namesetup(FAR struct task_tcb_s *tcb,
  ****************************************************************************/
 
 static inline int nxtask_stackargsetup(FAR struct task_tcb_s *tcb,
-                                       FAR char * const argv[])
+                                       FAR char *const        argv[])
 {
-  FAR char **stackargv;
+  FAR char **     stackargv;
   FAR const char *name;
-  FAR char *str;
-  size_t strtablen;
-  size_t argvlen;
-  int nbytes;
-  int argc;
-  int i;
+  FAR char *      str;
+  size_t          strtablen;
+  size_t          argvlen;
+  int             nbytes;
+  int             argc;
+  int             i;
 
   /* Get the name string that we will use as the first argument */
 
@@ -583,7 +583,7 @@ static inline int nxtask_stackargsetup(FAR struct task_tcb_s *tcb,
   stackargv[0] = str;
   nbytes       = strlen(name) + 1;
   strcpy(str, name);
-  str         += nbytes;
+  str += nbytes;
 
   /* Copy each argument */
 
@@ -597,7 +597,7 @@ static inline int nxtask_stackargsetup(FAR struct task_tcb_s *tcb,
       stackargv[i + 1] = str;
       nbytes           = strlen(argv[i]) + 1;
       strcpy(str, argv[i]);
-      str             += nbytes;
+      str += nbytes;
     }
 
   /* Put a terminator entry at the end of the argv[] array.  Then save the
@@ -606,7 +606,7 @@ static inline int nxtask_stackargsetup(FAR struct task_tcb_s *tcb,
    */
 
   stackargv[argc + 1] = NULL;
-  tcb->argv = stackargv;
+  tcb->argv           = stackargv;
 
   return OK;
 }
@@ -713,7 +713,7 @@ int pthread_schedsetup(FAR struct pthread_tcb_s *tcb, int priority,
  ****************************************************************************/
 
 int nxtask_argsetup(FAR struct task_tcb_s *tcb, FAR const char *name,
-                    FAR char * const argv[])
+                    FAR char *const argv[])
 {
   /* Setup the task name */
 

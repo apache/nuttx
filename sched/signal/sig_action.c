@@ -163,10 +163,10 @@ static FAR sigactq_t *nxsig_alloc_action(void)
 int nxsig_action(int signo, FAR const struct sigaction *act,
                  FAR struct sigaction *oact, bool force)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *       rtcb = this_task();
   FAR struct task_group_s *group;
   FAR sigactq_t *sigact;
-  _sa_handler_t handler;
+  _sa_handler_t  handler;
 
   /* Since sigactions can only be installed from the running thread of
    * execution, no special precautions should be necessary.

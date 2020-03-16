@@ -103,11 +103,11 @@ static mqd_t nxmq_alloc_des(void)
  *
  ****************************************************************************/
 
-mqd_t nxmq_create_des(FAR struct tcb_s *mtcb,
+mqd_t nxmq_create_des(FAR struct tcb_s *         mtcb,
                       FAR struct mqueue_inode_s *msgq, int oflags)
 {
   FAR struct task_group_s *group;
-  mqd_t mqdes;
+  mqd_t                    mqdes;
 
   /* A NULL TCB pointer means to use the TCB of the currently executing
    * task/thread.

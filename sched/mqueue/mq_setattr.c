@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include <fcntl.h>          /* O_NONBLOCK */
+#include <fcntl.h> /* O_NONBLOCK */
 #include <mqueue.h>
 
 #include <nuttx/mqueue.h>
@@ -76,7 +76,7 @@ int mq_setattr(mqd_t mqdes, const struct mq_attr *mq_stat,
 
       mqdes->oflags = ((mq_stat->mq_flags & O_NONBLOCK) |
                        (mqdes->oflags & (~O_NONBLOCK)));
-      ret = OK;
+      ret           = OK;
     }
 
   return ret;

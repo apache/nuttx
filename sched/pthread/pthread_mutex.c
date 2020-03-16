@@ -87,7 +87,7 @@ static void pthread_mutex_add(FAR struct pthread_mutex_s *mutex)
   if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
     {
       FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)rtcb;
-      irqstate_t flags;
+      irqstate_t                flags;
 
       /* Add the mutex to the list of mutexes held by this pthread */
 
@@ -123,10 +123,10 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
 
   if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
     {
-      FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)rtcb;
+      FAR struct pthread_tcb_s *  ptcb = (FAR struct pthread_tcb_s *)rtcb;
       FAR struct pthread_mutex_s *curr;
       FAR struct pthread_mutex_s *prev;
-      irqstate_t flags;
+      irqstate_t                  flags;
 
       flags = enter_critical_section();
 
@@ -134,7 +134,8 @@ static void pthread_mutex_remove(FAR struct pthread_mutex_s *mutex)
 
       for (prev = NULL, curr = ptcb->mhead;
            curr != NULL && curr != mutex;
-           prev = curr, curr = curr->flink);
+           prev = curr, curr = curr->flink)
+        ;
 
       DEBUGASSERT(curr == mutex);
 

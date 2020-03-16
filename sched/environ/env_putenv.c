@@ -41,12 +41,12 @@
 
 #ifndef CONFIG_DISABLE_ENVIRON
 
-#include <stdlib.h>
-#include <sched.h>
-#include <string.h>
-#include <errno.h>
+#  include <stdlib.h>
+#  include <sched.h>
+#  include <string.h>
+#  include <errno.h>
 
-#include <nuttx/kmalloc.h>
+#  include <nuttx/kmalloc.h>
 
 /****************************************************************************
  * Public Functions
@@ -77,7 +77,7 @@ int putenv(FAR const char *string)
 {
   char *pname;
   char *pequal;
-  int ret = OK;
+  int   ret = OK;
 
   /* Verify that a string was passed */
 
@@ -102,7 +102,7 @@ int putenv(FAR const char *string)
       /* Then let setenv do all of the work */
 
       *pequal = '\0';
-      ret = setenv(pname, pequal + 1, TRUE);
+      ret     = setenv(pname, pequal + 1, TRUE);
     }
 
   kmm_free(pname);

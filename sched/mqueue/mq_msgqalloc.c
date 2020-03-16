@@ -57,7 +57,7 @@
  *
  ****************************************************************************/
 
-FAR struct mqueue_inode_s *nxmq_alloc_msgq(mode_t mode,
+FAR struct mqueue_inode_s *nxmq_alloc_msgq(mode_t              mode,
                                            FAR struct mq_attr *attr)
 {
   FAR struct mqueue_inode_s *msgq;
@@ -75,7 +75,7 @@ FAR struct mqueue_inode_s *nxmq_alloc_msgq(mode_t mode,
   /* Allocate memory for the new message queue. */
 
   msgq = (FAR struct mqueue_inode_s *)
-    kmm_zalloc(sizeof(struct mqueue_inode_s));
+  kmm_zalloc(sizeof(struct mqueue_inode_s));
 
   if (msgq)
     {

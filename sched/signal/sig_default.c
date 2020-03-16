@@ -61,14 +61,14 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SIG_SIGUSR1_ACTION) || defined(CONFIG_SIG_SIGUSR2_ACTION) || \
-    defined(CONFIG_SIG_SIGALRM_ACTION) || defined(CONFIG_SIG_SIGPOLL_ACTION) || \
-    defined(CONFIG_SIG_SIGKILL_ACTION) || defined(CONFIG_SIG_SIGPIPE_ACTION)
+defined(CONFIG_SIG_SIGALRM_ACTION) || defined(CONFIG_SIG_SIGPOLL_ACTION) || \
+defined(CONFIG_SIG_SIGKILL_ACTION) || defined(CONFIG_SIG_SIGPIPE_ACTION)
 #  define HAVE_NXSIG_ABNORMAL_TERMINANTION 1
 #endif
 
 /* Bit definitions for the struct nxsig_defaction_s 'flags' field */
 
-#define SIG_FLAG_NOCATCH (1 << 0)  /* Signal cannot be caught or ignored */
+#define SIG_FLAG_NOCATCH (1 << 0) /* Signal cannot be caught or ignored */
 
 /****************************************************************************
  * Private Types
@@ -78,9 +78,9 @@
 
 struct nxsig_defaction_s
 {
-  uint8_t       signo;   /* Signal number.  Range 1..MAX_SIGNO */
-  uint8_t       flags;   /* See SIG_FLAG_ definitions */
-  _sa_handler_t action;  /* Default signal action */
+  uint8_t       signo;  /* Signal number.  Range 1..MAX_SIGNO */
+  uint8_t       flags;  /* See SIG_FLAG_ definitions */
+  _sa_handler_t action; /* Default signal action */
 };
 
 /****************************************************************************
@@ -100,9 +100,9 @@ static void nxsig_stop_task(int signo);
 /* Helpers */
 
 static _sa_handler_t nxsig_default_action(int signo);
-static void nxsig_setup_default_action(FAR struct task_group_s *group,
-                                       FAR const struct nxsig_defaction_s *
-                                           info);
+static void          nxsig_setup_default_action(FAR struct task_group_s *group,
+                                                FAR const struct nxsig_defaction_s *
+                                                info);
 
 /****************************************************************************
  * Private Data
@@ -118,31 +118,30 @@ static void nxsig_setup_default_action(FAR struct task_group_s *group,
  * to be in this table (e.g., SIGCHLD).
  */
 
-static const struct nxsig_defaction_s g_defactions[] =
-{
+static const struct nxsig_defaction_s g_defactions[] = {
 #ifdef CONFIG_SIG_SIGUSR1_ACTION
-  { SIGUSR1, 0,                nxsig_abnormal_termination },
+  { SIGUSR1, 0, nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGUSR2_ACTION
-  { SIGUSR2, 0,                nxsig_abnormal_termination },
+  { SIGUSR2, 0, nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGALRM_ACTION
-  { SIGALRM, 0,                nxsig_abnormal_termination },
+  { SIGALRM, 0, nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGPOLL_ACTION
-  { SIGPOLL, 0,                nxsig_abnormal_termination },
+  { SIGPOLL, 0, nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
   { SIGSTOP, SIG_FLAG_NOCATCH, nxsig_stop_task },
-  { SIGSTP,  0,                nxsig_stop_task },
+  { SIGSTP, 0, nxsig_stop_task },
   { SIGCONT, SIG_FLAG_NOCATCH, nxsig_null_action },
 #endif
 #ifdef CONFIG_SIG_SIGKILL_ACTION
-  { SIGINT,  0,                nxsig_abnormal_termination },
+  { SIGINT, 0, nxsig_abnormal_termination },
   { SIGKILL, SIG_FLAG_NOCATCH, nxsig_abnormal_termination },
 #endif
 #ifdef CONFIG_SIG_SIGPIPE_ACTION
-  { SIGPIPE, 0,                nxsig_abnormal_termination }
+  { SIGPIPE, 0, nxsig_abnormal_termination }
 #endif
 };
 
@@ -236,7 +235,7 @@ static void nxsig_abnormal_termination(int signo)
       return;
     }
 
-#ifdef CONFIG_CANCELLATION_POINTS
+#  ifdef CONFIG_CANCELLATION_POINTS
   /* Check if this task supports deferred cancellation */
 
   if ((rtcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
@@ -259,7 +258,7 @@ static void nxsig_abnormal_termination(int signo)
       sched_unlock();
       return;
     }
-#endif
+#  endif
 
   sched_unlock();
 
@@ -267,7 +266,7 @@ static void nxsig_abnormal_termination(int signo)
    * child pthread.
    */
 
-#ifdef HAVE_GROUP_MEMBERS
+#  ifdef HAVE_GROUP_MEMBERS
   /* Kill of of the children of the task.  This will not kill the currently
    * running task/pthread (this_task).  It will kill the main thread of the
    * task group if the this_task is a
@@ -275,9 +274,9 @@ static void nxsig_abnormal_termination(int signo)
    */
 
   group_killchildren((FAR struct task_tcb_s *)rtcb);
-#endif
+#  endif
 
-#ifndef CONFIG_DISABLE_PTHREAD
+#  ifndef CONFIG_DISABLE_PTHREAD
   /* Check if the currently running task is actually a pthread */
 
   if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
@@ -290,7 +289,7 @@ static void nxsig_abnormal_termination(int signo)
       pthread_exit(NULL);
     }
   else
-#endif
+#  endif
     {
       /* Exit to terminate the task (note that exit() vs. _exit() is used. */
 
@@ -317,25 +316,25 @@ static void nxsig_abnormal_termination(int signo)
 static void nxsig_stop_task(int signo)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)this_task();
-#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+#  if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
   FAR struct task_group_s *group;
 
   DEBUGASSERT(rtcb != NULL && rtcb->group != NULL);
   group = rtcb->group;
-#endif
+#  endif
 
   /* Careful:  In the multi-threaded task, the signal may be handled on a
    * child pthread.
    */
 
-#ifdef HAVE_GROUP_MEMBERS
+#  ifdef HAVE_GROUP_MEMBERS
   /* Suspend of of the children of the task.  This will not suspend the
    * currently running task/pthread (this_task).  It will suspend the
    * main thread of the task group if the this_task is a pthread.
    */
 
   group_suspendchildren(rtcb);
-#endif
+#  endif
 
   /* Lock the scheduler so this thread is not pre-empted until after we
    * call sched_suspend().
@@ -343,7 +342,7 @@ static void nxsig_stop_task(int signo)
 
   sched_lock();
 
-#if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
+#  if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
   /* Notify via waitpid if any parent is waiting for this task to EXIT
    * or STOP.  This action is only performed if WUNTRACED is set in the
    * waitpid flags.
@@ -356,7 +355,7 @@ static void nxsig_stop_task(int signo)
       if (group->tg_statloc != NULL)
         {
           *group->tg_statloc = 0;
-           group->tg_statloc = NULL;
+          group->tg_statloc  = NULL;
         }
 
       /* tg_waitflags == 0 means that the flags are available to another
@@ -374,7 +373,7 @@ static void nxsig_stop_task(int signo)
           nxsem_post(&group->tg_exitsem);
         }
     }
-#endif
+#  endif
 
   /* Then, finally, suspend this the final thread of the task group */
 
@@ -439,7 +438,7 @@ static _sa_handler_t nxsig_default_action(int signo)
 
 static void nxsig_setup_default_action(FAR struct task_group_s *group,
                                        FAR const struct nxsig_defaction_s *
-                                           info)
+                                       info)
 {
   /* Get the address of the handler for this signals default action. */
 
@@ -487,7 +486,7 @@ static void nxsig_setup_default_action(FAR struct task_group_s *group,
 bool nxsig_isdefault(FAR struct tcb_s *tcb, int signo)
 {
   FAR struct task_group_s *group;
-  int ret;
+  int                      ret;
 
   DEBUGASSERT(tcb != NULL && tcb->group != NULL && GOOD_SIGNO(signo));
   group = tcb->group;
@@ -563,8 +562,8 @@ bool nxsig_iscatchable(int signo)
 _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
 {
   FAR struct task_group_s *group;
-  _sa_handler_t handler = SIG_IGN;
-  irqstate_t flags;
+  _sa_handler_t            handler = SIG_IGN;
+  irqstate_t               flags;
 
   DEBUGASSERT(tcb != NULL && tcb->group != NULL);
   group = tcb->group;
@@ -621,7 +620,7 @@ _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
 int nxsig_default_initialize(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
-  int i;
+  int                      i;
 
   DEBUGASSERT(tcb != NULL && tcb->group != NULL);
   group = tcb->group;

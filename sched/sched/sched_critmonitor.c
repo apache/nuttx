@@ -52,13 +52,13 @@
 
 /* Start time when pre-emption disabled or critical section entered. */
 
-#ifdef CONFIG_SMP_NCPUS
+#  ifdef CONFIG_SMP_NCPUS
 static uint32_t g_premp_start[CONFIG_SMP_NCPUS];
 static uint32_t g_crit_start[CONFIG_SMP_NCPUS];
-#else
+#  else
 static uint32_t g_premp_start[1];
 static uint32_t g_crit_start[1];
-#endif
+#  endif
 
 /****************************************************************************
  * Public Data
@@ -66,13 +66,13 @@ static uint32_t g_crit_start[1];
 
 /* Maximum time with pre-emption disabled or within critical section. */
 
-#ifdef CONFIG_SMP_NCPUS
+#  ifdef CONFIG_SMP_NCPUS
 uint32_t g_premp_max[CONFIG_SMP_NCPUS];
 uint32_t g_crit_max[CONFIG_SMP_NCPUS];
-#else
-uint32_t g_premp_max[1];
-uint32_t g_crit_max[1];
-#endif
+#  else
+uint32_t        g_premp_max[1];
+uint32_t        g_crit_max[1];
+#  endif
 
 /****************************************************************************
  * Public Functions
@@ -223,7 +223,7 @@ void sched_critmon_csection(FAR struct tcb_s *tcb, bool state)
 void sched_critmon_resume(FAR struct tcb_s *tcb)
 {
   uint32_t elapsed;
-  int cpu = this_cpu();
+  int      cpu = this_cpu();
 
   DEBUGASSERT(tcb->premp_start == 0 && tcb->crit_start == 0);
 
@@ -274,7 +274,7 @@ void sched_critmon_resume(FAR struct tcb_s *tcb)
     {
       /* Check for the global max elapsed time */
 
-      elapsed      = up_critmon_gettime() - g_crit_start[cpu];
+      elapsed           = up_critmon_gettime() - g_crit_start[cpu];
       g_crit_start[cpu] = 0;
 
       if (elapsed > g_crit_max[cpu])
