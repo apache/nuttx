@@ -188,7 +188,7 @@ static int up_addrenv_initdata(uintptr_t l2table)
   up_invalidate_dcache((uintptr_t)virtptr,
                        (uintptr_t)virtptr + sizeof(uint32_t));
 
-  /* Get the physical address of the first page of of .bss/.data */
+  /* Get the physical address of the first page of .bss/.data */
 
   paddr = (uintptr_t)(*virtptr) & PTE_SMALL_PADDR_MASK;
   DEBUGASSERT(paddr);

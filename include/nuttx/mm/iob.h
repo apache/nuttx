@@ -269,7 +269,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled, enum iob_user_e consumerid);
  * Name: iob_navail
  *
  * Description:
- *   Return the number of of available IOBs.
+ *   Return the number of available IOBs.
  *
  ****************************************************************************/
 

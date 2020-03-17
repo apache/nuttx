@@ -1033,7 +1033,7 @@ o Kernel/Protected Build
                tls_info_s.  Then the PID could be obtained without a system call.
                TLS is not very useful in the FLAT build, however.  TLS works by
                putting per-thread data at the bottom of an aligned stack.  The
-               current stack pointer is the ANDed with the alignment mask to
+               current stack pointer is then ANDed with the alignment mask to
                obtain the per-thread data address.
 
                There are problems with this in the FLAT and PROTECTED builds:

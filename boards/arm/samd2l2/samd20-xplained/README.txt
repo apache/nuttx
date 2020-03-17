@@ -37,7 +37,7 @@ STATUS/ISSUES
 
     2. Garbage appears on the display sometimes after a reset (maybe 20% of
        the time) or after a power cycle (less after a power cycle).  I don't
-       understand the cause of of this but most of this can be eliminated by
+       understand the cause of this but most of this can be eliminated by
        simply holding the reset button longer and releasing it cleanly
        (then it fails maybe 5-10% of the time, maybe because of button
        chatter?) (2014-2-18).

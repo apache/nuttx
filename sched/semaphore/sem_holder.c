@@ -318,7 +318,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
 
   /* Make sure that the holder thread is still active.  If it exited without
    * releasing its counts, then that would be a bad thing.  But we can take
-   * no real action because we don't know know that the program is doing.
+   * no real action because we don't know what the program is doing.
    * Perhaps its plan is to kill a thread, then destroy the semaphore.
    */
 
@@ -402,7 +402,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
 
 #  else
   /* If the priority of the thread that is waiting for a count is less than
-   * of equal to the priority of the thread holding a count, then do nothing
+   * or equal to the priority of the thread holding a count, then do nothing
    * because the thread is already running at a sufficient priority.
    */
 
@@ -437,7 +437,7 @@ static int nxsem_verifyholder(FAR struct semholder_s *pholder,
   FAR struct tcb_s *htcb = (FAR struct tcb_s *)pholder->htcb;
 
   /* Called after a semaphore has been released (incremented), the semaphore
-   * could is non-negative, and there is no thread waiting for the count.
+   * could be non-negative, and there is no thread waiting for the count.
    * In this case, the priority of the holder should not be boosted.
    */
 
@@ -485,7 +485,7 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
 
   /* Make sure that the holder thread is still active.  If it exited without
    * releasing its counts, then that would be a bad thing.  But we can take
-   * no real action because we don't know know that the program is doing.
+   * no real action because we don't know what the program is doing.
    * Perhaps its plan is to kill a thread, then destroy the semaphore.
    */
 
@@ -532,7 +532,7 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
 
       /* There are multiple pending priority levels. The holder thread's
        * "boosted" priority could greater than or equal to
-       * "stcb->sched_priority" (it could be greater if its priority we
+       * "stcb->sched_priority" (it could be greater if its priority was
        * boosted because it also holds another semaphore).
        */
 
@@ -575,7 +575,7 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
         {
           /* The holder thread has been boosted to a higher priority than the
            * waiter task.  The pending priority should be in the list (unless
-           * it was lost because of of list overflow or because the holder
+           * it was lost because of list overflow or because the holder
            * was reprioritized again unbeknownst to the priority inheritance
            * logic).
            *
@@ -669,8 +669,8 @@ static int nxsem_restoreholderprio_self(FAR struct semholder_s *pholder,
 
 #  if CONFIG_SEM_PREALLOCHOLDERS == 0
       /* In the case where there are only 2 holders. This step
-       * is necessary to insure we have space. Release the holder
-       * if all counts have been given up. before reprioritizing
+       * is necessary to ensure we have space. Release the holder
+       * if all counts have been given up before reprioritizing
        * causes a context switch.
        */
 
@@ -687,7 +687,7 @@ static int nxsem_restoreholderprio_self(FAR struct semholder_s *pholder,
  * Name: nxsem_restorebaseprio_irq
  *
  * Description:
- *   This function is called after the an interrupt handler posts a count on
+ *   This function is called after an interrupt handler posts a count on
  *   the semaphore.  It will check if we need to drop the priority of any
  *   threads holding a count on the semaphore.  Their priority could have
  *   been boosted while they held the count.
@@ -696,7 +696,7 @@ static int nxsem_restoreholderprio_self(FAR struct semholder_s *pholder,
  *   stcb - The TCB of the task that was just started (if any).  If the
  *     post action caused a count to be given to another thread, then stcb
  *     is the TCB that received the count.  Note, just because stcb received
- *     the count, it does not mean that it it is higher priority than other
+ *     the count, it does not mean that it is higher priority than other
  *     threads.
  *   sem - A reference to the semaphore being posted.
  *     - If the semaphore count is <0 then there are still threads waiting
@@ -757,7 +757,7 @@ static inline void nxsem_restorebaseprio_irq(FAR struct tcb_s *stcb,
  *   stcb - The TCB of the task that was just started (if any).  If the
  *     post action caused a count to be given to another thread, then stcb
  *     is the TCB that received the count.  Note, just because stcb received
- *     the count, it does not mean that it it is higher priority than other
+ *     the count, it does not mean that it is higher priority than other
  *     threads.
  *   sem - A reference to the semaphore being posted.
  *     - If the semaphore count is <0 then there are still threads waiting
@@ -1062,7 +1062,7 @@ void nxsem_releaseholder(FAR sem_t *sem)
  *   stcb - The TCB of the task that was just started (if any).  If the
  *     post action caused a count to be given to another thread, then stcb
  *     is the TCB that received the count.  Note, just because stcb received
- *     the count, it does not mean that it it is higher priority than other
+ *     the count, it does not mean that it is higher priority than other
  *     threads.
  *   sem - A reference to the semaphore being posted.
  *     - If the semaphore count is <0 then there are still threads waiting

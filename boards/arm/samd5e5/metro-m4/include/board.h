@@ -336,7 +336,7 @@
  * CPU frequency = 120MHz / 1 = 120MHz
  */
 
-#define BOARD_MCLK_CPUDIV       1         /* MCLK divder to get CPU frequency */
+#define BOARD_MCLK_CPUDIV       1         /* MCLK divider to get CPU frequency */
 
 /* Peripheral clocking */
 

@@ -445,7 +445,7 @@ int stm32l4_oneshot_cancel(FAR struct stm32l4_oneshot_s *oneshot,
         }
       else
         {
-          /* The total time remaining is the difference.  Convert the that
+          /* The total time remaining is the difference.  Convert that
            * to units of microseconds.
            *
            *   frequency = ticks / second

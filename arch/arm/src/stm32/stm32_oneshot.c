@@ -443,7 +443,7 @@ int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
         }
       else
         {
-          /* The total time remaining is the difference.  Convert the that
+          /* The total time remaining is the difference.  Convert that
            * to units of microseconds.
            *
            *   frequency = ticks / second

@@ -399,21 +399,19 @@ void up_unblock_task(FAR struct tcb_s *tcb);
  * Name: up_block_task
  *
  * Description:
- *   The currently executing task at the head of
- *   the ready to run list must be stopped.  Save its context
- *   and move it to the inactive list specified by task_state.
+ *   The currently executing task at the head of the ready to run list must
+ *   be stopped.  Save its context and move it to the inactive list
+ *   specified by task_state.
  *
- *   This function is called only from the NuttX scheduling
- *   logic.  Interrupts will always be disabled when this
- *   function is called.
+ *   This function is called only from the NuttX scheduling logic.
+ *   Interrupts will always be disabled when this function is called.
  *
  * Input Parameters:
- *   tcb: Refers to a task in the ready-to-run list (normally
- *     the task at the head of the list).  It most be
- *     stopped, its context saved and moved into one of the
- *     waiting task lists.  It it was the task at the head
- *     of the ready-to-run list, then a context to the new
- *     ready to run task must be performed.
+ *   tcb: Refers to a task in the ready-to-run list (normally the task at
+ *     the head of the list).  It must be stopped, its context saved and
+ *     moved into one of the waiting task lists.  If it was the task at the
+ *     head of the ready-to-run list, then a context switch to the new ready
+ *     to run task must be performed.
  *   task_state: Specifies which waiting task list should be
  *     hold the blocked task TCB.
  *

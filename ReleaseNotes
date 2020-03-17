@@ -9053,7 +9053,7 @@ detailed bugfix information):
         to the specific pthread and no other.
       - uint32_t callbacks: Update the type passed to watchdog timer
         handlers.  Using uint32_t is a problem for 64-bit machines because
-        it it too small to pass a pointer.  uintptr_t is a more appropriate
+        it is too small to pass a pointer.  uintptr_t is a more appropriate
         type.
       - mq_timedreceive(): move the location where the errno value is set;
         the ETIMEDOUT errno setting was being overwritten by subsequent

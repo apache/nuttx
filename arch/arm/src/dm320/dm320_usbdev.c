@@ -1753,7 +1753,7 @@ static void dm320_epreset(unsigned int index)
 static inline void dm320_epinitialize(struct dm320_usbdev_s *priv)
 {
   uint16_t  offset;     /* Full USB buffer offset */
-  uint8_t addrhi;     /* MS bytes of ofset */
+  uint8_t addrhi;     /* MS bytes of offset */
   uint8_t addrlo;     /* LS bytes of offset */
   int     i;
 
@@ -1765,7 +1765,7 @@ static inline void dm320_epinitialize(struct dm320_usbdev_s *priv)
   dm320_putreg8(USB_CSR2_FLFIFO, DM320_USB_CSR2);
   dm320_putreg8(USB_CSR2_FLFIFO, DM320_USB_CSR2);
 
-  /* EP0 Fifo size/address (ofset == 0) */
+  /* EP0 Fifo size/address (offset == 0) */
 
   dm320_putreg8(0x00, DM320_USB_TXFIFO1);
   dm320_putreg8(0x00, DM320_USB_RXFIFO1);
