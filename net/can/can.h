@@ -331,6 +331,30 @@ ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
                        size_t len);
 
 /****************************************************************************
+ * Name: psock_can_sendmsg
+ *
+ * Description:
+ *   The psock_can_sendmsg() call may be used only when the packet socket is
+ *   in a connected state (so that the intended recipient is known).
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *   msg      msg to send
+ *   len      Length of msg to send
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   a negated errno value is returned.  See send() for the complete list
+ *   of return values.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_CMSG
+ssize_t psock_can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                       size_t len);
+#endif
+
+/****************************************************************************
  * Name: can_readahead_signal
  *
  * Description:

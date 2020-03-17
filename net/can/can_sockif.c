@@ -797,7 +797,7 @@ static ssize_t can_sendto(FAR struct socket *psock, FAR const void *buf,
  ****************************************************************************/
 #ifdef CONFIG_NET_CMSG
 static ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
-                    size_t len, int flags);
+                    size_t len, int flags)
 {
   ssize_t ret;
 
@@ -807,7 +807,7 @@ static ssize_t can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
     {
       /* Raw packet send */
 
-      ret = psock_can_send(psock, buf, len);
+      ret = psock_can_sendmsg(psock, msg, len);
     }
   else
     {

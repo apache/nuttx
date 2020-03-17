@@ -80,10 +80,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devif_pkt_send
+ * Name: devif_can_send
  *
  * Description:
- *   Called from socket logic in order to send a raw packet in response to
+ *   Called from socket logic in order to send a can packet in response to
  *   an xmit or poll request from the network interface driver.
  *
  *   This is almost identical to calling devif_send() except that the data to

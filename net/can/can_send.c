@@ -61,6 +61,10 @@
 #include "socket/socket.h"
 #include "can/can.h"
 
+#ifdef CONFIG_NET_CMSG
+#include <sys/time.h>
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -123,10 +127,15 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Copy the packet data into the device packet buffer and send it */
 
-          /* FIXME potentialy wrong function do we have a header?? */
-
           devif_can_send(dev, pstate->snd_buffer, pstate->snd_buflen);
           pstate->snd_sent = pstate->snd_buflen;
+
+          if (pstate->pr_msglen > 0) /* concat cmsg data after packet */
+            {
+              memcpy(dev->d_buf + pstate->snd_buflen, pstate->pr_msgbuf,
+                      pstate->pr_msglen);
+              dev->d_sndlen = pstate->snd_buflen + pstate->pr_msglen;
+            }
         }
 
       /* Don't allow any further call backs. */
@@ -225,6 +234,151 @@ ssize_t psock_can_send(FAR struct socket *psock, FAR const void *buf,
   state.snd_sock      = psock;          /* Socket descriptor to use */
   state.snd_buflen    = len;            /* Number of bytes to send */
   state.snd_buffer    = buf;            /* Buffer to send from */
+
+  /* Allocate resource to receive a callback */
+
+  state.snd_cb = can_callback_alloc(dev, conn);
+  if (state.snd_cb)
+    {
+      /* Set up the callback in the connection */
+
+      state.snd_cb->flags = CAN_POLL;
+      state.snd_cb->priv  = (FAR void *)&state;
+      state.snd_cb->event = psock_send_eventhandler;
+
+      /* Notify the device driver that new TX data is available. */
+
+      netdev_txnotify_dev(dev);
+
+      /* Wait for the send to complete or an error to occur.
+       * net_lockedwait will also terminate if a signal is received.
+       */
+
+      ret = net_lockedwait(&state.snd_sem);
+
+      /* Make sure that no further events are processed */
+
+      can_callback_free(dev, conn, state.snd_cb);
+    }
+
+  nxsem_destroy(&state.snd_sem);
+  net_unlock();
+
+  /* Check for a errors, Errors are signalled by negative errno values
+   * for the send length
+   */
+
+  if (state.snd_sent < 0)
+    {
+      return state.snd_sent;
+    }
+
+  /* If net_lockedwait failed, then we were probably reawakened by a signal.
+   * In this case, net_lockedwait will have returned negated errno
+   * appropriately.
+   */
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Return the number of bytes actually sent */
+
+  return state.snd_sent;
+}
+
+/****************************************************************************
+ * Name: psock_can_sendmsg
+ *
+ * Description:
+ *   The psock_can_sendmsg() call may be used only when the packet socket is
+ *   in a connected state (so that the intended recipient is known).
+ *
+ * Input Parameters:
+ *   psock    An instance of the internal socket structure.
+ *   msg      msg to send
+ *   len      Length of msg to send
+ *
+ * Returned Value:
+ *   On success, returns the number of characters sent.  On  error,
+ *   a negated errno value is retruend.  See send() for the complete list
+ *   of return values.
+ *
+ ****************************************************************************/
+
+ssize_t psock_can_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
+                       size_t len)
+{
+  FAR struct net_driver_s *dev;
+  FAR struct can_conn_s *conn;
+  struct send_s state;
+  int ret = OK;
+
+  conn = (FAR struct can_conn_s *)psock->s_conn;
+
+  /* Verify that the sockfd corresponds to valid, allocated socket */
+
+  if (!psock || psock->s_crefs <= 0)
+    {
+      return -EBADF;
+    }
+
+  /* Get the device driver that will service this transfer */
+
+  dev = conn->dev;
+  if (dev == NULL)
+    {
+      return -ENODEV;
+    }
+
+  if (conn->fd_frames)
+    {
+      if (msg->msg_iov->iov_len != CANFD_MTU
+              && msg->msg_iov->iov_len != CAN_MTU)
+        {
+          return -EINVAL;
+        }
+    }
+  else
+    {
+      if (msg->msg_iov->iov_len != CAN_MTU)
+        {
+          return -EINVAL;
+        }
+    }
+
+  /* Perform the send operation */
+
+  /* Initialize the state structure. This is done with the network locked
+   * because we don't want anything to happen until we are ready.
+   */
+
+  net_lock();
+  memset(&state, 0, sizeof(struct send_s));
+
+  /* This semaphore is used for signaling and, hence, should not have
+   * priority inheritance enabled.
+   */
+
+  nxsem_init(&state.snd_sem, 0, 0); /* Doesn't really fail */
+  nxsem_setprotocol(&state.snd_sem, SEM_PRIO_NONE);
+
+  state.snd_sock      = psock;                  /* Socket descriptor */
+  state.snd_buflen    = msg->msg_iov->iov_len;  /* bytes to send */
+  state.snd_buffer    = msg->msg_iov->iov_base; /* Buffer to send from */
+
+  if (msg->msg_controllen > sizeof(struct cmsghdr))
+    {
+      struct cmsghdr *cmsg = CMSG_FIRSTHDR(msg);
+      if (conn->tx_deadline && cmsg->cmsg_level == SOL_CAN_RAW
+              && cmsg->cmsg_type == CAN_RAW_TX_DEADLINE
+              && cmsg->cmsg_len == sizeof(struct timeval))
+        {
+          state.pr_msgbuf     = CMSG_DATA(cmsg); /* Buffer to cmsg data */
+          state.pr_msglen     = cmsg->cmsg_len;  /* len of cmsg data */
+        }
+    }
 
   /* Allocate resource to receive a callback */
 
