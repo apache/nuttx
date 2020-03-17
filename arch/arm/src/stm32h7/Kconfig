@@ -633,6 +633,90 @@ config STM32H7_SPI_DMATHRESHOLD
 		by polling logic.  But we need a threshold value to determine what
 		is small.
 
+config STM32H7_SPI1_DMA
+	bool "SPI1 DMA"
+	default n
+	depends on STM32H7_SPI1 && STM32H7_SPI_DMA
+	---help---
+		Use DMA to improve SPI1 transfer performance.
+
+config STM32H7_SPI1_DMA_BUFFER
+	int "SPI1 DMA buffer size"
+	default 0
+	depends on STM32H7_SPI1_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI1.
+
+config STM32H7_SPI2_DMA
+	bool "SPI2 DMA"
+	default n
+	depends on STM32H7_SPI2 && STM32H7_SPI_DMA
+	---help---
+		Use DMA to improve SPI2 transfer performance.
+
+config STM32H7_SPI2_DMA_BUFFER
+	int "SPI2 DMA buffer size"
+	default 0
+	depends on STM32H7_SPI2_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI2.
+
+config STM32H7_SPI3_DMA
+	bool "SPI3 DMA"
+	default n
+	depends on STM32H7_SPI3 && STM32H7_SPI_DMA
+	---help---
+		Use DMA to improve SPI3 transfer performance.
+
+config STM32H7_SPI3_DMA_BUFFER
+	int "SPI3 DMA buffer size"
+	default 0
+	depends on STM32H7_SPI3_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI3.
+
+config STM32H7_SPI4_DMA
+	bool "SPI4 DMA"
+	default n
+	depends on STM32H7_SPI4 && STM32H7_SPI_DMA
+	---help---
+		Use DMA to improve SPI4 transfer performance.
+
+config STM32H7_SPI4_DMA_BUFFER
+	int "SPI4 DMA buffer size"
+	default 0
+	depends on STM32H7_SPI4_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI4.
+
+config STM32H7_SPI5_DMA
+	bool "SPI5 DMA"
+	default n
+	depends on STM32H7_SPI5 && STM32H7_SPI_DMA
+	---help---
+		Use DMA to improve SPI5 transfer performance.
+
+config STM32H7_SPI5_DMA_BUFFER
+	int "SPI5 DMA buffer size"
+	default 0
+	depends on STM32H7_SPI5_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI5.
+
+config STM32H7_SPI6_DMA
+	bool "SPI6 DMA"
+	default n
+	depends on STM32H7_SPI6 && STM32H7_SPI_DMA
+	---help---
+		Use DMA to improve SPI6 transfer performance.
+
+config STM32H7_SPI6_DMA_BUFFER
+	int "SPI6 DMA buffer size"
+	default 0
+	depends on STM32H7_SPI6_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI6.
+
 endmenu # "SPI Configuration"
 
 menu "U[S]ART Configuration"
