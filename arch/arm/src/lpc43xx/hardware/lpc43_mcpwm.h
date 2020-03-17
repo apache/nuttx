@@ -134,7 +134,7 @@
  */
 
 /* PWM Control read address (CON), PWM Control set address (CONSET), and PWM Control
- * clear address (CONCLR) common regiser bit definitions.
+ * clear address (CONCLR) common register bit definitions.
  */
 
 #define MCPWM_CON_RUN0               (1 << 0)  /* Bit 0:  Stops/starts timer channel 0 */
@@ -160,7 +160,7 @@
 #define MCPWM_CON_DCMODE             (1 << 31) /* Bit 31: 3-phase DC mode select */
 
 /* Capture Control read address (CAPCON), Capture Control set address (CAPCONSET),
- * and Event Control clear address (CAPCONCLR) common register bit defintions
+ * and Event Control clear address (CAPCONCLR) common register bit definitions
  */
 
 #define MCPWM_CAPCON_CAP0MCI0RE      (1 << 0)  /* Bit 0:  Enable chan0 rising edge capture MCI0 */

@@ -386,7 +386,7 @@ void board_audio_i2s_enable(void)
  * Name: board_audio_i2s_disable
  *
  * Description:
- *   Dsiable I2S on the board.
+ *   Disable I2S on the board.
  *
  ****************************************************************************/
 

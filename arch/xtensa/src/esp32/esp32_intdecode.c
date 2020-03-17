@@ -74,7 +74,7 @@ static inline void xtensa_intclear(uint32_t mask)
  * Name: xtensa_int_decode
  *
  * Description:
- *   Determine the peripheral that geneated the interrupt and dispatch
+ *   Determine the peripheral that generated the interrupt and dispatch
  *   handling to the registered interrupt handler via xtensa_irq_dispatch().
  *
  * Input Parameters:

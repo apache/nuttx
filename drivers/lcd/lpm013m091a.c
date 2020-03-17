@@ -78,7 +78,7 @@
 
 struct lpm013m091a_dev_s
 {
-  /* Publically visible device structure */
+  /* Publicly visible device structure */
 
   struct lcd_dev_s dev;
 
@@ -297,7 +297,7 @@ static int lpm013m091a_hwinitialize(FAR struct lpm013m091a_dev_s *dev)
  *   devno   - Number of lcd device
  *   row     - Starting row to write to (range: 0 <= row < yres)
  *   col     - Starting column to write to (range: 0 <= col <= xres-npixels)
- *   buffer  - The buffer containing the run to be writen to the LCD
+ *   buffer  - The buffer containing the run to be written to the LCD
  *   npixels - The number of pixels to write to the
  *             (range: 0 < npixels <= xres-col)
  *
@@ -598,7 +598,7 @@ FAR struct lcd_dev_s *
           dev->setcontrast  = lpm013m091a_setcontrast;
           priv->lcd         = lcd;
 
-          /* Initialze the LCD driver */
+          /* Initialize the LCD driver */
 
           ret = lpm013m091a_hwinitialize(priv);
 

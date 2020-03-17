@@ -788,7 +788,7 @@ int spiffs_erase_block(FAR struct spiffs_s *fs, int16_t blkndx)
  * Name: spiffs_objlu_scan
  *
  * Description:
- *   Scans thru all obj lu and counts free, deleted and used pages.
+ *   Scans through all obj lu and counts free, deleted and used pages.
  *   Find the maximum block erase count  Checks magic if enabled
  *
  ****************************************************************************/
@@ -3389,7 +3389,7 @@ ssize_t spiffs_object_read(FAR struct spiffs_s *fs,
  * Name: spiffs_objlu_find_free_objid
  *
  * Description:
- *   Scans thru all object lookup for object index header pages. If total
+ *   Scans through all object lookup for object index header pages. If total
  *   possible number of object ids cannot fit into a work buffer, these are
  *   grouped. When a group containing free object ids is found, the object
  *   lu is again scanned for object ids within group and bitmasked.  Finally,

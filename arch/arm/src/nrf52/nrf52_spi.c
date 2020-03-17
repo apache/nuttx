@@ -112,7 +112,7 @@ static void nrf52_spi_setbits(FAR struct spi_dev_s *priv, int nbits);
 static int nrf52_spi_hwfeatures(FAR struct spi_dev_s *dev,
                                 spi_hwfeatures_t features);
 #endif
-static uint16_t nrf52_spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
+static uint32_t nrf52_spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
                                FAR const void *txbuffer,
                                FAR void *rxbuffer, size_t nwords);
@@ -456,12 +456,12 @@ static int nrf52_spi_init(FAR struct nrf52_spidev_s *priv)
  * Name: nrf52_spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -600,7 +600,8 @@ errout:
  *
  ****************************************************************************/
 
-static void nrf52_spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
+static void nrf52_spi_setmode(FAR struct spi_dev_s *dev,
+                              enum spi_mode_e mode)
 {
   FAR struct nrf52_spidev_s *priv = (FAR struct nrf52_spidev_s *)dev;
   uint32_t regval = 0;
@@ -757,9 +758,9 @@ static int nrf52_spi_hwfeatures(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static uint16_t nrf52_spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t nrf52_spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
-  uint16_t ret = 0;
+  uint32_t ret = 0;
 
   /* Exchange one word on SPI */
 
@@ -850,7 +851,7 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
 
   nrf52_spi_putreg(priv, NRF52_SPIM_EVENTS_STOPPED_OFFSET, 0);
 
-  /* Clear RX/TX DMA after tranfer */
+  /* Clear RX/TX DMA after transfer */
 
   nrf52_spi_putreg(priv, NRF52_SPIM_RXDPTR_OFFSET, 0);
   nrf52_spi_putreg(priv, NRF52_SPIM_RXDMAXCNT_OFFSET, 0);
@@ -869,9 +870,9 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
  * Input Parameters:
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
- *   nwords   - the length of data to send from the buffer in number of words.
- *              The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.
+ *   nwords   - the length of data to send from the buffer in number of
+ *              words.  The wordsize is determined by the number of
+ *              bits-per-word selected for the SPI interface.
  *
  * Returned Value:
  *   None

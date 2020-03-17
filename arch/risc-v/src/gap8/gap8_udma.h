@@ -40,8 +40,8 @@
  *  The only way to send or receive data is using the uDMA. These peripherals share
  *  the same uDMA ISR.
  *
- *  uDMA sybsystem drivers are object oriented to some extend. Peripherals inherit
- *  the udma class, which handels all the data exchange stuff.
+ *  uDMA subsystem drivers are object oriented to some extend. Peripherals inherit
+ *  the udma class, which handles all the data exchange stuff.
  ************************************************************************************/
 
 #ifndef _ARCH_RISCV_SRC_GAP8_UDMA_H

@@ -86,7 +86,7 @@
 #define IMXRT_CCM_CCGR5_OFFSET                   0x007c  /* CCM Clock Gating Register 5 */
 #define IMXRT_CCM_CCGR6_OFFSET                   0x0080  /* CCM Clock Gating Register 6 */
                                               /* 0x0084  Reserved */
-#define IMXRT_CCM_CMEOR_OFFSET                   0x0088  /* CCM Module Enable Overide Register */
+#define IMXRT_CCM_CMEOR_OFFSET                   0x0088  /* CCM Module Enable Override Register */
 
 /* Analog */
 
@@ -520,7 +520,7 @@
 
 #define CCM_CGPR_PMIC_DELAY_SCALER               (1 << 0)  /* Bit 0:      Defines clock division of clock for stby_count */
                                                            /* Bits 1-3:   Reserved */
-#define CCM_CGPR_EFUSE_PROG_SUPPLY_GATE          (1 << 4)  /* Bit 4:      allow fuse programing */
+#define CCM_CGPR_EFUSE_PROG_SUPPLY_GATE          (1 << 4)  /* Bit 4:      allow fuse programming */
                                                            /* Bits 5-13:  Reserved */
 #define CCM_CGPR_SYS_MEM_DS_CTRL_SHIFT           (14)      /* Bits 14-15: System memory DS control */
 #define CCM_CGPR_SYS_MEM_DS_CTRL_MASK            (0x7 << CCM_CGPR_SYS_MEM_DS_CTRL_SHIFT)
@@ -712,13 +712,13 @@
 /* Module Enable Override Register */
 
                                                            /* Bits 0-4: Reserved */
-#define CCM_CMEOR_MOD_EN_OV_GPT                  (1 << 5)  /* Bit 5:      Overide clock enable signal from GPT */
-#define CCM_CMEOR_MOD_EN_OV_PIT                  (1 << 6)  /* Bit 6:      Overide clock enable signal from PIT */
-#define CCM_CMEOR_MOD_EN_OV_USDHC                (1 << 7)  /* Bit 7:      Overide clock enable signal from USDHC */
-#define CCM_CMEOR_MOD_EN_OV_TRNG                 (1 << 9)  /* Bit 9:      Overide clock enable signal from TRNG */
+#define CCM_CMEOR_MOD_EN_OV_GPT                  (1 << 5)  /* Bit 5:      Override clock enable signal from GPT */
+#define CCM_CMEOR_MOD_EN_OV_PIT                  (1 << 6)  /* Bit 6:      Override clock enable signal from PIT */
+#define CCM_CMEOR_MOD_EN_OV_USDHC                (1 << 7)  /* Bit 7:      Override clock enable signal from USDHC */
+#define CCM_CMEOR_MOD_EN_OV_TRNG                 (1 << 9)  /* Bit 9:      Override clock enable signal from TRNG */
                                                            /* Bits 10-27: Reserved */
-#define CCM_CMEOR_MOD_EN_OV_CAN2_CPI             (1 << 28) /* Bit 28:     Overide clock enable signal from CAN2 */
-#define CCM_CMEOR_MOD_EN_OV_CAN1_CPI             (1 << 30) /* Bit 30:     Overide clock enable signal from CAN1 */
+#define CCM_CMEOR_MOD_EN_OV_CAN2_CPI             (1 << 28) /* Bit 28:     Override clock enable signal from CAN2 */
+#define CCM_CMEOR_MOD_EN_OV_CAN1_CPI             (1 << 30) /* Bit 30:     Override clock enable signal from CAN1 */
                                                            /* Bit 31:     Reserved */
 
 /*  Analog System PLL (2) Control Register ***********************************/

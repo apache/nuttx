@@ -54,18 +54,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NFS_TICKS          1              /* Number of system ticks */
-#define NFS_HZ             CLOCKS_PER_SEC /* Ticks/sec */
-#define NFS_TIMEO          (1 * NFS_HZ)   /* Default timeout = 1 second */
-#define NFS_MINTIMEO       (1 * NFS_HZ)   /* Min timeout to use */
-#define NFS_MAXTIMEO       (60 * NFS_HZ)  /* Max timeout to backoff to */
-#define NFS_TIMEOUTMUL     2              /* Timeout/Delay multiplier */
+#define NFS_TIMEO          10             /* Default timeout = 1 second */
+#define NFS_MINTIMEO       10             /* Min timeout to use */
+#define NFS_MAXTIMEO       255            /* Max timeout to backoff to */
 #define NFS_MAXREXMIT      100            /* Stop counting after this many */
 #define NFS_RETRANS        10             /* Num of retrans for soft mounts */
 #define NFS_WSIZE          8192           /* Def. write data size <= 8192 */
 #define NFS_RSIZE          8192           /* Def. read data size <= 8192 */
-#define NFS_READDIRSIZE    8192           /* Def. readdir size */
-#define NFS_NPROCS         23
+#define NFS_READDIRSIZE    1024           /* Def. readdir size */
 
 /* Ideally, NFS_DIRBLKSIZ should be bigger, but I've seen servers with
  * broken NFS/ethernet drivers that won't work with anything bigger (Linux..)
@@ -85,9 +81,6 @@
  *  Public Data
  ****************************************************************************/
 
-extern uint32_t nfs_true;
-extern uint32_t nfs_false;
-extern uint32_t nfs_xdrneg1;
 #ifdef CONFIG_NFS_STATISTICS
 extern struct nfsstats nfsstats;
 #endif
@@ -115,11 +108,7 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN void nfs_semtake(FAR struct nfsmount *nmp);
-EXTERN void nfs_semgive(FAR struct nfsmount *nmp);
-EXTERN int  nfs_checkmount(FAR struct nfsmount *nmp);
-EXTERN int  nfs_fsinfo(FAR struct nfsmount *nmp);
-EXTERN int nfs_request(struct nfsmount *nmp, int procnum,
+EXTERN int nfs_request(FAR struct nfsmount *nmp, int procnum,
                 FAR void *request, size_t reqlen,
                 FAR void *response, size_t resplen);
 EXTERN int  nfs_lookup(FAR struct nfsmount *nmp, FAR const char *filename,

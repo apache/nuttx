@@ -808,7 +808,7 @@ static int stm32_dma2d_setclut(FAR const struct fb_cmap_s *cmap)
  * Input Parameters:
  *   oinfo - Overlay to fill
  *   area  - Reference to the valid area structure select the area
- *   argb  - Color to fill the selected area. Color must be argb8888 formated.
+ *   argb  - Color to fill the selected area. Color must be argb8888 formatted.
  *
  * Returned Value:
  *    OK        - On success

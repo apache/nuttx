@@ -2728,7 +2728,7 @@ static bool cdcuart_rxflowcontrol(FAR struct uart_dev_s *dev,
 
           priv->iactive = false;
 
-          /* Set DSR if it is not alredy set */
+          /* Set DSR if it is not already set */
 
           if ((priv->serialstate & CDCACM_UART_DSR) == 0)
             {

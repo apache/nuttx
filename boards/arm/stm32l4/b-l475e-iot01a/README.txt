@@ -296,7 +296,7 @@ Configuration sub-directories
             Where 37 the address is an example.  It should be different for
             each radio, but in the the range 1..ed and ef..fe (ee and ff are
             the reserved for multicast and broadcast addresses, respectively.
-            Zero is a valid address but not recommeded).
+            Zero is a valid address but not recommended).
 
          b) Bring each the network up on each board in the WPAN:
 
@@ -340,7 +340,7 @@ Configuration sub-directories
        NOTE:  Unlike the UDP test, there the TCP test will terminate
        automatically when the packet exchange is complete.
 
-    6. The NSH Telnet deamon (server) is enabled.  However, it cannot be
+    6. The NSH Telnet daemon (server) is enabled.  However, it cannot be
        started automatically.  Rather, it must be started AFTER the network
        has been brought up using the NSH 'telnetd' command.  You would want
        to start the Telent daemon only if you want the node to serve Telent
@@ -360,7 +360,7 @@ Configuration sub-directories
          nsh> telnet <server-ip>
 
        Where <server-ip> is the IP address of the server that you got for
-       the ifconfig commna on the remote node.  Once the telnet session
+       the ifconfig comma on the remote node.  Once the telnet session
        has been started, you can end the session with:
 
          nsh> exit
@@ -619,7 +619,7 @@ Configuration sub-directories
         Initial testing shows the same basic behavior as noted before:
         The UDP test works and TCP test (usually) works.  There are,
         however, are errors in reported by the hub in the TCP test.
-        Occassionally the test will hang when ther server echoes the data
+        Occasionally the test will hang when the server echoes the data
         back to the client.  These errors are presumably the result of ACKs
         from the receiver colliding with frames from the sender.
 

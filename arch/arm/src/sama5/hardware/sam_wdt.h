@@ -56,7 +56,7 @@
 #define SAM_WDT_MR_OFFSET         0x04 /* Mode Register */
 #define SAM_WDT_SR_OFFSET         0x08 /* Status Register */
 
-/* WDT register adresses ***************************************************************/
+/* WDT register addresses **************************************************************/
 
 #define SAM_WDT_CR                (SAM_WDT_VBASE+SAM_WDT_CR_OFFSET)
 #define SAM_WDT_MR                (SAM_WDT_VBASE+SAM_WDT_MR_OFFSET)

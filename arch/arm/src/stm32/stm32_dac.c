@@ -169,11 +169,11 @@
 #if defined(CONFIG_STM32_DAC1CH1_DMA) && !defined(DAC1CH1_HRTIM) && \
     !defined(CONFIG_STM32_DAC1CH1_DMA_EXTERNAL)
 #  if !defined(CONFIG_STM32_DAC1CH1_TIMER)
-#    warning "A timer number must be specificed in CONFIG_STM32_DAC1CH1_TIMER"
+#    warning "A timer number must be specified in CONFIG_STM32_DAC1CH1_TIMER"
 #    undef CONFIG_STM32_DAC1CH1_DMA
 #    undef CONFIG_STM32_DAC1CH1_TIMER_FREQUENCY
 #  elif !defined(CONFIG_STM32_DAC1CH1_TIMER_FREQUENCY)
-#    warning "A timer frequency must be specificed in CONFIG_STM32_DAC1CH1_TIMER_FREQUENCY"
+#    warning "A timer frequency must be specified in CONFIG_STM32_DAC1CH1_TIMER_FREQUENCY"
 #    undef CONFIG_STM32_DAC1CH1_DMA
 #    undef CONFIG_STM32_DAC1CH1_TIMER
 #  endif
@@ -182,11 +182,11 @@
 #if defined(CONFIG_STM32_DAC1CH2_DMA) && !defined(DAC1CH2_HRTIM) && \
     !defined(CONFIG_STM32_DAC1CH2_DMA_EXTERNAL)
 #  if !defined(CONFIG_STM32_DAC1CH2_TIMER)
-#    warning "A timer number must be specificed in CONFIG_STM32_DAC1CH2_TIMER"
+#    warning "A timer number must be specified in CONFIG_STM32_DAC1CH2_TIMER"
 #    undef CONFIG_STM32_DAC1CH2_DMA
 #    undef CONFIG_STM32_DAC1CH2_TIMER_FREQUENCY
 #  elif !defined(CONFIG_STM32_DAC1CH2_TIMER_FREQUENCY)
-#    warning "A timer frequency must be specificed in CONFIG_STM32_DAC1CH2_TIMER_FREQUENCY"
+#    warning "A timer frequency must be specified in CONFIG_STM32_DAC1CH2_TIMER_FREQUENCY"
 #    undef CONFIG_STM32_DAC1CH2_DMA
 #    undef CONFIG_STM32_DAC1CH2_TIMER
 #  endif
@@ -195,11 +195,11 @@
 #if defined(CONFIG_STM32_DAC2CH1_DMA) && !defined(DAC2CH1_HRTIM) && \
     !defined(CONFIG_STM32_DAC2CH1_DMA_EXTERNAL)
 #  if !defined(CONFIG_STM32_DAC2CH1_TIMER)
-#    warning "A timer number must be specificed in CONFIG_STM32_DAC2CH1_TIMER"
+#    warning "A timer number must be specified in CONFIG_STM32_DAC2CH1_TIMER"
 #    undef CONFIG_STM32_DAC2CH1_DMA
 #    undef CONFIG_STM32_DAC2CH1_TIMER_FREQUENCY
 #  elif !defined(CONFIG_STM32_DAC2CH1_TIMER_FREQUENCY)
-#    warning "A timer frequency must be specificed in CONFIG_STM32_DAC2CH1_TIMER_FREQUENCY"
+#    warning "A timer frequency must be specified in CONFIG_STM32_DAC2CH1_TIMER_FREQUENCY"
 #    undef CONFIG_STM32_DAC2CH1_DMA
 #    undef CONFIG_STM32_DAC2CH1_TIMER
 #  endif
@@ -1229,7 +1229,7 @@ static int dac_timinit(FAR struct stm32_chan_s *chan)
    * counter mode (up).
    */
 
-  /* Enable the timer.  At most, two of the following cases (pluse the
+  /* Enable the timer.  At most, two of the following cases (pulse the
    * default) will be enabled
    */
 

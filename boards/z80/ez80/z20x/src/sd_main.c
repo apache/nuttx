@@ -44,12 +44,7 @@
 #define MMCSD_MOUNTPT    "/mnt/sdcard"
 #define MMCSD_HEXFILE    "/mnt/sdcard/nuttx.hex"
 
-#define SRAM_START       0x040000
-#define SRAM_SIZE        0x100000
-#define SRAM_END         (SRAM_START + SRAM_SIZE)
-
-#define SRAM_RESET       SRAM_START
-#define SRAM_ENTRY       ((sram_entry_t)SRAM_START)
+#define SRAM_ENTRY       ((sram_entry_t)PROGSTART)
 
 /****************************************************************************
  * Private Types
@@ -115,7 +110,7 @@ int sd_main(int argc, char *argv)
 
   /* Load the HEX image into memory */
 
-  ret = hex2mem(fd, (uint32_t)SRAM_START, (uint32_t)SRAM_END, 0);
+  ret = hex2mem(fd, (uint32_t)PROGSTART, (uint32_t)PROGEND, 0);
   if (ret < 0)
     {
       /* We failed to load the HEX image */

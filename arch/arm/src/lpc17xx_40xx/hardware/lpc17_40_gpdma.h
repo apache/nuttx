@@ -490,7 +490,7 @@
 #  define DMACH_CONTROL_DWIDTH_32BIT      (2 << DMACH_CONTROL_DWIDTH_SHIFT) /* Word (32-bit) */
 #define DMACH_CONTROL_SI                  (1 << 26) /* Bit 26: Source increment */
 #define DMACH_CONTROL_DI                  (1 << 27) /* Bit 27: Destination increment */
-#define DMACH_CONTROL_PROT1               (1 << 28) /* Bit 28: User/priviledged mode */
+#define DMACH_CONTROL_PROT1               (1 << 28) /* Bit 28: User/privileged mode */
 #define DMACH_CONTROL_PROT2               (1 << 29) /* Bit 29: Bufferable */
 #define DMACH_CONTROL_PROT3               (1 << 30) /* Bit 30: Cacheable */
 #define DMACH_CONTROL_I                   (1 << 31) /* Bit 31: Terminal count interrupt enable */

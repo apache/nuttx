@@ -128,7 +128,7 @@
  * Compliance Level: Required for TLB-based MMUs; Optional otherwise.
  */
 
-#define CP0_CONTEXT_BADVPN2_SHIFT   (4)       /* Bits 4-22: Virtual address that cause an excpetion */
+#define CP0_CONTEXT_BADVPN2_SHIFT   (4)       /* Bits 4-22: Virtual address that cause an exception */
 #define CP0_CONTEXT_BADVPN2_MASK    (0x0007ffff << CP0_CONTEXT_BADVPN2_SHIFT)
 #define CP0_CONTEXT_PTEBASE_SHIFT   (23)      /* Bits 23-31: Page table base address */
 #define CP0_CONTEXT_PTEBASE_MASK    (0x000001ff << CP0_CONTEXT_PTEBASE_SHIFT)
@@ -218,7 +218,7 @@
 #  define CP0_STATUS_IPL_SHIFT      (10)       /* Bits 10-16+18: Interrupt Mask */
 #  define CP0_STATUS_IPL_MASK       (0x17f << CP0_STATUS_IPL_SHIFT)
 #    define CP0_STATUS_IPL_ENALL    (0x00  << CP0_STATUS_IPL_SHIFT)
-#    define CP0_STATUS_IPL_SW0      ((CHIP_MAX_PRIORITY - 1) << CP0_STATUS_IPL_SHIFT)
+#    define CP0_STATUS_IPL_SW0      ((CHIP_SW0_PRIORITY - 1) << CP0_STATUS_IPL_SHIFT)
 #    define CP0_STATUS_IPL_DISALL   (CHIP_MAX_PRIORITY << CP0_STATUS_IPL_SHIFT)
 #      define CP0_STATUS_INT_ENALL  CP0_STATUS_IPL_ENALL
 #      define CP0_STATUS_INT_SW0    CP0_STATUS_IPL_SW0
@@ -491,7 +491,7 @@
 #define CP0_WATCHHI_MASK_MASK       (0x1ff << CP0_WATCHHI_MASK_SHIFT)
 #define CP0_WATCHHI_ASID_SHIFT      (16)       /* Bits 16-23:  ASID value which to match that in the EntryHi register */
 #define CP0_WATCHHI_ASID_MASK       (0xff << CP0_WATCHHI_ASID_SHIFT)
-#define CP0_WATCHHI_G               (1 << 30) /* Bit 30: Any address matcing the WatchLo addr will cause an exception */
+#define CP0_WATCHHI_G               (1 << 30) /* Bit 30: Any address matching the WatchLo addr will cause an exception */
 #define CP0_WATCHHI_M               (1 << 31) /* Bit 30: Another pair of WatchHi/WatchLo registers at select n+1 */
 
 /* Register Number: 20 Sel: 0 Name: XContext

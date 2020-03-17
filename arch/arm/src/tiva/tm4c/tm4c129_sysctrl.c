@@ -371,7 +371,7 @@ uint32_t tiva_clock_reconfigure(uint32_t pllfreq0, uint32_t pllfreq1,
         }
     }
 
-  /* We get here on a timout, failing to get the PLL lock indication */
+  /* We get here on a timeout, failing to get the PLL lock indication */
 
   DEBUGPANIC();
   return 0;

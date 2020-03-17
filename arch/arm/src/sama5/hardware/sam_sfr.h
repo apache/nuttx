@@ -276,11 +276,10 @@
 
 /* AIC Redirection Register */
 
-#  define SFR_AICREDIR_NSAIC        (1 << 0)  /* Bit 0: Interrupt redirection to Non-Secure AIC */
-#    define SFR_AICREDIR_ENABLE     (1 << 0)  /* Bit 0: 1=All interrupts to AIC */
-#    define SFR_AICREDIR_DISABLE    (0)       /* Bit 0: 0=Secure interrupts to SAIC */
-#  define SFR_AICREDIR_KEY          (0x5f67b102) /* Bits 1-31: Access key */
-
+#  define SFR_AICREDIR_NSAIC        (1 << 0)      /* Bit 0: Interrupt redirection to Non-Secure AIC */
+#    define SFR_AICREDIR_ENABLE     (1 << 0)      /* Bit 0: 1=All interrupts to AIC */
+#    define SFR_AICREDIR_DISABLE    (0)           /* Bit 0: 0=Secure interrupts to SAIC */
+#    define SFR_AICREDIR_KEY        (0xb6d81c4d)  /* Bits 1-31: Access key */
 #endif
 
 #ifdef ATSAMA5D2

@@ -5,7 +5,7 @@
  *     rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This dervies remotely from some Telnet logic from uIP which has a
+ * This derives remotely from some Telnet logic from uIP which has a
  * compatible BSD license:
  *
  *   Author: Adam Dunkels <adam@sics.se>
@@ -438,7 +438,7 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
                 telnet_sendopt(priv, TELNET_DO, ch);
               }
 
-            /* Reply with a DONT */
+            /* Reply with a DON'T */
 
             else
 #endif
@@ -1029,7 +1029,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
       goto errout_with_dev;
     }
 
-  /* Allocate a unique minor device number of the telnet drvier.
+  /* Allocate a unique minor device number of the telnet driver.
    * Get exclusive access to the minor counter.
    */
 

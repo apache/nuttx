@@ -262,7 +262,7 @@ static enum scg_system_clock_mode_e s32k1xx_get_runmode(void)
         mode = SCG_SYSTEM_CLOCK_MODE_VLPR;
         break;
 
-      /* Hight speed run mode */
+      /* High speed run mode */
 
       case SMC_PMSTAT_PMSTAT_HSRUN:
         mode = SCG_SYSTEM_CLOCK_MODE_HSRUN;

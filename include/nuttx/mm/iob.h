@@ -273,7 +273,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled, enum iob_user_e consumerid);
  * Name: iob_navail
  *
  * Description:
- *   Return the number of of available IOBs.
+ *   Return the number of available IOBs.
  *
  ****************************************************************************/
 
@@ -590,7 +590,7 @@ void iob_dump(FAR const char *msg, FAR struct iob_s *iob, unsigned int len,
  * Name: iob_getuserstats
  *
  * Description:
- *   Return a reference to the IOB usage statitics for the IOB consumer/producer
+ *   Return a reference to the IOB usage statistics for the IOB consumer/producer
  *
  * Input Parameters:
  *   userid - id representing the IOB producer/consumer

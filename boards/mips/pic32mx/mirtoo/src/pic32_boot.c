@@ -134,7 +134,7 @@ static inline void pic32mx_uartinitialize(void)
  *
  * Description:
  *   All PIC32MX architectures must provide the following entry point.
- *   This entry point is called early in the intitialization -- after all
+ *   This entry point is called early in the initialization -- after all
  *   memory has been configured and mapped but before any devices have been
  *   initialized.
  *

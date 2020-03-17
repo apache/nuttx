@@ -64,6 +64,9 @@
 #  if defined(CONFIG_ARM_LWL_CONSOLE)
 #    undef  USE_SERIALDRIVER
 #    undef  USE_EARLYSERIALINIT
+#  elif defined(CONFIG_CONSOLE_SYSLOG)
+#    undef  USE_SERIALDRIVER
+#    undef  USE_EARLYSERIALINIT
 #  else
 #    define USE_SERIALDRIVER 1
 #    define USE_EARLYSERIALINIT 1
@@ -427,20 +430,14 @@ void up_lowputs(const char *str);
 
 #ifdef USE_SERIALDRIVER
 void up_serialinit(void);
-#else
-#  define up_serialinit()
 #endif
 
 #ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void);
-#else
-#  define up_earlyserialinit()
 #endif
 
 #ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
-#else
-#  define rpmsg_serialinit()
 #endif
 
 #ifdef CONFIG_ARM_LWL_CONSOLE

@@ -1,4 +1,4 @@
-/******************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32h7/hardware/stm32h7x3xx_flash.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
@@ -31,16 +31,16 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_FLASH_H
 #define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7X3XX_FLASH_H
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ ****************************************************************************/
 
-/* Register Offsets *****************************************************************/
+/* Register Offsets *********************************************************/
 
 #define STM32_FLASH_ACR_OFFSET         0x0000 /* Access control register */
 #define STM32_FLASH_KEYR1_OFFSET       0x0004 /* Key register for bank 1 */
@@ -84,7 +84,7 @@
 #define STM32_FLASH_BANK1_OFFSET       0x0000 /* Bank 1 registers offset */
 #define STM32_FLASH_BANK2_OFFSET       0x0100 /* Bank 2 registers offset */
 
-/* Register Addresses ***************************************************************/
+/* Register Addresses *******************************************************/
 
 #define STM32_FLASH_ACR                (STM32_FLASHIF_BASE + STM32_FLASH_ACR_OFFSET)
 #define STM32_FLASH_KEYR1              (STM32_FLASHIF_BASE + STM32_FLASH_KEYR1_OFFSET)
@@ -125,7 +125,7 @@
 #define STM32_FLASH_CRCEADD2R          (STM32_FLASHIF_BASE + STM32_FLASH_CRCEADD2R_OFFSET)
 #define STM32_FLASH_ECC_FA2R           (STM32_FLASHIF_BASE + STM32_FLASH_ECC_FA2R_OFFSET)
 
-/* Register Bitfield Definitions ****************************************************/
+/* Register Bitfield Definitions ********************************************/
 
 /* Flash Access Control Register (ACR) Bank 1 or 2 */
 
@@ -168,7 +168,7 @@
 #define FLASH_CR_START                 (1 << 7)   /* Bit 7: Erase start */
 #define FLASH_CR_SNB_SHIFT             (8)        /* Bits 8-10: Sector number */
 #define FLASH_CR_SNB_MASK              (15 << FLASH_CR_SNB_SHIFT)  /* Used to clear FLASH_CR_SNB bits */
-#  define FLASH_CR_SNB(n)              ((uint32_t)(n & 0x7) << FLASH_CR_SNB_SHIFT) /* Sector n, n=0..7 */
+#  define FLASH_CR_SNB(n)              ((uint32_t)((n) & 0x7) << FLASH_CR_SNB_SHIFT) /* Sector n, n=0..7 */
                                                   /* Bits 11-13: Reserved */
 #define FLASH_CR_SPSS2                 (1 << 14)  /* Bit 14: Bank1 Reserved, Bank 2 special sector selection bit */
 #define FLASH_CR_CRCEN                 (1 << 15)  /* Bit 15: CRC control enable */
@@ -177,14 +177,14 @@
 #define FLASH_CR_PGSERRIE              (1 << 18)  /* Bit 18: Programming sequence error interrupt enable */
 #define FLASH_CR_STRBERRIE             (1 << 19)  /* Bit 19: Strobe error interrupt enable */
                                                   /* Bit 20: Reserved */
-#define FLASH_CR_INCERRIE              (1 << 21)  /* Bit 21: Inconsistency error interrupt enbale */
+#define FLASH_CR_INCERRIE              (1 << 21)  /* Bit 21: Inconsistency error interrupt enable */
 #define FLASH_CR_OPERRIE               (1 << 22)  /* Bit 22: Write/erase error interrupt enable */
 #define FLASH_CR_RDPERRIE              (1 << 23)  /* Bit 23: Read protection error interrupt enable */
 #define FLASH_CR_RDSERRIE              (1 << 24)  /* Bit 24: Secure error interrupt enable */
 #define FLASH_CR_SNECCERRIE            (1 << 25)  /* Bit 25: ECC single correction error interrupt enable */
 #define FLASH_CR_DBECCERRIE            (1 << 26)  /* Bit 26: ECC double detection error interrupt enable */
 #define FLASH_CR_CRCENDIE              (1 << 27)  /* Bit 27: CRC end of calculation interrupt enable */
-                                                  /* Bits 28-31: Reserverd */
+                                                  /* Bits 28-31: Reserved */
 
 /* Flash Status Register (SR)  Bank 1 or 2 */
 

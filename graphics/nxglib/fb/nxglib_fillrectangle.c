@@ -89,7 +89,7 @@ void NXGL_FUNCNAME(nxgl_fillrectangle, NXGLIB_SUFFIX)
 
   stride = pinfo->stride;
 
-  /* Get the dimensions of the rectange to fill in pixels */
+  /* Get the dimensions of the rectangle to fill in pixels */
 
   width  = rect->pt2.x - rect->pt1.x + 1;
   rows   = rect->pt2.y - rect->pt1.y + 1;

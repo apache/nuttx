@@ -511,7 +511,7 @@ static int lc823450_epclearreq(struct usbdev_ep_s *ep)
       q_ent = sq_remlast(&privep->req_q);
       req = &container_of(q_ent, struct lc823450_req_s, q_ent)->req;
 
-      /* return reqbuf to funciton driver */
+      /* return reqbuf to function driver */
 
       req->result = -ESHUTDOWN;
       req->callback(ep, req);
@@ -689,7 +689,7 @@ static int lc823450_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
     }
   else if (privep->in)
     {
-      /* Send packet requst from function driver */
+      /* Send packet request from function driver */
 
       flags = spin_lock_irqsave();
 
@@ -1555,7 +1555,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   g_usbdev.bufoffset = 0x180;
 
-  /* Device mode enbale */
+  /* Device mode enable */
 
   modifyreg32(USB_MODE, 0, USB_MODE_DEV_EN);
 

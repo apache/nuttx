@@ -1,5 +1,5 @@
 /*****************************************************************************
- * arm/arm/src/imxrt/imxrt_lpspi.c
+ * arch/arm/src/imxrt/imxrt_lpspi.c
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Authors: Teodora Kireva
@@ -151,7 +151,7 @@ static inline uint32_t imxrt_lpspi_getreg32(FAR struct imxrt_lpspidev_s *priv,
                                             uint8_t offset);
 static inline void imxrt_lpspi_putreg32(FAR struct imxrt_lpspidev_s *priv,
                                         uint8_t offset, uint32_t value);
-static inline uint16_t imxrt_lpspi_readword(
+static inline uint32_t imxrt_lpspi_readword(
                           FAR struct imxrt_lpspidev_s *priv);
 static inline void imxrt_lpspi_writeword(FAR struct imxrt_lpspidev_s *priv,
                                          uint16_t byte);
@@ -177,7 +177,7 @@ static void imxrt_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static int imxrt_lpspi_hwfeatures(FAR struct spi_dev_s *dev,
                                   imxrt_lpspi_hwfeatures_t features);
 #endif
-static uint16_t imxrt_lpspi_send(FAR struct spi_dev_s *dev, uint16_t wd);
+static uint32_t imxrt_lpspi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 static void imxrt_lpspi_exchange(FAR struct spi_dev_s *dev,
                                  FAR const void *txbuffer, FAR void *rxbuffer,
                                  size_t nwords);
@@ -482,7 +482,7 @@ static inline void imxrt_lpspi_putreg32(FAR struct imxrt_lpspidev_s *priv,
  *
  *****************************************************************************/
 
-static inline uint16_t imxrt_lpspi_readword(FAR struct imxrt_lpspidev_s *priv)
+static inline uint32_t imxrt_lpspi_readword(FAR struct imxrt_lpspidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
@@ -491,7 +491,7 @@ static inline uint16_t imxrt_lpspi_readword(FAR struct imxrt_lpspidev_s *priv)
 
   /* Then return the received byte */
 
-  return (uint16_t) imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_RDR_OFFSET);
+  return imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_RDR_OFFSET);
 }
 
 /*****************************************************************************
@@ -844,12 +844,12 @@ static inline void imxrt_lpspi_master_set_delays(
  * Name: imxrt_lpspi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -1233,15 +1233,15 @@ static int imxrt_lpspi_hwfeatures(FAR struct spi_dev_s *dev,
  *
  *****************************************************************************/
 
-static uint16_t imxrt_lpspi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t imxrt_lpspi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   FAR struct imxrt_lpspidev_s *priv = (FAR struct imxrt_lpspidev_s *)dev;
   uint32_t regval;
-  uint16_t ret;
+  uint32_t ret;
 
   DEBUGASSERT(priv && priv->spibase);
 
-  imxrt_lpspi_writeword(priv, (uint32_t) wd);
+  imxrt_lpspi_writeword(priv, wd);
 
   while ((imxrt_lpspi_getreg32(priv, IMXRT_LPSPI_SR_OFFSET) & LPSPI_SR_RDF) !=
          LPSPI_SR_RDF);
@@ -1322,7 +1322,7 @@ static void imxrt_lpspi_exchange_nodma(FAR struct spi_dev_s *dev,
 
           /* Exchange one word */
 
-          word = imxrt_lpspi_send(dev, word);
+          word = (uint16_t) imxrt_lpspi_send(dev, (uint32_t) word);
 
           /* Is there a buffer to receive the return value? */
 
@@ -1355,7 +1355,7 @@ static void imxrt_lpspi_exchange_nodma(FAR struct spi_dev_s *dev,
 
           /* Exchange one word */
 
-          word = (uint8_t) imxrt_lpspi_send(dev, (uint16_t) word);
+          word = (uint8_t) imxrt_lpspi_send(dev, (uint32_t) word);
 
           /* Is there a buffer to receive the return value? */
 
@@ -1408,9 +1408,9 @@ static void imxrt_lpspi_sndblock(FAR struct spi_dev_s *dev,
  *   rxbuffer - A pointer to the buffer in which to receive data
  *   nwords   - the length of data that can be received in the buffer in
  *              number of words.  The wordsize is determined by the number of
- *              bits-per-word selected for the SPI interface.  If
- *              nbits <= 8, the data is packed into uint8_t's;
- *              if nbits >8, the data is packed into uint16_t's
+ *              bits-per-word selected for the SPI interface.  If nbits <= 8,
+ *              the data is packed into uint8_t's; if nbits >8, the data is
+ *              packed into uint16_t's
  *
  * Returned Value:
  *   None

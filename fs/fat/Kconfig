@@ -110,7 +110,7 @@ config FAT_FORCE_INDIRECT
 		from mixed locations, some of which are DMA-able and some of
 		which are not.  But CONFIG_FAT_FORCE_INDIRECT could be used
 		without CONFIG_FAT_DMAMEMORY if there is, for example, only a
-		memory aligment constraints.
+		memory alignment constraints.
 
 			FORCE_   DMA    DIRECT EXAMPLE USAGE
 			INDIRECT MEMORY RETRY
@@ -184,7 +184,7 @@ config FAT_DIRECT_RETRY
 		The lower level SDIO driver may have, certain requirements on the
 		memory buffer in order to perform the transfer.  Perhaps special
 		DMA memory should be used (with CONFIG_FAT_DMAMEMORY) or perhaps
-		some special memory alignment is required to interace with the
+		some special memory alignment is required to interface with the
 		hardware.
 
 		If this option is selected, then the FAT file system will first

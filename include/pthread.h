@@ -506,7 +506,7 @@ int  pthread_setcancelstate(int state, FAR int *oldstate);
 int  pthread_setcanceltype(int type, FAR int *oldtype);
 void pthread_testcancel(void);
 
-/* A thread may set up cleanup functions to execut when the thread exits or
+/* A thread may set up cleanup functions to execute when the thread exits or
  * is canceled.
  */
 

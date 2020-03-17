@@ -51,7 +51,7 @@
 /************************************************************************************
  * Public Function - Initialization
  *
- * Performs low level board initializaiton tasks.
+ * Performs low level board initialization tasks.
  ************************************************************************************/
 
 void __nr5_init(void)

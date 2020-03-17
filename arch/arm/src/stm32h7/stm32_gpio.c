@@ -136,7 +136,7 @@ void stm32_gpioinit(void)
  *
  * Returned Value:
  *   OK on success
- *   A negated errono value on invalid port, or when pin is locked as ALT
+ *   A negated errno value on invalid port, or when pin is locked as ALT
  *   function.
  *
  * To-Do: Auto Power Enable
@@ -441,4 +441,4 @@ bool stm32_gpioread(uint32_t pinset)
   return 0;
 }
 
-#endif /* CONFIG_STM32H7_STM32H7X3XX */
+#endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX */

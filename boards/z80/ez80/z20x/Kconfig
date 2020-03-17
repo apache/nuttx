@@ -5,17 +5,48 @@
 
 if ARCH_BOARD_Z20X
 
-config Z20X_VGA
-	bool "VGA Controller attached?"
-	default n
+choice
+	prompt "Build selection"
+	default Z20X_PROGRAM
+
+config Z20X_SDBOOT
+	bool "SD boot loader"
+	select LIB_HEX2BIN
+	select EZ80_BOOTLOADER
+	depends on EZ80_SPI && MMCSD_SPI
 	---help---
-		Select this option if you have an I/O Controller and a VGA vide card
-		connected.
+		Select this option only with the boards/z20x/sdboot
+		configuration.  This will enable the components needed only by the
+		boot loader.
+
+config Z20X_W25BOOT
+	bool "W25 boot loader"
+	select Z20X_W25_CHARDEV
+	select LIB_HEX2BIN
+	select EZ80_BOOTLOADER
+	depends on EZ80_SPI && MTD_W25
+	---help---
+		Select this option only with the boards/z20x/w25boot
+		configuration.  This will enable the components needed only by the
+		boot loader.
+
+config Z20X_PROGRAM
+	bool "Loadable program"
+	select EZ80_PROGRAM
+	---help---
+		Normal program that resides on SD card or in W25 FLASH and is
+		loaded into RAM by a bootloader.
+
+config Z20X_STANDALONE
+	bool "Standalone FLASH progroam"
+	select BOOT_RUNFROMFLASH
+	---help---
+		Select this option only to build a small program that executes
+		from z20x FLASH memory.
 
 config Z20X_COPYTORAM
 	bool "Copy to RAM"
-	default n
-	depends on BOOT_RUNFROMEXTSRAM
+	select BOOT_RUNFROMEXTSRAM
 	---help---
 		This option is available only when running from external SRAM
 		(CONFIG_BOOT_RUNFROMEXTSRAM).  In that case there are two possible
@@ -24,12 +55,40 @@ config Z20X_COPYTORAM
 		boots out of FLASH, copies itself to SRAM, and runs from SRAM.  This
 		configuration setting selects that latter option.
 
-config Z20X_SDBOOT
-	bool "Build SD boot loader"
-	default n
+endchoice
+
+config Z20X_W25_PROGSIZE
+	int "W25 partition size"
+	default 262144
+	range 131072 524288
+	depends on Z20X_W25BOOT
 	---help---
-		Select this option only with the boards/z20x/sdboot
-		configuration.  This will enable the components needed only by the
-		boot loader.
+		This is the size of the partition at the beginning to the W25
+		serial FLASH that will be used to hold the boot program.  Since
+		this program must run from SRAM, there would be no purpose int
+		making this size any larger than the size of the internal SRAM.
+
+choice
+	prompt "Winbond W25 Usage"
+	default Z20X_W25_CHARDEV
+	depends on EZ80_SPI && MTD_W25
+
+config Z20X_W25_CHARDEV
+	bool "Character device"
+	select BCH
+
+config Z20X_W25_BLOCKDEV
+	bool "Block device"
+
+config Z20X_W25_MTDDEV
+	bool "MTD device"
+
+endchoice
+
+config Z20X_W25_MINOR
+	int "W25 device minor number"
+	default 0
+	range 0 255
+	depends on Z20X_W25_CHARDEV
 
 endif # ARCH_BOARD_Z20X

@@ -423,7 +423,7 @@
  *
  * On completion:
  *	All registers restored except for the PC with now resides at the top of the new stack
- *	so that ret can be used to switch to the new context. (ret, not reti, becaue ret
+ *	so that ret can be used to switch to the new context. (ret, not reti, because ret
  *	will preserve the restored interrupt state).
  *
  ********************************************************************************************/

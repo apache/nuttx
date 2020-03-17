@@ -174,7 +174,7 @@ static ssize_t devurand_read(FAR struct file *filep, FAR char *buffer,
 
   n = len;
 
-  /* Align buffer pointer to 4-byte boundry */
+  /* Align buffer pointer to 4-byte boundary */
 
   if (((uintptr_t)buffer & 0x03) != 0)
     {

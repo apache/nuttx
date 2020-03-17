@@ -237,7 +237,7 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
 
   i2cinfo("I2C TRANSFER count=%d\n", count);
 
-  /* Do we need change I2C bus freqency ? */
+  /* Do we need change I2C bus frequency ? */
 
   if (priv->msgv->frequency != priv->freq)
     {

@@ -336,7 +336,7 @@ static int skel_dup(FAR const struct file *oldp, FAR struct file *newp)
       return -ENOMEM;
     }
 
-  /* The copy the file attribtes from the old attributes to the new */
+  /* The copy the file attribute from the old attributes to the new */
 
   memcpy(newpriv, oldpriv, sizeof(struct skel_file_s));
 
@@ -376,7 +376,7 @@ static int skel_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
   /* TODO:  Initialize context specific data */
 
-  /* Initialze base structure components */
+  /* Initialize base structure components */
 
   level1->base.level    = 1;
   level1->base.nentries = 0;
@@ -444,7 +444,7 @@ static int skel_readdir(FAR struct fs_dirent_s *dir)
       ret = -ENOENT;
     }
 
-  /* We are tranversing a subdirectory of task attributes */
+  /* We are traversing a subdirectory of task attributes */
 
   else
     {

@@ -45,3 +45,6 @@ endif
 ifeq ($(CONFIG_ARCH_X86),y)
 include ${TOPDIR}/libs/libc/machine/x86/Make.defs
 endif
+ifeq ($(CONFIG_ARCH_XTENSA),y)
+include ${TOPDIR}/libs/libc/machine/xtensa/Make.defs
+endif

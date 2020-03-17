@@ -167,7 +167,7 @@
 #define USBDEV_CMDCODE_CMDCODE       (0x00ff0000)
 #define USBDEV_CMDCODE_MASK          (0x00ffff00)
 
-/* DMAINSTST/DMAINSTEN bit defintions */
+/* DMAINSTST/DMAINSTEN bit definitions */
 
 #define USBDEV_DMAINST_EOT           (0x00000001)
 #define USBDEV_DMAINST_NDDR          (0x00000002)

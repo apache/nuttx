@@ -397,7 +397,7 @@ static void s32k1xx_reset(struct s32k1xx_driver_s *priv);
  *
  * Description:
  *   The descriptors are represented by structures  Unfortunately, when the
- *   structures are overlayed on the data, the bytes are reversed because
+ *   structures are overlaid on the data, the bytes are reversed because
  *   the underlying hardware writes the data in big-endian byte order.
  *
  * Input Parameters:
@@ -745,7 +745,7 @@ static inline void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv)
 
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
-      ninfo("Iv6 frame\n");
+      ninfo("IPv6 frame\n");
       NETDEV_RXIPV6(&priv->dev);
 
       /* Give the IPv6 packet to the network layer */
@@ -2251,7 +2251,7 @@ static inline int s32k1xx_initphy(struct s32k1xx_driver_s *priv,
     {
       if (renogphy == false)
         {
-          /* Give things one more chance with renegociation turned on */
+          /* Give things one more chance with renegotiation turned on */
 
           return s32k1xx_initphy(priv, true);
         }

@@ -273,7 +273,7 @@ void foc_process(FAR struct foc_data_s *foc,
 
   foc_current_control(foc);
 
-  /* Inverse Park tranform (voltage dq -> voltage alpha-beta) */
+  /* Inverse Park transform (voltage dq -> voltage alpha-beta) */
 
   inv_park_transform(angle, &foc->v_dq, &foc->v_ab);
 

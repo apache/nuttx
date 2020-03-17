@@ -112,7 +112,7 @@ struct lc823450_wdt_lowerhalf_s
 
 /* Register operations ******************************************************/
 
-/* Interrupt hanlding *******************************************************/
+/* Interrupt handling *******************************************************/
 
 #ifdef CONFIG_LC823450_WDT_INTERRUPT
 static int    lc823450_wdt_interrupt(int irq, FAR void *context, FAR void *arg);

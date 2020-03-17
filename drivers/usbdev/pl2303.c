@@ -196,7 +196,7 @@
 #define PL2303_MXDESCLEN           (64)
 #define PL2303_MAXSTRLEN           (PL2303_MXDESCLEN-2)
 
-/* Vender specific control requests *******************************************/
+/* Vendor specific control requests *******************************************/
 
 #define PL2303_CONTROL_TYPE        (0x20)
 #define PL2303_SETLINEREQUEST      (0x20) /* OUT, Recipient interface */
@@ -582,7 +582,7 @@ static uint16_t usbclass_fillrequest(FAR struct pl2303_dev_s *priv, uint8_t *req
  * Description:
  *   This function obtains write requests, transfers the TX data into the request,
  *   and submits the requests to the USB controller.  This continues untils either
- *   (1) there are no further packets available, or (2) thre is not further data
+ *   (1) there are no further packets available, or (2) there is not further data
  *   to send.
  *
  ************************************************************************************/
@@ -689,7 +689,7 @@ static inline int usbclass_recvpacket(FAR struct pl2303_dev_s *priv,
    * the serial driver will be extracting data from the circular buffer and modifying
    * recv.tail.  During this time, we should avoid modifying recv.head; Instead we will
    * use a shadow copy of the index.  When interrupts are restored, the real recv.head
-   * will be updated with this indes.
+   * will be updated with this index.
    */
 
   if (priv->rxenabled)
@@ -2150,7 +2150,7 @@ static void usbser_rxint(FAR struct uart_dev_s *dev, bool enable)
            * buffer and modifying recv.tail.  During this time, we
            * should avoid modifying recv.head; When interrupts are restored,
            * we can update the head pointer for all of the data that we
-           * put into cicular buffer while "interrupts" were disabled.
+           * put into circular buffer while "interrupts" were disabled.
            */
 
           if (priv->rxhead != serdev->recv.head)

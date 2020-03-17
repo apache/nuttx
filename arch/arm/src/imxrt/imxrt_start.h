@@ -117,6 +117,19 @@ void imxrt_lowsetup(void);
 
 void imxrt_boardinitialize(void);
 
+/************************************************************************************
+ * Name: imxrt_ocram_initialize
+ *
+ * Description:
+ *   Called off reset vector to reconfigure the flexRAM
+ *   and finish the FLASH to RAM Copy.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_BOOT_RUNFROMISRAM
+void imxrt_ocram_initialize(void);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

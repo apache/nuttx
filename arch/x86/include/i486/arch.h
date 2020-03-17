@@ -61,7 +61,7 @@
                                            /* Bit 1:  Reserved */
 #define X86_FLAGS_PF             (1 << 2)  /* Bit 2:  Parity Flag */
                                            /* Bit 3:  Reserved */
-#define X86_FLAGS_AF             (1 << 4)  /* Bit 4:  Auxillary carry Flag */
+#define X86_FLAGS_AF             (1 << 4)  /* Bit 4:  Auxiliary carry Flag */
                                            /* Bit 5:  Reserved */
 #define X86_FLAGS_ZF             (1 << 6)  /* Bit 6:  Zero Flag */
 #define X86_FLAGS_SF             (1 << 7)  /* Bit 7:  Sign Flag */
@@ -278,7 +278,7 @@
 #define PIT_REG_COUNTER2        0x42
 #define PIT_REG_COMMAND         0x43
 
-/* PIT command bit defintions */
+/* PIT command bit definitions */
 
 #  define PIT_OCW_BINCOUNT_BCD  (1 << 0) /* vs binary */
 #  define PIT_OCW_MODE_SHIFT    (1)

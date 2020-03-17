@@ -615,8 +615,8 @@ VxWorks provides the following similar interface:
 <p>
 <b>Description:</b>
 The <code>task_setcancelstate()</code> function atomically
-sets both the calling task's cancelability state to the indicated
-state and returns the previous cancelability  state at the location
+sets both the calling task's cancellability state to the indicated
+state and returns the previous cancellability  state at the location
 referenced by oldstate.
 Legal values for state are TASK_CANCEL_ENABLE and TASK_CANCEL_DISABLE.
 </p>
@@ -625,7 +625,7 @@ Any pending thread cancellation may occur at the time that the
 cancellation state is set to TASK_CANCEL_ENABLE.
 </p>
 <p>
-The cancelability state and type of any newly created tasks are TASK_CANCEL_ENABLE and TASK_CANCEL_DEFERRED respectively.
+The cancellability state and type of any newly created tasks are TASK_CANCEL_ENABLE and TASK_CANCEL_DEFERRED respectively.
 <p>
 <b>Input Parameters:</b>
 </p>
@@ -664,11 +664,11 @@ No thread could be found corresponding to that specified by the given thread ID.
 </pre>
 <p>
 <b>Description:</b>
-The <code>task_setcanceltype()</code> function atomically both sets the calling task's cancelability type to the indicated type and returns the previous cancelability type at the location referenced by <code>oldtype</code>.
+The <code>task_setcanceltype()</code> function atomically both sets the calling task's cancellability type to the indicated type and returns the previous cancellability type at the location referenced by <code>oldtype</code>.
 Legal values for type are <code>TASK_CANCEL_DEFERRED</code> and <code>TASK_CANCEL_ASYNCHRONOUS</code>.
 </p>
 <p>
-The cancelability state and type of any newly created tasks are <code>TASK_CANCEL_ENABLE</code> and <code>TASK_CANCEL_DEFERRED</code> respectively.
+The cancellability state and type of any newly created tasks are <code>TASK_CANCEL_ENABLE</code> and <code>TASK_CANCEL_DEFERRED</code> respectively.
 </p>
 <p>
 <b>Input Parameters:</b>
@@ -712,7 +712,7 @@ No thread could be found corresponding to that specified by the given thread ID.
 </p>
 <p>
 The <code>task_testcancel()</code> function creates a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> in the calling task.
-The <code>task_testcancel()</code> function has no effect if cancelability is disabled.
+The <code>task_testcancel()</code> function has no effect if cancellability is disabled.
 </p>
 <p>
 <b>Input Parameters:</b> None
@@ -860,7 +860,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
 <p>
   This non-standard interface is included as a official NuttX API only because it is needed in certain build modes: <code>exec()</code> is probably the only want to load programs in the PROTECTED mode.  Other file execution APIs rely on a symbol table provided by the OS.  In the PROTECTED build mode, the OS cannot provide any meaningful symbolic information for execution of code in the user-space blob so that is the <code>exec()</code> function is really needed in that build case
 </p>
-  The interface is available in the FLAT build mode although it is not really necessary in that case.  It is currently used by some example code under the <code>apps/</code> that that generate their own symbol tables for linking test programs.  So althought it is not necessary, it can still be useful.
+  The interface is available in the FLAT build mode although it is not really necessary in that case.  It is currently used by some example code under the <code>apps/</code> that that generate their own symbol tables for linking test programs.  So although it is not necessary, it can still be useful.
 </p>
 <p>
   The interface would be completely useless and will not be supported in the KERNEL build mode where the contrary is true:  An application process cannot provide any meaning symbolic information for use in linking a different process.
@@ -902,7 +902,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
 </p>
 <p>
   <b>POSIX Compatibility:</b>
-  This is a non-standard inteface unique to NuttX.
+  This is a non-standard interface unique to NuttX.
   Motivation for inclusion of this non-standard interface in certain build modes is discussed above.
 </p>
 
@@ -951,7 +951,7 @@ int execv(FAR const char *path, FAR char *const argv[]);
   </li>
   <li>
      <code>CONFIG_EXECFUNCS_SYMTAB_ARRAY</code>:
-     Name of the ymbol table used by <code>execv()</code> or <code>execl()</code>.
+     Name of the symbol table used by <code>execv()</code> or <code>execl()</code>.
   </li>
   <li>
      <code>CONFIG_EXECFUNCS_NSYMBOLS_VAR</code>:
@@ -1005,7 +1005,7 @@ int execl(FAR const char *path, ...);
 <p>
   <b>Description:</b>
   <code>execl()</code> is functionally equivalent to <a href="#execv">execv()</a>, differing only in the form of its input parameters.
-  See the decription of <a href="#execv">execv()</a> for additional information.
+  See the description of <a href="#execv">execv()</a> for additional information.
 <p>
 <p>
   <b>Input Parameters:</b>
@@ -1019,7 +1019,7 @@ int execl(FAR const char *path, ...);
    <li>
    </li>
      <code>...</code>:
-     A list of the string arguments to be recevied by the program.
+     A list of the string arguments to be received by the program.
      Zero indicates the end of the list.
    </li>
 </ul>
@@ -1149,7 +1149,7 @@ int posix_spawnp(FAR pid_t *pid, FAR const char *file,
     The value specified by <code>file_actions</code> or <code>attr</code> is invalid.
   </li>
   <li>
-     Any errors that might have been return if <code>vfork()</code> and <code>excec[l|v]()</code> had been called.
+     Any errors that might have been return if <code>vfork()</code> and <code>exec[l|v]()</code> had been called.
   </li>
 </ul>
 <p>
@@ -1969,7 +1969,7 @@ int sched_setscheduler (pid_t pid, int policy, const struct sched_param *param);
 </pre></ul>
 <p>
   <b>Description:</b>
-  <code>sched_setscheduler()</code>  sets both the scheduling policyand the priority for the task identified by <code>pid</code>.
+  <code>sched_setscheduler()</code>  sets both the scheduling policy and the priority for the task identified by <code>pid</code>.
   If <code>pid</code> equals zero, the scheduler of the calling thread will be set.
   The parameter <code>param</code> holds the priority of the thread under the new policy.
 </p>
@@ -2254,7 +2254,7 @@ priority of the calling task is returned.
     <p>
       <b><code>CONFIG_SCHED_CHILD_STATUS</code></b>
       If this option is selected, then the exit status of the child task will be retained after the child task exits.
-      This option should be selected if you require knowledge of a child process' exit status.
+      This option should be selected if you require knowledge of a child process's exit status.
       Without this setting, <code>wait()</code>, <code>waitpid()</code> or <code>waitid()</code> may fail.
       For example, if you do:
     </p>
@@ -2438,7 +2438,7 @@ on this thread of execution.
   <b>Input Parameters:</b>
 </p>
 <ul>
-<li><code>pid</code>. The task ID of the thread to waid for</li>
+<li><code>pid</code>. The task ID of the thread to wait for</li>
 <li><code>stat_loc</code>. The location to return the exit status</li>
 <li><code>options</code>. ignored</li>
 </ul>
@@ -2752,7 +2752,7 @@ on this thread of execution.
   <b>Assumptions/Limitations:</b>
 <p>
   <b>POSIX  Compatibility:</b> Comparable to the ISO C interface of the same name.
-   Limitiations in the current implementation:
+   Limitations in the current implementation:
 </p>
 <ol>
   <li>Only a single <code>atexit</code> function can be registered unless <code>CONFIG_SCHED_ATEXIT_MAX</code> defines a larger number.</li>
@@ -3014,7 +3014,7 @@ interface of the same name.
     This is because the interrupt handler does not have the option of waiting for the message queue to become non-full.
   </li>
   <li>
-    It doesn't allocate new memory (because you cannot allocate memory from an interrup handler).
+    It doesn't allocate new memory (because you cannot allocate memory from an interrupt handler).
     Instead, there are are pool of pre-allocated message structures that may be used just for sending messages from interrupt handlers.
     The number of such pre-allocated messages is a configuration parameter.
   </li>
@@ -3478,7 +3478,7 @@ interface of the same name.
 <p>
   Semaphores are the preferred mechanism for gaining exclusive access to a
   resource.  sched_lock() and sched_unlock() can also be used for this purpose.
-  However, sched_lock() and sched_unlock() have other undesirable side-affects
+  However, sched_lock() and sched_unlock() have other undesirable side-effects
   in the operation of the system:  sched_lock() also prevents higher-priority
   tasks from running that do not depend upon the semaphore-managed resource
   and, as a result, can adversely affect system response times.
@@ -3565,8 +3565,8 @@ interface of the same name.
     In addition, there may be multiple threads of various priorities that
     need to wait for a count from the semaphore.
     These, the lower priority thread holding the semaphore may have to
-    be boosted numerous time and, to make things more complex, will have
-    to keep track of all of the boost priorities values in in order to
+    be boosted numerous times and, to make things more complex, will have
+    to keep track of all of the boost priorities values in order to
     correctly restore the priorities after a count has been handed out
     to the higher priority thread.
     The <code>CONFIG_SEM_NNESTPRIO</code> defines the size of an array,
@@ -3598,14 +3598,14 @@ interface of the same name.
   Semaphores (and mutexes) may be used for many different purposes.
   One typical use is for mutual exclusion and locking of resources:
   In this usage, the thread that needs exclusive access to a resources takes the semaphore to get access to the resource.
-  The same thread subsequently releases the seamphore count when it no longer needs exclusive access.
+  The same thread subsequently releases the semaphore count when it no longer needs exclusive access.
   Priority inheritance is intended just for this usage case.
 </p>
 <p>
   In a different usage case, a semaphore may to be used to signal an event:
   One thread A waits on a semaphore for an event to occur.
   When the event occurs, another thread B will post the semaphore waking the waiting thread A.
-  This is a completely different usage model; notice that in the mutual exclusion case, the same thread takes and posts the semaphore.  In the signaling case, one thread takes the seamphore and a different thread posts the samphore.  Priority inheritance should <i>never</i> be used in this signaling case.
+  This is a completely different usage model; notice that in the mutual exclusion case, the same thread takes and posts the semaphore.  In the signaling case, one thread takes the semaphore and a different thread posts the semaphore.  Priority inheritance should <i>never</i> be used in this signaling case.
   Subtle, strange behaviors may result.
 </p>
 <p>
@@ -4859,7 +4859,7 @@ interface of the same name.
 <p>
   <b>Tasks and Signals</b>.
   NuttX provides signal interfaces for tasks and pthreads.
-  Signals are used toalter the flow control of tasks by communicating asynchronous events within or between task contexts.
+  Signals are used to alter the flow control of tasks by communicating asynchronous events within or between task contexts.
   Any task or interrupt handler can post (or send) a signal to a particular task using its task ID.
   The task being signaled will execute task-specified signal handler function the next time that the task has priority.
   The signal handler is a user-supplied function that is bound to a specific signal and performs whatever actions are necessary whenever the signal is received.
@@ -5260,8 +5260,8 @@ Differences from the POSIX implementation include:
   The sigset() function will modify signal dispositions.
   The <code>signo</code> argument specifies the signal.
   The <code>disp</code> argument specifies the signal's disposition, which may be <code>SIG_DFL</code>, <code>SIG_IGN</code>, or the address of a signal handler.
-  If <code>disp</code> is the address of a signal handler, the system will add <code>signo</code> to the calling process' signal mask before executing the signal handler; when the signal handler returns, the system will restore the calling process' signal mask to its state prior to the delivery of the signal.
-  <code>signo</code> will be removed from the calling process' signal mask.
+  If <code>disp</code> is the address of a signal handler, the system will add <code>signo</code> to the calling process's signal mask before executing the signal handler; when the signal handler returns, the system will restore the calling process's signal mask to its state prior to the delivery of the signal.
+  <code>signo</code> will be removed from the calling process's signal mask.
 </p>
 <p>
   NOTE:  The value <code>SIG_HOLD</code> for <code>disp</code> is not currently supported.
@@ -5341,7 +5341,7 @@ interface of the same name.
 </pre>
 
 <p>
-<b>Description:</b> The sighold() function will add <code>signo</code> to the calling process' signal mask
+<b>Description:</b> The sighold() function will add <code>signo</code> to the calling process's signal mask
 </p>
 <p>
 <b>Input Parameters:</b>
@@ -5365,7 +5365,7 @@ interface of the same name.
 </pre>
 
 <p>
-<b>Description:</b> The sighold() function will remove <code>signo</code> from the calling process' signal mask
+<b>Description:</b> The sighold() function will remove <code>signo</code> from the calling process's signal mask
 </p>
 <p>
 <b>Input Parameters:</b>
@@ -5474,8 +5474,8 @@ is required in the present implementation (even if the signal is ignored).
 </pre>
 
 <p>
-<b>Description:</b> The <code>sigpause()</code>) function will remove <code>signo</code>) from the calling process' signal mask and suspend the calling process until a signal is received.
-The <code>sigpause()</code>) function will restore the process' signal mask to its original state before returning.
+<b>Description:</b> The <code>sigpause()</code>) function will remove <code>signo</code>) from the calling process's signal mask and suspend the calling process until a signal is received.
+The <code>sigpause()</code>) function will restore the process's signal mask to its original state before returning.
 <p>
 <b>Input Parameters:</b>
 <ul>
@@ -6329,14 +6329,14 @@ interface of the same name.
 <b>Description:</b>
 
 <p>The <code>pthread_cancel()</code> function will request that thread be canceled.
-The target thread's cancelability state, enabled, or disabled, determines when the cancellation takes effect:  When the cancellation is acted on, thread will be terminated.
-When cancelability is disabled, all cancellations are held pending in the target thread until the thread re-enables cancelability.</p>
+The target thread's cancellability state, enabled, or disabled, determines when the cancellation takes effect:  When the cancellation is acted on, thread will be terminated.
+When cancellability is disabled, all cancellations are held pending in the target thread until the thread re-enables cancellability.</p>
 
-<p>The target thread's cancelability state determines how the cancellation is acted on:
-Either asychronrously or deferred.
-Asynchronous cancellations we be acted upon immediately (when enabled), interrupting the thread with its processing in an abritray state.</p>
+<p>The target thread's cancellability state determines how the cancellation is acted on:
+Either asynchronously or deferred.
+Asynchronous cancellations will be acted upon immediately (when enabled), interrupting the thread with its processing in an arbitrary state.</p>
 
-<p>When cancelability is deferred, all cancellations are held pending in the target thread until the thread changes the cancelability type or a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> function such as <a href="#pthreadtestcancel"><code>pthread_testcancel()</code></a> is entered.</p>
+<p>When cancellability is deferred, all cancellations are held pending in the target thread until the thread changes the cancellability type or a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> function such as <a href="#pthreadtestcancel"><code>pthread_testcancel()</code></a> is entered.</p>
 
 <p>
 <b>Input Parameters:</b>
@@ -6376,8 +6376,8 @@ These destructors are not currently supported.</li>
 </p>
 <p>
 The <code>pthread_setcancelstate()</code> function atomically
-sets both the calling thread's cancelability state to the indicated
-state and returns the previous cancelability  state at the location
+sets both the calling thread's cancellability state to the indicated
+state and returns the previous cancellability  state at the location
 referenced by oldstate.
 Legal values for state are PTHREAD_CANCEL_ENABLE and PTHREAD_CANCEL_DISABLE.
 </p>
@@ -6421,11 +6421,11 @@ interface of the same name.
 </pre>
 <p>
 <b>Description:</b>
-The <code>pthread_setcanceltype()</code> function atomically both sets the calling thread's cancelability type to the indicated type and returns the previous cancelability type at the location referenced by <code>oldtype</code>.
+The <code>pthread_setcanceltype()</code> function atomically both sets the calling thread's cancellability type to the indicated type and returns the previous cancellability type at the location referenced by <code>oldtype</code>.
 Legal values for type are <code>PTHREAD_CANCEL_DEFERRED</code> and <code>PTHREAD_CANCEL_ASYNCHRONOUS</code>.
 </p>
 <p>
-The cancelability state and type of any newly created threads are <code>PTHREAD_CANCEL_ENABLE</code> and <code>PTHREAD_CANCEL_DEFERRED respectively</code>.
+The cancellability state and type of any newly created threads are <code>PTHREAD_CANCEL_ENABLE</code> and <code>PTHREAD_CANCEL_DEFERRED respectively</code>.
 </p>
 <p>
 <b>Input Parameters:</b>
@@ -6464,7 +6464,7 @@ returned to indicate the error.
 </p>
 <p>
 The <code>pthread_testcancel()</code> function creates a <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:cancellation-points">Cancellation Point</a> in the calling thread.
-The <code>pthread_testcancel()</code> function has no effect if cancelability is disabled.
+The <code>pthread_testcancel()</code> function has no effect if cancellability is disabled.
 </p>
 <p>
 <b>Input Parameters:</b> None
@@ -9771,7 +9771,7 @@ ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
   <b>Returned Value:</b>
   On success, returns the number of characters sent.
   If no data is available to be received and the peer has performed an orderly shutdown, recv() will return 0.
-  Othwerwise, on errors, -1 is returned, and <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately:
+  Otherwise, on errors, -1 is returned, and <a href="#ErrnoAccess"><code>errno</code></a> is set appropriately:
 </p>
 <ul>
     <li><code>EAGAIN</code>.
@@ -9874,7 +9874,7 @@ int getsockopt(int sockfd, int level, int option, void *value, socklen_t *value_
   the size of the option value is greater than <code>value_len</code>, the value
   stored in the object pointed to by the <code>value</code> argument will be silently
   truncated. Otherwise, the length pointed to by the <code>value_len</code> argument
-  will be modified to indicate the actual length of the<code>value</code>.
+  will be modified to indicate the actual length of the <code>value</code>.
 </p>
 <p>
   The <code>level</code> argument specifies the protocol level of the option. To

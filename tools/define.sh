@@ -97,7 +97,7 @@ fi
 
 #
 # Most compilers support CFLAG options like '-D<defn>' to add pre-processor
-# variable defintions.  Some (like the Zilog tools), do not.  This script
+# variable definitions.  Some (like the Zilog tools), do not.  This script
 # makes the selection of pre-processor definitions compiler independent.
 #
 # Below are all known compiler names (as found in the config/*/*/Make.defs
@@ -115,7 +115,7 @@ os=`uname -o 2>/dev/null || echo "Other"`
 
 #
 # Let's assume that all GCC compiler paths contain the string gcc and
-# no non-GCC compiler pathes include this substring
+# no non-GCC compiler paths include this substring
 #
 gcc=`echo $ccpath | grep gcc`
 sdcc=`echo $ccpath | grep sdcc`

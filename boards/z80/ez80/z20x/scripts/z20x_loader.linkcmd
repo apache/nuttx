@@ -1,0 +1,80 @@
+/*****************************************************************************/
+/* boards/z80/ez80/z20x/scripts/z20x_loader.linkcmd                          */
+/* For bootloader configurations running entirely out of FLASH               */
+/*                                                                           */
+/* Licensed to the Apache Software Foundation (ASF) under one or more        */
+/* contributor license agreements.  See the NOTICE file distributed with     */
+/* this work for additional information regarding copyright ownership.  The  */
+/* ASF licenses this file to you under the Apache License, Version 2.0 (the  */
+/* "License"); you may not use this file except in compliance with the       */
+/* License.  You may obtain a copy of the License at                         */
+/*                                                                           */
+/*   http://www.apache.org/licenses/LICENSE-2.0                              */
+/*                                                                           */
+/* Unless required by applicable law or agreed to in writing, software       */
+/* distributed under the License is distributed on an "AS IS" BASIS, WITHOUT */
+/* WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the */
+/* License for the specific language governing permissions and limitations   */
+/* under the License.                                                        */
+/*                                                                           */
+/*****************************************************************************/
+
+-FORMAT=OMF695,INTEL32
+-map -maxhexlen=64 -quiet -warnoverlap -xref -unresolved=fatal
+-sort NAME=ascending -warn -debug -NOigcase
+
+RANGE ROM $000000 : $01ffff
+RANGE RAM $040200 : $04ffff
+RANGE EXTIO $000000 : $00ffff
+RANGE INTIO $000000 : $0000ff
+
+CHANGE STRSECT is ROM
+
+ORDER .RESET,.IVECTS,.STARTUP,CODE,DATA
+COPY DATA ROM
+
+DEFINE __low_romdata = copy base of DATA
+DEFINE __low_data = base of DATA
+DEFINE __len_data = length of DATA
+DEFINE __low_bss = base of BSS
+DEFINE __len_bss = length of BSS
+DEFINE __stack = highaddr of RAM + 1
+DEFINE __heaptop = highaddr of RAM
+DEFINE __heapbot = top of RAM + 1
+DEFINE __low_romcode = copy base of CODE
+DEFINE __low_code = base of CODE
+DEFINE __len_code = length of CODE
+DEFINE __copy_code_to_ram = 0
+DEFINE __crtl = 1
+
+DEFINE __vecstart = $040000
+DEFINE __vecend = $0401ff
+DEFINE __loaderstart = $040200
+DEFINE __loaderend = $04ffff
+DEFINE __progstart = $050000
+DEFINE __progend = $0bffff
+
+DEFINE __CS0_LBR_INIT_PARAM = $04
+DEFINE __CS0_UBR_INIT_PARAM = $0b
+DEFINE __CS0_CTL_INIT_PARAM = $28
+DEFINE __CS0_BMC_INIT_PARAM = $00
+DEFINE __CS1_LBR_INIT_PARAM = $00
+DEFINE __CS1_UBR_INIT_PARAM = $00
+DEFINE __CS1_CTL_INIT_PARAM = $00
+DEFINE __CS1_BMC_INIT_PARAM = $00
+DEFINE __CS2_LBR_INIT_PARAM = $00
+DEFINE __CS2_UBR_INIT_PARAM = $00
+DEFINE __CS2_CTL_INIT_PARAM = $00
+DEFINE __CS2_BMC_INIT_PARAM = $00
+DEFINE __CS3_LBR_INIT_PARAM = $00
+DEFINE __CS3_UBR_INIT_PARAM = $00
+DEFINE __CS3_CTL_INIT_PARAM = $00
+DEFINE __CS3_BMC_INIT_PARAM = $00
+DEFINE __RAM_CTL_INIT_PARAM = $80
+DEFINE __RAM_ADDR_U_INIT_PARAM = $AF
+DEFINE __FLASH_CTL_INIT_PARAM = $28
+DEFINE __FLASH_ADDR_U_INIT_PARAM = $00
+
+define _SYS_CLK_FREQ = 20000000
+
+/* arch/z80/src/Makefile.zdsii will append target, object and library paths below */

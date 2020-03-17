@@ -144,7 +144,7 @@
 /* Some assertions */
 
 #ifdef CONFIG_LPWAN_SX127X_FSKOOK
-#  warning OOK support is not complete, RX+TX doesnt work yet!
+#  warning OOK support is not complete, RX+TX doesn't work yet!
 #  if CONFIG_LPWAN_SX127X_RXFIFO_DATA_LEN > SX127X_FOM_FIFO_LEN
 #    warning RX data length limited by chip RX FIFO size (FSK/OOK = 64, LORA = 256)
 #  endif
@@ -245,7 +245,7 @@ struct sx127x_lora_s
   uint8_t  bw;                  /* LORA banwidth */
   uint8_t  sf;                  /* Spreading factor */
   uint8_t  cr;                  /* Coding rate */
-  bool     implicthdr;          /* Implict header mode ON */
+  bool     implicthdr;          /* Implicit header mode ON */
   bool     invert_iq;           /* Invert I and Q signals */
 };
 #endif
@@ -1885,7 +1885,7 @@ static int sx127x_fskook_send(FAR struct sx127x_dev_s *dev,
 
   if (dev->fskook.fixlen == true)
     {
-      /* Write payload length reigster (only LSB for now) */
+      /* Write payload length register (only LSB for now) */
 
       sx127x_writeregbyte(dev, SX127X_FOM_PAYLOADLEN, datalen);
     }

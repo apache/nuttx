@@ -122,7 +122,7 @@ fi
 os=`uname -o 2>/dev/null || echo "Other"`
 
 # Let's assume that all GCC compiler paths contain the string gcc or
-# g++ and no non-GCC compiler pathes include these substrings
+# g++ and no non-GCC compiler paths include these substrings
 
 gcc=`echo $ccpath | grep gcc`
 if [ -z "${gcc}" ]; then

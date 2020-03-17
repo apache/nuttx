@@ -59,7 +59,7 @@
 
 /* The Type of a spinlock.
  *
- * This must be a uint32_ becaue it will be set using S32C1I instruction.
+ * This must be a uint32_ because it will be set using S32C1I instruction.
  * That instruction atomically stores to a memory location only if its
  * current value is the expected one.  The state register (SCOMPARE1) is
  * used to provide the additional comparison operand. Some implementations
@@ -70,7 +70,7 @@
 typedef uint32_t spinlock_t;
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************

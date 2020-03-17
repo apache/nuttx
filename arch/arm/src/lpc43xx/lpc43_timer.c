@@ -175,7 +175,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
 
   uint32_t val = getreg32(addr);
 
-  /* Is this the same value that we read from the same registe last time?
+  /* Is this the same value that we read from the same register last time?
    * Are we polling the register?  If so, suppress some of the output.
    */
 
@@ -608,7 +608,7 @@ static int lpc43_settimeout(FAR struct timer_lowerhalf_s *lower,
 
   priv->adjustment = priv->timeout - timeout;
 
-  tmrinfo("fclk=%d clkticks=%d timout=%d, adjustment=%d\n",
+  tmrinfo("fclk=%d clkticks=%d timeout=%d, adjustment=%d\n",
           TMR_FCLK, priv->clkticks, priv->timeout, priv->adjustment);
 
   return OK;

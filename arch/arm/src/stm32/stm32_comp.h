@@ -51,7 +51,7 @@
 #elif defined(CONFIG_STM32_STM32F33XX)
 #  include "hardware/stm32f33xxx_comp.h"
 #elif defined(CONFIG_STM32_STM32F37XX)
-#  error "COMP support for STM32F37XX ot implemented yet"
+#  error "COMP support for STM32F37XX not implemented yet"
 #endif
 
 /************************************************************************************

@@ -143,7 +143,7 @@ typedef enum adc_ch
 
 struct cxd56adc_dev_s
 {
-  adc_ch_t         ch;            /* adc cnannel number */
+  adc_ch_t         ch;            /* adc channel number */
   FAR struct seq_s *seq;          /* sequencer */
   uint8_t          freq;          /* coefficient of adc sampling frequency */
   uint16_t         fsize;         /* SCU FIFO size */

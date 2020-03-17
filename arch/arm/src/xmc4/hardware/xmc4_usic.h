@@ -118,7 +118,7 @@
 /* Register Addresses ****************************************************************/
 
 /* USIC0 Registers */
-/* Kernal Registers */
+/* Kernel Registers */
 
 #define XMC4_USIC0_ID                (XMC4_USIC0_BASE+XMC4_USIC_ID_OFFSET)
 
@@ -207,7 +207,7 @@
 #define XMC4_USIC01_IN               (XMC4_USIC0_CH1_BASE+XMC4_USIC_IN_OFFSET)
 
 /* USIC1 Registers */
-/* Kernal Registers */
+/* Kernel Registers */
 
 #define XMC4_USIC1_ID                (XMC4_USIC1_BASE+XMC4_USIC_ID_OFFSET)
 
@@ -296,7 +296,7 @@
 #define XMC4_USCI11_IN               (XMC4_USIC1_CH1_BASE+XMC4_USIC_IN_OFFSET)
 
 /* USCI2 Registers */
-/* Kernal Registers */
+/* Kernel Registers */
 
 #define XMC4_USCI2_ID                (XMC4_USCI2_BASE+XMC4_USIC_ID_OFFSET)
 
@@ -386,7 +386,7 @@
 
 /* Register Bit-Field Definitions **************************************************/
 
-/* Kernal Registers */
+/* Kernel Registers */
 /* Kernel State Configuration Register */
 
 #define USIC_ID_MOD_REV_SHIFT       (0)       /* Bits 0-7: Module Revision Number */

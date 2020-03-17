@@ -31,7 +31,7 @@ config NET_6LOWPAN_REASS_STATIC
 	---help---
 		By default, reassembly buffers may be allocated dynamically from the
 		stack when all of the statically allocation reassembly buffers are
-		in use.  This will equire additional CPU cycles to perform the
+		in use.  This will require additional CPU cycles to perform the
 		allocation and may effect deterministic behavior.  This option may
 		be selected to suppress all dynamica allocation of reassembly
 		buffers.  In that case, only static reassembly buffers are available;
@@ -69,7 +69,7 @@ config NET_6LOWPAN_COMPRESSION_THRESHOLD
 		when packets should not be compressed.
 
 config NET_6LOWPAN_MINPORT
-	hex "Minimum port nubmer"
+	hex "Minimum port number"
 	default 0xf0b0
 	depends on NET_6LOWPAN_COMPRESSION_HC1
 	---help---

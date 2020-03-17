@@ -228,7 +228,7 @@ static int smps_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       case PWRIOC_START:
         {
           /* Allow SMPS start only when some limits available
-           * and strucutre is locked.
+           * and structure is locked.
            * REVISIT: not sure if it is needed here
            */
 

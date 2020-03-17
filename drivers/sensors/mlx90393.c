@@ -146,7 +146,7 @@ static void mlx90393_start_burst_mode(FAR struct mlx90393_dev_s *dev)
 
   SPI_SELECT(dev->spi, dev->config->spi_devid, true);
 
-  /* Start Burst Mode (Continous Measurement on all channels) */
+  /* Start Burst Mode (Continuous Measurement on all channels) */
 
   SPI_SEND(dev->spi, MLX90393_SB | MLX90393_ZYXT_bm);
 
@@ -211,12 +211,12 @@ static void mlx90393_read_measurement_data(FAR struct mlx90393_dev_s *dev)
 
   SPI_LOCK(dev->spi, false);
 
-  /* Aquire the semaphore before the data is copied */
+  /* Acquire the semaphore before the data is copied */
 
   ret = nxsem_wait(&dev->datasem);
   if (ret != OK)
     {
-      snerr("ERROR: Could not aquire dev->datasem: %d\n", ret);
+      snerr("ERROR: Could not acquire dev->datasem: %d\n", ret);
       return;
     }
 
@@ -484,12 +484,12 @@ static ssize_t mlx90393_read(FAR struct file *filep, FAR char *buffer,
 
   /* Copy the sensor data into the buffer */
 
-  /* Aquire the semaphore before the data is copied */
+  /* Acquire the semaphore before the data is copied */
 
   ret = nxsem_wait(&priv->datasem);
   if (ret < 0)
     {
-      snerr("ERROR: Could not aquire priv->datasem: %d\n", ret);
+      snerr("ERROR: Could not acquire priv->datasem: %d\n", ret);
       return ret;
     }
 

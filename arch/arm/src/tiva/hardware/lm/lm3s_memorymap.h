@@ -93,7 +93,7 @@
 #endif
 
 /* Peripheral base addresses ********************************************************/
-/* The LM3S6918 and LM3S6965 differ by only the presence or absence of a few differnt
+/* The LM3S6918 and LM3S6965 differ by only the presence or absence of a few different
  * peripheral modules.  They could probably be combined into one peripheral memory
  * map.  However, keeping them separate does also provide so early, compile-time
  * error detection that makes the duplication worthwhile.

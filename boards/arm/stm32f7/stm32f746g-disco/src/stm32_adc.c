@@ -50,7 +50,7 @@
 #include "stm32_adc.h"
 
 #ifndef CONFIG_STM32F7_ADC3
-#  error "Only ADC3 channels are availiable on the arduino header of the board"
+#  error "Only ADC3 channels are available on the arduino header of the board"
 #endif
 
 #if defined(CONFIG_ADC) && defined(CONFIG_STM32F7_ADC3)

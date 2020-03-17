@@ -100,7 +100,7 @@ static const uint8_t g_srctype[SCRTYPE_NTYPES] =
   0, 0, 1, 1, 2, 3
 };
 
-/* This is an arry of bit maps that can be used to quickly determine is the
+/* This is an array of bit maps that can be used to quickly determine is the
  * peripheral identified by its PID is served by H64MX or H32MX.  Then the
  * appropriate MATRIX SPSELR register can be consulted to determine if the
  * peripheral interrupts are secured or not.
@@ -391,6 +391,10 @@ static void sam_aic_initialize(uintptr_t base)
   /* Set the (unused) spurious interrupt handler */
 
   putreg32((uint32_t)sam_spurious, base + SAM_AIC_SPU_OFFSET);
+
+  /* Configure debug register */
+
+  putreg32(AIC_DCR_PROT, base + SAM_AIC_DCR_OFFSET);
 
   /* Perform 8 interrupt acknowledgements by writing any value to the
    * EOICR register.

@@ -54,6 +54,7 @@
 
 #include <stdint.h>
 #include <nuttx/config.h>
+#include <nuttx/net/ethernet.h>
 
 /****************************************************************************
  * Public Definitions

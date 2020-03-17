@@ -552,7 +552,7 @@ static int bmp280_open_press(FAR struct file *filep)
   FAR struct bmp280_dev_s *priv  = inode->i_private;
   int ret;
 
-  /* first pressure device initilize */
+  /* first pressure device initialize */
 
   if (g_refcnt_press == 0)
     {
@@ -599,7 +599,7 @@ static int bmp280_open_temp(FAR struct file *filep)
   FAR struct bmp280_dev_s *priv  = inode->i_private;
   int ret;
 
-  /* first temperature device initilize */
+  /* first temperature device initialize */
 
   if (g_refcnt_temp == 0)
     {

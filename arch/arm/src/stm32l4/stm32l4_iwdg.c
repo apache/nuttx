@@ -60,7 +60,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Clocking *****************************************************************/
+
 /* The minimum frequency of the IWDG clock is:
  *
  *  Fmin = Flsi / 256
@@ -92,6 +94,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure provides the private representation of the "lower-half"
  * driver state structure.  This structure must be cast-compatible with the
  * well-known watchdog_lowerhalf_s structure.
@@ -111,6 +114,7 @@ struct stm32l4_lowerhalf_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Register operations ******************************************************/
 
 #ifdef CONFIG_STM32L4_IWDG_REGDEBUG
@@ -136,6 +140,7 @@ static int      stm32l4_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* "Lower half" driver methods */
 
 static const struct watchdog_ops_s g_wdgops =
@@ -203,7 +208,7 @@ static uint16_t stm32l4_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          wdinfo("[repeats %d more times]\n", count-3);
+          wdinfo("[repeats %d more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -610,7 +615,6 @@ static int stm32l4_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 void stm32l4_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
 {
   FAR struct stm32l4_lowerhalf_s *priv = &g_wdgdev;
-  uint32_t cr;
 
   wdinfo("Entry: devpath=%s lsifreq=%d\n", devpath, lsifreq);
 
@@ -639,7 +643,8 @@ void stm32l4_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
    * device option bits, the watchdog is automatically enabled at power-on.
    */
 
-  stm32l4_settimeout((FAR struct watchdog_lowerhalf_s *)priv, CONFIG_STM32L4_IWDG_DEFTIMOUT);
+  stm32l4_settimeout((FAR struct watchdog_lowerhalf_s *)priv,
+                     CONFIG_STM32L4_IWDG_DEFTIMOUT);
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
@@ -650,9 +655,17 @@ void stm32l4_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
    * on DBG_IWDG_STOP configuration bit in DBG module.
    */
 
-  cr = getreg32(STM32_DBGMCU_APB1_FZ);
-  cr |= DBGMCU_APB1_IWDGSTOP;
-  putreg32(cr, STM32_DBGMCU_APB1_FZ);
+#if defined(CONFIG_STM32L4_JTAG_FULL_ENABLE) || \
+    defined(CONFIG_STM32L4_JTAG_NOJNTRST_ENABLE) || \
+    defined(CONFIG_STM32L4_JTAG_SW_ENABLE)
+  {
+    uint32_t cr;
+
+    cr = getreg32(STM32_DBGMCU_APB1_FZ);
+    cr |= DBGMCU_APB1_IWDGSTOP;
+    putreg32(cr, STM32_DBGMCU_APB1_FZ);
+  }
+#endif
 }
 
 #endif /* CONFIG_WATCHDOG && CONFIG_STM32L4_IWDG */

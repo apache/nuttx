@@ -197,7 +197,7 @@
  *   Returns:      None.
  *
  * FT80X_IOC_AUDIO:
- *   Description:  Enable/disable an external audio amplifer.
+ *   Description:  Enable/disable an external audio amplifier.
  *   Argument:     0=disable; 1=enable.
  *   Returns:      None.
  */

@@ -66,7 +66,8 @@
  *
  ****************************************************************************/
 
-int modlib_depend(FAR struct module_s *importer, FAR struct module_s *exporter)
+int modlib_depend(FAR struct module_s *importer,
+                  FAR struct module_s *exporter)
 {
 #if CONFIG_MODLIB_MAXDEPEND > 0
   int freendx;
@@ -131,9 +132,9 @@ int modlib_depend(FAR struct module_s *importer, FAR struct module_s *exporter)
        * dependents if the importer is removed.
        */
 
-       DEBUGASSERT(importer->dependencies[freendx] == NULL);
-       importer->dependencies[freendx] = exporter;
-       return OK;
+      DEBUGASSERT(importer->dependencies[freendx] == NULL);
+      importer->dependencies[freendx] = exporter;
+      return OK;
     }
 
   /* If we get there then the list of dependencies is full. */

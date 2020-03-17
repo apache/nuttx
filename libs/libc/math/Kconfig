@@ -20,7 +20,7 @@ config LIBM
 		may have have a highly optimized version of libm.
 
 		Another possibility is that you have a custom, architecture-specific
-		math libary and that the corresponding math.h file resides at
+		math library and that the corresponding math.h file resides at
 		arch/<architecture>/include/math.h.  The option is selected via
 		CONFIG_ARCH_MATH_H.  If ARCH_MATH_H is selected,then the
 		include/nuttx/libmath.h header file will be copied to include/math.h

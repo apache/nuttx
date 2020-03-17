@@ -170,7 +170,7 @@
 #endif
 
 #if CONFIG_LP17_OHCI_NTDS < 2
-#  error "Insufficent TDs"
+#  error "Insufficient TDs"
 #endif
 
 /* Derived size of user transfer descriptor (TD) memory. */
@@ -2466,7 +2466,7 @@ static int lpc54_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   lpc54_takesem(&priv->exclsem);
 
-  /* Remove the ED to the correct list depending on the trasfer type */
+  /* Remove the ED to the correct list depending on the transfer type */
 
   switch (ed->xfrtype)
     {

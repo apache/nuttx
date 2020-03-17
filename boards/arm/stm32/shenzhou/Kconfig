@@ -15,7 +15,7 @@ config STM32_ILI1505_DISABLE
 	default n
 	---help---
 		This may be defined to disable support for the ILI1505 LCD controller
-		You might want to eliminate unused LCD controll support in order to
+		You might want to eliminate unused LCD controller support in order to
 		reduce the FLASH footprint.
 
 config STM32_ILI9300_DISABLE
@@ -23,7 +23,7 @@ config STM32_ILI9300_DISABLE
 	default n
 	---help---
 		This may be defined to disable support for the ILI9300 LCD controller
-		You might want to eliminate unused LCD controll support in order to
+		You might want to eliminate unused LCD controller support in order to
 		reduce the FLASH footprint.
 
 config STM32_ILI9320_DISABLE
@@ -31,7 +31,7 @@ config STM32_ILI9320_DISABLE
 	default n
 	---help---
 		This may be defined to disable support for the ILI9320 LCD controller
-		You might want to eliminate unused LCD controll support in order to
+		You might want to eliminate unused LCD controller support in order to
 		reduce the FLASH footprint.
 
 config STM32_ILI9321_DISABLE
@@ -39,7 +39,7 @@ config STM32_ILI9321_DISABLE
 	default n
 	---help---
 		This may be defined to disable support for the ILI9321 LCD controller
-		You might want to eliminate unused LCD controll support in order to
+		You might want to eliminate unused LCD controller support in order to
 		reduce the FLASH footprint.
 
 config STM32_ILI9325_DISABLE
@@ -47,7 +47,7 @@ config STM32_ILI9325_DISABLE
 	default n
 	---help---
 		This may be defined to disable support for the ILI9325 LCD controller
-		You might want to eliminate unused LCD controll support in order to
+		You might want to eliminate unused LCD controller support in order to
 		reduce the FLASH footprint.
 
 config STM32_ILI9328_DISABLE
@@ -55,7 +55,7 @@ config STM32_ILI9328_DISABLE
 	default n
 	---help---
 		This may be defined to disable support for the ILI9328 LCD controller
-		You might want to eliminate unused LCD controll support in order to
+		You might want to eliminate unused LCD controller support in order to
 		reduce the FLASH footprint.
 
 config STM32_ILI9331_DISABLE
@@ -63,7 +63,7 @@ config STM32_ILI9331_DISABLE
 	default n
 	---help---
 		This may be defined to disable support for the ILI9331 LCD controller
-		You might want to eliminate unused LCD controll support in order to
+		You might want to eliminate unused LCD controller support in order to
 		reduce the FLASH footprint.
 
 config STM32_ILI9919_DISABLE
@@ -71,7 +71,7 @@ config STM32_ILI9919_DISABLE
 	default n
 	---help---
 		This may be defined to disable support for the ILI9919 LCD controller
-		You might want to eliminate unused LCD controll support in order to
+		You might want to eliminate unused LCD controller support in order to
 		reduce the FLASH footprint.
 
 endmenu

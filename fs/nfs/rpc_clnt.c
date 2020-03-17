@@ -81,15 +81,11 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <queue.h>
-#include <time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <debug.h>
-#include <nuttx/kmalloc.h>
 
 #include "xdr_subs.h"
 #include "nfs_proto.h"
@@ -108,6 +104,22 @@
 #endif
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* Global RPC statistics */
+
+#ifdef CONFIG_NFS_STATISTICS
+struct rpcstats
+{
+  int rpcretries;
+  int rpcrequests;
+  int rpctimeouts;
+  int rpcinvalid;
+};
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -116,12 +128,8 @@
 static uint32_t rpc_reply;
 static uint32_t rpc_call;
 static uint32_t rpc_vers;
-static uint32_t rpc_msgdenied;
-static uint32_t rpc_mismatch;
-static uint32_t rpc_auth_unix;
-static uint32_t rpc_msgaccepted;
-static uint32_t rpc_autherr;
 static uint32_t rpc_auth_null;
+static uint32_t rpc_auth_unix;
 
 /* Global statics for all client instances.  Cleared by NuttX on boot-up. */
 
@@ -133,13 +141,13 @@ static struct rpcstats rpcstats;
  * Private Function Prototypes
  ****************************************************************************/
 
-static int rpcclnt_send(FAR struct rpcclnt *rpc, int procid, int prog,
+static int rpcclnt_socket(FAR struct rpcclnt *rpc, in_port_t rport);
+static int rpcclnt_send(FAR struct rpcclnt *rpc,
                         FAR void *call, int reqlen);
-static int rpcclnt_receive(FAR struct rpcclnt *rpc, struct sockaddr *aname,
-                           int proc, int program, void *reply, size_t resplen);
-static int rpcclnt_reply(FAR struct rpcclnt *rpc, int procid, int prog,
-                         void *reply, size_t resplen);
-static uint32_t rpcclnt_newxid(void);
+static int rpcclnt_receive(FAR struct rpcclnt *rpc,
+                           FAR void *reply, size_t resplen);
+static int rpcclnt_reply(FAR struct rpcclnt *rpc, uint32_t xid,
+                         FAR void *reply, size_t resplen);
 static void rpcclnt_fmtheader(FAR struct rpc_call_header *ch,
                               uint32_t xid, int procid, int prog, int vers);
 
@@ -148,21 +156,160 @@ static void rpcclnt_fmtheader(FAR struct rpc_call_header *ch,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: rpcclnt_socket
+ *
+ * Description:
+ *   Close(old), create, bind and connect the socket.
+ *
+ * Returned Value:
+ *   Returns zero on success or a (negative) errno value on failure.
+ *
+ ****************************************************************************/
+
+static int rpcclnt_socket(FAR struct rpcclnt *rpc, in_port_t rport)
+{
+  struct sockaddr_storage raddr;
+  struct sockaddr_storage laddr;
+  FAR in_port_t *lport;
+  in_port_t port = 1024;
+  struct timeval tv;
+  socklen_t addrlen;
+  int error;
+
+  /* Close the old socket */
+
+  psock_close(&rpc->rc_so);
+
+  /* Prepare the socket address */
+
+  memcpy(&raddr, rpc->rc_name, sizeof(raddr));
+
+  laddr.ss_family = raddr.ss_family;
+  memset(laddr.ss_data, 0, sizeof(laddr.ss_data));
+
+  if (raddr.ss_family == AF_INET6)
+    {
+      FAR struct sockaddr_in6 *sin;
+
+      addrlen = sizeof(struct sockaddr_in6);
+      if (rport != 0)
+        {
+          sin = (FAR struct sockaddr_in6 *)&raddr;
+          sin->sin6_port = htons(rport);
+        }
+
+      sin = (FAR struct sockaddr_in6 *)&laddr;
+      lport = &sin->sin6_port;
+    }
+  else
+    {
+      FAR struct sockaddr_in *sin;
+
+      addrlen = sizeof(struct sockaddr_in);
+      if (rport != 0)
+        {
+          sin = (FAR struct sockaddr_in *)&raddr;
+          sin->sin_port = htons(rport);
+        }
+
+      sin = (FAR struct sockaddr_in *)&laddr;
+      lport = &sin->sin_port;
+    }
+
+  /* Create the socket */
+
+  error = psock_socket(raddr.ss_family, rpc->rc_sotype, 0, &rpc->rc_so);
+  if (error < 0)
+    {
+      ferr("ERROR: psock_socket failed: %d", error);
+      return error;
+    }
+
+  /* Always set receive timeout to detect server crash and reconnect.
+   * Otherwise, we can get stuck in psock_receive forever.
+   */
+
+  tv.tv_sec  = rpc->rc_timeo / 10;
+  tv.tv_usec = (rpc->rc_timeo % 10) * 100000;
+
+  error = psock_setsockopt(&rpc->rc_so, SOL_SOCKET, SO_RCVTIMEO,
+                          (FAR const void *)&tv, sizeof(tv));
+  if (error < 0)
+    {
+      ferr("ERROR: psock_setsockopt failed: %d\n", error);
+      goto bad;
+    }
+
+  /* Some servers require that the client port be a reserved port
+   * number. We always allocate a reserved port, as this prevents
+   * filehandle disclosure through UDP port capture.
+   */
+
+  do
+    {
+      *lport = htons(--port);
+      error = psock_bind(&rpc->rc_so, (FAR struct sockaddr *)&laddr, addrlen);
+      if (error < 0)
+        {
+          ferr("ERROR: psock_bind failed: %d\n", error);
+        }
+    }
+  while (error == -EADDRINUSE && port >= 512);
+
+  if (error)
+    {
+      ferr("ERROR: psock_bind failed: %d\n", error);
+      goto bad;
+    }
+
+  /* Protocols that do not require connections could be optionally left
+   * unconnected.  That would allow servers to reply from a port other than
+   * the NFS_PORT.
+   */
+
+  error = psock_connect(&rpc->rc_so, (FAR struct sockaddr *)&raddr, addrlen);
+  if (error < 0)
+    {
+      ferr("ERROR: psock_connect to PMAP port failed: %d", error);
+      goto bad;
+    }
+
+  return OK;
+
+bad:
+  psock_close(&rpc->rc_so);
+  return error;
+}
+
+/****************************************************************************
  * Name: rpcclnt_send
  *
  * Description:
  *   This is the nfs send routine.
  *
  * Returned Value:
- *   Returns zero on success or a (positive) errno value on failure.
+ *   Returns zero on success or a (negative) errno value on failure.
  *
  ****************************************************************************/
 
-static int rpcclnt_send(FAR struct rpcclnt *rpc, int procid, int prog,
+static int rpcclnt_send(FAR struct rpcclnt *rpc,
                         FAR void *call, int reqlen)
 {
-  ssize_t nbytes;
+  uint32_t mark;
   int ret = OK;
+
+  /* Send the record marking(RM) for stream only */
+
+  if (rpc->rc_sotype == SOCK_STREAM)
+    {
+      mark = txdr_unsigned(0x80000000 | reqlen);
+      ret = psock_send(&rpc->rc_so, &mark, sizeof(mark), 0);
+      if (ret < 0)
+        {
+          ferr("ERROR: psock_send mark failed: %d\n", ret);
+          return ret;
+        }
+    }
 
   /* Send the call message
    *
@@ -170,44 +317,66 @@ static int rpcclnt_send(FAR struct rpcclnt *rpc, int procid, int prog,
    * On failure, it returns a negated errno value.
    */
 
-  nbytes = psock_send(rpc->rc_so, call, reqlen, 0);
-
-  if (nbytes < 0)
+  ret = psock_send(&rpc->rc_so, call, reqlen, 0);
+  if (ret < 0)
     {
-      /* psock_sendto failed */
-
-      ret = (int)-nbytes;
-      ferr("ERROR: psock_sendto failed: %d\n", ret);
+      ferr("ERROR: psock_send request failed: %d\n", ret);
+      return ret;
     }
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
  * Name: rpcclnt_receive
  *
  * Description:
- *   Receive a Sun RPC Request/Reply. For SOCK_DGRAM, the work is all done
- *   by psock_recvfrom().
+ *   Receive a Sun RPC Request/Reply.
  *
  ****************************************************************************/
 
-static int rpcclnt_receive(FAR struct rpcclnt *rpc, FAR struct sockaddr *aname,
-                           int proc, int program, FAR void *reply,
-                           size_t resplen)
+static int rpcclnt_receive(FAR struct rpcclnt *rpc,
+                           FAR void *reply, size_t resplen)
 {
-  ssize_t nbytes;
+  uint32_t mark;
   int error = 0;
 
-  socklen_t fromlen = sizeof(struct sockaddr);
-  nbytes = psock_recvfrom(rpc->rc_so, reply, resplen, 0, aname, &fromlen);
-  if (nbytes < 0)
+  /* Receive the record marking(RM) for stream only */
+
+  if (rpc->rc_sotype == SOCK_STREAM)
     {
-      error = (int)-nbytes;
-      ferr("ERROR: psock_recvfrom failed: %d\n", error);
+      error = psock_recv(&rpc->rc_so, &mark, sizeof(mark), 0);
+      if (error < 0)
+        {
+          ferr("ERROR: psock_recv mark failed: %d\n", error);
+          return error;
+        }
+
+      /* Limit the receive length to the marked value */
+
+      mark = fxdr_unsigned(uint32_t, mark);
+      if (!(mark & 0x80000000))
+        {
+          return -ENOSYS;
+        }
+
+      mark &= 0x7fffffff;
+      if (mark > resplen)
+        {
+          return -E2BIG;
+        }
+
+      resplen = mark;
     }
 
-  return error;
+  error = psock_recv(&rpc->rc_so, reply, resplen, 0);
+  if (error < 0)
+    {
+      ferr("ERROR: psock_recv response failed: %d\n", error);
+      return error;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -218,26 +387,18 @@ static int rpcclnt_receive(FAR struct rpcclnt *rpc, FAR struct sockaddr *aname,
  *
  ****************************************************************************/
 
-static int rpcclnt_reply(FAR struct rpcclnt *rpc, int procid, int prog,
+static int rpcclnt_reply(FAR struct rpcclnt *rpc, uint32_t xid,
                          FAR void *reply, size_t resplen)
 {
   int error;
 
+retry:
   /* Get the next RPC reply from the socket */
 
-  error = rpcclnt_receive(rpc, rpc->rc_name, procid, prog, reply, resplen);
+  error = rpcclnt_receive(rpc, reply, resplen);
   if (error != 0)
     {
       ferr("ERROR: rpcclnt_receive returned: %d\n", error);
-
-      /* If we failed because of a timeout, then try sending the CALL
-       * message again.
-       */
-
-      if (error == EAGAIN || error == ETIMEDOUT)
-        {
-          rpc->rc_timeout = true;
-        }
     }
 
   /* Get the xid and check that it is an RPC replysvr */
@@ -251,45 +412,17 @@ static int rpcclnt_reply(FAR struct rpcclnt *rpc, int procid, int prog,
         {
           ferr("ERROR: Different RPC REPLY returned\n");
           rpc_statistics(rpcinvalid);
-          error = EPROTO;
+          error = -EPROTO;
+        }
+      else if (replyheader->rp_xid != txdr_unsigned(xid))
+        {
+          ferr("ERROR: Different RPC XID returned\n");
+          rpc_statistics(rpcinvalid);
+          goto retry;
         }
     }
 
   return error;
-}
-
-/****************************************************************************
- * Name: rpcclnt_newxid
- *
- * Description:
- *   Get a new (non-zero) xid
- *
- ****************************************************************************/
-
-static uint32_t rpcclnt_newxid(void)
-{
-  static uint32_t rpcclnt_xid = 0;
-  static uint32_t rpcclnt_xid_touched = 0;
-
-  srand(time(NULL));
-  if ((rpcclnt_xid == 0) && (rpcclnt_xid_touched == 0))
-    {
-      rpcclnt_xid = rand();
-      rpcclnt_xid_touched = 1;
-    }
-  else
-    {
-      int xidp = 0;
-      do
-        {
-          xidp = rand();
-        }
-      while ((xidp % 256) == 0);
-
-      rpcclnt_xid += xidp;
-    }
-
-  return rpcclnt_xid;
 }
 
 /****************************************************************************
@@ -312,10 +445,16 @@ static void rpcclnt_fmtheader(FAR struct rpc_call_header *ch,
   ch->rp_vers           = txdr_unsigned(vers);
   ch->rp_proc           = txdr_unsigned(procid);
 
-  /* rpc_auth part (auth_null) */
+  /* rpc_auth part (auth_unix) */
 
-  ch->rpc_auth.authtype = rpc_auth_null;
-  ch->rpc_auth.authlen  = 0;
+  ch->rpc_auth.authtype = rpc_auth_unix;
+  ch->rpc_auth.authlen  = txdr_unsigned(sizeof(ch->rpc_unix));
+
+  ch->rpc_unix.stamp    = 0;
+  ch->rpc_unix.hostname = 0;
+  ch->rpc_unix.uid      = 0;
+  ch->rpc_unix.gid      = 0;
+  ch->rpc_unix.gidlist  = 0;
 
   /* rpc_verf part (auth_null) */
 
@@ -342,12 +481,8 @@ void rpcclnt_init(void)
   rpc_reply = txdr_unsigned(RPC_REPLY);
   rpc_vers = txdr_unsigned(RPC_VER2);
   rpc_call = txdr_unsigned(RPC_CALL);
-  rpc_msgdenied = txdr_unsigned(RPC_MSGDENIED);
-  rpc_msgaccepted = txdr_unsigned(RPC_MSGACCEPTED);
-  rpc_mismatch = txdr_unsigned(RPC_MISMATCH);
-  rpc_autherr = txdr_unsigned(RPC_AUTHERR);
-  rpc_auth_unix = txdr_unsigned(RPCAUTH_UNIX);
   rpc_auth_null = txdr_unsigned(RPCAUTH_NULL);
+  rpc_auth_unix = txdr_unsigned(RPCAUTH_UNIX);
 
   finfo("RPC initialized\n");
 }
@@ -361,13 +496,10 @@ void rpcclnt_init(void)
  *
  ****************************************************************************/
 
-int rpcclnt_connect(struct rpcclnt *rpc)
+int rpcclnt_connect(FAR struct rpcclnt *rpc)
 {
-  struct socket *so;
   int error;
-  struct sockaddr *saddr;
-  struct sockaddr_in sin;
-  struct sockaddr_in *sa;
+  int prot;
 
   union
   {
@@ -381,93 +513,18 @@ int rpcclnt_connect(struct rpcclnt *rpc)
     struct rpc_reply_mount mdata;
   } response;
 
-  struct timeval tv;
-  uint16_t tport;
-  int errval;
-
   finfo("Connecting\n");
 
   /* Create the socket */
 
-  saddr = rpc->rc_name;
-
-  /* Create an instance of the socket state structure */
-
-  so = (struct socket *)kmm_zalloc(sizeof(struct socket));
-  if (!so)
-    {
-      ferr("ERROR: Failed to allocate socket structure\n");
-      return ENOMEM;
-    }
-
-  error = psock_socket(saddr->sa_family, rpc->rc_sotype, IPPROTO_UDP, so);
+  error = rpcclnt_socket(rpc, 0);
   if (error < 0)
     {
-      errval = -error;
-      ferr("ERROR: psock_socket failed: %d", errval);
-      return errval;
+      ferr("ERROR: rpcclnt_socket failed: %d", error);
+      return error;
     }
 
-  rpc->rc_so = so;
-
-  /* Always set receive timeout to detect server crash and reconnect.
-   * Otherwise, we can get stuck in psock_receive forever.
-   */
-
-  tv.tv_sec  = 1;
-  tv.tv_usec = 0;
-
-  error = psock_setsockopt(rpc->rc_so, SOL_SOCKET, SO_RCVTIMEO,
-                          (const void *)&tv, sizeof(tv));
-  if (error < 0)
-    {
-      errval = -error;
-      ferr("ERROR: psock_setsockopt failed: %d\n", errval);
-      goto bad;
-    }
-
-  /* Some servers require that the client port be a reserved port
-   * number. We always allocate a reserved port, as this prevents
-   * filehandle disclosure through UDP port capture.
-   */
-
-  sin.sin_family      = AF_INET;
-  sin.sin_addr.s_addr = INADDR_ANY;
-  tport               = 1024;
-
-  errval = 0;
-  do
-    {
-      tport--;
-      sin.sin_port = htons(tport);
-
-      error = psock_bind(rpc->rc_so, (struct sockaddr *)&sin, sizeof(sin));
-      if (error < 0)
-        {
-          errval = -error;
-          ferr("ERROR: psock_bind failed: %d\n", errval);
-        }
-    }
-  while (errval == EADDRINUSE && tport > 1024 / 2);
-
-  if (error)
-    {
-      ferr("ERROR: psock_bind failed: %d\n", errval);
-      goto bad;
-    }
-
-  /* Protocols that do not require connections could be optionally left
-   * unconnected.  That would allow servers to reply from a port other than
-   * the NFS_PORT.
-   */
-
-  error = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
-  if (error < 0)
-    {
-      errval = -error;
-      ferr("ERROR: psock_connect to PMAP port failed: %d", errval);
-      goto bad;
-    }
+  prot = rpc->rc_sotype == SOCK_DGRAM ? IPPROTO_UDP : IPPROTO_TCP;
 
   /* Do the RPC to get a dynamic bounding with the server using ppmap.
    * Get port number for MOUNTD.
@@ -475,7 +532,7 @@ int rpcclnt_connect(struct rpcclnt *rpc)
 
   request.sdata.pmap.prog = txdr_unsigned(RPCPROG_MNT);
   request.sdata.pmap.vers = txdr_unsigned(RPCMNT_VER3);
-  request.sdata.pmap.proc = txdr_unsigned(IPPROTO_UDP);
+  request.sdata.pmap.prot = txdr_unsigned(prot);
   request.sdata.pmap.port = 0;
 
   error = rpcclnt_request(rpc, PMAPPROC_GETPORT, PMAPPROG, PMAPVERS,
@@ -487,21 +544,17 @@ int rpcclnt_connect(struct rpcclnt *rpc)
       goto bad;
     }
 
-  sa = (FAR struct sockaddr_in *)saddr;
-  sa->sin_port = htons(fxdr_unsigned(uint32_t, response.rdata.pmap.port));
-
-  error = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
+  error = rpcclnt_socket(rpc, fxdr_unsigned(uint32_t, response.rdata.pmap.port));
   if (error < 0)
     {
-      errval = -error;
-      ferr("ERROR: psock_connect MOUNTD port failed: %d\n", errval);
+      ferr("ERROR: rpcclnt_socket MOUNTD port failed: %d\n", error);
       goto bad;
     }
 
   /* Do RPC to mountd. */
 
   strncpy(request.mountd.mount.rpath, rpc->rc_path, 90);
-  request.mountd.mount.len =  txdr_unsigned(sizeof(request.mountd.mount.rpath));
+  request.mountd.mount.len = txdr_unsigned(sizeof(request.mountd.mount.rpath));
 
   error = rpcclnt_request(rpc, RPCMNT_MOUNT, RPCPROG_MNT, RPCMNT_VER3,
                           (FAR void *)&request.mountd,
@@ -514,7 +567,7 @@ int rpcclnt_connect(struct rpcclnt *rpc)
       goto bad;
     }
 
-  error = fxdr_unsigned(uint32_t, response.mdata.mount.status);
+  error = -fxdr_unsigned(uint32_t, response.mdata.mount.status);
   if (error != 0)
     {
       ferr("ERROR: Bad mount status: %d\n", error);
@@ -528,19 +581,16 @@ int rpcclnt_connect(struct rpcclnt *rpc)
    * NFS port in the socket.
    */
 
-  sa->sin_port = htons(PMAPPORT);
-
-  error = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
+  error = rpcclnt_socket(rpc, 0);
   if (error < 0)
     {
-      errval = -error;
-      ferr("ERROR: psock_connect PMAP port failed: %d\n", errval);
+      ferr("ERROR: rpcclnt_socket PMAP port failed: %d\n", error);
       goto bad;
     }
 
   request.sdata.pmap.prog = txdr_unsigned(NFS_PROG);
   request.sdata.pmap.vers = txdr_unsigned(NFS_VER3);
-  request.sdata.pmap.proc = txdr_unsigned(IPPROTO_UDP);
+  request.sdata.pmap.prot = txdr_unsigned(prot);
   request.sdata.pmap.port = 0;
 
   error = rpcclnt_request(rpc, PMAPPROC_GETPORT, PMAPPROG, PMAPVERS,
@@ -554,20 +604,17 @@ int rpcclnt_connect(struct rpcclnt *rpc)
       goto bad;
     }
 
-  sa->sin_port = htons(fxdr_unsigned(uint32_t, response.rdata.pmap.port));
-
-  error = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
+  error = rpcclnt_socket(rpc, fxdr_unsigned(uint32_t, response.rdata.pmap.port));
   if (error < 0)
     {
-      error = -error;
-      ferr("ERROR: psock_connect NFS port returns %d\n", error);
+      ferr("ERROR: rpcclnt_socket NFS port returns %d\n", error);
       goto bad;
     }
 
   return OK;
 
 bad:
-  rpcclnt_disconnect(rpc);
+  psock_close(&rpc->rc_so);
   return error;
 }
 
@@ -579,27 +626,8 @@ bad:
  *
  ****************************************************************************/
 
-void rpcclnt_disconnect(struct rpcclnt *rpc)
+void rpcclnt_disconnect(FAR struct rpcclnt *rpc)
 {
-  if (rpc->rc_so != NULL)
-    {
-      psock_close(rpc->rc_so);
-    }
-}
-
-/****************************************************************************
- * Name: rpcclnt_umount
- *
- * Description:
- *   Un-mount the NFS file system.
- *
- ****************************************************************************/
-
-int rpcclnt_umount(struct rpcclnt *rpc)
-{
-  struct sockaddr *saddr;
-  struct sockaddr_in *sa;
-
   union
   {
     struct rpc_call_pmap   sdata;
@@ -613,29 +641,20 @@ int rpcclnt_umount(struct rpcclnt *rpc)
   } response;
 
   int error;
-  int ret;
+  int prot;
 
-  saddr = rpc->rc_name;
-  sa = (FAR struct sockaddr_in *)saddr;
-
-  /* Do the RPC to get a dynamic bounding with the server using ppmap.
-   * Get port number for MOUNTD.
-   */
-
-  sa->sin_port = htons(PMAPPORT);
-
-  ret = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
-  if (ret < 0)
+  error = rpcclnt_socket(rpc, 0);
+  if (error < 0)
     {
-      error = -ret;
-      ferr("ERROR: psock_connect failed [port=%d]: %d\n",
-            ntohs(sa->sin_port), error);
+      ferr("ERROR: rpcclnt_socket failed: %d\n", error);
       goto bad;
     }
 
+  prot = rpc->rc_sotype == SOCK_DGRAM ? IPPROTO_UDP : IPPROTO_TCP;
+
   request.sdata.pmap.prog = txdr_unsigned(RPCPROG_MNT);
   request.sdata.pmap.vers = txdr_unsigned(RPCMNT_VER3);
-  request.sdata.pmap.proc = txdr_unsigned(IPPROTO_UDP);
+  request.sdata.pmap.prot = txdr_unsigned(prot);
   request.sdata.pmap.port = 0;
 
   error = rpcclnt_request(rpc, PMAPPROC_GETPORT, PMAPPROG, PMAPVERS,
@@ -649,21 +668,17 @@ int rpcclnt_umount(struct rpcclnt *rpc)
       goto bad;
     }
 
-  sa->sin_port = htons(fxdr_unsigned(uint32_t, response.rdata.pmap.port));
-
-  ret = psock_connect(rpc->rc_so, saddr, sizeof(*saddr));
-  if (ret < 0)
+  error = rpcclnt_socket(rpc, fxdr_unsigned(uint32_t, response.rdata.pmap.port));
+  if (error < 0)
     {
-      error = -ret;
-      ferr("ERROR: psock_connect failed [port=%d]: %d\n",
-            ntohs(sa->sin_port), error);
+      ferr("ERROR: rpcclnt_socket failed: %d\n", error);
       goto bad;
     }
 
   /* Do RPC to umountd. */
 
-  strncpy(request.mountd.umount.rpath, rpc->rc_path, 92);
-  request.mountd.umount.len =  txdr_unsigned(sizeof(request.mountd.umount.rpath));
+  strncpy(request.mountd.umount.rpath, rpc->rc_path, 90);
+  request.mountd.umount.len = txdr_unsigned(sizeof(request.mountd.umount.rpath));
 
   error = rpcclnt_request(rpc, RPCMNT_UMOUNT, RPCPROG_MNT, RPCMNT_VER3,
                           (FAR void *)&request.mountd,
@@ -676,11 +691,8 @@ int rpcclnt_umount(struct rpcclnt *rpc)
       goto bad;
     }
 
-  return OK;
-
 bad:
-  rpcclnt_disconnect(rpc);
-  return error;
+  psock_close(&rpc->rc_so);
 }
 
 /****************************************************************************
@@ -693,7 +705,7 @@ bad:
  *   certain errors.
  *
  *   On successful receipt, it verifies the RPC level of the returned values.
- *   (There may still be be NFS layer errors that will be deted by calling
+ *   (There may still be be NFS layer errors that will be detected by calling
  *   logic).
  *
  ****************************************************************************/
@@ -702,15 +714,15 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
                     int version, FAR void *request, size_t reqlen,
                     FAR void *response, size_t resplen)
 {
-  struct rpc_reply_header *replymsg;
+  FAR struct rpc_reply_header *replymsg;
   uint32_t tmp;
   uint32_t xid;
-  int retries;
+  int retries = 0;
   int error = 0;
 
   /* Get a new (non-zero) xid */
 
-  xid = rpcclnt_newxid();
+  xid = ++rpc->rc_xid;
 
   /* Initialize the RPC header fields */
 
@@ -728,17 +740,15 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
    * timeouts.
    */
 
-  retries = 0;
-  do
+  for (; ; )
     {
       /* Do the client side RPC. */
 
       rpc_statistics(rpcrequests);
-      rpc->rc_timeout = false;
 
       /* Send the RPC CALL message */
 
-      error = rpcclnt_send(rpc, procnum, prog, request, reqlen);
+      error = rpcclnt_send(rpc, request, reqlen);
       if (error != OK)
         {
           finfo("ERROR rpcclnt_send failed: %d\n", error);
@@ -748,16 +758,29 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
 
       else
         {
-          error = rpcclnt_reply(rpc, procnum, prog, response, resplen);
+          error = rpcclnt_reply(rpc, xid, response, resplen);
           if (error != OK)
             {
               finfo("ERROR rpcclnt_reply failed: %d\n", error);
             }
         }
 
-      retries++;
+      /* If we failed because of a timeout, then try sending the CALL
+       * message again.
+       */
+
+      if (error != -EAGAIN && error != -ETIMEDOUT)
+        {
+          break;
+        }
+
+      rpc_statistics(rpctimeouts);
+      if (++retries >= rpc->rc_retry)
+        {
+          break;
+        }
+      rpc_statistics(rpcretries);
     }
-  while (rpc->rc_timeout && retries <= rpc->rc_retry);
 
   if (error != OK)
     {
@@ -770,26 +793,9 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
   replymsg = (FAR struct rpc_reply_header *)response;
 
   tmp = fxdr_unsigned(uint32_t, replymsg->type);
-  if (tmp == RPC_MSGDENIED)
+  if (tmp != RPC_MSGACCEPTED)
     {
-      tmp = fxdr_unsigned(uint32_t, replymsg->status);
-      switch (tmp)
-        {
-        case RPC_MISMATCH:
-          ferr("ERROR: RPC_MSGDENIED: RPC_MISMATCH error\n");
-          return EOPNOTSUPP;
-
-        case RPC_AUTHERR:
-          ferr("ERROR: RPC_MSGDENIED: RPC_AUTHERR error\n");
-          return EACCES;
-
-        default:
-          return EOPNOTSUPP;
-        }
-    }
-  else if (tmp != RPC_MSGACCEPTED)
-    {
-      return EOPNOTSUPP;
+      return -EOPNOTSUPP;
     }
 
   tmp = fxdr_unsigned(uint32_t, replymsg->status);
@@ -797,15 +803,10 @@ int rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
     {
       finfo("RPC_SUCCESS\n");
     }
-  else if (tmp == RPC_PROGMISMATCH)
-    {
-      ferr("ERROR: RPC_MSGACCEPTED: RPC_PROGMISMATCH error\n");
-      return EOPNOTSUPP;
-    }
-  else if (tmp > 5)
+  else
     {
       ferr("ERROR: Unsupported RPC type: %d\n", tmp);
-      return EOPNOTSUPP;
+      return -EOPNOTSUPP;
     }
 
   return OK;

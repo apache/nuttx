@@ -89,7 +89,8 @@ void exit(int status)
   /* Perform common task termination logic.  This will get called again later
    * through logic kicked off by _exit().  However, we need to call it before
    * calling _exit() in order to handle atexit() and on_exit() callbacks and
-   * so that we can flush buffered I/O (both of which may required suspending).
+   * so that we can flush buffered I/O (both of which may required
+   * suspending).
    */
 
   nxtask_exithook(tcb, status, false);

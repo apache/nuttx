@@ -29,6 +29,16 @@
 
 #include <stdint.h>
 
+#define EI_NIDENT          16     /* Size of e_ident[] */
+
+/* NOTE: elf64.h and elf32.h refer EI_NIDENT defined above */
+
+#ifdef CONFIG_ELF_64BIT
+#  include <elf64.h>
+#else
+#  include <elf32.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -71,6 +81,7 @@
 #define EM_CRIS            76     /* Axis Communications 32-bit embedded processor */
 #define EM_V850            87     /* NEC v850 */
 #define EM_M32R            88     /* Renesas M32R */
+#define EM_XTENSA          94     /* Tensilica Xtensa */
 #define EM_RISCV           243    /* RISC-V */
 #define EM_ALPHA           0x9026
 #define EM_CYGNUS_V850     0x9080
@@ -93,7 +104,8 @@
 #define EI_DATA            5      /* Data encoding */
 #define EI_VERSION         6      /* File version */
 #define EI_PAD             7      /* Start of padding bytes */
-#define EI_NIDENT          16     /* Size of e_ident[] */
+
+/* EI_NIDENT is defined in "Included Files" section */
 
 #define EI_MAGIC_SIZE      4
 #define EI_MAGIC           {0x7f, 'E', 'L', 'F'}
@@ -210,13 +222,5 @@
 #define DT_BINDNOW         24         /* d_un=ignored */
 #define DT_LOPROC          0x70000000 /* d_un=unspecified */
 #define DT_HIPROC          0x7fffffff /* d_un= unspecified */
-
-/* NOTE: elf64.h and elf32.h refer EI_NIDENT defined above */
-
-#ifdef CONFIG_ELF_64BIT
-#  include <elf64.h>
-#else
-#  include <elf32.h>
-#endif
 
 #endif /* __INCLUDE_ELF_H */

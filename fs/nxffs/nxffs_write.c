@@ -741,7 +741,7 @@ int nxffs_wrextend(FAR struct nxffs_volume_s *volume,
  *   On successful return the following are also valid:
  *
  *   volume->ioblock - Read/write block number of the block containing the
- *     candidate oject position
+ *     candidate object position
  *   volume->iooffset - The offset in the block to the candidate object
  *     position.
  *   volume->froffset - Updated offset to the first free FLASH block after
@@ -828,7 +828,7 @@ int nxffs_wrreserve(FAR struct nxffs_volume_s *volume, size_t size)
  *   following settings (left by nxffs_wrreserve()):
  *
  *   volume->ioblock - Read/write block number of the block containing the
- *     candidate oject position
+ *     candidate object position
  *   volume->iooffset - The offset in the block to the candidate object
  *     position.
  *

@@ -376,7 +376,7 @@ static FAR void *vnc_updater(FAR void *arg)
   while (session->state == VNCSERVER_RUNNING)
     {
       /* Get the next queued rectangle update.  This call will block until an
-       * upate is available for the case where the update queue is empty.
+       * update is available for the case where the update queue is empty.
        */
 
       srcrect = vnc_remove_queue(session);

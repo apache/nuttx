@@ -585,7 +585,7 @@ bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
  * Name: sixlowpan_radio_framelen
  *
  * Description:
- *   Get the maximum frame length supported by radio network drvier.
+ *   Get the maximum frame length supported by radio network driver.
  *
  * Input Parameters:
  *   radio - Reference to a radio network driver state instance.

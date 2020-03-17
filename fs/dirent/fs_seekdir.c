@@ -64,7 +64,7 @@ static inline void seekpseudodir(struct fs_dirent_s *idir, off_t offset)
 
   /* Determine a starting point for the seek.  If the seek
    * is "forward" from the current position, then we will
-   * start at the current poisition.  Otherwise, we will
+   * start at the current position.  Otherwise, we will
    * "rewind" to the root dir.
    */
 
@@ -121,7 +121,7 @@ static inline void seekmountptdir(struct fs_dirent_s *idir, off_t offset)
 
   /* Determine a starting point for the seek.  If the seek
    * is "forward" from the current position, then we will
-   * start at the current poisition.  Otherwise, we will
+   * start at the current position.  Otherwise, we will
    * "rewind" to the root dir.
    */
 

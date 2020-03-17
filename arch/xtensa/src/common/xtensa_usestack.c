@@ -53,8 +53,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* XTENSA requires at least a 4-byte stack alignment.  For floating point use,
- * however, the stack must be aligned to 8-byte addresses.
+/* XTENSA requires at least a 4-byte stack alignment.  For floating point
+ * use, however, the stack must be aligned to 8-byte addresses.
  */
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT
@@ -127,9 +127,9 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
 
-  /* The XTENSA stack must be aligned at word (4 byte) or double word (8 byte)
-   * boundaries. If necessary top_of_stack must be rounded down to the
-   * next boundary
+  /* The XTENSA stack must be aligned at word (4 byte) or double word
+   * (8 byte) boundaries. If necessary top_of_stack must be rounded down to
+   * the next boundary
    */
 
   top_of_stack = STACK_ALIGN_DOWN(top_of_stack);

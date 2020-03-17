@@ -58,8 +58,8 @@
  * Pre-processor Macros
  ****************************************************************************/
 
-/* XTENSA requires at least a 4-byte stack alignment.  For floating point use,
- * however, the stack must be aligned to 8-byte addresses.
+/* XTENSA requires at least a 4-byte stack alignment.  For floating point
+ * use, however, the stack must be aligned to 8-byte addresses.
  *
  * REVIST: Is this true?  Comes from ARM EABI
  */
@@ -212,24 +212,29 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * stack.
        *
        * REVISIT:  This is not secure.  In secure built configurations it
-       * be more appropriate to use kmm_memalign() to allocte protected
+       * be more appropriate to use kmm_memalign() to allocate protected
        * memory rather than using the stack.
        */
 
       cpstart      = (uintptr_t)_CP_ALIGNDOWN(XCHAL_CP0_SA_ALIGN,
-                                              top_of_stack - XCHAL_CP1_SA_ALIGN);
+                                              top_of_stack -
+                                              XCHAL_CP1_SA_ALIGN);
       top_of_stack = cpstart;
 
       /* Initialize the coprocessor save area (see xtensa_coproc.h) */
 
       xcp                   = &tcb->xcp;
-      xcp->cpstate.cpenable = 0;  /* No coprocessors active for this thread */
-      xcp->cpstate.cpstored = 0;  /* No coprocessors saved for this thread */
-      xcp->cpstate.cpasa    = (uint32_t *)cpstart; /* Start of aligned save area */
+      xcp->cpstate.cpenable = 0;                   /* No coprocessors active
+                                                    * for this thread */
+      xcp->cpstate.cpstored = 0;                   /* No coprocessors saved
+                                                    * for this thread */
+      xcp->cpstate.cpasa    = (uint32_t *)cpstart; /* Start of aligned save
+                                                    * area */
 #endif
 
       /* The XTENSA stack must be aligned.  If necessary top_of_stack must be
-       * rounded down to the next boundary to meet this alignment requirement.
+       * rounded down to the next boundary to meet this alignment
+       * requirement.
        *
        * NOTE: Co-processor save area not included in the size of the stack.
        */
@@ -246,5 +251,5 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       return OK;
     }
 
-   return ERROR;
+  return ERROR;
 }

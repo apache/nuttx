@@ -118,7 +118,7 @@ up_fullcontextrestore:
 
 #else
 	/* For a flat build, we can do all of this here... Just think of this as
-	 * a longjmp() all on steriods.
+	 * a longjmp() all on steroids.
 	 */
 
 	/* Recover all registers except for r0, r1, r2, R15, and CPSR */

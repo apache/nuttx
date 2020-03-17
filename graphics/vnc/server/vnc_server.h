@@ -214,7 +214,7 @@ enum vnc_server_e
   VNCSERVER_INITIALIZED,       /* State structured initialized, but not connected */
   VNCSERVER_CONNECTED,         /* Connect to a client, but not yet configured */
   VNCSERVER_CONFIGURED,        /* Configured and ready to transfer graphics */
-  VNCSERVER_RUNNING,           /* Running and activly transferring graphics */
+  VNCSERVER_RUNNING,           /* Running and actively transferring graphics */
   VNCSERVER_STOPPING,          /* The updater has been asked to stop */
   VNCSERVER_STOPPED            /* The updater has stopped */
 };

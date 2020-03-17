@@ -430,16 +430,7 @@ found:
 
       if (ackseq < rcvseq)
         {
-          if (dev->d_len > 0)
-            {
-              /* Increment the received sequence number (perhaps including the
-               * discarded dummy byte in the probe).
-               */
-
-              net_incr32(conn->rcvseq, dev->d_len);
-            }
-
-          /* And send a "normal" acknowledgment of the KeepAlive probe */
+          /* Send a "normal" acknowledgment of the KeepAlive probe */
 
           tcp_send(dev, conn, TCP_ACK, tcpiplen);
           return;

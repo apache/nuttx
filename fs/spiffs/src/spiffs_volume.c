@@ -462,7 +462,7 @@ void spiffs_fobj_free(FAR struct spiffs_s *fs,
 
       if (curr == fobj)
         {
-          /* Yes, remove it from the list of of file objects */
+          /* Yes, remove it from the list of file objects */
 
           dq_rem((FAR dq_entry_t *)curr, &fs->objq);
           break;

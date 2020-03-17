@@ -87,16 +87,16 @@ void IRAM_ATTR __start(void)
 
   /* Make sure that normal interrupts are disabled.  This is really only an
    * issue when we are started in un-usual ways (such as from IRAM).  In this
-   * case, we can at least defer some unexpected interrupts left over from the
-   * last program execution.
+   * case, we can at least defer some unexpected interrupts left over from
+   * the last program execution.
    */
 
   up_irq_disable();
 
 #ifdef CONFIG_STACK_COLORATION
-  {
-    register uint32_t *ptr;
-    register int i;
+    {
+      register uint32_t *ptr;
+      register int i;
 
       /* If stack debug is enabled, then fill the stack with a recognizable
        * value that we can use later to test for high water marks.
@@ -106,13 +106,13 @@ void IRAM_ATTR __start(void)
         {
           *ptr++ = STACK_COLOR;
         }
-  }
+    }
 #endif
 
   /* Move the stack to a known location.  Although we were give a stack
-   * pointer at start-up, we don't know where that stack pointer is positioned
-   * respect to our memory map.  The only safe option is to switch to a well-
-   * known IDLE thread stack.
+   * pointer at start-up, we don't know where that stack pointer is
+   * positioned respect to our memory map.  The only safe option is to
+   * switch to a well-known IDLE thread stack.
    */
 
   sp = (uint32_t)g_idlestack + IDLETHREAD_STACKSIZE;
@@ -124,7 +124,7 @@ void IRAM_ATTR __start(void)
 
   /* Move CPU0 exception vectors to IRAM */
 
-  asm volatile ("wsr %0, vecbase\n"::"r" (&_init_start));
+  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (&_init_start));
 
   /* Set .bss to zero */
 
@@ -141,7 +141,7 @@ void IRAM_ATTR __start(void)
   esp32_clockconfig();
 
 #ifdef USE_EARLYSERIALINIT
- /* Perform early serial initialization */
+  /* Perform early serial initialization */
 
   xtensa_early_serial_initialize();
 #endif

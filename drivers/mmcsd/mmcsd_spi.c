@@ -265,7 +265,7 @@ static struct mmcsd_slot_s g_mmcsdslot[CONFIG_MMCSD_NSLOTS];
 
 static const uint32_t g_transpeedru[8] =
 {
-     10000,   /*  0:   10 Kbit/sec / 10 */
+     10000,   /*  0:  100 Kbit/sec / 10 */
     100000,   /*  1:    1 Mbit/sec / 10 */
    1000000,   /*  2:   10 Mbit/sec / 10 */
   10000000,   /*  3:  100 Mbit/sec / 10 */
@@ -1108,7 +1108,7 @@ static int mmcsd_close(FAR struct inode *inode)
 /****************************************************************************
  * Name: mmcsd_read
  *
- * Description:  Read the specified numer of sectors
+ * Description:  Read the specified number of sectors
  *
  ****************************************************************************/
 
@@ -1912,7 +1912,7 @@ static void mmcsd_mediachanged(void *arg)
  *     architectures that support multiple MMC/SD slots.  This value must be
  *     in the range {0, ..., CONFIG_MMCSD_NSLOTS}.
  *   spi - And instance of an SPI interface obtained by called the
- *     approprite xyz_spibus_initialize() function for the MCU "xyz" with
+ *     appropriate xyz_spibus_initialize() function for the MCU "xyz" with
  *     the appropriate port number.
  *
  ****************************************************************************/

@@ -877,15 +877,15 @@ enum stm32_hrtim_dma_e
   HRTIM_DMA_CMP4   = (1 << 3),  /* Common:Compare 4 DMA request */
   HRTIM_DMA_REP    = (1 << 4),  /* Common: Repetition DMA request */
   HRTIM_DMA_SYNC   = (1 << 5),  /* Master: Sync Input DMA request */
-  HRTIM_DMA_UPD    = (1 << 6),  /* Common: Update DMA reques */
-  HRTIM_DMA_CPT1   = (1 << 7),  /* Slaves: Capture 1 DMA reques */
-  HRTIM_DMA_CPT2   = (1 << 8),  /* Slaves: Capture 2 DMA reques */
-  HRTIM_DMA_SET1   = (1 << 9),  /* Slaves: Output 1 Set DMA reques */
-  HRTIM_DMA_RST1   = (1 << 10), /* Slaves: Output 1 Reset DMA reques */
-  HRTIM_DMA_SET2   = (1 << 11), /* Slaves: Output 2 Set DMA reques */
-  HRTIM_DMA_RST2   = (1 << 12), /* Slaves: Output 2 Reset DMA reques */
-  HRTIM_DMA_RST    = (1 << 13), /* Slaves: Reset DMA reques */
-  HRTIM_DMA_DLYPRT = (1 << 14)  /* Slaves: Delayed Protection DMA reques */
+  HRTIM_DMA_UPD    = (1 << 6),  /* Common: Update DMA request */
+  HRTIM_DMA_CPT1   = (1 << 7),  /* Slaves: Capture 1 DMA request */
+  HRTIM_DMA_CPT2   = (1 << 8),  /* Slaves: Capture 2 DMA request */
+  HRTIM_DMA_SET1   = (1 << 9),  /* Slaves: Output 1 Set DMA request */
+  HRTIM_DMA_RST1   = (1 << 10), /* Slaves: Output 1 Reset DMA request */
+  HRTIM_DMA_SET2   = (1 << 11), /* Slaves: Output 2 Set DMA request */
+  HRTIM_DMA_RST2   = (1 << 12), /* Slaves: Output 2 Reset DMA request */
+  HRTIM_DMA_RST    = (1 << 13), /* Slaves: Reset DMA request */
+  HRTIM_DMA_DLYPRT = (1 << 14)  /* Slaves: Delayed Protection DMA request */
 };
 
 /* HRTIM Output IDLE state */

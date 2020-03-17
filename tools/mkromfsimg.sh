@@ -67,7 +67,7 @@ fi
 
 # Extract all values from the .config in the $topdir that contains all of the NuttX
 # configuration settings.  The .config file was intended to be include-able by makefiles
-# and source-able by scripts.  Unfortunately,there are too many syntactic differents
+# and source-able by scripts.  Unfortunately,there are too many syntactic difference
 # to make that practical
 
 if [ ! -r $topdir/.config ]; then

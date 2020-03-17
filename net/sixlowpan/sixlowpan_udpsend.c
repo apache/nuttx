@@ -400,7 +400,7 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
  *   used by the IPv6 forwarding logic.
  *
  * Input Parameters:
- *   dev    - An instance of nework device state structure
+ *   dev    - An instance of network device state structure
  *   fwddev - The network device used to send the data.  This will be the
  *            same device except for the IP forwarding case where packets
  *            are sent across devices.
@@ -440,7 +440,7 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
 
       if (ipv6udp->ipv6.proto != IP_PROTO_UDP)
         {
-          nwarn("WARNING: Expected UDP protoype: %u vs %s\n",
+          nwarn("WARNING: Expected UDP prototype: %u vs %s\n",
                 ipv6udp->ipv6.proto, IP_PROTO_UDP);
         }
       else

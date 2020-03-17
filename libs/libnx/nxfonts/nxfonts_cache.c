@@ -547,7 +547,7 @@ static inline FAR struct nxfonts_glyph_s *
 
   if (glyph != NULL)
     {
-      /* Save the character code, dimensions, and physcial width of the glyph */
+      /* Save the character code, dimensions, and physical width of the glyph */
 
       glyph->code   = ch;
       glyph->width  = width;
@@ -854,7 +854,7 @@ void nxf_cache_disconnect(FCACHE fhandle)
 
       _SEM_DESTROY(&priv->fsem);
 
-      /* Finally, free the font cache stucture itself */
+      /* Finally, free the font cache structure itself */
 
       lib_free(priv);
     }

@@ -228,7 +228,7 @@
    SAMA5_CHAN6_ENABLE | SAMA5_CHAN7_ENABLE  | SAMA5_CHAN8_ENABLE  | \
    SAMA5_CHAN9_ENABLE | SAMA5_CHAN10_ENABLE | SAMA5_CHAN11_ENABLE)
 
-/* If we are supporting the analog chang feature, then sure that there
+/* If we are supporting the analog change feature, then sure that there
  * is a gain setting for each enabled channel.
  *
  * Valid gain settings are {0, 1, 2, 3} which may be interpreted as
@@ -1293,7 +1293,7 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
       return ret;
     }
 
-  /* Set the timer/counter waveform mode the clock input slected by
+  /* Set the timer/counter waveform mode the clock input selected by
    * sam_tc_divisor()
    */
 

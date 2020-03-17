@@ -172,7 +172,12 @@ struct module_s
   mod_initializer_t initializer;       /* Module initializer function */
 #endif
   struct mod_info_s modinfo;           /* Module information */
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+  FAR void *textalloc;                 /* Allocated kernel text memory */
+  FAR void *dataalloc;                 /* Allocated kernel memory */
+#else
   FAR void *alloc;                     /* Allocated kernel memory */
+#endif
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   size_t textsize;                     /* Size of the kernel .text memory allocation */
   size_t datasize;                     /* Size of the kernel .bss/.data memory allocation */
@@ -198,8 +203,8 @@ struct mod_loadinfo_s
   /* elfalloc is the base address of the memory that is allocated to hold the
    * module image.
    *
-   * The alloc[] array in struct module_s will hold memory that persists after
-   * the module has been loaded.
+   * The alloc[] array in struct module_s will hold memory that persists
+   * after the module has been loaded.
    */
 
   uintptr_t         textalloc;   /* .text memory allocated when module was loaded */
@@ -245,8 +250,8 @@ int modlib_initialize(FAR const char *filename,
  * Name: modlib_uninitialize
  *
  * Description:
- *   Releases any resources committed by modlib_initialize().  This essentially
- *   undoes the actions of modlib_initialize.
+ *   Releases any resources committed by modlib_initialize().  This
+ *   essentially undoes the actions of modlib_initialize.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -264,7 +269,8 @@ int modlib_uninitialize(FAR struct mod_loadinfo_s *loadinfo);
  *
  * Input Parameters:
  *   symtab - The location to store the symbol table.
- *   nsymbols - The location to store the number of symbols in the symbol table.
+ *   nsymbols - The location to store the number of symbols in the symbol
+ *              table.
  *
  * Returned Value:
  *   None
@@ -310,7 +316,8 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo);
  *
  * Description:
  *   Bind the imported symbol names in the loaded module described by
- *   'loadinfo' using the exported symbol values provided by modlib_setsymtab().
+ *   'loadinfo' using the exported symbol values provided by
+ *   modlib_setsymtab().
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -318,7 +325,8 @@ int modlib_load(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int modlib_bind(FAR struct module_s *modp, FAR struct mod_loadinfo_s *loadinfo);
+int modlib_bind(FAR struct module_s *modp,
+                FAR struct mod_loadinfo_s *loadinfo);
 
 /****************************************************************************
  * Name: modlib_unload
@@ -358,7 +366,8 @@ int modlib_unload(struct mod_loadinfo_s *loadinfo);
  ****************************************************************************/
 
 #if CONFIG_MODLIB_MAXDEPEND > 0
-int modlib_depend(FAR struct module_s *importer, FAR struct module_s *exporter);
+int modlib_depend(FAR struct module_s *importer,
+                  FAR struct module_s *exporter);
 #endif
 
 /****************************************************************************

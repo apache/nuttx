@@ -64,7 +64,8 @@ typedef enum gpio_inttype_e GPIO_INT_TYPE;
 
 /* GPIO interrupt handler, registered through gpio_intr_handler_register */
 
-typedef void (*gpio_intr_handler_fn_t)(uint32_t intr_mask, bool high, void *arg);
+typedef void (*gpio_intr_handler_fn_t)(uint32_t intr_mask, bool high,
+              void *arg);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -106,7 +107,7 @@ void gpio_init(void);
  *   set_mask     - the gpios that need high level.
  *   clear_mask   - the gpios that need low level.
  *   enable_mask  - the gpios that need be changed.
- *   disable_mask - the gpios that need diable output.
+ *   disable_mask - the gpios that need disable output.
  *
  * Returned Value:
  *  None
@@ -129,7 +130,7 @@ void gpio_output_set(uint32_t set_mask, uint32_t clear_mask,
  *   set_mask     - the gpios that need high level.
  *   clear_mask   - the gpios that need low level.
  *   enable_mask  - the gpios that need be changed.
- *   disable_mask - the gpios that need diable output.
+ *   disable_mask - the gpios that need disable output.
  *
  * Returned Value:
  *  None
@@ -260,7 +261,8 @@ void gpio_intr_ack_high(uint32_t ack_mask);
  *
  * Input Parameters:
  *   i          - gpio number.
- *   intr_state - only GPIO_PIN_INTR_LOLEVEL\GPIO_PIN_INTR_HILEVEL can be used
+ *   intr_state - only GPIO_PIN_INTR_LOLEVEL\GPIO_PIN_INTR_HILEVEL can be
+ *                used
  *
  * Returned Value:
  *  None

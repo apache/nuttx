@@ -94,7 +94,7 @@
 #define RES_8BIT        0
 #define RES_12BIT       (1 << 6)
 
-/* Data ready funtion enable bit: set during probe if using irq mode */
+/* Data ready function enable bit: set during probe if using irq mode */
 
 #define DRDYE           (1 << 5)
 
@@ -117,7 +117,7 @@
 
 #define KXTJ9_CTRL1_CONFIG  (RES_12BIT | KXTJ9_G_2G | DRDYE)
 
-/* Misc. driver defitions ***************************************************/
+/* Misc. driver definitions *************************************************/
 
 #define ACCEL_NUM_RETRIES   5
 
@@ -508,7 +508,7 @@ static ssize_t kxtj9_read(FAR struct file *filep, FAR char *buffer,
 
   if (nsamples < 1)
     {
-      snerr("ERROR: Bufer too small %lu < %u\n",
+      snerr("ERROR: Buffer too small %lu < %u\n",
             buflen, sizeof(struct kxtj9_sensor_data));
       return (ssize_t)-EINVAL;
     }

@@ -48,14 +48,14 @@
  * Pre-processor Definitions
  ****************************************************************************************************/
 
-#define STM32_HRTIM_MASTER_OFFSET       0x0000      /* HRTIM Master Timer base adress offset */
-#define STM32_HRTIM_TIMERA_OFFSET       0x0080      /* HRTIM Timer A base adress offset */
-#define STM32_HRTIM_TIMERB_OFFSET       0x0100      /* HRTIM Timer B base adress offset */
-#define STM32_HRTIM_TIMERC_OFFSET       0x0180      /* HRTIM Timer C base adress offset */
-#define STM32_HRTIM_TIMERD_OFFSET       0x0200      /* HRTIM Timer D base adress offset */
-#define STM32_HRTIM_TIMERE_OFFSET       0x0280      /* HRTIM Timer E base adress offset */
+#define STM32_HRTIM_MASTER_OFFSET       0x0000      /* HRTIM Master Timer base address offset */
+#define STM32_HRTIM_TIMERA_OFFSET       0x0080      /* HRTIM Timer A base address offset */
+#define STM32_HRTIM_TIMERB_OFFSET       0x0100      /* HRTIM Timer B base address offset */
+#define STM32_HRTIM_TIMERC_OFFSET       0x0180      /* HRTIM Timer C base address offset */
+#define STM32_HRTIM_TIMERD_OFFSET       0x0200      /* HRTIM Timer D base address offset */
+#define STM32_HRTIM_TIMERE_OFFSET       0x0280      /* HRTIM Timer E base address offset */
                                                     /* 0x300-0x37F: Reserved */
-#define STM32_HRTIM_CMN_OFFSET          0x0380      /* HRTIM Common registers base adress offset */
+#define STM32_HRTIM_CMN_OFFSET          0x0380      /* HRTIM Common registers base address offset */
 
 #define STM32_HRTIM1_MASTER_BASE        (STM32_HRTIM_MASTER_OFFSET+STM32_HRTIM1_BASE)
 #define STM32_HRTIM1_TIMERA_BASE        (STM32_HRTIM_TIMERA_OFFSET+STM32_HRTIM1_BASE)
@@ -1051,7 +1051,7 @@
 #define HRTIM_CR1_TEUDIS              (1 << 5) /* Bit 5: Timer E Update Disable */
 #define HRTIM_CR1_AD1USRC_SHIFT       16 /* Bits 16-18: ADC Trigger 1 Update Source  */
 #define HRTIM_CR1_AD1USRC_MASK        (7 << HRTIM_CR1_AD1USRC_SHIFT)
-#  define HRTIM_CR1_AD1USRC_MT        (0 << HRTIM_CR1_AD1USRC_SHIFT) /* 000: Mater Timer */
+#  define HRTIM_CR1_AD1USRC_MT        (0 << HRTIM_CR1_AD1USRC_SHIFT) /* 000: Master Timer */
 #  define HRTIM_CR1_AD1USRC_TA        (1 << HRTIM_CR1_AD1USRC_SHIFT) /* 001: Timer A */
 #  define HRTIM_CR1_AD1USRC_TB        (2 << HRTIM_CR1_AD1USRC_SHIFT) /* 010: Timer B */
 #  define HRTIM_CR1_AD1USRC_TC        (3 << HRTIM_CR1_AD1USRC_SHIFT) /* 011: Timer C */
@@ -1059,7 +1059,7 @@
 #  define HRTIM_CR1_AD1USRC_TE        (5 << HRTIM_CR1_AD1USRC_SHIFT) /* 101: Timer A */
 #define HRTIM_CR1_AD2USRC_SHIFT       19 /* Bits 19-21: ADC Trigger 2 Update Source  */
 #define HRTIM_CR1_AD2USRC_MASK        (7 << HRTIM_CR1_AD2USRC_SHIFT)
-#  define HRTIM_CR1_AD2USRC_MT        (0 << HRTIM_CR1_AD2USRC_SHIFT) /* 000: Mater Timer */
+#  define HRTIM_CR1_AD2USRC_MT        (0 << HRTIM_CR1_AD2USRC_SHIFT) /* 000: Master Timer */
 #  define HRTIM_CR1_AD2USRC_TA        (1 << HRTIM_CR1_AD2USRC_SHIFT) /* 001: Timer A */
 #  define HRTIM_CR1_AD2USRC_TB        (2 << HRTIM_CR1_AD2USRC_SHIFT) /* 010: Timer B */
 #  define HRTIM_CR1_AD2USRC_TC        (3 << HRTIM_CR1_AD2USRC_SHIFT) /* 011: Timer C */
@@ -1067,7 +1067,7 @@
 #  define HRTIM_CR1_AD2USRC_TE        (5 << HRTIM_CR1_AD2USRC_SHIFT) /* 101: Timer A */
 #define HRTIM_CR1_AD3USRC_SHIFT       22 /* Bits 22-24: ADC Trigger 3 Update Source  */
 #define HRTIM_CR1_AD3USRC_MASK        (7 << HRTIM_CR1_AD3USRC_SHIFT)
-#  define HRTIM_CR1_AD3USRC_MT        (0 << HRTIM_CR1_AD3USRC_SHIFT) /* 000: Mater Timer */
+#  define HRTIM_CR1_AD3USRC_MT        (0 << HRTIM_CR1_AD3USRC_SHIFT) /* 000: Master Timer */
 #  define HRTIM_CR1_AD3USRC_TA        (1 << HRTIM_CR1_AD3USRC_SHIFT) /* 001: Timer A */
 #  define HRTIM_CR1_AD3USRC_TB        (2 << HRTIM_CR1_AD3USRC_SHIFT) /* 010: Timer B */
 #  define HRTIM_CR1_AD3USRC_TC        (3 << HRTIM_CR1_AD3USRC_SHIFT) /* 011: Timer C */
@@ -1075,7 +1075,7 @@
 #  define HRTIM_CR1_AD3USRC_TE        (5 << HRTIM_CR1_AD3USRC_SHIFT) /* 101: Timer A */
 #define HRTIM_CR1_AD4USRC_SHIFT       25 /* Bits 25-27: ADC Trigger 4 Update Source  */
 #define HRTIM_CR1_AD4USRC_MASK        (7 << HRTIM_CR1_AD4USRC_SHIFT)
-#  define HRTIM_CR1_AD4USRC_MT        (0 << HRTIM_CR1_AD4USRC_SHIFT) /* 000: Mater Timer */
+#  define HRTIM_CR1_AD4USRC_MT        (0 << HRTIM_CR1_AD4USRC_SHIFT) /* 000: Master Timer */
 #  define HRTIM_CR1_AD4USRC_TA        (1 << HRTIM_CR1_AD4USRC_SHIFT) /* 001: Timer A */
 #  define HRTIM_CR1_AD4USRC_TB        (2 << HRTIM_CR1_AD4USRC_SHIFT) /* 010: Timer B */
 #  define HRTIM_CR1_AD4USRC_TC        (3 << HRTIM_CR1_AD4USRC_SHIFT) /* 011: Timer C */

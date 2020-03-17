@@ -52,3 +52,10 @@ CHIP_CSRCS += rx65n_timerisr.c
 ifeq ($(CONFIG_RX65N_EMAC),y)
 CHIP_CSRCS += rx65n_eth.c rx65n_cmtw0.c
 endif
+ifeq ($(CONFIG_RX65N_RTC),y)
+CHIP_CSRCS += rx65n_rtc.c
+endif
+
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += rx65n_rtc_lowerhalf.c
+endif

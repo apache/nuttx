@@ -40,7 +40,7 @@
 
 #include <nuttx/config.h>        /* NuttX configuration settings */
 #include <arch/board/board.h>   /* Board-specific settings */
-#include <arch/irq.h>           /* IRQ definitons */
+#include <arch/irq.h>           /* IRQ definitions */
 #include "up_internal.h"
 #include "rx65n/iodefine.h"
 #include "rx65n_definitions.h"
@@ -202,7 +202,7 @@ _up_vector:
    * structures are being accessed.
    */
 
-  SETPSW  I          /* Enable Inerrupt */
+  SETPSW  I          /* Enable Interrupt */
   MVTIPL  RX65N_INTERRUPT_IPL  /* configMAX_SYSCALL_INTERRUPT_PRIORITY */
 #endif
   MOV.L   #_up_num_irq, R2
@@ -224,7 +224,7 @@ _up_vector:
 
   /* Reset the interrupt mask as no more data structure access is required. */
 
-  CLRPSW  I     /* Disable Inerrupt */
+  CLRPSW  I     /* Disable Interrupt */
   MVTIPL  #15   /* configKERNEL_INTERRUPT_PRIORITY */
 #endif
   POPREGS

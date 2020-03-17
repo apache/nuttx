@@ -192,6 +192,10 @@ config IMXRT_USBOTG
 	select USBHOST_HAVE_ASYNCH if USBHOST
 	select USBHOST_ASYNCH
 
+config IMXRT_USBDEV
+	bool "USB Device"
+	default n
+
 config IMXRT_ENET
 	bool "Ethernet"
 	default n
@@ -1092,6 +1096,13 @@ config IMXRT_DTCM_HEAP
 	---help---
 		Select to add the entire DTCM to the heap
 
+config IMXRT_BOOTLOADER_HEAP
+	bool "Add ROM bootloader 40Kib RAM to heap"
+	default false
+	depends on BOOT_RUNFROMISRAM
+	---help---
+		Select to add the memory used by the ROM bootloader to heap
+
 config IMXRT_SDRAM_HEAP
 	bool "Add SDRAM to heap"
 	depends on IMXRT_SEMC_SDRAM && !IMXRT_SDRAM_PRIMARY
@@ -1363,10 +1374,10 @@ config IMXRT_LCD_VRAMBASE
 		Default: SDRAM
 
 config IMXRT_LCD_REFRESH_FREQ
-	int "LCD refesh rate (Hz)"
+	int "LCD refresh rate (Hz)"
 	default 60
 	---help---
-		LCD refesh rate (Hz)
+		LCD refresh rate (Hz)
 
 config IMXRT_LCD_BACKLIGHT
 	bool "Enable backlight"
@@ -1526,5 +1537,32 @@ config IMXRT_EHCI_PREALLOCATE
 
 endmenu # USB host controller driver (HCD) options
 endif # IMXRT_USBOTG && USBHOST
+
+if IMXRT_USBDEV
+
+menu "USB device controller driver (DCD) options"
+
+config IMXRT_USBDEV_NOVBUS
+    bool "No USB VBUS sensing"
+    default n
+
+config IMXRT_USBDEV_FRAME_INTERRUPT
+    bool "USB frame interrupt"
+    default n
+    ---help---
+        Handle USB Start-Of-Frame events.  Enable reading SOF from interrupt
+        handler vs. simply reading on demand. Probably a bad idea... Unless
+        there is some issue with sampling the SOF from hardware asynchronously.
+
+config IMXRT_USBDEV_REGDEBUG
+    bool "Register level debug"
+    depends on DEBUG_USB_INFO
+    default n
+    ---help---
+        Output detailed register-level USB device debug information.  Requires
+        also CONFIG_DEBUG_USB_INFO.
+
+endmenu # USB device controller driver (DCD) options
+endif # IMXRT_USBDEV
 
 endif # ARCH_CHIP_IMXRT

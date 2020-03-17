@@ -143,7 +143,7 @@ echo  ^<board-name^>:
 echo    Identifies the board.  This must correspond to a board directory
 echo    under nuttx/boards/.
 echo  ^<config-name^>:
-echo    Identifies the specific configuratin for the selected ^<board-name^>.
+echo    Identifies the specific configuration for the selected ^<board-name^>.
 echo    This must correspond to a sub-directory under the board directory at
 echo    under nuttx/boards/^<board-name^>/configs/.
 echo  -h:

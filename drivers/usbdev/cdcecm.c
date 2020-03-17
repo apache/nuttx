@@ -539,7 +539,7 @@ static void cdcecm_receive(FAR struct cdcecm_driver_s *self)
 #ifdef CONFIG_NET_IPv6
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
-      ninfo("Iv6 frame\n");
+      ninfo("IPv6 frame\n");
       NETDEV_RXIPV6(&self->dev);
 
       /* Dispatch IPv6 packet to the network layer */

@@ -110,7 +110,7 @@
  *
  * Input Parameters:
  *   radio   - A reference to a radio network device instance
- *   ipv6    - The IPv6 header followd by TCP, UDP, or ICMPv6 header to be
+ *   ipv6    - The IPv6 header followed by TCP, UDP, or ICMPv6 header to be
  *             compressed
  *   destmac - L2 destination address, needed to compress the IP
  *             destination field

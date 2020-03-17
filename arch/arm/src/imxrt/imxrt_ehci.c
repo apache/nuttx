@@ -331,7 +331,7 @@ enum usbhost_trace1codes_e
   EHCI_TRACE1_QTDSTATUS_FAILED,     /* EHCI ERROR: imxrt_qtd_statusphase failed */
   EHCI_TRACE1_TRANSFER_FAILED,      /* EHCI ERROR: Transfer failed */
   EHCI_TRACE1_QHFOREACH_FAILED,     /* EHCI ERROR: imxrt_qh_foreach failed: */
-  EHCI_TRACE1_SYSERR_INTR,          /* EHCI: Host System Error Interrup */
+  EHCI_TRACE1_SYSERR_INTR,          /* EHCI: Host System Error Interrupt */
   EHCI_TRACE1_USBERR_INTR,          /* EHCI: USB Error Interrupt (USBERRINT) Interrupt */
   EHCI_TRACE1_EPALLOC_FAILED,       /* EHCI ERROR: Failed to allocate EP info structure */
   EHCI_TRACE1_BADXFRTYPE,           /* EHCI ERROR: Support for transfer type not implemented */
@@ -1621,7 +1621,7 @@ static int imxrt_ioc_wait(struct imxrt_epinfo_s *epinfo)
  * Name: imxrt_qh_enqueue
  *
  * Description:
- *   Add a new, ready-to-go QH w/attached qTDs to the asynchonous queue.
+ *   Add a new, ready-to-go QH w/attached qTDs to the asynchronous queue.
  *
  * Assumptions:  The caller holds the EHCI exclsem
  *
@@ -2126,7 +2126,7 @@ static int imxrt_async_setup(struct imxrt_rhport_s *rhport,
   toggle = (uint32_t)epinfo->toggle << QTD_TOKEN_TOGGLE_SHIFT;
   ret    = -EIO;
 
-  /* Is the an EP0 SETUP request?  If so, req will be non-NULL and we will
+  /* Is there an EP0 SETUP request?  If so, req will be non-NULL and we will
    * queue two or three qTDs:
    *
    *   1) One for the SETUP phase,
@@ -2287,7 +2287,7 @@ static int imxrt_async_setup(struct imxrt_rhport_s *rhport,
       physaddr = imxrt_physramaddr((uintptr_t)qtd);
       *flink = imxrt_swap32(physaddr);
 
-      /* In an IN data qTD was also enqueued, then linke the data qTD's
+      /* In an IN data qTD was also enqueued, then linked the data qTD's
        * alternate pointer to this STATUS phase qTD in order to handle short
        * transfers.
        */
@@ -2795,7 +2795,7 @@ static int imxrt_qh_ioccheck(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
                QH_TOKEN_HALTED &&
               (token & QH_TOKEN_CERR_MASK) != 0)
             {
-              /* It is a stall,  Note the that the data toggle is reset
+              /* It is a stall,  Note that the data toggle is reset
                * after the stall.
                */
 
@@ -3577,7 +3577,7 @@ static int imxrt_rh_enumerate(FAR struct usbhost_connection_s *conn,
    *   01b         K-state   Low-speed device, release ownership of port
    *
    * NOTE: Low-speed devices could be detected by examining the PORTSC PSPD
-   * field after resetting the device.  The more convential way here, however,
+   * field after resetting the device.  The more conventional way here, however,
    * also appears to work.
    */
 

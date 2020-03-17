@@ -1,5 +1,5 @@
-NETWORK SUPPORT ON LINUX
-^^^^^^^^^^^^^^^^^^^^^^^^
+Network Support on Linux
+========================
 
 The simulation uses the TUN/TAP driver under Linux to provide network support.
 It can operate in one of two modes: host routed, or bridged.  In the host
@@ -11,8 +11,8 @@ to set up, but is much more flexible, and is likely to be easier to maintain
 in the end.
 
 
-HOST ROUTE MODE
-^^^^^^^^^^^^^^^
+Host Route Mode
+---------------
 
 If CONFIG_SIM_NET_HOST_ROUTE is enabled, the simulation will create and
 maintain a host route from the assigned IP address to the instance's tap
@@ -27,14 +27,52 @@ able to see it until the simulation is stopped.  The host route will force all
 traffic destined for that IP to be sent to the tap interface.
 
 NOTE:  If you configure an IP address that is not on the same subnet as your
-       host, additional manual setup will be required.  This is not
-       recommended; you should use bridge mode instead.
+       host, additional manual setup will be required. A helper script,
+       `tools/simhostroute.sh` is provided that can do this setup on Linux.
+       On Windows or macOS using host route mode is not recommended.
+
+Recent versions of Linux require setting kernel capabilities to allow the nuttx
+executable access to the tap network driver. You can see more about the tun/tap
+driver requiring Linux capabilities here:
+
+https://github.com/torvalds/linux/blob/master/Documentation/networking/tuntap.txt
+
+The `boards/sim/sim/sim/configs/tcpblaster/defconfig` is known to work in this
+configuration.
+
+To compile:
+
+    $ cp boards/sim/sim/sim/configs/tcpblaster/defconfig .config
+    $ make menuconfig  # optional, to adjust configuration
+    $ make clean; make
+
+You can do the following after compiling the NuttX simulator:
+
+On Linux:
+
+    $ # necessary on recent Linux distributions
+    $ sudo setcap cap_net_admin+ep ./nuttx
+    $ # set up the host route and IP tables rules
+    $ # replace ens33 with your Ethernet or wireless interface
+    $ sudo ./tools/simhostroute.sh ens33 on
+    $ # start the NuttX simulator
+    $ ./nuttx
+
+On the NuttX Simulator:
+
+    nsh> ifconfig eth0 10.0.1.2
+    nsh> ifup eth0
+
+On Linux:
+
+    $ # is nuttx up?
+    $ ping 10.0.1.2
 
 
-BRIDGE MODE
-^^^^^^^^^^^
+Bridge Mode
+-----------
 
-BASIC USAGE
+Basic Usage
 -----------
 If CONFIG_SIM_NET_BRIDGE is enabled, the simulation's tap interface will
 automatically be added to the Linux bridge device specified by the
@@ -54,11 +92,11 @@ multiple simulations, they will all be added to the same bridge and can talk
 amongst themselves.
 
 
-OPTION 1:  ROUTING LOCAL TRAFFIC TO THE BRIDGE
-----------------------------------------------
-If you want the host to be able to talk to your simluations, you will
+Option 1: Routing Local Traffic to the Bridge
+---------------------------------------------
+If you want the host to be able to talk to the simulator, you will
 also need to assign the bridge an IP address (this will be the default
-gateway you assign to your simluations) and add a network route.  Note
+gateway you assign to the simulator) and add a network route.  Note
 that the subnet chosen should not already be in use.  For example, if
 you want to use the 172.26.23.0/24 subnet for your simluations, you
 would do something like the following:
@@ -70,9 +108,9 @@ The standard Linux ifconfig utility will automatically add the appropriate
 network route, so no further effort is needed.
 
 
-OPTION 2:  LIVE NETWORK ACCESS
-------------------------------
-There are two main methods of giving your simulations access to your network
+Option 2: Live Network Access
+-----------------------------
+There are two main methods of giving the simulator access to your network
 at large.  One is to set up your Linux host as a router and configure your
 network so that it knows where to find the appropriate subnet.  This is far
 too complex for most use cases, so you can safely ignore it unless you have
@@ -111,16 +149,21 @@ as an ethernet hub; your simluation has direct access to the normal gateway as
 if the simluation were a device physically connected to the network.
 
 
-CONFIGURING AT STARTUP
+Configuring at Startup
 ----------------------
 Most Linux distributions have a mechanism for configuring a bridge at startup.
 See your distribution's documentation for more information.
 
+Setup Script
+------------
 
-NOTES
-^^^^^
+There is a script, `tools/simbridge.sh` that will do the setup for you.
 
-  o Users of VMware ESXi should be aware that the bridge will place the contained
+
+Notes
+-----
+
+  - Users of VMware ESXi should be aware that the bridge will place the contained
     ethernet interface into promiscuous mode (don't ask me why).  ESXi will
     reject this by default, and nothing will work.  To fix this, edit the
     properties of the relevant vSwitch or VLAN, select the Security tab, and
@@ -131,7 +174,7 @@ NOTES
 
     I don't know if VMware's consumer products have similar issues or not.
 
-  o tools/simbridge.sh could make the bridge setup easier:
+  - tools/simbridge.sh could make the bridge setup easier:
 
       # tools/simbridge.sh eth0 on
       # tools/simbridge.sh eth0 off

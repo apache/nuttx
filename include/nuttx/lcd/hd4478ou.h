@@ -60,7 +60,7 @@
 #  define HD4478OU_DISPLAY_BLINK  (1 << 0)   /*   Blink on/off */
 #  define HD4478OU_DISPLAY_CURSOR (1 << 1)   /*   Cursor on/off */
 #  define HD4478OU_DISPLAY_ON     (1 << 2)   /*   Display on/off */
-#define HD4478OU_SHIFT            (0x10)     /* Remove cursor and whole diplay */
+#define HD4478OU_SHIFT            (0x10)     /* Remove cursor and whole display */
 #  define HD4478OU_SHIFT_RIGHT    (1 << 2)   /*   Shift right */
 #  define HD4478OU_SHIFT_LEFT     (0x00)     /*   Shift right */
 #  define HD4478OU_SHIFT_DISPLAY  (1 << 3)   /*   Display shift */

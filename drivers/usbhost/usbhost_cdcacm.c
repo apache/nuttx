@@ -1578,7 +1578,7 @@ static int usbhost_cfgdesc(FAR struct usbhost_cdcacm_s *priv,
     }
 
   /* Sanity checking... did we find all of things that we needed for the
-   * basic CDC/ACM data itnerface? NOTE: that the Control interface with
+   * basic CDC/ACM data interface? NOTE: that the Control interface with
    * the Interrupt IN endpoint is optional.
    */
 

@@ -703,7 +703,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
 
   wm8904_writereg(priv, WM8904_FLL_CTRL1, 0);
 
-  /* Determine Fref.  The source refrence clock should be the MCLK */
+  /* Determine Fref.  The source reference clock should be the MCLK */
 
   fref   = priv->lower->mclk;
   regval = (WM8904_FLL_CLK_REF_SRC_MCLK | WM8904_FLL_CLK_REF_DIV1);

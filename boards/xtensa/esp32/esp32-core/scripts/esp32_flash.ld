@@ -59,6 +59,10 @@ SECTIONS
     *libpp.a:(.literal .text .literal.* .text.*)
     *libhal.a:(.literal .text .literal.* .text.*)
     _iram_text_end = ABSOLUTE(.);
+
+    /* Module text area starts at the end of iram0_0_seg */
+
+    _smodtext = ABSOLUTE(.);
   } > iram0_0_seg
 
   /* Shared RAM */

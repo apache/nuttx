@@ -359,7 +359,7 @@ static void apds9930_putreg16(FAR struct apds9930_dev_s *priv,
  * Name: apds9930_intclr
  *
  * Description:
- *   APDS9930 Inerrupt clear
+ *   APDS9930 Interrupt clear
  *
  ****************************************************************************/
 
@@ -845,7 +845,7 @@ static int apds9930_ioctl_ps(FAR struct file *filep, int cmd,
 
               ret = seq_ioctl(priv->seq, priv->minor, cmd, arg);
 #else
-              snerr("Unregisted SCU sequencer cmd: %d\n", cmd);
+              snerr("Unregistered SCU sequencer cmd: %d\n", cmd);
               ret = - ENOTTY;
 #endif
             }

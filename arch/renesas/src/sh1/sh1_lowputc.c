@@ -199,7 +199,7 @@ void up_lowputc(char ch)
 #ifdef HAVE_CONSOLE
   uint8_t ssr;
 
-  /* Wait until the TDR is avaible */
+  /* Wait until the TDR is available */
 
   while (!up_txready());
 

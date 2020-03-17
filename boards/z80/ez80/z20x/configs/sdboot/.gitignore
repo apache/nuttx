@@ -1,6 +1,6 @@
-nsh.hex
-nsh.map
-nsh.lod
-nsh.wsp
+sdboot.hex
+sdboot.map
+sdboot.lod
+sdboot.wsp
 *.asm
 Debug

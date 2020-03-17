@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/semaphore.h
  *
- *   Copyright (C) 2014-2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2017, 2020 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <errno.h>
 #include <semaphore.h>
@@ -65,7 +66,7 @@
  *
  * This is only important when compiling libraries (libc or libnx) that are
  * used both by the OS (libkc.a and libknx.a) or by the applications
- * (libuc.a and libunx.a).  The that case, the correct interface must be
+ * (libuc.a and libunx.a).  In that case, the correct interface must be
  * used for the build context.
  *
  * REVISIT:  In the flat build, the same functions must be used both by
@@ -539,6 +540,7 @@ int sem_setprotocol(FAR sem_t *sem, int protocol);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_HAVE_INLINE
 static inline int nxsem_wait_uninterruptible(FAR sem_t *sem)
 {
   int ret;
@@ -553,6 +555,9 @@ static inline int nxsem_wait_uninterruptible(FAR sem_t *sem)
 
   return ret;
 }
+#else
+int nxsem_wait_uninterruptible(FAR sem_t *sem);
+#endif
 
 /****************************************************************************
  * Name: nxsem_timedwait_uninterruptible
@@ -576,9 +581,10 @@ static inline int nxsem_wait_uninterruptible(FAR sem_t *sem)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_HAVE_INLINE
 static inline int
-nxsem_timedwait_uninterruptible(FAR sem_t *sem,
-                                FAR const struct timespec *abstime)
+  nxsem_timedwait_uninterruptible(FAR sem_t *sem,
+                                  FAR const struct timespec *abstime)
 {
   int ret;
 
@@ -592,6 +598,10 @@ nxsem_timedwait_uninterruptible(FAR sem_t *sem,
 
   return ret;
 }
+#else
+int nxsem_timedwait_uninterruptible(FAR sem_t *sem,
+                                    FAR const struct timespec *abstime);
+#endif
 
 /****************************************************************************
  * Name: nxsem_tickwait_uninterruptible
@@ -616,8 +626,9 @@ nxsem_timedwait_uninterruptible(FAR sem_t *sem,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_HAVE_INLINE
 static inline int
-nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start, uint32_t delay)
+  nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start, uint32_t delay)
 {
   int ret;
 
@@ -631,6 +642,10 @@ nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start, uint32_t delay)
 
   return ret;
 }
+#else
+int nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start,
+                                   uint32_t delay);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

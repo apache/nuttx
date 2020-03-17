@@ -474,7 +474,7 @@ static ssize_t userfs_write(FAR struct file *filep, FAR const char *buffer,
 
   if (buflen > priv->mxwrite)
     {
-      return -E2BIG; /* No implememented yet */
+      return -E2BIG; /* No implemented yet */
     }
 
   /* Get exclusive access */

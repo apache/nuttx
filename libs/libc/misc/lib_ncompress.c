@@ -71,7 +71,7 @@
 #  define ARGS(a)    ()
 #endif
 
-#define LARGS(a) ()             /* Relay on include files for libary func defs.
+#define LARGS(a) ()             /* Relay on include files for library func defs.
                                  */
 
 #ifndef SIG_TYPE

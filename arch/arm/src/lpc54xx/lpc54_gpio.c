@@ -115,9 +115,9 @@ static const uint32_t g_typea_mask[LPC54_GPIO_NPORTS] =
  * Description:
  *   Get the LPC548x IOCON register mask.
  *
- *   Type D: FUNC MODE         INVERT DIGIMODE FILTEROFF SLEW     OD
+ *   Type D: FUNC MODE         INVERT DIGIMODE FILTEROFF SLEW     ON
  *   Type I: FUNC      I2CSLEW INVERT DIGIMODE FILTEROFF I2CDRIVE I2CFILTEROFF
- *   Type A: FUNC MODE         INVERT DIGIMODE FILTEROFF          OD
+ *   Type A: FUNC MODE         INVERT DIGIMODE FILTEROFF          ON
  *
  ****************************************************************************/
 
@@ -212,7 +212,7 @@ static inline void lpc54_gpio_output(lpc54_pinset_t cfgset,
   putreg32(regval, regaddr);
 
   /* Set the initial value of the output.  Apparently this cannot be done
-   * before cofiguring the pin as an output.  I don't see anyway to avoid
+   * before configuring the pin as an output.  I don't see anyway to avoid
    * glitch.
    */
 
@@ -254,9 +254,9 @@ static void lpc54_gpio_iocon(lpc54_pinset_t cfgset, unsigned int port,
 
   /* Configure pins for supported pin type(s):
    *
-   *   Type D: FUNC MODE         INVERT DIGIMODE FILTEROFF SLEW     OD
+   *   Type D: FUNC MODE         INVERT DIGIMODE FILTEROFF SLEW     ON
    *   Type I: FUNC      I2CSLEW INVERT DIGIMODE FILTEROFF I2CDRIVE I2CFILTEROFF
-   *   Type A: FUNC MODE         INVERT DIGIMODE FILTEROFF          OD
+   *   Type A: FUNC MODE         INVERT DIGIMODE FILTEROFF          ON
    */
 
   pintype = lpc54_pintype(port, pin);
@@ -312,7 +312,7 @@ static void lpc54_gpio_iocon(lpc54_pinset_t cfgset, unsigned int port,
       iocon |= IOCON_I2CDRIVE_HIGH;
     }
 
-  /* OD: Type D and A only */
+  /* ON: Type D and A only */
 
   if ((pintype & (PIN_TYPED | PIN_TYPEA)) != 0 &&
       (cfgset & GPIO_OD_MASK) != 0)

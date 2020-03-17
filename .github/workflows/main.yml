@@ -1,0 +1,75 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: PR Check CI
+
+on:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-18.04
+    container: liuguo09/ubuntu-nuttx:18.04
+
+    steps:
+    - name: Checkout nuttx repo
+      uses: actions/checkout@v2
+      with:
+        path: nuttx
+        fetch-depth: 0
+
+    - name: Check Pull Request
+      run: |
+        cd nuttx
+        ranges=`git log -1 --merges --pretty=format:%P | awk -F" " '{ print $1 ".." $2 }'`
+        git log --oneline $ranges
+        commits=`git log --reverse --format=format:%H $ranges`
+        echo "./tools/checkpatch.sh -g $commits"
+        ./tools/checkpatch.sh -g $commits
+
+  build:
+    runs-on: ubuntu-18.04
+    container: liuguo09/ubuntu-nuttx:18.04
+
+    strategy:
+      matrix:
+        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, arm-14, arm-15, mips-riscv-x86, sim]
+
+    steps:
+    - name: Checkout nuttx repo
+      uses: actions/checkout@v2
+      with:
+        path: nuttx
+        fetch-depth: 0
+
+    - name: Fetch nuttx tags
+      run: |
+        cd nuttx
+        git fetch --tags
+
+    - name: Checkout apps repo
+      uses: actions/checkout@v2
+      with:
+        repository: apache/incubator-nuttx-apps
+        path: apps
+        fetch-depth: 0
+
+    - name: Checkout testing repo
+      uses: actions/checkout@v2
+      with:
+        repository: apache/incubator-nuttx-testing
+        path: testing
+
+    - name: Run builds
+      run: |
+        cd testing
+        ./cibuild.sh -x testlist/${{matrix.boards}}.dat

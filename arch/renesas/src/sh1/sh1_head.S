@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>	/* NuttX configuration settings */
 #include <arch/board/board.h>	/* Board-specific settings */
-#include <arch/irq.h>		/* IRQ definitons */
+#include <arch/irq.h>		/* IRQ definitions */
 
 #include "chip.h"		/* Chip-specific settings */
 #include "up_internal.h"
@@ -382,12 +382,12 @@ __start0:
 	bt		1b							/* Continue looping until all copied */
 	nop									/* Delay slot */
 
-	/* Update the VBR to show new adddress of vector table */
+	/* Update the VBR to show new address of vector table */
 
 	mov.l	.Lsvect, r0					/* R0: Address of SRAM vector table */
 	ldc		r0, vbr						/* Set VBR to start of SRAM vector table */
 
-	/* Initialize data segement */
+	/* Initialize data segment */
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 	mov.l	.Lsdata, r0					/* R0: Start of .data segment */

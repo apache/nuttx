@@ -1,35 +1,20 @@
 /****************************************************************************
  * sched/work/work_inherit.c
  *
- *   Copyright (C) 2014, 2016, 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -107,7 +92,8 @@ static void lpwork_boostworker(pid_t wpid, uint8_t reqprio)
 
               if (wtcb->npend_reprio < CONFIG_SEM_NNESTPRIO)
                 {
-                  wtcb->pend_reprios[wtcb->npend_reprio] = wtcb->sched_priority;
+                  wtcb->pend_reprios[wtcb->npend_reprio] =
+                    wtcb->sched_priority;
                   wtcb->npend_reprio++;
                 }
               else
@@ -227,9 +213,9 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
         }
 
       /* There are multiple pending priority levels. The worker thread's
-       * "boosted" priority could greater than or equal to "reqprio" (it could
-       * be greater if its priority we boosted because it also holds some
-       * semaphore).
+       * "boosted" priority could greater than or equal to "reqprio" (it
+       * could be greater if its priority we boosted because it also holds
+       * some semaphore).
        */
 
       else if (wtcb->sched_priority <= reqprio)
@@ -270,8 +256,8 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
         {
           /* The worker thread has been boosted to a higher priority than the
            * waiter task.  The pending priority should be in the list (unless
-           * it was lost because of of list overflow or because the worker
-           * was reprioritized again unbeknownst to the priority inheritance
+           * it was lost because of list overflow or because the worker was
+           * reprioritized again unbeknownst to the priority inheritance
            * logic).
            *
            * Search the list for the matching priority.
@@ -290,7 +276,8 @@ static void lpwork_restoreworker(pid_t wpid, uint8_t reqprio)
                   selected = wtcb->npend_reprio - 1;
                   if (selected > 0)
                     {
-                      wtcb->pend_reprios[index] = wtcb->pend_reprios[selected];
+                      wtcb->pend_reprios[index] =
+                        wtcb->pend_reprios[selected];
                     }
 
                   wtcb->npend_reprio = selected;

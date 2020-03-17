@@ -90,8 +90,9 @@
 int atexit(void (*func)(void))
 {
 #if defined(CONFIG_SCHED_ONEXIT)
-  /* atexit is equivalent to on_exit() with no argument (Assuming that the ABI
-   * can handle a callback function that receives more parameters than it expects).
+  /* atexit is equivalent to on_exit() with no argument (Assuming that the
+   * ABI can handle a callback function that receives more parameters than
+   * it expects).
    */
 
   return on_exit((onexitfunc_t)func, NULL);
@@ -110,10 +111,10 @@ int atexit(void (*func)(void))
     {
       sched_lock();
 
-      /* Search for the first available slot.  atexit() functions are registered
-       * from lower to higher array indices; they must be called in the reverse
-       * order of registration when task exists, i.e., from higher to lower
-       * indices.
+      /* Search for the first available slot.  atexit() functions are
+       * registered from lower to higher array indices; they must be called
+       * in the reverse order of registration when task exists, i.e., from
+       * higher to lower indices.
        */
 
       for (index = 0; index < CONFIG_SCHED_ATEXIT_MAX; index++)

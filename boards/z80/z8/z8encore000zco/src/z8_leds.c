@@ -69,7 +69,7 @@
 #define Z8_PORTG_ANODE_ROW5      0x20
 #define Z8_PORTG_ANODE_ROW6      0x40
 
-/* Port E: Cathode Bit Assignements (0 enables) */
+/* Port E: Cathode Bit Assignments (0 enables) */
 
 #define Z8_PORTE_CATHODE_MASK    0x1f
 #define Z8_PORTE_CATHODE_COLUMN0 0x01

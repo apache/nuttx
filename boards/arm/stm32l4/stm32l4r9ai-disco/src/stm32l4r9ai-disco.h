@@ -77,7 +77,7 @@
 #  undef HAVE_RTC_DRIVER
 #endif
 
-/* This is the on-chip progmem memroy driver minor number */
+/* This is the on-chip progmem memory driver minor number */
 
 #define PROGMEM_MTD_MINOR 1
 

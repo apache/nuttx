@@ -37,9 +37,9 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 
-ifeq ($(CONFIG_ARMV7M_DTCM),y)
-  LDSCRIPT = flash-dtcm.ld
-else
+ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
+  LDSCRIPT = flash.ld
+else ifeq ($(CONFIG_BOOT_RUNFROMISRAM),y)
   LDSCRIPT = flash-ocram.ld
 endif
 
@@ -115,7 +115,7 @@ LIBEXT = .a
 EXEEXT =
 
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
-  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDFLAGS += -nostartfiles -nodefaultlibs -Map nuttx.map
 endif
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g

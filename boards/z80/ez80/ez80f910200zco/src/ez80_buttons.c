@@ -64,7 +64,7 @@
  * Name: up_PB/1/2interrupt
  *
  * Description:
- *   These could be exteneded to provide interrupt driven button input
+ *   These could be extended to provide interrupt driven button input
  *
  ****************************************************************************/
 

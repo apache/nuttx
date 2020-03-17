@@ -26,6 +26,25 @@ Config.mk
   Subsequent logic within the configuration-specific Make.defs file may then
   override these default definitions as necessary.
 
+checkpatch.sh
+-------------
+  checkpatch.sh is a bash script that make use of nxstyle and codespell tools
+  to format patches and files conform to NuttX coding standard. For example,
+  it has been used in NuttX github action PR check build.
+
+  $ tools/checkpatch.sh -h
+  USAGE: ./tools/checkpatch.sh [options] [list|-]
+
+  Options:
+  -h
+  -c spell check with codespell(install with: pip install codespell)
+  -r range check only (coupled with -p or -g)
+  -p <patch list> (default)
+  -g <commit list>
+  -f <file list>
+  -  read standard input mainly used by git pre-commit hook as below:
+     git diff --cached | ./tools/checkpatch.sh -
+
 configure.sh
 configure.bat
 configure.c, cfgparser.c, and cfgparser.h
@@ -328,7 +347,7 @@ nxstyle.c
 pic32mx
 -------
 
-  This directory contains build tools used only for PIC32MX platforms
+  This directory contains build tools used only for PIC32MX/Z platforms
 
 bdf-convert.c
 -------------
@@ -466,60 +485,6 @@ bdf-convert.c
        NULL
        };
 
-Makefile.host
--------------
-
-  This is the makefile that is used to make the mkconfig program from
-  the mkconfig.c C file, the cmpconfig program from cmpconfig.c C file,
-  the mkversion program from the mkconfig.c C file, or the mksyscall
-  program from the mksyscall.c file.  Usage:
-
-  cd tools/
-  make -f Makefile.host <program>
-
-mkromfsimg.sh
--------------
-
-  This script may be used to automate the generation of a ROMFS file system
-  image.  It accepts an rcS script "template" and generates an image that
-  may be mounted under /etc in the NuttX pseudo file system.
-
-  TIP: Edit the resulting header file and mark the generated data values
-  as 'const' so that they will be stored in FLASH.
-
-mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
--------------------------------------------------------
-
-  NuttX uses the GCC compiler's capabilities to create Makefile dependencies.
-  The program mkdeps is used to run GCC in order to create the dependencies.
-  If a NuttX configuration uses the GCC toolchain, its Make.defs file (see
-  boards/README.txt) will include a line like:
-
-    MKDEP = $(TOPDIR)/tools/mkdeps[.exe] (See NOTE below)
-
-  If the NuttX configuration does not use a GCC compatible toolchain, then
-  it cannot use the dependencies and instead it uses mknulldeps.sh:
-
-    MKDEP = $(TOPDIR)/tools/mknulldeps.sh
-
-  The mknulldeps.sh is a stub script that does essentially nothing.
-
-  mkwindeps.sh is a version that creates dependencies using the Windows
-  native toolchain.  That generates Windows native paths in the dependency
-  file.  But the mkwindeps.sh uses cnvwindeps.c to convert the Windows
-  paths to POSIX paths.  This adds some time to the Windows dependency
-  generation but is generally the best option available for that mixed
-  environment of Cygwin with a native Windows GCC toolchain.
-
-  mkdeps.c generates mkdeps (on Linux) or mkdeps.exe (on Windows).
-  However, this version is still under-development.  It works well in
-  the all POSIX environment or in the all Windows environment but also
-  does not work well in mixed POSIX environment with a Windows toolchain.
-  In that case, there are still issues with the conversion of things like
-  'c:\Program Files' to 'c:program files' by bash.  Those issues may,
-  eventually be solvable but for now continue to use mkwindeps.sh in
-  that mixed environment.
-
 define.sh and define.bat
 ------------------------
 
@@ -530,6 +495,15 @@ define.sh and define.bat
 
   The define.bat script is a counterpart for use in the native Windows
   build.
+
+flash_writer.py
+---------------
+
+  This flash writer is using the xmodem for firmware transfer on
+  boards based on cxd56 chip (Ex. Spresense)
+
+  for flashing the .spk image to the board please use:
+  tools/flash_writer.py -s -c /dev/ttyUSB0 -d -b 115200 -n nuttx.spk
 
 ide_exporter.py
 ---------------
@@ -641,6 +615,64 @@ incdir.sh and incdir.bat
   build.  However, there is currently only one compiler supported in
   that context:  MinGW-GCC.
 
+indent.sh
+---------
+
+  This script can be used to indent .c and .h files in a manner similar
+  to the NuttX coding style.  It doesn't do a really good job, however
+  (see below and the comments at the top of the indent.sh file).
+
+  USAGE:
+    tools/indent.sh [-d] [-p] -o <out-file> <in-file>
+    tools/indent.sh [-d] [-p] <in-file-list>
+    tools/indent.sh [-d] -h
+
+  Where:
+    -<in-file>
+      A single, unformatted input file
+    -<in-file-list>
+      A list of unformatted input files that will be reformatted in place.
+    -o <out-file>
+      Write the single, reformatted <in-file> to <out-file>.  <in-file>
+      will not be modified.
+    -d
+      Enable script debug
+    -p
+      Comments are pre-formatted.  Do not reformat.
+    -h
+      Show this help message and exit
+
+  The conversions make by the indent.sh script differs from the NuttX coding
+  style in that:
+
+    1. The coding standard requires that the trailing */ of a multi-line
+       comment be on a separate line.  By default, indent.sh will put the
+       final */ on the same line as the last comment text.  If your C file
+       already has properly formatted comments then using the -p option will
+       eliminate that bad behavior
+    2. If your source file has highly formatted comments containing things
+       such as tables or lists, then use the -p option to preserve those
+       pre-formatted comments.
+    3. I usually align things vertically (like '=' in assignments),
+    4. indent.sh puts a bogus blank line at the top of the file,
+    5. I don't like the way it handles nested conditional compilation
+       intermixed with code.  I prefer the preprocessor conditional tests
+       be all right justified in that case.
+    6. I also indent brackets differently on structures than does this script.
+    7. I normally use no spaces in casts.  indent.sh adds spaces in casts like
+      "(FAR void *)&foo" becomes "(FAR void *) & foo".
+    8. When used with header files, the initial idempotence conditional test
+       causes all preprocessor directives to be indented in the file.  So for
+       header files, you will need to substitute "^#  " with "#" in the
+       converted header file.
+
+   You will manually need to check for the issues listed above after
+   performing the conversions.  nxstyle.c provides a good test that will
+   catch most of the indent.sh screw-ups.  Together, they do a pretty good
+   job of formatting.
+
+   See also nxstyle.c and uncrustify.cfg
+
 kconfig.bat
 -----------
 
@@ -720,63 +752,78 @@ logparser.c
     logparser _git_log.tmp >_changelog.txt
     rm -f _git_log.tmp
 
-indent.sh
----------
+Makefile.host
+-------------
 
-  This script can be used to indent .c and .h files in a manner similar
-  to the NuttX coding style.  It doesn't do a really good job, however
-  (see below and the comments at the top of the indent.sh file).
+  This is the makefile that is used to make the mkconfig program from
+  the mkconfig.c C file, the cmpconfig program from cmpconfig.c C file,
+  the mkversion program from the mkconfig.c C file, or the mksyscall
+  program from the mksyscall.c file.  Usage:
 
-  USAGE:
-    tools/indent.sh [-d] [-p] -o <out-file> <in-file>
-    tools/indent.sh [-d] [-p] <in-file-list>
-    tools/indent.sh [-d] -h
+  cd tools/
+  make -f Makefile.host <program>
 
-  Where:
-    -<in-file>
-      A single, unformatted input file
-    -<in-file-list>
-      A list of unformatted input files that will be reformatted in place.
-    -o <out-file>
-      Write the single, reformatted <in-file> to <out-file>.  <in-file>
-      will not be modified.
-    -d
-      Enable script debug
-    -p
-      Comments are pre-formatted.  Do not reformat.
-    -h
-      Show this help message and exit
+mkromfsimg.sh
+-------------
 
-  The conversions make by the indent.sh script differs from the NuttX coding
-  style in that:
+  This script may be used to automate the generation of a ROMFS file system
+  image.  It accepts an rcS script "template" and generates an image that
+  may be mounted under /etc in the NuttX pseudo file system.
 
-    1. The coding standard requires that the trailing */ of a multi-line
-       comment be on a separate line.  By default, indent.sh will put the
-       final */ on the same line as the last comment text.  If your C file
-       already has properly formatted comments then using the -p option will
-       eliminate that bad behavior
-    2. If your source file has highly formatted comments containing things
-       such as tables or lists, then use the -p option to preserve those
-       pre-formatted comments.
-    3. I usually align things vertically (like '=' in assignments),
-    4. indent.sh puts a bogus blank line at the top of the file,
-    5. I don't like the way it handles nested conditional compilation
-       intermixed with code.  I prefer the preprocessor conditional tests
-       be all right justified in that case.
-    6. I also indent brackets differently on structures than does this script.
-    7. I normally use no spaces in casts.  indent.sh adds spaces in casts like
-      "(FAR void *)&foo" becomes "(FAR void *) & foo".
-    8. When used with header files, the initial idempotence conditional test
-       causes all preprocessor directives to be indented in the file.  So for
-       header files, you will need to substitute "^#  " with "#" in the
-       converted header file.
+  TIP: Edit the resulting header file and mark the generated data values
+  as 'const' so that they will be stored in FLASH.
 
-   You will manually need to check for the issues listed above after
-   performing the conversions.  nxstyle.c provides a good test that will
-   catch most of the indent.sh screw-ups.  Together, they do a pretty good
-   job of formatting.
+mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
+-------------------------------------------------------
 
-   See also nxstyle.c and uncrustify.cfg
+  NuttX uses the GCC compiler's capabilities to create Makefile dependencies.
+  The program mkdeps is used to run GCC in order to create the dependencies.
+  If a NuttX configuration uses the GCC toolchain, its Make.defs file (see
+  boards/README.txt) will include a line like:
+
+    MKDEP = $(TOPDIR)/tools/mkdeps[.exe] (See NOTE below)
+
+  If the NuttX configuration does not use a GCC compatible toolchain, then
+  it cannot use the dependencies and instead it uses mknulldeps.sh:
+
+    MKDEP = $(TOPDIR)/tools/mknulldeps.sh
+
+  The mknulldeps.sh is a stub script that does essentially nothing.
+
+  mkwindeps.sh is a version that creates dependencies using the Windows
+  native toolchain.  That generates Windows native paths in the dependency
+  file.  But the mkwindeps.sh uses cnvwindeps.c to convert the Windows
+  paths to POSIX paths.  This adds some time to the Windows dependency
+  generation but is generally the best option available for that mixed
+  environment of Cygwin with a native Windows GCC toolchain.
+
+  mkdeps.c generates mkdeps (on Linux) or mkdeps.exe (on Windows).
+  However, this version is still under-development.  It works well in
+  the all POSIX environment or in the all Windows environment but also
+  does not work well in mixed POSIX environment with a Windows toolchain.
+  In that case, there are still issues with the conversion of things like
+  'c:\Program Files' to 'c:program files' by bash.  Those issues may,
+  eventually be solvable but for now continue to use mkwindeps.sh in
+  that mixed environment.
+
+
+ netusb.sh
+ ---------
+
+    Helper script used to set up the CDC ECM Ethernet Over USB driver,
+    host routes, and IP Tables rules to support networking with a NuttX
+    system that has a CDC ECM Ethernet Over USB driver configured. Only
+    supported on Linux.
+
+    General usage:
+
+      $ ./tools/netusb.sh
+      Usage: tools/netusb.sh <main-interface> <usb-net-interface> <on|off>
+
+    This has been tested on the SAMA5D3-Xplained board; see
+    `boards/arm/sama5/sama5d3-xplained/README.txt` for more information on how
+    to configure the CDC ECM driver for that board.
+
 
 README.txt
 ----------
@@ -903,6 +950,18 @@ sethost.sh
       -h will show this help test and terminate
       <config> selects configuration file.  Default: .config
 
+simhostroute.sh
+---------------
+
+   Helper script used to set up the tap driver, host routes,
+   and IP Tables rules to support networking with the
+   simulator under Linux.  General usage:
+
+     $ tools/simhostroute.sh
+     Usage: tools/simhostroute.sh <interface> <on|off>
+
+  See boards/sim/sim/sim/NETWORK-LINUX.txt for further information
+
 simbridge.sh
 ------------
 
@@ -960,7 +1019,7 @@ testbuild.sh
        list file.  The final, non-optional parameter, <testlist-file>,
        provides the path to that file.
 
-  The test list file is a sequence of build descriptons, one per line.  One
+  The test list file is a sequence of build descriptions, one per line.  One
   build descriptions consists of two comma separated values.  For example:
 
     stm32f429i-disco:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
@@ -977,7 +1036,7 @@ testbuild.sh
   configuration names depends on the underlying architecture of the
   configured board.
 
-  The prefix '-' can be used to skip a configruation:
+  The prefix '-' can be used to skip a configuration:
   -stm32f429i-disco/nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
 
 uncrustify.cfg
@@ -1043,18 +1102,15 @@ uncrustify.cfg
 
   See also indent.sh and nxstyle.c
 
+zds
+---
+
+  This directory contains build tools used only with the ZDS-II
+  platforms (z8, ez80, zNeo).
+
 zipme.sh
 --------
 
   I use this script to create the nuttx-xx.yy.tar.gz tarballs for
   release on Bitbucket.org.  It is handy because it also does the
   kind of clean that you need to do to make a clean code release.
-
-flash_writer.py
----------------
-
-  This flash writer is using the xmodem for firmware transfer on
-  boards based on cxd56 chip (Ex. Spresense)
-
-  for flashing the .spk image to the board please use:
-  tools/flash_writer.py -s -c /dev/ttyUSB0 -d -b 115200 -n nuttx.spk

@@ -157,7 +157,7 @@ static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static int         spi_hwfeatures(FAR struct spi_dev_s *dev,
                                   spi_hwfeatures_t features);
 #endif
-static uint16_t    spi_send(FAR struct spi_dev_s *dev, uint16_t wd);
+static uint32_t    spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 static void        spi_exchange(FAR struct spi_dev_s *dev,
                                 FAR const void *txbuffer,
                                 FAR void *rxbuffer, size_t nwords);
@@ -570,12 +570,12 @@ void inline spi_run(FAR struct kinetis_spidev_s *priv, bool enable)
  * Name: spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -937,11 +937,11 @@ static uint16_t spi_send_data(FAR struct kinetis_spidev_s *priv, uint16_t wd,
  *
  ************************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   FAR struct kinetis_spidev_s *priv = (FAR struct kinetis_spidev_s *)dev;
 
-  return spi_send_data(priv, wd, true);
+  return (uint32_t)spi_send_data(priv, (uint16_t)wd, true);
 }
 
 /************************************************************************************

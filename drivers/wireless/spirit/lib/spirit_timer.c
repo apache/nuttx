@@ -129,7 +129,7 @@ int spirit_timer_enable_autoreload(FAR struct spirit_library_s *spirit,
   ret = spirit_reg_read(spirit, PROTOCOL1_BASE, &regval, 1);
   if (ret >= 0)
     {
-      /* Mask te read value to enable or disable the reload on sync mode */
+      /* Mask the read value to enable or disable the reload on sync mode */
 
       if (newstate == S_ENABLE)
         {

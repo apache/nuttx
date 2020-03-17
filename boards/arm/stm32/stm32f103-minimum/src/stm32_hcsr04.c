@@ -58,7 +58,7 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Defintions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Use TIM1 as free running timer for HC-SR04 sensor */

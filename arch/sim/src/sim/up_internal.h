@@ -251,8 +251,6 @@ void up_timer_update(void);
 
 #ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
-#else
-#  define rpmsg_serialinit()
 #endif
 
 /* up_devconsole.c **********************************************************/

@@ -282,7 +282,7 @@ static struct tc_dev_s g_touchscreen;
  *
  * Description:
  *   Perform A/D sampling.
- *   Time must be allowed betwen the start of sampling
+ *   Time must be allowed between the start of sampling
  *   and conversion (approx. 100Ms).
  *
  ****************************************************************************/
@@ -333,12 +333,12 @@ static void tc_adc_sample(int pin)
  *
  * Description:
  *   Begin A/D conversion.
- *   Time must be allowed betwen the start of sampling
+ *   Time must be allowed between the start of sampling
  *   and conversion (approx. 100Ms).
  *
  * Assumptions:
  * 1) All output pins configured as outputs:
- * 2) Approprite pins are driven high and low
+ * 2) Appropriate pins are driven high and low
  *
  ****************************************************************************/
 
@@ -592,7 +592,7 @@ static int tc_waitsample(FAR struct tc_dev_s *priv,
   nxsem_post(&priv->devsem);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
-   * that is posted when new sample data is availble.
+   * that is posted when new sample data is available.
    */
 
   while (tc_sample(priv, sample) < 0)

@@ -231,7 +231,8 @@ static inline FAR void *dlinsert(FAR const char *filename)
 
   /* Get the module initializer entry point */
 
-  initializer = (mod_initializer_t)(loadinfo.textalloc + loadinfo.ehdr.e_entry);
+  initializer = (mod_initializer_t)(loadinfo.textalloc +
+                                    loadinfo.ehdr.e_entry);
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   modp->initializer = initializer;
 #endif

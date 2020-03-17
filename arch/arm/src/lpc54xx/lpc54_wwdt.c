@@ -67,7 +67,7 @@
 #define LPC54_MAX_WWDT_WINDOW  0xFFFFFF /* 24-bit max value */
 #define LPC54_MIN_WWDT_WINDOW  0x100    /* Minimum window value allowed */
 #define WWDT_WARNINT_VALUE     0x3FF    /* 10-bit max value */
-#define WWDT_MAXTIMEOUT        5592     /* Max timeout value in miliseconds */
+#define WWDT_MAXTIMEOUT        5592     /* Max timeout value in milliseconds */
 
 /* Configuration ************************************************************/
 
@@ -100,7 +100,7 @@ struct lpc54_lowerhalf_wwdt_s
 static void   lpc54_setwindow(uint32_t window);
 static void   lpc54_setwarning(uint32_t warning);
 
-/* Interrupt hanlding *******************************************************/
+/* Interrupt handling *******************************************************/
 
 static int    lpc54_wwdt_interrupt(int irq, FAR void *context);
 
@@ -464,7 +464,7 @@ static int lpc54_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   /* Remember the selected values */
 
   priv->reload = reload;
-  wdinfo("reload=%d timout=%d\n", reload, priv->timeout);
+  wdinfo("reload=%d timeout=%d\n", reload, priv->timeout);
   regval = reload;
   putreg32(regval, LPC54_WWDT_TC);
 
@@ -645,7 +645,7 @@ void lpc54_wwdt_initialize(FAR const char *devpath)
    */
 
   lpc54_wdtosc_powerup();
-#warning "Mising WDTOSCCTRL setup"
+#warning "Missing WDTOSCCTRL setup"
 
   /* Enable the register interface (WWDT bus clock):  Set the WWDT bit in the
    * AHBCLKCTRL0 register.

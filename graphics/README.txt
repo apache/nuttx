@@ -27,7 +27,7 @@ at the present, but here is the longer term roadmap:
               without NxWidgets and is built on top of NX.
   NXFONTS   - A set of C graphics tools for presenting (bitmap) font images.
   NX        - The tiny NuttX windowing system.  This includes the small-footprint
-              multi-user implentation (NXMU as described below).  NX can be used
+              multi-user implementation (NXMU as described below).  NX can be used
               without NxWidgets and without NXTOOLKIT for raw access to window memory.
   NXGLIB    - Low level graphics utilities and direct framebuffer rendering logic.
               NX is built on top of NXGLIB.

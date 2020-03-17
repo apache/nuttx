@@ -182,7 +182,7 @@
 #define AVR_EPSIZE_128                    (4 << EPSIZE0)
 #define AVR_EPSIZE_256                    (5 << EPSIZE0)
 
-/* General endpoint defintions */
+/* General endpoint definitions */
 
 #define AVR_EP0                           (0)
 #define AVR_NENDPOINTS                    (7)
@@ -480,7 +480,7 @@ static int avr_fifoready(int timeout)
           return -EAGAIN;
         }
 
-      /* Timeing is driven by the start of frame (SOF) interrupt which we
+      /* Timing is driven by the start of frame (SOF) interrupt which we
        * assume here to be at a one millisecond rate.
        */
 
@@ -1289,7 +1289,7 @@ static void avr_usbreset(void)
  * Name: avr_usbshutdown
  *
  * Description:
- *   Shutdown the USB interface and put the hardare in a known state
+ *   Shutdown the USB interface and put the hardware in a known state
  *
  ****************************************************************************/
 
@@ -2476,7 +2476,7 @@ static int avr_epsubmit(FAR struct usbdev_ep_s *ep,
 
           usbtrace(TRACE_OUTREQQUEUED(privep->ep.eplog), privreq->req.len);
 
-          /* If there is something avaible in the fifo now, then go get it */
+          /* If there is something available in the fifo now, then go get it */
 
           if (avr_fifoready(AVR_TIMEOUT_NONE) == OK)
             {

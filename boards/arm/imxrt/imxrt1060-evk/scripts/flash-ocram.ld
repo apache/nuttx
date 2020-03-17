@@ -1,9 +1,9 @@
 /****************************************************************************
  * boards/arm/imxrt/imxrt1060-evk/scripts/flash-ocram.ld
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2018, 2020 Gregory Nutt. All rights reserved.
  *   Authors: Ivan Ucherdzhiev <ivanucherdjiev@gmail.com>
- *            David Sidrane <david_s5@nscdg.com>
+ *            David Sidrane <david.sidrane@nscdg.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,12 +36,42 @@
 
 /* Specify the memory areas */
 
+/* The imxrt162-evk has 8MiB of QSPI FLASH beginning at address,
+ * 0x0060:0000, Upto 512Kb of DTCM RAM beginning at 0x2000:0000, and 1MiB OCRAM
+ * beginning at 0x2020:0000.  Neither DTCM or SDRAM are used in this
+ * configuration.
+ *
+ * The default flexram setting on the iMXRT 1062 is
+ * 256Kib to OCRRAM, 128Kib ITCM and 128Kib DTCM.
+ * This can be changed by using a dcd by minipulating
+ * IOMUX GPR16 and GPR17.
+ * The configuartion we will use is 384Kib to OCRRAM, 0Kib ITCM and
+ * 128Kib DTCM.
+ *
+ * This is the OCRAM inker script.
+ * The NXP ROM bootloader will move the FLASH image to OCRAM.
+ * We must reserve 32K for the bootloader' OCRAM usage from  the OCRAM Size
+ * and an additinal 8K for the ivt_s which is IVT_SIZE(8K) This 40K can be
+ * reused once the application is running.
+ *
+ *      0x2020:A000 to 0x202d:ffff - The application Image's vector table
+ *      0x2020:8000 to 0x2020:A000 - IVT
+ *      0x2020:0000 to 0x2020:7fff - NXP ROM bootloader.
+ *
+ * We artificially split the FLASH to allow locating sections that we do not
+ * want loaded inoto OCRAM. This is to save on OCRAM where the speen of the
+ * code does not matter.
+ *
+ */
+
 MEMORY
 {
-  flash (rx)  : ORIGIN = 0x60000000, LENGTH = 8M
-  sram  (rwx) : ORIGIN = 0x20200000, LENGTH = 512M
-  itcm  (rwx) : ORIGIN = 0x00000000, LENGTH = 128K
-  dtcm  (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
+  flash    (rx)  : ORIGIN = 0x60000000, LENGTH = 7M
+  flashxip (rx)  : ORIGIN = 0x60700000, LENGTH = 1M
+  /*                     Vectors @ boot+ivt   OCRAM2   Flex RAM     Boot  IVT */
+  sram     (rwx) : ORIGIN = 0x2020A000, LENGTH = 512K + 256K + 128K - (32K + 8K)
+  itcm     (rwx) : ORIGIN = 0x00000000, LENGTH = 0K
+  dtcm     (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
 }
 
 OUTPUT_ARCH(arm)
@@ -49,6 +79,7 @@ EXTERN(_vectors)
 EXTERN(g_flash_config)
 EXTERN(g_image_vector_table)
 EXTERN(g_boot_data)
+EXTERN(g_dcd_data)
 
 ENTRY(_stext)
 
@@ -69,24 +100,40 @@ SECTIONS
         KEEP(*(.boot_hdr.dcd_data))
         __boot_hdr_end__ = ABSOLUTE(.) ;
         . = 0x2000 ;
-    } >flash
+    } > flash
+
+	/* Catch all the section we want not in OCRAM so that the *(.text .text.*) in flash does not */
+
+    .flashxip : ALIGN(4)
+	{
+		FILL(0xff)
+
+		/* Order matters */
+
+		imxrt_start.o(.text)
+		imxrt_boot.o(.text)
+
+		*(.slow_memory)
+		*(.rodata .rodata.*)
+		KEEP(*(__param*))
+		*(.fixup)
+		*(.gnu.warning)
+		*(.gnu.linkonce.t.*)
+		*(.glue_7)
+		*(.glue_7t)
+		*(.got)
+		*(.gcc_except_table)
+		*(.gnu.linkonce.r.*)
+
+    } > flashxip
 
     .text :
     {
         _stext = ABSOLUTE(.);
         *(.vectors)
         *(.text .text.*)
-        *(.fixup)
-        *(.gnu.warning)
-        *(.rodata .rodata.*)
-        *(.gnu.linkonce.t.*)
-        *(.glue_7)
-        *(.glue_7t)
-        *(.got)
-        *(.gcc_except_table)
-        *(.gnu.linkonce.r.*)
         _etext = ABSOLUTE(.);
-    } > flash
+    } > sram AT > flash
 
     .init_section :
     {

@@ -71,7 +71,7 @@ struct lpm013m091a_lcd_s
 {
   /* Interface to control the LPM013M091A lcd driver
    *
-   *  - select      Select the device (as neccessary) before performing
+   *  - select      Select the device (as necessary) before performing
    *                any operations.
    *  - deselect    Deselect the device (as necessary).
    *  - sendcmd     Send specific command to the LCD driver.
@@ -109,7 +109,7 @@ struct lpm013m091a_lcd_s
  * Name:  lpm013m091a_initialize
  *
  * Description:
- *   Initialize the LCD video driver internal sturcture. Also initialize the
+ *   Initialize the LCD video driver internal structure. Also initialize the
  *   lcd hardware if not done. The control of the LCD driver is depend on the
  *   selected MCU interface and part of the platform specific subdriver
  *

@@ -58,6 +58,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* USB trace dumping */
 
 #ifndef CONFIG_USBDEV_TRACE
@@ -128,21 +129,21 @@ static void xtensa_assert(int errorcode)
 
   if (CURRENT_REGS || running_task()->flink == NULL)
     {
-       /* Blink the LEDs forever */
+      /* Blink the LEDs forever */
 
-       up_irq_save();
-        for (; ; )
-          {
+      up_irq_save();
+      for (; ; )
+        {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
-            board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
+          board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
 #ifdef CONFIG_ARCH_LEDS
-            board_autoled_on(LED_PANIC);
-            up_mdelay(250);
-            board_autoled_off(LED_PANIC);
-            up_mdelay(250);
+          board_autoled_on(LED_PANIC);
+          up_mdelay(250);
+          board_autoled_off(LED_PANIC);
+          up_mdelay(250);
 #endif
-          }
+        }
     }
   else
     {
@@ -254,7 +255,8 @@ void xtensa_panic(int xptcode, uint32_t *regs)
  *      Level-1 interrupt as indicated by set level-1 bits in the INTERRUPT
  *      register.
  *   5  AllocaCause
- *      MOVSP instruction, if caller’s registers are not in the register file.
+ *      MOVSP instruction, if caller’s registers are not in the register
+ *      file.
  *   6  IntegerDivideByZeroCause
  *      QUOS, QUOU, REMS, or REMU divisor operand is zero.
  *   7  PCValueErrorCause Next PC Value Illegal
@@ -312,7 +314,7 @@ void xtensa_panic(int xptcode, uint32_t *regs)
  *
  ****************************************************************************/
 
-void xtensa_user(int exccause, uint32_t *regs)
+void xtensa_user_panic(int exccause, uint32_t *regs)
 {
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
   struct tcb_s *rtcb = running_task();

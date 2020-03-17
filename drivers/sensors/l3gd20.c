@@ -238,12 +238,12 @@ static void l3gd20_read_measurement_data(FAR struct l3gd20_dev_s *dev)
 
   l3gd20_read_temperature(dev, &temperature);
 
-  /* Aquire the semaphore before the data is copied */
+  /* Acquire the semaphore before the data is copied */
 
   ret = nxsem_wait(&dev->datasem);
   if (ret < 0)
     {
-      snerr("ERROR: Could not aquire dev->datasem: %d\n", ret);
+      snerr("ERROR: Could not acquire dev->datasem: %d\n", ret);
       return;
     }
 
@@ -508,7 +508,7 @@ static ssize_t l3gd20_read(FAR struct file *filep, FAR char *buffer,
   ret = nxsem_wait(&priv->datasem);
   if (ret < 0)
     {
-      snerr("ERROR: Could not aquire priv->datasem: %d\n", ret);
+      snerr("ERROR: Could not acquire priv->datasem: %d\n", ret);
       return ret;
     }
 

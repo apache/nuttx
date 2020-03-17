@@ -92,7 +92,8 @@ void nxtask_start(void)
   int exitcode;
   int argc;
 
-  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD);
+  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != \
+              TCB_FLAG_TTYPE_PTHREAD);
 
 #ifdef CONFIG_SIG_DEFAULT
   /* Set up default signal actions */

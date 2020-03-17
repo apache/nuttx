@@ -79,7 +79,7 @@ int stm32_ltdcinitialize(void);
  * Name: stm32_ltdcuninitialize
  *
  * Description:
- *   Unitialize the ltdc controller
+ *   Uninitialize the ltdc controller
  *
  ****************************************************************************/
 

@@ -35,9 +35,20 @@
 
 /* Configuration */
 
-#define HAVE_MMCSD 1
+#define HAVE_SPIFLASH 1
+#define HAVE_MMCSD    1
+#define HAVE_XPT2046  1
+
+#if !defined(CONFIG_MTD_W25) || !defined(CONFIG_EZ80_SPI)
+#  undef HAVE_SPIFLASH
+#endif
+
 #if !defined(CONFIG_MMCSD_SPI) || !defined(CONFIG_EZ80_SPI)
 #  undef HAVE_MMCSD
+#endif
+
+#if !defined(CONFIG_INPUT_ADS7843E) || !defined(CONFIG_EZ80_SPI)
+#  undef HAVE_XPT2046
 #endif
 
 /* Helpers for accessing memory mapped registers */
@@ -47,6 +58,14 @@
 
 /* Memory map.  Board-specific extensions to the basic ez80f91 memory map
  * (see arch/z80/src/ez80/ez80f91.h)
+ *
+ *   00 0000 - 01 ffff - 128Kb FLASH
+ *   02 0000 - 03 ffff - (Reserved for parts with 256Kb FLASH)
+ *   04 0000 - 0b ffff - 512Kb External SRAM
+ *                       SSD1963  LCD frame buffer interface
+ *                       YM2413B Sound Generator
+ *   af e000 - af ffff - 8Kb on-chip SRAM
+ *   af e000 - af e3ff - IDLE stack
  *
  * Chip select 0 is for the 512Kb AS6C4008 SRAM starting at address 0x40000
  * (after the flash).
@@ -67,6 +86,50 @@
  * Chip select 3 is not used
  */
 
+/* RAM Memory map
+ *
+ * 040000              Beginning of RAM
+ * 040000 _vecstart    Beginning of Interrupt Redirection information.  This
+ *                     is used to hand off to RAM-based handlers for
+ *                     interrupts caught by FLASH interrupt vectors. 512b is
+ *                     set aside for RAM-based interrupt handling
+ *                     information.
+ * 0401ff _vecend      End of the Interrupt Redirection information.
+ * 040200 _loaderstart Start of RAM used exclusively by the bootloader.
+ *                     This memory region an be recovered by the RAM-based
+ *                     program.
+ * 04ffff _loaderend
+ * 050000 _progstart   Start of CODE for the RAM-based program.  The
+ *                     program can freely use the memory region from
+ *                     050000-0bffff and can recover the memory for
+ *                     40400-04ffff for heap usage.
+ * 0bffff _progend     End of RAM
+ */
+
+extern unsigned long _vecstart;
+#define VECSTART     ((uintptr_t)&_vecstart)
+
+extern unsigned long _vecend;
+#define VECEND       ((uintptr_t)&_vecend)
+
+#define VECSIZE      (VECEND - VECSTART + 1)
+
+extern unsigned long _loaderstart;
+#define LOADERSTART  ((uintptr_t)&_loaderstart)
+
+extern unsigned long _loaderend;
+#define LOADEREND    ((uintptr_t)&_loaderend)
+
+#define LOADERSIZE   (LOADEREND - LOADERSTART + 1)
+
+extern unsigned long _progstart;
+#define PROGSTART    ((uintptr_t)&_progstart)
+
+extern unsigned long _progend;
+#define PROGEND      ((uintptr_t)&_progend)
+
+#define PROGSIZE     (PROGEND - PROGSTART + 1)
+
 /* LED and port emulation memory register addresses */
 
 /* GPIO data bit definitions */
@@ -80,8 +143,20 @@
 #define EZ80_GPIOD6       (1 << 6)
 #define EZ80_GPIOD7       (1 << 7)
 
+/* Winbond W25 SPI FLASH */
+
+#ifndef CONFIG_Z20X_W25_MINOR
+#  define CONFIG_Z20X_W25_MINOR 0
+#endif
+
+#define __STR(s) #s
+#define __XSTR(s) __STR(s)
+
+#define W25_CHARDEV  "/dev/mtd" __XSTR(CONFIG_Z20X_W25_MINOR)
+#define W25_BLOCKDEV "/dev/mtdblock" __XSTR(CONFIG_Z20X_W25_MINOR)
+
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN
@@ -109,7 +184,7 @@ extern "C"
 
 int ez80_bringup(void);
 
-/*****************************************************************************
+/****************************************************************************
  * Name: ez80_mmcsd_initialize
  *
  * Description:
@@ -131,6 +206,18 @@ int ez80_mmcsd_initialize(void);
 
 #ifdef CONFIG_EZ80_SPI
 void ez80_spidev_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: ez80_w25_initialize
+ *
+ * Description:
+ *   Called to initialize Winbond W25 memory
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_SPIFLASH
+int ez80_w25_initialize(int minor);
 #endif
 
 #undef EXTERN

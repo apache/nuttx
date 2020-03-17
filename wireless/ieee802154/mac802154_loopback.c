@@ -343,7 +343,7 @@ static int lo_loopback(FAR struct net_driver_s *dev)
   IEEE802154_EADDRCOPY(ind.dest.eaddr, g_eaddr);
 
   /* Loop while there framelist to be sent, i.e., while the freme list is not
-   * emtpy.  Sending, of course, just means relaying back through the network
+   * empty.  Sending, of course, just means relaying back through the network
    * for this driver.
    */
 

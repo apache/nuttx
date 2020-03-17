@@ -86,7 +86,7 @@
 #define XEN1210_TIMING              0x01  /* Timing and biasing settings */
 #define XEN1210_TEST                0x02  /* Testing */
 
-/* Timming Cycles */
+/* Timing Cycles */
 
 #define XEN1210_1K_CYCLES           0x1113 /* 1024 cycles used be internale ADC */
 #define XEN1210_2K_CYCLES           0x2113 /* 2048 cycles used be internale ADC */

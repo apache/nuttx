@@ -289,7 +289,7 @@ static int get_dmasize(FAR struct altmdm_dev_s *priv, int data_size)
  * Name: wait_receiverready
  *
  * Description:
- *   Wait until reciever is ready.
+ *   Wait until receiver is ready.
  *
  ****************************************************************************/
 
@@ -1886,7 +1886,7 @@ int altmdm_spi_init(FAR struct altmdm_dev_s *priv)
 
   g_privdata = priv;
 
-  /* Initalize modem power management driver */
+  /* Initialize modem power management driver */
 
   altmdm_pm_init(priv);
 

@@ -56,8 +56,8 @@
  * mq_timedreceive() putmsg()                 sigsuspend()
  *
  * Each of the above function must call enter_cancellation_point() on entry
- * in order to establish the cancellation point and leave_cancellation_point()
- * on exit.  These functions are described below.
+ * in order to establish the cancellation point and
+ * leave_cancellation_point() on exit.  These functions are described below.
  *
  ****************************************************************************/
 
@@ -118,7 +118,7 @@ bool enter_cancellation_point(void)
    * need the TCB to be stationary (no interrupt level modification is
    * anticipated).
    *
-   * REVISIT: is locking the scheduler sufficent in SMP mode?
+   * REVISIT: is locking the scheduler sufficient in SMP mode?
    */
 
   sched_lock();
@@ -151,7 +151,8 @@ bool enter_cancellation_point(void)
           if (tcb->cpcount == 0)
             {
 #ifndef CONFIG_DISABLE_PTHREAD
-              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
+                  TCB_FLAG_TTYPE_PTHREAD)
                 {
                   pthread_exit(PTHREAD_CANCELED);
                 }
@@ -207,7 +208,7 @@ void leave_cancellation_point(void)
    * need the TCB to be stationary (no interrupt level modification is
    * anticipated).
    *
-   * REVISIT: is locking the scheduler sufficent in SMP mode?
+   * REVISIT: is locking the scheduler sufficient in SMP mode?
    */
 
   sched_lock();
@@ -237,7 +238,8 @@ void leave_cancellation_point(void)
           if ((tcb->flags & TCB_FLAG_CANCEL_PENDING) != 0)
             {
 #ifndef CONFIG_DISABLE_PTHREAD
-              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+              if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
+                  TCB_FLAG_TTYPE_PTHREAD)
                 {
                   pthread_exit(PTHREAD_CANCELED);
                 }
@@ -289,7 +291,7 @@ bool check_cancellation_point(void)
    * need the TCB to be stationary (no interrupt level modification is
    * anticipated).
    *
-   * REVISIT: is locking the scheduler sufficent in SMP mode?
+   * REVISIT: is locking the scheduler sufficient in SMP mode?
    */
 
   sched_lock();
@@ -322,7 +324,7 @@ bool check_cancellation_point(void)
  *   while we the thread is within the cancellation point.  This logic
  *   behaves much like sending a signal:  It will cause waiting threads
  *   to wake up and terminated with ECANCELED.  A call to
- *   leave_cancellation_point() whould then follow, causing the thread to
+ *   leave_cancellation_point() would then follow, causing the thread to
  *   exit.
  *
  ****************************************************************************/
@@ -342,7 +344,7 @@ void nxnotify_cancellation(FAR struct tcb_s *tcb)
   tcb->flags |= TCB_FLAG_CANCEL_PENDING;
 
   /* We only notify the cancellation if (1) the thread has not disabled
-   * cancellation, (2) the thread uses the deffered cancellation mode,
+   * cancellation, (2) the thread uses the deferred cancellation mode,
    * (3) the thread is waiting within a cancellation point.
    */
 

@@ -1268,7 +1268,7 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
           imxrt_lpi2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
 
           /* No interrupts or contex switches should occur in the following
-           * seuence. Otherwise, additional bytes may be sent by the device.
+           * sequence. Otherwise, additional bytes may be sent by the device.
            */
 
 #ifdef CONFIG_I2C_POLLED

@@ -367,7 +367,7 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
 #if 0
   if (config->hwfc)
     {
-      /* CTS controled by Rx FIFO */
+      /* CTS controlled by Rx FIFO */
 
       ucr2 |= UART_UCR2_CTSC;
 
@@ -521,7 +521,7 @@ int imx_uart_configure(uint32_t base, FAR const struct uart_config_s *config)
   putreg32(den - 1, base + UART_UBIR_OFFSET);
   putreg32(num - 1, base + UART_UBMR_OFFSET);
 
-  /* Fixup the divisor, the value in the UFCR regiser is
+  /* Fixup the divisor, the value in the UFCR register is
    *
    *   000 = Divide input clock by 6
    *   001 = Divide input clock by 5
@@ -601,7 +601,7 @@ void imx_lowputc(int ch)
 
       putreg32((uint32_t)'\r', IMX_CONSOLE_VBASE + UART_TXD_OFFSET);
 
-      /* Wait for the tranmsit regiser to be emptied. When the TXFE bit is non-zero,
+      /* Wait for the tranmsit register to be emptied. When the TXFE bit is non-zero,
        * the TX Buffer FIFO is empty.
        */
 
@@ -612,7 +612,7 @@ void imx_lowputc(int ch)
 
   putreg32((uint32_t)ch, IMX_CONSOLE_VBASE + UART_TXD_OFFSET);
 
-  /* Wait for the tranmsit regiser to be emptied. When the TXFE bit is non-zero,
+  /* Wait for the tranmsit register to be emptied. When the TXFE bit is non-zero,
    * the TX Buffer FIFO is empty.
    */
 

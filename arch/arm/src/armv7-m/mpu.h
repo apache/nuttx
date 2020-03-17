@@ -127,7 +127,7 @@
 #  define MPU_RASR_B            (1 << 16) /* Bit 16: Bufferable */
 #  define MPU_RASR_C            (1 << 17) /* Bit 17: Cacheable */
 #  define MPU_RASR_S            (1 << 18) /* Bit 18: Shareable */
-#  define MPU_RASR_TEX_SHIFT    (19)      /* Bits 19-21: TEX Address Permisson */
+#  define MPU_RASR_TEX_SHIFT    (19)      /* Bits 19-21: TEX Address Permission */
 #  define MPU_RASR_TEX_MASK     (7 << MPU_RASR_TEX_SHIFT)
 #    define MPU_RASR_TEX_SO     (0 << MPU_RASR_TEX_SHIFT) /* Strongly Ordered */
 #    define MPU_RASR_TEX_NOR    (1 << MPU_RASR_TEX_SHIFT) /* Normal           */

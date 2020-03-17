@@ -96,7 +96,7 @@ static inline int up_x11createframe(void)
   g_display = XOpenDisplay(NULL);
   if (g_display == NULL)
     {
-      printf("Unable to open display.\n");
+      printf("Unable to open display.\r\n");
       return -1;
     }
 
@@ -228,7 +228,6 @@ static void up_x11uninitX(void)
 #ifndef CONFIG_SIM_X11NOSHM
 static void up_x11uninitialize(void)
 {
-  fprintf(stderr, "Uninitializing\n");
   if (g_shmcheckpoint > 1)
     {
       if (!b_useshm && g_framebuffer)
@@ -263,7 +262,6 @@ static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
   if (XShmQueryExtension(g_display))
     {
       b_useshm = 1;
-      printf("Using shared memory.\n");
 
       up_x11traperrors();
       g_image = XShmCreateImage(g_display,
@@ -278,7 +276,7 @@ static inline int up_x11mapsharedmem(int depth, unsigned int fblen)
 
       if (!g_image)
         {
-          fprintf(stderr, "Unable to create g_image.");
+          fprintf(stderr, "Unable to create g_image.\r\n");
           return -1;
         }
 
@@ -336,7 +334,7 @@ shmerror:
 
       if (g_image == NULL)
         {
-          fprintf(stderr, "Unable to create g_image\n");
+          fprintf(stderr, "Unable to create g_image\r\n");
           return -1;
         }
 
@@ -385,7 +383,7 @@ int up_x11initialize(unsigned short width, unsigned short height,
                        &windowAttributes);
 
   /* Get the pixel depth.  If the depth is 24-bits, use 32 because X expects
-   * 32-bit aligment anyway.
+   * 32-bit alignment anyway.
    */
 
   depth = windowAttributes.depth;
@@ -417,8 +415,6 @@ int up_x11cmap(unsigned short first, unsigned short len,
   Colormap cMap;
   int ndx;
 
-  printf("Creating Colormap\n");
-
   /* Convert each color to X11 scaling */
 
   cMap = DefaultColormap(g_display, g_screen);
@@ -439,7 +435,7 @@ int up_x11cmap(unsigned short first, unsigned short len,
 
       if (!XAllocColor(g_display, cMap, &color))
         {
-          fprintf(stderr, "Failed to allocate color%d\n", ndx);
+          fprintf(stderr, "Failed to allocate color%d\r\n", ndx);
           return -1;
         }
     }

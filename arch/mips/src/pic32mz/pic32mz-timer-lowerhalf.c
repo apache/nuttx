@@ -706,7 +706,7 @@ int pic32mz_timer_initialize(FAR const char *devpath, int timer)
       return -EEXIST;
     }
 
-  tmrinfo("Timer registered successfuly\n");
+  tmrinfo("Timer registered successfully\n");
 
   return OK;
 }

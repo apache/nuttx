@@ -99,25 +99,25 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
   if (regs != CURRENT_REGS)
     {
 #if XCHAL_CP_NUM > 0
-       /* If an interrupt level context switch has occurred, then save the
-        * co-processor state in in the suspended thread's co-processor save
-        * area.
-        *
-        * NOTE 1. The state of the co-processor has not been altered and
-        *         still represents the to-be-suspended thread.
-        * NOTE 2. We saved a reference  TCB of the original thread on entry.
-        */
+      /* If an interrupt level context switch has occurred, then save the
+       * co-processor state in in the suspended thread's co-processor save
+       * area.
+       *
+       * NOTE 1. The state of the co-processor has not been altered and
+       *         still represents the to-be-suspended thread.
+       * NOTE 2. We saved a reference  TCB of the original thread on entry.
+       */
 
-       xtensa_coproc_savestate(&tcb->xcp.cpstate);
+      xtensa_coproc_savestate(&tcb->xcp.cpstate);
 
-       /* Then set up the co-processor state for the to-be-started thread.
-        *
-        * NOTE: The current thread for this CPU is the to-be-started
-        * thread.
-        */
+      /* Then set up the co-processor state for the to-be-started thread.
+       *
+       * NOTE: The current thread for this CPU is the to-be-started
+       * thread.
+       */
 
-       tcb = this_task();
-       xtensa_coproc_restorestate(&tcb->xcp.cpstate);
+      tcb = this_task();
+      xtensa_coproc_restorestate(&tcb->xcp.cpstate);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

@@ -69,7 +69,7 @@
 #define SAM_TWI_WPSR_OFFSET         0x00e8 /* Protection Status Register */
                                            /* 0x00ec-0x00fc: Reserved */
 
-/* TWI register adresses ****************************************************************/
+/* TWI register addresses ***************************************************************/
 
 #define SAM_TWI0_CR                 (SAM_TWI0_VBASE+SAM_TWI_CR_OFFSET)
 #define SAM_TWI0_MMR                (SAM_TWI0_VBASE+SAM_TWI_MMR_OFFSET)

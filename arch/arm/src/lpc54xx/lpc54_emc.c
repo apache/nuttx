@@ -310,7 +310,7 @@ void lpc54_emc_sdram_initialize(FAR const struct emc_dynamic_timing_config_s *ti
                EMC_DYNCONFIG_ADDRMAP(config->addrmap);
       putreg32(regval, LPC54_EMC_DYNCONFIG(config->chndx));
 
-      /* Abstract CAS latency from the SDRAM mode reigster setting values */
+      /* Abstract CAS latency from the SDRAM mode register setting values */
 
       caslat = (config->mode & EMC_SDRAM_MODE_CL_MASK) >> EMC_SDRAM_MODE_CL_SHIFT;
       regval = EMC_DYNRASCAS_RAS(config->rasnclk) | EMC_DYNRASCAS_CAS(caslat);
@@ -446,7 +446,7 @@ void lpc54_emc_sdram_initialize(FAR const struct emc_dynamic_timing_config_s *ti
   putreg32(regval, LPC54_EMC_DYNCONTROL);
 
   /* The buffer will be disabled when do the sdram initialization and
-   * enabled after the initialization during normal opeation.
+   * enabled after the initialization during normal operation.
    */
 
   for (i = 0, config = chconfig;

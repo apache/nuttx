@@ -78,7 +78,7 @@
 #  define GPIO_PERIPH          (2 << GPIO_MODE_SHIFT) /* Peripheral */
 #  define GPIO_INTERRUPT       (3 << GPIO_MODE_SHIFT) /* Interrupt input */
 
-/* Initial Ouptut Value:
+/* Initial Output Value:
  *
  *   GPIO OUTPUT 01V. .... .... ....  .... .... .... ....
  */
@@ -258,7 +258,7 @@ extern "C"
 
 /* Look-up table that maps GPIO1..GPIOn indexes into GPIO register base addresses */
 
-EXTERN uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS];
+EXTERN const uintptr_t g_gpio_base[IMXRT_GPIO_NPORTS];
 
 /************************************************************************************
  * Public Function Prototypes

@@ -40,7 +40,7 @@
  * Public Types
  ****************************************************************************/
 
-/* DO NOT CHANGE ORDER, IT MACHES CODE IN drivers/eeprom/i2c_xx24xx.c */
+/* DO NOT CHANGE ORDER, IT MATCHES CODE IN drivers/eeprom/i2c_xx24xx.c */
 
 enum eeprom_24xx_e
 {

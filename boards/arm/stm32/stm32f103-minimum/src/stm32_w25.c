@@ -280,22 +280,5 @@ int stm32_w25initialize(int minor)
 #endif /* CONFIG_FS_SMARTFS */
 #endif /* HAVE_W25 */
 
-  /* Create a RAM MTD device if configured */
-
-#if defined(CONFIG_RAMMTD) && defined(CONFIG_STM32F103MINIMUM_RAMMTD)
-  {
-    uint8_t *start = (uint8_t *)kmm_malloc(CONFIG_STM32F103MINIMUM_RAMMTD_SIZE * 1024);
-    mtd = rammtd_initialize(start, CONFIG_STM32F103MINIMUM_RAMMTD_SIZE * 1024);
-    mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
-
-#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-    /* Now initialize a SMART Flash block device and bind it to the MTD device */
-
-    smart_initialize(CONFIG_STM32F103MINIMUM_RAMMTD_MINOR, mtd, NULL);
-#endif
-  }
-
-#endif /* CONFIG_RAMMTD && CONFIG_STM32F103MINIMUM_RAMMTD */
-
   return OK;
 }

@@ -55,7 +55,7 @@
  * Function:  z16f_sysexec
  *
  * Description:
- *   Handle a Z16F system execption
+ *   Handle a Z16F system exception
  *
  ****************************************************************************/
 

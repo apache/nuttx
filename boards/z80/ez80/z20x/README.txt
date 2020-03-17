@@ -33,6 +33,8 @@ Contents
 ========
 
   o ZDS-II Compiler Versions
+  o Environments
+  o Memory Constaints
   o Serial Console
   o LEDs and Buttons
     - LEDs
@@ -61,6 +63,36 @@ Other Versions
   three files:  (1) arch/arm/z80/src/ez80/Kconfig, (2)
   boards/z80/ez80/z20x/scripts/Make.defs and, perhaps, (3)
   arch/z80/src/ez80/Toolchain.defs.
+
+Environments
+============
+
+Cygwin:
+
+  All testing was done using the Cygwin environment under Windows.
+
+MinGW/MSYS
+
+  One attempt was made using the MSYS2 environment under Windws.  That build
+  correctly until the very end, then it failed to include "chip.h".  this
+  was traced to arch/z80/src/Makefile.zdsiil:  The usrinc paths created by
+  Makefile.zdsiil contained POSIX-style paths that were not usable to the
+  ZDS-II compiler.
+
+Native
+
+  The Windows native build has not been attempt.  I would expect that it
+  would have numerous problems.
+
+Memory Constaints
+=================
+
+  The eZ80F92 has a smaller FLASH memory of 128Kb.  That combined with the
+  fact that the size of NuttX is increasing means that it is very easy to
+  exceed the ROM address space.
+
+  The sdboot configuration will fit into the ROM address space, but NOT if
+  you enable assertions, debug outputs, or even debug symbols.
 
 Serial Console
 ==============
@@ -172,34 +204,46 @@ Common Configuration Notes
 Configuration Subdirectories
 ----------------------------
 
-  nsh_flash, nsh_ram:
+  hello:
 
-    These configuration build the NuttShell (NSH).  That code can be
+    This is a minimal "Hello, World!" program that runs out of RAM.  It is
+    a small program that is really useful only for testing the bootloader.
+
+    NOTES:
+
+    1. Debugging from RAM
+
+       You can debug from RAM version using ZDS-II as follows:
+
+       a. Connect to the debugger,
+       b. Reset, Go, and Break.  This will initialize the external RAM
+       c. Break and Load the nuttx.lod file
+       c. Set the PC to 0x050000
+       d. Single step a few times to make sure things look good, then
+       e. Go
+
+  nsh:
+
+    This configuration builds the NuttShell (NSH).  That code can be
     found in apps/system/nsh and apps/system/nshlib..  For more
     information see:  apps/system/nsh/README.txt and
     Documentation/NuttShell.html.
 
+    To be usable, this configuration should:  (1) Use the same BAUD
+    as the bootloader and (2) switch from the MMC/SD card to the second
+    partition in the W25 part.
+
     NOTES:
 
-    1. The two configurations different only in that one builds for
-       execution entirely from FLASH and the other for execution entirely
-       from RAM.  A bootloader of some kind is required to support such
-       execution from RAM!  This difference is reflected in a single
-       configuration setting:
-
-         CONFIG_BOOT_RUNFROMFLASH=y    # Execute from flash (default)
-         CONFIG_BOOT_RUNFROMEXTSRAM=y  # Execute from external SRAM
-
-       A third configuration is possible but not formalized with its own
-       defconfig file:  You can also configure the code to boot from FLASH,
-       copy the code to external SRAM, and then execute from RAM.  Such a
-       configuration needs the following settings in the .config file:
+    1. This configuration builds for execution entirely from RAM.  A
+       bootloader of some kind is required to support such execution from
+       RAM!  This is reflected in a single configuration setting:
 
          CONFIG_BOOT_RUNFROMEXTSRAM=y  # Execute from external SRAM
-         CONFIG_Z20X_COPYTORAM=y  # Boot from FLASH but copy to SRAM
 
-       Why execute from SRAM at all?  Because you will get MUCH better
-       performance because of the zero wait state SRAM implementation.
+       Why execute from SRAM?  Because you will get MUCH better performance
+       because of the zero wait state SRAM implementation and you will not
+       be constrained by the eZ80F92's small FLASH size.
 
     2. The eZ80 RTC, the procFS file system, and SD card support in included.
        The procFS file system will be auto-mounted at /proc when the board
@@ -268,14 +312,14 @@ Configuration Subdirectories
        NOTE:  The is no card detect signal so the microSD card must be
        placed in the card slot before the system is started.
 
-    3. Debugging the RAM version
+    3. Debugging from RAM
 
-       You can debug the all RAM version using ZDS-II as follows:
+       You can debug from RAM version using ZDS-II as follows:
 
        a. Connect to the debugger,
        b. Reset, Go, and Break.  This will initialize the external RAM
        c. Break and Load the nuttx.lod file
-       c. Set the PC to 0x040000
+       c. Set the PC to 0x050000
        d. Single step a few times to make sure things look good, then
        e. Go
 
@@ -284,14 +328,73 @@ Configuration Subdirectories
        - The stack sizes have not been tuned and, hence, are probably too
          large.
 
-  sdboot
+  w25boot
 
     This configuration implements a very simple boot loader.  In runs from
-    FLASH and simply initializes the external SRAM, mounts the FAT file
-    system on the SD card, and checks to see if there is a file called
-    nuttx.hex on the SD card.  If so, it will load the Intel HEX file into
-    memory and jump to address 0x040000.  This, of course, assumes that
-    the application's reset vector resides at address 0x040000 in external
-    SRAM.
+    FLASH and simply initializes the external SRAM, mounts the W25 FLASH
+    and checks to see if there is a valid binary image at the beginning of
+    FLASH.  If so, it will load the binary into RAM, verify it and jump to
+    0x50000.  This, of course, assumes that the application's entry point
+    vector resides at address 0x050000 in external SRAM.
 
-    The boot loader source is located at boards/z20x/src/sd_main.c.
+    The boot loader source is located at boards/z20x/src/w25_main.c.
+
+    When starting, you may see one of two things, depending upon whether or
+    not there is a valid, bootable image in the W25 FLASH partition:
+
+    1. If there is a bootable image in FLASH, you should see something like:
+
+        Verifying 203125 bytes in the W25 Serial FLASH
+        Successfully verified 203125 bytes in the W25 Serial FLASH
+        [L]oad [B]oot
+        .........
+
+       The program will wait up to 5 seconds for you to provide a response:
+       B to load the program program from the W25 and start it, or L to
+       download a new program from serial and write it to FLASH.
+
+       If nothing is pressed in within the 5 second delay, the program will
+       continue to boot the program just as though B were pressed.
+
+       If L is pressed, then you should see the same dialog as for the case
+       where there is no valid binary image in FLASH.
+
+    2. If there is no valid program in FLASH (or if L is pressed), you will
+       be asked to :
+
+         Send HEX file now.
+
+    NOTES:
+
+    1. A large UART1 Rx buffer (4Kb), a slow UART1 BAUD (2400), and a very
+       low Rx FIFO trigger are used to avoid serial data overruns.  Running
+       at only 20MHz, the eZ80F92 is unable to process 115200 BAUD Intel Hex
+       at speed.  It is likely that a usable BAUD higher than 2400 could be
+       found through experimentation; it could also be possible to implement
+       some software handshake to protect the eZ80f92 from overrun (the
+       eZ80F92 does not support hardware flow control)
+
+       At 2400 BAUD the download takes a considerable amount of time but
+       seems to be reliable
+
+       Massive data loss occurs due to overruns at 115200 BAUD.  I have
+       tried the bootloader at 9600 with maybe 30-40% data loss, too much
+       data loss to be usable.  At 9600 baud, the Rx data overrun appears
+       to be in the Rx FIFO; the data loss symptom is small sequences of
+       around 8-10 bytes often missing in the data.  Apparently, the Rx FIFO
+       overflows before the poor little  eZ80F92 can service the Rx
+       interrupt and clear the FIFO.
+
+       The Rx FIFO trigger is set at 1 so that the ez80F92 will respond as
+       quickly to receipt of Rx data is possible and clear out the Rx FIFO.
+       The Rx FIFO trigger level is a trade-off be fast responsiveness and
+       reduced chance of Rx FIFO overrun (low) versus reduced Rx interrupt
+       overhead (high).
+
+       Things worth trying:  4800 BAUD, smaller Rx buffer, large Rx FIFO
+       trigger level.
+
+    2. Booting large programs from the serial FLASH is unbearably slow;
+       you will think that the system is simply not booting at all.  There
+       is probably some bug contributing to this probably (maybe the timer
+       interrupt rate?)

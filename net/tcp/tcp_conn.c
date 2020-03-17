@@ -313,7 +313,7 @@ static int tcp_selectport(uint8_t domain, FAR const union ip_addr_u *ipaddr,
  *   connection to be used with the provided TCP/IP header
  *
  * Assumptions:
- *   This function is called from network logic with the nework locked.
+ *   This function is called from network logic with the network locked.
  *
  ****************************************************************************/
 
@@ -827,7 +827,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
  *   connection to be used with the provided TCP/IP header
  *
  * Assumptions:
- *   This function is called from network logic with the nework locked.
+ *   This function is called from network logic with the network locked.
  *
  ****************************************************************************/
 
@@ -860,7 +860,7 @@ FAR struct tcp_conn_s *tcp_active(FAR struct net_driver_s *dev,
  *   Traverse the list of active TCP connections
  *
  * Assumptions:
- *   This function is called from network logic with the nework locked.
+ *   This function is called from network logic with the network locked.
  *
  ****************************************************************************/
 
@@ -885,7 +885,7 @@ FAR struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn)
  *    a new connection and initialize it to send a SYNACK in return.
  *
  * Assumptions:
- *   This function is called from network logic with the nework locked.
+ *   This function is called from network logic with the network locked.
  *
  ****************************************************************************/
 

@@ -183,7 +183,7 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
           ipv4 = IPv4BUF;
           net_ipv4addr_hdrcopy(&pstate->recv_from, ipv4->srcipaddr);
 
-          /* Decrement the count of oustanding requests.  I suppose this
+          /* Decrement the count of outstanding requests.  I suppose this
            * could have already been decremented of there were multiple
            * threads calling sendto() or recvfrom().  If there finds, we
            * may have to beef up the design.
@@ -231,7 +231,7 @@ end_wait:
  *   pstate   recvfrom state structure
  *
  * Returned Value:
- *   Nunber of bytes copied to the user buffer
+ *   Number of bytes copied to the user buffer
  *
  * Assumptions:
  *   The network is locked.
@@ -400,7 +400,7 @@ ssize_t icmp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
     }
 
   /* Check if there is buffered read-ahead data for this socket.  We may have
-   * already received the reponse to previous command.
+   * already received the response to previous command.
    */
 
   if (!IOB_QEMPTY(&conn->readahead))

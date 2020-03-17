@@ -392,7 +392,7 @@ void up_irqinitialize(void)
   int nintlines;
   int i;
 
-  /* The NVIC ICTR register (bits 0-4) holds the number of of interrupt
+  /* The NVIC ICTR register (bits 0-4) holds the number of interrupt
    * lines that the NVIC supports, defined in groups of 32. That is,
    * the total number of interrupt lines is up to (32*(INTLINESNUM+1)).
    *

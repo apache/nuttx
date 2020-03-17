@@ -101,7 +101,8 @@ static void nxsig_stop_task(int signo);
 
 static _sa_handler_t nxsig_default_action(int signo);
 static void nxsig_setup_default_action(FAR struct task_group_s *group,
-                                       FAR const struct nxsig_defaction_s *info);
+                                       FAR const struct nxsig_defaction_s *
+                                           info);
 
 /****************************************************************************
  * Private Data
@@ -217,13 +218,13 @@ static void nxsig_abnormal_termination(int signo)
       /* Then we cannot cancel the thread now.  Here is how this is
        * supposed to work:
        *
-       * "When cancelability is disabled, all cancels are held pending
-       *  in the target thread until the thread changes the cancelability.
-       *  When cancelability is deferred, all cancels are held pending in
-       *  the target thread until the thread changes the cancelability,
+       * "When cancellability is disabled, all cancels are held pending
+       *  in the target thread until the thread changes the cancellability.
+       *  When cancellability is deferred, all cancels are held pending in
+       *  the target thread until the thread changes the cancellability,
        *  calls a function which is a cancellation point or calls
        *  pthread_testcancel(), thus creating a cancellation point.  When
-       *  cancelability is asynchronous, all cancels are acted upon
+       *  cancellability is asynchronous, all cancels are acted upon
        *  immediately, interrupting the thread with its processing."
        *
        * REVISIT:  Does this rule apply to equally to both SIGKILL and
@@ -240,8 +241,8 @@ static void nxsig_abnormal_termination(int signo)
 
   if ((rtcb->flags & TCB_FLAG_CANCEL_DEFERRED) != 0)
     {
-      /* Then we cannot cancel the task asynchronously.  Mark the cancellation
-       * as pending.
+      /* Then we cannot cancel the task asynchronously.
+       * Mark the cancellation as pending.
        */
 
       rtcb->flags |= TCB_FLAG_CANCEL_PENDING;
@@ -267,10 +268,9 @@ static void nxsig_abnormal_termination(int signo)
    */
 
 #ifdef HAVE_GROUP_MEMBERS
-  /* Kill of of the children of the task.  This will not kill the currently
+  /* Kill all of the children of the task.  This will not kill the currently
    * running task/pthread (this_task).  It will kill the main thread of the
-   * task group if the this_task is a
-   * pthread.
+   * task group if this_task is a pthread.
    */
 
   group_killchildren((FAR struct task_tcb_s *)rtcb);
@@ -328,9 +328,9 @@ static void nxsig_stop_task(int signo)
    */
 
 #ifdef HAVE_GROUP_MEMBERS
-  /* Suspend of of the children of the task.  This will not suspend the
+  /* Suspend all of the children of the task.  This will not suspend the
    * currently running task/pthread (this_task).  It will suspend the
-   * main thread of the task group if the this_task is a pthread.
+   * main thread of the task group if this_task is a pthread.
    */
 
   group_suspendchildren(rtcb);
@@ -437,7 +437,8 @@ static _sa_handler_t nxsig_default_action(int signo)
  ****************************************************************************/
 
 static void nxsig_setup_default_action(FAR struct task_group_s *group,
-                                       FAR const struct nxsig_defaction_s *info)
+                                       FAR const struct nxsig_defaction_s *
+                                           info)
 {
   /* Get the address of the handler for this signals default action. */
 
@@ -539,7 +540,7 @@ bool nxsig_iscatchable(int signo)
  *
  * Description:
  *   If 'defaction' is true, then return the default signal handler action
- *   for the specified signal and mark that the default signal hander is
+ *   for the specified signal and mark that the default signal handler is
  *   in place (it is not yet).
  *
  *   If 'defaction' is false, then mark that the default signal handler is

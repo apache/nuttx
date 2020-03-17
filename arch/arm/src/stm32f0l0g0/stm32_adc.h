@@ -232,7 +232,7 @@ struct adc_sample_time_s
 };
 #endif /* CONFIG_STM32F0L0G0_ADC_CHANGE_SAMPLETIME */
 
-/* This structure provides the publicly visable representation of the
+/* This structure provides the publicly visible representation of the
  * "lower-half" ADC driver structure.
  */
 
@@ -242,7 +242,7 @@ struct stm32_adc_dev_s
 
   FAR const struct stm32_adc_ops_s *llops;
 
-  /* Require cast-compatibility with private "lower-half" ADC strucutre */
+  /* Require cast-compatibility with private "lower-half" ADC structure */
 };
 
 /* Low-level operations for ADC */

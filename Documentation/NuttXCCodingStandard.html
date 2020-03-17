@@ -417,7 +417,7 @@
   </li>
   <li>
     Text following '.' or ':' begins with an upper-case character;
-    text folowing ',' or ';' begins with a lower-case character.
+    text following ',' or ';' begins with a lower-case character.
   </li>
 </ul>
 <p>
@@ -506,7 +506,7 @@
 <p>
   <b>Indentation</b>
   Comments should, typically, be placed before the code section to which they apply.
-  The comment identation should be the same as the follow identation rules as the following code (if applicable).
+  The comment indentation should be the same as the follow indentation rules as the following code (if applicable).
 </p>
 
 <p>
@@ -608,7 +608,7 @@
 <p>
   <b>Comments to the Right of Data Definitions</b>.
   Comments to the right of a declaration with an enumeration or structure, on the other hand, are encouraged, provided that the comments are short and do not exceed the maximum line width (usually 78 characters).
-  Columnar alignment of comments is very desireable (but often cannot be achieved without violating the line width).
+  Columnar alignment of comments is very desirable (but often cannot be achieved without violating the line width).
 </p>
 <center><table width="60%" border=1>
 <tr><td bgcolor="white">
@@ -696,7 +696,7 @@ struct animals_s
 
 <p>
   <b>C Style Comments</b>.
-  C99/C11/C++ style comments (beginning wih <code>//</code>) should not be used with NuttX.
+  C99/C11/C++ style comments (beginning with <code>//</code>) should not be used with NuttX.
   NuttX generally follows C89 and all code outside of architecture specific directories must be compatible with C89.
 </p>
 <center><table width="60%" border=1>
@@ -803,7 +803,7 @@ void some_function(void)
   </li>
   <li>
     <b>Compound Statements</b>.
-    Within this document, an opening left brace followed by a sequence of statments, and ending with a closing right brace is refered to as a <i>compound statement</i>.
+    Within this document, an opening left brace followed by a sequence of statements, and ending with a closing right brace is referred to as a <i>compound statement</i>.
   </li>
   <li>
     <b>Nested Compound Statements</b>.
@@ -984,7 +984,7 @@ int animals(int animal)
 
 <p>
   <b>Indentation Unit</b>.
-  Indentation is in units of two spaces; Each indentation level is twos spaces further to the right than the preceding identation levels.
+  Indentation is in units of two spaces; Each indentation level is twos spaces further to the right than the preceding indentation levels.
   TAB characters may not be used for indentation.
 </p>
 <center><table width="60%" border=1>
@@ -1047,7 +1047,7 @@ int animals(int animal)
   C pre-processor statements should always be indented in this way in the <code>Pre-processor Definitions</code> <a href="#cfilestructure">section</a> of each file.
   C pre-processor statements may be indented in the <code>Public/Private Data</code> and <code>Public/Private Functions</code> sections of the file.
   However, often the indentation of C pre-processor statements conflicts with the indentation of the C code and makes the code more difficult to read.
-  In such cases, indentation of C pre-processor statements should be ommitted in those sections (only).
+  In such cases, indentation of C pre-processor statements should be omitted in those sections (only).
 </p>
 
 <center><table width="60%" border=1>
@@ -1133,7 +1133,7 @@ int animals(int animal)
     Otherwise, there should be no space before the left parentheses
   </li>
   <li>
-    <b>No space betwen function name and argument list</b>.
+    <b>No space between function name and argument list</b>.
     There should be no space between a function name and an argument list.
   </li>
   <li>
@@ -1455,7 +1455,7 @@ typedef int myinteger_t;
         First for structures that are defined within another union or structure (discouraged).  In those cases, the structure name should always be omitted.
       </li>
       <li>
-        Second for structures as the type of a local variable.  In this case, again, the structure name should always be ommitted.
+        Second for structures as the type of a local variable.  In this case, again, the structure name should always be omitted.
       </li>
     </ol>
   </li>
@@ -1791,7 +1791,7 @@ enum xyz_state_e
   </li>
   <li>
     <b>Prefix</b>.
-    Each related macro value should begin with an upper-case prefix that identifies the value as part of a set of values (and also to mimimize the likelihood of naming collisions).
+    Each related macro value should begin with an upper-case prefix that identifies the value as part of a set of values (and also to minimize the likelihood of naming collisions).
   </li>
   <li>
     <b>Single space after <code>#define</code></b>.
@@ -2077,7 +2077,7 @@ ptr = (FAR struct somestruct_s *)value;
   <li>
     <b>First definition or statement in column 3</b>.
     The first data definitions or statements in the function body are idented by two spaces.
-    Standards for statements are covered in the <a href="#statements">following paragaraph</a>
+    Standards for statements are covered in the <a href="#statements">following paragraph</a>
   </li>
   <li>
     <b>Local variables first</b>.
@@ -2570,7 +2570,7 @@ x++;
   </li>
   <li>
     <b>Followed by a single blank line</b>.
-    The final right brace that closes the <code>while &lt;condition&gt;</code> statment must be followed by a single blank line.
+    The final right brace that closes the <code>while &lt;condition&gt;</code> statement must be followed by a single blank line.
   </li>
   <li>
     <b>Exception</b>.
@@ -2692,7 +2692,7 @@ x++;
   <li>
     <b>Error Exit Labels</b>.
     The error exit label is normally called <code>errout</code>.
-    Multiple error labels are often to required to <i>unwind</i> to recover resources committe in logic prior to the error to otherwise <i>undo</i> preceding operations.
+    Multiple error labels are often to required to <i>unwind</i> to recover resources committed in logic prior to the error to otherwise <i>undo</i> preceding operations.
     Naming for these other labels would be some like <code>errout_with_allocation</code>, <code>errout_with_openfile</code>, etc.
   </li>
   <li>

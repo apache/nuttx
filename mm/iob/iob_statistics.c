@@ -113,7 +113,7 @@ void iob_stats_onfree(enum iob_user_e producerid)
  * Name: iob_getuserstats
  *
  * Description:
- *   Return a reference to the IOB usage statitics for the IOB consumer/producer
+ *   Return a reference to the IOB usage statistics for the IOB consumer/producer
  *
  * Input Parameters:
  *   userid - id representing the IOB producer/consumer

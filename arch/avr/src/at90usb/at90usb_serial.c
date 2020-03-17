@@ -319,7 +319,7 @@ static int usart1_txinterrupt(int irq, void *context, FAR void *arg)
 
   if ((ucsr1a & (1 << UDRE1)) != 0)
     {
-      /* Transmit data regiser empty ... process outgoing bytes */
+      /* Transmit data register empty ... process outgoing bytes */
 
       uart_xmitchars(&g_usart1port);
     }
@@ -513,6 +513,8 @@ static bool usart1_txempty(struct uart_dev_s *dev)
  * Public Functions
  ****************************************************************************/
 
+#ifdef USE_EARLYSERIALINIT
+
 /****************************************************************************
  * Name: up_earlyserialinit
  *
@@ -536,6 +538,7 @@ void up_earlyserialinit(void)
   usart1_setup(&g_usart1port);
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: up_serialinit

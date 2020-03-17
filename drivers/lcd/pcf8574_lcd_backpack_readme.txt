@@ -248,5 +248,5 @@ Troubleshooting
   is is dependent on the physics of the attached LCD module.  The useful
   range of voltages at this pin for any given LCD is quite narrow, and
   outside that range there will be nothing visible on the display, so most
-  of the turn range of the pot is non-useful.  It's less 'contrast' and
+  of the turn range of the pot is useless.  It's less 'contrast' and
   more 'LCD segment drive bias'.

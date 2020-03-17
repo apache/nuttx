@@ -72,7 +72,7 @@
 #define NRF52_SAADC_CHLIMIT_OFFSET(x)         (0x51c + (x + 0x10)) /* High/low limits for event monitoring of a CH[x] */
 #define NRF52_SAADC_RESOLUTION_OFFSET         0x05f0 /* Resolution configuration */
 #define NRF52_SAADC_OVERSAMPLE_OFFSET         0x05f4 /* Oversampling configuration */
-#define NRF52_SAADC_SAMPLERATE_OFFSET         0x05f8 /* Controls normal or continous sample rate */
+#define NRF52_SAADC_SAMPLERATE_OFFSET         0x05f8 /* Controls normal or continuous sample rate */
 #define NRF52_SAADC_PTR_OFFSET                0x062c /* Data pointer */
 #define NRF52_SAADC_MAXCNT_OFFSET             0x0630 /* Maximum number of 16-bit samples */
 #define NRF52_SAADC_AMOUNT_OFFSET             0x0634 /* Number of 16-bit samples written to buffer */
@@ -102,7 +102,7 @@
 
 /* CH[n] PSELP Register */
 
-#define SAADC_CHPSELP_SHIFT            (0)       /* Bits 0-4: Intput positive pin selection for CH[x] */
+#define SAADC_CHPSELP_SHIFT            (0)       /* Bits 0-4: Input positive pin selection for CH[x] */
 #define SAADC_CHPSELP_MASK             (0xf << SAADC_CHPSELP_SHIFT)
 #  define SAADC_CHPSELP_NC             (0x0 << SAADC_CHPSELP_SHIFT)
 #  define SAADC_CHPSELP_IN0            (0x1 << SAADC_CHPSELP_SHIFT)
@@ -118,7 +118,7 @@
 
 /* CH[n] PSELN Register */
 
-#define SAADC_CHPSELN_SHIFT            (0)       /* Bits 0-4: Intput negative pin selection for CH[x] */
+#define SAADC_CHPSELN_SHIFT            (0)       /* Bits 0-4: Input negative pin selection for CH[x] */
 #define SAADC_CHPSELN_MASK             (0xf << SAADC_CHPSELN_SHIFT)
 #  define SAADC_CHPSELN_NC             (0x0 << SAADC_CHPSELN_SHIFT)
 #  define SAADC_CHPSELN_IN0            (0x1 << SAADC_CHPSELN_SHIFT)

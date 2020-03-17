@@ -119,7 +119,7 @@
 #undef  AVR32_CLOCK_USB_OSC1
 #define AVR32_CLOCK_USB_DIV   0
 
-/* Main Clock settup: Select OSC0 as the main clock.
+/* Main Clock setup: Select OSC0 as the main clock.
  *
  * - A 12Mhz crystal is provided on he board for OSC0.
  * - The AVR32DEV1 board has no support for OSC1.

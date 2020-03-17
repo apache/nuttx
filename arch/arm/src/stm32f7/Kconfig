@@ -769,7 +769,7 @@ config STM32F7_STM32F765XX
 	select ARMV7M_HAVE_DTCM
 	select STM32F7_HAVE_FMC
 	select STM32F7_HAVE_ETHRNET
-	select STM32F7_HAVE_RNG # data sheet says yes, Product matix says no
+	select STM32F7_HAVE_RNG # data sheet says yes, Product matrix says no
 	select STM32F7_HAVE_SPI5 if !STM32F7_IO_CONFIG_V
 	select STM32F7_HAVE_SPI6 if !STM32F7_IO_CONFIG_V
 	select STM32F7_HAVE_SDMMC2 if !STM32F7_IO_CONFIG_V
@@ -806,7 +806,7 @@ config STM32F7_STM32F767XX
 	select STM32F7_HAVE_CAN2
 	select STM32F7_HAVE_SPI4
 
-config STM32F7_STM32F768XX # Revisit Wehn parts released
+config STM32F7_STM32F768XX # Revisit When parts released
 	bool
 	default n
 	select STM32F7_STM32F76XX
@@ -1126,20 +1126,6 @@ config STM32F7_PROGMEM
 	---help---
 		Add progmem support, start block and end block options are provided to
 		obtain an uniform flash memory mapping.
-
-if STM32F7_PROGMEM
-
-config STM32F7_PROGMEM_STARTBLOCK
-	int "First mapped progmem block"
-	default 0
-	range 0 64
-
-config STM32F7_PROGMEM_LASTBLOCK
-	int "Last mapped progmem block"
-	default -1
-	range -1 64
-
-endif # STM32F7_PROGMEM
 
 menu "STM32 Peripheral Support"
 
@@ -2050,7 +2036,7 @@ config STM32F7_FLOWCONTROL_BROKEN
 		Enable UART RTS flow control using Software. Because STM
 		Current STM32 have broken HW based RTS behavior (they assert
 		nRTS after every byte received)  Enable this setting workaround
-		this issue by useing software based management of RTS
+		this issue by using software based management of RTS
 
 config STM32F7_USART_BREAKS
 	bool "Add TIOxSBRK to support sending Breaks"
@@ -2135,6 +2121,14 @@ config STM32F7_INTERNAL_ULPI
 endchoice #"ULPI Selection"
 
 endmenu # OTG_HS Config
+
+config STM32F7_EXTERNAL_RAM
+	bool "External RAM on FMC"
+	default n
+	depends on STM32F7_FMC
+	select ARCH_HAVE_HEAP2
+	---help---
+		In addition to internal SDRAM, external RAM may be available through the FMC.
 
 menu "QuadSPI Configuration"
 	depends on STM32F7_QUADSPI
@@ -2287,12 +2281,28 @@ config STM32F7_SPI_DMA
 	---help---
 		Use DMA to improve SPI transfer performance.  Cannot be used with STM32F7_SPI_INTERRUPT.
 
+config STM32F7_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on STM32F7_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
 config STM32F7_SPI1_DMA
 	bool "SPI1 DMA"
 	default n
 	depends on STM32F7_SPI1 && STM32F7_SPI_DMA
 	---help---
 		Use DMA to improve SPI1 transfer performance.
+
+config STM32F7_SPI1_DMA_BUFFER
+	int "SPI1 DMA buffer size"
+	default 0
+	depends on STM32F7_SPI1_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI1.
 
 config STM32F7_SPI2_DMA
 	bool "SPI2 DMA"
@@ -2301,12 +2311,26 @@ config STM32F7_SPI2_DMA
 	---help---
 		Use DMA to improve SPI2 transfer performance.
 
+config STM32F7_SPI2_DMA_BUFFER
+	int "SPI2 DMA buffer size"
+	default 0
+	depends on STM32F7_SPI2_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI2.
+
 config STM32F7_SPI3_DMA
 	bool "SPI3 DMA"
 	default n
 	depends on STM32F7_SPI3 && STM32F7_SPI_DMA
 	---help---
 		Use DMA to improve SPI3 transfer performance.
+
+config STM32F7_SPI3_DMA_BUFFER
+	int "SPI3 DMA buffer size"
+	default 0
+	depends on STM32F7_SPI3_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI3.
 
 config STM32F7_SPI4_DMA
 	bool "SPI4 DMA"
@@ -2315,6 +2339,13 @@ config STM32F7_SPI4_DMA
 	---help---
 		Use DMA to improve SPI4 transfer performance.
 
+config STM32F7_SPI4_DMA_BUFFER
+	int "SPI4 DMA buffer size"
+	default 0
+	depends on STM32F7_SPI4_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI4.
+
 config STM32F7_SPI5_DMA
 	bool "SPI5 DMA"
 	default n
@@ -2322,12 +2353,26 @@ config STM32F7_SPI5_DMA
 	---help---
 		Use DMA to improve SPI5 transfer performance.
 
+config STM32F7_SPI5_DMA_BUFFER
+	int "SPI5 DMA buffer size"
+	default 0
+	depends on STM32F7_SPI5_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI5.
+
 config STM32F7_SPI6_DMA
 	bool "SPI6 DMA"
 	default n
 	depends on STM32F7_SPI6 && STM32F7_SPI_DMA
 	---help---
 		Use DMA to improve SPI6 transfer performance.
+
+config STM32F7_SPI6_DMA_BUFFER
+	int "SPI6 DMA buffer size"
+	default 0
+	depends on STM32F7_SPI6_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI6.
 
 endmenu # "SPI Configuration"
 
@@ -2396,7 +2441,7 @@ config STM32F7_SDMMC1_DMAPRIO
 	hex "SDMMC1 DMA priority"
 	default 0x00010000
 	---help---
-		Select SDMMC1 DMA prority.
+		Select SDMMC1 DMA priority.
 
 		Options are: 0x00000000 low, 0x00010000 medium,
 		0x00020000 high, 0x00030000 very high.  Default: medium.
@@ -2432,7 +2477,7 @@ config STM32F7_SDMMC2_DMAPRIO
 	hex "SDMMC2 DMA priority"
 	default 0x00010000
 	---help---
-		Select SDMMC2 DMA prority.
+		Select SDMMC2 DMA priority.
 
 		Options are: 0x00000000 low, 0x00010000 medium,
 		0x00020000 high, 0x00030000 very high.  Default: medium.

@@ -286,7 +286,7 @@ static int lpc17_40_getcmap(FAR struct fb_vtable_s *vtable,
       cmap->transp[i] = 0;
 #endif
 
-      /* Handle the case where the len ends on an odd boudary */
+      /* Handle the case where the len ends on an odd boundary */
 
       if ((i + 1) < last)
         {
@@ -352,7 +352,7 @@ static int lpc17_40_putcmap(FAR struct fb_vtable_s *vtable,
                        (uint32_t)cmap->green[i] << LCD_PAL_G0_SHIFT |
                        (uint32_t)cmap->blue[i]  << LCD_PAL_B0_SHIFT);
 
-      /* Handle the case where the len ends on an odd boudary */
+      /* Handle the case where the len ends on an odd boundary */
 
       if ((i + 1) >= last)
         {
@@ -366,7 +366,7 @@ static int lpc17_40_putcmap(FAR struct fb_vtable_s *vtable,
                    (uint32_t)cmap->blue[i+1]  << LCD_PAL_B1_SHIFT);
         }
 
-      /* Save the new pallete value */
+      /* Save the new palette value */
 
       *pal++ = (rgb0 | rgb1);
     }

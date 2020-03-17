@@ -147,7 +147,7 @@ normal_irq:
   addi s0, sp, XCPTCONTEXT_SIZE
   sd   s0,  2*8(sp)   /* original SP */
 
-  /* Setup arg0(exeption cause), arg1(context) */
+  /* Setup arg0(exception cause), arg1(context) */
 
   csrr a0, mcause  /* exception cause */
   csrr s0, mepc

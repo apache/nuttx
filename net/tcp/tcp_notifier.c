@@ -75,7 +75,7 @@
  *           may be used later in a call to tcp_notifier_teardown().
  *   == 0  - There is already buffered read-ahead data.  No notification
  *           will be provided.
- *   < 0   - An unexpected error occurred and notification will ocur.  The
+ *   < 0   - An unexpected error occurred and notification will occur.  The
  *           returned value is a negated errno value that indicates the
  *           nature of the failure.
  *
@@ -225,7 +225,7 @@ int tcp_disconnect_notifier_setup(worker_t worker,
  *   Eliminate a TCP read-ahead notification previously setup by
  *   tcp_readahead_notifier_setup().  This function should only be called
  *   if the notification should be aborted prior to the notification.  The
- *   notification will automatically be torn down after the notifcation.
+ *   notification will automatically be torn down after the notification.
  *
  * Input Parameters:
  *   key - The key value returned from a previous call to

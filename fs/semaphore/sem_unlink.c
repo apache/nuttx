@@ -135,8 +135,8 @@ int sem_unlink(FAR const char *name)
   ret = inode_remove(fullpath);
 
   /* inode_remove() should always fail with -EBUSY because we hae a reference
-   * on the inode.  -EBUSY means taht the inode was, indeed, unlinked but
-   * thatis could not be freed because there are refrences.
+   * on the inode.  -EBUSY means that the inode was, indeed, unlinked but
+   * thatis could not be freed because there are references.
    */
 
   DEBUGASSERT(ret >= 0 || ret == -EBUSY);

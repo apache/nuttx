@@ -90,7 +90,7 @@
 # define mx35info(x...)
 #endif
 
-/* Indentification register values **************************************************/
+/* Identification register values **************************************************/
 
 #define MX35_MANUFACTURER              CONFIG_MX35_MANUFACTURER
 #define MX35_MX35LF1GE4AB_CAPACITY     0x12  /* 1 Gb */
@@ -256,19 +256,19 @@ static inline void mx35_unlockblocks(struct mx35_dev_s *priv);
 
 static inline void mx35_lock(FAR struct spi_dev_s *dev)
 {
-  /* On SPI busses where there are multiple devices, it will be necessary to
-   * lock SPI to have exclusive access to the busses for a sequence of
+  /* On SPI buses where there are multiple devices, it will be necessary to
+   * lock SPI to have exclusive access to the buses for a sequence of
    * transfers.  The bus should be locked before the chip is selected.
    *
    * This is a blocking call and will not return until we have exclusive access to
-   * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
+   * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
    */
 
   SPI_LOCK(dev, true);
 
   /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
    * setmode methods to make sure that the SPI is properly configured for the device.
-   * If the SPI buss is being shared, then it may have been left in an incompatible
+   * If the SPI bus is being shared, then it may have been left in an incompatible
    * state.
    */
 

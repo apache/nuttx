@@ -301,7 +301,7 @@ static int skel_txpoll(FAR struct net_driver_s *dev)
 
       /* Check if the network is sending this packet to the IP address of
        * this device.  If so, just loop the packet back into the network but
-       * don't attmpt to put it on the wire.
+       * don't attempt to put it on the wire.
        */
 
       if (!devif_loopback(&priv->sk_dev))
@@ -443,7 +443,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
 
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          ninfo("Iv6 frame\n");
+          ninfo("IPv6 frame\n");
           NETDEV_RXIPV6(&priv->sk_dev);
 
           /* Dispatch IPv6 packet to the network layer */

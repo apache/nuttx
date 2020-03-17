@@ -35,6 +35,7 @@
 
 include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
+include ${TOPDIR}/tools/pic32/Config.mk
 include ${TOPDIR}/arch/mips/src/mips32/Toolchain.defs
 
 ifeq ($(WINTOOL),y)

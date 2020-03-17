@@ -65,7 +65,7 @@
 
 /* Clocking *****************************************************************/
 
-/* The watchdog is alway running under 32.768KHz:
+/* The watchdog is always running under 32.768KHz:
  *
  *  Fmin = Flsi / 32768
  *

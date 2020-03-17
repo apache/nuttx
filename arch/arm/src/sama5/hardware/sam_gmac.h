@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/hardware/sam_gmac.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -31,22 +31,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_GMAC_H
 #define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_GMAC_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include "hardware/sam_memorymap.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* GMAC Register Offsets ************************************************************/
+ ****************************************************************************/
+
+/* GMAC Register Offsets ****************************************************/
 
 #define SAM_GMAC_NCR_OFFSET        0x0000 /* Network Control Register */
 #define SAM_GMAC_NCFGR_OFFSET      0x0004 /* Network Configuration Register */
@@ -243,7 +244,7 @@
 #define SAM_GMAC_IMRPQ5_OFFSET     0x654 /* Interrupt Mask Register Priority Queue 5 */
 #define SAM_GMAC_IMRPQ6_OFFSET     0x658 /* Interrupt Mask Register Priority Queue 6 */
 
-/* GMAC Register Addresses *********************************************************/
+/* GMAC Register Addresses **************************************************/
 
 #define SAM_GMAC_NCR               (SAM_GMAC_VBASE+SAM_GMAC_NCR_OFFSET)
 #define SAM_GMAC_NCFGR             (SAM_GMAC_VBASE+SAM_GMAC_NCFGR_OFFSET)
@@ -436,7 +437,7 @@
 #define SAM_GMAC_IMRPQ5            (SAM_GMAC_VBASE+SAM_GMAC_IMRPQ5_OFFSET)
 #define SAM_GMAC_IMRPQ6            (SAM_GMAC_VBASE+SAM_GMAC_IMRPQ6_OFFSET)
 
-/* GMAC Register Bit Definitions ***************************************************/
+/* GMAC Register Bit Definitions ********************************************/
 
 /* Network Control Register */
 
@@ -871,13 +872,13 @@
  *
  * Use these definitions:
  *
- *      GMAC_INT_RCOMP                               Bit 1:  Receive Complete
- *      GMAC_INT_RXUBR                               Bit 2:  Receive Used Bit Read
- *      GMAC_INT_RLEX                                Bit 5:  Retry Limit Exceeded or Late Collision
- *      GMAC_INT_TFC                                 Bit 6:  Transmit Frame Corruption due to AHB error
- *      GMAC_INT_TCOMP                               Bit 7:  Transmit Complete
- *      GMAC_INT_ROVR                                Bit 10: Receive Overrun
- *      GMAC_INT_HRESP                               Bit 11: HRESP not OK
+ *      GMAC_INT_RCOMP    Bit 1:  Receive Complete
+ *      GMAC_INT_RXUBR    Bit 2:  Receive Used Bit Read
+ *      GMAC_INT_RLEX     Bit 5:  Retry Limit Exceeded or Late Collision
+ *      GMAC_INT_TFC      Bit 6:  Transmit Frame Corruption due to AHB error
+ *      GMAC_INT_TCOMP    Bit 7:  Transmit Complete
+ *      GMAC_INT_ROVR     Bit 10: Receive Overrun
+ *      GMAC_INT_HRESP    Bit 11: HRESP not OK
  */
 
 /* Transmit Buffer Queue Base Address Priority Queue 0-6 */
@@ -894,7 +895,7 @@
 
 /* Screening Type1 Register Priority Queue 0-15 */
 
-#define GMAC_ST1RPQ0_QNB_SHIFT    (0)       /* Bits 0-3: Que Number (0->7) */
+#define GMAC_ST1RPQ0_QNB_SHIFT    (0)       /* Bits 0-3: Queue Number (0->7) */
 #define GMAC_ST1RPQ0_QNB_MASK     (15 << GMAC_ST1RPQ0_QNB_SHIFT)
 #  define GMAC_ST1RPQ0_QNB(n)     ((uint32_t)(n) << GMAC_ST1RPQ0_QNB_SHIFT)
 #define GMAC_ST1RPQ0_DSTCM_SHIFT  (4)       /* Bits 4-11: Differentiated Services or Traffic Class Match */
@@ -908,7 +909,7 @@
 
 /* Screening Type2 Register Priority Queue 0-15 */
 
-#define GMAC_ST2RPQ0_QNB_SHIFT    (0)       /* Bits 0-3: Que Number (0->7) */
+#define GMAC_ST2RPQ0_QNB_SHIFT    (0)       /* Bits 0-3: Queue Number (0->7) */
 #define GMAC_ST2RPQ0_QNB_MASK     (15 << GMAC_ST2RPQ0_QNB_SHIFT)
 #  define GMAC_ST2RPQ0_QNB(n)     ((uint32_t)(n) << GMAC_ST2RPQ0_QNB_SHIFT)
 #define GMAC_ST2RPQ0_VLANP_SHIFT  (4)       /* Bits 4-7: VLAN Priority */
@@ -916,7 +917,7 @@
 #  define GMAC_ST2RPQ0_VLANP(n)   ((uint32_t)(n) << GMAC_ST2RPQ0_VLANP_SHIFT)
 #define GMAC_ST2RPQ0_VLANE        (1 << 8)  /* Bit 8:  VLAN Enable */
 
-/* Descriptors **********************************************************************/
+/* Descriptors **************************************************************/
 
 /* Receive buffer descriptor:  Address word */
 
@@ -992,9 +993,12 @@
 #define GMACTXD_STA_WRAP          (1 << 30) /* Bit 30: Last descriptor in descriptor list */
 #define GMACTXD_STA_USED          (1 << 31) /* Bit 31: Zero for the GMAC to read from buffer */
 
-/************************************************************************************
+#define GMAC_STATUS_LENGTH_MASK   0x3fffu
+
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
+
 /* Receive buffer descriptor */
 
 struct gmac_rxdesc_s

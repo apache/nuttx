@@ -305,7 +305,7 @@ int tcp_start_monitor(FAR struct socket *psock)
  *
  * Description:
  *   Stop monitoring TCP connection changes for a sockets associated with
- *   a given TCP connection stucture.
+ *   a given TCP connection structure.
  *
  * Input Parameters:
  *   conn - The TCP connection of interest

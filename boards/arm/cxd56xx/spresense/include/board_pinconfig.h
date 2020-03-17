@@ -46,7 +46,7 @@
 
 /* Customize from default to the board specific pin configuration
  * The default pin configurations are defined in
- * boards/arm/cxd56xx/spresense/inclue/board_pinconfig.h.
+ * boards/arm/cxd56xx/spresense/include/board_pinconfig.h.
  *
  *   Mode: shared pin function mode
  *   ENZI: 1=Input Enable, 0=Input Disable

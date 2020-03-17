@@ -120,7 +120,7 @@ setjmp:
  *   control back to the point where setjmp() was called and to restore ("rewind")
  *   the stack to its state at the time of the setjmp() call.  When control is
  *   passed back to where setjmp() had been called, setjmp() will return with
- *   'val', the second paramater passed to longjmp().
+ *   'val', the second parameter passed to longjmp().
  *
  * C Function Prototype:
  *   void longjmp(jmp_buf env, int val);

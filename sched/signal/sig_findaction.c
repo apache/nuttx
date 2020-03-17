@@ -67,7 +67,7 @@ FAR sigactq_t *nxsig_find_action(FAR struct task_group_s *group, int signo)
 
       sched_lock();
 
-      /* Seach the list for a sigaction on this signal */
+      /* Search the list for a sigaction on this signal */
 
       for (sigact = (FAR sigactq_t *)group->tg_sigactionq.head;
            ((sigact) && (sigact->signo != signo));

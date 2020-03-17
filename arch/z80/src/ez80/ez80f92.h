@@ -25,7 +25,7 @@
  * Included Files
  ************************************************************************************/
 
-#include "ez80f91_emac.h"
+#include "nuttx/config.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -33,11 +33,19 @@
 
 /* Memory map ***********************************************************************/
 
-#define EZ80_ONCHIPFLASH       0x000000 /* CS0: 128Kb of on-chip flash */
+#define EZ80_ONCHIPFLASH       0x000000 /* CS0: 64-128Kb of on-chip flash */
 #define EZ80_OFFCHIPCS0        0x400000 /* CS0: Off chip use (usually flash) */
 #define EZ80_OFFCHIPCS2        0x800000 /* CS2: Off chip use (e.g. memory mapped I/O) */
 #define EZ80_OFFCHIPCS1        0xc00000 /* CS1: Off chip use (usually SRAM) */
-#define EZ80_ONCHIPSRAM        0xffe000 /* On-chip SRAM (8Kb) on reset */
+#define EZ80_ONCHIPSRAM        0xffe000 /* On-chip SRAM (4-8Kb) on reset */
+
+#if defined(CONFIG_ARCH_CHIP_EZ80L92)
+#  define EZ80_FLASH_SIZE      0x020000 /* 128Kb on-chip flash */
+#  define EZ80_SRAM_SIZE       0x002000 /* 8Kb on-chip sram */
+#elif defined(CONFIG_ARCH_CHIP_EZ80L93)
+#  define EZ80_FLASH_SIZE      0x010000 /* 64Kb on-chip flash */
+#  define EZ80_SRAM_SIZE       0x001000 /* 4Kb on-chip sram */
+#endif
 
 /* Product ID Registers  ************************************************************/
 
@@ -93,9 +101,9 @@
 #define EZ80_TMRCTL_TIMCONT    0x10        /* Bit 4: Continuous mode */
 #define EZ80_TMRCTL_CLKDIV     0x18        /* Bits 2-3: Timer input clock divider */
 #  define EZ80_TMRCLKDIV_4     0x00        /*   00:   4 */
-#  define EZ80_TMRCLKDIV_16    0x08        /*   01:  16 */
-#  define EZ80_TMRCLKDIV_64    0x10        /*   10:  64 */
-#  define EZ80_TMRCLKDIV_256   0x18        /*   11: 256 */
+#  define EZ80_TMRCLKDIV_16    0x04        /*   01:  16 */
+#  define EZ80_TMRCLKDIV_64    0x08        /*   10:  64 */
+#  define EZ80_TMRCLKDIV_256   0x0c        /*   11: 256 */
 #define EZ80_TMRCTL_RSTEN      0x02        /* Bit 1: Reload and start function enabled */
 #define EZ80_TMRCTL_TIMEN      0x01        /* Bit 0: Programmable reload timer enabled */
 
@@ -158,6 +166,7 @@
 #define EZ80_IR_CTL            0xbf        /* Infrared Encoder/Decoder Control */
 
 /* UART Register Offsets ************************************************************/
+
                                            /* DLAB=0: */
 #define EZ80_UART_THR          0x00        /*    W: UART Transmit holding register */
 #define EZ80_UART_RBR          0x00        /*   R : UART Receive buffer register */
@@ -214,8 +223,8 @@
 #  define EZ80_UARTTRIG_8      0x80         /*   10: Receive FIFO trigger level=8 */
 #  define EZ80_UARTTRIG_14     0xc0         /*   11: Receive FIFO trigger level=14 */
                                             /* Bit 3-5: Reserved */
-#define EZ80_UARTFCTL_CLRTxF   0x04         /* Bit 2: Transmit enable */
-#define EZ80_UARTFCTL_CLRRxF   0x02         /* Bit 1: Receive enable */
+#define EZ80_UARTFCTL_CLRTXF   0x04         /* Bit 2: Transmit enable */
+#define EZ80_UARTFCTL_CLRRXF   0x02         /* Bit 1: Receive enable */
 #define EZ80_UARTFCTL_FIFOEN   0x01         /* Bit 0: Enable receive/transmit FIFOs */
 
 /* UART0/1 LCTL register bits *******************************************************/

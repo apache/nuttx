@@ -215,7 +215,7 @@
 #define SAM_FUSES_USBTRIM_MASK              (7 << SAM_FUSES_USBTRIM_SHIFT)
 #  define SAM_FUSES_USBTRIM(n)              ((uint32_t)(n) << SAM_FUSES_USBTRIM_SHIFT)
 
-/* NVM Software Callibration Area -- Temperature Calibration Parameters */
+/* NVM Software Calibration Area -- Temperature Calibration Parameters */
 
 #define SAM_FUSES_TLI_ADDR                  SAM_NVM_CALIBTEMP0
 #define SAM_FUSES_TLI_SHIFT                 (0)     /* Bits 0-7: Integer part temperature TL */
@@ -223,7 +223,7 @@
 #  define SAM_FUSES_TLI(n)                  ((uint32_t)(n) << SAM_FUSES_TLI_SHIFT)
 
 #define SAM_FUSES_TLD_ADDR                  SAM_NVM_CALIBTEMP0
-#define SAM_FUSES_TLD_SHIFT                 (8)     /* Bits 8-11: Fractional part temerature TL */
+#define SAM_FUSES_TLD_SHIFT                 (8)     /* Bits 8-11: Fractional part temperature TL */
 #define SAM_FUSES_TLD_MASK                  (15 << SAM_FUSES_TLD_SHIFT)
 #  define SAM_FUSES_TLD(n)                  ((uint32_t)(n) << SAM_FUSES_TLD_SHIFT)
 

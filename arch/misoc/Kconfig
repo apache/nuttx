@@ -57,14 +57,14 @@ config MISOC_UART
 	bool
 
 config MISOC_UART_RX_BUF_SIZE
-	int "UART RX Bufer size"
+	int "UART RX Buffer size"
 	default 64
 	depends on MISOC_UART
 	---help---
 		Size of RX buffers for MISOC UARTs
 
 config MISOC_UART_TX_BUF_SIZE
-	int "UART TX Bufer size"
+	int "UART TX Buffer size"
 	default 64
 	depends on MISOC_UART
 	---help---

@@ -79,7 +79,7 @@ config CXD56_IMAGEPROC
 	default n
 	select CXD56_GE2D
 	---help---
-		Enable support for accelerated format convertor, rotation and so on.
+		Enable support for accelerated format converter, rotation and so on.
 		using the CXD5602 image processing accelerator.
 
 comment "LTE Options"

@@ -26,7 +26,7 @@
 
 #include <sys/types.h>
 #include <sys/mount.h>
-#include <syslog.h>
+#include <debug.h>
 
 #include "z20x.h"
 
@@ -58,7 +58,19 @@ int ez80_bringup(void)
   ret = mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      ferr("ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef HAVE_SPIFLASH
+  /* Initialize and register the W25 FLASH file system. */
+
+  ret = ez80_w25_initialize(CONFIG_Z20X_W25_MINOR);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to initialize W25 minor %d: %d\n", 0, ret);
+      return ret;
     }
 #endif
 
@@ -68,10 +80,11 @@ int ez80_bringup(void)
   ret = ez80_mmcsd_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize SD card: %d\n", ret);
+      mcerr("ERROR: Failed to initialize SD card: %d\n", ret);
+      return ret;
     }
 #endif
 
   UNUSED(ret);
-  return ret;
+  return OK;
 }

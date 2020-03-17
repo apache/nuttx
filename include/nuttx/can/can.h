@@ -215,7 +215,7 @@
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half CAN driver to the lower-half CAN driver via the co_ioctl()
- * method fo the CAN lower-half interface.  However, the lower-half driver
+ * method of the CAN lower-half interface.  However, the lower-half driver
  * must reserve a block of commands as follows in order prevent IOCTL
  * command numbers from overlapping.
  *
@@ -314,7 +314,7 @@
 #  define CAN_ERROR2_BIT1         (1 << 4) /* Bit 4: Unable to send recessive bit */
 #  define CAN_ERROR2_OVERLOAD     (1 << 5) /* Bit 5: Bus overload */
 #  define CAN_ERROR2_ACTIVE       (1 << 6) /* Bit 6: Active error announcement */
-#  define CAN_ERROR2_TX           (1 << 7) /* Bit 7: Error occured on transmission */
+#  define CAN_ERROR2_TX           (1 << 7) /* Bit 7: Error occurred on transmission */
 
 /* Data[3]:  Error in CAN protocol.  This provides the loation of the error. */
 
@@ -777,7 +777,7 @@ int can_txdone(FAR struct can_dev_s *dev);
  * Description:
  *   Called from the CAN interrupt handler at the completion of a send
  *   operation.  This interface is needed only for CAN hardware that
- *   supports queing of outgoing messages in a H/W FIFO.
+ *   supports queueing of outgoing messages in a H/W FIFO.
  *
  *   The CAN upper half driver also supports a queue of output messages in a
  *   S/W FIFO.  Messages are added to that queue when when can_write() is
@@ -799,7 +799,7 @@ int can_txdone(FAR struct can_dev_s *dev);
  *   another transfer.
  *
  *   If the CAN hardware supports a H/W FIFO, can_txdone() is not called
- *   when the tranfer is complete, but rather when the transfer is queued in
+ *   when the transfer is complete, but rather when the transfer is queued in
  *   the H/W FIFO.  When the H/W FIFO becomes full, then dev_txready() will
  *   report false and the number of queued messages in the S/W FIFO will grow.
  *

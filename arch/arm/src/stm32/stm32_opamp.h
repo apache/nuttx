@@ -69,7 +69,7 @@
 #define OPAMP_MUX_DISABLE 0
 #define OPAMP_MUX_ENABLE 1
 
-/* User callibration  */
+/* User calibration  */
 
 #define OPAMP_USERCAL_DISABLE 0
 #define OPAMP_USERCAL_ENABLE  1

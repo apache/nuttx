@@ -423,7 +423,7 @@ static char *dequote(char *ptr)
 {
   int len;
 
-  /* Check if there is a traiing quote */
+  /* Check if there is a trailing quote */
 
   len = strlen(ptr);
   if (ptr[len-1] == '"')
@@ -517,7 +517,7 @@ static int htmlize_character(char *dest, char ch)
  * Name: htmlize_text
  *
  * Description:
- *   HTML-ize a free-text string.  This function preforms the conversions of
+ *   HTML-ize a free-text string.  This function performs the conversions of
  *   in htmlize_character() for a text string.
  *
  ****************************************************************************/
@@ -542,7 +542,7 @@ static char *htmlize_text(const char *src)
     {
       /* Expand characters as necessary.  NOTE:  There is no check if the
        * HTML-expanded text overflows the g_scratch[] buffer.  If you see
-       * errors, be suspicous.
+       * errors, be suspicious.
        */
 
       dest += htmlize_character(dest, *src);
@@ -556,7 +556,7 @@ static char *htmlize_text(const char *src)
  *
  * Description:
  *   HTML-ize an expression of configuration variables.  This function
- *   preforms the same conversions as in htmlize_character(), but also
+ *   performs the same conversions as in htmlize_character(), but also
  *   expands and adds hyper links for configuration variables.
  *
  ****************************************************************************/
@@ -708,7 +708,7 @@ static char *read_line(FILE *stream)
           g_line[len] = '\0';
         }
 
-      /* Does this continue on the next line?  Note taht this check
+      /* Does this continue on the next line?  Note that this check
        * could erroneoulsy combine two lines if a comment line ends with
        * a line continuation... Don't do that!
        */
@@ -1544,7 +1544,7 @@ static void process_dependson(void)
  * Name: print_dependencies
  *
  * Description:
- *   Output the current stack of depenencies
+ *   Output the current stack of dependencies
  *
  ****************************************************************************/
 
@@ -2708,7 +2708,7 @@ int main(int argc, char **argv, char **envp)
   output("  These settings are presented out-of-context because they cannot be directly controlled by the user.\n");
   output("  Many of these settings are selected automatically and indirectly when other, visible configuration variables are selected.\n");
   output("  One purpose of these hidden configuration variables is to control menuing in the kconfig-frontends configuration tool.\n");
-  output("  Many configuration variables with a form like <code>CONFIG_ARCH_HAVE_</code><i>feature</i>, for example, are used only to indicate that the selected archicture supports <i>feature</i> and so addition selection associated with <i>feature</i> will become accessible to the user.\n");
+  output("  Many configuration variables with a form like <code>CONFIG_ARCH_HAVE_</code><i>feature</i>, for example, are used only to indicate that the selected architecture supports <i>feature</i> and so addition selection associated with <i>feature</i> will become accessible to the user.\n");
   output("</p>\n");
   output("<ul>\n");
 

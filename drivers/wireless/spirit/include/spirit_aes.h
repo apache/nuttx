@@ -154,7 +154,7 @@ int spirit_aes_write_datain(FAR struct spirit_library_s *spirit,
  * Name: spirit_aes_read_dataout
  *
  * Description:
- *   Returns the encrypted or decrypted data or the decription key from the
+ *   Returns the encrypted or decrypted data or the description key from the
  *   AES_DATA_OUT register.
  *
  * Input Parameters:

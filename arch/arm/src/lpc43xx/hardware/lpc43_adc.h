@@ -142,7 +142,7 @@
 /* A/D Interrupt Enable Register */
 
 #define ADC_INTEN_CHAN(n)        (1 << (n))
-#define ADC_INTEN_CHAN0          (1 << 0)  /* Bit 0:  Enable ADC chan 0 complete intterrupt */
+#define ADC_INTEN_CHAN0          (1 << 0)  /* Bit 0:  Enable ADC chan 0 complete interrupt */
 #define ADC_INTEN_CHAN1          (1 << 1)  /* Bit 1:  Enable ADC chan 1 complete interrupt */
 #define ADC_INTEN_CHAN2          (1 << 2)  /* Bit 2:  Enable ADC chan 2 complete interrupt */
 #define ADC_INTEN_CHAN3          (1 << 3)  /* Bit 3:  Enable ADC chan 3 complete interrupt */

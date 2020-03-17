@@ -506,7 +506,7 @@ void nxglib_cursor_erase_32bpp(FAR struct nxbe_state_s *be,
  * Name: nxgl_cursor_backup_*bpp
  *
  * Description:
- *   Save the backgroud image for subsequent use to erase the cursor from the
+ *   Save the background image for subsequent use to erase the cursor from the
  *   device graphics memory.
  *
  ****************************************************************************/

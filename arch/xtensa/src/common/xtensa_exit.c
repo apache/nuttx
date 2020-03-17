@@ -201,8 +201,8 @@ void _exit(int status)
 
   xtensa_context_restore(tcb->xcp.regs);
 
-  /* xtensa_full_context_restore() should not return but could if the software
-   * interrupts are disabled.
+  /* xtensa_full_context_restore() should not return but could if the
+   * software interrupts are disabled.
    */
 
   DEBUGPANIC();

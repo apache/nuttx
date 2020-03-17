@@ -86,9 +86,9 @@
  *    locked.
  * 2. Scheduling logic would set the bit associated with the cpu in
  *    'g_cpu_lockset' when the TCB at the head of the g_assignedtasks[cpu]
- *    list transitions has 'lockcount' > 0. This might happen when sched_lock()
- *    is called, or after a context switch that changes the TCB at the
- *    head of the g_assignedtasks[cpu] list.
+ *    list transitions has 'lockcount' > 0. This might happen when
+ *    sched_lock() is called, or after a context switch that changes the
+ *    TCB at the head of the g_assignedtasks[cpu] list.
  * 3. Similarly, the cpu bit in the global 'g_cpu_lockset' would be cleared
  *    when the TCB at the head of the g_assignedtasks[cpu] list has
  *    'lockcount' == 0. This might happen when sched_unlock() is called, or
@@ -160,14 +160,14 @@ int sched_lock(void)
 #endif
   int cpu;
 
-  /* The following operation is non-atomic unless CONFIG_ARCH_GLOBAL_IRQDISABLE
-   * or CONFIG_ARCH_HAVE_FETCHADD is defined.
+  /* The following operation is non-atomic unless
+   * CONFIG_ARCH_GLOBAL_IRQDISABLE or CONFIG_ARCH_HAVE_FETCHADD is defined.
    */
 
 #if defined(CONFIG_ARCH_GLOBAL_IRQDISABLE)
-  /* If the CPU supports suppression of interprocessor interrupts, then simple
-   * disabling interrupts will provide sufficient protection for the following
-   * operation.
+  /* If the CPU supports suppression of interprocessor interrupts, then
+   * simple disabling interrupts will provide sufficient protection for
+   * the following operation.
    */
 
   flags = up_irq_save();
@@ -211,8 +211,8 @@ int sched_lock(void)
       DEBUGASSERT(rtcb->lockcount < MAX_LOCK_COUNT);
 
       /* We must hold the lock on this CPU before we increment the lockcount
-       * for the first time. Holding the lock is sufficient to lockout context
-       * switching.
+       * for the first time. Holding the lock is sufficient to lockout
+       * context switching.
        */
 
       if (rtcb->lockcount == 0)

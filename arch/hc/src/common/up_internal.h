@@ -61,8 +61,13 @@
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
 #else
-#  define USE_SERIALDRIVER 1
-#  define USE_EARLYSERIALINIT 1
+#  if defined(CONFIG_CONSOLE_SYSLOG)
+#    undef  USE_SERIALDRIVER
+#    undef  USE_EARLYSERIALINIT
+#  else
+#    define USE_SERIALDRIVER 1
+#    define USE_EARLYSERIALINIT 1
+#  endif
 #endif
 
 /* If some other device is used as the console, then the serial driver may
@@ -147,13 +152,16 @@ void up_sigdeliver(void);
 
 /* Debug output */
 
+#ifdef USE_EARLYSERIALINIT
 void up_earlyserialinit(void);
+#endif
+
+#ifdef USE_SERIALDRIVER
 void up_serialinit(void);
+#endif
 
 #ifdef CONFIG_RPMSG_UART
 void rpmsg_serialinit(void);
-#else
-#  define rpmsg_serialinit()
 #endif
 
 void up_lowputc(char ch);

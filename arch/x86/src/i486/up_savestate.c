@@ -67,7 +67,7 @@
  * Description:
  *   This function saves the interrupt level context information in the
  *   TCB.  This would just be a up_copystate but we have to handle one
- *   special case.  In the case where the privilige level changes, the
+ *   special case.  In the case where the privilege level changes, the
  *   value of sp and ss will not be saved on stack by the interrupt handler.
  *   So, in that case, we will have to fudge those values here.
  *

@@ -27,6 +27,8 @@
 #include <stdbool.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/mm/mm.h>
 #include <arch/chip/io.h>
 
 #include "chip.h"
@@ -49,6 +51,12 @@
 
 void ez80_board_initialize(void)
 {
+#ifdef CONFIG_Z20X_PROGRAM
+  /* Recover memory used by the bootloader */
+
+  kmm_addregion((FAR void *)PROGSTART, PROGSIZE);
+#endif
+
 #ifdef CONFIG_EZ80_SPI
   /* Initialize SPI chip selects */
 

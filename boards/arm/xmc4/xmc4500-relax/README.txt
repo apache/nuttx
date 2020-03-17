@@ -26,7 +26,7 @@ Serial Console
     VDD3.3 -       Available on pins 37-38 of either connector X1 or X2
     VDD5   -       Available on pins 39-40 of either connector X1 or X2
 
-  A TTL to RS-232 convertor or a USB TTL-to-USB serial adaptor is required.
+  A TTL to RS-232 converter or a USB TTL-to-USB serial adaptor is required.
   The notion of what is TX and what is RX depends on your point of view.
   With the TTL to RS-232 converter, I connect pin 17 to the pin labeled
   TX on the converter and pin 16 to the RX pin on the converter.

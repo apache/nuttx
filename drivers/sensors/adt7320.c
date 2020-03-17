@@ -421,7 +421,7 @@ static ssize_t adt7320_write(FAR struct file *filep, FAR const char *buffer,
  * Name: adt7320_ioctl
  *
  * Description:
- *   Suppoted IOCTLs:
+ *   Supported IOCTLs:
  *
  *     SNIOC_READSTAT: Read the status register, treat arg as an
  *     uint8_t pointer.

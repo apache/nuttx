@@ -171,7 +171,7 @@ static size_t udp_recvfrom_newdata(FAR struct net_driver_s *dev,
  *   Copy the read data from the packet
  *
  * Input Parameters:
- *   dev      The sructure of the network driver that generated the event
+ *   dev      The structure of the network driver that generated the event
  *   pstate   recvfrom state structure
  *
  * Returned Value:
@@ -375,6 +375,7 @@ static inline void udp_sender(FAR struct net_driver_s *dev,
 
               net_ipv4addr_copy(infrom->sin_addr.s_addr,
                                 net_ip4addr_conv32(ipv4->srcipaddr));
+              memset(infrom->sin_zero, 0, sizeof(infrom->sin_zero));
             }
         }
     }

@@ -137,5 +137,5 @@ Configurations
       for builtin applications is enabled, but in the base configuration no
       builtin applications are selected.
 
-      NOTE:  This is a very minimal NSH configuration in order to recude
+      NOTE:  This is a very minimal NSH configuration in order to reduce
       memory usage.  Most of the NSH niceties are not available.

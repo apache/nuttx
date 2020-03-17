@@ -82,6 +82,6 @@ void lpc54_lcd_initialize(void)
 #ifdef CONFIG_LPC54_LCD_BACKLIGHT
 void lpc54_backlight(bool blon)
 {
-  lpc54_gpio_write(GPIO_LCD_BL, blon); /* Hight illuminates */
+  lpc54_gpio_write(GPIO_LCD_BL, blon); /* High illuminates */
 }
 #endif

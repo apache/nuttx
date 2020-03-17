@@ -3571,7 +3571,7 @@ choice
 config SAMA5_ADC_SWTRIG
 	bool "Software trigger"
 	---help---
-		A-to-D Conversion is initiated only by sofware via an ioctl()
+		A-to-D Conversion is initiated only by software via an ioctl()
 
 config SAMA5_ADC_ADTRG
 	bool "External trigger via the ADTRG pin"

@@ -294,7 +294,7 @@
 
 /* Page Management **********************************************************/
 
-/* For page managment purposes, the following summarize the "heap" of
+/* For page management purposes, the following summarize the "heap" of
  * free pages, operations on free pages and the L2 page table.
  *
  * PG_POOL_VA2L1OFFSET(va)  - Given a virtual address, return the L1 table

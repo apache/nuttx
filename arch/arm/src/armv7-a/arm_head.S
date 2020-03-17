@@ -309,7 +309,7 @@ __start:
 
 	adr		r0, .LCraminfo			/* Address of primary RAM info */
 	ldmia	r0, {r1, r2, r3, r4}	/* Load the primary RAM description */
-	add		r2, r5, r2, lsr #18		/* R2=Offset page table addres */
+	add		r2, r5, r2, lsr #18		/* R2=Offset page table address */
 
 	/* Loop until each page table entry has been written for the primary RAM
 	 * region.
@@ -694,7 +694,7 @@ arm_data_initialize:
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 	/* If the .data section is in a separate, uninitialized address space,
-	 * then we will also need to copy the initial values of of the .data
+	 * then we will also need to copy the initial values of the .data
 	 * section from the .text region into that .data region.  This would
 	 * be the case if we are executing from FLASH and the .data section
 	 * lies in a different physical address region OR if we are support

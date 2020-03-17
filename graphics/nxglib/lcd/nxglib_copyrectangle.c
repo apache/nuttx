@@ -74,7 +74,7 @@ void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
   unsigned int remainder;
 #endif
 
-  /* Get the dimensions of the rectange to fill: width in pixels,
+  /* Get the dimensions of the rectangle to fill: width in pixels,
    * height in rows
    */
 

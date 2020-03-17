@@ -80,7 +80,7 @@
 #define PCF85263_I2C_ADDRESS 0x51
 
 /************************************************************************************
- * Priviate Types
+ * Private Types
  ************************************************************************************/
 
 /* This structure describes the state of the PCF85263 chip.  Only a single RTC is

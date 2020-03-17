@@ -348,7 +348,7 @@
 #endif
 
 /* Number of channels per ADC:
- *   - F0, L0             - 19, but singe SMP for all channels
+ *   - F0, L0             - 19, but single SMP for all channels
  *   - F1                 - 18
  *   - F2,F3,F4,F7,L4,L4+ - 19
  *   - H7                 - 20
@@ -1387,7 +1387,7 @@ static int adc_timinit(FAR struct stm32_dev_s *priv)
 
   /* Configure the timer channel to drive the ADC */
 
-  /* Caculate optimal values for the timer prescaler and for the timer
+  /* Calculate optimal values for the timer prescaler and for the timer
    * reload register.  If freq is the desired frequency, then
    *
    *   reload = timclk / freq
@@ -2745,7 +2745,7 @@ static void adc_configure(FAR struct adc_dev_s *dev)
 
   adc_voltreg_cfg(priv);
 
-  /* Calibrate ADC - doesnt work for now */
+  /* Calibrate ADC - doesn't work for now */
 
   adc_calibrate(priv);
 

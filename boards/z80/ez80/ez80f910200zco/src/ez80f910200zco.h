@@ -115,7 +115,7 @@
  *   The Data Terminal Ready (DTR) signal at D3 informs the modem that the PC
  *   is ready.
  * TX:
- *   The TX signal at D4 indicates that data is tranmitted to the modem.
+ *   The TX signal at D4 indicates that data is transmitted to the modem.
  */
 
 /* Push buttons:

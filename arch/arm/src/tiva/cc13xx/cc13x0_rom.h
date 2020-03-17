@@ -530,7 +530,7 @@
     ROM_API_UART_TABLE[0])
 
 #define rom_uart_set_expclk \
-    ((void (*)(uint32_t base, uint32_t uartclk, uint32_t buad, uint32_t config)) \
+    ((void (*)(uint32_t base, uint32_t uartclk, uint32_t baud, uint32_t config)) \
     ROM_API_UART_TABLE[1])
 
 #define rom_uart_get_expclk \

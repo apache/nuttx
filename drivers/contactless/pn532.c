@@ -413,7 +413,7 @@ int pn532_read_more(FAR struct pn532_dev_s *dev, FAR uint8_t *buff, uint8_t n)
  * Name: pn532_read_ack
  *
  * Description:
- *   Read Ack responce from device
+ *   Read Ack response from device
  *
  * Input Parameters:
  *   dev
@@ -542,7 +542,7 @@ bool pn532_set_config(FAR struct pn532_dev_s *dev, uint8_t flags)
   if (pn532_write_frame(dev, f) == OK)
     {
       pn532_read(dev, (uint8_t *) &resp, 9);
-      tracerx("set config responce", resp, 9);
+      tracerx("set config response", resp, 9);
       res = true;
     }
 

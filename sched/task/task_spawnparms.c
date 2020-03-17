@@ -333,15 +333,18 @@ int spawn_proxyattrs(FAR const posix_spawnattr_t *attr,
           switch (entry->action)
             {
               case SPAWN_FILE_ACTION_CLOSE:
-                ret = nxspawn_close((FAR struct spawn_close_file_action_s *)entry);
+                ret = nxspawn_close((FAR struct spawn_close_file_action_s *)
+                                    entry);
                 break;
 
               case SPAWN_FILE_ACTION_DUP2:
-                ret = nxspawn_dup2((FAR struct spawn_dup2_file_action_s *)entry);
+                ret = nxspawn_dup2((FAR struct spawn_dup2_file_action_s *)
+                                   entry);
                 break;
 
               case SPAWN_FILE_ACTION_OPEN:
-                ret = nxspawn_open((FAR struct spawn_open_file_action_s *)entry);
+                ret = nxspawn_open((FAR struct spawn_open_file_action_s *)
+                                   entry);
                 break;
 
               case SPAWN_FILE_ACTION_NONE:

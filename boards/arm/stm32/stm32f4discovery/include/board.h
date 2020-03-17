@@ -408,7 +408,7 @@
                            GPIO_PORTC | GPIO_PIN1)
 #endif
 
-/* DMA Channl/Stream Selections *****************************************************/
+/* DMA Channel/Stream Selections ****************************************************/
 
 /* Stream selections are arbitrary for now but might become important in the future
  * if we set aside more DMA channels/streams.

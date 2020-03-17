@@ -153,7 +153,7 @@
 #  define XK_Zen_Koho                    0xff3d  /* Multiple/All Candidate(s) */
 #  define XK_Mae_Koho                    0xff3e  /* Previous Candidate */
 
-/* 0xff31 thru 0xff3f are under XK_KOREAN */
+/* 0xff31 through 0xff3f are under XK_KOREAN */
 
 /* Cursor control & motion */
 
@@ -227,7 +227,7 @@
 #  define XK_KP_8                        0xffb8
 #  define XK_KP_9                        0xffb9
 
-/* Auxilliary functions; note the duplicate definitions for left and right
+/* Auxiliary functions; note the duplicate definitions for left and right
  * function keys;  Sun keyboards and a few other manufactures have such
  * function key groups on the left and/or right sides of the keyboard.
  * We've not found a keyboard with more than 35 function keys total.

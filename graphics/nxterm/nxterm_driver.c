@@ -139,7 +139,7 @@ static int nxterm_open(FAR struct file *filep)
 #endif
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  /* Increment the count of open file references */
+  /* Increment the count of open file reference */
 
   DEBUGASSERT(priv->orefs != UINT8_MAX);
   priv->orefs++;
@@ -174,7 +174,7 @@ static int nxterm_close(FAR struct file *filep)
       return ret;
     }
 
-  /* Has the driver been unlinked?  Was this the last open refernce to the
+  /* Has the driver been unlinked?  Was this the last open references to the
    * terminal driver?
    */
 
@@ -319,7 +319,7 @@ static int nxterm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   /* NOTE:  We don't need driver context here because the NXTERM handle
    * provided within each of the NXTERM IOCTL command data.  Mutual
-   * exclusion is similar managed by the IOCTL cmmand hendler.
+   * exclusion is similar managed by the IOCTL cmmand handler.
    *
    * This permits the IOCTL to be called in abnormal context (such as
    * from boardctl())
@@ -383,7 +383,7 @@ static int nxterm_unlink(FAR struct inode *inode)
  *
  * NOTE:  We don't need driver context here because the NXTERM handle
  * provided within each of the NXTERM IOCTL command data.  Mutual
- * exclusion is similar managed by the IOCTL cmmand hendler.
+ * exclusion is similar managed by the IOCTL cmmand handler.
  *
  * This permits the IOCTL to be called in abnormal context (such as
  * from boardctl())

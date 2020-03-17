@@ -90,7 +90,7 @@ struct lc823450_mtd_dev_s
 
   /* Other implementation specific data may follow here */
 
-  sem_t sem;            /* Assures mutually exclusive accesss to the slot */
+  sem_t sem;            /* Assures mutually exclusive access to the slot */
   uint32_t nblocks;     /* Number of blocks */
   uint32_t blocksize;   /* Size of one read/write blocks */
   uint32_t channel;     /* 0: eMMC, 1: SDC */

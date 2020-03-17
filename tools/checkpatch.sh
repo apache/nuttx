@@ -20,18 +20,23 @@ TOOLDIR=$(dirname $0)
 
 fail=0
 range=0
+spell=0
 
 usage() {
   echo "USAGE: ${0} [options] [list|-]"
   echo ""
   echo "Options:"
   echo "-h"
-  echo "-r range check only (used with -p and -c)"
-  echo "-p <patch list> (default)"
-  echo "-c <commit list>"
+  echo "-c spell check with codespell(install with: pip install codespell)"
+  echo "-r range check only (coupled with -p or -g)"
+  echo "-p <patch file names> (default)"
+  echo "-g <commit list>"
   echo "-f <file list>"
   echo "-  read standard input mainly used by git pre-commit hook as below:"
   echo "   git diff --cached | ./tools/checkpatch.sh -"
+  echo "Where a <commit list> is any syntax supported by git for specifying git revision, see GITREVISIONS(7)"
+  echo "Where a <patch file names> is a space separated list of patch file names or wildcard. or *.patch"
+ 
 }
 
 check_file() {
@@ -39,6 +44,14 @@ check_file() {
   ret=$?
   if [ $ret != 0 ]; then
     fail=$ret
+  fi
+
+  if [ $spell != 0 ]; then
+    codespell -q 7 ${@: -1}
+    ret=$?
+    if [ $ret != 0 ]; then
+      fail=$ret
+    fi
   fi
 }
 
@@ -98,6 +111,9 @@ while [ ! -z "$1" ]; do
     usage
     exit 0
     ;;
+  -c )
+    spell=1
+    ;;
   -r )
     range=1
     ;;
@@ -106,7 +122,7 @@ while [ ! -z "$1" ]; do
     patches=$@
     break
     ;;
-  -c )
+  -g )
     shift
     commits=$@
     break

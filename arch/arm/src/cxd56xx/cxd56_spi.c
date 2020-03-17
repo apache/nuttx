@@ -82,7 +82,7 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure descibes the state of the SPI driver */
+/* This structure describes the state of the SPI driver */
 
 struct cxd56_spidev_s
 {
@@ -117,8 +117,8 @@ struct cxd56_spidev_s
 
 static inline uint32_t spi_getreg(FAR struct cxd56_spidev_s *priv,
                                   uint8_t offset);
-static inline void spi_putreg(FAR struct cxd56_spidev_s *priv, uint8_t offset,
-                              uint32_t value);
+static inline void spi_putreg(FAR struct cxd56_spidev_s *priv,
+                              uint8_t offset, uint32_t value);
 
 /* DMA support */
 
@@ -136,8 +136,8 @@ static void spi_dmatxsetup(FAR struct cxd56_spidev_s *priv,
 static void spi_dmarxsetup(FAR struct cxd56_spidev_s *priv,
                            FAR const void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
-static void spi_dmasndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
-                            size_t nwords);
+static void spi_dmasndblock(FAR struct spi_dev_s *dev,
+                            FAR const void *buffer, size_t nwords);
 #endif
 #endif
 
@@ -148,7 +148,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
                                  uint32_t frequency);
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 static void __unused spi_exchange(FAR struct spi_dev_s *dev,
                                   FAR const void *txbuffer,
                                   FAR void *rxbuffer,
@@ -389,8 +389,8 @@ static inline uint32_t spi_getreg(FAR struct cxd56_spidev_s *priv,
  *
  ****************************************************************************/
 
-static inline void spi_putreg(FAR struct cxd56_spidev_s *priv, uint8_t offset,
-                              uint32_t value)
+static inline void spi_putreg(FAR struct cxd56_spidev_s *priv,
+                              uint8_t offset, uint32_t value)
 {
   putreg32(value, priv->spibase + (uint32_t)offset);
 }
@@ -399,12 +399,12 @@ static inline void spi_putreg(FAR struct cxd56_spidev_s *priv, uint8_t offset,
  * Name: spi_lock
  *
  * Description:
- *   On SPI busses where there are multiple devices, it will be necessary to
- *   lock SPI to have exclusive access to the busses for a sequence of
+ *   On SPI buses where there are multiple devices, it will be necessary to
+ *   lock SPI to have exclusive access to the buses for a sequence of
  *   transfers.  The bus should be locked before the chip is selected. After
  *   locking the SPI bus, the caller should then also call the setfrequency,
  *   setbits, and setmode methods to make sure that the SPI is properly
- *   configured for the device.  If the SPI buss is being shared, then it
+ *   configured for the device.  If the SPI bus is being shared, then it
  *   may have been left in an incompatible state.
  *
  * Input Parameters:
@@ -654,7 +654,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ****************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   FAR struct cxd56_spidev_s *priv = (FAR struct cxd56_spidev_s *)dev;
   register uint32_t regval;
@@ -678,7 +678,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   /* Write the byte to the TX FIFO */
 
-  spi_putreg(priv, CXD56_SPI_DR_OFFSET, (uint32_t)wd);
+  spi_putreg(priv, CXD56_SPI_DR_OFFSET, wd);
 
   /* Wait for the RX FIFO not empty */
 
@@ -700,7 +700,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   cxd56_spi_clock_gate_enable(priv->port);
 
-  return (uint16_t)regval;
+  return regval;
 }
 
 /****************************************************************************
@@ -724,8 +724,9 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *
  ****************************************************************************/
 
-static void spi_do_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                            FAR void *rxbuffer, size_t nwords)
+static void spi_do_exchange(FAR struct spi_dev_s *dev,
+                            FAR const void *txbuffer, FAR void *rxbuffer,
+                            size_t nwords)
 {
   FAR struct cxd56_spidev_s *priv = (FAR struct cxd56_spidev_s *)dev;
   uint32_t regval                 = 0;
@@ -793,7 +794,8 @@ static void spi_do_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
           rxpending++;
         }
 
-      /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty
+      /* Now, read the RX data from the RX FIFO
+       * while the RX FIFO is not empty
        */
 
       spiinfo("RX: rxpending: %d\n", rxpending);
@@ -1495,8 +1497,8 @@ static void spi_dmaexchange(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static void spi_dmasndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
-                            size_t nwords)
+static void spi_dmasndblock(FAR struct spi_dev_s *dev,
+                            FAR const void *buffer, size_t nwords)
 {
   spi_dmaexchange(dev, buffer, NULL, nwords);
 }
@@ -1510,8 +1512,7 @@ static void spi_dmasndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
  ****************************************************************************/
 
 static void spi_dmarecvblock(FAR struct spi_dev_s *dev,
-                             FAR const void *buffer,
-                             size_t nwords)
+                             FAR const void *buffer, size_t nwords)
 {
   spi_dmaexchange(dev, NULL, buffer, nwords);
 }

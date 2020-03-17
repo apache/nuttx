@@ -98,7 +98,8 @@ static void    ads1242_set_negative_input(FAR struct ads1242_dev_s *dev,
 static bool    ads1242_is_data_ready(FAR struct ads1242_dev_s *dev);
 
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_INFO)
-static void    ads1242_print_regs(FAR struct ads1242_dev_s *dev, char const *msg);
+static void    ads1242_print_regs(FAR struct ads1242_dev_s *dev,
+                 char const *msg);
 #endif /* CONFIG_DEBUG_FEATURES && CONFIG_DEBUG_INFO */
 
 /* Character driver methods */
@@ -183,7 +184,8 @@ static void ads1242_reset(FAR struct ads1242_dev_s *dev)
  * Name: ads1242_perform_selfgain_calibration
  ****************************************************************************/
 
-static void ads1242_perform_selfgain_calibration(FAR struct ads1242_dev_s *dev)
+static void ads1242_perform_selfgain_calibration(FAR struct ads1242_dev_s
+              *dev)
 {
   ads1242_lock(dev->spi);
 
@@ -198,7 +200,8 @@ static void ads1242_perform_selfgain_calibration(FAR struct ads1242_dev_s *dev)
  * Name: ads1242_perform_selfoffset_calibration
  ****************************************************************************/
 
-static void ads1242_perform_selfoffset_calibration(FAR struct ads1242_dev_s *dev)
+static void ads1242_perform_selfoffset_calibration(FAR struct ads1242_dev_s
+              *dev)
 {
   ads1242_lock(dev->spi);
 
@@ -270,7 +273,8 @@ static void ads1242_read_conversion_result(FAR struct ads1242_dev_s *dev,
  ****************************************************************************/
 
 static void ads1242_write_reg(FAR struct ads1242_dev_s *dev,
-                              uint8_t const reg_addr, uint8_t const reg_value)
+                              uint8_t const reg_addr,
+                              uint8_t const reg_value)
 {
   ads1242_lock(dev->spi);
 
@@ -345,9 +349,8 @@ static void ads1242_set_gain(FAR struct ads1242_dev_s *dev,
  * Name: ads1242_set_positive_input
  ****************************************************************************/
 
-static void
-  ads1242_set_positive_input(FAR struct ads1242_dev_s *dev,
-                             ADS1242_POSITIVE_INPUT_SELECTION const pos_in_sel)
+static void ads1242_set_positive_input(FAR struct ads1242_dev_s *dev,
+              ADS1242_POSITIVE_INPUT_SELECTION const pos_in_sel)
 {
   uint8_t mux_reg_value = 0;
 
@@ -366,9 +369,8 @@ static void
  * Name: ads1242_set_negative_input
  ****************************************************************************/
 
-static void
-  ads1242_set_negative_input(FAR struct ads1242_dev_s *dev,
-                             ADS1242_NEGATIVE_INPUT_SELECTION const neg_in_sel)
+static void ads1242_set_negative_input(FAR struct ads1242_dev_s *dev,
+              ADS1242_NEGATIVE_INPUT_SELECTION const neg_in_sel)
 {
   uint8_t mux_reg_value = 0;
 
@@ -392,7 +394,7 @@ static bool ads1242_is_data_ready(FAR struct ads1242_dev_s *dev)
   uint8_t acr_reg_value = 0xff;
 
   ads1242_read_reg(dev, ADS1242_REG_ACR, &acr_reg_value);
-  return (acr_reg_value & ADS1242_REG_ACR_BIT_nDRDY) == 0;
+  return (acr_reg_value & ADS1242_REG_ACR_BIT_NDRDY) == 0;
 }
 
 /****************************************************************************
@@ -400,7 +402,8 @@ static bool ads1242_is_data_ready(FAR struct ads1242_dev_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_INFO)
-static void ads1242_print_regs(FAR struct ads1242_dev_s *dev, char const *msg)
+static void ads1242_print_regs(FAR struct ads1242_dev_s *dev,
+                               char const *msg)
 {
   uint8_t setup_reg_value = 0;
   uint8_t mux_reg_value   = 0;
@@ -576,9 +579,11 @@ static int ads1242_ioctl (FAR struct file *filep, int cmd, unsigned long arg)
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/ads1242"
- *   spi - An instance of the SPI interface to use to communicate with ADS1242
- *   osc_freq_hz - The frequency of the ADS1242 oscillator in Hz. Required for
- *   calculating the minimum delay periods when accessing the device via SPI.
+ *   spi - An instance of the SPI interface to use to communicate with
+ *         ADS1242
+ *   osc_freq_hz - The frequency of the ADS1242 oscillator in Hz. Required
+ *                 for calculating the minimum delay periods when accessing
+ *                 the device via SPI.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
@@ -597,7 +602,8 @@ int ads1242_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Initialize the ADS1242 device structure */
 
-  priv = (FAR struct ads1242_dev_s *)kmm_malloc(sizeof(struct ads1242_dev_s));
+  priv =
+    (FAR struct ads1242_dev_s *)kmm_malloc(sizeof(struct ads1242_dev_s));
   if (priv == NULL)
     {
        _err("ERROR: Failed to allocate instance\n");

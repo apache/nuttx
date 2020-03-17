@@ -462,7 +462,7 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload);
  *
  * Description:
  *   Configure to use a oneshot timer as described in
- *   include/nuttx/timers/oneshot.h to provid external clocking to assess
+ *   include/nuttx/timers/oneshot.h to provide external clocking to assess
  *   the CPU load.
  *
  * Input Parameters:

@@ -8738,7 +8738,7 @@ config STM32_HCIUART_RXDMAPRIO
 	default 0x00010000 if !STM32_STM32F10XX
 	depends on STM32_HCIUART_RXDMA
 	---help---
-		Select HCI UART DMA prority.
+		Select HCI UART DMA priority.
 
 		For STM32 F1 family, options are: 0x00000000 low, 0x00001000 medium,
 		0x00002000 high, 0x00003000 very high.  Default: medium.
@@ -8758,7 +8758,7 @@ config STM32_HCIUART_SW_RXFLOW
 		If HCI UART DMA is enabled, this is probably the better selection
 		as well. In that case, the Rx DMA buffer will avoid Rx overrun due
 		to short, bursty activity.  Software RTS management will probably
-		result in overall better throughput and shoudl still avoid Rx data
+		result in overall better throughput and should still avoid Rx data
 		overrun conditions.
 
 config STM32_HCIUART_UPPER_WATERMARK
@@ -8820,12 +8820,35 @@ config STM32_SPI1_DMA
 	---help---
 		Use DMA to improve SPI1 transfer performance.
 
+config STM32_SPI1_DMA_BUFFER
+	int "SPI1 DMA buffer size"
+	default 0
+	depends on STM32_SPI1_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI1.
+
+config STM32_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on STM32_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
 config STM32_SPI2_DMA
 	bool "SPI2 DMA"
 	default n
 	depends on STM32_SPI2 && STM32_SPI_DMA
 	---help---
 		Use DMA to improve SPI2 transfer performance.
+
+config STM32_SPI2_DMA_BUFFER
+	int "SPI2 DMA buffer size"
+	default 0
+	depends on STM32_SPI2_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI2.
 
 config STM32_SPI3_DMA
 	bool "SPI3 DMA"
@@ -8834,12 +8857,26 @@ config STM32_SPI3_DMA
 	---help---
 		Use DMA to improve SPI3 transfer performance.
 
+config STM32_SPI3_DMA_BUFFER
+	int "SPI3 DMA buffer size"
+	default 0
+	depends on STM32_SPI3_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI3.
+
 config STM32_SPI4_DMA
 	bool "SPI4 DMA"
 	default n
 	depends on STM32_SPI4 && STM32_SPI_DMA
 	---help---
 		Use DMA to improve SPI4 transfer performance.
+
+config STM32_SPI4_DMA_BUFFER
+	int "SPI4 DMA buffer size"
+	default 0
+	depends on STM32_SPI4_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI4.
 
 config STM32_SPI5_DMA
 	bool "SPI5 DMA"
@@ -8848,12 +8885,26 @@ config STM32_SPI5_DMA
 	---help---
 		Use DMA to improve SPI5 transfer performance.
 
+config STM32_SPI5_DMA_BUFFER
+	int "SPI5 DMA buffer size"
+	default 0
+	depends on STM32_SPI5_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI5.
+
 config STM32_SPI6_DMA
 	bool "SPI6 DMA"
 	default n
 	depends on STM32_SPI6 && STM32_SPI_DMA
 	---help---
 		Use DMA to improve SPI6 transfer performance.
+
+config STM32_SPI5_DMA_BUFFER
+	int "SPI5 DMA buffer size"
+	default 0
+	depends on STM32_SPI5_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI6.
 
 endmenu # SPI Configuration
 
@@ -9011,7 +9062,7 @@ config STM32_SDIO_DMAPRIO
 	default 0x00001000 if STM32_STM32F10XX
 	default 0x00010000 if !STM32_STM32F10XX
 	---help---
-		Select SDIO DMA prority.
+		Select SDIO DMA priority.
 
 		For STM32 F1 family, options are: 0x00000000 low, 0x00001000 medium,
 		0x00002000 high, 0x00003000 very high.  Default: medium.

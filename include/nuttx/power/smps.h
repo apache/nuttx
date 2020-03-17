@@ -182,7 +182,7 @@ struct smps_params_s
   float p_out;                        /*  */
 };
 
-/* SMPS private data strucutre  */
+/* SMPS private data structure  */
 
 struct smps_s
 {
@@ -226,7 +226,7 @@ struct smps_ops_s
 
   CODE int (*mode_set)(FAR struct smps_dev_s *dev, uint8_t mode);
 
-  /* Set SMPS limts */
+  /* Set SMPS limits */
 
   CODE int (*limits_set)(FAR struct smps_dev_s *dev,
                          FAR struct smps_limits_s *limits);

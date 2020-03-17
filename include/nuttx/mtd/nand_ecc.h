@@ -6,7 +6,7 @@
  *
  * This logic was based largely on Atmel sample code with modifications for
  * better integration with NuttX.  The Atmel sample code has a BSD
- * compatibile license that requires this copyright notice:
+ * compatible license that requires this copyright notice:
  *
  *   Copyright (c) 2012, Atmel Corporation
  *
@@ -115,7 +115,7 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
  *   nand  - Upper-half, NAND FLASH interface
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
- *   data  - Buffer containing the data to be writting
+ *   data  - Buffer containing the data to be writing
  *   spare - Buffer containing the spare data to be written.
  *
  * Returned Value:

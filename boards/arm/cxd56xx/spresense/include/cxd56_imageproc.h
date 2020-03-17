@@ -43,7 +43,7 @@ extern "C"
 #endif
 
 /* Structure of rectangle coordinates from left top point to
- * right buttom point.
+ * right bottom point.
  */
 
   struct imageproc_rect_s

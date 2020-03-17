@@ -209,7 +209,7 @@ unsigned int neighbor_snapshot(FAR struct neighbor_entry_s *snapshot,
  * Name: neighbor_dumpentry
  *
  * Description:
- *   Dump the conents of an entry Neighbor Table.
+ *   Dump the contents of an entry Neighbor Table.
  *
  * Input Parameters:
  *   msg      - Message to print with the entry

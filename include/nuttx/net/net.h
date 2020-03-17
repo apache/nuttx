@@ -67,7 +67,7 @@
  *
  * This is only important when compiling libraries (libc or libnx) that are
  * used both by the OS (libkc.a and libknx.a) or by the applications
- * (libuc.a and libunx.a).  The that case, the correct interface must be
+ * (libuc.a and libunx.a).  In that case, the correct interface must be
  * used for the build context.
  *
  * REVISIT:  In the flat build, the same functions must be used both by
@@ -108,6 +108,32 @@
 
 #define SOCKCAP_NONBLOCKING (1 << 0)  /* Bit 0: Socket supports non-blocking
                                        *        operation. */
+
+/* Definitions of 8-bit socket flags */
+
+#define _SF_CLOEXEC         0x04  /* Bit 2: Close on execute */
+#define _SF_NONBLOCK        0x08  /* Bit 3: Don't block if no data (TCP/READ only) */
+#define _SF_LISTENING       0x10  /* Bit 4: SOCK_STREAM is listening */
+#define _SF_BOUND           0x20  /* Bit 5: SOCK_STREAM is bound to an address */
+                                  /* Bits 6-7: Connection state */
+#define _SF_CONNECTED       0x40  /* Bit 6: SOCK_STREAM/SOCK_DGRAM is connected */
+#define _SF_CLOSED          0x80  /* Bit 7: SOCK_STREAM was gracefully disconnected */
+
+/* Connection state encoding:
+ *
+ *  _SF_CONNECTED==1 && _SF_CLOSED==0 - the socket is connected
+ *  _SF_CONNECTED==0 && _SF_CLOSED==1 - the socket was gracefully disconnected
+ *  _SF_CONNECTED==0 && _SF_CLOSED==0 - the socket was rudely disconnected
+ */
+
+/* Macro to manage the socket state and flags */
+
+#define _SS_ISCLOEXEC(s)    (((s) & _SF_CLOEXEC)   != 0)
+#define _SS_ISNONBLOCK(s)   (((s) & _SF_NONBLOCK)  != 0)
+#define _SS_ISLISTENING(s)  (((s) & _SF_LISTENING) != 0)
+#define _SS_ISBOUND(s)      (((s) & _SF_BOUND)     != 0)
+#define _SS_ISCONNECTED(s)  (((s) & _SF_CONNECTED) != 0)
+#define _SS_ISCLOSED(s)     (((s) & _SF_CLOSED)    != 0)
 
 /****************************************************************************
  * Public Types
@@ -1312,7 +1338,7 @@ int net_poll(int sockfd, struct pollfd *fds, bool setup);
  * Name: psock_dup
  *
  * Description:
- *   Clone a socket descriptor to an arbitray descriptor number.  If file
+ *   Clone a socket descriptor to an arbitrary descriptor number.  If file
  *   descriptors are implemented, then this is called by dup() for the case
  *   of socket file descriptors.  If file descriptors are not implemented,
  *   then this function IS dup().
@@ -1329,7 +1355,7 @@ int psock_dup(FAR struct socket *psock, int minsd);
  * Name: net_dup
  *
  * Description:
- *   Clone a socket descriptor to an arbitray descriptor number.  If file
+ *   Clone a socket descriptor to an arbitrary descriptor number.  If file
  *   descriptors are implemented, then this is called by dup() for the case
  *   of socket file descriptors.  If file descriptors are not implemented,
  *   then this function IS dup().
@@ -1356,7 +1382,7 @@ int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2);
  * Name: net_dup2
  *
  * Description:
- *   Clone a socket descriptor to an arbitray descriptor number.  If file
+ *   Clone a socket descriptor to an arbitrary descriptor number.  If file
  *   descriptors are implemented, then this is called by dup2() for the case
  *   of socket file descriptors.  If file descriptors are not implemented,
  *   then this function IS dup2().

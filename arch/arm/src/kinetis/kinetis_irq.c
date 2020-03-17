@@ -164,7 +164,7 @@ static void kinetis_dumpnvic(const char *msg, int irq)
  *       kinetis_dbgmonitor, kinetis_pendsv, kinetis_reserved
  *
  * Description:
- *   Handlers for various execptions.  None are handled and all are fatal
+ *   Handlers for various exceptions.  None are handled and all are fatal
  *   error conditions.  The only advantage these provided over the default
  *   unexpected interrupt handler is that they provide a diagnostic output.
  *
@@ -332,7 +332,7 @@ void up_irqinitialize(void)
   int nintlines;
   int i;
 
-  /* The NVIC ICTR register (bits 0-4) holds the number of of interrupt
+  /* The NVIC ICTR register (bits 0-4) holds the number of interrupt
    * lines that the NVIC supports, defined in groups of 32. That is,
    * the total number of interrupt lines is up to (32*(INTLINESNUM+1)).
    *

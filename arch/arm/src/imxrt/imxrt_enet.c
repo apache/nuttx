@@ -388,7 +388,7 @@ static void imxrt_reset(struct imxrt_driver_s *priv);
  *
  * Description:
  *   The descriptors are represented by structures  Unfortunately, when the
- *   structures are overlayed on the data, the bytes are reversed because
+ *   structures are overlaid on the data, the bytes are reversed because
  *   the underlying hardware writes the data in big-endian byte order.
  *
  * Input Parameters:
@@ -736,7 +736,7 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
 
   if (BUF->type == HTONS(ETHTYPE_IP6))
     {
-      ninfo("Iv6 frame\n");
+      ninfo("IPv6 frame\n");
       NETDEV_RXIPV6(&priv->dev);
 
       /* Give the IPv6 packet to the network layer */

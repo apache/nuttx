@@ -986,13 +986,13 @@ static int imxrt_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
   struct imxrt_enc_lowerhalf_s *priv = (struct imxrt_enc_lowerhalf_s *)lower;
   switch (cmd)
     {
-      /* QEIOC_POSDIFF: returns the contens of the Position Difference register */
+      /* QEIOC_POSDIFF: returns the content of the Position Difference register */
 
       case QEIOC_POSDIFF:
         *((uint16_t *)arg) = imxrt_enc_getreg16(priv, IMXRT_ENC_POSD_OFFSET);
         break;
 
-      /* QEIOC_REVOLUTION: returns the contens of the Position Difference register */
+      /* QEIOC_REVOLUTION: returns the content of the Position Difference register */
 
       case QEIOC_REVOLUTION:
         *((uint16_t *)arg) = imxrt_enc_getreg16(priv, IMXRT_ENC_REV_OFFSET);

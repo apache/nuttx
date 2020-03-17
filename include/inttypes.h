@@ -56,7 +56,7 @@
  ****************************************************************************/
 
 /* "The following macros shall be defined. Each expands to a character string
- *  literal containing a conversion specifier, possibly modified by a lengt
+ *  literal containing a conversion specifier, possibly modified by a length
  *  modifier, suitable for use within the format argument of a formatted
  *  input/output function when converting the corresponding integer type.
  *  These macros have the general form of PRI (character string literals for
@@ -178,7 +178,7 @@ extern "C"
  */
 
 intmax_t  imaxabs(intmax_t j);
-imaxdiv_t imaxdiv(intmax_t numer, intmax_t denom);
+imaxdiv_t imaxdiv(intmax_t number, intmax_t denom);
 intmax_t  strtoimax(FAR const char *nptr, FAR char **endptr, int base);
 uintmax_t strtoumax(FAR const char *nptr, FAR char **endptr, int base);
 

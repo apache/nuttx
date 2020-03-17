@@ -535,7 +535,7 @@ __start:
 	 *
 	 *   R4 = Virtual address of the page table
 	 *   R3 = Physical address of the NuttX execution space (aligned to a
-	 *        one megabyte addres boundary
+	 *        one megabyte address boundary
 	 */
 
 #ifdef CONFIG_IDENTITY_TEXTMAP
@@ -588,8 +588,8 @@ __start:
 	strcc	fp, [r0],#4
 	bcc		.Lbssinit
 
-	/* If the .data section is in a separate, unitialized address space,
-	 * then we will also need to copy the initial values of of the .data
+	/* If the .data section is in a separate, uninitialized address space,
+	 * then we will also need to copy the initial values of the .data
 	 * section from the .text region into that .data region.  This would
 	 * be the case if we are executing from FLASH and the .data section
 	 * lies in a different physical address region OR if we are support

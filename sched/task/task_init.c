@@ -63,8 +63,8 @@
  *   task_create()
  *
  *   Unlike task_create():
- *     1. Allocate the TCB.  The pre-allocated TCB is passed in the arguments.
- *     2. Allocate the stack.  The pre-allocated stack is passed in the arguments.
+ *     1. Allocate the TCB.  The pre-allocated TCB is passed in argv.
+ *     2. Allocate the stack.  The pre-allocated stack is passed in argv.
  *     3. Activate the task. This must be done by calling task_activate().
  *
  * Input Parameters:
@@ -74,7 +74,7 @@
  *   stack      - Start of the pre-allocated stack
  *   stack_size - Size (in bytes) of the stack allocated
  *   entry      - Application start point of the new task
- *   arg        - A pointer to an array of input parameters.  The array
+ *   argv       - A pointer to an array of input parameters.  The array
  *                should be terminated with a NULL argv[] value. If no
  *                parameters are required, argv may be NULL.
  *

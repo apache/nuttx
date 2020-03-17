@@ -115,7 +115,8 @@ int task_restart(pid_t pid)
 
   tcb = (FAR struct task_tcb_s *)sched_gettcb(pid);
 #ifndef CONFIG_DISABLE_PTHREAD
-  if (!tcb || (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
+  if (!tcb || (tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) ==
+      TCB_FLAG_TTYPE_PTHREAD)
 #else
   if (!tcb)
 #endif

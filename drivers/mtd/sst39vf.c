@@ -510,7 +510,7 @@ static int sst39vf_sectorerase(FAR struct sst39vf_dev_s *priv,
 
   /* Use the data toggle delay method.  The typical delay is 18 MSec. The
    * maximum is 25 MSec.  With a 10 MS system timer resolution, this is
-   * the difference of of waiting 20MS vs. 20MS.  So using the data toggle
+   * the difference of waiting 20MS vs. 20MS.  So using the data toggle
    * delay method should give better write performance by about 10MS per
    * block.
    */
@@ -818,7 +818,7 @@ FAR struct mtd_dev_s *sst39vf_initialize(void)
   sst39vf_writeseq(g_swid_exit, 3);
   up_udelay(10);
 
-  /* Now see if we can suport the part */
+  /* Now see if we can support the part */
 
   finfo("Manufacturer: %02x\n", manufacturer);
   finfo("Chip ID:      %04x\n", chipid);

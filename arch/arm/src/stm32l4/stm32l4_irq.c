@@ -149,7 +149,7 @@ static void stm32l4_dumpnvic(const char *msg, int irq)
  *       stm32l4_dbgmonitor, stm32l4_pendsv, stm32l4_reserved
  *
  * Description:
- *   Handlers for various execptions.  None are handled and all are fatal
+ *   Handlers for various exceptions.  None are handled and all are fatal
  *   error conditions.  The only advantage these provided over the default
  *   unexpected interrupt handler is that they provide a diagnostic output.
  *
@@ -327,7 +327,7 @@ void up_irqinitialize(void)
   putreg32(DEFPRIORITY32, NVIC_SYSH8_11_PRIORITY);
   putreg32(DEFPRIORITY32, NVIC_SYSH12_15_PRIORITY);
 
-  /* The NVIC ICTR register (bits 0-4) holds the number of of interrupt
+  /* The NVIC ICTR register (bits 0-4) holds the number of interrupt
    * lines that the NVIC supports:
    *
    *  0 -> 32 interrupt lines,  8 priority registers

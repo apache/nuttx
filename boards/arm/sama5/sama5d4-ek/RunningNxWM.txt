@@ -1,6 +1,6 @@
 Simplified instructions for Running the NxWM Demo:
 
-Prequisites:
+Prerequisites:
 ===========
 
 1. SAMA5D4-MB Rev. C board and power supply
@@ -86,7 +86,7 @@ each boot.
 After that the Demo will start.  The opening screen will show a taskbar
 and tray to the left and the background with the NuttX logo.
 
-Touching the triange button in the taskbar will bring up the Start Window.
+Touching the triangle button in the taskbar will bring up the Start Window.
 The start window holds icons for each installed application.  For this demo
 the following icons will be visible:
 

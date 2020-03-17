@@ -110,7 +110,7 @@
         PORTA.PDR.BIT.BT0       =       PORTA.PDR.BIT.B1        = 1;    \
 }
 #else
-#errror "LEDs are not defined."
+#error "LEDs are not defined."
 #endif
 
 #define LED_STARTED       1     /* ON    OFF   NC    NC   */

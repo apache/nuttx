@@ -75,6 +75,8 @@
  ****************************************************************************/
 
 #include <sys/types.h>
+#include <nuttx/net/net.h>
+
 #include "nfs_proto.h"
 
 /****************************************************************************
@@ -144,7 +146,6 @@
 
 /* RPC definitions for the portmapper. */
 
-#define PMAPPORT         111
 #define PMAPPROG         100000
 #define PMAPVERS         2
 
@@ -161,25 +162,13 @@
  * Public Types
  ****************************************************************************/
 
-/* Global RPC statistics */
-
-#ifdef CONFIG_NFS_STATISTICS
-struct rpcstats
-{
-  int rpcretries;
-  int rpcrequests;
-  int rpctimeouts;
-  int rpcinvalid;
-};
-#endif
-
 /* PMAP headers */
 
 struct call_args_pmap
 {
   uint32_t prog;
   uint32_t vers;
-  uint32_t proc;
+  uint32_t prot;
   uint32_t port;
 };
 
@@ -218,7 +207,7 @@ struct call_result_mount
   uint32_t status;
   struct file_handle fhandle;
   uint32_t authlen;
-  uint32_t autolist[AUTH_MAX];
+  uint32_t authlist[AUTH_MAX];
 };
 
 /* Generic RPC call headers */
@@ -229,13 +218,13 @@ struct rpc_auth_info
   uint32_t authlen;           /* auth length */
 };
 
-struct auth_unix
+struct rpc_auth_unix
 {
-  int32_t stamp;
-  uint8_t hostname;           /* null */
-  int32_t uid;
-  int32_t gid;
-  int32_t gidlist;            /* null */
+  uint32_t stamp;
+  uint32_t hostname;          /* null */
+  uint32_t uid;
+  uint32_t gid;
+  uint32_t gidlist;           /* null */
 };
 
 struct rpc_call_header
@@ -247,6 +236,7 @@ struct rpc_call_header
   uint32_t rp_vers;           /* version */
   uint32_t rp_proc;           /* procedure */
   struct rpc_auth_info rpc_auth;
+  struct rpc_auth_unix rpc_unix;
   struct rpc_auth_info rpc_verf;
 };
 
@@ -349,11 +339,7 @@ struct rpc_reply_header
 
 struct nfs_reply_header
 {
-  uint32_t rp_xid;            /* Request transaction id */
-  uint32_t rp_direction;      /* Call direction (1) */
-  uint32_t type;
-  struct rpc_auth_info rpc_verfi;
-  uint32_t status;
+  struct rpc_reply_header rh;
   uint32_t nfs_status;
 };
 
@@ -376,115 +362,101 @@ struct rpc_reply_umount
 
 struct rpc_reply_create
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct CREATE3resok create;
 };
 
 struct rpc_reply_lookup
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct LOOKUP3resok lookup;
 };
 
 struct rpc_reply_write
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct WRITE3resok write;      /* Variable length */
 };
 
 struct rpc_reply_read
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct READ3resok read;        /* Variable length */
 };
 
 #define SIZEOF_rpc_reply_read(n) \
-  (sizeof(struct rpc_reply_header) + sizeof(uint32_t) + \
-   SIZEOF_READ3resok(n))
+  (sizeof(struct nfs_reply_header) + SIZEOF_READ3resok(n))
 
 struct rpc_reply_remove
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct REMOVE3resok remove;
 };
 
 struct rpc_reply_rename
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct RENAME3resok rename;
 };
 
 struct rpc_reply_mkdir
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct MKDIR3resok mkdir;
 };
 
 struct rpc_reply_rmdir
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct RMDIR3resok rmdir;
 };
 
 struct rpc_reply_readdir
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct READDIR3resok readdir;
 };
 
 #define SIZEOF_rpc_reply_readdir(n) \
-  (sizeof(struct rpc_reply_header) + sizeof(uint32_t) + \
-   SIZEOF_READDIR3resok(n))
+  (sizeof(struct nfs_reply_header) + SIZEOF_READDIR3resok(n))
 
 struct rpc_reply_fsinfo
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct nfsv3_fsinfo fsinfo;
 };
 
 struct rpc_reply_fsstat
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct nfs_statfs fsstat;
 };
 
 struct rpc_reply_getattr
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct nfs_fattr attr;
 };
 
 struct rpc_reply_setattr
 {
-  struct rpc_reply_header rh;
-  uint32_t status;
+  struct nfs_reply_header rh;
   struct SETATTR3resok setattr;
 };
 
-struct  rpcclnt
+struct rpcclnt
 {
-  nfsfh_t  rc_fh;             /* File handle of the root directory */
-  uint8_t  rc_fhsize;         /* File size of the root directory */
-  char    *rc_path;           /* Server's path of the mounted directory */
+  nfsfh_t   rc_fh;            /* File handle of the root directory */
+  uint8_t   rc_fhsize;        /* File size of the root directory */
+  FAR char *rc_path;          /* Server's path of the mounted directory */
 
-  struct  sockaddr *rc_name;
-  struct  socket *rc_so;      /* RPC socket */
+  FAR struct sockaddr_storage *rc_name;
+  struct socket rc_so;        /* RPC socket */
 
-  bool     rc_timeout;        /* Receipt of reply timed out */
-  uint8_t  rc_sotype;         /* Type of socket */
-  uint8_t  rc_retry;          /* Max retries */
+  uint8_t   rc_sotype;        /* Type of socket */
+  uint8_t   rc_timeo;         /* Timeout value (in deciseconds) */
+  uint8_t   rc_retry;         /* Max retries */
+  uint32_t  rc_xid;           /* Transaction id */
 };
 
 /****************************************************************************
@@ -493,12 +465,9 @@ struct  rpcclnt
 
 void rpcclnt_init(void);
 int  rpcclnt_connect(FAR struct rpcclnt *rpc);
-int  rpcclnt_reconnect(FAR struct rpcclnt *rpc);
 void rpcclnt_disconnect(FAR struct rpcclnt *rpc);
-int  rpcclnt_umount(FAR struct rpcclnt *rpc);
-void rpcclnt_safedisconnect(FAR struct rpcclnt *rpc);
-int  rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog, int version,
-                     FAR void *request, size_t reqlen,
+int  rpcclnt_request(FAR struct rpcclnt *rpc, int procnum, int prog,
+                     int version, FAR void *request, size_t reqlen,
                      FAR void *response, size_t resplen);
 
 #endif /* __FS_NFS_RPC_H */

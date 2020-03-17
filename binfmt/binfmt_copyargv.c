@@ -78,7 +78,7 @@
  *   argv     - Argument list
  *
  * Returned Value:
- *   Zero (OK) on success; a negated erro value on failure.
+ *   Zero (OK) on success; a negated error value on failure.
  *
  ****************************************************************************/
 

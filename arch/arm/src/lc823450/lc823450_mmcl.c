@@ -134,7 +134,7 @@ static int mmcl_close(FAR struct inode *inode)
 /****************************************************************************
  * Name: mmcl_read
  *
- * Description:  Read the specified numer of sectors
+ * Description:  Read the specified number of sectors
  *
  ****************************************************************************/
 

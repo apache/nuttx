@@ -19,25 +19,23 @@
 ;**************************************************************************
 
 ;**************************************************************************
-; Constants
-;**************************************************************************
-
-; The IRQ number to use for unused vectors
-
-EZ80_UNUSED		EQU	40h
-
-;**************************************************************************
 ; Global Symbols Imported
 ;**************************************************************************
 
-	xref	_ez80_rstcommon
+	xref	_ez80_irq_common
 
 ;**************************************************************************
 ; Global Symbols Exported
 ;**************************************************************************
 
-	xdef	_ez80_handlers
-	xdef	_handlersize
+	xdef	_ez80_initvectors
+
+;**************************************************************************
+; Constants
+;**************************************************************************
+
+NVECTORS	EQU	64		; Max possible interrupt vectors
+EZ80_UNUSED	EQU	64		; Denotes an unused vector
 
 ;**************************************************************************
 ; Macros
@@ -51,7 +49,7 @@ irqhandler: macro vectno
 								; Offset 8: Return PC is already on the stack
 	push	af					; Offset 7: AF (retaining flags)
 	ld		a, #vectno			; A = vector number
-	jp		_ez80_rstcommon		; Remaining RST handling is common
+	jp		_ez80_irq_common	; Remaining RST handling is common
 	endmac	irqhandler
 
 ;**************************************************************************
@@ -130,4 +128,71 @@ _ez80_handlers:
 	irqhandler	EZ80_UNUSED+15	;               61   0x134
 	irqhandler	EZ80_UNUSED+16	;               62   0x138
 	irqhandler	EZ80_UNUSED+17	;               63   0x13c
+
+;**************************************************************************
+; Vector Setup Logic
+;**************************************************************************
+
+; Still in .STARTUP section
+
+_ez80_initvectors:
+
+	; Initialize the vector table
+
+	ld		iy, _ez80_vectable
+	ld		ix, 4
+	ld		bc, 4
+	ld		b, NVECTORS
+	xor		a, a				; Clear carry; Set A to zero
+	ld		de, _handlersize	; Length of one irq handler in DE
+	ld		hl, _ez80_handlers 	; Start of handlers in HL
+
+	; "The size of I register is modified to 16 bits in the eZ80F91 device
+	;  differing from the previous versions of eZ80® CPU, to allow for a 16
+	;  MB range of interrupt vector table placement.
+	;
+	; "Additionally, the size of the IVECT register is increased from 8 bits
+	;  to 9 bits to provide an interrupt vector table that is expanded and
+	;  more easily integrated with other interrupts.
+	;
+	; "The vectors are 4 bytes (32 bits) apart, even though only 3 bytes
+	;  (24 bits) are required.  A fourth byte is implemented for both
+	;  programmability and expansion purposes."
+
+$1:
+	ld		(iy), hl			; Store IRQ handler
+	ld		(iy+3), a			; Pad with zero to 4 bytes
+	add		hl, de				; Point to next handler
+	push	de
+	ld		de, 4
+	add		iy, de				; Point to next entry in vector table
+	pop		de
+	djnz	$1					; Loop until all vectors have been written
+
+	; Select interrupt mode 2
+
+	im		2					; Interrupt mode 2
+
+	; Write the address of the vector table into the interrupt vector base
+
+	ld		hl, _ez80_vectable >> 8
+	ld		i, hl
+	ret
+
+;**************************************************************************
+; Vector Table
+;**************************************************************************
+
+; This segment must be aligned on a 512 byte boundary anywhere in RAM
+; Each entry will be a 3-byte address in a 4-byte space
+
+	define	.IVECTS, space = RAM, align = 200h
+	segment	.IVECTS
+
+	; The first 64 bytes are not used... the vectors actually start at +0x40
+
+_ez80_vecreserve:
+	ds	64
+_ez80_vectable:
+	ds	NVECTORS * 2
 	end

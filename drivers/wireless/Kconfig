@@ -38,7 +38,7 @@ config WL_GS2200M
 if WL_GS2200M
 
 config WL_GS2200M_SPI_FREQUENCY
-	int "SPI frequencey for GS2200M"
+	int "SPI frequency for GS2200M"
 	default 4000000
 	range 4000000 10000000
 

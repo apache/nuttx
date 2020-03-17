@@ -153,7 +153,10 @@
 #  undef  USE_SERIALDRIVER
 #  undef  USE_EARLYSERIALINIT
 #else
-#  if defined(HAVE_RS232_DEVICE)
+#  if defined(CONFIG_CONSOLE_SYSLOG)
+#    undef  USE_SERIALDRIVER
+#    undef  USE_EARLYSERIALINIT
+#  elif defined(HAVE_RS232_DEVICE)
 #    define USE_SERIALDRIVER 1
 #    define USE_EARLYSERIALINIT 1
 #  else

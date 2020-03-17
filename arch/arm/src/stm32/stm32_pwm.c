@@ -75,7 +75,7 @@
 /* PWM/Timer Definitions ****************************************************/
 
 /* The following definitions are used to identify the various time types.
- * There are some differences in timer types accross STM32 families:
+ * There are some differences in timer types across STM32 families:
  *   - TIM2 is 16-bit timer for F1, L1 and L0
  *   - TIM5 is 16-bit timer for F1
  */
@@ -407,7 +407,7 @@ struct stm32_pwmtimer_s
   uint8_t  irq;                         /* Timer update IRQ */
   uint8_t  prev;                        /* The previous value of the RCR (pre-loaded) */
   uint8_t  curr;                        /* The current value of the RCR (pre-loaded) */
-  uint32_t count;                       /* Remaining pluse count */
+  uint32_t count;                       /* Remaining pulse count */
 #else
   uint32_t frequency;                   /* Current frequency setting */
 #endif
@@ -2311,7 +2311,7 @@ static int pwm_duty_update(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
 
   pwminfo("ccr: %u\n", ccr);
 
-  /* Write coresponding CCR register */
+  /* Write corresponding CCR register */
 
   pwm_ccr_update(dev, channel, ccr);
 
@@ -3283,7 +3283,7 @@ static int pwm_pulsecount_configure(FAR struct pwm_lowerhalf_s *dev)
 
   for (j = 0; j < priv->chan_num; j++)
     {
-      /* Skip channle if not in use */
+      /* Skip channel if not in use */
 
       if (priv->channels[j].channel != 0)
         {
@@ -3316,7 +3316,7 @@ errout:
  *   Zero on success; a negated errno value on failure
  *
  * TODO: PWM_PULSECOUNT should be configurable for each timer instance
- * TODO: PULSECOUNT doesnt work with MULTICHAN at this moment
+ * TODO: PULSECOUNT doesn't work with MULTICHAN at this moment
  *
  ****************************************************************************/
 
@@ -3368,7 +3368,7 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
     }
 
   /* If a non-zero repetition count has been selected, then set the
-   * repitition counter to the count-1 (pwm_pulsecount_start() has already
+   * repetition counter to the count-1 (pwm_pulsecount_start() has already
    * assured us that the count value is within range).
    */
 
@@ -3526,7 +3526,7 @@ static int pwm_configure(FAR struct pwm_lowerhalf_s *dev)
 
   for (j = 0; j < priv->chan_num; j++)
     {
-      /* Skip channle if not in use */
+      /* Skip channel if not in use */
 
       if (priv->channels[j].channel != 0)
         {
@@ -3704,7 +3704,7 @@ static int pwm_timer(FAR struct pwm_lowerhalf_s *dev,
       priv->timtype == TIMTYPE_COUNTUP16_N)
     {
       /* If a non-zero repetition count has been selected, then set the
-       * repitition counter to the count-1 (pwm_start() has already
+       * repetition counter to the count-1 (pwm_start() has already
        * assured us that the count value is within range).
        */
 
@@ -3789,7 +3789,7 @@ static int pwm_interrupt(FAR struct pwm_lowerhalf_s *dev)
 
       pwm_soft_break(dev, true);
 
-      /* Disable first interrtups, stop and reset the timer */
+      /* Disable first interrupts, stop and reset the timer */
 
       pwm_stop(dev);
 

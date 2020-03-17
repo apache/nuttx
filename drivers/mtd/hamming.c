@@ -180,7 +180,7 @@ static void hamming_compute256(FAR const uint8_t *data, FAR uint8_t *code)
     }
 
   /* At this point, we have the line parities, and the column sum. First, We
-   * must caculate the parity group values on the column sum.
+   * must calculate the parity group values on the column sum.
    */
 
   for (i = 0; i < 8; i++)

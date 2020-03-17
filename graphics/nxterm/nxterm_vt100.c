@@ -198,7 +198,7 @@ static enum nxterm_vt100state_e nxterm_vt100seq(FAR struct nxterm_state_s *priv,
 
       /* The 'seqsize' is still smaller than the potential match(es).  We
        * will need to collect more characters before we can make a decision.
-       * Retun an indication that we have consumed the character.
+       * Return an indication that we have consumed the character.
        */
 
       return VT100_CONSUMED;

@@ -62,8 +62,8 @@ PIC32MX460F512L Pin Out
   ---- ----------------------------  -------------------------------------------------------
   PIN  NAME                          Board Connection (omitting pins brought to J3 and J4)
   ---- ----------------------------  -------------------------------------------------------
-   26  PGEC2/AN6/OCFA/RB6            PGC    ICSP/Debug/IO (J5) pin 5 (labled PGC)
-   27  PGED2/AN7/RB7                 PGD    ICSP/Debug/IO (J5) pin 4 (labled PGD)
+   26  PGEC2/AN6/OCFA/RB6            PGC    ICSP/Debug/IO (J5) pin 5 (labeled PGC)
+   27  PGED2/AN7/RB7                 PGD    ICSP/Debug/IO (J5) pin 4 (labeled PGD)
    28  VREF-/CVREF-/PMA7/RA9
    29  VREF+/CVREF+/PMA6/RA10
    30  AVdd
@@ -230,7 +230,7 @@ Toolchains
 
   Another option is the mips-elf toolchain used with the Pinguino project.  This
   is a relatively current mips-elf GCC and should provide free C++ support as
-  well. This toolchain can be downloded from the Pinguino website:
+  well. This toolchain can be downloaded from the Pinguino website:
   http://wiki.pinguino.cc/index.php/Main_Page#Download .
 
   See also boards/mirtoo/README.txt.  There is an experimental (untested)
@@ -306,29 +306,31 @@ Loading NuttX with PICkit2
     file to contain physical addresses.  But the nuttx.hex file generated from the
     top-level make will have address in the KSEG0 and KSEG1 regions.
 
-  tools/pic32mx/mkpichex:
+  tools/pic32/mkpichex:
   ----------------------
 
-    There is a simple tool in the NuttX tools/pic32mx directory that can be
+    There is a simple tool in the NuttX tools/pic32 directory that can be
     used to solve both issues with the nuttx.hex file.  But, first, you must
     build the tool:
 
-      cd tools/pic32mx
-      make
+      cd tools/pic32
+      make -f Makefile.host
 
-    Now you will have an excecutable file call mkpichex (or mkpichex.exe on
+    Now you will have an executable file call mkpichex (or mkpichex.exe on
     Cygwin).  This program will take the nutt.hex file as an input, it will
     convert all of the KSEG0 and KSEG1 addresses to physical address, and
     it will write the modified file, replacing the original nuttx.hex.
 
     To use this file, you need to do the following things:
 
-                       # Add the NuttX tools/pic32mx directory to your
+      export PATH =??? # Add the NuttX tools/pic32 directory to your
                        # PATH variable
       make             # Build nuttx and nuttx.hex
       mkpichex $PWD    # Convert addresses in nuttx.hex.  $PWD is the path
                        # to the top-level build directory.  It is the only
                        # required input to mkpichex.
+
+      This procedure is automatically performed at the end of a build.
 
 LEDs
 ====
@@ -585,7 +587,7 @@ Where <subdir> is one of the following:
        GND -- J4 pin 40: GND
        Vcc -- J4 pin 39: 5V
 
-    3. USB Configuations
+    3. USB Configurations
 
        Several USB device configurations can be enabled and included
        as NSH built-in built in functions.

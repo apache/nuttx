@@ -59,8 +59,8 @@
  * Name: bchlib_write
  *
  * Description:
- *   Write to the block device set-up by bchlib_setup as if it were a character
- *   device.
+ *   Write to the block device set-up by bchlib_setup as if it were a
+ *   character device.
  *
  ****************************************************************************/
 

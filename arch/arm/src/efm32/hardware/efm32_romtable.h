@@ -69,7 +69,7 @@
 #include "hardware/efm32_memorymap.h"
 
 #if !defined(CONFIG_EFM32_EFM32GG)
-#  warning This is the EFM32GG header file; Review/modification needed for this archtecture
+#  warning This is the EFM32GG header file; Review/modification needed for this architecture
 #endif
 
 /*******************************************************************************************************************************
@@ -82,8 +82,8 @@
 
 #define _ROMTABLE_PID0_FAMILYLSB_MASK       0x000000C0UL /* Least Significant Bits [1:0] of CHIP FAMILY, mask */
 #define _ROMTABLE_PID0_FAMILYLSB_SHIFT      6            /* Least Significant Bits [1:0] of CHIP FAMILY, shift */
-#define _ROMTABLE_PID0_REVMAJOR_MASK        0x0000003FUL /* CHIP MAJOR Revison, mask */
-#define _ROMTABLE_PID0_REVMAJOR_SHIFT       0            /* CHIP MAJOR Revison, shift */
+#define _ROMTABLE_PID0_REVMAJOR_MASK        0x0000003FUL /* CHIP MAJOR Revision, mask */
+#define _ROMTABLE_PID0_REVMAJOR_SHIFT       0            /* CHIP MAJOR Revision, shift */
 
 #define _ROMTABLE_PID1_FAMILYMSB_MASK       0x0000000FUL /* Most Significant Bits [5:2] of CHIP FAMILY, mask */
 #define _ROMTABLE_PID1_FAMILYMSB_SHIFT      0            /* Most Significant Bits [5:2] of CHIP FAMILY, shift */

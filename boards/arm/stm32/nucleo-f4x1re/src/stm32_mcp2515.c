@@ -108,10 +108,10 @@ static struct stm32_mcp2515config_s g_mcp2515config =
   .config =
   {
     .spi        = NULL,
-    .baud       = 0,     /* REVISIT.  Proably broken by commit eb7373cedfa */
-    .btp        = 0,     /* REVISIT.  Proably broken by commit eb7373cedfa */
+    .baud       = 0,     /* REVISIT.  Probably broken by commit eb7373cedfa */
+    .btp        = 0,     /* REVISIT.  Probably broken by commit eb7373cedfa */
     .devid      = 0,
-    .mode       = 0,     /* REVISIT.  Proably broken by commit eb7373cedfa */
+    .mode       = 0,     /* REVISIT.  Probably broken by commit eb7373cedfa */
     .nfilters   = 6,
 #ifdef MCP2515_LOOPBACK
     .loopback   = false;

@@ -68,7 +68,7 @@ config ROUTE_MAX_IPv4_CACHEROUTES
 	default 4
 	depends on ROUTE_IPv4_CACHEROUTE
 	---help---
-		This determines the maxium number of routes that can be cached in
+		This determines the maximum number of routes that can be cached in
 		memory.
 
 choice
@@ -134,7 +134,7 @@ config ROUTE_MAX_IPv6_CACHEROUTES
 	default 4
 	depends on ROUTE_IPv6_CACHEROUTE
 	---help---
-		This determines the maxium number of routes that can be cached in
+		This determines the maximum number of routes that can be cached in
 		memory.
 
 endif # NET_ROUTE

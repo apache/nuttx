@@ -310,6 +310,13 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
   DEBUGASSERT(stcb != NULL && info != NULL);
 
+  /* Don't actually send a signal for signo 0. */
+
+  if (info->si_signo == 0)
+    {
+      return OK;
+    }
+
   /************************** MASKED SIGNAL ACTIONS *************************/
 
   masked = (bool)sigismember(&stcb->sigprocmask, info->si_signo);

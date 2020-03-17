@@ -97,7 +97,7 @@ void nxbe_closewindow(FAR struct nxbe_window_s *wnd)
       NXBE_STATE_CLRMODAL(be);
     }
 
-  /* A hidden window does not exist in the hiearchy */
+  /* A hidden window does not exist in the hierarchy */
 
   if (!NXBE_ISHIDDEN(wnd))
     {

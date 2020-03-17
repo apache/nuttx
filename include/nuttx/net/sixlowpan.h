@@ -157,7 +157,7 @@
 #define SIXLOWPAN_HC_UDP_SRCPORT_C        0x80 /* Source port compressed to 4 bits */
 #define SIXLOWPAN_HC_UDP_DESTPORT_C       0x40 /* Destination port compressed to 4 bits */
 #define SIXLOWPAN_HC_UDP_LENGTH  _C       0x20 /* Elided, compute from IPv6 length */
-#define SIXLOWPAN_HC_UDP_ALL_C            0xe0 /* All commpressed */
+#define SIXLOWPAN_HC_UDP_ALL_C            0xe0 /* All compressed */
 
 /* IPHC encoding
  *
@@ -475,7 +475,7 @@ struct sixlowpan_reassbuf_s
  *
  *   After each frame is processed into d_buf, the IOB is deallocated.  If
  *   reassembly is incomplete, the partially reassembled packet must be
- *   preserved by the radio network drvier and provided again when the next
+ *   preserved by the radio network driver and provided again when the next
  *   frame is received.
  *
  *   When the packet in the d_buf is fully reassembled, it will be provided
@@ -508,7 +508,7 @@ struct sixlowpan_reassbuf_s
  *               must apply to all of the frames in the list.
  *
  * Returned Value:
- *   Ok is returned on success; Othewise a negated errno value is returned.
+ *   Ok is returned on success; Otherwise a negated errno value is returned.
  *
  ****************************************************************************/
 

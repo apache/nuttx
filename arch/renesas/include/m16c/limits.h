@@ -69,7 +69,7 @@
 #define INT_MAX     SHRT_MAX
 #define UINT_MAX    USHRT_MAX
 
-/* For M16C, typle 'long int' is 32-bits */
+/* For M16C, tuple 'long int' is 32-bits */
 
 #define LONG_MIN    (-LONG_MAX - 1)
 #define LONG_MAX    2147483647L

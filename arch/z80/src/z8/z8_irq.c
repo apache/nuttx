@@ -87,7 +87,7 @@ void up_irqinitialize(void)
  *
  * Description:
  *   Disable all interrupts; return previous interrupt state.
- *   REVISIT:  Doen't TDI() do all of this?
+ *   REVISIT:  Doesn't TDI() do all of this?
  *
  ****************************************************************************/
 
@@ -207,7 +207,7 @@ void up_enable_irq(int irq)
     {
       /* Enable the interrupt by setting the corresponding bit in the
        * appropriate IRQ enable high register.  The enable low
-       * register is assumed to be zero, resulting in "nomimal" interrupt
+       * register is assumed to be zero, resulting in "nominal" interrupt
        * priority.
        */
 

@@ -48,7 +48,7 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN
@@ -80,7 +80,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#if STM32H7_NETHERNET > 1
+#if STM32H7_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
 int stm32_ethinitialize(int intf);
 #endif
 
@@ -103,7 +103,7 @@ int stm32_ethinitialize(int intf);
  *
  * Assumptions:
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_STM32H7_PHYINIT
 int stm32_phy_boardinitialize(int intf);

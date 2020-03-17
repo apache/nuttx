@@ -95,13 +95,15 @@ struct modprocfs_file_s
 
 /* File system methods */
 
-static int     modprocfs_open(FAR struct file *filep, FAR const char *relpath,
-                 int oflags, mode_t mode);
+static int     modprocfs_open(FAR struct file *filep,
+                              FAR const char *relpath,
+                              int oflags, mode_t mode);
 static int     modprocfs_close(FAR struct file *filep);
-static ssize_t modprocfs_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+static ssize_t modprocfs_read(FAR struct file *filep,
+                              FAR char *buffer,
+                              size_t buflen);
 static int     modprocfs_dup(FAR const struct file *oldp,
-                 FAR struct file *newp);
+                             FAR struct file *newp);
 static int     modprocfs_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
@@ -146,12 +148,22 @@ static int modprocfs_callback(FAR struct module_s *modp, FAR void *arg)
   DEBUGASSERT(modp != NULL && arg != NULL);
   priv = (FAR struct modprocfs_file_s *)arg;
 
-  linesize = snprintf(priv->line, MOD_LINELEN, "%s,%p,%p,%p,%u,%p,%lu,%p,%lu\n",
+  linesize = snprintf(priv->line, MOD_LINELEN,
+                      "%s,%p,%p,%p,%u,%p,%lu,%p,%lu\n",
                       modp->modname, modp->initializer,
                       modp->modinfo.uninitializer, modp->modinfo.arg,
-                      modp->modinfo.nexports, modp->alloc,
+                      modp->modinfo.nexports,
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+                      modp->textalloc,
+#else
+                      modp->alloc,
+#endif
                       (unsigned long)modp->textsize,
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+                      (FAR uint8_t *)modp->dataalloc,
+#else
                       (FAR uint8_t *)modp->alloc + modp->textsize,
+#endif
                       (unsigned long)modp->datasize);
   copysize = procfs_memcpy(priv->line, linesize, priv->buffer,
                            priv->remaining, &priv->offset);
@@ -187,7 +199,8 @@ static int modprocfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Allocate the open file structure */
 
-  priv = (FAR struct modprocfs_file_s *)kmm_zalloc(sizeof(struct modprocfs_file_s));
+  priv = (FAR struct modprocfs_file_s *)
+         kmm_zalloc(sizeof(struct modprocfs_file_s));
   if (!priv)
     {
       ferr("ERROR: Failed to allocate file attributes\n");

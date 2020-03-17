@@ -57,7 +57,7 @@
  * 3. D7 / Orange LED   PTE8
  * 4  D9 / Blue LED     PTE9
  *
- * LED4 is reservered for user.
+ * LED4 is reserved for user.
  */
 
 /* The following definitions map the encoded LED setting to GPIO settings */

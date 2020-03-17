@@ -144,9 +144,9 @@ PIN NAME   SIGNAL         NOTES
 92  PB6    PB6-I2C1-SCL   2.4" TFT + Touchscreen, AT24C02
 93  PB7    PB7-I2C1-SDA   2.4" TFT + Touchscreen, AT24C02
 94  BOOT0  SW3            3V3 or DGND
-95  PB8    PB8-CAN-RX     CAN tranceiver, Header 2H
+95  PB8    PB8-CAN-RX     CAN transceiver, Header 2H
            PB8-C-DO_0     Camera (P9)
-96  PB9    PB9-CAN-TX     CAN tranceiver, Header 2H
+96  PB9    PB9-CAN-TX     CAN transceiver, Header 2H
            PB9-C-DO_1     Camera (P9)
 97  PE0    PE0-C-RRST     Camera (P9)
 98  PE1    PE1-FSMC_NBL1  2.4" TFT + Touchscreen
@@ -188,7 +188,7 @@ DFU and JTAG
   3. Run the DFU SE program to load nuttx.dfu into FLASH.
 
   What if the DFU loader is not in FLASH?  The loader code is available
-  inside of the Demo dirctory of the USBLib ZIP file that can be downloaded
+  inside of the Demo directory of the USBLib ZIP file that can be downloaded
   from the STMicro Website.  You can build it using RIDE (or other toolchains);
   you will need a JTAG emulator to burn it into FLASH the first time.
 
@@ -208,9 +208,10 @@ DFU and JTAG
   configuration options to enable JTAG in various different ways.
 
   These configurations effect the setting of the SWJ_CFG[2:0] bits in the AFIO
-  MAPR register.  These bits are used to configure the SWJ and trace alternate function I/Os. The SWJ (SerialWire JTAG) supports JTAG or SWD access to the
+  MAPR register.  These bits are used to configure the SWJ and trace alternate
+  function I/Os. The SWJ (SerialWire JTAG) supports JTAG or SWD access to the
   Cortex debug port.  The default state in this port is for all JTAG support
-  to be disable.
+  to be disabled.
 
   CONFIG_STM32_JTAG_FULL_ENABLE - sets SWJ_CFG[2:0] to 000 which enables full
     SWJ (JTAG-DP + SW-DP)
@@ -219,7 +220,7 @@ DFU and JTAG
     full SWJ (JTAG-DP + SW-DP) but without JNTRST.
 
   CONFIG_STM32_JTAG_SW_ENABLE - sets SWJ_CFG[2:0] to 010 which would set JTAG-DP
-    disabled and SW-DP enabled
+    disabled and SW-DP enabled.
 
   The default setting (none of the above defined) is SWJ_CFG[2:0] set to 100
   which disable JTAG-DP and SW-DP.
@@ -280,15 +281,15 @@ RTC
     CONFIG_RTC_HIRES - The typical RTC keeps time to resolution of 1
       second, usually supporting a 32-bit time_t value.  In this case,
       the RTC is used to &quot;seed&quot; the normal NuttX timer and the
-      NuttX timer provides for higher resoution time. If CONFIG_RTC_HIRES
+      NuttX timer provides for higher resolution time. If CONFIG_RTC_HIRES
       is enabled in the NuttX configuration, then the RTC provides higher
       resolution time and completely replaces the system timer for purpose of
       date and time.
-      CONFIG_RTC_FREQUENCY - If CONFIG_RTC_HIRES is defined, then the
+    CONFIG_RTC_FREQUENCY - If CONFIG_RTC_HIRES is defined, then the
       frequency of the high resolution RTC must be provided.  If CONFIG_RTC_HIRES
       is not defined, CONFIG_RTC_FREQUENCY is assumed to be one.
     CONFIG_RTC_ALARM - Enable if the RTC hardware supports setting of an alarm.
-      A callback function will be executed when the alarm goes off
+      A callback function will be executed when the alarm goes off.
 
   In hi-res mode, the STM32 RTC operates only at 16384Hz.  Overflow interrupts
   are handled when the 32-bit RTC counter overflows every 3 days and 43 minutes.
@@ -296,7 +297,7 @@ RTC
   a 48-bit RTC counter.
 
   In the lo-res mode, the RTC operates at 1Hz.  Overflow interrupts are not handled
-  (because the next overflow is not expected until the year 2106.
+  (because the next overflow is not expected until the year 2106).
 
    WARNING:  Overflow interrupts are lost whenever the STM32 is powered down.  The
    overflow interrupt may be lost even if the STM32 is powered down only momentarily.
@@ -445,7 +446,7 @@ M3 Wildfire-specific Configuration Options
 
   Alternate pin mappings.  The M3 Wildfire board requires only CAN1 remapping
   On the M3 Wildfire board pin PB9 is wired as TX and pin PB8 is wired as RX.
-  Which then makes the proper connection through the CAN transiver SN65HVD230
+  Which then makes the proper connection through the CAN transceiver SN65HVD230
   out to the CAN D-type 9-pn male connector where pin 2 is CANL and pin 7 is CANH.
 
     CONFIG_STM32_TIM1_FULL_REMAP
@@ -494,7 +495,7 @@ M3 Wildfire-specific Configuration Options
 
     CONFIG_STM32_SDIO_DMA - Support DMA data transfers.  Requires
       CONFIG_STM32_SDIO and CONFIG_STM32_DMA2.
-    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
+    CONFIG_STM32_SDIO_PRI - Select SDIO interrupt priority.  Default: 128
     CONFIG_STM32_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_STM32_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:

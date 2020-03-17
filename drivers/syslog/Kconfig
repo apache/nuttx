@@ -128,8 +128,8 @@ config SYSLOG_PREFIX_STRING
 
 choice
 	prompt "System log device"
-	default SYSLOG_CONSOLE if DEV_CONSOLE
-	default SYSLOG_NONE if !DEV_CONSOLE
+	default SYSLOG_CONSOLE if !ARCH_LOWPUTC
+	default SYSLOG_DEFAULT if ARCH_LOWPUTC
 	depends on !ARCH_SYSLOG
 
 config SYSLOG_CHAR
@@ -164,11 +164,11 @@ config SYSLOG_RPMSG
 	---help---
 		Use the rpmsg as a SYSLOG output device, send message to remote proc.
 
-config SYSLOG_NONE
-	bool "No SYSLOG device"
+config SYSLOG_DEFAULT
+	bool "Default SYSLOG device"
 	---help---
 		syslog() interfaces will be present, but all output will go to the
-		bit-bucket.
+		up_putc(ARCH_LOWPUTC == y) or bit-bucket(ARCH_LOWPUTC == n).
 
 endchoice
 

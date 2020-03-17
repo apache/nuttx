@@ -63,7 +63,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 /************************************************************************************
@@ -110,20 +110,66 @@ void stm32_pwr_enablebkp(bool writable);
  * Description:
  *   Enables the Backup regulator, the Backup regulator (used to maintain backup
  *   SRAM content in Standby and VBAT modes) is enabled. If BRE is reset, the backup
- *   regulator is switched off. The backup SRAM can still be used but its content will
- *   be lost in the Standby and VBAT modes. Once set, the application must wait that
- *   the Backup Regulator Ready flag (BRR) is set to indicate that the data written
- *   into the RAM will be maintained in the Standby and VBAT modes.
+ *   regulator is switched off. The backup SRAM can still be used but its content
+ *   will be lost in the Standby and VBAT modes. Once set, the application must wait
+ *   that the Backup Regulator Ready flag (BRR) is set to indicate that the data
+ *   written into the RAM will be maintained in the Standby and VBAT modes.
+ *
+ *   This function needs to be called after stm32_pwr_enablebkp(true) has been
+ *   called.
  *
  * Input Parameters:
- *   regon - state to set it to
+ *   region - state to set it to
  *
  * Returned Value:
  *   None
  *
  ************************************************************************************/
 
-void stm32_pwr_enablebreg(bool regon);
+void stm32_pwr_enablebreg(bool region);
+
+/************************************************************************************
+ * Name: stm32_pwr_configurewkup
+ *
+ * Description:
+ *   Configures the external wakeup (WKUP) signals for wakeup from standby mode.
+ *   Sets rising/falling edge sensitivity and pull state.
+ *
+ *
+ * Input Parameters:
+ *   pin    - WKUP pin number (0-5) to work on
+ *   en     - Enables the specified WKUP pin if true
+ *   rising - If true, wakeup is triggered on rising edge, otherwise,
+ *            it is triggered on the falling edge.
+ *   pull   - Specifies the WKUP pin pull resistor configuration
+ *            (GPIO_FLOAT, GPIO_PULLUP, or GPIO_PULLDOWN)
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void stm32_pwr_configurewkup(uint32_t pin, bool en, bool rising, uint32_t pull);
+
+/************************************************************************************
+ * Name: stm32_pwr_setvbatcharge
+ *
+ * Description:
+ *   Configures the internal charge resistor to charge a battery attached to
+ *   the VBAT pin.
+ *
+ *
+ * Input Parameters:
+ *   enable    - Enables the charge resistor if true, disables it if false
+ *   resistor  - Sets charge resistor to 1.5 KOhm if true,
+ *               sets it to 5 KOhm if false.
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void stm32_pwr_setvbatcharge(bool enable, bool resistor);
 
 #undef EXTERN
 #if defined(__cplusplus)

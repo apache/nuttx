@@ -90,7 +90,7 @@
 #define AON_RTC_CTL_RTC_UPD_EN          (1 << 1)  /* Bit 1:  Enable 16-KHz RTC_UPD output */
 #define AON_RTC_CTL_RTC_4KHZ_EN         (1 << 2)  /* Bit 2:  Enabvle 4KHz reference output */
 #define AON_RTC_CTL_RESET               (1 << 7)  /* Bit 7:  RTC counter reset */
-#define AON_RTC_CTL_EV_DELAY_SHIFT      (8)       /* Bits 8-11:  Nubmer SCLK_LF delay for events */
+#define AON_RTC_CTL_EV_DELAY_SHIFT      (8)       /* Bits 8-11:  Number SCLK_LF delay for events */
 #define AON_RTC_CTL_EV_DELAY_MASK       (15 << AON_RTC_CTL_EV_DELAY_SHIFT)
 #  define AON_RTC_CTL_EV_DELAY_D0       (0 << AON_RTC_CTL_EV_DELAY_SHIFT)  /* No delay on event */
 #  define AON_RTC_CTL_EV_DELAY_D1       (1 << AON_RTC_CTL_EV_DELAY_SHIFT)  /* Delay by 1 clock cycle */

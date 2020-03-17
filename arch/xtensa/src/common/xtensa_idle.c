@@ -74,17 +74,18 @@ void up_idle(void)
    * sleep in a reduced power mode until an interrupt occurs to save power
    */
 
-  /* This is a kludge that I still don't understand.  The call to kmm_trysemaphore()
-   * in the nx_start.c IDLE loop seems necessary for the good health of the IDLE
-   * loop.  When the work queue is enabled, this logic is removed from the IDLE
-   * loop and it appears that we are somehow left idling with interrupts non-
-   * functional. The following should be no-op, it just disables then re-enables
-   * interrupts.  But it fixes the problem and will stay here until I understand
-   * the problem/fix better.
+  /* This is a kludge that I still don't understand.  The call to
+   * kmm_trysemaphore() in the nx_start.c IDLE loop seems necessary for the
+   * good health of the IDLE loop.  When the work queue is enabled, this
+   * logic is removed from the IDLE loop and it appears that we are somehow
+   * left idling with interrupts non-functional. The following should be
+   * no-op, it just disables then re-enables interrupts.  But it fixes the
+   * problem and will stay here until I understand the problem/fix better.
    *
-   * And no, the contents of the CP0 status register are not incorrect.  But for
-   * some reason the status register needs to be re-written again on this thread
-   * for it to take effect.  This might be a PIC32-only issue?
+   * And no, the contents of the CP0 status register are not incorrect.
+   * But for some reason the status register needs to be re-written again
+   * on this thread for it to take effect.  This might be a PIC32-only
+   * issue?
    */
 
 #ifdef CONFIG_SCHED_WORKQUEUE
@@ -92,4 +93,10 @@ void up_idle(void)
   leave_critical_section(flags);
 #endif
 #endif
+
+  /* This would be an appropriate place to put some MCU-specific logic to
+   * sleep in a reduced power mode until an interrupt occurs to save power
+   */
+
+  __asm__ __volatile__ ("waiti 0");
 }

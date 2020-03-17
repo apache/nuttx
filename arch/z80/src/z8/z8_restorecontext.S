@@ -97,7 +97,7 @@ _z8_restorecontext:
 	ldx	r7, 3(rr0)
 
 	/* Copy all registers into the user register area.  NOTE: we
-	 * use the saved RP value to determine the destination adress.
+	 * use the saved RP value to determine the destination address.
 	 */
 
 	clr	r0			/* rr0 = destination address */

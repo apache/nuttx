@@ -737,8 +737,8 @@
     This port does not support interrupts or a real timer (and hence no
     round robin scheduler)  Otherwise, it is complete.
   </li>
-  <p>NOTE: In principle, this user mode port should run in any POSIX environement.
-    This target will probably not run &quot;out-of-the-box&quot; in unverified POSIX environments due to the many host environemnt dependencies.
+  <p>NOTE: In principle, this user mode port should run in any POSIX environment.
+    This target will probably not run &quot;out-of-the-box&quot; in unverified POSIX environments due to the many host environment dependencies.
   </p>
 
   <li><code>arch/arm</code>:
@@ -1751,7 +1751,7 @@ The specific environmental definitions are unique for each board but should incl
       The definitions in that header file provide the common interface between NuttX and the architecture-specific implementation in <code>arch/</code>.
     </p>
     <blockquote><small>
-      <code>up_</code> is supposed to stand for microprocessor; the <code>u</code> is like the Greek letter micron: <i>µ</i>.    So it would be <code>µP</code> which is a common shortening of the word microprocessor.  I don't like that name very much.  I wish I would have used a more obvious prefix like <code>arch_</code> instead -- then I would not have to answer this question so often.
+      <code>up_</code> is supposed to stand for microprocessor; the <code>u</code> is like the Greek letter micron: <i>Ä¾</i>.    So it would be <code>Ä¾P</code> which is a common shortening of the word microprocessor.  I don't like that name very much.  I wish I would have used a more obvious prefix like <code>arch_</code> instead -- then I would not have to answer this question so often.
     </small></blockquote>
   </li>
   <li>
@@ -2069,11 +2069,10 @@ The specific environmental definitions are unique for each board but should incl
 <p><b>Input Parameters:</b></p>
 <ul>
   <li><code>tcb</code>: Refers to a task in the ready-to-run list (normally
-    the task at the head of the list).  It most be
-    stopped, its context saved and moved into one of the
-    waiting task lists.  It it was the task at the head
-    of the ready-to-run list, then a context to the new
-    ready to run task must be performed.
+    the task at the head of the list).  It must be stopped, its context saved
+    and moved into one of the waiting task lists.  If it was the task at the
+    head of the ready-to-run list, then a context switch to the new ready to
+    run task must be performed.
   </li>
   <li><code>task_state</code>: Specifies which waiting task list should be
     hold the blocked task TCB.
@@ -2296,7 +2295,7 @@ The specific environmental definitions are unique for each board but should incl
   There are many interfaces exported from board- to architecture-specific logic.
   But there are only a few exported from board-specific logic to common NuttX logic.
   Those few of those related to initialization will be discussed in this paragraph.
-  There are others, like those used by <a href="#boardctl"><code>boardctl()</code></a> that will be dicussed in other paragraphs.
+  There are others, like those used by <a href="#boardctl"><code>boardctl()</code></a> that will be discussed in other paragraphs.
 </p>
 <p>
   All of the board-specific interfaces used by the NuttX OS logic are for controlled board initialization.
@@ -2339,7 +2338,7 @@ The specific environmental definitions are unique for each board but should incl
   This additional initialization phase may be used, for example, to initialize more complex, board-specific device drivers.
 </p>
 <p>
-  Waiting for events, use of I2C, SPI, etc are permissable in the context of board_late_initialize().
+  Waiting for events, use of I2C, SPI, etc are permissible in the context of board_late_initialize().
   That is because <code>board_late_initialize()</code> will run on a temporary, internal kernel thread.
 </p>
 
@@ -2573,7 +2572,7 @@ config ARCH_SIM
    bool "Simulation"
    select ARCH_HAVE_TICKLESS
    ---help---
-       Linux/Cywgin user-mode simulation.
+       Linux/Cygwin user-mode simulation.
 </pre></ul>
     <p>
       When the simulation platform is selected, <code>ARCH_HAVE_TICKLESS</code> is automatically selected, informing the configuration system that <i>Tickless OS</i> options can be selected.
@@ -4055,7 +4054,7 @@ void nxsched_timer_expiration(void);
     </p>
   <li>
     <p><b>Cancellation Points</b>:
-      Many of the application OS interfaces are <i>cancellation points</i>, i.e., when the task is operating in <i>defferred cancellation</i> state, it cannot be deleted or cancelled until it calls an application OS interface that is a cancellation point.
+      Many of the application OS interfaces are <i>cancellation points</i>, i.e., when the task is operating in <i>deferred cancellation</i> state, it cannot be deleted or cancelled until it calls an application OS interface that is a cancellation point.
     </p>
     <p>
       The POSIX specification is very specific about this, specific both in identifying which application OS interfaces are cancellation points and specific in the fact that it is prohibited for any OS operation other than those listed in the specification to generate cancellation points.
@@ -5865,7 +5864,7 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
      <code>void setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);</code><br>
      <code>void setbits(FAR struct spi_dev_s *dev, int nbits);</code><br>
      <code>uint8_t status(FAR struct spi_dev_s *dev, uint32_t devid);</code><br>
-     <code>uint16_t send(FAR struct spi_dev_s *dev, uint16_t wd);</code><br>
+     <code>uint32_t send(FAR struct spi_dev_s *dev, uint32_t wd);</code><br>
      <code>void exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer, FAR void *rxbuffer, size_t nwords);</code><br>
      <p><code>int registercallback(FAR struct spi_dev_s *dev, mediachange_t callback, void *arg);</code></p>
     </ul>
@@ -6716,7 +6715,7 @@ int syslog_initialize(void);
 <ol>
   <li>
     <p><b>Low-Level Serial Output</b>.
-      If you are using a SYSLOG console channel (<code>CONFIG_SYSLOG_CONSOLE</code>) and if the underlying architecture supports the low-level <code>up_putc()</code> interface(<code>CONFIG_ARCH_LOWPUTC</code>), then the SYLOG logic will direct the output to <code>up_putc()</code> which is capable of generating the serial output within the context of an interrupt handler.
+      If you are using a SYSLOG console channel (<code>CONFIG_SYSLOG_CONSOLE</code>) and if the underlying architecture supports the low-level <code>up_putc()</code> interface(<code>CONFIG_ARCH_LOWPUTC</code>), then the SYSLOG logic will direct the output to <code>up_putc()</code> which is capable of generating the serial output within the context of an interrupt handler.
     </p>
     <p>
       There are a few issues in doing this however:
@@ -6742,7 +6741,7 @@ int syslog_initialize(void);
 </li>
 <li>
   <p><b>Serialization Buffer</b>.
-    A final option is the use the an <i>interrupt buffer</i> to buffer the interrupt level SYSLOG output.  In this case:
+    A final option is the use of an <i>interrupt buffer</i> to buffer the interrupt level SYSLOG output.  In this case:
   </p>
   <ul>
     <li>
@@ -6752,7 +6751,7 @@ int syslog_initialize(void);
     </li>
     <li>
       <p>
-        Later, when the next normal syslog output is generated, it will first empty the content of the interrupt buffer to the SYSLOG device in the proper context.  It will then be followed by the normal syslog output.  In this case, the interrupt level SYSLOG output will interrupt the normal output stream and the interrupt level SYSLOG output will be inserted into the correct position in the SYSLOG output when the next normal SYLOG output is generated.
+        Later, when the next normal syslog output is generated, it will first empty the content of the interrupt buffer to the SYSLOG device in the proper context.  It will then be followed by the normal syslog output.  In this case, the interrupt level SYSLOG output will interrupt the normal output stream and the interrupt level SYSLOG output will be inserted into the correct position in the SYSLOG output when the next normal SYSLOG output is generated.
       </p>
     </li>
   </ul>

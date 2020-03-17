@@ -1,7 +1,7 @@
 ############################################################################
-# boards/arm/sama5/sama5d2-xult/src/Makefile
+# boards/arm/sama5/sama5d3-xplained/src/Makefile
 #
-#   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2020 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,18 +36,96 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = sam_boot.c sam_userleds.c
+CSRCS = sam_boot.c
+
+ifeq ($(CONFIG_SAMA5_SPI0),y)
+CSRCS += sam_spi.c
+else
+ifeq ($(CONFIG_SAMA5_SPI1),y)
+CSRCS += sam_spi.c
+endif
+endif
+
+ifeq ($(CONFIG_SAMA5_DDRCS),y)
+CSRCS += sam_sdram.c
+endif
+
+ifeq ($(CONFIG_SAMA5_EBICS3_NAND),y)
+CSRCS += sam_nandflash.c
+endif
+
+ifeq ($(CONFIG_MTD_AT25),y)
+ifeq ($(CONFIG_SAMA5_SPI0),y)
+CSRCS += sam_at25.c
+endif
+endif
+
+ifeq ($(CONFIG_SAMA5_HSMCI0),y)
+CSRCS += sam_hsmci.c
+else
+ifeq ($(CONFIG_SAMA5_HSMCI1),y)
+CSRCS += sam_hsmci.c
+endif
+endif
+
+ifeq ($(CONFIG_SAMA5_UHPHS),y)
+CSRCS += sam_usb.c
+else
+ifeq ($(CONFIG_SAMA5_UDPHS),y)
+CSRCS += sam_usb.c
+endif
+endif
+
+ifeq ($(CONFIG_SAMA5_EMACA),y)
+CSRCS += sam_ethernet.c
+else
+ifeq ($(CONFIG_SAMA5_GMAC),y)
+CSRCS += sam_ethernet.c
+endif
+endif
 
 ifeq ($(CONFIG_LIB_BOARDCTL),y)
-CSRCS += sam_appinit.c sam_bringup.c
-else
-ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
+CSRCS += sam_appinit.c
 CSRCS += sam_bringup.c
 endif
+
+ifeq ($(CONFIG_ADC),y)
+CSRCS += sam_adc.c
+ifeq ($(CONFIG_AJOYSTICK),y)
+CSRCS += sam_ajoystick.c
+endif
+endif
+
+ifeq ($(CONFIG_PWM),y)
+CSRCS += sam_pwm.c
+endif
+
+ifeq ($(CONFIG_CAN),y)
+CSRCS += sam_can.c
+endif
+
+ifeq ($(CONFIG_AUDIO_I2SCHAR),y)
+ifeq ($(CONFIG_SAMA5_SSC0),y)
+CSRCS += sam_i2schar.c
+else
+ifeq ($(CONFIG_SAMA5_SSC1),y)
+CSRCS += sam_i2schar.c
+endif
+endif
+endif
+
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += sam_usbmsc.c
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+CSRCS += sam_ostest.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += sam_autoleds.c
+else
+CSRCS += sam_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)

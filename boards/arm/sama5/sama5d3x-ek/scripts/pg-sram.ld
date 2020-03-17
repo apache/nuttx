@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /* The SAMA5D3 has 128 KB of ISRAM beginning at virtual address 0x0030:0000.
- * The .text vitual address space begins at the same location as the physical
+ * The .text virtual address space begins at the same location as the physical
  * address space:  0x0030:0000.  The virtual space is broken up into three
  * regions:
  *

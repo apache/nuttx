@@ -633,7 +633,7 @@ static bool _copy_data_from_pkt(FAR struct gs2200m_dev_s *dev,
       goto errout;
     }
 
-  /* Copy the pkt data to msg buffer upto MIN(request - len, remain) */
+  /* Copy the pkt data to msg buffer up to MIN(request - len, remain) */
 
   len = MIN(msg->reqlen - msg->len, pkt_dat->remain);
   off = pkt_dat->len - pkt_dat->remain;
@@ -1598,7 +1598,7 @@ static enum pkt_type_e gs2200m_join_network(FAR struct gs2200m_dev_s *dev,
     }
   else
     {
-      /* In AP mode, we can specify chennel to use */
+      /* In AP mode, we can specify channel to use */
 
       snprintf(cmd, sizeof(cmd), "AT+WA=%s,,%d\r\n", ssid, ch);
     }
@@ -2298,7 +2298,7 @@ static int gs2200m_ioctl_accept(FAR struct gs2200m_dev_s *dev,
   msg->type = TYPE_OK;
   msg->cid  = c_cid; /* NOTE: override new client cid */
 
-  /* Disalbe accept in progress */
+  /* Disable accept in progress */
 
   _enable_cid(&dev->aip_cid_bits, c_cid, false);
 

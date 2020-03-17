@@ -1013,7 +1013,7 @@ static void lpc17_40_rxdone_work(FAR void *arg)
 #ifdef CONFIG_NET_IPv6
           if (BUF->type == HTONS(ETHTYPE_IP6))
             {
-              ninfo("Iv6 frame\n");
+              ninfo("IPv6 frame\n");
               NETDEV_RXIPV6(&priv->lp_dev);
 
               /* Give the IPv6 packet to the network layer */
@@ -2478,7 +2478,7 @@ static inline int lpc17_40_phyreset(uint8_t phyaddr)
  *   None
  *
  * Assumptions:
- *   The adverisement regiser has already been configured.
+ *   The adverisement register has already been configured.
  *
  ****************************************************************************/
 

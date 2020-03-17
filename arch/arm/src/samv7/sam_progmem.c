@@ -398,10 +398,10 @@ ssize_t up_progmem_eraseblock(size_t cluster)
 #elif SAMV7_PAGE_PER_CLUSTER == 16
     arg   = page | 2;
 #elif SAMV7_PAGE_PER_CLUSTER == 8
-#  error Cluster size of 8 not suportted
+#  error Cluster size of 8 not supported
     arg   = page | 1;   /* Only valid for small 8 KB sectors */
 #elif SAMV7_PAGE_PER_CLUSTER == 4
-#  error Cluster size of 4 not suportted
+#  error Cluster size of 4 not supported
     arg   = page | 0;   /* Only valid for small 8 KB sectors */
 #else
 #  error Unsupported/undefined pages-per-cluster size

@@ -157,7 +157,7 @@ static int bat_gauge_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct battery_gauge_dev_s *dev  = inode->i_private;
   int ret;
 
-  /* Inforce mutually exclusive access to the battery driver */
+  /* Enforce mutually exclusive access to the battery driver */
 
   ret = nxsem_wait(&dev->batsem);
   if (ret < 0)

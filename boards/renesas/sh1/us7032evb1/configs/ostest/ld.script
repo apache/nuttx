@@ -39,7 +39,7 @@ SECTIONS
 {
     /* The us7032evb1 has CMON in PROM beginning at address 0x00000000 and
      * either 64Kb or 256Kb of SRAM beginning at 0x0a000000.  Neither the
-     * PROM nor the first 8Kb of SRAM are avaible to the devoleper as these
+     * PROM nor the first 8Kb of SRAM are available to the devoleper as these
      * are used by CMON.  The next 1Kb of SRAM is dedicated to relocated
      * interrupt vectors.
      */

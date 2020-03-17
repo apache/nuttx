@@ -135,7 +135,7 @@
 
 /* MCI Command Response Register - RESPCOMMAND - 0x400c 0010 */
 
-#define SDCARD_RESPCMD_SHIFT              (0)       /* Bits 0-5: Resopnse Command index */
+#define SDCARD_RESPCMD_SHIFT              (0)       /* Bits 0-5: Response Command index */
 #define SDCARD_RESPCMD_MASK               (0x3f << SDCARD_RESPCMD_SHIFT)
                                                     /* Bits 6-31: Reserved */
 

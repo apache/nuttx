@@ -72,7 +72,7 @@ int elf_verifyheader(FAR const Elf_Ehdr *header);
  * Description:
  *   Read 'readsize' bytes from the object file at 'offset'.  The data is
  *   read into 'buffer.' If 'buffer' is part of the ELF address environment,
- *   then the caller is responsibile for assuring that that address
+ *   then the caller is responsible for assuring that that address
  *   environment is in place before calling this function (i.e., that
  *   elf_addrenv_select() has been called if CONFIG_ARCH_ADDRENV=y).
  *
@@ -136,7 +136,7 @@ int elf_findsymtab(FAR struct elf_loadinfo_s *loadinfo);
  * Name: elf_readsym
  *
  * Description:
- *   Read the ELF symbol structure at the specfied index into memory.
+ *   Read the ELF symbol structure at the specified index into memory.
  *
  * Input Parameters:
  *   loadinfo - Load state information

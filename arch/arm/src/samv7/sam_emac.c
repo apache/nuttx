@@ -1988,7 +1988,7 @@ static void sam_receive(struct sam_emac_s *priv, int qid)
 #ifdef CONFIG_NET_IPv6
       if (BUF->type == HTONS(ETHTYPE_IP6))
         {
-          ninfo("Iv6 frame\n");
+          ninfo("IPv6 frame\n");
           NETDEV_RXIPV6(&priv->dev);
 
           /* Give the IPv6 packet to the network layer */
@@ -3843,7 +3843,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   regval |= EMAC_NCR_MPE;
   sam_putreg(priv, SAM_EMAC_NCR_OFFSET, regval);
 
-  /* Verify tht we can read the PHYID register */
+  /* Verify that we can read the PHYID register */
 
   ret = sam_phyread(priv, priv->phyaddr, MII_PHYID1, &phyid1);
   if (ret < 0)

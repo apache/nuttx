@@ -19,7 +19,7 @@ to the Bank Area. The Bank Area then runs to the start of Common Area 1.
 Registers
 =========
 
-CBAR (Comman/Bank Area Register)
+CBAR (Common/Bank Area Register)
 
   CBAR is an 8 bit I/O port that can be accessed by the processor's OUT and
   IN instructions. The lower 4-bits of CBAR (BA) specify the starting logical

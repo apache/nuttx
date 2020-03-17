@@ -442,7 +442,7 @@ __start:
 	 * - Preserve soft reset (SR) and non-maskable interrupt (NMI)
 	 * - CorExtend enabled based on whether CorExtend User Defined
 	 *   Instructions have been implemented (CEE = Config(UDI))
-	 * - Disable any pending interrups (IM7..IM2 = 0, IM1..IM0 = 0)
+	 * - Disable any pending interrupts (IM7..IM2 = 0, IM1..IM0 = 0)
 	 * - Disable hardware interrupts (IPL7:IPL2 = 0)
 	 * - Base mode is Kernel mode (UM = 0)
 	 * - Error level is normal (ERL = 0)

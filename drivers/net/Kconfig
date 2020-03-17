@@ -291,7 +291,7 @@ config ENCX24J600_NRXDESCR
 		Defines how many descriptors are preallocated for the
 		transmission and reception queues.
 		The ENC has a relative large packet buffer of 24kB which can
-		be used to buffer multiple packets simutaneously
+		be used to buffer multiple packets simultaneously
 
 config ENCX24J600_DUMPPACKET
 	bool "Dump Packets"

@@ -41,6 +41,7 @@ unset CONFIGS
 silent=n
 defaults=n
 prompt=y
+nocopy=n
 
 while [ ! -z "$1" ]; do
   case $1 in
@@ -58,6 +59,9 @@ while [ ! -z "$1" ]; do
   --defaults )
     defaults=y
     ;;
+  --nocopy )
+    nocopy=y
+    ;;
   --help )
     echo "$0 is a tool for refreshing board configurations"
     echo ""
@@ -74,6 +78,8 @@ while [ ! -z "$1" ]; do
     echo "     prompt unless --silent"
     echo "  --defaults"
     echo "     Do not prompt for new default selections; accept all recommended default values"
+    echo "  --nocopy"
+    echo "     Do not copy defconfig from nuttx/boards/<board>/configs to nuttx/.config"
     echo "  --help"
     echo "     Show this help message and exit"
     echo "  <board>"
@@ -95,6 +101,7 @@ done
 
 MYNAME=`basename $0`
 
+cd $WD
 if [ -x ./${MYNAME} ] ; then
   cd .. || { echo "ERROR: cd .. failed" ; exit 1 ; }
 fi
@@ -206,29 +213,32 @@ for CONFIG in ${CONFIGS}; do
   # Copy the .config and Make.defs to the toplevel directory
 
   rm -f SAVEconfig
-  if [ -e .config ]; then
-    mv .config SAVEconfig || \
-      { echo "ERROR: Failed to move .config to SAVEconfig"; exit 1; }
-  fi
-
-  cp -a $DEFCONFIG .config || \
-    { echo "ERROR: Failed to copy $DEFCONFIG to .config"; exit 1; }
-
   rm -f SAVEMake.defs
-  if [ -e Make.defs ]; then
-    mv Make.defs SAVEMake.defs || \
-      { echo "ERROR: Failed to move Make.defs to SAVEMake.defs"; exit 1; }
-  fi
 
-  cp -a $MAKEDEFS Make.defs || \
-    { echo "ERROR: Failed to copy $MAKEDEFS to Make.defs"; exit 1; }
+  if [ "X${nocopy}" != "Xy" ]; then
+    if [ -e .config ]; then
+      mv .config SAVEconfig || \
+        { echo "ERROR: Failed to move .config to SAVEconfig"; exit 1; }
+    fi
 
-  # Then run oldconfig or oldefconfig
+    cp -a $DEFCONFIG .config || \
+      { echo "ERROR: Failed to copy $DEFCONFIG to .config"; exit 1; }
 
-  if [ "X${defaults}" == "Xy" ]; then
-    make olddefconfig
-  else
-    make oldconfig
+    if [ -e Make.defs ]; then
+      mv Make.defs SAVEMake.defs || \
+        { echo "ERROR: Failed to move Make.defs to SAVEMake.defs"; exit 1; }
+    fi
+
+    cp -a $MAKEDEFS Make.defs || \
+      { echo "ERROR: Failed to copy $MAKEDEFS to Make.defs"; exit 1; }
+
+    # Then run oldconfig or oldefconfig
+
+    if [ "X${defaults}" == "Xy" ]; then
+      make olddefconfig
+    else
+      make oldconfig
+    fi
   fi
 
   # Run savedefconfig to create the new defconfig file

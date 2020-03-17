@@ -89,7 +89,7 @@
 #define LPC31_MPMC_STWAITPAGE1_OFFSET   0x230 /* Static Memory Page Mode Read Delay Registers 1 */
 #define LPC31_MPMC_STWAITWR1_OFFSET     0x234 /* Static Memory Write Delay Registers 1 */
 #define LPC31_MPMC_STWAITTURN1_OFFSET   0x238 /* Static Memory Turn Round Delay Registers 1 */
-                                                /* 0x240-0x278: Reserverd */
+                                                /* 0x240-0x278: Reserved */
 
 /* MPMC register (virtual) addresses ************************************************************/
 

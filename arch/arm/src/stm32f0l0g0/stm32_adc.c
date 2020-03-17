@@ -140,7 +140,7 @@
 #endif
 
 /* Number of channels per ADC:
- *   - F0, L0, G0 - 19, but singe SMP for all channels
+ *   - F0, L0, G0 - 19, but single SMP for all channels
  *
  * NOTE: this value can be obtained from SMPRx register description (ST manual)
  */
@@ -1254,7 +1254,7 @@ static void adc_configure(FAR struct adc_dev_s *dev)
 
   adc_voltreg_cfg(priv);
 
-  /* Calibrate ADC - doesnt work for now */
+  /* Calibrate ADC - doesn't work for now */
 
   adc_calibrate(priv);
 

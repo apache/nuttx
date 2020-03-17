@@ -46,7 +46,7 @@
 
 /* User configuration checks ************************************************/
 
-/* According to SKP16C26 documention, "SIO/UART1 pins are used for
+/* According to SKP16C26 documentation, "SIO/UART1 pins are used for
  * communication between the SKP16C26 board kernel and KD30 Debugger through
  * the ICD. Do not connect these pins to any other circuit, as UART1 cannot
  * be used in the user program.

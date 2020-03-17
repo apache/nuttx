@@ -15,9 +15,23 @@ config SAMA5D2XULT_384MHZ
 config SAMA5D2XULT_396MHZ
 	bool "396 MHz"
 
+config SAMA5D2XULT_498MHZ
+	bool "498 MHz"
+
 config SAMA5D2XULT_528MHZ
 	bool "528 MHz"
 
 endchoice # CPU Frequency
+
+config SAMA5D2XULT_USBHOST_STACKSIZE
+	int "USB host waiter stack size"
+	default 1536 if USBHOST_HUB
+	default 1024 if !USBHOST_HUB
+	depends on USBHOST
+
+config SAMA5D2XULT_USBHOST_PRIO
+	int "USB host waiter task priority"
+	default 100
+	depends on USBHOST
 
 endif # ARCH_BOARD_SAMA5D2_XULT

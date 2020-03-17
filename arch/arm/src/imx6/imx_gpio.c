@@ -509,7 +509,7 @@ static inline int imx_gpio_configperiph(gpio_pinset_t pinset)
 }
 
 /****************************************************************************
- * Public Funtions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -525,7 +525,7 @@ int imx_config_gpio(gpio_pinset_t pinset)
   irqstate_t flags;
   int ret;
 
-  /* Configure the pin as an input initially to avoid any spurios outputs */
+  /* Configure the pin as an input initially to avoid any spurious outputs */
 
   flags = enter_critical_section();
 

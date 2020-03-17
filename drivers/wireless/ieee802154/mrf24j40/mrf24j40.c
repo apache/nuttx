@@ -138,7 +138,7 @@ static int mrf24j40_energydetect(FAR struct mrf24j40_radio_s *dev,
  * Function: mrf24j40_dopoll_csma
  *
  * Description:
- *   This function is called in order to preform an out-of-sequence TX poll.
+ *   This function is called in order to perform an out-of-sequence TX poll.
  *   This is done:
  *
  *   1. After completion of a transmission (mrf24j40_txdone_csma),
@@ -196,7 +196,7 @@ void mrf24j40_dopoll_csma(FAR void *arg)
  * Function: mrf24j40_dopoll_gts
  *
  * Description:
- *   This function is called in order to preform an out-of-sequence TX poll.
+ *   This function is called in order to perform an out-of-sequence TX poll.
  *   This is done:
  *
  *   1. After completion of a transmission (mrf24j40_txdone_gts),

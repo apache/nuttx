@@ -562,7 +562,7 @@ int max326_rtc_setalarm(FAR struct timespec *ts, alm_callback_t cb, FAR void *ar
           goto errout_with_lock;
         }
 
-      /* Get the ALARM delay betwen now and the alarm time */
+      /* Get the ALARM delay between now and the alarm time */
 
       b32delay = b32alarm - b32now;
 

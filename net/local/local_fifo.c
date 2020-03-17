@@ -437,7 +437,7 @@ int local_release_halfduplex(FAR struct local_conn_s *conn)
    * oriented Unix domain socket, we don't really know the best time to
    * release the FIFO resource.  It would be extremely inefficient to create
    * and destroy the FIFO on each packet. But, on the other hand, failing
-   * to destory the FIFO will leave the FIFO resources in place after the
+   * to destroy the FIFO will leave the FIFO resources in place after the
    * communications have completed.
    *
    * I am thinking that there should be something like a timer.  The timer

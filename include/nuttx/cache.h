@@ -83,9 +83,7 @@ extern "C"
 #ifdef CONFIG_ARCH_ICACHE
 void up_enable_icache(void);
 #else
-static inline void up_enable_icache(void)
-{
-}
+#  define up_enable_icache()
 #endif
 
 /****************************************************************************
@@ -105,9 +103,7 @@ static inline void up_enable_icache(void)
 #ifdef CONFIG_ARCH_ICACHE
 void up_disable_icache(void);
 #else
-static inline void up_disable_icache(void)
-{
-}
+#  define up_disable_icache()
 #endif
 
 /****************************************************************************
@@ -128,9 +124,7 @@ static inline void up_disable_icache(void)
 #ifdef CONFIG_ARCH_ICACHE
 void up_invalidate_icache(uintptr_t start, uintptr_t end);
 #else
-static inline void up_invalidate_icache(uintptr_t start, uintptr_t end)
-{
-}
+#  define up_invalidate_icache(start, end)
 #endif
 
 /****************************************************************************
@@ -150,9 +144,7 @@ static inline void up_invalidate_icache(uintptr_t start, uintptr_t end)
 #ifdef CONFIG_ARCH_ICACHE
 void up_invalidate_icache_all(void);
 #else
-static inline void up_invalidate_icache_all(void)
-{
-}
+#  define up_invalidate_icache_all()
 #endif
 
  /****************************************************************************
@@ -175,9 +167,7 @@ static inline void up_invalidate_icache_all(void)
 #ifdef CONFIG_ARCH_DCACHE
 void up_enable_dcache(void);
 #else
-static inline void up_enable_dcache(void)
-{
-}
+#  define up_enable_dcache()
 #endif
 
 /****************************************************************************
@@ -197,9 +187,7 @@ static inline void up_enable_dcache(void)
 #ifdef CONFIG_ARCH_DCACHE
 void up_disable_dcache(void);
 #else
-static inline void up_disable_dcache(void)
-{
-}
+#  define up_disable_dcache()
 #endif
 
 /****************************************************************************
@@ -222,9 +210,7 @@ static inline void up_disable_dcache(void)
 #ifdef CONFIG_ARCH_DCACHE
 void up_invalidate_dcache(uintptr_t start, uintptr_t end);
 #else
-static inline void up_invalidate_dcache(uintptr_t start, uintptr_t end)
-{
-}
+#  define up_invalidate_dcache(start, end)
 #endif
 
 /****************************************************************************
@@ -244,9 +230,7 @@ static inline void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 #ifdef CONFIG_ARCH_DCACHE
 void up_invalidate_dcache_all(void);
 #else
-static inline void up_invalidate_dcache_all(void)
-{
-}
+#  define up_invalidate_dcache_all()
 #endif
 
 /****************************************************************************
@@ -268,9 +252,7 @@ static inline void up_invalidate_dcache_all(void)
 #ifdef CONFIG_ARCH_DCACHE
 void up_clean_dcache(uintptr_t start, uintptr_t end);
 #else
-static inline void up_clean_dcache(uintptr_t start, uintptr_t end)
-{
-}
+#  define up_clean_dcache(start, end)
 #endif
 
 /****************************************************************************
@@ -291,9 +273,7 @@ static inline void up_clean_dcache(uintptr_t start, uintptr_t end)
 #ifdef CONFIG_ARCH_DCACHE
 void up_clean_dcache_all(void);
 #else
-static inline void up_clean_dcache_all(void)
-{
-}
+#  define up_clean_dcache_all()
 #endif
 
 /****************************************************************************
@@ -315,9 +295,7 @@ static inline void up_clean_dcache_all(void)
 #ifdef CONFIG_ARCH_DCACHE
 void up_flush_dcache(uintptr_t start, uintptr_t end);
 #else
-static inline void up_flush_dcache(uintptr_t start, uintptr_t end)
-{
-}
+#  define up_flush_dcache(start, end)
 #endif
 
 /****************************************************************************
@@ -337,9 +315,7 @@ static inline void up_flush_dcache(uintptr_t start, uintptr_t end)
 #ifdef CONFIG_ARCH_DCACHE
 void up_flush_dcache_all(void);
 #else
-static inline void up_flush_dcache_all(void)
-{
-}
+#  define up_flush_dcache_all()
 #endif
 
 /****************************************************************************
@@ -363,9 +339,7 @@ static inline void up_flush_dcache_all(void)
 #ifdef CONFIG_ARCH_ICACHE
 void up_coherent_dcache(uintptr_t addr, size_t len);
 #else
-static inline void up_coherent_dcache(uintptr_t addr, size_t len)
-{
-}
+#  define up_coherent_dcache(addr, len)
 #endif
 
 #undef EXTERN

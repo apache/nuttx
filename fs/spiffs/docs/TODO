@@ -4,7 +4,7 @@ SPIFFS2 thoughts
 
 * Instead of exact object id:s in the object lookup tables, use a hash of span index and object id.
   Eg. object id xor:ed with bit-reversed span index.
-  This should decrease number of actual pages that needs to be visited when looking thru the obj lut.
+  This should decrease number of actual pages that needs to be visited when looking through the obj lut.
 
 * Logical number of each block. When moving stuff in a garbage collected page, the free
   page is assigned the same number as the garbage collected. Thus, object index pages do not have to

@@ -384,7 +384,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
           else
             {
-              /* Will there be another (even) packet afer this one?
+              /* Will there be another (even) packet after this one?
                * (next_sndlen > 0)  Will the split condition occur on that
                * next, even packet? ((next_sndlen - conn->mss) < 0) If
                * so, then perform the split now to avoid the case where the

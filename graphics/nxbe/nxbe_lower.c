@@ -65,7 +65,7 @@ void nxbe_lower(FAR struct nxbe_window_s *wnd)
   /* If the window is already at the bottom, then there is nothing to do.
    * Refuse to lower the background window; Refuse to lower a modal window.
    * It is impossible to lower a hidden window because it does not exist
-   * in the hiearchy.
+   * in the hierarchy.
    */
 
   if (wnd->below == NULL || wnd->below == &be->bkgd ||

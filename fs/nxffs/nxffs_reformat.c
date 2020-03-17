@@ -207,7 +207,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
           if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0 ||
               blkhdr->state != BLOCK_STATE_GOOD)
             {
-              /* The block is not formated with the NXFFS magic bytes or else
+              /* The block is not formatted with the NXFFS magic bytes or else
                * the block is specifically marked bad.
                */
 

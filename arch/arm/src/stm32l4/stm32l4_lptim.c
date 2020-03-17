@@ -1,5 +1,5 @@
 /************************************************************************************
- * arm/arm/src/stm3l42/stm32l4_lptim.c
+ * arch/arm/src/stm3l42/stm32l4_lptim.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
  *   Author: Uros Platise <uros.platise@isotel.eu>

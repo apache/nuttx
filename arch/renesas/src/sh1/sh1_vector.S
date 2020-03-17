@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>	/* NuttX configuration settings */
 #include <arch/board/board.h>	/* Board-specific settings */
-#include <arch/irq.h>		/* IRQ definitons */
+#include <arch/irq.h>		/* IRQ definitions */
 
 #include "chip.h"		/* Chip-specific settings */
 #include "up_internal.h"
@@ -247,7 +247,7 @@ _up_cmi_handler:
  * Name: _up_vector
  *
  * Description:
- *   Execption entry point.  Upon entry:
+ *   Exception entry point.  Upon entry:
  *
  *  R4 :  Holds IRQ number
  *  SP -> Saved R4		(REG_R4=19)	See irq.h
@@ -293,7 +293,7 @@ _up_vector:
 	sts.l	mach, @-r15
 	sts.l	macl, @-r15
 
-	/* Then save the value of the SP *before* the interrupt ocurred
+	/* Then save the value of the SP *before* the interrupt occurred
 	 *
 	 * SP -> SP		(REG_SP=9) See irq.h
 	 *       macl		(REG_MACL=10)
@@ -368,7 +368,7 @@ _up_vector:
 	bf	.Lcontextswitch
 	mov	r0, r15
 
-	/* Restore registers from the stack. NOTE: We coudl improve interrupt
+	/* Restore registers from the stack. NOTE: We cloud improve interrupt
          * performance by skipping the restore of r8-r14.  These will not
          * be modified by the called C code
          */

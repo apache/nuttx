@@ -336,7 +336,7 @@ void nxbe_cursor_enable(FAR struct nxbe_state_s *be, bool enable);
  *   Set the cursor image
  *
  *   The image is provided a a 2-bits-per-pixel image.  The two bit incoding
- *   is as followings:
+ *   is as following:
  *
  *   00 - The transparent background
  *   01 - Color1:  The main color of the cursor
@@ -389,7 +389,7 @@ void nxbe_cursor_setposition(FAR struct nxbe_state_s *be,
  *   be    - The back-end state structure instance, or
  *   wnd   - Window state structure
  *   rect  - The modified region of the window.  In windows coordinates for
- *           nxbe_cursor_backupdraw(); in graphics device corrdinates for
+ *           nxbe_cursor_backupdraw(); in graphics device coordinates for
  *           nxbe_cursor_backupdraw_dev().
  *   plane - The plane number to use.
  *
@@ -415,7 +415,7 @@ void nxbe_cursor_backupdraw_dev(FAR struct nxbe_state_s *be,
  *   be    - The back-end state structure instance, or
  *   wnd   - Window state structure
  *   rect  - The modified region of the window.  In windows coordinates for
- *           nxbe_cursor_backupdraw(); in graphics device corrdinates for
+ *           nxbe_cursor_backupdraw(); in graphics device coordinates for
  *           nxbe_cursor_backupdraw_dev().
  *
  * Returned Value:
@@ -505,7 +505,7 @@ void nxbe_modal(FAR struct nxbe_window_s *wnd, bool enable);
  *
  * Description:
  *   Select if the window is visible or hidden.  A hidden window is still
- *   present will will update normally, but will be on the visiable on the
+ *   present will will update normally, but will be on the visible on the
  *   display until it is unhidden.
  *
  * Input Parameters:
@@ -692,7 +692,7 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
  * Name: nxbe_flush
  *
  * Description:
- *   After per-window frambuffer has been updated, the modified region must
+ *   After per-window framebuffer has been updated, the modified region must
  *   be written to device graphics memory.  That function is managed by this
  *   simple function.  It does the following:
  *

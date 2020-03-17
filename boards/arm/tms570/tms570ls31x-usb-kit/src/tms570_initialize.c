@@ -87,7 +87,7 @@ void tms570_board_initialize(void)
 #if 0
   putreg32(0x01000001, 0xfff7b800 + 0);
 
-  /* - PULL functinality is enabled */
+  /* - PULL functionality is enabled */
 
   putreg32(0x00000000, 0xfff7b800 + 0x64);
 

@@ -60,7 +60,7 @@ Concepts
       size CONFIG_MM_PGSIZE.
 
     - A set of physical pages are allocated and the physical address of
-      these pages is retained in the internel data set.
+      these pages is retained in the internal data set.
 
   Now the key maps to and shared memory identifier (the table index) and
   the table index provides access to the list of physical pages making up
@@ -89,7 +89,7 @@ Concepts
 
     - Allocate a virtual address spaces of the same size as the physical
       address space using the per-process virtual shared memory virtual
-      page allocator that can be found in the calling process' task group
+      page allocator that can be found in the calling process's task group
       structure.
 
     - Use platform specific interfaces to mapy the physical memory to the

@@ -1,6 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/samv7/hardware/sam_sdramc.h
- * SDRAM Controler (SDRAMC) definitions for the SAMV71
+ * SDRAM Controller (SDRAMC) definitions for the SAMV71
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

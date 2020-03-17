@@ -107,7 +107,7 @@
 #define MMCSD_SPIR2_ERROR         0x0004 /* Error */
 #define MMCSD_SPIR2_CCERROR       0x0008 /* CC error */
 #define MMCSD_SPIR2_CARDECCFAIL   0x0010 /* Card ECC failed */
-#define MMCSD_SPIR2_WPVIOLATION   0x0020 /* WP violoation */
+#define MMCSD_SPIR2_WPVIOLATION   0x0020 /* WP violation */
 #define MMCSD_SPIR2_ERASEPARAM    0x0040 /* Erase parameter */
 #define MMCSD_SPIR2_OUTOFRANGE    0x0080 /* Out of range */
 #define MMCSD_SPIR2_CSDOVERWRITE  0x0080 /* CSD overwrite */

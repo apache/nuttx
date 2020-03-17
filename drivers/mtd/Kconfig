@@ -822,7 +822,7 @@ config MTD_SMART_SECTOR_CACHE_SIZE
 	---help---
 		Sets the size of the cache used for logical to physical sector mapping.  A
 		larger number allows larger files to be "seek"ed randomly without encountering
-		cache misses.  Any files larger than CACH_SIZE * SECTOR_SIZE that are seeked
+		cache misses.  Any files larger than CACH_SIZE * SECTOR_SIZE that are sought
 		start to end will cause the cache to flush forcing manual scanning of the
 		MTD device to find the logical to physical mappings.
 

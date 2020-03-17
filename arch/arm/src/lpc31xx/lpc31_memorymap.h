@@ -197,7 +197,7 @@
 #define LPC31_NAND_MMUFLAGS          MMU_IOFLAGS
 
 /* board_memorymap.h contains special mappings that are needed when a ROM
- * memory map is used.  It is included in this odd location becaue it depends
+ * memory map is used.  It is included in this odd location because it depends
  * on some the virtual address definitions provided above.
  */
 

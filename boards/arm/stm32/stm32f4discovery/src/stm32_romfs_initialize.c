@@ -93,7 +93,8 @@ __asm__ (
 "romfs_data_end:\n"
     ".globl   romfs_data_size\n"
 "romfs_data_size:\n"
-    ".word romfs_data_end - romfs_data_begin\n");
+    ".word romfs_data_end - romfs_data_begin\n"
+    ".previous\n");
 
 extern const char romfs_data_begin;
 extern const char romfs_data_end;

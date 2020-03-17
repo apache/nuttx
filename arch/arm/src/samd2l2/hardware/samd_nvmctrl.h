@@ -143,7 +143,7 @@
 #  define NVMCTRL_PARAM_PSZ_1KB      (7 << NVMCTRL_PARAM_PSZ_SHIFT) /* 1024 bytes */
 
 #ifdef CONFIG_ARCH_FAMILY_SAMD21
-#  define NVMCTRL_PARAM_RWWEEP_SHIFT (20)      /* Bits 20-31: Read whle write EEPROM emulation area pages */
+#  define NVMCTRL_PARAM_RWWEEP_SHIFT (20)      /* Bits 20-31: Read while write EEPROM emulation area pages */
 #  define NVMCTRL_PARAM_RWWEEP_MASK  (0xfff << NVMCTRL_PARAM_RWWEEP_SHIFT)
 #endif
 

@@ -228,6 +228,12 @@ static void generate_proxy(int nparms)
   fprintf(stream, "/* Auto-generated %s proxy file -- do not edit */\n\n", g_parm[NAME_INDEX]);
   fprintf(stream, "#include <nuttx/config.h>\n");
 
+  /* Suppress "'noreturn' function does return" warnings. */
+
+  fprintf(stream, "#include <nuttx/compiler.h>\n");
+  fprintf(stream, "#undef noreturn_function\n");
+  fprintf(stream, "#define noreturn_function\n");
+
   /* Does this function have a variable number of parameters?  If so then the
    * final parameter type will be encoded as "..."
    */

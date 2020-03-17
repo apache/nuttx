@@ -81,6 +81,13 @@ _ez80_init:
 	out0	(PC_ALT2), a
 	out0	(PD_ALT2), a
 
+	out0	(TMR0_CTL), a		; timers
+	out0	(TMR1_CTL), a
+	out0	(TMR2_CTL), a
+	out0	(TMR3_CTL), a
+	out0	(TMR4_CTL), a
+	out0	(TMR5_CTL), a
+
 	out0	(UART0_IER), a		; UARTs
 	out0	(UART1_IER), a
 
@@ -133,17 +140,6 @@ _ez80_init:
 	ld		a, __CS3_CTL_INIT_PARAM
 	out0	(CS3_CTL), a
 
-	; Enable internal memory
-
-	ld		a, __FLASH_ADDR_U_INIT_PARAM
-	out0	(FLASH_ADDR_U), a
-	ld		a, __FLASH_CTL_INIT_PARAM
-	out0	(FLASH_CTRL), a
-
-	ld		a, __RAM_ADDR_U_INIT_PARAM
-	out0	(RAM_ADDR_U), a
-	ld		a, __RAM_CTL_INIT_PARAM
-	out0	(RAM_CTL), a
 	ret
 
 ;*****************************************************************************
