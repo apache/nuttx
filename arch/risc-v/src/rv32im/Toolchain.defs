@@ -79,11 +79,16 @@ endif
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVGL)
   CROSSDEV ?= riscv64-unknown-elf-
   ARCROSSDEV ?= riscv64-unknown-elf-
-ifeq ($(CONFIG_RV32IM_HW_MULDIV),y)
-  ARCHCPUFLAGS = -march=rv32im -mabi=ilp32f -mdiv
-else
-  ARCHCPUFLAGS = -march=rv32im -mabi=ilp32f -mno-div
-endif
+  ifeq ($(CONFIG_ARCH_FPU),y)
+      ARCHCPUFLAGS = -march=rv32imf -mabi=ilp32f
+  else
+      ARCHCPUFLAGS = -march=rv32im -mabi=ilp32
+  endif
+  ifeq ($(CONFIG_RV32IM_HW_MULDIV),y)
+    ARCHCPUFLAGS += -mdiv
+  else
+    ARCHCPUFLAGS += -mno-div
+  endif
 endif
 
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVGW)
@@ -92,11 +97,16 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVGW)
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif
-ifeq ($(CONFIG_RV32IM_HW_MULDIV),y)
-  ARCHCPUFLAGS = -march=rv32im -mabi=ilp32f -mdiv
-else
-  ARCHCPUFLAGS = -march=rv32im -mabi=ilp32f -mno-div
-endif
+  ifeq ($(CONFIG_ARCH_FPU),y)
+      ARCHCPUFLAGS = -march=rv32imf -mabi=ilp32f
+  else
+      ARCHCPUFLAGS = -march=rv32im -mabi=ilp32
+  endif
+  ifeq ($(CONFIG_RV32IM_HW_MULDIV),y)
+    ARCHCPUFLAGS += -mdiv
+  else
+    ARCHCPUFLAGS += -mno-div
+  endif
 endif
 
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RISCY)
