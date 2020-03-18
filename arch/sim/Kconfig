@@ -118,14 +118,34 @@ config SIM_NETDEV
 	select SCHED_LPWORK
 	select SIM_WALLTIME
 	---help---
+		Build in support for a simulated network device.
+
+if SIM_NETDEV
+
+choice
+	prompt "Simulated Network Device Type"
+	default SIM_NETDEV_TAP
+
+config SIM_NETDEV_TAP
+	bool "Simulated Network Device with TAP/WPCAP"
+	---help---
 		Build in support for a simulated network device using a TAP device on Linux or
 		WPCAP on Windows.
+
+config SIM_NETDEV_VPNKIT
+	bool "Simulated Network Device with VPNKit"
+	---help---
+		Build in support for a simulated network device using VPNKit.
+
+endchoice
+
+endif
 
 if HOST_LINUX
 choice
 	prompt "Simulation Network Type"
 	default SIM_NET_HOST_ROUTE
-	depends on SIM_NETDEV
+	depends on SIM_NETDEV_TAP
 
 config SIM_NET_HOST_ROUTE
 	bool "Use local host route"

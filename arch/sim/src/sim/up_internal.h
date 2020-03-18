@@ -314,7 +314,7 @@ FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void);
 
 /* up_tapdev.c **************************************************************/
 
-#if defined(CONFIG_SIM_NETDEV) && !defined(__CYGWIN__)
+#if defined(CONFIG_SIM_NETDEV_TAP) && !defined(__CYGWIN__)
 void tapdev_init(void);
 int tapdev_avail(void);
 unsigned int tapdev_read(unsigned char *buf, unsigned int buflen);
@@ -332,7 +332,7 @@ void tapdev_ifdown(void);
 
 /* up_wpcap.c ***************************************************************/
 
-#if defined(CONFIG_SIM_NETDEV) && defined(__CYGWIN__)
+#if defined(CONFIG_SIM_NETDEV_TAP) && defined(__CYGWIN__)
 void wpcap_init(void);
 unsigned int wpcap_read(unsigned char *buf, unsigned int buflen);
 void wpcap_send(unsigned char *buf, unsigned int buflen);
@@ -343,6 +343,24 @@ void wpcap_send(unsigned char *buf, unsigned int buflen);
 #  define netdev_send(buf,buflen) wpcap_send(buf,buflen)
 #  define netdev_ifup(ifaddr)     {}
 #  define netdev_ifdown()         {}
+#endif
+
+/* up_vpnkit.c **************************************************************/
+
+#if defined(CONFIG_SIM_NETDEV_VPNKIT)
+void vpnkit_init(void);
+int vpnkit_avail(void);
+unsigned int vpnkit_read(unsigned char *buf, unsigned int buflen);
+void vpnkit_send(unsigned char *buf, unsigned int buflen);
+void vpnkit_ifup(in_addr_t ifaddr);
+void vpnkit_ifdown(void);
+
+#  define netdev_init()           vpnkit_init()
+#  define netdev_avail()          vpnkit_avail()
+#  define netdev_read(buf,buflen) vpnkit_read(buf,buflen)
+#  define netdev_send(buf,buflen) vpnkit_send(buf,buflen)
+#  define netdev_ifup(ifaddr)     vpnkit_ifup(ifaddr)
+#  define netdev_ifdown()         vpnkit_ifdown()
 #endif
 
 /* up_netdriver.c ***********************************************************/
