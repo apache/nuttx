@@ -104,7 +104,7 @@ struct can_conn_s
    */
 
   struct can_poll_s pollinfo[4]; /* FIXME make dynamic */
-  
+
 #ifdef CONFIG_NET_CANPROTO_OPTIONS
   int32_t loopback;
   int32_t recv_own_msgs;
@@ -115,12 +115,10 @@ struct can_conn_s
   int32_t tx_deadline;
 # endif
 #endif
-  
+
 #ifdef CONFIG_NET_TIMESTAMP
   FAR struct socket *psock; /* Needed to get SO_TIMESTAMP value */
 #endif
-
-  
 };
 
 /****************************************************************************
@@ -169,8 +167,8 @@ FAR struct can_conn_s *can_alloc(void);
  * Name: can_free()
  *
  * Description:
- *   Free a NetLink connection structure that is no longer in use. This should
- *   be done by the implementation of close().
+ *   Free a NetLink connection structure that is no longer in use. This
+ *   should be done by the implementation of close().
  *
  ****************************************************************************/
 
@@ -259,7 +257,6 @@ uint16_t can_datahandler(FAR struct can_conn_s *conn, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-
 ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
                      int flags, FAR struct sockaddr *from,
                      FAR socklen_t *fromlen);
@@ -282,7 +279,7 @@ ssize_t can_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
  *   flags    Receive flags (ignored)
  *
  ****************************************************************************/
-#ifdef CONFIG_NET_RECVMSG_CMSG
+#ifdef CONFIG_NET_CMSG
 ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                     size_t len, int flags);
 #endif
