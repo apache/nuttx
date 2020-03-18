@@ -142,7 +142,6 @@ static int peak_tx_mailbox_index_ = 0;
  */
 
 #define S32K1XX_WDDELAY     (1*CLK_TCK)
-#define S32K1XX_TXTIMEOUT   ((CONFIG_NET_CAN_RAW_TX_POLL/1000)*CLK_TCK)
 
 /****************************************************************************
  * Private Types
@@ -224,30 +223,30 @@ struct txmbstats
 
 struct s32k1xx_driver_s
 {
-  bool bifup;                  /* true:ifup false:ifdown */
-  uint8_t txtail;              /* The oldest busy TX descriptor */
-  uint8_t txhead;              /* The next TX descriptor to use */
-  uint8_t rxtail;              /* The next RX descriptor to use */
-  uint8_t phyaddr;             /* Selected PHY address */
+  bool bifup;                   /* true:ifup false:ifdown */
+  uint8_t txtail;               /* The oldest busy TX descriptor */
+  uint8_t txhead;               /* The next TX descriptor to use */
+  uint8_t rxtail;               /* The next RX descriptor to use */
+  uint8_t phyaddr;              /* Selected PHY address */
 #ifdef WORK_QUEUE
-  WDOG_ID txpoll;              /* TX poll timer */
+  WDOG_ID txpoll;               /* TX poll timer */
 #endif
 #ifdef TX_TIMEOUT_WQ
-  WDOG_ID txtimeout;           /* TX timeout timer */
+  WDOG_ID txtimeout[TXMBCOUNT]; /* TX timeout timer */
 #endif
-  struct work_s irqwork;       /* For deferring interrupt work to the work queue */
-  struct work_s pollwork;      /* For deferring poll work to the work queue */
+  struct work_s irqwork;        /* For deferring interrupt work to the wq */
+  struct work_s pollwork;       /* For deferring poll work to the work wq */
 #ifdef CAN_FD
-  struct canfd_frame *txdesc;  /* A pointer to the list of TX descriptor */
-  struct canfd_frame *rxdesc;  /* A pointer to the list of RX descriptors */
+  struct canfd_frame *txdesc;   /* A pointer to the list of TX descriptor */
+  struct canfd_frame *rxdesc;   /* A pointer to the list of RX descriptors */
 #else
-  struct can_frame *txdesc;    /* A pointer to the list of TX descriptor */
-  struct can_frame *rxdesc;    /* A pointer to the list of RX descriptors */
+  struct can_frame *txdesc;     /* A pointer to the list of TX descriptor */
+  struct can_frame *rxdesc;     /* A pointer to the list of RX descriptors */
 #endif
 
   /* This holds the information visible to the NuttX network */
 
-  struct net_driver_s dev;     /* Interface understood by the network */
+  struct net_driver_s dev;      /* Interface understood by the network */
 
   struct mb_s *rx;
   struct mb_s *tx;
@@ -311,10 +310,6 @@ static void s32k1xx_setenable(uint32_t enable);
 static void s32k1xx_setfreeze(uint32_t freeze);
 static uint32_t s32k1xx_waitmcr_change(uint32_t mask,
                                        uint32_t target_state);
-#ifdef TX_TIMEOUT_WQ
-static void s32k1xx_checkandaborttx(struct s32k1xx_driver_s *priv,
-        uint32_t mbi, struct timeval *now);
-#endif
 
 /* Interrupt handling */
 
@@ -446,31 +441,41 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
     }
 
 #ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
-      if (priv->dev.d_sndlen > priv->dev.d_len)
+  int32_t timeout = 0;
+  struct timespec ts;
+  clock_systimespec(&ts);
+
+  if (priv->dev.d_sndlen > priv->dev.d_len)
+    {
+      struct timeval *tv =
+             (struct timeval *)(priv->dev.d_buf + priv->dev.d_len);
+      priv->txmb[mbi].deadline = *tv;
+      timeout  = (tv->tv_sec - ts.tv_sec)*CLK_TCK
+                 + ((tv->tv_usec - ts.tv_nsec / 1000)*CLK_TCK) / 1000000;
+      if (timeout < 0)
         {
-          struct timeval *tv =
-                 (struct timeval *)(priv->dev.d_buf + priv->dev.d_len);
-          priv->txmb[mbi].deadline = *tv;
+          return 0;       /* No transmission for you! */
+        }
+    }
+  else
+    {
+      /* Default TX deadline defined in NET_CAN_RAW_DEFAULT_TX_DEADLINE */
+
+      if (CONFIG_NET_CAN_RAW_DEFAULT_TX_DEADLINE > 0)
+        {
+          timeout = ((CONFIG_NET_CAN_RAW_DEFAULT_TX_DEADLINE / 1000000)
+              *CLK_TCK);
+          priv->txmb[mbi].deadline.tv_sec = ts.tv_sec +
+              CONFIG_NET_CAN_RAW_DEFAULT_TX_DEADLINE / 1000000;
+          priv->txmb[mbi].deadline.tv_usec = (ts.tv_nsec / 1000) +
+              CONFIG_NET_CAN_RAW_DEFAULT_TX_DEADLINE % 1000000;
         }
       else
         {
-          /* Default TX deadline defined in NET_CAN_RAW_DEFAULT_TX_DEADLINE */
-
-          if (CONFIG_NET_CAN_RAW_DEFAULT_TX_DEADLINE > 0)
-            {
-              struct timespec ts;
-              clock_systimespec(&ts);
-              priv->txmb[mbi].deadline.tv_sec = ts.tv_sec +
-                      CONFIG_NET_CAN_RAW_DEFAULT_TX_DEADLINE / 1000000;
-              priv->txmb[mbi].deadline.tv_usec = (ts.tv_nsec / 1000) +
-                      CONFIG_NET_CAN_RAW_DEFAULT_TX_DEADLINE % 1000000;
-            }
-          else
-            {
-              priv->txmb[mbi].deadline.tv_sec = 0;
-              priv->txmb[mbi].deadline.tv_usec = 0;
-            }
+          priv->txmb[mbi].deadline.tv_sec = 0;
+          priv->txmb[mbi].deadline.tv_usec = 0;
         }
+    }
 #endif
 
   peak_tx_mailbox_index_ =
@@ -580,10 +585,14 @@ static int s32k1xx_transmit(FAR struct s32k1xx_driver_s *priv)
 
   NETDEV_TXPACKETS(&priv->dev);
 
-  /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 #ifdef TX_TIMEOUT_WQ
-  wd_start(priv->txtimeout, S32K1XX_TXTIMEOUT, s32k1xx_txtimeout_expiry, 1,
-           (wdparm_t)priv);
+  /* Setup the TX timeout watchdog (perhaps restarting the timer) */
+
+  if (timeout > 0)
+    {
+      wd_start(priv->txtimeout[mbi], timeout + 1, s32k1xx_txtimeout_expiry,
+                1, (wdparm_t)priv);
+    }
 #endif
 
   return OK;
@@ -838,19 +847,6 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv, uint32_t flags)
 {
   #warning Missing logic
 
-#ifdef TX_TIMEOUT_WQ
-  /* We are here because a transmission completed, so the watchdog can be
-   * canceled.
-   */
-
-  wd_cancel(priv->txtimeout);
-
-  struct timespec ts;
-  struct timeval *now = (struct timeval *)&ts;
-  clock_systimespec(&ts);
-  now->tv_usec = ts.tv_nsec / 1000; /* timespec to timeval conversion */
-#endif
-
   /* FIXME First Process Error aborts */
 
   /* Process TX completions */
@@ -863,16 +859,14 @@ static void s32k1xx_txdone(FAR struct s32k1xx_driver_s *priv, uint32_t flags)
           putreg32(mb_bit, S32K1XX_CAN0_IFLAG1);
           flags &= ~mb_bit;
           NETDEV_TXDONE(&priv->dev);
-        }
-
 #ifdef TX_TIMEOUT_WQ
-      /* MB is not done, check for timeout */
+          /* We are here because a transmission completed, so the
+           * corresponding watchdog can be canceled.
+           */
 
-      else
-        {
-       s32k1xx_checkandaborttx(priv, mbi, now);
-        }
+          wd_cancel(priv->txtimeout[mbi]);
 #endif
+        }
 
       mb_bit <<= 1;
     }
@@ -1017,19 +1011,6 @@ static void s32k1xx_polltimer_expiry(int argc, uint32_t arg, ...)
  *
  ****************************************************************************/
 #ifdef TX_TIMEOUT_WQ
-static void s32k1xx_checkandaborttx(struct s32k1xx_driver_s *priv,
-  uint32_t mbi, struct timeval *now)
-{
-  if (priv->txmb[mbi].deadline.tv_sec != 0
-      && (now->tv_sec > priv->txmb[mbi].deadline.tv_sec
-      || now->tv_usec > priv->txmb[mbi].deadline.tv_usec))
-    {
-      NETDEV_TXTIMEOUTS(&priv->dev);
-      struct mb_s *mb = &priv->tx[mbi];
-      mb->cs.code = CAN_TXMB_ABORT;
-      priv->txmb[mbi].pending = TX_ABORT;
-    }
-}
 
 static void s32k1xx_txtimeout_work(FAR void *arg)
 {
@@ -1040,9 +1021,21 @@ static void s32k1xx_txtimeout_work(FAR void *arg)
   clock_systimespec(&ts);
   now->tv_usec = ts.tv_nsec / 1000; /* timespec to timeval conversion */
 
-  for (int i = 0; i < TXMBCOUNT; i++)
+  /* The watchdog timed out, yet we still check mailboxes in case the
+   * transmit function transmitted a new frame
+   */
+
+  for (int mbi = 0; mbi < TXMBCOUNT; mbi++)
     {
-      s32k1xx_checkandaborttx(priv, i, now);
+      if (priv->txmb[mbi].deadline.tv_sec != 0
+          && (now->tv_sec > priv->txmb[mbi].deadline.tv_sec
+          || now->tv_usec > priv->txmb[mbi].deadline.tv_usec))
+        {
+          NETDEV_TXTIMEOUTS(&priv->dev);
+          struct mb_s *mb = &priv->tx[mbi];
+          mb->cs.code = CAN_TXMB_ABORT;
+          priv->txmb[mbi].pending = TX_ABORT;
+        }
     }
 }
 
@@ -1637,7 +1630,11 @@ int s32k1xx_netinitialize(int intf)
   priv->txpoll        = wd_create();       /* Create periodic poll timer */
 #endif
 #ifdef TX_TIMEOUT_WQ
-  priv->txtimeout     = wd_create();       /* Create TX timeout timer */
+  for (int i = 0; i < TXMBCOUNT; i++)
+    {
+      priv->txtimeout[i] = wd_create();    /* Create TX timeout timer */
+    }
+
 #endif
   priv->rx            = (struct mb_s *)(S32K1XX_CAN0_MB);
   priv->tx            = (struct mb_s *)(S32K1XX_CAN0_MB +

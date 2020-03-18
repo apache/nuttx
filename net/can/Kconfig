@@ -51,13 +51,6 @@ config NET_CAN_RAW_TX_DEADLINE
 		CAN frame is still in the HW TX mailbox then the CAN driver will 
 		discard the CAN frame automatically.
 		
-config NET_CAN_RAW_TX_POLL
-	int "TX deadline polling rate (ms) "
-	default 500
-	depends on NET_CAN_RAW_TX_DEADLINE
-	---help---
-		The polling rate on which the CAN driver checks whenever a TX deadline occurs
-		
 config NET_CAN_RAW_DEFAULT_TX_DEADLINE
 	int "Default TX deadline when no deadline is given (us)"
 	default 0
