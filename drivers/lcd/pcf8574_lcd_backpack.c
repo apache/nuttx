@@ -68,7 +68,7 @@
 #define DELAY_US_NYBBLE0    20
 #define DELAY_US_NYBBLE1    10
 #define DELAY_US_WRITE      40
-#define DELAY_US_HOMECLEAR  1500
+#define DELAY_US_HOMECLEAR  2000
 
 /* HD44780 commands */
 
