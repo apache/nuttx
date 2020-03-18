@@ -1,8 +1,10 @@
 /* SPDX-License-Identifier: ((GPL-2.0-only WITH Linux-syscall-note) OR BSD-3-Clause) */
-/*
+
+/************************************************************************************
  * linux/can/error.h
  *
- * Definitions of the CAN error messages to be filtered and passed to the user.
+ * Definitions of the CAN error messages to be filtered and passed to the
+ * user.
  *
  * Author: Oliver Hartkopp <oliver.hartkopp@volkswagen.de>
  * Copyright (c) 2002-2007 Volkswagen Group Electronic Research
@@ -40,7 +42,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
  * DAMAGE.
- */
+ ************************************************************************************/
 
 #ifndef _UAPI_CAN_ERROR_H
 #define _UAPI_CAN_ERROR_H
@@ -94,18 +96,18 @@
 #define CAN_ERR_PROT_LOC_SRTR    0x04 /* substitute RTR (SFF: RTR) */
 #define CAN_ERR_PROT_LOC_IDE     0x05 /* identifier extension */
 #define CAN_ERR_PROT_LOC_ID17_13 0x07 /* ID bits 17-13 */
-#define CAN_ERR_PROT_LOC_ID12_05 0x0F /* ID bits 12-5 */
-#define CAN_ERR_PROT_LOC_ID04_00 0x0E /* ID bits 4-0 */
-#define CAN_ERR_PROT_LOC_RTR     0x0C /* RTR */
-#define CAN_ERR_PROT_LOC_RES1    0x0D /* reserved bit 1 */
+#define CAN_ERR_PROT_LOC_ID12_05 0x0f /* ID bits 12-5 */
+#define CAN_ERR_PROT_LOC_ID04_00 0x0e /* ID bits 4-0 */
+#define CAN_ERR_PROT_LOC_RTR     0x0c /* RTR */
+#define CAN_ERR_PROT_LOC_RES1    0x0d /* reserved bit 1 */
 #define CAN_ERR_PROT_LOC_RES0    0x09 /* reserved bit 0 */
-#define CAN_ERR_PROT_LOC_DLC     0x0B /* data length code */
-#define CAN_ERR_PROT_LOC_DATA    0x0A /* data section */
+#define CAN_ERR_PROT_LOC_DLC     0x0b /* data length code */
+#define CAN_ERR_PROT_LOC_DATA    0x0a /* data section */
 #define CAN_ERR_PROT_LOC_CRC_SEQ 0x08 /* CRC sequence */
 #define CAN_ERR_PROT_LOC_CRC_DEL 0x18 /* CRC delimiter */
 #define CAN_ERR_PROT_LOC_ACK     0x19 /* ACK slot */
-#define CAN_ERR_PROT_LOC_ACK_DEL 0x1B /* ACK delimiter */
-#define CAN_ERR_PROT_LOC_EOF     0x1A /* end of frame */
+#define CAN_ERR_PROT_LOC_ACK_DEL 0x1b /* ACK delimiter */
+#define CAN_ERR_PROT_LOC_EOF     0x1a /* end of frame */
 #define CAN_ERR_PROT_LOC_INTERM  0x12 /* intermission */
 
 /* error status of CAN-transceiver / data[4] */
