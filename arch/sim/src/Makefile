@@ -157,7 +157,7 @@ ifeq ($(CONFIG_ARCH_ROMGETC),y)
   CSRCS += up_romgetc.c
 endif
 
-ifeq ($(CONFIG_SIM_NETDEV),y)
+ifeq ($(CONFIG_SIM_NETDEV_TAP),y)
   CSRCS += up_netdriver.c
   HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_PKTSIZE)
 ifneq ($(HOSTOS),Cygwin)
@@ -173,7 +173,12 @@ else # HOSTOS != Cygwin
   HOSTSRCS += up_wpcap.c
   DRVLIB = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
 endif # HOSTOS != Cygwin
-endif # CONFIG_SIM_NETDEV
+else ifeq ($(CONFIG_SIM_NETDEV_VPNKIT),y)
+  CSRCS += up_netdriver.c
+  HOSTSRCS += up_vpnkit.c
+  VPATH += :sim/vpnkit
+  HOSTSRCS += protocol.c negotiate.c
+endif
 
 ifeq ($(CONFIG_RPTUN),y)
   CSRCS += up_rptun.c
