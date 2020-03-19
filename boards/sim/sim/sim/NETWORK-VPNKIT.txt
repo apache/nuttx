@@ -12,6 +12,11 @@ Configuration
     CONFIG_SIM_NETDEV_TAP is not set
     CONFIG_SIM_NETDEV_VPNKIT=y
 
+You can use the sim:vpnkit configuration, which includes the above
+settings.
+
+    ./tools/configure.sh sim:vpnkit
+
 VPNKit setup
 ------------
 
