@@ -1264,3 +1264,7 @@ ustream
 
   Note that the binfs file system is mounted at /bin when the system starts
   up.
+
+vpnkit
+
+  This is a configuration with VPNKit support.  See NETWORK-VPNKIT.txt.
