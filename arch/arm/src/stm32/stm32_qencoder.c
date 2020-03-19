@@ -728,6 +728,7 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   uint32_t ccmr1;
   uint16_t ccer;
   uint16_t cr1;
+  uint16_t psc;
 #ifdef HAVE_16BIT_TIMERS
   uint16_t regval;
   int ret;
@@ -879,6 +880,12 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
   dier  = stm32_getreg16(priv, STM32_GTIM_DIER_OFFSET);
   dier &= ~GTIM_DIER_UIE;
   stm32_putreg16(priv, STM32_GTIM_DIER_OFFSET, dier);
+
+  /* Reset Prescalar to 0 ( +1 ) */
+  psc = stm32_getreg16(priv, STM32_GTIM_PSC_OFFSET);
+  psc = 0;
+  stm32_putreg16(priv, STM32_GTIM_PSC_OFFSET, psc);
+
 
   /* There is no need for interrupts with 32-bit timers */
 
