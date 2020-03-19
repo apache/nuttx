@@ -1014,7 +1014,12 @@ int main(int argc, char **argv, char **envp)
 
           /* Propagate rhcomment over preprocessor lines Issue #120 */
 
-          rhcomment = prevrhcmt;
+          if (prevrhcmt != 0)
+            {
+              /* Don't check position */
+
+              rhcomment = -1;
+            }
 
           lptr = strstr(line, "/*");
           if (lptr != NULL)
