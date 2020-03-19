@@ -271,7 +271,6 @@ sed -i -e "/CONFIG_HOST_OTHER/d" $nuttx/.config
 
 echo "  Refreshing..."
 cd $nuttx || { echo "ERROR: failed to cd to $nuttx"; exit 1; }
-make clean_context 1>/dev/null 2>&1
 if [ "X${debug}" = "Xy" ]; then
   make olddefconfig V=1 || { echo "ERROR: failed to refresh"; exit 1; }
 else
