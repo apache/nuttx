@@ -125,6 +125,9 @@ if [ ! -z "$1" ]; then
   showusage
 fi
 
+WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
+cd $WD
+
 if [ -x sethost.sh ]; then
   nuttx=$PWD/..
 else

@@ -282,6 +282,4 @@ fi
 # The saved defconfig files are all in compressed format and must be
 # reconstitued before they can be used.
 
-cd ${TOPDIR} || { echo "Failed to cd to ${TOPDIR}"; exit 10; }
-
-./tools/sethost.sh $debug $host
+${TOPDIR}/tools/sethost.sh $debug $host
