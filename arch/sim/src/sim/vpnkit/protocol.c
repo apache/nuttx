@@ -6,8 +6,10 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "log.h"
 #include "protocol.h"
+
+#define ERROR(fmt, ...) \
+        fprintf(stderr, "up_vpnkit: " fmt "\r\n", ##__VA_ARGS__)
 
 /* Version 0 of the protocol used this */
 char expected_hello_old[5] = {'V', 'M', 'N', 'E', 'T'};
