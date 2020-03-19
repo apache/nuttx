@@ -127,6 +127,7 @@ static char        g_delim         = '/';   /* Delimiter to use when forming pat
 static bool        g_winpaths      = false; /* False: POSIX style paths */
 #endif
 static bool        g_debug         = false; /* Enable debug output */
+static bool        g_enforce       = false; /* Enfore distclean */
 
 static const char *g_appdir        = NULL;  /* Relative path to the application directory */
 static const char *g_archdir       = NULL;  /* Name of architecture subdirectory */
@@ -173,11 +174,13 @@ static const char *g_optfiles[] =
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "\nUSAGE: %s  [-d] [-b] [-f] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>\n", progname);
+  fprintf(stderr, "\nUSAGE: %s  [-d] [-e] [-b|f] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>\n", progname);
   fprintf(stderr, "\nUSAGE: %s  [-h]\n", progname);
   fprintf(stderr, "\nWhere:\n");
   fprintf(stderr, "  -d:\n");
   fprintf(stderr, "    Enables debug output\n");
+  fprintf(stderr, "  -e:\n");
+  fprintf(stderr, "    Enforce distclean if already configured\n");
   fprintf(stderr, "  -b:\n");
 #ifdef CONFIG_WINDOWS_NATIVE
   fprintf(stderr, "    Informs the tool that it should use Windows style paths like C:\\Program Files\n");
@@ -246,7 +249,7 @@ static void parse_args(int argc, char **argv)
 
   g_debug = false;
 
-  while ((ch = getopt(argc, argv, "a:bcdfghlmnu")) > 0)
+  while ((ch = getopt(argc, argv, "a:bcdefghlmnu")) > 0)
     {
       switch (ch)
         {
@@ -266,6 +269,10 @@ static void parse_args(int argc, char **argv)
 
           case 'd' :
             g_debug = true;
+            break;
+
+          case 'e' :
+            g_enforce = true;
             break;
 
           case 'f' :
@@ -499,6 +506,11 @@ static void find_topdir(void)
       /* Yes, we are probably in the tools/ sub-directory */
 
       free(currdir);
+      if (chdir(g_topdir) < 0)
+        {
+          fprintf(stderr, "ERROR: Failed to ch to %s\n", g_topdir);
+          exit(EXIT_FAILURE);
+        }
     }
 }
 
@@ -747,20 +759,27 @@ static void check_configured(void)
   debug("check_configured: Checking %s\n", g_buffer);
   if (verify_file(g_buffer))
     {
-      fprintf(stderr, "ERROR: Found %s... Already configured\n", g_buffer);
-      fprintf(stderr, "       Please 'make distclean' and try again\n");
-      exit(EXIT_FAILURE);
-    }
-
-  /* Try the Make.defs file */
-
-  snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs", g_topdir, g_delim);
-  debug("check_configuration: Checking %s\n", g_buffer);
-  if (verify_file(g_buffer))
-    {
-      fprintf(stderr, "ERROR: Found %s... Already configured\n", g_buffer);
-      fprintf(stderr, "       Please 'make distclean' and try again\n");
-      exit(EXIT_FAILURE);
+      if (g_enforce)
+        {
+          if (g_debug)
+            {
+              system("make distclean V=1");
+            }
+          else
+            {
+        #ifdef WIN32
+              system("make distclean");
+        #else
+              system("make distclean 1>/dev/null");
+        #endif
+            }
+        }
+      else
+        {
+          fprintf(stderr, "ERROR: Found %s... Already configured\n", g_buffer);
+          fprintf(stderr, "       Please 'make distclean' and try again\n");
+          exit(EXIT_FAILURE);
+        }
     }
 }
 
@@ -1396,13 +1415,6 @@ static void configure(void)
 static void refresh(void)
 {
   int ret;
-
-  ret = chdir(g_topdir);
-  if (ret < 0)
-    {
-      fprintf(stderr, "ERROR: Failed to ch to %s\n", g_topdir);
-      exit(EXIT_FAILURE);
-    }
 
   printf("  Refreshing...\n");
   fflush(stdout);

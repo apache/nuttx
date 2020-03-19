@@ -648,6 +648,7 @@ endif
 	$(call DELFILE, include/nuttx/config.h)
 	$(call DELFILE, include/nuttx/version.h)
 	$(call DELFILE, Make.defs)
+	$(call DELFILE, defconfig)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
 	$(call DELFILE, .gdbinit)

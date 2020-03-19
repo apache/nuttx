@@ -37,10 +37,11 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-d] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>
+USAGE: ${0} [-d] [-e] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>
 
 Where:
   -d enables script debug output
+  -e enforce distclean if already configured
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
   -c selects the Windows host and Cygwin (c) environment.
@@ -71,6 +72,7 @@ unset winnative
 unset appdir
 unset host
 unset debug
+unset enforce
 
 while [ ! -z "$1" ]; do
   case "$1" in
@@ -88,7 +90,9 @@ while [ ! -z "$1" ]; do
     ;;
   -d )
     debug=-d
-    set -x
+    ;;
+  -e )
+    enforce=y
     ;;
   -h )
     echo "$USAGE"
@@ -163,6 +167,7 @@ fi
 
 src_config=${configpath}/defconfig
 dest_config="${TOPDIR}/.config"
+backup_config="${TOPDIR}/defconfig"
 
 if [ ! -r ${src_config} ]; then
   echo "File ${src_config} does not exist"
@@ -170,9 +175,18 @@ if [ ! -r ${src_config} ]; then
 fi
 
 if [ -r ${dest_config} ]; then
-  echo "Already configured!"
-  echo "Do 'make distclean' and try again."
-  exit 6
+  if cmp -s ${src_config} ${backup_config}; then
+    echo "No configuration change."
+    exit 0
+  fi
+
+  if [ "X${enforce}" = "Xy" ]; then
+    make -C ${TOPDIR} distclean
+  else
+    echo "Already configured!"
+    echo "Do 'make distclean' and try again."
+    exit 6
+  fi
 fi
 
 # Extract values needed from the defconfig file.  We need:
@@ -250,6 +264,8 @@ install -m 644 ${src_makedefs} "${dest_makedefs}" || \
   { echo "Failed to copy ${src_makedefs}" ; exit 8 ; }
 install -m 644 ${src_config} "${dest_config}" || \
   { echo "Failed to copy ${src_config}" ; exit 9 ; }
+install -m 644 ${src_config} "${backup_config}" || \
+  { echo "Failed to backup ${src_config}" ; exit 10 ; }
 
 # Install any optional files
 
