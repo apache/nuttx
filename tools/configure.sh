@@ -37,11 +37,10 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-d] [-s] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>
+USAGE: ${0} [-d] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>
 
 Where:
   -d enables script debug output
-  -s skip the .config/Make.defs existence check
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
   -c selects the Windows host and Cygwin (c) environment.
@@ -72,7 +71,6 @@ unset winnative
 unset appdir
 unset host
 unset debug
-skip=0
 
 while [ ! -z "$1" ]; do
   case "$1" in
@@ -95,9 +93,6 @@ while [ ! -z "$1" ]; do
   -h )
     echo "$USAGE"
     exit 0
-    ;;
-  -s )
-    skip=1
     ;;
   *)
     if [ ! -z "${boardconfig}" ]; then
@@ -174,7 +169,7 @@ if [ ! -r ${src_config} ]; then
   exit 5
 fi
 
-if [ ${skip} != 1 ] && [ -r ${dest_config} ]; then
+if [ -r ${dest_config} ]; then
   echo "Already configured!"
   echo "Do 'make distclean' and try again."
   exit 6
