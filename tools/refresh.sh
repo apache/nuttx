@@ -38,6 +38,7 @@ USAGE="USAGE: $0 [options] <board>:<config>"
 ADVICE="Try '$0 --help' for more information"
 
 unset CONFIGS
+debug=n
 defaults=n
 prompt=y
 nocopy=n
@@ -45,6 +46,7 @@ nocopy=n
 while [ ! -z "$1" ]; do
   case $1 in
   --debug )
+    debug=y
     set -x
     ;;
   --silent )
@@ -233,23 +235,36 @@ for CONFIG in ${CONFIGS}; do
     # Then run oldconfig or oldefconfig
 
     if [ "X${defaults}" == "Xy" ]; then
-      make olddefconfig
+      if [ "X${debug}" = "Xy" ]; then
+        make olddefconfig V=1
+      else
+        make olddefconfig 1>/dev/null 2>&1
+      fi
     else
-      make oldconfig
+      if [ "X${debug}" = "Xy" ]; then
+        make oldconfig V=1
+      else
+        make oldconfig
+      fi
     fi
   fi
 
   # Run savedefconfig to create the new defconfig file
 
-  make savedefconfig
-
-  # Show differences
-
-  $CMPCONFIG $DEFCONFIG defconfig
+  if [ "X${debug}" = "Xy" ]; then
+    make savedefconfig V=1
+  else
+    make savedefconfig 1>/dev/null 2>&1
+  fi
 
   # Save the refreshed configuration
 
   if [ "X${prompt}" == "Xy" ]; then
+
+    # Show differences
+
+    $CMPCONFIG $DEFCONFIG defconfig
+
     read -p "Save the new configuration (y/n)?" -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]
