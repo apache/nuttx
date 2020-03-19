@@ -127,7 +127,6 @@ static char        g_delim         = '/';   /* Delimiter to use when forming pat
 static bool        g_winpaths      = false; /* False: POSIX style paths */
 #endif
 static bool        g_debug         = false; /* Enable debug output */
-static bool        g_skip          = false; /* Skip .config/Make.defs existence check */
 
 static const char *g_appdir        = NULL;  /* Relative path to the application directory */
 static const char *g_archdir       = NULL;  /* Name of architecture subdirectory */
@@ -174,13 +173,11 @@ static const char *g_optfiles[] =
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "\nUSAGE: %s  [-d] [-s] [-b] [-f] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>\n", progname);
+  fprintf(stderr, "\nUSAGE: %s  [-d] [-b] [-f] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>\n", progname);
   fprintf(stderr, "\nUSAGE: %s  [-h]\n", progname);
   fprintf(stderr, "\nWhere:\n");
   fprintf(stderr, "  -d:\n");
   fprintf(stderr, "    Enables debug output\n");
-  fprintf(stderr, "  -s:\n");
-  fprintf(stderr, "    Skip the .config/Make.defs existence check\n");
   fprintf(stderr, "  -b:\n");
 #ifdef CONFIG_WINDOWS_NATIVE
   fprintf(stderr, "    Informs the tool that it should use Windows style paths like C:\\Program Files\n");
@@ -249,7 +246,7 @@ static void parse_args(int argc, char **argv)
 
   g_debug = false;
 
-  while ((ch = getopt(argc, argv, "a:bcdfghlmnsu")) > 0)
+  while ((ch = getopt(argc, argv, "a:bcdfghlmnu")) > 0)
     {
       switch (ch)
         {
@@ -295,10 +292,6 @@ static void parse_args(int argc, char **argv)
           case 'n' :
             g_host    = HOST_WINDOWS;
             g_windows = WINDOWS_NATIVE;
-            break;
-
-          case 's' :
-            g_skip = true;
             break;
 
           case 'u' :
@@ -746,13 +739,6 @@ static void check_configdir(void)
 
 static void check_configured(void)
 {
-  /* Skip to check .config/Make.defs? */
-
-  if (g_skip)
-    {
-      return;
-    }
-
   /* If we are already configured then there will be a .config and a Make.defs
    * file in the top-level directory.
    */
