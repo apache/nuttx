@@ -36,11 +36,10 @@ progname=$0
 debug=n
 host=
 wenv=
-unset configfile
 
 function showusage {
   echo ""
-  echo "USAGE: $progname -d [-l|m|c|u|g|n] [<config>]"
+  echo "USAGE: $progname -d [-l|m|c|u|g|n]"
   echo "       $progname -h"
   echo ""
   echo "Where:"
@@ -49,7 +48,6 @@ function showusage {
   echo "     Ubuntu under Windows 10 (u), MSYS/MSYS2 (g)"
   echo "     or Windows native (n). Default Linux"
   echo "  -h will show this help test and terminate"
-  echo "  <config> selects configuration file.  Default: .config"
   exit 1
 }
 
@@ -86,8 +84,6 @@ while [ ! -z "$1" ]; do
     showusage
     ;;
   * )
-    configfile="$1"
-    shift
     break;
     ;;
   esac
@@ -139,60 +135,14 @@ else
   fi
 fi
 
-rm -f $nuttx/SAVEconfig
-rm -f $nuttx/SAVEMake.defs
-
-unset dotconfig
-if [ -z "$configfile" ]; then
-  dotconfig=y
-else
-  if [ "X$configfile" = "X.config" ]; then
-    dotconfig=y
-  else
-    if [ "X$configfile" = "X$nuttx/.config" ]; then
-      dotconfig=y
-    fi
-  fi
+if [ ! -r $nuttx/.config ]; then
+  echo "There is no .config at $nuttx"
+  exit 1
 fi
 
-if [ "X$dotconfig" = "Xy" ]; then
-  unset configfile
-  if [ -r $nuttx/.config ]; then
-    configfile=$nuttx/.config
-  else
-    echo "There is no .config at $nuttx"
-    exit 1
-  fi
-
-  if [ ! -r $nuttx/Make.defs ]; then
-    echo "ERROR: No readable Make.defs file exists at $nuttx"
-    exit 1
-  fi
-else
-  if [ ! -r "$configfile" ]; then
-    echo "ERROR: No readable configuration file exists at $configfile"
-    exit 1
-  fi
-
-  configdir=`dirname $configfile`
-  makedefs=$configdir/Make.defs
-
-  if [ ! -r $makedefs ]; then
-    echo "ERROR: No readable Make.defs file exists at $configdir"
-    exit 1
-  fi
-
-  if [ -f $nuttx/.config ]; then
-    mv $nuttx/.config $nuttx/SAVEconfig
-  fi
-  cp $configfile $nuttx/.config || \
-    { echo "ERROR: cp to $nuttx/.config failed"; exit 1; }
-
-  if [ -f $nuttx/Make.defs ]; then
-    mv $nuttx/Make.defs $nuttx/SAVEMake.defs
-  fi
-  cp $makedefs $nuttx/Make.defs || \
-    { echo "ERROR: cp to $nuttx/Make.defs failed"; exit 1; }
+if [ ! -r $nuttx/Make.defs ]; then
+  echo "ERROR: No readable Make.defs file exists at $nuttx"
+  exit 1
 fi
 
 # Modify the configuration
@@ -275,24 +225,4 @@ if [ "X${debug}" = "Xy" ]; then
   make olddefconfig V=1 || { echo "ERROR: failed to refresh"; exit 1; }
 else
   make olddefconfig 1>/dev/null || { echo "ERROR: failed to refresh"; exit 1; }
-fi
-
-# Move config file to correct location and restore any previous .config
-# and Make.defs files
-
-if [ "X$dotconfig" != "Xy" ]; then
-  sed -i -e "s/^CONFIG_APPS_DIR/# CONFIG_APPS_DIR/g" .config
-
-  mv .config $configfile || \
-      { echo "ERROR: Failed to move .config to $configfile"; exit 1; }
-
-  if [ -e SAVEconfig ]; then
-    mv SAVEconfig .config || \
-      { echo "ERROR: Failed to move SAVEconfig to .config"; exit 1; }
-  fi
-
-  if [ -e SAVEMake.defs ]; then
-    mv SAVEMake.defs Make.defs || \
-      { echo "ERROR: Failed to move SAVEMake.defs to Make.defs"; exit 1; }
-  fi
 fi
