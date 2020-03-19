@@ -37,13 +37,14 @@ export SHELL=cmd
 
 TOPDIR := ${shell echo %CD%}
 -include $(TOPDIR)\.config
--include $(TOPDIR)/.version
 include $(TOPDIR)\tools\Config.mk
 -include $(TOPDIR)\Make.defs
 
+-include $(TOPDIR)\.version
+
 # In case .version file does not exist
 
-CONFIG_VERSION_STRING ?= "Unversioned"
+CONFIG_VERSION_STRING ?= "0.0"
 CONFIG_VERSION_MAJOR ?= 0
 CONFIG_VERSION_MINOR ?= 0
 CONFIG_VERSION_BUILD ?= "0"
@@ -55,12 +56,10 @@ CONFIG_VERSION_BUILD ?= "0"
 
 ifeq ($(V),1)
 export Q :=
-else
-ifeq ($(V),2)
+else ifeq ($(V),2)
 export Q :=
 else
 export Q := @
-endif
 endif
 
 # This define is passed as EXTRADEFINES for kernel-mode builds.  It is also passed
@@ -136,12 +135,10 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 include tools\ProtectedLibs.mk
-else
-ifeq ($(CONFIG_BUILD_KERNEL),y)
+else ifeq ($(CONFIG_BUILD_KERNEL),y)
 include tools\KernelLibs.mk
 else
 include tools\FlatLibs.mk
-endif
 endif
 
 # LINKLIBS derives from NUTTXLIBS and is simply the same list with the
@@ -199,10 +196,8 @@ all: $(BIN)
 
 ifeq ($(CONFIG_ARCH_MATH_H),y)
 NEED_MATH_H = y
-else
-ifeq ($(CONFIG_LIBM),y)
+else ifeq ($(CONFIG_LIBM),y)
 NEED_MATH_H = y
-endif
 endif
 
 ifeq ($(NEED_MATH_H),y)
@@ -254,19 +249,13 @@ endif
 # tools\mkversion tool is built and used to create include\nuttx\version.h
 
 tools\mkversion$(HOSTEXEEXT):
-	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkversion$(HOSTEXEEXT)
+	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" mkversion$(HOSTEXEEXT)
 
 $(TOPDIR)\.version:
 	$(Q) echo CONFIG_VERSION_STRING="0" > .version
 	$(Q) echo CONFIG_VERSION_MAJOR=0 >> .version
 	$(Q) echo CONFIG_VERSION_MINOR=0 >> .version
 	$(Q) echo CONFIG_VERSION_BUILD="0" >> .version
-
-# $(Q) if [ ! -f .version ]; then \
-# 	echo "No .version file found, creating one"; \
-# 	tools\version.sh -v 0.0 -b 0 .version; \
-# 	chmod 755 .version; \
-# fi
 
 include\nuttx\version.h: $(TOPDIR)\.version tools\mkversion$(HOSTEXEEXT)
 	$(Q) tools\mkversion$(HOSTEXEEXT) $(TOPDIR) > include\nuttx\version.h
@@ -276,10 +265,7 @@ include\nuttx\version.h: $(TOPDIR)\.version tools\mkversion$(HOSTEXEEXT)
 # tools\mkconfig tool is built and used to create include\nuttx\config.h
 
 tools\mkconfig$(HOSTEXEEXT):
-	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkconfig$(HOSTEXEEXT)
-
-staging:
-	$(Q) mkdir -p staging
+	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" mkconfig$(HOSTEXEEXT)
 
 include\nuttx\config.h: $(TOPDIR)\.config tools\mkconfig$(HOSTEXEEXT)
 	$(Q) tools\mkconfig$(HOSTEXEEXT) $(TOPDIR) > include\nuttx\config.h
@@ -287,25 +273,13 @@ include\nuttx\config.h: $(TOPDIR)\.config tools\mkconfig$(HOSTEXEEXT)
 # Targets used to create dependencies
 
 tools\mkdeps$(HOSTEXEEXT):
-	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkdeps$(HOSTEXEEXT)
+	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" mkdeps$(HOSTEXEEXT)
 
 # dirlinks, and helpers
 #
 # Directories links.  Most of establishing the NuttX configuration involves
 # setting up symbolic links with 'generic' directory names to specific,
 # configured directories.
-
-# Make.defs:
-# 	$(Q) echo "No Make.defs file found, creating one"
-# 	$(Q) echo "include $(TOPDIR)$(DELIM).config" > Make.defs
-# 	$(Q) echo "include $(TOPDIR)$(DELIM)tools$(DELIM)Config.mk" >> Make.defs
-
-# tools\initialconfig$(HOSTEXEEXT):
-# 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" initialconfig$(HOSTEXEEXT)
-#
-# .config: tools\initialconfig$(HOSTEXEEXT)
-# 	$(Q) echo "No .config file found, creating one"
-# 	$(Q) tools\initialconfig$(HOSTEXEEXT)
 
 # Link the arch\<arch-name>\include directory to include\arch
 
@@ -329,17 +303,6 @@ else
 	$(Q) echo FAKELNK > include\arch\board\.fakelnk
 endif
 
-# Link the boards\<arch>\<chip>\drivers dir to drivers\platform
-
-$(ARCH_SRC)\drivers: .config
-	@echo LN: $(TOPDIR)\drivers\platform to $(BOARD_DIR)\drivers
-ifeq ($(CONFIG_WINDOWS_MKLINK),y)
-	$(Q) /user:administrator mklink /d $(TOPDIR)\drivers\platform $(BOARD_DIR)\drivers
-else
-	$(Q) xcopy $(BOARD_DIR)\drivers $(TOPDIR)\drivers\platform /c /q /s /e /y /i
-	$(Q) echo FAKELNK > $(TOPDIR)\drivers\platform\.fakelnk
-endif
-
 ifeq ($(COMMON_DIR),y)
 # Link the boards\<arch>\<chip>\common dir to arch\<arch-name>\src\board
 # Link the boards\<arch>\<chip>\<board>\src dir to arch\<arch-name>\src\board\board
@@ -353,7 +316,6 @@ else
 	$(Q) echo FAKELNK > $(ARCH_SRC)\board\.fakelnk
 endif
 	@echo "LN: $(ARCH_SRC)\board\board to $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src"
-	$(Q) $(DIRLINK) $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src $(ARCH_SRC)\board\board
 ifeq ($(CONFIG_WINDOWS_MKLINK),y)
 	$(Q) /user:administrator mklink /d $(ARCH_SRC)\board\board $(BOARD_DIR)\$(CONFIG_ARCH_BOARD)\src
 else
@@ -373,7 +335,18 @@ else
 endif
 endif
 
-# Link arch\<arch-name>\include\<chip-name> to arch\<arch-name>\include\chip
+# Link the boards\<arch>\<chip>\drivers dir to drivers\platform
+
+drivers\platform: .config
+	@echo LN: $(TOPDIR)\drivers\platform to $(BOARD_DIR)\drivers
+ifeq ($(CONFIG_WINDOWS_MKLINK),y)
+	$(Q) /user:administrator mklink /d $(TOPDIR)\drivers\platform $(BOARD_DIR)\drivers
+else
+	$(Q) xcopy $(BOARD_DIR)\drivers $(TOPDIR)\drivers\platform /c /q /s /e /y /i
+	$(Q) echo FAKELNK > $(TOPDIR)\drivers\platform .fakelnk
+endif
+
+# Link arch\<arch-name>\src\<chip-name> to arch\<arch-name>\src\chip
 
 $(ARCH_SRC)\chip: .config
 ifneq ($(CONFIG_ARCH_CHIP),)
@@ -386,7 +359,7 @@ else
 endif
 endif
 
-# Link arch\<arch-name>\src\<chip-name> to arch\<arch-name>\src\chip
+# Link arch\<arch-name>\include\<chip-name> to arch\<arch-name>\include\chip
 
 include\arch\chip: include\arch
 ifneq ($(CONFIG_ARCH_CHIP),)
@@ -399,7 +372,7 @@ else
 endif
 endif
 
-dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip $(ARCH_SRC)\drivers
+dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(ARCH_SRC)\chip drivers\platform
 	$(Q) $(MAKE) -C boards dirlinks TOPDIR="$(TOPDIR)"
 	$(Q) $(MAKE) -C openamp dirlinks TOPDIR="$(TOPDIR)"
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks TOPDIR="$(TOPDIR)"
@@ -411,7 +384,8 @@ dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(
 # the config.h and version.h header files in the include\nuttx directory and
 # the establishment of symbolic links to configured directories.
 
-context: check_context staging include\nuttx\config.h include\nuttx\version.h include\math.h include\float.h include\stdarg.h include\setjmp.h dirlinks
+context: check_context include\nuttx\config.h include\nuttx\version.h include\math.h include\float.h include\stdarg.h include\setjmp.h dirlinks
+	$(Q) mkdir -p staging
 	$(Q) for %%G in ($(CONTEXTDIRS)) do ( $(MAKE) -C %%G TOPDIR="$(TOPDIR)" context )
 
 # clean_context
@@ -553,18 +527,16 @@ do_nconfig: dirlinks apps_preconfig
 
 nconfig: do_nconfig clean_context
 
-do_savedefconfig: dirlinks apps_preconfig
-
-savedefconfig: do_savedefconfig
+savedefconfig: dirlinks apps_preconfig
 	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --savedefconfig defconfig.tmp Kconfig
 	$(Q) sed -i -e "/CONFIG_APPS_DIR=/d" defconfig.tmp
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
 	-$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp
-	-$(Q) grep "^CONFIG_ARCH_CHIP=" .config >> defconfig.tmp
+	-$(Q) grep "CONFIG_ARCH_CHIP=" .config >> defconfig.tmp
 	-$(Q) grep "CONFIG_ARCH_BOARD=" .config >> defconfig.tmp
 	-$(Q) grep "^CONFIG_ARCH_CUSTOM" .config >> defconfig.tmp
-	-$(Q) grep "^CONFIG_ARCH_BOARD_CUSTOM=" .config >> defconfig.tmp
-	$(Q) cat defconfig.tmp | sort | uniq > sortedconfig.tmp
+	-$(Q) grep "^CONFIG_ARCH_BOARD_CUSTOM" .config >> defconfig.tmp
+	$(Q) export LC_ALL=C; cat defconfig.tmp | sort | uniq > sortedconfig.tmp
 	$(Q) echo "#" > warning.tmp
 	$(Q) echo "# This file is autogenerated: PLEASE DO NOT EDIT IT." >> warning.tmp
 	$(Q) echo "#" >> warning.tmp
