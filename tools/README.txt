@@ -940,7 +940,7 @@ sethost.sh
 
     $ ./sethost.sh -h
 
-    USAGE: ./sethost.sh [-l|m|c|u|g|n] [<config>]
+    USAGE: ./sethost.sh [-l|m|c|u|g|n]
            ./sethost.sh -h
 
     Where:
@@ -948,7 +948,6 @@ sethost.sh
          Ubuntu under Windows 10 (u), MSYS/MSYS2 (g)
          or Windows native (n).  Default Linux
       -h will show this help test and terminate
-      <config> selects configuration file.  Default: .config
 
 simhostroute.sh
 ---------------
