@@ -38,7 +38,6 @@ USAGE="USAGE: $0 [options] <board>:<config>"
 ADVICE="Try '$0 --help' for more information"
 
 unset CONFIGS
-silent=n
 defaults=n
 prompt=y
 nocopy=n
@@ -49,7 +48,6 @@ while [ ! -z "$1" ]; do
     set -x
     ;;
   --silent )
-    silent=y
     defaults=y
     prompt=n
     ;;
@@ -199,11 +197,11 @@ for CONFIG in ${CONFIGS}; do
     exit 1
   fi
 
-  if [ -r $MAKEDEFS1 ]; then
-    MAKEDEFS=$MAKEDEFS1
+  if [ -r $MAKEDEFS2 ]; then
+    MAKEDEFS=$MAKEDEFS2
   else
-    if [ -r $MAKEDEFS2 ]; then
-      MAKEDEFS=$MAKEDEFS2
+    if [ -r $MAKEDEFS1 ]; then
+      MAKEDEFS=$MAKEDEFS1
     else
       echo "No readable Make.defs file at $MAKEDEFS1 or $MAKEDEFS2"
       exit 1
@@ -247,7 +245,6 @@ for CONFIG in ${CONFIGS}; do
 
   # Show differences
 
-  # sed -i -e "s/^CONFIG_APPS_DIR/# CONFIG_APPS_DIR/g" defconfig
   $CMPCONFIG $DEFCONFIG defconfig
 
   # Save the refreshed configuration
