@@ -49,6 +49,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Access macros ************************************************************/
 
 /****************************************************************************
@@ -149,11 +150,15 @@
 #define QSPICMD_ADDRESS       (1 << 0)  /* Bit 0: Enable address transfer */
 #define QSPICMD_READDATA      (1 << 1)  /* Bit 1: Enable read data transfer */
 #define QSPICMD_WRITEDATA     (1 << 2)  /* Bit 2: Enable write data transfer */
+#define QSPICMD_IDUAL         (1 << 3)  /* Bit 3: Instruction on two lines */
+#define QSPICMD_IQUAD         (1 << 4)  /* Bit 4: Instruction on four lines */
 
 #define QSPICMD_ISADDRESS(f)  (((f) & QSPICMD_ADDRESS) != 0)
 #define QSPICMD_ISDATA(f)     (((f) & (QSPICMD_READDATA | QSPICMD_WRITEDATA)) != 0)
 #define QSPICMD_ISREAD(f)     (((f) & QSPICMD_READDATA) != 0)
 #define QSPICMD_ISWRITE(f)    (((f) & QSPICMD_WRITEDATA) != 0)
+#define QSPICMD_ISIDUAL(f)    (((f) & QSPICMD_IDUAL) != 0)
+#define QSPICMD_ISIQUAD(f)    (((f) & QSPICMD_IQUAD) != 0)
 
 /****************************************************************************
  * Name: QSPI_MEMORY
@@ -180,12 +185,16 @@
 #define QSPIMEM_QUADIO        (1 << 4)  /* Bit 4: Use Quad I/O (READ only) */
 #define QSPIMEM_SCRAMBLE      (1 << 5)  /* Bit 5: Scramble data */
 #define QSPIMEM_RANDOM        (1 << 6)  /* Bit 6: Use random key in scrambler */
+#define QSPIMEM_IDUAL         (1 << 7)  /* Bit 7: Instruction on two lines */
+#define QSPIMEM_IQUAD         (1 << 0)  /* Bit 0: Instruction on four lines */
 
 #define QSPIMEM_ISREAD(f)     (((f) & QSPIMEM_WRITE) == 0)
 #define QSPIMEM_ISWRITE(f)    (((f) & QSPIMEM_WRITE) != 0)
 #define QSPIMEM_ISDUALIO(f)   (((f) & QSPIMEM_DUALIO) != 0)
 #define QSPIMEM_ISQUADIO(f)   (((f) & QSPIMEM_QUADIO) != 0)
 #define QSPIMEM_ISSCRAMBLE(f) (((f) & QSPIMEM_SCRAMBLE) != 0)
+#define QSPIMEM_ISIDUAL(f)    (((f) & QSPIMEM_IDUAL) != 0)
+#define QSPIMEM_ISIQUAD(f)    (((f) & QSPIMEM_IQUAD) != 0)
 
 #define QSPIMEM_ISRANDOM(f) \
   (((f) & (QSPIMEM_SCRAMBLE|QSPIMEM_RANDOM)) == \
@@ -309,7 +318,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #undef EXTERN
