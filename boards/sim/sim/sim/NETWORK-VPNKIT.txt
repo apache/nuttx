@@ -12,6 +12,16 @@ Configuration
     CONFIG_SIM_NETDEV_TAP is not set
     CONFIG_SIM_NETDEV_VPNKIT=y
 
+VPNKit setup
+------------
+
+See https://github.com/moby/vpnkit for build instructions.
+
+If you have Docker Desktop for Mac installed on your machinie,
+you can find a vpnkit binary at:
+
+    /Applications/Docker.app/Contents/Resources/bin/com.docker.vpnkit
+
 How to run
 ----------
 
