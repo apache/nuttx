@@ -37,7 +37,7 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-d] [-e] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>
+USAGE: ${0} [-d] [-e] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name> [make-opts]
 
 Where:
   -d enables script debug output
@@ -54,6 +54,7 @@ Where:
      directory
   <board-name> is the name of the board in the boards directory
   configs/<config-name> is the name of the board configuration sub-directory
+  make-opts directly pass to make
 
 "
 
@@ -99,13 +100,9 @@ while [ ! -z "$1" ]; do
     exit 0
     ;;
   *)
-    if [ ! -z "${boardconfig}" ]; then
-      echo ""
-      echo "<board/config> defined twice"
-      echo "$USAGE"
-      exit 1
-    fi
     boardconfig=$1
+    shift
+    break
     ;;
   esac
   shift
@@ -181,7 +178,7 @@ if [ -r ${dest_config} ]; then
   fi
 
   if [ "X${enforce}" = "Xy" ]; then
-    make -C ${TOPDIR} distclean
+    make -C ${TOPDIR} distclean $*
   else
     echo "Already configured!"
     echo "Do 'make distclean' and try again."
@@ -293,4 +290,4 @@ fi
 # The saved defconfig files are all in compressed format and must be
 # reconstitued before they can be used.
 
-${TOPDIR}/tools/sethost.sh $debug $host
+${TOPDIR}/tools/sethost.sh $debug $host $*

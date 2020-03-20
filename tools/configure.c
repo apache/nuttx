@@ -80,6 +80,7 @@
 static void show_usage(const char *progname, int exitcode);
 static void debug(const char *fmt, ...);
 static void parse_args(int argc, char **argv);
+static int run_make(const char *arg);
 static bool check_directory(const char *directory);
 static void verify_directory(const char *directory);
 static bool verify_optiondir(const char *directory);
@@ -147,6 +148,8 @@ static char       *g_verstring     = "0.0"; /* Version String */
 static char       *g_srcdefconfig  = NULL;  /* Source defconfig file */
 static char       *g_srcmakedefs   = NULL;  /* Source Make.defs file */
 
+static char      **g_makeargv      = NULL;  /* Arguments pass to make */
+
 static bool        g_winnative     = false; /* True: Windows native configuration */
 static bool        g_oldnative     = false; /* True: Was Windows native configuration */
 static bool        g_needapppath   = true;  /* Need to add app path to the .config file */
@@ -177,7 +180,8 @@ static const char *g_optfiles[] =
 static void show_usage(const char *progname, int exitcode)
 {
   fprintf(stderr, "\nUSAGE: %s  [-d] [-e] [-b|f] [-l|m|c|u|g|n] "
-          "[-a <app-dir>] <board-name>:<config-name>\n", progname);
+          "[-a <app-dir>] <board-name>:<config-name> [make-opts]\n",
+          progname);
   fprintf(stderr, "\nUSAGE: %s  [-h]\n", progname);
   fprintf(stderr, "\nWhere:\n");
   fprintf(stderr, "  -d:\n");
@@ -235,6 +239,8 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "    a sub-directory under the board directory at\n");
   fprintf(stderr, "    under nuttx%cboards%c<board-name>%cconfigs%c.\n",
           g_delim, g_delim, g_delim, g_delim);
+  fprintf(stderr, "  [make-opts]:\n");
+  fprintf(stderr, "    Options directly pass to make\n");
   fprintf(stderr, "  -h:\n");
   fprintf(stderr, "    Prints this message and exits.\n");
   exit(exitcode);
@@ -368,11 +374,23 @@ static void parse_args(int argc, char **argv)
   *ptr++ = '\0';
   g_configdir = ptr;
 
-  if (optind < argc)
+  /* The left arguments will pass to make */
+
+  g_makeargv = &argv[optind];
+}
+
+static int run_make(const char *arg)
+{
+  char **argv;
+
+  snprintf(g_buffer, BUFFER_SIZE, "make %s", arg);
+  for (argv = g_makeargv; *argv; argv++)
     {
-      fprintf(stderr, "ERROR: Unexpected garbage at the end of the line\n");
-      show_usage(argv[0], EXIT_FAILURE);
+      strncat(g_buffer, " ", BUFFER_SIZE);
+      strncat(g_buffer, *argv, BUFFER_SIZE);
     }
+
+  return system(g_buffer);
 }
 
 static bool check_directory(const char *directory)
@@ -789,14 +807,14 @@ static void check_configured(void)
         {
           if (g_debug)
             {
-              system("make distclean V=1");
+              run_make("distclean V=1");
             }
           else
             {
         #ifdef WIN32
-              system("make distclean");
+              run_make("distclean");
         #else
-              system("make distclean 1>/dev/null");
+              run_make("distclean 1>/dev/null");
         #endif
             }
         }
@@ -1456,14 +1474,14 @@ static void refresh(void)
 
   if (g_debug)
     {
-      ret = system("make olddefconfig V=1");
+      ret = run_make("olddefconfig V=1");
     }
   else
     {
 #ifdef WIN32
-      ret = system("make olddefconfig");
+      ret = run_make("olddefconfig");
 #else
-      ret = system("make olddefconfig 1>/dev/null");
+      ret = run_make("olddefconfig 1>/dev/null");
 #endif
     }
 
