@@ -34,7 +34,7 @@
 
 WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 
-USAGE="USAGE: $0 [options] <board>:<config>"
+USAGE="USAGE: $0 [options] <board>:<config>+"
 ADVICE="Try '$0 --help' for more information"
 
 unset CONFIGS
@@ -47,7 +47,6 @@ while [ ! -z "$1" ]; do
   case $1 in
   --debug )
     debug=y
-    set -x
     ;;
   --silent )
     defaults=y
@@ -90,7 +89,7 @@ while [ ! -z "$1" ]; do
     exit 0
     ;;
   * )
-    CONFIGS=$1
+    CONFIGS=$*
     break
     ;;
   esac
@@ -238,13 +237,13 @@ for CONFIG in ${CONFIGS}; do
       if [ "X${debug}" = "Xy" ]; then
         make olddefconfig V=1
       else
-        make olddefconfig 1>/dev/null 2>&1
+        make olddefconfig 1>/dev/null
       fi
     else
       if [ "X${debug}" = "Xy" ]; then
         make oldconfig V=1
       else
-        make oldconfig
+        make oldconfig 1>/dev/null
       fi
     fi
   fi
@@ -254,7 +253,7 @@ for CONFIG in ${CONFIGS}; do
   if [ "X${debug}" = "Xy" ]; then
     make savedefconfig V=1
   else
-    make savedefconfig 1>/dev/null 2>&1
+    make savedefconfig 1>/dev/null
   fi
 
   # Save the refreshed configuration

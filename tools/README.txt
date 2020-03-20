@@ -856,7 +856,7 @@ refresh.sh
     $ tools/refresh.sh --help
     tools/refresh.sh is a tool for refreshing board configurations
 
-    USAGE: ./refresh.sh [options] <board>/<config>
+    USAGE: ./refresh.sh [options] <board>/<config>+
 
     Where [options] include:
       --debug
