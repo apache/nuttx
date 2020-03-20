@@ -74,18 +74,23 @@ void *litex_dispatch_irq(uint32_t vector, uint32_t *regs)
   if (LITEX_IRQ_MEXT == irq)
     {
       /* litex vexriscv dont follow riscv plic standard */
-      unsigned int pending, mask;
+
+      unsigned int pending;
+      unsigned int mask;
       asm volatile ("csrr %0, %1" : "=r"(pending) : "i"(LITEX_MPENDING_CSR));
-	    asm volatile ("csrr %0, %1" : "=r"(mask) : "i"(LITEX_MMASK_CSR));
+      asm volatile ("csrr %0, %1" : "=r"(mask) : "i"(LITEX_MMASK_CSR));
 
       uint32_t val = (pending & mask);
-      for(i = 0; i < 32; i++) {
-        if(val & (1 << i)) {
-          val = i;
-          val++;
-          break;
+      for (i = 0; i < 32; i++)
+        {
+          if (val & (1 << i))
+            {
+              val = i;
+              val++;
+              break;
+            }
         }
-      }
+
       /* Add the value to nuttx irq which is offset to the mext */
 
       irq += val;
@@ -118,11 +123,6 @@ void *litex_dispatch_irq(uint32_t vector, uint32_t *regs)
 
   irq_dispatch(irq, regs);
 
-  /**********************VERY IMPORTANT!!!*************************** 
-   * 
-   * vexriscv : it must clear pending in corresponding device driver! 
-   * 
-   ******************************************************************/
 #endif
 
   /* If a context switch occurred while processing the interrupt then

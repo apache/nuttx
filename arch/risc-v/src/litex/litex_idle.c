@@ -74,7 +74,6 @@ void up_idle(void)
   nxsched_process_timer();
 #else
 
-
   /* This would be an appropriate place to put some MCU-specific logic to
    * sleep in a reduced power mode until an interrupt occurs to save power
    */

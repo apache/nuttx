@@ -36,8 +36,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/*
- * litex vexRiscv does not follow RISC-V privileged specification and 
+
+/* litex vexRiscv does not follow RISC-V privileged specification and
  * uses two additional CSRs: mask and pending.
  */
 #define LITEX_MMASK_CSR     0xBC0

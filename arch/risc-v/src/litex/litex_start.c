@@ -97,8 +97,9 @@ void __litex_start(void)
    * give by _sdata and _edata.  The temporary location is in FLASH at the
    * end of all of the other read-only data (.text, .rodata) at _eronly.
    */
-  
+
   /* for vexriscv the full image is loaded in ddr ram */
+
   for (src = &_eronly, dest = &_sdata; dest < &_edata; )
     {
       *dest++ = *src++;

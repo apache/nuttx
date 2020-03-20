@@ -129,9 +129,11 @@ void litex_lowsetup(void)
   /* defualt baudrate set by fpga fabric is 1e6 */
 
   /* Enable TX */
-  putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
+
+  putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET),         \
+                            LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
   putreg8(UART_EV_TX, LITEX_CONSOLE_BASE + UART_EV_ENABLE_OFFSET);
-  
+
 #endif /* HAVE_SERIAL_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
 #endif /* HAVE_UART */
 }

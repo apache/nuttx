@@ -38,14 +38,13 @@
  ****************************************************************************/
 
 /* Register Base Address ****************************************************/
-/*
- * litex vexRiscv does not follow RISC-V privileged specification and 
+
+/* litex vexRiscv does not follow RISC-V privileged specification and
  * uses two additional CSRs: mask and pending.
  */
 
 #define LITEX_CPUTIMER_BASE 0xf0000800  /* riscv clint timer */
 #define LITEX_TIMER0_BASE   0xf0001800
 #define LITEX_UART0_BASE    0xf0001000  /* 0xf0001000 - : UART0 */
-
 
 #endif /* __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_MEMORYMAP_H */

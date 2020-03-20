@@ -257,7 +257,8 @@ static void up_restoreuartint(struct up_dev_s *priv, uint8_t im)
 
   priv->im = im;
 
-  putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
+  putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), \
+                    LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
   up_serialout(priv, UART_EV_ENABLE_OFFSET, im);
 
   leave_critical_section(flags);
@@ -282,7 +283,8 @@ static void up_disableuartint(struct up_dev_s *priv, uint8_t *im)
 
   priv->im = 0;
 
-  putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
+  putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), \
+                    LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
   up_serialout(priv, UART_EV_ENABLE_OFFSET, 0);
 
   leave_critical_section(flags);
@@ -299,8 +301,6 @@ static void up_disableuartint(struct up_dev_s *priv, uint8_t *im)
 
 static int up_setup(struct uart_dev_s *dev)
 {
-//  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-
 #if 0 /* TODO: Setup divisor */
 #endif
 
@@ -329,10 +329,10 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
+ *   the the setup() method is called, however, the serial console may
+ *   operate in a non-interrupt driven mode during the boot phase.
  *
  *   RX and TX interrupts are not enabled by the attach method (unless the
  *   hardware supports multiple levels of interrupt enabling).  The RX and TX
@@ -347,7 +347,8 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Initialize interrupt generation on the peripheral */
 
-  putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
+  putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), \
+                    LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
   up_serialout(priv, UART_EV_ENABLE_OFFSET, UART_EV_TX | UART_EV_RX);
 
   ret = irq_attach(priv->irq, up_interrupt, dev);
@@ -369,8 +370,8 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -412,6 +413,7 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
   /* Loop until there are no characters to be transferred or,
    * until we have been looping for a long time.
    */
+
   for (passes = 0; passes < 256; passes++)
     {
       /* Retrieve interrupt pending status */
@@ -469,7 +471,9 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int rxdata;
+
   /* Return status information */
+
   if (status)
     {
       *status = 0; /* We are not yet tracking serial errors */
@@ -505,7 +509,8 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
       priv->im &= ~UART_EV_RX;
     }
 
-  putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
+  putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), \
+                    LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
   up_serialout(priv, UART_EV_ENABLE_OFFSET, priv->im);
 
   leave_critical_section(flags);
@@ -565,7 +570,8 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       priv->im |= UART_EV_TX;
 
-      putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
+      putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), \
+                        LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
       up_serialout(priv, UART_EV_ENABLE_OFFSET, priv->im);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
@@ -580,8 +586,9 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       /* Disable the TX interrupt */
 
       priv->im &= ~UART_EV_TX;
-      
-      putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
+
+      putreg8(getreg8(LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET), \
+                        LITEX_CONSOLE_BASE + UART_EV_PENDING_OFFSET);
       up_serialout(priv, UART_EV_ENABLE_OFFSET, priv->im);
     }
 

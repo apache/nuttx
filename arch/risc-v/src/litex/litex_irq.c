@@ -65,7 +65,7 @@ void up_irqinitialize(void)
 {
   /* Disable Machine interrupts */
 
- up_irq_save();
+  up_irq_save();
 
   /* Disable all global interrupts */
 
@@ -216,7 +216,6 @@ uint32_t up_get_newintctx(void)
 
 void up_ack_irq(int irq)
 {
-//  board_autoled_on(LED_CPU);
 }
 
 /****************************************************************************
