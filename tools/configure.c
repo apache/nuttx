@@ -88,10 +88,11 @@ static void find_topdir(void);
 typedef void (*config_callback)(const char *boarddir, const char *archname,
                                 const char *chipname, const char *boardname,
                                 const char *configname, void *data);
-static void config_search(const char *boarddir, config_callback callback, void *data);
-static void find_archname_callback(const char *boarddir, const char *archname,
-                                   const char *chipname, const char *boardname,
-                                   const char *configname, void *data);
+static void config_search(const char *boarddir,
+                          config_callback callback, void *data);
+static void archname_callback(const char *boarddir, const char *archname,
+                              const char *chipname, const char *boardname,
+                              const char *configname, void *data);
 static void find_archname(void);
 static void enumerate_callback(const char *boarddir, const char *archname,
                                const char *chipname, const char *boardname,
@@ -105,7 +106,8 @@ static void get_verstring(void);
 static bool verify_appdir(const char *appdir);
 static void check_appdir(void);
 static void check_configuration(void);
-static void copy_file(const char *srcpath, const char *destpath, mode_t mode);
+static void copy_file(const char *srcpath,
+                      const char *destpath, mode_t mode);
 static void substitute(char *str, int ch1, int ch2);
 static char *double_appdir_backslashes(char *old_appdir);
 static void copy_optional(void);
@@ -174,7 +176,8 @@ static const char *g_optfiles[] =
 
 static void show_usage(const char *progname, int exitcode)
 {
-  fprintf(stderr, "\nUSAGE: %s  [-d] [-e] [-b|f] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>\n", progname);
+  fprintf(stderr, "\nUSAGE: %s  [-d] [-e] [-b|f] [-l|m|c|u|g|n] "
+          "[-a <app-dir>] <board-name>:<config-name>\n", progname);
   fprintf(stderr, "\nUSAGE: %s  [-h]\n", progname);
   fprintf(stderr, "\nWhere:\n");
   fprintf(stderr, "  -d:\n");
@@ -183,44 +186,53 @@ static void show_usage(const char *progname, int exitcode)
   fprintf(stderr, "    Enforce distclean if already configured\n");
   fprintf(stderr, "  -b:\n");
 #ifdef CONFIG_WINDOWS_NATIVE
-  fprintf(stderr, "    Informs the tool that it should use Windows style paths like C:\\Program Files\n");
-  fprintf(stderr, "    instead of POSIX style paths are used like /usr/local/bin.  Windows\n");
+  fprintf(stderr, "    Informs the tool that it should use Windows style\n");
+  fprintf(stderr, "    paths like C:\\Program Files instead of POSIX\n");
+  fprintf(stderr, "    style paths are used like /usr/local/bin. Windows\n");
   fprintf(stderr, "    style paths are used by default.\n");
 #else
-  fprintf(stderr, "    Informs the tool that it should use Windows style paths like C:\\Program Files.\n");
-  fprintf(stderr, "    By default, POSIX style paths like /usr/local/bin are used.\n");
+  fprintf(stderr, "    Informs the tool that it should use Windows style\n");
+  fprintf(stderr, "    paths like C:\\Program Files. By default, POSIX\n");
+  fprintf(stderr, "    style paths like /usr/local/bin are used.\n");
 #endif
   fprintf(stderr, "  -f:\n");
 #ifdef CONFIG_WINDOWS_NATIVE
-  fprintf(stderr, "    Informs the tool that it should use POSIX style paths like /usr/local/bin.\n");
-  fprintf(stderr, "    By default, Windows style paths like C:\\Program Files are used.\n");
+  fprintf(stderr, "    Informs the tool that it should use POSIX style\n");
+  fprintf(stderr, "    paths like /usr/local/bin. By default, Windows\n");
+  fprintf(stderr, "    style paths like C:\\Program Files are used.\n");
 #else
-  fprintf(stderr, "    Informs the tool that it should use POSIX style paths like /usr/local/bin\n");
-  fprintf(stderr, "    instead of Windows style paths like C:\\Program Files are used.  POSIX\n");
-  fprintf(stderr, "    style paths are used by default.\n");
+  fprintf(stderr, "    Informs the tool that it should use POSIX style\n");
+  fprintf(stderr, "    paths like /usr/local/bin instead of Windows\n");
+  fprintf(stderr, "    style paths like C:\\Program Files are used.\n");
+  fprintf(stderr, "    POSIX style paths are used by default.\n");
 #endif
   fprintf(stderr, "  [-l|m|c|u|g|n]\n");
   fprintf(stderr, "    Selects the host environment.\n");
   fprintf(stderr, "    -l Selects the Linux (l) host environment.\n");
   fprintf(stderr, "    -m Selects the macOS (m) host environment.\n");
-  fprintf(stderr, "    -c Selects the Windows host and Cygwin (c) environment.\n");
-  fprintf(stderr, "    -u Selects the Windows host and Ubuntu under Windows 10 (u) environment.\n");
-  fprintf(stderr, "    -g Selects the Windows host and the MinGW/MSYS environment.\n");
-  fprintf(stderr, "    -n Selects the Windows host and Windows native (n) environment.\n");
+  fprintf(stderr, "    -c Selects the Windows Cygwin (c) environment.\n");
+  fprintf(stderr, "    -u Selects the Windows Ubuntu (u) environment.\n");
+  fprintf(stderr, "    -g Selects the Windows MinGW/MSYS environment.\n");
+  fprintf(stderr, "    -n Selects the Windows native (n) environment.\n");
   fprintf(stderr, "  Default: Use host setup in the defconfig file.\n");
   fprintf(stderr, "  Default Windows: Cygwin.\n");
   fprintf(stderr, "  -a <app-dir>:\n");
-  fprintf(stderr, "    Informs the configuration tool where the application build\n");
-  fprintf(stderr, "    directory.  This is a relative path from the top-level NuttX\n");
-  fprintf(stderr, "    build directory.  But default, this tool will look in the usual\n");
-  fprintf(stderr, "    places to try to locate the application directory:  ..%capps or\n", g_delim);
-  fprintf(stderr, "    ..%capps-xx.yy where xx.yy is the NuttX version number.\n", g_delim);
+  fprintf(stderr, "    Informs the configuration tool where the\n");
+  fprintf(stderr, "    application build directory.  This is a relative\n");
+  fprintf(stderr, "    path from the top-level NuttX build directory.\n");
+  fprintf(stderr, "    But default, this tool will look in the usual\n");
+  fprintf(stderr, "    places to locate the application directory:\n");
+  fprintf(stderr, "    ..%capps or\n", g_delim);
+  fprintf(stderr, "    ..%capps-xx.yy where xx.yy is the version number.\n",
+          g_delim);
   fprintf(stderr, "  <board-name>:\n");
-  fprintf(stderr, "    Identifies the board.  This must correspond to a board directory\n");
-  fprintf(stderr, "    under nuttx%cboards%c.\n", g_delim, g_delim);
+  fprintf(stderr, "    Identifies the board.  This must correspond to a\n");
+  fprintf(stderr, "    board directory under nuttx%cboards%c.\n",
+          g_delim, g_delim);
   fprintf(stderr, "  <config-name>:\n");
-  fprintf(stderr, "    Identifies the specific configuration for the selected <board-name>.\n");
-  fprintf(stderr, "    This must correspond to a sub-directory under the board directory at\n");
+  fprintf(stderr, "    Identifies the specific configuration for the\n");
+  fprintf(stderr, "    selected <board-name>. This must correspond to\n");
+  fprintf(stderr, "    a sub-directory under the board directory at\n");
   fprintf(stderr, "    under nuttx%cboards%c<board-name>%cconfigs%c.\n",
           g_delim, g_delim, g_delim, g_delim);
   fprintf(stderr, "  -h:\n");
@@ -311,7 +323,8 @@ static void parse_args(int argc, char **argv)
             show_usage(argv[0], EXIT_FAILURE);
 
           case ':' :
-            fprintf(stderr, "ERROR: Missing option argument, option: %c\n", optopt);
+            fprintf(stderr, "ERROR: Missing option argument, option: %c\n",
+                    optopt);
             show_usage(argv[0], EXIT_FAILURE);
 
           default:
@@ -387,13 +400,15 @@ static void verify_directory(const char *directory)
 
   if (stat(directory, &buf) < 0)
     {
-      fprintf(stderr, "ERROR: stat of %s failed: %s\n", directory, strerror(errno));
+      fprintf(stderr, "ERROR: stat of %s failed: %s\n",
+              directory, strerror(errno));
       exit(EXIT_FAILURE);
     }
 
   if (!S_ISDIR(buf.st_mode))
     {
-      fprintf(stderr, "ERROR: %s exists but is not a directory\n", directory);
+      fprintf(stderr, "ERROR: %s exists but is not a directory\n",
+              directory);
       exit(EXIT_FAILURE);
     }
 }
@@ -411,19 +426,22 @@ static bool verify_optiondir(const char *directory)
       int errcode = errno;
       if (errcode == ENOENT)
         {
-          debug("verify_optiondir: stat of %s failed: %s\n", directory, strerror(errno));
+          debug("verify_optiondir: stat of %s failed: %s\n",
+                directory, strerror(errno));
           return false;
         }
       else
         {
-          fprintf(stderr, "ERROR: stat of %s failed: %s\n", directory, strerror(errno));
+          fprintf(stderr, "ERROR: stat of %s failed: %s\n",
+                  directory, strerror(errno));
           exit(EXIT_FAILURE);
         }
     }
 
   if (!S_ISDIR(buf.st_mode))
     {
-      fprintf(stderr, "ERROR: %s exists but is not a directory\n", directory);
+      fprintf(stderr, "ERROR: %s exists but is not a directory\n",
+              directory);
       exit(EXIT_FAILURE);
     }
 
@@ -441,12 +459,14 @@ static bool verify_file(const char *path)
       int errcode = errno;
       if (errcode == ENOENT)
         {
-          debug("verify_file: stat of %s failed: %s\n", path, strerror(errno));
+          debug("verify_file: stat of %s failed: %s\n",
+                path, strerror(errno));
           return false;
         }
       else
         {
-          fprintf(stderr, "ERROR: stat of %s failed: %s\n", path, strerror(errno));
+          fprintf(stderr, "ERROR: stat of %s failed: %s\n",
+                  path, strerror(errno));
           exit(EXIT_FAILURE);
         }
     }
@@ -465,15 +485,16 @@ static void find_topdir(void)
   char *currdir;
 
   /* Get and verify the top-level NuttX directory */
+
   /* First get the current directory.  We expect this to be either
    * the nuttx root directory or the tools subdirectory.
    */
 
-   if (getcwd(g_buffer, BUFFER_SIZE) == NULL)
-     {
-       fprintf(stderr, "ERROR: getcwd failed: %s\n", strerror(errno));
-       exit(EXIT_FAILURE);
-     }
+  if (getcwd(g_buffer, BUFFER_SIZE) == NULL)
+    {
+      fprintf(stderr, "ERROR: getcwd failed: %s\n", strerror(errno));
+      exit(EXIT_FAILURE);
+    }
 
   /* Assume that we are in the tools sub-directory and the directory above
    * is the nuttx root directory.
@@ -514,7 +535,8 @@ static void find_topdir(void)
     }
 }
 
-static void config_search(const char *boarddir, config_callback callback, void *data)
+static void config_search(const char *boarddir,
+                          config_callback callback, void *data)
 {
   DIR *dir;
   struct dirent *dp;
@@ -579,7 +601,8 @@ static void config_search(const char *boarddir, config_callback callback, void *
       if (S_ISDIR(buf.st_mode))
         {
           char *tmppath;
-          snprintf(g_buffer, BUFFER_SIZE, "%s%c%s", boarddir, g_delim, child);
+          snprintf(g_buffer, BUFFER_SIZE, "%s%c%s",
+                   boarddir, g_delim, child);
           tmppath = strdup(g_buffer);
           config_search(tmppath, callback, data);
           free(tmppath);
@@ -599,7 +622,7 @@ static void config_search(const char *boarddir, config_callback callback, void *
           char *configname;
           char *delim;
 
-          /* Get the board directory near the beginning of the 'boarddir' path:
+          /* Get the board directory near the beginning of the 'boarddir':
            * <archdir>/<chipdir>/<boarddir>/configs/<configdir>
            */
 
@@ -626,7 +649,8 @@ static void config_search(const char *boarddir, config_callback callback, void *
               delim = strchr(chipname, g_delim);
               if (delim == NULL)
                 {
-                  debug("ERROR: delimiter not found in path: %s\n", chipname);
+                  debug("ERROR: delimiter not found in path: %s\n",
+                        chipname);
                 }
               else
                 {
@@ -638,7 +662,8 @@ static void config_search(const char *boarddir, config_callback callback, void *
                   delim = strchr(boardname, g_delim);
                   if (delim == NULL)
                     {
-                      debug("ERROR: delimiter not found in path: %s\n", boardname);
+                      debug("ERROR: delimiter not found in path: %s\n",
+                            boardname);
                     }
                   else
                     {
@@ -648,13 +673,14 @@ static void config_search(const char *boarddir, config_callback callback, void *
                       delim  = strrchr(delim + 1, g_delim);
                       if (delim == NULL)
                         {
-                          debug("ERROR: Configuration directory not found in path: %s\n",
+                          debug("ERROR: directory not found in path: %s\n",
                                 boardname);
                         }
                       else
                         {
                           configname = delim + 1;
-                          callback(boarddir, archname, chipname, boardname, configname, data);
+                          callback(boarddir, archname, chipname,
+                                   boardname, configname, data);
                         }
                     }
                 }
@@ -668,9 +694,9 @@ static void config_search(const char *boarddir, config_callback callback, void *
   closedir(dir);
 }
 
-static void find_archname_callback(const char *boarddir, const char *archname,
-                                   const char *chipname, const char *boardname,
-                                   const char *configname, void *data)
+static void archname_callback(const char *boarddir, const char *archname,
+                              const char *chipname, const char *boardname,
+                              const char *configname, void *data)
 {
   if (strcmp(g_boarddir, boardname) == 0 &&
       strcmp(g_configdir, configname) == 0)
@@ -682,7 +708,7 @@ static void find_archname_callback(const char *boarddir, const char *archname,
 
 static void find_archname(void)
 {
-  config_search("", find_archname_callback, NULL);
+  config_search("", archname_callback, NULL);
   if (g_archdir == NULL || g_chipdir == NULL)
     {
       g_archdir = "unknown";
@@ -751,8 +777,8 @@ static void check_configdir(void)
 
 static void check_configured(void)
 {
-  /* If we are already configured then there will be a .config and a Make.defs
-   * file in the top-level directory.
+  /* If we are already configured then there will be a .config and
+   * a Make.defs file in the top-level directory.
    */
 
   snprintf(g_buffer, BUFFER_SIZE, "%s%c.config", g_topdir, g_delim);
@@ -776,7 +802,8 @@ static void check_configured(void)
         }
       else
         {
-          fprintf(stderr, "ERROR: Found %s... Already configured\n", g_buffer);
+          fprintf(stderr, "ERROR: Found %s... Already configured\n",
+                  g_buffer);
           fprintf(stderr, "       Please 'make distclean' and try again\n");
           exit(EXIT_FAILURE);
         }
@@ -860,6 +887,7 @@ static void check_appdir(void)
   char tmp[16];
 
   /* Get and verify the full path to the application directory */
+
   /* Was the appdir provided on the command line? */
 
   debug("check_appdir: Command line appdir=%s\n",
@@ -921,16 +949,13 @@ static void check_appdir(void)
 
       /* Try ../apps-xx.yy where xx.yy are the NuttX version number */
 
-      fprintf(stderr, "ERROR: Could not find the path to the application directory\n");
+      fprintf(stderr, "ERROR: Could not find the path to the appdir\n");
       exit(EXIT_FAILURE);
     }
-  else
+  else if (!verify_appdir(g_appdir))
     {
-      if (!verify_appdir(g_appdir))
-        {
-          fprintf(stderr, "ERROR: Command line path to application directory does not exist\n");
-          exit(EXIT_FAILURE);
-        }
+      fprintf(stderr, "ERROR: Command line path to appdir does not exist\n");
+      exit(EXIT_FAILURE);
     }
 }
 
@@ -988,12 +1013,15 @@ static void check_configuration(void)
 
       if (g_scriptspath != NULL)
         {
-          snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs", g_scriptspath, g_delim);
+          snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs",
+                   g_scriptspath, g_delim);
           debug("check_configuration: Checking %s\n", g_buffer);
           if (!verify_file(g_buffer))
             {
-              fprintf(stderr, "ERROR: No Make.defs file in %s\n", g_configpath);
-              fprintf(stderr, "       No Make.defs file in %s\n", g_scriptspath);
+              fprintf(stderr, "ERROR: No Make.defs file in %s\n",
+                      g_configpath);
+              fprintf(stderr, "       No Make.defs file in %s\n",
+                      g_scriptspath);
               enumerate_configs();
               exit(EXIT_FAILURE);
             }
@@ -1009,7 +1037,8 @@ static void check_configuration(void)
   g_srcmakedefs = strdup(g_buffer);
 }
 
-static void copy_file(const char *srcpath, const char *destpath, mode_t mode)
+static void copy_file(const char *srcpath,
+                      const char *destpath, mode_t mode)
 {
   int nbytesread;
   int nbyteswritten;
@@ -1021,22 +1050,24 @@ static void copy_file(const char *srcpath, const char *destpath, mode_t mode)
   rdfd = open(srcpath, O_RDONLY);
   if (rdfd < 0)
     {
-      fprintf(stderr, "ERROR: Failed to open %s for reading: %s\n", srcpath, strerror(errno));
+      fprintf(stderr, "ERROR: Failed to open %s for reading: %s\n",
+              srcpath, strerror(errno));
       exit(EXIT_FAILURE);
     }
 
-  /* Now open the destination for writing*/
+  /* Now open the destination for writing */
 
-  wrfd = open(destpath, O_WRONLY|O_CREAT|O_TRUNC, mode);
+  wrfd = open(destpath, O_WRONLY | O_CREAT | O_TRUNC, mode);
   if (wrfd < 0)
     {
-      fprintf(stderr, "ERROR: Failed to open %s for writing: %s\n", destpath, strerror(errno));
+      fprintf(stderr, "ERROR: Failed to open %s for writing: %s\n",
+              destpath, strerror(errno));
       exit(EXIT_FAILURE);
     }
 
   /* Now copy the file */
 
-  for (;;)
+  for (; ; )
     {
       do
         {
@@ -1155,7 +1186,8 @@ static void copy_optional(void)
         {
           char *optsrc = strdup(g_buffer);
 
-          snprintf(g_buffer, BUFFER_SIZE, "%s%c%s", g_topdir, g_delim, g_optfiles[i]);
+          snprintf(g_buffer, BUFFER_SIZE, "%s%c%s",
+                   g_topdir, g_delim, g_optfiles[i]);
 
           debug("copy_optional: Copying from %s to %s\n", optsrc, g_buffer);
           copy_file(optsrc, g_buffer, 0644);
@@ -1312,7 +1344,8 @@ static void set_host(const char *destconfig)
 
       default:
         {
-          fprintf(stderr, "ERROR: Unrecognized  host configuration: %d\n", g_host);
+          fprintf(stderr, "ERROR: Unrecognized  host configuration: %d\n",
+                  g_host);
           exit(EXIT_FAILURE);
         }
     }
@@ -1343,9 +1376,9 @@ static void configure(void)
 
   set_host(destconfig);
 
-  /* If we did not use the CONFIG_APPS_DIR that was in the defconfig config file,
-   * then append the correct application information to the tail of the .config
-   * file
+  /* If we did not use the CONFIG_APPS_DIR that was in the defconfig config
+   * file, then append the correct application information to the tail of the
+   * .config file
    */
 
   if (g_needapppath)
@@ -1353,8 +1386,8 @@ static void configure(void)
       FILE *stream;
       char *appdir = strdup(g_appdir);
 
-      /* One complexity is if we are using Windows paths, but the configuration
-       * needs POSIX paths (or vice versa).
+      /* One complexity is if we are using Windows paths, but the
+       * configuration needs POSIX paths (or vice versa).
        */
 
       if (g_winpaths != g_winnative)
@@ -1385,7 +1418,8 @@ static void configure(void)
           char *tmp_appdir = double_appdir_backslashes(appdir);
           if (NULL == tmp_appdir)
             {
-              fprintf(stderr, "ERROR: Failed to double appdir backslashes\n");
+              fprintf(stderr,
+                      "ERROR: Failed to double appdir backslashes\n");
               exit(EXIT_FAILURE);
             }
 
@@ -1398,7 +1432,8 @@ static void configure(void)
       stream = fopen(destconfig, "a");
       if (!stream)
         {
-          fprintf(stderr, "ERROR: Failed to open %s for append mode mode: %s\n",
+          fprintf(stderr,
+                  "ERROR: Failed to open %s for append mode mode: %s\n",
                   destconfig, strerror(errno));
           exit(EXIT_FAILURE);
         }
@@ -1424,13 +1459,13 @@ static void refresh(void)
       ret = system("make olddefconfig V=1");
     }
   else
-   {
+    {
 #ifdef WIN32
       ret = system("make olddefconfig");
 #else
       ret = system("make olddefconfig 1>/dev/null");
 #endif
-   }
+    }
 
   putchar('\n');
 
