@@ -67,7 +67,7 @@
     movi        \reg, 1
     j           2f
 1:
-    movii       \reg, 0
+    movi        \reg, 0
 2:
     .endm
 
