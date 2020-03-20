@@ -22,7 +22,7 @@ VPNKit setup
 
 See https://github.com/moby/vpnkit for build instructions.
 
-If you have Docker Desktop for Mac installed on your machinie,
+If you have Docker Desktop for Mac installed on your machine,
 you can find a vpnkit binary at:
 
     /Applications/Docker.app/Contents/Resources/bin/com.docker.vpnkit
