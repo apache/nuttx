@@ -3736,7 +3736,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>df</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code></code></td>
     <td><code>CONFIG_NSH_DISABLE_DF</code></td>
   </tr>
   <tr>
@@ -3785,7 +3785,7 @@ nsh&gt;
     <td><code>CONFIG_NSH_DISABLE_GET</code></td>
   </tr>
   <tr>
-    <td><b><code>help</code></b><sup>4</sup></td>
+    <td><b><code>help</code></b><sup>3</sup></td>
     <td><br></td>
     <td><code>CONFIG_NSH_DISABLE_HELP</code></td>
   </tr>
@@ -3880,7 +3880,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>mount</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code></code></td>
     <td><code>CONFIG_NSH_DISABLE_MOUNT</code></td>
   </tr>
   <tr>
@@ -4006,7 +4006,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>umount</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code></code></td>
     <td><code>CONFIG_NSH_DISABLE_UMOUNT</code></td>
   </tr>
   <tr>
@@ -4062,10 +4062,6 @@ nsh&gt;
   Special TFTP server start-up options will probably be required to permit
   creation of files for the correct operation of the <code>put</code> command.</small><br>
   <sup>3</sup><small>
-  <code>CONFIG_FS_READABLE</code> is not a user configuration but is set automatically
-  if any readable file system is selected.  At present, this is either <code>CONFIG_FS_FAT</code>
-  or <code>CONFIG_FS_ROMFS</code>.</small><br>
-  <sup>4</sup><small>
   Verbose help output can be suppressed by defining <code>CONFIG_NSH_HELP_TERSE</code>.
   In that case, the help command is still available but will be slightly smaller.
   </small>

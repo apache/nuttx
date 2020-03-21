@@ -70,10 +70,8 @@ static int     part_open(FAR struct inode *inode);
 static int     part_close(FAR struct inode *inode);
 static ssize_t part_read(FAR struct inode *inode, unsigned char *buffer,
                          size_t start_sector, unsigned int nsectors);
-#ifdef CONFIG_FS_WRITABLE
 static ssize_t part_write(FAR struct inode *inode, const unsigned char *buffer,
                           size_t start_sector, unsigned int nsectors);
-#endif
 static int     part_geometry(FAR struct inode *inode, struct geometry *geometry);
 static int     part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg);
 
@@ -90,11 +88,7 @@ static const struct block_operations g_part_bops =
   part_open,     /* open     */
   part_close,    /* close    */
   part_read,     /* read     */
-#ifdef CONFIG_FS_WRITABLE
   part_write,    /* write    */
-#else
-  NULL,         /* write    */
-#endif
   part_geometry, /* geometry */
   part_ioctl     /* ioctl    */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -180,7 +174,6 @@ static ssize_t part_read(FAR struct inode *inode, unsigned char *buffer,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
 static ssize_t part_write(FAR struct inode *inode, const unsigned char *buffer,
                         size_t start_sector, unsigned int nsectors)
 {
@@ -196,7 +189,6 @@ static ssize_t part_write(FAR struct inode *inode, const unsigned char *buffer,
 
   return parent->u.i_bops->write(parent, buffer, start_sector, nsectors);
 }
-#endif
 
 /****************************************************************************
  * Name: part_geometry

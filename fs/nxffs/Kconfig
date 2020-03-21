@@ -8,7 +8,6 @@ config FS_NXFFS
 	default n
 	depends on !DISABLE_MOUNTPOINT
 	select FS_READABLE
-	select FS_WRITABLE
 	---help---
 		Enable NuttX FLASH file system (NXFF) support.
 
