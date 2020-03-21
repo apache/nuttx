@@ -42,7 +42,7 @@ config MTD_PARTITION
 config FTL_WRITEBUFFER
 	bool "Enable write buffering in the FTL layer"
 	default n
-	depends on DRVR_WRITEBUFFER && FS_WRITABLE
+	depends on DRVR_WRITEBUFFER
 
 config FTL_READAHEAD
 	bool "Enable read-ahead buffering in the FTL layer"
@@ -791,7 +791,6 @@ endchoice # CRC level selection
 config MTD_SMART_FSCK
 	bool "Enable SMART file system check"
 	default n
-	depends on FS_WRITABLE
 	---help---
 		Enables fsck to check and repair the SMART file system.
 

@@ -572,7 +572,6 @@ menuconfig USBMSC
 	bool "USB Mass storage class device"
 	default n
 	select FS_READABLE
-	select FS_WRITABLE
 	---help---
 		References:
 		"Universal Serial Bus Mass Storage Class, Specification Overview,"

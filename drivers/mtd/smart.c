@@ -408,21 +408,17 @@ static ssize_t smart_reload(struct smart_struct_s *dev, FAR uint8_t *buffer,
                  off_t startblock, size_t nblocks);
 static ssize_t smart_read(FAR struct inode *inode, unsigned char *buffer,
                  size_t start_sector, unsigned int nsectors);
-#ifdef CONFIG_FS_WRITABLE
 static ssize_t smart_write(FAR struct inode *inode, const unsigned char *buffer,
                  size_t start_sector, unsigned int nsectors);
-#endif
 static int     smart_geometry(FAR struct inode *inode, struct geometry *geometry);
 static int     smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg);
 
 static int     smart_findfreephyssector(FAR struct smart_struct_s *dev,
                                         uint8_t canrelocate);
 
-#ifdef CONFIG_FS_WRITABLE
 static int smart_writesector(FAR struct smart_struct_s *dev, unsigned long arg);
 static inline int smart_allocsector(FAR struct smart_struct_s *dev,
                  unsigned long requested);
-#endif
 static int smart_readsector(FAR struct smart_struct_s *dev, unsigned long arg);
 
 #ifdef CONFIG_MTD_SMART_ENABLE_CRC
@@ -457,11 +453,7 @@ static const struct block_operations g_bops =
   smart_open,     /* open     */
   smart_close,    /* close    */
   smart_read,     /* read     */
-#ifdef CONFIG_FS_WRITABLE
   smart_write,    /* write    */
-#else
-  NULL,           /* write    */
-#endif
   smart_geometry, /* geometry */
   smart_ioctl     /* ioctl    */
 };
@@ -907,7 +899,6 @@ static ssize_t smart_read(FAR struct inode *inode, unsigned char *buffer,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
 static ssize_t smart_write(FAR struct inode *inode,
                 FAR const unsigned char *buffer,
                 size_t start_sector, unsigned int nsectors)
@@ -1018,7 +1009,6 @@ static ssize_t smart_write(FAR struct inode *inode,
 
   return nsectors;
 }
-#endif /* CONFIG_FS_WRITABLE */
 
 /****************************************************************************
  * Name: smart_geometry
@@ -1044,11 +1034,7 @@ static int smart_geometry(FAR struct inode *inode, struct geometry *geometry)
 #endif
       geometry->geo_available     = true;
       geometry->geo_mediachanged  = false;
-#ifdef CONFIG_FS_WRITABLE
       geometry->geo_writeenabled  = true;
-#else
-      geometry->geo_writeenabled  = false;
-#endif
 
       erasesize                   = dev->geo.erasesize;
       geometry->geo_nsectors      = dev->geo.neraseblocks * erasesize /
@@ -3042,7 +3028,6 @@ static crc_t smart_calc_sector_crc(FAR struct smart_struct_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
 static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long arg)
 {
   FAR struct  smart_sect_header_s  *sectorheader;
@@ -3248,7 +3233,6 @@ static inline int smart_llformat(FAR struct smart_struct_s *dev, unsigned long a
 
   return OK;
 }
-#endif /* CONFIG_FS_WRITABLE */
 
 /****************************************************************************
  * Name: smart_relocate_sector
@@ -3923,7 +3907,6 @@ retry:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
 static int smart_garbagecollect(FAR struct smart_struct_s *dev)
 {
   uint16_t  collectblock;
@@ -4046,7 +4029,6 @@ static int smart_garbagecollect(FAR struct smart_struct_s *dev)
 errout:
   return ret;
 }
-#endif /* CONFIG_FS_WRITABLE */
 
 /****************************************************************************
  * Name: smart_write_wearstatus
@@ -4254,8 +4236,6 @@ static inline int smart_read_wearstatus(FAR struct smart_struct_s *dev)
 #endif
       if ((sector != 0) && (physsector == 0xffff))
         {
-#ifdef CONFIG_FS_WRITABLE
-
           /* This logical sector does not exist yet.  We must allocate it */
 
           ret = smart_allocsector(dev, sector);
@@ -4265,7 +4245,6 @@ static inline int smart_read_wearstatus(FAR struct smart_struct_s *dev)
               ret = -EINVAL;
               goto errout;
             }
-#endif
         }
 
       /* Read the sector */
@@ -4324,7 +4303,6 @@ errout:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
 static int smart_write_alloc_sector(FAR struct smart_struct_s *dev,
                     uint16_t logical, uint16_t physical)
 {
@@ -4394,7 +4372,6 @@ static int smart_write_alloc_sector(FAR struct smart_struct_s *dev,
 
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: smart_validate_crc
@@ -4460,7 +4437,6 @@ static int smart_validate_crc(FAR struct smart_struct_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
 static int smart_writesector(FAR struct smart_struct_s *dev,
                     unsigned long arg)
 {
@@ -4857,7 +4833,6 @@ static int smart_writesector(FAR struct smart_struct_s *dev,
 errout:
   return ret;
 }
-#endif /* CONFIG_FS_WRITABLE */
 
 /****************************************************************************
  * Name: smart_readsector
@@ -5016,7 +4991,6 @@ errout:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
 static inline int smart_allocsector(FAR struct smart_struct_s *dev,
                     unsigned long requested)
 {
@@ -5251,7 +5225,6 @@ static inline int smart_allocsector(FAR struct smart_struct_s *dev,
 
   return logsector;
 }
-#endif /* CONFIG_FS_WRITABLE */
 
 /****************************************************************************
  * Name: smart_freesector
@@ -5262,7 +5235,6 @@ static inline int smart_allocsector(FAR struct smart_struct_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
 static inline int smart_freesector(FAR struct smart_struct_s *dev,
                     unsigned long logicalsector)
 {
@@ -5365,7 +5337,6 @@ static inline int smart_freesector(FAR struct smart_struct_s *dev,
 errout:
   return ret;
 }
-#endif /* CONFIG_FS_WRITABLE */
 
 /****************************************************************************
  * Name: smart_ioctl
@@ -5436,7 +5407,6 @@ static int smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
       ret = smart_readsector(dev, arg);
       goto ok_out;
 
-#ifdef CONFIG_FS_WRITABLE
     case BIOC_LLFORMAT:
 
       /* Perform a low-level format on the flash */
@@ -5481,7 +5451,6 @@ static int smart_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 #endif
 
       goto ok_out;
-#endif /* CONFIG_FS_WRITABLE */
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
     case BIOC_GETPROCFSD:
