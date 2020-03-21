@@ -64,7 +64,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Some sanity checks *******************************************************/
+
 /* Is there at least one UART enabled and configured as a RS-232 device? */
 
 #ifndef HAVE_UART_DEVICE
@@ -348,7 +350,7 @@ static uart_dev_t g_uart0port =
   {
     .size   = CONFIG_UART0_TXBUFSIZE,
     .buffer = g_uart0txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart0priv,
 };
@@ -383,7 +385,7 @@ static uart_dev_t g_uart1port =
   {
     .size   = CONFIG_UART1_TXBUFSIZE,
     .buffer = g_uart1txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart1priv,
 };
@@ -418,7 +420,7 @@ static uart_dev_t g_uart2port =
   {
     .size   = CONFIG_UART2_TXBUFSIZE,
     .buffer = g_uart2txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart2priv,
 };
@@ -453,7 +455,7 @@ static uart_dev_t g_uart3port =
   {
     .size   = CONFIG_UART3_TXBUFSIZE,
     .buffer = g_uart3txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart3priv,
 };
@@ -488,7 +490,7 @@ static uart_dev_t g_uart4port =
   {
     .size   = CONFIG_UART4_TXBUFSIZE,
     .buffer = g_uart4txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart4priv,
 };
@@ -523,7 +525,7 @@ static uart_dev_t g_uart5port =
   {
     .size   = CONFIG_UART5_TXBUFSIZE,
     .buffer = g_uart5txbuffer,
-   },
+  },
   .ops      = &g_uart_ops,
   .priv     = &g_uart5priv,
 };
@@ -557,8 +559,9 @@ static inline void xmc4_serialout(struct xmc4_dev_s *priv,
  * Name: xmc4_modifyreg
  ****************************************************************************/
 
-static inline void xmc4_modifyreg(struct xmc4_dev_s *priv, unsigned int offset,
-                                  uint32_t setbits, uint32_t clrbits)
+static inline void xmc4_modifyreg(struct xmc4_dev_s *priv, unsigned
+                                  int offset, uint32_t setbits,
+                                  uint32_t clrbits)
 {
   irqstate_t flags;
   uintptr_t regaddr = priv->uartbase + offset;
@@ -678,14 +681,15 @@ static void xmc4_shutdown(struct uart_dev_s *dev)
  * Name: xmc4_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).
+ *   The RX and TX interrupts are not enabled until the txint() and rxint()
+ *   methods are called.
  *
  ****************************************************************************/
 
@@ -712,8 +716,8 @@ static int xmc4_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.
+ *   The exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -885,8 +889,8 @@ static void xmc4_rxint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
+      /* Receive an interrupt when their is anything in the Rx data register
+       * (or an Rx timeout occurs).
        */
 
       priv->ccr |= CCR_RX_EVENTS;

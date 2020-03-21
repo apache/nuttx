@@ -1,7 +1,7 @@
 README for the XMC4500 Relax
 ============================
 
-  The directory provides board support for the Infinion XMC4500 Relax v1
+  The directory provides board support for the Infineon XMC4500 Relax v1
   boards.  There are to variants of this board:  There is a Lite version
   that has fewer features, for example, no 32.768KHz crystal.
 
