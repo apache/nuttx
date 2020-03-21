@@ -1,4 +1,4 @@
-/****************************************************************************
+/********************************************************************************************
  * arch/arm/include/xmc4/irq.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ********************************************************************************************/
 
 /* This file should never be included directed but, rather, only indirectly
  * through nuttx/irq.h
@@ -40,16 +40,16 @@
 #ifndef __ARCH_ARM_INCLUDE_XMC4_IRQ_H
 #define __ARCH_ARM_INCLUDE_XMC4_IRQ_H
 
-/************************************************************************************
+/********************************************************************************************
  * Included Files
- ************************************************************************************/
+ ********************************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-/************************************************************************************
+/********************************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ********************************************************************************************/
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map directly to
  * bits in the NVIC.  This does, however, waste several words of memory in the IRQ
@@ -79,6 +79,10 @@
 
 #if defined(CONFIG_ARCH_CHIP_XMC4500)
 #  include <arch/xmc4/xmc4500_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_XMC4700)
+#  include <arch/xmc4/xmc4700_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_XMC4800)
+#  include <arch/xmc4/xmc4800_irq.h>
 #else
   /* The interrupt vectors for other parts are defined in other documents and may or
    * may not be the same as above (the family members are all very similar)  This
@@ -87,33 +91,6 @@
    */
 
 #  error "No IRQ numbers for this XMC4xxx part"
-#endif
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
 #endif
 
 #endif /* __ARCH_ARM_INCLUDE_XMC4_IRQ_H */
