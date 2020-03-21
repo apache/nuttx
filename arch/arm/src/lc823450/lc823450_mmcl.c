@@ -78,10 +78,13 @@ static int     mmcl_open(FAR struct inode *inode);
 static int     mmcl_close(FAR struct inode *inode);
 static ssize_t mmcl_read(FAR struct inode *inode, unsigned char *buffer,
                          size_t start_sector, unsigned int nsectors);
-static ssize_t mmcl_write(FAR struct inode *inode, const unsigned char *buffer,
-                          size_t start_sector, unsigned int nsectors);
-static int     mmcl_geometry(FAR struct inode *inode, struct geometry *geometry);
-static int     mmcl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg);
+static ssize_t mmcl_write(FAR struct inode *inode,
+                          const unsigned char *buffer, size_t start_sector,
+                          unsigned int nsectors);
+static int     mmcl_geometry(FAR struct inode *inode,
+                             struct geometry *geometry);
+static int     mmcl_ioctl(FAR struct inode *inode, int cmd,
+                          unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -163,8 +166,9 @@ static ssize_t mmcl_read(FAR struct inode *inode, unsigned char *buffer,
  *
  ****************************************************************************/
 
-static ssize_t mmcl_write(FAR struct inode *inode, const unsigned char *buffer,
-  size_t start_sector, unsigned int nsectors)
+static ssize_t mmcl_write(FAR struct inode *inode,
+                          const unsigned char *buffer, size_t start_sector,
+                          unsigned int nsectors)
 {
   ssize_t nwrite;
   struct mmcl_dev_s *dev;
@@ -249,7 +253,8 @@ static int mmcl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
  * Name: mmcl_allocdev
  ****************************************************************************/
 
-static FAR struct mmcl_dev_s *mmcl_allocdev(int number, FAR struct mtd_dev_s *mtd)
+static FAR struct mmcl_dev_s *mmcl_allocdev(int number,
+                                            FAR struct mtd_dev_s *mtd)
 {
   struct mmcl_dev_s *dev;
   int ret;
@@ -268,7 +273,8 @@ static FAR struct mmcl_dev_s *mmcl_allocdev(int number, FAR struct mtd_dev_s *mt
        * from the size of a pointer).
        */
 
-      ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&dev->geo));
+      ret = MTD_IOCTL(mtd, MTDIOC_GEOMETRY,
+                      (unsigned long)((uintptr_t)&dev->geo));
       if (ret < 0)
         {
           finfo("MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", ret);
@@ -317,6 +323,7 @@ int mmcl_initialize(int minor, FAR struct mtd_dev_s *mtd)
     CONFIG_MTD_DEVPATH1,
 #endif
   };
+
   int ret = -ENOMEM;
 
   /* Sanity check */

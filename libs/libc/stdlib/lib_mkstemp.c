@@ -157,14 +157,14 @@ static void get_base62(FAR uint8_t *ptr)
 static void copy_base62(FAR const uint8_t *src, FAR char *dest, int len)
 {
   if (len < MAX_XS)
-     {
-       src += MAX_XS - len;
-     }
+    {
+      src += MAX_XS - len;
+    }
 
-   for (; len > 0; len--)
-     {
-       *dest++ = base62_to_char(*src++);
-     }
+  for (; len > 0; len--)
+    {
+      *dest++ = base62_to_char(*src++);
+    }
 }
 
 /****************************************************************************
