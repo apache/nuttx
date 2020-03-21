@@ -92,11 +92,7 @@ static const struct block_operations g_bops =
   mmcl_open,      /* open     */
   mmcl_close,     /* close    */
   mmcl_read,      /* read     */
-#ifdef CONFIG_FS_WRITABLE
   mmcl_write,     /* write    */
-#else
-  NULL,           /* write    */
-#endif
   mmcl_geometry,  /* geometry */
   mmcl_ioctl      /* ioctl    */
 };
@@ -167,7 +163,6 @@ static ssize_t mmcl_read(FAR struct inode *inode, unsigned char *buffer,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
 static ssize_t mmcl_write(FAR struct inode *inode, const unsigned char *buffer,
   size_t start_sector, unsigned int nsectors)
 {
@@ -189,7 +184,6 @@ static ssize_t mmcl_write(FAR struct inode *inode, const unsigned char *buffer,
 
   return nwrite;
 }
-#endif
 
 /****************************************************************************
  * Name: mmcl_geometry
@@ -210,11 +204,7 @@ static int mmcl_geometry(FAR struct inode *inode, struct geometry *geometry)
       dev = (struct mmcl_dev_s *)inode->i_private;
       geometry->geo_available     = true;
       geometry->geo_mediachanged  = false;
-#ifdef CONFIG_FS_WRITABLE
       geometry->geo_writeenabled  = true;
-#else
-      geometry->geo_writeenabled  = false;
-#endif
       geometry->geo_nsectors      = dev->geo.neraseblocks;
       geometry->geo_sectorsize    = dev->geo.blocksize;
 
