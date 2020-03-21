@@ -128,6 +128,7 @@ choice
 
 config SIM_NETDEV_TAP
 	bool "Simulated Network Device with TAP/WPCAP"
+	depends on (HOST_LINUX || HOST_WINDOWS)
 	---help---
 		Build in support for a simulated network device using a TAP device on Linux or
 		WPCAP on Windows.
