@@ -120,6 +120,20 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: showprogress
+ *
+ * Description:
+ *   Print a character on the UART to show boot status.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_FEATURES
+#  define showprogress(c) up_lowputc(c)
+#else
+#  define showprogress(c)
+#endif
+
 #ifdef CONFIG_ARMV7M_STACKCHECK
 /* we need to get r10 set before we can allow instrumentation calls */
 
@@ -373,25 +387,37 @@ void __start(void)
    * configuration).
    */
 
-  xmc4_fpu_config();
   xmc4_lowsetup();
+  showprogress('A');
+
+  /* Initialize the FPU (if configured) */
+
+  xmc4_fpu_config();
+  showprogress('B');
+
 #ifdef USE_EARLYSERIALINIT
+  /* Perform early serial initialization */
+
   xmc4_earlyserialinit();
+  showprogress('C');
 #endif
 
+#ifdef CONFIG_BUILD_PROTECTED
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
    * Normally this just means initializing the user space .data and .bss
    * segments.
    */
 
-#ifdef CONFIG_BUILD_PROTECTED
   xmc4_userspace();
+  showprogress('D');
 #endif
 
   /* Initialize other on-board resources */
 
   xmc4_board_initialize();
+
+  showprogress('E');
 
   /* Then start NuttX */
 
