@@ -271,14 +271,6 @@ FAR struct mtd_dev_s *mtd_temp;
 
       /* Now create a character device on the block device */
 
-      /* NOTE:  for this to work, you will need to make sure that
-       * CONFIG_FS_WRITABLE is set in the config.  It's not a user-
-       * visible setting, but you can make it set by selecting an
-       * arbitrary writable file system (you don't have to actually
-       * use it, just select it so that the block device created via
-       * ftl_initialize() will be writable).
-       */
-
       ret = bchdev_register(blockdev, chardev, false);
       if (ret < 0)
         {
