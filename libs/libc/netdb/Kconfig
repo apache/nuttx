@@ -21,7 +21,6 @@ config LIBC_GAISTRERROR
 menuconfig NETDB_HOSTFILE
 	bool "Network host file support"
 	default n
-	depends on FS_READABLE
 	select LIBC_NETDB
 	---help---
 		Enable network host table look ups via gethostbyname() and
@@ -126,7 +125,6 @@ config NETDB_DNSCLIENT_RETRIES
 config NETDB_RESOLVCONF
 	bool "DNS resolver file support"
 	default n
-	depends on FS_READABLE
 	---help---
 		Enable DNS server look ups in resolver file like /etc/resolv.conf.
 

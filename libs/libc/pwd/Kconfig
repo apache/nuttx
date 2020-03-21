@@ -6,7 +6,6 @@
 config LIBC_PASSWD_FILE
 	bool "Have passwd file"
 	default n
-	depends on FS_READABLE
 	---help---
 		Have a passwd file.  The format of the password file is:
 
