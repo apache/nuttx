@@ -1910,7 +1910,16 @@ config ARCH_BOARD_XMC4500RELAX
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		Infineon XMC4000 Relax Lite v1
+		Infineon XMC4500 Relax Lite v1
+
+config ARCH_BOARD_XMC4700RELAX
+	bool "Infineon XMC4700 Relax"
+	depends on ARCH_CHIP_XMC4700
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		Infineon XMC4700 Relax
 
 config ARCH_BOARD_Z16F2800100ZCOG
 	bool "Zilog Z16F2800100ZCOG Development Kit"
@@ -2250,6 +2259,7 @@ config ARCH_BOARD
 	default "us7032evb1"               if ARCH_BOARD_US7032EVB1
 	default "viewtool-stm32f107"       if ARCH_BOARD_VIEWTOOL_STM32F107
 	default "xmc4500-relax"            if ARCH_BOARD_XMC4500RELAX
+	default "xmc4700-relax"            if ARCH_BOARD_XMC4700RELAX
 	default "z16f2800100zcog"          if ARCH_BOARD_Z16F2800100ZCOG
 	default "z20x"                     if ARCH_BOARD_Z20X
 	default "z80sim"                   if ARCH_BOARD_Z80SIM
@@ -2766,6 +2776,9 @@ source "boards/arm/tms570/tms570ls31x-usb-kit/Kconfig"
 endif
 if ARCH_BOARD_XMC4500RELAX
 source "boards/arm/xmc4/xmc4500-relax/Kconfig"
+endif
+if ARCH_BOARD_XMC4700RELAX
+source "boards/arm/xmc4/xmc4700-relax/Kconfig"
 endif
 if ARCH_BOARD_AVR32DEV1
 source "boards/avr/at32uc3/avr32dev1/Kconfig"
