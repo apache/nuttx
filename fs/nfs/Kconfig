@@ -8,7 +8,6 @@ config NFS
 	default n
 	depends on !DISABLE_MOUNTPOINT
 	select FS_READABLE
-	select FS_WRITABLE
 	---help---
 		Enable network file system (NFS) client file system
 
