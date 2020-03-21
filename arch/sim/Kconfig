@@ -142,6 +142,11 @@ endchoice
 
 endif
 
+config SIM_NETDEV_VPNKIT_PATH
+	string "Unix domain socket to communicate with VPNKit"
+	default "/tmp/vpnkit-nuttx"
+	depends on SIM_NETDEV_VPNKIT
+
 if HOST_LINUX
 choice
 	prompt "Simulation Network Type"
