@@ -48,10 +48,7 @@
 #include <nuttx/board.h>
 #include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
-
-#ifdef CONFIG_FS_WRITABLE
-#  include <nuttx/drivers/ramdisk.h>
-#endif
+#include <nuttx/drivers/ramdisk.h>
 
 #ifdef CONFIG_NX
 #  include <nuttx/nx/nxmu.h>
