@@ -88,7 +88,7 @@ static int       cxd56_emmc_close(FAR struct inode *inode);
 static ssize_t   cxd56_emmc_read(FAR struct inode *inode,
                                  unsigned char *buffer, size_t start_sector,
                                  unsigned int nsectors);
-#if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
+#if !defined(CONFIG_MMCSD_READONLY)
 static ssize_t   cxd56_emmc_write(FAR struct inode *inode,
                                   const unsigned char *buffer,
                                   size_t start_sector,
@@ -103,7 +103,7 @@ static const struct block_operations g_bops =
   cxd56_emmc_open,     /* open     */
   cxd56_emmc_close,    /* close    */
   cxd56_emmc_read,     /* read     */
-#if defined(CONFIG_FS_WRITABLE)
+#if !defined(CONFIG_MMCSD_READONLY)
   cxd56_emmc_write,    /* write    */
 #else
   NULL,           /* write    */
@@ -164,7 +164,7 @@ static void emmc_reset(uint32_t reg, uint32_t bits)
   while (val & bits);
 }
 
-#if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
+#if !defined(CONFIG_MMCSD_READONLY)
 static void emmc_flushwritefifo(void)
 {
   /* eMMC host controller has a problem that invalid data is still remained
@@ -723,7 +723,7 @@ static int cxd56_emmc_readsectors(FAR struct cxd56_emmc_state_s *priv,
   return ret;
 }
 
-#if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
+#if !defined(CONFIG_MMCSD_READONLY)
 static int cxd56_emmc_writesectors(FAR struct cxd56_emmc_state_s *priv,
                                    const void *buf, size_t start_sector,
                                    unsigned int nsectors)
@@ -848,7 +848,7 @@ static ssize_t cxd56_emmc_read(FAR struct inode *inode, unsigned char *buffer,
   return nsectors;
 }
 
-#if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
+#if !defined(CONFIG_MMCSD_READONLY)
 static ssize_t cxd56_emmc_write(FAR struct inode *inode,
                                 const unsigned char *buffer,
                                 size_t start_sector,
@@ -884,7 +884,7 @@ static int cxd56_emmc_geometry(FAR struct inode *inode,
 
   geometry->geo_available = true;
   geometry->geo_mediachanged = false;
-#if defined(CONFIG_FS_WRITABLE)
+#if !defined(CONFIG_MMCSD_READONLY)
   geometry->geo_writeenabled = true;
 #else
   geometry->geo_writeenabled = false;
