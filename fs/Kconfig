@@ -53,12 +53,6 @@ config PSEUDOFS_SOFTLINKS
 		to link a directory in the pseudo-file system, such as /bin, to
 		to a directory in a mounted volume, say /mnt/sdcard/bin.
 
-config FS_READABLE
-	bool
-	default n
-	---help---
-		Automatically selected if any readable file system is selected
-
 source fs/aio/Kconfig
 source fs/semaphore/Kconfig
 source fs/mqueue/Kconfig
