@@ -138,9 +138,9 @@ int rmdir(FAR const char *pathname)
         }
 
       /* Remove the inode.  NOTE: Because we hold a reference count on the
-       * inode, it will not be deleted now.  But probably when inode_release()
-       * is called below.  inode_remove should return -EBUSY to indicate that
-       * the inode was not deleted now.
+       * inode, it will not be deleted now.  But probably when
+       * inode_release() is called below.  inode_remove should return
+       * -EBUSY to indicate that the inode was not deleted now.
        */
 
       inode_semtake();

@@ -488,8 +488,8 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
   FAR struct inode *oldinode;
   int ret;
 
-  /* Ignore paths that are interpreted as the root directory which has no name
-   * and cannot be moved
+  /* Ignore paths that are interpreted as the root directory which has no
+   * name and cannot be moved
    */
 
   if (!oldpath || *oldpath == '\0' || oldpath[0] != '/' ||

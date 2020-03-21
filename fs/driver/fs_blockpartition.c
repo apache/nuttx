@@ -68,13 +68,15 @@ struct part_struct_s
 
 static int     part_open(FAR struct inode *inode);
 static int     part_close(FAR struct inode *inode);
-static ssize_t part_read(FAR struct inode *inode, unsigned char *buffer,
-                         size_t start_sector, unsigned int nsectors);
-static ssize_t part_write(FAR struct inode *inode, const unsigned char *buffer,
-                          size_t start_sector, unsigned int nsectors);
-static int     part_geometry(FAR struct inode *inode, struct geometry *geometry);
-static int     part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg);
-
+static ssize_t part_read(FAR struct inode *inode, FAR unsigned char *buffer,
+                 size_t start_sector, unsigned int nsectors);
+static ssize_t part_write(FAR struct inode *inode,
+                 FAR const unsigned char *buffer, size_t start_sector,
+                 unsigned int nsectors);
+static int     part_geometry(FAR struct inode *inode,
+                 FAR struct geometry *geometry);
+static int     part_ioctl(FAR struct inode *inode, int cmd,
+                 unsigned long arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     part_unlink(FAR struct inode *inode);
 #endif
@@ -174,8 +176,9 @@ static ssize_t part_read(FAR struct inode *inode, unsigned char *buffer,
  *
  ****************************************************************************/
 
-static ssize_t part_write(FAR struct inode *inode, const unsigned char *buffer,
-                        size_t start_sector, unsigned int nsectors)
+static ssize_t part_write(FAR struct inode *inode,
+                          FAR const unsigned char *buffer,
+                          size_t start_sector, unsigned int nsectors)
 {
   FAR struct part_struct_s *dev = inode->i_private;
   FAR struct inode *parent = dev->parent;
@@ -245,12 +248,14 @@ static int part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
               ret = parent->u.i_bops->geometry(parent, &geo);
               if (ret >= 0)
                 {
-                  *(FAR uint8_t *)base += dev->firstsector * geo.geo_sectorsize;
+                  *(FAR uint8_t *)base +=
+                    dev->firstsector * geo.geo_sectorsize;
                 }
             }
           else if (cmd == MTDIOC_GEOMETRY)
             {
-              FAR struct mtd_geometry_s *mgeo = (FAR struct mtd_geometry_s *)arg;
+              FAR struct mtd_geometry_s *mgeo =
+                (FAR struct mtd_geometry_s *)arg;
               uint32_t blkper = mgeo->erasesize / mgeo->blocksize;
 
               mgeo->neraseblocks = dev->nsectors / blkper;

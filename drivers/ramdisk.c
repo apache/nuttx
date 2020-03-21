@@ -414,7 +414,8 @@ int ramdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
   char devname[16];
   int ret = -ENOMEM;
 
-  finfo("buffer: %p nsectors: %d sectsize: %d\n", buffer, nsectors, sectsize);
+  finfo("buffer: %p nsectors: %d sectsize: %d\n",
+        buffer, nsectors, sectsize);
 
   /* Sanity check */
 
