@@ -863,7 +863,10 @@ boards/arm/stm32/viewtool-stm32f107
   See http://www.viewtool.com/ for further information.
 
 config/xmc4500-relax
-  Infineon XMC4000 Relax Lite v1
+  Infineon XMC4500 Relax Lite v1
+
+config/xmc4700-relax
+  Infineon XMC4700 Relax
 
 boards/z16/z16f/z16f2800100zcog
   z16f Microcontroller.  This port use the Zilog z16f2800100zcog
