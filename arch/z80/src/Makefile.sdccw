@@ -202,12 +202,11 @@ export_startup: board\libboard$(LIBEXT) $(STARTUP_OBJS)
 
 # Build dependencies
 
-.depend: Makefile asm_mem.h chip\Make.defs $(DEPSRCS)
+Make.dep: Makefile asm_mem.h chip\Make.defs $(DEPSRCS)
 	$(Q) if exist board\Makefile ( $(MAKE) -C board TOPDIR="$(TOPDIR)" depend )
-	$(Q) $(MKDEP) --dep-path chip --dep-path common "$(CC)" -- $(CFLAGS) -- $(DEPSRCS) >Make.dep
-	$(Q) touch $@
+	$(Q) $(MKDEP) --dep-path chip --dep-path common "$(CC)" -- $(CFLAGS) -- $(DEPSRCS) >$@
 
-depend: .depend
+depend: Make.dep
 
 clean:
 	$(Q) if exist board\Makefile ( $(MAKE) -C board TOPDIR="$(TOPDIR)" clean )
@@ -219,6 +218,5 @@ clean:
 distclean: clean
 	$(Q) if exist board\Makefile ( $(MAKE) -C board TOPDIR="$(TOPDIR)" distclean )
 	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
 
 -include Make.dep

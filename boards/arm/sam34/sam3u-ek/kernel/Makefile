@@ -103,9 +103,7 @@ $(TOPDIR)$(DELIM)User.map: nuttx_user.elf
 	$(Q) $(NM) nuttx_user.elf >$(TOPDIR)$(DELIM)User.map
 	$(Q) $(CROSSDEV)size nuttx_user.elf
 
-.depend:
-
-depend: .depend
+depend:
 
 clean:
 	$(call DELFILE, nuttx_user.elf)

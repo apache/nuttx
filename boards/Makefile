@@ -103,16 +103,15 @@ $(CXXOBJS): %$(OBJEXT): %.cxx
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-.depend: Makefile $(SRCS)
+Make.dep: Makefile $(SRCS)
 ifneq ($(SRCS),)
-	$(Q) $(MKDEP) --dep-path . "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) $(MKDEP) --dep-path . "$(CC)" -- $(CFLAGS) -- $(SRCS) >$@
 endif
 ifneq ($(CXXSRCS),)
-	$(Q) $(MKDEP) --dep-path . "$(CXX)" -- $(CXXFLAGS) -- $(CXXSRCS) >>Make.dep
+	$(Q) $(MKDEP) --dep-path . "$(CXX)" -- $(CXXFLAGS) -- $(CXXSRCS) >>$@
 endif
-	$(Q) touch $@
 
-depend: .depend
+depend: Make.dep
 
 $(DUMMY_KCONFIG): $(BOARD_KCONFIG)
 	$(call DELFILE, $(DUMMY_KCONFIG))
@@ -134,6 +133,5 @@ clean: clean_context
 
 distclean: clean
 	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
 
 -include Make.dep

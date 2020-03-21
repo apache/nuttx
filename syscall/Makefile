@@ -79,12 +79,11 @@ $(BIN1): $(PROXY_OBJS)
 $(BIN2): $(STUB_OBJS)
 	$(call ARCHIVE, $@, $(STUB_OBJS))
 
-.depend: Makefile $(SRCS)
+Make.dep: Makefile $(SRCS)
 	$(Q) $(MKDEP) $(ROOTDEPPATH) $(PROXYDEPPATH) $(STUBDEPPATH) \
-	  "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
+	  "$(CC)" -- $(CFLAGS) -- $(SRCS) >$@
 
-depend: .depend
+depend: Make.dep
 
 .context: syscall.csv
 	$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)tools -f Makefile.host mksyscall
@@ -106,7 +105,6 @@ endif
 distclean: clean
 	$(call DELFILE, .context)
 	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
 	$(call DELFILE, proxies$(DELIM)*.c)
 	$(call DELFILE, stubs$(DELIM)*.c)
 

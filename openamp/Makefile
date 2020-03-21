@@ -66,11 +66,10 @@ $(BIN): $(OBJS)
 
 dirlinks::
 
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
+Make.dep: Makefile $(SRCS)
+	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >$@
 
-depend: .depend
+depend: Make.dep
 
 clean:
 	$(foreach obj,$(OBJS),$(call DELFILE, $(obj)))
@@ -79,6 +78,5 @@ clean:
 
 distclean:: clean
 	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
 
 -include Make.dep

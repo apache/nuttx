@@ -202,15 +202,14 @@ endif
 
 # Dependencies
 
-.depend: Makefile chip$(DELIM)Make.defs $(SRCS)
+Make.dep: Makefile chip$(DELIM)Make.defs $(SRCS)
 ifeq ($(BOARDMAKE),y)
 	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" depend
 endif
 	$(Q) $(MKDEP) $(patsubst %,--dep-path %,$(subst :, ,$(VPATH))) \
-	 "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
+	 "$(CC)" -- $(CFLAGS) -- $(SRCS) >$@
 
-depend: .depend
+depend: Make.dep
 
 clean:
 ifeq ($(BOARDMAKE),y)
@@ -226,6 +225,5 @@ ifeq ($(BOARDMAKE),y)
 	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" distclean
 endif
 	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
 
 -include Make.dep

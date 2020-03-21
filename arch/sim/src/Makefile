@@ -310,14 +310,13 @@ export_startup: board/libboard$(LIBEXT) up_head.o $(HOSTOBJS)
 
 # Dependencies
 
-.depend: Makefile $(SRCS)
+Make.dep: Makefile $(SRCS)
 	$(Q) if [ -e board/Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
 	fi
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
+	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >$@
 
-depend: .depend
+depend: Make.dep
 
 cleanrel:
 	$(Q) rm -f nuttx.rel $(HOSTOS)-names.dat
@@ -335,7 +334,6 @@ distclean: clean
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" distclean ; \
 	fi
 	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
 	$(call DELFILE, hostfs.h)
 	$(Q) rm -rf GNU
 
