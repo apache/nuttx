@@ -58,6 +58,9 @@ mkdir          NXmkdir
 mount          NXmount
 open           NXopen
 opendir        NXopendir
+optarg         NXoptarg
+optind         NXoptind
+optopt         NXoptopt
 nanosleep      NXnanosleep
 pipe           NXpipe
 poll           NXpoll
