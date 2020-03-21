@@ -52,8 +52,8 @@
  * Name: xmc4_clrpend
  *
  * Description:
- *   Clear a pending interrupt at the NVIC.  This does not seem to be required
- *   for most interrupts.  Don't know why...
+ *   Clear a pending interrupt at the NVIC.  This does not seem to be
+ *   required for most interrupts.  Don't know why...
  *
  *   I keep it in a separate file so that it will not increase the footprint
  *   on Kinetis platforms that do not need this function.
@@ -66,15 +66,15 @@ void xmc4_clrpend(int irq)
 
   if (irq >= XMC4_IRQ_FIRST)
     {
-      if (irq < (XMC4_IRQ_FIRST+32))
+      if (irq < (XMC4_IRQ_FIRST + 32))
         {
           putreg32(1 << (irq - XMC4_IRQ_FIRST), NVIC_IRQ0_31_CLRPEND);
         }
-      else if (irq < (XMC4_IRQ_FIRST+64))
+      else if (irq < (XMC4_IRQ_FIRST + 64))
         {
           putreg32(1 << (irq - XMC4_IRQ_FIRST - 32), NVIC_IRQ32_63_CLRPEND);
         }
-      else if (irq < (XMC4_IRQ_FIRST+96))
+      else if (irq < (XMC4_IRQ_FIRST +96))
         {
           putreg32(1 << (irq - XMC4_IRQ_FIRST - 64), NVIC_IRQ64_95_CLRPEND);
         }
