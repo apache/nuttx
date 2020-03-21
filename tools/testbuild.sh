@@ -98,7 +98,7 @@ while [ ! -z "$1" ]; do
   * )
     testfile="$1"
     shift
-    break;
+    break
     ;;
   esac
   shift

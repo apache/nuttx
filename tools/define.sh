@@ -71,7 +71,7 @@ while [ ! -z "$1" ]; do
     echo "    Enable script debug"
     ;;
   * )
-    break;
+    break
     ;;
   esac
   shift

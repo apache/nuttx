@@ -78,7 +78,7 @@ while [ ! -z "$1" ]; do
     exit 0
     ;;
   * )
-    break;
+    break
     ;;
   esac
   shift
