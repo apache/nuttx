@@ -54,7 +54,7 @@
  * Private Data
  ****************************************************************************/
 
-static const char *g_vpnkit_socket_path = "/tmp/vpnkit-nuttx"; /* XXX config */
+static const char *g_vpnkit_socket_path = CONFIG_SIM_NETDEV_VPNKIT_PATH;
 static struct vif_info g_vifinfo;
 static int g_vpnkit_fd = -1;
 

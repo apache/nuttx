@@ -175,6 +175,7 @@ else # HOSTOS != Cygwin
 endif # HOSTOS != Cygwin
 else ifeq ($(CONFIG_SIM_NETDEV_VPNKIT),y)
   CSRCS += up_netdriver.c
+  HOSTCFLAGS += -DCONFIG_SIM_NETDEV_VPNKIT_PATH=\"$(CONFIG_SIM_NETDEV_VPNKIT_PATH)\"
   HOSTSRCS += up_vpnkit.c
   VPATH += :sim/vpnkit
   HOSTSRCS += protocol.c negotiate.c
