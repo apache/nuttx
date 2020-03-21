@@ -74,7 +74,7 @@ CSRCS += up_allocateheap.c
 VPATH = sim
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
-HOSTSRCS = up_hosttime.c
+HOSTSRCS = up_hosttime.c up_cliopts.c
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += up_checkstack.c
@@ -175,6 +175,7 @@ else # HOSTOS != Cygwin
 endif # HOSTOS != Cygwin
 else ifeq ($(CONFIG_SIM_NETDEV_VPNKIT),y)
   CSRCS += up_netdriver.c
+  HOSTCFLAGS += -DCONFIG_SIM_NETDEV_VPNKIT
   HOSTCFLAGS += -DCONFIG_SIM_NETDEV_VPNKIT_PATH=\"$(CONFIG_SIM_NETDEV_VPNKIT_PATH)\"
   HOSTSRCS += up_vpnkit.c
   VPATH += :sim/vpnkit
