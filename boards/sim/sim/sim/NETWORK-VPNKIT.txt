@@ -34,4 +34,8 @@ How to run
 You can use it as the following:
 
     % vpnkit --ethernet /tmp/vpnkit-nuttx &
-    % ./nuttx
+    % ./nuttx --vpnkit-sock /tmp/vpnkit-nuttx
+
+You can use nuttx --vpnkit-sock option to specify the path of the unix
+domain socket to communicate with VPNKit.  Otherwise, the value
+specified by CONFIG_SIM_NETDEV_VPNKIT_PATH is used.

@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
@@ -77,6 +78,8 @@ static char g_logbuffer[4096];
 
 int main(int argc, char **argv, char **envp)
 {
+  process_cli_options(argc, argv);
+
 #ifdef CONFIG_SYSLOG_RPMSG
   syslog_rpmsg_init_early("server", g_logbuffer, sizeof(g_logbuffer));
 #endif

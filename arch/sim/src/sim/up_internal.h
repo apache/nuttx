@@ -395,6 +395,10 @@ struct qspi_dev_s;
 struct qspi_dev_s *up_qspiflashinitialize(void);
 #endif
 
+/* up_cliopts.c *************************************************************/
+
+void process_cli_options(int argc, char **argv);
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
