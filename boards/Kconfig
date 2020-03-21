@@ -43,6 +43,13 @@ config ARCH_BOARD_ARDUINO_M0
 		This options selects the Arduino M0 board featuring the Atmel
 		ATSAMD21 MCU.
 
+config ARCH_BOARD_ARTY_A7
+	bool "DIGILENT ARTY_A7 board"
+	depends on ARCH_CHIP_LITEX
+	---help---
+		This is the board configuration for the port of NuttX to the Digilent ARTY A7
+		board.  This board features the RISC-V litex vexriscv softcore
+
 config ARCH_BOARD_AVR32DEV1
 	bool "Atmel AVR32DEV1 board"
 	depends on ARCH_CHIP_AT32UC3B0256
@@ -2058,6 +2065,7 @@ config ARCH_BOARD
 	default "arduino-mega2560"         if ARCH_BOARD_ARDUINO_MEGA2560
 	default "arduino-due"              if ARCH_BOARD_ARDUINO_DUE
 	default "arduino-m0"               if ARCH_BOARD_ARDUINO_M0
+	default "arty_a7"                  if ARCH_BOARD_ARTY_A7
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
 	default "axoloti"                  if ARCH_BOARD_AXOLOTI
 	default "bambino-200e"             if ARCH_BOARD_BAMBINO_200E
@@ -2818,6 +2826,9 @@ source "boards/renesas/m16c/skp16c26/Kconfig"
 endif
 if ARCH_BOARD_US7032EVB1
 source "boards/renesas/sh1/us7032evb1/Kconfig"
+endif
+if ARCH_BOARD_ARTY_A7
+source "boards/risc-v/litex/arty_a7/Kconfig"
 endif
 if ARCH_BOARD_GAPUINO
 source "boards/risc-v/gap8/gapuino/Kconfig"

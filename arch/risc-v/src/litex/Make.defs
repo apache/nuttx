@@ -1,0 +1,49 @@
+############################################################################
+# arch/risc-v/src/litex/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Specify our HEAD assembly file.  This will be linked as
+# the first object file, so it will appear at address 0
+HEAD_ASRC = litex_vectors.S
+
+# Specify our general Assembly files
+CHIP_ASRCS = litex_head.S up_syscall.S
+
+# Specify C code within the common directory to be included
+CMN_CSRCS  += up_initialize.c up_swint.c
+CMN_CSRCS  += up_allocateheap.c up_createstack.c up_exit.c
+CMN_CSRCS  += up_assert.c up_blocktask.c up_copystate.c up_initialstate.c
+CMN_CSRCS  += up_interruptcontext.c up_modifyreg32.c up_puts.c up_mdelay.c
+CMN_CSRCS  += up_releasepending.c up_reprioritizertr.c
+CMN_CSRCS  += up_releasestack.c up_stackframe.c up_schedulesigaction.c
+CMN_CSRCS  += up_sigdeliver.c up_udelay.c up_unblocktask.c up_usestack.c
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += up_checkstack.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
+CMN_CSRCS  += up_vfork.c
+endif
+
+# Specify our C code within this directory to be included
+CHIP_CSRCS  = litex_allocateheap.c litex_clockconfig.c
+CHIP_CSRCS += litex_idle.c litex_irq.c litex_irq_dispatch.c
+CHIP_CSRCS += litex_lowputc.c litex_serial.c
+CHIP_CSRCS += litex_start.c litex_timerisr.c
