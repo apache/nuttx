@@ -265,8 +265,6 @@ static void parse_args(int argc, char **argv)
 
   /* Parse command line options */
 
-  g_debug = false;
-
   while ((ch = getopt(argc, argv, "a:bcdefghlmnu")) > 0)
     {
       switch (ch)
@@ -805,18 +803,7 @@ static void check_configured(void)
     {
       if (g_enforce)
         {
-          if (g_debug)
-            {
-              run_make("distclean V=1");
-            }
-          else
-            {
-        #ifdef WIN32
-              run_make("distclean");
-        #else
-              run_make("distclean 1>/dev/null");
-        #endif
-            }
+          run_make("distclean");
         }
       else
         {
@@ -1472,19 +1459,7 @@ static void refresh(void)
   printf("  Refreshing...\n");
   fflush(stdout);
 
-  if (g_debug)
-    {
-      ret = run_make("olddefconfig V=1");
-    }
-  else
-    {
-#ifdef WIN32
-      ret = run_make("olddefconfig");
-#else
-      ret = run_make("olddefconfig 1>/dev/null");
-#endif
-    }
-
+  ret = run_make("olddefconfig");
   putchar('\n');
 
 #ifdef WEXITSTATUS

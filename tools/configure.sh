@@ -37,10 +37,9 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-d] [-e] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name> [make-opts]
+USAGE: ${0} [-e] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name> [make-opts]
 
 Where:
-  -d enables script debug output
   -e enforce distclean if already configured
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
@@ -72,7 +71,6 @@ unset boardconfig
 unset winnative
 unset appdir
 unset host
-unset debug
 unset enforce
 
 while [ ! -z "$1" ]; do
@@ -88,9 +86,6 @@ while [ ! -z "$1" ]; do
   -n )
     winnative=y
     host+=" $1"
-    ;;
-  -d )
-    debug=-d
     ;;
   -e )
     enforce=y
@@ -290,4 +285,4 @@ fi
 # The saved defconfig files are all in compressed format and must be
 # reconstitued before they can be used.
 
-${TOPDIR}/tools/sethost.sh $debug $host $*
+${TOPDIR}/tools/sethost.sh $host $*

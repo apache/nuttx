@@ -33,17 +33,15 @@
 #
 
 progname=$0
-debug=n
 host=
 wenv=
 
 function showusage {
   echo ""
-  echo "USAGE: $progname -d [-l|m|c|u|g|n] [make-opts]"
+  echo "USAGE: $progname [-l|m|c|u|g|n] [make-opts]"
   echo "       $progname -h"
   echo ""
   echo "Where:"
-  echo "  -d enables script debug output"
   echo "  -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),"
   echo "     Ubuntu under Windows 10 (u), MSYS/MSYS2 (g)"
   echo "     or Windows native (n). Default Linux"
@@ -56,9 +54,6 @@ function showusage {
 
 while [ ! -z "$1" ]; do
   case $1 in
-  -d )
-    debug=y
-    ;;
   -l )
     host=linux
     ;;
@@ -216,8 +211,4 @@ fi
 sed -i -e "/CONFIG_HOST_OTHER/d" $nuttx/.config
 
 echo "  Refreshing..."
-if [ "X${debug}" = "Xy" ]; then
-  make olddefconfig $* V=1 || { echo "ERROR: failed to refresh"; exit 1; }
-else
-  make olddefconfig $* 1>/dev/null || { echo "ERROR: failed to refresh"; exit 1; }
-fi
+make olddefconfig $* || { echo "ERROR: failed to refresh"; exit 1; }
