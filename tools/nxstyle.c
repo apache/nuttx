@@ -1459,7 +1459,8 @@ int main(int argc, char **argv, char **envp)
                    */
 
                   if ((strncmp(&line[ident_index], "PRIx", 4) == 0) ||
-                      (strncmp(&line[ident_index], "SYS_", 4) == 0))
+                      (strncmp(&line[ident_index], "SYS_", 4) == 0) ||
+                      (strncmp(&line[ident_index], "STUB_", 5) == 0))
                     {
                       /* No error */
                     }
