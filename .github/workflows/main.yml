@@ -64,7 +64,7 @@ jobs:
 
     strategy:
       matrix:
-        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, arm-14, arm-15, mips-riscv-x86, sim, xtensa]
+        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, arm-14, arm-15, mips-riscv-x86-xtensa, sim]
     steps:
     - name: Checkout nuttx repo
       uses: actions/checkout@v2
