@@ -132,11 +132,10 @@ context: .tzbuilt romfs
 
 # Create dependencies
 
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
+Make.dep: Makefile $(SRCS)
+	$(Q) $(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >$@
 
-depend: .depend
+depend: Make.dep
 
 clean:
 	$(call DELFILE, .built)
@@ -144,7 +143,6 @@ clean:
 
 distclean: clean
 	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
 	$(call DELFILE, .tzunpack)
 	$(call DELFILE, .tzbuilt)
 	$(call DELFILE, romfs_zoneinfo.img)
