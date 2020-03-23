@@ -1,5 +1,5 @@
 ############################################################################
-# board/arm/cxd56xx/script/Config.mk
+# board/arm/cxd56xx/spresense/script/Config.mk
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
