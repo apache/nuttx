@@ -1,4 +1,5 @@
 /Make.dep
+/.depend
 /board
 /chip
 /nuttx.linkcmd

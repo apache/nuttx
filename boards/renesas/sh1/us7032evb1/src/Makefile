@@ -59,10 +59,11 @@ $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
 libboard$(LIBEXT): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-Make.dep: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >$@
+.depend: Makefile $(SRCS)
+	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) touch $@
 
-depend: Make.dep
+depend: .depend
 
 clean:
 	$(call DELFILE, libboard$(LIBEXT))
@@ -70,5 +71,6 @@ clean:
 
 distclean: clean
 	$(call DELFILE, Make.dep)
+	$(call DELFILE, .depend)
 
 -include Make.dep

@@ -97,7 +97,9 @@ locked.r: ld-locked.inc $(PASS1_LIBBOARD)
 $(PASS1_SRCDIR)$(DELIM)locked.r: locked.r
 	$(Q) cp -a locked.r $(TOPDIR)$(DELIM)$(PASS1_SRCDIR)$(DELIM)locked.r
 
-depend:
+.depend:
+
+depend: .depend
 
 clean:
 	$(call DELFILE, locked.r)

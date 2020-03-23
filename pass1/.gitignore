@@ -1,5 +1,6 @@
 /*.c
 /Make.dep
+/.depend
 /*.asm
 /*.obj
 /*.rel

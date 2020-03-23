@@ -1,4 +1,5 @@
 /Make.dep
+/.depend
 /*.src
 /*.obj
 /*.asm

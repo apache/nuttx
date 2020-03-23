@@ -92,10 +92,11 @@ $(BINFMT_COBJS): %$(OBJEXT): %.c
 $(BIN): $(BINFMT_OBJS)
 	$(call ARCHIVE, $@, $(BINFMT_OBJS))
 
-Make.dep: Makefile $(BINFMT_SRCS)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(BINFMT_SRCS) >$@
+.depend: Makefile $(BINFMT_SRCS)
+	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(BINFMT_SRCS) >Make.dep
+	$(Q) touch $@
 
-depend: Make.dep
+depend: .depend
 
 clean:
 	$(call DELFILE, $(BIN))
@@ -103,5 +104,6 @@ clean:
 
 distclean: clean
 	$(call DELFILE, Make.dep)
+	$(call DELFILE, .depend)
 
 -include Make.dep

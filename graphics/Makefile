@@ -132,10 +132,11 @@ $(BIN): $(OBJS)
 
 mklibgraphics: $(BIN)
 
-Make.dep: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >$@
+.depend: gensources Makefile $(SRCS)
+	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) touch $@
 
-depend: Make.dep
+depend: .depend
 
 clean_context:
 	$(Q) $(MAKE) -C nxglib -f Makefile.devblit distclean TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
@@ -153,5 +154,6 @@ clean:
 
 distclean: clean clean_context
 	$(call DELFILE, Make.dep)
+	$(call DELFILE, .depend)
 
 -include Make.dep

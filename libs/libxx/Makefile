@@ -104,10 +104,11 @@ $(CXXOBJS): %$(OBJEXT): %.cxx
 $(BIN):	$(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-Make.dep: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(DEPPATH) "$(CXX)" -- $(CXXFLAGS) -- $(SRCS) >$@
+.depend: Makefile $(SRCS)
+	$(Q) $(MKDEP) $(DEPPATH) "$(CXX)" -- $(CXXFLAGS) -- $(SRCS) >Make.dep
+	$(Q) touch $@
 
-depend: Make.dep
+depend: .depend
 
 clean:
 	$(call DELFILE, $(BIN))
@@ -115,5 +116,6 @@ clean:
 
 distclean: clean
 	$(call DELFILE, Make.dep)
+	$(call DELFILE, .depend)
 
 -include Make.dep

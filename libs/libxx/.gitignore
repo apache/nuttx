@@ -1,4 +1,5 @@
 /Make.dep
+/.depend
 /uClibc++
 /libcxx
 /*.asm
