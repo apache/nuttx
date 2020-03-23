@@ -279,13 +279,6 @@ endmenu # Build Setup
 
 menu "Binary Output Formats"
 
-config CXD56_BINARY
-	bool "spk binary format"
-	default n
-	---help---
-		Create nuttx.spk binary format used on spresense board and boards
-		based on cxd56xx arch.
-
 config INTELHEX_BINARY
 	bool "Intel HEX binary format"
 	default n

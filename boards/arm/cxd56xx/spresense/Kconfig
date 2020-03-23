@@ -125,4 +125,11 @@ endif # CXD56_LTE_SPI4
 
 endif # CXD56_LTE
 
+config CXD56_BINARY
+	bool "spk binary format"
+	default n
+	---help---
+		Create nuttx.spk binary format used on spresense board and boards
+		based on cxd56xx arch.
+
 endif
