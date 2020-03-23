@@ -122,7 +122,7 @@ fi
 if [ -x tools/sethost.sh ]; then
   nuttx=$PWD
 else
-  echo "This script must be execute in nuttx/ or nutts/tools directories"
+  echo "This script must be execute in nuttx/ or nuttx/tools directories"
   exit 1
 fi
 
@@ -211,4 +211,9 @@ fi
 sed -i -e "/CONFIG_HOST_OTHER/d" $nuttx/.config
 
 echo "  Refreshing..."
-make olddefconfig $* || { echo "ERROR: failed to refresh"; exit 1; }
+
+if grep -q "V=1" <<< "$*" ; then
+  make olddefconfig $* || { echo "ERROR: failed to refresh"; exit 1; }
+else
+  make olddefconfig $* 1>/dev/null || { echo "ERROR: failed to refresh"; exit 1; }
+fi
