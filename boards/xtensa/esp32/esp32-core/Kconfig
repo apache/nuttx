@@ -38,4 +38,10 @@ config ESP32CORE_RUN_IRAM
 		allows interoperability with the esp-idf system but makes you
 		reliant on the esp-idf design for these parts. Both are possible.
 
+config ESP32CORE_FLASH_IMAGE
+	bool "esp32 flash image"
+	default n
+	---help---
+		Create flash_image.bin mainly used for QEMU.
+
 endif # ARCH_BOARD_ESP32CORE

@@ -24,6 +24,7 @@
 
 # POSTBUILD -- Perform post build operations
 
+ifeq ($(CONFIG_ESP32CORE_FLASH_IMAGE),y)
 define POSTBUILD
 	@echo "MKIMAGE: ESP32 binary"
         $(Q) if ! esptool.py version ; then \
@@ -47,3 +48,4 @@ define POSTBUILD
 		echo "Generated: flash_image.bin (it can be run with 'qemu-system-xtensa -nographic -machine esp32 -drive file=flash_image.bin,if=mtd,format=raw')"; \
 	fi
 endef
+endif
