@@ -346,7 +346,11 @@ endif
 # args: $1 - newfile:  Temporary file to test
 #       $2 - oldfile:  File to replace
 
-ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+define TESTANDREPLACEFILE
+	$(Q) move /Y $1 $2
+endef
+else
 define TESTANDREPLACEFILE
 	if [ -f $2 ]; then \
 		if cmp $1 $2; then \
