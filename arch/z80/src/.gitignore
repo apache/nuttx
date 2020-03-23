@@ -1,4 +1,5 @@
 /Make.dep
+/.depend
 /up_mem.h
 /asm_mem.h
 /board

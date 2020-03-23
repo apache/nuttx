@@ -1,3 +1,4 @@
+.depend
 Make.dep
 *.o
 *.a
@@ -12,6 +13,7 @@ core
 .cproject
 cscope.out
 /Make.dep
+/.depend
 /*.asm
 /*.obj
 /*.rel

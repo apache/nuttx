@@ -139,11 +139,12 @@ nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT) nuttx.linkcmd
 	@echo "LD:  nuttx$(EXEEXT)"
 	$(Q) "$(LD)" $(LDFLAGS)
 
-Make.dep: Makefile chip$(DELIM)Make.defs $(DEPSRCS)
+.depend: Makefile chip$(DELIM)Make.defs $(DEPSRCS)
 	$(Q) if [ -e board$(DELIM)Makefile ]; then \
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" depend ; \
 	fi
-	$(Q) $(MKDEP) --dep-path chip --dep-path common "$(CC)" -- $(CFLAGS) -- $(DEPSRCS) >$@
+	$(Q) $(MKDEP) --dep-path chip --dep-path common "$(CC)" -- $(CFLAGS) -- $(DEPSRCS) >Make.dep
+	$(Q) touch $@
 
 # This is part of the top-level export target
 
@@ -157,7 +158,7 @@ export_startup: board$(DELIM)libboard$(LIBEXT) $(STARTUP_OBJS)
 
 # Dependencies
 
-depend: Make.dep
+depend: .depend
 
 clean:
 	$(Q) if [ -e board$(DELIM)Makefile ]; then \
@@ -175,5 +176,6 @@ distclean: clean
 		$(MAKE) -C board TOPDIR="$(TOPDIR)" distclean ; \
 	fi
 	$(call DELFILE, Make.dep)
+	$(call DELFILE, .depend)
 
 -include Make.dep
