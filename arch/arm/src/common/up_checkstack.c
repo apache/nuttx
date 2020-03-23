@@ -211,9 +211,15 @@ ssize_t up_check_stack_remain(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(void)
 {
+#ifdef CONFIG_SMP
+  return do_stackcheck(up_intstack_base(),
+                       (CONFIG_ARCH_INTERRUPTSTACK & ~3),
+                       true);
+#else
   return do_stackcheck((uintptr_t)&g_intstackalloc,
                        (CONFIG_ARCH_INTERRUPTSTACK & ~3),
                        true);
+#endif
 }
 
 size_t up_check_intstack_remain(void)
