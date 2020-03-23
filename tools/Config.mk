@@ -296,17 +296,17 @@ define COPYFILE
 endef
 endif
 
-# CATFILE - Cat and append a list of files
+# CATFILE - Cat a list of files
 #
 # USAGE: $(call CATFILE,dest,src1,src2,src3,...)
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 define CATFILE
-	$(Q) type $(2) >> $1
+	$(Q) type $(2) > $1
 endef
 else
 define CATFILE
-	$(Q) cat $(2) >> $1
+	$(Q) cat $(2) > $1
 endef
 endif
 
