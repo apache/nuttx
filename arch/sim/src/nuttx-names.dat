@@ -84,6 +84,7 @@ pthread_testcancel NXpthread_testcancel
 pthread_yield  NXpthread_yield
 ptsname        NXptsname
 ptsname_r      NXptsname_r
+putenv         NXputenv
 puts           NXputs
 read           NXread
 readdir        NXreaddir
