@@ -30,6 +30,7 @@
 #include <netinet/in.h>
 
 #include <poll.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -57,6 +58,7 @@
 static const char *g_vpnkit_socket_path = "/tmp/vpnkit-nuttx"; /* XXX config */
 static struct vif_info g_vifinfo;
 static int g_vpnkit_fd = -1;
+static bool g_connect_warned;
 
 /****************************************************************************
  * Private Functions
@@ -65,21 +67,21 @@ static int g_vpnkit_fd = -1;
 int negotiate(int fd, struct vif_info *vif);
 void netdriver_setmacaddr(unsigned char *macaddr);
 
-static void vpnkit_connect()
+static int vpnkit_connect()
 {
   struct sockaddr_un sun;
   int fd;
 
   if (g_vpnkit_fd != -1)
     {
-      return;
+      return 0;
     }
 
   fd = socket(AF_UNIX, SOCK_STREAM, 0);
   if (fd == -1)
     {
       ERROR("failed to create a socket");
-      return;
+      return -1;
     }
 
   memset(&sun, 0, sizeof(sun));
@@ -88,21 +90,28 @@ static void vpnkit_connect()
 
   if (connect(fd, (const struct sockaddr *)&sun, sizeof(sun)) == -1)
     {
-      ERROR("failed to connect to the vpnkit socket %s",
-            g_vpnkit_socket_path);
+      if (!g_connect_warned)
+        {
+          ERROR("failed to connect to the vpnkit socket %s",
+                g_vpnkit_socket_path);
+          g_connect_warned = true;
+        }
+
       close(fd);
-      return;
+      return -1;
     }
 
   if (negotiate(fd, &g_vifinfo))
     {
       ERROR("failed to negotiate with vpnkit");
       close(fd);
-      return;
+      return -1;
     }
 
   INFO("Successfully negotiated with vpnkit");
   g_vpnkit_fd = fd;
+  g_connect_warned = false;
+  return 0;
 }
 
 static void vpnkit_disconnect()
@@ -142,7 +151,11 @@ int vpnkit_avail(void)
   struct pollfd pfd;
   int ret;
 
-  vpnkit_connect();
+  if (vpnkit_connect())
+    {
+      return 0;
+    }
+
   memset(&pfd, 0, sizeof(pfd));
   pfd.fd = g_vpnkit_fd;
   pfd.events = POLLIN;
@@ -173,7 +186,11 @@ unsigned int vpnkit_read(unsigned char *buf, unsigned int buflen)
   ssize_t ret;
   DEBUG("vpnkit_read called");
 
-  vpnkit_connect();
+  if (vpnkit_connect())
+    {
+      return 0;
+    }
+
   ret = really_read(g_vpnkit_fd, header, sizeof(header));
   if (ret == -1)
     {
@@ -216,7 +233,11 @@ void vpnkit_send(unsigned char *buf, unsigned int buflen)
   ssize_t ret;
 
   DEBUG("vpnkit_send called");
-  vpnkit_connect();
+  if (vpnkit_connect())
+    {
+      return;
+    }
+
   header[0] = buflen & 0xff;
   header[1] = (buflen >> 8) & 0xff;
   ret = really_write(g_vpnkit_fd, header, sizeof(header));
