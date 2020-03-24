@@ -140,7 +140,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
       int j;
 
       ptr = (FAR uint32_t *)start;
-      for (i = 0; i < size; i += 4*64)
+      for (i = 0; i < size; i += 4 * 64)
         {
           for (j = 0; j < 64; j++)
             {
