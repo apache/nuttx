@@ -157,7 +157,7 @@ function distclean {
 
 function configure {
   echo "  Configuring..."
-  ./tools/configure.sh ${HOPTION} $config 1>/dev/null
+  ./tools/configure.sh ${HOPTION} $config
 
   if [ "X$toolchain" != "X" ]; then
     setting=`grep _TOOLCHAIN_ $nuttx/.config | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
