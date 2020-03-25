@@ -82,7 +82,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
   DEBUGASSERT((tcb->task_state >= FIRST_READY_TO_RUN_STATE) &&
               (tcb->task_state <= LAST_READY_TO_RUN_STATE));
 
-  //sinfo("Blocking TCB=%p\n", tcb);
+  /* sinfo("Blocking TCB=%p\n", tcb); */
 
   /* Remove the tcb task from the ready-to-run list.  If we are blocking the
    * task at the head of the task list (the most likely case), then a
@@ -128,8 +128,8 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
           sinfo("New Active Task TCB=%p\n", rtcb);
 
           /* The way that we handle signals in the simulation is kind of
-           * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
-           * driven environment.
+           * a kludge.  This would be unsafe in a truly multi-threaded,
+           * interrupt driven environment.
            */
 
           if (rtcb->xcp.sigdeliver)

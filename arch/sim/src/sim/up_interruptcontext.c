@@ -59,5 +59,6 @@
 bool up_interrupt_context(void)
 {
   /* The simulation is never in the interrupt state */
+
   return false;
 }

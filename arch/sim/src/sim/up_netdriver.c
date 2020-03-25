@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/up_netdriver.c
  *
- *   Copyright (C) 2007, 2009-2012, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2012, 2015-2016 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Based on code from uIP which also has a BSD-like license:
@@ -82,8 +83,8 @@ static struct net_driver_s g_sim_dev;
 
 static void netdriver_reply(FAR struct net_driver_s *dev)
 {
-  /* If the receiving resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
+  /* If the receiving resulted in data that should be sent out on
+   * the network, the field d_len is set to a value > 0.
    */
 
   if (dev->d_len > 0)
@@ -259,8 +260,8 @@ static int netdriver_txpoll(FAR struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return 0;
