@@ -28,6 +28,10 @@ you can find a vpnkit binary at:
 
     /Applications/Docker.app/Contents/Resources/bin/com.docker.vpnkit
 
+A docker image containing a static Linux binary is also available:
+
+    https://hub.docker.com/r/djs55/vpnkit
+
 How to run
 ----------
 
