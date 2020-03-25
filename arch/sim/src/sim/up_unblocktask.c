@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/sim/src/sim/up_unblocktask.c
  *
- *   Copyright (C) 2007-2009, 2013, 2015-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013, 2015-2016 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,6 +91,7 @@ void up_unblock_task(FAR struct tcb_s *tcb)
   if (sched_addreadytorun(tcb))
     {
       /* The currently active task has changed! */
+
       /* Update scheduler parameters */
 
       sched_suspend_scheduler(rtcb);
@@ -110,8 +112,8 @@ void up_unblock_task(FAR struct tcb_s *tcb)
           sinfo("New Active Task TCB=%p\n", rtcb);
 
           /* The way that we handle signals in the simulation is kind of
-           * a kludge.  This would be unsafe in a truly multi-threaded, interrupt
-           * driven environment.
+           * a kludge.  This would be unsafe in a truly multi-threaded,
+           * interrupt driven environment.
            */
 
           if (rtcb->xcp.sigdeliver)
@@ -128,6 +130,6 @@ void up_unblock_task(FAR struct tcb_s *tcb)
           /* Then switch contexts */
 
           up_longjmp(rtcb->xcp.regs, 1);
-       }
+        }
     }
 }

@@ -70,7 +70,8 @@ static void setrawmode(void)
 
   memcpy(&raw, &g_cooked, sizeof(struct termios));
 
-  raw.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+  raw.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR |
+                   ICRNL | IXON);
   raw.c_oflag &= ~OPOST;
   raw.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
   raw.c_cflag &= ~(CSIZE | PARENB);
