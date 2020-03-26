@@ -37,10 +37,6 @@
 -include $(TOPDIR)/Make.defs
 DELIM ?= $(strip /)
 
-ifeq ($(WINTCONFIG_CYGWIN_WINTOOLOOL),y)
-INCDIROPT = -w
-endif
-
 # Basic BINFMT source files
 
 BINFMT_ASRCS  =

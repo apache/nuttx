@@ -45,6 +45,6 @@ endif
 
 DEPPATH += --dep-path modem$(DELIM)altair
 VPATH += :modem$(DELIM)altair
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)modem}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)modem}
 
 endif

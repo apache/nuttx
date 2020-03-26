@@ -43,7 +43,7 @@ CSRCS += vnc_keymap.c
 endif
 
 DEPPATH += --dep-path vnc/server
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/vnc/server}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)/graphics/vnc/server}
 VPATH += :vnc/server
 
 endif

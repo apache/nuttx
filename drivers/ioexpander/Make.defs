@@ -75,7 +75,7 @@ ifeq ($(CONFIG_IOEXPANDER),y)
 
 DEPPATH += --dep-path ioexpander
 VPATH += :ioexpander
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)ioexpander}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)ioexpander}
 
 else ifeq ($(CONFIG_DEV_GPIO),y)
 
@@ -83,6 +83,6 @@ else ifeq ($(CONFIG_DEV_GPIO),y)
 
 DEPPATH += --dep-path ioexpander
 VPATH += :ioexpander
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)ioexpander}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)ioexpander}
 
 endif

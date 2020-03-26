@@ -86,12 +86,12 @@ endif
   INCLUDES = $(ARCHSTDINCLUDES) $(USRINCLUDES)
   CFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(INCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 else
-  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" "$(SCHEDSRCDIR)"}
-  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" "$(ARCHSRCDIR)$(DELIM)chip"}
+  CFLAGS += ${shell $(INCDIR) "$(CC)" "$(SCHEDSRCDIR)"}
+  CFLAGS += ${shell $(INCDIR) "$(CC)" "$(ARCHSRCDIR)$(DELIM)chip"}
 ifneq ($(CONFIG_ARCH_SIM),y)
-  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" "$(ARCHSRCDIR)$(DELIM)common"}
+  CFLAGS += ${shell $(INCDIR) "$(CC)" "$(ARCHSRCDIR)$(DELIM)common"}
 ifneq ($(ARCH_FAMILY),)
-  CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" "$(ARCHSRCDIR)$(DELIM)$(ARCH_FAMILY)"}
+  CFLAGS += ${shell $(INCDIR) "$(CC)" "$(ARCHSRCDIR)$(DELIM)$(ARCH_FAMILY)"}
 endif
 endif
 endif

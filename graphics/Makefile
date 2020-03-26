@@ -38,10 +38,6 @@
 
 DEPPATH = --dep-path .
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-INCDIROPT = -w
-endif
-
 ASRCS =
 CSRCS =
 VPATH =

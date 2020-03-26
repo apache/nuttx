@@ -36,10 +36,6 @@
 -include $(TOPDIR)/Make.defs
 DELIM ?= $(strip /)
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-INCDIROPT = -w
-endif
-
 # Add files to the build
 
 DEPPATH = --dep-path .

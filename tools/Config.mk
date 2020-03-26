@@ -100,6 +100,9 @@ endif
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   DEFINE = "$(TOPDIR)\tools\define.bat"
   INCDIR = "$(TOPDIR)\tools\incdir.bat"
+else ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  DEFINE = "$(TOPDIR)/tools/define.sh"
+  INCDIR = "$(TOPDIR)/tools/incdir.sh" -w
 else
   DEFINE = "$(TOPDIR)/tools/define.sh"
   INCDIR = "$(TOPDIR)/tools/incdir.sh"
