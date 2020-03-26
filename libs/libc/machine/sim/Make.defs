@@ -33,9 +33,19 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
+# XXX ELF relocations are not actually sim-dependent.
+# We should share the code with eg. ../x86/arch_elf.c.
 
+ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
+ifeq ($(CONFIG_HOST_X86_64),y)
+ifeq ($(CONFIG_SIM_M32),y)
 CSRCS += arch_elf.c
+else
+CSRCS += arch_elf64.c
+endif
+else
+CSRCS += arch_elf.c
+endif
 
 DEPPATH += --dep-path machine/sim
 VPATH += :machine/sim
