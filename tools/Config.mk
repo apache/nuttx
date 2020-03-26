@@ -363,3 +363,9 @@ define TESTANDREPLACEFILE
 	fi
 endef
 endif
+
+# Some defaults.
+# $(TOPDIR)/Make.defs can override these appropriately.
+
+MODULECC = $(CC)
+MODULELD = $(LD)
