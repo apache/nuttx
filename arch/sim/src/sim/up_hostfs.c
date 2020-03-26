@@ -320,7 +320,8 @@ int host_readdir(void *dirp, struct nuttx_dirent_s *entry)
 
       /* Copy the entry name */
 
-      strncpy(entry->d_name, ent->d_name, sizeof(entry->d_name));
+      strncpy(entry->d_name, ent->d_name, sizeof(entry->d_name) - 1);
+      entry->d_name[sizeof(entry->d_name) - 1] = 0;
 
       /* Map the type */
 
