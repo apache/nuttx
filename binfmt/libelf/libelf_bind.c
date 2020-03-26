@@ -56,8 +56,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
- * defined or CONFIG_ELF_DUMPBUFFER does nothing.
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to
+ * be defined or CONFIG_ELF_DUMPBUFFER does nothing.
  */
 
 #if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
@@ -228,8 +228,9 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
                              CONFIG_ELF_RELOCATION_BUFFERCOUNT);
           if (ret < 0)
             {
-              berr("Section %d reloc %d: Failed to read relocation entry: %d\n",
-                    relidx, i, ret);
+              berr("Section %d reloc %d: "
+                   "Failed to read relocation entry: %d\n",
+                   relidx, i, ret);
               break;
             }
         }
@@ -296,8 +297,8 @@ static int elf_relocate(FAR struct elf_loadinfo_s *loadinfo, int relidx,
           ret = elf_symvalue(loadinfo, sym, exports, nexports);
           if (ret < 0)
             {
-              /* The special error -ESRCH is returned only in one condition:  The
-               * symbol has no name.
+              /* The special error -ESRCH is returned only in one condition:
+               * The symbol has no name.
                *
                * There are a few relocations for a few architectures that do
                * no depend upon a named symbol.  We don't know if that is the
@@ -411,8 +412,9 @@ static int elf_relocateadd(FAR struct elf_loadinfo_s *loadinfo, int relidx,
                               CONFIG_ELF_RELOCATION_BUFFERCOUNT);
           if (ret < 0)
             {
-              berr("Section %d reloc %d: Failed to read relocation entry: %d\n",
-                    relidx, i, ret);
+              berr("Section %d reloc %d: "
+                   "Failed to read relocation entry: %d\n",
+                   relidx, i, ret);
               break;
             }
         }
@@ -479,8 +481,8 @@ static int elf_relocateadd(FAR struct elf_loadinfo_s *loadinfo, int relidx,
           ret = elf_symvalue(loadinfo, sym, exports, nexports);
           if (ret < 0)
             {
-              /* The special error -ESRCH is returned only in one condition:  The
-               * symbol has no name.
+              /* The special error -ESRCH is returned only in one condition:
+               * The symbol has no name.
                *
                * There are a few relocations for a few architectures that do
                * no depend upon a named symbol.  We don't know if that is the
