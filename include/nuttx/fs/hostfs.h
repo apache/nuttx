@@ -91,7 +91,7 @@
 
 /* Should match definition in include/limits.h */
 
-#define NUTTX_NAME_MAX   32
+#define NUTTX_NAME_MAX   CONFIG_NAME_MAX
 
 #endif /* __SIM__ */
 
