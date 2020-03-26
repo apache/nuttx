@@ -136,6 +136,9 @@
   ((n) -= NLMSG_ALIGN((hdr)->nlmsg_len), \
    (FAR struct nlmsghdr*) \
    (((FAR char*)(hdr)) + NLMSG_ALIGN((hdr)->nlmsg_len)))
+#define NLMSG_OK(nlh,len) ((len) >= (int)sizeof(struct nlmsghdr) && \
+    (nlh)->nlmsg_len >= sizeof(struct nlmsghdr) && \
+    (nlh)->nlmsg_len <= (len))
 #define NLMSG_PAYLOAD(hdr, len) \
   ((hdr)->nlmsg_len - NLMSG_SPACE((len)))
 
