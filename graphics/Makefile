@@ -38,6 +38,10 @@
 
 DEPPATH = --dep-path .
 
+ifeq ($(WINTOOL),y)
+INCDIROPT = -w
+endif
+
 ASRCS =
 CSRCS =
 VPATH =

@@ -37,7 +37,10 @@
 -include $(TOPDIR)/Make.defs
 DELIM ?= $(strip /)
 
-CFLAGS += ${shell $(INCDIR) "$(CC)" "$(TOPDIR)$(DELIM)sched"}
+ifeq ($(WINTOOL),y)
+INCDIROPT = -w
+endif
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" "$(TOPDIR)$(DELIM)sched"}
 
 # Basic BINFMT source files
 
