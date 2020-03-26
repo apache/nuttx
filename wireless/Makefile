@@ -36,6 +36,10 @@
 -include $(TOPDIR)/Make.defs
 DELIM ?= $(strip /)
 
+ifeq ($(WINTOOL),y)
+INCDIROPT = -w
+endif
+
 # Add files to the build
 
 DEPPATH = --dep-path .

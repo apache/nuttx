@@ -36,6 +36,10 @@
 -include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
 
+ifeq ($(WINTOOL),y)
+INCDIROPT = -w
+endif
+
 # Zoneinfo database
 
 ASRCS =
