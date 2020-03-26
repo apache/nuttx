@@ -224,6 +224,10 @@ volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS] SP_SECTION;
 int  up_setjmp(xcpt_reg_t *jb);
 void up_longjmp(xcpt_reg_t *jb, int val) noreturn_function;
 
+/* up_hostmemory.c **********************************************************/
+
+void *host_alloc_heap(size_t sz);
+
 /* up_hosttime.c ************************************************************/
 
 uint64_t host_gettime(bool rtc);

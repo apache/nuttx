@@ -52,8 +52,6 @@
  * Private Data
  ****************************************************************************/
 
-static uint8_t sim_heap[SIM_HEAP_SIZE];
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -71,6 +69,24 @@ static uint8_t sim_heap[SIM_HEAP_SIZE];
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
+  /* Note: Some subsystems like modlib and binfmt need to allocate
+   * executable memory.
+   */
+
+#if defined(CONFIG_LIBC_MODLIB) || defined(CONFIG_BINFMT_LOADABLE)
+  /* We make the entire heap executable here to keep
+   * the sim simpler. If it turns out to be a problem, the
+   * ARCH_HAVE_MODULE_TEXT mechanism can be an alternative.
+   */
+
+  uint8_t *sim_heap = host_alloc_heap(SIM_HEAP_SIZE);
+#else
+  /* This sim_heap would be placed in BSS, which is often not
+   * executable on modern environments.
+   */
+
+  static uint8_t sim_heap[SIM_HEAP_SIZE];
+#endif
   *heap_start = sim_heap;
   *heap_size  = SIM_HEAP_SIZE;
 }
