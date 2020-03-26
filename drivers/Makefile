@@ -36,10 +36,6 @@
 -include $(TOPDIR)/Make.defs
 DELIM ?= $(strip /)
 
-ifeq ($(WINTOOL),y)
-INCDIROPT = -w
-endif
-
 DEPPATH = --dep-path .
 ASRCS =
 CSRCS =

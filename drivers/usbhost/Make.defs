@@ -89,4 +89,4 @@ endif
 
 DEPPATH += --dep-path usbhost
 VPATH += :usbhost
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)usbhost}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)usbhost}

@@ -75,5 +75,5 @@ CSRCS += usbdev_trace.c usbdev_trprintf.c
 
 DEPPATH += --dep-path usbdev
 VPATH += :usbdev
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)usbdev}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)usbdev}
 endif

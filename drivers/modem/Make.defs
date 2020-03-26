@@ -45,6 +45,6 @@ include modem$(DELIM)altair$(DELIM)Make.defs
 
 DEPPATH += --dep-path modem
 VPATH += :modem
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)modem}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)modem}
 
 endif

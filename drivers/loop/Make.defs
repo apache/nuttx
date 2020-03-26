@@ -49,6 +49,6 @@ CSRCS += losetup.c
 
 DEPPATH += --dep-path loop
 VPATH += :loop
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)loop}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)loop}
 
 endif
