@@ -43,4 +43,4 @@ endif
 
 DEPPATH += --dep-path crypto
 VPATH += :crypto
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)crypto}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)crypto}

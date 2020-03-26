@@ -52,7 +52,7 @@ CSRCS += nxterm_sem.c
 endif
 
 DEPPATH += --dep-path nxterm
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxterm}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)/graphics/nxterm}
 VPATH += :nxterm
 
 endif

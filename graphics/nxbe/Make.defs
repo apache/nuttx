@@ -51,5 +51,5 @@ CSRCS += nxbe_cursor.c
 endif
 
 DEPPATH += --dep-path nxbe
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxbe}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)/graphics/nxbe}
 VPATH += :nxbe

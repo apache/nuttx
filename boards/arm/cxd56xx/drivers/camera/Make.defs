@@ -24,4 +24,4 @@ endif
 
 DEPPATH += --dep-path platform$(DELIM)camera
 VPATH += :platform$(DELIM)camera
-CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)platform$(DELIM)camera)
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)platform$(DELIM)camera)

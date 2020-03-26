@@ -36,10 +36,6 @@
 -include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-INCDIROPT = -w
-endif
-
 # Zoneinfo database
 
 ASRCS =

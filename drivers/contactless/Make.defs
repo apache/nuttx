@@ -49,5 +49,5 @@ endif
 
 DEPPATH += --dep-path contactless
 VPATH += :contactless
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)contactless}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)contactless}
 endif
