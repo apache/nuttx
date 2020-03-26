@@ -134,6 +134,8 @@ strcmp         NXstrcmp
 strcpy         NXstrcpy
 strcspn        NXstrcspn
 strdup         NXstrdup
+strerror       NXstrerror
+strerror_r     NXstrerror_r
 strftime       NXstrftime
 strlen         NXstrlen
 strncasecmp    NXstrncasecmp
