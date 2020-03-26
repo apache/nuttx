@@ -76,6 +76,12 @@ DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
 HOSTSRCS = up_hosttime.c
 
+ifeq ($(CONFIG_LIBC_MODLIB),y)
+  HOSTSRCS += up_hostmemory.c
+else ifeq ($(CONFIG_BINFMT_LOADABLE),y)
+  HOSTSRCS += up_hostmemory.c
+endif
+
 ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += up_checkstack.c
 endif
