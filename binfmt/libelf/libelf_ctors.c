@@ -110,8 +110,8 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
   /* Find the index to the section named ".ctors."  NOTE:  On old ABI system,
    * .ctors is the name of the section containing the list of constructors;
    * On newer systems, the similar section is called .init_array.  It is
-   * expected that the linker script will force the section name to be ".ctors"
-   * in either case.
+   * expected that the linker script will force the section name to be
+   * ".ctors" in either case.
    */
 
   ctoridx = elf_findsection(loadinfo, ".ctors");
@@ -189,7 +189,8 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
 
           for (i = 0; i < loadinfo->nctors; i++)
             {
-              FAR uintptr_t *ptr = (uintptr_t *)((FAR void *)(&loadinfo->ctors)[i]);
+              FAR uintptr_t *ptr = (uintptr_t *)
+                   ((FAR void *)(&loadinfo->ctors)[i]);
 
               binfo("ctor %d: %08lx + %08lx = %08lx\n",
                     i, *ptr, (unsigned long)loadinfo->textalloc,
@@ -200,9 +201,9 @@ int elf_loadctors(FAR struct elf_loadinfo_s *loadinfo)
         }
       else
         {
-          /* Save the address of the .ctors (actually, .init_array) where it was
-           * loaded into memory.  Since the .ctors lie in allocated memory, they
-           * will be relocated via the normal mechanism.
+          /* Save the address of the .ctors (actually, .init_array) where
+           * it was loaded into memory.  Since the .ctors lie in allocated
+           * memory, they will be relocated via the normal mechanism.
            */
 
           loadinfo->ctors = (binfmt_ctor_t *)shdr->sh_addr;
