@@ -135,7 +135,7 @@
 #define NLMSG_NEXT(hdr,n) \
   ((n) -= NLMSG_ALIGN((hdr)->nlmsg_len), \
    (FAR struct nlmsghdr*) \
-   (((FAR cha r*)(hdr)) + NLMSG_ALIGN((hdr)->nlmsg_len)))
+   (((FAR char*)(hdr)) + NLMSG_ALIGN((hdr)->nlmsg_len)))
 #define NLMSG_PAYLOAD(hdr, len) \
   ((hdr)->nlmsg_len - NLMSG_SPACE((len)))
 
