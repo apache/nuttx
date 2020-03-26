@@ -418,7 +418,7 @@ int modlib_symvalue(FAR struct module_s *modp,
               loadinfo->iobuffer, sym->st_value, symbol->sym_value,
               sym->st_value + symbol->sym_value);
 
-        sym->st_value += (Elf_Word)((uintptr_t)symbol->sym_value);
+        sym->st_value += ((uintptr_t)symbol->sym_value);
       }
       break;
 
