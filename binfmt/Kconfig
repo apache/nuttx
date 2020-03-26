@@ -10,6 +10,13 @@ config BINFMT_DISABLE
 		By default, support for loadable binary formats is built.  This logic
 		may be suppressed be defining this setting.
 
+config ELF_64BIT
+	bool "64bit ELF support"
+	default n
+	depends on (!BINFMT_DISABLE && ELF) || LIBC_MODLIB
+	---help---
+		This option is used to load 64bit ELF files
+
 if !BINFMT_DISABLE
 
 config PATH_INITIAL
