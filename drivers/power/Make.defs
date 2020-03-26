@@ -62,7 +62,7 @@ endif
 
 POWER_DEPPATH := --dep-path power
 POWER_VPATH := :power
-POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
 
 endif
 
@@ -74,7 +74,7 @@ CSRCS += smps.c
 
 POWER_DEPPATH := --dep-path power
 POWER_VPATH := :power
-POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
 
 endif
 
@@ -86,7 +86,7 @@ CSRCS += powerled.c
 
 POWER_DEPPATH := --dep-path power
 POWER_VPATH := :power
-POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
 
 endif
 
@@ -98,7 +98,7 @@ CSRCS += motor.c
 
 POWER_DEPPATH := --dep-path power
 POWER_VPATH := :power
-POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
 
 endif
 
@@ -136,7 +136,7 @@ endif
 
 POWER_DEPPATH := --dep-path power
 POWER_VPATH := :power
-POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
 
 endif
 
@@ -162,7 +162,7 @@ endif
 
 POWER_DEPPATH := --dep-path power
 POWER_VPATH := :power
-POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
 
 endif
 
@@ -188,7 +188,7 @@ endif
 
 POWER_DEPPATH := --dep-path power
 POWER_VPATH := :power
-POWER_CFLAGS := ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
 
 endif
 

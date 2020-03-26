@@ -41,5 +41,5 @@ CSRCS += rptun.c
 
 DEPPATH += --dep-path rptun
 VPATH += :rptun
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)rptun}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)rptun}
 endif

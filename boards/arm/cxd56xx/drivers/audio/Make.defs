@@ -53,4 +53,4 @@ endif
 
 DEPPATH += --dep-path platform$(DELIM)audio
 VPATH += :platform$(DELIM)audio
-CFLAGS += $(shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)platform$(DELIM)audio)
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)platform$(DELIM)audio)

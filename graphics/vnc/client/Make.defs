@@ -36,7 +36,7 @@
 ifeq ($(CONFIG_VNCCLIENT),y)
 
 DEPPATH += --dep-path vnc/client
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/vnc/client}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)/graphics/vnc/client}
 VPATH += :vnc/client
 
 endif

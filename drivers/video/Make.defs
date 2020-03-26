@@ -69,6 +69,6 @@ endif
 
 DEPPATH += --dep-path video
 VPATH += :video
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)video}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)video}
 
 endif
