@@ -190,6 +190,7 @@ endif
 ifeq ($(CONFIG_FS_HOSTFS),y)
 ifneq ($(CONFIG_FS_HOSTFS_RPMSG),y)
   HOSTSRCS += up_hostfs.c
+  HOSTCFLAGS += -DCONFIG_NAME_MAX=$(CONFIG_NAME_MAX)
 
 up_hostfs.c: hostfs.h
 
