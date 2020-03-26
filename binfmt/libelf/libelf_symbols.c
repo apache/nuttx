@@ -325,7 +325,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
               loadinfo->iobuffer, sym->st_value, symbol->sym_value,
               sym->st_value + symbol->sym_value);
 
-        sym->st_value += (Elf_Word)((uintptr_t)symbol->sym_value);
+        sym->st_value += ((uintptr_t)symbol->sym_value);
       }
       break;
 
