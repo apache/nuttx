@@ -27,6 +27,12 @@ config DEFAULT_SMALL
 		have already been selected in your configuration file.  This applies
 		only to new settings that require a default value.
 
+config DEFAULT_TASK_STACKSIZE
+	int "The default stack size for tasks"
+	default 2048
+	---help---
+		The default stack size for tasks.
+
 choice
 	prompt "Build Host Platform"
 	default HOST_LINUX

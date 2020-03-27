@@ -16,7 +16,7 @@ comment "NX Server Options"
 
 config SIM_LISTENER_STACKSIZE
 	int "NX Server/Listener Stack Size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The stacksize to use when creating the NX server.  Default 2048
 
