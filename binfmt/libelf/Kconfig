@@ -17,7 +17,7 @@ config ELF_ALIGN_LOG2
 
 config ELF_STACKSIZE
 	int "ELF Stack Size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		This is the default stack size that will be used when starting ELF binaries.
 

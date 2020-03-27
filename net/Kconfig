@@ -184,9 +184,9 @@ config SLIP_NINTERFACES
 
 config SLIP_STACKSIZE
 	int "SLIP stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
-		Select the stack size of the SLIP RX and TX tasks.  Default: 2048
+		Select the stack size of the SLIP RX and TX tasks.
 
 config SLIP_DEFPRIO
 	int "SLIP priority"

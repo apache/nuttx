@@ -329,7 +329,7 @@ config SMP_NCPUS
 
 config SMP_IDLETHREAD_STACKSIZE
 	int "CPU IDLE stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		Each CPU will have its own IDLE task.  System initialization occurs
 		on CPU0 and uses CONFIG_IDLETHREAD_STACKSIZE which will probably be
@@ -1272,7 +1272,7 @@ if BOARD_LATE_INITIALIZE
 
 config BOARD_INITTHREAD_STACKSIZE
 	int "Board initialization thread stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The size of the stack to allocate when starting the board
 		initialization thread.
@@ -1656,7 +1656,7 @@ config SCHED_HPWORKPRIORITY
 
 config SCHED_HPWORKSTACKSIZE
 	int "High priority worker thread stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The stack size allocated for the worker thread.  Default: 2K.
 
@@ -1755,7 +1755,7 @@ config SCHED_LPWORKPRIOMAX
 
 config SCHED_LPWORKSTACKSIZE
 	int "Low priority worker thread stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The stack size allocated for the lower priority worker thread.  Default: 2K.
 
@@ -1775,7 +1775,7 @@ config IDLETHREAD_STACKSIZE
 
 config USERMAIN_STACKSIZE
 	int "Main thread stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The size of the stack to allocate for the user initialization thread
 		that is started as soon as the OS completes its initialization.
@@ -1788,7 +1788,7 @@ config PTHREAD_STACK_MIN
 
 config PTHREAD_STACK_DEFAULT
 	int "Default pthread stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		Default pthread stack size
 
