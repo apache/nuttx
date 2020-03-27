@@ -85,7 +85,7 @@ struct nrf52_i2c_priv_s
   uint32_t                freq;     /* Current I2C frequency */
   int                     dcnt;     /* Current message length */
   uint16_t                flags;    /* Current message flags */
-  uint16_t                addr;     /* Current I2C address*/
+  uint16_t                addr;     /* Current I2C address */
   sem_t                   sem_excl; /* Mutual exclusion semaphore */
 #ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;                    /* Interrupt wait semaphore */

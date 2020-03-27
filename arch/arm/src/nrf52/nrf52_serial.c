@@ -329,10 +329,10 @@ static void nrf52_shutdown(struct uart_dev_s *dev)
  * Name: nrf52_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
+ *   the the setup() method is called, however, the serial console may
+ *   operate in a non-interrupt driven mode during the boot phase.
  *
  *   RX and TX interrupts are not enabled when by the attach method (unless
  *   the hardware supports multiple levels of interrupt enabling).
@@ -364,8 +364,8 @@ static int nrf52_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
- *   is the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.
+ *   The exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
