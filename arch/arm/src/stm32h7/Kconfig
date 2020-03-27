@@ -1186,6 +1186,7 @@ if STM32H7_BKPSRAM
 config STM32H7_BBSRAM
 	bool "BBSRAM File Support"
 	default n
+	select ARM_MPU
 
 config STM32H7_BBSRAM_FILES
 	int "Max Files to support in BBSRAM"

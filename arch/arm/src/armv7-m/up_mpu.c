@@ -48,6 +48,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_ARM_MPU_NREGIONS
@@ -313,4 +314,90 @@ uint32_t mpu_subregion(uintptr_t base, size_t size, uint8_t l2size)
 
   ret |= mpu_subregion_ls(offset, l2size);
   return ret;
+}
+
+/*****************************************************************************
+ * Name: mpu_control
+ *
+ * Description:
+ *   Configure and enable (or disable) the MPU
+ *
+ *****************************************************************************/
+
+void mpu_control(bool enable, bool hfnmiena, bool privdefena)
+{
+  uint32_t regval = 0;
+
+  if (enable)
+    {
+      regval |= MPU_CTRL_ENABLE; /* Enable the MPU */
+
+      if (hfnmiena)
+        {
+           regval |= MPU_CTRL_HFNMIENA; /* Enable MPU during hard fault, NMI, and FAULTMAS */
+        }
+
+      if (privdefena)
+        {
+          regval |= MPU_CTRL_PRIVDEFENA; /* Enable privileged access to default memory map */
+        }
+    }
+
+  putreg32(regval, MPU_CTRL);
+}
+
+/*****************************************************************************
+ * Name: mpu_configure_region
+ *
+ * Description:
+ *   Configure a region for privileged, strongly ordered memory
+ *
+ *****************************************************************************/
+
+void mpu_configure_region(uintptr_t base, size_t size,
+                                        uint32_t flags)
+{
+  unsigned int region = mpu_allocregion();
+  uint32_t     regval;
+  uint8_t      l2size;
+  uint8_t      subregions;
+  uintptr_t    alignedbase;
+
+  /* Ensure the base address alignment
+   *
+   * ARMv7-M Architecture Reference Manual
+   * B3.5.8 MPU Region Base Address Register, MPU_RBAR
+   * "Software must ensure that the value written to the ADDR field
+   * aligns with the size of the selected region."
+   */
+
+  alignedbase  = base & MPU_RBAR_ADDR_MASK;
+  l2size       = mpu_log2regionceil(size + base - alignedbase);
+  alignedbase &= ~((1 << l2size) - 1);
+  l2size       = mpu_log2regionceil(size + base - alignedbase);
+
+  DEBUGASSERT(alignedbase + (1 << l2size) >= base + size);
+  DEBUGASSERT(l2size == 5 || alignedbase + (1 << (l2size - 1)) < base + size);
+  DEBUGASSERT((alignedbase & MPU_RBAR_ADDR_MASK) == alignedbase);
+  DEBUGASSERT((alignedbase & ((1 << l2size) - 1)) == 0);
+
+  /* Select the region */
+
+  putreg32(region, MPU_RNR);
+
+  /* Select the region base address */
+
+  putreg32(alignedbase | region | MPU_RBAR_VALID, MPU_RBAR);
+
+  /* Select the region size and the sub-region map */
+
+  subregions = mpu_subregion(base, size, l2size);
+
+  /* The configure the region */
+
+  regval = MPU_RASR_ENABLE                              | /* Enable region  */
+           MPU_RASR_SIZE_LOG2((uint32_t)l2size)         | /* Region size    */
+           ((uint32_t)subregions << MPU_RASR_SRD_SHIFT) | /* Sub-regions    */
+           flags;
+  putreg32(regval, MPU_RASR);
 }
