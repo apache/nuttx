@@ -4,6 +4,7 @@ README
   o Environments
     - Installing Cygwin
     - Ubuntu Bash under Windows 10
+    - Using macOS
   o Installation
     - Download and Unpack
     - Semi-Optional apps/ Package
@@ -388,12 +389,24 @@ Ubuntu Bash under Windows 10
   framework like GTK or Qt.  So this might be a trip down the rabbit hole.
 
 Using macOS
-----------
-  You need install flock from https://github.com/discoteq/flock
-  before the build start:
+-----------
 
-    brew tap discoteq/discoteq
-    brew install flock
+  You need to install at least the following tools specific to macOS.
+
+  * flock (used by APPDIR build logic)
+
+    A macOS port is available at: https://github.com/discoteq/flock
+
+      brew tap discoteq/discoteq
+      brew install flock
+
+  If you want to build the sim:
+
+    * Xcode (the native compiler and the rest of the toolchain)
+
+    * ELF toolchain (if you want to build modules for CONFIG_LIBC_MODLIB)
+
+        brew install x86_64-elf-gc
 
 INSTALLATION
 ^^^^^^^^^^^^
