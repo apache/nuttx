@@ -135,10 +135,10 @@ static void nrf52_setbaud(uintptr_t base, const struct uart_config_s *config)
  * Name: nrf52_lowsetup
  *
  * Description:
- *   Called at the very beginning of _start. Performs low level initialization
- *   including setup of the console UART.  This UART initialization is done
- *   early so that the serial console is available for debugging very early in
- *   the boot sequence.
+ *   Called at the very beginning of _start. Performs low level
+ *   initialization including setup of the console UART.
+ *   This UART initialization is done early so that the serial console is
+ *   available for debugging very early in the boot sequence.
  *
  ****************************************************************************/
 
@@ -163,7 +163,8 @@ void nrf52_lowsetup(void)
  ****************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
-void nrf52_usart_configure(uintptr_t base, const struct uart_config_s *config)
+void nrf52_usart_configure(uintptr_t base,
+                           const struct uart_config_s *config)
 {
   uint32_t pin    = 0;
   uint32_t port   = 0;

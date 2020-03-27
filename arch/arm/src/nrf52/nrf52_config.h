@@ -49,7 +49,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Configuration *********************************************************************/
+/* Configuration ********************************************************************/
 
 /* Make sure that no unsupported UART, I2C master, or SPI master peripherals are
  * enabled.
@@ -94,9 +94,5 @@
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  define HAVE_UART_CONSOLE 1
 #endif
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_NRF52_NRF52_CONFIG_H */

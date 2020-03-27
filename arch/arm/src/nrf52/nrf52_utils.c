@@ -55,8 +55,8 @@
  * Name: nrf52_clrpend
  *
  * Description:
- *   Clear a pending interrupt at the NVIC.  This does not seem to be required
- *   for most interrupts.
+ *   Clear a pending interrupt at the NVIC.  This does not seem to be
+ *   required for most interrupts.
  *
  *   This function is logically a part of nrf52_irq.c, but I will keep it in
  *   a separate file so that it will not increase the footprint on NRF52
@@ -76,7 +76,8 @@ void nrf52_clrpend(int irq)
         }
       else if (irq < NRF52_IRQ_NIRQS)
         {
-          putreg32(1 << (irq - NRF52_IRQ_EXTINT - 32), NVIC_IRQ32_63_CLRPEND);
+          putreg32(1 << (irq - NRF52_IRQ_EXTINT - 32),
+                   NVIC_IRQ32_63_CLRPEND);
         }
     }
 }

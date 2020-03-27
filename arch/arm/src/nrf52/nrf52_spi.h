@@ -46,10 +46,6 @@
 #include "chip.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -84,14 +80,14 @@ FAR struct spi_dev_s *nrf52_spibus_initialize(int port);
  *      pins.
  *   2. Provide nrf52_spi0/1/...select() and nrf52_spi0/1/...status()
  *      functions in your board-specific logic. These functions will perform
- *      chip selection and status operations using GPIOs in the way your board
- *      is configured.
+ *      chip selection and status operations using GPIOs in the way your
+ *      board is configured.
  *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration file,
  *      then provide nrf52_spi0/1/...cmddata() functions in your
  *      board-specific logic. These functions will perform cmd/data selection
  *      operations using GPIOs in the way your board is configured.
- *   4. Add a calls to nrf52_spibus_initialize() in your low level application
- *      initialization logic
+ *   4. Add a calls to nrf52_spibus_initialize() in your low level
+ *      application initialization logic.
  *   5. The handle returned by nrf52_spibus_initialize() may then be used to
  *      bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to

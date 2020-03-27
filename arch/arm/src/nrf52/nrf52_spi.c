@@ -84,7 +84,9 @@ struct nrf52_spidev_s
   uint32_t         frequency;  /* Requested clock frequency */
   uint8_t          mode;       /* Mode 0,1,2,3 */
 
-  sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
+  sem_t            exclsem;    /* Held while chip is selected for mutual
+                                * exclusion
+                                */
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
   sem_t            sem_isr;    /* Interrupt wait semaphore */
 #endif
@@ -600,7 +602,8 @@ errout:
  *
  ****************************************************************************/
 
-static void nrf52_spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
+static void nrf52_spi_setmode(FAR struct spi_dev_s *dev,
+                              enum spi_mode_e mode)
 {
   FAR struct nrf52_spidev_s *priv = (FAR struct nrf52_spidev_s *)dev;
   uint32_t regval = 0;
@@ -869,9 +872,9 @@ static void nrf52_spi_exchange(FAR struct spi_dev_s *dev,
  * Input Parameters:
  *   dev      - Device-specific state data
  *   txbuffer - A pointer to the buffer of data to be sent
- *   nwords   - the length of data to send from the buffer in number of words.
- *              The wordsize is determined by the number of bits-per-word
- *              selected for the SPI interface.
+ *   nwords   - the length of data to send from the buffer in number of
+ *              words.  The wordsize is determined by the number of
+ *              bits-per-word selected for the SPI interface.
  *
  * Returned Value:
  *   None

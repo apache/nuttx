@@ -63,7 +63,7 @@
  *   clocking using the settings in board.h.  This function also performs
  *   other low-level chip as necessary.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void nrf52_clockconfig()
 {
