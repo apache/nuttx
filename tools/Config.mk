@@ -329,12 +329,14 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 define CLEAN
 	$(Q) if exist *$(OBJEXT) (del /f /q *$(OBJEXT))
 	$(Q) if exist *$(LIBEXT) (del /f /q *$(LIBEXT))
+	$(Q) if exist *.pdat (del /f /q *.pdat)
+	$(Q) if exist *.bdat (del /f /q *.bdat)
 	$(Q) if exist *~ (del /f /q *~)
 	$(Q) if exist (del /f /q  .*.swp)
 endef
 else
 define CLEAN
-	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp
+	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *.pdat *.bdat *~ .*.swp
 endef
 endif
 
