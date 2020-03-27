@@ -223,6 +223,12 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
   uint32_t regval = 0;
   int      ret = OK;
 
+  ret = nxsem_wait(&priv->sem_excl);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Reset ptr and dcnt */
 
   priv->dcnt = 0;
@@ -397,7 +403,8 @@ static int nrf52_i2c_transfer(FAR struct i2c_master_s *dev,
 #endif
 
 errout:
-    return ret;
+  nxsem_post(&priv->sem_excl);
+  return ret;
 }
 
 /****************************************************************************
