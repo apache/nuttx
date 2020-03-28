@@ -324,6 +324,13 @@ config ARCH_BOARD_HYMINI_STM32V
 		A configuration for the HY-Mini STM32v board.  This board is based on the
 		STM32F103VCT6 chip.
 
+config ARCH_BOARD_ICEBREAKER
+	bool "1bitsquared icebreaker ice40 FPGA board"
+	depends on ARCH_CHIP_LITEX
+	---help---
+		This is the board configuration for the port of NuttX to the 1bitsquared
+		icebreaker board.  This board features the RISC-V litex vexriscv softcore
+
 config ARCH_BOARD_IMXRT1020_EVK
 	bool "NXP i.MX RT 1020 EVK"
 	depends on ARCH_CHIP_MIMXRT1021DAG5A
@@ -2103,6 +2110,7 @@ config ARCH_BOARD
 	default "gapuino"                  if ARCH_BOARD_GAPUINO
 	default "hifive1-revb"             if ARCH_BOARD_HIFIVE1_REVB
 	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
+	default "icebreaker"               if ARCH_BOARD_ICEBREAKER
 	default "imxrt1020-evk"            if ARCH_BOARD_IMXRT1020_EVK
 	default "imxrt1050-evk"            if ARCH_BOARD_IMXRT1050_EVK
 	default "imxrt1060-evk"            if ARCH_BOARD_IMXRT1060_EVK
@@ -2350,6 +2358,9 @@ source "boards/arm/s32k1xx/s32k148evb/Kconfig"
 endif
 if ARCH_BOARD_SABRE_6QUAD
 source "boards/arm/imx6/sabre-6quad/Kconfig"
+endif
+if ARCH_BOARD_ICEBREAKER
+source "boards/risc-v/litex/icebreaker/Kconfig"
 endif
 if ARCH_BOARD_IMXRT1020_EVK
 source "boards/arm/imxrt/imxrt1020-evk/Kconfig"

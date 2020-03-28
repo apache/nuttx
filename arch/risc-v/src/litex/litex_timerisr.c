@@ -190,13 +190,13 @@ void up_timer_initialize(void)
 {
   /* Attach timer interrupt handler */
 
-  irq_attach(LITEX_IRQ_MTIMER, litex_timerisr, NULL);
+  //irq_attach(LITEX_IRQ_MTIMER, litex_timerisr, NULL);
 
   /* Reload CLINT mtimecmp */
 
-  litex_reload_mtimecmp();
+  //litex_reload_mtimecmp();
 
   /* And enable the timer interrupt */
 
-  up_enable_irq(LITEX_IRQ_MTIMER);
+  //up_enable_irq(LITEX_IRQ_MTIMER);
 }

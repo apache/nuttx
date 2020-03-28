@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/litex/hardware/litex_uart.h
+ * boards/risc-v/litex/icebreaker/src/litex_bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,31 +18,44 @@
  *
  ****************************************************************************/
 
-#ifndef ARCH_RISCV_SRC_LITEX_CHIP_LITEX_UART_H
-#define ARCH_RISCV_SRC_LITEX_CHIP_LITEX_UART_H
-
 /****************************************************************************
- * Pre-processor Definitions
+ * Included Files
  ****************************************************************************/
 
-#define UART_RXTX_OFFSET        0x00
-#define UART_TXFULL_OFFSET      0x04
-#define UART_RXEMPTY_OFFSET     0x08
-#define UART_EV_STATUS_OFFSET   0x0c
-#define UART_EV_PENDING_OFFSET  0x10
-#define UART_EV_ENABLE_OFFSET   0x14
+#include <nuttx/config.h>
 
-#ifdef CONFIG_LITEX_UART0
-#  define LITEX_UART0_RXTX          (LITEX_UART0_BASE + UART_RXTX_OFFSET)
-#  define LITEX_UART0_TXFULL        (LITEX_UART0_BASE + UART_TXFULL_OFFSET)
-#  define LITEX_UART0_RXEMPTY       (LITEX_UART0_BASE + UART_RXEMPTY_OFFSET)
-#  define LITEX_UART0_EV_STATUS     (LITEX_UART0_BASE + UART_EV_STATUS_OFFSET)
-#  define LITEX_UART0_EV_PENDING    (LITEX_UART0_BASE + UART_EV_PENDING_OFFSET)
-#  define LITEX_UART0_EV_ENABLE     (LITEX_UART0_BASE + UART_EV_ENABLE_OFFSET)
-#  define LITEX_UART0_PHY_TUNING_WORD   0xe0001000L
+#include <sys/mount.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
+
+#include <nuttx/board.h>
+#include <nuttx/input/buttons.h>
+
+#include "litex.h"
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: litex_bringup
+ ****************************************************************************/
+
+int litex_bringup(void)
+{
+  int ret = OK;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+    }
 #endif
 
-#define UART_EV_TX	0x1
-#define UART_EV_RX	0x2
-
-#endif /* _ARCH_RISCV_SRC_LITEX_CHIP_LITEX_UART_H */
+  return ret;
+}
