@@ -1,0 +1,42 @@
+/sim
+
+# From the Linux version of sim.dat
+-sim:cxxtest
+-sim:nxwm
+-sim:rpproxy
+-sim:rpserver
+
+# X11
+# macOS doesn't have X11
+-sim:nxlines
+-sim:touchscreen
+-sim:nx11
+-sim:nsh2
+
+# CONFIG_SIM_M32=y
+# The recent versions of macOS is 64-bit only
+-sim:loadable
+-sim:mtdpart
+-sim:mtdrwb
+-sim:rpproxy
+-sim:rpserver
+-sim:tcpblaster
+-sim:module32
+
+# For some reasons, macOS sim builds are considerably slower than
+# the Linux counterpart, at least on the GitHub-hosted runners.
+# To mitigate it, The following configs are moved to the
+# separate file. (sim-2.dat)
+-sim:ipforward
+-sim:unionfs
+-sim:tcploop
+-sim:spiffs
+-sim:userfs
+-sim:fb
+-sim:ustream
+-sim:udgram
+-sim:nsh
+-sim:nx
+-sim:nxffs
+-sim:configdata
+-sim:sixlowpan

@@ -1,0 +1,15 @@
+# Note: this list should be consistent with
+# the corresponding blacklist in sim-1.dat
+sim:ipforward
+sim:unionfs
+sim:tcploop
+sim:spiffs
+sim:userfs
+sim:fb
+sim:ustream
+sim:udgram
+sim:nsh
+sim:nx
+sim:nxffs
+sim:configdata
+sim:sixlowpan
