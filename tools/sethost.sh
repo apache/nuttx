@@ -92,6 +92,7 @@ done
 #   Cygwin: CYGWIN_NT-10.0-WOW
 #   Linux: Linux
 #   MSYS: MINGW32_NT-6.2
+
 if [ -z "$host" ]; then
   case $(uname -s) in
     Darwin)
@@ -107,6 +108,7 @@ if [ -z "$host" ]; then
       ;;
     *)
       # Assume linux as a fallback
+
       host=linux
       ;;
   esac
@@ -122,7 +124,7 @@ fi
 if [ -x tools/sethost.sh ]; then
   nuttx=$PWD
 else
-  echo "This script must be execute in nuttx/ or nuttx/tools directories"
+  echo "This script must be executed in nuttx/ or nuttx/tools directories"
   exit 1
 fi
 
