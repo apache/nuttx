@@ -198,8 +198,8 @@ function build {
 function dotest {
   echo "===================================================================================="
   config=`echo $1 | cut -d',' -f1`
-  re=\\b${config/\//:}\\b
-  if [[ $blacklist =~ $re ]]; then
+  re="-${config/\//:}[[:space:]]"
+  if [[ "${blacklist} " =~ $re ]]; then
     echo "Skipping: $1"
   else
     echo "Configuration/Tool: $1"
