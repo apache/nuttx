@@ -69,17 +69,16 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 #ifdef CONFIG_NETDB_RESOLVCONF_NONSTDPORT
   uint16_t port;
 #endif
-  int status;
   int ret;
 
   stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "a+");
   if (stream == NULL)
     {
-      int errcode = get_errno();
+      ret = -errno;
       nerr("ERROR: Failed to open %s: %d\n",
-           CONFIG_NETDB_RESOLVCONF_PATH, errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
+           CONFIG_NETDB_RESOLVCONF_PATH, ret);
+      DEBUGASSERT(ret < 0);
+      return ret;
     }
 
 #ifdef CONFIG_NET_IPv4
@@ -100,8 +99,8 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
                         DNS_MAX_ADDRSTR) == NULL)
             {
               ret = -errno;
-              nerr("ERROR: inet_ntop failed: %d\n", errcode);
-              DEBUGASSERT(errcode < 0);
+              nerr("ERROR: inet_ntop failed: %d\n", ret);
+              DEBUGASSERT(ret < 0);
               goto errout;
             }
 
@@ -133,8 +132,8 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
                         DNS_MAX_ADDRSTR) == NULL)
             {
               ret = -errno;
-              nerr("ERROR: inet_ntop failed: %d\n", errcode);
-              DEBUGASSERT(errcode < 0);
+              nerr("ERROR: inet_ntop failed: %d\n", ret);
+              DEBUGASSERT(ret < 0);
               goto errout;
             }
 
@@ -167,21 +166,21 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
   if (port != 0 && port != DNS_DEFAULT_PORT)
     {
-      status = fprintf(stream, "%s [%s]:%u\n",
-                       NETDB_DNS_KEYWORD, addrstr, port);
+      ret = fprintf(stream, "%s [%s]:%u\n",
+                    NETDB_DNS_KEYWORD, addrstr, port);
     }
   else
 #endif
     {
-      status = fprintf(stream, "%s %s\n",
-                       NETDB_DNS_KEYWORD, addrstr);
+      ret = fprintf(stream, "%s %s\n",
+                    NETDB_DNS_KEYWORD, addrstr);
     }
 
-  if (status < 0)
+  if (ret < 0)
     {
       ret = -errno;
-      nerr("ERROR: fprintf failed: %d\n", errcode);
-      DEBUGASSERT(errcode < 0);
+      nerr("ERROR: fprintf failed: %d\n", ret);
+      DEBUGASSERT(ret < 0);
       goto errout;
     }
 

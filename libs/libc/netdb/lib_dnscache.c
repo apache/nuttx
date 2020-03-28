@@ -105,7 +105,7 @@ static struct dns_cache_s g_dns_cache[CONFIG_NETDB_DNSCLIENT_ENTRIES];
  * Name: dns_save_answer
  *
  * Description:
- *   Same the last resolved hostname in the DNS cache
+ *   Save the last resolved hostname in the DNS cache
  *
  * Input Parameters:
  *   hostname - The hostname string to be cached.
