@@ -213,14 +213,6 @@ int dns_find_answer(FAR const char *hostname, FAR union dns_addr_u *addr,
   int next;
   int ndx;
 
-  /* If DNS not initialized, no need to proceed */
-
-  if (!dns_initialize())
-    {
-      nerr("ERROR: DNS failed to initialize\n");
-      return -EAGAIN;
-    }
-
   /* Get exclusive access to the DNS cache */
 
   dns_semtake();
