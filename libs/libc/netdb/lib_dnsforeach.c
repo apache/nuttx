@@ -101,7 +101,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
   /* Open the resolver configuration file */
 
-  stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "rb");
+  stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "r");
   if (stream == NULL)
     {
       ret = -errno;
