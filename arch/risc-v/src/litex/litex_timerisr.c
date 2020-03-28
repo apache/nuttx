@@ -35,6 +35,7 @@
 #include "up_arch.h"
 
 #include "litex.h"
+#include "hardware/litex_timer.h"
 #include "litex_clockconfig.h"
 
 /****************************************************************************
@@ -47,117 +48,9 @@
  * Private Data
  ****************************************************************************/
 
-static bool _b_tick_started = false;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/* litex mmio registers are a bit odd, by default they are byte-wide
- * registers that are on 32-bit word boundaries. So a "32-bit" registers
- * is actually broken into four bytes spanning a total address space of
- * 16 bytes.
- */
-
-static inline uint64_t litex_clint_time_read(void)
-{
-  uint64_t r = getreg8(LITEX_CLINT_MTIME);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x04);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x08);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x0c);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x10);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x14);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x18);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIME + 0x1c);
-  return r;
-}
-
-static inline uint64_t litex_clint_time_cmp_read(void)
-{
-  uint64_t r = getreg8(LITEX_CLINT_MTIMECMP);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x04);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x08);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x0c);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x10);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x14);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x18);
-  r <<= 8;
-  r |= getreg8(LITEX_CLINT_MTIMECMP + 0x1c);
-  return r;
-}
-
-static inline void litex_clint_time_cmp_write(uint64_t v)
-{
-  putreg8(v >> 56, LITEX_CLINT_MTIMECMP);
-  putreg8(v >> 48, LITEX_CLINT_MTIMECMP + 0x04);
-  putreg8(v >> 40, LITEX_CLINT_MTIMECMP + 0x08);
-  putreg8(v >> 32, LITEX_CLINT_MTIMECMP + 0x0c);
-  putreg8(v >> 24, LITEX_CLINT_MTIMECMP + 0x10);
-  putreg8(v >> 16, LITEX_CLINT_MTIMECMP + 0x14);
-  putreg8(v >> 8, LITEX_CLINT_MTIMECMP + 0x18);
-  putreg8(v, LITEX_CLINT_MTIMECMP + 0x1c);
-}
-
-/* helper function to set/clear csr */
-
-#define csr_clear(csr, val)					\
-({								\
-  unsigned long __v = (unsigned long)(val);		\
-  __asm__ __volatile__ ("csrc " #csr ", %0"		\
-            : : "rK" (__v));			\
-})
-
-#define csr_set(csr, val)					\
-({								\
-  unsigned long __v = (unsigned long)(val);		\
-  __asm__ __volatile__ ("csrs " #csr ", %0"		\
-            : : "rK" (__v));			\
-})
-
-/****************************************************************************
- * Name:  litex_reload_mtimecmp
- ****************************************************************************/
-
-static void litex_reload_mtimecmp(void)
-{
-  irqstate_t flags = spin_lock_irqsave();
-
-  uint64_t current;
-  uint64_t next;
-
-  if (!_b_tick_started)
-    {
-      _b_tick_started = true;
-      putreg8(1, LITEX_CLINT_LATCH);
-      current = litex_clint_time_read();
-    }
-  else
-    {
-      current = litex_clint_time_cmp_read();
-    }
-
-  next = current + TICK_COUNT;
-
-  litex_clint_time_cmp_write(next);
-  putreg8(1, LITEX_CLINT_LATCH);
-  csr_set(mie, MIE_MTIE);
-  csr_clear(mip, MIP_MTIP);
-
-  spin_unlock_irqrestore(flags);
-}
 
 /****************************************************************************
  * Name:  litex_timerisr
@@ -165,10 +58,8 @@ static void litex_reload_mtimecmp(void)
 
 static int litex_timerisr(int irq, void *context, FAR void *arg)
 {
-  litex_reload_mtimecmp();
-
+  putreg32(1, LITEX_TIMER0_EV_PENDING);
   /* Process timer interrupt */
-
   nxsched_process_timer();
   return 0;
 }
@@ -188,15 +79,11 @@ static int litex_timerisr(int irq, void *context, FAR void *arg)
 
 void up_timer_initialize(void)
 {
-  /* Attach timer interrupt handler */
-
-  //irq_attach(LITEX_IRQ_MTIMER, litex_timerisr, NULL);
-
-  /* Reload CLINT mtimecmp */
-
-  //litex_reload_mtimecmp();
-
-  /* And enable the timer interrupt */
-
-  //up_enable_irq(LITEX_IRQ_MTIMER);
+  putreg32(0, LITEX_TIMER0_EN);
+  putreg32(0, LITEX_TIMER0_LOAD);
+  putreg32(TICK_COUNT, LITEX_TIMER0_RELOAD);
+  putreg32(1, LITEX_TIMER0_EV_ENABLE);
+  putreg32(1, LITEX_TIMER0_EN);
+  irq_attach(LITEX_IRQ_TIMER0, litex_timerisr, NULL);
+  up_enable_irq(LITEX_IRQ_TIMER0);
 }

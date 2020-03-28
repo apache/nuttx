@@ -50,7 +50,7 @@ uint32_t litex_get_hfclk(void)
 {
   /* fpga fabric default sys frequency */
 
-  return 100000000UL;
+  return 21000000UL;
 }
 
 /****************************************************************************

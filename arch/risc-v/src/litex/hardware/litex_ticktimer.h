@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/litex/hardware/litex_plic.h
+ * arch/risc-v/src/litex/hardware/litex_ticktimer.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,17 +18,17 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_PLIC_H
-#define __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_PLIC_H
+#ifndef ARCH_RISCV_SRC_LITEX_CHIP_LITEX_TICKTIMER_H
+#define ARCH_RISCV_SRC_LITEX_CHIP_LITEX_TICKTIMER_H
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* litex vexRiscv does not follow RISC-V privileged specification and
- * uses two additional CSRs: mask and pending.
- */
-#define LITEX_MMASK_CSR     0xBC0     /* From LiteX CSR_IRQ_MASK */ 
-#define LITEX_MPENDING_CSR     0xFC0  /* from LiteX CSR_IRQ_PENDING */
+#define TICK_TIMER_CONTROL_OFFSET 0x00
+#define TICK_TIMER_TIME_OFFSET    0x04
 
-#endif /* __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_PLIC_H */
+#define LITEX_TICK_TIMER_CONTROL    (LITEX_TICK_TIMER_BASE + TICK_TIMER_CONTROL_OFFSET)
+#define LITEX_TICK_TIMER_TIME       (LITEX_TICK_TIMER_BASE + TICK_TIMER_TIME_OFFSET)
+
+#endif /* _ARCH_RISCV_SRC_LITEX_CHIP_LITEX_TICKTIMER_H */
