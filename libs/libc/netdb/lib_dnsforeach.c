@@ -104,11 +104,11 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
   stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "rb");
   if (stream == NULL)
     {
-      int errcode = get_errno();
+      ret = -errno;
       nerr("ERROR: Failed to open %s: %d\n",
-        CONFIG_NETDB_RESOLVCONF_PATH, errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
+        CONFIG_NETDB_RESOLVCONF_PATH, ret);
+      DEBUGASSERT(ret < 0);
+      return ret;
     }
 
   keylen = strlen(NETDB_DNS_KEYWORD);

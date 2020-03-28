@@ -204,7 +204,7 @@ int dns_query(int sd, FAR const char *hostname, FAR union dns_addr_u *addr,
  * Name: dns_save_answer
  *
  * Description:
- *   Same the last resolved hostname in the DNS cache
+ *   Save the last resolved hostname in the DNS cache
  *
  * Input Parameters:
  *   hostname - The hostname string to be cached.

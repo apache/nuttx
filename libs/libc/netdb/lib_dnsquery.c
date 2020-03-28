@@ -217,7 +217,6 @@ static int dns_send_query(int sd, FAR const char *name,
   uint8_t buffer[SEND_BUFFER_SIZE];
   uint16_t id;
   socklen_t addrlen;
-  int errcode;
   int ret;
   int len;
   int n;
@@ -323,9 +322,9 @@ static int dns_send_query(int sd, FAR const char *name,
 
   if (ret < 0)
     {
-      errcode = get_errno();
-      nerr("ERROR: sendto failed: %d\n", errcode);
-      return -errcode;
+      ret = -errno;
+      nerr("ERROR: sendto failed: %d\n", ret);
+      return ret;
     }
 
   return OK;
@@ -358,7 +357,6 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
   union dns_addr_u recvaddr;
   socklen_t raddrlen;
   int naddr_read;
-  int errcode;
   int ret;
 
   /* Receive the response */
@@ -368,9 +366,9 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
                           &recvaddr.addr, &raddrlen);
   if (ret < 0)
     {
-      errcode = -_NX_GETERRNO(ret);
-      nerr("ERROR: recv failed: %d\n", errcode);
-      return errcode;
+      ret = -_NX_GETERRNO(ret);
+      nerr("ERROR: recv failed: %d\n", ret);
+      return ret;
     }
 
 #ifdef CONFIG_NET_IPv4
