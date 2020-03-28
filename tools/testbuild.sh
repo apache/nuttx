@@ -131,7 +131,7 @@ fi
 
 export APPSDIR
 
-testlist=`grep -v "^-" $testfile || true`
+testlist=`grep -v -E "^(-|#)" $testfile || true`
 blacklist=`grep "^-" $testfile || true`
 
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
@@ -259,7 +259,7 @@ for line in $testlist; do
     for i in ${list}; do
       dotest $i${line/$dir/}
     done
-  elif [ "X$firstch" != "X#" ]; then
+  else
     dotest $line
   fi
 done
