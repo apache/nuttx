@@ -67,7 +67,7 @@ static bool g_connect_warned;
 int negotiate(int fd, struct vif_info *vif);
 void netdriver_setmacaddr(unsigned char *macaddr);
 
-static int vpnkit_connect()
+static int vpnkit_connect(void)
 {
   struct sockaddr_un sun;
   int fd;
@@ -114,7 +114,7 @@ static int vpnkit_connect()
   return 0;
 }
 
-static void vpnkit_disconnect()
+static void vpnkit_disconnect(void)
 {
   if (g_vpnkit_fd == -1)
     {
