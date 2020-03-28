@@ -166,7 +166,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
               /* Get the port number following the right bracket */
 
-              if (*ptr == ':')
+              if (*ptr++ == ':')
                 {
                   FAR char *portstr;
                   int tmp;
@@ -174,7 +174,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
                   /* Isolate the port string */
 
                   portstr = ptr;
-                  ptr     = find_spaces(addrstr);
+                  ptr     = find_spaces(ptr);
                   *ptr    = '\0';
 
                   /* Get the port number */
