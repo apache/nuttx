@@ -57,7 +57,8 @@
 
 /* These file systems require MTD drivers */
 
-#if defined(CONFIG_FS_SPIFFS) || defined(CONFIG_FS_LITTLEFS)
+#if (defined(CONFIG_FS_SPIFFS) || defined(CONFIG_FS_LITTLEFS)) && \
+    defined(CONFIG_MTD)
 #  define MDFS_SUPPORT 1
 #endif
 
