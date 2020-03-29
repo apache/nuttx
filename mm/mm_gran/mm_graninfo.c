@@ -1,35 +1,20 @@
 /****************************************************************************
  * mm/mm_gran/mm_graninfo.c
  *
- *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -73,53 +58,115 @@ struct valinfo_s
 
 static const struct nibble_info_s g_0bit_info[1] =
 {
-  { 0, 0, 0, 0}   /*  0 xxxx */
+  {               /*  0 xxxx */
+    0, 0, 0, 0
+  }
 };
 
 static const struct nibble_info_s g_1bit_info[2] =
 {
-  { 1, 1, 0, 0},  /*  0 xxx0 */
-  { 0, 0, 0, 0}   /*  1 xxx1 */
+  {               /*  0 xxx0 */
+    1, 1, 0, 0
+  },
+  {               /*  1 xxx1 */
+    0, 0, 0, 0
+  }
 };
 
 static const struct nibble_info_s g_2bit_info[4] =
 {
-  { 2, 2, 0, 0},  /*  0 xx00 */
-  { 1, 0, 1, 0},  /*  1 xx01 */
-  { 1, 1, 0, 0},  /*  2 xx10 */
-  { 0, 0, 0, 0}   /*  3 xx11 */
+  {               /*  0 xx00 */
+    2, 2, 0, 0
+  },
+  {               /*  1 xx01 */
+    1, 0, 1, 0
+  },
+  {               /*  2 xx10 */
+    1, 1, 0, 0
+  },
+  {               /*  3 xx11 */
+    0, 0, 0, 0
+  }
 };
 
 static const struct nibble_info_s g_3bit_info[8] =
 {
-  { 3, 3, 0, 0},  /*  0 x000 */
-  { 2, 0, 2, 0},  /*  1 x001 */
-  { 2, 1, 1, 0},  /*  2 x010 */
-  { 1, 0, 1, 0},  /*  3 x011 */
-  { 2, 2, 0, 0},  /*  4 x100 */
-  { 1, 0, 0, 1},  /*  5 x101 */
-  { 1, 1, 0, 0},  /*  6 x110 */
-  { 0, 0, 0, 0}   /*  7 x111 */
+  {               /*  0 x000 */
+    3, 3, 0, 0
+  },
+  {               /*  1 x001 */
+    2, 0, 2, 0
+  },
+  {               /*  2 x010 */
+    2, 1, 1, 0
+  },
+  {               /*  3 x011 */
+    1, 0, 1, 0
+  },
+  {               /*  4 x100 */
+    2, 2, 0, 0
+  },
+  {               /*  5 x101 */
+    1, 0, 0, 1
+  },
+  {               /*  6 x110 */
+    1, 1, 0, 0
+  },
+  {               /*  7 x111 */
+    0, 0, 0, 0
+  }
 };
 
 static const struct nibble_info_s g_4bit_info[16] =
 {
-  { 4, 4, 0, 0},  /*  0 0000 */
-  { 3, 0, 3, 0},  /*  1 0001 */
-  { 3, 1, 2, 0},  /*  2 0010 */
-  { 2, 0, 2, 0},  /*  3 0011 */
-  { 3, 2, 1, 0},  /*  4 0100 */
-  { 2, 0, 1, 1},  /*  5 0101 */
-  { 2, 1, 1, 0},  /*  6 0110 */
-  { 1, 0, 1, 0},  /*  7 0111 */
-  { 3, 3, 0, 0},  /*  8 1000 */
-  { 2, 0, 0, 2},  /*  9 1001 */
-  { 2, 1, 0, 1},  /* 10 1010 */
-  { 1, 0, 0, 1},  /* 11 1011 */
-  { 2, 2, 0, 0},  /* 12 1100 */
-  { 1, 0, 0, 1},  /* 13 1101 */
-  { 1, 1, 0, 0},  /* 14 1110 */
-  { 0, 0, 0, 0}   /* 15 1111 */
+  {               /*  0 0000 */
+    4, 4, 0, 0
+  },
+  {               /*  1 0001 */
+    3, 0, 3, 0
+  },
+  {               /*  2 0010 */
+    3, 1, 2, 0
+  },
+  {               /*  3 0011 */
+    2, 0, 2, 0
+  },
+  {               /*  4 0100 */
+    3, 2, 1, 0
+  },
+  {               /*  5 0101 */
+    2, 0, 1, 1
+  },
+  {               /*  6 0110 */
+    2, 1, 1, 0
+  },
+  {               /*  7 0111 */
+    1, 0, 1, 0
+  },
+  {               /*  8 1000 */
+    3, 3, 0, 0
+  },
+  {               /*  9 1001 */
+    2, 0, 0, 2
+  },
+  {               /* 10 1010 */
+    2, 1, 0, 1
+  },
+  {               /* 11 1011 */
+    1, 0, 0, 1
+  },
+  {               /* 12 1100 */
+    2, 2, 0, 0
+  },
+  {               /* 13 1101 */
+    1, 0, 0, 1
+  },
+  {               /* 14 1110 */
+    1, 1, 0, 0
+  },
+  {               /* 15 1111 */
+    0, 0, 0, 0
+  }
 };
 
 static const struct nibble_info_s *g_info_table[5] =
@@ -442,6 +489,7 @@ void gran_info(GRAN_HANDLE handle, FAR struct graninfo_s *info)
   unsigned int nbits;
   unsigned int granidx;
   unsigned int gatidx;
+  int ret;
 
   DEBUGASSERT(priv != NULL && info != NULL);
 
@@ -453,7 +501,14 @@ void gran_info(GRAN_HANDLE handle, FAR struct graninfo_s *info)
 
   /* Get exclusive access to the GAT */
 
-  gran_enter_critical(priv);
+  ret = gran_enter_critical(priv);
+  if (ret < 0)
+    {
+      /* Should happen only on task cancellation */
+
+      DEBUGASSERT(ret == -ECANCELED);
+      return;
+    }
 
   /* Traverse the granule allocation  */
 

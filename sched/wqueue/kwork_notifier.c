@@ -175,6 +175,7 @@ static void work_notifier_worker(FAR void *arg)
 {
   FAR struct work_notifier_entry_s *notifier =
     (FAR struct work_notifier_entry_s *)arg;
+  int ret;
 
   /* Forward to the real worker */
 
@@ -182,9 +183,12 @@ static void work_notifier_worker(FAR void *arg)
 
   /* Put the notification to the free list */
 
-  nxsem_wait_uninterruptible(&g_notifier_sem);
-  dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
-  nxsem_post(&g_notifier_sem);
+  ret = nxsem_wait_uninterruptible(&g_notifier_sem);
+  if (ret >= 0)
+    {
+      dq_addlast((FAR dq_entry_t *)notifier, &g_notifier_free);
+      nxsem_post(&g_notifier_sem);
+    }
 }
 
 /****************************************************************************
@@ -360,10 +364,16 @@ void work_notifier_signal(enum work_evtype_e evtype,
   FAR struct work_notifier_entry_s *notifier;
   FAR dq_entry_t *entry;
   FAR dq_entry_t *next;
+  int ret;
 
   /* Get exclusive access to the notifier data structure */
 
-  nxsem_wait_uninterruptible(&g_notifier_sem);
+  ret = nxsem_wait_uninterruptible(&g_notifier_sem);
+  if (ret < 0)
+    {
+      serr("ERROR: nxsem_wait_uninterruptible failed: %d\n", ret);
+      return;
+    }
 
   /* Don't let any newly started threads block this thread until all of
    * the notifications and been sent.
