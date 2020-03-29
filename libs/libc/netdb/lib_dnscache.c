@@ -79,7 +79,7 @@ struct dns_cache_s
 #endif
   char              name[CONFIG_NETDB_DNSCLIENT_NAMESIZE];
   uint8_t           naddr;      /* How many addresses per name */
-  union dns_addr_u  addr[CONFIG_NETDB_DNSCLIENT_MAXIP]; /* Resolved address */
+  union dns_addr_u  addr[CONFIG_NETDB_MAX_IPADDR]; /* Resolved address */
 };
 
 /****************************************************************************
@@ -127,7 +127,7 @@ void dns_save_answer(FAR const char *hostname,
   int next;
   int ndx;
 
-  naddr = MIN(naddr, CONFIG_NETDB_DNSCLIENT_MAXIP);
+  naddr = MIN(naddr, CONFIG_NETDB_MAX_IPADDR);
   DEBUGASSERT(naddr >= 1 && naddr <= UCHAR_MAX);
 
   /* Get exclusive access to the DNS cache */
