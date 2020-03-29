@@ -62,8 +62,8 @@ typedef struct lps25h_temper_data_s
 
 typedef struct lps25h_pressure_data_s
 {
-  uint32_t pressure_int_hP;
-  uint32_t pressure_Pa;
+  uint32_t pressure_int_hp;
+  uint32_t pressure_pa;
   uint32_t raw_data;
 } lps25h_pressure_data_t;
 
