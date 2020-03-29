@@ -70,6 +70,10 @@
 #  define CONFIG_NETDB_BUFSIZE 128
 #endif
 
+#ifndef CONFIG_NETDB_MAX_IPADDR
+#  define CONFIG_NETDB_MAX_IPADDR 1
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

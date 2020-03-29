@@ -61,7 +61,7 @@
 
 struct hostent_info_s
 {
-  FAR char *hi_addrlist[CONFIG_NETDB_DNSCLIENT_MAXIP + 1];
+  FAR char *hi_addrlist[CONFIG_NETDB_MAX_IPADDR + 1];
   char hi_data[1];
 };
 

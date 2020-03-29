@@ -66,7 +66,7 @@
 
 struct hostent_info_s
 {
-  FAR char *hi_addrlist[CONFIG_NETDB_DNSCLIENT_MAXIP + 1];
+  FAR char *hi_addrlist[CONFIG_NETDB_MAX_IPADDR + 1];
   char hi_data[1];
 };
 
@@ -402,7 +402,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
       return ret;
     }
 
-  DEBUGASSERT(naddr <= CONFIG_NETDB_DNSCLIENT_MAXIP);
+  DEBUGASSERT(naddr <= CONFIG_NETDB_MAX_IPADDR);
 
   /* Get the address type. */
 
@@ -564,7 +564,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
 
   /* We can read more than maximum, limit here. */
 
-  naddr = MIN(naddr, CONFIG_NETDB_DNSCLIENT_MAXIP);
+  naddr = MIN(naddr, CONFIG_NETDB_MAX_IPADDR);
 
   for (i = 0; i < naddr; i++)
     {
