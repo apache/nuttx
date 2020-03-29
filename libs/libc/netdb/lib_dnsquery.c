@@ -324,7 +324,7 @@ static int dns_send_query(int sd, FAR const char *name,
  *
  ****************************************************************************/
 
-static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
+static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
                              FAR struct dns_query_info_s *qinfo)
 {
   FAR uint8_t *nameptr;
@@ -338,6 +338,11 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
   uint16_t nanswers;
   int naddr_read;
   int ret;
+
+  if (naddr <= 0)
+    {
+      return -ERANGE;
+    }
 
   /* Receive the response */
 
@@ -456,6 +461,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
       if (nameptr == endofbuffer)
         {
           ret = -EILSEQ;
+          nwarn("Further parse returned %d\n", ret);
           break;
         }
 
@@ -476,6 +482,8 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
           ans->len   == HTONS(4) &&
           nameptr + 10 + 4 <= endofbuffer)
         {
+          FAR struct sockaddr_in *inaddr;
+
           nameptr += 10 + 4;
 
           ninfo("IPv4 address: %d.%d.%d.%d\n",
@@ -484,22 +492,12 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
                 (ans->u.ipv4.s_addr >> 16) & 0xff,
                 (ans->u.ipv4.s_addr >> 24) & 0xff);
 
-          if (naddr_read < *naddr)
-            {
-              FAR struct sockaddr_in *inaddr;
+          inaddr                  = &addr[naddr_read].ipv4;
+          inaddr->sin_family      = AF_INET;
+          inaddr->sin_port        = 0;
+          inaddr->sin_addr.s_addr = ans->u.ipv4.s_addr;
 
-              inaddr                   = &addr[naddr_read].ipv4;
-              inaddr->sin_family       = AF_INET;
-              inaddr->sin_port         = 0;
-              inaddr->sin_addr.s_addr  = ans->u.ipv4.s_addr;
-
-              naddr_read++;
-              if (naddr_read >= *naddr)
-                {
-                  break;
-                }
-            }
-          else
+          if (++naddr_read >= naddr)
             {
               ret = -ERANGE;
               break;
@@ -513,6 +511,8 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
           ans->len   == HTONS(16) &&
           nameptr + 10 + 16 <= endofbuffer)
         {
+          FAR struct sockaddr_in6 *inaddr;
+
           nameptr += 10 + 16;
 
           ninfo("IPv6 address: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
@@ -521,22 +521,12 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
                 ntohs(ans->u.ipv6.s6_addr[3]), ntohs(ans->u.ipv6.s6_addr[2]),
                 ntohs(ans->u.ipv6.s6_addr[1]), ntohs(*ans->u.ipv6.s6_addr));
 
-          if (naddr_read < *naddr)
-            {
-              FAR struct sockaddr_in6 *inaddr;
+          inaddr                  = &addr[naddr_read].ipv6;
+          inaddr->sin6_family     = AF_INET6;
+          inaddr->sin6_port       = 0;
+          memcpy(inaddr->sin6_addr.s6_addr, ans->u.ipv6.s6_addr, 16);
 
-              inaddr                   = &addr[naddr_read].ipv6;
-              inaddr->sin6_family      = AF_INET6;
-              inaddr->sin6_port        = 0;
-              memcpy(inaddr->sin6_addr.s6_addr, ans->u.ipv6.s6_addr, 16);
-
-              naddr_read++;
-              if (naddr_read >= *naddr)
-                {
-                  break;
-                }
-            }
-          else
+          if (++naddr_read >= naddr)
             {
               ret = -ERANGE;
               break;
@@ -553,13 +543,8 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
     {
       ret = -EADDRNOTAVAIL;
     }
-  else if (naddr_read > 0 && ret != OK)
-    {
-      nwarn("Got an IP, but further parse returned %d\n", ret);
-    }
 
-  *naddr = naddr_read;
-  return (naddr_read > 0) ? naddr_read : ret;
+  return naddr_read > 0 ? naddr_read : ret;
 }
 
 /****************************************************************************
@@ -586,6 +571,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 {
   FAR struct dns_query_s *query = (FAR struct dns_query_s *)arg;
   FAR struct dns_query_info_s qinfo;
+  int next = 0;
   int retries;
   int ret;
 
@@ -596,184 +582,83 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
   for (retries = 0; retries < CONFIG_NETDB_DNSCLIENT_RETRIES; retries++)
     {
 #ifdef CONFIG_NET_IPv4
-      /* Is this an IPv4 address? */
+      /* Send the IPv4 query */
 
-      if (addr->sa_family == AF_INET)
+      ret = dns_send_query(query->sd, query->hostname,
+                           (FAR union dns_addr_u *)addr,
+                           DNS_RECTYPE_A, &qinfo);
+      if (ret < 0)
         {
-          /* Yes.. verify the address size */
-
-          if (addrlen < sizeof(struct sockaddr_in))
-            {
-              /* Return zero to skip this address and try the next
-               * nameserver address in resolv.conf.
-               */
-
-              nerr("ERROR: Invalid IPv4 address size: %d\n", addrlen);
-              query->result = -EINVAL;
-              return 0;
-            }
-
-          /* Send the IPv4 query */
-
-          ret = dns_send_query(query->sd, query->hostname,
-                               (FAR union dns_addr_u *)addr,
-                               DNS_RECTYPE_A, &qinfo);
-          if (ret < 0)
-            {
-              /* Return zero to skip this address and try the next
-               * nameserver address in resolv.conf.
-               */
-
-              nerr("ERROR: IPv4 dns_send_query failed: %d\n", ret);
-              query->result = ret;
-              return 0;
-            }
-
-          /* Obtain the IPv4 response */
-
-          ret = dns_recv_response(query->sd, query->addr, query->naddr,
-                                  &qinfo);
-          if (ret >= 0)
-            {
-              /* IPv4 response received successfully */
-
-#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
-              /* Save the answer in the DNS cache */
-
-              dns_save_answer(query->hostname, query->addr,
-                              *query->naddr);
-#endif
-              /* Return 1 to indicate to (1) stop the traversal, and (2)
-               * indicate that the address was found.
-               */
-
-              return 1;
-            }
-
-          /* Handle errors */
-
-          nerr("ERROR: IPv4 dns_recv_response failed: %d\n", ret);
-
-          if (ret == -EADDRNOTAVAIL)
-            {
-              /* The IPv4 address is not available.  Return zero to
-               * continue the tranversal with the next nameserver
-               * address in resolv.conf.
-               */
-
-              query->result = -EADDRNOTAVAIL;
-              return 0;
-            }
-          else if (ret != -EAGAIN)
-            {
-              /* Some failure other than receive timeout occurred.  Return
-               * zero to skip this address and try the next nameserver
-               * address in resolv.conf.
-               */
-
-              query->result = ret;
-              return 0;
-            }
+          nerr("ERROR: IPv4 dns_send_query failed: %d\n", ret);
+          query->result = ret;
         }
       else
+        {
+          /* Obtain the IPv4 response */
+
+          ret = dns_recv_response(query->sd, &query->addr[next],
+                                  *query->naddr - next, &qinfo);
+          if (ret >= 0)
+            {
+              next += ret;
+            }
+          else
+            {
+              nerr("ERROR: IPv4 dns_recv_response failed: %d\n", ret);
+              query->result = ret;
+            }
+        }
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
-      /* Is this an IPv6 address? */
+      /* Send the IPv6 query */
 
-      if (addr->sa_family == AF_INET6)
+      ret = dns_send_query(query->sd, query->hostname,
+                          (FAR union dns_addr_u *)addr,
+                           DNS_RECTYPE_AAAA, &qinfo);
+      if (ret < 0)
         {
-          /* Yes.. verify the address size */
-
-          if (addrlen < sizeof(struct sockaddr_in6))
-            {
-              /* Return zero to skip this address and try the next
-               * nameserver address in resolv.conf.
-               */
-
-              nerr("ERROR: Invalid IPv6 address size: %d\n", addrlen);
-              query->result = -EINVAL;
-              return 0;
-            }
-
-          /* Send the IPv6 query */
-
-          ret = dns_send_query(query->sd, query->hostname,
-                              (FAR union dns_addr_u *)addr,
-                               DNS_RECTYPE_AAAA, &qinfo);
-          if (ret < 0)
-            {
-              /* Return zero to skip this address and try the next
-               * nameserver address in resolv.conf.
-               */
-
-              nerr("ERROR: IPv6 dns_send_query failed: %d\n", ret);
-              query->result = ret;
-              return 0;
-            }
-
-          /* Obtain the IPv6 response */
-
-          ret = dns_recv_response(query->sd, query->addr, query->naddr,
-                                  &qinfo);
-          if (ret >= 0)
-            {
-              /* IPv6 response received successfully */
-
-#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
-              /* Save the answer in the DNS cache */
-
-              dns_save_answer(query->hostname, query->addr, *query->naddr);
-#endif
-              /* Return 1 to indicate to (1) stop the traversal, and (2)
-               * indicate that the address was found.
-               */
-
-              return 1;
-            }
-
-          /* Handle errors */
-
-          nerr("ERROR: IPv6 dns_recv_response failed: %d\n", ret);
-
-          if (ret == -EADDRNOTAVAIL)
-            {
-              /* The IPv6 address is not available.  Return zero to
-               * continue the tranversal with the next nameserver
-               * address in resolv.conf.
-               */
-
-              query->result = -EADDRNOTAVAIL;
-              return 0;
-            }
-          else if (ret != -EAGAIN)
-            {
-              /* Some failure other than receive timeout occurred.  Return
-               * zero to skip this address and try the next nameserver
-               * address in resolv.conf.
-               */
-
-              query->result = ret;
-              return 0;
-            }
+          nerr("ERROR: IPv6 dns_send_query failed: %d\n", ret);
+          query->result = ret;
         }
       else
-#endif
         {
-          /* Unsupported address family. Return zero to continue the
-           * tranversal with the next nameserver address in resolv.conf.
+          /* Obtain the IPv6 response */
+
+          ret = dns_recv_response(query->sd, &query->addr[next],
+                                  *query->naddr - next, &qinfo);
+          if (ret >= 0)
+            {
+              next += ret;
+            }
+          else
+            {
+              nerr("ERROR: IPv6 dns_recv_response failed: %d\n", ret);
+              query->result = ret;
+            }
+        }
+#endif
+
+      if (next > 0)
+        {
+#if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
+          /* Save the answer in the DNS cache */
+
+          dns_save_answer(query->hostname, query->addr, next);
+#endif
+          /* Return 1 to indicate to (1) stop the traversal, and (2)
+           * indicate that the address was found.
            */
 
-          return 0;
+          *query->naddr = next;
+          return 1;
+        }
+      else if (query->result != -EAGAIN)
+        {
+          break;
         }
     }
 
-  /* We tried and could not communicate with this nameserver. Perhaps it
-   * is down?  Return zero to continue with the next address in the
-   * resolv.conf file.
-   */
-
-  query->result = -ETIMEDOUT;
   return 0;
 }
 
