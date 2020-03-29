@@ -143,7 +143,13 @@ int rmdir(FAR const char *pathname)
        * -EBUSY to indicate that the inode was not deleted now.
        */
 
-      inode_semtake();
+      ret = inode_semtake();
+      if (ret < 0)
+        {
+          errcode = -ret;
+          goto errout_with_inode;
+        }
+
       ret = inode_remove(pathname);
       inode_semgive();
 

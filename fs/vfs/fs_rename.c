@@ -208,7 +208,11 @@ next_subdir:
    * of  zero.
    */
 
-  inode_semtake();
+  ret = inode_semtake();
+  if (ret < 0)
+    {
+      goto errout;
+    }
 
   ret = inode_reserve(newpath, &newinode);
   if (ret < 0)
