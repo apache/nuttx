@@ -275,6 +275,7 @@ int nxsem_trywait(FAR sem_t *sem);
  *             expired.
  *   EDEADLK   A deadlock condition was detected.
  *   EINTR     A signal interrupted this function.
+ *   ECANCELED May be returned if the thread is canceled while waiting.
  *
  ****************************************************************************/
 
@@ -565,6 +566,7 @@ int nxsem_wait_uninterruptible(FAR sem_t *sem);
  *   ETIMEDOUT The semaphore could not be locked before the specified timeout
  *             expired.
  *   EDEADLK   A deadlock condition was detected.
+ *   ECANCELED May be returned if the thread is canceled while waiting.
  *
  ****************************************************************************/
 
@@ -581,7 +583,7 @@ static inline int
 
       ret = nxsem_timedwait(sem, abstime);
     }
-  while (ret == -EINTR || ret == -ECANCELED);
+  while (ret == -EINTR);
 
   return ret;
 }
