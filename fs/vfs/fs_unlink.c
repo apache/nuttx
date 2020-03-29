@@ -138,7 +138,12 @@ int unlink(FAR const char *pathname)
 
       if (inode->u.i_ops != NULL)
         {
-          inode_semtake();
+          ret = inode_semtake();
+          if (ret < 0)
+            {
+              errcode = -ret;
+              goto errout_with_inode;
+            }
 
           /* Refuse to unlink the inode if it has children.  I.e., if it is
            * functioning as a directory and the directory is not empty.

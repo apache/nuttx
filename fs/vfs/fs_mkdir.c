@@ -140,7 +140,13 @@ int mkdir(const char *pathname, mode_t mode)
        * count of zero.
        */
 
-      inode_semtake();
+      ret = inode_semtake();
+      if (ret < 0)
+        {
+          errcode = -ret;
+          goto errout_with_search;
+        }
+
       ret = inode_reserve(pathname, &inode);
       inode_semgive();
 

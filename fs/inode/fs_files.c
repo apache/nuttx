@@ -1,36 +1,20 @@
 /****************************************************************************
  * fs/inode/fs_files.c
  *
- *   Copyright (C) 2007-2009, 2011-2013, 2016-2017 Gregory Nutt. All rights
- *     reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -60,9 +44,9 @@
  * Name: _files_semtake
  ****************************************************************************/
 
-static void _files_semtake(FAR struct filelist *list)
+static int _files_semtake(FAR struct filelist *list)
 {
-  nxsem_wait_uninterruptible(&list->fl_sem);
+  return nxsem_wait_uninterruptible(&list->fl_sem);
 }
 
 /****************************************************************************
@@ -78,7 +62,8 @@ static void _files_semtake(FAR struct filelist *list)
  *   Close an inode (if open)
  *
  * Assumptions:
- *   Caller holds the list semaphore because the file descriptor will be freed.
+ *   Caller holds the list semaphore because the file descriptor will be
+ *   freed.
  *
  ****************************************************************************/
 
@@ -161,8 +146,8 @@ void files_releaselist(FAR struct filelist *list)
   DEBUGASSERT(list);
 
   /* Close each file descriptor .. Normally, you would need take the list
-   * semaphore, but it is safe to ignore the semaphore in this context because
-   * there should not be any references in this context.
+   * semaphore, but it is safe to ignore the semaphore in this context
+   * because there should not be any references in this context.
    */
 
   for (i = 0; i < CONFIG_NFILE_DESCRIPTORS; i++)
@@ -198,7 +183,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
   FAR struct inode *inode;
   int ret;
 
-  if (!filep1 || !filep1->f_inode || !filep2)
+  if (filep1 == NULL || filep1->f_inode == NULL || filep2 == NULL)
     {
       return -EBADF;
     }
@@ -214,7 +199,13 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
 
   if (list != NULL)
     {
-      _files_semtake(list);
+      ret = _files_semtake(list);
+      if (ret < 0)
+        {
+          /* Probably canceled */
+
+          return ret;
+        }
     }
 
   /* If there is already an inode contained in the new file structure,
@@ -232,7 +223,11 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
   /* Increment the reference count on the contained inode */
 
   inode = filep1->f_inode;
-  inode_addref(inode);
+  ret   = inode_addref(inode);
+  if (ret < 0)
+    {
+      goto errout_with_sem;
+    }
 
   /* Then clone the file structure */
 
@@ -298,14 +293,15 @@ errout_with_sem:
  * Name: files_allocate
  *
  * Description:
- *   Allocate a struct files instance and associate it with an inode instance.
- *   Returns the file descriptor == index into the files array.
+ *   Allocate a struct files instance and associate it with an inode
+ *   instance.  Returns the file descriptor == index into the files array.
  *
  ****************************************************************************/
 
 int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
 {
   FAR struct filelist *list;
+  int ret;
   int i;
 
   /* Get the file descriptor list.  It should not be NULL in this context. */
@@ -313,7 +309,14 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
   list = sched_getfiles();
   DEBUGASSERT(list != NULL);
 
-  _files_semtake(list);
+  ret = _files_semtake(list);
+  if (ret < 0)
+    {
+      /* Probably canceled */
+
+      return ret;
+    }
+
   for (i = minfd; i < CONFIG_NFILE_DESCRIPTORS; i++)
     {
       if (!list->fl_files[i].f_inode)
@@ -338,7 +341,8 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
  *   Close an inode (if open)
  *
  * Assumptions:
- *   Caller holds the list semaphore because the file descriptor will be freed.
+ *   Caller holds the list semaphore because the file descriptor will be
+ *   freed.
  *
  ****************************************************************************/
 
@@ -356,16 +360,21 @@ int files_close(int fd)
 
   /* If the file was properly opened, there should be an inode assigned */
 
-  if (fd < 0 || fd >= CONFIG_NFILE_DESCRIPTORS || !list->fl_files[fd].f_inode)
+  if (fd < 0 || fd >= CONFIG_NFILE_DESCRIPTORS ||
+      !list->fl_files[fd].f_inode)
     {
       return -EBADF;
     }
 
   /* Perform the protected close operation */
 
-  _files_semtake(list);
-  ret = _files_close(&list->fl_files[fd]);
-  _files_semgive(list);
+  ret = _files_semtake(list);
+  if (ret >= 0)
+    {
+      ret = _files_close(&list->fl_files[fd]);
+      _files_semgive(list);
+    }
+
   return ret;
 }
 
@@ -381,16 +390,20 @@ int files_close(int fd)
 void files_release(int fd)
 {
   FAR struct filelist *list;
+  int ret;
 
   list = sched_getfiles();
-  DEBUGASSERT(list);
+  DEBUGASSERT(list != NULL);
 
   if (fd >= 0 && fd < CONFIG_NFILE_DESCRIPTORS)
     {
-      _files_semtake(list);
-      list->fl_files[fd].f_oflags  = 0;
-      list->fl_files[fd].f_pos     = 0;
-      list->fl_files[fd].f_inode = NULL;
-      _files_semgive(list);
+      ret = _files_semtake(list);
+      if (ret >= 0)
+        {
+          list->fl_files[fd].f_oflags  = 0;
+          list->fl_files[fd].f_pos     = 0;
+          list->fl_files[fd].f_inode = NULL;
+          _files_semgive(list);
+        }
     }
 }
