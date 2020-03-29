@@ -68,21 +68,23 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
   int port;
   int ret;
 
-  if (addr->sa_family == AF_INET &&
+  if (addr && addr->sa_family == AF_INET &&
       addrlen == sizeof(struct sockaddr_in))
     {
-      const struct sockaddr_in *sa_in = (const struct sockaddr_in *)addr;
+      FAR const struct sockaddr_in *sa_in;
 
+      sa_in = (FAR const struct sockaddr_in *)addr;
       port = ntohs(sa_in->sin_port);
       saddr = &sa_in->sin_addr;
       saddr_len = sizeof(sa_in->sin_addr);
     }
 #ifdef CONFIG_NET_IPv6
-  else if (addr->sa_family == AF_INET6 &&
+  else if (addr && addr->sa_family == AF_INET6 &&
            addrlen == sizeof(struct sockaddr_in6))
     {
-      const struct sockaddr_in6 *sa_in6 = (const struct sockaddr_in6 *)addr;
+      FAR const struct sockaddr_in6 *sa_in6;
 
+      sa_in6 = (FAR const struct sockaddr_in6 *)addr;
       port = ntohs(sa_in6->sin6_port);
       saddr = &sa_in6->sin6_addr;
       saddr_len = sizeof(sa_in6->sin6_addr);
@@ -93,7 +95,7 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
       return EAI_FAMILY;
     }
 
-  if (!(flags & NI_NUMERICHOST))
+  if (host && !(flags & NI_NUMERICHOST))
     {
       struct hostent hostent;
       int h_errno;
@@ -157,7 +159,7 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
         }
     }
 
-  if (flags & NI_NUMERICHOST)
+  if (host && (flags & NI_NUMERICHOST))
     {
       if (!inet_ntop(addr->sa_family, saddr, host, hostlen))
         {
@@ -172,10 +174,10 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
         }
     }
 
-  if (!(flags & NI_NUMERICSERV))
+  if (serv && !(flags & NI_NUMERICSERV))
     {
       struct servent servent;
-      struct servent *result;
+      FAR struct servent *result;
 
       ret = getservbyport_r(port, flags & NI_DGRAM ? "udp" : "tcp",
                             &servent, serv, servlen, &result);
@@ -202,7 +204,7 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
         }
     }
 
-  if (flags & NI_NUMERICSERV)
+  if (serv && (flags & NI_NUMERICSERV))
     {
       snprintf(serv, servlen, "%d", port);
     }
