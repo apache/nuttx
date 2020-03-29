@@ -70,19 +70,11 @@ int getservbyport_r(int port, FAR const char *proto,
   int protocol;
   int i;
 
-  DEBUGASSERT(buf != NULL);
   DEBUGASSERT(result_buf != NULL && result != NULL);
 
   /* Linux man page says result must be NULL in case of failure. */
 
   *result = NULL;
-
-  /* We need space for two pointers for hostalias strings. */
-
-  if (buflen < 2 * sizeof(char *))
-    {
-      return ERANGE;
-    }
 
   if (proto == NULL)
     {
@@ -106,11 +98,9 @@ int getservbyport_r(int port, FAR const char *proto,
       if (port == g_services_db[i].s_port &&
           (protocol == 0 || protocol == g_services_db[i].s_protocol))
         {
-          result_buf->s_name = (char *)g_services_db[i].s_name;
-          result_buf->s_aliases = (void *)buf;
-          result_buf->s_aliases[0] = (char *)g_services_db[i].s_name;
-          result_buf->s_aliases[1] = NULL;
-          result_buf->s_port = HTONS(g_services_db[i].s_port);
+          result_buf->s_name = (FAR char *)g_services_db[i].s_name;
+          result_buf->s_aliases = NULL;
+          result_buf->s_port = htons(port);
 
           if (g_services_db[i].s_protocol == IPPROTO_TCP)
             {
