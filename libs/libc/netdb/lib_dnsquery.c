@@ -429,12 +429,12 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
   hdr         = (FAR struct dns_header_s *)buffer;
   endofbuffer = (FAR uint8_t*)buffer + ret;
 
-  ninfo("ID %d\n", htons(hdr->id));
+  ninfo("ID %d\n", ntohs(hdr->id));
   ninfo("Query %d\n", hdr->flags1 & DNS_FLAG1_RESPONSE);
   ninfo("Error %d\n", hdr->flags2 & DNS_FLAG2_ERR_MASK);
   ninfo("Num questions %d, answers %d, authrr %d, extrarr %d\n",
-        htons(hdr->numquestions), htons(hdr->numanswers),
-        htons(hdr->numauthrr), htons(hdr->numextrarr));
+        ntohs(hdr->numquestions), ntohs(hdr->numanswers),
+        ntohs(hdr->numauthrr), ntohs(hdr->numextrarr));
 
   /* Check for error */
 
@@ -449,7 +449,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
   if (hdr->id != qinfo->id)
     {
       nerr("ERROR: DNS wrong response ID (expected %d, got %d)\n",
-           htons(qinfo->id), htons(hdr->id));
+           ntohs(qinfo->id), ntohs(hdr->id));
       return -EBADMSG;
     }
 
@@ -457,8 +457,8 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
    * and the extrarr are simply discarded.
    */
 
-  nquestions = htons(hdr->numquestions);
-  nanswers   = htons(hdr->numanswers);
+  nquestions = ntohs(hdr->numquestions);
+  nanswers   = ntohs(hdr->numanswers);
 
   /* We only ever send queries with one question. */
 
@@ -524,7 +524,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
 
   que = (FAR struct dns_question_s *)nameptr;
   ninfo("Question: type=%04x, class=%04x\n",
-        htons(que->type), htons(que->class));
+        ntohs(que->type), ntohs(que->class));
 
   if (que->type  != qinfo->rectype ||
       que->class != HTONS(DNS_CLASS_IN))
@@ -554,9 +554,9 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
       ans = (FAR struct dns_answer_s *)nameptr;
 
       ninfo("Answer: type=%04x, class=%04x, ttl=%06x, length=%04x \n",
-            htons(ans->type), htons(ans->class),
-            (htons(ans->ttl[0]) << 16) | htons(ans->ttl[1]),
-            htons(ans->len));
+            ntohs(ans->type), ntohs(ans->class),
+            (ntohs(ans->ttl[0]) << 16) | ntohs(ans->ttl[1]),
+            ntohs(ans->len));
 
       /* Check for IPv4/6 address type and Internet class. Others are
        * discarded.
@@ -608,10 +608,10 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
           nameptr += 10 + 16;
 
           ninfo("IPv6 address: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-                htons(ans->u.ipv6.s6_addr[7]),  htons(ans->u.ipv6.s6_addr[6]),
-                htons(ans->u.ipv6.s6_addr[5]),  htons(ans->u.ipv6.s6_addr[4]),
-                htons(ans->u.ipv6.s6_addr[3]),  htons(ans->u.ipv6.s6_addr[2]),
-                htons(ans->u.ipv6.s6_addr[1]),  htons(ans->u.ipv6.s6_addr[0]));
+                ntohs(ans->u.ipv6.s6_addr[7]), ntohs(ans->u.ipv6.s6_addr[6]),
+                ntohs(ans->u.ipv6.s6_addr[5]), ntohs(ans->u.ipv6.s6_addr[4]),
+                ntohs(ans->u.ipv6.s6_addr[3]), ntohs(ans->u.ipv6.s6_addr[2]),
+                ntohs(ans->u.ipv6.s6_addr[1]), ntohs(ans->u.ipv6.s6_addr[0]));
 
           if (naddr_read < *naddr)
             {
@@ -637,7 +637,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
       else
 #endif
         {
-          nameptr = nameptr + 10 + htons(ans->len);
+          nameptr = nameptr + 10 + ntohs(ans->len);
         }
     }
 
