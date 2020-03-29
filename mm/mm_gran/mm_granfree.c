@@ -67,14 +67,17 @@ void gran_free(GRAN_HANDLE handle, FAR void *memory, size_t size)
 
   /* Get exclusive access to the GAT */
 
-  ret = gran_enter_critical(priv);
-  if (ret < 0)
+  do
     {
-      /* Should happen only on task cancellation */
+      ret = gran_enter_critical(priv);
 
-      DEBUGASSERT(ret == -ECANCELED);
-      return;
+      /* The only error Should happen on task cancellation.  We must
+       * try again in this case to avoid stranding the granule memory.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
+  while (ret < 0);
 
   /* Determine the granule number of the first granule in the allocation */
 
