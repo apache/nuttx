@@ -623,6 +623,13 @@ module
   This has apps/examples/module and apps/examples/sotest enabled.
   This configuration is intended for 64-bit host OS.
 
+module32
+
+  This is a configuration to test CONFIG_LIBC_MODLIB with CONFIG_SIM_M32
+  and 32-bit modules.
+  This has apps/examples/module and apps/examples/sotest enabled.
+  This configuration is intended for 64-bit host OS.
+
 mount
 
   Configures to use apps/examples/mount.
