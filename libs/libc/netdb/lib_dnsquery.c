@@ -96,16 +96,6 @@ struct dns_query_s
 
 struct dns_query_info_s
 {
-  union
-  {
-#ifdef CONFIG_NET_IPv4
-    struct in_addr srv_ipv4;                     /* DNS server address */
-#endif
-#ifdef CONFIG_NET_IPv6
-    struct in6_addr srv_ipv6;                    /* DNS server address */
-#endif
-  } u;
-  in_port_t srv_port;                              /* DNS server port */
   uint16_t id;                                     /* Query ID */
   uint16_t rectype;                                /* Queried record type */
   uint16_t qnamelen;                               /* Queried hostname length */
@@ -254,7 +244,7 @@ static int dns_send_query(int sd, FAR const char *name,
       len++;
 
       for (n = 0;
-           *src != '.' && *src != 0 &&
+           *src != '.' && *src != '\0' &&
            len <= CONFIG_NETDB_DNSCLIENT_NAMESIZE;
            src++)
         {
@@ -294,35 +284,27 @@ static int dns_send_query(int sd, FAR const char *name,
 
   /* Send the request */
 
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  if (uaddr->ipv4.sin_family == AF_INET)
-#endif
+  if (uaddr->addr.sa_family == AF_INET)
     {
-      addrlen           = sizeof(struct sockaddr_in);
-      qinfo->u.srv_ipv4 = uaddr->ipv4.sin_addr;
-      qinfo->srv_port   = uaddr->ipv4.sin_port;
+      addrlen = sizeof(struct sockaddr_in);
     }
-#endif
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
   else
-#endif
     {
-      addrlen           = sizeof(struct sockaddr_in6);
-      qinfo->u.srv_ipv6 = uaddr->ipv6.sin6_addr;
-      qinfo->srv_port   = uaddr->ipv6.sin6_port;
+      addrlen = sizeof(struct sockaddr_in6);
     }
-#endif
 
-  ret = sendto(sd, buffer, dest - buffer, 0, &uaddr->addr, addrlen);
-
-  /* Return the negated errno value on sendto failure */
-
+  ret = connect(sd, &uaddr->addr, addrlen);
   if (ret < 0)
     {
       ret = -errno;
+      nerr("ERROR: connect failed: %d\n", ret);
+      return ret;
+    }
+
+  ret = _NX_SEND(sd, buffer, dest - buffer, 0);
+  if (ret < 0)
+    {
+      ret = -_NX_GETERRNO(ret);
       nerr("ERROR: sendto failed: %d\n", ret);
       return ret;
     }
@@ -354,70 +336,18 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
   FAR struct dns_question_s *que;
   uint16_t nquestions;
   uint16_t nanswers;
-  union dns_addr_u recvaddr;
-  socklen_t raddrlen;
   int naddr_read;
   int ret;
 
   /* Receive the response */
 
-  raddrlen = sizeof(recvaddr.addr);
-  ret      = _NX_RECVFROM(sd, buffer, RECV_BUFFER_SIZE, 0,
-                          &recvaddr.addr, &raddrlen);
+  ret = _NX_RECV(sd, buffer, RECV_BUFFER_SIZE, 0);
   if (ret < 0)
     {
       ret = -_NX_GETERRNO(ret);
       nerr("ERROR: recv failed: %d\n", ret);
       return ret;
     }
-
-#ifdef CONFIG_NET_IPv4
-  /* Check for an IPv4 address */
-
-  if (recvaddr.addr.sa_family == AF_INET)
-    {
-      if (memcmp(&recvaddr.ipv4.sin_addr, &qinfo->u.srv_ipv4,
-                 sizeof(recvaddr.ipv4.sin_addr)) != 0)
-        {
-          /* Not response from DNS server. */
-
-          nerr("ERROR: DNS packet from wrong address\n");
-          return -EBADMSG;
-        }
-
-      if (recvaddr.ipv4.sin_port != qinfo->srv_port)
-        {
-          /* Not response from DNS server. */
-
-          nerr("ERROR: DNS packet from wrong port\n");
-          return -EBADMSG;
-        }
-    }
-#endif
-
-#ifdef CONFIG_NET_IPv6
-  /* Check for an IPv6 address */
-
-  if (recvaddr.addr.sa_family == AF_INET6)
-    {
-      if (memcmp(&recvaddr.ipv6.sin6_addr, &qinfo->u.srv_ipv6,
-                 sizeof(recvaddr.ipv6.sin6_addr)) != 0)
-        {
-          /* Not response from DNS server. */
-
-          nerr("ERROR: DNS packet from wrong address\n");
-          return -EBADMSG;
-        }
-
-      if (recvaddr.ipv6.sin6_port != qinfo->srv_port)
-        {
-          /* Not response from DNS server. */
-
-          nerr("ERROR: DNS packet from wrong port\n");
-          return -EBADMSG;
-        }
-    }
-#endif
 
   if (ret < sizeof(*hdr))
     {
