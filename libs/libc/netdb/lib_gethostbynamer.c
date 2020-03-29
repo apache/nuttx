@@ -71,34 +71,6 @@ struct hostent_info_s
 };
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* In the FLAT build, there is a single copy of this global variable that
- * can be accessed from application or OS code.  In the protected and
- * kernel build modes, however, there must be separate copies of OS and
- * users spaces.
- */
-
-#if !defined(CONFIG_BUILD_FLAT) && !defined(__KERNEL__)
-/* Local loopback addresses for user mode */
-
-#ifdef CONFIG_NET_IPv4
-
-const in_addr_t g_lo_ipv4addr = HTONL(0x7f000001);
-
-#else /* CONFIG_NET_IPv6 */
-
-const net_ipv6addr_t g_lo_ipv6addr =
-{
-  HTONS(0), HTONS(0), HTONS(0), HTONS(0),
-  HTONS(0), HTONS(0), HTONS(0), HTONS(1)
-};
-
-#endif
-#endif /* !CONFIG_BUILD_FLAT && !__KERNEL__ */
-
-/****************************************************************************
  * Private functions
  ****************************************************************************/
 
@@ -269,7 +241,7 @@ static int lib_localhost(FAR const char *name, FAR struct hostent *host,
   FAR char *dest;
   int namelen;
 
-  if (strcmp(name, "localhost") == 0)
+  if (strcmp(name, g_lo_hostname) == 0)
     {
       /* Yes.. it is the localhost */
 
