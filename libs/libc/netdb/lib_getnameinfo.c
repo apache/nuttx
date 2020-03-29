@@ -95,12 +95,6 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
 
   if (!(flags & NI_NUMERICHOST))
     {
-#ifndef CONFIG_NETDB_HOSTFILE
-      /* Fall-back to numeric for the host name. */
-
-      flags |= NI_NUMERICHOST;
-      UNUSED(saddr_len);
-#else
       struct hostent hostent;
       int h_errno;
 
@@ -161,7 +155,6 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
 
           flags |= NI_NUMERICHOST;
         }
-#endif /* CONFIG_NETDB_HOSTFILE */
     }
 
   if (flags & NI_NUMERICHOST)
@@ -184,8 +177,8 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
       struct servent servent;
       struct servent *result;
 
-      ret = getservbyport_r(port, flags & NI_DGRAM ? "udp" : NULL, &servent,
-                            serv, servlen, &result);
+      ret = getservbyport_r(port, flags & NI_DGRAM ? "udp" : "tcp",
+                            &servent, serv, servlen, &result);
 
       if (ret == OK)
         {

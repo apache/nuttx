@@ -51,7 +51,7 @@
 #include "libc.h"
 #include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_NETDB_HOSTFILE
+#ifdef CONFIG_LIBC_NETDB
 
 /****************************************************************************
  * Private Type Definitions
@@ -86,7 +86,7 @@ struct hostent_info_s
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_LOOPBACK
+#if defined(CONFIG_NET_LOOPBACK) && defined(CONFIG_NET_IPv4)
 static bool lib_lo_ipv4match(FAR const void *addr, socklen_t len, int type)
 {
   FAR struct in_addr *ipv4addr;
@@ -96,7 +96,7 @@ static bool lib_lo_ipv4match(FAR const void *addr, socklen_t len, int type)
       ipv4addr = (FAR struct in_addr *)addr;
       return net_ipv4addr_maskcmp(ipv4addr->s_addr,
                                   g_lo_ipv4addr,
-                                  g_lo_ipv4addr);
+                                  g_lo_ipv4mask);
     }
 
   return false;
@@ -120,15 +120,17 @@ static bool lib_lo_ipv4match(FAR const void *addr, socklen_t len, int type)
  *
  ****************************************************************************/
 
-#if (defined CONFIG_NET_LOOPBACK) && defined (CONFIG_NET_IPv6)
+#if defined(CONFIG_NET_LOOPBACK) && defined(CONFIG_NET_IPv6)
 static bool lib_lo_ipv6match(FAR const void *addr, socklen_t len, int type)
 {
-  FAR struct in_addr6 *ipv6addr;
+  FAR struct in6_addr *ipv6addr;
 
-  if (type == AF_INET6 && len >= sizeof(struct in_addr6))
+  if (type == AF_INET6 && len >= sizeof(struct in6_addr))
     {
-      ipv6addr = (FAR struct in_addr6 *)addr;
-      return net_ipv6addr_cmp(ipv6addr->sin6_addr.s6_addr16, g_lo_ipv6addr);
+      ipv6addr = (FAR struct in6_addr *)addr;
+      return net_ipv6addr_maskcmp(ipv6addr->s6_addr16,
+                                  g_lo_ipv6addr,
+                                  g_lo_ipv6mask);
     }
 
   return false;
@@ -150,30 +152,26 @@ static bool lib_lo_ipv6match(FAR const void *addr, socklen_t len, int type)
  *   buf - Caller provided buffer to hold string data associated with the
  *     host data.
  *   buflen - The size of the caller-provided buffer
- *   h_errnop - There h_errno value returned in the event of a failure.
  *
  * Returned Value:
- *   Zero (OK) is returned on success, -1 (ERROR) is returned on a failure
- *   with the returned h_errno value provided the reason for the failure.
+ *   Zero (OK) is returned on success, -1 (ERROR) is returned on a failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_NET_LOOPBACK
 static int lib_localhost(FAR const void *addr, socklen_t len, int type,
                          FAR struct hostent *host, FAR char *buf,
-                         size_t buflen, int *h_errnop)
+                         size_t buflen)
 {
   FAR struct hostent_info_s *info;
   socklen_t addrlen;
   FAR const uint8_t *src;
   FAR char *dest;
-  bool match;
-  int herrnocode;
   int namelen;
 
   memset(host, 0, sizeof(struct hostent));
-  memset(buf, 0, buflen);
 
+#ifdef CONFIG_NET_IPv4
   if (lib_lo_ipv4match(addr, len, type))
     {
       /* Setup to transfer the IPv4 address */
@@ -181,24 +179,27 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
       addrlen          = sizeof(struct in_addr);
       src              = (FAR uint8_t *)&g_lo_ipv4addr;
       host->h_addrtype = AF_INET;
+      goto out_copy;
     }
+#endif
+
 #ifdef CONFIG_NET_IPv6
-  else if (lib_lo_ipv6match(addr, len, type))
+  if (lib_lo_ipv6match(addr, len, type))
     {
       /* Setup to transfer the IPv6 address */
 
       addrlen          = sizeof(struct in6_addr);
       src              = (FAR uint8_t *)&g_lo_ipv6addr;
       host->h_addrtype = AF_INET6;
+      goto out_copy;
     }
 #endif
-  else
-    {
-      /* Return 1 meaning that we have no errors but no match either */
 
-      return 1;
-    }
+  /* Return 1 meaning that we have no errors but no match either */
 
+  return 1;
+
+out_copy:
   /* Make sure that space remains to hold the hostent structure and
    * the IP address.
    */
@@ -212,6 +213,7 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
   dest             = info->hi_data;
   buflen          -= (sizeof(struct hostent_info_s) - 1);
 
+  memset(info, 0, sizeof(struct hostent_info_s));
   memcpy(dest, src, addrlen);
 
   info->hi_addrlist[0] = dest;
@@ -224,24 +226,15 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
   /* And copy localhost host name */
 
   namelen = strlen(g_lo_hostname);
-  if (addrlen + namelen + 1 > buflen)
+  if (namelen + 1 > buflen)
     {
-      herrnocode = ERANGE;
-      goto errorout_with_herrnocode;
+      return -ERANGE;
     }
 
   strncpy(dest, g_lo_hostname, buflen);
   host->h_name = dest;
 
   return 0;
-
-errorout_with_herrnocode:
-  if (h_errnop)
-    {
-      *h_errnop = herrnocode;
-    }
-
-  return ERROR;
 }
 #endif
 
@@ -267,6 +260,7 @@ errorout_with_herrnocode:
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NETDB_HOSTFILE
 int lib_hostfile_lookup(FAR const void *addr, socklen_t len, int type,
                         FAR struct hostent *host, FAR char *buf,
                         size_t buflen, int *h_errnop)
@@ -356,6 +350,7 @@ errorout_with_herrnocode:
 
   return ERROR;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -407,7 +402,7 @@ int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
 #ifdef CONFIG_NET_LOOPBACK
   /* Check for the local loopback address */
 
-  if (lib_localhost(addr, len, type, host, buf, buflen, h_errnop) == 0)
+  if (lib_localhost(addr, len, type, host, buf, buflen) == 0)
     {
       /* Yes.. we are done */
 
@@ -424,9 +419,23 @@ int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
    * 3. Search the hosts file for a match.
    */
 
+#ifdef CONFIG_NETDB_HOSTFILE
   /* Search the hosts file for a match */
 
   return lib_hostfile_lookup(addr, len, type, host, buf, buflen, h_errnop);
+
+#else
+  /* The host file file is not supported.  The host address mapping was not
+   * found from any lookup heuristic
+   */
+
+  if (h_errnop)
+    {
+      *h_errnop = HOST_NOT_FOUND;
+    }
+
+  return ERROR;
+#endif
 }
 
-#endif /* CONFIG_NETDB_HOSTFILE */
+#endif /* CONFIG_LIBC_NETDB */
