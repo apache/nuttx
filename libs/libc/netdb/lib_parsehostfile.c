@@ -193,6 +193,13 @@ static ssize_t lib_copystring(FAR FILE *stream, FAR char *ptr,
 
   for (; ; )
     {
+      /* There there space to buffer one more character? */
+
+      if (nwritten >= buflen)
+        {
+          return -ERANGE;
+        }
+
       /* Read the next character from the file */
 
       ch = fgetc(stream);
@@ -215,20 +222,13 @@ static ssize_t lib_copystring(FAR FILE *stream, FAR char *ptr,
 
           /* Return EOF if nothing has written */
 
-          return nwritten == 0 ? 0 : nwritten + 1;
+          return nwritten + 1;
         }
 
       /* Write the next string to the buffer */
 
       *ptr++ = ch;
       nwritten++;
-
-      /* There there space to buffer one more character? */
-
-      if (nwritten >= buflen)
-        {
-          return -ERANGE;
-        }
     }
 }
 
@@ -322,7 +322,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
   addrstring[0] = ch;
 
   nwritten = lib_copystring(stream, &addrstring[1], &nread, 47, &ch);
-  if (nwritten <= 0)
+  if (nwritten < 0)
     {
       return nwritten;
     }
@@ -331,7 +331,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
     {
       /* The string was terminated with a newline of EOF */
 
-      return -EAGAIN;
+      return ch == EOF ? -EPIPE : -EAGAIN;
     }
 
   /* If the address contains a colon, say it is IPv6 */
@@ -347,7 +347,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
         }
 
       ret = inet_pton(AF_INET6, addrstring, ptr);
-      if (ret < 0)
+      if (ret <= 0)
         {
           /* Conversion failed.  Entry is corrupted */
 
@@ -355,7 +355,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
           return -EAGAIN;
         }
 
-      host->h_addrtype  = AF_INET6;
+      host->h_addrtype = AF_INET6;
     }
   else
     {
@@ -368,7 +368,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
         }
 
       ret = inet_pton(AF_INET, addrstring, ptr);
-      if (ret < 0)
+      if (ret <= 0)
         {
           /* Conversion failed.  Entry is corrupted */
 
@@ -376,7 +376,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
           return -EAGAIN;
         }
 
-      host->h_addrtype  = AF_INET;
+      host->h_addrtype = AF_INET;
     }
 
   info->hi_addrlist[0] = ptr;
@@ -397,6 +397,10 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
     {
       return -EAGAIN;
     }
+  else if (buflen == 0)
+    {
+      return -ERANGE;
+    }
 
   /* Parse the host name */
 
@@ -405,7 +409,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
   buflen--;
 
   nwritten = lib_copystring(stream, ptr, &nread, buflen, &ch);
-  if (nwritten <= 0)
+  if (nwritten < 0)
     {
       return nwritten;
     }
@@ -424,7 +428,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
 
   /* Parse any host name aliases */
 
-  for (i = 0; i < CONFIG_NETDB_MAX_ALTNAMES; i++)
+  for (i = 0; ; i++)
     {
       /* Skip over any leading whitespace */
 
@@ -434,6 +438,10 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
           /* No further aliases on the line */
 
           return nread;
+        }
+      else if (buflen == 0 || i >= CONFIG_NETDB_MAX_ALTNAMES)
+        {
+          return -ERANGE;
         }
 
       /* Parse the next alias */
@@ -446,10 +454,6 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
       if (nwritten < 0)
         {
           return nwritten;
-        }
-      else if (nwritten == 0)
-        {
-          return nread;
         }
 
        /* Save the pointer to the beginning of the next alias */
@@ -470,14 +474,6 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
       ptr += nwritten;
       buflen -= nwritten;
     }
-
-  /* We get here only if there are more than CONFIG_NETDB_MAX_ALTNAMES
-   * aliases on the line.  Skip to the endof the line, ignoring any
-   * additional aliases.
-   */
-
-  lib_skipline(stream, &nread);
-  return nread;
 }
 
 #endif /* CONFIG_NETDB_HOSTFILE */
