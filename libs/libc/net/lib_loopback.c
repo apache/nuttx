@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/route/route.h
+ * libs/libc/net/lib_loopback.c
  *
- *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,45 +33,48 @@
  *
  ****************************************************************************/
 
-#ifndef __NET_LOOPBACK_LOOBACK_H
-#define __NET_LOOPBACK_LOOBACK_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <nuttx/net/loopback.h>
+
 #ifdef CONFIG_NET_LOOPBACK
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+#ifdef CONFIG_LIBC_NETDB
+/* Local loopback hostname */
+
+const char           g_lo_hostname[] = "localhost";
+#endif
+
+/* Local loopback addresses */
+
+#ifdef CONFIG_NET_IPv4
+const in_addr_t      g_lo_ipv4addr   = HTONL(0x7f000001);
+const in_addr_t      g_lo_ipv4mask   = HTONL(0xff000000);
+#endif
+
+#ifdef CONFIG_NET_IPv6
+const net_ipv6addr_t g_lo_ipv6addr   =
 {
-#else
-#define EXTERN extern
+  HTONS(0), HTONS(0), HTONS(0), HTONS(0),
+  HTONS(0), HTONS(0), HTONS(0), HTONS(1)
+};
+const net_ipv6addr_t g_lo_ipv6mask   =
+{
+  HTONS(0xffff), HTONS(0xffff), HTONS(0xffff), HTONS(0xffff),
+  HTONS(0xffff), HTONS(0xffff), HTONS(0xffff), HTONS(0xffff)
+};
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* CONFIG_NET_LOOPBACK */
-#endif /* __NET_LOOPBACK_LOOBACK_H */

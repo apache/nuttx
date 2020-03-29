@@ -43,6 +43,10 @@ ifeq ($(CONFIG_NET),y)
 CSRCS += lib_recvmsg.c lib_sendmsg.c lib_shutdown.c
 endif
 
+ifeq ($(CONFIG_NET_LOOPBACK),y)
+CSRCS += lib_loopback.c
+endif
+
 # Routing table support
 
 ifeq ($(CONFIG_NET_ROUTE),y)
