@@ -291,9 +291,9 @@ static uint8_t usrsockdev_get_xid(FAR struct usrsock_conn_s *conn)
  *
  ****************************************************************************/
 
-static void usrsockdev_semtake(FAR sem_t *sem)
+static int usrsockdev_semtake(FAR sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
 }
 
 static void usrsockdev_semgive(FAR sem_t *sem)
@@ -349,6 +349,7 @@ static ssize_t usrsockdev_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode        *inode = filep->f_inode;
   FAR struct usrsockdev_s *dev;
+  int                      ret;
 
   if (len == 0)
     {
@@ -366,7 +367,12 @@ static ssize_t usrsockdev_read(FAR struct file *filep, FAR char *buffer,
 
   DEBUGASSERT(dev);
 
-  usrsockdev_semtake(&dev->devsem);
+  ret = usrsockdev_semtake(&dev->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   net_lock();
 
   /* Is request available? */
@@ -406,11 +412,13 @@ static ssize_t usrsockdev_read(FAR struct file *filep, FAR char *buffer,
  * Name: usrsockdev_seek
  ****************************************************************************/
 
-static off_t usrsockdev_seek(FAR struct file *filep, off_t offset, int whence)
+static off_t usrsockdev_seek(FAR struct file *filep, off_t offset,
+                             int whence)
 {
   FAR struct inode        *inode = filep->f_inode;
   FAR struct usrsockdev_s *dev;
   off_t pos;
+  int ret;
 
   if (whence != SEEK_CUR && whence != SEEK_SET)
     {
@@ -423,7 +431,12 @@ static off_t usrsockdev_seek(FAR struct file *filep, off_t offset, int whence)
 
   DEBUGASSERT(dev);
 
-  usrsockdev_semtake(&dev->devsem);
+  ret = usrsockdev_semtake(&dev->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   net_lock();
 
   /* Is request available? */
@@ -509,7 +522,8 @@ static ssize_t usrsockdev_handle_event(FAR struct usrsockdev_s *dev,
 
         /* Handle event. */
 
-        ret = usrsock_event(conn, hdr->events & ~USRSOCK_EVENT_INTERNAL_MASK);
+        ret = usrsock_event(conn,
+                            hdr->events & ~USRSOCK_EVENT_INTERNAL_MASK);
         if (ret < 0)
           {
             return ret;
@@ -839,7 +853,11 @@ static ssize_t usrsockdev_write(FAR struct file *filep,
 
   DEBUGASSERT(dev);
 
-  usrsockdev_semtake(&dev->devsem);
+  ret = (ssize_t)usrsockdev_semtake(&dev->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   if (!dev->datain_conn)
     {
@@ -926,7 +944,11 @@ static int usrsockdev_open(FAR struct file *filep)
 
   DEBUGASSERT(dev);
 
-  usrsockdev_semtake(&dev->devsem);
+  ret = usrsockdev_semtake(&dev->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   ninfo("opening /dev/usrsock\n");
 
@@ -969,7 +991,11 @@ static int usrsockdev_close(FAR struct file *filep)
 
   DEBUGASSERT(dev);
 
-  usrsockdev_semtake(&dev->devsem);
+  ret = usrsockdev_semtake(&dev->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   ninfo("closing /dev/usrsock\n");
 
@@ -1053,7 +1079,7 @@ static int usrsockdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct inode *inode = filep->f_inode;
   FAR struct usrsockdev_s *dev;
   pollevent_t eventset;
-  int ret = OK;
+  int ret;
   int i;
 
   DEBUGASSERT(inode);
@@ -1071,7 +1097,12 @@ static int usrsockdev_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  usrsockdev_semtake(&dev->devsem);
+  ret = usrsockdev_semtake(&dev->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   net_lock();
   if (setup)
     {

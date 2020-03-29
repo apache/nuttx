@@ -12,29 +12,31 @@
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
@@ -164,7 +166,8 @@ static void bt_enqueue_bufwork(FAR struct bt_bufferlist_s *list,
  *
  ****************************************************************************/
 
-static FAR struct bt_buf_s *bt_dequeue_bufwork(FAR struct bt_bufferlist_s *list)
+static FAR struct bt_buf_s *
+  bt_dequeue_bufwork(FAR struct bt_bufferlist_s *list)
 {
   FAR struct bt_buf_s *buf;
   irqstate_t flags;
@@ -248,7 +251,8 @@ static void hci_acl(FAR struct bt_buf_s *buf)
 
   if (buf->len != len)
     {
-      wlerr("ERROR:  ACL data length mismatch (%u != %u)\n", buf->len, len);
+      wlerr("ERROR:  ACL data length mismatch (%u != %u)\n",
+             buf->len, len);
       bt_buf_release(buf);
       return;
     }
@@ -256,7 +260,8 @@ static void hci_acl(FAR struct bt_buf_s *buf)
   conn = bt_conn_lookup_handle(buf->u.acl.handle);
   if (!conn)
     {
-      wlerr("ERROR:  Unable to find conn for handle %u\n", buf->u.acl.handle);
+      wlerr("ERROR:  Unable to find conn for handle %u\n",
+            buf->u.acl.handle);
       bt_buf_release(buf);
       return;
     }
@@ -362,8 +367,8 @@ static void hci_cmd_complete(FAR struct bt_buf_s *buf)
 
   bt_buf_consume(buf, sizeof(*evt));
 
-  /* All command return parameters have a 1-byte status in the beginning, so we
-   * can safely make this generalization.
+  /* All command return parameters have a 1-byte status in the beginning, so
+   * we can safely make this generalization.
    */
 
   status = buf->data;
@@ -445,7 +450,8 @@ static void hci_num_completed_packets(FAR struct bt_buf_s *buf)
 
 static void hci_encrypt_key_refresh_complete(FAR struct bt_buf_s *buf)
 {
-  FAR struct bt_hci_evt_encrypt_key_refresh_complete_s *evt = (FAR void *)buf->data;
+  FAR struct bt_hci_evt_encrypt_key_refresh_complete_s *evt =
+    (FAR void *)buf->data;
   FAR struct bt_conn_s *conn;
   uint16_t handle;
 
@@ -512,8 +518,8 @@ static int bt_hci_start_scanning(uint8_t scan_type, uint8_t scan_filter)
   memset(set_param, 0, sizeof(*set_param));
   set_param->scan_type = scan_type;
 
-  /* for the rest parameters apply default values according to spec 4.2, vol2,
-   * part E, 7.8.10
+  /* for the rest parameters apply default values according to spec 4.2,
+   * vol2, part E, 7.8.10
    */
 
   set_param->interval      = BT_HOST2LE16(0x0010);
@@ -522,7 +528,8 @@ static int bt_hci_start_scanning(uint8_t scan_type, uint8_t scan_filter)
   set_param->addr_type     = 0x00;
 
   bt_hci_cmd_send(BT_HCI_OP_LE_SET_SCAN_PARAMS, buf);
-  buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_SCAN_ENABLE, sizeof(*scan_enable));
+  buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_SCAN_ENABLE,
+                          sizeof(*scan_enable));
   if (buf == NULL)
     {
       wlerr("ERROR:  Failed to create buffer\n");
@@ -628,7 +635,8 @@ static void hci_disconn_complete(FAR struct bt_buf_s *buf)
   uint16_t handle = BT_LE162HOST(evt->handle);
   FAR struct bt_conn_s *conn;
 
-  wlinfo("status %u handle %u reason %u\n", evt->status, handle, evt->reason);
+  wlinfo("status %u handle %u reason %u\n",
+         evt->status, handle, evt->reason);
 
   if (evt->status)
     {
@@ -700,8 +708,8 @@ static void le_conn_complete(FAR struct bt_buf_s *buf)
 
       bt_conn_set_state(conn, BT_CONN_DISCONNECTED);
 
-      /* Drop the reference got by lookup call in CONNECT state. We are now in
-       * DISCONNECTED state since no successful LE link been made.
+      /* Drop the reference got by lookup call in CONNECT state. We are now
+       * in the DISCONNECTED state since no successful LE link been made.
        */
 
       bt_conn_release(conn);
@@ -824,7 +832,8 @@ static void le_adv_report(FAR struct bt_buf_s *buf)
        * according to spec 4.2, Vol 2, Part E, 7.7.65.2.
        */
 
-      info = bt_buf_consume(buf, sizeof(*info) + info->length + sizeof(rssi));
+      info = bt_buf_consume(buf,
+                            sizeof(*info) + info->length + sizeof(rssi));
     }
 }
 
@@ -977,7 +986,12 @@ static int hci_tx_kthread(int argc, FAR char *argv[])
 
       /* Wait until ncmd > 0 */
 
-      nxsem_wait_uninterruptible(&g_btdev.ncmd_sem);
+      ret = nxsem_wait_uninterruptible(&g_btdev.ncmd_sem);
+      if (ret < 0)
+        {
+          wlerr("nxsem_wait_uninterruptible() failed: %d\n", ret);
+          return EXIT_FAILURE;
+        }
 
       /* Get next command - wait if necessary */
 
@@ -1525,7 +1539,8 @@ void bt_driver_unregister(FAR const struct bt_driver_s *btdev)
  * Description:
  *   Called by the Bluetooth low-level driver when new data is received from
  *   the radio.  This may be called from the low-level driver and is part of
- *   the driver interface prototyped in include/nuttx/wireless/bluetooth/bt_driver.h
+ *   the driver interface prototyped in
+ *   include/nuttx/wireless/bluetooth/bt_driver.h
  *
  *   NOTE:  This function will defer all real work to the low or to the high
  *   priority work queues.  Therefore, this function may safely be called
