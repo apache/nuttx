@@ -118,10 +118,10 @@ int dns_unregister_notify(dns_callback_t callback, FAR void *arg)
 
       if (notify->callback == callback && notify->arg == arg)
         {
-           dq_rem(&notify->entry, &g_dns_notify);
-           dns_semgive();
-           lib_free(notify);
-           return OK;
+          dq_rem(&notify->entry, &g_dns_notify);
+          dns_semgive();
+          lib_free(notify);
+          return OK;
         }
     }
 
@@ -133,7 +133,8 @@ int dns_unregister_notify(dns_callback_t callback, FAR void *arg)
  * Name: dns_notify_nameserver
  ****************************************************************************/
 
-void dns_notify_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
+void dns_notify_nameserver(FAR const struct sockaddr *addr,
+                           socklen_t addrlen)
 {
   FAR dq_entry_t *entry;
 

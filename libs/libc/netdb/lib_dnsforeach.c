@@ -230,6 +230,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 #ifdef CONFIG_NET_IPv6
             }
 #endif
+
           if (ret != OK)
             {
               fclose(stream);

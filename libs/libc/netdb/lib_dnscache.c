@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/netdb/lib_dnscache.c
  *
- *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +80,7 @@ struct dns_cache_s
 #endif
   char              name[CONFIG_NETDB_DNSCLIENT_NAMESIZE];
   uint8_t           naddr;      /* How many addresses per name */
-  union dns_addr_u  addr[CONFIG_NETDB_MAX_IPADDR]; /* Resolved address */
+  union dns_addr_u  addr[CONFIG_NETDB_MAX_IPADDR];
 };
 
 /****************************************************************************
@@ -255,13 +256,14 @@ int dns_find_answer(FAR const char *hostname, FAR union dns_addr_u *addr,
       else
 #endif
         {
-          /* The entry has not expired, check for a name match.  Notice that
-           * because the names are truncated to CONFIG_NETDB_DNSCLIENT_NAMESIZE,
+          /* The entry has not expired, check for a name match. Because
+           * the names are truncated to CONFIG_NETDB_DNSCLIENT_NAMESIZE,
            * this has the possibility of aliasing two names and returning
            * the wrong entry from the cache.
            */
 
-          if (strncmp(hostname, entry->name, CONFIG_NETDB_DNSCLIENT_NAMESIZE) == 0)
+          if (strncmp(hostname, entry->name,
+                      CONFIG_NETDB_DNSCLIENT_NAMESIZE) == 0)
             {
               /* We have a match.  Return the resolved host address */
 

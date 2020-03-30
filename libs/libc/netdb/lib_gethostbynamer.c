@@ -94,7 +94,8 @@ struct hostent_info_s
  *
  ****************************************************************************/
 
-static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
+static int lib_numeric_address(FAR const char *name,
+                               FAR struct hostent *host,
                                FAR char *buf, size_t buflen)
 {
   FAR struct hostent_info_s *info;
@@ -108,9 +109,9 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
    */
 
   if (buflen <= sizeof(struct hostent_info_s))
-   {
-     return -ERANGE;
-   }
+    {
+      return -ERANGE;
+    }
 
   info    = (FAR struct hostent_info_s *)buf;
   ptr     = info->hi_data;
@@ -341,9 +342,9 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
    */
 
   if (buflen <= sizeof(struct hostent_info_s))
-   {
-     return -ERANGE;
-   }
+    {
+      return -ERANGE;
+    }
 
   /* Initialize buffers */
 
@@ -503,9 +504,9 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
    */
 
   if (buflen <= sizeof(struct hostent_info_s))
-   {
-     return -ERANGE;
-   }
+    {
+      return -ERANGE;
+    }
 
   /* Initialize buffers */
 
@@ -609,8 +610,10 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
  ****************************************************************************/
 
 #ifdef CONFIG_NETDB_HOSTFILE
-static int lib_hostfile_lookup(FAR const char *name, FAR struct hostent *host,
-                               FAR char *buf, size_t buflen, int *h_errnop)
+static int lib_hostfile_lookup(FAR const char *name,
+                               FAR struct hostent *host,
+                               FAR char *buf, size_t buflen,
+                               FAR int *h_errnop)
 {
   FAR FILE *stream;
   int herrnocode;
@@ -734,8 +737,8 @@ errorout_with_herrnocode:
  *   and its struct in_addr equivalent into the h_addr_list[0] field of the
  *   returned hostent structure.
  *
- *   gethostname_r() is *not* POSIX but is similar to a Glibc extension and is
- *   used internally by NuttX to implement the POSIX gethostname().
+ *   gethostname_r() is *not* POSIX but is similar to a Glibc extension and
+ *   is used internally by NuttX to implement the POSIX gethostname().
  *
  * Input Parameters:
  *   name - The name of the host to find.
@@ -784,7 +787,6 @@ int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
 #endif
 
   /* Try to find the name in the HOSTALIASES environment variable */
-  /* REVISIT: Not implemented */
 
 #ifdef CONFIG_NETDB_DNSCLIENT
 #if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0

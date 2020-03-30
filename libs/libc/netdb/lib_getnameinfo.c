@@ -100,8 +100,8 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
       struct hostent hostent;
       int h_errno;
 
-      ret = gethostbyaddr_r(saddr, saddr_len, addr->sa_family, &hostent, host,
-                            hostlen, &h_errno);
+      ret = gethostbyaddr_r(saddr, saddr_len, addr->sa_family, &hostent,
+                            host, hostlen, &h_errno);
 
       if (ret == OK)
         {

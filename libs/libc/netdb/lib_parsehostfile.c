@@ -281,9 +281,9 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
    */
 
   if (buflen <= sizeof(struct hostent_info_s))
-   {
-     return -ERANGE;
-   }
+    {
+      return -ERANGE;
+    }
 
   info    = (FAR struct hostent_info_s *)buf;
   ptr     = info->hi_data;
@@ -306,7 +306,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
 
       if (ch == '#')
         {
-           /* Skip to the end of line. */
+          /* Skip to the end of line. */
 
           ch = lib_skipline(stream, &nread);
           if (ch == EOF)
@@ -456,13 +456,13 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
           return nwritten;
         }
 
-       /* Save the pointer to the beginning of the next alias */
+      /* Save the pointer to the beginning of the next alias */
 
-       info->hi_aliases[i] = start;
-       if (host->h_aliases == NULL)
-         {
-           host->h_aliases = info->hi_aliases;
-         }
+      info->hi_aliases[i] = start;
+      if (host->h_aliases == NULL)
+        {
+          host->h_aliases = info->hi_aliases;
+        }
 
       if (!lib_isspace(ch))
         {
