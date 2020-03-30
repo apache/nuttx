@@ -287,7 +287,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
     {
       for (i = 0; hp->h_addr_list[i]; i++)
         {
-          if (family != AF_UNSPEC && hp->h_addrtype != family)
+          if (family != AF_UNSPEC && hp->h_addrtypes[i] != family)
             {
               /* Filter by protocol family. */
 
@@ -296,7 +296,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 
           /* REVISIT: filter by socktype and protocol not implemented. */
 
-          ai = alloc_ai(hp->h_addrtype, socktype, proto, port,
+          ai = alloc_ai(hp->h_addrtypes[i], socktype, proto, port,
                         hp->h_addr_list[i]);
           if (ai == NULL)
             {
