@@ -184,14 +184,17 @@ struct hostent
   FAR char **h_aliases;    /* A pointer to an array of pointers to the
                             * alternative host names, terminated by a
                             * null pointer. */
-  int        h_addrtype;   /* Address type. */
-  int        h_length;     /* The length, in bytes, of the address. */
+  FAR int   *h_addrtypes;  /* A pointer to an array of address type. */
+  FAR int   *h_lengths;    /* A pointer to an array of the length, in bytes,
+                            * of the address. */
   FAR char **h_addr_list;  /* A pointer to an array of pointers to network
                             * addresses (in network byte order) for the host,
                             * terminated by a null pointer. */
 };
 
 #define h_addr h_addr_list[0] /* For backward compatibility */
+#define h_length h_lengths[0]
+#define h_addrtype h_addrtypes[0]
 
 struct netent
 {

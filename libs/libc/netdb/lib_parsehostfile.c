@@ -72,8 +72,10 @@
 struct hostent_info_s
 {
   FAR char *hi_aliases[CONFIG_NETDB_MAX_ALTNAMES + 1];
+  int       hi_addrtypes[2];
+  int       hi_lengths[2];
   FAR char *hi_addrlist[2];
-  char hi_data[1];
+  char      hi_data[1];
 };
 
 /****************************************************************************
@@ -292,6 +294,10 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
   memset(host, 0, sizeof(struct hostent));
   memset(info, 0, sizeof(struct hostent_info_s));
 
+  host->h_addrtypes = info->hi_addrtypes;
+  host->h_lengths   = info->hi_lengths;
+  host->h_addr_list = info->hi_addrlist;
+
   /* Skip over any leading spaces */
 
   do
@@ -379,12 +385,11 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
       host->h_addrtype = AF_INET;
     }
 
-  info->hi_addrlist[0] = ptr;
-  host->h_addr_list    = info->hi_addrlist;
-  host->h_length       = addrlen;
+  host->h_addr    = ptr;
+  host->h_length  = addrlen;
 
-  ptr                 += addrlen;
-  buflen              -= addrlen;
+  ptr            += addrlen;
+  buflen         -= addrlen;
 
   /* Skip over any additional whitespace */
 

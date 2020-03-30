@@ -61,8 +61,10 @@
 
 struct hostent_info_s
 {
+  int       hi_addrtypes[CONFIG_NETDB_MAX_IPADDR + 1];
+  int       hi_lengths[CONFIG_NETDB_MAX_IPADDR + 1];
   FAR char *hi_addrlist[CONFIG_NETDB_MAX_IPADDR + 1];
-  char hi_data[1];
+  char      hi_data[1];
 };
 
 /****************************************************************************
@@ -164,34 +166,48 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
                          size_t buflen)
 {
   FAR struct hostent_info_s *info;
-  socklen_t addrlen;
-  FAR const uint8_t *src;
   FAR char *dest;
   int namelen;
 
+  /* Make sure that space remains to hold the hostent structure */
+
+  if (buflen <= sizeof(struct hostent_info_s))
+    {
+      return -ERANGE;
+    }
+
+  info    = (FAR struct hostent_info_s *)buf;
+  dest    = info->hi_data;
+  buflen -= (sizeof(struct hostent_info_s) - 1);
+
   memset(host, 0, sizeof(struct hostent));
+  memset(info, 0, sizeof(struct hostent_info_s));
+
+  host->h_addrtypes = info->hi_addrtypes;
+  host->h_lengths   = info->hi_lengths;
+  host->h_addr_list = info->hi_addrlist;
 
 #ifdef CONFIG_NET_IPv4
   if (lib_lo_ipv4match(addr, len, type))
     {
-      /* Setup to transfer the IPv4 address */
+      /* Save the IPv4 address */
 
-      addrlen          = sizeof(struct in_addr);
-      src              = (FAR uint8_t *)&g_lo_ipv4addr;
+      host->h_length   = sizeof(struct in_addr);
+      host->h_addr     = (FAR char *)&g_lo_ipv4addr;
       host->h_addrtype = AF_INET;
-      goto out_copy;
+      goto out_copyname;
     }
 #endif
 
 #ifdef CONFIG_NET_IPv6
   if (lib_lo_ipv6match(addr, len, type))
     {
-      /* Setup to transfer the IPv6 address */
+      /* Save the IPv6 address */
 
-      addrlen          = sizeof(struct in6_addr);
-      src              = (FAR uint8_t *)&g_lo_ipv6addr;
+      host->h_length   = sizeof(struct in6_addr);
+      host->h_addr     = (FAR char *)&g_lo_ipv6addr;
       host->h_addrtype = AF_INET6;
-      goto out_copy;
+      goto out_copyname;
     }
 #endif
 
@@ -199,29 +215,7 @@ static int lib_localhost(FAR const void *addr, socklen_t len, int type,
 
   return 1;
 
-out_copy:
-  /* Make sure that space remains to hold the hostent structure and
-   * the IP address.
-   */
-
-  if (buflen <= (sizeof(struct hostent_info_s) + addrlen))
-    {
-      return -ERANGE;
-    }
-
-  info             = (FAR struct hostent_info_s *)buf;
-  dest             = info->hi_data;
-  buflen          -= (sizeof(struct hostent_info_s) - 1);
-
-  memset(info, 0, sizeof(struct hostent_info_s));
-  memcpy(dest, src, addrlen);
-
-  info->hi_addrlist[0] = dest;
-  host->h_addr_list    = info->hi_addrlist;
-  host->h_length       = addrlen;
-
-  dest                += addrlen;
-  buflen              -= addrlen;
+out_copyname:
 
   /* And copy localhost host name */
 

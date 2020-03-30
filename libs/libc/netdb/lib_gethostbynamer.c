@@ -66,8 +66,10 @@
 
 struct hostent_info_s
 {
+  int       hi_addrtypes[CONFIG_NETDB_MAX_IPADDR + 1];
+  int       hi_lengths[CONFIG_NETDB_MAX_IPADDR + 1];
   FAR char *hi_addrlist[CONFIG_NETDB_MAX_IPADDR + 1];
-  char hi_data[1];
+  char      hi_data[1];
 };
 
 /****************************************************************************
@@ -119,6 +121,10 @@ static int lib_numeric_address(FAR const char *name,
 
   memset(host, 0, sizeof(struct hostent));
   memset(info, 0, sizeof(struct hostent_info_s));
+
+  host->h_addrtypes = info->hi_addrtypes;
+  host->h_lengths   = info->hi_lengths;
+  host->h_addr_list = info->hi_addrlist;
 
   /* If the address contains a colon, then it might be a numeric IPv6
    * address
@@ -189,12 +195,11 @@ static int lib_numeric_address(FAR const char *name,
       return 1;
     }
 
-  info->hi_addrlist[0] = ptr;
-  host->h_addr_list    = info->hi_addrlist;
-  host->h_length       = addrlen;
+  host->h_addr   = ptr;
+  host->h_length = addrlen;
 
-  ptr                 += addrlen;
-  buflen              -= addrlen;
+  ptr           += addrlen;
+  buflen        -= addrlen;
 
   /* And copy name */
 
@@ -235,53 +240,49 @@ static int lib_localhost(FAR const char *name, FAR struct hostent *host,
                                FAR char *buf, size_t buflen)
 {
   FAR struct hostent_info_s *info;
-  socklen_t addrlen;
-  FAR const char *src;
   FAR char *dest;
   int namelen;
+  int i = 0;
 
   if (strcmp(name, g_lo_hostname) == 0)
     {
       /* Yes.. it is the localhost */
 
-#ifdef CONFIG_NET_IPv4
-      /* Setup to transfer the IPv4 address */
+      /* Make sure that space remains to hold the hostent structure */
 
-      addrlen          = sizeof(struct in_addr);
-      src              = (FAR const char *)&g_lo_ipv4addr;
-      host->h_addrtype = AF_INET;
-
-#else /* CONFIG_NET_IPv6 */
-      /* Setup to transfer the IPv6 address */
-
-      addrlen          = sizeof(struct in6_addr);
-      src              = (FAR const char *)&g_lo_ipv6addr;
-      host->h_addrtype = AF_INET6;
-#endif
-
-      /* Make sure that space remains to hold the hostent structure and
-       * the IP address.
-       */
-
-      if (buflen <= (sizeof(struct hostent_info_s) + addrlen))
+      if (buflen <= sizeof(struct hostent_info_s))
         {
           return -ERANGE;
         }
 
-      info             = (FAR struct hostent_info_s *)buf;
-      dest             = info->hi_data;
-      buflen          -= (sizeof(struct hostent_info_s) - 1);
+      info    = (FAR struct hostent_info_s *)buf;
+      dest    = info->hi_data;
+      buflen -= (sizeof(struct hostent_info_s) - 1);
 
       memset(host, 0, sizeof(struct hostent));
       memset(info, 0, sizeof(struct hostent_info_s));
-      memcpy(dest, src, addrlen);
 
-      info->hi_addrlist[0] = dest;
-      host->h_addr_list    = info->hi_addrlist;
-      host->h_length       = addrlen;
+      host->h_addrtypes = info->hi_addrtypes;
+      host->h_lengths   = info->hi_lengths;
+      host->h_addr_list = info->hi_addrlist;
 
-      dest                += addrlen;
-      buflen              -= addrlen;
+#ifdef CONFIG_NET_IPv4
+      /* Save the IPv4 address */
+
+      info->hi_addrtypes[i] = AF_INET;
+      info->hi_lengths[i]   = sizeof(struct in_addr);
+      info->hi_addrlist[i]  = (FAR char *)&g_lo_ipv4addr;
+      i++;
+#endif
+
+#ifdef CONFIG_NET_IPv6
+      /* Save the IPv6 address */
+
+      info->hi_addrtypes[i] = AF_INET6;
+      info->hi_lengths[i]   = sizeof(struct in6_addr);
+      info->hi_addrlist[i]  = (FAR char *)&g_lo_ipv6addr;
+      i++;
+#endif
 
       /* And copy name */
 
@@ -362,6 +363,10 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
   memset(host, 0, sizeof(struct hostent));
   memset(info, 0, sizeof(struct hostent_info_s));
 
+  host->h_addrtypes = info->hi_addrtypes;
+  host->h_lengths   = info->hi_lengths;
+  host->h_addr_list = info->hi_addrlist;
+
   /* Try to get the host address using the DNS name server */
 
   naddr = buflen / sizeof(union dns_addr_u);
@@ -401,17 +406,13 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
         }
 #endif
 
-      /* REVISIT: This assumes addresses are all either IPv4 or IPv6. */
+      info->hi_addrtypes[i] = addrtype;
+      info->hi_lengths[i]   = addrlen;
+      info->hi_addrlist[i]  = addrdata;
 
-      info->hi_addrlist[i] = addrdata;
-      host->h_addrtype     = addrtype;
-      host->h_length       = addrlen;
-
-      ptr                 += sizeof(union dns_addr_u);
-      buflen              -= sizeof(union dns_addr_u);
+      ptr                  += sizeof(union dns_addr_u);
+      buflen               -= sizeof(union dns_addr_u);
     }
-
-  host->h_addr_list        = info->hi_addrlist;
 
   /* And copy name */
 
@@ -524,6 +525,10 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
   memset(host, 0, sizeof(struct hostent));
   memset(info, 0, sizeof(struct hostent_info_s));
 
+  host->h_addrtypes = info->hi_addrtypes;
+  host->h_lengths   = info->hi_lengths;
+  host->h_addr_list = info->hi_addrlist;
+
   /* Try to get the host address using the DNS name server */
 
   naddr = buflen / sizeof(union dns_addr_u);
@@ -561,17 +566,13 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
         }
 #endif
 
-      /* REVISIT: This assumes addresses are all either IPv4 or IPv6. */
+      info->hi_addrtypes[i] = addrtype;
+      info->hi_lengths[i]   = addrlen;
+      info->hi_addrlist[i]  = addrdata;
 
-      info->hi_addrlist[i] = addrdata;
-      host->h_addrtype     = addrtype;
-      host->h_length       = addrlen;
-
-      ptr                 += sizeof(union dns_addr_u);
-      buflen              -= sizeof(union dns_addr_u);
+      ptr                  += sizeof(union dns_addr_u);
+      buflen               -= sizeof(union dns_addr_u);
     }
-
-  host->h_addr_list        = info->hi_addrlist;
 
   /* And copy name */
 
