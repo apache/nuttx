@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_hidkbd.c
  *
- *   Copyright (C) 2011-2013, 2015-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -254,7 +239,8 @@ struct usbhost_outstream_s
 
 /* Semaphores */
 
-static void usbhost_takesem(sem_t *sem);
+static int  usbhost_takesem(FAR sem_t *sem);
+static void usbhost_forcetake(FAR sem_t *sem);
 #define usbhost_givesem(s) nxsem_post(s);
 
 /* Polling support */
@@ -268,28 +254,31 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass);
 
 /* Device name management */
 
-static int usbhost_allocdevno(FAR struct usbhost_state_s *priv);
+static int  usbhost_allocdevno(FAR struct usbhost_state_s *priv);
 static void usbhost_freedevno(FAR struct usbhost_state_s *priv);
-static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname);
+static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
+              FAR char *devname);
 
 /* Keyboard polling thread */
 
 static void usbhost_destroy(FAR void *arg);
-static void usbhost_putbuffer(FAR struct usbhost_state_s *priv, uint8_t keycode);
+static void usbhost_putbuffer(FAR struct usbhost_state_s *priv,
+              uint8_t keycode);
 #ifdef CONFIG_HIDKBD_ENCODED
 static void usbhost_putstream(FAR struct lib_outstream_s *this, int ch);
 #endif
-static inline uint8_t usbhost_mapscancode(uint8_t scancode, uint8_t modifier);
+static inline uint8_t usbhost_mapscancode(uint8_t scancode,
+              uint8_t modifier);
 #ifdef CONFIG_HIDKBD_ENCODED
 static inline void usbhost_encodescancode(FAR struct usbhost_state_s *priv,
-                                          uint8_t scancode, uint8_t modifier);
+              uint8_t scancode, uint8_t modifier);
 #endif
-static int usbhost_kbdpoll(int argc, char *argv[]);
+static int  usbhost_kbdpoll(int argc, char *argv[]);
 
 /* Helpers for usbhost_connect() */
 
 static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
-                                  FAR const uint8_t *configdesc, int desclen);
+              FAR const uint8_t *configdesc, int desclen);
 static inline int usbhost_devinit(FAR struct usbhost_state_s *priv);
 
 /* (Little Endian) Data helpers */
@@ -308,26 +297,26 @@ static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv);
 
 /* struct usbhost_registry_s methods */
 
-static struct usbhost_class_s *
-  usbhost_create(FAR struct usbhost_hubport_s *hport,
-                 FAR const struct usbhost_id_s *id);
+static struct usbhost_class_s *usbhost_create(
+              FAR struct usbhost_hubport_s *hport,
+              FAR const struct usbhost_id_s *id);
 
 /* struct usbhost_class_s methods */
 
-static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
-                           FAR const uint8_t *configdesc, int desclen);
-static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
+static int  usbhost_connect(FAR struct usbhost_class_s *usbclass,
+                            FAR const uint8_t *configdesc, int desclen);
+static int  usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 
 /* Driver methods.  We export the keyboard as a standard character driver */
 
-static int usbhost_open(FAR struct file *filep);
-static int usbhost_close(FAR struct file *filep);
+static int  usbhost_open(FAR struct file *filep);
+static int  usbhost_close(FAR struct file *filep);
 static ssize_t usbhost_read(FAR struct file *filep,
-                            FAR char *buffer, size_t len);
+              FAR char *buffer, size_t len);
 static ssize_t usbhost_write(FAR struct file *filep,
-                             FAR const char *buffer, size_t len);
-static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup);
+              FAR const char *buffer, size_t len);
+static int  usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
+              bool setup);
 
 /****************************************************************************
  * Private Data
@@ -401,35 +390,59 @@ static const uint8_t encoding[USBHID_NUMENCODINGS] =
 {
   /* 0x28-0x2f: Enter,escape,del,back-tab,space,_,+,{ */
 
-  KEYCODE_ENTER,   0,                   KEYCODE_FWDDEL,     KEYCODE_BACKDEL,  0,                   0,             0,                0,
+  KEYCODE_ENTER,        0,
+  KEYCODE_FWDDEL,       KEYCODE_BACKDEL,
+  0,                    0,
+  0,                    0,
 
   /* 0x30-0x37: },|,Non-US tilde,:,",grave tilde,<,> */
 
-  0,               0,                   0,                 0,                0,                   0,             0,                0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
 
   /* 0x38-0x3f: /,CapsLock,F1,F2,F3,F4,F5,F6 */
 
-  0,               KEYCODE_CAPSLOCK,    KEYCODE_F1,        KEYCODE_F2,       KEYCODE_F3,          KEYCODE_F4,    KEYCODE_F5,       KEYCODE_F6,
+  0,                    KEYCODE_CAPSLOCK,
+  KEYCODE_F1,           KEYCODE_F2,
+  KEYCODE_F3,           KEYCODE_F4,
+  KEYCODE_F5,           KEYCODE_F6,
 
   /* 0x40-0x47: F7,F8,F9,F10,F11,F12,PrtScn,ScrollLock */
 
-  KEYCODE_F7,      KEYCODE_F8,          KEYCODE_F9,        KEYCODE_F10,      KEYCODE_F11,         KEYCODE_F12,   KEYCODE_PRTSCRN,  KEYCODE_SCROLLLOCK,
+  KEYCODE_F7,           KEYCODE_F8,
+  KEYCODE_F9,           KEYCODE_F10,
+  KEYCODE_F11,          KEYCODE_F12,
+  KEYCODE_PRTSCRN,      KEYCODE_SCROLLLOCK,
 
   /* 0x48-0x4f: Pause,Insert,Home,PageUp,DeleteForward,End,PageDown,RightArrow */
 
-  KEYCODE_PAUSE,   KEYCODE_INSERT,      KEYCODE_HOME,      KEYCODE_PAGEUP,   KEYCODE_FWDDEL,      KEYCODE_END,   KEYCODE_PAGEDOWN, KEYCODE_RIGHT,
+  KEYCODE_PAUSE,        KEYCODE_INSERT,
+  KEYCODE_HOME,         KEYCODE_PAGEUP,
+  KEYCODE_FWDDEL,       KEYCODE_END,
+  KEYCODE_PAGEDOWN,     KEYCODE_RIGHT,
 
   /* 0x50-0x57: LeftArrow,DownArrow,UpArrow,Num Lock,/,*,-,+ */
 
-  KEYCODE_LEFT,    KEYCODE_DOWN,        KEYCODE_UP,        KEYCODE_NUMLOCK,  0,                   0,             0,                0,
+  KEYCODE_LEFT,         KEYCODE_DOWN,
+  KEYCODE_UP,           KEYCODE_NUMLOCK,
+  0,                    0,
+  0,                    0,
 
   /* 0x58-0x5f: Enter,1-7 */
 
-  KEYCODE_ENTER,   0,                   0,                 0,                0,                   0,             0,                0,
+  KEYCODE_ENTER,        0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
 
   /* 0x60-0x66: 8-9,0,.,Non-US \,Application,Power */
 
-  0,               0,                   0,                 0,                0,                   0,             KEYCODE_POWER,
+  0,                    0,
+  0,                    0,
+  0,                    0,
+  KEYCODE_POWER,
 
 #ifdef CONFIG_HIDKBD_ALLSCANCODES
 
@@ -437,63 +450,107 @@ static const uint8_t encoding[USBHID_NUMENCODINGS] =
 
   /* 0x68-0x6f: F13,F14,F15,F16,F17,F18,F19,F20 */
 
-  KEYCODE_F13,     KEYCODE_F14,         KEYCODE_F15,       KEYCODE_F16,      KEYCODE_F17,         KEYCODE_F18,   KEYCODE_F19,      KEYCODE_F20,
+  KEYCODE_F13,          KEYCODE_F14,
+  KEYCODE_F15,          KEYCODE_F16,
+  KEYCODE_F17,          KEYCODE_F18,
+  KEYCODE_F19,          KEYCODE_F20,
 
   /* 0x70-0x77: F21,F22,F23,F24,Execute,Help,Menu,Select */
 
-  KEYCODE_F21,     KEYCODE_F22,         KEYCODE_F23,       KEYCODE_F24,      KEYCODE_EXECUTE,     KEYCODE_HELP,  KEYCODE_MENU,     KEYCODE_SELECT,
+  KEYCODE_F21,          KEYCODE_F22,
+  KEYCODE_F23,          KEYCODE_F24,
+  KEYCODE_EXECUTE,      KEYCODE_HELP,
+  KEYCODE_MENU,         KEYCODE_SELECT,
 
   /* 0x78-0x7f: Stop,Again,Undo,Cut,Copy,Paste,Find,Mute */
 
-  KEYCODE_STOP,    KEYCODE_AGAIN,       KEYCODE_UNDO,      KEYCODE_CUT,      KEYCODE_COPY,        KEYCODE_PASTE, KEYCODE_FIND,     KEYCODE_MUTE,
+  KEYCODE_STOP,         KEYCODE_AGAIN,
+  KEYCODE_UNDO,         KEYCODE_CUT,
+  KEYCODE_COPY,         KEYCODE_PASTE,
+  KEYCODE_FIND,         KEYCODE_MUTE,
 
   /* 0x80-0x87: VolUp,VolDown,LCapsLock,lNumLock,LScrollLock,,,=,International1 */
 
-  KEYCODE_VOLUP,   KEYCODE_VOLDOWN,     KEYCODE_LCAPSLOCK, KEYCODE_LNUMLOCK, KEYCODE_LSCROLLLOCK, 0,             0,                0,
+  KEYCODE_VOLUP,        KEYCODE_VOLDOWN,
+  KEYCODE_LCAPSLOCK,    KEYCODE_LNUMLOCK,
+  KEYCODE_LSCROLLLOCK,  0,
+  0,                    0,
 
   /* 0x88-0x8f: International 2-9 */
 
-  0,               0,                   0,                 0,                0,                   0,             0,                0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
 
   /* 0x90-0x97: LAN 1-8 */
 
-  KEYCODE_LANG1,   KEYCODE_LANG2,       KEYCODE_LANG3,     KEYCODE_LANG4,    KEYCODE_LANG5,       KEYCODE_LANG6, KEYCODE_LANG7,    KEYCODE_LANG8,
+  KEYCODE_LANG1,        KEYCODE_LANG2,
+  KEYCODE_LANG3,        KEYCODE_LANG4,
+  KEYCODE_LANG5,        KEYCODE_LANG6,
+  KEYCODE_LANG7,        KEYCODE_LANG8,
 
   /* 0x98-0x9f: LAN 9,Erase,SysReq,Cancel,Clear,Prior,Return,Separator */
 
-  0,               0,                   KEYCODE_SYSREQ,    KEYCODE_CANCEL,   KEYCODE_CLEAR,       0,             KEYCODE_ENTER,    0,
+  0,                    0,
+  KEYCODE_SYSREQ,       KEYCODE_CANCEL,
+  KEYCODE_CLEAR,        0,
+  KEYCODE_ENTER,        0,
 
   /* 0xa0-0xa7: Out,Oper,Clear,CrSel,Excel,(reserved) */
 
-  0,               0,                   0,                 0,                0,                   0,             0,                 0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
 
   /* 0xa8-0xaf: (reserved) */
 
-  0,               0,                   0,                 0,                0,                   0,             0,                 0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
 
   /* 0xb0-0xb7: 00,000,ThouSeparator,DecSeparator,CurrencyUnit,SubUnit,(,) */
 
-  0,               0,                   0,                 0,                0,                   0,             0,                 0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
 
   /* 0xb8-0xbf: {,},tab,backspace,A-D */
 
-  0,               0,                   0,                 KEYCODE_BACKDEL,  0,                   0,             0,                 0,
+  0,                    0,
+  0,                    KEYCODE_BACKDEL,
+  0,                    0,
+  0,                    0,
 
   /* 0xc0-0xc7: E-F,XOR,^,%,<,>,& */
 
-  0,               0,                   0,                 0,                0,                   0,             0,                 0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
 
   /* 0xc8-0xcf: &&,|,||,:,#, ,@,! */
 
-  0,               0,                   0,                 0,                0,                   0,             0,                 0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
+  0,                    0,
 
   /* 0xd0-0xd7: Memory Store,Recall,Clear,Add,Subtract,Muliply,Divide,+/- */
 
-  KEYCODE_MEMSTORE, KEYCODE_MEMRECALL,  KEYCODE_MEMCLEAR,  KEYCODE_MEMADD,   KEYCODE_MEMSUB,     KEYCODE_MEMMUL, KEYCODE_MEMDIV,    KEYCODE_NEGATE,
+  KEYCODE_MEMSTORE,     KEYCODE_MEMRECALL,
+  KEYCODE_MEMCLEAR,     KEYCODE_MEMADD,
+  KEYCODE_MEMSUB,       KEYCODE_MEMMUL,
+  KEYCODE_MEMDIV,       KEYCODE_NEGATE,
 
   /* 0xd8-0xdd: Clear,ClearEntry,Binary,Octal,Decimal,Hexadecimal */
 
-  KEYCODE_CLEAR,    KEYCODE_CLEARENTRY, KEYCODE_BINARY,    KEYCODE_OCTAL,    KEYCODE_DECIMAL,    KEYCODE_HEXADECIMAL
+  KEYCODE_CLEAR,        KEYCODE_CLEARENTRY,
+  KEYCODE_BINARY,       KEYCODE_OCTAL,
+  KEYCODE_DECIMAL,      KEYCODE_HEXADECIMAL
 #endif
 };
 
@@ -583,9 +640,37 @@ static const uint8_t lcmap[USBHID_NUMSCANCODES] =
  *
  ****************************************************************************/
 
-static void usbhost_takesem(sem_t *sem)
+static int usbhost_takesem(FAR sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
+}
+
+/****************************************************************************
+ * Name: usbhost_forcetake
+ *
+ * Description:
+ *   This is just another wrapper but this one continues even if the thread
+ *   is canceled.  This must be done in certain conditions where were must
+ *   continue in order to clean-up resources.
+ *
+ ****************************************************************************/
+
+static void usbhost_forcetake(FAR sem_t *sem)
+{
+  int ret;
+
+  do
+    {
+      ret = nxsem_wait_uninterruptible(sem);
+
+      /* The only expected error would -ECANCELED meaning that the
+       * parent thread has been canceled.  We have to continue and
+       * terminate the poll in this case.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
+    }
+  while (ret < 0);
 }
 
 /****************************************************************************
@@ -635,7 +720,10 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
   FAR struct usbhost_state_s *priv;
 
   DEBUGASSERT(!up_interrupt_context());
-  priv = (FAR struct usbhost_state_s *)kmm_malloc(sizeof(struct usbhost_state_s));
+
+  priv = (FAR struct usbhost_state_s *)
+    kmm_malloc(sizeof(struct usbhost_state_s));
+
   uinfo("Allocated: %p\n", priv);
   return priv;
 }
@@ -706,7 +794,8 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
     }
 }
 
-static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname)
+static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
+                                     FAR char *devname)
 {
   snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->devchar);
 }
@@ -857,7 +946,8 @@ static void usbhost_putbuffer(FAR struct usbhost_state_s *priv,
 #ifdef CONFIG_HIDKBD_ENCODED
 static void usbhost_putstream(FAR struct lib_outstream_s *stream, int ch)
 {
-  FAR struct usbhost_outstream_s *privstream = (FAR struct usbhost_outstream_s *)stream;
+  FAR struct usbhost_outstream_s *privstream =
+    (FAR struct usbhost_outstream_s *)stream;
 
   DEBUGASSERT(privstream && privstream->priv);
   usbhost_putbuffer(privstream->priv, (uint8_t)ch);
@@ -980,8 +1070,12 @@ static int usbhost_kbdpoll(int argc, char *argv[])
   FAR struct usb_ctrlreq_s *ctrlreq;
   irqstate_t flags;
 #ifndef CONFIG_HIDKBD_NODEBOUNCE
-  uint8_t lastkey[6] = {0, 0, 0, 0, 0, 0};
+  uint8_t lastkey[6] =
+  {
+    0, 0, 0, 0, 0, 0
+  };
 #endif
+
 #if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_INFO)
   unsigned int npolls = 0;
 #endif
@@ -997,10 +1091,10 @@ static int usbhost_kbdpoll(int argc, char *argv[])
    * the start-up logic, and wait a bit to make sure that all of the class
    * creation logic has a chance to run to completion.
    *
-   * NOTE: that the reference count is *not* incremented here.  When the driver
-   * structure was created, it was created with a reference count of one.  This
-   * thread is responsible for that count.  The count will be decrement when
-   * this thread exits.
+   * NOTE: that the reference count is *not* incremented here.  When the
+   * driver structure was created, it was created with a reference count of
+   * one.  This thread is responsible for that count.  The count will be
+   * decrement when this thread exits.
    */
 
   priv = g_priv;
@@ -1022,7 +1116,11 @@ static int usbhost_kbdpoll(int argc, char *argv[])
        * open and actively trying to interact with the class driver.
        */
 
-      usbhost_takesem(&priv->exclsem);
+      ret = usbhost_takesem(&priv->exclsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Format the HID report request:
        *
@@ -1035,7 +1133,8 @@ static int usbhost_kbdpoll(int argc, char *argv[])
        */
 
       ctrlreq       = (struct usb_ctrlreq_s *)priv->tbuffer;
-      ctrlreq->type = USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS | USB_REQ_RECIPIENT_INTERFACE;
+      ctrlreq->type = USB_REQ_DIR_IN | USB_REQ_TYPE_CLASS |
+                      USB_REQ_RECIPIENT_INTERFACE;
       ctrlreq->req  = USBHID_REQUEST_GETREPORT;
 
       usbhost_putle16(ctrlreq->value, (USBHID_REPORTTYPE_INPUT << 8));
@@ -1070,9 +1169,10 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
       else if (priv->open)
         {
-          struct usbhid_kbdreport_s *rpt = (struct usbhid_kbdreport_s *)priv->tbuffer;
-          uint8_t                    keycode;
-          int                        i;
+          struct usbhid_kbdreport_s *rpt =
+            (struct usbhid_kbdreport_s *)priv->tbuffer;
+          uint8_t keycode;
+          int i;
 
           /* Success, reset the error counter */
 
@@ -1080,7 +1180,12 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
           /* Add the newly received keystrokes to our internal buffer */
 
-          usbhost_takesem(&priv->exclsem);
+          ret = usbhost_takesem(&priv->exclsem);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
           for (i = 0; i < 6; i++)
             {
               /* Is this key pressed?  But not pressed last time?
@@ -1121,7 +1226,8 @@ static int usbhost_kbdpoll(int argc, char *argv[])
 
                   keycode = usbhost_mapscancode(rpt->key[i], rpt->modifier);
                   iinfo("Key %d: %02x keycode:%c modifier: %02x\n",
-                         i, rpt->key[i], keycode ? keycode : ' ', rpt->modifier);
+                         i, rpt->key[i], keycode ? keycode : ' ',
+                         rpt->modifier);
 
                   /* Zero at this point means that the key does not map to a
                    * printable character.
@@ -1133,7 +1239,8 @@ static int usbhost_kbdpoll(int argc, char *argv[])
                        * a valid, NUL character.
                        */
 
-                      if ((rpt->modifier & (USBHID_MODIFER_LCTRL | USBHID_MODIFER_RCTRL)) != 0)
+                      if ((rpt->modifier & (USBHID_MODIFER_LCTRL |
+                                            USBHID_MODIFER_RCTRL)) != 0)
                         {
                           keycode &= 0x1f;
                         }
@@ -1145,14 +1252,16 @@ static int usbhost_kbdpoll(int argc, char *argv[])
                       usbhost_putbuffer(priv, keycode);
                     }
 
-                  /* The zero might, however, map to a special keyboard action (such as a
-                   * cursor movement or function key).  Attempt to encode the special key.
+                  /* The zero might, however, map to a special keyboard
+                   * action (such as a cursor movement or function key).
+                   * Attempt to encode the special key.
                    */
 
 #ifdef CONFIG_HIDKBD_ENCODED
                   else
                     {
-                      usbhost_encodescancode(priv, rpt->key[i], rpt->modifier);
+                      usbhost_encodescancode(priv, rpt->key[i],
+                                             rpt->modifier);
                     }
 #endif
                 }
@@ -1207,6 +1316,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
           uinfo("Still polling: %d\n", npolls);
         }
 #endif
+
       /* Wait for the required amount (or until a signal is received).  We
        * will wake up when either the delay elapses or we are signalled that
        * the device has been disconnected.
@@ -1236,7 +1346,7 @@ static int usbhost_kbdpoll(int argc, char *argv[])
    * trying to interact with the class driver.
    */
 
-  usbhost_takesem(&priv->exclsem);
+  usbhost_forcetake(&priv->exclsem);
 
   /* Indicate that we are no longer running and decrement the reference
    * count held by this thread.  If there are no other users of the class,
@@ -1301,8 +1411,8 @@ static int usbhost_kbdpoll(int argc, char *argv[])
  *   desclen - The length in bytes of the configuration descriptor.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
@@ -1365,7 +1475,8 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
         case USB_DESC_TYPE_INTERFACE:
           {
-            FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)configdesc;
+            FAR struct usb_ifdesc_s *ifdesc =
+              (FAR struct usb_ifdesc_s *)configdesc;
 
             uinfo("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
@@ -1404,21 +1515,23 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
         case USB_DESC_TYPE_ENDPOINT:
           {
-            FAR struct usb_epdesc_s *epdesc = (FAR struct usb_epdesc_s *)configdesc;
+            FAR struct usb_epdesc_s *epdesc =
+              (FAR struct usb_epdesc_s *)configdesc;
 
             uinfo("Endpoint descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_EPDESC);
 
             /* Check for an interrupt endpoint. */
 
-            if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) == USB_EP_ATTR_XFER_INT)
+            if ((epdesc->attr & USB_EP_ATTR_XFERTYPE_MASK) ==
+                USB_EP_ATTR_XFER_INT)
               {
                 /* Yes.. it is a interrupt endpoint.  IN or OUT? */
 
                 if (USB_ISEPOUT(epdesc->addr))
                   {
-                    /* It is an interrupt OUT endpoint.  There not be more than one
-                     * interrupt OUT endpoint.
+                    /* It is an interrupt OUT endpoint.  There not be more
+                     * than one interrupt OUT endpoint.
                      */
 
                     if ((found & USBHOST_EPOUTFOUND) != 0)
@@ -1435,11 +1548,14 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     /* Save the interrupt OUT endpoint information */
 
                     epoutdesc.hport        = hport;
-                    epoutdesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
+                    epoutdesc.addr         = epdesc->addr &
+                                             USB_EP_ADDR_NUMBER_MASK;
                     epoutdesc.in           = false;
                     epoutdesc.xfrtype      = USB_EP_ATTR_XFER_INT;
                     epoutdesc.interval     = epdesc->interval;
-                    epoutdesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
+                    epoutdesc.mxpacketsize =
+                      usbhost_getle16(epdesc->mxpacketsize);
+
                     uinfo("Interrupt OUT EP addr:%d mxpacketsize:%d\n",
                           epoutdesc.addr, epoutdesc.mxpacketsize);
                   }
@@ -1463,11 +1579,14 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     /* Save the interrupt IN endpoint information */
 
                     epindesc.hport        = hport;
-                    epindesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
+                    epindesc.addr         = epdesc->addr &
+                                            USB_EP_ADDR_NUMBER_MASK;
                     epindesc.in           = 1;
                     epindesc.xfrtype      = USB_EP_ATTR_XFER_INT;
                     epindesc.interval     = epdesc->interval;
-                    epindesc.mxpacketsize = usbhost_getle16(epdesc->mxpacketsize);
+                    epindesc.mxpacketsize =
+                      usbhost_getle16(epdesc->mxpacketsize);
+
                     uinfo("Interrupt IN EP addr:%d mxpacketsize:%d\n",
                           epindesc.addr, epindesc.mxpacketsize);
                   }
@@ -1578,25 +1697,32 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   priv->crefs++;
   DEBUGASSERT(priv->crefs == 2);
 
-  /* Start a worker task to poll the USB device.  It would be nice to used the
-   * the NuttX worker thread to do this, but this task needs to wait for events
-   * and activities on the worker thread should not involve significant waiting.
-   * Having a dedicated thread is more efficient in this sense, but requires more
-   * memory resources, primarily for the dedicated stack (CONFIG_HIDKBD_STACKSIZE).
+  /* Start a worker task to poll the USB device.  It would be nice to use
+   * the NuttX worker thread to do this, but this task needs to wait for
+   * events and activities on the worker thread should not involve
+   * significant waiting.  Having a dedicated thread is more efficient in
+   * this sense, but requires more memory resources, primarily for the
+   * dedicated stack (CONFIG_HIDKBD_STACKSIZE).
    */
 
   uinfo("Start poll task\n");
 
-  /* The inputs to a task started by kthread_create() are very awkard for this
-   * purpose.  They are really designed for command line tasks (argc/argv). So
-   * the following is kludge pass binary data when the keyboard poll task
-   * is started.
+  /* The inputs to a task started by kthread_create() are very awkard for
+   * this purpose.  They are really designed for command line tasks
+   * (argc/argv).  So the following is kludge pass binary data when the
+   * keyboard poll task is started.
    *
-   * First, make sure we have exclusive access to g_priv (what is the likelihood
-   * of this being used?  About zero, but we protect it anyway).
+   * First, make sure we have exclusive access to g_priv (what is the
+   * likelihood of this being used?  About zero, but we protect it anyway).
    */
 
-  usbhost_takesem(&g_exclsem);
+  ret = usbhost_takesem(&g_exclsem);
+  if (ret < 0)
+    {
+      usbhost_tdfree(priv);
+      goto errout;
+    }
+
   g_priv = priv;
 
   priv->pollpid = kthread_create("kbdpoll", CONFIG_HIDKBD_DEFPRIO,
@@ -1614,8 +1740,13 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   /* Now wait for the poll task to get properly initialized */
 
-  usbhost_takesem(&g_syncsem);
+  ret = usbhost_takesem(&g_syncsem);
   usbhost_givesem(&g_exclsem);
+
+  if (ret < 0)
+    {
+      goto errout;
+    }
 
   /* Register the driver */
 
@@ -1628,9 +1759,10 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
    */
 
 errout:
-  usbhost_takesem(&priv->exclsem);
+  usbhost_forcetake(&priv->exclsem);
   priv->crefs--;
   usbhost_givesem(&priv->exclsem);
+
   return ret;
 }
 
@@ -1693,7 +1825,8 @@ static inline uint32_t usbhost_getle32(const uint8_t *val)
 {
   /* Little endian means LS halfword first in byte stream */
 
-  return (uint32_t)usbhost_getle16(&val[2]) << 16 | (uint32_t)usbhost_getle16(val);
+  return (uint32_t)usbhost_getle16(&val[2]) << 16 |
+         (uint32_t)usbhost_getle16(val);
 }
 
 /****************************************************************************
@@ -1717,7 +1850,7 @@ static void usbhost_putle32(uint8_t *dest, uint32_t val)
   /* Little endian means LS halfword first in byte stream */
 
   usbhost_putle16(dest, (uint16_t)(val & 0xffff));
-  usbhost_putle16(dest+2, (uint16_t)(val >> 16));
+  usbhost_putle16(dest + 2, (uint16_t)(val >> 16));
 }
 #endif
 
@@ -1736,7 +1869,7 @@ static void usbhost_putle32(uint8_t *dest, uint32_t val)
  *
  ****************************************************************************/
 
-static inline int usbhost_tdalloc(FAR struct usbhost_state_s *priv)
+static int usbhost_tdalloc(FAR struct usbhost_state_s *priv)
 {
   FAR struct usbhost_hubport_s *hport;
 
@@ -1762,7 +1895,7 @@ static inline int usbhost_tdalloc(FAR struct usbhost_state_s *priv)
  *
  ****************************************************************************/
 
-static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv)
+static int usbhost_tdfree(FAR struct usbhost_state_s *priv)
 {
   FAR struct usbhost_hubport_s *hport;
   int result = OK;
@@ -1789,12 +1922,13 @@ static inline int usbhost_tdfree(FAR struct usbhost_state_s *priv)
  * Name: usbhost_create
  *
  * Description:
- *   This function implements the create() method of struct usbhost_registry_s.
- *   The create() method is a callback into the class implementation.  It is
- *   used to (1) create a new instance of the USB host class state and to (2)
- *   bind a USB host driver "session" to the class instance.  Use of this
- *   create() method will support environments where there may be multiple
- *   USB ports and multiple USB devices simultaneously connected.
+ *   This function implements the create() method of struct
+ *   usbhost_registry_s.  The create() method is a callback into the class
+ *   implementation.  It is used to (1) create a new instance of the USB
+ *   host class state and to (2) bind a USB host driver "session" to the
+ *   class instance.  Use of this create() method will support environments
+ *   where there may be multiple USB ports and multiple USB devices
+ *   simultaneously connected.
  *
  * Input Parameters:
  *   hport - The hub port that manages the new class instance.
@@ -1829,7 +1963,7 @@ static FAR struct usbhost_class_s *
 
       if (usbhost_allocdevno(priv) == OK)
         {
-         /* Initialize class method function pointers */
+          /* Initialize class method function pointers */
 
           priv->usbclass.hport        = hport;
           priv->usbclass.connect      = usbhost_connect;
@@ -1869,9 +2003,6 @@ static FAR struct usbhost_class_s *
 }
 
 /****************************************************************************
- * struct usbhost_class_s methods
- ****************************************************************************/
-/****************************************************************************
  * Name: usbhost_connect
  *
  * Description:
@@ -1881,17 +2012,18 @@ static FAR struct usbhost_class_s *
  *   descriptor to the class so that the class may initialize properly
  *
  * Input Parameters:
- *   usbclass - The USB host class entry previously obtained from a call to create().
+ *   usbclass   - The USB host class entry previously obtained from a call
+ *                to create().
  *   configdesc - A pointer to a uint8_t buffer container the configuration
- *     descriptor.
- *   desclen - The length in bytes of the configuration descriptor.
+ *                descriptor.
+ *   desclen    - The length in bytes of the configuration descriptor.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
- *   NOTE that the class instance remains valid upon return with a failure.  It is
- *   the responsibility of the higher level enumeration logic to call
+ *   NOTE that the class instance remains valid upon return with a failure.
+ *   It is the responsibility of the higher level enumeration logic to call
  *   CLASS_DISCONNECTED to free up the class driver resources.
  *
  * Assumptions:
@@ -2021,9 +2153,6 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 }
 
 /****************************************************************************
- * Character driver methods
- ****************************************************************************/
-/****************************************************************************
  * Name: usbhost_open
  *
  * Description:
@@ -2046,11 +2175,15 @@ static int usbhost_open(FAR struct file *filep)
   /* Make sure that we have exclusive access to the private data structure */
 
   DEBUGASSERT(priv && priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
-  usbhost_takesem(&priv->exclsem);
+  ret = usbhost_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Check if the keyboard device is still connected.  We need to disable
-   * interrupts momentarily to assure that there are no asynchronous disconnect
-   * events.
+   * interrupts momentarily to assure that there are no asynchronous
+   * disconnect events.
    */
 
   flags = enter_critical_section();
@@ -2071,6 +2204,7 @@ static int usbhost_open(FAR struct file *filep)
       priv->open = true;
       ret        = OK;
     }
+
   leave_critical_section(flags);
 
   usbhost_givesem(&priv->exclsem);
@@ -2090,6 +2224,7 @@ static int usbhost_close(FAR struct file *filep)
   FAR struct inode *inode;
   FAR struct usbhost_state_s *priv;
   irqstate_t flags;
+  int ret;
 
   uinfo("Entry\n");
   DEBUGASSERT(filep && filep->f_inode);
@@ -2099,7 +2234,11 @@ static int usbhost_close(FAR struct file *filep)
   /* Decrement the reference count on the driver */
 
   DEBUGASSERT(priv->crefs >= 1);
-  usbhost_takesem(&priv->exclsem);
+  ret = usbhost_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* We need to disable interrupts momentarily to assure that there are no
    * asynchronous poll or disconnect events.
@@ -2120,12 +2259,12 @@ static int usbhost_close(FAR struct file *filep)
        *
        * 1) It might be zero meaning that the polling thread has already
        *    exited and decremented its count.
-       * 2) If might be one meaning either that (a) the polling thread is still
-       *    running and still holds a count, or (b) the polling thread has exited,
-       *    but there is still an outstanding open reference.
+       * 2) If might be one meaning either that (a) the polling thread is
+       *    still running and still holds a count, or (b) the polling thread
+       *    has exited, but there is still an outstanding open reference.
        */
 
-     if (priv->crefs == 0 || (priv->crefs == 1 && priv->polling))
+      if (priv->crefs == 0 || (priv->crefs == 1 && priv->polling))
         {
           /* Yes.. In either case, then the driver is no longer open */
 
@@ -2177,7 +2316,8 @@ static int usbhost_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer,
+                            size_t len)
 {
   FAR struct inode           *inode;
   FAR struct usbhost_state_s *priv;
@@ -2193,7 +2333,11 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
   /* Make sure that we have exclusive access to the private data structure */
 
   DEBUGASSERT(priv && priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
-  usbhost_takesem(&priv->exclsem);
+  ret = usbhost_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Check if the keyboard is still connected.  We need to disable interrupts
    * momentarily to assure that there are no asynchronous disconnect events.
@@ -2202,8 +2346,8 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
   if (priv->disconnected)
     {
       /* No... the driver is no longer bound to the class.  That means that
-       * the USB keyboard is no longer connected.  Refuse any further attempts
-       * to access the driver.
+       * the USB keyboard is no longer connected.  Refuse any further
+       * attempts to access the driver.
        */
 
       ret = -ENODEV;
@@ -2230,8 +2374,17 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
 
           priv->waiting = true;
           usbhost_givesem(&priv->exclsem);
-          usbhost_takesem(&priv->waitsem);
-          usbhost_takesem(&priv->exclsem);
+          ret = usbhost_takesem(&priv->waitsem);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          ret = usbhost_takesem(&priv->exclsem);
+          if (ret < 0)
+            {
+              return ret;
+            }
 
           /* Did the keyboard become disconnected while we were waiting */
 
@@ -2248,16 +2401,16 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
            tail != priv->headndx && nbytes < len;
            nbytes++)
         {
-           /* Copy the next keyboard character into the user buffer */
+          /* Copy the next keyboard character into the user buffer */
 
-           *buffer++ = priv->kbdbuffer[tail];
+          *buffer++ = priv->kbdbuffer[tail];
 
-           /* Handle wrap-around of the tail index */
+          /* Handle wrap-around of the tail index */
 
-           if (++tail >= CONFIG_HIDKBD_BUFSIZE)
-             {
-               tail = 0;
-             }
+          if (++tail >= CONFIG_HIDKBD_BUFSIZE)
+            {
+              tail = 0;
+            }
         }
 
       ret = nbytes;
@@ -2301,7 +2454,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   FAR struct inode           *inode;
   FAR struct usbhost_state_s *priv;
-  int                         ret = OK;
+  int                         ret;
   int                         i;
 
   uinfo("Entry\n");
@@ -2312,7 +2465,11 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
   /* Make sure that we have exclusive access to the private data structure */
 
   DEBUGASSERT(priv);
-  usbhost_takesem(&priv->exclsem);
+  ret = usbhost_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Check if the keyboard is still connected.  We need to disable interrupts
    * momentarily to assure that there are no asynchronous disconnect events.
@@ -2321,8 +2478,8 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
   if (priv->disconnected)
     {
       /* No... the driver is no longer bound to the class.  That means that
-       * the USB keyboard is no longer connected.  Refuse any further attempts
-       * to access the driver.
+       * the USB keyboard is no longer connected.  Refuse any further
+       * attempts to access the driver.
        */
 
       ret = -ENODEV;
