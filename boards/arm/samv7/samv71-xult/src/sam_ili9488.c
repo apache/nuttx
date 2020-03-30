@@ -204,7 +204,7 @@
 #  define CONFIG_SAMV71XULT_LCD_BGCOLOR 0
 #endif
 
-/* Display/Color Properties **************************************************/
+/* Display/Color Properties *************************************************/
 
 /* Display Resolution */
 
@@ -228,7 +228,7 @@
 #define RGB_BLUE(rgb)         RGB16BLUE(rgb)
 #define RGB_COLOR(r,g,b)      RGBTO16(r,g,b)
 
-/* SAMV7-XULT LCD Hardware Definitions ***************************************/
+/* SAMV7-XULT LCD Hardware Definitions **************************************/
 
 /* LCD /CS is NCS3 */
 
@@ -286,7 +286,7 @@
 #  define LCD_RUNBUFFER_PIXELS SAM_XRES
 #endif
 
-/* Debug *********************************************************************/
+/* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
 #  define SAMPLENDX_BEFORE_SETUP  0
@@ -422,7 +422,8 @@ static int  sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 static int  sam_getpower(FAR struct lcd_dev_s *dev);
 static int  sam_setpower(FAR struct lcd_dev_s *dev, int power);
 static int  sam_getcontrast(FAR struct lcd_dev_s *dev);
-static int  sam_setcontrast(FAR struct lcd_dev_s *dev, unsigned int contrast);
+static int  sam_setcontrast(FAR struct lcd_dev_s *dev,
+              unsigned int contrast);
 
 /* Initialization */
 
@@ -458,26 +459,27 @@ static const uint32_t g_lcdpin[] =
  * if there are multiple LCD devices, they must each have unique run buffers.
  */
 
-static uint16_t g_runbuffer[LCD_RUNBUFFER_BYTES] __attribute__((aligned(LCD_ALIGN)));
+static uint16_t g_runbuffer[LCD_RUNBUFFER_BYTES]
+  __attribute__((aligned(LCD_ALIGN)));
 
 /* This structure describes the overall LCD video controller */
 
 static const struct fb_videoinfo_s g_videoinfo =
 {
-  .fmt     = SAM_COLORFMT,         /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
-  .xres    = SAM_XRES,             /* Horizontal resolution in pixel columns */
-  .yres    = SAM_YRES,             /* Vertical resolution in pixel rows */
-  .nplanes = 1,                    /* Number of color planes supported */
+  .fmt     = SAM_COLORFMT,              /* Color format: RGB16-565: RRRR RGGG GGGB BBBB */
+  .xres    = SAM_XRES,                  /* Horizontal resolution in pixel columns */
+  .yres    = SAM_YRES,                  /* Vertical resolution in pixel rows */
+  .nplanes = 1,                         /* Number of color planes supported */
 };
 
 /* This is the standard, NuttX Plane information object */
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = sam_putrun,            /* Put a run into LCD memory */
-  .getrun = sam_getrun,            /* Get a run from LCD memory */
-  .buffer = (uint8_t*)g_runbuffer, /* Run scratch buffer */
-  .bpp    = SAM_BPP,               /* Bits-per-pixel */
+  .putrun = sam_putrun,                 /* Put a run into LCD memory */
+  .getrun = sam_getrun,                 /* Get a run from LCD memory */
+  .buffer = (FAR uint8_t *)g_runbuffer, /* Run scratch buffer */
+  .bpp    = SAM_BPP,                    /* Bits-per-pixel */
 };
 
 /* This is the ILI9488 LCD driver object */
@@ -751,7 +753,8 @@ static void sam_disable_backlight(void)
  * Name:  sam_set_backlight
  *
  * Description:
- *   The the backlight to the level associated with the specified power value.
+ *   The the backlight to the level associated with the specified power
+ *   value.
  *
  ****************************************************************************/
 
@@ -994,7 +997,11 @@ static int sam_lcd_dmawait(FAR struct sam_dev_s *priv, uint32_t timeout)
        * incremented and there will be no wait.
        */
 
-      nxsem_wait_uninterruptible(&priv->waitsem);
+      ret = nxsem_wait_uninterruptible(&priv->waitsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 
   /* Dump the collect DMA sample data */
@@ -1041,7 +1048,8 @@ static void sam_lcd_dmacallback(DMA_HANDLE handle, void *arg, int result)
  ****************************************************************************/
 
 static int sam_lcd_txtransfer(FAR struct sam_dev_s *priv,
-                              FAR const uint16_t *buffer, unsigned int buflen)
+                              FAR const uint16_t *buffer,
+                              unsigned int buflen)
 {
   irqstate_t flags;
   int ret;
@@ -1083,7 +1091,8 @@ static int sam_lcd_txtransfer(FAR struct sam_dev_s *priv,
  ****************************************************************************/
 
 static int sam_lcd_rxtransfer(FAR struct sam_dev_s *priv,
-                              FAR const uint16_t *buffer, unsigned int buflen)
+                              FAR const uint16_t *buffer,
+                              unsigned int buflen)
 {
   irqstate_t flags;
   int ret;
@@ -1415,7 +1424,11 @@ static inline void sam_smc_initialize(void)
 static inline int sam_lcd_initialize(void)
 {
   FAR struct sam_dev_s *priv = &g_lcddev;
-  uint8_t buffer[4] = {0, 0, 0, 0};
+  uint8_t buffer[4] =
+  {
+    0, 0, 0, 0
+  };
+
   uint16_t id;
   uint16_t param;
   int ret;

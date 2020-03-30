@@ -176,16 +176,17 @@ void mq_inode_release(FAR struct inode *inode)
 
   /* Decrement the reference count on the inode */
 
-  ret = inode_semtake();
-  if (ret < 0)
+  do
     {
-      /* REVISIT:  Should get here only on task cancellation.  The MQ inode
-       * would not not be released in this case.
+      ret = inode_semtake();
+
+      /* The only error that is expected is due to thread cancellation.
+       * At this point, we must continue to free the mqueue anyway.
        */
 
-      ferr("ERROR: inode_semtake() failed: %d\n", ret);
-      return;
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
+  while (ret < 0);
 
   if (inode->i_crefs > 0)
     {
