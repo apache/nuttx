@@ -298,9 +298,23 @@ OpenOCD for the ESP32
 
       https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-devkitc.html
 
-    - Akizukidenshi's FT232H based JTAG adapter
+    - Akizukidenshi's FT232HL, a FT232H based JTAG adapter
 
       http://akizukidenshi.com/catalog/g/gK-06503/
+
+      With JP3 and JP4 closed, and connected to ESP32 as:
+
+        ---------------- -------
+        ESP32-DevKitC V4 FT232HL
+        ---------------- -------
+        J2       J3      J2
+        -------- ------- -------
+        IO13             AD0     (TCK)
+        IO12             AD1     (TDI)
+                 IO15    AD2     (TDO)
+        IO14             AD3     (TMS)
+        GND              GND
+        -------- ------- -------
 
     - The following version of OpenOCD from ESP-IDF (macOS version)
 
