@@ -171,9 +171,9 @@ int16_t romfs_devcacheread(struct romfs_mountpt_s *rm, uint32_t offset)
   uint32_t sector;
   int      ret;
 
-  /* rm->rm_cachesector holds the current sector that is buffer in or referenced
-   * by rm->tm_buffer. If the requested sector is the same as this sector,
-   * then we do nothing.
+  /* rm->rm_cachesector holds the current sector that is buffer in or
+   * referenced by rm->tm_buffer. If the requested sector is the same as this
+   * this then we do nothing.
    */
 
   sector = SEC_NSECTORS(rm, offset);
@@ -330,9 +330,9 @@ static inline int romfs_searchdir(struct romfs_mountpt_s *rm,
  * Name: romfs_semtake
  ****************************************************************************/
 
-void romfs_semtake(struct romfs_mountpt_s *rm)
+int romfs_semtake(struct romfs_mountpt_s *rm)
 {
-  nxsem_wait_uninterruptible(&rm->rm_sem);
+  return nxsem_wait_uninterruptible(&rm->rm_sem);
 }
 
 /****************************************************************************
@@ -351,8 +351,8 @@ void romfs_semgive(struct romfs_mountpt_s *rm)
  *
  ****************************************************************************/
 
-int romfs_hwread(struct romfs_mountpt_s *rm, uint8_t *buffer, uint32_t sector,
-                 unsigned int nsectors)
+int romfs_hwread(struct romfs_mountpt_s *rm, uint8_t *buffer,
+                 uint32_t sector, unsigned int nsectors)
 {
   int ret = OK;
 
@@ -415,9 +415,9 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf,
         sector, rf->rf_cachesector, rm->rm_hwsectorsize,
         rm->rm_xipbase, rf->rf_buffer);
 
-  /* rf->rf_cachesector holds the current sector that is buffer in or referenced
-   * by rf->rf_buffer. If the requested sector is the same as this sector,
-   * then we do nothing.
+  /* rf->rf_cachesector holds the current sector that is buffer in or
+   * referenced by rf->rf_buffer. If the requested sector is the same as this
+   * sector then we do nothing.
    */
 
   if (rf->rf_cachesector != sector)
@@ -458,10 +458,10 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf,
  * Name: romfs_hwconfigure
  *
  * Description:
- *   This function is called as part of the ROMFS mount operation   It
- *   configures the ROMFS filestem for use on this block driver.  This includes
- *   the accounting for the geometry of the device, setting up any XIP modes
- *   of operation, and/or allocating any cache buffers.
+ *   This function is called as part of the ROMFS mount operation.
+ *   It configures the ROMFS filestem for use on this block driver.  This
+ *   include the accounting for the geometry of the device, setting up any
+ *   XIP modes of operation, and/or allocating any cache buffers.
  *
  ****************************************************************************/
 
@@ -563,9 +563,9 @@ int romfs_hwconfigure(struct romfs_mountpt_s *rm)
  *
  * Description:
  *   This function is called as part of the ROMFS mount operation   It
- *   sets up the mount structure to include configuration information contained
- *   in the ROMFS header.  This is the place where we actually determine if
- *   the media contains a ROMFS filesystem.
+ *   sets up the mount structure to include configuration information
+ *   contained in the ROMFS header.  This is the place where we actually
+ *   determine if the media contains a ROMFS filesystem.
  *
  ****************************************************************************/
 
@@ -575,7 +575,7 @@ int romfs_fsconfigure(struct romfs_mountpt_s *rm)
   int16_t     ndx;
 
   /* Then get information about the ROMFS filesystem on the devices managed
-   * by this block driver.  Read sector zero which contains the volume header.
+   * by this block driver. Read sector zero which contains the volume header.
    */
 
   ndx = romfs_devcacheread(rm, 0);

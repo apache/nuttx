@@ -79,7 +79,8 @@
                                 *        to 16 byte boundary. */
 
 /* Bits 0-3 of the rf_next offset provide mode information.  These are the
- * values specified in  */
+ * values specified in
+ */
 
 #define RFNEXT_MODEMASK    7    /* Bits 0-2: Mode; bit 3: Executable */
 #define RFNEXT_ALLMODEMASK 15   /* Bits 0-3: All mode bits */
@@ -129,9 +130,9 @@
  * Public Types
  ****************************************************************************/
 
-/* This structure represents the overall mountpoint state.  An instance of this
- * structure is retained as inode private data on each mountpoint that is
- * mounted with a fat32 filesystem.
+/* This structure represents the overall mountpoint state.  An instance of
+ * this structure is retained as inode private data on each mountpoint that
+ * is mounted with a fat32 filesystem.
  */
 
 struct romfs_file_s;
@@ -141,7 +142,7 @@ struct romfs_mountpt_s
   struct romfs_file_s *rm_head;      /* A list to all files opened on this mountpoint */
 
   bool     rm_mounted;              /* true: The file system is ready */
-  uint16_t rm_hwsectorsize;         /* HW: Sector size reported by block driver*/
+  uint16_t rm_hwsectorsize;         /* HW: Sector size reported by block driver */
   sem_t    rm_sem;                  /* Used to assume thread-safe access */
   uint32_t rm_rootoffset;           /* Saved offset to the first root directory entry */
   uint32_t rm_hwnsectors;           /* HW: The number of sectors reported by the hardware */
@@ -202,7 +203,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-void romfs_semtake(FAR struct romfs_mountpt_s *rm);
+int  romfs_semtake(FAR struct romfs_mountpt_s *rm);
 void romfs_semgive(FAR struct romfs_mountpt_s *rm);
 int  romfs_hwread(FAR struct romfs_mountpt_s *rm, FAR uint8_t *buffer,
        uint32_t sector, unsigned int nsectors);
