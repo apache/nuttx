@@ -311,7 +311,7 @@ int lib_hostfile_lookup(FAR const void *addr, socklen_t len, int type,
               goto errorout_with_stream;
             }
         }
-      else if (nread > 0 && len == host->h_length && type == host->h_addrtype)
+      else if (len == host->h_length && type == host->h_addrtype)
         {
           /* We successfully read the entry and the type and size of the
            * address is good.  Now compare the addresses:

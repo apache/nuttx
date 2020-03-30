@@ -4,7 +4,8 @@
  *   Copyright (C) 2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Reference: http://pubs.opengroup.org/onlinepubs/009695399/basedefs/netdb.h.html
+ * Reference:
+ *   http://pubs.opengroup.org/onlinepubs/009695399/basedefs/netdb.h.html
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -180,8 +181,9 @@
 struct hostent
 {
   FAR char  *h_name;       /* Official name of the host. */
-  FAR char **h_aliases;    /* A pointer to an array of pointers to alternative
-                            * host names, terminated by a null pointer. */
+  FAR char **h_aliases;    /* A pointer to an array of pointers to the
+                            * alternative host names, terminated by a
+                            * null pointer. */
   int        h_addrtype;   /* Address type. */
   int        h_length;     /* The length, in bytes, of the address. */
   FAR char **h_addr_list;  /* A pointer to an array of pointers to network
@@ -193,10 +195,11 @@ struct hostent
 
 struct netent
 {
-  FAR char  *n_name;       /* Official, fully-qualified (including the domain)
+  FAR char  *n_name;       /* Official, fully-qualified(including the domain)
                             * name of the host. */
-  FAR char **n_aliases;    /* A pointer to an array of pointers to alternative
-                            * network names, terminated by a null pointer. */
+  FAR char **n_aliases;    /* A pointer to an array of pointers to the
+                            * alternative network names, terminated by a
+                            * null pointer. */
   int        n_addrtype;   /* The address type of the network. */
   uint32_t   n_net;        /* The network number, in host byte order. */
 };

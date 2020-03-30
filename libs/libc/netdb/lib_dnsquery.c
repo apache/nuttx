@@ -105,12 +105,12 @@ struct dns_query_info_s
     struct in6_addr srv_ipv6;                    /* DNS server address */
 #endif
   } u;
-  in_port_t srv_port;                            /* DNS server port */
-  uint16_t id;                                   /* Query ID */
-  uint16_t rectype;                              /* Queried record type */
-  uint16_t qnamelen;                             /* Queried hostname length */
-  char qname[CONFIG_NETDB_DNSCLIENT_NAMESIZE+2]; /* Queried hostname in encoded
-                                                  * format + NUL */
+  in_port_t srv_port;                              /* DNS server port */
+  uint16_t id;                                     /* Query ID */
+  uint16_t rectype;                                /* Queried record type */
+  uint16_t qnamelen;                               /* Queried hostname length */
+  char qname[CONFIG_NETDB_DNSCLIENT_NAMESIZE + 2]; /* Queried hostname in
+                                                    * encoded format + NUL */
 };
 
 /****************************************************************************
@@ -127,7 +127,7 @@ struct dns_query_info_s
  *
  *   query    - A pointer to the starting byte of the name entry in the DNS
  *              response.
- *   queryend - A pointer to the byte after the last byte of the DNS response.
+ *   queryend - A pointer to the byte after the last byte of the response.
  *
  * Returned Value:
  *   Pointer to the first byte after the parsed name, or the value of
@@ -143,7 +143,7 @@ static FAR uint8_t *dns_parse_name(FAR uint8_t *query, FAR uint8_t *queryend)
     {
       n = *query++;
 
-      /* Check for a leading or trailing pointer.*/
+      /* Check for a leading or trailing pointer */
 
       if ((n & 0xc0) != 0)
         {
@@ -245,7 +245,7 @@ static int dns_send_query(int sd, FAR const char *name,
   qname = qinfo->qname;
   len   = 0;
   do
-   {
+    {
       /* Copy the name string to both query and saved info. */
 
       src++;
@@ -394,6 +394,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
         }
     }
 #endif
+
 #ifdef CONFIG_NET_IPv6
   /* Check for an IPv6 address */
 
@@ -427,7 +428,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
     }
 
   hdr         = (FAR struct dns_header_s *)buffer;
-  endofbuffer = (FAR uint8_t*)buffer + ret;
+  endofbuffer = (FAR uint8_t *)buffer + ret;
 
   ninfo("ID %d\n", ntohs(hdr->id));
   ninfo("Query %d\n", hdr->flags1 & DNS_FLAG1_RESPONSE);
@@ -478,29 +479,6 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
     {
       return -EILSEQ;
     }
-
-#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_INFO)
-  {
-    int d = 64;
-    FAR uint8_t *ptr = nameptr + sizeof(struct dns_question_s);
-
-    lib_dumpbuffer("namestart: ", namestart, nameptr - namestart);
-
-    for (; ; )
-      {
-        ninfo("%02X %02X %02X %02X %02X %02X %02X %02X \n",
-              ptr[0], ptr[1], ptr[2], ptr[3],
-              ptr[4], ptr[5], ptr[6], ptr[7]);
-
-        ptr += 8;
-        d -= 8;
-        if (d < 0)
-          {
-            break;
-          }
-      }
-  }
-#endif
 
   /* Since dns_parse_name() skips any pointer bytes,
    * we cannot compare for equality here.
@@ -571,8 +549,8 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
           nameptr += 10 + 4;
 
           ninfo("IPv4 address: %d.%d.%d.%d\n",
-                (ans->u.ipv4.s_addr      ) & 0xff,
-                (ans->u.ipv4.s_addr >> 8 ) & 0xff,
+                (ans->u.ipv4.s_addr) & 0xff,
+                (ans->u.ipv4.s_addr >> 8) & 0xff,
                 (ans->u.ipv4.s_addr >> 16) & 0xff,
                 (ans->u.ipv4.s_addr >> 24) & 0xff);
 
@@ -580,7 +558,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
             {
               FAR struct sockaddr_in *inaddr;
 
-              inaddr                   = (FAR struct sockaddr_in *)&addr[naddr_read].addr;
+              inaddr                   = &addr[naddr_read].ipv4;
               inaddr->sin_family       = AF_INET;
               inaddr->sin_port         = 0;
               inaddr->sin_addr.s_addr  = ans->u.ipv4.s_addr;
@@ -611,13 +589,13 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int *naddr,
                 ntohs(ans->u.ipv6.s6_addr[7]), ntohs(ans->u.ipv6.s6_addr[6]),
                 ntohs(ans->u.ipv6.s6_addr[5]), ntohs(ans->u.ipv6.s6_addr[4]),
                 ntohs(ans->u.ipv6.s6_addr[3]), ntohs(ans->u.ipv6.s6_addr[2]),
-                ntohs(ans->u.ipv6.s6_addr[1]), ntohs(ans->u.ipv6.s6_addr[0]));
+                ntohs(ans->u.ipv6.s6_addr[1]), ntohs(*ans->u.ipv6.s6_addr));
 
           if (naddr_read < *naddr)
             {
               FAR struct sockaddr_in6 *inaddr;
 
-              inaddr                   = (FAR struct sockaddr_in6 *)&addr[naddr_read].addr;
+              inaddr                   = &addr[naddr_read].ipv6;
               inaddr->sin6_family      = AF_INET6;
               inaddr->sin6_port        = 0;
               memcpy(inaddr->sin6_addr.s6_addr, ans->u.ipv6.s6_addr, 16);
@@ -683,7 +661,7 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 
   /* Loop while receive timeout errors occur and there are remaining
    * retries.
-  */
+   */
 
   for (retries = 0; retries < CONFIG_NETDB_DNSCLIENT_RETRIES; retries++)
     {
@@ -852,11 +830,11 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
       else
 #endif
         {
-           /* Unsupported address family. Return zero to continue the
-            * tranversal with the next nameserver address in resolv.conf.
-            */
+          /* Unsupported address family. Return zero to continue the
+           * tranversal with the next nameserver address in resolv.conf.
+           */
 
-           return 0;
+          return 0;
         }
     }
 

@@ -57,7 +57,6 @@ char g_hostbuffer[CONFIG_NETDB_BUFSIZE];
  * macro or an identifier declared with external linkage.
  */
 
-/* REVISIT:  This should at least be per-task? */
 int h_errno;
 
 /****************************************************************************

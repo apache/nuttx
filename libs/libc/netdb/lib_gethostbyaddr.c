@@ -77,7 +77,8 @@
  *
  ****************************************************************************/
 
-FAR struct hostent *gethostbyaddr(FAR const void *addr, socklen_t len, int type)
+FAR struct hostent *gethostbyaddr(FAR const void *addr,
+                                  socklen_t len, int type)
 {
   int ret;
 
