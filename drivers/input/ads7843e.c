@@ -100,25 +100,29 @@
 static void ads7843e_lock(FAR struct spi_dev_s *spi);
 static void ads7843e_unlock(FAR struct spi_dev_s *spi);
 
-static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd);
+static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv,
+              uint8_t cmd);
 
 /* Interrupts and data sampling */
 
 static void ads7843e_notify(FAR struct ads7843e_dev_s *priv);
-static int ads7843e_sample(FAR struct ads7843e_dev_s *priv,
+static int  ads7843e_sample(FAR struct ads7843e_dev_s *priv,
                            FAR struct ads7843e_sample_s *sample);
-static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
+static int  ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
                                FAR struct ads7843e_sample_s *sample);
 static void ads7843e_worker(FAR void *arg);
-static int ads7843e_interrupt(int irq, FAR void *context, FAR void *arg);
+static int  ads7843e_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* Character driver methods */
 
-static int ads7843e_open(FAR struct file *filep);
-static int ads7843e_close(FAR struct file *filep);
-static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t len);
-static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
-static int ads7843e_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
+static int  ads7843e_open(FAR struct file *filep);
+static int  ads7843e_close(FAR struct file *filep);
+static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer,
+              size_t len);
+static int  ads7843e_ioctl(FAR struct file *filep, int cmd,
+              unsigned long arg);
+static int  ads7843e_poll(FAR struct file *filep, struct pollfd *fds,
+              bool setup);
 
 /****************************************************************************
  * Private Data
@@ -252,7 +256,8 @@ static void ads7843e_unlock(FAR struct spi_dev_s *spi)
  *
  ****************************************************************************/
 
-static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
+static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv,
+                                 uint8_t cmd)
 {
   uint8_t  buffer[2];
   uint16_t result;
@@ -302,10 +307,10 @@ static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
       nxsem_post(&priv->waitsem);
     }
 
-  /* If there are threads waiting on poll() for ADS7843E data to become available,
-   * then wake them up now.  NOTE: we wake up all waiting threads because we
-   * do not know that they are going to do.  If they all try to read the data,
-   * then some make end up blocking after all.
+  /* If there are threads waiting on poll() for ADS7843E data to become
+   * available, then wake them up now.  NOTE: we wake up all waiting threads
+   * because we do not know that they are going to do.  If they all try to
+   * read the data, then some make end up blocking after all.
    */
 
   for (i = 0; i < CONFIG_ADS7843E_NPOLLWAITERS; i++)
@@ -425,8 +430,8 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
   iinfo("Sampled\n");
 
   /* Re-acquire the semaphore that manages mutually exclusive access to
-   * the device structure.  We may have to wait here.  But we have our sample.
-   * Interrupts and pre-emption will be re-enabled while we wait.
+   * the device structure.  We may have to wait here.  But we have our
+   * sample.  Interrupts and pre-emption will be re-enabled while we wait.
    */
 
   ret = nxsem_wait(&priv->devsem);
@@ -498,7 +503,9 @@ static int ads7843e_schedule(FAR struct ads7843e_dev_s *priv)
 
 static void ads7843e_wdog(int argc, uint32_t arg1, ...)
 {
-  FAR struct ads7843e_dev_s *priv = (FAR struct ads7843e_dev_s *)((uintptr_t)arg1);
+  FAR struct ads7843e_dev_s *priv =
+    (FAR struct ads7843e_dev_s *)((uintptr_t)arg1);
+
   ads7843e_schedule(priv);
 }
 
@@ -515,6 +522,7 @@ static void ads7843e_worker(FAR void *arg)
   uint16_t                      xdiff;
   uint16_t                      ydiff;
   bool                          pendown;
+  int                           ret;
 
   DEBUGASSERT(priv != NULL);
 
@@ -537,7 +545,17 @@ static void ads7843e_worker(FAR void *arg)
 
   /* Get exclusive access to the driver data structure */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  do
+    {
+      ret = nxsem_wait_uninterruptible(&priv->devsem);
+
+      /* This would only fail if something canceled the worker thread?
+       * That is not expected.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
+    }
+  while (ret < 0);
 
   /* Check for pen up or down by reading the PENIRQ GPIO. */
 
@@ -552,8 +570,9 @@ static void ads7843e_worker(FAR void *arg)
       priv->threshx = INVALID_THRESHOLD;
       priv->threshy = INVALID_THRESHOLD;
 
-      /* Ignore the interrupt if the pen was already up (CONTACT_NONE == pen up
-       * and already reported; CONTACT_UP == pen up, but not reported)
+      /* Ignore the interrupt if the pen was already up (CONTACT_NONE ==
+       * pen up and already reported; CONTACT_UP == pen up, but not
+       * reported)
        */
 
       if (priv->sample.contact == CONTACT_NONE ||
@@ -571,8 +590,8 @@ static void ads7843e_worker(FAR void *arg)
     }
 
   /* It is a pen down event.  If the last loss-of-contact event has not been
-   * processed yet, then we have to ignore the pen down event (or else it will
-   * look like a drag event)
+   * processed yet, then we have to ignore the pen down event (or else it
+   * will look like a drag event)
    */
 
   else if (priv->sample.contact == CONTACT_UP)
@@ -603,17 +622,23 @@ static void ads7843e_worker(FAR void *arg)
 
       add_ui_randomness((x << 16) | y);
 
-      /* Perform a thresholding operation so that the results will be more stable.
-       * If the difference from the last sample is small, then ignore the event.
-       * REVISIT:  Should a large change in pressure also generate a event?
+      /* Perform a thresholding operation so that the results will be more
+       * stable.  If the difference from the last sample is small, then
+       * ignore the event.  REVISIT:  Should a large change in pressure also
+       * generate a event?
        */
 
-      xdiff = x > priv->threshx ? (x - priv->threshx) : (priv->threshx - x);
-      ydiff = y > priv->threshy ? (y - priv->threshy) : (priv->threshy - y);
+      xdiff = x > priv->threshx ?
+        (x - priv->threshx) :
+        (priv->threshx - x);
+      ydiff = y > priv->threshy ?
+        (y - priv->threshy) :
+        (priv->threshy - y);
 
       /* Continue to sample the position while the pen is down */
 
-      wd_start(priv->wdog, ADS7843E_WDOG_DELAY, ads7843e_wdog, 1, (uint32_t)priv);
+      wd_start(priv->wdog, ADS7843E_WDOG_DELAY, ads7843e_wdog, 1,
+               (uint32_t)priv);
 
       /* Check the thresholds.  Bail if there is no significant difference */
 
@@ -819,7 +844,8 @@ static int ads7843e_close(FAR struct file *filep)
  * Name: ads7843e_read
  ****************************************************************************/
 
-static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer,
+                             size_t len)
 {
   FAR struct inode          *inode;
   FAR struct ads7843e_dev_s *priv;
@@ -908,7 +934,8 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
 
       if (sample.valid)
         {
-          report->point[0].flags  = TOUCH_UP | TOUCH_ID_VALID | TOUCH_POS_VALID;
+          report->point[0].flags  = TOUCH_UP | TOUCH_ID_VALID |
+                                    TOUCH_POS_VALID;
         }
       else
         {
@@ -919,13 +946,15 @@ static ssize_t ads7843e_read(FAR struct file *filep, FAR char *buffer, size_t le
     {
       /* First contact */
 
-      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID;
+      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID |
+                                TOUCH_POS_VALID;
     }
   else /* if (sample->contact == CONTACT_MOVE) */
     {
       /* Movement of the same contact */
 
-      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID;
+      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID |
+                                TOUCH_POS_VALID;
     }
 
   iinfo("  id:      %d\n", report->point[0].id);
@@ -1126,7 +1155,8 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
 #ifndef CONFIG_ADS7843E_MULTIPLE
   priv = &g_ads7843e;
 #else
-  priv = (FAR struct ads7843e_dev_s *)kmm_malloc(sizeof(struct ads7843e_dev_s));
+  priv = (FAR struct ads7843e_dev_s *)
+    kmm_malloc(sizeof(struct ads7843e_dev_s));
   if (!priv)
     {
       ierr("ERROR: kmm_malloc(%d) failed\n", sizeof(struct ads7843e_dev_s));

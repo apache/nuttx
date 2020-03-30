@@ -87,6 +87,7 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Low-level SPI helpers */
 
 static void max11802_lock(FAR struct spi_dev_s *spi);
@@ -237,7 +238,7 @@ static uint16_t max11802_sendcmd(FAR struct max11802_dev_s *priv,
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN(0), false);
 
   result = ((uint16_t)buffer[0] << 8) | (uint16_t)buffer[1];
-  *tags = result & 0xF;
+  *tags = result & 0xf;
   result >>= 4; /* Get rid of tags */
 
   iinfo("cmd:%02x response:%04x\n", cmd, result);
@@ -323,11 +324,11 @@ static int max11802_sample(FAR struct max11802_dev_s *priv,
           priv->id++;
         }
       else if (sample->contact == CONTACT_DOWN)
-       {
+        {
           /* First report -- next report will be a movement */
 
-         priv->sample.contact = CONTACT_MOVE;
-       }
+          priv->sample.contact = CONTACT_MOVE;
+        }
 
       priv->penchange = false;
       ret = OK;
@@ -461,7 +462,9 @@ static int max11802_schedule(FAR struct max11802_dev_s *priv)
 
 static void max11802_wdog(int argc, uint32_t arg1, ...)
 {
-  FAR struct max11802_dev_s *priv = (FAR struct max11802_dev_s *)((uintptr_t)arg1);
+  FAR struct max11802_dev_s *priv =
+    (FAR struct max11802_dev_s *)((uintptr_t)arg1);
+
   max11802_schedule(priv);
 }
 
@@ -478,7 +481,8 @@ static void max11802_worker(FAR void *arg)
   uint16_t                      xdiff;
   uint16_t                      ydiff;
   bool                          pendown;
-  int                           tags, tags2;
+  int                           tags;
+  int                           tags2;
 
   DEBUGASSERT(priv != NULL);
 
@@ -505,7 +509,17 @@ static void max11802_worker(FAR void *arg)
 
   /* Get exclusive access to the driver data structure */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  do
+    {
+      ret = nxsem_wait_uninterruptible(&priv->devsem);
+
+      /* This would only fail if something canceled the worker thread?
+       * That is not expected.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
+    }
+  while (ret < 0);
 
   /* Check for pen up or down by reading the PENIRQ GPIO. */
 
@@ -564,11 +578,11 @@ static void max11802_worker(FAR void *arg)
        * again later.
        */
 
-       iinfo("Previous pen up event still in buffer\n");
-       max11802_notify(priv);
-       wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
-                (uint32_t)priv);
-       goto ignored;
+      iinfo("Previous pen up event still in buffer\n");
+      max11802_notify(priv);
+      wd_start(priv->wdog, MAX11802_WDOG_DELAY, max11802_wdog, 1,
+               (uint32_t)priv);
+      goto ignored;
     }
   else
     {
@@ -595,7 +609,7 @@ static void max11802_worker(FAR void *arg)
           x = max11802_sendcmd(priv, MAX11802_CMD_XPOSITION, &tags);
           y = max11802_sendcmd(priv, MAX11802_CMD_YPOSITION, &tags2);
 #endif
-          if (tags != 0xF && tags2 != 0xF)
+          if (tags != 0xf && tags2 != 0xf)
             {
               readycount++;
             }
@@ -876,7 +890,7 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
         {
           ret = -EAGAIN;
           goto errout;
-       }
+        }
 
       /* Wait for sample data */
 
@@ -912,7 +926,8 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
 
       if (sample.valid)
         {
-          report->point[0].flags  = TOUCH_UP | TOUCH_ID_VALID | TOUCH_POS_VALID;
+          report->point[0].flags  = TOUCH_UP | TOUCH_ID_VALID |
+                                    TOUCH_POS_VALID;
         }
       else
         {
@@ -923,13 +938,15 @@ static ssize_t max11802_read(FAR struct file *filep, FAR char *buffer,
     {
       /* First contact */
 
-      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID;
+      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID |
+                                TOUCH_POS_VALID;
     }
   else /* if (sample->contact == CONTACT_MOVE) */
     {
       /* Movement of the same contact */
 
-      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID | TOUCH_POS_VALID;
+      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID |
+                                TOUCH_POS_VALID;
     }
 
   iinfo("  id:      %d\n", report->point[0].id);
@@ -1130,7 +1147,8 @@ int max11802_register(FAR struct spi_dev_s *spi,
 #ifndef CONFIG_MAX11802_MULTIPLE
   priv = &g_max11802;
 #else
-  priv = (FAR struct max11802_dev_s *)kmm_malloc(sizeof(struct max11802_dev_s));
+  priv = (FAR struct max11802_dev_s *)
+    kmm_malloc(sizeof(struct max11802_dev_s));
   if (!priv)
     {
       ierr("ERROR: kmm_malloc(%d) failed\n", sizeof(struct max11802_dev_s));
@@ -1223,10 +1241,10 @@ int max11802_register(FAR struct spi_dev_s *spi,
   max11802_unlock(spi);
 
   if (ret != MAX11802_MODE)
-  {
-    ierr("ERROR: max11802 mode readback failed: %02x\n", ret);
-    goto errout_with_priv;
-  }
+    {
+      ierr("ERROR: max11802 mode readback failed: %02x\n", ret);
+      goto errout_with_priv;
+    }
 
   /* Register the device as an input device */
 

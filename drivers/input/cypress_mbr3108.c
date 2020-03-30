@@ -214,8 +214,8 @@ struct mbr3108_dev_s
 };
 
 /****************************************************************************
-* Private Function Prototypes
-*****************************************************************************/
+ * Private Function Prototypes
+ ****************************************************************************/
 
 static int mbr3108_open(FAR struct file *filep);
 static int mbr3108_close(FAR struct file *filep);
@@ -227,8 +227,8 @@ static int mbr3108_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
 
 /****************************************************************************
-* Private Data
-****************************************************************************/
+ * Private Data
+ ****************************************************************************/
 
 static const struct file_operations g_mbr3108_fileops =
 {
@@ -242,8 +242,8 @@ static const struct file_operations g_mbr3108_fileops =
 };
 
 /****************************************************************************
-* Private Functions
-****************************************************************************/
+ * Private Functions
+ ****************************************************************************/
 
 static int mbr3108_i2c_write(FAR struct mbr3108_dev_s *dev, uint8_t reg,
                              const uint8_t *buf, size_t buflen)
@@ -265,11 +265,13 @@ static int mbr3108_i2c_write(FAR struct mbr3108_dev_s *dev, uint8_t reg,
       .length    = buflen
     }
   };
+
   int ret = -EIO;
   int retries;
 
   /* MBR3108 will respond with NACK to address when in low-power mode. Host
-   * needs to retry address selection multiple times to get MBR3108 to wake-up.
+   * needs to retry address selection multiple times to get MBR3108 to
+   * wake-up.
    */
 
   for (retries = 0; retries < MBR3108_I2C_RETRIES; retries++)
@@ -317,11 +319,13 @@ static int mbr3108_i2c_read(FAR struct mbr3108_dev_s *dev, uint8_t reg,
       .length    = buflen
     }
   };
+
   int ret = -EIO;
   int retries;
 
   /* MBR3108 will respond with NACK to address when in low-power mode. Host
-   * needs to retry address selection multiple times to get MBR3108 to wake-up.
+   * needs to retry address selection multiple times to get MBR3108 to
+   * wake-up.
    */
 
   for (retries = 0; retries < MBR3108_I2C_RETRIES; retries++)
@@ -371,7 +375,9 @@ static int mbr3108_check_cmd_status(FAR struct mbr3108_dev_s *dev)
   const uint8_t start_reg = MBR3108_CTRL_CMD;
   const uint8_t last_reg = MBR3108_CTRL_CMD_ERR;
   uint8_t readbuf[MBR3108_CTRL_CMD_ERR - MBR3108_CTRL_CMD + 1];
-  uint8_t cmd, cmd_status, cmd_err;
+  uint8_t cmd;
+  uint8_t cmd_status;
+  uint8_t cmd_err;
   int ret;
 
   DEBUGASSERT(last_reg - start_reg + 1 == sizeof(readbuf));
@@ -483,7 +489,8 @@ static int mbr3108_clear_latched(FAR struct mbr3108_dev_s *dev)
   ret = mbr3108_i2c_write(dev, reg, &cmd, 1);
   if (ret < 0)
     {
-      mbr3108_dbg("MBR3108_CTRL_CMD:MBR3108_CMD_CLEAR_LATCHED write failed.\n");
+      mbr3108_dbg("MBR3108_CTRL_CMD:  "
+                  "MBR3108_CMD_CLEAR_LATCHED write failed.\n");
       return ret;
     }
 
@@ -526,8 +533,9 @@ static int mbr3108_debug_setup(FAR struct mbr3108_dev_s *dev,
   return ret;
 }
 
-static int mbr3108_device_configuration(FAR struct mbr3108_dev_s *dev,
-                                        FAR const struct mbr3108_sensor_conf_s *conf)
+static int
+  mbr3108_device_configuration(FAR struct mbr3108_dev_s *dev,
+                               FAR const struct mbr3108_sensor_conf_s *conf)
 {
   const uint8_t start_reg = MBR3108_SENSOR_EN;
   const uint8_t last_reg = MBR3108_CONFIG_CRC + 1;
@@ -580,7 +588,10 @@ static int mbr3108_device_configuration(FAR struct mbr3108_dev_s *dev,
 static int mbr3108_get_sensor_status(FAR struct mbr3108_dev_s *dev,
                                      FAR void *buf)
 {
-  struct mbr3108_sensor_status_s status = {};
+  struct mbr3108_sensor_status_s status =
+  {
+  };
+
   const uint8_t start_reg = MBR3108_BUTTON_STAT;
   const uint8_t last_reg = MBR3108_LATCHED_PROX_STAT;
   uint8_t readbuf[MBR3108_LATCHED_PROX_STAT - MBR3108_BUTTON_STAT + 1];
@@ -588,7 +599,7 @@ static int mbr3108_get_sensor_status(FAR struct mbr3108_dev_s *dev,
 
   DEBUGASSERT(last_reg - start_reg + 1 == sizeof(readbuf));
 
-  /* Attempt to sensor status registers.*/
+  /* Attempt to sensor status registers. */
 
   ret = mbr3108_i2c_read(dev, start_reg, readbuf, sizeof(readbuf));
   if (ret < 0)
@@ -598,14 +609,17 @@ static int mbr3108_get_sensor_status(FAR struct mbr3108_dev_s *dev,
       return ret;
     }
 
-  status.button = (readbuf[MBR3108_BUTTON_STAT + 0 - start_reg]) |
-                  (readbuf[MBR3108_BUTTON_STAT + 1 - start_reg] << 8);
-  status.proximity = readbuf[MBR3108_PROX_STAT - start_reg];
+  status.button            =
+    (readbuf[MBR3108_BUTTON_STAT + 0 - start_reg]) |
+    (readbuf[MBR3108_BUTTON_STAT + 1 - start_reg] << 8);
+  status.proximity         =
+    readbuf[MBR3108_PROX_STAT - start_reg];
 
-  status.latched_button =
-                  (readbuf[MBR3108_LATCHED_BUTTON_STAT + 0 - start_reg]) |
-                  (readbuf[MBR3108_LATCHED_BUTTON_STAT + 1 - start_reg] << 8);
-  status.latched_proximity = readbuf[MBR3108_LATCHED_PROX_STAT - start_reg];
+  status.latched_button    =
+    (readbuf[MBR3108_LATCHED_BUTTON_STAT + 0 - start_reg]) |
+    (readbuf[MBR3108_LATCHED_BUTTON_STAT + 1 - start_reg] << 8);
+  status.latched_proximity =
+    readbuf[MBR3108_LATCHED_PROX_STAT - start_reg];
 
   memcpy(buf, &status, sizeof(status));
 
@@ -619,13 +633,17 @@ static int mbr3108_get_sensor_status(FAR struct mbr3108_dev_s *dev,
 static int mbr3108_get_sensor_debug_data(FAR struct mbr3108_dev_s *dev,
                                          FAR void *buf)
 {
-  struct mbr3108_sensor_debug_s data = {};
+  struct mbr3108_sensor_debug_s data =
+  {
+  };
+
   const uint8_t start_reg = MBR3108_SYNC_COUNTER1;
   const uint8_t last_reg = MBR3108_SYNC_COUNTER2;
   uint8_t readbuf[MBR3108_SYNC_COUNTER2 - MBR3108_SYNC_COUNTER1 + 1];
+  uint8_t sync1;
+  uint8_t sync2;
   int ret;
   int retries;
-  uint8_t sync1, sync2;
 
   DEBUGASSERT(last_reg - start_reg + 1 == sizeof(readbuf));
 
@@ -692,7 +710,9 @@ static int mbr3108_probe_device(FAR struct mbr3108_dev_s *dev)
 
   DEBUGASSERT(last_reg - start_reg + 1 == sizeof(readbuf));
 
-  /* Attempt to read device identification registers with multi-byte read.*/
+  /* Attempt to read device identification registers with multi-byte
+   * read.
+   */
 
   ret = mbr3108_i2c_read(dev, start_reg, readbuf, sizeof(readbuf));
   if (ret < 0)
@@ -719,11 +739,11 @@ static int mbr3108_probe_device(FAR struct mbr3108_dev_s *dev)
       dev_rev != MBR3108_EXPECTED_DEVICE_REV)
     {
       mbr3108_dbg("Probe failed, dev-id mismatch!\n");
-      mbr3108_dbg(
-          "  Expected: family_id: 0x%02x, device_id: 0x%04x, device_rev: %d\n",
-          MBR3108_EXPECTED_FAMILY_ID,
-          MBR3108_EXPECTED_DEVICE_ID,
-          MBR3108_EXPECTED_DEVICE_REV);
+      mbr3108_dbg("  Expected: family_id: 0x%02x, device_id: "
+                  "0x%04x, device_rev: %d\n",
+                  MBR3108_EXPECTED_FAMILY_ID,
+                  MBR3108_EXPECTED_DEVICE_ID,
+                  MBR3108_EXPECTED_DEVICE_REV);
 
       return -ENXIO;
     }
@@ -874,7 +894,11 @@ static int mbr3108_open(FAR struct file *filep)
   DEBUGASSERT(inode && inode->i_private);
   priv = inode->i_private;
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   use_count = priv->cref + 1;
   if (use_count == 1)
@@ -936,6 +960,7 @@ static int mbr3108_close(FAR struct file *filep)
   FAR struct inode *inode;
   FAR struct mbr3108_dev_s *priv;
   int use_count;
+  int ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -943,7 +968,11 @@ static int mbr3108_close(FAR struct file *filep)
   DEBUGASSERT(inode && inode->i_private);
   priv = inode->i_private;
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   use_count = priv->cref - 1;
   if (use_count == 0)
@@ -1025,8 +1054,8 @@ static int mbr3108_poll(FAR struct file *filep, FAR struct pollfd *fds,
           goto out;
         }
 
-      /* This is a request to set up the poll.  Find an available slot for the
-       * poll structure reference.
+      /* This is a request to set up the poll.  Find an available slot for
+       * the poll structure reference.
        */
 
       for (i = 0; i < CONFIG_INPUT_CYPRESS_MBR3108_NPOLLWAITERS; i++)

@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/input/mxt.c
  *
- *   Copyright (C) 2014, 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -75,7 +60,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Driver support ***********************************************************/
+
 /* This format is used to construct the /dev/input[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
@@ -105,6 +92,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This enumeration describes the state of one contact.
  *
  *                  |
@@ -219,6 +207,7 @@ struct mxt_dev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* MXT register access */
 
 static int  mxt_getreg(FAR struct mxt_dev_s *priv, uint16_t regaddr,
@@ -279,6 +268,7 @@ static int  mxt_hwinitialize(FAR struct mxt_dev_s *priv);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* This the vtable that supports the character driver interface */
 
 static const struct file_operations mxt_fops =
@@ -606,10 +596,10 @@ static void mxt_notify(FAR struct mxt_dev_s *priv)
       nxsem_post(&priv->waitsem);
     }
 
-  /* If there are threads waiting on poll() for maXTouch data to become available,
-   * then wake them up now.  NOTE: we wake up all waiting threads because we
-   * do not know that they are going to do.  If they all try to read the data,
-   * then some make end up blocking after all.
+  /* If there are threads waiting on poll() for maXTouch data to become
+   * available, then wake them up now.  NOTE: we wake up all waiting threads
+   * because we do not know that they are going to do.  If they all try to
+   * read the data, then some make end up blocking after all.
    */
 
   for (i = 0; i < CONFIG_MXT_NPOLLWAITERS; i++)
@@ -708,8 +698,8 @@ static inline int mxt_waitsample(FAR struct mxt_dev_s *priv)
     }
 
   /* Re-acquire the semaphore that manages mutually exclusive access to
-   * the device structure.  We may have to wait here.  But we have our sample.
-   * Interrupts and pre-emption will be re-enabled while we wait.
+   * the device structure.  We may have to wait here.  But we have our
+   * sample.  Interrupts and pre-emption will be re-enabled while we wait.
    */
 
   ret = nxsem_wait(&priv->devsem);
@@ -742,7 +732,7 @@ static void mxt_button_event(FAR struct mxt_dev_s *priv,
    * pressed if the corresponding bit is zero.
    */
 
-   for (i = 0; i < priv->lower->nbuttons; i++)
+  for (i = 0; i < priv->lower->nbuttons; i++)
     {
       uint8_t bit = (MXT_GPIO0_MASK << i);
 
@@ -778,8 +768,10 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
 
   /* Extract the 12-bit X and Y positions */
 
-  x = ((uint16_t)msg->body[1] << 4) | (((uint16_t)msg->body[3] >> 4) & 0x0f);
-  y = ((uint16_t)msg->body[2] << 4) | (((uint16_t)msg->body[3] & 0x0f));
+  x = ((uint16_t)msg->body[1] << 4) |
+      (((uint16_t)msg->body[3] >> 4) & 0x0f);
+  y = ((uint16_t)msg->body[2] << 4) |
+      (((uint16_t)msg->body[3] & 0x0f));
 
   /* Swap X/Y as necessary */
 
@@ -896,8 +888,10 @@ static void mxt_touch_event(FAR struct mxt_dev_s *priv,
            * event?
            */
 
-          xdiff = x > sample->lastx ? (x - sample->lastx) : (sample->lastx - x);
-          ydiff = y > sample->lasty ? (y - sample->lasty) : (sample->lasty - y);
+          xdiff = x > sample->lastx ? (x - sample->lastx) :
+                                      (sample->lastx - x);
+          ydiff = y > sample->lasty ? (y - sample->lasty) :
+                                      (sample->lasty - y);
 
           /* Check the thresholds */
 
@@ -983,7 +977,17 @@ static void mxt_worker(FAR void *arg)
 
   /* Get exclusive access to the MXT driver data structure */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  do
+    {
+      ret = nxsem_wait_uninterruptible(&priv->devsem);
+
+      /* This would only fail if something canceled the worker thread?
+       * That is not expected.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
+    }
+  while (ret < 0);
 
   /* Loop, processing each message from the maXTouch */
 
@@ -1040,15 +1044,18 @@ static void mxt_worker(FAR void *arg)
         }
 #endif
 
-      /* 0xff marks the end of the messages; any other message IDs are ignored
-       * (after complaining a little).
+      /* 0xff marks the end of the messages; any other message IDs are
+       * ignored (after complaining a little).
        */
 
       else if (msg.id != 0xff)
         {
-          iinfo("Ignored: id=%u message={%02x %02x %02x %02x %02x %02x %02x}\n",
-                msg.id, msg.body[0], msg.body[1], msg.body[2], msg.body[3],
-                msg.body[4], msg.body[5], msg.body[6]);
+          iinfo("Ignored: id=%u message="
+                "{%02x %02x %02x %02x %02x %02x %02x}\n",
+                msg.id,
+                msg.body[0], msg.body[1], msg.body[2],
+                msg.body[3], msg.body[4], msg.body[5],
+                msg.body[6]);
 
           retries++;
         }
@@ -1056,6 +1063,7 @@ static void mxt_worker(FAR void *arg)
   while (id != 0xff && retries < 16);
 
 errout_with_semaphore:
+
   /* Release our lock on the MXT device */
 
   nxsem_post(&priv->devsem);
@@ -1294,7 +1302,7 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
         {
           ret = -EAGAIN;
           goto errout;
-       }
+        }
 
       /* Wait for sample data */
 
@@ -1354,7 +1362,8 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   if (ncontacts > 0)
     {
-      FAR struct touch_sample_s *report = (FAR struct touch_sample_s *)buffer;
+      FAR struct touch_sample_s *report =
+        (FAR struct touch_sample_s *)buffer;
 
       /* Yes, copy the sample data into the user buffer */
 
@@ -1442,8 +1451,9 @@ static ssize_t mxt_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
                   sample->contact = CONTACT_REPORT;
 
-                  /* A pressure measurement of zero means that pressure is not
-                   * available */
+                  /* A pressure measurement of zero means that pressure is
+                   * not available.
+                   */
 
                   if (point->pressure != 0)
                     {
@@ -1780,8 +1790,8 @@ static int mxt_hwinitialize(FAR struct mxt_dev_s *priv)
   info->ysize = regval;
 
   iinfo("Family: %u variant: %u version: %u.%u.%02x\n",
-        info->family, info->variant, info->version >> 4, info->version & 0x0f,
-        info->build);
+        info->family, info->variant, info->version >> 4,
+        info->version & 0x0f, info->build);
   iinfo("Matrix size: (%u,%u) objects: %u\n",
         info->xsize, info->ysize, info->nobjects);
 
