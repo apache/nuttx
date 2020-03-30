@@ -138,7 +138,8 @@ struct usbhost_freestate_s
 
 /* Semaphores */
 
-static void usbhost_takesem(sem_t *sem);
+static int usbhost_takesem(FAR sem_t *sem);
+static void usbhost_forcetake(FAR sem_t *sem);
 #define usbhost_givesem(s) nxsem_post(s);
 
 /* Memory allocation services */
@@ -311,9 +312,37 @@ static uint32_t g_devinuse;
  *
  ****************************************************************************/
 
-static void usbhost_takesem(sem_t *sem)
+static int usbhost_takesem(FAR sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
+}
+
+/****************************************************************************
+ * Name: usbhost_forcetake
+ *
+ * Description:
+ *   This is just another wrapper but this one continues even if the thread
+ *   is canceled.  This must be done in certain conditions where were must
+ *   continue in order to clean-up resources.
+ *
+ ****************************************************************************/
+
+static void usbhost_forcetake(FAR sem_t *sem)
+{
+  int ret;
+
+  do
+    {
+      ret = nxsem_wait_uninterruptible(sem);
+
+      /* The only expected error would -ECANCELED meaning that the
+       * parent thread has been canceled.  We have to continue and
+       * terminate the poll in this case.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
+    }
+  while (ret < 0);
 }
 
 /****************************************************************************
@@ -1347,7 +1376,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
    * driver has been registered.
    */
 
-  usbhost_takesem(&priv->exclsem);
+  usbhost_forcetake(&priv->exclsem);
   DEBUGASSERT(priv->crefs >= 2);
 
   /* Decrement the reference count */
@@ -1877,7 +1906,11 @@ static int usbhost_open(FAR struct inode *inode)
   /* Make sure that we have exclusive access to the private data structure */
 
   DEBUGASSERT(priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
-  usbhost_takesem(&priv->exclsem);
+  ret = usbhost_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Check if the mass storage device is still connected.  We need to
    * disable interrupts momentarily to assure that there are no asynchronous
@@ -1927,7 +1960,8 @@ static int usbhost_close(FAR struct inode *inode)
   /* Decrement the reference count on the block driver */
 
   DEBUGASSERT(priv->crefs > 1);
-  usbhost_takesem(&priv->exclsem);
+
+  usbhost_forcetake(&priv->exclsem);
   priv->crefs--;
 
   /* Release the semaphore.  The following operations when crefs == 1 are
@@ -1976,6 +2010,7 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
   FAR struct usbhost_state_s *priv;
   FAR struct usbhost_hubport_s *hport;
   ssize_t nbytes = 0;
+  int ret;
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct usbhost_state_s *)inode->i_private;
@@ -2001,7 +2036,11 @@ static ssize_t usbhost_read(FAR struct inode *inode, unsigned char *buffer,
     {
       FAR struct usbmsc_cbw_s *cbw;
 
-      usbhost_takesem(&priv->exclsem);
+      ret = usbhost_takesem(&priv->exclsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Assume allocation failure */
 
@@ -2084,6 +2123,7 @@ static ssize_t usbhost_write(FAR struct inode *inode,
   FAR struct usbhost_state_s *priv;
   FAR struct usbhost_hubport_s *hport;
   ssize_t nbytes;
+  int ret;
 
   uinfo("sector: %d nsectors: %d sectorsize: %d\n");
 
@@ -2108,7 +2148,11 @@ static ssize_t usbhost_write(FAR struct inode *inode,
     {
       FAR struct usbmsc_cbw_s *cbw;
 
-      usbhost_takesem(&priv->exclsem);
+      ret = usbhost_takesem(&priv->exclsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Assume allocation failure */
 
@@ -2198,19 +2242,19 @@ static int usbhost_geometry(FAR struct inode *inode,
     {
       /* Return the geometry of the USB mass storage device */
 
-      usbhost_takesem(&priv->exclsem);
+      ret = usbhost_takesem(&priv->exclsem);
+      if (ret >= 0)
+        {
+          geometry->geo_available     = true;
+          geometry->geo_mediachanged  = false;
+          geometry->geo_writeenabled  = true;
+          geometry->geo_nsectors      = priv->nblocks;
+          geometry->geo_sectorsize    = priv->blocksize;
+          usbhost_givesem(&priv->exclsem);
 
-      geometry->geo_available     = true;
-      geometry->geo_mediachanged  = false;
-      geometry->geo_writeenabled  = true;
-      geometry->geo_nsectors      = priv->nblocks;
-      geometry->geo_sectorsize    = priv->blocksize;
-      usbhost_givesem(&priv->exclsem);
-
-      uinfo("nsectors: %ld sectorsize: %d\n",
-             (long)geometry->geo_nsectors, geometry->geo_sectorsize);
-
-      ret = OK;
+          uinfo("nsectors: %ld sectorsize: %d\n",
+                 (long)geometry->geo_nsectors, geometry->geo_sectorsize);
+        }
     }
 
   return ret;
@@ -2247,17 +2291,20 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
     {
       /* Process the IOCTL by command */
 
-      usbhost_takesem(&priv->exclsem);
-      switch (cmd)
+      ret = usbhost_takesem(&priv->exclsem);
+      if (ret >= 0)
         {
-        /* Add support for ioctl commands here */
+          switch (cmd)
+            {
+              /* Add support for ioctl commands here */
 
-        default:
-          ret = -ENOTTY;
-          break;
+              default:
+                ret = -ENOTTY;
+                break;
+            }
+
+          usbhost_givesem(&priv->exclsem);
         }
-
-      usbhost_givesem(&priv->exclsem);
     }
 
   return ret;
