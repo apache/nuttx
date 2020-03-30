@@ -16,11 +16,6 @@
 # CONFIG_SIM_M32=y
 # The recent versions of macOS is 64-bit only
 -sim:loadable
--sim:mtdpart
--sim:mtdrwb
--sim:rpproxy
--sim:rpserver
--sim:tcpblaster
 -sim:module32
 
 # For some reasons, macOS sim builds are considerably slower than
