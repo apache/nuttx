@@ -114,10 +114,12 @@ struct sgp30_cmd_s
 static int sgp30_do_transfer(FAR struct i2c_master_s *i2c,
                              FAR struct i2c_msg_s *msgv,
                              size_t nmsg);
-static int sgp30_write_cmd(FAR struct sgp30_dev_s *priv, struct sgp30_cmd_s cmd,
+static int sgp30_write_cmd(FAR struct sgp30_dev_s *priv,
+                           struct sgp30_cmd_s cmd,
                            FAR struct sgp30_word_s *params,
                            unsigned int num_params);
-static int sgp30_read_cmd(FAR struct sgp30_dev_s *priv, struct sgp30_cmd_s cmd,
+static int sgp30_read_cmd(FAR struct sgp30_dev_s *priv,
+                          struct sgp30_cmd_s cmd,
                           FAR struct sgp30_word_s *words,
                           unsigned int num_words);
 
@@ -128,7 +130,8 @@ static void sgp30_set_command_param(FAR struct sgp30_word_s *param,
                                     uint16_t value);
 static int sgp30_check_data_crc(FAR const struct sgp30_word_s *words,
                                 unsigned int num_words);
-static uint16_t sgp30_data_word_to_uint16(FAR const struct sgp30_word_s *word);
+static uint16_t sgp30_data_word_to_uint16(
+                                FAR const struct sgp30_word_s *word);
 
 /* Driver features */
 
@@ -273,7 +276,8 @@ static int sgp30_do_transfer(FAR struct i2c_master_s *i2c,
  * Name: sgp30_write_cmd
  ****************************************************************************/
 
-static int sgp30_write_cmd(FAR struct sgp30_dev_s *priv, struct sgp30_cmd_s cmd,
+static int sgp30_write_cmd(FAR struct sgp30_dev_s *priv,
+                           struct sgp30_cmd_s cmd,
                            FAR struct sgp30_word_s *params,
                            unsigned int num_params)
 {
@@ -310,7 +314,8 @@ static int sgp30_write_cmd(FAR struct sgp30_dev_s *priv, struct sgp30_cmd_s cmd,
  * Name: sgp30_read_cmd
  ****************************************************************************/
 
-static int sgp30_read_cmd(FAR struct sgp30_dev_s *priv, struct sgp30_cmd_s cmd,
+static int sgp30_read_cmd(FAR struct sgp30_dev_s *priv,
+                          struct sgp30_cmd_s cmd,
                           FAR struct sgp30_word_s *words,
                           unsigned int num_words)
 {
@@ -415,7 +420,8 @@ static void sgp30_set_command_param(FAR struct sgp30_word_s *param,
  * Name: sgp30_data_word_to_uint16
  ****************************************************************************/
 
-static uint16_t sgp30_data_word_to_uint16(FAR const struct sgp30_word_s *word)
+static uint16_t sgp30_data_word_to_uint16(
+    FAR const struct sgp30_word_s *word)
 {
   return (word[0].data[0] << 8) | (word[0].data[1]);
 }
@@ -567,7 +573,11 @@ static int sgp30_open(FAR struct file *filep)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Increment the count of open references on the driver */
 
@@ -581,10 +591,12 @@ static int sgp30_open(FAR struct file *filep)
 
       if (sgp30_read_cmd(priv, SGP30_CMD_GET_SERIAL_ID, serial, 3) >= 0
           && sgp30_check_data_crc(serial, 3) >= 0 &&
-          sgp30_read_cmd(priv, SGP30_CMD_GET_FEATURE_SET_VERSION, buf, 1) >= 0
+          sgp30_read_cmd(priv,
+                         SGP30_CMD_GET_FEATURE_SET_VERSION, buf, 1) >= 0
           && sgp30_check_data_crc(buf, 1) >= 0)
         {
-          struct timespec start, curr;
+          struct timespec start;
+          struct timespec curr;
           sgp30_dbg("serial id: %04x-%04x-%04x\n",
                     sgp30_data_word_to_uint16(serial + 0),
                     sgp30_data_word_to_uint16(serial + 1),
@@ -599,23 +611,26 @@ static int sgp30_open(FAR struct file *filep)
           ret = sgp30_write_cmd(priv, SGP30_CMD_INIT_AIR_QUALITY, NULL, 0);
           if (ret < 0)
             {
-              sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY) failed, %d\n",
-                        ret);
+              sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY)"
+                         " failed, %d\n", ret);
             }
           else
             {
               uint32_t repeat = SGP30_INIT_RETRIES;
               clock_gettime(CLOCK_REALTIME, &curr);
               sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY)\n");
-              while (repeat-- && time_has_passed_ms(&curr, &start, SGP30_INIT_LIMIT_MS))
+              while (repeat-- &&
+                     time_has_passed_ms(&curr, &start, SGP30_INIT_LIMIT_MS))
                 {
-                  /* Infrequently the SGP30_CMD_INIT_AIR_QUALITY message delivery
-                   * takes suspiciously long time (SGP30_INIT_LIMIT_MS or more) and
-                   * in these cases the TVOC values will never reach the correct
-                   * level (not even after 24 hours).
-                   * If this delay is detected, the sensor is given a "General Call"
-                   * soft reset as described in the SGP30 datasheet and initialization
-                   * is tried again after CONFIG_SGP30_RESET_DELAY_US.
+                  /* Infrequently the SGP30_CMD_INIT_AIR_QUALITY message
+                   * delivery takes suspiciously long time
+                   * (SGP30_INIT_LIMIT_MS or more) and in these cases the
+                   * TVOC values will never reach the correct level (not
+                   * even after 24 hours).
+                   * If this delay is detected, the sensor is given a
+                   * "General Call" soft reset as described in the SGP30
+                   * datasheet and initialization is tried again after
+                   * CONFIG_SGP30_RESET_DELAY_US.
                    */
 
                   ret = sgp30_soft_reset(priv);
@@ -624,14 +639,17 @@ static int sgp30_open(FAR struct file *filep)
                       sgp30_dbg("sgp30_soft_reset failed, %d\n", ret);
                       return ret;
                     }
+
                   nxsig_usleep(CONFIG_SGP30_RESET_DELAY_US);
 
                   clock_gettime(CLOCK_REALTIME, &start);
-                  ret = sgp30_write_cmd(priv, SGP30_CMD_INIT_AIR_QUALITY, NULL, 0);
+                  ret = sgp30_write_cmd(priv, SGP30_CMD_INIT_AIR_QUALITY,
+                                        NULL, 0);
                   clock_gettime(CLOCK_REALTIME, &curr);
                   if (ret < 0)
                     {
-                      sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY) failed, %d\n", ret);
+                      sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY)"
+                                 " failed, %d\n", ret);
                     }
                 }
             }
@@ -666,10 +684,15 @@ static int sgp30_close(FAR struct file *filep)
 {
   FAR struct inode       *inode = filep->f_inode;
   FAR struct sgp30_dev_s *priv  = inode->i_private;
+  int ret;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Decrement the count of open references on the driver */
 
@@ -709,7 +732,11 @@ static ssize_t sgp30_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -804,7 +831,11 @@ static int sgp30_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -968,13 +999,18 @@ static int sgp30_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int sgp30_unlink(FAR struct inode *inode)
 {
   FAR struct sgp30_dev_s *priv;
+  int ret;
 
   DEBUGASSERT(inode != NULL && inode->i_private != NULL);
   priv = (FAR struct sgp30_dev_s *)inode->i_private;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Are there open references to the driver data structure? */
 

@@ -343,7 +343,11 @@ static int lps25h_open(FAR struct file *filep)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&dev->devsem);
+  ret = nxsem_wait_uninterruptible(&dev->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   dev->config->set_power(dev->config, true);
   ret = lps25h_read_reg8(dev, &addr, &value);
@@ -372,7 +376,11 @@ static int lps25h_close(FAR struct file *filep)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&dev->devsem);
+  ret = nxsem_wait_uninterruptible(&dev->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   dev->config->irq_enable(dev->config, false);
   dev->irqenabled = false;
@@ -395,7 +403,11 @@ static ssize_t lps25h_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&dev->devsem);
+  ret = nxsem_wait_uninterruptible(&dev->devsem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
   ret = lps25h_configure_dev(dev);
   if (ret < 0)
@@ -706,7 +718,11 @@ static int lps25h_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&dev->devsem);
+  ret = nxsem_wait_uninterruptible(&dev->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   switch (cmd)
     {

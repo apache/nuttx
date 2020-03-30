@@ -471,7 +471,8 @@ static int t67xx_read_gas_ppm(FAR struct t67xx_dev_s *priv,
     }
   else if (warming_up)
     {
-      snwarn("WARN: sensor still warming up after %d secs\n", T67XX_UPTIME_FULL_SEC);
+      snwarn("WARN: sensor still warming up after %d secs\n",
+              T67XX_UPTIME_FULL_SEC);
     }
 
   /* Read the CO2 level. */
@@ -635,7 +636,11 @@ static ssize_t t67xx_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* How many samples were requested to get? */
 
@@ -691,7 +696,11 @@ static int t67xx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   switch (cmd)
     {

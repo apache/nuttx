@@ -106,7 +106,8 @@ static ssize_t max44009_read(FAR struct file *filep, FAR char *buffer,
                              size_t buflen);
 static ssize_t max44009_write(FAR struct file *filep, FAR const char *buffer,
                               size_t buflen);
-static int max44009_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int max44009_ioctl(FAR struct file *filep, int cmd,
+                          unsigned long arg);
 static int max44009_poll(FAR struct file *filep, FAR struct pollfd *fds,
                          bool setup);
 
@@ -235,7 +236,11 @@ static int max44009_open(FAR struct file *filep)
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct max44009_dev_s *)inode->i_private;
 
-  nxsem_wait_uninterruptible(&priv->dev_sem);
+  ret = nxsem_wait_uninterruptible(&priv->dev_sem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   use_count = priv->cref + 1;
   if (use_count == 1)
@@ -272,6 +277,7 @@ static int max44009_close(FAR struct file *filep)
   FAR struct inode *inode;
   FAR struct max44009_dev_s *priv;
   int use_count;
+  int ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -279,7 +285,11 @@ static int max44009_close(FAR struct file *filep)
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct max44009_dev_s *)inode->i_private;
 
-  nxsem_wait_uninterruptible(&priv->dev_sem);
+  ret = nxsem_wait_uninterruptible(&priv->dev_sem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   use_count = priv->cref - 1;
   if (use_count == 0)
@@ -318,7 +328,11 @@ static ssize_t max44009_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct max44009_dev_s *)inode->i_private;
 
-  nxsem_wait_uninterruptible(&priv->dev_sem);
+  ret = nxsem_wait_uninterruptible(&priv->dev_sem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
   ret = max44009_read_data(priv, &data);
   if (ret < 0)
@@ -665,7 +679,8 @@ static int max44009_read_data(FAR struct max44009_dev_s *priv,
    *
    * E[3..0] = Exponent, M[7..0]: Mantissa.
    *
-   * Lux can be calculated as (full resolution): (M[7..0] << E[3..0]) * 0.045.
+   * Lux can be calculated as (full resolution):
+   *     (M[7..0] << E[3..0]) * 0.045.
    *
    * Lux can also be calculated using only HBYTE:
    *     (M[7..4] << E[3..0]) * 0.72
@@ -717,7 +732,11 @@ static int max44009_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct max44009_dev_s *)inode->i_private;
 
-  nxsem_wait_uninterruptible(&priv->dev_sem);
+  ret = nxsem_wait_uninterruptible(&priv->dev_sem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   switch (cmd)
     {
@@ -787,7 +806,11 @@ static int max44009_poll(FAR struct file *filep, FAR struct pollfd *fds,
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct max44009_dev_s *)inode->i_private;
 
-  nxsem_wait_uninterruptible(&priv->dev_sem);
+  ret = nxsem_wait_uninterruptible(&priv->dev_sem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   if (setup)
     {
@@ -799,8 +822,8 @@ static int max44009_poll(FAR struct file *filep, FAR struct pollfd *fds,
           goto out;
         }
 
-      /* This is a request to set up the poll.  Find an available slot for the
-       * poll structure reference.
+      /* This is a request to set up the poll.  Find an available slot for
+       * the poll structure reference.
        */
 
       for (i = 0; i < CONFIG_MAX44009_NPOLLWAITERS; i++)

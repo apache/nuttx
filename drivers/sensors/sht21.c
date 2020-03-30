@@ -382,10 +382,15 @@ static int sht21_open(FAR struct file *filep)
 {
   FAR struct inode       *inode = filep->f_inode;
   FAR struct sht21_dev_s *priv  = inode->i_private;
+  int ret;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Increment the count of open references on the driver */
 
@@ -410,10 +415,15 @@ static int sht21_close(FAR struct file *filep)
 {
   FAR struct inode       *inode = filep->f_inode;
   FAR struct sht21_dev_s *priv  = inode->i_private;
+  int ret;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Decrement the count of open references on the driver */
 
@@ -440,7 +450,8 @@ static int sht21_close(FAR struct file *filep)
  * Name: sht21_read
  ****************************************************************************/
 
-static ssize_t sht21_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
+static ssize_t sht21_read(FAR struct file *filep, FAR char *buffer,
+                          size_t buflen)
 {
   FAR struct inode       *inode  = filep->f_inode;
   FAR struct sht21_dev_s *priv   = inode->i_private;
@@ -451,7 +462,11 @@ static ssize_t sht21_read(FAR struct file *filep, FAR char *buffer, size_t bufle
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -507,7 +522,11 @@ static int sht21_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -582,13 +601,18 @@ static int sht21_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int sht21_unlink(FAR struct inode *inode)
 {
   FAR struct sht21_dev_s *priv;
+  int ret;
 
   DEBUGASSERT(inode != NULL && inode->i_private != NULL);
   priv = (FAR struct sht21_dev_s *)inode->i_private;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Are there open references to the driver data structure? */
 

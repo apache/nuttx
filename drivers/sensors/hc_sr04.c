@@ -63,7 +63,7 @@
 
 /****************************************************************************
  * Private Function Prototypes
- *****************************************************************************/
+ ****************************************************************************/
 
 static int hcsr04_open(FAR struct file *filep);
 static int hcsr04_close(FAR struct file *filep);
@@ -149,8 +149,14 @@ static int hcsr04_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct hcsr04_dev_s *priv = inode->i_private;
+  int ret;
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   nxsem_post(&priv->devsem);
   hcsr04_dbg("OPENED\n");
   return OK;
@@ -160,8 +166,14 @@ static int hcsr04_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct hcsr04_dev_s *priv = inode->i_private;
+  int ret;
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   nxsem_post(&priv->devsem);
   hcsr04_dbg("CLOSED\n");
   return OK;
@@ -174,10 +186,15 @@ static ssize_t hcsr04_read(FAR struct file *filep, FAR char *buffer,
   FAR struct hcsr04_dev_s *priv = inode->i_private;
   int distance = 0;
   ssize_t length = 0;
+  int ret;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
   /* Setup and send a pulse to start measuring */
 
@@ -187,7 +204,11 @@ static ssize_t hcsr04_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->conv_donesem);
+  ret = nxsem_wait_uninterruptible(&priv->conv_donesem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
   distance = hcsr04_read_distance(priv);
   if (distance < 0)
@@ -224,7 +245,11 @@ static int hcsr04_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   switch (cmd)
     {
@@ -267,8 +292,8 @@ static void hcsr04_notify(FAR struct hcsr04_dev_s *priv)
 
   /* If there are threads waiting on poll() for data to become available,
    * then wake them up now.  NOTE: we wake up all waiting threads because we
-   * do not know that they are going to do.  If they all try to read the data,
-   * then some make end up blocking after all.
+   * do not know that they are going to do.  If they all try to read the
+   * data, then some make end up blocking after all.
    */
 
   for (i = 0; i < CONFIG_HCSR04_NPOLLWAITERS; i++)
@@ -300,7 +325,11 @@ static int hcsr04_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   if (setup)
     {
