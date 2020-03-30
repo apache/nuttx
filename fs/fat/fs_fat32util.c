@@ -367,7 +367,7 @@ void fat_putuint32(FAR uint8_t *ptr, uint32_t value32)
 
 int fat_semtake(struct fat_mountpt_s *fs)
 {
-  nxsem_wait_uninterruptible(&fs->fs_sem);
+  return nxsem_wait_uninterruptible(&fs->fs_sem);
 }
 
 /****************************************************************************
