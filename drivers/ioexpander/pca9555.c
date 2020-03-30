@@ -147,9 +147,9 @@ static const struct ioexpander_ops_s g_pca9555_ops =
  *
  ****************************************************************************/
 
-static void pca9555_lock(FAR struct pca9555_dev_s *pca)
+static int pca9555_lock(FAR struct pca9555_dev_s *pca)
 {
-  nxsem_wait_uninterruptible(&pca->exclsem);
+  return nxsem_wait_uninterruptible(&pca->exclsem);
 }
 
 #define pca9555_unlock(p) nxsem_post(&(p)->exclsem)
@@ -202,7 +202,8 @@ static inline int pca9555_writeread(FAR struct pca9555_dev_s *pca,
   config.address   = pca->config->address;
   config.addrlen   = 7;
 
-  return i2c_writeread(pca->i2c, &config, wbuffer, wbuflen, rbuffer, rbuflen);
+  return i2c_writeread(pca->i2c, &config, wbuffer, wbuflen,
+                       rbuffer, rbuflen);
 }
 
 /****************************************************************************
@@ -338,7 +339,12 @@ static int pca9555_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9555_lock(pca);
+  ret = pca9555_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pca9555_setbit(pca, PCA9555_REG_CONFIG, pin,
                        (direction == IOEXPANDER_DIRECTION_IN));
   pca9555_unlock(pca);
@@ -376,7 +382,12 @@ static int pca9555_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
       /* Get exclusive access to the PCA555 */
 
-      pca9555_lock(pca);
+      ret = pca9555_lock(pca);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
       ret = pca9555_setbit(pca, PCA9555_REG_POLINV, pin, ival);
       pca9555_unlock(pca);
     }
@@ -409,7 +420,12 @@ static int pca9555_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9555_lock(pca);
+  ret = pca9555_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pca9555_setbit(pca, PCA9555_REG_OUTPUT, pin, value);
   pca9555_unlock(pca);
   return ret;
@@ -419,14 +435,15 @@ static int pca9555_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pca9555_readpin
  *
  * Description:
- *   Read the actual PIN level. This can be different from the last value written
- *      to this pin. Required.
+ *   Read the actual PIN level. This can be different from the last value
+ *      written to this pin. Required.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
  *   pin    - The index of the pin
  *   valptr - Pointer to a buffer where the pin level is stored. Usually TRUE
- *            if the pin is high, except if OPTION_INVERT has been set on this pin.
+ *            if the pin is high, except if OPTION_INVERT has been set on
+ *            this pin.
  *
  * Returned Value:
  *   0 on success, else a negative error code
@@ -441,7 +458,12 @@ static int pca9555_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9555_lock(pca);
+  ret = pca9555_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pca9555_getbit(pca, PCA9555_REG_INPUT, pin, value);
   pca9555_unlock(pca);
   return ret;
@@ -472,7 +494,12 @@ static int pca9555_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9555_lock(pca);
+  ret = pca9555_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pca9555_getbit(pca, PCA9555_REG_OUTPUT, pin, value);
   pca9555_unlock(pca);
   return ret;
@@ -507,8 +534,8 @@ static int pca9555_getmultibits(FAR struct pca9555_dev_s *pca, uint8_t addr,
 #ifdef CONFIG_PCA9555_SHADOW_MODE
   /* Save the new register value in the shadow register */
 
-  pca->sreg[addr]   = buf[0];
-  pca->sreg[addr+1] = buf[1];
+  pca->sreg[addr]     = buf[0];
+  pca->sreg[addr + 1] = buf[1];
 #endif
 
   /* Read the requested bits */
@@ -564,7 +591,11 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9555_lock(pca);
+  ret = pca9555_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Start by reading both registers, whatever the pins to change. We could
    * attempt to read one port only if all pins were on the same port, but
@@ -582,7 +613,7 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
   /* In Shadow-Mode we "read" the pin status from the shadow registers */
 
   buf[1] = pca->sreg[addr];
-  buf[2] = pca->sreg[addr+1];
+  buf[2] = pca->sreg[addr + 1];
 #endif
 
   /* Apply the user defined changes */
@@ -617,8 +648,9 @@ static int pca9555_multiwritepin(FAR struct ioexpander_dev_s *dev,
   buf[0] = addr;
 #ifdef CONFIG_PCA9555_SHADOW_MODE
   /* Save the new register values in the shadow register */
-  pca->sreg[addr] = buf[1];
-  pca->sreg[addr+1] = buf[2];
+
+  pca->sreg[addr]     = buf[1];
+  pca->sreg[addr + 1] = buf[2];
 #endif
   ret = pca9555_write(pca, buf, 3);
 
@@ -652,7 +684,12 @@ static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9555_lock(pca);
+  ret = pca9555_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pca9555_getmultibits(pca, PCA9555_REG_INPUT,
                              pins, values, count);
   pca9555_unlock(pca);
@@ -663,8 +700,8 @@ static int pca9555_multireadpin(FAR struct ioexpander_dev_s *dev,
  * Name: pca9555_multireadbuf
  *
  * Description:
- *   Read the buffered level of multiple pins. This routine may be faster than
- *   individual pin accesses. Optional.
+ *   Read the buffered level of multiple pins. This routine may be faster
+ *   than individual pin accesses. Optional.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
@@ -685,7 +722,12 @@ static int pca9555_multireadbuf(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9555_lock(pca);
+  ret = pca9555_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pca9555_getmultibits(pca, PCA9555_REG_OUTPUT,
                              pins, values, count);
   pca9555_unlock(pca);
@@ -722,27 +764,32 @@ static FAR void *pca9555_attach(FAR struct ioexpander_dev_s *dev,
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
   FAR void *handle = NULL;
   int i;
+  int ret;
 
   /* Get exclusive access to the PCA555 */
 
-  pca9555_lock(pca);
+  ret = pca9555_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Find and available in entry in the callback table */
 
   for (i = 0; i < CONFIG_PCA9555_INT_NCALLBACKS; i++)
     {
-       /* Is this entry available (i.e., no callback attached) */
+      /* Is this entry available (i.e., no callback attached) */
 
-       if (pca->cb[i].cbfunc == NULL)
-         {
-           /* Yes.. use this entry */
+      if (pca->cb[i].cbfunc == NULL)
+        {
+          /* Yes.. use this entry */
 
-           pca->cb[i].pinset = pinset;
-           pca->cb[i].cbfunc = callback;
-           pca->cb[i].cbarg  = arg;
-           handle            = &pca->cb[i];
-           break;
-         }
+          pca->cb[i].pinset = pinset;
+          pca->cb[i].cbfunc = callback;
+          pca->cb[i].cbarg  = arg;
+          handle            = &pca->cb[i];
+          break;
+        }
     }
 
   /* Add this callback to the table */
@@ -769,11 +816,13 @@ static FAR void *pca9555_attach(FAR struct ioexpander_dev_s *dev,
 static int pca9555_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
 {
   FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)dev;
-  FAR struct pca9555_callback_s *cb = (FAR struct pca9555_callback_s *)handle;
+  FAR struct pca9555_callback_s *cb =
+    (FAR struct pca9555_callback_s *)handle;
 
   DEBUGASSERT(pca != NULL && cb != NULL);
   DEBUGASSERT((uintptr_t)cb >= (uintptr_t)&pca->cb[0] &&
-              (uintptr_t)cb <= (uintptr_t)&pca->cb[CONFIG_TCA64XX_INT_NCALLBACKS-1]);
+              (uintptr_t)cb <=
+              (uintptr_t)&pca->cb[CONFIG_TCA64XX_INT_NCALLBACKS - 1]);
   UNUSED(pca);
 
   cb->pinset = 0;
@@ -808,8 +857,8 @@ static void pca9555_irqworker(void *arg)
 #ifdef CONFIG_PCA9555_SHADOW_MODE
       /* Don't forget to update the shadow registers at this point */
 
-      pca->sreg[addr]   = buf[0];
-      pca->sreg[addr+1] = buf[1];
+      pca->sreg[addr]     = buf[0];
+      pca->sreg[addr + 1] = buf[1];
 #endif
       /* Create a 16-bit pinset */
 
@@ -855,7 +904,7 @@ static void pca9555_irqworker(void *arg)
 
 static int pca9555_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  register FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s*)arg;
+  FAR struct pca9555_dev_s *pca = (FAR struct pca9555_dev_s *)arg;
 
   /* In complex environments, we cannot do I2C transfers from the interrupt
    * handler because semaphores are probably used to lock the I2C bus.  In
@@ -896,8 +945,9 @@ static int pca9555_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-FAR struct ioexpander_dev_s *pca9555_initialize(FAR struct i2c_master_s *i2cdev,
-                                                FAR struct pca9555_config_s *config)
+FAR struct ioexpander_dev_s *pca9555_initialize(
+                              FAR struct i2c_master_s *i2cdev,
+                              FAR struct pca9555_config_s *config)
 {
   FAR struct pca9555_dev_s *pcadev;
 
@@ -906,7 +956,8 @@ FAR struct ioexpander_dev_s *pca9555_initialize(FAR struct i2c_master_s *i2cdev,
 #ifdef CONFIG_PCA9555_MULTIPLE
   /* Allocate the device state structure */
 
-  pcadev = (FAR struct pca9555_dev_s *)kmm_zalloc(sizeof(struct pca9555_dev_s));
+  pcadev = (FAR struct pca9555_dev_s *)
+    kmm_zalloc(sizeof(struct pca9555_dev_s));
   if (!pcadev)
     {
       return NULL;

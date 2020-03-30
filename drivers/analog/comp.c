@@ -140,9 +140,9 @@ static void comp_pollnotify(FAR struct comp_dev_s *dev,
  * Name: comp_semtake
  ****************************************************************************/
 
-static void comp_semtake(FAR sem_t *sem)
+static int comp_semtake(FAR sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -161,7 +161,12 @@ static int comp_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   /* Are we setting up the poll?  Or tearing it down? */
 
-  comp_semtake(&dev->ad_sem);
+  ret = comp_semtake(&dev->ad_sem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   if (setup)
     {
       /* This is a request to set up the poll.  Find an available

@@ -145,8 +145,8 @@ static void sps30_set_command_param(FAR struct sps30_word_s *param,
                                     uint16_t value);
 static int sps30_check_data_crc(FAR const struct sps30_word_s *words,
                                 unsigned int num_words);
-static uint16_t sps30_data_word_to_uint16(FAR const struct sps30_word_s *word);
-static float sps30_data_words_to_float(FAR const struct sps30_word_s words[2]);
+static uint16_t sps30_data_word2uint16(FAR const struct sps30_word_s *word);
+static float sps30_data_words2float(FAR const struct sps30_word_s words[2]);
 
 /* Driver features */
 
@@ -372,10 +372,10 @@ static void sps30_set_command_param(FAR struct sps30_word_s *param,
 }
 
 /****************************************************************************
- * Name: sps30_data_words_to_float
+ * Name: sps30_data_words2float
  ****************************************************************************/
 
-static float sps30_data_words_to_float(FAR const struct sps30_word_s words[2])
+static float sps30_data_words2float(FAR const struct sps30_word_s words[2])
 {
   uint8_t data[4];
   float value;
@@ -389,10 +389,10 @@ static float sps30_data_words_to_float(FAR const struct sps30_word_s words[2])
 }
 
 /****************************************************************************
- * Name: sps30_data_word_to_uint16
+ * Name: sps30_data_word2uint16
  ****************************************************************************/
 
-static uint16_t sps30_data_word_to_uint16(FAR const struct sps30_word_s *word)
+static uint16_t sps30_data_word2uint16(FAR const struct sps30_word_s *word)
 {
   return (word[0].data[0] << 8) | (word[0].data[1]);
 }
@@ -406,7 +406,7 @@ static int sps30_check_data_crc(FAR const struct sps30_word_s *words,
 {
   while (num_words)
     {
-      if (sps30_crc_word(sps30_data_word_to_uint16(words)) != words->crc)
+      if (sps30_crc_word(sps30_data_word2uint16(words)) != words->crc)
         {
           return -1;
         }
@@ -493,7 +493,7 @@ static int sps30_read_values(FAR struct sps30_dev_s *priv,
               return ret;
             }
 
-          if (sps30_data_word_to_uint16(data) != 0x0001)
+          if (sps30_data_word2uint16(data) != 0x0001)
             {
               if (!wait)
                 {
@@ -542,25 +542,25 @@ static int sps30_read_values(FAR struct sps30_dev_s *priv,
                             ((data[18].crc ^ data[19].crc) << 8));
 
       priv->data.mass_concenration_pm1_0 =
-          sps30_data_words_to_float(data + 0);
+          sps30_data_words2float(data + 0);
       priv->data.mass_concenration_pm2_5 =
-          sps30_data_words_to_float(data + 2);
+          sps30_data_words2float(data + 2);
       priv->data.mass_concenration_pm4_0 =
-          sps30_data_words_to_float(data + 4);
+          sps30_data_words2float(data + 4);
       priv->data.mass_concenration_pm10 =
-          sps30_data_words_to_float(data + 6);
+          sps30_data_words2float(data + 6);
       priv->data.number_concenration_pm0_5 =
-          sps30_data_words_to_float(data + 8);
+          sps30_data_words2float(data + 8);
       priv->data.number_concenration_pm1_0 =
-          sps30_data_words_to_float(data + 10);
+          sps30_data_words2float(data + 10);
       priv->data.number_concenration_pm2_5 =
-          sps30_data_words_to_float(data + 12);
+          sps30_data_words2float(data + 12);
       priv->data.number_concenration_pm4_0 =
-          sps30_data_words_to_float(data + 14);
+          sps30_data_words2float(data + 14);
       priv->data.number_concenration_pm10 =
-          sps30_data_words_to_float(data + 16);
+          sps30_data_words2float(data + 16);
       priv->data.typical_particle_size =
-          sps30_data_words_to_float(data + 18);
+          sps30_data_words2float(data + 18);
       priv->last_update = ts;
       priv->valid = true;
 
@@ -665,17 +665,24 @@ static int sps30_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct sps30_dev_s *priv  = inode->i_private;
-  union
-  {
-    uint32_t u32[8];
-    char c[32];
-  } code, sn;
+  union article_u
+    {
+      uint32_t u32[8];
+      char c[32];
+    };
+
+  union article_u code;
+  union article_u sn;
 
   int ret;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Increment the count of open references on the driver */
 
@@ -738,10 +745,15 @@ static int sps30_close(FAR struct file *filep)
 {
   FAR struct inode       *inode = filep->f_inode;
   FAR struct sps30_dev_s *priv  = inode->i_private;
+  int ret;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Decrement the count of open references on the driver */
 
@@ -780,7 +792,11 @@ static ssize_t sps30_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -865,7 +881,11 @@ static int sps30_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -899,7 +919,8 @@ static int sps30_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           /* Start measurements (and set pressure compensation). */
 
           sps30_set_command_param(&param, SPS30_MEASUREMENT_MODE);
-          ret = sps30_write_cmd(priv, SPS30_CMD_START_MEASUREMENT, &param, 1);
+          ret = sps30_write_cmd(priv, SPS30_CMD_START_MEASUREMENT,
+                                &param, 1);
           if (ret >= 0)
             {
               priv->started = true;
@@ -989,13 +1010,18 @@ static int sps30_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int sps30_unlink(FAR struct inode *inode)
 {
   FAR struct sps30_dev_s *priv;
+  int ret;
 
   DEBUGASSERT(inode != NULL && inode->i_private != NULL);
   priv = (FAR struct sps30_dev_s *)inode->i_private;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Are there open references to the driver data structure? */
 
@@ -1028,7 +1054,7 @@ static int sps30_unlink(FAR struct inode *inode)
  *   Register the SPS30 character device as 'devpath'
  *
  * Input Parameters:
- *   devpath - The full path to the driver to register. E.g., "/dev/particle0"
+ *   devpath - The full path to the driver to register e.g., "/dev/particle0"
  *   i2c     - An instance of the I2C interface to use to communicate with
  *             the SPS30
  *   addr    - The I2C address of the SPS30. The I2C address of SPS30 is

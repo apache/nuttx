@@ -320,10 +320,10 @@ static uint8_t sht3x_crc_word(uint16_t word)
 }
 
 /****************************************************************************
- * Name: sht3x_data_word_to_uint16
+ * Name: sht3x_data_word2uint16
  ****************************************************************************/
 
-static uint16_t sht3x_data_word_to_uint16(FAR const struct sht3x_word_s *word)
+static uint16_t sht3x_data_word2uint16(FAR const struct sht3x_word_s *word)
 {
   return (word[0].data[0] << 8) | (word[0].data[1]);
 }
@@ -337,7 +337,7 @@ static int sht3x_check_data_crc(FAR const struct sht3x_word_s *words,
 {
   while (num_words)
     {
-      if (sht3x_crc_word(sht3x_data_word_to_uint16(words)) != words->crc)
+      if (sht3x_crc_word(sht3x_data_word2uint16(words)) != words->crc)
         {
           return -1;
         }
@@ -427,8 +427,8 @@ static int sht3x_read_values(FAR struct sht3x_dev_s *priv,
       return ret;
     }
 
-  temp16 = sht3x_data_word_to_uint16(data);
-  rh16 = sht3x_data_word_to_uint16(&data[1]);
+  temp16 = sht3x_data_word2uint16(data);
+  rh16 = sht3x_data_word2uint16(&data[1]);
   add_sensor_randomness(ts.tv_nsec ^ ((int)temp16 << 16 | rh16));
 
   priv->data.temperature = sht3x_temp_to_celsius(temp16);
@@ -453,10 +453,15 @@ static int sht3x_open(FAR struct file *filep)
 {
   FAR struct inode       *inode = filep->f_inode;
   FAR struct sht3x_dev_s *priv  = inode->i_private;
+  int ret;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Increment the count of open references on the driver */
 
@@ -481,10 +486,15 @@ static int sht3x_close(FAR struct file *filep)
 {
   FAR struct inode       *inode = filep->f_inode;
   FAR struct sht3x_dev_s *priv  = inode->i_private;
+  int ret;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Decrement the count of open references on the driver */
 
@@ -541,7 +551,11 @@ static int sht3x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -609,13 +623,18 @@ static int sht3x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int sht3x_unlink(FAR struct inode *inode)
 {
   FAR struct sht3x_dev_s *priv;
+  int ret;
 
   DEBUGASSERT(inode != NULL && inode->i_private != NULL);
   priv = (FAR struct sht3x_dev_s *)inode->i_private;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Are there open references to the driver data structure? */
 

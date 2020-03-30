@@ -153,8 +153,9 @@ static void scd30_set_command_param(FAR struct scd30_word_s *param,
                                     uint16_t value);
 static int scd30_check_data_crc(FAR const struct scd30_word_s *words,
                                 unsigned int num_words);
-static uint16_t scd30_data_word_to_uint16(FAR const struct scd30_word_s *word);
-static float scd30_data_words_to_float(FAR const struct scd30_word_s words[2]);
+static uint16_t scd30_data_word2uint16(FAR const struct scd30_word_s *word);
+static float scd30_data_words_to_float(
+                                FAR const struct scd30_word_s words[2]);
 
 /* Driver features */
 
@@ -361,7 +362,8 @@ static void scd30_set_command_param(FAR struct scd30_word_s *param,
  * Name: scd30_data_words_to_float
  ****************************************************************************/
 
-static float scd30_data_words_to_float(FAR const struct scd30_word_s words[2])
+static float scd30_data_words_to_float(
+  FAR const struct scd30_word_s words[2])
 {
   uint8_t data[4];
   float value;
@@ -375,10 +377,10 @@ static float scd30_data_words_to_float(FAR const struct scd30_word_s words[2])
 }
 
 /****************************************************************************
- * Name: scd30_data_word_to_uint16
+ * Name: scd30_data_word2uint16
  ****************************************************************************/
 
-static uint16_t scd30_data_word_to_uint16(FAR const struct scd30_word_s *word)
+static uint16_t scd30_data_word2uint16(FAR const struct scd30_word_s *word)
 {
   return (word[0].data[0] << 8) | (word[0].data[1]);
 }
@@ -392,7 +394,7 @@ static int scd30_check_data_crc(FAR const struct scd30_word_s *words,
 {
   while (num_words)
     {
-      if (scd30_crc_word(scd30_data_word_to_uint16(words)) != words->crc)
+      if (scd30_crc_word(scd30_data_word2uint16(words)) != words->crc)
         {
           return -1;
         }
@@ -487,7 +489,7 @@ static int scd30_read_values(FAR struct scd30_dev_s *priv, FAR float *temp,
               return ret;
             }
 
-          if (scd30_data_word_to_uint16(data) != 0x0001)
+          if (scd30_data_word2uint16(data) != 0x0001)
             {
               if (!wait)
                 {
@@ -614,7 +616,11 @@ static int scd30_open(FAR struct file *filep)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Increment the count of open references on the driver */
 
@@ -649,10 +655,15 @@ static int scd30_close(FAR struct file *filep)
 {
   FAR struct inode       *inode = filep->f_inode;
   FAR struct scd30_dev_s *priv  = inode->i_private;
+  int ret;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Decrement the count of open references on the driver */
 
@@ -695,7 +706,11 @@ static ssize_t scd30_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -765,7 +780,11 @@ static int scd30_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   if (priv->unlinked)
@@ -804,7 +823,8 @@ static int scd30_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           /* Start measurements (and set pressure compensation). */
 
           scd30_set_command_param(&param, priv->pressure_comp);
-          ret = scd30_write_cmd(priv, SCD30_CMD_START_MEASUREMENT, &param, 1);
+          ret = scd30_write_cmd(priv, SCD30_CMD_START_MEASUREMENT,
+                                &param, 1);
           if (ret >= 0)
             {
               priv->started = true;
@@ -972,13 +992,18 @@ static int scd30_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int scd30_unlink(FAR struct inode *inode)
 {
   FAR struct scd30_dev_s *priv;
+  int ret;
 
   DEBUGASSERT(inode != NULL && inode->i_private != NULL);
   priv = (FAR struct scd30_dev_s *)inode->i_private;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Are there open references to the driver data structure? */
 

@@ -31,8 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ********************************************************************************************/
-
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -71,8 +70,9 @@
 
 /* PCF8574xx Helpers */
 
-static void pcf8574_lock(FAR struct pcf8574_dev_s *priv);
-static int pcf8574_read(FAR struct pcf8574_dev_s *priv, FAR uint8_t *portval);
+static int pcf8574_lock(FAR struct pcf8574_dev_s *priv);
+static int pcf8574_read(FAR struct pcf8574_dev_s *priv,
+                        FAR uint8_t *portval);
 static int pcf8574_write(struct pcf8574_dev_s *priv, uint8_t portval);
 
 /* I/O Expander Methods */
@@ -94,7 +94,8 @@ static int pcf8574_multireadpin(FAR struct ioexpander_dev_s *dev,
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static FAR void *pcf8574_attach(FAR struct ioexpander_dev_s *dev,
              ioe_pinset_t pinset, ioe_callback_t callback, FAR void *arg);
-static int pcf8574_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle);
+static int pcf8574_detach(FAR struct ioexpander_dev_s *dev,
+                          FAR void *handle);
 #endif
 
 #ifdef CONFIG_PCF8574_INT_ENABLE
@@ -151,9 +152,9 @@ static const struct ioexpander_ops_s g_pcf8574_ops =
  *
  ****************************************************************************/
 
-static void pcf8574_lock(FAR struct pcf8574_dev_s *priv)
+static int pcf8574_lock(FAR struct pcf8574_dev_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->exclsem);
+  return nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 #define pcf8574_unlock(p) nxsem_post(&(p)->exclsem)
@@ -265,7 +266,11 @@ static int pcf8574_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the I/O Expander */
 
-  pcf8574_lock(priv);
+  ret = pcf8574_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Set a bit in inpins if the pin is an input.  Clear the bit in
    * inpins if the pin is an output.
@@ -331,7 +336,12 @@ static int pcf8574_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
       ioe_pinset_t bit = ((ioe_pinset_t)1 << pin);
 
       ret = OK;
-      pcf8574_lock(priv);
+      ret = pcf8574_lock(priv);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
       switch (ival)
         {
           case IOEXPANDER_VAL_HIGH:    /* Interrupt on high level */
@@ -408,7 +418,11 @@ static int pcf8574_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the I/O Expander */
 
-  pcf8574_lock(priv);
+  ret = pcf8574_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Make sure that this is an output pin */
 
@@ -444,8 +458,8 @@ static int pcf8574_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: pcf8574_readpin
  *
  * Description:
- *   Read the actual PIN level. This can be different from the last value written
- *   to this pin. Required.
+ *   Read the actual PIN level. This can be different from the last value
+ *   written to this pin. Required.
  *
  *   The PCF8574 is 'interesting' in that it doesn't really have a data
  *   direction register, but instead the outputs are current-limited when
@@ -458,7 +472,8 @@ static int pcf8574_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  *   dev    - Device-specific state data
  *   pin    - The index of the pin
  *   valptr - Pointer to a buffer where the pin level is stored. Usually TRUE
- *            if the pin is high, except if OPTION_INVERT has been set on this pin.
+ *            if the pin is high, except if OPTION_INVERT has been set on
+ *            this pin.
  *
  * Returned Value:
  *   0 on success, else a negative error code
@@ -472,13 +487,18 @@ static int pcf8574_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   uint8_t regval;
   int ret;
 
-  DEBUGASSERT(priv != NULL && priv->config != NULL &&  pin < 8 && value != NULL);
+  DEBUGASSERT(priv != NULL && priv->config != NULL &&
+              pin < 8 && value != NULL);
 
   gpioinfo("I2C addr=%02x, pin=%u\n", priv->config->address, pin);
 
   /* Get exclusive access to the I/O Expander */
 
-  pcf8574_lock(priv);
+  ret = pcf8574_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Is the pin an output? */
 
@@ -558,7 +578,11 @@ static int pcf8574_multiwritepin(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the I/O Expander */
 
-  pcf8574_lock(priv);
+  ret = pcf8574_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Process each pin setting */
 
@@ -635,7 +659,11 @@ static int pcf8574_multireadpin(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the I/O Expander */
 
-  pcf8574_lock(priv);
+  ret = pcf8574_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Read the input register for this pin
    *
@@ -719,27 +747,32 @@ static FAR void *pcf8574_attach(FAR struct ioexpander_dev_s *dev,
   FAR struct pcf8574_dev_s *priv = (FAR struct pcf8574_dev_s *)dev;
   FAR void *handle = NULL;
   int i;
+  int ret;
 
   /* Get exclusive access to the I/O Expander */
 
-  pcf8574_lock(priv);
+  ret = pcf8574_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Find and available in entry in the callback table */
 
   for (i = 0; i < CONFIG_PCF8574_INT_NCALLBACKS; i++)
     {
-       /* Is this entry available (i.e., no callback attached) */
+      /* Is this entry available (i.e., no callback attached) */
 
-       if (priv->cb[i].cbfunc == NULL)
-         {
-           /* Yes.. use this entry */
+      if (priv->cb[i].cbfunc == NULL)
+        {
+          /* Yes.. use this entry */
 
-           priv->cb[i].pinset = pinset;
-           priv->cb[i].cbfunc = callback;
-           priv->cb[i].cbarg  = arg;
-           handle             = &priv->cb[i];
-           break;
-         }
+          priv->cb[i].pinset = pinset;
+          priv->cb[i].cbfunc = callback;
+          priv->cb[i].cbarg  = arg;
+          handle             = &priv->cb[i];
+          break;
+        }
     }
 
   pcf8574_unlock(priv);
@@ -766,11 +799,13 @@ static FAR void *pcf8574_attach(FAR struct ioexpander_dev_s *dev,
 static int pcf8574_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
 {
   FAR struct pcf8574_dev_s *priv = (FAR struct pcf8574_dev_s *)dev;
-  FAR struct pcf8574_callback_s *cb = (FAR struct pcf8574_callback_s *)handle;
+  FAR struct pcf8574_callback_s *cb =
+    (FAR struct pcf8574_callback_s *)handle;
 
   DEBUGASSERT(priv != NULL && cb != NULL);
   DEBUGASSERT((uintptr_t)cb >= (uintptr_t)&priv->cb[0] &&
-              (uintptr_t)cb <= (uintptr_t)&priv->cb[CONFIG_PCF8574_INT_NCALLBACKS-1]);
+              (uintptr_t)cb <=
+              (uintptr_t)&priv->cb[CONFIG_PCF8574_INT_NCALLBACKS - 1]);
   UNUSED(priv);
 
   cb->pinset = 0;
@@ -905,7 +940,12 @@ static void pcf8574_irqworker(void *arg)
 
   /* Check for pending interrupts */
 
-  pcf8574_lock(priv);
+  ret = pcf8574_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   pcf8574_register_update(priv);
 
   /* Sample and clear the pending interrupts.  */
@@ -943,7 +983,8 @@ static void pcf8574_irqworker(void *arg)
   /* Re-start the poll timer */
 
   sched_lock();
-  ret = wd_start(priv->wdog, PCF8574_POLLDELAY, (wdentry_t)pcf8574_poll_expiry,
+  ret = wd_start(priv->wdog, PCF8574_POLLDELAY,
+                 (wdentry_t)pcf8574_poll_expiry,
                  1, (wdparm_t)priv);
   if (ret < 0)
     {
@@ -1059,8 +1100,8 @@ static void pcf8574_poll_expiry(int argc, wdparm_t arg1, ...)
  * Name: pcf8574_initialize
  *
  * Description:
- *   Instantiate and configure the PCF8574xx device driver to use the provided
- *   I2C device instance.
+ *   Instantiate and configure the PCF8574xx device driver to use the
+ *   provided I2C device instance.
  *
  * Input Parameters:
  *   i2c     - An I2C driver instance
@@ -1073,7 +1114,7 @@ static void pcf8574_poll_expiry(int argc, wdparm_t arg1, ...)
  ****************************************************************************/
 
 FAR struct ioexpander_dev_s *pcf8574_initialize(FAR struct i2c_master_s *i2c,
-                                              FAR struct pcf8574_config_s *config)
+                              FAR struct pcf8574_config_s *config)
 {
   FAR struct pcf8574_dev_s *priv;
   int ret;
@@ -1081,7 +1122,8 @@ FAR struct ioexpander_dev_s *pcf8574_initialize(FAR struct i2c_master_s *i2c,
 #ifdef CONFIG_PCF8574_MULTIPLE
   /* Allocate the device state structure */
 
-  priv = (FAR struct pcf8574_dev_s *)kmm_zalloc(sizeof(struct pcf8574_dev_s));
+  priv = (FAR struct pcf8574_dev_s *)
+    kmm_zalloc(sizeof(struct pcf8574_dev_s));
   if (!priv)
     {
       gpioerr("ERROR: Failed to allocate driver instance\n");
@@ -1112,7 +1154,8 @@ FAR struct ioexpander_dev_s *pcf8574_initialize(FAR struct i2c_master_s *i2c,
   priv->wdog    = wd_create();
   DEBUGASSERT(priv->wdog != NULL);
 
-  ret = wd_start(priv->wdog, PCF8574_POLLDELAY, (wdentry_t)pcf8574_poll_expiry,
+  ret = wd_start(priv->wdog, PCF8574_POLLDELAY,
+                 (wdentry_t)pcf8574_poll_expiry,
                  1, (wdparm_t)priv);
   if (ret < 0)
     {

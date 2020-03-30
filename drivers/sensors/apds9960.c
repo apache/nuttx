@@ -481,7 +481,8 @@ static int apds9960_probe(FAR struct apds9960_dev_s *priv)
  ****************************************************************************/
 
 static int apds9960_i2c_read(FAR struct apds9960_dev_s *priv,
-                           uint8_t const regaddr, FAR uint8_t *regval, int len)
+                             uint8_t const regaddr,
+                             FAR uint8_t *regval, int len)
 {
   struct i2c_config_s config;
   int ret = -1;
@@ -1063,10 +1064,14 @@ static int apds9960_readgesture(FAR struct apds9960_dev_s *priv)
                 {
                   for (i = 0; i < bytes_read; i += 4)
                     {
-                      priv->gesture_data.u_data[priv->gesture_data.index] = fifo_data[i + 0];
-                      priv->gesture_data.d_data[priv->gesture_data.index] = fifo_data[i + 1];
-                      priv->gesture_data.l_data[priv->gesture_data.index] = fifo_data[i + 2];
-                      priv->gesture_data.r_data[priv->gesture_data.index] = fifo_data[i + 3];
+                      priv->gesture_data.u_data[priv->gesture_data.index] =
+                        fifo_data[i + 0];
+                      priv->gesture_data.d_data[priv->gesture_data.index] =
+                        fifo_data[i + 1];
+                      priv->gesture_data.l_data[priv->gesture_data.index] =
+                        fifo_data[i + 2];
+                      priv->gesture_data.r_data[priv->gesture_data.index] =
+                        fifo_data[i + 3];
                       priv->gesture_data.index++;
                       priv->gesture_data.total_gestures++;
                     }
@@ -1171,6 +1176,7 @@ static ssize_t apds9960_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode         *inode;
   FAR struct apds9960_dev_s *priv;
+  int ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -1188,7 +1194,11 @@ static ssize_t apds9960_read(FAR struct file *filep, FAR char *buffer,
 
   /* Wait for data available */
 
-  nxsem_wait_uninterruptible(&priv->sample_sem);
+  ret = nxsem_wait_uninterruptible(&priv->sample_sem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
   buffer[0] = (char) priv->gesture_motion;
   buflen    = 1;
@@ -1218,7 +1228,7 @@ static ssize_t apds9960_write(FAR struct file *filep,
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/gest0"
- *   i2c - An instance of the I2C interface to use to communicate with APDS9960
+ *   i2c - An instance of the I2C interface to communicate with APDS9960
  *   addr - The I2C address of the APDS9960.
  *
  * Returned Value:
