@@ -925,7 +925,11 @@ static int unionfs_close(FAR struct file *filep)
 
   /* Get exclusive access to the file system data structures */
 
-  unionfs_semtake(ui, false);
+  ret = unionfs_semtake(ui, false);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   DEBUGASSERT(ui != NULL && filep->f_priv != NULL);
   uf = (FAR struct unionfs_file_s *)filep->f_priv;
@@ -1601,7 +1605,11 @@ static int unionfs_closedir(FAR struct inode *mountpt,
 
   /* Get exclusive access to the file system data structures */
 
-  unionfs_semtake(ui, true);
+  ret = unionfs_semtake(ui, true);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   DEBUGASSERT(dir);
   fu = &dir->u.unionfs;
@@ -2046,6 +2054,7 @@ static int unionfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
                           unsigned int flags)
 {
   FAR struct unionfs_inode_s *ui;
+  int ret;
 
   finfo("handle=%p blkdriver=%p flags=%x\n", handle, blkdriver, flags);
 
@@ -2056,7 +2065,11 @@ static int unionfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
   /* Get exclusive access to the file system data structures */
 
-  unionfs_semtake(ui, true);
+  ret = unionfs_semtake(ui, true);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Mark the file system as unmounted. */
 

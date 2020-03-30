@@ -102,7 +102,12 @@ static int fat_attrib(const char *path, fat_attrib_t *retattrib,
 
   /* Check if the mount is still healthy */
 
-  fat_semtake(fs);
+  ret = fat_semtake(fs);
+  if (ret < 0)
+    {
+      goto errout_with_inode;
+    }
+
   ret = fat_checkmount(fs);
   if (ret != OK)
     {
@@ -197,7 +202,8 @@ int fat_getattrib(const char *path, fat_attrib_t *attrib)
  * Name: fat_setattrib
  ****************************************************************************/
 
-int fat_setattrib(const char *path, fat_attrib_t setbits, fat_attrib_t clearbits)
+int fat_setattrib(const char *path, fat_attrib_t setbits,
+                  fat_attrib_t clearbits)
 {
   return fat_attrib(path, NULL, setbits, clearbits);
 }

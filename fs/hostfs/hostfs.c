@@ -172,9 +172,9 @@ const struct mountpt_operations hostfs_operations =
  * Name: hostfs_semtake
  ****************************************************************************/
 
-void hostfs_semtake(FAR struct hostfs_mountpt_s *fs)
+int hostfs_semtake(FAR struct hostfs_mountpt_s *fs)
 {
-  nxsem_wait_uninterruptible(fs->fs_sem);
+  return nxsem_wait_uninterruptible(fs->fs_sem);
 }
 
 /****************************************************************************
@@ -275,7 +275,11 @@ static int hostfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Allocate memory for the open file */
 
@@ -360,6 +364,7 @@ static int hostfs_close(FAR struct file *filep)
   FAR struct hostfs_ofile_s   *hf;
   FAR struct hostfs_ofile_s   *nextfile;
   FAR struct hostfs_ofile_s   *prevfile;
+  int ret;
 
   /* Sanity checks */
 
@@ -373,7 +378,11 @@ static int hostfs_close(FAR struct file *filep)
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Check if we are the last one with a reference to the file and
    * only close if we are.
@@ -459,7 +468,11 @@ static ssize_t hostfs_read(FAR struct file *filep, FAR char *buffer,
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Call the host to perform the read */
 
@@ -511,7 +524,11 @@ static ssize_t hostfs_write(FAR struct file *filep, const char *buffer,
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Test the permissions.  Only allow write if the file was opened with
    * write flags.
@@ -561,7 +578,11 @@ static off_t hostfs_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Call our internal routine to perform the seek */
 
@@ -600,7 +621,11 @@ static int hostfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Call our internal routine to perform the ioctl */
 
@@ -623,6 +648,7 @@ static int hostfs_sync(FAR struct file *filep)
   FAR struct inode            *inode;
   FAR struct hostfs_mountpt_s *fs;
   FAR struct hostfs_ofile_s   *hf;
+  int ret;
 
   /* Sanity checks */
 
@@ -638,7 +664,11 @@ static int hostfs_sync(FAR struct file *filep)
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   host_sync(hf->fd);
 
@@ -708,7 +738,11 @@ static int hostfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Call the host to perform the read */
 
@@ -749,7 +783,11 @@ static int hostfs_ftruncate(FAR struct file *filep, off_t length)
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Call the host to perform the truncate */
 
@@ -783,7 +821,11 @@ static int hostfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Append to the host's root directory */
 
@@ -817,6 +859,7 @@ static int hostfs_closedir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
   struct hostfs_mountpt_s  *fs;
+  int ret;
 
   /* Sanity checks */
 
@@ -828,7 +871,11 @@ static int hostfs_closedir(FAR struct inode *mountpt,
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Call the host's closedir function */
 
@@ -861,7 +908,11 @@ static int hostfs_readdir(FAR struct inode *mountpt,
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Call the host OS's readdir function */
 
@@ -910,6 +961,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   FAR char *options;
   char *ptr, *saveptr;
   int len;
+  int ret;
 
   /* Validate the block driver is NULL */
 
@@ -968,7 +1020,12 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     {
       /* Take the semaphore for the mount */
 
-      hostfs_semtake(fs);
+      ret = hostfs_semtake(fs);
+      if (ret < 0)
+        {
+          kmm_free(fs);
+          return ret;
+        }
     }
 
   /* Initialize the allocated mountpt state structure.  The filesystem is
@@ -1022,7 +1079,13 @@ static int hostfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
   /* Check if there are sill any files opened on the filesystem. */
 
   ret = OK; /* Assume success */
-  hostfs_semtake(fs);
+
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   if (fs->fs_head != NULL)
     {
       /* We cannot unmount now.. there are open files */
@@ -1061,7 +1124,11 @@ static int hostfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 
   fs = mountpt->i_private;
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Call the host fs to perform the statfs */
 
@@ -1094,7 +1161,11 @@ static int hostfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 
   fs = mountpt->i_private;
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Append to the host's root directory */
 
@@ -1130,7 +1201,11 @@ static int hostfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 
   fs = mountpt->i_private;
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Append to the host's root directory */
 
@@ -1167,7 +1242,11 @@ int hostfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 
   /* Take the semaphore */
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Append to the host's root directory */
 
@@ -1204,7 +1283,11 @@ int hostfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
 
   fs = mountpt->i_private;
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Append to the host's root directory */
 
@@ -1243,7 +1326,11 @@ static int hostfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
   fs = mountpt->i_private;
 
-  hostfs_semtake(fs);
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Append to the host's root directory */
 
