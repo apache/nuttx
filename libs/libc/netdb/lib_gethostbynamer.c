@@ -83,8 +83,7 @@ struct hostent_info_s
  *   h_addr_list[0] field of the returned hostent structure.
  *
  * Input Parameters:
- *   stream - File stream of the opened hosts file with the file pointer
- *     positioned at the beginning of the next host entry.
+ *   name - The name of the host to find.
  *   host - Caller provided location to return the host data.
  *   buf - Caller provided buffer to hold string data associated with the
  *     host data.
@@ -148,7 +147,7 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
           return 1;
         }
 
-      host->h_addrtype  = AF_INET6;
+      host->h_addrtype = AF_INET6;
     }
 
   /* If the address contains a colon, then it might be a numeric IPv6
@@ -179,7 +178,7 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
           return 1;
         }
 
-      host->h_addrtype  = AF_INET;
+      host->h_addrtype = AF_INET;
     }
 
   /* No colon?  No period?  Can't be a numeric address */
@@ -219,15 +218,14 @@ static int lib_numeric_address(FAR const char *name, FAR struct hostent *host,
  *   Check if the name is the reserved name for the local loopback device.
  *
  * Input Parameters:
- *   stream - File stream of the opened hosts file with the file pointer
- *     positioned at the beginning of the next host entry.
+ *   name - The name of the host to find.
  *   host - Caller provided location to return the host data.
  *   buf - Caller provided buffer to hold string data associated with the
  *     host data.
  *   buflen - The size of the caller-provided buffer
  *
  * Returned Value:
- *   Zero (0) is returned if the name is an numeric IP address.
+ *   Zero (0) is returned if the name is the loopback device.
  *
  ****************************************************************************/
 
@@ -385,7 +383,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
       if (((FAR struct sockaddr_in *)ptr)->sin_family == AF_INET)
 #endif
         {
-          addrlen  = sizeof(struct sockaddr_in);
+          addrlen  = sizeof(struct in_addr);
           addrtype = AF_INET;
           addrdata = &((FAR struct sockaddr_in *)ptr)->sin_addr;
         }
@@ -396,7 +394,7 @@ static int lib_find_answer(FAR const char *name, FAR struct hostent *host,
       else
 #endif
         {
-          addrlen  = sizeof(struct sockaddr_in6);
+          addrlen  = sizeof(struct in6_addr);
           addrtype = AF_INET6;
           addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin6_addr;
         }
@@ -545,7 +543,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
       if (((FAR struct sockaddr_in *)ptr)->sin_family == AF_INET)
 #endif
         {
-          addrlen  = sizeof(struct sockaddr_in);
+          addrlen  = sizeof(struct in_addr);
           addrtype = AF_INET;
           addrdata = &((FAR struct sockaddr_in *)ptr)->sin_addr;
         }
@@ -556,7 +554,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
       else
 #endif
         {
-          addrlen  = sizeof(struct sockaddr_in6);
+          addrlen  = sizeof(struct in6_addr);
           addrtype = AF_INET6;
           addrdata = &((FAR struct sockaddr_in6 *)ptr)->sin6_addr;
         }
@@ -606,7 +604,7 @@ static int lib_dns_lookup(FAR const char *name, FAR struct hostent *host,
  *   buflen - The size of the caller-provided buffer
  *
  * Returned Value:
- *   Zero (0) is returned if the DNS lookup was successful.
+ *   Zero (0) is returned if the host file lookup was successful.
  *
  ****************************************************************************/
 
@@ -756,10 +754,6 @@ errorout_with_herrnocode:
 int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
                     FAR char *buf, size_t buflen, int *h_errnop)
 {
-#ifdef CONFIG_NETDB_DNSCLIENT
-  int ret;
-#endif
-
   DEBUGASSERT(name != NULL && host != NULL && buf != NULL);
 
   /* Make sure that the h_errno has a non-error code */
@@ -796,8 +790,7 @@ int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
 #if CONFIG_NETDB_DNSCLIENT_ENTRIES > 0
   /* Check if we already have this hostname mapping cached */
 
-  ret = lib_find_answer(name, host, buf, buflen);
-  if (ret >= 0)
+  if (lib_find_answer(name, host, buf, buflen) >= 0)
     {
       /* Found the address mapping in the cache */
 
@@ -807,8 +800,7 @@ int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
 
   /* Try to get the host address using the DNS name server */
 
-  ret = lib_dns_lookup(name, host, buf, buflen);
-  if (ret >= 0)
+  if (lib_dns_lookup(name, host, buf, buflen) >= 0)
     {
       /* Successful DNS lookup! */
 
