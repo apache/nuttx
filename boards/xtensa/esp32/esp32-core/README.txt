@@ -289,6 +289,28 @@ OpenOCD for the ESP32
       need to specify the interface configuration file on the OpenOCD
       command line.
 
+  NOTE: Another OpenOCD configuration file is available in the NuttX
+  source tree at
+  nuttx/boards/xtensa/esp32/esp32-core/scripts/esp32-ft232h.cfg .
+  It has been tested with:
+
+    - ESP32-DevKitC V4
+
+      https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-devkitc.html
+
+    - Akizukidenshi's FT232H based JTAG adapter
+
+      http://akizukidenshi.com/catalog/g/gK-06503/
+
+    - The following version of OpenOCD from ESP-IDF (macOS version)
+
+      % openocd --version
+      Open On-Chip Debugger  v0.10.0-esp32-20191114 (2019-11-14-14:19)
+      Licensed under GNU GPL v2
+      For bug reports, read
+              http://openocd.org/doc/doxygen/bugs.html
+      %
+
   General OpenOCD build instructions
   ----------------------------------
   Installing OpenOCD.  The sources for the ESP32-enabled variant of
