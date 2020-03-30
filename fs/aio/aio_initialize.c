@@ -1,35 +1,20 @@
 /****************************************************************************
  * fs/aio/aio_initialize.c
  *
- *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -140,13 +125,14 @@ void aio_initialize(void)
  *   None
  *
  * Returned Value:
- *   None
+ *   aio_lock() return -ECANCELED if the calling thread is canceled.
  *
  ****************************************************************************/
 
-void aio_lock(void)
+int aio_lock(void)
 {
   pid_t me = getpid();
+  int ret = OK;
 
   /* Does this thread already hold the semaphore? */
 
@@ -159,13 +145,17 @@ void aio_lock(void)
     }
   else
     {
-      nxsem_wait_uninterruptible(&g_aio_exclsem);
+      ret = nxsem_wait_uninterruptible(&g_aio_exclsem);
+      if (ret >= 0)
+        {
+          /* And mark it as ours */
 
-      /* And mark it as ours */
-
-      g_aio_holder = me;
-      g_aio_count  = 1;
+          g_aio_holder = me;
+          g_aio_count  = 1;
+        }
     }
+
+  return ret;
 }
 
 void aio_unlock(void)
@@ -211,21 +201,30 @@ void aio_unlock(void)
 
 FAR struct aio_container_s *aioc_alloc(void)
 {
-  FAR struct aio_container_s *aioc;
+  FAR struct aio_container_s *aioc = NULL;
+  int ret;
 
   /* Take a count from semaphore, thus guaranteeing that we have an AIO
    * container set aside for us.
    */
 
-  nxsem_wait_uninterruptible(&g_aioc_freesem);
+  ret = nxsem_wait_uninterruptible(&g_aioc_freesem);
+  if (ret < 0)
+    {
+      return NULL;
+    }
 
   /* Get our AIO container */
 
-  aio_lock();
-  aioc = (FAR struct aio_container_s *)dq_remfirst(&g_aioc_free);
-  aio_unlock();
+  ret = aio_lock();
+  if (ret >= 0)
+    {
+      aioc = (FAR struct aio_container_s *)dq_remfirst(&g_aioc_free);
+      aio_unlock();
 
-  DEBUGASSERT(aioc);
+      DEBUGASSERT(aioc);
+    }
+
   return aioc;
 }
 
@@ -246,11 +245,24 @@ FAR struct aio_container_s *aioc_alloc(void)
 
 void aioc_free(FAR struct aio_container_s *aioc)
 {
+  int ret;
+
   DEBUGASSERT(aioc);
 
   /* Return the container to the free list */
 
-  aio_lock();
+  do
+    {
+      ret = aio_lock();
+
+      /* The only possible error should be if we were awakened only by
+       * thread cancellation.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
+    }
+  while (ret < 0);
+
   dq_addlast(&aioc->aioc_link, &g_aioc_free);
   aio_unlock();
 

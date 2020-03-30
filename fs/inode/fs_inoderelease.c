@@ -52,16 +52,18 @@ void inode_release(FAR struct inode *node)
     {
       /* Decrement the references of the inode */
 
-      ret = inode_semtake();
-      if (ret < 0)
+      do
         {
-          /* REVISIT:  Reference count will be wrong.  This could only
-           * happen on thread cancellation.
+          ret = inode_semtake();
+
+          /* This only possible error is due to cancellation of the thread.
+           * We need to try again anyway in this case, otherwise the
+           * reference count would be wrong.
            */
 
-          ferr("ERROR: inode_semtake failed: %d\n", ret);
-          return;
+          DEBUGASSERT(ret = OK || ret == -ECANCELED);
         }
+      while (ret < 0);
 
       if (node->i_crefs)
         {

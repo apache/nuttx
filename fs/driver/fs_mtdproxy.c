@@ -96,7 +96,12 @@ static FAR char *unique_blkdev(void)
     {
       /* Get the semaphore protecting the path number */
 
-      nxsem_wait_uninterruptible(&g_devno_sem);
+      ret = nxsem_wait_uninterruptible(&g_devno_sem);
+      if (ret < 0)
+        {
+          ferr("ERROR: nxsem_wait_uninterruptible failed: %d\n", ret);
+          return NULL;
+        }
 
       /* Get the next device number and release the semaphore */
 
@@ -197,9 +202,9 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
       goto out_with_fltdev;
     }
 
-  /* Unlink and free the block device name.  The driver instance will persist,
-   * provided that CONFIG_DISABLE_PSEUDOFS_OPERATIONS=y (otherwise, we have
-   * a problem here!)
+  /* Unlink and free the block device name.  The driver instance will
+   * persist, provided that CONFIG_DISABLE_PSEUDOFS_OPERATIONS=y (otherwise,
+   * we have a problem here!)
    */
 
 out_with_fltdev:

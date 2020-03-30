@@ -81,16 +81,17 @@ int sem_close(FAR sem_t *sem)
 
   /* Decrement the reference count on the inode */
 
-  ret = inode_semtake();
-  if (ret < 0)
+  do
     {
-      /* REVISIT:  This failure is probably -ECANCELED meaning that the
-       * thread was canceled.  In this case, the semaphore will not be
-       * closed.
+      ret = inode_semtake();
+
+      /* The only error that is expected is due to thread cancellation.
+       * At this point, we must continue to free the semaphore anyway.
        */
 
-      return ret;
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
+  while (ret < 0);
 
   if (inode->i_crefs > 0)
     {
