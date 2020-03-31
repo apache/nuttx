@@ -16,47 +16,6 @@ on:
   pull_request:
 
 jobs:
-  check:
-    runs-on: ubuntu-18.04
-
-    steps:
-    - name: Checkout nuttx repo
-      uses: actions/checkout@v2
-      with:
-        path: nuttx
-        fetch-depth: 0
-
-    - name: Check Pull Request
-      run: |
-        cd nuttx
-        ranges=`git log -1 --merges --pretty=format:%P | awk -F" " '{ print $1 ".." $2 }'`
-        git log --oneline $ranges
-        commits=`git log --reverse --format=format:%H $ranges`
-        echo "./tools/checkpatch.sh -g $commits"
-        ./tools/checkpatch.sh -g $commits
-
-  docs:
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        path: nuttx
-        fetch-depth: 1
-    - name: Generate Inlined Docs
-      run: |
-        echo "Inline Docs"
-        npm install --no-audit inliner
-        inliner=`pwd`/node_modules/inliner/cli/index.js
-        build_output=`pwd`/build
-        mkdir $build_output
-        cd nuttx/Documentation
-        find ./ -type f -name "*.html" -exec  script -e -c "$inliner {} > $build_output/{}" \;
-        ls -l $build_output/
-    - uses: actions/upload-artifact@v1
-      with:
-        name: htmldocs
-        path: ./build/
-
   build:
     runs-on: ubuntu-18.04
     env:
