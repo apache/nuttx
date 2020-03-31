@@ -58,6 +58,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
+#include "chip.h"
 
 /****************************************************************************
  * Private Functions
