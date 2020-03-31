@@ -290,7 +290,7 @@ static int ee24xx_waitwritecomplete(FAR struct ee24xx_dev_s *eedev,
   uint32_t addr_hi = (memaddr >> (eedev->addrlen << 3));
 
   msgs[0].frequency = eedev->freq;
-  msgs[0].addr      = eedev->addr | \
+  msgs[0].addr      = eedev->addr |
                       (addr_hi & ((1 << eedev->haddrbits) - 1));
   msgs[0].flags     = I2C_M_READ;
   msgs[0].buffer    = &adr;
@@ -328,7 +328,7 @@ static int ee24xx_writepage(FAR struct ee24xx_dev_s *eedev, uint32_t memaddr,
   maddr[1] = memaddr &  0xff;
 
   msgs[0].frequency = eedev->freq;
-  msgs[0].addr      = eedev->addr | \
+  msgs[0].addr      = eedev->addr |
                       (addr_hi & ((1 << eedev->haddrbits) - 1));
   msgs[0].flags     = 0;
   msgs[0].buffer    = eedev->addrlen == 2 ? &maddr[0] : &maddr[1];
@@ -575,7 +575,7 @@ static ssize_t ee24xx_read(FAR struct file *filep, FAR char *buffer,
   addr[1]           = (filep->f_pos) &  0xff;
 
   msgs[0].frequency = eedev->freq;
-  msgs[0].addr      = eedev->addr | \
+  msgs[0].addr      = eedev->addr |
                       (addr_hi & ((1 << eedev->haddrbits) - 1));
   msgs[0].flags     = 0;
   msgs[0].buffer    = eedev->addrlen == 2 ? &addr[0] : &addr[1];
