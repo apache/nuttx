@@ -434,8 +434,10 @@ static void ee25xx_writeenable(FAR struct spi_dev_s *spi, int enable)
  *
  ****************************************************************************/
 
-static void ee25xx_writepage(FAR struct ee25xx_dev_s *eedev, uint32_t devaddr,
-                             FAR const char *data, size_t len)
+static void ee25xx_writepage(FAR struct ee25xx_dev_s *eedev,
+                             uint32_t devaddr,
+                             FAR const char *data,
+                             size_t len)
 {
   ee25xx_lock(eedev->spi);
   SPI_SELECT(eedev->spi, SPIDEV_EEPROM(0), true);
@@ -602,15 +604,16 @@ static off_t ee25xx_seek(FAR struct file *filep, off_t offset, int whence)
 
   /* Opengroup.org:
    *
-   *  "The lseek() function shall allow the file offset to be set beyond the end
-   *   of the existing data in the file. If data is later written at this point,
-   *   subsequent reads of data in the gap shall return bytes with the value 0
-   *   until data is actually written into the gap."
+   *  "The lseek() function shall allow the file offset to be set beyond the
+   *  end of the existing data in the file. If data is later written at this
+   *  point, subsequent reads of data in the gap shall return bytes with the
+   *  value 0 until data is actually written into the gap."
    *
-   * We can conform to the first part, but not the second.  But return EINVAL if
+   * We can conform to the first part, but not the second.
+   * But return EINVAL if
    *
-   *  "...the resulting file offset would be negative for a regular file, block
-   *   special file, or directory."
+   *  "...the resulting file offset would be negative for a regular file,
+   *  block special file, or directory."
    */
 
   if (newpos >= 0)

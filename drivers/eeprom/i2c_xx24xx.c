@@ -36,7 +36,8 @@
  *              24xx128    16384     64   2     1010AAA
  *              24xx256    32768     64   2     1010AAA
  *              24xx512    65536    128   2     1010AAA
- *              24xx1025  131072    128   2     1010PAA Special case: address bit is shifted.
+ *              24xx1025  131072    128   2     1010PAA Special case: address
+ *                                                      bit is shifted.
  *              24xx1026  131072    128   2     1010AAP
  *
  * Atmel
@@ -58,7 +59,8 @@
  *              M24C04       512    16    1     1010AAP
  *              M24C08      1024    16    1     1010APP
  *              M24C16      2048    16    1     1010PPP
- *              M24C32      4096    32    2     1010AAA ID pages supported as a separate device
+ *              M24C32      4096    32    2     1010AAA ID pages supported
+ *                                                      as a separate device
  *              M24C64      8192    32    2     1010AAA
  *              M24128     16384    64    2     1010AAA
  *              M24256     32768    64    2     1010AAA
@@ -273,7 +275,8 @@ static int ee24xx_waitwritecomplete(FAR struct ee24xx_dev_s *eedev,
   uint32_t addr_hi = (memaddr >> (eedev->addrlen << 3));
 
   msgs[0].frequency = eedev->freq;
-  msgs[0].addr      = eedev->addr | (addr_hi & ((1 << eedev->haddrbits) - 1));
+  msgs[0].addr      = eedev->addr | \
+                      (addr_hi & ((1 << eedev->haddrbits) - 1));
   msgs[0].flags     = I2C_M_READ;
   msgs[0].buffer    = &adr;
   msgs[0].length    = 1;
@@ -310,7 +313,8 @@ static int ee24xx_writepage(FAR struct ee24xx_dev_s *eedev, uint32_t memaddr,
   maddr[1] = memaddr &  0xff;
 
   msgs[0].frequency = eedev->freq;
-  msgs[0].addr      = eedev->addr | (addr_hi & ((1 << eedev->haddrbits) - 1));
+  msgs[0].addr      = eedev->addr | \
+                      (addr_hi & ((1 << eedev->haddrbits) - 1));
   msgs[0].flags     = 0;
   msgs[0].buffer    = eedev->addrlen == 2 ? &maddr[0] : &maddr[1];
   msgs[0].length    = eedev->addrlen;
@@ -556,7 +560,8 @@ static ssize_t ee24xx_read(FAR struct file *filep, FAR char *buffer,
   addr[1]           = (filep->f_pos) &  0xff;
 
   msgs[0].frequency = eedev->freq;
-  msgs[0].addr      = eedev->addr | (addr_hi & ((1 << eedev->haddrbits) - 1));
+  msgs[0].addr      = eedev->addr | \
+                      (addr_hi & ((1 << eedev->haddrbits) - 1));
   msgs[0].flags     = 0;
   msgs[0].buffer    = eedev->addrlen == 2 ? &addr[0] : &addr[1];
   msgs[0].length    = eedev->addrlen;
