@@ -333,7 +333,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
           prev_ai = ai;
         }
 
-      return OK;
+      return (*res != NULL) ? OK : EAI_FAMILY;
     }
 
   return h_errno;
