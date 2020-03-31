@@ -63,9 +63,9 @@
  * Name: rwb_semtake
  ****************************************************************************/
 
-static int rwb_semtake(FAR sem_t *sem)
+static void rwb_semtake(FAR sem_t *sem)
 {
-  return nxsem_wait_uninterruptible(sem);
+  nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -73,34 +73,6 @@ static int rwb_semtake(FAR sem_t *sem)
  ****************************************************************************/
 
 #define rwb_semgive(s) nxsem_post(s)
-
-/****************************************************************************
- * Name: rwb_forcetake
- *
- * Description:
- *   This is just another wrapper but this one continues even if the thread
- *   is canceled.  This must be done in certain conditions where were must
- *   continue in order to clean-up resources.
- *
- ****************************************************************************/
-
-static void rwb_forcetake(FAR sem_t *sem)
-{
-  int ret;
-
-  do
-    {
-      ret = nxsem_wait_uninterruptible(sem);
-
-      /* The only expected error would -ECANCELED meaning that the
-       * parent thread has been canceled.  We have to continue and
-       * terminate the poll in this case.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -ECANCELED);
-    }
-  while (ret < 0);
-}
 
 /****************************************************************************
  * Name: rwb_overlap
@@ -194,7 +166,7 @@ static void rwb_wrtimeout(FAR void *arg)
    * worker thread.
    */
 
-  rwb_forcetake(&rwb->wrsem);
+  rwb_semtake(&rwb->wrsem);
   rwb_wrflush(rwb);
   rwb_semgive(&rwb->wrsem);
 }
@@ -422,7 +394,7 @@ int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
 
       finfo("startblock=%d blockcount=%p\n", startblock, blockcount);
 
-      rwb_forcetake(&rwb->wrsem);
+      rwb_semtake(&rwb->wrsem);
 
       /* Now there are five cases:
        *
@@ -559,7 +531,7 @@ int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
 
       finfo("startblock=%d blockcount=%p\n", startblock, blockcount);
 
-      rwb_forcetake(&rwb->rhsem);
+      rwb_semtake(&rwb->rhsem);
 
       /* Now there are five cases:
        *
@@ -793,14 +765,7 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
 
       /* Loop until we have read all of the requested blocks */
 
-      ret = nxsem_wait(&rwb->rhsem);
-      if (ret < 0)
-        {
-          /* Return EINTR or ECANCELED */
-
-          return ret;
-        }
-
+      rwb_semtake(&rwb->rhsem);
       for (remaining = nblocks; remaining > 0; )
         {
           /* Is there anything in the read-ahead buffer? */
