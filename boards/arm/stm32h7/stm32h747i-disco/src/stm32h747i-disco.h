@@ -165,6 +165,21 @@ int stm32_adc_setup(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32_dma_alloc_init
+ *
+ * Description:
+ *   Called to create a FAT DMA allocator
+ *
+ * Returned Value:
+ *   0 on success or -ENOMEM
+ *
+ ****************************************************************************/
+
+#if defined (CONFIG_FAT_DMAMEMORY)
+int stm32_dma_alloc_init(void);
+#endif
+
+/****************************************************************************
  * Name: stm32_sdio_initialize
  *
  * Description:
