@@ -454,7 +454,7 @@ _xtensa_coproc_handler:
 	mov		a0, sp							/* sp == a1 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
-	rsr		a0, EPS							/* Save interruptee's PS */
+	rsr		a0, PS							/* Save interruptee's PS */
 	s32i	a0, sp, (4 * REG_PS)
 	rsr		a0, EPC_1						/* Save interruptee's PC */
 	s32i	a0, sp, (4 * REG_PC)
