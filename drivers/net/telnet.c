@@ -819,7 +819,8 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct telnet_dev_s *priv = inode->i_private;
-  ssize_t ret = 0;
+  ssize_t nread = 0;
+  int ret;
 
   ninfo("len: %d\n", len);
 
@@ -848,33 +849,44 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
               return -EAGAIN;
             }
 
-          /* Wait for new data (or error) */
+          /* Wait for new data, interrupt, or thread cancellation */
 
-          nxsem_wait_uninterruptible(&priv->td_iosem);
+          ret = nxsem_wait(&priv->td_iosem);
+          if (ret < 0)
+            {
+              nerr("ERROR: nxsem_wait failed: %d\n", ret);
+              return (ssize_t)ret;
+            }
+
           continue;
         }
 
       /* Take exclusive access to data buffer */
 
-      nxsem_wait(&priv->td_exclsem);
+      ret = nxsem_wait(&priv->td_exclsem);
+      if (ret < 0)
+        {
+          nerr("ERROR: nxsem_wait failed: %d\n", ret);
+          return (ssize_t)ret;
+        }
 
       /* Process the buffered telnet data */
 
       src = &priv->td_rxbuffer[priv->td_offset];
-      ret = telnet_receive(priv, src, priv->td_pending, buffer, len);
+      nread = telnet_receive(priv, src, priv->td_pending, buffer, len);
 
       nxsem_post(&priv->td_exclsem);
     }
-  while (ret == 0);
+  while (nread == 0);
 
   /* Returned Value:
    *
-   * ret > 0:  The number of characters copied into the user buffer by
-   *           telnet_receive().
-   * ret <= 0: Loss of connection or error events reported by recv().
+   * nread > 0:  The number of characters copied into the user buffer by
+   *             telnet_receive().
+   * nread <= 0: Loss of connection or error events reported by recv().
    */
 
-  return ret;
+  return nread;
 }
 
 /****************************************************************************
