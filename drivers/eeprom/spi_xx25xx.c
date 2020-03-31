@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/eeprom/spi_xx25xx.c
  *
- *   Copyright (C) 2014, 2017 Gregory Nutt. All rights reserved.
- *   Author: Sebastien Lorquet <sebastien@lorquet.fr>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -220,29 +205,63 @@ static const struct ee25xx_geom_s g_ee25xx_devices[] =
 {
   /* Microchip devices */
 
-  { 0, 1, 1, 0}, /* 25xx010A     128   16     1 */
-  { 1, 1, 1, 0}, /* 25xx020A     256   16     1 */
-  { 2, 1, 1, 1}, /* 25xx040      512   16     1+bit */
-  { 3, 1, 1, 0}, /* 25xx080     1024   16     1 */
-  { 3, 2, 2, 0}, /* 25xx080B    1024   32     2 */
-  { 4, 1, 2, 0}, /* 25xx160     2048   16     2 */
-  { 4, 2, 2, 0}, /* 25xx160B/D  2048   32     2 */
-  { 5, 2, 2, 0}, /* 25xx320     4096   32     2 */
-  { 6, 2, 2, 0}, /* 25xx640     8192   32     2 */
-  { 7, 3, 2, 0}, /* 25xx128    16384   64     2 */
-  { 8, 3, 2, 0}, /* 25xx256    32768   64     2 */
-  { 9, 4, 2, 0}, /* 25xx512    65536  128     2 */
-  {10, 5, 3, 0}, /* 25xx1024  131072  256     3 */
+  {
+    0, 1, 1, 0
+  }, /* 25xx010A     128   16     1 */
+  {
+    1, 1, 1, 0
+  }, /* 25xx020A     256   16     1 */
+  {
+    2, 1, 1, 1
+  }, /* 25xx040      512   16     1+bit */
+  {
+    3, 1, 1, 0
+  }, /* 25xx080     1024   16     1 */
+  {
+    3, 2, 2, 0
+  }, /* 25xx080B    1024   32     2 */
+  {
+    4, 1, 2, 0
+  }, /* 25xx160     2048   16     2 */
+  {
+    4, 2, 2, 0
+  }, /* 25xx160B/D  2048   32     2 */
+  {
+    5, 2, 2, 0
+  }, /* 25xx320     4096   32     2 */
+  {
+    6, 2, 2, 0
+  }, /* 25xx640     8192   32     2 */
+  {
+    7, 3, 2, 0
+  }, /* 25xx128    16384   64     2 */
+  {
+    8, 3, 2, 0
+  }, /* 25xx256    32768   64     2 */
+  {
+    9, 4, 2, 0
+  }, /* 25xx512    65536  128     2 */
+  {
+    10, 5, 3, 0
+  }, /* 25xx1024  131072  256     3 */
 
   /* Atmel devices */
 
-  { 0, 0, 1, 0}, /* AT25010B     128    8     1 */
-  { 1, 0, 1, 0}, /* AT25020B     256    8     1 */
-  { 2, 0, 1, 1}, /* AT25040B     512    8     1+bit */
+  {
+    0, 0, 1, 0
+  }, /* AT25010B     128    8     1 */
+  {
+    1, 0, 1, 0
+  }, /* AT25020B     256    8     1 */
+  {
+    2, 0, 1, 1
+  }, /* AT25040B     512    8     1+bit */
 
   /* STM devices */
 
-  {11, 5, 3, 0}, /* M95M02    262144  256     3 */
+  {
+    11, 5, 3, 0
+  }, /* M95M02    262144  256     3 */
 };
 
 /* Driver operations */
@@ -437,9 +456,9 @@ static void ee25xx_writepage(FAR struct ee25xx_dev_s *eedev, uint32_t devaddr,
  *
  ****************************************************************************/
 
-static void ee25xx_semtake(FAR struct ee25xx_dev_s *eedev)
+static int ee25xx_semtake(FAR struct ee25xx_dev_s *eedev)
 {
-  nxsem_wait_uninterruptible(&eedev->sem);
+  return nxsem_wait_uninterruptible(&eedev->sem);
 }
 
 /****************************************************************************
@@ -473,7 +492,12 @@ static int ee25xx_open(FAR struct file *filep)
 
   DEBUGASSERT(inode && inode->i_private);
   eedev = (FAR struct ee25xx_dev_s *)inode->i_private;
-  ee25xx_semtake(eedev);
+
+  ret = ee25xx_semtake(eedev);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Increment the reference count */
 
@@ -505,7 +529,12 @@ static int ee25xx_close(FAR struct file *filep)
 
   DEBUGASSERT(inode && inode->i_private);
   eedev = (FAR struct ee25xx_dev_s *)inode->i_private;
-  ee25xx_semtake(eedev);
+
+  ret = ee25xx_semtake(eedev);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Decrement the reference count. I want the entire close operation
    * to be atomic wrt other driver operations.
@@ -540,7 +569,12 @@ static off_t ee25xx_seek(FAR struct file *filep, off_t offset, int whence)
 
   DEBUGASSERT(inode && inode->i_private);
   eedev = (FAR struct ee25xx_dev_s *)inode->i_private;
-  ee25xx_semtake(eedev);
+
+  ret = ee25xx_semtake(eedev);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Determine the new, requested file position */
 
@@ -559,6 +593,7 @@ static off_t ee25xx_seek(FAR struct file *filep, off_t offset, int whence)
       break;
 
     default:
+
       /* Return EINVAL if the whence argument is invalid */
 
       ee25xx_semgive(eedev);
@@ -605,7 +640,11 @@ static ssize_t ee25xx_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   eedev = (FAR struct ee25xx_dev_s *)inode->i_private;
 
-  ee25xx_semtake(eedev);
+  ret = ee25xx_semtake(eedev);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* trim len if read would go beyond end of device */
 
@@ -678,7 +717,11 @@ static ssize_t ee25xx_write(FAR struct file *filep, FAR const char *buffer,
 
   ret = len; /* save number of bytes written */
 
-  ee25xx_semtake(eedev);
+  ret = ee25xx_semtake(eedev);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Writes can't happen in a row like the read does.
    * The EEPROM is made of pages, and write sequences
@@ -780,7 +823,7 @@ int ee25xx_initialize(FAR struct spi_dev_s *dev, FAR char *devname,
   if ((devtype < 0) ||
       (devtype >= sizeof(g_ee25xx_devices) / sizeof(g_ee25xx_devices[0])))
     {
-     return -EINVAL;
+      return -EINVAL;
     }
 
   eedev = kmm_zalloc(sizeof(struct ee25xx_dev_s));
