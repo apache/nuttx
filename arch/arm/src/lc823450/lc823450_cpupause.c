@@ -86,7 +86,6 @@
 volatile spinlock_t g_cpu_wait[CONFIG_SMP_NCPUS];
 volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
 
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -302,7 +301,7 @@ int up_cpu_pause(int cpu)
    * called.  g_cpu_paused will be unlocked in any case.
    */
 
- return 0;
+  return 0;
 }
 
 /****************************************************************************
