@@ -160,7 +160,7 @@ static const struct i2c_ops_s ds_i2c_ops =
  *
  ****************************************************************************/
 
-static inline void ds_i2c_sem_wait(FAR struct i2c_master_s *i2cdev)
+static inline int ds_i2c_sem_wait(FAR struct i2c_master_s *i2cdev)
 {
   FAR struct ds_i2c_inst_s *inst = (FAR struct ds_i2c_inst_s *)i2cdev;
   FAR struct onewire_master_s *master = inst->master;
@@ -205,11 +205,13 @@ static int ds_error(uint8_t buf[])
       i2cerr("I2C device not responding\n");
       return -ENXIO;
     }
+
   if (buf[0] & DS_STATUS_START)
     {
       i2cerr("I2C status start\n");
       return -EAGAIN;
     }
+
   if (buf[0] != 0 || buf[1] != 0)
     {
       i2cerr("I2C IO error\n");
@@ -286,7 +288,8 @@ static int ds_busywait(FAR struct ds_i2c_inst_s *inst, size_t length)
 
          up_udelay(delay);
         }
-    } while (retries-- > 0);
+    }
+  while (retries-- > 0);
 
   i2cwarn("busywait timeout\n");
   return -ETIMEDOUT;
@@ -461,7 +464,8 @@ static int ds_i2c_write(FAR struct ds_i2c_inst_s *inst, uint16_t i2c_addr,
  *
  ****************************************************************************/
 
-static int ds_i2c_write_read(FAR struct ds_i2c_inst_s *inst, uint16_t i2c_addr,
+static int ds_i2c_write_read(FAR struct ds_i2c_inst_s *inst,
+                             uint16_t i2c_addr,
                              FAR const uint8_t *wbuffer, ssize_t wlength,
                              FAR uint8_t *rbuffer, ssize_t rlength)
 {
@@ -552,7 +556,8 @@ static int ds_i2c_write_read(FAR struct ds_i2c_inst_s *inst, uint16_t i2c_addr,
   return ONEWIRE_READ(master->dev, rbuffer, rlength);
 }
 
-static int ds_i2c_setfrequency(FAR struct ds_i2c_inst_s *inst, uint32_t frequency)
+static int ds_i2c_setfrequency(FAR struct ds_i2c_inst_s *inst,
+                               uint32_t frequency)
 {
   FAR struct onewire_master_s *master = inst->master;
   uint8_t buf[2];
@@ -645,15 +650,15 @@ static int ds_i2c_process(FAR struct i2c_master_s *i2cdev,
        * the common case of write followed by read to a same address.
        */
 
-      if (i < count - 1 && msgs[i].addr == msgs[i+1].addr &&
+      if (i < count - 1 && msgs[i].addr == msgs[i + 1].addr &&
           (msgs[i].flags & I2C_M_READ) == 0 &&
-          (msgs[i+1].flags & I2C_M_READ))
+          (msgs[i + 1].flags & I2C_M_READ))
         {
           /* Write-read combined transfer. */
 
           ret = ds_i2c_write_read(inst, msgs[i].addr,
                                   msgs[i].buffer, msgs[i].length,
-                                  msgs[i+1].buffer, msgs[i+1].length);
+                                  msgs[i + 1].buffer, msgs[i + 1].length);
           if (ret < 0)
             {
               i = ret;
@@ -668,7 +673,8 @@ static int ds_i2c_process(FAR struct i2c_master_s *i2cdev,
         {
           /* Read transfer. */
 
-          ret = ds_i2c_read(inst, msgs[i].addr, msgs[i].buffer, msgs[i].length);
+          ret = ds_i2c_read(inst, msgs[i].addr, msgs[i].buffer,
+                            msgs[i].length);
           if (ret < 0)
             {
               i = ret;
@@ -681,8 +687,8 @@ static int ds_i2c_process(FAR struct i2c_master_s *i2cdev,
         {
           /* Write transfer. Stop condition only for last transfer. */
 
-          ret = ds_i2c_write(inst, msgs[i].addr, msgs[i].buffer, msgs[i].length,
-                             i == (count-1));
+          ret = ds_i2c_write(inst, msgs[i].addr, msgs[i].buffer,
+                             msgs[i].length, i == (count - 1));
           if (ret < 0)
             {
               i = ret;
@@ -696,8 +702,9 @@ static int ds_i2c_process(FAR struct i2c_master_s *i2cdev,
 
       if (i < count)
         {
-          /* Yes. Resume to same DS28E17. */
-          /* Oddness: Skip-ROM does not set RS-bit needed by resume. */
+          /* Yes. Resume to same DS28E17.
+           * Oddness: Skip-ROM does not set RS-bit needed by resume.
+           */
 
           if (master->nslaves > 1)
             {
@@ -707,6 +714,7 @@ static int ds_i2c_process(FAR struct i2c_master_s *i2cdev,
             {
               ret = onewire_reset_select(&inst->slave);
             }
+
           if (ret < 0)
             {
               i = ret;
@@ -734,7 +742,12 @@ static int ds_i2c_reset(FAR struct i2c_master_s *i2cdev)
   FAR struct onewire_master_s *master = inst->master;
   int ret;
 
-  ds_i2c_sem_wait(i2cdev);
+  ret = ds_i2c_sem_wait(i2cdev);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = ONEWIRE_RESET(master->dev);
   ds_i2c_sem_post(i2cdev);
 
@@ -756,7 +769,12 @@ static int ds_i2c_transfer(FAR struct i2c_master_s *i2cdev,
 {
   int ret;
 
-  ds_i2c_sem_wait(i2cdev);
+  ret = ds_i2c_sem_wait(i2cdev);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = ds_i2c_process(i2cdev, msgs, count);
   ds_i2c_sem_post(i2cdev);
 
@@ -773,8 +791,16 @@ static int ds_i2c_transfer(FAR struct i2c_master_s *i2cdev,
 static int ds28e17_selftest(FAR struct ds_i2c_inst_s *inst)
 {
   FAR struct onewire_master_s *master = inst->master;
-  uint8_t txbuf[] = { ONEWIRE_CMD_READ_ROM };
-  uint8_t rxbuf[8] = { 0 };
+  uint8_t txbuf[] =
+  {
+    ONEWIRE_CMD_READ_ROM
+  };
+
+  uint8_t rxbuf[8] =
+  {
+    0
+  };
+
   uint64_t rom;
   uint8_t crc;
   int ret;
@@ -843,7 +869,9 @@ static int ds28e17_selftest(FAR struct ds_i2c_inst_s *inst)
  ****************************************************************************/
 
 int ds28e17_search(FAR struct ds28e17_dev_s *priv,
-                   void (*cb_search)(int family, uint64_t romcode, void *arg),
+                   void (*cb_search)(int family,
+                                     uint64_t romcode,
+                                     void *arg),
                    void *arg)
 {
   FAR struct onewire_master_s *master = (FAR struct onewire_master_s *)priv;
@@ -851,7 +879,12 @@ int ds28e17_search(FAR struct ds28e17_dev_s *priv,
 
   DEBUGASSERT(master != NULL && cb_search != NULL);
 
-  onewire_sem_wait(master);
+  ret = onewire_sem_wait(master);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = onewire_search(master, DS_FAMILY, false, cb_search, arg);
   onewire_sem_post(master);
 
@@ -881,6 +914,7 @@ FAR struct i2c_master_s *
 {
   FAR struct ds_i2c_inst_s *inst;  /* device, single instance */
   FAR struct onewire_master_s *master = (FAR struct onewire_master_s *)priv;
+  int ret;
 
   DEBUGASSERT(master != NULL);
 
@@ -903,7 +937,13 @@ FAR struct i2c_master_s *
 
   /* We need a recursive lock as this may be called from a search callback. */
 
-  onewire_sem_wait(master);
+  ret = onewire_sem_wait(master);
+  if (ret < 0)
+    {
+      kmm_free(inst);
+      i2cerr("ERROR: Failed to acquire lock\n");
+      return NULL;
+    }
 
   if (onewire_addslave(master, &inst->slave) < 0)
     {
@@ -953,7 +993,11 @@ int ds28e17_lower_half_unregister(FAR struct ds28e17_dev_s *priv,
   FAR struct onewire_master_s *master = inst->master;
   int ret;
 
-  onewire_sem_wait(master);
+  ret = onewire_sem_wait(master);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   ret = onewire_removeslave(master, &inst->slave);
   if (ret < 0)

@@ -53,7 +53,7 @@
  * Name: bch_semtake
  ****************************************************************************/
 
-void bchlib_semtake(FAR struct bchlib_s *bch)
+int bchlib_semtake(FAR struct bchlib_s *bch)
 {
-  nxsem_wait_uninterruptible(&bch->sem);
+  return nxsem_wait(&bch->sem);
 }

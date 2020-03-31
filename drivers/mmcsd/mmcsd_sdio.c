@@ -142,7 +142,7 @@ struct mmcsd_state_s
 
 /* Misc Helpers *************************************************************/
 
-static void    mmcsd_takesem(FAR struct mmcsd_state_s *priv);
+static int    mmcsd_takesem(FAR struct mmcsd_state_s *priv);
 
 #ifndef CONFIG_SDIO_MUXBUS
 #  define mmcsd_givesem(p) nxsem_post(&priv->sem);
@@ -256,13 +256,19 @@ static const struct block_operations g_bops =
  * Misc Helpers
  ****************************************************************************/
 
-static void mmcsd_takesem(FAR struct mmcsd_state_s *priv)
+static int mmcsd_takesem(FAR struct mmcsd_state_s *priv)
 {
+  int ret;
+
   /* Take the semaphore, giving exclusive access to the driver (perhaps
    * waiting)
    */
 
-  nxsem_wait_uninterruptible(&priv->sem);
+  ret = nxsem_wait_uninterruptible(&priv->sem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Lock the bus if mutually exclusive access to the SDIO bus is required
    * on this platform.
@@ -271,6 +277,8 @@ static void mmcsd_takesem(FAR struct mmcsd_state_s *priv)
 #ifdef CONFIG_SDIO_MUXBUS
   SDIO_LOCK(priv->dev, TRUE);
 #endif
+
+  return ret;
 }
 
 #ifdef CONFIG_SDIO_MUXBUS
@@ -2144,6 +2152,7 @@ static ssize_t mmcsd_flush(FAR void *dev, FAR const uint8_t *buffer,
 static int mmcsd_open(FAR struct inode *inode)
 {
   FAR struct mmcsd_state_s *priv;
+  int ret;
 
   finfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
@@ -2152,7 +2161,13 @@ static int mmcsd_open(FAR struct inode *inode)
   /* Just increment the reference count on the driver */
 
   DEBUGASSERT(priv->crefs < MAX_CREFS);
-  mmcsd_takesem(priv);
+
+  ret = mmcsd_takesem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   priv->crefs++;
   mmcsd_givesem(priv);
   return OK;
@@ -2168,6 +2183,7 @@ static int mmcsd_open(FAR struct inode *inode)
 static int mmcsd_close(FAR struct inode *inode)
 {
   FAR struct mmcsd_state_s *priv;
+  int ret;
 
   finfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
@@ -2176,7 +2192,12 @@ static int mmcsd_close(FAR struct inode *inode)
   /* Decrement the reference count on the block driver */
 
   DEBUGASSERT(priv->crefs > 0);
-  mmcsd_takesem(priv);
+  ret = mmcsd_takesem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   priv->crefs--;
   mmcsd_givesem(priv);
   return OK;
@@ -2208,7 +2229,11 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
   if (nsectors > 0)
     {
-      mmcsd_takesem(priv);
+      ret = mmcsd_takesem(priv);
+      if (ret < 0)
+        {
+          return (ssize_t)ret;
+        }
 
 #if defined(CONFIG_DRVR_READAHEAD)
       /* Get the data from the read-ahead buffer */
@@ -2282,7 +2307,11 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
   finfo("sector: %lu nsectors: %u sectorsize: %u\n",
         (unsigned long)startsector, nsectors, priv->blocksize);
 
-  mmcsd_takesem(priv);
+  ret = mmcsd_takesem(priv);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
 #if defined(CONFIG_DRVR_WRITEBUFFER)
   /* Write the data to the write buffer */
@@ -2349,7 +2378,12 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
       /* Is there a (supported) card inserted in the slot? */
 
       priv = (FAR struct mmcsd_state_s *)inode->i_private;
-      mmcsd_takesem(priv);
+      ret = mmcsd_takesem(priv);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
       if (IS_EMPTY(priv))
         {
           /* No.. return ENODEV */
@@ -2402,7 +2436,12 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
   /* Process the IOCTL by command */
 
-  mmcsd_takesem(priv);
+  ret = mmcsd_takesem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   switch (cmd)
     {
     case BIOC_PROBE: /* Check for media in the slot */
@@ -2467,13 +2506,19 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 static void mmcsd_mediachange(FAR void *arg)
 {
   FAR struct mmcsd_state_s *priv = (FAR struct mmcsd_state_s *)arg;
+  int ret;
 
   finfo("arg: %p\n", arg);
   DEBUGASSERT(priv);
 
   /* Is there a card present in the slot? */
 
-  mmcsd_takesem(priv);
+  ret = mmcsd_takesem(priv);
+  if (ret < 0)
+    {
+      return;
+    }
+
   if (SDIO_PRESENT(priv->dev))
     {
       /* No... process the card insertion.  This could cause chaos if we
@@ -3518,7 +3563,11 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
 {
   int ret;
 
-  mmcsd_takesem(priv);
+  ret = mmcsd_takesem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Get the capabilities of the SDIO driver */
 
