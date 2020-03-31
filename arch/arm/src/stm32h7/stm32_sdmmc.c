@@ -98,6 +98,12 @@
  * be monitored off the an HP work thread for a residual of less than
  * FIFO_SIZE_IN_BYTES / 2.
  *
+ * HW Issues when using IDMA
+ *
+ *    The DMA buffer must be located in a zone accessible via IDMA.
+ * For SDMMC1, IDMA cannot access SRAM123 or SRAM4. Refer to ST AN5200.
+ * Buffer validity is checked when CONFIG_ARCH_HAVE_SDIO_PREFLIGHT is set.
+ *
  * MDMA is only available on for SDMMC1 and Not supported at this time.
  *
  * Required system configuration options:
@@ -110,13 +116,13 @@
  *     APIs to manage concurrent accesses on the SDMMC bus.  This is not
  *     needed for the simple case of a single SD card, for example.
  *   CONFIG_STM32H7_SDMMC_IDMA - Enable SDMMC IDMA.
- *     DMA support for SDMMC. If disabled disabled, the SDMMC will work in
+ *     DMA support for SDMMC. If disabled, the SDMMC will work in
  *     interrupt mode and still use the IDMA to a local buffer for data
  *     lengths less the 32 bytes due to the FIFO limitations.
  *   CONFIG_SDMMC1/2_WIDTH_D1_ONLY - This may be selected to force the driver
  *     operate with only a single data line (the default is to use all
  *     4 SD data lines).
- *   CONFIG_CONFIG_STM32H7_SDMMC_XFRDEBUG - Enables some very low-level debug
+ *   CONFIG_STM32H7_SDMMC_XFRDEBUG - Enables some very low-level debug
  *     output This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_INFO
  *   CONFIG_SDMMC1/2_SDIO_MODE
  *     Build ins additional support needed only for SDIO cards (vs. SD memory
@@ -141,6 +147,11 @@
 
 #if !defined(CONFIG_STM32H7_SDMMC_IDMA)
 #  warning "Large Non-DMA transfer may result in RX overrun failures"
+#elif defined(CONFIG_STM32H7_SDMMC1)
+#  define SRAM123_START STM32_SRAM123_BASE
+#  define SRAM123_END   (SRAM123_START + STM32H7_SRAM123_SIZE)
+#  define SRAM4_START   STM32_SRAM4_BASE
+#  define SRAM4_END     (SRAM4_START + STM32H7_SRAM4_SIZE)
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
@@ -153,7 +164,7 @@
 #endif
 
 #if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_FEATURES)
-#  undef CONFIG_CONFIG_STM32H7_SDMMC_XFRDEBUG
+#  undef CONFIG_STM32H7_SDMMC_XFRDEBUG
 #endif
 
 #ifdef CONFIG_SDMMC1_SDIO_PULLUP
@@ -1514,6 +1525,21 @@ static void stm32_endtransfer(struct stm32_dev_s *priv,
   /* Clearing pending interrupt status on all transfer related interrupts */
 
   sdmmc_putreg32(priv, STM32_SDMMC_XFRDONE_ICR, STM32_SDMMC_ICR_OFFSET);
+
+#if defined(CONFIG_STM32H7_SDMMC_IDMA) && \
+    !defined(CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT)
+  /* invalidate dcache in case of DMA receive. */
+
+  if (priv->receivecnt)
+    {
+      up_invalidate_dcache((uintptr_t)priv->buffer,
+                           (uintptr_t)priv->buffer + priv->remaining);
+    }
+#endif
+
+  /* DMA debug instrumentation */
+
+  stm32_sample(priv, SAMPLENDX_END_TRANSFER);
 
   /* Mark the transfer finished */
 
@@ -3038,7 +3064,29 @@ static int stm32_registercallback(FAR struct sdio_dev_s *dev,
 static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
-  /* DMA must be possible to the buffer */
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+
+  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+
+  /* IDMA must be possible to the buffer */
+
+#if defined(CONFIG_STM32H7_SDMMC1)
+  if (priv->base == STM32_SDMMC1_BASE)
+    {
+      /* For SDMMC1, IDMA cannot access SRAM123 or SRAM4. */
+
+      if (((uintptr_t)buffer >= SRAM123_START &&
+          (uintptr_t)buffer + buflen <= SRAM123_END) ||
+          ((uintptr_t)buffer >= SRAM4_START &&
+          (uintptr_t)buffer + buflen <= SRAM4_END))
+        {
+          mcerr("invalid IDMA address "
+                  "buffer:0x%08x end:0x%08x\n",
+                  buffer, buffer + buflen - 1);
+          return -EFAULT;
+        }
+    }
+#endif
 
 #  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
   /* buffer alignment is required for DMA transfers with dcache in buffered
@@ -3048,15 +3096,11 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
    * ARMV7M_DCACHE_LINESIZE boundaries.
    */
 
-  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
-
-  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-
   if (buffer != priv->rxfifo &&
       (((uintptr_t)buffer & (ARMV7M_DCACHE_LINESIZE - 1)) != 0 ||
       ((uintptr_t)(buffer + buflen) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0))
     {
-      dmainfo("stm32_dmapreflight: dcache unaligned "
+      mcerr("dcache unaligned "
               "buffer:0x%08x end:0x%08x\n",
               buffer, buffer + buflen - 1);
       return -EFAULT;
@@ -3276,7 +3320,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 static int stm32_dmadelydinvldt(FAR struct sdio_dev_s *dev,
                               FAR const uint8_t *buffer, size_t buflen)
 {
-  /* Invaliate cache to physical memory when not in DTCM memory. */
+  /* Invalidate cache to physical memory when not in DTCM memory. */
 
   if ((uintptr_t)buffer < DTCM_START ||
       (uintptr_t)buffer + buflen > DTCM_END)
