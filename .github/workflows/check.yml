@@ -23,6 +23,7 @@ jobs:
     - name: Checkout nuttx repo
       uses: actions/checkout@v2
       with:
+        repository: apache/incubator-nuttx
         path: nuttx
         fetch-depth: 0
 
@@ -32,5 +33,5 @@ jobs:
         ranges=`git log -1 --merges --pretty=format:%P | awk -F" " '{ print $1 ".." $2 }'`
         git log --oneline $ranges
         commits=`git log --reverse --format=format:%H $ranges`
-        echo "./tools/checkpatch.sh -g $commits"
-        ./tools/checkpatch.sh -g $commits
+        echo "../nuttx/tools/checkpatch.sh -g $commits"
+        ../nuttx/tools/checkpatch.sh -g $commits
