@@ -289,7 +289,7 @@ int up_cpu_pause(int cpu)
    * called.  g_cpu_paused will be unlocked in any case.
    */
 
- return ret;
+  return ret;
 }
 
 /****************************************************************************
