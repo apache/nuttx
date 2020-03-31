@@ -68,4 +68,8 @@ ifeq ($(CONFIG_LIB_BOARDCTL),y)
 CSRCS += stm32_appinitialize.c
 endif
 
+ifeq ($(CONFIG_STM32H7_SDMMC), y)
+CSRCS += stm32_sdmmc.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
