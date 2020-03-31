@@ -45,7 +45,7 @@ CMN_ASRCS  = xtensa_context.S xtensa_coproc.S xtensa_cpuint.S xtensa_panic.S
 CMN_ASRCS += xtensa_sigtramp.S
 
 CMN_CSRCS  = xtensa_assert.c xtensa_blocktask.c xtensa_copystate.c
-CMN_CSRCS += xtensa_cpenable.c xtensa_createstack.c xtensa_exit.c xtensa_idle.c
+CMN_CSRCS += xtensa_cpenable.c xtensa_createstack.c xtensa_exit.c
 CMN_CSRCS += xtensa_initialize.c xtensa_initialstate.c xtensa_interruptcontext.c
 CMN_CSRCS += xtensa_irqdispatch.c xtensa_lowputs.c xtensa_mdelay.c
 CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
@@ -55,6 +55,10 @@ CMN_CSRCS += xtensa_sigdeliver.c xtensa_stackframe.c xtensa_udelay.c
 CMN_CSRCS += xtensa_unblocktask.c xtensa_usestack.c
 
 # Configuration-dependent common XTENSA files
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+  CMN_CSRCS += xtensa_idle.c
+endif
 
 ifeq ($(CONFIG_DEBUG_ALERT),y)
   CMN_CSRCS += xtensa_dumpstate.c
