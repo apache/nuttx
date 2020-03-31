@@ -58,10 +58,10 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run Pull Container
-      uses: ./nuttx/.github/actions/ci-container
+      uses: ./testing/.github/actions/ci-container
 
     - name: Run builds
-      uses: ./nuttx/.github/actions/ci-container
+      uses: ./testing/.github/actions/ci-container
       env:
         BLOBDIR: /tools/blobs
       with:
