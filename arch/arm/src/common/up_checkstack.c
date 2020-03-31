@@ -51,6 +51,7 @@
 
 #include "sched/sched.h"
 #include "up_internal.h"
+#include "chip.h"
 
 #ifdef CONFIG_STACK_COLORATION
 
