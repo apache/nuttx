@@ -28,6 +28,7 @@ jobs:
     - name: Checkout nuttx repo
       uses: actions/checkout@v2
       with:
+        repository: apache/incubator-nuttx
         path: nuttx
         fetch-depth: 0
 
