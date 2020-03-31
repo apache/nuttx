@@ -39,6 +39,7 @@
  * See "GS2200MS2W Adapter Command Reference Guide" for the explanation
  * of AT commands. You can find the document at:
  * https://www.telit.com/m2m-iot-products/wifi-bluetooth-modules/wi-fi-gs2200m/
+ *
  ****************************************************************************/
 
 /****************************************************************************
@@ -672,9 +673,9 @@ errout:
  * Name: gs2200m_lock
  ****************************************************************************/
 
-static void gs2200m_lock(FAR struct gs2200m_dev_s *dev)
+static int gs2200m_lock(FAR struct gs2200m_dev_s *dev)
 {
-  nxsem_wait_uninterruptible(&dev->dev_sem);
+  return nxsem_wait_uninterruptible(&dev->dev_sem);
 }
 
 /****************************************************************************
@@ -713,6 +714,7 @@ static ssize_t gs2200m_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode;
   FAR struct gs2200m_dev_s *dev;
+  int ret;
 
   DEBUGASSERT(filep);
   inode = filep->f_inode;
@@ -722,7 +724,15 @@ static ssize_t gs2200m_read(FAR struct file *filep, FAR char *buffer,
 
   ASSERT(1 == len);
 
-  gs2200m_lock(dev);
+  ret = nxsem_wait(dev);
+  if (ret < 0)
+    {
+      /* Return if a signal is received or if the the task was canceled
+       * while we were waiting.
+       */
+
+      return ret;
+    }
 
   ASSERT(0 < _notif_q_count(dev));
   char cid = _notif_q_pop(dev);
@@ -744,7 +754,7 @@ static ssize_t gs2200m_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t gs2200m_write(FAR struct file *filep, FAR const char *buffer,
                              size_t len)
 {
-  return 0;
+  return 0;  /* REVISIT:  Zero is not a legal return value from write() */
 }
 
 /****************************************************************************
@@ -2528,7 +2538,13 @@ static int gs2200m_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Lock the device */
 
-  gs2200m_lock(dev);
+  ret = gs2200m_lock(dev);
+  if (ret < 0)
+    {
+      /* Return only if the task was canceled */
+
+      return ret;
+    }
 
   /* Disable gs2200m irq to poll dready */
 
@@ -2649,7 +2665,13 @@ static int gs2200m_poll(FAR struct file *filep, FAR struct pollfd *fds,
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct gs2200m_dev_s *)inode->i_private;
 
-  gs2200m_lock(dev);
+  ret = gs2200m_lock(dev);
+  if (ret < 0)
+    {
+      /* Return if the task was canceled */
+
+      return ret;
+    }
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -2708,11 +2730,22 @@ static void gs2200m_irq_worker(FAR void *arg)
   char c_cid;
   int n;
   int ec;
+  int ret;
 
   DEBUGASSERT(arg != NULL);
   dev = (FAR struct gs2200m_dev_s *)arg;
 
-  gs2200m_lock(dev);
+  do
+    {
+      ret = gs2200m_lock(dev);
+
+      /* The only failure would be if the worker thread were canceled.  That
+       * is very unlikely, however.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
+    }
+  while (ret < 0);
 
   n = dev->lower->dready(&ec);
   wlinfo("== start (dready=%d, ec=%d) \n", n, ec);
@@ -2893,6 +2926,7 @@ static int gs2200m_start(FAR struct gs2200m_dev_s *dev)
 
 #if CONFIG_WL_GS2200M_LOGLEVEL > 0
   /* Set log level */
+
   t = gs2200m_set_loglevel(dev, CONFIG_WL_GS2200M_LOGLEVEL);
   ASSERT(TYPE_OK == t);
 #endif
