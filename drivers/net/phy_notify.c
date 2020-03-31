@@ -101,7 +101,7 @@ struct phy_notify_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void phy_semtake(void);
+static int phy_semtake(void);
 static FAR struct phy_notify_s *phy_find_unassigned(void);
 static FAR struct phy_notify_s *phy_find_assigned(FAR const char *intf,
                                                   pid_t pid);
@@ -128,9 +128,9 @@ static struct phy_notify_s
  * Name: phy_semtake
  ****************************************************************************/
 
-static void phy_semtake(void)
+static int phy_semtake(void)
 {
-  nxsem_wait_uninterruptible(&g_notify_clients_sem);
+  return nxsem_wait_uninterruptible(&g_notify_clients_sem);
 }
 
 #define phy_semgive() nxsem_post(&g_notify_clients_sem);
@@ -142,9 +142,16 @@ static void phy_semtake(void)
 static FAR struct phy_notify_s *phy_find_unassigned(void)
 {
   FAR struct phy_notify_s *client;
+  int ret;
   int i;
 
-  phy_semtake();
+  ret = phy_semtake();
+  if (ret < 0)
+    {
+      phyerr("ERROR: phy_semtake failed: %d\n", ret);
+      return NULL;
+    }
+
   for (i = 0; i < CONFIG_PHY_NOTIFICATION_NCLIENTS; i++)
     {
       client = &g_notify_clients[i];
@@ -180,9 +187,16 @@ static FAR struct phy_notify_s *phy_find_assigned(FAR const char *intf,
                                                   pid_t pid)
 {
   FAR struct phy_notify_s *client;
+  int ret;
   int i;
 
-  phy_semtake();
+  ret = phy_semtake();
+  if (ret < 0)
+    {
+      phyerr("ERROR: phy_semtake failed: %d\n", ret);
+      return NULL;
+    }
+
   for (i = 0; i < CONFIG_PHY_NOTIFICATION_NCLIENTS; i++)
     {
       client = &g_notify_clients[i];
@@ -286,7 +300,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid,
   /* Check if this client already exists */
 
   client = phy_find_assigned(intf, pid);
-  if (client)
+  if (client != NULL)
     {
       /* Yes.. update the signal number and argument */
 
@@ -297,7 +311,7 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid,
       /* No, allocate a new slot in the client notification table */
 
       client = phy_find_unassigned();
-      if (!client)
+      if (client == NULL)
         {
           phyerr("ERROR: Failed to allocate a client entry\n");
           return -ENOMEM;
@@ -345,13 +359,14 @@ int phy_notify_subscribe(FAR const char *intf, pid_t pid,
 int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
 {
   FAR struct phy_notify_s *client;
+  int ret;
 
   phyinfo("%s: PID=%d\n", intf, pid);
 
   /* Find the client entry for this interface */
 
   client = phy_find_assigned(intf, pid);
-  if (!client)
+  if (client == NULL)
     {
       phyerr("ERROR: No such client\n");
       return -ENOENT;
@@ -359,20 +374,24 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
 
   /* Detach and disable the PHY interrupt */
 
-  phy_semtake();
-  arch_phy_irq(intf, NULL, NULL, NULL);
+  ret = phy_semtake();
+  if (ret >= 0)
+    {
+      arch_phy_irq(intf, NULL, NULL, NULL);
 
-  /* Cancel any pending notification */
+      /* Cancel any pending notification */
 
-  nxsig_cancel_notification(&client->work);
+      nxsig_cancel_notification(&client->work);
 
-  /* Un-initialize the client entry */
+      /* Un-initialize the client entry */
 
-  client->assigned = false;
-  client->intf[0]  = '\0';
-  client->pid      = -1;
+      client->assigned = false;
+      client->intf[0]  = '\0';
+      client->pid      = -1;
 
-  phy_semgive();
+      phy_semgive();
+    }
+
   return OK;
 }
 

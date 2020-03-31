@@ -74,7 +74,8 @@
 static void     wm8776_writereg(FAR struct wm8776_dev_s *priv,
                   uint8_t regaddr, uint16_t regval);
 
-static void     wm8776_takesem(sem_t *sem);
+static int      wm8776_takesem(FAR sem_t *sem);
+static int      wm8776_forcetake(FAR sem_t *sem);
 #define         wm8776_givesem(s) nxsem_post(s)
 
 static int      wm8776_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
@@ -174,13 +175,13 @@ static const struct audio_ops_s g_audioops =
   wm8776_release        /* release        */
 };
 
-/************************************************************************************
+/****************************************************************************
  * Name: wm8776_writereg
  *
  * Description:
  *   Write the specified 16-bit register to the WM8776 device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void wm8776_writereg(FAR struct wm8776_dev_s *priv,
                             uint8_t regaddr,
@@ -208,28 +209,65 @@ static void wm8776_writereg(FAR struct wm8776_dev_s *priv,
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: wm8776_takesem
  *
  * Description:
- *  Take a semaphore count, handling the nasty EINTR return if we are interrupted
- *  by a signal.
+ *  Take a semaphore count, handling the nasty EINTR return if we are
+ *  interrupted by a signal.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static void wm8776_takesem(sem_t *sem)
+static int wm8776_takesem(sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
 }
 
-/************************************************************************************
+/****************************************************************************
+ * Name: wm8776_forcetake
+ *
+ * Description:
+ *   This is just another wrapper but this one continues even if the thread
+ *   is canceled.  This must be done in certain conditions where were must
+ *   continue in order to clean-up resources.
+ *
+ ****************************************************************************/
+
+static int wm8776_forcetake(FAR sem_t *sem)
+{
+  int result;
+  int ret = OK;
+
+  do
+    {
+      result = nxsem_wait_uninterruptible(sem);
+
+      /* The only expected error would -ECANCELED meaning that the
+       * parent thread has been canceled.  We have to continue and
+       * terminate the poll in this case.
+       */
+
+      DEBUGASSERT(result == OK || result == -ECANCELED);
+      if (ret == OK && result < 0)
+        {
+          /* Remember the first failure */
+
+          ret = result;
+        }
+    }
+  while (result < 0);
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: wm8776_setvolume
  *
  * Description:
- *   Set the right and left volume values in the WM8776 device based on the current
- *   volume and balance settings.
+ *   Set the right and left volume values in the WM8776 device based on the
+ *   current volume and balance settings.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 static void wm8776_setvolume(FAR struct wm8776_dev_s *priv, uint16_t volume,
@@ -312,8 +350,9 @@ static int wm8776_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* The types of audio units we implement */
 
-              caps->ac_controls.b[0] = AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
-                                     AUDIO_TYPE_PROCESSING;
+              caps->ac_controls.b[0] =
+                AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
+                AUDIO_TYPE_PROCESSING;
 
               break;
 
@@ -413,13 +452,14 @@ static int wm8776_configure(FAR struct audio_lowerhalf_s *dev,
               {
                 /* Scale the volume setting to the range {0x2f .. 0x79} */
 
-                wm8776_setvolume(priv, (0x4a * volume / 1000) + 0x2f, priv->mute);
+                wm8776_setvolume(priv, (0x4a * volume / 1000) + 0x2f,
+                                 priv->mute);
               }
             else
               {
                 ret = -EDOM;
               }
-           }
+          }
           break;
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
@@ -537,6 +577,7 @@ static void  wm8776_senddone(FAR struct i2s_dev_s *i2s,
   priv->inflight--;
 
   /* Save the result of the transfer */
+
   /* REVISIT:  This can be overwritten */
 
   priv->result = result;
@@ -639,7 +680,7 @@ static int wm8776_sendbuffer(FAR struct wm8776_dev_s *priv)
   irqstate_t flags;
   uint32_t timeout;
   int shift;
-  int ret = OK;
+  int ret;
 
   /* Loop while there are audio buffers to be sent and we have few than
    * CONFIG_WM8776_INFLIGHT then "in-flight"
@@ -653,7 +694,12 @@ static int wm8776_sendbuffer(FAR struct wm8776_dev_s *priv)
    * only while accessing 'inflight'.
    */
 
-  wm8776_takesem(&priv->pendsem);
+  ret = wm8776_takesem(&priv->pendsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   while (priv->inflight < CONFIG_WM8776_INFLIGHT &&
          dq_peek(&priv->pendq) != NULL && !priv->paused)
     {
@@ -713,6 +759,7 @@ static int wm8776_start(FAR struct audio_lowerhalf_s *dev)
   audinfo("Entry\n");
 
   /* Exit reduced power modes of operation */
+
   /* REVISIT */
 
   /* Create a message queue for the worker thread */
@@ -796,6 +843,7 @@ static int wm8776_stop(FAR struct audio_lowerhalf_s *dev)
   priv->threadid = 0;
 
   /* Enter into a reduced power usage mode */
+
   /* REVISIT: */
 
   return OK;
@@ -837,7 +885,8 @@ static int wm8776_pause(FAR struct audio_lowerhalf_s *dev)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int wm8776_resume(FAR struct audio_lowerhalf_s *dev, FAR void *session)
+static int wm8776_resume(FAR struct audio_lowerhalf_s *dev,
+                         FAR void *session)
 #else
 static int wm8776_resume(FAR struct audio_lowerhalf_s *dev)
 #endif
@@ -878,14 +927,20 @@ static int wm8776_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
   /* Add the new buffer to the tail of pending audio buffers */
 
-  wm8776_takesem(&priv->pendsem);
+  ret = wm8776_takesem(&priv->pendsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   apb->flags |= AUDIO_APB_OUTPUT_ENQUEUED;
   dq_addlast(&apb->dq_entry, &priv->pendq);
   wm8776_givesem(&priv->pendsem);
 
-  /* Send a message to the worker thread indicating that a new buffer has been
-   * enqueued.  If mq is NULL, then the playing has not yet started.  In that
-   * case we are just "priming the pump" and we don't need to send any message.
+  /* Send a message to the worker thread indicating that a new buffer has
+   * been enqueued.  If mq is NULL, then the playing has not yet started.
+   * In that case we are just "priming the pump" and we don't need to send
+   * any message.
    */
 
   ret = OK;
@@ -996,7 +1051,12 @@ static int wm8776_reserve(FAR struct audio_lowerhalf_s *dev)
 
   /* Borrow the APBQ semaphore for thread sync */
 
-  wm8776_takesem(&priv->pendsem);
+  ret = wm8776_takesem(&priv->pendsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   if (priv->reserved)
     {
       ret = -EBUSY;
@@ -1037,7 +1097,8 @@ static int wm8776_release(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct wm8776_dev_s *priv = (FAR struct wm8776_dev_s *)dev;
-  void  *value;
+  FAR void *value;
+  int ret;
 
   /* Join any old worker thread we had created to prevent a memory leak */
 
@@ -1049,14 +1110,14 @@ static int wm8776_release(FAR struct audio_lowerhalf_s *dev)
 
   /* Borrow the APBQ semaphore for thread sync */
 
-  wm8776_takesem(&priv->pendsem);
+  ret = wm8776_forcetake(&priv->pendsem);
 
   /* Really we should free any queued buffers here */
 
   priv->reserved = false;
   wm8776_givesem(&priv->pendsem);
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1075,11 +1136,12 @@ static int wm8776_release(FAR struct audio_lowerhalf_s *dev)
 
 static void wm8776_audio_output(FAR struct wm8776_dev_s *priv)
 {
-  wm8776_writereg(priv, WM8776_MASTER_ATT, WM8776_UPDATE | 0x58); /* -33db */
-  wm8776_writereg(priv, WM8776_DAC_IF, 0x32);  /* 32bit, I2S, standard pol */
+  wm8776_writereg(priv, WM8776_MASTER_ATT,
+                  WM8776_UPDATE | 0x58);           /* -33db */
+  wm8776_writereg(priv, WM8776_DAC_IF, 0x32);      /* 32bit, I2S, standard pol */
 
 #ifdef CONFIG_WM8776_SWAP_HPOUT
-  wm8776_writereg(priv, WM8776_DAC_CC, 0x62);  /* Swap HPOUT L/R */
+  wm8776_writereg(priv, WM8776_DAC_CC, 0x62);      /* Swap HPOUT L/R */
 #endif
 
   wm8776_writereg(priv, WM8776_MASTER_MODE, 0x00); /* slave mode, 128fs */
@@ -1120,7 +1182,6 @@ static void wm8776_hw_reset(FAR struct wm8776_dev_s *priv)
   /* Configure the WM8776 hardware as an audio input device */
 
   wm8776_audio_output(priv);
-
 }
 
 /****************************************************************************
@@ -1203,6 +1264,7 @@ repeat:
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
           case AUDIO_MSG_STOP:
+
             /* Indicate that we are terminating */
 
             audinfo("AUDIO_MSG_STOP: Terminating\n");
@@ -1238,7 +1300,6 @@ repeat:
         {
           goto repeat;
         }
-
     }
 
   /* Reset the WM8776 hardware */
@@ -1247,7 +1308,7 @@ repeat:
 
   /* Return any pending buffers in our pending queue */
 
-  wm8776_takesem(&priv->pendsem);
+  wm8776_forcetake(&priv->pendsem);
   while ((apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->pendq)) != NULL)
     {
       /* Release our reference to the buffer */
@@ -1286,7 +1347,6 @@ repeat:
   audinfo("Exit\n");
   return NULL;
 }
-
 
 /****************************************************************************
  * Public Functions
