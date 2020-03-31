@@ -55,7 +55,7 @@ FAR struct servent *getservbyname(FAR const char *name,
                                   FAR const char *proto)
 {
   static struct servent ent;
-  struct servent *res;
+  FAR struct servent *res;
   int ret;
 
   ret = getservbyname_r(name, proto, &ent, NULL, 0, &res);

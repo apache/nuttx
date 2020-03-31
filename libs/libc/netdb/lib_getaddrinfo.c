@@ -46,6 +46,7 @@
 #include <netdb.h>
 
 #include "libc.h"
+#include "lib_netdb.h"
 
 /****************************************************************************
  * Private Data Types
@@ -123,12 +124,14 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
   int flags = 0;
   int proto = 0;
   int socktype = 0;
-  FAR struct hostent *hp;
+  char hostbuffer[CONFIG_NETDB_BUFSIZE];
+  FAR struct hostent_s host;
   FAR struct ai_s *ai;
   FAR struct ai_s *prev_ai = NULL;
   const int valid_flags = AI_PASSIVE | AI_CANONNAME | AI_NUMERICHOST |
                           AI_NUMERICSERV | AI_V4MAPPED | AI_ALL |
                           AI_ADDRCONFIG;
+  int ret = OK;
   int i;
 
   if (hostname == NULL && servname == NULL)
@@ -278,63 +281,60 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 
   /* REVISIT: no check for AI_NUMERICHOST flag. */
 
-  /* REVISIT: use gethostbyname_r with own buffer of refactor all
-   * public APIs to use internal lookup function.
-   */
-
-  hp = gethostbyname(hostname);
-  if (hp && hp->h_name && hp->h_name[0] && hp->h_addr_list[0])
+  gethostentbyname_r(hostname, &host,
+                     hostbuffer, sizeof(hostbuffer), &ret);
+  if (ret != OK)
     {
-      for (i = 0; hp->h_addr_list[i]; i++)
-        {
-          if (family != AF_UNSPEC && hp->h_addrtypes[i] != family)
-            {
-              /* Filter by protocol family. */
-
-              continue;
-            }
-
-          /* REVISIT: filter by socktype and protocol not implemented. */
-
-          ai = alloc_ai(hp->h_addrtypes[i], socktype, proto, port,
-                        hp->h_addr_list[i]);
-          if (ai == NULL)
-            {
-              if (*res)
-                {
-                  freeaddrinfo(*res);
-                }
-
-              return EAI_MEMORY;
-            }
-
-          /* REVISIT: grok canonical name.
-           *
-           * OpenGroup: "if the canonical name is not available, then
-           * ai_canonname shall refer to the hostname argument or a string
-           * with the same contents."
-           */
-
-          ai->ai.ai_canonname = (FAR char *)hostname;
-
-          /* Add result to linked list.
-           * TODO: RFC 3484/6724 destination address sort not implemented.
-           */
-
-          if (prev_ai != NULL)
-            {
-              prev_ai->ai.ai_next = (FAR struct addrinfo *)ai;
-            }
-          else
-            {
-              *res = (FAR struct addrinfo *)ai;
-            }
-
-          prev_ai = ai;
-        }
-
-      return (*res != NULL) ? OK : EAI_FAMILY;
+      return ret;
     }
 
-  return h_errno;
+  for (i = 0; host.h_addr_list[i]; i++)
+    {
+      if (family != AF_UNSPEC && host.h_addrtypes[i] != family)
+        {
+          /* Filter by protocol family. */
+
+          continue;
+        }
+
+      /* REVISIT: filter by socktype and protocol not implemented. */
+
+      ai = alloc_ai(host.h_addrtypes[i], socktype, proto, port,
+                    host.h_addr_list[i]);
+      if (ai == NULL)
+        {
+          if (*res)
+            {
+              freeaddrinfo(*res);
+            }
+
+          return EAI_MEMORY;
+        }
+
+      /* REVISIT: grok canonical name.
+       *
+       * OpenGroup: "if the canonical name is not available, then
+       * ai_canonname shall refer to the hostname argument or a string
+       * with the same contents."
+       */
+
+      ai->ai.ai_canonname = (FAR char *)hostname;
+
+      /* Add result to linked list.
+       * TODO: RFC 3484/6724 destination address sort not implemented.
+       */
+
+      if (prev_ai != NULL)
+        {
+          prev_ai->ai.ai_next = (FAR struct addrinfo *)ai;
+        }
+      else
+        {
+          *res = (FAR struct addrinfo *)ai;
+        }
+
+      prev_ai = ai;
+    }
+
+  return (*res != NULL) ? OK : EAI_FAMILY;
 }
