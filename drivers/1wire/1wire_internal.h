@@ -92,7 +92,7 @@ bool onewire_check_crc16(FAR const uint8_t *input, uint16_t len,
 
 /* Rest are from 1wire.c */
 
-void onewire_sem_wait(FAR struct onewire_master_s *master);
+int  onewire_sem_wait(FAR struct onewire_master_s *master);
 void onewire_sem_post(FAR struct onewire_master_s *master);
 
 int onewire_addslave(FAR struct onewire_master_s *master,
@@ -163,7 +163,9 @@ int onewire_triplet(FAR struct onewire_master_s *master,
 int onewire_search(FAR struct onewire_master_s *master,
                    int family,
                    bool alarmonly,
-                   CODE void (*cb_search)(int family, uint64_t romcode, FAR void *arg),
+                   CODE void (*cb_search)(int family,
+                                          uint64_t romcode,
+                                          FAR void *arg),
                    FAR  void *arg);
 
 /****************************************************************************

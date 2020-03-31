@@ -143,7 +143,7 @@ static inline void onewire_sem_destroy(FAR struct onewire_sem_s *sem)
   nxsem_destroy(&sem->sem);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: onewire_pm_prepare
  *
  * Description:
@@ -170,7 +170,7 @@ static inline void onewire_sem_destroy(FAR struct onewire_sem_s *sem)
  *   power state change).  Drivers are not permitted to return non-zero
  *   values when reverting back to higher power consumption modes!
  *
- ************************************************************************************/
+ ****************************************************************************/
 #ifdef CONFIG_PM
 static int onewire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
                               enum pm_state_e pmstate)
@@ -190,6 +190,7 @@ static int onewire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
     case PM_STANDBY:
     case PM_SLEEP:
+
       /* Check if exclusive lock for the bus master is held. */
 
       if (nxsem_getvalue(&master->devsem.sem, &sval) < 0)
@@ -208,6 +209,7 @@ static int onewire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
       break;
 
     default:
+
       /* Should not get here */
 
       break;
@@ -229,9 +231,10 @@ static int onewire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
  *
  ****************************************************************************/
 
-void onewire_sem_wait(FAR struct onewire_master_s *master)
+int onewire_sem_wait(FAR struct onewire_master_s *master)
 {
   pid_t me;
+  int ret;
 
   /* Do we already hold the semaphore? */
 
@@ -248,13 +251,19 @@ void onewire_sem_wait(FAR struct onewire_master_s *master)
 
   else
     {
-      nxsem_wait_uninterruptible(&master->devsem.sem);
+      ret = nxsem_wait(master->devsem.sem);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Now we hold the semaphore */
 
       master->devsem.holder = me;
       master->devsem.count  = 1;
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -298,7 +307,10 @@ void onewire_sem_post(FAR struct onewire_master_s *master)
 int onewire_reset_resume(FAR struct onewire_master_s *master)
 {
   int ret;
-  uint8_t buf[] = { ONEWIRE_CMD_RESUME };
+  uint8_t buf[] =
+  {
+    ONEWIRE_CMD_RESUME
+  };
 
   ret = ONEWIRE_RESET(master->dev);
   if (ret < 0)
@@ -320,8 +332,16 @@ int onewire_reset_select(FAR struct onewire_slave_s *slave)
 {
   FAR struct onewire_master_s *master = slave->master;
   uint64_t tmp;
-  uint8_t skip_rom[1] = { ONEWIRE_CMD_SKIP_ROM };
-  uint8_t match_rom[9] = { ONEWIRE_CMD_MATCH_ROM, 0 };
+  uint8_t skip_rom[1] =
+  {
+    ONEWIRE_CMD_SKIP_ROM
+  };
+
+  uint8_t match_rom[9] =
+  {
+    ONEWIRE_CMD_MATCH_ROM, 0
+  };
+
   int ret;
 
   ret = ONEWIRE_RESET(master->dev);
@@ -355,8 +375,16 @@ int onewire_reset_select(FAR struct onewire_slave_s *slave)
 
 int onewire_readrom(FAR struct onewire_master_s *master, FAR uint64_t *rom)
 {
-  uint8_t txbuf[] = { ONEWIRE_CMD_READ_ROM };
-  uint8_t rxbuf[8] = { 0 };
+  uint8_t txbuf[] =
+  {
+    ONEWIRE_CMD_READ_ROM
+  };
+
+  uint8_t rxbuf[8] =
+  {
+    0
+  };
+
   uint64_t tmp = -1;
   int ret;
 
@@ -492,7 +520,9 @@ int onewire_triplet(FAR struct onewire_master_s *master,
 int onewire_search(FAR struct onewire_master_s *master,
                    int family,
                    bool alarmonly,
-                   CODE void (*cb_search)(int family, uint64_t romcode, FAR void *arg),
+                   CODE void (*cb_search)(int family,
+                                          uint64_t romcode,
+                                          FAR void *arg),
                    FAR void *arg)
 {
   FAR struct onewire_dev_s *dev = master->dev;
@@ -704,7 +734,8 @@ FAR struct onewire_master_s *
   DEBUGASSERT(dev != NULL);
   DEBUGASSERT(maxslaves > 0);
 
-  master = (FAR struct onewire_master_s *)kmm_malloc(sizeof(struct onewire_master_s));
+  master = (FAR struct onewire_master_s *)
+    kmm_malloc(sizeof(struct onewire_master_s));
   if (master == NULL)
     {
       i2cerr("ERROR: Failed to allocate\n");

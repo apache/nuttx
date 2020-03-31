@@ -163,7 +163,7 @@ struct mmcsd_cmdinfo_s
 
 /* Misc *********************************************************************/
 
-static void     mmcsd_semtake(FAR struct mmcsd_slot_s *slot);
+static int      mmcsd_semtake(FAR struct mmcsd_slot_s *slot);
 static void     mmcsd_semgive(FAR struct mmcsd_slot_s *slot);
 
 /* Card SPI interface *******************************************************/
@@ -386,8 +386,20 @@ static const struct mmcsd_cmdinfo_s g_acmd41 =
  * Name: mmcsd_semtake
  ****************************************************************************/
 
-static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
+static int mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
 {
+  int ret;
+
+  /* Get exclusive access to the MMC/SD device (possibly unnecessary if
+   * SPI_LOCK is also implemented as a semaphore).
+   */
+
+  ret = nxsem_wait_uninterruptible(&slot->sem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Get exclusive access to the SPI bus (if necessary) */
 
   SPI_LOCK(slot->spi, true);
@@ -401,11 +413,7 @@ static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
   SPI_HWFEATURES(slot->spi, 0);
   SPI_SETFREQUENCY(slot->spi, slot->spispeed);
 
-  /* Get exclusive access to the MMC/SD device (possibly unnecessary if
-   * SPI_LOCK is also implemented as a semaphore).
-   */
-
-  nxsem_wait_uninterruptible(&slot->sem);
+  return ret;
 }
 
 /****************************************************************************
@@ -414,10 +422,6 @@ static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
 
 static void mmcsd_semgive(FAR struct mmcsd_slot_s *slot)
 {
-  /* Relinquish the lock on the MMC/SD device */
-
-  nxsem_post(&slot->sem);
-
   /* Relinquish the lock on the SPI bus */
 
   /* The card may need up to 8 SCLK cycles to sample the CS status
@@ -429,6 +433,10 @@ static void mmcsd_semgive(FAR struct mmcsd_slot_s *slot)
   /* Relinquish exclusive access to the SPI bus */
 
   SPI_LOCK(slot->spi, false);
+
+  /* Relinquish the lock on the MMC/SD device */
+
+  nxsem_post(&slot->sem);
 }
 
 /****************************************************************************
@@ -1105,10 +1113,16 @@ static int mmcsd_open(FAR struct inode *inode)
     }
 #endif
 
+  ret = mmcsd_semtake(slot);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Verify that an MMC/SD card has been inserted */
 
   ret = -ENODEV;
-  mmcsd_semtake(slot);
+
   if ((SPI_STATUS(spi, SPIDEV_MMCSD(0)) & SPI_STATUS_PRESENT) != 0)
     {
       /* Yes.. a card is present.  Has it been initialized? */
@@ -1164,8 +1178,9 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   FAR struct spi_dev_s *spi;
   size_t nbytes;
   off_t  offset;
-  uint8_t  response;
+  uint8_t response;
   int    i;
+  int ret;
 
   finfo("start_sector=%d nsectors=%d\n", start_sector, nsectors);
 
@@ -1229,7 +1244,12 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
 
   /* Select the slave */
 
-  mmcsd_semtake(slot);
+  ret = mmcsd_semtake(slot);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
+
   SPI_SELECT(spi, SPIDEV_MMCSD(0), true);
 
   /* Single or multiple block read? */
@@ -1321,6 +1341,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
   off_t  offset;
   uint8_t response;
   int i;
+  int ret;
 
   finfo("start_sector=%d nsectors=%d\n", start_sector, nsectors);
 
@@ -1394,7 +1415,12 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
 
   /* Select the slave */
 
-  mmcsd_semtake(slot);
+  ret = mmcsd_semtake(slot);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
+
   SPI_SELECT(spi, SPIDEV_MMCSD(0), true);
 
   /* Single or multiple block transfer? */
@@ -1536,7 +1562,12 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
 
   /* Re-sample the CSD */
 
-  mmcsd_semtake(slot);
+  ret = mmcsd_semtake(slot);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   SPI_SELECT(spi, SPIDEV_MMCSD(0), true);
   ret = mmcsd_getcsd(slot, csd);
   SPI_SELECT(spi, SPIDEV_MMCSD(0), false);
@@ -1901,7 +1932,12 @@ static void mmcsd_mediachanged(void *arg)
 
   /* Save the current slot state and reassess the new state */
 
-  mmcsd_semtake(slot);
+  ret = mmcsd_semtake(slot);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   oldstate = slot->state;
 
   /* Check if media was removed or inserted */
@@ -2004,7 +2040,11 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
    * configured for the MMC/SD card
    */
 
-  mmcsd_semtake(slot);
+  ret = mmcsd_semtake(slot);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Initialize for the media in the slot (if any) */
 
