@@ -98,5 +98,7 @@ void up_idle(void)
    * sleep in a reduced power mode until an interrupt occurs to save power
    */
 
+#if XCHAL_HAVE_INTERRUPTS
   __asm__ __volatile__ ("waiti 0");
+#endif
 }
