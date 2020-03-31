@@ -107,6 +107,19 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTC | GPIO_PIN13)
 
+/* SD/TF Card'detected pin */
+
+#if defined(CONFIG_STM32H7_SDMMC1)
+#  define HAVE_SDIO
+#endif
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_MMCSD_SDIO)
+#  undef HAVE_SDIO
+#endif
+
+#define SDIO_SLOTNO        0
+#define SDIO_MINOR         0
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -149,6 +162,18 @@ void stm32_spidev_initialize(void);
 
 #ifdef CONFIG_ADC
 int stm32_adc_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_sdio_initialize
+ *
+ * Description:
+ *   Initialize SDIO-based MMC/SD card support
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_SDIO
+int stm32_sdio_initialize(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_STM32H747I_DISCO_SRC_STM32H747I_DISCO_H */
