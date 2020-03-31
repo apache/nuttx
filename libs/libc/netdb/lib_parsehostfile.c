@@ -50,7 +50,7 @@
 
 #include <arpa/inet.h>
 
-#include "libc.h"
+#include "lib_netdb.h"
 
 #ifdef CONFIG_NETDB_HOSTFILE
 
@@ -72,8 +72,8 @@
 struct hostent_info_s
 {
   FAR char *hi_aliases[CONFIG_NETDB_MAX_ALTNAMES + 1];
-  int       hi_addrtypes[2];
-  int       hi_lengths[2];
+  int       hi_addrtypes[1];
+  int       hi_lengths[1];
   FAR char *hi_addrlist[2];
   char      hi_data[1];
 };
@@ -239,7 +239,7 @@ static ssize_t lib_copystring(FAR FILE *stream, FAR char *ptr,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_parse_hostfile
+ * Name: parse_hostfile
  *
  * Description:
  *   Parse the next line from the hosts file.
@@ -264,8 +264,8 @@ static ssize_t lib_copystring(FAR FILE *stream, FAR char *ptr,
  *
  ****************************************************************************/
 
-ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
-                           FAR char *buf, size_t buflen)
+ssize_t parse_hostfile(FAR FILE *stream, FAR struct hostent_s *host,
+                       FAR char *buf, size_t buflen)
 {
   FAR struct hostent_info_s *info;
   FAR char addrstring[48];
@@ -291,7 +291,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
   ptr     = info->hi_data;
   buflen -= (sizeof(struct hostent_info_s) - 1);
 
-  memset(host, 0, sizeof(struct hostent));
+  memset(host, 0, sizeof(struct hostent_s));
   memset(info, 0, sizeof(struct hostent_info_s));
 
   host->h_addrtypes = info->hi_addrtypes;
@@ -361,7 +361,7 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
           return -EAGAIN;
         }
 
-      host->h_addrtype = AF_INET6;
+      host->h_addrtypes[0] = AF_INET6;
     }
   else
     {
@@ -382,14 +382,14 @@ ssize_t lib_parse_hostfile(FAR FILE *stream, FAR struct hostent *host,
           return -EAGAIN;
         }
 
-      host->h_addrtype = AF_INET;
+      host->h_addrtypes[0] = AF_INET;
     }
 
-  host->h_addr    = ptr;
-  host->h_length  = addrlen;
+  host->h_addr_list[0] = ptr;
+  host->h_lengths[0]   = addrlen;
 
-  ptr            += addrlen;
-  buflen         -= addrlen;
+  ptr    += addrlen;
+  buflen -= addrlen;
 
   /* Skip over any additional whitespace */
 

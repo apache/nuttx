@@ -184,17 +184,14 @@ struct hostent
   FAR char **h_aliases;    /* A pointer to an array of pointers to the
                             * alternative host names, terminated by a
                             * null pointer. */
-  FAR int   *h_addrtypes;  /* A pointer to an array of address type. */
-  FAR int   *h_lengths;    /* A pointer to an array of the length, in bytes,
-                            * of the address. */
+  int        h_addrtype;   /* Address type. */
+  int        h_length;     /* The length, in bytes, of the address. */
   FAR char **h_addr_list;  /* A pointer to an array of pointers to network
                             * addresses (in network byte order) for the host,
                             * terminated by a null pointer. */
 };
 
 #define h_addr h_addr_list[0] /* For backward compatibility */
-#define h_length h_lengths[0]
-#define h_addrtype h_addrtypes[0]
 
 struct netent
 {
@@ -291,6 +288,7 @@ int                  getnameinfo(FAR const struct sockaddr *sa,
 FAR struct hostent  *gethostbyaddr(FAR const void *addr, socklen_t len,
                                    int type);
 FAR struct hostent  *gethostbyname(FAR const char *name);
+FAR struct hostent  *gethostbyname2(FAR const char *name, int type);
 FAR struct servent  *getservbyport(int port, FAR const char *proto);
 FAR struct servent  *getservbyname(FAR const char *name,
                                    FAR const char *proto);
@@ -314,9 +312,16 @@ void                 setservent(int);
 
 int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
                     FAR struct hostent *host, FAR char *buf,
-                    size_t buflen, int *h_errnop);
-int gethostbyname_r(FAR const char *name, FAR struct hostent *host,
-                    FAR char *buf, size_t buflen, int *h_errnop);
+                    size_t buflen, FAR struct hostent **result,
+                    FAR int *h_errnop);
+int gethostbyname_r(FAR const char *name,
+                    FAR struct hostent *host, FAR char *buf,
+                    size_t buflen, FAR struct hostent **result,
+                    FAR int *h_errnop);
+int gethostbyname2_r(FAR const char *name, int type,
+                     FAR struct hostent *host, FAR char *buf,
+                     size_t buflen, FAR struct hostent **result,
+                     FAR int *h_errnop);
 int getservbyport_r(int port, FAR const char *proto,
                     FAR struct servent *result_buf, FAR char *buf,
                     size_t buflen, FAR struct servent **result);

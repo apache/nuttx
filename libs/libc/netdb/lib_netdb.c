@@ -63,4 +63,49 @@ int h_errno;
  * Public Functions
  ****************************************************************************/
 
+bool convert_hostent(const FAR struct hostent_s *in,
+                     int type, FAR struct hostent *out)
+{
+  int i;
+  int j;
+
+  /* Initialize the ouptut of hostent */
+
+  out->h_name = in->h_name;
+  out->h_aliases = in->h_aliases;
+  if (type != AF_UNSPEC)
+    {
+      out->h_addrtype = type;
+      if (type == AF_INET)
+        {
+          out->h_length = sizeof(struct in_addr);
+        }
+      else
+        {
+          out->h_length = sizeof(struct in6_addr);
+        }
+    }
+  else
+    {
+      type = in->h_addrtypes[0];
+      out->h_addrtype = in->h_addrtypes[0];
+      out->h_length = in->h_lengths[0];
+    }
+
+  out->h_addr_list = in->h_addr_list;
+
+  /* Remove different type from list */
+
+  for (i = j = 0; in->h_addr_list[i]; i++)
+    {
+      if (type == in->h_addrtypes[i])
+        {
+          in->h_addr_list[j++] = in->h_addr_list[i];
+        }
+    }
+
+  in->h_addr_list[j] = NULL;
+  return j != 0;
+}
+
 #endif /* CONFIG_LIBC_NETDB */

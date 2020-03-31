@@ -58,7 +58,7 @@
 FAR struct servent *getservbyport(int port, FAR const char *proto)
 {
   static struct servent ent;
-  struct servent *res;
+  FAR struct servent *res;
   int ret;
 
   ret = getservbyport_r(port, proto, &ent, NULL, 0, &res);

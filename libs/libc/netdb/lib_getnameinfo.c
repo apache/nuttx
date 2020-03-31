@@ -46,7 +46,6 @@
 #include <arpa/inet.h>
 #include <assert.h>
 
-#include "libc.h"
 #include "netdb/lib_netdb.h"
 
 #ifdef CONFIG_LIBC_NETDB
@@ -98,22 +97,23 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
   if (host && !(flags & NI_NUMERICHOST))
     {
       struct hostent hostent;
+      FAR struct hostent *res;
       int h_errno;
 
       ret = gethostbyaddr_r(saddr, saddr_len, addr->sa_family, &hostent,
-                            host, hostlen, &h_errno);
+                            host, hostlen, &res, &h_errno);
 
       if (ret == OK)
         {
-          size_t sz = strlen(hostent.h_name) + 1;
+          size_t sz = strlen(res->h_name) + 1;
 
           if (sz <= hostlen)
             {
-              memmove(host, hostent.h_name, sz);
+              memmove(host, res->h_name, sz);
             }
           else
             {
-              memmove(host, hostent.h_name, hostlen);
+              memmove(host, res->h_name, hostlen);
               host[hostlen - 1] = '\0';
             }
         }

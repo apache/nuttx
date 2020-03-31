@@ -38,6 +38,8 @@ ifeq ($(CONFIG_LIBC_NETDB),y)
 # Add the netdb C files to the build
 
 CSRCS += lib_netdb.c lib_gethostbyname.c lib_gethostbynamer.c
+CSRCS += lib_gethostbyname2.c lib_gethostbyname2r.c
+CSRCS += lib_gethostentbynamer.c
 CSRCS += lib_gethostbyaddr.c lib_gethostbyaddrr.c
 CSRCS += lib_getservbyname.c lib_getservbynamer.c
 CSRCS += lib_getservbyport.c lib_getservbyportr.c
