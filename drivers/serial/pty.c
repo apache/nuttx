@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/serial/pty.c
  *
- *   Copyright (C) 2016-2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -168,7 +153,7 @@ struct pty_devpair_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void    pty_semtake(FAR struct pty_devpair_s *devpair);
+static int     pty_semtake(FAR struct pty_devpair_s *devpair);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void    pty_destroy(FAR struct pty_devpair_s *devpair);
 #endif
@@ -219,9 +204,9 @@ static const struct file_operations g_pty_fops =
  * Name: pty_semtake
  ****************************************************************************/
 
-static void pty_semtake(FAR struct pty_devpair_s *devpair)
+static int pty_semtake(FAR struct pty_devpair_s *devpair)
 {
-  nxsem_wait_uninterruptible(&devpair->pp_exclsem);
+  return nxsem_wait_uninterruptible(&devpair->pp_exclsem);
 }
 
 /****************************************************************************
@@ -309,36 +294,48 @@ static int pty_open(FAR struct file *filep)
         {
           /* Wait until unlocked.  We will also most certainly suspend here. */
 
-          nxsem_wait(&devpair->pp_slavesem);
+          ret = nxsem_wait(&devpair->pp_slavesem);
+          if (ret < 0)
+            {
+              return ret;
+            }
 
           /* Get exclusive access to the device structure.  This might also
            * cause suspension.
            */
 
-          pty_semtake(devpair);
+          ret = pty_semtake(devpair);
+          if (ret < 0)
+            {
+              return ret;
+            }
 
           /* Check again in case something happened asynchronously while we
            * were suspended.
            */
 
           if (devpair->pp_locked)
-           {
-             /* This cannot suspend because we have the scheduler locked.
-              * So pp_locked cannot change asyncrhonously between this test
-              * and the redundant test at the top of the loop.
-              */
+            {
+              /* This cannot suspend because we have the scheduler locked.
+               * So pp_locked cannot change asyncrhonously between this test
+               * and the redundant test at the top of the loop.
+               */
 
-             pty_semgive(devpair);
-           }
+              pty_semgive(devpair);
+            }
         }
 
       sched_unlock();
     }
   else
     {
-       /* Master ... Get exclusive access to the device structure */
+      /* Master ... Get exclusive access to the device structure */
 
-       pty_semtake(devpair);
+      ret = pty_semtake(devpair);
+      if (ret < 0)
+        {
+          goto errout_with_sem;
+        }
     }
 
 #ifndef CONFIG_PSEUDOTERM_SUSV1
@@ -364,6 +361,7 @@ static int pty_open(FAR struct file *filep)
       ret = OK;
     }
 
+errout_with_sem:
   pty_semgive(devpair);
   return ret;
 }
@@ -379,6 +377,7 @@ static int pty_close(FAR struct file *filep)
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
   FAR struct pty_devpair_s *devpair;
+  int ret;
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode     = filep->f_inode;
@@ -388,7 +387,11 @@ static int pty_close(FAR struct file *filep)
 
   /* Get exclusive access */
 
-  pty_semtake(devpair);
+  ret = pty_semtake(devpair);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifdef CONFIG_PSEUDOTERM_SUSV1
   /* Did the (single) master just close its reference? */
@@ -561,6 +564,7 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
             }
 
           /* Perform input processing */
+
           /* \n -> \r or \r -> \n translation? */
 
           if (ch == '\n' && (dev->pd_iflag & INLCR) != 0)
@@ -578,7 +582,6 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
           if (ch != '\r' || (dev->pd_iflag & IGNCR) == 0)
             {
-
               /* Transfer the (possibly translated) character and update the
                * count of bytes transferred.
                */
@@ -612,7 +615,8 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
  * Name: pty_write
  ****************************************************************************/
 
-static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer, size_t len)
+static ssize_t pty_write(FAR struct file *filep,
+                         FAR const char *buffer, size_t len)
 {
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
@@ -743,7 +747,11 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  pty_semtake(devpair);
+  ret = pty_semtake(devpair);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Handle IOCTL commands */
 
@@ -920,7 +928,7 @@ static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct pty_dev_s *dev;
   FAR struct pty_devpair_s *devpair;
   FAR struct pty_poll_s *pollp = NULL;
-  int ret = -ENOSYS;
+  int ret;
   int i;
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
@@ -928,7 +936,13 @@ static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
   dev     = inode->i_private;
   devpair = dev->pd_devpair;
 
-  pty_semtake(devpair);
+  ret = pty_semtake(devpair);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -ENOSYS;
 
   if (setup)
     {
@@ -983,6 +997,7 @@ static int pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
           goto errout;
         }
+
       pollp->sink = fds->priv;
     }
 
@@ -1005,6 +1020,7 @@ static int pty_unlink(FAR struct inode *inode)
 {
   FAR struct pty_dev_s *dev;
   FAR struct pty_devpair_s *devpair;
+  int ret;
 
   DEBUGASSERT(inode != NULL && inode->i_private != NULL);
   dev       = inode->i_private;
@@ -1013,7 +1029,11 @@ static int pty_unlink(FAR struct inode *inode)
 
   /* Get exclusive access */
 
-  pty_semtake(devpair);
+  ret = pty_semtake(devpair);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Indicate that the driver has been unlinked */
 
@@ -1033,6 +1053,7 @@ static int pty_unlink(FAR struct inode *inode)
   return OK;
 }
 #endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1230,8 +1251,8 @@ errout_with_pipea:
     }
 
 errout_with_devpair:
-   nxsem_destroy(&devpair->pp_exclsem);
-   nxsem_destroy(&devpair->pp_slavesem);
-   kmm_free(devpair);
-   return ret;
+  nxsem_destroy(&devpair->pp_exclsem);
+  nxsem_destroy(&devpair->pp_slavesem);
+  kmm_free(devpair);
+  return ret;
 }

@@ -1260,7 +1260,7 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
                         size_t buflen)
 {
   FAR struct tun_device_s *priv = filep->f_priv;
-  ssize_t nread;
+  ssize_t nread = 0;
   int ret;
 
   if (priv == NULL)
