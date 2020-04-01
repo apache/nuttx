@@ -144,18 +144,19 @@ static int pca9540bdp_select_port(FAR struct pca9540bdp_dev_s *priv,
       return OK;
     }
 
-  /* Modify state and write it to the mux */
-  /* selecting a port always enables the device */
+  /* Modify state and write it to the mux. Selecting a port always enables
+   * the device
+   */
 
   priv->state = PCA9540BDP_ENABLE | val;
   return (pca9540bdp_write_config(priv, priv->state) == 0) ? OK : -ECOMM;
 }
 
-static int pca9540bdp_transfer_on_port(FAR struct i2c_master_s* dev,
+static int pca9540bdp_transfer_on_port(FAR struct i2c_master_s *dev,
                                        FAR struct i2c_msg_s *msgs, int count)
 {
-  FAR struct i2c_port_dev_s* port_dev = (FAR struct i2c_port_dev_s*) dev;
-  FAR struct pca9540bdp_dev_s* priv = port_dev->dev;
+  FAR struct i2c_port_dev_s *port_dev = (FAR struct i2c_port_dev_s *)dev;
+  FAR struct pca9540bdp_dev_s *priv = port_dev->dev;
   int ret;
 
   /* select the mux port */
@@ -177,8 +178,8 @@ static int pca9540bdp_transfer_on_port(FAR struct i2c_master_s* dev,
 #ifdef CONFIG_I2C_RESET
 static int pca9540bdp_reset_on_port (FAR struct i2c_master_s *dev)
 {
-  FAR struct i2c_port_dev_s* port_dev = (struct i2c_port_dev_s*) dev;
-  FAR struct pca9540bdp_dev_s* priv = port_dev->dev;
+  FAR struct i2c_port_dev_s *port_dev = (struct i2c_port_dev_s *)dev;
+  FAR struct pca9540bdp_dev_s *priv = port_dev->dev;
   int port = port_dev->port;
   int ret;
 
@@ -307,7 +308,8 @@ FAR struct pca9540bdp_dev_s *
       return NULL;  /* signal error condition */
     }
 
-  i2cinfo("PCA9549BDP (addr=0x%02x) set up with port %d\n", priv->addr, PCA9540BDP_SEL_PORT0);
+  i2cinfo("PCA9549BDP (addr=0x%02x) set up with port %d\n", priv->addr,
+          PCA9540BDP_SEL_PORT0);
 
   return priv;
 }

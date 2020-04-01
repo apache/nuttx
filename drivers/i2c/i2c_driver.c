@@ -417,7 +417,6 @@ int i2c_register(FAR struct i2c_master_s *i2c, int bus)
       return OK;
     }
 
-
   return -ENOMEM;
 }
 
