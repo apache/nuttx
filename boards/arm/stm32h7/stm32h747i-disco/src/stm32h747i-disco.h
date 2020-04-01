@@ -117,6 +117,8 @@
 #  undef HAVE_SDIO
 #endif
 
+#define GPIO_SDIO_NCD      (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTI|GPIO_PIN8)
+
 #define SDIO_SLOTNO        0
 #define SDIO_MINOR         0
 
