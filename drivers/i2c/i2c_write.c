@@ -58,7 +58,8 @@
  * Input Parameters:
  *   dev    - Device-specific state data
  *   config  - Described the I2C configuration
- *   buffer - A pointer to the read-only buffer of data to be written to device
+ *   buffer - A pointer to the read-only buffer of data to be written to
+ *            device
  *   buflen - The number of bytes to send from the buffer
  *
  * Returned Value:
