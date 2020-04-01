@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/z80/src/z8/z8_i2c.c
  *
- *   Copyright(C) 2009, 2011, 2013, 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES(INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -124,26 +109,6 @@ const struct i2c_ops_s g_ops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-/****************************************************************************
- * Name: z8_i2c_semtake/z8_i2c_semgive
- *
- * Description:
- *   Take/Give the I2C semaphore.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void z8_i2c_semtake(void)
-{
-  nxsem_wait_uninterruptible(&g_i2csem);
-}
-
-#define z8_i2c_semgive() nxsem_post(&g_i2csem)
 
 /****************************************************************************
  * Name: z8_i2c_waittxempty
@@ -182,7 +147,12 @@ static void z8_i2c_waittxempty(void)
 static void z8_i2c_waitrxavail(void)
 {
   int i;
-  for (i = 0; i <= 10000 && (I2CSTAT & (I2C_STAT_RDRF | I2C_STAT_NCKI)) == 0; i++);
+
+  for (i = 0;
+       i <= 10000 && (I2CSTAT & (I2C_STAT_RDRF | I2C_STAT_NCKI)) == 0;
+       i++)
+    {
+    }
 }
 
 /****************************************************************************
@@ -225,10 +195,10 @@ static uint16_t z8_i2c_getbrg(uint32_t frequency)
 
   /* Max is 400 Kb/sec */
 
-  if (frequency > 400*1000)
+  if (frequency > 400 * 1000)
     {
       _err("ERROR: Invalid inputs\n");
-      frequency = 400*1000;
+      frequency = 400 * 1000;
     }
 
   /* BRG = sysclock / (4 * frequency) */
@@ -247,7 +217,8 @@ static uint16_t z8_i2c_getbrg(uint32_t frequency)
  *
  * Input Parameters:
  *   dev    - Device-specific state data
- *   buffer - A pointer to a buffer of data to receive the data from the device
+ *   buffer - A pointer to a buffer of data to receive the data from the
+ *            device
  *   buflen - The requested number of bytes to be read
  *   flags  - Determines is a START and/or STOP indication is needed.
  *
@@ -357,7 +328,8 @@ static int z8_i2c_read_transfer(FAR struct z8_i2cdev_s *priv,
  *
  * Input Parameters:
  *   dev -    Device-specific state data
- *   buffer - A pointer to the read-only buffer of data to be written to device
+ *   buffer - A pointer to the read-only buffer of data to be written to
+ *            device
  *   buflen - The number of bytes to send from the buffer
  *   flags  - Determines is a START and/or STOP indication is needed.
  *
@@ -474,16 +446,18 @@ static void z8_i2c_setfrequency(FAR struct z8_i2cdev_s *priv,
   /* Has the frequency changed? */
 
   if (priv->frequency != frequency)
-  {
-    /* Calculate and save the BRG (we won't apply it until the first transfer) */
+    {
+      /* Calculate and save the BRG (we won't apply it until the first
+       * transfer)
+       */
 
-    brg = z8_i2c_getbrg(frequency);
-    z8_i2c_setbrg(brg);
+      brg = z8_i2c_getbrg(frequency);
+      z8_i2c_setbrg(brg);
 
-    /* Save the new I2C frequency */
+      /* Save the new I2C frequency */
 
-    priv->frequency = frequency;
-  }
+      priv->frequency = frequency;
+    }
 }
 
 /****************************************************************************
@@ -512,7 +486,7 @@ static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
   FAR struct i2c_msg_s *msg;
   bool nostop;
   uint8_t flags;
-  int ret = OK;
+  int ret;
   int i;
 
   /* Perform each segment of the transfer, message at a time */
@@ -521,9 +495,13 @@ static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Get exclusive access to the I2C bus */
 
-  z8_i2c_semtake();
+  ret = nxsem_wait(&g_i2csem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  /* The process each message seqment */
+  /* The process each message segment */
 
   for (i = 0; i < count; i++)
     {
@@ -540,7 +518,7 @@ static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
 
       nostop = false;
       if (i < (count - 1))
-       {
+        {
           FAR struct i2c_msg_s *next;
 
           /* No... Check if the next message should have a repeated start or
@@ -553,7 +531,8 @@ static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
 
           next = &msgs[i + 1];
           if ((msg->flags & I2C_M_NOSTART) != 0 &&
-              (msg->flags & (I2C_M_READ | I2C_M_TEN)) == (next->flags & (I2C_M_READ | I2C_M_TEN)) &&
+              (msg->flags & (I2C_M_READ | I2C_M_TEN)) ==
+                (next->flags & (I2C_M_READ | I2C_M_TEN)) &&
               msg->addr == next->addr)
             {
               nostop = true;
@@ -586,11 +565,11 @@ static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
       flags = (nostop) ? Z8_NOSTART : 0;
     }
 
-  z8_i2c_semgive();
+  nxsem_post(&g_i2csem);
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: z8_i2c_reset
  *
  * Description:
@@ -602,7 +581,7 @@ static int z8_i2c_transfer(FAR struct i2c_master_s *dev,
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 static int z8_i2c_reset(FAR struct i2c_master_s * dev)
@@ -640,7 +619,7 @@ FAR struct i2c_master_s *z8_i2cbus_initialize(int port)
     {
       /* Set up some initial BRG value */
 
-      uint16_t brg = z8_i2c_getbrg(100*1000);
+      uint16_t brg = z8_i2c_getbrg(100 * 1000);
       z8_i2c_setbrg(brg);
 
       /* Make sure that GPIOs are configured for the alternate function (this
