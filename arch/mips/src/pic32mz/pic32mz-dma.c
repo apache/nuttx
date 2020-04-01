@@ -102,7 +102,7 @@ struct pic32mz_dmac_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void pic32mz_dma_takesem(struct pic32mz_dmac_s *dmac);
+static int pic32mz_dma_takesem(struct pic32mz_dmac_s *dmac);
 static inline void pic32mz_dma_givesem(struct pic32mz_dmac_s *dmac);
 
 static inline uint32_t pic32mz_dma_getreg(FAR struct pic32mz_dmach_s *dmach,
@@ -211,9 +211,9 @@ static struct pic32mz_dmac_s g_dmac =
  *
  ****************************************************************************/
 
-static void pic32mz_dma_takesem(struct pic32mz_dmac_s *dmac)
+static int pic32mz_dma_takesem(struct pic32mz_dmac_s *dmac)
 {
-  nxsem_wait_uninterruptible(&dmac->chsem);
+  return nxsem_wait_uninterruptible(&dmac->chsem);
 }
 
 /****************************************************************************
@@ -582,7 +582,8 @@ static void pic32mz_dma_mode(FAR struct pic32mz_dmach_s *dmach,
 
   if (mode & PIC32MZ_DMA_MODE_AUTOEN)
     {
-      pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_CONSET_OFFSET, DMACH_CON_CHAEN);
+      pic32mz_dma_putreg(dmach, PIC32MZ_DMACH_CONSET_OFFSET,
+                         DMACH_CON_CHAEN);
     }
 }
 
@@ -690,8 +691,9 @@ void pic32mz_dma_sample(DMA_HANDLE handle, struct pic32mz_dmaregs_s *regs)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void pic32mz_dma_dump(DMA_HANDLE handle, const struct pic32mz_dmaregs_s *regs,
-                     const char *msg)
+void pic32mz_dma_dump(DMA_HANDLE handle,
+                      const struct pic32mz_dmaregs_s *regs,
+                      const char *msg)
 {
   struct pic32mz_dmach_s *dmach = (struct pic32mz_dmach_s *)handle;
 
@@ -790,8 +792,8 @@ void weak_function up_dma_initialize(void)
  * Name: pic32mz_dma_alloc
  *
  * Description:
- *   Allocate a DMA channel.  This function sets aside a DMA channel and gives
- *   the caller exclusive access to the DMA channel.
+ *   Allocate a DMA channel.  This function sets aside a DMA channel and
+ *   gives the caller exclusive access to the DMA channel.
  *
  * Returned Value:
  *   On success, this function returns a non-NULL, void* DMA channel handle.
@@ -804,10 +806,16 @@ DMA_HANDLE pic32mz_dma_alloc(const struct pic32mz_dma_chcfg_s *cfg)
 {
   struct pic32mz_dmach_s *dmach = NULL;
   unsigned int chndx;
+  int ret;
 
   /* Search for an available DMA channel */
 
-  pic32mz_dma_takesem(&g_dmac);
+  ret = pic32mz_dma_takesem(&g_dmac);
+  if (ret < 0)
+    {
+      return NULL;
+    }
+
   for (chndx = 0; chndx < CHIP_NDMACH; chndx++)
     {
       struct pic32mz_dmach_s *candidate = &g_dmac.dmachs[chndx];
