@@ -192,7 +192,7 @@ config NETDB_DNSSERVER_IPv4ADDR
 	depends on NETDB_DNSSERVER_IPv4
 	---help---
 		Default DNS server IPv4 address in host byte order.  Default value
-		10.0.0.0.1.  This may be changed via dns_add_nameserver().
+		10.0.0.1.  This may be changed via dns_add_nameserver().
 
 if NETDB_DNSSERVER_IPv6
 
