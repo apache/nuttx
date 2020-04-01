@@ -144,7 +144,8 @@ static inline ssize_t can_rtrread(FAR struct can_dev_s *dev,
                                   FAR struct canioc_rtr_s *rtr);
 static int            can_ioctl(FAR struct file *filep, int cmd,
                                 unsigned long arg);
-static int            can_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int            can_poll(FAR struct file *filep,
+                               FAR struct pollfd *fds,
                                bool setup);
 
 /****************************************************************************
@@ -690,8 +691,8 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
         }
       while (fifo->rx_head != fifo->rx_tail);
 
-      /* All on the messages have bee transferred.  Return the number of bytes
-       * that were read.
+      /* All on the messages have bee transferred.  Return the number of
+       * bytes that were read.
        */
 
       ret = nread;
@@ -1334,8 +1335,8 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
 
           fifo->rx_tail = nexttail;
 
-          /* The increment the counting semaphore. The maximum value should be
-           * CONFIG_CAN_FIFOSIZE -- one possible count for each allocated
+          /* The increment the counting semaphore. The maximum value should
+           * be CONFIG_CAN_FIFOSIZE -- one possible count for each allocated
            * message buffer.
            */
 
@@ -1521,7 +1522,8 @@ int can_txdone(FAR struct can_dev_s *dev)
  *   If the CAN hardware supports a H/W FIFO, can_txdone() is not called
  *   when the transfer is complete, but rather when the transfer is queued in
  *   the H/W FIFO.  When the H/W FIFO becomes full, then dev_txready() will
- *   report false and the number of queued messages in the S/W FIFO will grow.
+ *   report false and the number of queued messages in the S/W FIFO will
+ *   grow.
  *
  *   There is no mechanism in this case to inform the upper half driver when
  *   the hardware is again available, when there is again space in the H/W

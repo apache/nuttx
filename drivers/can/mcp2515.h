@@ -192,7 +192,7 @@
 #define TXBCTRL_TXERR        (1 << 4) /* Bit 4: Transmission Error Detected bit */
 #define TXBCTRL_MLOA         (1 << 5) /* Bit 5: Message Lost Arbitration bit */
 #define TXBCTRL_ABTF         (1 << 6) /* Bit 6: Message Aborted Flag bit */
-                                              /* Bit 7: Not used */
+                                      /* Bit 7: Not used */
 
 /* TXRTSCTRL – TXnRTS PIN CONTROL AND STATUS REGISTER */
 
@@ -249,13 +249,13 @@
 
 /* These bits are common to RXB0 and RXB1: */
 
-#define RXBCTRL_RXRTR        (1 << 3) /* Bit 3: Received Remote Transfer Request bit */
-                                      /* Bit 4: Not used */
-#define RXBCTRL_RXM_SHIFT    (5)      /* Bits 5-6: Receive Buffer Operating Mode bits */
+#define RXBCTRL_RXRTR        (1 << 3)                   /* Bit 3: Received Remote Transfer Request bit */
+                                                        /* Bit 4: Not used */
+#define RXBCTRL_RXM_SHIFT    (5)                        /* Bits 5-6: Receive Buffer Operating Mode bits */
 #define RXBCTRL_RXM_MASK     (0x3 << RXBCTRL_RXM_SHIFT)
 #define RXBCTRL_RXM_ALLMSG   (3 << RXBCTRL_RXM_SHIFT)   /* 11: Turn mask/filters off; receive any message */
 #define RXBCTRL_RXM_ALLVALID (0 << RXBCTRL_RXM_SHIFT)   /* 00: Receive all valid msgs using (STD or EXT) that meet filter criteria */
-                                      /* Bit 7: Not used */
+                                                        /* Bit 7: Not used */
 
 /* N.B.: In the datasheet DS21801D the file RXM of RXBnCTRL could to assume
  *       the value 01 and 10 to receive only STD or EXT msgs respectively.
@@ -264,7 +264,7 @@
 
 /* RXB1CTRL – RECEIVE BUFFER 1 CONTROL */
 
-#define RXB1CTRL_FILHIT_SHIFT (0)      /* Filter Hit bits - indicates which acceptance filter enabled reception of message */
+#define RXB1CTRL_FILHIT_SHIFT (0)                           /* Filter Hit bits - indicates which acceptance filter enabled reception of message */
 #define RXB1CTRL_FILHIT_MASK  (0x7 << RXB0CTRL_FILHIT_SHIFT)
 #define RXB1CTRL_FILHIT_F5    (5 << RXB1CTRL_FILHIT_SHIFT)  /* Acceptance Filter 5 (RXF5) */
 #define RXB1CTRL_FILHIT_F4    (4 << RXB1CTRL_FILHIT_SHIFT)  /* Acceptance Filter 4 (RXF4) */
@@ -355,14 +355,14 @@
 
 /* CNF1 – CONFIGURATION 1 */
 
-#define CNF1_BRP_SHIFT       (0)      /* Bits 0-5: Baud Rate Prescaler bits <5:0>, TQ = 2 x (BRP + 1)/Fosc */
+#define CNF1_BRP_SHIFT       (0)                    /* Bits 0-5: Baud Rate Prescaler bits <5:0>, TQ = 2 x (BRP + 1)/Fosc */
 #define CNF1_BRP_MASK        (0x3f << CNF1_BRP_SHIFT)
-#define CNF1_SJW_SHIFT       (6)      /* Bit 6-7: Synchronization Jump Width Length bits <1:0> */
+#define CNF1_SJW_SHIFT       (6)                    /* Bit 6-7: Synchronization Jump Width Length bits <1:0> */
 #define CNF1_SJW_MASK        (3 << CNF1_SJW_SHIFT)
-#  define CNF1_SJW_4xTQ      (3 << CNF1_SJW_SHIFT) /* Length = 4 x TQ */
-#  define CNF1_SJW_3xTQ      (2 << CNF1_SJW_SHIFT) /* Length = 3 x TQ */
-#  define CNF1_SJW_2xTQ      (1 << CNF1_SJW_SHIFT) /* Length = 2 x TQ */
-#  define CNF1_SJW_1xTQ      (0 << CNF1_SJW_SHIFT) /* Length = 1 x TQ */
+#  define CNF1_SJW_4xTQ      (3 << CNF1_SJW_SHIFT)  /* Length = 4 x TQ */
+#  define CNF1_SJW_3xTQ      (2 << CNF1_SJW_SHIFT)  /* Length = 3 x TQ */
+#  define CNF1_SJW_2xTQ      (1 << CNF1_SJW_SHIFT)  /* Length = 2 x TQ */
+#  define CNF1_SJW_1xTQ      (0 << CNF1_SJW_SHIFT)  /* Length = 1 x TQ */
 
 /* CNF2 – CONFIGURATION 2 */
 
