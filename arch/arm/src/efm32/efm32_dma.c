@@ -125,7 +125,8 @@ static struct dma_channel_s g_dmach[EFM32_DMA_NCHANNELS];
 #endif
 
 #ifdef CONFIG_EFM32_DMA_ALTDSEC
-static struct dma_descriptor_s g_descriptors[DESC_TABLE_SIZE + EFM32_DMA_NCHANNELS]
+static struct dma_descriptor_s
+  g_descriptors[DESC_TABLE_SIZE + EFM32_DMA_NCHANNELS]
   __attribute__((aligned(DESC_TABLE_ALIGN)));
 #else
 static struct dma_descriptor_s g_descriptors[EFM32_DMA_NCHANNELS]
@@ -148,15 +149,18 @@ static struct dma_descriptor_s g_descriptors[EFM32_DMA_NCHANNELS]
  *
  ****************************************************************************/
 
-static void efm32_set_chctrl(struct dma_channel_s *dmach, dma_config_t config)
+static void efm32_set_chctrl(struct dma_channel_s *dmach,
+                             dma_config_t config)
 {
   uintptr_t regaddr;
   uint32_t decoded;
   uint32_t regval;
 
-  decoded  = (uint32_t)(config & EFM32_DMA_SIGSEL_MASK) >> EFM32_DMA_SIGSEL_SHIFT;
+  decoded  = (uint32_t)(config & EFM32_DMA_SIGSEL_MASK) >>
+              EFM32_DMA_SIGSEL_SHIFT;
   regval   = (decoded << _DMA_CH_CTRL_SIGSEL_SHIFT);
-  decoded  = (uint32_t)(config & EFM32_DMA_SOURCSEL_MASK) >> EFM32_DMA_SOURCSEL_SHIFT;
+  decoded  = (uint32_t)(config & EFM32_DMA_SOURCSEL_MASK) >>
+              EFM32_DMA_SOURCSEL_SHIFT;
   regval  |= (decoded << _DMA_CH_CTRL_SOURCESEL_SHIFT);
 
   regaddr = EFM32_DMA_CHn_CTRL(dmach->chan);
@@ -337,6 +341,7 @@ DMA_HANDLE efm32_dmachannel(void)
   struct dma_channel_s *dmach;
   unsigned int chndx;
   uint32_t bit;
+  int ret;
 
   /* Take a count from the channel counting semaphore.  We may block
    * if there are no free channels.  When we get the count, then we can
@@ -344,11 +349,20 @@ DMA_HANDLE efm32_dmachannel(void)
    * reserved for us.
    */
 
-  nxsem_wait_uninterruptible(&g_dmac.chansem);
+  ret = nxsem_wait_uninterruptible(&g_dmac.chansem);
+  if (ret < 0)
+    {
+      return NULL;
+    }
 
   /* Get exclusive access to the DMA channel list */
 
-  nxsem_wait_uninterruptible(&g_dmac.exclsem);
+  ret = nxsem_wait_uninterruptible(&g_dmac.exclsem);
+  if (ret < 0)
+    {
+      nxsem_post(&g_dmac.chansem);
+      return NULL;
+    }
 
   /* Search for an available DMA channel */
 
@@ -387,7 +401,7 @@ DMA_HANDLE efm32_dmachannel(void)
  * Name: efm32_dmafree
  *
  * Description:
- *   Release a DMA channel.  If another thread is waiting for this DMA channel
+ *   Release a DMA channel. If another thread is waiting for this DMA channel
  *   in a call to efm32_dmachannel, then this function will re-assign the
  *   DMA channel to that thread and wake it up.  NOTE:  The 'handle' used
  *   in this argument must NEVER be used again until efm32_dmachannel() is
@@ -413,8 +427,8 @@ void efm32_dmafree(DMA_HANDLE handle)
 
   putreg32(1 << dmach->chan, EFM32_DMA_CHENC);
 
-  /* Mark the channel no longer in use.  Clearing the in-use flag is an atomic
-   * operation and so should be safe.
+  /* Mark the channel no longer in use.  Clearing the in-use flag is an
+   * atomic operation and so should be safe.
    */
 
   dmach->inuse = false;
@@ -459,8 +473,8 @@ void efm32_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   shift = efm32_align_shift(config);
   mask  = ALIGN_MASK(shift);
 
-  /* Make sure that the number of bytes we are asked to transfer is a multiple
-   * of the transfer size.
+  /* Make sure that the number of bytes we are asked to transfer is a
+   * multiple of the transfer size.
    */
 
   xfersize = (1 << shift);
@@ -556,8 +570,8 @@ void efm32_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
   shift = efm32_align_shift(config);
   mask  = ALIGN_MASK(shift);
 
-  /* Make sure that the number of bytes we are asked to transfer is a multiple
-   * of the transfer size.
+  /* Make sure that the number of bytes we are asked to transfer is a
+   * multiple of the transfer size.
    */
 
   xfersize = (1 << shift);
@@ -651,8 +665,8 @@ void efm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   bit = 1 << dmach->chan;
   if ((dmach->config & EFM32_DMA_SINGLE_MASK) == EFM32_DMA_BUFFER_FULL)
     {
-      /* Disable the single requests for the channel (i.e. do not react to data
-       * available, wait for buffer full)
+      /* Disable the single requests for the channel (i.e. do not react to
+       * data available, wait for buffer full)
        */
 
       putreg32(bit, EFM32_DMA_CHUSEBURSTS);

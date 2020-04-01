@@ -67,6 +67,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure represents the state of one DMA channel */
 
 struct lpc17_40_dmach_s
@@ -97,6 +98,7 @@ struct lpc17_40_gpdma_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* The state of the LPC17 DMA block */
 
 static struct lpc17_40_gpdma_s g_gpdma;
@@ -150,8 +152,8 @@ static void lpc17_40_dmainprogress(struct lpc17_40_dmach_s *dmach)
  * Description:
  *   A DMA has completed. Decrement the g_dma_inprogress counter.
  *
- *   This function is called only from lpc17_40_dmastop which, in turn, will be
- *   called either by the user directly, by the user indirectly via
+ *   This function is called only from lpc17_40_dmastop which, in turn, will
+ *   be called either by the user directly, by the user indirectly via
  *   lpc17_40_dmafree(), or from gpdma_interrupt when the transfer completes.
  *
  *   NOTE: In the first two cases, we must be able to handle the case where
@@ -272,8 +274,8 @@ static int gpdma_interrupt(int irq, FAR void *context, FAR void *arg)
  * Name: up_dma_initialize
  *
  * Description:
- *   Initialize the GPDMA subsystem.  Called from up_initialize() early in the
- *   boot-up sequence.  Prototyped in up_internal.h.
+ *   Initialize the GPDMA subsystem.  Called from up_initialize() early in
+ *   the boot-up sequence.  Prototyped in up_internal.h.
  *
  * Returned Value:
  *   None
@@ -390,10 +392,15 @@ DMA_HANDLE lpc17_40_dmachannel(void)
 {
   struct lpc17_40_dmach_s *dmach = NULL;
   int i;
+  int ret;
 
   /* Get exclusive access to the GPDMA state structure */
 
-  nxsem_wait_uninterruptible(&g_gpdma.exclsem);
+  ret = nxsem_wait_uninterruptible(&g_gpdma.exclsem);
+  if (ret < 0)
+    {
+      return NULL;
+    }
 
   /* Find an available DMA channel */
 
@@ -420,8 +427,8 @@ DMA_HANDLE lpc17_40_dmachannel(void)
  *
  * Description:
  *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until lpc17_40_dmachannel() is called again to re-gain
- *   a valid handle.
+ *   NEVER be used again until lpc17_40_dmachannel() is called again to
+ *   re-gain a valid handle.
  *
  * Returned Value:
  *   None
@@ -582,7 +589,8 @@ int lpc17_40_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   base    = LPC17_40_DMACH_BASE((uint32_t)dmach->chn);
   regval  = getreg32(base + LPC17_40_DMACH_CONTROL_OFFSET);
   regval &= ~DMACH_CONTROL_XFRSIZE_MASK;
-  regval |= (DMACH_CONTROL_I | ((uint32_t)dmach->nxfrs << DMACH_CONTROL_XFRSIZE_SHIFT));
+  regval |= (DMACH_CONTROL_I |
+             ((uint32_t)dmach->nxfrs << DMACH_CONTROL_XFRSIZE_SHIFT));
   putreg32(regval, base + LPC17_40_DMACH_CONTROL_OFFSET);
 
   /* Enable the channel and unmask terminal count and error interrupts.
@@ -602,8 +610,8 @@ int lpc17_40_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
  *
  * Description:
  *   Cancel the DMA.  After lpc17_40_dmastop() is called, the DMA channel is
- *   reset and lpc17_40_dmasetup() must be called before lpc17_40_dmastart() can be
- *   called again
+ *   reset and lpc17_40_dmasetup() must be called before lpc17_40_dmastart()
+ *   can be called again
  *
  *   This function will be called either by the user directly, by the user
  *   indirectly via lpc17_40_dmafree(), or from gpdma_interrupt when the
@@ -692,8 +700,9 @@ void lpc17_40_dmasample(DMA_HANDLE handle, struct lpc17_40_dmaregs_s *regs)
  ****************************************************************************/
 
 #ifdef CONFIG__DEBUG_DMA_INFO
-void lpc17_40_dmadump(DMA_HANDLE handle, const struct lpc17_40_dmaregs_s *regs,
-                   const char *msg)
+void lpc17_40_dmadump(DMA_HANDLE handle,
+                      const struct lpc17_40_dmaregs_s *regs,
+                      const char *msg)
 {
   struct lpc17_40_dmach_s *dmach = (DMA_HANDLE)handle;
   uint32_t base;
