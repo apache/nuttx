@@ -61,7 +61,7 @@ void inode_release(FAR struct inode *node)
            * reference count would be wrong.
            */
 
-          DEBUGASSERT(ret = OK || ret == -ECANCELED);
+          DEBUGASSERT(ret == OK || ret == -ECANCELED);
         }
       while (ret < 0);
 
