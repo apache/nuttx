@@ -101,9 +101,9 @@
 
 /* MPU Region Base Address Register Bit Definitions */
 
-#define MPU_RBAR_REGION_SHIFT   (0)       /* Bits 0-3: MPU region */
+#define MPU_RBAR_REGION_SHIFT   (0)        /* Bits 0-3: MPU region */
 #define MPU_RBAR_REGION_MASK    (15 << MPU_RBAR_REGION_SHIFT)
-#define MPU_RBAR_VALID          (1 << 4)  /* Bit 4: MPU Region Number valid */
+#define MPU_RBAR_VALID          (1 << 4)   /* Bit 4: MPU Region Number valid */
 #define MPU_RBAR_ADDR_MASK      0xffffffe0 /* Bits N-31:  Region base addrese */
 
 /* MPU Region Attributes and Size Register Bit Definitions */
@@ -204,8 +204,8 @@ uint8_t mpu_log2regionfloor(size_t size);
  *
  * Description:
  *   Given (1) the offset to the beginning of valid data, (2) the size of the
- *   memory to be mapped and (2) the log2 size of the mapping to use, determine
- *   the minimal sub-region set to span that memory region.
+ *   memory to be mapped and (2) the log2 size of the mapping to use,
+ *   determine the minimal sub-region set to span that memory region.
  *
  * Assumption:
  *   l2size has the same properties as the return value from
