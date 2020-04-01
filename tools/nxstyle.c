@@ -176,7 +176,7 @@ static const struct file_section_s g_section_info[] =
   },
   {
     " * Public Function Prototypes\n",  /* Index: PUBLIC_FUNCTION_PROTOTYPES */
-    C_HEADER
+    C_SOURCE | C_HEADER
   }
 };
 
