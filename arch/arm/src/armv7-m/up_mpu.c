@@ -1,4 +1,4 @@
-/****************************************************************************
+/*****************************************************************************
  * arch/arm/src/armv7-m/up_mpu.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
-/****************************************************************************
+/*****************************************************************************
  * Included Files
- ****************************************************************************/
+ *****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -45,19 +45,19 @@
 #include "mpu.h"
 #include "up_internal.h"
 
-/****************************************************************************
+/*****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
+ *****************************************************************************/
 
-/* Configuration ************************************************************/
+/* Configuration *************************************************************/
 
 #ifndef CONFIG_ARM_MPU_NREGIONS
 #  define CONFIG_ARM_MPU_NREGIONS 8
 #endif
 
-/****************************************************************************
+/*****************************************************************************
  * Private Data
- ****************************************************************************/
+ *****************************************************************************/
 
 /* These sets represent the set of disabled memory sub-regions.  A bit set
  * corresponds to a disabled sub-region; the LS bit corresponds to the first
@@ -87,11 +87,11 @@ static const uint8_t g_ls_regionmask[9] =
 
 static uint8_t g_region;
 
-/****************************************************************************
+/*****************************************************************************
  * Private Functions
- ****************************************************************************/
+ *****************************************************************************/
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_subregion_ms
  *
  * Description:
@@ -103,7 +103,7 @@ static uint8_t g_region;
  *   l2size has the same properties as the return value from
  *   mpu_log2regionceil()
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static inline uint32_t mpu_subregion_ms(size_t size, uint8_t l2size)
 {
@@ -122,7 +122,7 @@ static inline uint32_t mpu_subregion_ms(size_t size, uint8_t l2size)
 
   if (l2size < 32)
     {
-      mask  = ((1 << l2size)-1) >> 3; /* Shifted mask */
+      mask  = ((1 << l2size) - 1) >> 3; /* Shifted mask */
     }
 
   /* The 4Gb region size is a special case */
@@ -133,15 +133,15 @@ static inline uint32_t mpu_subregion_ms(size_t size, uint8_t l2size)
        * input.
        */
 
-      mask = 0x1fffffff;         /* Shifted mask */
+      mask = 0x1fffffff;          /* Shifted mask */
     }
 
-  asize = (size + mask) & ~mask; /* Adjusted size */
-  nsrs  = asize >> (l2size-3);   /* Number of subregions */
+  asize = (size + mask) & ~mask;  /* Adjusted size */
+  nsrs  = asize >> (l2size - 3);  /* Number of subregions */
   return g_ms_regionmask[nsrs];
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_subregion_ls
  *
  * Description:
@@ -154,7 +154,7 @@ static inline uint32_t mpu_subregion_ms(size_t size, uint8_t l2size)
  *   l2size has the same properties as the return value from
  *   mpu_log2regionceil()
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 static inline uint32_t mpu_subregion_ls(size_t offset, uint8_t l2size)
 {
@@ -184,19 +184,19 @@ static inline uint32_t mpu_subregion_ls(size_t offset, uint8_t l2size)
        * input.
        */
 
-      mask = 0x1fffffff;           /* Shifted mask */
+      mask = 0x1fffffff;              /* Shifted mask */
     }
 
-  aoffset = offset & ~mask;        /* Adjusted offset */
-  nsrs    = aoffset >> (l2size-3); /* Number of subregions */
+  aoffset = offset & ~mask;           /* Adjusted offset */
+  nsrs    = aoffset >> (l2size - 3);  /* Number of subregions */
   return g_ls_regionmask[nsrs];
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Public Functions
- ****************************************************************************/
+ *****************************************************************************/
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_allocregion
  *
  * Description:
@@ -207,7 +207,7 @@ static inline uint32_t mpu_subregion_ls(size_t offset, uint8_t l2size)
  *   - Regions are only allocated early in initialization, so no special
  *     protection against re-entrancy is required;
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 unsigned int mpu_allocregion(void)
 {
@@ -215,7 +215,7 @@ unsigned int mpu_allocregion(void)
   return (unsigned int)g_region++;
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_log2regionceil
  *
  * Description:
@@ -224,7 +224,7 @@ unsigned int mpu_allocregion(void)
  *
  *   size <= (1 << l2size)
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 uint8_t mpu_log2regionceil(size_t size)
 {
@@ -236,7 +236,7 @@ uint8_t mpu_log2regionceil(size_t size)
   return l2size;
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_log2regionfloor
  *
  * Description:
@@ -245,7 +245,7 @@ uint8_t mpu_log2regionceil(size_t size)
  *
  *   size >= (1 << l2size)
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 uint8_t mpu_log2regionfloor(size_t size)
 {
@@ -259,7 +259,7 @@ uint8_t mpu_log2regionfloor(size_t size)
   return l2size;
 }
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mpu_subregion
  *
  * Description:
@@ -271,7 +271,7 @@ uint8_t mpu_log2regionfloor(size_t size)
  *   l2size has the same properties as the return value from
  *   mpu_log2regionceil()
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 uint32_t mpu_subregion(uintptr_t base, size_t size, uint8_t l2size)
 {
