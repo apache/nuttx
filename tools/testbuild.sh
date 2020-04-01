@@ -43,6 +43,7 @@ MAKE=make
 unset testfile
 unset HOPTION
 unset JOPTION
+PRINTLISTONLY=0
 
 function showusage {
   echo ""
@@ -57,6 +58,7 @@ function showusage {
   echo "  -j <ncpus> passed on to make.  Default:  No -j make option."
   echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
   echo "  -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx"
+  echo "  -p only print the list of configs without running any builds"
   echo "  -h will show this help test and terminate"
   echo "  <testlist-file> selects the list of configurations to test.  No default"
   echo ""
@@ -91,6 +93,9 @@ while [ ! -z "$1" ]; do
   -t )
     shift
     nuttx="$1"
+    ;;
+  -p )
+    PRINTLISTONLY=1
     ;;
   -h )
     showusage
@@ -203,6 +208,9 @@ function dotest {
     echo "Skipping: $1"
   else
     echo "Configuration/Tool: $1"
+    if [ ${PRINTLISTONLY} -eq 1 ]; then
+      return
+    fi
 
     # Parse the next line
 

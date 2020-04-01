@@ -1002,6 +1002,7 @@ testbuild.sh
          Ubuntu under Windows 10 (u), or Windows native (n).  Default Linux
       -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps
       -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx
+      -p only print the list of configs without running any builds
       -j <ncpus> passed on to make.  Default:  No -j make option
       -d enables script debug output
       -x exit on build failures
