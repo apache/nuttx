@@ -581,35 +581,6 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
 
   for (retries = 0; retries < CONFIG_NETDB_DNSCLIENT_RETRIES; retries++)
     {
-#ifdef CONFIG_NET_IPv4
-      /* Send the IPv4 query */
-
-      ret = dns_send_query(query->sd, query->hostname,
-                           (FAR union dns_addr_u *)addr,
-                           DNS_RECTYPE_A, &qinfo);
-      if (ret < 0)
-        {
-          nerr("ERROR: IPv4 dns_send_query failed: %d\n", ret);
-          query->result = ret;
-        }
-      else
-        {
-          /* Obtain the IPv4 response */
-
-          ret = dns_recv_response(query->sd, &query->addr[next],
-                                  *query->naddr - next, &qinfo);
-          if (ret >= 0)
-            {
-              next += ret;
-            }
-          else
-            {
-              nerr("ERROR: IPv4 dns_recv_response failed: %d\n", ret);
-              query->result = ret;
-            }
-        }
-#endif /* CONFIG_NET_IPv4 */
-
 #ifdef CONFIG_NET_IPv6
       /* Send the IPv6 query */
 
@@ -638,6 +609,35 @@ static int dns_query_callback(FAR void *arg, FAR struct sockaddr *addr,
             }
         }
 #endif
+
+#ifdef CONFIG_NET_IPv4
+      /* Send the IPv4 query */
+
+      ret = dns_send_query(query->sd, query->hostname,
+                           (FAR union dns_addr_u *)addr,
+                           DNS_RECTYPE_A, &qinfo);
+      if (ret < 0)
+        {
+          nerr("ERROR: IPv4 dns_send_query failed: %d\n", ret);
+          query->result = ret;
+        }
+      else
+        {
+          /* Obtain the IPv4 response */
+
+          ret = dns_recv_response(query->sd, &query->addr[next],
+                                  *query->naddr - next, &qinfo);
+          if (ret >= 0)
+            {
+              next += ret;
+            }
+          else
+            {
+              nerr("ERROR: IPv4 dns_recv_response failed: %d\n", ret);
+              query->result = ret;
+            }
+        }
+#endif /* CONFIG_NET_IPv4 */
 
       if (next > 0)
         {
