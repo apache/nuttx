@@ -115,12 +115,10 @@ const struct i2c_ops_s g_ops =
  *
  ****************************************************************************/
 
-static void ez80_i2c_semtake(void)
+static int ez80_i2c_semtake(void)
 {
-  nxsem_wait_uninterruptible(&g_i2csem);
+  return nxsem_wait(&g_i2csem);
 }
-
-#define ez80_i2c_semgive() nxsem_post(&g_i2csem)
 
 /****************************************************************************
  * Name: ez80_i2c_setccr
@@ -808,7 +806,7 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
   FAR struct i2c_msg_s *msg;
   bool nostop;
   uint8_t flags;
-  int ret = OK;
+  int ret;
   int i;
 
   /* Perform each segment of the transfer, message at a time */
@@ -817,9 +815,13 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Get exclusive access to the I2C bus */
 
-  ez80_i2c_semtake();
+  ret = nxsem_wait(&g_i2csem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  /* The process each message seqment */
+  /* The process each message segment */
 
   for (i = 0; i < count; i++)
     {
@@ -885,7 +887,7 @@ static int ez80_i2c_transfer(FAR struct i2c_master_s *dev,
       flags = (nostop) ? EZ80_NOSTART : 0;
     }
 
-  ez80_i2c_semgive();
+  nxsem_post(&g_i2csem);
   return ret;
 }
 

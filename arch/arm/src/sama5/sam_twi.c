@@ -78,7 +78,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***************************************************************/
+
+/* Configuration ************************************************************/
 
 #ifndef CONFIG_SAMA5_TWI0_FREQUENCY
 #  define CONFIG_SAMA5_TWI0_FREQUENCY 100000
@@ -100,12 +101,14 @@
 #  undef CONFIG_SAMA5_TWI_REGDEBUG
 #endif
 
-/* Driver internal definitions *************************************************/
-/* If verbose I2C debug output is enabled, then allow more time before we declare
- * a timeout.  The debug output from twi_interrupt will really slow things down!
+/* Driver internal definitions **********************************************/
+
+/* If verbose I2C debug output is enabled, then allow more time before we
+ * declare a timeout.  The debug output from twi_interrupt will really slow
+ * things down!
  *
- * With a very slow clock (say 100,000 Hz), less than 100 usec would be required
- * to transfer on byte.  So these define a "long" timeout.
+ * With a very slow clock (say 100,000 Hz), less than 100 usec would be
+ * required to transfer on byte.  So these define a "long" timeout.
  */
 
 #ifdef CONFIG_DEBUG_I2C_INFO
@@ -131,6 +134,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* Invariant attributes of a TWI bus */
 
 struct twi_attr_s
@@ -164,10 +168,10 @@ struct twi_dev_s
   /* Debug stuff */
 
 #ifdef CONFIG_SAMA5_TWI_REGDEBUG
-   bool               wrlast;     /* Last was a write */
-   uint32_t           addrlast;   /* Last address */
-   uint32_t           vallast;    /* Last value */
-   int                ntimes;     /* Number of times */
+  bool                wrlast;     /* Last was a write */
+  uint32_t            addrlast;   /* Last address */
+  uint32_t            vallast;    /* Last value */
+  int                 ntimes;     /* Number of times */
 #endif
 };
 
@@ -177,7 +181,8 @@ struct twi_dev_s
 
 /* Low-level helper functions */
 
-static void twi_takesem(sem_t *sem);
+static int  twi_takesem(sem_t *sem);
+static int  twi_takesem_uninterruptible(sem_t *sem);
 #define     twi_givesem(sem) (nxsem_post(sem))
 
 #ifdef CONFIG_SAMA5_TWI_REGDEBUG
@@ -290,14 +295,14 @@ static const struct i2c_ops_s g_twiops =
 };
 
 /****************************************************************************
- * Low-level Helpers
+ * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: twi_takesem
  *
  * Description:
- *   Take the wait semaphore (handling false alarm wake-ups due to the receipt
- *   of signals).
+ *   Take the wait semaphore.  May be interrupted by a signal.
  *
  * Input Parameters:
  *   dev - Instance of the SDIO device driver state structure.
@@ -307,9 +312,29 @@ static const struct i2c_ops_s g_twiops =
  *
  ****************************************************************************/
 
-static void twi_takesem(sem_t *sem)
+static int twi_takesem(sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait(sem);
+}
+
+/****************************************************************************
+ * Name: twi_takesem_uninterruptible
+ *
+ * Description:
+ *   Take the wait semaphore (handling false alarm wake-ups due to the
+ *   receipt of signals).
+ *
+ * Input Parameters:
+ *   dev - Instance of the SDIO device driver state structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static int twi_takesem_uninterruptible(sem_t *sem)
+{
+  return nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -417,7 +442,8 @@ static void twi_putabs(struct twi_dev_s *priv, uintptr_t address,
  *
  ****************************************************************************/
 
-static inline uint32_t twi_getrel(struct twi_dev_s *priv, unsigned int offset)
+static inline uint32_t twi_getrel(struct twi_dev_s *priv,
+                                  unsigned int offset)
 {
   return twi_getabs(priv, priv->attr->base + offset);
 }
@@ -455,12 +481,14 @@ static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
 static int twi_wait(struct twi_dev_s *priv, unsigned int size)
 {
   uint32_t timeout;
+  int ret;
 
   /* Calculate a timeout value based on the size of the transfer
    *
    *   ticks = msec-per-byte * bytes / msec-per-tick
    *
-   * There is no concern about arithmetic overflow for reasonable transfer sizes.
+   * There is no concern about arithmetic overflow for reasonable transfer
+   * sizes.
    */
 
   timeout = MSEC2TICK(TWI_TIMEOUT_MSPB);
@@ -469,8 +497,8 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
       timeout = 1;
     }
 
-  /* Then start the timeout.  This timeout is needed to avoid hangs if/when an
-   * TWI transfer stalls.
+  /* Then start the timeout.  This timeout is needed to avoid hangs if/when
+   * a TWI transfer stalls.
    */
 
   wd_start(priv->timeout, timeout, twi_timeout, 1, (uint32_t)priv);
@@ -480,9 +508,15 @@ static int twi_wait(struct twi_dev_s *priv, unsigned int size)
   do
     {
       i2cinfo("TWI%d Waiting...\n", priv->attr->twi);
-      twi_takesem(&priv->waitsem);
+      ret = twi_takesem(&priv->waitsem);
       i2cinfo("TWI%d Awakened with result: %d\n",
               priv->attr->twi, priv->result);
+
+      if (ret < 0)
+        {
+          wd_cancel(priv->timeout);
+          return ret;
+        }
     }
   while (priv->result == -EBUSY);
 
@@ -720,7 +754,8 @@ static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
   /* Set slave address and number of internal address bytes. */
 
   twi_putrel(priv, SAM_TWI_MMR_OFFSET, 0);
-  twi_putrel(priv, SAM_TWI_MMR_OFFSET, TWI_MMR_IADRSZ_NONE | TWI_MMR_DADR(msg->addr));
+  twi_putrel(priv, SAM_TWI_MMR_OFFSET,
+             TWI_MMR_IADRSZ_NONE | TWI_MMR_DADR(msg->addr));
 
   /* Set internal address bytes (not used) */
 
@@ -797,18 +832,22 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
 
   /* Get exclusive access to the device */
 
-  twi_takesem(&priv->exclsem);
+  ret = twi_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Setup the message transfer */
 
   priv->msg  = msgs;
   priv->msgc = count;
 
- /* Configure the I2C frequency.
-  * REVISIT: Note that the frequency is set only on the first message.
-  * This could be extended to support different transfer frequencies for
-  * each message segment.
-  */
+  /* Configure the I2C frequency.
+   * REVISIT: Note that the frequency is set only on the first message.
+   * This could be extended to support different transfer frequencies for
+   * each message segment.
+   */
 
   twi_setfrequency(priv, msgs->frequency);
 
@@ -835,7 +874,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: twi_reset
  *
  * Description:
@@ -847,7 +886,7 @@ static int twi_transfer(FAR struct i2c_master_s *dev,
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 static int twi_reset(FAR struct i2c_master_s *dev)
@@ -863,7 +902,11 @@ static int twi_reset(FAR struct i2c_master_s *dev)
 
   /* Get exclusive access to the TWI device */
 
-  twi_takesem(&priv->exclsem);
+  ret = twi_takesem_uninterruptible(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Disable TWI interrupts */
 
@@ -1056,8 +1099,8 @@ static void twi_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
  *
  * Description:
  *   Initialize/Re-initialize the TWI peripheral.  This logic performs only
- *   repeatable initialization after either (1) the one-time initialization, or
- *   (2) after each bus reset.
+ *   repeatable initialization after either (1) the one-time initialization,
+ *   or (2) after each bus reset.
  *
  ****************************************************************************/
 

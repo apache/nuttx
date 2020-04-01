@@ -38,7 +38,7 @@
 
 /****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -80,7 +80,7 @@
 /* Configuration ************************************************************/
 
 /* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.
- ( Instead, CPU-intensive polling will be used.
+ * Instead, CPU-intensive polling will be used.
  */
 
 /* Interrupt wait timeout in seconds and milliseconds */
@@ -189,8 +189,14 @@ struct am335x_i2c_config_s
 
 struct am335x_i2c_priv_s
 {
-  const struct i2c_ops_s *ops; /* Standard I2C operations */
-  const struct am335x_i2c_config_s *config; /* Port configuration */
+  /* Standard I2C operations */
+
+  const struct i2c_ops_s *ops;
+
+  /* Port configuration */
+
+  const struct am335x_i2c_config_s *config;
+
   int refs;                    /* Reference count */
   sem_t sem_excl;              /* Mutual exclusion semaphore */
 #ifndef CONFIG_I2C_POLLED
@@ -230,17 +236,22 @@ static inline void am335x_i2c_putreg(FAR struct am335x_i2c_priv_s *priv,
 static inline void am335x_i2c_modifyreg(FAR struct am335x_i2c_priv_s *priv,
                                         uint16_t offset, uint32_t clearbits,
                                         uint32_t setbits);
-static inline void am335x_i2c_sem_wait(FAR struct am335x_i2c_priv_s *priv);
+static inline int am335x_i2c_sem_wait(FAR struct am335x_i2c_priv_s *priv);
+static int
+  am335x_i2c_sem_wait_uninterruptible(FAR struct am335x_i2c_priv_s *priv);
 
 #ifdef CONFIG_AM335X_I2C_DYNTIMEO
 static useconds_t am335x_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
 #endif /* CONFIG_AM335X_I2C_DYNTIMEO */
 
-static inline int  am335x_i2c_sem_waitdone(FAR struct am335x_i2c_priv_s *priv);
-static inline bool am335x_i2c_sem_waitstop(FAR struct am335x_i2c_priv_s *priv);
+static inline int
+  am335x_i2c_sem_waitdone(FAR struct am335x_i2c_priv_s *priv);
+static inline bool
+  am335x_i2c_sem_waitstop(FAR struct am335x_i2c_priv_s *priv);
 static inline void am335x_i2c_sem_post(FAR struct am335x_i2c_priv_s *priv);
 static inline void am335x_i2c_sem_init(FAR struct am335x_i2c_priv_s *priv);
-static inline void am335x_i2c_sem_destroy(FAR struct am335x_i2c_priv_s *priv);
+static inline void
+  am335x_i2c_sem_destroy(FAR struct am335x_i2c_priv_s *priv);
 
 #ifdef CONFIG_I2C_TRACE
 static void am335x_i2c_tracereset(FAR struct am335x_i2c_priv_s *priv);
@@ -256,7 +267,8 @@ static void am335x_i2c_setclock(FAR struct am335x_i2c_priv_s *priv,
 static inline void am335x_i2c_sendstart(FAR struct am335x_i2c_priv_s *priv,
                                         uint16_t address);
 static inline void am335x_i2c_sendstop(FAR struct am335x_i2c_priv_s *priv);
-static inline uint32_t am335x_i2c_getstatus(FAR struct am335x_i2c_priv_s *priv);
+static inline uint32_t
+  am335x_i2c_getstatus(FAR struct am335x_i2c_priv_s *priv);
 
 static int am335x_i2c_isr_process(struct am335x_i2c_priv_s * priv);
 
@@ -448,13 +460,28 @@ static inline void am335x_i2c_modifyreg(FAR struct am335x_i2c_priv_s *priv,
  * Name: am335x_i2c_sem_wait
  *
  * Description:
- *   Take the exclusive access, waiting as necessary
+ *   Take the exclusive access, waiting as necessary.  May be interrupted by
+ *   a signal.
  *
  ****************************************************************************/
 
-static inline void am335x_i2c_sem_wait(FAR struct am335x_i2c_priv_s *priv)
+static inline int am335x_i2c_sem_wait(FAR struct am335x_i2c_priv_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->sem_excl);
+  return nxsem_wait(&priv->sem_excl);
+}
+
+/****************************************************************************
+ * Name: am335x_i2c_sem_wait_uninterruptible
+ *
+ * Description:
+ *   Take the exclusive access, waiting as necessary.
+ *
+ ****************************************************************************/
+
+static int
+  am335x_i2c_sem_wait_uninterruptible(FAR struct am335x_i2c_priv_s *priv)
+{
+  return nxsem_wait_uninterruptible(&priv->sem_excl);
 }
 
 /****************************************************************************
@@ -655,7 +682,8 @@ static inline int am335x_i2c_sem_waitdone(FAR struct am335x_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static inline bool am335x_i2c_sem_waitstop(FAR struct am335x_i2c_priv_s *priv)
+static inline bool
+  am335x_i2c_sem_waitstop(FAR struct am335x_i2c_priv_s *priv)
 {
   clock_t start;
   clock_t elapsed;
@@ -863,8 +891,10 @@ static void am335x_i2c_tracedump(FAR struct am335x_i2c_priv_s *priv)
     {
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,
-             "%2d. STATUS: %08x COUNT: %3d EVENT: %s(%2d) PARM: %08x TIME: %d\n",
-             i + 1, trace->status, trace->count, g_trace_names[trace->event],
+             "%2d. STATUS: %08x COUNT: %3d EVENT: %s(%2d) PARM: %08x "
+             "TIME: %d\n",
+             i + 1, trace->status, trace->count,
+             g_trace_names[trace->event],
              trace->event, trace->parm, trace->time - priv->start_time);
     }
 }
@@ -1031,7 +1061,8 @@ static inline void am335x_i2c_sendstop(FAR struct am335x_i2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static inline uint32_t am335x_i2c_getstatus(FAR struct am335x_i2c_priv_s *priv)
+static inline uint32_t
+  am335x_i2c_getstatus(FAR struct am335x_i2c_priv_s *priv)
 {
 #ifndef CONFIG_I2C_POLLED
   return am335x_i2c_getreg(priv, AM335X_I2C_IRQ_STAT_OFFSET);
@@ -1100,7 +1131,8 @@ static int am335x_i2c_isr_process(struct am335x_i2c_priv_s *priv)
           am335x_i2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
 
           /* No interrupts or context switches should occur in the following
-           * sequence. Otherwise, additional bytes may be received by the device.
+           * sequence. Otherwise, additional bytes may be received by the
+           * device.
            */
 
 #ifdef CONFIG_I2C_POLLED
@@ -1331,7 +1363,8 @@ static int am335x_i2c_init(FAR struct am335x_i2c_priv_s *priv)
 
   /* Wait for I2C module comes out of reset */
 
-  while (!(am335x_i2c_getreg(priv, AM335X_I2C_SYSS_OFFSET) & I2C_SYSS_RST_DONE))
+  while (!(am335x_i2c_getreg(priv, AM335X_I2C_SYSS_OFFSET) &
+           I2C_SYSS_RST_DONE))
     {
     }
 
@@ -1382,16 +1415,21 @@ static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
                                FAR struct i2c_msg_s *msgs, int count)
 {
   FAR struct am335x_i2c_priv_s *priv = (struct am335x_i2c_priv_s *)dev;
-  int ret = -EBUSY;
+  int ret;
 
   DEBUGASSERT(count > 0);
 
   /* Ensure that address or flags don't change meanwhile */
 
-  am335x_i2c_sem_wait(priv);
+  ret = am335x_i2c_sem_wait(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Wait for any STOP in progress */
 
+  ret = -EBUSY;
   if (am335x_i2c_sem_waitstop(priv))
     {
       /* Clear any pending error interrupts */
@@ -1526,7 +1564,7 @@ static int am335x_i2c_reset(FAR struct i2c_master_s *dev)
   gpio_pinset_t scl_gpio;
   gpio_pinset_t sda_gpio;
   uint32_t frequency;
-  int ret = ERROR;
+  int ret;
 
   DEBUGASSERT(dev);
 
@@ -1536,7 +1574,13 @@ static int am335x_i2c_reset(FAR struct i2c_master_s *dev)
 
   /* Lock out other clients */
 
-  am335x_i2c_sem_wait(priv);
+  ret = am335x_i2c_sem_wait_uninterruptible(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -EIO;
 
   /* Save the current frequency */
 

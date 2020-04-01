@@ -191,8 +191,14 @@ struct imxrt_lpi2c_config_s
 
 struct imxrt_lpi2c_priv_s
 {
-  const struct i2c_ops_s *ops; /* Standard I2C operations */
-  const struct imxrt_lpi2c_config_s *config; /* Port configuration */
+  /* Standard I2C operations */
+
+  const struct i2c_ops_s *ops;
+
+  /* Port configuration */
+
+  const struct imxrt_lpi2c_config_s *config;
+
   int refs;                    /* Reference count */
   sem_t sem_excl;              /* Mutual exclusion semaphore */
 #ifndef CONFIG_I2C_POLLED
@@ -225,24 +231,31 @@ struct imxrt_lpi2c_priv_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline uint32_t imxrt_lpi2c_getreg(FAR struct imxrt_lpi2c_priv_s *priv,
-                                          uint16_t offset);
+static inline uint32_t
+  imxrt_lpi2c_getreg(FAR struct imxrt_lpi2c_priv_s *priv, uint16_t offset);
 static inline void imxrt_lpi2c_putreg(FAR struct imxrt_lpi2c_priv_s *priv,
                                       uint16_t offset, uint32_t value);
 static inline void imxrt_lpi2c_modifyreg(FAR struct imxrt_lpi2c_priv_s *priv,
                                          uint16_t offset, uint32_t clearbits,
                                          uint32_t setbits);
-static inline void imxrt_lpi2c_sem_wait(FAR struct imxrt_lpi2c_priv_s *priv);
+static inline int imxrt_lpi2c_sem_wait(FAR struct imxrt_lpi2c_priv_s *priv);
+static int
+  imxrt_lpi2c_sem_wait_uninterruptible(FAR struct imxrt_lpi2c_priv_s *priv);
 
 #ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
 static useconds_t imxrt_lpi2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
 #endif /* CONFIG_IMXRT_LPI2C_DYNTIMEO */
 
-static inline int  imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv);
-static inline void imxrt_lpi2c_sem_waitstop(FAR struct imxrt_lpi2c_priv_s *priv);
-static inline void imxrt_lpi2c_sem_post(FAR struct imxrt_lpi2c_priv_s *priv);
-static inline void imxrt_lpi2c_sem_init(FAR struct imxrt_lpi2c_priv_s *priv);
-static inline void imxrt_lpi2c_sem_destroy(FAR struct imxrt_lpi2c_priv_s *priv);
+static inline int
+  imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv);
+static inline void
+  imxrt_lpi2c_sem_waitstop(FAR struct imxrt_lpi2c_priv_s *priv);
+static inline void
+  imxrt_lpi2c_sem_post(FAR struct imxrt_lpi2c_priv_s *priv);
+static inline void
+  imxrt_lpi2c_sem_init(FAR struct imxrt_lpi2c_priv_s *priv);
+static inline void
+  imxrt_lpi2c_sem_destroy(FAR struct imxrt_lpi2c_priv_s *priv);
 
 #ifdef CONFIG_I2C_TRACE
 static void imxrt_lpi2c_tracereset(FAR struct imxrt_lpi2c_priv_s *priv);
@@ -258,7 +271,8 @@ static void imxrt_lpi2c_setclock(FAR struct imxrt_lpi2c_priv_s *priv,
 static inline void imxrt_lpi2c_sendstart(FAR struct imxrt_lpi2c_priv_s *priv,
                                          uint8_t address);
 static inline void imxrt_lpi2c_sendstop(FAR struct imxrt_lpi2c_priv_s *priv);
-static inline uint32_t imxrt_lpi2c_getstatus(FAR struct imxrt_lpi2c_priv_s *priv);
+static inline uint32_t
+  imxrt_lpi2c_getstatus(FAR struct imxrt_lpi2c_priv_s *priv);
 
 static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s * priv);
 
@@ -472,8 +486,8 @@ static struct imxrt_lpi2c_priv_s imxrt_lpi2c4_priv =
  *
  ****************************************************************************/
 
-static inline uint32_t imxrt_lpi2c_getreg(FAR struct imxrt_lpi2c_priv_s *priv,
-                                          uint16_t offset)
+static inline uint32_t
+  imxrt_lpi2c_getreg(FAR struct imxrt_lpi2c_priv_s *priv, uint16_t offset)
 {
   return getreg32(priv->config->base + offset);
 }
@@ -511,13 +525,28 @@ static inline void imxrt_lpi2c_modifyreg(FAR struct imxrt_lpi2c_priv_s *priv,
  * Name: imxrt_lpi2c_sem_wait
  *
  * Description:
- *   Take the exclusive access, waiting as necessary
+ *   Take the exclusive access, waiting as necessary.  May be interrupted by
+ *   a signal.
  *
  ****************************************************************************/
 
-static inline void imxrt_lpi2c_sem_wait(FAR struct imxrt_lpi2c_priv_s *priv)
+static inline int imxrt_lpi2c_sem_wait(FAR struct imxrt_lpi2c_priv_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->sem_excl);
+  return nxsem_wait(&priv->sem_excl);
+}
+
+/****************************************************************************
+ * Name: imxrt_lpi2c_sem_wait_uninterruptible
+ *
+ * Description:
+ *   Take the exclusive access, waiting as necessary.
+ *
+ ****************************************************************************/
+
+static int
+  imxrt_lpi2c_sem_wait_uninterruptible(FAR struct imxrt_lpi2c_priv_s *priv)
+{
+  return nxsem_wait_uninterruptible(&priv->sem_excl);
 }
 
 /****************************************************************************
@@ -559,7 +588,8 @@ static useconds_t imxrt_lpi2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
  ****************************************************************************/
 
 #ifndef CONFIG_I2C_POLLED
-static inline int imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv)
+static inline int
+  imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv)
 {
   struct timespec abstime;
   irqstate_t flags;
@@ -671,7 +701,8 @@ static inline int imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv)
   return ret;
 }
 #else
-static inline int imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv)
+static inline int
+  imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv)
 {
   clock_t timeout;
   clock_t start;
@@ -730,7 +761,8 @@ static inline int imxrt_lpi2c_sem_waitdone(FAR struct imxrt_lpi2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static inline void imxrt_lpi2c_sem_waitstop(FAR struct imxrt_lpi2c_priv_s *priv)
+static inline void
+  imxrt_lpi2c_sem_waitstop(FAR struct imxrt_lpi2c_priv_s *priv)
 {
   clock_t start;
   clock_t elapsed;
@@ -853,7 +885,8 @@ static inline void imxrt_lpi2c_sem_init(FAR struct imxrt_lpi2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static inline void imxrt_lpi2c_sem_destroy(FAR struct imxrt_lpi2c_priv_s *priv)
+static inline void
+  imxrt_lpi2c_sem_destroy(FAR struct imxrt_lpi2c_priv_s *priv)
 {
   nxsem_destroy(&priv->sem_excl);
 #ifndef CONFIG_I2C_POLLED
@@ -969,8 +1002,10 @@ static void imxrt_lpi2c_tracedump(FAR struct imxrt_lpi2c_priv_s *priv)
     {
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,
-             "%2d. STATUS: %08x COUNT: %3d EVENT: %s(%2d) PARM: %08x TIME: %d\n",
-             i + 1, trace->status, trace->count, g_trace_names[trace->event],
+             "%2d. STATUS: %08x COUNT: %3d EVENT: %s(%2d) PARM: %08x "
+             "TIME: %d\n",
+             i + 1, trace->status, trace->count,
+             g_trace_names[trace->event],
              trace->event, trace->parm, trace->time - priv->start_time);
     }
 }
@@ -1209,7 +1244,8 @@ static inline void imxrt_lpi2c_sendstop(FAR struct imxrt_lpi2c_priv_s *priv)
  *
  ****************************************************************************/
 
-static inline uint32_t imxrt_lpi2c_getstatus(FAR struct imxrt_lpi2c_priv_s *priv)
+static inline uint32_t
+  imxrt_lpi2c_getstatus(FAR struct imxrt_lpi2c_priv_s *priv)
 {
   return imxrt_lpi2c_getreg(priv, IMXRT_LPI2C_MSR_OFFSET);
 }
@@ -1240,7 +1276,8 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
 
   /* Check if there is more bytes to send */
 
-  else if (((priv->flags & I2C_M_READ) == 0) && (status & LPI2C_MSR_TDF) != 0)
+  else if (((priv->flags & I2C_M_READ) == 0) &&
+           (status & LPI2C_MSR_TDF) != 0)
     {
       if (priv->dcnt > 0)
         {
@@ -1259,7 +1296,8 @@ static int imxrt_lpi2c_isr_process(struct imxrt_lpi2c_priv_s *priv)
 
   /* Check if there is more bytes to read */
 
-  else if (((priv->flags & I2C_M_READ) != 0) && (status & LPI2C_MSR_RDF) != 0)
+  else if (((priv->flags & I2C_M_READ) != 0) &&
+           (status & LPI2C_MSR_RDF) != 0)
     {
       /* Read a byte, if dcnt goes < 0, then read dummy bytes to ack ISRs */
 
@@ -1628,13 +1666,17 @@ static int imxrt_lpi2c_transfer(FAR struct i2c_master_s *dev,
                                 FAR struct i2c_msg_s *msgs, int count)
 {
   FAR struct imxrt_lpi2c_priv_s *priv = (struct imxrt_lpi2c_priv_s *)dev;
-  int ret = 0;
+  int ret;
 
   DEBUGASSERT(count > 0);
 
   /* Ensure that address or flags don't change meanwhile */
 
-  imxrt_lpi2c_sem_wait(priv);
+  ret = imxrt_lpi2c_sem_wait(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Clear any pending error interrupts */
 
@@ -1743,7 +1785,7 @@ static int imxrt_lpi2c_reset(FAR struct i2c_master_s *dev)
   uint32_t scl_gpio;
   uint32_t sda_gpio;
   uint32_t frequency;
-  int ret = ERROR;
+  int ret;
 
   DEBUGASSERT(dev);
 
@@ -1753,7 +1795,13 @@ static int imxrt_lpi2c_reset(FAR struct i2c_master_s *dev)
 
   /* Lock out other clients */
 
-  imxrt_lpi2c_sem_wait(priv);
+  ret = imxrt_lpi2c_sem_wait_uninterruptible(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -EIO;
 
   /* Save the current frequency */
 
