@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/tiva/common/tiva_ssi.c
  *
- *   Copyright (C) 2009-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -239,7 +224,7 @@ static uint32_t ssi_disable(struct tiva_ssidev_s *priv);
 static void ssi_enable(struct tiva_ssidev_s *priv, uint32_t enable);
 
 #ifndef CONFIG_SSI_POLLWAIT
-static void ssi_semtake(sem_t *sem);
+static int ssi_semtake(sem_t *sem);
 #define ssi_semgive(s) nxsem_post(s);
 #endif
 
@@ -501,9 +486,9 @@ static void ssi_enable(struct tiva_ssidev_s *priv, uint32_t enable)
  ****************************************************************************/
 
 #ifndef CONFIG_SSI_POLLWAIT
-static void ssi_semtake(sem_t *sem)
+static int ssi_semtake(sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
 }
 #endif
 
@@ -842,9 +827,9 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
 
   priv->txbuffer     = (uint8_t *)txbuffer; /* Source buffer */
   priv->rxbuffer     = (uint8_t *)rxbuffer; /* Destination buffer */
-  priv->ntxwords     = nwords;             /* Number of words left to send */
-  priv->nrxwords     = 0;                  /* Number of words received */
-  priv->nwords       = nwords;             /* Total number of exchanges */
+  priv->ntxwords     = nwords;              /* Number of words left to send */
+  priv->nrxwords     = 0;                   /* Number of words received */
+  priv->nwords       = nwords;              /* Total number of exchanges */
 
   /* Set up the low-level data transfer function pointers */
 
@@ -905,9 +890,10 @@ static int ssi_transfer(struct tiva_ssidev_s *priv, const void *txbuffer,
   leave_critical_section(flags);
   do
     {
-      ssi_semtake(&priv->xfrsem);
+      ret = ssi_semtake(&priv->xfrsem);
     }
-  while (priv->nrxwords < priv->nwords);
+  while (priv->nrxwords < priv->nwords && ret >= 0);
+
   spiinfo("Transfer complete\n");
 
 #else
@@ -1527,12 +1513,11 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
       tiva_ssi0_enablepwr();
       tiva_ssi0_enableclk();
 
-      /* Configure SSI0 GPIOs (NOTE that SS is not initialized here, the
-       * logic in this file makes no assumptions about chip select)
+      /* Configure SSI0 GPIOs (NOTE that SSI0Fss is not initialized here,
+       * the logic in this file makes no assumptions about chip select).
        */
 
       tiva_configgpio(GPIO_SSI0_CLK);  /* PA2: SSI0 clock (SSI0Clk) */
-      /* tiva_configgpio(GPIO_SSI0_FSS);     PA3: SSI0 frame (SSI0Fss) */
       tiva_configgpio(GPIO_SSI0_RX);   /* PA4: SSI0 receive (SSI0Rx) */
       tiva_configgpio(GPIO_SSI0_TX);   /* PA5: SSI0 transmit (SSI0Tx) */
       break;
@@ -1559,10 +1544,9 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
       tiva_ssi1_enablepwr();
       tiva_ssi1_enableclk();
 
-      /* Configure SSI1 GPIOs */
+      /* Configure SSI1 GPIOs (except for SSI1Fss) */
 
       tiva_configgpio(GPIO_SSI1_CLK);  /* PE0: SSI1 clock (SSI1Clk) */
-      /* tiva_configgpio(GPIO_SSI1_FSS);     PE1: SSI1 frame (SSI1Fss) */
       tiva_configgpio(GPIO_SSI1_RX);   /* PE2: SSI1 receive (SSI1Rx) */
       tiva_configgpio(GPIO_SSI1_TX);   /* PE3: SSI1 transmit (SSI1Tx) */
       break;
@@ -1589,10 +1573,9 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
       tiva_ssi2_enablepwr();
       tiva_ssi2_enableclk();
 
-      /* Configure SSI2 GPIOs */
+      /* Configure SSI2 GPIOs (except for SSI2Fss) */
 
       tiva_configgpio(GPIO_SSI2_CLK);  /* PE0: SSI2 clock (SSI2Clk) */
-      /* tiva_configgpio(GPIO_SSI2_FSS);     PE1: SSI2 frame (SSI2Fss) */
       tiva_configgpio(GPIO_SSI2_RX);   /* PE2: SSI2 receive (SSI2Rx) */
       tiva_configgpio(GPIO_SSI2_TX);   /* PE3: SSI2 transmit (SSI2Tx) */
       break;
@@ -1619,10 +1602,9 @@ FAR struct spi_dev_s *tiva_ssibus_initialize(int port)
       tiva_ssi3_enablepwr();
       tiva_ssi3_enableclk();
 
-      /* Configure SSI3 GPIOs */
+      /* Configure SSI3 GPIOs (except for SSI3Fss) */
 
       tiva_configgpio(GPIO_SSI3_CLK);  /* PE0: SSI3 clock (SSI3Clk) */
-      /* tiva_configgpio(GPIO_SSI3_FSS);     PE1: SSI3 frame (SSI3Fss) */
       tiva_configgpio(GPIO_SSI3_RX);   /* PE2: SSI3 receive (SSI3Rx) */
       tiva_configgpio(GPIO_SSI3_TX);   /* PE3: SSI3 transmit (SSI3Tx) */
       break;
