@@ -77,6 +77,14 @@
 #define up_restorestate(regs) (g_current_regs = regs)
 #endif
 
+#define _START_TEXT  &_stext
+#define _END_TEXT    &_etext
+#define _START_BSS   &_sbss
+#define _END_BSS     &_ebss
+#define _DATA_INIT   &_eronly
+#define _START_DATA  &_sdata
+#define _END_DATA    &_edata
+
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is
  * assumed.
@@ -112,6 +120,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#ifndef __ASSEMBLY__
 #ifdef CONFIG_ARCH_RV64GC
 #ifdef CONFIG_SMP
 EXTERN volatile uint64_t *g_current_regs[CONFIG_SMP_NCPUS];
@@ -152,6 +161,8 @@ EXTERN uint32_t _sdata;           /* Start of .data */
 EXTERN uint32_t _edata;           /* End+1 of .data */
 EXTERN uint32_t _sbss;            /* Start of .bss */
 EXTERN uint32_t _ebss;            /* End+1 of .bss */
+
+#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Public Functions
