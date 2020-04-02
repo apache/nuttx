@@ -226,8 +226,8 @@ static inline void spi_dumpregs(FAR struct stm32_spidev_s *priv);
 /* DMA support */
 
 #ifdef CONFIG_STM32H7_SPI_DMA
-static void        spi_dmarxwait(FAR struct stm32_spidev_s *priv);
-static void        spi_dmatxwait(FAR struct stm32_spidev_s *priv);
+static int         spi_dmarxwait(FAR struct stm32_spidev_s *priv);
+static int         spi_dmatxwait(FAR struct stm32_spidev_s *priv);
 static inline void spi_dmarxwakeup(FAR struct stm32_spidev_s *priv);
 static inline void spi_dmatxwakeup(FAR struct stm32_spidev_s *priv);
 static void        spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr,
@@ -844,17 +844,27 @@ static inline bool spi_9to16bitmode(FAR struct stm32_spidev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32H7_SPI_DMA
-static void spi_dmarxwait(FAR struct stm32_spidev_s *priv)
+static int spi_dmarxwait(FAR struct stm32_spidev_s *priv)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting).  If the result is zero, then the
    * DMA must not really have completed???
    */
 
   do
     {
-      nxsem_wait_uninterruptible(&priv->rxsem);
+      ret = nxsem_wait_uninterruptible(&priv->rxsem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
-  while (priv->rxresult == 0);
+  while (priv->rxresult == 0 && ret == OK);
+
+  return ret;
 }
 #endif
 
@@ -867,17 +877,27 @@ static void spi_dmarxwait(FAR struct stm32_spidev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32H7_SPI_DMA
-static void spi_dmatxwait(FAR struct stm32_spidev_s *priv)
+static int spi_dmatxwait(FAR struct stm32_spidev_s *priv)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting).  If the result is zero, then the
    * DMA must not really have completed???
    */
 
   do
     {
-      nxsem_wait_uninterruptible(&priv->txsem);
+      ret = nxsem_wait_uninterruptible(&priv->txsem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
-  while (priv->txresult == 0);
+  while (priv->txresult == 0 && ret == OK);
+
+  return ret;
 }
 #endif
 
@@ -1828,8 +1848,12 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* Then wait for each to complete */
 
-      spi_dmarxwait(priv);
-      spi_dmatxwait(priv);
+      ret = spi_dmarxwait(priv);
+      if (ret >= 0)
+        {
+          ret = spi_dmatxwait(priv);
+          UNUSED(ret);
+        }
 
 #ifdef CONFIG_SPI_TRIGGER
       priv->trigarmed = false;
@@ -1837,7 +1861,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* Force RAM re-read */
 
-      if (rxbuffer)
+      if (rxbuffer != NULL)
         {
           up_invalidate_dcache((uintptr_t)rxbuffer,
                                (uintptr_t)rxbuffer + buflen);
