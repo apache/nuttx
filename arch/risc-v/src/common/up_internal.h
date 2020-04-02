@@ -193,6 +193,14 @@ void up_sigdeliver(void);
 int up_swint(int irq, FAR void *context, FAR void *arg);
 uint32_t up_get_newintctx(void);
 
+#ifdef CONFIG_ARCH_FPU
+void up_savefpu(uint32_t *regs);
+void up_restorefpu(const uint32_t *regs);
+#else
+#  define up_savefpu(regs)
+#  define up_restorefpu(regs)
+#endif
+
 /* Low level serial output **************************************************/
 
 void up_lowputc(char ch);
