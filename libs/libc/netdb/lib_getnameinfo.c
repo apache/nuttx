@@ -98,10 +98,10 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
     {
       struct hostent hostent;
       FAR struct hostent *res;
-      int h_errno;
+      int error;
 
       ret = gethostbyaddr_r(saddr, saddr_len, addr->sa_family, &hostent,
-                            host, hostlen, &res, &h_errno);
+                            host, hostlen, &res, &error);
 
       if (ret == OK)
         {
@@ -119,7 +119,7 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
         }
       else
         {
-          switch (h_errno)
+          switch (error)
             {
               case HOST_NOT_FOUND:
                 {
