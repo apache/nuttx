@@ -384,7 +384,9 @@ int gethostbyaddr_r(FAR const void *addr, socklen_t len, int type,
                     size_t buflen, FAR struct hostent **result,
                     FAR int *h_errnop)
 {
+#if defined(CONFIG_NET_LOOPBACK) || defined(CONFIG_NETDB_HOSTFILE)
   struct hostent_s tmp;
+#endif
   int ret;
 
   DEBUGASSERT(addr != NULL && host != NULL && buf != NULL);
