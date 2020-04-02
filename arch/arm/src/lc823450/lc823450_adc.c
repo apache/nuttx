@@ -109,8 +109,10 @@ struct lc823450_adc_inst_s
  ****************************************************************************/
 
 static inline void lc823450_adc_clearirq(void);
-static inline void lc823450_adc_sem_wait(FAR struct lc823450_adc_inst_s *inst);
-static inline void lc823450_adc_sem_post(FAR struct lc823450_adc_inst_s *inst);
+static inline int  lc823450_adc_sem_wait(
+    FAR struct lc823450_adc_inst_s *inst);
+static inline void lc823450_adc_sem_post(
+    FAR struct lc823450_adc_inst_s *inst);
 
 static int  lc823450_adc_bind(FAR struct adc_dev_s *dev,
                               FAR const struct adc_callback_s *callback);
@@ -118,7 +120,8 @@ static void lc823450_adc_reset(FAR struct adc_dev_s *dev);
 static int  lc823450_adc_setup(FAR struct adc_dev_s *dev);
 static void lc823450_adc_shutdown(FAR struct adc_dev_s *dev);
 static void lc823450_adc_rxint(FAR struct adc_dev_s *dev, bool enable);
-static int  lc823450_adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
+static int  lc823450_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
+                               unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -192,7 +195,6 @@ static void lc823450_adc_standby(int on)
       /* disable clock */
 
       modifyreg32(MCLKCNTAPB, MCLKCNTAPB_ADC_CLKEN, 0);
-
     }
   else
     {
@@ -225,6 +227,7 @@ static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
   uint32_t pclk;  /* APB clock in Hz */
   uint8_t i;
   uint32_t div;
+  int ret;
 
 #ifdef CONFIG_ADC_POLLED
   irqstate_t flags;
@@ -261,7 +264,12 @@ static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
   while ((getreg32(rADCSTS) & rADCSTS_fADCMPL) == 0)
     ;
 #else
-  nxsem_wait_uninterruptible(&inst->sem_isr);
+  ret = nxsem_wait_uninterruptible(&inst->sem_isr);
+  if (ret < 0)
+    {
+      return;
+    }
+
 #endif
 
 #ifdef CONFIG_ADC_POLLED
@@ -277,9 +285,9 @@ static void lc823450_adc_start(FAR struct lc823450_adc_inst_s *inst)
  *
  ****************************************************************************/
 
-static inline void lc823450_adc_sem_wait(FAR struct lc823450_adc_inst_s *inst)
+static inline int lc823450_adc_sem_wait(FAR struct lc823450_adc_inst_s *inst)
 {
-  nxsem_wait_uninterruptible(&inst->sem_excl);
+  return nxsem_wait_uninterruptible(&inst->sem_excl);
 }
 
 /****************************************************************************
@@ -290,7 +298,8 @@ static inline void lc823450_adc_sem_wait(FAR struct lc823450_adc_inst_s *inst)
  *
  ****************************************************************************/
 
-static inline void lc823450_adc_sem_post(FAR struct lc823450_adc_inst_s *inst)
+static inline void lc823450_adc_sem_post(
+    FAR struct lc823450_adc_inst_s *inst)
 {
   nxsem_post(&inst->sem_excl);
 }
@@ -407,9 +416,15 @@ static void lc823450_adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 {
   FAR struct lc823450_adc_inst_s *inst =
     (FAR struct lc823450_adc_inst_s *)dev->ad_priv;
+  int ret;
+
   ainfo("enable: %d\n", enable);
 
-  lc823450_adc_sem_wait(inst);
+  ret = lc823450_adc_sem_wait(inst);
+  if (ret < 0)
+    {
+      return;
+    }
 
 #ifndef CONFIG_ADC_POLLED
   if (enable)
@@ -448,7 +463,11 @@ static int lc823450_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
 
   ainfo("cmd=%xh\n", cmd);
 
-  lc823450_adc_sem_wait(priv);
+  ret = lc823450_adc_sem_wait(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   switch (cmd)
     {
@@ -534,7 +553,13 @@ FAR struct adc_dev_s *lc823450_adcinitialize(void)
       nxsem_init(&inst->sem_isr, 0, 0);
 #endif
 
-      lc823450_adc_sem_wait(inst);
+      ret = lc823450_adc_sem_wait(inst);
+      if (ret < 0)
+        {
+          aerr("adc_register failed: %d\n", ret);
+          kmm_free(g_inst);
+          return NULL;
+        }
 
       /* enable clock & unreset (include exitting standby mode) */
 
@@ -586,9 +611,11 @@ FAR struct adc_dev_s *lc823450_adcinitialize(void)
  * Name: lc823450_adc_receive
  ****************************************************************************/
 
-int lc823450_adc_receive(FAR struct adc_dev_s *dev, FAR struct adc_msg_s *msg)
+int lc823450_adc_receive(FAR struct adc_dev_s *dev,
+                         FAR struct adc_msg_s *msg)
 {
   uint8_t ch;
+  int ret;
   FAR struct lc823450_adc_inst_s *inst =
     (FAR struct lc823450_adc_inst_s *)dev->ad_priv;
 
@@ -602,7 +629,12 @@ int lc823450_adc_receive(FAR struct adc_dev_s *dev, FAR struct adc_msg_s *msg)
       return -EINVAL;
     }
 
-  lc823450_adc_sem_wait(inst);
+  ret = lc823450_adc_sem_wait(inst);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   lc823450_adc_standby(0);
   lc823450_adc_start(inst);
 

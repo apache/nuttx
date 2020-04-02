@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/sama5/sam_adc.c
  *
  *   Copyright (C) 2013, 2014, 2017-2018 Gregory Nutt. All rights reserved.
@@ -41,7 +41,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -88,6 +88,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Count the number of channels in use */
 
 #define SAMA5_CHAN0_INUSE    0
@@ -415,16 +416,17 @@ struct sam_adc_s
   /* Debug stuff */
 
 #ifdef CONFIG_SAMA5_ADC_REGDEBUG
-   bool wrlast;          /* Last was a write */
-   uintptr_t addrlast;   /* Last address */
-   uint32_t vallast;     /* Last value */
-   int ntimes;           /* Number of times */
+  bool wrlast;          /* Last was a write */
+  uintptr_t addrlast;   /* Last address */
+  uint32_t vallast;     /* Last value */
+  int ntimes;           /* Number of times */
 #endif
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Register operations ******************************************************/
 
 #ifdef CONFIG_SAMA5_ADC_REGDEBUG
@@ -511,6 +513,7 @@ static struct adc_dev_s g_adcdev;
 /****************************************************************************
  * Register Operations
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_adc_checkreg
  *
@@ -611,8 +614,8 @@ static void sam_adc_dmadone(void *arg)
   ainfo("ready=%d enabled=%d\n", priv->enabled, priv->ready);
   DEBUGASSERT(priv != NULL && !priv->ready);
 
-  /* If the DMA transfer is not enabled, just ignore the data (and do not start
-   * the next DMA transfer).
+  /* If the DMA transfer is not enabled, just ignore the data (and do not
+   * start the next DMA transfer).
    */
 
   if (priv->enabled)
@@ -656,13 +659,13 @@ static void sam_adc_dmadone(void *arg)
       sam_adc_dmasetup(priv, (FAR uint8_t *)next,
                        SAMA5_ADC_SAMPLES * sizeof(uint16_t));
 
-
       /* Invalidate the DMA buffer so that we are guaranteed to reload the
        * newly DMAed data from RAM.
        */
 
       up_invalidate_dcache((uintptr_t)buffer,
-                           (uintptr_t)buffer + SAMA5_ADC_SAMPLES * sizeof(uint16_t));
+                           (uintptr_t)buffer +
+                           SAMA5_ADC_SAMPLES * sizeof(uint16_t));
 
       /* Process each sample */
 
@@ -670,7 +673,8 @@ static void sam_adc_dmadone(void *arg)
         {
           /* Get the sample and the channel number */
 
-          chan   = (int)((*buffer & ADC_LCDR_CHANB_MASK) >> ADC_LCDR_CHANB_SHIFT);
+          chan   = (int)((*buffer & ADC_LCDR_CHANB_MASK) >>
+                    ADC_LCDR_CHANB_SHIFT);
           sample = ((*buffer & ADC_LCDR_DATA_MASK) >> ADC_LCDR_DATA_SHIFT);
 
           /* Verify that the upper-half driver has bound its callback functions */
@@ -827,6 +831,7 @@ static int sam_adc_dmasetup(FAR struct sam_adc_s *priv, FAR uint8_t *buffer,
 /****************************************************************************
  * ADC interrupt handling
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_adc_endconversion
  *
@@ -851,6 +856,7 @@ static void sam_adc_endconversion(void *arg)
   uint32_t regval;
   uint32_t pending;
   int chan;
+  int ret;
 
   DEBUGASSERT(priv != NULL);
   ainfo("pending=%08x\n", priv->pending);
@@ -861,7 +867,11 @@ static void sam_adc_endconversion(void *arg)
 
   /* Get exclusive access to the driver data structure */
 
-  sam_adc_lock(priv);
+  ret = sam_adc_lock(priv);
+  if (ret < 0)
+    {
+      return;
+    }
 
   /* Check for the end of conversion event on each channel */
 
@@ -881,7 +891,8 @@ static void sam_adc_endconversion(void *arg)
               /* Perform the data received callback */
 
               DEBUGASSERT(priv->cb->au_receive != NULL);
-              priv->cb->au_receive(priv->dev, chan, regval & ADC_CDR_DATA_MASK);
+              priv->cb->au_receive(priv->dev, chan, regval &
+                                   ADC_CDR_DATA_MASK);
             }
 
           pending &= ~bit;
@@ -984,8 +995,8 @@ static int sam_adc_interrupt(int irq, void *context, FAR void *arg)
  * Name: sam_adc_bind
  *
  * Description:
- *   Bind the upper-half driver callbacks to the lower-half implementation.  This
- *   must be called early in order to receive ADC event notifications.
+ *   Bind the upper-half driver callbacks to the lower-half implementation.
+ *   This must be called early in order to receive ADC event notifications.
  *
  ****************************************************************************/
 
@@ -1075,8 +1086,8 @@ static void sam_adc_reset(struct adc_dev_s *dev)
  * Description:
  *   Configure the ADC. This method is called the first time that the ADC
  *   device is opened.  This will occur when the port is first opened.
- *   This setup includes configuring and attaching ADC interrupts.  Interrupts
- *   are all disabled upon return.
+ *   This setup includes configuring and attaching ADC interrupts.
+ *   Interrupts are all disabled upon return.
  *
  ****************************************************************************/
 
@@ -1087,8 +1098,8 @@ static int sam_adc_setup(struct adc_dev_s *dev)
 
   ainfo("Setup\n");
 
-  /* Enable channel number tag.  This bit will force the channel number (CHNB)
-   * to be included in the LDCR register content.
+  /* Enable channel number tag.  This bit will force the channel number
+   * (CHNB) to be included in the LDCR register content.
    */
 
   regval  = sam_adc_getreg(priv, SAM_ADC_EMR);
@@ -1308,7 +1319,8 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
   priv->tc = sam_tc_allocate(channel, mode);
   if (!priv->tc)
     {
-      aerr("ERROR: Failed to allocate channel %d mode %08x\n", channel, mode);
+      aerr("ERROR: Failed to allocate channel %d mode %08x\n",
+            channel, mode);
       return -EINVAL;
     }
 
@@ -1327,8 +1339,8 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
 
   regval = sam_tc_infreq() / fdiv;
 
-  /* Set up TC_RA and TC_RC.  The frequency is determined by RA and RC:  TIOA is
-   * cleared on RA match; TIOA is set on RC match.
+  /* Set up TC_RA and TC_RC.  The frequency is determined by RA and RC:
+   * TIOA is cleared on RA match; TIOA is set on RC match.
    */
 
   sam_tc_setregister(priv->tc, TC_REGA, regval >> 1);
@@ -1514,7 +1526,8 @@ static void sam_adc_autocalibrate(struct sam_adc_s *priv)
 
   /* Wait for auto calibration to complete */
 
-  while (sam_adc_getreg(priv, SAM_ADC_ISR) & ADC_ISR_EOCAL) != ADC_ISR_EOCAL);
+  while ((sam_adc_getreg(priv, SAM_ADC_ISR) &
+          ADC_ISR_EOCAL) != ADC_ISR_EOCAL);
 #endif
 }
 
@@ -1535,8 +1548,8 @@ static void sam_adc_offset(struct sam_adc_s *priv)
 
 #ifdef CONFIG_SAMA5_ADC_ANARCH
   /* Set the offset for each enabled channel.  This centers the analog signal
-   * on Vrefin/2 before the gain scaling. The Offset applied is: (G-1)Vrefin/2
-   * where G is the gain applied. The default is no offset.
+   * on Vrefin/2 before the gain scaling. The Offset applied is:
+   * (G-1)Vrefin/2 where G is the gain applied. The default is no offset.
    */
 
 #if defined(CONFIG_SAMA5_ADC_CHAN0) && defined(CONFIG_SAMA5_ADC_OFFSET0)
@@ -1747,7 +1760,8 @@ static void sam_adc_analogchange(struct sam_adc_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_ADC_SEQUENCER
-static void sam_adc_setseqr(int chan, uint32_t *seqr1, uint32_t *seqr2, int seq)
+static void sam_adc_setseqr(int chan, uint32_t *seqr1, uint32_t *seqr2,
+                            int seq)
 {
   if (seq > 8)
     {
@@ -2103,8 +2117,10 @@ struct adc_dev_s *sam_adc_initialize(void)
       /* Set ADC timing */
 
       regval  = sam_adc_getreg(priv, SAM_ADC_MR);
-      regval &= ~(ADC_MR_STARTUP_MASK | ADC_MR_TRACKTIM_MASK | ADC_MR_SETTLING_MASK);
-      regval |= (ADC_MR_STARTUP_512 | ADC_MR_TRACKTIM(0) | ADC_MR_SETTLING_17);
+      regval &= ~(ADC_MR_STARTUP_MASK | ADC_MR_TRACKTIM_MASK |
+                ADC_MR_SETTLING_MASK);
+      regval |= (ADC_MR_STARTUP_512 | ADC_MR_TRACKTIM(0) |
+                ADC_MR_SETTLING_17);
       sam_adc_putreg(priv, SAM_ADC_MR, regval);
 
       /* Attach the ADC interrupt */
@@ -2143,10 +2159,10 @@ struct adc_dev_s *sam_adc_initialize(void)
  *
  ****************************************************************************/
 
-void sam_adc_lock(FAR struct sam_adc_s *priv)
+int sam_adc_lock(FAR struct sam_adc_s *priv)
 {
   ainfo("Locking\n");
-  nxsem_wait_uninterruptible(&priv->exclsem);
+  return nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -2194,7 +2210,8 @@ uint32_t sam_adc_getreg(struct sam_adc_s *priv, uintptr_t address)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_ADC_REGDEBUG
-void sam_adc_putreg(struct sam_adc_s *priv, uintptr_t address, uint32_t regval)
+void sam_adc_putreg(struct sam_adc_s *priv, uintptr_t address,
+                    uint32_t regval)
 {
   if (sam_adc_checkreg(priv, true, regval, address))
     {

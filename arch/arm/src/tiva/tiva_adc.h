@@ -211,7 +211,7 @@ struct tiva_adc_s;
  *
  ****************************************************************************/
 
-void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse);
+int tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse);
 
 /****************************************************************************
  * Name: tiva_adc_unlock
@@ -356,9 +356,10 @@ int tiva_adc_enable(uint8_t adc, bool state);
  *  TM4C123 - Select either MOSC or PIOSC. Both result in 16 MHz operation,
  *  however the PIOSC allows the ADC to operate in deep sleep mode.
  *
- *  TM4C129 - For the 129, there is still a selection between various internal
- *  clocks, however the output frequency is variable (16 MHz - 32 MHz); so it
- *  is much more intuitive to allow the clock variable be a frequency value.
+ *  TM4C129 - For the 129, there is still a selection between various
+ *  internal clocks, however the output frequency is variable (16 MHz -
+ *  32 MHz); so it is much more intuitive to allow the clock variable be a
+ *  frequency value.
  *
  ****************************************************************************/
 
@@ -543,9 +544,10 @@ void tiva_adc_sse_clear_int(uint8_t adc, uint8_t sse);
  * Name: tiva_adc_sse_data
  *
  * Description:
- *   Retrieves data from the FIFOs for all steps in the given sample sequencer.
- *   The input data buffer MUST be as large or larger than the sample sequencer.
- *   otherwise
+ *   Retrieves data from the FIFOs for all steps in the given sample
+ *   sequencer.
+ *   The input data buffer MUST be as large or larger than the sample
+ *   sequencer. otherwise
  *
  * Input Parameters:
  *   adc - peripheral state
@@ -593,7 +595,8 @@ void tiva_adc_sse_priority(uint8_t adc, uint8_t sse, uint8_t priority);
  *
  ****************************************************************************/
 
-void tiva_adc_sse_register_chn(uint8_t adc, uint8_t sse, uint8_t chn, uint32_t ain);
+void tiva_adc_sse_register_chn(uint8_t adc, uint8_t sse, uint8_t chn,
+                               uint32_t ain);
 
 /****************************************************************************
  * Name: tiva_adc_sse_differential
@@ -609,7 +612,8 @@ void tiva_adc_sse_register_chn(uint8_t adc, uint8_t sse, uint8_t chn, uint32_t a
  *
  ****************************************************************************/
 
-void tiva_adc_sse_differential(uint8_t adc, uint8_t sse, uint8_t chn, uint32_t diff);
+void tiva_adc_sse_differential(uint8_t adc, uint8_t sse, uint8_t chn,
+                               uint32_t diff);
 
 /****************************************************************************
  * Name: tiva_adc_sse_sample_hold_time
@@ -629,7 +633,8 @@ void tiva_adc_sse_differential(uint8_t adc, uint8_t sse, uint8_t chn, uint32_t d
  ****************************************************************************/
 
 #ifdef CONFIG_EXPERIMENTAL
-void tiva_adc_sse_sample_hold_time(uint8_t adc, uint8_t sse, uint8_t chn, uint32_t shold);
+void tiva_adc_sse_sample_hold_time(uint8_t adc, uint8_t sse, uint8_t chn,
+                                   uint32_t shold);
 #endif
 
 /****************************************************************************
@@ -647,8 +652,8 @@ void tiva_adc_sse_sample_hold_time(uint8_t adc, uint8_t sse, uint8_t chn, uint32
  *      -*Comparator/Differential select: The analog input is differentially
  *       sampled. The corresponding ADCSSMUXn nibble must be set to the pair
  *       number "i", where the paired inputs are "2i and 2i+1". Because the
- *       temperature sensor does not have a differential option, this bit must
- *       not be set when the TS3 bit is set.
+ *       temperature sensor does not have a differential option, this bit
+ *       must not be set when the TS3 bit is set.
  *
  *  *Comparator/Differential functionality is unsupported and ignored.
  *
@@ -660,7 +665,8 @@ void tiva_adc_sse_sample_hold_time(uint8_t adc, uint8_t sse, uint8_t chn, uint32
  *
  ****************************************************************************/
 
-void tiva_adc_sse_step_cfg(uint8_t adc, uint8_t sse, uint8_t chn, uint8_t cfg);
+void tiva_adc_sse_step_cfg(uint8_t adc, uint8_t sse, uint8_t chn,
+                           uint8_t cfg);
 
 /****************************************************************************
  * Name: tiva_adc_dump_reg_cfg
