@@ -14,7 +14,8 @@
  * The Tivaware sample code has a BSD compatible license that requires this
  * copyright notice:
  *
- * Copyright (c) 2005-2014 Texas Instruments Incorporated.  All rights reserved.
+ * Copyright (c) 2005-2014 Texas Instruments Incorporated.
+ * All rights reserved.
  * Software License Agreement
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -45,7 +46,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This is part of revision 2.1.0.12573 of the Tiva Peripheral Driver Library.
+ * This is part of revision 2.1.0.12573 of the Tiva Peripheral Driver
+ * Library.
  ****************************************************************************/
 
 /* Keep in mind that for every step there should be another entry in the
@@ -141,7 +143,8 @@ static void tiva_adc_reset(struct adc_dev_s *dev);
 static int  tiva_adc_setup(struct adc_dev_s *dev);
 static void tiva_adc_shutdown(struct adc_dev_s *dev);
 static void tiva_adc_rxint(struct adc_dev_s *dev, bool enable);
-static int  tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
+static int  tiva_adc_ioctl(struct adc_dev_s *dev, int cmd,
+                           unsigned long arg);
 
 /****************************************************************************
  * Public Data
@@ -350,6 +353,7 @@ static void tiva_adc_irqinitialize(struct tiva_adc_cfg_s *cfg)
           tiva_adc_irq_attach(0, 3, tiva_adc0_sse3_interrupt);
         }
     }
+
 #endif
 #ifdef CONFIG_TIVA_ADC1
   if (cfg->adc == 1)
@@ -381,8 +385,8 @@ static void tiva_adc_irqinitialize(struct tiva_adc_cfg_s *cfg)
  * Name: tiva_adc_bind
  *
  * Description:
- *   Bind the upper-half driver callbacks to the lower-half implementation.  This
- *   must be called early in order to receive ADC event notifications.
+ *   Bind the upper-half driver callbacks to the lower-half implementation.
+ *   This must be called early in order to receive ADC event notifications.
  *
  ****************************************************************************/
 
@@ -565,7 +569,11 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
           /* Get exclusive access to the driver data structure */
 
-          tiva_adc_lock(priv, sse);
+          ret = tiva_adc_lock(priv, sse);
+          if (ret < 0)
+            {
+              return ret;
+            }
 
           /* Start conversion and wait for end of conversion */
 
@@ -622,7 +630,7 @@ static int tiva_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
               (regval & TIVA_ADC_TRIG_PWM2) ||
               (regval & TIVA_ADC_TRIG_PWM3))
             {
-              tiva_adc_sse_pwm_trig(adc, sse, (uint32_t)(arg&0xFFFFFFFC));
+              tiva_adc_sse_pwm_trig(adc, sse, (uint32_t)(arg & 0xfffffffc));
             }
         }
         break;
@@ -666,10 +674,15 @@ static void tiva_adc_read(void *arg)
   uint8_t                i          = 0;
   uint8_t                fifo_count = 0;
   int32_t                buf[8];
+  int                    ret;
 
   /* Get exclusive access to the driver data structure */
 
-  tiva_adc_lock(g_adcs[sse->adc], sse->num);
+  ret = tiva_adc_lock(g_adcs[sse->adc], sse->num);
+  if (ret < 0)
+    {
+      return ;
+    }
 
   /* Get sampled data */
 
@@ -789,7 +802,6 @@ static struct tiva_adc_s *tiva_adc_struct_init(struct tiva_adc_cfg_s *cfg)
 
           for (s = 0; s < 4; s++)
             {
-
               /* Only configure selected SSEs */
 
               if (cfg->sse[s])
@@ -823,6 +835,7 @@ static struct tiva_adc_s *tiva_adc_struct_init(struct tiva_adc_cfg_s *cfg)
             {
               goto tiva_adc_struct_init_error;
             }
+
           goto tiva_adc_struct_init_ok;
         }
       else
@@ -941,12 +954,12 @@ int tiva_adc_initialize(const char *devpath, struct tiva_adc_cfg_s *cfg,
  *
  ****************************************************************************/
 
-void tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
+int tiva_adc_lock(FAR struct tiva_adc_s *priv, int sse)
 {
   struct tiva_adc_sse_s *s = g_sses[SSE_IDX(priv->devno, sse)];
 
   ainfo("Locking...\n");
-  nxsem_wait_uninterruptible(&s->exclsem);
+  return nxsem_wait_uninterruptible(&s->exclsem);
 }
 
 /****************************************************************************
@@ -1023,6 +1036,7 @@ static void tiva_adc_runtimeobj_vals(void)
       ainfo("SSE%d [0x%08x] adc=%d cfg=%d ena=%d num=%d\n",
              s, sse, sse->adc, sse->cfg, sse->ena, sse->num);
     }
+
 #  endif
 #  ifdef CONFIG_TIVA_ADC1
   ainfo("ADC1 [0x%08x] cfg=%d ena=%d devno=%d\n",
