@@ -6,7 +6,6 @@
 config LIBC_GROUP_FILE
 	bool "Have group file"
 	default n
-	depends on FS_READABLE
 	---help---
 		Have a group file.  The format of the group file is:
 

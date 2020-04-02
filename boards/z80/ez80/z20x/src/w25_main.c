@@ -30,6 +30,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <termios.h>
 #include <errno.h>
 #include <debug.h>
 #include <hex2bin.h>
@@ -143,7 +144,9 @@ static int w25_read_hex(FAR uint24_t *len)
       return ret;
     }
 
-  printf("Successfully loaded the Intel HEX file into memory...\n");
+  printf("Intel HEX file into memory loaded into RAM...\n");
+  fflush(stdout);
+
   *len = memoutstream.public.nput;
   return OK;
 }
@@ -220,6 +223,7 @@ static int w25_write_binary(FAR const struct prog_header_s *hdr)
 
   printf("Writing %lu bytes to the W25 Serial FLASH\n",
          (unsigned long)hdr->len);
+  fflush(stdout);
 
   ret = w25_write(fd, (FAR const void *)PROGSTART, hdr->len);
   if (ret < 0)
@@ -323,6 +327,10 @@ static int w25_read_binary(FAR struct prog_header_s *hdr)
    * CRC after loaded to memory.
    */
 
+  printf("Reading %lu bytes from the W25 Serial FLASH\n",
+         (unsigned long)hdr->len);
+  fflush(stdout);
+
   ret = w25_read(fd, (FAR void *)PROGSTART, hdr->len);
   if (ret < 0)
     {
@@ -343,11 +351,12 @@ errout:
  *
  ****************************************************************************/
 
-static uint24_t w25_crc24(uint32_t len)
+static uint24_t w25_crc24(uint24_t len)
 {
+#if 0 /* Very slow */
   FAR const uint8_t *src = (FAR const uint8_t *)PROGSTART;
   uint32_t crc = 0;
-  int i;
+  uint24_t i;
   int j;
 
   /* Loop for each byte in the binary image */
@@ -370,6 +379,52 @@ static uint24_t w25_crc24(uint32_t len)
     }
 
   return (uint24_t)crc;
+#else
+  FAR const uint24_t *src = (FAR const uint24_t *)PROGSTART;
+  uint24_t chksum = 0;
+  uint24_t remaining;
+
+  /* Loop for each uint24_t in the binary image */
+
+  for (remaining  = len;
+       remaining >= sizeof(uint24_t);
+       remaining -= sizeof(uint24_t))
+    {
+      uint24_t val = *src++;
+
+      /* Simple checksum */
+
+      chksum += val;
+    }
+
+  /* Handle trailing partial uint24_t's (assumes little endian) */
+
+  if (remaining > 0)
+    {
+      uint24_t val = *src;
+
+      switch (remaining)
+        {
+          case 1:
+            val &= 0x0000ff;
+            break;
+
+          case 2:
+            val &= 0x00ffff;
+            break;
+
+          default:  /* Shouldn't happen */
+            val = 0;
+            break;
+        }
+
+      /* Simple checksum */
+
+      chksum += val;
+    }
+
+  return chksum;
+#endif
 }
 
 /****************************************************************************
@@ -396,16 +451,15 @@ static int w25_read_verify(void)
       return ret;
     }
 
-  printf("Verifying %lu bytes in the W25 Serial FLASH\n",
-         (unsigned long)hdr.len);
+  printf("Verifying %lu bytes in RAM\n", (unsigned long)hdr.len);
+  fflush(stdout);
 
   /* Compare CRCs */
 
   crc = w25_crc24(hdr.len);
   if (crc == hdr.crc)
     {
-      printf("Successfully verified %lu bytes in the W25 Serial FLASH\n",
-             (unsigned long)hdr.len);
+      printf("Successfully verified %lu bytes\n", (unsigned long)hdr.len);
     }
   else
     {
@@ -490,6 +544,20 @@ static int w25_boot_program(void)
       fprintf(stderr, "ERROR: Failed to verify program: %d\n", ret);
       return ret;
     }
+
+#ifdef CONFIG_SERIAL_TERMIOS
+  /* Drain all pending Tx output in stdout. "Booting..." message will be
+   * lost if the outgoing Tx bytes are not drained.
+   */
+
+  ret = tcdrain(1);
+  if (ret < 0)
+    {
+      ret = -get_errno();
+      fprintf(stderr, "ERROR: tcdrain() failed: %d\n", ret);
+      return ret;
+    }
+#endif
 
   /* Start the successfully loaded program */
 
@@ -627,6 +695,7 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
           if (++count == 10)
             {
               putchar('.');
+              fflush(stdout);
               count = 0;
             }
         }
@@ -718,6 +787,9 @@ int w25_main(int argc, char *argv)
             {
               return EXIT_FAILURE;
             }
+
+          /* Load HEX command */
+
           else if (ret == 'L' || ret == 'l')
             {
               ret = w25_write_program();
@@ -728,8 +800,15 @@ int w25_main(int argc, char *argv)
                   disable = true;
                 }
             }
-          else /* if (ret == 'B' || ret == 'b' || ret == '\0') */
+
+          /* Boot from FLASH or timeout */
+
+          else /* if (ret == 'B' || ret == 'b' || ret == 0) */
             {
+              /* REVISIT:  The program is probably already in RAM.  We may
+               * not have to reload and verify it.
+               */
+
               ret = w25_boot_program();
 
               /* Shouldn't get here unless the FLASH content is bad */

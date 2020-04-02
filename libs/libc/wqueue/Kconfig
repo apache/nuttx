@@ -23,7 +23,7 @@ config LIB_USRWORKPRIORITY
 
 config LIB_USRWORKSTACKSIZE
 	int "User mode worker thread stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The stack size allocated for the lower priority worker thread.  Default: 2K.
 

@@ -57,7 +57,8 @@
  *
  * Input Parameters:
  *   dev    - Device-specific state data
- *   buffer - A pointer to a buffer of data to receive the data from the device
+ *   buffer - A pointer to a buffer of data to receive the data from the
+ *            device
  *   buflen - The requested number of bytes to be read
  *
  * Returned Value:

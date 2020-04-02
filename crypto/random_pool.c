@@ -120,9 +120,13 @@ static struct entropy_pool_s entropy_pool;
 #endif
 
 /* Polynomial from paper "The Linux Pseudorandom Number Generator Revisited"
- * x^POOL_SIZE + x^104 + x^76 + x^51 + x^25 + x + 1 */
+ * x^POOL_SIZE + x^104 + x^76 + x^51 + x^25 + x + 1
+ */
 
-static const uint32_t pool_stir[] = { POOL_SIZE, 104, 76, 51, 25, 1 };
+static const uint32_t pool_stir[] =
+{
+  POOL_SIZE, 104, 76, 51, 25, 1
+};
 
 /* Derived from IEEE 802.3 CRC-32 */
 
@@ -198,7 +202,7 @@ static void addentropy(FAR const uint32_t *buf, size_t n, bool inc_new)
         {
           g_rng.rd_newentr += 1;
         }
-   }
+    }
 }
 
 /****************************************************************************
@@ -260,15 +264,18 @@ static void getentropy(FAR blake2s_state *S)
  * number generator (DRBG) as used here. BLAKE2 specification is available
  * at https://blake2.net/
  *
- * BLAKE2Xs here  implementation is based on public-domain/CC0 BLAKE2 reference
- * implementation by Samual Neves, at
- *  https://github.com/BLAKE2/BLAKE2/tree/master/ref
- * Copyright 2012, Samuel Neves <sneves@dei.uc.pt>
+ * BLAKE2Xs here  implementation is based on public-domain/CC0 BLAKE2
+ * reference implementation by Samual Neves, at
+ *
+ *   https://github.com/BLAKE2/BLAKE2/tree/master/ref
+ *   Copyright 2012, Samuel Neves <sneves@dei.uc.pt>
  */
 
 static void rng_reseed(void)
 {
-  blake2s_param P = {};
+  blake2s_param P =
+    {
+    };
 
   /* Reset output node counter. */
 
@@ -336,8 +343,9 @@ static void rng_buf_internal(FAR void *bytes, size_t nbytes)
     }
   else if (g_rng.blake2xs.out_node_offset == UINT32_MAX)
     {
-      /* Maximum BLAKE2Xs output reached (2^32-1 output blocks, maximum 128 GiB
-       * bytes), reseed. */
+      /* Maximum BLAKE2Xs output reached (2^32-1 output blocks, maximum 128
+       * GiB bytes), reseed.
+       */
 
       rng_reseed();
     }
@@ -436,7 +444,8 @@ void up_rngaddentropy(enum rnd_source_t kindof, FAR const uint32_t *buf,
   if (kindof == RND_SRC_IRQ && n > 0)
     {
       /* Ignore interrupt randomness if previous interrupt was from same
-       * source. */
+       * source.
+       */
 
       if (buf[0] == g_rng.rd_prev_irq)
         {
@@ -463,7 +472,8 @@ void up_rngaddentropy(enum rnd_source_t kindof, FAR const uint32_t *buf,
       uint8_t curr_time = ts.tv_sec * 8 + ts.tv_nsec / (NSEC_PER_SEC / 8);
 
       /* Allow interrupts/timers increase entropy counter at max rate
-       * of 8 Hz. */
+       * of 8 Hz.
+       */
 
       if (g_rng.rd_prev_time == curr_time)
         {
@@ -500,14 +510,18 @@ void up_rngaddentropy(enum rnd_source_t kindof, FAR const uint32_t *buf,
 
 void up_rngreseed(void)
 {
-  nxsem_wait_uninterruptible(&g_rng.rd_sem);
+  int ret;
 
-  if (g_rng.rd_newentr >= MIN_SEED_NEW_ENTROPY_WORDS)
+  ret = nxsem_wait_uninterruptible(&g_rng.rd_sem);
+  if (ret >= 0)
     {
-      rng_reseed();
-    }
+      if (g_rng.rd_newentr >= MIN_SEED_NEW_ENTROPY_WORDS)
+        {
+          rng_reseed();
+        }
 
-  nxsem_post(&g_rng.rd_sem);
+      nxsem_post(&g_rng.rd_sem);
+    }
 }
 
 /****************************************************************************
@@ -549,7 +563,12 @@ void up_randompool_initialize(void)
 
 void getrandom(FAR void *bytes, size_t nbytes)
 {
-  nxsem_wait_uninterruptible(&g_rng.rd_sem);
-  rng_buf_internal(bytes, nbytes);
-  nxsem_post(&g_rng.rd_sem);
+  int ret;
+
+  ret = nxsem_wait_uninterruptible(&g_rng.rd_sem);
+  if (ret >= 0)
+    {
+      rng_buf_internal(bytes, nbytes);
+      nxsem_post(&g_rng.rd_sem);
+    }
 }

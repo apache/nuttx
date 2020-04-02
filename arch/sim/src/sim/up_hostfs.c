@@ -193,7 +193,7 @@ int host_close(int fd)
  * Name: host_read
  ****************************************************************************/
 
-ssize_t host_read(int fd, void* buf, size_t count)
+ssize_t host_read(int fd, void *buf, size_t count)
 {
   /* Just call the read routine */
 
@@ -296,7 +296,7 @@ void *host_opendir(const char *name)
  * Name: host_readdir
  ****************************************************************************/
 
-int host_readdir(void* dirp, struct nuttx_dirent_s* entry)
+int host_readdir(void *dirp, struct nuttx_dirent_s *entry)
 {
   struct dirent *ent;
 
@@ -320,7 +320,8 @@ int host_readdir(void* dirp, struct nuttx_dirent_s* entry)
 
       /* Copy the entry name */
 
-      strncpy(entry->d_name, ent->d_name, sizeof(entry->d_name));
+      strncpy(entry->d_name, ent->d_name, sizeof(entry->d_name) - 1);
+      entry->d_name[sizeof(entry->d_name) - 1] = 0;
 
       /* Map the type */
 

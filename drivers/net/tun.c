@@ -166,7 +166,7 @@ struct tun_driver_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void tun_lock(FAR struct tun_device_s *priv);
+static int  tun_lock(FAR struct tun_device_s *priv);
 static void tun_unlock(FAR struct tun_device_s *priv);
 
 /* Common TX logic */
@@ -249,9 +249,9 @@ static const struct file_operations g_tun_file_ops =
  * Name: tundev_lock
  ****************************************************************************/
 
-static void tundev_lock(FAR struct tun_driver_s *tun)
+static int tundev_lock(FAR struct tun_driver_s *tun)
 {
-  nxsem_wait_uninterruptible(&tun->waitsem);
+  return nxsem_wait_uninterruptible(&tun->waitsem);
 }
 
 /****************************************************************************
@@ -267,9 +267,9 @@ static void tundev_unlock(FAR struct tun_driver_s *tun)
  * Name: tun_lock
  ****************************************************************************/
 
-static void tun_lock(FAR struct tun_device_s *priv)
+static int tun_lock(FAR struct tun_device_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->waitsem);
+  return nxsem_wait_uninterruptible(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -778,10 +778,21 @@ static void tun_txdone(FAR struct tun_device_s *priv)
 static void tun_poll_work(FAR void *arg)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)arg;
+  int ret;
 
   /* Perform the poll */
 
-  tun_lock(priv);
+  ret = tun_lock(priv);
+  if (ret < 0)
+    {
+      /* This would indicate that the worker thread was canceled.. not a
+       * likely event.
+       */
+
+      DEBUGASSERT(ret == -ECANCELED);
+      return;
+    }
+
   net_lock();
 
   /* Check if there is room in the send another TX packet.  We cannot perform
@@ -930,8 +941,15 @@ static int tun_ifdown(FAR struct net_driver_s *dev)
 static void tun_txavail_work(FAR void *arg)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)arg;
+  int ret;
 
-  tun_lock(priv);
+  ret = tun_lock(priv);
+  if (ret < 0)
+    {
+      /* Thread has been canceled, skip poll-related work */
+
+      return;
+    }
 
   /* Check if there is room to hold another network packet. */
 
@@ -1152,6 +1170,7 @@ static int tun_close(FAR struct file *filep)
   FAR struct tun_driver_s *tun  = inode->i_private;
   FAR struct tun_device_s *priv = filep->f_priv;
   int intf;
+  int ret;
 
   if (priv == NULL)
     {
@@ -1159,13 +1178,16 @@ static int tun_close(FAR struct file *filep)
     }
 
   intf = priv - g_tun_devices;
-  tundev_lock(tun);
+  ret  = tundev_lock(tun);
+  if (ret >= 0)
+    {
+      tun->free_tuns |= (1 << intf);
+      tun_dev_uninit(priv);
 
-  tun->free_tuns |= (1 << intf);
-  tun_dev_uninit(priv);
+      tundev_unlock(tun);
+    }
 
-  tundev_unlock(tun);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1176,17 +1198,26 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
                          size_t buflen)
 {
   FAR struct tun_device_s *priv = filep->f_priv;
-  ssize_t ret;
+  ssize_t nwritten = 0;
+  int ret;
 
   if (priv == NULL || buflen > CONFIG_NET_TUN_PKTSIZE)
     {
       return -EINVAL;
     }
 
-  tun_lock(priv);
-
   for (; ; )
     {
+      /* Write must return immediately if interrupted by a signal (or if the
+       * thread is canceled) and no data has yet been written.
+       */
+
+      ret = nxsem_wait(&priv->waitsem);
+      if (ret < 0)
+        {
+          return nwritten == 0 ? (ssize_t)ret : nwritten;
+        }
+
       /* Check if there are free space to write */
 
       if (priv->write_d_len == 0)
@@ -1200,7 +1231,7 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
           tun_net_receive(priv);
           net_unlock();
 
-          ret = buflen;
+          nwritten = buflen;
           break;
         }
 
@@ -1208,18 +1239,17 @@ static ssize_t tun_write(FAR struct file *filep, FAR const char *buffer,
 
       if ((filep->f_oflags & O_NONBLOCK) != 0)
         {
-          ret = -EAGAIN;
+          nwritten = -EAGAIN;
           break;
         }
 
       priv->write_wait = true;
       tun_unlock(priv);
       nxsem_wait(&priv->write_wait_sem);
-      tun_lock(priv);
     }
 
   tun_unlock(priv);
-  return ret;
+  return nwritten;
 }
 
 /****************************************************************************
@@ -1230,29 +1260,38 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
                         size_t buflen)
 {
   FAR struct tun_device_s *priv = filep->f_priv;
-  ssize_t ret;
+  ssize_t nread = 0;
+  int ret;
 
   if (priv == NULL)
     {
       return -EINVAL;
     }
 
-  tun_lock(priv);
-
   for (; ; )
     {
+      /* Read must return immediately if interrupted by a signal (or if the
+       * thread is canceled) and no data has yet been read.
+       */
+
+      ret = nxsem_wait(&priv->waitsem);
+      if (ret < 0)
+        {
+          return nread == 0 ? (ssize_t)ret : nread;
+        }
+
       /* Check if there are data to read in write buffer */
 
       if (priv->write_d_len > 0)
         {
           if (buflen < priv->write_d_len)
             {
-              ret = -EINVAL;
+              nread = -EINVAL;
               break;
             }
 
           memcpy(buffer, priv->write_buf, priv->write_d_len);
-          ret = priv->write_d_len;
+          nread = priv->write_d_len;
           priv->write_d_len = 0;
 
           NETDEV_TXDONE(&priv->dev);
@@ -1266,12 +1305,12 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
         {
           if (buflen < priv->read_d_len)
             {
-              ret = -EINVAL;
+              nread = -EINVAL;
               break;
             }
 
           memcpy(buffer, priv->read_buf, priv->read_d_len);
-          ret = priv->read_d_len;
+          nread = priv->read_d_len;
           priv->read_d_len = 0;
 
           net_lock();
@@ -1284,18 +1323,17 @@ static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
 
       if ((filep->f_oflags & O_NONBLOCK) != 0)
         {
-          ret = -EAGAIN;
+          nread = -EAGAIN;
           break;
         }
 
       priv->read_wait = true;
       tun_unlock(priv);
       nxsem_wait(&priv->read_wait_sem);
-      tun_lock(priv);
     }
 
   tun_unlock(priv);
-  return ret;
+  return nread;
 }
 
 /****************************************************************************
@@ -1306,7 +1344,7 @@ int tun_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 {
   FAR struct tun_device_s *priv = filep->f_priv;
   pollevent_t eventset;
-  int ret = OK;
+  int ret;
 
   /* Some sanity checking */
 
@@ -1315,7 +1353,11 @@ int tun_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
       return -EINVAL;
     }
 
-  tun_lock(priv);
+  ret = tun_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   if (setup)
     {
@@ -1384,7 +1426,11 @@ static int tun_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           return -EINVAL;
         }
 
-      tundev_lock(tun);
+      ret = tundev_lock(tun);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       free_tuns = tun->free_tuns;
 

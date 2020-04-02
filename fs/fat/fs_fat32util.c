@@ -288,8 +288,8 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
 uint16_t fat_getuint16(uint8_t *ptr)
 {
   /* NOTE that (1) this operation is independent of endian-ness and that (2)
-   * byte-by-byte transfer is necessary in any case because the address may be
-   * unaligned.
+   * byte-by-byte transfer is necessary in any case because the address may
+   * be unaligned.
    */
 
   return ((uint16_t)ptr[1] << 8) | ptr[0];
@@ -302,8 +302,8 @@ uint16_t fat_getuint16(uint8_t *ptr)
 uint32_t fat_getuint32(uint8_t *ptr)
 {
   /* NOTE that (1) this operation is independent of endian-ness and that (2)
-   * byte-by-byte transfer is necessary in any case because the address may be
-   * unaligned.
+   * byte-by-byte transfer is necessary in any case because the address may
+   * be unaligned.
    */
 
   return ((uint32_t)fat_getuint16(&ptr[2]) << 16) | fat_getuint16(&ptr[0]);
@@ -365,9 +365,9 @@ void fat_putuint32(FAR uint8_t *ptr, uint32_t value32)
  * Name: fat_semtake
  ****************************************************************************/
 
-void fat_semtake(struct fat_mountpt_s *fs)
+int fat_semtake(struct fat_mountpt_s *fs)
 {
-  nxsem_wait_uninterruptible(&fs->fs_sem);
+  return nxsem_wait_uninterruptible(&fs->fs_sem);
 }
 
 /****************************************************************************
@@ -547,8 +547,8 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
    * zero.  This could be either the boot record or a partition that refers
    * to the boot record.
    *
-   * First read sector zero.  This will be the first access to the drive and a
-   * likely failure point.
+   * First read sector zero.  This will be the first access to the drive and
+   * a likely failure point.
    */
 
   fs->fs_fatbase = 0;
@@ -574,12 +574,13 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
       int i;
       for (i = 0; i < 4; i++)
         {
-          /* Check if the partition exists and, if so, get the bootsector for that
-           * partition and see if we can find the boot record there.
+          /* Check if the partition exists and, if so, get the bootsector for
+           * that partition and see if we can find the boot record there.
            */
 
           uint8_t part = PART_GETTYPE(i, fs->fs_buffer);
-          finfo("Partition %d, offset %d, type %d\n", i, PART_ENTRY(i), part);
+          finfo("Partition %d, offset %d, type %d\n",
+                 i, PART_ENTRY(i), part);
 
           if (part == 0)
             {
@@ -707,7 +708,8 @@ int fat_checkmount(struct fat_mountpt_s *fs)
             {
               struct geometry geo;
               int errcode = inode->u.i_bops->geometry(inode, &geo);
-              if (errcode == OK && geo.geo_available && !geo.geo_mediachanged)
+              if (errcode == OK && geo.geo_available &&
+                  !geo.geo_mediachanged)
                 {
                   return OK;
                 }
@@ -905,7 +907,8 @@ off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
           case FSTYPE_FAT16 :
             {
               unsigned int fatoffset = 2 * clusterno;
-              off_t        fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
+              off_t        fatsector = fs->fs_fatbase +
+                                       SEC_NSECTORS(fs, fatoffset);
               unsigned int fatindex  = fatoffset & SEC_NDXMASK(fs);
 
               if (fat_fscacheread(fs, fatsector) < 0)
@@ -921,7 +924,8 @@ off_t fat_getcluster(struct fat_mountpt_s *fs, uint32_t clusterno)
           case FSTYPE_FAT32 :
             {
               unsigned int fatoffset = 4 * clusterno;
-              off_t        fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
+              off_t        fatsector = fs->fs_fatbase +
+                                       SEC_NSECTORS(fs, fatoffset);
               unsigned int fatindex  = fatoffset & SEC_NDXMASK(fs);
 
               if (fat_fscacheread(fs, fatsector) < 0)
@@ -997,7 +1001,8 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
                 {
                   /* Save the LS four bits of the next cluster */
 
-                  value = (fs->fs_buffer[fatindex] & 0x0f) | nextcluster << 4;
+                  value = (fs->fs_buffer[fatindex] & 0x0f) |
+                           nextcluster << 4;
                 }
               else
                 {
@@ -1033,8 +1038,8 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
                     }
                 }
 
-              /* Output the MS byte first handling the 12-bit alignment within
-               * the 16-bits
+              /* Output the MS byte first handling the 12-bit alignment
+               * within the 16-bits
                */
 
               if ((clusterno & 1) != 0)
@@ -1058,7 +1063,8 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
           case FSTYPE_FAT16 :
             {
               unsigned int fatoffset = 2 * clusterno;
-              off_t        fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
+              off_t        fatsector = fs->fs_fatbase +
+                                       SEC_NSECTORS(fs, fatoffset);
               unsigned int fatindex  = fatoffset & SEC_NDXMASK(fs);
 
               if (fat_fscacheread(fs, fatsector) < 0)
@@ -1075,7 +1081,8 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
           case FSTYPE_FAT32 :
             {
               unsigned int fatoffset = 4 * clusterno;
-              off_t        fatsector = fs->fs_fatbase + SEC_NSECTORS(fs, fatoffset);
+              off_t        fatsector = fs->fs_fatbase +
+                                       SEC_NSECTORS(fs, fatoffset);
               unsigned int fatindex  = fatoffset & SEC_NDXMASK(fs);
               uint32_t     val;
 
@@ -1089,7 +1096,8 @@ int fat_putcluster(struct fat_mountpt_s *fs, uint32_t clusterno,
               /* Keep the top 4 bits */
 
               val = FAT_GETFAT32(fs->fs_buffer, fatindex) & 0xf0000000;
-              FAT_PUTFAT32(fs->fs_buffer, fatindex, val | (nextcluster & 0x0fffffff));
+              FAT_PUTFAT32(fs->fs_buffer, fatindex,
+                           val | (nextcluster & 0x0fffffff));
             }
           break;
 
@@ -1356,9 +1364,9 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
 
       if (!dir->fd_currcluster)
         {
-          /* For FAT12/16, the boot record tells us number of 32-bit directories
-           * that are contained in the root directory.  This should correspond to
-           * an even number of sectors.
+          /* For FAT12/16, the boot record tells us number of 32-bit
+           * directories that are contained in the root directory.  This
+           * should correspond to an even number of sectors.
            */
 
           if (ndx >= fs->fs_rootentcnt)
@@ -1372,17 +1380,17 @@ int fat_nextdirentry(struct fat_mountpt_s *fs, struct fs_fatdir_s *dir)
         }
       else
         {
-          /* Not a FAT12/16 root directory, check if we have examined the entire
-           * cluster comprising the directory.
+          /* Not a FAT12/16 root directory, check if we have examined the
+           * entire cluster comprising the directory.
            *
-           * The current sector within the cluster is the entry number divided
-           * byte the number of entries per sector
+           * The current sector within the cluster is the entry number
+           * divided byte the number of entries per sector
            */
 
           int sector = ndx / DIRSEC_NDIRS(fs);
 
-          /* We are finished with the cluster when the last sector of the cluster
-           * has been examined.
+          /* We are finished with the cluster when the last sector of the
+           * cluster has been examined.
            */
 
           if ((sector & (fs->fs_fatsecperclus - 1)) == 0)
@@ -1898,7 +1906,8 @@ int fat_ffcacheflush(struct fat_mountpt_s *fs, struct fat_file_s *ff)
  *
  ****************************************************************************/
 
-int fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff, off_t sector)
+int fat_ffcacheread(struct fat_mountpt_s *fs, struct fat_file_s *ff,
+                    off_t sector)
 {
   int ret;
 

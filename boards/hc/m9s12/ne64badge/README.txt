@@ -477,9 +477,9 @@ Common Configuration Notes
      b. Execute 'make menuconfig' in nuttx/ in order to start the
         reconfiguration process.
 
-  3. By default, all configurations assume the that you are building under
-     under Linux (should work under Windows with Cygwin as well).  This
-     is easily reconfigured:
+  3. By default, all configurations assume that you are building under
+     Linux (should work under Windows with Cygwin as well).  This is
+     easily reconfigured:
 
         CONFIG_HOST_LINUX=y
 

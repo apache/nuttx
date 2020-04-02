@@ -110,7 +110,7 @@ extern struct spawn_parms_s g_spawn_parms;
  *
  ****************************************************************************/
 
-void spawn_semtake(FAR sem_t *sem);
+int spawn_semtake(FAR sem_t *sem);
 #define spawn_semgive(sem) nxsem_post(sem)
 
 /****************************************************************************

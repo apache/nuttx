@@ -101,14 +101,14 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
   /* Open the resolver configuration file */
 
-  stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "rb");
+  stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "r");
   if (stream == NULL)
     {
-      int errcode = get_errno();
+      ret = -errno;
       nerr("ERROR: Failed to open %s: %d\n",
-        CONFIG_NETDB_RESOLVCONF_PATH, errcode);
-      DEBUGASSERT(errcode > 0);
-      return -errcode;
+        CONFIG_NETDB_RESOLVCONF_PATH, ret);
+      DEBUGASSERT(ret < 0);
+      return ret;
     }
 
   keylen = strlen(NETDB_DNS_KEYWORD);
@@ -166,7 +166,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
               /* Get the port number following the right bracket */
 
-              if (*ptr == ':')
+              if (*ptr++ == ':')
                 {
                   FAR char *portstr;
                   int tmp;
@@ -174,7 +174,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
                   /* Isolate the port string */
 
                   portstr = ptr;
-                  ptr     = find_spaces(addrstr);
+                  ptr     = find_spaces(ptr);
                   *ptr    = '\0';
 
                   /* Get the port number */
@@ -230,6 +230,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 #ifdef CONFIG_NET_IPv6
             }
 #endif
+
           if (ret != OK)
             {
               fclose(stream);

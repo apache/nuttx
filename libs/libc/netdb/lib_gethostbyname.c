@@ -40,10 +40,6 @@
 #include <nuttx/config.h>
 
 #include <netdb.h>
-#include <errno.h>
-
-#include "libc.h"
-#include "netdb/lib_netdb.h"
 
 #ifdef CONFIG_LIBC_NETDB
 
@@ -81,12 +77,7 @@
 
 FAR struct hostent *gethostbyname(FAR const char *name)
 {
-  int ret;
-
-  DEBUGASSERT(name != NULL);
-  ret = gethostbyname_r(name, &g_hostent, g_hostbuffer, CONFIG_NETDB_BUFSIZE,
-                       &h_errno);
-  return ret == 0 ? &g_hostent : NULL;
+  return gethostbyname2(name, AF_UNSPEC);
 }
 
 #endif /* CONFIG_LIBC_NETDB */

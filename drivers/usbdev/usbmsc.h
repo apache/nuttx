@@ -1,37 +1,21 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc.h
- *
- *   Copyright (C) 2008-2013, 2015, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
  * Mass storage class device.  Bulk-only with SCSI subclass.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -425,7 +409,7 @@ struct usbmsc_dev_s
 
   struct usbmsc_lun_s *lun;           /* Currently selected LUN */
   struct usbmsc_lun_s *luntab;        /* Allocated table of all LUNs */
-  uint8_t cdb[USBMSC_MAXCDBLEN];     /* Command data (cdb[]) from CBW */
+  uint8_t cdb[USBMSC_MAXCDBLEN];      /* Command data (cdb[]) from CBW */
   uint8_t           phaseerror:1;     /* Need to send phase sensing status */
   uint8_t           shortpacket:1;    /* Host transmission stopped unexpectedly */
   uint8_t           cbwdir:2;         /* Direction from CBW. See USBMSC_FLAGS_DIR* definitions */
@@ -483,8 +467,8 @@ EXTERN const char g_mscvendorstr[];
 EXTERN const char g_mscproductstr[];
 EXTERN const char g_mscserialstr[];
 
-/* If we are using a composite device, then vendor/product/serial number strings
- * are provided by the composite device logic.
+/* If we are using a composite device, then vendor/product/serial number
+ * strings are provided by the composite device logic.
  */
 
 #else
@@ -513,7 +497,7 @@ EXTERN FAR struct usbmsc_dev_s *g_usbmsc_handoff;
  *
  ****************************************************************************/
 
-void usbmsc_scsi_lock(FAR struct usbmsc_dev_s *priv);
+int usbmsc_scsi_lock(FAR struct usbmsc_dev_s *priv);
 
 /****************************************************************************
  * Name: usbmsc_scsi_unlock
@@ -525,7 +509,7 @@ void usbmsc_scsi_lock(FAR struct usbmsc_dev_s *priv);
 
 #define usbmsc_scsi_unlock(priv) nxsem_post(&priv->thlock)
 
-/*****************************************************************************
+/****************************************************************************
  * Name: usbmsc_scsi_signal
  *
  * Description:
@@ -591,10 +575,12 @@ int usbmsc_copy_epdesc(enum usbmsc_epdesc_e epid,
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf, FAR struct usbdev_devinfo_s *devinfo,
+int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf,
+                         FAR struct usbdev_devinfo_s *devinfo,
                          uint8_t speed, uint8_t type);
 #else
-int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf, FAR struct usbdev_devinfo_s *devinfo);
+int16_t usbmsc_mkcfgdesc(FAR uint8_t *buf,
+                         FAR struct usbdev_devinfo_s *devinfo);
 #endif
 
 /****************************************************************************

@@ -1987,7 +1987,7 @@
 	  There is no real substance in the initial check-in; only the directory
 	  structure and skeleton files (Code complete on 8/15/11).
 	* arch/arm/include/armv7-m, arch/arm/src/armv7-m, etc.: Rename all cortexm3
-	  directories and files to armv7-m; Change name of of all CORTEXM3 constants
+	  directories and files to armv7-m; Change name of all CORTEXM3 constants
 	  to ARMV7M.  This is a major namespace change needed to cleanly support the
 	  ARM Cortex-M4 which is also in the ARMv7 M Series (specifically, ARMv7E-M).
 	* sched/sig_initialize.c, sig_received.c, and mq_waitirq.c.  Fixed several
@@ -2566,7 +2566,7 @@
 	* configs/pic32-starterkit/nsh2:  Add a PIC32 Ethernet Starter Kit NSH
 	  configuration that has no serial console; all interaction is done via
 	  Telnet.
-	* net/netdev_sem.c:  Correct a deadlock condition by making a seamphore
+	* net/netdev_sem.c:  Correct a deadlock condition by making a semaphore
 	  recursive.  To my knowledge this deadlock only occurs when running the
 	  NSH command ifconfig over Telnet.  In that case the function netdev_foreach
 	  takes the network device semaphore, but so does the telnet logic causing
@@ -2822,7 +2822,7 @@
 	  to done in that case.
 	* arch/arc/src/stm32_otgfsdev.c:  Fixed some status settings in queuing of write
 	  messages. Added a "hack" to work around missing TxFIFO empty interrupts.  The
-	  hack is basically to poll for space in the TxFIFO instead of of setting up
+	  hack is basically to poll for space in the TxFIFO instead of setting up
 	  the interrupt.
 	* arch/arm/src/stm32/stm32f2* and chip/stm32f2*:  Update all STM32 F2 file so
 	  that they are equivalent to F4 files.  This is kind of a maintenance nightmare.
@@ -7602,7 +7602,7 @@
 	* include/unistd.h: Some POSIX_* and _POSIX_* macros are defined
 	  without value, whereas (as far as I can tell) the newer versions
 	  of the standard require them to have the value corresponding to
-	  the standard version implemented, like 200809L. Are the any plans
+	  the standard version implemented, like 200809L. Are there any plans
 	  to clean this up? For now I've put together a quick patch that
 	  defines those macros to 1, consistent with the rest of unistd.h.
 	  From Kosma Moczek (2014-6-30)
@@ -9217,7 +9217,7 @@
 	  but the received characters never arrive in the reader thread.
 	  The problem was fixed by re-initializing the semaphores on the last
 	  uart_close() on the device. From Harald Welte (2014-12-13).
-	* sched/semaphore/sem_recover.c, Make.defs, seamphore.c,
+	* sched/semaphore/sem_recover.c, Make.defs, semaphore.c,
 	  sched/wdog/wd_recover.c, Make.defs, wdog.h, sched/task/task_recover.c:
 	  Add logic to clean up after task_delete() or pthread_cancel() if the
 	  task happens to be waiting on a semaphore when it is cancelled
@@ -13393,7 +13393,7 @@
 	  often half-works and does weird things...).  From Angus Gratton
 	  (2016-12-14).
 	* Xtensa ESP32: Add missing ENTRY() and RET() macros in C callable
-	  assembly language.  At one time I though the that the ESP32 support the
+	  assembly language.  At one time I thought that the ESP32 supported the
 	  CALL0 ABI.  I was mistaken so there may be a few more like this
 	  (2016-12-14).
 	* Xtensa ESP32: Fix a couple of bugs associated with handling of CPU
@@ -22262,7 +22262,7 @@
 	* arch/arm/src/stm32:  Add support for DMA v1 CSELR support.  From
 	  Mateusz Szafoni (2018-12-19).
 	* Brings in initial WIP support for the STML0.  This initial commit is
-	  unverified and, hence it it marked "EXPERIMENTAL."  From Mateusz
+	  unverified and, hence it is marked "EXPERIMENTAL."  From Mateusz
 	  Szafoni (2018-12-19).
 	* configs/:  Hook new STM32L0 boards into the configuration system.
 	  nucleo boards use as default ST LINK MCO as clock input from MCU and
@@ -22284,7 +22284,7 @@
 	* mm/mm_heap/mm_sem.c:  This is a candidate replacement for the reverted
 	  change 91aa26774b291fa553f701ce5222e56a6156c323.  This change adds a
 	  check to mm_trysemaphore() (the root implementation of both
-	  kmm_trysemaphore() and umm_trysemaphore()).  It checks if the that task
+	  kmm_trysemaphore() and umm_trysemaphore()).  It checks if the task
 	  that is apparently executing is marked as RUNNING.  If not, how could
 	  the non-running task be trying to get the MM semaphore?  I think only
 	  in the exact scenario that Eunbong Song has described.  So I think the
@@ -25986,7 +25986,7 @@
 	    conditional logic.  Precedence of operators problem.
 	  - arch/arm/src/s32k1xx/s32k1xx_clockconfig.c:  Fix another problem
 	    related to whether a divider is pre-decremented or not.  The answer
-	    must be the divder values are never pre-decremented.  They are
+	    must be the divider values are never pre-decremented.  They are
 	    decremented just before being written to hardware.
 	  - arch/arm/src/s32k1xx/s32k1xx_periphclocks.c and related files:  Fix
 	    yet another case of confusion between pre-decremented and

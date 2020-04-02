@@ -1,43 +1,29 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_max3421e.c
  *
- *   Copyright (C) 2018, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* References:
  *   "MAX3421E USB Peripheral/Host Controller with SPI Interface",
  *      19-3953, Rev 4, Maxim Integrated, July 2013 (Datasheet).
  *   "MAX3421E Programming Guide", Maxim Integrated, December 2006
  *      (Application Note).
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************/
+ */
 
 /****************************************************************************
  * Included Files
@@ -74,7 +60,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***************************************************************/
+
+/* Configuration ************************************************************/
+
 /* MAX3421E USB Host Driver Support
  *
  * Pre-requisites
@@ -114,13 +102,13 @@
 #  undef CONFIG_MAX3421E_USBHOST_PKTDUMP
 #endif
 
-/* Delays **********************************************************************/
+/* Delays *******************************************************************/
 
-#define MAX3421E_READY_DELAY         200000 /* In loop counts */
-#define MAX3421E_FLUSH_DELAY         200000 /* In loop counts */
+#define MAX3421E_READY_DELAY         200000      /* In loop counts */
+#define MAX3421E_FLUSH_DELAY         200000      /* In loop counts */
 #define MAX3421E_SETUP_DELAY         SEC2TICK(5) /* 5 seconds in system ticks */
 #define MAX3421E_DATANAK_DELAY       SEC2TICK(5) /* 5 seconds in system ticks */
-#define MAX3421E_RETRY_COUNT         5      /* Number of tries before giving up */
+#define MAX3421E_RETRY_COUNT         5           /* Number of tries before giving up */
 
 /* Ever-present MIN/MAX macros */
 
@@ -220,7 +208,7 @@ struct max3421e_usbhost_s
   uint8_t           xfrtype;   /* See enum mx3421e_hxfrdn_e */
   uint8_t           inflight;  /* Number of Tx bytes "in-flight" (<= 128) */
   uint8_t           result;    /* The result of the transfer */
-  uint8_t           exclcount;  /* Number of nested exclem locks */
+  uint8_t           exclcount; /* Number of nested exclem locks */
   uint16_t          buflen;    /* Buffer length (at start of transfer) */
   uint16_t          xfrd;      /* Bytes transferred (at end of transfer) */
   pid_t             holder;    /* Current hold of the exclsem */
@@ -424,18 +412,18 @@ static void max3421e_sndblock(FAR struct max3421e_usbhost_s *priv,
 #  define max3421e_pktdump(m,b,n)
 #endif
 
-/* Semaphores ******************************************************************/
+/* Semaphores ***************************************************************/
 
-static void max3421e_takesem(sem_t *sem);
+static int max3421e_takesem(FAR sem_t *sem);
 #define max3421e_givesem(s) nxsem_post(s);
-static void max3421e_take_exclsem(FAR struct max3421e_usbhost_s *priv);
+static int max3421e_take_exclsem(FAR struct max3421e_usbhost_s *priv);
 static void max3421e_give_exclsem(FAR struct max3421e_usbhost_s *priv);
 
-/* Byte stream access helper functions *****************************************/
+/* Byte stream access helper functions **************************************/
 
 static inline uint16_t max3421e_getle16(const uint8_t *val);
 
-/* Channel management **********************************************************/
+/* Channel management *******************************************************/
 
 static int max3421e_chan_alloc(FAR struct max3421e_usbhost_s *priv);
 static inline void max3421e_chan_free(FAR struct max3421e_usbhost_s *priv,
@@ -452,11 +440,12 @@ static int max3421e_chan_wait(FAR struct max3421e_usbhost_s *priv,
 static void max3421e_chan_wakeup(FAR struct max3421e_usbhost_s *priv,
               FAR struct max3421e_chan_s *chan, int result);
 
-/* Control/data transfer logic *************************************************/
+/* Control/data transfer logic **********************************************/
 
 static inline void max3421e_save_toggles(FAR struct max3421e_usbhost_s *priv,
               FAR struct max3421e_chan_s *chan);
-static inline void max3421e_restore_toggles(FAR struct max3421e_usbhost_s *priv,
+static inline void max3421e_restore_toggles(
+              FAR struct max3421e_usbhost_s *priv,
               FAR struct max3421e_chan_s *chan);
 static int  max3421e_transfer_status(FAR struct max3421e_usbhost_s *priv);
 static void max3421e_transfer_terminate(FAR struct max3421e_usbhost_s *priv,
@@ -475,9 +464,9 @@ static ssize_t max3421e_out_transfer(FAR struct max3421e_usbhost_s *priv,
 #ifdef CONFIG_USBHOST_ASYNCH
 static void max3421e_out_next(FAR struct max3421e_usbhost_s *priv,
               FAR struct max3421e_chan_s *chan);
-static int  max3421e_out_asynch(FAR struct max3421e_usbhost_s *priv, int chidx,
-              FAR uint8_t *buffer, size_t buflen, usbhost_asynch_t callback,
-              FAR void *arg);
+static int  max3421e_out_asynch(FAR struct max3421e_usbhost_s *priv,
+              FAR struct max3421e_chan_s *chan, FAR uint8_t *buffer,
+              size_t buflen, usbhost_asynch_t callback, FAR void *arg);
 #endif
 
 /* Control transfers */
@@ -517,7 +506,7 @@ static int  max3421e_in_asynch(FAR struct max3421e_usbhost_s *priv,
               size_t buflen, usbhost_asynch_t callback, FAR void *arg);
 #endif
 
-/* Interrupt handling **********************************************************/
+/* Interrupt handling *******************************************************/
 
 static void max3421e_connect_event(FAR struct max3421e_usbhost_s *priv);
 static void max3421e_disconnect_event(FAR struct max3421e_usbhost_s *priv);
@@ -532,13 +521,14 @@ static inline void max3421e_int_enable(FAR struct max3421e_usbhost_s *priv,
               uint8_t irqset);
 static inline void max3421e_int_disable(FAR struct max3421e_usbhost_s *priv,
               uint8_t irqset);
-static inline uint8_t max3421e_int_status(FAR struct max3421e_usbhost_s *priv);
+static inline uint8_t max3421e_int_status(
+              FAR struct max3421e_usbhost_s *priv);
 static inline void max3421e_int_clear(FAR struct max3421e_usbhost_s *priv,
               uint8_t irqset);
 static void max3421e_int_wait(FAR struct max3421e_usbhost_s *priv,
               uint8_t irqset, unsigned int usec);
 
-/* USB host controller operations **********************************************/
+/* USB host controller operations *******************************************/
 
 static int  max3421e_wait(FAR struct usbhost_connection_s *conn,
               FAR struct usbhost_hubport_s **hport);
@@ -552,26 +542,33 @@ static int  max3421e_ep0configure(FAR struct usbhost_driver_s *drvr,
               usbhost_ep_t ep0, uint8_t funcaddr, uint8_t speed,
               uint16_t maxpacketsize);
 static int  max3421e_epalloc(FAR struct usbhost_driver_s *drvr,
-              FAR const FAR struct usbhost_epdesc_s *epdesc, FAR usbhost_ep_t *ep);
-static int  max3421e_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+              FAR const FAR struct usbhost_epdesc_s *epdesc,
+              FAR usbhost_ep_t *ep);
+static int  max3421e_epfree(FAR struct usbhost_driver_s *drvr,
+              usbhost_ep_t ep);
 static int  max3421e_alloc(FAR struct usbhost_driver_s *drvr,
               FAR uint8_t **buffer, FAR size_t *maxlen);
-static int  max3421e_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
+static int  max3421e_free(FAR struct usbhost_driver_s *drvr,
+              FAR uint8_t *buffer);
 static int  max3421e_ioalloc(FAR struct usbhost_driver_s *drvr,
               FAR uint8_t **buffer, size_t buflen);
-static int  max3421e_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
-static int  max3421e_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-              FAR const struct usb_ctrlreq_s *req, FAR uint8_t *buffer);
-static int  max3421e_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-              FAR const struct usb_ctrlreq_s *req, FAR const uint8_t *buffer);
-static ssize_t max3421e_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-              FAR uint8_t *buffer, size_t buflen);
+static int  max3421e_iofree(FAR struct usbhost_driver_s *drvr,
+              FAR uint8_t *buffer);
+static int  max3421e_ctrlin(FAR struct usbhost_driver_s *drvr,
+              usbhost_ep_t ep0, FAR const struct usb_ctrlreq_s *req,
+              FAR uint8_t *buffer);
+static int  max3421e_ctrlout(FAR struct usbhost_driver_s *drvr,
+              usbhost_ep_t ep0, FAR const struct usb_ctrlreq_s *req,
+              FAR const uint8_t *buffer);
+static ssize_t max3421e_transfer(FAR struct usbhost_driver_s *drvr,
+              usbhost_ep_t ep, FAR uint8_t *buffer, size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
-static int  max3421e_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-              FAR uint8_t *buffer, size_t buflen, usbhost_asynch_t callback,
-              FAR void *arg);
+static int  max3421e_asynch(FAR struct usbhost_driver_s *drvr,
+              usbhost_ep_t ep, FAR uint8_t *buffer, size_t buflen,
+              usbhost_asynch_t callback, FAR void *arg);
 #endif
-static int  max3421e_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+static int  max3421e_cancel(FAR struct usbhost_driver_s *drvr,
+                            usbhost_ep_t ep);
 #ifdef CONFIG_USBHOST_HUB
 static int  max3421e_connect(FAR struct max3421e_usbhost_s *priv,
               FAR struct usbhost_hubport_s *hport, bool connected);
@@ -587,7 +584,8 @@ static int  max3421e_startsof(FAR struct max3421e_usbhost_s *priv);
 static inline int max3421e_sw_initialize(FAR struct max3421e_usbhost_s *priv,
               FAR struct max3421e_connection_s *conn,
               FAR const struct max3421e_lowerhalf_s *lower);
-static inline int max3421e_hw_initialize(FAR struct max3421e_usbhost_s *priv);
+static inline int max3421e_hw_initialize(
+              FAR struct max3421e_usbhost_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -598,59 +596,101 @@ static inline int max3421e_hw_initialize(FAR struct max3421e_usbhost_s *priv);
 
 static const struct max3421e_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
 {
-  TRENTRY(MAX3421E_TRACE1_ALLOC_FAIL,        TR_FMT1, "INIT: Failed to allocate state structure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_ALLOC_FAIL, TR_FMT1,
+          "INIT: Failed to allocate state structure: %u\n"),
 #ifdef CONFIG_USBHOST_ASYNCH
-  TRENTRY(MAX3421E_TRACE1_ASYNCHSETUP_FAIL1, TR_FMT1, "OUT: Asynch setup failed: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_ASYNCHSETUP_FAIL2, TR_FMT1, "IN: Asynch setup failed: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_ASYNCHSETUP_FAIL1, TR_FMT1,
+          "OUT: Asynch setup failed: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_ASYNCHSETUP_FAIL2, TR_FMT1,
+          "IN: Asynch setup failed: %u\n"),
 #endif
-  TRENTRY(MAX3421E_TRACE1_BAD_JKSTATE,       TR_FMT1, "CONNECT: Bad JK state: %02x\n"),
-  TRENTRY(MAX3421E_TRACE1_BADREVISION,       TR_FMT1, "INIT: Bad revision number:  %02x\n"),
-  TRENTRY(MAX3421E_TRACE1_CHANALLOC_FAIL,    TR_FMT1, "EPALLOC: Channel allocation failed: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_CHANWAIT_FAIL,     TR_FMT1, "OUT: Channel wait failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN1,       TR_FMT1, "OUT: Disconnected during wait: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN2,       TR_FMT1, "CTRL: Disconnected during SETUP phase: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN3,       TR_FMT1, "CTRL OUT: Disconnected during DATA phase: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN4,       TR_FMT1, "CTRL IN: Disconnected during DATA phase: %u"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN5,       TR_FMT1, "IN: Disconnected during wait: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN6,       TR_FMT1, "CONNECT: Device disconnect #1: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN7,       TR_FMT1, "CONNECT: Device disconnect #2: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_DEVDISCONN8,       TR_FMT1, "CONNECT: Device disconnect #3: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_ENUMERATE_FAIL,    TR_FMT1, "CONNECT: Enumeration failed: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_INSETUP_FAIL1,     TR_FMT1, "CTRL IN: SETUP phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_BAD_JKSTATE, TR_FMT1,
+          "CONNECT: Bad JK state: %02x\n"),
+  TRENTRY(MAX3421E_TRACE1_BADREVISION, TR_FMT1,
+          "INIT: Bad revision number:  %02x\n"),
+  TRENTRY(MAX3421E_TRACE1_CHANALLOC_FAIL, TR_FMT1,
+          "EPALLOC: Channel allocation failed: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_CHANWAIT_FAIL, TR_FMT1,
+          "OUT: Channel wait failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN1, TR_FMT1,
+          "OUT: Disconnected during wait: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN2, TR_FMT1,
+          "CTRL: Disconnected during SETUP phase: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN3, TR_FMT1,
+          "CTRL OUT: Disconnected during DATA phase: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN4, TR_FMT1,
+          "CTRL IN: Disconnected during DATA phase: %u"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN5, TR_FMT1,
+          "IN: Disconnected during wait: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN6, TR_FMT1,
+          "CONNECT: Device disconnect #1: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN7, TR_FMT1,
+          "CONNECT: Device disconnect #2: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_DEVDISCONN8, TR_FMT1,
+          "CONNECT: Device disconnect #3: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_ENUMERATE_FAIL, TR_FMT1,
+          "CONNECT: Enumeration failed: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_INSETUP_FAIL1, TR_FMT1,
+          "CTRL IN: SETUP phase failure: %u\n"),
 #ifdef CONFIG_USBHOST_ASYNCH
-  TRENTRY(MAX3421E_TRACE1_INSETUP_FAIL2,     TR_FMT1, "CTRL IN: Asynch SETUP phase failure #1: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_INSETUP_FAIL3,     TR_FMT1, "CTRL IN: Asynch SETUP phase failure #2: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_INSETUP_FAIL2, TR_FMT1,
+          "CTRL IN: Asynch SETUP phase failure #1: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_INSETUP_FAIL3, TR_FMT1,
+          "CTRL IN: Asynch SETUP phase failure #2: %u\n"),
 #endif
-  TRENTRY(MAX3421E_TRACE1_IRQATTACH_FAIL,    TR_FMT1, "INIT: Failed to attach interrupt: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_OUTSETUP_FAIL1,    TR_FMT1, "CTRL OUT: SETUP phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_IRQATTACH_FAIL, TR_FMT1,
+          "INIT: Failed to attach interrupt: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_OUTSETUP_FAIL1, TR_FMT1,
+          "CTRL OUT: SETUP phase failure: %u\n"),
 #ifdef CONFIG_USBHOST_ASYNCH
-  TRENTRY(MAX3421E_TRACE1_OUTSETUP_FAIL2,    TR_FMT1, "CTRL OUT: Asynch SETUP phase failure #1: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_OUTSETUP_FAIL3,    TR_FMT1, "CTRL OUT: Asynch SETUP phase failure #2: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_OUTSETUP_FAIL2, TR_FMT1,
+          "CTRL OUT: Asynch SETUP phase failure #1: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_OUTSETUP_FAIL3, TR_FMT1,
+          "CTRL OUT: Asynch SETUP phase failure #2: %u\n"),
 #endif
-  TRENTRY(MAX3421E_TRACE1_RECVDATA_FAIL,     TR_FMT1, "CTRL IN: Data phase failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_RECVSTATUS_FAIL,   TR_FMT1, "CTRL OUT: Status phase failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_SENDDATA_FAIL,     TR_FMT1, "CTRL OUT: Data phase failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_SENDSETUP_FAIL1,   TR_FMT1, "CTRL OUT: SETUP phase failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_SENDSETUP_FAIL2,   TR_FMT1, "CTRL IN: SETUP phase failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_SENDSTATUS_FAIL,   TR_FMT1, "CTRL IN: Status phase failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_TRANSFER_FAILED1,  TR_FMT1, "OUT: Transfer wait returned failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_TRANSFER_FAILED2,  TR_FMT1, "CTRL: SETUP wait returned failure: %u\n"),
-  TRENTRY(MAX3421E_TRACE1_TRANSFER_FAILED3,  TR_FMT1, "IN: Transfer wait returned failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_RECVDATA_FAIL, TR_FMT1,
+          "CTRL IN: Data phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_RECVSTATUS_FAIL, TR_FMT1,
+          "CTRL OUT: Status phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_SENDDATA_FAIL, TR_FMT1,
+          "CTRL OUT: Data phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_SENDSETUP_FAIL1, TR_FMT1,
+          "CTRL OUT: SETUP phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_SENDSETUP_FAIL2, TR_FMT1,
+          "CTRL IN: SETUP phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_SENDSTATUS_FAIL, TR_FMT1,
+          "CTRL IN: Status phase failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_TRANSFER_FAILED1, TR_FMT1,
+          "OUT: Transfer wait returned failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_TRANSFER_FAILED2, TR_FMT1,
+          "CTRL: SETUP wait returned failure: %u\n"),
+  TRENTRY(MAX3421E_TRACE1_TRANSFER_FAILED3, TR_FMT1,
+          "IN: Transfer wait returned failure: %u\n"),
 
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
-  TRENTRY(MAX3421E_VTRACE1_CANCEL,           TR_FMT1, "Transfer canceled: EP%u\n"),
-  TRENTRY(MAX3421E_VTRACE1_CONNECTED1,       TR_FMT1, "CONNECT: Connection event: %u\n"),
-  TRENTRY(MAX3421E_VTRACE1_CONNECTED2,       TR_FMT1, "CONNECT: Connection change detected: %u\n"),
-  TRENTRY(MAX3421E_VTRACE1_CONNECTED3,       TR_FMT1, "CONNECT: Connected: %u\n"),
-  TRENTRY(MAX3421E_VTRACE1_DISCONNECTED1,    TR_FMT1, "CONNECT: Disconnected: %u\n"),
-  TRENTRY(MAX3421E_VTRACE1_DISCONNECTED2,    TR_FMT1, "CONNECT: Disconnect detected: %u\n"),
-  TRENTRY(MAX3421E_VTRACE1_ENUMERATE,        TR_FMT1, "ENUMERATE: Start: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_CANCEL, TR_FMT1,
+          "Transfer canceled: EP%u\n"),
+  TRENTRY(MAX3421E_VTRACE1_CONNECTED1, TR_FMT1,
+          "CONNECT: Connection event: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_CONNECTED2, TR_FMT1,
+          "CONNECT: Connection change detected: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_CONNECTED3, TR_FMT1,
+          "CONNECT: Connected: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_DISCONNECTED1, TR_FMT1,
+          "CONNECT: Disconnected: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_DISCONNECTED2, TR_FMT1,
+          "CONNECT: Disconnect detected: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_ENUMERATE, TR_FMT1,
+          "ENUMERATE: Start: %u\n"),
 #ifdef CONFIG_USBHOST_HUB
-  TRENTRY(MAX3421E_VTRACE1_HUB_CONNECTED,    TR_FMT1, "CONNECT: Hub connected: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_HUB_CONNECTED, TR_FMT1,
+          "CONNECT: Hub connected: %u\n"),
 #endif
-  TRENTRY(MAX3421E_VTRACE1_INITIALIZED,      TR_FMT1, "INIT: Hardware initialized: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_INITIALIZED, TR_FMT1,
+          "INIT: Hardware initialized: %u\n"),
 #ifdef CONFIG_USBHOST_ASYNCH
- TRENTRY(MAX3421E_VTRACE1_TRANSFER_COMPLETE, TR_FMT1, "OUT: Asynch transfer complete: %u\n"),
+  TRENTRY(MAX3421E_VTRACE1_TRANSFER_COMPLETE, TR_FMT1,
+          "OUT: Asynch transfer complete: %u\n"),
 #endif
 #endif
 };
@@ -659,28 +699,46 @@ static const struct max3421e_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
 {
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
 #ifdef CONFIG_USBHOST_ASYNCH
-  TRENTRY(MAX3421E_VTRACE2_ASYNCH,           TR_FMT2, "ASYNCH: Transfer started: EP%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_ASYNCH, TR_FMT2,
+          "ASYNCH: Transfer started: EP%u len=%u\n"),
 #endif
-  TRENTRY(MAX3421E_VTRACE2_BULKIN,           TR_FMT2, "BULK IN:  SETUP: Chan%u len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_BULKOUT,          TR_FMT2, "BULK OUT:  SETUP: Chan%u len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_CHANWAKEUP_IN,    TR_FMT2, "IN: Channel wakeup: Chan%, result=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_CHANWAKEUP_OUT,   TR_FMT2, "OUT: Channel wakeup: Chan%u result=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_CTRLIN,           TR_FMT2, "CTRL IN: Start: type=%u req=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_CTRLOUT,          TR_FMT2, "CTRL OUT: Start: type=%u req=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_BULKIN, TR_FMT2,
+          "BULK IN:  SETUP: Chan%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_BULKOUT, TR_FMT2,
+          "BULK OUT:  SETUP: Chan%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_CHANWAKEUP_IN, TR_FMT2,
+          "IN: Channel wakeup: Chan%, result=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_CHANWAKEUP_OUT, TR_FMT2,
+          "OUT: Channel wakeup: Chan%u result=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_CTRLIN, TR_FMT2,
+          "CTRL IN: Start: type=%u req=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_CTRLOUT, TR_FMT2,
+          "CTRL OUT: Start: type=%u req=%u\n"),
 #ifdef CONFIG_USBHOST_HUB
-  TRENTRY(MAX3421E_VTRACE2_HUB_CONNECTED,    TR_FMT2, "CONNECT: Hub connected: port=%u, connected=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_HUB_CONNECTED, TR_FMT2,
+          "CONNECT: Hub connected: port=%u, connected=%u\n"),
 #endif
-  TRENTRY(MAX3421E_VTRACE2_INTRIN,           TR_FMT2, "INTR IN: SETUP: Chan%u len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_INTROUT,          TR_FMT2, "INTR OUT: SETUP: Chan%u len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_ISOCIN,           TR_FMT2, "ISOC IN: SETUP: Chan%u len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_ISOCOUT,          TR_FMT2, "ISOC OUT: SETUP: Chan%u len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_RECVSTATUS,       TR_FMT2, "CTRL OUT: Receive status: Chan% len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_SENDSTATUS,       TR_FMT2, "CTRL IN: Send status: Chan% len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_STARTTRANSFER1,   TR_FMT2, "OUT: Send start: Chan% len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_STARTTRANSFER2,   TR_FMT2, "IN: Receive start: Chan% len=%u\n"),
-  TRENTRY(MAX3421E_VTRACE2_TRANSFER,         TR_FMT2, "Transfer start: EP%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_INTRIN, TR_FMT2,
+          "INTR IN: SETUP: Chan%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_INTROUT, TR_FMT2,
+          "INTR OUT: SETUP: Chan%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_ISOCIN, TR_FMT2,
+          "ISOC IN: SETUP: Chan%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_ISOCOUT, TR_FMT2,
+          "ISOC OUT: SETUP: Chan%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_RECVSTATUS, TR_FMT2,
+          "CTRL OUT: Receive status: Chan% len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_SENDSTATUS, TR_FMT2,
+          "CTRL IN: Send status: Chan% len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_STARTTRANSFER1, TR_FMT2,
+          "OUT: Send start: Chan% len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_STARTTRANSFER2, TR_FMT2,
+          "IN: Receive start: Chan% len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_TRANSFER, TR_FMT2,
+          "Transfer start: EP%u len=%u\n"),
 #ifdef CONFIG_USBHOST_ASYNCH
-  TRENTRY(MAX3421E_VTRACE2_XFRCOMPLETE,      TR_FMT2, "ASYNCH: Transfer complete: EP%u len=%u\n"),
+  TRENTRY(MAX3421E_VTRACE2_XFRCOMPLETE, TR_FMT2,
+          "ASYNCH: Transfer complete: EP%u len=%u\n"),
 #endif
 #endif
 };
@@ -772,8 +830,8 @@ static void max3421e_checkreg(uint8_t addr, uint8_t val, bool iswrite)
   static unsigned int count = 0;
   static bool prevwrite = false;
 
-  /* Is this the same value that we read from/wrote to the same register last time?
-   * Are we polling the register?  If so, suppress the output.
+  /* Is this the same value that we read from/wrote to the same register
+   * last time?  Are we polling the register?  If so, suppress the output.
    */
 
   if (addr == prevaddr && val == preval && prevwrite == iswrite)
@@ -974,7 +1032,6 @@ static inline void max3421e_modifyreg(FAR struct max3421e_usbhost_s *priv,
 static void max3421e_recvblock(FAR struct max3421e_usbhost_s *priv,
                                uint8_t addr, FAR void *buffer, size_t buflen)
 {
-
   FAR const struct max3421e_lowerhalf_s *lower = priv->lower;
   FAR struct spi_dev_s *spi;
   uint8_t cmd;
@@ -1061,9 +1118,9 @@ static void max3421e_sndblock(FAR struct max3421e_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static void max3421e_takesem(sem_t *sem)
+static int max3421e_takesem(FAR sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -1074,45 +1131,52 @@ static void max3421e_takesem(sem_t *sem)
  *
  ****************************************************************************/
 
-static void max3421e_take_exclsem(FAR struct max3421e_usbhost_s *priv)
+static int max3421e_take_exclsem(FAR struct max3421e_usbhost_s *priv)
 {
   pid_t me = getpid();
+  int ret = OK;
 
   /* Does this thread already hold the mutual exclusion mutex? */
 
   if (priv->holder == me)
     {
-       /* Yes.. just increment the count */
+      /* Yes.. just increment the count */
 
-       DEBUGASSERT(priv->exclcount < UINT8_MAX);
-       priv->exclcount++;
+      DEBUGASSERT(priv->exclcount < UINT8_MAX);
+      priv->exclcount++;
     }
   else
     {
       /* No.. take the semaphore */
 
-      max3421e_takesem(&priv->exclsem);
+      ret = max3421e_takesem(&priv->exclsem);
+      if (ret >= 0)
+        {
+          /* Now this thread is the holder with a count of one */
 
-      /* Now this thread is the holder with a count of one */
-
-      priv->holder = me;
-      priv->exclcount = 1;
+          priv->holder = me;
+          priv->exclcount = 1;
+        }
     }
+
+  return ret;
 }
 
 static void max3421e_give_exclsem(FAR struct max3421e_usbhost_s *priv)
 {
+#ifdef CONFIG_DEBUG_ASSERTIONS
   pid_t me = getpid();
 
   DEBUGASSERT(priv->holder == me);
+#endif
 
   /* Is the lock nested? */
 
   if (priv->exclcount > 0)
     {
-       /* Yes.. just decrement the count */
+      /* Yes.. just decrement the count */
 
-       priv->exclcount--;
+      priv->exclcount--;
     }
   else
     {
@@ -1177,7 +1241,8 @@ static int max3421e_chan_alloc(FAR struct max3421e_usbhost_s *priv)
  *
  ****************************************************************************/
 
-static void max3421e_chan_free(FAR struct max3421e_usbhost_s *priv, int chidx)
+static void max3421e_chan_free(FAR struct max3421e_usbhost_s *priv,
+                               int chidx)
 {
   DEBUGASSERT((unsigned)chidx < MAX3421E_NHOST_CHANNELS);
 
@@ -1193,13 +1258,14 @@ static void max3421e_chan_free(FAR struct max3421e_usbhost_s *priv, int chidx)
  * Name: max3421e_chan_waitsetup
  *
  * Description:
- *   Set the request for the transfer complete event well BEFORE enabling the
- *   transfer (as soon as we are absolutely committed to the to avoid transfer).
- *   We do this to minimize race conditions.  This logic would have to be expanded
- *   if we want to have more than one packet in flight at a time!
+ *   Set the request for the transfer complete event well BEFORE enabling
+ *   the transfer (as soon as we are absolutely committed to the transfer).
+ *   We do this to minimize race conditions.  This logic would have to be
+ *   expanded if we want to have more than one packet in flight at a time!
  *
  * Assumptions:
- *   Called from a normal thread context BEFORE the transfer has been started.
+ *   Called from a normal thread context BEFORE the transfer has been
+ *   started.
  *
  ****************************************************************************/
 
@@ -1215,8 +1281,9 @@ static int max3421e_chan_waitsetup(FAR struct max3421e_usbhost_s *priv,
 
   if (priv->connected)
     {
-      /* Yes.. then set waiter to indicate that we expect to be informed when
-       * either (1) the device is disconnected, or (2) the transfer completed.
+      /* Yes.. then set waiter to indicate that we expect to be informed
+       * when either (1) the device is disconnected, or (2) the transfer
+       * completed.
        */
 
       priv->waiter   = chan;
@@ -1236,8 +1303,8 @@ static int max3421e_chan_waitsetup(FAR struct max3421e_usbhost_s *priv,
  *
  * Description:
  *   Set the request for the transfer complete event well BEFORE enabling the
- *   transfer (as soon as we are absolutely committed to the to avoid transfer).
- *   We do this to minimize race conditions.  This logic would have to be expanded
+ *   transfer (as soon as we are absolutely committed to transfer).  We do
+ *   this to minimize race conditions.  This logic would have to be expanded
  *   if we want to have more than one packet in flight at a time!
  *
  * Assumptions:
@@ -1288,9 +1355,9 @@ static int max3421e_chan_wait(FAR struct max3421e_usbhost_s *priv,
   int ret;
 
   /* Disable interrupts so that the following operations will be atomic.  On
-   * the host global interrupt needs to be disabled.  However, here we disable
-   * all interrupts to exploit that fact that interrupts will be re-enabled
-   * while we wait.
+   * the host global interrupt needs to be disabled.  However, here we
+   * disable all interrupts to exploit that fact that interrupts will be re-
+   * enabled while we wait.
    */
 
   flags = enter_critical_section();
@@ -1308,7 +1375,11 @@ static int max3421e_chan_wait(FAR struct max3421e_usbhost_s *priv,
        * wait here.
        */
 
-      nxsem_wait_uninterruptible(&priv->waitsem);
+      ret = nxsem_wait_uninterruptible(&priv->waitsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
   while (priv->waiter != NULL);
 
@@ -1389,14 +1460,16 @@ static void max3421e_chan_wakeup(FAR struct max3421e_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static inline void max3421e_save_toggles(FAR struct max3421e_usbhost_s *priv,
-              FAR struct max3421e_chan_s *chan)
+static inline void
+  max3421e_save_toggles(FAR struct max3421e_usbhost_s *priv,
+                       FAR struct max3421e_chan_s *chan)
 {
   chan->toggles = max3421e_getreg(priv, MAX3421E_USBHOST_HCTL);
 }
 
-static inline void max3421e_restore_toggles(FAR struct max3421e_usbhost_s *priv,
-              FAR struct max3421e_chan_s *chan)
+static inline void
+  max3421e_restore_toggles(FAR struct max3421e_usbhost_s *priv,
+                           FAR struct max3421e_chan_s *chan)
 {
   max3421e_modifyreg(priv, MAX3421E_USBHOST_HCTL,
                      USBHOST_HCTL_TOGGLES_MASK,
@@ -1486,25 +1559,25 @@ static void max3421e_transfer_terminate(FAR struct max3421e_usbhost_s *priv,
                                         FAR struct max3421e_chan_s *chan,
                                         int result)
 {
-   /* Disable further SNDBAV, RCVDAV or HXFRDN interrupts */
+  /* Disable further SNDBAV, RCVDAV or HXFRDN interrupts */
 
-   max3421e_int_disable(priv, USBHOST_HIRQ_SNDBAVIRQ |
-                              USBHOST_HIRQ_RCVDAVIRQ |
-                              USBHOST_HIRQ_HXFRDNIRQ);
+  max3421e_int_disable(priv, USBHOST_HIRQ_SNDBAVIRQ |
+                             USBHOST_HIRQ_RCVDAVIRQ |
+                             USBHOST_HIRQ_HXFRDNIRQ);
 
-   /* Save the endpoint toggle settings.
-    *
-    * REVISIT:  The MAX4321E sends fixed DATA0 and DATA1 PID tokens for the
-    * various stages of a CONTROL transfer, regardless of the setting of
-    * the internal data toggle.
-    */
+  /* Save the endpoint toggle settings.
+   *
+   * REVISIT:  The MAX4321E sends fixed DATA0 and DATA1 PID tokens for the
+   * various stages of a CONTROL transfer, regardless of the setting of
+   * the internal data toggle.
+   */
 
-   max3421e_save_toggles(priv, chan);
+  max3421e_save_toggles(priv, chan);
 
-   /* Wake up any waiters for the end of transfer event */
+  /* Wake up any waiters for the end of transfer event */
 
-   DEBUGASSERT(priv->waiter != NULL);
-   max3421e_chan_wakeup(priv, chan, -result);
+  DEBUGASSERT(priv->waiter != NULL);
+  max3421e_chan_wakeup(priv, chan, -result);
 }
 
 /****************************************************************************
@@ -1551,7 +1624,7 @@ static void max3421e_put_sndfifo(FAR struct max3421e_usbhost_s *priv,
 
   for (i = 0;
        i < 2 && committed < priv->buflen &&
-       (max3421e_int_status(priv) & USBHOST_HIRQ_SNDBAVIRQ) == 1;
+       (max3421e_int_status(priv) & USBHOST_HIRQ_SNDBAVIRQ) != 0;
        i++)
     {
       /* Get the size of the biggest thing that we can put in the current
@@ -1727,7 +1800,7 @@ static void max3421e_send_start(FAR struct max3421e_usbhost_s *priv,
 
       max3421e_restore_toggles(priv, chan);
 
-      /* Then load the data into the SNDFIFO and start the transfer*/
+      /* Then load the data into the SNDFIFO and start the transfer */
 
       max3421e_put_sndfifo(priv, chan);
     }
@@ -1840,11 +1913,11 @@ static ssize_t max3421e_out_transfer(FAR struct max3421e_usbhost_s *priv,
               return (ssize_t)ret;
             }
 
-          /* Get the device a little time to catch up.  Then retry the transfer
-           * using the same buffer pointer and length.
+          /* Get the device a little time to catch up.  Then retry the
+           * transfer using the same buffer pointer and length.
            */
 
-          nxsig_usleep(20*1000);
+          nxsig_usleep(20 * 1000);
         }
       else
         {
@@ -2136,8 +2209,8 @@ static int max3421e_ctrl_senddata(FAR struct max3421e_usbhost_s *priv,
  * Name: max3421e_ctrl_recvdata
  *
  * Description:
- *   Receive data in the data phase of an IN control transfer.  Or receive status
- *   in the status phase of an OUT control transfer
+ *   Receive data in the data phase of an IN control transfer.  Or receive
+ *   status in the status phase of an OUT control transfer
  *
  * Assumptions:
  *   The SPI is not locked.  This function is called only from the CTRLIN
@@ -2447,6 +2520,7 @@ static uint8_t max3421e_get_rcvfifo(FAR struct max3421e_usbhost_s *priv,
   priv->xfrd += nrcvd;
 
   /* Discard any byte remaining in the RCVFIFO */
+
   /* REVISIT:  Is this necessary?  Or the MAX3421E automatically discard any
    * unread data?
    */
@@ -2533,10 +2607,10 @@ static void max3421e_recv_continue(FAR struct max3421e_usbhost_s *priv)
    * of the requested data has been received
    */
 
-   if (nrcvd < chan->maxpacket || priv->xfrd >= priv->buflen)
-     {
-       max3421e_transfer_terminate(priv, chan, OK);
-     }
+  if (nrcvd < chan->maxpacket || priv->xfrd >= priv->buflen)
+    {
+      max3421e_transfer_terminate(priv, chan, OK);
+    }
 
   /* If not all of the data has been received, then setup to receive
    * another packet.
@@ -2710,13 +2784,14 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
                     }
                   else
                     {
-                      /* For Isochronous endpoints, bInterval must be 1.  Bulk
-                       * endpoints do not have a polling interval.  Rather,
-                       * the should wait until data is received.
+                      /* For Isochronous endpoints, bInterval must be 1.
+                       * Bulk endpoints do not have a polling interval.
+                       * Rather, the should wait until data is received.
                        *
-                       * REVISIT:  For bulk endpoints this 1 msec delay is only
-                       * intended to give the CPU a break from the bulk EP tight
-                       * polling loop.  But are there performance issues?
+                       * REVISIT:  For bulk endpoints this 1 msec delay is
+                       * only intended to give the CPU a break from the bulk
+                       * EP tight polling loop.  But are there performance
+                       * issues?
                        */
 
                       delay = 1000;
@@ -2725,12 +2800,14 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
                   /* Wait for the next polling interval.  For interrupt and
                    * isochronous endpoints, this is necessary to assure the
                    * polling interval.  It is used in other cases only to
-                   * prevent the polling from consuming too much CPU bandwidth.
+                   * prevent the polling from consuming too much CPU
+                   * bandwidth.
                    *
-                   * Small delays could require more resolution than is provided
-                   * by the system timer.  For example, if the system timer
-                   * resolution is 10MS, then nxsig_usleep(1000) will actually request
-                   * a delay 20MS (due to both quantization and rounding).
+                   * Small delays could require more resolution than is
+                   * provided by the system timer.  For example, if the
+                   * system timer resolution is 10MS, then nxsig_usleep(1000)
+                   * will actually request a delay 20MS (due to both
+                   * quantization and rounding).
                    *
                    * REVISIT: So which is better?  To ignore tiny delays and
                    * hog the system bandwidth?  Or to wait for an excessive
@@ -2871,9 +2948,9 @@ static int max3421e_in_asynch(FAR struct max3421e_usbhost_s *priv,
 
   /* Set up for the transfer based on the direction and the endpoint type */
 
-  max3421_lock(priv);
+  max3421e_lock(priv);
   ret = max3421e_in_setup(priv, chan);
-  max3421_unlock(priv);
+  max3421e_unlock(priv);
 
   if (ret < 0)
     {
@@ -3046,8 +3123,8 @@ static void max3421e_irqwork(FAR void *arg)
 
   max3421e_lock(priv);
 
-  /* Loop while there are pending interrupts to process.  This loop may save a
-   * little interrupt handling overhead.
+  /* Loop while there are pending interrupts to process.  This loop may save
+   * a little interrupt handling overhead.
    */
 
   for (; ; )
@@ -3089,7 +3166,6 @@ static void max3421e_irqwork(FAR void *arg)
           /* Disable further SNDBAV (or HXFRDN) interrupts */
 
           max3421e_int_disable(priv, USBHOST_HIRQ_HXFRDNIRQ);
-
 
           /* Clear the pending HXFRDN interrupt */
 
@@ -3247,7 +3323,8 @@ static inline void max3421e_int_disable(FAR struct max3421e_usbhost_s *priv,
 
 /* Get the set of pending interrupts */
 
-static inline uint8_t max3421e_int_status(FAR struct max3421e_usbhost_s *priv)
+static inline uint8_t
+  max3421e_int_status(FAR struct max3421e_usbhost_s *priv)
 {
   return max3421e_getreg(priv, MAX3421E_USBHOST_HIRQ) & priv->irqset;
 }
@@ -3287,10 +3364,10 @@ static void max3421e_int_wait(FAR struct max3421e_usbhost_s *priv,
  *   Wait for a device to be connected or disconnected to/from a hub port.
  *
  * Input Parameters:
- *   conn - The USB host connection instance obtained as a parameter from the call to
- *      the USB driver initialization logic.
+ *   conn  - The USB host connection instance obtained as a parameter from
+ *           the call to the USB driver initialization logic.
  *   hport - The location to return the hub port descriptor that detected the
- *      connection related event.
+ *           connection related event.
  *
  * Returned Value:
  *   Zero (OK) is returned on success when a device is connected or
@@ -3311,6 +3388,7 @@ static int max3421e_wait(FAR struct usbhost_connection_s *conn,
   FAR struct max3421e_connection_s *maxconn;
   FAR struct max3421e_usbhost_s *priv;
   struct usbhost_hubport_s *connport;
+  int ret;
 
   maxconn = (FAR struct max3421e_connection_s *)conn;
   DEBUGASSERT(maxconn != NULL && maxconn->priv != NULL);
@@ -3322,7 +3400,11 @@ static int max3421e_wait(FAR struct usbhost_connection_s *conn,
     {
       /* We must have exclusive access to the USB host hardware and state structures */
 
-      max3421e_take_exclsem(priv);
+      ret = max3421e_take_exclsem(priv);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Is there a change in the connection state of the single root hub
        * port?
@@ -3371,7 +3453,11 @@ static int max3421e_wait(FAR struct usbhost_connection_s *conn,
 
       priv->pscwait = true;
       max3421e_give_exclsem(priv);
-      max3421e_takesem(&priv->pscsem);
+      ret = max3421e_takesem(&priv->pscsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 }
 
@@ -3389,8 +3475,8 @@ static int max3421e_wait(FAR struct usbhost_connection_s *conn,
  *      device.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   The caller has the SPI bus locked.
@@ -3423,7 +3509,7 @@ static int max3421e_getspeed(FAR struct max3421e_usbhost_s *priv,
    * 100ms.
    */
 
-  nxsig_usleep(100*1000);
+  nxsig_usleep(100 * 1000);
 
   /* Make sure we are still connected */
 
@@ -3472,8 +3558,8 @@ static int max3421e_getspeed(FAR struct max3421e_usbhost_s *priv,
  *      device.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
@@ -3493,7 +3579,11 @@ static int max3421e_enumerate(FAR struct usbhost_connection_s *conn,
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_take_exclsem(priv);
+  ret = max3421e_take_exclsem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* If this is a connection on the root hub, then we need to go to
    * little more effort to get the device speed.  If it is a connection
@@ -3511,8 +3601,8 @@ static int max3421e_enumerate(FAR struct usbhost_connection_s *conn,
       ret = max3421e_getspeed(priv, conn, hport);
       if (ret < 0)
         {
-           max3421e_give_exclsem(priv);
-           return ret;
+          max3421e_give_exclsem(priv);
+          return ret;
         }
     }
 
@@ -3549,14 +3639,14 @@ static int max3421e_enumerate(FAR struct usbhost_connection_s *conn,
   max3421e_lock(priv);
   max3421e_modifyreg(priv, MAX3421E_USBHOST_HCTL,
                      USBHOST_HCTL_TOGGLES_MASK,
-                     USBHOST_HCTL_RCVTOG0| USBHOST_HCTL_SNDTOG0);
+                     USBHOST_HCTL_RCVTOG0 | USBHOST_HCTL_SNDTOG0);
   max3421e_unlock(priv);
 
   max3421e_give_exclsem(priv);
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: max3421e_ep0configure
  *
  * Description:
@@ -3565,36 +3655,43 @@ static int max3421e_enumerate(FAR struct usbhost_connection_s *conn,
  *   external implementation of the enumeration logic.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep0 - The (opaque) EP0 endpoint instance
- *   funcaddr - The USB address of the function containing the endpoint that EP0
- *     controls
- *   speed - The speed of the port USB_SPEED_LOW or _FULL
+ *   drvr          - The USB host driver instance obtained as a parameter
+ *                   from the call to the class create() method.
+ *   ep0           - The (opaque) EP0 endpoint instance
+ *   funcaddr      - The USB address of the function containing the endpoint
+ *                   that EP0 controls
+ *   speed         - The speed of the port USB_SPEED_LOW or _FULL
  *   maxpacketsize - The maximum number of bytes that can be sent to or
- *    received from the endpoint in a single data packet
+ *                   received from the endpoint in a single data packet
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static int max3421e_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+static int max3421e_ep0configure(FAR struct usbhost_driver_s *drvr,
+                                 usbhost_ep_t ep0,
                                  uint8_t funcaddr, uint8_t speed,
                                  uint16_t maxpacketsize)
 {
-  FAR struct max3421e_usbhost_s *priv = (FAR struct max3421e_usbhost_s *)drvr;
+  FAR struct max3421e_usbhost_s *priv =
+    (FAR struct max3421e_usbhost_s *)drvr;
   FAR struct max3421e_chan_s *chan;
+  int ret;
 
   DEBUGASSERT(drvr != NULL && funcaddr < 128 && maxpacketsize <= 64);
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_take_exclsem(priv);
+  ret = max3421e_take_exclsem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Configure the EP0 channel */
 
@@ -3608,39 +3705,41 @@ static int max3421e_ep0configure(FAR struct usbhost_driver_s *drvr, usbhost_ep_t
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: max3421e_epalloc
  *
  * Description:
  *   Allocate and configure one endpoint.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr   - The USB host driver instance obtained as a parameter from the
+ *            call to the class create() method.
  *   epdesc - Describes the endpoint to be allocated.
- *   ep - A memory location provided by the caller in which to receive the
- *      allocated endpoint descriptor.
+ *   ep     - A memory location provided by the caller in which to receive
+ *            the allocated endpoint descriptor.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int max3421e_epalloc(FAR struct usbhost_driver_s *drvr,
                             FAR const struct usbhost_epdesc_s *epdesc,
                             FAR usbhost_ep_t *ep)
 {
-  FAR struct max3421e_usbhost_s *priv = (FAR struct max3421e_usbhost_s *)drvr;
+  FAR struct max3421e_usbhost_s *priv =
+    (FAR struct max3421e_usbhost_s *)drvr;
   struct usbhost_hubport_s *hport;
   FAR struct max3421e_chan_s *chan;
   int chidx;
+  int ret;
 
-  /* Sanity check.  NOTE that this method should only be called if a device is
-   * connected (because we need a valid low speed indication).
+  /* Sanity check.  NOTE that this method should only be called if a device
+   * is connected (because we need a valid low speed indication).
    */
 
   DEBUGASSERT(drvr != 0 && epdesc != NULL && ep != NULL);
@@ -3649,7 +3748,11 @@ static int max3421e_epalloc(FAR struct usbhost_driver_s *drvr,
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_take_exclsem(priv);
+  ret = max3421e_take_exclsem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Allocate a host channel for the endpoint */
 
@@ -3661,10 +3764,10 @@ static int max3421e_epalloc(FAR struct usbhost_driver_s *drvr,
       return chidx;
     }
 
-  /* Decode the endpoint descriptor to initialize the channel data structures.
-   * Note:  Here we depend on the fact that the endpoint point type is
-   * encoded in the same way in the endpoint descriptor as it is in the OTG
-   * HS hardware.
+  /* Decode the endpoint descriptor to initialize the channel data
+   * structures.  Note:  Here we depend on the fact that the endpoint point
+   * type is encoded in the same way in the endpoint descriptor as it is in
+   * the OTG HS hardware.
    */
 
   chan            = &priv->chan[chidx];
@@ -3684,68 +3787,76 @@ static int max3421e_epalloc(FAR struct usbhost_driver_s *drvr,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: max3421e_epfree
  *
  * Description:
  *   Free and endpoint previously allocated by DRVR_EPALLOC.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The endpoint to be freed.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *          call to the class create() method.
+ *   ep   - The endpoint to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static int max3421e_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+static int max3421e_epfree(FAR struct usbhost_driver_s *drvr,
+                           usbhost_ep_t ep)
 {
-  FAR struct max3421e_usbhost_s *priv = (FAR struct max3421e_usbhost_s *)drvr;
+  FAR struct max3421e_usbhost_s *priv =
+    (FAR struct max3421e_usbhost_s *)drvr;
+  int ret;
 
   DEBUGASSERT(priv);
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_take_exclsem(priv);
+  ret = max3421e_take_exclsem(priv);
+  if (ret >= 0)
+    {
+      /* Halt the channel and mark the channel available */
 
-  /* Halt the channel and mark the channel available */
+      max3421e_chan_free(priv, (intptr_t)ep);
+      max3421e_give_exclsem(priv);
+    }
 
-  max3421e_chan_free(priv, (intptr_t)ep);
-  max3421e_give_exclsem(priv);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
  * Name: max3421e_alloc
  *
  * Description:
- *   Some hardware supports special memory in which request and descriptor data can
- *   be accessed more efficiently.  This method provides a mechanism to allocate
- *   the request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kmm_malloc.
+ *   Some hardware supports special memory in which request and descriptor
+ *   data can be accessed more efficiently.  This method provides a
+ *   mechanism to allocate the request/descriptor memory.  If the underlying
+ *   hardware does not support such "special" memory, this functions may
+ *   simply map to kmm_malloc.
  *
- *   This interface was optimized under a particular assumption.  It was assumed
- *   that the driver maintains a pool of small, pre-allocated buffers for descriptor
- *   traffic.  NOTE that size is not an input, but an output:  The size of the
- *   pre-allocated buffer is returned.
+ *   This interface was optimized under a particular assumption.  It was
+ *   assumed that the driver maintains a pool of small, pre-allocated
+ *   buffers for descriptor traffic.  NOTE that size is not an input, but
+ *   an output:  The size of the pre-allocated buffer is returned.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   buffer - The address of a memory location provided by the caller in which to
- *     return the allocated buffer memory address.
- *   maxlen - The address of a memory location provided by the caller in which to
- *     return the maximum size of the allocated buffer memory.
+ *   drvr   - The USB host driver instance obtained as a parameter from the
+ *            call to the class create() method.
+ *   buffer - The address of a memory location provided by the caller in
+ *            which to return the allocated buffer memory address.
+ *   maxlen - The address of a memory location provided by the caller in
+ *            which to return the maximum size of the allocated buffer
+ *             memory.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -3779,26 +3890,28 @@ static int max3421e_alloc(FAR struct usbhost_driver_s *drvr,
  * Name: max3421e_free
  *
  * Description:
- *   Some hardware supports special memory in which request and descriptor data can
- *   be accessed more efficiently.  This method provides a mechanism to free that
- *   request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kmm_free().
+ *   Some hardware supports special memory in which request and descriptor
+ *   data can be accessed more efficiently.  This method provides a
+ *   mechanism to free that request/descriptor memory.  If the underlying
+ *   hardware does not support such "special" memory, this functions may
+ *   simply map to kmm_free().
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr   - The USB host driver instance obtained as a parameter from the
+ *            call to the class create() method.
  *   buffer - The address of the allocated buffer memory to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   - Never called from an interrupt handler.
  *
  ****************************************************************************/
 
-static int max3421e_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+static int max3421e_free(FAR struct usbhost_driver_s *drvr,
+                         FAR uint8_t *buffer)
 {
   /* There is no special memory requirement */
 
@@ -3807,32 +3920,34 @@ static int max3421e_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: max3421e_ioalloc
  *
  * Description:
  *   Some hardware supports special memory in which larger IO buffers can
- *   be accessed more efficiently.  This method provides a mechanism to allocate
- *   the request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kmm_malloc.
+ *   be accessed more efficiently.  This method provides a mechanism to
+ *   allocate the request/descriptor memory.  If the underlying hardware
+ *   does not support such "special" memory, this functions may simply map
+ *   to kmm_malloc.
  *
- *   This interface differs from DRVR_ALLOC in that the buffers are variable-sized.
+ *   This interface differs from DRVR_ALLOC in that the buffers are
+ *   variable-sized.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   buffer - The address of a memory location provided by the caller in which to
- *     return the allocated buffer memory address.
+ *   drvr   - The USB host driver instance obtained as a parameter from the
+ *            call to the class create() method.
+ *   buffer - The address of a memory location provided by the caller in
+ *            which to return the allocated buffer memory address.
  *   buflen - The size of the buffer required.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int max3421e_ioalloc(FAR struct usbhost_driver_s *drvr,
                             FAR uint8_t **buffer, size_t buflen)
@@ -3855,30 +3970,31 @@ static int max3421e_ioalloc(FAR struct usbhost_driver_s *drvr,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: max3421e_iofree
  *
  * Description:
- *   Some hardware supports special memory in which IO data can  be accessed more
- *   efficiently.  This method provides a mechanism to free that IO buffer
- *   memory.  If the underlying hardware does not support such "special" memory,
- *   this functions may simply map to kmm_free().
+ *   Some hardware supports special memory in which IO data can  be accessed
+ *   more efficiently.  This method provides a mechanism to free that IO
+ *   buffer memory.  If the underlying hardware does not support such
+ *   "special" memory, this functions may simply map to kmm_free().
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr   - The USB host driver instance obtained as a parameter from the
+ *            call to the class create() method.
  *   buffer - The address of the allocated buffer memory to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static int max3421e_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
+static int max3421e_iofree(FAR struct usbhost_driver_s *drvr,
+                           FAR uint8_t *buffer)
 {
   /* There is no special memory requirement */
 
@@ -3892,29 +4008,30 @@ static int max3421e_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffe
  *
  * Description:
  *   Process a IN or OUT request on the control endpoint.  These methods
- *   will enqueue the request and wait for it to complete.  Only one transfer may be
- *   queued; Neither these methods nor the transfer() method can be called again
- *   until the control transfer functions returns.
+ *   will enqueue the request and wait for it to complete.  Only one
+ *   transfer may be queued; Neither these methods nor the transfer() method
+ *   can be called again until the control transfer functions returns.
  *
  *   These are blocking methods; these functions will not return until the
  *   control transfer has completed.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep0 - The control endpoint to send/receive the control request.
- *   req - Describes the request to be sent.  This request must lie in memory
- *      created by DRVR_ALLOC.
+ *   drvr   - The USB host driver instance obtained as a parameter from
+ *            the call to the class create() method.
+ *   ep0    - The control endpoint to send/receive the control request.
+ *   req    - Describes the request to be sent.  This request must lie in
+ *            memory created by DRVR_ALLOC.
  *   buffer - A buffer used for sending the request and for returning any
- *     responses.  This buffer must be large enough to hold the length value
- *     in the request description. buffer must have been allocated using DRVR_ALLOC.
+ *            responses.  This buffer must be large enough to hold the
+ *            length value in the request description. buffer must have been
+ *            allocated using DRVR_ALLOC.
  *
- *   NOTE: On an IN transaction, req and buffer may refer to the same allocated
- *   memory.
+ *   NOTE: On an IN transaction, req and buffer may refer to the same
+ *   allocated memory.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -3922,7 +4039,8 @@ static int max3421e_iofree(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffe
  *
  ****************************************************************************/
 
-static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr,
+                           usbhost_ep_t ep0,
                            FAR const struct usb_ctrlreq_s *req,
                            FAR uint8_t *buffer)
 {
@@ -3951,7 +4069,11 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_take_exclsem(priv);
+  ret = max3421e_take_exclsem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Loop, retrying until the retry time expires */
 
@@ -3972,6 +4094,7 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
       do
         {
           /* Handle the IN data phase (if any) */
+
           /* The MAX4321E sends fixed DATA0 and DATA1 PID tokens for the
            * various stages of a CONTROL transfer, regardless of the
            * setting of the internal data toggle.
@@ -4015,11 +4138,13 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   return -ETIMEDOUT;
 }
 
-static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
+static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr,
+                            usbhost_ep_t ep0,
                             FAR const struct usb_ctrlreq_s *req,
                             FAR const uint8_t *buffer)
 {
-  FAR struct max3421e_usbhost_s *priv = (FAR struct max3421e_usbhost_s *)drvr;
+  FAR struct max3421e_usbhost_s *priv =
+    (FAR struct max3421e_usbhost_s *)drvr;
   FAR struct max3421e_chan_s *chan;
   uint16_t buflen;
   clock_t start;
@@ -4044,7 +4169,11 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_take_exclsem(priv);
+  ret = max3421e_take_exclsem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Loop, retrying until the retry time expires */
 
@@ -4065,9 +4194,10 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
       do
         {
           /* Handle the data OUT phase (if any) */
+
           /* The MAX4321E sends fixed DATA0 and DATA1 PID tokens for the
-           * various stages of a CONTROL transfer, regardless of the
-           * setting of the internal data toggle.
+           * various stages of a CONTROL transfer, regardless of the setting
+           * of the internal data toggle.
            */
 
           if (buflen > 0)
@@ -4115,26 +4245,27 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request, blocking until the transfer completes. Only
- *   one transfer may be  queued; Neither this method nor the ctrlin or
+ *   enqueue the transfer request, blocking until the transfer completes.
+ *   Only one transfer may be  queued; Neither this method nor the ctrlin or
  *   ctrlout methods can be called again until this function returns.
  *
  *   This is a blocking method; this functions will not return until the
  *   transfer has completed.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
- *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   drvr   - The USB host driver instance obtained as a parameter from the
+ *            call to the class create() method.
+ *   ep     - The IN or OUT endpoint descriptor for the device endpoint on
+ *            which to perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or
+ *            received (IN endpoint).  buffer must have been allocated
+ *            using DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
  *
  * Returned Value:
  *   On success, a non-negative value is returned that indicates the number
- *   of bytes successfully transferred.  On a failure, a negated errno value is
- *   returned that indicates the nature of the failure:
+ *   of bytes successfully transferred.  On a failure, a negated errno value
+ *   is returned that indicates the nature of the failure:
  *
  *     EAGAIN - If devices NAKs the transfer (or NYET or other error where
  *              it may be appropriate to restart the entire transaction).
@@ -4148,12 +4279,15 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *
  ****************************************************************************/
 
-static ssize_t max3421e_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                                 FAR uint8_t *buffer, size_t buflen)
+static ssize_t max3421e_transfer(FAR struct usbhost_driver_s *drvr,
+                                 usbhost_ep_t ep, FAR uint8_t *buffer,
+                                 size_t buflen)
 {
-  FAR struct max3421e_usbhost_s *priv  = (FAR struct max3421e_usbhost_s *)drvr;
+  FAR struct max3421e_usbhost_s *priv =
+    (FAR struct max3421e_usbhost_s *)drvr;
   FAR struct max3421e_chan_s *chan;
   ssize_t nbytes;
+  int ret;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT((intptr_t)ep >= 0 && (intptr_t)ep < MAX3421E_NHOST_CHANNELS);
@@ -4163,7 +4297,11 @@ static ssize_t max3421e_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_take_exclsem(priv);
+  ret = max3421e_take_exclsem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Handle IN and OUT transfer differently */
 
@@ -4194,20 +4332,21 @@ static ssize_t max3421e_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t
  *   ctrlout methods can be called again until the transfer completes.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
- *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
- *   buflen - The length of the data to be sent or received.
+ *   drvr     - The USB host driver instance obtained as a parameter from
+ *              the call to the class create() method.
+ *   ep       - The IN or OUT endpoint descriptor for the device endpoint
+ *              on which to perform the transfer.
+ *   buffer   - A buffer containing the data to be sent (OUT endpoint) or
+ *              received (IN endpoint).  buffer must have been allocated
+ *              using DRVR_ALLOC
+ *   buflen   - The length of the data to be sent or received.
  *   callback - This function will be called when the transfer completes.
- *   arg - The arbitrary parameter that will be passed to the callback function
- *     when the transfer completes.
+ *   arg      - The arbitrary parameter that will be passed to the callback
+ *              function when the transfer completes.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -4216,11 +4355,13 @@ static ssize_t max3421e_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int max3421e_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+static int max3421e_asynch(FAR struct usbhost_driver_s *drvr,
+                           usbhost_ep_t ep,
                            FAR uint8_t *buffer, size_t buflen,
                            usbhost_asynch_t callback, FAR void *arg)
 {
-  FAR struct max3421e_usbhost_s *priv  = (FAR struct max3421e_usbhost_s *)drvr;
+  FAR struct max3421e_usbhost_s *priv =
+    (FAR struct max3421e_usbhost_s *)drvr;
   FAR struct max3421e_chan_s *chan;
   int ret;
 
@@ -4232,7 +4373,11 @@ static int max3421e_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  max3421e_take_exclsem(priv);
+  ret = max3421e_take_exclsem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Handle IN and OUT transfer slightly differently */
 
@@ -4250,7 +4395,7 @@ static int max3421e_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
-/************************************************************************************
+/****************************************************************************
  * Name: max3421e_cancel
  *
  * Description:
@@ -4258,20 +4403,22 @@ static int max3421e_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
  *   asynchronous transfer will complete normally with the error -ESHUTDOWN.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which an
- *      asynchronous transfer should be transferred.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *          call to the class create() method.
+ *   ep   - The IN or OUT endpoint descriptor for the device endpoint on
+ *          which an asynchronous transfer should be transferred.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static int max3421e_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+static int max3421e_cancel(FAR struct usbhost_driver_s *drvr,
+                           usbhost_ep_t ep)
 {
-  FAR struct max3421e_usbhost_s *priv  = (FAR struct max3421e_usbhost_s *)drvr;
+  FAR struct max3421e_usbhost_s *priv =
+    (FAR struct max3421e_usbhost_s *)drvr;
   FAR struct max3421e_chan_s *chan;
   irqstate_t flags;
 
@@ -4281,8 +4428,8 @@ static int max3421e_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   usbhost_vtrace1(MAX3421E_VTRACE1_CANCEL, (intptr_t)ep);
 
-  /* We need to disable interrupts to avoid race conditions with the asynchronous
-   * completion of the transfer being canceled.
+  /* We need to disable interrupts to avoid race conditions with the
+   * asynchronous completion of the transfer being canceled.
    */
 
   flags = enter_critical_section();
@@ -4338,7 +4485,7 @@ static int max3421e_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: max3421e_connect
  *
  * Description:
@@ -4347,24 +4494,25 @@ static int max3421e_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   and port description to the system.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   hport - The descriptor of the hub port that detected the connection
- *      related event
+ *   drvr      - The USB host driver instance obtained as a parameter from
+ *               the call to the class create() method.
+ *   hport     - The descriptor of the hub port that detected the connection
+ *               related event
  *   connected - True: device connected; false: device disconnected
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_HUB
 static int max3421e_connect(FAR struct usbhost_driver_s *drvr,
                             FAR struct usbhost_hubport_s *hport,
                             bool connected)
 {
-  FAR struct max3421e_usbhost_s *priv = (FAR struct max3421e_usbhost_s *)drvr;
+  FAR struct max3421e_usbhost_s *priv =
+    (FAR struct max3421e_usbhost_s *)drvr;
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL && hport != NULL);
@@ -4393,17 +4541,18 @@ static int max3421e_connect(FAR struct usbhost_driver_s *drvr,
  * Name: max3421e_disconnect
  *
  * Description:
- *   Called by the class when an error occurs and driver has been disconnected.
- *   The USB host driver should discard the handle to the class instance (it is
- *   stale) and not attempt any further interaction with the class driver instance
- *   (until a new instance is received from the create() method).  The driver
- *   should not called the class' disconnected() method.
+ *   Called by the class when an error occurs and driver has been
+ *   disconnected.  The USB host driver should discard the handle to the
+ *   class instance (it is stale) and not attempt any further interaction
+ *   with the class driver instance (until a new instance is received from
+ *   the create() method).  The driver should not called the class'
+ *   disconnected() method.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   hport - The port from which the device is being disconnected.  Might be a port
- *      on a hub.
+ *   drvr  - The USB host driver instance obtained as a parameter from the
+ *           call to the class create() method.
+ *   hport - The port from which the device is being disconnected.  Might be
+ *           a port on a hub.
  *
  * Returned Value:
  *   None
@@ -4505,6 +4654,7 @@ static int max3421e_startsof(FAR struct max3421e_usbhost_s *priv)
     {
       default:
       case (USBHOST_HRSL_KSTATUS | USBHOST_HRSL_JSTATUS):
+
         /* Invalid state */
 
         usbhost_trace1(MAX3421E_TRACE1_BAD_JKSTATE, regval);
@@ -4512,11 +4662,13 @@ static int max3421e_startsof(FAR struct max3421e_usbhost_s *priv)
         /* Fall through */
 
       case 0:
+
         /* 0:  Not connected */
 
         return -ENODEV;
 
       case USBHOST_HRSL_KSTATUS:
+
         /* J=0, K=1: low-speed in full-speed (or vice versa) */
 
         if (lowspeed)
@@ -4534,6 +4686,7 @@ static int max3421e_startsof(FAR struct max3421e_usbhost_s *priv)
         break;
 
       case USBHOST_HRSL_JSTATUS:
+
         /* J=1,K=0: full-speed in full-speed (or vice versa) */
 
         if (lowspeed)
@@ -4548,6 +4701,7 @@ static int max3421e_startsof(FAR struct max3421e_usbhost_s *priv)
 
             clrbits |= USBHOST_MODE_SPEED;
           }
+
         break;
     }
 
@@ -4555,10 +4709,10 @@ static int max3421e_startsof(FAR struct max3421e_usbhost_s *priv)
 
   max3421e_modifyreg(priv, MAX3421E_USBHOST_MODE, clrbits, setbits);
 
- /* Wait for the first SOF received and 20ms has passed */
+  /* Wait for the first SOF received and 20ms has passed */
 
   max3421e_int_wait(priv, USBHOST_HIRQ_FRAMEIRQ, 0);
-  nxsig_usleep(20*1000);
+  nxsig_usleep(20 * 1000);
   return OK;
 }
 
@@ -4868,18 +5022,18 @@ errout_with_alloc:
   return NULL;
 }
 
-/********************************************************************************************
+/****************************************************************************
  * Name: usbhost_trformat1 and usbhost_trformat2
  *
  * Description:
  *   This interface must be provided by platform specific logic that knows
  *   the HCDs encoding of USB trace data.
  *
- *   Given an 9-bit index, return a format string suitable for use with, say,
- *   printf.  The returned format is expected to handle two unsigned integer
- *   values.
+ *   Given an 9-bit index, return a format string suitable for use with,
+ *   say, printf.  The returned format is expected to handle two unsigned
+ *   integer values.
  *
- ********************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USBHOST_TRACE
 FAR const char *usbhost_trformat1(uint16_t id)

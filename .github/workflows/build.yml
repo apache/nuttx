@@ -1,0 +1,70 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: PR Check CI (build)
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    env:
+      DOCKER_BUILDKIT: 1
+
+    strategy:
+      matrix:
+        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, mips-riscv-x86-xtensa, sim]
+    steps:
+    - name: Checkout nuttx repo
+      uses: actions/checkout@v2
+      with:
+        repository: apache/incubator-nuttx
+        path: nuttx
+        fetch-depth: 0
+
+    - name: Fetch nuttx tags
+      run: |
+        cd nuttx
+        git fetch --tags
+
+    - name: Checkout apps repo
+      uses: actions/checkout@v2
+      with:
+        repository: apache/incubator-nuttx-apps
+        path: apps
+        fetch-depth: 0
+
+    - name: Checkout testing repo
+      uses: actions/checkout@v2
+      with:
+        repository: apache/incubator-nuttx-testing
+        path: testing
+
+    - name: Docker Login
+      uses: azure/docker-login@v1
+      with:
+        login-server: docker.pkg.github.com
+        username: ${GITHUB_ACTOR}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Run Pull Container
+      uses: ./testing/.github/actions/ci-container
+
+    - name: Run builds
+      uses: ./testing/.github/actions/ci-container
+      env:
+        BLOBDIR: /tools/blobs
+      with:
+        run: |
+          cd testing
+          ./cibuild.sh -x testlist/${{matrix.boards}}.dat

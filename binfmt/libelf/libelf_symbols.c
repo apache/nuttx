@@ -71,8 +71,8 @@
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
- *   EINVAL - There is something inconsistent in the symbol table (should only
- *            happen if the file is corrupted).
+ *   EINVAL - There is something inconsistent in the symbol table (should
+ *            only happen if the file is corrupted).
  *   ESRCH - Symbol has no name
  *
  ****************************************************************************/
@@ -252,8 +252,8 @@ int elf_readsym(FAR struct elf_loadinfo_s *loadinfo, int index,
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
- *   EINVAL - There is something inconsistent in the symbol table (should only
- *            happen if the file is corrupted).
+ *   EINVAL - There is something inconsistent in the symbol table (should
+ *            only happen if the file is corrupted).
  *   ENOSYS - Symbol lies in common
  *   ESRCH  - Symbol has no name
  *   ENOENT - Symbol undefined and not provided via a symbol table
@@ -325,7 +325,7 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
               loadinfo->iobuffer, sym->st_value, symbol->sym_value,
               sym->st_value + symbol->sym_value);
 
-        sym->st_value += (Elf_Word)((uintptr_t)symbol->sym_value);
+        sym->st_value += ((uintptr_t)symbol->sym_value);
       }
       break;
 

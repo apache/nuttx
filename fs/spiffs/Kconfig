@@ -6,8 +6,6 @@
 config FS_SPIFFS
 	bool "SPIFFS File System"
 	default n
-	select FS_READABLE
-	select FS_WRITABLE
 	depends on !DISABLE_MOUNTPOINT
 	---help---
 		Build the SPIFFS file system.  This is a port of version 0.3.7 of

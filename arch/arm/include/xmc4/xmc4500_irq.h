@@ -1,4 +1,4 @@
-/*****************************************************************************
+/********************************************************************************************
  * arch/arm/include/xmc4/xmc4500_.h
  *
  *   Copyright (C) 2017 Gregory Nutt. All rights reserved.
@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ********************************************************************************************/
 
 /* This file should never be included directed but, rather, only indirectly
  * through nuttx/irq.h
@@ -40,15 +40,15 @@
 #ifndef xmc4__ARCH_ARM_INCLUDE_XMC4_XM4500_IRQ_H
 #define xmc4__ARCH_ARM_INCLUDE_XMC4_XM4500_IRQ_H
 
-/*****************************************************************************
+/********************************************************************************************
  * Included Files
- ****************************************************************************/
+ ********************************************************************************************/
 
 #include <nuttx/config.h>
 
-/*****************************************************************************
+/********************************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
+ ********************************************************************************************/
 
 /* IRQ numbers.  The IRQ number corresponds vector number and hence map
  * directly to bits in the NVIC.  This does, however, waste several words of
@@ -188,38 +188,14 @@
 #define XMC4_IRQ_GPCMA1_SR0 (XMC4_IRQ_FIRST + 110) /* 110: GPDMA1, SR0 */
 #define XMC4_IRQ_RESVD111   (XMC4_IRQ_FIRST + 111) /* 111: Reserved */
 
-#define XMC4_IRQ_NEXTINTS   112                  /* 112 Non core IRQs*/
-#define XMC4_IRQ_NVECTORS   (XMC4_IRQ_FIRST + XMC4_IRQ_NEXTINTS) /* 128 vectors */
+#define XMC4_IRQ_NEXTINTS   112                    /* 112 Non core IRQs */
+
+/* 128 vectors */
+
+#define XMC4_IRQ_NVECTORS   (XMC4_IRQ_FIRST + XMC4_IRQ_NEXTINTS)
 
 /* GPIO IRQ interrupts -- To be provided */
 
 #define NR_IRQS             XMC4_IRQ_NVECTORS
-
-/*****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/*****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/*****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-#endif
 
 #endif /* xmc4__ARCH_ARM_INCLUDE_XMC4_XM4500_IRQ_H */

@@ -56,6 +56,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_FILEMTD_BLOCKSIZE
@@ -383,9 +384,9 @@ static ssize_t filemtd_byteread(FAR struct mtd_dev_s *dev, off_t offset,
   /* Don't let read read past end of buffer */
 
   if (offset + nbytes > priv->nblocks * priv->erasesize)
-   {
-     return 0;
-   }
+    {
+      return 0;
+    }
 
   filemtd_read(priv, buf, offset, nbytes);
   return nbytes;
@@ -438,8 +439,8 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 
           if (geo)
             {
-              /* Populate the geometry structure with information need to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information need to
+               * know the capacity and how to access the device.
                */
 
               geo->blocksize    = priv->blocksize;
@@ -486,8 +487,9 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path, size_t offset,
-                                          size_t mtdlen, int16_t sectsize,
+FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path,
+                                          size_t offset, size_t mtdlen,
+                                          int16_t sectsize,
                                           int32_t erasesize)
 {
   FAR struct file_dev_s *priv;
@@ -506,10 +508,7 @@ FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path, size_t offset,
 
   /* Determine the file open mode */
 
-  mode  = O_RDOK;
-#ifdef CONFIG_FS_WRITABLE
-  mode |= O_WROK;
-#endif
+  mode = O_RDOK |= O_WROK;
 
   /* Try to open the file.  NOTE that block devices will use a character
    * driver proxy.

@@ -296,17 +296,17 @@ define COPYFILE
 endef
 endif
 
-# CATFILE - Cat and append a list of files
+# CATFILE - Cat a list of files
 #
 # USAGE: $(call CATFILE,dest,src1,src2,src3,...)
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 define CATFILE
-	$(Q) type $(2) >> $1
+	$(Q) type $(2) > $1
 endef
 else
 define CATFILE
-	$(Q) cat $(2) >> $1
+	$(Q) cat $(2) > $1
 endef
 endif
 
@@ -346,7 +346,11 @@ endif
 # args: $1 - newfile:  Temporary file to test
 #       $2 - oldfile:  File to replace
 
-ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+define TESTANDREPLACEFILE
+	$(Q) move /Y $1 $2
+endef
+else
 define TESTANDREPLACEFILE
 	if [ -f $2 ]; then \
 		if cmp $1 $2; then \
@@ -359,3 +363,9 @@ define TESTANDREPLACEFILE
 	fi
 endef
 endif
+
+# Some defaults.
+# $(TOPDIR)/Make.defs can override these appropriately.
+
+MODULECC = $(CC)
+MODULELD = $(LD)

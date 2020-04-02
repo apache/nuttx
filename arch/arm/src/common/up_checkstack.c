@@ -51,6 +51,7 @@
 
 #include "sched/sched.h"
 #include "up_internal.h"
+#include "chip.h"
 
 #ifdef CONFIG_STACK_COLORATION
 
@@ -140,7 +141,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
       int j;
 
       ptr = (FAR uint32_t *)start;
-      for (i = 0; i < size; i += 4*64)
+      for (i = 0; i < size; i += 4 * 64)
         {
           for (j = 0; j < 64; j++)
             {
@@ -211,9 +212,15 @@ ssize_t up_check_stack_remain(void)
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 size_t up_check_intstack(void)
 {
+#ifdef CONFIG_SMP
+  return do_stackcheck(up_intstack_base(),
+                       (CONFIG_ARCH_INTERRUPTSTACK & ~3),
+                       true);
+#else
   return do_stackcheck((uintptr_t)&g_intstackalloc,
                        (CONFIG_ARCH_INTERRUPTSTACK & ~3),
                        true);
+#endif
 }
 
 size_t up_check_intstack_remain(void)

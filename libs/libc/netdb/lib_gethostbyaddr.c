@@ -40,12 +40,10 @@
 #include <nuttx/config.h>
 
 #include <netdb.h>
-#include <errno.h>
 
-#include "libc.h"
 #include "netdb/lib_netdb.h"
 
-#ifdef CONFIG_NETDB_HOSTFILE
+#ifdef CONFIG_LIBC_NETDB
 
 /****************************************************************************
  * Public Functions
@@ -77,16 +75,15 @@
  *
  ****************************************************************************/
 
-FAR struct hostent *gethostbyaddr(FAR const void *addr, socklen_t len, int type)
+FAR struct hostent *gethostbyaddr(FAR const void *addr,
+                                  socklen_t len, int type)
 {
+  FAR struct hostent *res;
   int ret;
 
-  DEBUGASSERT(addr != NULL);
-  DEBUGASSERT(type == AF_INET || type == AF_INET6);
-
   ret = gethostbyaddr_r(addr, len, type, &g_hostent, g_hostbuffer,
-                        CONFIG_NETDB_BUFSIZE, &h_errno);
-  return ret == 0 ? &g_hostent : NULL;
+                        CONFIG_NETDB_BUFSIZE, &res, &h_errno);
+  return ret == 0 ? res : NULL;
 }
 
-#endif /* CONFIG_NETDB_HOSTFILE */
+#endif /* CONFIG_LIBC_NETDB */

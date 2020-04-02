@@ -132,7 +132,7 @@ int nxsem_post(FAR sem_t *sem)
 
       sched_lock();
 #endif
-      /* If the result of of semaphore unlock is non-positive, then
+      /* If the result of semaphore unlock is non-positive, then
        * there must be some task waiting for the semaphore.
        */
 

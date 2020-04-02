@@ -58,11 +58,10 @@
 FAR struct servent *getservbyport(int port, FAR const char *proto)
 {
   static struct servent ent;
-  static FAR char *buf[2];
-  struct servent *res;
+  FAR struct servent *res;
   int ret;
 
-  ret = getservbyport_r(port, proto, &ent, (FAR void *)buf, sizeof buf, &res);
+  ret = getservbyport_r(port, proto, &ent, NULL, 0, &res);
   return (ret != OK) ? NULL : res;
 }
 

@@ -54,6 +54,11 @@ CONFIG_VERSION_STRING ?= "0.0"
 CONFIG_VERSION_BUILD ?= "0"
 
 VERSION_ARG = -v $(CONFIG_VERSION_STRING) -b $(CONFIG_VERSION_BUILD)
+else
+
+# Generate .version every time from GIT history
+
+.PHONY: $(TOPDIR)/.version
 endif
 
 # Control build verbosity
@@ -63,12 +68,10 @@ endif
 
 ifeq ($(V),1)
 export Q :=
-else
-ifeq ($(V),2)
+else ifeq ($(V),2)
 export Q :=
 else
 export Q := @
-endif
 endif
 
 # Default tools
@@ -151,12 +154,10 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 include tools/ProtectedLibs.mk
-else
-ifeq ($(CONFIG_BUILD_KERNEL),y)
+else ifeq ($(CONFIG_BUILD_KERNEL),y)
 include tools/KernelLibs.mk
 else
 include tools/FlatLibs.mk
-endif
 endif
 
 # LINKLIBS derives from NUTTXLIBS and is simply the same list with the
@@ -195,9 +196,6 @@ all: $(BIN)
 .PHONY: dirlinks context clean_context check_context config oldconfig menuconfig nconfig qconfig gconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
 .PHONY: pass1 pass1deps pass1dep
 .PHONY: pass2 pass2deps pass2dep
-ifeq ($(GIT_DIR),y)
-.PHONY: $(TOPDIR)/.version
-endif
 
 # Target used to copy include/nuttx/lib/math.h.  If CONFIG_ARCH_MATH_H is
 # defined, then there is an architecture specific math.h header file
@@ -217,10 +215,8 @@ endif
 
 ifeq ($(CONFIG_ARCH_MATH_H),y)
 NEED_MATH_H = y
-else
-ifeq ($(CONFIG_LIBM),y)
+else ifeq ($(CONFIG_LIBM),y)
 NEED_MATH_H = y
-endif
 endif
 
 ifeq ($(NEED_MATH_H),y)
@@ -272,7 +268,7 @@ endif
 # tools/mkversion tool is built and used to create include/nuttx/version.h
 
 tools/mkversion$(HOSTEXEEXT):
-	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkversion$(HOSTEXEEXT)
+	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" mkversion$(HOSTEXEEXT)
 
 # [Re-]create .version if it doesn't already exist.
 
@@ -291,14 +287,11 @@ include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion$(HOSTEXEEXT)
 # tools/mkconfig tool is built and used to create include/nuttx/config.h
 
 tools/mkconfig$(HOSTEXEEXT):
-	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkconfig$(HOSTEXEEXT)
-
-staging:
-	$(Q) mkdir -p staging
+	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" mkconfig$(HOSTEXEEXT)
 
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig$(HOSTEXEEXT)
-	$(Q) tools/mkconfig $(TOPDIR) > include/nuttx/config.h.tmp
-	$(Q) $(call TESTANDREPLACEFILE, include/nuttx/config.h.tmp, $@)
+	$(Q) tools/mkconfig $(TOPDIR) > $@.tmp
+	$(Q) $(call TESTANDREPLACEFILE, $@.tmp, $@)
 
 # Targets used to create dependencies
 
@@ -313,18 +306,6 @@ tools/cnvwindeps$(HOSTEXEEXT):
 # Directories links.  Most of establishing the NuttX configuration involves
 # setting up symbolic links with 'generic' directory names to specific,
 # configured directories.
-
-# Make.defs:
-# 	$(Q) echo "No Make.defs file found, creating one"
-# 	$(Q) echo "include $(TOPDIR)$(DELIM).config" > Make.defs
-# 	$(Q) echo "include $(TOPDIR)$(DELIM)tools$(DELIM)Config.mk" >> Make.defs
-
-# tools/initialconfig$(HOSTEXEEXT):
-# 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)" initialconfig$(HOSTEXEEXT)
-#
-# .config: tools/initialconfig$(HOSTEXEEXT)
-# 	$(Q) echo "No .config file found, creating one"
-# 	$(Q) tools/initialconfig$(HOSTEXEEXT)
 
 # Link the arch/<arch-name>/include directory to include/arch
 
@@ -357,7 +338,7 @@ endif
 
 # Link the boards/<arch>/<chip>/drivers dir to drivers/platform
 
-$(ARCH_SRC)/drivers: .config
+drivers/platform: .config
 	@echo "LN: $(TOPDIR)/drivers/platform to $(BOARD_DIR)/drivers"
 	$(Q) $(DIRLINK) $(BOARD_DIR)/drivers $(TOPDIR)/drivers/platform
 
@@ -377,7 +358,7 @@ ifneq ($(CONFIG_ARCH_CHIP),)
 	$(Q) $(DIRLINK) $(TOPDIR)/$(ARCH_INC)/$(CONFIG_ARCH_CHIP) include/arch/chip
 endif
 
-dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip $(ARCH_SRC)/drivers
+dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip drivers/platform
 	$(Q) $(MAKE) -C boards dirlinks TOPDIR="$(TOPDIR)"
 	$(Q) $(MAKE) -C openamp dirlinks TOPDIR="$(TOPDIR)"
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks TOPDIR="$(TOPDIR)"
@@ -389,7 +370,8 @@ dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(
 # the config.h and version.h header files in the include/nuttx directory and
 # the establishment of symbolic links to configured directories.
 
-context: check_context staging include/nuttx/config.h include/nuttx/version.h include/math.h include/float.h include/stdarg.h include/setjmp.h dirlinks
+context: check_context include/nuttx/config.h include/nuttx/version.h include/math.h include/float.h include/stdarg.h include/setjmp.h dirlinks
+	$(Q) mkdir -p staging
 	$(Q) for dir in $(CONTEXTDIRS) ; do \
 		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" context; \
 	done
@@ -565,17 +547,15 @@ do_gconfig: dirlinks apps_preconfig
 
 gconfig: do_gconfig clean_context
 
-do_savedefconfig: dirlinks apps_preconfig
-
-savedefconfig: do_savedefconfig
+savedefconfig: dirlinks apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-conf --savedefconfig defconfig.tmp Kconfig
 	$(Q) sed -i -e "/CONFIG_APPS_DIR=/d" defconfig.tmp
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
 	$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp; true
-	$(Q) grep "^CONFIG_ARCH_CHIP=" .config >> defconfig.tmp; true
-	$(Q) grep "CONFIG_ARCH_BOARD=" .config && grep "CONFIG_ARCH_BOARD=" .config >> defconfig.tmp; true
-	$(Q) grep "^CONFIG_ARCH_CUSTOM" .config && grep "^CONFIG_ARCH_CUSTOM" .config >> defconfig.tmp; true
-	$(Q) grep "^CONFIG_ARCH_BOARD_CUSTOM=" .config && grep "^CONFIG_ARCH_BOARD_CUSTOM" .config >> defconfig.tmp; true
+	$(Q) grep "CONFIG_ARCH_CHIP=" .config >> defconfig.tmp; true
+	$(Q) grep "CONFIG_ARCH_BOARD=" .config >> defconfig.tmp; true
+	$(Q) grep "^CONFIG_ARCH_CUSTOM" .config >> defconfig.tmp; true
+	$(Q) grep "^CONFIG_ARCH_BOARD_CUSTOM" .config >> defconfig.tmp; true
 	$(Q) export LC_ALL=C; cat defconfig.tmp | sort | uniq > sortedconfig.tmp
 	$(Q) echo "#" > warning.tmp
 	$(Q) echo "# This file is autogenerated: PLEASE DO NOT EDIT IT." >> warning.tmp
@@ -648,6 +628,7 @@ endif
 	$(call DELFILE, include/nuttx/config.h)
 	$(call DELFILE, include/nuttx/version.h)
 	$(call DELFILE, Make.defs)
+	$(call DELFILE, defconfig)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
 	$(call DELFILE, .gdbinit)

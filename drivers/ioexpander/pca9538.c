@@ -129,9 +129,9 @@ static const struct ioexpander_ops_s g_pca9538_ops =
  *
  ****************************************************************************/
 
-static void pca9538_lock(FAR struct pca9538_dev_s *pca)
+static int pca9538_lock(FAR struct pca9538_dev_s *pca)
 {
-  nxsem_wait_uninterruptible(&pca->exclsem);
+  return nxsem_wait_uninterruptible(&pca->exclsem);
 }
 
 #define pca9538_unlock(p) nxsem_post(&(p)->exclsem)
@@ -311,7 +311,12 @@ static int pca9538_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9538_lock(pca);
+  ret = pca9538_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pca9538_setbit(pca, PCA9538_REG_CONFIG, pin,
                        (direction == IOEXPANDER_DIRECTION_IN));
   pca9538_unlock(pca);
@@ -349,7 +354,12 @@ static int pca9538_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
       /* Get exclusive access to the PCA555 */
 
-      pca9538_lock(pca);
+      ret = pca9538_lock(pca);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
       ret = pca9538_setbit(pca, PCA9538_REG_POLINV, pin, ival);
       pca9538_unlock(pca);
     }
@@ -382,7 +392,12 @@ static int pca9538_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9538_lock(pca);
+  ret = pca9538_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pca9538_setbit(pca, PCA9538_REG_OUTPUT, pin, value);
   pca9538_unlock(pca);
   return ret;
@@ -415,7 +430,12 @@ static int pca9538_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9538_lock(pca);
+  ret = pca9538_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pca9538_getbit(pca, PCA9538_REG_INPUT, pin, value);
   pca9538_unlock(pca);
   return ret;
@@ -446,7 +466,12 @@ static int pca9538_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9538_lock(pca);
+  ret = pca9538_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pca9538_getbit(pca, PCA9538_REG_OUTPUT, pin, value);
   pca9538_unlock(pca);
   return ret;
@@ -533,7 +558,11 @@ static int pca9538_multiwritepin(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9538_lock(pca);
+  ret = pca9538_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Start by reading both registers, whatever the pins to change. We could
    * attempt to read one port only if all pins were on the same port, but
@@ -617,7 +646,12 @@ static int pca9538_multireadpin(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9538_lock(pca);
+  ret = pca9538_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pca9538_getmultibits(pca, PCA9538_REG_INPUT,
                              pins, values, count);
   pca9538_unlock(pca);
@@ -650,7 +684,12 @@ static int pca9538_multireadbuf(FAR struct ioexpander_dev_s *dev,
 
   /* Get exclusive access to the PCA555 */
 
-  pca9538_lock(pca);
+  ret = pca9538_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pca9538_getmultibits(pca, PCA9538_REG_OUTPUT,
                              pins, values, count);
   pca9538_unlock(pca);
@@ -687,10 +726,15 @@ static FAR void *pca9538_attach(FAR struct ioexpander_dev_s *dev,
   FAR struct pca9538_dev_s *pca = (FAR struct pca9538_dev_s *)dev;
   FAR void *handle = NULL;
   int i;
+  int ret;
 
   /* Get exclusive access to the PCA555 */
 
-  pca9538_lock(pca);
+  ret = pca9538_lock(pca);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Find and available in entry in the callback table */
 
@@ -822,7 +866,7 @@ static void pca9538_irqworker(void *arg)
 
 static int pca9538_interrupt(int irq, FAR void *context, FAR void *arg)
 {
-  register FAR struct pca9538_dev_s *pca = (FAR struct pca9538_dev_s *)arg;
+  FAR struct pca9538_dev_s *pca = (FAR struct pca9538_dev_s *)arg;
 
   /* In complex environments, we cannot do I2C transfers from the interrupt
    * handler because semaphores are probably used to lock the I2C bus.  In

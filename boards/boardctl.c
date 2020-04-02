@@ -1,35 +1,20 @@
 /****************************************************************************
  * boards/boardctl.c
  *
- *   Copyright (C) 2015-2017, 2018-2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -48,10 +33,7 @@
 #include <nuttx/board.h>
 #include <nuttx/lib/modlib.h>
 #include <nuttx/binfmt/symtab.h>
-
-#ifdef CONFIG_FS_WRITABLE
-#  include <nuttx/drivers/ramdisk.h>
-#endif
+#include <nuttx/drivers/ramdisk.h>
 
 #ifdef CONFIG_NX
 #  include <nuttx/nx/nxmu.h>
@@ -98,7 +80,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_BOARDCTL_USBDEVCTRL
-static inline int boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
+static inline int
+  boardctl_usbdevctrl(FAR struct boardioc_usbdev_ctrl_s *ctrl)
 {
   int ret = OK;
 
@@ -300,10 +283,10 @@ static inline int boardctl_pmctrl(FAR struct boardioc_pm_ctrl_s *ctrl)
  *   to "correct" but awkward implementations.
  *
  *   boardctl() is non-standard OS interface to alleviate the problem.  It
- *   basically circumvents the normal device driver ioctl interlace and allows
- *   the application to perform direction IOCTL-like calls to the board-specific
- *   logic.  In it is especially useful for setting up board operational and
- *   test configurations.
+ *   basically circumvents the normal device driver ioctl interlace and
+ *   allows the application to perform direction IOCTL-like calls to the
+ *   board-specific logic.  In it is especially useful for setting up board
+ *   operational and test configurations.
  *
  * Input Parameters:
  *   cmd - Identifies the board command to be executed
@@ -325,16 +308,16 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       /* CMD:           BOARDIOC_INIT
        * DESCRIPTION:   Perform one-time application initialization.
        * ARG:           The boardctl() argument is passed to the
-       *                board_app_initialize() implementation without modification.
-       *                The argument has no meaning to NuttX; the meaning of the
-       *                argument is a contract between the board-specific
-       *                initialization logic and the matching application logic.
-       *                The value cold be such things as a mode enumeration value,
-       *                a set of DIP switch switch settings, a pointer to
-       *                configuration data read from a file or serial FLASH, or
-       *                whatever you would like to do with it.  Every
-       *                implementation should accept zero/NULL as a default
-       *                configuration.
+       *                board_app_initialize() implementation without
+       *                modification.  The argument has no meaning to NuttX;
+       *                the meaning of the argument is a contract between
+       *                the board-specific initialization logic and the
+       *                matching application logic.  The value cold be such
+       *                things as a mode enumeration value, a set of DIP
+       *                switch switch settings, a pointer to configuration
+       *                data read from a file or serial FLASH, or whatever
+       *                you would like to do with it.  Every implementation
+       *                should accept zero/NULL as a default configuration.
        * CONFIGURATION: CONFIG_LIB_BOARDCTL
        * DEPENDENCIES:  Board logic must provide board_app_initialization
        */
@@ -414,8 +397,9 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       /* CMD:           BOARDIOC_UNIQUEID
        * DESCRIPTION:   Return a unique ID associated with the board (such
        *                as a serial number or a MAC address).
-       * ARG:           A writable array of size CONFIG_BOARDCTL_UNIQUEID_SIZE
-       *                in which to receive the board unique ID.
+       * ARG:           A writable array of size
+       *                CONFIG_BOARDCTL_UNIQUEID_SIZE in which to receive
+       *                the board unique ID.
        * DEPENDENCIES:  Board logic must provide the board_uniqueid()
        *                interface.
        */
@@ -430,7 +414,8 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 #ifdef CONFIG_BOARDCTL_MKRD
       /* CMD:           BOARDIOC_MKRD
        * DESCRIPTION:   Create a RAM disk
-       * ARG:           Pointer to read-only instance of struct boardioc_mkrd_s.
+       * ARG:           Pointer to read-only instance of struct
+       *                boardioc_mkrd_s.
        * CONFIGURATION: CONFIG_BOARDCTL_MKRD
        * DEPENDENCIES:  None
        */
@@ -456,7 +441,8 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 #ifdef CONFIG_BOARDCTL_ROMDISK
       /* CMD:           BOARDIOC_ROMDISK
        * DESCRIPTION:   Register
-       * ARG:           Pointer to read-only instance of struct boardioc_romdisk_s.
+       * ARG:           Pointer to read-only instance of struct
+       *                boardioc_romdisk_s.
        * CONFIGURATION: CONFIG_BOARDCTL_ROMDISK
        * DEPENDENCIES:  None
        */
@@ -472,8 +458,8 @@ int boardctl(unsigned int cmd, uintptr_t arg)
             }
           else
             {
-              ret = romdisk_register((int)desc->minor, desc->image, desc->nsectors,
-                                     desc->sectsize);
+              ret = romdisk_register((int)desc->minor, desc->image,
+                                     desc->nsectors, desc->sectsize);
             }
         }
         break;
@@ -481,9 +467,9 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
 #ifdef CONFIG_BOARDCTL_APP_SYMTAB
       /* CMD:           BOARDIOC_APP_SYMTAB
-       * DESCRIPTION:   Select the application symbol table.  This symbol table
-       *                provides the symbol definitions exported to application
-       *                code from application space.
+       * DESCRIPTION:   Select the application symbol table.  This symbol
+       *                table provides the symbol definitions exported to
+       *                application code from application space.
        * ARG:           A pointer to an instance of struct boardioc_symtab_s
        * CONFIGURATION: CONFIG_BOARDCTL_APP_SYMTAB
        * DEPENDENCIES:  None
@@ -503,9 +489,9 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
 #ifdef CONFIG_BOARDCTL_OS_SYMTAB
       /* CMD:           BOARDIOC_OS_SYMTAB
-       * DESCRIPTION:   Select the OS symbol table.  This symbol table provides
-       *                the symbol definitions exported by the OS to kernel
-       *                modules.
+       * DESCRIPTION:   Select the OS symbol table.  This symbol table
+       *                provides the symbol definitions exported by the OS to
+       *                kernal modules.
        * ARG:           A pointer to an instance of struct boardioc_symtab_s
        * CONFIGURATION: CONFIG_BOARDCTL_OS_SYMTAB
        * DEPENDENCIES:  None
@@ -525,17 +511,18 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
 #ifdef CONFIG_BUILTIN
       /* CMD:           BOARDIOC_BUILTINS
-       * DESCRIPTION:   Provide the user-space list of built-in applications for
-       *                use by BINFS in protected mode.  Normally this is small
-       *                set of globals provided by user-space logic.  It provides
-       *                name-value pairs for associating built-in application
-       *                names with user-space entry point addresses.  These
-       *                globals are only needed for use by BINFS which executes
-       *                built-in applications from kernel-space in PROTECTED mode.
-       *                In the FLAT build, the user space globals are readily
-      *                 available.  (BINFS is not supportable in KERNEL mode since
-       *                user-space address have no general meaning that
-       *                configuration).
+       * DESCRIPTION:   Provide the user-space list of built-in applications
+       *                for use by BINFS in protected mode.  Normally this
+       *                is small set of globals provided by user-space
+       *                logic.  It provides name-value pairs for associating
+       *                built-in application names with user-space entry
+       *                point addresses.  These globals are only needed for
+       *                use by BINFS which executes built-in applications
+       *                from kernel-space in PROTECTED mode. In the FLAT
+       *                build, the user space globals are readily
+       *                available.  (BINFS is not supportable in KERNEL mode
+       *                since user-space address have no general meaning
+       *                that configuration).
        * ARG:           A pointer to an instance of struct boardioc_builtin_s
        * CONFIGURATION: This BOARDIOC command is always available when
        *                CONFIG_BUILTIN is enabled, but does nothing unless
@@ -560,7 +547,8 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 #ifdef CONFIG_BOARDCTL_USBDEVCTRL
       /* CMD:           BOARDIOC_USBDEV_CONTROL
        * DESCRIPTION:   Manage USB device classes
-       * ARG:           A pointer to an instance of struct boardioc_usbdev_ctrl_s
+       * ARG:           A pointer to an instance of struct
+       *                boardioc_usbdev_ctrl_s
        * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_USBDEVCTRL
        * DEPENDENCIES:  Board logic must provide board_<usbdev>_initialize()
        */
@@ -676,9 +664,10 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 
       /* CMD:           BOARDIOC_NXTERM_IOCTL
-       * DESCRIPTION:   Create an NX terminal IOCTL command.  Normal IOCTLs
-       *                cannot be be performed in most graphics contexts since
-       *                the depend on the task holding an open file descriptor
+       * DESCRIPTION:   Create an NX terminal IOCTL command.  Normal
+       *                IOCTLs cannot be be performed in most graphics
+       *                contexts since the depend on the task holding an
+       *                open file descriptor
        * ARG:           A reference readable/writable instance of struct
        *                boardioc_nxterm_ioctl_s
        * CONFIGURATION: CONFIG_NXTERM
@@ -699,9 +688,9 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 #ifdef CONFIG_BOARDCTL_TESTSET
       /* CMD:           BOARDIOC_TESTSET
        * DESCRIPTION:   Access architecture-specific up_testset() operation
-       * ARG:           A pointer to a write-able spinlock object.  On success
-       *                the  preceding spinlock state is returned:  0=unlocked,
-       *                1=locked.
+       * ARG:           A pointer to a write-able spinlock object.  On
+       *                success the  preceding spinlock state is returned:
+       *                0=unlocked, 1=locked.
        * CONFIGURATION: CONFIG_BOARDCTL_TESTSET
        * DEPENDENCIES:  Architecture-specific logic provides up_testset()
        */
@@ -725,10 +714,10 @@ int boardctl(unsigned int cmd, uintptr_t arg)
        default:
          {
 #ifdef CONFIG_BOARDCTL_IOCTL
-           /* Boards may also select CONFIG_BOARDCTL_IOCTL=y to enable board-
-            * specific commands.  In this case, all commands not recognized
-            * by boardctl() will be forwarded to the board-provided board_ioctl()
-            * function.
+           /* Boards may also select CONFIG_BOARDCTL_IOCTL=y to enable
+            * board-specific commands.  In this case, all commands not
+            * recognized by boardctl() will be forwarded to the board-
+            * provided board_ioctl() function.
             */
 
            ret = board_ioctl(cmd, arg);

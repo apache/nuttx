@@ -160,6 +160,7 @@ EXTERN volatile bool g_rtc_enabled;
  */
 
 /* EXTERN const irq_mapped_t g_irqmap[NR_IRQS]; */
+
 #endif
 
 /****************************************************************************
@@ -398,21 +399,19 @@ void up_unblock_task(FAR struct tcb_s *tcb);
  * Name: up_block_task
  *
  * Description:
- *   The currently executing task at the head of
- *   the ready to run list must be stopped.  Save its context
- *   and move it to the inactive list specified by task_state.
+ *   The currently executing task at the head of the ready to run list must
+ *   be stopped.  Save its context and move it to the inactive list
+ *   specified by task_state.
  *
- *   This function is called only from the NuttX scheduling
- *   logic.  Interrupts will always be disabled when this
- *   function is called.
+ *   This function is called only from the NuttX scheduling logic.
+ *   Interrupts will always be disabled when this function is called.
  *
  * Input Parameters:
- *   tcb: Refers to a task in the ready-to-run list (normally
- *     the task at the head of the list).  It most be
- *     stopped, its context saved and moved into one of the
- *     waiting task lists.  It it was the task at the head
- *     of the ready-to-run list, then a context to the new
- *     ready to run task must be performed.
+ *   tcb: Refers to a task in the ready-to-run list (normally the task at
+ *     the head of the list).  It must be stopped, its context saved and
+ *     moved into one of the waiting task lists.  If it was the task at the
+ *     head of the ready-to-run list, then a context switch to the new ready
+ *     to run task must be performed.
  *   task_state: Specifies which waiting task list should be
  *     hold the blocked task TCB.
  *
@@ -730,6 +729,42 @@ void up_allocate_pgheap(FAR void **heap_start, size_t *heap_size);
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \
     defined(CONFIG_ARCH_USE_MMU)
 uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
+#endif
+
+/****************************************************************************
+ * Name: up_module_text_init
+ *
+ * Description:
+ *   Initialize the module text allocator
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+void up_module_text_init(void);
+#endif
+
+/****************************************************************************
+ * Name: up_module_text_alloc
+ *
+ * Description:
+ *   Allocate memory for module text.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+FAR void *up_module_text_alloc(size_t size);
+#endif
+
+/****************************************************************************
+ * Name: up_module_text_free
+ *
+ * Description:
+ *   Free memory for module text.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+void up_module_text_free(FAR void *p);
 #endif
 
 /****************************************************************************

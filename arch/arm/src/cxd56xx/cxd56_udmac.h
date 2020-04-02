@@ -47,7 +47,7 @@
  ****************************************************************************/
 
 /* Bit encoded input parameter to cxd56_channel(). These encodings must fit
- * in the an unsigned integer of type dma_config_t.
+ * in an unsigned integer of type dma_config_t.
  *
  * Current limitations/assumptions in the encoding:
  *

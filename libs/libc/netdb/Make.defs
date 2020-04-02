@@ -38,6 +38,9 @@ ifeq ($(CONFIG_LIBC_NETDB),y)
 # Add the netdb C files to the build
 
 CSRCS += lib_netdb.c lib_gethostbyname.c lib_gethostbynamer.c
+CSRCS += lib_gethostbyname2.c lib_gethostbyname2r.c
+CSRCS += lib_gethostentbynamer.c
+CSRCS += lib_gethostbyaddr.c lib_gethostbyaddrr.c
 CSRCS += lib_getservbyname.c lib_getservbynamer.c
 CSRCS += lib_getservbyport.c lib_getservbyportr.c
 CSRCS += lib_gaistrerror.c lib_freeaddrinfo.c lib_getaddrinfo.c
@@ -46,7 +49,7 @@ CSRCS += lib_getnameinfo.c
 # Add host file support
 
 ifeq ($(CONFIG_NETDB_HOSTFILE),y)
-CSRCS += lib_gethostbyaddr.c lib_gethostbyaddrr.c lib_parsehostfile.c
+CSRCS += lib_parsehostfile.c
 endif
 
 # Add DNS lookup support

@@ -1,36 +1,20 @@
 /****************************************************************************
  * drivers/rwbuffer.c
  *
- *   Copyright (C) 2009, 2011, 2013-2014, 2017, 2020 Gregory Nutt. All
- *     rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -79,9 +63,37 @@
  * Name: rwb_semtake
  ****************************************************************************/
 
-static void rwb_semtake(FAR sem_t *sem)
+static int rwb_semtake(FAR sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
+}
+
+/****************************************************************************
+ * Name: rwb_forcetake
+ ****************************************************************************/
+
+static int rwb_forcetake(FAR sem_t *sem)
+{
+  int result;
+  int ret = OK;
+
+  do
+    {
+      result = rwb_semtake(sem);
+
+      /* The only expected failure is if the thread is canceled */
+
+      DEBUGASSERT(result == OK || result == -ECANCELED);
+      if (ret == OK && result < 0)
+        {
+          /* Remember the first error */
+
+          ret = result;
+        }
+    }
+  while (result < 0);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -182,7 +194,7 @@ static void rwb_wrtimeout(FAR void *arg)
    * worker thread.
    */
 
-  rwb_semtake(&rwb->wrsem);
+  rwb_forcetake(&rwb->wrsem);
   rwb_wrflush(rwb);
   rwb_semgive(&rwb->wrsem);
 }
@@ -410,7 +422,11 @@ int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
 
       finfo("startblock=%d blockcount=%p\n", startblock, blockcount);
 
-      rwb_semtake(&rwb->wrsem);
+      ret = rwb_semtake(&rwb->wrsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Now there are five cases:
        *
@@ -547,7 +563,11 @@ int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
 
       finfo("startblock=%d blockcount=%p\n", startblock, blockcount);
 
-      rwb_semtake(&rwb->rhsem);
+      ret = rwb_semtake(&rwb->rhsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Now there are five cases:
        *
@@ -779,9 +799,14 @@ static ssize_t rwb_read_(FAR struct rwbuffer_s *rwb, off_t startblock,
     {
       size_t remaining;
 
+      ret = nxsem_wait(&rwb->rhsem);
+      if (ret < 0)
+        {
+          return (ssize_t)ret;
+        }
+
       /* Loop until we have read all of the requested blocks */
 
-      rwb_semtake(&rwb->rhsem);
       for (remaining = nblocks; remaining > 0; )
         {
           /* Is there anything in the read-ahead buffer? */
@@ -868,9 +893,14 @@ ssize_t rwb_read(FAR struct rwbuffer_s *rwb, off_t startblock,
 
   if (rwb->wrmaxblocks > 0)
     {
+      ret = nxsem_wait(&rwb->wrsem);
+      if (ret < 0)
+        {
+          return (ssize_t)ret;
+        }
+
       /* If the write buffer overlaps the block(s) requested */
 
-      rwb_semtake(&rwb->wrsem);
       if (rwb_overlap(rwb->wrblockstart, rwb->wrnblocks, startblock,
                       nblocks))
         {
@@ -940,7 +970,12 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
        * streaming applications.
        */
 
-      rwb_semtake(&rwb->rhsem);
+      ret = nxsem_wait(&rwb->rhsem);
+      if (ret < 0)
+        {
+          return (ssize_t)ret;
+        }
+
       if (rwb_overlap(rwb->rhblockstart, rwb->rhnblocks, startblock,
                       nblocks))
         {
@@ -974,7 +1009,12 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
         {
           /* First flush the cache */
 
-          rwb_semtake(&rwb->wrsem);
+          ret = nxsem_wait(&rwb->wrsem);
+          if (ret < 0)
+            {
+              return (ssize_t)ret;
+            }
+
           rwb_wrflush(rwb);
           rwb_semgive(&rwb->wrsem);
 
@@ -986,7 +1026,12 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
         {
           /* Buffer the data in the write buffer */
 
-          rwb_semtake(&rwb->wrsem);
+          ret = nxsem_wait(&rwb->wrsem);
+          if (ret < 0)
+            {
+              return (ssize_t)ret;
+            }
+
           ret = rwb_writebuffer(rwb, startblock, nblocks, wrbuffer);
           rwb_semgive(&rwb->wrsem);
         }
@@ -1052,7 +1097,12 @@ int rwb_mediaremoved(FAR struct rwbuffer_s *rwb)
 #ifdef CONFIG_DRVR_WRITEBUFFER
   if (rwb->wrmaxblocks > 0)
     {
-      rwb_semtake(&rwb->wrsem);
+      ret = rwb_semtake(&rwb->wrsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
       rwb_resetwrbuffer(rwb);
       rwb_semgive(&rwb->wrsem);
     }
@@ -1061,7 +1111,12 @@ int rwb_mediaremoved(FAR struct rwbuffer_s *rwb)
 #ifdef CONFIG_DRVR_READAHEAD
   if (rwb->rhmaxblocks > 0)
     {
-      rwb_semtake(&rwb->rhsem);
+      ret = rwb_semtake(&rwb->rhsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
       rwb_resetrhbuffer(rwb);
       rwb_semgive(&rwb->rhsem);
     }
@@ -1118,12 +1173,14 @@ int rwb_invalidate(FAR struct rwbuffer_s *rwb,
 #ifdef CONFIG_DRVR_WRITEBUFFER
 int rwb_flush(FAR struct rwbuffer_s *rwb)
 {
-  rwb_semtake(&rwb->wrsem);
+  int ret;
+
+  ret = rwb_forcetake(&rwb->wrsem);
   rwb_wrcanceltimeout(rwb);
   rwb_wrflush(rwb);
   rwb_semgive(&rwb->wrsem);
 
-  return OK;
+  return ret;
 }
 #endif
 

@@ -27,6 +27,13 @@ config DEFAULT_SMALL
 		have already been selected in your configuration file.  This applies
 		only to new settings that require a default value.
 
+config DEFAULT_TASK_STACKSIZE
+	int "The default stack size for tasks"
+	default 8192 if ARCH_SIM
+	default 2048
+	---help---
+		The default stack size for tasks.
+
 choice
 	prompt "Build Host Platform"
 	default HOST_LINUX
@@ -278,13 +285,6 @@ endif # Build 2-pass
 endmenu # Build Setup
 
 menu "Binary Output Formats"
-
-config CXD56_BINARY
-	bool "spk binary format"
-	default n
-	---help---
-		Create nuttx.spk binary format used on spresense board and boards
-		based on cxd56xx arch.
 
 config INTELHEX_BINARY
 	bool "Intel HEX binary format"

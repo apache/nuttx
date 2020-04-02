@@ -58,17 +58,17 @@
  *
  * Description:
  *   The currently executing task at the head of the ready to run list must
- *   be stopped.  Save its context and move it to the inactive list specified
- *   by task_state.
+ *   be stopped.  Save its context and move it to the inactive list
+ *   specified by task_state.
  *
  * Input Parameters:
  *   tcb: Refers to a task in the ready-to-run list (normally the task at
- *     the head of the list).  It most be stopped, its context saved and
- *     moved into one of the waiting task lists.  It it was the task at the
- *     head of the ready-to-run list, then a context to the new ready to run
- *     task must be performed.
- *   task_state: Specifies which waiting task list should be hold the
- *     blocked task TCB.
+ *     the head of the list).  It must be stopped, its context saved and
+ *     moved into one of the waiting task lists.  If it was the task at the
+ *     head of the ready-to-run list, then a context switch to the new
+ *     ready to run task must be performed.
+ *   task_state: Specifies which waiting task list should hold the blocked
+ *     task TCB.
  *
  ****************************************************************************/
 
@@ -82,11 +82,10 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
   DEBUGASSERT((tcb->task_state >= FIRST_READY_TO_RUN_STATE) &&
               (tcb->task_state <= LAST_READY_TO_RUN_STATE));
 
-  /* Remove the tcb task from the ready-to-run list.  If we
-   * are blocking the task at the head of the task list (the
-   * most likely case), then a context switch to the next
-   * ready-to-run task is needed. In this case, it should
-   * also be true that rtcb == tcb.
+  /* Remove the tcb task from the ready-to-run list.  If we are blocking the
+   * task at the head of the task list (the most likely case), then a
+   * context switch to the next ready-to-run task is needed. In this case,
+   * it should also be true that rtcb == tcb.
    */
 
   switch_needed = sched_removereadytorun(tcb);

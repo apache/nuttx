@@ -7,8 +7,6 @@ config FS_HOSTFS
 	bool "Host File System"
 	default n
 	depends on !DISABLE_MOUNTPOINT
-	select FS_READABLE
-	select FS_WRITABLE
 	---help---
 		The Host file system provides a mechanism to mount directories
 		from the host OS during simulation mode.  The host directory

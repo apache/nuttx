@@ -65,9 +65,9 @@
 
 #include "stm32l476vg-disco.h"
 
-/* Conditional logic in stm32l476vg-disco.h will determine if certain features
- * are supported.  Tests for these features need to be made after including
- * stm32l476vg-disco.h.
+/* Conditional logic in stm32l476vg-disco.h will determine if certain
+ * features are supported.  Tests for these features need to be made after
+ * including stm32l476vg-disco.h.
  */
 
 #ifdef HAVE_RTC_DRIVER
@@ -129,7 +129,7 @@ int board_app_initialize(uintptr_t arg)
   FAR struct rtc_lowerhalf_s *rtclower;
 #endif
 #if defined(HAVE_N25QXXX)
-FAR struct mtd_dev_s *mtd_temp;
+  FAR struct mtd_dev_s *mtd_temp;
 #endif
 #if defined(HAVE_N25QXXX_CHARDEV)
   char blockdev[18];
@@ -197,34 +197,35 @@ FAR struct mtd_dev_s *mtd_temp;
           _err("ERROR: n25qxxx_initialize failed\n");
           return ret;
         }
+
       g_mtd_fs = mtd_temp;
 
 #ifdef CONFIG_MTD_PARTITION
-      {
-        FAR struct mtd_geometry_s geo;
-        off_t nblocks;
+        {
+          FAR struct mtd_geometry_s geo;
+          off_t nblocks;
 
-        /* Setup a partition of 256KiB for our file system. */
+          /* Setup a partition of 256KiB for our file system. */
 
-        ret = MTD_IOCTL(g_mtd_fs, MTDIOC_GEOMETRY,
-                        (unsigned long)(uintptr_t)&geo);
-        if (ret < 0)
-          {
-            _err("ERROR: MTDIOC_GEOMETRY failed\n");
-            return ret;
-          }
+          ret = MTD_IOCTL(g_mtd_fs, MTDIOC_GEOMETRY,
+                          (unsigned long)(uintptr_t)&geo);
+          if (ret < 0)
+            {
+              _err("ERROR: MTDIOC_GEOMETRY failed\n");
+              return ret;
+            }
 
-        nblocks = (256*1024) / geo.blocksize;
+          nblocks = (256 * 1024) / geo.blocksize;
 
-        mtd_temp = mtd_partition(g_mtd_fs, 0, nblocks);
-        if (!mtd_temp)
-          {
-            _err("ERROR: mtd_partition failed\n");
-            return ret;
-          }
+          mtd_temp = mtd_partition(g_mtd_fs, 0, nblocks);
+          if (!mtd_temp)
+            {
+              _err("ERROR: mtd_partition failed\n");
+              return ret;
+            }
 
-        g_mtd_fs = mtd_temp;
-      }
+          g_mtd_fs = mtd_temp;
+        }
 #endif
 
 #ifdef HAVE_N25QXXX_SMARTFS
@@ -270,14 +271,6 @@ FAR struct mtd_dev_s *mtd_temp;
       snprintf(chardev, 12, "/dev/mtd%d", N25QXXX_MTD_MINOR);
 
       /* Now create a character device on the block device */
-
-      /* NOTE:  for this to work, you will need to make sure that
-       * CONFIG_FS_WRITABLE is set in the config.  It's not a user-
-       * visible setting, but you can make it set by selecting an
-       * arbitrary writable file system (you don't have to actually
-       * use it, just select it so that the block device created via
-       * ftl_initialize() will be writable).
-       */
 
       ret = bchdev_register(blockdev, chardev, false);
       if (ret < 0)

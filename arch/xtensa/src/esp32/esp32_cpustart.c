@@ -88,6 +88,7 @@ static inline void xtensa_registerdump(FAR struct tcb_s *tcb)
   _info("CPU%d:\n", up_cpu_index());
 
   /* Dump the startup registers */
+
   /* To be provided */
 }
 #else
@@ -149,12 +150,12 @@ void xtensa_appcpu_start(void)
   register uint32_t sp;
 
 #ifdef CONFIG_STACK_COLORATION
-  {
-    register uint32_t *ptr;
-    register int i;
+    {
+      register uint32_t *ptr;
+      register int i;
 
-      /* If stack debug is enabled, then fill the stack with a recognizable value
-       * that we can use later to test for high water marks.
+      /* If stack debug is enabled, then fill the stack with a recognizable
+       * value that we can use later to test for high water marks.
        */
 
       for (i = 0, ptr = (uint32_t *)tcb->stack_alloc_ptr;
@@ -163,7 +164,7 @@ void xtensa_appcpu_start(void)
         {
           *ptr++ = STACK_COLOR;
         }
-  }
+    }
 #endif
 
   /* Move to the stack assigned to us by up_smp_start immediately.  Although
@@ -194,7 +195,7 @@ void xtensa_appcpu_start(void)
 
   /* Move CPU0 exception vectors to IRAM */
 
-  asm volatile ("wsr %0, vecbase\n"::"r" (&_init_start));
+  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (&_init_start));
 
   /* Make page 0 access raise an exception */
 

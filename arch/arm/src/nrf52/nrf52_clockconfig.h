@@ -49,15 +49,9 @@
 /* Frequencies of internal clocks */
 
 #define NRF52_SYSTEM_CLOCK     64000000  /* Default System clock value */
-#define NRF52_RTC_CLOCK           32768  /* RTC oscillator 32 kHz output (32k_clk )*/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
+#define NRF52_RTC_CLOCK           32768  /* RTC oscillator 32 kHz output
+                                          * (32k_clk)
+                                          */
 
 #ifndef __ASSEMBLY__
 
@@ -87,7 +81,7 @@ extern "C"
  *   clocking using the settings in board.h.  This function also performs
  *   other low-level chip as necessary.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 void nrf52_clockconfig(void);
 

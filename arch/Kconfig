@@ -213,6 +213,10 @@ config ARCH_NEED_ADDRENV_MAPPING
 	bool
 	default n
 
+config ARCH_HAVE_MODULE_TEXT
+	bool "Special memory region for dynamic code loading"
+	default n
+
 config ARCH_HAVE_MULTICPU
 	bool
 	default n
@@ -320,6 +324,16 @@ config ARCH_USE_MPU
 		order to enable use of the MPU.  For most architectures, this option
 		is enabled by other, platform-specific logic.  In those cases, this
 		selection will always be forced.
+
+config ARCH_USE_MODULE_TEXT
+	bool "Enable module text allocator"
+	default n
+	depends on ARCH_HAVE_MODULE_TEXT
+	---help---
+		This option enable architecture-sepecific memory allocator
+		for dynamic code loading. For example, ESP32 has a separate memory
+		regions for instruction and data and the memory region used for
+		usual malloc doesn't work for instruction.
 
 menuconfig ARCH_ADDRENV
 	bool "Address environments"

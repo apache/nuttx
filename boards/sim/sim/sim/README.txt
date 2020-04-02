@@ -27,7 +27,7 @@ Description
 -----------
 This README file describes the contents of the build configurations available
 for the NuttX "sim" target.  The sim target is a NuttX port that runs as a
-user-space program under Linux or Cygwin.  It is a very "low fidelity"
+user-space program under Linux, Cygwin, or macOS.  It is a very "low fidelity"
 embedded system simulation:  This environment does not support any kind of
 asynchronous events -- there are nothing like interrupts in this context.
 Therefore, there can be no pre-empting events.
@@ -84,8 +84,9 @@ graphical front-end to GDB:
    gdb> b user_start
    gdb> r
 
-NOTE:  This above steps work fine on both Linux and Cygwin.  On Cygwin, you
-will need to start the Cygwin-X server before running ddd.
+NOTE:  This above steps work fine on Linux, Cygwin, and macOS.
+On Cygwin, you will need to start the Cygwin-X server before running ddd.
+On macOS, it's probably easier to use lldb instead of gdb.
 
 Issues
 ^^^^^^
@@ -121,11 +122,11 @@ NuttX heap.  The memory management model is exactly the same in the simulation
 as in a real, target system.  This is good because this produces a higher
 fidelity simulation.
 
-However, when the simulation calls into Linux/Cygwin libraries, it will still
+However, when the simulation calls into the host OS libraries, it will still
 use these small simulation stacks.  This happens, for example, when you call
 into the system to get and put characters to the console window or when you
 make X11 calls into the system.  The programming model within those libraries
-will assume a Linux/Cygwin environment where the stack size grows dynamically
+will assume the host OS environment where the stack size grows dynamically
 and not the small, limited stacks of a deeply embedded system.
 
 As a consequence, those system libraries may allocate large data structures on
@@ -156,9 +157,9 @@ The simulation build is a two pass build:
      and then linked with nuttx.rel to generate the simulation program.
 
 NuttX is a POSIX compliant RTOS and is normally built on a POSIX compliant
-host environment (like Linux or Cygwin).  As a result, the same symbols are
-exported by both the NuttX domain and the host domain.  How can we keep them
-separate?
+host environment (like Linux, Cygwin, or macOS).  As a result, the same
+symbols are exported by both the NuttX domain and the host domain.  How can
+we keep them separate?
 
 This is done using the special file nuttx-name.dat.  This file just contains a
 mapping of original function names to new function names.  For example, the
@@ -615,6 +616,19 @@ minibasic
 
   This configuration was used to test the Mini Basic port at
   apps/interpreters/minibasic.
+
+module
+
+  This is a configuration to test CONFIG_LIBC_MODLIB with 64-bit modules.
+  This has apps/examples/module and apps/examples/sotest enabled.
+  This configuration is intended for 64-bit host OS.
+
+module32
+
+  This is a configuration to test CONFIG_LIBC_MODLIB with CONFIG_SIM_M32
+  and 32-bit modules.
+  This has apps/examples/module and apps/examples/sotest enabled.
+  This configuration is intended for 64-bit host OS.
 
 mount
 
@@ -1264,3 +1278,7 @@ ustream
 
   Note that the binfs file system is mounted at /bin when the system starts
   up.
+
+vpnkit
+
+  This is a configuration with VPNKit support.  See NETWORK-VPNKIT.txt.

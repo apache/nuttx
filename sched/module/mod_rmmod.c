@@ -128,15 +128,25 @@ int rmmod(FAR void *handle)
 
   /* Release resources held by the module */
 
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+  if (modp->textalloc != NULL || modp->dataalloc != NULL)
+#else
   if (modp->alloc != NULL)
+#endif
     {
-      /* Free the module memory */
+      /* Free the module memory
+       * and nullify so that the memory cannot be freed again
+       */
 
+#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
+      up_module_text_free((FAR void *)modp->textalloc);
+      kmm_free((FAR void *)modp->dataalloc);
+      modp->textalloc = NULL;
+      modp->dataalloc = NULL;
+#else
       kmm_free((FAR void *)modp->alloc);
-
-      /* Nullify so that the memory cannot be freed again */
-
       modp->alloc = NULL;
+#endif
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
       modp->textsize  = 0;
       modp->datasize  = 0;

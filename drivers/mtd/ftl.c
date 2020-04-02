@@ -71,9 +71,7 @@ struct ftl_struct_s
   uint16_t              blkper;   /* R/W blocks per erase block */
   uint16_t              refs;     /* Number of references */
   bool                  unlinked; /* The driver has been unlinked */
-#ifdef CONFIG_FS_WRITABLE
   FAR uint8_t          *eblock;   /* One, in-memory erase block */
-#endif
 };
 
 /****************************************************************************
@@ -86,13 +84,11 @@ static ssize_t ftl_reload(FAR void *priv, FAR uint8_t *buffer,
                  off_t startblock, size_t nblocks);
 static ssize_t ftl_read(FAR struct inode *inode, FAR unsigned char *buffer,
                  size_t start_sector, unsigned int nsectors);
-#ifdef CONFIG_FS_WRITABLE
 static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
                  off_t startblock, size_t nblocks);
 static ssize_t ftl_write(FAR struct inode *inode,
                  FAR const unsigned char *buffer, size_t start_sector,
                  unsigned int nsectors);
-#endif
 static int     ftl_geometry(FAR struct inode *inode,
                  FAR struct geometry *geometry);
 static int     ftl_ioctl(FAR struct inode *inode, int cmd,
@@ -110,11 +106,7 @@ static const struct block_operations g_bops =
   ftl_open,     /* open     */
   ftl_close,    /* close    */
   ftl_read,     /* read     */
-#ifdef CONFIG_FS_WRITABLE
   ftl_write,    /* write    */
-#else
-  NULL,         /* write    */
-#endif
   ftl_geometry, /* geometry */
   ftl_ioctl     /* ioctl    */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -167,12 +159,10 @@ static int ftl_close(FAR struct inode *inode)
 #ifdef FTL_HAVE_RWBUFFER
       rwb_uninitialize(&dev->rwb);
 #endif
-#ifdef CONFIG_FS_WRITABLE
       if (dev->eblock)
         {
           kmm_free(dev->eblock);
         }
-#endif
 
       kmm_free(dev);
     }
@@ -236,7 +226,6 @@ static ssize_t ftl_read(FAR struct inode *inode, unsigned char *buffer,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
 static int ftl_alloc_eblock(FAR struct ftl_struct_s *dev)
 {
   if (dev->eblock == NULL)
@@ -433,7 +422,6 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
 
   return nblocks;
 }
-#endif
 
 /****************************************************************************
  * Name: ftl_write
@@ -442,7 +430,6 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_WRITABLE
 static ssize_t ftl_write(FAR struct inode *inode,
                          FAR const unsigned char *buffer,
                          size_t start_sector, unsigned int nsectors)
@@ -459,7 +446,6 @@ static ssize_t ftl_write(FAR struct inode *inode,
   return ftl_flush(dev, buffer, start_sector, nsectors);
 #endif
 }
-#endif
 
 /****************************************************************************
  * Name: ftl_geometry
@@ -481,11 +467,7 @@ static int ftl_geometry(FAR struct inode *inode,
       dev = (struct ftl_struct_s *)inode->i_private;
       geometry->geo_available     = true;
       geometry->geo_mediachanged  = false;
-#ifdef CONFIG_FS_WRITABLE
       geometry->geo_writeenabled  = true;
-#else
-      geometry->geo_writeenabled  = false;
-#endif
       geometry->geo_nsectors      = dev->geo.neraseblocks * dev->blkper;
       geometry->geo_sectorsize    = dev->geo.blocksize;
 
@@ -583,12 +565,10 @@ static int ftl_unlink(FAR struct inode *inode)
 #ifdef FTL_HAVE_RWBUFFER
       rwb_uninitialize(&dev->rwb);
 #endif
-#ifdef CONFIG_FS_WRITABLE
       if (dev->eblock)
         {
           kmm_free(dev->eblock);
         }
-#endif
 
       kmm_free(dev);
     }
@@ -664,7 +644,7 @@ int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd)
       dev->rwb.wrflush     = ftl_flush;
       dev->rwb.rhreload    = ftl_reload;
 
-#if defined(CONFIG_FS_WRITABLE) && defined(CONFIG_FTL_WRITEBUFFER)
+#if defined(CONFIG_FTL_WRITEBUFFER)
       dev->rwb.wrmaxblocks = dev->blkper;
 #endif
 

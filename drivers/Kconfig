@@ -18,8 +18,6 @@ config DEV_ZERO
 config DRVR_MKRD
 	bool "RAM disk wrapper (mkrd)"
 	default n
-	select FS_READABLE
-	select FS_WRITABLE
 	---help---
 		Build the mkrd() function which serves as a wrapper to simplify
 		creation of RAM disks.  If the boardctrl() interface is enabled,

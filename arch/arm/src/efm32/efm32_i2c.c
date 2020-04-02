@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/efm32/efm32_i2c.c
  * EFM32 I2C Hardware Layer - Device Driver
  *
@@ -45,11 +45,11 @@
  *
  * Structure naming:
  *  - Device: structure as defined by the nuttx/i2c/i2c.h
- *  - Instance: represents each individual access to the I2C driver, obtained by
- *     the i2c_init(); it extends the Device structure from the nuttx/i2c/i2c.h;
- *     Instance points to OPS, to common I2C Hardware private data and contains
- *     its own private data, as frequency, address, mode of operation (in the
- *     future)
+ *  - Instance: represents each individual access to the I2C driver,
+ *     obtained by the i2c_init(); it extends the Device structure from the
+ *     nuttx/i2c/i2c.h; Instance points to OPS, to common I2C Hardware
+ *     private data and contains its own private data, as frequency,
+ *     address, mode of operation (in the future)
  *  - Private: Private data of an I2C Hardware
  *
  */
@@ -90,10 +90,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration **************************************************************/
+/* Configuration ************************************************************/
 
-/* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.  Instead,
- * CPU-intensive polling will be used.
+/* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.
+ * Instead, CPU-intensive polling will be used.
  */
 
 #if !defined(CONFIG_EFM32_EFM32GG)
@@ -132,11 +132,11 @@
 
 #define MKI2C_OUTPUT(p) (((p) & (GPIO_PORT_MASK | GPIO_PIN_MASK)) | I2C_OUTPUT)
 
-/* Debug ****************************************************************************/
+/* Debug ********************************************************************/
 
 /* I2C event trace logic.  NOTE:  trace uses the internal, non-standard,
- * low-level debug interface syslog() but does not require that any other debug
- * is enabled.
+ * low-level debug interface syslog() but does not require that any other
+ * debug is enabled.
  */
 
 #ifndef CONFIG_I2C_TRACE
@@ -151,16 +151,17 @@
 
 /* Error flags indicating I2C transfer has failed somehow.
  * Notice that I2C_IF_TXOF (transmit overflow) is not really possible with
- * this SW supporting master mode. Likewise for I2C_IF_RXUF (receive underflow)
- * RXUF is only likely to occur with this SW if using a debugger peeking into
- * RXDATA register. Thus, we ignore those types of fault.
+ * this SW supporting master mode. Likewise for I2C_IF_RXUF (receive
+ * underflow).  RXUF is only likely to occur with this SW if using a
+ * debugger peeking into RXDATA register. Thus, we ignore those types of
+ * fault.
  */
 
 #define I2C_IF_ERRORS    (I2C_IF_BUSERR | I2C_IF_ARBLOST)
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* I2C result state */
 
@@ -227,9 +228,15 @@ struct efm32_i2c_config_s
 
 struct efm32_i2c_priv_s
 {
-  const struct i2c_ops_s *ops; /* Standard I2C operations */
-  const struct efm32_i2c_config_s *config;    /* Port configuration */
-  int refs;                    /* Referernce count */
+  /* Standard I2C operations */
+
+  const struct i2c_ops_s *ops;
+
+  /* Port configuration */
+
+  const struct efm32_i2c_config_s *config;
+
+  int refs;                    /* Reference count */
   sem_t sem_excl;              /* Mutual exclusion semaphore */
 #ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;               /* Interrupt wait semaphore */
@@ -272,7 +279,9 @@ static inline void efm32_i2c_putreg(FAR struct efm32_i2c_priv_s *priv,
 static inline void efm32_i2c_modifyreg(FAR struct efm32_i2c_priv_s *priv,
                                        uint8_t offset, uint32_t clearbits,
                                        uint32_t setbits);
-static inline void efm32_i2c_sem_wait(FAR struct efm32_i2c_priv_s *priv);
+static inline int efm32_i2c_sem_wait(FAR struct efm32_i2c_priv_s *priv);
+static int
+  efm32_i2c_sem_wait_uninterruptible(FAR struct efm32_i2c_priv_s *priv);
 
 #ifdef CONFIG_EFM32_I2C_DYNTIMEOUT
 static useconds_t efm32_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
@@ -473,13 +482,28 @@ static const char *efm32_i2c_state_str(int i2c_state)
  * Name: efm32_i2c_sem_wait
  *
  * Description:
+ *   Take the exclusive access, waiting as necessary.  May be interrupted by
+ *   a signal.
+ *
+ ****************************************************************************/
+
+static inline int efm32_i2c_sem_wait(FAR struct efm32_i2c_priv_s *priv)
+{
+  return nxsem_wait(&priv->sem_excl);
+}
+
+/****************************************************************************
+ * Name: efm32_i2c_sem_wait_uninterruptible
+ *
+ * Description:
  *   Take the exclusive access, waiting as necessary
  *
  ****************************************************************************/
 
-static inline void efm32_i2c_sem_wait(FAR struct efm32_i2c_priv_s *priv)
+static int
+  efm32_i2c_sem_wait_uninterruptible(FAR struct efm32_i2c_priv_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->sem_excl);
+  return nxsem_wait_uninterruptible(&priv->sem_excl);
 }
 
 /****************************************************************************
@@ -505,7 +529,8 @@ static useconds_t efm32_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs)
     }
 
   /* Then return a number of microseconds based on a user provided scaling
-   * factor. */
+   * factor.
+   */
 
   return (useconds_t) (CONFIG_EFM32_I2C_DYNTIMEO_USECPERBYTE * bytecount);
 }
@@ -571,8 +596,9 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 
       if (ret < 0)
         {
-          /* Break out of the loop on irrecoverable errors.  This would include
-           * timeouts and mystery errors reported by nxsem_timedwait.
+          /* Break out of the loop on irrecoverable errors.  This would
+           * include timeouts and mystery errors reported by
+           * nxsem_timedwait.
            */
 
           break;
@@ -821,8 +847,13 @@ static void efm32_i2c_setclock(FAR struct efm32_i2c_priv_s *priv,
 #endif
                           << _I2C_CTRL_CLHR_SHIFT);
 
-      /* Frequency is given by fSCL = fHFPERCLK/((Nlow + Nhigh)(DIV + 1) + 4),
-       * thus DIV = ((fHFPERCLK - 4fSCL)/((Nlow + Nhigh)fSCL)) - 1
+      /* Frequency is given by:
+       *
+       *   fSCL = fHFPERCLK/((Nlow + Nhigh)(DIV + 1) + 4),
+       *
+       * thus
+       *
+       *   DIV = ((fHFPERCLK - 4fSCL)/((Nlow + Nhigh)fSCL)) - 1
        */
 
 #if defined(CONFIG_EFM32_I2C_CLHR_FAST)
@@ -840,7 +871,8 @@ static void efm32_i2c_setclock(FAR struct efm32_i2c_priv_s *priv,
        * bus frequency).
        */
 
-      if ((efm32_i2c_getreg(priv, EFM32_I2C_CTRL_OFFSET) & I2C_CTRL_SLAVE) && !div)
+      if ((efm32_i2c_getreg(priv, EFM32_I2C_CTRL_OFFSET) & I2C_CTRL_SLAVE) &&
+          !div)
         {
           div = 1;
         }
@@ -882,24 +914,25 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
         {
           if (priv->i2c_reg_if & I2C_IF_ARBLOST)
             {
-              /* If arbitration fault, it indicates either a slave device not
-               * responding as expected, or other master which is not supported
-               * by this SW. */
+              /* If arbitration fault, it indicates either a slave device
+               * not responding as expected, or other master which is not
+               * supported by this SW.
+               */
 
               priv->result = I2CRESULT_ARBLOST;
             }
           else if (priv->i2c_reg_if & I2C_IF_BUSERR)
             {
-              /* A bus error indicates a misplaced start or stop, which should
-               * not occur in master mode controlled by this SW.
+              /* A bus error indicates a misplaced start or stop, which
+               * should not occur in master mode controlled by this SW.
                */
 
               priv->result = I2CRESULT_BUSERR;
             }
 
-          /* If error situation occurred, it is difficult to know exact cause
-           * and how to resolve. It will be up to a wrapper to determine how to
-           * handle a fault/recovery if possible.
+          /* If error situation occurred, it is difficult to know exact
+           * cause and how to resolve. It will be up to a wrapper to
+           * determine how to handle a fault/recovery if possible.
            */
 
           priv->i2c_state = I2CSTATE_DONE;
@@ -908,9 +941,7 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
 
       switch (priv->i2c_state)
         {
-        /***************************************************
-         * Send first start+address (first byte if 10 bit)
-         */
+        /* Send first start+address (first byte if 10 bit) */
 
         case I2CSTATE_STARTADDRSEND:
           if (priv->flags & I2C_M_TEN)
@@ -949,9 +980,7 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
 
           goto done;
 
-        /*******************************************************
-         * Wait for ACK/NACK on address (first byte if 10 bit)
-         */
+        /* Wait for ACK/NACK on address (first byte if 10 bit) */
 
         case I2CSTATE_ADDRWFACKNACK:
           if (priv->i2c_reg_if & I2C_IF_NACK)
@@ -999,9 +1028,7 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
 
           goto done;
 
-        /******************************************************
-         * Wait for ACK/NACK on second byte of 10 bit address
-         */
+        /* Wait for ACK/NACK on second byte of 10 bit address */
 
         case I2CSTATE_ADDRWF2NDACKNACK:
           if (priv->i2c_reg_if & I2C_IF_NACK)
@@ -1030,14 +1057,13 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
                 {
                   priv->i2c_state = I2CSTATE_DATASEND;
                 }
+
               continue;
             }
 
           goto done;
 
-        /*******************************
-         * Send repeated start+address
-         */
+        /* Send repeated start+address */
 
         case I2CSTATE_RSTARTADDRSEND:
           if (priv->flags & I2C_M_TEN)
@@ -1078,8 +1104,7 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
           efm32_i2c_putreg(priv, EFM32_I2C_TXDATA_OFFSET, regval);
           goto done;
 
-        /***********************************************
-         * Wait for ACK/NACK on repeated start+address
+        /* Wait for ACK/NACK on repeated start+address
          * (first byte if 10 bit)
          */
 
@@ -1110,11 +1135,10 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
 
           goto done;
 
-        /*****************************
-         * Send a data byte to slave
-         */
+        /* Send a data byte to slave */
 
         case I2CSTATE_DATASEND:
+
           /* Reached end of data buffer? */
 
           if (priv->dcnt == 0)
@@ -1153,9 +1177,7 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
           priv->i2c_state = I2CSTATE_DATAWFACKNACK;
           goto done;
 
-        /*********************************************************
-         * Wait for ACK/NACK from slave after sending data to it
-         */
+        /* Wait for ACK/NACK from slave after sending data to it */
 
         case I2CSTATE_DATAWFACKNACK:
           if (priv->i2c_reg_if & I2C_IF_NACK)
@@ -1171,11 +1193,10 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
               priv->i2c_state = I2CSTATE_DATASEND;
               continue;
             }
+
           goto done;
 
-        /****************************
-         * Wait for data from slave
-         */
+        /* Wait for data from slave */
 
         case I2CSTATE_WFDATA:
           if (priv->i2c_reg_if & I2C_IF_RXDATAV)
@@ -1200,7 +1221,6 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
                 {
                   priv->i2c_state = I2CSTATE_WFSTOPSENT;
                   efm32_i2c_putreg(priv, EFM32_I2C_CMD_OFFSET, I2C_CMD_STOP);
-
                 }
               else
                 {
@@ -1210,20 +1230,20 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
 
                   if (priv->dcnt == 1)
                     {
-                      /* If there is more than one byte to receive and this is
-                       * the next to last byte we need to transmit the NACK
-                       * now, before receiving the last byte.
+                      /* If there is more than one byte to receive and this
+                       * is the next to last byte we need to transmit the
+                       * NAK now, before receiving the last byte.
                        */
 
-                      efm32_i2c_putreg(priv, EFM32_I2C_CMD_OFFSET, I2C_CMD_NACK);
+                      efm32_i2c_putreg(priv, EFM32_I2C_CMD_OFFSET,
+                                       I2C_CMD_NACK);
                     }
                 }
             }
+
           goto done;
 
-        /***********************************
-         * Wait for STOP to have been sent
-         */
+        /* Wait for STOP to have been sent */
 
         case I2CSTATE_WFSTOPSENT:
           if (priv->i2c_reg_if & I2C_IF_MSTOP)
@@ -1234,9 +1254,7 @@ static int efm32_i2c_isr_process(struct efm32_i2c_priv_s *priv)
 
           goto done;
 
-        /******************************/
         /* Unexpected state, SW fault */
-        /******************************/
 
         default:
           priv->result = I2CRESULT_SWFAULT;
@@ -1294,12 +1312,18 @@ static int efm32_i2c_isr(int irq, void *context, FAR void *arg)
 
 static void efm32_i2c_hwreset(FAR struct efm32_i2c_priv_s *priv)
 {
-  efm32_i2c_putreg(priv, EFM32_I2C_CTRL_OFFSET, _I2C_CTRL_RESETVALUE);
-  efm32_i2c_putreg(priv, EFM32_I2C_CLKDIV_OFFSET, _I2C_CLKDIV_RESETVALUE);
-  efm32_i2c_putreg(priv, EFM32_I2C_SADDR_OFFSET, _I2C_SADDR_RESETVALUE);
-  efm32_i2c_putreg(priv, EFM32_I2C_SADDRMASK_OFFSET, _I2C_SADDRMASK_RESETVALUE);
-  efm32_i2c_putreg(priv, EFM32_I2C_IEN_OFFSET, _I2C_IEN_RESETVALUE);
-  efm32_i2c_putreg(priv, EFM32_I2C_IFC_OFFSET, _I2C_IFC_MASK);
+  efm32_i2c_putreg(priv, EFM32_I2C_CTRL_OFFSET,
+                   _I2C_CTRL_RESETVALUE);
+  efm32_i2c_putreg(priv, EFM32_I2C_CLKDIV_OFFSET,
+                   _I2C_CLKDIV_RESETVALUE);
+  efm32_i2c_putreg(priv, EFM32_I2C_SADDR_OFFSET,
+                   _I2C_SADDR_RESETVALUE);
+  efm32_i2c_putreg(priv, EFM32_I2C_SADDRMASK_OFFSET,
+                   _I2C_SADDRMASK_RESETVALUE);
+  efm32_i2c_putreg(priv, EFM32_I2C_IEN_OFFSET,
+                   _I2C_IEN_RESETVALUE);
+  efm32_i2c_putreg(priv, EFM32_I2C_IFC_OFFSET,
+                   _I2C_IFC_MASK);
 
   /* Do not reset route register, setting should be done independently */
 }
@@ -1423,7 +1447,7 @@ static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
                               FAR struct i2c_msg_s *msgs, int count)
 {
   FAR struct efm32_i2c_priv_s *priv = (struct efm32_i2c_priv_s *)dev;
-  int ret = OK;
+  int ret;
 
   DEBUGASSERT(count > 0);
 
@@ -1434,7 +1458,11 @@ static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Ensure that address or flags don't change meanwhile */
 
-  efm32_i2c_sem_wait(priv);
+  ret = efm32_i2c_sem_wait(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Reset ptr and dcnt to ensure an unexpected data interrupt doesn't
    * overwrite stale data.
@@ -1486,8 +1514,9 @@ static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
 
   efm32_i2c_putreg(priv, EFM32_I2C_IFC_OFFSET, _I2C_IFC_MASK);
 
-  /* Call once isr to start state machine. I2C interrupt are disabled and will
-   * be enabled in efm32_i2c_sem_waitdone if CONFIG_I2C_POLLED is NOT defined
+  /* Call once isr to start state machine. I2C interrupt are disabled and
+   * will be enabled in efm32_i2c_sem_waitdone if CONFIG_I2C_POLLED is NOT
+   * defined.
    */
 
   efm32_i2c_isr_process(priv);
@@ -1564,7 +1593,7 @@ static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: efm32_i2c_reset
  *
  * Description:
@@ -1576,7 +1605,7 @@ static int efm32_i2c_transfer(FAR struct i2c_master_s *dev,
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_I2C_RESET
 int efm32_i2c_reset(FAR struct i2c_master_s *dev)
@@ -1586,7 +1615,7 @@ int efm32_i2c_reset(FAR struct i2c_master_s *dev)
   unsigned int stretch_count;
   uint32_t scl_gpio;
   uint32_t sda_gpio;
-  int ret = ERROR;
+  int ret;
 
   DEBUGASSERT(dev);
 
@@ -1596,7 +1625,13 @@ int efm32_i2c_reset(FAR struct i2c_master_s *dev)
 
   /* Lock out other clients */
 
-  efm32_i2c_sem_wait(priv);
+  ret = efm32_i2c_sem_wait_uninterruptible(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -EIO;
 
   /* De-init the port */
 
@@ -1676,6 +1711,7 @@ int efm32_i2c_reset(FAR struct i2c_master_s *dev)
   ret = OK;
 
 out:
+
   /* Release the port for re-use by other clients */
 
   efm32_i2c_sem_post(priv);

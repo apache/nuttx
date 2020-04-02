@@ -32,7 +32,7 @@ Status
     for recovery from this condition at: https://community.nxp.com/thread/505593 .
     But none of those options are working for me.
 
-    Give the success running of of SRAM and the success of the same fixes
+    Give the success running of SRAM and the success of the same fixes
     on the S32K118, I believe that the NSH configuration should now run out
     of FLASH.  Unfortunately, I cannot demonstrate that.
 

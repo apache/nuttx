@@ -1,8 +1,6 @@
 config FS_LITTLEFS
 	bool "LITTLEFS File System"
 	default n
-	select FS_READABLE
-	select FS_WRITABLE
 	depends on !DISABLE_MOUNTPOINT
 	---help---
 		Build the LITTLEFS file system. https://github.com/ARMmbed/littlefs.

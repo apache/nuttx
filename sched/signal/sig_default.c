@@ -268,10 +268,9 @@ static void nxsig_abnormal_termination(int signo)
    */
 
 #ifdef HAVE_GROUP_MEMBERS
-  /* Kill of of the children of the task.  This will not kill the currently
+  /* Kill all of the children of the task.  This will not kill the currently
    * running task/pthread (this_task).  It will kill the main thread of the
-   * task group if the this_task is a
-   * pthread.
+   * task group if this_task is a pthread.
    */
 
   group_killchildren((FAR struct task_tcb_s *)rtcb);
@@ -329,9 +328,9 @@ static void nxsig_stop_task(int signo)
    */
 
 #ifdef HAVE_GROUP_MEMBERS
-  /* Suspend of of the children of the task.  This will not suspend the
+  /* Suspend all of the children of the task.  This will not suspend the
    * currently running task/pthread (this_task).  It will suspend the
-   * main thread of the task group if the this_task is a pthread.
+   * main thread of the task group if this_task is a pthread.
    */
 
   group_suspendchildren(rtcb);

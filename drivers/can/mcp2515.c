@@ -211,25 +211,25 @@ enum can_state_s
 struct mcp2515_can_s
 {
   struct mcp2515_config_s *config; /* The constant configuration */
-  uint8_t state;            /* See enum can_state_s */
-  uint8_t nalloc;           /* Number of allocated filters */
-  sem_t locksem;            /* Enforces mutually exclusive access */
-  sem_t txfsem;             /* Used to wait for TX FIFO availability */
-  uint32_t btp;             /* Current bit timing */
-  uint8_t rxints;          /* Configured RX interrupts */
-  uint8_t txints;          /* Configured TX interrupts */
+  uint8_t state;                   /* See enum can_state_s */
+  uint8_t nalloc;                  /* Number of allocated filters */
+  sem_t locksem;                   /* Enforces mutually exclusive access */
+  sem_t txfsem;                    /* Used to wait for TX FIFO availability */
+  uint32_t btp;                    /* Current bit timing */
+  uint8_t rxints;                  /* Configured RX interrupts */
+  uint8_t txints;                  /* Configured TX interrupts */
 #ifdef CONFIG_CAN_ERRORS
-  uint32_t olderrors;       /* Used to detect the changes in error states */
+  uint32_t olderrors;              /* Used to detect the changes in error states */
 #endif
-  uint8_t filters;          /* Standard/Extende filter bit allocator. */
-  uint8_t txbuffers;        /* TX Buffers bit allocator. */
+  uint8_t filters;                 /* Standard/Extende filter bit allocator. */
+  uint8_t txbuffers;               /* TX Buffers bit allocator. */
 
   FAR uint8_t *spi_txbuf;
   FAR uint8_t *spi_rxbuf;
 #ifdef CONFIG_MCP2515_REGDEBUG
-  uintptr_t regaddr;        /* Last register address read */
-  uint32_t regval;          /* Last value read from the register */
-  unsigned int count;       /* Number of times that the value was read */
+  uintptr_t regaddr;               /* Last register address read */
+  uint32_t regval;                 /* Last value read from the register */
+  unsigned int count;              /* Number of times that the value was read */
 #endif
 };
 
@@ -241,10 +241,11 @@ struct mcp2515_can_s
 
 static void mcp2515_readregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
               FAR uint8_t *buffer, uint8_t len);
-static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
+static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv,
+              uint8_t regaddr,
               FAR const uint8_t *buffer, uint8_t len);
-static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
-              uint8_t mask, uint8_t value);
+static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv,
+              uint8_t regaddr, uint8_t mask, uint8_t value);
 #ifdef CONFIG_MCP2515_REGDEBUG
 static void mcp2515_dumpregs(FAR struct mcp2515_can_s *priv,
               FAR const char *msg);
@@ -254,7 +255,7 @@ static void mcp2515_dumpregs(FAR struct mcp2515_can_s *priv,
 
 /* Semaphore helpers */
 
-static void mcp2515_dev_lock(FAR struct mcp2515_can_s *priv);
+static int mcp2515_dev_lock(FAR struct mcp2515_can_s *priv);
 #define mcp2515_dev_unlock(priv) nxsem_post(&priv->locksem)
 
 /* MCP2515 helpers */
@@ -427,7 +428,8 @@ static void mcp2515_transfer(FAR struct mcp2515_can_s *priv, uint8_t len)
  *
  ****************************************************************************/
 
-static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
+static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv,
+                              uint8_t regaddr,
                               FAR const uint8_t *buffer, uint8_t len)
 {
   FAR struct mcp2515_config_s *config = priv->config;
@@ -480,8 +482,8 @@ static void mcp2515_writeregs(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
  *
  ****************************************************************************/
 
-static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv, uint8_t regaddr,
-                              uint8_t mask, uint8_t value)
+static void mcp2515_modifyreg(FAR struct mcp2515_can_s *priv,
+                              uint8_t regaddr, uint8_t mask, uint8_t value)
 {
   FAR struct mcp2515_config_s *config = priv->config;
   uint8_t wr[4] =
@@ -543,9 +545,9 @@ static void mcp2515_dumpregs(FAR struct mcp2515_can_s *priv,
  *
  ****************************************************************************/
 
-static void mcp2515_dev_lock(FAR struct mcp2515_can_s *priv)
+static int mcp2515_dev_lock(FAR struct mcp2515_can_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->locksem);
+  return nxsem_wait(&priv->locksem);
 }
 
 /****************************************************************************
@@ -573,13 +575,18 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
   uint8_t offset;
   uint8_t mode = CAN_FILTER_MASK;
   int ndx;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
 
   /* Get exclusive excess to the MCP2515 hardware */
 
-  mcp2515_dev_lock(priv);
+  ret = mcp2515_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Find an unused standard filter */
 
@@ -684,7 +691,8 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
               /* STD0 - STD2 */
 
               regval = (regval) |
-                       (uint8_t)(((extconfig->xf_id1 & 0x1c0000) >> 16) << 3);
+                       (uint8_t)(((extconfig->xf_id1 &
+                                   0x1c0000) >> 16) << 3);
               mcp2515_writeregs(priv, MCP2515_RXF0SIDL + offset +
                                 ((priv->nalloc - 1) * 4), &regval, 1);
 
@@ -714,7 +722,8 @@ static int mcp2515_add_extfilter(FAR struct mcp2515_can_s *priv,
               /* STD0 - STD2 */
 
               regval = (regval) |
-                       (uint8_t)(((extconfig->xf_id2 & 0x1c0000) >> 16) << 3);
+                       (uint8_t)(((extconfig->xf_id2 &
+                                   0x1c0000) >> 16) << 3);
               mcp2515_writeregs(priv, MCP2515_RXM0SIDL + offset, &regval, 1);
 
               /* STD3 - STD10 */
@@ -801,6 +810,7 @@ static int mcp2515_del_extfilter(FAR struct mcp2515_can_s *priv, int ndx)
   FAR struct mcp2515_config_s *config;
   uint8_t regval;
   uint8_t offset;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
@@ -818,7 +828,11 @@ static int mcp2515_del_extfilter(FAR struct mcp2515_can_s *priv, int ndx)
 
   /* Get exclusive excess to the MCP2515 hardware */
 
-  mcp2515_dev_lock(priv);
+  ret = mcp2515_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Check if this filter is really assigned */
 
@@ -902,13 +916,18 @@ static int mcp2515_add_stdfilter(FAR struct mcp2515_can_s *priv,
   uint8_t offset;
   uint8_t mode = CAN_FILTER_MASK;
   int ndx;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
 
   /* Get exclusive excess to the MCP2515 hardware */
 
-  mcp2515_dev_lock(priv);
+  ret = mcp2515_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Find an unused standard filter */
 
@@ -1074,6 +1093,7 @@ static int mcp2515_del_stdfilter(FAR struct mcp2515_can_s *priv, int ndx)
   FAR struct mcp2515_config_s *config;
   uint8_t regval;
   uint8_t offset;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
@@ -1091,7 +1111,11 @@ static int mcp2515_del_stdfilter(FAR struct mcp2515_can_s *priv, int ndx)
 
   /* Get exclusive excess to the MCP2515 hardware */
 
-  mcp2515_dev_lock(priv);
+  ret = mcp2515_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Check if this filter is really assigned */
 
@@ -1166,6 +1190,7 @@ static int mcp2515_del_stdfilter(FAR struct mcp2515_can_s *priv, int ndx)
 static void mcp2515_reset_lowlevel(FAR struct mcp2515_can_s *priv)
 {
   FAR struct mcp2515_config_s *config;
+  int ret;
 
   DEBUGASSERT(priv);
   config = priv->config;
@@ -1175,7 +1200,11 @@ static void mcp2515_reset_lowlevel(FAR struct mcp2515_can_s *priv)
 
   /* Get exclusive access to the MCP2515 peripheral */
 
-  mcp2515_dev_lock(priv);
+  ret = mcp2515_dev_lock(priv);
+  if (ret < 0)
+    {
+      return;
+    }
 
   /* Send SPI reset command to MCP2515 */
 
@@ -1263,7 +1292,11 @@ static int mcp2515_setup(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the MCP2515 peripheral */
 
-  mcp2515_dev_lock(priv);
+  ret = mcp2515_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* MCP2515 hardware initialization */
 
@@ -1521,15 +1554,14 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd,
            * PHSEG1 == PHSEG2 (PHSEG2 = TSEG2)
            *
            * See more at:
+           *  http://www.analog.com/en/analog-dialogue/articles/configure-can-bit-timing.html
            *
-           * http://www.analog.com/en/analog-dialogue/articles/configure-can-bit-timing.html
            */
 
           phseg1 = tseg2;
           prseg  = tseg1 - phseg1;
 
-          brp = (uint32_t)
-            (((float) MCP2515_CANCLK_FREQUENCY /
+          brp = (uint32_t)(((float) MCP2515_CANCLK_FREQUENCY /
              ((float)(tseg1 + tseg2 + 1) * (float)(2 * bt->bt_baud))) - 1);
 
           /* Save the value of the new bit timing register */
@@ -1716,6 +1748,7 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   uint8_t regval;
   uint8_t txbuf;
   unsigned int nbytes;
+  int ret;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
@@ -1729,11 +1762,21 @@ static int mcp2515_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   /* Get exclusive access to the MCP2515 peripheral */
 
-  mcp2515_dev_lock(priv);
+  ret = mcp2515_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Acquire buffer */
 
-  nxsem_wait(&priv->txfsem);
+  ret = nxsem_wait(&priv->txfsem);
+  if (ret < 0)
+    {
+      mcp2515_dev_unlock(priv);
+      return ret;
+    }
+
   DEBUGASSERT(priv->txbuffers != 0);
 
   txbuf = ffs(priv->txbuffers) - 1;
@@ -2485,7 +2528,8 @@ FAR struct mcp2515_can_s *
 
   caninfo("Starting mcp2515_instantiate()!\n");
 
-  priv = (FAR struct mcp2515_can_s *)kmm_malloc(sizeof(struct mcp2515_can_s));
+  priv = (FAR struct mcp2515_can_s *)
+    kmm_malloc(sizeof(struct mcp2515_can_s));
   if (priv == NULL)
     {
       canerr("ERROR: Failed to allocate instance of mcp2515_can_s!\n");
@@ -2553,7 +2597,8 @@ FAR struct mcp2515_can_s *
  *
  ****************************************************************************/
 
-FAR struct can_dev_s *mcp2515_initialize(FAR struct mcp2515_can_s *mcp2515can)
+FAR struct can_dev_s *mcp2515_initialize(
+    FAR struct mcp2515_can_s *mcp2515can)
 {
   FAR struct can_dev_s *dev;
 

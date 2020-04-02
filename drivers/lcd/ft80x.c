@@ -1,51 +1,40 @@
-/**************************************************************************************
+/****************************************************************************
  * drivers/lcd/ft80x.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
- *  - Document No.: FT_000792, "FT800 Embedded Video Engine", Datasheet Version 1.1,
- *    Clearance No.: FTDI# 334, Future Technology Devices International Ltd.
- *  - Document No.: FT_000986, "FT801 Embedded Video Engine Datasheet", Version 1.0,
- *    Clearance No.: FTDI#376, Future Technology Devices International Ltd.
- *  - Application Note AN_240AN_240, "FT800 From the Ground Up", Version 1.1,
- *    Issue Date: 2014-06-09, Future Technology Devices International Ltd.
- *  - "FT800 Series Programmer Guide Guide", Version 2.1, Issue Date: 2016-09-19,
- *    Future Technology Devices International Ltd.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- **************************************************************************************/
+ ****************************************************************************/
 
-/**************************************************************************************
+/* References:
+ *  - Document No.: FT_000792, "FT800 Embedded Video Engine", Datasheet
+ *    Version 1.1, Clearance No.: FTDI# 334, Future Technology Devices
+ *    International Ltd.
+ *  - Document No.: FT_000986, "FT801 Embedded Video Engine Datasheet",
+ *    Version 1.0, Clearance No.: FTDI#376, Future Technology Devices
+ *    International Ltd.
+ *  - Application Note AN_240AN_240, "FT800 From the Ground Up", Version
+ *    1.1, Issue Date: 2014-06-09, Future Technology Devices International
+ *    Ltd.
+ *  - "FT800 Series Programmer Guide Guide", Version 2.1, Issue Date:
+ *    2016-09-19, Future Technology Devices International Ltd.
+ */
+
+/****************************************************************************
  * Included Files
- **************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -153,6 +142,35 @@ static const struct file_operations g_ft80x_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ft80x_forcetake
+ *
+ * Description:
+ *   This is a wrapper around but nxsem_wait_uninterruptible().  The wrapper
+ *   continues to wait even if the thread is canceled.  This must be done in
+ *   certain conditions where were must continue in order to clean-up
+ *   resources.
+ *
+ ****************************************************************************/
+
+static void ft80x_forcetake(FAR sem_t *sem)
+{
+  int ret;
+
+  do
+    {
+      ret = nxsem_wait_uninterruptible(sem);
+
+      /* The only expected error would -ECANCELED meaning that the
+       * parent thread has been canceled.  We have to continue and
+       * terminate the poll in this case.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
+    }
+  while (ret < 0);
+}
 
 /****************************************************************************
  * Name: ft80x_fade
@@ -295,7 +313,7 @@ static void ft80x_interrupt_work(FAR void *arg)
 
   /* Get exclusive access to the device structures */
 
-  nxsem_wait_uninterruptible(&priv->exclsem);
+  ft80x_forcetake(&priv->exclsem);
 
   /* Get the set of pending interrupts.  Note that simply reading this
    * register is sufficient to clear all pending interrupts.
@@ -309,74 +327,74 @@ static void ft80x_interrupt_work(FAR void *arg)
    * implementation.
    */
 
-   if ((intflags & FT80X_INT_SWAP) != 0)
-     {
-       /* Display swap occurred */
+  if ((intflags & FT80X_INT_SWAP) != 0)
+    {
+      /* Display swap occurred */
 
-       lcdinfo("Display swap occurred\n");
-       ft80x_notify(priv, FT80X_NOTIFY_SWAP, 0);
-     }
+      lcdinfo("Display swap occurred\n");
+      ft80x_notify(priv, FT80X_NOTIFY_SWAP, 0);
+    }
 
-   if ((intflags & FT80X_INT_TOUCH) != 0)
-     {
-       /* Touch-screen touch detected */
+  if ((intflags & FT80X_INT_TOUCH) != 0)
+    {
+      /* Touch-screen touch detected */
 
-       lcdinfo("Touch-screen touch detected\n");
-       ft80x_notify(priv, FT80X_NOTIFY_TOUCH, 0);
-     }
+      lcdinfo("Touch-screen touch detected\n");
+      ft80x_notify(priv, FT80X_NOTIFY_TOUCH, 0);
+    }
 
-   if ((intflags & FT80X_INT_TAG) != 0)
-     {
-       /* Touch-screen tag value change */
+  if ((intflags & FT80X_INT_TAG) != 0)
+    {
+      /* Touch-screen tag value change */
 
-       lcdinfo("Touch-screen tag value change\n");
+      lcdinfo("Touch-screen tag value change\n");
 #ifdef CONFIG_LCD_FT800
-       regval = ft80x_read_word(priv, FT80X_REG_TOUCH_TAG);
+      regval = ft80x_read_word(priv, FT80X_REG_TOUCH_TAG);
 #else
-       regval = ft80x_read_word(priv, FT80X_REG_CTOUCH_TAG);
+      regval = ft80x_read_word(priv, FT80X_REG_CTOUCH_TAG);
 #endif
-       ft80x_notify(priv, FT80X_NOTIFY_TAG, (int)(regval & TOUCH_TAG_MASK));
-     }
+      ft80x_notify(priv, FT80X_NOTIFY_TAG, (int)(regval & TOUCH_TAG_MASK));
+    }
 
-   if ((intflags & FT80X_INT_SOUND) != 0)
-     {
-       /*  Sound effect ended */
+  if ((intflags & FT80X_INT_SOUND) != 0)
+    {
+      /*  Sound effect ended */
 
-       lcdinfo(" Sound effect ended\n");
-       ft80x_notify(priv, FT80X_NOTIFY_SOUND, 0);
-     }
+      lcdinfo(" Sound effect ended\n");
+      ft80x_notify(priv, FT80X_NOTIFY_SOUND, 0);
+    }
 
-   if ((intflags & FT80X_INT_PLAYBACK) != 0)
-     {
-       /* Audio playback ended */
+  if ((intflags & FT80X_INT_PLAYBACK) != 0)
+    {
+      /* Audio playback ended */
 
-       lcdinfo("Audio playback ended\n");
-       ft80x_notify(priv, FT80X_NOTIFY_PLAYBACK, 0);
-     }
+      lcdinfo("Audio playback ended\n");
+      ft80x_notify(priv, FT80X_NOTIFY_PLAYBACK, 0);
+    }
 
-   if ((intflags & FT80X_INT_CMDEMPTY) != 0)
-     {
-       /* Command FIFO empty */
+  if ((intflags & FT80X_INT_CMDEMPTY) != 0)
+    {
+      /* Command FIFO empty */
 
-       lcdinfo("Command FIFO empty\n");
-       ft80x_notify(priv, FT80X_NOTIFY_CMDEMPTY, 0);
-     }
+      lcdinfo("Command FIFO empty\n");
+      ft80x_notify(priv, FT80X_NOTIFY_CMDEMPTY, 0);
+    }
 
-   if ((intflags & FT80X_INT_CMDFLAG) != 0)
-     {
-       /* Command FIFO flag */
+  if ((intflags & FT80X_INT_CMDFLAG) != 0)
+    {
+      /* Command FIFO flag */
 
-       lcdinfo("Command FIFO flag\n");
-       ft80x_notify(priv, FT80X_NOTIFY_CMDFLAG, 0);
-     }
+      lcdinfo("Command FIFO flag\n");
+      ft80x_notify(priv, FT80X_NOTIFY_CMDFLAG, 0);
+    }
 
-   if ((intflags & FT80X_INT_CONVCOMPLETE) != 0)
-     {
-       /* Touch-screen conversions completed */
+  if ((intflags & FT80X_INT_CONVCOMPLETE) != 0)
+    {
+      /* Touch-screen conversions completed */
 
-       lcdinfo(" Touch-screen conversions completed\n");
-       ft80x_notify(priv, FT80X_NOTIFY_CONVCOMPLETE, 0);
-     }
+      lcdinfo(" Touch-screen conversions completed\n");
+      ft80x_notify(priv, FT80X_NOTIFY_CONVCOMPLETE, 0);
+    }
 
   /* Re-enable interrupts */
 
@@ -598,7 +616,7 @@ static ssize_t ft80x_write(FAR struct file *filep, FAR const char *buffer,
   if (buffer == NULL || ((uintptr_t)buffer & 3) != 0 ||
       len == 0 || (len & 3) != 0 || (len + filep->f_pos) > FT80X_RAM_DL_SIZE)
     {
-       return -EINVAL;
+      return -EINVAL;
     }
 
   /* Get exclusive access to the device structures */
@@ -659,12 +677,14 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
       /* FT80X_IOC_CREATEDL:
-       *   Description:  Write a display list to the FT80x display list memory
-       *   Description:  Write a display list to the FT80x display list memory
-       *                 starting at offset zero.  This may or may not be the
-       *                 entire display list.  Display lists may be created
-       *                 incrementally, starting with FT80X_IOC_CREATEDL and
-       *                 finishing the display list using FT80XIO_APPENDDL
+       *   Description:  Write a display list to the FT80x display list
+       *                 memory
+       *   Description:  Write a display list to the FT80x display list
+       *                 memory starting at offset zero.  This may or may
+       *                 not be the entire display list.  Display lists may
+       *                 be created incrementally, starting with
+       *                 FT80X_IOC_CREATEDL and finishing the display list
+       *                 using FT80XIO_APPENDDL
        *   Argument:     A reference to a display list structure instance.
        *                 See struct ft80x_displaylist_s.
        *   Returns:      None
@@ -682,12 +702,13 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* FT80X_IOC_APPENDDL:
        *   Description:  Write additional display list entries to the FT80x
-       *                 display list memory at the current display list offset.
-       *                 This IOCTL command permits display lists to be completed
-       *                 incrementally, starting with FT80X_IOC_CREATEDL and
-       *                 finishing the display list using FT80XIO_APPENDDL.
-       *   Argument:     A reference to a display list structure instance.  See
-       *                 struct ft80x_displaylist_s.
+       *                 display list memory at the current display list
+       *                 offset.  This IOCTL command permits display lists
+       *                 to be completed incrementally, starting with
+       *                 FT80X_IOC_CREATEDL and finishing the display list
+       *                 using FT80XIO_APPENDDL.
+       *   Argument:     A reference to a display list structure instance.
+       *                 See struct ft80x_displaylist_s.
        *   Returns:      None
        */
 
@@ -778,7 +799,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* FT80X_IOC_PUTRAMCMD
        *   Description:  Write 32-bit aligned data to FT80x FIFO (RAM_CMD)
-       *   Argument:     A reference to an instance of struct ft80x_relmem_s below.
+       *   Argument:     A reference to an instance of struct ft80x_relmem_s.
        *   Returns:      None.
        */
 
@@ -787,8 +808,7 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct ft80x_relmem_s *ramcmd =
             (FAR struct ft80x_relmem_s *)((uintptr_t)arg);
 
-          if (ramcmd == NULL || ((uintptr_t)ramcmd->offset & 3) != 0 /* ||
-              ramcmd->offset >= FT80X_CMDFIFO_SIZE */ )
+          if (ramcmd == NULL || ((uintptr_t)ramcmd->offset & 3) != 0)
             {
               ret = -EINVAL;
             }
@@ -803,7 +823,8 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* FT80X_IOC_GETREG8:
        *   Description:  Read an 8-bit register value from the FT80x.
-       *   Argument:     A reference to an instance of struct ft80x_register_s.
+       *   Argument:     A reference to an instance of struct
+       *                 ft80x_register_s.
        *   Returns:      The 8-bit value read from the register.
        */
 
@@ -826,7 +847,8 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* FT80X_IOC_GETREG16:
        *   Description:  Read a 16-bit register value from the FT80x.
-       *   Argument:     A reference to an instance of struct ft80x_register_s.
+       *   Argument:     A reference to an instance of struct
+       *                 ft80x_register_s.
        *   Returns:      The 16-bit value read from the register.
        */
 
@@ -849,7 +871,8 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* FT80X_IOC_GETREG32:
        *   Description:  Read a 32-bit register value from the FT80x.
-       *   Argument:     A reference to an instance of struct ft80x_register_s.
+       *   Argument:     A reference to an instance of struct
+       *                 ft80x_register_s.
        *   Returns:      The 32-bit value read from the register.
        */
 
@@ -872,8 +895,10 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* FT80X_IOC_GETREGS:
        *   Description:  Read multiple 32-bit register values from the FT80x.
-       *   Argument:     A reference to an instance of struct ft80x_registers_s.
-       *   Returns:      The 32-bit values read from the consecutive registers .
+       *   Argument:     A reference to an instance of struct
+       *                 ft80x_registers_s.
+       *   Returns:      The 32-bit values read from the consecutive
+       *                 registers .
        */
 
       case FT80X_IOC_GETREGS:
@@ -896,7 +921,8 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* FT80X_IOC_PUTREG8:
        *   Description:  Write an 8-bit register value to the FT80x.
-       *   Argument:     A reference to an instance of struct ft80x_register_s.
+       *   Argument:     A reference to an instance of struct
+       *                 ft80x_register_s.
        *   Returns:      None.
        */
 
@@ -919,7 +945,8 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* FT80X_IOC_PUTREG16:
        *   Description:  Write a 16-bit  register value to the FT80x.
-       *   Argument:     A reference to an instance of struct ft80x_register_s.
+       *   Argument:     A reference to an instance of struct
+       *                 ft80x_register_s.
        *   Returns:      None.
        */
 
@@ -942,7 +969,8 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* FT80X_IOC_PUTREG32:
        *   Description:  Write a 32-bit  register value to the FT80x.
-       *   Argument:     A reference to an instance of struct ft80x_register_s.
+       *   Argument:     A reference to an instance of struct
+       *                 ft80x_register_s.
        *   Returns:      None.
        */
 
@@ -965,7 +993,8 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       /* FT80X_IOC_PUTREGS:
        *   Description:  Write multiple 32-bit register values to the FT80x.
-       *   Argument:     A reference to an instance of struct ft80x_registers_s.
+       *   Argument:     A reference to an instance of struct
+       *                 ft80x_registers_s.
        *   Returns:      None.
        */
 
@@ -1091,7 +1120,8 @@ static int ft80x_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #if defined(CONFIG_LCD_FT80X_AUDIO_MCUSHUTDOWN)
           /* Amplifier is controlled by an MCU GPIO pin */
 
-          DEBUGASSERT(priv->lower->attach != NULL && priv->lower->audio != NULL);
+          DEBUGASSERT(priv->lower->attach != NULL &&
+                      priv->lower->audio != NULL);
           DEBUGASSERT(arg == 0 || arg == 1);
 
           priv->lower->audio(priv->lower, (arg != 0));
@@ -1207,8 +1237,8 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
    *   - FT80X_REG_VSYNC0
    *   - FT80X_REG_VSYNC1
    *
-   * And the FT80X_REG_CSPREAD register changes color clock timing to reduce system
-   * noise.
+   * And the FT80X_REG_CSPREAD register changes color clock timing to reduce
+   * system noise.
    *
    * GPIO bit 7 is used for the display enable pin of the LCD module. By
    * setting the direction of the GPIO bit to out direction, the display can
@@ -1221,7 +1251,8 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
    *
    * 1. Drive the PD_N pin high
    * 2. Wait for at least 20ms
-   * 3. Execute "Initialization Sequence during the Boot up" from steps 1 to 9
+   * 3. Execute "Initialization Sequence during the Boot up" from steps 1
+   *    to 9
    *
    * Initialization Sequence from Sleep Mode:
    *
@@ -1235,9 +1266,9 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
    * Mode" except waiting for at least 20ms in step 2.
    */
 
-   DEBUGASSERT(priv->lower != NULL && priv->lower->pwrdown != NULL);
-   priv->lower->pwrdown(priv->lower, false);
-   up_mdelay(20);
+  DEBUGASSERT(priv->lower != NULL && priv->lower->pwrdown != NULL);
+  priv->lower->pwrdown(priv->lower, false);
+  up_mdelay(20);
 
   /* Initialization Sequence during the boot up:
    *
@@ -1320,8 +1351,8 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
    * checked, the next task is to configure the LCD display parameters for
    * the chosen display with the values determined in Section 2.3.3 above.
    *
-   * a. Set FT80X_REG_PCLK to zero - This disables the pixel clock output while
-   *    the LCD and other system parameters are configured
+   * a. Set FT80X_REG_PCLK to zero - This disables the pixel clock output
+   *    while the LCD and other system parameters are configured
    * b. Set the following registers with values for the chosen display.
    *    Typical WQVGA and QVGA values are shown:
    *
@@ -1388,8 +1419,8 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
 
   /* 5. Write first display list */
 
-  ft80x_write_word(priv, FT80X_RAM_DL + 0, FT80X_CLEAR_COLOR_RGB(0,0,0));
-  ft80x_write_word(priv, FT80X_RAM_DL + 4, FT80X_CLEAR(1,1,1));
+  ft80x_write_word(priv, FT80X_RAM_DL + 0, FT80X_CLEAR_COLOR_RGB(0, 0, 0));
+  ft80x_write_word(priv, FT80X_RAM_DL + 4, FT80X_CLEAR(1, 1, 1));
   ft80x_write_word(priv, FT80X_RAM_DL + 8, FT80X_DISPLAY());
 
   /* 6. Write FT80X_REG_DLSWAP, FT800 swaps display list immediately */

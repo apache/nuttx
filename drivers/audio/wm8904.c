@@ -94,7 +94,8 @@ static
                   uint8_t regaddr);
 static void     wm8904_writereg(FAR struct wm8904_dev_s *priv,
                   uint8_t regaddr, uint16_t regval);
-static void     wm8904_takesem(sem_t *sem);
+static int      wm8904_takesem(FAR sem_t *sem);
+static int      wm8904_forcetake(FAR sem_t *sem);
 #define         wm8904_givesem(s) nxsem_post(s)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
@@ -104,7 +105,8 @@ static void     wm8904_setvolume(FAR struct wm8904_dev_s *priv,
 #endif
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
 static void     wm8904_setbass(FAR struct wm8904_dev_s *priv, uint8_t bass);
-static void     wm8904_settreble(FAR struct wm8904_dev_s *priv, uint8_t treble);
+static void     wm8904_settreble(FAR struct wm8904_dev_s *priv,
+                  uint8_t treble);
 #endif
 
 static void     wm8904_setdatawidth(FAR struct wm8904_dev_s *priv);
@@ -225,9 +227,9 @@ static const struct audio_ops_s g_audioops =
 #ifndef CONFIG_WM8904_CLKDEBUG
 static
 #endif
-const uint8_t g_sysclk_scaleb1[WM8904_BCLK_MAXDIV+1] =
+const uint8_t g_sysclk_scaleb1[WM8904_BCLK_MAXDIV + 1] =
 {
-   2,  3,  4,  6,  8, 10, 11, /*  1,  1.5,  2,  3,  4,  5,  5.5 */
+  2,  3,  4,  6,  8,  10, 11, /*  1,  1.5,  2,  3,  4,  5,  5.5 */
   12, 16, 20, 22, 24, 32, 40, /*  6,  8,   10, 11, 12, 16, 20   */
   44, 48, 50, 60, 64, 88, 96  /* 22, 24,   25, 30, 32, 44, 48   */
 };
@@ -297,7 +299,8 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
 
           if (retries < MAX_RETRIES)
             {
-              audwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n", ret);
+              audwarn("WARNING: I2C_TRANSFER failed: %d ... Resetting\n",
+                      ret);
 
               ret = I2C_RESET(priv->i2c);
               if (ret < 0)
@@ -331,13 +334,13 @@ uint16_t wm8904_readreg(FAR struct wm8904_dev_s *priv, uint8_t regaddr)
   return 0;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: wm8904_writereg
  *
  * Description:
  *   Write the specified 16-bit register to the WM8904 device.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
                             uint16_t regval)
@@ -405,28 +408,65 @@ static void wm8904_writereg(FAR struct wm8904_dev_s *priv, uint8_t regaddr,
     }
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: wm8904_takesem
  *
  * Description:
- *  Take a semaphore count, handling the nasty EINTR return if we are interrupted
- *  by a signal.
+ *  Take a semaphore count, handling the nasty EINTR return if we are
+ *  interrupted by a signal.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static void wm8904_takesem(sem_t *sem)
+static int wm8904_takesem(sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
 }
 
-/************************************************************************************
+/****************************************************************************
+ * Name: wm8904_forcetake
+ *
+ * Description:
+ *   This is just another wrapper but this one continues even if the thread
+ *   is canceled.  This must be done in certain conditions where were must
+ *   continue in order to clean-up resources.
+ *
+ ****************************************************************************/
+
+static int wm8904_forcetake(FAR sem_t *sem)
+{
+  int result;
+  int ret = OK;
+
+  do
+    {
+      result = nxsem_wait_uninterruptible(sem);
+
+      /* The only expected error would -ECANCELED meaning that the
+       * parent thread has been canceled.  We have to continue and
+       * terminate the poll in this case.
+       */
+
+      DEBUGASSERT(result == OK || result == -ECANCELED);
+      if (ret == OK && result < 0)
+        {
+          /* Remember the first failure */
+
+          ret = result;
+        }
+    }
+  while (result < 0);
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: wm8904_scalevolume
  *
  * Description:
- *   Set the right and left volume values in the WM8904 device based on the current
- *   volume and balance settings.
+ *   Set the right and left volume values in the WM8904 device based on the
+ *   current volume and balance settings.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 static inline uint16_t wm8904_scalevolume(uint16_t volume, b16_t scale)
@@ -435,14 +475,14 @@ static inline uint16_t wm8904_scalevolume(uint16_t volume, b16_t scale)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: wm8904_setvolume
  *
  * Description:
- *   Set the right and left volume values in the WM8904 device based on the current
- *   volume and balance settings.
+ *   Set the right and left volume values in the WM8904 device based on the
+ *   current volume and balance settings.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 static void wm8904_setvolume(FAR struct wm8904_dev_s *priv, uint16_t volume,
@@ -514,7 +554,7 @@ static void wm8904_setvolume(FAR struct wm8904_dev_s *priv, uint16_t volume,
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
-/************************************************************************************
+/****************************************************************************
  * Name: wm8904_setbass
  *
  * Description:
@@ -522,7 +562,7 @@ static void wm8904_setvolume(FAR struct wm8904_dev_s *priv, uint16_t volume,
  *
  *   The level and range are in whole percentage levels (0-100).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
 static void wm8904_setbass(FAR struct wm8904_dev_s *priv, uint8_t bass)
@@ -532,7 +572,7 @@ static void wm8904_setbass(FAR struct wm8904_dev_s *priv, uint8_t bass)
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
-/************************************************************************************
+/****************************************************************************
  * Name: wm8904_settreble
  *
  * Description:
@@ -540,7 +580,7 @@ static void wm8904_setbass(FAR struct wm8904_dev_s *priv, uint8_t bass)
  *
  *   The level and range are in whole percentage levels (0-100).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
 static void wm8904_settreble(FAR struct wm8904_dev_s *priv, uint8_t treble)
@@ -710,12 +750,12 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
 
   /* MCLK must be divided down so that fref <=13.5MHz */
 
-  if (fref > 4*13500000)
+  if (fref > 4 * 13500000)
     {
       fref >>= 3;
       regval = (WM8904_FLL_CLK_REF_SRC_MCLK | WM8904_FLL_CLK_REF_DIV8);
     }
-  else if (fref > 2*13500000)
+  else if (fref > 2 * 13500000)
     {
       fref >>= 2;
       regval = (WM8904_FLL_CLK_REF_SRC_MCLK | WM8904_FLL_CLK_REF_DIV4);
@@ -841,6 +881,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   priv->bitrate = fout;
 
   /* Now, Configure the FLL */
+
   /* FLL Control 1
    *
    * FLL_FRACN_ENA=1        : Enables fractional mode
@@ -918,7 +959,7 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   retries = 5;
   do
     {
-      nxsig_usleep(5*5000);
+      nxsig_usleep(5 * 5000);
     }
   while (priv->locked == false && --retries > 0);
 
@@ -941,10 +982,11 @@ static void wm8904_setbitrate(FAR struct wm8904_dev_s *priv)
   retries = 5;
   do
     {
-       nxsig_usleep(5*5000);
+       nxsig_usleep(5 * 5000);
     }
-  while ((wm8904_readreg(priv, WM8904_INT_STATUS) & WM8904_FLL_LOCK_INT) != 0 ||
-          --retries > 0);
+  while ((wm8904_readreg(priv, WM8904_INT_STATUS) &
+         WM8904_FLL_LOCK_INT) != 0 ||
+         --retries > 0);
 
   /* Clear all pending status bits by writing 1's into the interrupt status
    * register.
@@ -996,18 +1038,21 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
         switch (caps->ac_subtype)
           {
             case AUDIO_TYPE_QUERY:
+
               /* We don't decode any formats!  Only something above us in
                * the audio stream can perform decoding on our behalf.
                */
 
               /* The types of audio units we implement */
 
-              caps->ac_controls.b[0] = AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
-                                     AUDIO_TYPE_PROCESSING;
+              caps->ac_controls.b[0] =
+                AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
+                AUDIO_TYPE_PROCESSING;
 
               break;
 
             case AUDIO_FMT_MIDI:
+
               /* We only support Format 0 */
 
               caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
@@ -1032,10 +1077,11 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-              caps->ac_controls.b[0] = AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
-                                       AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
-                                       AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
-                                       AUDIO_SAMP_RATE_48K;
+              caps->ac_controls.b[0] =
+                AUDIO_SAMP_RATE_8K | AUDIO_SAMP_RATE_11K |
+                AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
+                AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
+                AUDIO_SAMP_RATE_48K;
               break;
 
             case AUDIO_FMT_MP3:
@@ -1059,13 +1105,14 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
           {
             /* Fill in the ac_controls section with the Feature Units we have */
 
-            caps->ac_controls.b[0] = AUDIO_FU_VOLUME | AUDIO_FU_BASS | AUDIO_FU_TREBLE;
+            caps->ac_controls.b[0] = AUDIO_FU_VOLUME | AUDIO_FU_BASS |
+                                     AUDIO_FU_TREBLE;
             caps->ac_controls.b[1] = AUDIO_FU_BALANCE >> 8;
           }
         else
           {
-            /* TODO:  Do we need to provide specific info for the Feature Units,
-             * such as volume setting ranges, etc.?
+            /* TODO:  Do we need to provide specific info for the Feature
+             * Units, such as volume setting ranges, etc.?
              */
           }
 
@@ -1088,7 +1135,8 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Provide capabilities of our Stereo Extender */
 
-              caps->ac_controls.b[0] = AUDIO_STEXT_ENABLE | AUDIO_STEXT_WIDTH;
+              caps->ac_controls.b[0] =
+                AUDIO_STEXT_ENABLE | AUDIO_STEXT_WIDTH;
               break;
 
             default:
@@ -1342,6 +1390,7 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
   priv->inflight--;
 
   /* Save the result of the transfer */
+
   /* REVISIT:  This can be overwritten */
 
   priv->result = result;
@@ -1444,7 +1493,7 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
   irqstate_t flags;
   uint32_t timeout;
   int shift;
-  int ret = OK;
+  int ret;
 
   /* Loop while there are audio buffers to be sent and we have few than
    * CONFIG_WM8904_INFLIGHT then "in-flight"
@@ -1458,7 +1507,12 @@ static int wm8904_sendbuffer(FAR struct wm8904_dev_s *priv)
    * only while accessing 'inflight'.
    */
 
-  wm8904_takesem(&priv->pendsem);
+  ret = wm8904_takesem(&priv->pendsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   while (priv->inflight < CONFIG_WM8904_INFLIGHT &&
          dq_peek(&priv->pendq) != NULL && !priv->paused)
     {
@@ -1540,6 +1594,7 @@ static int wm8904_start(FAR struct audio_lowerhalf_s *dev)
   audinfo("Entry\n");
 
   /* Exit reduced power modes of operation */
+
   /* REVISIT */
 
   /* Create a message queue for the worker thread */
@@ -1623,6 +1678,7 @@ static int wm8904_stop(FAR struct audio_lowerhalf_s *dev)
   priv->threadid = 0;
 
   /* Enter into a reduced power usage mode */
+
   /* REVISIT: */
 
   return OK;
@@ -1667,7 +1723,8 @@ static int wm8904_pause(FAR struct audio_lowerhalf_s *dev)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int wm8904_resume(FAR struct audio_lowerhalf_s *dev, FAR void *session)
+static int wm8904_resume(FAR struct audio_lowerhalf_s *dev,
+                         FAR void *session)
 #else
 static int wm8904_resume(FAR struct audio_lowerhalf_s *dev)
 #endif
@@ -1714,14 +1771,20 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
   /* Add the new buffer to the tail of pending audio buffers */
 
-  wm8904_takesem(&priv->pendsem);
+  ret = wm8904_takesem(&priv->pendsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   apb->flags |= AUDIO_APB_OUTPUT_ENQUEUED;
   dq_addlast(&apb->dq_entry, &priv->pendq);
   wm8904_givesem(&priv->pendsem);
 
-  /* Send a message to the worker thread indicating that a new buffer has been
-   * enqueued.  If mq is NULL, then the playing has not yet started.  In that
-   * case we are just "priming the pump" and we don't need to send any message.
+  /* Send a message to the worker thread indicating that a new buffer has
+   * been enqueued.  If mq is NULL, then the playing has not yet started.
+   * In that case we are just "priming the pump" and we don't need to send
+   * any message.
    */
 
   ret = OK;
@@ -1824,11 +1887,16 @@ static int wm8904_reserve(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *) dev;
-  int   ret = OK;
+  int ret;
 
   /* Borrow the APBQ semaphore for thread sync */
 
-  wm8904_takesem(&priv->pendsem);
+  ret = wm8904_takesem(&priv->pendsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   if (priv->reserved)
     {
       ret = -EBUSY;
@@ -1869,7 +1937,8 @@ static int wm8904_release(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
   FAR struct wm8904_dev_s *priv = (FAR struct wm8904_dev_s *)dev;
-  void  *value;
+  FAR void *value;
+  int ret;
 
   /* Join any old worker thread we had created to prevent a memory leak */
 
@@ -1881,14 +1950,14 @@ static int wm8904_release(FAR struct audio_lowerhalf_s *dev)
 
   /* Borrow the APBQ semaphore for thread sync */
 
-  wm8904_takesem(&priv->pendsem);
+  ret = wm8904_forcetake(&priv->pendsem);
 
   /* Really we should free any queued buffers here */
 
   priv->reserved = false;
   wm8904_givesem(&priv->pendsem);
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -2069,6 +2138,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
           case AUDIO_MSG_STOP:
+
             /* Indicate that we are terminating */
 
             audinfo("AUDIO_MSG_STOP: Terminating\n");
@@ -2103,7 +2173,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
 
   /* Return any pending buffers in our pending queue */
 
-  wm8904_takesem(&priv->pendsem);
+  wm8904_forcetake(&priv->pendsem);
   while ((apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->pendq)) != NULL)
     {
       /* Release our reference to the buffer */
@@ -2174,6 +2244,7 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
   wm8904_writereg(priv, WM8904_VMID_CTRL, regval);
 
   /* Mic Bias Control 0 */
+
   /* MICDET_ENA=1, MICBIAS_ENA=1   */
 
   regval = WM8904_MICDET_ENA | WM8904_MICBIAS_ENA;
@@ -2194,15 +2265,17 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
   wm8904_writereg(priv, WM8904_PM2, regval);
 
   /* Power Management 6 */
+
   /* DACL_ENA=1, DACR_ENA=1, ADCL_ENA=1, ADCR_ENA=1  */
 
-  regval = WM8904_DACL_ENA | WM8904_DACR_ENA | WM8904_ADCL_ENA | WM8904_ADCR_ENA;
+  regval = WM8904_DACL_ENA | WM8904_DACR_ENA | WM8904_ADCL_ENA |
+           WM8904_ADCR_ENA;
   wm8904_writereg(priv, WM8904_PM6, regval);
 
   /* Clock Rates 0.
    *
-   * This value sets TOCLK_RATE_DIV16=0, TOCLK_RATE_X4=0, and MCLK_DIV=0 while
-   * preserving the state of some undocumented bits (see wm8904.h).
+   * This value sets TOCLK_RATE_DIV16=0, TOCLK_RATE_X4=0, and MCLK_DIV=0
+   * while preserving the state of some undocumented bits (see wm8904.h).
    *
    *   MCLK_DIV=0           : MCLK is is not divided by 2.
    */
@@ -2244,13 +2317,14 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
 
   /* Audio Interface 1.
    *
-   * This value sets AIFADC_TDM=0, AIFADC_TDM_CHAN=0, BCLK_DIR=1 while preserving
-   * the state of some undocumented bits (see wm8904.h).
+   * This value sets AIFADC_TDM=0, AIFADC_TDM_CHAN=0, BCLK_DIR=1 while
+   * preserving the state of some undocumented bits (see wm8904.h).
    *
    *   Digital audio interface format      : I2S
    *   Digital audio interface word length : 24
    *   AIF_LRCLK_INV=0                     : LRCLK not inverted
-   *   BCLK_DIR=1                          : BCLK is an output (will clock I2S).
+   *   BCLK_DIR=1                          : BCLK is an output (will clock
+   *                                         I2S).
    *   AIF_BCLK_INV=0                      : BCLK not inverted
    *   AIF_TRIS=0                          : Outputs not tri-stated
    *   AIFADC_TDM_CHAN=0                   : ADCDAT outputs data on slot 0
@@ -2260,7 +2334,8 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
    *   Bit 14:                             : Undocumented
    */
 
-  regval = WM8904_AIF_FMT_I2S | WM8904_AIF_WL_24BITS | WM8904_BCLK_DIR | 0x4000;
+  regval = WM8904_AIF_FMT_I2S | WM8904_AIF_WL_24BITS | WM8904_BCLK_DIR |
+           0x4000;
   wm8904_writereg(priv, WM8904_AIF1, regval);
 
   /* Audio Interface 2.
@@ -2271,10 +2346,10 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
 
   /* Audio Interface 3
    *
-   * Set LRCLK as an output with rate = BCLK / (2*WM8904_FRAMELENn).  This is
-   * a value that varies with bits per sample, n=8 or 16.  Since I2S will send
-   * a word on each edge of LRCLK (after a delay), this essentially means that
-   * each audio frame is WM8904_FRAMELENn bits in length.
+   * Set LRCLK as an output with rate = BCLK / (2*WM8904_FRAMELENn).  This
+   * is a value that varies with bits per sample, n=8 or 16.  Since I2S will
+   * send a word on each edge of LRCLK (after a delay), this essentially
+   * means that each audio frame is WM8904_FRAMELENn bits in length.
    */
 
   regval = WM8904_LRCLK_DIR | WM8904_LRCLK_RATE(2*WM8904_FRAMELEN16);
@@ -2285,6 +2360,7 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
   wm8904_writereg(priv, WM8904_DAC_DIGI1, 0);
 
   /* Analogue Left Input 0 */
+
   /* Analogue Right Input 0 */
 
   regval =  WM8904_IN_VOL(5);
@@ -2297,6 +2373,7 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
   wm8904_writereg(priv, WM8904_ANA_RIGHT_IN1, 0);
 
   /* Analogue OUT1 Left */
+
   /* Analogue OUT1 Right */
 
   wm8904_setvolume(priv, CONFIG_WM8904_INITVOLUME, true);
@@ -2308,8 +2385,9 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
 
   /* Analogue HP 0 */
 
-  regval = WM8904_HPL_RMV_SHORT | WM8904_HPL_ENA_OUTP | WM8904_HPL_ENA_DLY | WM8904_HPL_ENA |
-           WM8904_HPR_RMV_SHORT | WM8904_HPR_ENA_OUTP | WM8904_HPR_ENA_DLY | WM8904_HPR_ENA;
+  regval = WM8904_HPL_RMV_SHORT | WM8904_HPL_ENA_OUTP | WM8904_HPL_ENA_DLY |
+           WM8904_HPL_ENA | WM8904_HPR_RMV_SHORT | WM8904_HPR_ENA_OUTP |
+           WM8904_HPR_ENA_DLY | WM8904_HPR_ENA;
   wm8904_writereg(priv, WM8904_ANA_HP0, regval);
 
   /* Charge Pump 0 */

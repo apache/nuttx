@@ -58,6 +58,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
+#include "chip.h"
 
 /****************************************************************************
  * Private Functions
@@ -75,7 +76,11 @@
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
 static inline void up_color_intstack(void)
 {
+#ifdef CONFIG_SMP
+  uint32_t *ptr = (uint32_t *)up_intstack_base();
+#else
   uint32_t *ptr = (uint32_t *)&g_intstackalloc;
+#endif
   ssize_t size;
 
   for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
@@ -135,8 +140,8 @@ void up_initialize(void)
 #endif
 
 #ifdef CONFIG_ARCH_DMA
-  /* Initialize the DMA subsystem if the weak function up_dma_initialize has been
-   * brought into the build
+  /* Initialize the DMA subsystem if the weak function up_dma_initialize has
+   * been brought into the build
    */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS

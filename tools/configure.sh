@@ -37,11 +37,10 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
-USAGE: ${0} [-d] [-s] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name>
+USAGE: ${0} [-e] [-l|m|c|u|g|n] [-a <app-dir>] <board-name>:<config-name> [make-opts]
 
 Where:
-  -d enables script debug output
-  -s skip the .config/Make.defs existence check
+  -e enforce distclean if already configured
   -l selects the Linux (l) host environment.
   -m selects the macOS (m) host environment.
   -c selects the Windows host and Cygwin (c) environment.
@@ -54,6 +53,7 @@ Where:
      directory
   <board-name> is the name of the board in the boards directory
   configs/<config-name> is the name of the board configuration sub-directory
+  make-opts directly pass to make
 
 "
 
@@ -71,8 +71,7 @@ unset boardconfig
 unset winnative
 unset appdir
 unset host
-unset debug
-skip=0
+unset enforce
 
 while [ ! -z "$1" ]; do
   case "$1" in
@@ -88,25 +87,17 @@ while [ ! -z "$1" ]; do
     winnative=y
     host+=" $1"
     ;;
-  -d )
-    debug=-d
-    set -x
+  -e )
+    enforce=y
     ;;
   -h )
     echo "$USAGE"
     exit 0
     ;;
-  -s )
-    skip=1
-    ;;
   *)
-    if [ ! -z "${boardconfig}" ]; then
-      echo ""
-      echo "<board/config> defined twice"
-      echo "$USAGE"
-      exit 1
-    fi
     boardconfig=$1
+    shift
+    break
     ;;
   esac
   shift
@@ -168,16 +159,26 @@ fi
 
 src_config=${configpath}/defconfig
 dest_config="${TOPDIR}/.config"
+backup_config="${TOPDIR}/defconfig"
 
 if [ ! -r ${src_config} ]; then
   echo "File ${src_config} does not exist"
   exit 5
 fi
 
-if [ ${skip} != 1 ] && [ -r ${dest_config} ]; then
-  echo "Already configured!"
-  echo "Do 'make distclean' and try again."
-  exit 6
+if [ -r ${dest_config} ]; then
+  if cmp -s ${src_config} ${backup_config}; then
+    echo "No configuration change."
+    exit 0
+  fi
+
+  if [ "X${enforce}" = "Xy" ]; then
+    make -C ${TOPDIR} distclean $*
+  else
+    echo "Already configured!"
+    echo "Do 'make distclean' and try again."
+    exit 6
+  fi
 fi
 
 # Extract values needed from the defconfig file.  We need:
@@ -255,6 +256,8 @@ install -m 644 ${src_makedefs} "${dest_makedefs}" || \
   { echo "Failed to copy ${src_makedefs}" ; exit 8 ; }
 install -m 644 ${src_config} "${dest_config}" || \
   { echo "Failed to copy ${src_config}" ; exit 9 ; }
+install -m 644 ${src_config} "${backup_config}" || \
+  { echo "Failed to backup ${src_config}" ; exit 10 ; }
 
 # Install any optional files
 
@@ -282,6 +285,4 @@ fi
 # The saved defconfig files are all in compressed format and must be
 # reconstitued before they can be used.
 
-cd ${TOPDIR} || { echo "Failed to cd to ${TOPDIR}"; exit 10; }
-
-./tools/sethost.sh $debug $host
+${TOPDIR}/tools/sethost.sh $host $*

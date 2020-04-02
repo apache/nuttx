@@ -904,7 +904,7 @@ Click Shield
   click mikroBUSes.  The above discusses on the UNO shield.  I know that the
   serial ports, at least, differ on the two shields.
 
-  UPDATE: And it appears the that Mega shield is *not* compatible with the
+  UPDATE: And it appears that the Mega shield is *not* compatible with the
   SAME70-Xplained.  I am told that the SPI in mikroBUS slots does not connect
   to pins on the  SAME70-Xplained that can support the SPI communications.
   Avoid this triple mikroBUS shield!

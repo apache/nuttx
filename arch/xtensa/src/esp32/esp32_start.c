@@ -124,7 +124,7 @@ void IRAM_ATTR __start(void)
 
   /* Move CPU0 exception vectors to IRAM */
 
-  asm volatile ("wsr %0, vecbase\n"::"r" (&_init_start));
+  __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (&_init_start));
 
   /* Set .bss to zero */
 

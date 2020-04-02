@@ -1,35 +1,20 @@
 /****************************************************************************
- * include/nuttx/sensors/dhtxx.c
+ * drivers/sensors/dhtxx.c
  *
- *   Copyright (C) 2018 Abdelatif GUETTOUCHE. All rights reserved.
- *   Author: Abdelatif GUETTOUCHE <abdelatif.guettouche@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -53,7 +38,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/sensors/dhtxx.h>
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -428,12 +413,17 @@ static int dhtxx_open(FAR struct file *filep)
 {
   FAR struct inode        *inode = filep->f_inode;
   FAR struct dhtxx_dev_s  *priv  = inode->i_private;
+  int ret;
 
   /* Acquire the semaphore, wait the sampling time before sending anything to
    * pass unstable state.
    */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   dht_standby_mode(priv);
 
@@ -479,13 +469,17 @@ static ssize_t dhtxx_read(FAR struct file *filep, FAR char *buffer,
 
   if (buflen < sizeof(FAR struct dhtxx_sensor_data_s))
     {
-      snerr("ERROR: Not enough memory for reading out a sensor data sample.\n");
+      snerr("ERROR: Not enough memory to read data sample.\n");
       return -ENOSYS;
     }
 
   memset(priv->raw_data, 0u, sizeof(priv->raw_data));
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
   dht_send_start_signal(priv);
 
@@ -587,7 +581,8 @@ static int dhtxx_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int dhtxx_register(FAR const char *devpath, FAR struct dhtxx_config_s *config)
+int dhtxx_register(FAR const char *devpath,
+                   FAR struct dhtxx_config_s *config)
 {
   FAR struct dhtxx_dev_s *priv;
   int ret;

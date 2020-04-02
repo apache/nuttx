@@ -1,0 +1,28 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "LITEX Configuration Options"
+
+menu "LITEX Peripheral Support"
+
+# These "hidden" settings determine is a peripheral option is available for the
+# selection MCU
+
+config LITEX_HAVE_UART0
+	bool
+	default y
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+# These are the peripheral selections proper
+
+config LITEX_UART0
+	bool "UART0"
+	default y
+	select ARCH_HAVE_UART0
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select LITEX_UART
+
+endmenu

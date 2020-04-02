@@ -76,6 +76,12 @@ DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
 HOSTSRCS = up_hosttime.c
 
+ifeq ($(CONFIG_LIBC_MODLIB),y)
+  HOSTSRCS += up_hostmemory.c
+else ifeq ($(CONFIG_BINFMT_LOADABLE),y)
+  HOSTSRCS += up_hostmemory.c
+endif
+
 ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += up_checkstack.c
 endif
@@ -157,7 +163,7 @@ ifeq ($(CONFIG_ARCH_ROMGETC),y)
   CSRCS += up_romgetc.c
 endif
 
-ifeq ($(CONFIG_SIM_NETDEV),y)
+ifeq ($(CONFIG_SIM_NETDEV_TAP),y)
   CSRCS += up_netdriver.c
   HOSTCFLAGS += -DNETDEV_BUFSIZE=$(CONFIG_NET_ETH_PKTSIZE)
 ifneq ($(HOSTOS),Cygwin)
@@ -173,7 +179,13 @@ else # HOSTOS != Cygwin
   HOSTSRCS += up_wpcap.c
   DRVLIB = /lib/w32api/libws2_32.a /lib/w32api/libiphlpapi.a
 endif # HOSTOS != Cygwin
-endif # CONFIG_SIM_NETDEV
+else ifeq ($(CONFIG_SIM_NETDEV_VPNKIT),y)
+  CSRCS += up_netdriver.c
+  HOSTCFLAGS += -DCONFIG_SIM_NETDEV_VPNKIT_PATH=\"$(CONFIG_SIM_NETDEV_VPNKIT_PATH)\"
+  HOSTSRCS += up_vpnkit.c
+  VPATH += :sim/vpnkit
+  HOSTSRCS += protocol.c negotiate.c
+endif
 
 ifeq ($(CONFIG_RPTUN),y)
   CSRCS += up_rptun.c
@@ -184,6 +196,7 @@ endif
 ifeq ($(CONFIG_FS_HOSTFS),y)
 ifneq ($(CONFIG_FS_HOSTFS_RPMSG),y)
   HOSTSRCS += up_hostfs.c
+  HOSTCFLAGS += -DCONFIG_NAME_MAX=$(CONFIG_NAME_MAX)
 
 up_hostfs.c: hostfs.h
 

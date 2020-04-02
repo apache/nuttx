@@ -7,7 +7,6 @@ config FS_CROMFS
 	bool "CROMFS file system"
 	default n
 	depends on !DISABLE_MOUNTPOINT
-	select FS_READABLE
 	select LIBC_LZF
 	---help---
 		Enable Compessed Read-Only Filesystem (CROMFS) support

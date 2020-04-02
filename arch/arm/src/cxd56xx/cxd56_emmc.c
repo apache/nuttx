@@ -33,6 +33,10 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <sys/types.h>
@@ -55,6 +59,10 @@
 #include "hardware/cxd56_emmc.h"
 #include "cxd56_pinconfig.h"
 
+/****************************************************************************
+ * Pre-processoro Definitions
+ ****************************************************************************/
+
 #define SECTOR_SIZE (512)
 
 #define EMMC_DATA_WRITE 0
@@ -67,7 +75,27 @@
 #define EMMC_RESP_R2  3
 #define EMMC_RESP_R3  4
 
-struct emmc_dma_desc_s {
+#define EMMC_CLKDIV_UNDER_400KHZ  (32u)
+#define EMMC_CLKDIV_NON_DIV       (0u)
+
+#define EMMC_RCA                  (2)         /* greater than 1 */
+
+#define EMMC_DATA_TIMEOUT         (0xFFFFFFu) /* max reg value */
+#define EMMC_RESP_TIMEOUT         (0xFFu)     /* max reg value */
+
+#define EMMC_MSIZE                (6)         /* Burst size is 512B */
+#define EMMC_FIFO_DEPTH           (0x100)     /* FIFO size is 1KB */
+
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct emmc_dma_desc_s
+{
   uint32_t ctrl;
   uint32_t size;
   uint32_t addr;
@@ -81,6 +109,10 @@ struct cxd56_emmc_state_s
   uint32_t total_sectors;
 };
 
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
 /* Block driver interfaces **************************************************/
 
 static int       cxd56_emmc_open(FAR struct inode *inode);
@@ -88,7 +120,7 @@ static int       cxd56_emmc_close(FAR struct inode *inode);
 static ssize_t   cxd56_emmc_read(FAR struct inode *inode,
                                  unsigned char *buffer, size_t start_sector,
                                  unsigned int nsectors);
-#if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
+#if !defined(CONFIG_MMCSD_READONLY)
 static ssize_t   cxd56_emmc_write(FAR struct inode *inode,
                                   const unsigned char *buffer,
                                   size_t start_sector,
@@ -98,37 +130,30 @@ static int       cxd56_emmc_geometry(FAR struct inode *inode,
                                      struct geometry *geometry);
 static int       emmc_interrupt(int irq, FAR void *context, FAR void *arg);
 
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
 static const struct block_operations g_bops =
 {
   cxd56_emmc_open,     /* open     */
   cxd56_emmc_close,    /* close    */
   cxd56_emmc_read,     /* read     */
-#if defined(CONFIG_FS_WRITABLE)
+#if !defined(CONFIG_MMCSD_READONLY)
   cxd56_emmc_write,    /* write    */
 #else
-  NULL,           /* write    */
+  NULL,                /* write    */
 #endif
   cxd56_emmc_geometry, /* geometry */
-  NULL            /* ioctl    */
+  NULL                 /* ioctl    */
 };
 
 static sem_t g_waitsem;
 struct cxd56_emmc_state_s g_emmcdev;
 
-#define EMMC_CLKDIV_UNDER_400KHZ  (32u)
-#define EMMC_CLKDIV_NON_DIV       (0u)
-
-#define EMMC_RCA                  (2) /* greater than 1 */
-
-#define EMMC_DATA_TIMEOUT         (0xFFFFFFu) /* max reg value */
-#define EMMC_RESP_TIMEOUT         (0xFFu) /* max reg value */
-
-#define EMMC_MSIZE                (6) /* Burst size is 512B */
-#define EMMC_FIFO_DEPTH           (0x100) /* FIFO size is 1KB */
-
-#ifndef MIN
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#endif
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 static void emmc_takesem(FAR sem_t *sem)
 {
@@ -164,7 +189,7 @@ static void emmc_reset(uint32_t reg, uint32_t bits)
   while (val & bits);
 }
 
-#if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
+#if !defined(CONFIG_MMCSD_READONLY)
 static void emmc_flushwritefifo(void)
 {
   /* eMMC host controller has a problem that invalid data is still remained
@@ -308,9 +333,9 @@ static struct emmc_dma_desc_s *emmc_setupdma(void *buf, unsigned int nbytes)
 
   /* Adjust first and last descriptor members */
 
-  descs[0].ctrl |= EMMC_IDMAC_DES0_FD;
-  descs[ndescs-1].ctrl |= EMMC_IDMAC_DES0_LD;
-  descs[ndescs-1].next = 0;
+  descs[0].ctrl          |= EMMC_IDMAC_DES0_FD;
+  descs[ndescs - 1].ctrl |= EMMC_IDMAC_DES0_LD;
+  descs[ndescs - 1].next  = 0;
 
 #ifdef CONFIG_DEBUG_VERBOSE
   for (i = 0, d = descs; i < ndescs; i++, d++)
@@ -341,6 +366,7 @@ static int emmc_checkresponse(void)
       ferr("Response error %08x\n", resp);
       return -EIO;
     }
+
   return OK;
 }
 
@@ -454,6 +480,7 @@ static int emmc_is_powerup(void)
         {
           return 0;
         }
+
       up_mdelay(5);
     }
   while (--retry);
@@ -716,14 +743,14 @@ static int cxd56_emmc_readsectors(FAR struct cxd56_emmc_state_s *priv,
       ret = -EIO;
     }
 
- finish:
+finish:
   emmc_givesem(&priv->excsem);
   kmm_free(descs);
 
   return ret;
 }
 
-#if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
+#if !defined(CONFIG_MMCSD_READONLY)
 static int cxd56_emmc_writesectors(FAR struct cxd56_emmc_state_s *priv,
                                    const void *buf, size_t start_sector,
                                    unsigned int nsectors)
@@ -787,7 +814,7 @@ static int cxd56_emmc_writesectors(FAR struct cxd56_emmc_state_s *priv,
 
   emmc_flushwritefifo();
 
- finish:
+finish:
   emmc_givesem(&priv->excsem);
   kmm_free(descs);
 
@@ -826,8 +853,9 @@ static int cxd56_emmc_close(FAR struct inode *inode)
   return OK;
 }
 
-static ssize_t cxd56_emmc_read(FAR struct inode *inode, unsigned char *buffer,
-                               size_t start_sector, unsigned int nsectors)
+static ssize_t cxd56_emmc_read(FAR struct inode *inode,
+                               unsigned char *buffer, size_t start_sector,
+                               unsigned int nsectors)
 {
   FAR struct cxd56_emmc_state_s *priv;
   int ret;
@@ -848,7 +876,7 @@ static ssize_t cxd56_emmc_read(FAR struct inode *inode, unsigned char *buffer,
   return nsectors;
 }
 
-#if defined(CONFIG_FS_WRITABLE) && !defined(CONFIG_MMCSD_READONLY)
+#if !defined(CONFIG_MMCSD_READONLY)
 static ssize_t cxd56_emmc_write(FAR struct inode *inode,
                                 const unsigned char *buffer,
                                 size_t start_sector,
@@ -884,7 +912,7 @@ static int cxd56_emmc_geometry(FAR struct inode *inode,
 
   geometry->geo_available = true;
   geometry->geo_mediachanged = false;
-#if defined(CONFIG_FS_WRITABLE)
+#if !defined(CONFIG_MMCSD_READONLY)
   geometry->geo_writeenabled = true;
 #else
   geometry->geo_writeenabled = false;
@@ -927,9 +955,11 @@ int cxd56_emmcinitialize(void)
               kmm_free(buf);
               return -EIO;
             }
+
           priv->total_sectors = *(FAR uint32_t *)&buf[EXTCSD_SEC_COUNT];
           kmm_free(descs);
         }
+
       kmm_free(buf);
     }
 
@@ -942,6 +972,10 @@ int cxd56_emmcinitialize(void)
 
   return OK;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 int emmc_uninitialize(void)
 {

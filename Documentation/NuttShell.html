@@ -646,7 +646,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated:  November 3, 2019</p>
+      <p>Last Updated:  March 21, 2020</p>
     </td>
   </tr>
 </table>
@@ -2477,7 +2477,7 @@ mkdir &lt;path&gt;
 <p>
   <b>Synopsis</b>.
   Create the directory at <code>&lt;path&gt;</code>.
-  All components of of <code>&lt;path&gt;</code> except the final directory name must exist on a mounted file
+  All components of <code>&lt;path&gt;</code> except the final directory name must exist on a mounted file
   system; the final directory must not.
 </p>
 <p>
@@ -3736,7 +3736,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>df</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code></code></td>
     <td><code>CONFIG_NSH_DISABLE_DF</code></td>
   </tr>
   <tr>
@@ -3785,7 +3785,7 @@ nsh&gt;
     <td><code>CONFIG_NSH_DISABLE_GET</code></td>
   </tr>
   <tr>
-    <td><b><code>help</code></b><sup>5</sup></td>
+    <td><b><code>help</code></b><sup>3</sup></td>
     <td><br></td>
     <td><code>CONFIG_NSH_DISABLE_HELP</code></td>
   </tr>
@@ -3860,7 +3860,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>mkdir</code></b></td>
-    <td>(((!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_WRITABLE</code>) || !<code>CONFIG_DISABLE_PSEUDOFS_OPERATIONS</code>)</td>
+    <td>(!<code>CONFIG_DISABLE_MOUNTPOINT</code> || !<code>CONFIG_DISABLE_PSEUDOFS_OPERATIONS</code>)</td>
     <td><code>CONFIG_NSH_DISABLE_MKDIR</code></td>
   </tr>
   <tr>
@@ -3875,17 +3875,17 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>mkrd</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code></code></td>
     <td><code>CONFIG_NSH_DISABLE_MKRD</code></td>
   </tr>
   <tr>
     <td><b><code>mount</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code></code></td>
     <td><code>CONFIG_NSH_DISABLE_MOUNT</code></td>
   </tr>
   <tr>
     <td><b><code>mv</code></b></td>
-    <td>(!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_WRITABLE</code>) || !<code>CONFIG_DISABLE_PSEUDOFS_OPERATIONS</code><sup>4</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> || !<code>CONFIG_DISABLE_PSEUDOFS_OPERATIONS</code></td>
     <td><code>CONFIG_NSH_DISABLE_MV</code></td>
   </tr>
   <tr>
@@ -3900,7 +3900,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>passwd</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_WRITABLE</code> &amp;&amp; <code>CONFIG_NSH_LOGIN_PASSWD</code>sup>4</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NSH_LOGIN_PASSWD</code></td>
     <td><code>CONFIG_NSH_DISABLE_PASSWD</code></td>
   </tr>
   <tr>
@@ -3941,12 +3941,12 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>rm</code></b></td>
-    <td>(!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_WRITABLE</code>) || !<code>CONFIG_DISABLE_PSEUDOFS_OPERATIONS</code><sup>4</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> || !<code>CONFIG_DISABLE_PSEUDOFS_OPERATIONS</code></td>
     <td><code>CONFIG_NSH_DISABLE_RM</code></td>
   </tr>
   <tr>
     <td><b><code>rmdir</code></b></td>
-    <td>(!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_WRITABLE</code>) || !<code>CONFIG_DISABLE_PSEUDOFS_OPERATIONS</code><sup>4</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> || !<code>CONFIG_DISABLE_PSEUDOFS_OPERATIONS</code></td>
     <td><code>CONFIG_NSH_DISABLE_RMDIR</code></td>
   </tr>
   <tr>
@@ -4006,7 +4006,7 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>umount</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_READABLE</code><sup>3</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code></code></td>
     <td><code>CONFIG_NSH_DISABLE_UMOUNT</code></td>
   </tr>
   <tr>
@@ -4031,12 +4031,12 @@ nsh&gt;
   </tr>
   <tr>
     <td><b><code>useradd</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_WRITABLE</code> &amp;&amp; <code>CONFIG_NSH_LOGIN_PASSWD</code>sup>4</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NSH_LOGIN_PASSWD</code></td>
     <td><code>CONFIG_NSH_DISABLE_USERADD</code></td>
   </tr>
   <tr>
     <td><b><code>userdel</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_WRITABLE</code> &amp;&amp; <code>CONFIG_NSH_LOGIN_PASSWD</code>sup>4</sup></td>
+    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NSH_LOGIN_PASSWD</code></td>
     <td><code>CONFIG_NSH_DISABLE_USERDEL</code></td>
   </tr>
   <tr>
@@ -4062,13 +4062,6 @@ nsh&gt;
   Special TFTP server start-up options will probably be required to permit
   creation of files for the correct operation of the <code>put</code> command.</small><br>
   <sup>3</sup><small>
-  <code>CONFIG_FS_READABLE</code> is not a user configuration but is set automatically
-  if any readable file system is selected.  At present, this is either <code>CONFIG_FS_FAT</code>
-  or <code>CONFIG_FS_ROMFS</code>.</small><br>
-  <sup>4</sup><small>
-  <code>CONFIG_FS_WRITABLE</code> is not a user configuration but is set automatically
-  if any writable file system is selected.  At present, this is only <code>CONFIG_FS_FAT</code>.</small><br>
-  <sup>5</sup><small>
   Verbose help output can be suppressed by defining <code>CONFIG_NSH_HELP_TERSE</code>.
   In that case, the help command is still available but will be slightly smaller.
   </small>
@@ -4366,7 +4359,7 @@ set FOOBAR ABC_${FOO}_${BAR}
         </li>
         <li>
           <code>CONFIG_NSH_USBCONSOLE</code>.
-          If defined, then the an arbitrary USB device may be used to as the NSH console.
+          If defined, then an arbitrary USB device may be used to as the NSH console.
           In this case, <code>CONFIG_NSH_USBCONDEV</code> must be defined to indicate which USB device to use as the console.
           The advantage of using a device other that <code>/dev/console</code> is that normal debug output can then use <code>/dev/console</code> while NSH uses <code>CONFIG_NSH_USBCONDEV</code>.
           <p>

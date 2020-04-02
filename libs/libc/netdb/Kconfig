@@ -18,10 +18,21 @@ config LIBC_GAISTRERROR
 		of memory. If this option is not selected, gai_strerror() will still exist in
 		the build but it will not decode error values.
 
+config NETDB_BUFSIZE
+	int "gethostbyname/gethostbyaddr buffer size"
+	default 128
+
+config NETDB_MAX_IPADDR
+	int "Max number of IP addresses per host"
+	default 2 if NET_IPv4 && NET_IPv6
+	default 1
+	---help---
+		This setting determines the maximum number of IP addresses
+		stored to the name resolution cache for a given host.
+
 menuconfig NETDB_HOSTFILE
 	bool "Network host file support"
 	default n
-	depends on FS_READABLE
 	select LIBC_NETDB
 	---help---
 		Enable network host table look ups via gethostbyname() and
@@ -36,10 +47,6 @@ config NETDB_HOSTCONF_PATH
 config NETDB_MAX_ALTNAMES
 	int "Max number of alternate host names"
 	default 4
-
-config NETDB_BUFSIZE
-	int "gethostname() buffer size"
-	default 128
 
 endif # NETDB_HOSTFILE
 
@@ -102,13 +109,6 @@ config NETDB_DNSCLIENT_MAXRESPONSE
 		can be received by the DNS resolver.  The default is 96 but may
 		need to be larger on enterprise networks (perhaps 176).
 
-config NETDB_DNSCLIENT_MAXIP
-	int "Max number of IP addresses per host"
-	default 1
-	---help---
-		This setting determines the maximum number of IP addresses
-		stored to the name resolution cache for a given host.
-
 config NETDB_DNSCLIENT_RECV_TIMEOUT
 	int "DNS receive timeout"
 	default 30
@@ -126,7 +126,6 @@ config NETDB_DNSCLIENT_RETRIES
 config NETDB_RESOLVCONF
 	bool "DNS resolver file support"
 	default n
-	depends on FS_READABLE
 	---help---
 		Enable DNS server look ups in resolver file like /etc/resolv.conf.
 
@@ -193,7 +192,7 @@ config NETDB_DNSSERVER_IPv4ADDR
 	depends on NETDB_DNSSERVER_IPv4
 	---help---
 		Default DNS server IPv4 address in host byte order.  Default value
-		10.0.0.0.1.  This may be changed via dns_add_nameserver().
+		10.0.0.1.  This may be changed via dns_add_nameserver().
 
 if NETDB_DNSSERVER_IPv6
 

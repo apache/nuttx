@@ -17,7 +17,6 @@ Directory Structure
        +- inet       - PF_INET/PF_INET6 socket interface
        +- ipforward  - IP forwarding logic
        +- local      - Unix domain (local) sockets
-       +- loopback   - Local loopback
        +- mld        - Multicast Listener Discovery (MLD)
        +- neighbor   - Neighbor Discovery Protocol (IPv6)
        +- netdev     - Socket network device interface

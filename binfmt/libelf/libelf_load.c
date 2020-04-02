@@ -346,11 +346,13 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
   exidx = elf_findsection(loadinfo, CONFIG_ELF_EXIDX_SECTNAME);
   if (exidx < 0)
     {
-      binfo("elf_findsection: Exception Index section not found: %d\n", exidx);
+      binfo("elf_findsection: Exception Index section not found: %d\n",
+            exidx);
     }
   else
     {
-      up_init_exidx(loadinfo->shdr[exidx].sh_addr, loadinfo->shdr[exidx].sh_size);
+      up_init_exidx(loadinfo->shdr[exidx].sh_addr,
+                    loadinfo->shdr[exidx].sh_size);
     }
 #endif
 

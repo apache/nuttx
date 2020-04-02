@@ -392,7 +392,7 @@ static int lsm6dsl_sensor_config(FAR struct lsm6dsl_dev_s *priv)
  * Name: lsm6dsl_isbitset
  *
  * Description:
- *   Check if bit it set from mask, not bit number.
+ *   Check if bit is set from mask, not bit number.
  *
  ****************************************************************************/
 

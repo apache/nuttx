@@ -3,12 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config ELF_64BIT
-	bool "64bit ELF support"
-	default n
-	---help---
-		This option is used to load 64bit ELF files
-
 config ELF_ALIGN_LOG2
 	int "Log2 Section Alignment"
 	default 2
@@ -17,7 +11,7 @@ config ELF_ALIGN_LOG2
 
 config ELF_STACKSIZE
 	int "ELF Stack Size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		This is the default stack size that will be used when starting ELF binaries.
 

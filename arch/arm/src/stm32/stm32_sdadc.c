@@ -820,7 +820,7 @@ static void sdadc_reset(FAR struct adc_dev_s *dev)
 
   sdadc_rccreset(priv, false);
 
-  /* Enable the SDADC (and wait it stabilizes) */
+  /* Enable the SDADC (and wait until it stabilizes) */
 
   sdadc_enable(priv, true);
 

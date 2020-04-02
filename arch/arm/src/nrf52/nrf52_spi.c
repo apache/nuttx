@@ -84,7 +84,9 @@ struct nrf52_spidev_s
   uint32_t         frequency;  /* Requested clock frequency */
   uint8_t          mode;       /* Mode 0,1,2,3 */
 
-  sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
+  sem_t            exclsem;    /* Held while chip is selected for mutual
+                                * exclusion
+                                */
 #ifdef CONFIG_NRF52_SPI_MASTER_INTERRUPTS
   sem_t            sem_isr;    /* Interrupt wait semaphore */
 #endif

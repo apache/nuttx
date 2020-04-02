@@ -58,6 +58,9 @@ mkdir          NXmkdir
 mount          NXmount
 open           NXopen
 opendir        NXopendir
+optarg         NXoptarg
+optind         NXoptind
+optopt         NXoptopt
 nanosleep      NXnanosleep
 pipe           NXpipe
 poll           NXpoll
@@ -81,6 +84,7 @@ pthread_testcancel NXpthread_testcancel
 pthread_yield  NXpthread_yield
 ptsname        NXptsname
 ptsname_r      NXptsname_r
+putenv         NXputenv
 puts           NXputs
 read           NXread
 readdir        NXreaddir
@@ -130,6 +134,8 @@ strcmp         NXstrcmp
 strcpy         NXstrcpy
 strcspn        NXstrcspn
 strdup         NXstrdup
+strerror       NXstrerror
+strerror_r     NXstrerror_r
 strftime       NXstrftime
 strlen         NXstrlen
 strncasecmp    NXstrncasecmp

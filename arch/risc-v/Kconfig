@@ -26,6 +26,12 @@ config ARCH_CHIP_K210
 	---help---
 		Kendryte K210 processor (RISC-V 64bit core with GC extensions)
 
+config ARCH_CHIP_LITEX
+	bool "Enjoy Digital LITEX VEXRISCV"
+	select ARCH_RV32IM
+	---help---
+		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA).
+
 config ARCH_CHIP_NR5
 	bool "NEXT NanoRisc5"
 	select ARCH_RV32IM
@@ -62,6 +68,7 @@ config ARCH_CHIP
 	string
 	default "fe310"		if ARCH_CHIP_FE310
 	default "k210"		if ARCH_CHIP_K210
+	default "litex"		if ARCH_CHIP_LITEX
 	default "nr5m100"	if ARCH_CHIP_NR5
 	default "gap8"		if ARCH_CHIP_GAP8
 
@@ -86,6 +93,9 @@ source arch/risc-v/src/fe310/Kconfig
 endif
 if ARCH_CHIP_K210
 source arch/risc-v/src/k210/Kconfig
+endif
+if ARCH_CHIP_LITEX
+source arch/risc-v/src/litex/Kconfig
 endif
 if ARCH_CHIP_NR5
 source arch/risc-v/src/nr5m100/Kconfig

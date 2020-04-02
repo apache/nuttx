@@ -285,11 +285,11 @@ int up_cpu_pause(int cpu)
   spin_unlock(&g_cpu_paused[cpu]);
 
   /* On successful return g_cpu_wait will be locked, the other CPU will be
-   * spinninf on g_cpu_wait and will not continue until g_cpu_resume() is
+   * spinning on g_cpu_wait and will not continue until g_cpu_resume() is
    * called.  g_cpu_paused will be unlocked in any case.
    */
 
- return ret;
+  return ret;
 }
 
 /****************************************************************************

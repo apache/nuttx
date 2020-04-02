@@ -78,31 +78,15 @@ int getservbyname_r(FAR const char *name, FAR const char *proto,
                     FAR struct servent *result_buf, FAR char *buf,
                     size_t buflen, FAR struct servent **result)
 {
-  char *end = "";
   int protocol;
   int i;
 
-  DEBUGASSERT(name != NULL && buf != NULL);
+  DEBUGASSERT(name != NULL);
   DEBUGASSERT(result_buf != NULL && result != NULL);
 
   /* Linux man page says result must be NULL in case of failure. */
 
   *result = NULL;
-
-  /* We need space for two pointers for hostalias strings. */
-
-  if (buflen < 2 * sizeof(char *))
-    {
-      return ERANGE;
-    }
-
-  /* Numeric port number strings are not service records. */
-
-  strtoul(name, &end, 10);
-  if (*end == '\0')
-    {
-      return ENOENT;
-    }
 
   if (proto == NULL)
     {
@@ -126,11 +110,9 @@ int getservbyname_r(FAR const char *name, FAR const char *proto,
       if (strcmp(name, g_services_db[i].s_name) == 0 &&
           (protocol == 0 || protocol == g_services_db[i].s_protocol))
         {
-          result_buf->s_name = (char *)name;
-          result_buf->s_aliases = (void *)buf;
-          result_buf->s_aliases[0] = (char *)name;
-          result_buf->s_aliases[1] = NULL;
-          result_buf->s_port = HTONS(g_services_db[i].s_port);
+          result_buf->s_name = (FAR char *)name;
+          result_buf->s_aliases = NULL;
+          result_buf->s_port = htons(g_services_db[i].s_port);
 
           if (g_services_db[i].s_protocol == IPPROTO_TCP)
             {

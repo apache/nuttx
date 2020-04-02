@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/netdb/lib_dnsbind.c
  *
- *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +53,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if CONFIG_NET_SOCKOPTS < 1
+#ifndef CONFIG_NET_SOCKOPTS
 #  error CONFIG_NET_SOCKOPTS required by this logic
 #endif
 
@@ -79,7 +80,6 @@
 int dns_bind(void)
 {
   struct timeval tv;
-  int errcode;
   int sd;
   int ret;
 
@@ -96,9 +96,9 @@ int dns_bind(void)
   sd = socket(PF_INET, SOCK_DGRAM, 0);
   if (sd < 0)
     {
-      errcode = get_errno();
-      nerr("ERROR: socket() failed: %d\n", errcode);
-      return -errcode;
+      ret = -errno;
+      nerr("ERROR: socket() failed: %d\n", ret);
+      return ret;
     }
 
   /* Set up a receive timeout */
@@ -109,10 +109,10 @@ int dns_bind(void)
   ret = setsockopt(sd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(struct timeval));
   if (ret < 0)
     {
-      errcode = get_errno();
-      nerr("ERROR: setsockopt() failed: %d\n", errcode);
+      ret = -errno;
+      nerr("ERROR: setsockopt() failed: %d\n", ret);
       close(sd);
-      return -errcode;
+      return ret;
     }
 
   return sd;

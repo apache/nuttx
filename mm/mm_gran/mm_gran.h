@@ -116,11 +116,12 @@ struct gran_s
  *   priv - Pointer to the gran state
  *
  * Returned Value:
- *   None
+ *   gran_enter_critical() may return any error reported by
+ *   nxsem_wait_uninterruptible()
  *
  ****************************************************************************/
 
-void gran_enter_critical(FAR struct gran_s *priv);
+int  gran_enter_critical(FAR struct gran_s *priv);
 void gran_leave_critical(FAR struct gran_s *priv);
 
 /****************************************************************************

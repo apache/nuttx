@@ -59,7 +59,8 @@
  *   Function for draining the output buffer of a terminal/serial device
  *
  * Input Parameters:
- *   fd  - The 'fd' argument is an open file descriptor associated with a terminal.
+ *   fd  - The 'fd' argument is an open file descriptor associated with a
+ *         terminal.
  *
  * Returned Value:
  *   Upon successful completion, 0 is returned. Otherwise, -1 is returned and
@@ -90,7 +91,7 @@ int tcdrain(int fd)
    * in this context because we are executing on the calling application's
    * thread.
    *
-   * NOTE: ioctl() will set the errno variable and return ERROR is any error
+   * NOTE: ioctl() will set the errno variable and return ERROR if any error
    * occurs.
    */
 

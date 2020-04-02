@@ -73,9 +73,10 @@ static void go_nx_start(void *pv, unsigned int nbytes)
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Memory Map ***************************************************************/
-/*
- * 0x0000:0000 - Beginning of the internal FLASH.   Address of vectors.
+
+/* 0x0000:0000 - Beginning of the internal FLASH.   Address of vectors.
  *               Mapped as boot memory address 0x0000:0000 at reset.
  * 0x07ff:ffff - End of flash region (assuming the max of 2MiB of FLASH).
  * 0x1fff:0000 - Start of internal SRAM and start of .data (_sdata)
@@ -119,6 +120,19 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: showprogress
+ *
+ * Description:
+ *   Print a character on the UART to show boot status.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_FEATURES
+#  define showprogress(c) up_lowputc(c)
+#else
+#  define showprogress(c)
+#endif
 
 #ifdef CONFIG_ARMV7M_STACKCHECK
 /* we need to get r10 set before we can allow instrumentation calls */
@@ -142,7 +156,8 @@ void __start(void) __attribute__ ((no_instrument_function));
  *       done, the processor reserves space on the stack for the FP state,
  *       but does not save that state information to the stack.
  *
- *  Software must not change the value of the ASPEN bit or LSPEN bit while either:
+ *  Software must not change the value of the ASPEN bit or LSPEN bit while
+ *  either:
  *   - the CPACR permits access to CP10 and CP11, that give access to the FP
  *     extension, or
  *   - the CONTROL.FPCA bit is set to 1
@@ -176,7 +191,7 @@ static inline void xmc4_fpu_config(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -206,7 +221,7 @@ static inline void xmc4_fpu_config(void)
   /* Enable full access to CP10 and CP11 */
 
   regval = getreg32(NVIC_CPACR);
-  regval |= ((3 << (2*10)) | (3 << (2*11)));
+  regval |= ((3 << (2 * 10)) | (3 << (2 * 11)));
   putreg32(regval, NVIC_CPACR);
 }
 
@@ -312,10 +327,12 @@ void __start(void)
 #ifdef CONFIG_ARMV7M_STACKCHECK
   /* Set the stack limit before we attempt to call any functions */
 
-  __asm__ volatile ("sub r10, sp, %0" : : "r" (CONFIG_IDLETHREAD_STACKSIZE - 64) : );
+  __asm__ volatile ("sub r10, sp, %0" : : "r"
+                    (CONFIG_IDLETHREAD_STACKSIZE - 64) :);
 #endif
 
   /* Disable the watchdog timer */
+
   /* TODO - add logic to disable the watchdog timer */
 
   /* Enable unaligned memory access */
@@ -370,25 +387,37 @@ void __start(void)
    * configuration).
    */
 
-  xmc4_fpu_config();
   xmc4_lowsetup();
+  showprogress('A');
+
+  /* Initialize the FPU (if configured) */
+
+  xmc4_fpu_config();
+  showprogress('B');
+
 #ifdef USE_EARLYSERIALINIT
+  /* Perform early serial initialization */
+
   xmc4_earlyserialinit();
+  showprogress('C');
 #endif
 
+#ifdef CONFIG_BUILD_PROTECTED
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
    * Normally this just means initializing the user space .data and .bss
    * segments.
    */
 
-#ifdef CONFIG_BUILD_PROTECTED
   xmc4_userspace();
+  showprogress('D');
 #endif
 
   /* Initialize other on-board resources */
 
   xmc4_board_initialize();
+
+  showprogress('E');
 
   /* Then start NuttX */
 

@@ -91,7 +91,7 @@
 
 /* Should match definition in include/limits.h */
 
-#define NUTTX_NAME_MAX   32
+#define NUTTX_NAME_MAX   CONFIG_NAME_MAX
 
 #endif /* __SIM__ */
 
@@ -122,8 +122,8 @@ typedef uint32_t     nuttx_time_t;
 
 struct nuttx_dirent_s
 {
-  uint8_t      d_type;             /* type of file */
-  char         d_name[NUTTX_NAME_MAX+1]; /* filename */
+  uint8_t      d_type;                     /* type of file */
+  char         d_name[NUTTX_NAME_MAX + 1]; /* filename */
 };
 
 /* These must exactly match the definition from include/sys/statfs.h: */
@@ -177,9 +177,9 @@ int           host_dup(int fd);
 int           host_fstat(int fd, struct nuttx_stat_s *buf);
 int           host_ftruncate(int fd, off_t length);
 void         *host_opendir(const char *name);
-int           host_readdir(void* dirp, struct nuttx_dirent_s* entry);
-void          host_rewinddir(void* dirp);
-int           host_closedir(void* dirp);
+int           host_readdir(void *dirp, struct nuttx_dirent_s *entry);
+void          host_rewinddir(void *dirp);
+int           host_closedir(void *dirp);
 int           host_statfs(const char *path, struct nuttx_statfs_s *buf);
 int           host_unlink(const char *pathname);
 int           host_mkdir(const char *pathname, mode_t mode);
@@ -198,9 +198,9 @@ int           host_dup(int fd);
 int           host_fstat(int fd, struct stat *buf);
 int           host_ftruncate(int fd, off_t length);
 void         *host_opendir(const char *name);
-int           host_readdir(void* dirp, struct dirent *entry);
-void          host_rewinddir(void* dirp);
-int           host_closedir(void* dirp);
+int           host_readdir(void *dirp, struct dirent *entry);
+void          host_rewinddir(void *dirp);
+int           host_closedir(void *dirp);
 int           host_statfs(const char *path, struct statfs *buf);
 int           host_unlink(const char *pathname);
 int           host_mkdir(const char *pathname, mode_t mode);

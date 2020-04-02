@@ -208,6 +208,7 @@ int arm_pause_handler(int irq, void *c, FAR void *arg)
   int cpu = up_cpu_index();
 
   /* Clear : Pause IRQ */
+
   /* IPC Interrupt Clear Command Register (write-only) */
 
   if (1 == cpu)
@@ -256,7 +257,7 @@ int arm_pause_handler(int irq, void *c, FAR void *arg)
 
 int up_cpu_pause(int cpu)
 {
-  DPRINTF("cpu=%d\n",cpu);
+  DPRINTF("cpu=%d\n", cpu);
 
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 
@@ -266,10 +267,10 @@ int up_cpu_pause(int cpu)
   sched_note_cpu_pause(this_task(), cpu);
 #endif
 
-  /* Take the both spinlocks.  The g_cpu_wait spinlock will prevent the interrupt
-   * handler from returning until up_cpu_resume() is called; g_cpu_paused
-   * is a handshake that will prefent this function from returning until
-   * the CPU is actually paused.
+  /* Take the both spinlocks.  The g_cpu_wait spinlock will prevent the
+   * interrupt handler from returning until up_cpu_resume() is called;
+   * g_cpu_paused is a handshake that will prefent this function from
+   * returning until the CPU is actually paused.
    */
 
   DEBUGASSERT(!spin_islocked(&g_cpu_wait[cpu]) &&
@@ -279,6 +280,7 @@ int up_cpu_pause(int cpu)
   spin_lock(&g_cpu_paused[cpu]);
 
   /* Execute Pause IRQ to CPU(cpu) */
+
   /* Set IPC Interrupt (IRQ0) (write-only) */
 
   if (cpu == 1)
@@ -298,11 +300,11 @@ int up_cpu_pause(int cpu)
   spin_unlock(&g_cpu_paused[cpu]);
 
   /* On successful return g_cpu_wait will be locked, the other CPU will be
-   * spinninf on g_cpu_wait and will not continue until g_cpu_resume() is
+   * spinning on g_cpu_wait and will not continue until g_cpu_resume() is
    * called.  g_cpu_paused will be unlocked in any case.
    */
 
- return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -326,7 +328,7 @@ int up_cpu_pause(int cpu)
 
 int up_cpu_resume(int cpu)
 {
-  DPRINTF("cpu=%d\n",cpu);
+  DPRINTF("cpu=%d\n", cpu);
 
   DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS && cpu != this_cpu());
 

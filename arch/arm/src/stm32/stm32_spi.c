@@ -49,6 +49,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -118,8 +119,6 @@
 #    error "Unknown STM32 DMA"
 #  endif
 
-#endif
-
 /* DMA channel configuration */
 
 #if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32L15XX) || \
@@ -145,6 +144,48 @@
 #  error "Unknown STM32 DMA"
 #endif
 
+#  define SPIDMA_BUFFER_MASK   (4 - 1)
+#  define SPIDMA_SIZE(b) (((b) + SPIDMA_BUFFER_MASK) & ~SPIDMA_BUFFER_MASK)
+#  define SPIDMA_BUF_ALIGN   aligned_data(4)
+
+#  if defined(CONFIG_STM32_SPI1_DMA_BUFFER) && \
+            CONFIG_STM32_SPI1_DMA_BUFFER > 0
+#    define SPI1_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI1_DMA_BUFFER)
+#    define SPI1_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  endif
+
+#  if defined(CONFIG_STM32_SPI2_DMA_BUFFER) && \
+            CONFIG_STM32_SPI2_DMA_BUFFER > 0
+#    define SPI2_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI2_DMA_BUFFER)
+#    define SPI2_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  endif
+
+#  if defined(CONFIG_STM32_SPI3_DMA_BUFFER) && \
+            CONFIG_STM32_SPI3_DMA_BUFFER > 0
+#    define SPI3_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI3_DMA_BUFFER)
+#    define SPI3_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  endif
+
+#  if defined(CONFIG_STM32_SPI4_DMA_BUFFER) && \
+            CONFIG_STM32_SPI4_DMA_BUFFER > 0
+#    define SPI4_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI4_DMA_BUFFER)
+#    define SPI4_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  endif
+
+#  if defined(CONFIG_STM32_SPI5_DMA_BUFFER) && \
+            CONFIG_STM32_SPI5_DMA_BUFFER > 0
+#    define SPI5_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI5_DMA_BUFFER)
+#    define SPI5_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  endif
+
+#  if defined(CONFIG_STM32_SPI6_DMA_BUFFER) && \
+            CONFIG_STM32_SPI6_DMA_BUFFER > 0
+#    define SPI6_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI6_DMA_BUFFER)
+#    define SPI6_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
+#  endif
+
+#endif
+
 /************************************************************************************
  * Private Types
  ************************************************************************************/
@@ -166,6 +207,9 @@ struct stm32_spidev_s
 #endif
   uint8_t          rxch;         /* The RX DMA channel number */
   uint8_t          txch;         /* The TX DMA channel number */
+  uint8_t          *rxbuf;       /* The RX DMA buffer */
+  uint8_t          *txbuf;       /* The TX DMA buffer */
+  size_t           buflen;       /* The DMA buffer length */
   DMA_HANDLE       rxdma;        /* DMA channel handle for RX transfers */
   DMA_HANDLE       txdma;        /* DMA channel handle for TX transfers */
   sem_t            rxsem;        /* Wait for RX DMA to complete */
@@ -199,7 +243,6 @@ static inline void spi_putreg8(FAR struct stm32_spidev_s *priv, uint8_t offset,
 #endif
 static inline uint16_t spi_readword(FAR struct stm32_spidev_s *priv);
 static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16_t byte);
-static inline bool spi_16bitmode(FAR struct stm32_spidev_s *priv);
 
 /* DMA support */
 
@@ -285,6 +328,11 @@ static const struct spi_ops_s g_sp1iops =
 #endif
 };
 
+#if defined(SPI1_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi1_txbuf[SPI1_DMABUFSIZE_ADJUSTED] SPI1_DMABUFSIZE_ALGN;
+static uint8_t g_spi1_rxbuf[SPI1_DMABUFSIZE_ADJUSTED] SPI1_DMABUFSIZE_ALGN;
+#endif
+
 static struct stm32_spidev_s g_spi1dev =
 {
   .spidev   =
@@ -300,6 +348,11 @@ static struct stm32_spidev_s g_spi1dev =
 #  ifdef CONFIG_STM32_SPI1_DMA
   .rxch     = DMACHAN_SPI1_RX,
   .txch     = DMACHAN_SPI1_TX,
+#if defined(SPI1_DMABUFSIZE_ADJUSTED)
+  .rxbuf    = g_spi1_rxbuf,
+  .txbuf    = g_spi1_txbuf,
+  .buflen   = SPI1_DMABUFSIZE_ADJUSTED,
+#    endif
 #  else
   .rxch     = 0,
   .txch     = 0,
@@ -336,9 +389,14 @@ static const struct spi_ops_s g_sp2iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi2register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
+
+#if defined(SPI2_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi2_txbuf[SPI2_DMABUFSIZE_ADJUSTED] SPI2_DMABUFSIZE_ALGN;
+static uint8_t g_spi2_rxbuf[SPI2_DMABUFSIZE_ADJUSTED] SPI2_DMABUFSIZE_ALGN;
+#endif
 
 static struct stm32_spidev_s g_spi2dev =
 {
@@ -355,6 +413,11 @@ static struct stm32_spidev_s g_spi2dev =
 #  ifdef CONFIG_STM32_SPI2_DMA
   .rxch     = DMACHAN_SPI2_RX,
   .txch     = DMACHAN_SPI2_TX,
+#if defined(SPI2_DMABUFSIZE_ADJUSTED)
+  .rxbuf    = g_spi2_rxbuf,
+  .txbuf    = g_spi2_txbuf,
+  .buflen   = SPI2_DMABUFSIZE_ADJUSTED,
+#    endif
 #  else
   .rxch     = 0,
   .txch     = 0,
@@ -391,9 +454,14 @@ static const struct spi_ops_s g_sp3iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi3register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
+
+#if defined(SPI3_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi3_txbuf[SPI3_DMABUFSIZE_ADJUSTED] SPI3_DMABUFSIZE_ALGN;
+static uint8_t g_spi3_rxbuf[SPI3_DMABUFSIZE_ADJUSTED] SPI3_DMABUFSIZE_ALGN;
+#endif
 
 static struct stm32_spidev_s g_spi3dev =
 {
@@ -410,6 +478,11 @@ static struct stm32_spidev_s g_spi3dev =
 #  ifdef CONFIG_STM32_SPI3_DMA
   .rxch     = DMACHAN_SPI3_RX,
   .txch     = DMACHAN_SPI3_TX,
+#if defined(SPI3_DMABUFSIZE_ADJUSTED)
+  .rxbuf    = g_spi3_rxbuf,
+  .txbuf    = g_spi3_txbuf,
+  .buflen   = SPI3_DMABUFSIZE_ADJUSTED,
+#    endif
 #  else
   .rxch     = 0,
   .txch     = 0,
@@ -446,9 +519,14 @@ static const struct spi_ops_s g_sp4iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi4register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
+
+#if defined(SPI4_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi4_txbuf[SPI4_DMABUFSIZE_ADJUSTED] SPI4_DMABUFSIZE_ALGN;
+static uint8_t g_spi4_rxbuf[SPI4_DMABUFSIZE_ADJUSTED] SPI4_DMABUFSIZE_ALGN;
+#endif
 
 static struct stm32_spidev_s g_spi4dev =
 {
@@ -465,6 +543,11 @@ static struct stm32_spidev_s g_spi4dev =
 #  ifdef CONFIG_STM32_SPI4_DMA
   .rxch     = DMACHAN_SPI4_RX,
   .txch     = DMACHAN_SPI4_TX,
+#if defined(SPI4_DMABUFSIZE_ADJUSTED)
+  .rxbuf    = g_spi4_rxbuf,
+  .txbuf    = g_spi4_txbuf,
+  .buflen   = SPI4_DMABUFSIZE_ADJUSTED,
+#    endif
 #  else
   .rxch     = 0,
   .txch     = 0,
@@ -501,9 +584,14 @@ static const struct spi_ops_s g_sp5iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi5register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
+
+#if defined(SPI5_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi5_txbuf[SPI5_DMABUFSIZE_ADJUSTED] SPI5_DMABUFSIZE_ALGN;
+static uint8_t g_spi5_rxbuf[SPI5_DMABUFSIZE_ADJUSTED] SPI5_DMABUFSIZE_ALGN;
+#endif
 
 static struct stm32_spidev_s g_spi5dev =
 {
@@ -520,6 +608,11 @@ static struct stm32_spidev_s g_spi5dev =
 #  ifdef CONFIG_STM32_SPI5_DMA
   .rxch     = DMACHAN_SPI5_RX,
   .txch     = DMACHAN_SPI5_TX,
+#if defined(SPI5_DMABUFSIZE_ADJUSTED)
+  .rxbuf    = g_spi5_rxbuf,
+  .txbuf    = g_spi5_txbuf,
+  .buflen   = SPI5_DMABUFSIZE_ADJUSTED,
+#    endif
 #  else
   .rxch     = 0,
   .txch     = 0,
@@ -556,9 +649,14 @@ static const struct spi_ops_s g_sp6iops =
 #ifdef CONFIG_SPI_CALLBACK
   .registercallback  = stm32_spi6register,  /* provided externally */
 #else
-  .registercallback  = 0,  /* not implemented */
+  .registercallback  = 0,                   /* not implemented */
 #endif
 };
+
+#if defined(SPI6_DMABUFSIZE_ADJUSTED)
+static uint8_t g_spi6_txbuf[SPI6_DMABUFSIZE_ADJUSTED] SPI6_DMABUFSIZE_ALGN;
+static uint8_t g_spi6_rxbuf[SPI6_DMABUFSIZE_ADJUSTED] SPI6_DMABUFSIZE_ALGN;
+#endif
 
 static struct stm32_spidev_s g_spi6dev =
 {
@@ -575,6 +673,11 @@ static struct stm32_spidev_s g_spi6dev =
 #  ifdef CONFIG_STM32_SPI6_DMA
   .rxch     = DMACHAN_SPI6_RX,
   .txch     = DMACHAN_SPI6_TX,
+#if defined(SPI6_DMABUFSIZE_ADJUSTED)
+  .rxbuf    = g_spi6_rxbuf,
+  .txbuf    = g_spi6_txbuf,
+  .buflen   = SPI6_DMABUFSIZE_ADJUSTED,
+#    endif
 #  else
   .rxch     = 0,
   .txch     = 0,
@@ -778,29 +881,6 @@ static inline void spi_writeword(FAR struct stm32_spidev_s *priv, uint16_t word)
 }
 
 /************************************************************************************
- * Name: spi_16bitmode
- *
- * Description:
- *   Check if the SPI is operating in 16-bit mode
- *
- * Input Parameters:
- *   priv     - Device-specific state data
- *
- * Returned Value:
- *   true: 16-bit mode, false: 8-bit mode
- *
- ************************************************************************************/
-
-static inline bool spi_16bitmode(FAR struct stm32_spidev_s *priv)
-{
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F37XX)
-  return (priv->nbits > 8);
-#else
-  return ((spi_getreg(priv, STM32_SPI_CR1_OFFSET) & SPI_CR1_DFF) != 0);
-#endif
-}
-
-/************************************************************************************
  * Name: spi_dmarxwait
  *
  * Description:
@@ -930,7 +1010,7 @@ static void spi_dmarxsetup(FAR struct stm32_spidev_s *priv, FAR void *rxbuffer,
 {
   /* 8- or 16-bit mode? */
 
-  if (spi_16bitmode(priv))
+  if (priv->nbits > 8)
     {
       /* 16-bit mode -- is there a buffer to receive data in? */
 
@@ -980,7 +1060,7 @@ static void spi_dmatxsetup(FAR struct stm32_spidev_s *priv, FAR const void *txbu
 {
   /* 8- or 16-bit mode? */
 
-  if (spi_16bitmode(priv))
+  if (priv->nbits > 8)
     {
       /* 16-bit mode -- is there a buffer to transfer data from? */
 
@@ -1570,7 +1650,7 @@ static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuff
 
   /* 8- or 16-bit mode? */
 
-  if (spi_16bitmode(priv))
+  if (priv->nbits > 8)
     {
       /* 16-bit mode */
 
@@ -1665,14 +1745,14 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
-
+  FAR void * xbuffer = rxbuffer;
   DEBUGASSERT(priv != NULL);
 
-#ifdef CONFIG_STM32_SPI_DMATHRESHOLD
   /* Convert the number of word to a number of bytes */
 
   size_t nbytes = (priv->nbits > 8) ? nwords << 1 : nwords;
 
+#ifdef CONFIG_STM32_SPI_DMATHRESHOLD
   /* If this is a small SPI transfer, then let spi_exchange_nodma() do the work. */
 
   if (nbytes <= CONFIG_STM32_SPI_DMATHRESHOLD)
@@ -1694,8 +1774,10 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
     }
 
 #ifdef CONFIG_STM32_DMACAPABLE
-  if ((txbuffer && !stm32_dmacapable((uint32_t)txbuffer, nwords, priv->txccr)) ||
-      (rxbuffer && !stm32_dmacapable((uint32_t)rxbuffer, nwords, priv->rxccr)))
+  if ((txbuffer && priv->txbuf == 0 &&
+      !stm32_dmacapable((uint32_t)txbuffer, nwords, priv->txccr)) ||
+      (rxbuffer && priv->rxbuf == 0 &&
+       !stm32_dmacapable((uint32_t)rxbuffer, nwords, priv->rxccr)))
     {
       /* Unsupported memory region fall back to non-DMA method. */
 
@@ -1711,6 +1793,27 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       DEBUGASSERT(priv && priv->spibase);
 
       /* Setup DMAs */
+
+      /* If this bus uses a in driver buffers we will incur 2 copies,
+       * The copy cost is << less the non DMA transfer time and having
+       * the buffer in the driver ensures DMA can be used. This is bacause
+       * the API does not support passing the buffer extent so the only
+       * extent is buffer + the transfer size. These can sizes be less than
+       * the cache line size, and not aligned and tyicaly greater then 4
+       * bytes, which is about the break even point for the DMA IO overhead.
+       */
+
+      if (txbuffer && priv->txbuf)
+        {
+          if (nbytes > priv->buflen)
+            {
+              nbytes = priv->buflen;
+            }
+
+          memcpy(priv->txbuf, txbuffer, nbytes);
+          txbuffer  = priv->txbuf;
+          rxbuffer  = rxbuffer ? priv->rxbuf : rxbuffer;
+        }
 
       spi_dmarxsetup(priv, rxbuffer, &rxdummy, nwords);
       spi_dmatxsetup(priv, txbuffer, &txdummy, nwords);
@@ -1742,6 +1845,11 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       spi_dmarxwait(priv);
       spi_dmatxwait(priv);
+
+      if (rxbuffer && priv->rxbuf)
+        {
+          memcpy(xbuffer, priv->rxbuf, nbytes);
+        }
 
 #ifdef CONFIG_SPI_TRIGGER
       priv->trigarmed = false;

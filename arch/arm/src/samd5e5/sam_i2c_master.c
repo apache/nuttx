@@ -151,12 +151,12 @@ struct i2c_attr_s
 
 struct sam_i2c_dev_s
 {
-  struct i2c_master_s dev;    /* I2C master device */
-  const struct i2c_attr_s *attr;  /* Invariant attributes of I2C device */
-  struct i2c_msg_s *msg;      /* Current message being processed */
-  uint32_t frequency;         /* I2C transfer clock frequency */
-  uint16_t flags;             /* Transfer flags */
-  uint16_t nextflags;         /* Next message flags */
+  struct i2c_master_s dev;       /* I2C master device */
+  const struct i2c_attr_s *attr; /* Invariant attributes of I2C device */
+  struct i2c_msg_s *msg;         /* Current message being processed */
+  uint32_t frequency;            /* I2C transfer clock frequency */
+  uint16_t flags;                /* Transfer flags */
+  uint16_t nextflags;            /* Next message flags */
 
   sem_t exclsem;              /* Only one thread can access at a time */
   sem_t waitsem;              /* Wait for I2C transfer completion */
@@ -189,7 +189,8 @@ static uint32_t i2c_getreg32(struct sam_i2c_dev_s *priv, unsigned int offset);
 static void i2c_putreg32(struct sam_i2c_dev_s *priv, uint32_t regval,
                          unsigned int offset);
 
-static void i2c_takesem(sem_t * sem);
+static int i2c_takesem(sem_t * sem);
+static int i2c_takesem_uninterruptible(sem_t * sem);
 #define i2c_givesem(sem) (nxsem_post(sem))
 
 #ifdef CONFIG_SAM_I2C_REGDEBUG
@@ -476,6 +477,25 @@ static void i2c_putreg32(struct sam_i2c_dev_s *priv, uint32_t regval,
  * Name: i2c_takesem
  *
  * Description:
+ *   Take the wait semaphore.  May be interrupted by a signal.
+ *
+ * Input Parameters:
+ *   dev - Instance of the SDIO device driver state structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ *******************************************************************************/
+
+static int i2c_takesem(sem_t *sem)
+{
+  return nxsem_wait(sem);
+}
+
+/*******************************************************************************
+ * Name: i2c_takesem_uninterruptible
+ *
+ * Description:
  *   Take the wait semaphore (handling false alarm wake-ups due to the receipt
  *   of signals).
  *
@@ -487,9 +507,9 @@ static void i2c_putreg32(struct sam_i2c_dev_s *priv, uint32_t regval,
  *
  *******************************************************************************/
 
-static void i2c_takesem(sem_t *sem)
+static int i2c_takesem_uninterruptible(sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
 }
 
 /*******************************************************************************
@@ -719,6 +739,7 @@ static int i2c_interrupt(int irq, FAR void *context, FAR void *arg)
           i2c_wait_synchronization(priv);
 
           /* STOP */
+
           if ((priv->nextflags & I2C_M_NOSTART) == 0)
             {
               regval  = i2c_getreg32(priv, SAM_I2C_CTRLB_OFFSET);
@@ -753,7 +774,6 @@ static int i2c_interrupt(int irq, FAR void *context, FAR void *arg)
           /* Cancel timeout */
 
           i2c_wakeup(priv, OK);
-          // i2cinfo("Got data = 0x%02X\n", msg->buffer[0]);
         }
 
       i2c_putreg8(priv, I2C_INT_SB, SAM_I2C_INTFLAG_OFFSET);
@@ -957,7 +977,7 @@ static int sam_i2c_transfer(FAR struct i2c_master_s *dev,
   irqstate_t flags;
   unsigned int size;
   int i;
-  int ret = -EBUSY;
+  int ret;
 
   DEBUGASSERT(dev != NULL && msgs != NULL && count > 0);
 
@@ -986,9 +1006,15 @@ static int sam_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Get exclusive access to the device */
 
-  i2c_takesem(&priv->exclsem);
+  ret = i2c_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Initiate the message transfer */
+
+  ret = -EBUSY;
 
   /* Initiate the transfer.  The rest will be handled from interrupt logic.
    * Interrupts must be disabled to prevent re-entrance from the interrupt
@@ -1051,8 +1077,6 @@ static uint32_t sam_i2c_setfrequency(struct sam_i2c_dev_s *priv,
   uint32_t baud = 0;
   uint32_t baud_hs = 0;
   uint32_t ctrla;
-
-  // i2cinfo("sercom=%d frequency=%d\n", priv->attr->sercom, frequency);
 
   /* Check if the configured BAUD is within the valid range */
 
@@ -1168,7 +1192,8 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
   regval = i2c_getreg32(priv, SAM_I2C_CTRLA_OFFSET);
   if (regval & I2C_CTRLA_ENABLE)
     {
-      i2cerr("ERROR: Cannot initialize I2C because it is already initialized!\n");
+      i2cerr("ERROR: Cannot initialize I2C "
+             "because it is already initialized!\n");
       return;
     }
 
@@ -1467,7 +1492,11 @@ int sam_i2c_reset(FAR struct i2c_master_s *dev)
 
   /* Get exclusive access to the I2C device */
 
-  i2c_takesem(&priv->exclsem);
+  ret = i2c_takesem_uninterruptible(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Disable I2C interrupts */
 
@@ -1477,7 +1506,7 @@ int sam_i2c_reset(FAR struct i2c_master_s *dev)
 
   i2c_putreg32(priv, ctrla & ~I2C_CTRLA_ENABLE, SAM_I2C_CTRLA_OFFSET);
 
-  /* Wait it get sync */
+  /* Wait to get sync */
 
   i2c_wait_synchronization(priv);
 

@@ -56,7 +56,8 @@ static int  devconsole_setup(FAR struct uart_dev_s *dev);
 static void devconsole_shutdown(FAR struct uart_dev_s *dev);
 static int  devconsole_attach(FAR struct uart_dev_s *dev);
 static void devconsole_detach(FAR struct uart_dev_s *dev);
-static int  devconsole_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int  devconsole_ioctl(FAR struct file *filep, int cmd,
+                             unsigned long arg);
 static int  devconsole_receive(FAR struct uart_dev_s *dev, uint32_t *status);
 static void devconsole_rxint(FAR struct uart_dev_s *dev, bool enable);
 static bool devconsole_rxavailable(FAR struct uart_dev_s *dev);
@@ -140,14 +141,15 @@ static void devconsole_shutdown(struct uart_dev_s *dev)
  * Name: devconsole_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
@@ -161,8 +163,8 @@ static int devconsole_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 

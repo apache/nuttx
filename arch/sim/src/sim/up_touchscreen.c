@@ -66,6 +66,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SIM_TCNWAITERS
@@ -73,6 +74,7 @@
 #endif
 
 /* Driver support ***********************************************************/
+
 /* This format is used to construct the /dev/input[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
@@ -675,19 +677,23 @@ errout_with_priv:
  *   None
  *
  * Returned Value:
- *   None.
+ *   Return OK if success or negative value of the error.
  *
  ****************************************************************************/
 
-void sim_tsc_uninitialize(void)
+int sim_tsc_uninitialize(void)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)&g_simtouchscreen;
   char devname[DEV_NAMELEN];
-  int ret;
+  int ret = OK;
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&priv->devsem);
+  ret = nxsem_wait_uninterruptible(&priv->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Stop the event loop (Hmm.. the caller must be sure that there are no
    * open references to the touchscreen driver.  This might better be
@@ -711,6 +717,8 @@ void sim_tsc_uninitialize(void)
 
   nxsem_destroy(&priv->waitsem);
   nxsem_destroy(&priv->devsem);
+
+  return ret;
 }
 
 /****************************************************************************

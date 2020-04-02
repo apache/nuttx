@@ -294,7 +294,7 @@
 
 /* Pick ttys7. This could be one of USART1-2. It can't be UART0-4
  * or USART 1 because those have already been assigned to ttsyS0-6.
- * One of of USART1-2 could also be the console.
+ * One of USART1-2 could also be the console.
  */
 
 #if defined(CONFIG_SAMV7_USART1) && defined(CONFIG_USART1_SERIALDRIVER) && \

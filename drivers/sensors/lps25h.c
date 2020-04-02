@@ -69,8 +69,8 @@
  * for conversion times:
  *
  * Typical conversion time ≈ 62*(Pavg+Tavg) + 975 μs
- *  ex: Tavg = 64; Pavg = 512; Typ. conversation time ≈ 36.7 ms (compatible with
- *                                                               ODT=25 Hz)
+ *  ex: Tavg = 64; Pavg = 512; Typ. conversation time ≈ 36.7 ms
+ *             (compatible with ODT=25 Hz)
  *  ex: Tavg = 32; Pavg = 128; Typ. conversation time ≈ 10.9 ms
  *  The formula is accurate within +/- 3% at room temperature
  *
@@ -155,10 +155,10 @@ enum LPS25H_RES_CONF_AVG_TEMP
 enum LPS25H_CTRL_REG1_ODR
 {
   CTRL_REG1_ODR_ONE_SHOT = 0,
-  CTRL_REG1_ODR_1Hz,
-  CTRL_REG1_ODR_7Hz,
-  CTRL_REG1_ODR_12_5Hz,
-  CTRL_REG1_ODR_25Hz
+  CTRL_REG1_ODR_1HZ,
+  CTRL_REG1_ODR_7HZ,
+  CTRL_REG1_ODR_12_5HZ,
+  CTRL_REG1_ODR_25HZ
 };
 
 enum LPS25H_CTRL_REG4_P1
@@ -196,9 +196,9 @@ enum LPS25H_INT_CFG_OP
   LIR = 0x4
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 static int lps25h_open(FAR struct file *filep);
 static int lps25h_close(FAR struct file *filep);
@@ -343,7 +343,11 @@ static int lps25h_open(FAR struct file *filep)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&dev->devsem);
+  ret = nxsem_wait_uninterruptible(&dev->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   dev->config->set_power(dev->config, true);
   ret = lps25h_read_reg8(dev, &addr, &value);
@@ -372,7 +376,11 @@ static int lps25h_close(FAR struct file *filep)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&dev->devsem);
+  ret = nxsem_wait_uninterruptible(&dev->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   dev->config->irq_enable(dev->config, false);
   dev->irqenabled = false;
@@ -395,7 +403,11 @@ static ssize_t lps25h_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&dev->devsem);
+  ret = nxsem_wait_uninterruptible(&dev->devsem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
   ret = lps25h_configure_dev(dev);
   if (ret < 0)
@@ -413,7 +425,7 @@ static ssize_t lps25h_read(FAR struct file *filep, FAR char *buffer,
     {
       /* This interface is mainly intended for easy debugging in nsh. */
 
-      length = snprintf(buffer, buflen, "%u\n", data.pressure_Pa);
+      length = snprintf(buffer, buflen, "%u\n", data.pressure_pa);
       if (length > buflen)
         {
           length = buflen;
@@ -486,7 +498,7 @@ static int lps25h_configure_dev(FAR struct lps25h_dev_s *dev)
   /* Write CTRL_REG1 to turn device on */
 
   ret = lps25h_write_reg8(dev, LPS25H_CTRL_REG1,
-                          LPS25H_PD | (CTRL_REG1_ODR_1Hz << 4));
+                          LPS25H_PD | (CTRL_REG1_ODR_1HZ << 4));
 
   return ret;
 }
@@ -570,7 +582,7 @@ static int lps25h_one_shot(FAR struct lps25h_dev_s *dev)
         {
           /* Some unknown mystery error */
 
-          DEBUGASSERT(false);
+          DEBUGASSERT(ret == -ECANCELED);
           return ret;
         }
 
@@ -635,10 +647,13 @@ static int lps25h_read_pressure(FAR struct lps25h_dev_s *dev,
 
   /* Convert to more usable format. */
 
-  pres->pressure_int_hP = pres_res / LPS25H_PRESSURE_INTERNAL_DIVIDER;
-  pres->pressure_Pa = (uint64_t)pres_res * 100000 / LPS25H_PRESSURE_INTERNAL_DIVIDER;
-  pres->raw_data = pres_res;
-  lps25h_dbg("Pressure: %u Pa\n", pres->pressure_Pa);
+  pres->pressure_int_hp =
+    pres_res / LPS25H_PRESSURE_INTERNAL_DIVIDER;
+  pres->pressure_pa     = (uint64_t)
+    pres_res * 100000 / LPS25H_PRESSURE_INTERNAL_DIVIDER;
+  pres->raw_data        = pres_res;
+
+  lps25h_dbg("Pressure: %u Pa\n", pres->pressure_pa);
 
   return ret;
 }
@@ -703,7 +718,11 @@ static int lps25h_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access */
 
-  nxsem_wait_uninterruptible(&dev->devsem);
+  ret = nxsem_wait_uninterruptible(&dev->devsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   switch (cmd)
     {

@@ -23,7 +23,6 @@ config LIB_HOMEDIR
 config LIBC_TMPDIR
 	string "Temporary file directory"
 	default "/tmp"
-	depends on FS_WRITABLE
 		---help---
 		If a write-able file system is selected, this string will be
 		provided to specify the full path to a directory where temporary
@@ -33,7 +32,6 @@ config LIBC_TMPDIR
 config LIBC_MAX_TMPFILE
 	int "Maximum size of a temporary file path"
 	default 32
-	depends on FS_WRITABLE
 		---help---
 		If a write-able file system is selected, then temporary file may be
 		supported at the path provided by LIBC_TMPDIR.  The tmpnam() interface

@@ -256,7 +256,7 @@
 #  define SIGEV_THREAD  3 /* A notification function is called */
 #endif
 
-/* Special values of of sa_handler used by sigaction and sigset.  They are all
+/* Special values of sa_handler used by sigaction and sigset.  They are all
  * treated like NULL for now.  This is okay for SIG_DFL and SIG_IGN because
  * in NuttX, the default action for all signals is to ignore them.
  */

@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/netdb/lib_dnscache.c
  *
- *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2014-2016 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +80,7 @@ struct dns_cache_s
 #endif
   char              name[CONFIG_NETDB_DNSCLIENT_NAMESIZE];
   uint8_t           naddr;      /* How many addresses per name */
-  union dns_addr_u  addr[CONFIG_NETDB_DNSCLIENT_MAXIP]; /* Resolved address */
+  union dns_addr_u  addr[CONFIG_NETDB_MAX_IPADDR];
 };
 
 /****************************************************************************
@@ -105,7 +106,7 @@ static struct dns_cache_s g_dns_cache[CONFIG_NETDB_DNSCLIENT_ENTRIES];
  * Name: dns_save_answer
  *
  * Description:
- *   Same the last resolved hostname in the DNS cache
+ *   Save the last resolved hostname in the DNS cache
  *
  * Input Parameters:
  *   hostname - The hostname string to be cached.
@@ -127,7 +128,7 @@ void dns_save_answer(FAR const char *hostname,
   int next;
   int ndx;
 
-  naddr = MIN(naddr, CONFIG_NETDB_DNSCLIENT_MAXIP);
+  naddr = MIN(naddr, CONFIG_NETDB_MAX_IPADDR);
   DEBUGASSERT(naddr >= 1 && naddr <= UCHAR_MAX);
 
   /* Get exclusive access to the DNS cache */
@@ -213,14 +214,6 @@ int dns_find_answer(FAR const char *hostname, FAR union dns_addr_u *addr,
   int next;
   int ndx;
 
-  /* If DNS not initialized, no need to proceed */
-
-  if (!dns_initialize())
-    {
-      nerr("ERROR: DNS failed to initialize\n");
-      return -EAGAIN;
-    }
-
   /* Get exclusive access to the DNS cache */
 
   dns_semtake();
@@ -263,13 +256,14 @@ int dns_find_answer(FAR const char *hostname, FAR union dns_addr_u *addr,
       else
 #endif
         {
-          /* The entry has not expired, check for a name match.  Notice that
-           * because the names are truncated to CONFIG_NETDB_DNSCLIENT_NAMESIZE,
+          /* The entry has not expired, check for a name match. Because
+           * the names are truncated to CONFIG_NETDB_DNSCLIENT_NAMESIZE,
            * this has the possibility of aliasing two names and returning
            * the wrong entry from the cache.
            */
 
-          if (strncmp(hostname, entry->name, CONFIG_NETDB_DNSCLIENT_NAMESIZE) == 0)
+          if (strncmp(hostname, entry->name,
+                      CONFIG_NETDB_DNSCLIENT_NAMESIZE) == 0)
             {
               /* We have a match.  Return the resolved host address */
 

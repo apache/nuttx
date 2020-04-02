@@ -267,7 +267,8 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs);
 uint32_t xtensa_enable_cpuint(uint32_t *shadow, uint32_t intmask);
 uint32_t xtensa_disable_cpuint(uint32_t *shadow, uint32_t intmask);
 void xtensa_panic(int xptcode, uint32_t *regs) noreturn_function;
-void xtensa_user(int exccause, uint32_t *regs) noreturn_function;
+void xtensa_user_panic(int exccause, uint32_t *regs) noreturn_function;
+uint32_t *xtensa_user(int exccause, uint32_t *regs);
 
 /* Software interrupt handler */
 

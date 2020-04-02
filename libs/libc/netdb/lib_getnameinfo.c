@@ -46,7 +46,6 @@
 #include <arpa/inet.h>
 #include <assert.h>
 
-#include "libc.h"
 #include "netdb/lib_netdb.h"
 
 #ifdef CONFIG_LIBC_NETDB
@@ -68,21 +67,23 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
   int port;
   int ret;
 
-  if (addr->sa_family == AF_INET &&
+  if (addr && addr->sa_family == AF_INET &&
       addrlen == sizeof(struct sockaddr_in))
     {
-      const struct sockaddr_in *sa_in = (const struct sockaddr_in *)addr;
+      FAR const struct sockaddr_in *sa_in;
 
+      sa_in = (FAR const struct sockaddr_in *)addr;
       port = ntohs(sa_in->sin_port);
       saddr = &sa_in->sin_addr;
       saddr_len = sizeof(sa_in->sin_addr);
     }
 #ifdef CONFIG_NET_IPv6
-  else if (addr->sa_family == AF_INET6 &&
+  else if (addr && addr->sa_family == AF_INET6 &&
            addrlen == sizeof(struct sockaddr_in6))
     {
-      const struct sockaddr_in6 *sa_in6 = (const struct sockaddr_in6 *)addr;
+      FAR const struct sockaddr_in6 *sa_in6;
 
+      sa_in6 = (FAR const struct sockaddr_in6 *)addr;
       port = ntohs(sa_in6->sin6_port);
       saddr = &sa_in6->sin6_addr;
       saddr_len = sizeof(sa_in6->sin6_addr);
@@ -93,37 +94,32 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
       return EAI_FAMILY;
     }
 
-  if (!(flags & NI_NUMERICHOST))
+  if (host && !(flags & NI_NUMERICHOST))
     {
-#ifndef CONFIG_NETDB_HOSTFILE
-      /* Fall-back to numeric for the host name. */
-
-      flags |= NI_NUMERICHOST;
-      UNUSED(saddr_len);
-#else
       struct hostent hostent;
-      int h_errno;
+      FAR struct hostent *res;
+      int error;
 
-      ret = gethostbyaddr_r(saddr, saddr_len, addr->sa_family, &hostent, host,
-                            hostlen, &h_errno);
+      ret = gethostbyaddr_r(saddr, saddr_len, addr->sa_family, &hostent,
+                            host, hostlen, &res, &error);
 
       if (ret == OK)
         {
-          size_t sz = strlen(hostent.h_name) + 1;
+          size_t sz = strlen(res->h_name) + 1;
 
           if (sz <= hostlen)
             {
-              memmove(host, hostent.h_name, sz);
+              memmove(host, res->h_name, sz);
             }
           else
             {
-              memmove(host, hostent.h_name, hostlen);
+              memmove(host, res->h_name, hostlen);
               host[hostlen - 1] = '\0';
             }
         }
       else
         {
-          switch (h_errno)
+          switch (error)
             {
               case HOST_NOT_FOUND:
                 {
@@ -161,10 +157,9 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
 
           flags |= NI_NUMERICHOST;
         }
-#endif /* CONFIG_NETDB_HOSTFILE */
     }
 
-  if (flags & NI_NUMERICHOST)
+  if (host && (flags & NI_NUMERICHOST))
     {
       if (!inet_ntop(addr->sa_family, saddr, host, hostlen))
         {
@@ -179,13 +174,13 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
         }
     }
 
-  if (!(flags & NI_NUMERICSERV))
+  if (serv && !(flags & NI_NUMERICSERV))
     {
       struct servent servent;
-      struct servent *result;
+      FAR struct servent *result;
 
-      ret = getservbyport_r(port, flags & NI_DGRAM ? "udp" : NULL, &servent,
-                            serv, servlen, &result);
+      ret = getservbyport_r(port, flags & NI_DGRAM ? "udp" : "tcp",
+                            &servent, serv, servlen, &result);
 
       if (ret == OK)
         {
@@ -209,7 +204,7 @@ int getnameinfo(FAR const struct sockaddr *addr, socklen_t addrlen,
         }
     }
 
-  if (flags & NI_NUMERICSERV)
+  if (serv && (flags & NI_NUMERICSERV))
     {
       snprintf(serv, servlen, "%d", port);
     }

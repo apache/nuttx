@@ -45,10 +45,6 @@
 #include "chip.h"
 #include "hardware/stm32_fmc.h"
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
@@ -61,14 +57,22 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32_fmc_sdram_wait
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_fmc_init
  *
  * Description:
- *   Wait for the SDRAM controller to be ready.
+ *   Initialize the FMC peripherial. Because FMC initialization is highly
+ *   dependent on the used parts, definition of the initial values for FMC
+ *   registers is mostly left to board designer.
+ *
+ *   Typically called from up_addregion().
  *
  ****************************************************************************/
 
-void stm32_fmc_sdram_wait(void);
+void stm32_fmc_init(void);
 
 /****************************************************************************
  * Name: stm32_fmc_enable

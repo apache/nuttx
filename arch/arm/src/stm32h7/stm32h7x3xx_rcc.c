@@ -298,6 +298,12 @@ static inline void rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_SDMMC1EN;
 #endif
 
+#ifdef CONFIG_STM32H7_FMC
+  /* Flexible static memory controller module clock enable */
+
+  regval |= RCC_AHB3ENR_FMCEN;
+#endif
+
   /* TODO: ... */
 
   putreg32(regval, STM32_RCC_AHB3ENR);   /* Enable peripherals */
@@ -775,7 +781,7 @@ static void stm32_stdclockconfig(void)
         }
 #endif
 
-      /* Ww must write the lower byte of the PWR_CR3 register is written once
+      /* We must write the lower byte of the PWR_CR3 register is written once
        * after POR and it shall be written before changing VOS level or
        * ck_sys clock frequency. No limitation applies to the upper bytes.
        *

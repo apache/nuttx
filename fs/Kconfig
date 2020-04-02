@@ -53,25 +53,6 @@ config PSEUDOFS_SOFTLINKS
 		to link a directory in the pseudo-file system, such as /bin, to
 		to a directory in a mounted volume, say /mnt/sdcard/bin.
 
-config FS_READABLE
-	bool
-	default n
-	---help---
-		Automatically selected if any readable file system is selected
-
-config FS_WRITABLE
-	bool "Writable file system"
-	default n
-	---help---
-		Automatically selected if any writable file system is selected.  If
-		not selected, support for writing will be disabled in all block
-		drivers and also the block-to-character (BCH) layer and the MTD FTL
-		layer.
-
-		This selection can also be manually selected.  You might want to do
-		this if there are no writable file systems enabled, but you still
-		want support for write access in block drivers and/or FTL.
-
 source fs/aio/Kconfig
 source fs/semaphore/Kconfig
 source fs/mqueue/Kconfig
