@@ -1399,6 +1399,7 @@ int main(int argc, char **argv, char **envp)
                    *   IGMPv2      as an IGMP version number
                    *   [0-9]p[0-9] as a decimal point
                    *   d[0-9]      as a divisor
+                   *   MHz         for frequencies
                    */
 
                    if (!have_lower && islower(line[n]))
@@ -1439,8 +1440,8 @@ int main(int argc, char **argv, char **envp)
                              }
                            break;
 
-                         /* Sequences containing 'p' or 'd' must have been
-                          * preceded by upper case characters.
+                         /* Sequences containing 'p', 'd', or 'z' must have
+                          * been preceded by upper case characters.
                           */
 
                          case 'p':
@@ -1459,6 +1460,16 @@ int main(int argc, char **argv, char **envp)
                              }
                              break;
 
+                         case 'z':
+                           if (!have_upper || n < 2 ||
+                               line[n - 1] != 'H' ||
+                               line[n - 2] != 'M')
+                             {
+                               have_lower = true;
+                             }
+                             break;
+                           break;
+
                          default:
                            have_lower = true;
                            break;
@@ -1473,13 +1484,6 @@ int main(int argc, char **argv, char **envp)
 
               if (have_upper && have_lower)
                 {
-                  /* REVISIT:  Although pre-processor definitions are
-                   * supposed to be all upper-case, there are exceptions
-                   * such as using 'p' for a decimal point or 'MHz'.
-                   * Those will be reported here, but probably should be
-                   * considered false alarms.
-                   */
-
                   /* Ignore symbols that begin with white-listed prefixes */
 
                   if (white_prefix(&line[ident_index], lineno))
