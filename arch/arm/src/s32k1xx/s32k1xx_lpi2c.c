@@ -245,9 +245,6 @@ static inline void
                           uint32_t setbits);
 static inline int
   s32k1xx_lpi2c_sem_wait(FAR struct s32k1xx_lpi2c_priv_s *priv);
-static int
-  s32k1xx_lpi2c_sem_wait_uninterruptible(
-    FAR struct s32k1xx_lpi2c_priv_s *priv);
 
 #ifdef CONFIG_S32K1XX_I2C_DYNTIMEO
 static useconds_t
@@ -463,21 +460,6 @@ static inline int
   s32k1xx_lpi2c_sem_wait(FAR struct s32k1xx_lpi2c_priv_s *priv)
 {
   return nxsem_wait(&priv->sem_excl);
-}
-
-/****************************************************************************
- * Name: s32k1xx_lpi2c_sem_wait_uninterruptible
- *
- * Description:
- *   Take the exclusive access, waiting as necessary
- *
- ****************************************************************************/
-
-static int
-  s32k1xx_lpi2c_sem_wait_uninterruptible(
-    FAR struct s32k1xx_lpi2c_priv_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->sem_excl);
 }
 
 /****************************************************************************
@@ -1705,7 +1687,7 @@ static int s32k1xx_lpi2c_reset(FAR struct i2c_master_s *dev)
 
   /* Lock out other clients */
 
-  ret = s32k1xx_lpi2c_sem_wait_uninterruptible(priv);
+  ret = s32k1xx_lpi2c_sem_wait(priv);
   if (ret < 0)
     {
       return ret;

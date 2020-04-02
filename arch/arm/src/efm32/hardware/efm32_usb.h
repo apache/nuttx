@@ -75,6 +75,7 @@
 /*******************************************************************************************************************************
  * Pre-processor Definitions
  *******************************************************************************************************************************/
+
 /* General definitions */
 
 #define EFM32_USB_EPTYPE_CTRL                      (0)      /* Control */
@@ -130,7 +131,7 @@
 #define EFM32_USB_HAINTMSK_OFFSET                  0x3c418  /* Host All Channels Interrupt Mask Register */
 #define EFM32_USB_HPRT_OFFSET                      0x3c440  /* Host Port Control and Status Register */
 
-#define EFM32_USB_HCn_OFFSET(n)                    (0x3c500 + ((n) << 5))
+#define EFM32_USB_HC_OFFSET(n)                     (0x3c500 + ((n) << 5))
 #define EFM32_USB_HC0_OFFSET                       0x3c500  /* Host Channel 0 Offset */
 #define EFM32_USB_HC1_OFFSET                       0x3c520  /* Host Channel 1 Offset */
 #define EFM32_USB_HC2_OFFSET                       0x3c540  /* Host Channel 2 Offset */
@@ -146,11 +147,11 @@
 #define EFM32_USB_HC12_OFFSET                      0x3c680  /* Host Channel 12 Offset */
 #define EFM32_USB_HC13_OFFSET                      0x3c6a0  /* Host Channel 13 Offset */
 
-#define EFM32_USB_HCn_CHAR_OFFSET                  0x00000  /* Host Channel n Characteristics Register */
-#define EFM32_USB_HCn_INT_OFFSET                   0x00008  /* Host Channel n Interrupt Register */
-#define EFM32_USB_HCn_INTMSK_OFFSET                0x0000c  /* Host Channel n Interrupt Mask Register */
-#define EFM32_USB_HCn_TSIZ_OFFSET                  0x00010  /* Host Channel n Transfer Size Register */
-#define EFM32_USB_HCn_DMAADDR_OFFSET               0x00014  /* Host Channel n DMA Address Register */
+#define EFM32_USB_HC_CHAR_OFFSET                   0x00000  /* Host Channel n Characteristics Register */
+#define EFM32_USB_HC_INT_OFFSET                    0x00008  /* Host Channel n Interrupt Register */
+#define EFM32_USB_HC_INTMSK_OFFSET                 0x0000c  /* Host Channel n Interrupt Mask Register */
+#define EFM32_USB_HC_TSIZ_OFFSET                   0x00010  /* Host Channel n Transfer Size Register */
+#define EFM32_USB_HC_DMAADDR_OFFSET                0x00014  /* Host Channel n DMA Address Register */
 
 #define EFM32_USB_DCFG_OFFSET                      0x3c800  /* Device Configuration Register */
 #define EFM32_USB_DCTL_OFFSET                      0x3c804  /* Device Control Register */
@@ -334,7 +335,7 @@
 #define EFM32_USB_HAINTMSK                         (EFM32_USB_BASE+EFM32_USB_HAINTMSK_OFFSET)
 #define EFM32_USB_HPRT                             (EFM32_USB_BASE+EFM32_USB_HPRT_OFFSET)
 
-#define EFM32_USB_HCn_BASE(n)                      (EFM32_USB_BASE+EFM32_USB_HCn_OFFSET(n))
+#define EFM32_USB_HC_BASE(n)                       (EFM32_USB_BASE+EFM32_USB_HC_OFFSET(n))
 #define EFM32_USB_HC0_BASE                         (EFM32_USB_BASE+EFM32_USB_HC0_OFFSET)
 #define EFM32_USB_HC1_BASE                         (EFM32_USB_BASE+EFM32_USB_HC1_OFFSET)
 #define EFM32_USB_HC2_BASE                         (EFM32_USB_BASE+EFM32_USB_HC2_OFFSET)
@@ -350,11 +351,11 @@
 #define EFM32_USB_HC12_BASE                        (EFM32_USB_BASE+EFM32_USB_HC12_OFFSET)
 #define EFM32_USB_HC13_BASE                        (EFM32_USB_BASE+EFM32_USB_HC13_OFFSET)
 
-#define EFM32_USB_HCn_CHAR(n)                      (EFM32_USB_HCn_BASE(n)+EFM32_USB_HCn_CHAR_OFFSET)
-#define EFM32_USB_HCn_INT(n)                       (EFM32_USB_HCn_BASE(n)+EFM32_USB_HCn_INT_OFFSET)
-#define EFM32_USB_HCn_INTMSK(n)                    (EFM32_USB_HCn_BASE(n)+EFM32_USB_HCn_INTMSK_OFFSET)
-#define EFM32_USB_HCn_TSIZ(n)                      (EFM32_USB_HCn_BASE(n)+EFM32_USB_HCn_TSIZ_OFFSET)
-#define EFM32_USB_HCn_DMAADDR(n)                   (EFM32_USB_HCn_BASE(n)+EFM32_USB_HCn_DMAADDR_OFFSET)
+#define EFM32_USB_HC_CHAR(n)                       (EFM32_USB_HC_BASE(n)+EFM32_USB_HC_CHAR_OFFSET)
+#define EFM32_USB_HC_INT(n)                        (EFM32_USB_HC_BASE(n)+EFM32_USB_HC_INT_OFFSET)
+#define EFM32_USB_HC_INTMSK(n)                     (EFM32_USB_HC_BASE(n)+EFM32_USB_HC_INTMSK_OFFSET)
+#define EFM32_USB_HC_TSIZ(n)                       (EFM32_USB_HC_BASE(n)+EFM32_USB_HC_TSIZ_OFFSET)
+#define EFM32_USB_HC_DMAADDR(n)                    (EFM32_USB_HC_BASE(n)+EFM32_USB_HC_DMAADDR_OFFSET)
 
 #define EFM32_USB_DCFG                             (EFM32_USB_BASE+EFM32_USB_DCFG_OFFSET)
 #define EFM32_USB_DCTL                             (EFM32_USB_BASE+EFM32_USB_DCTL_OFFSET)
