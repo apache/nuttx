@@ -151,10 +151,15 @@ function makefunc {
 
 # Clean up after the last build
 
+function distclean_with_git {
+  git -C $nuttx clean -xfdq
+  git -C $APPSDIR clean -xfdq
+}
+
 function distclean {
   if [ -f .config ]; then
     echo "  Cleaning..."
-    makefunc ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null
+    distclean_with_git || makefunc ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null
   fi
 }
 
