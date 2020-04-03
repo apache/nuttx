@@ -994,18 +994,26 @@ testbuild.sh
 
     $ ./testbuild.sh -h
 
-    USAGE: ./testbuild.sh [-l|m|c|u|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] <testlist-file>
+    USAGE: ./testbuild.sh [-l|m|c|u|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>
            ./testbuild.sh -h
 
     Where:
       -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),
-         Ubuntu under Windows 10 (u), or Windows native (n).  Default Linux
-      -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps
-      -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx
-      -p only print the list of configs without running any builds
-      -j <ncpus> passed on to make.  Default:  No -j make option
+         Ubuntu under Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Linux
       -d enables script debug output
       -x exit on build failures
+      -j <ncpus> passed on to make.  Default:  No -j make option.
+      -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps
+      -t <topdir> provides the absolute path to top nuttx/ directory.
+         Default $WD/../nuttx, where $WD is the parent directory of
+         the directory where this script is.
+      -p only print the list of configs without running any builds
+      -G Use "git clean -xfdq" instead of "make distclean" to clean the tree.
+         This option may speed up the builds. However, note that:
+           * This assumes that your trees are git based.
+           * This assumes that only nuttx and apps repos need to be cleaned.
+           * If the tree has files not managed by git, they will be removed
+             as well.
       -h will show this help test and terminate
       <testlist-file> selects the list of configurations to test.  No default
 
