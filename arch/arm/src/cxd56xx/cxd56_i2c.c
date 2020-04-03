@@ -94,7 +94,7 @@ struct cxd56_i2cdev_s
   unsigned int     base;       /* Base address of registers */
   uint16_t         irqid;      /* IRQ for this device */
   int8_t           port;       /* Port number */
-  uint32_t         base_freq;   /* branch frequency */
+  uint32_t         base_freq;  /* branch frequency */
 
   sem_t            mutex;      /* Only one thread can access at a time */
   sem_t            wait;       /* Place to wait for transfer completion */
@@ -148,9 +148,11 @@ static struct cxd56_i2cdev_s g_i2c2dev =
 
 static inline uint32_t i2c_reg_read(struct cxd56_i2cdev_s *priv,
                                     uint32_t offset);
-static inline void i2c_reg_write(struct cxd56_i2cdev_s *priv, uint32_t offset,
+static inline void i2c_reg_write(struct cxd56_i2cdev_s *priv,
+                                 uint32_t offset,
                                  uint32_t val);
-static inline void i2c_reg_rmw(struct cxd56_i2cdev_s *dev, uint32_t offset,
+static inline void i2c_reg_rmw(struct cxd56_i2cdev_s *dev,
+                               uint32_t offset,
                                uint32_t val, uint32_t mask);
 
 static int cxd56_i2c_disable(struct cxd56_i2cdev_s *priv);
@@ -724,7 +726,8 @@ static int cxd56_i2c_reset(FAR struct i2c_master_s *dev)
 
 #if defined(CONFIG_CXD56_I2C0_SCUSEQ) || defined(CONFIG_CXD56_I2C1_SCUSEQ)
 
-static int cxd56_i2c_scurecv(int port, int addr, uint8_t *buf, ssize_t buflen)
+static int cxd56_i2c_scurecv(int port, int addr,
+                             uint8_t *buf, ssize_t buflen)
 {
   uint16_t inst[2];
   int      instn;
@@ -774,7 +777,8 @@ static int cxd56_i2c_scurecv(int port, int addr, uint8_t *buf, ssize_t buflen)
   return ret;
 }
 
-static int cxd56_i2c_scusend(int port, int addr, uint8_t *buf, ssize_t buflen)
+static int cxd56_i2c_scusend(int port, int addr,
+                             uint8_t *buf, ssize_t buflen)
 {
   uint16_t inst[12];
   ssize_t  rem;
@@ -874,8 +878,8 @@ static inline uint32_t i2c_reg_read(struct cxd56_i2cdev_s *priv,
   return getreg32(priv->base + offset);
 }
 
-static inline void i2c_reg_write(struct cxd56_i2cdev_s *priv, uint32_t offset,
-                                 uint32_t val)
+static inline void i2c_reg_write(struct cxd56_i2cdev_s *priv,
+                                 uint32_t offset, uint32_t val)
 {
   putreg32(val, priv->base + offset);
 }

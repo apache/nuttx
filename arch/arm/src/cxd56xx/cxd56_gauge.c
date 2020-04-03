@@ -33,8 +33,7 @@
  *
  ****************************************************************************/
 
-/* CXD5247GF is Li-Ion Battery Charger with Power-Path Management.
- */
+/* CXD5247GF is Li-Ion Battery Charger with Power-Path Management. */
 
 /****************************************************************************
  * Included Files
@@ -108,13 +107,13 @@ static const struct file_operations g_gaugeops =
   gauge_close,  /* close */
   gauge_read,   /* read */
   gauge_write,  /* write */
-  0,              /* seek */
+  0,            /* seek */
   gauge_ioctl   /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , NULL          /* poll */
+  , NULL        /* poll */
 #endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL          /* unlink */
+  , NULL        /* unlink */
 #endif
 };
 
@@ -123,6 +122,7 @@ static struct bat_gauge_dev_s g_gaugedev;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: gauge_get_status
  ****************************************************************************/
@@ -231,6 +231,7 @@ static int gauge_get_capacity(FAR b16_t *capacity)
     {
       return -EIO;
     }
+
   ret = cxd56_pmic_getlowervol(&lower);
   if (ret < 0)
     {
