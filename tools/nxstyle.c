@@ -2033,6 +2033,19 @@ int main(int argc, char **argv, char **envp)
                       check_spaces_leftright(line, lineno, n, n + 1);
                       n++;
                     }
+
+                  /* Scientific notation with a negative exponent (eg. 10e-10)
+                   * REVISIT: This fails for cases where the variable name
+                   *          ends with 'e' preceded by a digit:
+                   *          a = abc1e-10;
+                   *          a = ABC1E-10;
+                   */
+
+                  else if ((line[n - 1] == 'e' || line[n - 1] == 'E') &&
+                           isdigit(line[n + 1]) && isdigit(line[n - 2]))
+                    {
+                      n++;
+                    }
                   else
                     {
                       /* '-' may function as a unary operator and snuggle
