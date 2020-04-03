@@ -43,11 +43,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define POLE_CNTR_THR 0.0f
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#define POLE_CNTR_THR (0.0f)
 
 /****************************************************************************
  * Public Functions
@@ -69,7 +65,8 @@
  *
  ****************************************************************************/
 
-void motor_openloop_init(FAR struct openloop_data_s *op, float max, float per)
+void motor_openloop_init(FAR struct openloop_data_s *op, float max,
+                         float per)
 {
   DEBUGASSERT(op != NULL);
   DEBUGASSERT(max > 0.0f);
@@ -209,7 +206,7 @@ void motor_angle_init(FAR struct motor_angle_s *angle, uint8_t p)
   /* Store pole pairs */
 
   angle->p = p;
-  angle->one_by_p = (float)1.0f/p;
+  angle->one_by_p = (float)1.0f / p;
 
   /* Initialize angle with 0.0 */
 
@@ -231,7 +228,8 @@ void motor_angle_init(FAR struct motor_angle_s *angle, uint8_t p)
  *
  ****************************************************************************/
 
-void motor_angle_e_update(FAR struct motor_angle_s *angle, float angle_new, float dir)
+void motor_angle_e_update(FAR struct motor_angle_s *angle, float angle_new,
+                          float dir)
 {
   DEBUGASSERT(angle != NULL);
   DEBUGASSERT(angle_new >= 0.0f && angle_new <= MOTOR_ANGLE_E_MAX);
@@ -264,7 +262,7 @@ void motor_angle_e_update(FAR struct motor_angle_s *angle, float angle_new, floa
 
   else if (angle->i < 0)
     {
-      angle->i = angle->p-1;
+      angle->i = angle->p - 1;
     }
 
   /* Update electrical angle structure */
@@ -272,8 +270,8 @@ void motor_angle_e_update(FAR struct motor_angle_s *angle, float angle_new, floa
   phase_angle_update(&angle->angle_el, angle_new);
 
   /* Calculate mechanical angle.
-   * One electrical angle rotation is equal to one mechanical rotation divided
-   * by number of motor pole pairs.
+   * One electrical angle rotation is equal to one mechanical rotation
+   * divided by number of motor pole pairs.
    */
 
   angle->anglem = (MOTOR_ANGLE_E_RANGE * angle->i +
@@ -299,7 +297,8 @@ void motor_angle_e_update(FAR struct motor_angle_s *angle, float angle_new, floa
  *
  ****************************************************************************/
 
-void motor_angle_m_update(FAR struct motor_angle_s *angle, float angle_new, float dir)
+void motor_angle_m_update(FAR struct motor_angle_s *angle, float angle_new,
+                          float dir)
 {
   DEBUGASSERT(angle != NULL);
   DEBUGASSERT(angle_new >= 0.0f && angle_new <= MOTOR_ANGLE_E_MAX);
@@ -313,7 +312,7 @@ void motor_angle_m_update(FAR struct motor_angle_s *angle, float angle_new, floa
 
   /* Update pole counter */
 
-  angle->i = (uint8_t)(angle->anglem * angle->p/MOTOR_ANGLE_M_MAX);
+  angle->i = (uint8_t)(angle->anglem * angle->p / MOTOR_ANGLE_M_MAX);
 
   /* Get electrical angle */
 
@@ -392,7 +391,7 @@ void motor_phy_params_init(FAR struct motor_phy_params_s *phy, uint8_t poles,
   phy->p          = poles;
   phy->res_base   = res;
   phy->ind        = ind;
-  phy->one_by_ind = 1.0f/ind;
+  phy->one_by_ind = 1.0f / ind;
 
   /* Initialize with zeros */
 

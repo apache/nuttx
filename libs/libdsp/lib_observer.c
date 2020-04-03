@@ -43,11 +43,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ANGLE_DIFF_THR M_PI_F
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#define ANGLE_DIFF_THR (M_PI_F)
 
 /****************************************************************************
  * Public Functions
@@ -187,8 +183,8 @@ void motor_observer_smo_init(FAR struct motor_observer_smo_s *smo,
  ****************************************************************************/
 
 void motor_observer_smo(FAR struct motor_observer_s *o, FAR ab_frame_t *i_ab,
-                        FAR ab_frame_t *v_ab, FAR struct motor_phy_params_s *phy,
-                        float dir)
+                        FAR ab_frame_t *v_ab,
+                        FAR struct motor_phy_params_s *phy, float dir)
 {
   DEBUGASSERT(o != NULL);
   DEBUGASSERT(i_ab != NULL);
@@ -213,21 +209,21 @@ void motor_observer_smo(FAR struct motor_observer_s *o, FAR ab_frame_t *i_ab,
 
   /* Calculate observer gains */
 
-  smo->F_gain = (1.0f - o->per*phy->res*phy->one_by_ind);
-  smo->G_gain = o->per*phy->one_by_ind;
+  smo->F = (1.0f - o->per * phy->res * phy->one_by_ind);
+  smo->G = o->per * phy->one_by_ind;
 
   /* Saturate F gain */
 
-  if (smo->F_gain < 0.0f)
+  if (smo->F < 0.0f)
     {
-      smo->F_gain = 0.0f;
+      smo->F = 0.0f;
     }
 
   /* Saturate G gain */
 
-  if (smo->G_gain > 0.999f)
+  if (smo->G > 0.999f)
     {
-      smo->G_gain = 0.999f;
+      smo->G = 0.999f;
     }
 
   /* Configure low pass filters
@@ -248,7 +244,8 @@ void motor_observer_smo(FAR struct motor_observer_s *o, FAR ab_frame_t *i_ab,
    *   filter = T * (2*PI) * f_c
    *   filter = T * omega_m * pole_pairs
    *
-   *   T          - [s] period at which the digital filter is being calculated
+   *   T          - [s] period at which the digital filter is being
+   *                calculated
    *   f_in       - [Hz] input frequency of the filter
    *   f_c        - [Hz] cutoff frequency of the filter
    *   omega_m    - [rad/s] mechanical angular velocity
@@ -284,8 +281,8 @@ void motor_observer_smo(FAR struct motor_observer_s *o, FAR ab_frame_t *i_ab,
 
   /* Estimate stator current */
 
-  i_est->a = smo->F_gain * i_est->a + smo->G_gain * (v_err->a - z->a);
-  i_est->b = smo->F_gain * i_est->b + smo->G_gain * (v_err->b - z->b);
+  i_est->a = smo->F * i_est->a + smo->G * (v_err->a - z->a);
+  i_est->b = smo->F * i_est->b + smo->G * (v_err->b - z->b);
 
   /* Get motor current error */
 
@@ -365,8 +362,9 @@ void motor_observer_smo(FAR struct motor_observer_s *o, FAR ab_frame_t *i_ab,
   /* Angle compensation.
    * Due to low pass filtering we have some delay in estimated phase angle.
    *
-   * Adaptive filters introduced above cause -PI/4 phase shift for each filter.
-   * We use 2 times filtering which give us constant -PI/2 (-90deg) phase shift.
+   * Adaptive filters introduced above cause -PI/4 phase shift for each
+   * filter. We use 2 times filtering which give us constant -PI/2 (-90deg)
+   * phase shift.
    */
 
   angle = angle + dir * M_PI_2_F;
@@ -420,7 +418,7 @@ void motor_sobserver_div_init(FAR struct motor_sobserver_div_s *so,
 
   /*  */
 
-  so->one_by_dt = 1.0f/(so->samples * per);
+  so->one_by_dt = 1.0f / (so->samples * per);
 }
 
 /****************************************************************************
@@ -462,7 +460,7 @@ void motor_sobserver_div(FAR struct motor_observer_s *o,
     {
       /* Correction sign depends on rotation direction */
 
-      so->angle_diff += dir*2*M_PI_F;
+      so->angle_diff += dir * 2 * M_PI_F;
     }
 
   /* Get absoulte value */

@@ -42,10 +42,6 @@
 #include <dsp.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -173,36 +169,42 @@ static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
           T2 = j;
           break;
         }
+
       case 2:
         {
           T1 = -k;
           T2 = -i;
           break;
         }
+
       case 3:
         {
           T1 = j;
           T2 = k;
           break;
         }
+
       case 4:
         {
           T1 = -i;
           T2 = -j;
           break;
         }
+
       case 5:
         {
           T1 = k;
           T2 = i;
           break;
         }
+
       case 6:
         {
           T1 = -j;
           T2 = -k;
           break;
         }
+
       default:
         {
           /* We should not get here */
@@ -222,46 +224,52 @@ static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
     {
       case 1:
         {
-          s->d_u = T1 + T2 + T0*0.5f;
-          s->d_v = T2 + T0*0.5f;
-          s->d_w = T0*0.5f;
+          s->d_u = T1 + T2 + T0 * 0.5f;
+          s->d_v = T2 + T0 * 0.5f;
+          s->d_w = T0 * 0.5f;
           break;
         }
+
       case 2:
         {
-          s->d_u = T1 + T0*0.5f;
-          s->d_v = T1 + T2 + T0*0.5f;
-          s->d_w = T0*0.5f;
+          s->d_u = T1 + T0 * 0.5f;
+          s->d_v = T1 + T2 + T0 * 0.5f;
+          s->d_w = T0 * 0.5f;
           break;
         }
+
       case 3:
         {
-          s->d_u = T0*0.5f;
-          s->d_v = T1 + T2 + T0*0.5f;
-          s->d_w = T2 + T0*0.5f;
+          s->d_u = T0 * 0.5f;
+          s->d_v = T1 + T2 + T0 * 0.5f;
+          s->d_w = T2 + T0 * 0.5f;
           break;
         }
+
       case 4:
         {
-          s->d_u = T0*0.5f;
-          s->d_v = T1 + T0*0.5f;
-          s->d_w = T1 + T2 + T0*0.5f;
+          s->d_u = T0 * 0.5f;
+          s->d_v = T1 + T0 * 0.5f;
+          s->d_w = T1 + T2 + T0 * 0.5f;
           break;
         }
+
       case 5:
         {
-          s->d_u = T2 + T0*0.5f;
-          s->d_v = T0*0.5f;
-          s->d_w = T1 + T2 + T0*0.5f;
+          s->d_u = T2 + T0 * 0.5f;
+          s->d_v = T0 * 0.5f;
+          s->d_w = T1 + T2 + T0 * 0.5f;
           break;
         }
+
       case 6:
         {
-          s->d_u = T1 + T2 + T0*0.5f;
-          s->d_v = T0*0.5f;
-          s->d_w = T1 + T0*0.5f;
+          s->d_u = T1 + T2 + T0 * 0.5f;
+          s->d_v = T0 * 0.5f;
+          s->d_w = T1 + T0 * 0.5f;
           break;
         }
+
       default:
         {
           /* We should not get here */
@@ -312,8 +320,8 @@ static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
  *
  * Input Parameters:
  *   s    - (out) pointer to the SVM data
- *   v_ab - (in) pointer to the modulation voltage vector in alpha-beta frame,
- *          normalized to magnitude (0.0 - 1.0)
+ *   v_ab - (in) pointer to the modulation voltage vector in alpha-beta
+ *          frame, normalized to magnitude (0.0 - 1.0)
  *
  * NOTE: v_ab vector magnitude must be in range <0.0, 1.0> to get correct
  *       SVM3 results.
@@ -322,7 +330,8 @@ static void svm3_duty_calc(FAR struct svm3_state_s *s, FAR abc_frame_t *ijk)
  *          For now we saturate output duty form SVM.
  *
  * REFERENCE:
- *   https://e2e.ti.com/group/motor/m/pdf_presentations/665547/download (32-34)
+ *   https://e2e.ti.com/group/motor/m/pdf_presentations/665547/download
+ *     pages 32-34
  *
  ****************************************************************************/
 
