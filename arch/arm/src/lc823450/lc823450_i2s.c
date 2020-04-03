@@ -197,15 +197,19 @@ static uint32_t _i2s_tx_th_bytes;
  * Private Function Prototypes
  ****************************************************************************/
 
-static uint32_t lc823450_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static uint32_t lc823450_i2s_rxsamplerate(struct i2s_dev_s *dev,
+                                          uint32_t rate);
 static uint32_t lc823450_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits);
-static int      lc823450_i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+static int      lc823450_i2s_receive(struct i2s_dev_s *dev,
+                                     struct ap_buffer_s *apb,
                                      i2s_callback_t callback, void *arg,
                                      uint32_t timeout);
 
-static uint32_t lc823450_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static uint32_t lc823450_i2s_txsamplerate(struct i2s_dev_s *dev,
+                                          uint32_t rate);
 static uint32_t lc823450_i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
-static int      lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+static int      lc823450_i2s_send(struct i2s_dev_s *dev,
+                                  struct ap_buffer_s *apb,
                                   i2s_callback_t callback, void *arg,
                                   uint32_t timeout);
 
@@ -328,7 +332,8 @@ static int _i2s_semtake(FAR sem_t *sem)
  * Name: lc823450_i2s_rxsamplerate
  ****************************************************************************/
 
-static uint32_t lc823450_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+static uint32_t lc823450_i2s_rxsamplerate(struct i2s_dev_s *dev,
+                                          uint32_t rate)
 {
   /* Change ASRC FSO rate */
 
@@ -410,7 +415,8 @@ static void _setup_tx_threshold(uint32_t tx_th)
  * Name: lc823450_i2s_rxdatawidth
  ****************************************************************************/
 
-static int lc823450_i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
+static int lc823450_i2s_ioctl(struct i2s_dev_s *dev, int cmd,
+                              unsigned long arg)
 {
   FAR const struct audio_caps_desc_s *cap_desc;
   uint32_t tx_th;
@@ -435,7 +441,8 @@ static int lc823450_i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
 
             rate[0] = getreg32(SSRC_FSI) >> 13;
             ch[0]   = (getreg32(BUFCTL('C')) & BUFCTL_MONO) ? 1 : 2;
-            fmt[0]  = getreg32(AUDSEL) & AUDSEL_DECSEL ? AUDIO_FMT_MP3 : AUDIO_FMT_PCM;
+            fmt[0]  = getreg32(AUDSEL) & AUDSEL_DECSEL ?
+                               AUDIO_FMT_MP3 : AUDIO_FMT_PCM;
 
             if (rate[0] != rate[1])
               {
@@ -496,8 +503,10 @@ static void _i2s_rxdma_callback(DMA_HANDLE hdma, void *arg, int result)
  * Name: lc823450_i2s_receive
  ****************************************************************************/
 
-static int lc823450_i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
-                                i2s_callback_t callback, void *arg,
+static int lc823450_i2s_receive(struct i2s_dev_s *dev,
+                                struct ap_buffer_s *apb,
+                                i2s_callback_t callback,
+                                void *arg,
                                 uint32_t timeout)
 {
   int ret = OK;
@@ -510,7 +519,6 @@ static int lc823450_i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
       /* Start J Buffer */
 
       modifyreg32(ABUFACCEN, 0, ABUFACCEN_CDCEN('J'));
-
 
       /* J Buffer : ACLTALN=0, ACLTEN=0 */
 
@@ -583,7 +591,8 @@ static void _i2s_txdma_callback(DMA_HANDLE hdma, void *arg, int result)
  * Name: lc823450_i2s_txsamplerate
  ****************************************************************************/
 
-static uint32_t lc823450_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+static uint32_t lc823450_i2s_txsamplerate(struct i2s_dev_s *dev,
+                                          uint32_t rate)
 {
   /* Change SSRC FSI rate */
 
