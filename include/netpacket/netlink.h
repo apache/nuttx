@@ -71,8 +71,8 @@
 #define NETLINK_SOCK_DIAG      3       /* Socket monitoring */
 #define NETLINK_NFLOG          4       /* netfilter/iptables ULOG */
 #define NETLINK_XFRM           5       /* Interface to IPsec security databases
-                                        * for key-manager daemons using the Internet
-                                        * Key Exchange protocol. */
+                                        * for key-manager daemons using the
+                                        * Internet Key Exchange protocol. */
 #define NETLINK_ISCSI          6       /* Open-iSCSI */
 #define NETLINK_AUDIT          7       /* Interface to auditing sub-system */
 #define NETLINK_FIB_LOOKUP     8
@@ -122,7 +122,7 @@
 /* Flags for ACK message */
 
 #define NLM_F_CAPPED           0x0100  /* request was capped */
-#define NLM_F_ACK_TLVS        0x0200  /* extended ACK TVLs were included */
+#define NLM_F_ACK_TLVS         0x0200  /* extended ACK TVLs were included */
 
 /* Definitions for struct nlmsghdr ******************************************/
 
