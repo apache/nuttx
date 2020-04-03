@@ -1786,6 +1786,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
   FAR void * xbuffer = rxbuffer;
+  int ret;
+
   DEBUGASSERT(priv != NULL);
 
   /* Convert the number of word to a number of bytes */
