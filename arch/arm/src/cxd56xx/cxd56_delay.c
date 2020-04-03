@@ -112,6 +112,7 @@ void up_udelay(useconds_t microseconds)
         {
         }
     }
+
   loops = loops * (microseconds % 1000) / CXD56XX_LOOPSPERUSEC_ADJUST;
   for (i = 0; i < loops; i++)
     {

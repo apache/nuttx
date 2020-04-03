@@ -54,7 +54,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Protoypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,7 +65,8 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_CXD56_ADC
-void cxd56_adc_getinterval(int adctype, uint32_t *interval, uint16_t *adjust);
+void cxd56_adc_getinterval(int adctype, uint32_t *interval,
+                           uint16_t *adjust);
 #else
 #define cxd56_adc_getinterval(adctype, interval, adjust)
 #endif

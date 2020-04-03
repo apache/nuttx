@@ -37,6 +37,10 @@
 #ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_DMAC_H
 #define __ARCH_ARM_SRC_CXD56XX_CXD56_DMAC_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <stdint.h>
 
 #include "cxd56_dmac_common.h"
@@ -185,8 +189,9 @@ void cxd56_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
  * Name: cxd56_dmastop
  *
  * Description:
- *  Cancel the DMA.  After cxd56_dmastop() is called, the DMA channel is reset
- *  and cxd56_dmasetup() must be called before cxd56_dmastart() can be called
+ *  Cancel the DMA.
+ *  After cxd56_dmastop() is called, the DMA channel is reset and
+ *  cxd56_dmasetup() must be called before cxd56_dmastart() can be called
  *  again
  *
  * Assumptions:

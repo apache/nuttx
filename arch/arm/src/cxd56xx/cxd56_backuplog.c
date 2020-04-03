@@ -143,6 +143,7 @@ static void *get_allocated_memory(const char *name, size_t size)
           up_backuplog_free(name);
         }
     }
+
   return NULL;
 }
 
@@ -163,6 +164,7 @@ static int allocate_memory(size_t size)
           allocated = i;
           break;
         }
+
       alloc_bits <<= 1;
     }
 
