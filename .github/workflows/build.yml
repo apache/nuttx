@@ -57,9 +57,6 @@ jobs:
         username: ${GITHUB_ACTOR}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Run Pull Container
-      uses: ./testing/.github/actions/ci-container
-
     - name: Run builds
       uses: ./testing/.github/actions/ci-container
       env:
