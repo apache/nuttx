@@ -428,6 +428,7 @@
 
 #define RADIO_TXPOWER_SHIFT               (0)      /* Bits 0-7: RADIO output power */
 #define RADIO_TXPOWER_MASK                (0xff << RADIO_TXPOWER_SHIFT)
+#define RADIO_TXPOWER_MAX                 (0xff)
 
 /* MODE Register */
 
@@ -445,34 +446,47 @@
 
 #define RADIO_PCNF0_LFLEN_SHIFT           (0)       /* Bits 0-3: Length on air of LENGTH field in number of bits */
 #define RADIO_PCNF0_LFLEN_MASK            (0xf << RADIO_PCNF0_LFLEN_SHIFT)
-#define RADIO_PCNF0_S0LEN                 (1 << 8)  /* Bit 8: Length on air of S0 field in number of bytes */
+#define RADIO_PCNF0_LFLEN_MAX             (0xf)
+#define RADIO_PCNF0_S0LEN_SHIFT           (8)      /* Bit 8: Length on air of S0 field in number of bytes */
+#define RADIO_PCNF0_S0LEN_MASK            (1 << RADIO_PCNF0_S0LEN_SHIFT)
+#define RADIO_PCNF0_S0LEN_MAX             (1)
 #define RADIO_PCNF0_S1LEN_SHIFT           (16)      /* Bits 16-19: Length on air of S1 field in number of bits */
 #define RADIO_PCNF0_S1LEN_MASK            (0xf << RADIO_PCNF0_S1LEN_SHIFT)
+#define RADIO_PCNF0_S1LEN_MAX             (0xf)
 #define RADIO_PCNF0_S1INCL                (1 << 20) /* Bit 20: Include or exclude S1 field in RAM */
 #define RADIO_PCNF0_CILEN_SHIFT           (22)      /* Bits 22-23: Length of code indicator - long range */
 #define RADIO_PCNF0_CILEN_MASK            (0x3 << RADIO_PCNF0_CILEN_SHIFT)
+#define RADIO_PCNF0_CILEN_MAX             (0x3)
 #define RADIO_PCNF0_PLEN_SHIFT            (24)      /* Bits 24-25: Length of preamble on air */
 #define RADIO_PCNF0_PLEN_MASK             (0x3 << RADIO_PCNF0_PLEN_SHIFT)
 #  define RADIO_PCNF0_PLEN_8BIT           (0 << RADIO_PCNF0_PLEN_SHIFT)
 #  define RADIO_PCNF0_PLEN_16BIT          (1 << RADIO_PCNF0_PLEN_SHIFT)
 #  define RADIO_PCNF0_PLEN_32BITZ         (2 << RADIO_PCNF0_PLEN_SHIFT)
 #  define RADIO_PCNF0_PLEN_LONGRANGE      (3 << RADIO_PCNF0_PLEN_SHIFT)
-#define RADIO_PCNF0_CRCINC                (1 << 26) /* Bit 26: Indicates if LENGTH field contains CRC */
+#define RADIO_PCNF0_CRCINC_SHIFT          (26)      /* Bit 26: Indicates if LENGTH field contains CRC */
+#define RADIO_PCNF0_CRCINC                (1 << RADIO_PCNF0_CRCINC_SHIFT)
 #define RADIO_PCNF0_TERMLEN_SHIFT         (29)      /* Bits 29-30: Length of TERM field in Long Range operation */
 #define RADIO_PCNF0_TERMLEN_MASK          (0x3 << RADIO_PCNF0_TERMLEN_SHIFT)
+#define RADIO_PCNF0_TERMLEN_MAX           (0x3)
 
 /* PCNF1 Register */
 
 #define RADIO_PCNF1_MAXLEN_SHIFT          (0)       /* Bits 0-7: Maximum length of packet payload */
 #define RADIO_PCNF1_MAXLEN_MASK           (0xff << RADIO_PCNF1_MAXLEN_SHIFT)
+#define RADIO_PCNF1_MAXLEN_MAX            (0xff)
 #define RADIO_PCNF1_STATLEN_SHIFT         (8)       /* Bits 8-15: Static length in number of bytes */
 #define RADIO_PCNF1_STATLEN_MASK          (0xff << RADIO_PCNF1_STATLEN_SHIFT)
+#define RADIO_PCNF1_STATLEN_MAX           (0xff)
 #define RADIO_PCNF1_BALEN_SHIFT           (16)      /* Bits 16-18: Base address length in number of bytes */
 #define RADIO_PCNF1_BALEN_MASK            (0x7 << RADIO_PCNF1_BALEN_SHIFT)
-#define RADIO_PCNF1_ENDIAN                (1 << 24) /* Bit 24: On air endianness of packet */
+#define RADIO_PCNF1_BALEN_MIN             (0x2)
+#define RADIO_PCNF1_BALEN_MAX             (0x4)
+#define RADIO_PCNF1_ENDIAN_SHIFT          (24)      /* Bit 24: On air endianness of packet */
+#define RADIO_PCNF1_ENDIAN                (1 << RADIO_PCNF1_ENDIAN_SHIFT)
 #  define RADIO_PCNF1_ENDIAN_LITTLE       (0 << 24) /* Least significant bit on air first */
 #  define RADIO_PCNF1_ENDIAN_BITG         (1 << 24) /* Most significant bit on air first */
-#define RADIO_PCNF1_WHITEEN               (1 << 25) /* Bit 25: Enable or disable packet whitening */
+#define RADIO_PCNF1_WHITEEN_SHIFT         (25)      /* Bit 25: Enable or disable packet whitening */
+#define RADIO_PCNF1_WHITEEN               (1 << RADIO_PCNF1_WHITEEN_SHIFT)
 
 /* TXADDRESS Register */
 
@@ -492,10 +506,10 @@
 #  define RADIO_CRCCNF_LEN_2              (2 << RADIO_CRCCNF_LEN_SHIFT)
 #  define RADIO_CRCCNF_LEN_3              (3 << RADIO_CRCCNF_LEN_SHIFT)
 #define RADIO_CRCCNF_SKIPADDR_SHIFT       (8)       /* Bit 8-9: Include or exclude packet address field out of CRC calculation */
-#define RADIO_CRCCNF_SKIPADDR_MASK        (0x3 << RADIO_CRCCNF_SKIPADDR_SHIFT)
-#  define RADIO_CRCCNF_SKIPADDR_INCL      (0x3 << RADIO_CRCCNF_SKIPADDR_SHIFT)
-#  define RADIO_CRCCNF_SKIPADDR_SKIP      (0x3 << RADIO_CRCCNF_SKIPADDR_SHIFT)
-#  define RADIO_CRCCNF_SKIPADDR_IEEE      (0x3 << RADIO_CRCCNF_SKIPADDR_SHIFT)
+#define RADIO_CRCCNF_SKIPADDR_MASK        (0 << RADIO_CRCCNF_SKIPADDR_SHIFT)
+#  define RADIO_CRCCNF_SKIPADDR_INCL      (1 << RADIO_CRCCNF_SKIPADDR_SHIFT)
+#  define RADIO_CRCCNF_SKIPADDR_SKIP      (2 << RADIO_CRCCNF_SKIPADDR_SHIFT)
+#  define RADIO_CRCCNF_SKIPADDR_IEEE      (3 << RADIO_CRCCNF_SKIPADDR_SHIFT)
 
 /* CRCPOLY Register */
 
@@ -511,6 +525,7 @@
 
 #define RADIO_TIFS_SHIFT                  (0)      /* Bits 0-9: Interframe spacing in μs */
 #define RADIO_TIFS_MASK                   (0x3ff << RADIO_TIFS_SHIFT)
+#define RADIO_TIFS_MAX                    (0x3ff)
 
 /* RSSISAMPLE Register */
 
@@ -520,21 +535,22 @@
 /* STATE Register */
 
 #define RADIO_STATE_SHIFT                 (0)     /* Bits 0-2: Current radio state */
-#define RADIO_STATE_MASK                  (0xf << RADIO_STATE_STATE_SHIFT)
-#  define RADIO_STATE_DISABLED            (0 << RADIO_STATE_STATE_SHIFT)
-#  define RADIO_STATE_RXRU                (1 << RADIO_STATE_STATE_SHIFT)
-#  define RADIO_STATE_RXIDLE              (2 << RADIO_STATE_STATE_SHIFT)
-#  define RADIO_STATE_RX                  (3 << RADIO_STATE_STATE_SHIFT)
-#  define RADIO_STATE_RXDISABLE           (4 << RADIO_STATE_STATE_SHIFT)
-#  define RADIO_STATE_TXRU                (9 << RADIO_STATE_STATE_SHIFT)
-#  define RADIO_STATE_TXIDLE              10 << RADIO_STATE_STATE_SHIFT)
-#  define RADIO_STATE_TX                  (11 << RADIO_STATE_STATE_SHIFT)
-#  define RADIO_STATE_TXDISABLE           (12 << RADIO_STATE_STATE_SHIFT)
+#define RADIO_STATE_MASK                  (0xf << RADIO_STATE_SHIFT)
+#  define RADIO_STATE_DISABLED            (0 << RADIO_STATE_SHIFT)
+#  define RADIO_STATE_RXRU                (1 << RADIO_STATE_SHIFT)
+#  define RADIO_STATE_RXIDLE              (2 << RADIO_STATE_SHIFT)
+#  define RADIO_STATE_RX                  (3 << RADIO_STATE_SHIFT)
+#  define RADIO_STATE_RXDISABLE           (4 << RADIO_STATE_SHIFT)
+#  define RADIO_STATE_TXRU                (9 << RADIO_STATE_SHIFT)
+#  define RADIO_STATE_TXIDLE              (10 << RADIO_STATE_SHIFT)
+#  define RADIO_STATE_TX                  (11 << RADIO_STATE_SHIFT)
+#  define RADIO_STATE_TXDISABLE           (12 << RADIO_STATE_SHIFT)
 
 /* DATAWHITEIV Register */
 
 #define RADIO_DATAWHITEIV_SHIFT           (0)     /* Bits 0-6: Data whitening initial value */
 #define RADIO_DATAWHITEIV_MASK            (0x3f << RADIO_DATAWHITEIV_SHIFT)
+#define RADIO_DATAWHITEIV_MAX             (0x3f)
 
 /* DAP Register */
 
@@ -583,5 +599,6 @@
 /* POWER Register */
 
 #define RADIO_POWER_ENABLE                (1 << 0) /* Bit 0: Peripheral power control */
+#define RADIO_POWER_DISABLE               (0 << 0) /* Bit 0: Peripheral power control */
 
 #endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_RADIO_H */

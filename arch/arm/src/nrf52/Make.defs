@@ -128,3 +128,8 @@ endif
 ifeq ($(CONFIG_NRF52_I2C_MASTER),y)
 CHIP_CSRCS += nrf52_i2c.c
 endif
+
+ifeq ($(CONFIG_NRF52_RADIO),y)
+CHIP_CSRCS += nrf52_radio.c
+
+endif
