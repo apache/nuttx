@@ -167,8 +167,8 @@ BIN       = $(NUTTXNAME)$(EXEEXT)
 
 all: $(BIN)
 .PHONY: dirlinks context clean_context check_context config oldconfig menuconfig nconfig qconfig gconfig export subdir_clean clean subdir_distclean distclean apps_clean apps_distclean
-.PHONY: pass1 pass1deps pass1dep
-.PHONY: pass2 pass2deps pass2dep
+.PHONY: pass1 pass1dep
+.PHONY: pass2 pass2dep
 
 # Target used to copy include/nuttx/lib/math.h.  If CONFIG_ARCH_MATH_H is
 # defined, then there is an architecture specific math.h header file
@@ -398,9 +398,7 @@ include tools/LibTargets.mk
 # is an archive.  Exactly what is performed during pass1 or what it generates
 # is unknown to this makefile unless CONFIG_PASS1_OBJECT is defined.
 
-pass1deps: pass1dep $(USERLIBS)
-
-pass1: pass1deps
+pass1: $(USERLIBS)
 ifeq ($(CONFIG_BUILD_2PASS),y)
 	$(Q) if [ -z "$(CONFIG_PASS1_BUILDIR)" ]; then \
 		echo "ERROR: CONFIG_PASS1_BUILDIR not defined"; \
@@ -417,9 +415,7 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) TOPDIR="$(TOPDIR)" LINKLIBS="$(LINKLIBS)" USERLIBS="$(USERLIBS)" "$(CONFIG_PASS1_TARGET)"
 endif
 
-pass2deps: pass2dep $(NUTTXLIBS)
-
-pass2: pass2deps
+pass2: $(NUTTXLIBS)
 	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(LINKLIBS)" EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" $(BIN)
 	$(Q) if [ -w /tftpboot ] ; then \
 		cp -f $(BIN) /tftpboot/$(BIN).${CONFIG_ARCH}; \
@@ -454,7 +450,7 @@ endif
 # pass1 dependencies and pass1 first, then build pass2 dependencies and pass2.
 # in that case, execute 'make pass1 pass2' from the command line.
 
-$(BIN): pass1deps pass2deps pass1 pass2
+$(BIN): pass1 pass2
 
 # download
 #
@@ -551,7 +547,7 @@ savedefconfig: dirlinks apps_preconfig
 # in tools/mkexport.sh only supports GCC and, for example, explicitly assumes
 # that the archiver is 'ar'
 
-export: pass2deps
+export: $(NUTTXLIBS)
 	$(Q) MAKE=${MAKE} $(MKEXPORT) $(MKEXPORT_ARGS) -l "$(EXPORTLIBS)"
 
 # General housekeeping targets:  dependencies, cleaning, etc.
