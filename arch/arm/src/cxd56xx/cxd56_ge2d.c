@@ -133,7 +133,9 @@ static int ge2d_close(FAR struct file *filep)
  * Name: ge2d_read
  ****************************************************************************/
 
-static ssize_t ge2d_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t ge2d_read(FAR struct file *filep,
+                         FAR char *buffer,
+                         size_t len)
 {
   return 0;
 }
@@ -170,8 +172,12 @@ static ssize_t ge2d_write(FAR struct file *filep,
 
   /* Enable error and completion interrupts. */
 
-  bits = GE2D_INTR_WR_ERR | GE2D_INTR_RD_ERR | GE2D_INTR_NDE | GE2D_INTR_DSD |
-    GE2D_INTR_NDF;
+  bits = GE2D_INTR_WR_ERR |
+         GE2D_INTR_RD_ERR |
+         GE2D_INTR_NDE |
+         GE2D_INTR_DSD |
+         GE2D_INTR_NDF;
+
   putreg32(bits, GE2D_INTR_ENABLE);
 
   /* Wait for interrupts for processing done. */

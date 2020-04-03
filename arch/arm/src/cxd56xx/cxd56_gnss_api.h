@@ -36,8 +36,16 @@
 #ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_GNSS_API_H
 #define __ARCH_ARM_SRC_CXD56XX_CXD56_GNSS_API_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <arch/chip/gnss_type.h>
 #include <arch/chip/gnss.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /* GD Start mode */
 
@@ -59,6 +67,10 @@
 #define CXD56_GNSS_OPMOD_LOWPOWER   2
 #define CXD56_GNSS_OPMOD_BALANCE    4
 #define CXD56_GNSS_OPMOD_1PSS       5
+
+/****************************************************************************
+ * Public Function Protoypes
+ ****************************************************************************/
 
 /* Start a positioning
  * beginning to search the satellites and measure the receiver position
@@ -132,7 +144,7 @@ int GD_SetFrameTime(uint16_t sec, uint32_t fracSec);
 
 /* Get the almanac data */
 
-int GD_GetAlmanac(uint32_t satellite, FAR uint32_t* almanac,
+int GD_GetAlmanac(uint32_t satellite, FAR uint32_t *almanac,
                   FAR uint32_t *almanacSize);
 
 /* Set the almanac data */
@@ -141,7 +153,7 @@ int GD_SetAlmanac(uint32_t satellite, FAR uint32_t *almanac);
 
 /* Get the Ephemeris data */
 
-int GD_GetEphemeris(uint32_t satellite, FAR uint32_t* ephemeris,
+int GD_GetEphemeris(uint32_t satellite, FAR uint32_t *ephemeris,
                     FAR uint32_t *ephemerisSize);
 
 /* Set the Ephemeris data */
@@ -187,7 +199,7 @@ int GD_StopGpsTest(void);
 
 /* Get GPS test result */
 
-int GD_GetGpsTestResult(FAR float* cn, FAR float* doppler);
+int GD_GetGpsTestResult(FAR float *cn, FAR float *doppler);
 
 /* Control Spectrum output */
 
@@ -326,7 +338,7 @@ int GD_RtkSetOutputInterval(int interval);
 
 /* Get output interval of carrier phase info. [ms] */
 
-int GD_RtkGetOutputInterval(FAR int* interval);
+int GD_RtkGetOutputInterval(FAR int *interval);
 
 /* Set GNSS of outputting carrier phase info. */
 
@@ -334,7 +346,7 @@ int GD_RtkSetGnss(uint32_t gnss);
 
 /* Get GNSS of outputting carrier phase info. */
 
-int GD_RtkGetGnss(FAR uint32_t* pGnss);
+int GD_RtkGetGnss(FAR uint32_t *pGnss);
 
 /* Set enable/disable GD to notify updating ephemeris */
 
@@ -342,7 +354,7 @@ int GD_RtkSetEphNotify(int enable);
 
 /* Get enable/disable GD to notify updating ephemeris */
 
-int GD_RtkGetEphNotify(FAR int* enable);
+int GD_RtkGetEphNotify(FAR int *enable);
 
 /* Set the Ephemeris data Ephemeris data size is variable. */
 
@@ -350,7 +362,7 @@ int GD_SetVarEphemeris(uint32_t *ephemeris, uint32_t ephemerisSize);
 
 /* Get the Ephemeris data Ephemeris data size is variable. */
 
-int GD_GetVarEphemeris(uint32_t satellite, uint32_t* ephemeris,
+int GD_GetVarEphemeris(uint32_t satellite, uint32_t *ephemeris,
                        uint32_t ephemerisSize);
 
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_GNSS_API_H */

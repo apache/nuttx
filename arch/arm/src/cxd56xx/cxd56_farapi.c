@@ -128,7 +128,8 @@ extern char Image$$MODLIST$$Base[];
 
 static sem_t g_farwait;
 static sem_t g_farlock;
-static struct pm_cpu_wakelock_s g_wlock = {
+static struct pm_cpu_wakelock_s g_wlock =
+{
   .count = 0,
   .info  = PM_CPUWAKELOCK_TAG('R', 'M', 0),
 };
@@ -269,6 +270,7 @@ void cxd56_farapiinitialize(void)
       PANIC();
 #  endif
     }
+
 #endif
   nxsem_init(&g_farlock, 0, 1);
   nxsem_init(&g_farwait, 0, 0);
