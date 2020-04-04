@@ -653,13 +653,13 @@
  *
  ****************************************************************************/
 
-#define SDIO_RECVR1(dev,cmd,R1) ((dev)->recvR1(dev,cmd,R1)) /* 48-bit */
-#define SDIO_RECVR2(dev,cmd,R2) ((dev)->recvR2(dev,cmd,R2)) /* 136-bit */
-#define SDIO_RECVR3(dev,cmd,R3) ((dev)->recvR3(dev,cmd,R3)) /* 48-bit */
-#define SDIO_RECVR4(dev,cmd,R4) ((dev)->recvR4(dev,cmd,R4)) /* 48-bit */
-#define SDIO_RECVR5(dev,cmd,R5) ((dev)->recvR5(dev,cmd,R5)) /* 48-bit */
-#define SDIO_RECVR6(dev,cmd,R6) ((dev)->recvR6(dev,cmd,R6)) /* 48-bit */
-#define SDIO_RECVR7(dev,cmd,R7) ((dev)->recvR7(dev,cmd,R7)) /* 48-bit */
+#define SDIO_RECVR1(dev,cmd,R1) ((dev)->recv_r1(dev,cmd,R1)) /* 48-bit */
+#define SDIO_RECVR2(dev,cmd,R2) ((dev)->recv_r2(dev,cmd,R2)) /* 136-bit */
+#define SDIO_RECVR3(dev,cmd,R3) ((dev)->recv_r3(dev,cmd,R3)) /* 48-bit */
+#define SDIO_RECVR4(dev,cmd,R4) ((dev)->recv_r4(dev,cmd,R4)) /* 48-bit */
+#define SDIO_RECVR5(dev,cmd,R5) ((dev)->recv_r5(dev,cmd,R5)) /* 48-bit */
+#define SDIO_RECVR6(dev,cmd,R6) ((dev)->recv_r6(dev,cmd,R6)) /* 48-bit */
+#define SDIO_RECVR7(dev,cmd,R7) ((dev)->recv_r7(dev,cmd,R7)) /* 48-bit */
 
 /****************************************************************************
  * Name: SDIO_WAITENABLE
@@ -948,13 +948,13 @@ struct sdio_dev_s
   int   (*cancel)(FAR struct sdio_dev_s *dev);
 
   int   (*waitresponse)(FAR struct sdio_dev_s *dev, uint32_t cmd);
-  int   (*recvR1)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R1);
-  int   (*recvR2)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t R2[4]);
-  int   (*recvR3)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R3);
-  int   (*recvR4)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R4);
-  int   (*recvR5)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R5);
-  int   (*recvR6)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R6);
-  int   (*recvR7)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R7);
+  int   (*recv_r1)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R1);
+  int   (*recv_r2)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t R2[4]);
+  int   (*recv_r3)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R3);
+  int   (*recv_r4)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R4);
+  int   (*recv_r5)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R5);
+  int   (*recv_r6)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R6);
+  int   (*recv_r7)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R7);
 
   /* Event/Callback support */
 

@@ -440,13 +440,13 @@ struct lpc17_40_dev_s g_scard_dev =
     .sendsetup        = lpc17_40_sendsetup,
     .cancel           = lpc17_40_cancel,
     .waitresponse     = lpc17_40_waitresponse,
-    .recvR1           = lpc17_40_recvshortcrc,
-    .recvR2           = lpc17_40_recvlong,
-    .recvR3           = lpc17_40_recvshort,
-    .recvR4           = lpc17_40_recvnotimpl,
-    .recvR5           = lpc17_40_recvnotimpl,
-    .recvR6           = lpc17_40_recvshortcrc,
-    .recvR7           = lpc17_40_recvshort,
+    .recv_r1          = lpc17_40_recvshortcrc,
+    .recv_r2          = lpc17_40_recvlong,
+    .recv_r3          = lpc17_40_recvshort,
+    .recv_r4          = lpc17_40_recvnotimpl,
+    .recv_r5          = lpc17_40_recvnotimpl,
+    .recv_r6          = lpc17_40_recvshortcrc,
+    .recv_r7          = lpc17_40_recvshort,
     .waitenable       = lpc17_40_waitenable,
     .eventwait        = lpc17_40_eventwait,
     .callbackenable   = lpc17_40_callbackenable,
@@ -1998,7 +1998,7 @@ static int lpc17_40_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 }
 
 /****************************************************************************
- * Name: lpc17_40_recvRx
+ * Name: lpc17_40_recv*
  *
  * Description:
  *   Receive response to SD card command.  Only the critical payload is

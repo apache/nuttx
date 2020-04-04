@@ -501,13 +501,13 @@ struct cxd56_sdiodev_s g_sdhcdev =
       .sendsetup        = cxd56_sdio_sendsetup,
       .cancel           = cxd56_sdio_cancel,
       .waitresponse     = cxd56_sdio_waitresponse,
-      .recvR1           = cxd56_sdio_recvshortcrc,
-      .recvR2           = cxd56_sdio_recvlong,
-      .recvR3           = cxd56_sdio_recvshort,
-      .recvR4           = cxd56_sdio_recvshort,
-      .recvR5           = cxd56_sdio_recvshort,
-      .recvR6           = cxd56_sdio_recvshortcrc,
-      .recvR7           = cxd56_sdio_recvshort,
+      .recv_r1          = cxd56_sdio_recvshortcrc,
+      .recv_r2          = cxd56_sdio_recvlong,
+      .recv_r3          = cxd56_sdio_recvshort,
+      .recv_r4          = cxd56_sdio_recvshort,
+      .recv_r5          = cxd56_sdio_recvshort,
+      .recv_r6          = cxd56_sdio_recvshortcrc,
+      .recv_r7          = cxd56_sdio_recvshort,
       .waitenable       = cxd56_sdio_waitenable,
       .eventwait        = cxd56_sdio_eventwait,
       .callbackenable   = cxd56_sdio_callbackenable,
@@ -2280,7 +2280,7 @@ static int cxd56_sdio_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 }
 
 /****************************************************************************
- * Name: cxd56_sdio_recvRx
+ * Name: cxd56_sdio_recv*
  *
  * Description:
  *   Receive response to SDIO command.  Only the critical payload is

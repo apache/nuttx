@@ -385,13 +385,13 @@ struct lpc54_dev_s g_scard_dev =
     .sendsetup        = lpc54_sendsetup,
     .cancel           = lpc54_cancel,
     .waitresponse     = lpc54_waitresponse,
-    .recvR1           = lpc54_recvshortcrc,
-    .recvR2           = lpc54_recvlong,
-    .recvR3           = lpc54_recvshort,
-    .recvR4           = lpc54_recvnotimpl,
-    .recvR5           = lpc54_recvnotimpl,
-    .recvR6           = lpc54_recvshortcrc,
-    .recvR7           = lpc54_recvshort,
+    .recv_r1          = lpc54_recvshortcrc,
+    .recv_r2          = lpc54_recvlong,
+    .recv_r3          = lpc54_recvshort,
+    .recv_r4          = lpc54_recvnotimpl,
+    .recv_r5          = lpc54_recvnotimpl,
+    .recv_r6          = lpc54_recvshortcrc,
+    .recv_r7          = lpc54_recvshort,
     .waitenable       = lpc54_waitenable,
     .eventwait        = lpc54_eventwait,
     .callbackenable   = lpc54_callbackenable,
@@ -1938,7 +1938,7 @@ static int lpc54_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 }
 
 /****************************************************************************
- * Name: lpc54_recvRx
+ * Name: lpc54_recv*
  *
  * Description:
  *   Receive response to SD card command.  Only the critical payload is

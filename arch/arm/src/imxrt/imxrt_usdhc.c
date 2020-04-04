@@ -406,13 +406,13 @@ struct imxrt_dev_s g_sdhcdev[IMXRT_MAX_SDHC_DEV_SLOTS] =
 #endif
       .cancel           = imxrt_cancel,
       .waitresponse     = imxrt_waitresponse,
-      .recvR1           = imxrt_recvshortcrc,
-      .recvR2           = imxrt_recvlong,
-      .recvR3           = imxrt_recvshort,
-      .recvR4           = imxrt_recvshort,
-      .recvR5           = imxrt_recvshortcrc,
-      .recvR6           = imxrt_recvshortcrc,
-      .recvR7           = imxrt_recvshort,
+      .recv_r1          = imxrt_recvshortcrc,
+      .recv_r2          = imxrt_recvlong,
+      .recv_r3          = imxrt_recvshort,
+      .recv_r4          = imxrt_recvshort,
+      .recv_r5          = imxrt_recvshortcrc,
+      .recv_r6          = imxrt_recvshortcrc,
+      .recv_r7          = imxrt_recvshort,
       .waitenable       = imxrt_waitenable,
       .eventwait        = imxrt_eventwait,
       .callbackenable   = imxrt_callbackenable,
@@ -464,13 +464,13 @@ struct imxrt_dev_s g_sdhcdev[IMXRT_MAX_SDHC_DEV_SLOTS] =
 #endif
       .cancel           = imxrt_cancel,
       .waitresponse     = imxrt_waitresponse,
-      .recvR1           = imxrt_recvshortcrc,
-      .recvR2           = imxrt_recvlong,
-      .recvR3           = imxrt_recvshort,
-      .recvR4           = imxrt_recvshort,
-      .recvR5           = imxrt_recvshortcrc,
-      .recvR6           = imxrt_recvshortcrc,
-      .recvR7           = imxrt_recvshort,
+      .recv_r1          = imxrt_recvshortcrc,
+      .recv_r2          = imxrt_recvlong,
+      .recv_r3          = imxrt_recvshort,
+      .recv_r4          = imxrt_recvshort,
+      .recv_r5          = imxrt_recvshortcrc,
+      .recv_r6          = imxrt_recvshortcrc,
+      .recv_r7          = imxrt_recvshort,
       .waitenable       = imxrt_waitenable,
       .eventwait        = imxrt_eventwait,
       .callbackenable   = imxrt_callbackenable,
@@ -2372,7 +2372,7 @@ static int imxrt_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 }
 
 /****************************************************************************
- * Name: imxrt_recvRx
+ * Name: imxrt_recv*
  *
  * Description:
  *   Receive response to SDIO command.  Only the critical payload is

@@ -2946,7 +2946,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
   ret = mmsd_recv_r6(priv, SD_CMD3);
   if (ret != OK)
     {
-      ferr("ERROR: mmcsd_recvR2 for SD RCA failed: %d\n", ret);
+      ferr("ERROR: mmsd_recv_r6 for SD RCA failed: %d\n", ret);
       return ret;
     }
 

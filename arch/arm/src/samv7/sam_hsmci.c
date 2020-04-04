@@ -551,13 +551,13 @@ static const struct sdio_dev_s g_callbacks =
   .sendsetup        = sam_sendsetup,
   .cancel           = sam_cancel,
   .waitresponse     = sam_waitresponse,
-  .recvR1           = sam_recvshort,
-  .recvR2           = sam_recvlong,
-  .recvR3           = sam_recvshort,
-  .recvR4           = sam_recvnotimpl,
-  .recvR5           = sam_recvnotimpl,
-  .recvR6           = sam_recvshort,
-  .recvR7           = sam_recvshort,
+  .recv_r1          = sam_recvshort,
+  .recv_r2          = sam_recvlong,
+  .recv_r3          = sam_recvshort,
+  .recv_r4          = sam_recvnotimpl,
+  .recv_r5          = sam_recvnotimpl,
+  .recv_r6          = sam_recvshort,
+  .recv_r7          = sam_recvshort,
   .waitenable       = sam_waitenable,
   .eventwait        = sam_eventwait,
   .callbackenable   = sam_callbackenable,
@@ -2456,7 +2456,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 }
 
 /****************************************************************************
- * Name: sam_recvRx
+ * Name: sam_recv*
  *
  * Description:
  *   Receive response to SDIO command.  Only the critical payload is

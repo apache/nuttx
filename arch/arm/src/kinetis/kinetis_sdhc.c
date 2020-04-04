@@ -374,13 +374,13 @@ struct kinetis_dev_s g_sdhcdev =
 #endif
     .cancel           = kinetis_cancel,
     .waitresponse     = kinetis_waitresponse,
-    .recvR1           = kinetis_recvshortcrc,
-    .recvR2           = kinetis_recvlong,
-    .recvR3           = kinetis_recvshort,
-    .recvR4           = kinetis_recvnotimpl,
-    .recvR5           = kinetis_recvnotimpl,
-    .recvR6           = kinetis_recvshortcrc,
-    .recvR7           = kinetis_recvshort,
+    .recv_r1          = kinetis_recvshortcrc,
+    .recv_r2          = kinetis_recvlong,
+    .recv_r3          = kinetis_recvshort,
+    .recv_r4          = kinetis_recvnotimpl,
+    .recv_r5          = kinetis_recvnotimpl,
+    .recv_r6          = kinetis_recvshortcrc,
+    .recv_r7          = kinetis_recvshort,
     .waitenable       = kinetis_waitenable,
     .eventwait        = kinetis_eventwait,
     .callbackenable   = kinetis_callbackenable,
@@ -2140,7 +2140,7 @@ static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 }
 
 /****************************************************************************
- * Name: kinetis_recvRx
+ * Name: kinetis_recv*
  *
  * Description:
  *   Receive response to SDIO command.  Only the critical payload is
