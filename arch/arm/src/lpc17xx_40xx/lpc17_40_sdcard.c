@@ -482,9 +482,9 @@ static struct lpc17_40_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
  *
  ****************************************************************************/
 
-static void lpc17_40_takesem(struct lpc17_40_dev_s *priv)
+static int lpc17_40_takesem(struct lpc17_40_dev_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->waitsem);
+  return nxsem_wait_uninterruptible(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -2311,7 +2311,16 @@ static sdio_eventset_t lpc17_40_eventwait(FAR struct sdio_dev_s *dev,
        * there will be no wait.
        */
 
-      lpc17_40_takesem(priv);
+      ret = lpc17_40_takesem(priv);
+      if (ret < 0)
+        {
+          wd_cancel(priv->waitwdog);
+
+          leave_critical_section(flags);
+
+          return SDIOWAIT_ERROR;
+        }
+
       wkupevent = priv->wkupevent;
 
       /* Check if the event has occurred.  When the event has occurred, then
