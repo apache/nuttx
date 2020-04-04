@@ -84,6 +84,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure describes the static configuration of a TC channel */
 
 struct sam_chconfig_s
@@ -138,10 +139,10 @@ struct sam_tc_s
   /* Debug stuff */
 
 #ifdef CONFIG_SAMV7_TC_REGDEBUG
-   bool wr;                /* True:Last was a write */
-   uint32_t regaddr;       /* Last address */
-   uint32_t regval;        /* Last value */
-   int ntimes;             /* Number of times */
+  bool wr;                /* True:Last was a write */
+  uint32_t regaddr;       /* Last address */
+  uint32_t regval;        /* Last value */
+  int ntimes;             /* Number of times */
 #endif
 };
 
@@ -159,7 +160,7 @@ struct mck_divsrc_s
 
 /* Low-level helpers ********************************************************/
 
-static void sam_takesem(struct sam_tc_s *tc);
+static int  sam_takesem(struct sam_tc_s *tc);
 #define     sam_givesem(tc) (nxsem_post(&tc->exclsem))
 
 #ifdef CONFIG_SAMV7_TC_REGDEBUG
@@ -220,6 +221,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* Static timer configuration */
 
 #ifdef CONFIG_SAMV7_TC0
@@ -569,11 +571,20 @@ static struct sam_tc_s g_tc901;
 
 static struct mck_divsrc_s g_log2divider[TC_NDIVOPTIONS] =
 {
-                        /* TIMER_CLOCK1(0) -> PCK6 */
-  {3, 1},               /* TIMER_CLOCK2(1) -> MCK/8 */
-  {5, 2},               /* TIMER_CLOCK3(2) -> MCK/32 */
-  {7, 3},               /* TIMER_CLOCK4(3) -> MCK/128 */
-  {0, 4},               /* TIMER_CLOCK5(4) -> SLCK (No MCK divider) */
+            /* TIMER_CLOCK1(0) -> PCK6 */
+
+  {
+    3, 1    /* TIMER_CLOCK2(1) -> MCK/8 */
+  },
+  {
+    5, 2    /* TIMER_CLOCK3(2) -> MCK/32 */
+  },
+  {
+    7, 3    /* TIMER_CLOCK4(3) -> MCK/128 */
+  },
+  {
+    0, 4    /* TIMER_CLOCK5(4) -> SLCK (No MCK divider) */
+  },
 };
 
 /* TC register lookup used by sam_tc_setregister */
@@ -590,9 +601,11 @@ static const uint8_t g_regoffset[TC_NREGISTERS] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Low-level Helpers
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_takesem
  *
@@ -608,9 +621,9 @@ static const uint8_t g_regoffset[TC_NREGISTERS] =
  *
  ****************************************************************************/
 
-static void sam_takesem(struct sam_tc_s *tc)
+static int sam_takesem(struct sam_tc_s *tc)
 {
-  nxsem_wait_uninterruptible(&tc->exclsem);
+  return nxsem_wait_uninterruptible(&tc->exclsem);
 }
 
 /****************************************************************************
@@ -640,17 +653,24 @@ static void sam_regdump(struct sam_chan_s *chan, const char *msg)
   base = tc->base;
   tmrinfo("TC%d [%08x]: %s\n", tc->tc, (int)base, msg);
   tmrinfo("  BMR: %08x QIMR: %08x QISR: %08x WPMR: %08x\n",
-          getreg32(base+SAM_TC_BMR_OFFSET), getreg32(base+SAM_TC_QIMR_OFFSET),
-          getreg32(base+SAM_TC_QISR_OFFSET), getreg32(base+SAM_TC_WPMR_OFFSET));
+          getreg32(base + SAM_TC_BMR_OFFSET),
+          getreg32(base + SAM_TC_QIMR_OFFSET),
+          getreg32(base + SAM_TC_QISR_OFFSET),
+          getreg32(base + SAM_TC_WPMR_OFFSET));
 
   base = chan->base;
-  tmrinfo("TC%d Channel %d [%08x]: %s\n", tc->tc, chan->chan, (int)base, msg);
+  tmrinfo("TC%d Channel %d [%08x]: %s\n",
+          tc->tc, chan->chan, (int)base, msg);
   tmrinfo("  CMR: %08x SSMR: %08x  RAB: %08x   CV: %08x\n",
-          getreg32(base+SAM_TC_CMR_OFFSET), getreg32(base+SAM_TC_SMMR_OFFSET),
-          getreg32(base+SAM_TC_RAB_OFFSET), getreg32(base+SAM_TC_CV_OFFSET));
+          getreg32(base + SAM_TC_CMR_OFFSET),
+          getreg32(base + SAM_TC_SMMR_OFFSET),
+          getreg32(base + SAM_TC_RAB_OFFSET),
+          getreg32(base + SAM_TC_CV_OFFSET));
   tmrinfo("   RA: %08x   RB: %08x   RC: %08x  IMR: %08x\n",
-          getreg32(base+SAM_TC_RA_OFFSET), getreg32(base+SAM_TC_RB_OFFSET),
-          getreg32(base+SAM_TC_RC_OFFSET), getreg32(base+SAM_TC_IMR_OFFSET));
+          getreg32(base + SAM_TC_RA_OFFSET),
+          getreg32(base + SAM_TC_RB_OFFSET),
+          getreg32(base + SAM_TC_RC_OFFSET),
+          getreg32(base + SAM_TC_IMR_OFFSET));
 }
 #endif
 
@@ -791,8 +811,8 @@ static inline uint32_t sam_chan_getreg(struct sam_chan_s *chan,
  *
  ****************************************************************************/
 
-static inline void sam_chan_putreg(struct sam_chan_s *chan, unsigned int offset,
-                                   uint32_t regval)
+static inline void sam_chan_putreg(struct sam_chan_s *chan,
+                                   unsigned int offset, uint32_t regval)
 {
   uint32_t regaddr = chan->base + offset;
 
@@ -809,6 +829,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan, unsigned int offset,
 /****************************************************************************
  * Interrupt Handling
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_tc_interrupt
  *
@@ -879,7 +900,8 @@ static int sam_tc_interrupt(struct sam_tc_s *tc, struct sam_chan_s *chan)
  *   A pointer to the initialized timer channel structure associated with tc
  *   and channel.  NULL is returned on any failure.
  *
- *   On successful return, the caller holds the tc exclusive access semaphore.
+ *   On successful return, the caller holds the tc exclusive access
+ *   semaphore.
  *
  ****************************************************************************/
 
@@ -1105,7 +1127,8 @@ static int sam_tc_mcksrc(uint32_t frequency, uint32_t *tcclks,
  *   A pointer to the initialized timer channel structure associated with tc
  *   and channel.  NULL is returned on any failure.
  *
- *   On successful return, the caller holds the tc exclusive access semaphore.
+ *   On successful return, the caller holds the tc exclusive access
+ *   semaphore.
  *
  ****************************************************************************/
 
@@ -1120,6 +1143,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
   int chndx;
   int ch;
   int chfirst;
+  int ret;
 
   /* Select the timer/counter and get the index associated with the
    * channel.
@@ -1208,7 +1232,13 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
   /* Get exclusive access to the timer/count data structure */
 
-  sam_takesem(tc);
+  ret = sam_takesem(tc);
+  if (ret < 0)
+    {
+      leave_critical_section(flags);
+      return NULL;
+    }
+
   leave_critical_section(flags);
 
   /* Is the requested channel already in-use? */
@@ -1286,6 +1316,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: sam_tc_allocate
  *
@@ -1720,7 +1751,8 @@ int sam_tc_clockselect(uint32_t frequency, uint32_t *tcclks,
 
           if (tcclks)
             {
-              tmrinfo("return tcclks=%08lx\n", (unsigned long)TC_CMR_TCCLKS_PCK6);
+              tmrinfo("return tcclks=%08lx\n",
+                      (unsigned long)TC_CMR_TCCLKS_PCK6);
               *tcclks = TC_CMR_TCCLKS_PCK6;
             }
 
