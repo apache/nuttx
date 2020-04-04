@@ -359,7 +359,7 @@ struct cxd56_sdhcregs_s
 
 /* Low-level helpers ********************************************************/
 
-static void cxd56_takesem(struct cxd56_sdiodev_s *priv);
+static int  cxd56_takesem(struct cxd56_sdiodev_s *priv);
 #define     cxd56_givesem(priv) (nxsem_post(&(priv)->waitsem))
 static void cxd56_configwaitints(struct cxd56_sdiodev_s *priv,
               uint32_t waitints, sdio_eventset_t waitevents,
@@ -566,13 +566,14 @@ static FAR uint32_t cxd56_sdhci_adma_dscr[CXD56_SDIO_MAX_LEN_ADMA_DSCR * 2];
  *   dev - Instance of the SDIO device driver state structure.
  *
  * Returned Value:
- *   None
+ *   Normally OK, but may return -ECANCELED in the rare event that the task
+ *   has been canceled.
  *
  ****************************************************************************/
 
-static void cxd56_takesem(struct cxd56_sdiodev_s *priv)
+static int cxd56_takesem(struct cxd56_sdiodev_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->waitsem);
+  return nxsem_wait_uninterruptible(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -2664,7 +2665,17 @@ static sdio_eventset_t cxd56_sdio_eventwait(FAR struct sdio_dev_s *dev,
        * there will be no wait.
        */
 
-      cxd56_takesem(priv);
+      ret = cxd56_takesem(priv);
+      if (ret < 0)
+        {
+          /* Task canceled.  Cancel the wdog (assuming it was started) and
+           * return an SDIO error.
+           */
+
+          wd_cancel(priv->waitwdog);
+          return SDIOWAIT_ERROR;
+        }
+
       wkupevent = priv->wkupevent;
 
       /* Check if the event has occurred
@@ -3233,9 +3244,9 @@ static void cxd56_sdio_callback(void *arg)
 }
 
 #ifdef CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION
-static void cxd56_sdio_takesem(FAR struct cxd56_sdiodev_s *priv)
+static int cxd56_sdio_takesem(FAR struct cxd56_sdiodev_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->sc.sem);
+  return nxsem_wait_uninterruptible(&priv->sc.sem);
 }
 
 /****************************************************************************
@@ -3732,7 +3743,11 @@ static int cxd56_sdio_register_irq(FAR struct sdio_dev_s *dev, int func_num,
       return -EBUSY;
     }
 
-  cxd56_sdio_takesem(priv);
+  ret = cxd56_sdio_takesem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* enable irq in device side */
 
@@ -3849,7 +3864,12 @@ static int cxd56_sdio_function_disable(FAR struct sdio_dev_s *dev,
   sf0 = priv->sc.fn[0];
   mcinfo("I/O func's num:%d\n", sf->number);
 
-  cxd56_sdio_takesem(priv);
+  ret = cxd56_sdio_takesem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = cxd56_sdio_readb_internal(sf0, SDIO_CCCR_IOEN, &rv);
   if (ret)
     {
@@ -3865,6 +3885,7 @@ static int cxd56_sdio_function_disable(FAR struct sdio_dev_s *dev,
 
   nxsem_post(&priv->sc.sem);
   return 0;
+
 FUNC_DIS_ERR:
   mcerr("ERROR: Io fail ret %u\n", ret);
   nxsem_post(&priv->sc.sem);
@@ -3901,7 +3922,12 @@ static int cxd56_sdio_function_enable(FAR struct sdio_dev_s *dev,
       return 0;
     }
 
-  cxd56_sdio_takesem(priv);
+  ret = cxd56_sdio_takesem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = cxd56_sdio_readb_internal(sf0, SDIO_CCCR_IOEN, &rv);
   if (ret)
     {
@@ -3962,9 +3988,13 @@ static int cxd56_sdio_readb(FAR struct sdio_dev_s *dev, int func_num,
   struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
   int ret;
 
-  cxd56_sdio_takesem(priv);
-  ret = cxd56_sdio_readb_internal(priv->sc.fn[func_num], addr, rdata);
-  nxsem_post(&priv->sc.sem);
+  ret = cxd56_sdio_takesem(priv);
+  if (ret >= 0)
+    {
+      ret = cxd56_sdio_readb_internal(priv->sc.fn[func_num], addr, rdata);
+      nxsem_post(&priv->sc.sem);
+    }
+
   return ret;
 }
 
@@ -3991,9 +4021,14 @@ static int cxd56_sdio_writeb(FAR struct sdio_dev_s *dev, int func_num,
   struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
   int ret;
 
-  cxd56_sdio_takesem(priv);
-  ret = cxd56_sdio_writeb_internal(priv->sc.fn[func_num], addr, data, rdata);
-  nxsem_post(&priv->sc.sem);
+  ret = cxd56_sdio_takesem(priv);
+  if (ret >= 0)
+    {
+      ret = cxd56_sdio_writeb_internal(priv->sc.fn[func_num], addr, data,
+                                       data);
+      nxsem_post(&priv->sc.sem);
+    }
+
   return ret;
 }
 
@@ -4014,7 +4049,8 @@ static int cxd56_sdio_writeb(FAR struct sdio_dev_s *dev, int func_num,
  ****************************************************************************/
 
 static int cxd56_sdio_write(FAR struct sdio_dev_s *dev, int func_num,
-                    uint32_t addr, FAR uint8_t * data, uint32_t size)
+                            uint32_t addr, FAR uint8_t * data,
+                            uint32_t size)
 {
   uint32_t remainder = size;
   int ret;
@@ -4028,7 +4064,12 @@ static int cxd56_sdio_write(FAR struct sdio_dev_s *dev, int func_num,
 
   /* Do the bulk of the transfer using block mode (if supported). */
 
-  cxd56_sdio_takesem(priv);
+  ret = cxd56_sdio_takesem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   if (size >= SDIO_BLOCK_SIZE)
     {
       while (remainder >= SDIO_BLOCK_SIZE)
@@ -4165,7 +4206,12 @@ static int cxd56_sdio_read(FAR struct sdio_dev_s *dev, int func_num,
 
   /* Do the bulk of the transfer using block mode (if supported). */
 
-  cxd56_sdio_takesem(priv);
+  ret = cxd56_sdio_takesem(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   if (size >= SDIO_BLOCK_SIZE)
     {
       while (remainder >= SDIO_BLOCK_SIZE)

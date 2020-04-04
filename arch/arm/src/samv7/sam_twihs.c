@@ -181,7 +181,6 @@ struct twi_dev_s
 /* Low-level helper functions */
 
 static int  twi_takesem(sem_t *sem);
-static int  twi_takesem_uninterruptible(sem_t *sem);
 #define     twi_givesem(sem) (nxsem_post(sem))
 
 #ifdef CONFIG_SAMV7_TWIHSHS_REGDEBUG
@@ -319,26 +318,6 @@ static const struct i2c_ops_s g_twiops =
 static int twi_takesem(sem_t *sem)
 {
   return nxsem_wait(sem);
-}
-
-/****************************************************************************
- * Name: twi_takesem_uninterruptible
- *
- * Description:
- *   Take the wait semaphore (handling false alarm wake-ups due to the
- *   receipt of signals).
- *
- * Input Parameters:
- *   dev - Instance of the SDIO device driver state structure.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static int twi_takesem_uninterruptible(sem_t *sem)
-{
-  return nxsem_wait_uninterruptible(sem);
 }
 
 /****************************************************************************
@@ -1156,7 +1135,7 @@ static int twi_reset(FAR struct i2c_master_s *dev)
 
   /* Get exclusive access to the TWIHS device */
 
-  ret = twi_takesem_uninterruptible(&priv->exclsem);
+  ret = twi_takesem(&priv->exclsem);
   if (ret >= 0)
     {
       /* Do the reset-procedure */

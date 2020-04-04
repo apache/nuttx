@@ -394,7 +394,7 @@ struct sam_xfrregs_s
 
 /* Low-level helpers ********************************************************/
 
-static void sam_takesem(struct sam_dev_s *priv);
+static int  sam_takesem(struct sam_dev_s *priv);
 #define     sam_givesem(priv) (nxsem_post(&priv->waitsem))
 
 static void sam_configwaitints(struct sam_dev_s *priv, uint32_t waitmask,
@@ -575,13 +575,14 @@ static bool                     g_cmdinitialized;
  *   dev - Instance of the SDIO device driver state structure.
  *
  * Returned Value:
- *   None
+ *   Normally OK, but may return -ECANCELED in the rare event that the task
+ *   has been canceled.
  *
  ****************************************************************************/
 
-static void sam_takesem(struct sam_dev_s *priv)
+static int sam_takesem(struct sam_dev_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->waitsem);
+  return nxsem_wait_uninterruptible(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -2342,7 +2343,19 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
        * incremented and there will be no wait.
        */
 
-      sam_takesem(priv);
+      ret = sam_takesem(priv);
+      if (ret < 0)
+        {
+          /* Task canceled.  Cancel the wdog (assuming it was started),
+           * disable all event, and return an SDIO error.
+           */
+
+          wd_cancel(priv->waitwdog);
+          sam_disablexfrints(priv);
+          sam_disablewaitints(priv, SDIOWAIT_ERROR);
+          return SDIOWAIT_ERROR;
+        }
+
       wkupevent = priv->wkupevent;
 
       /* Check if the event has occurred.  When the event has occurred, then
