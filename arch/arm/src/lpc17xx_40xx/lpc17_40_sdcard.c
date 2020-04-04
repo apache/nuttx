@@ -310,7 +310,7 @@ static int lpc17_40_takesem(struct lpc17_40_dev_s *priv);
 static inline void lpc17_40_setclock(uint32_t clkcr);
 static void lpc17_40_configwaitints(struct lpc17_40_dev_s *priv,
               uint32_t waitmask, sdio_eventset_t waitevents,
-	      sdio_eventset_t wkupevents);
+              sdio_eventset_t wkupevents);
 static void lpc17_40_configxfrints(struct lpc17_40_dev_s *priv,
               uint32_t xfrmask);
 static void lpc17_40_setpwrctrl(uint32_t pwrctrl);

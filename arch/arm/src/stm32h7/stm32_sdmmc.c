@@ -305,7 +305,7 @@
 
 struct stm32_dev_s
 {
-  struct sdio_dev_s  dev;        /* Standard, base SDIO interface */
+  struct sdio_dev_s  dev;             /* Standard, base SDIO interface */
 
   /* STM32-specific extensions */
 
@@ -317,30 +317,30 @@ struct stm32_dev_s
 
   /* Event support */
 
-  sem_t              waitsem;    /* Implements event waiting */
-  sdio_eventset_t    waitevents; /* Set of events to be waited for */
-  uint32_t           waitmask;   /* Interrupt enables for event waiting */
+  sem_t              waitsem;         /* Implements event waiting */
+  sdio_eventset_t    waitevents;      /* Set of events to be waited for */
+  uint32_t           waitmask;        /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  WDOG_ID            waitwdog;   /* Watchdog that handles event timeouts */
+  WDOG_ID            waitwdog;        /* Watchdog that handles event timeouts */
 
   /* Callback support */
 
-  sdio_statset_t     cdstatus;   /* Card status */
-  sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
-  worker_t           callback;   /* Registered callback function */
-  void              *cbarg;      /* Registered callback argument */
-  struct work_s      cbwork;     /* Callback work queue structure */
+  sdio_statset_t     cdstatus;        /* Card status */
+  sdio_eventset_t    cbevents;        /* Set of events to be cause callbacks */
+  worker_t           callback;        /* Registered callback function */
+  void              *cbarg;           /* Registered callback argument */
+  struct work_s      cbwork;          /* Callback work queue structure */
 
   /* Interrupt mode data transfer support */
 
-  uint32_t          *buffer;     /* Address of current R/W buffer */
-  size_t             remaining;  /* Number of bytes remaining in the transfer */
-  uint32_t           xfrmask;    /* Interrupt enables for data transfer */
+  uint32_t          *buffer;          /* Address of current R/W buffer */
+  size_t             remaining;       /* Number of bytes remaining in the transfer */
+  uint32_t           xfrmask;         /* Interrupt enables for data transfer */
 
   /* DMA data transfer support */
 
-  bool               widebus;    /* Required for DMA support */
-  bool               onebit;     /* true: Only 1-bit transfers are supported */
+  bool               widebus;         /* Required for DMA support */
+  bool               onebit;          /* true: Only 1-bit transfers are supported */
 
 #if defined(HAVE_SDMMC_SDIO_MODE)
   /* Interrupt at SDIO_D1 pin, only for SDIO cards */
@@ -353,10 +353,10 @@ struct stm32_dev_s
 
   /* Misc */
 
-  uint32_t           blocksize;  /* Current block size */
-  uint32_t           receivecnt; /* Real count to receive */
+  uint32_t           blocksize;       /* Current block size */
+  uint32_t           receivecnt;      /* Real count to receive */
 #if !defined(CONFIG_STM32H7_SDMMC_IDMA)
-  struct work_s      cbfifo;     /* Monitor for Lame FIFO */
+  struct work_s      cbfifo;          /* Monitor for Lame FIFO */
 #endif
   uint8_t            rxfifo[FIFO_SIZE_IN_BYTES] /* To offload with IDMA */
                      __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
@@ -402,7 +402,7 @@ static void stm32_configxfrints(struct stm32_dev_s *priv, uint32_t xfrmask);
 static void stm32_setpwrctrl(struct stm32_dev_s *priv, uint32_t pwrctrl);
 static inline uint32_t stm32_getpwrctrl(struct stm32_dev_s *priv);
 
-/* Debug Helpers **************************************************************/
+/* Debug Helpers ************************************************************/
 
 #if defined(CONFIG_STM32H7_SDMMC_XFRDEBUG)
 static void stm32_sampleinit(void);
@@ -802,7 +802,8 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
 #if defined(HAVE_SDMMC_SDIO_MODE)
   if (priv->sdiomode == true)
     {
-      sdmmc_putreg32(priv, priv->xfrmask | priv->waitmask | priv->sdiointmask,
+      sdmmc_putreg32(priv,
+                     priv->xfrmask | priv->waitmask | priv->sdiointmask,
                      STM32_SDMMC_MASK_OFFSET);
     }
   else
@@ -840,7 +841,8 @@ static void stm32_configxfrints(struct stm32_dev_s *priv, uint32_t xfrmask)
 #if defined(HAVE_SDMMC_SDIO_MODE)
   if (priv->sdiomode == true)
     {
-      sdmmc_putreg32(priv, priv->xfrmask | priv->waitmask | priv->sdiointmask,
+      sdmmc_putreg32(priv,
+                     priv->xfrmask | priv->waitmask | priv->sdiointmask,
                      STM32_SDMMC_MASK_OFFSET);
     }
   else
@@ -900,10 +902,6 @@ static inline uint32_t stm32_getpwrctrl(struct stm32_dev_s *priv)
   return sdmmc_getreg32(priv, STM32_SDMMC_POWER_OFFSET) &
     STM32_SDMMC_POWER_PWRCTRL_MASK;
 }
-
-/****************************************************************************
- * Debug Helpers
- ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_sampleinit
@@ -1318,7 +1316,8 @@ static void stm32_eventtimeout(int argc, uint32_t arg)
  *
  ****************************************************************************/
 
-static void stm32_endwait(struct stm32_dev_s *priv, sdio_eventset_t wkupevent)
+static void stm32_endwait(struct stm32_dev_s *priv,
+                          sdio_eventset_t wkupevent)
 {
   /* Cancel the watchdog timeout */
 
@@ -1433,17 +1432,14 @@ static void stm32_sdmmc_fifo_monitor(FAR void *arg)
   /* Check for the lame FIFO condition */
 
   if (sdmmc_getreg32(priv, STM32_SDMMC_DCOUNT_OFFSET) != 0 &&
-      sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET) == STM32_SDMMC_STA_DPSMACT)
+      sdmmc_getreg32(priv, STM32_SDMMC_STA_OFFSET) ==
+      STM32_SDMMC_STA_DPSMACT)
     {
       work_queue(HPWORK, &priv->cbfifo,
                  (worker_t)stm32_sdmmc_fifo_monitor, arg, 1);
     }
 }
 #endif
-
-/****************************************************************************
- * Interrupt Handling
- ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_sdmmc[1|2]_rdyinterrupt
@@ -1561,7 +1557,8 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                * we used IDMA to manage the lame fifo
                */
 
-              if (priv->remaining && priv->remaining < FIFO_SIZE_IN_BYTES / 2)
+              if (priv->remaining && priv->remaining <
+                  FIFO_SIZE_IN_BYTES / 2)
                 {
                   memcpy(priv->buffer, priv->rxfifo, priv->remaining);
                 }
@@ -1581,7 +1578,9 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
 
               mcerr("ERROR: Data block CRC failure, remaining: %d\n",
                    priv->remaining);
-              stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
+
+              stm32_endtransfer(priv,
+                                SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
           /* Handle data timeout error */
@@ -1594,6 +1593,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
 
               mcerr("ERROR: Data timeout, remaining: %d\n",
                     priv->remaining);
+
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE |
                                       SDIOWAIT_TIMEOUT);
             }
@@ -1608,6 +1608,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
 
               mcerr("ERROR: RX FIFO overrun, remaining: %d\n",
                     priv->remaining);
+
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE |
                                       SDIOWAIT_ERROR);
             }
@@ -1622,6 +1623,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
 
               mcerr("ERROR: TX FIFO underrun, remaining: %d\n",
                     priv->remaining);
+
               stm32_endtransfer(priv, SDIOWAIT_TRANSFERDONE |
                                       SDIOWAIT_ERROR);
             }
@@ -1698,10 +1700,6 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
 
   return OK;
 }
-
-/****************************************************************************
- * SDIO Interface Methods
- ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_lock
@@ -2739,8 +2737,8 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
 #if defined(CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE)
   if ((priv->waitevents & SDIOWAIT_WRCOMPLETE) != 0)
     {
-      /* Atomically read pin to see if ready (true) and determine if ISR fired
-       * If Pin is ready and if ISR did NOT fire end the wait here
+      /* Atomically read pin to see if ready (true) and determine if ISR
+       * fired.  If Pin is ready and if ISR did NOT fire end the wait here
        */
 
       if (stm32_gpioread(priv->d0_gpio) &&
@@ -2751,10 +2749,10 @@ static sdio_eventset_t stm32_eventwait(FAR struct sdio_dev_s *dev,
     }
 #endif
 
-  /* Loop until the event (or the timeout occurs). Race conditions are avoided
-   * by calling stm32_waitenable prior to triggering the logic that will cause
-   * the wait to terminate.  Under certain race conditions, the waited-for
-   * may have already occurred before this function was called!
+  /* Loop until the event (or the timeout occurs). Race conditions are
+   * avoided by calling stm32_waitenable prior to triggering the logic that
+   * will cause the wait to terminate.  Under certain race conditions, the
+   * waited-for may have already occurred before this function was called!
    */
 
   for (; ; )
@@ -2891,8 +2889,8 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
 #  if defined(CONFIG_ARMV7M_DCACHE) && !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
   /* buffer alignment is required for DMA transfers with dcache in buffered
    * mode (not write-through) because a) arch_invalidate_dcache could lose
-   * buffered writes and b) arch_flush_dcache could corrupt adjacent memory if
-   * the maddr and the mend+1, the next next address are not on
+   * buffered writes and b) arch_flush_dcache could corrupt adjacent memory
+   * if the maddr and the mend+1, the next next address are not on
    * ARMV7M_DCACHE_LINESIZE boundaries.
    */
 
@@ -2935,8 +2933,8 @@ static int stm32_dmapreflight(FAR struct sdio_dev_s *dev,
  ****************************************************************************/
 
 #if defined(CONFIG_STM32H7_SDMMC_IDMA)
-static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
-                              size_t buflen)
+static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
+                              FAR uint8_t *buffer, size_t buflen)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
   uint32_t dblksize;
@@ -2994,7 +2992,8 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Force RAM reread */
 
 #  if !defined(CONFIG_ARCH_HAVE_SDIO_DELAYED_INVLDT)
-  if ((uintptr_t)buffer < DTCM_START || (uintptr_t)buffer + buflen > DTCM_END)
+  if ((uintptr_t)buffer < DTCM_START ||
+      (uintptr_t)buffer + buflen > DTCM_END)
     {
       up_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
     }
@@ -3068,7 +3067,8 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
 
 #  if defined(CONFIG_ARMV7M_DCACHE) && \
       !defined(CONFIG_ARMV7M_DCACHE_WRITETHROUGH)
-  if ((uintptr_t)buffer < DTCM_START || (uintptr_t)buffer + buflen > DTCM_END)
+  if ((uintptr_t)buffer < DTCM_START ||
+      (uintptr_t)buffer + buflen > DTCM_END)
     {
       up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
     }
@@ -3141,10 +3141,6 @@ static int stm32_dmadelydinvldt(FAR struct sdio_dev_s *dev,
 #endif
 
 /****************************************************************************
- * Initialization/uninitialization/reset
- ****************************************************************************/
-
-/****************************************************************************
  * Name: stm32_callback
  *
  * Description:
@@ -3200,16 +3196,18 @@ static void stm32_callback(void *arg)
 
       priv->cbevents = 0;
 
-      /* Callbacks cannot be performed in the context of an interrupt handler.
-       * If we are in an interrupt handler, then queue the callback to be
-       * performed later on the work thread.
+      /* Callbacks cannot be performed in the context of an interrupt
+       * handler.  If we are in an interrupt handler, then queue the
+       * callback to be performed later on the work thread.
        */
 
       if (up_interrupt_context())
         {
           /* Yes.. queue it */
 
-          mcinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
+          mcinfo("Queuing callback to %p(%p)\n",
+                 priv->callback, priv->cbarg);
+
           work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
                      priv->cbarg, 0);
         }
