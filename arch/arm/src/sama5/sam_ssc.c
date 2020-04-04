@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_ssc.c
  *
- *   Copyright (C) 2013-2014, 2016-2017 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -78,6 +63,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_SCHED_WORKQUEUE
@@ -391,7 +377,8 @@
 #define DMA_TIMEOUT_MS    (800)
 #define DMA_TIMEOUT_TICKS MSEC2TICK(DMA_TIMEOUT_MS)
 
-/* Debug *******************************************************************/
+/* Debug ********************************************************************/
+
 /* Check if SSC debut is enabled (non-standard.. no support in
  * include/debug.h
  */
@@ -418,6 +405,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* I2S buffer container */
 
 struct sam_buffer_s
@@ -491,11 +479,11 @@ struct sam_ssc_s
   /* Debug stuff */
 
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
-   bool     wr;                /* Last was a write */
-   uint32_t regaddr;           /* Last address */
-   uint32_t regval;            /* Last value */
-   int      count;             /* Number of times */
-#endif /* CONFIG_SAMA5_SSC_REGDEBUG */
+  bool     wr;                 /* Last was a write */
+  uint32_t regaddr;            /* Last address */
+  uint32_t regval;             /* Last value */
+  int      count;              /* Number of times */
+#endif
 };
 
 /****************************************************************************
@@ -505,13 +493,14 @@ struct sam_ssc_s
 /* Register helpers */
 
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
-static bool     ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t regval,
-                  uint32_t regaddr);
+static bool     ssc_checkreg(struct sam_ssc_s *priv, bool wr,
+                  uint32_t regval, uint32_t regaddr);
 #else
 # define        ssc_checkreg(priv,wr,regval,regaddr) (false)
 #endif
 
-static inline uint32_t ssc_getreg(struct sam_ssc_s *priv, unsigned int offset);
+static inline uint32_t ssc_getreg(struct sam_ssc_s *priv,
+                  unsigned int offset);
 static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
                   uint32_t regval);
 static inline uintptr_t ssc_physregaddr(struct sam_ssc_s *priv,
@@ -543,10 +532,10 @@ static void     ssc_dump_queues(struct sam_transport_s *xpt,
 
 /* Semaphore helpers */
 
-static void     ssc_exclsem_take(struct sam_ssc_s *priv);
+static int      ssc_exclsem_take(struct sam_ssc_s *priv);
 #define         ssc_exclsem_give(priv) nxsem_post(&priv->exclsem)
 
-static void     ssc_bufsem_take(struct sam_ssc_s *priv);
+static int      ssc_bufsem_take(struct sam_ssc_s *priv);
 #define         ssc_bufsem_give(priv) nxsem_post(&priv->bufsem)
 
 /* Buffer container helpers */
@@ -640,6 +629,7 @@ static void     ssc1_configure(struct sam_ssc_s *priv);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* I2S device operations */
 
 static const struct i2s_ops_s g_sscops =
@@ -882,13 +872,14 @@ static void ssc_dump_queues(struct sam_transport_s *xpt, const char *msg)
  *   priv - A reference to the SSC peripheral state
  *
  * Returned Value:
- *  None
+ *   Normally OK, but may return -ECANCELED in the rare event that the task
+ *   has been canceled.
  *
  ****************************************************************************/
 
-static void ssc_exclsem_take(struct sam_ssc_s *priv)
+static int ssc_exclsem_take(struct sam_ssc_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->exclsem);
+  return nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -901,13 +892,14 @@ static void ssc_exclsem_take(struct sam_ssc_s *priv)
  *   priv - A reference to the SSC peripheral state
  *
  * Returned Value:
- *  None
+ *   Normally OK, but may return -ECANCELED in the rare event that the task
+ *   has been canceled.
  *
  ****************************************************************************/
 
-static void ssc_bufsem_take(struct sam_ssc_s *priv)
+static int ssc_bufsem_take(struct sam_ssc_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->bufsem);
+  return nxsem_wait_uninterruptible(&priv->bufsem);
 }
 
 /****************************************************************************
@@ -934,12 +926,17 @@ static struct sam_buffer_s *ssc_buf_allocate(struct sam_ssc_s *priv)
 {
   struct sam_buffer_s *bfcontainer;
   irqstate_t flags;
+  int ret;
 
   /* Set aside a buffer container.  By doing this, we guarantee that we will
    * have at least one free buffer container.
    */
 
-  ssc_bufsem_take(priv);
+  ret = ssc_bufsem_take(priv);
+  if (ret < 0)
+    {
+      return NULL;
+    }
 
   /* Get the buffer from the head of the free list */
 
@@ -972,7 +969,8 @@ static struct sam_buffer_s *ssc_buf_allocate(struct sam_ssc_s *priv)
  *
  ****************************************************************************/
 
-static void ssc_buf_free(struct sam_ssc_s *priv, struct sam_buffer_s *bfcontainer)
+static void ssc_buf_free(struct sam_ssc_s *priv,
+                         struct sam_buffer_s *bfcontainer)
 {
   irqstate_t flags;
 
@@ -1072,6 +1070,7 @@ static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
   sam_dmasample(priv->rx.dma, &priv->rx.dmaregs[DMA_END_TRANSFER]);
 
   /* Then dump the sampled DMA registers */
+
   /* Initial register values */
 
   sam_dmadump(priv->rx.dma, &priv->rx.dmaregs[DMA_INITIAL],
@@ -1137,6 +1136,7 @@ static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
   sam_dmasample(priv->tx.dma, &priv->tx.dmaregs[DMA_END_TRANSFER]);
 
   /* Then dump the sampled DMA registers */
+
   /* Initial register values */
 
   sam_dmadump(priv->tx.dma, &priv->tx.dmaregs[DMA_INITIAL],
@@ -1316,7 +1316,6 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
       up_invalidate_dcache((uintptr_t)apb->samp,
                            (uintptr_t)apb->samp + apb->nmaxbytes);
-
     }
 #if 1 /* REVISIT: Chained RX transfers */
   while (0);
@@ -1386,9 +1385,9 @@ static void ssc_rx_worker(void *arg)
   DEBUGASSERT(priv);
 
   /* When the transfer was started, the active buffer containers were removed
-   * from the rx.pend queue and saved in the rx.act queue.  We get here when the
-   * DMA is finished... either successfully, with a DMA error, or with a DMA
-   * timeout.
+   * from the rx.pend queue and saved in the rx.act queue.  We get here when
+   * the DMA is finished... either successfully, with a DMA error, or with a
+   * DMA timeout.
    *
    * In any case, the buffer containers in rx.act will be moved to the end
    * of the rx.done queue and rx.act queue will be emptied before this worker
@@ -1798,9 +1797,9 @@ static void ssc_tx_worker(void *arg)
   DEBUGASSERT(priv);
 
   /* When the transfer was started, the active buffer containers were removed
-   * from the tx.pend queue and saved in the tx.act queue.  We get here when the
-   * DMA is finished... either successfully, with a DMA error, or with a DMA
-   * timeout.
+   * from the tx.pend queue and saved in the tx.act queue.  We get here when
+   * the DMA is finished... either successfully, with a DMA error, or with a
+   * DMA timeout.
    *
    * In any case, the buffer containers in tx.act will be moved to the end
    * of the tx.done queue and tx.act will be emptied before this worker is
@@ -2201,7 +2200,11 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   /* Get exclusive access to the SSC driver data */
 
-  ssc_exclsem_take(priv);
+  ret = ssc_exclsem_take(priv);
+  if (ret < 0)
+    {
+      goto errout_with_buf;
+    }
 
   /* Has the RX channel been enabled? */
 
@@ -2230,8 +2233,8 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.pend);
   ssc_dump_rxqueues(priv, "Receiving");
 
-  /* Then start the next transfer.  If there is already a transfer in progress,
-   * then this will do nothing.
+  /* Then start the next transfer.  If there is already a transfer in
+   * progress, then this will do nothing.
    */
 
   ret = ssc_rxdma_setup(priv);
@@ -2242,6 +2245,8 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
 errout_with_exclsem:
   ssc_exclsem_give(priv);
+
+errout_with_buf:
   ssc_buf_free(priv, bfcontainer);
   return ret;
 
@@ -2418,7 +2423,11 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   /* Get exclusive access to the SSC driver data */
 
-  ssc_exclsem_take(priv);
+  ret = ssc_exclsem_take(priv);
+  if (ret < 0)
+    {
+      goto errout_with_buf;
+    }
 
   /* Has the TX channel been enabled? */
 
@@ -2447,8 +2456,8 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.pend);
   ssc_dump_txqueues(priv, "Transmitting");
 
-  /* Then start the next transfer.  If there is already a transfer in progress,
-   * then this will do nothing.
+  /* Then start the next transfer.  If there is already a transfer in
+   * progress, then this will do nothing.
    */
 
   ret = ssc_txdma_setup(priv);
@@ -2459,6 +2468,8 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
 errout_with_exclsem:
   ssc_exclsem_give(priv);
+
+errout_with_buf:
   ssc_buf_free(priv, bfcontainer);
   return ret;
 
@@ -2479,7 +2490,8 @@ errout_with_exclsem:
  *   priv - Fully initialized SSC device structure.
  *
  * Returned Value:
- *   OK is returned on failure.  A negated errno value is returned on failure.
+ *   OK is returned on failure.  A negated errno value is returned on
+ *   failure.
  *
  ****************************************************************************/
 
@@ -2495,6 +2507,7 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
   fslen  = priv->rxfslen - 1;
 
   /* RCMR settings */
+
   /* Configure the receiver input clock */
 
   regval = 0;
@@ -2504,7 +2517,8 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
       regval = SSC_RCMR_CKS_RK;
       break;
 
-    case SSC_CLKSRC_TXOUT:   /* Receiver clock source is the transmitter clock */
+    case SSC_CLKSRC_TXOUT:   /* Receiver clock source is the transmitter
+                              * clock */
       regval = SSC_RCMR_CKS_TK;
       break;
 
@@ -2560,26 +2574,29 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
              SSC_RCMR_STTDLY(priv->rxsttdly) | SSC_RCMR_PERIOD(0));
   ssc_putreg(priv, SAM_SSC_RCMR_OFFSET, regval);
 
-  /* RFMR settings. Some of these settings will need to be configurable as well.
-   * Currently hardcoded to:
+  /* RFMR settings. Some of these settings will need to be configurable as
+   * well.  Currently hardcoded to:
    *
    *  SSC_RFMR_DATLEN(n)    'n' determined by configuration
    *  SSC_RFMR_LOOP         Determined by configuration
    *  SSC_RFMR_MSBF         Most significant bit first
    *  SSC_RFMR_DATNB(n)     Data number 'n' per frame (hard-coded)
    *  SSC_RFMR_FSLEN        Set to LS 4 bits of (CONFIG_SSCx_RX_FSLEN-1)
-   *  SSC_RFMR_FSLEN(1)     Pulse length = FSLEN + (FSLEN_EXT * 16) + 1 = 2 clocks
+   *  SSC_RFMR_FSLEN(1)     Pulse length = FSLEN + (FSLEN_EXT * 16) + 1 = 2
+   *                        clocks
    *  SSC_RFMR_FSOS_NONE    RF pin is always in input
    *  SSC_RFMR_FSEDGE_POS   Positive frame sync edge detection
    *  SSC_RFMR_FSLENEXT   I Set to MS 4 bits of (CONFIG_SSCx_TX_FSLEN-1)
    */
 
-  regval = (SSC_RFMR_DATLEN(CONFIG_SAMA5_SSC0_DATALEN - 1) | SSC_RFMR_MSBF |
-            SSC_RFMR_DATNB(SSC_DATNB - 1) | SSC_RFMR_FSOS_NONE);
+  regval = SSC_RFMR_DATLEN(CONFIG_SAMA5_SSC0_DATALEN - 1) |
+           SSC_RFMR_MSBF | SSC_RFMR_DATNB(SSC_DATNB - 1) |
+           SSC_RFMR_FSOS_NONE;
 
   /* Set the RX frame synch  */
 
-  regval |= (SSC_RFMR_FSLEN(fslen & 0x0f) | SSC_RFMR_FSLENEXT((fslen >> 4) & 0x0f));
+  regval |= SSC_RFMR_FSLEN(fslen & 0x0f) |
+            SSC_RFMR_FSLENEXT((fslen >> 4) & 0x0f);
 
   /* Loopback mode? */
 
@@ -2620,6 +2637,7 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
   period = SCC_PERIOD(priv->txsttdly, priv->datalen);
 
   /* TCMR settings */
+
   /* Configure the transmitter input clock */
 
   regval = 0;
@@ -2689,7 +2707,8 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
   if (priv->txclk == SSC_CLKSRC_MCKDIV)
     {
       regval |= (SSC_TCMR_CKG_CONT | SSC_TCMR_START_CONT |
-                 SSC_TCMR_STTDLY(priv->txsttdly) | SSC_TCMR_PERIOD(period / 2 - 1));
+                 SSC_TCMR_STTDLY(priv->txsttdly) |
+                 SSC_TCMR_PERIOD(period / 2 - 1));
     }
   else
     {
@@ -2699,16 +2718,18 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
 
   ssc_putreg(priv, SAM_SSC_TCMR_OFFSET, regval);
 
-  /* TFMR settings. Some of these settings will need to be configurable as well.
-   * Currently set to:
+  /* TFMR settings. Some of these settings will need to be configurable as
+   * well.  Currently set to:
    *
    *  SSC_TFMR_DATLEN(n)    'n' determined by configuration
    *  SSC_TFMR_DATDEF        Data default = 0
    *  SSC_TFMR_MSBF          Most significant bit first
    *  SSC_TFMR_DATNB(n)      Data number 'n' per frame (hard-coded)
    *  SSC_TFMR_FSDEN         Enabled if CONFIG_SSCx_TX_FSLEN > 0
-   *  SSC_TFMR_FSLEN         If enabled, set to LS 4 bits of (CONFIG_SSCx_TX_FSLEN-1)
-   *  SSC_TFMR_FSLENEXT      If enabled, set to MS 4 bits of (CONFIG_SSCx_TX_FSLEN-1)
+   *  SSC_TFMR_FSLEN         If enabled, set to LS 4 bits of
+   *                         (CONFIG_SSCx_TX_FSLEN-1)
+   *  SSC_TFMR_FSLENEXT      If enabled, set to MS 4 bits of
+   *                         (CONFIG_SSCx_TX_FSLEN-1)
    *
    * If master (i.e., provides clocking):
    *  SSC_TFMR_FSOS_NEGATIVE Negative pulse TF output
@@ -2873,7 +2894,8 @@ static void ssc_clocking(struct sam_ssc_s *priv)
 
   /* Reset, disable receiver & transmitter */
 
-  ssc_putreg(priv, SAM_SSC_CR_OFFSET, SSC_CR_RXDIS | SSC_CR_TXDIS | SSC_CR_SWRST);
+  ssc_putreg(priv, SAM_SSC_CR_OFFSET,
+             SSC_CR_RXDIS | SSC_CR_TXDIS | SSC_CR_SWRST);
 
   /* Configure MCK/2 divider */
 
