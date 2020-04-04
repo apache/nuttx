@@ -305,7 +305,7 @@ struct lpc17_40_sampleregs_s
 
 /* Low-level helpers ********************************************************/
 
-static void lpc17_40_takesem(struct lpc17_40_dev_s *priv);
+static int lpc17_40_takesem(struct lpc17_40_dev_s *priv);
 #define     lpc17_40_givesem(priv) (nxsem_post(&priv->waitsem))
 static inline void lpc17_40_setclock(uint32_t clkcr);
 static void lpc17_40_configwaitints(struct lpc17_40_dev_s *priv,
