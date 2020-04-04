@@ -4,8 +4,9 @@
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This file was leveraged from the NuttX i.MXRT port.  Portions of that eDMA logic
- * derived from NXP sample code which has a compatible BSD 3-clause license:
+ * This file was leveraged from the NuttX i.MXRT port.  Portions of that eDMA
+ * logic derived from NXP sample code which has a compatible BSD 3-clause
+ * license:
  *
  *   Copyright (c) 2015, Freescale Semiconductor, Inc.
  *   Copyright 2016-2017 NXP
@@ -125,8 +126,8 @@ struct s32k1xx_dmach_s
 
 #if CONFIG_S32K1XX_EDMA_NTCD > 0
   /* That TCD list is linked through the DLAST SGA field.  The first transfer
-   * to be performed is at the head of the list.  Subsequent TCDs are added at
-   * the tail of the list.
+   * to be performed is at the head of the list.  Subsequent TCDs are added
+   * at the tail of the list.
    */
 
   struct s32k1xx_edmatcd_s *head;   /* First TCD in the list */
@@ -182,9 +183,9 @@ static struct s32k1xx_edmatcd_s g_tcd_pool[CONFIG_S32K1XX_EDMA_NTCD]
  *
  ****************************************************************************/
 
-static void s32k1xx_takechsem(void)
+static int s32k1xx_takechsem(void)
 {
-  nxsem_wait_uninterruptible(&g_edma.chsem);
+  return nxsem_wait_uninterruptible(&g_edma.chsem);
 }
 
 static inline void s32k1xx_givechsem(void)
@@ -301,13 +302,14 @@ static inline void s32k1xx_tcd_initialize(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_tcd_chanlink
  *
  * Description:
- *   This function configures either a minor link or a major link. The minor link
- *   means the channel link is triggered every time CITER decreases by 1. The major
- *   link means that the channel link  is triggered when the CITER is exhausted.
+ *   This function configures either a minor link or a major link. The minor
+ *   link means the channel link is triggered every time CITER decreases by 1
+ *   The major link means that the channel link  is triggered when the CITER
+ *   is exhausted.
  *
  *   NOTE: Users should ensure that DONE flag is cleared before calling this
  *   interface, or the configuration is invalid.
@@ -320,10 +322,11 @@ static inline void s32k1xx_tcd_initialize(void)
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_EDMA_ELINK
-static inline void s32k1xx_tcd_chanlink(uint8_t flags, struct s32k1xx_dmach_s *linkch,
+static inline void s32k1xx_tcd_chanlink(uint8_t flags,
+                                        struct s32k1xx_dmach_s *linkch,
                                         struct s32k1xx_edmatcd_s *tcd)
 {
   uint16_t regval16;
@@ -392,7 +395,7 @@ static inline void s32k1xx_tcd_chanlink(uint8_t flags, struct s32k1xx_dmach_s *l
  ****************************************************************************/
 
 static inline void s32k1xx_tcd_configure(struct s32k1xx_edmatcd_s *tcd,
-                                         const struct s32k1xx_edma_xfrconfig_s *config)
+                            const struct s32k1xx_edma_xfrconfig_s *config)
 {
   tcd->saddr    = config->saddr;
   tcd->soff     = config->soff;
@@ -412,8 +415,9 @@ static inline void s32k1xx_tcd_configure(struct s32k1xx_edmatcd_s *tcd,
 #ifdef CONFIG_S32K1XX_EDMA_ELINK
   /* Configure major/minor link mapping */
 
-  s32k1xx_tcd_chanlink(config->flags, (struct s32k1xx_dmach_s *)config->linkch,
-                     tcd);
+  s32k1xx_tcd_chanlink(config->flags,
+                       (struct s32k1xx_dmach_s *)config->linkch,
+                       tcd);
 #endif
 }
 
@@ -826,7 +830,8 @@ void weak_function up_dma_initialize(void)
  *
  * Input Parameters:
  *   dmamux - DMAMUX configuration see DMAMUX channel configuration register
- *            bit-field definitions in hardware/s32k1xx_dmamux.h.  Settings include:
+ *            bit-field definitions in hardware/s32k1xx_dmamux.h.
+ *            Settings include:
  *
  *            DMAMUX_CHCFG_SOURCE     Chip-specific DMA source (required)
  *            DMAMUX_CHCFG_AON        DMA Channel Always Enable (optional)
@@ -854,11 +859,17 @@ DMACH_HANDLE s32k1xx_dmach_alloc(uint32_t dmamux, uint8_t dchpri)
 {
   struct s32k1xx_dmach_s *dmach;
   unsigned int chndx;
+  int ret;
 
   /* Search for an available DMA channel */
 
   dmach = NULL;
-  s32k1xx_takechsem();
+  ret = s32k1xx_takechsem();
+  if (ret < 0)
+    {
+      return NULL;
+    }
+
   for (chndx = 0; chndx < S32K1XX_EDMA_NCHANNELS; chndx++)
     {
       struct s32k1xx_dmach_s *candidate = &g_edma.dmach[chndx];
@@ -911,8 +922,8 @@ DMACH_HANDLE s32k1xx_dmach_alloc(uint32_t dmamux, uint8_t dchpri)
  *
  * Description:
  *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until s32k1xx_dmach_alloc() is called again to re-gain
- *   a valid handle.
+ *   NEVER be used again until s32k1xx_dmach_alloc() is called again to
+ *   re-gain a valid handle.
  *
  * Returned Value:
  *   None
@@ -926,7 +937,8 @@ void s32k1xx_dmach_free(DMACH_HANDLE handle)
   uint8_t regval8;
 
   dmainfo("dmach: %p\n", dmach);
-  DEBUGASSERT(dmach != NULL && dmach->inuse && dmach->state != S32K1XX_DMA_ACTIVE);
+  DEBUGASSERT(dmach != NULL && dmach->inuse &&
+              dmach->state != S32K1XX_DMA_ACTIVE);
 
   /* Mark the channel no longer in use.  Clearing the inuse flag is an atomic
    * operation and so should be safe.
@@ -934,7 +946,7 @@ void s32k1xx_dmach_free(DMACH_HANDLE handle)
 
   dmach->flags = 0;
   dmach->inuse = false;                   /* No longer in use */
-  dmach->state = S32K1XX_DMA_IDLE;          /* Better not be active! */
+  dmach->state = S32K1XX_DMA_IDLE;        /* Better not be active! */
 
   /* Make sure that the channel is disabled. */
 
@@ -953,10 +965,11 @@ void s32k1xx_dmach_free(DMACH_HANDLE handle)
  * Description:
  *   This function adds the eDMA transfer to the DMA sequence.  The request
  *   is setup according to the content of the transfer configuration
- *   structure.  For "normal" DMA, s32k1xx_dmach_xfrsetup is called only once.
+ *   structure. For "normal" DMA, s32k1xx_dmach_xfrsetup is called only once.
  *   Scatter/gather DMA is accomplished by calling this function repeatedly,
  *   once for each transfer in the sequence.  Scatter/gather DMA processing
- *   is enabled automatically when the second transfer configuration is received.
+ *   is enabled automatically when the second transfer configuration is
+ *   received.
  *
  *   This function may be called multiple times to handle multiple,
  *   discontinuous transfers (scatter-gather)
@@ -1090,8 +1103,8 @@ int s32k1xx_dmach_xfrsetup(DMACH_HANDLE *handle,
 
   /* Configure channel TCD registers to the values specified in config. */
 
-  s32k1xx_tcd_configure((struct s32k1xx_edmatcd_s *)S32K1XX_EDMA_TCD_BASE(dmach->chan),
-                        config);
+  s32k1xx_tcd_configure((struct s32k1xx_edmatcd_s *)
+                        S32K1XX_EDMA_TCD_BASE(dmach->chan), config);
 
   /* Enable the DONE interrupt when the major iteration count completes. */
 
@@ -1132,38 +1145,41 @@ int s32k1xx_dmach_xfrsetup(DMACH_HANDLE *handle,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_dmach_start
  *
  * Description:
- *   Start the DMA transfer.  This function should be called after the final call
- *   to s32k1xx_dmach_xfrsetup() in order to avoid race conditions.
+ *   Start the DMA transfer.  This function should be called after the final
+ *   call to s32k1xx_dmach_xfrsetup() in order to avoid race conditions.
  *
- *   At the conclusion of each major DMA loop, a callback to the user-provided
- *   function is made:  |For "normal" DMAs, this will correspond to the DMA DONE
- *   interrupt; for scatter gather DMAs, multiple interrupts will be generated
- *   with the final being the DONE interrupt.
+ *   At the conclusion of each major DMA loop, a callback to the user
+ *   provided function is made:  |For "normal" DMAs, this will correspond to
+ *   the DMA DONE interrupt; for scatter gather DMAs, multiple interrupts
+ *   will be generated with the final being the DONE interrupt.
  *
- *   At the conclusion of the DMA, the DMA channel is reset, all TCDs are freed, and
- *   the callback function is called with the the success/fail result of the DMA.
+ *   At the conclusion of the DMA, the DMA channel is reset, all TCDs are
+ *   freed, and the callback function is called with the the success/fail
+ *   result of the DMA.
  *
- *   NOTE: On Rx DMAs (peripheral-to-memory or memory-to-memory), it is necessary
- *   to invalidate the destination memory.  That is not done automatically by the
- *   DMA module.  Invalidation of the destination memory regions is the
- *   responsibility of the caller.
+ *   NOTE: On Rx DMAs (peripheral-to-memory or memory-to-memory), it is
+ *   necessary to invalidate the destination memory.  That is not done
+ *   automatically by the DMA module.  Invalidation of the destination memory
+ *   regions is the responsibility of the caller.
  *
  * Input Parameters:
  *   handle   - DMA channel handle created by s32k1xx_dmach_alloc()
- *   callback - The callback to be invoked when the DMA is completes or is aborted.
+ *   callback - The callback to be invoked when the DMA is completes or is
+ *              aborted.
  *   arg      - An argument that accompanies the callback
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
  *   any failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-int s32k1xx_dmach_start(DMACH_HANDLE handle, edma_callback_t callback, void *arg)
+int s32k1xx_dmach_start(DMACH_HANDLE handle, edma_callback_t callback,
+                        void *arg)
 {
   struct s32k1xx_dmach_s *dmach = (struct s32k1xx_dmach_s *)handle;
   irqstate_t flags;
@@ -1182,8 +1198,8 @@ int s32k1xx_dmach_start(DMACH_HANDLE handle, edma_callback_t callback, void *arg
   dmach->state    = S32K1XX_DMA_ACTIVE;
 
 #if CONFIG_S32K1XX_EDMA_NTCD > 0
-  /* Although it is not recommended, it might be possible to call this function
-   * multiple times while adding TCDs on the fly.
+  /* Although it is not recommended, it might be possible to call this
+   * function multiple times while adding TCDs on the fly.
    */
 
   if (dmach->state != S32K1XX_DMA_ACTIVE)
@@ -1204,13 +1220,13 @@ int s32k1xx_dmach_start(DMACH_HANDLE handle, edma_callback_t callback, void *arg
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: s32k1xx_dmach_stop
  *
  * Description:
- *   Cancel the DMA.  After s32k1xx_dmach_stop() is called, the DMA channel is reset,
- *   all TCDs are freed, and s32k1xx_dmarx/txsetup() must be called before
- *   s32k1xx_dmach_start() can be called again
+ *   Cancel the DMA.  After s32k1xx_dmach_stop() is called, the DMA channel
+ *   is reset, all TCDs are freed, and s32k1xx_dmarx/txsetup() must be called
+ *   before s32k1xx_dmach_start() can be called again.
  *
  * Input Parameters:
  *   handle   - DMA channel handle created by s32k1xx_dmach_alloc()
@@ -1218,7 +1234,7 @@ int s32k1xx_dmach_start(DMACH_HANDLE handle, edma_callback_t callback, void *arg
  * Returned Value:
  *   None.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void s32k1xx_dmach_stop(DMACH_HANDLE handle)
 {
@@ -1256,7 +1272,8 @@ void s32k1xx_dmach_stop(DMACH_HANDLE handle)
  *   initial value of NBYTES (for example copied before enabling the channel)
  *   is needed. The formula to calculate it is shown below:
  *
- *     RemainingBytes = RemainingMajorLoopCount * NBYTES(initially configured)
+ *     RemainingBytes = RemainingMajorLoopCount *
+ *                      NBYTES(initially configured)
  *
  * Input Parameters:
  *   handle  - DMA channel handle created by s32k1xx_dmach_alloc()
