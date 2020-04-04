@@ -113,7 +113,7 @@ struct sam_dmach_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void   sam_takechsem(void);
+static int   sam_takechsem(void);
 static inline void sam_givechsem(void);
 #if CONFIG_SAMD2L2_DMAC_NDESC > 0
 static void   sam_takedsem(void);
