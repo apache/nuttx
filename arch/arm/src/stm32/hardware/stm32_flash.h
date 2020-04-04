@@ -61,20 +61,21 @@
 #  if defined(CONFIG_STM32_STM32L15XX)
 #    if defined(CONFIG_STM32_HIGHDENSITY)
 
-/* Different STM32L1xxx MCU version are now called by different 'categories' instead
- * of 'densities'. Cat.5 MCU can have up to 512KB of FLASH. STM32L1xxx also have
- * data EEPROM, up to 16KB.
+/* Different STM32L1xxx MCU version are now called by different 'categories'
+ * instead of 'densities'. Cat.5 MCU can have up to 512KB of FLASH.
+ * STM32L1xxx also have data EEPROM, up to 16KB.
  */
 
 #      define STM32_FLASH_NPAGES        2048
 #      define STM32_FLASH_PAGESIZE      256
 #    else
 
-/* The STM32 (< Cat.5) L15xx/L16xx can support up to 384KB of FLASH. (In reality, most
- * supported L15xx parts have no more than 128KB). The program memory block is divided
- * into 96 sectors of 4 Kbytes each, and each sector is further split up into 16 pages
- * of 256 bytes each. The sector is the write protection granularity. In total, the
- * program memory block contains 1536 pages.
+/* The STM32 (< Cat.5) L15xx/L16xx can support up to 384KB of FLASH.
+ * (In reality, most supported L15xx parts have no more than 128KB).
+ * The program memory block is divided into 96 sectors of 4 Kbytes each,
+ * and each sector is further split up into 16 pages of 256 bytes each.
+ * The sector is the write protection granularity. In total, the program
+ * memory block contains 1536 pages.
  */
 
 #      define STM32_FLASH_NPAGES        1536
@@ -325,6 +326,7 @@
 #endif
 
 /* Register Bitfield Definitions ****************************************************/
+
 /* Flash Access Control Register (ACR) */
 
 #if defined(CONFIG_STM32_STM32L15XX)
@@ -445,10 +447,10 @@
 #    define FLASH_CR_PSIZE_X16      (1 << FLASH_CR_PSIZE_SHIFT) /* 01 program x16 */
 #    define FLASH_CR_PSIZE_X32      (2 << FLASH_CR_PSIZE_SHIFT) /* 10 program x32 */
 #    define FLASH_CR_PSIZE_X64      (3 << FLASH_CR_PSIZE_SHIFT) /* 11 program x64 */
-#  define FLASH_CR_STRT             (1 << 16)              /* Bit 16: Start Erase */
-#  define FLASH_CR_EOPIE            (1 << 24)              /* Bit 24: End of operation interrupt enable */
-#  define FLASH_CR_ERRIE            (1 << 25)              /* Bit 25: Error interrupt enable */
-#  define FLASH_CR_LOCK             (1 << 31)              /* Bit 31: Lock */
+#  define FLASH_CR_STRT             (1 << 16)                   /* Bit 16: Start Erase */
+#  define FLASH_CR_EOPIE            (1 << 24)                   /* Bit 24: End of operation interrupt enable */
+#  define FLASH_CR_ERRIE            (1 << 25)                   /* Bit 25: Error interrupt enable */
+#  define FLASH_CR_LOCK             (1 << 31)                   /* Bit 31: Lock */
 #endif
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #  define FLASH_CR_MER1             (1 << 15)              /* Bit 15: Mass Erase sectors 12..23 */
@@ -457,22 +459,22 @@
 /* Flash Option Control Register (OPTCR) */
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
-#  define FLASH_OPTCR_OPTLOCK       (1 << 0)               /* Bit 0: Option lock */
-#  define FLASH_OPTCR_OPTSTRT       (1 << 1)               /* Bit 1: Option start */
-#  define FLASH_OPTCR_BORLEV_SHIFT  (2)                    /* Bits 2-3: BOR reset Level */
+#  define FLASH_OPTCR_OPTLOCK       (1 << 0)                        /* Bit 0: Option lock */
+#  define FLASH_OPTCR_OPTSTRT       (1 << 1)                        /* Bit 1: Option start */
+#  define FLASH_OPTCR_BORLEV_SHIFT  (2)                             /* Bits 2-3: BOR reset Level */
 #  define FLASH_OPTCR_BORLEV_MASK   (3 << FLASH_OPTCR_BORLEV_SHIFT)
 #    define FLASH_OPTCR_VBOR3       (0 << FLASH_OPTCR_BORLEV_SHIFT) /* 00: BOR Level 3 */
 #    define FLASH_OPTCR_VBOR2       (1 << FLASH_OPTCR_BORLEV_SHIFT) /* 01: BOR Level 2 */
 #    define FLASH_OPTCR_VBOR1       (2 << FLASH_OPTCR_BORLEV_SHIFT) /* 10: BOR Level 1 */
 #    define FLASH_OPTCR_VBOR0       (3 << FLASH_OPTCR_BORLEV_SHIFT) /* 11: BOR off */
-#  define FLASH_OPTCR_USER_SHIFT    (5)                    /* Bits 5-7: User option bytes */
+#  define FLASH_OPTCR_USER_SHIFT    (5)                             /* Bits 5-7: User option bytes */
 #  define FLASH_OPTCR_USER_MASK     (7 << FLASH_OPTCR_USER_SHIFT)
-#    define FLASH_OPTCR_NRST_STDBY  (1 << 7)               /* Bit 7: nRST_STDBY */
-#    define FLASH_OPTCR_NRST_STOP   (1 << 6)               /* Bit 6: nRST_STOP */
-#    define FLASH_OPTCR_WDG_SW      (1 << 5)               /* Bit 5: WDG_SW */
-#  define FLASH_OPTCR_RDP_SHIFT     (8)                    /* Bits 8-15: Read protect */
+#    define FLASH_OPTCR_NRST_STDBY  (1 << 7)                        /* Bit 7: nRST_STDBY */
+#    define FLASH_OPTCR_NRST_STOP   (1 << 6)                        /* Bit 6: nRST_STOP */
+#    define FLASH_OPTCR_WDG_SW      (1 << 5)                        /* Bit 5: WDG_SW */
+#  define FLASH_OPTCR_RDP_SHIFT     (8)                             /* Bits 8-15: Read protect */
 #  define FLASH_OPTCR_RDP_MASK      (0xff << FLASH_OPTCR_RDP_SHIFT)
-#  define FLASH_OPTCR_NWRP_SHIFT    (16)                   /* Bits 16-27: Not write protect */
+#  define FLASH_OPTCR_NWRP_SHIFT    (16)                            /* Bits 16-27: Not write protect */
 #  define FLASH_OPTCR_NWRP_MASK     (0xfff << FLASH_OPTCR_NWRP_SHIFT)
 #endif
 
@@ -492,11 +494,11 @@
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ************************************************************************************/
 
-void stm32_flash_lock(void);
-void stm32_flash_unlock(void);
+int stm32_flash_lock(void);
+int stm32_flash_unlock(void);
 
 #if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F4XXX)
 int stm32_flash_writeprotect(size_t page, bool enabled);

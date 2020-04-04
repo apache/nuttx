@@ -46,13 +46,13 @@
 #include "hardware/stm32l4_flash.h"
 
 /************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ************************************************************************************/
 
-void stm32l4_flash_lock(void);
-void stm32l4_flash_unlock(void);
+int stm32l4_flash_lock(void);
+int stm32l4_flash_unlock(void);
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32l4_flash_user_optbytes
  *
  * Description:
@@ -67,7 +67,7 @@ void stm32l4_flash_unlock(void);
  * Returned Value:
  *   Option bytes after operation is completed
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 uint32_t stm32l4_flash_user_optbytes(uint32_t clrbits, uint32_t setbits);
 

@@ -118,9 +118,9 @@ static uint32_t g_page_buffer[FLASH_PAGE_WORDS];
  * Private Functions
  ****************************************************************************/
 
-static inline void sem_lock(void)
+static inline int sem_lock(void)
 {
-  nxsem_wait_uninterruptible(&g_sem);
+  return nxsem_wait_uninterruptible(&g_sem);
 }
 
 static inline void sem_unlock(void)
@@ -176,7 +176,8 @@ static inline void flash_erase(size_t page)
   finfo("erase page %u\n", page);
 
   modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_PAGE_ERASE);
-  modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PNB_MASK, FLASH_CR_PNB(page & 0xff));
+  modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PNB_MASK,
+              FLASH_CR_PNB(page & 0xff));
 
 #if defined(CONFIG_STM32L4_STM32L4X5) || \
     defined(CONFIG_STM32L4_STM32L4X6) || \
@@ -223,18 +224,36 @@ static void data_cache_enable(void)
  * Public Functions
  ****************************************************************************/
 
-void stm32l4_flash_unlock(void)
+int stm32l4_flash_unlock(void)
 {
-  sem_lock();
+  int ret;
+
+  ret = sem_lock();
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   flash_unlock();
   sem_unlock();
+
+  return ret;
 }
 
-void stm32l4_flash_lock(void)
+int stm32l4_flash_lock(void)
 {
-  sem_lock();
+  int ret;
+
+  ret = sem_lock();
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   flash_lock();
   sem_unlock();
+
+  return ret;
 }
 
 /****************************************************************************
@@ -257,6 +276,7 @@ void stm32l4_flash_lock(void)
 uint32_t stm32l4_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
 {
   uint32_t regval;
+  int ret;
 
   /* To avoid accidents, do not allow setting RDP via this function.
    * Remove these asserts if want to enable changing the protection level.
@@ -266,7 +286,12 @@ uint32_t stm32l4_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
   DEBUGASSERT((clrbits & FLASH_OPTCR_RDP_MASK) == 0);
   DEBUGASSERT((setbits & FLASH_OPTCR_RDP_MASK) == 0);
 
-  sem_lock();
+  ret = sem_lock();
+  if (ret < 0)
+    {
+      return 0;
+    }
+
   flash_optbytes_unlock();
 
   /* Modify Option Bytes in register. */
@@ -342,6 +367,8 @@ bool up_progmem_isuniform(void)
 
 ssize_t up_progmem_eraseblock(size_t block)
 {
+  int ret;
+
   if (block >= STM32L4_FLASH_NPAGES)
     {
       return -EFAULT;
@@ -349,7 +376,12 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   /* Erase single block */
 
-  sem_lock();
+  ret = sem_lock();
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
+
   flash_unlock();
 
   flash_erase(block);
@@ -429,7 +461,11 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
   dest = (uint32_t *)((uint8_t *)addr - offset);
   written = 0;
 
-  sem_lock();
+  ret = sem_lock();
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
   /* Get flash ready and begin flashing. */
 
