@@ -229,7 +229,7 @@ struct kinetis_sdhcregs_s
 
 /* Low-level helpers ********************************************************/
 
-static void kinetis_takesem(struct kinetis_dev_s *priv);
+static int  kinetis_takesem(struct kinetis_dev_s *priv);
 #define     kinetis_givesem(priv) (nxsem_post(&priv->waitsem))
 static void kinetis_configwaitints(struct kinetis_dev_s *priv,
               uint32_t waitints, sdio_eventset_t waitevents,
@@ -423,13 +423,14 @@ static struct kinetis_sdhcregs_s g_sampleregs[DEBUG_NSAMPLES];
  *   dev - Instance of the SDIO device driver state structure.
  *
  * Returned Value:
- *   None
+ *   Normally OK, but may return -ECANCELED in the rare event that the task
+ *   has been canceled.
  *
  ****************************************************************************/
 
-static void kinetis_takesem(struct kinetis_dev_s *priv)
+static int kinetis_takesem(struct kinetis_dev_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->waitsem);
+  return nxsem_wait_uninterruptible(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -2520,7 +2521,17 @@ static sdio_eventset_t kinetis_eventwait(FAR struct sdio_dev_s *dev,
        * incremented and there will be no wait.
        */
 
-      kinetis_takesem(priv);
+      ret = kinetis_takesem(priv);
+      if (ret < 0)
+        {
+          /* Task canceled.  Cancel the wdog (assuming it was started) and
+           * return an SDIO error.
+           */
+
+          wd_cancel(priv->waitwdog);
+          return SDIOWAIT_ERROR;
+        }
+
       wkupevent = priv->wkupevent;
 
       /* Check if the event has occurred.  When the event has occurred, then

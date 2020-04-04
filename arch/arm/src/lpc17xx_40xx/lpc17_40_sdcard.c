@@ -488,7 +488,8 @@ static struct lpc17_40_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
  *   dev - Instance of the SD card device driver state structure.
  *
  * Returned Value:
- *   None
+ *   Normally OK, but may return -ECANCELED in the rare event that the task
+ *   has been canceled.
  *
  ****************************************************************************/
 
@@ -2363,10 +2364,12 @@ static sdio_eventset_t lpc17_40_eventwait(FAR struct sdio_dev_s *dev,
       ret = lpc17_40_takesem(priv);
       if (ret < 0)
         {
+          /* Task canceled.  Cancel the wdog (assuming it was started) and
+           * return an SDIO error.
+           */
+
           wd_cancel(priv->waitwdog);
-
           leave_critical_section(flags);
-
           return SDIOWAIT_ERROR;
         }
 

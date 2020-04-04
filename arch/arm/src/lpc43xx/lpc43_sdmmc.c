@@ -271,7 +271,7 @@ static void lpc43_putreg(uint32_t val, uint32_t addr);
 
 /* Low-level helpers ********************************************************/
 
-static void lpc43_takesem(struct lpc43_dev_s *priv);
+static int  lpc43_takesem(struct lpc43_dev_s *priv);
 #define     lpc43_givesem(priv) (nxsem_post(&priv->waitsem))
 static inline void lpc43_setclock(uint32_t clkdiv);
 static inline void lpc43_sdcard_clock(bool enable);
@@ -525,13 +525,14 @@ static void lpc43_putreg(uint32_t val, uint32_t addr)
  *   dev - Instance of the SD card device driver state structure.
  *
  * Returned Value:
- *   None
+ *   Normally OK, but may return -ECANCELED in the rare event that the task
+ *   has been canceled.
  *
  ****************************************************************************/
 
-static void lpc43_takesem(struct lpc43_dev_s *priv)
+static int lpc43_takesem(struct lpc43_dev_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->waitsem);
+  return nxsem_wait_uninterruptible(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -2329,7 +2330,18 @@ static sdio_eventset_t lpc43_eventwait(FAR struct sdio_dev_s *dev,
        * incremented and there will be no wait.
        */
 
-      lpc43_takesem(priv);
+      ret = lpc43_takesem(priv);
+      if (ret < 0)
+        {
+          /* Task canceled.  Cancel the wdog -- assuming it was started and
+           * return an SDIO error.
+           */
+
+          wd_cancel(priv->waitwdog);
+          leave_critical_section(flags);
+          return SDIOWAIT_ERROR;
+        }
+
       wkupevent = priv->wkupevent;
 
       /* Check if the event has occurred.  When the event has occurred, then
