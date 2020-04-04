@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_usbhost.h
  *
  *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
@@ -32,14 +32,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_USBHOST_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_USBHOST_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/usb/usbhost.h>
@@ -58,9 +58,9 @@
 #  error "Unsupported STM32L4 chip"
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USBHOST_TRACE
 enum usbhost_trace1codes_e
@@ -85,7 +85,7 @@ enum usbhost_trace1codes_e
   OTGFS_VTRACE1_GINT_PTXFE,          /* OTGFS Handle the periodic TxFIFO empty interrupt */
   OTGFS_VTRACE1_GINT_HC,             /* OTGFS Handle the host channels interrupt */
   OTGFS_VTRACE1_GINT_HPRT,           /* OTGFS Handle the host port interrupt */
-  OTGFS_VTRACE1_GINT_HPRT_POCCHNG,   /* OTGFS  HPRT: Port Over-Current Change*/
+  OTGFS_VTRACE1_GINT_HPRT_POCCHNG,   /* OTGFS  HPRT: Port Over-Current Change */
   OTGFS_VTRACE1_GINT_HPRT_PCDET,     /* OTGFS  HPRT: Port Connect Detect */
   OTGFS_VTRACE1_GINT_HPRT_PENCHNG,   /* OTGFS  HPRT: Port Enable Changed */
   OTGFS_VTRACE1_GINT_HPRT_LSDEV,     /* OTGFS  HPRT: Low Speed Device Connected */
@@ -139,11 +139,11 @@ enum usbhost_trace1codes_e
 
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-/*
- * STM32L4 USB OTG FS Host Driver Support
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/* STM32L4 USB OTG FS Host Driver Support
  *
  * Pre-requisites
  *
@@ -157,8 +157,8 @@ enum usbhost_trace1codes_e
  *    Default 128 (512 bytes)
  *  CONFIG_STM32L4_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
  *    in 32-bit words.  Default 96 (384 bytes)
- *  CONFIG_STM32L4_OTGFS_PTXFIFO_SIZE - Size of the periodic Tx FIFO in 32-bit
- *    words.  Default 96 (384 bytes)
+ *  CONFIG_STM32L4_OTGFS_PTXFIFO_SIZE - Size of the periodic Tx FIFO in
+ *    32-bit words.  Default 96 (384 bytes)
  *  CONFIG_STM32L4_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
  *    want to do that?
  *
@@ -166,9 +166,9 @@ enum usbhost_trace1codes_e
  *    debug.  Depends on CONFIG_DEBUG.
  */
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -181,31 +181,34 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/***********************************************************************************
+/****************************************************************************
  * Name: stm32l4_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided be
- *   each platform that implements the STM32L4 OTG FS host interface
+ *   Enable/disable driving of VBUS 5V output.  This function must be
+ *   provided be each platform that implements the STM32L4 OTG FS host
+ *   interface
  *
- *   "On-chip 5 V VBUS generation is not supported. For this reason, a charge pump
- *    or, if 5 V are available on the application board, a basic power switch, must
- *    be added externally to drive the 5 V VBUS line. The external charge pump can
- *    be driven by any GPIO output. When the application decides to power on VBUS
- *    using the chosen GPIO, it must also set the port power bit in the host port
- *    control and status register (PPWR bit in OTG_FS_HPRT).
+ *   "On-chip 5 V VBUS generation is not supported. For this reason, a charge
+ *    pump or, if 5 V are available on the application board, a basic power
+ *    switch, must be added externally to drive the 5 V VBUS line. The
+ *    external charge pump can be driven by any GPIO output. When the
+ *    application decides to power on VBUS using the chosen GPIO, it must
+ *    also set the port power bit in the host port control and status
+ *    register (PPWR bit in OTG_FS_HPRT).
  *
- *   "The application uses this field to control power to this port, and the core
- *    clears this bit on an over current condition."
+ *   "The application uses this field to control power to this port, and the
+ *    core clears this bit on an over current condition."
  *
  * Input Parameters:
- *   iface - For future growth to handle multiple USB host interface.  Should be zero.
+ *   iface - For future growth to handle multiple USB host interface.
+ *     Should be zero.
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:
  *   None
  *
- ***********************************************************************************/
+ ****************************************************************************/
 
 void stm32l4_usbhost_vbusdrive(int iface, bool enable);
 
