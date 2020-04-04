@@ -244,10 +244,15 @@
 struct sdio_softc_s
 {
   int func_num;               /* number of I/O functions (SDIO) */
-  FAR struct sdio_function_s *fn[SDIO_FUNC_NUM_MAX + 1];     /* selected card */
+
+  /* Selected card */
+
+  FAR struct sdio_function_s *fn[SDIO_FUNC_NUM_MAX + 1];
+
   bool full_speed;            /* high speed mode */
   uint8_t dma;                /* true: hardware supports DMA */
-  sem_t  sem;                 /* Assures mutually exclusive access to the sdio */
+  sem_t  sem;                 /* Assures mutually exclusive access to the
+                               * sdio */
 };
 
 /* Structure describing either an SDIO device I/O function. */
@@ -256,10 +261,11 @@ struct sdio_function_s
 {
   /* common members */
 
-  FAR struct sdio_softc_s *sc;  /* card slot softc */
-  sdio_irqhandler_t *irq_callback;    /* function callback */
-  int number;                 /* I/O function number or -1, 0 for func0,1 for func1... */
-  struct sdio_cis_s cis;        /* decoded CIS */
+  FAR struct sdio_softc_s *sc;      /* Dard slot softc */
+  sdio_irqhandler_t *irq_callback;  /* function callback */
+  int number;                       /* I/O function number or -1, 0 for
+                                     * func0,1 for func1... */
+  struct sdio_cis_s cis;            /* Decoded CIS */
 };
 #endif /* CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION */
 
@@ -267,41 +273,43 @@ struct sdio_function_s
 
 struct cxd56_sdiodev_s
 {
-  struct sdio_dev_s  dev;        /* Standard, base SDIO interface */
+  struct sdio_dev_s  dev;             /* Standard, base SDIO interface */
 
   /* CXD56xx-specific extensions */
 
   /* Event support */
 
-  sem_t              waitsem;    /* Implements event waiting */
-  sdio_eventset_t    waitevents; /* Set of events to be waited for */
-  uint32_t           waitints;   /* Interrupt enables for event waiting */
+  sem_t              waitsem;         /* Implements event waiting */
+  sdio_eventset_t    waitevents;      /* Set of events to be waited for */
+  uint32_t           waitints;        /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  WDOG_ID            waitwdog;   /* Watchdog that handles event timeouts */
+  WDOG_ID            waitwdog;        /* Watchdog that handles event timeouts */
 
   /* Callback support */
 
-  sdio_statset_t     cdstatus;   /* Card status */
-  sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
-  worker_t           callback;   /* Registered callback function */
-  void              *cbarg;      /* Registered callback argument */
-  struct work_s      cbwork;     /* Callback work queue structure */
+  sdio_statset_t     cdstatus;        /* Card status */
+  sdio_eventset_t    cbevents;        /* Set of events to be cause callbacks */
+  worker_t           callback;        /* Registered callback function */
+  void              *cbarg;           /* Registered callback argument */
+  struct work_s      cbwork;          /* Callback work queue structure */
 
   /* Interrupt mode data transfer support */
 
-  uint32_t          *buffer;     /* Address of current R/W buffer */
-  size_t             remaining;  /* Number of bytes remaining in the transfer */
-  uint32_t           xfrints;    /* Interrupt enables for data transfer */
+  uint32_t          *buffer;          /* Address of current R/W buffer */
+  size_t             remaining;       /* Number of bytes remaining in the
+                                       * transfer */
+  uint32_t           xfrints;         /* Interrupt enables for data transfer */
 
   /* DMA data transfer support */
 
 #ifdef CONFIG_SDIO_DMA
-  volatile uint8_t   xfrflags;   /* Used to synchronize SDIO and DMA completion events */
+  volatile uint8_t   xfrflags;        /* Used to synchronize SDIO and DMA
+                                       * completion events */
   bool usedma;
   bool dmasend_prepare;
   size_t   receive_size;
-  uint8_t  *aligned_buffer; /* Used to buffer alignment */
-  uint8_t  *receive_buffer; /* Used to keep receive buffer address */
+  uint8_t  *aligned_buffer;           /* Used to buffer alignment */
+  uint8_t  *receive_buffer;           /* Used to keep receive buffer address */
   uint32_t dma_cmd;
   uint32_t dmasend_cmd;
   uint32_t dmasend_regcmd;
@@ -311,7 +319,8 @@ struct cxd56_sdiodev_s
 
   uint16_t blocksize;
 #ifdef CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION
-  struct sdio_softc_s sc;           /* Structure describing a single SDIO card slot. */
+  struct sdio_softc_s sc;           /* Structure describing a single SDIO
+                                     * card slot. */
 #endif /* CONFIG_CXD56_SDIO_ENABLE_MULTIFUNCTION */
 };
 
@@ -424,7 +433,8 @@ static int  cxd56_sdio_sendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, uint32_t nbytes);
 static int  cxd56_sdio_cancel(FAR struct sdio_dev_s *dev);
 
-static int  cxd56_sdio_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
+static int  cxd56_sdio_waitresponse(FAR struct sdio_dev_s *dev,
+              uint32_t cmd);
 static int  cxd56_sdio_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rshort);
 static int  cxd56_sdio_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
@@ -501,13 +511,13 @@ struct cxd56_sdiodev_s g_sdhcdev =
       .sendsetup        = cxd56_sdio_sendsetup,
       .cancel           = cxd56_sdio_cancel,
       .waitresponse     = cxd56_sdio_waitresponse,
-      .recvR1           = cxd56_sdio_recvshortcrc,
-      .recvR2           = cxd56_sdio_recvlong,
-      .recvR3           = cxd56_sdio_recvshort,
-      .recvR4           = cxd56_sdio_recvshort,
-      .recvR5           = cxd56_sdio_recvshort,
-      .recvR6           = cxd56_sdio_recvshortcrc,
-      .recvR7           = cxd56_sdio_recvshort,
+      .recv_r1          = cxd56_sdio_recvshortcrc,
+      .recv_r2          = cxd56_sdio_recvlong,
+      .recv_r3          = cxd56_sdio_recvshort,
+      .recv_r4          = cxd56_sdio_recvshort,
+      .recv_r5          = cxd56_sdio_recvshort,
+      .recv_r6          = cxd56_sdio_recvshortcrc,
+      .recv_r7          = cxd56_sdio_recvshort,
       .waitenable       = cxd56_sdio_waitenable,
       .eventwait        = cxd56_sdio_eventwait,
       .callbackenable   = cxd56_sdio_callbackenable,
@@ -543,10 +553,6 @@ static FAR uint32_t cxd56_sdhci_adma_dscr[CXD56_SDIO_MAX_LEN_ADMA_DSCR * 2];
 
 /****************************************************************************
  * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Low-level Helpers
  ****************************************************************************/
 
 /****************************************************************************
@@ -636,10 +642,6 @@ static void cxd56_configxfrints(struct cxd56_sdiodev_s *priv,
 }
 
 /****************************************************************************
- * DMA Helpers
- ****************************************************************************/
-
-/****************************************************************************
  * Name: cxd56_sampleinit
  *
  * Description:
@@ -713,7 +715,8 @@ static void cxd56_sample(struct cxd56_sdiodev_s *priv, int index)
 
 #ifdef CONFIG_SDIO_XFRDEBUG
 static void cxd56_dumpsample(struct cxd56_sdiodev_s *priv,
-                               struct cxd56_sdhcregs_s *regs, const char *msg)
+                             struct cxd56_sdhcregs_s *regs,
+                             const char *msg)
 {
   mcinfo("SDHC Registers: %s\n", msg);
   mcinfo("   DSADDR[%08x]: %08x\n", CXD56_SDHCI_DSADDR,    regs->dsaddr);
@@ -775,10 +778,6 @@ static void cxd56_showregs(struct cxd56_sdiodev_s *priv, const char *msg)
   cxd56_dumpsample(priv, &regs, msg);
 }
 #endif
-
-/****************************************************************************
- * Data Transfer Helpers
- ****************************************************************************/
 
 /****************************************************************************
  * Name: cxd56_dataconfig
@@ -1156,10 +1155,6 @@ static void cxd56_endtransfer(struct cxd56_sdiodev_s *priv,
 }
 
 /****************************************************************************
- * Interrupt Handling
- ****************************************************************************/
-
-/****************************************************************************
  * Name: cxd56_interrupt
  *
  * Description:
@@ -1315,10 +1310,6 @@ static int cxd56_interrupt(int irq, FAR void *context, FAR void *arg)
 
   return OK;
 }
-
-/****************************************************************************
- * SDIO Interface Methods
- ****************************************************************************/
 
 /****************************************************************************
  * Name: cxd56_sdio_lock
@@ -1988,12 +1979,13 @@ static void cxd56_blocksetup(FAR struct sdio_dev_s *dev,
  * Name: cxd56_sdio_recvsetup
  *
  * Description:
- *   Setup hardware in preparation for data transfer from the card in non-DMA
- *   (interrupt driven mode).  This method will do whatever controller setup
- *   is necessary.  This would be called for SD memory just BEFORE sending
- *   CMD13 (SEND_STATUS), CMD17 (READ_SINGLE_BLOCK), CMD18
- *   (READ_MULTIPLE_BLOCKS), ACMD51 (SEND_SCR), etc.  Normally, SDIO_WAITEVENT
- *   will be called to receive the indication that the transfer is complete.
+ *   Setup hardware in preparation for data transfer from the card in non-
+ *   DMA (interrupt driven mode).  This method will do whatever controller
+ *   setup is necessary.  This would be called for SD memory just BEFORE
+ *   sending CMD13 (SEND_STATUS), CMD17 (READ_SINGLE_BLOCK), CMD18
+ *   (READ_MULTIPLE_BLOCKS), ACMD51 (SEND_SCR), etc.  Normally,
+ *   SDIO_WAITEVENT will be called to receive the indication that the
+ *   transfer is complete.
  *
  * Input Parameters:
  *   dev    - An instance of the SDIO device interface
@@ -2280,7 +2272,7 @@ static int cxd56_sdio_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 }
 
 /****************************************************************************
- * Name: cxd56_sdio_recvRx
+ * Name: cxd56_sdio_recv*
  *
  * Description:
  *   Receive response to SDIO command.  Only the critical payload is
@@ -2658,10 +2650,10 @@ static sdio_eventset_t cxd56_sdio_eventwait(FAR struct sdio_dev_s *dev,
         }
     }
 
-  /* Loop until the event (or the timeout occurs). Race conditions are avoided
-   * by calling cxd56_waitenable prior to triggering the logic that will cause
-   * the wait to terminate.  Under certain race conditions, the waited-for
-   * may have already occurred before this function was called!
+  /* Loop until the event (or the timeout occurs). Race conditions are
+   * avoided by calling cxd56_waitenable prior to triggering the logic that
+   * will cause the wait to terminate.  Under certain race conditions, the
+   * waited-for may have already occurred before this function was called!
    */
 
   for (; ; )
@@ -2909,7 +2901,8 @@ static int cxd56_sdio_dmarecvsetup(FAR struct sdio_dev_s *dev,
 
       /* Allocate aligned buffer */
 
-      priv->aligned_buffer = (uint8_t *) kmm_malloc(sizeof(uint8_t) * buflen);
+      priv->aligned_buffer = (uint8_t *)
+        kmm_malloc(sizeof(uint8_t) * buflen);
 
       /* Keep receive buffer address */
 
@@ -3024,7 +3017,8 @@ static int cxd56_sdio_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Allocate aligned buffer */
 
-      priv->aligned_buffer = (uint8_t *) kmm_malloc(sizeof(uint8_t) * buflen);
+      priv->aligned_buffer = (uint8_t *)
+        kmm_malloc(sizeof(uint8_t) * buflen);
 
       /* Copy buffer to aligned address */
 
@@ -3208,9 +3202,9 @@ static void cxd56_sdio_callback(void *arg)
       priv->cbevents = 0;
       leave_critical_section(flags);
 
-      /* Callbacks cannot be performed in the context of an interrupt handler.
-       * If we are in an interrupt handler, then queue the callback to be
-       * performed later on the work thread.
+      /* Callbacks cannot be performed in the context of an interrupt
+       * handler.  If we are in an interrupt handler, then queue the
+       * callback to be performed later on the work thread.
        */
 
       if (up_interrupt_context())/* (1) */
@@ -3218,7 +3212,10 @@ static void cxd56_sdio_callback(void *arg)
           /* Yes.. queue it */
 
           work_cancel(HPWORK, &priv->cbwork);
-          mcinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
+
+          mcinfo("Queuing callback to %p(%p)\n",
+                 priv->callback, priv->cbarg);
+
           work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
                      priv->cbarg, delay);
         }
@@ -3227,7 +3224,9 @@ static void cxd56_sdio_callback(void *arg)
           /* No.. then just call the callback here */
 
           up_mdelay(delay);
+
           mcinfo("Callback to %p(%p)\n", priv->callback, priv->cbarg);
+
           priv->callback(priv->cbarg);
         }
     }
@@ -3480,7 +3479,9 @@ static FAR struct sdio_function_s *
   FAR struct sdio_function_s *sf;
 
   DEBUGASSERT(sc);
-  sf = (FAR struct sdio_function_s *)kmm_malloc(sizeof(struct sdio_function_s));
+
+  sf = (FAR struct sdio_function_s *)
+    kmm_malloc(sizeof(struct sdio_function_s));
   if (!sf)
     {
       mcerr("ERROR: Failed\n");
@@ -3984,7 +3985,8 @@ static int cxd56_sdio_readb(FAR struct sdio_dev_s *dev, int func_num,
  ****************************************************************************/
 
 static int cxd56_sdio_writeb(FAR struct sdio_dev_s *dev, int func_num,
-                             uint32_t addr, uint8_t data, FAR uint8_t * rdata)
+                             uint32_t addr, uint8_t data,
+                             FAR uint8_t * rdata)
 {
   struct cxd56_sdiodev_s *priv = (struct cxd56_sdiodev_s *)dev;
   int ret;
@@ -4500,7 +4502,8 @@ SDIO_INIT_CIS_ERR:
  *   slotno - Not used.
  *
  * Returned Values:
- *   A reference to an SDIO interface structure. NULL is returned on failures.
+ *   A reference to an SDIO interface structure. NULL is returned on
+ *   failures.
  *
  ****************************************************************************/
 
@@ -4612,7 +4615,8 @@ FAR struct sdio_dev_s *cxd56_sdhci_initialize(int slotno)
  *   slotno - Not used.
  *
  * Returned Values:
- *   A reference to an SDIO interface structure. NULL is returned on failures.
+ *   A reference to an SDIO interface structure. NULL is returned on
+ *   failures.
  *
  ****************************************************************************/
 
