@@ -847,7 +847,8 @@ static void ssc_dump_queues(struct sam_transport_s *xpt, const char *msg)
  *   priv - A reference to the SSC peripheral state
  *
  * Returned Value:
- *  None
+ *   Normally OK, but may return -ECANCELED in the rare event that the task
+ *   has been canceled.
  *
  ****************************************************************************/
 
@@ -866,7 +867,8 @@ static int ssc_exclsem_take(struct sam_ssc_s *priv)
  *   priv - A reference to the SSC peripheral state
  *
  * Returned Value:
- *  None
+ *   Normally OK, but may return -ECANCELED in the rare event that the task
+ *   has been canceled.
  *
  ****************************************************************************/
 

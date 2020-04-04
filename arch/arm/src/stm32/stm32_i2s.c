@@ -259,24 +259,29 @@
 
 struct stm32_buffer_s
 {
-  struct stm32_buffer_s *flink;  /* Supports a singly linked list */
-  i2s_callback_t callback;     /* Function to call when the transfer completes */
-  uint32_t timeout;            /* The timeout value to use with DMA transfers */
-  void *arg;                   /* The argument to be returned with the callback */
-  struct ap_buffer_s *apb;     /* The audio buffer */
-  int result;                  /* The result of the transfer */
+  struct stm32_buffer_s *flink; /* Supports a singly linked list */
+  i2s_callback_t callback;      /* Function to call when the transfer
+                                 * completes */
+  uint32_t timeout;             /* The timeout value to use with DMA
+                                 * transfers */
+  void *arg;                    /* The argument to be returned with the
+                                 * callback */
+  struct ap_buffer_s *apb;      /* The audio buffer */
+  int result;                   /* The result of the transfer */
 };
 
-/* This structure describes the state of one receiver or transmitter transport */
+/* This structure describes the state of one receiver or transmitter
+ * transport.
+ */
 
 struct stm32_transport_s
 {
-  DMA_HANDLE dma;             /* I2S DMA handle */
-  WDOG_ID dog;                /* Watchdog that handles DMA timeouts */
-  sq_queue_t pend;            /* A queue of pending transfers */
-  sq_queue_t act;             /* A queue of active transfers */
-  sq_queue_t done;            /* A queue of completed transfers */
-  struct work_s work;         /* Supports worker thread operations */
+  DMA_HANDLE dma;               /* I2S DMA handle */
+  WDOG_ID dog;                  /* Watchdog that handles DMA timeouts */
+  sq_queue_t pend;              /* A queue of pending transfers */
+  sq_queue_t act;               /* A queue of active transfers */
+  sq_queue_t done;              /* A queue of completed transfers */
+  struct work_s work;           /* Supports worker thread operations */
 
 #ifdef CONFIG_STM32_I2S_DMADEBUG
   struct stm32_dmaregs_s dmaregs[DMA_NSAMPLES];
@@ -299,7 +304,8 @@ struct stm32_i2s_s
   uint8_t           txenab:1;     /* True: TX transfers enabled */
   uint8_t           i2sno:6;      /* I2S controller number (0 or 1) */
 #ifdef I2S_HAVE_MCK
-  uint32_t          samplerate;   /* Data sample rate (determines only MCK divider) */
+  uint32_t          samplerate;   /* Data sample rate (determines only MCK
+                                   * divider) */
 #endif
   uint32_t          rxccr;        /* DMA control register for RX transfers */
   uint32_t          txccr;        /* DMA control register for TX transfers */
@@ -312,18 +318,18 @@ struct stm32_i2s_s
 
   /* Pre-allocated pool of buffer containers */
 
-  sem_t bufsem;                   /* Buffer wait semaphore */
-  struct stm32_buffer_s *freelist;  /* A list a free buffer containers */
+  sem_t bufsem;                    /* Buffer wait semaphore */
+  struct stm32_buffer_s *freelist; /* A list a free buffer containers */
   struct stm32_buffer_s containers[CONFIG_STM32_I2S_MAXINFLIGHT];
 
   /* Debug stuff */
 
 #ifdef CONFIG_STM32_I2S_REGDEBUG
-  bool     wr;                /* Last was a write */
-  uint32_t regaddr;           /* Last address */
-  uint16_t regval;            /* Last value */
-  int      count;             /* Number of times */
-#endif /* CONFIG_STM32_I2S_REGDEBUG */
+  bool     wr;                     /* Last was a write */
+  uint32_t regaddr;                /* Last address */
+  uint16_t regval;                 /* Last value */
+  int      count;                  /* Number of times */
+#endif
 };
 
 /****************************************************************************
@@ -359,10 +365,10 @@ static void     i2s_dump_regs(struct stm32_i2s_s *priv, const char *msg);
 
 /* Semaphore helpers */
 
-static void     i2s_exclsem_take(struct stm32_i2s_s *priv);
+static int      i2s_exclsem_take(struct stm32_i2s_s *priv);
 #define         i2s_exclsem_give(priv) nxsem_post(&priv->exclsem)
 
-static void     i2s_bufsem_take(struct stm32_i2s_s *priv);
+static int      i2s_bufsem_take(struct stm32_i2s_s *priv);
 #define         i2s_bufsem_give(priv) nxsem_post(&priv->bufsem)
 
 /* Buffer container helpers */
@@ -632,13 +638,14 @@ static void i2s_dump_regs(struct stm32_i2s_s *priv, const char *msg)
  *   priv - A reference to the i2s peripheral state
  *
  * Returned Value:
- *  None
+ *   Normally OK, but may return -ECANCELED in the rare event that the task
+ *   has been canceled.
  *
  ****************************************************************************/
 
-static void i2s_exclsem_take(struct stm32_i2s_s *priv)
+static int i2s_exclsem_take(struct stm32_i2s_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->exclsem);
+  return nxsem_wait_uninterruptible(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -651,13 +658,14 @@ static void i2s_exclsem_take(struct stm32_i2s_s *priv)
  *   priv - A reference to the i2s peripheral state
  *
  * Returned Value:
- *  None
+ *   Normally OK, but may return -ECANCELED in the rare event that the task
+ *   has been canceled.
  *
  ****************************************************************************/
 
-static void i2s_bufsem_take(struct stm32_i2s_s *priv)
+static int i2s_bufsem_take(struct stm32_i2s_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->bufsem);
+  return nxsem_wait_uninterruptible(&priv->bufsem);
 }
 
 /****************************************************************************
@@ -684,12 +692,17 @@ static struct stm32_buffer_s *i2s_buf_allocate(struct stm32_i2s_s *priv)
 {
   struct stm32_buffer_s *bfcontainer;
   irqstate_t flags;
+  int ret;
 
   /* Set aside a buffer container.  By doing this, we guarantee that we will
    * have at least one free buffer container.
    */
 
-  i2s_bufsem_take(priv);
+  ret = i2s_bufsem_take(priv);
+  if (ret < 0)
+    {
+      return NULL;
+    }
 
   /* Get the buffer from the head of the free list */
 
@@ -1893,7 +1906,11 @@ static int stm32_i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   /* Get exclusive access to the I2S driver data */
 
-  i2s_exclsem_take(priv);
+  ret = i2s_exclsem_take(priv);
+  if (ret < 0)
+    {
+      goto errout_with_buf;
+    }
 
   /* Has the RX channel been enabled? */
 
@@ -1933,6 +1950,8 @@ static int stm32_i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
 errout_with_exclsem:
   i2s_exclsem_give(priv);
+
+errout_with_buf:
   i2s_buf_free(priv, bfcontainer);
   return ret;
 
@@ -2099,7 +2118,11 @@ static int stm32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   /* Get exclusive access to the I2S driver data */
 
-  i2s_exclsem_take(priv);
+  ret = i2s_exclsem_take(priv);
+  if (ret < 0)
+    {
+      goto errout_with_buf;
+    }
 
   /* Has the TX channel been enabled? */
 
@@ -2139,6 +2162,8 @@ static int stm32_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
 errout_with_exclsem:
   i2s_exclsem_give(priv);
+
+errout_with_buf:
   i2s_buf_free(priv, bfcontainer);
   return ret;
 
