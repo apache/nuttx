@@ -207,7 +207,8 @@ static void can_dumpmbregs(FAR struct sam_can_s *priv, FAR const char *msg);
 
 /* Semaphore helpers */
 
-static void can_semtake(FAR struct sam_can_s *priv);
+static int  can_semtake(FAR struct sam_can_s *priv);
+static int  can_semtake_noncancelable(FAR struct sam_can_s *priv);
 #define can_semgive(priv) nxsem_post(&priv->exclsem)
 
 /* Mailboxes */
@@ -563,13 +564,48 @@ static void can_dumpmbregs(FAR struct sam_can_s *priv, FAR const char *msg)
  *   priv - A reference to the CAN peripheral state
  *
  * Returned Value:
- *  None
+ *  Normally success (OK) is returned, but the error -ECANCELED may be
+ *  return in the event that task has been canceled.
  *
  ****************************************************************************/
 
-static void can_semtake(FAR struct sam_can_s *priv)
+static int can_semtake(FAR struct sam_can_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->exclsem);
+  return nxsem_wait_uninterruptible(&priv->exclsem);
+}
+
+/****************************************************************************
+ * Name: can_semtake_noncancelable
+ *
+ * Description:
+ *   This is just a wrapper to handle the annoying behavior of semaphore
+ *   waits that return due to the receipt of a signal.  This version also
+ *   ignores attempts to cancel the thread.
+ *
+ ****************************************************************************/
+
+static int can_semtake_noncancelable(FAR struct sam_can_s *priv)
+{
+  int result;
+  int ret = OK;
+
+  do
+    {
+      result = nxsem_wait_uninterruptible(&priv->exclsem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(result == OK || result == -ECANCELED);
+      if (ret == OK && result < 0)
+        {
+          ret = result;
+        }
+    }
+  while (result < 0);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -765,6 +801,7 @@ static void can_reset(FAR struct can_dev_s *dev)
 {
   FAR struct sam_can_s *priv;
   FAR const struct sam_config_s *config;
+  int ret;
   int i;
 
   DEBUGASSERT(dev);
@@ -778,7 +815,7 @@ static void can_reset(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the CAN peripheral */
 
-  can_semtake(priv);
+  can_semtake_noncancelable();
 
   /* Disable all interrupts */
 
@@ -834,7 +871,11 @@ static int can_setup(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the CAN peripheral */
 
-  can_semtake(priv);
+  ret = can_semtake(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* CAN hardware initialization */
 
@@ -915,7 +956,7 @@ static void can_shutdown(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the CAN peripheral */
 
-  can_semtake(priv);
+  can_semtake_noncancelable(priv);
 
   /* Disable the CAN interrupts */
 
@@ -987,7 +1028,7 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
 
   /* Get exclusive access to the CAN peripheral */
 
-  can_semtake(priv);
+  can_semtake_noncancelable(priv);
 
   /* Support disabling interrupts on any mailboxes that are actively
    * transmitting (txmbset); also suppress enabling new TX mailbox until
@@ -1090,7 +1131,11 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   /* Get exclusive access to the CAN peripheral */
 
-  can_semtake(priv);
+  ret = can_semtake(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Allocate a mailbox */
 
@@ -1206,7 +1251,11 @@ static bool can_txready(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the CAN peripheral */
 
-  can_semtake(priv);
+  ret = can_semtake(priv);
+  if (ret < 0)
+    {
+      return false;
+    }
 
   /* Return true not all mailboxes are in-use */
 

@@ -1273,14 +1273,15 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
  *   None
  *
  * Returned Value:
- *   None
+ *  Normally success (OK) is returned, but the error -ECANCELED may be
+ *  return in the event that task has been canceled.
  *
  ****************************************************************************/
 
 #if NAND_NPMECC_BANKS > 1
-void pmecc_lock(void)
+int pmecc_lock(void)
 {
-  nxsem_wait_uninterruptible(&g_pmecc.exclsem);
+  return nxsem_wait_uninterruptible(&g_pmecc.exclsem);
 }
 #endif
 

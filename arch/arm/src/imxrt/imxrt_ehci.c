@@ -434,7 +434,7 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
 /* Semaphores ***************************************************************/
 
 static int imxrt_takesem(sem_t *sem);
-static int imxrt_takesem_uninterruptible(sem_t *sem);
+static int imxrt_takesem_noncancelable(sem_t *sem);
 #define imxrt_givesem(s) nxsem_post(s);
 
 /* Allocators ***************************************************************/
@@ -1078,7 +1078,7 @@ static int imxrt_takesem(sem_t *sem)
 }
 
 /****************************************************************************
- * Name: imxrt_takesem_uninterruptible
+ * Name: imxrt_takesem_noncancelable
  *
  * Description:
  *   This is just a wrapper to handle the annoying behavior of semaphore
@@ -1087,7 +1087,7 @@ static int imxrt_takesem(sem_t *sem)
  *
  ****************************************************************************/
 
-static int imxrt_takesem_uninterruptible(sem_t *sem)
+static int imxrt_takesem_noncancelable(sem_t *sem)
 {
   int result;
   int ret = OK;
@@ -2591,7 +2591,7 @@ static ssize_t imxrt_transfer_wait(struct imxrt_epinfo_s *epinfo)
    * this upon return.
    */
 
-  ret2 = imxrt_takesem_uninterruptible(&g_ehci.exclsem);
+  ret2 = imxrt_takesem_noncancelable(&g_ehci.exclsem);
   if (ret >= 0 && ret2 < 0)
     {
       ret = ret2;
@@ -2615,7 +2615,7 @@ static ssize_t imxrt_transfer_wait(struct imxrt_epinfo_s *epinfo)
     }
 #endif
 
-  /* Did imxrt_ioc_wait() or imxrt_takesem_uninterruptible() report an
+  /* Did imxrt_ioc_wait() or imxrt_takesem_noncancelable() report an
    * error?
    */
 
@@ -3338,7 +3338,7 @@ static void imxrt_ehci_bottomhalf(FAR void *arg)
    * real option (other than to reschedule and delay).
    */
 
-  imxrt_takesem_uninterruptible(&g_ehci.exclsem);
+  imxrt_takesem_noncancelable(&g_ehci.exclsem);
 
   /* Handle all unmasked interrupt sources
    * USB Interrupt (USBINT)
