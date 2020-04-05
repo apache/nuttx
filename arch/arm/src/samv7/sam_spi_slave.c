@@ -128,7 +128,7 @@ static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 #endif
 
 static int      spi_semtake(struct sam_spidev_s *priv);
-static void     spi_semtake_uninterruptible(struct sam_spidev_s *priv);
+static void     spi_semtake_noncancelable(struct sam_spidev_s *priv);
 #define         spi_semgive(priv) (nxsem_post(&(priv)->spisem))
 
 /* Interrupt Handling */
@@ -351,7 +351,7 @@ static int spi_semtake(struct sam_spidev_s *priv)
 }
 
 /****************************************************************************
- * Name: spi_semtake_uninterruptible
+ * Name: spi_semtake_noncancelable
  *
  * Description:
  *   Take the semaphore that enforces mutually exclusive access to SPI
@@ -365,7 +365,7 @@ static int spi_semtake(struct sam_spidev_s *priv)
  *
  ****************************************************************************/
 
-static void spi_semtake_uninterruptible(struct sam_spidev_s *priv)
+static void spi_semtake_noncancelable(struct sam_spidev_s *priv)
 {
   int ret;
 
@@ -881,7 +881,7 @@ static void spi_unbind(struct spi_sctrlr_s *sctrlr)
 
   /* Get exclusive access to the SPI device */
 
-  spi_semtake_uninterruptible(priv);
+  spi_semtake_noncancelable(priv);
 
   /* Disable SPI interrupts (still enabled at the NVIC) */
 
@@ -1069,7 +1069,7 @@ static void spi_qflush(struct spi_sctrlr_s *sctrlr)
 
   /* Get exclusive access to the SPI device */
 
-  spi_semtake_uninterruptible(priv);
+  spi_semtake_noncancelable(priv);
 
   /* Mark the buffer empty, momentarily disabling interrupts */
 

@@ -370,7 +370,7 @@ static void lpc54_putreg(uint32_t val, uint32_t addr);
 /* Semaphores ***************************************************************/
 
 static int  lpc54_takesem(sem_t *sem);
-static int  lpc54_takesem_uninterruptible(sem_t *sem);
+static int  lpc54_takesem_noncancelable(sem_t *sem);
 #define lpc54_givesem(s) nxsem_post(s);
 
 /* Byte stream access helper functions **************************************/
@@ -692,7 +692,7 @@ static int lpc54_takesem(sem_t *sem)
 }
 
 /****************************************************************************
- * Name: lpc54_takesem_uninterruptible
+ * Name: lpc54_takesem_noncancelable
  *
  * Description:
  *   This is just a wrapper to handle the annoying behavior of semaphore
@@ -701,7 +701,7 @@ static int lpc54_takesem(sem_t *sem)
  *
  ****************************************************************************/
 
-static int lpc54_takesem_uninterruptible(sem_t *sem)
+static int lpc54_takesem_noncancelable(sem_t *sem)
 {
   int result;
   int ret = OK;
@@ -2672,7 +2672,7 @@ static int lpc54_free(struct usbhost_driver_s *drvr, uint8_t *buffer)
 
   /* We must have exclusive access to the transfer buffer pool */
 
-  ret = lpc54_takesem_uninterruptible(&priv->exclsem);
+  ret = lpc54_takesem_noncancelable(&priv->exclsem);
   lpc54_tbfree(buffer);
   lpc54_givesem(&priv->exclsem);
   return ret;

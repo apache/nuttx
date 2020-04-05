@@ -240,7 +240,7 @@ static inline void imxrt_lpi2c_modifyreg(FAR struct imxrt_lpi2c_priv_s *priv,
                                          uint32_t setbits);
 static inline int imxrt_lpi2c_sem_wait(FAR struct imxrt_lpi2c_priv_s *priv);
 static int
-  imxrt_lpi2c_sem_wait_uninterruptible(FAR struct imxrt_lpi2c_priv_s *priv);
+  imxrt_lpi2c_sem_wait_noncancelable(FAR struct imxrt_lpi2c_priv_s *priv);
 
 #ifdef CONFIG_IMXRT_LPI2C_DYNTIMEO
 static useconds_t imxrt_lpi2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
@@ -536,7 +536,7 @@ static inline int imxrt_lpi2c_sem_wait(FAR struct imxrt_lpi2c_priv_s *priv)
 }
 
 /****************************************************************************
- * Name: imxrt_lpi2c_sem_wait_uninterruptible
+ * Name: imxrt_lpi2c_sem_wait_noncancelable
  *
  * Description:
  *   Take the exclusive access, waiting as necessary.
@@ -544,7 +544,7 @@ static inline int imxrt_lpi2c_sem_wait(FAR struct imxrt_lpi2c_priv_s *priv)
  ****************************************************************************/
 
 static int
-  imxrt_lpi2c_sem_wait_uninterruptible(FAR struct imxrt_lpi2c_priv_s *priv)
+  imxrt_lpi2c_sem_wait_noncancelable(FAR struct imxrt_lpi2c_priv_s *priv)
 {
   return nxsem_wait_uninterruptible(&priv->sem_excl);
 }
@@ -1795,7 +1795,7 @@ static int imxrt_lpi2c_reset(FAR struct i2c_master_s *dev)
 
   /* Lock out other clients */
 
-  ret = imxrt_lpi2c_sem_wait_uninterruptible(priv);
+  ret = imxrt_lpi2c_sem_wait_noncancelable(priv);
   if (ret < 0)
     {
       return ret;

@@ -419,7 +419,7 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
 /* Semaphores ***************************************************************/
 
 static int lpc31_takesem(sem_t *sem);
-static int lpc31_takesem_uninterruptible(sem_t *sem);
+static int lpc31_takesem_noncancelable(sem_t *sem);
 #define lpc31_givesem(s) nxsem_post(s);
 
 /* Allocators ***************************************************************/
@@ -1064,7 +1064,7 @@ static int lpc31_takesem(sem_t *sem)
 }
 
 /****************************************************************************
- * Name: lpc31_takesem_uninterruptible
+ * Name: lpc31_takesem_noncancelable
  *
  * Description:
  *   This is just a wrapper to handle the annoying behavior of semaphore
@@ -1073,7 +1073,7 @@ static int lpc31_takesem(sem_t *sem)
  *
  ****************************************************************************/
 
-static int lpc31_takesem_uninterruptible(sem_t *sem)
+static int lpc31_takesem_noncancelable(sem_t *sem)
 {
   int result;
   int ret = OK;
@@ -2575,7 +2575,7 @@ static ssize_t lpc31_transfer_wait(struct lpc31_epinfo_s *epinfo)
    * this upon return.
    */
 
-  ret2 = lpc31_takesem_uninterruptible(&g_ehci.exclsem);
+  ret2 = lpc31_takesem_noncancelable(&g_ehci.exclsem);
   if (ret2 < 0)
     {
       ret = ret2;
@@ -2599,7 +2599,7 @@ static ssize_t lpc31_transfer_wait(struct lpc31_epinfo_s *epinfo)
     }
 #endif
 
-  /* Did lpc31_ioc_wait() or lpc31_takesem_uninterruptible() report an
+  /* Did lpc31_ioc_wait() or lpc31_takesem_noncancelable() report an
    * error?
    */
 
@@ -3322,7 +3322,7 @@ static void lpc31_ehci_bottomhalf(FAR void *arg)
    * real option (other than to reschedule and delay).
    */
 
-  lpc31_takesem_uninterruptible(&g_ehci.exclsem);
+  lpc31_takesem_noncancelable(&g_ehci.exclsem);
 
   /* Handle all unmasked interrupt sources */
 

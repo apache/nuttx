@@ -479,7 +479,7 @@ static inline void stm32l4_i2c_modifyreg32(FAR struct stm32l4_i2c_priv_s *priv,
                                            uint8_t offset, uint32_t clearbits,
                                            uint32_t setbits);
 static inline int stm32l4_i2c_sem_wait(FAR struct i2c_master_s *dev);
-static int stm32l4_i2c_sem_wait_uninterruptible(FAR struct i2c_master_s *dev);
+static int stm32l4_i2c_sem_wait_noncancelable(FAR struct i2c_master_s *dev);
 #ifdef CONFIG_STM32L4_I2C_DYNTIMEO
 static useconds_t stm32l4_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
 #endif /* CONFIG_STM32L4_I2C_DYNTIMEO */
@@ -752,14 +752,14 @@ static inline int stm32l4_i2c_sem_wait(FAR struct i2c_master_s *dev)
 }
 
 /************************************************************************************
- * Name: stm32l4_i2c_sem_wait_uninterruptible
+ * Name: stm32l4_i2c_sem_wait_noncancelable
  *
  * Description:
  *   Take the exclusive access, waiting as necessary
  *
  ************************************************************************************/
 
-static int stm32l4_i2c_sem_wait_uninterruptible(FAR struct i2c_master_s *dev)
+static int stm32l4_i2c_sem_wait_noncancelable(FAR struct i2c_master_s *dev)
 {
   return
     nxsem_wait_uninterruptible(&((struct stm32l4_i2c_inst_s *)dev)->priv->sem_excl);
@@ -2727,7 +2727,7 @@ static int stm32l4_i2c_reset(FAR struct i2c_master_s * dev)
 
   /* Lock out other clients */
 
-  ret = stm32l4_i2c_sem_wait_uninterruptible(dev);
+  ret = stm32l4_i2c_sem_wait_noncancelable(dev);
   if (ret < 0)
     {
       return ret;

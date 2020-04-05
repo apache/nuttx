@@ -281,7 +281,7 @@ static inline void efm32_i2c_modifyreg(FAR struct efm32_i2c_priv_s *priv,
                                        uint32_t setbits);
 static inline int efm32_i2c_sem_wait(FAR struct efm32_i2c_priv_s *priv);
 static int
-  efm32_i2c_sem_wait_uninterruptible(FAR struct efm32_i2c_priv_s *priv);
+  efm32_i2c_sem_wait_noncancelable(FAR struct efm32_i2c_priv_s *priv);
 
 #ifdef CONFIG_EFM32_I2C_DYNTIMEOUT
 static useconds_t efm32_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
@@ -493,7 +493,7 @@ static inline int efm32_i2c_sem_wait(FAR struct efm32_i2c_priv_s *priv)
 }
 
 /****************************************************************************
- * Name: efm32_i2c_sem_wait_uninterruptible
+ * Name: efm32_i2c_sem_wait_noncancelable
  *
  * Description:
  *   Take the exclusive access, waiting as necessary
@@ -501,7 +501,7 @@ static inline int efm32_i2c_sem_wait(FAR struct efm32_i2c_priv_s *priv)
  ****************************************************************************/
 
 static int
-  efm32_i2c_sem_wait_uninterruptible(FAR struct efm32_i2c_priv_s *priv)
+  efm32_i2c_sem_wait_noncancelable(FAR struct efm32_i2c_priv_s *priv)
 {
   return nxsem_wait_uninterruptible(&priv->sem_excl);
 }
@@ -1625,7 +1625,7 @@ int efm32_i2c_reset(FAR struct i2c_master_s *dev)
 
   /* Lock out other clients */
 
-  ret = efm32_i2c_sem_wait_uninterruptible(priv);
+  ret = efm32_i2c_sem_wait_noncancelable(priv);
   if (ret < 0)
     {
       return ret;

@@ -238,7 +238,7 @@ static inline void am335x_i2c_modifyreg(FAR struct am335x_i2c_priv_s *priv,
                                         uint32_t setbits);
 static inline int am335x_i2c_sem_wait(FAR struct am335x_i2c_priv_s *priv);
 static int
-  am335x_i2c_sem_wait_uninterruptible(FAR struct am335x_i2c_priv_s *priv);
+  am335x_i2c_sem_wait_noncancelable(FAR struct am335x_i2c_priv_s *priv);
 
 #ifdef CONFIG_AM335X_I2C_DYNTIMEO
 static useconds_t am335x_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
@@ -471,7 +471,7 @@ static inline int am335x_i2c_sem_wait(FAR struct am335x_i2c_priv_s *priv)
 }
 
 /****************************************************************************
- * Name: am335x_i2c_sem_wait_uninterruptible
+ * Name: am335x_i2c_sem_wait_noncancelable
  *
  * Description:
  *   Take the exclusive access, waiting as necessary.
@@ -479,7 +479,7 @@ static inline int am335x_i2c_sem_wait(FAR struct am335x_i2c_priv_s *priv)
  ****************************************************************************/
 
 static int
-  am335x_i2c_sem_wait_uninterruptible(FAR struct am335x_i2c_priv_s *priv)
+  am335x_i2c_sem_wait_noncancelable(FAR struct am335x_i2c_priv_s *priv)
 {
   return nxsem_wait_uninterruptible(&priv->sem_excl);
 }
@@ -1574,7 +1574,7 @@ static int am335x_i2c_reset(FAR struct i2c_master_s *dev)
 
   /* Lock out other clients */
 
-  ret = am335x_i2c_sem_wait_uninterruptible(priv);
+  ret = am335x_i2c_sem_wait_noncancelable(priv);
   if (ret < 0)
     {
       return ret;

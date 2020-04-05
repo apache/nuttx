@@ -344,7 +344,7 @@ static void sam_putreg(uint32_t val, uint32_t addr);
 /* Semaphores ***************************************************************/
 
 static int  sam_takesem(sem_t *sem);
-static int  sam_takesem_uninterruptible(sem_t *sem);
+static int  sam_takesem_noncancelable(sem_t *sem);
 #define sam_givesem(s) nxsem_post(s);
 
 /* Byte stream access helper functions **************************************/
@@ -640,7 +640,7 @@ static int sam_takesem(sem_t *sem)
 }
 
 /****************************************************************************
- * Name: sam_takesem_uninterruptible
+ * Name: sam_takesem_noncancelable
  *
  * Description:
  *   This is just a wrapper to handle the annoying behavior of semaphore
@@ -649,7 +649,7 @@ static int sam_takesem(sem_t *sem)
  *
  ****************************************************************************/
 
-static int sam_takesem_uninterruptible(sem_t *sem)
+static int sam_takesem_noncancelable(sem_t *sem)
 {
   int result;
   int ret = OK;
@@ -1929,7 +1929,7 @@ static int sam_ctrltd(struct sam_rhport_s *rhport,
        * this upon return.
        */
 
-      ret2 = sam_takesem_uninterruptible(&g_ohci.exclsem);
+      ret2 = sam_takesem_noncancelable(&g_ohci.exclsem);
       if (ret2 < 0)
         {
           ret = ret2;
@@ -2285,7 +2285,7 @@ static void sam_ohci_bottomhalf(void *arg)
    * real option (other than to reschedule and delay).
    */
 
-  sam_takesem_uninterruptible(&g_ohci.exclsem);
+  sam_takesem_noncancelable(&g_ohci.exclsem);
 
   /* Root hub status change interrupt */
 
@@ -2912,7 +2912,7 @@ static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
    * periodic list and the interrupt table.
    */
 
-  ret2 = sam_takesem_uninterruptible(&g_ohci.exclsem);
+  ret2 = sam_takesem_noncancelable(&g_ohci.exclsem);
 
   /* Remove the ED to the correct list depending on the transfer type */
 
@@ -3045,7 +3045,7 @@ static int sam_free(struct usbhost_driver_s *drvr, uint8_t *buffer)
 
   /* We must have exclusive access to the transfer buffer pool */
 
-  ret = sam_takesem_uninterruptible(&g_ohci.exclsem);
+  ret = sam_takesem_noncancelable(&g_ohci.exclsem);
   sam_tbfree(buffer);
   sam_givesem(&g_ohci.exclsem);
   return ret;
