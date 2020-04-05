@@ -421,7 +421,7 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
 /* Semaphores ***************************************************************/
 
 static int lpc43_takesem(sem_t *sem);
-static int lpc43_takesem_uninterruptible(sem_t *sem);
+static int lpc43_takesem_noncancelable(sem_t *sem);
 #define lpc43_givesem(s) nxsem_post(s);
 
 /* Allocators ***************************************************************/
@@ -1054,7 +1054,7 @@ static int lpc43_takesem(sem_t *sem)
 }
 
 /****************************************************************************
- * Name: lpc43_takesem_uninterruptible
+ * Name: lpc43_takesem_noncancelable
  *
  * Description:
  *   This is just a wrapper to handle the annoying behavior of semaphore
@@ -1063,7 +1063,7 @@ static int lpc43_takesem(sem_t *sem)
  *
  ****************************************************************************/
 
-static int lpc43_takesem_uninterruptible(sem_t *sem)
+static int lpc43_takesem_noncancelable(sem_t *sem)
 {
   int result;
   int ret = OK;
@@ -2462,13 +2462,13 @@ static ssize_t lpc43_transfer_wait(struct lpc43_epinfo_s *epinfo)
    * this upon return.
    */
 
-  ret2 = lpc43_takesem_uninterruptible(&g_ehci.exclsem);
+  ret2 = lpc43_takesem_noncancelable(&g_ehci.exclsem);
   if (ret2 < 0)
     {
       ret = ret2;
     }
 
-  /* Did lpc43_ioc_wait() or lpc43_takesem_uninterruptible()report an
+  /* Did lpc43_ioc_wait() or lpc43_takesem_noncancelable()report an
    * error?
    */
 
@@ -3160,7 +3160,7 @@ static void lpc43_ehci_bottomhalf(FAR void *arg)
    * real option (other than to reschedule and delay).
    */
 
-  lpc43_takesem_uninterruptible(&g_ehci.exclsem);
+  lpc43_takesem_noncancelable(&g_ehci.exclsem);
 
   /* Handle all unmasked interrupt sources */
 

@@ -153,7 +153,7 @@ static inline void
   kinetis_i2c_sem_destroy(FAR struct kinetis_i2cdev_s *priv);
 static inline int kinetis_i2c_sem_wait(FAR struct kinetis_i2cdev_s *priv);
 static int
-  kinetis_i2c_sem_wait_uninterruptible(FAR struct kinetis_i2cdev_s *priv);
+  kinetis_i2c_sem_wait_noncancelable(FAR struct kinetis_i2cdev_s *priv);
 static inline void kinetis_i2c_sem_post(struct kinetis_i2cdev_s *priv);
 
 /* Signal Helper */
@@ -364,7 +364,7 @@ static inline int kinetis_i2c_sem_wait(FAR struct kinetis_i2cdev_s *priv)
 }
 
 /****************************************************************************
- * Name: kinetis_i2c_sem_wait_uninterruptible
+ * Name: kinetis_i2c_sem_wait_noncancelable
  *
  * Description:
  *   Take the exclusive access, waiting as necessary
@@ -372,7 +372,7 @@ static inline int kinetis_i2c_sem_wait(FAR struct kinetis_i2cdev_s *priv)
  ****************************************************************************/
 
 static int
-  kinetis_i2c_sem_wait_uninterruptible(FAR struct kinetis_i2cdev_s *priv)
+  kinetis_i2c_sem_wait_noncancelable(FAR struct kinetis_i2cdev_s *priv)
 {
   return nxsem_wait_uninterruptible(&priv->mutex);
 }
@@ -1280,7 +1280,7 @@ static int kinetis_i2c_reset(struct i2c_master_s *dev)
 
   /* Lock out other clients */
 
-  ret = kinetis_i2c_sem_wait_uninterruptible(priv);
+  ret = kinetis_i2c_sem_wait_noncancelable(priv);
   if (ret < 0)
     {
       return ret;

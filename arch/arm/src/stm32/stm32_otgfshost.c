@@ -297,7 +297,7 @@ static inline void stm32_modifyreg(uint32_t addr, uint32_t clrbits,
 /* Semaphores ***************************************************************/
 
 static int  stm32_takesem(sem_t *sem);
-static int  stm32_takesem_uninterruptible(sem_t *sem);
+static int  stm32_takesem_noncancelable(sem_t *sem);
 #define stm32_givesem(s) nxsem_post(s);
 
 /* Byte stream access helper functions **************************************/
@@ -648,7 +648,7 @@ static int stm32_takesem(sem_t *sem)
 }
 
 /****************************************************************************
- * Name: stm32_takesem_uninterruptible
+ * Name: stm32_takesem_noncancelable
  *
  * Description:
  *   This is just a wrapper to handle the annoying behavior of semaphore
@@ -657,7 +657,7 @@ static int stm32_takesem(sem_t *sem)
  *
  ****************************************************************************/
 
-static int stm32_takesem_uninterruptible(sem_t *sem)
+static int stm32_takesem_noncancelable(sem_t *sem)
 {
   int result;
   int ret = OK;
@@ -4244,7 +4244,7 @@ static int stm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* We must have exclusive access to the USB host hardware and state structures */
 
-  ret = stm32_takesem_uninterruptible(&priv->exclsem);
+  ret = stm32_takesem_noncancelable(&priv->exclsem);
 
   /* A single channel is represent by an index in the range of 0 to
    * STM32_MAX_TX_FIFOS.  Otherwise, the ep must be a pointer to an allocated

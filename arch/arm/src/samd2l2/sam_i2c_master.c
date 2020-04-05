@@ -202,7 +202,7 @@ static void i2c_putreg32(struct sam_i2c_dev_s *priv, uint32_t regval,
                          unsigned int offset);
 
 static int i2c_takesem(sem_t * sem);
-static int i2c_takesem_uninterruptible(sem_t * sem);
+static int i2c_takesem_noncancelable(sem_t * sem);
 #define i2c_givesem(sem) (nxsem_post(sem))
 
 #ifdef CONFIG_SAM_I2C_REGDEBUG
@@ -468,7 +468,7 @@ static int i2c_takesem(sem_t *sem)
 }
 
 /*******************************************************************************
- * Name: i2c_takesem_uninterruptible
+ * Name: i2c_takesem_noncancelable
  *
  * Description:
  *   Take the wait semaphore (handling false alarm wake-ups due to the receipt
@@ -482,7 +482,7 @@ static int i2c_takesem(sem_t *sem)
  *
  *******************************************************************************/
 
-static int i2c_takesem_uninterruptible(sem_t *sem)
+static int i2c_takesem_noncancelable(sem_t *sem)
 {
   return nxsem_wait_uninterruptible(sem);
 }
@@ -1453,7 +1453,7 @@ int sam_i2c_reset(FAR struct i2c_master_s *dev)
 
   /* Get exclusive access to the I2C device */
 
-  ret = i2c_takesem_uninterruptible(&priv->exclsem);
+  ret = i2c_takesem_noncancelable(&priv->exclsem);
   if (ret < 0)
     {
       return ret;
