@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather,
+/* This file should never be included directly but, rather,
  * only indirectly through nuttx/arch.h (via arch/arch.h)
  */
 

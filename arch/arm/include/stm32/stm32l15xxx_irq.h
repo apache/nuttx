@@ -34,7 +34,7 @@
  *
  ****************************************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly through nuttx/irq.h */
+/* This file should never be included directly but, rather, only indirectly through nuttx/irq.h */
 
 #ifndef __ARCH_ARM_INCLUDE_STM32_STM32FL15XXX_IRQ_H
 #define __ARCH_ARM_INCLUDE_STM32_STM32FL15XXX_IRQ_H
