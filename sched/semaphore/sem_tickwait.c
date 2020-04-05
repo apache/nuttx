@@ -189,7 +189,6 @@ errout_with_irqdisabled:
  *
  ****************************************************************************/
 
-#ifndef CONFIG_HAVE_INLINE
 int nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start,
                                    uint32_t delay)
 {
@@ -205,5 +204,4 @@ int nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start,
 
   return ret;
 }
-#endif
 

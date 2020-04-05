@@ -221,7 +221,6 @@ errout_with_irqdisabled:
  *
  ****************************************************************************/
 
-#ifndef CONFIG_HAVE_INLINE
 int nxsem_timedwait_uninterruptible(FAR sem_t *sem,
                                     FAR const struct timespec *abstime)
 {
@@ -237,7 +236,6 @@ int nxsem_timedwait_uninterruptible(FAR sem_t *sem,
 
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: sem_timedwait
