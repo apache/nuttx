@@ -441,21 +441,11 @@ static void emmc_send(int datatype, uint32_t opcode, uint32_t arg,
 
   /* Wait for command or data transfer done */
 
-  do
+  ret = emmc_takesem(&g_waitsem);
+  if (ret < 0)
     {
-      ret = emmc_takesem(&g_waitsem);
-
-      /* The only expected error is ECANCELED which would occur if the
-       * calling thread were canceled.
-       */
-
-      DEBUGASSERT(ret == OK || ret == -ECANCELED);
-
-      /* REVISIT: emmc_taksem error is lost. This loop needs to save
-       *          the return from takesem and return it at the end.
-       */
+      return;
     }
-  while (ret < 0);
 
   /* Restore interrupt mask */
 
