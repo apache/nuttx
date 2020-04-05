@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only
+/* This file should never be included directly but, rather, only
  * indirectly through arch/types.h (which is, in turn only accessed
  * through sys/types.h or stdint.h).
  */
