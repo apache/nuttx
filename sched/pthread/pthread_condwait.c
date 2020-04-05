@@ -80,12 +80,27 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
     }
   else
     {
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+      uint8_t mflags;
+#endif
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+      uint8_t type;
+      int16_t nlocks;
+#endif
+
       /* Give up the mutex */
 
       sinfo("Give up mutex / take cond\n");
 
       sched_lock();
       mutex->pid = -1;
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+      mflags     = mutex->flags;
+#endif
+#ifdef CONFIG_PTHREAD_MUTEX_TYPES
+      type       = mutex->type;
+      nlocks     = mutex->nlocks;
+#endif
       ret        = pthread_mutex_give(mutex);
 
       /* Take the semaphore.  This may be awakened only be a signal (EINTR)
@@ -125,9 +140,13 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
         {
           /* Yes.. Then initialize it properly */
 
-          mutex->pid = getpid();
+          mutex->pid    = getpid();
+#ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
+          mutex->flags  = mflags;
+#endif
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
-          mutex->nlocks = 1;
+          mutex->type   = type;
+          mutex->nlocks = nlocks;
 #endif
         }
     }
