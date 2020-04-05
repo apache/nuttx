@@ -141,10 +141,10 @@
 /* Low-level HSMC Helpers */
 
 #if NAND_NBANKS > 1
-void            nand_lock(void);
+int             nand_lock(void);
 void            nand_unlock(void);
 #else
-#  define       nand_lock()
+#  define       nand_lock() (0)
 #  define       nand_unlock()
 #endif
 
@@ -306,14 +306,15 @@ struct sam_nand_s g_nand;
  *   None
  *
  * Returned Value:
- *   None
+ *  Normally success (OK) is returned, but the error -ECANCELED may be
+ *  return in the event that task has been canceled.
  *
  ****************************************************************************/
 
 #if NAND_NBANKS > 1
-void nand_lock(void)
+static int nand_lock(void)
 {
-  nxsem_wait_uninterruptible(&g_nand.exclsem);
+  return nxsem_wait_uninterruptible(&g_nand.exclsem);
 }
 #endif
 
@@ -332,7 +333,7 @@ void nand_lock(void)
  ****************************************************************************/
 
 #if NAND_NBANKS > 1
-void nand_unlock(void)
+static void nand_unlock(void)
 {
   nxsem_post(&g_nand.exclsem);
 }
@@ -2033,7 +2034,12 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
    * is properly configured for this CS.
    */
 
-  pmecc_lock();
+  ret = pmecc_lock();
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pmecc_configure(priv, false);
   if (ret < 0)
     {
@@ -2312,7 +2318,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   unsigned int eccsize;
   unsigned int sector;
   unsigned int i;
-  int ret = 0;
+  int ret;
 
   finfo("block=%d page=%d data=%p\n", (int)block, page, data);
   DEBUGASSERT(priv && data);
@@ -2321,7 +2327,12 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
    * is properly configured for this CS.
    */
 
-  pmecc_lock();
+  ret = pmecc_lock();
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   ret = pmecc_configure(priv, false);
   if (ret < 0)
     {
@@ -2542,17 +2553,21 @@ static int nand_eraseblock(struct nand_raw_s *raw, off_t block)
 {
   struct sam_nandcs_s *priv = (struct sam_nandcs_s *)raw;
   int retries = NAND_ERASE_NRETRIES;
-  int ret = OK;
+  int ret;
 
   DEBUGASSERT(priv);
 
   finfo("block=%d\n", (int)block);
 
-  /* Get exclusvie access to the HSMC hardware.
+  /* Get exclusive access to the HSMC hardware.
    * REVISIT:  The scope of this exclusivity is just NAND.
    */
 
-  nand_lock();
+  ret = nand_lock();
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Try up to NAND_ERASE_NRETRIES times to erase the FLASH */
 
@@ -2606,9 +2621,13 @@ static int nand_rawread(struct nand_raw_s *raw, off_t block,
    * REVISIT:  The scope of this exclusivity is just NAND.
    */
 
-  nand_lock();
-  ret = nand_readpage_noecc(priv, block, page, data, spare);
-  nand_unlock();
+  ret = nand_lock();
+  if (ret >= 0)
+    {
+      ret = nand_readpage_noecc(priv, block, page, data, spare);
+      nand_unlock();
+    }
+
   return ret;
 }
 
@@ -2644,9 +2663,13 @@ static int nand_rawwrite(struct nand_raw_s *raw, off_t block,
    * REVISIT:  The scope of this exclusivity is just NAND.
    */
 
-  nand_lock();
-  ret = nand_writepage_noecc(priv, block, page, data, spare);
-  nand_unlock();
+  ret = nand_lock();
+  if (ret >= 0)
+    {
+      ret = nand_writepage_noecc(priv, block, page, data, spare);
+      nand_unlock();
+    }
+
   return ret;
 }
 
@@ -2683,7 +2706,11 @@ static int nand_readpage(struct nand_raw_s *raw, off_t block,
    * REVISIT:  The scope of this exclusivity is just NAND.
    */
 
-  nand_lock();
+  ret = nand_lock();
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Read the page */
 
@@ -2746,7 +2773,11 @@ static int nand_writepage(struct nand_raw_s *raw, off_t block,
    * REVISIT:  The scope of this exclusivity is just NAND.
    */
 
-  nand_lock();
+  ret = nand_lock();
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Write the page */
 

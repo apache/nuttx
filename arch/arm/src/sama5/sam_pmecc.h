@@ -55,7 +55,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Block checking and H/W ECC support must be enabled for PMECC */
 
 #ifndef CONFIG_MTD_NAND_HWECC
@@ -216,7 +218,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -229,14 +231,15 @@ extern "C"
  *   None
  *
  * Returned Value:
- *   None
+ *  Normally success (OK) is returned, but the error -ECANCELED may be
+ *  return in the event that task has been canceled.
  *
  ****************************************************************************/
 
 #if NAND_NPMECC_BANKS > 1
-void pmecc_lock(void);
+int pmecc_lock(void);
 #else
-#  define pmecc_lock()
+#  define pmecc_lock() (0)
 #endif
 
 /****************************************************************************
@@ -394,7 +397,7 @@ uint32_t pmecc_get_pagesize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_PMECC_GALOIS_CUSTOM
-void pmecc_buildgf(uint32_t mm, int16_t* indexof, int16_t* alphato);
+void pmecc_buildgf(uint32_t mm, int16_t *indexof, int16_t *alphato);
 #endif
 
 #undef EXTERN
@@ -403,7 +406,9 @@ void pmecc_buildgf(uint32_t mm, int16_t* indexof, int16_t* alphato);
 #endif
 
 #else /* CONFIG_SAMA5_HAVE_PMECC */
+
 /****************************************************************************/
+
 /* Stub definitions to minimize conditional compilation when PMECC is
  * disabled
  */

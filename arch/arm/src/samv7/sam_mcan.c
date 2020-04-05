@@ -913,6 +913,7 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg);
 /* Semaphore helpers */
 
 static void mcan_dev_lock(FAR struct sam_mcan_s *priv);
+static void mcan_dev_lock_noncancelable(FAR struct sam_mcan_s *priv);
 #define mcan_dev_unlock(priv) nxsem_post(&priv->locksem)
 
 static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv);
@@ -1367,13 +1368,48 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
  *   priv - A reference to the MCAN peripheral state
  *
  * Returned Value:
- *  None
+ *  Normally success (OK) is returned, but the error -ECANCELED may be
+ *  return in the event that task has been canceled.
  *
  ****************************************************************************/
 
-static void mcan_dev_lock(FAR struct sam_mcan_s *priv)
+static int mcan_dev_lock(FAR struct sam_mcan_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->locksem);
+  ret = nxsem_wait_uninterruptible(&priv->locksem);
+}
+
+/****************************************************************************
+ * Name: mcan_dev_lock_noncancelable
+ *
+ * Description:
+ *   This is just a wrapper to handle the annoying behavior of semaphore
+ *   waits that return due to the receipt of a signal.  This version also
+ *   ignores attempts to cancel the thread.
+ *
+ ****************************************************************************/
+
+static int mcan_dev_lock_noncancelable(FAR struct sam_can_s *priv)
+{
+  int result;
+  int ret = OK;
+
+  do
+    {
+      result = nxsem_wait_uninterruptible(&priv->exclsem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(result == OK || result == -ECANCELED);
+      if (ret == OK && result < 0)
+        {
+          ret = result;
+        }
+    }
+  while (result < 0);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1742,7 +1778,11 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
 
   /* Get exclusive excess to the MCAN hardware */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Find an unused standard filter */
 
@@ -1897,7 +1937,11 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
 
   /* Get exclusive excess to the MCAN hardware */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   word = ndx >> 5;
   bit  = ndx & 0x1f;
@@ -1997,13 +2041,18 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
   int word;
   int bit;
   int ndx;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
 
   /* Get exclusive excess to the MCAN hardware */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Find an unused standard filter */
 
@@ -2137,6 +2186,7 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
   uint32_t regval;
   int word;
   int bit;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
@@ -2152,7 +2202,11 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
 
   /* Get exclusive excess to the MCAN hardware */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   word = ndx >> 5;
   bit  = ndx & 0x1f;
@@ -2258,12 +2312,17 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
 static int mcan_start_busoff_recovery_sequence(FAR struct sam_mcan_s *priv)
 {
   uint32_t regval;
+  int ret;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* only start BUS-OFF recovery if we are in BUS-OFF state */
 
@@ -2315,7 +2374,7 @@ static void mcan_reset(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  mcan_dev_lock_noncancelable(priv);
 
   /* Disable all interrupts */
 
@@ -2371,7 +2430,11 @@ static int mcan_setup(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* MCAN hardware initialization */
 
@@ -2450,7 +2513,7 @@ static void mcan_shutdown(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  mcan_dev_lock_noncancelable(priv);
 
   /* Disable MCAN interrupts at the NVIC */
 
@@ -2861,6 +2924,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   unsigned int ndx;
   unsigned int nbytes;
   unsigned int i;
+  int ret;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
@@ -2897,7 +2961,14 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      mcan_buffer_release(priv);
+      sched_unlock();
+      return ret;
+    }
+
   sched_unlock();
 
   /* Get our reserved Tx FIFO/queue put index */
@@ -3016,10 +3087,15 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
 #ifdef CONFIG_DEBUG_FEATURES
   int sval;
 #endif
+  int ret;
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return false;
+    }
 
   /* Return the state of the TX FIFOQ.  Return TRUE if the TX FIFO/Queue is
    * not full.
@@ -3077,7 +3153,11 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return false;
+    }
 
   /* Return the state of the TX FIFOQ.  Return TRUE if the TX FIFO/Queue is
    * empty.  We don't have a reliable indication that the FIFO is empty, so
