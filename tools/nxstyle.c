@@ -1721,7 +1721,9 @@ int main(int argc, char **argv, char **envp)
                   {
                     if (n > indent)
                       {
-                        /* REVISIT: dnest is always > 0 here if bfunctions == false */
+                        /* REVISIT: dnest is always > 0 here if bfunctions ==
+                         * false.
+                         */
 
                         if (dnest == 0 || !bfunctions || lineno == rbrace_lineno)
                           {
@@ -1888,7 +1890,9 @@ int main(int argc, char **argv, char **envp)
                           }
                       }
 
-                    /* The right brace should not be preceded with a a blank line */
+                    /* The right brace should not be preceded with a a blank
+                     * line.
+                     */
 
                     if (lineno == blank_lineno + 1)
                       {
@@ -2367,29 +2371,72 @@ int main(int argc, char **argv, char **envp)
 
       /* Loop terminates when NUL or newline character found */
 
-      if (line[n] == '\n')
+      if (line[n] == '\n' || line[n] == '\0')
         {
+          /* If the parse terminated on the NULL, then back up to the last
+           * character (which should be the newline).
+           */
+
+          int m = n;
+          if (line[m] == '\0' && m > 0)
+            {
+              m--;
+            }
+
           /* Check for space at the end of the line.  Except for carriage
            * returns which we have already reported (one time) above.
            */
 
-          if (n > 1 && isspace((int)line[n - 1]) && line[n - 1] != '\r')
+          if (m > 1 && isspace((int)line[m - 1]) &&
+              line[m - 1] != '\n' && line[m - 1] != '\r')
             {
-               ERROR("Dangling whitespace at the end of line", lineno, n);
+               ERROR("Dangling whitespace at the end of line", lineno, m);
             }
 
-          /* Check for long lines */
+          /* The line width is determined by the location of the final
+           * asterisk in block comments.  The closing line of the block
+           * comment will exceed that by one one character, the '/'
+           * following the final asterisk.
+           */
 
-          if (n > g_maxline)
+          else if (m > g_maxline)
+            {
+              bool bslash;
+              int a;
+
+              for (bslash = false, a = m;
+                   a > 2 && strchr("\n\r/", line[a]) != NULL;
+                   a--)
+                {
+                  if (line[a] == '/')
+                    {
+                      bslash = true;
+                    }
+                }
+
+              if (bslash && line[a] == '*')
+                {
+                  m = a + 1;
+                }
+            }
+
+          /* Check for long lines
+           *
+           * REVISIT:  Long line checks suppressed on right hand comments
+           * for now.  This just prevents a large number of difficult-to-
+           * fix complaints that we would have otherwise.
+           */
+
+          if (m > g_maxline && !rhcomment)
             {
               if (g_file_type == C_SOURCE)
                 {
-                  ERROR("Long line found", lineno, n);
+                  ERROR("Long line found", lineno, m);
                 }
               else if (g_file_type == C_HEADER)
 
                 {
-                  WARN("Long line found", lineno, n);
+                  WARN("Long line found", lineno, m);
                 }
             }
         }
