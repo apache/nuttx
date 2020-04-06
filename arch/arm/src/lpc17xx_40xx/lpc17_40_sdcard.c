@@ -206,7 +206,9 @@
 #define SDCARD_WAITALL_ICR   (SDCARD_CMDDONE_ICR | SDCARD_RESPDONE_ICR | \
                               SDCARD_XFRDONE_ICR)
 
-/* Let's wait until we have both SD card transfer complete and DMA complete. */
+/* Let's wait until we have both SD card transfer complete and DMA
+ * complete.
+ */
 
 #define SDCARD_XFRDONE_FLAG  (1)
 #define SDCARD_DMADONE_FLAG  (2)
@@ -1799,7 +1801,9 @@ static int lpc17_40_recvsetup(FAR struct sdio_dev_s *dev,
   lpc17_40_sampleinit();
   lpc17_40_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-  /* Save the destination buffer information for use by the interrupt handler */
+  /* Save the destination buffer information for use by the interrupt
+   * handler.
+   */
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
@@ -2099,7 +2103,9 @@ static int lpc17_40_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
 #endif
     }
 
-  /* Clear all pending message completion events and return the R1/R6 response */
+  /* Clear all pending message completion events and return the R1/R6
+   * response.
+   */
 
   putreg32(SDCARD_RESPDONE_ICR | SDCARD_CMDDONE_ICR, LPC17_40_SDCARD_CLEAR);
   *rshort = getreg32(LPC17_40_SDCARD_RESP0);
@@ -2516,7 +2522,9 @@ static int lpc17_40_dmarecvsetup(FAR struct sdio_dev_s *dev,
       lpc17_40_sampleinit();
       lpc17_40_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-      /* Save the destination buffer information for use by the interrupt handler */
+      /* Save the destination buffer information for use by the interrupt
+       * handler.
+       */
 
       priv->buffer    = (uint32_t *)buffer;
       priv->remaining = buflen;
@@ -2595,7 +2603,9 @@ static int lpc17_40_dmasendsetup(FAR struct sdio_dev_s *dev,
       lpc17_40_sampleinit();
       lpc17_40_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-      /* Save the source buffer information for use by the interrupt handler */
+      /* Save the source buffer information for use by the interrupt
+       * handler.
+       */
 
       priv->buffer    = (uint32_t *)buffer;
       priv->remaining = buflen;

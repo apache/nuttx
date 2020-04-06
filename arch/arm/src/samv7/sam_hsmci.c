@@ -1168,7 +1168,9 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
 
       sam_putreg(priv, 0, SAM_HSMCI_DMA_OFFSET);
 
-      /* Terminate the transfer with an I/O error in the event of a DMA failure */
+      /* Terminate the transfer with an I/O error in the event of a DMA
+       * failure.
+       */
 
       if (result < 0)
         {
@@ -1569,7 +1571,9 @@ static int sam_hsmci_interrupt(int irq, void *context, void *arg)
                 }
             }
 
-          /* Otherwise it must be a DMA transfer that completed successfully */
+          /* Otherwise it must be a DMA transfer that completed
+           * successfully.
+           */
 
           else
             {
@@ -1788,7 +1792,9 @@ static void sam_widebus(FAR struct sdio_dev_s *dev, bool wide)
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t regval;
 
-  /* Set 1-bit or 4-bit bus by configuring the SDCBUS field of the SDCR register */
+  /* Set 1-bit or 4-bit bus by configuring the SDCBUS field of the SDCR
+   * register.
+   */
 
   regval  = sam_getreg(priv, SAM_HSMCI_SDCR_OFFSET);
   regval &= ~HSMCI_SDCR_SDCBUS_MASK;
@@ -1821,7 +1827,9 @@ static void sam_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
   uint32_t regval;
   bool enable = true;
 
-  /* Fetch the current mode register and mask out the clkdiv+clockodd (and pwsdiv) */
+  /* Fetch the current mode register and mask out the clkdiv+clockodd (and
+   * pwsdiv).
+   */
 
   regval = sam_getreg(priv, SAM_HSMCI_MR_OFFSET);
   regval &= ~(HSMCI_MR_CLKDIV_MASK | HSMCI_MR_PWSDIV_MASK | HSMCI_MR_CLKODD);
@@ -2160,7 +2168,9 @@ static int sam_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   priv->xfrbusy = true;
   priv->txbusy  = false;
 
-  /* Save the destination buffer information for use by the interrupt handler */
+  /* Save the destination buffer information for use by the interrupt
+   * handler.
+   */
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;
@@ -2339,7 +2349,9 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
 
   sam_notransfer(priv);
 
-  /* Clearing (most) pending interrupt status by reading the status register */
+  /* Clearing (most) pending interrupt status by reading the status
+   * register.
+   */
 
   sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
 

@@ -794,7 +794,9 @@ static void cxd56_dataconfig(struct cxd56_sdiodev_s *priv, bool bwrite,
 {
   uint32_t regval = 0;
 
-  /* Set the data timeout value in the SDHCI_SYSCTL field to the selected value */
+  /* Set the data timeout value in the SDHCI_SYSCTL field to the selected
+   * value.
+   */
 
   regval  = getreg32(CXD56_SDHCI_SYSCTL);
   regval &= ~SDHCI_SYSCTL_DTOCV_MASK;
@@ -825,7 +827,9 @@ static void cxd56_datadisable(void)
 {
   uint32_t regval;
 
-  /* Set the data timeout value in the SDHCI_SYSCTL field to the maximum value */
+  /* Set the data timeout value in the SDHCI_SYSCTL field to the maximum
+   * value.
+   */
 
   regval  = getreg32(CXD56_SDHCI_SYSCTL);
   regval &= ~SDHCI_SYSCTL_DTOCV_MASK;
@@ -1187,7 +1191,9 @@ static int cxd56_interrupt(int irq, FAR void *context, FAR void *arg)
   mcinfo("IRQSTAT: %08x IRQSIGEN %08x enabled: %08x\n",
           getreg32(CXD56_SDHCI_IRQSTAT), regval, enabled);
 
-  /* Disable card interrupts to clear the card interrupt to the host system. */
+  /* Disable card interrupts to clear the card interrupt to the host
+   * system.
+   */
 
   regval &= ~(SDHCI_INT_CINT | enabled);
   putreg32(regval, CXD56_SDHCI_IRQSIGEN);
@@ -2016,7 +2022,9 @@ static int cxd56_sdio_recvsetup(FAR struct sdio_dev_s *dev,
   cxd56_sampleinit();
   cxd56_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-  /* Save the destination buffer information for use by the interrupt handler */
+  /* Save the destination buffer information for use by the interrupt
+   * handler.
+   */
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
@@ -2937,7 +2945,9 @@ static int cxd56_sdio_dmarecvsetup(FAR struct sdio_dev_s *dev,
   cxd56_sampleinit();
   cxd56_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-  /* Save the destination buffer information for use by the interrupt handler */
+  /* Save the destination buffer information for use by the interrupt
+   * handler.
+   */
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;

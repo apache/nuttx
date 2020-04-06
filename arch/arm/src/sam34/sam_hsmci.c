@@ -1288,7 +1288,9 @@ static int sam_interrupt(int irq, void *context, FAR void *arg)
       pending = enabled & priv->xfrmask;
       if (pending != 0)
         {
-          /* Yes.. the transfer is complete.  Did it complete with an error? */
+          /* Yes.. the transfer is complete.  Did it complete with an
+           * error?
+           */
 
           if ((pending & HSMCI_DATA_ERRORS) != 0)
             {
@@ -1540,7 +1542,9 @@ static void sam_widebus(FAR struct sdio_dev_s *dev, bool wide)
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t regval;
 
-  /* Set 1-bit or 4-bit bus by configuring the SDCBUS field of the SDCR register */
+  /* Set 1-bit or 4-bit bus by configuring the SDCBUS field of the SDCR
+   * register.
+   */
 
   regval  = getreg32(SAM_HSMCI_SDCR);
   regval &= ~HSMCI_SDCR_SDCBUS_MASK;
@@ -1878,7 +1882,9 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
 
   sam_notransfer(priv);
 
-  /* Clearing (most) pending interrupt status by reading the status register */
+  /* Clearing (most) pending interrupt status by reading the status
+   * register.
+   */
 
   getreg32(SAM_HSMCI_SR);
 
