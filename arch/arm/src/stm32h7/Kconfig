@@ -12,13 +12,113 @@ choice
 	default ARCH_CHIP_STM32H743ZI
 	depends on ARCH_CHIP_STM32H7
 
+config ARCH_CHIP_STM32H743AG
+	bool "STM32H743AG"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_G
+	select STM32H7_IO_CONFIG_A
+	---help---
+		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
+		UFBGA169
+
+config ARCH_CHIP_STM32H743AI
+	bool "STM32H743AI"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_A
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		UFBGA169
+
+config ARCH_CHIP_STM32H743BG
+	bool "STM32H743BG"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_G
+	select STM32H7_IO_CONFIG_B
+	---help---
+		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
+		LQFP208
+
+config ARCH_CHIP_STM32H743BI
+	bool "STM32H743BI"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_B
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		LQFP208
+
+config ARCH_CHIP_STM32H743IG
+	bool "STM32H743IG"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_G
+	select STM32H7_IO_CONFIG_I
+	---help---
+		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
+		LQFP176 or UFBGA176
+
+config ARCH_CHIP_STM32H743II
+	bool "STM32H743II"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_I
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		LQFP176 or UFBGA176
+
+config ARCH_CHIP_STM32H743VG
+	bool "STM32H743VG"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_G
+	select STM32H7_IO_CONFIG_V
+	---help---
+		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
+		LQFP100 or TFBGA100
+
+config ARCH_CHIP_STM32H743VI
+	bool "STM32H743VI"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_V
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		LQFP100 or TFBGA100
+
+config ARCH_CHIP_STM32H743XG
+	bool "STM32H743XG"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_G
+	select STM32H7_IO_CONFIG_X
+	---help---
+		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
+		TFBGA240
+
+config ARCH_CHIP_STM32H743XI
+	bool "STM32H743XI"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_X
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		TFBGA240
+
+config ARCH_CHIP_STM32H743ZG
+	bool "STM32H743ZG"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_G
+	select STM32H7_IO_CONFIG_Z
+	---help---
+		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
+		LQFP144
+
 config ARCH_CHIP_STM32H743ZI
 	bool "STM32H743ZI"
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
-# TODO: IO_CONFIG
+	select STM32H7_IO_CONFIG_Z
 	---help---
-		STM32 H7 Cortex M7, 2048 FLASH, 1024K Kb SRAM
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		LQFP144
 
 config ARCH_CHIP_STM32H747XI
 	bool "STM32H747XI"
@@ -26,17 +126,88 @@ config ARCH_CHIP_STM32H747XI
 	select STM32H7_FLASH_CONFIG_I
 # TODO: IO_CONFIG
 	---help---
-		Dual core STM32 H7 Cortex M7+M4, 2048 FLASH, 1024K Kb SRAM
+		Dual core STM32 H7 Cortex M7+M4, 2048 Kb FLASH, 1024K Kb SRAM
+
+config ARCH_CHIP_STM32H753AI
+	bool "STM32H753AI"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_A
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		with cryptographic accelerator, UFBGA169
+
+
+config ARCH_CHIP_STM32H753BI
+	bool "STM32H753BI"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_B
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		with cryptographic accelerator, LQFP208
 
 config ARCH_CHIP_STM32H753II
 	bool "STM32H753II"
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
-# TODO: IO_CONFIG
+	select STM32H7_IO_CONFIG_I
 	---help---
-		STM32 H7 Cortex M7, 2048 FLASH, 1024K Kb SRAM
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		with cryptographic accelerator, LQFP176/UFBGA176
+
+config ARCH_CHIP_STM32H753VI
+	bool "STM32H753VI"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_V
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		with cryptographic accelerator, LQFP100/TFBGA100
+
+config ARCH_CHIP_STM32H753XI
+	bool "STM32H753XI"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_X
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		with cryptographic accelerator, TFBGA240
+
+config ARCH_CHIP_STM32H753ZI
+	bool "STM32H753ZI"
+	select STM32H7_STM32H7X3XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_Z
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		with cryptographic accelerator, LQFP144
 
 endchoice # STM32 H7 Chip Selection
+
+config STM32H7_IO_CONFIG_A
+	bool
+	default n
+
+config STM32H7_IO_CONFIG_B
+	bool
+	default n
+
+config STM32H7_IO_CONFIG_I
+	bool
+	default n
+
+config STM32H7_IO_CONFIG_V
+	bool
+	default n
+
+config STM32H7_IO_CONFIG_X
+	bool
+	default n
+
+config STM32H7_IO_CONFIG_Z
+	bool
+	default n
 
 config STM32H7_STM32H7X3XX
 	bool
@@ -50,11 +221,11 @@ config STM32H7_STM32H7X3XX
 	select ARMV7M_HAVE_DTCM
 	select STM32H7_HAVE_ETHERNET
 	select STM32H7_HAVE_FMC
+	select STM32H7_HAVE_GPIOF if !STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_GPIOG if !STM32H7_IO_CONFIG_V
 	select STM32H7_HAVE_SPI4
-	select STM32H7_HAVE_SPI5
+	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
 	select STM32H7_HAVE_SPI6
-	bool
-	default n
 
 config STM32H7_STM32H7X7XX
 	bool
@@ -68,11 +239,11 @@ config STM32H7_STM32H7X7XX
 	select ARMV7M_HAVE_DTCM
 	select STM32H7_HAVE_ETHERNET
 	select STM32H7_HAVE_FMC
+	select STM32H7_HAVE_GPIOF
+	select STM32H7_HAVE_GPIOG
 	select STM32H7_HAVE_SPI4
 	select STM32H7_HAVE_SPI5
 	select STM32H7_HAVE_SPI6
-	bool
-	default n
 
 config STM32H7_FLASH_CONFIG_B
 	bool
@@ -159,8 +330,16 @@ config STM32H7_HAVE_ETHERNET
 	default n
 
 config STM32H7_HAVE_FMC
-    bool
-    default n
+	bool
+	default n
+
+config STM32H7_HAVE_GPIOF
+	bool
+	default n
+
+config STM32H7_HAVE_GPIOG
+	bool
+	default n
 
 config STM32H7_HAVE_SPI4
 	bool
@@ -289,13 +468,13 @@ config STM32H7_ETHMAC
 	select ARCH_HAVE_PHY
 
 config STM32H7_FMC
-        bool "FMC"
-        default n
-        depends on STM32H7_HAVE_FMC
-        ---help---
-                Enable Flexible Memory Controller.
-                To correctly configure FMC for your hardware, you will have to define
-                a number of macros in your board.h file. See stm32_fmc.c for directions.
+	bool "FMC"
+	default n
+	depends on STM32H7_HAVE_FMC
+	---help---
+		Enable Flexible Memory Controller.
+		To correctly configure FMC for your hardware, you will have to define
+		a number of macros in your board.h file. See stm32_fmc.c for directions.
 
 config STM32H7_OTGFS
 	bool "OTG FS"

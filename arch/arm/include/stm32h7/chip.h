@@ -49,12 +49,19 @@
 
 /* STM32H7x3xx  Differences between family members:
  *
- *   ----------- ----------------
+ *   ----------- ---------------- ----- ----
+ *                                       SPI
+ *   PART        PACKAGE          GPIOs  I2S
+ *   ----------- ---------------- ----- ----
+ *   STM32H7x3Ax UFBGA169          132   6/3
+ *   STM32H7x3Bx LQFP208           168   6/3
+ *   STM32H7x3Ix LQFP176/UFBGA176  140   6/3
+ *   STM32H7x3Vx LQFP100/TFBGA100   82   5/3
+ *   STM32H7x3Xx TFBGA240          168   6/3
+ *   STM32H7x3Zx LQFP144           114   6/3
+ *   ----------- ---------------- ----- ----
  *
- *   PART        PACKAGE
- *   ----------- ----------------
- *   STM32H7x3Zx LQFP144
- *   ----------- ----------------
+ * Parts STM32H7xxxG have 1024Kb of FLASH
  *
  * Parts STM32H7xxxI have 2048Kb of FLASH
  *
@@ -62,7 +69,24 @@
  * with CONFIG_STM32H7_FLASH_OVERRIDE_x
  */
 
-#if defined(CONFIG_ARCH_CHIP_STM32H743ZI) || defined(CONFIG_ARCH_CHIP_STM32H753II)
+#if defined (CONFIG_ARCH_CHIP_STM32H743AG) || \
+    defined (CONFIG_ARCH_CHIP_STM32H743AI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H743BG) || \
+    defined (CONFIG_ARCH_CHIP_STM32H743BI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H743IG) || \
+    defined (CONFIG_ARCH_CHIP_STM32H743II) || \
+    defined (CONFIG_ARCH_CHIP_STM32H743VG) || \
+    defined (CONFIG_ARCH_CHIP_STM32H743VI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H743XG) || \
+    defined (CONFIG_ARCH_CHIP_STM32H743XI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H743ZG) || \
+    defined (CONFIG_ARCH_CHIP_STM32H743ZI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H753AI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H753BI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H753II) || \
+    defined (CONFIG_ARCH_CHIP_STM32H753VI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H753XI) || \
+    defined (CONFIG_ARCH_CHIP_STM32H753ZI)
 #elif defined(CONFIG_ARCH_CHIP_STM32H747XI)
 #else
 #  error STM32 H7 chip not identified
@@ -92,7 +116,22 @@
 
 /* Peripherals */
 
-#  define STM32H7_NGPIO                   (11)        /* GPIOA-GPIOK */
+#  if defined(CONFIG_STM32H7_IO_CONFIG_A)
+#      define STM32H7_NGPIO               (10)        /* GPIOA-GPIOJ */
+#  elif defined(CONFIG_STM32H7_IO_CONFIG_B)
+#      define STM32H7_NGPIO               (11)        /* GPIOA-GPIOK */
+#  elif defined(CONFIG_STM32H7_IO_CONFIG_I)
+#      define STM32H7_NGPIO               (9)         /* GPIOA-GPIOI */
+#  elif defined(CONFIG_STM32H7_IO_CONFIG_V)
+#      define STM32H7_NGPIO               (8)         /* GPIOA-GPIOH, missing GPIOF-GPIOG */
+#  elif defined(CONFIG_STM32H7_IO_CONFIG_X)
+#      define STM32H7_NGPIO               (11)        /* GPIOA-GPIOK */
+#  elif defined(CONFIG_STM32H7_IO_CONFIG_Z)
+#      define STM32H7_NGPIO               (8)         /* GPIOA-GPIOH */
+#  else
+#      error CONFIG_STM32H7_IO_CONFIG_x Not Set
+#  endif
+
 #  define STM32H7_NDMA                    (4)         /* (4) DMA1, DMA2, BDMA and MDMA */
 #  define STM32H7_NADC                    (3)         /* (3) ADC1-3*/
 #  define STM32H7_NDAC                    (2)         /* (2) DAC1-2*/
@@ -172,7 +211,7 @@
 #  define STM32H7_NFMC                     0   /* No FMC memory controller */
 #endif
 
-/* NVIC priority levels **************************************************************/
+/* NVIC priority levels *************************************************************/
 
 /* 16 Programmable interrupt levels */
 
