@@ -658,7 +658,9 @@ static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
   unsigned int watermark;
   uint32_t regval = 0;
 
-  /* Set the data timeout value in the SDHC_SYSCTL field to the selected value */
+  /* Set the data timeout value in the SDHC_SYSCTL field to the selected
+   * value.
+   */
 
   regval  = getreg32(KINETIS_SDHC_SYSCTL);
   regval &= ~SDHC_SYSCTL_DTOCV_MASK;
@@ -729,7 +731,9 @@ static void kinetis_datadisable(void)
 {
   uint32_t regval;
 
-  /* Set the data timeout value in the SDHC_SYSCTL field to the maximum value */
+  /* Set the data timeout value in the SDHC_SYSCTL field to the maximum
+   * value.
+   */
 
   regval  = getreg32(KINETIS_SDHC_SYSCTL);
   regval &= ~SDHC_SYSCTL_DTOCV_MASK;
@@ -1088,7 +1092,9 @@ static int kinetis_interrupt(int irq, void *context, FAR void *arg)
   mcinfo("IRQSTAT: %08x IRQSIGEN %08x enabled: %08x\n",
          getreg32(KINETIS_SDHC_IRQSTAT), regval, enabled);
 
-  /* Disable card interrupts to clear the card interrupt to the host system. */
+  /* Disable card interrupts to clear the card interrupt to the host
+   * system.
+   */
 
   regval &= ~SDHC_INT_CINT;
   putreg32(regval, KINETIS_SDHC_IRQSIGEN);
@@ -1958,7 +1964,9 @@ static int kinetis_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   kinetis_sampleinit();
   kinetis_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-  /* Save the destination buffer information for use by the interrupt handler */
+  /* Save the destination buffer information for use by the interrupt
+   * handler.
+   */
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
@@ -2667,7 +2675,9 @@ static int kinetis_dmarecvsetup(FAR struct sdio_dev_s *dev,
   kinetis_sampleinit();
   kinetis_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-  /* Save the destination buffer information for use by the interrupt handler */
+  /* Save the destination buffer information for use by the interrupt
+   * handler.
+   */
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;

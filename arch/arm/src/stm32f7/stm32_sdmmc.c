@@ -2261,7 +2261,9 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   stm32_sampleinit();
   stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-  /* Save the destination buffer information for use by the interrupt handler */
+  /* Save the destination buffer information for use by the interrupt
+   * handler.
+   */
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
@@ -2563,7 +2565,9 @@ static int stm32_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
 #endif
     }
 
-  /* Clear all pending message completion events and return the R1/R6 response */
+  /* Clear all pending message completion events and return the R1/R6
+   * response.
+   */
 
   sdmmc_putreg32(priv, STM32_SDMMC_RESPDONE_ICR | STM32_SDMMC_CMDDONE_ICR,
                  STM32_SDMMC_ICR_OFFSET);
@@ -3067,7 +3071,9 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
   stm32_sampleinit();
   stm32_sample(priv, SAMPLENDX_BEFORE_SETUP);
 
-  /* Save the destination buffer information for use by the interrupt handler */
+  /* Save the destination buffer information for use by the interrupt
+   * handler.
+   */
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;

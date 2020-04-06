@@ -704,7 +704,9 @@ static int twi_interrupt(int irq, FAR void *context, FAR void *arg)
             }
           else
             {
-              /* No.. just switch to the next message and continue sending.  */
+              /* No.. just switch to the next message and continue
+               * sending.
+               */
 
               DEBUGASSERT((next->flags & I2C_M_READ) == 0);
               priv->msg = next;

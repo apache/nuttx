@@ -1736,7 +1736,9 @@ static void imxrt_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
         mcinfo("IDMODE\n");
 
-        /* Put out an additional 80 clocks in case this is a power-up sequence */
+        /* Put out an additional 80 clocks in case this is a power-up
+         * sequence.
+         */
 
         regval |= (BOARD_USDHC_IDMODE_PRESCALER |
                    BOARD_USDHC_IDMODE_DIVISOR |
@@ -2042,7 +2044,9 @@ static int imxrt_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
   mcrregval |= USDHC_MC_DMAEN;
 #endif
 
-  /* Check for abort. TODO: Check Suspend/Resume bits too in XFR_TYP::CMDTYP */
+  /* Check for abort. TODO: Check Suspend/Resume bits too in
+   * XFR_TYP::CMDTYP.
+   */
 
   if (cmd & MMCSD_STOPXFR)
     {
@@ -2379,9 +2383,11 @@ static int imxrt_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
   enerrors = getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET) & errors;
   if (enerrors != 0)
     {
-      mcerr("ERROR: cmd: %08x errors: %08x, fired %08x IRQSTAT: %08x\n", cmd, \
-        errors, enerrors, getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET));
-        ret = -EIO;
+      mcerr("ERROR: cmd: %08x errors: %08x, fired %08x IRQSTAT: %08x\n",
+            cmd, errors, enerrors,
+            getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET));
+
+      ret = -EIO;
     }
 
   return ret;

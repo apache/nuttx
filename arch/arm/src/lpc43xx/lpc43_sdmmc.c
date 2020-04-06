@@ -188,7 +188,9 @@
 #define SDCARD_WAITALL_CLEAR    (SDCARD_CMDDONE_CLEAR | SDCARD_RESPDONE_CLEAR | \
                                  SDCARD_XFRDONE_CLEAR)
 
-/* Let's wait until we have both SD card transfer complete and DMA complete. */
+/* Let's wait until we have both SD card transfer complete and DMA
+ * complete.
+ */
 
 #define SDCARD_XFRDONE_FLAG     (1)
 #define SDCARD_DMADONE_FLAG     (2)
@@ -1736,7 +1738,9 @@ static int lpc43_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
-  /* Save the destination buffer information for use by the interrupt handler */
+  /* Save the destination buffer information for use by the interrupt
+   * handler.
+   */
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
