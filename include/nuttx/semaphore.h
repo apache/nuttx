@@ -526,6 +526,12 @@ int sem_setprotocol(FAR sem_t *sem, int protocol);
  *   EINVAL    - Invalid attempt to get the semaphore
  *   ECANCELED - May be returned if the thread is canceled while waiting.
  *
+ * NOTE:  It is essential that callers of this function handle the
+ * ECANCELED error.  Correct handling is that the function should return the
+ * error and the error should propagate back up the calling tree to the
+ * cancellation point interface function where the thread termination will
+ * be handled gracefully
+ *
  ****************************************************************************/
 
 int nxsem_wait_uninterruptible(FAR sem_t *sem);
@@ -550,6 +556,12 @@ int nxsem_wait_uninterruptible(FAR sem_t *sem);
  *             expired.
  *   EDEADLK   A deadlock condition was detected.
  *   ECANCELED May be returned if the thread is canceled while waiting.
+ *
+ * NOTE:  It is essential that callers of this function handle the
+ * ECANCELED error.  Correct handling is that the function should return the
+ * error and the error should propagate back up the calling tree to the
+ * cancellation point interface function where the thread termination will
+ * be handled gracefully
  *
  ****************************************************************************/
 
@@ -580,6 +592,12 @@ int nxsem_timedwait_uninterruptible(FAR sem_t *sem,
  *
  *     -ETIMEDOUT is returned on the timeout condition.
  *     -ECANCELED may be returned if the thread is canceled while waiting.
+ *
+ * NOTE:  It is essential that callers of this function handle the
+ * ECANCELED error.  Correct handling is that the function should return the
+ * error and the error should propagate back up the calling tree to the
+ * cancellation point interface function where the thread termination will
+ * be handled gracefully
  *
  ****************************************************************************/
 
