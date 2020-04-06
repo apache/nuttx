@@ -202,7 +202,7 @@ static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
         {
           gpioinfo("Start 1 second timer\n");
           wd_start(simgpint->wdog, SEC2TICK(1),
-                   (wdentry_t)sim_interrupt, 1, (wdparm_t)dev);
+                   sim_interrupt, 1, (wdparm_t)dev);
         }
     }
   else
