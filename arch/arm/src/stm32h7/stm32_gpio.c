@@ -83,10 +83,18 @@ const uint32_t g_gpiobase[STM32H7_NGPIO] =
   STM32_GPIOE_BASE,
 #endif
 #if STM32H7_NGPIO > 5
+#  if defined(CONFIG_STM32H7_HAVE_GPIOF)
   STM32_GPIOF_BASE,
+#  else
+  0,
+#  endif
 #endif
 #if STM32H7_NGPIO > 6
+#  if defined(CONFIG_STM32H7_HAVE_GPIOG)
   STM32_GPIOG_BASE,
+#  else
+  0,
+#  endif
 #endif
 #if STM32H7_NGPIO > 7
   STM32_GPIOH_BASE,
@@ -165,6 +173,10 @@ int stm32_configgpio(uint32_t cfgset)
   /* Get the port base address */
 
   base = g_gpiobase[port];
+  if (base == 0)
+    {
+      return -EINVAL;
+    }
 
   /* Get the pin number and select the port configuration register for that
    * pin
@@ -182,7 +194,10 @@ int stm32_configgpio(uint32_t cfgset)
         break;
 
       case GPIO_OUTPUT:     /* General purpose output mode */
-        stm32_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0); /* Set the initial output value */
+
+        /* Set the initial output value */
+
+        stm32_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0);
         pinmode = GPIO_MODER_OUTPUT;
         break;
 
@@ -312,7 +327,9 @@ int stm32_configgpio(uint32_t cfgset)
 
   putreg32(regval, base + STM32_GPIO_OTYPER_OFFSET);
 
-  /* Otherwise, it is an input pin.  Should it configured as an EXTI interrupt? */
+  /* Otherwise, it is an input pin.  Should it configured as an EXTI
+   * interrupt?
+   */
 
   if (pinmode != GPIO_MODER_OUTPUT && (cfgset & GPIO_EXTI) != 0)
     {
@@ -342,14 +359,15 @@ int stm32_configgpio(uint32_t cfgset)
  * Name: stm32_unconfiggpio
  *
  * Description:
- *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set it
- *   into default HiZ state (and possibly mark it's unused) and unlock it whether
- *   it was previously selected as alternative function (GPIO_ALT|GPIO_CNF_AFPP|...).
+ * Unconfigure a GPIO pin based on bit-encoded description of the pin, set
+ * it into default HiZ state (and possibly mark it's unused) and unlock it
+ * whether it was previously selected as alternative function
+ * (GPIO_ALT|GPIO_CNF_AFPP|...).
  *
- *   This is a safety function and prevents hardware from schocks, as unexpected
- *   write to the Timer Channel Output GPIO to fixed '1' or '0' while it should
- *   operate in PWM mode could produce excessive on-board currents and trigger
- *   over-current/alarm function.
+ * This is a safety function and prevents hardware from shocks, as
+ * unexpected write to the Timer Channel Output GPIO to fixed '1' or '0'
+ * while it should operate in PWM mode could produce excessive on-board
+ * currents and trigger over-current/alarm function.
  *
  * Returned Value:
  *  OK on success
@@ -391,23 +409,25 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
       /* Get the port base address */
 
       base = g_gpiobase[port];
-
-      /* Get the pin number  */
-
-      pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-
-      /* Set or clear the output on the pin */
-
-      if (value)
+      if (base != 0)
         {
-          bit = GPIO_BSRR_SET(pin);
-        }
-      else
-        {
-          bit = GPIO_BSRR_RESET(pin);
-        }
+          /* Get the pin number  */
 
-      putreg32(bit, base + STM32_GPIO_BSRR_OFFSET);
+          pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+
+          /* Set or clear the output on the pin */
+
+          if (value)
+            {
+              bit = GPIO_BSRR_SET(pin);
+            }
+          else
+            {
+              bit = GPIO_BSRR_RESET(pin);
+            }
+
+          putreg32(bit, base + STM32_GPIO_BSRR_OFFSET);
+        }
     }
 }
 
@@ -431,11 +451,14 @@ bool stm32_gpioread(uint32_t pinset)
       /* Get the port base address */
 
       base = g_gpiobase[port];
+      if (base != 0)
+        {
+          /* Get the pin number and return the input state of that pin */
 
-      /* Get the pin number and return the input state of that pin */
-
-      pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-      return ((getreg32(base + STM32_GPIO_IDR_OFFSET) & (1 << pin)) != 0);
+          pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+          return ((getreg32(base + STM32_GPIO_IDR_OFFSET) &
+                  (1 << pin)) != 0);
+        }
     }
 
   return 0;
