@@ -835,7 +835,7 @@ static void sai_mckdivider(struct stm32f7_sai_s *priv)
  *
  ****************************************************************************/
 
-static void sai_timeout(int argc, uint32_t arg)
+static void sai_timeout(int argc, uint32_t arg, ...)
 {
   struct stm32f7_sai_s *priv = (struct stm32f7_sai_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -978,7 +978,7 @@ static int sai_dma_setup(struct stm32f7_sai_s *priv)
 
   if (bfcontainer->timeout > 0)
     {
-      ret = wd_start(priv->dog, bfcontainer->timeout, (wdentry_t)sai_timeout,
+      ret = wd_start(priv->dog, bfcontainer->timeout, sai_timeout,
                      1, (uint32_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note

@@ -256,7 +256,7 @@ static int cxd56_rtc_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ************************************************************************************/
 
-static void cxd56_rtc_initialize(int argc, uint32_t arg)
+static void cxd56_rtc_initialize(int argc, uint32_t arg, ...)
 {
   struct timespec ts;
 #ifdef CONFIG_CXD56_RTC_LATEINIT
@@ -285,7 +285,7 @@ static void cxd56_rtc_initialize(int argc, uint32_t arg)
         rtcinfo("retry count: %d\n", s_retry);
 
         if (OK == wd_start(s_wdog, MSEC2TICK(RTC_CLOCK_CHECK_INTERVAL),
-                           (wdentry_t)cxd56_rtc_initialize, 1, (wdparm_t)NULL))
+                           cxd56_rtc_initialize, 1, (wdparm_t)NULL))
           {
             /* Again, this function is called recursively */
 

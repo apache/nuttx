@@ -448,7 +448,7 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result);
 
 /* Data Transfer Helpers ****************************************************/
 
-static void sam_eventtimeout(int argc, uint32_t arg);
+static void sam_eventtimeout(int argc, uint32_t arg, ...);
 static void sam_endwait(struct sam_dev_s *priv, sdio_eventset_t wkupevent);
 static void sam_endtransfer(struct sam_dev_s *priv,
               sdio_eventset_t wkupevent);
@@ -1088,7 +1088,7 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
  *
  ****************************************************************************/
 
-static void sam_eventtimeout(int argc, uint32_t arg)
+static void sam_eventtimeout(int argc, uint32_t arg, ...)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)arg;
 
@@ -2328,7 +2328,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay, (wdentry_t)sam_eventtimeout,
+      ret   = wd_start(priv->waitwdog, delay, sam_eventtimeout,
                        1, (uint32_t)priv);
       if (ret < 0)
         {
