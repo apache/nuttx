@@ -984,7 +984,7 @@ static void pcf8574_irqworker(void *arg)
 
   sched_lock();
   ret = wd_start(priv->wdog, PCF8574_POLLDELAY,
-                 (wdentry_t)pcf8574_poll_expiry,
+                 pcf8574_poll_expiry,
                  1, (wdparm_t)priv);
   if (ret < 0)
     {
@@ -1155,7 +1155,7 @@ FAR struct ioexpander_dev_s *pcf8574_initialize(FAR struct i2c_master_s *i2c,
   DEBUGASSERT(priv->wdog != NULL);
 
   ret = wd_start(priv->wdog, PCF8574_POLLDELAY,
-                 (wdentry_t)pcf8574_poll_expiry,
+                 pcf8574_poll_expiry,
                  1, (wdparm_t)priv);
   if (ret < 0)
     {
