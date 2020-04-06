@@ -767,7 +767,7 @@ static void sim_interrupt_work(void *arg)
 
   /* Re-start the poll timer */
 
-  ret = wd_start(priv->wdog, SIM_POLLDELAY, (wdentry_t)sim_interrupt,
+  ret = wd_start(priv->wdog, SIM_POLLDELAY, sim_interrupt,
                  1, (wdparm_t)priv);
   if (ret < 0)
     {
@@ -854,7 +854,7 @@ FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void)
   priv->wdog = wd_create();
   DEBUGASSERT(priv->wdog != NULL);
 
-  ret = wd_start(priv->wdog, SIM_POLLDELAY, (wdentry_t)sim_interrupt,
+  ret = wd_start(priv->wdog, SIM_POLLDELAY, sim_interrupt,
                  1, (wdparm_t)priv);
   if (ret < 0)
     {
