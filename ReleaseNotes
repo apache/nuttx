@@ -15349,8 +15349,8 @@ detailed bugfix information):
     * NXP/Freescale Kinetis:
 
       - Kinetis MPU:  Disable MPU when not in protected mode.  The hardware
-        reset state of the the MPU precludes any bus masters other then DMA
-        access to memory. Unfortunately USB and SDHC have there own DMA and
+        reset state of the the MPU precludes any bus masters other than DMA
+        access to memory. Unfortunately USB and SDHC have their own DMA and
         will not have access to memory in the default reset state.  This change
         disabled the MPU if present on system startup.  From David Sidrane.
       - Kinetis MPU:  Fixed warning for kinetis_mpudisable. Missing header

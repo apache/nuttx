@@ -187,7 +187,7 @@ fi
 # (2) The CONFIG_APPS_DIR setting to see if there is a configured location for the
 #     application directory.  This can be overridden from the command line.
 
-# If we are going to some host other then windows native or to a windows
+# If we are going to some host other than windows native or to a windows
 # native host, then don't even check what is in the defconfig file.
 
 oldnative=`grep CONFIG_WINDOWS_NATIVE= ${src_config} | cut -d'=' -f2`
