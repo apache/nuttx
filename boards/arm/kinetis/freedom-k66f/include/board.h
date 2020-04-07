@@ -74,9 +74,9 @@
  * KINETIS_MCG_PLL_REF_MIN >= PLLIN <=KINETIS_MCG_PLL_REF_MAX  reference
  * clock to the PLL.
  *
- *   PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 12 Mhz  / 1  = 12 MHz
- *   PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 12 Mhz  * 30 = 360 MHz
- *   MCG Frequency:         PLLOUT = 180 Mhz = 360 MHz /
+ *   PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 12 MHz  / 1  = 12 MHz
+ *   PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 12 MHz  * 30 = 360 MHz
+ *   MCG Frequency:         PLLOUT = 180 MHz = 360 MHz /
  *                                             KINETIS_MCG_PLL_INTERNAL_DIVBY
  *
  * PRDIV register value is the divider minus KINETIS_MCG_C5_PRDIV_BASE.
@@ -114,7 +114,7 @@
 #define BOARD_SOPT2_PLLFLLSEL   SIM_SOPT2_PLLFLLSEL_MCGPLLCLK
 #define BOARD_SOPT2_FREQ        BOARD_MCG_FREQ
 
-/* N.B. The above BOARD_SOPT2_FREQ precludes use of USB with a 12 Mhz Xtal
+/* N.B. The above BOARD_SOPT2_FREQ precludes use of USB with a 12 MHz Xtal
  * Divider output clock = Divider input clock × [ (USBFRAC+1) / (USBDIV+1) ]
  *     SIM_CLKDIV2_FREQ = BOARD_SOPT2_FREQ × [ (USBFRAC+1) / (USBDIV+1) ]
  *                48Mhz = 168Mhz X [(1 + 1) / (6 + 1)]
@@ -131,8 +131,8 @@
 
 /* Divider output clock = Divider input clock * ((PLLFLLFRAC+1)/(PLLFLLDIV+1))
  *  SIM_CLKDIV3_FREQ = BOARD_SOPT2_FREQ × [ (PLLFLLFRAC+1) / (PLLFLLDIV+1)]
- *            90 Mhz = 180 Mhz X [(0 + 1) / (1 + 1)]
- *            90 Mhz = 180 Mhz / (1 + 1) * (0 + 1)
+ *            90 MHz = 180 MHz X [(0 + 1) / (1 + 1)]
+ *            90 MHz = 180 MHz / (1 + 1) * (0 + 1)
  */
 
 #define BOARD_SIM_CLKDIV3_PLLFLLFRAC  1

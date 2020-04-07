@@ -756,7 +756,7 @@ static void stm32_stdclockconfig(void)
 #if defined(CONFIG_STM32_STM32F429) || defined(CONFIG_STM32_STM32F446) || \
     defined(CONFIG_STM32_STM32F469)
 
-      /* Enable the Over-drive to extend the clock frequency to 180 Mhz */
+      /* Enable the Over-drive to extend the clock frequency to 180 MHz */
 
       regval  = getreg32(STM32_PWR_CR);
       regval |= PWR_CR_ODEN;

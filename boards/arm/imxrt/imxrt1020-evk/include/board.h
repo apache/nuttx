@@ -63,7 +63,7 @@
  *                        528Mhz  = (24Mhz * 22) / 1
  *
  *     AHB_CLOCK_ROOT             = PLL6fOut / IMXRT_AHB_PODF_DIVIDER
- *     1Hz to 500 Mhz             = Mhz / IMXRT_ARM_CLOCK_DIVIDER
+ *     1Hz to 500 MHz             = MHz / IMXRT_ARM_CLOCK_DIVIDER
  *                        IMXRT_ARM_CLOCK_DIVIDER = 1
  *                        500Mhz  = 500Mhz / 1
  *

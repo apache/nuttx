@@ -345,7 +345,7 @@ Build Notes:
      cd avr-lib-1.7.1
 
   3. Configure avr-lib.  Assuming that WinAVR is installed at the following
-     loction:
+     location:
 
      export PATH=/cygdrive/c/WinAVR/bin:$PATH
      ./configure --build=`./config.guess` --host=avr

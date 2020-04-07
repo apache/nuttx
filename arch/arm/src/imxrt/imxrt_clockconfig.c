@@ -605,7 +605,7 @@ void imxrt_clockconfig(void)
   reg |= IMXRT_LPI2C_CLK_SELECT;
   putreg32(reg, IMXRT_CCM_CSCDR2);
 
-  /* Set LPI2C divider to 5  for 12 Mhz */
+  /* Set LPI2C divider to 5  for 12 MHz */
 
   reg  = getreg32(IMXRT_CCM_CSCDR2);
   reg &= ~CCM_CSCDR2_LPI2C_CLK_PODF_MASK;

@@ -79,7 +79,7 @@
  *      Fast-mode (up to 400 kHz)
  *      fI2CCLK clock source selection is based on RCC_CCIPR_I2CxSEL
  *      being set to PCLK and the calculations are based on PCLK frequency
- *      of 80 Mhz
+ *      of 80 MHz
  *
  *  - Multiple instances (shared bus)
  *  - Interrupt based operation
@@ -100,7 +100,7 @@
  *  - Wakeup from Stop mode
  *  - More effective error reporting to higher layers
  *  - Slave operation
- *  - Support of fI2CCLK frequencies other than 80 Mhz and other clock sources
+ *  - Support of fI2CCLK frequencies other than 80 MHz and other clock sources
  *  - Polled operation (code present but untested)
  *  - SMBus support
  *  - Multi-master support
@@ -1349,7 +1349,7 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
           /* Default timing calculations from original STM32L4 driver: */
 
           /*  The Speed and timing calculation are based on the following
-           *  fI2CCLK = PCLK and is 80 Mhz
+           *  fI2CCLK = PCLK and is 80 MHz
            *  Analog filter is on,
            *  Digital filter off
            *  Rise Time is 120 ns and fall is 10 ns
@@ -1400,7 +1400,7 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
       else if (i2cclk_mhz == 120)
         {
           /*  The Speed and timing calculation are based on the following
-           *  fI2CCLK = PCLK and is 120 Mhz
+           *  fI2CCLK = PCLK and is 120 MHz
            *  Analog filter is on,
            *  Digital filter off
            *  Rise Time is 120 ns and fall is 25 ns
@@ -2378,7 +2378,7 @@ static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv)
 
   /* TODO:
    * - Provide means to set peripheral clock source via RCC_CCIPR_I2CxSEL
-   * - Make clock source Kconfigurable (currently PCLK = 80 Mhz)
+   * - Make clock source Kconfigurable (currently PCLK = 80 MHz)
    */
 
   /* Force a frequency update */

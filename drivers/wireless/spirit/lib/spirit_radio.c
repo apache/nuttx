@@ -90,7 +90,7 @@ static const uint8_t g_vectc_bandval[4] =
   SYNT0_BS_6, SYNT0_BS_12, SYNT0_BS_16, SYNT0_BS_32
 };
 
-/* It represents the available channel bandwidth times 10 for 26 Mhz xtal.
+/* It represents the available channel bandwidth times 10 for 26 MHz xtal.
  * NOTE: The channel bandwidth for others xtal frequencies can be computed
  * since this table multiplying the current table by a factor
  * xtal_frequency/26e6.

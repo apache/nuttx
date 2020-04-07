@@ -772,7 +772,7 @@ static void stm32l4_stdclockconfig(void)
 
       /* Switch to Range 1 boost mode to support system frequencies up to
        * 120 MHz.
-       * If any PLL has output frequency higher than 80 Mhz, Range 1 boost
+       * If any PLL has output frequency higher than 80 MHz, Range 1 boost
        * mode needs to be used (RM0432, "6.2.9 Clock source frequency versus
        * voltage scaling").
        * Range 2 is not supported.

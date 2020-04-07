@@ -63,7 +63,7 @@
  *                        600Mhz  = (24Mhz * 100/2) / 2
  *
  *     AHB_CLOCK_ROOT             = PLL1fOut / IMXRT_AHB_PODF_DIVIDER
- *     1Hz to 600 Mhz             = 600Mhz / IMXRT_ARM_CLOCK_DIVIDER
+ *     1Hz to 600 MHz             = 600Mhz / IMXRT_ARM_CLOCK_DIVIDER
  *                        IMXRT_ARM_CLOCK_DIVIDER = 1
  *                        600Mhz  = 600Mhz / 1
  *

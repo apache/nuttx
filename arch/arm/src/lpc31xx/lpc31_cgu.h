@@ -1500,7 +1500,7 @@ Nandflash Controller */
 
 #define CGU_HPFINSEL_SHIFT               (0)       /* Bits 0-3: Select input to high HPPLL0 */
 #define CGU_HPFINSEL_MASK                (15 << CGU_HPFINSEL_SHIFT)
-#  define CGU_HPFINSEL_FFAST             (CGU_FREQIN_FFAST     << CGU_HPFINSEL_SHIFT) /* ffast (12 Mhz) */
+#  define CGU_HPFINSEL_FFAST             (CGU_FREQIN_FFAST     << CGU_HPFINSEL_SHIFT) /* ffast (12 MHz) */
 #  define CGU_HPFINSEL_I2SRXBCK0         (CGU_FREQIN_I2SRXBCK0 << CGU_HPFINSEL_SHIFT) /* I2SRX_BCK0 */
 #  define CGU_HPFINSEL_I2SRXWS0          (CGU_FREQIN_I2SRXWS0  << CGU_HPFINSEL_SHIFT) /* I2SRX_WS0 */
 #  define CGU_HPFINSEL_I2SRXBCK1         (CGU_FREQIN_I2SRXBCK1 << CGU_HPFINSEL_SHIFT) /* I2SRX_BCK1 */
