@@ -374,7 +374,7 @@ config STM32H7_ADC
 	bool
 	default n
 
-config STM32H7_CAN
+config STM32H7_FDCAN
 	bool
 	default n
 
@@ -438,6 +438,16 @@ config STM32H7_ADC3
 	bool "ADC3"
 	default n
 	select STM32H7_ADC
+
+config STM32H7_FDCAN1
+	bool "FDCAN1"
+	default n
+	select STM32H7_FDCAN
+
+config STM32H7_FDCAN2
+	bool "FDCAN2"
+	default n
+	select STM32H7_FDCAN
 
 config STM32H7_CRC
 	bool "CRC"
@@ -1421,6 +1431,718 @@ config SDMMC2_SDIO_PULLUP
 
 endmenu # "SDMMC2 Configuration"
 endmenu # "SD/MMC Configuration"
+
+menu "CAN Configuration"
+	depends on STM32H7_FDCAN
+
+config STM32H7_FDCAN_QUEUE_MODE
+	bool "FDCAN QUEUE mode (vs FIFO mode)"
+	default n
+
+choice
+	prompt "FDCAN clock source (PCK5)"
+	default STM32H7_FDCAN_CLKSRC_MCK
+
+config STM32H7_FDCAN_CLKSRC_SLOW
+	bool "Slow clock"
+
+config STM32H7_FDCAN_CLKSRC_MAIN
+	bool "Main clock"
+
+config STM32H7_FDCAN_CLKSRC_PLLA
+	bool "PLLA clock"
+
+config STM32H7_FDCAN_CLKSRC_UPLL
+	bool "UPLL clock"
+
+config STM32H7_FDCAN_CLKSRC_MCK
+	bool "Master clock"
+
+endchoice # FDCAN clock source
+
+config STM32H7_FDCAN_CLKSRC_PRESCALER
+	int "FDCAN clock prescaler"
+	default 1
+	range 1 1024
+	---help---
+		The frequency associated with time quanta is derived by dividing
+		down the input frequency. This setting provides prescaler/divider
+		must lie the range of 1 to 1024.
+
+menu "FDCAN1 device driver options"
+	depends on STM32H7_FDCAN1
+
+choice
+	prompt "FDCAN1 frame format"
+	default STM32H7_FDCAN1_ISO11898_1
+
+config STM32H7_FDCAN1_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32H7_FDCAN1_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN1 frame format
+
+choice
+	prompt "FDCAN1 mode"
+	default STM32H7_FDCAN1_CLASSIC
+
+config STM32H7_FDCAN1_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Clasic CAN mode
+
+config STM32H7_FDCAN1_FD
+	bool "CAN FD"
+	depends on CAN_FD
+	---help---
+		Enable CAN FD mode
+
+config STM32H7_FDCAN1_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN1 mode
+
+config STM32H7_FDCAN1_LOOPBACK
+	bool "Enable FDCAN1 loopback mode"
+	default n
+	---help---
+		Enable the FDCAN1 local loopback mode for testing purposes.
+
+config STM32H7_FDCAN1_BITRATE
+	int "FDCAN1 bitrate"
+	default 500000
+	---help---
+		FDCAN1 bitrate in bits per second.  Required if STM32H7_FDCAN1 is defined.
+
+config STM32H7_FDCAN1_PROPSEG
+	int "FDCAN1 PropSeg"
+	default 2
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H7_FDCAN1_PHASESEG1
+	int "FDCAN1 PhaseSeg1"
+	default 11
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H7_FDCAN1_PHASESEG2
+	int "FDCAN1 PhaseSeg2"
+	default 11
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H7_FDCAN1_FSJW
+	int "FDCAN1 synchronization jump width"
+	default 4
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
+
+config STM32H7_FDCAN1_FBITRATE
+	int "FDCAN1 fast bitrate"
+	default 2000000
+	---help---
+		FDCAN1 bitrate in bits per second.  Required if STM32H7_FDCAN1 is
+		defined.
+
+config STM32H7_FDCAN1_FPROPSEG
+	int "FDCAN1 fast PropSeg"
+	default 2
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H7_FDCAN1_FPHASESEG1
+	int "FDCAN1 fast PhaseSeg1"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H7_FDCAN1_FPHASESEG2
+	int "FDCAN1 fast PhaseSeg2"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H7_FDCAN1_FFSJW
+	int "FDCAN1 fast synchronization jump width"
+	default 2
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
+
+config STM32H7_FDCAN1_NSTDFILTERS
+	int "FDCAN1 number of standard filters"
+	default 8
+	range 0 128
+	---help---
+		Number of standard message ID filters.
+
+config STM32H7_FDCAN1_NEXTFILTERS
+	int "FDCAN1 number of extended filters"
+	default 8
+	range 0 64
+	depends on CAN_EXTID
+	---help---
+		Number of extended message ID filters.
+
+choice
+	prompt "FDCAN1 RX FIFO0 element size"
+	default STM32H7_FDCAN1_RXFIFO0_8BYTES
+
+config STM32H7_FDCAN1_RXFIFO0_8BYTES
+	bool "8 bytes"
+
+config STM32H7_FDCAN1_RXFIFO0_12BYTES
+	bool "12 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXFIFO0_16BYTES
+	bool "16 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXFIFO0_20BYTES
+	bool "20 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXFIFO0_24BYTES
+	bool "24 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXFIFO0_32BYTES
+	bool "32 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXFIFO0_48BYTES
+	bool "48 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXFIFO0_64BYTES
+	bool "64 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+endchoice # FDCAN1 RX buffer element size
+
+config STM32H7_FDCAN1_RXFIFO0_SIZE
+	int "FDCAN1 RX FIFO0 size"
+	default 8
+	range 1 64
+	---help---
+		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
+
+choice
+	prompt "FDCAN1 RX FIFO1 element size"
+	default STM32H7_FDCAN1_RXFIFO1_8BYTES
+
+config STM32H7_FDCAN1_RXFIFO1_8BYTES
+	bool "8 bytes"
+
+config STM32H7_FDCAN1_RXFIFO1_12BYTES
+	bool "12 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXFIFO1_16BYTES
+	bool "16 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXFIFO1_20BYTES
+	bool "20 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXFIFO1_24BYTES
+	bool "24 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXFIFO1_32BYTES
+	bool "32 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXFIFO1_48BYTES
+	bool "48 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXFIFO1_64BYTES
+	bool "64 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+endchoice # FDCAN1 RX buffer element size
+
+config STM32H7_FDCAN1_RXFIFO1_SIZE
+	int "FDCAN1 RX FIFO1 size"
+	default 4
+	range 1 64
+	---help---
+		Number of receive FIFO 1 elements for FDCAN1.  Zero disables FIFO 1.
+
+choice
+	prompt "FDCAN1 RX buffer element size"
+	default STM32H7_FDCAN1_RXBUFFER_8BYTES
+
+config STM32H7_FDCAN1_RXBUFFER_8BYTES
+	bool "8 bytes"
+
+config STM32H7_FDCAN1_RXBUFFER_12BYTES
+	bool "12 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXBUFFER_16BYTES
+	bool "16 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXBUFFER_20BYTES
+	bool "20 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXBUFFER_24BYTES
+	bool "24 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXBUFFER_32BYTES
+	bool "32 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXBUFFER_48BYTES
+	bool "48 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_RXBUFFER_64BYTES
+	bool "64 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+endchoice # FDCAN1 RX buffer element size
+
+config STM32H7_FDCAN1_DEDICATED_RXBUFFER_SIZE
+	int "FDCAN1 dedicated RX buffer size"
+	default 0
+	range 0 64
+	depends on EXPERIMENTAL
+	---help---
+		Number of dedicated RX buffer elements for FDCAN1.
+
+		NOTE: Dedicated RX buffers are not used in the current FDCAN design.
+
+choice
+	prompt "FDCAN1 TX buffer element size"
+	default STM32H7_FDCAN1_TXBUFFER_8BYTES
+
+config STM32H7_FDCAN1_TXBUFFER_8BYTES
+	bool "8 bytes"
+
+config STM32H7_FDCAN1_TXBUFFER_12BYTES
+	bool "12 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_TXBUFFER_16BYTES
+	bool "16 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_TXBUFFER_20BYTES
+	bool "20 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_TXBUFFER_24BYTES
+	bool "24 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_TXBUFFER_32BYTES
+	bool "32 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_TXBUFFER_48BYTES
+	bool "48 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+config STM32H7_FDCAN1_TXBUFFER_64BYTES
+	bool "64 bytes"
+	depends on STM32H7_FDCAN1_FD
+
+endchoice # FDCAN1 TX buffer element size
+
+config STM32H7_FDCAN1_DEDICATED_TXBUFFER_SIZE
+	int "FDCAN1 dedicated TX buffer size"
+	default 0
+	range 0 32
+	depends on EXPERIMENTAL
+	---help---
+		Number of dedicated TX buffer elements for FDCAN1.
+
+		NOTE: Dedicated TX buffers are not used in the current FDCAN design.
+
+config STM32H7_FDCAN1_TXFIFOQ_SIZE
+	int "FDCAN1 TX FIFO queue size"
+	default 4
+	range 1 32
+	---help---
+		Number of dedicated TX buffer elements for FDCAN1.
+
+config STM32H7_FDCAN1_TXEVENTFIFO_SIZE
+	int "FDCAN1 TX event FIFO size"
+	default 0
+	range 0 32
+	depends on EXPERIMENTAL
+	---help---
+		Number of TX event FIFO elements for FDCAN1.  Zero disables TX event FIFO.
+
+endmenu # FDCAN1 device driver options
+
+menu "FDCAN2 device driver options"
+	depends on STM32H7_FDCAN2
+
+choice
+	prompt "FDCAN2 frame format"
+	default STM32H7_FDCAN2_ISO11898_1
+
+config STM32H7_FDCAN2_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32H7_FDCAN2_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN2 frame format
+
+choice
+	prompt "FDCAN2 mode"
+	default STM32H7_FDCAN2_CLASSIC
+
+config STM32H7_FDCAN2_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Classic CAN mode
+
+config STM32H7_FDCAN2_FD
+	bool "CAN FD"
+	depends on CAN_FD
+	---help---
+		Enable CAN FD mode
+
+config STM32H7_FDCAN2_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN2 mode
+
+config STM32H7_FDCAN2_LOOPBACK
+	bool "Enable FDCAN2 loopback mode"
+	default n
+	---help---
+		Enable the FDCAN2 local loopback mode for testing purposes.
+
+config STM32H7_FDCAN2_BITRATE
+	int "FDCAN2 bitrate"
+	default 500000
+	---help---
+		FDCAN2 bitrate in bits per second.  Required if STM32H7_FDCAN2 is
+		defined.
+
+config STM32H7_FDCAN2_PROPSEG
+	int "FDCAN2 PropSeg"
+	default 2
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H7_FDCAN2_PHASESEG1
+	int "FDCAN2 PhaseSeg1"
+	default 11
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H7_FDCAN2_PHASESEG2
+	int "FDCAN2 PhaseSeg2"
+	default 11
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H7_FDCAN2_FSJW
+	int "FDCAN2 synchronization jump width"
+	default 4
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
+
+config STM32H7_FDCAN2_FBITRATE
+	int "FDCAN2 fast bitrate"
+	default 2000000
+	---help---
+		FDCAN2 bitrate in bits per second.  Required if STM32H7_FDCAN2 is
+		defined.
+
+config STM32H7_FDCAN2_FPROPSEG
+	int "FDCAN2 fast PropSeg"
+	default 2
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H7_FDCAN2_FPHASESEG1
+	int "FDCAN2 fast PhaseSeg1"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H7_FDCAN2_FPHASESEG2
+	int "FDCAN2 fast PhaseSeg2"
+	default 4
+	range 1 63
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32H7_FDCAN2_FFSJW
+	int "FDCAN2 fast synchronization jump width"
+	default 2
+	range 1 5
+	---help---
+		The duration of a synchronization jump is Tcan_clk x FSJW.
+
+config STM32H7_FDCAN2_NSTDFILTERS
+	int "FDCAN2 number of standard filters"
+	default 8
+	range 0 128
+	---help---
+		Number of standard message ID filters.
+
+config STM32H7_FDCAN2_NEXTFILTERS
+	int "FDCAN2 number of extended filters"
+	default 8
+	range 0 64
+	depends on CAN_EXTID
+	---help---
+		Number of extended message ID filters.
+
+choice
+	prompt "FDCAN2 RX FIFO0 element size"
+	default STM32H7_FDCAN2_RXFIFO0_8BYTES
+
+config STM32H7_FDCAN2_RXFIFO0_8BYTES
+	bool "8 bytes"
+
+config STM32H7_FDCAN2_RXFIFO0_12BYTES
+	bool "12 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXFIFO0_16BYTES
+	bool "16 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXFIFO0_20BYTES
+	bool "20 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXFIFO0_24BYTES
+	bool "24 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXFIFO0_32BYTES
+	bool "32 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXFIFO0_48BYTES
+	bool "48 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXFIFO0_64BYTES
+	bool "64 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+endchoice # FDCAN2 RX buffer element size
+
+config STM32H7_FDCAN2_RXFIFO0_SIZE
+	int "FDCAN2 RX FIFO0 size"
+	default 8
+	range 1 64
+	---help---
+		Number of receive FIFO 0 elements.  Zero disables FIFO 0.
+
+choice
+	prompt "FDCAN2 RX FIFO1 element size"
+	default STM32H7_FDCAN2_RXFIFO1_8BYTES
+
+config STM32H7_FDCAN2_RXFIFO1_8BYTES
+	bool "8 bytes"
+
+config STM32H7_FDCAN2_RXFIFO1_12BYTES
+	bool "12 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXFIFO1_16BYTES
+	bool "16 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXFIFO1_20BYTES
+	bool "20 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXFIFO1_24BYTES
+	bool "24 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXFIFO1_32BYTES
+	bool "32 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXFIFO1_48BYTES
+	bool "48 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXFIFO1_64BYTES
+	bool "64 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+endchoice # FDCAN2 RX buffer element size
+
+config STM32H7_FDCAN2_RXFIFO1_SIZE
+	int "FDCAN2 RX FIFO1 size"
+	default 4
+	range 1 64
+	---help---
+		Number of receive FIFO 1 elements for FDCAN2.  Zero disables FIFO 1.
+
+choice
+	prompt "FDCAN2 RX buffer element size"
+	default STM32H7_FDCAN2_RXBUFFER_8BYTES
+
+config STM32H7_FDCAN2_RXBUFFER_8BYTES
+	bool "8 bytes"
+
+config STM32H7_FDCAN2_RXBUFFER_12BYTES
+	bool "12 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXBUFFER_16BYTES
+	bool "16 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXBUFFER_20BYTES
+	bool "20 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXBUFFER_24BYTES
+	bool "24 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXBUFFER_32BYTES
+	bool "32 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXBUFFER_48BYTES
+	bool "48 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_RXBUFFER_64BYTES
+	bool "64 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+endchoice # FDCAN2 RX buffer element size
+
+config STM32H7_FDCAN2_DEDICATED_RXBUFFER_SIZE
+	int "FDCAN2 dedicated RX buffer size"
+	default 0
+	range 0 64
+	depends on EXPERIMENTAL
+	---help---
+		Number of dedicated RX buffer elements for FDCAN2.
+
+		NOTE: Dedicated RX buffers are not used in the current FDCAN design.
+
+choice
+	prompt "FDCAN2 TX buffer element size"
+	default STM32H7_FDCAN2_TXBUFFER_8BYTES
+
+config STM32H7_FDCAN2_TXBUFFER_8BYTES
+	bool "8 bytes"
+
+config STM32H7_FDCAN2_TXBUFFER_12BYTES
+	bool "12 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_TXBUFFER_16BYTES
+	bool "16 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_TXBUFFER_20BYTES
+	bool "20 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_TXBUFFER_24BYTES
+	bool "24 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_TXBUFFER_32BYTES
+	bool "32 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_TXBUFFER_48BYTES
+	bool "48 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+config STM32H7_FDCAN2_TXBUFFER_64BYTES
+	bool "64 bytes"
+	depends on STM32H7_FDCAN2_FD
+
+endchoice # FDCAN2 TX buffer element size
+
+config STM32H7_FDCAN2_TXEVENTFIFO_SIZE
+	int "FDCAN2 TX event FIFO size"
+	default 0
+	range 0 32
+	depends on EXPERIMENTAL
+	---help---
+		Number of TX event FIFO elements for FDCAN2.  Zero disables TX event FIFO.
+
+config STM32H7_FDCAN2_DEDICATED_TXBUFFER_SIZE
+	int "FDCAN2 dedicated TX buffer size"
+	default 0
+	range 0 32
+	depends on EXPERIMENTAL
+	---help---
+		Number of dedicated TX buffer elements for FDCAN2.
+
+		NOTE: Dedicated TX buffers are not used in the current FDCAN design.
+
+config STM32H7_FDCAN2_TXFIFOQ_SIZE
+	int "FDCAN2 TX FIFO queue"
+	default 4
+	range 1 32
+	---help---
+		Number of dedicated TX buffer elements for FDCAN2.
+
+endmenu # FDCAN2 device driver options
+
+config STM32H7_FDCAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.
+
+endmenu # CAN device driver options
+
+
 
 if STM32H7_BKPSRAM
 
