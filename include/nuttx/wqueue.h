@@ -61,7 +61,6 @@
  *   handle delayed processing from interrupt handlers.  This feature
  *   is required for some drivers but, if there are not complaints,
  *   can be safely disabled.  The worker thread also performs
- *   garbage collection -- completing any delayed memory deallocations
  *   from interrupt handlers.  If the worker thread is disabled,
  *   then that clean will be performed by the IDLE thread instead
  *   (which runs at the lowest of priority and may not be appropriate

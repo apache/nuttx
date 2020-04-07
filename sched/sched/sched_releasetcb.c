@@ -172,7 +172,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
         {
           if (tcb->dspace->crefs <= 1)
             {
-              sched_kfree(tcb->dspace);
+              kmm_free(tcb->dspace);
             }
           else
             {
@@ -199,7 +199,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
       /* And, finally, release the TCB itself */
 
-      sched_kfree(tcb);
+      kmm_free(tcb);
     }
 
   return ret;

@@ -409,7 +409,7 @@ void ieee802154_primitive_free(FAR struct ieee802154_primitive_s *prim)
       /* Otherwise, deallocate it. */
 
       DEBUGASSERT(priv->pool == POOL_PRIMITIVE_DYNAMIC);
-      sched_kfree(priv);
+      kmm_free(priv);
     }
 #endif
 

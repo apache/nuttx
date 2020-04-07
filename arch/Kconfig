@@ -276,10 +276,6 @@ config ARCH_HAVE_RTC_SUBSECONDS
 	bool
 	default n
 
-config ARCH_HAVE_GARBAGE
-	bool
-	default n
-
 config ARCH_GLOBAL_IRQDISABLE
 	bool
 	default n

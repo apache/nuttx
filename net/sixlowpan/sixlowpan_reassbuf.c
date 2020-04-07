@@ -446,7 +446,7 @@ void sixlowpan_reass_free(FAR struct sixlowpan_reassbuf_s *reass)
 
       /* Otherwise, deallocate it. */
 
-      sched_kfree(reass);
+      kmm_free(reass);
 #endif
     }
 
