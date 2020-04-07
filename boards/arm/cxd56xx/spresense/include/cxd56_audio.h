@@ -161,6 +161,17 @@ void board_audio_initialize(void);
 
 void board_audio_finalize(void);
 
+/****************************************************************************
+ * Name: board_audio_initialize_driver
+ *
+ * Description:
+ *   Initializes a CXD56 audio device driver node with the given number.
+ *   Used by the audio driver. Should not be used by users.
+ *
+ ****************************************************************************/
+
+int board_audio_initialize_driver(int minor);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
