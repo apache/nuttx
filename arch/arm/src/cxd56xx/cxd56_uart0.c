@@ -278,6 +278,7 @@ static ssize_t uart0_write(FAR struct file *filep,
       set_errno(-ret);
       ret = 0;
     }
+
   return (ssize_t)ret;
 }
 

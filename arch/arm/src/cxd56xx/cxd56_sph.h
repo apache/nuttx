@@ -36,7 +36,15 @@
 #ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_SPH_H
 #define __ARCH_ARM_SRC_CXD56XX_CXD56_SPH_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <sys/ioctl.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #define _HSIOCVALID(c) (_IOC_TYPE(c)==0x7f00)
 #define _HSIOC(nr)     _IOC(0x7f00,nr)
@@ -53,6 +61,10 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Public Function Protoypes
+ ****************************************************************************/
 
 int cxd56_sphinitialize(FAR const char *devname);
 

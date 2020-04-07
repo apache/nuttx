@@ -37,7 +37,7 @@
 #define __ARCH_ARM_SRC_CXD56XX_CXD56_SFC_H
 
 /****************************************************************************
- * include files
+ * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
@@ -53,6 +53,10 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 FAR struct mtd_dev_s *cxd56_sfc_initialize(void);
 

@@ -45,7 +45,7 @@
 #include <stdint.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 void cxd56_get_uniqueid(uint8_t uniqueid[]);

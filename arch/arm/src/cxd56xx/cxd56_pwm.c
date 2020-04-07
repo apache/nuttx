@@ -265,6 +265,7 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param)
     {
       period = 0xffff;
     }
+
   offperiod = ((0x10000 - duty) * (period + 1) + 0x8000) >> 16;
   if (offperiod == 0)
     {
@@ -274,6 +275,7 @@ static int convert_freq2period(uint32_t freq, ub16_t duty, uint32_t *param)
     {
       offperiod = period;
     }
+
   *param = (period & 0xffff) |
            ((offperiod & 0xffff) << PWM_PARAM_OFFPERIOD_SHIFT);
 

@@ -33,6 +33,10 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
@@ -91,19 +95,20 @@ struct cxd56_powermgr_procfs_dir_s
  ****************************************************************************/
 
 static int cxd56_powermgr_procfs_open(FAR struct file *filep,
-                            FAR const char *relpath, int oflags, mode_t mode);
+                                      FAR const char *relpath,
+                                      int oflags, mode_t mode);
 static int cxd56_powermgr_procfs_close(FAR struct file *filep);
 static ssize_t cxd56_powermgr_procfs_read(FAR struct file *filep,
-                                             FAR char *buffer, size_t buflen);
+                                          FAR char *buffer, size_t buflen);
 static int cxd56_powermgr_procfs_dup(FAR const struct file *oldp,
-                                                       FAR struct file *newp);
+                                     FAR struct file *newp);
 static int cxd56_powermgr_procfs_opendir(FAR const char *relpath,
-                                                 FAR struct fs_dirent_s *dir);
+                                         FAR struct fs_dirent_s *dir);
 static int cxd56_powermgr_procfs_closedir(FAR struct fs_dirent_s *dir);
 static int cxd56_powermgr_procfs_readdir(struct fs_dirent_s *dir);
 static int cxd56_powermgr_procfs_rewinddir(struct fs_dirent_s *dir);
 static int cxd56_powermgr_procfs_stat(FAR const char *relpath,
-                                                        FAR struct stat *buf);
+                                      FAR struct stat *buf);
 
 /****************************************************************************
  * Private Data
@@ -124,21 +129,41 @@ const struct procfs_operations cxd56_powermgr_procfs_operations =
 };
 
 static const struct procfs_entry_s g_powermgr_procfs1 =
-                               {"pm**", &cxd56_powermgr_procfs_operations};
+{
+  "pm**", &cxd56_powermgr_procfs_operations
+};
+
 static const struct procfs_entry_s g_powermgr_procfs2 =
-                               {"pm/" , &cxd56_powermgr_procfs_operations};
+{
+  "pm/" , &cxd56_powermgr_procfs_operations
+};
+
 static FAR char *g_powermg_procfs_buffer;
 static size_t g_powermg_procfs_size;
 static size_t g_powermg_procfs_len;
 
-static const char* g_powermg_procfs_clock_source_name[]
-                   = {"RCOSC", "SYSPLL", "XOSC", "RTC"};
-static const char* g_powermg_procfs_power_state[]
-                   = {"-", "o"};
-static const char* g_powermg_procfs_dir[]
-                   = {"clock", "power"};
+static const char *g_powermg_procfs_clock_source_name[] =
+{
+  "RCOSC",
+  "SYSPLL",
+  "XOSC",
+  "RTC"
+};
+
+static const char *g_powermg_procfs_power_state[] =
+{
+  "-",
+  "o"
+};
+
+static const char *g_powermg_procfs_dir[] =
+{
+  "clock",
+  "power"
+};
+
 /****************************************************************************
- * Private Function
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -291,8 +316,10 @@ static void cxd56_powermgr_procfs_clock(void)
                  cxd56_get_sys_baseclock(), dsptabl[3],
                  cxd56_get_sys_ahb_baseclock(), dsptabl[4],
                  cxd56_get_sys_apb_baseclock(), dsptabl[5],
-                 cxd56_get_com_baseclock(), cxd56_get_img_uart_baseclock(),
-                 cxd56_get_sys_sfc_baseclock(), cxd56_get_img_spi_baseclock(),
+                 cxd56_get_com_baseclock(),
+                 cxd56_get_img_uart_baseclock(),
+                 cxd56_get_sys_sfc_baseclock(),
+                 cxd56_get_img_spi_baseclock(),
                  scu, cxd56_get_img_wspi_baseclock(),
                  lpadc, cxd56_get_usb_baseclock(),
                  hpadc, emmc,
@@ -385,7 +412,9 @@ static void cxd56_powermgr_procfs_power_state(void)
  ****************************************************************************/
 
 static int cxd56_powermgr_procfs_check_dir(char *relpath,
-                                        mode_t *mode, int *level, int *fileno)
+                                           mode_t *mode,
+                                           int *level,
+                                           int *fileno)
 {
   char *temp;
   int ret = OK;
@@ -443,7 +472,9 @@ static int cxd56_powermgr_procfs_check_dir(char *relpath,
  ****************************************************************************/
 
 static int cxd56_powermgr_procfs_open(FAR struct file *filep,
-                             FAR const char *relpath, int oflags, mode_t mode)
+                                      FAR const char *relpath,
+                                      int oflags,
+                                      mode_t mode)
 {
   FAR struct cxd56_powermgr_procfs_file_s *priv;
   int ret;
@@ -580,7 +611,7 @@ static ssize_t cxd56_powermgr_procfs_read(FAR struct file *filep,
  ****************************************************************************/
 
 static int cxd56_powermgr_procfs_dup(FAR const struct file *oldp,
-                                                        FAR struct file *newp)
+                                     FAR struct file *newp)
 {
   void *oldpriv;
   void *newpriv;
@@ -621,7 +652,7 @@ static int cxd56_powermgr_procfs_dup(FAR const struct file *oldp,
  ****************************************************************************/
 
 static int cxd56_powermgr_procfs_stat(FAR const char *relpath,
-                                                         FAR struct stat *buf)
+                                      FAR struct stat *buf)
 {
   int ret;
   mode_t mode;
@@ -652,7 +683,7 @@ static int cxd56_powermgr_procfs_stat(FAR const char *relpath,
  ****************************************************************************/
 
 static int cxd56_powermgr_procfs_opendir(FAR const char *relpath,
-                                                 FAR struct fs_dirent_s *dir)
+                                         FAR struct fs_dirent_s *dir)
 {
   FAR struct cxd56_powermgr_procfs_dir_s *procfs;
   int ret;
@@ -770,7 +801,7 @@ static int cxd56_powermgr_procfs_rewinddir(struct fs_dirent_s *dir)
 }
 
 /****************************************************************************
- * Public Function
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -786,9 +817,9 @@ int cxd56_pm_initialize_procfs(void)
   int ret;
   ret = procfs_register(&g_powermgr_procfs1);
   if (ret < 0)
-    return -EPERM;
+      return -EPERM;
   ret = procfs_register(&g_powermgr_procfs2);
   if (ret < 0)
-    return -EPERM;
+      return -EPERM;
   return ret;
 }

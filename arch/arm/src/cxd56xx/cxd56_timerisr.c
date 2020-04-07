@@ -97,11 +97,12 @@ static int cxd56_changeclock(uint8_t id)
   if (id == CXD56_PM_CALLBACK_ID_CLK_CHG_START)
     {
       flags = enter_critical_section();
-      {
-        systcsr = getreg32(NVIC_SYSTICK_CTRL);
-        systcsr &= ~NVIC_SYSTICK_CTRL_ENABLE;
-        putreg32(systcsr, NVIC_SYSTICK_CTRL);
-      }
+        {
+          systcsr = getreg32(NVIC_SYSTICK_CTRL);
+          systcsr &= ~NVIC_SYSTICK_CTRL_ENABLE;
+          putreg32(systcsr, NVIC_SYSTICK_CTRL);
+        }
+
       leave_critical_section(flags);
     }
   else if ((id == CXD56_PM_CALLBACK_ID_CLK_CHG_END) ||
@@ -110,20 +111,22 @@ static int cxd56_changeclock(uint8_t id)
       current = (cxd56_get_cpu_baseclk() / CLK_TCK) - 1;
 
       flags = enter_critical_section();
-      {
-        if (g_systrvr != current)
-          {
-            putreg32(current, NVIC_SYSTICK_RELOAD);
-            g_systrvr = current;
-            putreg32(0, NVIC_SYSTICK_CURRENT);
-          }
-        if (id == CXD56_PM_CALLBACK_ID_CLK_CHG_END)
-          {
-            systcsr = getreg32(NVIC_SYSTICK_CTRL);
-            systcsr |= NVIC_SYSTICK_CTRL_ENABLE;
-            putreg32(systcsr, NVIC_SYSTICK_CTRL);
-          }
-      }
+        {
+          if (g_systrvr != current)
+            {
+              putreg32(current, NVIC_SYSTICK_RELOAD);
+              g_systrvr = current;
+              putreg32(0, NVIC_SYSTICK_CURRENT);
+            }
+
+          if (id == CXD56_PM_CALLBACK_ID_CLK_CHG_END)
+            {
+              systcsr = getreg32(NVIC_SYSTICK_CTRL);
+              systcsr |= NVIC_SYSTICK_CTRL_ENABLE;
+              putreg32(systcsr, NVIC_SYSTICK_CTRL);
+            }
+        }
+
       leave_critical_section(flags);
     }
 
