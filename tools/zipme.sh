@@ -36,13 +36,22 @@
 
 WD=`pwd`
 
-TAR="tar cvf"
-ZIP=gzip
+TAR=tar
+
+silent=0
 
 # Get command line parameters
 
-USAGE="USAGE: $0 [-d|h] [-b <build]> <major.minor>"
+USAGE="USAGE: $0 [-d|h|s] [-b <build]> [-e <exclude>] <major.minor>"
 ADVICE="Try '$0 -h' for more information"
+
+# A list of files and folders to exclude from the final tarball.
+
+EXCLPAT="
+  .github
+  .asf.yaml
+
+"
 
 unset VERSION
 unset VERSIONOPT
@@ -59,6 +68,13 @@ while [ ! -z "$1" ]; do
     set -x
     DEBUG=-d
     ;;
+  -e )
+    shift
+    EXCLPAT+=${1}
+    ;;
+  -s )
+    silent=1
+    ;;
   -h )
     echo "$0 is a tool for generation of release versions of NuttX"
     echo ""
@@ -72,6 +88,11 @@ while [ ! -z "$1" ]; do
     echo "     Enable script debug"
     echo "  -h"
     echo "     show this help message and exit"
+    echo "   -e"
+    echo "     Exclude a list of files or folder"
+    echo "     NOTE: The list must be quoted, example -e \"*.out tmp\""
+    echo "   -s"
+    echo "     Run commands silently"
     echo "  <major.minor>"
     echo "     The NuttX version number expressed as a major and minor number separated"
     echo "     by a period"
@@ -89,6 +110,20 @@ done
 VERSION=$1
 VERSIONOPT="-v ${VERSION}"
 
+# Full tar options
+
+for pat in ${EXCLPAT} ; do
+  TAR+=" --exclude=${pat}"
+done
+
+TAR+=" --exclude-vcs-ignores --exclude-vcs"
+
+if [ $silent != 0 ] ; then
+  TAR+=" -czf"
+else
+  TAR+=" -czvf"
+fi
+
 # Make sure we know what is going on
 
 if [ -z ${VERSION} ] ; then
@@ -97,18 +132,6 @@ if [ -z ${VERSION} ] ; then
   echo $ADVICE
   exit 1;
 fi
-
-if [ -z "${BUILD}" ]; then
-  GITINFO=`git log 2>/dev/null | head -1`
-  if [ -z "${GITINFO}" ]; then
-    echo "GIT version information is not available. Use the -b option"
-    echo $USAGE
-    echo $ADVICE
-    exit 1;
-  fi
-  echo "GIT: ${GITINFO}"
-fi
-
 
 # Find the directory we were executed from and were we expect to
 # see the directories to tar up
@@ -121,7 +144,7 @@ else
   if [ -x ${WD}/tools/${MYNAME} ] ; then
     TRUNKDIR="${WD}/.."
   else
-    if [ -x ${WD}/nuttx-${VERSION}/tools/${MYNAME} ] ; then
+    if [ -x ${WD}/nuttx/tools/${MYNAME} ] ; then
       TRUNKDIR="${WD}"
     else
       echo "You must cd into the NUTTX directory to execute this script."
@@ -132,10 +155,10 @@ fi
 
 # Get the NuttX directory names and the path to the parent directory
 
-NUTTX=${TRUNKDIR}/nuttx-${VERSION}
-APPDIR=${TRUNKDIR}/apps-${VERSION}
+NUTTXDIR=${TRUNKDIR}/nuttx
+APPSDIR=${TRUNKDIR}/apps
 
-# Make sure that the versioned directory exists
+# Make sure that the directories exists
 
 if [ ! -d ${TRUNKDIR} ]; then
   echo "Directory ${TRUNKDIR} does not exist"
@@ -145,73 +168,75 @@ fi
 cd ${TRUNKDIR} || \
   { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
 
-if [ ! -d nuttx-${VERSION} ] ; then
-  echo "Directory ${TRUNKDIR}/nuttx-${VERSION} does not exist!"
+if [ ! -d ${NUTTXDIR} ] ; then
+  echo "Directory ${TRUNKDIR}/${NUTTXDIR} does not exist!"
   exit 1
 fi
 
-if [ ! -d apps-${VERSION} ] ; then
-  echo "Directory ${TRUNKDIR}/apps-${VERSION} does not exist!"
+if [ ! -d ${APPSDIR} ] ; then
+  echo "Directory ${TRUNKDIR}/${APPSDIR} does not exist!"
   exit 1
 fi
 
 # Create the versioned tarball names
 
-NUTTX_TARNAME=nuttx-${VERSION}.tar
-APPS_TARNAME=apps-${VERSION}.tar
+NUTTX_TARNAME=apache-nuttx-${VERSION}-incubating.tar
+APPS_TARNAME=apache-nuttx-apps-${VERSION}-incubating.tar
 NUTTX_ZIPNAME=${NUTTX_TARNAME}.gz
 APPS_ZIPNAME=${APPS_TARNAME}.gz
 
-# Prepare the nuttx directory -- Remove editor garbage
+# Prepare the nuttx directory
 
-find ${TRUNKDIR} -name '*~' -exec rm -f '{}' ';' || \
-      { echo "Removal of emacs garbage failed!" ; exit 1 ; }
-find ${TRUNKDIR} -name '*.swp' -exec rm -f '{}' ';' || \
-      { echo "Removal of VI garbage failed!" ; exit 1 ; }
+# Make sure that versioned copies of certain files are in place
 
-# Make sure that versioned copies of the certain files are in place
-
-cd ${NUTTX}/Documentation || \
-   { echo "Failed to cd to ${NUTTX}/Documentation" ; exit 1 ; }
+cd ${NUTTXDIR}/Documentation || \
+   { echo "Failed to cd to ${NUTTXDIR}/Documentation" ; exit 1 ; }
 
 # Write a version file into the NuttX directory.  The syntax of file is such that it
 # may be sourced by a bash script or included by a Makefile.
 
-VERSIONSH=${NUTTX}/tools/version.sh
+VERSIONSH=${NUTTXDIR}/tools/version.sh
 if [ ! -x "${VERSIONSH}" ]; then
   echo "No executable script was found at: ${VERSIONSH}"
   exit 1
 fi
 
-${VERSIONSH} ${DEBUG} ${BUILD} ${VERSIONOPT} ${NUTTX}/.version || \
-    { echo "${VERSIONSH} failed"; cat ${NUTTX}/.version; exit 1; }
-chmod 755 ${NUTTX}/.version || \
-    { echo "'chmod 755 ${NUTTX}/.version' failed"; exit 1; }
+${VERSIONSH} ${DEBUG} ${BUILD} ${VERSIONOPT} ${NUTTXDIR}/.version || \
+    { echo "${VERSIONSH} failed"; cat ${NUTTXDIR}/.version; exit 1; }
+chmod 755 ${NUTTXDIR}/.version || \
+    { echo "'chmod 755 ${NUTTXDIR}/.version' failed"; exit 1; }
 
 # Update the configuration variable documentation
 #
-# MKCONFIGVARS=${NUTTX}/tools/mkconfigvars.sh
-# CONFIGVARHTML=${NUTTX}/Documentation/NuttXConfigVariables.html
+# MKCONFIGVARS=${NUTTXDIR}/tools/mkconfigvars.sh
+# CONFIGVARHTML=${NUTTXDIR}/Documentation/NuttXConfigVariables.html
 #
 # if [ ! -x "${MKCONFIGVARS}" ]; then
 #     echo "No executable script was found at: ${MKCONFIGVARS}"
 #     exit 1
 # fi
 #
-# cd ${NUTTX} || \
-#    { echo "Failed to cd to ${NUTTX}" ; exit 1 ; }
+# cd ${NUTTXDIR} || \
+#    { echo "Failed to cd to ${NUTTXDIR}" ; exit 1 ; }
 #
 # ${MKCONFIGVARS} ${DEBUG} ${VERSIONOPT} || \
 #     { echo "${MKCONFIGVARS} failed"; exit 1; }
 # chmod 644 ${CONFIGVARHTML} || \
 #     { echo "'chmod 644 ${CONFIGVARHTML}' failed"; exit 1; }
 #
+
 # Perform a full clean for the distribution
 
 cd ${TRUNKDIR} || \
    { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
 
-make -C ${NUTTX} distclean
+echo "Cleaning the repositories"
+
+if [ $silent != 0 ] ; then
+  make -C ${NUTTXDIR} distclean 1>/dev/null
+else
+  make -C ${NUTTXDIR} distclean
+fi
 
 # Remove any previous tarballs
 
@@ -241,17 +266,12 @@ fi
 
 # Then tar and zip-up the directories
 
-cd ${TRUNKDIR} || \
-   { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
+echo "Archiving and zipping nuttx/"
+${TAR} ${NUTTX_ZIPNAME} `basename ${NUTTXDIR}` || \
+      { echo "tar of ${NUTTX_ZIPNAME} failed!" ; exit 1 ; }
 
-${TAR} ${NUTTX_TARNAME} nuttx-${VERSION} || \
-      { echo "tar of ${NUTTX_TARNAME} failed!" ; exit 1 ; }
-${ZIP} ${NUTTX_TARNAME} || \
-      { echo "zip of ${NUTTX_TARNAME} failed!" ; exit 1 ; }
+echo "Archiving and zipping apps/"
+${TAR} ${APPS_ZIPNAME} `basename ${APPSDIR}` || \
+      { echo "tar of ${APPS_ZIPNAME} failed!" ; exit 1 ; }
 
-${TAR} ${APPS_TARNAME} apps-${VERSION} || \
-      { echo "tar of ${APPS_TARNAME} failed!" ; exit 1 ; }
-${ZIP} ${APPS_TARNAME} || \
-      { echo "zip of ${APPS_TARNAME} failed!" ; exit 1 ; }
-
-cd ${NUTTX}
+cd ${NUTTXDIR}
