@@ -561,7 +561,7 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
                         bool setup)
 {
   FAR struct netlink_conn_s *conn;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
   conn = (FAR struct netlink_conn_s *)psock->s_conn;
@@ -626,44 +626,6 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
               conn->pollsem   = NULL;
               conn->pollevent = NULL;
             }
-          else
-            {
-              /* Call netlink_notify_response() to receive a notification
-               * when a response has been queued.
-               */
-
-              ret = netlink_notify_response(psock);
-              if (ret < 0)
-                {
-                  nerr("ERROR: netlink_notify_response() failed: %d\n", ret);
-                  netlink_notifier_teardown(conn);
-                  conn->pollsem   = NULL;
-                  conn->pollevent = NULL;
-                }
-              else if (ret == 0)
-                {
-                  /* The return value of zero means that a response is
-                   * already available and that no notification is
-                   * forthcoming.
-                   */
-
-                  netlink_notifier_teardown(conn);
-                  conn->pollsem   = NULL;
-                  conn->pollevent = NULL;
-                  fds->revents    = POLLIN;
-                  nxsem_post(fds->sem);
-                }
-              else
-                {
-                  ret = OK;
-                }
-            }
-        }
-      else
-        {
-          /* There will not be any wakeups coming?  Probably an error? */
-
-          ret = OK;
         }
 
       net_unlock();

@@ -262,23 +262,6 @@ netlink_get_response(FAR struct socket *psock);
 bool netlink_check_response(FAR struct socket *psock);
 
 /****************************************************************************
- * Name: netlink_notify_response
- *
- * Description:
- *   Notify a thread when a response is available.  The thread will be
- *   notified via work queue notifier when the response becomes available.
- *
- * Returned Value:
- *   Zero (OK) is returned if the response is already available.  No
- *     notification will be sent.
- *   One is returned if the notification was successfully setup.
- *   A negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int netlink_notify_response(FAR struct socket *psock);
-
-/****************************************************************************
  * Name: netlink_route_sendto()
  *
  * Description:
