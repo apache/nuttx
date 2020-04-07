@@ -27,6 +27,35 @@ if AUDIO_TONE
 
 endif # AUDIO_TONE
 
+config AUDIO_CXD56
+	bool "CXD56 audio driver"
+	default n
+	depends on AUDIO
+	select AUDIO_DRIVER_SPECIFIC_BUFFERS
+	---help---
+		Enable support for audio playback using the CXD5247 chip on the
+		CXD56 Spresense board.
+
+if AUDIO_CXD56
+
+if AUDIO_DRIVER_SPECIFIC_BUFFERS
+
+config CXD56_AUDIO_NUM_BUFFERS
+	int "Number of audio buffers to use"
+	default 4
+
+config CXD56_AUDIO_BUFFER_SIZE
+	int "Size of each audio buffer"
+	default 4096
+
+endif # AUDIO_DRIVER_SPECIFIC_BUFFERS
+
+config CXD56_AUDIO_WORKER_STACKSIZE
+	int "Worker thread stack size"
+	default 768
+
+endif # AUDIO_CXD56
+
 config AUDIO_VS1053
 	bool "VS1053 codec chip"
 	default n
