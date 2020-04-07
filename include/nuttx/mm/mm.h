@@ -224,6 +224,13 @@ struct mm_freenode_s
   FAR struct mm_freenode_s *blink;
 };
 
+#ifdef __KERNEL__
+struct mm_delaynode_s
+{
+  struct mm_delaynode_s *flink;
+};
+#endif
+
 /* What is the size of the freenode? */
 
 #define MM_PTR_SIZE sizeof(FAR struct mm_freenode_s *)
@@ -263,6 +270,12 @@ struct mm_heap_s
    */
 
   struct mm_freenode_s mm_nodelist[MM_NNODES];
+
+#ifdef __KERNEL__
+  /* Free delay list, for some situation can't do free immdiately */
+
+  struct mm_delaynode_s mm_delaylist;
+#endif
 };
 
 /****************************************************************************
