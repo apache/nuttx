@@ -56,12 +56,6 @@
 #ifdef CONFIG_NET_NETLINK
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define NETLINK_NO_WAITER ((pid_t)-1)
-
-/****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
@@ -72,13 +66,6 @@ struct netlink_conn_s
   /* Common prologue of all connection structures. */
 
   dq_entry_t node;                   /* Supports a doubly linked list */
-
-  /* This is a list of NetLink connection callbacks.  Each callback
-   * represents a thread that is stalled, waiting for a device-specific
-   * event.
-   */
-
-  FAR struct devif_callback_s *list; /* NetLink callbacks */
 
   /* NetLink-specific content follows */
 
@@ -95,7 +82,7 @@ struct netlink_conn_s
 
   /* Queued response data */
 
-  sq_queue_t resplist;               /* Singly linked list of responses*/
+  sq_queue_t resplist;               /* Singly linked list of responses */
 };
 
 /****************************************************************************
@@ -111,12 +98,6 @@ extern "C"
 #endif
 
 EXTERN const struct sock_intf_s g_netlink_sockif;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-struct sockaddr_nl;  /* Forward reference */
 
 /****************************************************************************
  * Name: netlink_initialize()
@@ -163,17 +144,6 @@ void netlink_free(FAR struct netlink_conn_s *conn);
  ****************************************************************************/
 
 FAR struct netlink_conn_s *netlink_nextconn(FAR struct netlink_conn_s *conn);
-
-/****************************************************************************
- * Name: netlink_active()
- *
- * Description:
- *   Find a connection structure that is the appropriate connection for the
- *   provided NetLink address
- *
- ****************************************************************************/
-
-FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr);
 
 /****************************************************************************
  * Name: netlink_notifier_setup
@@ -255,7 +225,7 @@ void netlink_notifier_signal(FAR struct netlink_conn_s *conn);
  ****************************************************************************/
 
 FAR struct netlink_response_s *
-  netlink_tryget_response(FAR struct socket *psock);
+netlink_tryget_response(FAR struct socket *psock);
 
 /****************************************************************************
  * Name: netlink_get_response
@@ -276,7 +246,7 @@ FAR struct netlink_response_s *
  ****************************************************************************/
 
 FAR struct netlink_response_s *
-  netlink_get_response(FAR struct socket *psock);
+netlink_get_response(FAR struct socket *psock);
 
 /****************************************************************************
  * Name: netlink_check_response
