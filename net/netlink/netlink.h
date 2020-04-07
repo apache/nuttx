@@ -71,6 +71,8 @@ struct netlink_conn_s
 
   uint32_t pid;                      /* Port ID (if bound) */
   uint32_t groups;                   /* Multicast groups mask (if bound) */
+  uint32_t dst_pid;                  /* Destination port ID */
+  uint32_t dst_groups;               /* Destination multicast groups mask */
   uint8_t crefs;                     /* Reference counts on this instance */
   uint8_t protocol;                  /* See NETLINK_* definitions */
 

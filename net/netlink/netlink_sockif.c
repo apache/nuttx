@@ -281,11 +281,11 @@ static int netlink_bind(FAR struct socket *psock,
 
   /* Save the address information in the connection structure */
 
-  nladdr          = (FAR struct sockaddr_nl *)addr;
-  conn            = (FAR struct netlink_conn_s *)psock->s_conn;
+  nladdr = (FAR struct sockaddr_nl *)addr;
+  conn   = (FAR struct netlink_conn_s *)psock->s_conn;
 
-  conn->pid       = nladdr->nl_pid;
-  conn->groups    = nladdr->nl_groups;
+  conn->pid    = nladdr->nl_pid ? nladdr->nl_pid : getpid();
+  conn->groups = nladdr->nl_groups;
 
   return OK;
 }
@@ -317,25 +317,21 @@ static int netlink_getsockname(FAR struct socket *psock,
                                FAR socklen_t *addrlen)
 {
   FAR struct sockaddr_nl *nladdr;
+  FAR struct netlink_conn_s *conn;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && addr != NULL &&
               addrlen != NULL && *addrlen >= sizeof(struct sockaddr_nl));
+
+  conn = (FAR struct netlink_conn_s *)psock->s_conn;
 
   /* Return the address information in the address structure */
 
   nladdr = (FAR struct sockaddr_nl *)addr;
   memset(nladdr, 0, sizeof(struct sockaddr_nl));
 
-  nladdr->nl_family     = AF_NETLINK;
-
-  if (_SS_ISBOUND(psock->s_flags))
-    {
-      FAR struct netlink_conn_s *conn;
-
-      conn              = (FAR struct netlink_conn_s *)psock->s_conn;
-      nladdr->nl_pid    = conn->pid;
-      nladdr->nl_groups = conn->groups;
-    }
+  nladdr->nl_family = AF_NETLINK;
+  nladdr->nl_pid    = conn->pid;
+  nladdr->nl_groups = conn->groups;
 
   *addrlen = sizeof(struct sockaddr_nl);
   return OK;
@@ -373,8 +369,25 @@ static int netlink_getpeername(FAR struct socket *psock,
                                FAR struct sockaddr *addr,
                                FAR socklen_t *addrlen)
 {
-#warning Missing logic for NETLINK getsockname
-  return -EOPNOTSUPP;  /* Or maybe return -EAFNOSUPPORT; */
+  FAR struct sockaddr_nl *nladdr;
+  FAR struct netlink_conn_s *conn;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && addr != NULL &&
+              addrlen != NULL && *addrlen >= sizeof(struct sockaddr_nl));
+
+  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+
+  /* Return the address information in the address structure */
+
+  nladdr = (FAR struct sockaddr_nl *)addr;
+  memset(nladdr, 0, sizeof(struct sockaddr_nl));
+
+  nladdr->nl_family = AF_NETLINK;
+  nladdr->nl_pid    = conn->dst_pid;
+  nladdr->nl_groups = conn->dst_groups;
+
+  *addrlen = sizeof(struct sockaddr_nl);
+  return OK;
 }
 
 /****************************************************************************
@@ -405,7 +418,6 @@ static int netlink_getpeername(FAR struct socket *psock,
 
 static int netlink_listen(FAR struct socket *psock, int backlog)
 {
-#warning Missing logic for NETLINK listen
   return -EOPNOTSUPP;
 }
 
@@ -431,8 +443,21 @@ static int netlink_connect(FAR struct socket *psock,
                            FAR const struct sockaddr *addr,
                            socklen_t addrlen)
 {
-#warning Missing logic for NETLINK connect
-  return -EOPNOTSUPP;
+  FAR struct sockaddr_nl *nladdr;
+  FAR struct netlink_conn_s *conn;
+
+  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && addr != NULL &&
+              addrlen >= sizeof(struct sockaddr_nl));
+
+  /* Save the address information in the connection structure */
+
+  nladdr = (FAR struct sockaddr_nl *)addr;
+  conn   = (FAR struct netlink_conn_s *)psock->s_conn;
+
+  conn->dst_pid    = nladdr->nl_pid;
+  conn->dst_groups = nladdr->nl_groups;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -482,7 +507,6 @@ static int netlink_connect(FAR struct socket *psock,
 static int netlink_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                           FAR socklen_t *addrlen, FAR struct socket *newsock)
 {
-#warning Missing logic for NETLINK accept
   return -EOPNOTSUPP;
 }
 
@@ -665,38 +689,27 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
 static ssize_t netlink_send(FAR struct socket *psock, FAR const void *buf,
                             size_t len, int flags)
 {
+  FAR struct netlink_conn_s *conn;
+  struct sockaddr_nl nladdr;
+
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
 
-  /* The socket must be connected in order to use send */
+  /* Get the underlying connection structure */
 
-  if (_SS_ISBOUND(psock->s_flags))
-    {
-      FAR struct netlink_conn_s *conn;
-      struct sockaddr_nl nladdr;
+  conn = (FAR struct netlink_conn_s *)psock->s_conn;
 
-      /* Get the underlying connection structure */
+  /* Format the address */
 
-      conn             = (FAR struct netlink_conn_s *)psock->s_conn;
+  nladdr.nl_family = AF_NETLINK;
+  nladdr.nl_pad    = 0;
+  nladdr.nl_pid    = conn->dst_pid;
+  nladdr.nl_groups = conn->dst_groups;
 
-      /* Format the address */
+  /* Then let sendto() perform the actual send operation */
 
-      nladdr.nl_family = AF_NETLINK;
-      nladdr.nl_pad    = 0;
-      nladdr.nl_pid    = conn->pid;
-      nladdr.nl_groups = conn->groups;
-
-      /* Then let sendto() perform the actual send operation */
-
-      return netlink_sendto(psock, buf, len, flags,
-                            (FAR const struct sockaddr *)&nladdr,
-                            sizeof(struct sockaddr_nl));
-    }
-
-  /* EDESTADDRREQ.  Signifies that the socket is not connection-mode and no
-   * peer address is set.
-   */
-
-  return -EDESTADDRREQ;
+  return netlink_sendto(psock, buf, len, flags,
+                        (FAR const struct sockaddr *)&nladdr,
+                        sizeof(struct sockaddr_nl));
 }
 
 /****************************************************************************
@@ -851,10 +864,6 @@ static int netlink_close(FAR struct socket *psock)
 
   if (conn->crefs <= 1)
     {
-      /* Yes... inform user-space daemon of socket close. */
-
-#warning Missing logic in NETLINK close()
-
       /* Free the connection structure */
 
       conn->crefs = 0;
