@@ -1313,7 +1313,9 @@ static void tca64_interrupt(FAR void *arg)
 
       priv->config->enable(priv->config, false);
 
-      /* Schedule interrupt related work on the high priority worker thread. */
+      /* Schedule interrupt related work on the high priority worker
+       * thread.
+       */
 
       work_queue(HPWORK, &priv->work, tca64_irqworker,
                  (FAR void *)priv, 0);
@@ -1357,7 +1359,9 @@ static void tca64_poll_expiry(int argc, wdparm_t arg1, ...)
 
       priv->config->enable(priv->config, false);
 
-      /* Schedule interrupt related work on the high priority worker thread. */
+      /* Schedule interrupt related work on the high priority worker
+       * thread.
+       */
 
       work_queue(HPWORK, &priv->work, tca64_irqworker,
                  (FAR void *)priv, 0);

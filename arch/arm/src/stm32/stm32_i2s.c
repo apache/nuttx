@@ -1036,7 +1036,9 @@ static int i2s_rxdma_setup(struct stm32_i2s_s *priv)
 
   do
     {
-      /* Remove the pending RX transfer at the head of the RX pending queue. */
+      /* Remove the pending RX transfer at the head of the RX pending
+       * queue.
+       */
 
       bfcontainer = (struct stm32_buffer_s *)sq_remfirst(&priv->rx.pend);
       DEBUGASSERT(bfcontainer && bfcontainer->apb);
@@ -1271,7 +1273,9 @@ static void i2s_rx_schedule(struct stm32_i2s_s *priv, int result)
 
       bfcontainer->result = result;
 
-      /* Add the completed buffer container to the tail of the rx.done queue */
+      /* Add the completed buffer container to the tail of the rx.done
+       * queue
+       */
 
       sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.done);
     }
@@ -1433,7 +1437,9 @@ static int i2s_txdma_setup(struct stm32_i2s_s *priv)
 
   do
     {
-      /* Remove the pending TX transfer at the head of the TX pending queue. */
+      /* Remove the pending TX transfer at the head of the TX pending
+       * queue.
+       */
 
       bfcontainer = (struct stm32_buffer_s *)sq_remfirst(&priv->tx.pend);
       DEBUGASSERT(bfcontainer && bfcontainer->apb);
@@ -1654,7 +1660,9 @@ static void i2s_tx_schedule(struct stm32_i2s_s *priv, int result)
 
       bfcontainer->result = result;
 
-      /* Add the completed buffer container to the tail of the tx.done queue */
+      /* Add the completed buffer container to the tail of the tx.done
+       * queue
+       */
 
       sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.done);
     }
@@ -2278,7 +2286,10 @@ static uint32_t i2s_mckdivider(struct stm32_i2s_s *priv)
   i2s_putreg(priv, STM32_SPI_I2SCFGR_OFFSET,
              SPI_I2SCFGR_I2SMOD | SPI_I2SCFGR_I2SCFG_MTX | SPI_I2SCFGR_I2SE);
 
-  /* putreg32((getreg32(STM32_DMA1_HIFCR) | DMA_HIFCR_CTCIF7), STM32_DMA1_HIFCR); */
+#if 0
+  putreg32((getreg32(STM32_DMA1_HIFCR) | DMA_HIFCR_CTCIF7),
+           STM32_DMA1_HIFCR);
+#endif
 
   putreg32((getreg32(STM32_DMA1_HIFCR) | 0x80000000), STM32_DMA1_HIFCR);
 

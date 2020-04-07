@@ -288,7 +288,9 @@ int timer_settime(timer_t timerid, int flags,
 
   nxsig_cancel_notification(&timer->pt_work);
 
-  /* If the it_value member of value is zero, the timer will not be re-armed */
+  /* If the it_value member of value is zero, the timer will not be
+   * re-armed
+   */
 
   if (value->it_value.tv_sec <= 0 && value->it_value.tv_nsec <= 0)
     {
