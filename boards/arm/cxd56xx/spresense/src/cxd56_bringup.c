@@ -176,6 +176,7 @@ static void timer_initialize(void)
       snprintf(devname, sizeof(devname), "/dev/timer%d", i);
       cxd56_timer_initialize(devname, i);
     }
+
   return;
 }
 #endif
@@ -340,6 +341,14 @@ int cxd56_bringup(void)
   if (ret < 0)
     {
       _err("ERROR: Failed to initialize SPI-Flash. %d\n", errno);
+    }
+#endif
+
+#ifdef CONFIG_AUDIO_CXD56
+  ret = board_audio_initialize_driver(1);
+  if (ret < 0)
+    {
+      _err("ERROR: Failed to initialize audio. %d\n", ret);
     }
 #endif
 
