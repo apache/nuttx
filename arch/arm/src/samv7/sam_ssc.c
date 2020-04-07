@@ -393,7 +393,9 @@ struct sam_buffer_s
   int result;                  /* The result of the transfer */
 };
 
-/* This structure describes the state of one receiver or transmitter transport */
+/* This structure describes the state of one receiver or transmitter
+ * transport
+ */
 
 struct sam_transport_s
 {
@@ -1246,7 +1248,9 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
   do
     {
-      /* Remove the pending RX transfer at the head of the RX pending queue. */
+      /* Remove the pending RX transfer at the head of the RX pending
+       * queue.
+       */
 
       bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rx.pend);
       DEBUGASSERT(bfcontainer && bfcontainer->apb);
@@ -1499,7 +1503,9 @@ static void ssc_rx_schedule(struct sam_ssc_s *priv, int result)
 
       bfcontainer->result = result;
 
-      /* Add the completed buffer container to the tail of the rx.done queue */
+      /* Add the completed buffer container to the tail of the rx.done
+       * queue
+       */
 
       sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.done);
     }
@@ -1662,7 +1668,9 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
   do
     {
-      /* Remove the pending TX transfer at the head of the TX pending queue. */
+      /* Remove the pending TX transfer at the head of the TX pending
+       * queue.
+       */
 
       bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->tx.pend);
       DEBUGASSERT(bfcontainer && bfcontainer->apb);
@@ -1903,7 +1911,9 @@ static void ssc_tx_schedule(struct sam_ssc_s *priv, int result)
 
       bfcontainer->result = result;
 
-      /* Add the completed buffer container to the tail of the tx.done queue */
+      /* Add the completed buffer container to the tail of the tx.done
+       * queue
+       */
 
       sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.done);
     }

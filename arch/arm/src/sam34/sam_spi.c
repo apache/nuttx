@@ -792,7 +792,9 @@ static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 
   if (spics->result == -EBUSY)
     {
-      /* Save the result of the transfer if no error was previously reported */
+      /* Save the result of the transfer if no error was previously
+       * reported
+       */
 
       spics->result = result;
     }
@@ -984,7 +986,9 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   spiinfo("cs=%d frequency=%d\n", spics->cs, frequency);
 
-  /* Check if the requested frequency is the same as the frequency selection */
+  /* Check if the requested frequency is the same as the frequency
+   * selection
+   */
 
   if (spics->frequency == frequency)
     {

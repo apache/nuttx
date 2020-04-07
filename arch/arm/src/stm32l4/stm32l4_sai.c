@@ -523,7 +523,9 @@ static void sai_timeout(int argc, uint32_t arg, ...)
   stm32l4_dmastop(priv->dma);
 #endif
 
-  /* Then schedule completion of the transfer to occur on the worker thread. */
+  /* Then schedule completion of the transfer to occur on the worker
+   * thread.
+   */
 
   sai_schedule(priv, -ETIMEDOUT);
 }

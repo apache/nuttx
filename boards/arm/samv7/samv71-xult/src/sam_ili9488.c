@@ -603,7 +603,9 @@ static int sam_lcd_get(FAR struct sam_dev_s *priv, uint8_t cmd,
 
   ret = sam_sendcmd(priv, cmd);
 
-  /* If the command was sent successfully, then receive any accompanying data */
+  /* If the command was sent successfully, then receive any accompanying
+   * data
+   */
 
   if (ret == OK && buflen > 0)
     {

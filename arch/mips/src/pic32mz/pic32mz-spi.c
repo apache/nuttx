@@ -1226,7 +1226,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   uint32_t actual;
   uint32_t regval;
 
-  /* Check if the requested frequency is the same as the frequency selection */
+  /* Check if the requested frequency is the same as the frequency
+   * selection
+   */
 
   if (priv->frequency == frequency)
     {
@@ -1575,7 +1577,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
   if (priv->nbits > 8)
     {
-      /* 16-bit transfer (2 bytes)*/
+      /* 16-bit transfer (2 bytes) */
 
       width  = 2;
     }
@@ -1999,7 +2001,9 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   up_disable_irq(priv->config->txirq);
 #endif
 
-  /* Stop and reset the SPI module by clearing the ON bit in the CON register. */
+  /* Stop and reset the SPI module by clearing the ON bit in the CON
+   * register.
+   */
 
   spi_putreg(priv, PIC32MZ_SPI_CON_OFFSET, 0);
 

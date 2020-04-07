@@ -1040,7 +1040,9 @@ static void pcf8574_interrupt(FAR void *arg)
 
       priv->config->enable(priv->config, false);
 
-      /* Schedule interrupt related work on the high priority worker thread. */
+      /* Schedule interrupt related work on the high priority worker
+       * thread.
+       */
 
       work_queue(HPWORK, &priv->work, pcf8574_irqworker,
                  (FAR void *)priv, 0);
@@ -1084,7 +1086,9 @@ static void pcf8574_poll_expiry(int argc, wdparm_t arg1, ...)
 
       priv->config->enable(priv->config, false);
 
-      /* Schedule interrupt related work on the high priority worker thread. */
+      /* Schedule interrupt related work on the high priority worker
+       * thread.
+       */
 
       work_queue(HPWORK, &priv->work, pcf8574_irqworker,
                  (FAR void *)priv, 0);
