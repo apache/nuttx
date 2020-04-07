@@ -86,26 +86,26 @@
 
 struct cxd56_spidev_s
 {
-  struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
-  uint32_t         spibase;    /* SPIn base address */
+  struct spi_dev_s spidev;      /* Externally visible part of the SPI interface */
+  uint32_t         spibase;     /* SPIn base address */
   uint32_t         spibasefreq;
 #ifdef CONFIG_CXD56_SPI_INTERRUPTS
-  uint8_t          spiirq;     /* SPI IRQ number */
+  uint8_t          spiirq;      /* SPI IRQ number */
 #endif
-  sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
-  uint32_t         frequency;  /* Requested clock frequency */
-  uint32_t         actual;     /* Actual clock frequency */
-  uint8_t          nbits;      /* Width of word in bits (4 to 16) */
-  uint8_t          mode;       /* Mode 0,1,2,3 */
-  uint8_t          port;       /* Port number */
+  sem_t            exclsem;     /* Held while chip is selected for mutual exclusion */
+  uint32_t         frequency;   /* Requested clock frequency */
+  uint32_t         actual;      /* Actual clock frequency */
+  uint8_t          nbits;       /* Width of word in bits (4 to 16) */
+  uint8_t          mode;        /* Mode 0,1,2,3 */
+  uint8_t          port;        /* Port number */
   int              initialized; /* Initialized flag */
 #ifdef CONFIG_CXD56_DMAC
-  bool             dmaenable;  /* Use DMA or not */
-  DMA_HANDLE       rxdmach;    /* RX DMA channel handle */
-  DMA_HANDLE       txdmach;    /* TX DMA channel handle */
-  sem_t            dmasem;     /* Wait for DMA to complete */
-  dma_config_t     rxconfig;   /* RX DMA configuration */
-  dma_config_t     txconfig;   /* TX DMA configuration */
+  bool             dmaenable;   /* Use DMA or not */
+  DMA_HANDLE       rxdmach;     /* RX DMA channel handle */
+  DMA_HANDLE       txdmach;     /* TX DMA channel handle */
+  sem_t            dmasem;      /* Wait for DMA to complete */
+  dma_config_t     rxconfig;    /* RX DMA configuration */
+  dma_config_t     txconfig;    /* TX DMA configuration */
 #endif
 };
 

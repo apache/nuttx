@@ -33,6 +33,10 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
@@ -49,6 +53,10 @@ int FM_RawVerifyWrite(uint32_t offset, const void *buf, uint32_t size);
 int FM_RawRead(uint32_t offset, void *buf, uint32_t size);
 int FM_RawEraseSector(uint32_t sector);
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 #ifndef CONFIG_CXD56_SPIFLASHSIZE
 #  define CONFIG_CXD56_SPIFLASHSIZE (16 * 1024 * 1024)
 #endif
@@ -63,9 +71,8 @@ int FM_RawEraseSector(uint32_t sector);
 #endif
 #define PAGE_SIZE (1 << PAGE_SHIFT)
 
-/**
- * Flash device information
- */
+/* Flash device information */
+
 struct flash_controller_s
 {
   struct mtd_dev_s mtd; /* MTD interface */
@@ -75,8 +82,13 @@ struct flash_controller_s
 static struct flash_controller_s g_sfc;
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: cxd56_erase
  ****************************************************************************/
+
 static int cxd56_erase(FAR struct mtd_dev_s *dev, off_t startblock,
                        size_t nblocks)
 {
@@ -94,6 +106,7 @@ static int cxd56_erase(FAR struct mtd_dev_s *dev, off_t startblock,
           return ERROR;
         }
     }
+
   return OK;
 }
 
@@ -191,13 +204,14 @@ static int cxd56_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
           finfo("cmd: GEOM\n");
           if (geo)
             {
-              /* Populate the geometry structure with information need to know
-               * the capacity and how to access the device.
+              /* Populate the geometry structure with information need to
+               * know the capacity and how to access the device.
                *
-               * NOTE: that the device is treated as though it where just an
-               * array of fixed size blocks.  That is most likely not true,
-               * but the client will expect the device logic to do whatever is
-               * necessary to make it appear so.
+               * NOTE: that the device is treated as though it where just
+               * an array of fixed size blocks.
+               * That is most likely not true, but the client will expect
+               * the device logic to do whatever is necessary to make it
+               * appear so.
                */
 
               geo->blocksize    = PAGE_SIZE;

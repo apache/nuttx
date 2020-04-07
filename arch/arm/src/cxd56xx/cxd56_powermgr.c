@@ -33,6 +33,10 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -55,6 +59,10 @@
 #include "cxd56_pmic.h"
 #include "chip.h"
 #include "hardware/cxd5602_backupmem.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #define INTC_REG_INV(n) (CXD56_INTC_BASE + 0x20 + ((n) << 2))
 #define INTC_REG_EN(n)  (CXD56_INTC_BASE + 0x10 + ((n) << 2))
@@ -180,6 +188,10 @@ static int cxd56_pm_semtake(FAR sem_t *id)
   return nxsem_wait_uninterruptible(id);
 }
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 static int cxd56_pm_needcallback(uint32_t target,
                                  FAR struct cxd56_pm_target_id_s *table)
 {
@@ -245,8 +257,8 @@ static int cxd56_pm_do_callback(uint8_t id,
         }
     }
 
-  /* If one of the callbacks has been failed, then recovery call to previously
-   * called entries.
+  /* If one of the callbacks has been failed, then recovery call to
+   * previously called entries.
    */
 
   if (ret != 0)
@@ -257,6 +269,7 @@ static int cxd56_pm_do_callback(uint8_t id,
         {
           id = CXD56_PM_CALLBACK_ID_CLK_CHG_END;
         }
+
       if (id == CXD56_PM_CALLBACK_ID_HOT_SLEEP)
         {
           id = CXD56_PM_CALLBACK_ID_HOT_BOOT;
@@ -293,6 +306,7 @@ static void cxd56_pm_clkchange(struct cxd56_pm_message_s *message)
         {
           return;
         }
+
       id = CXD56_PM_CALLBACK_ID_CLK_CHG_END;
       mid = MSGID_CLK_CHG_END;
       g_clockcange_start = 0;
@@ -831,7 +845,8 @@ int cxd56_pm_initialize(void)
  *
  * Description:
  *   Get the system boot cause. This boot cause indicates the cause why the
- *   system is launched from the state of power-off, deep sleep or cold sleep.
+ *   system is launched from the state of power-off,
+ *   deep sleep or cold sleep.
  *   Each boot cause is defined as PM_BOOT_XXX.
  *
  * Return:
@@ -982,6 +997,7 @@ int up_pm_sleep(enum pm_sleepmode_e mode)
       PM_ColdSleep(NULL);
       break;
     }
+
   __asm volatile ("dsb");
   for (; ; );
 }

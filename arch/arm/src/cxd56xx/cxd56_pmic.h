@@ -205,7 +205,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -361,7 +361,8 @@ int cxd56_pmic_set_loadswitch(uint8_t chset, bool value);
  *   chset - LoadSwitch Channel number(s)
  *
  * Returned Value:
- *   Return true if all of the specified chset are on. Otherwise, return false
+ *   Return true if all of the specified chset are on.
+ *   Otherwise, return false
  *
  ****************************************************************************/
 
@@ -420,7 +421,8 @@ int cxd56_pmic_set_ddc_ldo(uint8_t chset, bool value);
  *   chset - DDC/LDO Channel number(s)
  *
  * Returned Value:
- *   Return true if all of the specified chset are on. Otherwise, return false
+ *   Return true if all of the specified chset are on.
+ *   Otherwise, return false
  *
  ****************************************************************************/
 
@@ -609,7 +611,8 @@ int cxd56_pmic_getchargestate(FAR uint8_t *state);
  * Name: cxd56_pmic_setrechargevol
  *
  * Description:
- *   Set threshold voltage against full charge for automatic restart charging.
+ *   Set threshold voltage against full charge for automatic restart
+ *   charging.
  *
  * Input Parameter:
  *   mV - Available values are -400, -350, -300 and -250 (mV)
@@ -625,7 +628,8 @@ int cxd56_pmic_setrechargevol(int mv);
  * Name: cxd56_pmic_getrechargevol
  *
  * Description:
- *   Get threshold voltage against full charge for automatic restart charging.
+ *   Get threshold voltage against full charge for automatic restart
+ *   charging.
  *
  * Input Parameter:
  *   mV - Possible values are -400, -350, -300 and -250 (mV)
