@@ -88,7 +88,7 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype)
         {
           if (kmm_heapmember(dtcb->stack_alloc_ptr))
             {
-              sched_kfree(dtcb->stack_alloc_ptr);
+              kmm_free(dtcb->stack_alloc_ptr);
             }
         }
       else
@@ -98,7 +98,7 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype)
 
           if (umm_heapmember(dtcb->stack_alloc_ptr))
             {
-              sched_ufree(dtcb->stack_alloc_ptr);
+              kumm_free(dtcb->stack_alloc_ptr);
             }
         }
 

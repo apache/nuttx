@@ -900,7 +900,7 @@ int sched_sporadic_stop(FAR struct tcb_s *tcb)
 
   /* The free the container holder the sporadic scheduling parameters */
 
-  sched_kfree(tcb->sporadic);
+  kmm_free(tcb->sporadic);
   tcb->sporadic = NULL;
   return OK;
 }

@@ -119,32 +119,6 @@ int nx_idle_task(int argc, FAR char *argv[])
 
   for (; ; )
     {
-      /* Perform garbage collection (if it is not being done by the worker
-       * thread).  This cleans-up memory de-allocations that were queued
-       * because they could not be freed in that execution context (for
-       * example, if the memory was freed from an interrupt handler).
-       */
-
-#ifndef CONFIG_SCHED_WORKQUEUE
-      /* We must have exclusive access to the memory manager to do this
-       * BUT the idle task cannot wait on a semaphore.  So we only do
-       * the cleanup now if we can get the semaphore -- this should be
-       * possible because if the IDLE thread is running, no other task is!
-       *
-       * WARNING: This logic could have undesirable side-effects if priority
-       * inheritance is enabled.  Imagine the possible issues if the
-       * priority of the IDLE thread were to get boosted!  Moral: If you
-       * use priority inheritance, then you should also enable the work
-       * queue so that is done in a safer context.
-       */
-
-      if (sched_have_garbage() && kmm_trysemaphore() == 0)
-        {
-          sched_garbage_collection();
-          kmm_givesemaphore();
-        }
-#endif
-
       /* Perform any processor-specific idle state operations */
 
       up_idle();

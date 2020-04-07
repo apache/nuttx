@@ -93,7 +93,7 @@ void nxmq_free_msg(FAR struct mqueue_msg_s *mqmsg)
 
   else if (mqmsg->type == MQ_ALLOC_DYN)
     {
-      sched_kfree(mqmsg);
+      kmm_free(mqmsg);
     }
   else
     {

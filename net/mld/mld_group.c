@@ -267,7 +267,7 @@ void mld_grpfree(FAR struct net_driver_s *dev, FAR struct mld_group_s *group)
 
   /* Then release the group structure resources. */
 
-  mldinfo("Call sched_kfree()\n");
+  mldinfo("Call kmm_free()\n");
   kmm_free(group);
 
 #ifndef CONFIG_NET_MLD_ROUTER

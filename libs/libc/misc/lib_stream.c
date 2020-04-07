@@ -159,7 +159,7 @@ void lib_stream_release(FAR struct task_group_s *group)
 #ifndef CONFIG_BUILD_KERNEL
           /* Release memory from the user heap */
 
-          sched_ufree(stream->fs_bufstart);
+          kumm_free(stream->fs_bufstart);
 #else
           /* If the exiting group is unprivileged, then it has an address
            * environment.  Don't bother to release the memory in this case...
@@ -171,7 +171,7 @@ void lib_stream_release(FAR struct task_group_s *group)
 
           if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) != 0)
             {
-              sched_kfree(stream->fs_bufstart);
+              kmm_free(stream->fs_bufstart);
             }
 #endif
         }

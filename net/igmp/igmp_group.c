@@ -246,8 +246,8 @@ void igmp_grpfree(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group)
 
   /* Then release the group structure resources. */
 
-  grpinfo("Call sched_kfree()\n");
-  sched_kfree(group);
+  grpinfo("Call kmm_free()\n");
+  kmm_free(group);
 }
 
 #endif /* CONFIG_NET_IGMP */

@@ -237,6 +237,6 @@ void pktradio_metadata_free(FAR struct pktradio_metadata_s *metadata)
       /* Otherwise, deallocate it.  We won't access the free list */
 
       nxsem_post(&g_metadata_sem);
-      sched_kfree(metadata);
+      kmm_free(metadata);
     }
 }

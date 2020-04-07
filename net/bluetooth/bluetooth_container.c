@@ -215,6 +215,6 @@ void bluetooth_container_free(FAR struct bluetooth_container_s *container)
       /* Otherwise, deallocate it. */
 
       net_unlock();
-      sched_kfree(container);
+      kmm_free(container);
     }
 }

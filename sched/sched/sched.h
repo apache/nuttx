@@ -250,29 +250,6 @@ extern volatile dq_queue_t g_waitingforfill;
 
 extern volatile dq_queue_t g_inactivetasks;
 
-/* These are lists of dayed memory deallocations that need to be handled
- * within the IDLE loop or worker thread.  These deallocations get queued
- * by sched_kufree and sched_kfree() if the OS needs to deallocate memory
- * while it is within an interrupt handler.
- */
-
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
-extern volatile sq_queue_t g_delayed_kfree;
-#endif
-
-#ifndef CONFIG_BUILD_KERNEL
-/* REVISIT:  It is not safe to defer user allocation in the kernel mode
- * build.  Why?  Because the correct user context will not be in place
- * when these deferred de-allocations are performed.  In order to make
- * this work, we would need to do something like:  (1) move g_delayed_kufree
- * into the group structure, then traverse the groups to collect garbage on
- * a group-by-group basis.
- */
-
-extern volatile sq_queue_t g_delayed_kufree;
-#endif
-
 /* This is the value of the last process ID assigned to a task */
 
 extern volatile pid_t g_lastpid;

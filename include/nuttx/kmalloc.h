@@ -191,48 +191,6 @@ void group_free(FAR struct task_group_s *group, FAR void *mem);
 
 #endif
 
-/* Functions defined in sched/sched_kfree.c **********************************/
-
-/* Handles memory freed from an interrupt handler.  In that context, kmm_free()
- * (or kumm_free()) cannot be called.  Instead, the allocations are saved in a
- * list of delayed allocations that will be periodically cleaned up by
- * sched_garbage_collection().
- */
-
-void sched_ufree(FAR void *address);
-
-#if defined(CONFIG_MM_KERNEL_HEAP) && defined(__KERNEL__)
-void sched_kfree(FAR void *address);
-#else
-#  define sched_kfree(a) sched_ufree(a)
-#endif
-
-/* Signal the worker thread that is has some clean up to do */
-
-void sched_signal_free(void);
-
-/* Functions defined in sched/sched_garbage *********************************/
-
-/* Must be called periodically to clean up deallocations delayed by
- * sched_kmm_free().  This may be done from either the IDLE thread or from a
- * worker thread.  The IDLE thread has very low priority and could starve
- * the system for memory in some context.
- */
-
-void sched_garbage_collection(void);
-
-/* Is is not a good idea for the IDLE threads to take the KMM semaphore.
- * That can cause the IDLE thread to take processing time from higher
- * priority tasks.  The IDLE threads will only take the KMM semaphore if
- * there is garbage to be collected.
- *
- * Certainly there is a race condition involved in sampling the garbage
- * state.  The looping nature of the IDLE loops should catch any missed
- * garbage from the test on the next time around.
- */
-
-bool sched_have_garbage(void);
-
 #undef KMALLOC_EXTERN
 #if defined(__cplusplus)
 }

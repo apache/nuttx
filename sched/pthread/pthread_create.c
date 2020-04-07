@@ -612,7 +612,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   return ret;
 
 errout_with_join:
-  sched_kfree(pjoin);
+  kmm_free(pjoin);
   ptcb->joininfo = NULL;
 
 errout_with_tcb:
