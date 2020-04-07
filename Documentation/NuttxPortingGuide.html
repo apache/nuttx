@@ -240,7 +240,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: April 2, 2020</p>
+      <p>Last Updated: April 7, 2020</p>
     </td>
   </tr>
 </table>
@@ -2948,6 +2948,10 @@ wd_start() on a given watchdog ID has any effect.
 <li><code>wdentry</code>. Function to call on timeout
 <li><code>argc</code>.  The number of uint32_t parameters to pass to wdentry.
 <li><code>...</code>. uint32_t size parameters to pass to wdentry
+
+<p>
+<b>NOTE</b>:  All parameters must be of type <code>wdparm_t</code>.
+</p>
 </ul>
 
 <p>
