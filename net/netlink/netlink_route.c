@@ -79,20 +79,6 @@
 #  define CONFIG_NETLINK_DISABLE_GETROUTE 1
 #endif
 
-#undef NETLINK_DISABLE_NLMSGDONE
-#if defined(CONFIG_NETLINK_DISABLE_GETLINK) && \
-    defined(CONFIG_NETLINK_DISABLE_GETROUTE)
-#  define NETLINK_DISABLE_NLMSGDONE 1
-#endif
-
-/* Helpers ******************************************************************/
-
-#define IFA_RTA(r)  \
-  ((FAR struct rtattr *)(((FAR char *)(r)) + \
-   NLMSG_ALIGN(sizeof(struct ifaddrmsg))))
-#define IFA_PAYLOAD(n) \
-  NLMSG_PAYLOAD(n, sizeof(struct ifaddrmsg))
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -416,7 +402,7 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
   resp->hdr.nlmsg_pid    = devinfo->req->hdr.nlmsg_pid;
 
   resp->iface.ifi_family = devinfo->req->gen.rtgen_family;
-  resp->iface.ifi_pid    = devinfo->req->hdr.nlmsg_pid;
+  resp->iface.ifi_pad    = 0;
   resp->iface.ifi_type   = devinfo->req->hdr.nlmsg_type;
 #ifdef CONFIG_NETDEV_IFINDEX
   resp->iface.ifi_index  = dev->d_ifindex;

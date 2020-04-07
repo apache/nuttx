@@ -77,7 +77,7 @@ struct netlink_response_s
   /* Message-specific data may follow */
 };
 
-#define SIZEOF_NETLINK_RESPONSE_S(n) (sizeof(struct netlink_response_s) + (n) - 1)
+#define SIZEOF_NETLINK_RESPONSE_S(n) (sizeof(struct netlink_response_s) + (n))
 
 /****************************************************************************
  * Public Function Prototypes
