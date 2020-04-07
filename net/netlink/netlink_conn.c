@@ -129,7 +129,7 @@ static void netlink_response_available(FAR void *arg)
  * Name: netlink_initialize()
  *
  * Description:
- *   Initialize the User Socket connection structures.  Called once and only
+ *   Initialize the NetLink connection structures.  Called once and only
  *   from the networking layer.
  *
  ****************************************************************************/
@@ -251,27 +251,6 @@ FAR struct netlink_conn_s *netlink_nextconn(FAR struct netlink_conn_s *conn)
 }
 
 /****************************************************************************
- * Name: netlink_active
- *
- * Description:
- *   Find a connection structure that is the appropriate connection for the
- *   provided NetLink address
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr)
-{
-  /* This function is used to handle routing of incoming messages to sockets
-   * connected to the address.  There is no such use case for NetLink
-   * sockets.
-   */
-
-  return NULL;
-}
-
-/****************************************************************************
  * Name: netlink_add_response
  *
  * Description:
@@ -330,7 +309,7 @@ void netlink_add_response(NETLINK_HANDLE handle,
  ****************************************************************************/
 
 FAR struct netlink_response_s *
-  netlink_tryget_response(FAR struct socket *psock)
+netlink_tryget_response(FAR struct socket *psock)
 {
   FAR struct netlink_response_s *resp;
   FAR struct netlink_conn_s *conn;
@@ -369,7 +348,7 @@ FAR struct netlink_response_s *
  ****************************************************************************/
 
 FAR struct netlink_response_s *
-  netlink_get_response(FAR struct socket *psock)
+netlink_get_response(FAR struct socket *psock)
 {
   FAR struct netlink_response_s *resp;
   FAR struct netlink_conn_s *conn;
@@ -391,8 +370,8 @@ FAR struct netlink_response_s *
 
       /* Set up a semaphore to notify us when a response is queued. */
 
-      (void)sem_init(&waitsem, 0, 0);
-      (void)nxsem_setprotocol(&waitsem, SEM_PRIO_NONE);
+      sem_init(&waitsem, 0, 0);
+      nxsem_setprotocol(&waitsem, SEM_PRIO_NONE);
 
       /* Set up a notifier to post the semaphore when a response is
        * received.
@@ -420,7 +399,6 @@ FAR struct netlink_response_s *
 
       if (ret < 0)
         {
-          resp = NULL;
           break;
         }
     }

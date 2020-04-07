@@ -118,7 +118,7 @@ const struct sock_intf_s g_netlink_sockif =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inet_setup
+ * Name: netlink_setup
  *
  * Description:
  *   Called for socket() to verify that the provided socket type and
@@ -458,7 +458,7 @@ static int netlink_connect(FAR struct socket *psock,
  *   actual length of the address returned.
  *
  *   If no pending connections are present on the queue, and the socket is
- *   not marked as non-blocking, inet_accept blocks the caller until a
+ *   not marked as non-blocking, accept blocks the caller until a
  *   connection is present. If the socket is marked non-blocking and no
  *   pending connections are present on the queue, inet_accept returns
  *   EAGAIN.
@@ -518,7 +518,7 @@ static void netlink_response_available(FAR void *arg)
       /* Wake up the poll() with POLLIN */
 
        *conn->pollevent |= POLLIN;
-       (void)nxsem_post(conn->pollsem);
+       nxsem_post(conn->pollsem);
     }
   else
     {
