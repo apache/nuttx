@@ -37,14 +37,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking *************************************************************************/
+/* Clocking *****************************************************************/
 
-/* The STM32F4 Discovery board features a single 8MHz crystal.  Space is provided
- * for a 32kHz RTC backup crystal, but it is not stuffed.
+/* The STM32F4 Discovery board features a single 8MHz crystal. Space is
+ * provided for a 32kHz RTC backup crystal, but it is not stuffed.
  *
  * This is the canonical configuration:
  *   System Clock source           : PLL (HSE)
- *   SYSCLK(Hz)                    : 180000000    Determined by PLL configuration
+ *   SYSCLK(Hz)                    : 180000000    Determined by PLL config
  *   HCLK(Hz)                      : 180000000    (STM32_RCC_CFGR_HPRE)
  *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
  *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
@@ -54,7 +54,7 @@
  *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
  *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
  *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
- *   Main regulator output voltage : Scale1 mode  Needed for high speed SYSCLK
+ *   Main regulator output voltage : Scale1 mode  Needed for highspeed SYSCLK
  *   Flash Latency(WS)             : 5
  *   Prefetch Buffer               : OFF
  *   Instruction cache             : ON
@@ -100,9 +100,7 @@
 
 #define STM32_RCC_CFGR_HPRE     RCC_CFGR_HPRE_SYSCLK  /* HCLK  = SYSCLK / 1 */
 #define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
-#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY  /* same as above, to satisfy compiler */
-
-/* APB1 clock (PCLK1) is HCLK/4 (42MHz) */
+#define STM32_BOARD_HCLK        STM32_HCLK_FREQUENCY
 
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd4     /* PCLK1 = HCLK / 4 */
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/4)
@@ -146,7 +144,7 @@
 #define BOARD_TIM7_FREQUENCY    (STM32_HCLK_FREQUENCY/2)
 #define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
 
-/* DMA Channel/Stream Selections *********************************************/
+/* DMA Channel/Stream Selections ********************************************/
 
 /* Stream selections are arbitrary for now but might become important in the
  * future if we set aside more DMA channels/streams.
@@ -164,7 +162,6 @@
 
 #define DMAMAP_SDMMC1  DMAMAP_SDMMC1_1
 #define DMAMAP_SDMMC2  DMAMAP_SDMMC2_1
-
 
 /* FLASH wait states
  *
@@ -209,13 +206,14 @@
 #define BOARD_LED3_BIT    (1 << BOARD_LED3)
 
 /* If CONFIG_ARCH_LEDS is defined, the usage by the board port is defined in
- * include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
- * events as follows:
+ * include/board.h and src/stm32_leds.c. The LEDs are used to encode
+ * OS-related events as follows:
  *
  *
  *   SYMBOL                     Meaning                      LED state
  *                                                        Red   Green Blue
- *   ----------------------  --------------------------  ------ ------ ----*/
+ *   ----------------------  --------------------------  ------ ------ ---
+ */
 
 #define LED_STARTED        0 /* NuttX has been started   OFF    OFF   OFF  */
 #define LED_HEAPALLOCATE   1 /* Heap has been allocated  OFF    OFF   ON   */
@@ -257,8 +255,8 @@
 
 /* USART6:
  *
- * These configurations assume that you are using a standard Arduio RS-232 shield
- * with the serial interface with RX on pin D0 and TX on pin D1:
+ * These configurations assume that you are using a standard Arduio RS-232
+ * shield with the serial interface with RX on pin D0 and TX on pin D1:
  *
  *   -------- ---------------
  *               STM32F4
@@ -281,7 +279,6 @@
  # define GPIO_USART3_RX GPIO_USART3_RX_3
  # define GPIO_USART3_TX GPIO_USART3_TX_3
 #endif
-
 
 /* DMA channels *************************************************************/
 

@@ -103,7 +103,7 @@
 
 #define ARRAYSIZE(a) (sizeof((a))/sizeof(a[0]))
 
-/* For Assert keep this much of the file name*/
+/* For Assert keep this much of the file name */
 
 #define MAX_FILE_PATH_LENGTH 40
 
@@ -127,7 +127,6 @@ typedef struct
   uint32_t sp;
   uint32_t top;
   uint32_t size;
-
 } _stack_t;
 
 typedef struct
@@ -249,7 +248,8 @@ typedef struct
 typedef struct
 {
   info_t    info;                  /* The info */
-#if CONFIG_ARCH_INTERRUPTSTACK > 3 /* The amount of stack data is compile time
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
+                                   /* The amount of stack data is compile time
                                     * sized backed on what is left after the
                                     * other BBSRAM files are defined
                                     * The order is such that only the
@@ -293,8 +293,8 @@ static int hardfault_get_desc(struct bbsramd_s *desc)
 
       if (ret < 0)
         {
-          syslog(LOG_INFO, "stm32 bbsram: Failed to get Fault Log descriptor "
-              "(%d)\n", ret);
+          syslog(LOG_INFO, "stm32 bbsram:"
+              "Failed to get Fault Log descriptor" "(%d)\n", ret);
         }
     }
 
@@ -338,8 +338,9 @@ int stm32_bbsram_int(void)
   stm32_bbsraminitialize(BBSRAM_PATH, filesizes);
 
 #if defined(CONFIG_STM32F4_SAVE_CRASHDUMP)
-  /* Panic Logging in Battery Backed Up Files */
-  /* Do we have an hard fault in BBSRAM? */
+  /* Panic Logging in Battery Backed Up Files
+   * Do we have an hard fault in BBSRAM?
+   */
 
   rv = hardfault_get_desc(&desc);
   if (rv >= OK)
@@ -348,7 +349,7 @@ int stm32_bbsram_int(void)
       state = (desc.lastwrite.tv_sec || desc.lastwrite.tv_nsec) ?  OK : 1;
 
       syslog(LOG_INFO, "Fault Log info File No %d Length %d flags:0x%02x "
-          "state:%d\n",(unsigned int)desc.fileno, (unsigned int) desc.len,
+          "state:%d\n", (unsigned int)desc.fileno, (unsigned int) desc.len,
           (unsigned int)desc.flags, state);
 
       if (state == OK)
@@ -363,8 +364,8 @@ int stm32_bbsram_int(void)
       rv = unlink(HARDFAULT_PATH);
       if (rv < 0)
         {
-          syslog(LOG_INFO, "stm32 bbsram: Failed to unlink Fault Log file [%s"
-                 "] (%d)\n", HARDFAULT_PATH, rv);
+          syslog(LOG_INFO, "stm32 bbsram: Failed to unlink Fault Log file"
+                 "[%s] (%d)\n", HARDFAULT_PATH, rv);
         }
     }
 #endif /* CONFIG_STM32F4_SAVE_CRASHDUMP */
@@ -478,9 +479,10 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
 
   /* Is it Invalid? */
 
-  if (!(pdump->info.stacks.interrupt.sp <= pdump->info.stacks.interrupt.top &&
-        pdump->info.stacks.interrupt.sp > pdump->info.stacks.interrupt.top -
-          pdump->info.stacks.interrupt.size))
+  if (!(pdump->info.stacks.interrupt.sp
+      <= pdump->info.stacks.interrupt.top &&
+      pdump->info.stacks.interrupt.sp > pdump->info.stacks.interrupt.top -
+      pdump->info.stacks.interrupt.size))
     {
       pdump->info.flags |= INVALID_INTSTACK_PTR;
     }

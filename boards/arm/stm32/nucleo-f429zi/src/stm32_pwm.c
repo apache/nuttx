@@ -133,6 +133,7 @@ int stm32_pwm_setup(void)
           aerr("ERROR: pwm_register failed: %d\n", ret);
           return ret;
         }
+
 #endif
       /* Now we are initialized */
 

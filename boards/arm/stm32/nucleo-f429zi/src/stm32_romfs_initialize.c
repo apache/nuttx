@@ -1,4 +1,4 @@
-/*****************************************************************************
+/****************************************************************************
  * boards/arm/stm32f4/nucleo-f429zi/src/stm32_romfs_initialize.c
  * This file provides contents of an optional ROMFS volume, mounted at boot.
  *
@@ -19,7 +19,7 @@
  *
  ****************************************************************************/
 
-/*****************************************************************************
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
@@ -67,18 +67,18 @@
  ****************************************************************************/
 
 __asm__ (
-    ".section .rodata\n"
-    ".balign  16\n"
-    ".globl   romfs_data_begin\n"
-"romfs_data_begin:\n"
-    ".incbin " STR(CONFIG_STM32_ROMFS_IMAGEFILE) "\n"\
-    \
-    ".balign " STR(ROMFS_SECTOR_SIZE) "\n"
-    ".globl   romfs_data_end\n"
-"romfs_data_end:\n"
-    ".globl   romfs_data_size\n"
-"romfs_data_size:\n"
-    ".word romfs_data_end - romfs_data_begin\n");
+    "   .section .rodata                            \n"
+    "   .balign  16                                 \n"
+    "   .globl   romfs_data_begin                   \n"
+    "romfs_data_begin:                              \n"
+    "   .incbin " STR(CONFIG_STM32_ROMFS_IMAGEFILE)"\n"
+    "   .balign " STR(ROMFS_SECTOR_SIZE)           "\n"
+    "   .globl   romfs_data_end                     \n"
+    "romfs_data_end:                                \n"
+    "   .globl   romfs_data_size                    \n"
+    "romfs_data_size:                               \n"
+    "   .word romfs_data_end - romfs_data_begin     \n"
+    );
 
 extern const char romfs_data_begin;
 extern const char romfs_data_end;

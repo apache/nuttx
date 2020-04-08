@@ -77,16 +77,23 @@
  */
 
 #ifdef CONFIG_STM32F4_ADC1
-static const uint8_t  g_chanlist[ADC1_NCHANNELS] = {3};
+static const uint8_t  g_chanlist[ADC1_NCHANNELS] =
+    {
+        3
+    };
 
 /* Configurations of pins used byte each ADC channels
  *
- * {GPIO_ADC1_IN1,  GPIO_ADC1_IN2,  GPIO_ADC1_IN3, GPIO_ADC1_IN4,  GPIO_ADC1_IN5,
- *  GPIO_ADC1_IN6,  GPIO_ADC1_IN7,  GPIO_ADC1_IN8,  GPIO_ADC1_IN9, GPIO_ADC1_IN10,
- *  GPIO_ADC1_IN11, GPIO_ADC1_IN12, GPIO_ADC1_IN13, GPIO_ADC1_IN15};
+ * {GPIO_ADC1_IN1,  GPIO_ADC1_IN2,  GPIO_ADC1_IN3, GPIO_ADC1_IN4,
+ *  GPIO_ADC1_IN5,  GPIO_ADC1_IN6,  GPIO_ADC1_IN7,  GPIO_ADC1_IN8,
+ *  GPIO_ADC1_IN9, GPIO_ADC1_IN10,  GPIO_ADC1_IN11, GPIO_ADC1_IN12,
+ *  GPIO_ADC1_IN13, GPIO_ADC1_IN15};
  */
 
-static const uint32_t g_pinlist[ADC1_NCHANNELS] = {GPIO_ADC1_IN3};
+static const uint32_t g_pinlist[ADC1_NCHANNELS] =
+    {
+        GPIO_ADC1_IN3
+    };
 #endif
 
 /****************************************************************************
