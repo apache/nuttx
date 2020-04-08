@@ -26618,3 +26618,78 @@ information):
         fixes the violation of the portable POSIX OS interface, but also
         permits use of ROM disks in PROTECTED and KERNEL modes.  From
         Gregory Nutt.
+
+NuttX-9.0 Release Notes
+------------------------
+
+The 134rd release of NuttX, Version 9.0 also marks the first release under
+Apache, was made on MMMM DD, YYYY, and is available for download from the
+nuttx.apache.org website.
+Note: The release consists of two tarballs:
+apache-nuttx-9.0-incubating.tar.gz and
+apache-apps-9.0-incubating.tar.gz.
+
+Both may be needed (see the top-level nuttx/README.txt file for build
+information).
+
+(1) What's New In This Release
+
+    (A) Maybe a paragraph or two listing the most major new features/changes.
+    (B) Highlights of project news since last release.
+
+(2) Compatibility Concerns
+
+    Point out any major changes that require changes by downstream users.
+
+(3) Major Changes to Core OS
+
+     - Add ELF64 support. From Masayuki Ishikawa
+
+(4) Major Changes to Build System
+
+
+(5) Architectural Support
+    
+    (A) List new architectures and boards
+       - Initial support for Sipeed Maix Bit board with Kendryte K210 processor.
+         From Masayuki Ishikawa
+       - Add initial support for Kendryte K210 processor in SMP mode. From Masayuki
+         Ishikawa.
+       - S32K: Add support for NXP drone boards. From Peter Van Der Perk
+
+    (B) List architectures with significant improvements
+       - IMXRT: Fix interrupts storm (serial & I2C).  From David Sidrane.
+       - Various fixes and cosmetic changes to the CxD56xx architecture. From Alin Jerpelea
+       - Fix SiFive FE310 related code (comments, improve serial irq handling, initial
+         int status). From Masayuki Ishikawa
+       - Implement QSPI for SPI32H7. From Minamiya Natsuki
+       - Improvements for the nRF52 port: I2C, SPI, GPIO support. From Mateusz Szafoni
+       - Updates for LPC17xx serial. From macman88
+       - Adds basic support for Microchip SAM E54 Xplained Pro board. From macman88
+       - Adds an Ethernet driver for the SAME5x family (based on the SAMA5 GMAC
+         driver). From macman88
+       - Add CDC ECM Ethernet over USB High Speed for SAMA5D36-Xplained. From Adam
+         Feurer
+       - Sim: Reimplement sim uart on top of serial driver framework.  From Xiang Xiao
+
+    (C) List removed architectures
+
+(6) Driver Support
+
+    (A) List major new drivers
+        - Add Support for Quectel EC20 4G LTE Module USB CDC/ACM. From aroma890225
+    (B) List drivers with significant improvements
+        - Various fixes for USBDEV driver: Remove unnecessary reset logic, Descriptor
+          type mismatch fix when dual speed is enabled, Fix invalid/unsupported command
+          processing, Fix string ID calculation.
+        - smartfs improvements (Handling duplicate sectors, Support fsck to check and
+          repair the smartfs file system, Recover SPI Flash from initial error
+          state.). From Alin Jerpelea
+        - NET: Improve TUN and SLIP, refine Control+C Handling in Telnet.  From Xiang
+          Xiao
+    (C) List removed drivers
+
+(7) Security Issues Fixed in this Release
+
+(8) Known Problems in this Release
+
