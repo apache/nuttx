@@ -799,40 +799,52 @@ static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
                                 FAR struct sockaddr *from,
                                 FAR socklen_t *fromlen)
 {
-  FAR struct netlink_conn_s *conn;
-  FAR struct nlmsghdr *nlmsg;
-  int ret;
+  FAR struct netlink_response_s *entry;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
   DEBUGASSERT(from == NULL ||
               (fromlen != NULL && *fromlen >= sizeof(struct sockaddr_nl)));
 
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+  /* Find the response to this message.  The return value */
 
-  /* Get a reference to the NetLink message */
-
-  nlmsg = (FAR struct nlmsghdr *)buf;
-
-  switch (conn->protocol)
+  entry = (FAR struct netlink_response_s *)netlink_tryget_response(psock);
+  if (entry == NULL)
     {
-#ifdef CONFIG_NETLINK_ROUTE
-      case NETLINK_ROUTE:
-        ret = netlink_route_recvfrom(psock, nlmsg, len, flags,
-                                     (FAR struct sockaddr_nl *)from);
-        if (ret >= 0 && fromlen != NULL)
-          {
-            *fromlen = sizeof(struct sockaddr_nl);
-          }
+      /* No response is variable, but presumably, one is expected.  Check
+       * if the socket has been configured for non-blocking operation.
+       */
 
-        break;
-#endif
+      if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+        {
+          return -EAGAIN;
+        }
 
-      default:
-       ret = -EOPNOTSUPP;
-       break;
+      /* Wait for the response.  This should always succeed. */
+
+      entry = (FAR struct netlink_response_s *)netlink_get_response(psock);
+      DEBUGASSERT(entry != NULL);
+      if (entry == NULL)
+        {
+          return -EPIPE;
+        }
     }
 
-  return ret;
+  if (len > entry->msg.nlmsg_len)
+    {
+      len = entry->msg.nlmsg_len;
+    }
+
+  /* Copy the payload to the user buffer */
+
+  memcpy(buf, &entry->msg, len);
+  kmm_free(entry);
+
+  if (from != NULL)
+    {
+      netlink_getpeername(psock, from, fromlen);
+    }
+
+  return len;
 }
 
 /****************************************************************************

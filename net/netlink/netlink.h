@@ -279,21 +279,6 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
                              socklen_t tolen);
 #endif
 
-/****************************************************************************
- * Name: netlink_route_recvfrom()
- *
- * Description:
- *   Perform the recvfrom() operation for the NETLINK_ROUTE protocol.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NETLINK_ROUTE
-ssize_t netlink_route_recvfrom(FAR struct socket *psock,
-                               FAR struct nlmsghdr *nlmsg,
-                               size_t len, int flags,
-                               FAR struct sockaddr_nl *from);
-#endif
-
 #undef EXTERN
 #ifdef __cplusplus
 }
