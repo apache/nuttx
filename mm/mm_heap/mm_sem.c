@@ -174,6 +174,11 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
    * 'else', albeit with a nonsensical PID value.
    */
 
+  if (my_pid < 0)
+    {
+      return my_pid;
+    }
+
   /* Does the current task already hold the semaphore?  Is the current
    * task actually running?
    */
