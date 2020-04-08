@@ -957,6 +957,15 @@ config ARCH_BOARD_NR5M100_NEXYS4
 		This is the port NuttX to the NEXT RISC-V processor runnining on a Digilent
 		Nexys-4 (non DDR version) FPGA board.
 
+config ARCH_BOARD_NUCLEO_F429ZI
+	bool "STMicro NUCLEO-F429ZI"
+	depends on ARCH_CHIP_STM32F429Z
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo-F429zi board based on the STMicro STM32F429ZIT6 MCU.
+
 config ARCH_BOARD_NUCLEO_144
 	bool "STMicro NUCLEO-144"
 	depends on ARCH_CHIP_STM32F722ZE || ARCH_CHIP_STM32F746ZG || ARCH_CHIP_STM32F767ZI
@@ -1211,7 +1220,7 @@ config ARCH_BOARD_INTEL64_QEMU
 	bool "Intel64 for Qemu simulator"
 	depends on ARCH_X86_64 || ARCH_INTEL64
 	---help---
-		Port of NuttX to QEMU in intel64 mode.  This port will also run on real 
+		Port of NuttX to QEMU in intel64 mode.  This port will also run on real
 		generic Intel64 hardware.
 
 config ARCH_BOARD_RX65N
@@ -2153,6 +2162,7 @@ config ARCH_BOARD
 	default "nucleo-f303ze"            if ARCH_BOARD_NUCLEO_F303ZE
 	default "nucleo-f334r8"            if ARCH_BOARD_NUCLEO_F334R8
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
+	default "nucleo-f429zi"            if ARCH_BOARD_NUCLEO_F429ZI
 	default "nucleo-f446re"            if ARCH_BOARD_NUCLEO_F446RE
 	default "nucleo-f410rb"            if ARCH_BOARD_NUCLEO_F410RB
 	default "nucleo-g070rb"            if ARCH_BOARD_NUCLEO_G070RB
@@ -2656,6 +2666,9 @@ source "boards/arm/stm32/nucleo-f446re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 source "boards/arm/stm32/nucleo-f4x1re/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F429ZI
+source "boards/arm/stm32/nucleo-f429zi/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L152RE
 source "boards/arm/stm32/nucleo-l152re/Kconfig"
