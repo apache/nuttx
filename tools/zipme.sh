@@ -35,15 +35,11 @@
 #set -x
 
 WD=`pwd`
-
 TAR=tar
-
-silent=0
-
-# Get command line parameters
-
-USAGE="USAGE: $0 [-d|h|s] [-b <build]> [-e <exclude>] <major.minor>"
-ADVICE="Try '$0 -h' for more information"
+GPG="gpg -sab"
+SHASUM=sha512sum
+verbose=0
+sign=0
 
 # A list of files and folders to exclude from the final tarball.
 
@@ -52,6 +48,10 @@ EXCLPAT="
   .asf.yaml
 
 "
+# Get command line parameters
+
+USAGE="USAGE: $0 [-d|h|v|s] [-b <build]> [-e <exclude>] [-k <key-id>] <major.minor>"
+ADVICE="Try '$0 -h' for more information"
 
 unset VERSION
 unset VERSIONOPT
@@ -72,8 +72,15 @@ while [ ! -z "$1" ]; do
     shift
     EXCLPAT+=${1}
     ;;
+  -v )
+    verbose=1
+    ;;
   -s )
-    silent=1
+    sign=1
+    ;;
+  -k )
+    shift
+    GPG+=" --default-key $1"
     ;;
   -h )
     echo "$0 is a tool for generation of release versions of NuttX"
@@ -89,10 +96,14 @@ while [ ! -z "$1" ]; do
     echo "  -h"
     echo "     show this help message and exit"
     echo "   -e"
-    echo "     Exclude a list of files or folder"
+    echo "     Exclude a list of files or folders"
     echo "     NOTE: The list must be quoted, example -e \"*.out tmp\""
+    echo "   -v"
+    echo "     Be verbose. The output could be more than you care to see."
     echo "   -s"
-    echo "     Run commands silently"
+    echo "    PGP sign the final tarballs and create digests."
+    echo "   -k"
+    echo "    PGP key ID.  If not provided the default ID will be used."
     echo "  <major.minor>"
     echo "     The NuttX version number expressed as a major and minor number separated"
     echo "     by a period"
@@ -118,10 +129,10 @@ done
 
 TAR+=" --exclude-vcs-ignores --exclude-vcs"
 
-if [ $silent != 0 ] ; then
-  TAR+=" -czf"
-else
+if [ $verbose != 0 ] ; then
   TAR+=" -czvf"
+else
+  TAR+=" -czf"
 fi
 
 # Make sure we know what is going on
@@ -184,6 +195,10 @@ NUTTX_TARNAME=apache-nuttx-${VERSION}-incubating.tar
 APPS_TARNAME=apache-nuttx-apps-${VERSION}-incubating.tar
 NUTTX_ZIPNAME=${NUTTX_TARNAME}.gz
 APPS_ZIPNAME=${APPS_TARNAME}.gz
+NUTTX_ASCNAME=${NUTTX_ZIPNAME}.asc
+APPS_ASCNAME=${APPS_ZIPNAME}.asc
+NUTTX_SHANAME=${NUTTX_ZIPNAME}.sha512
+APPS_SHANAME=${APPS_ZIPNAME}.sha512
 
 # Prepare the nuttx directory
 
@@ -232,10 +247,10 @@ cd ${TRUNKDIR} || \
 
 echo "Cleaning the repositories"
 
-if [ $silent != 0 ] ; then
-  make -C ${NUTTXDIR} distclean 1>/dev/null
-else
+if [ $verbose != 0 ] ; then
   make -C ${NUTTXDIR} distclean
+else
+  make -C ${NUTTXDIR} distclean 1>/dev/null
 fi
 
 # Remove any previous tarballs
@@ -264,6 +279,32 @@ if [ -f ${APPS_ZIPNAME} ] ; then
      { echo "rm ${APPS_ZIPNAME} failed!" ; exit 1 ; }
 fi
 
+# Remove any previous signatures or digests
+
+if [ -f ${NUTTX_ASCNAME} ] ; then
+  echo "Removing ${TRUNKDIR}/${NUTTX_ASCNAME}"
+  rm -f ${NUTTX_ASCNAME} || \
+     { echo "rm ${NUTTX_ASCNAME} failed!" ; exit 1; }
+fi
+
+if [ -f ${APPS_ASCNAME} ] ; then
+  echo "Removing ${TRUNKDIR}/${APPS_ASCNAME}"
+  rm -f ${APPS_ASCNAME} || \
+     { echo "rm ${APPS_ASCNAME} failed!" ; exit 1; }
+fi
+
+if [ -f ${NUTTX_SHANAME} ] ; then
+  echo "Removing ${TRUNKDIR}/${NUTTX_SHANAME}"
+  rm -f ${NUTTX_SHANAME} || \
+     { echo "rm ${NUTTX_SHANAME} failed!" ; exit 1; }
+fi
+
+if [ -f ${APPS_SHANAME} ] ; then
+  echo "Removing ${TRUNKDIR}/${APPS_SHANAME}"
+  rm -f ${APPS_SHANAME} || \
+     { echo "rm ${APPS_SHANAME} failed!" ; exit 1; }
+fi
+
 # Then tar and zip-up the directories
 
 echo "Archiving and zipping nuttx/"
@@ -273,5 +314,22 @@ ${TAR} ${NUTTX_ZIPNAME} `basename ${NUTTXDIR}` || \
 echo "Archiving and zipping apps/"
 ${TAR} ${APPS_ZIPNAME} `basename ${APPSDIR}` || \
       { echo "tar of ${APPS_ZIPNAME} failed!" ; exit 1 ; }
+
+# Finally sign the tarballs and create the digests
+
+if [ $sign != 0 ] ; then
+  echo "Signing the tarballs"
+  ${GPG} ${NUTTX_ZIPNAME} || \
+        { echo "Signing ${NUTTX_ZIPNAME} failed!" ; exit 1 ; }
+
+  ${GPG} ${APPS_ZIPNAME} || \
+        { echo "Signing ${APPS_ZIPNAME} failed!" ; exit 1 ; }
+
+  ${SHASUM} ${NUTTX_ZIPNAME} > ${NUTTX_SHANAME} || \
+           { echo "Digest of ${NUTTX_ZIPNAME} failed!" ; exit 1 ; }
+
+  ${SHASUM} ${APPS_ZIPNAME} > ${APPS_SHANAME} || \
+           { echo "Digest of ${APPS_ZIPNAME} failed!" ; exit 1 ; }
+fi
 
 cd ${NUTTXDIR}
