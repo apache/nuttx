@@ -46,7 +46,7 @@ Olimex STR-P711
  - Power supply filtering capacitor
  - RESET circuit
  - RESET button
- - 4 Mhz crystal oscillator
+ - 4 MHz crystal oscillator
  - 32768 Hz crystal and RTC
 
  Power Supply

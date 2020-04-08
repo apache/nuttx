@@ -12528,7 +12528,7 @@ Additional new features and extended functionality:
     * Xtensa/ESP32
 
       - Xtensa ESP32:  Basic architectural support for Xtensa processors and
-        the Expressif. ESP32 added.
+        the Espressif. ESP32 added.
       - Xtensa ESP32:  Add EXPERIMENTAL hooks to support lazy Xtensa
         co-processor state restore in the future.
       - Xtensa ESP32:  Basic port is function in both single CPU and dual CPU
@@ -12540,7 +12540,7 @@ Additional new features and extended functionality:
 
     * Xtensa/ESP32 Boards:
 
-      - ESP32 Core v2:  Basic support for Expressif ESP32 Core v2 board
+      - ESP32 Core v2:  Basic support for Espressif ESP32 Core v2 board
         added.  The initial release includes an NSH and an SMP test
         configuration.
       - ESP32 Core v2:  Add configuration to support linking NuttX for
@@ -13769,10 +13769,10 @@ Additional new features and extended functionality:
       - STM32 L1:  stm32l15xxx_rcc: configure medium performance voltage
         range and zero wait-state when allowed by SYSCLK setting.  Zero
         wait-state for flash can be configured when:  (1) Range 1 and
-        SYSCLK <= 16 Mhz, (2) Range 2 and SYSCLK <= 8 Mhz, or (3) Range 3
-        and SYSCLK <= 4.2 Mhz.  Medium performance voltage range (1.5V)
-        can be configured when SYSCLK is up to 16 Mhz and PLLVCO up to
-        48 Mhz.  From Juha Niskanen.
+        SYSCLK <= 16 MHz, (2) Range 2 and SYSCLK <= 8 MHz, or (3) Range 3
+        and SYSCLK <= 4.2 MHz.  Medium performance voltage range (1.5V)
+        can be configured when SYSCLK is up to 16 MHz and PLLVCO up to
+        48 MHz.  From Juha Niskanen.
       - STM32 F0: Add basic support for STM32F0.  From Alan Carvalho de
         Assis.
       - STM32 F0:  Add basic support for STM32F07x family.
@@ -14778,7 +14778,7 @@ Additional new features and extended functionality:
 
       - STM32 L4:  Add support for the STM32L475 family.
       - STM32 L4 RCC:  Enable ADC clock source.  From Juha Niskanen.
-      - STM32:  Allow clock frequencies > 168 Mhz on stm32f427/429.  We need
+      - STM32:  Allow clock frequencies > 168 MHz on stm32f427/429.  We need
         to enable the power overdrive for this case.  This change allows the
         required bits to be set in proper sequence.  It also modifies the
         local register access operations to allow more than 16-bit registers.
@@ -15297,7 +15297,7 @@ detailed bugfix information):
         has not caused problems in the past, but seeing it set in the PC is
         unnerving.
 
-    * Expressif ESP32:
+    * Espressif ESP32:
 
       - Fix ESP32 gpio enable reg and default UART pin. Modify default UART
         pin for ESP-WROOM-32. Fix gpio enable reg.  From Sungki Kim.
@@ -15349,8 +15349,8 @@ detailed bugfix information):
     * NXP/Freescale Kinetis:
 
       - Kinetis MPU:  Disable MPU when not in protected mode.  The hardware
-        reset state of the the MPU precludes any bus masters other then DMA
-        access to memory. Unfortunately USB and SDHC have there own DMA and
+        reset state of the the MPU precludes any bus masters other than DMA
+        access to memory. Unfortunately USB and SDHC have their own DMA and
         will not have access to memory in the default reset state.  This change
         disabled the MPU if present on system startup.  From David Sidrane.
       - Kinetis MPU:  Fixed warning for kinetis_mpudisable. Missing header
@@ -15957,7 +15957,7 @@ Additional new features and extended functionality:
         drivers.  The peripheral on STM32F7 and STM32L4 are identical except
         for L4's 'wakeup from stop mode' flag and STM32F7's I2C driver is in
         more 'ready to use' state.  The I2C clock configuration is kept the
-        same as before (I2CCLK = PCLK1 80 Mhz) instead of switching to
+        same as before (I2CCLK = PCLK1 80 MHz) instead of switching to
         STM32F7 arch default that is I2CCLK=HSI. Further work would be to
         add configuration option for choosing I2C clock source instead of
         current hard-coded default.  From Jussi Kivilinna.
@@ -22578,7 +22578,7 @@ detailed bugfix information):
         Raised DEBUGASSERT in armv7-m/up_ramvec_initialize.c line: 144.
         From Mateusz Szafoni.
 
-    * Expressif ESP32 Drivers:
+    * Espressif ESP32 Drivers:
 
       - ESP32 Timer ISR:  Fix backward comparison.  From Gregory Nutt.
       - ESP32 Serial:  Fix some backward arguments.   Correct 2-stop bit
@@ -25894,7 +25894,7 @@ Additional new features and extended functionality:
       - STM32 L4+ DMA:  Add DMA support for STM32L4+ series.  From Jussi
         Kivilinna.
       - STM32 L4 Clocking:  Enable "Range 1 boost" mode if any PLL freq
-        above 80 Mhz.  From Jussi Kivilinna.
+        above 80 MHz.  From Jussi Kivilinna.
       - STM32 L4 LPTIM:  Add support for LPTIM timers on the STM32L4 as PWM
         outputs.  From Matias N.
       - STM32 H7 Progmem: Add FLASH progmem support.  From David Sidrane.

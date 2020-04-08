@@ -1221,7 +1221,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
    * case, the ECC computation takes into account the whole spare area
    * minus the ECC area in the ECC computation operation
    *
-   * NOTE:  At 133 Mhz, the clkctrl field must be programmed with 2,
+   * NOTE:  At 133 MHz, the clkctrl field must be programmed with 2,
    * indicating that the setup time is 3 clock cycles.
    */
 

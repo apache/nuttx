@@ -9488,7 +9488,7 @@ config STM32_USB_ITRMP
 		The legacy USB in the F1 series shared interrupt lines with USB
 		device and CAN1.  In the F3 series, a hardware options was added to
 		either retain the legacy F1 behavior or to map the USB interrupts to
-		there own dedicated vectors.  The option is available only for the
+		their own dedicated vectors.  The option is available only for the
 		F3 family and selects the use of the dedicated USB interrupts.
 
 menu "CAN driver configuration"

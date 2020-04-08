@@ -12927,9 +12927,9 @@
 	* arch/arm/src/stm32f7:  otgdev fixed typo.  From David Sidrane
 	  (2016-10-28).
 	* arch/xtensa: Basic architectural support for Xtensa processors and
-	  the Expressif. ESP32 added.  Totally untested on initial release
+	  the Espressif. ESP32 added.  Totally untested on initial release
 	  (2016-10-31).
-	* configs/esp32-core: Basic support for Expressif ESP32 Core v2 board
+	* configs/esp32-core: Basic support for Espressif ESP32 Core v2 board
 	  added.  The initial release includes an NSH and an SMP test
 	  configuration.  Totally untested on initial relesae (2016-10-31).
 	* configs/bambino-200e: Add basic support to Micromint Bambino 200E
@@ -13441,7 +13441,7 @@
 	  (2016-12-20).
 	* Xtensa ESP32: Missing prologue/epilogue macros on C callable function
 	  (2016-12-20).
-	* Xtensa ESP32: Update APP CPU startup logic to match current Expressif
+	* Xtensa ESP32: Update APP CPU startup logic to match current Espressif
 	  example code.  Fix errors APP CPU startup (2016-12-20).
 	* fs/procfs: Fix procfs status for SMP case (2016-12-20).
 	* Xtensa ESP32:  Clock frequency is different if running from IRAM or is
@@ -13986,7 +13986,7 @@
 	  BOARD_SIM_CLKDIV2_USBFRAC to the kinetis_clockconfig.  From David
 	  Sidrane (2017-02-27).
 	* Kinetis:  Use BOARD_xxxx to drive system clocking: (1) Shifted the clock
-	  speed of MK20DX128VLH5 to 48 Mhz to be able to uses USB. (2) Set
+	  speed of MK20DX128VLH5 to 48 MHz to be able to uses USB. (2) Set
 	  BOARD_OUTDIV3 to 0 - there is no BOARD_OUTDIV3 on a MK20DX128VLH5 or
 	  K20DX256VLH7, (3) Added BOARD_SOPT2_PLLFLLSEL and BOARD_SOPT2_FREQ along
 	  with settings for BOARD_SIM_CLKDIV2_USBFRAC and BOARD_SIM_CLKDIV2_USBDIV
@@ -14589,10 +14589,10 @@
 	  From Juha Niskanen (2017-04-05).
 	* STM32:  stm32l15xxx_rcc: configure medium performance voltage range
 	  and zero wait-state when allowed by SYSCLK setting.  Zero wait-state
-	  for flash can be configured when:  (1) Range 1 and SYSCLK <= 16 Mhz,
-	  (2) Range 2 and SYSCLK <= 8 Mhz, or (3) Range 3 and SYSCLK <= 4.2
-	  Mhz.  Medium performance voltage range (1.5V) can be configured when
-	  SYSCLK is up to 16 Mhz and PLLVCO up to 48 Mhz.  From Juha Niskanen
+	  for flash can be configured when:  (1) Range 1 and SYSCLK <= 16 MHz,
+	  (2) Range 2 and SYSCLK <= 8 MHz, or (3) Range 3 and SYSCLK <= 4.2
+	  MHz.  Medium performance voltage range (1.5V) can be configured when
+	  SYSCLK is up to 16 MHz and PLLVCO up to 48 MHz.  From Juha Niskanen
 	  (2017-04-05).
 	* wireless/ieee802154:  Initial MAC char driver write functionality.
 	  From Anthony Merlino (2017-04-05).
@@ -15395,8 +15395,8 @@
 	* Fix ELF loader up_checkarch on ARM arch.  From Cristian Condurache
 	  (2017-05-09).
 	* Kinetis:  Disable MPU when not in protected mode.  The hardware reset
-	  state of the the MPU precludes any bus masters other then DMA access
-	  to memory. Unfortunately USB and SDHC have there own DMA and will not
+	  state of the the MPU precludes any bus masters other than DMA access
+	  to memory. Unfortunately USB and SDHC have their own DMA and will not
 	  have access to memory in the default reset state.  This change
 	  disabled the MPU if present on system startup.  From David Sidrane
 	  (2017-06-02).
@@ -15694,7 +15694,7 @@
 	  6LoWPAN compatible port numbers (2017-06-20).
 	* mac802154_req_data() can return without releasing the exclsem
 	  (2017-06-20).
-	* STM32:  Allow clock frequencies > 168 Mhz on stm32f427/429.  We need
+	* STM32:  Allow clock frequencies > 168 MHz on stm32f427/429.  We need
 	  to enable the power overdrive for this case.  This patch allows the
 	  required bits to be set in proper sequence.  It also modifies the
 	  local register access operations to allow more than 16-bit registers.
@@ -17633,7 +17633,7 @@
 	  mode' flag and STM32F7's I2C driver is in more 'ready to use' state.
 
 	  Commit ports the STM32F7 I2C driver to STM32L4. The I2C clock
-	  configuration is kept the same as before (I2CCLK = PCLK1 80 Mhz)
+	  configuration is kept the same as before (I2CCLK = PCLK1 80 MHz)
 	  instead of switching to STM32F7 arch default that is I2CCLK=HSI.
 	  Further work would be to add configuration option for choosing I2C
 	  clock source instead of current hard-coded default.  From Jussi
@@ -27085,7 +27085,7 @@
 	* Add DMA support for STM32L4+ series
 	  - Add DMA support for STM32L4+
 	  - stm32l4xrxx_rcc: enable "Range 1 boost" mode if any PLL freq above
-	    80 Mhz
+	    80 MHz
 	  From Jussi Kivilinna (2019-10-25).
 	* stm32l4_otgfs: enable OTGFS for STM32L4+ series.  The OTGFS peripheral
 	  on stm32l4x6 and stm32l4rxxx reference manual is exactly the same.

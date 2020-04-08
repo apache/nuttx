@@ -70,8 +70,8 @@
  * a KINETIS_MCG_PLL_REF_MIN >= PLLIN <= KINETIS_MCG_PLL_REF_MIN reference
  * clock to the PLL.
  *
- *   PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 50  Mhz  / 20 = 2.5 MHz
- *   PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 2.5 Mhz  * 48 = 120 MHz
+ *   PLL Input frequency:   PLLIN  = REFCLK / PRDIV = 50  MHz  / 20 = 2.5 MHz
+ *   PLL Output frequency:  PLLOUT = PLLIN  * VDIV  = 2.5 MHz  * 48 = 120 MHz
  *   MCG Frequency:         PLLOUT = 120 MHz
  *
  * PRDIV register value is the divider minus KINETIS_MCG_C5_PRDIV_BASE.

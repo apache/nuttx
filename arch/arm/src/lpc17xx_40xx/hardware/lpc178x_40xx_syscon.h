@@ -227,7 +227,7 @@
 #  define SYSCON_FLASHCFG_TIM_2             (2 << SYSCON_FLASHCFG_TIM_SHIFT) /* 3 CPU clock <= 60 MHz CPU clock */
 #  define SYSCON_FLASHCFG_TIM_3             (3 << SYSCON_FLASHCFG_TIM_SHIFT) /* 4 CPU clock <= 80 MHz CPU clock */
 #  define SYSCON_FLASHCFG_TIM_4             (4 << SYSCON_FLASHCFG_TIM_SHIFT) /* 5 CPU clock <= 100 MHz CPU clock
-                                                                              * (Up to 120 Mhz for LPC1788x) */
+                                                                              * (Up to 120 MHz for LPC1788x) */
 #  define SYSCON_FLASHCFG_TIM_5             (5 << SYSCON_FLASHCFG_TIM_SHIFT) /* "safe" setting for any conditions */
                                                       /* Bits 16-31:  Reserved */
 /* Memory Mapping Control register (MEMMAP - 0x400F C040) */

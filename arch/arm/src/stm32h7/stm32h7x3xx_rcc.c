@@ -818,7 +818,7 @@ static void stm32_stdclockconfig(void)
 
       /* Over-drive is needed if
        *  - Voltage output scale 1 mode is selected and SYSCLK frequency is
-       *    over 400 Mhz.
+       *    over 400 MHz.
        */
 
       if ((STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_1) &&
@@ -830,7 +830,7 @@ static void stm32_stdclockconfig(void)
           regval |= RCC_APB4ENR_SYSCFGEN;
           putreg32(regval, STM32_RCC_APB4ENR);
 
-          /* Enable Overdrive to extend the clock frequency up to 480 Mhz. */
+          /* Enable Overdrive to extend the clock frequency up to 480 MHz. */
 
           regval = getreg32(STM32_SYSCFG_PWRCR);
           regval |= SYSCFG_PWRCR_ODEN;

@@ -6,7 +6,7 @@
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Derivies from sample code provided by Expressif Systems:
+ * Derives from sample code provided by Espressif Systems:
  *
  *   Copyright 2015-2016 Espressif Systems (Shanghai) PTE LTD
  *

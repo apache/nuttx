@@ -64,7 +64,7 @@
  *
  *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 50MHz/20 = 2.5 MHz
  *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = 2.5Mhz*48 = 120MHz
- *   MCG Frequency:         PLLOUT = 120 Mhz
+ *   MCG Frequency:         PLLOUT = 120 MHz
  */
 
 #define BOARD_PRDIV          20  /* PLL External Reference Divider */

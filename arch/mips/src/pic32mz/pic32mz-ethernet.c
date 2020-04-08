@@ -3094,7 +3094,7 @@ static inline int pic32mz_phyinit(struct pic32mz_driver_s *priv)
   /* The RMII/MII of operation can be selected by strap options or register
    * control (using the RBR register). For RMII mode, it is required to use
    * the strap option, since it requires a 50 MHz clock instead of the normal
-   * 25 Mhz.
+   * 25 MHz.
    */
 
 #endif
