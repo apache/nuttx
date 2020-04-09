@@ -231,6 +231,7 @@ void *host_alloc_heap(size_t sz);
 /* up_hosttime.c ************************************************************/
 
 uint64_t host_gettime(bool rtc);
+void host_sleep(uint64_t nsec);
 void host_sleepuntil(uint64_t nsec);
 
 /* up_simsmp.c **************************************************************/
