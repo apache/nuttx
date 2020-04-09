@@ -41,6 +41,7 @@
 #include <nuttx/fs/hostfs_rpmsg.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/serial/uart_rpmsg.h>
+#include <nuttx/syslog/syslog_rpmsg.h>
 
 #include "up_internal.h"
 
