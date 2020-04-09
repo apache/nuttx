@@ -56,8 +56,8 @@ extern "C"
 #endif
 
 #ifdef CONFIG_SYSLOG_RPMSG
-int syslog_rpmsg_init_early(FAR const char *cpu_name, FAR void *buffer,
-                            size_t size);
+void syslog_rpmsg_init_early(FAR const char *cpu_name, FAR void *buffer,
+                             size_t size);
 int syslog_rpmsg_init(void);
 int syslog_rpmsg_putc(int ch);
 #endif
