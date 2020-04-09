@@ -150,8 +150,8 @@ extern "C"
 #endif
 
 #else
-/* Otherwise, the kernel-space allocators are declared in include/nuttx/mm/mm.h
- * and we can call them directly.
+/* Otherwise, the kernel-space allocators are declared in
+ * include/nuttx/mm/mm.h and we can call them directly.
  */
 
 #endif
@@ -168,6 +168,7 @@ extern "C"
  *   unprivileged code.
  *
  ****************************************************************************/
+
 /* Functions defined in group/group_malloc.c ********************************/
 
 FAR void *group_malloc(FAR struct task_group_s *group, size_t nbytes);

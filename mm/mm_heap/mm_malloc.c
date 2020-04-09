@@ -203,7 +203,8 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
         {
           /* Get a pointer to the next node in physical memory */
 
-          next = (FAR struct mm_freenode_s *)(((FAR char *)node) + node->size);
+          next = (FAR struct mm_freenode_s *)
+                 (((FAR char *)node) + node->size);
 
           /* Create the remainder node */
 

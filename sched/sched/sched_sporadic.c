@@ -1037,7 +1037,9 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 
       unrealized = now - sporadic->eventtime;
 
-      /* Ignore very short pre-emptions that are below our timing resolution. */
+      /* Ignore very short pre-emptions that are below
+       * our timing resolution.
+       */
 
       if (unrealized > 0)
         {
