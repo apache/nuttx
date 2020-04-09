@@ -1,0 +1,58 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: Release Packaging
+
+on:
+  push:
+    branches:
+      - 'releases/*'  # Only try to package releases branches
+    tags:
+      - 'nuttx-*'
+
+jobs:
+  package:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout nuttx repo
+      uses: actions/checkout@v2
+      with:
+        repository: apache/incubator-nuttx
+        path: nuttx
+        ref: ${{ github.ref }}
+        fetch-depth: 1
+    - name: Checkout apps repo
+      uses: actions/checkout@v2
+      with:
+        repository: apache/incubator-nuttx-apps
+        path: apps
+        ref: ${{ github.ref }}  # Use a matching ref for apps
+        fetch-depth: 1
+    - name: Perform packaging
+      id: package
+      shell: bash
+      run: |
+        shopt -s extglob
+        BRANCH_VER=${GITHUB_REF##*/}
+        pushd nuttx
+        git fetch --tags
+        RELEASE_VER=`./tools/gitver.sh $BRANCH_VER`
+        popd
+        echo "Packaging release $RELEASE_VER"
+        ./nuttx/tools/zipme.sh $RELEASE_VER
+        mkdir output
+        mv !(nuttx|apps|output) ./output
+        echo ::set-output name=release_ver::$RELEASE_VER
+    - uses: actions/upload-artifact@v1
+      with:
+        name: release-bundle-nuttx-${{ steps.package.outputs.release_ver }}
+        path: ./output/

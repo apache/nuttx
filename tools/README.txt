@@ -1137,3 +1137,22 @@ zipme.sh
         Same as above but use the key-id XXXXXX to sign the tarballs
       ./tools/zipme.sh -e "*.swp tmp" 9.0.0
         Create the tarballs but exclude any .swp file and the "tmp" directory.
+
+gitver.sh
+---------
+
+  This script will attempt to generate a semver version based on the git tags
+  and the supplied target version as either major.minor or major.minor.patch
+  If there is not yet a tag for Version 0.1 and 0.1 is supplied it will
+  return the version 0.1.0 If a tag exists of 0.1.2-RC1 it would return
+  version 0.1.2 to standard out if 0.1 or 0.1.2 is supplied.
+  
+  This is helpful for generating a version string for a release tarball on a
+  release branch that has a version of major.minor Even if the first tag has not
+  been made on this branch it will create the version string as the first patch
+  number.  If there is already a tag with the major.minor version of the branch
+  it will use that.
+
+  Example usage:
+  $ ./gitver.sh 0.1
+    0.1.2
