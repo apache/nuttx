@@ -176,7 +176,7 @@
 # define MM_ALLOC_BIT    0x80000000
 #endif
 #define MM_IS_ALLOCATED(n) \
-  ((int)((struct mm_allocnode_s*)(n)->preceding) < 0))
+  ((int)((struct mm_allocnode_s*)(n)->preceding) < 0)
 
 /****************************************************************************
  * Public Types
