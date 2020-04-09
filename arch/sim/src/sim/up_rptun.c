@@ -229,7 +229,7 @@ int up_rptun_init(void)
 
       while (g_dev.shmem->base == 0)
         {
-          up_hostusleep(1000);
+          host_sleep(1000);
         }
 
       s_addrenv[0].va               = (uintptr_t)g_dev.shmem;
