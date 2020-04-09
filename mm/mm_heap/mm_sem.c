@@ -51,6 +51,10 @@
 #  include <nuttx/irq.h>
 #endif
 
+#ifdef MONITOR_MM_SEMAPHORE
+#  include <debug.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -86,7 +90,6 @@
 /* Define MONITOR_MM_SEMAPHORE to enable semaphore state monitoring */
 
 #ifdef MONITOR_MM_SEMAPHORE
-#  include <debug.h>
 #  define msemerr  _err
 #  define msemwarn _warn
 #  define mseminfo _info

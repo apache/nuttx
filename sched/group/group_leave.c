@@ -311,7 +311,8 @@ static inline void group_release(FAR struct task_group_s *group)
  ****************************************************************************/
 
 #ifdef HAVE_GROUP_MEMBERS
-static inline void group_removemember(FAR struct task_group_s *group, pid_t pid)
+static inline void group_removemember(FAR struct task_group_s *group,
+                                      pid_t pid)
 {
   irqstate_t flags;
   int i;

@@ -151,7 +151,8 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
        * index past the tail chunk because it is always allocated.
        */
 
-      andbeyond = (FAR struct mm_allocnode_s *)((FAR char *)next + next->size);
+      andbeyond = (FAR struct mm_allocnode_s *)
+                    ((FAR char *)next + next->size);
 
       /* Remove the next node.  There must be a predecessor,
        * but there may not be a successor node.
@@ -167,7 +168,8 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       /* Then merge the two chunks */
 
       node->size          += next->size;
-      andbeyond->preceding =  node->size | (andbeyond->preceding & MM_ALLOC_BIT);
+      andbeyond->preceding =  node->size |
+                              (andbeyond->preceding & MM_ALLOC_BIT);
       next                 = (FAR struct mm_freenode_s *)andbeyond;
     }
 

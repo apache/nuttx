@@ -1241,7 +1241,9 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
 
   DEBUGASSERT(priv != NULL);
 
-  /* Set aside a transfer buffer for exclusive use by the mass storage driver */
+  /* Set aside a transfer buffer for exclusive
+   * use by the mass storage driver
+   */
 
   ret = usbhost_talloc(priv);
   if (ret < 0)
@@ -1729,7 +1731,9 @@ static FAR struct usbhost_class_s *
 
           priv->crefs = 1;
 
-          /* Initialize semaphores (this works okay in the interrupt context) */
+          /* Initialize semaphores
+           * (this works okay in the interrupt context)
+           */
 
           nxsem_init(&priv->exclsem, 0, 1);
 

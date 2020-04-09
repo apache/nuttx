@@ -1,7 +1,8 @@
 /****************************************************************************
  * libs/libc/misc/lib_stream.c
  *
- *   Copyright (C) 2007, 2011, 2013-2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011, 2013-2014, 2017 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,7 +90,7 @@ void lib_stream_initialize(FAR struct task_group_s *group)
   /* Initialize each FILE structure */
 
   for (i = 0; i < CONFIG_NFILE_STREAMS; i++)
-   {
+    {
       FAR struct file_struct *stream = &list->sl_streams[i];
 
       /* Clear the IOB */

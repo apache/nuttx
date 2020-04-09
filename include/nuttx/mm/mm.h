@@ -1,7 +1,8 @@
 /****************************************************************************
  * include/nuttx/mm/mm.h
  *
- *   Copyright (C) 2007-2009, 2013-2014, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014, 2017 Gregory Nutt.
+ *    All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +53,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* If the MCU has a small (16-bit) address capability, then we will use
  * a smaller chunk header that contains 16-bit size/offset information.
  * We will also use the smaller header on MCUs with wider addresses if
@@ -111,6 +113,7 @@
 #endif
 
 /* Chunk Header Definitions *************************************************/
+
 /* These definitions define the characteristics of allocator
  *
  * MM_MIN_SHIFT is used to define MM_MIN_CHUNK.
@@ -185,10 +188,10 @@
 /* Determines the size of the chunk size/offset type */
 
 #ifdef CONFIG_MM_SMALL
-   typedef uint16_t mmsize_t;
+typedef uint16_t mmsize_t;
 #  define MMSIZE_MAX UINT16_MAX
 #else
-   typedef uint32_t mmsize_t;
+typedef uint32_t mmsize_t;
 #  define MMSIZE_MAX UINT32_MAX
 #endif
 
@@ -366,12 +369,12 @@ void mm_takesemaphore(FAR struct mm_heap_s *heap);
 int  mm_trysemaphore(FAR struct mm_heap_s *heap);
 void mm_givesemaphore(FAR struct mm_heap_s *heap);
 
-/* Functions contained in umm_sem.c ****************************************/
+/* Functions contained in umm_sem.c *****************************************/
 
 int  umm_trysemaphore(void);
 void umm_givesemaphore(void);
 
-/* Functions contained in kmm_sem.c ****************************************/
+/* Functions contained in kmm_sem.c *****************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 int  kmm_trysemaphore(void);

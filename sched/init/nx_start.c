@@ -193,7 +193,9 @@ volatile dq_queue_t g_waitingforfill;
 #endif
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
-/* This is the list of all tasks that have been stopped via SIGSTOP or SIGSTP */
+/* This is the list of all tasks that have been stopped
+ * via SIGSTOP or SIGSTP
+ */
 
 volatile dq_queue_t g_stoppedtasks;
 #endif
