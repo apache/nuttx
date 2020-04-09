@@ -106,14 +106,6 @@ static int  syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
 
 static struct syslog_rpmsg_s g_syslog_rpmsg;
 
-static const struct syslog_channel_s g_syslog_rpmsg_channel =
-{
-  up_putc,
-  up_putc,
-  syslog_rpmsg_flush,
-  syslog_rpmsg_write,
-};
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -358,8 +350,8 @@ int syslog_rpmsg_putc(int ch)
   return ch;
 }
 
-int syslog_rpmsg_init_early(FAR const char *cpuname, FAR void *buffer,
-                            size_t size)
+void syslog_rpmsg_init_early(FAR const char *cpuname, FAR void *buffer,
+                             size_t size)
 {
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
   char prev, cur;
@@ -403,8 +395,6 @@ out:
       priv->head = priv->tail = 0;
       memset(priv->buffer, 0, size);
     }
-
-  return syslog_channel(&g_syslog_rpmsg_channel);
 }
 
 int syslog_rpmsg_init(void)
