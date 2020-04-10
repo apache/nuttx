@@ -42,9 +42,9 @@ else                                    # default
 ARCH_SUBDIR = or1k
 endif
 
-CPPFLAGS += $(EXTRADEFINES)
-CFLAGS += $(EXTRADEFINES)
-CXXFLAGS += $(EXTRADEFINES)
+CPPFLAGS += $(EXTRAFLAGS)
+CFLAGS += $(EXTRAFLAGS)
+CXXFLAGS += $(EXTRAFLAGS)
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ARCH_SRCDIR = $(TOPDIR)\arch\$(CONFIG_ARCH)\src
@@ -173,7 +173,7 @@ $(UBIN): $(UOBJS)
 	$(call ARCHIVE, $@, $(UOBJS))
 
 board$(DELIM)libboard$(LIBEXT):
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
+	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT)
 	$(Q) echo "LD: nuttx"

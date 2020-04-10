@@ -81,7 +81,7 @@ DIRLINK = $(TOPDIR)/tools/link.sh
 DIRUNLINK = $(TOPDIR)/tools/unlink.sh
 endif
 
-# This define is passed as EXTRADEFINES for kernel-mode builds.  It is also passed
+# This define is passed as EXTRAFLAGS for kernel-mode builds.  It is also passed
 # during PASS1 (but not PASS2) context and depend targets.
 
 KDEFINE = ${shell $(DEFINE) "$(CC)" __KERNEL__}
@@ -446,7 +446,7 @@ endif
 pass2deps: pass2dep $(NUTTXLIBS)
 
 pass2: pass2deps
-	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(LINKLIBS)" EXTRADEFINES=$(KDEFINE) $(BIN)
+	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(LINKLIBS)" EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" $(BIN)
 	$(Q) if [ -w /tftpboot ] ; then \
 		cp -f $(BIN) /tftpboot/$(BIN).${CONFIG_ARCH}; \
 	fi
@@ -502,7 +502,7 @@ pass1dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 
 pass2dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 	$(Q) for dir in $(KERNDEPDIRS) ; do \
-		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" EXTRADEFINES=$(KDEFINE) depend; \
+		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" depend; \
 	done
 
 # Configuration targets
