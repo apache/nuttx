@@ -59,7 +59,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* This "connection" structure describes the underlying state of the socket. */
+/* This connection structure describes the underlying state of the socket. */
 
 struct netlink_conn_s
 {
@@ -127,8 +127,8 @@ FAR struct netlink_conn_s *netlink_alloc(void);
  * Name: netlink_free()
  *
  * Description:
- *   Free a NetLink connection structure that is no longer in use. This should
- *   be done by the implementation of close().
+ *   Free a NetLink connection structure that is no longer in use. This
+ *   should be done by the implementation of close().
  *
  ****************************************************************************/
 
