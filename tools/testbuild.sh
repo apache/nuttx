@@ -39,6 +39,7 @@ progname=$0
 fail=0
 APPSDIR=$WD/../apps
 MAKE_FLAGS=-k
+EXTRA_FLAGS=
 MAKE=make
 unset testfile
 unset HOPTION
@@ -48,13 +49,14 @@ GITCLEAN=0
 
 function showusage {
   echo ""
-  echo "USAGE: $progname [-l|m|c|u|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>"
+  echo "USAGE: $progname [-l|m|c|u|g|n] [-d] [-e <extraflags>] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>"
   echo "       $progname -h"
   echo ""
   echo "Where:"
   echo "  -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),"
   echo "     Ubuntu under Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Linux"
   echo "  -d enables script debug output"
+  echo "  -e pass extra c/c++ flags such as -Wno-cpp via make command line"
   echo "  -x exit on build failures"
   echo "  -j <ncpus> passed on to make.  Default:  No -j make option."
   echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
@@ -84,6 +86,10 @@ while [ ! -z "$1" ]; do
     ;;
   -d )
     set -x
+    ;;
+  -e )
+    shift
+    EXTRA_FLAGS="EXTRAFLAGS=$1"
     ;;
   -x )
     MAKE_FLAGS='--silent --no-print-directory'
@@ -214,7 +220,7 @@ function configure {
 function build {
   echo "  Building NuttX..."
   echo "------------------------------------------------------------------------------------"
-  makefunc ${JOPTION} ${MAKE_FLAGS} 1>/dev/null
+  makefunc ${JOPTION} ${MAKE_FLAGS} ${EXTRA_FLAGS} 1>/dev/null
 }
 
 # Coordinate the steps for the next build test
