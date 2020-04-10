@@ -59,7 +59,7 @@
  * Private Functions
  ****************************************************************************/
 
-#ifdef __KERNEL__
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 {
   FAR struct mm_delaynode_s *tmp;
@@ -69,8 +69,8 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 
   flags = enter_critical_section();
 
-  tmp = heap->mm_delaylist.flink;
-  heap->mm_delaylist.flink = NULL;
+  tmp = heap->mm_delaylist;
+  heap->mm_delaylist = NULL;
 
   leave_critical_section(flags);
 
@@ -116,7 +116,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   void *ret = NULL;
   int ndx;
 
-#ifdef __KERNEL__
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   /* Firstly, free mm_delaylist */
 
   mm_free_delaylist(heap);

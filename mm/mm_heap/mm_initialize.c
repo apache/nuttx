@@ -175,10 +175,10 @@ void mm_initialize(FAR struct mm_heap_s *heap, FAR void *heapstart,
   heap->mm_nregions = 0;
 #endif
 
-#ifdef __KERNEL__
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   /* Initialize mm_delaylist */
 
-  heap->mm_delaylist.flink = NULL;
+  heap->mm_delaylist = NULL;
 #endif
 
   /* Initialize the node array */
