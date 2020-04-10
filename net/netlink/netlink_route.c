@@ -83,31 +83,15 @@
  * Private Types
  ****************************************************************************/
 
-/* Used to send message done.  gen is tacked on to provide the address
- * family.  It is discarded before returning the struct nlmsghdr payload.
- */
-
-struct nlroute_msgdone_response_s
-{
-  struct nlmsghdr  hdr;
-  struct rtgenmsg  gen;
-};
+/* Used to send message done */
 
 struct nlroute_msgdone_rsplist_s
 {
   sq_entry_t flink;
-  struct nlroute_msgdone_response_s payload;
+  struct nlmsghdr payload;
 };
 
-/* RTM_GETLINK:  Enumerate network devices .  The message contains the
- * 'rtgenmsg' structure.
- */
-
-struct getlink_sendto_request_s
-{
-  struct nlmsghdr  hdr;
-  struct rtgenmsg  gen;
-};
+/* RTM_GETLINK:  Enumerate network devices */
 
 struct getlink_recvfrom_response_s
 {
@@ -123,15 +107,7 @@ struct getlink_recvfrom_rsplist_s
   struct getlink_recvfrom_response_s payload;
 };
 
-/* RTM_GETNEIGH:  Get neighbor table entry.  The message contains an 'ndmsg'
- * structure.
- */
-
-struct getneigh_sendto_request_s
-{
-  struct nlmsghdr hdr;
-  struct ndmsg    msg;
-};
+/* RTM_GETNEIGH:  Get neighbor table entry */
 
 struct getneigh_recvfrom_response_s
 {
@@ -155,36 +131,16 @@ struct getneigh_recvfrom_rsplist_s
 
 /* RTM_GETROUTE.  Get routing tables */
 
-struct getroute_sendto_request_s
-{
-  struct nlmsghdr  hdr;
-  struct rtgenmsg  gen;
-};
-
-struct getroute_recvfrom_response_s
-{
-  struct nlmsghdr  hdr;
-  struct rtmsg     rte;
-
-  /* Addresses follow */
-};
-
-struct getroute_recvfrom_resplist_s
-{
-  sq_entry_t flink;
-  struct getroute_recvfrom_response_s payload;
-};
-
 struct getroute_recvfrom_ipv4addr_s
 {
-  struct rtattr    attr;
-  in_addr_t        addr;
+  struct rtattr attr;
+  in_addr_t     addr;
 };
 
 struct getroute_recvfrom_ipv4response_s
 {
-  struct nlmsghdr  hdr;
-  struct rtmsg     rte;
+  struct nlmsghdr hdr;
+  struct rtmsg    rte;
   struct getroute_recvfrom_ipv4addr_s dst;
   struct getroute_recvfrom_ipv4addr_s genmask;
   struct getroute_recvfrom_ipv4addr_s gateway;
@@ -198,14 +154,14 @@ struct getroute_recvfrom_ipv4resplist_s
 
 struct getroute_recvfrom_ipv6addr_s
 {
-  struct rtattr    attr;
-  net_ipv6addr_t   addr;
+  struct rtattr  attr;
+  net_ipv6addr_t addr;
 };
 
 struct getroute_recvfrom_ipv6response_s
 {
-  struct nlmsghdr  hdr;
-  struct rtmsg     rte;
+  struct nlmsghdr hdr;
+  struct rtmsg    rte;
   struct getroute_recvfrom_ipv6addr_s dst;
   struct getroute_recvfrom_ipv6addr_s genmask;
   struct getroute_recvfrom_ipv6addr_s gateway;
@@ -219,16 +175,16 @@ struct getroute_recvfrom_ipv6resplist_s
 
 /* netdev_foreach() callback */
 
-struct nlroute_devinfo_s
+struct nlroute_sendto_request_s
 {
-  FAR struct socket *psock;
-  FAR const struct getlink_sendto_request_s *req;
+  struct nlmsghdr hdr;
+  struct rtgenmsg gen;
 };
 
-struct nlroute_routeinfo_s
+struct nlroute_info_s
 {
   FAR struct socket *psock;
-  FAR const struct getroute_sendto_request_s *req;
+  FAR const struct nlroute_sendto_request_s *req;
 };
 
 /****************************************************************************
@@ -247,14 +203,14 @@ struct nlroute_routeinfo_s
 static int netlink_device_callback(FAR struct net_driver_s *dev,
                                    FAR void *arg)
 {
-  FAR struct nlroute_devinfo_s *devinfo;
+  FAR struct nlroute_info_s *info;
   FAR struct getlink_recvfrom_rsplist_s *alloc;
   FAR struct getlink_recvfrom_response_s *resp;
 
   DEBUGASSERT(dev != NULL && arg != NULL);
 
-  devinfo = (FAR struct nlroute_devinfo_s *)arg;
-  DEBUGASSERT(devinfo->psock != NULL && devinfo->req != NULL);
+  info = (FAR struct nlroute_info_s *)arg;
+  DEBUGASSERT(info->psock != NULL && info->req != NULL);
 
   /* Check if the link is in the UP state */
 
@@ -267,15 +223,15 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 
   /* Filter only the requested address families */
 
-  switch (devinfo->req->gen.rtgen_family)
+  switch (info->req->gen.rtgen_family)
     {
 #ifdef CONFIG_NET_LOCAL
       case AF_LOCAL:
-        /* Should have devinfo->psock->s_domain == PF_LOCAL and d_lltype ==
+        /* Should have info->psock->s_domain == PF_LOCAL and d_lltype ==
          * NET_LL_LOOPBACK.
          */
 
-        if (devinfo->psock->s_domain == PF_LOCAL)
+        if (info->psock->s_domain == PF_LOCAL)
           {
             DEBUGASSERT(dev->d_lltype == NET_LL_LOOPBACK);
             break;
@@ -287,13 +243,13 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 #endif
 
 #ifdef CONFIG_NET_IPv4
-        /* Should have devinfo->psock->s_domain == PF_INET but d_lltype could be
+        /* Should have info->psock->s_domain == PF_INET but d_lltype could be
          * several things.
          */
 
       case AF_INET:
 
-        if (devinfo->psock->s_domain == PF_INET)
+        if (info->psock->s_domain == PF_INET)
           {
             break;
           }
@@ -304,13 +260,13 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 #endif
 
 #ifdef CONFIG_NET_IPv6
-        /* Should have devinfo->psock->s_domain == PF_INET6 but d_lltype
-         * could be several things.
+        /* Should have info->psock->s_domain == PF_INET6 but d_lltype could be
+         * several things.
          */
 
       case AF_INET6:
 
-        if (devinfo->psock->s_domain == PF_INET6)
+        if (info->psock->s_domain == PF_INET6)
           {
             break;
           }
@@ -321,12 +277,12 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 #endif
 
 #ifdef CONFIG_NET_BLUETOOTH
-        /* Should have devinfo->psock->s_domain == PF_PACKET and d_lltype
-         * should be NET_LL_BLUETOOTH.
+        /* Should have info->psock->s_domain == PF_PACKET and d_lltype should be
+         * NET_LL_BLUETOOTH.
          */
 
       case AF_BLUETOOTH:
-        if (devinfo->psock->s_domain == PF_PACKET)
+        if (info->psock->s_domain == PF_PACKET)
           {
             DEBUGASSERT(dev->d_lltype == NET_LL_BLUETOOTH);
             break;
@@ -345,8 +301,8 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
       case AF_IEEE802154:
         if (dev->d_lltype == NET_LL_IEEE802154)
           {
-            DEBUGASSERT(devinfo->psock->s_domain == PF_PACKET ||
-                        devinfo->psock->s_domain == PF_INET6);
+            DEBUGASSERT(info->psock->s_domain == PF_PACKET ||
+                        info->psock->s_domain == PF_INET6);
             break;
           }
         else
@@ -362,7 +318,7 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 
         if (dev->d_lltype == NET_LL_PKTRADIO)
           {
-            DEBUGASSERT(devinfo->psock->s_domain == PF_INET6);
+            DEBUGASSERT(info->psock->s_domain == PF_INET6);
             break;
           }
         else
@@ -377,14 +333,14 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
       case AF_UNSPEC:
       case AF_PKTRADIO:
       default:
-        nerr("ERROR: Unsupported address family: %u\n", devinfo->req->gen);
+        nerr("ERROR: Unsupported address family: %u\n", info->req->gen);
         return 0;
     }
 
   /* Allocate the response buffer */
 
   alloc = (FAR struct getlink_recvfrom_rsplist_s *)
-    kmm_malloc(sizeof(struct getlink_recvfrom_rsplist_s));
+    kmm_zalloc(sizeof(struct getlink_recvfrom_rsplist_s));
   if (alloc == NULL)
     {
       nerr("ERROR: Failed to allocate response buffer.\n");
@@ -397,17 +353,14 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 
   resp->hdr.nlmsg_len    = sizeof(struct getlink_recvfrom_response_s);
   resp->hdr.nlmsg_type   = RTM_NEWLINK;
-  resp->hdr.nlmsg_flags  = devinfo->req->hdr.nlmsg_flags;
-  resp->hdr.nlmsg_seq    = devinfo->req->hdr.nlmsg_seq;
-  resp->hdr.nlmsg_pid    = devinfo->req->hdr.nlmsg_pid;
+  resp->hdr.nlmsg_flags  = info->req->hdr.nlmsg_flags;
+  resp->hdr.nlmsg_seq    = info->req->hdr.nlmsg_seq;
+  resp->hdr.nlmsg_pid    = info->req->hdr.nlmsg_pid;
 
-  resp->iface.ifi_family = devinfo->req->gen.rtgen_family;
-  resp->iface.ifi_pad    = 0;
-  resp->iface.ifi_type   = devinfo->req->hdr.nlmsg_type;
+  resp->iface.ifi_family = info->req->gen.rtgen_family;
+  resp->iface.ifi_type   = dev->d_lltype;
 #ifdef CONFIG_NETDEV_IFINDEX
   resp->iface.ifi_index  = dev->d_ifindex;
-#else
-  resp->iface.ifi_index  = 0;
 #endif
   resp->iface.ifi_flags  = dev->d_flags;
   resp->iface.ifi_change = 0xffffffff;
@@ -417,16 +370,9 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 
   strncpy((FAR char *)resp->data, dev->d_ifname, IFNAMSIZ);
 
-  /* REVISIT:  Another response should be provided with nlmsg_type =
-   * RTM_NEWROUTE.  That response should include struct rtmsg followed by a
-   * number of attributes.  This response provides routing information for
-   * the device including address (RTA_DST) and gateway (RTA_GATEWAY)
-   * attributes.
-   */
-
   /* Finally, add the data to the list of pending responses */
 
-  netlink_add_response(devinfo->psock, (FAR struct netlink_response_s *)alloc);
+  netlink_add_response(info->psock, (FAR struct netlink_response_s *)alloc);
   return 0;
 }
 #endif
@@ -441,17 +387,17 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 
 #ifndef CONFIG_NETLINK_DISABLE_GETLINK
 static int netlink_get_devlist(FAR struct socket *psock,
-                               FAR const struct getlink_sendto_request_s *req)
+                               FAR const struct nlroute_sendto_request_s *req)
 {
-  struct nlroute_devinfo_s devinfo;
+  struct nlroute_info_s info;
   FAR struct nlroute_msgdone_rsplist_s *alloc;
-  FAR struct nlroute_msgdone_response_s *resp;
+  FAR struct nlmsghdr *resp;
   int ret;
 
   /* Pre-allocate the list terminator */
 
   alloc = (FAR struct nlroute_msgdone_rsplist_s *)
-    kmm_malloc(sizeof(struct nlroute_msgdone_rsplist_s));
+    kmm_zalloc(sizeof(struct nlroute_msgdone_rsplist_s));
   if (alloc == NULL)
     {
       nerr("ERROR: Failed to allocate response terminator.\n");
@@ -460,31 +406,30 @@ static int netlink_get_devlist(FAR struct socket *psock,
 
   /* Visit each device */
 
-  devinfo.psock = psock;
-  devinfo.req   = req;
+  info.psock = psock;
+  info.req   = req;
 
   net_lock();
-  ret = netdev_foreach(netlink_device_callback, &devinfo);
+  ret = netdev_foreach(netlink_device_callback, &info);
+  net_unlock();
   if (ret < 0)
     {
-      net_unlock();
+      kmm_free(alloc);
       return ret;
     }
 
   /* Initialize and send the list terminator */
 
-  resp                   = &alloc->payload;
-  resp->hdr.nlmsg_len    = sizeof(struct nlroute_msgdone_response_s);
-  resp->hdr.nlmsg_type   = NLMSG_DONE;
-  resp->hdr.nlmsg_flags  = req->hdr.nlmsg_flags;
-  resp->hdr.nlmsg_seq    = req->hdr.nlmsg_seq;
-  resp->hdr.nlmsg_pid    = req->hdr.nlmsg_pid;
-  resp->gen.rtgen_family = req->gen.rtgen_family;
+  resp               = &alloc->payload;
+  resp->nlmsg_len    = sizeof(struct nlmsghdr);
+  resp->nlmsg_type   = NLMSG_DONE;
+  resp->nlmsg_flags  = req->hdr.nlmsg_flags;
+  resp->nlmsg_seq    = req->hdr.nlmsg_seq;
+  resp->nlmsg_pid    = req->hdr.nlmsg_pid;
 
   /* Finally, add the data to the list of pending responses */
 
   netlink_add_response(psock, (FAR struct netlink_response_s *)alloc);
-  net_unlock();
   return OK;
 }
 #endif
@@ -499,7 +444,7 @@ static int netlink_get_devlist(FAR struct socket *psock,
 
 #if defined(CONFIG_NET_ARP) && !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
 static int netlink_get_arptable(FAR struct socket *psock,
-                                FAR const struct getneigh_sendto_request_s *req)
+                                FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct getneigh_recvfrom_rsplist_s *entry;
   unsigned int ncopied;
@@ -517,7 +462,7 @@ static int netlink_get_arptable(FAR struct socket *psock,
   rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
   allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
 
-  entry     = (FAR struct getneigh_recvfrom_rsplist_s *)kmm_malloc(allocsize);
+  entry     = (FAR struct getneigh_recvfrom_rsplist_s *)kmm_zalloc(allocsize);
   if (entry == NULL)
     {
       nerr("ERROR: Failed to allocate response buffer.\n");
@@ -527,10 +472,9 @@ static int netlink_get_arptable(FAR struct socket *psock,
   /* Populate the entry */
 
   memcpy(&entry->payload.hdr, &req->hdr, sizeof(struct nlmsghdr));
-  entry->payload.hdr.nlmsg_len = rspsize;
-  memcpy(&entry->payload.msg, &req->msg, sizeof(struct ndmsg));
-  entry->payload.attr.rta_len  = RTA_LENGTH(tabsize);
-  entry->payload.attr.rta_type = 0;
+  entry->payload.hdr.nlmsg_len  = rspsize;
+  entry->payload.msg.ndm_family = req->gen.rtgen_family;
+  entry->payload.attr.rta_len   = RTA_LENGTH(tabsize);
 
   /* Lock the network so that the ARP table will be stable, then copy
    * the ARP table into the allocated memory.
@@ -582,7 +526,7 @@ static int netlink_get_arptable(FAR struct socket *psock,
 
 #if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
 static int netlink_get_nbtable(FAR struct socket *psock,
-                               FAR const struct getneigh_sendto_request_s *req)
+                               FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct getneigh_recvfrom_rsplist_s *entry;
   unsigned int ncopied;
@@ -601,7 +545,7 @@ static int netlink_get_nbtable(FAR struct socket *psock,
   rspsize   = SIZEOF_NLROUTE_RECVFROM_RESPONSE_S(tabsize);
   allocsize = SIZEOF_NLROUTE_RECVFROM_RSPLIST_S(tabsize);
 
-  entry     = (FAR struct getneigh_recvfrom_rsplist_s *)kmm_malloc(allocsize);
+  entry     = (FAR struct getneigh_recvfrom_rsplist_s *)kmm_zalloc(allocsize);
   if (entry == NULL)
     {
       nerr("ERROR: Failed to allocate response buffer.\n");
@@ -611,10 +555,9 @@ static int netlink_get_nbtable(FAR struct socket *psock,
   /* Populate the entry */
 
   memcpy(&entry->payload.hdr, &req->hdr, sizeof(struct nlmsghdr));
-  entry->payload.hdr.nlmsg_len = rspsize;
-  memcpy(&entry->payload.msg, &req->msg, sizeof(struct ndmsg));
-  entry->payload.attr.rta_len  = RTA_LENGTH(tabsize);
-  entry->payload.attr.rta_type = 0;
+  entry->payload.hdr.nlmsg_len  = rspsize;
+  entry->payload.msg.ndm_family = req->gen.rtgen_family;
+  entry->payload.attr.rta_len   = RTA_LENGTH(tabsize);
 
   /* Lock the network so that the Neighbor table will be stable, then
    * copy the Neighbor table into the allocated memory.
@@ -666,16 +609,16 @@ static int netlink_get_nbtable(FAR struct socket *psock,
 
 #ifndef CONFIG_NETLINK_DISABLE_GETROUTE
 static int
-  netlink_route_terminator(FAR struct socket *psock,
-                           FAR const struct getroute_sendto_request_s *req)
+netlink_route_terminator(FAR struct socket *psock,
+                         FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct nlroute_msgdone_rsplist_s *alloc;
-  FAR struct nlroute_msgdone_response_s *resp;
+  FAR struct nlmsghdr *resp;
 
   /* Allocate the list terminator */
 
   alloc = (FAR struct nlroute_msgdone_rsplist_s *)
-    kmm_malloc(sizeof(struct nlroute_msgdone_rsplist_s));
+    kmm_zalloc(sizeof(struct nlroute_msgdone_rsplist_s));
   if (alloc == NULL)
     {
       nerr("ERROR: Failed to allocate response terminator.\n");
@@ -684,13 +627,12 @@ static int
 
   /* Initialize and send the list terminator */
 
-  resp                   = &alloc->payload;
-  resp->hdr.nlmsg_len    = sizeof(struct nlroute_msgdone_response_s);
-  resp->hdr.nlmsg_type   = NLMSG_DONE;
-  resp->hdr.nlmsg_flags  = req->hdr.nlmsg_flags;
-  resp->hdr.nlmsg_seq    = req->hdr.nlmsg_seq;
-  resp->hdr.nlmsg_pid    = req->hdr.nlmsg_pid;
-  resp->gen.rtgen_family = req->gen.rtgen_family;
+  resp              = &alloc->payload;
+  resp->nlmsg_len   = sizeof(struct nlmsghdr);
+  resp->nlmsg_type  = NLMSG_DONE;
+  resp->nlmsg_flags = req->hdr.nlmsg_flags;
+  resp->nlmsg_seq   = req->hdr.nlmsg_seq;
+  resp->nlmsg_pid   = req->hdr.nlmsg_pid;
 
   /* Finally, add the response to the list of pending responses */
 
@@ -711,17 +653,17 @@ static int
 static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
                               FAR void *arg)
 {
-  FAR struct nlroute_routeinfo_s *routeinfo;
+  FAR struct nlroute_info_s *info;
   FAR struct getroute_recvfrom_ipv4resplist_s *alloc;
   FAR struct getroute_recvfrom_ipv4response_s *resp;
 
   DEBUGASSERT(route != NULL && arg != NULL);
-  routeinfo = (FAR struct nlroute_routeinfo_s *)arg;
+  info = (FAR struct nlroute_info_s *)arg;
 
   /* Allocate the response */
 
   alloc = (FAR struct getroute_recvfrom_ipv4resplist_s *)
-    kmm_malloc(sizeof(struct getroute_recvfrom_ipv4resplist_s));
+    kmm_zalloc(sizeof(struct getroute_recvfrom_ipv4resplist_s));
   if (alloc == NULL)
     {
       return -ENOMEM;
@@ -732,12 +674,11 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
   resp                        = &alloc->payload;
   resp->hdr.nlmsg_len         = sizeof(struct getroute_recvfrom_ipv4response_s);
   resp->hdr.nlmsg_type        = RTM_NEWROUTE;
-  resp->hdr.nlmsg_flags       = routeinfo->req->hdr.nlmsg_flags;
-  resp->hdr.nlmsg_seq         = routeinfo->req->hdr.nlmsg_seq;
-  resp->hdr.nlmsg_pid         = routeinfo->req->hdr.nlmsg_pid;
+  resp->hdr.nlmsg_flags       = info->req->hdr.nlmsg_flags;
+  resp->hdr.nlmsg_seq         = info->req->hdr.nlmsg_seq;
+  resp->hdr.nlmsg_pid         = info->req->hdr.nlmsg_pid;
 
-  memset(&resp->rte, 0, sizeof(struct rtmsg));  /* REVISIT:  Uninitialize fields */
-  resp->rte.rtm_family        = routeinfo->req->gen.rtgen_family;
+  resp->rte.rtm_family        = info->req->gen.rtgen_family;
   resp->rte.rtm_table         = RT_TABLE_MAIN;
   resp->rte.rtm_protocol      = RTPROT_STATIC;
   resp->rte.rtm_scope         = RT_SCOPE_SITE;
@@ -756,7 +697,7 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
 
   /* Finally, add the response to the list of pending responses */
 
-  netlink_add_response(routeinfo->psock, (FAR struct netlink_response_s *)alloc);
+  netlink_add_response(info->psock, (FAR struct netlink_response_s *)alloc);
   return OK;
 }
 #endif
@@ -771,18 +712,17 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
 
 #if defined(CONFIG_NET_IPv4) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
 static int netlink_get_ipv4route(FAR struct socket *psock,
-                                 FAR const struct getroute_sendto_request_s *req)
+                                 FAR const struct nlroute_sendto_request_s *req)
 {
-  struct nlroute_routeinfo_s routeinfo;
+  struct nlroute_info_s info;
   int ret;
 
   /* Visit each routing table entry */
 
-  routeinfo.psock = psock;
-  routeinfo.req   = req;
+  info.psock = psock;
+  info.req   = req;
 
-  net_lock();
-  ret = net_foreachroute_ipv4(netlink_ipv4_route, &routeinfo);
+  ret = net_foreachroute_ipv4(netlink_ipv4_route, &info);
   if (ret < 0)
     {
       return ret;
@@ -790,9 +730,7 @@ static int netlink_get_ipv4route(FAR struct socket *psock,
 
   /* Terminate the routing table */
 
-  ret = netlink_route_terminator(psock, req);
-  net_unlock();
-  return ret;
+  return netlink_route_terminator(psock, req);
 }
 #endif
 
@@ -808,17 +746,17 @@ static int netlink_get_ipv4route(FAR struct socket *psock,
 static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
                               FAR void *arg)
 {
-  FAR struct nlroute_routeinfo_s *routeinfo;
+  FAR struct nlroute_info_s *info;
   FAR struct getroute_recvfrom_ipv6resplist_s *alloc;
   FAR struct getroute_recvfrom_ipv6response_s *resp;
 
   DEBUGASSERT(route != NULL && arg != NULL);
-  routeinfo = (FAR struct nlroute_routeinfo_s *)arg;
+  info = (FAR struct nlroute_info_s *)arg;
 
   /* Allocate the response */
 
   alloc = (FAR struct getroute_recvfrom_ipv6resplist_s *)
-    kmm_malloc(sizeof(struct getroute_recvfrom_ipv6resplist_s));
+    kmm_zalloc(sizeof(struct getroute_recvfrom_ipv6resplist_s));
   if (alloc == NULL)
     {
       return -ENOMEM;
@@ -829,12 +767,11 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
   resp                        = &alloc->payload;
   resp->hdr.nlmsg_len         = sizeof(struct getroute_recvfrom_ipv6response_s);
   resp->hdr.nlmsg_type        = RTM_NEWROUTE;
-  resp->hdr.nlmsg_flags       = routeinfo->req->hdr.nlmsg_flags;
-  resp->hdr.nlmsg_seq         = routeinfo->req->hdr.nlmsg_seq;
-  resp->hdr.nlmsg_pid         = routeinfo->req->hdr.nlmsg_pid;
+  resp->hdr.nlmsg_flags       = info->req->hdr.nlmsg_flags;
+  resp->hdr.nlmsg_seq         = info->req->hdr.nlmsg_seq;
+  resp->hdr.nlmsg_pid         = info->req->hdr.nlmsg_pid;
 
-  memset(&resp->rte, 0, sizeof(struct rtmsg));  /* REVISIT:  Uninitialize fields */
-  resp->rte.rtm_family        = routeinfo->req->gen.rtgen_family;
+  resp->rte.rtm_family        = info->req->gen.rtgen_family;
   resp->rte.rtm_table         = RT_TABLE_MAIN;
   resp->rte.rtm_protocol      = RTPROT_STATIC;
   resp->rte.rtm_scope         = RT_SCOPE_SITE;
@@ -853,7 +790,7 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
 
   /* Finally, add the response to the list of pending responses */
 
-  netlink_add_response(routeinfo->psock, (FAR struct netlink_response_s *)alloc);
+  netlink_add_response(info->psock, (FAR struct netlink_response_s *)alloc);
   return OK;
 }
 #endif
@@ -868,18 +805,17 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
 
 #if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
 static int netlink_get_ip6vroute(FAR struct socket *psock,
-                                 FAR const struct getroute_sendto_request_s *req)
+                                 FAR const struct nlroute_sendto_request_s *req)
 {
-  struct nlroute_routeinfo_s routeinfo;
+  struct nlroute_info_s info;
   int ret;
 
   /* Visit each routing table entry */
 
-  routeinfo.psock = psock;
-  routeinfo.req   = req;
+  info.psock = psock;
+  info.req   = req;
 
-  net_lock();
-  ret = net_foreachroute_ipv6(netlink_ipv6_route, &routeinfo);
+  ret = net_foreachroute_ipv6(netlink_ipv6_route, &info);
   if (ret < 0)
     {
       return ret;
@@ -887,9 +823,7 @@ static int netlink_get_ip6vroute(FAR struct socket *psock,
 
   /* Terminate the routing table */
 
-  ret = netlink_route_terminator(psock, req);
-  net_unlock();
-  return ret;
+  return netlink_route_terminator(psock, req);
 }
 #endif
 
@@ -911,8 +845,8 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
                              FAR const struct sockaddr_nl *to,
                              socklen_t tolen)
 {
-  FAR const struct getneigh_sendto_request_s *gnreq =
-    (FAR const struct getneigh_sendto_request_s *)nlmsg;
+  FAR const struct nlroute_sendto_request_s *req =
+    (FAR const struct nlroute_sendto_request_s *)nlmsg;
   int ret;
 
   DEBUGASSERT(psock != NULL && nlmsg != NULL &&
@@ -923,20 +857,15 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
 
   /* Handle according to the message type */
 
-  switch (gnreq->hdr.nlmsg_type)
+  switch (nlmsg->nlmsg_type)
     {
 #ifndef CONFIG_NETLINK_DISABLE_GETLINK
       /* Dump a list of all devices */
 
       case RTM_GETLINK:
-        {
-          FAR const struct getlink_sendto_request_s *glreq =
-            (FAR const struct getlink_sendto_request_s *)nlmsg;
+        /* Generate the response */
 
-          /* Generate the response */
-
-          ret = netlink_get_devlist(psock, glreq);
-        }
+        ret = netlink_get_devlist(psock, req);
         break;
 #endif
 
@@ -944,30 +873,28 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
       /* Retrieve ARP/Neighbor Tables */
 
       case RTM_GETNEIGH:
-        {
 #ifdef CONFIG_NET_ARP
-          /* Retrieve the ARP table in its entirety. */
+        /* Retrieve the ARP table in its entirety. */
 
-          if (gnreq->msg.ndm_family == AF_INET)
-            {
-              ret = netlink_get_arptable(psock, gnreq);
-            }
-          else
+        if (req->gen.rtgen_family == AF_INET)
+          {
+            ret = netlink_get_arptable(psock, req);
+          }
+        else
 #endif
 
 #ifdef CONFIG_NET_IPv6
-          /* Retrieve the IPv6 neighbor table in its entirety. */
+        /* Retrieve the IPv6 neighbor table in its entirety. */
 
-          if (gnreq->msg.ndm_family == AF_INET6)
-            {
-               ret = netlink_get_nbtable(psock, gnreq);
-            }
-          else
+        if (req->gen.rtgen_family == AF_INET6)
+          {
+             ret = netlink_get_nbtable(psock, req);
+          }
+        else
 #endif
-            {
-              ret = -EAFNOSUPPORT;
-            }
-        }
+          {
+            ret = -EAFNOSUPPORT;
+          }
         break;
 #endif /* !CONFIG_NETLINK_DISABLE_GETNEIGH */
 
@@ -975,28 +902,23 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
       /* Retrieve the IPv4 or IPv6 routing table */
 
       case RTM_GETROUTE:
-        {
-          FAR const struct getroute_sendto_request_s *grreq =
-            (FAR const struct getroute_sendto_request_s *)nlmsg;
-
 #ifdef CONFIG_NET_IPv4
-          if (grreq->gen.rtgen_family == AF_INET)
-            {
-              ret = netlink_get_ipv4route(psock, grreq);
-            }
-          else
+        if (req->gen.rtgen_family == AF_INET)
+          {
+            ret = netlink_get_ipv4route(psock, req);
+          }
+        else
 #endif
 #ifdef CONFIG_NET_IPv6
-          if (grreq->gen.rtgen_family == AF_INET6)
-            {
-              ret = netlink_get_ip6vroute(psock, grreq);
-            }
-          else
+        if (req->gen.rtgen_family == AF_INET6)
+          {
+            ret = netlink_get_ip6vroute(psock, req);
+          }
+        else
 #endif
-            {
-              ret = -EAFNOSUPPORT;
-            }
-        }
+          {
+            ret = -EAFNOSUPPORT;
+          }
         break;
 #endif
 
