@@ -82,7 +82,7 @@ ld-locked.inc: mklocked.sh $(TOPDIR)$(DELIM).config
 # is available to link against.
 
 $(PASS1_LIBBOARD):
-	$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)boards$(DELIM)ea3131$(DELIM)src TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
+	$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)boards$(DELIM)ea3131$(DELIM)src TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 # Create the locked.r file containing all of the code (except the start-up code)
 # that needs to lie in the locked text region.

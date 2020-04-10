@@ -67,10 +67,10 @@ Installing New Fonts
 
        genfontsources:
          ifeq ($(CONFIG_NXFONT_SANS23X27),y)
-          @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=1 EXTRADEFINES=$(EXTRADEFINES)
+          @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=1 EXTRAFLAGS=$(EXTRAFLAGS)
         endif
          ifeq ($(CONFIG_NXFONT_MYFONT),y)
-          @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=2 EXTRADEFINES=$(EXTRADEFINES)
+          @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=2 EXTRAFLAGS=$(EXTRAFLAGS)
         endif
 
     6. nuttx/graphics/nxfonts/Make.defs.  Set the make variable NXFSET_CSRCS.

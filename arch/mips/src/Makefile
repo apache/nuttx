@@ -40,9 +40,9 @@ ifeq ($(CONFIG_ARCH_MIPS),y)
 ARCH_SUBDIR = mips32
 endif
 
-CPPFLAGS += $(EXTRADEFINES)
-CFLAGS += $(EXTRADEFINES)
-CXXFLAGS += $(EXTRADEFINES)
+CPPFLAGS += $(EXTRAFLAGS)
+CFLAGS += $(EXTRAFLAGS)
+CXXFLAGS += $(EXTRAFLAGS)
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ARCH_SRCDIR = $(TOPDIR)\arch\$(CONFIG_ARCH)\src
@@ -136,7 +136,7 @@ libarch$(LIBEXT): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
 board/libboard$(LIBEXT):
-	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRADEFINES=$(EXTRADEFINES)
+	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
 	@echo "LD: nuttx"
