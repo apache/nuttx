@@ -171,7 +171,8 @@ FAR struct netlink_conn_s *netlink_alloc(void)
   /* The free list is protected by a semaphore (that behaves like a mutex). */
 
   _netlink_semtake(&g_free_sem);
-  conn = (FAR struct netlink_conn_s *)dq_remfirst(&g_free_netlink_connections);
+  conn = (FAR struct netlink_conn_s *)
+           dq_remfirst(&g_free_netlink_connections);
   if (conn != NULL)
     {
       /* Make sure that the connection is marked as uninitialized */
@@ -191,8 +192,8 @@ FAR struct netlink_conn_s *netlink_alloc(void)
  * Name: netlink_free()
  *
  * Description:
- *   Free a NetLink connection structure that is no longer in use. This should
- *   be done by the implementation of close().
+ *   Free a NetLink connection structure that is no longer in use. This
+ *   should be done by the implementation of close().
  *
  ****************************************************************************/
 

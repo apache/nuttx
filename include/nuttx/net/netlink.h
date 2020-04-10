@@ -54,8 +54,8 @@
  * Public Types
  ****************************************************************************/
 
-/* This is the form of the obfuscated state structure passed to modules outside of the
- * networking layer.
+/* This is the form of the obfuscated state structure passed to modules
+ * outside of the networking layer.
  */
 
 typedef FAR void *NETLINK_HANDLE;
