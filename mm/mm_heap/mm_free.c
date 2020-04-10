@@ -43,25 +43,24 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
 #include <nuttx/mm/mm.h>
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-#ifdef __KERNEL__
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
 {
-  FAR struct mm_delaynode_s *new = mem;
+  FAR struct mm_delaynode_s *tmp = mem;
   irqstate_t flags;
 
   /* Delay the deallocation until a more appropriate time. */
 
   flags = enter_critical_section();
 
-  new->flink = heap->mm_delaylist.flink;
-  heap->mm_delaylist.flink = new;
+  tmp->flink = heap->mm_delaylist;
+  heap->mm_delaylist = tmp;
 
   leave_critical_section(flags);
 }
@@ -85,6 +84,9 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
   FAR struct mm_freenode_s *node;
   FAR struct mm_freenode_s *prev;
   FAR struct mm_freenode_s *next;
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  int ret;
+#endif
 
   minfo("Freeing %p\n", mem);
 
@@ -95,7 +97,7 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
-#ifdef __KERNEL__
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   /* Check current environment */
 
   if (up_interrupt_context())
@@ -105,13 +107,16 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       mm_add_delaylist(heap, mem);
       return;
     }
-  else if (mm_trysemaphore(heap) == 0)
+  else if ((ret = mm_trysemaphore(heap)) == 0)
     {
       /* Got the sem, do free immediately */
     }
-  else if (sched_idletask())
+  else if (ret == -ESRCH || sched_idletask())
     {
-      /* We are in IDLE task & can't get sem, add to mm_delaylist */
+      /* We are in IDLE task & can't get sem, or meet -ESRCH return,
+       * which means we are in situations during context switching(See
+       * mm_trysemaphore() & getpid()). Then add to mm_delaylist.
+       */
 
       mm_add_delaylist(heap, mem);
       return;
