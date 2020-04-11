@@ -138,6 +138,14 @@ the Z85230 ESCC channel A.
 Status
 ======
 
+2020-4-11:  Support for CONFIG_CAN_PASS_STRUCTS was removed in NuttX-9.1.
+  This was necessary to enforce some POSIX interface compliance but also
+  means that ALL older SDCC versions will no long build with NuttX.  I have
+  been told that the newest SDCC compilers can indeed pass structure and
+  union parameters and return values.  If that is correct, then perhaps
+  the newer SDCC compilers will be used.  Otherwise, it will be necessary
+  to use some other, more compliant compiler.
+
 2014-8-22:  After some time idling away, I tried rebuilding with Windows 8,
   the latest MinGW and the latest SDCC.  I fixed a few things but there a
   still a few issues.  The last "show stopper" before I gave up for now was
