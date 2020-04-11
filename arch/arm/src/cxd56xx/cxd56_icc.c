@@ -251,13 +251,10 @@ static int icc_irqhandler(int cpuid, uint32_t word[2])
 #ifndef CONFIG_DISABLE_SIGNAL
   if (priv->pid != INVALID_PROCESS_ID)
     {
-#  ifdef CONFIG_CAN_PASS_STRUCTS
       union sigval value;
+
       value.sival_ptr = priv->sigdata;
       sigqueue(priv->pid, priv->signo, value);
-#  else
-      sigqueue(priv->pid, priv->signo, priv->sigdata);
-#  endif
     }
 #endif
 

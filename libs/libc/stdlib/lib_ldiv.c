@@ -47,8 +47,6 @@
 
 #include <stdlib.h>
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -81,5 +79,3 @@ ldiv_t ldiv(long numer, long denom)
   f.rem  = numer % denom;
   return f;
 }
-
-#endif /* CONFIG_CAN_PASS_STRUCTS */

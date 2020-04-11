@@ -47,7 +47,7 @@
 
 #include <stdlib.h>
 
-#if defined(CONFIG_CAN_PASS_STRUCTS) && defined(CONFIG_HAVE_LONG_LONG)
+#if defined(CONFIG_HAVE_LONG_LONG)
 
 /****************************************************************************
  * Public Functions
@@ -82,4 +82,4 @@ lldiv_t lldiv(long long numer, long long denom)
   return f;
 }
 
-#endif /* CONFIG_CAN_PASS_STRUCTS && CONFIG_HAVE_LONG_LONG */
+#endif /* CONFIG_HAVE_LONG_LONG */

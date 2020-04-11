@@ -3392,13 +3392,9 @@ static void cxd56_notify_signal(uint16_t state, uint16_t power)
 
   if (priv->signo > 0)
     {
-#ifdef CONFIG_CAN_PASS_STRUCTS
       union sigval value;
       value.sival_int = state << 16 | power;
       sigqueue(priv->pid, priv->signo, value);
-#else
-      sigqueue(priv->pid, priv->signo, state << 16 | power);
-#endif
     }
 }
 
