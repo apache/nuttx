@@ -43,8 +43,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to be
- * defined or CONFIG_NXFLAT_DUMPBUFFER does nothing.
+/* CONFIG_DEBUG_FEATURES, CONFIG_DEBUG_INFO, and CONFIG_DEBUG_BINFMT have to
+ * be defined or CONFIG_NXFLAT_DUMPBUFFER does nothing.
  */
 
 #if !defined(CONFIG_DEBUG_INFO) || !defined (CONFIG_DEBUG_BINFMT)
@@ -58,14 +58,6 @@
 #endif
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -75,7 +67,8 @@
  * Description:
  *   Perform the NXFLAT_RELOC_TYPE_REL32I binding:
  *
- *   Meaning: Object file contains a 32-bit offset into I-Space at the offset.
+ *   Meaning: Object file contains a 32-bit offset into I-Space at the
+ *            offset.
  *   Fixup:   Add mapped I-Space address to the offset.
  *
  * Returned Value:
@@ -114,7 +107,8 @@ static inline int nxflat_bindrel32i(FAR struct nxflat_loadinfo_s *loadinfo,
  * Description:
  *   Perform the NXFLAT_RELOC_TYPE_REL32D binding:
  *
- *   Meaning: Object file contains a 32-bit offset into D-Space at the offset.
+ *   Meaning: Object file contains a 32-bit offset into D-Space at the
+ *            offset.
  *   Fixup:   Add allocated D-Space address to the offset.
  *
  * Returned Value:
@@ -175,10 +169,13 @@ static inline int nxflat_bindrel32id(FAR struct nxflat_loadinfo_s *loadinfo,
 
   if (offset < loadinfo->dsize)
     {
-      addr = (FAR uint32_t *)(offset + loadinfo->dspace->region);
+      addr  = (FAR uint32_t *)(offset + loadinfo->dspace->region);
       binfo("  Before: %08x\n", *addr);
-     *addr += ((uint32_t)loadinfo->ispace - (uint32_t)(loadinfo->dspace->region));
+
+     *addr += ((uint32_t)loadinfo->ispace -
+               (uint32_t)(loadinfo->dspace->region));
       binfo("  After: %08x\n", *addr);
+
       return OK;
     }
   else
@@ -268,36 +265,42 @@ static inline int nxflat_gotrelocs(FAR struct nxflat_loadinfo_s *loadinfo)
       switch (NXFLAT_RELOC_TYPE(reloc.r_info))
         {
         /* NXFLAT_RELOC_TYPE_REL32I  Meaning: Object file contains a 32-bit
-         *                                    offset into I-Space at the offset.
-         *                           Fixup:   Add mapped I-Space address to the
+         *                                    offset into I-Space at the
          *                                    offset.
+         *                           Fixup:   Add mapped I-Space address
+         *                                    to the offset.
          */
 
         case NXFLAT_RELOC_TYPE_REL32I:
           {
-            result = nxflat_bindrel32i(loadinfo, NXFLAT_RELOC_OFFSET(reloc.r_info));
+            result = nxflat_bindrel32i(loadinfo,
+                                       NXFLAT_RELOC_OFFSET(reloc.r_info));
           }
           break;
 
-        /* NXFLAT_RELOC_TYPE_REL32D  Meaning: Object file contains a 32-bit offset
-         *                                    into D-Space at the offset.
-         *                           Fixup:   Add allocated D-Space address to the
+        /* NXFLAT_RELOC_TYPE_REL32D  Meaning: Object file contains a 32-bit
+         *                                    offset into D-Space at the
          *                                    offset.
+         *                           Fixup:   Add allocated D-Space address
+         *                                    to the offset.
          */
 
         case NXFLAT_RELOC_TYPE_REL32D:
           {
-            result = nxflat_bindrel32d(loadinfo, NXFLAT_RELOC_OFFSET(reloc.r_info));
+            result = nxflat_bindrel32d(loadinfo,
+                                       NXFLAT_RELOC_OFFSET(reloc.r_info));
           }
           break;
 
-        /* NXFLAT_RELOC_TYPE_REL32ID Meaning: Object file contains a 32-bit offset
-         *                                    into I-Space at the offset that will
-         *                                    unfortunately be references relative
-         *                                    to the GOT
-         *                           Fixup:   Add allocated the mapped I-Space
-         *                                    address MINUS the allocated D-Space
-         *                                    address to the offset.
+        /* NXFLAT_RELOC_TYPE_REL32ID Meaning: Object file contains a 32-bit
+         *                                    offset into I-Space at the
+         *                                    offset that will unfortunately
+         *                                    be references relative to the
+         *                                    GOT
+         *                           Fixup:   Add allocated the mapped
+         *                                    I-Space address MINUS the
+         *                                    allocated D-Space address to
+         *                                    the offset.
          */
 
 #ifdef NXFLAT_RELOC_TYPE_REL32ID
@@ -436,7 +439,8 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
       for (i = 0; i < nimports; i++)
         {
           binfo("Import[%d] (%08p) offset: %08x func: %08x\n",
-                i, &imports[i], imports[i].i_funcname, imports[i].i_funcaddress);
+                i, &imports[i], imports[i].i_funcname,
+                imports[i].i_funcaddress);
 
           /* Get a pointer to the imported symbol name.  The name itself
            * lies in the TEXT segment.  But the reference to the name
@@ -518,10 +522,10 @@ static inline int nxflat_clearbss(FAR struct nxflat_loadinfo_s *loadinfo)
   int ret;
 #endif
 
-  /* .bss resides within the D-Space allocation.  If CONFIG_ARCH_ADDRENV=y, then
-   * that D-Space allocation lies in an address environment that may not be
-   * in place.  So, in that case, we must call nxflat_addrenv_select to
-   * temporarily instantiate that address space before the .bss can be
+  /* .bss resides within the D-Space allocation.  If CONFIG_ARCH_ADDRENV=y,
+   * then that D-Space allocation lies in an address environment that may
+   * not be in place.  So, in that case, we must call nxflat_addrenv_select
+   * to temporarily instantiate that address space before the .bss can be
    * accessed.
    */
 
@@ -564,8 +568,8 @@ static inline int nxflat_clearbss(FAR struct nxflat_loadinfo_s *loadinfo)
  * Description:
  *   Bind the imported symbol names in the loaded module described by
  *   'loadinfo' using the exported symbol values provided by 'symtab'.
- *   After binding the module, clear the BSS region (which held the relocation
- *   data) in preparation for execution.
+ *   After binding the module, clear the BSS region (which held the
+ *   relocation data) in preparation for execution.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on
@@ -578,7 +582,8 @@ int nxflat_bind(FAR struct nxflat_loadinfo_s *loadinfo,
 {
   /* Bind the imported symbol, absolute relocations separately.  This is done
    * before the standard relocations because that logic may modify the
-   * import list (for the better hopefully, but we don't want to depend on it).
+   * import list (for the better hopefully, but we don't want to depend on
+   * it).
    */
 
   int ret = nxflat_bindimports(loadinfo, exports, nexports);

@@ -281,8 +281,10 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 
   /* The first line is the headers */
 
-  linesize  = snprintf(procfile->line, MEMINFO_LINELEN,
-                       "             total       used       free    largest\n");
+  linesize  =
+    snprintf(procfile->line, MEMINFO_LINELEN,
+             "             total       used       free    largest\n");
+
   copysize  = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                             &offset);
   totalsize = copysize;

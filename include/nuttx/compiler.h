@@ -604,7 +604,9 @@
 
 #  undef CONFIG_HAVE_CXX14
 
-/* ISO C11 supports anonymous (unnamed) structures and unions.  Does ICCARM? */
+/* ISO C11 supports anonymous (unnamed) structures and unions.  Does
+ * ICCARM?
+ */
 
 #  undef CONFIG_HAVE_ANONYMOUS_STRUCT
 #  undef  CONFIG_HAVE_ANONYMOUS_UNION

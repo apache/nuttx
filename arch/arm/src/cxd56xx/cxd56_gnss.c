@@ -160,6 +160,12 @@ struct cxd56_gnss_shared_info_s
   uint32_t argv[GNSS_SHARED_INFO_MAX_ARGC];
 };
 
+struct cxd56_devsig_table_s
+{
+  uint8_t                sigtype;
+  cxd56_cpu1sighandler_t handler;
+};
+
 struct cxd56_gnss_dev_s
 {
   sem_t                           devsem;
@@ -2037,7 +2043,9 @@ static FAR char *cxd56_gnss_read_cep_file(FAR FILE *fp, int32_t offset,
 
   return buf;
 
-  /* send signal to CPU1 in error for just notify completion of read sequence */
+  /* Send signal to CPU1 in error for just notify completion of read
+   * sequence.
+   */
 
   _err1:
   free(buf);
@@ -2829,62 +2837,50 @@ static int cxd56_gnss_register(FAR const char *devpath)
   FAR struct cxd56_gnss_dev_s *priv;
   int                          i;
   int                          ret;
-  static struct
+
+  static struct cxd56_devsig_table_s devsig_table[] =
   {
-    uint8_t                sigtype;
-    cxd56_cpu1sighandler_t handler;
-  } devsig_table[] =
-    {
     {
       CXD56_CPU1_DATA_TYPE_GNSS,
       cxd56_gnss_default_sighandler
     },
-
     {
       CXD56_CPU1_DATA_TYPE_AGPS,
       cxd56_gnss_common_signalhandler
     },
-
     {
       CXD56_CPU1_DATA_TYPE_RTK,
       cxd56_gnss_common_signalhandler
     },
-
     {
       CXD56_CPU1_DATA_TYPE_GPSEPHEMERIS,
       cxd56_gnss_common_signalhandler
     },
-
     {
       CXD56_CPU1_DATA_TYPE_GLNEPHEMERIS,
       cxd56_gnss_common_signalhandler
     },
-
     {
       CXD56_CPU1_DATA_TYPE_SPECTRUM,
       cxd56_gnss_common_signalhandler
     },
-
     {
       CXD56_CPU1_DATA_TYPE_PVTLOG,
       cxd56_gnss_common_signalhandler
     },
-
     {
       CXD56_CPU1_DATA_TYPE_CPUFIFOAPI,
       cxd56_gnss_cpufifoapi_signalhandler
     },
-
     {
       CXD56_CPU1_DATA_TYPE_SBAS,
       cxd56_gnss_common_signalhandler
     },
-
     {
       CXD56_CPU1_DATA_TYPE_DCREPORT,
       cxd56_gnss_common_signalhandler
     }
-    };
+  };
 
   priv = (FAR struct cxd56_gnss_dev_s *)kmm_malloc(
     sizeof(struct cxd56_gnss_dev_s));
