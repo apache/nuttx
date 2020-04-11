@@ -38,6 +38,7 @@
 /********************************************************************************
  * Pre-processor Definitions
  ********************************************************************************/
+
 /* Signal set management definitions and macros. */
 
 #define NULL_SIGNAL_SET ((sigset_t)0x00000000)
@@ -258,7 +259,7 @@
 #endif
 
 /********************************************************************************
- * Public Type Definitions
+ * Public Types
  ********************************************************************************/
 
 /* This defines a set of 32 signals (numbered 0 through 31).
@@ -401,11 +402,19 @@ int  sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
 
 #else /* __INCLUDE_SIGNAL_H */
 
-#include <stdint.h>
-
 /* Avoid circular dependencies by assuring that simple type definitions are
  * available in any inclusion ordering.
  */
+
+/********************************************************************************
+ * Included Files
+ ********************************************************************************/
+
+#include <stdint.h>
+
+/********************************************************************************
+ * Public Types
+ ********************************************************************************/
 
 #ifndef __SIGSET_T_DEFINED
 typedef uint32_t sigset_t;

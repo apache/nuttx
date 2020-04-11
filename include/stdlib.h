@@ -79,7 +79,7 @@ struct mallinfo
   int uordblks; /* This is the total size of memory occupied by
                  * chunks handed out by malloc. */
   int fordblks; /* This is the total size of memory occupied
-                 * by free (not in use) chunks.*/
+                 * by free (not in use) chunks. */
 };
 
 /* Structure type returned by the div() function. */

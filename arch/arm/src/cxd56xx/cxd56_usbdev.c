@@ -563,7 +563,9 @@ static const struct usbdev_ops_s g_devops =
   .pullup      = cxd56_pullup,
 };
 
-/* There is only one, single, pre-allocated instance of the driver structure */
+/* There is only one, single, pre-allocated instance of the driver
+ * structure.
+ */
 
 static struct cxd56_usbdev_s g_usbdev;
 
@@ -1622,7 +1624,9 @@ static int cxd56_epinterrupt(int irq, FAR void *context)
 
                   cxd56_txdmacomplete(privep);
 
-                  /* Clear NAK to raise IN interrupt for send next IN packets */
+                  /* Clear NAK to raise IN interrupt for send next IN
+                   * packets.
+                   */
 
                   putreg32(ctrl | USB_CNAK, CXD56_USB_IN_EP_CONTROL(n));
                 }
@@ -1718,7 +1722,9 @@ static int cxd56_epinterrupt(int irq, FAR void *context)
                           priv->ep0datlen += len;
                         }
 
-                      /* Dispatch to cxd56_ep0setup if received all OUT data */
+                      /* Dispatch to cxd56_ep0setup if received all OUT
+                       * data.
+                       */
 
                       if (priv->ep0datlen == priv->ep0reqlen)
                         {
@@ -1791,7 +1797,9 @@ static int cxd56_epinterrupt(int irq, FAR void *context)
 
                   if (!(stat & USB_INT_MRXFIFOEMPTY))
                     {
-                      /* Flush Receive FIFO and clear NAK to finish status stage */
+                      /* Flush Receive FIFO and clear NAK to finish status
+                       * stage.
+                       */
 
                       putreg32(ctrl | USB_MRXFLUSH,
                                CXD56_USB_OUT_EP_CONTROL(n));
@@ -2467,7 +2475,9 @@ static int cxd56_epsubmit(FAR struct usbdev_ep_s *ep,
       if (priv->ctrl.req == USB_REQ_SETCONFIGURATION ||
           priv->ctrl.req == USB_REQ_SETINTERFACE)
         {
-          /* Nothing to transfer -- exit success, with zero bytes transferred */
+          /* Nothing to transfer -- exit success, with zero bytes
+           * transferred
+           */
 
           usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
           cxd56_reqcomplete(privep, OK);
