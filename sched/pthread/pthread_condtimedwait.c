@@ -124,16 +124,12 @@ static void pthread_condtimedout(int argc, wdparm_t arg1, ...)
        *  just use nxsig_queue().
        */
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
       union sigval value;
 
       /* Send the specified signal to the specified task. */
 
       value.sival_ptr = NULL;
       nxsig_queue((int)pid, signo, value);
-#else
-      nxsig_queue((int)pid, signo, NULL);
-#endif
     }
 
 #endif /* HAVE_GROUP_MEMBERS */

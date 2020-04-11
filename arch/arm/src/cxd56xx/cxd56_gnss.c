@@ -2154,13 +2154,10 @@ static void cxd56_gnss_common_signalhandler(uint32_t data,
       struct cxd56_gnss_sig_s *sig = &priv->sigs[i];
       if (sig->enable && sig->info.gnsssig == sigtype)
         {
-#ifdef CONFIG_CAN_PASS_STRUCTS
           union sigval value;
+
           value.sival_ptr = &sig->info;
           sigqueue(sig->pid, sig->info.signo, value);
-#else
-          sigqueue(sig->pid, sig->info.signo, &sig->info);
-#endif
           issetmask = 1;
         }
     }

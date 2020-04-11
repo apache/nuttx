@@ -125,39 +125,6 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
 
 static void timer_timeout(int argc, wdparm_t itimer, ...)
 {
-#ifndef CONFIG_CAN_PASS_STRUCTS
-  /* On many small machines, pointers are encoded and cannot be simply cast
-   * from wdparm_t to struct tcb_s *.  The following union works around this
-   * (see wdogparm_t).
-   */
-
-  union
-  {
-    FAR struct posix_timer_s *timer;
-    wdparm_t                  itimer;
-  } u;
-
-  u.itimer = itimer;
-
-  /* Send the specified signal to the specified task.   Increment the
-   * reference count on the timer first so that will not be deleted until
-   * after the signal handler returns.
-   */
-
-  u.timer->pt_crefs++;
-  timer_signotify(u.timer);
-
-  /* Release the reference.  timer_release will return nonzero if the timer
-   * was not deleted.
-   */
-
-  if (timer_release(u.timer))
-    {
-      /* If this is a repetitive timer, then restart the watchdog */
-
-      timer_restart(u.timer, itimer);
-    }
-#else
   FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)itimer;
 
   /* Send the specified signal to the specified task.   Increment the
@@ -178,7 +145,6 @@ static void timer_timeout(int argc, wdparm_t itimer, ...)
 
       timer_restart(timer, itimer);
     }
-#endif
 }
 
 /****************************************************************************

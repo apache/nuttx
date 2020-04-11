@@ -1490,9 +1490,7 @@ static void seq_handlefifointr(FAR struct cxd56_scudev_s *priv,
   int i;
 #ifndef CONFIG_DISABLE_SIGNAL
   struct wm_notify_s *notify;
-#  ifdef CONFIG_CAN_PASS_STRUCTS
   union sigval value;
-#  endif
 #endif
 
   if ((intr & 0x007ffe00) == 0)
@@ -1520,12 +1518,8 @@ static void seq_handlefifointr(FAR struct cxd56_scudev_s *priv,
 
           DEBUGASSERT(notify->pid != 0);
 
-#  ifdef CONFIG_CAN_PASS_STRUCTS
           value.sival_ptr = notify->ts;
           sigqueue(notify->pid, notify->signo, value);
-#  else
-          sigqueue(notify->pid, notify->signo, (FAR void *)notify->ts);
-#  endif
 #endif
         }
     }
@@ -1611,15 +1605,12 @@ static void seq_handlemathfintr(FAR struct cxd56_scudev_s *priv,
 #ifndef CONFIG_DISABLE_SIGNAL
       if (detected)
         {
+          union sigval value;
+
           DEBUGASSERT(notify->pid != 0);
 
-#  ifdef CONFIG_CAN_PASS_STRUCTS
-          union sigval value;
           value.sival_ptr = notify->arg;
           sigqueue(notify->pid, notify->signo, value);
-#  else
-          sigqueue(notify->pid, notify->signo, (FAR void *)notify->arg);
-#  endif
           detected = 0;
         }
 #endif
