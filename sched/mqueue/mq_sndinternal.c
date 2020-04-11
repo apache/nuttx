@@ -169,7 +169,9 @@ FAR struct mqueue_msg_s *nxmq_alloc_msg(void)
 
           if (mqmsg != NULL)
             {
-              /* Yes... remember that this message was dynamically allocated */
+              /* Yes... remember that this message was dynamically
+               * allocated.
+               */
 
               mqmsg->type = MQ_ALLOC_DYN;
             }
@@ -414,7 +416,9 @@ int nxmq_do_send(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
 
       for (btcb = (FAR struct tcb_s *)g_waitingformqnotempty.head;
            btcb && btcb->msgwaitq != msgq;
-           btcb = btcb->flink);
+           btcb = btcb->flink)
+        {
+        }
 
       /* If one was found, unblock it */
 
