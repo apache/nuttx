@@ -52,11 +52,12 @@
  * Name: sixlowpan_udp_chksum
  *
  * Description:
- *   Perform the checksum calcaultion over the IPv6, protocol headers, and
+ *   Perform the checksum calculation over the IPv6, protocol headers, and
  *   data payload as necessary.
  *
  * Input Parameters:
- *   ipv6udp - A reference to a structure containing the IPv6 and UDP headers.
+ *   ipv6udp - A reference to a structure containing the IPv6 and UDP
+ *             headers.
  *   buf     - The beginning of the payload data
  *   buflen  - The length of the payload data.
  *
@@ -238,7 +239,8 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 
   /* Copy the source and destination addresses */
 
-  net_ipv6addr_hdrcopy(ipv6udp.ipv6.destipaddr, to6->sin6_addr.in6_u.u6_addr16);
+  net_ipv6addr_hdrcopy(ipv6udp.ipv6.destipaddr,
+                       to6->sin6_addr.in6_u.u6_addr16);
   if (!net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
     {
       net_ipv6addr_hdrcopy(ipv6udp.ipv6.srcipaddr, conn->u.ipv6.laddr);
@@ -292,7 +294,8 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 
   ret = sixlowpan_send(dev, &conn->list,
                        (FAR const struct ipv6_hdr_s *)&ipv6udp,
-                       buf, buflen, &destmac, _SO_TIMEOUT(psock->s_sndtimeo));
+                       buf, buflen, &destmac,
+                       _SO_TIMEOUT(psock->s_sndtimeo));
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);

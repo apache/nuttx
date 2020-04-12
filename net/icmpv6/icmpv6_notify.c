@@ -70,8 +70,8 @@ static struct icmpv6_notify_s *g_icmpv6_waiters;
  *   is sent so that there is no race condition when icmpv6_wait() is called.
  *
  * Assumptions:
- *   This function is called from icmpv6_neighbor() and executes in the normal
- *   tasking environment.
+ *   This function is called from icmpv6_neighbor() and executes in the
+ *   normal tasking environment.
  *
  ****************************************************************************/
 

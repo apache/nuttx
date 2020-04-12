@@ -286,8 +286,9 @@ int icmpv6_rwait(FAR struct icmpv6_rnotify_s *notify, unsigned int timeout)
  *
  ****************************************************************************/
 
-void icmpv6_rnotify(FAR struct net_driver_s *dev, const net_ipv6addr_t draddr,
-                    const net_ipv6addr_t prefix, unsigned int preflen)
+void icmpv6_rnotify(FAR struct net_driver_s *dev,
+                    const net_ipv6addr_t draddr, const net_ipv6addr_t prefix,
+                    unsigned int preflen)
 {
   FAR struct icmpv6_rnotify_s *curr;
 

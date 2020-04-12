@@ -61,13 +61,16 @@
 
 struct sixlowpan_send_s
 {
-  FAR struct devif_callback_s *s_cb;      /* Reference to callback instance */
-  sem_t                        s_waitsem; /* Supports waiting for driver events */
-  int                          s_result;  /* The result of the transfer */
-  FAR const struct ipv6_hdr_s *s_ipv6hdr; /* IPv6 header, followed by UDP or ICMP header. */
+  FAR struct devif_callback_s *s_cb;            /* Reference to callback
+                                                 * instance */
+  sem_t                        s_waitsem;       /* Supports waiting for
+                                                 * driver events */
+  int                          s_result;        /* The result of the transfer */
+  FAR const struct ipv6_hdr_s *s_ipv6hdr;       /* IPv6 header, followed by
+                                                 * UDP or ICMP header. */
   FAR const struct netdev_varaddr_s *s_destmac; /* Destination MAC address */
-  FAR const void              *s_buf;     /* Data to send */
-  size_t                       s_len;     /* Length of data in buf */
+  FAR const void              *s_buf;           /* Data to send */
+  size_t                       s_len;           /* Length of data in buf */
 };
 
 /****************************************************************************
@@ -169,9 +172,9 @@ end_wait:
  * Name: sixlowpan_send
  *
  * Description:
- *   Process an outgoing UDP or ICMPv6 packet.  Takes an IP packet and formats
- *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
- *   UDP/ICMPv6 send logic.
+ *   Process an outgoing UDP or ICMPv6 packet.  Takes an IP packet and
+ *   formats it to be sent on an 802.15.4 network using 6lowpan.  Called
+ *   from common UDP/ICMPv6 send logic.
  *
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is

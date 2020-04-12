@@ -75,16 +75,18 @@
 
 struct sixlowpan_send_s
 {
-  FAR struct socket           *s_sock;    /* Internal socket reference */
-  FAR struct devif_callback_s *s_cb;      /* Reference to callback instance */
-  sem_t                        s_waitsem; /* Supports waiting for driver events */
-  int                          s_result;  /* The result of the transfer */
+  FAR struct socket           *s_sock;          /* Internal socket reference */
+  FAR struct devif_callback_s *s_cb;            /* Reference to callback
+                                                 * instance */
+  sem_t                        s_waitsem;       /* Supports waiting for
+                                                 * driver events */
+  int                          s_result;        /* The result of the transfer */
   FAR const struct netdev_varaddr_s *s_destmac; /* Destination MAC address */
-  FAR const uint8_t           *s_buf;     /* Data to send */
-  size_t                       s_buflen;  /* Length of data in buf */
-  ssize_t                      s_sent;    /* The number of bytes sent */
-  uint32_t                     s_isn;     /* Initial sequence number */
-  uint32_t                     s_acked;   /* The number of bytes acked */
+  FAR const uint8_t           *s_buf;           /* Data to send */
+  size_t                       s_buflen;        /* Length of data in buf */
+  ssize_t                      s_sent;          /* The number of bytes sent */
+  uint32_t                     s_isn;           /* Initial sequence number */
+  uint32_t                     s_acked;         /* The number of bytes acked */
 };
 
 /****************************************************************************
@@ -99,7 +101,8 @@ struct sixlowpan_send_s
  *   data payload as necessary.
  *
  * Input Parameters:
- *   ipv6tcp - A reference to a structure containing the IPv6 and TCP headers.
+ *   ipv6tcp - A reference to a structure containing the IPv6 and TCP
+ *             headers.
  *   buf     - The beginning of the payload data
  *   buflen  - The length of the payload data.
  *
@@ -449,15 +452,17 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
         }
 
       ninfo("s_buflen=%u s_sent=%u mss=%u winsize=%u sndlen=%d\n",
-            sinfo->s_buflen, sinfo->s_sent, conn->mss, conn->winsize, sndlen);
+            sinfo->s_buflen, sinfo->s_sent, conn->mss, conn->winsize,
+            sndlen);
 
       if (sndlen > 0)
         {
-          /* Set the sequence number for this packet.  NOTE:  The network updates
-           * sndseq on receipt of ACK *before* this function is called.  In that
-           * case sndseq will point to the next unacknowledged byte (which might
-           * have already been sent).  We will overwrite the value of sndseq
-           * here before the packet is sent.
+          /* Set the sequence number for this packet.  NOTE:  The network
+           * updates sndseq on receipt of ACK *before* this function is
+           * called.  In that case sndseq will point to the next
+           * unacknowledged byte (which might have already been sent).  We
+           * will overwrite the value of sndseq here before the packet is
+           * sent.
            */
 
           seqno = sinfo->s_sent + sinfo->s_isn;
@@ -493,8 +498,8 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
           /* Increment the count of bytes sent, the number of unacked bytes,
            * and the total count of TCP packets sent.
            *
-           * NOTE: tcp_appsend() normally increments conn->tx_unacked based on
-           * the value of dev->d_sndlen.  However, dev->d_len is always
+           * NOTE: tcp_appsend() normally increments conn->tx_unacked based
+           * on the value of dev->d_sndlen.  However, dev->d_len is always
            * zero for 6LoWPAN since it does not send via the dev->d_buf
            * but, rather, uses a backdoor frame interface with the IEEE
            * 802.15.4 MAC.
@@ -677,8 +682,8 @@ static int sixlowpan_send_packet(FAR struct socket *psock,
  * Name: psock_6lowpan_tcp_send
  *
  * Description:
- *   psock_6lowpan_tcp_send() call may be used only when the TCP socket is in a
- *   connected state (so that the intended recipient is known).
+ *   psock_6lowpan_tcp_send() call may be used only when the TCP socket is
+ *   in a connected state (so that the intended recipient is known).
  *
  * Input Parameters:
  *   psock - An instance of the internal socket structure.
@@ -889,7 +894,8 @@ void sixlowpan_tcp_send(FAR struct net_driver_s *dev,
            * units of 32-bit words).
            */
 
-          hdrlen = IPv6_HDRLEN + (((uint16_t)ipv6hdr->tcp.tcpoffset >> 4) << 2);
+          hdrlen = IPv6_HDRLEN +
+                   (((uint16_t)ipv6hdr->tcp.tcpoffset >> 4) << 2);
 
           /* Drop the packet if the buffer length is less than this. */
 

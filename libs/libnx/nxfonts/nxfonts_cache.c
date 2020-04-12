@@ -282,9 +282,9 @@ static FAR struct nxfonts_glyph_s *
 
   /* Try to find the glyph in the list of pre-rendered glyphs */
 
-   for (prev = NULL, glyph = priv->head;
-        glyph != NULL;
-        prev = glyph, glyph = glyph->flink)
+  for (prev = NULL, glyph = priv->head;
+       glyph != NULL;
+       prev = glyph, glyph = glyph->flink)
     {
       /* Check if we found the glyph for this character */
 
@@ -433,9 +433,12 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
 
       /* Get two 32-bit values for alternating 32 representations */
 
-      pixel[0] = (uint32_t)priv->bgcolor <<  8 | (uint32_t)priv->bgcolor >> 16;
-      pixel[1] = (uint32_t)priv->bgcolor << 16 | (uint32_t)priv->bgcolor >> 8;
-      pixel[2] = (uint32_t)priv->bgcolor << 24 | (uint32_t)priv->bgcolor;
+      pixel[0] = (uint32_t)priv->bgcolor <<  8 |
+                 (uint32_t)priv->bgcolor >> 16;
+      pixel[1] = (uint32_t)priv->bgcolor << 16 |
+                 (uint32_t)priv->bgcolor >> 8;
+      pixel[2] = (uint32_t)priv->bgcolor << 24 |
+                 (uint32_t)priv->bgcolor;
 
       for (row = 0; row < glyph->height; row++)
         {
@@ -532,7 +535,9 @@ static inline FAR struct nxfonts_glyph_s *
 
   if (glyph != NULL)
     {
-      /* Save the character code, dimensions, and physical width of the glyph */
+      /* Save the character code, dimensions, and physical width of the
+       * glyph.
+       */
 
       glyph->code   = ch;
       glyph->width  = width;
@@ -660,7 +665,7 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
       /* Allocate memory for the (empty) font cache */
 
       priv = (FAR struct nxfonts_fcache_s *)
-        lib_zalloc(sizeof( struct nxfonts_fcache_s));
+        lib_zalloc(sizeof(struct nxfonts_fcache_s));
 
       if (priv == NULL)
         {
@@ -784,7 +789,8 @@ errout_with_lock:
  *   font handle is invalid upon return in either case.
  *
  * Input Parameters:
- *   fhandle - A font cache handle previously returned by nxf_cache_connect();
+ *   fhandle - A font cache handle previously returned by
+ *             nxf_cache_connect();
  *
  * Returned Value:
  *   None
@@ -864,7 +870,8 @@ void nxf_cache_disconnect(FCACHE fhandle)
  *   cache.
  *
  * Input Parameters:
- *   fhandle - A font cache handle previously returned by nxf_cache_connect();
+ *   fhandle - A font cache handle previously returned by
+ *             nxf_cache_connect();
  *
  * Returned Value:
  *   Zero (OK) is returned if the metrics were
@@ -896,7 +903,8 @@ NXHANDLE nxf_cache_getfonthandle(FCACHE fhandle)
  *
  ****************************************************************************/
 
-FAR const struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fhandle, uint8_t ch)
+FAR const struct nxfonts_glyph_s *
+  nxf_cache_getglyph(FCACHE fhandle, uint8_t ch)
 {
   FAR struct nxfonts_fcache_s *priv = (FAR struct nxfonts_fcache_s *)fhandle;
   FAR struct nxfonts_glyph_s *glyph;
