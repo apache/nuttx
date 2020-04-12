@@ -110,11 +110,6 @@ static inline bool pic32mx_outputhigh(uint16_t pinset)
   return ((pinset & GPIO_VALUE_MASK) != 0);
 }
 
-static inline bool pic32mx_value(uint16_t pinset)
-{
-  return ((pinset & GPIO_VALUE_MASK) != GPIO_VALUE_ZERO);
-}
-
 static inline unsigned int pic32mx_portno(uint16_t pinset)
 {
   return ((pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT);

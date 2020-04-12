@@ -1935,7 +1935,7 @@ static void mmcsd_mediachanged(void *arg)
   ret = mmcsd_semtake(slot);
   if (ret < 0)
     {
-      return ret;
+      return;
     }
 
   oldstate = slot->state;

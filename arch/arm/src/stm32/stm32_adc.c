@@ -2857,7 +2857,6 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   irqstate_t flags;
-  int ret;
 
   ainfo("intf: %d\n", priv->intf);
   flags = enter_critical_section();
@@ -2879,8 +2878,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   /* Only if this is the first initialzied ADC instance in the ADC block */
 
 #ifdef HAVE_ADC_CMN_DATA
-  ret = adccmn_lock(priv, true);
-  if (ret < 0)
+  if (adccmn_lock(priv, true) < 0)
     {
       return;
     }
@@ -3041,7 +3039,6 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
-  int ret;
 
   /* Disable ADC */
 
@@ -3059,8 +3056,7 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
 #endif
 
 #ifdef HAVE_ADC_CMN_DATA
-  ret = adccmn_lock(priv, true);
-  if (ret < 0)
+  if (adccmn_lock(priv, true) < 0)
     {
       return;
     }

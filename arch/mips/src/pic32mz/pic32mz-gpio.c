@@ -121,11 +121,6 @@ static inline bool pic32mz_outputhigh(pinset_t pinset)
   return ((pinset & GPIO_VALUE_MASK) != 0);
 }
 
-static inline bool pic32mz_value(pinset_t pinset)
-{
-  return ((pinset & GPIO_VALUE_MASK) != GPIO_VALUE_ZERO);
-}
-
 static inline unsigned int pic32mz_portno(pinset_t pinset)
 {
   return ((pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT);

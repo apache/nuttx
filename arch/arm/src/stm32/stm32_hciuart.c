@@ -2101,7 +2101,7 @@ static ssize_t hciuart_read(const struct btuart_lowerhalf_s *lower,
                   ret = nxsem_wait_uninterruptible(&state->rxwait);
                   if (ret < 0)
                     {
-                      ntotal == (ssize_t)ret;
+                      ntotal = (ssize_t)ret;
                       break;
                     }
                 }

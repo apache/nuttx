@@ -724,7 +724,7 @@ static ssize_t gs2200m_read(FAR struct file *filep, FAR char *buffer,
 
   ASSERT(1 == len);
 
-  ret = nxsem_wait(dev);
+  ret = nxsem_wait(&dev->dev_sem);
   if (ret < 0)
     {
       /* Return if a signal is received or if the the task was canceled
