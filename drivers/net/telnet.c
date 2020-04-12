@@ -295,7 +295,9 @@ static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
   for (; priv->td_pid >= 0 && len > 0; buffer++, len--)
     {
 #ifdef CONFIG_TTY_SIGINT
-      /* Is this the special character that will generate the SIGINT signal? */
+      /* Is this the special character that will generate the SIGINT
+       * signal?
+       */
 
       if (*buffer == CONFIG_TTY_SIGINT_CHAR)
         {
@@ -309,7 +311,9 @@ static void telnet_check_ctrlchar(FAR struct telnet_dev_s *priv,
 #endif
 
 #ifdef CONFIG_TTY_SIGSTP
-      /* Is this the special character that will generate the SIGSTP signal? */
+      /* Is this the special character that will generate the SIGSTP
+       * signal?
+       */
 
       if (*buffer == CONFIG_TTY_SIGSTP_CHAR)
         {
@@ -459,7 +463,9 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
 #ifdef CONFIG_TELNET_CHARACTER_MODE
             if (ch == TELNET_SGA || ch == TELNET_ECHO)
               {
-                /* If it received 'ECHO' or 'Suppress Go Ahead', then do nothing */
+                /* If it received 'ECHO' or 'Suppress Go Ahead', then do
+                 * nothing.
+                 */
               }
             else
               {
@@ -587,7 +593,9 @@ static bool telnet_putchar(FAR struct telnet_dev_s *priv, uint8_t ch,
   register int index;
   bool ret = false;
 
-  /* Ignore carriage returns (we will put these in automatically as necessary) */
+  /* Ignore carriage returns (we will put these in automatically as
+   * necessary).
+   */
 
   if (ch != TELNET_CR)
     {
@@ -1166,7 +1174,9 @@ static int telnet_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   switch (cmd)
     {
 #ifdef HAVE_SIGNALS
-      /* Make the given terminal the controlling terminal of the calling process */
+      /* Make the given terminal the controlling terminal of the calling
+       * process.
+       */
 
     case TIOCSCTTY:
       {
