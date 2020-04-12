@@ -566,7 +566,7 @@ static int tzload(FAR const char *name,
     {
       p = TZDIR;
       if (p == NULL ||
-          sizeof(lsp->fullname - 1) <= strlen(p) + strlen(name))
+          FILENAME_MAX <= strlen(p) + strlen(name))
         {
           goto oops;
         }
