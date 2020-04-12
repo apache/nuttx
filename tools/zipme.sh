@@ -315,7 +315,16 @@ echo "Archiving and zipping apps/"
 ${TAR} ${APPS_ZIPNAME} `basename ${APPSDIR}` || \
       { echo "tar of ${APPS_ZIPNAME} failed!" ; exit 1 ; }
 
-# Finally sign the tarballs and create the digests
+# Create the hashes for the two tarballs
+
+echo "Creating the hashes"
+${SHASUM} ${NUTTX_ZIPNAME} > ${NUTTX_SHANAME} || \
+         { echo "Digest of ${NUTTX_ZIPNAME} failed!" ; exit 1 ; }
+
+${SHASUM} ${APPS_ZIPNAME} > ${APPS_SHANAME} || \
+         { echo "Digest of ${APPS_ZIPNAME} failed!" ; exit 1 ; }
+
+# Finally sign the tarballs
 
 if [ $sign != 0 ] ; then
   echo "Signing the tarballs"
@@ -324,12 +333,6 @@ if [ $sign != 0 ] ; then
 
   ${GPG} ${APPS_ZIPNAME} || \
         { echo "Signing ${APPS_ZIPNAME} failed!" ; exit 1 ; }
-
-  ${SHASUM} ${NUTTX_ZIPNAME} > ${NUTTX_SHANAME} || \
-           { echo "Digest of ${NUTTX_ZIPNAME} failed!" ; exit 1 ; }
-
-  ${SHASUM} ${APPS_ZIPNAME} > ${APPS_SHANAME} || \
-           { echo "Digest of ${APPS_ZIPNAME} failed!" ; exit 1 ; }
 fi
 
 cd ${NUTTXDIR}
