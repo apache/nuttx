@@ -816,6 +816,10 @@ static void tms570_eclk_configure(void)
 
 void tms570_clockconfig(void)
 {
+#ifdef CONFIG_TMS570_SELFTEST
+  int check;
+#endif /* CONFIG_TMS570_SELFTEST */
+
   /* Configure PLL control registers and enable PLLs. */
 
    tms570_pll_setup();
@@ -839,8 +843,10 @@ void tms570_clockconfig(void)
 #ifdef CONFIG_TMS570_SELFTEST
   /* Wait for eFuse controller self-test to complete and check results */
 
-  DEBUGASSERT(tms570_efc_selftest_complete() == 0);
-#endif
+  check = tms570_efc_selftest_complete();
+  DEBUGASSERT(check == 0);
+  UNUSED(check);
+#endif /* CONFIG_TMS570_SELFTEST */
 
   /* Set up flash address and data wait states. */
 
