@@ -89,7 +89,9 @@ void board_late_initialize(void)
 #if (defined(CONFIG_SAM34_WDT) && !defined(CONFIG_WDT_DISABLE_ON_RESET))
   /* Configure watchdog timer and enable kicker kernel thread. */
 
-  DEBUGASSERT(sam_watchdog_initialize() >= 0);
+  int check = sam_watchdog_initialize();
+  DEBUGASSERT(check >= 0);
+  UNUSED(check);
 #endif
 
 #ifndef CONFIG_ARCH_LEDS
