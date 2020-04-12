@@ -143,7 +143,7 @@ static inline void pic32mx_putreg(uintptr_t uart_base, unsigned int offset,
  *
  ****************************************************************************/
 
-#ifdef HAVE_UART_DEVICE
+#ifdef HAVE_SERIAL_CONSOLE
 static inline uint32_t pic32mx_getreg(uintptr_t uart_base,
                                           unsigned int offset)
 {

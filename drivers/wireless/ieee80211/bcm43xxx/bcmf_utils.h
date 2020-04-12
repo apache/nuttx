@@ -67,13 +67,13 @@ int bcmf_sem_wait(sem_t *sem, unsigned int timeout_ms);
 dq_entry_t *bcmf_dqueue_pop_tail(dq_queue_t *queue);
 void bcmf_dqueue_push(dq_queue_t *queue, dq_entry_t *entry);
 
-static inline uint16_t bcmf_getle16(uint16_t *val)
+static inline uint16_t bcmf_getle16(void *val)
 {
   uint8_t *valb = (uint8_t *)val;
   return (uint16_t)valb[0] << 8 | (uint16_t)valb[1];
 }
 
-static inline uint16_t bcmf_getle32(uint32_t *val)
+static inline uint32_t bcmf_getle32(void *val)
 {
   uint16_t *valw = (uint16_t *)val;
   return (uint32_t)bcmf_getle16(valw) << 16 | bcmf_getle16(valw + 1);

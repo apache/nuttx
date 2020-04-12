@@ -501,8 +501,6 @@ static inline struct pic32mx_ep_s *
 static inline void
               pic32mx_epunreserve(struct pic32mx_usbdev_s *priv,
                 struct pic32mx_ep_s *privep);
-static inline bool
-              pic32mx_epreserved(struct pic32mx_usbdev_s *priv, int epno);
 static void  pic32mx_ep0configure(struct pic32mx_usbdev_s *priv);
 
 /* Endpoint operations ******************************************************/
@@ -3055,16 +3053,6 @@ pic32mx_epunreserve(struct pic32mx_usbdev_s *priv, struct pic32mx_ep_s *privep)
   irqstate_t flags = enter_critical_section();
   priv->epavail   |= PIC32MX_ENDP_BIT(USB_EPNO(privep->ep.eplog));
   leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: pic32mx_epreserved
- ****************************************************************************/
-
-static inline bool
-pic32mx_epreserved(struct pic32mx_usbdev_s *priv, int epno)
-{
-  return ((priv->epavail & PIC32MX_ENDP_BIT(epno)) == 0);
 }
 
 /****************************************************************************

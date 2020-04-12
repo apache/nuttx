@@ -144,7 +144,7 @@
 /* Some assertions */
 
 #ifdef CONFIG_LPWAN_SX127X_FSKOOK
-#  warning OOK support is not complete, RX+TX doesn't work yet!
+#  warning OOK support is not complete, RX+TX does not work yet!
 #  if CONFIG_LPWAN_SX127X_RXFIFO_DATA_LEN > SX127X_FOM_FIFO_LEN
 #    warning RX data length limited by chip RX FIFO size (FSK/OOK = 64, LORA = 256)
 #  endif
