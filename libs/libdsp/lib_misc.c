@@ -371,10 +371,6 @@ float fast_atan2(float y, float x)
     {
       angle = -angle;
     }
-  else
-    {
-      angle = angle;
-    }
 
   return angle;
 }

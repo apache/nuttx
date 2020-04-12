@@ -75,7 +75,7 @@
 int link(FAR const char *path1, FAR const char *path2)
 {
   struct inode_search_s desc;
-  FAR struct inode *inode;
+  FAR struct inode *inode = NULL;
   int errcode;
   int ret;
 

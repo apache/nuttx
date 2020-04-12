@@ -554,7 +554,7 @@ int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
 int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
                              off_t startblock, size_t blockcount)
 {
-  int ret;
+  int ret = OK;
 
   if (rwb->rhmaxblocks > 0 && rwb->rhnblocks > 0)
     {

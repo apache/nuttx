@@ -51,6 +51,7 @@
 #include <signal.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
 #  include <net/if.h>
@@ -61,6 +62,7 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 #if !defined(CONFIG_MAC802154_NPANDESC) || CONFIG_MAC802154_NPANDESC <= 0
@@ -71,6 +73,7 @@
 #define MAC802154_NPANDESC CONFIG_MAC802154_NPANDESC
 
 /* IEEE 802.15.4 address macros */
+
 /* Copy a an IEEE 802.15.4 address */
 
 #define IEEE802154_ANYADDRCOPY(dest,src,len) \
