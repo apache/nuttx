@@ -1257,7 +1257,7 @@ int file_fcntl(FAR struct file *filep, int cmd, ...);
  * Description:
  *   Low-level poll operation based on struct file.  This is used both to (1)
  *   support detached file, and also (2) by fdesc_poll() to perform all
- *   normal operations on file descriptors descriptors.
+ *   normal operations on file descriptors.
  *
  * Input Parameters:
  *   file     File structure instance
