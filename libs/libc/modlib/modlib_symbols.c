@@ -412,7 +412,9 @@ int modlib_symvalue(FAR struct module_s *modp,
             return -ENOENT;
           }
 
-        /* Yes... add the exported symbol value to the ELF symbol table entry */
+        /* Yes... add the exported symbol value to the ELF symbol tablei
+         * entry
+         */
 
         binfo("SHN_UNDEF: name=%s %08x+%08x=%08x\n",
               loadinfo->iobuffer, sym->st_value, symbol->sym_value,

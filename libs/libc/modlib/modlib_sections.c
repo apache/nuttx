@@ -248,7 +248,9 @@ int modlib_findsection(FAR struct mod_loadinfo_s *loadinfo,
   int ret;
   int i;
 
-  /* Search through the shdr[] array in loadinfo for a section named 'sectname' */
+  /* Search through the shdr[] array in loadinfo for a section named
+   * 'sectname'
+   */
 
   for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
     {
