@@ -163,7 +163,8 @@ CXD56_AUDIO_ECODE cxd56_audio_analog_poweroff(void)
   return ret;
 }
 
-CXD56_AUDIO_ECODE cxd56_audio_analog_poweron_input(FAR cxd56_audio_mic_gain_t *gain)
+CXD56_AUDIO_ECODE
+cxd56_audio_analog_poweron_input(FAR cxd56_audio_mic_gain_t *gain)
 {
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
 
@@ -276,7 +277,8 @@ CXD56_AUDIO_ECODE cxd56_audio_analog_disable_output(void)
   return ret;
 }
 
-CXD56_AUDIO_ECODE cxd56_audio_analog_set_micgain(FAR cxd56_audio_mic_gain_t *gain)
+CXD56_AUDIO_ECODE
+cxd56_audio_analog_set_micgain(FAR cxd56_audio_mic_gain_t *gain)
 {
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
 

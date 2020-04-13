@@ -640,13 +640,13 @@
  *
  ****************************************************************************/
 
-#define SDIO_RECVR1(dev,cmd,R1) ((dev)->recv_r1(dev,cmd,R1)) /* 48-bit */
-#define SDIO_RECVR2(dev,cmd,R2) ((dev)->recv_r2(dev,cmd,R2)) /* 136-bit */
-#define SDIO_RECVR3(dev,cmd,R3) ((dev)->recv_r3(dev,cmd,R3)) /* 48-bit */
-#define SDIO_RECVR4(dev,cmd,R4) ((dev)->recv_r4(dev,cmd,R4)) /* 48-bit */
-#define SDIO_RECVR5(dev,cmd,R5) ((dev)->recv_r5(dev,cmd,R5)) /* 48-bit */
-#define SDIO_RECVR6(dev,cmd,R6) ((dev)->recv_r6(dev,cmd,R6)) /* 48-bit */
-#define SDIO_RECVR7(dev,cmd,R7) ((dev)->recv_r7(dev,cmd,R7)) /* 48-bit */
+#define SDIO_RECVR1(dev,cmd,r1) ((dev)->recv_r1(dev,cmd,r1)) /* 48-bit */
+#define SDIO_RECVR2(dev,cmd,r2) ((dev)->recv_r2(dev,cmd,r2)) /* 136-bit */
+#define SDIO_RECVR3(dev,cmd,r3) ((dev)->recv_r3(dev,cmd,r3)) /* 48-bit */
+#define SDIO_RECVR4(dev,cmd,r4) ((dev)->recv_r4(dev,cmd,r4)) /* 48-bit */
+#define SDIO_RECVR5(dev,cmd,r5) ((dev)->recv_r5(dev,cmd,r5)) /* 48-bit */
+#define SDIO_RECVR6(dev,cmd,r6) ((dev)->recv_r6(dev,cmd,r6)) /* 48-bit */
+#define SDIO_RECVR7(dev,cmd,r7) ((dev)->recv_r7(dev,cmd,r7)) /* 48-bit */
 
 /****************************************************************************
  * Name: SDIO_WAITENABLE

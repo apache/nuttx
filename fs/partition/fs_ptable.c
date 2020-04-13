@@ -84,7 +84,8 @@ static int read_partition_block(FAR struct partition_state_s *state,
 {
   if (state->blk)
     {
-      return state->blk->u.i_bops->read(state->blk, buffer, startblock, nblocks);
+      return state->blk->u.i_bops->read(state->blk,
+                                        buffer, startblock, nblocks);
     }
   else
     {
