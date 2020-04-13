@@ -116,8 +116,8 @@ int modlib_readsym(FAR struct mod_loadinfo_s *loadinfo, int index,
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
- *   EINVAL - There is something inconsistent in the symbol table (should only
- *            happen if the file is corrupted)
+ *   EINVAL - There is something inconsistent in the symbol table (should
+ *            only happen if the file is corrupted)
  *   ENOSYS - Symbol lies in common
  *   ESRCH  - Symbol has no name
  *   ENOENT - Symbol undefined and not provided via a symbol table
@@ -189,7 +189,8 @@ int modlib_allocbuffer(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
-int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo, size_t increment);
+int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo,
+                         size_t increment);
 
 /****************************************************************************
  * Name: modlib_freebuffers
