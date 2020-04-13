@@ -361,6 +361,61 @@
 #define  RT_SCOPE_HOST        254  /* Route on local host */
 #define  RT_SCOPE_NOWHERE     255  /* Destination does not exist */
 
+/* RTnetlink multicast groups (userspace) */
+
+#define RTMGRP_LINK           1
+#define RTMGRP_NOTIFY         2
+#define RTMGRP_NEIGH          4
+#define RTMGRP_TC             8
+
+#define RTMGRP_IPV4_IFADDR    0x10
+#define RTMGRP_IPV4_MROUTE    0x20
+#define RTMGRP_IPV4_ROUTE     0x40
+#define RTMGRP_IPV4_RULE      0x80
+
+#define RTMGRP_IPV6_IFADDR    0x100
+#define RTMGRP_IPV6_MROUTE    0x200
+#define RTMGRP_IPV6_ROUTE     0x400
+#define RTMGRP_IPV6_IFINFO    0x800
+
+#define RTMGRP_DECnet_IFADDR  0x1000
+#define RTMGRP_DECnet_ROUTE   0x4000
+
+#define RTMGRP_IPV6_PREFIX    0x20000
+
+/* RTnetlink multicast groups */
+
+#define RTNLGRP_NONE          0
+#define RTNLGRP_LINK          1
+#define RTNLGRP_NOTIFY        2
+#define RTNLGRP_NEIGH         3
+#define RTNLGRP_TC            4
+#define RTNLGRP_IPV4_IFADDR   5
+#define RTNLGRP_IPV4_MROUTE   6
+#define RTNLGRP_IPV4_ROUTE    7
+#define RTNLGRP_IPV4_RULE     8
+#define RTNLGRP_IPV6_IFADDR   9
+#define RTNLGRP_IPV6_MROUTE   10
+#define RTNLGRP_IPV6_ROUTE    11
+#define RTNLGRP_IPV6_IFINFO   12
+#define RTNLGRP_DECnet_IFADDR 13
+#define RTNLGRP_NOP2          14
+#define RTNLGRP_DECnet_ROUTE  15
+#define RTNLGRP_DECnet_RULE   16
+#define RTNLGRP_NOP4          17
+#define RTNLGRP_IPV6_PREFIX   18
+#define RTNLGRP_IPV6_RULE     19
+#define RTNLGRP_ND_USEROPT    20
+#define RTNLGRP_PHONET_IFADDR 21
+#define RTNLGRP_PHONET_ROUTE  22
+#define RTNLGRP_DCB           23
+#define RTNLGRP_IPV4_NETCONF  24
+#define RTNLGRP_IPV6_NETCONF  25
+#define RTNLGRP_MDB           26
+#define RTNLGRP_MPLS_ROUTE    27
+#define RTNLGRP_NSID          28
+#define RTNLGRP_MAX           29
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
