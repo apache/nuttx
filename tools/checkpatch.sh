@@ -36,7 +36,6 @@ usage() {
   echo "   git diff --cached | ./tools/checkpatch.sh -"
   echo "Where a <commit list> is any syntax supported by git for specifying git revision, see GITREVISIONS(7)"
   echo "Where a <patch file names> is a space separated list of patch file names or wildcard. or *.patch"
- 
 }
 
 check_file() {
