@@ -110,7 +110,7 @@
 #  define ADC_MAX_SAMPLES ADC_MAX_CHANNELS_NODMA
 #endif
 
-/* DMA channels and interface values differs according to STM32 DMA IP core version */
+/* DMA values differs according to STM32 DMA IP core version */
 
 #if  defined(HAVE_IP_DMA_V1)
 #  define ADC_DMA_CONTROL_WORD (DMA_CCR_MSIZE_16BITS | \

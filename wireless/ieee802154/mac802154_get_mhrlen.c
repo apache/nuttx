@@ -54,7 +54,18 @@
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
- * Public MAC Functions
+ * Private Data
+ ****************************************************************************/
+
+/* Map between ieee802154_addrmode_e enum and actual address length */
+
+static const uint8_t mac802154_addr_length[4] =
+{
+  0, 0, 2, 8
+};
+
+/****************************************************************************
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -72,8 +83,9 @@ int mac802154_get_mhrlen(MACHANDLE mac,
     (FAR struct ieee802154_privmac_s *)mac;
   int ret = 3; /* Always frame control (2 bytes) and seq. num (1 byte) */
 
-  /* Check to make sure both the dest address and the source address are not set
-   * to NONE */
+  /* Check to make sure both the dest address and the source address are not
+   * set to NONE
+   */
 
   if (meta->destaddr.mode == IEEE802154_ADDRMODE_NONE &&
       meta->srcmode == IEEE802154_ADDRMODE_NONE)
@@ -81,7 +93,9 @@ int mac802154_get_mhrlen(MACHANDLE mac,
       return -EINVAL;
     }
 
-  /* The source address can only be set to NONE if the device is the PAN coord */
+  /* The source address can only be set to NONE
+   * if the device is the PAN coord
+   */
 
   if (meta->srcmode == IEEE802154_ADDRMODE_NONE &&
       priv->devmode != IEEE802154_DEVMODE_PANCOORD)
@@ -95,10 +109,10 @@ int mac802154_get_mhrlen(MACHANDLE mac,
 
   /* Add the source address length */
 
-  ret += mac802154_addr_length[ meta->srcmode];
+  ret += mac802154_addr_length[meta->srcmode];
 
-  /* If both destination and source addressing information is present, the MAC
-   * sublayer shall compare the destination and source PAN identifiers.
+  /* If both destination and source addressing information is present, the
+   * MAC sublayer shall compare the destination and source PAN identifiers.
    * [1] pg. 41.
    */
 
@@ -117,8 +131,8 @@ int mac802154_get_mhrlen(MACHANDLE mac,
         }
     }
 
-  /* If we are here, PAN ID compression is off, so include the dest and source
-   * PAN ID if the respective address is included
+  /* If we are here, PAN ID compression is off, so include the dest and
+   * source PAN ID if the respective address is included
    */
 
   if (meta->srcmode != IEEE802154_ADDRMODE_NONE)

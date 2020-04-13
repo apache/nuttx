@@ -944,7 +944,7 @@ static int mmcsd_getcardinfo(FAR struct mmcsd_slot_s *slot, uint8_t *buffer,
       return -EIO;
     }
 
-  /* Try up to 8 times to find the start of block (or until an error occurs) */
+  /* Try up to 8 times to find the start of block or until an error occurs */
 
   for (i = 0; i < 8; i++)
     {
@@ -1427,7 +1427,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
 
   if (nsectors == 1)
     {
-      /* Send CMD24 (WRITE_BLOCK) and verify that good R1 status is returned */
+      /* Send CMD24(WRITE_BLOCK) and verify that good R1 is returned */
 
       response = mmcsd_sendcmd(slot, &g_cmd24, offset);
       if (response != MMCSD_SPIR1_OK)
@@ -1720,7 +1720,7 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
   result = mmcsd_sendcmd(slot, &g_cmd8, 0x1aa);
   if (result == MMCSD_SPIR1_IDLESTATE)
     {
-      /* Verify the operating voltage and that the 0xaa was correctly echoed */
+      /* Verify the operating voltage and 0xaa was correctly echoed */
 
       if (((slot->r7 & MMCSD_SPIR7_VOLTAGE_MASK) ==
            MMCSD_SPIR7_VOLTAGE_27) &&

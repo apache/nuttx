@@ -77,7 +77,7 @@ begin_packed_struct struct sdio_cmd53
   uint32_t rw_flag          : 1;
 } end_packed_struct;
 
-begin_packed_struct struct sdio_resp_R5
+begin_packed_struct struct sdio_resp_r5
 {
   uint32_t data             : 8;
   struct
@@ -131,7 +131,7 @@ int sdio_io_rw_direct(FAR struct sdio_dev_s *dev, bool write,
                       uint8_t inb, uint8_t *outb)
 {
   union sdio_cmd5x arg;
-  struct sdio_resp_R5 resp;
+  struct sdio_resp_r5 resp;
   uint32_t data;
   int ret;
 
@@ -194,7 +194,7 @@ int sdio_io_rw_extended(FAR struct sdio_dev_s *dev, bool write,
                         unsigned int blocklen, unsigned int nblocks)
 {
   union sdio_cmd5x arg;
-  struct sdio_resp_R5 resp;
+  struct sdio_resp_r5 resp;
   uint32_t data;
   int ret;
   sdio_eventset_t wkupevent;

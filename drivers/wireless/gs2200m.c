@@ -38,7 +38,7 @@
  *
  * See "GS2200MS2W Adapter Command Reference Guide" for the explanation
  * of AT commands. You can find the document at:
- * https://www.telit.com/m2m-iot-products/wifi-bluetooth-modules/wi-fi-gs2200m/
+ * https://telit.com/m2m-iot-products/wifi-bluetooth-modules/wi-fi-gs2200m/
  *
  ****************************************************************************/
 

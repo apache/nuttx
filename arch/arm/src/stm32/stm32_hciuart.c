@@ -2288,7 +2288,7 @@ static ssize_t hciuart_write(const struct btuart_lowerhalf_s *lower,
         }
     }
 
-  /* If the Tx buffer is not empty, then exit with the Tx interrupts enabled. */
+  /* If Tx buffer is not empty, then exit with Tx interrupts enabled. */
 
   if (state->txhead != state->txtail)
     {

@@ -92,7 +92,7 @@
 #if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || \
     defined(CONFIG_STM32_ADC3) || defined(CONFIG_STM32_ADC4)
 
-/* This implementation is for the STM32 ADC IP version 1 and STM32 ADC IP version 2 */
+/* This implementation is for the STM32 ADC IP version 1 and 2 */
 
 #if !defined(HAVE_IP_ADC_V1) && !defined(HAVE_IP_ADC_V2)
 #  error "STM32 ADC IP version not specified"
@@ -220,7 +220,7 @@
 #  endif
 #endif
 
-/* DMA channels and interface values differs according to STM32 DMA IP core version */
+/* DMA values differs according to STM32 DMA IP core version */
 
 #if defined(HAVE_IP_DMA_V2)
 #  define ADC_DMA_CONTROL_WORD (DMA_SCR_MSIZE_16BITS | \
