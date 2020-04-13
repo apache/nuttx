@@ -179,7 +179,8 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
 
   if (my_pid < 0)
     {
-      return my_pid;
+      ret = my_pid;
+      goto errout;
     }
 
   /* Does the current task already hold the semaphore?  Is the current
