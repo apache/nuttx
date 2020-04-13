@@ -89,6 +89,7 @@
 #include "igmp/igmp.h"
 #include "icmpv6/icmpv6.h"
 #include "route/route.h"
+#include "netlink/netlink.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1761,6 +1762,10 @@ void netdev_ifup(FAR struct net_driver_s *dev)
               /* Mark the interface as up */
 
               dev->d_flags |= IFF_UP;
+
+              /* Update the driver status */
+
+              netlink_device_notify(dev);
             }
         }
     }
@@ -1783,6 +1788,10 @@ void netdev_ifdown(FAR struct net_driver_s *dev)
               /* Mark the interface as down */
 
               dev->d_flags &= ~IFF_UP;
+
+              /* Update the driver status */
+
+              netlink_device_notify(dev);
             }
         }
 
