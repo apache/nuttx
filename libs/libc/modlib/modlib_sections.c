@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -164,65 +163,6 @@ static inline int modlib_sectname(FAR struct mod_loadinfo_s *loadinfo,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: modlib_loadshdrs
- *
- * Description:
- *   Loads section headers into memory.
- *
- * Returned Value:
- *   0 (OK) is returned on success and a negated errno is returned on
- *   failure.
- *
- ****************************************************************************/
-
-int modlib_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
-{
-  size_t shdrsize;
-  int ret;
-
-  DEBUGASSERT(loadinfo->shdr == NULL);
-
-  /* Verify that there are sections */
-
-  if (loadinfo->ehdr.e_shnum < 1)
-    {
-      berr("ERROR: No sections(?)\n");
-      return -EINVAL;
-    }
-
-  /* Get the total size of the section header table */
-
-  shdrsize = (size_t)loadinfo->ehdr.e_shentsize *
-             (size_t)loadinfo->ehdr.e_shnum;
-  if (loadinfo->ehdr.e_shoff + shdrsize > loadinfo->filelen)
-    {
-      berr("ERROR: Insufficent space in file for section header table\n");
-      return -ESPIPE;
-    }
-
-  /* Allocate memory to hold a working copy of the sector header table */
-
-  loadinfo->shdr = (FAR FAR Elf_Shdr *)lib_malloc(shdrsize);
-  if (!loadinfo->shdr)
-    {
-      berr("ERROR: Failed to allocate the section header table. Size: %ld\n",
-           (long)shdrsize);
-      return -ENOMEM;
-    }
-
-  /* Read the section header table into memory */
-
-  ret = modlib_read(loadinfo, (FAR uint8_t *)loadinfo->shdr, shdrsize,
-                    loadinfo->ehdr.e_shoff);
-  if (ret < 0)
-    {
-      berr("ERROR: Failed to read section header table: %d\n", ret);
-    }
-
-  return ret;
-}
 
 /****************************************************************************
  * Name: modlib_findsection
