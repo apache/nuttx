@@ -53,6 +53,14 @@
 #include "devif/devif.h"
 #include "socket/socket.h"
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_NETLINK_ROUTE
+  #define netlink_device_notify(dev)
+#endif
+
 #ifdef CONFIG_NET_NETLINK
 
 /****************************************************************************
@@ -277,6 +285,16 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
                              size_t len, int flags,
                              FAR const struct sockaddr_nl *to,
                              socklen_t tolen);
+
+/****************************************************************************
+ * Name: netlink_device_notify()
+ *
+ * Description:
+ *   Perform the route broadcast for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+void netlink_device_notify(FAR struct net_driver_s *dev);
 #endif
 
 #undef EXTERN

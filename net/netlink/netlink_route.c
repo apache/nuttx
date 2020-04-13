@@ -184,32 +184,21 @@ struct nlroute_info_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: netlink_device_callback
+ * Name: netlink_get_device
  *
  * Description:
- *   Handle one device.
+ *   Generate one device response.
  *
  ****************************************************************************/
 
 #ifndef CONFIG_NETLINK_DISABLE_GETLINK
-static int netlink_device_callback(FAR struct net_driver_s *dev,
-                                   FAR void *arg)
+static FAR struct netlink_response_s *
+netlink_get_device(FAR struct net_driver_s *dev,
+                   FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct getlink_recvfrom_rsplist_s *alloc;
   FAR struct getlink_recvfrom_response_s *resp;
-  FAR struct nlroute_info_s *info = arg;
-
-  DEBUGASSERT(dev != NULL && arg != NULL);
-  DEBUGASSERT(info->handle != NULL && info->req != NULL);
-
-  /* Check if the link is in the UP state */
-
-  if ((dev->d_flags & IFF_UP) == 0)
-    {
-      /* No.. skip this device */
-
-      return 0;
-    }
+  int up = IFF_IS_UP(dev->d_flags);
 
   /* Allocate the response buffer */
 
@@ -218,7 +207,7 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
   if (alloc == NULL)
     {
       nerr("ERROR: Failed to allocate response buffer.\n");
-      return -ENOMEM;
+      return NULL;
     }
 
   /* Initialize the response buffer */
@@ -226,12 +215,12 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
   resp                   = &alloc->payload;
 
   resp->hdr.nlmsg_len    = sizeof(struct getlink_recvfrom_response_s);
-  resp->hdr.nlmsg_type   = RTM_NEWLINK;
-  resp->hdr.nlmsg_flags  = info->req->hdr.nlmsg_flags;
-  resp->hdr.nlmsg_seq    = info->req->hdr.nlmsg_seq;
-  resp->hdr.nlmsg_pid    = info->req->hdr.nlmsg_pid;
+  resp->hdr.nlmsg_type   = up ? RTM_NEWLINK : RTM_DELLINK;
+  resp->hdr.nlmsg_flags  = req ? req->hdr.nlmsg_flags : 0;
+  resp->hdr.nlmsg_seq    = req ? req->hdr.nlmsg_seq : 0;
+  resp->hdr.nlmsg_pid    = req ? req->hdr.nlmsg_pid : 0;
 
-  resp->iface.ifi_family = info->req->gen.rtgen_family;
+  resp->iface.ifi_family = req ? req->gen.rtgen_family : AF_PACKET;
   resp->iface.ifi_type   = dev->d_lltype;
 #ifdef CONFIG_NETDEV_IFINDEX
   resp->iface.ifi_index  = dev->d_ifindex;
@@ -244,23 +233,22 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 
   strncpy((FAR char *)resp->data, dev->d_ifname, IFNAMSIZ);
 
-  /* Finally, add the data to the list of pending responses */
+  /* Finally, return the response */
 
-  netlink_add_response(info->handle, (FAR struct netlink_response_s *)alloc);
-  return OK;
+  return (FAR struct netlink_response_s *)alloc;
 }
 #endif
 
 /****************************************************************************
- * Name: netlink_response_terminator
+ * Name: netlink_get_terminator
  *
  * Description:
- *   Dump a list of all network devices of the specified type.
+ *   Generate one NLMSG_DONE response.
  *
  ****************************************************************************/
 
-static int netlink_response_terminator(NETLINK_HANDLE handle,
-                              FAR const struct nlroute_sendto_request_s *req)
+static FAR struct netlink_response_s *
+netlink_get_terminator(FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct netlink_response_s *resp;
   FAR struct nlmsghdr *hdr;
@@ -271,7 +259,7 @@ static int netlink_response_terminator(NETLINK_HANDLE handle,
   if (resp == NULL)
     {
       nerr("ERROR: Failed to allocate response terminator.\n");
-      return -ENOMEM;
+      return NULL;
     }
 
   /* Initialize and send the list terminator */
@@ -279,11 +267,33 @@ static int netlink_response_terminator(NETLINK_HANDLE handle,
   hdr              = &resp->msg;
   hdr->nlmsg_len   = sizeof(struct nlmsghdr);
   hdr->nlmsg_type  = NLMSG_DONE;
-  hdr->nlmsg_flags = req->hdr.nlmsg_flags;
-  hdr->nlmsg_seq   = req->hdr.nlmsg_seq;
-  hdr->nlmsg_pid   = req->hdr.nlmsg_pid;
+  hdr->nlmsg_flags = req ? req->hdr.nlmsg_flags : 0;
+  hdr->nlmsg_seq   = req ? req->hdr.nlmsg_seq : 0;
+  hdr->nlmsg_pid   = req ? req->hdr.nlmsg_pid : 0;
 
-  /* Finally, add the response to the list of pending responses */
+  /* Finally, return the response */
+
+  return resp;
+}
+
+/****************************************************************************
+ * Name: netlink_add_terminator
+ *
+ * Description:
+ *   Add one NLMSG_DONE response to handle.
+ *
+ ****************************************************************************/
+
+static int netlink_add_terminator(NETLINK_HANDLE handle,
+                              FAR const struct nlroute_sendto_request_s *req)
+{
+  FAR struct netlink_response_s * resp;
+
+  resp = netlink_get_terminator(req);
+  if (resp == NULL)
+    {
+      return -ENOMEM;
+    }
 
   netlink_add_response(handle, resp);
   return OK;
@@ -298,6 +308,22 @@ static int netlink_response_terminator(NETLINK_HANDLE handle,
  ****************************************************************************/
 
 #ifndef CONFIG_NETLINK_DISABLE_GETLINK
+static int netlink_device_callback(FAR struct net_driver_s *dev,
+                                   FAR void *arg)
+{
+  FAR struct nlroute_info_s *info = arg;
+  FAR struct netlink_response_s * resp;
+
+  resp = netlink_get_device(dev, info->req);
+  if (resp == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  netlink_add_response(info->handle, resp);
+  return OK;
+}
+
 static int netlink_get_devlist(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
@@ -317,7 +343,7 @@ static int netlink_get_devlist(NETLINK_HANDLE handle,
       return ret;
     }
 
-  return netlink_response_terminator(handle, req);
+  return netlink_add_terminator(handle, req);
 }
 #endif
 
@@ -576,7 +602,7 @@ static int netlink_get_ipv4route(NETLINK_HANDLE handle,
 
   /* Terminate the routing table */
 
-  return netlink_response_terminator(handle, req);
+  return netlink_add_terminator(handle, req);
 }
 #endif
 
@@ -669,7 +695,7 @@ static int netlink_get_ip6vroute(NETLINK_HANDLE handle,
 
   /* Terminate the routing table */
 
-  return netlink_response_terminator(handle, req);
+  return netlink_add_terminator(handle, req);
 }
 #endif
 
@@ -783,5 +809,34 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: netlink_device_notify()
+ *
+ * Description:
+ *   Perform the route broadcast for the NETLINK_ROUTE protocol.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NETLINK_DISABLE_GETLINK
+void netlink_device_notify(FAR struct net_driver_s *dev)
+{
+  FAR struct netlink_response_s *resp;
+
+  DEBUGASSERT(dev != NULL);
+
+  resp = netlink_get_device(dev, NULL);
+  if (resp != NULL)
+    {
+      netlink_add_broadcast(RTNLGRP_LINK, resp);
+
+      resp = netlink_get_terminator(NULL);
+      if (resp != NULL)
+        {
+          netlink_add_broadcast(RTNLGRP_LINK, resp);
+        }
+    }
+}
+#endif
 
 #endif /* CONFIG_NETLINK_ROUTE */
