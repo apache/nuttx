@@ -83,14 +83,6 @@
  * Private Types
  ****************************************************************************/
 
-/* Used to send message done */
-
-struct nlroute_msgdone_rsplist_s
-{
-  sq_entry_t flink;
-  struct nlmsghdr payload;
-};
-
 /* RTM_GETLINK:  Enumerate network devices */
 
 struct getlink_recvfrom_response_s
@@ -262,6 +254,44 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 #endif
 
 /****************************************************************************
+ * Name: netlink_response_terminator
+ *
+ * Description:
+ *   Dump a list of all network devices of the specified type.
+ *
+ ****************************************************************************/
+
+static int netlink_response_terminator(FAR struct socket *psock,
+                              FAR const struct nlroute_sendto_request_s *req)
+{
+  FAR struct netlink_response_s *resp;
+  FAR struct nlmsghdr *hdr;
+
+  /* Allocate the list terminator */
+
+  resp = kmm_zalloc(sizeof(struct netlink_response_s));
+  if (resp == NULL)
+    {
+      nerr("ERROR: Failed to allocate response terminator.\n");
+      return -ENOMEM;
+    }
+
+  /* Initialize and send the list terminator */
+
+  hdr              = &resp->msg;
+  hdr->nlmsg_len   = sizeof(struct nlmsghdr);
+  hdr->nlmsg_type  = NLMSG_DONE;
+  hdr->nlmsg_flags = req->hdr.nlmsg_flags;
+  hdr->nlmsg_seq   = req->hdr.nlmsg_seq;
+  hdr->nlmsg_pid   = req->hdr.nlmsg_pid;
+
+  /* Finally, add the response to the list of pending responses */
+
+  netlink_add_response(psock, resp);
+  return OK;
+}
+
+/****************************************************************************
  * Name: netlink_get_devlist
  *
  * Description:
@@ -274,19 +304,7 @@ static int netlink_get_devlist(FAR struct socket *psock,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   struct nlroute_info_s info;
-  FAR struct nlroute_msgdone_rsplist_s *alloc;
-  FAR struct nlmsghdr *resp;
   int ret;
-
-  /* Pre-allocate the list terminator */
-
-  alloc = (FAR struct nlroute_msgdone_rsplist_s *)
-    kmm_zalloc(sizeof(struct nlroute_msgdone_rsplist_s));
-  if (alloc == NULL)
-    {
-      nerr("ERROR: Failed to allocate response terminator.\n");
-      return -ENOMEM;
-    }
 
   /* Visit each device */
 
@@ -298,23 +316,10 @@ static int netlink_get_devlist(FAR struct socket *psock,
   net_unlock();
   if (ret < 0)
     {
-      kmm_free(alloc);
       return ret;
     }
 
-  /* Initialize and send the list terminator */
-
-  resp               = &alloc->payload;
-  resp->nlmsg_len    = sizeof(struct nlmsghdr);
-  resp->nlmsg_type   = NLMSG_DONE;
-  resp->nlmsg_flags  = req->hdr.nlmsg_flags;
-  resp->nlmsg_seq    = req->hdr.nlmsg_seq;
-  resp->nlmsg_pid    = req->hdr.nlmsg_pid;
-
-  /* Finally, add the data to the list of pending responses */
-
-  netlink_add_response(psock, (FAR struct netlink_response_s *)alloc);
-  return OK;
+  return netlink_response_terminator(psock, req);
 }
 #endif
 
@@ -485,48 +490,6 @@ static int netlink_get_nbtable(FAR struct socket *psock,
 #endif
 
 /****************************************************************************
- * Name: netlink_route_terminator
- *
- * Description:
- *   Dump a list of all network devices of the specified type.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_NETLINK_DISABLE_GETROUTE
-static int
-netlink_route_terminator(FAR struct socket *psock,
-                         FAR const struct nlroute_sendto_request_s *req)
-{
-  FAR struct nlroute_msgdone_rsplist_s *alloc;
-  FAR struct nlmsghdr *resp;
-
-  /* Allocate the list terminator */
-
-  alloc = (FAR struct nlroute_msgdone_rsplist_s *)
-    kmm_zalloc(sizeof(struct nlroute_msgdone_rsplist_s));
-  if (alloc == NULL)
-    {
-      nerr("ERROR: Failed to allocate response terminator.\n");
-      return -ENOMEM;
-    }
-
-  /* Initialize and send the list terminator */
-
-  resp              = &alloc->payload;
-  resp->nlmsg_len   = sizeof(struct nlmsghdr);
-  resp->nlmsg_type  = NLMSG_DONE;
-  resp->nlmsg_flags = req->hdr.nlmsg_flags;
-  resp->nlmsg_seq   = req->hdr.nlmsg_seq;
-  resp->nlmsg_pid   = req->hdr.nlmsg_pid;
-
-  /* Finally, add the response to the list of pending responses */
-
-  netlink_add_response(psock, (FAR struct netlink_response_s *)alloc);
-  return OK;
-}
-#endif
-
-/****************************************************************************
  * Name: netlink_ipv4_route
  *
  * Description:
@@ -615,7 +578,7 @@ static int netlink_get_ipv4route(FAR struct socket *psock,
 
   /* Terminate the routing table */
 
-  return netlink_route_terminator(psock, req);
+  return netlink_response_terminator(psock, req);
 }
 #endif
 
@@ -708,7 +671,7 @@ static int netlink_get_ip6vroute(FAR struct socket *psock,
 
   /* Terminate the routing table */
 
-  return netlink_route_terminator(psock, req);
+  return netlink_response_terminator(psock, req);
 }
 #endif
 
