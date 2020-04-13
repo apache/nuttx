@@ -51,6 +51,7 @@
 #include <nuttx/net/netdev.h>
 
 #include "netdev/netdev.h"
+#include "netlink/netlink.h"
 
 /****************************************************************************
  * Public Functions
@@ -76,6 +77,7 @@ int netdev_carrier_on(FAR struct net_driver_s *dev)
   if (dev)
     {
       dev->d_flags |= IFF_RUNNING;
+      netlink_device_notify(dev);
       return OK;
     }
 
@@ -102,6 +104,7 @@ int netdev_carrier_off(FAR struct net_driver_s *dev)
   if (dev)
     {
       dev->d_flags &= ~IFF_RUNNING;
+      netlink_device_notify(dev);
       return OK;
     }
 
