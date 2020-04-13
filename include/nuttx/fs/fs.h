@@ -179,7 +179,8 @@
  * the open method will redirect to another driver and return a file
  * descriptor instead.
  *
- * This case is when SUSv1 pseudo-terminals are used (CONFIG_PSEUDOTERM_SUSV1=y).
+ * This case is when SUSv1 pseudo-terminals are usedi
+ * (CONFIG_PSEUDOTERM_SUSV1=y).
  * In this case, the output is encoded and decoded using these macros in
  * order to support (a) returning file descriptor 0 (which really should
  * not happen), and (b) avoiding confusion if some other open method returns
@@ -227,14 +228,15 @@ struct file_operations
 
   int     (*open)(FAR struct file *filep);
 
-  /* The following methods must be identical in signature and position because
-   * the struct file_operations and struct mountp_operations are treated like
-   * unions.
+  /* The following methods must be identical in signature and position
+   * because the struct file_operations and struct mountp_operations are
+   * treated like unions.
    */
 
   int     (*close)(FAR struct file *filep);
   ssize_t (*read)(FAR struct file *filep, FAR char *buffer, size_t buflen);
-  ssize_t (*write)(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+  ssize_t (*write)(FAR struct file *filep, FAR const char *buffer,
+                   size_t buflen);
   off_t   (*seek)(FAR struct file *filep, off_t offset, int whence);
   int     (*ioctl)(FAR struct file *filep, int cmd, unsigned long arg);
 
@@ -273,7 +275,8 @@ struct block_operations
             size_t start_sector, unsigned int nsectors);
   ssize_t (*write)(FAR struct inode *inode, FAR const unsigned char *buffer,
             size_t start_sector, unsigned int nsectors);
-  int     (*geometry)(FAR struct inode *inode, FAR struct geometry *geometry);
+  int     (*geometry)(FAR struct inode *inode, FAR struct geometry
+                      *geometry);
   int     (*ioctl)(FAR struct inode *inode, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   int     (*unlink)(FAR struct inode *inode);
@@ -432,27 +435,37 @@ struct filelist
 /* The following structure defines the list of files used for standard C I/O.
  * Note that NuttX can support the standard C APIs with or without buffering
  *
- * When buffering is used, the following describes the usage of the I/O buffer.
- * The buffer can be used for reading or writing -- but not both at the same time.
+ * When buffering is used, the following describes the usage of the I/O
+ * buffer.
+ * The buffer can be used for reading or writing -- but not both at the same
+ * time.
  * An fflush is implied between each change in direction of access.
  *
- * The field fs_bufread determines whether the buffer is being used for reading or
- * for writing as follows:
+ * The field fs_bufread determines whether the buffer is being used for
+ * reading or for writing as follows:
  *
  *              BUFFER
- *     +----------------------+ <- fs_bufstart Points to the beginning of the buffer.
- *     | WR: Buffered data    |                WR: Start of buffered write data.
- *     | RD: Already read     |                RD: Start of already read data.
+ *     +----------------------+ <- fs_bufstart Points to the beginning of
+ *     |                      |    the buffer.
+ *     | WR: Buffered data    |                WR: Start of buffered write
+ *     |                      |                    data.
+ *     | RD: Already read     |                RD: Start of already read
+ *     |                      |                    data.
  *     +----------------------+
  *     | WR: Available buffer | <- fs_bufpos   Points to next byte:
- *     | RD: Read-ahead data  |                WR: End+1 of buffered write data.
- *     |                      |                RD: Points to next char to return
+ *     | RD: Read-ahead data  |                WR: End+1 of buffered write
+ *     |                      |                    data.
+ *     |                      |                RD: Points to next char to
+ *     |                      |                    return
  *     +----------------------+
  *     | WR: Available        | <- fs_bufread  Top+1 of buffered read data
- *     | RD: Available        |                WR: bufstart buffer used for writing.
- *     |                      |                RD: Pointer to last buffered read char+1
+ *     | RD: Available        |                WR: bufstart buffer used for
+ *     |                      |                    writing.
+ *     |                      |                RD: Pointer to last buffered
+ *     |                      |                    read char+1
  *     +----------------------+
- *                              <- fs_bufend   Points to the end of the buffer+1
+ *                              <- fs_bufend   Points to the end of the
+ *                                             buffer+1
  */
 
 #if CONFIG_NFILE_STREAMS > 0
@@ -734,8 +747,8 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
  * Name: fs_dupfd OR dup
  *
  * Description:
- *   Clone a file descriptor 'fd' to an arbitrary descriptor number (any value
- *   greater than or equal to 'minfd'). If socket descriptors are
+ *   Clone a file descriptor 'fd' to an arbitrary descriptor number (any
+ *   value greater than or equal to 'minfd'). If socket descriptors are
  *   implemented, then this is called by dup() for the case of file
  *   descriptors.  If socket descriptors are not implemented, then this
  *   function IS dup().
@@ -894,7 +907,8 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
  *   Call the close method and release the inode
  *
  * Input Parameters:
- *   inode - reference to the inode of a block driver opened by open_blockdriver
+ *   inode - reference to the inode of a block driver opened by
+ *           open_blockdriver
  *
  * Returned Value:
  *   Returns zero on success or a negated errno on failure:
@@ -1094,7 +1108,8 @@ ssize_t nx_read(int fd, FAR void *buf, size_t nbytes);
  *
  ****************************************************************************/
 
-ssize_t file_write(FAR struct file *filep, FAR const void *buf, size_t nbytes);
+ssize_t file_write(FAR struct file *filep, FAR const void *buf,
+                   size_t nbytes);
 
 /****************************************************************************
  * Name: nx_write
@@ -1286,8 +1301,8 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
  *
  * Input Parameters:
  *   filep  - File structure instance
- *   buf    - The caller provide location in which to return information about
- *            the open file.
+ *   buf    - The caller provide location in which to return information
+ *            about the open file.
  *
  * Returned Value:
  *   Upon successful completion, 0 shall be returned. Otherwise, -1 shall be
