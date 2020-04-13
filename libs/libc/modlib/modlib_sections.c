@@ -240,7 +240,6 @@ int modlib_loadshdrs(FAR struct mod_loadinfo_s *loadinfo)
  *
  ****************************************************************************/
 
-#if 0 /* Not used */
 int modlib_findsection(FAR struct mod_loadinfo_s *loadinfo,
                        FAR const char *sectname)
 {
@@ -281,4 +280,3 @@ int modlib_findsection(FAR struct mod_loadinfo_s *loadinfo,
 
   return -ENOENT;
 }
-#endif
