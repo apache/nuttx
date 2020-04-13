@@ -273,13 +273,10 @@ FAR struct netlink_conn_s *netlink_nextconn(FAR struct netlink_conn_s *conn)
 void netlink_add_response(NETLINK_HANDLE handle,
                           FAR struct netlink_response_s *resp)
 {
-  FAR struct socket *psock;
   FAR struct netlink_conn_s *conn;
 
-  psock = (FAR struct socket *)handle;
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL && resp != NULL);
-
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+  conn = handle;
+  DEBUGASSERT(conn != NULL && resp != NULL);
 
   /* Add the response to the end of the FIFO list */
 
@@ -310,14 +307,11 @@ void netlink_add_response(NETLINK_HANDLE handle,
  ****************************************************************************/
 
 FAR struct netlink_response_s *
-netlink_tryget_response(FAR struct socket *psock)
+netlink_tryget_response(FAR struct netlink_conn_s *conn)
 {
   FAR struct netlink_response_s *resp;
-  FAR struct netlink_conn_s *conn;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
 
   /* Return the response at the head of the pending response list (may be
    * NULL).
@@ -349,15 +343,12 @@ netlink_tryget_response(FAR struct socket *psock)
  ****************************************************************************/
 
 FAR struct netlink_response_s *
-netlink_get_response(FAR struct socket *psock)
+netlink_get_response(FAR struct netlink_conn_s *conn)
 {
   FAR struct netlink_response_s *resp;
-  FAR struct netlink_conn_s *conn;
   int ret;
 
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
 
   /* Loop, until a response is received.  A loop is used because in the case
    * of multiple waiters, all waiters will be awakened, but only the highest
@@ -365,7 +356,7 @@ netlink_get_response(FAR struct socket *psock)
    */
 
   net_lock();
-  while ((resp = netlink_tryget_response(psock)) == NULL)
+  while ((resp = netlink_tryget_response(conn)) == NULL)
     {
       sem_t waitsem;
 
@@ -419,12 +410,9 @@ netlink_get_response(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-bool netlink_check_response(FAR struct socket *psock)
+bool netlink_check_response(FAR struct netlink_conn_s *conn)
 {
-  FAR struct netlink_conn_s *conn;
-
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
-  conn = (FAR struct netlink_conn_s *)psock->s_conn;
+  DEBUGASSERT(conn != NULL);
 
   /* Check if the response is available.  It is not necessary to lock the
    * network because the sq_peek() is an atomic operation.

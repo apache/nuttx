@@ -227,7 +227,7 @@ void netlink_notifier_signal(FAR struct netlink_conn_s *conn);
  ****************************************************************************/
 
 FAR struct netlink_response_s *
-netlink_tryget_response(FAR struct socket *psock);
+netlink_tryget_response(FAR struct netlink_conn_s *conn);
 
 /****************************************************************************
  * Name: netlink_get_response
@@ -248,7 +248,7 @@ netlink_tryget_response(FAR struct socket *psock);
  ****************************************************************************/
 
 FAR struct netlink_response_s *
-netlink_get_response(FAR struct socket *psock);
+netlink_get_response(FAR struct netlink_conn_s *conn);
 
 /****************************************************************************
  * Name: netlink_check_response
@@ -261,7 +261,7 @@ netlink_get_response(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-bool netlink_check_response(FAR struct socket *psock);
+bool netlink_check_response(FAR struct netlink_conn_s *conn);
 
 /****************************************************************************
  * Name: netlink_route_sendto()
@@ -272,7 +272,7 @@ bool netlink_check_response(FAR struct socket *psock);
  ****************************************************************************/
 
 #ifdef CONFIG_NETLINK_ROUTE
-ssize_t netlink_route_sendto(FAR struct socket *psock,
+ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
                              FAR const struct nlmsghdr *nlmsg,
                              size_t len, int flags,
                              FAR const struct sockaddr_nl *to,

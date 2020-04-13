@@ -605,7 +605,7 @@ static int netlink_poll(FAR struct socket *psock, FAR struct pollfd *fds,
        */
 
       net_lock();
-      if (netlink_check_response(psock))
+      if (netlink_check_response(conn))
         {
           revents |= POLLIN;
         }
@@ -761,7 +761,7 @@ static ssize_t netlink_sendto(FAR struct socket *psock, FAR const void *buf,
     {
 #ifdef CONFIG_NETLINK_ROUTE
       case NETLINK_ROUTE:
-        ret = netlink_route_sendto(psock, nlmsg, len, flags,
+        ret = netlink_route_sendto(conn, nlmsg, len, flags,
                                    (FAR struct sockaddr_nl *)to,
                                    tolen);
         break;
@@ -810,7 +810,7 @@ static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
 
   /* Find the response to this message.  The return value */
 
-  entry = (FAR struct netlink_response_s *)netlink_tryget_response(psock);
+  entry = netlink_tryget_response(psock->s_conn);
   if (entry == NULL)
     {
       /* No response is variable, but presumably, one is expected.  Check
@@ -824,7 +824,7 @@ static ssize_t netlink_recvfrom(FAR struct socket *psock, FAR void *buf,
 
       /* Wait for the response.  This should always succeed. */
 
-      entry = (FAR struct netlink_response_s *)netlink_get_response(psock);
+      entry = netlink_get_response(psock->s_conn);
       DEBUGASSERT(entry != NULL);
       if (entry == NULL)
         {

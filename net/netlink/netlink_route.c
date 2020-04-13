@@ -175,7 +175,7 @@ struct nlroute_sendto_request_s
 
 struct nlroute_info_s
 {
-  FAR struct socket *psock;
+  NETLINK_HANDLE handle;
   FAR const struct nlroute_sendto_request_s *req;
 };
 
@@ -195,14 +195,12 @@ struct nlroute_info_s
 static int netlink_device_callback(FAR struct net_driver_s *dev,
                                    FAR void *arg)
 {
-  FAR struct nlroute_info_s *info;
   FAR struct getlink_recvfrom_rsplist_s *alloc;
   FAR struct getlink_recvfrom_response_s *resp;
+  FAR struct nlroute_info_s *info = arg;
 
   DEBUGASSERT(dev != NULL && arg != NULL);
-
-  info = (FAR struct nlroute_info_s *)arg;
-  DEBUGASSERT(info->psock != NULL && info->req != NULL);
+  DEBUGASSERT(info->handle != NULL && info->req != NULL);
 
   /* Check if the link is in the UP state */
 
@@ -248,8 +246,8 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
 
   /* Finally, add the data to the list of pending responses */
 
-  netlink_add_response(info->psock, (FAR struct netlink_response_s *)alloc);
-  return 0;
+  netlink_add_response(info->handle, (FAR struct netlink_response_s *)alloc);
+  return OK;
 }
 #endif
 
@@ -261,7 +259,7 @@ static int netlink_device_callback(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static int netlink_response_terminator(FAR struct socket *psock,
+static int netlink_response_terminator(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct netlink_response_s *resp;
@@ -287,7 +285,7 @@ static int netlink_response_terminator(FAR struct socket *psock,
 
   /* Finally, add the response to the list of pending responses */
 
-  netlink_add_response(psock, resp);
+  netlink_add_response(handle, resp);
   return OK;
 }
 
@@ -300,7 +298,7 @@ static int netlink_response_terminator(FAR struct socket *psock,
  ****************************************************************************/
 
 #ifndef CONFIG_NETLINK_DISABLE_GETLINK
-static int netlink_get_devlist(FAR struct socket *psock,
+static int netlink_get_devlist(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   struct nlroute_info_s info;
@@ -308,8 +306,8 @@ static int netlink_get_devlist(FAR struct socket *psock,
 
   /* Visit each device */
 
-  info.psock = psock;
-  info.req   = req;
+  info.handle = handle;
+  info.req    = req;
 
   net_lock();
   ret = netdev_foreach(netlink_device_callback, &info);
@@ -319,7 +317,7 @@ static int netlink_get_devlist(FAR struct socket *psock,
       return ret;
     }
 
-  return netlink_response_terminator(psock, req);
+  return netlink_response_terminator(handle, req);
 }
 #endif
 
@@ -332,14 +330,14 @@ static int netlink_get_devlist(FAR struct socket *psock,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_ARP) && !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
-static int netlink_get_arptable(FAR struct socket *psock,
+static int netlink_get_arptable(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct getneigh_recvfrom_rsplist_s *entry;
   unsigned int ncopied;
+  size_t allocsize;
   size_t tabsize;
   size_t rspsize;
-  size_t allocsize;
 
   /* Preallocate memory to hold the maximum sized ARP table
    * REVISIT:  This is probably excessively large and could cause false
@@ -400,7 +398,7 @@ static int netlink_get_arptable(FAR struct socket *psock,
 
   /* Finally, add the data to the list of pending responses */
 
-  netlink_add_response(psock, (FAR struct netlink_response_s *)entry);
+  netlink_add_response(handle, (FAR struct netlink_response_s *)entry);
   return OK;
 }
 #endif
@@ -414,14 +412,14 @@ static int netlink_get_arptable(FAR struct socket *psock,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETNEIGH)
-static int netlink_get_nbtable(FAR struct socket *psock,
+static int netlink_get_nbtable(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   FAR struct getneigh_recvfrom_rsplist_s *entry;
   unsigned int ncopied;
+  size_t allocsize;
   size_t tabsize;
   size_t rspsize;
-  size_t allocsize;
 
   /* Preallocate memory to hold the maximum sized Neighbor table
    * REVISIT:  This is probably excessively large and could cause false
@@ -484,7 +482,7 @@ static int netlink_get_nbtable(FAR struct socket *psock,
 
   /* Finally, add the response to the list of pending responses */
 
-  netlink_add_response(psock, (FAR struct netlink_response_s *)entry);
+  netlink_add_response(handle, (FAR struct netlink_response_s *)entry);
   return OK;
 }
 #endif
@@ -501,9 +499,9 @@ static int netlink_get_nbtable(FAR struct socket *psock,
 static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
                               FAR void *arg)
 {
-  FAR struct nlroute_info_s *info;
   FAR struct getroute_recvfrom_ipv4resplist_s *alloc;
   FAR struct getroute_recvfrom_ipv4response_s *resp;
+  FAR struct nlroute_info_s *info;
 
   DEBUGASSERT(route != NULL && arg != NULL);
   info = (FAR struct nlroute_info_s *)arg;
@@ -545,7 +543,7 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
 
   /* Finally, add the response to the list of pending responses */
 
-  netlink_add_response(info->psock, (FAR struct netlink_response_s *)alloc);
+  netlink_add_response(info->handle, (FAR struct netlink_response_s *)alloc);
   return OK;
 }
 #endif
@@ -559,7 +557,7 @@ static int netlink_ipv4_route(FAR struct net_route_ipv4_s *route,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv4) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
-static int netlink_get_ipv4route(FAR struct socket *psock,
+static int netlink_get_ipv4route(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   struct nlroute_info_s info;
@@ -567,8 +565,8 @@ static int netlink_get_ipv4route(FAR struct socket *psock,
 
   /* Visit each routing table entry */
 
-  info.psock = psock;
-  info.req   = req;
+  info.handle = handle;
+  info.req    = req;
 
   ret = net_foreachroute_ipv4(netlink_ipv4_route, &info);
   if (ret < 0)
@@ -578,7 +576,7 @@ static int netlink_get_ipv4route(FAR struct socket *psock,
 
   /* Terminate the routing table */
 
-  return netlink_response_terminator(psock, req);
+  return netlink_response_terminator(handle, req);
 }
 #endif
 
@@ -594,9 +592,9 @@ static int netlink_get_ipv4route(FAR struct socket *psock,
 static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
                               FAR void *arg)
 {
-  FAR struct nlroute_info_s *info;
   FAR struct getroute_recvfrom_ipv6resplist_s *alloc;
   FAR struct getroute_recvfrom_ipv6response_s *resp;
+  FAR struct nlroute_info_s *info;
 
   DEBUGASSERT(route != NULL && arg != NULL);
   info = (FAR struct nlroute_info_s *)arg;
@@ -638,7 +636,7 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
 
   /* Finally, add the response to the list of pending responses */
 
-  netlink_add_response(info->psock, (FAR struct netlink_response_s *)alloc);
+  netlink_add_response(info->handle, (FAR struct netlink_response_s *)alloc);
   return OK;
 }
 #endif
@@ -652,7 +650,7 @@ static int netlink_ipv6_route(FAR struct net_route_ipv6_s *route,
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv6) && !defined(CONFIG_NETLINK_DISABLE_GETROUTE)
-static int netlink_get_ip6vroute(FAR struct socket *psock,
+static int netlink_get_ip6vroute(NETLINK_HANDLE handle,
                               FAR const struct nlroute_sendto_request_s *req)
 {
   struct nlroute_info_s info;
@@ -660,8 +658,8 @@ static int netlink_get_ip6vroute(FAR struct socket *psock,
 
   /* Visit each routing table entry */
 
-  info.psock = psock;
-  info.req   = req;
+  info.handle = handle;
+  info.req    = req;
 
   ret = net_foreachroute_ipv6(netlink_ipv6_route, &info);
   if (ret < 0)
@@ -671,7 +669,7 @@ static int netlink_get_ip6vroute(FAR struct socket *psock,
 
   /* Terminate the routing table */
 
-  return netlink_response_terminator(psock, req);
+  return netlink_response_terminator(handle, req);
 }
 #endif
 
@@ -687,7 +685,7 @@ static int netlink_get_ip6vroute(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-ssize_t netlink_route_sendto(FAR struct socket *psock,
+ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
                              FAR const struct nlmsghdr *nlmsg,
                              size_t len, int flags,
                              FAR const struct sockaddr_nl *to,
@@ -697,7 +695,7 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
     (FAR const struct nlroute_sendto_request_s *)nlmsg;
   int ret;
 
-  DEBUGASSERT(psock != NULL && nlmsg != NULL &&
+  DEBUGASSERT(handle != NULL && nlmsg != NULL &&
               nlmsg->nlmsg_len >= sizeof(struct nlmsghdr) &&
               len >= sizeof(struct nlmsghdr) &&
               len >= nlmsg->nlmsg_len && to != NULL &&
@@ -714,7 +712,7 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
 
         /* Generate the response */
 
-        ret = netlink_get_devlist(psock, req);
+        ret = netlink_get_devlist(handle, req);
         break;
 #endif
 
@@ -727,7 +725,7 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
 
         if (req->gen.rtgen_family == AF_INET)
           {
-            ret = netlink_get_arptable(psock, req);
+            ret = netlink_get_arptable(handle, req);
           }
         else
 #endif
@@ -737,7 +735,7 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
 
         if (req->gen.rtgen_family == AF_INET6)
           {
-             ret = netlink_get_nbtable(psock, req);
+             ret = netlink_get_nbtable(handle, req);
           }
         else
 #endif
@@ -754,14 +752,14 @@ ssize_t netlink_route_sendto(FAR struct socket *psock,
 #ifdef CONFIG_NET_IPv4
         if (req->gen.rtgen_family == AF_INET)
           {
-            ret = netlink_get_ipv4route(psock, req);
+            ret = netlink_get_ipv4route(handle, req);
           }
         else
 #endif
 #ifdef CONFIG_NET_IPv6
         if (req->gen.rtgen_family == AF_INET6)
           {
-            ret = netlink_get_ip6vroute(psock, req);
+            ret = netlink_get_ip6vroute(handle, req);
           }
         else
 #endif
