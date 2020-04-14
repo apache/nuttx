@@ -68,7 +68,7 @@
 
 #define CXD56_CRG_APP_TILE_CLK_GATING_ENB  (CXD56_ADSP_BASE + 0x02001084)
 
-/* RESET register bits **********************************************************************/
+/* RESET register bits ******************************************************/
 
 #define XRS_AUD     (1<<0)
 #define XRS_IMG     (1<<4)
@@ -78,7 +78,7 @@
 #define XRS_MMC_CRG (1<<11)
 #define XRS_DSP_GEN (1<<22)
 
-/* CK_GATE_AHB register bits ****************************************************************/
+/* CK_GATE_AHB register bits ************************************************/
 
 #define CK_GATE_AUD  (1<<0)
 #define CK_GATE_IMG  (1<<4)
