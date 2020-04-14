@@ -1183,7 +1183,9 @@ static int stm32_1wire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
       if (sval <= 0)
         {
-          /* Exclusive lock is held, do not allow entry to deeper PM states. */
+          /* Exclusive lock is held, do not allow entry to deeper PM
+           * states.
+           */
 
           return -EBUSY;
         }

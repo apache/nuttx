@@ -589,7 +589,9 @@ static void lc823450_i2c_starttransfer(FAR struct lc823450_i2c_priv_s *priv)
     {
       if (priv->dcnt > 1)
         {
-          /* If the next byte to be received is not final, we have to send ACK. */
+          /* If the next byte to be received is not final, we have to send
+           * ACK.
+           */
 
           modifyreg32(priv->config->base + I2CCTL, I2C_CTL_ACK,
                       I2C_CTL_ACK);
@@ -665,7 +667,9 @@ static int lc823450_i2c_poll(FAR struct lc823450_i2c_priv_s *priv)
 
       if (flags & I2C_M_READ)
         {
-          /* When READ transaction, terminate it with NACK and then STOP condition */
+          /* When READ transaction, terminate it with NACK and then STOP
+           * condition.
+           */
 
           lc823450_i2c_sendnack(priv);
         }
@@ -765,7 +769,9 @@ static int lc823450_i2c_poll(FAR struct lc823450_i2c_priv_s *priv)
 
           if (priv->msgv->flags & I2C_M_NOSTART)
             {
-              /* In this case, we don't have to restart using START condition. */
+              /* In this case, we don't have to restart using START
+               * condition.
+               */
 
               i2cinfo("no re-START condition\n");
 
@@ -931,7 +937,9 @@ static int lc823450_i2c_deinit(FAR struct lc823450_i2c_priv_s *priv,
   modifyreg32(priv->config->base + I2CSTR, I2C_CTL_SCLR, I2C_CTL_SCLR);
   modifyreg32(priv->config->base + I2CCTL, I2C_CTL_SRST, I2C_CTL_SRST);
 
-  /* Change pinmux from I2C to GPIO, and i2c mode to Push-Pull to Open Drain */
+  /* Change pinmux from I2C to GPIO, and i2c mode to Push-Pull to Open
+   * Drain.
+   */
 
   if (port == 0)
     {
