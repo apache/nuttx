@@ -228,8 +228,8 @@ config ARCH_CHIP_MK66FN2M0VLQ18
 
 endchoice
 
-# These "hidden" settings determine is a peripheral option is available for
-# the selection MCU
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
 
 config KINETIS_HAVE_UART5
 	bool

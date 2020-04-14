@@ -77,8 +77,8 @@ config EFM32_EFM32GG
 
 menu "EFM32 Peripheral Support"
 
-# These "hidden" settings determine is a peripheral option is available for
-# the selection MCU
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
 
 config EFM32_HAVE_USART2
 	bool
