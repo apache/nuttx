@@ -71,7 +71,7 @@ jobs:
 
     strategy:
       matrix:
-        boards: [arm-13, mips-riscv-x86-xtensa, sim]
+        boards: [arm-11, mips-riscv-x86-xtensa, sim]
 
     steps:
     - name: Checkout nuttx repo
