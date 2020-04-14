@@ -297,9 +297,11 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
         ret = OK;
         break;
     }
+#endif
 
   return ret;
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 pollerr:
   fds->revents |= POLLERR;
   nxsem_post(fds->sem);
