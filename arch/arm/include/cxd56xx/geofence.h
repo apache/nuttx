@@ -192,7 +192,7 @@ struct cxd56_geofence_region_s
 
 struct cxd56_geofence_mode_s
 {
-  uint16_t deadzone;          /* dead zone [meter] */
+  uint16_t deadzone;           /* dead zone [meter] */
   uint16_t dwell_detecttime;   /* Dewlling period time [sec] */
 };
 

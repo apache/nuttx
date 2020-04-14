@@ -36,21 +36,20 @@
 #ifndef __ARCH_ARM_INCLUDE_CXD56XX_USBDEV_H
 #define __ARCH_ARM_INCLUDE_CXD56XX_USBDEV_H
 
-/********************************************************************************************
+/****************************************************************************
  * Included Files
- ********************************************************************************************/
+ ****************************************************************************/
 
-/********************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ********************************************************************************************/
+ ****************************************************************************/
 
-/* BOARDIOC_USBDEV_SETNOTIFYSIG signal value ************************************************/
+/* BOARDIOC_USBDEV_SETNOTIFYSIG signal value ********************************/
 
 #define USBDEV_STATE_DETACH       0
 #define USBDEV_STATE_ATTACH       1
 
-/*
- * The BOARDIOC_USBDEV_SETNOTIFYSIG signal output the VBUS connection state
+/* The BOARDIOC_USBDEV_SETNOTIFYSIG signal output the VBUS connection state
  * and supply current value to the signal handler argument (sival_int).
  *
  * Please use the following macros.
