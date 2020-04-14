@@ -1120,7 +1120,9 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, setbits, clrbits);
         spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
-        /* Save the mode so that subsequent re-configurations will be faster */
+        /* Save the mode so that subsequent re-configurations will be
+         * faster.
+         */
 
         priv->mode = mode;
     }
@@ -1185,9 +1187,11 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       spi_modifycr(STM32L4_SPI_CR2_OFFSET, priv, setbits, clrbits);
       spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so the subsequence re-configurations will be
+       * faster.  nbits has been clobbered... save the signed value.
+       */
 
-      priv->nbits = savbits; /* nbits has been clobbered... save the signed value. */
+      priv->nbits = savbits;
     }
 }
 
@@ -1450,6 +1454,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
   FAR struct stm32l4_spidev_s *priv = (FAR struct stm32l4_spidev_s *)dev;
+  int ret;
 
 #ifdef CONFIG_STM32L4_DMACAPABLE
   if ((txbuffer &&
@@ -1670,7 +1675,9 @@ static int spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
       if (sval <= 0)
         {
-          /* Exclusive lock is held, do not allow entry to deeper PM states. */
+          /* Exclusive lock is held, do not allow entry to deeper PM
+           * states.
+           */
 
           return -EBUSY;
         }
