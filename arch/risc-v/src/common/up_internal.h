@@ -142,14 +142,14 @@ EXTERN uint32_t g_intstackalloc; /* Allocated stack base */
 EXTERN uint32_t g_intstackbase;  /* Initial top of interrupt stack */
 #endif
 
-/* These 'addresses' of these values are setup by the linker script.  They are
- * not actual uint32_t storage locations! They are only used meaningfully in the
- * following way:
+/* These 'addresses' of these values are setup by the linker script.  They
+ * are not actual uint32_t storage locations! They are only used meaningfully
+ * in the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
  *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32_t variable _data (it is
- *    not!).
+ *    that the value _sdata is the address of a uint32_t variable _data (it
+ *    is not!).
  *  - We can recoved the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
@@ -165,12 +165,12 @@ EXTERN uint32_t _ebss;            /* End+1 of .bss */
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
+* Public Function Prototypes
+  ***************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/* Low level initialization provided by board-level logic ******************/
+/* Low level initialization provided by board-level logic *******************/
 
 void up_boot(void);
 

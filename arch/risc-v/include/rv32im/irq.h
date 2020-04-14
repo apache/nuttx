@@ -55,7 +55,7 @@
 
 /* Configuration ************************************************************/
 
-/* If this is a kernel build, how many nested system calls should we support? */
+/* How many nested system calls should we support? */
 
 #ifndef CONFIG_SYS_NNEST
 #  define CONFIG_SYS_NNEST 2
@@ -66,8 +66,10 @@
 #define REG_EPC_NDX         0
 
 /* General pupose registers */
-/* $0: Zero register does not need to be saved */
-/* $1: ra (return address) */
+
+/* $0: Zero register does not need to be saved
+ * $1: ra (return address)
+ */
 
 #define REG_X1_NDX          1
 
