@@ -228,7 +228,8 @@ int stm32_bringup(void)
   ret = stm32_sdio_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
     }
 #endif
 
