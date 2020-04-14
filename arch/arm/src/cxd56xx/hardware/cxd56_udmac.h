@@ -133,10 +133,10 @@
 
 #define DMA_CTRL_NEXT_USEBURST    (1 << 3)
 
-#define DMA_CTRL_CYCLE_CTRL_INVALID                    0x0  /* Invalid cycle type */
-#define DMA_CTRL_CYCLE_CTRL_BASIC                      0x1  /* Basic cycle type */
-#define DMA_CTRL_CYCLE_CTRL_AUTO                       0x2  /* Auto cycle type */
-#define DMA_CTRL_CYCLE_CTRL_PINGPONG                   0x3  /* PingPong cycle type */
+#define DMA_CTRL_CYCLE_CTRL_INVALID                    0x0 /* Invalid cycle type */
+#define DMA_CTRL_CYCLE_CTRL_BASIC                      0x1 /* Basic cycle type */
+#define DMA_CTRL_CYCLE_CTRL_AUTO                       0x2 /* Auto cycle type */
+#define DMA_CTRL_CYCLE_CTRL_PINGPONG                   0x3 /* PingPong cycle type */
 #define DMA_CTRL_CYCLE_CTRL_MEM_SCATTER_GATHER         0x4 /* Memory scatter gather cycle type */
 #define DMA_CTRL_CYCLE_CTRL_MEM_SCATTER_GATHER_ALT     0x5 /* Memory scatter gather using alternate structure  */
 #define DMA_CTRL_CYCLE_CTRL_PER_SCATTER_GATHER         0x6 /* Peripheral scatter gather cycle type */
@@ -161,7 +161,7 @@ struct dma_descriptor_s
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_UDMAC_H */

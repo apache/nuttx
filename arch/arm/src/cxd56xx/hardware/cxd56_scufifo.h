@@ -60,9 +60,11 @@
 #define SCUFIFO_OVERRUNCLR    (1 << 0)  /* [R] Clear FIFO over run error */
 #define SCUFIFO_OVERWRITE     (1 << 4)  /* [W] Over write when FIFO is full. */
 #define SCUFIFO_ENADCINTERVAL (1 << 12) /* [W] Enable ADC interval instead of
-                                         * PREDIV. */
+                                         * PREDIV.
+                                         */
+
 #define SCUFIFO_ADCINTERVAL(x) (((x) & 0xf) << 8) /* [W] ADC interval */
-#define SCUFIFO_BPS(x)         ((x) & 0xf) /* [W] Bytes per sample */
+#define SCUFIFO_BPS(x)         ((x) & 0xf)        /* [W] Bytes per sample */
 
 #define SCUFIFO_D0_W0_S_CTRL0		(CXD56_SCU_FIFO_REG_BASE + 0x0)
 #define SCUFIFO_D0_W0_S_CTRL1		(CXD56_SCU_FIFO_REG_BASE + 0x4)
