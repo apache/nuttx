@@ -37,14 +37,14 @@
 #define __ARCH_ARM_INCLUDE_CXD56XX_SCU_H
 
 /****************************************************************************
- * include files
+ * Included Files
  ****************************************************************************/
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <nuttx/fs/ioctl.h>
 
-/***************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -53,8 +53,7 @@
 #define _SCUIOCVALID(c)   (_IOC_TYPE(c)==_SCUIOCBASE)
 #define _SCUIOC(nr)       _IOC(_SCUIOCBASE,nr)
 
-/*
- * Set FIFO size used by sequencer
+/* Set FIFO size used by sequencer
  *
  * uint16_t FIFO size in bytes
  * return ioctl return value provides success/failure indication
@@ -62,8 +61,7 @@
 
 #define SCUIOC_SETFIFO     _SCUIOC(0x0001)
 
-/*
- * Free FIFO used by sequencer
+/* Free FIFO used by sequencer
  *
  * param: none
  * return: ioctl return value provides success/failure indication
@@ -71,8 +69,7 @@
 
 #define SCUIOC_FREEFIFO    _SCUIOC(0x0002)
 
-/*
- * Set sequencer sampling rate
+/* Set sequencer sampling rate
  *
  * param: uint8_t: sampling rate
  * return: ioctl return value provides success/failure indication
@@ -80,8 +77,7 @@
 
 #define SCUIOC_SETSAMPLE   _SCUIOC(0x0003)
 
-/*
- * Enable/Disable sign conversion preprocessing
+/* Enable/Disable sign conversion preprocessing
  *
  * param: unsigned long: 0 = disable, 1 = enable
  * return: ioctl return value provides success/failure indication
@@ -89,8 +85,7 @@
 
 #define SCUIOC_SETSIGNCONV _SCUIOC(0x0004)
 
-/*
- * Set offset/gain adjustment parameter
+/* Set offset/gain adjustment parameter
  *
  * param: Pointer to struct adjust_xyz_s.
  * return: ioctl return value provides success/failure indication
@@ -98,8 +93,7 @@
 
 #define SCUIOC_SETOGADJUST _SCUIOC(0x0005)
 
-/*
- * Clear offset/gain adjustment parameter
+/* Clear offset/gain adjustment parameter
  *
  * param: none
  * return: ioctl return value provides success/failure indication
@@ -107,8 +101,7 @@
 
 #define SCUIOC_CLROGADJUST _SCUIOC(0x0006)
 
-/*
- * Set IIR filter coefficiencies
+/* Set IIR filter coefficiencies
  *
  * param: Pointer to struct math_filter_s
  * return: ioctl return value provides success/failure indication
@@ -116,8 +109,7 @@
 
 #define SCUIOC_SETFILTER   _SCUIOC(0x0007)
 
-/*
- * Set event notifier parameters
+/* Set event notifier parameters
  *
  * Set event notifier. This command must use with IIR filter, so it will be
  * error when no filter set by SCUIOC_SETFILTER.
@@ -128,8 +120,7 @@
 
 #define SCUIOC_SETNOTIFY   _SCUIOC(0x0008)
 
-/*
- * Set elements per sample
+/* Set elements per sample
  *
  * SCU can be treat 3 axis sample data as 1 or 2 axis data. For example,
  * user can be used to detect via event notifier, about the board is
@@ -142,8 +133,7 @@
 
 #define SCUIOC_SETELEMENTS   _SCUIOC(0x0009)
 
-/*
- * Set decimation parameters (Decimator only)
+/* Set decimation parameters (Decimator only)
  *
  * param: Pointer to struct decimation_s
  * return: ioctl return value provides success/failure indication
@@ -151,8 +141,7 @@
 
 #define SCUIOC_SETDECIMATION _SCUIOC(0x000a)
 
-/*
- * Set FIFO sample data watermark
+/* Set FIFO sample data watermark
  *
  * param: Pointer of struct scufifo_wm_s
  * return: ioctl return value provides success/failure indication
@@ -160,8 +149,7 @@
 
 #define SCUIOC_SETWATERMARK  _SCUIOC(0x000b)
 
-/*
- * Start sequencer
+/* Start sequencer
  *
  * param: None
  * return: ioctl return value provides success/failure indication
@@ -169,8 +157,7 @@
 
 #define SCUIOC_START       _SCUIOC(0x0010)
 
-/*
- * Stop sequencer
+/* Stop sequencer
  *
  * param: None
  * return: ioctl return value provides success/failure indication
@@ -178,8 +165,7 @@
 
 #define SCUIOC_STOP        _SCUIOC(0x0011)
 
-/*
- * Set FIFO overwrite mode
+/* Set FIFO overwrite mode
  *
  * param: unsigned long: 0 = overwrite disable, 1 = overwrite enable
  * return: ioctl return value provides success/failure indication
@@ -187,8 +173,7 @@
 
 #define SCUIOC_SETFIFOMODE _SCUIOC(0x0012)
 
-/*
- * Delete FIFO data
+/* Delete FIFO data
  *
  * param: uint16_t delete size
  * return: ioctl return value provides success/failure indication
@@ -196,15 +181,15 @@
 
 #define SCUIOC_DELFIFODATA _SCUIOC(0x0013)
 
-#define SCU_BUS_SPI     1         /*< SPI bus */
-#define SCU_BUS_I2C0    2         /*< I2C0 bus */
-#define SCU_BUS_I2C1    3         /*< I2C1 bus */
-#define SCU_BUS_LPADC0  0x10      /*< LPADC0 */
-#define SCU_BUS_LPADC1  0x11      /*< LPADC1 */
-#define SCU_BUS_LPADC2  0x12      /*< LPADC2 */
-#define SCU_BUS_LPADC3  0x13      /*< LPADC3 */
-#define SCU_BUS_HPADC0  0x14      /*< HPADC1 */
-#define SCU_BUS_HPADC1  0x15      /*< HPADC2 */
+#define SCU_BUS_SPI     1         /* SPI bus */
+#define SCU_BUS_I2C0    2         /* I2C0 bus */
+#define SCU_BUS_I2C1    3         /* I2C1 bus */
+#define SCU_BUS_LPADC0  0x10      /* LPADC0 */
+#define SCU_BUS_LPADC1  0x11      /* LPADC1 */
+#define SCU_BUS_LPADC2  0x12      /* LPADC2 */
+#define SCU_BUS_LPADC3  0x13      /* LPADC3 */
+#define SCU_BUS_HPADC0  0x14      /* HPADC1 */
+#define SCU_BUS_HPADC1  0x15      /* HPADC2 */
 
 /* Send 1 byte instruction */
 
@@ -224,21 +209,21 @@
 
 /* Sequencer types */
 
-#define SEQ_TYPE_NORMAL    0    /*< Normal sequencer */
-#define SEQ_TYPE_DECI      1    /*< Decimator */
+#define SEQ_TYPE_NORMAL    0    /* Normal sequencer */
+#define SEQ_TYPE_DECI      1    /* Decimator */
 
 /* Event control */
 
-#define SCU_EV_RISE_EN   (1 << 31) /*< Rise event enable */
-#define SCU_EV_FALL_EN   (1 << 30) /*< Fall event enable */
-#define SCU_EV_OUT8BITS  (1 << 29) /*< Output only upper 8 bits */
+#define SCU_EV_RISE_EN   (1 << 31) /* Rise event enable */
+#define SCU_EV_FALL_EN   (1 << 30) /* Fall event enable */
+#define SCU_EV_OUT8BITS  (1 << 29) /* Output only upper 8 bits */
 
 #define SCU_EV_OUTSHIFT     16
 #define SCU_EV_OUTMASK      (3 << SCU_EV_OUTSHIFT)
-#define SCU_EV_OUTALWAYS    (0 << SCU_EV_OUTSHIFT) /*< Always output to FIFO */
-#define SCU_EV_OUTSTART     (1 << SCU_EV_OUTSHIFT) /*< Output start after event occurred */
-#define SCU_EV_OUTSTOP      (2 << SCU_EV_OUTSHIFT) /*< Output stop after event occurred */
-#define SCU_EV_NOTOUT       (3 << SCU_EV_OUTSHIFT) /*< No output to FIFO */
+#define SCU_EV_OUTALWAYS    (0 << SCU_EV_OUTSHIFT) /* Always output to FIFO */
+#define SCU_EV_OUTSTART     (1 << SCU_EV_OUTSHIFT) /* Output start after event occurred */
+#define SCU_EV_OUTSTOP      (2 << SCU_EV_OUTSHIFT) /* Output stop after event occurred */
+#define SCU_EV_NOTOUT       (3 << SCU_EV_OUTSHIFT) /* No output to FIFO */
 
 #define SCU_EV_WRITESAMPLEMASK 0xfff
 
@@ -248,43 +233,42 @@
 
 /* Event type flags */
 
-#define SCU_EV_RISE  (1) /*< Rise (low to high) event occurred */
-#define SCU_EV_FALL  (2) /*< Fall (high to low) event occurred */
+#define SCU_EV_RISE  (1) /* Rise (low to high) event occurred */
+#define SCU_EV_FALL  (2) /* Fall (high to low) event occurred */
 
 /* Level adjustment (decimator only) */
 
-#define SCU_LEVELADJ_X1 (0)     /*< Level adjustment x1 */
-#define SCU_LEVELADJ_X2 (1)     /*< Level adjustment x2 */
-#define SCU_LEVELADJ_X4 (2)     /*< Level adjustment x4 */
-#define SCU_LEVELADJ_X8 (3)     /*< Level adjustment x8 */
+#define SCU_LEVELADJ_X1 (0)     /* Level adjustment x1 */
+#define SCU_LEVELADJ_X2 (1)     /* Level adjustment x2 */
+#define SCU_LEVELADJ_X4 (2)     /* Level adjustment x4 */
+#define SCU_LEVELADJ_X8 (3)     /* Level adjustment x8 */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/*
- * IIR filter position
+/* IIR filter position
  * details IIR filter can be set 2 filters on data path.
  * image html scu_IIR_filter_path.png
  */
 
 enum filter_pos_e
 {
-  FILTER_POS_NONE = 0,    /*< Filter none */
-  FILTER_POS_AA,          /*< 2 for all */
-  FILTER_POS_FF,          /*< 2 for FIFO */
-  FILTER_POS_AF,          /*< 1 for all, 1 for FIFO */
-  FILTER_POS_EE,          /*< 2 for Event detector */
-  FILTER_POS_AE,          /*< 1 for all, 1 for Event detector */
-  FILTER_POS_FE,          /*< 1 for FIFO, 1 for Event detector */
+  FILTER_POS_NONE = 0,    /* Filter none */
+  FILTER_POS_AA,          /* 2 for all */
+  FILTER_POS_FF,          /* 2 for FIFO */
+  FILTER_POS_AF,          /* 1 for all, 1 for FIFO */
+  FILTER_POS_EE,          /* 2 for Event detector */
+  FILTER_POS_AE,          /* 1 for all, 1 for Event detector */
+  FILTER_POS_FE,          /* 1 for FIFO, 1 for Event detector */
 };
 
 /* Sample timestamp */
 
 struct scutimestamp_s
 {
-  uint32_t sec;                 /*< Seconds */
-  uint16_t tick;                /*< Clock tick (based on 32768 Hz) */
+  uint32_t sec;                 /* Seconds */
+  uint16_t tick;                /* Clock tick (based on 32768 Hz) */
 };
 
 /* IIR filter coefficiencies */
@@ -299,21 +283,20 @@ struct iir_coeff_s
 
 struct iir_filter_s
 {
-  uint8_t ishift;               /*< Input shift */
-  uint8_t oshift;               /*< Output shift */
-  struct iir_coeff_s coeff[5];  /*< IIR filter coefficiencies */
+  uint8_t ishift;               /* Input shift */
+  uint8_t oshift;               /* Output shift */
+  struct iir_coeff_s coeff[5];  /* IIR filter coefficiencies */
 };
 
 /* Math Function IIR filter setting */
 
 struct math_filter_s
 {
-  enum filter_pos_e pos;         /*< Insert position identifier */
-  struct iir_filter_s filter[2]; /*< IIR filter parameters */
+  enum filter_pos_e pos;         /* Insert position identifier */
+  struct iir_filter_s filter[2]; /* IIR filter parameters */
 };
 
-/*
- * Event configuration
+/* Event configuration
  *
  * a threshold is rise/fall threshold for input data.
  * When set this member for a rise in struct scuev_notify_s, counting data
@@ -334,70 +317,71 @@ struct math_filter_s
 
 struct sensor_event_s
 {
-  uint16_t threshold;           /*< Threshold */
-  uint16_t count0;              /*< Preventing counts */
-  uint16_t count1;              /*< Actual counts  */
-  uint16_t delaysamples;        /*< Event notification delay in samples */
+  uint16_t threshold;           /* Threshold */
+  uint16_t count0;              /* Preventing counts */
+  uint16_t count1;              /* Actual counts  */
+  uint16_t delaysamples;        /* Event notification delay in samples */
 };
 
 /* Arguments for event signal */
 
 struct scuev_arg_s
 {
-  struct scutimestamp_s ts;    /*< timestamp stored when event occurred. */
-  uint32_t              type;  /*< Event type (SCU_EV_RISE or SCU_EV_FALL) */
+  struct scutimestamp_s ts;    /* timestamp stored when event occurred. */
+  uint32_t              type;  /* Event type (SCU_EV_RISE or SCU_EV_FALL) */
 };
 
 /* Event notifier setting */
 
 struct scuev_notify_s
 {
-  int                    signo;  /*< Signal number (0 - 31, except system reserved) */
+  int                    signo;  /* Signal number (0 - 31, except system reserved) */
 
-  struct sensor_event_s  rise;   /*< Rise threshold */
-  struct sensor_event_s  fall;   /*< Fall threshold */
+  struct sensor_event_s  rise;   /* Rise threshold */
+  struct sensor_event_s  fall;   /* Fall threshold */
 
-  uint32_t               ctrl;   /*< Event control */
+  uint32_t               ctrl;   /* Event control */
 
-  FAR struct scuev_arg_s *arg;   /*< Arguments for event raised */
+  FAR struct scuev_arg_s *arg;   /* Arguments for event raised */
 };
 
 /* Offset/gain adjustment parameter */
 
-struct adjust_s {
-  uint16_t offset;              /*< Offset value */
-  uint16_t gain;                /*< Gain value */
+struct adjust_s
+{
+  uint16_t offset;              /* Offset value */
+  uint16_t gain;                /* Gain value */
 };
 
 /* Offset/gain adjustment parameter for 3 axis */
 
-struct adjust_xyz_s {
-  struct adjust_s x;            /*< For X axis */
-  struct adjust_s y;            /*< For Y axis */
-  struct adjust_s z;            /*< For Z axis */
+struct adjust_xyz_s
+{
+  struct adjust_s x;            /* For X axis */
+  struct adjust_s y;            /* For Y axis */
+  struct adjust_s z;            /* For Z axis */
 };
 
 /* Decimation parameter */
 
 struct decimation_s
 {
-  uint8_t ratio;                /*< Decimation ratio (1 / (2 ^ ratio)), 0 - 9 */
-  uint8_t leveladj;             /*< Output data multiplier */
-  uint8_t forcethrough;         /*< Force through */
+  uint8_t ratio;                /* Decimation ratio (1 / (2 ^ ratio)), 0 - 9 */
+  uint8_t leveladj;             /* Output data multiplier */
+  uint8_t forcethrough;         /* Force through */
 };
 
 /* Watermark notification */
 
 struct scufifo_wm_s
 {
-  int                    signo; /*< Signal number (0 - 31, except system reserved) */
+  int                    signo; /* Signal number (0 - 31, except system reserved) */
 
   /* Pointer to memory to be timestamp stored */
 
   FAR struct scutimestamp_s *ts;
 
-  /*
-   * Watermark value. SCU notifies when
+  /* Watermark value. SCU notifies when
    * stored samples over watermark in FIFO.
    * Valid value range: 1 - 65535
    */
@@ -407,8 +391,7 @@ struct scufifo_wm_s
 
 struct seq_s;     /* The sequencer object */
 
-/*
- * Open sequencer
+/* Open sequencer
  *
  * param [in] type    : Sequencer type. Set one of the following definitions.
  *        - #SEQ_TYPE_NORMAL
@@ -423,16 +406,14 @@ struct seq_s;     /* The sequencer object */
 
 FAR struct seq_s *seq_open(int type, int bustype);
 
-/*
- * Close sequencer device
+/* Close sequencer device
  *
  * param [in] seq : Sequencer instance
  */
 
 void seq_close(FAR struct seq_s *seq);
 
-/*
- * Read sequencer FIFO data
+/* Read sequencer FIFO data
  *
  * param [in]  seq    : Sequencer instance
  * param [in]  fifoid : FIFO ID (decimator only)
@@ -444,8 +425,7 @@ void seq_close(FAR struct seq_s *seq);
 
 int seq_read(FAR struct seq_s *seq, int fifoid, char *buffer, int length);
 
-/*
- * Sequencer specific ioctl
+/* Sequencer specific ioctl
  *
  * This API should be called from each sensor driver ioctl().
  *
@@ -461,8 +441,7 @@ int seq_read(FAR struct seq_s *seq, int fifoid, char *buffer, int length);
 
 int seq_ioctl(FAR struct seq_s *seq, int fifoid, int cmd, unsigned long arg);
 
-/*
- * Set cyclic sequencer instruction
+/* Set cyclic sequencer instruction
  *
  * param [in] seq      : Sequencer instance
  * param [in] inst     : Pointer to instruction array
@@ -474,8 +453,7 @@ int seq_ioctl(FAR struct seq_s *seq, int fifoid, int cmd, unsigned long arg);
 int seq_setinstruction(FAR struct seq_s *seq, const uint16_t *inst,
                        uint16_t nr_insts);
 
-/*
- * Set sample data format
+/* Set sample data format
  *
  * param [in] seq      : Sequencer instance
  * param [in] sample   : Bytes per sample
@@ -489,8 +467,7 @@ int seq_setinstruction(FAR struct seq_s *seq, const uint16_t *inst,
 void seq_setsample(FAR struct seq_s *seq, uint8_t sample, uint8_t offset,
                    uint8_t elemsize, bool swapbyte);
 
-/*
- * Set slave ID or address
+/* Set slave ID or address
  *
  * param [in] seq        : An instance of sequencer
  * param [in] slave_addr : In SPI, slave select ID. In I2C, bus address.
@@ -498,8 +475,7 @@ void seq_setsample(FAR struct seq_s *seq, uint8_t sample, uint8_t offset,
 
 void seq_setaddress(FAR struct seq_s *seq, uint32_t slave_addr);
 
-/*
- * SPI data transfer via sequencer.
+/* SPI data transfer via sequencer.
  *
  * This function use 'oneshot' feature on SCU. So user unnecessary to specify
  * any opened sequencer.
@@ -518,8 +494,7 @@ void seq_setaddress(FAR struct seq_s *seq, uint32_t slave_addr);
 int scu_spitransfer(int slavesel, uint16_t *inst, uint32_t nr_insts,
                          uint8_t *buffer, int len);
 
-/*
- * I2C data transfer via sequencer
+/* I2C data transfer via sequencer
  *
  * This function use 'oneshot' feature on SCU. So user unnecessary to
  * specify any opened sequencer.
@@ -539,8 +514,7 @@ int scu_spitransfer(int slavesel, uint16_t *inst, uint32_t nr_insts,
 int scu_i2ctransfer(int port, int slave, uint16_t *inst, uint32_t nr_insts,
                          uint8_t *buffer, int len);
 
-/*
- * Initialize SCU
+/* Initialize SCU
  *
  * warning: This API called from board_app_initialize().
  * Do not call this API from each sensor drivers.
@@ -548,8 +522,7 @@ int scu_i2ctransfer(int port, int slave, uint16_t *inst, uint32_t nr_insts,
 
 void scu_initialize(void);
 
-/*
- * Uninitialize SCU
+/* Uninitialize SCU
  *
  * warning: This API called from board_app_initialize().
  * Do not call this API from each sensor drivers.
