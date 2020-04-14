@@ -138,7 +138,7 @@ int stm32_flash_unlock(void)
   return ret;
 }
 
-void stm32_flash_lock(void)
+int stm32_flash_lock(void)
 {
   int ret;
 
