@@ -129,7 +129,7 @@ struct stm32_1wire_config_s
 struct stm32_1wire_priv_s
 {
   const struct stm32_1wire_config_s *config; /* Port configuration */
-  volatile int refs;                         /* Referernce count */
+  volatile int refs;                         /* Reference count */
   sem_t    sem_excl;                         /* Mutual exclusion semaphore */
   sem_t    sem_isr;                          /* Interrupt wait semaphore */
   int      baud;                             /* Baud rate */
