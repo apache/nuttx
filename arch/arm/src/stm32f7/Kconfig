@@ -1129,8 +1129,8 @@ config STM32F7_PROGMEM
 
 menu "STM32 Peripheral Support"
 
-# These "hidden" settings determine is a peripheral option is available for the
-# selection MCU
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
 
 config STM32F7_HAVE_LTDC
 	bool

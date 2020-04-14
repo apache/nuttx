@@ -28,8 +28,8 @@ endchoice
 
 menu "FE310 Peripheral Support"
 
-# These "hidden" settings determine is a peripheral option is available for the
-# selection MCU
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
 
 config FE310_HAVE_UART0
 	bool
