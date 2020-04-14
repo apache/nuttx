@@ -120,7 +120,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
 static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t ch);
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
                          size_t nwords);
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
@@ -145,7 +145,11 @@ static const struct spi_ops_s g_spiops =
   .registercallback  = 0,                 /* Not implemented */
 };
 
-static struct spi_dev_s g_spidev = {&g_spiops};
+static struct spi_dev_s g_spidev =
+{
+  &g_spiops
+};
+
 static sem_t g_exclsem = SEM_INITIALIZER(1);  /* For mutually exclusive access */
 
 /****************************************************************************
@@ -187,7 +191,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
     }
   else
     {
-      ret= nxsem_post(&g_exclsem);
+      ret = nxsem_post(&g_exclsem);
     }
 
   return ret;
@@ -232,7 +236,8 @@ static void spi_select(FAR struct spi_dev_s *dev, uint32_t devid,
       /* Enable slave select (low enables) */
 
       putreg32(bit, CS_CLR_REGISTER);
-      spiinfo("CS asserted: %08x->%08x\n", regval, getreg32(CS_PIN_REGISTER));
+      spiinfo("CS asserted: %08x->%08x\n",
+              regval, getreg32(CS_PIN_REGISTER));
     }
   else
     {
@@ -405,7 +410,7 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
  *
  ****************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   register uint16_t regval;
 
@@ -486,8 +491,8 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
           getreg16(LPC214X_SPI1_DR);
         }
 
-      /* There is a race condition where TFE may go true just before
-       * RNE goes true and this loop terminates prematurely.  The nasty little
+      /* There is a race condition where TFE may go true just before RNE
+       * goes true and this loop terminates prematurely.  The nasty little
        * delay in the following solves that (it could probably be tuned
        * to improve performance).
        */
@@ -524,10 +529,12 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
                           size_t nwords)
 {
-  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
   uint32_t rxpending = 0;
 
-  /* While there is remaining to be sent (and no synchronization error has occurred) */
+  /* While there is remaining to be sent
+   * (and no synchronization error has occurred)
+   */
 
   spiinfo("nwords: %d\n", nwords);
   while (nwords || rxpending)
@@ -547,7 +554,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
           rxpending++;
         }
 
-      /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
+      /* Now, read RX data from RX FIFO while RX FIFO is not empty */
 
       spiinfo("RX: rxpending: %d\n", rxpending);
       while (getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE)
@@ -595,8 +602,8 @@ FAR struct spi_dev_s *lpc214x_spibus_initialize(int port)
    *
    *   PINSEL1 P0.17/CAP1.2/SCK1/MAT1.2  Bits 2-3=10 for SCK1
    *   PINSEL1 P0.18/CAP1.3/MISO1/MAT1.3 Bits 4-5=10 for MISO1
-   *                      (This is the RESET line for the UG_2864AMBAG01,
-   *                      although it is okay to configure it as an input too)
+   *                     (This is the RESET line for the UG_2864AMBAG01,
+   *                     although it is okay to configure it as an input too)
    *   PINSEL1 P0.19/MAT1.2/MOSI1/CAP1.2 Bits 6-7=10 for MOSI1
    *   PINSEL1 P0.20/MAT1.3/SSEL1/EINT3  Bits 8-9=00 for P0.20
    *                                     (we'll control it via GPIO or FIO)
