@@ -134,7 +134,7 @@ struct lc823450_i2c_priv_s
 
   FAR const struct lc823450_i2c_config_s *config;
 
-  int   refs;                      /* Referernce count */
+  int   refs;                      /* Reference count */
   sem_t sem_excl;                  /* Mutual exclusion semaphore */
 #ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;                   /* Interrupt wait semaphore */
