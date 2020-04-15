@@ -158,7 +158,7 @@ blacklist=`grep "^-" $testfile || true`
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
 function makefunc {
-  ${MAKE} $@
+  ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" $@ 1>/dev/null
   ret=$?
   if [ $ret != 0 ]; then
     fail=$ret
@@ -178,7 +178,7 @@ function distclean {
     if [ ${GITCLEAN} -eq 1 ]; then
       distclean_with_git
     else
-      makefunc ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null
+      makefunc ${JOPTION} distclean
     fi
   fi
 }
@@ -211,7 +211,7 @@ function configure {
 
 
     echo "  Refreshing..."
-    makefunc ${MAKE_FLAGS} olddefconfig 1>/dev/null
+    makefunc olddefconfig 1>/dev/null
   fi
 }
 
@@ -220,7 +220,7 @@ function configure {
 function build {
   echo "  Building NuttX..."
   echo "------------------------------------------------------------------------------------"
-  makefunc ${JOPTION} ${MAKE_FLAGS} ${EXTRA_FLAGS} 1>/dev/null
+  makefunc ${JOPTION}
 }
 
 # Coordinate the steps for the next build test
