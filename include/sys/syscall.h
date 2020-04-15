@@ -89,7 +89,7 @@
 #  define SYS_getgid                   (__SYS_uid + 3)
 #  define __SYS_sem                    (__SYS_uid + 4)
 #else
-#  define __SYS_sem                     __SYS_uid
+#  define __SYS_sem                    (__SYS_uid + 0)
 #endif
 
 /* Semaphores */
@@ -110,12 +110,12 @@
 /* Named semaphores */
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-#  define SYS_sem_open                 __SYS_named_sem
+#  define SYS_sem_open                 (__SYS_named_sem + 0)
 #  define SYS_sem_close                (__SYS_named_sem + 1)
 #  define SYS_sem_unlink               (__SYS_named_sem + 2)
 #  define __SYS_task_create            (__SYS_named_sem + 3)
 #else
-#  define __SYS_task_create            __SYS_named_sem
+#  define __SYS_task_create            (__SYS_named_sem + 0)
 #endif
 
 /* Task creation APIs based on global entry points cannot be use with
@@ -123,7 +123,7 @@
  */
 
 #ifndef CONFIG_BUILD_KERNEL
-#  define SYS_task_create              __SYS_task_create
+#  define SYS_task_create              (__SYS_task_create + 0)
 #ifdef CONFIG_BUILD_PROTECTED
 #  define SYS_nx_task_spawn            (__SYS_task_create + 1)
 #  define __SYS_task_delete            (__SYS_task_create + 2)
@@ -136,11 +136,11 @@
  */
 
 #else
-#  define SYS_pgalloc                  __SYS_task_create
+#  define SYS_pgalloc                  (__SYS_task_create + 0)
 #  define __SYS_task_delete            (__SYS_task_create + 1)
 #endif
 
-#  define SYS_task_delete              __SYS_task_delete
+#  define SYS_task_delete              (__SYS_task_delete + 0)
 #  define SYS_task_restart             (__SYS_task_delete + 1)
 #  define SYS_task_setcancelstate      (__SYS_task_delete + 2)
 #  define SYS_up_assert                (__SYS_task_delete + 3)
@@ -156,37 +156,37 @@
 /* The following can be individually enabled */
 
 #if defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_ARCH_HAVE_VFORK)
-#  define SYS_vfork                    __SYS_vfork
+#  define SYS_vfork                    (__SYS_vfork + 0)
 #  define __SYS_atexit                 (__SYS_vfork + 1)
 #else
-#  define __SYS_atexit                 __SYS_vfork
+#  define __SYS_atexit                 (__SYS_vfork + 0)
 #endif
 
 #ifdef CONFIG_SCHED_ATEXIT
-#  define SYS_atexit                   __SYS_atexit
+#  define SYS_atexit                   (__SYS_atexit + 0)
 #  define __SYS_on_exit                (__SYS_atexit + 1)
 #else
-#  define __SYS_on_exit                __SYS_atexit
+#  define __SYS_on_exit                (__SYS_atexit + 0)
 #endif
 
 #ifdef CONFIG_SCHED_ONEXIT
-#  define SYS_on_exit                  __SYS_on_exit
+#  define SYS_on_exit                  (__SYS_on_exit + 0)
 #  define __SYS_waitpid                (__SYS_on_exit + 1)
 #else
-#  define __SYS_waitpid                __SYS_on_exit
+#  define __SYS_waitpid                (__SYS_on_exit + 0)
 #endif
 
 #ifdef CONFIG_SCHED_WAITPID
-#  define SYS_waitpid                  __SYS_waitpid
+#  define SYS_waitpid                  (__SYS_waitpid + 0)
 #  ifdef CONFIG_SCHED_HAVE_PARENT
 #    define SYS_wait                   (__SYS_waitpid + 1)
 #    define SYS_waitid                 (__SYS_waitpid + 2)
 #    define __SYS_insmod               (__SYS_waitpid + 3)
 #  else
 #    define __SYS_insmod               (__SYS_waitpid + 1)
-#endif
+#  endif
 #else
-#  define __SYS_insmod                 __SYS_waitpid
+#  define __SYS_insmod                 (__SYS_waitpid + 0)
 #endif
 
 /* The following can only be defined if we are configured to load
@@ -194,12 +194,12 @@
  */
 
 #ifdef CONFIG_MODULE
-#  define SYS_insmod                   __SYS_insmod
+#  define SYS_insmod                  (__SYS_insmod + 0)
 #  define SYS_rmmod                   (__SYS_insmod + 1)
 #  define SYS_modhandle               (__SYS_insmod + 2)
 #  define __SYS_exec                  (__SYS_insmod + 3)
 #else
-#  define __SYS_exec                   __SYS_insmod
+#  define __SYS_exec                  (__SYS_insmod + 0)
 #endif
 
 /* The following can only be defined if we are configured to execute
@@ -208,24 +208,24 @@
 
 #ifndef CONFIG_BINFMT_DISABLE
 #  ifndef CONFIG_BUILD_KERNEL
-#    define SYS_exec                   __SYS_exec
+#    define SYS_exec                   (__SYS_exec + 0)
 #    define __SYS_posix_spawn          (__SYS_exec + 1)
 #  else
-#    define __SYS_posix_spawn          __SYS_exec
+#    define __SYS_posix_spawn          (__SYS_exec + 0)
 #  endif
 #  ifdef CONFIG_LIBC_EXECFUNCS
 #    ifdef CONFIG_LIB_ENVPATH
-#      define SYS_posix_spawnp         __SYS_posix_spawn
+#      define SYS_posix_spawnp         (__SYS_posix_spawn + 0)
 #    else
-#      define SYS_posix_spawn          __SYS_posix_spawn
+#      define SYS_posix_spawn          (__SYS_posix_spawn + 0)
 #    endif
 #    define SYS_execv                  (__SYS_posix_spawn + 1)
 #    define __SYS_signals              (__SYS_posix_spawn + 2)
 #  else
-#    define __SYS_signals              __SYS_posix_spawn
+#    define __SYS_signals              (__SYS_posix_spawn + 0)
 #  endif
 #else
-#  define __SYS_signals                __SYS_exec
+#  define __SYS_signals                (__SYS_exec + 0)
 #endif
 
 /* The following are only defined is signals are supported in the NuttX
@@ -270,7 +270,7 @@
 #  define SYS_setitimer                (__SYS_timers + 6)
 #  define __SYS_syslog                 (__SYS_timers + 7)
 #else
-#  define __SYS_syslog                 __SYS_timers
+#  define __SYS_syslog                 (__SYS_timers + 0)
 #endif
 
 /* Unconditional system logging */
@@ -305,34 +305,34 @@
 #  define __SYS_poll                 (__SYS_descriptors + 6)
 #endif
 
-#define SYS_poll                     __SYS_poll
+#define SYS_poll                     (__SYS_poll + 0)
 #define SYS_select                   (__SYS_poll + 1)
 #define SYS_ppoll                    (__SYS_poll + 2)
 #define SYS_pselect                  (__SYS_poll + 3)
 #define __SYS_ifindex                (__SYS_poll + 4)
 
 #ifdef CONFIG_NETDEV_IFINDEX
-#  define SYS_if_indextoname         __SYS_ifindex
+#  define SYS_if_indextoname         (__SYS_ifindex + 0)
 #  define SYS_if_nametoindex         (__SYS_ifindex + 1)
 #  define __SYS_termios              (__SYS_ifindex + 2)
 #else
-#  define __SYS_termios               __SYS_ifindex
+#  define __SYS_termios              (__SYS_ifindex + 0)
 #endif
 
 #ifdef CONFIG_SERIAL_TERMIOS
-#  define SYS_tcdrain                __SYS_termios
+#  define SYS_tcdrain                (__SYS_termios + 0)
 #  define __SYS_boardctl             (__SYS_termios + 1)
 #else
-#  define __SYS_boardctl             __SYS_termios
+#  define __SYS_boardctl             (__SYS_termios + 0)
 #endif
 
 /* Board support */
 
 #ifdef CONFIG_LIB_BOARDCTL
-#    define SYS_boardctl                __SYS_boardctl
+#    define SYS_boardctl                (__SYS_boardctl + 0)
 #  define __SYS_filedesc                (__SYS_boardctl + 1)
 #else
-#  define __SYS_filedesc               __SYS_boardctl
+#  define __SYS_filedesc                (__SYS_boardctl + 0)
 #endif
 
 /* The following are defined if file descriptors are enabled */
@@ -366,7 +366,7 @@
 #  define SYS_readlink                 (__SYS_link + 1)
 #  define __SYS_pipes                  (__SYS_link + 2)
 #else
-#  define __SYS_pipes                  __SYS_link
+#  define __SYS_pipes                  (__SYS_link + 0)
 #endif
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
@@ -392,10 +392,10 @@
 #endif
 
 #if defined(CONFIG_NET_SENDFILE)
-#  define SYS_sendfile,                __SYS_sendfile
+#  define SYS_sendfile,                (__SYS_sendfile + 0)
 #  define __SYS_mountpoint             (__SYS_sendfile + 1)
 #else
-#  define __SYS_mountpoint             __SYS_sendfile
+#  define __SYS_mountpoint             (__SYS_sendfile + 0)
 #endif
 
 #if !defined(CONFIG_DISABLE_MOUNTPOINT)
@@ -409,7 +409,7 @@
 #  define SYS_unlink                   (__SYS_mountpoint + 7)
 #  define __SYS_shm                    (__SYS_mountpoint + 8)
 #else
-#  define __SYS_shm                    __SYS_mountpoint
+#  define __SYS_shm                    (__SYS_mountpoint + 0)
 #endif
 
 /* Shared memory interfaces */
@@ -421,7 +421,7 @@
 #  define SYS_shmdt                    (__SYS_shm + 3)
 #  define __SYS_pthread                (__SYS_shm + 4)
 #else
-#  define __SYS_pthread                __SYS_shm
+#  define __SYS_pthread                (__SYS_shm + 0)
 #endif
 
 /* The following are defined if pthreads are enabled */
@@ -464,7 +464,7 @@
 #    define SYS_pthread_getaffinity_np (__SYS_pthread_smp + 1)
 #    define __SYS_pthread_signals      (__SYS_pthread_smp + 2)
 #  else
-#    define __SYS_pthread_signals      __SYS_pthread_smp
+#    define __SYS_pthread_signals      (__SYS_pthread_smp + 0)
 #  endif
 
 #  define SYS_pthread_cond_timedwait   (__SYS_pthread_signals + 0)
@@ -477,11 +477,11 @@
 #    define SYS_pthread_cleanup_pop    (__SYS_pthread_cleanup + 1)
 #    define __SYS_mqueue               (__SYS_pthread_cleanup + 2)
 #  else
-#    define __SYS_mqueue               __SYS_pthread_cleanup
+#    define __SYS_mqueue               (__SYS_pthread_cleanup + 0)
 #  endif
 
 #else
-#  define __SYS_mqueue                 __SYS_pthread
+#  define __SYS_mqueue                 (__SYS_pthread + 0)
 #endif
 
 /* The following are defined only if message queues are enabled */
@@ -499,7 +499,7 @@
 #  define SYS_mq_unlink                (__SYS_mqueue + 9)
 #  define __SYS_environ                (__SYS_mqueue + 10)
 #else
-#  define __SYS_environ                __SYS_mqueue
+#  define __SYS_environ                (__SYS_mqueue + 0)
 #endif
 
 /* The following are defined only if environment variables are supported */
@@ -512,7 +512,7 @@
 #  define SYS_unsetenv                 (__SYS_environ + 4)
 #  define __SYS_netdb                  (__SYS_environ + 5)
 #else
-#  define __SYS_netdb                __SYS_environ
+#  define __SYS_netdb                  (__SYS_environ + 0)
 #endif
 
 /* The following are defined if netdb is supported */
@@ -521,7 +521,7 @@
 #  define SYS_sethostname              (__SYS_netdb + 0)
 #  define __SYS_network                (__SYS_netdb + 1)
 #else
-#  define __SYS_network                __SYS_netdb
+#  define __SYS_network                (__SYS_netdb + 0)
 #endif
 
 /* The following are defined only if networking AND sockets are supported */
@@ -540,16 +540,18 @@
 #  define SYS_sendto                   (__SYS_network + 10)
 #  define SYS_setsockopt               (__SYS_network + 11)
 #  define SYS_socket                   (__SYS_network + 12)
+#  define __SYS_socket                 (__SYS_network + 13)
 #else
-#  define SYS_socket                    __SYS_network
+#  define __SYS_socket                 (__SYS_network + 0)
 #endif
 
 /* The following is defined only if CONFIG_TASK_NAME_SIZE > 0 */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-#  define SYS_prctl                    (SYS_socket + 1)
+#  define SYS_prctl                    (__SYS_socket + 0)
+#  define __SYS_prctl                  (__SYS_socket + 1)
 #else
-#  define SYS_prctl                    SYS_socket
+#  define __SYS_prctl                  (__SYS_socket + 0)
 #endif
 
 /* The following is defined only if entropy pool random number generator
@@ -557,10 +559,10 @@
  */
 
 #ifdef CONFIG_CRYPTO_RANDOM_POOL
-#  define SYS_getrandom                (SYS_prctl + 1)
-#  define SYS_maxsyscall               (SYS_prctl + 2)
+#  define SYS_getrandom                (__SYS_prctl + 0)
+#  define SYS_maxsyscall               (__SYS_prctl + 1)
 #else
-#  define SYS_maxsyscall               (SYS_prctl + 1)
+#  define SYS_maxsyscall               (__SYS_prctl + 0)
 #endif
 
 /* Note that the reported number of system calls does *NOT* include the
