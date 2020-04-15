@@ -10,13 +10,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-name: PR Check CI (build)
+name: Build
 
 on:
   pull_request:
 
 jobs:
-  build-linux:
+  Linux:
     runs-on: ubuntu-18.04
     env:
       DOCKER_BUILDKIT: 1
@@ -66,7 +66,7 @@ jobs:
           cd testing
           ./cibuild.sh -x -G testlist/${{matrix.boards}}.dat
 
-  build-macos:
+  macOS:
     runs-on: macos-10.15
 
     strategy:
