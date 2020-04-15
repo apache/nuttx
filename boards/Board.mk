@@ -37,6 +37,27 @@
 
 -include $(TOPDIR)/Make.defs
 
+ifneq ($(RCSRCS)$(RCRAWS),)
+ETCDIR := etctmp
+ETCSRC := $(ETCDIR:%=%.c)
+
+CSRCS += $(ETCSRC)
+
+RCOBJS = $(RCSRCS:%=$(ETCDIR)$(DELIM)%)
+
+$(RCOBJS): $(ETCDIR)$(DELIM)%: %
+	$(Q) mkdir -p $(dir $@)
+	$(call PREPROCESS, $<, $@)
+
+$(ETCSRC): $(RCRAWS) $(RCOBJS)
+	$(foreach raw, $(RCRAWS), \
+	  $(shell mkdir -p $(dir $(ETCDIR)$(DELIM)$(raw))) \
+	  $(shell cp -rfp $(raw) $(ETCDIR)$(DELIM)$(raw)))
+	$(Q) genromfs -f romfs.img -d $(ETCDIR)$(DELIM)$(CONFIG_NSH_ROMFSMOUNTPT) -V "$(basename $<)"
+	$(Q) xxd -i romfs.img | sed -e "s/^unsigned/const unsigned/g" > $@
+	$(Q) rm romfs.img
+endif
+
 ifneq ($(ZDSVERSION),)
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 else
@@ -119,7 +140,7 @@ ifneq ($(CXXOBJS),)
 	$(call ARCHIVE, $@, $(CXXOBJS))
 endif
 
-.depend: Makefile $(SRCS) $(CXXSRCS)
+.depend: Makefile $(SRCS) $(CXXSRCS) $(RCSRCS)
 ifneq ($(ZDSVERSION),)
 	$(Q) $(MKDEP) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 else
@@ -127,6 +148,9 @@ else
 endif
 ifneq ($(CXXSRCS),)
 	$(Q) $(MKDEP) $(DEPPATH) "$(CXX)" -- $(CXXFLAGS) -- $(CXXSRCS) >>Make.dep
+endif
+ifneq ($(RCSRCS),)
+	$(Q) $(MKDEP) $(DEPPATH) "$(CPP)" --obj-path . -- $(CPPFLAGS) -- $(RCSRCS) >>Make.dep
 endif
 	$(Q) touch $@
 
@@ -138,6 +162,8 @@ endif
 
 clean:
 	$(call DELFILE, libboard$(LIBEXT))
+	$(call DELFILE, $(ETCSRC))
+	$(call DELDIR, $(ETCDIR))
 	$(call CLEAN)
 	$(EXTRA_CLEAN)
 
