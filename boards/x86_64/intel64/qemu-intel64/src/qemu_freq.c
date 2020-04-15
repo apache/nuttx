@@ -49,7 +49,7 @@ extern unsigned long x86_64_timer_freq;
  *
  * Description:
  *   Initializes all platform-specific timer facilities.  This function is
- *   called early in the initialization sequence by up_intialize().
+ *   called early in the initialization sequence by up_initialize().
  *   On return, the current up-time should be available from
  *   up_timer_gettime() and the interval timer is ready for use (but not
  *   actively timing.
@@ -77,7 +77,8 @@ void x86_64_timer_calibrate_freq(void)
   unsigned long numerator;
   unsigned long denominator;
 
-  asm volatile("cpuid" : "=c" (crystal_freq), "=b" (numerator), "=a" (denominator)
+  asm volatile("cpuid"
+      : "=c" (crystal_freq), "=b" (numerator), "=a" (denominator)
       : "a" (X86_64_CPUID_TSC)
       : "rdx", "memory");
 
