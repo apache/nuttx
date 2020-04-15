@@ -1856,7 +1856,7 @@ void usbmsc_uninitialize(FAR void *handle)
            * have no option but to continue with the teardown.
            */
 
-          DEBUGASSERT(ret == OK || ret == -ECANCLED);
+          DEBUGASSERT(ret == OK || ret == -ECANCELED);
         }
       while (ret < 0);
 
