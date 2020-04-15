@@ -74,4 +74,9 @@ else
 endif
 endif
 
+#ifdef CONFIG_NSH_ROMFSETC
+  RCSRCS = etc/init.d/rcS
+  RCRAWS = etc/group etc/passwd
+#endif
+
 include $(TOPDIR)/boards/Board.mk

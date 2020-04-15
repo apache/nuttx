@@ -60,7 +60,7 @@ endif
 CROSSDEV =
 CC = $(CROSSDEV)cc
 CXX = $(CROSSDEV)c++
-CPP = $(CROSSDEV)cc -E
+CPP = $(CROSSDEV)cc -E -P -x c
 LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)ar rcs
