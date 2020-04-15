@@ -206,7 +206,8 @@ int up_rptun_init(void)
 
       rsc->rsc_tbl_hdr.ver          = 1;
       rsc->rsc_tbl_hdr.num          = 1;
-      rsc->offset[0]                = offsetof(struct rptun_rsc_s, rpmsg_vdev);
+      rsc->offset[0]                = offsetof(struct rptun_rsc_s,
+                                               rpmsg_vdev);
       rsc->rpmsg_vdev.type          = RSC_VDEV;
       rsc->rpmsg_vdev.id            = VIRTIO_ID_RPMSG;
       rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS

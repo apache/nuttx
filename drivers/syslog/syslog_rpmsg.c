@@ -177,7 +177,8 @@ static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
       priv->buffer[B2C_OFF(priv->head)] = 0;
     }
 
-  priv->buffer[B2C_OFF(priv->head)] |= (ch & 0xff) << (8 * B2C_REM(priv->head));
+  priv->buffer[B2C_OFF(priv->head)] |= (ch & 0xff) <<
+                                       (8 * B2C_REM(priv->head));
 
   priv->head += 1;
   if (priv->head >= C2B(priv->size))
@@ -276,8 +277,9 @@ static void syslog_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
     }
 }
 
-static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
-                               size_t len, uint32_t src, FAR void *priv_)
+static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
+                               FAR void *data, size_t len, uint32_t src,
+                               FAR void *priv_)
 {
   FAR struct syslog_rpmsg_s *priv = priv_;
   FAR struct syslog_rpmsg_header_s *header = data;
