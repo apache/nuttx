@@ -1318,7 +1318,7 @@ static struct stm32l4_pwmchan_s g_pwmlp1channels[] =
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32L4_LPTIM1_CH1POL,
+      .pol     = 0,             /* REVISIT: Configure using CONFIG_STM32L4_LPTIM1_CH1POL, */
       .idle    = 0,             /* No idle */
       .pincfg  = PWM_LPTIM1_CH1CFG,
     }
