@@ -74,10 +74,6 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -146,13 +142,11 @@ static struct usbdevclass_driverops_s g_driverops =
   NULL               /* resume */
 };
 
-/* Used to hand-off the state structure when the SCSI worker thread is started */
+/* Used to hand-off the state structure when the SCSI worker thread is
+ * started.
+ */
 
 FAR struct usbmsc_dev_s *g_usbmsc_handoff;
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -225,10 +219,6 @@ static void usbmsc_freereq(FAR struct usbdev_ep_s *ep,
       EP_FREEREQ(ep, req);
     }
 }
-
-/****************************************************************************
- * Class Driver Interfaces
- ****************************************************************************/
 
 /****************************************************************************
  * Name: usbmsc_bind
@@ -358,7 +348,9 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
       leave_critical_section(flags);
     }
 
-  /* Report if we are selfpowered (unless we are part of a composite device) */
+  /* Report if we are selfpowered (unless we are part of a composite
+   * device).
+   */
 
 #ifndef CONFIG_USBMSC_COMPOSITE
 #ifdef CONFIG_USBDEV_SELFPOWERED
@@ -896,10 +888,6 @@ static void usbmsc_disconnect(FAR struct usbdevclass_driver_s *driver,
 }
 
 /****************************************************************************
- * Initialization/Un-Initialization
- ****************************************************************************/
-
-/****************************************************************************
  * Name: usbmsc_lununinitialize
  ****************************************************************************/
 
@@ -919,10 +907,6 @@ static void usbmsc_lununinitialize(struct usbmsc_lun_s *lun)
 
 /****************************************************************************
  * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Internal Interfaces
  ****************************************************************************/
 
 /****************************************************************************
@@ -1170,7 +1154,9 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
         sq_addlast((FAR sq_entry_t *)privreq, &priv->rdreqlist);
         leave_critical_section(flags);
 
-        /* Signal the worker thread that there is received data to be processed */
+        /* Signal the worker thread that there is received data to be
+         * processed.
+         */
 
         priv->theventset |= USBMSC_EVENT_RDCOMPLETE;
         usbmsc_scsi_signal(priv);
@@ -1286,10 +1272,6 @@ static int usbmsc_sync_wait(FAR struct usbmsc_dev_s *priv)
 {
   return nxsem_wait_uninterruptible(&priv->thsynch);
 }
-
-/****************************************************************************
- * User Interfaces
- ****************************************************************************/
 
 /****************************************************************************
  * Name: usbmsc_configure
@@ -1562,7 +1544,9 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
   lun->sectorsize  = geo.geo_sectorsize;
   lun->readonly    = readonly;
 
-  /* If the driver does not support the write method, then this is read-only */
+  /* If the driver does not support the write method, then this is read-
+   * only.
+   */
 
   if (!inode->u.i_bops->write)
     {
@@ -1724,7 +1708,9 @@ int usbmsc_exportluns(FAR void *handle)
 
   DEBUGASSERT(g_usbmsc_handoff == NULL);
 
-  /* Register the USB storage class driver (unless we are part of a composite device) */
+  /* Register the USB storage class driver (unless we are part of a composite
+   * device).
+   */
 
 #ifndef CONFIG_USBMSC_COMPOSITE
   ret = usbdev_register(&drvr->drvr);
