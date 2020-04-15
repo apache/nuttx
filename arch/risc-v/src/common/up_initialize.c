@@ -124,6 +124,16 @@ void up_initialize(void)
   idle->adj_stack_ptr   = (FAR void *)g_idle_topstack;
   idle->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
 
+#ifdef CONFIG_PM
+  /* Initialize the power management subsystem.  This MCU-specific function
+   * must be called *very* early in the initialization sequence *before* any
+   * other device drivers are initialized (since they may attempt to register
+   * with the power management subsystem).
+   */
+
+  up_pminitialize();
+#endif
+
   /* Register devices */
 
 #if defined(CONFIG_DEV_NULL)
