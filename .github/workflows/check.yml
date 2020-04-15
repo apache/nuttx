@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-name: PR Check CI (check)
+name: Check
 
 on:
   pull_request:
