@@ -201,6 +201,14 @@ void up_restorefpu(const uint32_t *regs);
 #  define up_restorefpu(regs)
 #endif
 
+/* Power management *********************************************************/
+
+#ifdef CONFIG_PM
+void up_pminitialize(void);
+#else
+#  define up_pminitialize()
+#endif
+
 /* Low level serial output **************************************************/
 
 void up_lowputc(char ch);
