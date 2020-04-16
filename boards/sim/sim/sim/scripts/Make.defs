@@ -62,7 +62,11 @@ CC = $(CROSSDEV)cc
 CXX = $(CROSSDEV)c++
 CPP = $(CROSSDEV)cc -E -P -x c
 LD = $(CROSSDEV)ld
+ifeq ($(CONFIG_HOST_MACOS),y)
+STRIP = $(CROSSDEV)strip
+else
 STRIP = $(CROSSDEV)strip --strip-unneeded
+endif
 AR = $(CROSSDEV)ar rcs
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
