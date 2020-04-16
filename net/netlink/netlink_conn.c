@@ -317,7 +317,7 @@ void netlink_add_broadcast(int group, FAR struct netlink_response_s *data)
 
   while ((conn = netlink_nextconn(conn)) != NULL)
     {
-      if (conn->groups & (1 << (group - 1)) == 0)
+      if ((conn->groups & (1 << (group - 1))) == 0)
         {
           continue;
         }
