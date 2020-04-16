@@ -305,8 +305,8 @@ static void ioctl_get_ipv4addr(FAR struct sockaddr *outaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv4
-static void inline ioctl_get_ipv4broadcast(FAR struct sockaddr *outaddr,
-                                           in_addr_t inaddr, in_addr_t netmask)
+static void ioctl_get_ipv4broadcast(FAR struct sockaddr *outaddr,
+                                    in_addr_t inaddr, in_addr_t netmask)
 {
   FAR struct sockaddr_in *dest  = (FAR struct sockaddr_in *)outaddr;
   dest->sin_family              = AF_INET;
@@ -378,7 +378,8 @@ static void ioctl_set_ipv4addr(FAR in_addr_t *outaddr,
 static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
                                FAR const struct sockaddr_storage *inaddr)
 {
-  FAR const struct sockaddr_in6 *src = (FAR const struct sockaddr_in6 *)inaddr;
+  FAR const struct sockaddr_in6 *src =
+    (FAR const struct sockaddr_in6 *)inaddr;
   memcpy(outaddr, src->sin6_addr.in6_u.u6_addr8, 16);
 }
 #endif
@@ -511,7 +512,7 @@ static int netdev_iee802154_ioctl(FAR struct socket *psock, int cmd,
  * Name: netdev_pktradio_ioctl
  *
  * Description:
- *   Perform non-IEEE802.15.4 packet radio network device specific operations.
+ *   Perform non-IEEE802.15.4 packet radio network device specific operation.
  *
  * Input Parameters:
  *   psock  - Socket structure
@@ -605,7 +606,7 @@ static int netdev_wifr_ioctl(FAR struct socket *psock, int cmd,
         {
           /* Just forward the IOCTL to the wireless driver */
 
-          ret = dev->d_ioctl(dev, cmd, ((unsigned long)(uintptr_t)req));
+          ret = dev->d_ioctl(dev, cmd, (unsigned long)(uintptr_t)req);
         }
     }
 
@@ -1065,8 +1066,9 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifr_dev(req);
           if (dev && dev->d_ioctl)
             {
-              struct mii_ioctl_notify_s *notify = &req->ifr_ifru.ifru_mii_notify;
-              ret = dev->d_ioctl(dev, cmd, ((unsigned long)(uintptr_t)notify));
+              struct mii_ioctl_notify_s *notify =
+                &req->ifr_ifru.ifru_mii_notify;
+              ret = dev->d_ioctl(dev, cmd, (unsigned long)(uintptr_t)notify);
             }
         }
         break;
@@ -1079,8 +1081,10 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifr_dev(req);
           if (dev && dev->d_ioctl)
             {
-              struct mii_ioctl_data_s *mii_data = &req->ifr_ifru.ifru_mii_data;
-              ret = dev->d_ioctl(dev, cmd, ((unsigned long)(uintptr_t)mii_data));
+              struct mii_ioctl_data_s *mii_data =
+                &req->ifr_ifru.ifru_mii_data;
+              ret = dev->d_ioctl(dev, cmd,
+                                 (unsigned long)(uintptr_t)mii_data);
             }
         }
         break;
@@ -1243,9 +1247,10 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
               FAR struct sockaddr_in *addr =
                 (FAR struct sockaddr_in *)&req->arp_pa;
 
-              /* Find the existing ARP table entry for this protocol address. */
+              /* Find the existing ARP entry for this protocol address. */
 
-              FAR struct arp_entry_s *entry = arp_lookup(addr->sin_addr.s_addr);
+              FAR struct arp_entry_s *entry =
+                arp_lookup(addr->sin_addr.s_addr);
               if (entry != NULL)
                 {
                   /* The ARP table is fixed size; an entry is deleted
@@ -1613,8 +1618,6 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
       return -EBADF;
     }
 
-  /* Execute the command.  First check for a standard network IOCTL command. */
-
 #ifdef CONFIG_NET_USRSOCK
   /* Check for a USRSOCK ioctl command */
 
@@ -1624,7 +1627,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
     {
       /* Check for a standard network IOCTL command. */
 
-      ret = netdev_ifr_ioctl(psock, cmd, (FAR struct ifreq *)((uintptr_t)arg));
+      ret = netdev_ifr_ioctl(psock, cmd, (FAR struct ifreq *)(uintptr_t)arg);
     }
 
 #if defined(CONFIG_NETDEV_IOCTL) && defined(CONFIG_NETDEV_WIRELESS_IOCTL)
@@ -1672,7 +1675,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
   if (ret == -ENOTTY)
     {
       ret = netdev_imsf_ioctl(psock, cmd,
-                              (FAR struct ip_msfilter *)((uintptr_t)arg));
+                              (FAR struct ip_msfilter *)(uintptr_t)arg);
     }
 #endif
 
@@ -1682,7 +1685,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
   if (ret == -ENOTTY)
     {
       ret = netdev_arp_ioctl(psock, cmd,
-                             (FAR struct arpreq *)((uintptr_t)arg));
+                             (FAR struct arpreq *)(uintptr_t)arg);
     }
 #endif
 
@@ -1692,7 +1695,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
   if (ret == -ENOTTY)
     {
       ret = netdev_rt_ioctl(psock, cmd,
-                            (FAR struct rtentry *)((uintptr_t)arg));
+                            (FAR struct rtentry *)(uintptr_t)arg);
     }
 #endif
 
