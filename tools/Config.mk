@@ -369,3 +369,4 @@ endif
 
 MODULECC = $(CC)
 MODULELD = $(LD)
+MODULESTRIP = $(STRIP)
