@@ -1,4 +1,4 @@
-/***************************************************************************
+/****************************************************************************
  * boards/arm/cxd56xx/drivers/audio/cxd56_audio_config.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
