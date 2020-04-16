@@ -532,6 +532,7 @@ static inline bool sixlowpan_isbytebased(const net_ipv6addr_t ipaddr,
 }
 #endif
 
+#ifdef HAVE_SADDR
 static inline bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
                                           FAR const uint8_t *saddr)
 {
@@ -539,7 +540,9 @@ static inline bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
           ipaddr[6] == HTONS(0xfe00) &&
           ipaddr[7] == *(uint16_t *)saddr);
 }
+#endif
 
+#ifdef HAVE_EADDR
 static inline bool sixlowpan_iseaddrbased(const net_ipv6addr_t ipaddr,
                                           FAR const uint8_t *eaddr)
 {
@@ -554,6 +557,7 @@ static inline bool sixlowpan_iseaddrbased(const net_ipv6addr_t ipaddr,
           ipaddr[6] ==   *(uint16_t *)(eaddr + 4) &&
           ipaddr[7] ==   *(uint16_t *)(eaddr + 6));
 }
+#endif
 
 bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
                           FAR const struct netdev_varaddr_s *addr)
