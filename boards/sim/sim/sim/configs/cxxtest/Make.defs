@@ -96,6 +96,7 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   # eg. brew install x86_64-elf-gcc
   MODULECC = x86_64-elf-gcc
   MODULELD = x86_64-elf-ld
+  MODULESTRIP = x86_64-elf-strip --strip-unneeded
   # It seems macOS/x86_64 loads the program text around 00000001_xxxxxxxx.
   # The gcc default (-mcmodel=small) would produce out-of-range 32-bit
   # relocations.
