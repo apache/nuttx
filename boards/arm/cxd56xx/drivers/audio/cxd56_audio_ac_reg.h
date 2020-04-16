@@ -1,4 +1,4 @@
-/***************************************************************************
+/****************************************************************************
  * boards/arm/cxd56xx/drivers/audio/cxd56_audio_ac_reg.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
@@ -36,13 +36,13 @@
 #ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_AC_REG_H
 #define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_AC_REG_H
 
-/***************************************************************************
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <arch/chip/audio.h>
 
-/***************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -368,7 +368,7 @@ enum audio_codec_register_id_e
 
 typedef enum audio_codec_register_id_e AC_REG_ID;
 
-/***************************************************************************
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -379,15 +379,15 @@ struct cxd56_audio_ac_reg_seloutch_s
 
 typedef struct cxd56_audio_ac_reg_seloutch_s cxd56_audio_ac_reg_seloutch_t;
 
-/***************************************************************************
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/***************************************************************************
+/****************************************************************************
  * Inline Functions
  ****************************************************************************/
 
-/***************************************************************************
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -412,10 +412,11 @@ void cxd56_audio_ac_reg_set_dncram(cxd56_audio_dnc_id_t id,
 void cxd56_audio_ac_reg_enable_deq(void);
 void cxd56_audio_ac_reg_disable_deq(void);
 void cxd56_audio_ac_reg_set_deq_param(FAR cxd56_audio_deq_coef_t *deq);
-CXD56_AUDIO_ECODE cxd56_audio_ac_reg_poweron_cic(uint8_t mic_in,
-                                                 uint8_t mic_mode,
-                                                 uint8_t cic_num,
-                                                 FAR cxd56_audio_mic_gain_t *gain);
+CXD56_AUDIO_ECODE cxd56_audio_ac_reg_poweron_cic(
+                                uint8_t mic_in,
+                                uint8_t mic_mode,
+                                uint8_t cic_num,
+                                FAR cxd56_audio_mic_gain_t *gain);
 void cxd56_audio_ac_reg_poweroff_cic(void);
 CXD56_AUDIO_ECODE cxd56_audio_ac_reg_poweron_decim(uint8_t mic_mode,
                                                    uint8_t clk_mode);
@@ -433,7 +434,8 @@ void cxd56_audio_ac_reg_set_cicgain(uint8_t cic_num,
 void cxd56_audio_ac_reg_enable_digsft(void);
 void cxd56_audio_ac_reg_disable_digsft(void);
 void cxd56_audio_ac_reg_set_dsrrate(uint32_t rate);
-void cxd56_audio_ac_reg_set_seloutch(FAR cxd56_audio_ac_reg_seloutch_t *seloutch);
+void cxd56_audio_ac_reg_set_seloutch(
+                    FAR cxd56_audio_ac_reg_seloutch_t *seloutch);
 void cxd56_audio_ac_reg_enable_dma(void);
 
 void cxd56_audio_ac_reg_poweron_i2s(uint8_t clk_mode);
@@ -442,8 +444,9 @@ void cxd56_audio_ac_reg_enable_i2s_src2(void);
 void cxd56_audio_ac_reg_enable_i2s_bcklrckout(void);
 void cxd56_audio_ac_reg_disable_i2s_bcklrckout(void);
 
-CXD56_AUDIO_ECODE cxd56_audio_ac_reg_set_selector(cxd56_audio_signal_t sig,
-                                                  cxd56_audio_sel_t sel);
+CXD56_AUDIO_ECODE cxd56_audio_ac_reg_set_selector(
+                                     cxd56_audio_signal_t sig,
+                                     cxd56_audio_sel_t sel);
 
 CXD56_AUDIO_ECODE cxd56_audio_ac_reg_enable_cstereo(bool sign_inv,
                                                     int16_t vol);
