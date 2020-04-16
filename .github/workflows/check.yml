@@ -30,8 +30,7 @@ jobs:
     - name: Check Pull Request
       run: |
         cd nuttx
-        ranges=`git log -1 --merges --pretty=format:%P | awk -F" " '{ print $1 ".." $2 }'`
-        git log --oneline $ranges
-        commits=`git log --reverse --format=format:%H $ranges`
+        commits=`git log -1 --merges --pretty=format:%P | awk -F" " '{ print $1 ".." $2 }'`
+        git log --oneline $commits
         echo "../nuttx/tools/checkpatch.sh -g $commits"
         ../nuttx/tools/checkpatch.sh -g $commits
