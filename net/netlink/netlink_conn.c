@@ -290,6 +290,78 @@ void netlink_add_response(NETLINK_HANDLE handle,
 }
 
 /****************************************************************************
+ * Name: netlink_add_broadcast
+ *
+ * Description:
+ *   Add broadcast data to all interested netlink connections.
+ *
+ *   Note:  The network will be momentarily locked to support exclusive
+ *   access to the pending response list.
+ *
+ * Input Parameters:
+ *   group - The broadcast group index.
+ *   data  - The broadcast data.  The memory referenced by 'data'
+ *           must have been allocated via kmm_malloc().  It will be freed
+ *           using kmm_free() after it has been consumed.
+ *
+ ****************************************************************************/
+
+void netlink_add_broadcast(int group, FAR struct netlink_response_s *data)
+{
+  FAR struct netlink_conn_s *conn = NULL;
+  int first = 1;
+
+  DEBUGASSERT(data != NULL);
+
+  net_lock();
+
+  while ((conn = netlink_nextconn(conn)) != NULL)
+    {
+      if (conn->groups & (1 << (group - 1)) == 0)
+        {
+          continue;
+        }
+
+      /* Duplicate the package except the first loop */
+
+      if (!first)
+        {
+          FAR struct netlink_response_s *tmp;
+          size_t len;
+
+          len = sizeof(sq_entry_t) + data->msg.nlmsg_len;
+          tmp = kmm_malloc(len);
+          if (tmp == NULL)
+            {
+              break;
+            }
+
+          memcpy(tmp, data, len);
+          data = tmp;
+        }
+
+      first = 0;
+
+      /* Add the response to the end of the FIFO list */
+
+      sq_addlast(&data->flink, &conn->resplist);
+
+      /* Notify any waiters that a response is available */
+
+      netlink_notifier_signal(conn);
+    }
+
+  net_unlock();
+
+  /* Drop the package if nobody is interested in */
+
+  if (first)
+    {
+      kmm_free(data);
+    }
+}
+
+/****************************************************************************
  * Name: netlink_tryget_response
  *
  * Description:

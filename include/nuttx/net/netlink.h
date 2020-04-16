@@ -72,7 +72,7 @@ typedef FAR void *NETLINK_HANDLE;
 struct netlink_response_s
 {
   sq_entry_t flink;
-  FAR struct nlmsghdr msg;
+  struct nlmsghdr msg;
 
   /* Message-specific data may follow */
 };
@@ -112,6 +112,25 @@ extern "C"
 
 void netlink_add_response(NETLINK_HANDLE handle,
                           FAR struct netlink_response_s *resp);
+
+/****************************************************************************
+ * Name: netlink_add_broadcast
+ *
+ * Description:
+ *   Add broadcast data to all interested netlink connections.
+ *
+ *   Note:  The network will be momentarily locked to support exclusive
+ *   access to the pending response list.
+ *
+ * Input Parameters:
+ *   group - The broadcast group index.
+ *   data  - The broadcast data.  The memory referenced by 'data'
+ *           must have been allocated via kmm_malloc().  It will be freed
+ *           using kmm_free() after it has been consumed.
+ *
+ ****************************************************************************/
+
+void netlink_add_broadcast(int group, FAR struct netlink_response_s *data);
 
 #undef EXTERN
 #ifdef __cplusplus
