@@ -164,7 +164,8 @@
  * Private Types
  ****************************************************************************/
 
-enum isx012_state_e {
+enum isx012_state_e
+{
   STATE_ISX012_PRESLEEP,
   STATE_ISX012_SLEEP,
   STATE_ISX012_ACTIVE,
@@ -173,7 +174,8 @@ enum isx012_state_e {
 
 typedef enum isx012_state_e isx012_state_t;
 
-struct isx012_reg_s {
+struct isx012_reg_s
+{
   uint16_t regaddr;
   uint16_t regval;
   uint8_t  regsize;
@@ -189,7 +191,8 @@ struct isx012_conv_v4l2_to_regval_s
 
 typedef struct isx012_conv_v4l2_to_regval_s isx012_conv_v4l2_to_regval_t;
 
-struct isx012_modeparam_s {
+struct isx012_modeparam_s
+{
   uint8_t  fps;         /* use ISX012 register setting value */
   uint32_t format;      /* use V4L2 definition */
   uint16_t hsize;
@@ -290,7 +293,8 @@ static int isx012_refresh(void);
 static isx012_dev_t   g_isx012_private;
 
 #ifndef ISX012_NOT_USE_NSTBY
-static const isx012_reg_t g_isx012_presleep[] = {
+static const isx012_reg_t g_isx012_presleep[] =
+{
   {PLL_CKSEL, 0x00, 0x01}, /* PLL_CKSEL */
   {SRCCK_DIV, 0x00, 0x01}, /* SRCCK_DIV */
   {INCK_SET,  0x17, 0x01}, /* INCK_SET */
@@ -298,7 +302,8 @@ static const isx012_reg_t g_isx012_presleep[] = {
 #define ISX012_PRESLEEP_NENTRIES ARRAY_NENTRIES(g_isx012_presleep)
 #endif
 
-static const isx012_reg_t g_isx012_def_init[] = {
+static const isx012_reg_t g_isx012_def_init[] =
+{
 #ifdef ISX012_NOT_USE_NSTBY
   {PLL_CKSEL,         0x00, 0x01},
   {SRCCK_DIV,         0x00, 0x01},
@@ -343,7 +348,8 @@ static const isx012_reg_t g_isx012_def_init[] = {
 };
 #define ISX012_RESET_NENTRIES ARRAY_NENTRIES(g_isx012_def_init)
 
-static const uint8_t g_isx012_cxc_rgb_data[CXC_RGB_DATA_UNIT_NUM][CXC_RGB_DATA_UNIT_SIZE] =
+static const uint8_t g_isx012_cxc_rgb_data[CXC_RGB_DATA_UNIT_NUM]
+                                          [CXC_RGB_DATA_UNIT_SIZE] =
 {
   {0x01, 0x43, 0xc0, 0xf0, 0x4f, 0xfc, 0x13},  /* CXC_RGB_UNIT0  */
   {0x80, 0x44, 0x20, 0x21, 0x48, 0x04, 0x0e},  /* CXC_RGB_UNIT1  */
@@ -374,7 +380,8 @@ static const uint8_t g_isx012_cxc_rgb_data[CXC_RGB_DATA_UNIT_NUM][CXC_RGB_DATA_U
   {0x84, 0x03, 0xe1, 0x40, 0x28, 0x10, 0x0a},  /* CXC_RGB_UNIT26 */
 };
 
-static const uint8_t g_isx012_cxc_grb_data[CXC_GRB_DATA_UNIT_NUM][CXC_GRB_DATA_UNIT_SIZE] =
+static const uint8_t g_isx012_cxc_grb_data[CXC_GRB_DATA_UNIT_NUM]
+                                          [CXC_GRB_DATA_UNIT_SIZE] =
 {
   {0x00, 0x3d, 0x40, 0x0f, 0xc0, 0x03, 0xf2},  /* CXC_GRB_UNIT0  */
   {0x80, 0x7c, 0x80, 0x1f, 0xd8, 0x03, 0xf0},  /* CXC_GRB_UNIT1  */
@@ -405,7 +412,8 @@ static const uint8_t g_isx012_cxc_grb_data[CXC_GRB_DATA_UNIT_NUM][CXC_GRB_DATA_U
   {0x01, 0x82, 0xa0, 0x20, 0x20, 0x08, 0x08},  /* CXC_GRB_UNIT26 */
 };
 
-static const uint8_t g_isx012_shd_rgb_data[SHD_RGB_DATA_UNIT_NUM][SHD_RGB_DATA_UNIT_SIZE] =
+static const uint8_t g_isx012_shd_rgb_data[SHD_RGB_DATA_UNIT_NUM]
+                                          [SHD_RGB_DATA_UNIT_SIZE] =
 {
   {0xf1, 0x59, 0x52, 0x7b, 0x98, 0xc4, 0x9d, 0x23, 0x29, 0x87, 0x46}, /* SHD_RGB_UNIT0  */
   {0xc6, 0x81, 0xd1, 0x70, 0x56, 0xe4, 0x9c, 0x1b, 0x6d, 0x07, 0x48}, /* SHD_RGB_UNIT1  */
@@ -433,10 +441,11 @@ static const uint8_t g_isx012_shd_rgb_data[SHD_RGB_DATA_UNIT_NUM][SHD_RGB_DATA_U
   {0xe1, 0xd1, 0x91, 0x71, 0x38, 0xc4, 0x1b, 0x0a, 0xed, 0x86, 0x42}, /* SHD_RGB_UNIT23 */
   {0xcb, 0x49, 0xd1, 0x78, 0x86, 0x74, 0x9f, 0x2d, 0xb9, 0x88, 0x51}, /* SHD_RGB_UNIT24 */
   {0x11, 0x62, 0x93, 0x7c, 0x9c, 0x94, 0x1d, 0x1b, 0x41, 0x67, 0x46}, /* SHD_RGB_UNIT25 */
-  {0xcf, 0x81, 0x91, 0x77, 0x82, 0x54, 0x9f, 0x2a, 0x21, 0xa8, 0x4d}  /* SHD_RGB_UNIT26 */
+  {0xcf, 0x81, 0x91, 0x77, 0x82, 0x54, 0x9f, 0x2a, 0x21, 0xa8, 0x4d}, /* SHD_RGB_UNIT26 */
 };
 
-static const uint8_t g_isx012_shd_grb_data[SHD_GRB_DATA_UNIT_NUM][SHD_GRB_DATA_UNIT_SIZE] =
+static const uint8_t g_isx012_shd_grb_data[SHD_GRB_DATA_UNIT_NUM]
+                                          [SHD_GRB_DATA_UNIT_SIZE] =
 {
   {0xe8, 0xa9, 0x0f, 0x78, 0xe4, 0x13, 0x9d, 0xf0, 0x04, 0xe7, 0x39}, /* SHD_GRB_UNIT0  */
   {0xbd, 0x51, 0x0e, 0x6f, 0x94, 0x63, 0x1c, 0xea, 0x4c, 0x27, 0x3c}, /* SHD_GRB_UNIT1  */
@@ -464,10 +473,11 @@ static const uint8_t g_isx012_shd_grb_data[SHD_GRB_DATA_UNIT_NUM][SHD_GRB_DATA_U
   {0xde, 0x09, 0xcf, 0x70, 0x92, 0x73, 0x9b, 0xe0, 0xcc, 0x06, 0x38}, /* SHD_GRB_UNIT23 */
   {0xc0, 0x89, 0x4e, 0x74, 0xcc, 0x13, 0x1e, 0xfc, 0x84, 0x48, 0x45}, /* SHD_GRB_UNIT24 */
   {0x06, 0x7a, 0xd0, 0x7a, 0xe6, 0x33, 0x1d, 0xef, 0x24, 0x07, 0x3b}, /* SHD_GRB_UNIT25 */
-  {0xc4, 0xb1, 0x0e, 0x74, 0xca, 0x33, 0x1e, 0xfc, 0xc4, 0x07, 0x41}  /* SHD_GRB_UNIT26 */
+  {0xc4, 0xb1, 0x0e, 0x74, 0xca, 0x33, 0x1e, 0xfc, 0xc4, 0x07, 0x41}, /* SHD_GRB_UNIT26 */
 };
 
-static const uint8_t g_isx012_shd_r1_data[SHD_R1_DATA_UNIT_NUM][SHD_R1_DATA_UNIT_SIZE] =
+static const uint8_t g_isx012_shd_r1_data[SHD_R1_DATA_UNIT_NUM]
+                                         [SHD_R1_DATA_UNIT_SIZE] =
 {
   {0x10, 0x92, 0x10, 0x82, 0xf8, 0x43, 0x1f, 0xfb, 0xf0, 0xe7, 0x40}, /* SHD_R1_UNIT0   */
   {0x07, 0x92, 0xd0, 0x82, 0xec, 0x33, 0x9e, 0xed, 0x68, 0xe7, 0x3c}, /* SHD_R1_UNIT1   */
@@ -482,10 +492,11 @@ static const uint8_t g_isx012_shd_r1_data[SHD_R1_DATA_UNIT_NUM][SHD_R1_DATA_UNIT
   {0xc7, 0x41, 0x50, 0x7c, 0x7e, 0xd3, 0x19, 0xc5, 0x48, 0x86, 0x35}, /* SHD_R1_UNIT10  */
   {0xda, 0xa9, 0xcf, 0x8c, 0x42, 0x24, 0x20, 0xf5, 0x8c, 0x67, 0x3c}, /* SHD_R1_UNIT11  */
   {0xf6, 0x89, 0xd0, 0x88, 0x90, 0x34, 0x23, 0x0b, 0x15, 0xa8, 0x3f}, /* SHD_R1_UNIT12  */
-  {0x00, 0x72, 0x10, 0x89, 0x68, 0x04, 0x69, 0x00, 0x00, 0x19, 0x26}  /* SHD_R1_UNIT13  */
+  {0x00, 0x72, 0x10, 0x89, 0x68, 0x04, 0x69, 0x00, 0x00, 0x19, 0x26}, /* SHD_R1_UNIT13  */
 };
 
-static const uint8_t g_isx012_shd_r2_data[SHD_R2_DATA_UNIT_NUM][SHD_R2_DATA_UNIT_SIZE] =
+static const uint8_t g_isx012_shd_r2_data[SHD_R2_DATA_UNIT_NUM]
+                                         [SHD_R2_DATA_UNIT_SIZE] =
 {
   {0x3a, 0xe2, 0x11, 0x8c, 0x42, 0x74, 0xa1, 0x0c, 0x89, 0x08, 0x46}, /* SHD_R2_UNIT0   */
   {0x30, 0xe2, 0xd1, 0x8c, 0x36, 0x54, 0x20, 0xfe, 0xec, 0x47, 0x41}, /* SHD_R2_UNIT1   */
@@ -500,10 +511,11 @@ static const uint8_t g_isx012_shd_r2_data[SHD_R2_DATA_UNIT_NUM][SHD_R2_DATA_UNIT
   {0xe1, 0x61, 0x91, 0x84, 0xb6, 0x43, 0x9b, 0xcf, 0x9c, 0x66, 0x38}, /* SHD_R2_UNIT10  */
   {0xf6, 0xa1, 0x50, 0x97, 0x8e, 0x34, 0x22, 0x04, 0x01, 0x08, 0x40}, /* SHD_R2_UNIT11  */
   {0x15, 0x9a, 0x51, 0x92, 0xf2, 0xd4, 0xa5, 0x1d, 0x99, 0xa8, 0x43}, /* SHD_R2_UNIT12  */
-  {0x21, 0x82, 0x91, 0x92, 0xbe, 0xf4, 0x9e, 0xf3, 0x4c, 0x87, 0x38}  /* SHD_R2_UNIT13  */
+  {0x21, 0x82, 0x91, 0x92, 0xbe, 0xf4, 0x9e, 0xf3, 0x4c, 0x87, 0x38}, /* SHD_R2_UNIT13  */
 };
 
-static const uint8_t g_isx012_shd_b2_data[SHD_B2_DATA_UNIT_NUM][SHD_B2_DATA_UNIT_SIZE] =
+static const uint8_t g_isx012_shd_b2_data[SHD_B2_DATA_UNIT_NUM]
+                                         [SHD_B2_DATA_UNIT_SIZE] =
 {
   {0xef, 0x39, 0xcf, 0x74, 0x88, 0xb3, 0x1b, 0xdf, 0x20, 0x47, 0x3b}, /* SHD_B2_UNIT0   */
   {0xdf, 0x59, 0xcf, 0x77, 0x8c, 0x43, 0x1b, 0xd7, 0xb8, 0x46, 0x37}, /* SHD_B2_UNIT1   */
@@ -518,7 +530,7 @@ static const uint8_t g_isx012_shd_b2_data[SHD_B2_DATA_UNIT_NUM][SHD_B2_DATA_UNIT
   {0x95, 0xf9, 0x0e, 0x73, 0x48, 0x63, 0x98, 0xb9, 0xd8, 0xa5, 0x30}, /* SHD_B2_UNIT10  */
   {0xa5, 0xb1, 0x8d, 0x83, 0xf4, 0xa3, 0x1d, 0xe0, 0xd0, 0x06, 0x36}, /* SHD_B2_UNIT11  */
   {0xbe, 0xa9, 0x4e, 0x79, 0x50, 0xd4, 0x20, 0xf6, 0x54, 0xa7, 0x38}, /* SHD_B2_UNIT12  */
-  {0xc5, 0x91, 0xce, 0x7a, 0xf4, 0x03, 0x44, 0x00, 0x60, 0x60, 0x00}  /* SHD_B2_UNIT13  */
+  {0xc5, 0x91, 0xce, 0x7a, 0xf4, 0x03, 0x44, 0x00, 0x60, 0x60, 0x00}, /* SHD_B2_UNIT13  */
 };
 
 static const isx012_reg_t g_isx012_shd_thresholds[] =
@@ -549,36 +561,40 @@ static const isx012_reg_t g_isx012_shd_wb[] =
 #define ISX012_SHD_WB_NENTRIES ARRAY_NENTRIES(g_isx012_shd_wb)
 
 static isx012_conv_v4l2_to_regval_t
- g_isx012_supported_colorfx[ISX012_MAX_COLOREFFECT + 1] = {
+  g_isx012_supported_colorfx[ISX012_MAX_COLOREFFECT + 1] =
+{
   {V4L2_COLORFX_NONE,         REGVAL_EFFECT_NONE},
   {V4L2_COLORFX_BW,           REGVAL_EFFECT_MONOTONE},
   {V4L2_COLORFX_SEPIA,        REGVAL_EFFECT_SEPIA},
   {V4L2_COLORFX_NEGATIVE,     REGVAL_EFFECT_NEGPOS},
   {V4L2_COLORFX_SKETCH,       REGVAL_EFFECT_SKETCH},
   {V4L2_COLORFX_SOLARIZATION, REGVAL_EFFECT_SOLARIZATION},
-  {V4L2_COLORFX_PASTEL,       REGVAL_EFFECT_PASTEL}
+  {V4L2_COLORFX_PASTEL,       REGVAL_EFFECT_PASTEL},
 };
 
 static isx012_conv_v4l2_to_regval_t
- g_isx012_supported_presetwb[ISX012_MAX_PRESETWB + 1] = {
+  g_isx012_supported_presetwb[ISX012_MAX_PRESETWB + 1] =
+{
   {V4L2_WHITE_BALANCE_AUTO,         REGVAL_AWB_ATM},
   {V4L2_WHITE_BALANCE_INCANDESCENT, REGVAL_AWB_LIGHTBULB},
   {V4L2_WHITE_BALANCE_FLUORESCENT,  REGVAL_AWB_FLUORESCENTLIGHT},
   {V4L2_WHITE_BALANCE_DAYLIGHT,     REGVAL_AWB_CLEARWEATHER},
   {V4L2_WHITE_BALANCE_CLOUDY,       REGVAL_AWB_CLOUDYWEATHER},
-  {V4L2_WHITE_BALANCE_SHADE,        REGVAL_AWB_SHADE}
+  {V4L2_WHITE_BALANCE_SHADE,        REGVAL_AWB_SHADE},
 };
 
 static isx012_conv_v4l2_to_regval_t
- g_isx012_supported_photometry[ISX012_MAX_PHOTOMETRY + 1] = {
+  g_isx012_supported_photometry[ISX012_MAX_PHOTOMETRY + 1] =
+{
   {V4L2_EXPOSURE_METERING_AVERAGE,         REGVAL_PHOTOMETRY_AVERAGE},
   {V4L2_EXPOSURE_METERING_CENTER_WEIGHTED, REGVAL_PHOTOMETRY_CENTERWEIGHT},
   {V4L2_EXPOSURE_METERING_SPOT,            REGVAL_PHOTOMETRY_SPOT},
-  {V4L2_EXPOSURE_METERING_MATRIX,          REGVAL_PHOTOMETRY_MULTIPATTERN}
+  {V4L2_EXPOSURE_METERING_MATRIX,          REGVAL_PHOTOMETRY_MULTIPATTERN},
 };
 
 static isx012_conv_v4l2_to_regval_t
-  g_isx012_supported_iso[ISX012_MAX_ISO + 1] = {
+  g_isx012_supported_iso[ISX012_MAX_ISO + 1] =
+{
   {25 * 1000,   REGVAL_ISO_25},
   {32 * 1000,   REGVAL_ISO_32},
   {40 * 1000,   REGVAL_ISO_40},
@@ -597,7 +613,7 @@ static isx012_conv_v4l2_to_regval_t
   {800 * 1000,  REGVAL_ISO_800},
   {1000 * 1000, REGVAL_ISO_1000},
   {1250 * 1000, REGVAL_ISO_1250},
-  {1600 * 1000, REGVAL_ISO_1600}
+  {1600 * 1000, REGVAL_ISO_1600},
 };
 
 static struct video_devops_s g_isx012_video_devops =
@@ -701,7 +717,8 @@ static int isx012_putreg(isx012_dev_t *priv,
 }
 
 static int isx012_putreglist(isx012_dev_t *priv,
-                             FAR const isx012_reg_t *reglist, size_t nentries)
+                             FAR const isx012_reg_t *reglist,
+                             size_t nentries)
 {
   FAR const isx012_reg_t *entry;
   int ret = OK;
@@ -716,6 +733,7 @@ static int isx012_putreglist(isx012_dev_t *priv,
           return ret;
         }
     }
+
   return ret;
 }
 
@@ -741,6 +759,7 @@ static int isx012_chk_int_state(isx012_dev_t *priv,
       nxsig_usleep(wait_time * 1000);
       time += wait_time;
     }
+
   return ERROR;
 }
 
@@ -843,19 +862,22 @@ static int isx012_set_mode_param(isx012_dev_t *priv,
         break;
     }
 
-  ret = isx012_putreg(priv, sensmode_regaddr, sensmode, sizeof(uint8_t));
+  ret = isx012_putreg(priv, sensmode_regaddr,
+                      sensmode, sizeof(uint8_t));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = isx012_putreg(priv, hsize_regaddr,    param->hsize, sizeof(uint16_t));
+  ret = isx012_putreg(priv, hsize_regaddr,
+                      param->hsize, sizeof(uint16_t));
   if (ret < 0)
     {
       return ret;
     }
 
-  ret = isx012_putreg(priv, vsize_regaddr,    param->vsize, sizeof(uint16_t));
+  ret = isx012_putreg(priv, vsize_regaddr,
+                      param->vsize, sizeof(uint16_t));
   if (ret < 0)
     {
       return ret;
@@ -863,13 +885,15 @@ static int isx012_set_mode_param(isx012_dev_t *priv,
 
   if (format == REGVAL_OUTFMT_INTERLEAVE)
     {
-      ret = isx012_putreg(priv, HSIZE_TN, param->int_hsize, sizeof(uint16_t));
+      ret = isx012_putreg(priv, HSIZE_TN,
+                          param->int_hsize, sizeof(uint16_t));
       if (ret < 0)
         {
           return ret;
         }
 
-      ret = isx012_putreg(priv, VSIZE_TN, param->int_vsize, sizeof(uint16_t));
+      ret = isx012_putreg(priv, VSIZE_TN,
+                          param->int_vsize, sizeof(uint16_t));
       if (ret < 0)
         {
           return ret;
@@ -1008,6 +1032,7 @@ static int isx012_change_camera_mode(isx012_dev_t *priv, uint8_t mode)
 /****************************************************************************
  * isx012_change_device_state
  ****************************************************************************/
+
 static int isx012_change_device_state(isx012_dev_t *priv,
                                       isx012_state_t state)
 {
@@ -1377,9 +1402,17 @@ static int isx012_set_buf(uint32_t bufaddr, uint32_t bufsize)
 {
   int ret;
   FAR struct isx012_dev_s *priv = &g_isx012_private;
-  cisif_param_t cis_param = {0};
-  cisif_sarea_t sarea = {0};
   isx012_modeparam_t *mode_param = NULL;
+
+  cisif_param_t cis_param =
+    {
+       0
+    };
+
+  cisif_sarea_t sarea =
+    {
+       0
+    };
 
   sarea.strg_addr     = (uint8_t *)bufaddr;
   sarea.strg_size     = bufsize;
@@ -1558,7 +1591,8 @@ static int isx012_get_range_of_fmt(FAR struct v4l2_fmtdesc *format)
   return OK;
 }
 
-static int isx012_get_range_of_framesize(FAR struct v4l2_frmsizeenum *frmsize)
+static int isx012_get_range_of_framesize(
+                     FAR struct v4l2_frmsizeenum *frmsize)
 {
   int ret;
 
@@ -3295,7 +3329,8 @@ static int isx012_set_ctrlval(uint16_t ctrl_class,
             case V4L2_CID_AUTO_N_PRESET_WHITE_BALANCE:
               for (cnt = 0; cnt <= ISX012_MAX_PRESETWB; cnt++)
                 {
-                  if (g_isx012_supported_presetwb[cnt].v4l2 == control->value)
+                  if (g_isx012_supported_presetwb[cnt].v4l2
+                      == control->value)
                     {
                       ret = OK;
                       break;
@@ -3631,6 +3666,7 @@ static int isx012_set_shd(FAR isx012_dev_t *priv)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 int isx012_register(FAR struct i2c_master_s *i2c)
 {
   FAR struct isx012_dev_s *priv = &g_isx012_private;
