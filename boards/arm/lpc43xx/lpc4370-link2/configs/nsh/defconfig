@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_ARCH_FPU is not set
-# CONFIG_NSH_DISABLE_DATE is not set
 # CONFIG_NSH_DISABLE_IFCONFIG is not set
 # CONFIG_NSH_DISABLE_PS is not set
 # CONFIG_SPI_EXCHANGE is not set

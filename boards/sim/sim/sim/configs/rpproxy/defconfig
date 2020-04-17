@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_NET_ETHERNET is not set
-# CONFIG_SIM_NETDEV is not set
 CONFIG_ARCH="sim"
 CONFIG_ARCH_BOARD="sim"
 CONFIG_ARCH_BOARD_SIM=y
