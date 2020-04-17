@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/audio/cxd56.h
+ * drivers/audio/cxd56.c
  *
  *   Copyright 2019 Sony Semiconductor Solutions Corporation
  *
@@ -1006,29 +1006,29 @@ static void cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol, bool fade)
     }
 
   switch (id)
-  {
-    case CXD56_VOL_ID_MIXER_IN1:
-      write_reg(REG_AC_SDIN1_VOL, vol);
-      break;
-    case CXD56_VOL_ID_MIXER_IN2:
-      write_reg(REG_AC_SDIN2_VOL, vol);
-      break;
-    case CXD56_VOL_ID_MIXER_OUT:
-      write_reg(REG_AC_DAC_VOL, vol);
-      break;
-  }
+    {
+      case CXD56_VOL_ID_MIXER_IN1:
+        write_reg(REG_AC_SDIN1_VOL, vol);
+        break;
+      case CXD56_VOL_ID_MIXER_IN2:
+        write_reg(REG_AC_SDIN2_VOL, vol);
+        break;
+      case CXD56_VOL_ID_MIXER_OUT:
+        write_reg(REG_AC_DAC_VOL, vol);
+        break;
+    }
 
   waittime = (fade ? CXD56_VOL_MUTE_TIME(vol, 1) : CXD56_VOL_WAIT_TIME);
 
   nxsig_usleep(waittime);
 
   if (vol == CXD56_VOL_MUTE_REG)
-  {
-    /* Disable analog out */
+    {
+      /* Disable analog out */
 
-    as_aca_control(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
-                   (uint32_t)CXD56_OUT_DEV_OFF);
-  }
+      as_aca_control(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
+                     (uint32_t)CXD56_OUT_DEV_OFF);
+    }
 }
 
 static void cxd56_init_i2s1_output(uint8_t bits)
@@ -1321,8 +1321,27 @@ static uint32_t cxd56_power_on(FAR struct cxd56_dev_s *dev)
 
       write_reg(REG_I2S_ENSEL, (dev->samplerate > 48000) ? 1 : 0);
 
-      /* TODO: alc, cstereo, dnc, deq, vol & datapath (reset mic */
+      /* Disable DEQ */
+      write_reg(REG_AC_DEQ_EN, 0);
 
+      /* Disable DNC. */
+
+      write_reg(REG_AC_DNC1_MUTE, 1);
+      write_reg(REG_AC_DNC2_MUTE, 1);
+      write_reg(REG_AC_DNC1_START, 0);
+      write_reg(REG_AC_DNC2_START, 0);
+
+      /* Disable ALC/SPC */
+
+      write_reg(REG_AC_ALC_EN, 0);
+      write_reg(REG_AC_SPC_EN, 0);
+
+      /* Disable Clear Stereo */
+
+      write_reg(REG_AC_CS_SIGN, 0);
+      write_reg(REG_AC_CS_VOL, 0x00);
+
+      /* Attach interrupts */
       cxd56_attach_irq(true);
       cxd56_enable_irq(true);
     }
@@ -1337,24 +1356,9 @@ static uint32_t cxd56_power_off(FAR struct cxd56_dev_s *dev)
 {
   audinfo("cxd56_power_off\n");
 
-  /* Codec block. */
-
   /* Disable AHBMASTER. */
 
   write_reg(REG_AC_MCK_AMBMSTR_EN, 0);
-
-  /* Disable CODEC. */
-
-  write_reg(REG_AC_ALC_EN, 0);
-  write_reg(REG_AC_SPC_EN, 0);
-  write_reg(REG_AC_DEQ_EN, 0);
-
-  /* Disable DNC. */
-
-  write_reg(REG_AC_DNC1_MUTE, 1);
-  write_reg(REG_AC_DNC2_MUTE, 1);
-  write_reg(REG_AC_DNC1_START, 0);
-  write_reg(REG_AC_DNC2_START, 0);
 
   /* Disable SRC. */
 
@@ -1386,8 +1390,6 @@ static uint32_t cxd56_power_off(FAR struct cxd56_dev_s *dev)
   write_reg(REG_AC_PDN_DNC1, 1);
   write_reg(REG_AC_PDN_DNC2, 1);
   write_reg(REG_AC_PDN_ANC, 1);
-
-  /* Analog block. */
 
   /* Disable audio clock */
 
