@@ -267,7 +267,8 @@ struct bmi160_dev_s
  * Private Functions
  ****************************************************************************/
 
-static uint8_t bmi160_getreg8(FAR struct bmi160_dev_s *priv, uint8_t regaddr);
+static uint8_t bmi160_getreg8(FAR struct bmi160_dev_s *priv,
+                              uint8_t regaddr);
 static void bmi160_putreg8(FAR struct bmi160_dev_s *priv,
                            uint8_t regaddr, uint8_t regval);
 
@@ -286,15 +287,15 @@ static int     bmi160_checkid(FAR struct bmi160_dev_s *priv);
 
 #ifdef CONFIG_SENSORS_BMI160_I2C
 static int bmi160_devregister(FAR const char *devpath,
-		              FAR struct i2c_master_s *dev,
+                              FAR struct i2c_master_s *dev,
                               int minor,
-			      const struct file_operations *fops,
-			      int port);
+                              const struct file_operations *fops,
+                              int port);
 #else /* CONFIG_SENSORS_BMI160_SPI */
 static int bmi160_devregister(FAR const char *devpath,
-		              FAR struct spi_dev_s *dev,
+                              FAR struct spi_dev_s *dev,
                               int minor,
-			      const struct file_operations *fops);
+                              const struct file_operations *fops);
 #endif
 
 static int     bmi160_set_accel_pm(FAR struct bmi160_dev_s *priv, int pm);
@@ -310,20 +311,20 @@ static const struct file_operations g_bmi160gyrofops =
 {
   bmi160_open_gyro,    /* open */
   bmi160_close_gyro,   /* close */
-  bmi160_read,    /* read */
+  bmi160_read,         /* read */
   0,                   /* write */
   0,                   /* seek */
-  bmi160_ioctl,   /* ioctl */
+  bmi160_ioctl,        /* ioctl */
 };
 
 static const struct file_operations g_bmi160accelfops =
 {
   bmi160_open_accel,    /* open */
   bmi160_close_accel,   /* close */
-  bmi160_read,    /* read */
+  bmi160_read,          /* read */
   0,                    /* write */
   0,                    /* seek */
-  bmi160_ioctl,   /* ioctl */
+  bmi160_ioctl,         /* ioctl */
 };
 
 /* SCU instructions for pick gyro sensing data. */
@@ -491,8 +492,14 @@ static int bmi160_seqinit_gyro(FAR struct bmi160_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_bmi160gyroinst, itemsof(g_bmi160gyroinst));
-  seq_setsample(priv->seq, BMI160_BYTESPERSAMPLE, 0, BMI160_ELEMENTSIZE, false);
+  seq_setinstruction(priv->seq,
+                     g_bmi160gyroinst,
+                     itemsof(g_bmi160gyroinst));
+  seq_setsample(priv->seq,
+                BMI160_BYTESPERSAMPLE,
+                0,
+                BMI160_ELEMENTSIZE,
+                false);
 
   return OK;
 }
@@ -524,8 +531,14 @@ static int bmi160_seqinit_accel(FAR struct bmi160_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_bmi160accelinst, itemsof(g_bmi160accelinst));
-  seq_setsample(priv->seq, BMI160_BYTESPERSAMPLE, 0, BMI160_ELEMENTSIZE, false);
+  seq_setinstruction(priv->seq,
+                     g_bmi160accelinst,
+                     itemsof(g_bmi160accelinst));
+  seq_setsample(priv->seq,
+                BMI160_BYTESPERSAMPLE,
+                0,
+                BMI160_ELEMENTSIZE,
+                false);
 
   return OK;
 }
@@ -686,7 +699,9 @@ static int bmi160_close_accel(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static ssize_t bmi160_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t bmi160_read(FAR struct file *filep,
+                           FAR char *buffer,
+                           size_t len)
 {
   FAR struct inode        *inode = filep->f_inode;
   FAR struct bmi160_dev_s *priv  = inode->i_private;
@@ -791,11 +806,16 @@ static int bmi160_checkid(FAR struct bmi160_dev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_BMI160_I2C
-static int bmi160_devregister(FAR const char *devpath, FAR struct i2c_master_s *dev,
-                              int minor, const struct file_operations *fops, int port)
+static int bmi160_devregister(FAR const char *devpath,
+                              FAR struct i2c_master_s *dev,
+                              int minor,
+                              const struct file_operations *fops,
+                              int port)
 #else /* CONFIG_SENSORS_BMI160_SPI */
-static int bmi160_devregister(FAR const char *devpath, FAR struct spi_dev_s *dev,
-                              int minor, const struct file_operations *fops)
+static int bmi160_devregister(FAR const char *devpath,
+                              FAR struct spi_dev_s *dev,
+                              int minor,
+                              const struct file_operations *fops)
 #endif
 {
   FAR struct bmi160_dev_s *priv;
@@ -1021,7 +1041,7 @@ int bmi160_init(FAR struct spi_dev_s *dev)
       return ret;
     }
 
-  /* To avoid gyro wakeup it is required to write 0x00 to 0x6C*/
+  /* To avoid gyro wakeup it is required to write 0x00 to 0x6C */
 
   bmi160_putreg8(priv, BMI160_PMU_TRIGGER, 0);
   up_mdelay(1);

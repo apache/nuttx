@@ -284,8 +284,14 @@ static int kx022_seqinit(FAR struct kx022_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_kx022inst, itemsof(g_kx022inst));
-  seq_setsample(priv->seq, KX022_BYTESPERSAMPLE, 0, KX022_ELEMENTSIZE, false);
+  seq_setinstruction(priv->seq,
+                     g_kx022inst,
+                     itemsof(g_kx022inst));
+  seq_setsample(priv->seq,
+                KX022_BYTESPERSAMPLE,
+                0,
+                KX022_ELEMENTSIZE,
+                false);
 
   return OK;
 }
