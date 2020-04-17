@@ -137,9 +137,9 @@ static int board_mscclassobject(int minor,
  * Name: board_mscuninitialize
  *
  * Description:
- *   Un-initialize the USB storage class driver.  This is just an application-
- *   specific wrapper aboutn usbmsc_unitialize() that is called form the
- *   composite device logic.
+ *   Un-initialize the USB storage class driver.
+ *   This is just an application specific wrapper for usbmsc_unitialize()
+ *   that is called form the composite device logic.
  *
  * Input Parameters:
  *   classdev - The class driver instrance previously give to the composite
