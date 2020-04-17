@@ -205,10 +205,9 @@ typedef enum cxd56_dmahandle_e cxd56_dmahandle_t;
 enum cxd56_devstate_e
 {
   CXD56_DEV_STATE_OFF,
-  CXD56_DEV_STATE_STOPPED,
-  CXD56_DEV_STATE_STARTING,
+  CXD56_DEV_STATE_PAUSED,
   CXD56_DEV_STATE_STARTED,
-  CXD56_DEV_STATE_STOPPING,
+  CXD56_DEV_STATE_STOPPED
 };
 
 struct cxd56_dev_s
