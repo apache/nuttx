@@ -300,6 +300,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 }
 #endif
 
+#if (CONFIG_MM_REGIONS > 1)
 /****************************************************************************
  * Name: addregion
  *
@@ -389,3 +390,4 @@ void arm_addregion(void)
     }
 #endif
 }
+#endif
