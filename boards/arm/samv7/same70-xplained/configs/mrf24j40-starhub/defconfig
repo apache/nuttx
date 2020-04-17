@@ -7,7 +7,6 @@
 #
 # CONFIG_ARCH_RAMFUNCS is not set
 # CONFIG_NET_IPv4 is not set
-# CONFIG_NSH_DISABLE_DATE is not set
 # CONFIG_SAMV7_UART0 is not set
 # CONFIG_SAMV7_UART2 is not set
 # CONFIG_SAMV7_UART4 is not set
