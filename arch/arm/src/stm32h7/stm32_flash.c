@@ -339,11 +339,14 @@ FAR struct stm32h7_flash_priv_s * stm32h7_flash_bank(size_t address)
  *
  * Description:
  *   Unlock the flash option bytes
+ *   Returns true if the flash was locked before, false otherwise
  *
  ****************************************************************************/
 
-static void stm32h7_unlock_flashopt(FAR struct stm32h7_flash_priv_s *priv)
+static bool stm32h7_unlock_flashopt(FAR struct stm32h7_flash_priv_s *priv)
 {
+  bool ret = false;
+
   while (stm32h7_flash_getreg32(priv, STM32_FLASH_SR1_OFFSET) & FLASH_SR_BSY)
     {
     }
@@ -357,7 +360,13 @@ static void stm32h7_unlock_flashopt(FAR struct stm32h7_flash_priv_s *priv)
                              FLASH_OPTKEY1);
       stm32h7_flash_putreg32(priv, STM32_FLASH_OPTKEYR_OFFSET,
                              FLASH_OPTKEY2);
+
+      /* Was locked before and now unlocked */
+
+      ret = true;
     }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -439,7 +448,7 @@ int stm32h7_flash_unlock(size_t addr)
       stm32h7_flash_sem_unlock(priv);
     }
 
-  return ret:;
+  return ret;
 }
 
 /****************************************************************************
@@ -542,13 +551,19 @@ uint32_t stm32h7_flash_getopt(void)
 void stm32h7_flash_optmodify(uint32_t clear, uint32_t set)
 {
   struct stm32h7_flash_priv_s *priv;
+  bool was_locked;
+
   priv = stm32h7_flash_bank(STM32_FLASH_BANK1);
   if (priv)
     {
-    stm32h7_unlock_flashopt(priv);
-    stm32h7_flash_modifyreg32(priv, STM32_FLASH_OPTSR_PRG_OFFSET,
-                              clear, set);
-    stm32h7_save_flashopt(priv);
+      was_locked = stm32h7_unlock_flashopt(priv);
+      stm32h7_flash_modifyreg32(priv, STM32_FLASH_OPTSR_PRG_OFFSET,
+                                clear, set);
+      stm32h7_save_flashopt(priv);
+      if (was_locked)
+        {
+          stm32h7_lock_flashopt(priv);
+        }
     }
 }
 
