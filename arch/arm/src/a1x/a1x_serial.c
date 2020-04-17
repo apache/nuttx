@@ -656,7 +656,8 @@ static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset,
+                                uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -706,13 +707,13 @@ static inline void up_enablebreaks(struct up_dev_s *priv, bool enable)
   up_serialout(priv, A1X_UART_LCR_OFFSET, lcr);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: a1x_uart0config, uart1config, uart2config, ..., uart7config
  *
  * Description:
  *   Configure the UART
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_A1X_UART0
 static inline void a1x_uart0config(void)
@@ -882,7 +883,7 @@ static inline void a1x_uart7config(void)
 };
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: a1x_uartdl
  *
  * Description:
@@ -891,7 +892,7 @@ static inline void a1x_uart7config(void)
  *     BAUD = PCLK / (16 * DL), or
  *     DL   = PCLK / BAUD / 16
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline uint32_t a1x_uartdl(uint32_t baud)
 {
@@ -920,11 +921,13 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Clear fifos */
 
-  up_serialout(priv, A1X_UART_FCR_OFFSET, (UART_FCR_RFIFOR | UART_FCR_XFIFOR));
+  up_serialout(priv, A1X_UART_FCR_OFFSET,
+              (UART_FCR_RFIFOR | UART_FCR_XFIFOR));
 
   /* Set trigger */
 
-  up_serialout(priv, A1X_UART_FCR_OFFSET, (UART_FCR_FIFOE | UART_FCR_RT_HALF));
+  up_serialout(priv, A1X_UART_FCR_OFFSET,
+              (UART_FCR_FIFOE | UART_FCR_RT_HALF));
 
   /* Set up the IER */
 
@@ -1016,14 +1019,16 @@ static void up_shutdown(struct uart_dev_s *dev)
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
+ *   Configure the UART to operation in interrupt driven mode.
+ *   This method is called when the serial port is opened.
+ *   Normally, this is just after the  the setup() method is called,
+ *   however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method
+ *   (unless the hardware supports multiple levels of interrupt enabling).
+ *   The RX and TX interrupts are not enabled until the txint() and rxint()
+ *   methods are called.
  *
  ****************************************************************************/
 
@@ -1051,8 +1056,9 @@ static int up_attach(struct uart_dev_s *dev)
  * Name: up_detach
  *
  * Description:
- *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
+ *   Detach UART interrupts.
+ *   This method is called when the serial port is closed normally
+ *   just before the shutdown method is called.  The exception is
  *   the serial console which is never shutdown.
  *
  ****************************************************************************/
@@ -1139,11 +1145,16 @@ static int uart_interrupt(int irq, void *context, void *arg)
               break;
             }
 
-          /* Busy detect.  Just ignore.  Cleared by reading the status register */
+          /* Busy detect.
+           * Just ignore.
+           * Cleared by reading the status register
+           */
 
           case UART_IIR_IID_BUSY:
             {
-              /* Read from the UART status register to clear the BUSY condition */
+              /* Read from the UART status register
+               * to clear the BUSY condition
+               */
 
               status = up_serialin(priv, A1X_UART_USR_OFFSET);
               break;
@@ -1156,7 +1167,9 @@ static int uart_interrupt(int irq, void *context, void *arg)
               return OK;
             }
 
-            /* Otherwise we have received an interrupt that we cannot handle */
+            /* Otherwise we have received an interrupt
+             * that we cannot handle
+             */
 
           default:
             {
@@ -1266,7 +1279,10 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
          */
 
         /* DLAB open latch */
-        /* REVISIT:  Shouldn't we just call up_setup() to do all of the following? */
+
+        /* REVISIT:
+         * Shouldn't we just call up_setup() to do all of the following?
+         */
 
         lcr = getreg32(priv->uartbase + A1X_UART_LCR_OFFSET);
         up_serialout(priv, A1X_UART_LCR_OFFSET, (lcr | UART_LCR_DLAB));

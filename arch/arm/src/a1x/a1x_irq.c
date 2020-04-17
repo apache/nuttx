@@ -171,7 +171,9 @@ void up_irqinitialize(void)
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 #ifdef CONFIG_A1X_PIO_IRQ
-  /* Initialize logic to support a second level of interrupt decoding for PIO pins. */
+  /* Initialize logic to support a second level of interrupt decoding
+   * for PIO pins.
+   */
 
   a1x_pio_irqinitialize();
 #endif
@@ -212,8 +214,8 @@ uint32_t *arm_decodeirq(uint32_t *regs)
   uint32_t regval;
 
   /* During initialization, the BASE address register was set to zero.
-   * Therefore, when we read the VECTOR address register, we get the IRQ number
-   * shifted left by two.
+   * Therefore, when we read the VECTOR address register, we get the IRQ
+   * number shifted left by two.
    */
 
   regval = getreg32(A1X_INTC_VECTOR);
