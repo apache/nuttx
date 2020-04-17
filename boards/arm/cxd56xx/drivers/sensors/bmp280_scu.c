@@ -154,8 +154,10 @@ struct bmp280_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static uint8_t bmp280_getreg8(FAR struct bmp280_dev_s *priv, uint8_t regaddr);
-static void bmp280_putreg8(FAR struct bmp280_dev_s *priv, uint8_t regaddr,
+static uint8_t bmp280_getreg8(FAR struct bmp280_dev_s *priv,
+                              uint8_t regaddr);
+static void bmp280_putreg8(FAR struct bmp280_dev_s *priv,
+                           uint8_t regaddr,
                            uint8_t regval);
 
 /* Character driver methods */
@@ -386,7 +388,8 @@ static int bmp280_get_calib_param_temp(FAR struct bmp280_dev_s *priv)
  *
  ****************************************************************************/
 
-static void bmp280_set_power_mode(FAR struct bmp280_dev_s *priv, uint8_t value)
+static void bmp280_set_power_mode(FAR struct bmp280_dev_s *priv,
+                                  uint8_t value)
 {
   uint8_t v_data_u8 = 0;
 
@@ -403,7 +406,8 @@ static void bmp280_set_power_mode(FAR struct bmp280_dev_s *priv, uint8_t value)
  *
  ****************************************************************************/
 
-static void bmp280_set_oversamp_press(FAR struct bmp280_dev_s *priv, uint8_t value)
+static void bmp280_set_oversamp_press(FAR struct bmp280_dev_s *priv,
+                                      uint8_t value)
 {
   uint8_t v_data_u8 = 0;
 
@@ -827,7 +831,8 @@ static int bmp280_ioctl_temp(FAR struct file *filep, int cmd,
 
       case SNIOC_GETADJ:
         {
-          struct bmp280_temp_adj_s *user = (struct bmp280_temp_adj_s *)(uintptr_t)arg;
+          struct bmp280_temp_adj_s *user = (struct bmp280_temp_adj_s *)
+                                           (uintptr_t)arg;
 
           user->dig_t1 = g_temp_adj.dig_t1;
           user->dig_t2 = g_temp_adj.dig_t2;

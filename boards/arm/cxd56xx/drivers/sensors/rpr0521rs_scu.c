@@ -150,15 +150,20 @@ static int rpr0521rs_open_als(FAR struct file *filep);
 static int rpr0521rs_open_ps(FAR struct file *filep);
 static int rpr0521rs_close_als(FAR struct file *filep);
 static int rpr0521rs_close_ps(FAR struct file *filep);
-static ssize_t rpr0521rs_read_als(FAR struct file *filep, FAR char *buffer,
+static ssize_t rpr0521rs_read_als(FAR struct file *filep,
+                                  FAR char *buffer,
                                   size_t buflen);
-static ssize_t rpr0521rs_read_ps(FAR struct file *filep, FAR char *buffer,
+static ssize_t rpr0521rs_read_ps(FAR struct file *filep,
+                                 FAR char *buffer,
                                  size_t buflen);
-static ssize_t rpr0521rs_write(FAR struct file *filep, FAR const char *buffer,
-                                   size_t buflen);
-static int rpr0521rs_ioctl_als(FAR struct file *filep, int cmd,
+static ssize_t rpr0521rs_write(FAR struct file *filep,
+                               FAR const char *buffer,
+                               size_t buflen);
+static int rpr0521rs_ioctl_als(FAR struct file *filep,
+                               int cmd,
                                unsigned long arg);
-static int rpr0521rs_ioctl_ps(FAR struct file *filep, int cmd,
+static int rpr0521rs_ioctl_ps(FAR struct file *filep,
+                              int cmd,
                               unsigned long arg);
 
 /****************************************************************************
@@ -303,7 +308,12 @@ static uint16_t rpr0521rs_getreg16(FAR struct rpr0521rs_dev_s *priv,
   inst[0] = SCU_INST_SEND(regaddr);
   inst[1] = SCU_INST_RECV(2) | SCU_INST_LAST;
 
-  scu_i2ctransfer(priv->port, priv->addr, inst, 2, (FAR uint8_t *)&regval, 2);
+  scu_i2ctransfer(priv->port,
+                  priv->addr,
+                  inst,
+                  2,
+                 (FAR uint8_t *)&regval,
+                  2);
 
   return regval;
 }
@@ -405,7 +415,9 @@ static void rpr0521rs_setmodecontrol(FAR struct rpr0521rs_dev_s *priv,
     {
       if (enable)
         {
-          val = setbit | checkbit | RPR0521RS_MODE_CONTROL_MEASTIME_100_100MS;
+          val = setbit |
+                checkbit |
+                RPR0521RS_MODE_CONTROL_MEASTIME_100_100MS;
         }
       else
         {
@@ -455,8 +467,13 @@ static int rpr0521rsals_seqinit(FAR struct rpr0521rs_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_rpr0521rsalsinst, itemsof(g_rpr0521rsalsinst));
-  seq_setsample(priv->seq, RPR0521RS_ALS_BYTESPERSAMPLE, 0, RPR0521RS_ELEMENTSIZE,
+  seq_setinstruction(priv->seq,
+                     g_rpr0521rsalsinst,
+                     itemsof(g_rpr0521rsalsinst));
+  seq_setsample(priv->seq,
+                RPR0521RS_ALS_BYTESPERSAMPLE,
+                0,
+                RPR0521RS_ELEMENTSIZE,
                 false);
 
   return OK;
@@ -489,8 +506,13 @@ static int rpr0521rsps_seqinit(FAR struct rpr0521rs_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_rpr0521rspsinst, itemsof(g_rpr0521rspsinst));
-  seq_setsample(priv->seq, RPR0521RS_PS_BYTESPERSAMPLE, 0, RPR0521RS_ELEMENTSIZE,
+  seq_setinstruction(priv->seq,
+                     g_rpr0521rspsinst,
+                     itemsof(g_rpr0521rspsinst));
+  seq_setsample(priv->seq,
+                RPR0521RS_PS_BYTESPERSAMPLE,
+                0,
+                RPR0521RS_ELEMENTSIZE,
                 false);
 
   return OK;
@@ -674,7 +696,8 @@ static ssize_t rpr0521rs_read_ps(FAR struct file *filep, FAR char *buffer,
   if (len)
     {
       len = RPR0521RS_PS_BYTESPERSAMPLE;
-      *(FAR uint16_t *)buffer = rpr0521rs_getreg16(priv, RPR0521RS_PS_DATA_LSB);
+      *(FAR uint16_t *)buffer = rpr0521rs_getreg16(priv,
+                                                   RPR0521RS_PS_DATA_LSB);
     }
 #else
   len = seq_read(priv->seq, priv->minor, buffer, len);
@@ -687,7 +710,8 @@ static ssize_t rpr0521rs_read_ps(FAR struct file *filep, FAR char *buffer,
  * Name: rpr0521rs_write
  ****************************************************************************/
 
-static ssize_t rpr0521rs_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t rpr0521rs_write(FAR struct file *filep,
+                               FAR const char *buffer,
                                size_t buflen)
 {
   return -ENOSYS;
@@ -697,7 +721,8 @@ static ssize_t rpr0521rs_write(FAR struct file *filep, FAR const char *buffer,
  * Name: rpr0521rs_ioctl_als
  ****************************************************************************/
 
-static int rpr0521rs_ioctl_als(FAR struct file *filep, int cmd,
+static int rpr0521rs_ioctl_als(FAR struct file *filep,
+                               int cmd,
                                unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
@@ -730,7 +755,8 @@ static int rpr0521rs_ioctl_als(FAR struct file *filep, int cmd,
  * Name: rpr0521rs_ioctl_ps
  ****************************************************************************/
 
-static int rpr0521rs_ioctl_ps(FAR struct file *filep, int cmd,
+static int rpr0521rs_ioctl_ps(FAR struct file *filep,
+                              int cmd,
                               unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
@@ -790,7 +816,8 @@ static int rpr0521rs_ioctl_ps(FAR struct file *filep, int cmd,
 
       case SNIOC_GETINTSTATUS:
         {
-          FAR uint8_t intstatus = rpr0521rs_getreg8(priv, RPR0521RS_INTERRUPT);
+          FAR uint8_t intstatus = rpr0521rs_getreg8(priv,
+                                                    RPR0521RS_INTERRUPT);
           *(FAR uint8_t *)(uintptr_t)arg = intstatus;
           sninfo("Get proximity IntStatus 0x%02x\n", intstatus);
         }
@@ -885,7 +912,8 @@ int rpr0521rs_init(FAR struct i2c_master_s *i2c, int port)
  * Name: rpr0521rsals_register
  *
  * Description:
- *   Register the RPR0521RS ambient light sensor character device as 'devpath'
+ *   Register the RPR0521RS ambient light sensor character device as
+ *   'devpath'
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/light0"

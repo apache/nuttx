@@ -356,8 +356,13 @@ static int lt1pa01als_seqinit(FAR struct lt1pa01_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_lt1pa01alsinst, itemsof(g_lt1pa01alsinst));
-  seq_setsample(priv->seq, LT1PA01_ALS_BYTESPERSAMPLE, 0, LT1PA01_ELEMENTSIZE,
+  seq_setinstruction(priv->seq,
+                     g_lt1pa01alsinst,
+                     itemsof(g_lt1pa01alsinst));
+  seq_setsample(priv->seq,
+                LT1PA01_ALS_BYTESPERSAMPLE,
+                0,
+                LT1PA01_ELEMENTSIZE,
                 false);
 
   return OK;
@@ -390,8 +395,13 @@ static int lt1pa01prox_seqinit(FAR struct lt1pa01_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_lt1pa01proxinst, itemsof(g_lt1pa01proxinst));
-  seq_setsample(priv->seq, LT1PA01_PROX_BYTESPERSAMPLE, 0, LT1PA01_ELEMENTSIZE,
+  seq_setinstruction(priv->seq,
+                     g_lt1pa01proxinst,
+                     itemsof(g_lt1pa01proxinst));
+  seq_setsample(priv->seq,
+                LT1PA01_PROX_BYTESPERSAMPLE,
+                0,
+                LT1PA01_ELEMENTSIZE,
                 false);
 
   return OK;
