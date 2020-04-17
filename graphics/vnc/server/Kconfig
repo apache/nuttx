@@ -44,7 +44,7 @@ config VNCSERVER_PRIO
 
 config VNCSERVER_STACKSIZE
 	int "VNC server stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 
 config VNCSERVER_UPDATER_PRIO
 	int "VNC updater thread priority"
@@ -52,7 +52,7 @@ config VNCSERVER_UPDATER_PRIO
 
 config VNCSERVER_UPDATER_STACKSIZE
 	int "VNC updater thread stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 
 choice
 	prompt "VNC color format"
