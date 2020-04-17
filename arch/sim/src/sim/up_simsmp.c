@@ -98,6 +98,7 @@ volatile spinlock_t g_cpu_paused[CONFIG_SMP_NCPUS];
 void nx_start(void);
 void up_cpu_started(void);
 int up_cpu_paused(int cpu);
+void host_sleepuntil(uint64_t nsec);
 
 /****************************************************************************
  * Private Functions
@@ -162,9 +163,18 @@ static void *sim_idle_trampoline(void *arg)
 
   for (; ; )
     {
+#ifdef CONFIG_SIM_WALLTIME
+      uint64_t now = 0;
+
+      /* Wait a bit so that the timing is close to the correct rate. */
+
+      now += 1000 * CONFIG_USEC_PER_TICK;
+      host_sleepuntil(now);
+#else
       /* Give other pthreads/CPUs a shot */
 
       pthread_yield();
+#endif
     }
 
   return NULL;
