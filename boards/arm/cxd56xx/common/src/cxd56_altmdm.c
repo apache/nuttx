@@ -143,8 +143,8 @@ void board_altmdm_poweron(void)
         }
     }
 
-  /* Slave request seems to float in Lite Hibernation and becomes HIGH at some
-   * times when it should stay LOW.
+  /* Slave request seems to float in Lite Hibernation and becomes HIGH at
+   * some times when it should stay LOW.
    */
 
   cxd56_pin_config(PINCONF_SET(SLAVE_REQUEST,
