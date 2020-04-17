@@ -50,6 +50,10 @@
 
 #include "cxd56_i2c.h"
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #ifdef CONFIG_SENSORS_BM1383GLV_SCU
 int board_bm1383glv_initialize(FAR const char *devpath, int bus)
 {

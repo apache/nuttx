@@ -50,6 +50,10 @@
 
 #include "cxd56_i2c.h"
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #ifdef CONFIG_SENSORS_BH1745NUC_SCU
 int board_bh1745nuc_initialize(FAR const char *devpath, int bus)
 {

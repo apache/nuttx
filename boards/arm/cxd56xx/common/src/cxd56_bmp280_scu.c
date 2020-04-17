@@ -62,6 +62,10 @@
 #  define TEMP_NR_SEQS 1
 #endif
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #ifdef CONFIG_SENSORS_BMP280_SCU
 int board_bmp280_initialize(int bus)
 {
