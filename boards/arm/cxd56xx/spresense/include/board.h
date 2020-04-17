@@ -78,7 +78,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Clocking ****************************************************************/
+/* Clocking *****************************************************************/
 
 #ifdef CONFIG_CXD56_80MHz
 #  define BOARD_FCLKOUT_FREQUENCY   (80000000)
@@ -86,7 +86,7 @@
 #  define BOARD_FCLKOUT_FREQUENCY   (100000000)
 #endif
 
-/* UART clocking ***********************************************************/
+/* UART clocking ************************************************************/
 
 /* Configure all UARTs to use the XTAL input frequency */
 
@@ -94,7 +94,7 @@
 #define BOARD_UART1_BASEFREQ        BOARD_FCLKOUT_FREQUENCY
 #define BOARD_UART2_BASEFREQ        CONFIG_CXD56_XOSC_CLOCK
 
-/* LED definitions *********************************************************/
+/* LED definitions **********************************************************/
 
 #define GPIO_LED1           (PIN_I2S1_BCK)
 #define GPIO_LED2           (PIN_I2S1_LRCK)
@@ -125,11 +125,11 @@
 #define LED_ASSERTION           (BOARD_LED1_BIT | BOARD_LED2_BIT | BOARD_LED3_BIT)
 #define LED_PANIC               (BOARD_LED4_BIT)
 
-/* Buttons definitions *****************************************************/
+/* Buttons definitions ******************************************************/
 
 #define BOARD_NUM_BUTTONS   (2)
 
-/* Power Control definitions ***********************************************/
+/* Power Control definitions ************************************************/
 
 /*   For SPRESENSE board:
  *
@@ -192,17 +192,17 @@ enum board_power_device
   POWER_LTE             = PMIC_GPO(2),
 };
 
-/* CXD5247 audio control definitions ***************************************/
+/* CXD5247 audio control definitions ****************************************/
 
 #define CXD5247_XRST  PIN_SPI3_CS2_X
 #define CXD5247_AVDD  (0x01)
 #define CXD5247_DVDD  (0x02)
 
-/* LCD Display clocking ****************************************************/
+/* LCD Display clocking *****************************************************/
 
 #define ILI9340_SPI_MAXFREQUENCY    40000000
 
-/* Display device pin definitions ******************************************/
+/* Display device pin definitions *******************************************/
 
 #if defined(CONFIG_LCD_ON_MAIN_BOARD) /* Display connected to main board. */
 
@@ -234,12 +234,12 @@ enum board_power_device
 
 #endif
 
-/* Sensor device bus definitions *******************************************/
+/* Sensor device bus definitions ********************************************/
 
 #define SENSOR_I2C      0
 #define SENSOR_SPI      3
 
-/* Imager device pin definitions *******************************************/
+/* Imager device pin definitions ********************************************/
 
 #define IMAGER_RST      PIN_SDIO_DIR1_3
 #define IMAGER_SLEEP    PIN_SDIO_DIR0

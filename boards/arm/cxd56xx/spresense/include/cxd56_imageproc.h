@@ -1,4 +1,4 @@
-/***************************************************************************
+/****************************************************************************
  * boards/arm/cxd56xx/spresense/include/cxd56_imageproc.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
@@ -32,6 +32,10 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_IMAGEPROC_H
 #define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_IMAGEPROC_H
 
@@ -54,6 +58,10 @@ extern "C"
       uint16_t y2;               /* Y coordinate of rignt bottom point */
     };
   typedef struct imageproc_rect_s imageproc_rect_t;
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 /* Initialize imageproc library
  */

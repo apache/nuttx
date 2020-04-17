@@ -295,6 +295,7 @@ int board_flash_power_control(bool en)
 
       board_power_control(POWER_FLASH, false);
     }
+
   return ret;
 }
 

@@ -49,7 +49,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Altair modem gpio definitions *******************************************/
+/* Altair modem gpio definitions ********************************************/
 
 #if defined(CONFIG_MODEM_ALTMDM) && defined(CONFIG_CXD56_GPIO_IRQ)
 
