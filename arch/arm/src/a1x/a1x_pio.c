@@ -70,6 +70,7 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: a1x_pio_pin
  *
@@ -398,13 +399,13 @@ bool a1x_pio_read(pio_pinset_t pinset)
   return ((regval & PIO_DAT(pin)) != 0);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: a1x_pio_irqenable
  *
  * Description:
  *   Enable the interrupt for specified PIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_A1X_PIO_IRQ
 void a1x_pio_irqenable(int irq)
@@ -419,8 +420,8 @@ void a1x_pio_irqenable(int irq)
 
       pin = irq - A1X_PIO_EINT0
 
-      /* Un-mask the interrupt be setting the corresponding bit in the PIO INT CTL
-       * register.
+      /* Un-mask the interrupt be setting the corresponding bit in the
+       * PIO INT CTL register.
        */
 
       flags   = enter_critical_section();
@@ -431,13 +432,13 @@ void a1x_pio_irqenable(int irq)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: a1x_pio_irqdisable
  *
  * Description:
  *   Disable the interrupt for specified PIO IRQ
  *
- ************************************************************************************/
+ ****************************************************************************/
 #ifdef CONFIG_A1X_PIO_IRQ
 
 void a1x_pio_irqdisable(int irq)
@@ -452,8 +453,8 @@ void a1x_pio_irqdisable(int irq)
 
       pin = irq - A1X_PIO_EINT0
 
-      /* Mask the interrupt be clearning the corresponding bit in the PIO INT CTL
-       * register.
+      /* Mask the interrupt be clearning the corresponding bit in the
+       * PIO INT CTL register.
        */
 
       flags   = enter_critical_section();
