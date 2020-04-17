@@ -18,6 +18,6 @@ config RPTUN_PRIORITY
 
 config RPTUN_STACKSIZE
 	int "rptun stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 
 endif # RPTUN

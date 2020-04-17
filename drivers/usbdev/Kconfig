@@ -718,7 +718,7 @@ config USBMSC_SCSI_PRIO
 
 config USBMSC_SCSI_STACKSIZE
 	int "USBMSC SCSI daemon stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		Stack size used with the SCSI kernel thread.  The default value
 		is not tuned.
