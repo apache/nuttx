@@ -929,6 +929,8 @@ static void cxd56_dma_int_handler(void)
 
       if (dev->mq != NULL)
         {
+          /* Request more data */
+
           msg.msg_id = AUDIO_MSG_DATA_REQUEST;
           msg.u.data = 0;
           (void)nxmq_send(dev->mq, (FAR const char *) &msg,
@@ -937,12 +939,15 @@ static void cxd56_dma_int_handler(void)
 
       if (ecode == CXD56_AUDIO_ECODE_DMA_TRANS)
         {
-          /* End of data */
+          /* Notify end of data */
 
-          msg.msg_id = AUDIO_MSG_STOP;
-          msg.u.data = 0;
-          (void)nxmq_send(dev->mq, (FAR const char *)&msg,
-                          sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+          if (dev->state != CXD56_DEV_STATE_PAUSED)
+            {
+              msg.msg_id = AUDIO_MSG_STOP;
+              msg.u.data = 0;
+              (void)nxmq_send(dev->mq, (FAR const char *)&msg,
+                              sizeof(msg), CONFIG_CXD56_MSG_PRIO);
+            }
         }
     }
 }
@@ -1283,21 +1288,17 @@ static uint32_t cxd56_power_on(FAR struct cxd56_dev_s *dev)
       write_reg(REG_AC_DSR_RATE, 1);
       write_reg(REG_AC_DIGSFT,   1);
 
-#if defined(CONFIG_CXD56_I2S0) || defined(CONFIG_CXD56_I2S1)
       /* Clear interrupt status of bck_err */
 
       write_reg(REG_INT_M_I2S1_BCL_ERR1, 0);
       write_reg(REG_INT_M_I2S1_BCL_ERR2, 0);
 
       cxd56_power_on_i2s1(dev);
-#endif /* defined(CONFIG_CXD56_I2S0) || defined(CONFIG_CXD56_I2S1) */
 
-#ifdef CONFIG_CXD56_I2S0
       /* Enable I2S data input and output of SRC1 */
 
       write_reg(REG_AC_SDIN1_EN, 1);
       write_reg(REG_AC_SDOUT1_EN, 1);
-#endif /* CONFIG_CXD56_I2S0 */
 
       /* Enable BCK, LRCK output if master (1). */
 
@@ -1347,7 +1348,6 @@ static uint32_t cxd56_power_on(FAR struct cxd56_dev_s *dev)
     }
 
   g_codec_start_count++;
-  dev->state = CXD56_DEV_STATE_STOPPED;
 
   return CXD56_AUDIO_ECODE_OK;
 }
@@ -1639,6 +1639,8 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
             auderr("Power on analog output failed- (%d)\n", ret);
             goto error;
           }
+
+        priv->state = CXD56_DEV_STATE_STOPPED;
       }
       break;
     }
@@ -1680,8 +1682,6 @@ static int cxd56_start(FAR struct audio_lowerhalf_s *lower)
       goto error;
     }
 
-  priv->state = CXD56_DEV_STATE_STARTING;
-
 error:
   return ret;
 }
@@ -1717,8 +1717,6 @@ static int cxd56_stop_dma(FAR struct cxd56_dev_s *priv)
           write_reg(REG_AC_PDN_SMSTR, 1);
           as_aca_control(CXD56_ACA_CTL_POWER_OFF_OUTPUT, (uint32_t)NULL);
         }
-
-      priv->state = CXD56_DEV_STATE_STOPPED;
     }
 
   return ret;
@@ -1742,8 +1740,6 @@ static int cxd56_stop(FAR struct audio_lowerhalf_s *lower)
     {
       goto error;
     }
-
-  priv->state = CXD56_DEV_STATE_STOPPING;
 
   msg.msg_id = AUDIO_MSG_STOP;
   msg.u.data = 0;
@@ -1774,8 +1770,22 @@ static int cxd56_pause(FAR struct audio_lowerhalf_s *lower,
 static int cxd56_pause(FAR struct audio_lowerhalf_s *lower)
 #endif
 {
+  int ret = OK;
+  FAR struct cxd56_dev_s *dev = (FAR struct cxd56_dev_s *)lower;
+
   audinfo("cxd56_pause\n");
-  return OK;
+
+  if (dev->state == CXD56_DEV_STATE_STARTED)
+    {
+      dev->state = CXD56_DEV_STATE_PAUSED;
+
+      ret = cxd56_stop_dma(dev);
+      if (ret != CXD56_AUDIO_ECODE_OK)
+        {
+          auderr("Could not stop DMA transfer. (%d)\n", ret);
+        }
+    }
+  return ret;
 }
 
 /****************************************************************************
@@ -1792,8 +1802,24 @@ static int cxd56_resume(FAR struct audio_lowerhalf_s *lower,
 static int cxd56_resume(FAR struct audio_lowerhalf_s *lower)
 #endif
 {
+  int ret = OK;
+  FAR struct cxd56_dev_s *dev = (FAR struct cxd56_dev_s *)lower;
+
   audinfo("cxd56_resume\n");
-  return OK;
+
+  if (dev->state == CXD56_DEV_STATE_PAUSED)
+    {
+      dev->state = CXD56_DEV_STATE_STARTED;
+      cxd56_power_on_analog_output(dev);
+      board_external_amp_mute_control(false);
+
+      ret = cxd56_start_dma(dev);
+      if (ret != CXD56_AUDIO_ECODE_OK)
+        {
+          audinfo("Could not resume DMA transfer. (%d)\n", ret);
+        }
+    }
+  return ret;
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
 
@@ -1858,14 +1884,19 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
   int timeout;
   uint32_t addr;
   uint32_t size;
-  static int bufcount = 0;
   CXD56_AUDIO_ECODE ret = CXD56_AUDIO_ECODE_OK;
 
   cxd56_take_sem(&dev->pendsem);
   if (dq_count(&dev->pendingq) == 0)
     {
-    audinfo("Pending queue empty! Played %d buffers.\n", bufcount);
-    dev->state = CXD56_DEV_STATE_STOPPING;
+      /* Pending queue empty, nothing to do */
+
+      struct audio_msg_s msg;
+
+      msg.msg_id = AUDIO_MSG_STOP;
+      msg.u.data = 0;
+      (void)nxmq_send(dev->mq, (FAR const char *)&msg,
+                      sizeof(msg), CONFIG_CXD56_MSG_PRIO);
     }
   else
     {
@@ -2003,7 +2034,6 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
           dq_pop(&dev->pendingq);
           dq_push(&dev->runningq, &apb->dq_entry);
           dev->state = CXD56_DEV_STATE_STARTED;
-          bufcount++;
         }
     }
 
@@ -2148,13 +2178,22 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
       switch (msg.msg_id)
         {
           case AUDIO_MSG_STOP:
-            cxd56_stop_dma(priv);
+            ret = cxd56_stop_dma(priv);
+            if (ret != CXD56_AUDIO_ECODE_OK)
+              {
+                auderr("Could not stop DMA transfer. (%d)\n", ret);
+                priv->running = false;
+              }
+            priv->state = CXD56_DEV_STATE_STOPPED;
             priv->running = false;
             audinfo("Workerthread stopped.\n");
             break;
 
           case AUDIO_MSG_DATA_REQUEST:
-            cxd56_start_dma(priv);
+            if (priv->state == CXD56_DEV_STATE_STARTED)
+            {
+                cxd56_start_dma(priv);
+            }
             break;
 
           case AUDIO_MSG_ENQUEUE:
