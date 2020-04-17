@@ -49,14 +49,14 @@
  * Public Data
  ****************************************************************************/
 
-char line[LINESIZE+1];
+char line[LINESIZE + 1];
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* These are configuration variable name that are quoted by configuration tool
- * but which must be unquoted when used in C code.
+/* These are configuration variable name that are quoted by configuration
+ * tool but which must be unquoted when used in C code.
  */
 
 static const char *dequote_list[] =
@@ -120,14 +120,15 @@ static char *find_value_end(char *ptr)
     {
       if (*ptr == '"')
         {
-           do ptr++; while (*ptr && *ptr != '"');
-           if (*ptr) ptr++;
+          do ptr++; while (*ptr && *ptr != '"');
+          if (*ptr) ptr++;
         }
       else
         {
-           do ptr++; while (*ptr && !isspace((int)*ptr) && *ptr != '"');
+          do ptr++; while (*ptr && !isspace((int)*ptr) && *ptr != '"');
         }
     }
+
   return ptr;
 }
 
@@ -137,7 +138,7 @@ static char *read_line(FILE *stream)
 {
   char *ptr;
 
-  for (;;)
+  for (; ; )
     {
       line[LINESIZE] = '\0';
       if (!fgets(line, LINESIZE, stream))
@@ -229,7 +230,7 @@ static char *dequote_value(const char *varname, char *varval)
 
   if (dqval)
     {
-      /* Check if the variable name is in the list of strings to be dequoted */
+      /* Check if the variable name is in the dequoted list of strings */
 
       for (dqnam = dequote_list; *dqnam; dqnam++)
         {
@@ -248,52 +249,52 @@ static char *dequote_value(const char *varname, char *varval)
           /* Yes... Check if there is a trailing quote */
 
           len = strlen(dqval);
-          if (dqval[len-1] == '"')
+          if (dqval[len - 1] == '"')
             {
               /* Yes... replace it with a terminator */
 
-              dqval[len-1] = '\0';
+              dqval[len - 1] = '\0';
               len--;
             }
 
           /* Is there a leading quote? */
 
-           if (dqval[0] == '"')
-             {
-               /* Yes.. skip over the leading quote */
+          if (dqval[0] == '"')
+            {
+              /* Yes.. skip over the leading quote */
 
-               dqval++;
-               len--;
-             }
+              dqval++;
+              len--;
+            }
 
-           /* A special case is a quoted list of quoted strings.  In that case
-            * we will need to remove the backspaces from the internally quoted
-            * strings.  NOTE: this will not handle nested quoted quotes.
-            */
+          /* A special case is a quoted list of quoted strings.  In that case
+           * we will need to remove the backspaces from the internally quoted
+           * strings.  NOTE: this will not handle nested quoted quotes.
+           */
 
-           for (ptr = dqval; *ptr; ptr++)
-             {
-               /* Check for a quoted quote */
+          for (ptr = dqval; *ptr; ptr++)
+            {
+              /* Check for a quoted quote */
 
-               if (ptr[0] == '\\' && ptr[1] == '"')
-                 {
-                   /* Delete the backslash by moving the rest of the string */
+              if (ptr[0] == '\\' && ptr[1] == '"')
+                {
+                  /* Delete the backslash by moving the rest of the string */
 
-                   for (i = 0; ptr[i]; i++)
-                     {
-                       ptr[i] = ptr[i+1];
-                     }
+                  for (i = 0; ptr[i]; i++)
+                    {
+                      ptr[i] = ptr[i + 1];
+                    }
 
-                   len--;
-                 }
-             }
+                  len--;
+                }
+            }
 
-           /* Handle the case where nothing is left after dequoting */
+          /* Handle the case where nothing is left after dequoting */
 
-           if (len <= 0)
-             {
-               dqval = NULL;
-             }
+          if (len <= 0)
+            {
+              dqval = NULL;
+            }
         }
     }
 
@@ -331,8 +332,8 @@ void generate_definitions(FILE *stream)
 
               varval = dequote_value(varname, varval);
 
-              /* If no value was provided or if the special value 'n' was provided,
-               * then undefine the configuration variable.
+              /* If no value was provided or if the special value 'n' was
+               * provided, then undefine the configuration variable.
                */
 
               if (!varval || strcmp(varval, "n") == 0)
@@ -340,8 +341,8 @@ void generate_definitions(FILE *stream)
                   printf("#undef %s\n", varname);
                 }
 
-              /* Simply define the configuration variable to '1' if it has the
-               * special value "y"
+              /* Simply define the configuration variable to '1' if it has
+               * the special value "y"
                */
 
               else if (strcmp(varval, "y") == 0)
