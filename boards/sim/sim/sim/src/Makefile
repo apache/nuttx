@@ -75,8 +75,10 @@ endif
 endif
 
 ifeq ($(CONFIG_NSH_ROMFSETC),y)
+ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
   RCSRCS = etc/init.d/rcS
   RCRAWS = etc/group etc/passwd
+endif
 endif
 
 include $(TOPDIR)/boards/Board.mk
