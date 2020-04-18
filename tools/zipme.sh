@@ -50,7 +50,7 @@ EXCLPAT="
 "
 # Get command line parameters
 
-USAGE="USAGE: $0 [-d|h|v|s] [-b <build]> [-e <exclude>] [-k <key-id>] <major.minor>"
+USAGE="USAGE: $0 [-d|h|v|s] [-b <build]> [-e <exclude>] [-k <key-id>] <major.minor.patch>"
 ADVICE="Try '$0 -h' for more information"
 
 unset VERSION
@@ -104,8 +104,8 @@ while [ ! -z "$1" ]; do
     echo "    PGP sign the final tarballs and create digests."
     echo "   -k"
     echo "    PGP key ID.  If not provided the default ID will be used."
-    echo "  <major.minor>"
-    echo "     The NuttX version number expressed as a major and minor number separated"
+    echo "  <major.minor.patch>"
+    echo "     The NuttX version number expressed as a major, minor and patch number separated"
     echo "     by a period"
     exit 0
     ;;
