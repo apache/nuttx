@@ -47,6 +47,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Must match definitions in arch/sim/include/spinlock.h */
 
 #define SP_UNLOCKED   0   /* The Un-locked state */
@@ -55,6 +56,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* Must match definitions in arch/sim/include/spinlock.h.  Assuming that
  * bool and unsigned char are equivalent.
  */
@@ -132,7 +134,8 @@ static void *sim_idle_trampoline(void *arg)
 
   /* Set the CPU number zero for the CPU thread */
 
-  ret = pthread_setspecific(g_cpukey, (const void *)((uintptr_t)cpuinfo->cpu));
+  ret = pthread_setspecific(g_cpukey,
+                           (const void *)((uintptr_t)cpuinfo->cpu));
   if (ret != 0)
     {
       return NULL;
@@ -154,7 +157,7 @@ static void *sim_idle_trampoline(void *arg)
   pthread_mutex_unlock(&cpuinfo->mutex);
 
   /* up_cpu_started() is logically a part of this function but needs to be
-   * inserted in the path because in needs to access NuttX domain definitions.
+   * inserted in the path because in needs to access NuttX domain definition.
    */
 
   up_cpu_started();
@@ -349,7 +352,8 @@ int up_cpu_start(int cpu)
    * in a multi-CPU hardware model.
    */
 
-  ret = pthread_create(&g_sim_cputhread[cpu], NULL, sim_idle_trampoline, &cpuinfo);
+  ret = pthread_create(&g_sim_cputhread[cpu],
+                       NULL, sim_idle_trampoline, &cpuinfo);
   if (ret != 0)
     {
       ret = -ret;  /* REVISIT:  That is a host errno value. */
