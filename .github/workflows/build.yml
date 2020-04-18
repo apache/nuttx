@@ -56,7 +56,7 @@ jobs:
         login-server: docker.pkg.github.com
         username: ${GITHUB_ACTOR}
         password: ${{ secrets.GITHUB_TOKEN }}
-    
+
     - name: Docker Pull
       uses: nick-invision/retry@v1
       with:
