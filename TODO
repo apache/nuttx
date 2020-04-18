@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 3, 2019)
+NuttX TODO List (Last updated April 18, 2020)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -27,7 +27,7 @@ nuttx/:
  (12)  File system/Generic drivers (fs/, drivers/)
  (10)  Graphics Subsystem (graphics/)
   (1)  Build system / Toolchains
-  (3)  Linux/Cygwin simulation (arch/sim)
+  (2)  Linux/Cygwin simulation (arch/sim)
   (5)  ARM (arch/arm/)
 
 apps/ and other Add-Ons:
@@ -2555,69 +2555,6 @@ o Linux/Cygwin simulation (arch/sim)
                up_irq_restore() to block and (conditionally) unblock the signal.
   Status:      Open
   Priority:    Low
-
-  Title:       SMP SIMULATION ISSUES
-  Description: The configuration has basic support SMP testing.  The simulation
-               supports the emulation of multiple CPUs by creating multiple
-               pthreads, each run a copy of the simulation in the same process
-               address space.
-
-               At present, the SMP simulation is not fully functional:  It does
-               operate on the simulated CPU threads for a few context switches
-               then fails during a setjmp() operation.  I suspect that this is
-               not an issue with the NuttX SMP logic but more likely some chaos
-               in the pthread controls. I have seen similar such strange behavior
-               other times that I have tried to use setjmp/longmp from a signal
-               handler! Like when I tried to implement simulated interrupts
-               using signals.
-
-               Apparently, if longjmp is invoked from the context of a signal
-               handler, the result is undefined:
-               http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1318.htm
-
-               You can enable SMP for ostest configuration by enabling:
-
-                 -# CONFIG_EXPERIMENTAL is not set
-                 +CONFIG_EXPERIMENTAL=y
-
-                 +CONFIG_SPINLOCK=y
-                 +CONFIG_SMP=y
-                 +CONFIG_SMP_NCPUS=2
-                 +CONFIG_SMP_IDLETHREAD_STACKSIZE=2048
-
-               You also must enable near-realtime-performance otherwise even long
-               timeouts will expire before a CPU thread even has a chance to
-               execute.
-
-                 -# CONFIG_SIM_WALLTIME is not set
-                 +CONFIG_SIM_WALLTIME=y
-
-               And you can enable some additional debug output with:
-
-                 -# CONFIG_DEBUG_SCHED is not set
-                 +CONFIG_DEBUG_SCHED=y
-
-                 -# CONFIG_SCHED_INSTRUMENTATION is not set
-                 +CONFIG_SCHED_INSTRUMENTATION=y
-
-               The NSH configuration can also be forced to run SMP, but
-               suffers from the same quirky behavior.  I can be made
-               reliable if you modify arch/sim/src/up_idle.c so that
-               the IDLE loop only runs for CPU0.  Otherwise, often
-               simuart_post() will be called from CPU1 and it will try
-               to restart NSH on CPU0 and, again, the same quirkiness
-               occurs.
-
-               But for example, this command:
-
-                 nsh> sleep 1 &
-
-               will execute the sleep command on CPU1 which has worked
-               every time that I have tried it (which is not too many
-               times).
-
-  Status:      Open
-  Priority:    Low, SMP is important, but SMP on the simulator is not
 
 o ARM (arch/arm/)
   ^^^^^^^^^^^^^^^
