@@ -88,7 +88,7 @@ int main(int argc, char **argv, char **envp)
       exit(2);
     }
 
-  stream= fopen(filepath, "r");
+  stream = fopen(filepath, "r");
   if (!stream)
     {
       fprintf(stderr, "open %s failed: %s\n", filepath, strerror(errno));
@@ -99,7 +99,9 @@ int main(int argc, char **argv, char **envp)
   printf("#ifndef __INCLUDE_NUTTX_VERSION_H\n");
   printf("#define __INCLUDE_NUTTX_VERSION_H\n\n");
   generate_definitions(stream);
-  printf("\n#define CONFIG_VERSION ((CONFIG_VERSION_MAJOR << 8) | (CONFIG_VERSION_MINOR))\n\n");
+  printf("\n#define CONFIG_VERSION ((CONFIG_VERSION_MAJOR << 16) |\\\n"
+         "                        (CONFIG_VERSION_MINOR << 8) |\\\n"
+         "                        (CONFIG_VERSION_PATCH))\n\n");
   printf("#endif /* __INCLUDE_NUTTX_VERSION_H */\n");
   fclose(stream);
 

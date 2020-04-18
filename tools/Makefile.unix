@@ -50,7 +50,7 @@ ifneq ($(GIT_DIR),y)
 
 # In case the version file does not exist
 
-CONFIG_VERSION_STRING ?= "0.0"
+CONFIG_VERSION_STRING ?= "0.0.0"
 CONFIG_VERSION_BUILD ?= "0"
 
 VERSION_ARG = -v $(CONFIG_VERSION_STRING) -b $(CONFIG_VERSION_BUILD)
