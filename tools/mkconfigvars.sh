@@ -32,7 +32,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-USAGE="USAGE: $0 [-d|h] [-v <major.minor>]"
+USAGE="USAGE: $0 [-d|h] [-v <major.minor.patch>]"
 ADVICE="Try '$0 -h' for more information"
 
 unset VERSION
@@ -52,8 +52,8 @@ while [ ! -z "$1" ]; do
     echo $USAGE
     echo ""
     echo "Where:"
-    echo "  -v <major.minor>"
-    echo "     The NuttX version number expressed as a major and minor number separated"
+    echo "  -v <major.minor.patch>"
+    echo "     The NuttX version number expressed as a major, minor and patch number separated"
     echo "     by a period"
     echo "  -d"
     echo "     Enable script debug"

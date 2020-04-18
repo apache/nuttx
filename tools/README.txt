@@ -207,11 +207,11 @@ mkconfigvars.sh
   $ tools/mkconfigvars.sh -h
   tools/mkconfigvars.sh is a tool for generation of configuration variable documentation
 
-  USAGE: tools/mkconfigvars.sh [-d|h] [-v <major.minor>]
+  USAGE: tools/mkconfigvars.sh [-d|h] [-v <major.minor.patch>]
 
   Where:
-    -v <major.minor>
-       The NuttX version number expressed as a major and minor number separated
+    -v <major.minor.patch>
+       The NuttX version number expressed as a major, minor and patch number separated
        by a period
     -d
        Enable script debug
@@ -1129,11 +1129,11 @@ zipme.sh
   Any VCS files or directories are excluded from the final tarballs.
 
   $ ./tools/zipme.sh -h
-    USAGE="USAGE: ./tools/zipme.sh [-d|h|v|s] [-b <build]> [-e <exclude>] [-k <key-id>] <major.minor>"
+    USAGE="USAGE: ./tools/zipme.sh [-d|h|v|s] [-b <build]> [-e <exclude>] [-k <key-id>] <major.minor.patch>"
   Examples:
-      ./tools/zipme.sh -s 9.0
-        Create version 9.0 tarballs and sign them.
-      ./tools/zipme.sh -s -k XXXXXX 9.0
+      ./tools/zipme.sh -s 9.0.0
+        Create version 9.0.0 tarballs and sign them.
+      ./tools/zipme.sh -s -k XXXXXX 9.0.0
         Same as above but use the key-id XXXXXX to sign the tarballs
-      ./tools/zipme.sh -e "*.swp tmp" 9.0 
-        Create the tarballs but exclude any *.swp file and the "tmp" directory.
+      ./tools/zipme.sh -e "*.swp tmp" 9.0.0
+        Create the tarballs but exclude any .swp file and the "tmp" directory.
