@@ -938,7 +938,7 @@ Where <subdir> is one of the following:
        CONFIG_NSH_DISABLE_MKFIFO=y
        CONFIG_NSH_DISABLE_MKRD=y
        CONFIG_NSH_DISABLE_PUT=y
-       CONFIG_NSH_DISABLE_SH=y
+       CONFIG_NSH_DISABLE_SOURCE=y
        CONFIG_NSH_DISABLE_TEST=y
        CONFIG_NSH_DISABLE_WGET=y
 

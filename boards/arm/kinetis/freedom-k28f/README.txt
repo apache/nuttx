@@ -57,7 +57,7 @@ STATUS
         [           cmp         false       mkdir       rm          true
         ?           dirname     free        mh          rmdir       uname
         basename    dd          help        mount       set         umount
-        break       df          hexdump     mv          sh          unset
+        break       df          hexdump     mv          source      unset
         cat         echo        kill        mw          sleep       usleep
         cd          exec        ls          ps          test        xd
         cp          exit        mb          pwd         time
