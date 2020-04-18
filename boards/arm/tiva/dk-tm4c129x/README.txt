@@ -338,7 +338,7 @@ Networking Support
       cp          free        kill        mkrd        put         usleep
       cmp         get         losetup     mh          rm          wget
       dd          help        ls          mount       rmdir       xd
-      df          hexdump     mb          mv          sh
+      df          hexdump     mb          mv          source
 
     Builtin Apps:
     nsh>

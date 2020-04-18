@@ -481,7 +481,7 @@ Nokia 5110 LCD Display support:
   nsh> ?
   help usage:  help [-v] [<cmd>]
 
-    [           dd          free        mb          sh          usleep
+    [           dd          free        mb          source      usleep
     ?           echo        help        mh          sleep       xd
     cat         exec        hexdump     mw          test
     cd          exit        kill        pwd         true
