@@ -11,14 +11,17 @@ core
 /.gdbinit
 /cscope.*
 /.config
+/.config-e
 /.config.old
 /.version
 /defconfig
+/defconfig.tmp-e
 /Make.defs
 /staging
 /nuttx
 /nuttx.*
 /nuttx-*
+/uImage
 /_SAVED_APPS_config
 /*.map
 /*.elf
