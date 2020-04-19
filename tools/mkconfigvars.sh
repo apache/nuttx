@@ -115,7 +115,7 @@ else
   if [ -x ${KCONFIG2HTML2} ]; then
     KCONFIG2HTML=${KCONFIG2HTML2}
   else
-    make -C ${KCONFIG2MAKEDIR} -f ${KCONFIG2MAKEFILE} ${KCONFIG2HTML_TARGET} || \
+    make -C ${KCONFIG2MAKEDIR} -f ${KCONFIG2MAKEFILE} ${KCONFIG2HTML_TARGET} 1>/dev/null || \
       { echo "ERROR: make ${KCONFIG2HTML1} failed" ; exit 1 ; }
   fi
 fi
