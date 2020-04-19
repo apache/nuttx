@@ -185,7 +185,9 @@ function distclean {
 
 function configure {
   echo "  Configuring..."
-  ./tools/configure.sh ${HOPTION} $config
+  if ! ./tools/configure.sh ${HOPTION} $config; then
+    fail=1
+  fi
 
   if [ "X$toolchain" != "X" ]; then
     setting=`grep _TOOLCHAIN_ $nuttx/.config | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
@@ -207,9 +209,7 @@ function configure {
       sed -i -e "\$aCONFIG_ARCH_SIZET_LONG=y" $nuttx/.config
     fi
 
-
-    echo "  Refreshing..."
-    makefunc olddefconfig 1>/dev/null
+    makefunc olddefconfig
   fi
 }
 
@@ -217,8 +217,13 @@ function configure {
 
 function build {
   echo "  Building NuttX..."
-  echo "------------------------------------------------------------------------------------"
   makefunc ${JOPTION}
+
+  # Ensure defconfig in the canonical form
+
+  if ! ./tools/refresh.sh --silent $config; then
+    fail=1
+  fi
 }
 
 # Coordinate the steps for the next build test
