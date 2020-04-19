@@ -963,11 +963,14 @@ static void stm32l4serial_setformat(FAR struct uart_dev_s *dev)
   /* Use oversamply by 8 only if the divisor is small.  But what is small? */
 
   cr1 = stm32l4serial_getreg(priv, STM32L4_USART_CR1_OFFSET);
+  brr = stm32l4serial_getreg(priv, STM32L4_USART_BRR_OFFSET);
+  brr &= ~(USART_BRR_MANT_MASK | USART_BRR_FRAC_MASK);
+
   if (usartdiv8 > 100)
     {
       /* Use usartdiv16 */
 
-      brr  = (usartdiv8 + 1) >> 1;
+      brr  |= (usartdiv8 + 1) >> 1;
 
       /* Clear oversampling by 8 to enable oversampling by 16 */
 
@@ -979,7 +982,7 @@ static void stm32l4serial_setformat(FAR struct uart_dev_s *dev)
 
       /* Perform mysterious operations on bits 0-3 */
 
-      brr  = ((usartdiv8 & 0xfff0) | ((usartdiv8 & 0x000f) >> 1));
+      brr  |= ((usartdiv8 & 0xfff0) | ((usartdiv8 & 0x000f) >> 1));
 
       /* Set oversampling by 8 */
 
