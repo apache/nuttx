@@ -119,6 +119,27 @@ bool stm32l4_pwr_enablebkp(bool writable);
 
 bool stm32l4_pwr_enableusv(bool set);
 
+/************************************************************************************
+ * Name: stm32_pwr_setvos
+ *
+ * Description:
+ *   Set voltage scaling for Vcore
+ *
+ * Input Parameters:
+ *   vos - Either 1 or 2, to set to Range 1 or 2, respectively
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   At present, this function is called only from initialization logic.  If used
+ *   for any other purpose that protection to assure that its operation is atomic
+ *   will be required.
+ *
+ ************************************************************************************/
+
+void stm32_pwr_setvos(int vos);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
