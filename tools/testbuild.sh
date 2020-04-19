@@ -165,16 +165,12 @@ function makefunc {
 
 # Clean up after the last build
 
-function distclean_with_git {
-  git -C $nuttx clean -xfdq
-  git -C $APPSDIR clean -xfdq
-}
-
 function distclean {
+  echo "  Cleaning..."
   if [ -f .config ]; then
-    echo "  Cleaning..."
     if [ ${GITCLEAN} -eq 1 ]; then
-      distclean_with_git
+      git -C $nuttx clean -xfdq
+      git -C $APPSDIR clean -xfdq
     else
       makefunc ${JOPTION} distclean
     fi
@@ -223,6 +219,19 @@ function build {
 
   if ! ./tools/refresh.sh --silent $config; then
     fail=1
+  fi
+
+  # Ensure nuttx and apps directory in clean state
+
+  if [ -d $nuttx/.git ] || [ -d $APPSDIR/.git ]; then
+    if [[ -n $(git -C $nuttx status -s) ]]; then
+      git -C $nuttx status
+      fail=1
+    fi
+    if [[ -n $(git -C $APPSDIR status -s) ]]; then
+      git -C $APPSDIR status
+      fail=1
+    fi
   fi
 }
 
