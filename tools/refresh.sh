@@ -38,6 +38,7 @@ USAGE="USAGE: $0 [options] <board>:<config>+"
 ADVICE="Try '$0 --help' for more information"
 
 unset CONFIGS
+diff=0
 debug=n
 defaults=n
 prompt=y
@@ -154,7 +155,7 @@ if [ "X${CONFIGS}" == "Xall" ]; then
 fi
 
 for CONFIG in ${CONFIGS}; do
-  echo "Refresh ${CONFIG}"
+  echo "  Normalize ${CONFIG}"
 
   # Set up the environment
 
@@ -256,28 +257,30 @@ for CONFIG in ${CONFIGS}; do
     make savedefconfig 1>/dev/null
   fi
 
-  # Save the refreshed configuration
+  # Show differences
 
-  if [ "X${prompt}" == "Xy" ]; then
+  if ! $CMPCONFIG $DEFCONFIG defconfig; then
 
-    # Show differences
+    # Save the refreshed configuration
 
-    $CMPCONFIG $DEFCONFIG defconfig
+    if [ "X${prompt}" == "Xy" ]; then
 
-    read -p "Save the new configuration (y/n)?" -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
+      read -p "Save the new configuration (y/n)?" -n 1 -r
+      echo
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "Saving the new configuration file"
+        mv defconfig $DEFCONFIG || \
+            { echo "ERROR: Failed to move defconfig to $DEFCONFIG"; exit 1; }
+        chmod 644 $DEFCONFIG
+      fi
+    else
       echo "Saving the new configuration file"
       mv defconfig $DEFCONFIG || \
           { echo "ERROR: Failed to move defconfig to $DEFCONFIG"; exit 1; }
       chmod 644 $DEFCONFIG
     fi
-  else
-    echo "Saving the new configuration file"
-    mv defconfig $DEFCONFIG || \
-        { echo "ERROR: Failed to move defconfig to $DEFCONFIG"; exit 1; }
-    chmod 644 $DEFCONFIG
+
+    diff=1
   fi
 
   # Restore any previous .config and Make.defs files
@@ -292,3 +295,5 @@ for CONFIG in ${CONFIGS}; do
       { echo "ERROR: Failed to move SAVEMake.defs to Make.defs"; exit 1; }
   fi
 done
+
+exit $diff

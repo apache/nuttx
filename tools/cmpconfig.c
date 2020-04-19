@@ -63,11 +63,12 @@ static void show_usage(const char *progname)
   exit(EXIT_FAILURE);
 }
 
-static void compare_variables(struct variable_s *list1, struct variable_s *list2)
+static int compare_variables(struct variable_s *list1,
+                             struct variable_s *list2)
 {
   char *varval1;
   char *varval2;
-  int result;
+  int ret = 0;
 
   while (list1 || list2)
     {
@@ -94,27 +95,33 @@ static void compare_variables(struct variable_s *list1, struct variable_s *list2
           printf("file1:\n");
           printf("file2: %s=%s\n\n", list2->var, varval2);
           list2 = list2->flink;
+          ret = EXIT_FAILURE;
         }
       else if (!list2)
         {
           printf("file1: %s=%s\n", list1->var, varval1);
           printf("file2:\n\n");
           list1 = list1->flink;
+          ret = EXIT_FAILURE;
         }
       else
         {
+          int result;
+
           result = strcmp(list1->var, list2->var);
           if (result < 0)
             {
               printf("file1: %s=%s\n", list1->var, varval1);
               printf("file2:\n\n");
               list1 = list1->flink;
+              ret = EXIT_FAILURE;
             }
           else if (result > 0)
             {
               printf("file1:\n");
               printf("file2: %s=%s\n\n", list2->var, varval2);
               list2 = list2->flink;
+              ret = EXIT_FAILURE;
             }
           else /* if (result == 0) */
             {
@@ -130,6 +137,8 @@ static void compare_variables(struct variable_s *list1, struct variable_s *list2
             }
         }
     }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -171,9 +180,5 @@ int main(int argc, char **argv, char **envp)
   fclose(stream1);
   fclose(stream2);
 
-  printf("Comparing:\n\n");
-  printf("  file1 = %s\n", argv[1]);
-  printf("  file2 = %s\n\n", argv[2]);
-  compare_variables(list1, list2);
-  return EXIT_SUCCESS;
+  return compare_variables(list1, list2);
 }
