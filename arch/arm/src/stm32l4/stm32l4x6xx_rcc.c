@@ -777,23 +777,26 @@ static void stm32l4_stdclockconfig(void)
 
   if (timeout > 0)
     {
-#warning todo: regulator voltage according to clock freq
-#if 0
       /* Ensure Power control is enabled before modifying it. */
 
-      regval  = getreg32(STM32L4_RCC_APB1ENR);
-      regval |= RCC_APB1ENR_PWREN;
-      putreg32(regval, STM32L4_RCC_APB1ENR);
+      stm32l4_pwr_enableclk(true);
 
-      /* Select regulator voltage output Scale 1 mode to support system
-       * frequencies up to 168 MHz.
-       */
+      if (STM32L4_SYSCLK_FREQUENCY > 24000000ul)
+        {
+          /* Select regulator voltage output Scale 1 mode to support system
+           * frequencies up to 168 MHz.
+           */
 
-      regval  = getreg32(STM32L4_PWR_CR);
-      regval &= ~PWR_CR_VOS_MASK;
-      regval |= PWR_CR_VOS_SCALE_1;
-      putreg32(regval, STM32L4_PWR_CR);
-#endif
+          stm32_pwr_setvos(1);
+        }
+      else
+        {
+          /* Select regulator voltage output Scale 2 mode for
+           * frequencies below 24 MHz
+           */
+
+          stm32_pwr_setvos(2);
+        }
 
       /* Set the HCLK source/divider */
 
