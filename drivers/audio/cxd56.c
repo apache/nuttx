@@ -68,9 +68,9 @@
 #define CXD56_VOL_MIN            -1020
 #define CXD56_VOL_MAX            120
 #define CXD56_VOL_MUTE           (CXD56_VOL_MIN - 1)
-#define CXD56_VOL_RANGE          (CXD56_VOL_MAX - CXD56_VOL_MIN)
+#define CXD56_VOL_RANGE          ((CXD56_VOL_MAX - CXD56_VOL_MIN) / 2)
 #define CXD56_VOL_NX_TO_CXD56(v) ((int)((float)((v) / 1000.0) * CXD56_VOL_RANGE) \
-                                 + CXD56_VOL_MIN)
+                                 + CXD56_VOL_MIN + CXD56_VOL_RANGE)
 #define CXD56_VOL_WAIT_TIME      20
 #define CXD56_VOL_TO_REG(vol)    (((vol) / 5) & 0xff)
 #define CXD56_VOL_MUTE_REG       0x33
@@ -301,7 +301,7 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev);
 static int cxd56_stop_dma(FAR struct cxd56_dev_s *priv);
 static void cxd56_set_dma_int_en(bool enabled);
 static void cxd56_set_dma_running(cxd56_dmahandle_t handle, bool running);
-static void cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol, bool fade);
+static int cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol);
 static void cxd56_swap_buffer_rl(uint32_t addr, uint16_t size);
 static void *cxd56_workerthread(pthread_addr_t pvarg);
 
@@ -986,9 +986,9 @@ static void cxd56_enable_irq(bool enable)
     }
 }
 
-static void cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol, bool fade)
+static int cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol)
 {
-  uint32_t waittime = 0;
+  int ret;
 
   if (vol == CXD56_VOL_MUTE)
     {
@@ -996,18 +996,7 @@ static void cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol, bool fade)
     }
   else
     {
-      CXD56_AUDIO_ECODE ret;
-
       vol = CXD56_VOL_TO_REG(vol);
-
-      /* Enable analog out */
-
-      ret = as_aca_control(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
-                           (uint32_t)CXD56_OUT_DEV_SP);
-      if (ret != CXD56_AUDIO_ECODE_OK)
-        {
-          auderr("cxd56_set_volume analog out enable failed. (%d)\n", ret);
-        }
     }
 
   switch (id)
@@ -1023,17 +1012,37 @@ static void cxd56_set_volume(enum cxd56_vol_id_e id, int16_t vol, bool fade)
         break;
     }
 
-  waittime = (fade ? CXD56_VOL_MUTE_TIME(vol, 1) : CXD56_VOL_WAIT_TIME);
-
-  nxsig_usleep(waittime);
 
   if (vol == CXD56_VOL_MUTE_REG)
     {
       /* Disable analog out */
 
-      as_aca_control(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
-                     (uint32_t)CXD56_OUT_DEV_OFF);
+      ret = as_aca_control(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
+                           (uint32_t)CXD56_OUT_DEV_OFF);
+      if (ret != CXD56_AUDIO_ECODE_OK)
+        {
+          auderr("cxd56_set_volume analog out disable failed. (%d)\n", ret);
+          ret = -EBUSY;
+          goto error;
+        }
     }
+  else
+    {
+      /* Enable analog out */
+
+      ret = as_aca_control(CXD56_ACA_CTL_SET_OUTPUT_DEVICE,
+                           (uint32_t)CXD56_OUT_DEV_SP);
+      if (ret != CXD56_AUDIO_ECODE_OK)
+        {
+          auderr("cxd56_set_volume analog out enable failed. (%d)\n", ret);
+          ret = -EBUSY;
+          goto error;
+        }
+    }
+  ret = OK;
+
+error:
+  return ret;
 }
 
 static void cxd56_init_i2s1_output(uint8_t bits)
@@ -1234,7 +1243,7 @@ static uint32_t cxd56_power_on_analog_output(FAR struct cxd56_dev_s *dev)
   write_reg(REG_INT_M_OVF_SMASR, 0);
   write_reg(REG_AC_NSPMUTE, 0);
 
-  cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_OUT, dev->volume, true);
+  cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_OUT, dev->volume);
 
   return CXD56_AUDIO_ECODE_OK;
 }
@@ -1323,6 +1332,7 @@ static uint32_t cxd56_power_on(FAR struct cxd56_dev_s *dev)
       write_reg(REG_I2S_ENSEL, (dev->samplerate > 48000) ? 1 : 0);
 
       /* Disable DEQ */
+
       write_reg(REG_AC_DEQ_EN, 0);
 
       /* Disable DNC. */
@@ -1342,7 +1352,6 @@ static uint32_t cxd56_power_on(FAR struct cxd56_dev_s *dev)
       write_reg(REG_AC_CS_SIGN, 0);
       write_reg(REG_AC_CS_VOL, 0x00);
 
-      /* Attach interrupts */
       cxd56_attach_irq(true);
       cxd56_enable_irq(true);
     }
@@ -1571,14 +1580,10 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
                 /* Scale the volume setting to the range {-1020..120} */
 
                 priv->volume = CXD56_VOL_NX_TO_CXD56(volume);
-                audinfo("Volume: %d (priv = %d)\n", volume, priv->volume);
 
-                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_OUT,
-                                 priv->volume, false);
-                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_IN1,
-                                 priv->volume, false);
-                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_IN2,
-                                 priv->volume, false);
+                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_OUT, priv->volume);
+                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_IN1, priv->volume);
+                cxd56_set_volume(CXD56_AUDIO_VOLID_MIXER_IN2, priv->volume);
               }
             else
               {
@@ -1619,6 +1624,8 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
         audinfo("  Samplerate:  %d\n", priv->samplerate);
         audinfo("  Bit width:   %d\n", priv->bitwidth);
 
+        /* Get ready to start receiving buffers */
+
         ret = cxd56_power_on(priv);
         if (ret != CXD56_AUDIO_ECODE_OK)
           {
@@ -1630,13 +1637,6 @@ static int cxd56_configure(FAR struct audio_lowerhalf_s *lower,
         if (ret != CXD56_AUDIO_ECODE_OK)
           {
             auderr("DMA init failed. (%d)\n", ret);
-            goto error;
-          }
-
-        ret = cxd56_power_on_analog_output(priv);
-        if (ret != CXD56_AUDIO_ECODE_OK)
-          {
-            auderr("Power on analog output failed- (%d)\n", ret);
             goto error;
           }
 
@@ -1668,11 +1668,18 @@ static int cxd56_start(FAR struct audio_lowerhalf_s *lower)
 
   audinfo("cxd56_start\n");
 
-  /* Select audio data path */
+  /* Set audio path and enable output */
 
   if (priv->dma_handle == CXD56_AUDIO_DMA_I2S0_DOWN)
     {
       write_reg(REG_AC_AU_DAT_SEL1, CXD56_AUDAT_SEL_BUSIF1);
+    }
+
+  ret = cxd56_power_on_analog_output(priv);
+  if (ret != CXD56_AUDIO_ECODE_OK)
+    {
+      auderr("Power on analog output failed- (%d)\n", ret);
+      goto error;
     }
 
   ret = cxd56_init_worker(lower);
