@@ -125,7 +125,7 @@ else
   if [ -x ${CMPCONFIG2} ]; then
     CMPCONFIG=${CMPCONFIG2}
   else
-    make -C ${CMPCONFIGMAKEDIR} -f ${CMPCONFIGMAKEFILE} ${CMPCONFIG_TARGET} || \
+    make -C ${CMPCONFIGMAKEDIR} -f ${CMPCONFIGMAKEFILE} ${CMPCONFIG_TARGET} 1>/dev/null || \
       { echo "ERROR: make ${CMPCONFIG1} failed" ; exit 1 ; }
   fi
 fi
