@@ -726,7 +726,8 @@ static void stm32l4_stdclockconfig(void)
   /* setting MSIRANGE */
 
   regval  = getreg32(STM32L4_RCC_CR);
-  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION);    /* Enable MSI and frequency */
+  regval &= ~RCC_CR_MSIRANGE_MASK;                /* Zero-out current MSIRANGE bits */
+  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION | RCC_CR_MSIRGSEL);  /* Enable MSI and frequency */
   putreg32(regval, STM32L4_RCC_CR);
 
   /* Wait until the MSI is ready (or until a timeout elapsed) */
