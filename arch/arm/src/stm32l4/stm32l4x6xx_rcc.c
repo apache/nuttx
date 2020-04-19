@@ -864,6 +864,9 @@ static void stm32l4_stdclockconfig(void)
       regval |= RCC_PLLCFG_PLLSRC_HSE;
 #endif
 
+#ifndef STM32L4_BOARD_NOPLL
+      /* Use the main PLL as SYSCLK, so enable it first */
+
       putreg32(regval, STM32L4_RCC_PLLCFG);
 
       /* Enable the main PLL */
@@ -877,6 +880,7 @@ static void stm32l4_stdclockconfig(void)
       while ((getreg32(STM32L4_RCC_CR) & RCC_CR_PLLRDY) == 0)
         {
         }
+#endif
 
 #ifdef CONFIG_STM32L4_SAI1PLL
       /* Configure SAI1 PLL */
@@ -945,6 +949,8 @@ static void stm32l4_stdclockconfig(void)
         }
 #endif
 
+      /* TODO: could reduce flash wait states according to vcore range and freq */
+
       /* Enable FLASH prefetch, instruction cache, data cache, and 4 wait states */
 
 #ifdef CONFIG_STM32L4_FLASH_PREFETCH
@@ -955,17 +961,34 @@ static void stm32l4_stdclockconfig(void)
 #endif
       putreg32(regval, STM32L4_FLASH_ACR);
 
-      /* Select the main PLL as system clock source */
+      /* Select the system clock source */
 
       regval  = getreg32(STM32L4_RCC_CFGR);
       regval &= ~RCC_CFGR_SW_MASK;
+#ifndef STM32L4_BOARD_NOPLL
       regval |= RCC_CFGR_SW_PLL;
+#elif STM32L4_BOARD_USEMSI
+      regval |= RCC_CFGR_SW_MSI;
+#elif STM32L4_BOARD_USEHSI
+      regval |= RCC_CFGR_SW_HSI;
+#elif STM32L4_BOARD_USEHSE
+      regval |= RCC_CFGR_SW_HSE;
+#endif
       putreg32(regval, STM32L4_RCC_CFGR);
 
       /* Wait until the PLL source is used as the system clock source */
 
       while ((getreg32(STM32L4_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
-              RCC_CFGR_SWS_PLL)
+#ifndef STM32L4_BOARD_NOPLL
+              RCC_CFGR_SWS_PLL
+#elif STM32L4_BOARD_USEMSI
+              RCC_CFGR_SWS_MSI
+#elif STM32L4_BOARD_USEHSI
+              RCC_CFGR_SWS_HSI
+#elif STM32L4_BOARD_USEHSE
+              RCC_CFGR_SWS_HSE
+#endif
+             )
         {
         }
 
