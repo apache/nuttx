@@ -226,3 +226,46 @@ bool stm32l4_pwr_enableusv(bool set)
 
   return was_set;
 }
+
+/************************************************************************************
+ * Name: stm32_pwr_setvos
+ *
+ * Description:
+ *   Set voltage scaling for Vcore
+ *
+ * Input Parameters:
+ *   vos - Either 1 or 2, to set to Range 1 or 2, respectively
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   At present, this function is called only from initialization logic.  If used
+ *   for any other purpose that protection to assure that its operation is atomic
+ *   will be required.
+ *
+ ************************************************************************************/
+
+void stm32_pwr_setvos(int vos)
+{
+  uint32_t regval;
+
+  if (vos != 1 && vos != 2)
+    {
+      return;
+    }
+
+  regval  = getreg32(STM32L4_PWR_CR1);
+  regval &= ~PWR_CR1_VOS_MASK;
+
+  if (vos == 1)
+    {
+      regval |= PWR_CR1_VOS_RANGE1;
+    }
+  else
+    {
+      regval |= PWR_CR1_VOS_RANGE2;
+    }
+
+  putreg32(regval, STM32L4_PWR_CR1);
+}
