@@ -42,17 +42,13 @@ usage() {
 }
 
 check_file() {
-  $TOOLDIR/nxstyle $@ 2>&1
-  ret=$?
-  if [ $ret != 0 ]; then
-    fail=$ret
+  if ! $TOOLDIR/nxstyle $@ 2>&1; then
+    fail=1
   fi
 
   if [ $spell != 0 ]; then
-    codespell -q 7 ${@: -1}
-    ret=$?
-    if [ $ret != 0 ]; then
-      fail=$ret
+    if ! codespell -q 7 ${@: -1}; then
+      fail=1
     fi
   fi
 }
@@ -83,10 +79,8 @@ check_ranges() {
 }
 
 check_patch() {
-  git apply --check $1
-  ret=$?
-  if [ $ret != 0 ]; then
-    fail=$ret
+  if ! git apply --check $1; then
+    fail=1
   else
     git apply $1
     diffs=`cat $1`

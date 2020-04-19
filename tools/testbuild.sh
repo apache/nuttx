@@ -158,10 +158,8 @@ blacklist=`grep "^-" $testfile || true`
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
 function makefunc {
-  ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" $@ 1>/dev/null
-  ret=$?
-  if [ $ret != 0 ]; then
-    fail=$ret
+  if ! ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" $@ 1>/dev/null; then
+    fail=1
   fi
 }
 
