@@ -115,7 +115,12 @@ LIBEXT = .a
 EXEEXT =
 
 ifneq ($(CROSSDEV),arm-nuttx-elf-)
-  LDFLAGS += -nostartfiles -nodefaultlibs -Map nuttx.map
+  LDFLAGS += -nostartfiles -nodefaultlibs
+ifeq ($(WINTOOL),y)
+  LDFLAGS += -Map="${shell cygpath -w $(TOPDIR)/nuttx.map}"
+else
+  LDFLAGS += -Map=$(TOPDIR)/nuttx.map
+endif
 endif
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
