@@ -1,7 +1,7 @@
-README for the Expressif ESP32 Core board (V2)
+README for the Espressif ESP32 Core board (V2)
 ==============================================
 
-  The ESP32 is a dual-core system from Expressif with two Harvard
+  The ESP32 is a dual-core system from Espressif with two Harvard
   architecture Xtensa LX6 CPUs. All embedded memory, external memory and
   peripherals are located on the data bus and/or the instruction bus of
   these CPUs. With some minor exceptions, the address mapping of two CPUs
@@ -173,7 +173,7 @@ Memory Map
   IRAM for PRO cpu:  0x40080000 0x400a0000  RX  iram0_0_seg
     - Interrupt Vectors
     - Low level handlers
-    - Xtensa/Expressif libraries
+    - Xtensa/Espressif libraries
   RTC fast memory:   0x400c0000 0x400c2000  RWX rtc_iram_seg (PRO_CPU only)
     - .rtc.text (unused?)
   FLASH:             0x400d0018 0x40400018  RX  iram0_2_seg  (actually FLASH)
@@ -752,7 +752,7 @@ Things to Do
   1. There is no support for an interrupt stack yet.
 
   2. There is no clock initialization logic in place.  This depends on logic in
-     Expressif libriaries.  The board comes up using that basic 40 Mhz crystal
+     Espressif libraries.  The board comes up using that basic 40 MHz crystal
      for clocking.  Getting to 80 MHz will require clocking initialization in
      esp32_clockconfig.c.
 

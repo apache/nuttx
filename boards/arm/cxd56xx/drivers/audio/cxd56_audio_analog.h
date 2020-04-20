@@ -1,4 +1,4 @@
-/***************************************************************************
+/****************************************************************************
  * boards/arm/cxd56xx/drivers/audio/cxd56_audio_analog.h
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
@@ -36,41 +36,43 @@
 #ifndef __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_ANALOG_H
 #define __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_ANALOG_H
 
-/***************************************************************************
+/****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <arch/chip/audio.h>
 
-/***************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/***************************************************************************
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/***************************************************************************
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/***************************************************************************
+/****************************************************************************
  * Inline Functions
  ****************************************************************************/
 
-/***************************************************************************
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 CXD56_AUDIO_ECODE cxd56_audio_analog_poweron(void);
 CXD56_AUDIO_ECODE cxd56_audio_analog_poweroff(void);
-CXD56_AUDIO_ECODE cxd56_audio_analog_poweron_input(FAR cxd56_audio_mic_gain_t *gain);
+CXD56_AUDIO_ECODE cxd56_audio_analog_poweron_input(
+                                     FAR cxd56_audio_mic_gain_t *gain);
 CXD56_AUDIO_ECODE cxd56_audio_analog_poweron_output(void);
 CXD56_AUDIO_ECODE cxd56_audio_analog_poweroff_input(void);
 CXD56_AUDIO_ECODE cxd56_audio_analog_poweroff_output(void);
 CXD56_AUDIO_ECODE cxd56_audio_analog_enable_output(void);
 CXD56_AUDIO_ECODE cxd56_audio_analog_disable_output(void);
-CXD56_AUDIO_ECODE cxd56_audio_analog_set_micgain(FAR cxd56_audio_mic_gain_t *gain);
+CXD56_AUDIO_ECODE cxd56_audio_analog_set_micgain(
+                                     FAR cxd56_audio_mic_gain_t *gain);
 CXD56_AUDIO_ECODE cxd56_audio_analog_wait_input_standby(void);
 
 #endif /* __BOARDS_ARM_CXD56XX_DRIVERS_AUDIO_CXD56_AUDIO_ANALOG_H */

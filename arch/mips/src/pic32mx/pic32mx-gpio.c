@@ -110,11 +110,6 @@ static inline bool pic32mx_outputhigh(uint16_t pinset)
   return ((pinset & GPIO_VALUE_MASK) != 0);
 }
 
-static inline bool pic32mx_value(uint16_t pinset)
-{
-  return ((pinset & GPIO_VALUE_MASK) != GPIO_VALUE_ZERO);
-}
-
 static inline unsigned int pic32mx_portno(uint16_t pinset)
 {
   return ((pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT);
@@ -175,7 +170,7 @@ int pic32mx_configgpio(uint16_t cfgset)
 #if defined(CHIP_PIC32MX1) || defined(CHIP_PIC32MX2)
           putreg32(mask, base + PIC32MX_IOPORT_ANSELCLR_OFFSET);
 #endif
-          /* It is an output; clear the corresponding bit in the TRIS register */
+          /* It is an output; clear the corresponding bit in TRIS register */
 
           putreg32(mask, base + PIC32MX_IOPORT_TRISCLR_OFFSET);
 
@@ -204,7 +199,7 @@ int pic32mx_configgpio(uint16_t cfgset)
         }
       else
         {
-          /* It is an input; set the corresponding bit in the TRIS register. */
+          /* It is an input; set the corresponding bit in TRIS register. */
 
           putreg32(mask, base + PIC32MX_IOPORT_TRISSET_OFFSET);
           putreg32(mask, base + PIC32MX_IOPORT_ODCCLR_OFFSET);

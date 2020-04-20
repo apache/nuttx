@@ -21,7 +21,7 @@ if USBMONITOR
 
 config USBMONITOR_STACKSIZE
 	int "USB Monitor daemon stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The stack size to use the USB monitor daemon.  Default: 2048
 

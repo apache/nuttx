@@ -259,8 +259,8 @@ int bcmf_probe(FAR struct bcmf_sdio_dev_s *sbus)
       goto exit_error;
     }
 
-  /* Default device clock speed is up to 25 Mhz
-   * We could set EHS bit to operate at a clock rate up to 50 Mhz.
+  /* Default device clock speed is up to 25 MHz
+   * We could set EHS bit to operate at a clock rate up to 50 MHz.
    */
 
   SDIO_CLOCK(sbus->sdio_dev, CLOCK_SD_TRANSFER_4BIT);

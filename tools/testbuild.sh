@@ -39,26 +39,35 @@ progname=$0
 fail=0
 APPSDIR=$WD/../apps
 MAKE_FLAGS=-k
+EXTRA_FLAGS=
 MAKE=make
 unset testfile
 unset HOPTION
 unset JOPTION
 PRINTLISTONLY=0
+GITCLEAN=0
 
 function showusage {
   echo ""
-  echo "USAGE: $progname [-l|m|c|u|g|n] [-si|-sl>] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] <testlist-file>"
+  echo "USAGE: $progname [-l|m|c|u|g|n] [-d] [-e <extraflags>] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>"
   echo "       $progname -h"
   echo ""
   echo "Where:"
   echo "  -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),"
   echo "     Ubuntu under Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Linux"
   echo "  -d enables script debug output"
+  echo "  -e pass extra c/c++ flags such as -Wno-cpp via make command line"
   echo "  -x exit on build failures"
   echo "  -j <ncpus> passed on to make.  Default:  No -j make option."
   echo "  -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps"
   echo "  -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx"
   echo "  -p only print the list of configs without running any builds"
+  echo "  -G Use \"git clean -xfdq\" instead of \"make distclean\" to clean the tree."
+  echo "     This option may speed up the builds. However, note that:"
+  echo "       * This assumes that your trees are git based."
+  echo "       * This assumes that only nuttx and apps repos need to be cleaned."
+  echo "       * If the tree has files not managed by git, they will be removed"
+  echo "         as well."
   echo "  -h will show this help test and terminate"
   echo "  <testlist-file> selects the list of configurations to test.  No default"
   echo ""
@@ -78,6 +87,10 @@ while [ ! -z "$1" ]; do
   -d )
     set -x
     ;;
+  -e )
+    shift
+    EXTRA_FLAGS="EXTRAFLAGS=$1"
+    ;;
   -x )
     MAKE_FLAGS='--silent --no-print-directory'
     set -e
@@ -96,6 +109,9 @@ while [ ! -z "$1" ]; do
     ;;
   -p )
     PRINTLISTONLY=1
+    ;;
+  -G )
+    GITCLEAN=1
     ;;
   -h )
     showusage
@@ -142,7 +158,7 @@ blacklist=`grep "^-" $testfile || true`
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
 function makefunc {
-  ${MAKE} $@
+  ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" $@ 1>/dev/null
   ret=$?
   if [ $ret != 0 ]; then
     fail=$ret
@@ -159,7 +175,11 @@ function distclean_with_git {
 function distclean {
   if [ -f .config ]; then
     echo "  Cleaning..."
-    distclean_with_git || makefunc ${JOPTION} ${MAKE_FLAGS} distclean 1>/dev/null
+    if [ ${GITCLEAN} -eq 1 ]; then
+      distclean_with_git
+    else
+      makefunc ${JOPTION} distclean
+    fi
   fi
 }
 
@@ -191,7 +211,7 @@ function configure {
 
 
     echo "  Refreshing..."
-    makefunc ${MAKE_FLAGS} olddefconfig 1>/dev/null
+    makefunc olddefconfig 1>/dev/null
   fi
 }
 
@@ -200,7 +220,7 @@ function configure {
 function build {
   echo "  Building NuttX..."
   echo "------------------------------------------------------------------------------------"
-  makefunc ${JOPTION} ${MAKE_FLAGS} 1>/dev/null
+  makefunc ${JOPTION}
 }
 
 # Coordinate the steps for the next build test

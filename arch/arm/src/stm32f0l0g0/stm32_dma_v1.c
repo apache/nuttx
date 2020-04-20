@@ -58,7 +58,8 @@
 #include "stm32_dma.h"
 #include "stm32.h"
 
-/* This file supports the STM32 DMA IP core version 1 - F0, F1, F3, L0, L1, L4
+/* This file supports the STM32 DMA IP core version 1 - F0, F1, F3, L0, L1,
+ * L4
  *
  * F0, L0 and L4 have the additional CSELR register which is used to remap
  * the DMA requests for each channel.
@@ -224,9 +225,9 @@ static inline void dmachan_putreg(struct stm32_dma_s *dmach,
  *
  ****************************************************************************/
 
-static void stm32_dmatake(FAR struct stm32_dma_s *dmach)
+static int stm32_dmatake(FAR struct stm32_dma_s *dmach)
 {
-  nxsem_wait_uninterruptible(&dmach->sem);
+  return nxsem_wait_uninterruptible(&dmach->sem);
 }
 
 static inline void stm32_dmagive(FAR struct stm32_dma_s *dmach)
@@ -293,6 +294,7 @@ static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
     {
       DEBUGPANIC();
     }
+
   dmach = &g_dma[chndx];
 
   /* Get the interrupt status (for this channel only) */
@@ -311,6 +313,7 @@ static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
       dmach->callback(dmach, isr >> DMA_ISR_CHAN_SHIFT(dmach->chan),
                       dmach->arg);
     }
+
   return OK;
 }
 
@@ -396,6 +399,7 @@ DMA_HANDLE stm32_dmachannel(unsigned int chndef)
 {
   int chndx = 0;
   struct stm32_dma_s *dmach = NULL;
+  int ret;
 
 #ifdef DMA_HAVE_CSELR
   chndx = (chndef & DMACHAN_SETTING_CHANNEL_MASK) >>
@@ -412,7 +416,11 @@ DMA_HANDLE stm32_dmachannel(unsigned int chndef)
    * is available if it is currently being used by another driver
    */
 
-  stm32_dmatake(dmach);
+  ret = stm32_dmatake(dmach);
+  if (ret < 0)
+    {
+      return NULL;
+    }
 
   /* The caller now has exclusive use of the DMA channel */
 
@@ -432,9 +440,9 @@ DMA_HANDLE stm32_dmachannel(unsigned int chndef)
  * Name: stm32_dmafree
  *
  * Description:
- *   Release a DMA channel.  If another thread is waiting for this DMA channel
- *   in a call to stm32_dmachannel, then this function will re-assign the
- *   DMA channel to that thread and wake it up.  NOTE:  The 'handle' used
+ *   Release a DMA channel.  If another thread is waiting for this DMA
+ *   channel in a call to stm32_dmachannel, then this function will re-assign
+ *   the DMA channel to that thread and wake it up.  NOTE:  The 'handle' used
  *   in this argument must NEVER be used again until stm32_dmachannel() is
  *   called again to re-gain access to the channel.
  *
@@ -580,7 +588,7 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
       /* In nonstop mode, when the transfer completes it immediately resets
        * and starts again.  The transfer-complete interrupt is thus always
        * enabled, and the half-complete interrupt can be used in circular
-       * mode to determine when the buffer is half-full, or in double-buffered
+       * mode to determine when the buffer is half-full or in double-buffered
        * mode to determine when one of the two buffers is full.
        */
 
@@ -694,11 +702,13 @@ bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
     {
       case STM32_SRAM_BASE:
       case STM32_CODE_BASE:
+
         /* All RAM and flash is supported */
 
         return true;
 
       default:
+
         /* Everything else is unsupported by DMA */
 
         return false;

@@ -141,7 +141,7 @@
 
 #define HCOR ((volatile struct ehci_hcor_s *)IMXRT_USBOTG_HCOR_BASE)
 
-/* Interrupts ****************************************************************
+/* Interrupts ***************************************************************
  * This is the set of interrupts handled by this driver.
  */
 
@@ -159,7 +159,7 @@
 
 #define FRAME_LIST_SIZE 1024
 
-/* DMA ***********************************************************************/
+/* DMA **********************************************************************/
 
 /* For now, we are assuming an identity mapping between physical and virtual
  * address spaces.
@@ -168,7 +168,7 @@
 #define imxrt_physramaddr(a) (a)
 #define imxrt_virtramaddr(a) (a)
 
-/* USB trace *****************************************************************/
+/* USB trace ****************************************************************/
 
 #ifdef HAVE_USBHOST_TRACE
 #  define TR_FMT1 false
@@ -433,7 +433,8 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
 
 /* Semaphores ***************************************************************/
 
-static void imxrt_takesem(sem_t *sem);
+static int imxrt_takesem(sem_t *sem);
+static int imxrt_takesem_noncancelable(sem_t *sem);
 #define imxrt_givesem(s) nxsem_post(s);
 
 /* Allocators ***************************************************************/
@@ -460,7 +461,8 @@ static int imxrt_qtd_invalidate(struct imxrt_qtd_s *qtd, uint32_t **bp,
           void *arg);
 static int imxrt_qh_invalidate(struct imxrt_qh_s *qh);
 #endif
-static int imxrt_qtd_flush(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg);
+static int imxrt_qtd_flush(struct imxrt_qtd_s *qtd, uint32_t **bp,
+                           void *arg);
 static int imxrt_qh_flush(struct imxrt_qh_s *qh);
 
 /* Endpoint Transfer Handling ***********************************************/
@@ -487,14 +489,14 @@ static struct imxrt_qh_s *imxrt_qh_create(struct imxrt_rhport_s *rhport,
          struct imxrt_epinfo_s *epinfo);
 static int imxrt_qtd_addbpl(struct imxrt_qtd_s *qtd, const void *buffer,
          size_t buflen);
-static struct imxrt_qtd_s *imxrt_qtd_setupphase(struct imxrt_epinfo_s *epinfo,
-         const struct usb_ctrlreq_s *req);
+static struct imxrt_qtd_s *imxrt_qtd_setupphase(
+         struct imxrt_epinfo_s *epinfo, const struct usb_ctrlreq_s *req);
 static struct imxrt_qtd_s *imxrt_qtd_dataphase(struct imxrt_epinfo_s *epinfo,
          void *buffer, int buflen, uint32_t tokenbits);
 static struct imxrt_qtd_s *imxrt_qtd_statusphase(uint32_t tokenbits);
-static ssize_t imxrtimxrt_virtramaddr_async_setup(struct imxrt_rhport_s *rhport,
-         struct imxrt_epinfo_s *epinfo, const struct usb_ctrlreq_s *req,
-         uint8_t *buffer, size_t buflen);
+static ssize_t imxrtimxrt_virtramaddr_async_setup(
+         struct imxrt_rhport_s *rhport, struct imxrt_epinfo_s *epinfo,
+         const struct usb_ctrlreq_s *req, uint8_t *buffer, size_t buflen);
 #ifndef CONFIG_USBHOST_INT_DISABLE
 static int imxrt_intr_setup(struct imxrt_rhport_s *rhport,
          struct imxrt_epinfo_s *epinfo, uint8_t *buffer, size_t buflen);
@@ -542,7 +544,8 @@ static int imxrt_epalloc(FAR struct usbhost_driver_s *drvr,
 static int imxrt_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 static int imxrt_alloc(FAR struct usbhost_driver_s *drvr,
          FAR uint8_t **buffer, FAR size_t *maxlen);
-static int imxrt_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
+static int imxrt_free(FAR struct usbhost_driver_s *drvr,
+         FAR uint8_t *buffer);
 static int imxrt_ioalloc(FAR struct usbhost_driver_s *drvr,
          FAR uint8_t **buffer, size_t buflen);
 static int imxrt_iofree(FAR struct usbhost_driver_s *drvr,
@@ -566,7 +569,7 @@ static int imxrt_connect(FAR struct usbhost_driver_s *drvr,
 static void imxrt_disconnect(FAR struct usbhost_driver_s *drvr,
                              FAR struct usbhost_hubport_s *hport);
 
-/* Initialization **************************************************************/
+/* Initialization ***********************************************************/
 
 static int imxrt_reset(void);
 
@@ -645,69 +648,119 @@ static struct imxrt_qtd_s *g_qtdpool;
 
 static const struct imxrt_ehci_trace_s g_trace1[TRACE1_NSTRINGS] =
 {
-  TRENTRY(EHCI_TRACE1_SYSTEMERROR,         TR_FMT1, "EHCI ERROR: System error: %06x\n"),
-  TRENTRY(EHCI_TRACE1_QTDFOREACH_FAILED,   TR_FMT1, "EHCI ERROR: imxrt_qtd_foreach failed: %d\n"),
-  TRENTRY(EHCI_TRACE1_QHALLOC_FAILED,      TR_FMT1, "EHCI ERROR: Failed to allocate a QH\n"),
-  TRENTRY(EHCI_TRACE1_BUFTOOBIG,           TR_FMT1, "EHCI ERROR: Buffer too big. Remaining %d\n"),
-  TRENTRY(EHCI_TRACE1_REQQTDALLOC_FAILED,  TR_FMT1, "EHCI ERROR: Failed to allocate request qTD"),
-  TRENTRY(EHCI_TRACE1_ADDBPL_FAILED,       TR_FMT1, "EHCI ERROR: imxrt_qtd_addbpl failed: %d\n"),
-  TRENTRY(EHCI_TRACE1_DATAQTDALLOC_FAILED, TR_FMT1, "EHCI ERROR: Failed to allocate data buffer qTD, 0"),
-  TRENTRY(EHCI_TRACE1_DEVDISCONNECTED,     TR_FMT1, "EHCI ERROR: Device disconnected %d\n"),
-  TRENTRY(EHCI_TRACE1_QHCREATE_FAILED,     TR_FMT1, "EHCI ERROR: imxrt_qh_create failed\n"),
-  TRENTRY(EHCI_TRACE1_QTDSETUP_FAILED,     TR_FMT1, "EHCI ERROR: imxrt_qtd_setupphase failed\n"),
+  TRENTRY(EHCI_TRACE1_SYSTEMERROR, TR_FMT1,
+          "EHCI ERROR: System error: %06x\n"),
+  TRENTRY(EHCI_TRACE1_QTDFOREACH_FAILED, TR_FMT1,
+          "EHCI ERROR: imxrt_qtd_foreach failed: %d\n"),
+  TRENTRY(EHCI_TRACE1_QHALLOC_FAILED, TR_FMT1,
+          "EHCI ERROR: Failed to allocate a QH\n"),
+  TRENTRY(EHCI_TRACE1_BUFTOOBIG, TR_FMT1,
+          "EHCI ERROR: Buffer too big. Remaining %d\n"),
+  TRENTRY(EHCI_TRACE1_REQQTDALLOC_FAILED, TR_FMT1,
+          "EHCI ERROR: Failed to allocate request qTD"),
+  TRENTRY(EHCI_TRACE1_ADDBPL_FAILED, TR_FMT1,
+          "EHCI ERROR: imxrt_qtd_addbpl failed: %d\n"),
+  TRENTRY(EHCI_TRACE1_DATAQTDALLOC_FAILED, TR_FMT1,
+          "EHCI ERROR: Failed to allocate data buffer qTD, 0"),
+  TRENTRY(EHCI_TRACE1_DEVDISCONNECTED, TR_FMT1,
+          "EHCI ERROR: Device disconnected %d\n"),
+  TRENTRY(EHCI_TRACE1_QHCREATE_FAILED, TR_FMT1,
+          "EHCI ERROR: imxrt_qh_create failed\n"),
+  TRENTRY(EHCI_TRACE1_QTDSETUP_FAILED, TR_FMT1,
+          "EHCI ERROR: imxrt_qtd_setupphase failed\n"),
 
-  TRENTRY(EHCI_TRACE1_QTDDATA_FAILED,      TR_FMT1, "EHCI ERROR: imxrt_qtd_dataphase failed\n"),
-  TRENTRY(EHCI_TRACE1_QTDSTATUS_FAILED,    TR_FMT1, "EHCI ERROR: imxrt_qtd_statusphase failed\n"),
-  TRENTRY(EHCI_TRACE1_TRANSFER_FAILED,     TR_FMT1, "EHCI ERROR: Transfer failed %d\n"),
-  TRENTRY(EHCI_TRACE1_QHFOREACH_FAILED,    TR_FMT1, "EHCI ERROR: imxrt_qh_foreach failed: %d\n"),
-  TRENTRY(EHCI_TRACE1_SYSERR_INTR,         TR_FMT1, "EHCI: Host System Error Interrupt\n"),
-  TRENTRY(EHCI_TRACE1_USBERR_INTR,         TR_FMT1, "EHCI: USB Error Interrupt (USBERRINT) Interrupt: %06x\n"),
-  TRENTRY(EHCI_TRACE1_EPALLOC_FAILED,      TR_FMT1, "EHCI ERROR: Failed to allocate EP info structure\n"),
-  TRENTRY(EHCI_TRACE1_BADXFRTYPE,          TR_FMT1, "EHCI ERROR: Support for transfer type %d not implemented\n"),
-  TRENTRY(EHCI_TRACE1_HCHALTED_TIMEOUT,    TR_FMT1, "EHCI ERROR: Timed out waiting for HCHalted. USBSTS: %06x\n"),
-  TRENTRY(EHCI_TRACE1_QHPOOLALLOC_FAILED,  TR_FMT1, "EHCI ERROR: Failed to allocate the QH pool\n"),
+  TRENTRY(EHCI_TRACE1_QTDDATA_FAILED, TR_FMT1,
+          "EHCI ERROR: imxrt_qtd_dataphase failed\n"),
+  TRENTRY(EHCI_TRACE1_QTDSTATUS_FAILED, TR_FMT1,
+          "EHCI ERROR: imxrt_qtd_statusphase failed\n"),
+  TRENTRY(EHCI_TRACE1_TRANSFER_FAILED, TR_FMT1,
+          "EHCI ERROR: Transfer failed %d\n"),
+  TRENTRY(EHCI_TRACE1_QHFOREACH_FAILED, TR_FMT1,
+          "EHCI ERROR: imxrt_qh_foreach failed: %d\n"),
+  TRENTRY(EHCI_TRACE1_SYSERR_INTR, TR_FMT1,
+          "EHCI: Host System Error Interrupt\n"),
+  TRENTRY(EHCI_TRACE1_USBERR_INTR, TR_FMT1,
+          "EHCI: USB Error Interrupt (USBERRINT) Interrupt: %06x\n"),
+  TRENTRY(EHCI_TRACE1_EPALLOC_FAILED, TR_FMT1,
+          "EHCI ERROR: Failed to allocate EP info structure\n"),
+  TRENTRY(EHCI_TRACE1_BADXFRTYPE, TR_FMT1,
+          "EHCI ERROR: Support for transfer type %d not implemented\n"),
+  TRENTRY(EHCI_TRACE1_HCHALTED_TIMEOUT, TR_FMT1,
+          "EHCI ERROR: Timed out waiting for HCHalted. USBSTS: %06x\n"),
+  TRENTRY(EHCI_TRACE1_QHPOOLALLOC_FAILED, TR_FMT1,
+          "EHCI ERROR: Failed to allocate the QH pool\n"),
 
-  TRENTRY(EHCI_TRACE1_QTDPOOLALLOC_FAILED, TR_FMT1, "EHCI ERROR: Failed to allocate the qTD pool\n"),
-  TRENTRY(EHCI_TRACE1_PERFLALLOC_FAILED,   TR_FMT1, "EHCI ERROR: Failed to allocate the periodic frame list\n"),
-  TRENTRY(EHCI_TRACE1_RESET_FAILED,        TR_FMT1, "EHCI ERROR: imxrt_reset failed: %d\n"),
-  TRENTRY(EHCI_TRACE1_RUN_FAILED,          TR_FMT1, "EHCI ERROR: EHCI Failed to run: USBSTS=%06x\n"),
-  TRENTRY(EHCI_TRACE1_IRQATTACH_FAILED,    TR_FMT1, "EHCI ERROR: Failed to attach IRQ%d\n"),
+  TRENTRY(EHCI_TRACE1_QTDPOOLALLOC_FAILED, TR_FMT1,
+          "EHCI ERROR: Failed to allocate the qTD pool\n"),
+  TRENTRY(EHCI_TRACE1_PERFLALLOC_FAILED, TR_FMT1,
+          "EHCI ERROR: Failed to allocate the periodic frame list\n"),
+  TRENTRY(EHCI_TRACE1_RESET_FAILED, TR_FMT1,
+          "EHCI ERROR: imxrt_reset failed: %d\n"),
+  TRENTRY(EHCI_TRACE1_RUN_FAILED, TR_FMT1,
+          "EHCI ERROR: EHCI Failed to run: USBSTS=%06x\n"),
+  TRENTRY(EHCI_TRACE1_IRQATTACH_FAILED, TR_FMT1,
+          "EHCI ERROR: Failed to attach IRQ%d\n"),
 
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
-  TRENTRY(EHCI_VTRACE1_PORTSC_CSC,         TR_FMT1, "EHCI Connect Status Change: %06x\n"),
-  TRENTRY(EHCI_VTRACE1_PORTSC_CONNALREADY, TR_FMT1, "EHCI Already connected: %06x\n"),
-  TRENTRY(EHCI_VTRACE1_PORTSC_DISCALREADY, TR_FMT1, "EHCI Already disconnected: %06x\n"),
-  TRENTRY(EHCI_VTRACE1_TOPHALF,            TR_FMT1, "EHCI Interrupt: %06x\n"),
-  TRENTRY(EHCI_VTRACE1_AAINTR,             TR_FMT1, "EHCI Async Advance Interrupt\n"),
+  TRENTRY(EHCI_VTRACE1_PORTSC_CSC, TR_FMT1,
+          "EHCI Connect Status Change: %06x\n"),
+  TRENTRY(EHCI_VTRACE1_PORTSC_CONNALREADY, TR_FMT1,
+          "EHCI Already connected: %06x\n"),
+  TRENTRY(EHCI_VTRACE1_PORTSC_DISCALREADY, TR_FMT1,
+          "EHCI Already disconnected: %06x\n"),
+  TRENTRY(EHCI_VTRACE1_TOPHALF, TR_FMT1,
+          "EHCI Interrupt: %06x\n"),
+  TRENTRY(EHCI_VTRACE1_AAINTR, TR_FMT1,
+          "EHCI Async Advance Interrupt\n"),
 
-  TRENTRY(EHCI_VTRACE1_CLASSENUM,          TR_FMT1, "EHCI Hub port %d: Enumerate the device\n"),
-  TRENTRY(EHCI_VTRACE1_USBINTR,            TR_FMT1, "EHCI USB Interrupt (USBINT) Interrupt: %06x\n"),
-  TRENTRY(EHCI_VTRACE1_ENUM_DISCONN,       TR_FMT1, "EHCI Enumeration not connected\n"),
-  TRENTRY(EHCI_VTRACE1_INITIALIZING,       TR_FMT1, "EHCI Initializing EHCI Stack\n"),
-  TRENTRY(EHCI_VTRACE1_HCCPARAMS,          TR_FMT1, "EHCI HCCPARAMS=%06x\n"),
-  TRENTRY(EHCI_VTRACE1_INIITIALIZED,       TR_FMT1, "EHCI USB EHCI Initialized\n"),
+  TRENTRY(EHCI_VTRACE1_CLASSENUM, TR_FMT1,
+          "EHCI Hub port %d: Enumerate the device\n"),
+  TRENTRY(EHCI_VTRACE1_USBINTR, TR_FMT1,
+          "EHCI USB Interrupt (USBINT) Interrupt: %06x\n"),
+  TRENTRY(EHCI_VTRACE1_ENUM_DISCONN, TR_FMT1,
+          "EHCI Enumeration not connected\n"),
+  TRENTRY(EHCI_VTRACE1_INITIALIZING, TR_FMT1,
+          "EHCI Initializing EHCI Stack\n"),
+  TRENTRY(EHCI_VTRACE1_HCCPARAMS, TR_FMT1,
+          "EHCI HCCPARAMS=%06x\n"),
+  TRENTRY(EHCI_VTRACE1_INIITIALIZED, TR_FMT1,
+          "EHCI USB EHCI Initialized\n"),
 #endif
 };
 
 static const struct imxrt_ehci_trace_s g_trace2[TRACE2_NSTRINGS] =
 {
-  TRENTRY(EHCI_TRACE2_EPSTALLED,           TR_FMT2, "EHCI EP%d Stalled: TOKEN=%04x\n"),
-  TRENTRY(EHCI_TRACE2_EPIOERROR,           TR_FMT2, "EHCI ERROR: EP%d TOKEN=%04x\n"),
-  TRENTRY(EHCI_TRACE2_CLASSENUM_FAILED,    TR_FMT2, "EHCI Hub port %d usbhost_enumerate() failed: %d\n"),
+  TRENTRY(EHCI_TRACE2_EPSTALLED, TR_FMT2,
+          "EHCI EP%d Stalled: TOKEN=%04x\n"),
+  TRENTRY(EHCI_TRACE2_EPIOERROR, TR_FMT2,
+          "EHCI ERROR: EP%d TOKEN=%04x\n"),
+  TRENTRY(EHCI_TRACE2_CLASSENUM_FAILED, TR_FMT2,
+          "EHCI Hub port %d usbhost_enumerate() failed: %d\n"),
 
 #ifdef HAVE_USBHOST_TRACE_VERBOSE
-  TRENTRY(EHCI_VTRACE2_ASYNCXFR,           TR_FMT2, "EHCI Async transfer EP%d buflen=%d\n"),
-  TRENTRY(EHCI_VTRACE2_INTRXFR,            TR_FMT2, "EHCI Intr Transfer EP%d buflen=%d\n"),
-  TRENTRY(EHCI_VTRACE2_IOCCHECK,           TR_FMT2, "EHCI IOC EP%d TOKEN=%04x\n"),
-  TRENTRY(EHCI_VTRACE2_PORTSC,             TR_FMT2, "EHCI PORTSC%d: %04x\n"),
-  TRENTRY(EHCI_VTRACE2_PORTSC_CONNECTED,   TR_FMT2, "EHCI RHPort%d connected, pscwait: %d\n"),
-  TRENTRY(EHCI_VTRACE2_PORTSC_DISCONND,    TR_FMT2, "EHCI RHport%d disconnected, pscwait: %d\n"),
-  TRENTRY(EHCI_VTRACE2_MONWAKEUP,          TR_FMT2, "EHCI RHPort%d connected: %d\n"),
+  TRENTRY(EHCI_VTRACE2_ASYNCXFR, TR_FMT2,
+          "EHCI Async transfer EP%d buflen=%d\n"),
+  TRENTRY(EHCI_VTRACE2_INTRXFR, TR_FMT2,
+          "EHCI Intr Transfer EP%d buflen=%d\n"),
+  TRENTRY(EHCI_VTRACE2_IOCCHECK, TR_FMT2,
+          "EHCI IOC EP%d TOKEN=%04x\n"),
+  TRENTRY(EHCI_VTRACE2_PORTSC, TR_FMT2,
+          "EHCI PORTSC%d: %04x\n"),
+  TRENTRY(EHCI_VTRACE2_PORTSC_CONNECTED, TR_FMT2,
+          "EHCI RHPort%d connected, pscwait: %d\n"),
+  TRENTRY(EHCI_VTRACE2_PORTSC_DISCONND, TR_FMT2,
+          "EHCI RHport%d disconnected, pscwait: %d\n"),
+  TRENTRY(EHCI_VTRACE2_MONWAKEUP, TR_FMT2,
+          "EHCI RHPort%d connected: %d\n"),
 
-  TRENTRY(EHCI_VTRACE2_EPALLOC,            TR_FMT2, "EHCI EPALLOC: EP%d TYPE=%d\n"),
-  TRENTRY(EHCI_VTRACE2_CTRLINOUT,          TR_FMT2, "EHCI CTRLIN/OUT: RHPort%d req: %02x\n"),
-  TRENTRY(EHCI_VTRACE2_HCIVERSION,         TR_FMT2, "EHCI HCIVERSION %x.%02x\n"),
-  TRENTRY(EHCI_VTRACE2_HCSPARAMS,          TR_FMT2, "EHCI nports=%d, HCSPARAMS=%04x\n"),
+  TRENTRY(EHCI_VTRACE2_EPALLOC, TR_FMT2,
+          "EHCI EPALLOC: EP%d TYPE=%d\n"),
+  TRENTRY(EHCI_VTRACE2_CTRLINOUT, TR_FMT2,
+          "EHCI CTRLIN/OUT: RHPort%d req: %02x\n"),
+  TRENTRY(EHCI_VTRACE2_HCIVERSION, TR_FMT2,
+          "EHCI HCIVERSION %x.%02x\n"),
+  TRENTRY(EHCI_VTRACE2_HCSPARAMS, TR_FMT2,
+          "EHCI nports=%d, HCSPARAMS=%04x\n"),
 #endif
 };
 #endif /* HAVE_USBHOST_TRACE */
@@ -1019,9 +1072,43 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
  *
  ****************************************************************************/
 
-static void imxrt_takesem(sem_t *sem)
+static int imxrt_takesem(sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
+}
+
+/****************************************************************************
+ * Name: imxrt_takesem_noncancelable
+ *
+ * Description:
+ *   This is just a wrapper to handle the annoying behavior of semaphore
+ *   waits that return due to the receipt of a signal.  This version also
+ *   ignores attempts to cancel the thread.
+ *
+ ****************************************************************************/
+
+static int imxrt_takesem_noncancelable(sem_t *sem)
+{
+  int result;
+  int ret = OK;
+
+  do
+    {
+      result = nxsem_wait_uninterruptible(sem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(result == OK || result == -ECANCELED);
+      if (ret == OK && result < 0)
+        {
+          ret = result;
+        }
+    }
+  while (result < 0);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1139,8 +1226,9 @@ static int imxrt_qh_foreach(struct imxrt_qh_s *qh, uint32_t **bp,
   DEBUGASSERT(qh && handler);
   while (qh)
     {
-      /* Is this the end of the list?  Check the horizontal link pointer (HLP)
-       * terminate (T) bit.  If T==1, then the HLP address is not valid.
+      /* Is this the end of the list?  Check the horizontal link pointer
+       * (HLP) terminate (T) bit.  If T==1, then the HLP address is not
+       * valid.
        */
 
       physaddr = imxrt_swap32(qh->hw.hlp);
@@ -1177,8 +1265,8 @@ static int imxrt_qh_foreach(struct imxrt_qh_s *qh, uint32_t **bp,
        * unlinking the entry!  But that is okay because we already have the
        * next QH pointer.
        *
-       * Notice that we do not manage the back pointer (bp).  If the call-out
-       * uses it, it must update it as necessary.
+       * Notice that we do not manage the back pointer (bp).  If the call-
+       * out uses it, it must update it as necessary.
        */
 
       ret = handler(qh, bp, arg);
@@ -1286,8 +1374,8 @@ static int imxrt_qtd_foreach(struct imxrt_qh_s *qh, foreach_qtd_t handler,
  * Name: imxrt_qtd_discard
  *
  * Description:
- *   This is a imxrt_qtd_foreach callback.  It simply unlinks the QTD, updates
- *   the back pointer, and frees the QTD structure.
+ *   This is a imxrt_qtd_foreach callback.  It simply unlinks the QTD,
+ *   updates the back pointer, and frees the QTD structure.
  *
  ****************************************************************************/
 
@@ -1390,8 +1478,8 @@ static int imxrt_qh_invalidate(struct imxrt_qh_s *qh)
  * Name: imxrt_qtd_flush
  *
  * Description:
- *   This is a callback from imxrt_qtd_foreach.  It simply flushes D-cache for
- *   address range of the qTD entry.
+ *   This is a callback from imxrt_qtd_foreach.  It simply flushes D-cache
+ *   for address range of the qTD entry.
  *
  ****************************************************************************/
 
@@ -1598,23 +1686,30 @@ static int imxrt_ioc_setup(struct imxrt_rhport_s *rhport,
  * Description:
  *   Wait for the IOC event.
  *
- * Assumption:  The caller does *NOT* hold the EHCI exclsem.  That would cause
- * a deadlock when the bottom-half, worker thread needs to take the semaphore.
+ * Assumption:  The caller does *NOT* hold the EHCI exclsem.  That would
+ * cause a deadlock when the bottom-half, worker thread needs to take the
+ * semaphore.
  *
  ****************************************************************************/
 
 static int imxrt_ioc_wait(struct imxrt_epinfo_s *epinfo)
 {
+  int ret = OK;
+
   /* Wait for the IOC event.  Loop to handle any false alarm semaphore
-   * counts.
+   * counts.  Return an error if the task is canceled.
    */
 
   while (epinfo->iocwait)
     {
-      imxrt_takesem(&epinfo->iocsem);
+      ret = imxrt_takesem(&epinfo->iocsem);
+      if (ret < 0)
+        {
+          break;
+        }
     }
 
-  return epinfo->result;
+  return ret < 0 ? ret : epinfo->result;
 }
 
 /****************************************************************************
@@ -1641,8 +1736,8 @@ static void imxrt_qh_enqueue(struct imxrt_qh_s *qhead, struct imxrt_qh_s *qh)
 
   /* Add the new QH to the head of the asynchronous queue list.
    *
-   * First, attach the old head as the new QH HLP and flush the new QH and its
-   * attached qTDs to RAM.
+   * First, attach the old head as the new QH HLP and flush the new QH and
+   * its attached qTDs to RAM.
    */
 
   qh->hw.hlp = qhead->hw.hlp;
@@ -1813,8 +1908,8 @@ static int imxrt_qtd_addbpl(struct imxrt_qtd_s *qtd, const void *buffer,
   uint32_t next;
   int ndx;
 
-  /* Flush the contents of the data buffer to RAM so that the correct contents
-   * will be accessed for an OUT DMA.
+  /* Flush the contents of the data buffer to RAM so that the correct
+   * contents will be accessed for an OUT DMA.
    */
 
   up_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
@@ -2326,11 +2421,12 @@ errout_with_qh:
  *     millisecond period a transaction should be executed for the queue
  *     head. Software must ensure that all queue heads in the periodic
  *     schedule have S-Mask set to a non-zero value. An S-mask with a zero
- *     value in the context of the periodic schedule yields undefined results.
+ *     value in the context of the periodic schedule yields undefined
+ *     results.
  *
- *    "If the desired poll rate is greater than one frame, system software can
- *     use a combination of queue head linking and S-Mask values to spread
- *     interrupts of equal poll rates through the schedule so that the
+ *    "If the desired poll rate is greater than one frame, system software
+ *     can use a combination of queue head linking and S-Mask values to
+ *     spread interrupts of equal poll rates through the schedule so that the
  *     periodic bandwidth is allocated and managed in the most efficient
  *     manner possible."
  *
@@ -2471,6 +2567,7 @@ errout_with_qh:
 static ssize_t imxrt_transfer_wait(struct imxrt_epinfo_s *epinfo)
 {
   int ret;
+  int ret2;
 
   /* Release the EHCI semaphore while we wait.  Other threads need the
    * opportunity to access the EHCI resources while we wait.
@@ -2481,7 +2578,9 @@ static ssize_t imxrt_transfer_wait(struct imxrt_epinfo_s *epinfo)
    * or we will deadlock while waiting (because the working thread that
    * wakes this thread up needs the exclsem).
    */
-#warning REVISIT
+
+  /* REVISIT */
+
   imxrt_givesem(&g_ehci.exclsem);
 
   /* Wait for the IOC completion event */
@@ -2492,7 +2591,11 @@ static ssize_t imxrt_transfer_wait(struct imxrt_epinfo_s *epinfo)
    * this upon return.
    */
 
-  imxrt_takesem(&g_ehci.exclsem);
+  ret2 = imxrt_takesem_noncancelable(&g_ehci.exclsem);
+  if (ret >= 0 && ret2 < 0)
+    {
+      ret = ret2;
+    }
 
 #if 0 /* Does not seem to be needed */
   /* Was there a data buffer?  Was this an OUT transfer? */
@@ -2512,7 +2615,9 @@ static ssize_t imxrt_transfer_wait(struct imxrt_epinfo_s *epinfo)
     }
 #endif
 
-  /* Did imxrt_ioc_wait() report an error? */
+  /* Did imxrt_ioc_wait() or imxrt_takesem_noncancelable() report an
+   * error?
+   */
 
   if (ret < 0)
     {
@@ -2690,10 +2795,10 @@ static int imxrt_qtd_ioccheck(struct imxrt_qtd_s *qtd, uint32_t **bp,
  * Name: imxrt_qh_ioccheck
  *
  * Description:
- *   This function is a imxrt_qh_foreach() callback function.  It services one
- *   QH in the asynchronous queue.  It check all attached qTD structures and
- *   remove all of the structures that are no longer active.  if all of the
- *   qTD structures are removed, then QH itself will also be removed.
+ *   This function is a imxrt_qh_foreach() callback function.  It services
+ *   one QH in the asynchronous queue.  It check all attached qTD structures
+ *   and remove all of the structures that are no longer active.  if all of
+ *   the qTD structures are removed, then QH itself will also be removed.
  *
  ****************************************************************************/
 
@@ -2718,7 +2823,7 @@ static int imxrt_qh_ioccheck(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
   epinfo = qh->epinfo;
   DEBUGASSERT(epinfo);
 
-  /* Paragraph 3.6.3: "The nine DWords in [the Transfer Overlay] area
+  /* Paragraph 3.6.3:  "The nine DWords in [the Transfer Overlay] area
    * represent a transaction working space for the host controller.  The
    * general operational model is that the host controller can detect
    * whether the overlay area contains a description of an active transfer.
@@ -2739,6 +2844,7 @@ static int imxrt_qh_ioccheck(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
       /* Yes... we cannot process the QH while it is still active.  Return
        * zero to visit the next QH in the list.
        */
+
       *bp = &qh->hw.hlp;
       return OK;
     }
@@ -2821,6 +2927,7 @@ static int imxrt_qh_ioccheck(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
           epinfo->iocwait = false;
           imxrt_givesem(&epinfo->iocsem);
         }
+
 #ifdef CONFIG_USBHOST_ASYNCH
       /* No.. Is there a pending asynchronous transfer? */
 
@@ -2858,7 +2965,8 @@ static int imxrt_qh_ioccheck(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_ASYNCH
-static int imxrt_qtd_cancel(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg)
+static int imxrt_qtd_cancel(struct imxrt_qtd_s *qtd, uint32_t **bp,
+                            void *arg)
 {
   DEBUGASSERT(qtd != NULL && bp != NULL);
 
@@ -2891,10 +2999,10 @@ static int imxrt_qtd_cancel(struct imxrt_qtd_s *qtd, uint32_t **bp, void *arg)
  * Name: imxrt_qh_cancel
  *
  * Description:
- *   This function is a imxrt_qh_foreach() callback function.  It cancels one
- *   QH in the asynchronous queue.  It will remove all attached qTD structures
- *   and remove all of the structures that are no longer active.  Then QH
- *   itself will also be removed.
+ *   This function is a imxrt_qh_foreach() callback function.  It cancels
+ *   one QH in the asynchronous queue.  It will remove all attached qTD
+ *   structures and remove all of the structures that are no longer active.
+ *   Then QH itself will also be removed.
  *
  ****************************************************************************/
 
@@ -2968,7 +3076,7 @@ static int imxrt_qh_cancel(struct imxrt_qh_s *qh, uint32_t **bp, void *arg)
  * Description:
  *   EHCI USB Interrupt (USBINT) "Bottom Half" interrupt handler
  *
- *  "The Host Controller sets this bit to 1 on the  completion of a USB
+ *  "The Host Controller sets this bit to 1 on the completion of a USB
  *   transaction, which results in the retirement of a Transfer Descriptor
  *   that had its IOC bit set.
  *
@@ -2991,7 +3099,8 @@ static inline void imxrt_ioc_bottomhalf(void)
    */
 
   up_invalidate_dcache((uintptr_t)&g_asynchead.hw,
-                       (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
+                       (uintptr_t)&g_asynchead.hw +
+                       sizeof(struct ehci_qh_s));
 
   /* Set the back pointer to the forward QH pointer of the asynchronous
    * queue head.
@@ -3216,7 +3325,7 @@ static inline void imxrt_async_advance_bottomhalf(void)
  * Name: imxrt_ehci_bottomhalf
  *
  * Description:
- *   EHCI "Bottom Half" interrupt handler
+ *   EHCI "Bottom Half" interrupt handler.  Runs on a work queue thread.
  *
  ****************************************************************************/
 
@@ -3229,7 +3338,7 @@ static void imxrt_ehci_bottomhalf(FAR void *arg)
    * real option (other than to reschedule and delay).
    */
 
-  imxrt_takesem(&g_ehci.exclsem);
+  imxrt_takesem_noncancelable(&g_ehci.exclsem);
 
   /* Handle all unmasked interrupt sources
    * USB Interrupt (USBINT)
@@ -3297,7 +3406,8 @@ static void imxrt_ehci_bottomhalf(FAR void *arg)
    *   if the frame list size (as programmed in the Frame List Size field of
    *   the USBCMD register) is 1024, the Frame Index Register rolls over
    *   every time FRINDEX[13] toggles. Similarly, if the size is 512, the
-   *   Host Controller sets this bit to a one every time FRINDEX[12] toggles."
+   *   Host Controller sets this bit to a one every time FRINDEX[12]
+   *   toggles."
    */
 
 #if 0 /* Not used */
@@ -3378,9 +3488,9 @@ static int imxrt_ehci_interrupt(int irq, FAR void *context, FAR void *arg)
   pending = usbsts & regval;
   if (pending != 0)
     {
-      /* Schedule interrupt handling work for the high priority worker thread
-       * so that we are not pressed for time and so that we can interrupt with
-       * other USB threads gracefully.
+      /* Schedule interrupt handling work for the high priority worker
+       * thread so that we are not pressed for time and so that we can
+       * interrupt with other USB threads gracefully.
        *
        * The worker should be available now because we implement a handshake
        * by controlling the EHCI interrupts.
@@ -3436,9 +3546,10 @@ static int imxrt_wait(FAR struct usbhost_connection_s *conn,
 {
   irqstate_t flags;
   int rhpndx;
+  int ret;
 
-  /* Loop until a change in the connection state changes on one of the root
-   * hub ports or until an error occurs.
+  /* Loop until the connection state changes on one of the root hub ports or
+   * until an error occurs.
    */
 
   flags = enter_critical_section();
@@ -3497,7 +3608,11 @@ static int imxrt_wait(FAR struct usbhost_connection_s *conn,
        */
 
       g_ehci.pscwait = true;
-      imxrt_takesem(&g_ehci.pscsem);
+      ret = imxrt_takesem(&g_ehci.pscsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 }
 
@@ -3521,8 +3636,8 @@ static int imxrt_wait(FAR struct usbhost_connection_s *conn,
  *           device.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
@@ -3577,8 +3692,8 @@ static int imxrt_rh_enumerate(FAR struct usbhost_connection_s *conn,
    *   01b         K-state   Low-speed device, release ownership of port
    *
    * NOTE: Low-speed devices could be detected by examining the PORTSC PSPD
-   * field after resetting the device.  The more conventional way here, however,
-   * also appears to work.
+   * field after resetting the device.  The more conventional way here,
+   * however, also appears to work.
    */
 
   regval = imxrt_getreg(&HCOR->portsc[rhpndx]);
@@ -3623,7 +3738,7 @@ static int imxrt_rh_enumerate(FAR struct usbhost_connection_s *conn,
 
   /* Put the root hub port in reset.
    *
-   * Paragraph 2.3.9:
+   * EHCI Paragraph 2.3.9:
    *
    *  "The HCHalted bit in the USBSTS register should be a zero before
    *   software attempts to use [the Port Reset] bit. The host controller
@@ -3635,12 +3750,12 @@ static int imxrt_rh_enumerate(FAR struct usbhost_connection_s *conn,
   /* EHCI paragraph 2.3.9:
    *
    *  "When software writes a one to [the Port Reset] bit (from a zero), the
-   *   bus reset sequence as defined in the USB Specification Revision 2.0 is
-   *   started.  Software writes a zero to this bit to terminate the bus reset
-   *   sequence.  Software must keep this bit at a one long enough to ensure
-   *   the reset sequence, as specified in the USB Specification Revision 2.0,
-   *   completes. Note: when software writes this bit to a one, it must also
-   *   write a zero to the Port Enable bit."
+   *   bus reset sequence as defined in the USB Specification Revision 2.0
+   *   is started.  Software writes a zero to this bit to terminate the bus
+   *   reset sequence.  Software must keep this bit at a one long enough to
+   *   ensure the reset sequence, as specified in the USB Specification
+   *   Revision 2.0, completes. Note: when software writes this bit to a
+   *   one, it must also write a zero to the Port Enable bit."
    */
 
   regaddr = &HCOR->portsc[RHPNDX(rhport)];
@@ -3799,18 +3914,18 @@ static int imxrt_enumerate(FAR struct usbhost_connection_s *conn,
  *   an external implementation of the enumeration logic.
  *
  * Input Parameters:
- *   drvr          - The USB host driver instance obtained as a parameter
- *                   from the call to the class create() method.
- *   funcaddr      - The USB address of the function containing the endpoint
- *                   that EP0 controls.  A funcaddr of zero will be received
- *                   if no address is yet assigned to the device.
- *   speed         - The speed of the port USB_SPEED_LOW, _FULL, or _HIGH
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   funcaddr - The USB address of the function containing the endpoint that
+ *     EP0 controls.  A funcaddr of zero will be received if no address is
+ *     yet assigned to the device.
+ *   speed - The speed of the port USB_SPEED_LOW, _FULL, or _HIGH
  *   maxpacketsize - The maximum number of bytes that can be sent to or
- *                   received from the endpoint in a single data packet
+ *    received from the endpoint in a single data packet
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
@@ -3822,21 +3937,25 @@ static int imxrt_ep0configure(FAR struct usbhost_driver_s *drvr,
                               uint8_t speed, uint16_t maxpacketsize)
 {
   struct imxrt_epinfo_s *epinfo = (struct imxrt_epinfo_s *)ep0;
+  int ret;
 
   DEBUGASSERT(drvr != NULL && epinfo != NULL && maxpacketsize < 2048);
 
   /* We must have exclusive access to the EHCI data structures. */
 
-  imxrt_takesem(&g_ehci.exclsem);
+  ret = imxrt_takesem(&g_ehci.exclsem);
+  if (ret >= 0)
+    {
+      /* Remember the new device address and max packet size */
 
-  /* Remember the new device address and max packet size */
+      epinfo->devaddr   = funcaddr;
+      epinfo->speed     = speed;
+      epinfo->maxpacket = maxpacketsize;
 
-  epinfo->devaddr   = funcaddr;
-  epinfo->speed     = speed;
-  epinfo->maxpacket = maxpacketsize;
+      imxrt_givesem(&g_ehci.exclsem);
+    }
 
-  imxrt_givesem(&g_ehci.exclsem);
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -3846,15 +3965,15 @@ static int imxrt_ep0configure(FAR struct usbhost_driver_s *drvr,
  *   Allocate and configure one endpoint.
  *
  * Input Parameters:
- *   drvr   - The USB host driver instance obtained as a parameter from the
- *            call to the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   epdesc - Describes the endpoint to be allocated.
- *   ep     - A memory location provided by the caller in which to receive
- *            the allocated endpoint descriptor.
+ *   ep - A memory location provided by the caller in which to receive the
+ *      allocated endpoint descriptor.
  *
  * Returned Value:
  *   On success, zero (OK) is returned. On a failure, a negated errno value
- *   is returned indicating the nature of the failure
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
@@ -3868,8 +3987,8 @@ static int imxrt_epalloc(FAR struct usbhost_driver_s *drvr,
   struct imxrt_epinfo_s *epinfo;
   struct usbhost_hubport_s *hport;
 
-  /* Sanity check.  NOTE that this method should only be called if a device is
-   * connected (because we need a valid low speed indication).
+  /* Sanity check.  NOTE that this method should only be called if a device
+   * is connected (because we need a valid low speed indication).
    */
 
   DEBUGASSERT(drvr != 0 && epdesc != NULL && epdesc->hport != NULL &&
@@ -3888,7 +4007,8 @@ static int imxrt_epalloc(FAR struct usbhost_driver_s *drvr,
 
   /* Allocate a endpoint information structure */
 
-  epinfo = (struct imxrt_epinfo_s *)kmm_zalloc(sizeof(struct imxrt_epinfo_s));
+  epinfo = (struct imxrt_epinfo_s *)
+    kmm_zalloc(sizeof(struct imxrt_epinfo_s));
   if (!epinfo)
     {
       usbhost_trace1(EHCI_TRACE1_EPALLOC_FAILED, 0);
@@ -3926,7 +4046,7 @@ static int imxrt_epalloc(FAR struct usbhost_driver_s *drvr,
   return OK;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: imxrt_epfree
  *
  * Description:
@@ -3976,16 +4096,16 @@ static int imxrt_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   The size of the pre-allocated buffer is returned.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call
- *      to the class create() method.
- *   buffer - The address of a memory location provided by the caller in which
- *      to return the allocated buffer memory address.
- *   maxlen - The address of a memory location provided by the caller in which
- *      to return the maximum size of the allocated buffer memory.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   buffer - The address of a memory location provided by the caller in
+ *     which to return the allocated buffer memory address.
+ *   maxlen - The address of a memory location provided by the caller in
+ *     which to return the maximum size of the allocated buffer memory.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -4070,13 +4190,13 @@ static int imxrt_free(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer)
  *   buflen - The size of the buffer required.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ***************************************************************************/
+ ****************************************************************************/
 
 static int imxrt_ioalloc(FAR struct usbhost_driver_s *drvr,
                          FAR uint8_t **buffer, size_t buflen)
@@ -4109,8 +4229,8 @@ static int imxrt_ioalloc(FAR struct usbhost_driver_s *drvr,
  *   buffer - The address of the allocated buffer memory to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
@@ -4133,9 +4253,9 @@ static int imxrt_iofree(FAR struct usbhost_driver_s *drvr,
  *
  * Description:
  *   Process a IN or OUT request on the control endpoint.  These methods
- *   will enqueue the request and wait for it to complete.  Only one transfer
- *   may be queued; Neither these methods nor the transfer() method can be
- *   called again until the control transfer functions returns.
+ *   will enqueue the request and wait for it to complete.  Only one
+ *   transfer may be queued; Neither these methods nor the transfer() method
+ *   can be called again until the control transfer functions returns.
  *
  *   These are blocking methods; these functions will not return until the
  *   control transfer has completed.
@@ -4155,8 +4275,8 @@ static int imxrt_iofree(FAR struct usbhost_driver_s *drvr,
  *   allocated memory.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -4191,7 +4311,11 @@ static int imxrt_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to the EHCI hardware and data structures. */
 
-  imxrt_takesem(&g_ehci.exclsem);
+  ret = imxrt_takesem(&g_ehci.exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Set the request for the IOC event well BEFORE initiating the transfer. */
 
@@ -4228,8 +4352,8 @@ static int imxrt_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                          FAR const struct usb_ctrlreq_s *req,
                          FAR const uint8_t *buffer)
 {
-  /* imxrt_ctrlin can handle both directions.  We just need to work around the
-   * differences in the function signatures.
+  /* imxrt_ctrlin can handle both directions.  We just need to work around
+   * the differences in the function signatures.
    */
 
   return imxrt_ctrlin(drvr, ep0, req, (uint8_t *)buffer);
@@ -4240,8 +4364,8 @@ static int imxrt_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request, blocking until the transfer completes. Only
- *   one transfer may be  queued; Neither this method nor the ctrlin or
+ *   enqueue the transfer request, blocking until the transfer completes.
+ *   Only one transfer may be  queued; Neither this method nor the ctrlin or
  *   ctrlout methods can be called again until this function returns.
  *
  *   This is a blocking method; this functions will not return until the
@@ -4287,7 +4411,11 @@ static ssize_t imxrt_transfer(FAR struct usbhost_driver_s *drvr,
 
   /* We must have exclusive access to the EHCI hardware and data structures. */
 
-  imxrt_takesem(&g_ehci.exclsem);
+  ret = imxrt_takesem(&g_ehci.exclsem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
   /* Set the request for the IOC event well BEFORE initiating the transfer. */
 
@@ -4363,16 +4491,16 @@ errout_with_sem:
  *   ep       - The IN or OUT endpoint descriptor for the device endpoint on
  *              which to perform the transfer.
  *   buffer   - A buffer containing the data to be sent (OUT endpoint) or
- *              received (IN endpoint).  buffer must have been allocated using
- *              DRVR_ALLOC
+ *              received (IN endpoint).  buffer must have been allocated
+ *              using DRVR_ALLOC
  *   buflen   - The length of the data to be sent or received.
  *   callback - This function will be called when the transfer completes.
  *   arg      - The arbitrary parameter that will be passed to the callback
  *              function when the transfer completes.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -4393,7 +4521,11 @@ static int imxrt_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   /* We must have exclusive access to the EHCI hardware and data structures. */
 
-  imxrt_takesem(&g_ehci.exclsem);
+  ret = imxrt_takesem(&g_ehci.exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Set the request for the callback well BEFORE initiating the transfer. */
 
@@ -4460,12 +4592,12 @@ errout_with_sem:
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the
  *          call to the class create() method.
- *   ep   - The IN or OUT endpoint descriptor for the device endpoint on which
- *          an asynchronous transfer should be transferred.
+ *   ep   - The IN or OUT endpoint descriptor for the device endpoint on
+ *          which an asynchronous transfer should be transferred.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
  ****************************************************************************/
 
@@ -4493,7 +4625,11 @@ static int imxrt_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
    * interrupt level.
    */
 
-  imxrt_takesem(&g_ehci.exclsem);
+  ret = imxrt_takesem(&g_ehci.exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Sample and reset all transfer termination information.  This will
    * prevent any callbacks from occurring while are performing the
@@ -4601,12 +4737,12 @@ static int imxrt_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   /* Find and remove the QH.  There are four possibilities:
    *
    * 1)  The transfer has already completed and the QH is no longer in the
-   *     list.  In this case, imxrt_hq_foreach will return zero
+   *     list.  In this case, sam_hq_foreach will return zero
    * 2a) The transfer is not active and still pending.  It was removed from
-   *     the list and imxrt_hq_foreach will return one.
+   *     the list and sam_hq_foreach will return one.
    * 2b) The is active but not yet complete.  This is currently handled the
    *     same as 2a).  REVISIT: This needs to be fixed.
-   * 3)  Some bad happened and imxrt_hq_foreach returned an error code < 0.
+   * 3)  Some bad happened and sam_hq_foreach returned an error code < 0.
    */
 
   ret = imxrt_qh_foreach(qh, &bp, imxrt_qh_cancel, epinfo);
@@ -4657,17 +4793,17 @@ errout_with_sem:
  *   and port description to the system.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call
- *          to the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   hport - The descriptor of the hub port that detected the connection
- *      related event
+ *     related event
  *   connected - True: device connected; false: device disconnected
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_HUB
 static int imxrt_connect(FAR struct usbhost_driver_s *drvr,
@@ -4711,10 +4847,10 @@ static int imxrt_connect(FAR struct usbhost_driver_s *drvr,
  *   disconnected() method.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call
- *          to the class create() method.
- *   hport - The port from which the device is being disconnected.  Might be a
- *            port on a hub.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   hport - The port from which the device is being disconnected.  Might be
+ *     a port on a hub.
  *
  * Returned Value:
  *   None
@@ -4781,11 +4917,11 @@ static int imxrt_reset(void)
   uint32_t regval;
   unsigned int timeout;
 
-  /* Make sure that the EHCI is halted:  "When [the Run/Stop] bit is set to 0,
-   * the Host Controller completes the current transaction on the USB and then
-   * halts. The HC Halted bit in the status register indicates when the Hos
-   * Controller has finished the transaction and has entered the stopped
-   * state..."
+  /* Make sure that the EHCI is halted:  "When [the Run/Stop] bit is set to
+   * 0, the Host Controller completes the current transaction on the USB and
+   * then halts. The HC Halted bit in the status register indicates when the
+   * Host Controller has finished the transaction and has entered the
+   * stopped state..."
    */
 
   imxrt_putreg(0, &HCOR->usbcmd);
@@ -4852,6 +4988,7 @@ static int imxrt_reset(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Name: imxrt_ehci_initialize
  *
@@ -4960,8 +5097,8 @@ FAR struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
       rhport->ep0.speed = USB_SPEED_FULL;
       rhport->ep0.maxpacket = 8;
 
-      /* The EP0 iocsem semaphore is used for signaling and, hence, should not
-       * have priority inheritance enabled.
+      /* The EP0 iocsem semaphore is used for signaling and, hence, should
+       * not have priority inheritance enabled.
        */
 
       nxsem_init(&rhport->ep0.iocsem, 0, 0);
@@ -5048,7 +5185,7 @@ FAR struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
 
   imxrt_clockall_usboh3();
 
-    /* Reset the controller from the OTG peripheral */
+  /* Reset the controller from the OTG peripheral */
 
   putreg32(USBDEV_USBCMD_RST, IMXRT_USBDEV_USBCMD);
   while ((getreg32(IMXRT_USBDEV_USBCMD) & USBDEV_USBCMD_RST) != 0);
@@ -5078,8 +5215,8 @@ FAR struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
     }
 
   /* Re-program the USB host controller.  As implemented, imxrt_reset()
-   * requires the host mode setup in order to work.  However, we lose the host
-   * configuration in the reset.
+   * requires the host mode setup in order to work.  However, we lose the
+   * host configuration in the reset.
    */
 
 #  ifdef CONFIG_IMXRT_EHCI_SDIS
@@ -5223,7 +5360,7 @@ FAR struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
       return NULL;
     }
 
-  /* Interrupt Configuration *************************************************/
+  /* Interrupt Configuration ************************************************/
 
   ret = irq_attach(IMXRT_IRQ_USBOTG1, imxrt_ehci_interrupt, NULL);
   if (ret != 0)
@@ -5253,8 +5390,8 @@ FAR struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
     }
 
   /* If there is a USB device in the slot at power up, then we will not get
-   * the status change interrupt to signal us that the device is connected. We
-   * need to set the initial connected state accordingly.
+   * the status change interrupt to signal us that the device is connected.
+   * We need to set the initial connected state accordingly.
    */
 
   for (i = 0; i < IMXRT_EHCI_NRHPORT; i++)
@@ -5272,7 +5409,7 @@ FAR struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
   return &g_ehciconn;
 }
 
-/*****************************************************************************
+/****************************************************************************
  * Name: usbhost_trformat1 and usbhost_trformat2
  *
  * Description:
@@ -5283,7 +5420,7 @@ FAR struct usbhost_connection_s *imxrt_ehci_initialize(int controller)
  *   printf.  The returned format is expected to handle two unsigned integer
  *   values.
  *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifdef HAVE_USBHOST_TRACE
 FAR const char *usbhost_trformat1(uint16_t id)

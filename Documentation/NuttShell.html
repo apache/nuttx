@@ -3970,11 +3970,6 @@ nsh&gt;
     <td><code>CONFIG_NSH_DISABLE_SET</code></td>
   </tr>
   <tr>
-    <td><b><code>sh</code></b></td>
-    <td><code>CONFIG_NFILE_STREAMS &gt; 0 &amp;&amp; !<code>CONFIG_NSH_DISABLESCRIPT</code></td>
-    <td><code>CONFIG_NSH_DISABLE_SH</code></td>
-  </tr>
-  <tr>
     <td><b><code>shutdown</code></b></td>
     <td><code>CONFIG_BOARDCTL_POWEROFF || CONFIG_BOARD_RESET</code></td>
     <td><code>CONFIG_NSH_DISABLE_SHUTDOWN</code></td>
@@ -3983,6 +3978,11 @@ nsh&gt;
     <td><b><code>sleep</code></b></td>
     <td>&nbsp;</td>
     <td><code>CONFIG_NSH_DISABLE_SLEEP</code></td>
+  </tr>
+  <tr>
+    <td><b><code>source</code></b></td>
+    <td><code>CONFIG_NFILE_STREAMS &gt; 0 &amp;&amp; !<code>CONFIG_NSH_DISABLESCRIPT</code></td>
+    <td><code>CONFIG_NSH_DISABLE_SOURCE</code></td>
   </tr>
   <tr>
     <td><b><code>telnetd</code></b></td>

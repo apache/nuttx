@@ -49,6 +49,10 @@
 
 #include "cxd56_i2c.h"
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #if defined(CONFIG_CXD56_I2C) && defined(CONFIG_APDS9960)
 
 int board_apds9960_initialize(FAR const char *devpath, int bus)

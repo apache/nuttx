@@ -53,18 +53,18 @@
 
 /* Register offsets *********************************************************/
 
-#define CXD56_SPI_CR0_OFFSET    0x0000 /* Control Register 0 */
-#define CXD56_SPI_CR1_OFFSET    0x0004 /* Control Register 1 */
-#define CXD56_SPI_DR_OFFSET     0x0008 /* Data Register */
-#define CXD56_SPI_SR_OFFSET     0x000c /* Status Register */
-#define CXD56_SPI_CPSR_OFFSET   0x0010 /* Clock Prescale Register */
-#define CXD56_SPI_IMSC_OFFSET   0x0014 /* Interrupt Mask Set and Clear Reg */
-#define CXD56_SPI_RIS_OFFSET    0x0018 /* Raw Interrupt Status Register */
-#define CXD56_SPI_MIS_OFFSET    0x001c /* Masked Interrupt Status Register */
-#define CXD56_SPI_ICR_OFFSET    0x0020 /* Interrupt Clear Register */
-#define CXD56_SPI_DMACR_OFFSET  0x0024 /* DMA Control Register */
-#define CXD56_SPI_CSMODE_OFFSET 0x0090 /* CS control mode */
-#define CXD56_SPI_CS_OFFSET     0x0094 /* CS output */
+#define CXD56_SPI_CR0_OFFSET       0x0000 /* Control Register 0 */
+#define CXD56_SPI_CR1_OFFSET       0x0004 /* Control Register 1 */
+#define CXD56_SPI_DR_OFFSET        0x0008 /* Data Register */
+#define CXD56_SPI_SR_OFFSET        0x000c /* Status Register */
+#define CXD56_SPI_CPSR_OFFSET      0x0010 /* Clock Prescale Register */
+#define CXD56_SPI_IMSC_OFFSET      0x0014 /* Interrupt Mask Set and Clear Reg */
+#define CXD56_SPI_RIS_OFFSET       0x0018 /* Raw Interrupt Status Register */
+#define CXD56_SPI_MIS_OFFSET       0x001c /* Masked Interrupt Status Register */
+#define CXD56_SPI_ICR_OFFSET       0x0020 /* Interrupt Clear Register */
+#define CXD56_SPI_DMACR_OFFSET     0x0024 /* DMA Control Register */
+#define CXD56_SPI_CSMODE_OFFSET    0x0090 /* CS control mode */
+#define CXD56_SPI_CS_OFFSET        0x0094 /* CS output */
 #define CXD56_SPI_SLAVETYPE_OFFSET 0x0098 /* Slave type */
 
 /* Register addresses *******************************************************/
@@ -205,7 +205,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_SPI_H */

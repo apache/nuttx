@@ -31,7 +31,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ***************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_GAUGE_H
 #define __ARCH_ARM_SRC_CXD56XX_CXD56_GAUGE_H

@@ -295,7 +295,9 @@ static void     spi_recvblock(struct spi_dev_s *dev, void *buffer,
  * Private Data
  ****************************************************************************/
 
-/* This array maps chip select numbers (0-3 or 1-15) to CSR register offsets */
+/* This array maps chip select numbers (0-3 or 1-15) to CSR register
+ * offsets
+ */
 
 #if defined(CONFIG_SAMV7_SPI_CS_DECODING)
 static const uint8_t g_csroffset[16] =
@@ -762,7 +764,7 @@ static void spi_dma_sampledone(struct sam_spics_s *spics)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_SPI_DMA
-static void spi_dmatimeout(int argc, uint32_t arg)
+static void spi_dmatimeout(int argc, uint32_t arg, ...)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)arg;
   DEBUGASSERT(spics != NULL);
@@ -819,7 +821,9 @@ static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
 
   if (spics->result == -EBUSY)
     {
-      /* Save the result of the transfer if no error was previously reported */
+      /* Save the result of the transfer if no error was previously
+       * reported
+       */
 
       spics->result = result;
     }
@@ -1022,7 +1026,9 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   spiinfo("cs=%d frequency=%d\n", spics->cs, frequency);
 
-  /* Check if the requested frequency is the same as the frequency selection */
+  /* Check if the requested frequency is the same as the frequency
+   * selection
+   */
 
   if (spics->frequency == frequency)
     {
@@ -1259,7 +1265,7 @@ static int spi_hwfeatures(struct spi_dev_s *dev, uint8_t features)
       offset  = (unsigned int)g_csroffset[spics->cs];
       regval  = spi_getreg(spi, offset);
       regval &= ~SPI_CSR_CSNAAT; /* Chip Select Not Active After Transfer */
-      regval |= SPI_CSR_CSAAT; /* Chip Select Active After Transfer */
+      regval |= SPI_CSR_CSAAT ;  /* Chip Select Active After Transfer */
       spi_putreg(spi, regval, offset);
     }
   else
@@ -1858,7 +1864,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       /* Start (or re-start) the watchdog timeout */
 
       ret = wd_start(spics->dmadog, DMA_TIMEOUT_TICKS,
-                     (wdentry_t)spi_dmatimeout, 1, (uint32_t)spics);
+                     spi_dmatimeout, 1, (uint32_t)spics);
       if (ret < 0)
         {
            spierr("ERROR: wd_start failed: %d\n", ret);

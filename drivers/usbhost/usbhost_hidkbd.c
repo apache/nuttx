@@ -416,7 +416,9 @@ static const uint8_t encoding[USBHID_NUMENCODINGS] =
   KEYCODE_F11,          KEYCODE_F12,
   KEYCODE_PRTSCRN,      KEYCODE_SCROLLLOCK,
 
-  /* 0x48-0x4f: Pause,Insert,Home,PageUp,DeleteForward,End,PageDown,RightArrow */
+  /* 0x48-0x4f: Pause,Insert,Home,PageUp,
+   * DeleteForward,End,PageDown,RightArrow
+   */
 
   KEYCODE_PAUSE,        KEYCODE_INSERT,
   KEYCODE_HOME,         KEYCODE_PAGEUP,
@@ -469,7 +471,9 @@ static const uint8_t encoding[USBHID_NUMENCODINGS] =
   KEYCODE_COPY,         KEYCODE_PASTE,
   KEYCODE_FIND,         KEYCODE_MUTE,
 
-  /* 0x80-0x87: VolUp,VolDown,LCapsLock,lNumLock,LScrollLock,,,=,International1 */
+  /* 0x80-0x87: VolUp,VolDown,LCapsLock,lNumLock,LScrollLock,,,
+   * =,International1
+   */
 
   KEYCODE_VOLUP,        KEYCODE_VOLDOWN,
   KEYCODE_LCAPSLOCK,    KEYCODE_LNUMLOCK,
@@ -749,7 +753,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
   /* Free the class instance. */
 
   uinfo("Freeing: %p\n", usbclass);
-  sched_kfree(usbclass);
+  kmm_free(usbclass);
 }
 
 /****************************************************************************
@@ -1481,7 +1485,9 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
             uinfo("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
-            /* Did we already find what we needed from a preceding interface? */
+            /* Did we already find what we needed
+             * from a preceding interface?
+             */
 
             if ((found & USBHOST_RQDFOUND) == USBHOST_RQDFOUND)
               {
@@ -1605,7 +1611,9 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
       if (found == USBHOST_ALLFOUND)
         {
-          /* Yes.. then break out of the loop and use the preceding interface */
+          /* Yes.. then break out of the loop
+           * and use the preceding interface
+           */
 
           done = true;
         }
@@ -1681,7 +1689,9 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   char devname[DEV_NAMELEN];
   int ret;
 
-  /* Set aside a transfer buffer for exclusive use by the keyboard class driver */
+  /* Set aside a transfer buffer for exclusive
+   * use by the keyboard class driver
+   */
 
   ret = usbhost_tdalloc(priv);
   if (ret < 0)
@@ -1731,7 +1741,9 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
                                  (FAR char * const *)NULL);
   if (priv->pollpid < 0)
     {
-      /* Failed to started the poll thread... probably due to memory resources */
+      /* Failed to started the poll thread...
+       * probably due to memory resources
+       */
 
       usbhost_givesem(&g_exclsem);
       ret = (int)priv->pollpid;

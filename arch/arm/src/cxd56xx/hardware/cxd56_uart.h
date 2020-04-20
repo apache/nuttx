@@ -107,7 +107,7 @@
 #define UART_INTR_PE        (1u << 8)  /* Parity error interrupt */
 #define UART_INTR_BE        (1u << 9)  /* Break error interrupt */
 #define UART_INTR_OE        (1u << 10) /* Overrun error interrupt */
-#define UART_INTR_ALL       (0x7ff)  /* All of interrupts */
+#define UART_INTR_ALL       (0x7ff)    /* All of interrupts */
 
 #define UART_FLAG_RI        (1u << 8)  /* Ring indicator */
 #define UART_FLAG_TXFE      (1u << 7)  /* Transmit FIFO empty */
@@ -128,7 +128,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_UART_H */

@@ -36,7 +36,6 @@ usage() {
   echo "   git diff --cached | ./tools/checkpatch.sh -"
   echo "Where a <commit list> is any syntax supported by git for specifying git revision, see GITREVISIONS(7)"
   echo "Where a <patch file names> is a space separated list of patch file names or wildcard. or *.patch"
- 
 }
 
 check_file() {
@@ -57,7 +56,7 @@ check_file() {
 
 check_ranges() {
   while read; do
-    if [[ $REPLY =~ \+\+\+\ (b/)?([^[:blank:]]+).* ]]; then
+    if [[ $REPLY =~ ^(\+\+\+\ (b/)?([^[:blank:]]+).*)$ ]]; then
       if [ "$ranges" != "" ]; then
         if [ $range != 0 ]; then
           check_file $ranges $path 2>&1
@@ -65,7 +64,7 @@ check_ranges() {
           check_file $path 2>&1
         fi
       fi
-      path=${BASH_REMATCH[2]}
+      path=${BASH_REMATCH[3]}
       ranges=""
     elif [[ $REPLY =~ @@\ -[0-9]+(,[0-9]+)?\ \+([0-9]+,[0-9]+)?\ @@.* ]]; then
       ranges+="-r ${BASH_REMATCH[2]} "

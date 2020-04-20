@@ -104,7 +104,7 @@
 
 /* This is the type of the function that is called to uninitialize the
  * the loaded module.  This may mean, for example, un-registering a device
- * driver. If the module is successfully initialized, its memory will be
+ * driver. If the module is successfully uninitialized, its memory will be
  * deallocated.
  *
  * Input Parameters:
@@ -113,7 +113,7 @@
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure to
- *   initialize the module.  If zero is returned, then the module memory
+ *   uninitialize the module.  If zero is returned, then the module memory
  *   will be deallocated.  If the module is still in use (for example with
  *   open driver instances), the uninitialization function should fail with
  *   -EBUSY
@@ -121,10 +121,10 @@
 
 typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
 
-/* The contect of this structure is returned by module_initialize().
+/* The content of this structure is filled by module_initialize().
  *
  *   uninitializer - The pointer to the uninitialization function.  NULL may
- *                   be returned if no uninitialization is needed (i.e, the
+ *                   be specified if no uninitialization is needed (i.e, the
  *                   the module memory can be deallocated at any time).
  *   arg           - An argument that will be passed to the uninitialization
  *                   function.
@@ -142,11 +142,11 @@ struct mod_info_s
 
 /* A NuttX module is expected to export a function called module_initialize()
  * that has the following function prototype.  This function should appear as
- * the entry point in the ELF module file and will be called by the binfmt
- * logic after the module has been loaded into kernel memory.
+ * the entry point in the ELF module file and will be called by the loader
+ * logic after the module has been loaded into memory.
  *
  * Input Parameters:
- *   modinfo - Module information returned by modlib_initialize().
+ *   modinfo - Module information to be filled by the initializer.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on any failure to

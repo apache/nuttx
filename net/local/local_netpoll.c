@@ -261,7 +261,6 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
           else
             {
               fds->priv = shadowfds;
-              ret = OK;
             }
         }
         break;
@@ -302,10 +301,12 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   return ret;
 
+#ifdef CONFIG_NET_LOCAL_STREAM
 pollerr:
   fds->revents |= POLLERR;
   nxsem_post(fds->sem);
   return OK;
+#endif
 }
 
 /****************************************************************************
@@ -327,14 +328,13 @@ pollerr:
 int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 {
   FAR struct local_conn_s *conn;
-  int status = OK;
-  int ret = -ENOSYS;
+  int ret = OK;
 
   conn = (FAR struct local_conn_s *)psock->s_conn;
 
   if (conn->lc_proto == SOCK_DGRAM)
     {
-      return ret;
+      return -ENOSYS;
     }
 
 #ifdef CONFIG_NET_LOCAL_STREAM
@@ -354,6 +354,7 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
       case (POLLIN | POLLOUT):
         {
           FAR struct pollfd *shadowfds = fds->priv;
+          int ret2;
 
           if (shadowfds == NULL)
             {
@@ -363,15 +364,10 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
           /* Teardown for both shadow pollfds. */
 
           ret = file_poll(&conn->lc_infile, &shadowfds[0], false);
-          if (ret < 0)
+          ret2 = file_poll(&conn->lc_outfile, &shadowfds[1], false);
+          if (ret2 < 0)
             {
-              status = ret;
-            }
-
-          ret = file_poll(&conn->lc_outfile, &shadowfds[1], false);
-          if (ret < 0)
-            {
-              status = ret;
+              ret = ret2;
             }
 
           fds->revents |= shadowfds[0].revents | shadowfds[1].revents;
@@ -387,7 +383,7 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
               return OK;
             }
 
-          status = file_poll(&conn->lc_infile, fds, false);
+          ret = file_poll(&conn->lc_infile, fds, false);
         }
         break;
 
@@ -398,7 +394,7 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
               return OK;
             }
 
-          status = file_poll(&conn->lc_outfile, fds, false);
+          ret = file_poll(&conn->lc_outfile, fds, false);
         }
         break;
 
@@ -407,7 +403,7 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
     }
 #endif
 
-  return status;
+  return ret;
 }
 
 #endif /* HAVE_LOCAL_POLL */

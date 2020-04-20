@@ -50,7 +50,7 @@ ifneq ($(GIT_DIR),y)
 
 # In case the version file does not exist
 
-CONFIG_VERSION_STRING ?= "0.0"
+CONFIG_VERSION_STRING ?= "0.0.0"
 CONFIG_VERSION_BUILD ?= "0"
 
 VERSION_ARG = -v $(CONFIG_VERSION_STRING) -b $(CONFIG_VERSION_BUILD)
@@ -81,7 +81,7 @@ DIRLINK = $(TOPDIR)/tools/link.sh
 DIRUNLINK = $(TOPDIR)/tools/unlink.sh
 endif
 
-# This define is passed as EXTRADEFINES for kernel-mode builds.  It is also passed
+# This define is passed as EXTRAFLAGS for kernel-mode builds.  It is also passed
 # during PASS1 (but not PASS2) context and depend targets.
 
 KDEFINE = ${shell $(DEFINE) "$(CC)" __KERNEL__}
@@ -417,7 +417,7 @@ include tools/LibTargets.mk
 # pass1 and pass2
 #
 # If the 2 pass build option is selected, then this pass1 target is
-# configured to built before the pass2 target.  This pass1 target may, as an
+# configured to be built before the pass2 target.  This pass1 target may, as an
 # example, build an extra link object (CONFIG_PASS1_OBJECT) which may be an
 # incremental (relative) link object, but could be a static library (archive);
 # some modification to this Makefile would be required if CONFIG_PASS1_OBJECT
@@ -446,7 +446,7 @@ endif
 pass2deps: pass2dep $(NUTTXLIBS)
 
 pass2: pass2deps
-	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(LINKLIBS)" EXTRADEFINES=$(KDEFINE) $(BIN)
+	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" EXTRA_OBJS="$(EXTRA_OBJS)" LINKLIBS="$(LINKLIBS)" EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" $(BIN)
 	$(Q) if [ -w /tftpboot ] ; then \
 		cp -f $(BIN) /tftpboot/$(BIN).${CONFIG_ARCH}; \
 	fi
@@ -487,7 +487,7 @@ $(BIN): pass1deps pass2deps pass1 pass2
 # This is a helper target that will rebuild NuttX and download it to the target
 # system in one step.  The operation of this target depends completely upon
 # implementation of the DOWNLOAD command in the user Make.defs file.  It will
-# generate an error an error if the DOWNLOAD command is not defined.
+# generate an error if the DOWNLOAD command is not defined.
 
 download: $(BIN)
 	$(call DOWNLOAD, $<)
@@ -502,7 +502,7 @@ pass1dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 
 pass2dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 	$(Q) for dir in $(KERNDEPDIRS) ; do \
-		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" EXTRADEFINES=$(KDEFINE) depend; \
+		$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)" depend; \
 	done
 
 # Configuration targets

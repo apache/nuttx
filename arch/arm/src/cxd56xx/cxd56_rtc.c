@@ -33,9 +33,9 @@
  *
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -60,10 +60,11 @@
 #include "hardware/cxd5602_backupmem.h"
 #include "hardware/cxd56_rtc.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+ ****************************************************************************/
+
+/* Configuration ************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
 #  ifndef CONFIG_RTC_FREQUENCY
@@ -97,9 +98,9 @@
 #define RTC_CLOCK_CHECK_INTERVAL  (200) /* milliseconds */
 #define RTC_CLOCK_CHECK_MAX_RETRY (15)
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 struct alm_cbinfo_s
@@ -117,9 +118,9 @@ struct rtc_backup_s
   int64_t  reserved1;
 };
 
-/************************************************************************************
+/****************************************************************************
  * Private Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* Callback to use when the alarm expires */
 
@@ -131,17 +132,17 @@ static struct alm_cbinfo_s g_alarmcb[RTC_ALARM_LAST];
 
 static struct rtc_backup_s *g_rtc_save;
 
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 volatile bool g_rtc_enabled = false;
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: rtc_dumptime
  *
  * Description:
@@ -153,7 +154,7 @@ volatile bool g_rtc_enabled = false;
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_RTC
 static void rtc_dumptime(FAR const struct timespec *tp, FAR const char *msg)
@@ -172,7 +173,7 @@ static void rtc_dumptime(FAR const struct timespec *tp, FAR const char *msg)
 #  define rtc_dumptime(tp, msg)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: cxd56_rtc_interrupt
  *
  * Description:
@@ -185,7 +186,7 @@ static void rtc_dumptime(FAR const struct timespec *tp, FAR const char *msg)
  * Returned Value:
  *   Zero (OK) on success; A negated errno value on failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 static int cxd56_rtc_interrupt(int irq, FAR void *context, FAR void *arg)
@@ -193,7 +194,8 @@ static int cxd56_rtc_interrupt(int irq, FAR void *context, FAR void *arg)
   FAR struct alm_cbinfo_s *cbinfo;
   alm_callback_t cb;
   FAR void *cb_arg;
-  uint32_t source, clear;
+  uint32_t source;
+  uint32_t clear;
   int id;
   int ret = OK;
 
@@ -221,6 +223,7 @@ static int cxd56_rtc_interrupt(int irq, FAR void *context, FAR void *arg)
       rtcerr("ERROR: Invalid ALARM\n");
       return ret;
     }
+
   putreg32(clear, CXD56_RTC0_ALMCLR);
   putreg32(0, CXD56_RTC0_ALMOUTEN(id));
 
@@ -231,7 +234,7 @@ static int cxd56_rtc_interrupt(int irq, FAR void *context, FAR void *arg)
       /* Alarm callback */
 
       cb = cbinfo->ac_cb;
-      cb_arg = (FAR void*)cbinfo->ac_arg;
+      cb_arg = (FAR void *)cbinfo->ac_arg;
 
       cbinfo->ac_cb  = NULL;
       cbinfo->ac_arg = NULL;
@@ -243,20 +246,20 @@ static int cxd56_rtc_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 #endif
 
-
-/************************************************************************************
+/****************************************************************************
  * Name: cxd56_rtc_initialize
  *
  * Description:
  *   Actually initialize the hardware RTC. This function is called in the
- *   initialization sequence, thereafter may be called when wdog timer is expired.
+ *   initialization sequence, thereafter may be called when wdog timer is
+ *   expired.
  *
  * Input Parameters:
  *   arg: Not used
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static void cxd56_rtc_initialize(int argc, uint32_t arg)
+static void cxd56_rtc_initialize(int argc, uint32_t arg, ...)
 {
   struct timespec ts;
 #ifdef CONFIG_CXD56_RTC_LATEINIT
@@ -268,30 +271,30 @@ static void cxd56_rtc_initialize(int argc, uint32_t arg)
       s_wdog = wd_create();
     }
 
-  /* Check whether RTC clock source selects the external RTC and the synchronization
-   * from the external RTC is completed.
+  /* Check whether RTC clock source selects the external RTC and the
+   * synchronization from the external RTC is completed.
    */
 
-  g_rtc_save = (struct rtc_backup_s*)BKUP->rtc_saved_data;
+  g_rtc_save = (struct rtc_backup_s *)BKUP->rtc_saved_data;
 
-  if (((getreg32(CXD56_TOPREG_CKSEL_ROOT) & STATUS_RTC_MASK) != STATUS_RTC_SEL) ||
+  if (((getreg32(CXD56_TOPREG_CKSEL_ROOT) & STATUS_RTC_MASK)
+       != STATUS_RTC_SEL) ||
       (g_rtc_save->magic != MAGIC_RTC_SAVE))
     {
-
       /* Retry until RTC clock is stable */
 
-      if (s_retry++ < RTC_CLOCK_CHECK_MAX_RETRY) {
+      if (s_retry++ < RTC_CLOCK_CHECK_MAX_RETRY)
+        {
+          rtcinfo("retry count: %d\n", s_retry);
 
-        rtcinfo("retry count: %d\n", s_retry);
+          if (OK == wd_start(s_wdog, MSEC2TICK(RTC_CLOCK_CHECK_INTERVAL),
+                             cxd56_rtc_initialize, 1, (wdparm_t)NULL))
+            {
+              /* Again, this function is called recursively */
 
-        if (OK == wd_start(s_wdog, MSEC2TICK(RTC_CLOCK_CHECK_INTERVAL),
-                           (wdentry_t)cxd56_rtc_initialize, 1, (wdparm_t)NULL))
-          {
-            /* Again, this function is called recursively */
-
-            return;
-          }
-      }
+              return;
+            }
+        }
 
       rtcerr("ERROR: Use inaccurate RCRTC instead of RTC\n");
     }
@@ -337,7 +340,8 @@ static void cxd56_rtc_initialize(int argc, uint32_t arg)
     {
       /* Reflect the system operating time to RTC offset data. */
 
-      g_rtc_save->offset = SEC_TO_CNT(ts.tv_sec) | NSEC_TO_PRECNT(ts.tv_nsec);
+      g_rtc_save->offset = SEC_TO_CNT(ts.tv_sec) |
+                           NSEC_TO_PRECNT(ts.tv_nsec);
     }
 
   /* Make it possible to use the RTC timer functions */
@@ -347,16 +351,16 @@ static void cxd56_rtc_initialize(int argc, uint32_t arg)
   return;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_initialize
  *
  * Description:
- *   Initialize the hardware RTC per the selected configuration.  This function is
- *   called once during the OS initialization sequence
+ *   Initialize the hardware RTC per the selected configuration.  This
+ *   function is called once during the OS initialization sequence
  *
  * Input Parameters:
  *   None
@@ -364,7 +368,7 @@ static void cxd56_rtc_initialize(int argc, uint32_t arg)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_initialize(void)
 {
@@ -372,15 +376,15 @@ int up_rtc_initialize(void)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_time
  *
  * Description:
  *   Get the current time in seconds.  This is similar to the standard time()
- *   function.  This interface is only required if the low-resolution RTC/counter
- *   hardware implementation selected.  It is only used by the RTOS during
- *   initialization to set up the system time when CONFIG_RTC is set but neither
- *   CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
+ *   function.  This interface is only required if the low-resolution
+ *   RTC/counter hardware implementation selected.  It is only used by the
+ *   RTOS during initialization to set up the system time when CONFIG_RTC is
+ *   set but neither CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
  *
  * Input Parameters:
  *   None
@@ -388,7 +392,7 @@ int up_rtc_initialize(void)
  * Returned Value:
  *   The current time in seconds
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_RTC_HIRES
 time_t up_rtc_time(void)
@@ -399,17 +403,17 @@ time_t up_rtc_time(void)
   count += g_rtc_save->offset;
   count >>= 15; /* convert to 1sec resolution */
 
-  return (time_t)count/CONFIG_RTC_FREQUENCY;
+  return (time_t)count / CONFIG_RTC_FREQUENCY;
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_gettime
  *
  * Description:
- *   Get the current time from the high resolution RTC clock/counter.  This interface
- *   is only supported by the high-resolution RTC/counter hardware implementation.
- *   It is used to replace the system timer.
+ *   Get the current time from the high resolution RTC clock/counter.  This
+ *   interface is only supported by the high-resolution RTC/counter hardware
+ *   implementation.  It is used to replace the system timer.
  *
  * Input Parameters:
  *   tp - The location to return the high resolution time value.
@@ -417,7 +421,7 @@ time_t up_rtc_time(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
 int up_rtc_gettime(FAR struct timespec *tp)
@@ -430,7 +434,8 @@ int up_rtc_gettime(FAR struct timespec *tp)
   /* Then we can save the time in seconds and fractional seconds. */
 
   tp->tv_sec  = count / CONFIG_RTC_FREQUENCY;
-  tp->tv_nsec = (count % CONFIG_RTC_FREQUENCY)*(NSEC_PER_SEC/CONFIG_RTC_FREQUENCY);
+  tp->tv_nsec = (count % CONFIG_RTC_FREQUENCY) *
+                (NSEC_PER_SEC / CONFIG_RTC_FREQUENCY);
 
   rtc_dumptime(tp, "Getting time");
 
@@ -438,12 +443,12 @@ int up_rtc_gettime(FAR struct timespec *tp)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_rtc_settime
  *
  * Description:
- *   Set the RTC to the provided time.  All RTC implementations must be able to
- *   set their time based on a standard timespec.
+ *   Set the RTC to the provided time.  All RTC implementations must be able
+ *   to set their time based on a standard timespec.
  *
  * Input Parameters:
  *   tp - the time to use
@@ -451,7 +456,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 int up_rtc_settime(FAR const struct timespec *tp)
 {
@@ -488,7 +493,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cxd56_rtc_count
  *
  * Description:
@@ -497,15 +502,14 @@ int up_rtc_settime(FAR const struct timespec *tp)
  * Returned Value:
  *   64bit counter value running at 32kHz
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 uint64_t cxd56_rtc_count(void)
 {
   uint64_t val;
   irqstate_t flags;
 
-  /*
-   * The pre register is latched with reading the post rtcounter register,
+  /* The pre register is latched with reading the post rtcounter register,
    * so these registers always have to been read in the below order,
    * 1st post -> 2nd pre, and should be operated in atomic.
    */
@@ -520,7 +524,7 @@ uint64_t cxd56_rtc_count(void)
   return val;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: cxd56_rtc_almcount
  *
  * Description:
@@ -529,7 +533,7 @@ uint64_t cxd56_rtc_count(void)
  * Returned Value:
  *   64bit alarm counter value running at 32kHz
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 uint64_t cxd56_rtc_almcount(void)
@@ -548,7 +552,7 @@ uint64_t cxd56_rtc_almcount(void)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: cxd56_rtc_setalarm
  *
  * Description:
@@ -560,7 +564,7 @@ uint64_t cxd56_rtc_almcount(void)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 int cxd56_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
@@ -617,7 +621,7 @@ int cxd56_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 }
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Name: cxd56_rtc_cancelalarm
  *
  * Description:
@@ -629,7 +633,7 @@ int cxd56_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
  * Returned Value:
  *   Zero (OK) on success; a negated errno on failure
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
 int cxd56_rtc_cancelalarm(enum alm_id_e alarmid)

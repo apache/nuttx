@@ -52,10 +52,12 @@
 /* Set the standard pinconf macro Definitions
  *  - If it's used as input pin, then set 1. Otherwise set 0 (default).
  *  - If it's drived in 4mA, then set 1. Otherwise set 0 (default 2mA).
- *  - If it's used as weak pull-up/down, then set PINCONF_PULLUP/PINCONF_PULLDOWN.
+ *  - If it's used as weak pull-up/down,
+ *    then set PINCONF_PULLUP/PINCONF_PULLDOWN.
  *    Otherwise set 0 (default).
  *
  */
+
 #define PINCONF(pin, mode, input, drive, pull) \
   ( \
     (PINCONF_SET_PIN(pin)) | \
@@ -67,128 +69,134 @@
 
 /* CXD5602 Pin Configuration Table
  *
- * Group            Pin             100 185 Mode0   Mode1           Mode2           Mode3
- * ================ =============== === === ======= =============== =============== ===============
- * I2C4             I2C4_BCK        o   o   GPIO    I2C4(PMIC)      -               -
- *                  I2C4_BDT        o   o   GPIO    I2C4(PMIC)      -               -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * PMIC_INT         PMIC_INT        o   o   GPIO    PMIC_INT        PMIC_INT(OD)    -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * RTC_IRQ_OUT      RTC_IRQ_OUT     -   o   GPIO    RTC_IRQ_OUT     RTC_IRQ_OUT(OD) -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * AP_CLK           AP_CLK          o   o   GPIO    AP_CLK          PMU_WDT         PMU_WDT(OD)
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * GNSS_1PPS_OUT    GNSS_1PPS_OUT   -   o   GPIO    GNSS_1PPS_OUT   CPU_WDT         CPU_WDT(OD)
- * ---------------- --------------- --- --- --------------- ------- --------------- ---------------
- * SPI0A            SPI0_CS_X       o   o   GPIO    UART1(DBG)      SPI0(CFG)       SYS_MONOUT0
- *                  SPI0_SCK        o   o   GPIO    UART1(DBG)      SPI0(CFG)       SYS_MONOUT1
- * ---------------- --------------- --- --- ------- ---------------                 ---------------
- * SPI0B            SPI0_MOSI       -   o   GPIO    I2C2(CFG)       SPI0(CFG)       SYS_MONOUT2
- *                  SPI0_MISO       -   o   GPIO    I2C2(CFG)       SPI0(CFG)       SYS_MONOUT3
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * SPI1A            SPI1_CS_X       o   o   GPIO    SPI1(Flash)     SPI0(CFG)       SYS_MONOUT4
- *                  SPI1_SCK        o   o   GPIO    SPI1(Flash)     SPI0(CFG)       SYS_MONOUT5
- *                  SPI1_IO0        o   o   GPIO    SPI1(Flash)     SPI0(CFG)       SYS_MONOUT6
- *                  SPI1_IO1        o   o   GPIO    SPI1(Flash)     SPI0(CFG)       SYS_MONOUT7
- * ---------------- --------------- --- --- -------                 --------------- ---------------
- * SPI1B            SPI1_IO2        o   o   GPIO    SPI1(Flash)     -               SYS_MONOUT8
- *                  SPI1_IO3        o   o   GPIO    SPI1(Flash)     -               SYS_MONOUT9
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * SPI2A            SPI2_CS_X       o   o   GPIO    SPI2(HostIF)    UART0(HostIF)   I2C3(HostIF)
- *                  SPI2_SCK        o   o   GPIO    SPI2(HostIF)    UART0(HostIF)   I2C3(HostIF)
- * ---------------- --------------- --- --- -------                 --------------- ---------------
- * SPI2B            SPI2_MOSI       o   o   GPIO    SPI2(HostIF)    UART0(HostIF)   -
- *                  SPI2_MISO       o   o   GPIO    SPI2(HostIF)    UART0(HostIF)   -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * HIFIRQ           HIF_IRQ_OUT     o   o   GPIO    HIF_IRQ_OUT     HIF_IRQ_OUT(OD) GNSS_1PPS_OUT
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * HIFEXT           HIF_GPIO0       -   o   GPIO    -               -               GPS_EXTLD
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * SEN_IRQ_IN       SEN_IRQ_IN      o   o   GPIO    SEN_IRQ_IN      SYS_MONOUT0     DBG_LOGGER
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * SPI3_CS0_X       SPI3_CS0_X      o   o   GPIO    SPI3_CS0_X      SYS_MONOUT1     DBG_LOGGER
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * SPI3_CS1_X       SPI3_CS1_X      o   o   GPIO    SPI3_CS1_X      SYS_MONOUT2     DBG_LOGGER
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * SPI3_CS2_X       SPI3_CS2_X      o   o   GPIO    SPI3_CS2_X      SYS_MONOUT3     DBG_LOGGER
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * SPI3             SPI3_SCK        o   o   GPIO    SPI3(Sensor)    SYS_MONOUT4     DBG_LOGGER
- *                  SPI3_MOSI       o   o   GPIO    SPI3(Sensor)    SYS_MONOUT5     DBG_LOGGER
- *                  SPI3_MISO       o   o   GPIO    SPI3(Sensor)    SYS_MONOUT6     DBG_LOGGER
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * I2C0             I2C0_BCK        o   o   GPIO    I2C0(Sensor)    SYS_MONOUT7     DBG_LOGGER
- *                  I2C0_BDT        o   o   GPIO    I2C0(Sensor)    SYS_MONOUT8     DBG_LOGGER
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * PWMA             PWM0            o   o   GPIO    PWMA            SYS_MONOUT9     DBG_LOGGER
- *                  PWM1            o   o   GPIO    PWMA            GPIO            DBG_LOGGER
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * PWMB             PWM2            o   o   GPIO    PWMB            I2C1(Sensor)    DBG_LOGGER
- *                  PWM3            o   o   GPIO    PWMB            I2C1(Sensor)    DBG_LOGGER
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * IS               IS_CLK          -   o   GPIO    IS              -               -
- *                  IS_VSYNC        -   o   GPIO    IS              -               -
- *                  IS_HSYNC        -   o   GPIO    IS              -               -
- *                  IS_DATA0        -   o   GPIO    IS              -               -
- *                  IS_DATA1        -   o   GPIO    IS              -               -
- *                  IS_DATA2        -   o   GPIO    IS              -               -
- *                  IS_DATA3        -   o   GPIO    IS              -               -
- *                  IS_DATA4        -   o   GPIO    IS              -               -
- *                  IS_DATA5        -   o   GPIO    IS              -               -
- *                  IS_DATA6        -   o   GPIO    IS              -               -
- *                  IS_DATA7        -   o   GPIO    IS              -               -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * UART2            UART2_TXD       o   o   GPIO    UART2(APP)      APP_MONOUT0     -
- *                  UART2_RXD       o   o   GPIO    UART2(APP)      APP_MONOUT1     -
- *                  UART2_CTS       o   o   GPIO    UART2(APP)      APP_MONOUT2     -
- *                  UART2_RTS       o   o   GPIO    UART2(APP)      APP_MONOUT3     -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * SPI4             SPI4_CS_X       o   o   GPIO    SPI4(APP)       APP_MONOUT4     -
- *                  SPI4_SCK        o   o   GPIO    SPI4(APP)       APP_MONOUT5     -
- *                  SPI4_MOSI       o   o   GPIO    SPI4(APP)       APP_MONOUT6     -
- *                  SPI4_MISO       o   o   GPIO    SPI4(APP)       APP_MONOUT7     -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * EMMCA            EMMC_CLK        o   o   GPIO    EMMC            SPI5(APP)       -
- *                  EMMC_CMD        o   o   GPIO    EMMC            SPI5(APP)       -
- *                  EMMC_DATA0      o   o   GPIO    EMMC            SPI5(APP)       -
- *                  EMMC_DATA1      o   o   GPIO    EMMC            SPI5(APP)       -
- * ---------------- --------------- --- --- -------                 --------------- ---------------
- * EMMCB            EMMC_DATA2      o   o   GPIO    EMMC            APP_MONOUT8     -
- *                  EMMC_DATA3      o   o   GPIO    EMMC            APP_MONOUT9     -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * SDIOA            SDIO_CLK        -   o   GPIO    SDIO            SPI5(APP)       -
- *                  SDIO_CMD        -   o   GPIO    SDIO            SPI5(APP)       -
- *                  SDIO_DATA0      -   o   GPIO    SDIO            SPI5(APP)       -
- *                  SDIO_DATA1      -   o   GPIO    SDIO            SPI5(APP)       -
- *                  SDIO_DATA2      -   o   GPIO    SDIO            GPIO            -
- *                  SDIO_DATA3      -   o   GPIO    SDIO            GPIO            -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * SDIOB            SDIO_CD         -   o   GPIO    SDIO            -               -
- *                  SDIO_WP         -   o   GPIO    SDIO            -               -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * SDIOC            SDIO_CMDDIR     -   o   GPIO    SDIO            -               -
- *                  SDIO_DIR0       -   o   GPIO    SDIO            -               -
- *                  SDIO_DIR1_3     -   o   GPIO    SDIO            -               -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * SDIOD            SDIO_CLKI       -   o   GPIO    SDIO            -               -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * I2S0             I2S0_BCK        o   o   GPIO    I2S0            APP_MONOUT0     -
- *                  I2S0_LRCK       o   o   GPIO    I2S0            APP_MONOUT1     -
- *                  I2S0_DATA_IN    o   o   GPIO    I2S0            APP_MONOUT2     -
- *                  I2S0_DATA_OUT   o   o   GPIO    I2S0            APP_MONOUT3     -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * I2S1             I2S1_BCK        -   o   GPIO    I2S1            APP_MONOUT4     -
- *                  I2S1_LRCK       -   o   GPIO    I2S1            APP_MONOUT5     -
- *                  I2S1_DATA_IN    -   o   GPIO    I2S1            APP_MONOUT6     -
- *                  I2S1_DATA_OUT   -   o   GPIO    I2S1            APP_MONOUT7     -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * MCLK             MCLK            o   o   GPIO    MCLK            APP_MONOUT8     -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * PDM              PDM_CLK         o   o   GPIO    PDM             APP_MONOUT9     -
- *                  PDM_IN          o   o   GPIO    PDM             GPIO            -
- *                  PDM_OUT         o   o   GPIO    PDM             GPIO            -
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
- * USBVBUS          USB_VBUSINT     o   o   GPIO    USB_VBUSINT     -               DBG_LOGGER
- * ---------------- --------------- --- --- ------- --------------- --------------- ---------------
+ * Group        Pin             100  Mode0  Mode1      Mode2         Mode3
+ * ========= ============= = = ==== ============= =============== ==========
+ * I2C4      I2C4_BCK      o o GPIO I2C4(PMIC)    -               -
+ *           I2C4_BDT      o o GPIO I2C4(PMIC)    -               -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * PMIC_INT  PMIC_INT      o o GPIO PMIC_INT      PMIC_INT(OD)    -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * RTC_IRQ
+ *    _OUT   RTC_IRQ_OUT   - o GPIO RTC_IRQ_OUT   RTC_IRQ_OUT(OD) -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * AP_CLK    AP_CLK        o o GPIO AP_CLK        PMU_WDT         PMU_WDT(OD)
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * GNSS_1PPS
+  *     _OUT GNSS_1PPS_OUT - o GPIO GNSS_1PPS_OUT CPU_WDT         CPU_WDT(OD)
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SPI0A     SPI0_CS_X     o o GPIO UART1(DBG)    SPI0(CFG)       SYS_MONOUT0
+ *           SPI0_SCK      o o GPIO UART1(DBG)    SPI0(CFG)       SYS_MONOUT1
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SPI0B     SPI0_MOSI     - o GPIO I2C2(CFG)     SPI0(CFG)       SYS_MONOUT2
+ *           SPI0_MISO     - o GPIO I2C2(CFG)     SPI0(CFG)       SYS_MONOUT3
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SPI1A     SPI1_CS_X     o o GPIO SPI1(Flash)   SPI0(CFG)       SYS_MONOUT4
+ *           SPI1_SCK      o o GPIO SPI1(Flash)   SPI0(CFG)       SYS_MONOUT5
+ *           SPI1_IO0      o o GPIO SPI1(Flash)   SPI0(CFG)       SYS_MONOUT6
+ *           SPI1_IO1      o o GPIO SPI1(Flash)   SPI0(CFG)       SYS_MONOUT7
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SPI1B     SPI1_IO2      o o GPIO SPI1(Flash)   -               SYS_MONOUT8
+ *           SPI1_IO3      o o GPIO SPI1(Flash)   -               SYS_MONOUT9
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SPI2A     SPI2_CS_X     o o GPIO SPI2(HostIF)  UART0(HostIF)   I2C3(Host)
+ *           SPI2_SCK      o o GPIO SPI2(HostIF)  UART0(HostIF)   I2C3(Host)
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SPI2B     SPI2_MOSI     o o GPIO SPI2(HostIF)  UART0(HostIF)   -
+ *           SPI2_MISO     o o GPIO SPI2(HostIF)  UART0(HostIF)   -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * HIFIRQ    HIF_IRQ_OUT   o o GPIO HIF_IRQ_OUT   HIF_IRQ_OUT(OD) GNSS_1PPS
+ *                                                                     _OUT
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * HIFEXT    HIF_GPIO0     - o GPIO -             -               GPS_EXTLD
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SEN_IRQ_I SEN_IRQ_IN    o o GPIO SEN_IRQ_IN    SYS_MONOUT0     DBG_LOGGER
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SPI3
+ *    _CS0_  SPI3_CS0_X    o o GPIO SPI3_CS0_X    SYS_MONOUT1     DBG_LOGGER
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SPI3
+ *    _CS1_  SPI3_CS1_X    o o GPIO SPI3_CS1_X    SYS_MONOUT2     DBG_LOGGER
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SPI3
+ *    _CS2_X SPI3_CS2_X    o o GPIO SPI3_CS2_X    SYS_MONOUT3     DBG_LOGGER
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SPI3      SPI3_SCK      o o GPIO SPI3(Sensor)  SYS_MONOUT4     DBG_LOGGER
+ *           SPI3_MOSI     o o GPIO SPI3(Sensor)  SYS_MONOUT5     DBG_LOGGER
+ *           SPI3_MISO     o o GPIO SPI3(Sensor)  SYS_MONOUT6     DBG_LOGGER
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * I2C0      I2C0_BCK      o o GPIO I2C0(Sensor)  SYS_MONOUT7     DBG_LOGGER
+ *           I2C0_BDT      o o GPIO I2C0(Sensor)  SYS_MONOUT8     DBG_LOGGER
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * PWMA      PWM0          o o GPIO PWMA          SYS_MONOUT9     DBG_LOGGER
+ *           PWM1          o o GPIO PWMA          GPIO            DBG_LOGGER
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * PWMB      PWM2          o o GPIO PWMB          I2C1(Sensor)    DBG_LOGGER
+ *           PWM3          o o GPIO PWMB          I2C1(Sensor)    DBG_LOGGER
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * IS        IS_CLK        - o GPIO IS            -               -
+ *           IS_VSYNC      - o GPIO IS            -               -
+ *           IS_HSYNC      - o GPIO IS            -               -
+ *           IS_DATA0      - o GPIO IS            -               -
+ *           IS_DATA1      - o GPIO IS            -               -
+ *           IS_DATA2      - o GPIO IS            -               -
+ *           IS_DATA3      - o GPIO IS            -               -
+ *           IS_DATA4      - o GPIO IS            -               -
+ *           IS_DATA5      - o GPIO IS            -               -
+ *           IS_DATA6      - o GPIO IS            -               -
+ *           IS_DATA7      - o GPIO IS            -               -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * UART2     UART2_TXD     o o GPIO UART2(APP)    APP_MONOUT0     -
+ *           UART2_RXD     o o GPIO UART2(APP)    APP_MONOUT1     -
+ *           UART2_CTS     o o GPIO UART2(APP)    APP_MONOUT2     -
+ *           UART2_RTS     o o GPIO UART2(APP)    APP_MONOUT3     -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SPI4      SPI4_CS_X     o o GPIO SPI4(APP)     APP_MONOUT4     -
+ *           SPI4_SCK      o o GPIO SPI4(APP)     APP_MONOUT5     -
+ *           SPI4_MOSI     o o GPIO SPI4(APP)     APP_MONOUT6     -
+ *           SPI4_MISO     o o GPIO SPI4(APP)     APP_MONOUT7     -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * EMMCA     EMMC_CLK      o o GPIO EMMC          SPI5(APP)       -
+ *           EMMC_CMD      o o GPIO EMMC          SPI5(APP)       -
+ *           EMMC_DATA0    o o GPIO EMMC          SPI5(APP)       -
+ *           EMMC_DATA1    o o GPIO EMMC          SPI5(APP)       -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * EMMCB     EMMC_DATA2    o o GPIO EMMC          APP_MONOUT8     -
+ *           EMMC_DATA3    o o GPIO EMMC          APP_MONOUT9     -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SDIOA     SDIO_CLK      - o GPIO SDIO          SPI5(APP)       -
+ *           SDIO_CMD      - o GPIO SDIO          SPI5(APP)       -
+ *           SDIO_DATA0    - o GPIO SDIO          SPI5(APP)       -
+ *           SDIO_DATA1    - o GPIO SDIO          SPI5(APP)       -
+ *           SDIO_DATA2    - o GPIO SDIO          GPIO            -
+ *           SDIO_DATA3    - o GPIO SDIO          GPIO            -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SDIOB     SDIO_CD       - o GPIO SDIO          -               -
+ *           SDIO_WP       - o GPIO SDIO          -               -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SDIOC     SDIO_CMDDIR   - o GPIO SDIO          -               -
+ *           SDIO_DIR0     - o GPIO SDIO          -               -
+ *           SDIO_DIR1_3   - o GPIO SDIO          -               -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * SDIOD     SDIO_CLKI     - o GPIO SDIO          -               -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * I2S0      I2S0_BCK      o o GPIO I2S0          APP_MONOUT0     -
+ *           I2S0_LRCK     o o GPIO I2S0          APP_MONOUT1     -
+ *           I2S0_DATA_IN  o o GPIO I2S0          APP_MONOUT2     -
+ *           I2S0_DATA_OUT o o GPIO I2S0          APP_MONOUT3     -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * I2S1      I2S1_BCK      - o GPIO I2S1          APP_MONOUT4     -
+ *           I2S1_LRCK     - o GPIO I2S1          APP_MONOUT5     -
+ *           I2S1_DATA_IN  - o GPIO I2S1          APP_MONOUT6     -
+ *           I2S1_DATA_OUT - o GPIO I2S1          APP_MONOUT7     -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * MCLK      MCLK          o o GPIO MCLK          APP_MONOUT8     -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * PDM       PDM_CLK       o o GPIO PDM           APP_MONOUT9     -
+ *           PDM_IN        o o GPIO PDM           GPIO            -
+ *           PDM_OUT       o o GPIO PDM           GPIO            -
+ * --------- ------------- - - ---- ------------- --------------- ----------
+ * USBVBUS   USB_VBUSINT   o o GPIO USB_VBUSINT   -               DBG_LOGGER
+ * --------- ------------- - - ---- ------------- --------------- ----------
  */
 
 /* Default pin configurations
@@ -196,10 +204,10 @@
  *  ENZI: 1=Input Enable, 0=Input Disable
  *  4mA : Drive Current 1=4mA, 0=2mA
  *  Pull: 0=HiZ floating, PINCONF_PULLUP, PINCONF_PULLDOWN
- *                                                                      M  E     P
- *                                                  P                   o  N  4  u
- *                                                  i                   d  Z  m  l
- *                                                  n                   e  I  A  l
+ *                                                            M  E     P
+ *                                        P                   o  N  4  u
+ *                                        i                   d  Z  m  l
+ *                                        n                   e  I  A  l
  */
 
 #define PINCONF_I2C4_BCK_GPIO               PINCONF(PIN_I2C4_BCK,       0, 0, 0, 0)
@@ -621,6 +629,7 @@
 #define PINCONFS_SDIOD_GPIO                 { PINCONF_SDIO_CLKI_GPIO }
 #define PINCONFS_SDIOD_SDIO                 { PINCONF_SDIO_CLKI }
 #endif /* CONFIG_CXD56_FCBGA */
+
 #define PINCONFS_I2S0_GPIO                  { PINCONF_I2S0_BCK_GPIO, PINCONF_I2S0_LRCK_GPIO, \
                                                PINCONF_I2S0_DATA_IN_GPIO, PINCONF_I2S0_DATA_OUT_GPIO }
 #define PINCONFS_I2S0_M_HIGH                { PINCONF_I2S0_BCK_M_HIGH, PINCONF_I2S0_LRCK_M_HIGH, \
@@ -643,6 +652,7 @@
 #define PINCONFS_I2S1_S_NORM                { PINCONF_I2S1_BCK_S, PINCONF_I2S1_LRCK_S, \
                                                PINCONF_I2S1_DATA_IN, PINCONF_I2S1_DATA_OUT_NORM }
 #endif /* CONFIG_CXD56_FCBGA */
+
 #define PINCONFS_MCLK_GPIO                  { PINCONF_MCLK_GPIO }
 #define PINCONFS_MCLK                       { PINCONF_MCLK }
 #define PINCONFS_PDM_GPIO                   { PINCONF_PDM_CLK_GPIO, PINCONF_PDM_IN_GPIO, PINCONF_PDM_OUT_GPIO }
@@ -650,6 +660,10 @@
 #define PINCONFS_PDM_NORM                   { PINCONF_PDM_CLK_NORM, PINCONF_PDM_IN, PINCONF_PDM_OUT_NORM }
 #define PINCONFS_USB_VBUSINT_GPIO           { PINCONF_USB_VBUSINT_GPIO }
 #define PINCONFS_USB_VBUSINT                { PINCONF_USB_VBUSINT }
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #ifdef CONFIG_CXD56_CUSTOM_PINCONFIG
 /* Change the pin configuration depending on each board */

@@ -97,7 +97,7 @@ config VIEWTOOL_MAX3421E_PWR
 
 config VIEWTOOL_MAX3421E_CONNMON_STACKSIZE
 	int "MAX3421E USB connection monitor stack size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 
 config VIEWTOOL_MAX3421E_CONNMON_PRIORITY
 	int "MAX3421E USB connection monitor priority"

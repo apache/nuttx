@@ -74,11 +74,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ***************************************************************/
+/* Configuration ************************************************************/
 
 /* All I/O buffers must lie in AHB SRAM because of the OHCI DMA. It might be
- * okay if no I/O buffers are used *IF* the application can guarantee that all
- * end-user I/O buffers reside in AHB SRAM.
+ * okay if no I/O buffers are used *IF* the application can guarantee that
+ * all end-user I/O buffers reside in AHB SRAM.
  */
 
 #if LPC17_40_IOBUFFERS < 1
@@ -93,7 +93,8 @@
 #  undef CONFIG_LPC17_40_USBHOST_REGDEBUG
 #endif
 
-/* OHCI Setup ******************************************************************/
+/* OHCI Setup ***************************************************************/
+
 /* Frame Interval / Periodic Start */
 
 #define BITS_PER_FRAME          12000
@@ -129,7 +130,7 @@
 #  define usbhost_dumpgpio()
 #endif
 
-/* USB Host Memory *************************************************************/
+/* USB Host Memory **********************************************************/
 
 /* Helper definitions */
 
@@ -142,7 +143,7 @@
 #define MIN_PERINTERVAL 2
 #define MAX_PERINTERVAL 32
 
-/* Descriptors *****************************************************************/
+/* Descriptors **************************************************************/
 
 /* TD delay interrupt value */
 
@@ -218,8 +219,8 @@ struct lpc17_40_xfrinfo_s
 
 /* The OCHI expects the size of an endpoint descriptor to be 16 bytes.
  * However, the size allocated for an endpoint descriptor is 32 bytes in
- * lpc17_40_ohciram.h.  This extra 16-bytes is used by the OHCI host driver in
- * order to maintain additional endpoint-specific data.
+ * lpc17_40_ohciram.h.  This extra 16-bytes is used by the OHCI host driver
+ * in order to maintain additional endpoint-specific data.
  */
 
 struct lpc17_40_ed_s
@@ -232,8 +233,11 @@ struct lpc17_40_ed_s
 
   uint8_t          xfrtype;   /* 16: Transfer type.  See SB_EP_ATTR_XFER_* in usb.h */
   uint8_t          interval;  /* 17: Periodic EP polling interval: 2, 4, 6, 16, or 32 */
-  sem_t            wdhsem;    /* 18: Semaphore used to wait for Writeback Done Head event */
-                              /*    Unused bytes may follow, depending on the size of sem_t */
+  sem_t            wdhsem;    /* 18: Semaphore used to wait for Writeback
+                               *     Done Head event */
+
+  /* Unused bytes may follow, depending on the size of sem_t */
+
   /* Pointer to structure that manages asynchronous transfers on this pipe */
 
   struct lpc17_40_xfrinfo_s *xfrinfo;
@@ -241,8 +245,8 @@ struct lpc17_40_ed_s
 
 /* The OCHI expects the size of an transfer descriptor to be 16 bytes.
  * However, the size allocated for an endpoint descriptor is 32 bytes in
- * lpc17_40_ohciram.h.  This extra 16-bytes is used by the OHCI host driver in
- * order to maintain additional endpoint-specific data.
+ * lpc17_40_ohciram.h.  This extra 16-bytes is used by the OHCI host driver
+ * in order to maintain additional endpoint-specific data.
  */
 
 struct lpc17_40_gtd_s
@@ -262,14 +266,15 @@ struct lpc17_40_gtd_s
 struct lpc17_40_list_s
 {
   struct lpc17_40_list_s *flink; /* Link to next buffer in the list */
-                              /* Variable length buffer data follows */
+
+  /* Variable length buffer data follows */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Register operations ********************************************************/
+/* Register operations ******************************************************/
 
 #ifdef CONFIG_LPC17_40_USBHOST_REGDEBUG
 static void lpc17_40_printreg(uint32_t addr, uint32_t val, bool iswrite);
@@ -281,19 +286,20 @@ static void lpc17_40_putreg(uint32_t val, uint32_t addr);
 # define lpc17_40_putreg(val,addr) putreg32(val,addr)
 #endif
 
-/* Semaphores ******************************************************************/
+/* Semaphores ***************************************************************/
 
-static void lpc17_40_takesem(sem_t *sem);
+static int lpc17_40_takesem(sem_t *sem);
+static int lpc17_40_takesem_noncancelable(sem_t *sem);
 #define lpc17_40_givesem(s) nxsem_post(s);
 
-/* Byte stream access helper functions *****************************************/
+/* Byte stream access helper functions **************************************/
 
 static inline uint16_t lpc17_40_getle16(const uint8_t *val);
 #if 0 /* Not used */
 static void lpc17_40_putle16(uint8_t *dest, uint16_t val);
 #endif
 
-/* OHCI memory pool helper functions *******************************************/
+/* OHCI memory pool helper functions ****************************************/
 
 static inline void lpc17_40_edfree(struct lpc17_40_ed_s *ed);
 static  struct lpc17_40_gtd_s *lpc17_40_tdalloc(void);
@@ -307,105 +313,111 @@ static void lpc17_40_freeio(uint8_t *buffer);
 static struct lpc17_40_xfrinfo_s *lpc17_40_alloc_xfrinfo(void);
 static void lpc17_40_free_xfrinfo(struct lpc17_40_xfrinfo_s *xfrinfo);
 
-/* ED list helper functions ****************************************************/
+/* ED list helper functions *************************************************/
 
 static inline int lpc17_40_addctrled(struct lpc17_40_usbhost_s *priv,
-                                  struct lpc17_40_ed_s *ed);
+                                     struct lpc17_40_ed_s *ed);
 static inline int lpc17_40_remctrled(struct lpc17_40_usbhost_s *priv,
-                                  struct lpc17_40_ed_s *ed);
+                                     struct lpc17_40_ed_s *ed);
 
 static inline int lpc17_40_addbulked(struct lpc17_40_usbhost_s *priv,
-                                  struct lpc17_40_ed_s *ed);
+                                     struct lpc17_40_ed_s *ed);
 static inline int lpc17_40_rembulked(struct lpc17_40_usbhost_s *priv,
-                                  struct lpc17_40_ed_s *ed);
+                                     struct lpc17_40_ed_s *ed);
 
 #if !defined(CONFIG_USBHOST_INT_DISABLE) || !defined(CONFIG_USBHOST_ISOC_DISABLE)
 static unsigned int lpc17_40_getinterval(uint8_t interval);
-static void lpc17_40_setinttab(uint32_t value, unsigned int interval, unsigned int offset);
+static void lpc17_40_setinttab(uint32_t value, unsigned int interval,
+                               unsigned int offset);
 #endif
 
 static inline int lpc17_40_addinted(struct lpc17_40_usbhost_s *priv,
-                                 const struct usbhost_epdesc_s *epdesc,
-                                 struct lpc17_40_ed_s *ed);
+                                    const struct usbhost_epdesc_s *epdesc,
+                                    struct lpc17_40_ed_s *ed);
 static inline int lpc17_40_reminted(struct lpc17_40_usbhost_s *priv,
-                                 struct lpc17_40_ed_s *ed);
+                                    struct lpc17_40_ed_s *ed);
 
 static inline int lpc17_40_addisoced(struct lpc17_40_usbhost_s *priv,
-                                  const struct usbhost_epdesc_s *epdesc,
-                                  struct lpc17_40_ed_s *ed);
+                                     const struct usbhost_epdesc_s *epdesc,
+                                     struct lpc17_40_ed_s *ed);
 static inline int lpc17_40_remisoced(struct lpc17_40_usbhost_s *priv,
-                                  struct lpc17_40_ed_s *ed);
+                                     struct lpc17_40_ed_s *ed);
 
-/* Descriptor helper functions *************************************************/
+/* Descriptor helper functions **********************************************/
 
 static int lpc17_40_enqueuetd(struct lpc17_40_usbhost_s *priv,
+                              struct lpc17_40_ed_s *ed, uint32_t dirpid,
+                              uint32_t toggle, volatile uint8_t *buffer,
+                              size_t buflen);
+static int lpc17_40_ctrltd(struct lpc17_40_usbhost_s *priv,
                            struct lpc17_40_ed_s *ed, uint32_t dirpid,
-                           uint32_t toggle, volatile uint8_t *buffer,
-                           size_t buflen);
-static int lpc17_40_ctrltd(struct lpc17_40_usbhost_s *priv, struct lpc17_40_ed_s *ed,
-                        uint32_t dirpid, uint8_t *buffer, size_t buflen);
+                           uint8_t *buffer, size_t buflen);
 
-/* Interrupt handling **********************************************************/
+/* Interrupt handling *******************************************************/
 
 static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg);
 
-/* USB host controller operations **********************************************/
+/* USB host controller operations *******************************************/
 
 static int lpc17_40_wait(struct usbhost_connection_s *conn,
-                      struct usbhost_hubport_s **hport);
+                         struct usbhost_hubport_s **hport);
 static int lpc17_40_rh_enumerate(struct usbhost_connection_s *conn,
-                              struct usbhost_hubport_s *hport);
+                                 struct usbhost_hubport_s *hport);
 static int lpc17_40_enumerate(struct usbhost_connection_s *conn,
-                           struct usbhost_hubport_s *hport);
+                              struct usbhost_hubport_s *hport);
 
 static int lpc17_40_ep0configure(struct usbhost_driver_s *drvr,
-                              usbhost_ep_t ep0, uint8_t funcaddr, uint8_t speed,
-                              uint16_t maxpacketsize);
+                                 usbhost_ep_t ep0, uint8_t funcaddr,
+                                 uint8_t speed, uint16_t maxpacketsize);
 static int lpc17_40_epalloc(struct usbhost_driver_s *drvr,
-                         const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
+                            const struct usbhost_epdesc_s *epdesc,
+                            usbhost_ep_t *ep);
 static int lpc17_40_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 static int lpc17_40_alloc(struct usbhost_driver_s *drvr,
-                       uint8_t **buffer, size_t *maxlen);
+                          uint8_t **buffer, size_t *maxlen);
 static int lpc17_40_free(struct usbhost_driver_s *drvr, uint8_t *buffer);
 static int lpc17_40_ioalloc(struct usbhost_driver_s *drvr,
-                         uint8_t **buffer, size_t buflen);
+                            uint8_t **buffer, size_t buflen);
 static int lpc17_40_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer);
 static int lpc17_40_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                        const struct usb_ctrlreq_s *req,
-                        uint8_t *buffer);
+                           const struct usb_ctrlreq_s *req,
+                           uint8_t *buffer);
 static int lpc17_40_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                         const struct usb_ctrlreq_s *req,
-                         const uint8_t *buffer);
+                            const struct usb_ctrlreq_s *req,
+                            const uint8_t *buffer);
 static int lpc17_40_transfer_common(struct lpc17_40_usbhost_s *priv,
-                                 struct lpc17_40_ed_s *ed, uint8_t *buffer,
-                                 size_t buflen);
+                                    struct lpc17_40_ed_s *ed,
+                                    uint8_t *buffer, size_t buflen);
 #if LPC17_40_IOBUFFERS > 0
 static int lpc17_40_dma_alloc(struct lpc17_40_usbhost_s *priv,
-                           struct lpc17_40_ed_s *ed, uint8_t *userbuffer,
-                           size_t buflen, uint8_t **alloc);
+                              struct lpc17_40_ed_s *ed, uint8_t *userbuffer,
+                              size_t buflen, uint8_t **alloc);
 static void lpc17_40_dma_free(struct lpc17_40_usbhost_s *priv,
-                           struct lpc17_40_ed_s *ed, uint8_t *userbuffer,
-                           size_t buflen, uint8_t *alloc);
+                              struct lpc17_40_ed_s *ed, uint8_t *userbuffer,
+                              size_t buflen, uint8_t *alloc);
 #endif
-static ssize_t lpc17_40_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                              uint8_t *buffer, size_t buflen);
+static ssize_t lpc17_40_transfer(struct usbhost_driver_s *drvr,
+                                 usbhost_ep_t ep, uint8_t *buffer,
+                                 size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
 static void lpc17_40_asynch_completion(struct lpc17_40_usbhost_s *priv,
-                                    struct lpc17_40_ed_s *ed);
-static int lpc17_40_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                        FAR uint8_t *buffer, size_t buflen,
-                        usbhost_asynch_t callback, FAR void *arg);
+                                       struct lpc17_40_ed_s *ed);
+static int lpc17_40_asynch(FAR struct usbhost_driver_s *drvr,
+                           usbhost_ep_t ep, FAR uint8_t *buffer,
+                           size_t buflen, usbhost_asynch_t callback,
+                           FAR void *arg);
 #endif
-static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr,
+                           usbhost_ep_t ep);
 #ifdef CONFIG_USBHOST_HUB
 static int lpc17_40_connect(FAR struct usbhost_driver_s *drvr,
-                         FAR struct usbhost_hubport_s *hport,
-                         bool connected);
+                            FAR struct usbhost_hubport_s *hport,
+                            bool connected);
 #endif
 static void lpc17_40_disconnect(struct usbhost_driver_s *drvr,
-                             struct usbhost_hubport_s *hport);
+                                struct usbhost_hubport_s *hport);
 
-/* Initialization **************************************************************/
+/* Initialization ***********************************************************/
 
 static inline void lpc17_40_ep0init(struct lpc17_40_usbhost_s *priv);
 
@@ -413,9 +425,9 @@ static inline void lpc17_40_ep0init(struct lpc17_40_usbhost_s *priv);
  * Private Data
  ****************************************************************************/
 
-/* In this driver implementation, support is provided for only a single a single
- * USB device.  All status information can be simply retained in a single global
- * instance.
+/* In this driver implementation, support is provided for only a single a
+ * single USB device.  All status information can be simply retained in a
+ * single global instance.
  */
 
 static struct lpc17_40_usbhost_s g_usbhost;
@@ -440,11 +452,8 @@ static struct lpc17_40_list_s *g_iofree; /* List of unused I/O buffers */
 /* Pool and freelist of transfer structures */
 
 static struct lpc17_40_list_s *g_xfrfree;
-static struct lpc17_40_xfrinfo_s g_xfrbuffers[CONFIG_LPC17_40_USBHOST_NPREALLOC];
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+static struct lpc17_40_xfrinfo_s
+  g_xfrbuffers[CONFIG_LPC17_40_USBHOST_NPREALLOC];
 
 /****************************************************************************
  * Private Functions
@@ -481,8 +490,8 @@ static void lpc17_40_checkreg(uint32_t addr, uint32_t val, bool iswrite)
   static uint32_t count = 0;
   static bool     prevwrite = false;
 
-  /* Is this the same value that we read from/wrote to the same register last time?
-   * Are we polling the register?  If so, suppress the output.
+  /* Is this the same value that we read from/wrote to the same register
+   * last time?  Are we polling the register?  If so, suppress the output.
    */
 
   if (addr == prevaddr && val == preval && prevwrite == iswrite)
@@ -581,9 +590,43 @@ static void lpc17_40_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static void lpc17_40_takesem(sem_t *sem)
+static int lpc17_40_takesem(sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
+}
+
+/****************************************************************************
+ * Name: lpc17_40_takesem_noncancelable
+ *
+ * Description:
+ *   This is just a wrapper to handle the annoying behavior of semaphore
+ *   waits that return due to the receipt of a signal.  This version also
+ *   ignores attempts to cancel the thread.
+ *
+ ****************************************************************************/
+
+static int lpc17_40_takesem_noncancelable(sem_t *sem)
+{
+  int result;
+  int ret = OK;
+
+  do
+    {
+      result = nxsem_wait_uninterruptible(sem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(result == OK || result == -ECANCELED);
+      if (ret == OK && result < 0)
+        {
+          ret = result;
+        }
+    }
+  while (result < 0);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -652,8 +695,8 @@ static struct lpc17_40_gtd_s *lpc17_40_tdalloc(void)
   struct lpc17_40_gtd_s *ret;
   irqstate_t flags;
 
-  /* Disable interrupts momentarily so that lpc17_40_tdfree is not called from the
-   * interrupt handler.
+  /* Disable interrupts momentarily so that lpc17_40_tdfree is not called
+   * from the interrupt handler.
    */
 
   flags = enter_critical_section();
@@ -674,7 +717,8 @@ static struct lpc17_40_gtd_s *lpc17_40_tdalloc(void)
  *   Return an transfer descriptor to the free list
  *
  * Assumptions:
- *   - Only called from the WDH interrupt handler (and during initialization).
+ *   - Only called from the WDH interrupt handler (and during
+ *     initialization).
  *   - Interrupts are disabled in any case.
  *
  ****************************************************************************/
@@ -713,6 +757,7 @@ static uint8_t *lpc17_40_tballoc(void)
     {
       g_tbfree = ((struct lpc17_40_list_s *)ret)->flink;
     }
+
   return ret;
 }
 
@@ -852,7 +897,7 @@ static void lpc17_40_free_xfrinfo(struct lpc17_40_xfrinfo_s *xfrinfo)
  ****************************************************************************/
 
 static inline int lpc17_40_addctrled(struct lpc17_40_usbhost_s *priv,
-                                  struct lpc17_40_ed_s *ed)
+                                     struct lpc17_40_ed_s *ed)
 {
   irqstate_t flags;
   uint32_t regval;
@@ -890,7 +935,7 @@ static inline int lpc17_40_addctrled(struct lpc17_40_usbhost_s *priv,
  ****************************************************************************/
 
 static inline int lpc17_40_remctrled(struct lpc17_40_usbhost_s *priv,
-                                  struct lpc17_40_ed_s *ed)
+                                     struct lpc17_40_ed_s *ed)
 {
   struct lpc17_40_ed_s *curr;
   struct lpc17_40_ed_s *prev;
@@ -907,10 +952,14 @@ static inline int lpc17_40_remctrled(struct lpc17_40_usbhost_s *priv,
 
   /* Find the ED in the control list. */
 
-  head = (struct lpc17_40_ed_s *)lpc17_40_getreg(LPC17_40_USBHOST_CTRLHEADED);
+  head = (struct lpc17_40_ed_s *)
+    lpc17_40_getreg(LPC17_40_USBHOST_CTRLHEADED);
+
   for (prev = NULL, curr = head;
        curr && curr != ed;
-       prev = curr, curr = (struct lpc17_40_ed_s *)curr->hw.nexted);
+       prev = curr, curr = (struct lpc17_40_ed_s *)curr->hw.nexted)
+    {
+    }
 
   /* It would be a bug if we do not find the ED in the control list. */
 
@@ -972,7 +1021,7 @@ static inline int lpc17_40_remctrled(struct lpc17_40_usbhost_s *priv,
  ****************************************************************************/
 
 static inline int lpc17_40_addbulked(struct lpc17_40_usbhost_s *priv,
-                                  struct lpc17_40_ed_s *ed)
+                                     struct lpc17_40_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_BULK_DISABLE
   irqstate_t flags;
@@ -1014,7 +1063,7 @@ static inline int lpc17_40_addbulked(struct lpc17_40_usbhost_s *priv,
  ****************************************************************************/
 
 static inline int lpc17_40_rembulked(struct lpc17_40_usbhost_s *priv,
-                                  struct lpc17_40_ed_s *ed)
+                                     struct lpc17_40_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_BULK_DISABLE
   struct lpc17_40_ed_s *curr;
@@ -1032,10 +1081,14 @@ static inline int lpc17_40_rembulked(struct lpc17_40_usbhost_s *priv,
 
   /* Find the ED in the bulk list. */
 
-  head = (struct lpc17_40_ed_s *)lpc17_40_getreg(LPC17_40_USBHOST_BULKHEADED);
+  head = (struct lpc17_40_ed_s *)
+    lpc17_40_getreg(LPC17_40_USBHOST_BULKHEADED);
+
   for (prev = NULL, curr = head;
        curr && curr != ed;
-       prev = curr, curr = (struct lpc17_40_ed_s *)curr->hw.nexted);
+       prev = curr, curr = (struct lpc17_40_ed_s *)curr->hw.nexted)
+    {
+    }
 
   /* It would be a bug if we do not find the ED in the bulk list. */
 
@@ -1096,9 +1149,10 @@ static inline int lpc17_40_rembulked(struct lpc17_40_usbhost_s *priv,
 #if !defined(CONFIG_USBHOST_INT_DISABLE) || !defined(CONFIG_USBHOST_ISOC_DISABLE)
 static unsigned int lpc17_40_getinterval(uint8_t interval)
 {
-  /* The bInterval field of the endpoint descriptor contains the polling interval
-   * for interrupt and isochronous endpoints. For other types of endpoint, this
-   * value should be ignored. bInterval is provided in units of 1MS frames.
+  /* The bInterval field of the endpoint descriptor contains the polling
+   * interval for interrupt and isochronous endpoints. For other types of
+   * endpoint, this value should be ignored. bInterval is provided in units
+   * of 1MS frames.
    */
 
   if (interval < 3)
@@ -1128,13 +1182,14 @@ static unsigned int lpc17_40_getinterval(uint8_t interval)
  * Name: lpc17_40_setinttab
  *
  * Description:
- *   Set the interrupt table to the selected value using the provided interval
- *   and offset.
+ *   Set the interrupt table to the selected value using the provided
+ *   interval and offset.
  *
  ****************************************************************************/
 
 #if !defined(CONFIG_USBHOST_INT_DISABLE) || !defined(CONFIG_USBHOST_ISOC_DISABLE)
-static void lpc17_40_setinttab(uint32_t value, unsigned int interval, unsigned int offset)
+static void lpc17_40_setinttab(uint32_t value, unsigned int interval,
+                               unsigned int offset)
 {
   unsigned int i;
   for (i = offset; i < HCCA_INTTBL_WSIZE; i += interval)
@@ -1150,23 +1205,24 @@ static void lpc17_40_setinttab(uint32_t value, unsigned int interval, unsigned i
  * Description:
  *   Helper function to add an ED to the HCCA interrupt table.
  *
- *   To avoid reshuffling the table so much and to keep life simple in general,
- *    the following rules are applied:
+ *   To avoid reshuffling the table so much and to keep life simple in
+ *   general, the following rules are applied:
  *
  *     1. IN EDs get the even entries, OUT EDs get the odd entries.
- *     2. Add IN/OUT EDs are scheduled together at the minimum interval of all
- *        IN/OUT EDs.
+ *     2. Add IN/OUT EDs are scheduled together at the minimum interval of
+ *        all IN/OUT EDs.
  *
  *   This has the following consequences:
  *
  *     1. The minimum support polling rate is 2MS, and
- *     2. Some devices may get polled at a much higher rate than they request.
+ *     2. Some devices may get polled at a much higher rate than they
+ *        request.
  *
  ****************************************************************************/
 
 static inline int lpc17_40_addinted(struct lpc17_40_usbhost_s *priv,
-                                 const struct usbhost_epdesc_s *epdesc,
-                                 struct lpc17_40_ed_s *ed)
+                                    const struct usbhost_epdesc_s *epdesc,
+                                    struct lpc17_40_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_INT_DISABLE
   unsigned int interval;
@@ -1174,8 +1230,8 @@ static inline int lpc17_40_addinted(struct lpc17_40_usbhost_s *priv,
   uint32_t head;
   uint32_t regval;
 
-  /* Disable periodic list processing.  Does this take effect immediately?  Or
-   * at the next SOF... need to check.
+  /* Disable periodic list processing.  Does this take effect immediately?
+   * Or at the next SOF... need to check.
    */
 
   regval  = lpc17_40_getreg(LPC17_40_USBHOST_CTRL);
@@ -1221,6 +1277,7 @@ static inline int lpc17_40_addinted(struct lpc17_40_usbhost_s *priv,
           interval = priv->outinterval;
         }
     }
+
   uinfo("min interval: %d offset: %d\n", interval, offset);
 
   /* Get the head of the first of the duplicated entries.  The first offset
@@ -1259,22 +1316,23 @@ static inline int lpc17_40_addinted(struct lpc17_40_usbhost_s *priv,
  * Description:
  *   Helper function to remove an ED from the HCCA interrupt table.
  *
- *   To avoid reshuffling the table so much and to keep life simple in general,
- *    the following rules are applied:
+ *   To avoid reshuffling the table so much and to keep life simple in
+ *   general, the following rules are applied:
  *
  *     1. IN EDs get the even entries, OUT EDs get the odd entries.
- *     2. Add IN/OUT EDs are scheduled together at the minimum interval of all
- *        IN/OUT EDs.
+ *     2. Add IN/OUT EDs are scheduled together at the minimum interval of
+ *        all IN/OUT EDs.
  *
  *   This has the following consequences:
  *
  *     1. The minimum support polling rate is 2MS, and
- *     2. Some devices may get polled at a much higher rate than they request.
+ *     2. Some devices may get polled at a much higher rate than they
+ *        request.
  *
  ****************************************************************************/
 
 static inline int lpc17_40_reminted(struct lpc17_40_usbhost_s *priv,
-                                 struct lpc17_40_ed_s *ed)
+                                    struct lpc17_40_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_INT_DISABLE
   struct lpc17_40_ed_s *head;
@@ -1284,8 +1342,8 @@ static inline int lpc17_40_reminted(struct lpc17_40_usbhost_s *priv,
   unsigned int       offset;
   uint32_t           regval;
 
-  /* Disable periodic list processing.  Does this take effect immediately?  Or
-   * at the next SOF... need to check.
+  /* Disable periodic list processing.  Does this take effect immediately?
+   * Or at the next SOF... need to check.
    */
 
   regval  = lpc17_40_getreg(LPC17_40_USBHOST_CTRL);
@@ -1372,8 +1430,8 @@ static inline int lpc17_40_reminted(struct lpc17_40_usbhost_s *priv,
           priv->outinterval = interval;
         }
 
-      /* Set the head ED in all of the appropriate entries of the HCCA interrupt
-       * table (head might be NULL).
+      /* Set the head ED in all of the appropriate entries of the HCCA
+       * interrupt table (head might be NULL).
        */
 
       lpc17_40_setinttab((uint32_t)head, interval, offset);
@@ -1403,8 +1461,8 @@ static inline int lpc17_40_reminted(struct lpc17_40_usbhost_s *priv,
  ****************************************************************************/
 
 static inline int lpc17_40_addisoced(struct lpc17_40_usbhost_s *priv,
-                                  const struct usbhost_epdesc_s *epdesc,
-                                  struct lpc17_40_ed_s *ed)
+                                     const struct usbhost_epdesc_s *epdesc,
+                                     struct lpc17_40_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
 #  warning "Isochronous endpoints not yet supported"
@@ -1421,7 +1479,7 @@ static inline int lpc17_40_addisoced(struct lpc17_40_usbhost_s *priv,
  ****************************************************************************/
 
 static inline int lpc17_40_remisoced(struct lpc17_40_usbhost_s *priv,
-                                  struct lpc17_40_ed_s *ed)
+                                     struct lpc17_40_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
 #  warning "Isochronous endpoints not yet supported"
@@ -1439,8 +1497,9 @@ static inline int lpc17_40_remisoced(struct lpc17_40_usbhost_s *priv,
  ****************************************************************************/
 
 static int lpc17_40_enqueuetd(struct lpc17_40_usbhost_s *priv,
-                           struct lpc17_40_ed_s *ed, uint32_t dirpid,
-                           uint32_t toggle, volatile uint8_t *buffer, size_t buflen)
+                              struct lpc17_40_ed_s *ed, uint32_t dirpid,
+                              uint32_t toggle, volatile uint8_t *buffer,
+                              size_t buflen)
 {
   struct lpc17_40_gtd_s *td;
   int ret = -ENOMEM;
@@ -1452,7 +1511,8 @@ static int lpc17_40_enqueuetd(struct lpc17_40_usbhost_s *priv,
     {
       /* Initialize the allocated TD and link it before the common tail TD. */
 
-      td->hw.ctrl         = (GTD_STATUS_R | dirpid | TD_DELAY(0) | toggle | GTD_STATUS_CC_MASK);
+      td->hw.ctrl         = (GTD_STATUS_R | dirpid | TD_DELAY(0) | toggle |
+                             GTD_STATUS_CC_MASK);
       TDTAIL->hw.ctrl     = 0;
       td->hw.cbp          = (uint32_t)buffer;
       TDTAIL->hw.cbp      = 0;
@@ -1480,14 +1540,16 @@ static int lpc17_40_enqueuetd(struct lpc17_40_usbhost_s *priv,
  * Name: lpc17_40_wdhwait
  *
  * Description:
- *   Set the request for the Writeback Done Head event well BEFORE enabling the
- *   transfer (as soon as we are absolutely committed to the to avoid transfer).
- *   We do this to minimize race conditions.  This logic would have to be expanded
- *   if we want to have more than one packet in flight at a time!
+ *   Set the request for the Writeback Done Head event well BEFORE enabling
+ *   the transfer (as soon as we are absolutely committed to the to avoid
+ *   transfer).  We do this to minimize race conditions.  This logic would
+ *   have to be expanded if we want to have more than one packet in flight
+ *   at a time!
  *
  ****************************************************************************/
 
-static int lpc17_40_wdhwait(struct lpc17_40_usbhost_s *priv, struct lpc17_40_ed_s *ed)
+static int lpc17_40_wdhwait(struct lpc17_40_usbhost_s *priv,
+                            struct lpc17_40_ed_s *ed)
 {
   struct lpc17_40_xfrinfo_s *xfrinfo;
   irqstate_t flags = enter_critical_section();
@@ -1500,8 +1562,9 @@ static int lpc17_40_wdhwait(struct lpc17_40_usbhost_s *priv, struct lpc17_40_ed_
 
   if (priv->connected)
     {
-      /* Yes.. then set wdhwait to indicate that we expect to be informed when
-       * either (1) the device is disconnected, or (2) the transfer completed.
+      /* Yes.. then set wdhwait to indicate that we expect to be informed
+       * when either (1) the device is disconnected, or (2) the transfer
+       * completed.
        */
 
       xfrinfo->wdhwait = true;
@@ -1517,17 +1580,18 @@ static int lpc17_40_wdhwait(struct lpc17_40_usbhost_s *priv, struct lpc17_40_ed_
  *
  * Description:
  *   Process a IN or OUT request on the control endpoint.  This function
- *   will enqueue the request and wait for it to complete.  Only one transfer
- *   may be queued; Neither these methods nor the transfer() method can be
- *   called again until the control transfer functions returns.
+ *   will enqueue the request and wait for it to complete.  Only one
+ *   transfer may be queued; Neither these methods nor the transfer() method
+ *   can be called again until the control transfer functions returns.
  *
  *   These are blocking methods; these functions will not return until the
  *   control transfer has completed.
  *
  ****************************************************************************/
 
-static int lpc17_40_ctrltd(struct lpc17_40_usbhost_s *priv, struct lpc17_40_ed_s *ed,
-                        uint32_t dirpid, uint8_t *buffer, size_t buflen)
+static int lpc17_40_ctrltd(struct lpc17_40_usbhost_s *priv,
+                           struct lpc17_40_ed_s *ed, uint32_t dirpid,
+                           uint8_t *buffer, size_t buflen)
 {
   struct lpc17_40_xfrinfo_s *xfrinfo;
   uint32_t toggle;
@@ -1555,8 +1619,8 @@ static int lpc17_40_ctrltd(struct lpc17_40_usbhost_s *priv, struct lpc17_40_ed_s
 
   ed->xfrinfo = xfrinfo;
 
-  /* Set the request for the Writeback Done Head event well BEFORE enabling the
-   * transfer.
+  /* Set the request for the Writeback Done Head event well BEFORE enabling
+   * the transfer.
    */
 
   ret = lpc17_40_wdhwait(priv, ed);
@@ -1583,8 +1647,8 @@ static int lpc17_40_ctrltd(struct lpc17_40_usbhost_s *priv, struct lpc17_40_ed_s
   ret = lpc17_40_enqueuetd(priv, ed, dirpid, toggle, buffer, buflen);
   if (ret == OK)
     {
-      /* Set ControlListFilled.  This bit is used to indicate whether there are
-       * TDs on the Control list.
+      /* Set ControlListFilled.  This bit is used to indicate whether there
+       * are TDs on the Control list.
        */
 
       regval = lpc17_40_getreg(LPC17_40_USBHOST_CMDST);
@@ -1593,11 +1657,15 @@ static int lpc17_40_ctrltd(struct lpc17_40_usbhost_s *priv, struct lpc17_40_ed_s
 
       /* Wait for the Writeback Done Head interrupt */
 
-      lpc17_40_takesem(&ed->wdhsem);
+      ret = lpc17_40_takesem(&ed->wdhsem);
+      if (ret < 0)
+        {
+          /* Task has been canceled */
+        }
 
       /* Check the TD completion status bits */
 
-      if (xfrinfo->tdstatus == TD_CC_NOERROR)
+      else if (xfrinfo->tdstatus == TD_CC_NOERROR)
         {
           ret = OK;
         }
@@ -1690,7 +1758,8 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
                         }
                       else
                         {
-                          uwarn("WARNING: Spurious status change (connected)\n");
+                          uwarn("WARNING: Spurious status change "
+                                "(connected)\n");
                         }
 
                       /* The LSDA (Low speed device attached) bit is valid
@@ -1746,13 +1815,15 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
                     }
                   else
                     {
-                       uwarn("WARNING: Spurious status change (disconnected)\n");
+                       uwarn("WARNING: Spurious status change "
+                             "(disconnected)\n");
                     }
                 }
 
               /* Clear the status change interrupt */
 
-              lpc17_40_putreg(OHCI_RHPORTST_CSC, LPC17_40_USBHOST_RHPORTST1);
+              lpc17_40_putreg(OHCI_RHPORTST_CSC,
+                              LPC17_40_USBHOST_RHPORTST1);
             }
 
           /* Check for port reset status change */
@@ -1761,7 +1832,8 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
             {
               /* Release the RH port from reset */
 
-              lpc17_40_putreg(OHCI_RHPORTST_PRSC, LPC17_40_USBHOST_RHPORTST1);
+              lpc17_40_putreg(OHCI_RHPORTST_PRSC,
+                              LPC17_40_USBHOST_RHPORTST1);
             }
         }
 
@@ -1772,17 +1844,18 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
           struct lpc17_40_gtd_s *td;
           struct lpc17_40_gtd_s *next;
 
-          /* The host controller just wrote the list of finished TDs into the HCCA
-           * done head.  This may include multiple packets that were transferred
-           * in the preceding frame.
+          /* The host controller just wrote the list of finished TDs into
+           * the HCCA done head.  This may include multiple packets that
+           * were transferred in the preceding frame.
            *
-           * Remove the TD(s) from the Writeback Done Head in the HCCA and return
-           * them to the free list.  Note that this is safe because the hardware
-           * will not modify the writeback done head again until the WDH bit is
-           * cleared in the interrupt status register.
+           * Remove the TD(s) from the Writeback Done Head in the HCCA and
+           * return them to the free list.  Note that this is safe because
+           * the hardware will not modify the writeback done head again
+           * until the WDH bit is cleared in the interrupt status register.
            */
 
-          td = (struct lpc17_40_gtd_s *)(HCCA->donehead & HCCA_DONEHEAD_MASK);
+          td = (struct lpc17_40_gtd_s *)
+            (HCCA->donehead & HCCA_DONEHEAD_MASK);
           HCCA->donehead = 0;
           next = NULL;
 
@@ -1797,7 +1870,9 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
                */
 
               if ((uintptr_t)td < LPC17_40_TDFREE_BASE ||
-                  (uintptr_t)td >= (LPC17_40_TDFREE_BASE + LPC17_40_TD_SIZE*CONFIG_LP17_USBHOST_NTDS))
+                  (uintptr_t)td >= (LPC17_40_TDFREE_BASE +
+                                    LPC17_40_TD_SIZE *
+                                    CONFIG_LP17_USBHOST_NTDS))
                 {
                   break;
                 }
@@ -1807,26 +1882,29 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
               ed      = td->ed;
               DEBUGASSERT(ed != NULL);
 
-              /* If there is a transfer in progress, then the xfrinfo pointer will be
-               * non-NULL.  But it appears that a NULL pointer may be received with a
-               * spurious interrupt such as may occur after a transfer is cancelled.
+              /* If there is a transfer in progress, then the xfrinfo
+               * pointer will be non-NULL.  But it appears that a NULL
+               * pointer may be received with a spurious interrupt such as
+               * may occur after a transfer is cancelled.
                */
 
               xfrinfo = ed->xfrinfo;
               if (xfrinfo)
                 {
-                  /* Save the condition code from the (single) TD status/control
-                   * word.
+                  /* Save the condition code from the (single) TD
+                   * status/control word.
                    */
 
-                  xfrinfo->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
+                  xfrinfo->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >>
+                                       GTD_STATUS_CC_SHIFT;
 
 #ifdef CONFIG_DEBUG_USB
                   if (xfrinfo->tdstatus != TD_CC_NOERROR)
                     {
                       /* The transfer failed for some reason... dump some diagnostic info. */
 
-                      uerr("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
+                      uerr("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d "
+                           "RHPORTST1:%08x\n",
                            ed->xfrtype, td->hw.ctrl, xfrinfo->tdstatus,
                            lpc17_40_getreg(LPC17_40_USBHOST_RHPORTST1));
                     }
@@ -1903,20 +1981,16 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * USB Host Controller Operations
- ****************************************************************************/
-
-/****************************************************************************
  * Name: lpc17_40_wait
  *
  * Description:
  *   Wait for a device to be connected or disconnected to/from a hub port.
  *
  * Input Parameters:
- *   conn - The USB host connection instance obtained as a parameter from the call to
- *      the USB driver initialization logic.
- *   hport - The location to return the hub port descriptor that detected the
- *      connection related event.
+ *   conn - The USB host connection instance obtained as a parameter from
+ *     the call to the USB driver initialization logic.
+ *   hport - The location to return the hub port descriptor that detected
+ *     the connection related event.
  *
  * Returned Value:
  *   Zero (OK) is returned on success when a device is connected or
@@ -1932,11 +2006,12 @@ static int lpc17_40_usbinterrupt(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 static int lpc17_40_wait(struct usbhost_connection_s *conn,
-                      struct usbhost_hubport_s **hport)
+                         struct usbhost_hubport_s **hport)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)&g_usbhost;
   struct usbhost_hubport_s *connport;
   irqstate_t flags;
+  int ret;
 
   flags = enter_critical_section();
   for (; ; )
@@ -1983,7 +2058,8 @@ static int lpc17_40_wait(struct usbhost_connection_s *conn,
           *hport = connport;
           leave_critical_section(flags);
 
-          uinfo("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
+          uinfo("Hub port Connected: %s\n",
+                connport->connected ? "YES" : "NO");
           return OK;
         }
 #endif
@@ -1991,7 +2067,11 @@ static int lpc17_40_wait(struct usbhost_connection_s *conn,
       /* Wait for the next connection event */
 
       priv->pscwait = true;
-      lpc17_40_takesem(&priv->pscsem);
+      ret = lpc17_40_takesem(&priv->pscsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 }
 
@@ -2015,8 +2095,8 @@ static int lpc17_40_wait(struct usbhost_connection_s *conn,
  *      device.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
@@ -2024,7 +2104,7 @@ static int lpc17_40_wait(struct usbhost_connection_s *conn,
  ****************************************************************************/
 
 static int lpc17_40_rh_enumerate(struct usbhost_connection_s *conn,
-                              struct usbhost_hubport_s *hport)
+                                 struct usbhost_hubport_s *hport)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)&g_usbhost;
   DEBUGASSERT(conn != NULL && hport != NULL && hport->port == 0);
@@ -2043,20 +2123,25 @@ static int lpc17_40_rh_enumerate(struct usbhost_connection_s *conn,
 
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
-  nxsig_usleep(100*1000);
+  nxsig_usleep(100 * 1000);
 
-  /* Put RH port 1 in reset (the LPC176x supports only a single downstream port) */
+  /* Put RH port 1 in reset (the LPC176x supports only a single downstream
+   * port).
+   */
 
   lpc17_40_putreg(OHCI_RHPORTST_PRS, LPC17_40_USBHOST_RHPORTST1);
 
   /* Wait for the port reset to complete */
 
-  while ((lpc17_40_getreg(LPC17_40_USBHOST_RHPORTST1) & OHCI_RHPORTST_PRS) != 0);
+  while ((lpc17_40_getreg(LPC17_40_USBHOST_RHPORTST1) & OHCI_RHPORTST_PRS)
+         != 0)
+    {
+    }
 
   /* Release RH port 1 from reset and wait a bit */
 
   lpc17_40_putreg(OHCI_RHPORTST_PRSC, LPC17_40_USBHOST_RHPORTST1);
-  nxsig_usleep(200*1000);
+  nxsig_usleep(200 * 1000);
   return OK;
 }
 
@@ -2095,7 +2180,7 @@ static int lpc17_40_enumerate(FAR struct usbhost_connection_s *conn,
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_ep0configure
  *
  * Description:
@@ -2104,37 +2189,45 @@ static int lpc17_40_enumerate(FAR struct usbhost_connection_s *conn,
  *   an external implementation of the enumeration logic.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   ep0 - The (opaque) EP0 endpoint instance
- *   funcaddr - The USB address of the function containing the endpoint that EP0
- *     controls
+ *   funcaddr - The USB address of the function containing the endpoint that
+ *     EP0 controls.  A funcaddr of zero will be received if no address is
+ *     yet assigned to the device.
  *   speed - The speed of the port USB_SPEED_LOW, _FULL, or _HIGH
  *   mps (maxpacketsize) - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static int lpc17_40_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                              uint8_t funcaddr, uint8_t speed, uint16_t maxpacketsize)
+static int lpc17_40_ep0configure(struct usbhost_driver_s *drvr,
+                                 usbhost_ep_t ep0, uint8_t funcaddr,
+                                 uint8_t speed, uint16_t maxpacketsize)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;
   struct lpc17_40_ed_s      *ed;
   uint32_t hwctrl;
+  int ret;
 
-  DEBUGASSERT(drvr != NULL && ep0 != NULL && funcaddr < 128 && maxpacketsize < 2048);
+  DEBUGASSERT(drvr != NULL && ep0 != NULL && funcaddr < 128 &&
+              maxpacketsize < 2048);
   ed = (struct lpc17_40_ed_s *)ep0;
 
   /* We must have exclusive access to EP0 and the control list */
 
-  lpc17_40_takesem(&priv->exclsem);
+  ret = lpc17_40_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Set the EP0 ED control word */
 
@@ -2155,47 +2248,54 @@ static int lpc17_40_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_epalloc
  *
  * Description:
  *   Allocate and configure one endpoint.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   epdesc - Describes the endpoint to be allocated.
  *   ep - A memory location provided by the caller in which to receive the
  *      allocated endpoint descriptor.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_40_epalloc(struct usbhost_driver_s *drvr,
-                         const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
+                            const struct usbhost_epdesc_s *epdesc,
+                            usbhost_ep_t *ep)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;
   struct usbhost_hubport_s *hport;
   struct lpc17_40_ed_s *ed;
-  int ret  = -ENOMEM;
+  int ret;
 
-  /* Sanity check.  NOTE that this method should only be called if a device is
-   * connected (because we need a valid low speed indication).
+  /* Sanity check.  NOTE that this method should only be called if a device
+   * is connected (because we need a valid low speed indication).
    */
 
   DEBUGASSERT(priv && epdesc && ep && priv->connected);
 
-  /* We must have exclusive access to the ED pool, the bulk list, the periodic list
-   * and the interrupt table.
+  /* We must have exclusive access to the ED pool, the bulk list, the
+   * periodic list and the interrupt table.
    */
 
-  lpc17_40_takesem(&priv->exclsem);
+  ret = lpc17_40_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -ENOMEM;
 
   /* Take the next ED from the beginning of the free list */
 
@@ -2251,6 +2351,7 @@ static int lpc17_40_epalloc(struct usbhost_driver_s *drvr,
           ed->hw.ctrl |= ED_CONTROL_F;
         }
 #endif
+
       uinfo("EP%d CTRL:%08x\n", epdesc->addr, ed->hw.ctrl);
 
       /* Initialize the semaphore that is used to wait for the endpoint
@@ -2297,7 +2398,8 @@ static int lpc17_40_epalloc(struct usbhost_driver_s *drvr,
         {
           /* No.. destroy it and report the error */
 
-          uerr("ERROR: Failed to queue ED for transfer type: %d\n", ed->xfrtype);
+          uerr("ERROR: Failed to queue ED for transfer type: %d\n",
+               ed->xfrtype);
           nxsem_destroy(&ed->wdhsem);
           lpc17_40_edfree(ed);
         }
@@ -2313,25 +2415,25 @@ static int lpc17_40_epalloc(struct usbhost_driver_s *drvr,
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_epfree
  *
  * Description:
  *   Free and endpoint previously allocated by DRVR_EPALLOC.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   ep - The endpint to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_40_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
@@ -2341,13 +2443,18 @@ static int lpc17_40_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* There should not be any pending, real TDs linked to this ED */
 
-  DEBUGASSERT(ed && (ed->hw.headp & ED_HEADP_ADDR_MASK) == LPC17_40_TDTAIL_ADDR);
+  DEBUGASSERT(ed != NULL &&
+              (ed->hw.headp & ED_HEADP_ADDR_MASK) == LPC17_40_TDTAIL_ADDR);
 
-  /* We must have exclusive access to the ED pool, the bulk list, the periodic list
-   * and the interrupt table.
+  /* We must have exclusive access to the ED pool, the bulk list, the
+   * periodic list and the interrupt table.
    */
 
-  lpc17_40_takesem(&priv->exclsem);
+  ret = lpc17_40_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Remove the ED to the correct list depending on the transfer type */
 
@@ -2389,27 +2496,28 @@ static int lpc17_40_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  * Name: lpc17_40_alloc
  *
  * Description:
- *   Some hardware supports special memory in which request and descriptor data can
- *   be accessed more efficiently.  This method provides a mechanism to allocate
- *   the request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kmm_malloc.
+ *   Some hardware supports special memory in which request and descriptor
+ *   data can be accessed more efficiently.  This method provides a
+ *   mechanism to allocate the request/descriptor memory.  If the underlying
+ *   hardware does not support such "special" memory, this functions may
+ *   simply map to kmm_malloc.
  *
- *   This interface was optimized under a particular assumption.  It was assumed
- *   that the driver maintains a pool of small, pre-allocated buffers for descriptor
- *   traffic.  NOTE that size is not an input, but an output:  The size of the
- *   pre-allocated buffer is returned.
+ *   This interface was optimized under a particular assumption.  It was
+ *   assumed that the driver maintains a pool of small, pre-allocated
+ *   buffers for descriptor traffic.  NOTE that size is not an input, but
+ *   an output:  The size of the pre-allocated buffer is returned.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   buffer - The address of a memory location provided by the caller in which to
- *     return the allocated buffer memory address.
- *   maxlen - The address of a memory location provided by the caller in which to
- *     return the maximum size of the allocated buffer memory.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   buffer - The address of a memory location provided by the caller in
+ *     which to return the allocated buffer memory address.
+ *   maxlen - The address of a memory location provided by the caller in
+ *     which to return the maximum size of the allocated buffer memory.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -2418,15 +2526,22 @@ static int lpc17_40_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  ****************************************************************************/
 
 static int lpc17_40_alloc(struct usbhost_driver_s *drvr,
-                       uint8_t **buffer, size_t *maxlen)
+                          uint8_t **buffer, size_t *maxlen)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;
+  int ret;
+
   DEBUGASSERT(priv && buffer && maxlen);
-  int ret = -ENOMEM;
 
   /* We must have exclusive access to the transfer buffer pool */
 
-  lpc17_40_takesem(&priv->exclsem);
+  ret = lpc17_40_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -ENOMEM;
 
   *buffer = lpc17_40_tballoc();
   if (*buffer)
@@ -2443,19 +2558,20 @@ static int lpc17_40_alloc(struct usbhost_driver_s *drvr,
  * Name: lpc17_40_free
  *
  * Description:
- *   Some hardware supports special memory in which request and descriptor data can
- *   be accessed more efficiently.  This method provides a mechanism to free that
- *   request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kmm_free().
+ *   Some hardware supports special memory in which request and descriptor
+ *   data can be accessed more efficiently.  This method provides a
+ *   mechanism to free that request/descriptor memory.  If the underlying
+ *   hardware does not support such "special" memory, this functions may
+ *   simply map to kmm_free().
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   buffer - The address of the allocated buffer memory to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Never called from an interrupt handler.
@@ -2465,45 +2581,49 @@ static int lpc17_40_alloc(struct usbhost_driver_s *drvr,
 static int lpc17_40_free(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;
+  int ret;
+
   DEBUGASSERT(buffer);
 
   /* We must have exclusive access to the transfer buffer pool */
 
-  lpc17_40_takesem(&priv->exclsem);
+  ret = lpc17_40_takesem_noncancelable(&priv->exclsem);
   lpc17_40_tbfree(buffer);
   lpc17_40_givesem(&priv->exclsem);
-  return OK;
+  return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_ioalloc
  *
  * Description:
  *   Some hardware supports special memory in which larger IO buffers can
- *   be accessed more efficiently.  This method provides a mechanism to allocate
- *   the request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kmm_malloc.
+ *   be accessed more efficiently.  This method provides a mechanism to
+ *   allocate the request/descriptor memory.  If the underlying hardware
+ *   does not support such "special" memory, this functions may simply map
+ *   to kmm_malloc.
  *
- *   This interface differs from DRVR_ALLOC in that the buffers are variable-sized.
+ *   This interface differs from DRVR_ALLOC in that the buffers are
+ *   variable-sized.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   buffer - The address of a memory location provided by the caller in which to
- *     return the allocated buffer memory address.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   buffer - The address of a memory location provided by the caller in
+ *     which to return the allocated buffer memory address.
  *   buflen - The size of the buffer required.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_40_ioalloc(struct usbhost_driver_s *drvr,
-                         uint8_t **buffer, size_t buflen)
+                            uint8_t **buffer, size_t buflen)
 {
   DEBUGASSERT(drvr && buffer);
 
@@ -2524,28 +2644,28 @@ static int lpc17_40_ioalloc(struct usbhost_driver_s *drvr,
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_iofree
  *
  * Description:
- *   Some hardware supports special memory in which IO data can  be accessed more
- *   efficiently.  This method provides a mechanism to free that IO buffer
- *   memory.  If the underlying hardware does not support such "special" memory,
- *   this functions may simply map to kmm_free().
+ *   Some hardware supports special memory in which IO data can  be accessed
+ *   more efficiently.  This method provides a mechanism to free that IO
+ *   buffer memory.  If the underlying hardware does not support such
+ *   "special" memory, this functions may simply map to kumm_free().
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   buffer - The address of the allocated buffer memory to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int lpc17_40_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
@@ -2565,29 +2685,31 @@ static int lpc17_40_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer)
  * Description:
  * Description:
  *   Process a IN or OUT request on the control endpoint.  These methods
- *   will enqueue the request and wait for it to complete.  Only one transfer may be
- *   queued; Neither these methods nor the transfer() method can be called again
- *   until the control transfer functions returns.
+ *   will enqueue the request and wait for it to complete.  Only one
+ *   transfer may be queued; Neither these methods nor the transfer()
+ *   method can be called again until the control transfer functions
+ *   returns.
  *
  *   These are blocking methods; these functions will not return until the
  *   control transfer has completed.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   ep0 - The control endpoint to send/receive the control request.
- *   req - Describes the request to be sent.  This request must lie in memory
- *      created by DRVR_ALLOC.
+ *   req - Describes the request to be sent.  This request must lie in
+ *     memory created by DRVR_ALLOC.
  *   buffer - A buffer used for sending the request and for returning any
  *     responses.  This buffer must be large enough to hold the length value
- *     in the request description. buffer must have been allocated using DRVR_ALLOC.
+ *     in the request description. buffer must have been allocated using
+ *     DRVR_ALLOC.
  *
- *   NOTE: On an IN transaction, req and buffer may refer to the same allocated
- *   memory.
+ *   NOTE: On an IN transaction, req and buffer may refer to the same
+ *   allocated memory.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -2596,8 +2718,8 @@ static int lpc17_40_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer)
  ****************************************************************************/
 
 static int lpc17_40_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                        const struct usb_ctrlreq_s *req,
-                        uint8_t *buffer)
+                           const struct usb_ctrlreq_s *req,
+                           uint8_t *buffer)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;
   struct lpc17_40_ed_s *ed = (struct lpc17_40_ed_s *)ep0;
@@ -2612,10 +2734,15 @@ static int lpc17_40_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to EP0 and the control list */
 
-  lpc17_40_takesem(&priv->exclsem);
+  ret = lpc17_40_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   len = lpc17_40_getle16(req->len);
-  ret = lpc17_40_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t *)req, USB_SIZEOF_CTRLREQ);
+  ret = lpc17_40_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t *)req,
+                        USB_SIZEOF_CTRLREQ);
   if (ret == OK)
     {
       if (len)
@@ -2634,13 +2761,13 @@ static int lpc17_40_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 }
 
 static int lpc17_40_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                         const struct usb_ctrlreq_s *req,
-                         const uint8_t *buffer)
+                            const struct usb_ctrlreq_s *req,
+                            const uint8_t *buffer)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;
   struct lpc17_40_ed_s *ed = (struct lpc17_40_ed_s *)ep0;
   uint16_t len;
-  int  ret;
+  int ret;
 
   DEBUGASSERT(priv != NULL && ed != NULL && req != NULL);
 
@@ -2650,15 +2777,21 @@ static int lpc17_40_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to EP0 and the control list */
 
-  lpc17_40_takesem(&priv->exclsem);
+  ret = lpc17_40_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   len = lpc17_40_getle16(req->len);
-  ret = lpc17_40_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t *)req, USB_SIZEOF_CTRLREQ);
+  ret = lpc17_40_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t *)req,
+                        USB_SIZEOF_CTRLREQ);
   if (ret == OK)
     {
       if (len)
         {
-          ret = lpc17_40_ctrltd(priv, ed, GTD_STATUS_DP_OUT, (uint8_t *)buffer, len);
+          ret = lpc17_40_ctrltd(priv, ed, GTD_STATUS_DP_OUT,
+                                (uint8_t *)buffer, len);
         }
 
       if (ret == OK)
@@ -2680,15 +2813,16 @@ static int lpc17_40_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *
  * Input Parameters:
  *   priv - Internal driver state structure.
- *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
- *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   ed - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which to perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or
+ *     received (IN endpoint).  buffer must have been allocated using
+ *     DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  *
  * Assumptions:
@@ -2698,8 +2832,8 @@ static int lpc17_40_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  ****************************************************************************/
 
 static int lpc17_40_transfer_common(struct lpc17_40_usbhost_s *priv,
-                                 struct lpc17_40_ed_s *ed, uint8_t *buffer,
-                                 size_t buflen)
+                                    struct lpc17_40_ed_s *ed,
+                                    uint8_t *buffer, size_t buflen)
 {
   struct lpc17_40_xfrinfo_s *xfrinfo;
   uint32_t dirpid;
@@ -2731,7 +2865,8 @@ static int lpc17_40_transfer_common(struct lpc17_40_usbhost_s *priv,
   /* Then enqueue the transfer */
 
   xfrinfo->tdstatus = TD_CC_NOERROR;
-  ret = lpc17_40_enqueuetd(priv, ed, dirpid, GTD_STATUS_T_TOGGLE, buffer, buflen);
+  ret = lpc17_40_enqueuetd(priv, ed, dirpid, GTD_STATUS_T_TOGGLE, buffer,
+                           buflen);
   if (ret == OK)
     {
       /* BulkListFilled. This bit is used to indicate whether there are any
@@ -2753,20 +2888,21 @@ static int lpc17_40_transfer_common(struct lpc17_40_usbhost_s *priv,
  * Name: lpc17_40_dma_alloc
  *
  * Description:
- *   Allocate DMA memory to perform a transfer, copying user data as necessary
+ *   Allocate DMA memory to perform a transfer, copying user data as
+ *   necessary
  *
  * Input Parameters:
  *   priv - Internal driver state structure.
- *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   userbuffer - The user buffer containing the data to be sent (OUT endpoint)
- *      or received (IN endpoint).
+ *   ed - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which to perform the transfer.
+ *   userbuffer - The user buffer containing the data to be sent (OUT
+ *     endpoint) or received (IN endpoint).
  *   buflen - The length of the data to be sent or received.
  *   alloc - The location to return the allocated DMA buffer.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -2776,13 +2912,14 @@ static int lpc17_40_transfer_common(struct lpc17_40_usbhost_s *priv,
 
 #if LPC17_40_IOBUFFERS > 0
 static int lpc17_40_dma_alloc(struct lpc17_40_usbhost_s *priv,
-                           struct lpc17_40_ed_s *ed, uint8_t *userbuffer,
-                           size_t buflen, uint8_t **alloc)
+                              struct lpc17_40_ed_s *ed, uint8_t *userbuffer,
+                              size_t buflen, uint8_t **alloc)
 {
   uint8_t *newbuffer;
 
   if ((uintptr_t)userbuffer < LPC17_40_SRAM_BANK0 ||
-      (uintptr_t)userbuffer >= (LPC17_40_SRAM_BANK0 + LPC17_40_BANK0_SIZE + LPC17_40_BANK1_SIZE))
+      (uintptr_t)userbuffer >= (LPC17_40_SRAM_BANK0 + LPC17_40_BANK0_SIZE +
+                                LPC17_40_BANK1_SIZE))
     {
       /* Will the transfer fit in an IO buffer? */
 
@@ -2829,16 +2966,16 @@ static int lpc17_40_dma_alloc(struct lpc17_40_usbhost_s *priv,
  *
  * Input Parameters:
  *   priv - Internal driver state structure.
- *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   userbuffer - The user buffer containing the data to be sent (OUT endpoint)
- *      or received (IN endpoint).
+ *   ed - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which to perform the transfer.
+ *   userbuffer - The user buffer containing the data to be sent (OUT
+ *     endpoint) or received (IN endpoint).
  *   buflen - The length of the data to be sent or received.
  *   alloc - The allocated DMA buffer to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -2847,8 +2984,8 @@ static int lpc17_40_dma_alloc(struct lpc17_40_usbhost_s *priv,
  ****************************************************************************/
 
 static void lpc17_40_dma_free(struct lpc17_40_usbhost_s *priv,
-                           struct lpc17_40_ed_s *ed, uint8_t *userbuffer,
-                           size_t buflen, uint8_t *newbuffer)
+                              struct lpc17_40_ed_s *ed, uint8_t *userbuffer,
+                              size_t buflen, uint8_t *newbuffer)
 {
   irqstate_t flags;
 
@@ -2882,26 +3019,27 @@ static void lpc17_40_dma_free(struct lpc17_40_usbhost_s *priv,
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request, blocking until the transfer completes. Only
- *   one transfer may be  queued; Neither this method nor the ctrlin or
+ *   enqueue the transfer request, blocking until the transfer completes.
+ *   Only one transfer may be  queued; Neither this method nor the ctrlin or
  *   ctrlout methods can be called again until this function returns.
  *
  *   This is a blocking method; this functions will not return until the
  *   transfer has completed.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
- *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which
+ *     to perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or
+ *     received (IN endpoint).  buffer must have been allocated using
+ *     DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
  *
  * Returned Value:
  *   On success, a non-negative value is returned that indicates the number
- *   of bytes successfully transferred.  On a failure, a negated errno value is
- *   returned that indicates the nature of the failure:
+ *   of bytes successfully transferred.  On a failure, a negated errno value
+ *   is returned that indicates the nature of the failure:
  *
  *     EAGAIN - If devices NAKs the transfer (or NYET or other error where
  *              it may be appropriate to restart the entire transaction).
@@ -2915,8 +3053,9 @@ static void lpc17_40_dma_free(struct lpc17_40_usbhost_s *priv,
  *
  ****************************************************************************/
 
-static ssize_t lpc17_40_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                              uint8_t *buffer, size_t buflen)
+static ssize_t lpc17_40_transfer(struct usbhost_driver_s *drvr,
+                                 usbhost_ep_t ep, uint8_t *buffer,
+                                 size_t buflen)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;
   struct lpc17_40_ed_s *ed = (struct lpc17_40_ed_s *)ep;
@@ -2930,11 +3069,16 @@ static ssize_t lpc17_40_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   DEBUGASSERT(priv && ed && buffer && buflen > 0);
 
-  /* We must have exclusive access to the endpoint, the TD pool, the I/O buffer
-   * pool, the bulk and interrupt lists, and the HCCA interrupt table.
+  /* We must have exclusive access to the endpoint, the TD pool, the I/O
+   * buffer pool, the bulk and interrupt lists, and the HCCA interrupt
+   * table.
    */
 
-  lpc17_40_takesem(&priv->exclsem);
+  ret = lpc17_40_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Allocate a structure to retain the information needed when the transfer
    * completes.
@@ -2978,8 +3122,8 @@ static ssize_t lpc17_40_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
     }
 #endif
 
-  /* Set the request for the Writeback Done Head event well BEFORE enabling the
-   * transfer.
+  /* Set the request for the Writeback Done Head event well BEFORE enabling
+   * the transfer.
    */
 
   ret = lpc17_40_wdhwait(priv, ed);
@@ -3002,7 +3146,11 @@ static ssize_t lpc17_40_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   /* Wait for the Writeback Done Head interrupt */
 
-  lpc17_40_takesem(&ed->wdhsem);
+  ret = lpc17_40_takesem(&ed->wdhsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Check the TD completion status bits */
 
@@ -3038,6 +3186,7 @@ static ssize_t lpc17_40_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
      }
 
 errout_with_wdhwait:
+
   /* Make sure that there is no outstanding request on this endpoint */
 
   xfrinfo->wdhwait = false;
@@ -3050,6 +3199,7 @@ errout_with_buffers:
 #endif
 
 errout_with_xfrinfo:
+
   /* Make sure that there is no outstanding request on this endpoint */
 
   lpc17_40_free_xfrinfo(xfrinfo);
@@ -3069,8 +3219,8 @@ errout_with_sem:
  *
  * Input Parameters:
  *   priv - Internal driver state structure.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which the
- *      transfer was performed.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which the transfer was performed.
  *
  * Returned Value:
  *   None
@@ -3082,7 +3232,7 @@ errout_with_sem:
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static void lpc17_40_asynch_completion(struct lpc17_40_usbhost_s *priv,
-                                    struct lpc17_40_ed_s *ed)
+                                       struct lpc17_40_ed_s *ed)
 {
   struct lpc17_40_xfrinfo_s *xfrinfo;
   usbhost_asynch_t callback;
@@ -3130,7 +3280,8 @@ static void lpc17_40_asynch_completion(struct lpc17_40_usbhost_s *priv,
 #if LPC17_40_IOBUFFERS > 0
   /* Free any temporary IO buffers */
 
-  lpc17_40_dma_free(priv, ed, xfrinfo->buffer, xfrinfo->buflen, xfrinfo->alloc);
+  lpc17_40_dma_free(priv, ed, xfrinfo->buffer, xfrinfo->buflen,
+                    xfrinfo->alloc);
 #endif
 
   /* Extract the callback information before freeing the buffer */
@@ -3163,20 +3314,21 @@ static void lpc17_40_asynch_completion(struct lpc17_40_usbhost_s *priv,
  *   ctrlout methods can be called again until the transfer completes.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
- *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which
+ *     to perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or
+ *     received (IN endpoint).  buffer must have been allocated using
+ *     DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
  *   callback - This function will be called when the transfer completes.
- *   arg - The arbitrary parameter that will be passed to the callback function
- *     when the transfer completes.
+ *   arg - The arbitrary parameter that will be passed to the callback
+ *     function when the transfer completes.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -3186,24 +3338,29 @@ static void lpc17_40_asynch_completion(struct lpc17_40_usbhost_s *priv,
 
 #ifdef CONFIG_USBHOST_ASYNCH
 static int lpc17_40_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                        uint8_t *buffer, size_t buflen,
-                        usbhost_asynch_t callback, void *arg)
+                           uint8_t *buffer, size_t buflen,
+                           usbhost_asynch_t callback, void *arg)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;
   struct lpc17_40_ed_s *ed = (struct lpc17_40_ed_s *)ep;
   struct lpc17_40_xfrinfo_s *xfrinfo;
   int ret;
 
-  DEBUGASSERT(priv && ed && ed->xfrinfo == NULL && buffer && buflen > 0 && callback);
+  DEBUGASSERT(priv && ed && ed->xfrinfo == NULL && buffer && buflen > 0 &&
+              callback);
 
-  /* We must have exclusive access to the endpoint, the TD pool, the I/O buffer
-   * pool, the bulk and interrupt lists, and the HCCA interrupt table.
+  /* We must have exclusive access to the endpoint, the TD pool, the I/O
+   * buffer pool, the bulk and interrupt lists, and the HCCA interrupt table.
    */
 
-  lpc17_40_takesem(&priv->exclsem);
+  ret = lpc17_40_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  /* Allocate a structure to retain the information needed when the asynchronous
-   * transfer completes.
+  /* Allocate a structure to retain the information needed when the
+   * asynchronous transfer completes.
    */
 
   DEBUGASSERT(ed->xfrinfo == NULL);
@@ -3278,7 +3435,7 @@ errout_with_sem:
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_cancel
  *
  * Description:
@@ -3286,18 +3443,19 @@ errout_with_sem:
  *   asynchronous transfer will complete normally with the error -ESHUTDOWN.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which an
- *      asynchronous transfer should be transferred.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which an asynchronous transfer should be transferred.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
+static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr,
+                           usbhost_ep_t ep)
 {
 #ifdef CONFIG_USBHOST_ASYNCH
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;
@@ -3320,8 +3478,8 @@ static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   xfrinfo = ed->xfrinfo;
   if (xfrinfo)
     {
-      /* It might be possible for no transfer to be in progress (callback == NULL
-       * and wdhwait == false)
+      /* It might be possible for no transfer to be in progress (callback ==
+       * NULL and wdhwait == false)
        */
 
 #ifdef CONFIG_USBHOST_ASYNCH
@@ -3344,7 +3502,8 @@ static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
               /* Remove the TDs attached to the ED, keeping the ED in the list */
 
-              td           = (struct lpc17_40_gtd_s *)(ed->hw.headp & ED_HEADP_ADDR_MASK);
+              td           = (struct lpc17_40_gtd_s *)
+                             (ed->hw.headp & ED_HEADP_ADDR_MASK);
               ed->hw.headp = LPC17_40_TDTAIL_ADDR;
               ed->xfrinfo  = NULL;
 
@@ -3355,9 +3514,12 @@ static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
             }
           else
             {
-              /* Remove the TDs attached to the ED, keeping the Ed in the list */
+              /* Remove the TDs attached to the ED, keeping the Ed in the
+               * list.
+               */
 
-              td           = (struct lpc17_40_gtd_s *)(ed->hw.headp & ED_HEADP_ADDR_MASK);
+              td           = (struct lpc17_40_gtd_s *)
+                             (ed->hw.headp & ED_HEADP_ADDR_MASK);
               ed->hw.headp = LPC17_40_TDTAIL_ADDR;
               ed->xfrinfo  = NULL;
             }
@@ -3400,7 +3562,9 @@ static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 #ifdef CONFIG_USBHOST_ASYNCH
           else
             {
-              /* Otherwise, perform the callback and free the transfer structure */
+              /* Otherwise, perform the callback and free the transfer
+               * structure.
+               */
 
               lpc17_40_asynch_completion(priv, ed);
             }
@@ -3421,7 +3585,7 @@ static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc17_40_connect
  *
  * Description:
@@ -3430,22 +3594,22 @@ static int lpc17_40_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   and port description to the system.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   hport - The descriptor of the hub port that detected the connection
- *      related event
+ *     related event
  *   connected - True: device connected; false: device disconnected
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_HUB
 static int lpc17_40_connect(FAR struct usbhost_driver_s *drvr,
-                         FAR struct usbhost_hubport_s *hport,
-                         bool connected)
+                            FAR struct usbhost_hubport_s *hport,
+                            bool connected)
 {
   struct lpc17_40_usbhost_s *priv = (struct lpc17_40_usbhost_s *)drvr;
   DEBUGASSERT(priv != NULL && hport != NULL);
@@ -3454,7 +3618,8 @@ static int lpc17_40_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  uinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n",
+        hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 
@@ -3475,17 +3640,18 @@ static int lpc17_40_connect(FAR struct usbhost_driver_s *drvr,
  * Name: lpc17_40_disconnect
  *
  * Description:
- *   Called by the class when an error occurs and driver has been disconnected.
- *   The USB host driver should discard the handle to the class instance (it is
- *   stale) and not attempt any further interaction with the class driver instance
- *   (until a new instance is received from the create() method).  The driver
- *   should not called the class' disconnected() method.
+ *   Called by the class when an error occurs and driver has been
+ *   disconnected.  The USB host driver should discard the handle to the
+ *   class instance (it is stale) and not attempt any further interaction
+ *   with the class driver instance (until a new instance is received from
+ *   the create() method).  The driver should not call the class'
+ *   disconnected() method.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   hport - The port from which the device is being disconnected.  Might be a port
- *      on a hub.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   hport - The port from which the device is being disconnected.  Might
+ *     be a port on a hub.
  *
  * Returned Value:
  *   None
@@ -3497,15 +3663,12 @@ static int lpc17_40_connect(FAR struct usbhost_driver_s *drvr,
  ****************************************************************************/
 
 static void lpc17_40_disconnect(struct usbhost_driver_s *drvr,
-                             struct usbhost_hubport_s *hport)
+                                struct usbhost_hubport_s *hport)
 {
   DEBUGASSERT(hport != NULL);
   hport->devclass = NULL;
 }
 
-/****************************************************************************
- * Initialization
- ****************************************************************************/
 /****************************************************************************
  * Name: lpc17_40_ep0init
  *
@@ -3585,7 +3748,8 @@ struct usbhost_connection_s *lpc17_40_usbhost_initialize(int controller)
   int i;
 
   /* Sanity checks.  NOTE: If certain OS features are enabled, it may be
-   * necessary to increase the size of LPC17_40_ED/TD_SIZE in lpc17_40_ohciram.h
+   * necessary to increase the size of LPC17_40_ED/TD_SIZE in
+   * lpc17_40_ohciram.h
    */
 
   DEBUGASSERT(controller == 0);
@@ -3593,6 +3757,7 @@ struct usbhost_connection_s *lpc17_40_usbhost_initialize(int controller)
   DEBUGASSERT(sizeof(struct lpc17_40_gtd_s) <= LPC17_40_TD_SIZE);
 
   /* Initialize the state data structure */
+
   /* Initialize the device operations */
 
   drvr                 = &priv->drvr;
@@ -3635,8 +3800,8 @@ struct usbhost_connection_s *lpc17_40_usbhost_initialize(int controller)
   nxsem_init(&priv->pscsem,  0, 0);
   nxsem_init(&priv->exclsem, 0, 1);
 
-  /* The pscsem semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
+  /* The pscsem semaphore is used for signaling and, hence, should not
+   * have priority inheritance enabled.
    */
 
   nxsem_setprotocol(&priv->pscsem, SEM_PRIO_NONE);
@@ -3646,8 +3811,8 @@ struct usbhost_connection_s *lpc17_40_usbhost_initialize(int controller)
   priv->outinterval = MAX_PERINTERVAL;
 #endif
 
-  /* Enable power by setting PCUSB in the PCONP register.  Disable interrupts
-   * because this register may be shared with other drivers.
+  /* Enable power by setting PCUSB in the PCONP register.  Disable
+   * interrupts because this register may be shared with other drivers.
    */
 
   flags   = enter_critical_section();
@@ -3656,11 +3821,12 @@ struct usbhost_connection_s *lpc17_40_usbhost_initialize(int controller)
   lpc17_40_putreg(regval, LPC17_40_SYSCON_PCONP);
   leave_critical_section(flags);
 
-  /* Enable clocking on USB (USB PLL clocking was initialized in very low-
-   * evel clock setup logic (see lpc17_40_clockconfig.c)).  We do still need
-   * to set up USBOTG CLKCTRL to enable clocking.
+  /* Enable clocking on USB (USB PLL clocking was initialized in very
+   * low-level clock setup logic (see lpc17_40_clockconfig.c)).  We do still
+   * need* to set up USBOTG CLKCTRL to enable clocking.
    *
-   * NOTE: The PORTSEL clock needs to be enabled only when accessing OTGSTCTRL
+   * NOTE: The PORTSEL clock needs to be enabled only when accessing
+   * OTGSTCTRL
    */
 
   lpc17_40_putreg(LPC17_40_CLKCTRL_ENABLES, LPC17_40_USBOTG_CLKCTRL);
@@ -3688,7 +3854,8 @@ struct usbhost_connection_s *lpc17_40_usbhost_initialize(int controller)
 
   /* Now we can turn off the PORTSEL clock */
 
-  lpc17_40_putreg((LPC17_40_CLKCTRL_ENABLES & ~USBOTG_CLK_PORTSELCLK), LPC17_40_USBOTG_CLKCTRL);
+  lpc17_40_putreg((LPC17_40_CLKCTRL_ENABLES & ~USBOTG_CLK_PORTSELCLK),
+                  LPC17_40_USBOTG_CLKCTRL);
 
   /* Configure I/O pins */
 
@@ -3707,13 +3874,21 @@ struct usbhost_connection_s *lpc17_40_usbhost_initialize(int controller)
 
 #if 0 /* Useful if you have doubts about the layout */
   uinfo("AHB SRAM:\n");
-  uinfo("  HCCA:   %08x %d\n", LPC17_40_HCCA_BASE,   LPC17_40_HCCA_SIZE);
-  uinfo("  TDTAIL: %08x %d\n", LPC17_40_TDTAIL_ADDR, LPC17_40_TD_SIZE);
-  uinfo("  EDCTRL: %08x %d\n", LPC17_40_EDCTRL_ADDR, LPC17_40_ED_SIZE);
-  uinfo("  EDFREE: %08x %d\n", LPC17_40_EDFREE_BASE, LPC17_40_ED_SIZE);
-  uinfo("  TDFREE: %08x %d\n", LPC17_40_TDFREE_BASE, LPC17_40_EDFREE_SIZE);
-  uinfo("  TBFREE: %08x %d\n", LPC17_40_TBFREE_BASE, LPC17_40_TBFREE_SIZE);
-  uinfo("  IOFREE: %08x %d\n", LPC17_40_IOFREE_BASE, LPC17_40_IOBUFFERS * CONFIG_LPC17_40_USBHOST_IOBUFSIZE);
+  uinfo("  HCCA:   %08x %d\n",
+        LPC17_40_HCCA_BASE,   LPC17_40_HCCA_SIZE);
+  uinfo("  TDTAIL: %08x %d\n",
+        LPC17_40_TDTAIL_ADDR, LPC17_40_TD_SIZE);
+  uinfo("  EDCTRL: %08x %d\n",
+        LPC17_40_EDCTRL_ADDR, LPC17_40_ED_SIZE);
+  uinfo("  EDFREE: %08x %d\n",
+        LPC17_40_EDFREE_BASE, LPC17_40_ED_SIZE);
+  uinfo("  TDFREE: %08x %d\n",
+        LPC17_40_TDFREE_BASE, LPC17_40_EDFREE_SIZE);
+  uinfo("  TBFREE: %08x %d\n",
+        LPC17_40_TBFREE_BASE, LPC17_40_TBFREE_SIZE);
+  uinfo("  IOFREE: %08x %d\n",
+        LPC17_40_IOFREE_BASE,
+        LPC17_40_IOBUFFERS * CONFIG_LPC17_40_USBHOST_IOBUFSIZE);
 #endif
 
   /* Initialize all the TDs, EDs and HCCA to 0 */
@@ -3831,7 +4006,7 @@ struct usbhost_connection_s *lpc17_40_usbhost_initialize(int controller)
 
   /* Enable OHCI interrupts */
 
-  lpc17_40_putreg((LPC17_40_ALL_INTS | OHCI_INT_MIE), LPC17_40_USBHOST_INTEN);
+  lpc17_40_putreg(LPC17_40_ALL_INTS | OHCI_INT_MIE, LPC17_40_USBHOST_INTEN);
 
   /* Attach USB host controller interrupt handler */
 

@@ -145,7 +145,7 @@ static int altmdm_uninitialize(FAR struct altmdm_dev_s *priv)
 {
   int ret;
 
-  /* Unintialize ALTMDM SPI driver */
+  /* Uninitialize ALTMDM SPI driver */
 
   altmdm_spi_uninit(priv);
 

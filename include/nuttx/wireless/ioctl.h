@@ -62,9 +62,9 @@
  */
 
 #define WLIOC_SETRADIOFREQ  _WLCIOC(0x0001)  /* arg: Pointer to uint32_t, frequency
-                                             * value (in Mhz) */
+                                             * value (in MHz) */
 #define WLIOC_GETRADIOFREQ  _WLCIOC(0x0002)  /* arg: Pointer to uint32_t, frequency
-                                             * value (in Mhz) */
+                                             * value (in MHz) */
 #define WLIOC_SETADDR       _WLCIOC(0x0003)  /* arg: Pointer to address value, format
                                              * of the address is driver specific */
 #define WLIOC_GETADDR       _WLCIOC(0x0004)  /* arg: Pointer to address value, format

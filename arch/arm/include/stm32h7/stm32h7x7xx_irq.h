@@ -34,7 +34,7 @@
  *
  ****************************************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly through arch/irq.h */
+/* This file should never be included directly but, rather, only indirectly through arch/irq.h */
 
 #ifndef __ARCH_ARM_INCLUDE_STM32H7_STM32H7X7XX_IRQ_H
 

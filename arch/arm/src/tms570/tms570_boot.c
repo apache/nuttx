@@ -297,6 +297,10 @@ static void go_nx_start(void)
 
 void arm_boot(void)
 {
+#ifdef CONFIG_TMS570_SELFTEST
+  int check;
+#endif /* CONFIG_TMS570_SELFTEST */
+
   /* Enable CPU Event Export.
    *
    * This allows the CPU to signal any single-bit or double-bit errors
@@ -340,7 +344,8 @@ void arm_boot(void)
   /* Run the memory selftest on CPU RAM. */
 
   tms570_memtest_start(PBIST_RINFOL_ESRAM1_RAM);
-  DEBUGASSERT(tms570_memtest_complete() == OK);
+  check = tms570_memtest_complete();
+  DEBUGASSERT(check == OK);
 #endif /* CONFIG_TMS570_SELFTEST */
 
   /* Initialize CPU RAM. */
@@ -379,7 +384,9 @@ void arm_boot(void)
 
   /* Wait for the memory test to complete */
 
-  DEBUGASSERT(tms570_memtest_complete() == OK);
+  check = tms570_memtest_complete();
+  DEBUGASSERT(check == OK);
+  UNUSED(check);
 #endif /* CONFIG_TMS570_SELFTEST */
 
 #ifdef CONFIG_TMS570_MIBASPI1

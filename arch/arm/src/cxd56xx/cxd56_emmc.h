@@ -36,6 +36,10 @@
 #ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_EMMC_H
 #define __ARCH_ARM_SRC_CXD56XX_CXD56_EMMC_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
@@ -48,6 +52,10 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Public Function Protoypes
+ ****************************************************************************/
 
 int cxd56_emmcinitialize(void);
 void cxd56_emmcuninitialize(void);

@@ -35,7 +35,7 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
+/* This file should never be included directly but, rather, only indirectly
  * through nuttx/irq.h
  */
 
@@ -55,7 +55,7 @@
 
 /* Configuration ************************************************************/
 
-/* If this is a kernel build, how many nested system calls should we support? */
+/* How many nested system calls should we support? */
 
 #ifndef CONFIG_SYS_NNEST
 #  define CONFIG_SYS_NNEST 2
@@ -66,8 +66,10 @@
 #define REG_EPC_NDX         0
 
 /* General pupose registers */
-/* $0: Zero register does not need to be saved */
-/* $1: ra (return address) */
+
+/* $0: Zero register does not need to be saved
+ * $1: ra (return address)
+ */
 
 #define REG_X1_NDX          1
 
@@ -132,11 +134,63 @@
 #ifdef CONFIG_ARCH_CHIP_GAP8
 /* 31 registers, ePC, plus 6 loop registers */
 
-#  define XCPTCONTEXT_REGS  (32 + 6)
+#  define INT_XCPT_REGS     (32 + 6)
 #else
-#  define XCPTCONTEXT_REGS  33
+#  define INT_XCPT_REGS     33
 #endif
 
+#define INT_XCPT_SIZE       (4 * INT_XCPT_REGS)
+
+#ifdef CONFIG_ARCH_FPU
+
+#if defined(CONFIG_ARCH_DPFPU)
+#  define FPU_REG_SIZE      2
+#elif defined(CONFIG_ARCH_QPFPU)
+#  define FPU_REG_SIZE      4
+#else
+#  define FPU_REG_SIZE      1
+#endif
+
+#  define REG_F0_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 0)
+#  define REG_F1_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 1)
+#  define REG_F2_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 2)
+#  define REG_F3_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 3)
+#  define REG_F4_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 4)
+#  define REG_F5_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 5)
+#  define REG_F6_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 6)
+#  define REG_F7_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 7)
+#  define REG_F8_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 8)
+#  define REG_F9_NDX        (INT_XCPT_REGS + FPU_REG_SIZE * 9)
+#  define REG_F10_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 10)
+#  define REG_F11_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 11)
+#  define REG_F12_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 12)
+#  define REG_F13_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 13)
+#  define REG_F14_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 14)
+#  define REG_F15_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 15)
+#  define REG_F16_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 16)
+#  define REG_F17_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 17)
+#  define REG_F18_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 18)
+#  define REG_F19_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 19)
+#  define REG_F20_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 20)
+#  define REG_F21_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 21)
+#  define REG_F22_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 22)
+#  define REG_F23_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 23)
+#  define REG_F24_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 24)
+#  define REG_F25_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 25)
+#  define REG_F26_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 26)
+#  define REG_F27_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 27)
+#  define REG_F28_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 28)
+#  define REG_F29_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 29)
+#  define REG_F30_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 30)
+#  define REG_F31_NDX       (INT_XCPT_REGS + FPU_REG_SIZE * 31)
+#  define REG_FCSR_NDX      (INT_XCPT_REGS + FPU_REG_SIZE * 32)
+
+#  define FPU_XCPT_REGS     (FPU_REG_SIZE * 33)
+#else
+#  define FPU_XCPT_REGS     0
+#endif
+
+#define XCPTCONTEXT_REGS    (INT_XCPT_REGS + FPU_XCPT_REGS)
 #define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
 /* In assembly language, values have to be referenced as byte address
@@ -178,6 +232,42 @@
 #  define REG_X30           (4*REG_X30_NDX)
 #  define REG_X31           (4*REG_X31_NDX)
 #  define REG_INT_CTX       (4*REG_INT_CTX_NDX)
+#ifdef CONFIG_ARCH_FPU
+#  define REG_F0            (4*REG_F0_NDX)
+#  define REG_F1            (4*REG_F1_NDX)
+#  define REG_F2            (4*REG_F2_NDX)
+#  define REG_F3            (4*REG_F3_NDX)
+#  define REG_F4            (4*REG_F4_NDX)
+#  define REG_F5            (4*REG_F5_NDX)
+#  define REG_F6            (4*REG_F6_NDX)
+#  define REG_F7            (4*REG_F7_NDX)
+#  define REG_F8            (4*REG_F8_NDX)
+#  define REG_F9            (4*REG_F9_NDX)
+#  define REG_F10           (4*REG_F10_NDX)
+#  define REG_F11           (4*REG_F11_NDX)
+#  define REG_F12           (4*REG_F12_NDX)
+#  define REG_F13           (4*REG_F13_NDX)
+#  define REG_F14           (4*REG_F14_NDX)
+#  define REG_F15           (4*REG_F15_NDX)
+#  define REG_F16           (4*REG_F16_NDX)
+#  define REG_F17           (4*REG_F17_NDX)
+#  define REG_F18           (4*REG_F18_NDX)
+#  define REG_F19           (4*REG_F19_NDX)
+#  define REG_F20           (4*REG_F20_NDX)
+#  define REG_F21           (4*REG_F21_NDX)
+#  define REG_F22           (4*REG_F22_NDX)
+#  define REG_F23           (4*REG_F23_NDX)
+#  define REG_F24           (4*REG_F24_NDX)
+#  define REG_F25           (4*REG_F25_NDX)
+#  define REG_F26           (4*REG_F26_NDX)
+#  define REG_F27           (4*REG_F27_NDX)
+#  define REG_F28           (4*REG_F28_NDX)
+#  define REG_F29           (4*REG_F29_NDX)
+#  define REG_F30           (4*REG_F30_NDX)
+#  define REG_F31           (4*REG_F31_NDX)
+#  define REG_FCSR          (4*REG_FCSR_NDX)
+#endif
+
 #else
 #  define REG_EPC           REG_EPC_NDX
 #  define REG_X1            REG_X1_NDX
@@ -212,6 +302,43 @@
 #  define REG_X30           REG_X30_NDX
 #  define REG_X31           REG_X31_NDX
 #  define REG_INT_CTX       REG_INT_CTX_NDX
+
+#ifdef CONFIG_ARCH_FPU
+#  define REG_F0            REG_F0_NDX
+#  define REG_F1            REG_F1_NDX
+#  define REG_F2            REG_F2_NDX
+#  define REG_F3            REG_F3_NDX
+#  define REG_F4            REG_F4_NDX
+#  define REG_F5            REG_F5_NDX
+#  define REG_F6            REG_F6_NDX
+#  define REG_F7            REG_F7_NDX
+#  define REG_F8            REG_F8_NDX
+#  define REG_F9            REG_F9_NDX
+#  define REG_F10           REG_F10_NDX
+#  define REG_F11           REG_F11_NDX
+#  define REG_F12           REG_F12_NDX
+#  define REG_F13           REG_F13_NDX
+#  define REG_F14           REG_F14_NDX
+#  define REG_F15           REG_F15_NDX
+#  define REG_F16           REG_F16_NDX
+#  define REG_F17           REG_F17_NDX
+#  define REG_F18           REG_F18_NDX
+#  define REG_F19           REG_F19_NDX
+#  define REG_F20           REG_F20_NDX
+#  define REG_F21           REG_F21_NDX
+#  define REG_F22           REG_F22_NDX
+#  define REG_F23           REG_F23_NDX
+#  define REG_F24           REG_F24_NDX
+#  define REG_F25           REG_F25_NDX
+#  define REG_F26           REG_F26_NDX
+#  define REG_F27           REG_F27_NDX
+#  define REG_F28           REG_F28_NDX
+#  define REG_F29           REG_F29_NDX
+#  define REG_F30           REG_F30_NDX
+#  define REG_F31           REG_F31_NDX
+#  define REG_FCSR          REG_FCSR_NDX
+#endif
+
 #endif
 
 /* Now define more user friendly alternative name that can be used either

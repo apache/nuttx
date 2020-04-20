@@ -91,14 +91,14 @@ void up_release_stack(FAR struct tcb_s *dtcb, uint8_t ttype)
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
         {
-          sched_kfree(dtcb->stack_alloc_ptr);
+          kmm_free(dtcb->stack_alloc_ptr);
         }
       else
 #endif
         {
           /* Use the user-space allocator if this is a task or pthread */
 
-          sched_ufree(dtcb->stack_alloc_ptr);
+          kumm_free(dtcb->stack_alloc_ptr);
         }
 
       /* Mark the stack freed */

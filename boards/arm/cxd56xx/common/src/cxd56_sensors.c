@@ -166,9 +166,9 @@
 #define _I2C_DEVICE_WOPATH(_name) _DEVICE_WOPATH(_name, SENSOR_I2C)
 #define _SPI_DEVICE_WOPATH(_name) _DEVICE_WOPATH(_name, SENSOR_SPI)
 
-/************************************************************************************
+/****************************************************************************
  * Private Types
- ************************************************************************************/
+ ****************************************************************************/
 
 typedef int (*_init_t)(int bus);
 typedef int (*_initdev_t)(FAR const char *devpath, int bus);
@@ -278,7 +278,8 @@ int board_sensors_initialize(void)
 
       if (ret < 0)
         {
-          _err("Failed to init %s at bus %d: %d\n", dev->name, dev->bus, ret);
+          _err("Failed to init %s at bus %d: %d\n",
+                dev->name, dev->bus, ret);
         }
     }
 

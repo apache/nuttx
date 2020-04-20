@@ -44,6 +44,8 @@ checkpatch.sh
   -f <file list>
   -  read standard input mainly used by git pre-commit hook as below:
      git diff --cached | ./tools/checkpatch.sh -
+  Where a <commit list> is any syntax supported by git for specifying git revision, see GITREVISIONS(7)
+  Where a <patch file names> is a space separated list of patch file names or wildcard. or *.patch
 
 configure.sh
 configure.bat
@@ -205,11 +207,11 @@ mkconfigvars.sh
   $ tools/mkconfigvars.sh -h
   tools/mkconfigvars.sh is a tool for generation of configuration variable documentation
 
-  USAGE: tools/mkconfigvars.sh [-d|h] [-v <major.minor>]
+  USAGE: tools/mkconfigvars.sh [-d|h] [-v <major.minor.patch>]
 
   Where:
-    -v <major.minor>
-       The NuttX version number expressed as a major and minor number separated
+    -v <major.minor.patch>
+       The NuttX version number expressed as a major, minor and patch number separated
        by a period
     -d
        Enable script debug
@@ -412,10 +414,10 @@ bdf-convert.c
 
        genfontsources:
          ifeq ($(CONFIG_NXFONT_SANS23X27),y)
-          @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=1 EXTRADEFINES=$(EXTRADEFINES)
+          @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=1 EXTRAFLAGS=$(EXTRAFLAGS)
         endif
          ifeq ($(CONFIG_NXFONT_MYFONT),y)
-          @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=2 EXTRADEFINES=$(EXTRADEFINES)
+          @$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=2 EXTRAFLAGS=$(EXTRAFLAGS)
         endif
 
     6. nuttx/libnx/nxfonts/Make.defs.  Set the make variable NXFSET_CSRCS.
@@ -994,18 +996,26 @@ testbuild.sh
 
     $ ./testbuild.sh -h
 
-    USAGE: ./testbuild.sh [-l|m|c|u|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] <testlist-file>
+    USAGE: ./testbuild.sh [-l|m|c|u|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>
            ./testbuild.sh -h
 
     Where:
       -l|m|c|u|g|n selects Linux (l), macOS (m), Cygwin (c),
-         Ubuntu under Windows 10 (u), or Windows native (n).  Default Linux
-      -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps
-      -t <topdir> provides the absolute path to top nuttx/ directory.  Default $PWD/../nuttx
-      -p only print the list of configs without running any builds
-      -j <ncpus> passed on to make.  Default:  No -j make option
+         Ubuntu under Windows 10 (u), MSYS/MSYS2 (g) or Windows native (n).  Default Linux
       -d enables script debug output
       -x exit on build failures
+      -j <ncpus> passed on to make.  Default:  No -j make option.
+      -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps
+      -t <topdir> provides the absolute path to top nuttx/ directory.
+         Default $WD/../nuttx, where $WD is the parent directory of
+         the directory where this script is.
+      -p only print the list of configs without running any builds
+      -G Use "git clean -xfdq" instead of "make distclean" to clean the tree.
+         This option may speed up the builds. However, note that:
+           * This assumes that your trees are git based.
+           * This assumes that only nuttx and apps repos need to be cleaned.
+           * If the tree has files not managed by git, they will be removed
+             as well.
       -h will show this help test and terminate
       <testlist-file> selects the list of configurations to test.  No default
 
@@ -1113,5 +1123,17 @@ zipme.sh
 --------
 
   I use this script to create the nuttx-xx.yy.tar.gz tarballs for
-  release on Bitbucket.org.  It is handy because it also does the
-  kind of clean that you need to do to make a clean code release.
+  release.  It is handy because it also does the kind of clean up
+  that you need to do to make a clean code release.
+  It can also PGP sign the final tarballs and create their SHA512 hash.
+  Any VCS files or directories are excluded from the final tarballs.
+
+  $ ./tools/zipme.sh -h
+    USAGE="USAGE: ./tools/zipme.sh [-d|h|v|s] [-b <build]> [-e <exclude>] [-k <key-id>] <major.minor.patch>"
+  Examples:
+      ./tools/zipme.sh -s 9.0.0
+        Create version 9.0.0 tarballs and sign them.
+      ./tools/zipme.sh -s -k XXXXXX 9.0.0
+        Same as above but use the key-id XXXXXX to sign the tarballs
+      ./tools/zipme.sh -e "*.swp tmp" 9.0.0
+        Create the tarballs but exclude any .swp file and the "tmp" directory.

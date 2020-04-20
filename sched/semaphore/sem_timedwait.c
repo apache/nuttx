@@ -175,8 +175,7 @@ int nxsem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 
   /* Start the watchdog */
 
-  wd_start(rtcb->waitdog, ticks, (wdentry_t)nxsem_timeout,
-           1, getpid());
+  wd_start(rtcb->waitdog, ticks, nxsem_timeout, 1, getpid());
 
   /* Now perform the blocking wait.  If nxsem_wait() fails, the
    * negated errno value will be returned below.
@@ -221,7 +220,6 @@ errout_with_irqdisabled:
  *
  ****************************************************************************/
 
-#ifndef CONFIG_HAVE_INLINE
 int nxsem_timedwait_uninterruptible(FAR sem_t *sem,
                                     FAR const struct timespec *abstime)
 {
@@ -237,7 +235,6 @@ int nxsem_timedwait_uninterruptible(FAR sem_t *sem,
 
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: sem_timedwait

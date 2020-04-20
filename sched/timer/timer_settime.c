@@ -43,7 +43,7 @@
 static inline void timer_signotify(FAR struct posix_timer_s *timer);
 static inline void timer_restart(FAR struct posix_timer_s *timer,
                                  wdparm_t itimer);
-static void timer_timeout(int argc, wdparm_t itimer);
+static void timer_timeout(int argc, wdparm_t itimer, ...);
 
 /****************************************************************************
  * Private Functions
@@ -99,7 +99,7 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
     {
       timer->pt_last = timer->pt_delay;
       wd_start(timer->pt_wdog, timer->pt_delay,
-               (wdentry_t)timer_timeout, 1, itimer);
+               timer_timeout, 1, itimer);
     }
 }
 
@@ -123,41 +123,8 @@ static inline void timer_restart(FAR struct posix_timer_s *timer,
  *
  ****************************************************************************/
 
-static void timer_timeout(int argc, wdparm_t itimer)
+static void timer_timeout(int argc, wdparm_t itimer, ...)
 {
-#ifndef CONFIG_CAN_PASS_STRUCTS
-  /* On many small machines, pointers are encoded and cannot be simply cast
-   * from wdparm_t to struct tcb_s *.  The following union works around this
-   * (see wdogparm_t).
-   */
-
-  union
-  {
-    FAR struct posix_timer_s *timer;
-    wdparm_t                  itimer;
-  } u;
-
-  u.itimer = itimer;
-
-  /* Send the specified signal to the specified task.   Increment the
-   * reference count on the timer first so that will not be deleted until
-   * after the signal handler returns.
-   */
-
-  u.timer->pt_crefs++;
-  timer_signotify(u.timer);
-
-  /* Release the reference.  timer_release will return nonzero if the timer
-   * was not deleted.
-   */
-
-  if (timer_release(u.timer))
-    {
-      /* If this is a repetitive timer, then restart the watchdog */
-
-      timer_restart(u.timer, itimer);
-    }
-#else
   FAR struct posix_timer_s *timer = (FAR struct posix_timer_s *)itimer;
 
   /* Send the specified signal to the specified task.   Increment the
@@ -178,7 +145,6 @@ static void timer_timeout(int argc, wdparm_t itimer)
 
       timer_restart(timer, itimer);
     }
-#endif
 }
 
 /****************************************************************************
@@ -288,7 +254,9 @@ int timer_settime(timer_t timerid, int flags,
 
   nxsig_cancel_notification(&timer->pt_work);
 
-  /* If the it_value member of value is zero, the timer will not be re-armed */
+  /* If the it_value member of value is zero, the timer will not be
+   * re-armed
+   */
 
   if (value->it_value.tv_sec <= 0 && value->it_value.tv_nsec <= 0)
     {
@@ -355,7 +323,7 @@ int timer_settime(timer_t timerid, int flags,
        */
 
       timer->pt_last = delay;
-      ret = wd_start(timer->pt_wdog, delay, (wdentry_t)timer_timeout,
+      ret = wd_start(timer->pt_wdog, delay, timer_timeout,
                      1, (wdparm_t)timer);
       if (ret < 0)
         {

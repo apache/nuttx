@@ -193,7 +193,9 @@ volatile dq_queue_t g_waitingforfill;
 #endif
 
 #ifdef CONFIG_SIG_SIGSTOP_ACTION
-/* This is the list of all tasks that have been stopped via SIGSTOP or SIGSTP */
+/* This is the list of all tasks that have been stopped
+ * via SIGSTOP or SIGSTP
+ */
 
 volatile dq_queue_t g_stoppedtasks;
 #endif
@@ -203,29 +205,6 @@ volatile dq_queue_t g_stoppedtasks;
  */
 
 volatile dq_queue_t g_inactivetasks;
-
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
-/* These are lists of delayed memory deallocations that need to be handled
- * within the IDLE loop or worker thread.  These deallocations get queued
- * by sched_kufree and sched_kfree() if the OS needs to deallocate memory
- * while it is within an interrupt handler.
- */
-
-volatile sq_queue_t g_delayed_kfree;
-#endif
-
-#ifndef CONFIG_BUILD_KERNEL
-/* REVISIT:  It is not safe to defer user allocation in the kernel mode
- * build.  Why?  Because the correct user context will not be in place
- * when these deferred de-allocations are performed.  In order to make this
- * work, we would need to do something like:  (1) move g_delayed_kufree
- * into the group structure, then traverse the groups to collect garbage
- * on a group-by-group basis.
- */
-
-volatile sq_queue_t g_delayed_kufree;
-#endif
 
 /* This is the value of the last process ID assigned to a task */
 
@@ -418,13 +397,6 @@ void nx_start(void)
   dq_init(&g_stoppedtasks);
 #endif
   dq_init(&g_inactivetasks);
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
-  sq_init(&g_delayed_kfree);
-#endif
-#ifndef CONFIG_BUILD_KERNEL
-  sq_init(&g_delayed_kufree);
-#endif
 
 #ifdef CONFIG_SMP
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
@@ -850,32 +822,6 @@ void nx_start(void)
   sinfo("CPU0: Beginning Idle Loop\n");
   for (; ; )
     {
-      /* Perform garbage collection (if it is not being done by the worker
-       * thread).  This cleans-up memory de-allocations that were queued
-       * because they could not be freed in that execution context (for
-       * example, if the memory was freed from an interrupt handler).
-       */
-
-#ifndef CONFIG_SCHED_WORKQUEUE
-      /* We must have exclusive access to the memory manager to do this
-       * BUT the idle task cannot wait on a semaphore.  So we only do
-       * the cleanup now if we can get the semaphore -- this should be
-       * possible because if the IDLE thread is running, no other task is!
-       *
-       * WARNING: This logic could have undesirable side-effects if priority
-       * inheritance is enabled.  Imagine the possible issues if the
-       * priority of the IDLE thread were to get boosted!  Moral: If you
-       * use priority inheritance, then you should also enable the work
-       * queue so that is done in a safer context.
-       */
-
-      if (sched_have_garbage() && kmm_trysemaphore() == 0)
-        {
-          sched_garbage_collection();
-          kmm_givesemaphore();
-        }
-#endif
-
       /* Perform any processor-specific idle state operations */
 
       up_idle();

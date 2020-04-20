@@ -81,14 +81,14 @@
 #define DIR_CW   (1.0f)
 #define DIR_CCW  (-1.0f)
 
-/* Some math constants *********************************************************/
+/* Some math constants ******************************************************/
 
 #define SQRT3_BY_TWO_F     (0.866025f)
 #define SQRT3_BY_THREE_F   (0.57735f)
 #define ONE_BY_SQRT3_F     (0.57735f)
 #define TWO_BY_SQRT3_F     (1.15470f)
 
-/* Some lib constants **********************************************************/
+/* Some lib constants *******************************************************/
 
 /* Motor electrical angle is in range 0.0 to 2*PI */
 
@@ -102,7 +102,7 @@
 #define MOTOR_ANGLE_M_MIN    (0.0f)
 #define MOTOR_ANGLE_M_RANGE  (MOTOR_ANGLE_M_MAX - MOTOR_ANGLE_M_MIN)
 
-/* Some useful macros ***************************************************************/
+/* Some useful macros *******************************************************/
 
 /****************************************************************************
  * Name: LP_FILTER
@@ -276,7 +276,8 @@ struct motor_observer_s
 
   float angle_err;           /* Observer angle error.
                               * This can be used to gradually eliminate
-                              * error between openloop angle and observer angle
+                              * error between openloop angle and observer
+                              * angle
                               */
 
   /* There are different types of motor observers which different
@@ -314,8 +315,8 @@ struct motor_observer_smo_s
 {
   float k_slide;        /* Bang-bang controller gain */
   float err_max;        /* Linear mode threshold */
-  float F_gain;         /* Current observer F gain (1-Ts*R/L) */
-  float G_gain;         /* Current observer G gain (Ts/L) */
+  float F;              /* Current observer F gain (1-Ts*R/L) */
+  float G;              /* Current observer G gain (Ts/L) */
   float emf_lp_filter1; /* Adaptive first low pass EMF filter */
   float emf_lp_filter2; /* Adaptive second low pass EMF filter */
   ab_frame_t emf;       /* Estimated back-EMF */
@@ -360,7 +361,7 @@ struct foc_data_s
                               */
 
   abc_frame_t      i_abc;    /* Current in ABC frame */
-  ab_frame_t       i_ab;     /* Current in apha-beta frame*/
+  ab_frame_t       i_ab;     /* Current in apha-beta frame */
   dq_frame_t       i_dq;     /* Current in dq frame */
   dq_frame_t       i_dq_err; /* DQ current error */
 
@@ -373,7 +374,7 @@ struct foc_data_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #undef EXTERN
@@ -429,7 +430,7 @@ void angle_norm(FAR float *angle, float per, float bottom, float top);
 void angle_norm_2pi(FAR float *angle, float bottom, float top);
 void phase_angle_update(FAR struct phase_angle_s *angle, float val);
 
-/* 3-phase system space vector modulation*/
+/* 3-phase system space vector modulation */
 
 void svm3_init(FAR struct svm3_state_s *s, float min, float max);
 void svm3(FAR struct svm3_state_s *s, FAR ab_frame_t *ab);
@@ -476,9 +477,9 @@ float motor_openloop_angle_get(FAR struct openloop_data_s *op);
 
 void motor_angle_init(FAR struct motor_angle_s *angle, uint8_t p);
 void motor_angle_e_update(FAR struct motor_angle_s *angle,
-                          float angle_new,float dir);
+                          float angle_new, float dir);
 void motor_angle_m_update(FAR struct motor_angle_s *angle,
-                          float angle_new,float dir);
+                          float angle_new, float dir);
 float motor_angle_m_get(FAR struct motor_angle_s *angle);
 float motor_angle_e_get(FAR struct motor_angle_s *angle);
 

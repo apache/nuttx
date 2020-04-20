@@ -63,7 +63,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Time zone object file directory */
 
 #ifdef CONFIG_LIBC_TZDIR
@@ -125,7 +127,8 @@
 
 #define isleap(y)           (((y) % 4) == 0 && (((y) % 100) != 0 || ((y) % 400) == 0))
 
-/* Since everything in isleap is modulo 400 (or a factor of 400), we know that
+/* Since everything in isleap is modulo 400 (or a factor of 400), we know
+ * that
  *    isleap(y) == isleap(y % 400)
  * and so
  *    isleap(a + b) == isleap((a + b) % 400)
@@ -280,7 +283,8 @@ struct state_s
   time_t ats[TZ_MAX_TIMES];
   unsigned char types[TZ_MAX_TIMES];
   struct ttinfo_s ttis[TZ_MAX_TYPES];
-  char chars[BIGGEST(BIGGEST(TZ_MAX_CHARS + 1, GMTLEN), (2 * (MY_TZNAME_MAX + 1)))];
+  char chars[BIGGEST(BIGGEST(TZ_MAX_CHARS + 1, GMTLEN),
+                    (2 * (MY_TZNAME_MAX + 1)))];
   struct lsinfo_s lsis[TZ_MAX_LEAPS];
   int defaulttype;            /* For early times or if no transitions */
 };
@@ -302,13 +306,13 @@ struct rule_s
 
 static time_t const g_min_timet =
   (TYPE_SIGNED(time_t)
-   ? (time_t) -1 << (CHAR_BIT * sizeof (time_t) - 1)
-   : 0);
+    ? (time_t) -1 << (CHAR_BIT * sizeof (time_t) - 1)
+    : 0);
 
 static time_t const g_max_timet =
   (TYPE_SIGNED(time_t)
-   ? - (~ 0 < 0) - ((time_t) -1 << (CHAR_BIT * sizeof (time_t) - 1))
-   : -1);
+    ? - (~ 0 < 0) - ((time_t) -1 << (CHAR_BIT * sizeof (time_t) - 1))
+    : -1);
 
 static const char g_wildabbr[] = WILDABBR;
 
@@ -359,7 +363,8 @@ static FAR const char *getzname(FAR const char *strp);
 static FAR const char *getqzname(FAR const char *strp, const int delim);
 static FAR const char *getnum(FAR const char *strp, FAR int *nump,
               int min, int max);
-static FAR const char *getsecs(FAR const char *strp, FAR int_fast32_t *secsp);
+static FAR const char *getsecs(FAR const char *strp,
+              FAR int_fast32_t *secsp);
 static FAR const char *getoffset(FAR const char *strp,
               FAR int_fast32_t *offsetp);
 static FAR const char *getrule(FAR const char *strp,
@@ -375,7 +380,8 @@ static int  increment_overflow32(FAR int_fast32_t * number, int delta);
 static int  increment_overflow_time(time_t * t, int_fast32_t delta);
 static int  normalize_overflow32(FAR int_fast32_t * tensptr,
               FAR int *unitsptr, int base);
-static int  normalize_overflow(FAR int *tensptr, FAR int *unitsptr, int base);
+static int  normalize_overflow(FAR int *tensptr, FAR int *unitsptr,
+              int base);
 static void settzname(void);
 static time_t time1(FAR struct tm *tmp,
               FAR struct tm *(*funcp)(FAR const time_t *, int_fast32_t,
@@ -508,18 +514,20 @@ static int tzload(FAR const char *name,
   typedef union
   {
     struct tzhead_s tzhead_s;
-    char buf[2 * sizeof(struct tzhead_s) + 2 * sizeof *sp + 4 * TZ_MAX_TIMES];
+    char buf[2 * sizeof(struct tzhead_s) +
+             2 * sizeof *sp +
+             4 * TZ_MAX_TIMES];
   } u_t;
+
+  /* Section 4.9.1 of the C standard says that
+   * "FILENAME_MAX expands to an integral constant expression
+   * that is the size needed for an array of char large enough
+   * to hold the longest file name string that the implementation
+   * guarantees can be opened."
+   */
 
   union local_storage
   {
-    /* Section 4.9.1 of the C standard says that
-     * "FILENAME_MAX expands to an integral constant expression
-     * that is the size needed for an array of char large enough
-     * to hold the longest file name string that the implementation
-     * guarantees can be opened."
-     */
-
     char fullname[FILENAME_MAX + 1];
 
     /* The main part of the storage for this function.  */
@@ -566,7 +574,7 @@ static int tzload(FAR const char *name,
     {
       p = TZDIR;
       if (p == NULL ||
-          sizeof(lsp->fullname - 1) <= strlen(p) + strlen(name))
+          FILENAME_MAX <= strlen(p) + strlen(name))
         {
           goto oops;
         }
@@ -626,13 +634,13 @@ static int tzload(FAR const char *name,
           goto oops;
         }
 
-      if (nread - (p - up->buf) < sp->timecnt * stored +        /* ats */
-          sp->timecnt +         /* types */
-          sp->typecnt * 6 +     /* ttinfos */
-          sp->charcnt +         /* chars */
-          sp->leapcnt * (stored + 4) +  /* lsinfos */
-          ttisstdcnt +          /* ttisstds */
-          ttisgmtcnt)           /* ttisgmts */
+      if (nread - (p - up->buf) < sp->timecnt * stored + /* ats */
+          sp->timecnt +                                  /* types */
+          sp->typecnt * 6 +                              /* ttinfos */
+          sp->charcnt +                                  /* chars */
+          sp->leapcnt * (stored + 4) +                   /* lsinfos */
+          ttisstdcnt +                                   /* ttisstds */
+          ttisgmtcnt)                                    /* ttisgmts */
         {
           goto oops;
         }
@@ -642,7 +650,8 @@ static int tzload(FAR const char *name,
         {
           int_fast64_t at = stored == 4 ? detzcode(p) : detzcode64(p);
           sp->types[i] = ((TYPE_SIGNED(time_t)
-                           ? g_min_timet <= at : 0 <= at) && at <= g_max_timet);
+                           ? g_min_timet <= at : 0 <= at) &&
+                           at <= g_max_timet);
           if (sp->types[i])
             {
               if (i && !timecnt && at != g_min_timet)
@@ -896,7 +905,8 @@ oops:
   return -1;
 }
 
-static int typesequiv(FAR const struct state_s *const sp, const int a, const int b)
+static int typesequiv(FAR const struct state_s *const sp, const int a,
+                      const int b)
 {
   int result;
 
@@ -918,8 +928,8 @@ static int typesequiv(FAR const struct state_s *const sp, const int a, const int
   return result;
 }
 
-/* Given a pointer into a time zone string, scan until a character that is not
- * a valid character in a zone name is found. Return a pointer to that
+/* Given a pointer into a time zone string, scan until a character that is
+ * not a valid character in a zone name is found. Return a pointer to that
  * character.
  */
 
@@ -927,7 +937,8 @@ static FAR const char *getzname(FAR const char *strp)
 {
   char c;
 
-  while ((c = *strp) != '\0' && !is_digit(c) && c != ',' && c != '-' && c != '+')
+  while ((c = *strp) != '\0' && !is_digit(c) && c != ',' &&
+         c != '-' && c != '+')
     {
       ++strp;
     }
@@ -955,10 +966,10 @@ static FAR const char *getqzname(FAR const char *strp, const int delim)
   return strp;
 }
 
-/* Given a pointer into a time zone string, extract a number from that string.
- * Check that the number is within a specified range; if it is not, return
- * NULL.
- * Otherwise, return a pointer to the first character not part of the number.
+/* Given a pointer into a time zone string, extract a number from that
+ * string.  Check that the number is within a specified range; if it is not,
+ * return NULL.  Otherwise, return a pointer to the first character not part
+ * of the number.
  */
 
 static FAR const char *getnum(FAR const char *strp, FAR int *const nump,
@@ -1180,6 +1191,7 @@ static int_fast32_t transtime(const int year,
   switch (rulep->r_type)
     {
     case JULIAN_DAY:
+
       /* Jn - Julian day, 1 == January 1, 60 == March 1 even in leap
        * years.
        * In non-leap years, or if the day number is 59 or less, just
@@ -1189,10 +1201,14 @@ static int_fast32_t transtime(const int year,
 
       value = (rulep->r_day - 1) * SECSPERDAY;
       if (leapyear && rulep->r_day >= 60)
-        value += SECSPERDAY;
+        {
+          value += SECSPERDAY;
+        }
+
       break;
 
     case DAY_OF_YEAR:
+
       /* n - day of year.
        * Just add SECSPERDAY times the day number to the time of
        * January 1, midnight, to get the day.
@@ -1202,6 +1218,7 @@ static int_fast32_t transtime(const int year,
       break;
 
     case MONTH_NTH_DAY_OF_WEEK:
+
       /* Mm.n.d - nth "dth day" of month m */
 
       /* Use Zeller's Congruence to get day-of-week of first day of
@@ -1307,6 +1324,7 @@ static int tzparse(FAR const char *name, FAR struct state_s *const sp,
           name = getzname(name);
           stdlen = name - stdname;
         }
+
       if (*name == '\0')
         {
           return -1;
@@ -1412,9 +1430,12 @@ static int tzparse(FAR const char *name, FAR struct state_s *const sp,
           for (year = EPOCH_YEAR; year < yearlim; year++)
             {
               int_fast32_t
-                starttime = transtime(year, &start, stdoffset),
-                endtime = transtime(year, &end, dstoffset);
-              int_fast32_t yearsecs = (g_year_lengths[isleap(year)] * SECSPERDAY);
+                starttime  = transtime(year, &start, stdoffset);
+              int_fast32_t
+                endtime    = transtime(year, &end, dstoffset);
+              int_fast32_t
+                yearsecs   = (g_year_lengths[isleap(year)] * SECSPERDAY);
+
               int reversed = endtime < starttime;
               if (reversed)
                 {
@@ -1425,7 +1446,8 @@ static int tzparse(FAR const char *name, FAR struct state_s *const sp,
 
               if (reversed ||
                    (starttime < endtime &&
-                    (endtime - starttime < (yearsecs + (stdoffset - dstoffset)))))
+                    (endtime - starttime <
+                     (yearsecs + (stdoffset - dstoffset)))))
                 {
                   if (TZ_MAX_TIMES - 2 < timecnt)
                     {
@@ -1764,8 +1786,8 @@ static struct tm *localsub(FAR const time_t * const timep,
 
 /* gmtsub is to gmtime as localsub is to localtime */
 
-static struct tm *gmtsub(FAR const time_t * const timep, const int_fast32_t offset,
-                         struct tm *const tmp)
+static struct tm *gmtsub(FAR const time_t * const timep,
+                         const int_fast32_t offset, struct tm *const tmp)
 {
   if (!g_gmt_isset)
     {
@@ -1846,7 +1868,8 @@ static struct tm *timesub(FAR const time_t * const timep,
       int leapdays;
 
       tdelta = tdays / DAYSPERLYEAR;
-      if (!((!TYPE_SIGNED(time_t) || INT_MIN <= tdelta) && tdelta <= INT_MAX))
+      if (!((!TYPE_SIGNED(time_t) || INT_MIN <= tdelta) &&
+          tdelta <= INT_MAX))
         {
           return NULL;
         }
@@ -1869,13 +1892,13 @@ static struct tm *timesub(FAR const time_t * const timep,
       y = newy;
     }
 
-  {
-    int_fast32_t seconds;
+    {
+      int_fast32_t seconds;
 
-    seconds = tdays * SECSPERDAY;
-    tdays = seconds / SECSPERDAY;
-    rem += seconds - tdays * SECSPERDAY;
-  }
+      seconds = tdays * SECSPERDAY;
+      tdays = seconds / SECSPERDAY;
+      rem += seconds - tdays * SECSPERDAY;
+    }
 
   /* Given the range, we can now fearlessly cast */
 
@@ -1896,7 +1919,10 @@ static struct tm *timesub(FAR const time_t * const timep,
   while (idays < 0)
     {
       if (increment_overflow(&y, -1))
-        return NULL;
+        {
+          return NULL;
+        }
+
       idays += g_year_lengths[isleap(y)];
     }
 
@@ -2054,7 +2080,7 @@ static int tmcomp(FAR const struct tm *atmp, FAR const struct tm *btmp)
 
 static time_t time2sub(struct tm *const tmp,
                        FAR struct tm *(*const funcp)(FAR const time_t *,
-                                                     int_fast32_t, struct tm *),
+                       int_fast32_t, struct tm *),
                        const int_fast32_t offset, FAR int *const okayp,
                        const int do_norm_secs)
 {
@@ -2279,7 +2305,8 @@ static time_t time2sub(struct tm *const tmp,
        * gets checked.
        */
 
-      sp = (FAR const struct state_s *)((funcp == localsub) ? lclptr : gmtptr);
+      sp = (FAR const struct state_s *)
+        ((funcp == localsub) ? lclptr : gmtptr);
       if (sp == NULL)
         {
           return -1;
@@ -2437,7 +2464,8 @@ static time_t time1(FAR struct tm *const tmp,
               continue;
             }
 
-          tmp->tm_sec += sp->ttis[otheri].tt_gmtoff - sp->ttis[samei].tt_gmtoff;
+          tmp->tm_sec  += sp->ttis[otheri].tt_gmtoff -
+                          sp->ttis[samei].tt_gmtoff;
           tmp->tm_isdst = !tmp->tm_isdst;
           t = time2(tmp, funcp, offset, &okay);
           if (okay)
@@ -2445,7 +2473,8 @@ static time_t time1(FAR struct tm *const tmp,
               return t;
             }
 
-          tmp->tm_sec -= sp->ttis[otheri].tt_gmtoff - sp->ttis[samei].tt_gmtoff;
+          tmp->tm_sec  -= sp->ttis[otheri].tt_gmtoff -
+                          sp->ttis[samei].tt_gmtoff;
           tmp->tm_isdst = !tmp->tm_isdst;
         }
     }

@@ -177,8 +177,8 @@ enum scg_sosc_gain_e
 
 enum scg_sosc_range_e
 {
-  SCG_SOSC_RANGE_MID       = 2,        /* Medium frequency range selected for the crystal OSC (4 Mhz to 8 Mhz). */
-  SCG_SOSC_RANGE_HIGH      = 3,        /* High frequency range selected for the crystal OSC (8 Mhz to 40 Mhz). */
+  SCG_SOSC_RANGE_MID       = 2,        /* Medium frequency range selected for the crystal OSC (4 MHz to 8 MHz). */
+  SCG_SOSC_RANGE_HIGH      = 3,        /* High frequency range selected for the crystal OSC (8 MHz to 40 MHz). */
 };
 
 struct scg_sosc_config_s

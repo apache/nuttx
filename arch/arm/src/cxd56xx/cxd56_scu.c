@@ -266,7 +266,8 @@ static void seq_setstartinterval(int sid, int interval);
 static void seq_setstartphase(int sid, int phase);
 static void seq_startseq(int sid);
 static void seq_stopseq(int sid);
-static int seq_setadjustment(FAR struct seq_s *seq, struct adjust_xyz_s *adj);
+static int seq_setadjustment(FAR struct seq_s *seq,
+                             struct adjust_xyz_s *adj);
 static int seq_setfilter(FAR struct scufifo_s *fifo, int pos,
                          struct iir_filter_s iir[2]);
 static int seq_seteventnotifier(FAR struct scufifo_s *fifo,
@@ -565,7 +566,8 @@ static inline void mathf_free(int8_t mid)
  *   Allocate sequencer
  *
  * Returned Value:
- *   Allocated sequencer ID is returned on success. -1 is returned on failure.
+ *   Allocated sequencer ID is returned on success.
+ *   -1 is returned on failure.
  *
  ****************************************************************************/
 
@@ -807,7 +809,8 @@ static void seq_setbus(int sid, int bustype)
  *
  ****************************************************************************/
 
-static void seq_setdataformat(int sid, int start, int bps, int swap, int elem)
+static void seq_setdataformat(int sid, int start,
+                              int bps, int swap, int elem)
 {
   uint32_t val;
   val = start & 0xf;
@@ -1224,7 +1227,9 @@ static int seq_start(FAR struct seq_s *seq, int fifoid)
 
           /* Calculate timestamp interval for ADC */
 
-          cxd56_adc_getinterval(seq->bustype, &fifo->interval, &fifo->adjust);
+          cxd56_adc_getinterval(seq->bustype,
+                                &fifo->interval,
+                                &fifo->adjust);
 
           /* Enable ADC */
 
@@ -1478,15 +1483,14 @@ static void seq_sync(FAR struct seq_s *seq, int req)
  *
  ****************************************************************************/
 
-static void seq_handlefifointr(FAR struct cxd56_scudev_s *priv, uint32_t intr)
+static void seq_handlefifointr(FAR struct cxd56_scudev_s *priv,
+                               uint32_t intr)
 {
   uint32_t bit;
   int i;
 #ifndef CONFIG_DISABLE_SIGNAL
   struct wm_notify_s *notify;
-#  ifdef CONFIG_CAN_PASS_STRUCTS
   union sigval value;
-#  endif
 #endif
 
   if ((intr & 0x007ffe00) == 0)
@@ -1514,12 +1518,8 @@ static void seq_handlefifointr(FAR struct cxd56_scudev_s *priv, uint32_t intr)
 
           DEBUGASSERT(notify->pid != 0);
 
-#  ifdef CONFIG_CAN_PASS_STRUCTS
           value.sival_ptr = notify->ts;
           sigqueue(notify->pid, notify->signo, value);
-#  else
-          sigqueue(notify->pid, notify->signo, (FAR void *)notify->ts);
-#  endif
 #endif
         }
     }
@@ -1605,15 +1605,12 @@ static void seq_handlemathfintr(FAR struct cxd56_scudev_s *priv,
 #ifndef CONFIG_DISABLE_SIGNAL
       if (detected)
         {
+          union sigval value;
+
           DEBUGASSERT(notify->pid != 0);
 
-#  ifdef CONFIG_CAN_PASS_STRUCTS
-          union sigval value;
           value.sival_ptr = notify->arg;
           sigqueue(notify->pid, notify->signo, value);
-#  else
-          sigqueue(notify->pid, notify->signo, (FAR void *)notify->arg);
-#  endif
           detected = 0;
         }
 #endif
@@ -2112,7 +2109,8 @@ static void seq_fifofree(FAR struct scufifo_s *fifo)
  *
  ****************************************************************************/
 
-static inline struct scufifo_s *seq_getfifo(FAR struct seq_s *seq, int fifoid)
+static inline struct scufifo_s *seq_getfifo(FAR struct seq_s *seq,
+                                            int fifoid)
 {
   DEBUGASSERT(fifoid >= 0 && fifoid < 3);
 
@@ -2903,7 +2901,9 @@ static inline void seq_read8(uint32_t addr, FAR uint8_t *buffer, int length)
  * Name: seq_read16
  ****************************************************************************/
 
-static inline void seq_read16(uint32_t addr, FAR uint16_t *buffer, int length)
+static inline void seq_read16(uint32_t addr,
+                              FAR uint16_t *buffer,
+                              int length)
 {
   int i;
 
@@ -2917,7 +2917,9 @@ static inline void seq_read16(uint32_t addr, FAR uint16_t *buffer, int length)
  * Name: seq_read32
  ****************************************************************************/
 
-static inline void seq_read32(uint32_t addr, FAR uint32_t *buffer, int length)
+static inline void seq_read32(uint32_t addr,
+                              FAR uint32_t *buffer,
+                              int length)
 {
   int i;
 

@@ -124,8 +124,8 @@ static const struct tms570_pinmux_s g_pinmux_table[] =
 
 #define ESM_SR1_PLL1SLIP     0x400
 #define ESM_SR4_PLL2SLIP     0x400
-#define dcc1CNT1_CLKSRC_PLL1 0x0000a000u
-#define dcc1CNT1_CLKSRC_PLL2 0x0000a001u
+#define DCC1CNT1_CLKSRC_PLL1 0x0000a000u
+#define DCC1CNT1_CLKSRC_PLL2 0x0000a001u
 
 /****************************************************************************
  * Name: check_frequency
@@ -138,8 +138,7 @@ static uint32_t check_frequency(uint32_t cnt1_clksrc)
 {
   uint32_t regval = 0;
 
-  /* Setup DCC1 */
-  /* DCC1 Global Control register configuration */
+  /* Setup DCC1: Global Control register configuration */
 
   regval =  (uint32_t)0x5u |                   /* Disable  DCC1 */
             (uint32_t)((uint32_t)0x5u << 4u) | /* No Error Interrupt */
@@ -193,7 +192,7 @@ static uint32_t check_frequency(uint32_t cnt1_clksrc)
 }
 
 /****************************************************************************
- * Name: _errata_SSWF021_45_both_plls
+ * Name: _errata_sswf021_45_both_plls
  *
  * Description:
  *   This function is used to verify that PLL1 and PLL2 lock after
@@ -203,7 +202,7 @@ static uint32_t check_frequency(uint32_t cnt1_clksrc)
  *
  ****************************************************************************/
 
-uint32_t _errata_SSWF021_45_both_plls(uint32_t count)
+uint32_t _errata_sswf021_45_both_plls(uint32_t count)
 {
   uint32_t failcode;
   uint32_t retries;
@@ -267,41 +266,41 @@ uint32_t _errata_SSWF021_45_both_plls(uint32_t count)
               ((getreg32(TMS570_ESM_SR1) & ESM_SR1_PLL1SLIP) == 0u)) ||
              (((getreg32(TMS570_SYS_CSVSTAT) & SYS_CLKSRC_PLL2) == 0u) &&
               ((getreg32(TMS570_ESM_SR4) & ESM_SR4_PLL2SLIP) == 0u)))
-         {
-           /* Wait */
-         }
+        {
+          /* Wait */
+        }
 
-     /* If PLL1 valid, check the frequency */
+      /* If PLL1 valid, check the frequency */
 
-     if ((getreg32(TMS570_ESM_SR1) & ESM_SR1_PLL1SLIP) != 0u)
-       {
-         failcode |= 1u;
-       }
-     else
-       {
-         failcode |= check_frequency(dcc1CNT1_CLKSRC_PLL1);
-       }
+      if ((getreg32(TMS570_ESM_SR1) & ESM_SR1_PLL1SLIP) != 0u)
+        {
+          failcode |= 1u;
+        }
+      else
+        {
+          failcode |= check_frequency(DCC1CNT1_CLKSRC_PLL1);
+        }
 
-     /* If PLL2 valid, check the frequency */
+      /* If PLL2 valid, check the frequency */
 
-     if ((getreg32(TMS570_ESM_SR4) & ESM_SR4_PLL2SLIP) != 0u)
-       {
-         failcode |= 2u;
-       }
-     else
-       {
-         failcode |= (check_frequency(dcc1CNT1_CLKSRC_PLL2) << 1U);
-       }
+      if ((getreg32(TMS570_ESM_SR4) & ESM_SR4_PLL2SLIP) != 0u)
+        {
+          failcode |= 2u;
+        }
+      else
+        {
+          failcode |= (check_frequency(DCC1CNT1_CLKSRC_PLL2) << 1U);
+        }
 
-     if (failcode == 0u)
-       {
-         break;
-       }
-   }
+      if (failcode == 0u)
+        {
+          break;
+        }
+    }
 
   /* Disable plls */
 
-  regval = 0x00000002U | 0x00000040U;
+  regval = 0x00000002u | 0x00000040u;
   putreg32(regval, TMS570_SYS_CSDISSET);
 
   while ((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
@@ -314,7 +313,7 @@ uint32_t _errata_SSWF021_45_both_plls(uint32_t count)
 
   /* First set VCLK2 = HCLK */
 
-  regval = clkcntrlsave & 0x000F0100U;
+  regval = clkcntrlsave & 0x000f0100u;
   putreg32(regval, TMS570_SYS_CLKCNTL);
 
   putreg32(clkcntrlsave, TMS570_SYS_CLKCNTL);
@@ -420,7 +419,7 @@ static void tms570_pll_setup(void)
       while ((getreg32(TMS570_SYS_CSDIS) & regval) != regval)
         {
         }
-   }
+    }
 
   /* Setup pll control register 1 */
 
@@ -677,9 +676,9 @@ static void tms570_clocksrc_configure(void)
 
   /* Work Around for Errata SYS#46: Errata Description: Clock Source
    * Switching Not Qualified with Clock Source Enable And Clock Source Valid
-   * Workaround: Always check the CSDIS register to make sure the clock source
-   * is turned on and check the CSVSTAT register to make sure the clock source
-   * is valid. Then write to GHVSRC to switch the clock.
+   * Workaround: Always check the CSDIS register to make sure the clock
+   * source is turned on and check the CSVSTAT register to make sure the
+   * clock source is valid. Then write to GHVSRC to switch the clock.
    */
 
   do
@@ -724,7 +723,7 @@ static void tms570_clocksrc_configure(void)
    * programmed value
    */
 
-   /* Setup asynchronous peripheral clock sources for AVCLK1 */
+  /* Setup asynchronous peripheral clock sources for AVCLK1 */
 
 #if defined(CONFIG_ARCH_CHIP_TMS570LS3137ZWT)
   regval = SYS_VCLKASRC_VCLKA2S_VCLK | SYS_VCLKASRC_VCLKA1S_VCLK;
@@ -795,7 +794,7 @@ static void tms570_eclk_configure(void)
    * ECPINSEL=0 Bit 24, VCLK is selected as the ECP clock source
    */
 
-  regval = SYS_ECPCNTL_ECPDIV(8-1) | SYS_ECPCNTL_ECPINSEL_LOW;
+  regval = SYS_ECPCNTL_ECPDIV(8 - 1) | SYS_ECPCNTL_ECPINSEL_LOW;
   putreg32(regval, TMS570_SYS_ECPCNTL);
 }
 
@@ -816,9 +815,13 @@ static void tms570_eclk_configure(void)
 
 void tms570_clockconfig(void)
 {
+#ifdef CONFIG_TMS570_SELFTEST
+  int check;
+#endif /* CONFIG_TMS570_SELFTEST */
+
   /* Configure PLL control registers and enable PLLs. */
 
-   tms570_pll_setup();
+  tms570_pll_setup();
 
 #ifdef CONFIG_TMS570_SELFTEST
   /* Run eFuse controller start-up checks and start eFuse controller ECC
@@ -839,8 +842,10 @@ void tms570_clockconfig(void)
 #ifdef CONFIG_TMS570_SELFTEST
   /* Wait for eFuse controller self-test to complete and check results */
 
-  DEBUGASSERT(tms570_efc_selftest_complete() == 0);
-#endif
+  check = tms570_efc_selftest_complete();
+  DEBUGASSERT(check == 0);
+  UNUSED(check);
+#endif /* CONFIG_TMS570_SELFTEST */
 
   /* Set up flash address and data wait states. */
 

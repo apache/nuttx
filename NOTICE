@@ -36,5 +36,25 @@ FAT Long File Names
 
   So you have been forewarned:  Use the long filename at your own risk!
 
+
+NXP Restriction for SPIFI code
+==============================
+
+  NOTE: Code supporting spifi for the LCP43xx has restricted usage by NXP
+  FILES:
+    arch/arm/src/lpc43xx/hardware/lpc43_spifi.h
+    arch/arm/src/lpc43xx/spifi/inc/spifilib_api.h
+    arch/arm/src/lpc43xx/spifi/inc/spifilib_dev.h
+    arch/arm/src/lpc43xx/spifi/inc/private/spifilib_chiphw.h
+    arch/arm/src/lpc43xx/spifi/src/spifilib_dev_common.c
+    arch/arm/src/lpc43xx/spifi/src/spifilib_fam_standard_cmd.c
+
+   Permission to use, copy, modify, and distribute this software and its
+   documentation is hereby granted, under NXP Semiconductors' and its
+   licensor's relevant copyrights in the software, without fee, provided that it
+   is used in conjunction with NXP Semiconductors microcontrollers. This
+   copyright, permission, and disclaimer notice must appear in all copies of
+   this code.
+
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).

@@ -62,6 +62,10 @@
 #  define ACCEL_NR_SEQS 1
 #endif
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #if defined(CONFIG_SENSORS_BMI160_SCU)
 
 int board_bmi160_initialize(int bus)

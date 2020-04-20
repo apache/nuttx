@@ -143,7 +143,7 @@ static inline void pic32mx_putreg(uintptr_t uart_base, unsigned int offset,
  *
  ****************************************************************************/
 
-#ifdef HAVE_UART_DEVICE
+#ifdef HAVE_SERIAL_CONSOLE
 static inline uint32_t pic32mx_getreg(uintptr_t uart_base,
                                           unsigned int offset)
 {
@@ -326,9 +326,9 @@ void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
  * Name: pic32mx_consoleinit
  *
  * Description:
- *   Initialize a low-level console for debug output.  This function is called
- *   very early in the initialization sequence to configure the serial console
- *   UART (only).
+ *   Initialize a low-level console for debug output.  This function is
+ *   called very early in the initialization sequence to configure the
+ *   serial console UART (only).
  *
  ****************************************************************************/
 

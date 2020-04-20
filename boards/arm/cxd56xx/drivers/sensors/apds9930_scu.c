@@ -328,7 +328,12 @@ static uint16_t apds9930_getreg16(FAR struct apds9930_dev_s *priv,
   inst[0] = SCU_INST_SEND(APDS9930_CMD_TYPE_AUTOINC | regaddr);
   inst[1] = SCU_INST_RECV(2) | SCU_INST_LAST;
 
-  scu_i2ctransfer(priv->port, priv->addr, inst, 2, (FAR uint8_t *)&regval, 2);
+  scu_i2ctransfer(priv->port,
+                  priv->addr,
+                  inst,
+                  2,
+                 (FAR uint8_t *)&regval,
+                  2);
 
   return regval;
 }
@@ -503,8 +508,13 @@ static int apds9930als_seqinit(FAR struct apds9930_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_apds9930alsinst, itemsof(g_apds9930alsinst));
-  seq_setsample(priv->seq, APDS9930_ALS_BYTESPERSAMPLE, 0, APDS9930_ELEMENTSIZE,
+  seq_setinstruction(priv->seq,
+                     g_apds9930alsinst,
+                     itemsof(g_apds9930alsinst));
+  seq_setsample(priv->seq,
+                APDS9930_ALS_BYTESPERSAMPLE,
+                0,
+                APDS9930_ELEMENTSIZE,
                 false);
 
   return OK;
@@ -537,8 +547,13 @@ static int apds9930ps_seqinit(FAR struct apds9930_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_apds9930psinst, itemsof(g_apds9930psinst));
-  seq_setsample(priv->seq, APDS9930_PS_BYTESPERSAMPLE, 0, APDS9930_ELEMENTSIZE,
+  seq_setinstruction(priv->seq,
+                     g_apds9930psinst,
+                     itemsof(g_apds9930psinst));
+  seq_setsample(priv->seq,
+                APDS9930_PS_BYTESPERSAMPLE,
+                0,
+                APDS9930_ELEMENTSIZE,
                 false);
 
   return OK;

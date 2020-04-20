@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-# Logic specific to IPv6 Neighbor Discovery Protocol
+# Logic specific to NETLINK
 
 ifeq ($(CONFIG_NET_NETLINK),y)
 

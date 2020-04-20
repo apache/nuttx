@@ -113,7 +113,7 @@ FAR const void *modsym(FAR void *handle, FAR const char *name)
                              modp->modinfo.nexports);
   if (symbol == NULL)
     {
-      berr("ERROR: Failed to find symbol in symbol \"$s\" in table\n", name);
+      berr("ERROR: Failed to find symbol in symbol \"%s\" in table\n", name);
       err = ENOENT;
       goto errout_with_lock;
     }

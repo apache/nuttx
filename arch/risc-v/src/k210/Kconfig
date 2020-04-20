@@ -7,8 +7,8 @@ comment "K210 Configuration Options"
 
 menu "K210 Peripheral Support"
 
-# These "hidden" settings determine is a peripheral option is available for the
-# selection MCU
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
 
 config K210_HAVE_UART0
 	bool

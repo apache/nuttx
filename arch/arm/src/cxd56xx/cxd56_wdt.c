@@ -76,6 +76,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure provides the private representation of the "lower-half"
  * driver state structure.  This structure must be cast-compatible with the
  * well-known watchdog_lowerhalf_s structure.
@@ -175,8 +176,8 @@ static uint32_t cxd56_getreg(uintptr_t regaddr)
 
   uint32_t regval = getreg32(regaddr);
 
-  /* Is this the same value that we read from the same register last time?  Are
-   * we polling the register?  If so, suppress some of the output.
+  /* Is this the same value that we read from the same register last time?
+   * Are we polling the register? If so, suppress some of the output.
    */
 
   if (regaddr == prevaddr && regval == preval)
@@ -282,8 +283,8 @@ static int cxd56_wdtinterrupt(int irq, FAR void *context, FAR void *arg)
  *   Start the watchdog timer, resetting the time to the current timeout,
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Values:
  *   Zero on success; a negated errno value on failure.
@@ -311,8 +312,8 @@ static int cxd56_start(FAR struct watchdog_lowerhalf_s *lower)
  *   Stop the watchdog timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Values:
  *   Zero on success; a negated errno value on failure.
@@ -339,8 +340,8 @@ static int cxd56_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   the atchdog timer or "petting the dog".
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Values:
  *   Zero on success; a negated errno value on failure.
@@ -568,8 +569,8 @@ static xcpt_t cxd56_capture(FAR struct watchdog_lowerhalf_s *lower,
  *   are forwarded to the lower half driver through this method.
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *   cmd   - The ioctol command value
  *   arg   - The optional argument that accompanies the 'cmd'.  The
  *           interpretation of this argument depends on the particular
@@ -619,9 +620,9 @@ static int cxd56_pm_event(uint8_t id)
 
       case CXD56_PM_CALLBACK_ID_CLK_CHG_END:
       case CXD56_PM_CALLBACK_ID_HOT_BOOT:
-        /* If watchdog has been already running before the clock is changed or
-         * entering in hot sleep , re-start the watchdog  timer with a timeout
-         * value based on the new watchdog timer clock.
+        /* If watchdog has been already running before the clock is changed
+         * or entering in hot sleep, re-start the watchdog timer with a
+         * timeout value based on the new watchdog timer clock.
          */
 
         if (priv->started)
@@ -634,6 +635,7 @@ static int cxd56_pm_event(uint8_t id)
       default:
         break;
     }
+
   return 0;
 }
 

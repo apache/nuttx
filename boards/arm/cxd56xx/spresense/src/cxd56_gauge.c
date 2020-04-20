@@ -50,6 +50,10 @@
 static int g_gaugeinitialized = 0;
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: board_gauge_initialize
  *
  * Description:
@@ -69,6 +73,7 @@ int board_gauge_initialize(FAR const char *devpath, FAR int16_t *gaugemeter)
           _err("ERROR: Failed to initialize gauge.\n");
           return -ENODEV;
         }
+
       g_gaugeinitialized = 1;
     }
 
@@ -95,6 +100,7 @@ int board_gauge_uninitialize(FAR const char *devpath)
           _err("ERROR: Failed to finalize gauge.\n");
           return -ENODEV;
         }
+
       g_gaugeinitialized = 0;
     }
 

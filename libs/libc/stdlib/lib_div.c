@@ -42,8 +42,6 @@
 
 #include <stdlib.h>
 
-#ifdef CONFIG_CAN_PASS_STRUCTS
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -76,5 +74,3 @@ div_t div(int numer, int denom)
   f.rem  = numer % denom;
   return f;
 }
-
-#endif /* CONFIG_CAN_PASS_STRUCTS */

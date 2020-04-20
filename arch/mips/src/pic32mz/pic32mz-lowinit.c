@@ -217,7 +217,7 @@ static inline void pic32mz_prefetch(void)
     }
   else
     {
-      /* For devices with 252 Mhz SYSCLK */
+      /* For devices with 252 MHz SYSCLK */
 
       nwaits = 4;
       regval = PRECON_PREFEN_CPUID;

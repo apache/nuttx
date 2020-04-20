@@ -67,6 +67,7 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
+
 /* If processing is not done at the interrupt level, then work queue support
  * is required.
  */
@@ -85,15 +86,7 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* Map between ieee802154_addrmode_e enum and actual address length */
-
-static const uint8_t mac802154_addr_length[4] = {0, 0, 2, 8};
-
-/****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
 struct mac802154_radiocb_s
@@ -102,11 +95,12 @@ struct mac802154_radiocb_s
   FAR struct ieee802154_privmac_s *priv;
 };
 
-/* Enumeration for representing what operation the MAC layer is currently doing.
- * There can only be one command being handled at any given time, but certain
- * operations such as association requires more than one command to be sent.
- * Therefore, the need to track not only what command is currently active, but
- * also, what overall operation the command is apart of is necessary.
+/* Enumeration for representing what operation the MAC layer is currently
+ * doing. There can only be one command being handled at any given time, but
+ * certain operations such as association requires more than one command to
+ * be sent. Therefore, the need to track not only what command is currently
+ * active, but also, what overall operation the command is apart of is
+ * necessary.
  */
 
 enum mac802154_operation_e
@@ -126,7 +120,7 @@ enum mac802154_operation_e
 
 struct ieee802154_privmac_s
 {
-  /*************************** General Fields *********************************/
+  /*************************** General Fields *******************************/
 
   FAR struct ieee802154_radio_s  *radio;    /* Contained IEEE802.15.4 radio dev */
   FAR struct mac802154_maccb_s   *cb;       /* Head of a list of MAC callbacks */
@@ -136,12 +130,13 @@ struct ieee802154_privmac_s
   uint8_t nclients;                         /* Number of notification clients */
 
   /* Only support a single command at any given time. As of now I see no
-   * condition where you need to have more than one command frame simultaneously
+   * condition where you need to have more than one command frame
+   * simultaneously
    */
 
   sem_t                          opsem;     /* Exclusive operations */
 
-  /******************* Fields related to MAC operations ***********************/
+  /******************* Fields related to MAC operations *********************/
 
   enum mac802154_operation_e     curr_op;   /* The current overall operation */
   enum ieee802154_cmdid_e        curr_cmd;  /* Type of the current cmd */
@@ -149,7 +144,7 @@ struct ieee802154_privmac_s
   uint8_t                        nrxusers;
   struct work_s                  macop_work;
 
-  /******************* Fields related to SCAN operation ***********************/
+  /******************* Fields related to SCAN operation *********************/
 
   uint8_t scanindex;
   uint8_t edlist[15];
@@ -159,13 +154,14 @@ struct ieee802154_privmac_s
   struct ieee802154_scan_req_s currscan;
   uint32_t scansymdur;
 
-  /******************* Fields related to notifications ************************/
+  /******************* Fields related to notifications **********************/
 
   sq_queue_t primitive_queue;     /* Queue of primitives to pass via notify()
-                                   * callback to registered receivers */
-  struct work_s notifwork;        /* For deferring notifications to LPWORK queue*/
+                                   * callback to registered receivers
+                                   */
+  struct work_s notifwork;        /* For deferring notifications to LPWORK queue */
 
-  /******************* Tx descriptor queues and pools *************************/
+  /******************* Tx descriptor queues and pools ***********************/
 
   struct ieee802154_txdesc_s txdesc_pool[CONFIG_MAC802154_NTXDESC];
   sem_t txdesc_sem;
@@ -181,12 +177,13 @@ struct ieee802154_privmac_s
   sq_queue_t csma_queue;
   sq_queue_t gts_queue;
 
-  /* Support a singly linked list of transactions that will be sent indirectly.
-   * This list should only be used by a MAC acting as a coordinator.  These
-   * transactions will stay here until the data is extracted by the destination
-   * device sending a Data Request MAC command or if too much time passes. This
-   * list should also be used to populate the address list of the outgoing
-   * beacon frame.
+  /* Support a singly linked list of transactions that will be sent
+   * indirectly. This list should only be used by a MAC acting as a
+   * coordinator.  These transactions will stay here until the data
+   * is extracted by the destination device sending a Data Request
+   * MAC command or if too much time passes. This list should also
+   * be used to populate the address list of the outgoing beacon
+   * frame.
    */
 
   sq_queue_t indirect_queue;
@@ -195,15 +192,15 @@ struct ieee802154_privmac_s
 
   sq_queue_t dataind_queue;
 
-  /************* Fields related to addressing and coordinator *****************/
+  /************* Fields related to addressing and coordinator ***************/
 
-  /* Holds all address information (Extended, Short, and PAN ID) for the MAC. */
+  /* Holds all address information (Extended, Short, and PAN ID) for MAC */
 
   struct ieee802154_addr_s addr;
 
   struct ieee802154_pandesc_s pandesc;
 
-  /*************** Fields related to beacon-enabled networks ******************/
+  /*************** Fields related to beacon-enabled networks ****************/
 
   /* Holds attributes pertaining to the superframe specification */
 
@@ -220,7 +217,7 @@ struct ieee802154_privmac_s
   uint8_t beaconpayload[IEEE802154_MAX_BEACON_PAYLOAD_LEN];
   uint8_t beaconpayloadlength;
 
-  /****************** Fields related to offloading work ***********************/
+  /****************** Fields related to offloading work *********************/
 
   /* Work structures for offloading aynchronous work */
 
@@ -229,7 +226,7 @@ struct ieee802154_privmac_s
   struct work_s purge_work;
   struct work_s timer_work;
 
-  /****************** Uncategorized MAC PIB attributes ***********************/
+  /****************** Uncategorized MAC PIB attributes **********************/
 
   /* The maximum time to wait either for a frame intended as a response to a
    * data request frame or for a broadcast frame following a beacon with the
@@ -249,9 +246,9 @@ struct ieee802154_privmac_s
 
   uint8_t dsn;                      /* Seq. num added to tx data or MAC frame */
 
-  /* The maximum time, in multiples of aBaseSuperframeDuration, a device shall
-   * wait for a response command frame to be available following a request
-   * command frame. [1] 128.
+  /* The maximum time, in multiples of aBaseSuperframeDuration, a device
+   * shall wait for a response command frame to be available following a
+   * request command frame. [1] 128.
    */
 
   uint8_t resp_waittime;
@@ -279,7 +276,7 @@ struct ieee802154_privmac_s
 
   /* Start of 32-bit bitfield */
 
-  /* The offset, measured is symbols, between the symbol boundary at which the
+  /* The offset, measured is symbols, between the symbol boundary at which
    * MLME captures the timestamp of each transmitted and received frame, and
    * the onset of the first symbol past the SFD, namely the first symbol of
    * the frames [1] pg. 129.
@@ -313,6 +310,7 @@ struct ieee802154_privmac_s
   uint8_t max_csmabackoffs    : 3;  /* Max num backoffs for CSMA algorithm
                                      * before declaring ch access failure */
   uint8_t maxretries          : 3;  /* Max # of retries allowed after tx fail */
+
   /* End of 8-bit bitfield. */
 
   /* Start of 8-bit bitfield */
@@ -320,8 +318,6 @@ struct ieee802154_privmac_s
   uint8_t rxonidle            : 1;  /* Receiver on when idle? */
 
   /* End of 8-bit bitfield. */
-
-
 
   /* TODO: Add Security-related MAC PIB attributes */
 };
@@ -524,7 +520,7 @@ void mac802154_notify(FAR struct ieee802154_privmac_s *priv,
   ((GETHOST16(ptr, index) & IEEE802154_GTSDIR_MASK) >> \
   IEEE802154_GTSDIR_SHIFT_MASK)
 
-/* Helper macros for setting/receiving bits for Pending Address Specification */
+/* Helper macros for setting/receiving bits for Pending Address */
 
 #define IEEE802154_GETNPENDSADDR(ptr, index) \
   ((GETHOST16(ptr, index) & IEEE802154_PENDADDR_NSADDR) >> \
@@ -562,8 +558,9 @@ static inline int mac802154_takesem(sem_t *sem, bool allowinterrupt)
 #define mac802154_lock(dev, allowinterrupt) \
   mac802154_lockpriv(dev, allowinterrupt, __FUNCTION__)
 
-static inline int mac802154_lockpriv(FAR struct ieee802154_privmac_s *dev,
-                    bool allowinterrupt, FAR const char *funcname)
+static inline int
+mac802154_lockpriv(FAR struct ieee802154_privmac_s *dev,
+                   bool allowinterrupt, FAR const char *funcname)
 {
   int ret;
 
@@ -585,8 +582,9 @@ static inline int mac802154_lockpriv(FAR struct ieee802154_privmac_s *dev,
   return ret;
 }
 
-static inline void mac802154_txdesc_free(FAR struct ieee802154_privmac_s *priv,
-                                         FAR struct ieee802154_txdesc_s *txdesc)
+static inline void
+mac802154_txdesc_free(FAR struct ieee802154_privmac_s *priv,
+                      FAR struct ieee802154_txdesc_s *txdesc)
 {
   sq_addlast((FAR sq_entry_t *)txdesc, &priv->txdesc_queue);
   mac802154_givesem(&priv->txdesc_sem);
@@ -603,8 +601,8 @@ static inline void mac802154_txdesc_free(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-static inline uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv,
-                                            uint32_t symbols)
+static inline uint32_t
+mac802154_symtoticks(FAR struct ieee802154_privmac_s *priv, uint32_t symbols)
 {
   union ieee802154_attr_u attrval;
   uint32_t ret;
@@ -621,18 +619,18 @@ static inline uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *pri
 
   ret = ((uint64_t)attrval.phy.symdur_picosec * symbols) / (1000 * 1000);
 
-  /* This method should only be used for things that can be late. For instance,
-   * it's always okay to wait a little longer before disabling your receiver.
-   * Therefore, we force the tick count to round up.
+  /* This method should only be used for things that can be late. For
+   * instance, it's always okay to wait a little longer before disabling
+   * your receiver. Therefore, we force the tick count to round up.
    */
 
   if (ret % USEC_PER_TICK == 0)
     {
-      ret = ret/USEC_PER_TICK;
+      ret = ret / USEC_PER_TICK;
     }
   else
     {
-      ret = ret/USEC_PER_TICK;
+      ret = ret / USEC_PER_TICK;
       ret++;
     }
 
@@ -652,12 +650,15 @@ static inline uint32_t mac802154_symtoticks(FAR struct ieee802154_privmac_s *pri
  *
  ****************************************************************************/
 
-static inline void mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
+static inline void
+mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
                      uint32_t numsymbols, worker_t worker)
 {
   DEBUGASSERT(work_available(&priv->timer_work));
 
-  /* Schedule the work, converting the number of symbols to the number of CPU ticks */
+  /* Schedule the work
+   * converting the number of symbols to the number of CPU ticks
+   */
 
   work_queue(HPWORK, &priv->timer_work, worker, priv,
              mac802154_symtoticks(priv, numsymbols));
@@ -674,14 +675,16 @@ static inline void mac802154_timerstart(FAR struct ieee802154_privmac_s *priv,
  *
  ****************************************************************************/
 
-static inline int mac802154_timercancel(FAR struct ieee802154_privmac_s *priv)
+static inline int
+mac802154_timercancel(FAR struct ieee802154_privmac_s *priv)
 {
   work_cancel(HPWORK, &priv->timer_work);
   wlinfo("Timer cancelled\n");
   return OK;
 }
 
-static inline void mac802154_rxenable(FAR struct ieee802154_privmac_s *priv)
+static inline void
+mac802154_rxenable(FAR struct ieee802154_privmac_s *priv)
 {
   priv->nrxusers++;
 
@@ -694,7 +697,8 @@ static inline void mac802154_rxenable(FAR struct ieee802154_privmac_s *priv)
     }
 }
 
-static inline void mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
+static inline void
+mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
 {
   priv->nrxusers--;
 
@@ -707,54 +711,61 @@ static inline void mac802154_rxdisable(FAR struct ieee802154_privmac_s *priv)
     }
 }
 
-static inline void mac802154_setchannel(FAR struct ieee802154_privmac_s *priv,
-                                        uint8_t channel)
+static inline void
+mac802154_setchannel(FAR struct ieee802154_privmac_s *priv,
+                     uint8_t channel)
 {
   priv->radio->setattr(priv->radio, IEEE802154_ATTR_PHY_CHAN,
                         (FAR const union ieee802154_attr_u *)&channel);
 }
 
-static inline void mac802154_setchpage(FAR struct ieee802154_privmac_s *priv,
-                                       uint8_t chpage)
+static inline void
+mac802154_setchpage(FAR struct ieee802154_privmac_s *priv,
+                    uint8_t chpage)
 {
   priv->radio->setattr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
                         (FAR const union ieee802154_attr_u *)&chpage);
 }
 
-static inline void mac802154_setpanid(FAR struct ieee802154_privmac_s *priv,
-                                      const uint8_t *panid)
+static inline void
+mac802154_setpanid(FAR struct ieee802154_privmac_s *priv,
+                   FAR const uint8_t *panid)
 {
   IEEE802154_PANIDCOPY(priv->addr.panid, panid);
   priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_PANID,
                         (FAR const union ieee802154_attr_u *)panid);
 }
 
-static inline void mac802154_setsaddr(FAR struct ieee802154_privmac_s *priv,
-                                      const uint8_t *saddr)
+static inline void
+mac802154_setsaddr(FAR struct ieee802154_privmac_s *priv,
+                   FAR const uint8_t *saddr)
 {
   IEEE802154_SADDRCOPY(priv->addr.saddr, saddr);
   priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_SADDR,
                         (FAR const union ieee802154_attr_u *)saddr);
 }
 
-static inline void mac802154_setcoordsaddr(FAR struct ieee802154_privmac_s *priv,
-                                          const uint8_t *saddr)
+static inline void
+mac802154_setcoordsaddr(FAR struct ieee802154_privmac_s *priv,
+                        FAR const uint8_t *saddr)
 {
   IEEE802154_SADDRCOPY(priv->pandesc.coordaddr.saddr, saddr);
   priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_SADDR,
                         (FAR const union ieee802154_attr_u *)saddr);
 }
 
-static inline void mac802154_setcoordeaddr(FAR struct ieee802154_privmac_s *priv,
-                                           const uint8_t *eaddr)
+static inline void
+mac802154_setcoordeaddr(FAR struct ieee802154_privmac_s *priv,
+                        FAR const uint8_t *eaddr)
 {
   IEEE802154_EADDRCOPY(priv->pandesc.coordaddr.eaddr, eaddr);
   priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
                         (FAR const union ieee802154_attr_u *)eaddr);
 }
 
-static inline void mac802154_setcoordaddr(FAR struct ieee802154_privmac_s *priv,
-                                          FAR const struct ieee802154_addr_s *addr)
+static inline void
+mac802154_setcoordaddr(FAR struct ieee802154_privmac_s *priv,
+                       FAR const struct ieee802154_addr_s *addr)
 {
   memcpy(&priv->pandesc.coordaddr, addr, sizeof(struct ieee802154_addr_s));
   priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_COORD_EADDR,
@@ -763,8 +774,8 @@ static inline void mac802154_setcoordaddr(FAR struct ieee802154_privmac_s *priv,
                         (FAR const union ieee802154_attr_u *)addr->saddr);
 }
 
-static inline void mac802154_setrxonidle(FAR struct ieee802154_privmac_s *priv,
-                                         bool rxonidle)
+static inline void
+mac802154_setrxonidle(FAR struct ieee802154_privmac_s *priv, bool rxonidle)
 {
   priv->rxonidle = rxonidle;
   if (priv->rxonidle)
@@ -780,8 +791,8 @@ static inline void mac802154_setrxonidle(FAR struct ieee802154_privmac_s *priv,
                         (FAR const union ieee802154_attr_u *)&rxonidle);
 }
 
-static inline void mac802154_setdevmode(FAR struct ieee802154_privmac_s *priv,
-                                        enum ieee802154_devmode_e mode)
+static inline void
+mac802154_setdevmode(FAR struct ieee802154_privmac_s *priv, uint8_t mode)
 {
   priv->devmode = mode;
   priv->radio->setattr(priv->radio, IEEE802154_ATTR_MAC_DEVMODE,

@@ -929,8 +929,8 @@ endchoice
 
 menu "STM32 Peripheral Support"
 
-# These "hidden" settings determine is a peripheral option is available for the
-# selection MCU
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
 
 config STM32F0L0G0_HAVE_AES
 	bool

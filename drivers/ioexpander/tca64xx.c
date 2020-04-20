@@ -1257,7 +1257,7 @@ errout_with_restart:
   /* Re-start the poll timer */
 
   sched_lock();
-  ret = wd_start(priv->wdog, TCA64XX_POLLDELAY, (wdentry_t)tca64_poll_expiry,
+  ret = wd_start(priv->wdog, TCA64XX_POLLDELAY, tca64_poll_expiry,
                  1, (wdparm_t)priv);
   if (ret < 0)
     {
@@ -1313,7 +1313,9 @@ static void tca64_interrupt(FAR void *arg)
 
       priv->config->enable(priv->config, false);
 
-      /* Schedule interrupt related work on the high priority worker thread. */
+      /* Schedule interrupt related work on the high priority worker
+       * thread.
+       */
 
       work_queue(HPWORK, &priv->work, tca64_irqworker,
                  (FAR void *)priv, 0);
@@ -1357,7 +1359,9 @@ static void tca64_poll_expiry(int argc, wdparm_t arg1, ...)
 
       priv->config->enable(priv->config, false);
 
-      /* Schedule interrupt related work on the high priority worker thread. */
+      /* Schedule interrupt related work on the high priority worker
+       * thread.
+       */
 
       work_queue(HPWORK, &priv->work, tca64_irqworker,
                  (FAR void *)priv, 0);
@@ -1426,7 +1430,7 @@ FAR struct ioexpander_dev_s *tca64_initialize(FAR struct i2c_master_s *i2c,
   priv->wdog    = wd_create();
   DEBUGASSERT(priv->wdog != NULL);
 
-  ret = wd_start(priv->wdog, TCA64XX_POLLDELAY, (wdentry_t)tca64_poll_expiry,
+  ret = wd_start(priv->wdog, TCA64XX_POLLDELAY, tca64_poll_expiry,
                  1, (wdparm_t)priv);
   if (ret < 0)
     {

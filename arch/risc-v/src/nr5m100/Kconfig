@@ -40,8 +40,8 @@ config NR5_EPIC
 
 menu "NR5 Peripheral Support"
 
-# These "hidden" settings determine is a peripheral option is available for the
-# selection MCU
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
 
 config NR5_HAVE_UART1
 	bool

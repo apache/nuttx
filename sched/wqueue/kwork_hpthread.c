@@ -60,11 +60,7 @@ struct hp_wqueue_s g_hpwork;
  *   high priority work queue.
  *
  *   These, along with the lower priority worker thread(s) are the kernel
- *   mode work queues (also build in the flat build).  One of these threads
- *   also performs periodic garbage collection (that would otherwise be
- *   performed by the idle thread if CONFIG_SCHED_WORKQUEUE is not defined).
- *   That will be the higher priority worker thread only if a lower priority
- *   worker thread is available.
+ *   mode work queues (also build in the flat build).
  *
  *   All kernel mode worker threads are started by the OS during normal
  *   bring up.  This entry point is referenced by OS internally and should
@@ -80,8 +76,8 @@ struct hp_wqueue_s g_hpwork;
 
 static int work_hpthread(int argc, char *argv[])
 {
+  int wndx = 0;
 #if CONFIG_SCHED_HPNTHREADS > 1
-  int wndx;
   pid_t me = getpid();
   int i;
 
@@ -103,42 +99,12 @@ static int work_hpthread(int argc, char *argv[])
 
   for (; ; )
     {
-#if CONFIG_SCHED_HPNTHREADS > 1
-      /* Thread 0 is special.  Only thread 0 performs period garbage collection */
+      /* Then process queued work.  work_process will not return until: (1)
+       * there is no further work in the work queue, and (2) signal is
+       * triggered, or delayed work expires.
+       */
 
-      if (wndx > 0)
-        {
-          /* The other threads will perform work, waiting indefinitely until
-           * signalled for the next work availability.
-           */
-
-          work_process((FAR struct kwork_wqueue_s *)&g_hpwork, wndx);
-        }
-      else
-#endif
-        {
-#ifndef CONFIG_SCHED_LPWORK
-          /* First, perform garbage collection.  This cleans-up memory
-           * de-allocations that were queued because they could not be freed
-           * in that execution context (for example, if the memory was freed
-           * from an interrupt handler).
-           *
-           * NOTE: If the work thread is disabled, this clean-up is
-           * performed by the IDLE thread (at a very, very low priority).
-           * If the low-priority work thread is enabled, then the garbage
-           * collection is done on that thread instead.
-           */
-
-          sched_garbage_collection();
-#endif
-
-          /* Then process queued work.  work_process will not return until:
-           * (1) there is no further work in the work queue, and (2) signal
-           * is triggered, or delayed work expires.
-           */
-
-          work_process((FAR struct kwork_wqueue_s *)&g_hpwork, 0);
-        }
+      work_process((FAR struct kwork_wqueue_s *)&g_hpwork, wndx);
     }
 
   return OK; /* To keep some compilers happy */

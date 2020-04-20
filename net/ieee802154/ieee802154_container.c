@@ -130,9 +130,9 @@ void ieee802154_container_initialize(void)
  *   None
  *
  * Returned Value:
- *   A reference to the allocated container structure.  All user fields in this
- *   structure have been zeroed.  On a failure to allocate, NULL is
- *   returned.
+ *   A reference to the allocated container structure.
+ *   All user fields in this structure have been zeroed.
+ *   On a failure to allocate, NULL is returned.
  *
  * Assumptions:
  *   The caller has locked the network.
@@ -215,6 +215,6 @@ void ieee802154_container_free(FAR struct ieee802154_container_s *container)
       /* Otherwise, deallocate it. */
 
       net_unlock();
-      sched_kfree(container);
+      kmm_free(container);
     }
 }

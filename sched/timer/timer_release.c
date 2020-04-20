@@ -71,7 +71,7 @@ static inline void timer_free(struct posix_timer_s *timer)
       /* Otherwise, return it to the heap */
 
       leave_critical_section(flags);
-      sched_kfree(timer);
+      kmm_free(timer);
     }
 }
 

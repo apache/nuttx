@@ -56,6 +56,10 @@
 #  define KX022_FIFO_CNT 1
 #endif
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #ifdef CONFIG_SENSORS_KX022_SCU
 int board_kx022_initialize(FAR const char *devpath, int bus)
 {

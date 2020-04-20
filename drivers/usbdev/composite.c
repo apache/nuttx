@@ -720,7 +720,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
        * Non-Standard Class Requests
        **********************************************************************/
 
-       /* Class implementations should handle there own interface and endpoint
+       /* Class implementations should handle their own interface and endpoint
         * requests.
         */
 

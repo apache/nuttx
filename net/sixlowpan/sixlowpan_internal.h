@@ -25,7 +25,8 @@
  *    All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
@@ -37,17 +38,18 @@
  *    contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
  ****************************************************************************/
 
 #ifndef _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H
@@ -194,8 +196,8 @@ struct ieee802_txmetadata_s
 };
 #endif
 
-/* This structure holds the packet metadata as a union when multiple different
- * radio type are supported.
+/* This structure holds the packet metadata as a union when multiple
+ * different radio types are supported.
  */
 
 union sixlowpan_metadata_u
@@ -251,9 +253,9 @@ struct iob_s;               /* Forward reference */
  * Name: sixlowpan_send
  *
  * Description:
- *   Process an outgoing UDP or ICMPv6 packet.  Takes an IP packet and formats
- *   it to be sent on an 802.15.4 network using 6lowpan.  Called from common
- *   UDP/ICMPv6 send logic.
+ *   Process an outgoing UDP or ICMPv6 packet.  Takes an IP packet and
+ *   formats it to be sent on an 802.15.4 network using 6lowpan.  Called
+ *   from common UDP/ICMPv6 send logic.
  *
  *   The payload data is in the caller 'buf' and is of length 'buflen'.
  *   Compressed headers will be added and if necessary the packet is
@@ -284,7 +286,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
                    FAR struct devif_callback_s **list,
                    FAR const struct ipv6_hdr_s *ipv6hdr, FAR const void *buf,
                    size_t len, FAR const struct netdev_varaddr_s *destmac,
-                   uint16_t timeout);
+                   unsigned int timeout);
 
 /****************************************************************************
  * Name: sixlowpan_meta_data
@@ -398,12 +400,12 @@ int sixlowpan_queue_frames(FAR struct radio_driver_s *radio,
  * Name: sixlowpan_hc06_initialize
  *
  * Description:
- *   sixlowpan_hc06_initialize() is called during OS initialization at power-up
- *   reset.  It is called from the common sixlowpan_initialize() function.
- *   sixlowpan_hc06_initialize() configures HC06 networking data structures.
- *   It is called prior to platform-specific driver initialization so that
- *   the 6LoWPAN networking subsystem is prepared to deal with network
- *   driver initialization actions.
+ *   sixlowpan_hc06_initialize() is called during OS initialization at
+ *   power-up reset.  It is called from the common sixlowpan_initialize()
+ *   function.  sixlowpan_hc06_initialize() configures HC06 networking data
+ *   structures.  It is called prior to platform-specific driver
+ *   initialization so that the 6LoWPAN networking subsystem is prepared to
+ *   deal with network driver initialization actions.
  *
  * Input Parameters:
  *   None
@@ -571,10 +573,10 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
  *
  * Description:
  *   sixlowpan_nexthopaddr(): If the destination is on-link, extract the
- *   IEEE 802.15.14 destination address from the destination IP address. If the
- *   destination is not reachable directly, use the routing table (if available)
- *   or fall back to the default router IP address and use the router IP address
- *   to derive the IEEE 802.15.4 MAC address.
+ *   IEEE 802.15.14 destination address from the destination IP address.  If
+ *   the destination is not reachable directly, use the routing table (if
+ *   available) or fall back to the default router IP address and use the
+ *   router IP address to derive the IEEE 802.15.4 MAC address.
  *
  ****************************************************************************/
 
@@ -601,15 +603,17 @@ int sixlowpan_nexthopaddr(FAR struct radio_driver_s *radio,
  *   (eaddr).
  *
  *   sixlowpan_islinklocal() and sixlowpan_ismacbased() will return true for
- *   address created in this fashion.  sixlowpan_destaddrfromip() is intended to
- *   handle a tagged address or any size.  Local addresses are of a fixed but
- *   configurable size and sixlowpan_isaddrbased() is for use with such local
- *   addresses.
+ *   address created in this fashion.  sixlowpan_destaddrfromip() is
+ *   intended to handle a tagged address or any size.  Local addresses are
+ *   of a fixed but configurable size and sixlowpan_isaddrbased() is for use
+ *   with such local addresses.
  *
  *    128  112  96   80    64   48   32   16
  *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE
+ *                                             48-bit MAC
+ *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE
+ *                                             EUI-64
  *
  ****************************************************************************/
 

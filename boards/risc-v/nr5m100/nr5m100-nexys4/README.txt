@@ -67,13 +67,13 @@ Development Environment
   cores require a separate I and D bus with cache SRAM and an external memory cache controller,
   etc.  This in addition to the pipeline registers adds additional gate count.
 
-  The nr5m100-nexys4 core runs at 83.333 Mhz which provides about 18 Mhz effective operating
+  The nr5m100-nexys4 core runs at 83.333 MHz which provides about 18 MHz effective operating
   speed with the multi-clock per instruction architecture.  If you are looking for a higher
   performance platform, you should check out the PULP Platform ( http://www.pulp-platform.org ).
   That is an FPGA design with a 4-stage pipeline RISC-V core, though not currently supported
   by NuttX.  The NR5M100 project will likely pull in the RISC-V core from that design next,
   though this will probably not be available soon.  With a bit of work, it is possible to
-  run the nr5m100-nexys4 core at 170 Mhz with a 6.5 clocks-per-instruction state machine.
+  run the nr5m100-nexys4 core at 170 MHz with a 6.5 clocks-per-instruction state machine.
   This would give an effective performance of about 26Mhz.
 
 Development Environment

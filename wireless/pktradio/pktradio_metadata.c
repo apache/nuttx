@@ -55,9 +55,9 @@
  * Private Data
  ****************************************************************************/
 
-/* The g_free_metadata is a list of meta-data structures that are available for
- * general use.  The number of messages in this list is a system configuration
- * item.
+/* The g_free_metadata is a list of meta-data structures that are available
+ * for general use.  The number of messages in this list is a system
+ * configuration item.
  */
 
 static FAR struct pktradio_metadata_s *g_free_metadata;
@@ -140,8 +140,8 @@ void pktradio_metadata_initialize(void)
  *   None
  *
  * Returned Value:
- *   A reference to the allocated metadata structure.  All user fields in this
- *   structure have been zeroed.  On a failure to allocate, NULL is
+ *   A reference to the allocated metadata structure.  All user fields in
+ *   this structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
  *
  ****************************************************************************/
@@ -185,10 +185,10 @@ FAR struct pktradio_metadata_s *pktradio_metadata_allocate(void)
 
   if (metadata != NULL)
     {
-       /* Zero and tag the allocated meta-data structure. */
+      /* Zero and tag the allocated meta-data structure. */
 
-       memset(metadata, 0, sizeof(struct pktradio_metadata_s));
-       metadata->pm_pool = pool;
+      memset(metadata, 0, sizeof(struct pktradio_metadata_s));
+      metadata->pm_pool = pool;
     }
 
   return metadata;
@@ -237,6 +237,6 @@ void pktradio_metadata_free(FAR struct pktradio_metadata_s *metadata)
       /* Otherwise, deallocate it.  We won't access the free list */
 
       nxsem_post(&g_metadata_sem);
-      sched_kfree(metadata);
+      kmm_free(metadata);
     }
 }

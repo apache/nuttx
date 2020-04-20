@@ -240,7 +240,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 8, 2019</p>
+      <p>Last Updated: April 7, 2020</p>
     </td>
   </tr>
 </table>
@@ -2948,6 +2948,10 @@ wd_start() on a given watchdog ID has any effect.
 <li><code>wdentry</code>. Function to call on timeout
 <li><code>argc</code>.  The number of uint32_t parameters to pass to wdentry.
 <li><code>...</code>. uint32_t size parameters to pass to wdentry
+
+<p>
+<b>NOTE</b>:  All parameters must be of type <code>wdparm_t</code>.
+</p>
 </ul>
 
 <p>
@@ -6220,13 +6224,13 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
      <code>int (*sendsetup)(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer, size_t nbytes);</code><br>
      <code>int (*cancel)(FAR struct sdio_dev_s *dev);</code><br>
      <code>int (*waitresponse)(FAR struct sdio_dev_s *dev, uint32_t cmd);</code><br>
-     <code>int (*recvR1)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R1);</code><br>
-     <code>int (*recvR2)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t R2[4]);</code><br>
-     <code>int (*recvR3)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R3);</code><br>
-     <code>int (*recvR4)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R4);</code><br>
-     <code>int (*recvR5)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R5);</code><br>
-     <code>int (*recvR6)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R6);</code><br>
-     <code>int (*recvR7)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R7);</code></p>
+     <code>int (*recv_r1)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R1);</code><br>
+     <code>int (*recv_r2)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t R2[4]);</code><br>
+     <code>int (*recv_r3)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R3);</code><br>
+     <code>int (*recv_r4)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R4);</code><br>
+     <code>int (*recv_r5)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R5);</code><br>
+     <code>int (*recv_r6)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R6);</code><br>
+     <code>int (*recv_r7)(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *R7);</code></p>
     </ul>
     <p>
       Event/Callback support:

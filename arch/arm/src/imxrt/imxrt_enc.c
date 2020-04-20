@@ -56,7 +56,7 @@
 
 #include "imxrt_enc.h"
 
-/* This functionality is dependent on  Qencoder Sensor support*/
+/* This functionality is dependent on Qencoder Sensor support */
 
 #ifndef CONFIG_SENSORS_QENCODER
 #  undef CONFIG_IMXRT_ENC
@@ -69,9 +69,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Debug ****************************************************************************/
+/* Debug ********************************************************************/
 
-/* Non-standard debug that may be used to enable the imxrt qe's built-in test features */
+/* Non-standard debug that may be used to enable the imxrt qe's built-in test
+ * features
+ */
 
 #ifndef CONFIG_DEBUG_FEATURES
 #  undef CONFIG_DEBUG_SENSORS
@@ -262,12 +264,15 @@ struct imxrt_qeconfig_s
   uint32_t  init_val;       /* Value to initialize position counters to */
   uint32_t  modulus;        /* Modulus to use when modulo counting is enabled */
   uint16_t  in_filt_per;    /* Period for input filter sampling in # of periph
-                             * clock cycles */
+                             * clock cycles
+                             */
   uint16_t  in_filt_cnt;    /* # of consecutive input filter samples that must
-                             * agree */
+                             * agree
+                             */
   uint16_t  init_flags;     /* Flags to control which signals and edge transitions
                              * will reinitialize the position counter. Bits 4-0:
-                             * [MOD, REV, XNE, XIP, HNE, HIP] */
+                             * [MOD, REV, XNE, XIP, HNE, HIP]
+                             */
 
 #ifdef CONFIG_DEBUG_SENSORS
   bool      tst_dir_adv;    /* Whether to generate down/up test signals */
@@ -280,8 +285,8 @@ struct imxrt_qeconfig_s
 struct imxrt_enc_lowerhalf_s
 {
   /* The first field of this state structure must be a pointer to the lower-
-  * half callback structure:
-  */
+   * half callback structure:
+   */
 
   FAR const struct qe_ops_s *ops;             /* Lower half callback structure */
 
@@ -289,7 +294,8 @@ struct imxrt_enc_lowerhalf_s
 
   FAR const struct imxrt_qeconfig_s *config;  /* static configuration */
   sem_t sem_excl;                             /* Mutual exclusion semaphore to
-                                               * ensure atomic 32-bit reads. */
+                                               * ensure atomic 32-bit reads.
+                                               */
 };
 
 /****************************************************************************
@@ -309,8 +315,10 @@ static inline void imxrt_enc_modifyreg16
 static void imxrt_enc_clock_enable (uint32_t base);
 static void imxrt_enc_clock_disable (uint32_t base);
 
-static inline void imxrt_enc_sem_wait(FAR struct imxrt_enc_lowerhalf_s *priv);
-static inline void imxrt_enc_sem_post(FAR struct imxrt_enc_lowerhalf_s *priv);
+static inline int  imxrt_enc_sem_wait(
+    FAR struct imxrt_enc_lowerhalf_s *priv);
+static inline void imxrt_enc_sem_post(
+    FAR struct imxrt_enc_lowerhalf_s *priv);
 
 static int imxrt_enc_reconfig(FAR struct imxrt_enc_lowerhalf_s *priv,
               uint16_t args);
@@ -329,7 +337,8 @@ static int imxrt_enc_test_gen(FAR struct imxrt_enc_lowerhalf_s *priv,
 
 static int imxrt_setup(FAR struct qe_lowerhalf_s *lower);
 static int imxrt_shutdown(FAR struct qe_lowerhalf_s *lower);
-static int imxrt_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos);
+static int imxrt_position(FAR struct qe_lowerhalf_s *lower,
+                          FAR int32_t *pos);
 static int imxrt_reset(FAR struct qe_lowerhalf_s *lower);
 static int imxrt_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
               unsigned long arg);
@@ -359,9 +368,12 @@ static const struct imxrt_qeconfig_s imxrt_enc1_config =
   .modulus     = CONFIG_ENC1_MODULUS,
   .in_filt_per = CONFIG_ENC1_FILTPER,
   .in_filt_cnt = CONFIG_ENC1_FILTCNT,
-  .init_flags  = CONFIG_ENC1_HIP << HIP_SHIFT | CONFIG_ENC1_HNE << HNE_SHIFT |
-                 CONFIG_ENC1_XIP << XIP_SHIFT | CONFIG_ENC1_XNE << XNE_SHIFT |
-                 CONFIG_ENC1_DIR << REV_SHIFT | CONFIG_ENC1_MOD << MOD_SHIFT,
+  .init_flags  = CONFIG_ENC1_HIP << HIP_SHIFT |
+                 CONFIG_ENC1_HNE << HNE_SHIFT |
+                 CONFIG_ENC1_XIP << XIP_SHIFT |
+                 CONFIG_ENC1_XNE << XNE_SHIFT |
+                 CONFIG_ENC1_DIR << REV_SHIFT |
+                 CONFIG_ENC1_MOD << MOD_SHIFT,
 
 #ifdef CONFIG_DEBUG_SENSORS
   .tst_dir_adv = CONFIG_ENC1_TST_DIR,
@@ -384,9 +396,12 @@ static const struct imxrt_qeconfig_s imxrt_enc2_config =
   .modulus     = CONFIG_ENC2_MODULUS,
   .in_filt_per = CONFIG_ENC2_FILTPER,
   .in_filt_cnt = CONFIG_ENC2_FILTCNT,
-  .init_flags  = CONFIG_ENC2_HIP << HIP_SHIFT | CONFIG_ENC2_HNE << HNE_SHIFT |
-                 CONFIG_ENC2_XIP << XIP_SHIFT | CONFIG_ENC2_XNE << XNE_SHIFT |
-                 CONFIG_ENC2_DIR << REV_SHIFT | CONFIG_ENC2_MOD << MOD_SHIFT,
+  .init_flags  = CONFIG_ENC2_HIP << HIP_SHIFT |
+                 CONFIG_ENC2_HNE << HNE_SHIFT |
+                 CONFIG_ENC2_XIP << XIP_SHIFT |
+                 CONFIG_ENC2_XNE << XNE_SHIFT |
+                 CONFIG_ENC2_DIR << REV_SHIFT |
+                 CONFIG_ENC2_MOD << MOD_SHIFT,
 
 #ifdef CONFIG_DEBUG_SENSORS
   .tst_dir_adv = CONFIG_ENC2_TST_DIR,
@@ -409,9 +424,12 @@ static const struct imxrt_qeconfig_s imxrt_enc3_config =
   .modulus     = CONFIG_ENC3_MODULUS,
   .in_filt_per = CONFIG_ENC3_FILTPER,
   .in_filt_cnt = CONFIG_ENC3_FILTCNT,
-  .init_flags  = CONFIG_ENC3_HIP << HIP_SHIFT | CONFIG_ENC3_HNE << HNE_SHIFT |
-                 CONFIG_ENC3_XIP << XIP_SHIFT | CONFIG_ENC3_XNE << XNE_SHIFT |
-                 CONFIG_ENC3_DIR << REV_SHIFT | CONFIG_ENC3_MOD << MOD_SHIFT,
+  .init_flags  = CONFIG_ENC3_HIP << HIP_SHIFT |
+                 CONFIG_ENC3_HNE << HNE_SHIFT |
+                 CONFIG_ENC3_XIP << XIP_SHIFT |
+                 CONFIG_ENC3_XNE << XNE_SHIFT |
+                 CONFIG_ENC3_DIR << REV_SHIFT |
+                 CONFIG_ENC3_MOD << MOD_SHIFT,
 
 #ifdef CONFIG_DEBUG_SENSORS
   .tst_dir_adv = CONFIG_ENC3_TST_DIR,
@@ -434,9 +452,12 @@ static const struct imxrt_qeconfig_s imxrt_enc4_config =
   .modulus     = CONFIG_ENC4_MODULUS,
   .in_filt_per = CONFIG_ENC4_FILTPER,
   .in_filt_cnt = CONFIG_ENC4_FILTCNT,
-  .init_flags  = CONFIG_ENC4_HIP << HIP_SHIFT | CONFIG_ENC4_HNE << HNE_SHIFT |
-                 CONFIG_ENC4_XIP << XIP_SHIFT | CONFIG_ENC4_XNE << XNE_SHIFT |
-                 CONFIG_ENC4_DIR << REV_SHIFT | CONFIG_ENC4_MOD << MOD_SHIFT,
+  .init_flags  = CONFIG_ENC4_HIP << HIP_SHIFT |
+                 CONFIG_ENC4_HNE << HNE_SHIFT |
+                 CONFIG_ENC4_XIP << XIP_SHIFT |
+                 CONFIG_ENC4_XNE << XNE_SHIFT |
+                 CONFIG_ENC4_DIR << REV_SHIFT |
+                 CONFIG_ENC4_MOD << MOD_SHIFT,
 
 #ifdef CONFIG_DEBUG_SENSORS
   .tst_dir_adv = CONFIG_ENC4_TST_DIR,
@@ -570,9 +591,9 @@ void imxrt_enc_clock_disable (uint32_t base)
  *
  ****************************************************************************/
 
-static inline void imxrt_enc_sem_wait(FAR struct imxrt_enc_lowerhalf_s *priv)
+static inline int imxrt_enc_sem_wait(FAR struct imxrt_enc_lowerhalf_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->sem_excl);
+  return nxsem_wait_uninterruptible(&priv->sem_excl);
 }
 
 /****************************************************************************
@@ -755,8 +776,8 @@ static void imxrt_enc_modulo_disable(FAR struct imxrt_enc_lowerhalf_s *priv)
  *
  * Input Parameters:
  *   priv - A reference to the IMXRT enc lowerhalf structure
- *   value - Bit encoded variable to indicate how many pulse advances to generate
- *           and which direction to generate them.
+ *   value - Bit encoded variable to indicate how many pulse advances to
+ *           generate and which direction to generate them.
  *              Bits 15-9: Reserved.
  *              Bit 8: QDN. Generate negative/ positive advances.
  *              Bits 7-0: TEST_COUNT. Number of advances to generate.
@@ -808,21 +829,25 @@ static int imxrt_enc_test_gen(FAR struct imxrt_enc_lowerhalf_s *priv,
 static int imxrt_setup(FAR struct qe_lowerhalf_s *lower)
 {
   FAR struct imxrt_enc_lowerhalf_s *priv =
-                                    (FAR struct imxrt_enc_lowerhalf_s *)lower;
+    (FAR struct imxrt_enc_lowerhalf_s *)lower;
   FAR const struct imxrt_qeconfig_s *config = priv->config;
   uint32_t regval;
+  int ret;
+
+  ret = imxrt_enc_sem_wait(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Ungate the clock */
 
   imxrt_enc_clock_enable(config->base);
 
-  /* Initialize the registers */
-
-  imxrt_enc_sem_wait(priv);
-
   /* Initial value registers */
 
-  imxrt_enc_putreg16(priv, IMXRT_ENC_LINIT_OFFSET, config->init_val & 0xffff);
+  imxrt_enc_putreg16(priv, IMXRT_ENC_LINIT_OFFSET,
+                     config->init_val & 0xffff);
   imxrt_enc_putreg16(priv, IMXRT_ENC_UINIT_OFFSET,
                         (config->init_val >> 16) & 0xffff);
 
@@ -843,7 +868,8 @@ static int imxrt_setup(FAR struct qe_lowerhalf_s *lower)
 #ifdef CONFIG_DEBUG_SENSORS
   regval = ENC_TST_TCE | ENC_TST_TEN;
   regval |= config->tst_dir_adv ? ENC_TST_QDN : 0;
-  regval |= (config->tst_period & ENC_TST_PERIOD_MASK) << ENC_TST_PERIOD_SHIFT;
+  regval |= (config->tst_period & ENC_TST_PERIOD_MASK) <<
+            ENC_TST_PERIOD_SHIFT;
   imxrt_enc_putreg16(priv, IMXRT_ENC_TST_OFFSET, regval);
 #endif
 
@@ -876,11 +902,17 @@ static int imxrt_setup(FAR struct qe_lowerhalf_s *lower)
 
 static int imxrt_shutdown(FAR struct qe_lowerhalf_s *lower)
 {
-  FAR struct imxrt_enc_lowerhalf_s *priv = (FAR struct imxrt_enc_lowerhalf_s *)lower;
+  FAR struct imxrt_enc_lowerhalf_s *priv =
+    (FAR struct imxrt_enc_lowerhalf_s *)lower;
+  int ret;
 
   /* Ensure any in-progress operations are done. */
 
-  imxrt_enc_sem_wait(priv);
+  ret = imxrt_enc_sem_wait(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
 #ifdef CONFIG_DEBUG_SENSORS
   imxrt_enc_putreg16(priv, IMXRT_ENC_TST_OFFSET, 0);
@@ -914,26 +946,35 @@ static int imxrt_shutdown(FAR struct qe_lowerhalf_s *lower)
 
 static int imxrt_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
 {
-  FAR struct imxrt_enc_lowerhalf_s *priv = (FAR struct imxrt_enc_lowerhalf_s *)lower;
+  FAR struct imxrt_enc_lowerhalf_s *priv =
+    (FAR struct imxrt_enc_lowerhalf_s *)lower;
   uint16_t lpos;
   uint16_t upos;
   int i;
+  int ret;
 
-  imxrt_enc_sem_wait(priv);
+  ret = imxrt_enc_sem_wait(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   lpos = imxrt_enc_getreg16(priv, IMXRT_ENC_LPOS_OFFSET);
 
-  /**********************************************************************************
-   * When a position register is read, it triggers a snapshot into the position hold
-   * registers.
+  /**************************************************************************
+   * When a position register is read, it triggers a snapshot into the
+   * position hold registers.
    *
    * If the core clock is faster than the peripheral clock, we might need to
-   * wait until the snapshot registers latch properly. There is no interrupt to
-   * signal that the snapshot is done, so we have to poll LPOSH until it equals our
-   * reading. We will poll for at most, 2 peripheral clock cycles. Since IPG_PODF max
-   * is 4, at most  we'll poll 8 core clock cycles.
-   **********************************************************************************/
+   * wait until the snapshot registers latch properly. There is no interrupt
+   * to signal that the snapshot is done, so we have to poll LPOSH until it
+   * equals our reading. We will poll for at most, 2 peripheral clock cycles.
+   * Since IPG_PODF max is 4, at most  we'll poll 8 core clock cycles.
+   **************************************************************************/
 
-  for (i = 8; lpos != imxrt_enc_getreg16(priv, IMXRT_ENC_LPOSH_OFFSET) && i > 0; i--)
+  for (i = 8;
+       lpos != imxrt_enc_getreg16(priv, IMXRT_ENC_LPOSH_OFFSET) && i > 0;
+       i--)
     {
     }
 
@@ -961,11 +1002,18 @@ static int imxrt_position(FAR struct qe_lowerhalf_s *lower, FAR int32_t *pos)
 
 static int imxrt_reset(FAR struct qe_lowerhalf_s *lower)
 {
-  FAR struct imxrt_enc_lowerhalf_s *priv = (FAR struct imxrt_enc_lowerhalf_s *)lower;
+  FAR struct imxrt_enc_lowerhalf_s *priv =
+    (FAR struct imxrt_enc_lowerhalf_s *)lower;
+  int ret;
 
   /* Write a 1 to the SWIP bit to load UINIT and LINIT into UPOS and LPOS */
 
-  imxrt_enc_sem_wait(priv);
+  ret = imxrt_enc_sem_wait(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   imxrt_enc_modifyreg16(priv, IMXRT_ENC_CTRL_OFFSET, 0, ENC_CTRL_SWIP);
   imxrt_enc_sem_post(priv);
 
@@ -1029,12 +1077,13 @@ static int imxrt_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
  * Name: imxrt_qeinitialize
  *
  * Description:
- *   Initialize a quadrature encoder interface.  This function must be called from
- *   board-specific logic..
+ *   Initialize a quadrature encoder interface.  This function must be called
+ *   from board-specific logic..
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/qe0"
- *   enc     - The encoder peripheral to use.  'enc' must be an element of {1,2,3,4}
+ *   enc     - The encoder peripheral to use.  'enc' must be an element of
+ *             {1,2,3,4}
  *
  * Returned Value:
  *   Zero on success; A negated errno value is returned on failure.

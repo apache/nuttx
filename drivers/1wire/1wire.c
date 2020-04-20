@@ -251,7 +251,7 @@ int onewire_sem_wait(FAR struct onewire_master_s *master)
 
   else
     {
-      ret = nxsem_wait(master->devsem.sem);
+      ret = nxsem_wait(&master->devsem.sem);
       if (ret < 0)
         {
           return ret;

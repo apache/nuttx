@@ -139,8 +139,10 @@ static int alloc_slot(int pin, bool isalloc)
             {
               putreg8(INTSEL_DEFAULT_VAL, base + slot);
             }
+
           break; /* already used */
         }
+
       if ((-1 == alloc) && (INTSEL_DEFAULT_VAL == val))
         {
           alloc = slot;
@@ -254,6 +256,7 @@ static int set_gpioint_config(int slot, uint32_t gpiocfg)
     {
       val &= ~(1 << (slot + 16));
     }
+
   putreg32(val, CXD56_TOPREG_PMU_WAKE_TRIG_NOISECUTEN0);
 
   /* Configure the polarity */
@@ -307,6 +310,7 @@ static int set_gpioint_config(int slot, uint32_t gpiocfg)
       DEBUGASSERT(0);
       break;
     }
+
   putreg32(val, selreg);
 
   return 0;
@@ -410,7 +414,8 @@ static int gpioint_handler(int irq, FAR void *context, FAR void *arg)
  *   IRQ number on success; a negated errno value on failure.
  *
  * Assumptions:
- *   The interrupt are disabled so that read-modify-write operations are safe.
+ *   The interrupt are disabled so that read-modify-write operations
+ *   are safe.
  *
  ****************************************************************************/
 
@@ -453,24 +458,24 @@ int cxd56_gpioint_config(uint32_t pin, uint32_t gpiocfg, xcpt_t isr,
   /* set GPIO interrupt configuration */
 
   if (gpiocfg & GPIOINT_TOGGLE_BOTH_MASK)
-  {
-   /* set GPIO pseudo both edge interrupt */
-
-    flags = enter_critical_section();
-    g_bothedge |= (1 << slot);
-    leave_critical_section(flags);
-
-    /* detect the change from the current signal */
-
-    if (true == cxd56_gpio_read(pin))
     {
-      gpiocfg |= GPIOINT_SET_POLARITY(GPIOINT_LEVEL_LOW);
+      /* set GPIO pseudo both edge interrupt */
+
+      flags = enter_critical_section();
+      g_bothedge |= (1 << slot);
+      leave_critical_section(flags);
+
+      /* detect the change from the current signal */
+
+      if (true == cxd56_gpio_read(pin))
+        {
+          gpiocfg |= GPIOINT_SET_POLARITY(GPIOINT_LEVEL_LOW);
+        }
+      else
+        {
+          gpiocfg |= GPIOINT_SET_POLARITY(GPIOINT_LEVEL_HIGH);
+        }
     }
-    else
-    {
-      gpiocfg |= GPIOINT_SET_POLARITY(GPIOINT_LEVEL_HIGH);
-    }
-  }
 
   set_gpioint_config(slot, gpiocfg);
 
@@ -523,6 +528,7 @@ int cxd56_gpioint_pin(int irq)
     {
       return -1;
     }
+
   slot = GET_IRQ2SLOT(irq);
   return get_slot2pin(slot);
 }
@@ -638,10 +644,12 @@ int cxd56_gpioint_status(uint32_t pin, cxd56_gpioint_status_t *stat)
     {
       stat->polarity = GPIOINT_EDGE_RISE;
     }
+
   if ((g_isr[slot]) && (stat->polarity == GPIOINT_LEVEL_LOW))
     {
       stat->polarity = GPIOINT_EDGE_FALL;
     }
+
   if ((g_isr[slot]) && (g_bothedge & (1 << slot)))
     {
       stat->polarity = GPIOINT_EDGE_BOTH;

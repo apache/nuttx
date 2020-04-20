@@ -41,6 +41,7 @@
 #include <nuttx/fs/hostfs_rpmsg.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/serial/uart_rpmsg.h>
+#include <nuttx/syslog/syslog_rpmsg.h>
 
 #include "up_internal.h"
 
@@ -205,7 +206,8 @@ int up_rptun_init(void)
 
       rsc->rsc_tbl_hdr.ver          = 1;
       rsc->rsc_tbl_hdr.num          = 1;
-      rsc->offset[0]                = offsetof(struct rptun_rsc_s, rpmsg_vdev);
+      rsc->offset[0]                = offsetof(struct rptun_rsc_s,
+                                               rpmsg_vdev);
       rsc->rpmsg_vdev.type          = RSC_VDEV;
       rsc->rpmsg_vdev.id            = VIRTIO_ID_RPMSG;
       rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS
@@ -228,7 +230,7 @@ int up_rptun_init(void)
 
       while (g_dev.shmem->base == 0)
         {
-          up_hostusleep(1000);
+          host_sleep(1000);
         }
 
       s_addrenv[0].va               = (uintptr_t)g_dev.shmem;

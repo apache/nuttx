@@ -58,8 +58,8 @@
 
 /* Bit-encoded input to stm32_configgpio() */
 
-/* Each port bit of the general-purpose I/O (GPIO) ports can be individually configured
- * by software in several modes:
+/* Each port bit of the general-purpose I/O (GPIO) ports can be individually
+ * configured by software in several modes:
  *
  *  - Input floating
  *  - Input pull-up
@@ -162,7 +162,9 @@
 #define GPIO_OPENDRAIN                (1 << 9)                   /* Bit9: 1=Open-drain output */
 #define GPIO_PUSHPULL                 (0)                        /* Bit9: 0=Push-pull output */
 
-/* If the pin is a GPIO digital output, then this identifies the initial output value.
+/* If the pin is a GPIO digital output, then this identifies the initial output
+ * value.
+ *
  * If the pin is an input, this bit is overloaded to provide the qualifier to
  * distinguish input pull-up and -down:
  *
@@ -195,17 +197,39 @@
 
 #define GPIO_PORT_SHIFT               (4)                        /* Bit 4-7:  Port number */
 #define GPIO_PORT_MASK                (15 << GPIO_PORT_SHIFT)
+#if STM32H7_NGPIO > 0
 #  define GPIO_PORTA                  (0 << GPIO_PORT_SHIFT)     /*   GPIOA */
+#endif
+#if STM32H7_NGPIO > 1
 #  define GPIO_PORTB                  (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
+#endif
+#if STM32H7_NGPIO > 2
 #  define GPIO_PORTC                  (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
+#endif
+#if STM32H7_NGPIO > 3
 #  define GPIO_PORTD                  (3 << GPIO_PORT_SHIFT)     /*   GPIOD */
+#endif
+#if STM32H7_NGPIO > 4
 #  define GPIO_PORTE                  (4 << GPIO_PORT_SHIFT)     /*   GPIOE */
+#endif
+#if (STM32H7_NGPIO > 5) && (defined(CONFIG_STM32H7_HAVE_GPIOF))
 #  define GPIO_PORTF                  (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
+#endif
+#if (STM32H7_NGPIO > 6) && (defined(CONFIG_STM32H7_HAVE_GPIOG))
 #  define GPIO_PORTG                  (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
+#endif
+#if STM32H7_NGPIO > 7
 #  define GPIO_PORTH                  (7 << GPIO_PORT_SHIFT)     /*   GPIOH */
+#endif
+#if STM32H7_NGPIO > 8
 #  define GPIO_PORTI                  (8 << GPIO_PORT_SHIFT)     /*   GPIOI */
+#endif
+#if STM32H7_NGPIO > 9
 #  define GPIO_PORTJ                  (9 << GPIO_PORT_SHIFT)     /*   GPIOJ */
+#endif
+#if STM32H7_NGPIO > 10
 #  define GPIO_PORTK                  (10 << GPIO_PORT_SHIFT)    /*   GPIOK */
+#endif
 
 /* This identifies the bit in the port:
  *
@@ -315,7 +339,7 @@ void stm32_gpiowrite(uint32_t pinset, bool value);
 
 bool stm32_gpioread(uint32_t pinset);
 
-/****************************************************************************
+/************************************************************************************
  * Name: stm32_gpiosetevent
  *
  * Description:

@@ -97,11 +97,15 @@ struct bh1721fvc_dev_s
 
 static int bh1721fvc_open(FAR struct file *filep);
 static int bh1721fvc_close(FAR struct file *filep);
-static ssize_t bh1721fvc_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t bh1721fvc_read(FAR struct file *filep,
+                              FAR char *buffer,
                               size_t buflen);
-static ssize_t bh1721fvc_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t bh1721fvc_write(FAR struct file *filep,
+                               FAR const char *buffer,
                                size_t buflen);
-static int bh1721fvc_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int bh1721fvc_ioctl(FAR struct file *filep,
+                           int cmd,
+                           unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -184,8 +188,13 @@ static int bh1721fvc_seqinit(FAR struct bh1721fvc_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_bh1721fvcinst, itemsof(g_bh1721fvcinst));
-  seq_setsample(priv->seq, BH1721FVC_BYTESPERSAMPLE, 0, BH1721FVC_ELEMENTSIZE,
+  seq_setinstruction(priv->seq,
+                     g_bh1721fvcinst,
+                     itemsof(g_bh1721fvcinst));
+  seq_setsample(priv->seq,
+                BH1721FVC_BYTESPERSAMPLE,
+                0,
+                BH1721FVC_ELEMENTSIZE,
                 false);
 
   return OK;
@@ -275,7 +284,8 @@ static ssize_t bh1721fvc_read(FAR struct file *filep, FAR char *buffer,
  * Name: bh1721fvc_write
  ****************************************************************************/
 
-static ssize_t bh1721fvc_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t bh1721fvc_write(FAR struct file *filep,
+                               FAR const char *buffer,
                                size_t buflen)
 {
   return -ENOSYS;
@@ -343,7 +353,8 @@ int bh1721fvc_init(FAR struct i2c_master_s *i2c, int port)
  * Name: bh1721fvc_register
  *
  * Description:
- *   Register the BH1721FVC ambient light sensor character device as 'devpath'
+ *   Register the BH1721FVC ambient light sensor character device as
+ *   'devpath'
  *
  * Input Parameters:
  *   devpath - The full path to the driver to register. E.g., "/dev/light0"

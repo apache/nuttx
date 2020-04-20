@@ -131,7 +131,7 @@ static int get_mode_regaddr(uint32_t pin, uint32_t *addr, uint32_t *shift)
   DEBUGASSERT(addr && shift);
 
   if ((pin < PIN_I2C4_BCK) || (PIN_USB_VBUSINT < pin))
-    return -EINVAL;
+      return -EINVAL;
 
   if (pin <= PIN_HIF_GPIO0)
     {
@@ -187,6 +187,7 @@ static int get_mode_regaddr(uint32_t pin, uint32_t *addr, uint32_t *shift)
         {
           *shift = GROUP_HIFEXT;
         }
+
       *addr = CXD56_TOPREG_IOCSYS_IOMD0;
     }
   else if (pin <= PIN_PWM3)
@@ -223,6 +224,7 @@ static int get_mode_regaddr(uint32_t pin, uint32_t *addr, uint32_t *shift)
         {
           *shift = GROUP_PWMB;
         }
+
       *addr = CXD56_TOPREG_IOCSYS_IOMD1;
     }
   else
@@ -283,6 +285,7 @@ static int get_mode_regaddr(uint32_t pin, uint32_t *addr, uint32_t *shift)
         {
           *shift = GROUP_USBVBUS;
         }
+
       *addr = CXD56_TOPREG_IOCAPP_IOMD;
     }
 
@@ -377,7 +380,9 @@ int cxd56_pin_configs(uint32_t pinconfs[], size_t n)
       if (((PIN_SPI2_CS_X <= pin) && (pin <= latch_endpin)) &&
           (PINCONF_MODE0 == mode))
         {
-          modifyreg32(CXD56_TOPREG_DBG_HOSTIF_SEL, LATCH_OFF_MASK, LATCH_OFF);
+          modifyreg32(CXD56_TOPREG_DBG_HOSTIF_SEL,
+                      LATCH_OFF_MASK,
+                      LATCH_OFF);
         }
 
       /* Set IO cell register */
@@ -406,6 +411,7 @@ int cxd56_pin_configs(uint32_t pinconfs[], size_t n)
           modifyreg32(modereg, (0x3 << shift), (mode << shift));
         }
     }
+
   return 0;
 }
 

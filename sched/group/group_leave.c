@@ -217,7 +217,7 @@ static inline void group_release(FAR struct task_group_s *group)
 
   if (group->tg_members)
     {
-      sched_kfree(group->tg_members);
+      kmm_free(group->tg_members);
       group->tg_members = NULL;
     }
 #endif
@@ -234,7 +234,7 @@ static inline void group_release(FAR struct task_group_s *group)
    * and freed from the single, global user allocator.
    */
 
-  sched_ufree(group->tg_streamlist);
+  kumm_free(group->tg_streamlist);
 
 #  elif defined(CONFIG_BUILD_KERNEL)
   /* In the kernel build, the unprivileged process's stream list will be
@@ -251,7 +251,7 @@ static inline void group_release(FAR struct task_group_s *group)
        * must explicitly freed here.
        */
 
-      sched_kfree(group->tg_streamlist);
+      kmm_free(group->tg_streamlist);
     }
 
 #  endif
@@ -285,7 +285,7 @@ static inline void group_release(FAR struct task_group_s *group)
     {
       /* Release the group container itself */
 
-      sched_kfree(group);
+      kmm_free(group);
     }
 }
 
@@ -311,7 +311,8 @@ static inline void group_release(FAR struct task_group_s *group)
  ****************************************************************************/
 
 #ifdef HAVE_GROUP_MEMBERS
-static inline void group_removemember(FAR struct task_group_s *group, pid_t pid)
+static inline void group_removemember(FAR struct task_group_s *group,
+                                      pid_t pid)
 {
   irqstate_t flags;
   int i;

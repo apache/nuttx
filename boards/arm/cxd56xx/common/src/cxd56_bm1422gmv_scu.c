@@ -56,6 +56,10 @@
 #  define BM1422GMV_PATH_CNT 1
 #endif
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #ifdef CONFIG_SENSORS_BM1422GMV_SCU
 int board_bm1422gmv_initialize(FAR const char *devpath, int bus)
 {

@@ -1,41 +1,27 @@
 /****************************************************************************
  * arch/arm/src/samv7/sam_mcan.c
  *
- *   Copyright (C) 2015-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * References:
- *   SAMV7D3 Series Data Sheet
- *   Atmel sample code
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX, Atmel, nor the names of its contributors may
- *    be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
+
+/* References:
+ *   SAMV7D3 Series Data Sheet
+ *   Atmel sample code
+ */
 
 /****************************************************************************
  * Included Files
@@ -71,6 +57,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Common definitions *******************************************************/
 
 #ifndef MIN
@@ -110,6 +97,7 @@
   (SAMV7_MCAN_CLKSRC_FREQUENCY / CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER)
 
 /* Buffer Alignment *********************************************************/
+
 /* Buffer Alignment.
  *
  * The MCAN peripheral does not require any data be aligned.  However, if
@@ -703,6 +691,7 @@
 #define MAILBOX_ADDRESS(a)        ((uint32_t)(a) & 0x0000fffc)
 
 /* Interrupts ***************************************************************/
+
 /* Common interrupts
  *
  *   MCAN_INT_TSW  - Timestamp Wraparound
@@ -785,6 +774,7 @@
 #define MCAN_ANYERR_INTS (MCAN_CMNERR_INTS | MCAN_RXERR_INTS | MCAN_TXERR_INTS)
 
 /* Debug ********************************************************************/
+
 /* Debug configurations that may be enabled just for testing MCAN */
 
 #ifndef CONFIG_DEBUG_CAN_INFO
@@ -877,7 +867,10 @@ struct sam_config_s
 
 struct sam_mcan_s
 {
-  const struct sam_config_s *config; /* The constant configuration */
+  /* The constant configuration */
+
+  const struct sam_config_s *config;
+
   uint8_t state;            /* See enum can_state_s */
 #ifdef CONFIG_CAN_EXTID
   uint8_t nextalloc;        /* Number of allocated extended filters */
@@ -920,6 +913,7 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg);
 /* Semaphore helpers */
 
 static void mcan_dev_lock(FAR struct sam_mcan_s *priv);
+static void mcan_dev_lock_noncancelable(FAR struct sam_mcan_s *priv);
 #define mcan_dev_unlock(priv) nxsem_post(&priv->locksem)
 
 static void mcan_buffer_reserve(FAR struct sam_mcan_s *priv);
@@ -1008,10 +1002,14 @@ static const struct sam_config_s g_mcan0const =
   .txpinset         = GPIO_MCAN0_TX,
   .base             = SAM_MCAN0_BASE,
   .baud             = CONFIG_SAMV7_MCAN0_BITRATE,
-  .btp              = MCAN_BTP_BRP(MCAN0_BRP) | MCAN_BTP_TSEG1(MCAN0_TSEG1) |
-                      MCAN_BTP_TSEG2(MCAN0_TSEG2) | MCAN_BTP_SJW(MCAN0_SJW),
-  .fbtp             = MCAN_FBTP_FBRP(MCAN0_FBRP) | MCAN_FBTP_FTSEG1(MCAN0_FTSEG1) |
-                      MCAN_FBTP_FTSEG2(MCAN0_FTSEG2) | MCAN_FBTP_FSJW(MCAN0_FSJW),
+  .btp              = MCAN_BTP_BRP(MCAN0_BRP) |
+                      MCAN_BTP_TSEG1(MCAN0_TSEG1) |
+                      MCAN_BTP_TSEG2(MCAN0_TSEG2) |
+                      MCAN_BTP_SJW(MCAN0_SJW),
+  .fbtp             = MCAN_FBTP_FBRP(MCAN0_FBRP) |
+                      MCAN_FBTP_FTSEG1(MCAN0_FTSEG1) |
+                      MCAN_FBTP_FTSEG2(MCAN0_FTSEG2) |
+                      MCAN_FBTP_FSJW(MCAN0_FSJW),
   .port             = 0,
   .pid              = SAM_PID_MCAN00,
   .irq0             = SAM_IRQ_MCAN00,
@@ -1084,10 +1082,14 @@ static const struct sam_config_s g_mcan1const =
   .txpinset         = GPIO_MCAN1_TX,
   .base             = SAM_MCAN1_BASE,
   .baud             = CONFIG_SAMV7_MCAN1_BITRATE,
-  .btp              = MCAN_BTP_BRP(MCAN1_BRP) | MCAN_BTP_TSEG1(MCAN1_TSEG1) |
-                      MCAN_BTP_TSEG2(MCAN1_TSEG2) | MCAN_BTP_SJW(MCAN1_SJW),
-  .fbtp             = MCAN_FBTP_FBRP(MCAN1_FBRP) | MCAN_FBTP_FTSEG1(MCAN1_FTSEG1) |
-                      MCAN_FBTP_FTSEG2(MCAN1_FTSEG2) | MCAN_FBTP_FSJW(MCAN1_FSJW),
+  .btp              = MCAN_BTP_BRP(MCAN1_BRP) |
+                      MCAN_BTP_TSEG1(MCAN1_TSEG1) |
+                      MCAN_BTP_TSEG2(MCAN1_TSEG2) |
+                      MCAN_BTP_SJW(MCAN1_SJW),
+  .fbtp             = MCAN_FBTP_FBRP(MCAN1_FBRP) |
+                      MCAN_FBTP_FTSEG1(MCAN1_FTSEG1) |
+                      MCAN_FBTP_FTSEG2(MCAN1_FTSEG2) |
+                      MCAN_FBTP_FSJW(MCAN1_FSJW),
   .port             = 1,
   .pid              = SAM_PID_MCAN10,
   .irq0             = SAM_IRQ_MCAN10,
@@ -1240,7 +1242,8 @@ static uint32_t mcan_getreg(FAR struct sam_mcan_s *priv, int offset)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMV7_MCAN_REGDEBUG
-static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval)
+static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset,
+                        uint32_t regval)
 {
   FAR const struct sam_config_s *config = priv->config;
   uintptr_t regaddr = config->base + offset;
@@ -1255,7 +1258,8 @@ static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval
 }
 
 #else
-static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset, uint32_t regval)
+static void mcan_putreg(FAR struct sam_mcan_s *priv, int offset,
+                        uint32_t regval)
 {
   FAR const struct sam_config_s *config = priv->config;
   putreg32(regval, config->base + offset);
@@ -1364,13 +1368,48 @@ static void mcan_dumpregs(FAR struct sam_mcan_s *priv, FAR const char *msg)
  *   priv - A reference to the MCAN peripheral state
  *
  * Returned Value:
- *  None
+ *  Normally success (OK) is returned, but the error -ECANCELED may be
+ *  return in the event that task has been canceled.
  *
  ****************************************************************************/
 
-static void mcan_dev_lock(FAR struct sam_mcan_s *priv)
+static int mcan_dev_lock(FAR struct sam_mcan_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->locksem);
+  ret = nxsem_wait_uninterruptible(&priv->locksem);
+}
+
+/****************************************************************************
+ * Name: mcan_dev_lock_noncancelable
+ *
+ * Description:
+ *   This is just a wrapper to handle the annoying behavior of semaphore
+ *   waits that return due to the receipt of a signal.  This version also
+ *   ignores attempts to cancel the thread.
+ *
+ ****************************************************************************/
+
+static int mcan_dev_lock_noncancelable(FAR struct sam_can_s *priv)
+{
+  int result;
+  int ret = OK;
+
+  do
+    {
+      result = nxsem_wait_uninterruptible(&priv->exclsem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(result == OK || result == -ECANCELED);
+      if (ret == OK && result < 0)
+        {
+          ret = result;
+        }
+    }
+  while (result < 0);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1739,7 +1778,11 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
 
   /* Get exclusive excess to the MCAN hardware */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Find an unused standard filter */
 
@@ -1814,7 +1857,10 @@ static int mcan_add_extfilter(FAR struct sam_mcan_s *priv,
 
               /* Wait for initialization mode to take effect */
 
-              while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) & MCAN_CCCR_INIT) == 0);
+              while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) &
+                     MCAN_CCCR_INIT) == 0)
+                {
+                }
 
               /* Enable writing to configuration registers */
 
@@ -1891,7 +1937,11 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
 
   /* Get exclusive excess to the MCAN hardware */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   word = ndx >> 5;
   bit  = ndx & 0x1f;
@@ -1925,7 +1975,10 @@ static int mcan_del_extfilter(FAR struct sam_mcan_s *priv, int ndx)
 
       /* Wait for initialization mode to take effect */
 
-      while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) & MCAN_CCCR_INIT) == 0);
+      while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) &
+             MCAN_CCCR_INIT) == 0)
+        {
+        }
 
       /* Enable writing to configuration registers */
 
@@ -1988,13 +2041,18 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
   int word;
   int bit;
   int ndx;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
 
   /* Get exclusive excess to the MCAN hardware */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Find an unused standard filter */
 
@@ -2065,7 +2123,10 @@ static int mcan_add_stdfilter(FAR struct sam_mcan_s *priv,
 
               /* Wait for initialization mode to take effect */
 
-              while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) & MCAN_CCCR_INIT) == 0);
+              while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) &
+                     MCAN_CCCR_INIT) == 0)
+                {
+                }
 
               /* Enable writing to configuration registers */
 
@@ -2125,6 +2186,7 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
   uint32_t regval;
   int word;
   int bit;
+  int ret;
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
   config = priv->config;
@@ -2140,7 +2202,11 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
 
   /* Get exclusive excess to the MCAN hardware */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   word = ndx >> 5;
   bit  = ndx & 0x1f;
@@ -2174,7 +2240,10 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
 
       /* Wait for initialization mode to take effect */
 
-      while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) & MCAN_CCCR_INIT) == 0);
+      while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) &
+              MCAN_CCCR_INIT) == 0)
+        {
+        }
 
       /* Enable writing to configuration registers */
 
@@ -2217,17 +2286,19 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
  *   This function initiates the BUS-OFF recovery sequence.
  *   CAN Specification Rev. 2.0 or ISO11898-1:2015
  *   According the SAMV71 datasheet:
- *   If the device goes Bus_Off, it will set MCAN_CCCR.INIT of its own accord,
- *   stopping all bus activities. Once MCAN_CCCR.INIT has been cleared by the
- *   processor (application), the device will then wait for 129 occurrences of
- *   Bus Idle (129 * 11 consecutive recessive bits) before resuming normal
- *   operation. At the end of the Bus_Off recovery sequence, the Error
- *   Management Counters will be reset. During the waiting time after the
- *   resetting of MCAN_CCCR.INIT, each time a sequence of 11 recessive bits
- *   has been monitored, a Bit0 Error code is written to MCAN_PSR.LEC, enablin
- *   the processor to readily check up whether the CAN bus is stuck at dominant
- *   or continuously disturbed and to monitor the Bus_Off recovery sequence.
- *   MCAN_ECR.REC is used to count these sequences.
+ *
+ *   "If the device goes Bus_Off, it will set MCAN_CCCR.INIT of its own
+ *    accord, stopping all bus activities. Once MCAN_CCCR.INIT has been
+ *    cleared by the processor (application), the device will then wait for
+ *    129 occurrences of Bus Idle (129 * 11 consecutive recessive bits)
+ *    before resuming normal operation. At the end of the Bus_Off recovery
+ *    sequence, the Error Management Counters will be reset. During the
+ *    waiting time after the resetting of MCAN_CCCR.INIT, each time a
+ *    sequence of 11 recessive bits has been monitored, a Bit0 Error code is
+ *    written to MCAN_PSR.LEC, enabling the processor to readily check up
+ *    whether the CAN bus is stuck at dominant or continuously disturbed and
+ *    to monitor the Bus_Off recovery sequence.  MCAN_ECR.REC is used to
+ *    count these sequences."
  *
  * Input Parameters:
  *   priv - An instance of the MCAN driver state structure.
@@ -2241,12 +2312,17 @@ static int mcan_del_stdfilter(FAR struct sam_mcan_s *priv, int ndx)
 static int mcan_start_busoff_recovery_sequence(FAR struct sam_mcan_s *priv)
 {
   uint32_t regval;
+  int ret;
 
   DEBUGASSERT(priv);
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* only start BUS-OFF recovery if we are in BUS-OFF state */
 
@@ -2298,7 +2374,7 @@ static void mcan_reset(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  mcan_dev_lock_noncancelable(priv);
 
   /* Disable all interrupts */
 
@@ -2354,14 +2430,19 @@ static int mcan_setup(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* MCAN hardware initialization */
 
   ret = mcan_hw_initialize(priv);
   if (ret < 0)
     {
-      canerr("ERROR: MCAN%d H/W initialization failed: %d\n", config->port, ret);
+      canerr("ERROR: MCAN%d H/W initialization failed: %d\n",
+             config->port, ret);
       return ret;
     }
 
@@ -2393,7 +2474,8 @@ static int mcan_setup(FAR struct can_dev_s *dev)
   mcan_dumpregs(priv, "After receive setup");
 
   /* Enable the interrupts at the NVIC (they are still disabled at the MCAN
-   * peripheral). */
+   * peripheral).
+   */
 
   up_enable_irq(config->irq0);
   up_enable_irq(config->irq1);
@@ -2431,7 +2513,7 @@ static void mcan_shutdown(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  mcan_dev_lock_noncancelable(priv);
 
   /* Disable MCAN interrupts at the NVIC */
 
@@ -2569,11 +2651,11 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
       /* CANIOC_GET_BITTIMING:
        *   Description:    Return the current bit timing settings
        *   Argument:       A pointer to a write-able instance of struct
-       *                   canioc_bittiming_s in which current bit timing values
-       *                   will be returned.
-       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
-       *                   is returned with the errno variable set to indicate the
-       *                   nature of the error.
+       *                   canioc_bittiming_s in which current bit timing
+       *                   values will be returned.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set
+       *                   to indicate the nature of the error.
        *   Dependencies:   None
        */
 
@@ -2587,11 +2669,15 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
           DEBUGASSERT(bt != NULL);
 
           regval       = mcan_getreg(priv, SAM_MCAN_BTP_OFFSET);
-          bt->bt_sjw   = ((regval & MCAN_BTP_SJW_MASK) >> MCAN_BTP_SJW_SHIFT) + 1;
-          bt->bt_tseg1 = ((regval & MCAN_BTP_TSEG1_MASK) >> MCAN_BTP_TSEG1_SHIFT) + 1;
-          bt->bt_tseg2 = ((regval & MCAN_BTP_TSEG2_MASK) >> MCAN_BTP_TSEG2_SHIFT) + 1;
+          bt->bt_sjw   = ((regval & MCAN_BTP_SJW_MASK) >>
+                          MCAN_BTP_SJW_SHIFT) + 1;
+          bt->bt_tseg1 = ((regval & MCAN_BTP_TSEG1_MASK) >>
+                          MCAN_BTP_TSEG1_SHIFT) + 1;
+          bt->bt_tseg2 = ((regval & MCAN_BTP_TSEG2_MASK) >>
+                          MCAN_BTP_TSEG2_SHIFT) + 1;
 
-          brp          = ((regval & MCAN_BTP_BRP_MASK) >> MCAN_BTP_BRP_SHIFT) + 1;
+          brp          = ((regval & MCAN_BTP_BRP_MASK) >>
+                          MCAN_BTP_BRP_SHIFT) + 1;
           bt->bt_baud  = SAMV7_MCANCLK_FREQUENCY / brp /
                          (bt->bt_tseg1 + bt->bt_tseg2 + 1);
           ret = OK;
@@ -2601,18 +2687,18 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
       /* CANIOC_SET_BITTIMING:
        *   Description:    Set new current bit timing values
        *   Argument:       A pointer to a read-able instance of struct
-       *                   canioc_bittiming_s in which the new bit timing values
-       *                   are provided.
-       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
-       *                   is returned with the errno variable set to indicate the
-       *                   nature of the error.
+       *                   canioc_bittiming_s in which the new bit timing
+       *                   values are provided.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set
+       *                   to indicate the nature of the error.
        *   Dependencies:   None
        *
-       * REVISIT: There is probably a limitation here:  If there are multiple
-       * threads trying to send CAN packets, when one of these threads reconfigures
-       * the bitrate, the MCAN hardware will be reset and the context of operation
-       * will be lost.  Hence, this IOCTL can only safely be executed in quiescent
-       * time periods.
+       * REVISIT: There is probably a limitation here:  If there are
+       * multiple threads trying to send CAN packets, when one of these
+       * threads reconfigures the bitrate, the MCAN hardware will be reset
+       * and the context of operation will be lost.  Hence, this IOCTL can
+       * only safely be executed in quiescent time periods.
        */
 
       case CANIOC_SET_BITTIMING:
@@ -2698,17 +2784,20 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
       case CANIOC_ADD_EXTFILTER:
         {
           DEBUGASSERT(arg != 0);
-          ret = mcan_add_extfilter(priv, (FAR struct canioc_extfilter_s *)arg);
+
+          ret = mcan_add_extfilter(priv,
+                                   (FAR struct canioc_extfilter_s *)arg);
         }
         break;
 
       /* CANIOC_DEL_EXTFILTER:
-       *   Description:    Remove an address filter for a standard 29 bit address.
+       *   Description:    Remove an address filter for a standard 29 bit
+       *                   address.
        *   Argument:       The filter index previously returned by the
        *                   CANIOC_ADD_EXTFILTER command
-       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
-       *                   is returned with the errno variable set to indicate the
-       *                   nature of the error.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set
+       *                   to indicate the nature of the error.
        */
 
       case CANIOC_DEL_EXTFILTER:
@@ -2731,17 +2820,20 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
       case CANIOC_ADD_STDFILTER:
         {
           DEBUGASSERT(arg != 0);
-          ret = mcan_add_stdfilter(priv, (FAR struct canioc_stdfilter_s *)arg);
+
+          ret = mcan_add_stdfilter(priv,
+                                   (FAR struct canioc_stdfilter_s *)arg);
         }
         break;
 
       /* CANIOC_DEL_STDFILTER:
-       *   Description:    Remove an address filter for a standard 11 bit address.
+       *   Description:    Remove an address filter for a standard 11 bit
+       *                   address.
        *   Argument:       The filter index previously returned by the
        *                   CANIOC_ADD_STDFILTER command
-       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
-       *                   is returned with the errno variable set to indicate the
-       *                   nature of the error.
+       *   Returned Value: Zero (OK) is returned on success.  Otherwise -1
+       *                   (ERROR) is returned with the errno variable set
+       *                   to indicate the nature of the error.
        */
 
       case CANIOC_DEL_STDFILTER:
@@ -2754,9 +2846,9 @@ static int mcan_ioctl(FAR struct can_dev_s *dev, int cmd, unsigned long arg)
       /* CANIOC_BUSOFF_RECOVERY:
        *   Description : Initiates the BUS - OFF recovery sequence
        *   Argument : None
-       *   Returned Value : Zero (OK) is returned on success. Otherwise - 1 (ERROR)
-       *                    is returned with the errno variable set to indicate the
-       *                    nature of the error.
+       *   Returned Value : Zero (OK) is returned on success. Otherwise -1
+       *                    (ERROR) is returned with the errno variable set
+       *                    to indicate the nature of the error.
        *   Dependencies : None
        */
 
@@ -2832,6 +2924,7 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   unsigned int ndx;
   unsigned int nbytes;
   unsigned int i;
+  int ret;
 
   DEBUGASSERT(dev);
   priv = dev->cd_priv;
@@ -2868,7 +2961,14 @@ static int mcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      mcan_buffer_release(priv);
+      sched_unlock();
+      return ret;
+    }
+
   sched_unlock();
 
   /* Get our reserved Tx FIFO/queue put index */
@@ -2987,10 +3087,15 @@ static bool mcan_txready(FAR struct can_dev_s *dev)
 #ifdef CONFIG_DEBUG_FEATURES
   int sval;
 #endif
+  int ret;
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return false;
+    }
 
   /* Return the state of the TX FIFOQ.  Return TRUE if the TX FIFO/Queue is
    * not full.
@@ -3048,7 +3153,11 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
 
   /* Get exclusive access to the MCAN peripheral */
 
-  mcan_dev_lock(priv);
+  ret = mcan_dev_lock(priv);
+  if (ret < 0)
+    {
+      return false;
+    }
 
   /* Return the state of the TX FIFOQ.  Return TRUE if the TX FIFO/Queue is
    * empty.  We don't have a reliable indication that the FIFO is empty, so
@@ -3105,7 +3214,8 @@ static bool mcan_txempty(FAR struct can_dev_s *dev)
  ****************************************************************************/
 
 #if 0 /* Not Used */
-bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv, int bufndx)
+bool mcan_dedicated_rxbuffer_available(FAR struct sam_mcan_s *priv,
+                                       int bufndx)
 {
   if (bufndx < 32)
     {
@@ -3191,8 +3301,9 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status)
 
   if ((status & (MCAN_INT_RF0L | MCAN_INT_RF1L)) != 0)
     {
-      /* Receive FIFO 0 Message Lost */
-      /* Receive FIFO 1 Message Lost */
+      /* Receive FIFO 0/1 Message Lost
+       * Receive FIFO 1 Message Lost
+       */
 
       errbits |= CAN_ERROR_CONTROLLER;
       data[1] |= CAN_ERROR1_RXOVERFLOW;
@@ -3215,8 +3326,9 @@ static void mcan_error(FAR struct can_dev_s *dev, uint32_t status)
 
   if ((status & (MCAN_INT_MRAF | MCAN_INT_ELO)) != 0)
     {
-      /* Message RAM Access Failure */
-      /* Error Logging Overflow */
+      /* Message RAM Access Failure
+       * Error Logging Overflow
+       */
 
       errbits |= CAN_ERROR_CONTROLLER;
       data[1] |= CAN_ERROR1_UNSPEC;
@@ -3315,6 +3427,7 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
   up_invalidate_dcache((uintptr_t)rxbuffer, (uintptr_t)rxbuffer + nbytes);
 
   /* Format the CAN header */
+
   /* Work R0 contains the CAN ID */
 
   regval = *rxbuffer++;
@@ -3339,12 +3452,14 @@ static void mcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
     {
       /* Save the extended ID of the newly received message */
 
-      hdr.ch_id    = (regval & BUFFER_R0_EXTID_MASK) >> BUFFER_R0_EXTID_SHIFT;
+      hdr.ch_id    = (regval & BUFFER_R0_EXTID_MASK) >>
+                     BUFFER_R0_EXTID_SHIFT;
       hdr.ch_extid = true;
     }
   else
     {
-      hdr.ch_id    = (regval & BUFFER_R0_STDID_MASK) >> BUFFER_R0_STDID_SHIFT;
+      hdr.ch_id    = (regval & BUFFER_R0_STDID_MASK) >>
+                     BUFFER_R0_STDID_SHIFT;
       hdr.ch_extid = false;
     }
 
@@ -3552,7 +3667,7 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
 #if 0 /* Not used */
       /* Check if a message has been stored to the dedicated RX buffer (DRX) */
 
-      if ((pending & MCAN_INT_DRX) != 0))
+      if ((pending & MCAN_INT_DRX) != 0)
         {
           int i;
 
@@ -3583,11 +3698,13 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
 
                   if (i < 32)
                     {
-                      sam_putreg(priv, SAM_MCAN_NDAT1_OFFSET, (1 << i);
+                      sam_putreg(priv, SAM_MCAN_NDAT1_OFFSET,
+                                 (1 << i);
                     }
                   else
                     {
-                      sam_putreg(priv, SAM_MCAN_NDAT1_OFFSET, (1 << (i - 32));
+                      sam_putreg(priv, SAM_MCAN_NDAT1_OFFSET,
+                                 (1 << (i - 32));
                     }
                 }
             }
@@ -3651,6 +3768,7 @@ static int mcan_interrupt(int irq, void *context, FAR void *arg)
         }
 
       /* Check for successful reception of a new message in RX FIFO0 */
+
       /* Clear the RX FIFO0 new message interrupt */
 
       mcan_putreg(priv, SAM_MCAN_IR_OFFSET, MCAN_INT_RF0N);
@@ -3829,6 +3947,7 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
   mcan_putreg(priv, SAM_MCAN_TXESC_OFFSET, regval);
 
   /* Configure Message Filters */
+
   /* Disable all standard filters */
 
   msgram = config->msgram.stdfilters;
@@ -3895,7 +4014,8 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
 #if 0 /* Not necessary in initialization mode */
   /* Wait for the mode to take effect */
 
-  while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) & (MCAN_CCCR_FDBS | MCAN_CCCR_FDO)) != 0);
+  while ((mcan_getreg(priv, SAM_MCAN_CCCR_OFFSET) &
+         (MCAN_CCCR_FDBS | MCAN_CCCR_FDO)) != 0);
 #endif
 
   /* Enable FIFO/Queue mode
@@ -3932,6 +4052,7 @@ static int mcan_hw_initialize(struct sam_mcan_s *priv)
 #endif
 
   /* Configure interrupt lines */
+
   /* Select RX-related interrupts */
 
 #if 0 /* Dedicated RX buffers are not used by this driver */
@@ -4002,7 +4123,8 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
    * use PCK5 to derive bit rate.
    */
 
-  regval = PMC_PCK_PRES(CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER - 1) | SAMV7_MCAN_CLKSRC;
+  regval = PMC_PCK_PRES(CONFIG_SAMV7_MCAN_CLKSRC_PRESCALER - 1) |
+           SAMV7_MCAN_CLKSRC;
   putreg32(regval, SAM_PMC_PCK5);
 
   /* Enable PCK5 */
@@ -4024,7 +4146,8 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
 
       regval  = getreg32(SAM_MATRIX_CAN0);
       regval &= MATRIX_CAN0_RESERVED;
-      regval |= (uint32_t)config->msgram.stdfilters & MATRIX_CAN0_CAN0DMABA_MASK;
+      regval |= (uint32_t)config->msgram.stdfilters &
+                MATRIX_CAN0_CAN0DMABA_MASK;
       putreg32(regval, SAM_MATRIX_CAN0);
     }
   else
@@ -4042,7 +4165,8 @@ FAR struct can_dev_s *sam_mcan_initialize(int port)
 
       regval  = getreg32(SAM_MATRIX_CCFG_SYSIO);
       regval &= ~MATRIX_CCFG_CAN1DMABA_MASK;
-      regval |= (uint32_t)config->msgram.stdfilters & MATRIX_CCFG_CAN1DMABA_MASK;
+      regval |= (uint32_t)config->msgram.stdfilters &
+                MATRIX_CCFG_CAN1DMABA_MASK;
       putreg32(regval, SAM_MATRIX_CCFG_SYSIO);
     }
   else

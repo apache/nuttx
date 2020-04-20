@@ -455,7 +455,9 @@ static struct usbhost_cdcacm_s g_prealloc[CONFIG_USBHOST_CDCACM_NPREALLOC];
 static FAR struct usbhost_freestate_s *g_freelist;
 #endif
 
-/* This is a bitmap that is used to allocate device minor numbers /dev/ttyACM[n]. */
+/* This is a bitmap that is used to allocate device
+ * minor numbers /dev/ttyACM[n].
+ */
 
 static uint32_t g_devinuse;
 
@@ -599,12 +601,12 @@ static void usbhost_freeclass(FAR struct usbhost_cdcacm_s *usbclass)
 {
   DEBUGASSERT(usbclass != NULL);
 
-  /* Free the class instance (calling sched_kfree() in case we are executing
+  /* Free the class instance (calling kmm_free() in case we are executing
    * from an interrupt handler.
    */
 
   uinfo("Freeing: %p\n", usbclass);
-  sched_kfree(usbclass);
+  kmm_free(usbclass);
 }
 #endif
 
@@ -1109,7 +1111,9 @@ static void usbhost_rxdata_work(FAR void *arg)
   while (priv->rxena && !priv->disconnected)
 #endif
     {
-      /* Stop now if there is no room for another character in the RX buffer. */
+      /* Stop now if there is no room for another
+       * character in the RX buffer.
+       */
 
       if (nexthead == rxbuf->tail)
         {
@@ -1938,11 +1942,15 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
           priv->usbclass.connect      = usbhost_connect;
           priv->usbclass.disconnected = usbhost_disconnected;
 
-          /* The initial reference count is 1... One reference is held by the driver */
+          /* The initial reference count is 1...
+           * One reference is held by the driver
+           */
 
           priv->crefs = 1;
 
-          /* Initialize semaphores (this works okay in the interrupt context) */
+          /* Initialize semaphores
+           * (this works okay in the interrupt context)
+           */
 
           nxsem_init(&priv->exclsem, 0, 1);
 

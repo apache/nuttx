@@ -199,6 +199,7 @@ static void spi_pincontrol(int bus, bool on)
           CXD56_PIN_CONFIGS(PINCONFS_EMMCA_GPIO);
         }
 #endif
+
 #ifdef CONFIG_CXD56_SPI5_PINMAP_SDIO
       if (on)
         {

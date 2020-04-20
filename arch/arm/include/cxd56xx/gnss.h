@@ -45,7 +45,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * include files
+ * Included Files
  ****************************************************************************/
 
 #include <arch/chip/gnss_type.h>
@@ -55,7 +55,9 @@ extern "C"
  *
  * param arg
  * Start mode value of uint32_t. Not address pointer.
- * One of #CXD56_GNSS_STMOD_COLD, #CXD56_GNSS_STMOD_WARM, #CXD56_GNSS_STMOD_HOT
+ * One of #CXD56_GNSS_STMOD_COLD,
+ *        #CXD56_GNSS_STMOD_WARM,
+ *        #CXD56_GNSS_STMOD_HOT
  */
 
 #define CXD56_GNSS_IOCTL_START 1
@@ -177,8 +179,8 @@ extern "C"
 #define CXD56_GNSS_IOCTL_GET_TCXO_OFFSET 10
 
 /* Set receiver time to GNSS.
- * The UTC time standard is used for the receiver time stored in a argument of
- * cxd56_gnss_datetime type.
+ * The UTC time standard is used for the receiver time stored in a argument
+ * of cxd56_gnss_datetime type.
  * The receiver position, current time and TCXO offset value, ephemeris data
  * are required in order to initiate a hot start.
  * Set the time with this command before hot start if GPS time is not counted

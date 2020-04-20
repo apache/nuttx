@@ -49,6 +49,10 @@
 
 #include "cxd56_i2c.h"
 
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 #if defined(CONFIG_CXD56_I2C) && defined(CONFIG_SENSORS_BMP280)
 int board_bmp280_initialize(int bus)
 {

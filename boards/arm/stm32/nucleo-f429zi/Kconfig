@@ -1,0 +1,52 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_NUCLEO_F429ZI
+
+choice
+	prompt "Select Console wiring."
+	default NUCLEO_F429ZI_CONSOLE_ARDUINO
+	---help---
+		Select where you will connect the console.
+
+		Virtual COM Port:
+
+		Advantage: Use the ST-Link as a console. No Extra wiring
+		needed.
+
+		Disadvantage: Not the best choice for initial bring up.
+
+		ARDUINO Connector:
+
+		Advantage: You have a shield so it is easy.
+
+		Disadvantage: You loose the use of the
+		other functions on PC6, PC7
+
+				STM32F4
+			ARDUIONO FUNCTION  GPIO
+			-- ----- --------- ----
+			DO RX    USART6_RX PG9
+			D1 TX    USART6_TX PG14
+			-- ----- --------- ---
+
+config NUCLEO_F429ZI_CONSOLE_ARDUINO
+	bool "Arduino Connector"
+	select STM32_USART6
+	select USART6_SERIALDRIVER
+	select USART6_SERIAL_CONSOLE
+
+config NUCLEO_F429ZI_CONSOLE_VIRTUAL
+	bool "Virtual Comport"
+	select STM32_USART3
+	select USART3_SERIALDRIVER
+	select USART3_SERIAL_CONSOLE
+
+config NUCLEO_F429ZI_CONSOLE_NONE
+	bool "No Console"
+
+endchoice # "Select Console wiring"
+
+endif # ARCH_BOARD_NUCLEO_144

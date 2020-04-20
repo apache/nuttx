@@ -122,16 +122,16 @@ struct stm32_1wire_config_s
 struct stm32_1wire_priv_s
 {
   const struct stm32_1wire_config_s *config; /* Port configuration */
-  volatile int refs;              /* Referernce count */
-  sem_t    sem_excl;              /* Mutual exclusion semaphore */
-  sem_t    sem_isr;               /* Interrupt wait semaphore */
-  int      baud;                  /* Baud rate */
-  const struct stm32_1wire_msg_s *msgs; /* Messages data */
-  uint8_t *byte;                  /* Current byte */
-  uint8_t  bit;                   /* Current bit */
-  volatile int result;            /* Exchange result */
+  volatile int refs;                         /* Reference count */
+  sem_t    sem_excl;                         /* Mutual exclusion semaphore */
+  sem_t    sem_isr;                          /* Interrupt wait semaphore */
+  int      baud;                             /* Baud rate */
+  const struct stm32_1wire_msg_s *msgs;      /* Messages data */
+  uint8_t *byte;                             /* Current byte */
+  uint8_t  bit;                              /* Current bit */
+  volatile int result;                       /* Exchange result */
 #ifdef CONFIG_PM
-  struct pm_callback_s pm_cb;     /* PM callbacks */
+  struct pm_callback_s pm_cb;                /* PM callbacks */
 #endif
 };
 
@@ -159,8 +159,9 @@ static void stm32_1wire_set_apb_clock(struct stm32_1wire_priv_s *priv,
 static int stm32_1wire_init(FAR struct stm32_1wire_priv_s *priv);
 static int stm32_1wire_deinit(FAR struct stm32_1wire_priv_s *priv);
 static inline void stm32_1wire_sem_init(FAR struct stm32_1wire_priv_s *priv);
-static inline void stm32_1wire_sem_destroy(FAR struct stm32_1wire_priv_s *priv);
-static inline void stm32_1wire_sem_wait(FAR struct stm32_1wire_priv_s *priv);
+static inline void stm32_1wire_sem_destroy(
+    FAR struct stm32_1wire_priv_s *priv);
+static inline int  stm32_1wire_sem_wait(FAR struct stm32_1wire_priv_s *priv);
 static inline void stm32_1wire_sem_post(FAR struct stm32_1wire_priv_s *priv);
 static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
                                FAR const struct stm32_1wire_msg_s *msgs,
@@ -174,7 +175,8 @@ static int stm32_1wire_read(FAR struct onewire_dev_s *dev, uint8_t *buffer,
 static int stm32_1wire_exchange(FAR struct onewire_dev_s *dev, bool reset,
                                 const uint8_t *txbuffer, int txbuflen,
                                 uint8_t *rxbuffer, int rxbuflen);
-static int stm32_1wire_writebit(FAR struct onewire_dev_s *dev, const uint8_t *bit);
+static int stm32_1wire_writebit(FAR struct onewire_dev_s *dev,
+                                const uint8_t *bit);
 static int stm32_1wire_readbit(FAR struct onewire_dev_s *dev, uint8_t *bit);
 #ifdef CONFIG_PM
 static int stm32_1wire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
@@ -397,7 +399,8 @@ static void stm32_1wire_set_baud(struct stm32_1wire_priv_s *priv)
    *   usartdiv8 = 2 * fCK / baud
    */
 
-   usartdiv8 = ((priv->config->apbclock << 1) + (priv->baud >> 1)) / priv->baud;
+  usartdiv8 = ((priv->config->apbclock << 1) + (priv->baud >> 1)) /
+                priv->baud;
 
   /* Baud rate for standard USART (SPI mode included):
    *
@@ -432,13 +435,13 @@ static void stm32_1wire_set_baud(struct stm32_1wire_priv_s *priv)
       cr1 |= USART_CR1_OVER8;
     }
 
-   stm32_1wire_out(priv, STM32L4_USART_CR1_OFFSET, cr1);
-   stm32_1wire_out(priv, STM32L4_USART_BRR_OFFSET, brr);
+  stm32_1wire_out(priv, STM32L4_USART_CR1_OFFSET, cr1);
+  stm32_1wire_out(priv, STM32L4_USART_BRR_OFFSET, brr);
 
-   if (enabled)
-     {
-       stm32_1wire_out(priv, STM32L4_USART_CR1_OFFSET, cr1 | USART_CR1_UE);
-     }
+  if (enabled)
+    {
+      stm32_1wire_out(priv, STM32L4_USART_CR1_OFFSET, cr1 | USART_CR1_UE);
+    }
 }
 
 /****************************************************************************
@@ -533,9 +536,10 @@ static int stm32_1wire_init(FAR struct stm32_1wire_priv_s *priv)
 
   stm32_1wire_set_apb_clock(priv, true);
 
-  /* Configure CR2 */
-  /* Clear STOP, CLKEN, CPOL, CPHA, LBCL, and interrupt enable bits */
-  /* Set LBDIE */
+  /* Configure CR2
+   * Clear STOP, CLKEN, CPOL, CPHA, LBCL, and interrupt enable bits
+   * Set LBDIE
+   */
 
   regval  = stm32_1wire_in(priv, STM32L4_USART_CR2_OFFSET);
   regval &= ~(USART_CR2_STOP_MASK | USART_CR2_CLKEN | USART_CR2_CPOL |
@@ -543,9 +547,10 @@ static int stm32_1wire_init(FAR struct stm32_1wire_priv_s *priv)
   regval |= USART_CR2_LBDIE;
   stm32_1wire_out(priv, STM32L4_USART_CR2_OFFSET, regval);
 
-  /* Configure CR1 */
-  /* Clear TE, REm, all interrupt enable bits, PCE, PS and M */
-  /* Set RXNEIE */
+  /* Configure CR1
+   * Clear TE, REm, all interrupt enable bits, PCE, PS and M
+   * Set RXNEIE
+   */
 
   regval  = stm32_1wire_in(priv, STM32L4_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_TE | USART_CR1_RE | USART_CR1_ALLINTS |
@@ -553,12 +558,14 @@ static int stm32_1wire_init(FAR struct stm32_1wire_priv_s *priv)
   regval |= USART_CR1_RXNEIE;
   stm32_1wire_out(priv, STM32L4_USART_CR1_OFFSET, regval);
 
-  /* Configure CR3 */
-  /* Clear CTSE, RTSE, and all interrupt enable bits */
-  /* Set ONEBIT, HDSEL and EIE */
+  /* Configure CR3
+   * Clear CTSE, RTSE, and all interrupt enable bits
+   * Set ONEBIT, HDSEL and EIE
+   */
 
   regval  = stm32_1wire_in(priv, STM32L4_USART_CR3_OFFSET);
-  regval &= ~(USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE | USART_CR3_EIE);
+  regval &= ~(USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE |
+              USART_CR3_EIE);
   regval |= (USART_CR3_ONEBIT | USART_CR3_HDSEL | USART_CR3_EIE);
   stm32_1wire_out(priv, STM32L4_USART_CR3_OFFSET, regval);
 
@@ -659,7 +666,8 @@ static inline void stm32_1wire_sem_init(FAR struct stm32_1wire_priv_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_1wire_sem_destroy(FAR struct stm32_1wire_priv_s *priv)
+static inline void stm32_1wire_sem_destroy(
+    FAR struct stm32_1wire_priv_s *priv)
 {
   nxsem_destroy(&priv->sem_excl);
   nxsem_destroy(&priv->sem_isr);
@@ -673,9 +681,9 @@ static inline void stm32_1wire_sem_destroy(FAR struct stm32_1wire_priv_s *priv)
  *
  ****************************************************************************/
 
-static inline void stm32_1wire_sem_wait(FAR struct stm32_1wire_priv_s *priv)
+static inline int stm32_1wire_sem_wait(FAR struct stm32_1wire_priv_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->sem_excl);
+  return nxsem_wait_uninterruptible(&priv->sem_excl);
 }
 
 /****************************************************************************
@@ -709,7 +717,11 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
 
   /* Lock out other clients */
 
-  stm32_1wire_sem_wait(priv);
+  ret = stm32_1wire_sem_wait(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   priv->result = ERROR;
 
@@ -722,6 +734,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
           break;
 
         case ONEWIRETASK_RESET:
+
           /* Set baud rate */
 
           priv->baud = RESET_BAUD;
@@ -743,6 +756,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
 
         case ONEWIRETASK_WRITE:
         case ONEWIRETASK_WRITEBIT:
+
           /* Set baud rate */
 
           priv->baud = TIMESLOT_BAUD;
@@ -754,7 +768,8 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
           priv->msgs = &msgs[indx];
           priv->byte = priv->msgs->buffer;
           priv->bit = 0;
-          stm32_1wire_send(priv, (*priv->byte & (1 << priv->bit)) ? WRITE_TX1 : WRITE_TX0);
+          stm32_1wire_send(priv, (*priv->byte & (1 << priv->bit)) ?
+                           WRITE_TX1 : WRITE_TX0);
           leave_critical_section(irqs);
 
           /* Wait.  Break on timeout if TX line closed to GND */
@@ -766,6 +781,7 @@ static int stm32_1wire_process(struct stm32_1wire_priv_s *priv,
 
         case ONEWIRETASK_READ:
         case ONEWIRETASK_READBIT:
+
           /* Set baud rate */
 
           priv->baud = TIMESLOT_BAUD;
@@ -850,7 +866,11 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
               if (++priv->bit >= 8)
                 {
                   priv->bit = 0;
-                  if (++priv->byte >= (priv->msgs->buffer + priv->msgs->buflen)) /* Done? */
+
+                  /* Done? */
+
+                  if (++priv->byte >=
+                      (priv->msgs->buffer + priv->msgs->buflen))
                     {
                       priv->msgs = NULL;
                       priv->result = OK;
@@ -861,7 +881,8 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
 
               /* Send next bit */
 
-              stm32_1wire_send(priv, (*priv->byte & (1 << priv->bit)) ? WRITE_TX1 : WRITE_TX0);
+              stm32_1wire_send(priv, (*priv->byte & (1 << priv->bit)) ?
+                               WRITE_TX1 : WRITE_TX0);
               break;
 
             case ONEWIRETASK_READ:
@@ -968,8 +989,9 @@ static int stm32_1wire_reset(FAR struct onewire_dev_s *dev)
  *
  ****************************************************************************/
 
-static int stm32_1wire_write(FAR struct onewire_dev_s *dev, const uint8_t *buffer,
-                           int buflen)
+static int stm32_1wire_write(FAR struct onewire_dev_s *dev,
+                             const uint8_t *buffer,
+                             int buflen)
 {
   struct stm32_1wire_priv_s *priv = ((struct stm32_1wire_inst_s *)dev)->priv;
   const struct stm32_1wire_msg_s msgs[1] =
@@ -990,7 +1012,8 @@ static int stm32_1wire_write(FAR struct onewire_dev_s *dev, const uint8_t *buffe
  *
  ****************************************************************************/
 
-static int stm32_1wire_read(FAR struct onewire_dev_s *dev, uint8_t *buffer, int buflen)
+static int stm32_1wire_read(FAR struct onewire_dev_s *dev, uint8_t *buffer,
+                            int buflen)
 {
   struct stm32_1wire_priv_s *priv = ((struct stm32_1wire_inst_s *)dev)->priv;
   const struct stm32_1wire_msg_s msgs[1] =
@@ -1016,7 +1039,6 @@ static int stm32_1wire_read(FAR struct onewire_dev_s *dev, uint8_t *buffer, int 
 static int stm32_1wire_exchange(FAR struct onewire_dev_s *dev, bool reset,
                                 FAR const uint8_t *txbuffer, int txbuflen,
                                 FAR uint8_t *rxbuffer, int rxbuflen)
-
 {
   int result = ERROR;
   struct stm32_1wire_priv_s *priv = ((struct stm32_1wire_inst_s *)dev)->priv;
@@ -1053,6 +1075,7 @@ static int stm32_1wire_exchange(FAR struct onewire_dev_s *dev, bool reset,
 
       result = stm32_1wire_process(priv, msgs, 2);
     }
+
   return result;
 }
 
@@ -1064,7 +1087,8 @@ static int stm32_1wire_exchange(FAR struct onewire_dev_s *dev, bool reset,
  *
  ****************************************************************************/
 
-static int stm32_1wire_writebit(FAR struct onewire_dev_s *dev, const uint8_t *bit)
+static int stm32_1wire_writebit(FAR struct onewire_dev_s *dev,
+                                const uint8_t *bit)
 {
   struct stm32_1wire_priv_s *priv = ((struct stm32_1wire_inst_s *)dev)->priv;
   const struct stm32_1wire_msg_s msgs[1] =
@@ -1100,7 +1124,7 @@ static int stm32_1wire_readbit(FAR struct onewire_dev_s *dev, uint8_t *bit)
   return stm32_1wire_process(priv, msgs, 1);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_1wire_pm_prepare
  *
  * Description:
@@ -1127,7 +1151,7 @@ static int stm32_1wire_readbit(FAR struct onewire_dev_s *dev, uint8_t *bit)
  *   power state change).  Drivers are not permitted to return non-zero
  *   values when reverting back to higher power consumption modes!
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_PM
 static int stm32_1wire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
@@ -1135,7 +1159,7 @@ static int stm32_1wire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 {
   struct stm32_1wire_priv_s *priv =
       (struct stm32_1wire_priv_s *)((char *)cb -
-                                      offsetof(struct stm32_1wire_priv_s, pm_cb));
+                                 offsetof(struct stm32_1wire_priv_s, pm_cb));
   int sval;
 
   /* Logic to prepare for a reduced power state goes here. */
@@ -1148,6 +1172,7 @@ static int stm32_1wire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
     case PM_STANDBY:
     case PM_SLEEP:
+
       /* Check if exclusive lock for 1-Wire bus is held. */
 
       if (nxsem_getvalue(&priv->sem_excl, &sval) < 0)
@@ -1158,7 +1183,9 @@ static int stm32_1wire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
       if (sval <= 0)
         {
-          /* Exclusive lock is held, do not allow entry to deeper PM states. */
+          /* Exclusive lock is held, do not allow entry to deeper PM
+           * states.
+           */
 
           return -EBUSY;
         }
@@ -1166,6 +1193,7 @@ static int stm32_1wire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
       break;
 
     default:
+
       /* Should not get here */
 
       break;
@@ -1183,7 +1211,7 @@ static int stm32_1wire_pm_prepare(FAR struct pm_callback_s *cb, int domain,
  * Name: stm32l4_1wireinitialize
  *
  * Description:
- *   Initialize the selected 1-Wire port. And return a unique instance of struct
+ *   Initialize the selected 1-Wire port. And return a unique instance of
  *   struct onewire_dev_s.  This function may be called to obtain multiple
  *   instances of the interface, each of which may be set up with a
  *   different frequency and slave address.

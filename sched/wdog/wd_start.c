@@ -151,10 +151,12 @@ static inline void wd_expiration(void)
  *   on a given watchdog ID has any effect.
  *
  * Input Parameters:
- *   wdog     - watchdog ID
+ *   wdog     - Watchdog ID
  *   delay    - Delay count in clock ticks
- *   wdentry  - function to call on timeout
- *   parm1..4 - parameters to pass to wdentry
+ *   wdentry  - Function to call on timeout
+ *   parm1..4 - Parameters to pass to wdentry
+ *
+ *   NOTE:  All parameters must be of type wdparm_t.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return to

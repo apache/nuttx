@@ -1,4 +1,4 @@
-/****************************************************************************
+/*****************************************************************************
  * include/nuttx/wireless/ieee802154/ieee802154_mac.h
  *
  *   Copyright (C) 2016 Sebastien Lorquet. All rights reserved.
@@ -37,20 +37,21 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 #ifndef __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_MAC_H
 #define __INCLUDE_NUTTX_WIRELESS_IEEE802154_IEEE802154_MAC_H
 
-/****************************************************************************
+/*****************************************************************************
  * Included Files
- ****************************************************************************/
+ *****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include <signal.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #if defined(CONFIG_NET_6LOWPAN) || defined(CONFIG_NET_IEEE802154)
 #  include <net/if.h>
@@ -58,10 +59,11 @@
 
 #include <nuttx/fs/ioctl.h>
 
-/****************************************************************************
+/*****************************************************************************
  * Pre-Processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
+ *****************************************************************************/
+
+/* Configuration *************************************************************/
 
 #if !defined(CONFIG_MAC802154_NPANDESC) || CONFIG_MAC802154_NPANDESC <= 0
 #  undef CONFIG_MAC802154_NPANDESC
@@ -71,6 +73,7 @@
 #define MAC802154_NPANDESC CONFIG_MAC802154_NPANDESC
 
 /* IEEE 802.15.4 address macros */
+
 /* Copy a an IEEE 802.15.4 address */
 
 #define IEEE802154_ANYADDRCOPY(dest,src,len) \
@@ -101,13 +104,12 @@
 
 /* Some addresses */
 
-#define IEEE802154_PANID_UNSPEC ((uint8_t[]){0xFF,0xFF})
-#define IEEE802154_SADDR_UNSPEC ((uint8_t[]){0xFF,0xFF})
-#define IEEE802154_SADDR_BCAST  ((uint8_t[]){0xFE,0xFF})
-#define IEEE802154_EADDR_UNSPEC ((uint8_t[]){0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF})
+#define IEEE802154_PANID_UNSPEC ((uint8_t[]){0xff,0xff})
+#define IEEE802154_SADDR_UNSPEC ((uint8_t[]){0xff,0xff})
+#define IEEE802154_SADDR_BCAST  ((uint8_t[]){0xfe,0xff})
+#define IEEE802154_EADDR_UNSPEC ((uint8_t[]){0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff})
 
-
-/* IEEE 802.15.4 MAC Character Driver IOCTL Commands ************************/
+/* IEEE 802.15.4 MAC Character Driver IOCTL Commands *************************/
 
 /* The IEEE 802.15.4 standard specifies a MLME Service Access Point (SAP)
  * including a series of primitives that are used as an interface between
@@ -136,20 +138,20 @@
 #define MAC802154IOC_MLME_RXENABLE_REQUEST     _MAC802154IOC(0x0007)
 #define MAC802154IOC_MLME_SCAN_REQUEST         _MAC802154IOC(0x0008)
 #define MAC802154IOC_MLME_SET_REQUEST          _MAC802154IOC(0x0009)
-#define MAC802154IOC_MLME_START_REQUEST        _MAC802154IOC(0x000A)
-#define MAC802154IOC_MLME_SYNC_REQUEST         _MAC802154IOC(0x000B)
-#define MAC802154IOC_MLME_POLL_REQUEST         _MAC802154IOC(0x000C)
-#define MAC802154IOC_MLME_DPS_REQUEST          _MAC802154IOC(0x000D)
-#define MAC802154IOC_MLME_SOUNDING_REQUEST     _MAC802154IOC(0x000E)
-#define MAC802154IOC_MLME_CALIBRATE_REQUEST    _MAC802154IOC(0x000F)
+#define MAC802154IOC_MLME_START_REQUEST        _MAC802154IOC(0x000a)
+#define MAC802154IOC_MLME_SYNC_REQUEST         _MAC802154IOC(0x000b)
+#define MAC802154IOC_MLME_POLL_REQUEST         _MAC802154IOC(0x000c)
+#define MAC802154IOC_MLME_DPS_REQUEST          _MAC802154IOC(0x000d)
+#define MAC802154IOC_MLME_SOUNDING_REQUEST     _MAC802154IOC(0x000e)
+#define MAC802154IOC_MLME_CALIBRATE_REQUEST    _MAC802154IOC(0x000f)
 
 /* Non-standard MAC ioctl calls */
 
-#define MAC802154IOC_NOTIFY_REGISTER           _MAC802154IOC(0x00FD)
-#define MAC802154IOC_GET_EVENT                 _MAC802154IOC(0x00FE)
-#define MAC802154IOC_ENABLE_EVENTS             _MAC802154IOC(0x00FF)
+#define MAC802154IOC_NOTIFY_REGISTER           _MAC802154IOC(0x00fd)
+#define MAC802154IOC_GET_EVENT                 _MAC802154IOC(0x00fe)
+#define MAC802154IOC_ENABLE_EVENTS             _MAC802154IOC(0x00ff)
 
-/* IEEE 802.15.4 MAC Interface **********************************************/
+/* IEEE 802.15.4 MAC Interface ***********************************************/
 
 /* Frame control field masks, 2 bytes
  * Seee IEEE 802.15.4/2011 5.2.1.1 page 57
@@ -160,9 +162,9 @@
 #define IEEE802154_FRAMECTRL_PEND       0x0010  /* Frame pending, bit 4 */
 #define IEEE802154_FRAMECTRL_ACKREQ     0x0020  /* Acknowledge request, bit 5 */
 #define IEEE802154_FRAMECTRL_PANIDCOMP  0x0040  /* PAN ID Compression, bit 6 */
-#define IEEE802154_FRAMECTRL_DADDR      0x0C00  /* Dest addressing mode, bits 10-11 */
+#define IEEE802154_FRAMECTRL_DADDR      0x0c00  /* Dest addressing mode, bits 10-11 */
 #define IEEE802154_FRAMECTRL_VERSION    0x3000  /* Source addressing mode, bits 12-13 */
-#define IEEE802154_FRAMECTRL_SADDR      0xC000  /* Source addressing mode, bits 14-15 */
+#define IEEE802154_FRAMECTRL_SADDR      0xc000  /* Source addressing mode, bits 14-15 */
 
 #define IEEE802154_FRAMECTRL_SHIFT_FTYPE      0  /* Frame type, bits 0-2 */
 #define IEEE802154_FRAMECTRL_SHIFT_SEC        3  /* Security Enabled, bit 3 */
@@ -177,9 +179,9 @@
  * Seee IEEE 802.15.4/2011 5.2.2.1.2 page 62
  */
 
-#define IEEE802154_SFSPEC_BEACONORDER 0x000F  /* Beacon order, bits 0-3 */
-#define IEEE802154_SFSPEC_SFORDER     0x00F0  /* Superframe Order, bit 4-7 */
-#define IEEE802154_SFSPEC_FINCAPSLOT  0x0F00  /* Final CAP Slot, bit 8-11 */
+#define IEEE802154_SFSPEC_BEACONORDER 0x000f  /* Beacon order, bits 0-3 */
+#define IEEE802154_SFSPEC_SFORDER     0x00f0  /* Superframe Order, bit 4-7 */
+#define IEEE802154_SFSPEC_FINCAPSLOT  0x0f00  /* Final CAP Slot, bit 8-11 */
 #define IEEE802154_SFSPEC_BLE         0x1000  /* Battery Life Ext, bit 12 */
 #define IEEE802154_SFSPEC_PANCOORD    0x4000  /* PAN Coordinator, bit 14 */
 #define IEEE802154_SFSPEC_ASSOCPERMIT 0x8000  /* Association Permit, bit 15 */
@@ -205,7 +207,7 @@
  * Seee IEEE 802.15.4/2011 5.2.2.1.3 page 63
  */
 
-#define IEEE802154_GTSDIR_MASK  0x7F /* GTS Directions Mask, bits 0-6 */
+#define IEEE802154_GTSDIR_MASK  0x7f /* GTS Directions Mask, bits 0-6 */
 
 #define IEEE802154_GTSDIR_SHIFT_MASK  0 /* GTS Directions Mask, bits 0-6 */
 
@@ -237,7 +239,7 @@
 /* IEEE 802.15.4 PHY constants */
 
 #define IEEE802154_MAX_PHY_PACKET_SIZE        127
-#define IEEE802154_TURN_AROUND_TIME           12 /*symbol periods*/
+#define IEEE802154_TURN_AROUND_TIME           12 /* symbol periods*/
 
 /* IEEE 802.15.4 MAC constants */
 
@@ -277,9 +279,9 @@
 
 #define MAX_ORPHAN_ADDR   32  /* REVISIT */
 
-/****************************************************************************
+/*****************************************************************************
  * Public Types
- ****************************************************************************/
+ *****************************************************************************/
 
 /* IEEE 802.15.4 MAC status codes */
 
@@ -455,7 +457,7 @@ enum ieee802154_attr_e
   IEEE802154_ATTR_MAC_PANCOORD_EXT_ADDR,
   IEEE802154_ATTR_MAC_PANCOORD_SHORT_ADDR,
 
-  /* Non-standard MAC Attributes*/
+  /* Non-standard MAC Attributes */
 
   IEEE802154_ATTR_MAC_DEVMODE,
 };
@@ -471,6 +473,7 @@ enum ieee802154_frametype_e
 };
 
 /* MAC command IDs */
+
 /* TODO: Change terminology to be "current primitive" */
 
 enum ieee802154_cmdid_e
@@ -593,7 +596,7 @@ struct ieee802154_pandesc_s
 
   struct ieee802154_addr_s coordaddr;
 
-  uint8_t chan;  /* current channel occupied by the network */
+  uint8_t chan;   /* current channel occupied by the network */
   uint8_t chpage; /* current channel page occupied by the network */
 
   /* The superframe specifications received in the beacon frame */
@@ -679,6 +682,7 @@ union ieee802154_phyattr_u
   int32_t   txpwr;
   uint32_t  symdur_picosec;
   uint8_t   fcslen;
+
   /* TODO: Fill this out as we implement supported get/set commands */
 };
 
@@ -893,7 +897,8 @@ struct ieee802154_data_ind_s
  * Primitive: MCPS-PURGE.request
  *
  * Description:
- *    Allows the next higher layer to purge an MSDU from the transaction queue.
+ *   Allows the next higher layer to purge an MSDU from the transaction
+ *   queue.
  *
  *****************************************************************************/
 
@@ -920,17 +925,18 @@ struct ieee802154_assoc_req_s
 
   FAR struct ieee802154_primitive_s *flink;
 
-  uint8_t chan;  /* Channel number to attempt association */
+  uint8_t chan;   /* Channel number to attempt association */
   uint8_t chpage; /* Channel page to attempt association */
 
   /* TODO:
    * This is a non-standard field. I believe there is a catch 22 in the
-   * standard and until I can figure it out, I'm adding this boolean to let the
-   * application tell the MAC whether it is trying to assocaite with a beacon
-   * enabled PAN or non-beacon enabled PAN. If it is beacon-enabled, the MAC
-   * will track the beacon first before transmitting the association. This can
-   * take some time depending on the beacon interval. If the PAN is non-beacon
-   * enabled, the association request is sent immediately via CSMA.
+   * standard and until I can figure it out, I'm adding this boolean to let
+   * the application tell the MAC whether it is trying to associate with a
+   * beacon enabled PAN or non-beacon enabled PAN. If it is beacon-enabled,
+   * the MAC will track the beacon first before transmitting the
+   * association.  This can take some time depending on the beacon interval.
+   * If the PAN is non-beacon enabled, the association request is sent
+   * immediately via CSMA.
    *
    * The catch 22: The standard outlines the procedure for associating: reset
    * the MAC, scan to find PAN's and pass coordinator address info to
@@ -1015,7 +1021,7 @@ struct ieee802154_assoc_resp_s
 
   uint8_t devaddr[IEEE802154_EADDRSIZE];
 
-  /* Address assigned to the device. 0xFFFF if failure */
+  /* Address assigned to the device. 0xffff if failure */
 
   uint8_t assocsaddr[IEEE802154_SADDRSIZE];
 
@@ -1034,8 +1040,8 @@ struct ieee802154_assoc_resp_s
  * Primitive: MLME-ASSOCIATE.confirm
  *
  * Description:
- *    Used to inform the next higher layer of the initiating device whether its
- *    request to associate was successful or unsuccessful.
+ *   Used to inform the next higher layer of the initiating device whether
+ *   its request to associate was successful or unsuccessful.
  *
  *****************************************************************************/
 
@@ -1152,11 +1158,11 @@ struct ieee802154_disassoc_conf_s
  * Primitive: MLME-BEACONNOTIFY.indication
  *
  * Description:
- *    Used to send parameters contained within a beacon frame received by the
- *    MAC sublayer to the next higher layer when either macAutoRequest is set to
- *    FALSE or when the beacon frame contains one or more octets of payload. The
- *    primitive also sends a measure of the LQI and the time the beacon frame
- *    was received.
+ *   Used to send parameters contained within a beacon frame received by
+ *   the MAC sublayer to the next higher layer when either macAutoRequest is
+ *   set to FALSE or when the beacon frame contains one or more octets of
+ *   payload.  The primitive also sends a measure of the LQI and the time the
+ *   beacon frame was received.
  *
  *****************************************************************************/
 
@@ -1208,9 +1214,9 @@ struct ieee802154_commstatus_ind_s
  * Primitive: MLME-GTS.request
  *
  * Description:
- *    Allows a device to send a request to the PAN coordinator to allocate a new
- *    GTS or to deallocate an existing GTS. This primitive is also used by the
- *    PAN coordinator to initiate a GTS deallocation.
+ *   Allows a device to send a request to the PAN coordinator to allocate a
+ *   new GTS or to deallocate an existing GTS. This primitive is also used
+ *   by the PAN coordinator to initiate a GTS deallocation.
  *
  *****************************************************************************/
 
@@ -1233,8 +1239,8 @@ struct ieee802154_gts_req_s
  * Primitive: MLME-GTS.confirm
  *
  * Description:
- *    Reports the results of a request to allocate a new GTS or to deallocate an
- *    existing GTS.
+ *    Reports the results of a request to allocate a new GTS or to deallocate
+ *    an existing GTS.
  *
  *****************************************************************************/
 
@@ -1277,8 +1283,8 @@ struct ieee802154_gts_ind_s
  * Primitive: MLME-ORPHAN.indication
  *
  * Description:
- *    Generated by the MLME of a coordinator and issued to its next higher layer
- *    on receipt of an orphan notification command.
+ *    Generated by the MLME of a coordinator and issued to its next higher
+ *    layer on receipt of an orphan notification command.
  *
  *****************************************************************************/
 
@@ -1465,10 +1471,10 @@ struct ieee802154_get_req_s
  *    Attempts to write the given value to the indicated PIB attribute.
  *
  *  NOTE: The standard specifies that confirmation should be indicated via
- *  the asynchronous MLME-SET.confirm primitive.  However, in our implementation
- *  there is no reason not to synchronously return the status immediately.
- *  Therefore, we do merge the functionality of the MLME-SET.request and
- *  MLME-SET.confirm primitives together.
+ *  the asynchronous MLME-SET.confirm primitive.  However, in our
+ *  implementation there is no reason not to synchronously return the status
+ *  immediately.  Therefore, we do merge the functionality of the
+ *  MLME-SET.request and MLME-SET.confirm primitives together.
  *
  *****************************************************************************/
 
@@ -1486,9 +1492,9 @@ struct ieee802154_set_req_s
  * Primitive: MLME-START.request
  *
  * Description:
- *    Used by the PAN coordinator to initiate a new PAN or to begin using a new
- *    superframe configuration. This primitive is also used by a device already
- *    associated with an existing PAN to begin using a new superframe
+ *    Used by the PAN coordinator to initiate a new PAN or to begin using a
+ *    new superframe configuration. This primitive is also used by a device
+ *    already associated with an existing PAN to begin using a new superframe
  *    configuration.
  *
  *****************************************************************************/
@@ -1686,9 +1692,9 @@ union ieee802154_primitive_u
 struct ieee802154_primitive_s
 {
   /* Must be first member so that we can interchange between the actual
-   * primitive and this extended struct. Note, all frames also have the first
-   * entry as a forward link to a primitive so that primitives can be contained
-   * in lists.
+   * primitive and this extended struct. Note, all frames also have the
+   * first entry as a forward link to a primitive so that primitives can be
+   * contained in lists.
    */
 
   union ieee802154_primitive_u u;
@@ -1715,9 +1721,9 @@ union ieee802154_macarg_u
   struct ieee802154_start_req_s    startreq;    /* MAC802154IOC_MLME_START_REQUEST */
   struct ieee802154_sync_req_s     syncreq;     /* MAC802154IOC_MLME_SYNC_REQUEST */
   struct ieee802154_poll_req_s     pollreq;     /* MAC802154IOC_MLME_POLL_REQUEST */
-  /* To be determined */                        /* MAC802154IOC_MLME_DPS_REQUEST */
-  /* To be determined */                        /* MAC802154IOC_MLME_SOUNDING_REQUEST */
-  /* To be determined */                        /* MAC802154IOC_MLME_CALIBRATE_REQUEST */
+                                                /* MAC802154IOC_MLME_DPS_REQUEST */
+                                                /* MAC802154IOC_MLME_SOUNDING_REQUEST */
+                                                /* MAC802154IOC_MLME_CALIBRATE_REQUEST */
 
   struct sigevent                  event;       /* MAC802154IOC_NOTIFY_REGISTER */
   struct ieee802154_primitive_s    primitive;   /* MAC802154IOC_GET_EVENT */
@@ -1752,13 +1758,13 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
+/*****************************************************************************
  * Public Function Prototypes
- ****************************************************************************/
+ *****************************************************************************/
 
 struct ieee802154_radio_s; /* Forward reference */
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mac802154_create
  *
  * Description:
@@ -1780,11 +1786,11 @@ struct ieee802154_radio_s; /* Forward reference */
  * Returned Value:
  *   An opaque reference to the MAC state data.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev);
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mac802154dev_register
  *
  * Description:
@@ -1800,11 +1806,11 @@ MACHANDLE mac802154_create(FAR struct ieee802154_radio_s *radiodev);
  *   Zero (OK) is returned on success.  Otherwise a negated errno value is
  *   returned to indicate the nature of the failure.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 int mac802154dev_register(MACHANDLE mac, int minor);
 
-/****************************************************************************
+/*****************************************************************************
  * Name: mac802154netdev_register
  *
  * Description:
@@ -1818,19 +1824,19 @@ int mac802154dev_register(MACHANDLE mac, int minor);
  *   Zero (OK) is returned on success.  Otherwise a negated errno value is
  *   returned to indicate the nature of the failure.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 int mac802154netdev_register(MACHANDLE mac);
 
-/****************************************************************************
+/*****************************************************************************
  * Name: ieee802154_primitivepool_initialize
  *
  * Description:
- *   This function initializes the primitive allocator. Primitives are defined
- *   in the standard and are used to pass information between the MAC layer and
- *   the next highest layer. They are a data type abstraction.  This function must
- *   be called early in the initialization sequence before any radios
- *   begin operation.
+ *   This function initializes the primitive allocator. Primitives are
+ *   defined in the standard and are used to pass information between the
+ *   MAC layer and the next highest layer. They are a data type abstraction.
+ *   This function must be called early in the initialization sequence
+ *   before any radios begin operation.
  *
  * Input Parameters:
  *   None
@@ -1838,11 +1844,11 @@ int mac802154netdev_register(MACHANDLE mac);
  * Returned Value:
  *   None
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 void ieee802154_primitivepool_initialize(void);
 
-/****************************************************************************
+/*****************************************************************************
  * Name: ieee802154_primitive_allocate
  *
  * Description:
@@ -1862,21 +1868,22 @@ void ieee802154_primitivepool_initialize(void);
  *   None
  *
  * Returned Value:
- *   A reference to the allocated primitive structure.  All user fields in this
- *   structure have been zeroed.  On a failure to allocate, NULL is
+ *   A reference to the allocated primitive structure.  All user fields in
+ *   this structure have been zeroed.  On a failure to allocate, NULL is
  *   returned.
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void);
 
-/****************************************************************************
+/*****************************************************************************
  * Name: ieee802154_primitive_free
  *
  * Description:
- *   The ieee802154_primitive_free function will return a primitive structure to
- *   the free pool if it was a pre-allocated primitive structure. If the primitive
- *   was allocated dynamically it will be deallocated.
+ *   The ieee802154_primitive_free function will return a primitive
+ *   structure to the free pool if it was a pre-allocated primitive
+ *   structure. If the primitive was allocated dynamically it will be
+ *   deallocated.
  *
  * Input Parameters:
  *   prim - primitive structure to free
@@ -1884,7 +1891,7 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void);
  * Returned Value:
  *   None
  *
- ****************************************************************************/
+ *****************************************************************************/
 
 void ieee802154_primitive_free(FAR struct ieee802154_primitive_s *prim);
 

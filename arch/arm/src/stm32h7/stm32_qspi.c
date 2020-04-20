@@ -1315,7 +1315,9 @@ static int qspi0_interrupt(int irq, void *context, FAR void *arg)
         }
       else
         {
-          /* XXX if it's NOT auto stop; something needs to happen here; a callback? */
+          /* XXX if it's NOT auto stop; something needs to happen here;
+           * a callback?
+           */
         }
     }
 
@@ -1391,7 +1393,7 @@ static int qspi0_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void qspi_dma_timeout(int argc, uint32_t arg)
+static void qspi_dma_timeout(int argc, uint32_t arg, ...)
 {
   struct stm32h7_qspidev_s *priv = (struct stm32h7_qspidev_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1446,7 +1448,9 @@ static void qspi_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
   if (priv->result == -EBUSY)
     {
-      /* Save the result of the transfer if no error was previously reported */
+      /* Save the result of the transfer if no error was previously
+       * reported
+       */
 
       if (isr & DMA_STREAM_TCIF_BIT)
         {
@@ -1565,7 +1569,7 @@ static int qspi_memory_dma(struct stm32h7_qspidev_s *priv,
       /* Start (or re-start) the watchdog timeout */
 
       ret = wd_start(priv->dmadog, DMA_TIMEOUT_TICKS,
-                     (wdentry_t)qspi_dma_timeout, 1, (uint32_t)priv);
+                     qspi_dma_timeout, 1, (uint32_t)priv);
       if (ret < 0)
         {
            spierr("ERROR: wd_start failed: %d\n", ret);
@@ -1707,7 +1711,9 @@ static int qspi_receive_blocking(struct stm32h7_qspidev_s *priv,
           qspi_waitstatusflags(priv, QSPI_SR_TCF, 1);
           qspi_putreg(priv, QSPI_FCR_CTCF, STM32_QUADSPI_FCR_OFFSET);
 
-          /* Use Abort to clear the busy flag, and ditch any extra bytes in fifo */
+          /* Use Abort to clear the busy flag, and ditch any extra bytes in
+           * fifo
+           */
 
           qspi_abort(priv);
         }
@@ -1873,7 +1879,9 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
   qspi_abort(priv);
   qspi_waitstatusflags(priv, QSPI_SR_BUSY, 0);
 
-  /* Check if the requested frequency is the same as the frequency selection */
+  /* Check if the requested frequency is the same as the frequency
+   * selection
+   */
 
   if (priv->frequency == frequency)
     {
@@ -2339,7 +2347,9 @@ static int qspi_memory(struct qspi_dev_s *dev,
     {
       /* polling mode */
 
-      /* Set up the Communications Configuration Register as per command info */
+      /* Set up the Communications Configuration Register as per command
+       * info
+       */
 
       qspi_ccrconfig(priv, &xctn,
                      QSPIMEM_ISWRITE(meminfo->flags) ? CCR_FMODE_INDWR :

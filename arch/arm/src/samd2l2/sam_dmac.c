@@ -60,7 +60,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* Condition out the whole file unless DMA is selected in the configuration */
 
 #ifdef CONFIG_SAMD2L2_DMAC
@@ -80,6 +82,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* The direction of the transfer */
 
 enum sam_dmadir_e
@@ -110,7 +113,7 @@ struct sam_dmach_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void   sam_takechsem(void);
+static int   sam_takechsem(void);
 static inline void sam_givechsem(void);
 #if CONFIG_SAMD2L2_DMAC_NDESC > 0
 static void   sam_takedsem(void);
@@ -145,10 +148,10 @@ static sem_t g_dsem;
 
 static struct sam_dmach_s g_dmach[SAMD2L2_NDMACHAN];
 
-/* NOTE: Using the same address as the base descriptors for writeback descriptors
- * causes TERR and FERR interrupts to be raised immediately after starting DMA.
- * This was tested on SAMD21G18A, and it would appear that the writeback
- * buffer must be located at a different memory address.
+/* NOTE: Using the same address as the base descriptors for writeback
+ * descriptors causes TERR and FERR interrupts to be raised immediately after
+ * starting DMA. This was tested on SAMD21G18A, and it would appear that the
+ * writeback buffer must be located at a different memory address.
  *
  * - Matt Thompson
  */
@@ -179,9 +182,9 @@ static struct dma_desc_s g_dma_desc[CONFIG_SAMD2L2_DMAC_NDESC]
  *
  ****************************************************************************/
 
-static void sam_takechsem(void)
+static int sam_takechsem(void)
 {
-  nxsem_wait_uninterruptible(&g_chsem);
+  return nxsem_wait_uninterruptible(&g_chsem);
 }
 
 static inline void sam_givechsem(void)
@@ -308,6 +311,7 @@ static int sam_dmainterrupt(int irq, void *context, FAR void *arg)
       else if ((intpend & DMAC_INTPEND_SUSP) != 0)
         {
           dmaerr("Channel suspended. Channel %d\n", chndx);
+
           /* REVISIT: Do we want to do anything here? */
         }
     }
@@ -626,17 +630,18 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
    *
    * Other settings come from the channel configuration:
    *
-   *   LPSRAM_BTCTRL_BEATSIZE       - Determined by DMACH_FLAG_BEATSIZE
-   *   LPSRAM_BTCTRL_SRCINC         - Determined by DMACH_FLAG_MEM_INCREMENT
-   *   LPSRAM_BTCTRL_DSTINC         - Determined by DMACH_FLAG_PERIPH_INCREMENT
-   *   LPSRAM_BTCTRL_STEPSEL        - Determined by DMACH_FLAG_STEPSEL
-   *   LPSRAM_BTCTRL_STEPSIZE       - Determined by DMACH_FLAG_STEPSIZE
+   *   LPSRAM_BTCTRL_BEATSIZE     - Determined by DMACH_FLAG_BEATSIZE
+   *   LPSRAM_BTCTRL_SRCINC       - Determined by DMACH_FLAG_MEM_INCREMENT
+   *   LPSRAM_BTCTRL_DSTINC       - Determined by DMACH_FLAG_PERIPH_INCREMENT
+   *   LPSRAM_BTCTRL_STEPSEL      - Determined by DMACH_FLAG_STEPSEL
+   *   LPSRAM_BTCTRL_STEPSIZE     - Determined by DMACH_FLAG_STEPSIZE
    */
 
   btctrl  = LPSRAM_BTCTRL_VALID | LPSRAM_BTCTRL_EVOSEL_DISABLE |
             LPSRAM_BTCTRL_BLOCKACT_INT;
 
-  tmp     = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >> DMACH_FLAG_BEATSIZE_SHIFT;
+  tmp     = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >>
+             DMACH_FLAG_BEATSIZE_SHIFT;
   btctrl |= tmp << LPSRAM_BTCTRL_BEATSIZE_SHIFT;
 
   /* See Addressing on page 264 of the datasheet.
@@ -665,7 +670,8 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
       btctrl |= LPSRAM_BTCTRL_STEPSEL;
     }
 
-  tmp     = (dmach->dc_flags & DMACH_FLAG_STEPSIZE_MASK) >> LPSRAM_BTCTRL_STEPSIZE_SHIFT;
+  tmp     = (dmach->dc_flags & DMACH_FLAG_STEPSIZE_MASK) >>
+             LPSRAM_BTCTRL_STEPSIZE_SHIFT;
   btctrl |= tmp << LPSRAM_BTCTRL_STEPSIZE_SHIFT;
 
   /* Add the new descriptor list entry */
@@ -709,17 +715,18 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
    *
    * Other settings come from the channel configuration:
    *
-   *   LPSRAM_BTCTRL_BEATSIZE       - Determined by DMACH_FLAG_BEATSIZE
-   *   LPSRAM_BTCTRL_SRCINC         - Determined by DMACH_FLAG_PERIPH_INCREMENT
-   *   LPSRAM_BTCTRL_DSTINC         - Determined by DMACH_FLAG_MEM_INCREMENT
-   *   LPSRAM_BTCTRL_STEPSEL        - Determined by DMACH_FLAG_STEPSEL
-   *   LPSRAM_BTCTRL_STEPSIZE       - Determined by DMACH_FLAG_STEPSIZE
+   *   LPSRAM_BTCTRL_BEATSIZE     - Determined by DMACH_FLAG_BEATSIZE
+   *   LPSRAM_BTCTRL_SRCINC       - Determined by DMACH_FLAG_PERIPH_INCREMENT
+   *   LPSRAM_BTCTRL_DSTINC       - Determined by DMACH_FLAG_MEM_INCREMENT
+   *   LPSRAM_BTCTRL_STEPSEL      - Determined by DMACH_FLAG_STEPSEL
+   *   LPSRAM_BTCTRL_STEPSIZE     - Determined by DMACH_FLAG_STEPSIZE
    */
 
   btctrl  = LPSRAM_BTCTRL_VALID | LPSRAM_BTCTRL_EVOSEL_DISABLE |
             LPSRAM_BTCTRL_BLOCKACT_INT;
 
-  tmp     = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >> DMACH_FLAG_BEATSIZE_SHIFT;
+  tmp     = (dmach->dc_flags & DMACH_FLAG_BEATSIZE_MASK) >>
+             DMACH_FLAG_BEATSIZE_SHIFT;
   btctrl |= tmp << LPSRAM_BTCTRL_BEATSIZE_SHIFT;
 
   /* Set up the Block Transfer Count Register configuration */
@@ -743,7 +750,8 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
       btctrl |= LPSRAM_BTCTRL_STEPSEL;
     }
 
-  tmp     = (dmach->dc_flags & DMACH_FLAG_STEPSIZE_MASK) >> LPSRAM_BTCTRL_STEPSIZE_SHIFT;
+  tmp     = (dmach->dc_flags & DMACH_FLAG_STEPSIZE_MASK) >>
+             LPSRAM_BTCTRL_STEPSIZE_SHIFT;
   btctrl |= tmp << LPSRAM_BTCTRL_STEPSIZE_SHIFT;
 
   /* Add the new descriptor list entry */
@@ -855,11 +863,16 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
   struct sam_dmach_s *dmach;
   irqstate_t flags;
   unsigned int chndx;
+  int ret;
 
   /* Search for an available DMA channel */
 
   dmach = NULL;
-  sam_takechsem();
+  ret = sam_takechsem();
+  if (ret < 0)
+    {
+      return NULL;
+    }
 
   for (chndx = 0; chndx < SAMD2L2_NDMACHAN; chndx++)
     {
@@ -897,21 +910,21 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
   return (DMA_HANDLE)dmach;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_dmaconfig
  *
  * Description:
  *   There are two channel usage models:  (1) The channel is allocated and
- *   configured in one step.  This is the typical case where a DMA channel performs
- *   a constant role.  The alternative is (2) where the DMA channel is reconfigured
- *   on the fly.  In this case, the chflags provided to sam_dmachannel are not used
- *   and sam_dmaconfig() is called before each DMA to configure the DMA channel
- *   appropriately.
+ *   configured in one step.  This is the typical case where a DMA channel
+ *   performs a constant role.  The alternative is (2) where the DMA channel
+ *   is reconfigured on the fly.  In this case, the chflags provided to
+ *   sam_dmachannel are not used and sam_dmaconfig() is called before each
+ *   DMA to configure the DMA channel appropriately.
  *
  * Returned Value:
  *   None
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void sam_dmaconfig(DMA_HANDLE handle, uint32_t chflags)
 {
@@ -997,7 +1010,7 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 
           remaining -= maxtransfer;
 
-          /* Increment the memory & peripheral address (if it is appropriate to
+          /* Increment the memory & peripheral address (if it is appropriate
            * do do).
            *
            * REVISIT: What if stepsize is not 1?
@@ -1183,8 +1196,8 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
       /* Setup the Quality of Service Control Register
        *
        *   DMAC_QOSCTRL_WRBQOS_DISABLE - Background
-       *   DMAC_QOSCTRL_FQOS, DMAC_QOSCTRL_DQOS - Depend on DMACH_FLAG_PERIPH_QOS
-       *     and DMACH_FLAG_MEM_QOS
+       *   DMAC_QOSCTRL_FQOS, DMAC_QOSCTRL_DQOS - Depend on
+       *       DMACH_FLAG_PERIPH_QOS and DMACH_FLAG_MEM_QOS
        */
 
       periphqos = (dmach->dc_flags & DMACH_FLAG_PERIPH_QOS_MASK) >>
@@ -1321,15 +1334,20 @@ void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
 
   dmainfo("%s\n", msg);
   dmainfo("  DMAC Registers:\n");
-  dmainfo("         CTRL: %04x      CRCCTRL: %04x      CRCDATAIN: %08x  CRCCHKSUM: %08x\n",
+  dmainfo("         CTRL: %04x      CRCCTRL: %04x"
+          "      CRCDATAIN: %08x  CRCCHKSUM: %08x\n",
           regs->ctrl, regs->crcctrl, regs->crcdatain, regs->crcchksum);
-  dmainfo("    CRCSTATUS: %02x        DBGCTRL: %02x          QOSCTRL: %02x       SWTRIGCTRL: %08x\n",
+  dmainfo("    CRCSTATUS: %02x        DBGCTRL: %02x"
+          "          QOSCTRL: %02x       SWTRIGCTRL: %08x\n",
           regs->crcstatus, regs->dbgctrl, regs->qosctrl, regs->swtrigctrl);
-  dmainfo("     PRICTRL0: %08x  INTPEND: %04x      INTSTATUS: %08x     BUSYCH: %08x\n",
+  dmainfo("     PRICTRL0: %08x  INTPEND: %04x"
+          "     INTSTATUS: %08x     BUSYCH: %08x\n",
           regs->prictrl0, regs->intpend, regs->intstatus, regs->busych);
-  dmainfo("       PENDCH: %08x   ACTIVE: %08x   BASEADDR: %08x    WRBADDR: %08x\n",
+  dmainfo("       PENDCH: %08x   ACTIVE: %08x"
+          "   BASEADDR: %08x    WRBADDR: %08x\n",
           regs->pendch, regs->active, regs->baseaddr, regs->wrbaddr);
-  dmainfo("         CHID: %02x       CHCRTRLA: %02x         CHCRTRLB: %08x   CHINFLAG: %02x\n",
+  dmainfo("         CHID: %02x       CHCRTRLA: %02x"
+          "         CHCRTRLB: %08x   CHINFLAG: %02x\n",
           regs->chid, regs->chctrla, regs->chctrlb, regs->chintflag);
   dmainfo("     CHSTATUS: %02x\n",
           regs->chstatus);

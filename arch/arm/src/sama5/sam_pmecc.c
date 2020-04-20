@@ -72,6 +72,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Number of bits of correction.  These much match the (unshifted) values
  * in the SMC_PMECCFG register BCH_ERR field.
  */
@@ -89,6 +90,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This is the form of the PMECC descriptor that is passed to the ECC
  * detection correction algorithm in ROM.  The binary for of this structure
  * cannot be altered!
@@ -118,7 +120,8 @@ struct pmecc_desc_s
 
   /* 468-: Sigma table */
 
-  int16_t smu[PMECC_MAX_CORRECTABILITY + 2][2 * PMECC_MAX_CORRECTABILITY + 1];
+  int16_t smu[PMECC_MAX_CORRECTABILITY + 2]
+             [2 * PMECC_MAX_CORRECTABILITY + 1];
 
   /* Polynomial order */
 
@@ -142,7 +145,7 @@ struct sam_pmecc_s
 
 /* This is the type of the ROM detection/correction function
  *
- * REVISIT:  Whare are the types Pmecc and Pmerrloc?
+ * REVISIT:  Where are the types Pmecc and Pmerrloc?
  */
 
 #ifdef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
@@ -165,13 +168,19 @@ static uint32_t pmecc_correctionalgo(uint32_t isr, uintptr_t data);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* PMECC state data */
 
 static struct sam_pmecc_s g_pmecc;
 
-/* Maps BCH_ERR correctability register value to number of errors per sector */
+/* Maps BCH_ERR correctability register value to number of errors per
+ * sector.
+ */
 
-static const uint8_t g_correctability[5] = {2, 4, 8, 12, 24};
+static const uint8_t g_correctability[5] =
+{
+  2, 4, 8, 12, 24
+};
 
 /****************************************************************************
  * Private Functions
@@ -243,6 +252,7 @@ static uint32_t pmecc_substitute(void)
     }
 
   /* Computation 2t syndromes based on S(x) */
+
   /* Odd syndromes */
 
   for (i = 1; i <= 2 * g_pmecc.desc.tt - 1; i = i + 2)
@@ -298,9 +308,9 @@ static uint32_t pmecc_getsigma(void)
   int16_t *lmu = g_pmecc.desc.lmu;
   int16_t *si = g_pmecc.desc.si;
   int16_t tt = g_pmecc.desc.tt;
-  int32_t mu[PMECC_MAX_CORRECTABILITY+1];       /* Mu */
-  int32_t dmu[PMECC_MAX_CORRECTABILITY+1];      /* Discrepancy */
-  int32_t delta[PMECC_MAX_CORRECTABILITY+1];    /* Delta order   */
+  int32_t mu[PMECC_MAX_CORRECTABILITY + 1];     /* Mu */
+  int32_t dmu[PMECC_MAX_CORRECTABILITY + 1];    /* Discrepancy */
+  int32_t delta[PMECC_MAX_CORRECTABILITY + 1];  /* Delta order   */
   int32_t largest;
   int32_t diff;
   int ro;                                       /* Index of largest delta */
@@ -311,6 +321,7 @@ static uint32_t pmecc_getsigma(void)
   dmu0count = 0;
 
   /* First Row */
+
   /* Mu */
 
   mu[0] = -1; /* Actually -1/2 */
@@ -337,6 +348,7 @@ static uint32_t pmecc_getsigma(void)
   delta[0] = (mu[0] * 2 - lmu[0]) >> 1;
 
   /* Second row */
+
   /* Mu */
 
   mu[1]  = 0;
@@ -371,10 +383,11 @@ static uint32_t pmecc_getsigma(void)
 
   for (i = 1; i <= tt; i++)
     {
-      mu[i+1] = i << 1;
+      mu[i + 1] = i << 1;
 
       /* Compute Sigma (Mu+1) and L(mu). */
-      /* check if discrepancy is set to 0 */
+
+      /* Check if discrepancy is set to 0 */
 
       if (dmu[i] == 0)
         {
@@ -385,8 +398,9 @@ static uint32_t pmecc_getsigma(void)
                 {
                   for (j = 0; j <= (lmu[i] >> 1) + 1; j++)
                     {
-                      g_pmecc.desc.smu[tt+1][j] = g_pmecc.desc.smu[i][j];
+                      g_pmecc.desc.smu[tt + 1][j] = g_pmecc.desc.smu[i][j];
                     }
+
                   lmu[tt + 1] = lmu[i];
                   return 0;
                 }
@@ -399,6 +413,7 @@ static uint32_t pmecc_getsigma(void)
                     {
                       g_pmecc.desc.smu[tt + 1][j] = g_pmecc.desc.smu[i][j];
                     }
+
                   lmu[tt + 1] = lmu[i];
                   return 0;
                 }
@@ -451,9 +466,9 @@ static uint32_t pmecc_getsigma(void)
 
           /* Init smu[i+1] with 0 */
 
-          for (k = 0; k < (2 * PMECC_MAX_CORRECTABILITY+1); k ++)
+          for (k = 0; k < (2 * PMECC_MAX_CORRECTABILITY + 1); k ++)
             {
-              g_pmecc.desc.smu[i+1][k] = 0;
+              g_pmecc.desc.smu[i + 1][k] = 0;
             }
 
           /* Compute smu[i+1] */
@@ -465,17 +480,19 @@ static uint32_t pmecc_getsigma(void)
                    g_pmecc.desc.smu[i + 1][k + diff] =
                      g_pmecc.desc.alphato[(g_pmecc.desc.indexof[dmu[i]] +
                      (g_pmecc.desc.nn - g_pmecc.desc.indexof[dmu[ro]]) +
-                     g_pmecc.desc.indexof[g_pmecc.desc.smu[ro][k]]) % g_pmecc.desc.nn];
+                     g_pmecc.desc.indexof[g_pmecc.desc.smu[ro][k]]) %
+                                          g_pmecc.desc.nn];
                 }
             }
 
           for (k = 0; k <= lmu[i] >> 1; k++)
             {
-              g_pmecc.desc.smu[i+1][k] ^= g_pmecc.desc.smu[i][k];
+              g_pmecc.desc.smu[i + 1][k] ^= g_pmecc.desc.smu[i][k];
             }
         }
 
       /* End Compute Sigma (Mu+1) and L(mu) */
+
       /* In either case compute delta */
 
       delta[i + 1]  = (mu[i + 1] * 2 - lmu[i + 1]) >> 1;
@@ -491,13 +508,18 @@ static uint32_t pmecc_getsigma(void)
                   dmu[i + 1] = si[2 * (i - 1) + 3];
                 }
 
-              /* Check if one operand of the multiplier is null, its index is -1 */
+              /* Check if one operand of the multiplier is null, its index
+               * is -1
+               */
 
-              else if (g_pmecc.desc.smu[i + 1][k] && si[2 * (i - 1) + 3 - k])
+              else if (g_pmecc.desc.smu[i + 1][k] &&
+                       si[2 * (i - 1) + 3 - k])
                 {
                   dmu[i + 1] =
-                    g_pmecc.desc.alphato[(g_pmecc.desc.indexof[g_pmecc.desc.smu[i + 1][k]] +
-                    g_pmecc.desc.indexof[si[2 * (i - 1) + 3 - k]]) % g_pmecc.desc.nn] ^ dmu[i + 1];
+                    g_pmecc.desc.alphato[
+                      (g_pmecc.desc.indexof[g_pmecc.desc.smu[i + 1][k]] +
+                    g_pmecc.desc.indexof[si[2 * (i - 1) + 3 - k]]) %
+                      g_pmecc.desc.nn] ^ dmu[i + 1];
                 }
             }
         }
@@ -637,22 +659,27 @@ static uint32_t pmecc_errorcorrection(uintptr_t sectorbase,
 
               if (*(uint8_t *)(sectorbase + bytepos) & (1 << bitpos))
                 {
-                  *(uint8_t *)(sectorbase + bytepos) &= (0xff ^ (1 << bitpos));
+                  *(uint8_t *)(sectorbase + bytepos) &=
+                    (0xff ^ (1 << bitpos));
                 }
               else
                 {
-                  *(uint8_t *)(sectorbase + bytepos) |= (1 << bitpos);
+                  *(uint8_t *)(sectorbase + bytepos) |=
+                    (1 << bitpos);
                 }
             }
           else
             {
-              if (*(uint8_t *)(sectorbase + bytepos + eccsize) & (1 << bitpos))
+              if (*(uint8_t *)(sectorbase + bytepos + eccsize) &
+                  (1 << bitpos))
                 {
-                  *(uint8_t *)(sectorbase + bytepos + eccsize) &= (0xff ^ (1 << bitpos));
+                  *(uint8_t *)(sectorbase + bytepos + eccsize) &=
+                    (0xff ^ (1 << bitpos));
                 }
               else
                 {
-                  *(uint8_t *)(sectorbase + bytepos + eccsize) |= (1 << bitpos);
+                  *(uint8_t *)(sectorbase + bytepos + eccsize) |=
+                    (1 << bitpos);
                 }
             }
         }
@@ -721,7 +748,8 @@ static uint32_t pmecc_correctionalgo(uint32_t isr, uintptr_t data)
 
           /* Number of bits of the sector + ecc */
 
-          nerrors = pmecc_errorlocation((sectorsz * 8) + (g_pmecc.desc.tt * mm));
+          nerrors = pmecc_errorlocation((sectorsz * 8) +
+                    (g_pmecc.desc.tt * mm));
           if (nerrors == -1)
             {
               return 1;
@@ -850,7 +878,7 @@ static int pmecc_bcherr1k(uint8_t nsectors, uint16_t eccsize)
 static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
 {
   uint16_t correctability512;
-  uint16_t correctability1K;
+  uint16_t correctability1k;
   uint8_t nsectors512;
   uint8_t nsectors1k;
   uint8_t bcherr;
@@ -922,11 +950,11 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
       case 3:  /* Both 512B and 1KB sectors possible */
         {
           correctability512 = nsectors512 * g_correctability[bcherr512];
-          correctability1K  = nsectors1k * g_correctability[bcherr1k];
+          correctability1k  = nsectors1k * g_correctability[bcherr1k];
 
           /* Use 512B sectors unless we can do better with 1K sectors */
 
-          if (correctability512 >= correctability1K)
+          if (correctability512 >= correctability1k)
             {
               g_pmecc.sector1k = false;
               g_pmecc.nsectors = nsectors512;
@@ -1072,12 +1100,18 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
       g_pmecc.desc.sectorsz = HSMC_PMECCFG_SECTORSZ_1024;
       sectorsperpage        = (priv->raw.model.pagesize >> 10);
       g_pmecc.desc.mm       = 14;
-#if defined (CONFIG_SAMA5_PMECC_GALOIS_TABLE1024_ROMADDR) && defined (CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES)
-      g_pmecc.desc.alphato  = (int16_t *)&(pmecc_gf1024[PMECC_GF_SIZEOF_1024]);
-      g_pmecc.desc.indexof  = (int16_t *)&(pmecc_gf1024[0]);
+
+#if defined (CONFIG_SAMA5_PMECC_GALOIS_TABLE1024_ROMADDR) && \
+    defined (CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES)
+      g_pmecc.desc.alphato  =
+        (int16_t *)&(pmecc_gf1024[PMECC_GF_SIZEOF_1024]);
+      g_pmecc.desc.indexof  =
+        (int16_t *)&(pmecc_gf1024[0]);
 #else
-      g_pmecc.desc.alphato  = (int16_t *)&(pmecc_gf1024[PMECC_GF_ALPHA_TO]);
-      g_pmecc.desc.indexof  = (int16_t *)&(pmecc_gf1024[PMECC_GF_INDEX_OF]);
+      g_pmecc.desc.alphato  =
+        (int16_t *)&(pmecc_gf1024[PMECC_GF_ALPHA_TO]);
+      g_pmecc.desc.indexof  =
+        (int16_t *)&(pmecc_gf1024[PMECC_GF_INDEX_OF]);
 #endif
     }
   else
@@ -1087,12 +1121,18 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
       g_pmecc.desc.sectorsz = HSMC_PMECCFG_SECTORSZ_512;
       sectorsperpage        = (priv->raw.model.pagesize >> 9);
       g_pmecc.desc.mm       = 13;
-#if defined (CONFIG_SAMA5_PMECC_GALOIS_TABLE512_ROMADDR) && defined (CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES)
-      g_pmecc.desc.alphato  = (int16_t *)&(pmecc_gf512[PMECC_GF_SIZEOF_512]);
-      g_pmecc.desc.indexof  = (int16_t *)&(pmecc_gf512[0]);
+
+#if defined (CONFIG_SAMA5_PMECC_GALOIS_TABLE512_ROMADDR) && \
+    defined (CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES)
+      g_pmecc.desc.alphato  =
+        (int16_t *)&(pmecc_gf512[PMECC_GF_SIZEOF_512]);
+      g_pmecc.desc.indexof  =
+        (int16_t *)&(pmecc_gf512[0]);
 #else
-      g_pmecc.desc.alphato  = (int16_t *)&(pmecc_gf512[PMECC_GF_ALPHA_TO]);
-      g_pmecc.desc.indexof  = (int16_t *)&(pmecc_gf512[PMECC_GF_INDEX_OF]);
+      g_pmecc.desc.alphato  =
+        (int16_t *)&(pmecc_gf512[PMECC_GF_ALPHA_TO]);
+      g_pmecc.desc.indexof  =
+        (int16_t *)&(pmecc_gf512[PMECC_GF_INDEX_OF]);
 #endif
     }
 
@@ -1133,7 +1173,8 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
   else
     {
       g_pmecc.desc.eccsize =
-        (((g_pmecc.desc.mm * g_pmecc.correctability) >> 3) + 1) * sectorsperpage;
+        (((g_pmecc.desc.mm * g_pmecc.correctability) >> 3) + 1) *
+        sectorsperpage;
     }
 
   finfo("mm=%d correctability=%d eccsize=%d\n",
@@ -1162,8 +1203,11 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
 
   g_pmecc.desc.sparesize = priv->raw.model.sparesize;
 
-  //g_pmecc.desc.nandwr = PMECC_CFG_NANDWR;  /* NAND write access */
-  g_pmecc.desc.nandwr = 0;  /* NAND Read access */
+#if 0
+  g_pmecc.desc.nandwr = PMECC_CFG_NANDWR;  /* NAND write access */
+#else
+  g_pmecc.desc.nandwr = 0;                 /* NAND Read access */
+#endif
   if (protected)
     {
       g_pmecc.desc.sparena = HSMC_PMECCFG_SPARE_ENABLE;
@@ -1177,7 +1221,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
    * case, the ECC computation takes into account the whole spare area
    * minus the ECC area in the ECC computation operation
    *
-   * NOTE:  At 133 Mhz, the clkctrl field must be programmed with 2,
+   * NOTE:  At 133 MHz, the clkctrl field must be programmed with 2,
    * indicating that the setup time is 3 clock cycles.
    */
 
@@ -1185,7 +1229,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
   g_pmecc.desc.clkctrl   = 2;
   g_pmecc.desc.interrupt = 0;
 
-   /* Disable ECC module */
+  /* Disable ECC module */
 
   nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DISABLE);
 
@@ -1229,14 +1273,15 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
  *   None
  *
  * Returned Value:
- *   None
+ *  Normally success (OK) is returned, but the error -ECANCELED may be
+ *  return in the event that task has been canceled.
  *
  ****************************************************************************/
 
 #if NAND_NPMECC_BANKS > 1
-void pmecc_lock(void)
+int pmecc_lock(void)
 {
-  nxsem_wait_uninterruptible(&g_pmecc.exclsem);
+  return nxsem_wait_uninterruptible(&g_pmecc.exclsem);
 }
 #endif
 
@@ -1283,8 +1328,9 @@ void pmecc_unlock(void)
 int pmecc_correction(uint32_t isr, uintptr_t data)
 {
 #ifdef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
-  /* REVISIT:  Whare are the types Pmecc and Pmerrloc? */
-  /* REVISIT:  Check returned value */
+  /* REVISIT:  Whare are the types Pmecc and Pmerrloc?
+   * REVISIT:  Check returned value
+   */
 
   return pmecc_correctionalgo(??, ??, &g_pmecc, isr, data);
 #else
@@ -1458,22 +1504,21 @@ void pmecc_buildgf(uint32_t mm, int16_t *indexof, int16_t *alphato)
     {
       /* Check if the msb bit of the lfsr is set */
 
-      if (alphato[i-1] & mask)
+      if (alphato[i - 1] & mask)
         {
           /* Feedback loop is set */
 
-          alphato[i] = alphato[mm] ^ ((alphato[i-1] ^ mask) << 1);
+          alphato[i] = alphato[mm] ^ ((alphato[i - 1] ^ mask) << 1);
         }
       else
         {
           /* Only shift is enabled */
 
-          alphato[i] = alphato[i-1] << 1;
+          alphato[i] = alphato[i - 1] << 1;
         }
 
       /* lookup table */
 
-      //indexof[alphato[i]] = i;
       indexof[alphato[i]] = i % nn;
     }
 

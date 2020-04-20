@@ -104,7 +104,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated:  November 21, 2019</p>
+      <p>Last Updated:  April 16, 2020</p>
     </td>
   </tr>
 </table>
@@ -120,7 +120,7 @@
 
 <p>
   <b>Goals</b>.
-  NuttX is a real timed embedded operating system (RTOS).
+  NuttX is a real time embedded operating system (RTOS).
   Its goals are:
 <p>
 <center><table width="90%">
@@ -1450,11 +1450,13 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 8.2.
-  NuttX 8.2 is the 133<sup>rd</sup> release of NuttX.
-  It was released on November 16, 2019, and is available for download from the
-  <a href="https://bitbucket.org/nuttx/nuttx/downloads/">Bitbucket.org</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-8.2.tar.gz</code> and <code>apps-8.2.tar.gz</code>.
+  The current release is NuttX 9.0.
+  NuttX 9.0 is the 134<sup>rd</sup> release of NuttX.
+  It was released on April 30, 2020, and is available for download from the
+  <a href="https://nuttx.apache.org/">nuttx.apache.org</a> website.
+  Note that the release consists of two tarballs:
+  <code>apache-nuttx-9.0.x-incubating.tar.gz</code> and
+  <code>apache-nuttx-apps-9.0.x-incubating.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
 </p>
 
@@ -1463,17 +1465,23 @@
 <ul>
   <li><b>nuttx</b>.
     <ul><p>
-      Release notes for NuttX 8.2 are available <a href="https://bitbucket.org/nuttx/nuttx/downloads/">here</a>.
-      Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>.
-      The ChangeLog for all releases of NuttX is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ChangeLog" target="_blank">Bitbucket GIT</a>.
+      Release notes for all released versions on NuttX are available in <a href="https://github.com/apache/incubator-nuttx/blob/master/ReleaseNotes" target="_blank">GitHub</a>.
+      The ReleaseNotes for the current release is at the bottom of that file.
+      The ChangeLog for all releases of NuttX is available in the ChangeLog file
+      that can viewed in <a href="https://github.com/apache/incubator-nuttx/blob/master/ChangeLog" target="_blank">GitHub</a>.
       The ChangeLog for the current release is at the bottom of that file.
     </p>
   </li></ul>
   <li><b>apps</b>.
     <ul><p>
-      Release notes for NuttX 8.2 are available <a href="https://bitbucket.org/nuttx/apps/downloads/">here</a>.
-      Release notes for all released versions on NuttX are available in the <a href="https://bitbucket.org/nuttx/nuttx/src/master/ReleaseNotes" target="_blank">Bitbucket GIT</a>
-      The ChangeLog for the all releases of <code>apps/</code> is available in the ChangeLog file that can viewed in the <a href="https://bitbucket.org/nuttx/apps/src/master/ChangeLog.txt" target="_blank">Bitbucket GIT</a>.
+      Release notes for all released versions on NuttX are available in <a
+        href="https://github.com/apache/incubator-nuttx/blob/master/ReleaseNotes"
+        target="_blank">GitHub</a>
+      The ReleaseNotes for the current release is at the bottom of that file.
+      The ChangeLog for all releases of <code>apps/</code> is available in the
+      ChangeLog file that can viewed in the <a
+      href="https://github.com/apache/incubator-nuttx/blob/master/ChangeLog"
+    target="_blank">GitHub</a>.
       The ChangeLog for the current release is at the bottom of that file.
     </p>
   </li></ul>
@@ -1524,7 +1532,7 @@
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (13)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (39)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (59)</li>
-      <li><a href="#armcortexm7">ARM Cortex-M7</a> (14)</li>
+      <li><a href="#armcortexm7">ARM Cortex-M7</a> (15)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1575,6 +1583,8 @@
     <ul>
       <li><a href="#nr5mxx"> NEXT RISC-V NR5Mxx</a> (1)</li>
       <li><a href="#gwgap8">GreenWaves GAP8 (1)</a></li>
+      <li><a href="#k210">Kendryte K210 (1)</a></li>
+      <li><a href="#artya7">Litex (1)</a></li>
     </ul>
   </li>
   <li>Xtensa LX6:
@@ -1585,7 +1595,7 @@
   <li>ZiLOG
     <ul>
         <li><a href="#zilogz16f">ZiLOG ZNEO Z16F</a> (2)</li>
-        <li><a href="#zilogez80acclaim">ZiLOG eZ80 Acclaim!</a> (1)</li>
+        <li><a href="#zilogez80acclaim">ZiLOG eZ80 Acclaim!</a> (4)</li>
         <li><a href="#zilogz8encore">ZiLOG Z8Encore!</a> (2)</li>
         <li><a href="#zilogz180">ZiLOG Z180</a> (1)</li>
         <li><a href="#zilogz80">ZiLOG Z80</a> (2)</li>
@@ -1614,7 +1624,7 @@
       <li><a href="#bcm2708">BCM2708</a> <small>(ARM1176JZ)</small></li>
     </ul>
   </li>
-  <li>Expressif
+  <li>Espressif
     <ul>
       <li><a href="#esp32">ESP32</a> <small>(Dual Xtensa LX6)</small></li>
     </ul>
@@ -2478,6 +2488,11 @@
           Additional work in progress to extend this port and more capable is anticipated in NuttX-7.29.
         </li>
         <li>
+          <b>NuttX-9.0</b>
+          CAN support was added.
+          Clock Configuration was added.
+        </li>
+        <li>
           <b>NuttX-7.31</b>.
           An LCD driver was added in NuttX-7.31.
         </li>
@@ -2932,6 +2947,9 @@ nsh>
         Current development efforts are focused on porting the NuttX window system (NX)
         to work with the Evaluation Kits OLED display.
       </p>
+      <p>
+        NuttX-9.0 added protected build support to the LM3S6965-ek.
+      </p>
       <p><small>
         <b>NOTE</b>: As it is configured now, you MUST have a network connected.
         Otherwise, the NSH prompt will not come up because the Ethernet
@@ -3337,6 +3355,10 @@ nsh>
       <li>
         <b>NuttX-8.2</b>
         Added PWM and TIM drivers for the G0.  From Daniel Pereira Volpato.
+      </li>
+      <li>
+        <b>NuttX-9.0</b>
+        Added I2C support for F0, L0 and G0.
       </li>
     </p>
   </td>
@@ -5814,6 +5836,10 @@ Mem:         29232       5920      23312      23312
       These unverfied drivers include:  SPI, I2C, DMA, USB.
       Also refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/samd5e5/metro-m4/README.txt" target="_blank">README</a> file for further information about the current state of the port.
     </p>
+    <p>
+      Nuttx-9.0 added basic support for Microchip SAME54 Xplained Pro board.
+      An ethernet driver was also added to the SAME5x familly.
+    </p>
   </td>
 </tr>
 
@@ -5907,6 +5933,12 @@ Mem:         29232       5920      23312      23312
           From Eduard Niesner contributed a PWM driver.
           Added UID access from Valmantas Paliksa.
           USB High speed driver was added for STM32F7 series by Ramtin Amin.
+        </p>
+      </li>
+      <li>
+        <p><b>NuttX-9.0</b>.
+          Added serial DMA support.
+        </p>
       </li>
     </ul>
   </td>
@@ -5991,7 +6023,6 @@ Mem:         29232       5920      23312      23312
   <td>
     <p>
       <a name="stm32h7x3">STMicro STM32 H7x3</a>
-      <a name="stm32f76xx77xx"><b>STMicro STM32 F76xx/F77xx</b>.</a>
       Architecture support for the STM32 H7x3 was added through efforts of several people in NuttX-7.26.  Support is available for one board from this family:
     </p>
     <ul>
@@ -5999,12 +6030,22 @@ Mem:         29232       5920      23312      23312
         <p>
           <b>Nucleo-H743ZI</b>.
           This is a member of the Nucleo-144 board family.
-          Support for this board was also added NuttX-7.26.
-          See the board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/arm/stm32f7/nucleo-h743zi/README.txt">README.txt</a> file for further information.
+          Support for this board was added in NuttX-7.26.
+          See the board <a href="https://github.com/apache/incubator-nuttx/blob/master/boards/arm/stm32h7/nucleo-h743zi/README.txt">README.txt</a> file for further information.
         </p>
         <p>
           The basic NSH configuration is fully, thanks to the bring-up efforts of Mateusz Szafoni.
-          This port is port is still a work in progress and additional drivers are being ported from the F7 family.
+          This port is still a work in progress and additional drivers are being ported from the F7 family.
+        </p>
+      </li>
+      <li>
+        <p>
+          <b>STMicro STM32H747I-DISCO</b>.
+          Support for this board was added in NuttX-9.0.
+          See the board <a href="https://github.com/apache/incubator-nuttx/blob/master/boards/arm/stm32h7/stm32h747i-disco/README.txt">README.txt</a> file for further information.
+        </p>
+        <p>
+          This port is still a work in progress.
         </p>
       </li>
     </ul>
@@ -6032,6 +6073,11 @@ Mem:         29232       5920      23312      23312
       <li>
         <p><b>NuttX-8.2</b>.
          Added support for SDMMC and FLASH progmem.  From David Sidrane.
+        </p>
+      </li>
+      <li>
+        <p><b>NuttX-9.0</b>.
+         Added QSPI support for the STM32H7.
         </p>
       </li>
     </p>
@@ -6111,6 +6157,9 @@ Mem:         29232       5920      23312      23312
       <li>
         <p><b>NuttX-8.2</b>.
         An LCD drivers was added in NuttX-8.2 by Fabio Balzano.
+        </p>
+        <p><b>NuttX-9.0</b>.
+          Added USB Device support.
         </p>
       </li>
     </ul>
@@ -6429,6 +6478,25 @@ Mem:         29232       5920      23312      23312
          This is a great, stable starting point for anyone interested in fleshing out the x86 port!
          Refer to the NuttX <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/x86/qemu/qemu-i486/README.txt" target="_blank">README</a> file for further information.
       </p>
+      <p>
+      <b>QEMU/Intel64</b>
+        An x86_64 flat address port was ported in NuttX-9.0.
+        It consists of the following feautres:
+        <ul>
+          <li> - Runs in x86_64 long mode.</li>
+          <li> - Configurable SSE/AVX support.</li>
+          <li>- IRQs are managed by LAPIC(X2APIC) and IOAPIC.</li>
+          <li>- Used TSC_DEADLINE or APIC timer for systick.</li>
+          <li>- Pages are now maps the kernel at 4GB~, but changeable.</li>
+        </ul>
+      </p>
+      <p>
+        This kernel with ostest have been tested with
+        <ul>
+          <li>Qemu/KVM on a Xeon 2630v4 machine.</li>
+          <li>Bochs with broadwell_ult emulation.</li>
+        </ul>
+      </p>
     </ul>
   </td>
 </tr>
@@ -6662,6 +6730,10 @@ Mem:         29232       5920      23312      23312
         <b>NuttX-7.31</b>.
         Abdelatif Guettouche contributed DMA support.
       </p>
+      <p>
+        <b>NuttX-9.0</b>.
+        Cache operations were implemented.
+      </p>
     </ul>
     </p>
       Refer to the NuttX board <a href="https://bitbucket.org/nuttx/nuttx/src/master/boards/mips/pic32mz/pic32mz-starterkit/README.txt" target="_blank">README</a> file for further information.
@@ -6779,6 +6851,9 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
     <ul>
       <li><b>NuttX-8.2</b></li>
       Basic support for the RX65N family was released by Anjana with support for two boards:  The RSK RX65N-2MB and the GR-Rose.
+      <li><b>NuttX-9.0</b>
+        RTC driver for the RX65N was added.
+      </li>
     </ul>
   </td>
 </tr>
@@ -6805,6 +6880,15 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
       The GAP8 features a RI5CY core called Fabric Controller(FC), and a cluster of 8 RI5CY cores that runs at a bit slower speed.
       The GAP8 is an implementation of the opensource PULP platform, a Parallel-Ultra-Low-Power design.
     </p>
+    <p>
+      <li><a href="#k210">Sipeed Maix bit</a></li>
+      Initial support for the Sipeed Maix bit board was added in Nuttx-9.0.
+    </p>
+    <p>
+      <a name="artya7"><b>Litex ARTY_A7</b></a>.
+      Support for the Digilent ARTY_A7 board along with CPU VexRiscV SOC were added
+      in NuttX-9.0.
+    </p>
   </td>
 </tr>
 
@@ -6819,12 +6903,12 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
   <td>
     <p>
       <b>Xtensa LX6 ESP32 Architectural Support</b>.
-      Basic architectural support for Xtensa LX6 processors and the port for the Expressif ESP32 were added in NuttX-7.19.
+      Basic architectural support for Xtensa LX6 processors and the port for the Espressif ESP32 were added in NuttX-7.19.
       The basic ESP32 port is function in both single CPU and dual CPU SMP configurations.
     </p>
     <p>
-      <b>Expressif ESP32 Core v2 Board</b>
-      The NuttX release includes support for Expressif ESP32 Core v2 board.
+      <b>Espressif ESP32 Core v2 Board</b>
+      The NuttX release includes support for Espressif ESP32 Core v2 board.
       There is an NSH configuration for each CPU configuration and an OS test configuration for verificatin of the port.
     </p>
     <p>
@@ -6876,12 +6960,13 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
   <td>
     <p>
       <b>Zilog eZ80Acclaim! Microcontroller</b>.
-      There are three eZ80Acclaim! ports:
+      There are four eZ80Acclaim! ports:
     </p>
     <ul>
       <li>The ZiLOG ez80f0910200kitg development kit.
       <li>The ZiLOG ez80f0910200zcog-d development kit.
       <li>The MakerLisp CPU board.
+      <li>The Z20x DIY computing system.
     </ul>
     <p>
       All three boards are based on the eZ80F091 part and all use the Zilog ZDS-II
@@ -6911,6 +6996,14 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
         A VGA display adapter provides an IBM PC-like color text-mode display;
         A USB keyboard adapter provides for standard keyboard input.
         Data storage and interchange is accomplished by a SPI-based micro-SD card.
+      </p>
+      <p>
+        <b>NuttX-9.0:</b>
+          Support for the Z20X board was added.  The port includes:
+            - Initial support to have a functional nsh.
+            - Support for SPI and W25 FLASH.
+            - A bootloader capable of writing code to the W25 FLASH and load it to the
+              SRAM to be executed.
       </p>
     </ul>
   </td>

@@ -382,14 +382,15 @@ static int sim_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  * Name: sim_readpin
  *
  * Description:
- *   Read the actual PIN level. This can be different from the last value written
- *   to this pin. Required.
+ *   Read the actual PIN level. This can be different from the last value
+ *   written to this pin. Required.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
  *   pin    - The index of the pin
  *   valptr - Pointer to a buffer where the pin level is stored. Usually TRUE
- *            if the pin is high, except if OPTION_INVERT has been set on this pin.
+ *            if the pin is high, except if OPTION_INVERT has been set on
+ *            this pin.
  *
  * Returned Value:
  *   0 on success, else a negative error code
@@ -403,7 +404,8 @@ static int sim_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   ioe_pinset_t inval;
   bool retval;
 
-  DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS && value != NULL);
+  DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS &&
+              value != NULL);
 
   gpioinfo("pin=%u\n", pin);
 
@@ -607,7 +609,8 @@ static int sim_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
 
   DEBUGASSERT(priv != NULL && cb != NULL);
   DEBUGASSERT((uintptr_t)cb >= (uintptr_t)&priv->cb[0] &&
-              (uintptr_t)cb <= (uintptr_t)&priv->cb[CONFIG_SIM_INT_NCALLBACKS - 1]);
+              (uintptr_t)cb <= (uintptr_t)&priv->cb[
+                                            CONFIG_SIM_INT_NCALLBACKS - 1]);
   UNUSED(priv);
 
   cb->pinset = 0;
@@ -767,7 +770,7 @@ static void sim_interrupt_work(void *arg)
 
   /* Re-start the poll timer */
 
-  ret = wd_start(priv->wdog, SIM_POLLDELAY, (wdentry_t)sim_interrupt,
+  ret = wd_start(priv->wdog, SIM_POLLDELAY, sim_interrupt,
                  1, (wdparm_t)priv);
   if (ret < 0)
     {
@@ -806,7 +809,9 @@ static void sim_interrupt(int argc, wdparm_t arg1, ...)
 
   if (work_available(&priv->work))
     {
-      /* Schedule interrupt related work on the high priority worker thread. */
+      /* Schedule interrupt related work on the high priority worker
+       * thread.
+       */
 
       work_queue(HPWORK, &priv->work, sim_interrupt_work,
                  (FAR void *)priv, 0);
@@ -821,8 +826,8 @@ static void sim_interrupt(int argc, wdparm_t arg1, ...)
  * Name: sim_ioexpander_initialize
  *
  * Description:
- *   Instantiate and configure the I/O Expander device driver to use the provided
- *   I2C device instance.
+ *   Instantiate and configure the I/O Expander device driver to use the
+ *   provided I2C device instance.
  *
  * Input Parameters:
  *   i2c     - An I2C driver instance
@@ -854,7 +859,7 @@ FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void)
   priv->wdog = wd_create();
   DEBUGASSERT(priv->wdog != NULL);
 
-  ret = wd_start(priv->wdog, SIM_POLLDELAY, (wdentry_t)sim_interrupt,
+  ret = wd_start(priv->wdog, SIM_POLLDELAY, sim_interrupt,
                  1, (wdparm_t)priv);
   if (ret < 0)
     {

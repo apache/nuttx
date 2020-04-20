@@ -56,8 +56,8 @@
 #  define HAVE_UART 1
 #endif
 
-/* Make sure all features are disabled for disabled U[S]ARTs.  This simplifies
- * checking later.
+/* Make sure all features are disabled for disabled U[S]ARTs.
+ * This simplifies checking later.
  */
 
 #ifndef CONFIG_CXD56_UART0
@@ -129,10 +129,6 @@
 
 /****************************************************************************
  * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
  ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_CXD56XX_CXD56_CONFIG_H */

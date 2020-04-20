@@ -117,7 +117,7 @@ static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
 static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t ch);
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
                          size_t nwords);
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
@@ -142,7 +142,11 @@ static const struct spi_ops_s g_spiops =
   .registercallback  = 0,                 /* Not implemented */
 };
 
-static struct spi_dev_s g_spidev = {&g_spiops};
+static struct spi_dev_s g_spidev =
+{
+  &g_spiops
+};
+
 static sem_t g_exclsem = SEM_INITIALIZER(1);  /* For mutually exclusive access */
 
 /****************************************************************************
@@ -303,8 +307,8 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 
 static uint8_t spi_status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
-  /* I don't think there is anyway to determine these things on the mcu123.com
-   * board.
+  /* I don't think there is anyway to determine these things on the
+   * mcu123.com board.
    */
 
   spiinfo("Return SPI_STATUS_PRESENT\n");
@@ -359,7 +363,7 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
  *
  ****************************************************************************/
 
-static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
+static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
   register uint16_t regval;
 
@@ -441,9 +445,9 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
         }
 
       /* There is a race condition where TFE may go true just before
-       * RNE goes true and this loop terminates prematurely.  The nasty little
-       * delay in the following solves that (it could probably be tuned
-       * to improve performance).
+       * RNE goes true and this loop terminates prematurely.  The nasty
+       * little delay in the following solves that (it could probably
+       * be tuned to improve performance).
        */
 
       else if ((sr & LPC214X_SPI1SR_TFE) != 0)
@@ -479,7 +483,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
                           size_t nwords)
 {
-  FAR uint8_t *ptr = (FAR uint8_t*)buffer;
+  FAR uint8_t *ptr = (FAR uint8_t *)buffer;
   uint32_t rxpending = 0;
 
   /* While there is remaining to be sent
@@ -504,7 +508,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
           rxpending++;
         }
 
-      /* Now, read the RX data from the RX FIFO while the RX FIFO is not empty */
+      /* Now, read RX data from the RX FIFO while RX FIFO is not empty */
 
       spiinfo("RX: rxpending: %d\n", rxpending);
       while (getreg8(LPC214X_SPI1_SR) & LPC214X_SPI1SR_RNE)

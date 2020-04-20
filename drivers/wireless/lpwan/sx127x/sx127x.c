@@ -144,7 +144,7 @@
 /* Some assertions */
 
 #ifdef CONFIG_LPWAN_SX127X_FSKOOK
-#  warning OOK support is not complete, RX+TX doesn't work yet!
+#  warning OOK support is not complete, RX+TX does not work yet!
 #  if CONFIG_LPWAN_SX127X_RXFIFO_DATA_LEN > SX127X_FOM_FIFO_LEN
 #    warning RX data length limited by chip RX FIFO size (FSK/OOK = 64, LORA = 256)
 #  endif
@@ -409,10 +409,10 @@ static int sx127x_preamble_get(FAR struct sx127x_dev_s *dev);
 static int sx127x_opmode_set(FAR struct sx127x_dev_s *dev, uint8_t opmode);
 static uint8_t sx127x_opmode_get(FAR struct sx127x_dev_s *dev);
 static int sx127x_opmode_init(FAR struct sx127x_dev_s *dev, uint8_t opmode);
-static int sx127x_syncword_set(FAR struct sx127x_dev_s *dev, FAR uint8_t *sw,
-                               uint8_t len);
-static void sx127x_syncword_get(FAR struct sx127x_dev_s *dev, FAR uint8_t *sw,
-                                FAR uint8_t *len);
+static int sx127x_syncword_set(FAR struct sx127x_dev_s *dev,
+                               FAR uint8_t *sw, uint8_t len);
+static void sx127x_syncword_get(FAR struct sx127x_dev_s *dev,
+                                FAR uint8_t *sw, FAR uint8_t *len);
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
 static void sx127x_dumpregs(FAR struct sx127x_dev_s *dev);
 #else
@@ -1311,7 +1311,7 @@ static int sx127x_lora_isr0_process(FAR struct sx127x_dev_s *dev)
       case SX127X_OPMODE_RX:
       case SX127X_OPMODE_RXSINGLE:
         {
-          /* REVISIT: Always check PAYLOADCRCERR, even if CRCONPAYLOAD not set */
+          /* REVISIT: Always check PAYLOADCRCERR even CRCONPAYLOAD not set */
 
           if ((irq & SX127X_LRM_IRQ_PAYLOADCRCERR) != 0)
             {
@@ -1752,8 +1752,8 @@ static ssize_t sx127x_rxfifo_get(FAR struct sx127x_dev_s *dev,
 
   /* Get packet header */
 
-  pkt = (struct sx127x_read_hdr_s *)(dev->rx_buffer +
-                                     dev->nxt_read * SX127X_RXFIFO_ITEM_SIZE);
+  pkt = (struct sx127x_read_hdr_s *)
+    (dev->rx_buffer + dev->nxt_read * SX127X_RXFIFO_ITEM_SIZE);
 
   /* Packet length is data length + header length */
 
@@ -1763,7 +1763,8 @@ static ssize_t sx127x_rxfifo_get(FAR struct sx127x_dev_s *dev,
 
   for (i = 0; i < pktlen && i < SX127X_RXFIFO_ITEM_SIZE; i += 1)
     {
-      buffer[i] = dev->rx_buffer[dev->nxt_read * SX127X_RXFIFO_ITEM_SIZE + i];
+      buffer[i] =
+        dev->rx_buffer[dev->nxt_read * SX127X_RXFIFO_ITEM_SIZE + i];
     }
 
   dev->nxt_read = (dev->nxt_read + 1) % CONFIG_LPWAN_SX127X_RXFIFO_LEN;
@@ -2111,8 +2112,8 @@ static int sx127x_fskook_opmode_init(FAR struct sx127x_dev_s *dev,
            * - RX trigger on PreableDetect
            */
 
-          setbits = (SX127X_FOM_RXCFG_AGCAUTOON | SX127X_FOM_RXCFG_AFCAUTOON |
-                     SX127X_FOM_RXCFG_TRG_PREDET);
+          setbits = (SX127X_FOM_RXCFG_AGCAUTOON | SX127X_FOM_RXCFG_AFCAUTOON
+                     | SX127X_FOM_RXCFG_TRG_PREDET);
 
           sx127x_writeregbyte(dev, SX127X_FOM_RXCFG, setbits);
 
@@ -2204,7 +2205,8 @@ errout:
  *
  ****************************************************************************/
 
-static int sx127x_fskook_rxbw_set(FAR struct sx127x_dev_s *dev, uint8_t rx_bw)
+static int sx127x_fskook_rxbw_set(FAR struct sx127x_dev_s *dev,
+                                  uint8_t rx_bw)
 {
   DEBUGASSERT(dev->modulation == SX127X_MODULATION_FSK ||
               dev->modulation == SX127X_MODULATION_OOK);
@@ -2568,9 +2570,9 @@ static void sx127x_fskook_init(FAR struct sx127x_dev_s *dev)
    */
 
   setbits  = 0;
-  setbits |= (dev->fskook.fixlen == true ?  0 : SX127X_FOM_PKTCFG1_PCKFORMAT);
-  setbits |= (dev->crcon == true ? SX127X_FOM_PKTCFG1_CRCON : 0);
-  clrbits  = (SX127X_FOM_PKTCFG1_PCKFORMAT | SX127X_FOM_PKTCFG1_CRCON);
+  setbits |= dev->fskook.fixlen == true ?  0 : SX127X_FOM_PKTCFG1_PCKFORMAT;
+  setbits |= dev->crcon == true ? SX127X_FOM_PKTCFG1_CRCON : 0;
+  clrbits  = SX127X_FOM_PKTCFG1_PCKFORMAT | SX127X_FOM_PKTCFG1_CRCON;
 
   /* Write packet mode settings 1 */
 
@@ -3303,7 +3305,7 @@ static void sx127x_lora_init(FAR struct sx127x_dev_s *dev)
 
   /* Modem PHY config 2:
    *   - RXCRCON
-   *     NOTE: this works differently for implicit header and explicit header!
+   *     NOTE: this works differently for implicit header and explicit header
    *   - packet mode
    */
 
@@ -3498,8 +3500,8 @@ static int sx127x_lora_preamble_get(FAR struct sx127x_dev_s *dev)
  * Name: sx127x_syncword_get
  ****************************************************************************/
 
-static void sx127x_syncword_get(FAR struct sx127x_dev_s *dev, FAR uint8_t *sw,
-                                FAR uint8_t *len)
+static void sx127x_syncword_get(FAR struct sx127x_dev_s *dev,
+                                FAR uint8_t *sw, FAR uint8_t *len)
 {
   dev->ops.syncword_get(dev, sw, len);
 }
@@ -3508,8 +3510,8 @@ static void sx127x_syncword_get(FAR struct sx127x_dev_s *dev, FAR uint8_t *sw,
  * Name: sx127x_syncword_set
  ****************************************************************************/
 
-static int sx127x_syncword_set(FAR struct sx127x_dev_s *dev, FAR uint8_t *sw,
-                               uint8_t len)
+static int sx127x_syncword_set(FAR struct sx127x_dev_s *dev,
+                               FAR uint8_t *sw, uint8_t len)
 {
   return dev->ops.syncword_set(dev, sw, len);
 }

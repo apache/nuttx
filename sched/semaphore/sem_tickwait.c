@@ -132,8 +132,7 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
 
   /* Start the watchdog with interrupts still disabled */
 
-  wd_start(rtcb->waitdog, delay, (wdentry_t)nxsem_timeout,
-           1, getpid());
+  wd_start(rtcb->waitdog, delay, nxsem_timeout, 1, getpid());
 
   /* Now perform the blocking wait */
 
@@ -189,7 +188,6 @@ errout_with_irqdisabled:
  *
  ****************************************************************************/
 
-#ifndef CONFIG_HAVE_INLINE
 int nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start,
                                    uint32_t delay)
 {
@@ -205,5 +203,4 @@ int nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start,
 
   return ret;
 }
-#endif
 

@@ -185,12 +185,12 @@ static const struct file_operations g_ak09912fops =
   ak09912_close,                 /* close */
   ak09912_read,                  /* read */
   ak09912_write,                 /* write */
-  0,                            /* seek */
-  ak09912_ioctl,                            /* ioctl */
+  0,                             /* seek */
+  ak09912_ioctl,                 /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  0,                            /* poll */
+  0,                             /* poll */
 #endif
-  0                             /* unlink */
+  0                              /* unlink */
 };
 
 /* Take XYZ data, temperature and Status 2 register.
@@ -456,7 +456,8 @@ static int ak09912_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_GETADJ:
         {
-          struct ak09912_sensadj_s *user = (struct ak09912_sensadj_s *)(uintptr_t)arg;
+          struct ak09912_sensadj_s *user = (struct ak09912_sensadj_s *)
+                                           (uintptr_t)arg;
 
           user->x = g_asa.x;
           user->y = g_asa.y;
@@ -554,7 +555,8 @@ int ak09912_register(FAR const char *devpath, int minor,
 
   /* Initialize the AK09912 device structure */
 
-  priv = (FAR struct ak09912_dev_s *)kmm_malloc(sizeof(struct ak09912_dev_s));
+  priv = (FAR struct ak09912_dev_s *)
+          kmm_malloc(sizeof(struct ak09912_dev_s));
   if (!priv)
     {
       snerr("Failed to allocate instance\n");

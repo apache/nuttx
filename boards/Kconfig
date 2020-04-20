@@ -179,10 +179,10 @@ config ARCH_BOARD_EKKLM3S9B96
 		an EKK-LM3S9B96 which is a Cortex-M3.
 
 config ARCH_BOARD_ESP32CORE
-	bool "Expressif ESP32 Core board V2"
+	bool "Espressif ESP32 Core board V2"
 	depends on ARCH_CHIP_ESP32
 	---help---
-		The ESP32 is a dual-core system from Expressif with two Harvard
+		The ESP32 is a dual-core system from Espressif with two Harvard
 		architecture Xtensa LX6 CPUs. All embedded memory, external memory
 		and peripherals are located on the data bus and/or the instruction
 		bus of these CPUs. With some minor exceptions, the address mapping
@@ -568,7 +568,7 @@ config ARCH_BOARD_MAKERLISP
 	depends on ARCH_CHIP_EZ80F91
 	select ARCH_HAVE_LEDS
 	---help---
-		ez80Acclaim! Microcontroller.  This port use the MakerLips machine
+		ez80Acclaim! Microcontroller.  This port use the MakerLisp machine
 		based on an eZ80F091 part, and the Zilog ZDS-II Windows command line
 		tools.  The development environment is Cygwin under Windows. A
 		Windows native development environment is available but has not
@@ -957,6 +957,15 @@ config ARCH_BOARD_NR5M100_NEXYS4
 		This is the port NuttX to the NEXT RISC-V processor runnining on a Digilent
 		Nexys-4 (non DDR version) FPGA board.
 
+config ARCH_BOARD_NUCLEO_F429ZI
+	bool "STMicro NUCLEO-F429ZI"
+	depends on ARCH_CHIP_STM32F429Z
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo-F429zi board based on the STMicro STM32F429ZIT6 MCU.
+
 config ARCH_BOARD_NUCLEO_144
 	bool "STMicro NUCLEO-144"
 	depends on ARCH_CHIP_STM32F722ZE || ARCH_CHIP_STM32F746ZG || ARCH_CHIP_STM32F767ZI
@@ -1205,13 +1214,13 @@ config ARCH_BOARD_QEMU_I486
 	depends on ARCH_X86 || ARCH_I486
 	---help---
 		Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
-		hardwared (Google the Bifferboard).
+		hardware (Google the Bifferboard).
 
 config ARCH_BOARD_INTEL64_QEMU
 	bool "Intel64 for Qemu simulator"
 	depends on ARCH_X86_64 || ARCH_INTEL64
 	---help---
-		Port of NuttX to QEMU in intel64 mode.  This port will also run on real 
+		Port of NuttX to QEMU in intel64 mode.  This port will also run on real
 		generic Intel64 hardware.
 
 config ARCH_BOARD_RX65N
@@ -1732,7 +1741,7 @@ config ARCH_BOARD_STM32L476_MDK
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		Motorola Mods Development Board (MDK) features  STM32L476ME MCU.
-		The STM32L476ME  is a Cortex-M4 optimised for low-power operation
+		The STM32L476ME is a Cortex-M4 optimised for low-power operation
 		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
 
 config ARCH_BOARD_STM32L_DISCOVERY
@@ -2153,6 +2162,7 @@ config ARCH_BOARD
 	default "nucleo-f303ze"            if ARCH_BOARD_NUCLEO_F303ZE
 	default "nucleo-f334r8"            if ARCH_BOARD_NUCLEO_F334R8
 	default "nucleo-f4x1re"            if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
+	default "nucleo-f429zi"            if ARCH_BOARD_NUCLEO_F429ZI
 	default "nucleo-f446re"            if ARCH_BOARD_NUCLEO_F446RE
 	default "nucleo-f410rb"            if ARCH_BOARD_NUCLEO_F410RB
 	default "nucleo-g070rb"            if ARCH_BOARD_NUCLEO_G070RB
@@ -2656,6 +2666,9 @@ source "boards/arm/stm32/nucleo-f446re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F401RE || ARCH_BOARD_NUCLEO_F411RE
 source "boards/arm/stm32/nucleo-f4x1re/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_F429ZI
+source "boards/arm/stm32/nucleo-f429zi/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L152RE
 source "boards/arm/stm32/nucleo-l152re/Kconfig"

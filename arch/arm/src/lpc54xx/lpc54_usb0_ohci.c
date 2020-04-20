@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lpc54xx/lpc54_usb0_ohci.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -73,11 +58,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ***************************************************************/
+/* Configuration ************************************************************/
 
 /* All I/O buffers must lie in AHB SRAM because of the OHCI DMA. It might be
- * okay if no I/O buffers are used *IF* the application can guarantee that all
- * end-user I/O buffers reside in AHB SRAM.
+ * okay if no I/O buffers are used *IF* the application can guarantee that
+ * all end-user I/O buffers reside in AHB SRAM.
  */
 
 #if LPC54_IOBUFFERS < 1
@@ -92,7 +77,7 @@
 #  undef CONFIG_LPC54_OHCI_REGDEBUG
 #endif
 
-/* OHCI Setup ******************************************************************/
+/* OHCI Setup ***************************************************************/
 
 /* Frame Interval / Periodic Start */
 
@@ -129,22 +114,22 @@
 #  define usbhost_dumpgpio()
 #endif
 
-/* Numbers and Sizes of Things *************************************************/
+/* Numbers and Sizes of Things **********************************************/
 
 /* Fixed size of the OHCI control area */
 
 #define LPC54_HCCA_SIZE 256
 
-/* Fixed endpoint descriptor size.  The actual size required by the hardware is only
- * 16 bytes, however, we set aside an additional 16 bytes for for internal use by
- * the OHCI host driver.  16-bytes is set aside because the EDs must still be
- * aligned to 16-byte boundaries.
+/* Fixed endpoint descriptor size.  The actual size required by the hardware
+ * is only 16 bytes, however, we set aside an additional 16 bytes for
+ * internal use by the OHCI host driver.  16-bytes is set aside because the
+ * EDs must still be aligned to 16-byte boundaries.
  */
 
 #define LPC54_ED_SIZE   32
 
-/* Configurable number of user endpoint descriptors (EDs).  This number excludes
- * the control endpoint that is always allocated.
+/* Configurable number of user endpoint descriptors (EDs).  This number
+ * excludes the control endpoint that is always allocated.
  */
 
 #ifndef CONFIG_LP17_OHCI_NEDS
@@ -155,10 +140,10 @@
 
 #define LPC54_EDFREE_SIZE (CONFIG_LP17_OHCI_NEDS * LPC54_ED_SIZE)
 
-/* Fixed transfer descriptor size.  The actual size required by the hardware is only
- * 16 bytes, however, we set aside an additional 16 bytes for for internal use by
- * the OHCI host driver.  16-bytes is set aside because the TDs must still be
- * aligned to 16-byte boundaries.
+/* Fixed transfer descriptor size.  The actual size required by the hardware
+ * is only 16 bytes, however, we set aside an additional 16 bytes for for
+ * internal use by the OHCI host driver.  16-bytes is set aside because the
+ * TDs must still be aligned to 16-byte boundaries.
  */
 
 #define LPC54_TD_SIZE   32
@@ -199,8 +184,9 @@
 
 #define LPC54_TBFREE_SIZE (CONFIG_LPC54_OHCI_TDBUFFERS * CONFIG_LPC54_OHCI_TDBUFSIZE)
 
-/* Configurable size of an IO buffer.  The number of IO buffers will be determined
- * by what is left at the end of the BANK1 memory setup aside of OHCI RAM.
+/* Configurable size of an IO buffer.  The number of IO buffers will be
+ * determined by what is left at the end of the BANK1 memory setup aside of
+ * OHCI RAM.
  */
 
 #ifndef CONFIG_LPC54_OHCI_IOBUFSIZE
@@ -211,7 +197,7 @@
 #  error "IO buffer size must be an even number of 32-bit words"
 #endif
 
-/* USB Host Memory *************************************************************/
+/* USB Host Memory **********************************************************/
 
 /* Required Alignment */
 
@@ -239,7 +225,7 @@
 #define MIN_PERINTERVAL  2
 #define MAX_PERINTERVAL  32
 
-/* Descriptors *****************************************************************/
+/* Descriptors **************************************************************/
 
 /* TD delay interrupt value */
 
@@ -329,8 +315,11 @@ struct lpc54_ed_s
 
   uint8_t          xfrtype;   /* 16: Transfer type.  See SB_EP_ATTR_XFER_* in usb.h */
   uint8_t          interval;  /* 17: Periodic EP polling interval: 2, 4, 6, 16, or 32 */
-  sem_t            wdhsem;    /* 18: Semaphore used to wait for Writeback Done Head event */
-                              /*    Unused bytes may follow, depending on the size of sem_t */
+  sem_t            wdhsem;    /* 18: Semaphore used to wait for Writeback
+                               *     Done Head event */
+
+  /* Unused bytes may follow, depending on the size of sem_t */
+
   /* Pointer to structure that manages asynchronous transfers on this pipe */
 
   struct lpc54_xfrinfo_s *xfrinfo;
@@ -366,7 +355,7 @@ struct lpc54_list_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Register operations ********************************************************/
+/* Register operations ******************************************************/
 
 #ifdef CONFIG_LPC54_OHCI_REGDEBUG
 static void lpc54_printreg(uint32_t addr, uint32_t val, bool iswrite);
@@ -378,19 +367,20 @@ static void lpc54_putreg(uint32_t val, uint32_t addr);
 # define lpc54_putreg(val,addr) putreg32(val,addr)
 #endif
 
-/* Semaphores ******************************************************************/
+/* Semaphores ***************************************************************/
 
-static void lpc54_takesem(sem_t *sem);
+static int  lpc54_takesem(sem_t *sem);
+static int  lpc54_takesem_noncancelable(sem_t *sem);
 #define lpc54_givesem(s) nxsem_post(s);
 
-/* Byte stream access helper functions *****************************************/
+/* Byte stream access helper functions **************************************/
 
 static inline uint16_t lpc54_getle16(const uint8_t *val);
 #if 0 /* Not used */
 static void lpc54_putle16(uint8_t *dest, uint16_t val);
 #endif
 
-/* OHCI memory pool helper functions *******************************************/
+/* OHCI memory pool helper functions ****************************************/
 
 static inline void lpc54_edfree(struct lpc54_ed_s *ed);
 static  struct lpc54_gtd_s *lpc54_tdalloc(void);
@@ -404,7 +394,7 @@ static void lpc54_freeio(uint8_t *buffer);
 static struct lpc54_xfrinfo_s *lpc54_alloc_xfrinfo(void);
 static void lpc54_free_xfrinfo(struct lpc54_xfrinfo_s *xfrinfo);
 
-/* ED list helper functions ****************************************************/
+/* ED list helper functions *************************************************/
 
 static inline int lpc54_addctrled(struct lpc54_usbhost_s *priv,
                                   struct lpc54_ed_s *ed);
@@ -418,7 +408,8 @@ static inline int lpc54_rembulked(struct lpc54_usbhost_s *priv,
 
 #if !defined(CONFIG_OHCI_INT_DISABLE) || !defined(CONFIG_OHCI_ISOC_DISABLE)
 static unsigned int lpc54_getinterval(uint8_t interval);
-static void lpc54_setinttab(uint32_t value, unsigned int interval, unsigned int offset);
+static void lpc54_setinttab(uint32_t value, unsigned int interval,
+                            unsigned int offset);
 #endif
 
 static inline int lpc54_addinted(struct lpc54_usbhost_s *priv,
@@ -433,7 +424,7 @@ static inline int lpc54_addisoced(struct lpc54_usbhost_s *priv,
 static inline int lpc54_remisoced(struct lpc54_usbhost_s *priv,
                                   struct lpc54_ed_s *ed);
 
-/* Descriptor helper functions *************************************************/
+/* Descriptor helper functions **********************************************/
 
 static int lpc54_enqueuetd(struct lpc54_usbhost_s *priv,
                            struct lpc54_ed_s *ed, uint32_t dirpid,
@@ -442,11 +433,11 @@ static int lpc54_enqueuetd(struct lpc54_usbhost_s *priv,
 static int lpc54_ctrltd(struct lpc54_usbhost_s *priv, struct lpc54_ed_s *ed,
                         uint32_t dirpid, uint8_t *buffer, size_t buflen);
 
-/* Interrupt handling **********************************************************/
+/* Interrupt handling *******************************************************/
 
 static int lpc54_usbinterrupt(int irq, void *context, FAR void *arg);
 
-/* USB host controller operations **********************************************/
+/* USB host controller operations *******************************************/
 
 static int lpc54_wait(struct usbhost_connection_s *conn,
                       struct usbhost_hubport_s **hport);
@@ -456,10 +447,11 @@ static int lpc54_enumerate(struct usbhost_connection_s *conn,
                            struct usbhost_hubport_s *hport);
 
 static int lpc54_ep0configure(struct usbhost_driver_s *drvr,
-                              usbhost_ep_t ep0, uint8_t funcaddr, uint8_t speed,
-                              uint16_t maxpacketsize);
+                              usbhost_ep_t ep0, uint8_t funcaddr,
+                              uint8_t speed, uint16_t maxpacketsize);
 static int lpc54_epalloc(struct usbhost_driver_s *drvr,
-                         const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
+                         const struct usbhost_epdesc_s *epdesc,
+                         usbhost_ep_t *ep);
 static int lpc54_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 static int lpc54_alloc(struct usbhost_driver_s *drvr,
                        uint8_t **buffer, size_t *maxlen);
@@ -502,7 +494,7 @@ static int lpc54_connect(FAR struct usbhost_driver_s *drvr,
 static void lpc54_disconnect(struct usbhost_driver_s *drvr,
                              struct usbhost_hubport_s *hport);
 
-/* Initialization **************************************************************/
+/* Initialization ***********************************************************/
 
 static inline void lpc54_ep0init(struct lpc54_usbhost_s *priv);
 
@@ -510,9 +502,9 @@ static inline void lpc54_ep0init(struct lpc54_usbhost_s *priv);
  * Private Data
  ****************************************************************************/
 
-/* In this driver implementation, support is provided for only a single a single
- * USB device.  All status information can be simply retained in a single global
- * instance.
+/* In this driver implementation, support is provided for only a single a
+ * single USB device.  All status information can be simply retained in a
+ * single global instance.
  */
 
 static struct lpc54_usbhost_s g_usbhost;
@@ -560,10 +552,6 @@ static struct lpc54_list_s *g_xfrfree;
 static struct lpc54_xfrinfo_s g_xfrbuffers[CONFIG_LPC54_OHCI_NPREALLOC];
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -598,8 +586,8 @@ static void lpc54_checkreg(uint32_t addr, uint32_t val, bool iswrite)
   static uint32_t count = 0;
   static bool     prevwrite = false;
 
-  /* Is this the same value that we read from/wrote to the same register last time?
-   * Are we polling the register?  If so, suppress the output.
+  /* Is this the same value that we read from/wrote to the same register
+   * last time?  Are we polling the register?  If so, suppress the output.
    */
 
   if (addr == prevaddr && val == preval && prevwrite == iswrite)
@@ -698,9 +686,43 @@ static void lpc54_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static void lpc54_takesem(sem_t *sem)
+static int lpc54_takesem(sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
+}
+
+/****************************************************************************
+ * Name: lpc54_takesem_noncancelable
+ *
+ * Description:
+ *   This is just a wrapper to handle the annoying behavior of semaphore
+ *   waits that return due to the receipt of a signal.  This version also
+ *   ignores attempts to cancel the thread.
+ *
+ ****************************************************************************/
+
+static int lpc54_takesem_noncancelable(sem_t *sem)
+{
+  int result;
+  int ret = OK;
+
+  do
+    {
+      result = nxsem_wait_uninterruptible(sem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(result == OK || result == -ECANCELED);
+      if (ret == OK && result < 0)
+        {
+          ret = result;
+        }
+    }
+  while (result < 0);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -769,8 +791,8 @@ static struct lpc54_gtd_s *lpc54_tdalloc(void)
   struct lpc54_gtd_s *ret;
   irqstate_t flags;
 
-  /* Disable interrupts momentarily so that lpc54_tdfree is not called from the
-   * interrupt handler.
+  /* Disable interrupts momentarily so that lpc54_tdfree is not called from
+   * the interrupt handler.
    */
 
   flags = enter_critical_section();
@@ -791,7 +813,8 @@ static struct lpc54_gtd_s *lpc54_tdalloc(void)
  *   Return an transfer descriptor to the free list
  *
  * Assumptions:
- *   - Only called from the WDH interrupt handler (and during initialization).
+ *   - Only called from the WDH interrupt handler (and during
+ *     initialization).
  *   - Interrupts are disabled in any case.
  *
  ****************************************************************************/
@@ -830,6 +853,7 @@ static uint8_t *lpc54_tballoc(void)
     {
       g_tbfree = ((struct lpc54_list_s *)ret)->flink;
     }
+
   return ret;
 }
 
@@ -1213,9 +1237,10 @@ static inline int lpc54_rembulked(struct lpc54_usbhost_s *priv,
 #if !defined(CONFIG_OHCI_INT_DISABLE) || !defined(CONFIG_OHCI_ISOC_DISABLE)
 static unsigned int lpc54_getinterval(uint8_t interval)
 {
-  /* The bInterval field of the endpoint descriptor contains the polling interval
-   * for interrupt and isochronous endpoints. For other types of endpoint, this
-   * value should be ignored. bInterval is provided in units of 1MS frames.
+  /* The bInterval field of the endpoint descriptor contains the polling
+   * interval for interrupt and isochronous endpoints. For other types of
+   * endpoint, this value should be ignored. bInterval is provided in units
+   * of 1MS frames.
    */
 
   if (interval < 3)
@@ -1245,13 +1270,14 @@ static unsigned int lpc54_getinterval(uint8_t interval)
  * Name: lpc54_setinttab
  *
  * Description:
- *   Set the interrupt table to the selected value using the provided interval
- *   and offset.
+ *   Set the interrupt table to the selected value using the provided
+ *   interval and offset.
  *
  ****************************************************************************/
 
 #if !defined(CONFIG_OHCI_INT_DISABLE) || !defined(CONFIG_OHCI_ISOC_DISABLE)
-static void lpc54_setinttab(uint32_t value, unsigned int interval, unsigned int offset)
+static void lpc54_setinttab(uint32_t value, unsigned int interval,
+                            unsigned int offset)
 {
   unsigned int i;
   for (i = offset; i < HCCA_INTTBL_WSIZE; i += interval)
@@ -1267,17 +1293,18 @@ static void lpc54_setinttab(uint32_t value, unsigned int interval, unsigned int 
  * Description:
  *   Helper function to add an ED to the HCCA interrupt table.
  *
- *   To avoid reshuffling the table so much and to keep life simple in general,
- *    the following rules are applied:
+ *   To avoid reshuffling the table so much and to keep life simple in
+ *   general, the following rules are applied:
  *
  *     1. IN EDs get the even entries, OUT EDs get the odd entries.
- *     2. Add IN/OUT EDs are scheduled together at the minimum interval of all
- *        IN/OUT EDs.
+ *     2. Add IN/OUT EDs are scheduled together at the minimum interval of
+ *        all IN/OUT EDs.
  *
  *   This has the following consequences:
  *
  *     1. The minimum support polling rate is 2MS, and
- *     2. Some devices may get polled at a much higher rate than they request.
+ *     2. Some devices may get polled at a much higher rate than they
+ *        request.
  *
  ****************************************************************************/
 
@@ -1291,8 +1318,8 @@ static inline int lpc54_addinted(struct lpc54_usbhost_s *priv,
   uint32_t head;
   uint32_t regval;
 
-  /* Disable periodic list processing.  Does this take effect immediately?  Or
-   * at the next SOF... need to check.
+  /* Disable periodic list processing.  Does this take effect immediately?
+   * Or at the next SOF... need to check.
    */
 
   regval  = lpc54_getreg(LPC54_OHCI_CTRL);
@@ -1338,6 +1365,7 @@ static inline int lpc54_addinted(struct lpc54_usbhost_s *priv,
           interval = priv->outinterval;
         }
     }
+
   uinfo("min interval: %d offset: %d\n", interval, offset);
 
   /* Get the head of the first of the duplicated entries.  The first offset
@@ -1376,17 +1404,18 @@ static inline int lpc54_addinted(struct lpc54_usbhost_s *priv,
  * Description:
  *   Helper function to remove an ED from the HCCA interrupt table.
  *
- *   To avoid reshuffling the table so much and to keep life simple in general,
- *    the following rules are applied:
+ *   To avoid reshuffling the table so much and to keep life simple in
+ *   general, the following rules are applied:
  *
  *     1. IN EDs get the even entries, OUT EDs get the odd entries.
- *     2. Add IN/OUT EDs are scheduled together at the minimum interval of all
- *        IN/OUT EDs.
+ *     2. Add IN/OUT EDs are scheduled together at the minimum interval of
+ *        all IN/OUT EDs.
  *
  *   This has the following consequences:
  *
  *     1. The minimum support polling rate is 2MS, and
- *     2. Some devices may get polled at a much higher rate than they request.
+ *     2. Some devices may get polled at a much higher rate than they
+ *        request.
  *
  ****************************************************************************/
 
@@ -1401,8 +1430,8 @@ static inline int lpc54_reminted(struct lpc54_usbhost_s *priv,
   unsigned int       offset;
   uint32_t           regval;
 
-  /* Disable periodic list processing.  Does this take effect immediately?  Or
-   * at the next SOF... need to check.
+  /* Disable periodic list processing.  Does this take effect immediately?
+   * Or at the next SOF... need to check.
    */
 
   regval  = lpc54_getreg(LPC54_OHCI_CTRL);
@@ -1489,8 +1518,8 @@ static inline int lpc54_reminted(struct lpc54_usbhost_s *priv,
           priv->outinterval = interval;
         }
 
-      /* Set the head ED in all of the appropriate entries of the HCCA interrupt
-       * table (head might be NULL).
+      /* Set the head ED in all of the appropriate entries of the HCCA
+       * interrupt table (head might be NULL).
        */
 
       lpc54_setinttab((uint32_t)head, interval, offset);
@@ -1557,7 +1586,8 @@ static inline int lpc54_remisoced(struct lpc54_usbhost_s *priv,
 
 static int lpc54_enqueuetd(struct lpc54_usbhost_s *priv,
                            struct lpc54_ed_s *ed, uint32_t dirpid,
-                           uint32_t toggle, volatile uint8_t *buffer, size_t buflen)
+                           uint32_t toggle, volatile uint8_t *buffer,
+                           size_t buflen)
 {
   struct lpc54_gtd_s *td;
   int ret = -ENOMEM;
@@ -1569,7 +1599,8 @@ static int lpc54_enqueuetd(struct lpc54_usbhost_s *priv,
     {
       /* Initialize the allocated TD and link it before the common tail TD. */
 
-      td->hw.ctrl         = (GTD_STATUS_R | dirpid | TD_DELAY(0) | toggle | GTD_STATUS_CC_MASK);
+      td->hw.ctrl         = (GTD_STATUS_R | dirpid | TD_DELAY(0) | toggle |
+                             GTD_STATUS_CC_MASK);
       TDTAIL->hw.ctrl     = 0;
       td->hw.cbp          = (uint32_t)buffer;
       TDTAIL->hw.cbp      = 0;
@@ -1597,10 +1628,11 @@ static int lpc54_enqueuetd(struct lpc54_usbhost_s *priv,
  * Name: lpc54_wdhwait
  *
  * Description:
- *   Set the request for the Writeback Done Head event well BEFORE enabling the
- *   transfer (as soon as we are absolutely committed to the to avoid transfer).
- *   We do this to minimize race conditions.  This logic would have to be expanded
- *   if we want to have more than one packet in flight at a time!
+ *   Set the request for the Writeback Done Head event well BEFORE enabling
+ *   the transfer (as soon as we are absolutely committed to the to avoid
+ *   transfer).  We do this to minimize race conditions.  This logic would
+ *   have to be expanded if we want to have more than one packet in flight
+ *   at a time!
  *
  ****************************************************************************/
 
@@ -1617,8 +1649,9 @@ static int lpc54_wdhwait(struct lpc54_usbhost_s *priv, struct lpc54_ed_s *ed)
 
   if (priv->connected)
     {
-      /* Yes.. then set wdhwait to indicate that we expect to be informed when
-       * either (1) the device is disconnected, or (2) the transfer completed.
+      /* Yes.. then set wdhwait to indicate that we expect to be informed
+       * when either (1) the device is disconnected, or (2) the transfer
+       * completed.
        */
 
       xfrinfo->wdhwait = true;
@@ -1672,8 +1705,8 @@ static int lpc54_ctrltd(struct lpc54_usbhost_s *priv, struct lpc54_ed_s *ed,
 
   ed->xfrinfo = xfrinfo;
 
-  /* Set the request for the Writeback Done Head event well BEFORE enabling the
-   * transfer.
+  /* Set the request for the Writeback Done Head event well BEFORE enabling
+   * the transfer.
    */
 
   ret = lpc54_wdhwait(priv, ed);
@@ -1700,8 +1733,8 @@ static int lpc54_ctrltd(struct lpc54_usbhost_s *priv, struct lpc54_ed_s *ed,
   ret = lpc54_enqueuetd(priv, ed, dirpid, toggle, buffer, buflen);
   if (ret == OK)
     {
-      /* Set ControlListFilled.  This bit is used to indicate whether there are
-       * TDs on the Control list.
+      /* Set ControlListFilled.  This bit is used to indicate whether there
+       * are TDs on the Control list.
        */
 
       regval = lpc54_getreg(LPC54_OHCI_CMDST);
@@ -1710,11 +1743,15 @@ static int lpc54_ctrltd(struct lpc54_usbhost_s *priv, struct lpc54_ed_s *ed,
 
       /* Wait for the Writeback Done Head interrupt */
 
-      lpc54_takesem(&ed->wdhsem);
+      ret = lpc54_takesem(&ed->wdhsem);
+      if (ret < 0)
+        {
+          /* Task has been canceled */
+        }
 
       /* Check the TD completion status bits */
 
-      if (xfrinfo->tdstatus == TD_CC_NOERROR)
+      else if (xfrinfo->tdstatus == TD_CC_NOERROR)
         {
           ret = OK;
         }
@@ -1772,7 +1809,9 @@ static int lpc54_usbinterrupt(int irq, void *context, FAR void *arg)
               uint32_t rhstatus = lpc54_getreg(LPC54_OHCI_RHSTATUS);
               uinfo("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
 
-              /* If DRWE is set, Connect Status Change indicates a remote wake-up event */
+              /* If DRWE is set, Connect Status Change indicates a remote
+               * wake-up event.
+               */
 
               if (rhstatus & OHCI_RHSTATUS_DRWE)
                 {
@@ -1807,7 +1846,8 @@ static int lpc54_usbinterrupt(int irq, void *context, FAR void *arg)
                         }
                       else
                         {
-                          uwarn("WARNING: Spurious status change (connected)\n");
+                          uwarn("WARNING: Spurious status change "
+                                "(connected)\n");
                         }
 
                       /* The LSDA (Low speed device attached) bit is valid
@@ -1863,7 +1903,8 @@ static int lpc54_usbinterrupt(int irq, void *context, FAR void *arg)
                     }
                   else
                     {
-                       uwarn("WARNING: Spurious status change (disconnected)\n");
+                       uwarn("WARNING: Spurious status change "
+                             "(disconnected)\n");
                     }
                 }
 
@@ -1889,14 +1930,14 @@ static int lpc54_usbinterrupt(int irq, void *context, FAR void *arg)
           struct lpc54_gtd_s *td;
           struct lpc54_gtd_s *next;
 
-          /* The host controller just wrote the list of finished TDs into the HCCA
-           * done head.  This may include multiple packets that were transferred
-           * in the preceding frame.
+          /* The host controller just wrote the list of finished TDs into
+           * the HCCA done head.  This may include multiple packets that
+           * were transferred in the preceding frame.
            *
-           * Remove the TD(s) from the Writeback Done Head in the HCCA and return
-           * them to the free list.  Note that this is safe because the hardware
-           * will not modify the writeback done head again until the WDH bit is
-           * cleared in the interrupt status register.
+           * Remove the TD(s) from the Writeback Done Head in the HCCA and
+           * return them to the free list.  Note that this is safe because
+           * the hardware will not modify the writeback done head again
+           * until the WDH bit is cleared in the interrupt status register.
            */
 
           td = (struct lpc54_gtd_s *)(HCCA->donehead & HCCA_DONEHEAD_MASK);
@@ -1909,12 +1950,13 @@ static int lpc54_usbinterrupt(int irq, void *context, FAR void *arg)
             {
               /* REVISIT: I have encountered bad TDs in the done list linked
                * after at least one good TD.  This is some consequence of how
-               * transfers are being cancelled.  But for now, I have only
+               * transfers are being canceled.  But for now, I have only
                * this work-around.
                */
 
               if ((uintptr_t)td < LPC54_TDFREE_BASE ||
-                  (uintptr_t)td >= (LPC54_TDFREE_BASE + LPC54_TD_SIZE*CONFIG_LP17_OHCI_NTDS))
+                  (uintptr_t)td >= (LPC54_TDFREE_BASE +
+                                    LPC54_TD_SIZE * CONFIG_LP17_OHCI_NTDS))
                 {
                   break;
                 }
@@ -1924,26 +1966,31 @@ static int lpc54_usbinterrupt(int irq, void *context, FAR void *arg)
               ed      = td->ed;
               DEBUGASSERT(ed != NULL);
 
-              /* If there is a transfer in progress, then the xfrinfo pointer will be
-               * non-NULL.  But it appears that a NULL pointer may be received with a
-               * spurious interrupt such as may occur after a transfer is cancelled.
+              /* If there is a transfer in progress, then the xfrinfo
+               * pointer will be non-NULL.  But it appears that a NULL
+               * pointer may be received with a spurious interrupt such as
+               * may occur after a transfer is canceled.
                */
 
               xfrinfo = ed->xfrinfo;
               if (xfrinfo)
                 {
-                  /* Save the condition code from the (single) TD status/control
-                   * word.
+                  /* Save the condition code from the (single) TD status/
+                   * control word.
                    */
 
-                  xfrinfo->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
+                  xfrinfo->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >>
+                                      GTD_STATUS_CC_SHIFT;
 
 #ifdef CONFIG_DEBUG_USB
                   if (xfrinfo->tdstatus != TD_CC_NOERROR)
                     {
-                      /* The transfer failed for some reason... dump some diagnostic info. */
+                      /* The transfer failed for some reason... dump some
+                       * diagnostic info.
+                       */
 
-                      uerr("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
+                      uerr("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d "
+                           "RHPORTST1:%08x\n",
                            ed->xfrtype, td->hw.ctrl, xfrinfo->tdstatus,
                            lpc54_getreg(LPC54_OHCI_RHPORTST1));
                     }
@@ -2020,27 +2067,23 @@ static int lpc54_usbinterrupt(int irq, void *context, FAR void *arg)
 }
 
 /****************************************************************************
- * USB Host Controller Operations
- ****************************************************************************/
-
-/****************************************************************************
  * Name: lpc54_wait
  *
  * Description:
  *   Wait for a device to be connected or disconnected to/from a hub port.
  *
  * Input Parameters:
- *   conn - The USB host connection instance obtained as a parameter from the call to
- *      the USB driver initialization logic.
- *   hport - The location to return the hub port descriptor that detected the
- *      connection related event.
+ *   conn - The USB host connection instance obtained as a parameter from
+ *     the call to the USB driver initialization logic.
+ *   hport - The location to return the hub port descriptor that detected
+ *     the connection related event.
  *
  * Returned Value:
  *   Zero (OK) is returned on success when a device is connected or
- *   disconnected. This function will not return until either (1) a device is
- *   connected or disconnect to/from any hub port or until (2) some failure
- *   occurs.  On a failure, a negated errno value is returned indicating the
- *   nature of the failure
+ *   disconnected. This function will not return until either (1) a device
+ *   is connected or disconnect to/from any hub port or until (2) some
+ *   failure occurs.  On a failure, a negated errno value is returned
+ *   indicating the nature of the failure
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -2054,6 +2097,11 @@ static int lpc54_wait(struct usbhost_connection_s *conn,
   struct lpc54_usbhost_s *priv = (struct lpc54_usbhost_s *)&g_usbhost;
   struct usbhost_hubport_s *connport;
   irqstate_t flags;
+  int ret;
+
+  /* Loop until a change in the connection state changes on one of the root
+   * hub ports or until an error occurs.
+   */
 
   flags = enter_critical_section();
   for (; ; )
@@ -2100,7 +2148,8 @@ static int lpc54_wait(struct usbhost_connection_s *conn,
           *hport = connport;
           leave_critical_section(flags);
 
-          uinfo("Hub port Connected: %s\n", connport->connected ? "YES" : "NO");
+          uinfo("Hub port Connected: %s\n",
+                connport->connected ? "YES" : "NO");
           return OK;
         }
 #endif
@@ -2108,7 +2157,11 @@ static int lpc54_wait(struct usbhost_connection_s *conn,
       /* Wait for the next connection event */
 
       priv->pscwait = true;
-      lpc54_takesem(&priv->pscsem);
+      ret = lpc54_takesem(&priv->pscsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 }
 
@@ -2132,8 +2185,8 @@ static int lpc54_wait(struct usbhost_connection_s *conn,
  *      device.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
@@ -2160,7 +2213,7 @@ static int lpc54_rh_enumerate(struct usbhost_connection_s *conn,
 
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
-  nxsig_usleep(100*1000);
+  nxsig_usleep(100 * 1000);
 
   /* Put RH port 1 in reset (the LPC546x supports only a single downstream port) */
 
@@ -2173,7 +2226,7 @@ static int lpc54_rh_enumerate(struct usbhost_connection_s *conn,
   /* Release RH port 1 from reset and wait a bit */
 
   lpc54_putreg(OHCI_RHPORTST_PRSC, LPC54_OHCI_RHPORTST1);
-  nxsig_usleep(200*1000);
+  nxsig_usleep(200 * 1000);
   return OK;
 }
 
@@ -2212,7 +2265,7 @@ static int lpc54_enumerate(FAR struct usbhost_connection_s *conn,
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_ep0configure
  *
  * Description:
@@ -2221,37 +2274,45 @@ static int lpc54_enumerate(FAR struct usbhost_connection_s *conn,
  *   an external implementation of the enumeration logic.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   ep0 - The (opaque) EP0 endpoint instance
- *   funcaddr - The USB address of the function containing the endpoint that EP0
- *     controls
+ *   funcaddr - The USB address of the function containing the endpoint that
+ *     EP0 controls.  A funcaddr of zero will be received if no address is
+ *     yet assigned to the device.
  *   speed - The speed of the port USB_SPEED_LOW, _FULL, or _HIGH
  *   mps (maxpacketsize) - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-static int lpc54_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                              uint8_t funcaddr, uint8_t speed, uint16_t maxpacketsize)
+static int lpc54_ep0configure(struct usbhost_driver_s *drvr,
+                              usbhost_ep_t ep0, uint8_t funcaddr,
+                              uint8_t speed, uint16_t maxpacketsize)
 {
   struct lpc54_usbhost_s *priv = (struct lpc54_usbhost_s *)drvr;
   struct lpc54_ed_s      *ed;
   uint32_t hwctrl;
+  int ret;
 
-  DEBUGASSERT(drvr != NULL && ep0 != NULL && funcaddr < 128 && maxpacketsize < 2048);
+  DEBUGASSERT(drvr != NULL && ep0 != NULL && funcaddr < 128 &&
+              maxpacketsize < 2048);
   ed = (struct lpc54_ed_s *)ep0;
 
   /* We must have exclusive access to EP0 and the control list */
 
-  lpc54_takesem(&priv->exclsem);
+  ret = lpc54_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Set the EP0 ED control word */
 
@@ -2272,47 +2333,54 @@ static int lpc54_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_epalloc
  *
  * Description:
  *   Allocate and configure one endpoint.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   epdesc - Describes the endpoint to be allocated.
  *   ep - A memory location provided by the caller in which to receive the
  *      allocated endpoint descriptor.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int lpc54_epalloc(struct usbhost_driver_s *drvr,
-                         const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
+                         const struct usbhost_epdesc_s *epdesc,
+                         usbhost_ep_t *ep)
 {
   struct lpc54_usbhost_s *priv = (struct lpc54_usbhost_s *)drvr;
   struct usbhost_hubport_s *hport;
   struct lpc54_ed_s *ed;
-  int ret  = -ENOMEM;
+  int ret;
 
-  /* Sanity check.  NOTE that this method should only be called if a device is
-   * connected (because we need a valid low speed indication).
+  /* Sanity check.  NOTE that this method should only be called if a device
+   * is connected (because we need a valid low speed indication).
    */
 
   DEBUGASSERT(priv && epdesc && ep && priv->connected);
 
-  /* We must have exclusive access to the ED pool, the bulk list, the periodic list
-   * and the interrupt table.
+  /* We must have exclusive access to the ED pool, the bulk list, the
+   * periodic list, and the interrupt table.
    */
 
-  lpc54_takesem(&priv->exclsem);
+  ret = lpc54_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -ENOMEM;
 
   /* Take the next ED from the beginning of the free list */
 
@@ -2368,6 +2436,7 @@ static int lpc54_epalloc(struct usbhost_driver_s *drvr,
           ed->hw.ctrl |= ED_CONTROL_F;
         }
 #endif
+
       uinfo("EP%d CTRL:%08x\n", epdesc->addr, ed->hw.ctrl);
 
       /* Initialize the semaphore that is used to wait for the endpoint
@@ -2414,7 +2483,9 @@ static int lpc54_epalloc(struct usbhost_driver_s *drvr,
         {
           /* No.. destroy it and report the error */
 
-          uerr("ERROR: Failed to queue ED for transfer type: %d\n", ed->xfrtype);
+          uerr("ERROR: Failed to queue ED for transfer type: %d\n",
+               ed->xfrtype);
+
           nxsem_destroy(&ed->wdhsem);
           lpc54_edfree(ed);
         }
@@ -2430,25 +2501,25 @@ static int lpc54_epalloc(struct usbhost_driver_s *drvr,
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_epfree
  *
  * Description:
  *   Free and endpoint previously allocated by DRVR_EPALLOC.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   ep - The endpint to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int lpc54_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
@@ -2458,13 +2529,18 @@ static int lpc54_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* There should not be any pending, real TDs linked to this ED */
 
-  DEBUGASSERT(ed && (ed->hw.headp & ED_HEADP_ADDR_MASK) == LPC54_TDTAIL_ADDR);
+  DEBUGASSERT(ed && (ed->hw.headp & ED_HEADP_ADDR_MASK) ==
+              LPC54_TDTAIL_ADDR);
 
-  /* We must have exclusive access to the ED pool, the bulk list, the periodic list
-   * and the interrupt table.
+  /* We must have exclusive access to the ED pool, the bulk list, the
+   * periodic list and the interrupt table.
    */
 
-  lpc54_takesem(&priv->exclsem);
+  ret = lpc54_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Remove the ED to the correct list depending on the transfer type */
 
@@ -2506,27 +2582,28 @@ static int lpc54_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  * Name: lpc54_alloc
  *
  * Description:
- *   Some hardware supports special memory in which request and descriptor data can
- *   be accessed more efficiently.  This method provides a mechanism to allocate
- *   the request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kmm_malloc.
+ *   Some hardware supports special memory in which request and descriptor
+ *   data can be accessed more efficiently.  This method provides a
+ *   mechanism to allocate the request/descriptor memory.  If the underlying
+ *   hardware does not support such "special" memory, this functions may
+ *   simply map to kmm_malloc.
  *
- *   This interface was optimized under a particular assumption.  It was assumed
- *   that the driver maintains a pool of small, pre-allocated buffers for descriptor
- *   traffic.  NOTE that size is not an input, but an output:  The size of the
- *   pre-allocated buffer is returned.
+ *   This interface was optimized under a particular assumption.  It was
+ *   assumed that the driver maintains a pool of small, pre-allocated
+ *   buffers for descriptor traffic.  NOTE that size is not an input, but
+ *   an output:  The size of the pre-allocated buffer is returned.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   buffer - The address of a memory location provided by the caller in which to
- *     return the allocated buffer memory address.
- *   maxlen - The address of a memory location provided by the caller in which to
- *     return the maximum size of the allocated buffer memory.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   buffer - The address of a memory location provided by the caller in
+ *     which to return the allocated buffer memory address.
+ *   maxlen - The address of a memory location provided by the caller in
+ *     which to return the maximum size of the allocated buffer memory.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -2539,11 +2616,17 @@ static int lpc54_alloc(struct usbhost_driver_s *drvr,
 {
   struct lpc54_usbhost_s *priv = (struct lpc54_usbhost_s *)drvr;
   DEBUGASSERT(priv && buffer && maxlen);
-  int ret = -ENOMEM;
+  int ret;
 
   /* We must have exclusive access to the transfer buffer pool */
 
-  lpc54_takesem(&priv->exclsem);
+  ret = lpc54_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -ENOMEM;
 
   *buffer = lpc54_tballoc();
   if (*buffer)
@@ -2560,19 +2643,20 @@ static int lpc54_alloc(struct usbhost_driver_s *drvr,
  * Name: lpc54_free
  *
  * Description:
- *   Some hardware supports special memory in which request and descriptor data can
- *   be accessed more efficiently.  This method provides a mechanism to free that
- *   request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kmm_free().
+ *   Some hardware supports special memory in which request and descriptor
+ *   data can be accessed more efficiently.  This method provides a
+ *   mechanism to free that request/descriptor memory.  If the underlying
+ *   hardware does not support such "special" memory, this functions may
+ *   simply map to kmm_free().
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   buffer - The address of the allocated buffer memory to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Never called from an interrupt handler.
@@ -2582,42 +2666,46 @@ static int lpc54_alloc(struct usbhost_driver_s *drvr,
 static int lpc54_free(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
   struct lpc54_usbhost_s *priv = (struct lpc54_usbhost_s *)drvr;
+  int ret;
+
   DEBUGASSERT(buffer);
 
   /* We must have exclusive access to the transfer buffer pool */
 
-  lpc54_takesem(&priv->exclsem);
+  ret = lpc54_takesem_noncancelable(&priv->exclsem);
   lpc54_tbfree(buffer);
   lpc54_givesem(&priv->exclsem);
-  return OK;
+  return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_ioalloc
  *
  * Description:
  *   Some hardware supports special memory in which larger IO buffers can
- *   be accessed more efficiently.  This method provides a mechanism to allocate
- *   the request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kmm_malloc.
+ *   be accessed more efficiently.  This method provides a mechanism to
+ *   allocate the request/descriptor memory.  If the underlying hardware
+ *   does not support such "special" memory, this functions may simply map
+ *   to kumm_malloc.
  *
- *   This interface differs from DRVR_ALLOC in that the buffers are variable-sized.
+ *   This interface differs from DRVR_ALLOC in that the buffers are
+ *   variable-sized.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   buffer - The address of a memory location provided by the caller in which to
- *     return the allocated buffer memory address.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   buffer - The address of a memory location provided by the caller in
+ *     which to return the allocated buffer memory address.
  *   buflen - The size of the buffer required.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int lpc54_ioalloc(struct usbhost_driver_s *drvr,
                          uint8_t **buffer, size_t buflen)
@@ -2641,28 +2729,28 @@ static int lpc54_ioalloc(struct usbhost_driver_s *drvr,
 #endif
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_iofree
  *
  * Description:
- *   Some hardware supports special memory in which IO data can  be accessed more
- *   efficiently.  This method provides a mechanism to free that IO buffer
- *   memory.  If the underlying hardware does not support such "special" memory,
- *   this functions may simply map to kmm_free().
+ *   Some hardware supports special memory in which IO data can  be accessed
+ *   more efficiently.  This method provides a mechanism to free that IO
+ *   buffer memory.  If the underlying hardware does not support such
+ *   "special" memory, this functions may simply map to kumm_free().
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   buffer - The address of the allocated buffer memory to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int lpc54_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
@@ -2680,31 +2768,31 @@ static int lpc54_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer)
  * Name: lpc54_ctrlin and lpc54_ctrlout
  *
  * Description:
- * Description:
  *   Process a IN or OUT request on the control endpoint.  These methods
- *   will enqueue the request and wait for it to complete.  Only one transfer may be
- *   queued; Neither these methods nor the transfer() method can be called again
- *   until the control transfer functions returns.
+ *   will enqueue the request and wait for it to complete.  Only one
+ *   transfer may be queued; Neither these methods nor the transfer() method
+ *   can be called again until the control transfer functions returns.
  *
  *   These are blocking methods; these functions will not return until the
  *   control transfer has completed.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   ep0 - The control endpoint to send/receive the control request.
- *   req - Describes the request to be sent.  This request must lie in memory
- *      created by DRVR_ALLOC.
+ *   req - Describes the request to be sent.  This request must lie in
+ *     memory created by DRVR_ALLOC.
  *   buffer - A buffer used for sending the request and for returning any
  *     responses.  This buffer must be large enough to hold the length value
- *     in the request description. buffer must have been allocated using DRVR_ALLOC.
+ *     in the request description. buffer must have been allocated using
+ *     DRVR_ALLOC.
  *
- *   NOTE: On an IN transaction, req and buffer may refer to the same allocated
- *   memory.
+ *   NOTE: On an IN transaction, req and buffer may refer to the same
+ *   allocated memory.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -2729,10 +2817,15 @@ static int lpc54_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to EP0 and the control list */
 
-  lpc54_takesem(&priv->exclsem);
+  ret = lpc54_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   len = lpc54_getle16(req->len);
-  ret = lpc54_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t *)req, USB_SIZEOF_CTRLREQ);
+  ret = lpc54_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t *)req,
+                     USB_SIZEOF_CTRLREQ);
   if (ret == OK)
     {
       if (len)
@@ -2767,15 +2860,21 @@ static int lpc54_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to EP0 and the control list */
 
-  lpc54_takesem(&priv->exclsem);
+  ret = lpc54_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   len = lpc54_getle16(req->len);
-  ret = lpc54_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t *)req, USB_SIZEOF_CTRLREQ);
+  ret = lpc54_ctrltd(priv, ed, GTD_STATUS_DP_SETUP, (uint8_t *)req,
+                     USB_SIZEOF_CTRLREQ);
   if (ret == OK)
     {
       if (len)
         {
-          ret = lpc54_ctrltd(priv, ed, GTD_STATUS_DP_OUT, (uint8_t *)buffer, len);
+          ret = lpc54_ctrltd(priv, ed, GTD_STATUS_DP_OUT, (uint8_t *)buffer,
+                            len);
         }
 
       if (ret == OK)
@@ -2797,16 +2896,16 @@ static int lpc54_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *
  * Input Parameters:
  *   priv - Internal driver state structure.
- *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
- *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   ed - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which to  perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or
+ *     received (IN endpoint).  buffer must have been allocated using
+ *     DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
- *
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -2848,7 +2947,8 @@ static int lpc54_transfer_common(struct lpc54_usbhost_s *priv,
   /* Then enqueue the transfer */
 
   xfrinfo->tdstatus = TD_CC_NOERROR;
-  ret = lpc54_enqueuetd(priv, ed, dirpid, GTD_STATUS_T_TOGGLE, buffer, buflen);
+  ret = lpc54_enqueuetd(priv, ed, dirpid, GTD_STATUS_T_TOGGLE, buffer,
+                        buflen);
   if (ret == OK)
     {
       /* BulkListFilled. This bit is used to indicate whether there are any
@@ -2870,20 +2970,21 @@ static int lpc54_transfer_common(struct lpc54_usbhost_s *priv,
  * Name: lpc54_dma_alloc
  *
  * Description:
- *   Allocate DMA memory to perform a transfer, copying user data as necessary
+ *   Allocate DMA memory to perform a transfer, copying user data as
+ *   necessary
  *
  * Input Parameters:
  *   priv - Internal driver state structure.
- *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   userbuffer - The user buffer containing the data to be sent (OUT endpoint)
- *      or received (IN endpoint).
+ *   ed - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which to perform the transfer.
+ *   userbuffer - The user buffer containing the data to be sent (OUT
+ *      endpoint) or received (IN endpoint).
  *   buflen - The length of the data to be sent or received.
  *   alloc - The location to return the allocated DMA buffer.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -2899,7 +3000,8 @@ static int lpc54_dma_alloc(struct lpc54_usbhost_s *priv,
   uint8_t *newbuffer;
 
   if ((uintptr_t)userbuffer < LPC54_SRAM_BANK0 ||
-      (uintptr_t)userbuffer >= (LPC54_SRAM_BANK0 + LPC54_BANK0_SIZE + LPC54_BANK1_SIZE))
+      (uintptr_t)userbuffer >= (LPC54_SRAM_BANK0 + LPC54_BANK0_SIZE +
+                                LPC54_BANK1_SIZE))
     {
       /* Will the transfer fit in an IO buffer? */
 
@@ -2946,16 +3048,16 @@ static int lpc54_dma_alloc(struct lpc54_usbhost_s *priv,
  *
  * Input Parameters:
  *   priv - Internal driver state structure.
- *   ed - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   userbuffer - The user buffer containing the data to be sent (OUT endpoint)
- *      or received (IN endpoint).
+ *   ed - The IN or OUT endpoint descriptor for the device endpoint on which
+ *     to perform the transfer.
+ *   userbuffer - The user buffer containing the data to be sent (OUT
+ *     endpoint) or received (IN endpoint).
  *   buflen - The length of the data to be sent or received.
  *   alloc - The allocated DMA buffer to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -2999,26 +3101,27 @@ static void lpc54_dma_free(struct lpc54_usbhost_s *priv,
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request, blocking until the transfer completes. Only
- *   one transfer may be  queued; Neither this method nor the ctrlin or
+ *   enqueue the transfer request, blocking until the transfer completes.
+ *   Only one transfer may be  queued; Neither this method nor the ctrlin or
  *   ctrlout methods can be called again until this function returns.
  *
  *   This is a blocking method; this functions will not return until the
  *   transfer has completed.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
- *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which to perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or
+ *     received (IN endpoint).  buffer must have been allocated using
+ *     DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
  *
  * Returned Value:
  *   On success, a non-negative value is returned that indicates the number
- *   of bytes successfully transferred.  On a failure, a negated errno value is
- *   returned that indicates the nature of the failure:
+ *   of bytes successfully transferred.  On a failure, a negated errno value
+ *   is returned that indicates the nature of the failure:
  *
  *     EAGAIN - If devices NAKs the transfer (or NYET or other error where
  *              it may be appropriate to restart the entire transaction).
@@ -3047,11 +3150,16 @@ static ssize_t lpc54_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   DEBUGASSERT(priv && ed && buffer && buflen > 0);
 
-  /* We must have exclusive access to the endpoint, the TD pool, the I/O buffer
-   * pool, the bulk and interrupt lists, and the HCCA interrupt table.
+  /* We must have exclusive access to the endpoint, the TD pool, the I/O
+   * buffer pool, the bulk and interrupt lists, and the HCCA interrupt
+   * table.
    */
 
-  lpc54_takesem(&priv->exclsem);
+  ret = lpc54_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
   /* Allocate a structure to retain the information needed when the transfer
    * completes.
@@ -3095,8 +3203,8 @@ static ssize_t lpc54_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
     }
 #endif
 
-  /* Set the request for the Writeback Done Head event well BEFORE enabling the
-   * transfer.
+  /* Set the request for the Writeback Done Head event well BEFORE enabling
+   * the transfer.
    */
 
   ret = lpc54_wdhwait(priv, ed);
@@ -3119,7 +3227,12 @@ static ssize_t lpc54_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   /* Wait for the Writeback Done Head interrupt */
 
-  lpc54_takesem(&ed->wdhsem);
+  ret = lpc54_takesem(&ed->wdhsem);
+  if (ret < 0)
+    {
+      nbytes = (ssize_t)ret;
+      goto errout_with_wdhwait;
+    }
 
   /* Check the TD completion status bits */
 
@@ -3155,6 +3268,7 @@ static ssize_t lpc54_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
      }
 
 errout_with_wdhwait:
+
   /* Make sure that there is no outstanding request on this endpoint */
 
   xfrinfo->wdhwait = false;
@@ -3167,6 +3281,7 @@ errout_with_buffers:
 #endif
 
 errout_with_xfrinfo:
+
   /* Make sure that there is no outstanding request on this endpoint */
 
   lpc54_free_xfrinfo(xfrinfo);
@@ -3186,8 +3301,8 @@ errout_with_sem:
  *
  * Input Parameters:
  *   priv - Internal driver state structure.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which the
- *      transfer was performed.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which the transfer was performed.
  *
  * Returned Value:
  *   None
@@ -3280,20 +3395,21 @@ static void lpc54_asynch_completion(struct lpc54_usbhost_s *priv,
  *   ctrlout methods can be called again until the transfer completes.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
- *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which to perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or
+ *     received (IN endpoint).  buffer must have been allocated using
+ *     DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
  *   callback - This function will be called when the transfer completes.
- *   arg - The arbitrary parameter that will be passed to the callback function
- *     when the transfer completes.
+ *   arg - The arbitrary parameter that will be passed to the callback
+ *     function when the transfer completes.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -3311,16 +3427,22 @@ static int lpc54_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   struct lpc54_xfrinfo_s *xfrinfo;
   int ret;
 
-  DEBUGASSERT(priv && ed && ed->xfrinfo == NULL && buffer && buflen > 0 && callback);
+  DEBUGASSERT(priv && ed && ed->xfrinfo == NULL && buffer && buflen > 0 &&
+              callback);
 
-  /* We must have exclusive access to the endpoint, the TD pool, the I/O buffer
-   * pool, the bulk and interrupt lists, and the HCCA interrupt table.
+  /* We must have exclusive access to the endpoint, the TD pool, the I/O
+   * buffer pool, the bulk and interrupt lists, and the HCCA interrupt
+   * table.
    */
 
-  lpc54_takesem(&priv->exclsem);
+  ret lpc54_takesem(&priv->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
-  /* Allocate a structure to retain the information needed when the asynchronous
-   * transfer completes.
+  /* Allocate a structure to retain the information needed when the
+   * asynchronous transfer completes.
    */
 
   DEBUGASSERT(ed->xfrinfo == NULL);
@@ -3395,7 +3517,7 @@ errout_with_sem:
 }
 #endif /* CONFIG_OHCI_ASYNCH */
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_cancel
  *
  * Description:
@@ -3403,16 +3525,16 @@ errout_with_sem:
  *   asynchronous transfer will complete normally with the error -ESHUTDOWN.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which an
- *      asynchronous transfer should be transferred.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which an asynchronous transfer should be transferred.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int lpc54_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
@@ -3437,8 +3559,8 @@ static int lpc54_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   xfrinfo = ed->xfrinfo;
   if (xfrinfo)
     {
-      /* It might be possible for no transfer to be in progress (callback == NULL
-       * and wdhwait == false)
+      /* It might be possible for no transfer to be in progress (callback ==
+       * NULL and wdhwait == false)
        */
 
 #ifdef CONFIG_OHCI_ASYNCH
@@ -3461,7 +3583,8 @@ static int lpc54_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
               /* Remove the TDs attached to the ED, keeping the ED in the list */
 
-              td           = (struct lpc54_gtd_s *)(ed->hw.headp & ED_HEADP_ADDR_MASK);
+              td           = (struct lpc54_gtd_s *)
+                             (ed->hw.headp & ED_HEADP_ADDR_MASK);
               ed->hw.headp = LPC54_TDTAIL_ADDR;
               ed->xfrinfo  = NULL;
 
@@ -3474,7 +3597,8 @@ static int lpc54_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
             {
               /* Remove the TDs attached to the ED, keeping the Ed in the list */
 
-              td           = (struct lpc54_gtd_s *)(ed->hw.headp & ED_HEADP_ADDR_MASK);
+              td           = (struct lpc54_gtd_s *)
+                             (ed->hw.headp & ED_HEADP_ADDR_MASK);
               ed->hw.headp = LPC54_TDTAIL_ADDR;
               ed->xfrinfo  = NULL;
             }
@@ -3538,7 +3662,7 @@ static int lpc54_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: lpc54_connect
  *
  * Description:
@@ -3547,17 +3671,17 @@ static int lpc54_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   and port description to the system.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   hport - The descriptor of the hub port that detected the connection
- *      related event
+ *     related event
  *   connected - True: device connected; false: device disconnected
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_OHCI_HUB
 static int lpc54_connect(FAR struct usbhost_driver_s *drvr,
@@ -3571,7 +3695,8 @@ static int lpc54_connect(FAR struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  uinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n",
+        hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 
@@ -3592,17 +3717,18 @@ static int lpc54_connect(FAR struct usbhost_driver_s *drvr,
  * Name: lpc54_disconnect
  *
  * Description:
- *   Called by the class when an error occurs and driver has been disconnected.
- *   The USB host driver should discard the handle to the class instance (it is
- *   stale) and not attempt any further interaction with the class driver instance
- *   (until a new instance is received from the create() method).  The driver
- *   should not called the class' disconnected() method.
+ *   Called by the class when an error occurs and driver has been
+ *   disconnected.  The USB host driver should discard the handle to the
+ *   class instance (it is stale) and not attempt any further interaction
+ *   with the class driver instance (until a new instance is received from
+ *   the create() method).  The driver should not called the class'
+ *   disconnected() method.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   hport - The port from which the device is being disconnected.  Might be a port
- *      on a hub.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *      call to the class create() method.
+ *   hport - The port from which the device is being disconnected.  Might be
+ *      a port on a hub.
  *
  * Returned Value:
  *   None
@@ -3620,9 +3746,6 @@ static void lpc54_disconnect(struct usbhost_driver_s *drvr,
   hport->devclass = NULL;
 }
 
-/****************************************************************************
- * Initialization
- ****************************************************************************/
 /****************************************************************************
  * Name: lpc54_ep0init
  *
@@ -3710,6 +3833,7 @@ struct usbhost_connection_s *lpc54_usbhost_initialize(int controller)
   DEBUGASSERT(sizeof(struct lpc54_gtd_s) <= LPC54_TD_SIZE);
 
   /* Initialize the state data structure */
+
   /* Initialize the device operations */
 
   drvr                 = &priv->drvr;
@@ -3799,7 +3923,8 @@ struct usbhost_connection_s *lpc54_usbhost_initialize(int controller)
 
   /* Now we can turn off the PORTSEL clock */
 
-  lpc54_putreg((LPC54_CLKCTRL_ENABLES & ~USBOTG_CLK_PORTSELCLK), LPC54_USBOTG_CLKCTRL);
+  lpc54_putreg((LPC54_CLKCTRL_ENABLES & ~USBOTG_CLK_PORTSELCLK),
+               LPC54_USBOTG_CLKCTRL);
 
   /* Configure I/O pins */
 
@@ -3818,13 +3943,20 @@ struct usbhost_connection_s *lpc54_usbhost_initialize(int controller)
 
 #if 0 /* Useful if you have doubts about the layout */
   uinfo("AHB SRAM:\n");
-  uinfo("  HCCA:   %08x %d\n", LPC54_HCCA_BASE,   LPC54_HCCA_SIZE);
-  uinfo("  TDTAIL: %08x %d\n", LPC54_TDTAIL_ADDR, LPC54_TD_SIZE);
-  uinfo("  EDCTRL: %08x %d\n", LPC54_EDCTRL_ADDR, LPC54_ED_SIZE);
-  uinfo("  EDFREE: %08x %d\n", LPC54_EDFREE_BASE, LPC54_ED_SIZE);
-  uinfo("  TDFREE: %08x %d\n", LPC54_TDFREE_BASE, LPC54_EDFREE_SIZE);
-  uinfo("  TBFREE: %08x %d\n", LPC54_TBFREE_BASE, LPC54_TBFREE_SIZE);
-  uinfo("  IOFREE: %08x %d\n", LPC54_IOFREE_BASE, LPC54_IOBUFFERS * CONFIG_LPC54_OHCI_IOBUFSIZE);
+  uinfo("  HCCA:   %08x %d\n",
+        LPC54_HCCA_BASE, LPC54_HCCA_SIZE);
+  uinfo("  TDTAIL: %08x %d\n",
+        LPC54_TDTAIL_ADDR, LPC54_TD_SIZE);
+  uinfo("  EDCTRL: %08x %d\n",
+        LPC54_EDCTRL_ADDR, LPC54_ED_SIZE);
+  uinfo("  EDFREE: %08x %d\n",
+        LPC54_EDFREE_BASE, LPC54_ED_SIZE);
+  uinfo("  TDFREE: %08x %d\n",
+        LPC54_TDFREE_BASE, LPC54_EDFREE_SIZE);
+  uinfo("  TBFREE: %08x %d\n",
+        LPC54_TBFREE_BASE, LPC54_TBFREE_SIZE);
+  uinfo("  IOFREE: %08x %d\n",
+        LPC54_IOFREE_BASE, LPC54_IOBUFFERS * CONFIG_LPC54_OHCI_IOBUFSIZE);
 #endif
 
   /* Initialize all the TDs, EDs and HCCA to 0 */

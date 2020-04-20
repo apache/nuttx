@@ -42,7 +42,29 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/mm/mm.h>
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+static void mm_add_delaylist(FAR struct mm_heap_s *heap, FAR void *mem)
+{
+  FAR struct mm_delaynode_s *tmp = mem;
+  irqstate_t flags;
+
+  /* Delay the deallocation until a more appropriate time. */
+
+  flags = enter_critical_section();
+
+  tmp->flink = heap->mm_delaylist;
+  heap->mm_delaylist = tmp;
+
+  leave_critical_section(flags);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -62,6 +84,9 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
   FAR struct mm_freenode_s *node;
   FAR struct mm_freenode_s *prev;
   FAR struct mm_freenode_s *next;
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  int ret;
+#endif
 
   minfo("Freeing %p\n", mem);
 
@@ -72,11 +97,40 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
-  /* We need to hold the MM semaphore while we muck with the
-   * nodelist.
-   */
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  /* Check current environment */
 
-  mm_takesemaphore(heap);
+  if (up_interrupt_context())
+    {
+      /* We are in ISR, add to mm_delaylist */
+
+      mm_add_delaylist(heap, mem);
+      return;
+    }
+  else if ((ret = mm_trysemaphore(heap)) == 0)
+    {
+      /* Got the sem, do free immediately */
+    }
+  else if (ret == -ESRCH || sched_idletask())
+    {
+      /* We are in IDLE task & can't get sem, or meet -ESRCH return,
+       * which means we are in situations during context switching(See
+       * mm_trysemaphore() & getpid()). Then add to mm_delaylist.
+       */
+
+      mm_add_delaylist(heap, mem);
+      return;
+    }
+  else
+#endif
+    {
+      /* We need to hold the MM semaphore while we muck with the
+       * nodelist.
+       */
+
+      mm_takesemaphore(heap);
+    }
+
   DEBUGASSERT(mm_heapmember(heap, mem));
 
   /* Map the memory chunk into a free node */
@@ -102,7 +156,8 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
        * index past the tail chunk because it is always allocated.
        */
 
-      andbeyond = (FAR struct mm_allocnode_s *)((FAR char *)next + next->size);
+      andbeyond = (FAR struct mm_allocnode_s *)
+                    ((FAR char *)next + next->size);
 
       /* Remove the next node.  There must be a predecessor,
        * but there may not be a successor node.
@@ -118,7 +173,8 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       /* Then merge the two chunks */
 
       node->size          += next->size;
-      andbeyond->preceding =  node->size | (andbeyond->preceding & MM_ALLOC_BIT);
+      andbeyond->preceding =  node->size |
+                              (andbeyond->preceding & MM_ALLOC_BIT);
       next                 = (FAR struct mm_freenode_s *)andbeyond;
     }
 

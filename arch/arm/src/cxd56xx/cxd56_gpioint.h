@@ -64,7 +64,9 @@
 /* GPIO Interrupt Polarity Definitions */
 
 /* #define GPIOINT_INSTANT_HIGH      (0) */ /* Not supported */
+
 /* #define GPIOINT_INSTANT_LOW       (1) */ /* Not supported */
+
 #define GPIOINT_LEVEL_HIGH          (2) /* High Level */
 #define GPIOINT_LEVEL_LOW           (3) /* Low Level */
 #define GPIOINT_EDGE_RISE           (4) /* Rising Edge */
@@ -120,7 +122,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -139,7 +141,8 @@ extern "C"
  *   IRQ number on success; a negated errno value on failure.
  *
  * Assumptions:
- *   The interrupt are disabled so that read-modify-write operations are safe.
+ *   The interrupt are disabled so that read-modify-write operations
+ *   are safe.
  *
  ****************************************************************************/
 

@@ -1,35 +1,20 @@
 /****************************************************************************
  * libs/libnx/nxfonts/nxfonts_cache.c
  *
- *   Copyright (C) 2017, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -297,9 +282,9 @@ static FAR struct nxfonts_glyph_s *
 
   /* Try to find the glyph in the list of pre-rendered glyphs */
 
-   for (prev = NULL, glyph = priv->head;
-        glyph != NULL;
-        prev = glyph, glyph = glyph->flink)
+  for (prev = NULL, glyph = priv->head;
+       glyph != NULL;
+       prev = glyph, glyph = glyph->flink)
     {
       /* Check if we found the glyph for this character */
 
@@ -448,9 +433,12 @@ static inline void nxf_fillglyph(FAR struct nxfonts_fcache_s *priv,
 
       /* Get two 32-bit values for alternating 32 representations */
 
-      pixel[0] = (uint32_t)priv->bgcolor <<  8 | (uint32_t)priv->bgcolor >> 16;
-      pixel[1] = (uint32_t)priv->bgcolor << 16 | (uint32_t)priv->bgcolor >> 8;
-      pixel[2] = (uint32_t)priv->bgcolor << 24 | (uint32_t)priv->bgcolor;
+      pixel[0] = (uint32_t)priv->bgcolor <<  8 |
+                 (uint32_t)priv->bgcolor >> 16;
+      pixel[1] = (uint32_t)priv->bgcolor << 16 |
+                 (uint32_t)priv->bgcolor >> 8;
+      pixel[2] = (uint32_t)priv->bgcolor << 24 |
+                 (uint32_t)priv->bgcolor;
 
       for (row = 0; row < glyph->height; row++)
         {
@@ -547,7 +535,9 @@ static inline FAR struct nxfonts_glyph_s *
 
   if (glyph != NULL)
     {
-      /* Save the character code, dimensions, and physical width of the glyph */
+      /* Save the character code, dimensions, and physical width of the
+       * glyph.
+       */
 
       glyph->code   = ch;
       glyph->width  = width;
@@ -675,7 +665,7 @@ FCACHE nxf_cache_connect(enum nx_fontid_e fontid,
       /* Allocate memory for the (empty) font cache */
 
       priv = (FAR struct nxfonts_fcache_s *)
-        lib_zalloc(sizeof( struct nxfonts_fcache_s));
+        lib_zalloc(sizeof(struct nxfonts_fcache_s));
 
       if (priv == NULL)
         {
@@ -799,7 +789,8 @@ errout_with_lock:
  *   font handle is invalid upon return in either case.
  *
  * Input Parameters:
- *   fhandle - A font cache handle previously returned by nxf_cache_connect();
+ *   fhandle - A font cache handle previously returned by
+ *             nxf_cache_connect();
  *
  * Returned Value:
  *   None
@@ -836,7 +827,9 @@ void nxf_cache_disconnect(FCACHE fhandle)
 
       for (prev = NULL, fcache = g_fcaches;
            fcache != priv && fcache != NULL;
-           fcache = fcache->flink);
+           fcache = fcache->flink)
+        {
+        }
 
       DEBUGASSERT(fcache == priv);
       nxf_removecache(fcache, prev);
@@ -877,7 +870,8 @@ void nxf_cache_disconnect(FCACHE fhandle)
  *   cache.
  *
  * Input Parameters:
- *   fhandle - A font cache handle previously returned by nxf_cache_connect();
+ *   fhandle - A font cache handle previously returned by
+ *             nxf_cache_connect();
  *
  * Returned Value:
  *   Zero (OK) is returned if the metrics were
@@ -909,7 +903,8 @@ NXHANDLE nxf_cache_getfonthandle(FCACHE fhandle)
  *
  ****************************************************************************/
 
-FAR const struct nxfonts_glyph_s *nxf_cache_getglyph(FCACHE fhandle, uint8_t ch)
+FAR const struct nxfonts_glyph_s *
+  nxf_cache_getglyph(FCACHE fhandle, uint8_t ch)
 {
   FAR struct nxfonts_fcache_s *priv = (FAR struct nxfonts_fcache_s *)fhandle;
   FAR struct nxfonts_glyph_s *glyph;

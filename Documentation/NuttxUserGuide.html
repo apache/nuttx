@@ -2223,7 +2223,7 @@ priority of the calling task is returned.
       <b>NOTE:</b>
       Behavior of features related to <i>task group</i>s depend of NuttX configuration settings.
       See the discussion of &quot;Parent and Child Tasks,&quot; below.
-      See also the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:nxtasking">NuttX Threading Wiki</a> page and the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:tasksnthreads">Tasks vs. Threads FAQ</a> for additional information on tasks and threads in NuttX.
+      See also the <a href="https://cwiki.apache.org/confluence/display/NUTTX/NuttX+Tasking">NuttX Tasking</a> page and the <a href="https://cwiki.apache.org/confluence/display/NUTTX/Tasks+vs.+Threads+FAQ">Tasks vs. Threads FAQ</a> for additional information on tasks and threads in NuttX.
     </small></blockquote>
     <p>
       A <i>task group</i> terminates when the last thread within the group exits.
@@ -3919,8 +3919,7 @@ interface of the same name.
 <b>Function Prototype:</b>
 <pre>
     #include &lt;semaphore.h&gt;
-    #include &lt;time.h&gt;
-    int sem_wait(sem_t *sem, const struct timespec *abstime);
+    int sem_timedwait(sem_t *sem, const struct timespec *abstime);
 </pre>
 
 <p>
@@ -3948,7 +3947,7 @@ interface of the same name.
 <li>0 (<code>OK</code>), or -1 (<code>ERROR</code>) is unsuccessful
 </ul>
 <p>
-If <code>sem_wait</code> returns -1 (<code>ERROR</code>) then the cause of the failure
+If <code>sem_timedwait</code> returns -1 (<code>ERROR</code>) then the cause of the failure
 will be indicated by the thread-specific <a href="#ErrnoAccess"><code>errno</code></a>.
 The following lists the possible values for <a href="#ErrnoAccess"><code>errno</code></a>:
 <p>
@@ -4006,7 +4005,7 @@ returns without blocking.
 <ul>
 <li>0 (<code>OK</code>) or -1 (<code>ERROR</code>) if unsuccessful
 </ul>
-If <code>sem_wait</code> returns -1 (<code>ERROR</code>) then the cause of the failure
+If <code>sem_trywait</code> returns -1 (<code>ERROR</code>) then the cause of the failure
 will be indicated by the thread-specific <a href="#ErrnoAccess"><code>errno</code></a>.
 The following lists the possible values for <a href="#ErrnoAccess"><code>errno</code></a>:
 <p>
@@ -4165,7 +4164,7 @@ Otherwise, an -1 (<code>ERROR</code>) will be returned and the <code>errno</code
 <b>Returned Value:</b>
 </p>
 <p>
-If successful, the <code>sem_getprotocol()</code> function will return zero (<code>OK</code>).
+If successful, the <code>sem_setprotocol()</code> function will return zero (<code>OK</code>).
 Otherwise, an -1 (<code>ERROR</code>) will be returned and the <code>errno</code> value will be set to indicate the nature of the error.
 </p>
 <p>
@@ -4936,7 +4935,7 @@ interface of the same name.
 <blockquote><small>
   <b>NOTE:</b>
   Behavior of features related to <i>task group</i>s depend of NuttX configuration settings.
-  See the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:nxtasking">NuttX Threading Wiki</a> page and the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:tasksnthreads">Tasks vs. Threads FAQ</a> for additional information on tasks and threads in NuttX.
+  See also the <a href="https://cwiki.apache.org/confluence/display/NUTTX/NuttX+Tasking">NuttX Tasking</a> page and the <a href="https://cwiki.apache.org/confluence/display/NUTTX/Tasks+vs.+Threads+FAQ">Tasks vs. Threads FAQ</a> for additional information on tasks and threads in NuttX.
 </small></blockquote>
 <p>
   <b>Signaling Multi-threaded Task Groups</b>.
@@ -5750,7 +5749,7 @@ be sent.
 <blockquote><small>
   <b>NOTE:</b>
   Behavior of features related to <i>task group</i>s depend of NuttX configuration settings.
-  See the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:nxtasking">NuttX Threading Wiki</a> page and the <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:tasksnthreads">Tasks vs. Threads FAQ</a> for additional information on tasks and threads in NuttX.
+  See also the <a href="https://cwiki.apache.org/confluence/display/NUTTX/NuttX+Tasking">NuttX Tasking</a> page and the <a href="https://cwiki.apache.org/confluence/display/NUTTX/Tasks+vs.+Threads+FAQ">Tasks vs. Threads FAQ</a> for additional information on tasks and threads in NuttX.
 </small></blockquote>
 <p>
   The following pthread interfaces are supported in some form by NuttX:

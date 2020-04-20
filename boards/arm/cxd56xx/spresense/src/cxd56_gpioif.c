@@ -110,6 +110,7 @@ int board_gpio_status(uint32_t pin, bool *input, bool *output, bool *drive,
     {
       return ret;
     }
+
   *input = PINCONF_INPUT_ENABLED(pstat.input_en);
   *drive = PINCONF_IS_DRIVE_HIGH(pstat.drive);
   if (PINCONF_IS_FLOAT(pstat.pull))
@@ -149,6 +150,7 @@ void board_gpio_write(uint32_t pin, int value)
     {
       cxd56_gpio_write(pin, (value > 0));
     }
+
   return;
 }
 
@@ -212,7 +214,10 @@ int board_gpio_intconfig(uint32_t pin, int mode, bool filter, xcpt_t isr)
  * Name: board_gpio_intstatus
  ****************************************************************************/
 
-int board_gpio_intstatus(uint32_t pin, int *mode, bool *filter, bool *enabled)
+int board_gpio_intstatus(uint32_t pin,
+                         int *mode,
+                         bool *filter,
+                         bool *enabled)
 {
 #ifdef CONFIG_CXD56_GPIO_IRQ
   int ret;
@@ -249,6 +254,7 @@ int board_gpio_intstatus(uint32_t pin, int *mode, bool *filter, bool *enabled)
         *mode = 0;
         break;
     }
+
   *filter = stat.filter;
   *enabled = stat.enable;
 
@@ -278,6 +284,7 @@ int board_gpio_int(uint32_t pin, bool enable)
           cxd56_gpioint_disable(pin);
         }
     }
+
   return irq;
 #else
   return -ENOTSUP;

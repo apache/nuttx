@@ -10,13 +10,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-name: PR Check CI (build)
+name: Build
 
 on:
   pull_request:
 
 jobs:
-  build:
+  Linux:
     runs-on: ubuntu-18.04
     env:
       DOCKER_BUILDKIT: 1
@@ -57,8 +57,13 @@ jobs:
         username: ${GITHUB_ACTOR}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Run Pull Container
-      uses: ./testing/.github/actions/ci-container
+    - name: Docker Pull
+      uses: nick-invision/retry@v1
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        retry_wait_seconds: 10
+        command: docker pull docker.pkg.github.com/apache/incubator-nuttx-testing/nuttx-ci-linux
 
     - name: Run builds
       uses: ./testing/.github/actions/ci-container
@@ -67,4 +72,51 @@ jobs:
       with:
         run: |
           cd testing
-          ./cibuild.sh -x testlist/${{matrix.boards}}.dat
+          ./cibuild.sh -x -G testlist/${{matrix.boards}}.dat
+
+  macOS:
+    runs-on: macos-10.15
+
+    strategy:
+      matrix:
+        boards: [arm-12, mips-riscv-x86-xtensa, sim]
+
+    steps:
+    - name: Checkout nuttx repo
+      uses: actions/checkout@v2
+      with:
+        repository: apache/incubator-nuttx
+        path: nuttx
+        fetch-depth: 0
+
+    - name: Fetch nuttx tags
+      run: |
+        cd nuttx
+        git fetch --tags
+
+    - name: Checkout apps repo
+      uses: actions/checkout@v2
+      with:
+        repository: apache/incubator-nuttx-apps
+        path: apps
+        fetch-depth: 0
+
+    - name: Checkout testing repo
+      uses: actions/checkout@v2
+      with:
+        repository: apache/incubator-nuttx-testing
+        path: testing
+
+    - name: Restore cache
+      id: cache-tools
+      uses: actions/cache@v1
+      env:
+        cache-name: ${{ runner.os }}-cache-tools
+      with:
+        path: prebuilt
+        key: ${{ runner.os }}-tools-${{ hashFiles('./testing/cibuild.sh') }}
+
+    - name: Run builds
+      run: |
+        cd testing
+        ./cibuild.sh -i -x -G testlist/${{matrix.boards}}.dat

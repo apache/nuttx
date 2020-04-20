@@ -61,7 +61,7 @@ config STM3240G_BOARDINIT_PRIO
 
 config STM3240G_BOARDINIT_STACK
 	int "Board initialization thread Size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		If BOARD_LATE_INITIALIZE initialize is defined, then the function
 		board_late_initialize() will be called to perform board-specific

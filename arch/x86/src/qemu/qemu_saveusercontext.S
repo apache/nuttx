@@ -132,16 +132,16 @@ up_saveusercontext:
 	 *							EIP
 	 *							CS					...
 	 *							EFLAGS				EIP
-	 *						->	ESP					CS
+	 *							ESP					CS
 	 * ESP->Return address		SS					EFLAGS
-	 *		Argument			Argument			Argument
+	 *		Argument		->	Argument			Argument
 	 *
 	 * NOTE:  We don't yet know the value for REG_ESP!  That depends upon
 	 * if a priority change occurs or not.
 	 */
 
 
-	leal	-4(%esp), %ecx
+	leal	4(%esp), %ecx
 	movl	%ecx, (4*REG_SP)(%eax)
 
 	/* Fetch the PC from the stack and save it in the save block */

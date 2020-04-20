@@ -51,6 +51,10 @@
 #  include <nuttx/irq.h>
 #endif
 
+#ifdef MONITOR_MM_SEMAPHORE
+#  include <debug.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -86,7 +90,6 @@
 /* Define MONITOR_MM_SEMAPHORE to enable semaphore state monitoring */
 
 #ifdef MONITOR_MM_SEMAPHORE
-#  include <debug.h>
 #  define msemerr  _err
 #  define msemwarn _warn
 #  define mseminfo _info
@@ -173,6 +176,12 @@ int mm_trysemaphore(FAR struct mm_heap_s *heap)
    * avoid taking the fatal 'if' logic and will fall through to use the
    * 'else', albeit with a nonsensical PID value.
    */
+
+  if (my_pid < 0)
+    {
+      ret = my_pid;
+      goto errout;
+    }
 
   /* Does the current task already hold the semaphore?  Is the current
    * task actually running?

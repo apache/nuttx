@@ -96,6 +96,7 @@ struct cxd56_lowerhalf_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Prototypes for static methods in struct rtc_ops_s */
 
 static int cxd56_rdtime(FAR struct rtc_lowerhalf_s *lower,
@@ -107,7 +108,7 @@ static int cxd56_settime(FAR struct rtc_lowerhalf_s *lower,
 static int cxd56_setalarm(FAR struct rtc_lowerhalf_s *lower,
                           FAR const struct lower_setalarm_s *alarminfo);
 static int cxd56_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setrelative_s *alarminfo);
+                          FAR const struct lower_setrelative_s *alarminfo);
 static int cxd56_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
                              int alarmid);
 #endif
@@ -115,6 +116,7 @@ static int cxd56_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* CXD56 RTC driver operations */
 
 static const struct rtc_ops_s g_rtc_ops =
@@ -317,7 +319,8 @@ static int cxd56_setalarm(FAR struct rtc_lowerhalf_s *lower,
   int ret = -EINVAL;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
-  DEBUGASSERT((RTC_ALARM0 == alarminfo->id) || (RTC_ALARM1 == alarminfo->id));
+  DEBUGASSERT((RTC_ALARM0 == alarminfo->id) ||
+              (RTC_ALARM1 == alarminfo->id));
 
   priv = (FAR struct cxd56_lowerhalf_s *)lower;
 
@@ -384,10 +387,12 @@ static int cxd56_setrelative(FAR struct rtc_lowerhalf_s *lower,
   int ret = -EINVAL;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
-  DEBUGASSERT((RTC_ALARM0 <= alarminfo->id) && (alarminfo->id < RTC_ALARM_LAST));
+  DEBUGASSERT((RTC_ALARM0 <= alarminfo->id) &&
+              (alarminfo->id < RTC_ALARM_LAST));
 
-  if (((alarminfo->id == RTC_ALARM0) || (alarminfo->id == RTC_ALARM1)) &&
-      (alarminfo->reltime > 0))
+  if (((alarminfo->id == RTC_ALARM0) ||
+       (alarminfo->id == RTC_ALARM1)) &&
+       (alarminfo->reltime > 0))
     {
       /* Disable pre-emption while we do this so that we don't have to worry
        * about being suspended and working on an old time.

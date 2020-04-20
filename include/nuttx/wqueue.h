@@ -61,14 +61,13 @@
  *   handle delayed processing from interrupt handlers.  This feature
  *   is required for some drivers but, if there are not complaints,
  *   can be safely disabled.  The worker thread also performs
- *   garbage collection -- completing any delayed memory deallocations
  *   from interrupt handlers.  If the worker thread is disabled,
  *   then that clean will be performed by the IDLE thread instead
  *   (which runs at the lowest of priority and may not be appropriate
  *   if memory reclamation is of high priority).  If CONFIG_SCHED_HPWORK
  *   is enabled, then the following options can also be used:
- * CONFIG_SCHED_HPNTHREADS - The number of thread in the high-priority queue's
- *   thread pool.  Default: 1
+ * CONFIG_SCHED_HPNTHREADS - The number of thread in the high-priority
+ *   queue's thread pool.  Default: 1
  * CONFIG_SCHED_HPWORKPRIORITY - The execution priority of the high-
  *   priority worker thread.  Default: 224
  * CONFIG_SCHED_HPWORKSTACKSIZE - The stack size allocated for the worker
@@ -380,8 +379,8 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
  *
  * Description:
  *   Cancel previously queued work.  This removes work from the work queue.
- *   After work has been cancelled, it may be re-queue by calling work_queue()
- *   again.
+ *   After work has been cancelled, it may be re-queue by calling
+ *   work_queue() again.
  *
  * Input Parameters:
  *   qid    - The work queue ID

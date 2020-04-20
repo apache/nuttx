@@ -155,9 +155,9 @@ struct cxd56_emmc_state_s g_emmcdev;
  * Private Functions
  ****************************************************************************/
 
-static void emmc_takesem(FAR sem_t *sem)
+static int emmc_takesem(FAR sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
 }
 
 static void emmc_givesem(FAR sem_t *sem)
@@ -377,6 +377,7 @@ static void emmc_send(int datatype, uint32_t opcode, uint32_t arg,
   uint32_t mask;
   uint32_t cmd;
   uint32_t status;
+  int ret;
 
   /* Get current interrupt mask, leave SDIO relative bits. */
 
@@ -440,7 +441,11 @@ static void emmc_send(int datatype, uint32_t opcode, uint32_t arg,
 
   /* Wait for command or data transfer done */
 
-  emmc_takesem(&g_waitsem);
+  ret = emmc_takesem(&g_waitsem);
+  if (ret < 0)
+    {
+      return;
+    }
 
   /* Restore interrupt mask */
 
@@ -708,7 +713,12 @@ static int cxd56_emmc_readsectors(FAR struct cxd56_emmc_state_s *priv,
       return -ENOMEM;
     }
 
-  emmc_takesem(&priv->excsem);
+  ret = emmc_takesem(&priv->excsem);
+  if (ret < 0)
+    {
+      kmm_free(descs);
+      return ret;
+    }
 
   putreg32(nsectors * SECTOR_SIZE, EMMC_BYTCNT);
   emmc_send(EMMC_NON_DATA, SET_BLOCK_COUNT, nsectors, EMMC_RESP_R1);
@@ -765,7 +775,12 @@ static int cxd56_emmc_writesectors(FAR struct cxd56_emmc_state_s *priv,
       return -ENOMEM;
     }
 
-  emmc_takesem(&priv->excsem);
+  ret = emmc_takesem(&priv->excsem);
+  if (ret < 0)
+    {
+      kmm_free(descs);
+      return ret;
+    }
 
   putreg32(nsectors * SECTOR_SIZE, EMMC_BYTCNT);
   emmc_send(EMMC_NON_DATA, SET_BLOCK_COUNT, nsectors, EMMC_RESP_R1);
@@ -825,13 +840,19 @@ finish:
 static int cxd56_emmc_open(FAR struct inode *inode)
 {
   FAR struct cxd56_emmc_state_s *priv;
+  int ret;
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct cxd56_emmc_state_s *)inode->i_private;
 
   /* Just increment the reference count on the driver */
 
-  emmc_takesem(&priv->excsem);
+  ret = emmc_takesem(&priv->excsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   priv->crefs++;
   emmc_givesem(&priv->excsem);
   return OK;
@@ -840,6 +861,7 @@ static int cxd56_emmc_open(FAR struct inode *inode)
 static int cxd56_emmc_close(FAR struct inode *inode)
 {
   FAR struct cxd56_emmc_state_s *priv;
+  int ret;
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct cxd56_emmc_state_s *)inode->i_private;
@@ -847,7 +869,12 @@ static int cxd56_emmc_close(FAR struct inode *inode)
   /* Decrement the reference count on the block driver */
 
   DEBUGASSERT(priv->crefs > 0);
-  emmc_takesem(&priv->excsem);
+  ret = emmc_takesem(&priv->excsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   priv->crefs--;
   emmc_givesem(&priv->excsem);
   return OK;

@@ -30,8 +30,8 @@ config ARCH_CHIP
 
 menu "MISOC Peripheral Support"
 
-# These "hidden" settings determine is a peripheral option is available for the
-# selection MCU
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
 
 config MISOC_HAVE_UART1
 	bool

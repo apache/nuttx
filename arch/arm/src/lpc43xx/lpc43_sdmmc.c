@@ -87,6 +87,7 @@
 #define MCI_DMADES1_BS1(x)      (x)
 
 /* Configuration ************************************************************/
+
 /* Required system configuration options in the sched/Kconfig:
  *
  *   CONFIG_SCHED_WORKQUEUE -- Callback support requires work queue support.
@@ -187,7 +188,9 @@
 #define SDCARD_WAITALL_CLEAR    (SDCARD_CMDDONE_CLEAR | SDCARD_RESPDONE_CLEAR | \
                                  SDCARD_XFRDONE_CLEAR)
 
-/* Let's wait until we have both SD card transfer complete and DMA complete. */
+/* Let's wait until we have both SD card transfer complete and DMA
+ * complete.
+ */
 
 #define SDCARD_XFRDONE_FLAG     (1)
 #define SDCARD_DMADONE_FLAG     (2)
@@ -217,40 +220,42 @@ struct sdmmc_dma_s
 
 struct lpc43_dev_s
 {
-  struct sdio_dev_s  dev;        /* Standard, base SD card interface */
+  struct sdio_dev_s  dev;             /* Standard, base SD card interface */
 
   /* LPC43XX-specific extensions */
+
   /* Event support */
 
-  sem_t              waitsem;    /* Implements event waiting */
-  sdio_eventset_t    waitevents; /* Set of events to be waited for */
-  uint32_t           waitmask;   /* Interrupt enables for event waiting */
+  sem_t              waitsem;         /* Implements event waiting */
+  sdio_eventset_t    waitevents;      /* Set of events to be waited for */
+  uint32_t           waitmask;        /* Interrupt enables for event waiting */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
-  WDOG_ID            waitwdog;   /* Watchdog that handles event timeouts */
+  WDOG_ID            waitwdog;        /* Watchdog that handles event timeouts */
 
   /* Callback support */
 
-  sdio_statset_t     cdstatus;   /* Card status */
-  sdio_eventset_t    cbevents;   /* Set of events to be cause callbacks */
-  worker_t           callback;   /* Registered callback function */
-  void              *cbarg;      /* Registered callback argument */
-  struct work_s      cbwork;     /* Callback work queue structure */
+  sdio_statset_t     cdstatus;        /* Card status */
+  sdio_eventset_t    cbevents;        /* Set of events to be cause callbacks */
+  worker_t           callback;        /* Registered callback function */
+  void              *cbarg;           /* Registered callback argument */
+  struct work_s      cbwork;          /* Callback work queue structure */
 
   /* Interrupt mode data transfer support */
 
-  uint32_t          *buffer;     /* Address of current R/W buffer */
-  uint32_t           xfrmask;    /* Interrupt enables for data transfer */
+  uint32_t          *buffer;          /* Address of current R/W buffer */
+  uint32_t           xfrmask;         /* Interrupt enables for data transfer */
 #ifdef CONFIG_LPC43_SDMMC_DMA
-  uint32_t           dmamask;    /* Interrupt enables for DMA transfer */
+  uint32_t           dmamask;         /* Interrupt enables for DMA transfer */
 #endif
-  ssize_t            remaining;  /* Number of bytes remaining in the transfer */
-  bool               wrdir;      /* True: Writing False: Reading */
+  ssize_t            remaining;       /* Number of bytes remaining in the
+                                       * transfer */
+  bool               wrdir;           /* True: Writing False: Reading */
 
   /* DMA data transfer support */
 
-  bool               widebus;    /* Required for DMA support */
+  bool               widebus;         /* Required for DMA support */
 #ifdef CONFIG_LPC43_SDMMC_DMA
-  bool               dmamode;    /* true: DMA mode transfer */
+  bool               dmamode;         /* true: DMA mode transfer */
 #endif
 };
 
@@ -268,26 +273,29 @@ static void lpc43_putreg(uint32_t val, uint32_t addr);
 
 /* Low-level helpers ********************************************************/
 
-static void lpc43_takesem(struct lpc43_dev_s *priv);
+static int  lpc43_takesem(struct lpc43_dev_s *priv);
 #define     lpc43_givesem(priv) (nxsem_post(&priv->waitsem))
 static inline void lpc43_setclock(uint32_t clkdiv);
 static inline void lpc43_sdcard_clock(bool enable);
 static int  lpc43_ciu_sendcmd(uint32_t cmd, uint32_t arg);
 static void lpc43_enable_ints(struct lpc43_dev_s *priv);
 static void lpc43_disable_allints(struct lpc43_dev_s *priv);
-static void lpc43_config_waitints(struct lpc43_dev_s *priv, uint32_t waitmask,
-              sdio_eventset_t waitevents, sdio_eventset_t wkupevents);
+static void lpc43_config_waitints(struct lpc43_dev_s *priv,
+              uint32_t waitmask, sdio_eventset_t waitevents,
+              sdio_eventset_t wkupevents);
 static void lpc43_config_xfrints(struct lpc43_dev_s *priv, uint32_t xfrmask);
 #ifdef CONFIG_LPC43_SDMMC_DMA
 static void lpc43_config_dmaints(struct lpc43_dev_s *priv, uint32_t xfrmask,
-                                uint32_t dmamask);
+              uint32_t dmamask);
 #endif
 
 /* Data Transfer Helpers ****************************************************/
 
-static void lpc43_eventtimeout(int argc, uint32_t arg);
-static void lpc43_endwait(struct lpc43_dev_s *priv, sdio_eventset_t wkupevent);
-static void lpc43_endtransfer(struct lpc43_dev_s *priv, sdio_eventset_t wkupevent);
+static void lpc43_eventtimeout(int argc, uint32_t arg, ...);
+static void lpc43_endwait(struct lpc43_dev_s *priv,
+              sdio_eventset_t wkupevent);
+static void lpc43_endtransfer(struct lpc43_dev_s *priv,
+              sdio_eventset_t wkupevent);
 
 /* Interrupt Handling *******************************************************/
 
@@ -381,13 +389,13 @@ struct lpc43_dev_s g_scard_dev =
     .sendsetup        = lpc43_sendsetup,
     .cancel           = lpc43_cancel,
     .waitresponse     = lpc43_waitresponse,
-    .recvR1           = lpc43_recvshortcrc,
-    .recvR2           = lpc43_recvlong,
-    .recvR3           = lpc43_recvshort,
-    .recvR4           = lpc43_recvnotimpl,
-    .recvR5           = lpc43_recvnotimpl,
-    .recvR6           = lpc43_recvshortcrc,
-    .recvR7           = lpc43_recvshort,
+    .recv_r1          = lpc43_recvshortcrc,
+    .recv_r2          = lpc43_recvlong,
+    .recv_r3          = lpc43_recvshort,
+    .recv_r4          = lpc43_recvnotimpl,
+    .recv_r5          = lpc43_recvnotimpl,
+    .recv_r6          = lpc43_recvshortcrc,
+    .recv_r7          = lpc43_recvshort,
     .waitenable       = lpc43_waitenable,
     .eventwait        = lpc43_eventwait,
     .callbackenable   = lpc43_callbackenable,
@@ -461,7 +469,7 @@ static uint32_t lpc43_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          mcinfo("[repeats %d more times]\n", count-3);
+          mcinfo("[repeats %d more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -519,13 +527,14 @@ static void lpc43_putreg(uint32_t val, uint32_t addr)
  *   dev - Instance of the SD card device driver state structure.
  *
  * Returned Value:
- *   None
+ *   Normally OK, but may return -ECANCELED in the rare event that the task
+ *   has been canceled.
  *
  ****************************************************************************/
 
-static void lpc43_takesem(struct lpc43_dev_s *priv)
+static int lpc43_takesem(struct lpc43_dev_s *priv)
 {
-  nxsem_wait_uninterruptible(&priv->waitsem);
+  return nxsem_wait_uninterruptible(&priv->waitsem);
 }
 
 /****************************************************************************
@@ -635,7 +644,8 @@ static int lpc43_ciu_sendcmd(uint32_t cmd, uint32_t arg)
     {
       if (watchtime - clock_systimer() > SDCARD_CMDTIMEOUT)
         {
-          mcerr("TMO Timed out (%08X)\n",lpc43_getreg(LPC43_SDMMC_CMD));
+          mcerr("TMO Timed out (%08X)\n",
+                lpc43_getreg(LPC43_SDMMC_CMD));
           return 1;
         }
     }
@@ -730,7 +740,8 @@ static void lpc43_disable_allints(struct lpc43_dev_s *priv)
  *
  ****************************************************************************/
 
-static void lpc43_config_waitints(struct lpc43_dev_s *priv, uint32_t waitmask,
+static void lpc43_config_waitints(struct lpc43_dev_s *priv,
+                                  uint32_t waitmask,
                                   sdio_eventset_t waitevents,
                                   sdio_eventset_t wkupevent)
 {
@@ -827,7 +838,7 @@ static void lpc43_config_dmaints(struct lpc43_dev_s *priv, uint32_t xfrmask,
  *
  ****************************************************************************/
 
-static void lpc43_eventtimeout(int argc, uint32_t arg)
+static void lpc43_eventtimeout(int argc, uint32_t arg, ...)
 {
   struct lpc43_dev_s *priv = (struct lpc43_dev_s *)arg;
 
@@ -835,7 +846,8 @@ static void lpc43_eventtimeout(int argc, uint32_t arg)
 
   /* There is always race conditions with timer expirations. */
 
-  DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0 || priv->wkupevent != 0);
+  DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0 ||
+              priv->wkupevent != 0);
 
   /* Is a data transfer complete event expected? */
 
@@ -866,7 +878,8 @@ static void lpc43_eventtimeout(int argc, uint32_t arg)
  *
  ****************************************************************************/
 
-static void lpc43_endwait(struct lpc43_dev_s *priv, sdio_eventset_t wkupevent)
+static void lpc43_endwait(struct lpc43_dev_s *priv,
+                          sdio_eventset_t wkupevent)
 {
   mcinfo("wkupevent=%04x\n", (unsigned)wkupevent);
 
@@ -903,7 +916,8 @@ static void lpc43_endwait(struct lpc43_dev_s *priv, sdio_eventset_t wkupevent)
  *
  ****************************************************************************/
 
-static void lpc43_endtransfer(struct lpc43_dev_s *priv, sdio_eventset_t wkupevent)
+static void lpc43_endtransfer(struct lpc43_dev_s *priv,
+                              sdio_eventset_t wkupevent)
 {
   mcinfo("wkupevent=%04x\n", (unsigned)wkupevent);
 
@@ -972,12 +986,14 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
           /* Update card status */
 
           cdstatus = priv->cdstatus;
-          if ((lpc43_getreg(LPC43_SDMMC_CDETECT) & SDMMC_CDETECT_NOTPRESENT) == 0)
+          if ((lpc43_getreg(LPC43_SDMMC_CDETECT) &
+              SDMMC_CDETECT_NOTPRESENT) == 0)
             {
               priv->cdstatus |= SDIO_STATUS_PRESENT;
 
 #ifdef CONFIG_MMCSD_HAVE_WRITEPROTECT
-              if ((lpc43_getreg(LPC43_SDMMC_WRTPRT) & SDMMC_WRTPRT_PROTECTED) != 0)
+              if ((lpc43_getreg(LPC43_SDMMC_WRTPRT) &
+                  SDMMC_WRTPRT_PROTECTED) != 0)
                 {
                   priv->cdstatus |= SDIO_STATUS_WRPROTECTED;
                 }
@@ -992,11 +1008,11 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
 
               lpc43_putreg(SDMMC_PWREN, LPC43_SDMMC_PWREN);
 #endif
-
             }
           else
             {
-              priv->cdstatus &= ~(SDIO_STATUS_PRESENT | SDIO_STATUS_WRPROTECTED);
+              priv->cdstatus &=
+                ~(SDIO_STATUS_PRESENT | SDIO_STATUS_WRPROTECTED);
 
 #ifdef CONFIG_LPC43_SDMMC_PWRCTRL
               /* Disable power to the SD card */
@@ -1061,6 +1077,7 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
             }
 
           /* Check for transfer errors */
+
           /* Handle data block send/receive CRC failure */
 
           if ((pending & SDMMC_INT_DCRC) != 0)
@@ -1069,7 +1086,9 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
 
               mcerr("ERROR: Data CRC failure, pending=%08x remaining: %d\n",
                     pending, priv->remaining);
-              lpc43_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
+
+              lpc43_endtransfer(priv,
+                                SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
           /* Handle data timeout error */
@@ -1080,7 +1099,9 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
 
               mcerr("ERROR: Data timeout, pending=%08x remaining: %d\n",
                     pending, priv->remaining);
-              lpc43_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT);
+
+              lpc43_endtransfer(priv,
+                                SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT);
             }
 
           /* Handle RX FIFO overrun error */
@@ -1091,7 +1112,9 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
 
               mcerr("ERROR: RX FIFO overrun, pending=%08x remaining: %d\n",
                     pending, priv->remaining);
-              lpc43_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
+
+              lpc43_endtransfer(priv,
+                                SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
           /* Handle TX FIFO underrun error */
@@ -1102,7 +1125,9 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
 
               mcerr("ERROR: TX FIFO underrun, pending=%08x remaining: %d\n",
                     pending, priv->remaining);
-              lpc43_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
+
+              lpc43_endtransfer(priv,
+                                SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
           /* Handle start bit error */
@@ -1113,7 +1138,9 @@ static int lpc43_sdmmc_interrupt(int irq, void *context, FAR void *arg)
 
               mcerr("ERROR: Start bit, pending=%08x remaining: %d\n",
                     pending, priv->remaining);
-              lpc43_endtransfer(priv, SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
+
+              lpc43_endtransfer(priv,
+                                SDIOWAIT_TRANSFERDONE | SDIOWAIT_ERROR);
             }
 
           /* Handle data end events.  Note that RXDR may accompany DTO, DTO
@@ -1259,7 +1286,8 @@ static void lpc43_reset(FAR struct sdio_dev_s *dev)
                SDMMC_CTRL_DMARESET, LPC43_SDMMC_CTRL);
 
   while ((lpc43_getreg(LPC43_SDMMC_CTRL) &
-          (SDMMC_CTRL_CNTLRRESET | SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET)) != 0)
+          (SDMMC_CTRL_CNTLRRESET | SDMMC_CTRL_FIFORESET |
+           SDMMC_CTRL_DMARESET)) != 0)
     {
     }
 
@@ -1597,7 +1625,8 @@ static int lpc43_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((cmd & MMCSD_WRDATAXFR) == MMCSD_WRDATAXFR)
     {
-      regval |= SDMMC_CMD_DATAXFREXPTD | SDMMC_CMD_WRITE | SDMMC_CMD_WAITPREV;
+      regval |= SDMMC_CMD_DATAXFREXPTD | SDMMC_CMD_WRITE |
+                SDMMC_CMD_WAITPREV;
     }
   else if ((cmd & MMCSD_RDDATAXFR) == MMCSD_RDDATAXFR)
     {
@@ -1678,12 +1707,13 @@ static void lpc43_blocksetup(FAR struct sdio_dev_s *dev,
  * Name: lpc43_recvsetup
  *
  * Description:
- *   Setup hardware in preparation for data transfer from the card in non-DMA
- *   (interrupt driven mode).  This method will do whatever controller setup
- *   is necessary.  This would be called for SD memory just BEFORE sending
- *   CMD13 (SEND_STATUS), CMD17 (READ_SINGLE_BLOCK), CMD18
- *   (READ_MULTIPLE_BLOCKS), ACMD51 (SEND_SCR), etc.  Normally, SDCARD_WAITEVENT
- *   will be called to receive the indication that the transfer is complete.
+ *   Setup hardware in preparation for data transfer from the card in non-
+ *   DMA (interrupt driven mode).  This method will do whatever controller
+ *   setup is necessary.  This would be called for SD memory just BEFORE
+ *   sending CMD13 (SEND_STATUS), CMD17 (READ_SINGLE_BLOCK), CMD18
+ *   (READ_MULTIPLE_BLOCKS), ACMD51 (SEND_SCR), etc.  Normally,
+ *   SDCARD_WAITEVENT will be called to receive the indication that the
+ *   transfer is complete.
  *
  * Input Parameters:
  *   dev    - An instance of the SD card device interface
@@ -1708,7 +1738,9 @@ static int lpc43_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
-  /* Save the destination buffer information for use by the interrupt handler */
+  /* Save the destination buffer information for use by the interrupt
+   * handler.
+   */
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = nbytes;
@@ -1762,8 +1794,8 @@ static int lpc43_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-static int lpc43_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer,
-                           size_t nbytes)
+static int lpc43_sendsetup(FAR struct sdio_dev_s *dev,
+                           FAR const uint8_t *buffer, size_t nbytes)
 {
   struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
 #ifdef CONFIG_LPC43_SDMMC_DMA
@@ -1816,9 +1848,9 @@ static int lpc43_sendsetup(FAR struct sdio_dev_s *dev, FAR const uint8_t *buffer
  *
  * Description:
  *   Cancel the data transfer setup of SDCARD_RECVSETUP, SDCARD_SENDSETUP,
- *   SDCARD_DMARECVSETUP or SDCARD_DMASENDSETUP.  This must be called to cancel
- *   the data transfer setup if, for some reason, you cannot perform the
- *   transfer.
+ *   SDCARD_DMARECVSETUP or SDCARD_DMASENDSETUP.  This must be called to
+ *   cancel the data transfer setup if, for some reason, you cannot perform
+ *   the transfer.
  *
  * Input Parameters:
  *   dev  - An instance of the SD card device interface
@@ -1917,7 +1949,8 @@ static int lpc43_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
     {
       if (clock_systimer() - watchtime > timeout)
         {
-          mcerr("ERROR: Timeout cmd: %04x events: %04x STA: %08x RINTSTS: %08x\n",
+          mcerr("ERROR: Timeout cmd: %04x events: %04x STA: %08x "
+                "RINTSTS: %08x\n",
                 cmd, events, lpc43_getreg(LPC43_SDMMC_STATUS),
                 lpc43_getreg(LPC43_SDMMC_RINTSTS));
 
@@ -1925,7 +1958,8 @@ static int lpc43_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
         }
       else if ((lpc43_getreg(LPC43_SDMMC_RINTSTS) & SDCARD_INT_RESPERR) != 0)
         {
-          mcerr("ERROR: SDMMC failure cmd: %04x events: %04x STA: %08x RINTSTS: %08x\n",
+          mcerr("ERROR: SDMMC failure cmd: %04x events: %04x STA: %08x "
+                "RINTSTS: %08x\n",
                 cmd, events, lpc43_getreg(LPC43_SDMMC_STATUS),
                 lpc43_getreg(LPC43_SDMMC_RINTSTS));
 
@@ -1938,7 +1972,7 @@ static int lpc43_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 }
 
 /****************************************************************************
- * Name: lpc43_recvRx
+ * Name: lpc43_recv*
  *
  * Description:
  *   Receive response to SD card command.  Only the critical payload is
@@ -1989,7 +2023,6 @@ static int lpc43_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
    *     7:1       bit6   - bit0   CRC7
    *     0         1               End bit
    */
-
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (!rshort)
@@ -2095,7 +2128,8 @@ static int lpc43_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
   return ret;
 }
 
-static int lpc43_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
+static int lpc43_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
+                           uint32_t *rshort)
 {
   uint32_t regval;
   int ret = OK;
@@ -2224,9 +2258,9 @@ static void lpc43_waitenable(FAR struct sdio_dev_s *dev,
  *
  * Description:
  *   Wait for one of the enabled events to occur (or a timeout).  Note that
- *   all events enabled by SDCARD_WAITEVENTS are disabled when lpc43_eventwait
- *   returns.  SDCARD_WAITEVENTS must be called again before lpc43_eventwait
- *   can be used again.
+ *   all events enabled by SDCARD_WAITEVENTS are disabled when
+ *   lpc43_eventwait returns.  SDCARD_WAITEVENTS must be called again before
+ *   lpc43_eventwait can be used again.
  *
  * Input Parameters:
  *   dev     - An instance of the SD card device interface
@@ -2279,7 +2313,7 @@ static sdio_eventset_t lpc43_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = MSEC2TICK(timeout);
-      ret   = wd_start(priv->waitwdog, delay, (wdentry_t)lpc43_eventtimeout,
+      ret   = wd_start(priv->waitwdog, delay, lpc43_eventtimeout,
                        1, (uint32_t)priv);
       if (ret < 0)
         {
@@ -2287,24 +2321,36 @@ static sdio_eventset_t lpc43_eventwait(FAR struct sdio_dev_s *dev,
         }
     }
 
-  /* Loop until the event (or the timeout occurs). Race conditions are avoided
-   * by calling lpc43_waitenable prior to triggering the logic that will cause
-   * the wait to terminate.  Under certain race conditions, the waited-for
-   * may have already occurred before this function was called!
+  /* Loop until the event (or the timeout occurs). Race conditions are
+   * avoided by calling lpc43_waitenable prior to triggering the logic that
+   * will cause the wait to terminate.  Under certain race conditions, the
+   * waited-for may have already occurred before this function was called!
    */
 
   for (; ; )
     {
-      /* Wait for an event in event set to occur.  If this the event has already
-       * occurred, then the semaphore will already have been incremented and
-       * there will be no wait.
+      /* Wait for an event in event set to occur.  If this the event has
+       * already occurred, then the semaphore will already have been
+       * incremented and there will be no wait.
        */
 
-      lpc43_takesem(priv);
+      ret = lpc43_takesem(priv);
+      if (ret < 0)
+        {
+          /* Task canceled.  Cancel the wdog -- assuming it was started and
+           * return an SDIO error.
+           */
+
+          wd_cancel(priv->waitwdog);
+          leave_critical_section(flags);
+          return SDIOWAIT_ERROR;
+        }
+
       wkupevent = priv->wkupevent;
 
       /* Check if the event has occurred.  When the event has occurred, then
-       * evenset will be set to 0 and wkupevent will be set to a nonzero value.
+       * evenset will be set to 0 and wkupevent will be set to a nonzero
+       * value.
        */
 
       if (wkupevent != 0)
@@ -2329,9 +2375,9 @@ errout:
  * Name: lpc43_callbackenable
  *
  * Description:
- *   Enable/disable of a set of SD card callback events.  This is part of the
- *   the SD card callback sequence.  The set of events is configured to enabled
- *   callbacks to the function provided in lpc43_registercallback.
+ *   Enable/disable of a set of SD card callback events.  This is part of
+ *   the SD card callback sequence.  The set of events is configured to
+ *   enabled callbacks to the function provided in lpc43_registercallback.
  *
  *   Events are automatically disabled once the callback is performed and no
  *   further callback events will occur until they are again enabled by
@@ -2419,8 +2465,8 @@ static int lpc43_registercallback(FAR struct sdio_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_LPC43_SDMMC_DMA
-static int lpc43_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
-                              size_t buflen)
+static int lpc43_dmarecvsetup(FAR struct sdio_dev_s *dev,
+                              FAR uint8_t *buffer, size_t buflen)
 {
   struct lpc43_dev_s *priv = (struct lpc43_dev_s *)dev;
   uint32_t regval;
@@ -2448,7 +2494,9 @@ static int lpc43_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   lpc43_putreg(SDMMC_BMOD_SWR, LPC43_SDMMC_BMOD);
 
-  /* Save the destination buffer information for use by the interrupt handler */
+  /* Save the destination buffer information for use by the interrupt
+   * handler.
+   */
 
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;
@@ -2461,12 +2509,13 @@ static int lpc43_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   regval |= SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET;
   lpc43_putreg(regval, LPC43_SDMMC_CTRL);
 
-  while ((lpc43_getreg(LPC43_SDMMC_CTRL) & (SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET)) != 0)
+  while ((lpc43_getreg(LPC43_SDMMC_CTRL) & (SDMMC_CTRL_FIFORESET |
+                                            SDMMC_CTRL_DMARESET)) != 0)
     {
     }
 
-  /* Configure the FIFO so that we will receive the DMA/FIFO requests whenever
-   * there more than than (FIFO_DEPTH/2) - 1 words in the FIFO.
+  /* Configure the FIFO so that we will receive the DMA/FIFO requests
+   * whenever there more than than (FIFO_DEPTH/2) - 1 words in the FIFO.
    */
 
   regval = SDMMC_FIFOTH_RXWMARK(LPC43_RXFIFO_DEPTH / 2 - 1) |
@@ -2495,7 +2544,8 @@ static int lpc43_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
       /* Setup buffer address (chained) */
 
-      g_sdmmc_dmadd[i].des2 = (uint32_t)priv->buffer + (i * MCI_DMADES1_MAXTR);
+      g_sdmmc_dmadd[i].des2 = (uint32_t)priv->buffer +
+                              (i * MCI_DMADES1_MAXTR);
 
       /* Setup basic control */
 
@@ -2611,12 +2661,13 @@ static int lpc43_dmasendsetup(FAR struct sdio_dev_s *dev,
   regval |= SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET;
   lpc43_putreg(regval, LPC43_SDMMC_CTRL);
 
-  while ((lpc43_getreg(LPC43_SDMMC_CTRL) & (SDMMC_CTRL_FIFORESET | SDMMC_CTRL_DMARESET)) != 0)
+  while ((lpc43_getreg(LPC43_SDMMC_CTRL) & (SDMMC_CTRL_FIFORESET |
+                                            SDMMC_CTRL_DMARESET)) != 0)
     {
     }
 
-  /* Configure the FIFO so that we will receive the DMA/FIFO requests whenever
-   * there are FIFO_DEPTH/2 or fewer words in the FIFO.
+  /* Configure the FIFO so that we will receive the DMA/FIFO requests
+   * whenever there are FIFO_DEPTH/2 or fewer words in the FIFO.
    */
 
   regval = SDMMC_FIFOTH_TXWMARK(LPC43_TXFIFO_DEPTH / 2) |
@@ -2645,7 +2696,8 @@ static int lpc43_dmasendsetup(FAR struct sdio_dev_s *dev,
 
       /* Setup buffer address (chained) */
 
-      g_sdmmc_dmadd[i].des2 = (uint32_t)priv->buffer + (i * MCI_DMADES1_MAXTR);
+      g_sdmmc_dmadd[i].des2 = (uint32_t)priv->buffer +
+                              (i * MCI_DMADES1_MAXTR);
 
       /* Setup basic control */
 
@@ -2750,17 +2802,19 @@ static void lpc43_callback(struct lpc43_dev_s *priv)
 
       priv->cbevents = 0;
 
-      /* Callbacks cannot be performed in the context of an interrupt handler.
-       * If we are in an interrupt handler, then queue the callback to be
-       * performed later on the work thread.
+      /* Callbacks cannot be performed in the context of an interrupt
+       * handler.  If we are in an interrupt handler, then queue the
+       * callback to be performed later on the work thread.
        */
 
       if (up_interrupt_context())
         {
           /* Yes.. queue it */
 
-           mcinfo("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
-          work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback, priv->cbarg, 0);
+          mcinfo("Queuing callback to %p(%p)\n",
+                 priv->callback, priv->cbarg);
+          work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
+                     priv->cbarg, 0);
         }
       else
         {
@@ -2786,7 +2840,8 @@ static void lpc43_callback(struct lpc43_dev_s *priv)
  *   slotno - Not used.
  *
  * Returned Value:
- *   A reference to an SD card interface structure.  NULL is returned on failures.
+ *   A reference to an SD card interface structure.  NULL is returned on
+ *   failures.
  *
  ****************************************************************************/
 

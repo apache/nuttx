@@ -109,9 +109,9 @@ enum pmic_cmd_type_e
 
 /* Register CNT_USB2 [1:0] USB_CUR_LIM constants */
 
-#define PMIC_CUR_LIM_2_5mA  0
-#define PMIC_CUR_LIM_100mA  1
-#define PMIC_CUR_LIM_500mA  2
+#define PMIC_CUR_LIM_2_5MA  0
+#define PMIC_CUR_LIM_100MA  1
+#define PMIC_CUR_LIM_500MA  2
 
 /* Register CNT_CHG1 [6:5] VO_CHG_DET4 constants */
 
@@ -567,7 +567,8 @@ int cxd56_pmic_set_loadswitch(uint8_t chset, bool value)
  *   chset - LoadSwitch Channel number(s)
  *
  * Returned Value:
- *   Return true if all of the specified chset are on. Otherwise, return false
+ *   Return true if all of the specified chset are on.
+ *   Otherwise, return false
  *
  ****************************************************************************/
 
@@ -664,7 +665,8 @@ int cxd56_pmic_set_ddc_ldo(uint8_t chset, bool value)
  *   chset - DDC/LDO Channel number(s)
  *
  * Returned Value:
- *   Return true if all of the specified chset are on. Otherwise, return false
+ *   Return true if all of the specified chset are on.
+ *   Otherwise, return false
  *
  ****************************************************************************/
 
@@ -925,15 +927,15 @@ int cxd56_pmic_getchargecurrent(FAR int *current)
 
   switch (val & 0x3)
     {
-      case PMIC_CUR_LIM_2_5mA:
+      case PMIC_CUR_LIM_2_5MA:
         *current = 2;
         break;
 
-      case PMIC_CUR_LIM_100mA:
+      case PMIC_CUR_LIM_100MA:
         *current = 100;
         break;
 
-      case PMIC_CUR_LIM_500mA:
+      case PMIC_CUR_LIM_500MA:
         *current = 500;
         break;
 
@@ -968,15 +970,15 @@ int cxd56_pmic_setchargecurrent(int current)
   switch (current)
     {
       case 2:
-        val = PMIC_CUR_LIM_2_5mA;
+        val = PMIC_CUR_LIM_2_5MA;
         break;
 
       case 100:
-        val = PMIC_CUR_LIM_100mA;
+        val = PMIC_CUR_LIM_100MA;
         break;
 
       case 500:
-        val = PMIC_CUR_LIM_500mA;
+        val = PMIC_CUR_LIM_500MA;
         break;
 
       default:
@@ -1045,7 +1047,8 @@ int cxd56_pmic_getchargestate(uint8_t *state)
  * Name: cxd56_pmic_setrechargevol
  *
  * Description:
- *   Set threshold voltage against full charge for automatic restart charging.
+ *   Set threshold voltage against full charge for automatic restart
+ *   charging.
  *
  * Input Parameter:
  *   mv - Available values are -400, -350, -300 and -250 (mv)
@@ -1090,7 +1093,8 @@ int cxd56_pmic_setrechargevol(int mv)
  * Name: cxd56_pmic_getrechargevol
  *
  * Description:
- *   Get threshold voltage against full charge for automatic restart charging.
+ *   Get threshold voltage against full charge for automatic restart
+ *   charging.
  *
  * Input Parameter:
  *   mv - Possible values are -400, -350, -300 and -250 (mv)

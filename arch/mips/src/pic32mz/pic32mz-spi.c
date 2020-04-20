@@ -218,7 +218,7 @@ static void spi_dma_sampledone(FAR struct pic32mz_dev_s *priv);
 #  endif
 static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
 static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg);
-static void spi_dmatimeout(int argc, uint32_t arg);
+static void spi_dmatimeout(int argc, uint32_t arg, ...);
 #endif
 
 /* SPI methods */
@@ -995,7 +995,7 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_SPI_DMA
-static void spi_dmatimeout(int argc, uint32_t arg)
+static void spi_dmatimeout(int argc, uint32_t arg, ...)
 {
   struct pic32mz_dev_s *priv = (struct pic32mz_dev_s *)arg;
   DEBUGASSERT(priv != NULL);
@@ -1226,7 +1226,9 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
   uint32_t actual;
   uint32_t regval;
 
-  /* Check if the requested frequency is the same as the frequency selection */
+  /* Check if the requested frequency is the same as the frequency
+   * selection
+   */
 
   if (priv->frequency == frequency)
     {
@@ -1575,7 +1577,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
   if (priv->nbits > 8)
     {
-      /* 16-bit transfer (2 bytes)*/
+      /* 16-bit transfer (2 bytes) */
 
       width  = 2;
     }
@@ -1773,7 +1775,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
       /* Start (or re-start) the watchdog timeout */
 
       ret = wd_start(priv->dmadog, DMA_TIMEOUT_TICKS,
-                     (wdentry_t)spi_dmatimeout, 1, (uint32_t)priv);
+                     spi_dmatimeout, 1, (uint32_t)priv);
       if (ret < 0)
         {
           spierr("ERROR: wd_start failed: %d\n", ret);
@@ -1999,7 +2001,9 @@ FAR struct spi_dev_s *pic32mz_spibus_initialize(int port)
   up_disable_irq(priv->config->txirq);
 #endif
 
-  /* Stop and reset the SPI module by clearing the ON bit in the CON register. */
+  /* Stop and reset the SPI module by clearing the ON bit in the CON
+   * register.
+   */
 
   spi_putreg(priv, PIC32MZ_SPI_CON_OFFSET, 0);
 

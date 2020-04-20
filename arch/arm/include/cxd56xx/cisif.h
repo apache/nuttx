@@ -40,8 +40,12 @@
  * Public Types
  ****************************************************************************/
 
-typedef void (*notify_callback_t)(uint8_t code, uint32_t size, uint32_t addr);
-typedef void (*comp_callback_t)(uint8_t code, uint32_t size, uint32_t addr);
+typedef void (*notify_callback_t)(uint8_t code,
+                                  uint32_t size,
+                                  uint32_t addr);
+typedef void (*comp_callback_t)(uint8_t code,
+                                uint32_t size,
+                                uint32_t addr);
 
 struct cisif_init_yuv_param_s
 {

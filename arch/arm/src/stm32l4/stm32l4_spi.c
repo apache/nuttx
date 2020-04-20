@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_spi.c
  *
- *   Copyright (C) 2009-2013, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -199,8 +184,8 @@ static inline bool spi_16bitmode(FAR struct stm32l4_spidev_s *priv);
 /* DMA support */
 
 #ifdef CONFIG_STM32L4_SPI_DMA
-static void        spi_dmarxwait(FAR struct stm32l4_spidev_s *priv);
-static void        spi_dmatxwait(FAR struct stm32l4_spidev_s *priv);
+static int         spi_dmarxwait(FAR struct stm32l4_spidev_s *priv);
+static int         spi_dmatxwait(FAR struct stm32l4_spidev_s *priv);
 static inline void spi_dmarxwakeup(FAR struct stm32l4_spidev_s *priv);
 static inline void spi_dmatxwakeup(FAR struct stm32l4_spidev_s *priv);
 static void        spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr,
@@ -640,17 +625,27 @@ static inline bool spi_16bitmode(FAR struct stm32l4_spidev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_SPI_DMA
-static void spi_dmarxwait(FAR struct stm32l4_spidev_s *priv)
+static int spi_dmarxwait(FAR struct stm32l4_spidev_s *priv)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting).  If the result is zero, then the
    * DMA must not really have completed???
    */
 
   do
     {
-      nxsem_wait_uninterruptible(&priv->rxsem);
+      ret = nxsem_wait_uninterruptible(&priv->rxsem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
-  while (priv->rxresult == 0);
+  while (priv->rxresult == 0 && ret == OK);
+
+  return ret;
 }
 #endif
 
@@ -663,17 +658,27 @@ static void spi_dmarxwait(FAR struct stm32l4_spidev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_SPI_DMA
-static void spi_dmatxwait(FAR struct stm32l4_spidev_s *priv)
+static int spi_dmatxwait(FAR struct stm32l4_spidev_s *priv)
 {
+  int ret;
+
   /* Take the semaphore (perhaps waiting).  If the result is zero, then the
    * DMA must not really have completed???
    */
 
   do
     {
-      nxsem_wait_uninterruptible(&priv->txsem);
+      ret = nxsem_wait_uninterruptible(&priv->txsem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(ret == OK || ret == -ECANCELED);
     }
-  while (priv->txresult == 0);
+  while (priv->txresult == 0 && ret == OK);
+
+  return ret;
 }
 #endif
 
@@ -1115,7 +1120,9 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, setbits, clrbits);
         spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
-        /* Save the mode so that subsequent re-configurations will be faster */
+        /* Save the mode so that subsequent re-configurations will be
+         * faster.
+         */
 
         priv->mode = mode;
     }
@@ -1180,9 +1187,11 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
       spi_modifycr(STM32L4_SPI_CR2_OFFSET, priv, setbits, clrbits);
       spi_modifycr(STM32L4_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
-      /* Save the selection so the subsequence re-configurations will be faster */
+      /* Save the selection so the subsequence re-configurations will be
+       * faster.  nbits has been clobbered... save the signed value.
+       */
 
-      priv->nbits = savbits; /* nbits has been clobbered... save the signed value. */
+      priv->nbits = savbits;
     }
 }
 
@@ -1445,6 +1454,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
   FAR struct stm32l4_spidev_s *priv = (FAR struct stm32l4_spidev_s *)dev;
+  int ret;
 
 #ifdef CONFIG_STM32L4_DMACAPABLE
   if ((txbuffer &&
@@ -1496,8 +1506,12 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 
       /* Then wait for each to complete */
 
-      spi_dmarxwait(priv);
-      spi_dmatxwait(priv);
+      ret = spi_dmarxwait(priv);
+      if (ret >= 0)
+        {
+          ret = spi_dmatxwait(priv);
+          UNUSED(ret);
+        }
 
 #ifdef CONFIG_SPI_TRIGGER
       priv->trigarmed = false;
@@ -1661,7 +1675,9 @@ static int spi_pm_prepare(FAR struct pm_callback_s *cb, int domain,
 
       if (sval <= 0)
         {
-          /* Exclusive lock is held, do not allow entry to deeper PM states. */
+          /* Exclusive lock is held, do not allow entry to deeper PM
+           * states.
+           */
 
           return -EBUSY;
         }

@@ -63,11 +63,12 @@ static FILE *g_stubstream;
 
 static bool is_vararg(const char *type, int ndx, int nparms)
 {
-  if (strcmp(type,"...") == 0)
+  if (strcmp(type, "...") == 0)
     {
-      if (ndx != (nparms-1))
+      if (ndx != (nparms - 1))
         {
-          fprintf(stderr, "%d: ... is not the last in the argument list\n", g_lineno);
+          fprintf(stderr, "%d: ... is not the last in the argument list\n",
+                  g_lineno);
           exit(11);
         }
       else if (nparms < 2)
@@ -84,12 +85,12 @@ static bool is_vararg(const char *type, int ndx, int nparms)
 
 static bool is_union(const char *type)
 {
-  return (strncmp(type,"union", 5) == 0);
+  return (strncmp(type, "union", 5) == 0);
 }
 
 static const char *check_funcptr(const char *type)
 {
-  const char *str = strstr(type,"(*)");
+  const char *str = strstr(type, "(*)");
   if (str)
     {
       return str + 2;
@@ -114,7 +115,9 @@ static void print_formalparm(FILE *stream, const char *argtype, int parmno)
   const char *part2;
   int len;
 
-  /* Function pointers and array formal parameter types are a little more work */
+  /* Function pointers and array formal parameter types are a little more
+   * work
+   */
 
   if ((part2 = check_funcptr(argtype)) != NULL ||
       (part2 = check_array(argtype)) != NULL)
@@ -139,12 +142,13 @@ static void get_formalparmtype(const char *arg, char *formal)
     {
       *formal++ = *arg++;
     }
+
   *formal   = '\0';
 }
 
 static void get_actualparmtype(const char *arg, char *actual)
 {
-  const char *pstart = strchr(arg,'|');
+  const char *pstart = strchr(arg, '|');
   if (pstart)
     {
       /* The actual parameter type starts after the '|' */
@@ -168,12 +172,13 @@ static void get_actualparmtype(const char *arg, char *actual)
     {
       *actual++ = *pstart++;
     }
+
   *actual   = '\0';
 }
 
 static void get_fieldname(const char *arg, char *fieldname)
 {
-  char *pactual = strchr(arg,'|');
+  char *pactual = strchr(arg, '|');
   char *pstart;
 
   if (pactual)
@@ -181,10 +186,12 @@ static void get_fieldname(const char *arg, char *fieldname)
       /* The actual parameter type starts after the '|' */
 
       pactual++;
-      pstart = strchr(pactual,'|');
+      pstart = strchr(pactual, '|');
       if (pstart)
         {
-          /* The fieldname is everything past the second '|' to the end of the string */
+          /* The fieldname is everything past the second '|' to the end of
+           * the string
+           */
 
           pstart++;
           strncpy(fieldname, pstart, MAX_PARMSIZE);
@@ -198,11 +205,11 @@ static void get_fieldname(const char *arg, char *fieldname)
 
 static FILE *open_proxy(void)
 {
-  char filename[MAX_PARMSIZE+10];
+  char filename[MAX_PARMSIZE + 10];
   FILE *stream;
 
-  snprintf(filename, MAX_PARMSIZE+9, "PROXY_%s.c", g_parm[NAME_INDEX]);
-  filename[MAX_PARMSIZE+9] = '\0';
+  snprintf(filename, MAX_PARMSIZE + 9, "PROXY_%s.c", g_parm[NAME_INDEX]);
+  filename[MAX_PARMSIZE + 9] = '\0';
 
   stream = fopen(filename, "w");
   if (stream == NULL)
@@ -210,6 +217,7 @@ static FILE *open_proxy(void)
       fprintf(stderr, "Failed to open %s: %s\n", filename, strerror(errno));
       exit(10);
     }
+
   return stream;
 }
 
@@ -225,7 +233,8 @@ static void generate_proxy(int nparms)
 
   /* Generate "up-front" information, include correct header files */
 
-  fprintf(stream, "/* Auto-generated %s proxy file -- do not edit */\n\n", g_parm[NAME_INDEX]);
+  fprintf(stream, "/* Auto-generated %s proxy file -- do not edit */\n\n",
+          g_parm[NAME_INDEX]);
   fprintf(stream, "#include <nuttx/config.h>\n");
 
   /* Suppress "'noreturn' function does return" warnings. */
@@ -238,9 +247,9 @@ static void generate_proxy(int nparms)
    * final parameter type will be encoded as "..."
    */
 
-  if (is_vararg(g_parm[PARM1_INDEX+nparms-1], nparms-1, nparms))
+  if (is_vararg(g_parm[PARM1_INDEX + nparms - 1], nparms - 1, nparms))
     {
-      nformal = nparms-1;
+      nformal = nparms - 1;
       bvarargs = true;
       fprintf(stream, "#include <stdarg.h>\n");
     }
@@ -261,7 +270,9 @@ static void generate_proxy(int nparms)
       fprintf(stream, "#if %s\n\n", g_parm[COND_INDEX]);
     }
 
-  /* Generate the function definition that matches standard function prototype */
+  /* Generate the function definition that matches standard function
+   * prototype
+   */
 
   fprintf(stream, "%s %s(", g_parm[RETTYPE_INDEX], g_parm[NAME_INDEX]);
 
@@ -279,7 +290,7 @@ static void generate_proxy(int nparms)
            * formal parameter type.
            */
 
-          get_formalparmtype(g_parm[PARM1_INDEX+i], formal);
+          get_formalparmtype(g_parm[PARM1_INDEX + i], formal);
 
           /* Arguments after the first must be separated from the preceding
            * parameter with a comma.
@@ -290,7 +301,7 @@ static void generate_proxy(int nparms)
               fprintf(stream, ", ");
             }
 
-          print_formalparm(stream, formal, i+1);
+          print_formalparm(stream, formal, i + 1);
         }
     }
 
@@ -298,27 +309,30 @@ static void generate_proxy(int nparms)
 
   if (bvarargs)
     {
-       fprintf(stream, ", ...)\n{\n");
+      fprintf(stream, ", ...)\n{\n");
 
-       /* Get parm variables .. some from the parameter list and others from
-        * the varargs.
-        */
+      /* Get parm variables .. some from the parameter list and others from
+       * the varargs.
+       */
 
-       if (nparms < 7)
-         {
-           fprintf(stream, "  va_list ap;\n");
-           for (i = nparms; i < 7; i++)
-             {
-               fprintf(stream, "  uintptr_t parm%d;\n", i);
-             }
+      if (nparms < 7)
+        {
+          fprintf(stream, "  va_list ap;\n");
 
-           fprintf(stream, "\n  va_start(ap, parm%d);\n", nparms-1);
-           for (i = nparms; i < 7; i++)
-             {
-               fprintf(stream, "  parm%d = va_arg(ap, uintptr_t);\n", i);
-             }
-           fprintf(stream, "  va_end(ap);\n\n");
-         }
+          for (i = nparms; i < 7; i++)
+            {
+              fprintf(stream, "  uintptr_t parm%d;\n", i);
+            }
+
+          fprintf(stream, "\n  va_start(ap, parm%d);\n", nparms - 1);
+
+          for (i = nparms; i < 7; i++)
+            {
+              fprintf(stream, "  parm%d = va_arg(ap, uintptr_t);\n", i);
+            }
+
+          fprintf(stream, "  va_end(ap);\n\n");
+        }
     }
   else
     {
@@ -336,7 +350,8 @@ static void generate_proxy(int nparms)
     }
   else
     {
-      fprintf(stream, "  return (%s)sys_call%d(", g_parm[RETTYPE_INDEX], nactual);
+      fprintf(stream, "  return (%s)sys_call%d(", g_parm[RETTYPE_INDEX],
+              nactual);
     }
 
   /* Create the parameter list with the matching types.  The first parameter
@@ -349,19 +364,19 @@ static void generate_proxy(int nparms)
     {
       /* Is the parameter a union member */
 
-      if (i < nparms && is_union(g_parm[PARM1_INDEX+i]))
+      if (i < nparms && is_union(g_parm[PARM1_INDEX + i]))
         {
           /* Then we will have to pick a field name that can be cast to a
            * uintptr_t.  There probably should be some error handling here
            * to catch the case where the fieldname was not supplied.
            */
 
-          get_fieldname(g_parm[PARM1_INDEX+i], fieldname);
-          fprintf(stream, ", (uintptr_t)parm%d.%s", i+1, fieldname);
+          get_fieldname(g_parm[PARM1_INDEX + i], fieldname);
+          fprintf(stream, ", (uintptr_t)parm%d.%s", i + 1, fieldname);
         }
       else
         {
-          fprintf(stream, ", (uintptr_t)parm%d", i+1);
+          fprintf(stream, ", (uintptr_t)parm%d", i + 1);
         }
     }
 
@@ -385,9 +400,11 @@ static FILE *open_stub(void)
           g_stubstream = fopen("STUB.h", "w");
           if (g_stubstream == NULL)
             {
-              fprintf(stderr, "Failed to open STUB.h: %s\n", strerror(errno));
+              fprintf(stderr, "Failed to open STUB.h: %s\n",
+                      strerror(errno));
               exit(9);
             }
+
           fprintf(g_stubstream, "/* Autogenerated STUB header file */\n\n");
           fprintf(g_stubstream, "#ifndef __STUB_H\n");
           fprintf(g_stubstream, "#define __STUB_H\n\n");
@@ -397,18 +414,21 @@ static FILE *open_stub(void)
     }
   else
     {
-      char filename[MAX_PARMSIZE+8];
+      char filename[MAX_PARMSIZE + 8];
       FILE *stream;
 
-      snprintf(filename, MAX_PARMSIZE+7, "STUB_%s.c", g_parm[NAME_INDEX]);
-      filename[MAX_PARMSIZE+7] = '\0';
+      snprintf(filename, MAX_PARMSIZE + 7, "STUB_%s.c", g_parm[NAME_INDEX]);
+      filename[MAX_PARMSIZE + 7] = '\0';
 
       stream = fopen(filename, "w");
+
       if (stream == NULL)
         {
-          fprintf(stderr, "Failed to open %s: %s\n", filename, strerror(errno));
+          fprintf(stderr, "Failed to open %s: %s\n", filename,
+                  strerror(errno));
           exit(9);
         }
+
       return stream;
     }
 }
@@ -431,7 +451,8 @@ static void generate_stub(int nparms)
 
   /* Generate "up-front" information, include correct header files */
 
-  fprintf(stream, "/* Auto-generated %s stub file -- do not edit */\n\n", g_parm[0]);
+  fprintf(stream, "/* Auto-generated %s stub file -- do not edit */\n\n",
+          g_parm[0]);
   fprintf(stream, "#include <nuttx/config.h>\n");
   fprintf(stream, "#include <stdint.h>\n");
 
@@ -447,7 +468,9 @@ static void generate_stub(int nparms)
       fprintf(stream, "#if %s\n\n", g_parm[COND_INDEX]);
     }
 
-  /* Generate the function definition that matches standard function prototype */
+  /* Generate the function definition that matches standard function
+   * prototype
+   */
 
   if (g_inline)
     {
@@ -462,18 +485,18 @@ static void generate_stub(int nparms)
     {
       /* Check for a variable number of arguments */
 
-      if (is_vararg(g_parm[PARM1_INDEX+i], i, nparms))
+      if (is_vararg(g_parm[PARM1_INDEX + i], i, nparms))
         {
           /* Always receive six arguments in this case */
 
-          for (j = i+1; j <= 6; j++)
+          for (j = i + 1; j <= 6; j++)
             {
               fprintf(stream, ", uintptr_t parm%d", j);
             }
         }
       else
         {
-          fprintf(stream, ", uintptr_t parm%d", i+1);
+          fprintf(stream, ", uintptr_t parm%d", i + 1);
         }
     }
 
@@ -499,14 +522,15 @@ static void generate_stub(int nparms)
   for (i = 0; i < nparms; i++)
     {
       /* Get the formal type of the parameter, and get the type that we
-       * actually have to cast to.  For example for a formal type like 'int parm[]'
-       * we have to cast the actual parameter to 'int*'.  The worst is a union
-       * type like 'union sigval' where we have to cast to (union sigval)((FAR void *)parm)
+       * actually have to cast to.  For example for a formal type like
+       * 'int parm[]' we have to cast the actual parameter to 'int*'.
+       * The worst is a union type like 'union sigval' where we have to
+       * cast to (union sigval)((FAR void *)parm)
        * -- Yech.
        */
 
-     get_formalparmtype(g_parm[PARM1_INDEX+i], formal);
-     get_actualparmtype(g_parm[PARM1_INDEX+i], actual);
+     get_formalparmtype(g_parm[PARM1_INDEX + i], formal);
+     get_actualparmtype(g_parm[PARM1_INDEX + i], actual);
 
       /* Treat the first argument in the list differently from the others..
        * It does not need a comma before it.
@@ -520,7 +544,7 @@ static void generate_stub(int nparms)
             {
               /* Always pass six arguments */
 
-              for (j = i+1; j <= 6; j++)
+              for (j = i + 1; j <= 6; j++)
                 {
                   fprintf(stream, ", parm%d", j);
                 }
@@ -529,11 +553,12 @@ static void generate_stub(int nparms)
             {
               if (is_union(formal))
                 {
-                  fprintf(stream, ", (%s)((%s)parm%d)", formal, actual, i+1);
+                  fprintf(stream, ", (%s)((%s)parm%d)", formal, actual,
+                          i + 1);
                 }
               else
                 {
-                  fprintf(stream, ", (%s)parm%d", actual, i+1);
+                  fprintf(stream, ", (%s)parm%d", actual, i + 1);
                 }
             }
         }
@@ -541,11 +566,11 @@ static void generate_stub(int nparms)
         {
           if (is_union(formal))
             {
-              fprintf(stream, "(%s)((%s)parm%d)", formal, actual, i+1);
+              fprintf(stream, "(%s)((%s)parm%d)", formal, actual, i + 1);
             }
           else
             {
-              fprintf(stream, "(%s)parm%d",actual, i+1);
+              fprintf(stream, "(%s)parm%d", actual, i + 1);
             }
         }
     }
@@ -567,6 +592,7 @@ static void generate_stub(int nparms)
     {
       fprintf(stream, "#endif /* %s */\n", g_parm[COND_INDEX]);
     }
+
   stub_close(stream);
 }
 
@@ -647,7 +673,7 @@ int main(int argc, char **argv, char **envp)
 
   /* Open the CSV file */
 
-  stream= fopen(csvpath, "r");
+  stream = fopen(csvpath, "r");
   if (!stream)
     {
       fprintf(stderr, "open %s failed: %s\n", csvpath, strerror(errno));

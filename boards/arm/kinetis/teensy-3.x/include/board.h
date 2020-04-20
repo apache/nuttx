@@ -92,7 +92,7 @@
  *
  * Board can be overclocked at 96MHz (per PJRC.com)
  *   PLL Input frequency:   PLLIN  = REFCLK/PRDIV = 16MHz/8 = 2MHz
- *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = Mhz*48 = 96MHz
+ *   PLL Output frequency:  PLLOUT = PLLIN*VDIV   = MHz*48 = 96MHz
  *   MCG Frequency:         PLLOUT = 96MHz
  */
 

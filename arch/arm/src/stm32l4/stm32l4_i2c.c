@@ -79,7 +79,7 @@
  *      Fast-mode (up to 400 kHz)
  *      fI2CCLK clock source selection is based on RCC_CCIPR_I2CxSEL
  *      being set to PCLK and the calculations are based on PCLK frequency
- *      of 80 Mhz
+ *      of 80 MHz
  *
  *  - Multiple instances (shared bus)
  *  - Interrupt based operation
@@ -100,7 +100,7 @@
  *  - Wakeup from Stop mode
  *  - More effective error reporting to higher layers
  *  - Slave operation
- *  - Support of fI2CCLK frequencies other than 80 Mhz and other clock sources
+ *  - Support of fI2CCLK frequencies other than 80 MHz and other clock sources
  *  - Polled operation (code present but untested)
  *  - SMBus support
  *  - Multi-master support
@@ -478,8 +478,6 @@ static inline void stm32l4_i2c_putreg32(FAR struct stm32l4_i2c_priv_s *priv,
 static inline void stm32l4_i2c_modifyreg32(FAR struct stm32l4_i2c_priv_s *priv,
                                            uint8_t offset, uint32_t clearbits,
                                            uint32_t setbits);
-static inline int stm32l4_i2c_sem_wait(FAR struct i2c_master_s *dev);
-static int stm32l4_i2c_sem_wait_uninterruptible(FAR struct i2c_master_s *dev);
 #ifdef CONFIG_STM32L4_I2C_DYNTIMEO
 static useconds_t stm32l4_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
 #endif /* CONFIG_STM32L4_I2C_DYNTIMEO */
@@ -738,34 +736,6 @@ static inline void stm32l4_i2c_modifyreg32(FAR struct stm32l4_i2c_priv_s *priv,
 }
 
 /************************************************************************************
- * Name: stm32l4_i2c_sem_wait
- *
- * Description:
- *   Take the exclusive access, waiting as necessary.  May be interrupted by a
- *   signal.
- *
- ************************************************************************************/
-
-static inline int stm32l4_i2c_sem_wait(FAR struct i2c_master_s *dev)
-{
-  return nxsem_wait(&((struct stm32l4_i2c_inst_s *)dev)->priv->sem_excl);
-}
-
-/************************************************************************************
- * Name: stm32l4_i2c_sem_wait_uninterruptible
- *
- * Description:
- *   Take the exclusive access, waiting as necessary
- *
- ************************************************************************************/
-
-static int stm32l4_i2c_sem_wait_uninterruptible(FAR struct i2c_master_s *dev)
-{
-  return
-    nxsem_wait_uninterruptible(&((struct stm32l4_i2c_inst_s *)dev)->priv->sem_excl);
-}
-
-/************************************************************************************
  * Name: stm32l4_i2c_tousecs
  *
  * Description:
@@ -961,7 +931,7 @@ static inline int stm32l4_i2c_sem_waitdone(FAR struct stm32l4_i2c_priv_s *priv)
  ************************************************************************************/
 
 static inline void
-stm32l4_i2c_set_7bit_address(FAR struct stm32l4_i2c_priv_s *priv)
+  stm32l4_i2c_set_7bit_address(FAR struct stm32l4_i2c_priv_s *priv)
 {
   stm32l4_i2c_modifyreg32(priv, STM32L4_I2C_CR2_OFFSET, I2C_CR2_SADD7_MASK,
                           ((priv->msgv->addr & 0x7f) << I2C_CR2_SADD7_SHIFT));
@@ -1349,7 +1319,7 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
           /* Default timing calculations from original STM32L4 driver: */
 
           /*  The Speed and timing calculation are based on the following
-           *  fI2CCLK = PCLK and is 80 Mhz
+           *  fI2CCLK = PCLK and is 80 MHz
            *  Analog filter is on,
            *  Digital filter off
            *  Rise Time is 120 ns and fall is 10 ns
@@ -1400,7 +1370,7 @@ static void stm32l4_i2c_setclock(FAR struct stm32l4_i2c_priv_s *priv,
       else if (i2cclk_mhz == 120)
         {
           /*  The Speed and timing calculation are based on the following
-           *  fI2CCLK = PCLK and is 120 Mhz
+           *  fI2CCLK = PCLK and is 120 MHz
            *  Analog filter is on,
            *  Digital filter off
            *  Rise Time is 120 ns and fall is 25 ns
@@ -2378,7 +2348,7 @@ static int stm32l4_i2c_init(FAR struct stm32l4_i2c_priv_s *priv)
 
   /* TODO:
    * - Provide means to set peripheral clock source via RCC_CCIPR_I2CxSEL
-   * - Make clock source Kconfigurable (currently PCLK = 80 Mhz)
+   * - Make clock source Kconfigurable (currently PCLK = 80 MHz)
    */
 
   /* Force a frequency update */
@@ -2687,7 +2657,7 @@ static int stm32l4_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Ensure that address or flags don't change meanwhile */
 
-  ret = stm32l4_i2c_sem_wait(dev);
+  ret = nxsem_wait(&((struct stm32l4_i2c_inst_s *)dev)->priv->sem_excl);
   if (ret >= 0)
     {
       ret = stm32l4_i2c_process(dev, msgs, count);
@@ -2727,7 +2697,7 @@ static int stm32l4_i2c_reset(FAR struct i2c_master_s * dev)
 
   /* Lock out other clients */
 
-  ret = stm32l4_i2c_sem_wait_uninterruptible(dev);
+  ret = nxsem_wait_uninterruptible(&priv->sem_excl);
   if (ret < 0)
     {
       return ret;

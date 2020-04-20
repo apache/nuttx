@@ -58,7 +58,6 @@ EXTRA_DISTCLEAN = $(call DELFILE, $(SCRIPTOUT))
 include $(TOPDIR)/boards/Board.mk
 
 $(SCRIPTOUT): $(SCRIPTIN) $(CONFIGFILE)
-	# $(call PREPROCESS, $(SCRIPTIN), $@)
 	$(Q) $(CC) -isystem $(TOPDIR)/include -C -P -x c -E $(SCRIPTIN) -o $@
 
 context: $(SCRIPTOUT)

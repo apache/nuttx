@@ -1,4 +1,4 @@
-/***************************************************************************
+/****************************************************************************
  * boards/arm/cxd56xx/drivers/audio/cxd56_audio_aca.c
  *
  *   Copyright 2018 Sony Semiconductor Solutions Corporation
@@ -493,7 +493,8 @@ static void get_sp_split_on(uint8_t cf_sp_spliton,
     }
 }
 
-static void get_sp_driver(uint8_t cfg_sp_drv, FAR as_aca_sp_drv_sel_id_t *sp_drv)
+static void get_sp_driver(uint8_t cfg_sp_drv,
+                          FAR as_aca_sp_drv_sel_id_t *sp_drv)
 {
   switch (cfg_sp_drv)
     {
@@ -574,7 +575,8 @@ void get_input_param(as_aca_pulco_in_param_t *param,
         {
           mic_id = mic_sel - 1;
           param->mic_gain[mic_id] = (gain->gain[i] >= MIC_GAIN_MAX) ?
-                                     MIC_GAIN_MAX : (gain->gain[i] / 30) * 30;
+                                     MIC_GAIN_MAX :
+                                    (gain->gain[i] / 30) * 30;
 
           pga_gain = gain->gain[i] - param->mic_gain[mic_id];
           param->pga_gain[mic_id] = (pga_gain >= PGA_GAIN_MAX) ?
@@ -628,7 +630,7 @@ void get_pwon_out_param(as_aca_pulco_out_param_t *param)
   get_sp_driver((uint8_t)cxd56_audio_config_get_spdriver(), &param->sp_drv);
 }
 
-/***************************************************************************
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -678,13 +680,15 @@ CXD56_AUDIO_ECODE cxd56_audio_aca_poweron_micbias(void)
   return CXD56_AUDIO_ECODE_OK;
 }
 
-CXD56_AUDIO_ECODE cxd56_audio_aca_poweron_input(FAR cxd56_audio_mic_gain_t *gain)
+CXD56_AUDIO_ECODE cxd56_audio_aca_poweron_input(
+                                 FAR cxd56_audio_mic_gain_t *gain)
 {
   as_aca_pulco_in_param_t pwon_input_param;
 
   get_input_param(&pwon_input_param, gain);
 
-  if (as_aca_control(AS_ACA_POWER_ON_INPUT, (uint32_t)&pwon_input_param) != 0)
+  if (as_aca_control(AS_ACA_POWER_ON_INPUT,
+     (uint32_t)&pwon_input_param) != 0)
     {
       return CXD56_AUDIO_ECODE_ANA_PWON_INPUT;
     }
@@ -712,7 +716,8 @@ CXD56_AUDIO_ECODE cxd56_audio_aca_poweron_output(void)
 
   get_pwon_out_param(&pwon_output_param);
 
-  if (as_aca_control(AS_ACA_POWER_ON_OUTPUT, (uint32_t)&pwon_output_param) != 0)
+  if (as_aca_control(AS_ACA_POWER_ON_OUTPUT,
+     (uint32_t)&pwon_output_param) != 0)
     {
       return CXD56_AUDIO_ECODE_ANA_PWON_OUTPUT;
     }
@@ -752,7 +757,8 @@ CXD56_AUDIO_ECODE cxd56_audio_aca_enable_output(void)
 
 CXD56_AUDIO_ECODE cxd56_audio_aca_disable_output(void)
 {
-  if (as_aca_control(AS_ACA_SET_OUTPUT_DEVICE, (uint32_t)AS_OUT_DEV_OFF) != 0)
+  if (as_aca_control(AS_ACA_SET_OUTPUT_DEVICE,
+     (uint32_t)AS_OUT_DEV_OFF) != 0)
     {
       return CXD56_AUDIO_ECODE_ANA_DISABLE_OUTPUT;
     }
@@ -760,7 +766,8 @@ CXD56_AUDIO_ECODE cxd56_audio_aca_disable_output(void)
   return CXD56_AUDIO_ECODE_OK;
 }
 
-CXD56_AUDIO_ECODE cxd56_audio_aca_set_micgain(FAR cxd56_audio_mic_gain_t *gain)
+CXD56_AUDIO_ECODE cxd56_audio_aca_set_micgain(
+                             FAR cxd56_audio_mic_gain_t *gain)
 {
   as_aca_pulco_in_param_t mic_gain_param;
 

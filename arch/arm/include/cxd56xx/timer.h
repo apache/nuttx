@@ -36,14 +36,17 @@
 #ifndef __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
 #define __ARCH_ARM_INCLUDE_CXD56XX_TIMER_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/timers/timer.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/*
- * Set callback handler
+/* Set callback handler
  *
  * param A pointer to struct timer_sethandler_s
  * return ioctl return value provides success/failure indication

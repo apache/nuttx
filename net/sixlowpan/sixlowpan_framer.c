@@ -53,6 +53,7 @@
 
 #ifdef CONFIG_NET_6LOWPAN
 
+#ifdef CONFIG_WIRELESS_IEEE802154
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -150,7 +151,6 @@ static inline bool sixlowpan_eaddrnull(FAR const uint8_t *eaddr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_WIRELESS_IEEE802154
 int sixlowpan_meta_data(FAR struct radio_driver_s *radio,
                         FAR const struct ieee802_txmetadata_s *pktmeta,
                         FAR struct ieee802154_frame_meta_s *meta)

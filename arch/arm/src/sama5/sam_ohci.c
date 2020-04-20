@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/sama5/sam_ohci.c
  *
- *   Copyright (C) 2013, 2015-2017 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -77,15 +62,17 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ***************************************************************/
+
+/* Configuration ************************************************************/
+
 /* Pre-requisites */
 
 #ifndef CONFIG_SCHED_WORKQUEUE
 #  error Work queue support is required (CONFIG_SCHED_WORKQUEUE)
 #endif
 
-/* Configurable number of user endpoint descriptors (EDs).  This number excludes
- * the control endpoint that is always allocated.
+/* Configurable number of user endpoint descriptors (EDs).  This number
+ * excludes the control endpoint that is always allocated.
  */
 
 #ifndef CONFIG_SAMA5_OHCI_NEDS
@@ -102,8 +89,8 @@
 #  error Insufficient number of transfer descriptors (CONFIG_SAMA5_OHCI_NTDS < 2)
 #endif
 
-/* Minimum alignment for DMA access is 16 bytes, but it is safer to align to the
- * cache line size.
+/* Minimum alignment for DMA access is 16 bytes, but it is safer to align to
+ * the cache line size.
  */
 
 #if ARMV7A_DCACHE_LINESIZE > 16
@@ -154,7 +141,8 @@
 #  undef CONFIG_SAMA5_OHCI_REGDEBUG
 #endif
 
-/* OHCI Setup ******************************************************************/
+/* OHCI Setup ***************************************************************/
+
 /* Frame Interval / Periodic Start.
  *
  * At 12Mbps, there are 12000 bit time in each 1Msec frame.
@@ -181,13 +169,15 @@
 #define SAM_NORMAL_INTS       (OHCI_INT_WDH|OHCI_INT_RHSC)
 #define SAM_ALL_INTS          (SAM_NORMAL_INTS|SAM_DEBUG_INTS)
 
-/* Periodic Intervals **********************************************************/
+/* Periodic Intervals *******************************************************/
+
 /* Periodic intervals 2, 4, 8, 16,and 32 supported */
 
 #define MIN_PERINTERVAL 2
 #define MAX_PERINTERVAL 32
 
-/* Descriptors *****************************************************************/
+/* Descriptors **************************************************************/
+
 /* Actual number of allocated EDs and TDs will include one for the control ED
  * and one for the tail ED for each RHPort:
  */
@@ -209,11 +199,12 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This structure contains one endpoint list.  The main reason for the existence
- * of this structure is to contain the sem_t value associated with the ED.  It
- * doesn't work well within the ED itself because then the semaphore counter
- * is subject to DMA cache operations (invalidate a modified semaphore count
- * is fatal!).
+
+/* This structure contains one endpoint list.  The main reason for the
+ * existence of this structure is to contain the sem_t value associated with
+ * the ED.  It doesn't work well within the ED itself because then the
+ * semaphore counter is subject to DMA cache operations (invalidate a
+ * modified semaphore count is fatal!).
  */
 
 struct sam_eplist_s
@@ -284,9 +275,9 @@ struct sam_ohci_s
 /* The OCHI expects the size of an endpoint descriptor to be 16 bytes.
  * However, the size allocated for an endpoint descriptor is 32 bytes.  This
  * is necessary first because the Cortex-A5 cache line size is 32 bytes and
- * this is the smallest amount of memory that we can perform cache operations
- * on.  The  16-bytes is also used by the OHCI host driver in order to maintain
- * additional endpoint-specific data.
+ * this is the smallest amount of memory that we can perform cache
+ * operations on.  The  16-bytes is also used by the OHCI host driver in
+ * order to maintain additional endpoint-specific data.
  */
 
 struct sam_ed_s
@@ -338,7 +329,7 @@ struct sam_list_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* Register operations ********************************************************/
+/* Register operations ******************************************************/
 
 #ifdef CONFIG_SAMA5_OHCI_REGDEBUG
 static void sam_printreg(uint32_t addr, uint32_t val, bool iswrite);
@@ -350,19 +341,20 @@ static void sam_putreg(uint32_t val, uint32_t addr);
 # define sam_putreg(val,addr) putreg32(val,addr)
 #endif
 
-/* Semaphores ******************************************************************/
+/* Semaphores ***************************************************************/
 
-static void sam_takesem(sem_t *sem);
+static int  sam_takesem(sem_t *sem);
+static int  sam_takesem_noncancelable(sem_t *sem);
 #define sam_givesem(s) nxsem_post(s);
 
-/* Byte stream access helper functions *****************************************/
+/* Byte stream access helper functions **************************************/
 
 static inline uint16_t sam_getle16(const uint8_t *val);
 #if 0 /* Not used */
 static void sam_putle16(uint8_t *dest, uint16_t val);
 #endif
 
-/* OHCI memory pool helper functions *******************************************/
+/* OHCI memory pool helper functions ****************************************/
 
 static struct sam_ed_s *sam_edalloc(void);
 static void sam_edfree(struct sam_ed_s *ed);
@@ -371,7 +363,7 @@ static void sam_tdfree(struct sam_gtd_s *buffer);
 static uint8_t *sam_tballoc(void);
 static void sam_tbfree(uint8_t *buffer);
 
-/* ED list helper functions ****************************************************/
+/* ED list helper functions *************************************************/
 
 static int sam_addctrled(struct sam_ed_s *ed);
 static inline int sam_remctrled(struct sam_ed_s *ed);
@@ -381,7 +373,8 @@ static inline int sam_rembulked(struct sam_ed_s *ed);
 
 #if !defined(CONFIG_USBHOST_INT_DISABLE) || !defined(CONFIG_USBHOST_ISOC_DISABLE)
 static unsigned int sam_getinterval(uint8_t interval);
-static void sam_setinttab(uint32_t value, unsigned int interval, unsigned int offset);
+static void sam_setinttab(uint32_t value, unsigned int interval,
+                          unsigned int offset);
 #endif
 
 static inline int sam_addinted(const struct usbhost_epdesc_s *epdesc,
@@ -392,10 +385,11 @@ static inline int sam_addisoced(const struct usbhost_epdesc_s *epdesc,
                                 struct sam_ed_s *ed);
 static inline int sam_remisoced(struct sam_ed_s *ed);
 
-/* Descriptor helper functions *************************************************/
+/* Descriptor helper functions **********************************************/
 
-static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplist,
-                         struct sam_ed_s *ed, uint32_t dirpid, uint32_t toggle,
+static int sam_enqueuetd(struct sam_rhport_s *rhport,
+                         struct sam_eplist_s *eplist, struct sam_ed_s *ed,
+                         uint32_t dirpid, uint32_t toggle,
                          volatile uint8_t *buffer, size_t buflen);
 static int  sam_ep0enqueue(struct sam_rhport_s *rhport);
 static void sam_ep0dequeue(struct sam_eplist_s *ep0);
@@ -409,13 +403,13 @@ static int  sam_wdhasynch(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
 static int  sam_ctrltd(struct sam_rhport_s *rhport, struct sam_eplist_s *ep0,
                        uint32_t dirpid, uint8_t *buffer, size_t buflen);
 
-/* Interrupt handling **********************************************************/
+/* Interrupt handling *******************************************************/
 
 static void sam_rhsc_bottomhalf(void);
 static void sam_wdh_bottomhalf(void);
 static void sam_ohci_bottomhalf(void *arg);
 
-/* USB host controller operations **********************************************/
+/* USB host controller operations *******************************************/
 
 static int sam_wait(struct usbhost_connection_s *conn,
                     struct usbhost_hubport_s **hport);
@@ -425,10 +419,11 @@ static int sam_enumerate(struct usbhost_connection_s *conn,
                          struct usbhost_hubport_s *hport);
 
 static int sam_ep0configure(struct usbhost_driver_s *drvr,
-                            usbhost_ep_t ep0, uint8_t funcaddr, uint8_t speed,
-                            uint16_t maxpacketsize);
+                            usbhost_ep_t ep0, uint8_t funcaddr,
+                            uint8_t speed, uint16_t maxpacketsize);
 static int sam_epalloc(struct usbhost_driver_s *drvr,
-                       const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
+                       const struct usbhost_epdesc_s *epdesc,
+                       usbhost_ep_t *ep);
 static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 static int sam_alloc(struct usbhost_driver_s *drvr,
                      uint8_t **buffer, size_t *maxlen);
@@ -466,9 +461,9 @@ static void sam_disconnect(struct usbhost_driver_s *drvr,
  * Private Data
  ****************************************************************************/
 
-/* In this driver implementation, support is provided for only a single a single
- * USB device.  All status information can be simply retained in a single global
- * instance.
+/* In this driver implementation, support is provided for only a single a
+ * single USB device.  All status information can be simply retained in a
+ * single global instance.
  */
 
 static struct sam_ohci_s g_ohci;
@@ -539,8 +534,8 @@ static void sam_checkreg(uint32_t addr, uint32_t val, bool iswrite)
   static uint32_t count = 0;
   static bool     prevwrite = false;
 
-  /* Is this the same value that we read from/wrote to the same register last time?
-   * Are we polling the register?  If so, suppress the output.
+  /* Is this the same value that we read from/wrote to the same register
+   * last time?  Are we polling the register?  If so, suppress the output.
    */
 
   if (addr == prevaddr && val == preval && prevwrite == iswrite)
@@ -639,9 +634,43 @@ static void sam_putreg(uint32_t val, uint32_t addr)
  *
  ****************************************************************************/
 
-static void sam_takesem(sem_t *sem)
+static int sam_takesem(sem_t *sem)
 {
-  nxsem_wait_uninterruptible(sem);
+  return nxsem_wait_uninterruptible(sem);
+}
+
+/****************************************************************************
+ * Name: sam_takesem_noncancelable
+ *
+ * Description:
+ *   This is just a wrapper to handle the annoying behavior of semaphore
+ *   waits that return due to the receipt of a signal.  This version also
+ *   ignores attempts to cancel the thread.
+ *
+ ****************************************************************************/
+
+static int sam_takesem_noncancelable(sem_t *sem)
+{
+  int result;
+  int ret = OK;
+
+  do
+    {
+      result = nxsem_wait_uninterruptible(sem);
+
+      /* The only expected error is ECANCELED which would occur if the
+       * calling thread were canceled.
+       */
+
+      DEBUGASSERT(result == OK || result == -ECANCELED);
+      if (ret == OK && result < 0)
+        {
+          ret = result;
+        }
+    }
+  while (result < 0);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -755,7 +784,8 @@ static struct sam_gtd_s *sam_tdalloc(void)
  *   Free a transfer descriptor by returning it to the free list
  *
  * Assumptions:
- *   - Only called from the WDH interrupt handler (and during initialization).
+ *   - Only called from the WDH interrupt handler (and during
+ *     initialization).
  *   - Interrupts are disabled in any case.
  *
  ****************************************************************************/
@@ -1064,9 +1094,10 @@ static inline int sam_rembulked(struct sam_ed_s *ed)
 #if !defined(CONFIG_USBHOST_INT_DISABLE) || !defined(CONFIG_USBHOST_ISOC_DISABLE)
 static unsigned int sam_getinterval(uint8_t interval)
 {
-  /* The bInterval field of the endpoint descriptor contains the polling interval
-   * for interrupt and isochronous endpoints. For other types of endpoint, this
-   * value should be ignored. bInterval is provided in units of 1MS frames.
+  /* The bInterval field of the endpoint descriptor contains the polling
+   * interval for interrupt and isochronous endpoints. For other types of
+   * endpoint, this value should be ignored. bInterval is provided in units
+   * of 1MS frames.
    */
 
   if (interval < 3)
@@ -1096,13 +1127,14 @@ static unsigned int sam_getinterval(uint8_t interval)
  * Name: sam_setinttab
  *
  * Description:
- *   Set the interrupt table to the selected value using the provided interval
- *   and offset.
+ *   Set the interrupt table to the selected value using the provided
+ *   interval and offset.
  *
  ****************************************************************************/
 
 #if !defined(CONFIG_USBHOST_INT_DISABLE) || !defined(CONFIG_USBHOST_ISOC_DISABLE)
-static void sam_setinttab(uint32_t value, unsigned int interval, unsigned int offset)
+static void sam_setinttab(uint32_t value, unsigned int interval,
+                          unsigned int offset)
 {
   uintptr_t inttbl;
   unsigned int i;
@@ -1127,17 +1159,18 @@ static void sam_setinttab(uint32_t value, unsigned int interval, unsigned int of
  * Description:
  *   Helper function to add an ED to the HCCA interrupt table.
  *
- *   To avoid reshuffling the table so much and to keep life simple in general,
- *    the following rules are applied:
+ *   To avoid reshuffling the table so much and to keep life simple in
+ *   general, the following rules are applied:
  *
  *     1. IN EDs get the even entries, OUT EDs get the odd entries.
- *     2. Add IN/OUT EDs are scheduled together at the minimum interval of all
- *        IN/OUT EDs.
+ *     2. Add IN/OUT EDs are scheduled together at the minimum interval of
+ *        all IN/OUT EDs.
  *
  *   This has the following consequences:
  *
  *     1. The minimum support polling rate is 2MS, and
- *     2. Some devices may get polled at a much higher rate than they request.
+ *     2. Some devices may get polled at a much higher rate than they
+ *         request.
  *
  ****************************************************************************/
 
@@ -1152,8 +1185,8 @@ static inline int sam_addinted(const struct usbhost_epdesc_s *epdesc,
   uintptr_t physhead;
   uint32_t regval;
 
-  /* Disable periodic list processing.  Does this take effect immediately?  Or
-   * at the next SOF... need to check.
+  /* Disable periodic list processing.  Does this take effect immediately?
+   * Or at the next SOF... need to check.
    */
 
   flags   = enter_critical_section();
@@ -1246,17 +1279,18 @@ static inline int sam_addinted(const struct usbhost_epdesc_s *epdesc,
  * Description:
  *   Helper function to remove an ED from the HCCA interrupt table.
  *
- *   To avoid reshuffling the table so much and to keep life simple in general,
- *    the following rules are applied:
+ *   To avoid reshuffling the table so much and to keep life simple in
+ *   general, the following rules are applied:
  *
  *     1. IN EDs get the even entries, OUT EDs get the odd entries.
- *     2. Add IN/OUT EDs are scheduled together at the minimum interval of all
- *        IN/OUT EDs.
+ *     2. Add IN/OUT EDs are scheduled together at the minimum interval of
+ *        all IN/OUT EDs.
  *
  *   This has the following consequences:
  *
  *     1. The minimum support polling rate is 2MS, and
- *     2. Some devices may get polled at a much higher rate than they request.
+ *     2. Some devices may get polled at a much higher rate than they
+ *        request.
  *
  ****************************************************************************/
 
@@ -1272,8 +1306,8 @@ static inline int sam_reminted(struct sam_ed_s *ed)
   unsigned int offset;
   uint32_t regval;
 
-  /* Disable periodic list processing.  Does this take effect immediately?  Or
-   * at the next SOF... need to check.
+  /* Disable periodic list processing.  Does this take effect immediately?
+   * Or at the next SOF... need to check.
    */
 
   flags   = enter_critical_section();
@@ -1372,8 +1406,8 @@ static inline int sam_reminted(struct sam_ed_s *ed)
           g_ohci.outinterval = interval;
         }
 
-      /* Set the head ED in all of the appropriate entries of the HCCA interrupt
-       * table (head might be NULL).
+      /* Set the head ED in all of the appropriate entries of the HCCA
+       * interrupt table (head might be NULL).
        */
 
       sam_setinttab((uint32_t)physhead, interval, offset);
@@ -1410,7 +1444,6 @@ static inline int sam_addisoced(const struct usbhost_epdesc_s *epdesc,
 #  warning "Isochronous endpoints not yet supported"
 #endif
   return -ENOSYS;
-
 }
 
 /****************************************************************************
@@ -1438,8 +1471,9 @@ static inline int sam_remisoced(struct sam_ed_s *ed)
  *
  ****************************************************************************/
 
-static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplist,
-                         struct sam_ed_s *ed, uint32_t dirpid, uint32_t toggle,
+static int sam_enqueuetd(struct sam_rhport_s *rhport,
+                         struct sam_eplist_s *eplist, struct sam_ed_s *ed,
+                         uint32_t dirpid, uint32_t toggle,
                          volatile uint8_t *buffer, size_t buflen)
 {
   struct sam_gtd_s *td;
@@ -1606,12 +1640,12 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
  * Name: sam_ep0dequeue
  *
  * Description:
- *   Remove the ED for EP0 from the control ED list and possibly disable control
- *   list processing.
+ *   Remove the ED for EP0 from the control ED list and possibly disable
+ *   control list processing.
  *
  * Input Parameters:
- *   ep0 - The control endpoint to be released.  May be the control endpoint for
- *         an attached hub.
+ *   ep0 - The control endpoint to be released.  May be the control endpoint
+ *     for an attached hub.
  *
  * Returned Value:
  *   None
@@ -1717,10 +1751,11 @@ static void sam_ep0dequeue(struct sam_eplist_s *ep0)
  * Name: sam_wdhwait
  *
  * Description:
- *   Set the request for the Writeback Done Head event well BEFORE enabling the
- *   transfer (as soon as we are absolutely committed to perform the transfer).
- *   We do this to minimize race conditions.  This logic would have to be
- *   expanded if we want to have more than one packet in flight at a time!
+ *   Set the request for the Writeback Done Head event well BEFORE enabling
+ *   the transfer (as soon as we are absolutely committed to perform the
+ *   transfer).  We do this to minimize race conditions.  This logic would
+ *   have to be expanded if we want to have more than one packet in flight
+ *   at a time!
  *
  ****************************************************************************/
 
@@ -1763,10 +1798,11 @@ static int sam_wdhwait(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
  * Name: sam_wdhasynch
  *
  * Description:
- *   Set the request for the Writeback Done Head callback well BEFORE enabling
- *   the transfer (as soon as we are absolutely committed to perform the
- *   transfer).  We do this to minimize race conditions.  This logic would have
- *   to be expanded if we want to have more than one packet in flight at a time!
+ *   Set the request for the Writeback Done Head callback well BEFORE
+ *   enabling the transfer (as soon as we are absolutely committed to
+ *   perform the transfer).  We do this to minimize race conditions.  This
+ *   logic would have to be expanded if we want to have more than one packet
+ *   in flight at a time!
  *
  ****************************************************************************/
 
@@ -1820,16 +1856,18 @@ static int sam_wdhasynch(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
  *
  ****************************************************************************/
 
-static int sam_ctrltd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplist,
-                      uint32_t dirpid, uint8_t *buffer, size_t buflen)
+static int sam_ctrltd(struct sam_rhport_s *rhport,
+                      struct sam_eplist_s *eplist, uint32_t dirpid,
+                      uint8_t *buffer, size_t buflen)
 {
   struct sam_ed_s *edctrl;
   uint32_t toggle;
   uint32_t regval;
   int ret;
+  int ret2;
 
-  /* Set the request for the Writeback Done Head event well BEFORE enabling the
-   * transfer.
+  /* Set the request for the Writeback Done Head event well BEFORE enabling
+   * the transfer.
    */
 
   edctrl = eplist->ed;
@@ -1854,11 +1892,12 @@ static int sam_ctrltd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplist,
   /* Then enqueue the transfer */
 
   edctrl->tdstatus = TD_CC_NOERROR;
-  ret = sam_enqueuetd(rhport, eplist, edctrl, dirpid, toggle, buffer, buflen);
+  ret = sam_enqueuetd(rhport, eplist, edctrl, dirpid, toggle, buffer,
+                      buflen);
   if (ret == OK)
     {
-      /* Set ControlListFilled.  This bit is used to indicate whether there are
-       * TDs on the Control list.
+      /* Set ControlListFilled.  This bit is used to indicate whether there
+       * are TDs on the Control list.
        */
 
       regval = sam_getreg(SAM_USBHOST_CMDST);
@@ -1881,20 +1920,29 @@ static int sam_ctrltd(struct sam_rhport_s *rhport, struct sam_eplist_s *eplist,
        * alarm semaphore counts.
        */
 
-      while (eplist->wdhwait)
+      while (eplist->wdhwait && ret >= 0)
         {
-          sam_takesem(&eplist->wdhsem);
+          ret = sam_takesem(&eplist->wdhsem);
         }
 
       /* Re-acquire the ECHI semaphore.  The caller expects to be holding
        * this upon return.
        */
 
-      sam_takesem(&g_ohci.exclsem);
+      ret2 = sam_takesem_noncancelable(&g_ohci.exclsem);
+      if (ret2 < 0)
+        {
+          ret = ret2;
+        }
+
+      if (ret < 0)
+        {
+          /* The thread was canceled */
+        }
 
       /* Check the TD completion status bits */
 
-      if (edctrl->tdstatus == TD_CC_NOERROR)
+      else if (edctrl->tdstatus == TD_CC_NOERROR)
         {
           ret = OK;
         }
@@ -1933,7 +1981,7 @@ static void sam_rhsc_bottomhalf(void)
     {
       rhport   = &g_ohci.rhport[rhpndx];
 
-      regaddr  = SAM_USBHOST_RHPORTST(rhpndx+1);
+      regaddr  = SAM_USBHOST_RHPORTST(rhpndx + 1);
       rhportst = sam_getreg(regaddr);
 
       usbhost_vtrace2(OHCI_VTRACE2_RHPORTST, rhpndx + 1, (uint16_t)rhportst);
@@ -1997,7 +2045,8 @@ static void sam_rhsc_bottomhalf(void)
                       rhport->hport.hport.speed = USB_SPEED_FULL;
                     }
 
-                  usbhost_vtrace1(OHCI_VTRACE1_SPEED, rhport->hport.hport.speed);
+                  usbhost_vtrace1(OHCI_VTRACE1_SPEED,
+                                  rhport->hport.hport.speed);
                 }
 
               /* Check if we are now disconnected */
@@ -2099,7 +2148,8 @@ static void sam_wdh_bottomhalf(void)
 
   /* Now read the done head. */
 
-  td = (struct sam_gtd_s *)sam_virtramaddr(g_hcca.donehead & HCCA_DONEHEAD_MASK);
+  td = (struct sam_gtd_s *)
+    sam_virtramaddr(g_hcca.donehead & HCCA_DONEHEAD_MASK);
   g_hcca.donehead = 0;
 
   /* Process each TD in the write done list */
@@ -2144,14 +2194,18 @@ static void sam_wdh_bottomhalf(void)
            * word.
            */
 
-          ed->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
+          ed->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >>
+                         GTD_STATUS_CC_SHIFT;
 
 #ifdef HAVE_USBHOST_TRACE
           if (ed->tdstatus != TD_CC_NOERROR)
             {
-              /* The transfer failed for some reason... dump some diagnostic info. */
+              /* The transfer failed for some reason... dump some diagnostic
+               * info.
+               */
 
-              usbhost_trace2(OHCI_TRACE2_WHDTDSTATUS, ed->tdstatus, ed->xfrtype);
+              usbhost_trace2(OHCI_TRACE2_WHDTDSTATUS, ed->tdstatus,
+                             ed->xfrtype);
             }
 #endif
 
@@ -2214,11 +2268,11 @@ static void sam_wdh_bottomhalf(void)
  * Name: sam_ohci_bottomhalf
  *
  * Description:
- *   OHCI interrupt bottom half.  This function runs on the high priority worker
- *   thread and was xcheduled when the last interrupt occurred.  The set of
- *   pending interrupts is provided as the argument.  OHCI interrupts were
- *   disabled when this function is scheduled so no further interrupts can
- *   occur until this work re-enables OHCI interrupts
+ *   OHCI interrupt bottom half.  This function runs on the high priority
+ *   worker thread and was xcheduled when the last interrupt occurred.  The
+ *   set of pending interrupts is provided as the argument.  OHCI interrupts
+ *   were disabled when this function is scheduled so no further interrupts
+ *   can occur until this work re-enables OHCI interrupts
  *
  ****************************************************************************/
 
@@ -2226,12 +2280,12 @@ static void sam_ohci_bottomhalf(void *arg)
 {
   uint32_t pending = (uint32_t)arg;
 
-  /* We need to have exclusive access to the OHCI data structures.  Waiting here
-   * is not a good thing to do on the worker thread, but there is no real option
-   * (other than to reschedule and delay).
+  /* We need to have exclusive access to the OHCI data structures.  Waiting
+   * here is not a good thing to do on the worker thread, but there is no
+   * real option (other than to reschedule and delay).
    */
 
-  sam_takesem(&g_ohci.exclsem);
+  sam_takesem_noncancelable(&g_ohci.exclsem);
 
   /* Root hub status change interrupt */
 
@@ -2247,9 +2301,9 @@ static void sam_ohci_bottomhalf(void *arg)
 
   if ((pending & OHCI_INT_WDH) != 0)
     {
-      /* The host controller just wrote the list of finished TDs into the HCCA
-       * done head.  This may include multiple packets that were transferred
-       * in the preceding frame.
+      /* The host controller just wrote the list of finished TDs into the
+       * HCCA done head.  This may include multiple packets that were
+       * transferred in the preceding frame.
        */
 
       usbhost_vtrace1(OHCI_VTRACE1_WDHINTR, pending);
@@ -2288,27 +2342,23 @@ static void sam_ohci_bottomhalf(void *arg)
 }
 
 /****************************************************************************
- * USB Host Controller Operations
- ****************************************************************************/
-
-/****************************************************************************
  * Name: sam_wait
  *
  * Description:
  *   Wait for a device to be connected or disconnected to/from a hub port.
  *
  * Input Parameters:
- *   conn - The USB host connection instance obtained as a parameter from the call to
- *      the USB driver initialization logic.
- *   hport - The location to return the hub port descriptor that detected the
- *      connection related event.
+ *   conn - The USB host connection instance obtained as a parameter from
+ *     the call to the USB driver initialization logic.
+ *   hport - The location to return the hub port descriptor that detected
+ *     the connection related event.
  *
  * Returned Value:
  *   Zero (OK) is returned on success when a device is connected or
- *   disconnected. This function will not return until either (1) a device is
- *   connected or disconnect to/from any hub port or until (2) some failure
- *   occurs.  On a failure, a negated errno value is returned indicating the
- *   nature of the failure
+ *   disconnected. This function will not return until either (1) a device
+ *   is connected or disconnect to/from any hub port or until (2) some
+ *   failure occurs.  On a failure, a negated errno value is returned
+ *   indicating the nature of the failure
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -2321,9 +2371,10 @@ static int sam_wait(struct usbhost_connection_s *conn,
 {
   irqstate_t flags;
   int rhpndx;
+  int ret;
 
-  /* Loop until a change in the connection state changes on one of the root hub
-   * ports or until an error occurs.
+  /* Loop until a change in the connection state changes on one of the root
+   * hub ports or until an error occurs.
    */
 
   flags = enter_critical_section();
@@ -2393,12 +2444,13 @@ static int sam_wait(struct usbhost_connection_s *conn,
       /* No changes on any port. Wait for a connection/disconnection event
        * and check again
        */
-      /* No changes on any port. Wait for a connection/disconnection event
-       * and check again
-       */
 
       g_ohci.pscwait = true;
-      sam_takesem(&g_ohci.pscsem);
+      ret = sam_takesem(&g_ohci.pscsem);
+      if (ret < 0)
+        {
+          return ret;
+        }
     }
 }
 
@@ -2422,8 +2474,8 @@ static int sam_wait(struct usbhost_connection_s *conn,
  *      device.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
@@ -2481,7 +2533,7 @@ static int sam_rh_enumerate(struct usbhost_connection_s *conn,
    * ports)
    */
 
-  regaddr = SAM_USBHOST_RHPORTST(rhpndx+1);
+  regaddr = SAM_USBHOST_RHPORTST(rhpndx + 1);
   sam_putreg(OHCI_RHPORTST_PRS, regaddr);
 
   /* Wait for the port reset to complete */
@@ -2530,7 +2582,7 @@ static int sam_enumerate(struct usbhost_connection_s *conn,
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_ep0configure
  *
  * Description:
@@ -2539,31 +2591,33 @@ static int sam_enumerate(struct usbhost_connection_s *conn,
  *   an external implementation of the enumeration logic.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   funcaddr - The USB address of the function containing the endpoint that EP0
- *     controls.  A funcaddr of zero will be received if no address is yet assigned
- *     to the device.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   funcaddr - The USB address of the function containing the endpoint that
+ *     EP0 controls.  A funcaddr of zero will be received if no address is
+ *     yet assigned to the device.
  *   speed - The speed of the port USB_SPEED_LOW, _FULL, or _HIGH
  *   maxpacketsize - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-                              uint8_t funcaddr, uint8_t speed, uint16_t maxpacketsize)
+                              uint8_t funcaddr, uint8_t speed,
+                              uint16_t maxpacketsize)
 {
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_eplist_s *ep0list = (struct sam_eplist_s *)ep0;
   struct sam_ed_s *edctrl;
   uint32_t hwctrl;
+  int ret;
 
   usbhost_vtrace2(OHCI_VTRACE2_EP0CONFIG, speed, funcaddr);
   DEBUGASSERT(rhport && maxpacketsize < 2048);
@@ -2572,7 +2626,11 @@ static int sam_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to EP0 and the control list */
 
-  sam_takesem(&g_ohci.exclsem);
+  ret = sam_takesem(&g_ohci.exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Set the EP0 ED control word (preserving only speed) */
 
@@ -2593,35 +2651,37 @@ static int sam_ep0configure(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
                   (uintptr_t)edctrl + sizeof(struct ohci_ed_s));
   sam_givesem(&g_ohci.exclsem);
 
-  usbhost_vtrace2(OHCI_VTRACE2_EP0CTRLED, RHPORT(rhport), (uint16_t)edctrl->hw.ctrl);
+  usbhost_vtrace2(OHCI_VTRACE2_EP0CTRLED, RHPORT(rhport),
+                  (uint16_t)edctrl->hw.ctrl);
   UNUSED(rhport);
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_epalloc
  *
  * Description:
  *   Allocate and configure one endpoint.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   epdesc - Describes the endpoint to be allocated.
  *   ep - A memory location provided by the caller in which to receive the
  *      allocated endpoint descriptor.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_epalloc(struct usbhost_driver_s *drvr,
-                       const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
+                       const struct usbhost_epdesc_s *epdesc,
+                       usbhost_ep_t *ep)
 {
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_eplist_s *eplist;
@@ -2631,8 +2691,8 @@ static int sam_epalloc(struct usbhost_driver_s *drvr,
   uintptr_t physaddr;
   int ret  = -ENOMEM;
 
-  /* Sanity check.  NOTE that this method should only be called if a device is
-   * connected (because we need a valid low speed indication).
+  /* Sanity check.  NOTE that this method should only be called if a device
+   * is connected (because we need a valid low speed indication).
    */
 
   DEBUGASSERT(rhport != NULL && epdesc != NULL && epdesc->hport != NULL);
@@ -2660,11 +2720,15 @@ static int sam_epalloc(struct usbhost_driver_s *drvr,
 
   nxsem_setprotocol(&eplist->wdhsem, SEM_PRIO_NONE);
 
-  /* We must have exclusive access to the ED pool, the bulk list, the periodic list
-   * and the interrupt table.
+  /* We must have exclusive access to the ED pool, the bulk list, the
+   * periodic list, and the interrupt table.
    */
 
-  sam_takesem(&g_ohci.exclsem);
+  ret = sam_takesem(&g_ohci.exclsem);
+  if (ret < 0)
+    {
+      goto errout_with_eplist;
+    }
 
   /* Allocate an ED and a tail TD for the new endpoint */
 
@@ -2800,30 +2864,31 @@ errout_with_ed:
   sam_edfree(ed);
 errout_with_semaphore:
   sam_givesem(&g_ohci.exclsem);
+errout_with_eplist:
   kmm_free(eplist);
 errout:
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_epfree
  *
  * Description:
  *   Free and endpoint previously allocated by DRVR_EPALLOC.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   ep - The endpoint to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
@@ -2833,6 +2898,7 @@ static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   struct sam_eplist_s *eplist = (struct sam_eplist_s *)ep;
   struct sam_ed_s *ed;
   int ret;
+  int ret2;
 
   DEBUGASSERT(rhport != NULL && eplist != NULL &&
               eplist->ed != NULL && eplist->tail != NULL);
@@ -2842,11 +2908,11 @@ static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   ed = eplist->ed;
   DEBUGASSERT((ed->hw.headp & ED_HEADP_ADDR_MASK) == ed->hw.tailp);
 
-  /* We must have exclusive access to the ED pool, the bulk list, the periodic list
-   * and the interrupt table.
+  /* We must have exclusive access to the ED pool, the bulk list, the
+   * periodic list and the interrupt table.
    */
 
-  sam_takesem(&g_ohci.exclsem);
+  ret2 = sam_takesem_noncancelable(&g_ohci.exclsem);
 
   /* Remove the ED to the correct list depending on the transfer type */
 
@@ -2883,34 +2949,35 @@ static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   nxsem_destroy(&eplist->wdhsem);
   kmm_free(eplist);
   sam_givesem(&g_ohci.exclsem);
-  return ret;
+  return ret < 0 ? ret : ret2;
 }
 
 /****************************************************************************
  * Name: sam_alloc
  *
  * Description:
- *   Some hardware supports special memory in which request and descriptor data can
- *   be accessed more efficiently.  This method provides a mechanism to allocate
- *   the request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kmm_malloc.
+ *   Some hardware supports special memory in which request and descriptor
+ *   data can be accessed more efficiently.  This method provides a
+ *   mechanism to allocate the request/descriptor memory.  If the underlying
+ *   hardware does not support such "special" memory, this functions may
+ *   simply map to kmm_malloc.
  *
- *   This interface was optimized under a particular assumption.  It was assumed
- *   that the driver maintains a pool of small, pre-allocated buffers for descriptor
- *   traffic.  NOTE that size is not an input, but an output:  The size of the
- *   pre-allocated buffer is returned.
+ *   This interface was optimized under a particular assumption.  It was
+ *   assumed that the driver maintains a pool of small, pre-allocated
+ *   buffers for descriptor traffic.  NOTE that size is not an input, but
+ *   an output:  The size of the pre-allocated buffer is returned.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   buffer - The address of a memory location provided by the caller in which to
- *     return the allocated buffer memory address.
- *   maxlen - The address of a memory location provided by the caller in which to
- *     return the maximum size of the allocated buffer memory.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   buffer - The address of a memory location provided by the caller in
+ *     which to return the allocated buffer memory address.
+ *   maxlen - The address of a memory location provided by the caller in
+ *     which to return the maximum size of the allocated buffer memory.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -2921,12 +2988,19 @@ static int sam_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 static int sam_alloc(struct usbhost_driver_s *drvr,
                      uint8_t **buffer, size_t *maxlen)
 {
-  int ret = -ENOMEM;
+  int ret;
+
   DEBUGASSERT(drvr && buffer && maxlen);
 
   /* We must have exclusive access to the transfer buffer pool */
 
-  sam_takesem(&g_ohci.exclsem);
+  ret = sam_takesem(&g_ohci.exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = -ENOMEM;
 
   *buffer = sam_tballoc();
   if (*buffer)
@@ -2943,19 +3017,20 @@ static int sam_alloc(struct usbhost_driver_s *drvr,
  * Name: sam_free
  *
  * Description:
- *   Some hardware supports special memory in which request and descriptor data
- *   can be accessed more efficiently.  This method provides a mechanism to
- *   free that request/descriptor memory.  If the underlying hardware does not
- *   support such "special" memory, this functions may simply map to kmm_free().
+ *   Some hardware supports special memory in which request and descriptor
+ *   data can be accessed more efficiently.  This method provides a
+ *   mechanism to free that request/descriptor memory.  If the underlying
+ *   hardware does not support such "special" memory, this functions may
+ *   simply map to kmm_free().
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call
- *      to the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   buffer - The address of the allocated buffer memory to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Never called from an interrupt handler.
@@ -2964,42 +3039,46 @@ static int sam_alloc(struct usbhost_driver_s *drvr,
 
 static int sam_free(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
+  int ret;
+
   DEBUGASSERT(drvr && buffer);
 
   /* We must have exclusive access to the transfer buffer pool */
 
-  sam_takesem(&g_ohci.exclsem);
+  ret = sam_takesem_noncancelable(&g_ohci.exclsem);
   sam_tbfree(buffer);
   sam_givesem(&g_ohci.exclsem);
-  return OK;
+  return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_ioalloc
  *
  * Description:
  *   Some hardware supports special memory in which larger IO buffers can
- *   be accessed more efficiently.  This method provides a mechanism to allocate
- *   the request/descriptor memory.  If the underlying hardware does not support
- *   such "special" memory, this functions may simply map to kumm_malloc.
+ *   be accessed more efficiently.  This method provides a mechanism to
+ *   allocate the request/descriptor memory.  If the underlying hardware
+ *   does not support such "special" memory, this functions may simply map
+ *   to kumm_malloc.
  *
- *   This interface differs from DRVR_ALLOC in that the buffers are variable-sized.
+ *   This interface differs from DRVR_ALLOC in that the buffers are
+ *   variable-sized.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   buffer - The address of a memory location provided by the caller in which to
- *     return the allocated buffer memory address.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   buffer - The address of a memory location provided by the caller in
+ *     which to return the allocated buffer memory address.
  *   buflen - The size of the buffer required.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_ioalloc(struct usbhost_driver_s *drvr, uint8_t **buffer,
                        size_t buflen)
@@ -3012,28 +3091,28 @@ static int sam_ioalloc(struct usbhost_driver_s *drvr, uint8_t **buffer,
   return *buffer ? OK : -ENOMEM;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_iofree
  *
  * Description:
- *   Some hardware supports special memory in which IO data can  be accessed more
- *   efficiently.  This method provides a mechanism to free that IO buffer
- *   memory.  If the underlying hardware does not support such "special" memory,
- *   this functions may simply map to kumm_free().
+ *   Some hardware supports special memory in which IO data can  be accessed
+ *   more efficiently.  This method provides a mechanism to free that IO
+ *   buffer memory.  If the underlying hardware does not support such
+ *   "special" memory, this functions may simply map to kumm_free().
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   buffer - The address of the allocated buffer memory to be freed.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   This function will *not* be called from an interrupt handler.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer)
 {
@@ -3049,31 +3128,31 @@ static int sam_iofree(struct usbhost_driver_s *drvr, uint8_t *buffer)
  * Name: sam_ctrlin and sam_ctrlout
  *
  * Description:
- * Description:
  *   Process a IN or OUT request on the control endpoint.  These methods
- *   will enqueue the request and wait for it to complete.  Only one transfer may be
- *   queued; Neither these methods nor the transfer() method can be called again
- *   until the control transfer functions returns.
+ *   will enqueue the request and wait for it to complete.  Only one
+ *   transfer may be queued; Neither these methods nor the transfer() method
+ *   can be called again until the control transfer functions returns.
  *
  *   These are blocking methods; these functions will not return until the
  *   control transfer has completed.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   ep0 - The control endpoint to send/receive the control request.
- *   req - Describes the request to be sent.  This request must lie in memory
- *      created by DRVR_ALLOC.
+ *   req - Describes the request to be sent.  This request must lie in
+ *     memory created by DRVR_ALLOC.
  *   buffer - A buffer used for sending the request and for returning any
  *     responses.  This buffer must be large enough to hold the length value
- *     in the request description. buffer must have been allocated using DRVR_ALLOC.
+ *     in the request description. buffer must have been allocated using
+ *     DRVR_ALLOC.
  *
- *   NOTE: On an IN transaction, req and buffer may refer to the same allocated
- *   memory.
+ *   NOTE: On an IN transaction, req and buffer may refer to the same
+ *   allocated memory.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -3095,7 +3174,8 @@ static int sam_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(OHCI_VTRACE2_CTRLIN, RHPORT(rhport), req->req);
 #else
-  uinfo("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %02x%02x\n",
+  uinfo("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x "
+        "len: %02x%02x\n",
         RHPORT(rhport), req->type, req->req, req->value[1],
         req->value[0], req->index[1], req->index[0], req->len[1],
         req->len[0]);
@@ -3103,7 +3183,11 @@ static int sam_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to EP0 and the control list */
 
-  sam_takesem(&g_ohci.exclsem);
+  ret = sam_takesem(&g_ohci.exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   len = sam_getle16(req->len);
   ret = sam_ctrltd(rhport, eplist, GTD_STATUS_DP_SETUP, (uint8_t *)req,
@@ -3144,7 +3228,8 @@ static int sam_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(OHCI_VTRACE2_CTRLOUT, RHPORT(rhport), req->req);
 #else
-  uinfo("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %02x%02x\n",
+  uinfo("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x "
+        "len: %02x%02x\n",
         RHPORT(rhport), req->type, req->req, req->value[1],
         req->value[0], req->index[1], req->index[0], req->len[1],
         req->len[0]);
@@ -3152,7 +3237,11 @@ static int sam_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   /* We must have exclusive access to EP0 and the control list */
 
-  sam_takesem(&g_ohci.exclsem);
+  ret = sam_takesem(&g_ohci.exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   len = sam_getle16(req->len);
   ret = sam_ctrltd(rhport, eplist, GTD_STATUS_DP_SETUP, (uint8_t *)req,
@@ -3186,14 +3275,14 @@ static int sam_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
  *   rhport - Internal driver root hub port state structure.
  *   eplist - The internal representation of the device endpoint on which
  *     to perform the transfer.
- *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
- *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or
+ *     received (IN endpoint).  buffer must have been allocated using
+ *     DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
- *
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -3259,30 +3348,32 @@ static int sam_transfer_common(struct sam_rhport_s *rhport,
 
   return ret;
 }
+
 /****************************************************************************
  * Name: sam_transfer
  *
  * Description:
  *   Process a request to handle a transfer descriptor.  This method will
- *   enqueue the transfer request, blocking until the transfer completes. Only
- *   one transfer may be  queued; Neither this method nor the ctrlin or
+ *   enqueue the transfer request, blocking until the transfer completes.
+ *   Only one transfer may be  queued; Neither this method nor the ctrlin or
  *   ctrlout methods can be called again until this function returns.
  *
  *   This is a blocking method; this functions will not return until the
  *   transfer has completed.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
- *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which to perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or
+ *     received (IN endpoint).  buffer must have been allocated using
+ *     DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure:
  *
  *     EAGAIN - If devices NAKs the transfer (or NYET or other error where
  *              it may be appropriate to restart the entire transaction).
@@ -3305,6 +3396,7 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   ssize_t nbytes;
   bool in;
   int ret;
+  int ret2;
 
   DEBUGASSERT(rhport && eplist && eplist->ed && eplist->tail &&
               buffer && buflen > 0);
@@ -3312,14 +3404,19 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   ed = eplist->ed;
   in = (ed->hw.ctrl & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN;
 
-  /* We must have exclusive access to the endpoint, the TD pool, the I/O buffer
-   * pool, the bulk and interrupt lists, and the HCCA interrupt table.
+  /* We must have exclusive access to the endpoint, the TD pool, the I/O
+   * buffer pool, the bulk and interrupt lists, and the HCCA interrupt
+   * table.
    */
 
-  sam_takesem(&g_ohci.exclsem);
+  ret = sam_takesem(&g_ohci.exclsem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
 
-  /* Set the request for the Writeback Done Head event well BEFORE enabling the
-   * transfer.
+  /* Set the request for the Writeback Done Head event well BEFORE enabling
+   * the transfer.
    */
 
   ret = sam_wdhwait(rhport, ed, buffer, buflen);
@@ -3347,6 +3444,7 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
    * or we will deadlock while waiting (because the working thread that
    * wakes this thread up needs the exclsem).
    */
+
 #warning REVISIT
   sam_givesem(&g_ohci.exclsem);
 
@@ -3354,16 +3452,25 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
    * alarm semaphore counts.
    */
 
-  while (eplist->wdhwait)
+  while (eplist->wdhwait && ret >= 0)
     {
-      sam_takesem(&eplist->wdhsem);
+      ret = sam_takesem(&eplist->wdhsem);
     }
 
   /* Re-acquire the OCHI semaphore.  The caller expects to be holding
    * this upon return.
    */
 
-  sam_takesem(&g_ohci.exclsem);
+  ret2 = sam_takesem(&g_ohci.exclsem);
+  if (ret2 < 0)
+    {
+      ret = ret2;
+    }
+
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Invalidate the D cache to force the ED to be reloaded from RAM */
 
@@ -3410,6 +3517,7 @@ static ssize_t sam_transfer(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
     }
 
 errout:
+
   /* Make sure that there is no outstanding request on this endpoint */
 
   eplist->wdhwait = false;
@@ -3528,20 +3636,21 @@ static void sam_asynch_completion(struct sam_eplist_s *eplist)
  *   ctrlout methods can be called again until the transfer completes.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which to
- *      perform the transfer.
- *   buffer - A buffer containing the data to be sent (OUT endpoint) or received
- *     (IN endpoint).  buffer must have been allocated using DRVR_ALLOC
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on
+ *     which to perform the transfer.
+ *   buffer - A buffer containing the data to be sent (OUT endpoint) or
+ *     received (IN endpoint).  buffer must have been allocated using
+ *     DRVR_ALLOC
  *   buflen - The length of the data to be sent or received.
  *   callback - This function will be called when the transfer completes.
- *   arg - The arbitrary parameter that will be passed to the callback function
- *     when the transfer completes.
+ *   arg - The arbitrary parameter that will be passed to the callback
+ *     function when the transfer completes.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
  * Assumptions:
  *   - Called from a single thread so no mutual exclusion is required.
@@ -3563,14 +3672,19 @@ static int sam_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
               buffer && buflen > 0 && buflen <= UINT16_MAX);
   ed = eplist->ed;
 
-  /* We must have exclusive access to the endpoint, the TD pool, the I/O buffer
-   * pool, the bulk and interrupt lists, and the HCCA interrupt table.
+  /* We must have exclusive access to the endpoint, the TD pool, the I/O
+   * buffer pool, the bulk and interrupt lists, and the HCCA interrupt
+   * table.
    */
 
-  sam_takesem(&g_ohci.exclsem);
+  ret = sam_takesem(&g_ohci.exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Set the request for the Writeback Done Head callback well BEFORE
-   * enabling thetransfer.
+   * enabling the transfer.
    */
 
   ret = sam_wdhasynch(rhport, ed, callback, arg, buffer, buflen);
@@ -3597,6 +3711,7 @@ static int sam_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   return OK;
 
 errout:
+
   /* Make sure that there is no outstanding request on this endpoint */
 
   eplist->callback = NULL;
@@ -3606,7 +3721,7 @@ errout:
 }
 #endif /* CONFIG_USBHOST_ASYNCH */
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_cancel
  *
  * Description:
@@ -3614,16 +3729,16 @@ errout:
  *   asynchronous transfer will complete normally with the error -ESHUTDOWN.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   ep - The IN or OUT endpoint descriptor for the device endpoint on which an
- *      asynchronous transfer should be transferred.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   ep - The IN or OUT endpoint descriptor for the device endpoint on which
+ *     an asynchronous transfer should be transferred.
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
@@ -3694,8 +3809,8 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
                           (uintptr_t)ed + sizeof(struct ohci_ed_s));
         }
 
-      /* Free all transfer descriptors that were connected to the ED.  In some
-       * race conditions with the hardware, this might be none.
+      /* Free all transfer descriptors that were connected to the ED.  In
+       * some race conditions with the hardware, this might be none.
        */
 
       while (td != (struct sam_gtd_s *)eplist->tail)
@@ -3749,7 +3864,7 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_connect
  *
  * Description:
@@ -3758,17 +3873,17 @@ static int sam_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
  *   and port description to the system.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
  *   hport - The descriptor of the hub port that detected the connection
- *      related event
+ *     related event
  *   connected - True: device connected; false: device disconnected
  *
  * Returned Value:
- *   On success, zero (OK) is returned. On a failure, a negated errno value is
- *   returned indicating the nature of the failure.
+ *   On success, zero (OK) is returned. On a failure, a negated errno value
+ *   is returned indicating the nature of the failure.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_USBHOST_HUB
 static int sam_connect(struct usbhost_driver_s *drvr,
@@ -3780,7 +3895,8 @@ static int sam_connect(struct usbhost_driver_s *drvr,
   /* Set the connected/disconnected flag */
 
   hport->connected = connected;
-  uinfo("Hub port %d connected: %s\n", hport->port, connected ? "YES" : "NO");
+  uinfo("Hub port %d connected: %s\n",
+        hport->port, connected ? "YES" : "NO");
 
   /* Report the connection event */
 
@@ -3803,17 +3919,18 @@ static int sam_connect(struct usbhost_driver_s *drvr,
  * Name: sam_disconnect
  *
  * Description:
- *   Called by the class when an error occurs and driver has been disconnected.
- *   The USB host driver should discard the handle to the class instance (it is
- *   stale) and not attempt any further interaction with the class driver instance
- *   (until a new instance is received from the create() method).  The driver
- *   should not called the class' disconnected() method.
+ *   Called by the class when an error occurs and driver has been
+ *   disconnected.  The USB host driver should discard the handle to the
+ *   class instance (it is stale) and not attempt any further interaction
+ *   with the class driver instance (until a new instance is received from
+ *   the create() method).  The driver should not called the class'
+ *   disconnected() method.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   hport - The port from which the device is being disconnected.  Might be a port
- *      on a hub.
+ *   drvr - The USB host driver instance obtained as a parameter from the
+ *     call to the class create() method.
+ *   hport - The port from which the device is being disconnected.  Might be
+ *     a port on a hub.
  *
  * Returned Value:
  *   None
@@ -4135,7 +4252,7 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
       g_ohci.rhport[i].connected = ((regval & OHCI_RHPORTST_CCS) != 0);
 
       usbhost_vtrace2(OHCI_VTRACE2_INITCONNECTED,
-                      i+1, g_ohci.rhport[i].connected);
+                      i + 1, g_ohci.rhport[i].connected);
     }
 
   /* Enable interrupts at the interrupt controller.  If ECHI is enabled,
@@ -4159,9 +4276,9 @@ struct usbhost_connection_s *sam_ohci_initialize(int controller)
  * Name: sam_ohci_tophalf
  *
  * Description:
- *   OHCI "Top Half" interrupt handler.  If both EHCI and OHCI are enabled, then
- *   EHCI will manage the common UHPHS interrupt and will forward the interrupt
- *   event to this function.
+ *   OHCI "Top Half" interrupt handler.  If both EHCI and OHCI are enabled,
+ *   then EHCI will manage the common UHPHS interrupt and will forward the
+ *   interrupt event to this function.
  *
  ****************************************************************************/
 
@@ -4178,16 +4295,17 @@ int sam_ohci_tophalf(int irq, void *context, FAR void *arg)
   usbhost_vtrace1(OHCI_VTRACE1_INTRPENDING, intst & inten);
 
 #ifdef CONFIG_SAMA5_EHCI
-  /* Check the Master Interrupt Enable bit (MIE).  It this function is called
-   * from the common UHPHS interrupt handler, there might be pending interrupts
-   * but with the overall interstate disabled.  This could never happen if only
-   * OHCI were enabled because we would never get here.
+  /* Check the Master Interrupt Enable bit (MIE).  It this function is
+   * called from the common UHPHS interrupt handler, there might be pending
+   * interrupts but with the overall interstate disabled.  This could never
+   * happen if only OHCI were enabled because we would never get here.
    */
 
   if ((inten & OHCI_INT_MIE) != 0)
 #endif
     {
       /* Mask out the interrupts that are not enabled */
+
       pending = intst & inten;
       if (pending != 0)
         {

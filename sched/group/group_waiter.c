@@ -91,7 +91,7 @@ void group_delwaiter(FAR struct task_group_s *group)
        * freed).
        */
 
-      sched_kfree(group);
+      kmm_free(group);
     }
 }
 

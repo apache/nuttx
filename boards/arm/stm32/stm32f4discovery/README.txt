@@ -1201,7 +1201,7 @@ Press Reset pin of the board and you will see:
     nsh> ?
     help usage:  help [-v] [<cmd>]
 
-      [           cmp         free        mh          sh          usleep
+      [           cmp         free        mh          source      usleep
       ?           dirname     help        mv          sleep       xd
       basename    dd          hexdump     mw          test
       break       echo        kill        pwd         time

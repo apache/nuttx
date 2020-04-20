@@ -401,7 +401,9 @@ static inline void esp32_serialout(struct esp32_dev_s *priv, int offset,
 static inline void esp32_restoreuartint(struct esp32_dev_s *priv,
                                         uint32_t intena)
 {
-  /* Restore the previous interrupt state (assuming all interrupts disabled) */
+  /* Restore the previous interrupt state
+   * (assuming all interrupts disabled)
+   */
 
   esp32_serialout(priv, UART_INT_ENA_OFFSET, intena);
 }

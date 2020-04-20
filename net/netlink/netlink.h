@@ -53,19 +53,21 @@
 #include "devif/devif.h"
 #include "socket/socket.h"
 
-#ifdef CONFIG_NET_NETLINK
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define NETLINK_NO_WAITER ((pid_t)-1)
+#ifndef CONFIG_NETLINK_ROUTE
+  #define netlink_device_notify(dev)
+#endif
+
+#ifdef CONFIG_NET_NETLINK
 
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
 
-/* This "connection" structure describes the underlying state of the socket. */
+/* This connection structure describes the underlying state of the socket. */
 
 struct netlink_conn_s
 {
@@ -73,17 +75,12 @@ struct netlink_conn_s
 
   dq_entry_t node;                   /* Supports a doubly linked list */
 
-  /* This is a list of NetLink connection callbacks.  Each callback
-   * represents a thread that is stalled, waiting for a device-specific
-   * event.
-   */
-
-  FAR struct devif_callback_s *list; /* NetLink callbacks */
-
   /* NetLink-specific content follows */
 
   uint32_t pid;                      /* Port ID (if bound) */
   uint32_t groups;                   /* Multicast groups mask (if bound) */
+  uint32_t dst_pid;                  /* Destination port ID */
+  uint32_t dst_groups;               /* Destination multicast groups mask */
   uint8_t crefs;                     /* Reference counts on this instance */
   uint8_t protocol;                  /* See NETLINK_* definitions */
 
@@ -95,7 +92,7 @@ struct netlink_conn_s
 
   /* Queued response data */
 
-  sq_queue_t resplist;               /* Singly linked list of responses*/
+  sq_queue_t resplist;               /* Singly linked list of responses */
 };
 
 /****************************************************************************
@@ -111,12 +108,6 @@ extern "C"
 #endif
 
 EXTERN const struct sock_intf_s g_netlink_sockif;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-struct sockaddr_nl;  /* Forward reference */
 
 /****************************************************************************
  * Name: netlink_initialize()
@@ -144,8 +135,8 @@ FAR struct netlink_conn_s *netlink_alloc(void);
  * Name: netlink_free()
  *
  * Description:
- *   Free a NetLink connection structure that is no longer in use. This should
- *   be done by the implementation of close().
+ *   Free a NetLink connection structure that is no longer in use. This
+ *   should be done by the implementation of close().
  *
  ****************************************************************************/
 
@@ -163,17 +154,6 @@ void netlink_free(FAR struct netlink_conn_s *conn);
  ****************************************************************************/
 
 FAR struct netlink_conn_s *netlink_nextconn(FAR struct netlink_conn_s *conn);
-
-/****************************************************************************
- * Name: netlink_active()
- *
- * Description:
- *   Find a connection structure that is the appropriate connection for the
- *   provided NetLink address
- *
- ****************************************************************************/
-
-FAR struct netlink_conn_s *netlink_active(FAR struct sockaddr_nl *addr);
 
 /****************************************************************************
  * Name: netlink_notifier_setup
@@ -255,7 +235,7 @@ void netlink_notifier_signal(FAR struct netlink_conn_s *conn);
  ****************************************************************************/
 
 FAR struct netlink_response_s *
-  netlink_tryget_response(FAR struct socket *psock);
+netlink_tryget_response(FAR struct netlink_conn_s *conn);
 
 /****************************************************************************
  * Name: netlink_get_response
@@ -276,7 +256,7 @@ FAR struct netlink_response_s *
  ****************************************************************************/
 
 FAR struct netlink_response_s *
-  netlink_get_response(FAR struct socket *psock);
+netlink_get_response(FAR struct netlink_conn_s *conn);
 
 /****************************************************************************
  * Name: netlink_check_response
@@ -289,24 +269,7 @@ FAR struct netlink_response_s *
  *
  ****************************************************************************/
 
-bool netlink_check_response(FAR struct socket *psock);
-
-/****************************************************************************
- * Name: netlink_notify_response
- *
- * Description:
- *   Notify a thread when a response is available.  The thread will be
- *   notified via work queue notifier when the response becomes available.
- *
- * Returned Value:
- *   Zero (OK) is returned if the response is already available.  No
- *     notification will be sent.
- *   One is returned if the notification was successfully setup.
- *   A negated errno value is returned on any failure.
- *
- ****************************************************************************/
-
-int netlink_notify_response(FAR struct socket *psock);
+bool netlink_check_response(FAR struct netlink_conn_s *conn);
 
 /****************************************************************************
  * Name: netlink_route_sendto()
@@ -317,26 +280,21 @@ int netlink_notify_response(FAR struct socket *psock);
  ****************************************************************************/
 
 #ifdef CONFIG_NETLINK_ROUTE
-ssize_t netlink_route_sendto(FAR struct socket *psock,
+ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
                              FAR const struct nlmsghdr *nlmsg,
                              size_t len, int flags,
                              FAR const struct sockaddr_nl *to,
                              socklen_t tolen);
-#endif
 
 /****************************************************************************
- * Name: netlink_route_recvfrom()
+ * Name: netlink_device_notify()
  *
  * Description:
- *   Perform the recvfrom() operation for the NETLINK_ROUTE protocol.
+ *   Perform the route broadcast for the NETLINK_ROUTE protocol.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NETLINK_ROUTE
-ssize_t netlink_route_recvfrom(FAR struct socket *psock,
-                               FAR struct nlmsghdr *nlmsg,
-                               size_t len, int flags,
-                               FAR struct sockaddr_nl *from);
+void netlink_device_notify(FAR struct net_driver_s *dev);
 #endif
 
 #undef EXTERN

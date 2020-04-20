@@ -38,6 +38,10 @@
 #ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_UDMAC_H
 #define __ARCH_ARM_SRC_CXD56XX_CXD56_UDMAC_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <stdint.h>
 
 #include "cxd56_dmac_common.h"
@@ -56,17 +60,17 @@
  *   - Memory address is always incremented.
  */
 
-#define CXD56_UDMA_XFERSIZE_SHIFT         (10)      /* Bits 10-11: Transfer size */
-#define CXD56_UDMA_XFERSIZE_MASK          (3 << CXD56_UDMA_XFERSIZE_SHIFT)
+#define CXD56_UDMA_XFERSIZE_SHIFT       (10)      /* Bits 10-11: Transfer size */
+#define CXD56_UDMA_XFERSIZE_MASK        (3 << CXD56_UDMA_XFERSIZE_SHIFT)
 #define CXD56_UDMA_XFERSIZE_BYTE        (0 << CXD56_UDMA_XFERSIZE_SHIFT)
 #define CXD56_UDMA_XFERSIZE_HWORD       (1 << CXD56_UDMA_XFERSIZE_SHIFT)
 #define CXD56_UDMA_XFERSIZE_WORD        (2 << CXD56_UDMA_XFERSIZE_SHIFT)
 
-#define CXD56_UDMA_SINGLE_MASK            (1 << 12) /* Bit 12: Single or Buffer full request */
+#define CXD56_UDMA_SINGLE_MASK          (1 << 12) /* Bit 12: Single or Buffer full request */
 #define CXD56_UDMA_SINGLE               (1 << 12) /*         1=Buffer full request */
 #define CXD56_UDMA_BUFFER_FULL          (0)       /*         0=Buffer full request */
 
-#define CXD56_UDMA_MEMINCR_MASK           (1 << 13) /* Bit 13: Increment memory address */
+#define CXD56_UDMA_MEMINCR_MASK         (1 << 13) /* Bit 13: Increment memory address */
 #define CXD56_UDMA_MEMINCR              (1 << 13) /*         1=Increment memory address */
 #define CXD56_UDMA_NOINCR               (0)       /*         0=No memory address increment */
 
@@ -144,10 +148,12 @@ DMA_HANDLE cxd56_udmachannel(void);
  * Name: cxd56_udmafree
  *
  * Description:
- *   Release a DMA channel.  If another thread is waiting for this DMA
- *   channel in a call to cxd56_udmachannel, then this function will re-assign
- *   the DMA channel to that thread and wake it up.
- *   NOTE:  The 'handle' used in this argument must NEVER be used again until
+ *   Release a DMA channel.
+ *   If another thread is waiting for this DMA channel in a call to
+ *   cxd56_udmachannel, then this function will re-assign the DMA channel to
+ *   that thread and wake it up.
+ *   NOTE:
+ *   The 'handle' used in this argument must NEVER be used again until
  *   cxd56_udmachannel() is called again to re-gain access to the channel.
  *
  * Returned Value:

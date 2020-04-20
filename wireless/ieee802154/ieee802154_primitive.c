@@ -51,9 +51,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* NOTE:  The CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE options is marked as marked
- * 'experimental' and with the default 0 zero because there are no interrupt
- * level allocations performed by the current IEEE 802.15.4 MAC code.
+/* NOTE:  The CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE options is marked as
+ * marked 'experimental' and with the default 0 zero because there are no
+ * interrupt level allocations performed by the current IEEE 802.15.4 MAC
+ * code.
  */
 
 #if !defined(CONFIG_IEEE802154_PRIMITIVE_PREALLOC) || \
@@ -101,8 +102,8 @@ struct ieee802154_priv_primitive_s
 #if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > 0
 #if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE
 /* The g_primfree is a list of primitive structures that are available for
- * general use.  The number of messages in this list is a system configuration
- * item.
+ * general use.  The number of messages in this list is a system
+ * configuration item.
  */
 
 static struct ieee802154_priv_primitive_s *g_primfree;
@@ -118,7 +119,8 @@ static struct ieee802154_priv_primitive_s *g_primfree_irq;
 
 /* Pool of pre-allocated primitive structures */
 
-static struct ieee802154_priv_primitive_s g_primpool[CONFIG_IEEE802154_PRIMITIVE_PREALLOC];
+static struct ieee802154_priv_primitive_s
+                g_primpool[CONFIG_IEEE802154_PRIMITIVE_PREALLOC];
 #endif /* CONFIG_IEEE802154_PRIMITIVE_PREALLOC > 0 */
 
 static bool g_poolinit = false;
@@ -159,8 +161,8 @@ void ieee802154_primitivepool_initialize(void)
   int remaining = CONFIG_IEEE802154_PRIMITIVE_PREALLOC;
 
 #if CONFIG_IEEE802154_PRIMITIVE_PREALLOC > CONFIG_IEEE802154_PRIMITIVE_IRQRESERVE
-  /* Initialize g_primfree, the list of primitive structures that are available
-   * for general use.
+  /* Initialize g_primfree, the list of primitive structures that are
+   * available for general use.
    */
 
   g_primfree = NULL;
@@ -228,9 +230,9 @@ void ieee802154_primitivepool_initialize(void)
  *   None
  *
  * Returned Value:
- *   A reference to the allocated primitive structure.  All user fields in this
- *   structure have been zeroed.  On a failure to allocate, NULL is
- *   returned.
+ *   A reference to the allocated primitive structure.
+ *   All user fields in this structure have been zeroed.
+ *   On a failure to allocate, NULL is returned.
  *
  ****************************************************************************/
 
@@ -317,7 +319,9 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void)
               return NULL;
             }
 
-          /* Remember that this primitive structure was dynamically allocated */
+          /* Remember that this primitive structure
+           * was dynamically allocated
+           */
 
           pool = POOL_PRIMITIVE_DYNAMIC;
         }
@@ -341,8 +345,8 @@ FAR struct ieee802154_primitive_s *ieee802154_primitive_allocate(void)
  * Name: ieee802154_primitive_free
  *
  * Description:
- *   The ieee802154_primitive_free function will return a primitive structure to
- *   the free pool of  messages if it was a pre-allocated primitive
+ *   The ieee802154_primitive_free function will return a primitive structure
+ *   to the free pool of  messages if it was a pre-allocated primitive
  *   structure. If the primitive structure was allocated dynamically it will
  *   be deallocated.
  *
@@ -409,7 +413,7 @@ void ieee802154_primitive_free(FAR struct ieee802154_primitive_s *prim)
       /* Otherwise, deallocate it. */
 
       DEBUGASSERT(priv->pool == POOL_PRIMITIVE_DYNAMIC);
-      sched_kfree(priv);
+      kmm_free(priv);
     }
 #endif
 

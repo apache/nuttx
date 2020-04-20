@@ -57,7 +57,12 @@ static int g_chargerinitialized = 0;
  *
  ****************************************************************************/
 
-int board_charger_initialize(FAR const char *devpath, FAR int16_t *gaugemeter)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+int board_charger_initialize(FAR const char *devpath,
+                             FAR int16_t *gaugemeter)
 {
   int ret;
 
@@ -69,6 +74,7 @@ int board_charger_initialize(FAR const char *devpath, FAR int16_t *gaugemeter)
           _err("ERROR: Failed to initialize charger.\n");
           return -ENODEV;
         }
+
       g_chargerinitialized = 1;
     }
 
@@ -95,6 +101,7 @@ int board_charger_uninitialize(FAR const char *devpath)
           _err("ERROR: Failed to finalize charger.\n");
           return -ENODEV;
         }
+
       g_chargerinitialized = 0;
     }
 

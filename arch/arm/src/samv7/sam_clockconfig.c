@@ -266,13 +266,13 @@ static inline void sam_pmcsetup(void)
 
   if ((getreg32(SAM_PMC_MCKR) & PMC_MCKR_PLLADIV2) != 0)
     {
-      /* Divider = 480 Mhz / 2 / 48 Mhz = 5 */
+      /* Divider = 480 MHz / 2 / 48 MHz = 5 */
 
       regval |=  PMC_USB_USBDIV(4);
     }
   else
     {
-      /* Divider = 480 Mhz / 1 / 48 Mhz = 10 */
+      /* Divider = 480 MHz / 1 / 48 MHz = 10 */
 
       regval |=  PMC_USB_USBDIV(9);
     }

@@ -62,28 +62,28 @@ extern "C"
 
 /* Register Offsets *********************************************************/
 
-#define CXD56_SDHCI_DSADDR_OFFSET     (0x0000) /* DMA System Address Register */
-#define CXD56_SDHCI_BLKATTR_OFFSET    (0x0004) /* Block Attributes Register */
-#define CXD56_SDHCI_CMDARG_OFFSET     (0x0008) /* Command Argument Register */
-#define CXD56_SDHCI_XFERTYP_OFFSET    (0x000c) /* Transfer Type Register */
-#define CXD56_SDHCI_CMDRSP0_OFFSET    (0x0010) /* Command Response 0 */
-#define CXD56_SDHCI_CMDRSP1_OFFSET    (0x0014) /* Command Response 1 */
-#define CXD56_SDHCI_CMDRSP2_OFFSET    (0x0018) /* Command Response 2 */
-#define CXD56_SDHCI_CMDRSP3_OFFSET    (0x001c) /* Command Response 3 */
-#define CXD56_SDHCI_DATPORT_OFFSET    (0x0020) /* Buffer Data Port Register */
-#define CXD56_SDHCI_PRSSTAT_OFFSET    (0x0024) /* Present State Register */
-#define CXD56_SDHCI_PROCTL_OFFSET     (0x0028) /* Protocol Control Register */
-#define CXD56_SDHCI_SYSCTL_OFFSET     (0x002c) /* System Control Register */
-#define CXD56_SDHCI_IRQSTAT_OFFSET    (0x0030) /* Interrupt Status Register */
-#define CXD56_SDHCI_IRQSTATEN_OFFSET  (0x0034) /* Interrupt Status Enable Register */
-#define CXD56_SDHCI_IRQSIGEN_OFFSET   (0x0038) /* Interrupt Signal Enable Register */
-#define CXD56_SDHCI_AC12ERR_OFFSET    (0x003c) /* Auto CMD12 Error Status Register */
-#define CXD56_SDHCI_HTCAPBLT_OFFSET   (0x0040) /* Host Controller Capabilities */
-#define CXD56_SDHCI_FEVT_OFFSET       (0x0050) /* Force Event Register */
-#define CXD56_SDHCI_ADMAES_OFFSET     (0x0054) /* ADMA Error Status Register */
-#define CXD56_SDHCI_ADSADDR_OFFSET    (0x0058) /* ADMA System Address Register */
-#define CXD56_SDHCI_VENDSPEC_OFFSET   (0x0110) /* Vendor Specific Control */
-#define CXD56_SDHCI_OTHERIOLL_OFFSET  (0x021C) /* IO Pin Control       */
+#define CXD56_SDHCI_DSADDR_OFFSET      (0x0000) /* DMA System Address Register */
+#define CXD56_SDHCI_BLKATTR_OFFSET     (0x0004) /* Block Attributes Register */
+#define CXD56_SDHCI_CMDARG_OFFSET      (0x0008) /* Command Argument Register */
+#define CXD56_SDHCI_XFERTYP_OFFSET     (0x000c) /* Transfer Type Register */
+#define CXD56_SDHCI_CMDRSP0_OFFSET     (0x0010) /* Command Response 0 */
+#define CXD56_SDHCI_CMDRSP1_OFFSET     (0x0014) /* Command Response 1 */
+#define CXD56_SDHCI_CMDRSP2_OFFSET     (0x0018) /* Command Response 2 */
+#define CXD56_SDHCI_CMDRSP3_OFFSET     (0x001c) /* Command Response 3 */
+#define CXD56_SDHCI_DATPORT_OFFSET     (0x0020) /* Buffer Data Port Register */
+#define CXD56_SDHCI_PRSSTAT_OFFSET     (0x0024) /* Present State Register */
+#define CXD56_SDHCI_PROCTL_OFFSET      (0x0028) /* Protocol Control Register */
+#define CXD56_SDHCI_SYSCTL_OFFSET      (0x002c) /* System Control Register */
+#define CXD56_SDHCI_IRQSTAT_OFFSET     (0x0030) /* Interrupt Status Register */
+#define CXD56_SDHCI_IRQSTATEN_OFFSET   (0x0034) /* Interrupt Status Enable Register */
+#define CXD56_SDHCI_IRQSIGEN_OFFSET    (0x0038) /* Interrupt Signal Enable Register */
+#define CXD56_SDHCI_AC12ERR_OFFSET     (0x003c) /* Auto CMD12 Error Status Register */
+#define CXD56_SDHCI_HTCAPBLT_OFFSET    (0x0040) /* Host Controller Capabilities */
+#define CXD56_SDHCI_FEVT_OFFSET        (0x0050) /* Force Event Register */
+#define CXD56_SDHCI_ADMAES_OFFSET      (0x0054) /* ADMA Error Status Register */
+#define CXD56_SDHCI_ADSADDR_OFFSET     (0x0058) /* ADMA System Address Register */
+#define CXD56_SDHCI_VENDSPEC_OFFSET    (0x0110) /* Vendor Specific Control */
+#define CXD56_SDHCI_OTHERIOLL_OFFSET   (0x021C) /* IO Pin Control       */
 #define CXD56_SDHCI_USERDEF1CTL_OFFSET (0x0270) /* User Define1 Control Register */
 #define CXD56_SDHCI_USERDEF2CTL_OFFSET (0x0274) /* User Define2 Control Register */
 
@@ -120,7 +120,7 @@ extern "C"
 
 /* DMA System Address Register */
 
-#define SDHCI_DSADDR_SHIFT               (1)       /* Bits 1-31: DMA System Address */
+#define SDHCI_DSADDR_SHIFT               (1)          /* Bits 1-31: DMA System Address */
 #define SDHCI_DSADDR_MASK                (0xfffffffe) /* Bits 0-1: Reserved */
 
 /* Block Attributes Register */
@@ -151,17 +151,20 @@ extern "C"
 #define SDHCI_XFERTYP_RSPTYP_LEN136      (1 << SDHCI_XFERTYP_RSPTYP_SHIFT) /* Response length 136 */
 #define SDHCI_XFERTYP_RSPTYP_LEN48       (2 << SDHCI_XFERTYP_RSPTYP_SHIFT) /* Response length 48 */
 #define SDHCI_XFERTYP_RSPTYP_LEN48BSY    (3 << SDHCI_XFERTYP_RSPTYP_SHIFT) /* Response length 48, check busy */
+
                                                   /* Bit 18: Reserved */
 
 #define SDHCI_XFERTYP_CCCEN              (1 << 19) /* Bit 19: Command CRC Check Enable */
 #define SDHCI_XFERTYP_CICEN              (1 << 20) /* Bit 20: Command Index Check Enable */
 #define SDHCI_XFERTYP_DPSEL              (1 << 21) /* Bit 21: Data Present Select */
 #define SDHCI_XFERTYP_CMDTYP_SHIFT       (22)      /* Bits 22-23: Command Type */
+
 #define SDHCI_XFERTYP_CMDTYP_MASK        (3 << SDHCI_XFERTYP_CMDTYP_SHIFT)
 #define SDHCI_XFERTYP_CMDTYP_NORMAL      (0 << SDHCI_XFERTYP_CMDTYP_SHIFT) /* Normal other commands */
 #define SDHCI_XFERTYP_CMDTYP_SUSPEND     (1 << SDHCI_XFERTYP_CMDTYP_SHIFT) /* Suspend CMD52 for writing bus suspend in CCCR */
 #define SDHCI_XFERTYP_CMDTYP_RESUME      (2 << SDHCI_XFERTYP_CMDTYP_SHIFT) /* Resume CMD52 for writing function select in CCCR */
 #define SDHCI_XFERTYP_CMDTYP_ABORT       (3 << SDHCI_XFERTYP_CMDTYP_SHIFT) /* Abort CMD12, CMD52 for writing I/O abort in CCCR */
+
 #define SDHCI_XFERTYP_CMDINX_SHIFT       (24)      /* Bits 24-29: Command Index */
 #define SDHCI_XFERTYP_CMDINX_MASK        (63 << SDHCI_XFERTYP_CMDINX_SHIFT)
                                                   /* Bits 30-31: Reserved */
@@ -202,13 +205,17 @@ extern "C"
 
 #define SDHCI_PROCTL_LCTL                (1 << 0)  /* Bit 0:  LED Control */
 #define SDHCI_PROCTL_DTW_SHIFT           (1)       /* Bits 1-2: Data Transfer Width */
+
 #define SDHCI_PROCTL_DTW_MASK            (1 << SDHCI_PROCTL_DTW_SHIFT)
 #define SDHCI_PROCTL_DTW_1BIT            (0 << SDHCI_PROCTL_DTW_SHIFT) /* 1-bit mode */
 #define SDHCI_PROCTL_DTW_4BIT            (1 << SDHCI_PROCTL_DTW_SHIFT) /* 4-bit mode */
+
 #define SDHCI_PROCTL_DMAS_SHIFT          (3)       /* Bits 8-9: DMA Select */
+
 #define SDHCI_PROCTL_DMAS_MASK           (3 << SDHCI_PROCTL_DMAS_SHIFT)
 #define SDHCI_PROCTL_DMAS_NODMA          (0 << SDHCI_PROCTL_DMAS_SHIFT) /* No DMA or simple DMA is selected */
 #define SDHCI_PROCTL_DMAS_ADMA2          (2 << SDHCI_PROCTL_DMAS_SHIFT) /* ADMA2 is selected */
+
 #define SDHCI_PROCTL_CDTL                (1 << 6)  /* Bit 6:  Card Detect Test Level */
 #define SDHCI_PROCTL_CDSS                (1 << 7)  /* Bit 7:  Card Detect Signal Selection */
                                                    /* Bits 10-15: Reserved */
@@ -237,13 +244,14 @@ extern "C"
 #define SDHCI_SYSCTL_DTOCV_SHIFT         (16)      /* Bits 16-19: Data Timeout Counter Value */
 #define SDHCI_SYSCTL_DTOCV_MASK          (0xf << SDHCI_SYSCTL_DTOCV_SHIFT)
 #define SDHCI_SYSCTL_DTOCV_MUL(n)        (((n)-213) << SDHCI_SYSCTL_DTOCV_SHIFT) /* SDCLK x n, n=213..227 */
+
                                                   /* Bits 20-23: Reserved */
 
 #define SDHCI_SYSCTL_RSTA                (1 << 24) /* Bit 24: Software Reset For ALL */
 #define SDHCI_SYSCTL_RSTC                (1 << 25) /* Bit 25: Software Reset For CMD Line */
 #define SDHCI_SYSCTL_RSTD                (1 << 26) /* Bit 26: Software Reset For DAT Line */
 #define SDHCI_SYSCTL_INITA               (1 << 27) /* Bit 27: Initialization Active */
-                                                  /* Bits 28-31: Reserved */
+                                                   /* Bits 28-31: Reserved */
 
 /* Interrupt Status Register, Interrupt Status Enable Register,
  * and Interrupt Signal Enable Register
@@ -294,8 +302,7 @@ extern "C"
 
 /* Host Controller Capabilities */
 
-                                                  /* Bits 0-15: Reserved */
-
+                                                   /* Bits 0-15: Reserved */
 #define SDHCI_HTCAPBLT_MBL_SHIFT         (16)      /* Bits 16-18: Max Block Length */
 #define SDHCI_HTCAPBLT_MBL_MASK          (7 << SDHCI_HTCAPBLT_MBL_SHIFT)
 #define SDHCI_HTCAPBLT_MBL_512BYTES      (0 << SDHCI_HTCAPBLT_MBL_SHIFT)
@@ -311,7 +318,7 @@ extern "C"
 #define SDHCI_HTCAPBLT_VS33              (1 << 24) /* Bit 24: Voltage Support 3.3 V */
 #define SDHCI_HTCAPBLT_VS30              (1 << 25) /* Bit 25: Voltage Support 3.0 V */
 #define SDHCI_HTCAPBLT_VS18              (1 << 26) /* Bit 26: Voltage Support 1.8 */
-                                                  /* Bits 27-31: Reserved */
+                                                   /* Bits 27-31: Reserved */
 
 /* Force Event Register */
 
@@ -350,6 +357,7 @@ extern "C"
 #define SDHCI_ADMAES_FDS                 (1 << SDHCI_ADMAES_ADMAES_SHIFT) /* Fetch descriptor */
 #define SDHCI_ADMAES_CADR                (2 << SDHCI_ADMAES_ADMAES_SHIFT) /* Change address */
 #define SDHCI_ADMAES_TFR                 (3 << SDHCI_ADMAES_ADMAES_SHIFT) /* Transfer data */
+
 #define SDHCI_ADMAES_LME                 (1 << 2)  /* Bit 2:  ADMA Length Mismatch Error */
 #define SDHCI_ADMAES_DCE                 (1 << 3)  /* Bit 3:  ADMA Descriptor Error */
                                                    /* Bits 4-31: Reserved */
@@ -368,7 +376,7 @@ extern "C"
 
 #define SDHCI_VENDOR_INTSTVAL_SHIFT      (16)      /* Bits 16-23: Internal State Value */
 #define SDHCI_VENDOR_INTSTVAL_MASK       (0xff << SDHCI_VENDOR_INTSTVAL_SHIFT)
-                                                  /* Bits 24-31: Reserved */
+                                                   /* Bits 24-31: Reserved */
 
 /* User Define1 Control Register */
 
@@ -408,13 +416,14 @@ extern "C"
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 struct sdio_dev_s;
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -466,6 +475,7 @@ FAR struct sdio_dev_s *cxd56_sdhci_finalize(int slotno);
  *   None
  *
  ****************************************************************************/
+
 void cxd56_sdhci_mediachange(FAR struct sdio_dev_s *dev);
 
 /****************************************************************************
@@ -483,6 +493,7 @@ void cxd56_sdhci_mediachange(FAR struct sdio_dev_s *dev);
  *   None
  *
  ****************************************************************************/
+
 void cxd56_sdhci_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
 
 #undef EXTERN

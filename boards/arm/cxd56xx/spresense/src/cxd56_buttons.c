@@ -61,8 +61,9 @@
  * Public Functions
  ****************************************************************************/
 
-/* Below functions are template to support the Board button for NuttX original
- * feature. If you support the feature, copy this file into your board
+/* Below functions are template to support the Board button for NuttX
+ * original feature.
+ * If you support the feature, copy this file into your board
  * directory and implement the contents.
  */
 

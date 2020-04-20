@@ -5,7 +5,7 @@
 
 config LIBC_IOCTL_VARIADIC
 	bool "Enable variadic ioctl()"
-	default n
+	default y
 	---help---
 		By default, NuttX implements the "old style," three-parameter,
 		ioctl() interface with this function prototype:

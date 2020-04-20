@@ -134,7 +134,7 @@
 /* Limits of integer types capable of holding object pointers */
 
 #define INTPTR_MIN          PTR_MIN
-#define INTPTR_MAX          PTR_MIN
+#define INTPTR_MAX          PTR_MAX
 #define UINTPTR_MAX         UPTR_MAX
 
 /* Limits of greatest-width integer types */
@@ -200,8 +200,8 @@
  * architecture-specific logic with leading underscore character. This file
  * typedef's these to the final name without the underscore character.  This
  * roundabout way of doings things allows the stdint.h to be removed from the
- * include/ directory in the event that the user prefers to use the definitions
- * provided by their toolchain header files.
+ * include/ directory in the event that the user prefers to use the
+ * definitions provided by their toolchain header files.
  */
 
 typedef _int8_t             int8_t;

@@ -197,7 +197,7 @@
 #  define SYSCON_FLASHCFG_TIM_3           (2 << SYSCON_FLASHCFG_TIM_SHIFT) /* 3 CPU clock <= 60 MHz CPU clock */
 #  define SYSCON_FLASHCFG_TIM_4           (3 << SYSCON_FLASHCFG_TIM_SHIFT) /* 4 CPU clock <= 80 MHz CPU clock */
 #  define SYSCON_FLASHCFG_TIM_5           (4 << SYSCON_FLASHCFG_TIM_SHIFT) /* 5 CPU clock <= 100 MHz CPU clock
-                                                                            * (Up to 120 Mhz for LPC1759/69 only */
+                                                                            * (Up to 120 MHz for LPC1759/69 only */
 #  define SYSCON_FLASHCFG_TIM_6           (5 << SYSCON_FLASHCFG_TIM_SHIFT) /* "safe" setting for any conditions */
                                                       /* Bits 16-31:  Reserved */
 

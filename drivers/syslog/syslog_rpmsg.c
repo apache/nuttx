@@ -88,8 +88,8 @@ struct syslog_rpmsg_s
  ****************************************************************************/
 
 static void syslog_rpmsg_work(FAR void *priv_);
-static void syslog_rpmsg_putc(FAR struct syslog_rpmsg_s *priv, int ch,
-                              bool last);
+static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
+                                 bool last);
 static int  syslog_rpmsg_flush(void);
 static ssize_t syslog_rpmsg_write(FAR const char *buffer, size_t buflen);
 static void syslog_rpmsg_device_created(FAR struct rpmsg_device *rdev,
@@ -105,14 +105,6 @@ static int  syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
  ****************************************************************************/
 
 static struct syslog_rpmsg_s g_syslog_rpmsg;
-
-static const struct syslog_channel_s g_syslog_rpmsg_channel =
-{
-  up_putc,
-  up_putc,
-  syslog_rpmsg_flush,
-  syslog_rpmsg_write,
-};
 
 /****************************************************************************
  * Private Functions
@@ -177,15 +169,16 @@ static void syslog_rpmsg_work(FAR void *priv_)
   rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len);
 }
 
-static void syslog_rpmsg_putc(FAR struct syslog_rpmsg_s *priv, int ch,
-                              bool last)
+static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
+                                 bool last)
 {
   if (B2C_REM(priv->head) == 0)
     {
       priv->buffer[B2C_OFF(priv->head)] = 0;
     }
 
-  priv->buffer[B2C_OFF(priv->head)] |= (ch & 0xff) << (8 * B2C_REM(priv->head));
+  priv->buffer[B2C_OFF(priv->head)] |= (ch & 0xff) <<
+                                       (8 * B2C_REM(priv->head));
 
   priv->head += 1;
   if (priv->head >= C2B(priv->size))
@@ -244,7 +237,7 @@ static ssize_t syslog_rpmsg_write(FAR const char *buffer, size_t buflen)
   flags = enter_critical_section();
   for (nwritten = 1; nwritten <= buflen; nwritten++)
     {
-      syslog_rpmsg_putc(priv, *buffer++, nwritten == buflen);
+      syslog_rpmsg_putchar(priv, *buffer++, nwritten == buflen);
     }
 
   leave_critical_section(flags);
@@ -284,8 +277,9 @@ static void syslog_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
     }
 }
 
-static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
-                               size_t len, uint32_t src, FAR void *priv_)
+static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
+                               FAR void *data, size_t len, uint32_t src,
+                               FAR void *priv_)
 {
   FAR struct syslog_rpmsg_s *priv = priv_;
   FAR struct syslog_rpmsg_header_s *header = data;
@@ -352,14 +346,14 @@ int syslog_rpmsg_putc(int ch)
   irqstate_t flags;
 
   flags = enter_critical_section();
-  syslog_rpmsg_putc(priv, ch, true);
+  syslog_rpmsg_putchar(priv, ch, true);
   leave_critical_section(flags);
 
   return ch;
 }
 
-int syslog_rpmsg_init_early(FAR const char *cpuname, FAR void *buffer,
-                            size_t size)
+void syslog_rpmsg_init_early(FAR const char *cpuname, FAR void *buffer,
+                             size_t size)
 {
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
   char prev, cur;
@@ -403,8 +397,6 @@ out:
       priv->head = priv->tail = 0;
       memset(priv->buffer, 0, size);
     }
-
-  return syslog_channel(&g_syslog_rpmsg_channel);
 }
 
 int syslog_rpmsg_init(void)

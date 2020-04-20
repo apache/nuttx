@@ -124,12 +124,12 @@ endif
 
 ifeq ($(CONFIG_MODLIB_SYSTEM_SYMTAB),y)
 
-modlib_symtab.c : $(CSVFILES) $(MKSYMTAB)
+modlib_sys_symtab.c : $(CSVFILES) $(MKSYMTAB)
 	$(Q) cat $(CSVFILES) | LC_ALL=C sort >$@.csv
 	$(Q) $(MKSYMTAB) $@.csv $@ $(CONFIG_MODLIB_SYMTAB_ARRAY) $(CONFIG_MODLIB_NSYMBOLS_VAR)
 	$(Q) rm -f $@.csv
 
-CSRCS += modlib_symtab.c
+CSRCS += modlib_sys_symtab.c
 
 endif
 
@@ -168,14 +168,14 @@ endif
 
 ifneq ($(BIN),$(UBIN))
 $(UBIN):
-	$(Q) $(MAKE) $(UBIN) BIN=$(UBIN) BINDIR=ubin TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
+	$(Q) $(MAKE) $(UBIN) BIN=$(UBIN) BINDIR=ubin TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 
 # C library for the kernel phase of the two-pass kernel build
 
 ifneq ($(BIN),$(KBIN))
 $(KBIN):
-	$(Q) $(MAKE) $(KBIN) BIN=$(KBIN) BINDIR=kbin TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
+	$(Q) $(MAKE) $(KBIN) BIN=$(KBIN) BINDIR=kbin TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 
 # Context

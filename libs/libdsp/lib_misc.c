@@ -43,9 +43,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#define VECTOR2D_SATURATE_MAG_MIN (1e-10f)
+#define FAST_ATAN2_SMALLNUM       (1e-10f)
 
 /****************************************************************************
  * Public Functions
@@ -125,9 +124,9 @@ void vector2d_saturate(FAR float *x, FAR float *y, float max)
 
   mag = vector2d_mag(*x, *y);
 
-  if (mag < 1e-10f)
+  if (mag < VECTOR2D_SATURATE_MAG_MIN)
     {
-      mag = 1e-10f;
+      mag = VECTOR2D_SATURATE_MAG_MIN;
     }
 
   if (mag > max)
@@ -327,7 +326,7 @@ float fast_cos2(float angle)
  *   Fast atan2 calculation
  *
  * REFERENCE:
- *   https://dspguru.com/dsp/tricks/fixed-point-atan2-with-self-normalization/
+ * https://dspguru.com/dsp/tricks/fixed-point-atan2-with-self-normalization/
  *
  * Input Parameters:
  *   x - (in)
@@ -349,7 +348,7 @@ float fast_atan2(float y, float x)
 
   /* Get absolute value of y and add some small number to prevent 0/0 */
 
-  abs_y = fabsf(y)+1e-10f;
+  abs_y = fabsf(y) + FAST_ATAN2_SMALLNUM;
 
   /* Calculate angle */
 
@@ -371,10 +370,6 @@ float fast_atan2(float y, float x)
   if (y < 0.0f)
     {
       angle = -angle;
-    }
-  else
-    {
-      angle = angle;
     }
 
   return angle;

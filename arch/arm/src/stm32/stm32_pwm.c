@@ -412,8 +412,8 @@ struct stm32_pwmtimer_s
   uint32_t frequency;                   /* Current frequency setting */
 #endif
   uint32_t base;                        /* The base address of the timer */
-  uint32_t pclk;                        /* The frequency of the peripheral clock
-                                         * that drives the timer module.
+  uint32_t pclk;                        /* The frequency of the peripheral
+                                         * clock that drives the timer module
                                          */
 #ifdef CONFIG_PWM_PULSECOUNT
   FAR void *handle;                     /* Handle used for upper-half callback */
@@ -1975,7 +1975,6 @@ static void pwm_putreg(struct stm32_pwmtimer_s *priv, int offset,
 static void pwm_modifyreg(struct stm32_pwmtimer_s *priv, uint32_t offset,
                             uint32_t clearbits, uint32_t setbits)
 {
-
   if (pwm_reg_is_32bit(priv->timtype, offset) == true)
     {
       /* 32-bit register */
@@ -2032,7 +2031,7 @@ static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
               pwm_getreg(priv, STM32_GTIM_EGR_OFFSET),
               pwm_getreg(priv, STM32_GTIM_CCMR1_OFFSET));
     }
-   else
+  else
     {
       pwminfo("   SR: %04x EGR:  %04x CCMR1: %04x CCMR2: %04x\n",
               pwm_getreg(priv, STM32_GTIM_SR_OFFSET),
@@ -2101,7 +2100,6 @@ static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
 
 static int pwm_ccr_update(FAR struct pwm_lowerhalf_s *dev, uint8_t index,
                           uint32_t ccr)
-
 {
   FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
   uint32_t offset = 0;
@@ -2358,8 +2356,8 @@ static int pwm_frequency_update(FAR struct pwm_lowerhalf_s *dev,
   uint32_t timclk    = 0;
   uint32_t prescaler = 0;
 
-  /* Calculate optimal values for the timer prescaler and for the timer reload
-   * register.  If 'frequency' is the desired frequency, then
+  /* Calculate optimal values for the timer prescaler and for the timer
+   * reload register. If 'frequency' is the desired frequency, then
    *
    *   reload = timclk / frequency
    *   timclk = pclk / presc
@@ -2417,7 +2415,8 @@ static int pwm_frequency_update(FAR struct pwm_lowerhalf_s *dev,
       reload--;
     }
 
-  pwminfo("TIM%u PCLK: %u frequency: %u TIMCLK: %u prescaler: %u reload: %u\n",
+  pwminfo("TIM%u PCLK: %u frequency: %u TIMCLK: %u "
+          "prescaler: %u reload: %u\n",
           priv->timid, priv->pclk, frequency, timclk, prescaler, reload);
 
   /* Set the reload and prescaler values */
@@ -2813,13 +2812,13 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
 
   /* Configure output polarity (all PWM timers) */
 
-  if (priv->channels[channel-1].out1.pol == STM32_POL_NEG)
+  if (priv->channels[channel - 1].out1.pol == STM32_POL_NEG)
     {
-      ccer |= (GTIM_CCER_CC1P << ((channel-1)*4));
+      ccer |= (GTIM_CCER_CC1P << ((channel - 1) * 4));
     }
   else
     {
-      ccer &= ~(GTIM_CCER_CC1P << ((channel-1)*4));
+      ccer &= ~(GTIM_CCER_CC1P << ((channel - 1) * 4));
     }
 
 #ifdef HAVE_ADVTIM
@@ -2828,36 +2827,36 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
     {
       /* Configure output IDLE State */
 
-      if (priv->channels[channel-1].out1.idle == STM32_IDLE_ACTIVE)
+      if (priv->channels[channel - 1].out1.idle == STM32_IDLE_ACTIVE)
         {
-          cr2 |= (ATIM_CR2_OIS1 << ((channel-1)*2));
+          cr2 |= (ATIM_CR2_OIS1 << ((channel - 1) * 2));
         }
       else
         {
-          cr2 &= ~(ATIM_CR2_OIS1 << ((channel-1)*2));
+          cr2 &= ~(ATIM_CR2_OIS1 << ((channel - 1) * 2));
         }
 
 #ifdef HAVE_PWM_COMPLEMENTARY
       /* Configure complementary output IDLE state */
 
-      if (priv->channels[channel-1].out2.idle == STM32_IDLE_ACTIVE)
+      if (priv->channels[channel - 1].out2.idle == STM32_IDLE_ACTIVE)
         {
-          cr2 |= (ATIM_CR2_OIS1N << ((channel-1)*2));
+          cr2 |= (ATIM_CR2_OIS1N << ((channel - 1) * 2));
         }
       else
         {
-          cr2 &= ~(ATIM_CR2_OIS1N << ((channel-1)*2));
+          cr2 &= ~(ATIM_CR2_OIS1N << ((channel - 1) * 2));
         }
 
       /* Configure complementary output polarity */
 
-      if (priv->channels[channel-1].out2.pol == STM32_POL_NEG)
+      if (priv->channels[channel - 1].out2.pol == STM32_POL_NEG)
         {
-          ccer |= (ATIM_CCER_CC1NP << ((channel-1)*4));
+          ccer |= (ATIM_CCER_CC1NP << ((channel - 1) * 4));
         }
       else
         {
-          ccer &= ~(ATIM_CCER_CC1NP << ((channel-1)*4));
+          ccer &= ~(ATIM_CCER_CC1NP << ((channel - 1) * 4));
         }
 #endif /* HAVE_PWM_COMPLEMENTARY */
 
@@ -2883,7 +2882,7 @@ static int pwm_output_configure(FAR struct stm32_pwmtimer_s *priv,
        *          which causes an ugly condition above
        */
 
-      ccer &= ~(GTIM_CCER_CC1NP << ((channel-1)*4));
+      ccer &= ~(GTIM_CCER_CC1NP << ((channel - 1) * 4));
     }
 #endif /* HAVE_GTIM_CCXNP */
 
@@ -3008,7 +3007,8 @@ errout:
  *
  ****************************************************************************/
 
-static int pwm_sync_configure(FAR struct stm32_pwmtimer_s *priv, uint8_t trgo)
+static int pwm_sync_configure(FAR struct stm32_pwmtimer_s *priv,
+                              uint8_t trgo)
 {
   uint32_t cr2 = 0;
 
@@ -3109,7 +3109,7 @@ static uint16_t pwm_outputs_from_channels(FAR struct stm32_pwmtimer_s *priv)
 
           if (priv->channels[i].out1.in_use == 1)
             {
-              outputs |= (STM32_PWM_OUT1 << ((channel-1)*2));
+              outputs |= (STM32_PWM_OUT1 << ((channel - 1) * 2));
             }
 
 #ifdef HAVE_PWM_COMPLEMENTARY
@@ -3117,7 +3117,7 @@ static uint16_t pwm_outputs_from_channels(FAR struct stm32_pwmtimer_s *priv)
 
           if (priv->channels[i].out2.in_use == 1)
             {
-              outputs |= (STM32_PWM_OUT1N << ((channel-1)*2));
+              outputs |= (STM32_PWM_OUT1N << ((channel - 1) * 2));
             }
 #endif
         }
@@ -3186,7 +3186,6 @@ static int pwm_break_dt_configure(FAR struct stm32_pwmtimer_s *priv)
       /* Configure BRK2 filter */
 
       bdtr |= (priv->brk.flt2 << ATIM_BDTR_BK2F_SHIFT);
-
     }
 #endif /* HAVE_IP_TIMERS_V2 */
 #endif /* HAVE_BREAK */

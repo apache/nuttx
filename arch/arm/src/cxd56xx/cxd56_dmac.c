@@ -33,6 +33,10 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 
@@ -65,68 +69,72 @@
 #define __WO volatile
 #define __RW volatile
 
-struct dmac_ch_register_map {
-    __RW uint32_t srcaddr;
-    __RW uint32_t destaddr;
-    __RW uint32_t lli;
-    __RW uint32_t control;
-    __RW uint32_t configuration;
-    uint32_t reserved[3];
+struct dmac_ch_register_map
+{
+  __RW uint32_t srcaddr;
+  __RW uint32_t destaddr;
+  __RW uint32_t lli;
+  __RW uint32_t control;
+  __RW uint32_t configuration;
+  uint32_t reserved[3];
 };
 
-struct dmac080_ch_register_map {
-    __RW uint32_t srcaddr;
-    __RW uint32_t destaddr;
-    __RW uint32_t lli;
-    __RW uint32_t control;
-    __RW uint32_t configuration;
-    __RW uint32_t deflli;
-    uint32_t reserved[2];
+struct dmac080_ch_register_map
+{
+  __RW uint32_t srcaddr;
+  __RW uint32_t destaddr;
+  __RW uint32_t lli;
+  __RW uint32_t control;
+  __RW uint32_t configuration;
+  __RW uint32_t deflli;
+  uint32_t reserved[2];
 };
 
-struct dmac_register_map {
-    __RO uint32_t intstatus;
-    __RO uint32_t inttcstatus;
-    __WO uint32_t inttcclear;
-    __RO uint32_t interrorstatus;
-    __WO uint32_t interrorclear;
-    __RO uint32_t rawinttcstatus;
-    __RO uint32_t rawinterrorstatus;
-    __RO uint32_t enbldchns;
-    __RW uint32_t softbreq;
-    __RW uint32_t softsreq;
-    __RW uint32_t softlbreq;
-    __RW uint32_t softlsreq;
-    __RW uint32_t configuration;
-    __RW uint32_t sync;
+struct dmac_register_map
+{
+  __RO uint32_t intstatus;
+  __RO uint32_t inttcstatus;
+  __WO uint32_t inttcclear;
+  __RO uint32_t interrorstatus;
+  __WO uint32_t interrorclear;
+  __RO uint32_t rawinttcstatus;
+  __RO uint32_t rawinterrorstatus;
+  __RO uint32_t enbldchns;
+  __RW uint32_t softbreq;
+  __RW uint32_t softsreq;
+  __RW uint32_t softlbreq;
+  __RW uint32_t softlsreq;
+  __RW uint32_t configuration;
+  __RW uint32_t sync;
 
-    uint32_t reserved0[50];
+  uint32_t reserved0[50];
 
-    struct dmac_ch_register_map channel[2];
+  struct dmac_ch_register_map channel[2];
 };
 
-struct dmac080_register_map {
-    __RO uint32_t intstatus;
-    __RO uint32_t inttcstatus;
-    __WO uint32_t inttcclear;
-    __RO uint32_t interrorstatus;
-    __WO uint32_t interrorclear;
-    __RO uint32_t rawinttcstatus;
-    __RO uint32_t rawinterrorstatus;
-    __RO uint32_t enbldchns;
-    __RW uint32_t softbreq;
-    __RW uint32_t softsreq;
-    __RW uint32_t softlbreq;
-    __RW uint32_t softlsreq;
-    __RW uint32_t configuration;
-    __RW uint32_t sync;
-    __RW uint32_t sreqmask;
+struct dmac080_register_map
+{
+  __RO uint32_t intstatus;
+  __RO uint32_t inttcstatus;
+  __WO uint32_t inttcclear;
+  __RO uint32_t interrorstatus;
+  __WO uint32_t interrorclear;
+  __RO uint32_t rawinttcstatus;
+  __RO uint32_t rawinterrorstatus;
+  __RO uint32_t enbldchns;
+  __RW uint32_t softbreq;
+  __RW uint32_t softsreq;
+  __RW uint32_t softlbreq;
+  __RW uint32_t softlsreq;
+  __RW uint32_t configuration;
+  __RW uint32_t sync;
+  __RW uint32_t sreqmask;
 
-    uint32_t reserved0[49];
+  uint32_t reserved0[49];
 
-    /* XXX: deflli not supported */
+  /* XXX: deflli not supported */
 
-    struct dmac_ch_register_map channel[5];
+  struct dmac_ch_register_map channel[5];
 };
 
 #define DMAC_CH_ENABLE (1u<<0)
@@ -137,15 +145,16 @@ struct dmac080_register_map {
 #define itemsof(a) (sizeof(a)/sizeof(a[0]))
 #endif
 
-/**
+/****************************************************************************
  * Link list item structure for use scatter/gather operation
- */
+ ****************************************************************************/
 
-typedef struct {
-    uint32_t src_addr;	        /**< Source address */
-    uint32_t dest_addr;	        /**< Destination address */
-    uint32_t nextlli;           /**< Next link list */
-    uint32_t control;           /**< Transfer control */
+typedef struct
+{
+  uint32_t src_addr;          /* Source address */
+  uint32_t dest_addr;         /* Destination address */
+  uint32_t nextlli;           /* Next link list */
+  uint32_t control;           /* Transfer control */
 } dmac_lli_t;
 
 #define CXD56_DMAC_M2M   0  /**< Memory to memory */
@@ -176,66 +185,63 @@ typedef struct {
 
 #define CXD56_DMAC_MAX_SIZE 0xfff
 
-/**
+/****************************************************************************
  * Helper macro for construct transfer control parameter.
  * Each parameters are the same with PD_DmacSetControl().
  *
- * @par Example:
+ * Example:
  * Here is an example for transfer setting with no interrupt,
  * address increments, 4 byte, 4 burst and 16380 bytes (4 x 4095).
  *
- * @code
  * list.control = PD_DmacCtrlHelper(0, 1, 1,
  *                                  PD_DMAC_WIDTH32, PD_DMAC_WIDTH32,
  *                                  PD_DMAC_BSIZE4, PD_DMAC_BSIZE4,
  *                                  0xfffu);
- * @endcode
- */
+ ****************************************************************************/
 
 #define DMAC_CTRL_HELPER(intr, di, si, dwidth, swidth, dbsize, sbsize, tsize) \
-    (((intr) & 1u) << 31 |                                               \
-     ((di) & 1u) << 27 |                                                 \
-     ((si) & 1u) << 26 |                                                 \
-     ((dwidth) & 7u) << 21 |                                             \
-     ((swidth) & 7u) << 18 |                                             \
-     ((dbsize) & 7u) << 15 |                                             \
-     ((sbsize) & 7u) << 12 |                                             \
-     ((tsize) & 0xfffu))
+  (((intr) & 1u) << 31 |                                               \
+   ((di) & 1u) << 27 |                                                 \
+   ((si) & 1u) << 26 |                                                 \
+   ((dwidth) & 7u) << 21 |                                             \
+   ((swidth) & 7u) << 18 |                                             \
+   ((dbsize) & 7u) << 15 |                                             \
+   ((sbsize) & 7u) << 12 |                                             \
+   ((tsize) & 0xfffu))
 
-/**
+/****************************************************************************
  * Helper macro for construct transfer control parameter
  * (for APP DMAC channel 2 - 6).
  * Each parameters are the same with PD_DmacSetExControl().
  *
- * @par Example:
+ * Example:
  * Here is an example for transfer setting with no interrupt,
  * address increments, 4 byte, 4 burst and 16380 bytes (4 x 4095).
  *
- * @code
  * list.control = PD_DmacExCtrlHelper(0, 1, 1, 0, 0,
  *                                    PD_DMAC_WIDTH32, PD_DMAC_WIDTH32,
  *                                    PD_DMAC_BSIZE4, PD_DMAC_BSIZE4,
  *                                    0xfffu);
- * @endcode
  *
- * @note If you want to different burst sizes to source and destination,
+ * If you want to different burst sizes to source and destination,
  * then data may remained in FIFO. In this case, DMAC cannot clear them.
- * Do not use this configuration to transferring unknown size data (especially
- * communication peripherals). I recommend the same setting to burst sizes.
- */
+ * Do not use this configuration to transferring unknown size data
+ * (especially communication peripherals).
+ * I recommend the same setting to burst sizes.
+ ****************************************************************************/
 
 #define DMAC_EX_CTRL_HELPER(\
-    intr, di, si, dmaster, smaster, dwidth, swidth, dbsize, sbsize, tsize) \
-    (((intr) & 1u) << 31 |                                              \
-     ((di) & 1u) << 30 |                                                \
-     ((si) & 1u) << 29 |                                                \
-     ((dmaster) & 1u) << 28 |                                           \
-     ((smaster) & 1u) << 27 |                                           \
-     ((dwidth) & 3u) << 25 |                                            \
-     ((swidth) & 3u) << 23 |                                            \
-     ((dbsize) & 3u) << 21 |                                            \
-     ((sbsize) & 3u) << 19 |                                            \
-     ((tsize) & 0x7ffffu))
+  intr, di, si, dmaster, smaster, dwidth, swidth, dbsize, sbsize, tsize) \
+  (((intr) & 1u) << 31 |                                              \
+   ((di) & 1u) << 30 |                                                \
+   ((si) & 1u) << 29 |                                                \
+   ((dmaster) & 1u) << 28 |                                           \
+   ((smaster) & 1u) << 27 |                                           \
+   ((dwidth) & 3u) << 25 |                                            \
+   ((swidth) & 3u) << 23 |                                            \
+   ((dbsize) & 3u) << 21 |                                            \
+   ((sbsize) & 3u) << 19 |                                            \
+   ((tsize) & 0x7ffffu))
 
 static int open_channels = 0;
 
@@ -244,28 +250,30 @@ static int intr_handler_admac1(int irq, FAR void *context, FAR void *arg);
 static int intr_handler_idmac(int irq, FAR void *context, FAR void *arg);
 static int intr_handler_skdmac0(int irq, FAR void *context, FAR void *arg);
 static int intr_handler_skdmac1(int irq, FAR void *context, FAR void *arg);
-static uint32_t irq_map[] = {
-    CXD56_IRQ_APP_DMAC0,
-    CXD56_IRQ_APP_DMAC1,
-    CXD56_IRQ_IDMAC,
-    CXD56_IRQ_IDMAC,
-    CXD56_IRQ_IDMAC,
-    CXD56_IRQ_IDMAC,
-    CXD56_IRQ_IDMAC,
-    CXD56_IRQ_SKDMAC_0,
-    CXD56_IRQ_SKDMAC_1,
+static uint32_t irq_map[] =
+{
+  CXD56_IRQ_APP_DMAC0,
+  CXD56_IRQ_APP_DMAC1,
+  CXD56_IRQ_IDMAC,
+  CXD56_IRQ_IDMAC,
+  CXD56_IRQ_IDMAC,
+  CXD56_IRQ_IDMAC,
+  CXD56_IRQ_IDMAC,
+  CXD56_IRQ_SKDMAC_0,
+  CXD56_IRQ_SKDMAC_1,
 };
 
-static int (*intc_handler[])(int irq, FAR void *context, FAR void *arg) = {
-    intr_handler_admac0,
-    intr_handler_admac1,
-    intr_handler_idmac,
-    intr_handler_idmac,
-    intr_handler_idmac,
-    intr_handler_idmac,
-    intr_handler_idmac,
-    intr_handler_skdmac0,
-    intr_handler_skdmac1,
+static int (*intc_handler[])(int irq, FAR void *context, FAR void *arg) =
+{
+  intr_handler_admac0,
+  intr_handler_admac1,
+  intr_handler_idmac,
+  intr_handler_idmac,
+  intr_handler_idmac,
+  intr_handler_idmac,
+  intr_handler_idmac,
+  intr_handler_skdmac0,
+  intr_handler_skdmac1,
 };
 
 /****************************************************************************
@@ -306,7 +314,8 @@ static int dma_stop(int ch);
 
 static int ch2dmac(int ch)
 {
-    switch (ch) {
+  switch (ch)
+    {
     case 0: case 1:
         return 1;
     case 2: case 3: case 4: case 5: case 6: /* APP IDMAC */
@@ -320,9 +329,10 @@ static int ch2dmac(int ch)
 
 static struct dmac_register_map *get_device(int ch)
 {
-    int id = ch2dmac(ch);
+  int id = ch2dmac(ch);
 
-    switch (id) {
+  switch (id)
+    {
     case 1: return (struct dmac_register_map *)DMAC1_REG_BASE;
     case 2: return (struct dmac_register_map *)DMAC2_REG_BASE;
     case 3: return (struct dmac_register_map *)DMAC3_REG_BASE;
@@ -332,23 +342,30 @@ static struct dmac_register_map *get_device(int ch)
 
 static struct dmac_ch_register_map *get_channel(int ch)
 {
-    struct dmac_register_map *dev = get_device(ch);
-    if (dev == NULL)
-        return NULL;
+  struct dmac_register_map *dev = get_device(ch);
+  if (dev == NULL)
+     return NULL;
 
-    if (is_dmac(2, dev)) {
+  if (is_dmac(2, dev))
+    {
         return &dev->channel[ch - 7];
     }
-    else if (is_dmac(3, dev)) {
+  else if (is_dmac(3, dev))
+    {
         return &((struct dmac080_register_map *)dev)->channel[ch - 2];
     }
 
-    return &dev->channel[ch & 1];
+  return &dev->channel[ch & 1];
 }
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 static int get_pmid(int ch)
 {
-    switch (ch) {
+  switch (ch)
+    {
     case 0: case 1:
         return PM_APP_ADMAC;
     case 2: case 3: case 4: case 5: case 6:
@@ -358,300 +375,345 @@ static int get_pmid(int ch)
     default:
         break; /* may not comes here */
     }
-    return 0;
+
+  return 0;
 }
 
-struct dmac_ch_register_frame {
-    uint32_t srcaddr;
-    uint32_t destaddr;
-    uint32_t lli;
-    uint32_t control;
-    uint32_t configuration;
+struct dmac_ch_register_frame
+{
+  uint32_t srcaddr;
+  uint32_t destaddr;
+  uint32_t lli;
+  uint32_t control;
+  uint32_t configuration;
 };
 
-struct dmac_register_frame {
-    uint32_t configuration;
-    struct dmac_ch_register_frame channel[2];
+struct dmac_register_frame
+{
+  uint32_t configuration;
+  struct dmac_ch_register_frame channel[2];
 };
 
 static void _dmac_intc_handler(int ch)
 {
-    struct dmac_register_map *dev = get_device(ch);
-    struct dma_channel_s *dmach;
-    uint32_t mask;
-    int itc;
-    int err;
+  struct dmac_register_map *dev = get_device(ch);
+  struct dma_channel_s *dmach;
+  uint32_t mask;
+  int itc;
+  int err;
 
-    mask = (1u << (ch & 1));
+  mask = (1u << (ch & 1));
 
-    if (is_dmac(2, dev)) {
+  if (is_dmac(2, dev))
+    {
         mask = 1u << (ch - 7);
     }
-    else if (is_dmac(3, dev)) {
+
+  else if (is_dmac(3, dev))
+    {
         mask = 1u << (ch - 2);
     }
 
-    itc = dev->inttcstatus & mask;
-    err = dev->interrorstatus & mask;
-    dev->inttcclear = itc;
-    dev->interrorclear = err;
+  itc = dev->inttcstatus & mask;
+  err = dev->interrorstatus & mask;
+  dev->inttcclear = itc;
+  dev->interrorclear = err;
 
-    dmach = &g_dmach[ch];
+  dmach = &g_dmach[ch];
 
-    if (dmach->callback) {
-        int flags = itc ? CXD56_DMA_INTR_ITC : 0;
-        flags |= err ? CXD56_DMA_INTR_ERR : 0;
-        dmach->callback((DMA_HANDLE)dmach, flags, dmach->arg);
+  if (dmach->callback)
+    {
+      int flags = itc ? CXD56_DMA_INTR_ITC : 0;
+      flags |= err ? CXD56_DMA_INTR_ERR : 0;
+      dmach->callback((DMA_HANDLE)dmach, flags, dmach->arg);
     }
 }
 
 static int intr_handler_admac0(int irq, FAR void *context, FAR void *arg)
 {
-    _dmac_intc_handler(0);
-    return OK;
+  _dmac_intc_handler(0);
+  return OK;
 }
 
 static int intr_handler_admac1(int irq, FAR void *context, FAR void *arg)
 {
-    _dmac_intc_handler(1);
-    return OK;
+  _dmac_intc_handler(1);
+  return OK;
 }
 
 static int intr_handler_idmac(int irq, FAR void *context, FAR void *arg)
 {
-    struct dmac_register_map *dev = get_device(2); /* XXX */
-    uint32_t stat = dev->intstatus & 0x1f;
-    int i;
+  struct dmac_register_map *dev = get_device(2); /* XXX */
+  uint32_t stat = dev->intstatus & 0x1f;
+  int i;
 
-    for (i = 2; stat; i++, stat >>= 1) {
-        if (stat & 1)
-            _dmac_intc_handler(i);
+  for (i = 2; stat; i++, stat >>= 1)
+    {
+      if (stat & 1)
+        {
+          _dmac_intc_handler(i);
+        }
     }
 
-    return OK;
+  return OK;
 }
 
 static int intr_handler_skdmac0(int irq, FAR void *context, FAR void *arg)
 {
-    _dmac_intc_handler(7);
-    return OK;
+  _dmac_intc_handler(7);
+  return OK;
 }
 
 static int intr_handler_skdmac1(int irq, FAR void *context, FAR void *arg)
 {
-    _dmac_intc_handler(8);
-    return OK;
+  _dmac_intc_handler(8);
+  return OK;
 }
 
 static void controller_power_on(int ch)
 {
-    int id = get_pmid(ch);
+  int id = get_pmid(ch);
 
-    if (id == PM_APP_SKDMAC)
-        return;
+  if (id == PM_APP_SKDMAC)
+    {
+      return;
+    }
 
-/* TODO power on */
+  /* TODO power on */
 }
 
 static void controller_power_off(int ch)
 {
-    int id = get_pmid(ch);
+  int id = get_pmid(ch);
 
-    if (id == PM_APP_SKDMAC) /* Do not disable SKDMAC, leave it to SAKE driver. */
-        return;
+  if (id == PM_APP_SKDMAC) /* Do not disable SKDMAC, leave it to SAKE driver. */
+    {
+      return;
+    }
 
-/* TODO power off */
+  /* TODO power off */
 }
 
 int dma_init(int ch)
 {
-    int id = ch2dmac(ch);
+  int id = ch2dmac(ch);
 
-    if (!id)
-        return -ENODEV;
+  if (!id)
+    {
+      return -ENODEV;
+    }
 
-    controller_power_on(ch);
+  controller_power_on(ch);
 
-    irq_attach(irq_map[ch], intc_handler[ch], NULL);
+  irq_attach(irq_map[ch], intc_handler[ch], NULL);
 
-    return 0;
+  return 0;
 }
 
 int dma_uninit(int ch)
 {
-    int id = ch2dmac(ch);
+  int id = ch2dmac(ch);
 
-    if (!id)
-        return -ENODEV;
+  if (!id)
+    {
+      return -ENODEV;
+    }
 
-    controller_power_off(ch);
+  controller_power_off(ch);
 
-    return 0;
+  return 0;
 }
 
 int dma_open(int ch)
 {
-    struct dmac_register_map *dmac = get_device(ch);
-    irqstate_t flags;
+  struct dmac_register_map *dmac = get_device(ch);
+  irqstate_t flags;
 
-    if (dmac == NULL)
-        return -ENODEV;
-
-    flags = enter_critical_section();
-
-    if (open_channels & (1u << ch)) {
-        leave_critical_section(flags);
-        return -EBUSY;
+  if (dmac == NULL)
+    {
+      return -ENODEV;
     }
-    open_channels |= 1u << ch;
 
-    leave_critical_section(flags);
+  flags = enter_critical_section();
 
-    g_dmach[ch].callback = NULL;
-    g_dmach[ch].arg = NULL;
+  if (open_channels & (1u << ch))
+    {
+      leave_critical_section(flags);
+      return -EBUSY;
+    }
 
-    dmac->sync = 0;
-    dmac->configuration |= 1;
+  open_channels |= 1u << ch;
 
-    return 0;
+  leave_critical_section(flags);
+
+  g_dmach[ch].callback = NULL;
+  g_dmach[ch].arg = NULL;
+
+  dmac->sync = 0;
+  dmac->configuration |= 1;
+
+  return 0;
 }
 
 static int dma_close(int ch)
 {
-    struct dmac_register_map *dmac = get_device(ch);
-    uint32_t enabled;
-    irqstate_t flags;
-    uint32_t chmask;
-    int shift;
+  struct dmac_register_map *dmac = get_device(ch);
+  uint32_t enabled;
+  irqstate_t flags;
+  uint32_t chmask;
+  int shift;
 
-    if (dmac == NULL)
-        return -ENODEV;
-
-    shift = ch & 1;
-
-    if (is_dmac(2, dmac)) {
-        shift = ch - 7;
+  if (dmac == NULL)
+    {
+      return -ENODEV;
     }
-    else if (is_dmac(3, dmac)) {
+
+  shift = ch & 1;
+
+  if (is_dmac(2, dmac))
+    {
+      shift = ch - 7;
+    }
+  else if (is_dmac(3, dmac))
+    {
         shift = ch - 2;
     }
 
-    enabled = dmac->enbldchns;
-    if (enabled & (1 << shift))
-        return -EBUSY;
-
-    dma_clearintrcallback(ch);
-
-    flags = enter_critical_section();
-
-    chmask = (3u << (ch & ~1));
-
-    if (is_dmac(2, dmac)) {
-        chmask = 0x3u << 7;
+  enabled = dmac->enbldchns;
+  if (enabled & (1 << shift))
+    {
+      return -EBUSY;
     }
-    else if (is_dmac(3, dmac)) {
+
+  dma_clearintrcallback(ch);
+
+  flags = enter_critical_section();
+
+  chmask = (3u << (ch & ~1));
+
+  if (is_dmac(2, dmac))
+    {
+      chmask = 0x3u << 7;
+    }
+  else if (is_dmac(3, dmac))
+    {
         chmask = 0x1fu << 2;
     }
 
-    open_channels &= ~(1u << ch);
+  open_channels &= ~(1u << ch);
 
-    /* Stop device if both of channels are already closed */
+  /* Stop device if both of channels are already closed */
 
-    if (!(open_channels & chmask))
-        dmac->configuration &= ~1;
+  if (!(open_channels & chmask))
+    {
+      dmac->configuration &= ~1;
+    }
 
-    leave_critical_section(flags);
+  leave_critical_section(flags);
 
-    return 0;
+  return 0;
 }
 
 static int dma_setconfig(int ch, int itc, int ierr, int flowctrl,
                          int destperi, int srcperi)
 {
-    struct dmac_ch_register_map *channel = get_channel(ch);
-    if (channel == NULL)
-        return -ENODEV;
+  struct dmac_ch_register_map *channel = get_channel(ch);
+  if (channel == NULL)
+    {
+      return -ENODEV;
+    }
 
-    channel->configuration = (itc & 1) << 15 |
-        (ierr & 1) << 14 |
-        (flowctrl & 7) << 11 |
+  channel->configuration = (itc & 1) << 15 |
+                           (ierr & 1) << 14 |
+                           (flowctrl & 7) << 11 |
+                           1 << 25 | 1 << 24 | /* Burst enable */
+                           (destperi & 0xf) << 6 |
+                           (srcperi & 0xf) << 1;
 
-        /* Burst enable */
-
-        1 << 25 | 1 << 24 |
-
-        (destperi & 0xf) << 6 |
-        (srcperi & 0xf) << 1;
-
-    return 0;
+  return 0;
 }
 
 static int dma_setintrcallback(int ch, dma_callback_t func, void *data)
 {
-    if (ch >= NCHANNELS)
-        return -ENODEV;
+  if (ch >= NCHANNELS)
+    {
+      return -ENODEV;
+    }
 
-    g_dmach[ch].callback = func;
-    g_dmach[ch].arg = data;
+  g_dmach[ch].callback = func;
+  g_dmach[ch].arg = data;
 
-    up_enable_irq(irq_map[ch]);
+  up_enable_irq(irq_map[ch]);
 
-    return 0;
+  return 0;
 }
 
 static int dma_clearintrcallback(int ch)
 {
-    if (ch >= NCHANNELS)
-        return -ENODEV;
+  if (ch >= NCHANNELS)
+    {
+      return -ENODEV;
+    }
 
-    g_dmach[ch].callback = NULL;
-    g_dmach[ch].arg = NULL;
+  g_dmach[ch].callback = NULL;
+  g_dmach[ch].arg = NULL;
 
-    up_disable_irq(irq_map[ch]);
+  up_disable_irq(irq_map[ch]);
 
-    return 0;
+  return 0;
 }
 
 static int dma_start(int ch, dmac_lli_t *list)
 {
-    struct dmac_ch_register_map *channel = get_channel(ch);
-    if (channel == NULL)
-        return -ENODEV;
-
-    if (list) {
-        channel->srcaddr = list->src_addr;
-        channel->destaddr = list->dest_addr;
-        channel->lli = list->nextlli;
-        channel->control = list->control;
+  struct dmac_ch_register_map *channel = get_channel(ch);
+  if (channel == NULL)
+    {
+      return -ENODEV;
     }
 
-    channel->configuration |= DMAC_CH_ENABLE;
+  if (list)
+    {
+      channel->srcaddr = list->src_addr;
+      channel->destaddr = list->dest_addr;
+      channel->lli = list->nextlli;
+      channel->control = list->control;
+    }
 
-    return 0;
+  channel->configuration |= DMAC_CH_ENABLE;
+
+  return 0;
 }
 
 static int dma_stop(int ch)
 {
-    struct dmac_ch_register_map *channel = get_channel(ch);
-    if (channel == NULL)
-        return -ENODEV;
+  struct dmac_ch_register_map *channel = get_channel(ch);
+  if (channel == NULL)
+    {
+      return -ENODEV;
+    }
 
-    if (!(channel->configuration & DMAC_CH_ENABLE))
-        return 0; /* already stopped */
+  if (!(channel->configuration & DMAC_CH_ENABLE))
+    {
+      return 0; /* already stopped */
+    }
 
-    /* Set HALT and poll Active bit for FIFO is cleaned */
+  /* Set HALT and poll Active bit for FIFO is cleaned */
 
-    channel->configuration |= DMAC_CH_HALT;
+  channel->configuration |= DMAC_CH_HALT;
 
-    (void) channel->lli;
-    (void) channel->lli;
+  (void) channel->lli;
+  (void) channel->lli;
 
-    while (channel->configuration & DMAC_CH_ACTIVE);
+  while (channel->configuration & DMAC_CH_ACTIVE);
 
-    channel->configuration &= ~(DMAC_CH_HALT | DMAC_CH_ENABLE);
+  channel->configuration &= ~(DMAC_CH_HALT | DMAC_CH_ENABLE);
 
-    return 0;
+  return 0;
 }
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: cxd56_dmainitialize
@@ -684,7 +746,8 @@ void weak_function up_dma_initialize(void)
  * Name: cxd56_dmachannel
  *
  * Description:
- *  Allocate a DMA channel.  This function gives the caller mutually exclusive
+ *  Allocate a DMA channel.
+ *  This function gives the caller mutually exclusive
  *  access to a DMA channel.
  *
  *  If no DMA channel is available, then cxd56_dmachannel() will wait until
@@ -718,6 +781,7 @@ DMA_HANDLE cxd56_dmachannel(int ch, ssize_t maxsize)
       dmaerr("Invalid channel number %d.\n", ch);
       goto err;
     }
+
   dmach = &g_dmach[ch];
 
   if (maxsize == 0)

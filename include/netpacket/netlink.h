@@ -65,30 +65,32 @@
 
 #define NETLINK_ROUTE          0       /* Routing/device hook for user-space
                                         * routing daemons (default) */
-#define NETLINK_USERSOCK       1       /* Reserved for user mode socket protocols */
-#define NETLINK_FIREWALL       2       /* Interface to receive packets from
+#define NETLINK_UNUSED         1       /* Unused number */
+#define NETLINK_USERSOCK       2       /* Reserved for user mode socket protocols */
+#define NETLINK_FIREWALL       3       /* Interface to receive packets from
                                         * the firewall */
-#define NETLINK_SOCK_DIAG      3       /* Socket monitoring */
-#define NETLINK_NFLOG          4       /* netfilter/iptables ULOG */
-#define NETLINK_XFRM           5       /* Interface to IPsec security databases
-                                        * for key-manager daemons using the Internet
-                                        * Key Exchange protocol. */
-#define NETLINK_ISCSI          6       /* Open-iSCSI */
-#define NETLINK_AUDIT          7       /* Interface to auditing sub-system */
-#define NETLINK_FIB_LOOKUP     8
-#define NETLINK_CONNECTOR      9
-#define NETLINK_NETFILTER      10      /* netfilter subsystem */
-#define NETLINK_IP6_FW         11      /* Interface to transport packets from
+#define NETLINK_SOCK_DIAG      4       /* Socket monitoring */
+#define NETLINK_NFLOG          5       /* netfilter/iptables ULOG */
+#define NETLINK_XFRM           6       /* Interface to IPsec security databases
+                                        * for key-manager daemons using the
+                                        * Internet Key Exchange protocol. */
+#define NETLINK_SELINUX        7       /* SELinux event notifications */
+#define NETLINK_ISCSI          8       /* Open-iSCSI */
+#define NETLINK_AUDIT          9       /* Interface to auditing sub-system */
+#define NETLINK_FIB_LOOKUP     10
+#define NETLINK_CONNECTOR      11
+#define NETLINK_NETFILTER      12      /* netfilter subsystem */
+#define NETLINK_IP6_FW         13      /* Interface to transport packets from
                                         * netfilter to user-space. */
-#define NETLINK_DNRTMSG        12      /* DECnet routing messages */
-#define NETLINK_KOBJECT_UEVENT 13      /* Kernel messages to userspace */
-#define NETLINK_GENERIC        14
+#define NETLINK_DNRTMSG        14      /* DECnet routing messages */
+#define NETLINK_KOBJECT_UEVENT 15      /* Kernel messages to userspace */
+#define NETLINK_GENERIC        16
                                        /* NETLINK_DM (DM Events) */
-#define NETLINK_SCSITRANSPORT  16      /* SCSI Transports */
-#define NETLINK_ECRYPTFS       17
-#define NETLINK_RDMA           18
-#define NETLINK_CRYPTO         19      /* Crypto layer */
-#define NETLINK_SMC            20      /* SMC monitoring */
+#define NETLINK_SCSITRANSPORT  18      /* SCSI Transports */
+#define NETLINK_ECRYPTFS       19
+#define NETLINK_RDMA           20
+#define NETLINK_CRYPTO         21      /* Crypto layer */
+#define NETLINK_SMC            22      /* SMC monitoring */
 
 /* Definitions associated with struct sockaddr_nl ***************************/
 
@@ -122,7 +124,7 @@
 /* Flags for ACK message */
 
 #define NLM_F_CAPPED           0x0100  /* request was capped */
-#define NLM_F_ACK_TLVS        0x0200  /* extended ACK TVLs were included */
+#define NLM_F_ACK_TLVS         0x0200  /* extended ACK TVLs were included */
 
 /* Definitions for struct nlmsghdr ******************************************/
 
@@ -131,13 +133,17 @@
 #define NLMSG_HDRLEN          sizeof(struct nlmsghdr)
 #define NLMSG_LENGTH(n)       (NLMSG_HDRLEN + (n))
 #define NLMSG_SPACE(len)      NLMSG_ALIGN(NLMSG_LENGTH(len))
-#define NLMSG_DATA(hdr)       ((FAR void*)(((FAR char*)hdr) + NLMSG_HDRLEN))
-#define NLMSG_NEXT(hdr,n) \
+#define NLMSG_DATA(hdr)       ((FAR void *)(((FAR char *)hdr) + NLMSG_HDRLEN))
+#define NLMSG_NEXT(hdr, n) \
   ((n) -= NLMSG_ALIGN((hdr)->nlmsg_len), \
-   (FAR struct nlmsghdr*) \
-   (((FAR cha r*)(hdr)) + NLMSG_ALIGN((hdr)->nlmsg_len)))
+   (FAR struct nlmsghdr *) \
+   (((FAR char *)(hdr)) + NLMSG_ALIGN((hdr)->nlmsg_len)))
+#define NLMSG_OK(nlh, len) \
+  ((len) >= (int)sizeof(struct nlmsghdr) && \
+    (nlh)->nlmsg_len >= sizeof(struct nlmsghdr) && \
+    (nlh)->nlmsg_len <= (len))
 #define NLMSG_PAYLOAD(hdr, len) \
-  ((hdr)->nlmsg_len - NLMSG_SPACE((len)))
+  ((hdr)->nlmsg_len - NLMSG_SPACE(len))
 
 #define NLMSG_NOOP            1    /* Nothing */
 #define NLMSG_ERROR           2    /* Error */
@@ -151,14 +157,14 @@
 
 #define RTA_MASK              (sizeof(uint32_t) - 1)
 #define RTA_ALIGN(n)          (((n) + RTA_MASK) & ~RTA_MASK)
-#define RTA_OK(rta,n) \
+#define RTA_OK(rta, n) \
   ((n) >= (int)sizeof(struct rtattr) && \
    (rta)->rta_len >= sizeof(struct rtattr) && \
    (rta)->rta_len <= (n))
 #define RTA_NEXT(rta, attrlen) \
   ((attrlen) -= RTA_ALIGN((rta)->rta_len), \
-   (FAR struct rtattr*)(((FAR char*)(rta)) + RTA_ALIGN((rta)->rta_len)))
-#define RTA_LENGTH(n)         (RTA_ALIGN(sizeof(struct rtattr)) + (n))
+   (FAR struct rtattr *)(((FAR char *)(rta)) + RTA_ALIGN((rta)->rta_len)))
+#define RTA_LENGTH(n)         (sizeof(struct rtattr) + (n))
 #define RTA_SPACE(n)          RTA_ALIGN(RTA_LENGTH(n))
 #define RTA_DATA(rta)         ((FAR void *)(((FAR char *)(rta)) + RTA_LENGTH(0)))
 #define RTA_PAYLOAD(rta)      ((int)((rta)->rta_len) - RTA_LENGTH(0))
@@ -170,8 +176,8 @@
 #define RTA_SRC               2    /* Argument:  Route source address */
 #define RTA_IIF               3    /* Argument:  Input interface index */
 #define RTA_OIF               4    /* Argument:  Output interface index */
-#define RTA_GENMASK           5    /* Argument:  Network address mask of sub-net */
-#define RTA_GATEWAY           6    /* Argument:  Gateway address of the route */
+#define RTA_GATEWAY           5    /* Argument:  Gateway address of the route */
+#define RTA_GENMASK           6    /* Argument:  Network address mask of sub-net */
 
 /* NETLINK_ROUTE protocol message types *************************************/
 
@@ -183,10 +189,10 @@
  *   of rtattr structures.
  */
 
-#define RTM_NEWLINK           0
-#define RTM_DELLINK           1
-#define RTM_GETLINK           2
-#define RTM_SETLINK           3
+#define RTM_NEWLINK           16
+#define RTM_DELLINK           17
+#define RTM_GETLINK           18
+#define RTM_SETLINK           19
 
 /* Address settings:
  *
@@ -196,9 +202,9 @@
  *   followed by rtattr routing attributes.
  */
 
-#define RTM_NEWADDR           4
-#define RTM_DELADDR           5
-#define RTM_GETADDR           6
+#define RTM_NEWADDR           20
+#define RTM_DELADDR           21
+#define RTM_GETADDR           22
 
 /* Routing tables:
  *
@@ -212,9 +218,9 @@
  *   except rtm_table and rtm_protocol, 0 is the wildcard.
  */
 
-#define RTM_NEWROUTE         7
-#define RTM_DELROUTE         8
-#define RTM_GETROUTE         9
+#define RTM_NEWROUTE         24
+#define RTM_DELROUTE         25
+#define RTM_GETROUTE         26
 
 /* Neighbor cache:
  *
@@ -223,9 +229,9 @@
  *   an ARP entry).  The message contains an ndmsg structure.
  */
 
-#define RTM_NEWNEIGH         10
-#define RTM_DELNEIGH         11
-#define RTM_GETNEIGH         12
+#define RTM_NEWNEIGH         28
+#define RTM_DELNEIGH         29
+#define RTM_GETNEIGH         30
 
 /* Routing rules:
  *
@@ -233,9 +239,9 @@
  *   Add, delete or retrieve a routing rule.  Carries a struct rtmsg
  */
 
-#define RTM_NEWRULE          13
-#define RTM_DELRULE          14
-#define RTM_GETRULE          15
+#define RTM_NEWRULE          32
+#define RTM_DELRULE          33
+#define RTM_GETRULE          34
 
 /* Queuing discipline settings:
  *
@@ -244,9 +250,9 @@
  *   struct tcmsg and may be followed by a series of attributes.
  */
 
-#define RTM_NEWQDISC         16
-#define RTM_DELQDISC         17
-#define RTM_GETQDISC         18
+#define RTM_NEWQDISC         36
+#define RTM_DELQDISC         37
+#define RTM_GETQDISC         38
 
 /* Traffic classes used with queues:
  *
@@ -255,9 +261,9 @@
  *   tcmsg as described above.
  */
 
-#define RTM_NEWTCLASS        19
-#define RTM_DELTCLASS        20
-#define RTM_GETTCLASS        21
+#define RTM_NEWTCLASS        40
+#define RTM_DELTCLASS        41
+#define RTM_GETTCLASS        42
 
 /* Traffic filters:
  *
@@ -266,27 +272,31 @@
  *   messages contain a struct tcmsg as described above.
  */
 
-#define RTM_NEWTFILTER       22
-#define RTM_DELTFILTER       23
-#define RTM_GETTFILTER       24
+#define RTM_NEWTFILTER       44
+#define RTM_DELTFILTER       45
+#define RTM_GETTFILTER       46
 
 /* Others: */
 
-#define RTM_NEWACTION        25
-#define RTM_DELACTION        26
-#define RTM_GETACTION        27
-#define RTM_NEWPREFIX        28
-#define RTM_GETPREFIX        29
-#define RTM_GETMULTICAST     30
-#define RTM_GETANYCAST       31
-#define RTM_NEWNEIGHTBL      32
-#define RTM_GETNEIGHTBL      33
-#define RTM_SETNEIGHTBL      34
+#define RTM_NEWACTION        48
+#define RTM_DELACTION        49
+#define RTM_GETACTION        50
+#define RTM_NEWPREFIX        52
+#define RTM_GETMULTICAST     58
+#define RTM_GETANYCAST       62
+#define RTM_NEWNEIGHTBL      64
+#define RTM_GETNEIGHTBL      66
+#define RTM_SETNEIGHTBL      67
 
-#define RTM_FIRSTMSG          0
-#define RTM_LASTMSG          34
+#define RTM_BASE             16
+#define RTM_MAX              67
 
 /* Definitions for struct ifaddrmsg  ****************************************/
+
+#define IFA_RTA(r)          ((FAR struct rtattr *) \
+                             (((FAR char *)(r)) + \
+                              NLMSG_ALIGN(sizeof(struct ifaddrmsg))))
+#define IFA_PAYLOAD(n)      NLMSG_PAYLOAD(n, sizeof(struct ifaddrmsg))
 
 /* ifa_flags definitions:  ifa_flags is a flag word of IFA_F_SECONDARY for
  * secondary address (old alias interface), IFA_F_PERMANENT for a permanent
@@ -294,7 +304,7 @@
  */
 
 #define IFA_F_SECONDARY      0x01
-#define IFA_F_PERMANENT      0x02
+#define IFA_F_PERMANENT      0x80
 
 /* Definitions for struct ifinfomsg *****************************************/
 
@@ -339,8 +349,8 @@
 #define RTPROT_KERNEL         2    /* Route installed by kernel */
 #define RTPROT_BOOT           3    /* Route installed during boot */
 #define RTPROT_STATIC         4    /* Route installed by administrator */
-#define RTPROT_RA             5    /* RDISC/ND router advertisements */
-#define RTPROT_DHCP           6    /* DHCP client */
+#define RTPROT_RA             9    /* RDISC/ND router advertisements */
+#define RTPROT_DHCP           16   /* DHCP client */
 
 /* rtm_scope */
 
@@ -350,6 +360,61 @@
 #define  RT_SCOPE_LINK        253  /* Route on this link */
 #define  RT_SCOPE_HOST        254  /* Route on local host */
 #define  RT_SCOPE_NOWHERE     255  /* Destination does not exist */
+
+/* RTnetlink multicast groups (userspace) */
+
+#define RTMGRP_LINK           1
+#define RTMGRP_NOTIFY         2
+#define RTMGRP_NEIGH          4
+#define RTMGRP_TC             8
+
+#define RTMGRP_IPV4_IFADDR    0x10
+#define RTMGRP_IPV4_MROUTE    0x20
+#define RTMGRP_IPV4_ROUTE     0x40
+#define RTMGRP_IPV4_RULE      0x80
+
+#define RTMGRP_IPV6_IFADDR    0x100
+#define RTMGRP_IPV6_MROUTE    0x200
+#define RTMGRP_IPV6_ROUTE     0x400
+#define RTMGRP_IPV6_IFINFO    0x800
+
+#define RTMGRP_DECnet_IFADDR  0x1000
+#define RTMGRP_DECnet_ROUTE   0x4000
+
+#define RTMGRP_IPV6_PREFIX    0x20000
+
+/* RTnetlink multicast groups */
+
+#define RTNLGRP_NONE          0
+#define RTNLGRP_LINK          1
+#define RTNLGRP_NOTIFY        2
+#define RTNLGRP_NEIGH         3
+#define RTNLGRP_TC            4
+#define RTNLGRP_IPV4_IFADDR   5
+#define RTNLGRP_IPV4_MROUTE   6
+#define RTNLGRP_IPV4_ROUTE    7
+#define RTNLGRP_IPV4_RULE     8
+#define RTNLGRP_IPV6_IFADDR   9
+#define RTNLGRP_IPV6_MROUTE   10
+#define RTNLGRP_IPV6_ROUTE    11
+#define RTNLGRP_IPV6_IFINFO   12
+#define RTNLGRP_DECnet_IFADDR 13
+#define RTNLGRP_NOP2          14
+#define RTNLGRP_DECnet_ROUTE  15
+#define RTNLGRP_DECnet_RULE   16
+#define RTNLGRP_NOP4          17
+#define RTNLGRP_IPV6_PREFIX   18
+#define RTNLGRP_IPV6_RULE     19
+#define RTNLGRP_ND_USEROPT    20
+#define RTNLGRP_PHONET_IFADDR 21
+#define RTNLGRP_PHONET_ROUTE  22
+#define RTNLGRP_DCB           23
+#define RTNLGRP_IPV4_NETCONF  24
+#define RTNLGRP_IPV6_NETCONF  25
+#define RTNLGRP_MDB           26
+#define RTNLGRP_MPLS_ROUTE    27
+#define RTNLGRP_NSID          28
+#define RTNLGRP_MAX           29
 
 /****************************************************************************
  * Public Type Definitions
@@ -404,9 +469,9 @@ struct rtattr
 struct ifinfomsg
 {
   uint8_t  ifi_family;    /* AF_UNSPEC */
-  uint8_t  ifi_pid;
+  uint8_t  ifi_pad;
   uint16_t ifi_type;      /* Device type (ARPHRD) */
-  int16_t  ifi_index;     /* Unique interface index */
+  int32_t  ifi_index;     /* Unique interface index */
   uint32_t ifi_flags;     /* Device IFF_* flags  */
   uint32_t ifi_change;    /* Change mask, must always be 0xffffffff */
 };
@@ -431,7 +496,7 @@ struct ifaddrmsg
   uint8_t  ifa_prefixlen; /* Prefix length of address */
   uint8_t  ifa_flags;     /* Address flags.  See IFA_F_* definitions */
   uint8_t  ifa_scope;     /* Address scope */
-  int16_t  ifa_index;     /* Unique interface index */
+  int32_t  ifa_index;     /* Unique interface index */
 };
 
 /* RTM_NEWNEIGH, RTM_DELNEIGH, RTM_GETNEIGH

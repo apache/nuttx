@@ -121,9 +121,11 @@ struct bh1745nuc_dev_s
 
 static int bh1745nuc_open(FAR struct file *filep);
 static int bh1745nuc_close(FAR struct file *filep);
-static ssize_t bh1745nuc_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t bh1745nuc_read(FAR struct file *filep,
+                              FAR char *buffer,
                               size_t buflen);
-static ssize_t bh1745nuc_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t bh1745nuc_write(FAR struct file *filep,
+                               FAR const char *buffer,
                                size_t buflen);
 static int bh1745nuc_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
@@ -276,8 +278,12 @@ static int bh1745nuc_seqinit(FAR struct bh1745nuc_dev_s *priv)
 
   /* Set instruction and sample data information to sequencer */
 
-  seq_setinstruction(priv->seq, g_bh1745nucinst, itemsof(g_bh1745nucinst));
-  seq_setsample(priv->seq, BH1745NUC_BYTESPERSAMPLE, 0, BH1745NUC_ELEMENTSIZE,
+  seq_setinstruction(priv->seq, g_bh1745nucinst,
+                     itemsof(g_bh1745nucinst));
+  seq_setsample(priv->seq,
+                BH1745NUC_BYTESPERSAMPLE,
+                0,
+                BH1745NUC_ELEMENTSIZE,
                 false);
 
   return OK;
@@ -392,7 +398,8 @@ static ssize_t bh1745nuc_read(FAR struct file *filep, FAR char *buffer,
  * Name: bh1745nuc_write
  ****************************************************************************/
 
-static ssize_t bh1745nuc_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t bh1745nuc_write(FAR struct file *filep,
+                               FAR const char *buffer,
                                size_t buflen)
 {
   return -ENOSYS;
@@ -402,7 +409,9 @@ static ssize_t bh1745nuc_write(FAR struct file *filep, FAR const char *buffer,
  * Name: bh1745nuc_ioctl
  ****************************************************************************/
 
-static int bh1745nuc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int bh1745nuc_ioctl(FAR struct file *filep,
+                           int cmd,
+                           unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct bh1745nuc_dev_s *priv = inode->i_private;

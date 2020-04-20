@@ -25,8 +25,8 @@
  * is suppressed and the platform specific code is expected to provide the
  * following custom functions.
  *
- *   void sim_timer_initialize(void): Initializes the timer facilities.  Called
- *     early in the intialization sequence (by up_intialize()).
+ *   void sim_timer_initialize(void): Initializes the timer facilities.
+ *     Called early in the initialization sequence (by up_initialize()).
  *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *   int up_timer_cancel(void):  Cancels the interval timer.
@@ -91,7 +91,8 @@ void up_mask_tmr(void)
   /* Disable TSC Deadline interrupt */
 
 #ifdef CONFIG_ARCH_INTEL64_HAVE_TSC_DEADLINE
-  write_msr(MSR_X2APIC_LVTT, TMR_IRQ | MSR_X2APIC_LVTT_TSC_DEADLINE | (1 << 16));
+  write_msr(MSR_X2APIC_LVTT, TMR_IRQ | MSR_X2APIC_LVTT_TSC_DEADLINE |
+            (1 << 16));
 #else
   write_msr(MSR_X2APIC_LVTT, TMR_IRQ | (1 << 16));
 #endif
@@ -137,8 +138,9 @@ void up_timer_initialize(void)
 
 static inline uint64_t up_ts2tick(FAR const struct timespec *ts)
 {
-  return ROUND_INT_DIV((uint64_t)ts->tv_nsec * x86_64_timer_freq, NS_PER_SEC) +
-                       (uint64_t)ts->tv_sec * x86_64_timer_freq;
+  return ROUND_INT_DIV((uint64_t)ts->tv_nsec * x86_64_timer_freq,
+                       NS_PER_SEC) +
+         (uint64_t)ts->tv_sec * x86_64_timer_freq;
 }
 
 static inline void up_tick2ts(uint64_t tick, FAR struct timespec *ts)

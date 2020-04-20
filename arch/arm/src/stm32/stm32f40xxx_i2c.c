@@ -265,7 +265,7 @@ struct stm32_i2c_priv_s
 
   const struct stm32_i2c_config_s *config;
 
-  int refs;                    /* Referernce count */
+  int refs;                    /* Reference count */
   sem_t sem_excl;              /* Mutual exclusion semaphore */
 #ifndef CONFIG_I2C_POLLED
   sem_t sem_isr;               /* Interrupt wait semaphore */
@@ -314,8 +314,6 @@ static inline void stm32_i2c_putreg(FAR struct stm32_i2c_priv_s *priv,
 static inline void stm32_i2c_modifyreg(FAR struct stm32_i2c_priv_s *priv,
                                        uint8_t offset, uint16_t clearbits,
                                        uint16_t setbits);
-static inline int stm32_i2c_sem_wait(FAR struct stm32_i2c_priv_s *priv);
-static int stm32_i2c_sem_wait_uninterruptible(FAR struct stm32_i2c_priv_s *priv);
 
 #ifdef CONFIG_STM32_I2C_DYNTIMEO
 static useconds_t stm32_i2c_tousecs(int msgc, FAR struct i2c_msg_s *msgs);
@@ -558,34 +556,6 @@ static inline void stm32_i2c_modifyreg(FAR struct stm32_i2c_priv_s *priv,
                                        uint16_t setbits)
 {
   modifyreg16(priv->config->base + offset, clearbits, setbits);
-}
-
-/************************************************************************************
- * Name: stm32_i2c_sem_wait
- *
- * Description:
- *   Take the exclusive access, waiting as necessary.  May be interrupted by a
- *   signal.
- *
- ************************************************************************************/
-
-static inline int stm32_i2c_sem_wait(FAR struct stm32_i2c_priv_s *priv)
-{
-  return nxsem_wait(&priv->sem_excl);
-}
-
-/************************************************************************************
- * Name: stm32_i2c_sem_wait_uninterruptible
- *
- * Description:
- *   Take the exclusive access, waiting as necessary.  May be interrupted by a
- *   signal.
- *
- ************************************************************************************/
-
-static int stm32_i2c_sem_wait_uninterruptible(FAR struct stm32_i2c_priv_s *priv)
-{
-  return nxsem_wait_uninterruptible(&priv->sem_excl);
 }
 
 /************************************************************************************
@@ -2290,7 +2260,7 @@ static int stm32_i2c_transfer(FAR struct i2c_master_s *dev,
 
   /* Ensure that address or flags don't change meanwhile */
 
-  ret = stm32_i2c_sem_wait(priv);
+  ret = nxsem_wait(&priv->sem_excl);
   if (ret < 0)
     {
       return ret;
@@ -2521,7 +2491,7 @@ static int stm32_i2c_reset(FAR struct i2c_master_s *dev)
 
   /* Lock out other clients */
 
-  ret = stm32_i2c_sem_wait_uninterruptible(priv);
+  ret = nxsem_wait_uninterruptible(&priv->sem_excl);
   if (ret < 0)
     {
       return ret;

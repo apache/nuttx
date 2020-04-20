@@ -900,7 +900,7 @@ int sched_sporadic_stop(FAR struct tcb_s *tcb)
 
   /* The free the container holder the sporadic scheduling parameters */
 
-  sched_kfree(tcb->sporadic);
+  kmm_free(tcb->sporadic);
   tcb->sporadic = NULL;
   return OK;
 }
@@ -1037,7 +1037,9 @@ int sched_sporadic_resume(FAR struct tcb_s *tcb)
 
       unrealized = now - sporadic->eventtime;
 
-      /* Ignore very short pre-emptions that are below our timing resolution. */
+      /* Ignore very short pre-emptions that are below
+       * our timing resolution.
+       */
 
       if (unrealized > 0)
         {

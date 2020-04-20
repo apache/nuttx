@@ -390,7 +390,9 @@ static int rwb_rhreload(FAR struct rwbuffer_s *rwb, off_t startblock)
       rwb->rhnblocks    = nblocks;
       rwb->rhblockstart = startblock;
 
-      /* The return value is not the number of blocks we asked to be loaded. */
+      /* The return value is not the number of blocks we asked to be
+       * loaded.
+       */
 
       return nblocks;
     }
@@ -554,7 +556,7 @@ int rwb_invalidate_writebuffer(FAR struct rwbuffer_s *rwb,
 int rwb_invalidate_readahead(FAR struct rwbuffer_s *rwb,
                              off_t startblock, size_t blockcount)
 {
-  int ret;
+  int ret = OK;
 
   if (rwb->rhmaxblocks > 0 && rwb->rhnblocks > 0)
     {
@@ -1003,7 +1005,9 @@ ssize_t rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
     {
       finfo("startblock=%d wrbuffer=%p\n", startblock, wrbuffer);
 
-      /* Use the block cache unless the buffer size is bigger than block cache */
+      /* Use the block cache unless the buffer size is bigger than block
+       * cache.
+       */
 
       if (nblocks > rwb->wrmaxblocks)
         {

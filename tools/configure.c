@@ -990,7 +990,7 @@ static void check_configuration(void)
       g_oldnative = true;
     }
 
-  /* If we are going to some host other then windows native or to a windows
+  /* If we are going to some host other than windows native or to a windows
    * native host, then don't ignore what is in the defconfig file.
    */
 

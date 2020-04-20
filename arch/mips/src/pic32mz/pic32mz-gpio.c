@@ -61,6 +61,7 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
 /* This table can be used to map a port number to a IOPORT base address.  For
  * example, an index of zero would correspond to IOPORTA, one with IOPORTB,
  * etc.
@@ -121,11 +122,6 @@ static inline bool pic32mz_outputhigh(pinset_t pinset)
   return ((pinset & GPIO_VALUE_MASK) != 0);
 }
 
-static inline bool pic32mz_value(pinset_t pinset)
-{
-  return ((pinset & GPIO_VALUE_MASK) != GPIO_VALUE_ZERO);
-}
-
 static inline unsigned int pic32mz_portno(pinset_t pinset)
 {
   return ((pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT);
@@ -148,12 +144,14 @@ static inline unsigned int pic32mz_slewrate(pinset_t pinset)
 
 static inline unsigned int pic32mz_slewratecon0(pinset_t pinset)
 {
-  return (pic32mz_slewrate(pinset) & GPIO_SR_CON0_MASK) >> GPIO_SR_CON0_SHIFT;
+  return (pic32mz_slewrate(pinset) & GPIO_SR_CON0_MASK) >>
+         GPIO_SR_CON0_SHIFT;
 }
 
 static inline unsigned int pic32mz_slewratecon1(pinset_t pinset)
 {
-  return (pic32mz_slewrate(pinset) & GPIO_SR_CON1_MASK) >> GPIO_SR_CON1_SHIFT;
+  return (pic32mz_slewrate(pinset) & GPIO_SR_CON1_MASK) >>
+         GPIO_SR_CON1_SHIFT;
 }
 
 /****************************************************************************
@@ -211,7 +209,7 @@ int pic32mz_configgpio(pinset_t cfgset)
 
           putreg32(mask, base + PIC32MZ_IOPORT_ANSELCLR_OFFSET);
 
-          /* It is an output; clear the corresponding bit in the TRIS register */
+          /* It is an output; clear the corresponding bit in TRIS register */
 
           putreg32(mask, base + PIC32MZ_IOPORT_TRISCLR_OFFSET);
 
@@ -240,7 +238,7 @@ int pic32mz_configgpio(pinset_t cfgset)
         }
       else
         {
-          /* It is an input; set the corresponding bit in the TRIS register. */
+          /* It is an input; set the corresponding bit in TRIS register. */
 
           putreg32(mask, base + PIC32MZ_IOPORT_TRISSET_OFFSET);
           putreg32(mask, base + PIC32MZ_IOPORT_ODCCLR_OFFSET);

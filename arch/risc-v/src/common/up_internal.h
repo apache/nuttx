@@ -77,6 +77,14 @@
 #define up_restorestate(regs) (g_current_regs = regs)
 #endif
 
+#define _START_TEXT  &_stext
+#define _END_TEXT    &_etext
+#define _START_BSS   &_sbss
+#define _END_BSS     &_ebss
+#define _DATA_INIT   &_eronly
+#define _START_DATA  &_sdata
+#define _END_DATA    &_edata
+
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is
  * assumed.
@@ -112,6 +120,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
+#ifndef __ASSEMBLY__
 #ifdef CONFIG_ARCH_RV64GC
 #ifdef CONFIG_SMP
 EXTERN volatile uint64_t *g_current_regs[CONFIG_SMP_NCPUS];
@@ -133,14 +142,14 @@ EXTERN uint32_t g_intstackalloc; /* Allocated stack base */
 EXTERN uint32_t g_intstackbase;  /* Initial top of interrupt stack */
 #endif
 
-/* These 'addresses' of these values are setup by the linker script.  They are
- * not actual uint32_t storage locations! They are only used meaningfully in the
- * following way:
+/* These 'addresses' of these values are setup by the linker script.  They
+ * are not actual uint32_t storage locations! They are only used meaningfully
+ * in the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
  *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32_t variable _data (it is
- *    not!).
+ *    that the value _sdata is the address of a uint32_t variable _data (it
+ *    is not!).
  *  - We can recoved the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
@@ -153,13 +162,15 @@ EXTERN uint32_t _edata;           /* End+1 of .data */
 EXTERN uint32_t _sbss;            /* Start of .bss */
 EXTERN uint32_t _ebss;            /* End+1 of .bss */
 
+#endif /* __ASSEMBLY__ */
+
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
+* Public Function Prototypes
+  ***************************************************************************/
 
 #ifndef __ASSEMBLY__
 
-/* Low level initialization provided by board-level logic ******************/
+/* Low level initialization provided by board-level logic *******************/
 
 void up_boot(void);
 
@@ -181,6 +192,22 @@ void up_copystate(uint32_t *dest, uint32_t *src);
 void up_sigdeliver(void);
 int up_swint(int irq, FAR void *context, FAR void *arg);
 uint32_t up_get_newintctx(void);
+
+#ifdef CONFIG_ARCH_FPU
+void up_savefpu(uint32_t *regs);
+void up_restorefpu(const uint32_t *regs);
+#else
+#  define up_savefpu(regs)
+#  define up_restorefpu(regs)
+#endif
+
+/* Power management *********************************************************/
+
+#ifdef CONFIG_PM
+void up_pminitialize(void);
+#else
+#  define up_pminitialize()
+#endif
 
 /* Low level serial output **************************************************/
 

@@ -409,7 +409,7 @@ int nrf24l01_setdatarate(FAR struct nrf24l01_dev_s *dev,
  *
  * Input Parameters:
  *   dev Pointer to an nRF24L01 device structure
- *   freq New frequency value  (in Mhz: 2400 to 2525)
+ *   freq New frequency value  (in MHz: 2400 to 2525)
  *
  * Returned Value:
  *   OK
@@ -425,7 +425,7 @@ int nrf24l01_setradiofreq(FAR struct nrf24l01_dev_s *dev, uint32_t freq);
  *   dev Pointer to an nRF24L01 device structure
  *
  * Returned Value:
- *   Radio frequency  (in Mhz)
+ *   Radio frequency  (in MHz)
  *
  ********************************************************************************************/
 

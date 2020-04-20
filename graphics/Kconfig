@@ -514,7 +514,7 @@ config NXSTART_SERVERPRIO
 
 config NXSTART_SERVERSTACK
 	int "NX Server Stack Size"
-	default 2048
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		NX server thread stack size (in multi-user mode).  Default 2048
 

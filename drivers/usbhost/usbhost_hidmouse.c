@@ -237,7 +237,9 @@ struct usbhost_state_s
 
   struct usbhost_class_s  usbclass;
 
-  /* This is an instance of the USB host driver bound to this class instance */
+  /* This is an instance of the USB host driver
+   * bound to this class instance
+   */
 
   struct usbhost_driver_s *drvr;
 
@@ -538,7 +540,7 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *usbclass)
   /* Free the class instance. */
 
   uinfo("Freeing: %p\n", usbclass);
-  sched_kfree(usbclass);
+  kmm_free(usbclass);
 }
 
 /****************************************************************************
@@ -1173,7 +1175,9 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 
                   priv->sample.valid = true;
 
-                  /* Indicate the availability of new sample data for this ID */
+                  /* Indicate the availability of new sample data
+                   * for this ID
+                   */
 
                   priv->sample.id = priv->id;
 #else
@@ -1498,7 +1502,9 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
             uinfo("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
-            /* Did we already find what we needed from a preceding interface? */
+            /* Did we already find what we needed from
+             * a preceding interface?
+             */
 
             if ((found & USBHOST_ALLFOUND) == USBHOST_ALLFOUND)
               {
@@ -1588,7 +1594,9 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
       if (found == USBHOST_ALLFOUND)
         {
-          /* Yes.. then break out of the loop and use the preceding interface */
+          /* Yes.. then break out of the loop
+           * and use the preceding interface
+           */
 
           done = true;
         }
@@ -1646,7 +1654,9 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   char devname[DEV_NAMELEN];
   int ret;
 
-  /* Set aside a transfer buffer for exclusive use by the mouse class driver */
+  /* Set aside a transfer buffer for exclusive
+   * use by the mouse class driver
+   */
 
   ret = usbhost_tdalloc(priv);
   if (ret < 0)
@@ -1696,7 +1706,9 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
                                  (FAR char * const *)NULL);
   if (priv->pollpid < 0)
     {
-      /* Failed to started the poll thread... probably due to memory resources */
+      /* Failed to started the poll thread...
+       * probably due to memory resources
+       */
 
       usbhost_givesem(&g_exclsem);
       ret = priv->pollpid;

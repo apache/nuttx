@@ -38,14 +38,18 @@
 #ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_DMAC_COMMON_H
 #define __ARCH_ARM_SRC_CXD56XX_CXD56_DMAC_COMMON_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <stdint.h>
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* DMA_HANDLE provides an opaque are reference that can be used to represent a
- * DMA channel.
+/* DMA_HANDLE provides an opaque are reference that can be used to represent
+ * a DMA channel.
  */
 
 typedef FAR void *DMA_HANDLE;
@@ -70,7 +74,8 @@ typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
  * this should be changed to a uint32_t.
  */
 
-typedef struct {
+typedef struct
+{
     uint16_t channel_cfg;
     uint8_t dest_width;
     uint8_t src_width;

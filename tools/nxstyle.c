@@ -1399,6 +1399,7 @@ int main(int argc, char **argv, char **envp)
                    *   IGMPv2      as an IGMP version number
                    *   [0-9]p[0-9] as a decimal point
                    *   d[0-9]      as a divisor
+                   *   MHz         for frequencies
                    */
 
                    if (!have_lower && islower(line[n]))
@@ -1439,8 +1440,8 @@ int main(int argc, char **argv, char **envp)
                              }
                            break;
 
-                         /* Sequences containing 'p' or 'd' must have been
-                          * preceded by upper case characters.
+                         /* Sequences containing 'p', 'd', or 'z' must have
+                          * been preceded by upper case characters.
                           */
 
                          case 'p':
@@ -1459,6 +1460,16 @@ int main(int argc, char **argv, char **envp)
                              }
                              break;
 
+                         case 'z':
+                           if (!have_upper || n < 2 ||
+                               line[n - 1] != 'H' ||
+                               line[n - 2] != 'M')
+                             {
+                               have_lower = true;
+                             }
+                             break;
+                           break;
+
                          default:
                            have_lower = true;
                            break;
@@ -1473,13 +1484,6 @@ int main(int argc, char **argv, char **envp)
 
               if (have_upper && have_lower)
                 {
-                  /* REVISIT:  Although pre-processor definitions are
-                   * supposed to be all upper-case, there are exceptions
-                   * such as using 'p' for a decimal point or 'MHz'.
-                   * Those will be reported here, but probably should be
-                   * considered false alarms.
-                   */
-
                   /* Ignore symbols that begin with white-listed prefixes */
 
                   if (white_prefix(&line[ident_index], lineno))
@@ -1717,7 +1721,9 @@ int main(int argc, char **argv, char **envp)
                   {
                     if (n > indent)
                       {
-                        /* REVISIT: dnest is always > 0 here if bfunctions == false */
+                        /* REVISIT: dnest is always > 0 here if bfunctions ==
+                         * false.
+                         */
 
                         if (dnest == 0 || !bfunctions || lineno == rbrace_lineno)
                           {
@@ -1884,7 +1890,9 @@ int main(int argc, char **argv, char **envp)
                           }
                       }
 
-                    /* The right brace should not be preceded with a a blank line */
+                    /* The right brace should not be preceded with a a blank
+                     * line.
+                     */
 
                     if (lineno == blank_lineno + 1)
                       {
@@ -2027,6 +2035,19 @@ int main(int argc, char **argv, char **envp)
                   else if (line[n + 1] == '=')
                     {
                       check_spaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+
+                  /* Scientific notation with a negative exponent (eg. 10e-10)
+                   * REVISIT: This fails for cases where the variable name
+                   *          ends with 'e' preceded by a digit:
+                   *          a = abc1e-10;
+                   *          a = ABC1E-10;
+                   */
+
+                  else if ((line[n - 1] == 'e' || line[n - 1] == 'E') &&
+                           isdigit(line[n + 1]) && isdigit(line[n - 2]))
+                    {
                       n++;
                     }
                   else
@@ -2350,29 +2371,72 @@ int main(int argc, char **argv, char **envp)
 
       /* Loop terminates when NUL or newline character found */
 
-      if (line[n] == '\n')
+      if (line[n] == '\n' || line[n] == '\0')
         {
+          /* If the parse terminated on the NULL, then back up to the last
+           * character (which should be the newline).
+           */
+
+          int m = n;
+          if (line[m] == '\0' && m > 0)
+            {
+              m--;
+            }
+
           /* Check for space at the end of the line.  Except for carriage
            * returns which we have already reported (one time) above.
            */
 
-          if (n > 1 && isspace((int)line[n - 1]) && line[n - 1] != '\r')
+          if (m > 1 && isspace((int)line[m - 1]) &&
+              line[m - 1] != '\n' && line[m - 1] != '\r')
             {
-               ERROR("Dangling whitespace at the end of line", lineno, n);
+               ERROR("Dangling whitespace at the end of line", lineno, m);
             }
 
-          /* Check for long lines */
+          /* The line width is determined by the location of the final
+           * asterisk in block comments.  The closing line of the block
+           * comment will exceed that by one one character, the '/'
+           * following the final asterisk.
+           */
 
-          if (n > g_maxline)
+          else if (m > g_maxline)
+            {
+              bool bslash;
+              int a;
+
+              for (bslash = false, a = m;
+                   a > 2 && strchr("\n\r/", line[a]) != NULL;
+                   a--)
+                {
+                  if (line[a] == '/')
+                    {
+                      bslash = true;
+                    }
+                }
+
+              if (bslash && line[a] == '*')
+                {
+                  m = a + 1;
+                }
+            }
+
+          /* Check for long lines
+           *
+           * REVISIT:  Long line checks suppressed on right hand comments
+           * for now.  This just prevents a large number of difficult-to-
+           * fix complaints that we would have otherwise.
+           */
+
+          if (m > g_maxline && !rhcomment)
             {
               if (g_file_type == C_SOURCE)
                 {
-                  ERROR("Long line found", lineno, n);
+                  ERROR("Long line found", lineno, m);
                 }
               else if (g_file_type == C_HEADER)
 
                 {
-                  WARN("Long line found", lineno, n);
+                  WARN("Long line found", lineno, m);
                 }
             }
         }

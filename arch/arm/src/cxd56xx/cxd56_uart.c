@@ -307,6 +307,7 @@ static int cxd56_uart_clockchange(uint8_t id)
           {
             return -1; /* don't restart if processing data in rxfifo */
           }
+
         cxd56_uart_stop(ch);
         cxd56_uart_start(ch);
         break;
@@ -314,6 +315,7 @@ static int cxd56_uart_clockchange(uint8_t id)
       default:
         break;
     }
+
 #endif
   return 0;
 }
@@ -387,14 +389,14 @@ void cxd56_lowsetup(void)
   /* Configure the console (only) */
 
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
-  {
-    uint32_t val;
-    val = getreg32(CONSOLE_BASE + CXD56_UART_CR);
-    if (val & UART_CR_EN)
-      {
-        return;
-      }
-  }
+    {
+      uint32_t val;
+      val = getreg32(CONSOLE_BASE + CXD56_UART_CR);
+      if (val & UART_CR_EN)
+        {
+          return;
+        }
+    }
 
   putreg32(CONSOLE_LCR_VALUE, CONSOLE_BASE + CXD56_UART_LCR_H);
   cxd56_setbaud(CONSOLE_BASE, CONSOLE_BASEFREQ, CONSOLE_BAUD);

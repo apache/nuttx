@@ -1,7 +1,8 @@
 /****************************************************************************
  * arch/risc-v/src/common/up_initialize.c
  *
- *   Copyright (C) 2007-2010, 2012-2015, 2017 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012-2015, 2017 Gregory Nutt. All rights
+ *   reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +50,7 @@
 
 #include <arch/board/board.h>
 
+#include "sched/sched.h"
 #include "up_arch.h"
 #include "up_internal.h"
 
@@ -105,6 +107,8 @@ static inline void up_color_intstack(void)
 
 void up_initialize(void)
 {
+  FAR struct tcb_s *idle;
+
   /* Colorize the interrupt stack */
 
   up_color_intstack();
@@ -112,6 +116,23 @@ void up_initialize(void)
   /* Add any extra memory fragments to the memory manager */
 
   up_addregion();
+
+  /* Initialize the idle task stack info */
+
+  idle = this_task(); /* It should be idle task */
+  idle->stack_alloc_ptr = _END_BSS;
+  idle->adj_stack_ptr   = (FAR void *)g_idle_topstack;
+  idle->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+
+#ifdef CONFIG_PM
+  /* Initialize the power management subsystem.  This MCU-specific function
+   * must be called *very* early in the initialization sequence *before* any
+   * other device drivers are initialized (since they may attempt to register
+   * with the power management subsystem).
+   */
+
+  up_pminitialize();
+#endif
 
   /* Register devices */
 

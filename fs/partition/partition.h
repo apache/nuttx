@@ -59,24 +59,6 @@ struct partition_state_s
   size_t erasesize;
 };
 
-/****************************************************************************
- * Public Inline Functions
- ****************************************************************************/
-
-static inline int read_partition_block(FAR struct partition_state_s *state,
-                                       FAR void *buffer, size_t startblock,
-                                       size_t nblocks)
-{
-  if (state->blk)
-    {
-      return state->blk->u.i_bops->read(state->blk, buffer, startblock, nblocks);
-    }
-  else
-    {
-      return state->mtd->bread(state->mtd, startblock, nblocks, buffer);
-    }
-}
-
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 
 #endif /* __FS_PARTITION_PARTITION_H */

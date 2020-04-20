@@ -106,35 +106,51 @@
 
 #define REG_SET_BITS(_r, _b, _m) (*(volatile uint32_t*)(_r) = (*(volatile uint32_t*)(_r) & ~(_m)) | ((_b) & (_m)))
 
-/* Get field from register, used when _f is not left shifted by _f##_S */
+/* Get field from register,
+ * used when _f is not left shifted by _f##_S
+ */
 
 #define REG_GET_FIELD(_r, _f) ((REG_READ(_r) >> (_f##_S)) & (_f))
 
-/* Set field to register, used when _f is not left shifted by _f##_S */
+/* Set field to register,
+ * used when _f is not left shifted by _f##_S
+ */
 
 #define REG_SET_FIELD(_r, _f, _v) (REG_WRITE((_r),((REG_READ(_r) & ~((_f) << (_f##_S)))|(((_v) & (_f))<<(_f##_S)))))
 
-/* Set field value from a variable, used when _f is not left shifted by _f##_S */
+/* Set field value from a variable,
+ * used when _f is not left shifted by _f##_S
+ */
 
 #define VALUE_GET_FIELD(_r, _f) (((_r) >> (_f##_S)) & (_f))
 
-/* Get field value from a variable, used when _f is left shifted by _f##_S */
+/* Get field value from a variable,
+ * used when _f is left shifted by _f##_S
+ */
 
 #define VALUE_GET_FIELD2(_r, _f) (((_r) & (_f))>> (_f##_S))
 
-/* Set field value to a variable, used when _f is not left shifted by _f##_S */
+/* Set field value to a variable,
+ * used when _f is not left shifted by _f##_S
+ */
 
 #define VALUE_SET_FIELD(_r, _f, _v) ((_r)=(((_r) & ~((_f) << (_f##_S)))|((_v)<<(_f##_S))))
 
-/* Set field value to a variable, used when _f is left shifted by _f##_S */
+/* Set field value to a variable,
+ * used when _f is left shifted by _f##_S
+ */
 
 #define VALUE_SET_FIELD2(_r, _f, _v) ((_r)=(((_r) & ~(_f))|((_v)<<(_f##_S))))
 
-/* Generate a value from a field value, used when _f is not left shifted by _f##_S */
+/* Generate a value from a field value,
+ * used when _f is not left shifted by _f##_S
+ */
 
 #define FIELD_TO_VALUE(_f, _v) (((_v)&(_f))<<_f##_S)
 
-/* Generate a value from a field value, used when _f is left shifted by _f##_S */
+/* Generate a value from a field value,
+ * used when _f is left shifted by _f##_S
+ */
 
 #define FIELD_TO_VALUE2(_f, _v) (((_v)<<_f##_S) & (_f))
 
@@ -301,56 +317,57 @@
 #define ETS_CACHE_IA_INTR_SOURCE                68 /* Interrupt of Cache Invalied Access, LEVEL */
 
 /* Interrupt cpu using table */
-/*************************************************************************************************************
- *      Intr num                Level           Type                    PRO CPU usage           APP CPU uasge
- *      0                       1               extern level            WMAC                    Reserved
- *      1                       1               extern level            BT/BLE Host VHCI        Reserved
- *      2                       1               extern level            FROM_CPU                FROM_CPU
- *      3                       1               extern level            TG0_WDT                 Reserved
- *      4                       1               extern level            WBB
- *      5                       1               extern level            BT Controller
- *      6                       1               timer                   RTOS Tick               RTOS Tick
- *      7                       1               software                Reserved                Reserved
- *      8                       1               extern level            BLE Controller
- *      9                       1               extern level
- *      10                      1               extern edge             Internal Timer
- *      11                      3               profiling
- *      12                      1               extern level
- *      13                      1               extern level
- *      14                      7               nmi                     Reserved                Reserved
- *      15                      3               timer                   Internal Timer
- *      16                      5               timer
- *      17                      1               extern level
- *      18                      1               extern level
- *      19                      2               extern level
- *      20                      2               extern level
- *      21                      2               extern level
- *      22                      3               extern edge
- *      23                      3               extern level
- *      24                      4               extern level
- *      25                      4               extern level            Reserved                Reserved
- *      26                      5               extern level            Reserved                Reserved
- *      27                      3               extern level            Reserved                Reserved
- *      28                      4               extern edge
- *      29                      3               software                Reserved                Reserved
- *      30                      4               extern edge             Reserved                Reserved
- *      31                      5               extern level            Reserved                Reserved
- *************************************************************************************************************/
+
+/****************************************************************************
+ *Intr num  Level     Type          PRO CPU usage     APP CPU uasge
+ *   0        1   extern level      WMAC                 Reserved
+ *   1        1   extern level      BT/BLE Host VHCI     Reserved
+ *   2        1   extern level      FROM_CPU             FROM_CPU
+ *   3        1   extern level      TG0_WDT              Reserved
+ *   4        1   extern level      WBB
+ *   5        1   extern level      BT Controller
+ *   6        1   timer             RTOS Tick            RTOS Tick
+ *   7        1   software          Reserved             Reserved
+ *   8        1   extern level      BLE Controller
+ *   9        1   extern level
+ *   10       1   extern edge       Internal Timer
+ *   11       3   profiling
+ *   12       1   extern level
+ *   13       1   extern level
+ *   14       7   nmi               Reserved             Reserved
+ *   15       3   timer             Internal Timer
+ *   16       5   timer
+ *   17       1   extern level
+ *   18       1   extern level
+ *   19       2   extern level
+ *   20       2   extern level
+ *   21       2   extern level
+ *   22       3   extern edge
+ *   23       3   extern level
+ *   24       4   extern level
+ *   25       4   extern level      Reserved             Reserved
+ *   26       5   extern level      Reserved             Reserved
+ *   27       3   extern level      Reserved             Reserved
+ *   28       4   extern edge
+ *   29       3   software          Reserved             Reserved
+ *   30       4   extern edge       Reserved             Reserved
+ *   31       5   extern level      Reserved             Reserved
+ ****************************************************************************/
 
 /* CPU0 Interrupt number reserved, not touch this. */
 
-#define ETS_WMAC_INUM                           0
-#define ETS_BT_HOST_INUM                        1
-#define ETS_FROM_CPU_INUM                       2
-#define ETS_T0_WDT_INUM                         3
-#define ETS_WBB_INUM                            4
-#define ETS_TG0_T1_INUM                         10 /* Use edge interrupt */
+#define ETS_WMAC_INUM               0
+#define ETS_BT_HOST_INUM            1
+#define ETS_FROM_CPU_INUM           2
+#define ETS_T0_WDT_INUM             3
+#define ETS_WBB_INUM                4
+#define ETS_TG0_T1_INUM             10 /* Use edge interrupt */
 
 /* CPU0 Interrupt number used in ROM, should be cancelled in SDK */
 
-#define ETS_SLC_INUM                            1
-#define ETS_UART0_INUM                          5
-#define ETS_UART1_INUM                          5
+#define ETS_SLC_INUM                1
+#define ETS_UART0_INUM              5
+#define ETS_UART1_INUM              5
 
 /* Other interrupt numbers should be managed by the user */
 

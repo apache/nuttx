@@ -47,6 +47,9 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/audio/audio.h>
+#include <nuttx/audio/cxd56.h>
+#include <nuttx/audio/pcm.h>
 #include <nuttx/signal.h>
 #include <arch/chip/audio.h>
 
@@ -216,6 +219,7 @@ int board_aca_power_control(int target, bool en)
           board_power_control(POWER_AUDIO_AVDD, true);
           avdd_on = true;
         }
+
       if (!dvdd_on && (target & CXD5247_DVDD))
         {
           board_power_control(POWER_AUDIO_DVDD, true);
@@ -242,12 +246,14 @@ int board_aca_power_control(int target, bool en)
           board_power_control(POWER_AUDIO_AVDD, false);
           avdd_on = false;
         }
+
       if (dvdd_on && (target & CXD5247_DVDD))
         {
           board_power_control(POWER_AUDIO_DVDD, false);
           dvdd_on = false;
         }
     }
+
   return ret;
 }
 
@@ -268,6 +274,7 @@ bool board_aca_power_monitor(int target)
     {
       avdd_stat = board_power_monitor(POWER_AUDIO_AVDD);
     }
+
   if (target & CXD5247_DVDD)
     {
       dvdd_stat = board_power_monitor(POWER_AUDIO_DVDD);
@@ -277,7 +284,7 @@ bool board_aca_power_monitor(int target)
 }
 
 #define MUTE_OFF_DELAY  (1250 * 1000) /* ms */
-#define MUTE_ON_DELAY   (150 * 1000) /* ms */
+#define MUTE_ON_DELAY   (150 * 1000)  /* ms */
 
 /****************************************************************************
  * Name: board_external_amp_mute_control
@@ -459,4 +466,57 @@ void board_audio_finalize(void)
   /* Disable I2S. */
 
   board_audio_i2s_disable();
+}
+
+/****************************************************************************
+ * Name: board_audio_initialize_driver
+ *
+ * Description:
+ *   Initialize and register the CXD56 audio driver.
+ *
+ ****************************************************************************/
+
+static struct cxd56_lower_s g_cxd56_lower;
+
+int board_audio_initialize_driver(int minor)
+{
+  FAR struct audio_lowerhalf_s *cxd56;
+  FAR struct audio_lowerhalf_s *pcm;
+  char devname[12];
+  int ret;
+
+  /* Initialize CXD56 device driver */
+
+  cxd56 = cxd56_initialize(&g_cxd56_lower);
+  if (!cxd56)
+    {
+      auderr("ERROR: Failed to initialize the CXD56 audio\n");
+
+      return -ENODEV;
+    }
+
+  /* Initialize a PCM decoder with the CXD56 instance. */
+
+  pcm = pcm_decode_initialize(cxd56);
+  if (!pcm)
+    {
+      auderr("ERROR: Failed create the PCM decoder\n");
+
+      return -ENODEV;
+    }
+
+  /* Create a device name */
+
+  snprintf(devname, 12, "pcm%d",  minor);
+
+  /* Finally, we can register the PCM/CXD56 audio device. */
+
+  ret = audio_register(devname, pcm);
+  if (ret < 0)
+    {
+      auderr("ERROR: Failed to register /dev/%s device: %d\n",
+             devname, ret);
+    }
+
+  return ret;
 }

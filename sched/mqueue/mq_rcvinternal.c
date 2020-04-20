@@ -286,7 +286,9 @@ ssize_t nxmq_do_receive(mqd_t mqdes, FAR struct mqueue_msg_s *mqmsg,
       flags = enter_critical_section();
       for (btcb = (FAR struct tcb_s *)g_waitingformqnotfull.head;
            btcb && btcb->msgwaitq != msgq;
-           btcb = btcb->flink);
+           btcb = btcb->flink)
+        {
+        }
 
       /* If one was found, unblock it.  NOTE:  There is a race
        * condition here:  the queue might be full again by the

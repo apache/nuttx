@@ -1352,7 +1352,7 @@ SPIFI_FAM_NODE_T *spifi_REG_FAMILY_CommonCommandSet(void)
 			0x1000,					/* sub-block size */
 			0x100,					/* page size */
 			MAX_SINGLE_READ,					/* max single read bytes */
-			104,				/* max clock rate in Mhz */
+			104,				/* max clock rate in MHz */
 			104,				/* max read clock rate in MHz */
 			104,				/* max high speed read clock rate in MHz */
 			104,				/* max program clock rate in MHz */

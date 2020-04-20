@@ -94,10 +94,10 @@ static const char g_pthreadname[] = "<pthread>";
  *   This functions sets up parameters in the Task Control Block (TCB) in
  *   preparation for starting a new thread.
  *
- *   pthread_argsetup() is called from task_init() and nxtask_start() to create
- *   a new task (with arguments cloned via strdup) or pthread_create() which
- *   has one argument passed by value (distinguished by the pthread boolean
- *   argument).
+ *   pthread_argsetup() is called from task_init() and nxtask_start() to
+ *   create a new task (with arguments cloned via strdup) or pthread_create()
+ *   which has one argument passed by value (distinguished by the pthread
+ *   boolean argument).
  *
  * Input Parameters:
  *   tcb        - Address of the new task's TCB
@@ -260,7 +260,8 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
 
   /* Allocate a TCB for the new task. */
 
-  ptcb = (FAR struct pthread_tcb_s *)kmm_zalloc(sizeof(struct pthread_tcb_s));
+  ptcb = (FAR struct pthread_tcb_s *)
+            kmm_zalloc(sizeof(struct pthread_tcb_s));
   if (!ptcb)
     {
       serr("ERROR: Failed to allocate TCB\n");
@@ -612,7 +613,7 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   return ret;
 
 errout_with_join:
-  sched_kfree(pjoin);
+  kmm_free(pjoin);
   ptcb->joininfo = NULL;
 
 errout_with_tcb:

@@ -349,10 +349,10 @@ static inline void rcc_enableahb4(void)
 #if STM32H7_NGPIO > 4
              | RCC_AHB4ENR_GPIOEEN
 #endif
-#if STM32H7_NGPIO > 5
+#if (STM32H7_NGPIO > 5) && (defined(CONFIG_STM32H7_HAVE_GPIOF))
              | RCC_AHB4ENR_GPIOFEN
 #endif
-#if STM32H7_NGPIO > 6
+#if (STM32H7_NGPIO > 6) && (defined(CONFIG_STM32H7_HAVE_GPIOG))
              | RCC_AHB4ENR_GPIOGEN
 #endif
 #if STM32H7_NGPIO > 7
@@ -818,7 +818,7 @@ static void stm32_stdclockconfig(void)
 
       /* Over-drive is needed if
        *  - Voltage output scale 1 mode is selected and SYSCLK frequency is
-       *    over 400 Mhz.
+       *    over 400 MHz.
        */
 
       if ((STM32_PWR_VOS_SCALE == PWR_D3CR_VOS_SCALE_1) &&
@@ -830,7 +830,7 @@ static void stm32_stdclockconfig(void)
           regval |= RCC_APB4ENR_SYSCFGEN;
           putreg32(regval, STM32_RCC_APB4ENR);
 
-          /* Enable Overdrive to extend the clock frequency up to 480 Mhz. */
+          /* Enable Overdrive to extend the clock frequency up to 480 MHz. */
 
           regval = getreg32(STM32_SYSCFG_PWRCR);
           regval |= SYSCFG_PWRCR_ODEN;

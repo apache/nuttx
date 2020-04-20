@@ -138,17 +138,14 @@ typedef struct sysctl_unloadfwgp_s
 } sysctl_unloadfwgp_t;
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
-/**
- * Initialize system control block
- */
+
+/* Initialize system control block */
 
 void cxd56_sysctlinitialize(void);
 
-/**
- * Send system control command
- */
+/* Send system control command */
 
 int cxd56_sysctlcmd(uint8_t id, uint32_t data);
 

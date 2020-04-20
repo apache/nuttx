@@ -304,11 +304,11 @@ typedef struct SPIFI_DEVICE_DATA {
 	uint16_t subBlkSize;						/**< size of sub-block */
 	uint16_t pageSize;							/**< page size */
 	uint32_t maxReadSize;						/**< max read allowed in one operation */
-	uint8_t maxClkRate;							/**< (in Mhz) maximum clock rate (max common speed) */
-	uint8_t maxReadRate;						/**< (in Mhz) max clock rate for read (driver may utilize fast read) */
-	uint8_t maxHSReadRate;						/**< (in Mhz) max clock rate for quad / dual read */
-	uint8_t maxProgramRate;						/**< (in Mhz) max clock rate for program */
-	uint8_t maxHSProgramRate;					/**< (in Mhz) max clock rate for quad program */
+	uint8_t maxClkRate;							/**< (in MHz) maximum clock rate (max common speed) */
+	uint8_t maxReadRate;						/**< (in MHz) max clock rate for read (driver may utilize fast read) */
+	uint8_t maxHSReadRate;						/**< (in MHz) max clock rate for quad / dual read */
+	uint8_t maxProgramRate;						/**< (in MHz) max clock rate for program */
+	uint8_t maxHSProgramRate;					/**< (in MHz) max clock rate for quad program */
 	uint8_t initDeInitFxId;					/**< init/DeInit fx_id */
 	uint8_t clearStatusFxId;					/**< clearStatus fx_id */
 	uint8_t getStatusFxId;					/**< getStatus fx_id */

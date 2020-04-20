@@ -113,17 +113,18 @@
  *   sixlowpan_eaddrfromip() handle short and extended addresses,
  *   respectively.
  *
- *    128  112  96   80    64   48   32   16
- *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address IEEE 48-bit MAC
- *    xxxx 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
- *    xxxx 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *   128  112  96   80    64   48   32   16
+ *   ---- ---- ---- ----  ---- ---- ---- ----
+ *   fe80 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address 48-bit MAC
+ *   xxxx 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address 48-bit MAC
+ *   xxxx 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address EUI-64
  *
  ****************************************************************************/
 
 #ifndef CONFIG_NET_STARPOINT
 #ifdef HAVE_BYTEADDR
-static void sixlowpan_baddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *baddr)
+static void sixlowpan_baddrfromip(const net_ipv6addr_t ipaddr,
+                                  FAR uint8_t *baddr)
 {
   /* Big-endian uint16_t to byte order */
 
@@ -132,7 +133,8 @@ static void sixlowpan_baddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *badd
 #endif
 
 #ifdef HAVE_SADDR
-static void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *saddr)
+static void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr,
+                                  FAR uint8_t *saddr)
 {
   /* Big-endian uint16_t to byte order */
 
@@ -142,7 +144,8 @@ static void sixlowpan_saddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *sadd
 #endif
 
 #ifdef HAVE_EADDR
-static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *eaddr)
+static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr,
+                                  FAR uint8_t *eaddr)
 {
   FAR uint8_t *eptr = eaddr;
   int i;
@@ -169,10 +172,10 @@ static void sixlowpan_eaddrfromip(const net_ipv6addr_t ipaddr, FAR uint8_t *eadd
  *
  * Description:
  *   sixlowpan_nexthopaddr(): If the destination is on-link, extract the
- *   IEEE 802.15.14 destination address from the destination IP address. If the
- *   destination is not reachable directly, use the routing table (if available)
- *   or fall back to the default router IP address and use the router IP address
- *   to derive the IEEE 802.15.4 MAC address.
+ *   IEEE 802.15.14 destination address from the destination IP address.
+ *   If the destination is not reachable directly, use the routing table
+ *   (if available) or fall back to the default router IP address and use
+ *   the router IP address to derive the IEEE 802.15.4 MAC address.
  *
  ****************************************************************************/
 
@@ -230,13 +233,13 @@ int sixlowpan_nexthopaddr(FAR struct radio_driver_s *radio,
  *   handles a tagged address union which may either a short or and
  *   extended destination address.
  *
- *    128  112  96   80    64   48   32   16
- *    ---- ---- ---- ----  ---- ---- ---- ----
- *    ffxx xxxx xxxx xxxx  xxxx xxxx xxxx xxxx Multicast address (RFC 3513)
- *    ff02 0000 0000 0000  0000 0000 0000 0001 All nodes multicast group
- *    xxxx 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address IEEE 48-bit MAC
- *    xxxx 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
- *    xxxx 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *   128  112  96   80    64   48   32   16
+ *   ---- ---- ---- ----  ---- ---- ---- ----
+ *   ffxx xxxx xxxx xxxx  xxxx xxxx xxxx xxxx Multicast address (RFC 3513)
+ *   ff02 0000 0000 0000  0000 0000 0000 0001 All nodes multicast group
+ *   xxxx 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address 48-bit MAC
+ *   xxxx 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address 48-bit MAC
+ *   xxxx 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address EUI-64
  *
  *   In the case there the IEEE 802.15.4 node functions as an endpoint in a
  *   start topology, the destination address will, instead, be the address
@@ -310,8 +313,9 @@ int sixlowpan_destaddrfromip(FAR struct radio_driver_s *radio,
 
   /* Otherwise, the destination MAC address is encoded in the IP address */
 
-  /* If the address is link-local, or matches the prefix of the local address,
-   * the interface identifier can be extracted from the lower bits of the address.
+  /* If the address is link-local, or matches the prefix of the local
+   * address, the interface identifier can be extracted from the lower
+   * bits of the address.
    */
 
   if (!sixlowpan_islinklocal(ipaddr) &&
@@ -414,11 +418,11 @@ int sixlowpan_destaddrfromip(FAR struct radio_driver_s *radio,
  *   address from an IEEE802.15.4 short address (saddr), extended address
  *   (eaddr), or other variable length radio addresses.
  *
- *    128  112  96   80    64   48   32   16
- *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *   128  112  96   80    64   48   32   16
+ *   ---- ---- ---- ----  ---- ---- ---- ----
+ *   fe80 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address 48-bit MAC
+ *   fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address 48-bit MAC
+ *   fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address EUI-64
  *
  ****************************************************************************/
 
@@ -514,11 +518,11 @@ void sixlowpan_ipfromaddr(FAR const struct netdev_varaddr_s *addr,
  *   IEEE802.15.4 MAC addresses.  sixlowpan_destaddrfromip() is intended to
  *   handle a tagged address or any size.
  *
- *    128  112  96   80    64   48   32   16
- *    ---- ---- ---- ----  ---- ---- ---- ----
- *    fe80 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address IEEE 48-bit MAC
- *    fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address IEEE EUI-64
+ *   128  112  96   80    64   48   32   16
+ *   ---- ---- ---- ----  ---- ---- ---- ----
+ *   fe80 0000 0000 0000  0000 00ff fe00 xx00 1-byte short address 48-bit MAC
+ *   fe80 0000 0000 0000  0000 00ff fe00 xxxx 2-byte short address 48-bit MAC
+ *   fe80 0000 0000 0000  xxxx xxxx xxxx xxxx 8-byte extended address EUI-64
  *
  ****************************************************************************/
 
@@ -532,6 +536,7 @@ static inline bool sixlowpan_isbytebased(const net_ipv6addr_t ipaddr,
 }
 #endif
 
+#ifdef HAVE_SADDR
 static inline bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
                                           FAR const uint8_t *saddr)
 {
@@ -539,7 +544,9 @@ static inline bool sixlowpan_issaddrbased(const net_ipv6addr_t ipaddr,
           ipaddr[6] == HTONS(0xfe00) &&
           ipaddr[7] == *(uint16_t *)saddr);
 }
+#endif
 
+#ifdef HAVE_EADDR
 static inline bool sixlowpan_iseaddrbased(const net_ipv6addr_t ipaddr,
                                           FAR const uint8_t *eaddr)
 {
@@ -554,6 +561,7 @@ static inline bool sixlowpan_iseaddrbased(const net_ipv6addr_t ipaddr,
           ipaddr[6] ==   *(uint16_t *)(eaddr + 4) &&
           ipaddr[7] ==   *(uint16_t *)(eaddr + 6));
 }
+#endif
 
 bool sixlowpan_ismacbased(const net_ipv6addr_t ipaddr,
                           FAR const struct netdev_varaddr_s *addr)
@@ -649,7 +657,9 @@ int sixlowpan_src_panid(FAR struct radio_driver_s *radio,
       return ret;
     }
 
-  /* MAC802154 gives us PAN ID in Little Endinan Order, but we need it in Network Order */
+  /* MAC802154 gives us PAN ID in Little Endinan Order, but we need
+   * it in Network Order.
+   */
 
   panid[0] = arg.u.getreq.attrval.mac.panid[1];
   panid[1] = arg.u.getreq.attrval.mac.panid[0];

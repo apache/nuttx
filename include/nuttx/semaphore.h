@@ -26,7 +26,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
 #include <errno.h>
 #include <semaphore.h>
@@ -523,29 +522,19 @@ int sem_setprotocol(FAR sem_t *sem, int protocol);
  *   sem - Semaphore descriptor.
  *
  * Return Value:
- *   Zero(OK) - On success
- *   EINVAL - Invalid attempt to get the semaphore
+ *   Zero(OK)  - On success
+ *   EINVAL    - Invalid attempt to get the semaphore
+ *   ECANCELED - May be returned if the thread is canceled while waiting.
+ *
+ * NOTE:  It is essential that callers of this function handle the
+ * ECANCELED error.  Correct handling is that the function should return the
+ * error and the error should propagate back up the calling tree to the
+ * cancellation point interface function where the thread termination will
+ * be handled gracefully
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_INLINE
-static inline int nxsem_wait_uninterruptible(FAR sem_t *sem)
-{
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_wait(sem);
-    }
-  while (ret == -EINTR || ret == -ECANCELED);
-
-  return ret;
-}
-#else
 int nxsem_wait_uninterruptible(FAR sem_t *sem);
-#endif
 
 /****************************************************************************
  * Name: nxsem_timedwait_uninterruptible
@@ -568,29 +557,16 @@ int nxsem_wait_uninterruptible(FAR sem_t *sem);
  *   EDEADLK   A deadlock condition was detected.
  *   ECANCELED May be returned if the thread is canceled while waiting.
  *
+ * NOTE:  It is essential that callers of this function handle the
+ * ECANCELED error.  Correct handling is that the function should return the
+ * error and the error should propagate back up the calling tree to the
+ * cancellation point interface function where the thread termination will
+ * be handled gracefully
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_INLINE
-static inline int
-  nxsem_timedwait_uninterruptible(FAR sem_t *sem,
-                                  FAR const struct timespec *abstime)
-{
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_timedwait(sem, abstime);
-    }
-  while (ret == -EINTR);
-
-  return ret;
-}
-#else
 int nxsem_timedwait_uninterruptible(FAR sem_t *sem,
                                     FAR const struct timespec *abstime);
-#endif
 
 /****************************************************************************
  * Name: nxsem_tickwait_uninterruptible
@@ -617,29 +593,16 @@ int nxsem_timedwait_uninterruptible(FAR sem_t *sem,
  *     -ETIMEDOUT is returned on the timeout condition.
  *     -ECANCELED may be returned if the thread is canceled while waiting.
  *
+ * NOTE:  It is essential that callers of this function handle the
+ * ECANCELED error.  Correct handling is that the function should return the
+ * error and the error should propagate back up the calling tree to the
+ * cancellation point interface function where the thread termination will
+ * be handled gracefully
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_INLINE
-static inline int
-  nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start,
-                                 uint32_t delay)
-{
-  int ret;
-
-  do
-    {
-      /* Take the semaphore (perhaps waiting) */
-
-      ret = nxsem_tickwait(sem, start, delay);
-    }
-  while (ret == -EINTR);
-
-  return ret;
-}
-#else
 int nxsem_tickwait_uninterruptible(FAR sem_t *sem, clock_t start,
                                    uint32_t delay);
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

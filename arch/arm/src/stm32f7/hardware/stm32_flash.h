@@ -55,11 +55,11 @@
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ************************************************************************************/
 
-void stm32_flash_lock(void);
-void stm32_flash_unlock(void);
+int stm32_flash_lock(void);
+int stm32_flash_unlock(void);
 int stm32_flash_writeprotect(size_t page, bool enabled);
 
 #endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32_FLASH_H */

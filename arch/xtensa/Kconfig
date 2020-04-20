@@ -10,7 +10,7 @@ choice
 	default ARCH_CHIP_ESP32
 
 config ARCH_CHIP_ESP32
-	bool "Expressif ESP32"
+	bool "Espressif ESP32"
 	select ARCH_FAMILY_LX6
 	select XTENSA_HAVE_INTERRUPTS
 	select ARCH_HAVE_MULTICPU
@@ -18,7 +18,7 @@ config ARCH_CHIP_ESP32
 	select ARCH_TOOLCHAIN_GNU
 	select ARCH_GLOBAL_IRQDISABLE
 	---help---
-		The ESP32 is a dual-core system from Expressif with two Harvard
+		The ESP32 is a dual-core system from Espressif with two Harvard
 		architecture Xtensa LX6 CPUs. All embedded memory, external memory
 		and peripherals are located on the data bus and/or the instruction
 		bus of these CPUs. With some minor exceptions, the address mapping
