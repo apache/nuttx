@@ -137,11 +137,6 @@ CHIP_CSRCS += stm32_adc.c
 endif
 
 ifeq ($(CONFIG_STM32H7_BBSRAM),y)
-ifeq ($(CONFIG_ARMV7M_DCACHE),y)
-ifeq ($(CONFIG_ARM_MPU),y)
-CMN_CSRCS += arm_mpu.c
-endif
-endif
 CHIP_CSRCS += stm32_bbsram.c
 endif
 
