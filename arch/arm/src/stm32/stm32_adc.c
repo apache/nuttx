@@ -3798,8 +3798,22 @@ static int adc_inj_set_ch(FAR struct adc_dev_s *dev, uint8_t ch)
 
   for (i = 0 ; i < priv->cj_channels; i += 1)
     {
+#if defined(HAVE_IP_ADC_V1)
+      /* Injected channels sequence for for ADC IPv1:
+       *
+       *           1      2     3      4
+       *   IL=1: JSQR4,
+       *   IL=2: JSQR3, JSQR4
+       *   IL=3: JSQR2, JSQR3, JSQR4
+       *   IL=4: JSQR1, JSQR2, JSQR3, JSQR4
+       */
+
+      setbits |= (priv->j_chanlist[priv->cj_channels - 1 - i] <<
+                  (ADC_JSQR_JSQ4_SHIFT - ADC_JSQR_JSQ_SHIFT * i));
+#else
       setbits |= priv->j_chanlist[i] << (ADC_JSQR_JSQ1_SHIFT +
-                                        ADC_JSQR_JSQ_SHIFT * i);
+                                         ADC_JSQR_JSQ_SHIFT * i);
+#endif
     }
 
   /* Write register */
