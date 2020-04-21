@@ -320,7 +320,8 @@ static void pwm_modifyreg(struct stm32_pwmtimer_s *priv, uint32_t offset,
                           uint32_t clearbits, uint32_t setbits);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg);
+static void pwm_dumpregs(FAR struct pwm_lowerhalf_s *dev,
+                         FAR const char *msg);
 #else
 #  define pwm_dumpregs(priv,msg)
 #endif
@@ -1716,7 +1717,7 @@ static void pwm_modifyreg(struct stm32_pwmtimer_s *priv, uint32_t offset,
  *   Dump all timer registers.
  *
  * Input Parameters:
- *   priv - A reference to the PWM block status
+ *   dev - A reference to the lower half PWM driver state structure
  *
  * Returned Value:
  *   None
@@ -1726,6 +1727,8 @@ static void pwm_modifyreg(struct stm32_pwmtimer_s *priv, uint32_t offset,
 #ifdef CONFIG_DEBUG_PWM_INFO
 static void pwm_dumpregs(struct stm32_pwmtimer_s *priv, FAR const char *msg)
 {
+  FAR struct stm32_pwmtimer_s *priv = (FAR struct stm32_pwmtimer_s *)dev;
+
   pwminfo("%s:\n", msg);
   if (priv->timid == 16 || priv->timid == 17)
     {
@@ -2650,7 +2653,7 @@ static int pwm_outputs_enable(FAR struct pwm_lowerhalf_s *dev,
   regval |= ((outputs & STM32_PWM_OUT3N) ? ATIM_CCER_CC3NE : 0);
   regval |= ((outputs & STM32_PWM_OUT4)  ? ATIM_CCER_CC4E  : 0);
 
-  /* NOTE: CC4N does not exist, but some docs show configuration bits for it */
+  /* NOTE: CC4N doesn't exist, but some docs show configuration bits for it */
 
 #ifdef HAVE_IP_TIMERS_V2
   regval |= ((outputs & STM32_PWM_OUT5)  ? ATIM_CCER_CC5E  : 0);
@@ -3167,7 +3170,7 @@ static int pwm_pulsecount_timer(FAR struct pwm_lowerhalf_s *dev,
       up_enable_irq(priv->irq);
     }
 
-  pwm_dumpregs(priv, "After starting");
+  pwm_dumpregs(dev, "After starting");
 
 errout:
   return ret;
@@ -3460,7 +3463,7 @@ static int pwm_timer(FAR struct pwm_lowerhalf_s *dev,
 
   pwm_timer_enable(dev, true);
 
-  pwm_dumpregs(priv, "After starting");
+  pwm_dumpregs(dev, "After starting");
 
 errout:
   return ret;
@@ -3821,7 +3824,7 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
       goto errout;
     }
 
-  pwm_dumpregs(priv, "Initially");
+  pwm_dumpregs(dev, "Initially");
 
   /* Configure the PWM output pins, but do not start the timer yet */
 
@@ -3829,21 +3832,38 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
     {
       if (priv->channels[i].out1.in_use == 1)
         {
-          pincfg = priv->channels[i].out1.pincfg;
-          pwminfo("pincfg: %08x\n", pincfg);
+          /* Do not configure the pin if pincfg is not specified.
+           * This prevents overwriting the PA0 configuration if the
+           * channel is used internally.
+           */
 
-          stm32_configgpio(pincfg);
-          pwm_dumpgpio(pincfg, "PWM setup");
+          pincfg = priv->channels[i].out1.pincfg;
+          if (pincfg != 0)
+            {
+              pwminfo("pincfg: %08x\n", pincfg);
+
+              stm32_configgpio(pincfg);
+              pwm_dumpgpio(pincfg, "PWM setup");
+            }
         }
 
 #ifdef HAVE_PWM_COMPLEMENTARY
       if (priv->channels[i].out2.in_use == 1)
         {
           pincfg = priv->channels[i].out2.pincfg;
-          pwminfo("pincfg: %08x\n", pincfg);
 
-          stm32_configgpio(pincfg);
-          pwm_dumpgpio(pincfg, "PWM setup");
+          /* Do not configure the pin if pincfg is not specified.
+           * This prevents overwriting the PA0 configuration if the
+           * channel is used internally.
+           */
+
+          if (pincfg != 0)
+            {
+              pwminfo("pincfg: %08x\n", pincfg);
+
+              stm32_configgpio(pincfg);
+              pwm_dumpgpio(pincfg, "PWM setup");
+            }
         }
 #endif
     }
@@ -4209,7 +4229,7 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
   leave_critical_section(flags);
 
   pwminfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
-  pwm_dumpregs(priv, "After stop");
+  pwm_dumpregs(dev, "After stop");
 
 errout:
   return ret;
