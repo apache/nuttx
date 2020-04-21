@@ -556,8 +556,8 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               /* Perform a simple apb_free operation */
 
-              DEBUGASSERT(bufdesc->u.pBuffer != NULL);
-              apb_free(bufdesc->u.pBuffer);
+              DEBUGASSERT(bufdesc->u.buffer != NULL);
+              apb_free(bufdesc->u.buffer);
               ret = sizeof(struct audio_buf_desc_s);
             }
         }
@@ -575,7 +575,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           DEBUGASSERT(lower->ops->enqueuebuffer != NULL);
 
           bufdesc = (FAR struct audio_buf_desc_s *) arg;
-          ret = lower->ops->enqueuebuffer(lower, bufdesc->u.pBuffer);
+          ret = lower->ops->enqueuebuffer(lower, bufdesc->u.buffer);
         }
         break;
 

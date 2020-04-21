@@ -597,7 +597,7 @@ static int audio_comp_freebuffer(FAR struct audio_lowerhalf_s *dev,
 
   if (ret == -ENOTTY)
     {
-      apb_free(bufdesc->u.pBuffer);
+      apb_free(bufdesc->u.buffer);
       ret = sizeof(*bufdesc);
     }
 
