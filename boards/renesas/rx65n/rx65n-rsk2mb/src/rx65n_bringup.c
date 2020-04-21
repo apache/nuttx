@@ -34,6 +34,7 @@
 
 #include <nuttx/board.h>
 
+#include "rx65n_rsk2mb.h"
 #include <rx65n_definitions.h>
 #ifdef CONFIG_LIB_BOARDCTL
 
@@ -122,6 +123,12 @@ int rx65n_bringup(void)
              ret, errno);
     }
 
+#endif
+
+#ifdef CONFIG_RX65N_SBRAM
+  /* Initialize standby RAM */
+
+  (void)rx65n_sbram_int();
 #endif
   return OK;
 }
