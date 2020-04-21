@@ -1,6 +1,7 @@
 /Make.dep
 /.depend
 /Cygwin-names.dat
+/Darwin-names.dat
 /Msys-names.dat
 /Linux-names.dat
 /nuttx.rel

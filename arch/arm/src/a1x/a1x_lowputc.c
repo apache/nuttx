@@ -203,11 +203,12 @@ void up_lowputc(char ch)
 #if defined HAVE_UART_DEVICE && defined HAVE_SERIAL_CONSOLE
   /* Wait for the transmitter to be available */
 
-  while ((getreg32(CONSOLE_BASE+A1X_UART_LSR_OFFSET) & UART_LSR_THRE) == 0);
+  while ((getreg32(CONSOLE_BASE + A1X_UART_LSR_OFFSET) &
+          UART_LSR_THRE) == 0);
 
   /* Send the character */
 
-  putreg32((uint32_t)ch, CONSOLE_BASE+A1X_UART_THR_OFFSET);
+  putreg32((uint32_t)ch, CONSOLE_BASE + A1X_UART_THR_OFFSET);
 #endif
 }
 
@@ -264,28 +265,35 @@ void a1x_lowsetup(void)
 
   /* Clear fifos */
 
-  putreg32(UART_FCR_RFIFOR | UART_FCR_XFIFOR, CONSOLE_BASE + A1X_UART_FCR_OFFSET);
+  putreg32(UART_FCR_RFIFOR | UART_FCR_XFIFOR,
+           CONSOLE_BASE + A1X_UART_FCR_OFFSET);
 
   /* Set trigger */
 
-  putreg32(UART_FCR_FIFOE | UART_FCR_RT_HALF, CONSOLE_BASE + A1X_UART_FCR_OFFSET);
+  putreg32(UART_FCR_FIFOE | UART_FCR_RT_HALF,
+           CONSOLE_BASE + A1X_UART_FCR_OFFSET);
 
   /* Set up the LCR and set DLAB=1 */
 
-  putreg32(CONSOLE_LCR_VALUE | UART_LCR_DLAB, CONSOLE_BASE + A1X_UART_LCR_OFFSET);
+  putreg32(CONSOLE_LCR_VALUE | UART_LCR_DLAB,
+           CONSOLE_BASE + A1X_UART_LCR_OFFSET);
 
   /* Set the BAUD divisor */
 
-  putreg32(CONSOLE_DL >> 8, CONSOLE_BASE+A1X_UART_DLH_OFFSET);
-  putreg32(CONSOLE_DL & 0xff, CONSOLE_BASE+A1X_UART_DLL_OFFSET);
+  putreg32(CONSOLE_DL >> 8,
+           CONSOLE_BASE + A1X_UART_DLH_OFFSET);
+  putreg32(CONSOLE_DL & 0xff,
+           CONSOLE_BASE + A1X_UART_DLL_OFFSET);
 
   /* Clear DLAB */
 
-  putreg32(CONSOLE_LCR_VALUE, CONSOLE_BASE+A1X_UART_LCR_OFFSET);
+  putreg32(CONSOLE_LCR_VALUE,
+           CONSOLE_BASE + A1X_UART_LCR_OFFSET);
 
   /* Configure the FIFOs */
 
-  putreg32(UART_FCR_RT_HALF | UART_FCR_XFIFOR | UART_FCR_RFIFOR | UART_FCR_FIFOE,
+  putreg32(UART_FCR_RT_HALF | UART_FCR_XFIFOR |
+           UART_FCR_RFIFOR | UART_FCR_FIFOE,
            CONSOLE_BASE + A1X_UART_FCR_OFFSET);
 #endif
 #endif /* HAVE_UART_DEVICE */

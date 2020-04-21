@@ -18,6 +18,7 @@
 
 TOOLDIR=$(dirname $0)
 
+check=check_patch
 fail=0
 range=0
 spell=0
@@ -36,20 +37,18 @@ usage() {
   echo "   git diff --cached | ./tools/checkpatch.sh -"
   echo "Where a <commit list> is any syntax supported by git for specifying git revision, see GITREVISIONS(7)"
   echo "Where a <patch file names> is a space separated list of patch file names or wildcard. or *.patch"
+
+  exit $@
 }
 
 check_file() {
-  $TOOLDIR/nxstyle $@
-  ret=$?
-  if [ $ret != 0 ]; then
-    fail=$ret
+  if ! $TOOLDIR/nxstyle $@ 2>&1; then
+    fail=1
   fi
 
   if [ $spell != 0 ]; then
-    codespell -q 7 ${@: -1}
-    ret=$?
-    if [ $ret != 0 ]; then
-      fail=$ret
+    if ! codespell -q 7 ${@: -1}; then
+      fail=1
     fi
   fi
 }
@@ -59,9 +58,9 @@ check_ranges() {
     if [[ $REPLY =~ ^(\+\+\+\ (b/)?([^[:blank:]]+).*)$ ]]; then
       if [ "$ranges" != "" ]; then
         if [ $range != 0 ]; then
-          check_file $ranges $path 2>&1
+          check_file $ranges $path
         else
-          check_file $path 2>&1
+          check_file $path
         fi
       fi
       path=${BASH_REMATCH[3]}
@@ -72,18 +71,16 @@ check_ranges() {
   done
   if [ "$ranges" != "" ]; then
     if [ $range != 0 ]; then
-      check_file $ranges $path 2>&1
+      check_file $ranges $path
     else
-      check_file $path 2>&1
+      check_file $path
     fi
   fi
 }
 
 check_patch() {
-  git apply --check $1
-  ret=$?
-  if [ $ret != 0 ]; then
-    fail=$ret
+  if ! git apply --check $1; then
+    fail=1
   else
     git apply $1
     diffs=`cat $1`
@@ -106,53 +103,39 @@ fi
 
 while [ ! -z "$1" ]; do
   case "$1" in
-  -h )
-    usage
-    exit 0
+  - )
+    check_ranges
     ;;
   -c )
     spell=1
     ;;
+  -f )
+    check=check_file
+    ;;
+  -g )
+    check=check_commit
+    ;;
+  -h )
+    usage 0
+    ;;
+  -p )
+    check=check_patch
+    ;;
   -r )
     range=1
     ;;
-  -p )
-    shift
-    patches=$@
-    break
-    ;;
-  -g )
-    shift
-    commits=$@
-    break
-    ;;
-  -f )
-    shift
-    files=$@
-    break
-    ;;
-  - )
-    check_ranges
-    break
+  -* )
+    usage 1
     ;;
   * )
-    patches=$@
     break
     ;;
   esac
   shift
 done
 
-for patch in $patches; do
-  check_patch $patch
-done
-
-for commit in $commits; do
-  check_commit $commit
-done
-
-for file in $files; do
-  check_file $file 2>&1
+for arg in $@; do
+  $check $arg
 done
 
 exit $fail

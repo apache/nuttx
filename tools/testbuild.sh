@@ -158,25 +158,19 @@ blacklist=`grep "^-" $testfile || true`
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
 
 function makefunc {
-  ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" $@ 1>/dev/null
-  ret=$?
-  if [ $ret != 0 ]; then
-    fail=$ret
+  if ! ${MAKE} ${MAKE_FLAGS} "${EXTRA_FLAGS}" $@ 1>/dev/null; then
+    fail=1
   fi
 }
 
 # Clean up after the last build
 
-function distclean_with_git {
-  git -C $nuttx clean -xfdq
-  git -C $APPSDIR clean -xfdq
-}
-
 function distclean {
+  echo "  Cleaning..."
   if [ -f .config ]; then
-    echo "  Cleaning..."
     if [ ${GITCLEAN} -eq 1 ]; then
-      distclean_with_git
+      git -C $nuttx clean -xfdq
+      git -C $APPSDIR clean -xfdq
     else
       makefunc ${JOPTION} distclean
     fi
@@ -187,7 +181,9 @@ function distclean {
 
 function configure {
   echo "  Configuring..."
-  ./tools/configure.sh ${HOPTION} $config
+  if ! ./tools/configure.sh ${HOPTION} $config; then
+    fail=1
+  fi
 
   if [ "X$toolchain" != "X" ]; then
     setting=`grep _TOOLCHAIN_ $nuttx/.config | grep -v CONFIG_ARCH_TOOLCHAIN_* | grep =y`
@@ -209,9 +205,7 @@ function configure {
       sed -i -e "\$aCONFIG_ARCH_SIZET_LONG=y" $nuttx/.config
     fi
 
-
-    echo "  Refreshing..."
-    makefunc olddefconfig 1>/dev/null
+    makefunc olddefconfig
   fi
 }
 
@@ -219,8 +213,26 @@ function configure {
 
 function build {
   echo "  Building NuttX..."
-  echo "------------------------------------------------------------------------------------"
   makefunc ${JOPTION}
+
+  # Ensure defconfig in the canonical form
+
+  if ! ./tools/refresh.sh --silent $config; then
+    fail=1
+  fi
+
+  # Ensure nuttx and apps directory in clean state
+
+  if [ -d $nuttx/.git ] || [ -d $APPSDIR/.git ]; then
+    if [[ -n $(git -C $nuttx status -s) ]]; then
+      git -C $nuttx status
+      fail=1
+    fi
+    if [[ -n $(git -C $APPSDIR status -s) ]]; then
+      git -C $APPSDIR status
+      fail=1
+    fi
+  fi
 }
 
 # Coordinate the steps for the next build test

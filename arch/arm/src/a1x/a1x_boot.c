@@ -59,6 +59,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* The vectors are, by default, positioned at the beginning of the text
  * section.  They will always have to be copied to the correct location.
  *
@@ -247,8 +248,8 @@ static void a1x_copyvectorblock(void)
   a1x_vectorpermissions(MMU_L2_VECTRWFLAGS);
 #endif
 
-  /* Copy the vectors into ISRAM at the address that will be mapped to the vector
-   * address:
+  /* Copy the vectors into ISRAM at the address that will be mapped to the
+   * vector address:
    *
    *   A1X_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
    *   A1X_VECTOR_VSRAM - Virtual address of vector table in SRAM
