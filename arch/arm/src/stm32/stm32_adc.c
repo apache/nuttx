@@ -3694,69 +3694,6 @@ static uint32_t adc_sqrbits(FAR struct stm32_dev_s *priv, int first,
 }
 
 /****************************************************************************
- * Name: adc_offset_set
- ****************************************************************************/
-
-#ifdef CONFIG_STM32_ADC_LL_OPS
-#ifdef HAVE_IP_ADC_V2
-static int adc_offset_set(FAR struct stm32_adc_dev_s *dev, uint8_t ch,
-                          uint8_t i, uint16_t offset)
-{
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
-  uint32_t regval = 0;
-  uint32_t reg    = 0;
-  int      ret    = OK;
-
-  if (i >= 4)
-    {
-      /* There are only four offset registers. */
-
-      ret = -E2BIG;
-      goto errout;
-    }
-
-  reg = STM32_ADC_OFR1_OFFSET + i * 4;
-
-  regval = ADC_OFR_OFFSETY_EN;
-  adc_putreg(priv, reg, regval);
-
-  regval |= ADC_OFR_OFFSETY_CH(ch) | ADC_OFR_OFFSETY(offset);
-  adc_putreg(priv, reg, regval);
-
-errout:
-  return ret;
-}
-#else  /* HAVE_IP_ADC_V1 */
-static int adc_offset_set(FAR struct stm32_adc_dev_s *dev, uint8_t ch,
-                          uint8_t i, uint16_t offset)
-{
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
-  uint32_t reg = 0;
-  int      ret = OK;
-
-  /* WARNING: Offset only for injected channels! */
-
-  UNUSED(ch);
-
-  if (i >= 4)
-    {
-      /* There are only four offset registers. */
-
-      ret = -E2BIG;
-      goto errout;
-    }
-
-  reg = STM32_ADC_JOFR1_OFFSET + i * 4;
-
-  adc_putreg(priv, reg, offset);
-
-errout:
-  return ret;
-}
-#endif
-#endif /* CONFIG_STM32_ADC_LL_OPS */
-
-/****************************************************************************
  * Name: adc_set_ch
  *
  * Description:
@@ -4323,6 +4260,67 @@ static void adc_llops_reg_startconv(FAR struct stm32_adc_dev_s *dev,
 
   adc_reg_startconv(priv, enable);
 }
+
+/****************************************************************************
+ * Name: adc_offset_set
+ ****************************************************************************/
+
+#ifdef HAVE_IP_ADC_V2
+static int adc_offset_set(FAR struct stm32_adc_dev_s *dev, uint8_t ch,
+                          uint8_t i, uint16_t offset)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
+  uint32_t regval = 0;
+  uint32_t reg    = 0;
+  int      ret    = OK;
+
+  if (i >= 4)
+    {
+      /* There are only four offset registers. */
+
+      ret = -E2BIG;
+      goto errout;
+    }
+
+  reg = STM32_ADC_OFR1_OFFSET + i * 4;
+
+  regval = ADC_OFR_OFFSETY_EN;
+  adc_putreg(priv, reg, regval);
+
+  regval |= ADC_OFR_OFFSETY_CH(ch) | ADC_OFR_OFFSETY(offset);
+  adc_putreg(priv, reg, regval);
+
+errout:
+  return ret;
+}
+#else  /* HAVE_IP_ADC_V1 */
+static int adc_offset_set(FAR struct stm32_adc_dev_s *dev, uint8_t ch,
+                          uint8_t i, uint16_t offset)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
+  uint32_t reg = 0;
+  int      ret = OK;
+
+  /* WARNING: Offset only for injected channels! */
+
+  UNUSED(ch);
+
+  if (i >= 4)
+    {
+      /* There are only four offset registers. */
+
+      ret = -E2BIG;
+      goto errout;
+    }
+
+  reg = STM32_ADC_JOFR1_OFFSET + i * 4;
+
+  adc_putreg(priv, reg, offset);
+
+errout:
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: adc_regbufregister
