@@ -92,7 +92,7 @@
 
 #define RX_SCISCR_SXSIN1   (0x02)
 
-/*   External clock, SCK pin used for clock input */
+/* External clock, SCK pin used for clock input */
 
 #define RX_SCISCR_SXSIN2   (0x03)
 
@@ -174,10 +174,10 @@
 
 #define RX65N_CMT_CMCR_DEFAULT          (0x0080)
 #define RX65N_CMT_CMCR_CMIE_ENABLE      (0x0040)
-#define RX65N_CMT_MSTPCRA_STOP          (0x00008000)    /*Release unit0(CMT0 and CMT1) from module stop state*/
-#define RX65N_CMT_UNIT1_MSTPCRA_STOP    (0x00004000)    /*Release unit1(CMT2 and CMT3) from module stop state*/
-#define RX65N_CMTW_UNIT1_MSTPCRA_STOP   (0x00000001)    /*Release CMTW unit1 from module stop state*/
-#define RX65N_CMTW_UNIT0_MSTPCRA_STOP   (0x00000002)    /*Release CMTW unit0 from module stop state*/
+#define RX65N_CMT_MSTPCRA_STOP          (0x00008000)    /* Release unit0(CMT0 and CMT1) from module stop state */
+#define RX65N_CMT_UNIT1_MSTPCRA_STOP    (0x00004000)    /* Release unit1(CMT2 and CMT3) from module stop state */
+#define RX65N_CMTW_UNIT1_MSTPCRA_STOP   (0x00000001)    /* Release CMTW unit1 from module stop state */
+#define RX65N_CMTW_UNIT0_MSTPCRA_STOP   (0x00000002)    /* Release CMTW unit0 from module stop state */
 #define RX65N_CMTCMSTR0_STR0            (0x0001)        /* Bit 0: TCNT0 is counting */
 #define RX65N_CMTCMSTR0_STR1            (0x0002)        /* Bit 1: TCNT1 is counting */
 #define RX65N_CMTCMSTR1_STR2            (0x0001)        /* Bit 0: TCNT0 is counting */
@@ -536,6 +536,10 @@
 #define RX65N_RTC_WAIT_PERIOD 184
 #define RTC_RCR2_HR24         (0x40)
 #define RTC_PERIODIC_INTERRUPT_2_SEC (0xf)
+
+/* StandBy RAM Address */
+
+#define RX65N_SBRAM_BASE  0x000a4000
 
 /****************************************************************************
  * Public Types

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/renesas/rx65n/rx65n-grrose/src/rx65n_appinit.c
+ * boards/renesas/rx65n/rx65n-grrose/src/rx65n.appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,6 +28,7 @@
 #include <stdint.h>
 
 #include <nuttx/board.h>
+#include "rx65n_grrose.h"
 
 #ifdef CONFIG_LIB_BOARDCTL
 

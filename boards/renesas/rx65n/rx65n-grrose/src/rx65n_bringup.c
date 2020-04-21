@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/renesas/rx65n/rx65n-grrose/src/rx65n_bringup.c
+ * boards/renesas/rx65n/rx65n-grrose/src/rx65n.bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -34,6 +34,7 @@
 
 #include <nuttx/board.h>
 
+#include "rx65n_grrose.h"
 #include <rx65n_definitions.h>
 #ifdef CONFIG_LIB_BOARDCTL
 
@@ -122,6 +123,12 @@ int rx65n_bringup(void)
              ret, errno);
     }
 
+#endif
+
+#ifdef CONFIG_RX65N_SBRAM
+  /* Initialize battery-backed RAM */
+
+  (void)rx65n_sbram_int();
 #endif
   return OK;
 }
