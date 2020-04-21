@@ -1134,6 +1134,50 @@ static int stm32can_ioctl(FAR struct can_dev_s *dev, int cmd,
         }
         break;
 
+      case CANIOC_SET_NART:
+        {
+          uint32_t regval;
+          ret = stm32can_enterinitmode(priv);
+          if (ret != 0)
+            {
+              return ret;
+            }
+          regval = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+          if (arg == 1)
+            {
+              regval |= CAN_MCR_NART;
+            }
+          else
+            {
+              regval &= ~CAN_MCR_NART;
+            }
+          stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+          return stm32can_exitinitmode(priv);
+        }
+        break;
+
+      case CANIOC_SET_ABOM:
+        {
+          uint32_t regval;
+          ret = stm32can_enterinitmode(priv);
+          if (ret != 0)
+            {
+              return ret;
+            }
+          regval = stm32can_getreg(priv, STM32_CAN_MCR_OFFSET);
+          if (arg == 1)
+            {
+              regval |= CAN_MCR_ABOM;
+            }
+          else
+            {
+              regval &= ~CAN_MCR_ABOM;
+            }
+          stm32can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
+          return stm32can_exitinitmode(priv);
+        }
+        break;
+
       /* Unsupported/unrecognized command */
 
       default:

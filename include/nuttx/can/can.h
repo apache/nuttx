@@ -197,6 +197,24 @@
  *                   is returned with the errno variable set to indicate the
  *                   nature of the error.
  *   Dependencies:   None
+ *
+ * CANIOC_SET_NART:
+ *   Description:    Enable/Disable NART (No Automatic Retry)
+ *   Argument:       Set to 1 to enable NART, 0 to disable. Default is
+ *                   disabled.
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
+ *
+ * CANIOC_SET_ABOM:
+ *   Description:    Enable/Disable ABOM (Automatic Bus-off Management)
+ *   Argument:       Set to 1 to enable ABOM, 0 to disable. Default is
+ *                   disabled.
+ *   Returned Value: Zero (OK) is returned on success.  Otherwise -1 (ERROR)
+ *                   is returned with the errno variable set to indicate the
+ *                   nature of the error.
+ *   Dependencies:   None
  */
 
 #define CANIOC_RTR                _CANIOC(1)
@@ -209,9 +227,11 @@
 #define CANIOC_GET_CONNMODES      _CANIOC(8)
 #define CANIOC_SET_CONNMODES      _CANIOC(9)
 #define CANIOC_BUSOFF_RECOVERY    _CANIOC(10)
+#define CANIOC_SET_NART           _CANIOC(11)
+#define CANIOC_SET_ABOM           _CANIOC(12)
 
 #define CAN_FIRST                 0x0001         /* First common command */
-#define CAN_NCMDS                 10             /* Ten common commands */
+#define CAN_NCMDS                 12             /* Ten common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half CAN driver to the lower-half CAN driver via the co_ioctl()
