@@ -54,6 +54,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************
  *
  * CONFIG_AUDIO_WM8904 - Enables WM8904 support
@@ -129,6 +130,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This is the type of the WM8904 interrupt handler.  The lower level code
  * will intercept the interrupt and provide the upper level with the private
  * data that was provided when the interrupt was attached.

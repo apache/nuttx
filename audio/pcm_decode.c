@@ -215,13 +215,15 @@ static int  pcm_ioctl(FAR struct audio_lowerhalf_s *dev,
               int cmd, unsigned long arg);
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int  pcm_reserve(FAR struct audio_lowerhalf_s *dev, FAR void **session);
+static int  pcm_reserve(FAR struct audio_lowerhalf_s *dev,
+                        FAR void **session);
 #else
 static int  pcm_reserve(FAR struct audio_lowerhalf_s *dev);
 #endif
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int  pcm_release(FAR struct audio_lowerhalf_s *dev, FAR void *session);
+static int  pcm_release(FAR struct audio_lowerhalf_s *dev,
+                        FAR void *session);
 #else
 static int  pcm_release(FAR struct audio_lowerhalf_s *dev);
 #endif
@@ -399,14 +401,14 @@ static bool pcm_parsewav(FAR struct pcm_decode_s *priv, uint8_t *data)
 
       if (priv->bpsamp != 8 && priv->bpsamp != 16)
         {
-          auderr("ERROR: Cannot support bits per sample of %d in this mode\n",
+          auderr("ERROR: %d bits per sample are not suported in this mode\n",
                  priv->bpsamp);
           return -EINVAL;
         }
 
       if (priv->nchannels != 1 && priv->nchannels != 2)
         {
-          auderr("ERROR: Cannot support number of channels of %d in this mode\n",
+          auderr("ERROR: %d channels are not supported in this mode\n",
                  priv->nchannels);
           return -EINVAL;
         }
@@ -637,7 +639,9 @@ static void pcm_subsample(FAR struct pcm_decode_s *priv,
               priv->skip     = skipsize;
             }
 
-          /* Now copy the sample from the end of audio buffer to the beginning. */
+          /* Now copy the sample from the end of audio buffer
+           * to the beginning.
+           */
 
           for (i = 0; i < copysize; i++)
             {
@@ -666,10 +670,11 @@ static void pcm_subsample(FAR struct pcm_decode_s *priv,
  * Description:
  *   This method is called to retrieve the lower-half device capabilities.
  *   It will be called with device type AUDIO_TYPE_QUERY to request the
- *   overall capabilities, such as to determine the types of devices supported
- *   audio formats supported, etc.  Then it may be called once or more with
- *   reported supported device types to determine the specific capabilities
- *   of that device type (such as MP3 encoder, WMA encoder, PCM output, etc.).
+ *   overall capabilities, such as to determine the types of devices
+ *   supported audio formats supported, etc.
+ *   Then it may be called once or more with reported supported device types
+ *   to determine the specific capabilities of that device type
+ *   (such as MP3 encoder, WMA encoder, PCM output, etc.).
  *
  ****************************************************************************/
 
@@ -696,9 +701,9 @@ static int pcm_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
       return ret;
     }
 
-  /* Modify the capabilities reported by the lower driver:  PCM is the only
-   * supported format that we will report, regardless of what the lower driver
-   * reported.
+  /* Modify the capabilities reported by the lower driver:
+   * PCM is the only supported format that we will report,
+   * regardless of what the lower driver  reported.
    */
 
   if (caps->ac_subtype == AUDIO_TYPE_QUERY)
@@ -724,7 +729,8 @@ static int pcm_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int pcm_configure(FAR struct audio_lowerhalf_s *dev,
-                         FAR void *session, FAR const struct audio_caps_s *caps)
+                         FAR void *session,
+                         FAR const struct audio_caps_s *caps)
 #else
 static int pcm_configure(FAR struct audio_lowerhalf_s *dev,
                          FAR const struct audio_caps_s *caps)
@@ -776,8 +782,8 @@ static int pcm_configure(FAR struct audio_lowerhalf_s *dev,
  *   output generation.  It should also disable the audio hardware and put
  *   it into the lowest possible power usage state.
  *
- *   Any enqueued Audio Pipeline Buffers that have not been processed / dequeued
- *   should be dequeued by this function.
+ *   Any enqueued Audio Pipeline Buffers that have not been
+ *   processed / dequeued should be dequeued by this function.
  *
  ****************************************************************************/
 
@@ -805,10 +811,10 @@ static int pcm_shutdown(FAR struct audio_lowerhalf_s *dev)
  * Name: pcm_start
  *
  * Description:
- *   Start audio streaming in the configured mode.  For input and synthesis
- *   devices, this means it should begin sending streaming audio data.  For output
- *   or processing type device, it means it should begin processing of any enqueued
- *   Audio Pipeline Buffers.
+ *   Start audio streaming in the configured mode.
+ *   For input and synthesis devices, this means it should begin sending
+ *   streaming audio data.  For output or processing type device, it means
+ *   it should begin processing of any enqueued Audio Pipeline Buffers.
  *
  ****************************************************************************/
 
@@ -879,8 +885,9 @@ static int pcm_stop(FAR struct audio_lowerhalf_s *dev)
  * Name: pcm_pause
  *
  * Description:
- *   Pause the audio stream.  Should keep current playback context active
- *   in case a resume is issued.  Could be called and then followed by a stop.
+ *   Pause the audio stream.
+ *   Should keep current playback context active in case a resume  is issued.
+ *   Could be called and then followed by a stop.
  *
  ****************************************************************************/
 
@@ -1037,6 +1044,7 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   if (priv->streaming)
     {
       /* Yes, we are streaming */
+
       /* Check for the last audio buffer in the stream */
 
       if ((apb->flags & AUDIO_APB_FINAL) != 0)
@@ -1120,8 +1128,9 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 
           /* Then give the audio buffer to the lower driver */
 
-          audinfo("Pass to lower enqueuebuffer: apb=%p curbyte=%d nbytes=%d\n",
-                  apb, apb->curbyte, apb->nbytes);
+          audinfo(
+               "Pass to lower enqueuebuffer: apb=%p curbyte=%d nbytes=%d\n",
+                apb, apb->curbyte, apb->nbytes);
 
           ret = lower->ops->enqueuebuffer(lower, apb);
           if (ret == OK)

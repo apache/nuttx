@@ -232,7 +232,9 @@ static int audio_i2s_configure(FAR struct audio_lowerhalf_s *dev,
 {
   FAR struct audio_i2s_s *audio_i2s = (struct audio_i2s_s *)dev;
   FAR struct i2s_dev_s *i2s;
-  int samprate, nchannels, bpsamp;
+  int samprate;
+  int nchannels;
+  int bpsamp;
   int ret = OK;
 
   DEBUGASSERT(audio_i2s != NULL && caps != NULL);

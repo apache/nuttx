@@ -149,11 +149,11 @@ struct vs1053_struct_s
  ****************************************************************************/
 
 static int     vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
-                 FAR struct audio_caps_s *pCaps);
+                 FAR struct audio_caps_s *caps);
 static int     vs1053_shutdown(FAR struct audio_lowerhalf_s *lower);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int     vs1053_configure(FAR struct audio_lowerhalf_s *lower,
-                 FAR void *session, FAR const struct audio_caps_s *pCaps);
+                 FAR void *session, FAR const struct audio_caps_s *caps);
 static int     vs1053_start(FAR struct audio_lowerhalf_s *lower,
                  FAR void *session);
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
@@ -167,12 +167,12 @@ static int     vs1053_resume(FAR struct audio_lowerhalf_s *lower,
                  FAR void *session);
 #endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
 static int     vs1053_reserve(FAR struct audio_lowerhalf_s *lower,
-                 FAR void** ppContext);
+                 FAR void** session);
 static int     vs1053_release(FAR struct audio_lowerhalf_s *lower,
-                 FAR void *pContext);
+                 FAR void *session);
 #else
 static int     vs1053_configure(FAR struct audio_lowerhalf_s *lower,
-                 FAR const struct audio_caps_s *pCaps);
+                 FAR const struct audio_caps_s *caps);
 static int     vs1053_start(FAR struct audio_lowerhalf_s *lower);
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
 static int     vs1053_stop(FAR struct audio_lowerhalf_s *lower);
@@ -236,8 +236,8 @@ static const uint8_t   g_logtable [] =
   22,  21,  19,  18,  17,     /* 60 - 68 */
   15,  14,  13,  12,  11,     /* 70 - 78 */
   10,   9,   8,   7,   6,     /* 80 - 88 */
-   5,   4,   3,   2,   1,     /* 90 - 98 */
-    0                         /* 100     */
+  5,    4,   3,   2,   1,     /* 90 - 98 */
+  0                           /* 100     */
 };
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
@@ -245,26 +245,29 @@ static const uint8_t   g_logtable [] =
  * Private Functions
  ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: vs1053_spi_lock
- ************************************************************************************/
+ ****************************************************************************/
 
-static void vs1053_spi_lock(FAR struct spi_dev_s *dev, unsigned long freq_mhz)
+static void vs1053_spi_lock(FAR struct spi_dev_s *dev,
+                            unsigned long freq_mhz)
 {
   /* On SPI buses where there are multiple devices, it will be necessary to
    * lock SPI to have exclusive access to the buses for a sequence of
    * transfers.  The bus should be locked before the chip is selected.
    *
-   * This is a blocking call and will not return until we have exclusive access to
-   * the SPI bus.  We will retain that exclusive access until the bus is unlocked.
+   * This is a blocking call and will not return until we have exclusive
+   * access to the SPI bus.
+   * We will retain that exclusive access until the bus is unlocked.
    */
 
   SPI_LOCK(dev, true);
 
-  /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
-   * setmode methods to make sure that the SPI is properly configured for the device.
-   * If the SPI bus is being shared, then it may have been left in an incompatible
-   * state.
+  /* After locking the SPI bus, the we also need call the setfrequency,
+   * setbits, and setmode methods to make sure that the SPI is properly
+   * configured for the device.
+   * If the SPI bus is being shared, then it may have been left in an
+   * incompatible state.
    */
 
   SPI_SETMODE(dev, CONFIG_VS1053_SPIMODE);
@@ -273,19 +276,19 @@ static void vs1053_spi_lock(FAR struct spi_dev_s *dev, unsigned long freq_mhz)
   SPI_SETFREQUENCY(dev, freq_mhz);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: vs1053_spi_unlock
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline void vs1053_spi_unlock(FAR struct spi_dev_s *dev)
 {
   SPI_LOCK(dev, false);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: vs1053_readreg - Read the specified 16-bit register from the
  *                        VS1053 device.  Caller must hold the SPI lock.
- ************************************************************************************/
+ ****************************************************************************/
 
 static uint16_t vs1053_readreg(FAR struct vs1053_struct_s *dev, uint8_t reg)
 {
@@ -313,12 +316,14 @@ static uint16_t vs1053_readreg(FAR struct vs1053_struct_s *dev, uint8_t reg)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: vs1053_writereg - Write the specified 16-bit register to the
  *                         VS1053 device.  Caller must hold the SPI lock.
- ************************************************************************************/
+ ****************************************************************************/
 
-static void vs1053_writereg(FAR struct vs1053_struct_s *dev, uint8_t reg, uint16_t val)
+static void vs1053_writereg(FAR struct vs1053_struct_s *dev,
+                            uint8_t reg,
+                            uint16_t val)
 {
   FAR struct spi_dev_s *spi = dev->spi;
 
@@ -336,7 +341,7 @@ static void vs1053_writereg(FAR struct vs1053_struct_s *dev, uint8_t reg, uint16
   /* Now read the 16-bit value */
 
   SPI_SEND(spi, val >> 8);
-  SPI_SEND(spi, val & 0xFF);
+  SPI_SEND(spi, val & 0xff);
 
   /* Deselect the CODEC */
 
@@ -354,7 +359,8 @@ static void vs1053_writereg(FAR struct vs1053_struct_s *dev, uint8_t reg, uint16
  *
  ****************************************************************************/
 
-static int vs1053_setfrequency(FAR struct vs1053_struct_s *dev, uint32_t freq)
+static int vs1053_setfrequency(FAR struct vs1053_struct_s *dev,
+                               uint32_t freq)
 {
   double    factor;
   uint16_t  reg;
@@ -395,7 +401,7 @@ static int vs1053_setfrequency(FAR struct vs1053_struct_s *dev, uint32_t freq)
    * increase the frequency the maximum amount as needed
    */
 
-  reg |= (VS1053_SC_ADD_XTALIx20 << VS1053_SC_ADD_SHIFT);
+  reg |= (VS1053_SC_ADD_XTALI_X20 << VS1053_SC_ADD_SHIFT);
 
   /* If we aren't running with a 12.228Mhz input crystal, then we
    * must tell the chip what the frequency is
@@ -431,11 +437,12 @@ static int vs1053_setfrequency(FAR struct vs1053_struct_s *dev, uint32_t freq)
   return OK;
 }
 
-/************************************************************************************
- * Name: vs1053_logapprox - Approximate the register value in .5 dB increments
- *                          level based on the percentage using a log table since
- *                          math libraries aren't available.
- ************************************************************************************/
+/****************************************************************************
+ * Name: vs1053_logapprox -
+ *           Approximate the register value in .5 dB increments
+ *           level based on the percentage using a log table since
+ *           math libraries aren't available.
+ ****************************************************************************/
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 uint8_t vs1053_logapprox(int percent)
@@ -447,14 +454,15 @@ uint8_t vs1053_logapprox(int percent)
       return 0;
     }
 
-  return (g_logtable[percent >> 1] + g_logtable[(percent+1) >> 1]) >> 1;
+  return (g_logtable[percent >> 1] + g_logtable[(percent + 1) >> 1]) >> 1;
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
-/************************************************************************************
- * Name: vs1053_setvolume - Set the right and left volume values in the VS1053
- *                          device based on the current volume and balance settings.
- ************************************************************************************/
+/****************************************************************************
+ * Name: vs1053_setvolume -
+ *             Set the right and left volume values in the VS1053
+ *             device based on the current volume and balance settings.
+ ****************************************************************************/
 
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
 static void vs1053_setvolume(FAR struct vs1053_struct_s *dev)
@@ -462,7 +470,8 @@ static void vs1053_setvolume(FAR struct vs1053_struct_s *dev)
   FAR struct spi_dev_s *spi = dev->spi;
   uint32_t              leftlevel;
   uint32_t              rightlevel;
-  uint8_t               leftreg, rightreg;
+  uint8_t               leftreg;
+  uint8_t               rightreg;
 
   /* Constrain balance */
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
@@ -505,6 +514,7 @@ static void vs1053_setvolume(FAR struct vs1053_struct_s *dev)
 #endif
 
   /* Calculate the left and right register values */
+
   /* The register sets the volume in dB which is a logrithmic scale,
    * so we must use log() to calculate the register value.
    */
@@ -520,20 +530,22 @@ static void vs1053_setvolume(FAR struct vs1053_struct_s *dev)
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
-/************************************************************************************
+/****************************************************************************
  * Name: vs1053_setbass - Set the bass and treble level as specified in the
  *                        context's bass and treble variables..
  *
  * The level and range are in whole percentage levels (0-100).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
 static void vs1053_setbass(FAR struct vs1053_struct_s *dev)
 {
   FAR struct spi_dev_s *spi = dev->spi;
-  int       bass_range, bass_boost;
-  int       treble_range, treble_boost;
+  int       bass_range;
+  int       bass_boost;
+  int       treble_range;
+  int       treble_boost;
 
   /* Calculate range and boost based on level */
 
@@ -545,8 +557,9 @@ static void vs1053_setbass(FAR struct vs1053_struct_s *dev)
   /* Lock the SPI bus to get exclsive access to the chip. */
 
   vs1053_spi_lock(spi, dev->spi_freq);
-  vs1053_writereg(dev, VS1053_SCI_BASS, (treble_boost << 12) | (treble_range << 8) |
-      (bass_boost << 4) | bass_range);
+  vs1053_writereg(dev, VS1053_SCI_BASS,
+                 (treble_boost << 12) | (treble_range << 8) |
+                 (bass_boost << 4) | bass_range);
   vs1053_spi_unlock(spi);
 }
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
@@ -559,20 +572,20 @@ static void vs1053_setbass(FAR struct vs1053_struct_s *dev)
  ****************************************************************************/
 
 static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
-            FAR struct audio_caps_s *pCaps)
+            FAR struct audio_caps_s *caps)
 {
   audinfo("Entry\n");
 
   /* Validate the structure */
 
-  DEBUGASSERT(pCaps->ac_len >= sizeof(struct audio_caps_s));
+  DEBUGASSERT(caps->ac_len >= sizeof(struct audio_caps_s));
 
   /* Fill in the caller's structure based on requested info */
 
-  pCaps->ac_format.hw  = 0;
-  pCaps->ac_controls.w = 0;
+  caps->ac_format.hw  = 0;
+  caps->ac_controls.w = 0;
 
-  switch (pCaps->ac_type)
+  switch (caps->ac_type)
     {
       /* Caller is querying for the types of units we support */
 
@@ -582,14 +595,15 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
          * must then call us back for specific info for each capability.
          */
 
-        pCaps->ac_channels = 2;       /* Stereo output */
+        caps->ac_channels = 2;       /* Stereo output */
 
-        switch (pCaps->ac_subtype)
+        switch (caps->ac_subtype)
           {
             case AUDIO_TYPE_QUERY:
+
               /* The input formats we can decode / accept */
 
-              pCaps->ac_format.hw = 0
+              caps->ac_format.hw = 0
 #ifdef CONFIG_AUDIO_FORMAT_AC3
                     | (1 << (AUDIO_FMT_AC3 - 1))
 #endif
@@ -612,8 +626,9 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
               /* The types of audio units we implement */
 
-              pCaps->ac_controls.b[0] = AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
-                                      AUDIO_TYPE_PROCESSING;
+              caps->ac_controls.b[0] = AUDIO_TYPE_OUTPUT |
+                                       AUDIO_TYPE_FEATURE |
+                                       AUDIO_TYPE_PROCESSING;
 
               break;
 
@@ -621,15 +636,16 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
 #ifdef CONFIG_AUDIO_FORMAT_MIDI
             case AUDIO_FMT_MIDI:
+
               /* We only support Format 0 */
 
-              pCaps->ac_controls.b[0] = AUDIO_SUBFMT_MIDI_0;
-              pCaps->ac_controls.b[1] = AUDIO_SUBFMT_END;
+              caps->ac_controls.b[0] = AUDIO_SUBFMT_MIDI_0;
+              caps->ac_controls.b[1] = AUDIO_SUBFMT_END;
               break;
 #endif
 
             default:
-              pCaps->ac_controls.b[0] = AUDIO_SUBFMT_END;
+              caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
               break;
           }
 
@@ -639,28 +655,34 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
       case AUDIO_TYPE_OUTPUT:
 
-        pCaps->ac_channels = 2;
+        caps->ac_channels = 2;
 
-        switch (pCaps->ac_subtype)
+        switch (caps->ac_subtype)
           {
             case AUDIO_TYPE_QUERY:
 
               /* Report the Sample rates we support */
 
-              pCaps->ac_controls.b[0] = AUDIO_SAMP_RATE_8K  | AUDIO_SAMP_RATE_11K |
-                                        AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K |
-                                        AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K |
-                                        AUDIO_SAMP_RATE_48K;
+              caps->ac_controls.b[0] = AUDIO_SAMP_RATE_8K  |
+                                       AUDIO_SAMP_RATE_11K |
+                                       AUDIO_SAMP_RATE_16K |
+                                       AUDIO_SAMP_RATE_22K |
+                                       AUDIO_SAMP_RATE_32K |
+                                       AUDIO_SAMP_RATE_44K |
+                                       AUDIO_SAMP_RATE_48K;
               break;
 
             case AUDIO_FMT_MP3:
             case AUDIO_FMT_WMA:
             case AUDIO_FMT_PCM:
-              /* Report the Bit rates we support.  The bit rate support is actually a
-               * complex function of the format and selected sample rate, and the datasheet
-               * has multiple tables to indicate the supported bit rate vs sample rate vs
-               * format.  The selected sample rate should be provided in the ac_format
-               * field of the query, and only a single sample rate should be given.
+              /* Report the Bit rates we support.
+               * The bit rate support is actually a complex function of the
+               * format and selected sample rate, and the datasheet has
+               * multiple tables to indicate the supported bit rate vs sample
+               * rate vsformat.
+               * The selected sample rate should be provided in the ac_format
+               * field of the query, and only a single sample rate should be
+               * given.
                */
 
               /* TODO:  Create a table or set of tables to report this! */
@@ -677,18 +699,25 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
       case AUDIO_TYPE_FEATURE:
 
-        /* If the sub-type is UNDEF, then report the Feature Units we support */
+        /* If the sub-type is UNDEF,
+         * then report the Feature Units we support
+         */
 
-        if (pCaps->ac_subtype == AUDIO_FU_UNDEF)
+        if (caps->ac_subtype == AUDIO_FU_UNDEF)
           {
-            /* Fill in the ac_controls section with the Feature Units we have */
+            /* Fill in the ac_controls section with the
+             * Feature Units we have
+             */
 
-            pCaps->ac_controls.b[0] = AUDIO_FU_VOLUME | AUDIO_FU_BASS | AUDIO_FU_TREBLE;
-            pCaps->ac_controls.b[1] = AUDIO_FU_BALANCE >> 8;
+            caps->ac_controls.b[0] = AUDIO_FU_VOLUME |
+                                     AUDIO_FU_BASS |
+                                     AUDIO_FU_TREBLE;
+            caps->ac_controls.b[1] = AUDIO_FU_BALANCE >> 8;
           }
         else
           {
-            /* TODO:  Do we need to provide specific info for the Feature Units,
+            /* TODO:
+             * Do we need to provide specific info for the Feature Units,
              * such as volume setting ranges, etc.?
              */
           }
@@ -699,20 +728,21 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
       case AUDIO_TYPE_PROCESSING:
 
-        switch (pCaps->ac_subtype)
+        switch (caps->ac_subtype)
           {
             case AUDIO_PU_UNDEF:
 
               /* Provide the type of Processing Units we support */
 
-              pCaps->ac_controls.b[0] = AUDIO_PU_STEREO_EXTENDER;
+              caps->ac_controls.b[0] = AUDIO_PU_STEREO_EXTENDER;
               break;
 
             case AUDIO_PU_STEREO_EXTENDER:
 
               /* Proivde capabilities of our Stereo Extender */
 
-              pCaps->ac_controls.b[0] = AUDIO_STEXT_ENABLE | AUDIO_STEXT_WIDTH;
+              caps->ac_controls.b[0] = AUDIO_STEXT_ENABLE |
+                                       AUDIO_STEXT_WIDTH;
               break;
 
             default:
@@ -730,8 +760,8 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
         /* Zero out the fields to indicate no support */
 
-        pCaps->ac_subtype = 0;
-        pCaps->ac_channels = 0;
+        caps->ac_subtype = 0;
+        caps->ac_channels = 0;
 
         break;
     }
@@ -740,7 +770,7 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
    * proper Audio device type.
    */
 
-  return pCaps->ac_len;
+  return caps->ac_len;
 }
 
 /****************************************************************************
@@ -753,10 +783,10 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
-            FAR void *session, FAR const struct audio_caps_s *pCaps)
+            FAR void *session, FAR const struct audio_caps_s *caps)
 #else
 static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
-            FAR const struct audio_caps_s *pCaps)
+            FAR const struct audio_caps_s *caps)
 #endif
 {
   int     ret = OK;
@@ -768,19 +798,20 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
 
   /* Process the configure operation */
 
-  switch (pCaps->ac_type)
+  switch (caps->ac_type)
     {
       case AUDIO_TYPE_FEATURE:
 
         /* Process based on Feature Unit */
 
-        switch (pCaps->ac_format.hw)
+        switch (caps->ac_format.hw)
           {
 #ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
             case AUDIO_FU_VOLUME:
+
               /* Set the volume */
 
-              dev->volume = pCaps->ac_controls.hw[0];
+              dev->volume = caps->ac_controls.hw[0];
               vs1053_setvolume(dev);
 
               break;
@@ -788,9 +819,10 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
 
 #if !defined(CONFIG_AUDIO_EXCLUDE_TONE) && !defined(CONFIG_AUDIO_EXCLUDE_VOLUME)
             case AUDIO_FU_BALANCE:
+
               /* Set the volume */
 
-              dev->balance = pCaps->ac_controls.hw[0];
+              dev->balance = caps->ac_controls.hw[0];
               vs1053_setvolume(dev);
 
               break;
@@ -798,11 +830,12 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
             case AUDIO_FU_BASS:
+
               /* Set the bass.  The percentage level (0-100) is in the
                * ac_controls[0] parameter.
                */
 
-              dev->bass = pCaps->ac_controls.b[0];
+              dev->bass = caps->ac_controls.b[0];
               if (dev->bass > 100)
                 dev->bass = 100;
               vs1053_setbass(dev);
@@ -814,7 +847,7 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
                * ac_controls.b[0] parameter.
                */
 
-              dev->treble = pCaps->ac_controls.b[0];
+              dev->treble = caps->ac_controls.b[0];
               if (dev->treble > 100)
                 dev->treble = 100;
               vs1053_setbass(dev);
@@ -823,6 +856,7 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
 #endif /* CONFIG_AUDIO_EXCLUDE_TONE */
 
             default:
+
               /* Others we don't support */
 
               break;
@@ -837,7 +871,7 @@ static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
 
         /* We only support STEREO_EXTENDER */
 
-        if (pCaps->ac_format.hw == AUDIO_PU_STEREO_EXTENDER)
+        if (caps->ac_format.hw == AUDIO_PU_STEREO_EXTENDER)
           {
           }
 
@@ -922,7 +956,7 @@ static int vs1053_shutdown(FAR struct audio_lowerhalf_s *lower)
   audinfo("Entry\n");
   vs1053_spi_lock(spi, dev->spi_freq);            /* Lock the device */
   vs1053_setfrequency(dev, CONFIG_VS1053_XTALI);  /* Reduce speed to minimum */
-  vs1053_writereg(dev, VS1053_SCI_VOL, 0xFEFE);   /* Power down the DAC outputs */
+  vs1053_writereg(dev, VS1053_SCI_VOL, 0xfefe);   /* Power down the DAC outputs */
   vs1053_spi_unlock(spi);                         /* Unlock the device */
   return OK;
 }
@@ -940,7 +974,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
 {
   int                   bytecount;
   int                   ret;
-  uint8_t               *pSamp = NULL;
+  uint8_t               *samp = NULL;
   uint16_t              reg;
   struct ap_buffer_s    *apb;
   FAR struct spi_dev_s  *spi = dev->spi;
@@ -957,18 +991,22 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
    */
 
   vs1053_spi_lock(spi, VS1053_DATA_FREQ);   /* Lock the SPI bus */
+
   SPI_SELECT(spi, SPIDEV_AUDIO_DATA(0), true); /* Select the VS1053 data bus */
 
   /* Local stack copy of our active buffer */
 
   apb = dev->apb;
-  //audinfo("Entry apb=%p, Bytes left=%d\n", apb, apb->nbytes - apb->curbyte);
+
+  /* audinfo("Entry apb=%p, Bytes left=%d\n",
+   *         apb, apb->nbytes - apb->curbyte);
+   */
 
   /* Setup pointer to the next sample in the buffer */
 
   if (apb)
     {
-      pSamp = &apb->samp[apb->curbyte];
+      samp = &apb->samp[apb->curbyte];
     }
   else if (!dev->endmode)
     {
@@ -1004,7 +1042,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
            * 32 bytes at a time.
            */
 
-          if (dev->endfillbytes == 32*65)
+          if (dev->endfillbytes == 32 * 65)
             {
               /* After at least 2052 bytes, we send an SM_CANCEL */
 
@@ -1014,7 +1052,7 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
               vs1053_writereg(dev, VS1053_SCI_MODE, reg | VS1053_SM_CANCEL);
               dev->hw_lower->enable(dev->hw_lower);   /* Enable the DREQ interrupt */
             }
-          else if (dev->endfillbytes >= 32*130)
+          else if (dev->endfillbytes >= 32 * 130)
             {
               /* Do a hard reset and terminate */
 
@@ -1023,14 +1061,15 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
               dev->endmode = false;
               break;
             }
-          else if (dev->endfillbytes > 32*65)
+          else if (dev->endfillbytes > 32 * 65)
             {
               /* After each 32 byte of endfillchar, check the status
                * register to see if SM_CANCEL has been cleared.  If
                * it has been cleared, then we're done.
                */
 
-              if (!(vs1053_readreg(dev, VS1053_SCI_STATUS) & VS1053_SM_CANCEL))
+              if (!(vs1053_readreg(dev, VS1053_SCI_STATUS) &
+                    VS1053_SM_CANCEL))
                 {
                   SPI_SETFREQUENCY(dev->spi, dev->spi_freq);
                   dev->hw_lower->disable(dev->hw_lower);   /* Disable the DREQ interrupt */
@@ -1039,13 +1078,18 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
                           vs1053_readreg(dev, VS1053_SCI_HDAT1),
                           vs1053_readreg(dev, VS1053_SCI_HDAT0));
 
-                  vs1053_writereg(dev, VS1053_SCI_WRAMADDR, VS1053_END_FILL_BYTE);
-                  dev->endfillchar = vs1053_readreg(dev, VS1053_SCI_WRAM) >> 8;
+                  vs1053_writereg(dev,
+                                  VS1053_SCI_WRAMADDR,
+                                  VS1053_END_FILL_BYTE);
+                  dev->endfillchar = vs1053_readreg(dev,
+                                                    VS1053_SCI_WRAM) >> 8;
 
                   audinfo("EndFillChar: 0x%0X\n", dev->endfillchar);
 
                   reg = vs1053_readreg(dev, VS1053_SCI_MODE);
-                  vs1053_writereg(dev, VS1053_SCI_MODE, reg | VS1053_SM_RESET);
+                  vs1053_writereg(dev,
+                                  VS1053_SCI_MODE,
+                                  reg | VS1053_SM_RESET);
 
                   dev->running = false;
                   dev->endmode = false;
@@ -1066,18 +1110,20 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
             {
               bytecount = 32;
             }
+
 #if 1
-          SPI_SNDBLOCK(spi, pSamp, bytecount);
-          pSamp += bytecount;
+          SPI_SNDBLOCK(spi, samp, bytecount);
+          samp += bytecount;
 #else
           bytecount = bytecount;
           while (bytecount--)
             {
               /* Send next byte from the buffer */
 
-              SPI_SEND(spi, *pSamp);
-              pSamp++;
+              SPI_SEND(spi, *samp);
+              samp++;
             }
+
 #endif
           apb->curbyte += bytecount;
 
@@ -1121,8 +1167,11 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
 
                   dev->hw_lower->disable(dev->hw_lower);   /* Disable the DREQ interrupt */
                   SPI_SETFREQUENCY(dev->spi, dev->spi_freq);
-                  vs1053_writereg(dev, VS1053_SCI_WRAMADDR, VS1053_END_FILL_BYTE);
-                  dev->endfillchar = vs1053_readreg(dev, VS1053_SCI_WRAM) >> 8;
+                  vs1053_writereg(dev,
+                                  VS1053_SCI_WRAMADDR,
+                                  VS1053_END_FILL_BYTE);
+                  dev->endfillchar = vs1053_readreg(dev,
+                                                    VS1053_SCI_WRAM) >> 8;
                   SPI_SETFREQUENCY(dev->spi, VS1053_DATA_FREQ);
                   dev->hw_lower->enable(dev->hw_lower);   /* Enable the DREQ interrupt */
 
@@ -1133,12 +1182,12 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
                   if (dev->cancelmode)
                     {
-                      /* If we are in cancel mode, then we don't dequeue the buffer
-                       * or need to send another SM_CANCEL, so jump into the middle
-                       * of the stop sequence.
+                      /* If we are in cancel mode, then we don't dequeue the
+                       * buffer or need to send another SM_CANCEL, so jump
+                       * into the middle of the stop sequence.
                        */
 
-                      dev->endfillbytes = 32*65+1;
+                      dev->endfillbytes = 32 * 65 + 1;
                       continue;
                     }
                   else
@@ -1180,14 +1229,17 @@ static void vs1053_feeddata(FAR struct vs1053_struct_s *dev)
               apb = (struct ap_buffer_s *) dq_remfirst(&dev->apbq);
               dev->apb = apb;
 
-              //audinfo("Next Buffer = %p, bytes = %d\n", apb, apb ? apb->nbytes : 0);
+              /* audinfo("Next Buffer = %p, bytes = %d\n",
+               *          apb, apb ? apb->nbytes : 0);
+               */
+
               if (apb == NULL)
                 {
                   nxsem_post(&dev->apbq_sem);
                   break;
                 }
 
-              pSamp = &apb->samp[apb->curbyte];
+              samp = &apb->samp[apb->curbyte];
               apb_reference(apb);                /* Add our buffer reference */
               nxsem_post(&dev->apbq_sem);
             }
@@ -1222,13 +1274,13 @@ static int vs1053_dreq_isr(int irq, FAR void *context, FAR void *arg)
 
   if (dev->running)
     {
-      msg.msgId = AUDIO_MSG_DATA_REQUEST;
+      msg.msg_id = AUDIO_MSG_DATA_REQUEST;
       nxmq_send(dev->mq, (FAR const char *)&msg, sizeof(msg),
                 CONFIG_VS1053_MSG_PRIO);
     }
   else
     {
-      msg.msgId = AUDIO_MSG_DATA_REQUEST;
+      msg.msg_id = AUDIO_MSG_DATA_REQUEST;
     }
 
   return 0;
@@ -1302,7 +1354,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
 
       /* Process the message */
 
-      switch (msg.msgId)
+      switch (msg.msg_id)
         {
           /* The ISR has requested more data */
 
@@ -1356,7 +1408,8 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
     {
       /* Get the next buffer from the queue */
 
-      while ((apb = (FAR struct ap_buffer_s *) dq_remfirst(&dev->apbq)) != NULL)
+      while ((apb = (FAR struct ap_buffer_s *) dq_remfirst(&dev->apbq))
+               != NULL)
         ;
     }
 
@@ -1397,7 +1450,8 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
  ****************************************************************************/
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int vs1053_start(FAR struct audio_lowerhalf_s *lower, FAR void *session)
+static int vs1053_start(FAR struct audio_lowerhalf_s *lower,
+                        FAR void *session)
 #else
 static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
 #endif
@@ -1501,7 +1555,8 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int vs1053_stop(FAR struct audio_lowerhalf_s *lower, FAR void *session)
+static int vs1053_stop(FAR struct audio_lowerhalf_s *lower,
+                       FAR void *session)
 #else
 static int vs1053_stop(FAR struct audio_lowerhalf_s *lower)
 #endif
@@ -1512,7 +1567,7 @@ static int vs1053_stop(FAR struct audio_lowerhalf_s *lower)
 
   /* Send a message to stop all audio streaming */
 
-  term_msg.msgId = AUDIO_MSG_STOP;
+  term_msg.msg_id = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
   nxmq_send(dev->mq, (FAR const char *)&term_msg, sizeof(term_msg),
             CONFIG_VS1053_MSG_PRIO);
@@ -1545,7 +1600,8 @@ static int vs1053_stop(FAR struct audio_lowerhalf_s *lower)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int vs1053_pause(FAR struct audio_lowerhalf_s *lower, FAR void *session)
+static int vs1053_pause(FAR struct audio_lowerhalf_s *lower,
+                        FAR void *session)
 #else
 static int vs1053_pause(FAR struct audio_lowerhalf_s *lower)
 #endif
@@ -1574,7 +1630,8 @@ static int vs1053_pause(FAR struct audio_lowerhalf_s *lower)
 
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int vs1053_resume(FAR struct audio_lowerhalf_s *lower, FAR void *session)
+static int vs1053_resume(FAR struct audio_lowerhalf_s *lower,
+                         FAR void *session)
 #else
 static int vs1053_resume(FAR struct audio_lowerhalf_s *lower)
 #endif
@@ -1626,7 +1683,7 @@ static int vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
 
       if (dev->mq != NULL)
         {
-          term_msg.msgId = AUDIO_MSG_ENQUEUE;
+          term_msg.msg_id = AUDIO_MSG_ENQUEUE;
           term_msg.u.data = 0;
           nxmq_send(dev->mq, (FAR const char *)&term_msg,
                     sizeof(term_msg), CONFIG_VS1053_MSG_PRIO);
@@ -1660,7 +1717,7 @@ static int vs1053_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
                   unsigned long arg)
 {
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
-  FAR struct ap_buffer_info_s *pBufInfo;
+  FAR struct ap_buffer_info_s *bufinfo;
 #endif
 
   /* Deal with ioctls passed from the upper-half driver */
@@ -1680,9 +1737,9 @@ static int vs1053_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
       case AUDIOIOC_GETBUFFERINFO:
 
-        pBufInfo = (FAR struct ap_buffer_info_s *) arg;
-        pBufInfo->buffer_size = CONFIG_VS1053_BUFFER_SIZE;
-        pBufInfo->nbuffers = CONFIG_VS1053_NUM_BUFFERS;
+        bufinfo = (FAR struct ap_buffer_info_s *) arg;
+        bufinfo->buffer_size = CONFIG_VS1053_BUFFER_SIZE;
+        bufinfo->nbuffers = CONFIG_VS1053_NUM_BUFFERS;
         break;
 #endif
 

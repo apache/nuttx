@@ -587,7 +587,7 @@ static void  wm8776_senddone(FAR struct i2s_dev_s *i2s,
    * buffers in the done queue that need to be cleaned up.
    */
 
-  msg.msgId = AUDIO_MSG_COMPLETE;
+  msg.msg_id = AUDIO_MSG_COMPLETE;
   ret = mq_send(priv->mq, (FAR const char *)&msg, sizeof(msg),
                 CONFIG_WM8776_MSG_PRIO);
   if (ret < 0)
@@ -832,7 +832,7 @@ static int wm8776_stop(FAR struct audio_lowerhalf_s *dev)
 
   /* Send a message to stop all audio streaming */
 
-  term_msg.msgId = AUDIO_MSG_STOP;
+  term_msg.msg_id = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
   mq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
           CONFIG_WM8776_MSG_PRIO);
@@ -946,7 +946,7 @@ static int wm8776_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   ret = OK;
   if (priv->mq != NULL)
     {
-      term_msg.msgId  = AUDIO_MSG_ENQUEUE;
+      term_msg.msg_id  = AUDIO_MSG_ENQUEUE;
       term_msg.u.data = 0;
 
       ret = mq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
@@ -1250,7 +1250,7 @@ repeat:
 
       /* Process the message */
 
-      switch (msg.msgId)
+      switch (msg.msg_id)
         {
           /* The ISR has requested more data.  We will catch this case at
            * the top of the loop.
@@ -1288,7 +1288,7 @@ repeat:
             break;
 
           default:
-            auderr("ERROR: Ignoring message ID %d\n", msg.msgId);
+            auderr("ERROR: Ignoring message ID %d\n", msg.msg_id);
             break;
         }
 
