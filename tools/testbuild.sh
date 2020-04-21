@@ -173,6 +173,19 @@ function distclean {
       git -C $APPSDIR clean -xfdq
     else
       makefunc ${JOPTION} distclean
+
+      # Ensure nuttx and apps directory in clean state even with --ignored
+
+      if [ -d $nuttx/.git ] || [ -d $APPSDIR/.git ]; then
+        if [[ -n $(git -C $nuttx status --ignored -s) ]]; then
+          git -C $nuttx status --ignored
+          fail=1
+        fi
+        if [[ -n $(git -C $APPSDIR status --ignored -s) ]]; then
+          git -C $APPSDIR status --ignored
+          fail=1
+        fi
+      fi
     fi
   fi
 }
