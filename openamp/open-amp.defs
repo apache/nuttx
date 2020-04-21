@@ -35,8 +35,6 @@
 
 ifeq ($(CONFIG_OPENAMP),y)
 
-OPENAMP_HDRS += $(wildcard open-amp/lib/include/openamp/*.h)
-
 CSRCS += open-amp/lib/remoteproc/elf_loader.c
 CSRCS += open-amp/lib/remoteproc/remoteproc.c
 CSRCS += open-amp/lib/remoteproc/remoteproc_virtio.c
@@ -46,15 +44,33 @@ CSRCS += open-amp/lib/rpmsg/rpmsg_virtio.c
 CSRCS += open-amp/lib/virtio/virtio.c
 CSRCS += open-amp/lib/virtio/virtqueue.c
 
-.openamp_headers: $(OPENAMP_HDRS)
+open-amp.zip:
+	$(Q) wget https://github.com/OpenAMP/open-amp/archive/v$(VERSION).zip -O open-amp.zip
+	$(Q) unzip -o open-amp.zip
+	$(Q) mv open-amp-$(VERSION) open-amp
+	$(Q) patch -p0 < 0001-rpmsg-remove-the-address-check-in-rpmsg_send-rpmsg_t.patch
+	$(Q) patch -p0 < 0002-rpmsg-merge-rpmsg_register_endpoint-into-rpmsg_init_.patch
+	$(Q) patch -p0 < 0003-rpmsg-shouldn-t-allocate-0-1023-address-in-rpmsg_cre.patch
+	$(Q) patch -p0 < 0004-rpmsg-wait-ept-ready-in-rpmsg_send.patch
+	$(Q) patch -p0 < 0005-rpmsg-return-fail-if-either-source-or-destination-ad.patch
+	$(Q) patch -p0 < 0006-remoteproc_mmap-support-va-to-pa-da-conversion.patch
+	$(Q) patch -p0 < 0007-rpmsg-bring-back-zero-copy-transfer.patch
+	$(Q) patch -p0 < 0008-ns-acknowledge-the-received-creation-message.patch
+	$(Q) patch -p0 < 0009-implement-rproc_virtio_read_config-rproc_virtio_writ.patch
+	$(Q) patch -p0 < 0010-Negotiate-individual-buffer-size-dynamically.patch
+
+.openamp_headers: open-amp.zip
+	$(eval headers := $(wildcard open-amp/lib/include/openamp/*.h))
 	$(shell mkdir -p $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM))
-	$(foreach header,$^,$(shell cp -rf $(header) $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM)))
+	$(foreach header,$(headers),$(shell cp -rf $(header) $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM)))
 	touch $@
 
 dirlinks:: .openamp_headers
 
 distclean::
 	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)openamp$(DELIM))
+	$(call DELDIR, open-amp)
+	$(call DELFILE, open-amp.zip)
 	$(call DELFILE, .openamp_headers)
 
 endif

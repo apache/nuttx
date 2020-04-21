@@ -37,14 +37,9 @@ ifeq ($(CONFIG_OPENAMP),y)
 
 ifeq ($(CONFIG_ARCH), sim)
 LIBMETAL_ARCH = x86_64
-else
-LIBMETAL_ARCH = $(subst -,,$(CONFIG_ARCH))
+else ifeq ($(CONFIG_ARCH), risc-v)
+LIBMETAL_ARCH = riscv
 endif
-
-LIBMETAL_HDRS += $(wildcard libmetal/lib/compiler/gcc/*.h)
-LIBMETAL_HDRS += $(wildcard libmetal/lib/processor/$(LIBMETAL_ARCH)/*.h)
-LIBMETAL_HDRS += $(wildcard libmetal/lib/system/nuttx/*.h)
-LIBMETAL_HDRS += $(wildcard libmetal/lib/*.h)
 
 CSRCS += libmetal/lib/system/nuttx/condition.c
 CSRCS += libmetal/lib/system/nuttx/device.c
@@ -77,11 +72,21 @@ LIBMETAL_HDRS_SEDEXP := \
 	 s/@PROJECT_MACHINE_UPPER@/$(CONFIG_ARCH_CHIP)/g; \
 	 s/cmakedefine/undef/g"
 
-.libmetal_headers: $(LIBMETAL_HDRS)
-	$(foreach headers,$(LIBMETAL_HDRS), \
-		$(eval hobj := $(patsubst libmetal$(DELIM)lib$(DELIM)%,$(TOPDIR)$(DELIM)include$(DELIM)metal$(DELIM)%,$(headers))) \
+libmetal.zip:
+	$(Q) wget https://github.com/OpenAMP/libmetal/archive/v$(VERSION).zip -O libmetal.zip
+	$(Q) unzip -o libmetal.zip
+	$(Q) mv libmetal-$(VERSION) libmetal
+	$(Q) patch -p0 < 0001-nuttx-change-sched_kfree-to-metal_free_memory.patch
+
+.libmetal_headers: libmetal.zip
+	$(eval headers := $(wildcard libmetal/lib/compiler/gcc/*.h))
+	$(eval headers += $(wildcard libmetal/lib/processor/$(LIBMETAL_ARCH)/*.h))
+	$(eval headers += $(wildcard libmetal/lib/system/nuttx/*.h))
+	$(eval headers += $(wildcard libmetal/lib/*.h))
+	$(foreach header,$(headers), \
+		$(eval hobj := $(patsubst libmetal$(DELIM)lib$(DELIM)%,$(TOPDIR)$(DELIM)include$(DELIM)metal$(DELIM)%,$(header))) \
 		$(shell if [ ! -d $(dir $(hobj)) ];then mkdir -p $(dir $(hobj)); fi) \
-		$(shell sed $(LIBMETAL_HDRS_SEDEXP) $(headers) > $(hobj)) \
+		$(shell sed $(LIBMETAL_HDRS_SEDEXP) $(header) > $(hobj)) \
 	)
 	touch $@
 
@@ -89,6 +94,8 @@ dirlinks:: .libmetal_headers
 
 distclean::
 	$(call DELDIR, $(TOPDIR)$(DELIM)include$(DELIM)metal)
+	$(call DELDIR, libmetal)
+	$(call DELFILE, libmetal.zip)
 	$(call DELFILE, .libmetal_headers)
 
 endif

@@ -1,4 +1,7 @@
 /.libmetal_headers
 /.openamp_headers
+/.depend
+/Make.dep
 /libmetal
 /open-amp
+/*.zip
