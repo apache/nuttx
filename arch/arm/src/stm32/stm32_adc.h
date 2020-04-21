@@ -54,6 +54,45 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+/* Generalized definitions for ADC  *************************************************/
+
+#if defined(HAVE_IP_ADC_V1)
+#  define STM32_ADC_DMAREG_OFFSET      STM32_ADC_CR2_OFFSET
+#  define ADC_DMAREG_DMA               ADC_CR2_DMA
+#  define STM32_ADC_EXTREG_OFFSET      STM32_ADC_CR2_OFFSET
+#  define ADC_EXTREG_EXTSEL_MASK       ADC_CR2_EXTSEL_MASK
+#  define STM32_ADC_JEXTREG_OFFSET     STM32_ADC_CR2_OFFSET
+#  define ADC_JEXTREG_JEXTSEL_MASK     ADC_CR2_JEXTSEL_MASK
+#  define STM32_ADC_ISR_OFFSET         STM32_ADC_SR_OFFSET
+#  define STM32_ADC_IER_OFFSET         STM32_ADC_CR1_OFFSET
+#  ifdef HAVE_BASIC_ADC
+#    define ADC_EXTREG_EXTEN_MASK      ADC_CR2_EXTTRIG
+#    define ADC_EXTREG_EXTEN_NONE      0
+#    define ADC_EXTREG_EXTEN_DEFAULT   ADC_CR2_EXTTRIG
+#    define ADC_JEXTREG_JEXTEN_MASK    ADC_CR2_JEXTTRIG
+#    define ADC_JEXTREG_JEXTEN_NONE    0
+#    define ADC_JEXTREG_JEXTEN_DEFAULT ADC_CR2_JEXTTRIG
+#  else
+#    define ADC_EXTREG_EXTEN_MASK      ADC_CR2_EXTEN_MASK
+#    define ADC_EXTREG_EXTEN_NONE      ADC_CR2_EXTEN_NONE
+#    define ADC_EXTREG_EXTEN_DEFAULT   ADC_CR2_EXTEN_RISING
+#    define ADC_JEXTREG_JEXTEN_MASK    ADC_CR2_JEXTEN_MASK
+#    define ADC_JEXTREG_JEXTEN_NONE    ADC_CR2_JEXTEN_NONE
+#    define ADC_JEXTREG_JEXTEN_DEFAULT ADC_CR2_JEXTEN_RISING
+#  endif
+#elif defined(HAVE_IP_ADC_V2)
+#  define STM32_ADC_DMAREG_OFFSET      STM32_ADC_CFGR1_OFFSET
+#  define ADC_DMAREG_DMA               ADC_CFGR1_DMAEN
+#  define STM32_ADC_EXTREG_OFFSET      STM32_ADC_CFGR1_OFFSET
+#  define ADC_EXTREG_EXTSEL_MASK       ADC_CFGR1_EXTSEL_MASK
+#  define ADC_EXTREG_EXTEN_MASK        ADC_CFGR1_EXTEN_MASK
+#  define ADC_EXTREG_EXTEN_DEFAULT     ADC_CFGR1_EXTEN_RISING
+#  define STM32_ADC_JEXTREG_OFFSET     STM32_ADC_JSQR_OFFSET
+#  define ADC_JEXTREG_JEXTSEL_MASK     ADC_JSQR_JEXTSEL_MASK
+#  define ADC_JEXTREG_JEXTEN_MASK      ADC_JSQR_JEXTEN_MASK
+#  define ADC_JEXTREG_JEXTEN_DEFAULT   ADC_JSQR_JEXTEN_RISING
+#endif
+
 /* Configuration ********************************************************************/
 
 /* Timer devices may be used for different purposes.  One special purpose is to
