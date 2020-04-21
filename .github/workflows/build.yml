@@ -170,7 +170,7 @@ jobs:
           run: |
             git -C sources/nuttx fetch --tags
             cd sources/testing
-            ./cibuild.sh -x -G testlist/${{matrix.boards}}.dat
+            ./cibuild.sh -x testlist/${{matrix.boards}}.dat
 
   macOS:
     runs-on: macos-10.15
@@ -211,4 +211,4 @@ jobs:
         run: |
           git -C sources/nuttx fetch --tags
           cd sources/testing
-          ./cibuild.sh -i -x -G testlist/${{matrix.boards}}.dat
+          ./cibuild.sh -i -x testlist/${{matrix.boards}}.dat
