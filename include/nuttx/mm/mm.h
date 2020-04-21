@@ -211,12 +211,10 @@ struct mm_freenode_s
   FAR struct mm_freenode_s *blink;
 };
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 struct mm_delaynode_s
 {
   struct mm_delaynode_s *flink;
 };
-#endif
 
 /* What is the size of the freenode? */
 
@@ -258,11 +256,9 @@ struct mm_heap_s
 
   struct mm_freenode_s mm_nodelist[MM_NNODES];
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   /* Free delay list, for some situation can't do free immdiately */
 
   struct mm_delaynode_s *mm_delaylist;
-#endif
 };
 
 /****************************************************************************
