@@ -54,14 +54,16 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************
  *
  * CONFIG_AUDIO_CS43L22 - Enables CS43L22 support
- * CONFIG_CS43L22_INITVOLUME - The initial volume level in the range {0..1000}
- * CONFIG_CS43L22_INFLIGHT - Maximum number of buffers that the CS43L22 driver
- *   will send to the I2S driver before any have completed.
- * CONFIG_CS43L22_MSG_PRIO - Priority of messages sent to the CS43L22 worker
- *   thread.
+ * CONFIG_CS43L22_INITVOLUME - The initial volume level
+ *                             in the range {0..1000}
+ * CONFIG_CS43L22_INFLIGHT - Maximum number of buffers that the CS43L22
+ *   driver will send to the I2S driver before any have completed.
+ * CONFIG_CS43L22_MSG_PRIO - Priority of messages sent to the CS43L22
+ *   worker thread.
  * CONFIG_CS43L22_BUFFER_SIZE - Preferred buffer size
  * CONFIG_CS43L22_NUM_BUFFERS - Preferred number of buffers
  * CONFIG_CS43L22_WORKER_STACKSIZE - Stack size to use when creating the the
@@ -130,6 +132,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This is the type of the CS43L22 interrupt handler.  The lower level code
  * will intercept the interrupt and provide the upper level with the private
  * data that was provided when the interrupt was attached.
@@ -137,8 +140,9 @@
 
 struct cs43l22_lower_s; /* Forward reference.  Defined below */
 
-typedef CODE int (*cs43l22_handler_t)(FAR const struct cs43l22_lower_s *lower,
-                                      FAR void *arg);
+typedef CODE int (*cs43l22_handler_t)
+                 (FAR const struct cs43l22_lower_s *lower,
+                  FAR void *arg);
 
 /* A reference to a structure of this type must be passed to the CS43L22
  * driver.  This structure provides information about the configuration

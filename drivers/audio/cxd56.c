@@ -929,7 +929,7 @@ static void cxd56_dma_int_handler(void)
 
       if (dev->mq != NULL)
         {
-          msg.msgId = AUDIO_MSG_DATA_REQUEST;
+          msg.msg_id = AUDIO_MSG_DATA_REQUEST;
           msg.u.data = 0;
           (void)nxmq_send(dev->mq, (FAR const char *) &msg,
                           sizeof(msg), CONFIG_CXD56_MSG_PRIO);
@@ -939,7 +939,7 @@ static void cxd56_dma_int_handler(void)
         {
           /* End of data */
 
-          msg.msgId = AUDIO_MSG_STOP;
+          msg.msg_id = AUDIO_MSG_STOP;
           msg.u.data = 0;
           (void)nxmq_send(dev->mq, (FAR const char *)&msg,
                           sizeof(msg), CONFIG_CXD56_MSG_PRIO);
@@ -1743,7 +1743,7 @@ static int cxd56_stop(FAR struct audio_lowerhalf_s *lower)
 
   priv->state = CXD56_DEV_STATE_STOPPING;
 
-  msg.msgId = AUDIO_MSG_STOP;
+  msg.msg_id = AUDIO_MSG_STOP;
   msg.u.data = 0;
   (void)nxmq_send(priv->mq, (FAR const char *)&msg,
                   sizeof(msg), CONFIG_CXD56_MSG_PRIO);
@@ -1804,7 +1804,7 @@ static int cxd56_resume(FAR struct audio_lowerhalf_s *lower)
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int cxd56_release(FAR struct audio_lowerhalf_s *lower,
-                  FAR void *pContext)
+                  FAR void *session)
 #else
 static int cxd56_release(FAR struct audio_lowerhalf_s *lower)
 #endif
@@ -1822,7 +1822,7 @@ static int cxd56_release(FAR struct audio_lowerhalf_s *lower)
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int cxd56_reserve(FAR struct audio_lowerhalf_s *lower,
-                  FAR void **ppContext)
+                  FAR void **session)
 #else
 static int cxd56_reserve(FAR struct audio_lowerhalf_s *lower)
 #endif
@@ -2030,7 +2030,7 @@ static int cxd56_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
 
   if (priv->mq != NULL)
     {
-      msg.msgId = AUDIO_MSG_ENQUEUE;
+      msg.msg_id = AUDIO_MSG_ENQUEUE;
       msg.u.data = 0;
       (void)nxmq_send(priv->mq, (FAR const char *) &msg,
                       sizeof(msg), CONFIG_CXD56_MSG_PRIO);
@@ -2143,7 +2143,7 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
 
       /* Process the message */
 
-      switch (msg.msgId)
+      switch (msg.msg_id)
         {
           case AUDIO_MSG_STOP:
             cxd56_stop_dma(priv);

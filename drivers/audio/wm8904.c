@@ -1099,11 +1099,15 @@ static int wm8904_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
       case AUDIO_TYPE_FEATURE:
 
-        /* If the sub-type is UNDEF, then report the Feature Units we support */
+        /* If the sub-type is UNDEF,
+         * then report the Feature Units we support
+         */
 
         if (caps->ac_subtype == AUDIO_FU_UNDEF)
           {
-            /* Fill in the ac_controls section with the Feature Units we have */
+            /* Fill in the ac_controls section with
+             * the Feature Units we have
+             */
 
             caps->ac_controls.b[0] = AUDIO_FU_VOLUME | AUDIO_FU_BASS |
                                      AUDIO_FU_TREBLE;
@@ -1400,7 +1404,7 @@ static void  wm8904_senddone(FAR struct i2s_dev_s *i2s,
    * buffers in the done queue that need to be cleaned up.
    */
 
-  msg.msgId = AUDIO_MSG_COMPLETE;
+  msg.msg_id = AUDIO_MSG_COMPLETE;
   ret = nxmq_send(priv->mq, (FAR const char *)&msg, sizeof(msg),
                   CONFIG_WM8904_MSG_PRIO);
   if (ret < 0)
@@ -1667,7 +1671,7 @@ static int wm8904_stop(FAR struct audio_lowerhalf_s *dev)
 
   /* Send a message to stop all audio streaming */
 
-  term_msg.msgId = AUDIO_MSG_STOP;
+  term_msg.msg_id = AUDIO_MSG_STOP;
   term_msg.u.data = 0;
   nxmq_send(priv->mq, (FAR const char *)&term_msg, sizeof(term_msg),
             CONFIG_WM8904_MSG_PRIO);
@@ -1790,7 +1794,7 @@ static int wm8904_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
   ret = OK;
   if (priv->mq != NULL)
     {
-      term_msg.msgId  = AUDIO_MSG_ENQUEUE;
+      term_msg.msg_id  = AUDIO_MSG_ENQUEUE;
       term_msg.u.data = 0;
 
       ret = nxmq_send(priv->mq, (FAR const char *)&term_msg,
@@ -2124,7 +2128,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
 
       /* Process the message */
 
-      switch (msg.msgId)
+      switch (msg.msg_id)
         {
           /* The ISR has requested more data.  We will catch this case at
            * the top of the loop.
@@ -2162,7 +2166,7 @@ static void *wm8904_workerthread(pthread_addr_t pvarg)
             break;
 
           default:
-            auderr("ERROR: Ignoring message ID %d\n", msg.msgId);
+            auderr("ERROR: Ignoring message ID %d\n", msg.msg_id);
             break;
         }
     }

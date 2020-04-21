@@ -93,7 +93,7 @@
 #define VS1053_SM_LINE1             0x4000
 #define VS1053_SM_CLK_RANGE         0x8000
 
-/* STATUS register bit definitions ****************************************/
+/* STATUS register bit definitions ******************************************/
 
 #define VS1053_SS_DO_NOT_JUMP       0x8000
 #define VS1053_SS_SWING             0x7000
@@ -115,14 +115,14 @@
 #define VS1053_VER_VS1063           6
 #define VS1053_VER_VS1103           7
 
-/* BASS register bit definitions ******************************************/
+/* BASS register bit definitions ********************************************/
 
 #define VS1053_ST_AMPLITUDE         0xF000
 #define VS1053_ST_FREQLIMIT         0x0F00
 #define VS1053_SB_AMPLITUDE         0x00F0
 #define VS1053_SB_FREQLIMIT         0x000F
 
-/* CLOCKF register bit definitions ****************************************/
+/* CLOCKF register bit definitions ******************************************/
 
 #define VS1053_SC_MULT              0xE000
 #define VS1053_SC_MULT_SHIFT        13
@@ -130,21 +130,21 @@
 #define VS1053_SC_ADD_SHIFT         11
 #define VS1053_SC_FREQ              0x07FF
 
-#define VS1053_SC_MULT_XTALIx10     0
-#define VS1053_SC_MULT_XTALIx20     1
-#define VS1053_SC_MULT_XTALIx25     2
-#define VS1053_SC_MULT_XTALIx30     3
-#define VS1053_SC_MULT_XTALIx35     4
-#define VS1053_SC_MULT_XTALIx40     5
-#define VS1053_SC_MULT_XTALIx45     6
-#define VS1053_SC_MULT_XTALIx50     7
+#define VS1053_SC_MULT_XTALI_X10     0
+#define VS1053_SC_MULT_XTALI_X20     1
+#define VS1053_SC_MULT_XTALI_X25     2
+#define VS1053_SC_MULT_XTALI_X30     3
+#define VS1053_SC_MULT_XTALI_X35     4
+#define VS1053_SC_MULT_XTALI_X40     5
+#define VS1053_SC_MULT_XTALI_X45     6
+#define VS1053_SC_MULT_XTALI_X50     7
 
-#define VS1053_SC_ADD_NONE          0
-#define VS1053_SC_ADD_XTALIx10      1
-#define VS1053_SC_ADD_XTALIx15      2
-#define VS1053_SC_ADD_XTALIx20      3
+#define VS1053_SC_ADD_NONE           0
+#define VS1053_SC_ADD_XTALI_X10      1
+#define VS1053_SC_ADD_XTALI_X15      2
+#define VS1053_SC_ADD_XTALI_X20      3
 
-/* WRAM Addresses **********************************************************/
+/* WRAM Addresses ***********************************************************/
 
 #define VS1053_XRAM_BASE            0x1800      /* X data RAM */
 #define VS1053_XRAM_SIZE            256
@@ -158,7 +158,7 @@
 #define VS1053_IO_BASE              0xC000
 #define VS1053_IO_SIZE              0x4000
 
-/* HDAT1 register values *************************************************/
+/* HDAT1 register values ****************************************************/
 
 #define VS1053_HDAT1_WAV            0x7665      /* "ve" (as in Wave) */
 #define VS1053_HDAT1_ADTS           0x4154      /* "AT" */

@@ -58,6 +58,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* So far, I have not been able to get FLL lock interrupts. Worse, I have
  * been able to get the FLL to claim that it is locked at all even when
  * polling.  What am I doing wrong?
@@ -175,6 +176,7 @@
 #define WM8904_DUMMY                 0xff /* Dummy register address */
 
 /* Register Default Values **************************************************/
+
 /* Registers have some undocumented bits set on power up.  These probably
  * should be retained on writes (?).
  */
@@ -287,22 +289,22 @@
 
 /* 0x04 Bias Control */
 
-#define WM8904_ISEL_SHIFT            (2)       /* Bits 2-3: Master Bias Control */
+#define WM8904_ISEL_SHIFT            (2)                      /* Bits 2-3: Master Bias Control */
 #define WM8904_ISEL_MASK             (3 << WM8904_ISEL_SHIFT)
 #  define WM8904_ISEL_LOW            (0 << WM8904_ISEL_SHIFT) /* Low power bias */
 #  define WM8904_ISEL_HIGH           (2 << WM8904_ISEL_SHIFT) /* High performance bias */
-#define WM8904_BIAS_ENA              (1 << 0)  /* Bit 0:  Normal bias current generator */
+#define WM8904_BIAS_ENA              (1 << 0)                 /* Bit 0:  Normal bias current generator */
 
 /* 0x05 VMID Control */
 
-#define WM8904_VMID_BUF_ENA          (1 << 6)  /* Bit 6:  Enable VMID buffer to unused I/O */
-#define WM8904_VMID_RES_SHIFT        (1)       /* Bits 1-2: VMID divider enable and select */
+#define WM8904_VMID_BUF_ENA          (1 << 6)                     /* Bit 6:  Enable VMID buffer to unused I/O */
+#define WM8904_VMID_RES_SHIFT        (1)                          /* Bits 1-2: VMID divider enable and select */
 #define WM8904_VMID_RES_MASK         (3 << WM8904_VMID_RES_SHIFT)
 #  define WM8904_VMID_RES_OFF        (0 << WM8904_VMID_RES_SHIFT) /* VMID disabled */
 #  define WM8904_VMID_RES_NORMAL     (1 << WM8904_VMID_RES_SHIFT) /* 2 x 50k divider */
 #  define WM8904_VMID_RES_STANDBY    (2 << WM8904_VMID_RES_SHIFT) /* 2 x 250k divider */
 #  define WM8904_VMID_RES_FASTSTART  (3 << WM8904_VMID_RES_SHIFT) /* 2 x 5k divider */
-#define WM8904_VMID_ENA              (1 << 0)  /* Bit 0:  VMID buffer enable */
+#define WM8904_VMID_ENA              (1 << 0)                     /* Bit 0:  VMID buffer enable */
 
 /* 0x06 Mic Bias Control 0 */
 
@@ -433,29 +435,32 @@
 /* 0x1a Audio Interface 2 */
 
 #define WM8904_OPCLK_DIV_SHIFT       (8)       /* Bits 8-11: GPIO Output Clock Divider */
+
 #define WM8904_OPCLK_DIV_MASK        (15 << WM8904_OPCLK_DIV_SHIFT)
-#  define WM8904_OPCLK_DIV1          (0 << WM8904_OPCLK_DIV_SHIFT) /* SYSCLK */
-#  define WM8904_OPCLK_DIV2          (1 << WM8904_OPCLK_DIV_SHIFT) /* SYSCLK / 2 */
-#  define WM8904_OPCLK_DIV3          (2 << WM8904_OPCLK_DIV_SHIFT) /* SYSCLK / 3 */
-#  define WM8904_OPCLK_DIV4          (3 << WM8904_OPCLK_DIV_SHIFT) /* SYSCLK / 4 */
-#  define WM8904_OPCLK_DIV5p5        (4 << WM8904_OPCLK_DIV_SHIFT) /* SYSCLK / 5.5 */
-#  define WM8904_OPCLK_DIV6          (5 << WM8904_OPCLK_DIV_SHIFT) /* SYSCLK / 6 */
-#  define WM8904_OPCLK_DIV8          (6 << WM8904_OPCLK_DIV_SHIFT) /* SYSCLK / 8 */
-#  define WM8904_OPCLK_DIV12         (7 << WM8904_OPCLK_DIV_SHIFT) /* SYSCLK / 12 */
-#  define WM8904_OPCLK_DIV16         (8 << WM8904_OPCLK_DIV_SHIFT) /* SYSCLK / 16 */
+#  define WM8904_OPCLK_DIV1          (0 << WM8904_OPCLK_DIV_SHIFT)  /* SYSCLK */
+#  define WM8904_OPCLK_DIV2          (1 << WM8904_OPCLK_DIV_SHIFT)  /* SYSCLK / 2 */
+#  define WM8904_OPCLK_DIV3          (2 << WM8904_OPCLK_DIV_SHIFT)  /* SYSCLK / 3 */
+#  define WM8904_OPCLK_DIV4          (3 << WM8904_OPCLK_DIV_SHIFT)  /* SYSCLK / 4 */
+#  define WM8904_OPCLK_DIV5p5        (4 << WM8904_OPCLK_DIV_SHIFT)  /* SYSCLK / 5.5 */
+#  define WM8904_OPCLK_DIV6          (5 << WM8904_OPCLK_DIV_SHIFT)  /* SYSCLK / 6 */
+#  define WM8904_OPCLK_DIV8          (6 << WM8904_OPCLK_DIV_SHIFT)  /* SYSCLK / 8 */
+#  define WM8904_OPCLK_DIV12         (7 << WM8904_OPCLK_DIV_SHIFT)  /* SYSCLK / 12 */
+#  define WM8904_OPCLK_DIV16         (8 << WM8904_OPCLK_DIV_SHIFT)  /* SYSCLK / 16 */
+
 #define WM8904_BCLK_DIV_SHIFT        (0)       /* Bits 0-4: BCLK Frequency (Master Mode) */
+
 #define WM8904_BCLK_DIV_MASK         (31 << WM8904_BCLK_DIV_SHIFT)
 #  define WM8904_BCLK_DIV(n)         ((uint16_t)(n) << WM8904_BCLK_DIV_SHIFT)
-#  define WM8904_BCLK_DIV1           (0 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK */
-#  define WM8904_BCLK_DIV1p5         (1 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 1.5 */
-#  define WM8904_BCLK_DIV2           (2 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 2 */
-#  define WM8904_BCLK_DIV3           (3 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 3 */
-#  define WM8904_BCLK_DIV4           (4 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 4 */
-#  define WM8904_BCLK_DIV5           (5 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 5 */
-#  define WM8904_BCLK_DIV5p5         (6 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 5.5 */
-#  define WM8904_BCLK_DIV6           (7 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 6 */
-#  define WM8904_BCLK_DIV8           (8 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 8 */
-#  define WM8904_BCLK_DIV10          (9 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 10 */
+#  define WM8904_BCLK_DIV1           (0 << WM8904_BCLK_DIV_SHIFT)  /* SYSCLK */
+#  define WM8904_BCLK_DIV1p5         (1 << WM8904_BCLK_DIV_SHIFT)  /* SYSCLK / 1.5 */
+#  define WM8904_BCLK_DIV2           (2 << WM8904_BCLK_DIV_SHIFT)  /* SYSCLK / 2 */
+#  define WM8904_BCLK_DIV3           (3 << WM8904_BCLK_DIV_SHIFT)  /* SYSCLK / 3 */
+#  define WM8904_BCLK_DIV4           (4 << WM8904_BCLK_DIV_SHIFT)  /* SYSCLK / 4 */
+#  define WM8904_BCLK_DIV5           (5 << WM8904_BCLK_DIV_SHIFT)  /* SYSCLK / 5 */
+#  define WM8904_BCLK_DIV5p5         (6 << WM8904_BCLK_DIV_SHIFT)  /* SYSCLK / 5.5 */
+#  define WM8904_BCLK_DIV6           (7 << WM8904_BCLK_DIV_SHIFT)  /* SYSCLK / 6 */
+#  define WM8904_BCLK_DIV8           (8 << WM8904_BCLK_DIV_SHIFT)  /* SYSCLK / 8 */
+#  define WM8904_BCLK_DIV10          (9 << WM8904_BCLK_DIV_SHIFT)  /* SYSCLK / 10 */
 #  define WM8904_BCLK_DIV11          (10 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 11 */
 #  define WM8904_BCLK_DIV12          (11 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 12 */
 #  define WM8904_BCLK_DIV16          (12 << WM8904_BCLK_DIV_SHIFT) /* SYSCLK / 16 */
@@ -476,6 +481,7 @@
 #  define WM8904_LRCLK_RATE(n)       ((uint16_t)(n) << WM8904_LRCLK_RATE_SHIFT)
 
 /* 0x1e DAC Digital Volume Left */
+
 /* 0x1f DAC Digital Volume Right */
 
 #define WM8904_DAC_VU                (1 << 8)  /* Bit 8:  DAC volume update */
@@ -493,11 +499,14 @@
 #  define WM8904_ADCR_DAC_SVOL(n)    ((uint16_t)(n) << WM8904_ADCR_DAC_SVOL_SHIFT)
 #define WM8904_ADC_TO_DACL_SHIFT     (2)       /* Bits 2-3: Left DAC digital sidetone source */
 #define WM8904_ADC_TO_DACL_MASK      (3 << WM8904_ADC_TO_DACL_SHIFT)
+
 #  define WM8904_ADC_TO_DACL_NONE    (0 << WM8904_ADC_TO_DACL_SHIFT) /* No sidetone */
 #  define WM8904_ADC_TO_DACL_LEFT    (1 << WM8904_ADC_TO_DACL_SHIFT) /* Left ADC */
 #  define WM8904_ADC_TO_DACL_RIGHT   (2 << WM8904_ADC_TO_DACL_SHIFT) /* Right ADC */
+
 #define WM8904_ADC_TO_DACR_SHIFT     (0)       /* Bits 0-1: Right DAC digital sidetone source */
 #define WM8904_ADC_TO_DACR_MASK      (3 << WM8904_ADC_TO_DACR_SHIFT)
+
 #  define WM8904_ADC_TO_DACR_NONE    (0 << WM8904_ADC_TO_DACR_SHIFT) /* No sidetone */
 #  define WM8904_ADC_TO_DACR_LEFT    (1 << WM8904_ADC_TO_DACR_SHIFT) /* Left ADC */
 #  define WM8904_ADC_TO_DACR_RIGHT   (2 << WM8904_ADC_TO_DACR_SHIFT) /* Right ADC */
@@ -518,6 +527,7 @@
 #  define WM8904_DEEMPH_48KHZ        (3 << WM8904_DEEMPH_SHIFT) /* 48kHz sample rate */
 
 /* 0x24 ADC Digital Volume Left */
+
 /* 0x25 ADC Digital Volume Right */
 
 #define WM8904_ADC_VU                (1 << 8)  /* Bit 8:  ADC Volume Update */
@@ -529,10 +539,12 @@
 
 #define WM8904_ADC_HPF_CUT_SHIFT     (5)      /* Bits 5-6: ADC digital high pass filter cut-off */
 #define WM8904_ADC_HPF_CUT_MASK      (3 << WM8904_ADC_HPF_CUT_SHIFT)
+
 #  define WM8904_ADC_HPF_CUT_HIFI    (0 << WM8904_ADC_HPF_CUT_SHIFT) /* Hi-fi mode */
 #  define WM8904_ADC_HPF_CUT_VOICE1  (1 << WM8904_ADC_HPF_CUT_SHIFT) /* Voice mode 1 */
 #  define WM8904_ADC_HPF_CUT_VOICE2  (2 << WM8904_ADC_HPF_CUT_SHIFT) /* Voice mode 2 */
 #  define WM8904_ADC_HPF_CUT_VOICE3  (3 << WM8904_ADC_HPF_CUT_SHIFT) /* Voice mode 3 */
+
 #define WM8904_ADC_HPF               (1 << 4)  /* Bit 4:  ADC digital high pass filter enable */
 #define WM8904_ADCL_DATINV           (1 << 1)  /* Bit 1:  Left ADC invert */
 #define WM8904_ADCR_DATINV           (1 << 0)  /* Bit 0:  Right ADC invert */
@@ -548,10 +560,12 @@
 #define WM8904_DRC_DAC_PATH          (1 << 14) /* Bit 14: DRC path select */
 #define WM8904_DRC_GS_HYST_LVL_SHIFT (11)      /* Bits 11-12: Gain smoothing hysteresis threshold */
 #define WM8904_DRC_GS_HYST_LVL_MASK  (3 << WM8904_DRC_GS_HYST_LVL_SHIFT)
+
 #  define WM8904_DRC_GS_HYST_LVL(n)  ((uint16_t)(n) << WM8904_DRC_GS_HYST_LVL_SHIFT)
 #  define WM8904_DRC_GS_HYST_LOW     (0 << WM8904_DRC_GS_HYST_LVL_SHIFT) /* Low */
 #  define WM8904_DRC_GS_HYST_MEDIUM  (1 << WM8904_DRC_GS_HYST_LVL_SHIFT) /* Medium */
 #  define WM8904_DRC_GS_HYST_HIGH    (2 << WM8904_DRC_GS_HYST_LVL_SHIFT) /* High */
+
 #define WM8904_DRC_STARTUP_GAIN_SHIFT  (6)      /* Bits 6-10: Initial gain at DRC startup */
 #define WM8904_DRC_STARTUP_GAIN_MASK   (31 << WM8904_DRC_STARTUP_GAIN_SHIFT)
 #  define WM8904_DRC_STARTUP_GAIN(n)   ((uint16_t)(n) << WM8904_DRC_STARTUP_GAIN_SHIFT)
@@ -586,14 +600,17 @@
 
 #define WM8904_DRC_HI_COMP_SHIFT     (3)      /* Bits 3-5: Compressor slope (upper region) */
 #define WM8904_DRC_HI_COMP_MASK      (7 << WM8904_DRC_HI_COMP_SHIFT)
+
 #  define WM8904_DRC_HI_COMP_DIV1    (0 << WM8904_DRC_HI_COMP_SHIFT) /* 1 (no compression) */
 #  define WM8904_DRC_HI_COMP_DIV2    (1 << WM8904_DRC_HI_COMP_SHIFT) /* 1/2 */
 #  define WM8904_DRC_HI_COMP_DIV4    (2 << WM8904_DRC_HI_COMP_SHIFT) /* 1/4 */
 #  define WM8904_DRC_HI_COMP_DIV8    (3 << WM8904_DRC_HI_COMP_SHIFT) /* 1/8 */
 #  define WM8904_DRC_HI_COMP_DIV16   (4 << WM8904_DRC_HI_COMP_SHIFT) /* 1/16 */
 #  define WM8904_DRC_HI_COMP_ZERO    (5 << WM8904_DRC_HI_COMP_SHIFT) /* 0 */
+
 #define WM8904_DRC_LO_COMP_SHIFT     (0)      /* Bits 0-2:  Compressor slope (lower region)*/
 #define WM8904_DRC_LO_COMP_MASK      (7 << WM8904_DRC_LO_COMP_SHIFT)
+
 #  define WM8904_DRC_LO_COMP(n)      ((uint16_t)(n) << WM8904_DRC_LO_COMP_SHIFT)
 #  define WM8904_DRC_LO_COMP_DIV1    (0 << WM8904_DRC_HI_COMP_SHIFT) /* 1 (no compression) */
 #  define WM8904_DRC_LO_COMP_DIV2    (1 << WM8904_DRC_HI_COMP_SHIFT) /* 1/2 */
@@ -612,6 +629,7 @@
 #  define WM8904_DRC_KNEE_OP(n)      ((uint16_t)(n) << WM8904_DRC_KNEE_OP_SHIFT)
 
 /* 0x2c Analogue Left Input 0 */
+
 /* 0x2d Analogue Right Input 0 */
 
 #define WM8904_INMUTE                (1 << 7)  /* Bit 7:  Input PGA mute */
@@ -620,6 +638,7 @@
 #  define WM8904_IN_VOL(n)           ((uint16_t)(n) << WM8904_IN_VOL_SHIFT)
 
 /* 0x2e Analogue Left Input 1 */
+
 /* 0x2f Analogue Right Input 1 */
 
 #define WM8904_IN_CM_ENA             (1 << 6)  /* Bit 6: Input PGA common mode rejection enable  */
@@ -642,6 +661,7 @@
 #  define WM8904_MODE_DIFFMIC        (2 << WM8904_MODE_SHIFT) /* Differential MIC */
 
 /* 0x39 Analogue OUT1 Left */
+
 /* 0x3a Analogue OUT1 Right */
 
 #define WM8904_HPOUT_MUTE            (1 << 8)  /* Bit 8:  Headphone output mute */
@@ -652,6 +672,7 @@
 #  define WM8904_HPOUT_VOL(n)        ((uint16_t)(n) << WM8904_HPOUT_VOL_SHIFT)
 
 /* 0x3b Analogue OUT2 Left */
+
 /* 0x3c Analogue OUT2 Right */
 
 #define WM8904_LINEOUT_MUTE          (1 << 8)  /* Bit 8:  Headphone output mute */
@@ -846,6 +867,7 @@
 #  define WM8904_FLL_FRATIO_DIV16    (4 << WM8904_FLL_FRATIO_SHIFT) /* Divide by 16 */
 
 /* 0x76 FLL Control 3, Bits 0-15=Fractional multiply for FREF */
+
 /* 0x77 FLL Control 4 */
 
 #define WM8904_FLL_N_SHIFT           (5)      /* Bits 5-14: Integer multiply for FREF */
@@ -871,6 +893,7 @@
 #  define WM8904_FLL_CLK_REF_DIV2    (1 << WM8904_FLL_CLK_REF_DIV_SHIFT) /* MCLK / 2 */
 #  define WM8904_FLL_CLK_REF_DIV4    (2 << WM8904_FLL_CLK_REF_DIV_SHIFT) /* MCLK / 4 */
 #  define WM8904_FLL_CLK_REF_DIV8    (3 << WM8904_FLL_CLK_REF_DIV_SHIFT) /* MCLK / 8 */
+
 #define WM8904_FLL_CLK_REF_SRC_SHIFT   (0)      /* Bits 0-2: FLL clock source */
 #define WM8904_FLL_CLK_REF_SRC_MASK    (3 << WM8904_FLL_CLK_REF_SRC_SHIFT)
 #  define WM8904_FLL_CLK_REF_SRC_MCLK  (0 << WM8904_FLL_CLK_REF_SRC_SHIFT)
@@ -958,9 +981,13 @@
 #define WM8904_BCLK_PD               (1 << 0)  /* Bit 0:  BCLK pull-down resistor enable */
 
 /* Common interrupt bits */
+
 /* 0x7f Interrupt Status */
+
 /* 0x80 Interrupt Status Mask */
+
 /* 0x81 Interrupt Polarity */
+
 /* 0x82 Interrupt Debounce */
 
 #define WM8904_GPIO_BCLK_INT         (1 << 9)  /* Bit 9:  GPIO4 interrupt */
@@ -985,6 +1012,7 @@
 #define WM8904_EQ_ENA                (1 << 0)  /* Bit 0:  EQ enable */
 
 /* 0x87-0x8b EQ2-EQ6:   5 bit equalizer value */
+
 /* 0x8c-0x9d EQ7-EQ24: 16-bit equalizer value */
 
 /* 0xa1 Control Interface Test 1 */
@@ -1012,7 +1040,8 @@
 #define WM8904FLL_FRC_NCO_MASK       (0x3f << WM8904FLL_FRC_NCO_SHIFT)
 #  define WM8904FLL_FRC_NCO_VAL(n)   ((uint16_t)(n) << WM8904FLL_FRC_NCO_SHIFT)
 
-/* FLL Configuration *********************************************************/
+/* FLL Configuration ********************************************************/
+
 /* Default FLL configuration */
 
 #define WM8904_DEFAULT_SAMPRATE      11025     /* Initial sample rate */
@@ -1056,10 +1085,11 @@ struct wm8904_dev_s
   /* We are an audio lower half driver (We are also the upper "half" of
    * the WM8904 driver with respect to the board lower half driver).
    *
-   * Terminology: Our "lower" half audio instances will be called dev for the
-   * publicly visible version and "priv" for the version that only this driver
-   * knows.  From the point of view of this driver, it is the board lower
-   * "half" that is referred to as "lower".
+   * Terminology:
+   * Our "lower" half audio instances will be called dev for the publicly
+   * visible version and "priv" for the version that only this driver knows.
+   * From the point of view of this driver, it is the board lower "half"
+   * that is referred to as "lower".
    */
 
   struct audio_lowerhalf_s dev;             /* WM8904 audio lower half (this device) */
@@ -1107,7 +1137,7 @@ struct wm8904_dev_s
  ****************************************************************************/
 
 #ifdef CONFIG_WM8904_CLKDEBUG
-extern const uint8_t g_sysclk_scaleb1[WM8904_BCLK_MAXDIV+1];
+extern const uint8_t g_sysclk_scaleb1[WM8904_BCLK_MAXDIV + 1];
 extern const uint8_t g_fllratio[WM8904_NFLLRATIO];
 #endif
 

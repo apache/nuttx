@@ -337,9 +337,12 @@ void wm8904_clock_analysis(FAR struct audio_lowerhalf_s *dev,
       syslog(LOG_INFO, "  Fref:            %lu Hz (after divider)\n", fref);
 
       regval = wm8904_readreg(priv, WM8904_FLL_CTRL2);
-      frndx  = (regval & WM8904_FLL_FRATIO_MASK) >> WM8904_FLL_FRATIO_SHIFT;
-      tmp    = (regval & WM8904_FLL_CTRL_RATE_MASK) >> WM8904_FLL_CTRL_RATE_SHIFT;
-      outdiv = ((regval & WM8904_FLL_OUTDIV_MASK) >> WM8904_FLL_OUTDIV_SHIFT) + 1;
+      frndx = (regval & WM8904_FLL_FRATIO_MASK) >>
+                        WM8904_FLL_FRATIO_SHIFT;
+      tmp = (regval & WM8904_FLL_CTRL_RATE_MASK) >>
+                      WM8904_FLL_CTRL_RATE_SHIFT;
+      outdiv = ((regval & WM8904_FLL_OUTDIV_MASK) >>
+                          WM8904_FLL_OUTDIV_SHIFT) + 1;
 
       syslog(LOG_INFO, "  FLL_CTRL_RATE:   Fvco / %u\n", tmp + 1);
 
@@ -397,7 +400,8 @@ void wm8904_clock_analysis(FAR struct audio_lowerhalf_s *dev,
       sysclk >>= 1;
     }
 
-  syslog(LOG_INFO, "  SYSCLK:          %lu (after divider)\n", (unsigned long)sysclk);
+  syslog(LOG_INFO, "  SYSCLK:          %lu (after divider)\n",
+        (unsigned long)sysclk);
 
   regval = wm8904_readreg(priv, WM8904_CLKRATE2);
 
