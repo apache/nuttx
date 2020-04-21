@@ -1,46 +1,20 @@
 /****************************************************************************
  * fs/littlefs/lfs_vfs.c
  *
- * This file is a part of NuttX:
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Ported by:
- *
- *   Copyright (C) 2019 Pinecone Inc. All rights reserved.
- *   Author: lihaichen <li8303@163.com>
- *
- * This port derives from ARM mbed logic which has a compatible 3-clause
- * BSD license:
- *
- *   Copyright (c) 2017, Arm Limited. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the names ARM, NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -56,14 +30,15 @@
 
 #include <nuttx/fs/dirent.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/semaphore.h>
 
 #include <sys/stat.h>
 #include <sys/statfs.h>
 
-#include "lfs.h"
-#include "lfs_util.h"
+#include "littlefs/lfs.h"
+#include "littlefs/lfs_util.h"
 
 /****************************************************************************
  * Private Types
@@ -79,7 +54,7 @@ struct littlefs_mountpt_s
   sem_t                 sem;
   FAR struct inode     *drv;
   struct mtd_geometry_s geo;
-  struct lfs_config_s   cfg;
+  struct lfs_config     cfg;
   lfs_t                 lfs;
 };
 
@@ -249,7 +224,7 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
                          int oflags, mode_t mode)
 {
   FAR struct littlefs_mountpt_s *fs;
-  FAR struct lfs_file_s *priv;
+  FAR struct lfs_file *priv;
   FAR struct inode *inode;
   int ret;
 
@@ -327,7 +302,7 @@ errsem:
 static int littlefs_close(FAR struct file *filep)
 {
   FAR struct littlefs_mountpt_s *fs;
-  FAR struct lfs_file_s *priv;
+  FAR struct lfs_file *priv;
   FAR struct inode *inode;
   int ret;
 
@@ -363,7 +338,7 @@ static ssize_t littlefs_read(FAR struct file *filep, FAR char *buffer,
                              size_t buflen)
 {
   FAR struct littlefs_mountpt_s *fs;
-  FAR struct lfs_file_s *priv;
+  FAR struct lfs_file *priv;
   FAR struct inode *inode;
   ssize_t ret;
   int semret;
@@ -401,7 +376,7 @@ static ssize_t littlefs_write(FAR struct file *filep, const char *buffer,
                               size_t buflen)
 {
   FAR struct littlefs_mountpt_s *fs;
-  FAR struct lfs_file_s *priv;
+  FAR struct lfs_file *priv;
   FAR struct inode *inode;
   ssize_t ret;
   int semret;
@@ -438,7 +413,7 @@ static ssize_t littlefs_write(FAR struct file *filep, const char *buffer,
 static off_t littlefs_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct littlefs_mountpt_s *fs;
-  FAR struct lfs_file_s *priv;
+  FAR struct lfs_file *priv;
   FAR struct inode *inode;
   off_t ret;
   int semret;
@@ -505,7 +480,7 @@ static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int littlefs_sync(FAR struct file *filep)
 {
   FAR struct littlefs_mountpt_s *fs;
-  FAR struct lfs_file_s *priv;
+  FAR struct lfs_file *priv;
   FAR struct inode *inode;
   int ret;
 
@@ -551,7 +526,7 @@ static int littlefs_dup(FAR const struct file *oldp, FAR struct file *newp)
 static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
   FAR struct littlefs_mountpt_s *fs;
-  FAR struct lfs_file_s *priv;
+  FAR struct lfs_file *priv;
   FAR struct inode *inode;
   int ret;
 
@@ -598,7 +573,7 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 static int littlefs_truncate(FAR struct file *filep, off_t length)
 {
   FAR struct littlefs_mountpt_s *fs;
-  FAR struct lfs_file_s *priv;
+  FAR struct lfs_file *priv;
   FAR struct inode *inode;
   int ret;
 
@@ -634,7 +609,7 @@ static int littlefs_opendir(FAR struct inode *mountpt,
                             FAR struct fs_dirent_s *dir)
 {
   FAR struct littlefs_mountpt_s *fs;
-  FAR struct lfs_dir_s *priv;
+  FAR struct lfs_dir *priv;
   int ret;
 
   /* Recover our private data from the inode instance */
@@ -689,7 +664,7 @@ static int littlefs_closedir(FAR struct inode *mountpt,
                              FAR struct fs_dirent_s *dir)
 {
   struct littlefs_mountpt_s *fs;
-  FAR struct lfs_dir_s *priv;
+  FAR struct lfs_dir *priv;
   int ret;
 
   /* Recover our private data from the inode instance */
@@ -724,8 +699,8 @@ static int littlefs_readdir(FAR struct inode *mountpt,
                             FAR struct fs_dirent_s *dir)
 {
   FAR struct littlefs_mountpt_s *fs;
-  FAR struct lfs_dir_s *priv;
-  struct lfs_info_s info;
+  FAR struct lfs_dir *priv;
+  struct lfs_info info;
   int ret;
 
   /* Recover our private data from the inode instance */
@@ -777,7 +752,7 @@ static int littlefs_rewinddir(FAR struct inode *mountpt,
                               FAR struct fs_dirent_s *dir)
 {
   struct littlefs_mountpt_s *fs;
-  FAR struct lfs_dir_s *priv;
+  FAR struct lfs_dir *priv;
   int ret;
 
   /* Recover our private data from the inode instance */
@@ -815,7 +790,7 @@ static int littlefs_rewinddir(FAR struct inode *mountpt,
  *
  ****************************************************************************/
 
-static int littlefs_read_block(FAR const struct lfs_config_s *c,
+static int littlefs_read_block(FAR const struct lfs_config *c,
                                lfs_block_t block, lfs_off_t off,
                                FAR void *buffer, lfs_size_t size)
 {
@@ -843,7 +818,7 @@ static int littlefs_read_block(FAR const struct lfs_config_s *c,
  * Name: littlefs_write_block
  ****************************************************************************/
 
-static int littlefs_write_block(FAR const struct lfs_config_s *c,
+static int littlefs_write_block(FAR const struct lfs_config *c,
                                 lfs_block_t block, lfs_off_t off,
                                 FAR const void *buffer, lfs_size_t size)
 {
@@ -871,7 +846,7 @@ static int littlefs_write_block(FAR const struct lfs_config_s *c,
  * Name: littlefs_erase_block
  ****************************************************************************/
 
-static int littlefs_erase_block(FAR const struct lfs_config_s *c,
+static int littlefs_erase_block(FAR const struct lfs_config *c,
                                 lfs_block_t block)
 {
   FAR struct littlefs_mountpt_s *fs = c->context;
@@ -894,7 +869,7 @@ static int littlefs_erase_block(FAR const struct lfs_config_s *c,
  * Name: littlefs_sync_block
  ****************************************************************************/
 
-static int littlefs_sync_block(FAR const struct lfs_config_s *c)
+static int littlefs_sync_block(FAR const struct lfs_config *c)
 {
   FAR struct littlefs_mountpt_s *fs = c->context;
   FAR struct inode *drv = fs->drv;
@@ -988,21 +963,19 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
 
   /* Initialize lfs_config structure */
 
-  fs->cfg.context     = fs;
-  fs->cfg.read        = littlefs_read_block;
-  fs->cfg.prog        = littlefs_write_block;
-  fs->cfg.erase       = littlefs_erase_block;
-  fs->cfg.sync        = littlefs_sync_block;
-  fs->cfg.read_size   = fs->geo.blocksize;
-  fs->cfg.prog_size   = fs->geo.blocksize;
-  fs->cfg.block_size  = fs->geo.erasesize;
-  fs->cfg.block_count = fs->geo.neraseblocks;
-  fs->cfg.lookahead   = 32 * ((fs->cfg.block_count + 31) / 32);
-
-  if (fs->cfg.lookahead > 32 * fs->cfg.read_size)
-    {
-      fs->cfg.lookahead = 32 * fs->cfg.read_size;
-    }
+  fs->cfg.context        = fs;
+  fs->cfg.read           = littlefs_read_block;
+  fs->cfg.prog           = littlefs_write_block;
+  fs->cfg.erase          = littlefs_erase_block;
+  fs->cfg.sync           = littlefs_sync_block;
+  fs->cfg.read_size      = fs->geo.blocksize;
+  fs->cfg.prog_size      = fs->geo.blocksize;
+  fs->cfg.block_size     = fs->geo.erasesize;
+  fs->cfg.block_count    = fs->geo.neraseblocks;
+  fs->cfg.block_cycles   = 500;
+  fs->cfg.cache_size     = fs->geo.blocksize;
+  fs->cfg.lookahead_size = lfs_min(lfs_alignup(fs->cfg.block_count / 8, 8),
+                                   fs->cfg.read_size);
 
   /* Then get information about the littlefs filesystem on the devices
    * managed by this driver.
@@ -1117,20 +1090,6 @@ static int littlefs_unbind(FAR void *handle, FAR struct inode **driver,
 }
 
 /****************************************************************************
- * Name: littlefs_used_block
- ****************************************************************************/
-
-static int littlefs_used_block(void *arg, lfs_block_t block)
-{
-  FAR struct statfs *buf = arg;
-
-  buf->f_bfree--;
-  buf->f_bavail--;
-
-  return 0;
-}
-
-/****************************************************************************
  * Name: littlefs_statfs
  *
  * Description: Return filesystem statistics
@@ -1162,7 +1121,15 @@ static int littlefs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
       return ret;
     }
 
-  ret = lfs_traverse(&fs->lfs, littlefs_used_block, buf);
+  ret = lfs_fs_size(&fs->lfs);
+  if (ret > 0)
+    {
+      buf->f_bfree -= ret;
+      buf->f_bavail -= ret;
+
+      ret = 0;
+    }
+
   littlefs_semgive(fs);
 
   return ret;
@@ -1285,7 +1252,7 @@ static int littlefs_stat(FAR struct inode *mountpt, FAR const char *relpath,
                          FAR struct stat *buf)
 {
   FAR struct littlefs_mountpt_s *fs;
-  struct lfs_info_s info;
+  struct lfs_info info;
   int ret;
 
   memset(buf, 0, sizeof(*buf));
