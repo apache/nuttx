@@ -465,8 +465,8 @@ struct audio_buf_desc_s
   uint16_t            numbytes;           /* Number of bytes to allocate */
   union
   {
-    FAR struct ap_buffer_s  *pBuffer;     /* Buffer to free / enqueue */
-    FAR struct ap_buffer_s  **ppBuffer;   /* Pointer to receive allocated buffer */
+    FAR struct ap_buffer_s  *buffer;     /* Buffer to free / enqueue */
+    FAR struct ap_buffer_s  **pbuffer;   /* Pointer to receive allocated buffer */
   } u;
 };
 
