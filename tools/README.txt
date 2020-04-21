@@ -1120,7 +1120,7 @@ zipme.sh
   Any VCS files or directories are excluded from the final tarballs.
 
   $ ./tools/zipme.sh -h
-    USAGE="USAGE: ./tools/zipme.sh [-d|h|v|s] [-b <build]> [-e <exclude>] [-k <key-id>] <major.minor.patch>"
+    USAGE="USAGE: ./tools/zipme.sh [-d|h|v|s] [-b <build]> [-e <exclude>] [-k <key-id>] [<major.minor.patch>]"
   Examples:
       ./tools/zipme.sh -s 9.0.0
         Create version 9.0.0 tarballs and sign them.
