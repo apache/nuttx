@@ -164,8 +164,9 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
               /* up_switchcontext forces a context switch to the task at the
                * head of the ready-to-run list.  It does not 'return' in the
-               * normal sense.  When it does return, it is because the blocked
-               * task is again ready to run and has execution priority.
+               * normal sense.  When it does return, it is because the
+               * blocked task is again ready to run and has execution
+               * priority.
                */
             }
         }

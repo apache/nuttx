@@ -277,8 +277,9 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
                   /* Now tcb on the other CPU can be accessed safely */
 
-                  /* Copy tcb->xcp.regs to tcp.xcp.saved. These will be restored
-                   * by the signal trampoline after the signal has been delivered.
+                  /* Copy tcb->xcp.regs to tcp.xcp.saved. These will be
+                   * restored by the signal trampoline after the signal has
+                   * been delivered.
                    */
 
                   tcb->xcp.sigdeliver        = (FAR void *)sigdeliver;
@@ -313,10 +314,10 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                 {
                   /* tcb is running on the same CPU */
 
-                  /* Save the return PC, CPSR and either the BASEPRI or PRIMASK
-                   * registers (and perhaps also the LR).  These will be
-                   * restored by the signal trampoline after the signal has been
-                   * delivered.
+                  /* Save the return PC, CPSR and either the BASEPRI or
+                   * PRIMASK registers (and perhaps also the LR).  These
+                   * will be restored by the signal trampoline after the
+                   * signal has been delivered.
                    */
 
                   tcb->xcp.sigdeliver       = (FAR void *)sigdeliver;
@@ -347,15 +348,15 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                   CURRENT_REGS[REG_LR]      = EXC_RETURN_PRIVTHR;
 #endif
 
-                  /* And make sure that the saved context in the TCB is the same
-                   * as the interrupt return context.
+                  /* And make sure that the saved context in the TCB is the
+                   * same as the interrupt return context.
                    */
 
                   up_savestate(tcb->xcp.regs);
                 }
 
-              /* Increment the IRQ lock count so that when the task is restarted,
-               * it will hold the IRQ spinlock.
+              /* Increment the IRQ lock count so that when the task is
+               * restarted, it will hold the IRQ spinlock.
                */
 
               DEBUGASSERT(tcb->irqcount < INT16_MAX);
@@ -363,14 +364,14 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               /* In an SMP configuration, the interrupt disable logic also
                * involves spinlocks that are configured per the TCB irqcount
-               * field.  This is logically equivalent to enter_critical_section().
-               * The matching call to leave_critical_section() will be
-               * performed in up_sigdeliver().
+               * field.  This is logically equivalent to
+               * enter_critical_section().  The matching call to
+               * leave_critical_section() will be performed in
+               * up_sigdeliver().
                */
 
               spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
                           &g_cpu_irqlock);
-
 
               /* RESUME the other CPU if it was PAUSED */
 

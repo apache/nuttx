@@ -120,7 +120,7 @@ void up_initial_state(struct tcb_s *tcb)
 #if !defined(CONFIG_ARMV7M_LAZYFPU) && defined(CONFIG_ARCH_FPU)
 
   xcp->regs[REG_FPSCR] = 0;      /* REVISIT: Initial FPSCR should be configurable */
-  xcp->regs[REG_FPReserved] = 0;
+  xcp->regs[REG_FP_RESERVED] = 0;
 
 #endif /* !CONFIG_ARMV7M_LAZYFPU && CONFIG_ARCH_FPU */
 

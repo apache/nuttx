@@ -123,7 +123,8 @@ int up_hardfault(int irq, FAR void *context, FAR void *arg)
   hfalert("  IRQ: %d regs: %p\n", irq, context);
   hfalert("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
-  hfalert("  CFAULTS: %08x HFAULTS: %08x DFAULTS: %08x BFAULTADDR: %08x AFAULTS: %08x\n",
+  hfalert("  CFAULTS: %08x HFAULTS: %08x DFAULTS: %08x BFAULTADDR: %08x "
+          "AFAULTS: %08x\n",
           getreg32(NVIC_CFAULTS), getreg32(NVIC_HFAULTS),
           getreg32(NVIC_DFAULTS), getreg32(NVIC_BFAULT_ADDR),
           getreg32(NVIC_AFAULTS));
