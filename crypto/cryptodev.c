@@ -67,11 +67,14 @@
 
 /* Character driver methods */
 
-static ssize_t cryptodev_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t cryptodev_read(FAR struct file *filep,
+                              FAR char *buffer,
                               size_t len);
-static ssize_t cryptodev_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t cryptodev_write(FAR struct file *filep,
+                               FAR const char *buffer,
                                size_t len);
-static int cryptodev_ioctl(FAR struct file *filep, int cmd,
+static int cryptodev_ioctl(FAR struct file *filep,
+                           int cmd,
                            unsigned long arg);
 
 /****************************************************************************
@@ -96,19 +99,23 @@ static const struct file_operations g_cryptodevops =
  * Private Functions
  ****************************************************************************/
 
-static ssize_t cryptodev_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t cryptodev_read(FAR struct file *filep,
+                              FAR char *buffer,
                               size_t len)
 {
   return -EACCES;
 }
 
-static ssize_t cryptodev_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t cryptodev_write(FAR struct file *filep,
+                               FAR const char *buffer,
                                size_t len)
 {
   return -EACCES;
 }
 
-static int cryptodev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int cryptodev_ioctl(FAR struct file *filep,
+                           int cmd,
+                           unsigned long arg)
 {
   switch (cmd)
   {
