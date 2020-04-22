@@ -1,0 +1,243 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "ARMV8M Configuration Options"
+
+config ARMV8M_HAVE_ICACHE
+	bool
+	default n
+
+config ARMV8M_HAVE_DCACHE
+	bool
+	default n
+
+config ARMV8M_LAZYFPU
+	bool "Lazy FPU storage"
+	default n
+	depends on ARCH_HAVE_LAZYFPU
+	---help---
+		There are two forms of the common vector logic.  There are pros and
+		cons to each option:
+
+		1) The standard common vector logic exploits features of the ARMv8-M
+		   architecture to save the all of floating registers on entry into
+		   each interrupt and then to restore the floating registers when
+		   the interrupt returns.  The primary advantage to this approach is
+		   that floating point operations are available in interrupt
+		   handling logic.  Since the volatile registers are preserved,
+		   operations on the floating point registers by interrupt handling
+		   logic has no ill effect.  The downside is, of course, that more
+		   stack operations are required on each interrupt to save and store
+		   the floating point registers.  Because of the some special
+		   features of the ARMv-M, this is not as much overhead as you might
+		   expect, but overhead nonetheless.
+
+		2) The lazy FPU common vector logic does not save or restore
+		   floating point registers on entry and exit from the interrupt
+		   handler. Rather, the floating point registers are not restored
+		   until it is absolutely necessary to do so when a context switch
+		   occurs and the interrupt handler will be returning to a different
+		   floating point context.  Since floating point registers are not
+		   protected, floating point operations must not be performed in
+		   interrupt handling logic.  Better interrupt performance is be
+		   expected, however.
+
+		By default, the "standard" common vector logic is build.  This
+		option selects the alternate lazy FPU common vector logic.
+
+config ARMV8M_USEBASEPRI
+	bool "Use BASEPRI Register"
+	default y if ARCH_HIPRI_INTERRUPT
+	---help---
+		Use the BASEPRI register to enable and disable interrupts. By
+		default, the PRIMASK register is used for this purpose. This
+		usually results in hardfaults when supervisor calls are made.
+		Though, these hardfaults are properly handled by the RTOS, the
+		hardfaults can confuse some debuggers. With the BASEPRI
+		register, these hardfaults, will be avoided. For more details see
+		http://www.nuttx.org/doku.php?id=wiki:nxinternal:svcall
+
+		WARNING:  If CONFIG_ARCH_HIPRI_INTERRUPT is selected, then you
+		MUST select CONFIG_ARMV8M_USEBASEPRI.  The Kconfig dependencies
+		here will permit to select an invalid configuration because it
+		cannot enforce that requirement.  If you create this invalild
+		configuration, you will encounter some problems that may be
+		very difficult to debug.
+
+config ARMV8M_ICACHE
+	bool "Use I-Cache"
+	default n
+	depends on ARMV8M_HAVE_ICACHE
+	select ARCH_ICACHE
+
+config ARMV8M_DCACHE
+	bool "Use D-Cache"
+	default n
+	depends on ARMV8M_HAVE_DCACHE
+	select ARCH_DCACHE
+
+config ARMV8M_DCACHE_WRITETHROUGH
+	bool "D-Cache Write-Through"
+	default n
+	depends on ARMV8M_DCACHE
+
+config ARMV8M_HAVE_ITCM
+	bool
+	default n
+
+config ARMV8M_HAVE_DTCM
+	bool
+	default n
+
+config ARMV8M_ITCM
+	bool "Use ITCM"
+	default n
+	depends on ARMV8M_HAVE_ITCM
+
+config ARMV8M_DTCM
+	bool "Use DTCM"
+	default n
+	depends on ARMV8M_HAVE_DTCM
+
+choice
+	prompt "Toolchain Selection"
+	default ARMV8M_TOOLCHAIN_GNU_EABIW if TOOLCHAIN_WINDOWS
+	default ARMV8M_TOOLCHAIN_GNU_EABIL if !TOOLCHAIN_WINDOWS
+
+config ARMV8M_TOOLCHAIN_ATOLLIC
+	bool "Atollic Lite/Pro for Windows"
+	depends on TOOLCHAIN_WINDOWS
+	select ARCH_TOOLCHAIN_GNU
+
+config ARMV8M_TOOLCHAIN_BUILDROOT
+	bool "Buildroot (Cygwin or Linux)"
+	depends on !WINDOWS_NATIVE
+	select ARCH_TOOLCHAIN_GNU
+
+config ARMV8M_TOOLCHAIN_CODEREDL
+	bool "CodeRed for Linux"
+	depends on HOST_LINUX
+	select ARCH_TOOLCHAIN_GNU
+
+config ARMV8M_TOOLCHAIN_CODEREDW
+	bool "CodeRed for Windows"
+	depends on TOOLCHAIN_WINDOWS
+	select ARCH_TOOLCHAIN_GNU
+
+config ARMV8M_TOOLCHAIN_CODESOURCERYL
+	bool "CodeSourcery GNU toolchain under Linux"
+	depends on HOST_LINUX
+	select ARCH_TOOLCHAIN_GNU
+
+config ARMV8M_TOOLCHAIN_CODESOURCERYW
+	bool "CodeSourcery GNU toolchain under Windows"
+	depends on TOOLCHAIN_WINDOWS
+	select ARCH_TOOLCHAIN_GNU
+
+config ARMV8M_TOOLCHAIN_DEVKITARM
+	bool "devkitARM GNU toolchain"
+	depends on TOOLCHAIN_WINDOWS
+	select ARCH_TOOLCHAIN_GNU
+
+config ARMV8M_TOOLCHAIN_GNU_EABIL
+	bool "Generic GNU EABI toolchain under Linux (or other POSIX environment)"
+	depends on !WINDOWS_NATIVE
+	select ARCH_TOOLCHAIN_GNU
+	---help---
+		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
+		configured for arm-none-eabi.
+
+config ARMV8M_TOOLCHAIN_GNU_EABIW
+	bool "Generic GNU EABI toolchain under Windows"
+	depends on TOOLCHAIN_WINDOWS
+	select ARCH_TOOLCHAIN_GNU
+
+config ARMV8M_TOOLCHAIN_CLANGL
+	bool "Generic Clang toolchain under Linux (or other POSIX environment)"
+	depends on !WINDOWS_NATIVE
+	select ARCH_TOOLCHAIN_GNU
+
+config ARMV8M_TOOLCHAIN_CLANGW
+	bool "Generic Clang toolchain under Windows"
+	depends on TOOLCHAIN_WINDOWS
+	select ARCH_TOOLCHAIN_GNU
+	---help---
+		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
+		configured for arm-none-eabi.
+
+config ARMV8M_TOOLCHAIN_RAISONANCE
+	bool "STMicro Raisonance for Windows"
+	depends on TOOLCHAIN_WINDOWS
+	select ARCH_TOOLCHAIN_GNU
+
+endchoice
+
+config ARMV8M_OABI_TOOLCHAIN
+	bool "OABI (vs EABI)"
+	default n
+	depends on ARMV8M_TOOLCHAIN_BUILDROOT
+	---help---
+		Most of the older buildroot toolchains are OABI and are named
+		arm-nuttx-elf- vs. arm-nuttx-eabi-
+
+config ARMV8M_TARGET2_PREL
+	bool "R_ARM_TARGET2 is PC relative"
+	default n if !CXX_EXCEPTION
+	default y if CXX_EXCEPTION
+	depends on ELF
+	---help---
+		Perform a PC relative relocation for relocation type R_ARM_TARGET2
+
+config ARMV8M_HAVE_STACKCHECK
+	bool
+	default n
+
+config ARMV8M_STACKCHECK
+	bool "Check for stack overflow on each function call"
+	default n
+	depends on ARMV8M_HAVE_STACKCHECK
+	---help---
+		This check uses R10 to check for a stack overflow within each
+		function call. This has performances and code size impacts, but it
+		will be able to catch hard to find stack overflows.
+
+		Currently only available only for the STM32, SAM3/4 and SAMA5D
+		architectures.  The changes are not complex and patches for
+		other architectures will be accepted.
+
+		This option requires that you are using a GCC toolchain and that
+		you also include -finstrument-functions in your CFLAGS when you
+		compile.  This addition to your CFLAGS should probably be added
+		to the definition of the CFFLAGS in your board Make.defs file.
+
+config ARMV8M_ITMSYSLOG
+	bool "ITM SYSLOG support"
+	default n
+	select ARCH_SYSLOG
+	select SYSLOG
+	---help---
+		Enable hooks to support ITM syslog output.  This requires additional
+		MCU support in order to be used.  See arch/arm/src/armv8-m/itm_syslog.h
+		for additional initialization information.
+
+if ARMV8M_ITMSYSLOG
+
+config ARMV8M_ITMSYSLOG_PORT
+	int "ITM SYSLOG Port"
+	default 0
+	range 0 31
+
+config ARMV8M_ITMSYSLOG_SWODIV
+	int "ITM SYSLOG SWO divider"
+	default 15
+	range 1 8192
+
+endif # ARMV8M_ITMSYSLOG
+
+config ARMV8M_SYSTICK
+	bool "SysTick timer driver"
+	depends on TIMER
+	---help---
+		Enable SysTick timer driver.
