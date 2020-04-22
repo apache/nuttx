@@ -353,7 +353,8 @@ static void edid_block(FAR struct edid_info_s *edid, FAR const uint8_t *desc)
           edid->edid_modes[edid->edid_nmodes] = mode;
           if (edid->edid_preferred_mode == NULL)
             {
-              edid->edid_preferred_mode = &edid->edid_modes[edid->edid_nmodes];
+              edid->edid_preferred_mode =
+                          &edid->edid_modes[edid->edid_nmodes];
             }
 
           edid->edid_nmodes++;
@@ -433,6 +434,7 @@ static void edid_block(FAR struct edid_info_s *edid, FAR const uint8_t *desc)
       break;
 
     case EDID_DESCTYPE_WHITEPOINT:
+
       /* Not implemented yet */
 
       break;
@@ -477,21 +479,24 @@ int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid)
 
   /* Get product identification */
 
-  manufacturer                =  (uint16_t)data[EDID_VENDOR_MANUFACTURER_OFFSET] |
-                                ((uint16_t)data[EDID_VENDOR_MANUFACTURER_OFFSET + 1] << 8);
+  manufacturer =
+            (uint16_t)data[EDID_VENDOR_MANUFACTURER_OFFSET] |
+            ((uint16_t)data[EDID_VENDOR_MANUFACTURER_OFFSET + 1] << 8);
 
   edid->edid_manufacturer[0]  = EDID_VENDOR_MANUFACTURER_1(manufacturer);
   edid->edid_manufacturer[1]  = EDID_VENDOR_MANUFACTURER_2(manufacturer);
   edid->edid_manufacturer[2]  = EDID_VENDOR_MANUFACTURER_3(manufacturer);
   edid->edid_manufacturer[3]  = 0;     /* NUL terminate for convenience */
 
-  edid->edid_product          =  (uint16_t)data[EDID_VENDOR_PRODUCTCODE_OFFSET] |
-                                ((uint16_t)data[EDID_VENDOR_PRODUCTCODE_OFFSET + 1] << 8);
+  edid->edid_product =
+            (uint16_t)data[EDID_VENDOR_PRODUCTCODE_OFFSET] |
+            ((uint16_t)data[EDID_VENDOR_PRODUCTCODE_OFFSET + 1] << 8);
 
-  edid->edid_serial           = ((uint32_t)data[EDID_VENDOR_SERIALNO_OFFSET] << 24) |
-                                ((uint32_t)data[EDID_VENDOR_SERIALNO_OFFSET + 1] << 16) |
-                                ((uint32_t)data[EDID_VENDOR_SERIALNO_OFFSET + 2] << 8) |
-                                 (uint32_t)data[EDID_VENDOR_SERIALNO_OFFSET + 3];
+  edid->edid_serial =
+            ((uint32_t)data[EDID_VENDOR_SERIALNO_OFFSET] << 24) |
+            ((uint32_t)data[EDID_VENDOR_SERIALNO_OFFSET + 1] << 16) |
+            ((uint32_t)data[EDID_VENDOR_SERIALNO_OFFSET + 2] << 8) |
+            (uint32_t)data[EDID_VENDOR_SERIALNO_OFFSET + 3];
 
   edid->edid_week             = data[EDID_VENDOR_WEEK_OFFSET];
   edid->edid_year             = data[EDID_VENDOR_YEAR_OFFSET] + 1990;
@@ -571,7 +576,8 @@ int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid)
 
   for (i = 0; i < EDID_DESCRIPTOR_NUMBER; i++)
     {
-      edid_block(edid, data + EDID_DESCRIPTOR_OFFSET + i * EDID_DESCRIPTOR_SIZE);
+      edid_block(edid,
+                 data + EDID_DESCRIPTOR_OFFSET + i * EDID_DESCRIPTOR_SIZE);
     }
 
   /* Some monitors lie about their maximum supported dot clock
