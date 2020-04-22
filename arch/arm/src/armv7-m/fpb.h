@@ -21,17 +21,17 @@
 #ifndef __ARCH_ARM_SRC_ARMV&-M_FPB_H
 #define __ARCH_ARM_SRC_ARMV&-M_FPB_H
 
-/******************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ******************************************************************************/
+ ****************************************************************************/
 
-/* Flash Patch and Breakpoint Unit FPB ***************************************/
+/* Flash Patch and Breakpoint Unit FPB **************************************/
 
-/* FPB Register Base Address *************************************************/
+/* FPB Register Base Address ************************************************/
 
 #define FPB_BASE                  0xe0002000
 
-/* FPB Register Offsets *******************************************************/
+/* FPB Register Offsets *****************************************************/
 
 #define FPB_CTRL_OFFSET       0x0000  /* Control */
 #define FPB_REMAP_OFFSET      0x0004  /* Remap */
@@ -44,7 +44,7 @@
 #define FPB_COMP6_OFFSET      0x0020  /* Comparator 6 */
 #define FPB_COMP7_OFFSET      0x0024  /* Comparator 7 */
 
-/* FPB Register Addresses *****************************************************/
+/* FPB Register Addresses ***************************************************/
 
 #define FPB_CTRL              (FPB_BASE + FPB_CTRL_OFFSET)
 #define FPB_REMAP             (FPB_BASE + FPB_REMAP_OFFSET)
@@ -57,7 +57,7 @@
 #define FPB_COMP6             (FPB_BASE + FPB_COMP6_OFFSET)
 #define FPB_COMP7             (FPB_BASE + FPB_COMP7_OFFSET
 
-/* FPB Register Bitfield Definitions ******************************************/
+/* FPB Register Bitfield Definitions ****************************************/
 
 /* FPB_CTRL */
 

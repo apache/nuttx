@@ -1,4 +1,4 @@
-/*****************************************************************************
+/*********************************************************************************************
  * arch/arm/src/armv7-m/mpu.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_ARMV7M_MPU_H
 #define __ARCH_ARM_SRC_ARMV7M_MPU_H
 
-/*****************************************************************************
+/*********************************************************************************************
  * Included Files
- *****************************************************************************/
+ *********************************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -37,9 +37,9 @@
 #  include "up_arch.h"
 #endif
 
-/*****************************************************************************
+/*********************************************************************************************
  * Pre-processor Definitions
- *****************************************************************************/
+ *********************************************************************************************/
 
 /* MPU Register Addresses */
 
@@ -86,18 +86,18 @@
 
 /* MPU Region Base Address Register Bit Definitions */
 
-#define MPU_RBAR_REGION_SHIFT   (0)        /* Bits 0-3: MPU region */
+#define MPU_RBAR_REGION_SHIFT   (0)                         /* Bits 0-3: MPU region */
 #define MPU_RBAR_REGION_MASK    (15 << MPU_RBAR_REGION_SHIFT)
-#define MPU_RBAR_VALID          (1 << 4)   /* Bit 4: MPU Region Number valid */
-#define MPU_RBAR_ADDR_MASK      0xffffffe0 /* Bits N-31:  Region base addrese */
+#define MPU_RBAR_VALID          (1 << 4)                    /* Bit 4: MPU Region Number valid */
+#define MPU_RBAR_ADDR_MASK      0xffffffe0                  /* Bits N-31:  Region base addrese */
 
 /* MPU Region Attributes and Size Register Bit Definitions */
 
-#define MPU_RASR_ENABLE         (1 << 0)  /* Bit 0: Region enable */
-#define MPU_RASR_SIZE_SHIFT     (1)       /* Bits 1-5: Size of the MPU protection region */
+#define MPU_RASR_ENABLE         (1 << 0)                   /* Bit 0: Region enable */
+#define MPU_RASR_SIZE_SHIFT     (1)                        /* Bits 1-5: Size of the MPU protection region */
 #define MPU_RASR_SIZE_MASK      (31 << MPU_RASR_SIZE_SHIFT)
 #  define MPU_RASR_SIZE_LOG2(n) ((n-1) << MPU_RASR_SIZE_SHIFT)
-#define MPU_RASR_SRD_SHIFT      (8)       /* Bits 8-15: Subregion disable */
+#define MPU_RASR_SRD_SHIFT      (8)                        /* Bits 8-15: Subregion disable */
 #define MPU_RASR_SRD_MASK       (0xff << MPU_RASR_SRD_SHIFT)
 #  define MPU_RASR_SRD_0        (0x01 << MPU_RASR_SRD_SHIFT)
 #  define MPU_RASR_SRD_1        (0x02 << MPU_RASR_SRD_SHIFT)
@@ -107,36 +107,36 @@
 #  define MPU_RASR_SRD_5        (0x20 << MPU_RASR_SRD_SHIFT)
 #  define MPU_RASR_SRD_6        (0x40 << MPU_RASR_SRD_SHIFT)
 #  define MPU_RASR_SRD_7        (0x80 << MPU_RASR_SRD_SHIFT)
-#define MPU_RASR_ATTR_SHIFT     (16)      /* Bits 16-31: MPU Region Attribute field */
+#define MPU_RASR_ATTR_SHIFT     (16)                       /* Bits 16-31: MPU Region Attribute field */
 #define MPU_RASR_ATTR_MASK      (0xffff << MPU_RASR_ATTR_SHIFT)
-#  define MPU_RASR_B            (1 << 16) /* Bit 16: Bufferable */
-#  define MPU_RASR_C            (1 << 17) /* Bit 17: Cacheable */
-#  define MPU_RASR_S            (1 << 18) /* Bit 18: Shareable */
-#  define MPU_RASR_TEX_SHIFT    (19)      /* Bits 19-21: TEX Address Permission */
+#  define MPU_RASR_B            (1 << 16)                  /* Bit 16: Bufferable */
+#  define MPU_RASR_C            (1 << 17)                  /* Bit 17: Cacheable */
+#  define MPU_RASR_S            (1 << 18)                  /* Bit 18: Shareable */
+#  define MPU_RASR_TEX_SHIFT    (19)                       /* Bits 19-21: TEX Address Permission */
 #  define MPU_RASR_TEX_MASK     (7 << MPU_RASR_TEX_SHIFT)
 #    define MPU_RASR_TEX_SO     (0 << MPU_RASR_TEX_SHIFT) /* Strongly Ordered */
 #    define MPU_RASR_TEX_NOR    (1 << MPU_RASR_TEX_SHIFT) /* Normal           */
 #    define MPU_RASR_TEX_DEV    (2 << MPU_RASR_TEX_SHIFT) /* Device           */
-#    define MPU_RASR_TEX_BB(bb) ((4|(bb)) << MPU_RASR_TEX_SHIFT) /* Normal BB AA */
-#      define MPU_RASR_CP_NC    (0)  /* Non-cacheable */
-#      define MPU_RASR_CP_WBRA  (1)  /* Write back, write and Read- Allocate */
-#      define MPU_RASR_CP_WT    (2)  /* Write through, no Write-Allocate */
-#      define MPU_RASR_CP_WB    (4)  /* Write back, no Write-Allocate */
-#  define MPU_RASR_AP_SHIFT     (24)      /* Bits 24-26: Access permission */
+#    define MPU_RASR_TEX_BB(bb) ((4|(bb)) << MPU_RASR_TEX_SHIFT)
+#      define MPU_RASR_CP_NC    (0)                       /* Non-cacheable */
+#      define MPU_RASR_CP_WBRA  (1)                       /* Write back, write and Read- Allocate */
+#      define MPU_RASR_CP_WT    (2)                       /* Write through, no Write-Allocate */
+#      define MPU_RASR_CP_WB    (4)                       /* Write back, no Write-Allocate */
+#  define MPU_RASR_AP_SHIFT     (24)                      /* Bits 24-26: Access permission */
 #  define MPU_RASR_AP_MASK      (7 << MPU_RASR_AP_SHIFT)
-#    define MPU_RASR_AP_NONO    (0 << MPU_RASR_AP_SHIFT) /* P:None U:None */
-#    define MPU_RASR_AP_RWNO    (1 << MPU_RASR_AP_SHIFT) /* P:RW   U:None */
-#    define MPU_RASR_AP_RWRO    (2 << MPU_RASR_AP_SHIFT) /* P:RW   U:RO   */
-#    define MPU_RASR_AP_RWRW    (3 << MPU_RASR_AP_SHIFT) /* P:RW   U:RW   */
-#    define MPU_RASR_AP_RONO    (5 << MPU_RASR_AP_SHIFT) /* P:RO   U:None */
-#    define MPU_RASR_AP_RORO    (6 << MPU_RASR_AP_SHIFT) /* P:RO   U:RO   */
-#  define MPU_RASR_XN           (1 << 28) /* Bit 28: Instruction access disable */
+#    define MPU_RASR_AP_NONO    (0 << MPU_RASR_AP_SHIFT)  /* P:None U:None */
+#    define MPU_RASR_AP_RWNO    (1 << MPU_RASR_AP_SHIFT)  /* P:RW   U:None */
+#    define MPU_RASR_AP_RWRO    (2 << MPU_RASR_AP_SHIFT)  /* P:RW   U:RO   */
+#    define MPU_RASR_AP_RWRW    (3 << MPU_RASR_AP_SHIFT)  /* P:RW   U:RW   */
+#    define MPU_RASR_AP_RONO    (5 << MPU_RASR_AP_SHIFT)  /* P:RO   U:None */
+#    define MPU_RASR_AP_RORO    (6 << MPU_RASR_AP_SHIFT)  /* P:RO   U:RO   */
+#  define MPU_RASR_XN           (1 << 28)                 /* Bit 28: Instruction access disable */
 
 #ifdef CONFIG_ARM_MPU
 
-/*****************************************************************************
+/*********************************************************************************************
  * Public Function Prototypes
- *****************************************************************************/
+ *********************************************************************************************/
 
 #ifndef __ASSEMBLY__
 #undef EXTERN
@@ -148,17 +148,17 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_allocregion
  *
  * Description:
  *  Allocate the next region
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 unsigned int mpu_allocregion(void);
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_log2regionceil
  *
  * Description:
@@ -167,11 +167,11 @@ unsigned int mpu_allocregion(void);
  *
  *   size <= (1 << l2size)
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 uint8_t mpu_log2regionceil(size_t size);
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_log2regionfloor
  *
  * Description:
@@ -180,11 +180,11 @@ uint8_t mpu_log2regionceil(size_t size);
  *
  *   size >= (1 << l2size)
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 uint8_t mpu_log2regionfloor(size_t size);
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_subregion
  *
  * Description:
@@ -196,42 +196,42 @@ uint8_t mpu_log2regionfloor(size_t size);
  *   l2size has the same properties as the return value from
  *   mpu_log2regionceil()
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 uint32_t mpu_subregion(uintptr_t base, size_t size, uint8_t l2size);
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_control
  *
  * Description:
  *   Configure and enable (or disable) the MPU
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 void mpu_control(bool enable, bool hfnmiena, bool privdefena);
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_configure_region
  *
  * Description:
  *   Configure a region for privileged, strongly ordered memory
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 void mpu_configure_region(uintptr_t base, size_t size,
                                         uint32_t flags);
 
-/*****************************************************************************
+/*********************************************************************************************
  * Inline Functions
- *****************************************************************************/
+ *********************************************************************************************/
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_showtype
  *
  * Description:
  *   Show the characteristics of the MPU
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 #ifdef CONFIG_DEBUG_SCHED_INFO
 #  define mpu_showtype() \
@@ -247,13 +247,13 @@ void mpu_configure_region(uintptr_t base, size_t size,
 #  define mpu_showtype() do { } while (0)
 #endif
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_priv_stronglyordered
  *
  * Description:
  *   Configure a region for privileged, strongly ordered memory
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 #define mpu_priv_stronglyordered(base, size) \
   do \
@@ -268,13 +268,13 @@ void mpu_configure_region(uintptr_t base, size_t size,
                                                /* Instruction access */); \
     } while (0)
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_user_flash
  *
  * Description:
  *   Configure a region for user program flash
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 #define mpu_user_flash(base, size) \
   do \
@@ -289,13 +289,13 @@ void mpu_configure_region(uintptr_t base, size_t size,
                                                /* Instruction access */); \
     } while (0)
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_priv_flash
  *
  * Description:
  *   Configure a region for privileged program flash
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 #define mpu_priv_flash(base, size) \
   do \
@@ -310,13 +310,13 @@ void mpu_configure_region(uintptr_t base, size_t size,
                                                /* Instruction access */); \
     } while (0)
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_user_intsram
  *
  * Description:
  *   Configure a region as user internal SRAM
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 #define mpu_user_intsram(base, size) \
   do \
@@ -331,13 +331,13 @@ void mpu_configure_region(uintptr_t base, size_t size,
                                                /* Instruction access */); \
     } while (0)
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_priv_intsram
  *
  * Description:
  *   Configure a region as privileged internal SRAM
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 #define mpu_priv_intsram(base, size) \
   do \
@@ -352,13 +352,13 @@ void mpu_configure_region(uintptr_t base, size_t size,
                                                /* Instruction access */); \
     } while (0)
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_user_extsram
  *
  * Description:
  *   Configure a region as user external SRAM
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 #define mpu_user_extsram(base, size) \
   do \
@@ -373,13 +373,13 @@ void mpu_configure_region(uintptr_t base, size_t size,
                                                /* Instruction access */); \
     } while (0)
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_priv_extsram
  *
  * Description:
  *   Configure a region as privileged external SRAM
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 #define mpu_priv_extsram(base, size) \
   do \
@@ -394,13 +394,13 @@ void mpu_configure_region(uintptr_t base, size_t size,
                                                /* Instruction access */); \
     } while (0)
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_peripheral
  *
  * Description:
  *   Configure a region as privileged peripheral address space
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 #define mpu_peripheral(base, size) \
   do \
@@ -415,13 +415,13 @@ void mpu_configure_region(uintptr_t base, size_t size,
                            MPU_RASR_XN         /* No Instruction access */); \
     } while (0)
 
-/*****************************************************************************
+/*********************************************************************************************
  * Name: mpu_user_peripheral
  *
  * Description:
  *   Configure a region as user peripheral address space
  *
- *****************************************************************************/
+ *********************************************************************************************/
 
 #define mpu_user_peripheral(base, size) \
   do \

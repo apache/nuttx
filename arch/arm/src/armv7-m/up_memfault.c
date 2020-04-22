@@ -53,10 +53,10 @@
  * Name: up_memfault
  *
  * Description:
- *   This is Memory Management Fault exception handler.  Normally we get here
- *   when the Cortex M3 MPU is enabled and an MPU fault is detected.  However,
- *   I understand that there are other error conditions that can also generate
- *   memory management faults.
+ *   This is Memory Management Fault exception handler.  Normally we get
+ *   here when the Cortex M3 MPU is enabled and an MPU fault is detected.
+ *   However, I understand that there are other error conditions that can
+ *   also generate memory management faults.
  *
  ****************************************************************************/
 

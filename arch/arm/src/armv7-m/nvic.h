@@ -34,6 +34,7 @@
 /* Exception/interrupt vector numbers *******************************************************/
 
                                                /* Vector  0: Reset stack pointer value */
+
                                                /* Vector  1: Reset */
 #define NVIC_IRQ_NMI                    (2)    /* Vector  2: Non-Maskable Interrupt (NMI) */
 #define NVIC_IRQ_HARDFAULT              (3)    /* Vector  3: Hard fault */
@@ -489,6 +490,7 @@
 #define NVIC_INTCTRL_VECTACTIVE_MASK    (0x1ff << NVIC_INTCTRL_VECTACTIVE_SHIFT)
 
 /* System control register (SYSCON) */
+
                                                   /* Bit 0:  Reserved */
 #define NVIC_SYSCON_SLEEPONEXIT         (1 << 1)  /* Bit 1:  Sleep-on-exit (returning from Handler to Thread mode) */
 #define NVIC_SYSCON_SLEEPDEEP           (1 << 2)  /* Bit 2: Use deep sleep in low power mode */
@@ -641,6 +643,7 @@
 #define NVIC_DEMCR_TRCENA               (1 << 24) /* Bit 24: Enable trace and debug blocks */
 
 /* Instruction Tightly-Coupled Memory Control Register (ITCMCR) */
+
 /* Data Tightly-Coupled Memory Control Registers (DTCMCR */
 
 #define NVIC_TCMCR_EN                   (1 << 0)  /* Bit 9:  TCM enable */

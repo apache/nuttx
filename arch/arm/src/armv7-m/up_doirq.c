@@ -47,9 +47,9 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
 #else
   uint32_t *savestate;
 
-  /* Nested interrupts are not supported in this implementation.  If you want
-   * to implement nested interrupts, you would have to (1) change the way that
-   * CURRENT_REGS is handled and (2) the design associated with
+  /* Nested interrupts are not supported in this implementation.  If you
+   * want to implement nested interrupts, you would have to (1) change the
+   * way that CURRENT_REGS is handled and (2) the design associated with
    * CONFIG_ARCH_INTERRUPTSTACK.  The savestate variable will not work for
    * that purpose as implemented here because only the outermost nested
    * interrupt can result in a context switch.
