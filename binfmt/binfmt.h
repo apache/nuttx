@@ -61,9 +61,10 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* This is a list of registered handlers for different binary formats.  This
- * list should only be accessed by normal user programs.  It should be sufficient
- * protection to simply disable pre-emption when accessing this list.
+/* This is a list of registered handlers for different binary formats.
+ * This list should only be accessed by normal user programs.  It should be
+ * sufficient protection to simply disable pre-emption when accessing this
+ * list.
  */
 
 EXTERN FAR struct binfmt_s *g_binfmts;

@@ -97,7 +97,8 @@ static int g_exec_nsymbols;
  *
  * Input Parameters:
  *   symtab - The location to store the symbol table.
- *   nsymbols - The location to store the number of symbols in the symbol table.
+ *   nsymbols - The location to store the number of symbols in the symbol
+ *   table.
  *
  * Returned Value:
  *   None
