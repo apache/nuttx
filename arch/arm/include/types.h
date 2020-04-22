@@ -98,13 +98,13 @@ typedef signed int         _ssize_t;
 typedef unsigned int       _size_t;
 #endif
 
-/* This is the size of the interrupt state save returned by up_irq_save().  For
- * ARM, a 32 register value is returned, for the thumb2, Cortex-M3, the 16-bit
- * primask register value is returned,
+/* This is the size of the interrupt state save returned by up_irq_save().
+ * For ARM, a 32 register value is returned, for the thumb2, Cortex-M3,
+ * the 16-bit primask register value is returned,
  */
 
 #ifdef __thumb2__
-#if defined(CONFIG_ARMV7M_USEBASEPRI) || defined(CONFIG_ARCH_ARMV6M)
+#if defined(CONFIG_ARMV7M_USEBASEPRI) || defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARMV8M_USEBASEPRI)
 typedef unsigned char      irqstate_t;
 #else
 typedef unsigned short     irqstate_t;

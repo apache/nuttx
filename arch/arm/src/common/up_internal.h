@@ -97,7 +97,7 @@
  * some configurations.
  */
 
-#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M)
+#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 
   /* If the floating point unit is present and enabled, then save the
    * floating point registers as well as normal ARM registers.  This only
@@ -128,8 +128,9 @@
 #  endif
 #  define up_restorestate(regs) (CURRENT_REGS = regs)
 
-/* Otherwise, for the ARM7 and ARM9.  The state is copied in full from stack
- * to stack.  This is not very efficient and should be fixed to match Cortex-A5.
+/* Otherwise, for the ARM7 and ARM9.  The state is copied in full from
+ * stack to stack. This is not very efficient and should be fixed to
+ * match Cortex-A5.
  */
 
 #else
@@ -234,14 +235,14 @@ EXTERN uint32_t g_intstackalloc; /* Allocated stack base */
 EXTERN uint32_t g_intstackbase;  /* Initial top of interrupt stack */
 #endif
 
-/* These 'addresses' of these values are setup by the linker script.  They are
- * not actual uint32_t storage locations! They are only used meaningfully in the
- * following way:
+/* These 'addresses' of these values are setup by the linker script.
+ * They are not actual uint32_t storage locations! They are only used
+ * meaningfully in the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
  *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32_t variable _data (it is
- *    not!).
+ *    that the value _sdata is the address of a uint32_t variable _data (it
+ *    is not!).
  *  - We can recoved the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
@@ -254,9 +255,9 @@ EXTERN uint32_t _edata;           /* End+1 of .data */
 EXTERN uint32_t _sbss;            /* Start of .bss */
 EXTERN uint32_t _ebss;            /* End+1 of .bss */
 
-/* Sometimes, functions must be executed from RAM.  In this case, the following
- * macro may be used (with GCC!) to specify a function that will execute from
- * RAM.  For example,
+/* Sometimes, functions must be executed from RAM.  In this case, the
+ * following macro may be used (with GCC!) to specify a function that
+ * will execute from RAM.  For example,
  *
  *   int __ramfunc__ foo (void);
  *   int __ramfunc__ foo (void) { return bar; }
@@ -301,7 +302,7 @@ EXTERN uint32_t _eramfuncs;       /* Copy destination end address in RAM */
 
 #ifndef __ASSEMBLY__
 
-/* Low level initialization provided by board-level logic ******************/
+/* Low level initialization provided by board-level logic *******************/
 
 void arm_boot(void);
 
@@ -332,7 +333,7 @@ void up_pminitialize(void);
 
 /* Exception handling logic unique to the Cortex-M family */
 
-#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M)
+#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 
 /* Interrupt acknowledge and dispatch */
 
@@ -344,7 +345,7 @@ uint32_t *up_doirq(int irq, uint32_t *regs);
 int  up_svcall(int irq, FAR void *context, FAR void *arg);
 int  up_hardfault(int irq, FAR void *context, FAR void *arg);
 
-#  if defined(CONFIG_ARCH_ARMV7M)
+#  if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 
 int  up_memfault(int irq, FAR void *context, FAR void *arg);
 
@@ -474,10 +475,10 @@ void up_wdtinit(void);
 
 /* Networking ***************************************************************/
 
-/* Defined in board/xyz_network.c for board-specific Ethernet implementations,
- * or chip/xyx_ethernet.c for chip-specific Ethernet implementations, or
- * common/up_etherstub.c for a corner case where the network is enabled yet
- * there is no Ethernet driver to be initialized.
+/* Defined in board/xyz_network.c for board-specific Ethernet
+ * implementations, or chip/xyx_ethernet.c for chip-specific Ethernet
+ * implementations, orcommon/up_etherstub.c for a corner case where the
+ * network is enabled yetthere is no Ethernet driver to be initialized.
  *
  * Use of common/up_etherstub.c is deprecated.  The preferred mechanism is to
  * use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize() in
