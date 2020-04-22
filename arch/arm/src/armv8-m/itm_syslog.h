@@ -1,8 +1,10 @@
 /****************************************************************************
- * arch/arm/include/setjmp.h
+ * arch/arm/src/armv8-m/itm_syslog.h
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: David S. Alessio <David@DSA.Consulting>
+ *   Copyright (C) 2014 Pierre-noel Bouteville . All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Authors: Pierre-noel Bouteville <pnb990@gmail.com>
+ *            Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,72 +35,32 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_SETJUMP_H
-#define __ARCH_ARM_INCLUDE_SETJUMP_H
+#ifndef __ARCH_ARM_SRC_ARMV8_M_ITM_SYSLOG_H
+#define __ARCH_ARM_SRC_ARMV8_M_ITM_SYSLOG_H
 
 /****************************************************************************
- * Included Files
+ * Public Functions
  ****************************************************************************/
-
-#include <nuttx/config.h>
 
 /****************************************************************************
- * Public Types
+ * Name: itm_syslog_initialize
+ *
+ * Description:
+ *   Performs ARM-specific initialize for the ITM SYSLOG functions.
+ *   Additional, board specific logic may be required to:
+ *
+ *   - Enable/configured serial wire output pins
+ *   - Enable debug clocking.
+ *
+ *   Those operations must be performed by MCU-specific logic before this
+ *   function is called.
+ *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
-struct setjmp_buf_s
-{
-  /* Note: core registers r0-r3 are caller-saved */
-
-  unsigned r4;
-  unsigned r5;
-  unsigned r6;
-  unsigned r7;
-  unsigned r8;
-  unsigned r9;
-  unsigned r10;
-  unsigned r11;
-  unsigned ip; /* this is really sp */
-  unsigned lr;
-
-#ifdef CONFIG_ARCH_FPU
-  /* note: FPU registers s0-s15 are caller-saved */
-
-  float    s16;
-  float    s17;
-  float    s18;
-  float    s19;
-  float    s20;
-  float    s21;
-  float    s22;
-  float    s23;
-  float    s24;
-  float    s25;
-  float    s26;
-  float    s27;
-  float    s28;
-  float    s29;
-  float    s30;
-  float    s31;
-
-  unsigned fpscr;
-#endif
-};
-
-/* Traditional typedef for setjmp_buf */
-
-typedef struct setjmp_buf_s jmp_buf[1];
-
+#ifdef CONFIG_ARMV8M_ITMSYSLOG
+void itm_syslog_initialize(void);
 #else
-#  error "setjmp() not compiled!"
-#endif /* CONFIG_ARCH_ARMV7M */
+#  define itm_syslog_initialize()
+#endif
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-int setjmp(jmp_buf env);
-void longjmp(jmp_buf env, int val) noreturn_function;
-
-#endif /* __ARCH_ARM_INCLUDE_SETJUMP_H */
+#endif /* __ARCH_ARM_SRC_ARMV8_M_ITM_SYSLOG_H */

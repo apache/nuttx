@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/arm/include/setjmp.h
+ * arch/arm/src/armv8-m/up_vectors.c
  *
- *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
- *   Author: David S. Alessio <David@DSA.Consulting>
+ *   Copyright (C) 2012 Michael Smith. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,72 +32,61 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_SETJUMP_H
-#define __ARCH_ARM_INCLUDE_SETJUMP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#include "chip.h"
+#include "up_internal.h"
 
-#if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
-struct setjmp_buf_s
-{
-  /* Note: core registers r0-r3 are caller-saved */
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
 
-  unsigned r4;
-  unsigned r5;
-  unsigned r6;
-  unsigned r7;
-  unsigned r8;
-  unsigned r9;
-  unsigned r10;
-  unsigned r11;
-  unsigned ip; /* this is really sp */
-  unsigned lr;
+#define IDLE_STACK      ((unsigned)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
 
-#ifdef CONFIG_ARCH_FPU
-  /* note: FPU registers s0-s15 are caller-saved */
-
-  float    s16;
-  float    s17;
-  float    s18;
-  float    s19;
-  float    s20;
-  float    s21;
-  float    s22;
-  float    s23;
-  float    s24;
-  float    s25;
-  float    s26;
-  float    s27;
-  float    s28;
-  float    s29;
-  float    s30;
-  float    s31;
-
-  unsigned fpscr;
+#ifndef ARMV8M_PERIPHERAL_INTERRUPTS
+#  error ARMV8M_PERIPHERAL_INTERRUPTS must be defined to the number of I/O interrupts to be supported
 #endif
-};
-
-/* Traditional typedef for setjmp_buf */
-
-typedef struct setjmp_buf_s jmp_buf[1];
-
-#else
-#  error "setjmp() not compiled!"
-#endif /* CONFIG_ARCH_ARMV7M */
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-int setjmp(jmp_buf env);
-void longjmp(jmp_buf env, int val) noreturn_function;
+/* Chip-specific entrypoint */
 
-#endif /* __ARCH_ARM_INCLUDE_SETJUMP_H */
+extern void __start(void);
+
+/* Common exception entrypoint */
+
+extern void exception_common(void);
+
+/************************************************************************************
+ * Public data
+ ************************************************************************************/
+
+/* The v7m vector table consists of an array of function pointers, with the first
+ * slot (vector zero) used to hold the initial stack pointer.
+ *
+ * As all exceptions (interrupts) are routed via exception_common, we just need to
+ * fill this array with pointers to it.
+ *
+ * Note that the [ ... ] designated initialiser is a GCC extension.
+ */
+
+unsigned _vectors[] __attribute__((section(".vectors"))) =
+{
+  /* Initial stack */
+
+  IDLE_STACK,
+
+  /* Reset exception handler */
+
+  (unsigned)&__start,
+
+  /* Vectors 2 - n point directly at the generic handler */
+
+  [2 ... (15 + ARMV8M_PERIPHERAL_INTERRUPTS)] = (unsigned)&exception_common
+};
