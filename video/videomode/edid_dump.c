@@ -209,9 +209,11 @@ void edid_dump(FAR const struct edid_info_s *edid)
   if (edid->edid_have_range)
     {
       syslog(LOG_INFO, "%-16sHorizontal: %d - %d kHz\n",
-             "Range:", edid->edid_range.er_min_hfreq, edid->edid_range.er_max_hfreq);
+             "Range:", edid->edid_range.er_min_hfreq,
+              edid->edid_range.er_max_hfreq);
       syslog(LOG_INFO, "%-16sVertical: %d - %d Hz\n",
-             "", edid->edid_range.er_min_vfreq, edid->edid_range.er_max_vfreq);
+             "", edid->edid_range.er_min_vfreq,
+             edid->edid_range.er_max_vfreq);
       syslog(LOG_INFO, "%-16sMax Dot Clock: %d MHz\n",
              "", edid->edid_range.er_max_clock);
       if (edid->edid_range.er_have_gtf2)
