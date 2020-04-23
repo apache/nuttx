@@ -139,11 +139,13 @@ static int audio_comp_release(FAR struct audio_lowerhalf_s *dev);
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static void audio_comp_callback(FAR void *arg, uint16_t reason,
-                                FAR struct ap_buffer_s *apb, uint16_t status,
+                                FAR struct ap_buffer_s *apb,
+                                uint16_t status,
                                 FAR void *session);
 #else
 static void audio_comp_callback(FAR void *arg, uint16_t reason,
-                                FAR struct ap_buffer_s *apb, uint16_t status);
+                                FAR struct ap_buffer_s *apb,
+                                uint16_t status);
 #endif
 
 /****************************************************************************
@@ -597,7 +599,7 @@ static int audio_comp_freebuffer(FAR struct audio_lowerhalf_s *dev,
 
   if (ret == -ENOTTY)
     {
-      apb_free(bufdesc->u.pBuffer);
+      apb_free(bufdesc->u.buffer);
       ret = sizeof(*bufdesc);
     }
 

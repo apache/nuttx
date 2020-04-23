@@ -319,7 +319,9 @@ int elf_symvalue(FAR struct elf_loadinfo_s *loadinfo, FAR Elf_Sym *sym,
             return -ENOENT;
           }
 
-        /* Yes... add the exported symbol value to the ELF symbol table entry */
+        /* Yes... add the exported symbol value to the ELF symbol table
+         * entry
+         */
 
         binfo("SHN_UNDEF: name=%s %08x+%08x=%08x\n",
               loadinfo->iobuffer, sym->st_value, symbol->sym_value,

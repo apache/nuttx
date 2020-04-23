@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/armv7-m/up_svcall.c
  *
- *   Copyright (C) 2009, 2011-2015, 2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -96,33 +81,34 @@ static void dispatch_syscall(void) naked_function;
 static void dispatch_syscall(void)
 {
   __asm__ __volatile__
-  (
-    /* Create a stack frame to hold 3 parameters + LR and SP adjustment value.
-     * Also, Ensure 8 bytes alignment. We use IP as a scratch.
-     *
-     * NOTE: new_SP = (orig_SP - 20) & ~7
-     *              = orig_SP - 20 - ((orig_SP - 20) & ~7)
-     */
-    " mov ip, sp\n"                /* Calculate (orig_SP - new_SP) */
-    " sub ip, ip, #20\n"
-    " and ip, ip, #7\n"
-    " add ip, ip, #20\n"
-    " sub sp, sp, ip\n"
-    " str r4, [sp, #0]\n"          /* Move parameter 4 (if any) into position */
-    " str r5, [sp, #4]\n"          /* Move parameter 5 (if any) into position */
-    " str r6, [sp, #8]\n"          /* Move parameter 6 (if any) into position */
-    " str lr, [sp, #12]\n"         /* Save lr in the stack frame */
-    " str ip, [sp, #16]\n"         /* Save (orig_SP - new_SP) value */
-    " ldr ip, =g_stublookup\n"     /* R12=The base of the stub lookup table */
-    " ldr ip, [ip, r0, lsl #2]\n"  /* R12=The address of the stub for this syscall */
-    " blx ip\n"                    /* Call the stub (modifies lr) */
-    " ldr lr, [sp, #12]\n"         /* Restore lr */
-    " ldr r2, [sp, #16]\n"         /* Restore (orig_SP - new_SP) value */
-    " add sp, sp, r2\n"            /* Restore SP */
-    " mov r2, r0\n"                /* R2=Save return value in R2 */
-    " mov r0, #3\n"                /* R0=SYS_syscall_return */
-    " svc 0"                       /* Return from the syscall */
-  );
+    (
+      /* Create a stack frame to hold 3 parameters + LR and SP adjustment
+       * value.  Also, Ensure 8 bytes alignment. We use IP as a scratch.
+       *
+       * NOTE: new_SP = (orig_SP - 20) & ~7
+       *              = orig_SP - 20 - ((orig_SP - 20) & ~7)
+       */
+
+      " mov ip, sp\n"                /* Calculate (orig_SP - new_SP) */
+      " sub ip, ip, #20\n"
+      " and ip, ip, #7\n"
+      " add ip, ip, #20\n"
+      " sub sp, sp, ip\n"
+      " str r4, [sp, #0]\n"          /* Move parameter 4 (if any) into position */
+      " str r5, [sp, #4]\n"          /* Move parameter 5 (if any) into position */
+      " str r6, [sp, #8]\n"          /* Move parameter 6 (if any) into position */
+      " str lr, [sp, #12]\n"         /* Save lr in the stack frame */
+      " str ip, [sp, #16]\n"         /* Save (orig_SP - new_SP) value */
+      " ldr ip, =g_stublookup\n"     /* R12=The base of the stub lookup table */
+      " ldr ip, [ip, r0, lsl #2]\n"  /* R12=The address of the stub for this syscall */
+      " blx ip\n"                    /* Call the stub (modifies lr) */
+      " ldr lr, [sp, #12]\n"         /* Restore lr */
+      " ldr r2, [sp, #16]\n"         /* Restore (orig_SP - new_SP) value */
+      " add sp, sp, r2\n"            /* Restore SP */
+      " mov r2, r0\n"                /* R2=Save return value in R2 */
+      " mov r0, #3\n"                /* R0=SYS_syscall_return */
+      " svc 0"                       /* Return from the syscall */
+    );
 }
 #endif
 
@@ -200,17 +186,19 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
 
       /* R0=SYS_restore_context:  This a restore context command:
        *
-       *   void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+       *   void up_fullcontextrestore(uint32_t *restoreregs)
+       *          noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
        *   R0 = SYS_restore_context
        *   R1 = restoreregs
        *
-       * In this case, we simply need to set CURRENT_REGS to restore register
-       * area referenced in the saved R1. context == CURRENT_REGS is the normal
-       * exception return.  By setting CURRENT_REGS = context[R1], we force
-       * the return to the saved context referenced in R1.
+       * In this case, we simply need to set CURRENT_REGS to restore
+       * register area referenced in the saved R1. context == CURRENT_REGS
+       * is the normal exception return.  By setting CURRENT_REGS =
+       * context[R1], we force the return to the saved context referenced
+       * in R1.
        */
 
       case SYS_restore_context:
@@ -277,8 +265,8 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
           regs[REG_EXC_RETURN] = rtcb->xcp.syscall[index].excreturn;
           rtcb->xcp.nsyscalls  = index;
 
-          /* The return value must be in R0-R1.  dispatch_syscall() temporarily
-           * moved the value for R0 into R2.
+          /* The return value must be in R0-R1.  dispatch_syscall()
+           * temporarily moved the value for R0 into R2.
            */
 
           regs[REG_R0]         = regs[REG_R2];
@@ -295,7 +283,8 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
 
       /* R0=SYS_task_start:  This a user task start
        *
-       *   void up_task_start(main_t taskentry, int argc, FAR char *argv[]) noreturn_function;
+       *   void up_task_start(main_t taskentry, int argc, FAR char *argv[])
+       *          noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
@@ -328,7 +317,8 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
 
       /* R0=SYS_pthread_start:  This a user pthread start
        *
-       *   void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg) noreturn_function;
+       *   void up_pthread_start(pthread_startroutine_t entrypt,
+       *                         pthread_addr_t arg) noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
@@ -469,7 +459,9 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
         break;
     }
 
-  /* Report what happened.  That might difficult in the case of a context switch */
+  /* Report what happened.  That might difficult in the case of a context
+   * switch.
+   */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
 # ifndef CONFIG_DEBUG_SVCALL

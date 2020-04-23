@@ -53,6 +53,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Access macros ************************************************************/
 
 /****************************************************************************
@@ -261,6 +262,7 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* Transfer complete callbacks */
 
 struct i2s_dev_s;
@@ -273,27 +275,36 @@ struct i2s_ops_s
 {
   /* Receiver methods */
 
-  CODE int      (*i2s_rxchannels)(FAR struct i2s_dev_s *dev, uint8_t channels);
-  CODE uint32_t (*i2s_rxsamplerate)(FAR struct i2s_dev_s *dev, uint32_t rate);
-  CODE uint32_t (*i2s_rxdatawidth)(FAR struct i2s_dev_s *dev, int bits);
+  CODE int      (*i2s_rxchannels)(FAR struct i2s_dev_s *dev,
+                                  uint8_t channels);
+  CODE uint32_t (*i2s_rxsamplerate)(FAR struct i2s_dev_s *dev,
+                                    uint32_t rate);
+  CODE uint32_t (*i2s_rxdatawidth)(FAR struct i2s_dev_s *dev,
+                                   int bits);
   CODE int      (*i2s_receive)(FAR struct i2s_dev_s *dev,
-                  FAR struct ap_buffer_s *apb, i2s_callback_t callback,
-                  FAR void *arg, uint32_t timeout);
+                               FAR struct ap_buffer_s *apb,
+                               i2s_callback_t callback,
+                               FAR void *arg,
+                               uint32_t timeout);
 
   /* Transmitter methods */
 
-  CODE int      (*i2s_txchannels)(FAR struct i2s_dev_s *dev, uint8_t channels);
-  CODE uint32_t (*i2s_txsamplerate)(FAR struct i2s_dev_s *dev, uint32_t rate);
-  CODE uint32_t (*i2s_txdatawidth)(FAR struct i2s_dev_s *dev, int bits);
+  CODE int      (*i2s_txchannels)(FAR struct i2s_dev_s *dev,
+                                  uint8_t channels);
+  CODE uint32_t (*i2s_txsamplerate)(FAR struct i2s_dev_s *dev,
+                                    uint32_t rate);
+  CODE uint32_t (*i2s_txdatawidth)(FAR struct i2s_dev_s *dev,
+                                   int bits);
   CODE int      (*i2s_send)(FAR struct i2s_dev_s *dev,
-                  FAR struct ap_buffer_s *apb, i2s_callback_t callback,
-                  FAR void *arg, uint32_t timeout);
+                            FAR struct ap_buffer_s *apb,
+                            i2s_callback_t callback,
+                            FAR void *arg,
+                            uint32_t timeout);
 
   /* Ioctl */
 
   CODE int      (*i2s_ioctl)(FAR struct i2s_dev_s *dev,
                              int cmd, unsigned long arg);
-
 };
 
 /* I2S private data.  This structure only defines the initial fields of the
@@ -320,7 +331,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************

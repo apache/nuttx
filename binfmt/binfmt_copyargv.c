@@ -103,19 +103,23 @@ int binfmt_copyargv(FAR struct binary_s *bin, FAR char * const *argv)
 
       for (i = 0; argv[i]; i++)
         {
-          /* Increment the size of the allocation with the size of the next string */
+          /* Increment the size of the allocation with the size of the next
+           * string
+           */
 
           argsize += (strlen(argv[i]) + 1);
           nargs++;
 
-          /* This is a sanity check to prevent running away with an unterminated
-           * argv[] list.  MAX_EXEC_ARGS should be sufficiently large that this
+          /* This is a sanity check to prevent running away with an
+           * unterminated argv[] list.
+           * MAX_EXEC_ARGS should be sufficiently large that this
            * never happens in normal usage.
            */
 
           if (nargs > MAX_EXEC_ARGS)
             {
-              berr("ERROR: Too many arguments: %lu\n", (unsigned long)argvsize);
+              berr("ERROR: Too many arguments: %lu\n",
+                   (unsigned long)argvsize);
               return -E2BIG;
             }
         }

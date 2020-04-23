@@ -55,14 +55,22 @@
 
 #include "chip.h"
 
+#ifdef CONFIG_STM32H7_PWM
+#  include <arch/board/board.h>
+#  include "hardware/stm32_tim.h"
+#endif
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
+
 /* Timer devices may be used for different purposes.  One special purpose is
- * to generate modulated outputs for such things as motor control.  If CONFIG_STM32H7_TIMn
- * is defined then the CONFIG_STM32H7_TIMn_PWM must also be defined to indicate that
- * timer "n" is intended to be used for pulsed output signal generation.
+ * to generate modulated outputs for such things as motor control.
+ * If CONFIG_STM32H7_TIMn is defined then the CONFIG_STM32H7_TIMn_PWM must also be
+ * defined to indicate that timer "n" is intended to be used for pulsed output
+ * signal generation.
  */
 
 #ifndef CONFIG_STM32H7_TIM1
@@ -110,9 +118,6 @@
 /* Check if PWM support for any channel is enabled. */
 
 #ifdef CONFIG_STM32H7_PWM
-
-#include <arch/board/board.h>
-#include "hardware/stm32_tim.h"
 
 /* PWM driver channels configuration */
 
@@ -829,10 +834,10 @@
 #define PWM_TIM_ENABLE(dev, state)                                                 \
         (dev)->llops->tim_enable((FAR struct pwm_lowerhalf_s *)dev, state)
 #ifdef CONFIG_DEBUG_PWM_INFO
-#  define PWM_DUMP_REGS(dev)                                                       \
-        (dev)->llops->dump_regs((FAR struct pwm_lowerhalf_s *)dev)
+#  define PWM_DUMP_REGS(dev, msg)                                 \
+  (dev)->llops->dump_regs((FAR struct pwm_lowerhalf_s *)dev, msg)
 #else
-#  define PWM_DUMP_REGS(dev)
+#  define PWM_DUMP_REGS(dev, msg)
 #endif
 #define PWM_DT_UPDATE(dev, dt)                                                     \
         (dev)->llops->dt_update((FAR struct pwm_lowerhalf_s *)dev, dt)
@@ -915,13 +920,18 @@ enum stm32_pwm_output_e
   STM32_PWM_OUT3  = (1 << 4),
   STM32_PWM_OUT3N = (1 << 5),
   STM32_PWM_OUT4  = (1 << 6),
+
   /* 1 << 7 reserved - no complementary output for CH4 */
+
 #ifdef HAVE_IP_TIMERS_V2
   /* Only available inside micro */
 
   STM32_PWM_OUT5  = (1 << 8),
+
   /* 1 << 9 reserved - no complementary output for CH5 */
+
   STM32_PWM_OUT6  = (1 << 10),
+
   /* 1 << 11 reserved - no complementary output for CH6 */
 #endif
 };
@@ -974,7 +984,8 @@ struct stm32_pwm_ops_s
 
   /* Enable outputs */
 
-  int (*outputs_enable)(FAR struct pwm_lowerhalf_s *dev, uint16_t outputs, bool state);
+  int (*outputs_enable)(FAR struct pwm_lowerhalf_s *dev, uint16_t outputs,
+                        bool state);
 
   /* Software update */
 
@@ -999,7 +1010,7 @@ struct stm32_pwm_ops_s
 #ifdef CONFIG_DEBUG_PWM_INFO
   /* Dump timer registers */
 
-  int (*dump_regs)(FAR struct pwm_lowerhalf_s *dev);
+  void (*dump_regs)(FAR struct pwm_lowerhalf_s *dev, FAR const char *msg);
 #endif
 
 #ifdef HAVE_PWM_COMPLEMENTARY
@@ -1027,7 +1038,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 /************************************************************************************

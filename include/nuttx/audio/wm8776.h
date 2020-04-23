@@ -61,7 +61,6 @@ struct wm8776_lower_s
   uint8_t  address;    /* 7-bit I2C address (only bits 0-6 used) */
 };
 
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -86,7 +85,6 @@ FAR struct audio_lowerhalf_s *
   wm8776_initialize(FAR struct i2c_master_s *i2c,
                     FAR struct i2s_dev_s *i2s,
                     FAR const struct wm8776_lower_s *lower);
-
 
 #undef EXTERN
 #ifdef __cplusplus

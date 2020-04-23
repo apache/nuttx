@@ -169,8 +169,8 @@ int elf_readsym(FAR struct elf_loadinfo_s *loadinfo, int index,
  *   0 (OK) is returned on success and a negated errno is returned on
  *   failure.
  *
- *   EINVAL - There is something inconsistent in the symbol table (should only
- *            happen if the file is corrupted)
+ *   EINVAL - There is something inconsistent in the symbol table (should
+ *            only happen if the file is corrupted)
  *   ENOSYS - Symbol lies in common
  *   ESRCH  - Symbol has no name
  *   ENOENT - Symbol undefined and not provided via a symbol table
@@ -265,12 +265,13 @@ int elf_loaddtors(FAR struct elf_loadinfo_s *loadinfo);
  * Name: elf_addrenv_alloc
  *
  * Description:
- *   Allocate memory for the ELF image (textalloc and dataalloc). If
- *   CONFIG_ARCH_ADDRENV=n, textalloc will be allocated using kmm_zalloc() and
- *   dataalloc will be a offset from textalloc.  If CONFIG_ARCH_ADDRENV-y, then
- *   textalloc and dataalloc will be allocated using up_addrenv_create().  In
- *   either case, there will be a unique instance of textalloc and dataalloc
- *   (and stack) for each instance of a process.
+ *   Allocate memory for the ELF image (textalloc and dataalloc).
+ *   If CONFIG_ARCH_ADDRENV=n, textalloc will be allocated using kmm_zalloc()
+ *   and dataalloc will be a offset from textalloc.
+ *   If CONFIG_ARCH_ADDRENV-y, then textalloc and dataalloc will be allocated
+ *   using up_addrenv_create().
+ *   In either case, there will be a unique instance of textalloc and
+ *   dataalloc (and stack) for each instance of a process.
  *
  * Input Parameters:
  *   loadinfo - Load state information

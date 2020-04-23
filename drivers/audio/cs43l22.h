@@ -63,6 +63,7 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
 /* So far, I have not been able to get FLL lock interrupts. Worse, I have
  * been able to get the FLL to claim that it is locked at all even when
  * polling.  What am I doing wrong?
@@ -120,8 +121,9 @@
 #define CS43L22_SPKAMUTE           (1 << 4)
 
 /* Register Default Values **************************************************/
-/* Registers have some undocumented bits set on power up.  These probably
- * should be retained on writes (?).
+
+/* Registers have some undocumented bits set on power up.
+ * These probably should be retained on writes (?).
  */
 
 #define CS43L22_ID_REV_DEFAULT             0xe3 /* Chip I.D. and Revision */
@@ -179,33 +181,41 @@
 /* 0x04 Power Control 2 */
 #define CS43L22_PDN_HPB_SHIFT         (6)                          /* Bits 6-7: Headphone channel B Control */
 #define CS43L22_PDN_HPB_ON_HW_PIN_LO  (0 << CS43L22_PDN_HPB_SHIFT) /* PDN_HPx[1:0] 00 Headphone channel is ON when the SPK/HP_SW pin, 6, is LO
-                                                                                      Headphone channel is OFF when the SPK/HP_SW pin, 6, is HI */
+                                                                    *                 Headphone channel is OFF when the SPK/HP_SW pin, 6, is HI
+                                                                    */
 #define CS43L22_PDN_HPB_ON_HW_PIN_HI  (1 << CS43L22_PDN_HPB_SHIFT) /* PDN_HPx[1:0] 01 Headphone channel is ON when the SPK/HP_SW pin, 6, is HI
-                                                                                      Headphone channel is OFF when the SPK/HP_SW pin, 6, is LO */
+                                                                    *                 Headphone channel is OFF when the SPK/HP_SW pin, 6, is LO
+                                                                    */
 #define CS43L22_PDN_HPB_ON            (2 << CS43L22_PDN_HPB_SHIFT) /* PDN_HPx[1:0] 10 Headphone channel is always ON */
 #define CS43L22_PDN_HPB_OFF           (3 << CS43L22_PDN_HPB_SHIFT) /* PDN_HPx[1:0] 11 Headphone channel is always OFF */
 
 #define CS43L22_PDN_HPA_SHIFT         (4)                          /* Bits 4-5: Headphone channel A Control */
 #define CS43L22_PDN_HPA_ON_HW_PIN_LO  (0 << CS43L22_PDN_HPA_SHIFT) /* PDN_HPx[1:0] 00 Headphone channel is ON when the SPK/HP_SW pin, 6, is LO
-                                                                                      Headphone channel is OFF when the SPK/HP_SW pin, 6, is HI */
+                                                                    *                 Headphone channel is OFF when the SPK/HP_SW pin, 6, is HI */
 #define CS43L22_PDN_HPA_ON_HW_PIN_HI  (1 << CS43L22_PDN_HPA_SHIFT) /* PDN_HPx[1:0] 01 Headphone channel is ON when the SPK/HP_SW pin, 6, is HI
-                                                                                      Headphone channel is OFF when the SPK/HP_SW pin, 6, is LO */
+                                                                    *                 Headphone channel is OFF when the SPK/HP_SW pin, 6, is LO
+                                                                    */
 #define CS43L22_PDN_HPA_ON            (2 << CS43L22_PDN_HPA_SHIFT) /* PDN_HPx[1:0] 10 Headphone channel is always ON */
 #define CS43L22_PDN_HPA_OFF           (3 << CS43L22_PDN_HPA_SHIFT) /* PDN_HPx[1:0] 11 Headphone channel is always OFF */
 
 #define CS43L22_PDN_SPKB_SHIFT        (2)                           /* Bits 2-3: Speaker channel B Control */
 #define CS43L22_PDN_SPKB_ON_HW_PIN_LO (0 << CS43L22_PDN_SPKB_SHIFT) /* PDN_HPx[1:0] 00 Speaker channel is ON when the SPK/HP_SW pin, 6, is LO
-                                                                                       Speaker channel is OFF when the SPK/HP_SW pin, 6, is HI */
+                                                                     *                 Speaker channel is OFF when the SPK/HP_SW pin, 6, is HI
+                                                                     */
+
 #define CS43L22_PDN_SPKB_ON_HW_PIN_HI (1 << CS43L22_PDN_SPKB_SHIFT) /* PDN_HPx[1:0] 01 Speaker channel is ON when the SPK/HP_SW pin, 6, is HI
-                                                                                       Speaker channel is OFF when the SPK/HP_SW pin, 6, is LO */
+                                                                     *                 Speaker channel is OFF when the SPK/HP_SW pin, 6, is LO
+                                                                     */
 #define CS43L22_PDN_SPKB_ON           (2 << CS43L22_PDN_SPKB_SHIFT) /* PDN_HPx[1:0] 10 Speaker channel is always ON */
 #define CS43L22_PDN_SPKB_OFF          (3 << CS43L22_PDN_SPKB_SHIFT) /* PDN_HPx[1:0] 11 Speaker channel is always OFF */
 
 #define CS43L22_PDN_SPKA_SHIFT        (0)                           /* Bits 0-1: Speaker channel A Control */
 #define CS43L22_PDN_SPKA_ON_HW_PIN_LO (0 << CS43L22_PDN_SPKA_SHIFT) /* PDN_HPx[1:0] 00 Speaker channel is ON when the SPK/HP_SW pin, 6, is LO
-                                                                                       Speaker channel is OFF when the SPK/HP_SW pin, 6, is HI */
+                                                                     *                 Speaker channel is OFF when the SPK/HP_SW pin, 6, is HI
+                                                                     */
 #define CS43L22_PDN_SPKA_ON_HW_PIN_HI (1 << CS43L22_PDN_SPKA_SHIFT) /* PDN_HPx[1:0] 01 Speaker channel is ON when the SPK/HP_SW pin, 6, is HI
-                                                                                       Speaker channel is OFF when the SPK/HP_SW pin, 6, is LO */
+                                                                     *                 Speaker channel is OFF when the SPK/HP_SW pin, 6, is LO
+                                                                     */
 #define CS43L22_PDN_SPKA_ON           (2 << CS43L22_PDN_SPKA_SHIFT) /* PDN_HPx[1:0] 10 Speaker channel is always ON */
 #define CS43L22_PDN_SPKA_OFF          (3 << CS43L22_PDN_SPKA_SHIFT) /* PDN_HPx[1:0] 11 Speaker channel is always OFF */
 
@@ -223,6 +233,7 @@
 #define CS43L22_VIDEOCLK_ENABLE       (1 << 3)                      /* Bit 3: Specifies whether or not the external MCLK frequency is 27 MHz */
 
 #define CS43L22_MCLK_LRCK_RATIO_SHIFT (1)                           /* Bits 1-2: Internal MCLK/LRCK Ratio */
+
 #define CS43L22_RATIO_128_64          (0 << CS43L22_MCLK_LRCK_RATIO_SHIFT)    /* RATIO[1:0] Internal MCLK Cycles per LRCK=128, SCLK/LRCK=64 Ratio in Master Mode */
 #define CS43L22_RATIO_125_62          (1 << CS43L22_MCLK_LRCK_RATIO_SHIFT)    /* RATIO[1:0] Internal MCLK Cycles per LRCK=125, SCLK/LRCK=62 Ratio in Master Mode */
 #define CS43L22_RATIO_132_66          (2 << CS43L22_MCLK_LRCK_RATIO_SHIFT)    /* RATIO[1:0] Internal MCLK Cycles per LRCK=132, SCLK/LRCK=66 Ratio in Master Mode */
@@ -237,17 +248,17 @@
 
 #define CS43L22_DSP_MODE_ENABLE       (1 << 4)                      /* Configures a data-packed interface format for the DAC */
 
-#define CS43L22_DAC_IF_FORMAT_SHIFT   (2)                           /* Bits 2-3: Configures the digital interface format for data on SDIN */
+#define CS43L22_DAC_IF_FORMAT_SHIFT   (2)                                   /* Bits 2-3: Configures the digital interface format for data on SDIN */
 #define CS43L22_DAC_IF_LEFT_JUSTIFIED (0 << CS43L22_DAC_IF_FORMAT_SHIFT)    /* DACDIF[1:0] Left Justified, up to 24-bit data */
 #define CS43L22_DAC_IF_I2S            (1 << CS43L22_DAC_IF_FORMAT_SHIFT)    /* DACDIF[1:0] I2S, up to 24-bit data */
 #define CS43L22_DAC_IF_RIGHT_JUSTIFIED (2 << CS43L22_DAC_IF_FORMAT_SHIFT)   /* DACDIF[1:0] Right Justified */
 #define CS43L22_DAC_IF_RESERVED       (3 << CS43L22_DAC_IF_FORMAT_SHIFT)    /* DACDIF[1:0] Reserved */
 
-#define CS43L22_AUDIO_WORD_LENGHT_SHIFT (0)                          /* Bits 0-1: Configures the audio sample word length used for the data into SDIN */
-#define CS43L22_AWL_DSP_32_RJ_24      (0 << CS43L22_AUDIO_WORD_LENGHT_SHIFT)/* AWL[1:0] DSP Mode: 32-bit data, Right Justified: 24-bit data */
-#define CS43L22_AWL_DSP_24_RJ_20      (1 << CS43L22_AUDIO_WORD_LENGHT_SHIFT)/* AWL[1:0] DSP Mode: 24-bit data, Right Justified: 20-bit data */
-#define CS43L22_AWL_DSP_20_RJ_18      (2 << CS43L22_AUDIO_WORD_LENGHT_SHIFT)/* AWL[1:0] DSP Mode: 20-bit data, Right Justified: 18-bit data */
-#define CS43L22_AWL_DSP_16_RJ_16      (3 << CS43L22_AUDIO_WORD_LENGHT_SHIFT)/* AWL[1:0] DSP Mode: 16 bit data, Right Justified: 16-bit data */
+#define CS43L22_AUDIO_WORD_LENGHT_SHIFT (0)                                  /* Bits 0-1: Configures the audio sample word length used for the data into SDIN */
+#define CS43L22_AWL_DSP_32_RJ_24      (0 << CS43L22_AUDIO_WORD_LENGHT_SHIFT) /* AWL[1:0] DSP Mode: 32-bit data, Right Justified: 24-bit data */
+#define CS43L22_AWL_DSP_24_RJ_20      (1 << CS43L22_AUDIO_WORD_LENGHT_SHIFT) /* AWL[1:0] DSP Mode: 24-bit data, Right Justified: 20-bit data */
+#define CS43L22_AWL_DSP_20_RJ_18      (2 << CS43L22_AUDIO_WORD_LENGHT_SHIFT) /* AWL[1:0] DSP Mode: 20-bit data, Right Justified: 18-bit data */
+#define CS43L22_AWL_DSP_16_RJ_16      (3 << CS43L22_AUDIO_WORD_LENGHT_SHIFT) /* AWL[1:0] DSP Mode: 16 bit data, Right Justified: 16-bit data */
 
 /* 0x0E Miscellaneous Controls */
 #define CS43L22_FREEZE                (1 << 3)                      /* Configures a hold on all register settings */
@@ -256,7 +267,7 @@
 /* 0x1F Tone Control */
 #define CS43L22_TREB_GAIN_SHIFT       (4)                           /* Sets the gain of the treble shelving filter */
 #define CS43L22_TREB_GAIN(a)          ((a) << CS43L22_TREB_GAIN_SHIFT)
-                                                                    /* TREB[3:0] Gain Setting:*/
+                                                                    /* TREB[3:0] Gain Setting: */
                                                                     /* 0000 +12.0 dB */
                                                                     /* ··· ··· */
                                                                     /* 0111 +1.5 dB */
@@ -267,7 +278,7 @@
 
 #define CS43L22_BASS_GAIN_SHIFT       (0)                           /* Sets the gain of the bass shelving filter */
 #define CS43L22_BASS_GAIN(a)          ((a) << CS43L22_BASS_GAIN_SHIFT)
-                                                                    /* BASS[3:0] Gain Setting:*/
+                                                                    /* BASS[3:0] Gain Setting: */
                                                                     /* 0000 +12.0 dB */
                                                                     /* ··· ··· */
                                                                     /* 0111 +1.5 dB */
@@ -276,7 +287,8 @@
                                                                     /* 1111 -10.5 dB */
                                                                     /* Step Size: 1.5 dB */
 
-/* FLL Configuration *********************************************************/
+/* FLL Configuration ********************************************************/
+
 /* Default FLL configuration */
 
 #define CS43L22_DEFAULT_SAMPRATE      11025     /* Initial sample rate */
@@ -312,8 +324,9 @@ struct cs43l22_dev_s
   /* We are an audio lower half driver (We are also the upper "half" of
    * the CS43L22 driver with respect to the board lower half driver).
    *
-   * Terminology: Our "lower" half audio instances will be called dev for the
-   * publicly visible version and "priv" for the version that only this driver
+   * Terminology:
+   * Our "lower" half audio instances will be called dev for the publicly
+   * visible version and "priv" for the version that only this driver
    * knows.  From the point of view of this driver, it is the board lower
    * "half" that is referred to as "lower".
    */
@@ -363,7 +376,7 @@ struct cs43l22_dev_s
  ****************************************************************************/
 
 #ifdef CONFIG_CS43L22_CLKDEBUG
-extern const uint8_t g_sysclk_scaleb1[CS43L22_BCLK_MAXDIV+1];
+extern const uint8_t g_sysclk_scaleb1[CS43L22_BCLK_MAXDIV + 1];
 extern const uint8_t g_fllratio[CS43L22_NFLLRATIO];
 #endif
 

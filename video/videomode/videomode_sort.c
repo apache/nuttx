@@ -202,7 +202,8 @@ void sort_videomodes(FAR struct videomode_s *modes,
                   tmpmode = &modes[i];
                 }
 
-              if (atemp == abest || _abs(abest - atemp) <= (abest / 8))
+              if (atemp == abest ||
+                  _abs(abest - atemp) <= (abest / 8))
                 {
                   if (modes[i].hdisplay > hbest)
                     {
@@ -210,7 +211,8 @@ void sort_videomodes(FAR struct videomode_s *modes,
                       tmpmode = &modes[i];
                     }
 
-                  if (modes[i].hdisplay == hbest && modes[i].vdisplay > vbest)
+                  if (modes[i].hdisplay ==
+                      hbest && modes[i].vdisplay > vbest)
                     {
                       vbest = modes[i].vdisplay;
                       tmpmode = &modes[i];

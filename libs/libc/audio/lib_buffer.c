@@ -104,17 +104,17 @@ int apb_alloc(FAR struct audio_buf_desc_s *bufdesc)
   int                 ret;
   struct ap_buffer_s  *apb;
 
-  DEBUGASSERT(bufdesc->u.ppBuffer != NULL);
+  DEBUGASSERT(bufdesc->u.pbuffer != NULL);
 
   /* Perform a user mode allocation */
 
   bufsize = sizeof(struct ap_buffer_s) + bufdesc->numbytes;
   apb = lib_umalloc(bufsize);
-  *bufdesc->u.ppBuffer = apb;
+  *bufdesc->u.pbuffer = apb;
 
   /* Test if the allocation was successful or not */
 
-  if (*bufdesc->u.ppBuffer == NULL)
+  if (*bufdesc->u.pbuffer == NULL)
     {
       ret = -ENOMEM;
     }

@@ -932,14 +932,13 @@
 #define PWM_TIM_ENABLE(dev, state)                                                 \
         (dev)->llops->tim_enable((FAR struct pwm_lowerhalf_s *)dev, state)
 #ifdef CONFIG_DEBUG_PWM_INFO
-#  define PWM_DUMP_REGS(dev)                                                       \
-        (dev)->llops->dump_regs((FAR struct pwm_lowerhalf_s *)dev)
+#  define PWM_DUMP_REGS(dev, msg)                                                  \
+        (dev)->llops->dump_regs((FAR struct pwm_lowerhalf_s *)dev, msg)
 #else
-#  define PWM_DUMP_REGS(dev)
+#  define PWM_DUMP_REGS(dev, msg)
 #endif
 #define PWM_DT_UPDATE(dev, dt)                                                     \
         (dev)->llops->dt_update((FAR struct pwm_lowerhalf_s *)dev, dt)
-
 #endif
 
 /************************************************************************************
@@ -1108,7 +1107,7 @@ struct stm32_pwm_ops_s
 #ifdef CONFIG_DEBUG_PWM_INFO
   /* Dump timer registers */
 
-  int (*dump_regs)(FAR struct pwm_lowerhalf_s *dev);
+  void (*dump_regs)(FAR struct pwm_lowerhalf_s *dev, FAR const char *msg);
 #endif
 
 #ifdef HAVE_PWM_COMPLEMENTARY

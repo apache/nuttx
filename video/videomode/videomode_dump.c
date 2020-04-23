@@ -111,8 +111,12 @@ void videomode_dump(FAR const char *prefix,
         {
           syslog(LOG_INFO, " (%lu %u %u %u %u %u %u",
                  (unsigned long)videomode->dotclock,
-                 videomode->hsync_start, videomode->hsync_end, videomode->htotal,
-                 videomode->vsync_start, videomode->vsync_end, videomode->vtotal);
+                 videomode->hsync_start,
+                 videomode->hsync_end,
+                 videomode->htotal,
+                 videomode->vsync_start,
+                 videomode->vsync_end,
+                 videomode->vtotal);
           syslog(LOG_INFO, " %s%sH %s%sV)\n",
                  videomode->flags & VID_PHSYNC ? "+" : "",
                  videomode->flags & VID_NHSYNC ? "-" : "",

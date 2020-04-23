@@ -84,10 +84,11 @@ struct wm8776_dev_s
   /* We are an audio lower half driver (We are also the upper "half" of
    * the WM8776 driver with respect to the board lower half driver).
    *
-   * Terminology: Our "lower" half audio instances will be called dev for the
-   * publicly visible version and "priv" for the version that only this driver
-   * knows.  From the point of view of this driver, it is the board lower
-   * "half" that is referred to as "lower".
+   * Terminology:
+   * Our "lower" half audio instances will be called dev for the publicly
+   * visible version and "priv" for the version that only this driver knows
+   * From the point of view of this driver, it is the board lower "half"
+   * that is referred to as "lower".
    */
 
   struct audio_lowerhalf_s dev;             /* WM8776 audio lower half (this device) */
