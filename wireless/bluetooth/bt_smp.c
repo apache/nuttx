@@ -12,30 +12,31 @@
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS
+ * ; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -276,7 +277,7 @@ static const uint8_t g_key[] =
   0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c
 };
 
-static const uint8_t g_M[] =
+static const uint8_t g_m[] =
 {
   0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96,
   0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a,
@@ -366,7 +367,8 @@ static int le_encrypt(const uint8_t key[16], const uint8_t plaintext[16],
 {
   FAR struct bt_hci_cp_le_encrypt_s *cp;
   FAR struct bt_hci_rp_le_encrypt_s *rp;
-  FAR struct bt_buf_s *buf, *rsp;
+  FAR struct bt_buf_s *buf;
+  FAR struct bt_buf_s *rsp;
   int err;
 
   wlinfo("key %s plaintext %s\n", h(key, 16), h(plaintext, 16));
@@ -451,9 +453,9 @@ static int smp_ah(FAR const uint8_t irk[16], FAR const uint8_t r[3],
     }
 
   /* The output of the random address function ah is: ah(h, r) = e(k, r') mod
-   * 2^24 The output of the security function e is then truncated to 24 bits by
-   * taking the least significant 24 bits of the output of e as the result of
-   * ah.
+   * 2^24 The output of the security function e is then truncated to 24 bits
+   * by taking the least significant 24 bits of the output of e as the result
+   * of ah.
    */
 
   memcpy(out, res, 3);
@@ -503,7 +505,9 @@ static int smp_c1(FAR const uint8_t k[16], FAR const uint8_t r[16],
 
   wlinfo("p2 %s\n", h(p2, 16));
 
-  xor_128((FAR struct uint128_s *)enc_data, (FAR struct uint128_s *)p2, (FAR struct uint128_s *)enc_data);
+  xor_128((FAR struct uint128_s *)enc_data,
+          (FAR struct uint128_s *)p2,
+          (FAR struct uint128_s *)enc_data);
   return le_encrypt(k, enc_data, enc_data);
 }
 
@@ -609,8 +613,8 @@ static uint8_t smp_pairing_req(FAR struct bt_conn_s *conn,
 
   rsp = bt_buf_extend(rsp_buf, sizeof(*rsp));
 
-  /* For JustWorks pairing simplify rsp parameters. TODO: needs to be reworked
-   * later on.
+  /* For JustWorks pairing simplify rsp parameters.
+   * TODO: needs to be reworked later on.
    */
 
   auth               = (req->auth_req & BT_SMP_AUTH_MASK);
@@ -650,7 +654,9 @@ static uint8_t smp_send_pairing_confirm(FAR struct bt_conn_s *conn)
   FAR struct bt_buf_s *rsp_buf;
   int err;
 
-  rsp_buf = bt_smp_create_pdu(conn, BT_SMP_CMD_PAIRING_CONFIRM, sizeof(*req));
+  rsp_buf = bt_smp_create_pdu(conn,
+                              BT_SMP_CMD_PAIRING_CONFIRM,
+                              sizeof(*req));
   if (!rsp_buf)
     {
       return BT_SMP_ERR_UNSPECIFIED;
@@ -699,6 +705,7 @@ static uint8_t smp_pairing_rsp(FAR struct bt_conn_s *conn,
   smp->remote_dist &= rsp->resp_key_dist;
 
   /* Store rsp for later use */
+
   smp->prsp[0] = BT_SMP_CMD_PAIRING_RSP;
   memcpy(smp->prsp + 1, rsp, sizeof(*rsp));
 
@@ -791,6 +798,7 @@ static uint8_t smp_pairing_random(FAR struct bt_conn_s *conn,
       uint8_t stk[16];
 
       /* No need to store master STK */
+
       err = smp_s1(smp->tk, smp->rrnd, smp->prnd, stk);
       if (err)
         {
@@ -798,6 +806,7 @@ static uint8_t smp_pairing_random(FAR struct bt_conn_s *conn,
         }
 
       /* Rand and EDiv are 0 for the STK */
+
       if (bt_conn_le_start_encryption(conn, 0, 0, stk))
         {
           wlerr("ERROR: Failed to start encryption\n");
@@ -824,6 +833,7 @@ static uint8_t smp_pairing_random(FAR struct bt_conn_s *conn,
     }
 
   /* Rand and EDiv are 0 for the STK */
+
   keys->slave_ltk.rand = 0;
   keys->slave_ltk.ediv = 0;
 
@@ -858,6 +868,7 @@ static uint8_t smp_pairing_failed(FAR struct bt_conn_s *conn,
     }
 
   /* return no error to avoid sending Pairing Failed in response */
+
   return 0;
 }
 
@@ -870,7 +881,8 @@ static void bt_smp_distribute_keys(FAR struct bt_conn_s *conn)
   keys = bt_keys_get_addr(&conn->dst);
   if (!keys)
     {
-      wlerr("ERROR: Unable to look up keys for %s\n", bt_addr_le_str(&conn->dst));
+      wlerr("ERROR: Unable to look up keys for %s\n",
+            bt_addr_le_str(&conn->dst));
       return;
     }
 
@@ -932,7 +944,8 @@ static uint8_t smp_encrypt_info(FAR struct bt_conn_s *conn,
   keys = bt_keys_get_type(BT_KEYS_LTK, &conn->dst);
   if (!keys)
     {
-      wlerr("ERROR: Unable to get keys for %s\n", bt_addr_le_str(&conn->dst));
+      wlerr("ERROR: Unable to get keys for %s\n",
+            bt_addr_le_str(&conn->dst));
       return BT_SMP_ERR_UNSPECIFIED;
     }
 
@@ -955,7 +968,8 @@ static uint8_t smp_master_ident(FAR struct bt_conn_s *conn,
   keys = bt_keys_get_type(BT_KEYS_LTK, &conn->dst);
   if (!keys)
     {
-      wlerr("ERROR: Unable to get keys for %s\n", bt_addr_le_str(&conn->dst));
+      wlerr("ERROR: Unable to get keys for %s\n",
+            bt_addr_le_str(&conn->dst));
       return BT_SMP_ERR_UNSPECIFIED;
     }
 
@@ -993,7 +1007,8 @@ static uint8_t smp_ident_info(FAR struct bt_conn_s *conn,
   keys = bt_keys_get_type(BT_KEYS_IRK, &conn->dst);
   if (!keys)
     {
-      wlerr("ERROR: Unable to get keys for %s\n", bt_addr_le_str(&conn->dst));
+      wlerr("ERROR: Unable to get keys for %s\n",
+            bt_addr_le_str(&conn->dst));
       return BT_SMP_ERR_UNSPECIFIED;
     }
 
@@ -1023,7 +1038,8 @@ static uint8_t smp_ident_addr_info(FAR struct bt_conn_s *conn,
   keys = bt_keys_get_type(BT_KEYS_IRK, &conn->dst);
   if (!keys)
     {
-      wlerr("ERROR: Unable to get keys for %s\n", bt_addr_le_str(&conn->dst));
+      wlerr("ERROR: Unable to get keys for %s\n",
+            bt_addr_le_str(&conn->dst));
       return BT_SMP_ERR_UNSPECIFIED;
     }
 
@@ -1117,7 +1133,8 @@ static void bt_smp_receive(FAR struct bt_conn_s *conn,
 
       if (buf->len != g_smp_handlers[hdr->code].expect_len)
         {
-          wlerr("ERROR: Invalid len %u for code 0x%02x\n", buf->len, hdr->code);
+          wlerr("ERROR: Invalid len %u for code 0x%02x\n",
+                buf->len, hdr->code);
           err = BT_SMP_ERR_INVALID_PARAMS;
         }
       else
@@ -1274,7 +1291,9 @@ static void array_shift(FAR const uint8_t *in, FAR uint8_t *out)
   for (i = 15; i >= 0; i--)
     {
       out[i] = in[i] << 1;
+
       /* previous byte */
+
       out[i] |= overflow;
       overflow = in[i] & 0x80 ? 1 : 0;
     }
@@ -1290,12 +1309,18 @@ static int cmac_subkey(FAR const uint8_t *key, FAR uint8_t *k1,
     [0 ... 14] = 0x00,
     [15] = 0x87,
   };
-  uint8_t zero[16] = { 0 };
+
+  uint8_t zero[16] =
+  {
+    0
+   };
+
   uint8_t *tmp = zero;
   uint8_t l[16];
   int err;
 
   /* L := AES-128(K, const_Zero) */
+
   err = le_encrypt(key, zero, tmp);
   if (err)
     {
@@ -1307,27 +1332,35 @@ static int cmac_subkey(FAR const uint8_t *key, FAR uint8_t *k1,
   wlinfo("l %s\n", h(l, 16));
 
   /* if MSB(L) == 0 K1 = L << 1 */
+
   if (!(l[0] & 0x80))
     {
       array_shift(l, k1);
+
       /* else K1 = (L << 1) XOR rb */
     }
   else
     {
       array_shift(l, k1);
-      xor_128((FAR struct uint128_s *)k1, (FAR struct uint128_s *)rb, (FAR struct uint128_s *)k1);
+      xor_128((FAR struct uint128_s *)k1,
+              (FAR struct uint128_s *)rb,
+              (FAR struct uint128_s *)k1);
     }
 
   /* if MSB(K1) == 0 K2 = K1 << 1 */
+
   if (!(k1[0] & 0x80))
     {
       array_shift(k1, k2);
+
       /* else K2 = (K1 << 1) XOR rb */
     }
   else
     {
       array_shift(k1, k2);
-      xor_128((FAR struct uint128_s *)k2, (struct uint128_s *FAR )rb, (FAR struct uint128_s *)k2);
+      xor_128((FAR struct uint128_s *)k2,
+              (struct uint128_s *FAR)rb,
+              (FAR struct uint128_s *)k2);
     }
 
   return 0;
@@ -1399,11 +1432,13 @@ static int bt_smp_aes_cmac(FAR const uint8_t *key, FAR const uint8_t *in,
       if ((len % 16) == 0)
         {
           /* complete blocks */
+
           flag = 1;
         }
       else
         {
           /* last block is not complete */
+
           flag = 0;
         }
     }
@@ -1502,25 +1537,25 @@ static int smp_aes_cmac_test(void)
 {
   int err;
 
-  err = aes_test("Test aes-cmac0", g_key, g_M, 0, g_mac1);
+  err = aes_test("Test aes-cmac0", g_key, g_m, 0, g_mac1);
   if (err)
     {
       return err;
     }
 
-  err = aes_test("Test aes-cmac16", g_key, g_M, 16, g_mac2);
+  err = aes_test("Test aes-cmac16", g_key, g_m, 16, g_mac2);
   if (err)
     {
       return err;
     }
 
-  err = aes_test("Test aes-cmac40", g_key, g_M, 40, g_mac3);
+  err = aes_test("Test aes-cmac40", g_key, g_m, 40, g_mac3);
   if (err)
     {
       return err;
     }
 
-  err = aes_test("Test aes-cmac64", g_key, g_M, 64, g_mac4);
+  err = aes_test("Test aes-cmac64", g_key, g_m, 64, g_mac4);
   if (err)
     {
       return err;
@@ -1606,8 +1641,8 @@ int bt_smp_send_pairing_req(FAR struct bt_conn_s *conn)
 
   req = bt_buf_extend(req_buf, sizeof(*req));
 
-  /* For JustWorks pairing simplify req parameters. TODO: needs to be reworked
-   * later on
+  /* For JustWorks pairing simplify req parameters.
+   * TODO: needs to be reworked later on
    */
 
   req->auth_req      = BT_SMP_AUTH_BONDING;
@@ -1623,6 +1658,7 @@ int bt_smp_send_pairing_req(FAR struct bt_conn_s *conn)
   memset(smp->tk, 0, sizeof(smp->tk));
 
   /* Store req for later use */
+
   smp->preq[0] = BT_SMP_CMD_PAIRING_REQ;
 
   memcpy(smp->preq + 1, req, sizeof(*req));

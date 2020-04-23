@@ -12,30 +12,31 @@
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS
+ * ; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -436,13 +437,16 @@ static void att_req_destroy(FAR struct bt_att_req_s *req)
   memset(req, 0, sizeof(*req));
 }
 
-static void send_err_rsp(struct bt_conn_s *conn, uint8_t req, uint16_t handle,
+static void send_err_rsp(struct bt_conn_s *conn,
+                         uint8_t req,
+                         uint16_t handle,
                          uint8_t err)
 {
   struct bt_att_error_rsp_s *rsp;
   struct bt_buf_s *buf;
 
   /* Ignore opcode 0x00 */
+
   if (!req)
     {
       return;
@@ -510,7 +514,9 @@ static uint8_t att_mtu_req(struct bt_conn_s *conn, struct bt_buf_s *data)
   return 0;
 }
 
-static uint8_t att_handle_rsp(struct bt_conn_s *conn, void *pdu, uint16_t len,
+static uint8_t att_handle_rsp(struct bt_conn_s *conn,
+                              void *pdu,
+                              uint16_t len,
                               uint8_t err)
 {
   FAR struct bt_att_s *att = conn->att;
@@ -532,7 +538,8 @@ static uint8_t att_handle_rsp(struct bt_conn_s *conn, void *pdu, uint16_t len,
   return 0;
 }
 
-static uint8_t att_mtu_rsp(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf)
+static uint8_t att_mtu_rsp(FAR struct bt_conn_s *conn,
+                           FAR struct bt_buf_s *buf)
 {
   FAR struct bt_att_s *att = conn->att;
   FAR struct bt_att_exchange_mtu_rsp_s *rsp;
@@ -628,7 +635,8 @@ static uint8_t find_info_cb(FAR const struct bt_gatt_attr_s *attr,
 
         /* Fast forward to next item position */
 
-        data->u.info16         = bt_buf_extend(data->buf, sizeof(*data->u.info16));
+        data->u.info16         = bt_buf_extend(data->buf,
+                                               sizeof(*data->u.info16));
         data->u.info16->handle = BT_HOST2LE16(attr->handle);
         data->u.info16->uuid   = BT_HOST2LE16(attr->uuid->u.u16);
 
@@ -643,9 +651,11 @@ static uint8_t find_info_cb(FAR const struct bt_gatt_attr_s *attr,
 
         /* Fast forward to next item position */
 
-        data->u.info128         = bt_buf_extend(data->buf, sizeof(*data->u.info128));
+        data->u.info128         = bt_buf_extend(data->buf,
+                                                sizeof(*data->u.info128));
         data->u.info128->handle = BT_HOST2LE16(attr->handle);
-        memcpy(data->u.info128->uuid, attr->uuid->u.u128,
+        memcpy(data->u.info128->uuid,
+               attr->uuid->u.u128,
                sizeof(data->u.info128->uuid));
 
         return att->mtu - data->buf->len > sizeof(*data->u.info128) ?
@@ -852,7 +862,8 @@ static uint8_t att_find_type_req(FAR struct bt_conn_s *conn,
   return att_find_type_rsp(conn, start_handle, end_handle, value, data->len);
 }
 
-static bool uuid_create(FAR struct bt_uuid_s *uuid, FAR struct bt_buf_s *data)
+static bool uuid_create(FAR struct bt_uuid_s *uuid,
+                        FAR struct bt_buf_s *data)
 {
   if (data->len > sizeof(uuid->u.u128))
     {
@@ -1149,14 +1160,19 @@ static uint8_t att_read_req(FAR struct bt_conn_s *conn,
 
   wlinfo("handle 0x%04x\n", handle);
 
-  return att_read_rsp(conn, BT_ATT_OP_READ_REQ, BT_ATT_OP_READ_RSP, handle, 0);
+  return att_read_rsp(conn,
+                      BT_ATT_OP_READ_REQ,
+                      BT_ATT_OP_READ_RSP,
+                      handle,
+                      0);
 }
 
 static uint8_t att_read_blob_req(FAR struct bt_conn_s *conn,
                                  FAR struct bt_buf_s *data)
 {
   FAR struct bt_att_read_blob_req_s *req;
-  uint16_t handle, offset;
+  uint16_t handle;
+  uint16_t offset;
 
   req = (FAR void *)data->data;
 
@@ -1362,7 +1378,8 @@ static uint8_t att_read_group_req(FAR struct bt_conn_s *conn,
    * shall not be used in the ATT Read By Group Type Request.
    */
 
-  if (bt_uuid_cmp(&uuid, &g_primary_uuid) && bt_uuid_cmp(&uuid, &g_secondary_uuid))
+  if (bt_uuid_cmp(&uuid, &g_primary_uuid) &&
+      bt_uuid_cmp(&uuid, &g_secondary_uuid))
     {
       send_err_rsp(conn, BT_ATT_OP_READ_GROUP_REQ, start_handle,
                    BT_ATT_ERR_UNSUPPORTED_GROUP_TYPE);
@@ -1382,7 +1399,8 @@ static uint8_t write_cb(FAR const struct bt_gatt_attr_s *attr,
 
   /* Check for write support and flush support in case of prepare */
 
-  if (!attr->write || (data->op == BT_ATT_OP_PREPARE_WRITE_REQ && !attr->flush))
+  if (!attr->write ||
+      (data->op == BT_ATT_OP_PREPARE_WRITE_REQ && !attr->flush))
     {
       data->err = BT_ATT_ERR_WRITE_NOT_PERMITTED;
       return BT_GATT_ITER_STOP;
@@ -1398,7 +1416,11 @@ static uint8_t write_cb(FAR const struct bt_gatt_attr_s *attr,
 
   /* Read attribute value and store in the buffer */
 
-  write = attr->write(data->conn, attr, data->value, data->len, data->offset);
+  write = attr->write(data->conn,
+                      attr,
+                      data->value,
+                      data->len,
+                      data->offset);
   if (write < 0 || write != data->len)
     {
       data->err = err_to_att(write);
@@ -1528,6 +1550,7 @@ static uint8_t att_prepare_write_req(FAR struct bt_conn_s *conn,
                        BT_ATT_OP_PREPARE_WRITE_RSP, handle, offset,
                        data->data, data->len);
 }
+
 typedef CODE uint8_t
   (*bt_gatt_attr_func_t)(FAR const struct bt_gatt_attr_s *attr,
                          FAR void *user_data);
@@ -1832,8 +1855,9 @@ void bt_att_initialize(void)
   bt_l2cap_chan_register(&chan);
 }
 
-FAR struct bt_buf_s *bt_att_create_pdu(FAR struct bt_conn_s *conn, uint8_t op,
-                                     size_t len)
+FAR struct bt_buf_s *bt_att_create_pdu(FAR struct bt_conn_s *conn,
+                                       uint8_t op,
+                                       size_t len)
 {
   FAR struct bt_att_hdr_s *hdr;
   FAR struct bt_buf_s *buf;
