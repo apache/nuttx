@@ -12,30 +12,31 @@
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS
+ * ; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -115,7 +116,7 @@ struct bt_conn_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -169,7 +170,8 @@ void bt_conn_send(FAR struct bt_conn_s *conn, FAR struct bt_buf_s *buf);
  *
  ****************************************************************************/
 
-FAR struct bt_conn_s *bt_conn_add(FAR const bt_addr_le_t *peer, uint8_t role);
+FAR struct bt_conn_s *bt_conn_add(FAR const bt_addr_le_t *peer,
+                                  uint8_t role);
 
 /****************************************************************************
  * Name: bt_conn_set_state
@@ -187,7 +189,8 @@ FAR struct bt_conn_s *bt_conn_add(FAR const bt_addr_le_t *peer, uint8_t role);
  *
  ****************************************************************************/
 
-void bt_conn_set_state(FAR struct bt_conn_s *conn, enum bt_conn_state_e state);
+void bt_conn_set_state(FAR struct bt_conn_s *conn,
+                       enum bt_conn_state_e state);
 
 /****************************************************************************
  * Name: bt_conn_lookup_handle
@@ -301,18 +304,18 @@ FAR const bt_addr_le_t *bt_conn_get_dst(FAR const struct bt_conn_s *conn);
  * Name: bt_conn_security
  *
  * Description:
- *   This function enable security (encryption) for a connection. If device is
- *   already paired with sufficiently strong key encryption will be enabled. If
- *   link is already encrypted with sufficiently strong key this function does
- *   nothing.
+ *   This function enable security (encryption) for a connection.
+ *   If device is already paired with sufficiently strong key encryption will
+ *   be enabled. If link is already encrypted with sufficiently strong key
+ *   this function does nothing.
  *
- *   If device is not paired pairing will be initiated. If device is paired and
- *   keys are too weak but input output capabilities allow for strong enough keys
- *   pairing will be initiated.
+ *   If device is not paired pairing will be initiated.
+ *   If device is paired and keys are too weak but input output capabilities
+ *   allow for strong enough keys pairing will be initiated.
  *
- *   This function may return error if required level of security is not possible
- *   to achieve due to local or remote device limitation (eg input output
- *   capabilities).
+ *   This function may return error if required level of security is not
+ *   possible to achieve due to local or remote device limitation (eg input
+ *   output capabilities).
  *
  * Input Parameters:
  *   conn - Connection object.

@@ -12,30 +12,31 @@
  *   All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * modification, are permitted provided that the following conditions are
+ * met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
  * 3. Neither the name of the copyright holder nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS
+ * ; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -334,42 +335,42 @@ FAR struct bt_keys_s *bt_keys_find_irk(FAR const bt_addr_le_t * addr)
     }
 
   bt_keys_foreach(&g_irks, cur, irk.next)
-  {
-    FAR struct bt_irk_s *irk = &(*cur)->irk;
+    {
+      FAR struct bt_irk_s *irk = &(*cur)->irk;
 
-    if (!bt_addr_cmp((bt_addr_t *) addr->val, &irk->rpa))
-      {
-        wlinfo("cached RPA %s for %s\n", bt_addr_str(&irk->rpa),
-               bt_addr_le_str(&(*cur)->addr));
-        return *cur;
-      }
+      if (!bt_addr_cmp((bt_addr_t *) addr->val, &irk->rpa))
+        {
+          wlinfo("cached RPA %s for %s\n", bt_addr_str(&irk->rpa),
+                 bt_addr_le_str(&(*cur)->addr));
+          return *cur;
+        }
 
-    if (bt_smp_irk_matches(irk->val, (bt_addr_t *) addr->val))
-      {
-        FAR struct bt_keys_s *match = *cur;
+      if (bt_smp_irk_matches(irk->val, (bt_addr_t *) addr->val))
+        {
+          FAR struct bt_keys_s *match = *cur;
 
-        wlinfo("RPA %s matches %s\n", bt_addr_str(&irk->rpa),
-               bt_addr_le_str(&(*cur)->addr));
+          wlinfo("RPA %s matches %s\n", bt_addr_str(&irk->rpa),
+                 bt_addr_le_str(&(*cur)->addr));
 
-        bt_addr_copy(&irk->rpa, (bt_addr_t *) addr->val);
+          bt_addr_copy(&irk->rpa, (bt_addr_t *) addr->val);
 
-        /* Move to the beginning of the list for faster future lookups. */
+          /* Move to the beginning of the list for faster future lookups. */
 
-        if (match != g_irks)
-          {
-            /* Remove match from list */
+          if (match != g_irks)
+            {
+              /* Remove match from list */
 
-            *cur = irk->next;
+              *cur = irk->next;
 
-            /* Add match to the beginning */
+              /* Add match to the beginning */
 
-            irk->next = g_irks;
-            g_irks    = match;
-          }
+              irk->next = g_irks;
+              g_irks    = match;
+            }
 
-        return match;
-      }
-  }
+          return match;
+        }
+    }
 
   wlinfo("No IRK for %s\n", bt_addr_le_str(addr));
   return NULL;

@@ -667,7 +667,9 @@ int btnet_ioctl(FAR struct net_driver_s *netdev, int cmd, unsigned long arg)
         }
         break;
 
-      /* SIOCBTSCANSTOP:  Stop LE scanning and discard any buffered results. */
+      /* SIOCBTSCANSTOP:
+       *  Stop LE scanning and discard any buffered results.
+       */
 
       case SIOCBTSCANSTOP:
         {
