@@ -51,7 +51,7 @@
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
- * Public MAC Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -64,7 +64,8 @@
  *
  ****************************************************************************/
 
-int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
+int mac802154_req_start(MACHANDLE mac,
+                        FAR struct ieee802154_start_req_s *req)
 {
   FAR struct ieee802154_privmac_s *priv =
     (FAR struct ieee802154_privmac_s *)mac;
@@ -79,14 +80,14 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
     }
 
   /* When the CoordRealignment parameter is set to TRUE, the coordinator
-   * attempts to transmit a coordinator realignment command frame as described
-   * in 5.1.2.3.2. If the transmission of the coordinator realignment command
-   * fails due to a channel access failure, the MLME will not make any changes
-   * to the superframe configuration. (i.e., no PIB attributes will be
-   * changed).  If the coordinator realignment command is successfully
-   * transmitted, the MLME updates the PIB attributes BeaconOrder,
-   * SuperframeOrder, PANId, ChannelPage, and ChannelNumber parameters.
-   * [1] pg. 106
+   * attempts to transmit a coordinator realignment command frame as
+   * described in 5.1.2.3.2. If the transmission of the coordinator
+   * realignment command fails due to a channel access failure, the MLME
+   * will not make any changes to the superframe configuration. (i.e., no
+   * PIB attributes will be changed).  If the coordinator realignment
+   * command is successfully transmitted, the MLME updates the PIB
+   * attributes BeaconOrder, SuperframeOrder, PANId, ChannelPage, and
+   * ChannelNumber parameters. [1] pg. 106
    */
 
   if (req->coordrealign)
@@ -102,10 +103,12 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
   /* Tell the radio layer to set the channel number and channel page */
 
-  priv->radio->setattr(priv->radio, IEEE802154_ATTR_PHY_CHAN,
-                        (FAR const union ieee802154_attr_u *)&req->chan);
-  priv->radio->setattr(priv->radio, IEEE802154_ATTR_PHY_CURRENT_PAGE,
-                        (FAR const union ieee802154_attr_u *)&req->chpage);
+  priv->radio->setattr(priv->radio,
+                       IEEE802154_ATTR_PHY_CHAN,
+                       (FAR const union ieee802154_attr_u *)&req->chan);
+  priv->radio->setattr(priv->radio,
+                       IEEE802154_ATTR_PHY_CURRENT_PAGE,
+                       (FAR const union ieee802154_attr_u *)&req->chpage);
 
   /* The address used in the Source Address field of the beacon frame shall
    * contain the value of macExtendedAddress if macShortAddress is equal to
@@ -131,7 +134,9 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
   priv->sfspec.beaconorder = req->beaconorder;
 
-  /* The value of macSuperframeOrder shall be ignored if macBeaconOrder = 15. pg. 19 */
+  /* The value of macSuperframeOrder shall be ignored if
+   * macBeaconOrder = 15. pg. 19
+   */
 
   if (priv->sfspec.beaconorder < 15)
     {
@@ -171,8 +176,8 @@ int mac802154_req_start(MACHANDLE mac, FAR struct ieee802154_start_req_s *req)
 
       priv->sfspec.final_capslot = 15;
 
-      /* If the PAN coordinator parameter is set to TRUE, the MLME ignores the
-       * StartTime parameter and begins beacon transmissions immediately.
+      /* If the PAN coordinator parameter is set to TRUE, the MLME ignores
+       * the StartTime parameter and begins beacon transmissions immediately.
        */
 
       if (req->pancoord)

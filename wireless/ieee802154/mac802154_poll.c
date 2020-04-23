@@ -63,7 +63,7 @@
 static void mac802154_polltimeout(FAR void *arg);
 
 /****************************************************************************
- * Public MAC Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -84,18 +84,18 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
   FAR struct ieee802154_txdesc_s *txdesc;
   int ret;
 
-  /* On receipt of the MLME-POLL.request primitive, the MLME requests data from
-   * the coordinator, as described in 5.1.6.3. If the poll is directed to the
-   * PAN coordinator, the data request command may be generated without any
-   * destination address information present. Otherwise, the data request
-   * command is always generated with the destination address information in the
-   * CoordPANId and CoordAddress parameters.
+  /* On receipt of the MLME-POLL.request primitive, the MLME requests data
+   * from the coordinator, as described in 5.1.6.3. If the poll is directed
+   * to the PAN coordinator, the data request command may be generated
+   * without any destination address information present. Otherwise, the data
+   * request command is always generated with the destination address
+   * information in the CoordPANId and CoordAddress parameters.
    */
 
   /* Get exclusive access to the operation semaphore. This must happen before
-   * getting exclusive access to the MAC struct or else there could be a lockup
-   * condition. This would occur if another thread is using the cmdtrans but
-   * needs access to the MAC in order to unlock it.
+   * getting exclusive access to the MAC struct or else there could be a
+   * lockup condition. This would occur if another thread is using the
+   * cmdtrans but needs access to the MAC in order to unlock it.
    */
 
   ret = mac802154_takesem(&priv->opsem, true);
@@ -106,12 +106,12 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
 
   /* Get exclusive access to the MAC */
 
-   ret = mac802154_lock(priv, true);
-   if (ret < 0)
-     {
-       mac802154_givesem(&priv->opsem);
-       return ret;
-     }
+  ret = mac802154_lock(priv, true);
+  if (ret < 0)
+    {
+      mac802154_givesem(&priv->opsem);
+      return ret;
+    }
 
   priv->curr_op = MAC802154_OP_POLL;
   priv->curr_cmd = IEEE802154_CMD_DATA_REQ;
@@ -127,26 +127,34 @@ int mac802154_req_poll(MACHANDLE mac, FAR struct ieee802154_poll_req_s *req)
     }
 
   /* The Source Addressing Mode field shall be set according to the value of
-   * macShortAddress. If macShortAddress is less than 0xfffe, short addressing
-   * shall be used. Extended addressing shall be used otherwise.
+   * macShortAddress.
+   * If macShortAddress is less than 0xfffe, short addressing shall be used.
+   * Extended addressing shall be used otherwise.
    */
 
   if (priv->addr.saddr[0] >= 0xfe && priv->addr.saddr[1] == 0xff)
     {
-      mac802154_createdatareq(priv, &req->coordaddr, IEEE802154_ADDRMODE_EXTENDED,
+      mac802154_createdatareq(priv,
+                              &req->coordaddr,
+                              IEEE802154_ADDRMODE_EXTENDED,
                               txdesc);
     }
   else
     {
-      mac802154_createdatareq(priv, &req->coordaddr, IEEE802154_ADDRMODE_SHORT,
+      mac802154_createdatareq(priv,
+                              &req->coordaddr,
+                              IEEE802154_ADDRMODE_SHORT,
                               txdesc);
     }
 
-  /* Save a copy of the destination addressing information into the tx descriptor.
-   * We only do this for commands to help with handling their progession.
+  /* Save a copy of the destination addressing information into the tx
+   * descriptor. We only do this for commands to help with handling their
+   * progession.
    */
 
-  memcpy(&txdesc->destaddr, &req->coordaddr, sizeof(struct ieee802154_addr_s));
+  memcpy(&txdesc->destaddr,
+         &req->coordaddr,
+         sizeof(struct ieee802154_addr_s));
 
   /* Save a reference of the tx descriptor */
 
@@ -252,19 +260,20 @@ void mac802154_txdone_datareq_poll(FAR struct ieee802154_privmac_s *priv,
  * Name: mac802154_polltimeout
  *
  * Description:
- *   Function registered with MAC timer that gets called via the work queue to
- *   handle a timeout for extracting a response from the Coordinator.
+ *   Function registered with MAC timer that gets called via the work queue
+ *   to handle a timeout for extracting a response from the Coordinator.
  *
  ****************************************************************************/
 
 void mac802154_polltimeout(FAR void *arg)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
+  FAR struct ieee802154_privmac_s *priv =
+                                  (FAR struct ieee802154_privmac_s *)arg;
   FAR struct ieee802154_primitive_s *primitive;
 
   /* If there is work scheduled for the rxframe_worker, we want to reschedule
-   * this work, so that we make sure if the frame we were waiting for was just
-   * received, we don't timeout
+   * this work, so that we make sure if the frame we were waiting for was
+   * just received, we don't timeout
    */
 
   if (!work_available(&priv->rx_work))
@@ -282,6 +291,7 @@ void mac802154_polltimeout(FAR void *arg)
   mac802154_lock(priv, false);
 
   /* We are no longer performing the association operation */
+
   priv->curr_op = MAC802154_OP_NONE;
   priv->cmd_desc = NULL;
   mac802154_givesem(&priv->opsem);

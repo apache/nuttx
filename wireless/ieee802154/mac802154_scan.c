@@ -70,14 +70,14 @@ static void mac802154_scantimeout(FAR void *arg);
  * Name: mac802154_req_scan
  *
  * Description:
- *   The MLME-SCAN.request primitive is used to initiate a channel scan over a
- *   given list of channels. A device can use a channel scan to measure the
- *   energy on the channel, search for the coordinator with which it associated,
- *   or search for all coordinators transmitting beacon frames within the POS of
- *   the scanning device. Scan results are returned
+ *   The MLME-SCAN.request primitive is used to initiate a channel scan over
+ *   a given list of channels. A device can use a channel scan to measure the
+ *   energy on the channel, search for the coordinator with which it
+ *   associated, or search for all coordinators transmitting beacon frames
+ *   within the POS of the scanning device. Scan results are returned
  *   via MULTIPLE calls to the struct mac802154_maccb_s->conf_scan callback.
- *   This is a difference with the official 802.15.4 specification, implemented
- *   here to save memory.
+ *   This is a difference with the official 802.15.4 specification,
+ *   implemented here to save memory.
  *
  ****************************************************************************/
 
@@ -95,8 +95,8 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
 
   wlinfo("MLME: SCAN.request received\n");
 
-  /* Need to get access to the ops semaphore since operations are serial. This
-   * must be done before locking the MAC so that we don't hold the MAC
+  /* Need to get access to the ops semaphore since operations are serial.
+   * This must be done before locking the MAC so that we don't hold the MAC
    */
 
   ret = mac802154_takesem(&priv->opsem, true);
@@ -122,7 +122,8 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
   priv->scanindex = 0;
   priv->npandesc = 0;
 
-  priv->scansymdur = IEEE802154_BASE_SUPERFRAME_DURATION * ((1 << req->duration) + 1);
+  priv->scansymdur = IEEE802154_BASE_SUPERFRAME_DURATION *
+                     ((1 << req->duration) + 1);
 
   switch (req->type)
     {
@@ -135,17 +136,18 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
           mac802154_setchannel(priv, req->channels[priv->scanindex]);
           mac802154_setchpage(priv, req->chpage);
 
-          /* Before commencing an active or passive scan, the MAC sublayer shall
-           * store the value of macPANId and then set it to 0xffff for the
-           * duration of the scan. This enables the receive filter to accept all
-           * beacons rather than just the beacons from its current PAN, as
-           * described in 5.1.6.2. On completion of the scan, the MAC sublayer
-           * shall restore the value of macPANId to the value stored before the
-           * scan began. [1] pg. 24
+          /* Before commencing an active or passive scan, the MAC sublayer
+           * shall store the value of macPANId and then set it to 0xffff for
+           * the duration of the scan. This enables the receive filter to
+           * accept all beacons rather than just the beacons from its current
+           * PAN, as described in 5.1.6.2. On completion of the scan, the MAC
+           * sublayer shall restore the value of macPANId to the value stored
+           * before the scan began. [1] pg. 24
            */
 
           IEEE802154_PANIDCOPY(priv->panidbeforescan, priv->addr.panid);
-          mac802154_setpanid(priv, (const uint8_t *)&IEEE802154_PANID_UNSPEC);
+          mac802154_setpanid(priv,
+                             (const uint8_t *) & IEEE802154_PANID_UNSPEC);
 
           /* ...after switching to the channel for a passive scan, the device
            * shall enable its receiver for at most
@@ -154,7 +156,9 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
            */
 
           mac802154_rxenable(priv);
-          mac802154_timerstart(priv, priv->scansymdur, mac802154_scantimeout);
+          mac802154_timerstart(priv,
+                               priv->scansymdur,
+                               mac802154_scantimeout);
         }
         break;
       case IEEE802154_SCANTYPE_ACTIVE:
@@ -191,7 +195,8 @@ int mac802154_req_scan(MACHANDLE mac, FAR struct ieee802154_scan_req_s *req)
     }
 
   mac802154_unlock(priv)
-return OK;
+
+  return OK;
 
 errout_with_sem:
   mac802154_unlock(priv)
@@ -219,47 +224,52 @@ void mac802154_scanfinish(FAR struct ieee802154_privmac_s *priv,
 
   if (priv->currscan.type == IEEE802154_SCANTYPE_ED)
     {
-      /* "The list of energy measurements, one for each channel searched during an
-       *  ED scan. This parameter is null for active, passive, and orphan scans." [1]
+      /* "The list of energy measurements, one for each channel searched
+       *  during an ED scan. This parameter is null for active, passive,
+       *  and orphan scans." [1]
        */
 
-      memcpy(scanconf->edlist, priv->edlist, sizeof(scanconf->edlist));
-      memcpy(scanconf->chlist, priv->currscan.channels, sizeof(scanconf->chlist));
+      memcpy(scanconf->edlist,
+             priv->edlist,
+             sizeof(scanconf->edlist));
+      memcpy(scanconf->chlist,
+             priv->currscan.channels,
+             sizeof(scanconf->chlist));
       scanconf->numresults = priv->currscan.numchan;
     }
 
   else
     {
-        /* "A list of the channels given in the request which were not scanned. This
-         *  parameter is not valid for ED scans." [1]
-         */
+      /* "A list of the channels given in the request which were not
+       *  scanned. This parameter is not valid for ED scans." [1]
+       */
 
-        scanconf->numunscanned = priv->currscan.numchan - priv->scanindex;
-        if (scanconf->numunscanned)
+      scanconf->numunscanned = priv->currscan.numchan - priv->scanindex;
+      if (scanconf->numunscanned)
         {
           memcpy(scanconf->chlist, &priv->currscan.channels[priv->scanindex],
                  scanconf->numunscanned);
         }
 
-        /* "The list of PAN descriptors, one for each beacon found during an active or
-         *  passive scan if macAutoRequest is set to TRUE. This parameter is null for
-         *  ED and orphan scans or when macAutoRequest is set to FALSE during an
-         *  active or passive scan." [1]
-         */
+      /* "The list of PAN descriptors, one for each beacon found during an
+       *  active or passive scan if macAutoRequest is set to TRUE. This
+       *  parameter is null for ED and orphan scans or when macAutoRequest
+       *  is set to FALSE during an active or passive scan." [1]
+       */
 
-        if (priv->currscan.type != IEEE802154_SCANTYPE_ORPHAN && priv->autoreq)
-          {
-            memcpy(scanconf->pandescs, priv->pandescs,
-                   sizeof(struct ieee802154_pandesc_s) * priv->npandesc);
-            scanconf->numresults = priv->npandesc;
-          }
+      if (priv->currscan.type != IEEE802154_SCANTYPE_ORPHAN && priv->autoreq)
+        {
+          memcpy(scanconf->pandescs, priv->pandescs,
+                 sizeof(struct ieee802154_pandesc_s) * priv->npandesc);
+          scanconf->numresults = priv->npandesc;
+        }
 
-        if (priv->currscan.type == IEEE802154_SCANTYPE_PASSIVE)
-          {
-            /* Reset the PAN ID to the setting before the scan started */
+      if (priv->currscan.type == IEEE802154_SCANTYPE_PASSIVE)
+        {
+          /* Reset the PAN ID to the setting before the scan started */
 
-            mac802154_setpanid(priv, priv->panidbeforescan);
-          }
+          mac802154_setpanid(priv, priv->panidbeforescan);
+        }
     }
 
   scanconf->status = status;
@@ -274,15 +284,16 @@ void mac802154_scanfinish(FAR struct ieee802154_privmac_s *priv,
  * Name: mac802154_edscan_onresult
  *
  * Description:
- *   Function indirectly called from the radio layer via the radiocb edresult()
- *   call.
+ *   Function indirectly called from the radio layer via the radiocb
+ *   edresult() call.
  *
  * Assumptions:
  *   Called with the priv mac struct locked
  *
  ****************************************************************************/
 
-void mac802154_edscan_onresult(FAR struct ieee802154_privmac_s *priv, uint8_t edval)
+void mac802154_edscan_onresult(FAR struct ieee802154_privmac_s *priv,
+                               uint8_t edval)
 {
   DEBUGASSERT(priv->curr_op == MAC802154_OP_SCAN &&
               priv->currscan.type == IEEE802154_SCANTYPE_ED);
@@ -324,14 +335,15 @@ void mac802154_edscan_onresult(FAR struct ieee802154_privmac_s *priv, uint8_t ed
  * Name: mac802154_scantimeout
  *
  * Description:
- *   Function registered with MAC timer that gets called via the work queue to
- *   handle a timeout for performing a scan operation.
+ *   Function registered with MAC timer that gets called via the work queue
+ *   to handle a timeout for performing a scan operation.
  *
  ****************************************************************************/
 
 static void mac802154_scantimeout(FAR void *arg)
 {
-  FAR struct ieee802154_privmac_s *priv = (FAR struct ieee802154_privmac_s *)arg;
+  FAR struct ieee802154_privmac_s *priv =
+             (FAR struct ieee802154_privmac_s *)arg;
   DEBUGASSERT(priv->curr_op == MAC802154_OP_SCAN);
 
   mac802154_lock(priv, false);
@@ -353,6 +365,7 @@ static void mac802154_scantimeout(FAR void *arg)
         {
           mac802154_scanfinish(priv, IEEE802154_STATUS_NO_BEACON);
         }
+
       return;
     }
 
