@@ -87,8 +87,10 @@ struct mac802154dev_callback_s
 {
   /* This holds the information visible to the MAC layer */
 
-  struct mac802154_maccb_s mc_cb;     /* Interface understood by the MAC layer */
-  FAR struct mac802154_chardevice_s *mc_priv;    /* Our priv data */
+  struct mac802154_maccb_s mc_cb;             /* Interface understood by
+                                               * the MAC layer
+                                               */
+  FAR struct mac802154_chardevice_s *mc_priv; /* Our priv data */
 };
 
 struct mac802154_chardevice_s
@@ -128,7 +130,7 @@ struct mac802154_chardevice_s
  * Private Function Prototypes
  ****************************************************************************/
 
- /* Semaphore helpers */
+/* Semaphore helpers */
 
 static inline int mac802154dev_takesem(sem_t *sem);
 #define mac802154dev_givesem(s) nxsem_post(s);
@@ -333,13 +335,15 @@ static int mac802154dev_close(FAR struct file *filep)
       FAR struct ieee802154_primitive_s *primitive;
 
       primitive =
-        (FAR struct ieee802154_primitive_s *)sq_remfirst(&dev->primitive_queue);
+        (FAR struct ieee802154_primitive_s *)
+        sq_remfirst(&dev->primitive_queue);
 
       while (primitive)
         {
           ieee802154_primitive_free(primitive);
           primitive =
-            (FAR struct ieee802154_primitive_s *)sq_remfirst(&dev->primitive_queue);
+            (FAR struct ieee802154_primitive_s *)
+            sq_remfirst(&dev->primitive_queue);
         }
     }
 
@@ -398,9 +402,12 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
 
       /* Try popping a data indication off the list */
 
-      ind = (FAR struct ieee802154_data_ind_s *)sq_remfirst(&dev->dataind_queue);
+      ind = (FAR struct ieee802154_data_ind_s *)
+            sq_remfirst(&dev->dataind_queue);
 
-      /* If the indication is not null, we can exit the loop and copy the data */
+      /* If the indication is not null, we can exit the loop and copy the
+       * data
+       */
 
       if (ind != NULL)
         {
@@ -408,11 +415,12 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
           break;
         }
 
-      /* If this is a non-blocking call, or if there is another read operation
-       * already pending, don't block. This driver returns EAGAIN even when
-       * configured as non-blocking if another read operation is already pending
-       * This situation should be rare. It will only occur when there are 2 calls
-       * to read from separate threads and there was no data in the rx list.
+      /* If this is a non-blocking call, or if there is another read
+       * operation already pending, don't block. This driver returns EAGAIN
+       * even when configured as non-blocking if another read operation is
+       * already pending. This situation should be rare.
+       * It will only occur when there are 2 calls  to read from separate
+       * threads and there was no data in the rx list.
        */
 
       if ((filep->f_oflags & O_NONBLOCK) || dev->readpending)
@@ -433,8 +441,8 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
           return ret;
         }
 
-      /* Let the loop wrap back around, we will then pop a indication and this
-       * time, it should have a data indication
+      /* Let the loop wrap back around, we will then pop a indication and
+       * this time, it should have a data indication
        */
     }
 
@@ -475,22 +483,22 @@ static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
              rx->length);
     }
 
- memcpy(&rx->meta, ind, sizeof(struct ieee802154_data_ind_s));
+  memcpy(&rx->meta, ind, sizeof(struct ieee802154_data_ind_s));
 
- /* Zero out the forward link and IOB reference */
+  /* Zero out the forward link and IOB reference */
 
- rx->meta.flink = NULL;
- rx->meta.frame = NULL;
+  rx->meta.flink = NULL;
+  rx->meta.frame = NULL;
 
- /* Free the IOB */
+  /* Free the IOB */
 
- iob_free(ind->frame, IOBUSER_WIRELESS_MAC802154_CHARDEV);
+  iob_free(ind->frame, IOBUSER_WIRELESS_MAC802154_CHARDEV);
 
- /* Deallocate the data indication */
+  /* Deallocate the data indication */
 
- ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)ind);
+  ieee802154_primitive_free((FAR struct ieee802154_primitive_s *)ind);
 
- return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -632,13 +640,15 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
               primitive = (FAR struct ieee802154_primitive_s *)
                               sq_remfirst(&dev->primitive_queue);
 
-              /* If there was an event to pop off, copy it into the user data and
-               * free it from the MAC layer's memory.
+              /* If there was an event to pop off, copy it into the user data
+               * and free it from the MAC layer's memory.
                */
 
               if (primitive != NULL)
                 {
-                  memcpy(&macarg->primitive, primitive, sizeof(struct ieee802154_primitive_s));
+                  memcpy(&macarg->primitive,
+                         primitive,
+                         sizeof(struct ieee802154_primitive_s));
 
                   /* Free the notification */
 
@@ -647,12 +657,13 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
                   break;
                 }
 
-              /* If this is a non-blocking call, or if there is another getevent
-               * operation already pending, don't block. This driver returns
-               * EAGAIN even when configured as non-blocking if another getevent
-               * operation is already pending This situation should be rare.
-               * It will only occur when there are 2 calls from separate threads
-               * and there was no events in the queue.
+              /* If this is a non-blocking call, or if there is another
+               * getevent operation already pending, don't block. This driver
+               * returns EAGAIN even when configured as non-blocking if
+               * another getevent operation is already pending This situation
+               * should be rare.
+               * It will only occur when there are 2 calls from separate
+               * threads and there was no events in the queue.
                */
 
               if ((filep->f_oflags & O_NONBLOCK) || dev->geteventpending)
@@ -673,8 +684,8 @@ static int mac802154dev_ioctl(FAR struct file *filep, int cmd,
                   return ret;
                 }
 
-              /* Get exclusive access again, then loop back around and try and
-               * pop an event off the queue
+              /* Get exclusive access again, then loop back around and try
+               * and pop an event off the queue
                */
 
                 ret = mac802154dev_takesem(&dev->md_exclsem);
@@ -724,21 +735,23 @@ static int mac802154dev_notify(FAR struct mac802154_maccb_s *maccb,
       return mac802154dev_rxframe(dev, &primitive->u.dataind);
     }
 
-  /* If there is a registered notification receiver, queue the event and signal
-   * the receiver. Events should be popped from the queue from the application
-   * at a reasonable rate in order for the MAC layer to be able to allocate new
-   * notifications.
+  /* If there is a registered notification receiver, queue the event and
+   * signal the receiver. Events should be popped from the queue from the
+   * application at a reasonable rate in order for the MAC layer to be able
+   * to allocate new notifications.
    */
 
-  if (dev->enableevents && (dev->md_open != NULL || dev->md_notify_registered))
+  if (dev->enableevents &&
+      (dev->md_open != NULL || dev->md_notify_registered))
     {
-      /* Get exclusive access to the driver structure.  We don't care about any
-       * signals so if we see one, just go back to trying to get access again */
+      /* Get exclusive access to the driver structure.  We don't care about
+       * any signals so if we see one, just go back to trying to get access
+       * again
+       */
 
       while (mac802154dev_takesem(&dev->md_exclsem) != 0);
 
       sq_addlast((FAR sq_entry_t *)primitive, &dev->primitive_queue);
-
 
       /* Check if there is a read waiting for data */
 
@@ -761,8 +774,8 @@ static int mac802154dev_notify(FAR struct mac802154_maccb_s *maccb,
       return OK;
     }
 
-  /* By returning a negative value, we let the MAC know that we don't want the
-   * primitive and it will free it for us
+  /* By returning a negative value, we let the MAC know that we don't want
+   * the primitive and it will free it for us
    */
 
   return -1;
@@ -784,7 +797,8 @@ static int mac802154dev_rxframe(FAR struct mac802154_chardevice_s *dev,
                                 FAR struct ieee802154_data_ind_s *ind)
 {
   /* Get exclusive access to the driver structure.  We don't care about any
-   * signals so if we see one, just go back to trying to get access again */
+   * signals so if we see one, just go back to trying to get access again
+   */
 
   while (mac802154dev_takesem(&dev->md_exclsem) != 0);
 
@@ -882,6 +896,7 @@ int mac802154dev_register(MACHANDLE mac, int minor)
       nerr("ERROR: Failed to bind the MAC callbacks: %d\n", ret);
 
       /* Free memory and return the error */
+
       kmm_free(dev);
       return ret;
     }

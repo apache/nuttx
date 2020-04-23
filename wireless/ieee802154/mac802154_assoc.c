@@ -205,11 +205,15 @@ int mac802154_req_associate(MACHANDLE mac,
       mac802154_puteaddr(iob, priv->pandesc.coordaddr.eaddr);
     }
 
-  /* The Source PAN Identifier field shall contain the broadcast PAN identifier. */
+  /* The Source PAN Identifier field shall contain the broadcast PAN
+   * identifier.
+   */
 
   mac802154_putsaddr(iob, &IEEE802154_SADDR_BCAST);
 
-  /* The Source Address field shall contain the value of macExtendedAddress. */
+  /* The Source Address field shall contain the value of
+   * macExtendedAddress.
+   */
 
   mac802154_puteaddr(iob, priv->addr.eaddr);
 
@@ -259,7 +263,9 @@ int mac802154_req_associate(MACHANDLE mac,
 
   for (i = 0; i < priv->npandesc; i++)
     {
-      /* Check to make sure the beacon is from the same channel as the request */
+      /* Check to make sure the beacon is from the same channel as the
+       * request
+       */
 
       if (req->chan != priv->pandescs[i].chan)
         {
@@ -380,11 +386,13 @@ int mac802154_resp_associate(MACHANDLE mac,
 
   mac802154_puteaddr(iob, resp->devaddr);
 
-  /* The Source Address field shall contain the value of macExtendedAddress. */
+  /* The Source Address field shall contain the value of
+   * macExtendedAddress.
+   */
 
   mac802154_puteaddr(iob, priv->addr.eaddr);
 
-   /* Copy in the Command Frame Identifier */
+  /* Copy in the Command Frame Identifier */
 
   iob->io_data[iob->io_len++] = IEEE802154_CMD_ASSOC_RESP;
 
@@ -405,12 +413,12 @@ int mac802154_resp_associate(MACHANDLE mac,
 
   /* Get exclusive access to the MAC */
 
-   ret = mac802154_lock(priv, true);
-   if (ret < 0)
-     {
-       iob_free(iob, IOBUSER_WIRELESS_MAC802154);
-       return ret;
-     }
+  ret = mac802154_lock(priv, true);
+  if (ret < 0)
+    {
+      iob_free(iob, IOBUSER_WIRELESS_MAC802154);
+      return ret;
+    }
 
   /* Allocate the txdesc, waiting if necessary */
 
@@ -553,8 +561,8 @@ void mac802154_txdone_assocreq(FAR struct ieee802154_privmac_s *priv,
           DEBUGASSERT(priv->pandesc.coordaddr.mode !=
                       IEEE802154_ADDRMODE_NONE);
 
-          /* Off-load extracting the Association Response to the work queue to
-           * avoid locking up the calling thread.
+          /* Off-load extracting the Association Response to the work queue
+           * to avoid locking up the calling thread.
            */
 
           DEBUGASSERT(work_available(&priv->macop_work));
@@ -655,7 +663,6 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
 
       if (priv->sfspec.beaconorder == 15)
         {
-
           /* Start a timer, if we receive the data frame, we will cancel
            * the timer, otherwise it will expire and we will notify the
            * next highest layer of the failure.
@@ -664,7 +671,6 @@ void mac802154_txdone_datareq_assoc(FAR struct ieee802154_privmac_s *priv,
           wlinfo("Starting timeout timer\n");
           mac802154_timerstart(priv, priv->max_frame_waittime,
                                mac802154_assoctimeout);
-
         }
 
       /* Deallocate the data conf notification as it is no longer needed. */
@@ -837,7 +843,7 @@ void mac802154_rx_assocresp(FAR struct ieee802154_privmac_s *priv,
 }
 
 /****************************************************************************
- * Private Function
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -857,8 +863,8 @@ static void mac802154_assoctimeout(FAR void *arg)
   FAR struct ieee802154_primitive_s *primitive;
 
   /* If there is work scheduled for the rxframe_worker, we want to reschedule
-   * this work, so that we make sure if the frame we were waiting for was just
-   * received, we don't timeout
+   * this work, so that we make sure if the frame we were waiting for was
+   * just received, we don't timeout
    */
 
   if (!work_available(&priv->rx_work))
@@ -903,8 +909,8 @@ static void mac802154_assoctimeout(FAR void *arg)
  * Name: mac802154_extract_assocrespj
  *
  * Description:
- *   Create and send a Data request command to extract the Association response
- *   from the Coordinator.
+ *   Create and send a Data request command to extract the Association
+ *   response from the Coordinator.
  *
  * Assumptions:
  *   Called with the MAC unlocked.

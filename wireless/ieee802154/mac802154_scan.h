@@ -60,7 +60,8 @@
 
 struct ieee802154_privmac_s; /* Forward Reference */
 
-void mac802154_edscan_onresult(FAR struct ieee802154_privmac_s *priv, uint8_t edval);
+void mac802154_edscan_onresult(FAR struct ieee802154_privmac_s *priv,
+                               uint8_t edval);
 
 void mac802154_scanfinish(FAR struct ieee802154_privmac_s *priv,
                                  enum ieee802154_status_e status);

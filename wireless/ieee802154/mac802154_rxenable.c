@@ -69,8 +69,8 @@ static void mac802154_rxenabletimeout(FAR void *arg);
  * Name: mac802154_rxenabletimeout
  *
  * Description:
- *   Function registered with MAC timer that gets called via the work queue to
- *   handle a timeout for extracting the Association Response from the
+ *   Function registered with MAC timer that gets called via the work queue
+ *   to handle a timeout for extracting the Association Response from the
  *   Coordinator.
  *
  ****************************************************************************/
@@ -162,7 +162,7 @@ int mac802154_req_rxenable(MACHANDLE mac,
 
           mac802154_rxenable(priv);
 
-          if (req->rxon_dur != 0xFFFFFFFF)
+          if (req->rxon_dur != 0xffffffff)
             {
               mac802154_timerstart(priv, req->rxon_dur,
                                    mac802154_rxenabletimeout);

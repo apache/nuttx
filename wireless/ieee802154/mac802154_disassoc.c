@@ -55,16 +55,17 @@
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
- * Public MAC Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: mac802154_req_disassociate
  *
  * Description:
- *   The MLME-DISASSOCIATE.request primitive is used by an associated device to
- *   notify the coordinator of its intent to leave the PAN. It is also used by
- *   the coordinator to instruct an associated device to leave the PAN.
+ *   The MLME-DISASSOCIATE.request primitive is used by an associated device
+ *   to notify the coordinator of its intent to leave the PAN. It is also
+ *   used by the coordinator to instruct an associated device to leave the
+ *   PAN.
  *   Confirmation is returned via the
  *   struct mac802154_maccb_s->conf_disassociate callback.
  *

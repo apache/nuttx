@@ -57,7 +57,7 @@
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
- * Public MAC Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -108,7 +108,8 @@ int mac802154_req_data(MACHANDLE mac,
    * sublayer will set the Frame Version to one. [1] pg. 118.
    */
 
-  if ((frame->io_len - frame->io_offset) > IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE)
+  if ((frame->io_len - frame->io_offset) >
+       IEEE802154_MAX_SAFE_MAC_PAYLOAD_SIZE)
     {
       *frame_ctrl |= (1 << IEEE802154_FRAMECTRL_SHIFT_VERSION);
     }
@@ -131,16 +132,18 @@ int mac802154_req_data(MACHANDLE mac,
 
       if (meta->destaddr.mode == IEEE802154_ADDRMODE_SHORT)
         {
-          IEEE802154_SADDRCOPY(&frame->io_data[mhr_len], meta->destaddr.saddr);
+          IEEE802154_SADDRCOPY(&frame->io_data[mhr_len],
+                               meta->destaddr.saddr);
           mhr_len += IEEE802154_SADDRSIZE;
         }
       else if (meta->destaddr.mode == IEEE802154_ADDRMODE_EXTENDED)
         {
           int index;
 
-          /* The IEEE 802.15.4 Standard is confusing with regards to byte-order
-           * for * extended address. More research discovers that the extended
-           * address should be sent in reverse-canonical form.
+          /* The IEEE 802.15.4 Standard is confusing with regards to
+           * byte-order for * extended address. More research discovers
+           * that the extended address should be sent in reverse-canonical
+           * form.
            */
 
           for (index = IEEE802154_EADDRSIZE - 1; index >= 0; index--)
@@ -165,8 +168,8 @@ int mac802154_req_data(MACHANDLE mac,
       return ret;
     }
 
-  /* If both destination and source addressing information is present, the MAC
-   * sublayer shall compare the destination and source PAN identifiers.
+  /* If both destination and source addressing information is present, the
+   * MAC sublayer shall compare the destination and source PAN identifiers.
    * [1] pg. 41.
    */
 
@@ -206,9 +209,10 @@ int mac802154_req_data(MACHANDLE mac,
         {
           int index;
 
-          /* The IEEE 802.15.4 Standard is confusing with regards to byte-order
-           * for * extended address. More research discovers that the extended
-           * address should be sent in reverse-canonical form.
+          /* The IEEE 802.15.4 Standard is confusing with regards to
+           * byte-order for * extended address. More research discovers
+           * that the extended address should be sent in reverse-canonical
+           * form.
            */
 
           for (index = IEEE802154_EADDRSIZE - 1; index >= 0; index--)
@@ -263,11 +267,11 @@ int mac802154_req_data(MACHANDLE mac,
       return ret;
     }
 
-   /* Set the offset to 0 to include the header ( we do not want to
-    * modify the frame until AFTER the last place that -EINTR could
-    * be returned and could generate a retry.  Subsequent error returns
-    * are fatal and no retry should occur.
-    */
+  /* Set the offset to 0 to include the header ( we do not want to
+   * modify the frame until AFTER the last place that -EINTR could
+   * be returned and could generate a retry.  Subsequent error returns
+   * are fatal and no retry should occur.
+   */
 
   frame->io_offset = 0;
 
@@ -278,25 +282,26 @@ int mac802154_req_data(MACHANDLE mac,
   txdesc->frametype = IEEE802154_FRAME_DATA;
   txdesc->ackreq = meta->flags.ackreq;
 
-  /* If the TxOptions parameter specifies that a GTS transmission is required,
-   * the MAC sublayer will determine whether it has a valid GTS as described
-   * 5.1.7.3. If a valid GTS could not be found, the MAC sublayer will discard
-   * the MSDU. If a valid GTS was found, the MAC sublayer will defer, if
-   * necessary, until the GTS. If the TxOptions parameter specifies that a GTS
-   * transmission is not required, the MAC sublayer will transmit the MSDU using
-   * either slotted CSMA-CA in the CAP for a beacon-enabled PAN or unslotted
-   * CSMA-CA for a nonbeacon-enabled PAN. Specifying a GTS transmission in the
-   * TxOptions parameter overrides an indirect transmission request.
-   * [1] pg. 118.
+  /* If the TxOptions parameter specifies that a GTS transmission is
+   * required, the MAC sublayer will determine whether it has a valid GTS as
+   * described 5.1.7.3. If a valid GTS could not be found, the MAC sublayer
+   * will discard the MSDU. If a valid GTS was found, the MAC sublayer will
+   * defer, if necessary, until the GTS. If the TxOptions parameter specifies
+   * that a GTS transmission is not required, the MAC sublayer will transmit
+   * the MSDU using either slotted CSMA-CA in the CAP for a beacon-enabled
+   * PAN or unslotted CSMA-CA for a nonbeacon-enabled PAN. Specifying a GTS
+   * transmission in the TxOptions parameter overrides an indirect
+   * transmission request. [1] pg. 118.
    */
 
   if (meta->flags.usegts)
     {
-      /* TODO: Support GTS transmission. This should just change where we link
+      /* TODO:
+       * Support GTS transmission. This should just change where we link
        * the transaction.  Instead of going in the CSMA transaction list, it
-       * should be linked to the GTS' transaction list. We'll need to check if
-       * the GTS is valid, and then find the GTS, before linking. Note, we also
-       * don't have to try and kick-off any transmission here.
+       * should be linked to the GTS' transaction list. We'll need to check
+       * if the GTS is valid, and then find the GTS, before linking.
+       * Note, we also don't have to try and kick-off any transmission here.
        */
 
       ret = -ENOTSUP;
@@ -304,19 +309,20 @@ int mac802154_req_data(MACHANDLE mac,
     }
   else
     {
-      /* If the TxOptions parameter specifies that an indirect transmission is
-       * required and this primitive is received by the MAC sublayer of a
+      /* If the TxOptions parameter specifies that an indirect transmission
+       * is required and this primitive is received by the MAC sublayer of a
        * coordinator, the data frame is sent using indirect transmission, as
        * described in 5.1.5 and 5.1.6.3. [1]
        */
 
       if (meta->flags.indirect)
         {
-          /* If the TxOptions parameter specifies that an indirect transmission
-           * is required and if the device receiving this primitive is not a
-           * coordinator, the destination address is not present, or the
-           * TxOptions parameter also specifies a GTS transmission, the indirect
-           * transmission option will be ignored. [1]
+          /* If the TxOptions parameter specifies that an indirect
+           * transmission is required and if the device receiving this
+           * primitive is not a coordinator, the destination address is not
+           * present, or the TxOptions parameter also specifies a
+           * GTS transmission, the indirect transmission option will be
+           * ignored. [1]
            *
            * NOTE: We don't just ignore the parameter.  Instead, we throw an
            * error, since this really shouldn't be happening.
@@ -359,6 +365,7 @@ int mac802154_req_data(MACHANDLE mac,
   return OK;
 
 errout_with_txdesc:
+
   /* Free TX the descriptor, but preserve the IOB. */
 
   txdesc->frame = NULL;

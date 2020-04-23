@@ -56,7 +56,7 @@
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
- * Public MAC Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -68,13 +68,13 @@
  *
  *   NOTE: The standard specifies that confirmation should be provided via
  *   via the asynchronous MLME-RESET.confirm primitive.  However, in our
- *   implementation we synchronously return the value immediately. Therefore,
- *   we merge the functionality of the MLME-RESET.request and MLME-RESET.confirm
- *   primitives together.
+ *   implementation we synchronously return the value immediately.
+ *   Therefore, we merge the functionality of the MLME-RESET.request and
+ *   MLME-RESET.confirm primitives together.
  *
  * Input Parameters:
- *   mac          - Handle to the MAC layer instance
- *   resetattr    - Whether or not to reset the MAC PIB attributes to defaults
+ *   mac       - Handle to the MAC layer instance
+ *   resetattr - Whether or not to reset the MAC PIB attributes to defaults
  *
  ****************************************************************************/
 
@@ -113,11 +113,12 @@ int mac802154_req_reset(MACHANDLE mac, bool resetattr)
       priv->sec_enabled = false;        /* Security disabled by default */
       priv->tx_totaldur = 0;            /* 0 transmit duration */
 
-      priv->trans_persisttime = 0x01F4;
+      priv->trans_persisttime = 0x01f4;
 
       /* Reset the short address and PAN ID. The extended address does not
        * get reset. It is a read-only attribute and the radio driver should
-       * be in charge of managing it. We pull a local copy for us to use below.
+       * be in charge of managing it. We pull a local copy for us to use
+       * below.
        */
 
       priv->addr.mode = IEEE802154_ADDRMODE_EXTENDED;
@@ -135,11 +136,14 @@ int mac802154_req_reset(MACHANDLE mac, bool resetattr)
        * reset.
        */
 
-      priv->radio->getattr(priv->radio, IEEE802154_ATTR_MAC_EADDR, &attr);
-      IEEE802154_EADDRCOPY(priv->addr.eaddr, attr.mac.eaddr);
+      priv->radio->getattr(priv->radio,
+                           IEEE802154_ATTR_MAC_EADDR, &attr);
+      IEEE802154_EADDRCOPY(priv->addr.eaddr,
+                           attr.mac.eaddr);
 
-      priv->radio->getattr(priv->radio, IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME,
-                            &attr);
+      priv->radio->getattr(priv->radio,
+                           IEEE802154_ATTR_MAC_MAX_FRAME_WAITTIME,
+                           &attr);
       priv->max_frame_waittime = attr.mac.max_frame_waittime;
     }
 
