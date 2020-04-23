@@ -244,8 +244,7 @@ static uint32_t rx65n_sbram_crc(FAR struct sbramfh_s *pf)
 
 static int rx65n_sbram_open(FAR struct file *filep)
 {
-  FAR struct inode *inode = fil
-  ep->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct rx65n_sbram_s *bbr;
 
   DEBUGASSERT(inode && inode->i_private);
