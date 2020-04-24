@@ -79,8 +79,17 @@
 /* Register Bitfield Definitions ********************************************************************/
 
 #define LPTIM_CFGR_CKSEL          (1 << 0)   /* Bit   0: Clock selector */
-#define LPTIM_CFGR_CKPOL_SHIFT    (1)        /* Bits 2-1: Clock Polarity */
-#define LPTIM_CFGR_CKPOL_MASK     (3 << LPTIM_CFGR_CKPOL_SHIFT)
+#define LPTIM_CFGR_CKSEL_SHIFT    (0)
+#define LPTIM_CFGR_CKSEL_MASK     (1)
+#  define LPTIM_CFGR_CKSEL_INTCLK (0)        /* 0: Internal clock */
+#  define LPTIM_CFGR_CKSEL_EXTCLK (1)        /* 1: External clock */
+
+#define LPTIM_CFGR_CKPOL_SHIFT     (1)        /* Bits 2-1: Clock Polarity */
+#define LPTIM_CFGR_CKPOL_MASK      (3 << LPTIM_CFGR_CKPOL_SHIFT)
+#  define LPTIM_CFGR_CKPOL_RISING  (0 << LPTIM_CFGR_CKPOL_SHIFT) /* 00: Rising Edge */
+#  define LPTIM_CFGR_CKPOL_FALLING (1 << LPTIM_CFGR_CKPOL_SHIFT) /* 01: Falling Edge */
+#  define LPTIM_CFGR_CKPOL_BOTH    (2 << LPTIM_CFGR_CKPOL_SHIFT) /* 00: Both Edges */
+
 #define LPTIM_CFGR_CKFLT_SHIFT    (3)        /* Bits 4-3: Digital filter for external clock */
 #define LPTIM_CFGR_CKFLTN_MASK    (3 << LPTIM_CFGR_CKFLT_SHIFT)
                                              /* Bit  5: reserved */

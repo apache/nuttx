@@ -82,6 +82,7 @@
 #include "stm32l4.h"
 #include "stm32l4_gpio.h"
 #include "stm32l4_lptim.h"
+#include "stm32l4_rcc.h"
 
 #if defined(CONFIG_STM32L4_LPTIM1) || defined(CONFIG_STM32L4_LPTIM2)
 
@@ -119,6 +120,16 @@ static int stm32l4_lptim_setclock(FAR struct stm32l4_lptim_dev_s *dev,
                                   uint32_t freq);
 static int stm32l4_lptim_setchannel(FAR struct stm32l4_lptim_dev_s *dev,
                                     stm32l4_lptim_channel_t channel, int enable);
+static int stm32l4_lptim_setclocksource(FAR struct stm32l4_lptim_dev_s *dev,
+                                        stm32l4_lptim_clksrc_t clksrc);
+static int stm32l4_lptim_setpolarity(FAR struct stm32l4_lptim_dev_s *dev,
+                                     stm32l4_lptim_clkpol_t polarity);
+static uint32_t stm32l4_lptim_getcounter(FAR struct stm32l4_lptim_dev_s *dev);
+static int stm32l4_lptim_setcountmode(FAR struct stm32l4_lptim_dev_s *dev,
+                                      stm32l4_lptim_cntmode_t cntmode);
+static void stm32l4_lptim_setperiod(FAR struct stm32l4_lptim_dev_s *dev,
+                                  uint32_t period);
+static uint32_t stm32l4_lptim_getperiod(FAR struct stm32l4_lptim_dev_s *dev);
 
 /************************************************************************************
  * Private Data
@@ -126,9 +137,15 @@ static int stm32l4_lptim_setchannel(FAR struct stm32l4_lptim_dev_s *dev,
 
 static const struct stm32l4_lptim_ops_s stm32l4_lptim_ops =
 {
-  .setmode    = &stm32l4_lptim_setmode,
-  .setclock   = &stm32l4_lptim_setclock,
-  .setchannel = &stm32l4_lptim_setchannel,
+  .setmode        = &stm32l4_lptim_setmode,
+  .setclock       = &stm32l4_lptim_setclock,
+  .setchannel     = &stm32l4_lptim_setchannel,
+  .setclocksource = &stm32l4_lptim_setclocksource,
+  .setpolarity    = &stm32l4_lptim_setpolarity,
+  .getcounter     = &stm32l4_lptim_getcounter,
+  .setcountmode   = &stm32l4_lptim_setcountmode,
+  .setperiod      = &stm32l4_lptim_setperiod,
+  .getperiod      = &stm32l4_lptim_getperiod
 };
 
 #if defined(CONFIG_STM32L4_LPTIM1)
@@ -484,6 +501,222 @@ static int stm32l4_lptim_setchannel(FAR struct stm32l4_lptim_dev_s *dev,
     }
 
   return ret;
+}
+
+/************************************************************************************
+ * Name: stm32l4_lptim_setclocksource
+ ************************************************************************************/
+
+static int stm32l4_lptim_setclocksource(FAR struct stm32l4_lptim_dev_s *dev,
+                                        stm32l4_lptim_clksrc_t clksrc)
+{
+  FAR struct stm32l4_lptim_priv_s *priv = (FAR struct stm32l4_lptim_priv_s *)dev;
+
+  DEBUGASSERT(dev != NULL);
+
+  if (clksrc == STM32L4_LPTIM_CLK_EXT)
+    {
+      stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET, LPTIM_CFGR_CKSEL_MASK,
+                          LPTIM_CFGR_CKSEL_EXTCLK);
+    }
+  else
+    {
+      uint32_t ccr_mask = 0;
+
+      switch(priv->base)
+        {
+#ifdef CONFIG_STM32L4_LPTIM1
+          case STM32L4_LPTIM1_BASE:
+            ccr_mask = RCC_CCIPR_LPTIM1SEL_MASK;
+          break;
+#endif
+#ifdef CONFIG_STM32L4_LPTIM2
+          case STM32L4_LPTIM2_BASE:
+            ccr_mask = RCC_CCIPR_LPTIM2SEL_MASK;
+          break;
+#endif
+        }
+
+      uint32_t ccr_bits = 0;
+
+      switch(clksrc)
+        {
+          case STM32L4_LPTIM_CLK_PCLK:
+            switch(priv->base)
+              {
+#ifdef CONFIG_STM32L4_LPTIM1
+                case STM32L4_LPTIM1_BASE:
+                  ccr_bits = RCC_CCIPR_LPTIM1SEL_PCLK;
+                break;
+#endif
+#ifdef CONFIG_STM32L4_LPTIM2
+              case STM32L4_LPTIM2_BASE:
+                  ccr_bits = RCC_CCIPR_LPTIM2SEL_PCLK;
+                break;
+#endif
+              }
+          break;
+          case STM32L4_LPTIM_CLK_HSI:
+          switch(priv->base)
+            {
+#ifdef CONFIG_STM32L4_LPTIM1
+              case STM32L4_LPTIM1_BASE:
+                ccr_bits = RCC_CCIPR_LPTIM1SEL_HSI;
+              break;
+#endif
+#ifdef CONFIG_STM32L4_LPTIM2
+            case STM32L4_LPTIM2_BASE:
+                ccr_bits = RCC_CCIPR_LPTIM2SEL_HSI;
+              break;
+#endif
+            }
+          break;
+          case STM32L4_LPTIM_CLK_LSI:
+          switch(priv->base)
+            {
+#ifdef CONFIG_STM32L4_LPTIM1
+              case STM32L4_LPTIM1_BASE:
+                ccr_bits = RCC_CCIPR_LPTIM1SEL_LSI;
+              break;
+#endif
+#ifdef CONFIG_STM32L4_LPTIM2
+            case STM32L4_LPTIM2_BASE:
+                ccr_bits = RCC_CCIPR_LPTIM2SEL_LSI;
+              break;
+#endif
+            }
+          break;
+          case STM32L4_LPTIM_CLK_LSE:
+          switch(priv->base)
+            {
+#ifdef CONFIG_STM32L4_LPTIM1
+              case STM32L4_LPTIM1_BASE:
+                ccr_bits = RCC_CCIPR_LPTIM1SEL_LSE;
+              break;
+#endif
+#ifdef CONFIG_STM32L4_LPTIM2
+            case STM32L4_LPTIM2_BASE:
+                ccr_bits = RCC_CCIPR_LPTIM2SEL_LSE;
+              break;
+#endif
+            }
+          break;
+          default:
+          break;
+        }
+
+      modifyreg32(STM32L4_RCC_CCIPR, ccr_mask, ccr_bits);
+
+      stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET, LPTIM_CFGR_CKSEL_MASK,
+                          LPTIM_CFGR_CKSEL_INTCLK);
+    }
+
+  return OK;
+}
+
+/************************************************************************************
+ * Name: stm32l4_lptim_setperiod
+ ************************************************************************************/
+
+static void stm32l4_lptim_setperiod(FAR struct stm32l4_lptim_dev_s *dev,
+                                    uint32_t period)
+{
+  FAR struct stm32l4_lptim_priv_s *priv = (FAR struct stm32l4_lptim_priv_s *)dev;
+
+  DEBUGASSERT(dev != NULL);
+  putreg32(period, (uintptr_t)(priv->base + STM32L4_LPTIM_ARR_OFFSET));
+}
+
+/************************************************************************************
+ * Name: stm32l4_tim_getperiod
+ ************************************************************************************/
+
+static uint32_t stm32l4_lptim_getperiod(FAR struct stm32l4_lptim_dev_s *dev)
+{
+  FAR struct stm32l4_lptim_priv_s *priv = (FAR struct stm32l4_lptim_priv_s *)dev;
+
+  DEBUGASSERT(dev != NULL);
+  return getreg32((uintptr_t)(priv->base + STM32L4_LPTIM_ARR_OFFSET));
+}
+
+/************************************************************************************
+ * Name: stm32l4_lptim_setcountmode
+ ************************************************************************************/
+
+static int stm32l4_lptim_setcountmode(FAR struct stm32l4_lptim_dev_s *dev,
+                                      stm32l4_lptim_cntmode_t cntmode)
+{
+  DEBUGASSERT(dev != NULL);
+
+
+  if (cntmode == STM32L4_LPTIM_COUNT_CLOCK)
+    {
+      stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET,
+                          LPTIM_CFGR_COUNTMODE, 0);
+    }
+  else if (cntmode == STM32L4_LPTIM_COUNT_EXTTRIG)
+    {
+      stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET,
+                          0, LPTIM_CFGR_COUNTMODE);
+    }
+  else
+    {
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/************************************************************************************
+ * Name: stm32l4_lptim_setpolarity
+ ************************************************************************************/
+
+static int stm32l4_lptim_setpolarity(FAR struct stm32l4_lptim_dev_s *dev,
+                                        stm32l4_lptim_clkpol_t polarity)
+{
+  DEBUGASSERT(dev != NULL);
+
+  switch(polarity)
+    {
+      case STM32L4_LPTIM_CLKPOL_RISING:
+          stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET, LPTIM_CFGR_CKPOL_MASK,
+                              LPTIM_CFGR_CKPOL_RISING);
+          break;
+
+      case STM32L4_LPTIM_CLKPOL_FALLING:
+          stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET, LPTIM_CFGR_CKPOL_MASK,
+                              LPTIM_CFGR_CKPOL_FALLING);
+          break;
+
+      case STM32L4_LPTIM_CLKPOL_BOTH:
+          stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET, LPTIM_CFGR_CKPOL_MASK,
+                              LPTIM_CFGR_CKPOL_BOTH);
+          break;
+    }
+
+  return OK;
+}
+
+/************************************************************************************
+ * Name: stm32l4_lptim_setpolarity
+ ************************************************************************************/
+
+static uint32_t stm32l4_lptim_getcounter(FAR struct stm32l4_lptim_dev_s *dev)
+{
+  FAR struct stm32l4_lptim_priv_s *priv = (FAR struct stm32l4_lptim_priv_s *)dev;
+
+  DEBUGASSERT(dev != NULL);
+
+  uint32_t counter1, counter2;
+
+  do
+    {
+      counter1 = getreg32((uintptr_t)(priv->base + STM32L4_LPTIM_CNT_OFFSET));
+      counter2 = getreg32((uintptr_t)(priv->base + STM32L4_LPTIM_CNT_OFFSET));
+    } while (counter1 != counter2);
+
+
+  return counter1;
 }
 
 /************************************************************************************
