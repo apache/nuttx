@@ -83,6 +83,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Helpers **************************************************************************/
 
 #define STM32L4_LPTIM_SETMODE(d,mode)     ((d)->ops->setmode(d,mode))
@@ -129,7 +130,6 @@ typedef enum
   STM32L4_LPTIM_MODE_CONTINUOUS   = 0x0002,
   STM32L4_LPTIM_MODE_MASK         = 0x000f,
 } stm32l4_lptim_mode_t;
-
 
 /* LPTIM Clock Source */
 
@@ -200,7 +200,7 @@ struct stm32l4_lptim_ops_s
 };
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 /* Get timer structure, power-up, reset, and mark it as used */

@@ -523,7 +523,7 @@ static int stm32l4_lptim_setclocksource(FAR struct stm32l4_lptim_dev_s *dev,
     {
       uint32_t ccr_mask = 0;
 
-      switch(priv->base)
+      switch (priv->base)
         {
 #ifdef CONFIG_STM32L4_LPTIM1
           case STM32L4_LPTIM1_BASE:
@@ -539,10 +539,10 @@ static int stm32l4_lptim_setclocksource(FAR struct stm32l4_lptim_dev_s *dev,
 
       uint32_t ccr_bits = 0;
 
-      switch(clksrc)
+      switch (clksrc)
         {
           case STM32L4_LPTIM_CLK_PCLK:
-            switch(priv->base)
+            switch (priv->base)
               {
 #ifdef CONFIG_STM32L4_LPTIM1
                 case STM32L4_LPTIM1_BASE:
@@ -557,7 +557,7 @@ static int stm32l4_lptim_setclocksource(FAR struct stm32l4_lptim_dev_s *dev,
               }
           break;
           case STM32L4_LPTIM_CLK_HSI:
-          switch(priv->base)
+          switch (priv->base)
             {
 #ifdef CONFIG_STM32L4_LPTIM1
               case STM32L4_LPTIM1_BASE:
@@ -572,7 +572,7 @@ static int stm32l4_lptim_setclocksource(FAR struct stm32l4_lptim_dev_s *dev,
             }
           break;
           case STM32L4_LPTIM_CLK_LSI:
-          switch(priv->base)
+          switch (priv->base)
             {
 #ifdef CONFIG_STM32L4_LPTIM1
               case STM32L4_LPTIM1_BASE:
@@ -587,7 +587,7 @@ static int stm32l4_lptim_setclocksource(FAR struct stm32l4_lptim_dev_s *dev,
             }
           break;
           case STM32L4_LPTIM_CLK_LSE:
-          switch(priv->base)
+          switch (priv->base)
             {
 #ifdef CONFIG_STM32L4_LPTIM1
               case STM32L4_LPTIM1_BASE:
@@ -648,7 +648,6 @@ static int stm32l4_lptim_setcountmode(FAR struct stm32l4_lptim_dev_s *dev,
 {
   DEBUGASSERT(dev != NULL);
 
-
   if (cntmode == STM32L4_LPTIM_COUNT_CLOCK)
     {
       stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET,
@@ -676,7 +675,7 @@ static int stm32l4_lptim_setpolarity(FAR struct stm32l4_lptim_dev_s *dev,
 {
   DEBUGASSERT(dev != NULL);
 
-  switch(polarity)
+  switch (polarity)
     {
       case STM32L4_LPTIM_CLKPOL_RISING:
           stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET, LPTIM_CFGR_CKPOL_MASK,
@@ -707,14 +706,15 @@ static uint32_t stm32l4_lptim_getcounter(FAR struct stm32l4_lptim_dev_s *dev)
 
   DEBUGASSERT(dev != NULL);
 
-  uint32_t counter1, counter2;
+  uint32_t counter1;
+  uint32_t counter2;
 
   do
     {
       counter1 = getreg32((uintptr_t)(priv->base + STM32L4_LPTIM_CNT_OFFSET));
       counter2 = getreg32((uintptr_t)(priv->base + STM32L4_LPTIM_CNT_OFFSET));
-    } while (counter1 != counter2);
-
+    }
+  while (counter1 != counter2);
 
   return counter1;
 }
