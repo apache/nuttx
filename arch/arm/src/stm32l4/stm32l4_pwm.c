@@ -176,8 +176,8 @@ struct stm32l4_pwm_out_s
 
 struct stm32l4_pwmchan_s
 {
-  uint8_t                  channel:4;   /* Timer output channel: {1,..4} */
-  uint8_t                  mode:4;      /* PWM channel mode (see stm32l4_pwm_chanmode_e) */
+  uint8_t                    channel:4;   /* Timer output channel: {1,..4} */
+  uint8_t                    mode:4;      /* PWM channel mode (see stm32l4_pwm_chanmode_e) */
   struct stm32l4_pwm_out_s   out1;        /* PWM output configuration */
 #ifdef HAVE_BREAK
   struct stm32l4_pwm_break_s brk;         /* PWM break configuration */
@@ -196,6 +196,7 @@ struct stm32l4_pwmtimer_s
   FAR const struct stm32l4_pwm_ops_s *llops; /* Low-level PWM ops */
 #endif
   FAR struct stm32l4_pwmchan_s *channels; /* Channels configuration */
+
   uint8_t  timid:5;                     /* Timer ID {1,...,17} */
   uint8_t  chan_num:3;                  /* Number of configured channels */
   uint8_t  timtype:3;                   /* See the TIMTYPE_* definitions */
@@ -1610,7 +1611,6 @@ static void pwm_dumpregs(FAR struct pwm_lowerhalf_s *dev,
 
 static int pwm_ccr_update(FAR struct pwm_lowerhalf_s *dev, uint8_t index,
                           uint32_t ccr)
-
 {
   FAR struct stm32l4_pwmtimer_s *priv = (FAR struct stm32l4_pwmtimer_s *)dev;
   uint32_t offset = 0;
@@ -1979,7 +1979,8 @@ static int pwm_frequency_update(FAR struct pwm_lowerhalf_s *dev,
       reload--;
     }
 
-  pwminfo("TIM%u PCLK: %u frequency: %u TIMCLK: %u prescaler: %u reload: %u\n",
+  pwminfo("TIM%u PCLK: %u frequency: %u TIMCLK: %u "
+          "prescaler: %u reload: %u\n",
           priv->timid, priv->pclk, frequency, timclk, prescaler, reload);
 
   /* Set the reload and prescaler values */
@@ -2047,7 +2048,8 @@ static int pwm_lp_frequency_update(FAR struct pwm_lowerhalf_s *dev,
    * and not simply return the feasible frequency without complaining.
    */
 
-  pwminfo("LPTIM%u PCLK: %u frequency: %u TIMCLK: %u prescaler: %u reload: %u\n",
+  pwminfo("LPTIM%u PCLK: %u frequency: %u TIMCLK: %u "
+          "prescaler: %u reload: %u\n",
           priv->timid, priv->pclk, frequency, timclk, prescaler, reload);
 
   /* Set the reload register value */
@@ -2555,7 +2557,8 @@ static int pwm_outputs_enable(FAR struct pwm_lowerhalf_s *dev,
   regval |= ((outputs & STM32L4_PWM_OUT3N) ? ATIM_CCER_CC3NE : 0);
   regval |= ((outputs & STM32L4_PWM_OUT4)  ? ATIM_CCER_CC4E  : 0);
 
-  /* NOTE: CC4N does not exist, but some docs show configuration bits for it */
+  /* NOTE: CC4N does not exist, but some docs show configuration bits for it
+   */
 
   regval |= ((outputs & STM32L4_PWM_OUT5)  ? ATIM_CCER_CC5E  : 0);
   regval |= ((outputs & STM32L4_PWM_OUT6)  ? ATIM_CCER_CC6E  : 0);
