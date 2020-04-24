@@ -54,7 +54,7 @@
  * Private Data
  ****************************************************************************/
 
-/* Protects g_seqno, DNS cache and notify */
+/* Protects DNS cache, nameserver list and notify list. */
 
 static sem_t g_dns_sem = SEM_INITIALIZER(1);
 
@@ -94,9 +94,15 @@ static const uint16_t g_ipv6_hostaddr[8] =
 bool dns_initialize(void)
 {
 #ifndef CONFIG_NETDB_RESOLVCONF
-  /* Has the DNS server IP address been assigned? */
+  int nservers;
 
-  if (!g_dns_address)
+  dns_semtake();
+  nservers = g_dns_nservers;
+  dns_semgive();
+
+  /* Has at least one DNS server IP address been assigned? */
+
+  if (nservers == 0)
     {
 #if defined(CONFIG_NETDB_DNSSERVER_IPv4)
       struct sockaddr_in addr4;
@@ -147,7 +153,7 @@ bool dns_initialize(void)
  * Name: dns_semtake
  *
  * Description:
- *   Take the DNS semaphore, ignoring errors do to the receipt of signals.
+ *   Take the DNS semaphore, ignoring errors due to the receipt of signals.
  *
  ****************************************************************************/
 
