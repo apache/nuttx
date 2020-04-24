@@ -1,6 +1,9 @@
 Apache NuttX
 Copyright 2020 The Apache Software Foundation
 
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
 FAT Long File Names
 ===================
 
@@ -55,6 +58,3 @@ NXP Restriction for SPIFI code
    is used in conjunction with NXP Semiconductors microcontrollers. This
    copyright, permission, and disclaimer notice must appear in all copies of
    this code.
-
-This product includes software developed at
-The Apache Software Foundation (http://www.apache.org/).
