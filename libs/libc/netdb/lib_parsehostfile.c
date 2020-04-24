@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/netdb/lib_parsehostile.c
+ * libs/libc/netdb/lib_parsehostfile.c
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
