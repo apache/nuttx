@@ -106,6 +106,7 @@
 #  define LPTIM_CFGR_PRESCd32     (5 << LPTIM_CFGR_PRESC_SHIFT) /* 101: divide by 32 */
 #  define LPTIM_CFGR_PRESCd64     (6 << LPTIM_CFGR_PRESC_SHIFT) /* 110: divide by 64 */
 #  define LPTIM_CFGR_PRESCd128    (7 << LPTIM_CFGR_PRESC_SHIFT) /* 111: divide by 128 */
+
                                              /* Bit  12: reserved */
 #define LPTIM_CFGR_TRIGSEL_SHIFT  (13)       /* Bits 15-13: Trigger selector */
 #define LPTIM_CFGR_TRIGSEL_MASK   (7 << LPTIM_CFGR_TRIGSEL_SHIFT)
