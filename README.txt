@@ -140,9 +140,9 @@ Source Code
 -----------
 
   The project sources are in two Git repositories.  The core OS is in
-  incubator-nuttx and the apps repository is in incubator-apps.  These are
-  housed in GitBox on ASF servers and also mirrored at GitHub.  These are
-  kept in sync, so you can use whichever option you prefer.
+  incubator-nuttx and the apps repository is in incubator-nuttx-apps.  These
+  are housed in GitBox on ASF servers and also mirrored at GitHub.  These
+  are kept in sync, so you can use whichever option you prefer.
 
   - NuttX core OS repository:
 
