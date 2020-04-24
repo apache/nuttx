@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_pwr.c
  *
  *   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -34,11 +34,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
@@ -51,9 +51,9 @@
 #include "stm32l4_pwr.h"
 #include "stm32l4_rcc.h"
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
 static inline uint16_t stm32l4_pwr_getreg(uint8_t offset)
 {
@@ -65,22 +65,25 @@ static inline void stm32l4_pwr_putreg(uint8_t offset, uint16_t value)
   putreg32((uint32_t)value, STM32L4_PWR_BASE + (uint32_t)offset);
 }
 
-static inline void stm32l4_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uint16_t setbits)
+static inline void stm32l4_pwr_modifyreg(uint8_t offset, uint16_t clearbits,
+                                         uint16_t setbits)
 {
-  modifyreg32(STM32L4_PWR_BASE + (uint32_t)offset, (uint32_t)clearbits, (uint32_t)setbits);
+  modifyreg32(STM32L4_PWR_BASE + (uint32_t)offset,
+              (uint32_t)clearbits, (uint32_t)setbits);
 }
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: enableclk
  *
  * Description:
- *   Enable/disable the clock to the power control peripheral.  Enabling must be done
- *   after the APB1 clock is validly configured, and prior to using any functionality
- *   controlled by the PWR block (i.e. much of anything else provided by this module).
+ *   Enable/disable the clock to the power control peripheral.  Enabling
+ *   must be done after the APB1 clock is validly configured, and prior to
+ *   using any functionality controlled by the PWR block (i.e. much of
+ *   anything else provided by this module).
  *
  * Input Parameters:
  *   enable - True: enable the clock to the Power control (PWR) block.
@@ -88,7 +91,7 @@ static inline void stm32l4_pwr_modifyreg(uint8_t offset, uint16_t clearbits, uin
  * Returned Value:
  *   True:  the PWR block was previously enabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool stm32l4_pwr_enableclk(bool enable)
 {
@@ -118,12 +121,12 @@ bool stm32l4_pwr_enableclk(bool enable)
   return wasenabled;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_pwr_enablebkp
  *
  * Description:
- *   Enables access to the backup domain (RTC registers, RTC backup data registers
- *   and backup SRAM).
+ *   Enables access to the backup domain (RTC registers, RTC backup data
+ *   registers and backup SRAM).
  *
  * Input Parameters:
  *   writable - True: enable ability to write to backup domain registers
@@ -131,7 +134,7 @@ bool stm32l4_pwr_enableclk(bool enable)
  * Returned Value:
  *   True: The backup domain was previously writable.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool stm32l4_pwr_enablebkp(bool writable)
 {
@@ -167,21 +170,21 @@ bool stm32l4_pwr_enablebkp(bool writable)
   return waswritable;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_pwr_enableusv
  *
  * Description:
- *   Enables or disables the USB Supply Valid monitoring.  Setting this bit is
- *   mandatory to use the USB OTG FS peripheral.
+ *   Enables or disables the USB Supply Valid monitoring.  Setting this bit
+ *   is mandatory to use the USB OTG FS peripheral.
  *
  * Input Parameters:
- *   set - True: Vddusb is valid; False: Vddusb is not present. Logical and electrical
- *         isolation is applied to ignore this supply.
+ *   set - True: Vddusb is valid; False: Vddusb is not present. Logical and
+ *         electrical isolation is applied to ignore this supply.
  *
  * Returned Value:
  *   True: The bit was previously set.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool stm32l4_pwr_enableusv(bool set)
 {
@@ -227,7 +230,7 @@ bool stm32l4_pwr_enableusv(bool set)
   return was_set;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_setvos
  *
  * Description:
@@ -240,11 +243,11 @@ bool stm32l4_pwr_enableusv(bool set)
  *   None
  *
  * Assumptions:
- *   At present, this function is called only from initialization logic.  If used
- *   for any other purpose that protection to assure that its operation is atomic
- *   will be required.
+ *   At present, this function is called only from initialization logic.
+ *   If used for any other purpose that protection to assure that its
+ *   operation is atomic will be required.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_setvos(int vos)
 {

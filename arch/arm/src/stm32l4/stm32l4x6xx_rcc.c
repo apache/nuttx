@@ -723,11 +723,11 @@ static void stm32l4_stdclockconfig(void)
         }
     }
 
-  /* setting MSIRANGE */
+  /* Enable MSI and choosing frequency */
 
   regval  = getreg32(STM32L4_RCC_CR);
-  regval &= ~RCC_CR_MSIRANGE_MASK;                /* Zero-out current MSIRANGE bits */
-  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION | RCC_CR_MSIRGSEL);  /* Enable MSI and frequency */
+  regval &= ~RCC_CR_MSIRANGE_MASK;
+  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION | RCC_CR_MSIRGSEL);
   putreg32(regval, STM32L4_RCC_CR);
 
   /* Wait until the MSI is ready (or until a timeout elapsed) */
@@ -949,9 +949,11 @@ static void stm32l4_stdclockconfig(void)
         }
 #endif
 
-      /* TODO: could reduce flash wait states according to vcore range and freq */
-
-      /* Enable FLASH prefetch, instruction cache, data cache, and 4 wait states */
+      /* Enable FLASH prefetch, instruction cache, data cache,
+       * and 4 wait states.
+       * TODO: could reduce flash wait states according to vcore range
+       * and freq
+       */
 
 #ifdef CONFIG_STM32L4_FLASH_PREFETCH
       regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN |
