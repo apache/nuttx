@@ -127,7 +127,8 @@ int bt_queue_open(FAR const char *name, int oflags, int nmsgs,
  *   Block until the next buffer is received on the queue.
  *
  * Input Parameters:
- *   mqd - The message queue descriptor previously returned by bt_open_*queue.
+ *   mqd - The message queue descriptor previously returned by
+ *         bt_open_*queue.
  *   buf - The location in which to return the received buffer.
  *
  * Returned Value:

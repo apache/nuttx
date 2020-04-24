@@ -74,7 +74,7 @@ endif
 
 KERNDEPDIRS += sched drivers boards $(ARCH_SRC)
 KERNDEPDIRS += fs binfmt
-CONTEXTDIRS = boards $(APPDIR)
+CONTEXTDIRS = boards fs $(APPDIR)
 CLEANDIRS += pass1
 
 ifeq ($(CONFIG_BUILD_FLAT),y)

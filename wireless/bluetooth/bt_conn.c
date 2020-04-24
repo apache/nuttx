@@ -615,7 +615,9 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
                           BT_NORMAL_PRIO);
           }
 
-        /* Release the reference we took for the very first state transition. */
+        /* Release the reference we took for the very first state
+         * transition.
+         */
 
         bt_conn_release(conn);
         break;

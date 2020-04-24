@@ -56,7 +56,7 @@
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
- * Public MAC Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,10 +67,10 @@
  *   attribute.
  *
  *   NOTE: The standard specifies that the attribute value should be returned
- *   via the asynchronous MLME-GET.confirm primitive.  However, in our
- *   implementation, we synchronously return the value immediately.Therefore, we
- *   merge the functionality of the MLME-GET.request and MLME-GET.confirm
- *   primitives together.
+ *   via the asynchronous MLME-GET.confirm primitive.
+ *   However, in our implementation, we synchronously return the value
+ *   immediately. Therefore, we merge the functionality of the
+ *   MLME-GET.request and MLME-GET.confirm primitives together.
  *
  ****************************************************************************/
 
@@ -103,13 +103,15 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
 
       case IEEE802154_ATTR_MAC_COORD_SADDR:
         {
-          IEEE802154_SADDRCOPY(attrval->mac.coordsaddr, priv->pandesc.coordaddr.saddr);
+          IEEE802154_SADDRCOPY(attrval->mac.coordsaddr,
+                               priv->pandesc.coordaddr.saddr);
         }
         break;
 
       case IEEE802154_ATTR_MAC_COORD_EADDR:
         {
-          IEEE802154_EADDRCOPY(attrval->mac.coordeaddr, priv->pandesc.coordaddr.eaddr);
+          IEEE802154_EADDRCOPY(attrval->mac.coordeaddr,
+                               priv->pandesc.coordaddr.eaddr);
         }
         break;
 
@@ -165,10 +167,10 @@ int mac802154_req_get(MACHANDLE mac, enum ieee802154_attr_e attr,
  *   indicated MAC PIB attribute.
  *
  *   NOTE: The standard specifies that confirmation should be indicated via
- *   the asynchronous MLME-SET.confirm primitive.  However, in our implementation
- *   we synchronously return the status from the request. Therefore, we do merge
- *   the functionality of the MLME-SET.request and MLME-SET.confirm primitives
- *   together.
+ *   the asynchronous MLME-SET.confirm primitive.
+ *   However, in our implementation we synchronously return the status from
+ *   the request. Therefore, we do merge the functionality of the
+ *   MLME-SET.request and MLME-SET.confirm primitives together.
  *
  ****************************************************************************/
 
@@ -248,5 +250,6 @@ int mac802154_req_set(MACHANDLE mac, enum ieee802154_attr_e attr,
         }
         break;
     }
+
   return ret;
 }

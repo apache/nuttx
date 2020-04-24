@@ -50,15 +50,15 @@
 #include <nuttx/wireless/ieee802154/ieee802154_mac.h>
 
 /****************************************************************************
- * Public MAC Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: mac802154_req_gts
  *
  * Description:
- *   The MLME-GTS.request primitive allows a device to send a request to the PAN
- *   coordinator to allocate a new GTS or to deallocate an existing GTS.
+ *   The MLME-GTS.request primitive allows a device to send a request to the
+ *   PAN coordinator to allocate a new GTS or to deallocate an existing GTS.
  *   Confirmation is returned via the
  *   struct mac802154_maccb_s->conf_gts callback.
  *
