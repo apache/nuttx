@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/stm32l4/stm32l4_pwr.h
  *
  *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
@@ -31,14 +31,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_PWR_H
 #define __ARCH_ARM_SRC_STM32L4_STM32L4_PWR_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -47,9 +47,9 @@
 #include "chip.h"
 #include "hardware/stm32l4_pwr.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -62,17 +62,18 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: enableclk
  *
  * Description:
- *   Enable/disable the clock to the power control peripheral.  Enabling must be done
- *   after the APB1 clock is validly configured, and prior to using any functionality
- *   controlled by the PWR block (i.e. much of anything else provided by this module).
+ *   Enable/disable the clock to the power control peripheral.  Enabling
+ *   must be done after the APB1 clock is validly configured, and prior to
+ *   using any functionality controlled by the PWR block (i.e. much of
+ *   anything else provided by this module).
  *
  * Input Parameters:
  *   enable - True: enable the clock to the Power control (PWR) block.
@@ -80,16 +81,16 @@ extern "C"
  * Returned Value:
  *   True:  the PWR block was previously enabled.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool stm32l4_pwr_enableclk(bool enable);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_pwr_enablebkp
  *
  * Description:
- *   Enables access to the backup domain (RTC registers, RTC backup data registers
- *   and backup SRAM).
+ *   Enables access to the backup domain (RTC registers, RTC backup data
+ *   registers and backup SRAM).
  *
  * Input Parameters:
  *   writable - True: enable ability to write to backup domain registers
@@ -97,29 +98,29 @@ bool stm32l4_pwr_enableclk(bool enable);
  * Returned Value:
  *   True: The backup domain was previously writable.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool stm32l4_pwr_enablebkp(bool writable);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32l4_pwr_enableusv
  *
  * Description:
- *   Enables or disables the USB Supply Valid monitoring.  Setting this bit is
- *   mandatory to use the USB OTG FS peripheral.
+ *   Enables or disables the USB Supply Valid monitoring.  Setting this bit
+ *   is mandatory to use the USB OTG FS peripheral.
  *
  * Input Parameters:
- *   set - True: Vddusb is valid; False: Vddusb is not present. Logical and electrical
- *         isolation is applied to ignore this supply.
+ *   set - True: Vddusb is valid; False: Vddusb is not present. Logical and
+ *         electrical isolation is applied to ignore this supply.
  *
  * Returned Value:
  *   True: The bit was previously set.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 bool stm32l4_pwr_enableusv(bool set);
 
-/************************************************************************************
+/****************************************************************************
  * Name: stm32_pwr_setvos
  *
  * Description:
@@ -132,11 +133,11 @@ bool stm32l4_pwr_enableusv(bool set);
  *   None
  *
  * Assumptions:
- *   At present, this function is called only from initialization logic.  If used
- *   for any other purpose that protection to assure that its operation is atomic
- *   will be required.
+ *   At present, this function is called only from initialization logic.
+ *   If used for any other purpose that protection to assure that its
+ *   operation is atomic will be required.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void stm32_pwr_setvos(int vos);
 
