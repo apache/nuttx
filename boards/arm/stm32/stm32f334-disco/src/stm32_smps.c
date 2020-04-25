@@ -201,7 +201,7 @@ enum converter_mode_e
   CONVERTER_MODE_INIT,      /* Initial mode */
   CONVERTER_MODE_BUCK,      /* Buck mode operations  (V_in > V_out) */
   CONVERTER_MODE_BOOST,     /* Boost mode operations (V_in < V_out) */
-  CONVERTER_MODE_BUCKBOOST, /* Buck-boost operations (V_in near V_out)*/
+  CONVERTER_MODE_BUCKBOOST, /* Buck-boost operations (V_in near V_out) */
 };
 
 /* SMPS lower drivers structure */
@@ -396,7 +396,7 @@ static int smps_setup(FAR struct smps_dev_s *dev)
 
   /* Update ADC sample time */
 
-  for (i = 0; i < ADC1_NCHANNELS; i+= 1)
+  for (i = 0; i < ADC1_NCHANNELS; i += 1)
     {
       channels[i].sample_time = ADC_SMPR_61p5;
       channels[i].channel     = g_adc1chan[i];
@@ -450,7 +450,7 @@ static int smps_start(FAR struct smps_dev_s *dev)
   /* Get TIMA period value for given frequency */
 
   fclk = HRTIM_FCLK_GET(hrtim, HRTIM_TIMER_TIMA);
-  per = fclk/TIMA_PWM_FREQ;
+  per = fclk / TIMA_PWM_FREQ;
   if (per > HRTIM_PER_MAX)
     {
       pwrerr("ERROR:  Can not achieve tima pwm freq=%u if fclk=%llu\n",
@@ -466,7 +466,7 @@ static int smps_start(FAR struct smps_dev_s *dev)
   /* Get TIMB period value for given frequency */
 
   fclk = HRTIM_FCLK_GET(hrtim, HRTIM_TIMER_TIMB);
-  per = fclk/TIMB_PWM_FREQ;
+  per = fclk / TIMB_PWM_FREQ;
   if (per > HRTIM_PER_MAX)
     {
       pwrerr("ERROR:  Can not achieve timb pwm freq=%u if fclk=%llu\n",
@@ -485,14 +485,18 @@ static int smps_start(FAR struct smps_dev_s *dev)
 
   /* Configure TIMER A and TIMER B deadtime mode
    *
-   * NOTE: In deadtime mode we have to configure output 1 only (SETx1, RSTx1),
-   * output 2 configuration is not significant.
+   * NOTE: In deadtime mode we have to configure output 1 only
+   * (SETx1, RSTx1), output 2 configuration is not significant.
    */
 
-  HRTIM_DEADTIME_UPDATE(hrtim, HRTIM_TIMER_TIMA, HRTIM_DT_EDGE_RISING, DT_RISING);
-  HRTIM_DEADTIME_UPDATE(hrtim, HRTIM_TIMER_TIMA, HRTIM_DT_EDGE_FALLING, DT_FALLING);
-  HRTIM_DEADTIME_UPDATE(hrtim, HRTIM_TIMER_TIMB, HRTIM_DT_EDGE_RISING, DT_RISING);
-  HRTIM_DEADTIME_UPDATE(hrtim, HRTIM_TIMER_TIMB, HRTIM_DT_EDGE_FALLING, DT_FALLING);
+  HRTIM_DEADTIME_UPDATE(hrtim, HRTIM_TIMER_TIMA, HRTIM_DT_EDGE_RISING,
+                        DT_RISING);
+  HRTIM_DEADTIME_UPDATE(hrtim, HRTIM_TIMER_TIMA, HRTIM_DT_EDGE_FALLING,
+                        DT_FALLING);
+  HRTIM_DEADTIME_UPDATE(hrtim, HRTIM_TIMER_TIMB, HRTIM_DT_EDGE_RISING,
+                        DT_RISING);
+  HRTIM_DEADTIME_UPDATE(hrtim, HRTIM_TIMER_TIMB, HRTIM_DT_EDGE_FALLING,
+                        DT_FALLING);
 
   /* Set T4 and T12 to a low state.
    * Deadtime mode force T11 and T5 to a high state.
@@ -635,28 +639,28 @@ static int smps_limits_set(FAR struct smps_dev_s *dev,
 
   if (limits->v_out * 1000 > CONFIG_EXAMPLES_SMPS_OUT_VOLTAGE_LIMIT)
     {
-      limits->v_out = (float)CONFIG_EXAMPLES_SMPS_OUT_VOLTAGE_LIMIT/1000.0;
+      limits->v_out = (float)CONFIG_EXAMPLES_SMPS_OUT_VOLTAGE_LIMIT / 1000.0;
       pwrwarn("WARNING: "
-              "SMPS output voltage limiit > SMPS absolute output voltage limit."
-              " Set output voltage limit to %.2f.\n",
+              "SMPS output voltage limiit > SMPS absolute output voltage "
+              "limit. Set output voltage limit to %.2f.\n",
               limits->v_out);
     }
 
   if (limits->v_in * 1000 > CONFIG_EXAMPLES_SMPS_IN_VOLTAGE_LIMIT)
     {
-      limits->v_in = (float)CONFIG_EXAMPLES_SMPS_IN_VOLTAGE_LIMIT/1000.0;
+      limits->v_in = (float)CONFIG_EXAMPLES_SMPS_IN_VOLTAGE_LIMIT / 1000.0;
       pwrwarn("WARNING: "
-              "SMPS input voltage limiit > SMPS absolute input voltage limit."
-              " Set input voltage limit to %.2f.\n",
+              "SMPS input voltage limiit > SMPS absolute input voltage "
+              "limit. Set input voltage limit to %.2f.\n",
               limits->v_in);
     }
 
   if (limits->i_out * 1000 > CONFIG_EXAMPLES_SMPS_OUT_CURRENT_LIMIT)
     {
-      limits->i_out = (float)CONFIG_EXAMPLES_SMPS_OUT_CURRENT_LIMIT/1000.0;
+      limits->i_out = (float)CONFIG_EXAMPLES_SMPS_OUT_CURRENT_LIMIT / 1000.0;
       pwrwarn("WARNING: "
-              "SMPS output current limiit > SMPS absolute output current limit."
-              " Set output current limit to %.2f.\n",
+              "SMPS output current limiit > SMPS absolute output current "
+              "limit. Set output current limit to %.2f.\n",
               limits->i_out);
     }
 
@@ -738,7 +742,8 @@ static float smps_controller(FAR struct smps_priv_s *priv, float err)
  * Name: smps_duty_set
  ****************************************************************************/
 
-static void smps_duty_set(struct smps_priv_s *priv, struct smps_lower_dev_s *lower,
+static void smps_duty_set(struct smps_priv_s *priv,
+                          struct smps_lower_dev_s *lower,
                           float out)
 {
   FAR struct hrtim_dev_s *hrtim = lower->hrtim;
@@ -761,7 +766,7 @@ static void smps_duty_set(struct smps_priv_s *priv, struct smps_lower_dev_s *low
           if (out >= priv->v_in) out = priv->v_in;
           if (out < 0.0) out = 0.0;
 
-          duty = out/priv->v_in;
+          duty = out / priv->v_in;
 
 #warning TODO: current limit in buck mode
 
@@ -769,7 +774,7 @@ static void smps_duty_set(struct smps_priv_s *priv, struct smps_lower_dev_s *low
 
           cmp = (uint16_t)(per * duty);
 
-          if (cmp > per-30) cmp = per - 30;
+          if (cmp > per - 30) cmp = per - 30;
 
           /* Set T4 duty cycle. T11 is complementary to T4 */
 
@@ -785,7 +790,7 @@ static void smps_duty_set(struct smps_priv_s *priv, struct smps_lower_dev_s *low
           if (out < priv->v_in) out = priv->v_in;
           if (out >= BOOST_VOLT_MAX) out = BOOST_VOLT_MAX;
 
-          duty = 1.0 - priv->v_in/out;
+          duty = 1.0 - priv->v_in / out;
 
 #warning TODO: current limit in boost mode
 
@@ -809,7 +814,7 @@ static void smps_duty_set(struct smps_priv_s *priv, struct smps_lower_dev_s *low
           if (out < priv->v_in) out = priv->v_in;
           if (out >= BOOST_VOLT_MAX) out = BOOST_VOLT_MAX;
 
-          duty = 1.0 - priv->v_in/out;
+          duty = 1.0 - priv->v_in / out;
 
 #warning TODO: current limit in buck boost mode
 
@@ -841,7 +846,8 @@ static void smps_duty_set(struct smps_priv_s *priv, struct smps_lower_dev_s *low
  *
  ****************************************************************************/
 
-static void smps_conv_mode_set(struct smps_priv_s *priv, struct smps_lower_dev_s *lower,
+static void smps_conv_mode_set(struct smps_priv_s *priv,
+                               struct smps_lower_dev_s *lower,
                                uint8_t mode)
 {
   FAR struct hrtim_dev_s *hrtim = lower->hrtim;
@@ -854,7 +860,6 @@ static void smps_conv_mode_set(struct smps_priv_s *priv, struct smps_lower_dev_s
     {
       case CONVERTER_MODE_INIT:
         {
-
           break;
         }
 
@@ -862,15 +867,19 @@ static void smps_conv_mode_set(struct smps_priv_s *priv, struct smps_lower_dev_s
         {
           /* Set T12 low (T5 high) on the next PER */
 
-          HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMB_CH1, HRTIM_OUT_SET_NONE);
-          HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMB_CH1, HRTIM_OUT_RST_PER);
-
+          HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMB_CH1,
+                               HRTIM_OUT_SET_NONE);
+          HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMB_CH1,
+                               HRTIM_OUT_RST_PER);
 
           /* Set T4 to a high state on PER and reset on CMP1.
-             T11 is complementary to T4. */
+           * T11 is complementary to T4.
+           */
 
-          HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMA_CH1, HRTIM_OUT_SET_PER);
-          HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMA_CH1, HRTIM_OUT_RST_CMP1);
+          HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMA_CH1,
+                               HRTIM_OUT_SET_PER);
+          HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMA_CH1,
+                               HRTIM_OUT_RST_CMP1);
 
           break;
         }
@@ -879,14 +888,19 @@ static void smps_conv_mode_set(struct smps_priv_s *priv, struct smps_lower_dev_s
         {
           /* Set T4 high (T11 low) on the next PER */
 
-          HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMA_CH1, HRTIM_OUT_SET_PER);
-          HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMA_CH1, HRTIM_OUT_RST_NONE);
+          HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMA_CH1,
+                               HRTIM_OUT_SET_PER);
+          HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMA_CH1,
+                               HRTIM_OUT_RST_NONE);
 
           /* Set T12 to a high state on PER and reset on CMP1.
-             T5 is complementary to T12. */
+           * T5 is complementary to T12.
+           */
 
-          HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMB_CH1, HRTIM_OUT_SET_PER);
-          HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMB_CH1, HRTIM_OUT_RST_CMP1);
+          HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMB_CH1,
+                               HRTIM_OUT_SET_PER);
+          HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMB_CH1,
+                               HRTIM_OUT_RST_CMP1);
 
           break;
         }
@@ -894,22 +908,28 @@ static void smps_conv_mode_set(struct smps_priv_s *priv, struct smps_lower_dev_s
       case CONVERTER_MODE_BUCKBOOST:
         {
           /* Set T4 to a high state on PER and reset on CMP1.
-             T11 is complementary to T4. */
+           * T11 is complementary to T4.
+           */
 
-          HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMA_CH1, HRTIM_OUT_SET_PER);
-          HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMA_CH1, HRTIM_OUT_RST_CMP1);
+          HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMA_CH1,
+                               HRTIM_OUT_SET_PER);
+          HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMA_CH1,
+                               HRTIM_OUT_RST_CMP1);
 
           /* Set T12 to a high state on PER and reset on CMP1.
-             T5 is complementary to T12. */
+           * T5 is complementary to T12.
+           */
 
-          HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMB_CH1, HRTIM_OUT_SET_PER);
-          HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMB_CH1, HRTIM_OUT_RST_CMP1);
+          HRTIM_OUTPUT_SET_SET(hrtim, HRTIM_OUT_TIMB_CH1,
+                               HRTIM_OUT_SET_PER);
+          HRTIM_OUTPUT_RST_SET(hrtim, HRTIM_OUT_TIMB_CH1,
+                               HRTIM_OUT_RST_CMP1);
 
           /* Set fixed duty cycle (80%) on buck converter (T4 and T11) */
 
           HRTIM_CMP_SET(hrtim, HRTIM_TIMER_TIMA, HRTIM_CMP1,
-                        0.8 * ((uint16_t)HRTIM_PER_GET(hrtim, HRTIM_TIMER_TIMA)));
-
+                        0.8 * ((uint16_t)HRTIM_PER_GET(hrtim,
+                                                       HRTIM_TIMER_TIMA)));
 
           break;
         }
@@ -962,25 +982,33 @@ static void adc12_handler(void)
       priv->v_out = (priv->v_out_raw * ref / bit) * V_OUT_RATIO;
       priv->v_in  = (priv->v_in_raw * ref / bit) * V_IN_RATIO;
 
-      /* According to measured voltages we set converter in appropriate mode */
+      /* According to measured voltages we set converter
+       * in appropriate mode
+       */
 
-      if (smps->param.v_out > (priv->v_in+SMPS_BUCKBOOST_RANGE))
+      if (smps->param.v_out > (priv->v_in + SMPS_BUCKBOOST_RANGE))
         {
-          /* Desired output voltage greater than input voltage - set boost converter */
+          /* Desired output voltage greater than input voltage - set
+           * boost converter
+           */
 
           mode = CONVERTER_MODE_BOOST;
         }
 
-      else if (smps->param.v_out < (priv->v_in-SMPS_BUCKBOOST_RANGE))
+      else if (smps->param.v_out < (priv->v_in - SMPS_BUCKBOOST_RANGE))
         {
-          /* Desired output voltage lower than input voltage - set buck converter */
+          /* Desired output voltage lower than input voltage - set
+           * buck converter
+           */
 
           mode = CONVERTER_MODE_BUCK;
         }
 
       else
         {
-          /* Desired output voltage close to input voltage - set buck-boost converter */
+          /* Desired output voltage close to input voltage - set
+           * buck-boost converter
+           */
 
           mode = CONVERTER_MODE_BUCKBOOST;
         }
@@ -1101,8 +1129,9 @@ int stm32_smps_setup(void)
 
       adc->ad_ops->ao_setup(adc);
 
-      /* We do not need register character drivers for SMPS lower peripherals.
-       * All control should be done via SMPS character driver.
+      /* We do not need register character drivers for SMPS lower
+       * peripherals. All control should be done via SMPS character
+       * driver.
        */
 
       ret = smps_register(CONFIG_EXAMPLES_SMPS_DEVPATH, smps, (void *)lower);
