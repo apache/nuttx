@@ -230,7 +230,7 @@ void adc_handler(void)
       g_highpri.r_volt[g_highpri.current] =
         (float)g_highpri.r_val[g_highpri.current] * ref / bit;
 
-      if (g_highpri.current >= REG_NCHANNELS-1)
+      if (g_highpri.current >= REG_NCHANNELS - 1)
         {
           g_highpri.current = 0;
         }
@@ -267,6 +267,7 @@ void adc_handler(void)
 #endif
 
 irq_out:
+
   /* Clear ADC pending interrupts */
 
   STM32_ADC_INT_ACK(adc, pending);
@@ -308,6 +309,7 @@ void dma2s0_handler(void)
     }
 
 irq_out:
+
   /* Clear DMA pending interrupts */
 
   stm32_dma_intack(DMA2, DMA_STREAM0, pending);
