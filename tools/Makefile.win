@@ -399,6 +399,7 @@ clean_context:
 	$(Q) for %%G in ($(CCLEANDIRS)) do ( if exist %%G\Makefile $(MAKE) -C %%G TOPDIR="$(TOPDIR)" clean_context )
 	$(call DELFILE, include\nuttx\config.h)
 	$(call DELFILE, include\nuttx\version.h)
+	$(call DELFILE, include\float.h)
 	$(call DELFILE, include\math.h)
 	$(call DELFILE, include\stdarg.h)
 	$(call DELFILE, include\setjmp.h)
@@ -590,6 +591,7 @@ clean: subdir_clean
 	$(call DELFILE, nuttx_user*)
 	$(call DELFILE, .gdbinit)
 	$(call DELDIR, staging)
+	$(call DELFILE, uImage)
 	$(call CLEAN)
 
 subdir_distclean:
@@ -601,8 +603,10 @@ ifeq ($(CONFIG_BUILD_2PASS),y)
 endif
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, defconfig)
+	$(call DELFILE, defconfig.tmp-e)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
+	$(call DELFILE, .config-e)
 	$(call DELDIR, include\arch\board)
 	$(call DELDIR, include\arch\chip)
 	$(call DELDIR, include\arch)

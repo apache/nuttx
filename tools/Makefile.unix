@@ -387,6 +387,7 @@ clean_context:
 			$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" clean_context ; \
 		fi \
 	done
+	$(call DELFILE, include/float.h)
 	$(call DELFILE, include/math.h)
 	$(call DELFILE, include/stdarg.h)
 	$(call DELFILE, include/setjmp.h)
@@ -612,6 +613,7 @@ clean: subdir_clean
 	$(call DELDIR, nuttx-export*)
 	$(call DELFILE, nuttx_user*)
 	$(call DELDIR, staging)
+	$(call DELFILE, uImage)
 	$(call CLEAN)
 
 subdir_distclean:
@@ -629,8 +631,10 @@ endif
 	$(call DELFILE, include/nuttx/version.h)
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, defconfig)
+	$(call DELFILE, defconfig.tmp-e)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
+	$(call DELFILE, .config-e)
 	$(call DELFILE, .gdbinit)
 	$(Q) $(DIRUNLINK) include/arch/board
 	$(Q) $(DIRUNLINK) include/arch/chip
