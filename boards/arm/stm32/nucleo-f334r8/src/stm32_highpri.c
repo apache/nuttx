@@ -260,7 +260,7 @@ void adc12_handler(void)
       g_highpri.r_volt[g_highpri.current] =
         (float)g_highpri.r_val[g_highpri.current] * ref / bit;
 
-      if (g_highpri.current >= REG_NCHANNELS-1)
+      if (g_highpri.current >= REG_NCHANNELS - 1)
         {
           g_highpri.current = 0;
         }
@@ -297,6 +297,7 @@ void adc12_handler(void)
 #endif
 
 irq_out:
+
   /* Clear ADC pending interrupts */
 
   STM32_ADC_INT_ACK(adc, pending);
@@ -338,6 +339,7 @@ void dma1ch1_handler(void)
     }
 
 irq_out:
+
   /* Clear DMA pending interrupts */
 
   stm32_dma_intack(STM32_DMA1_CHAN1, pending);
@@ -411,7 +413,7 @@ int highpri_main(int argc, char *argv[])
 
   /* Set Timer A Period */
 
-  HRTIM_PER_SET(hrtim, HRTIM_TIMER_TIMA, 0xFFD0);
+  HRTIM_PER_SET(hrtim, HRTIM_TIMER_TIMA, 0xffd0);
 #endif /* HIGHPRI_HAVE_HRTIM */
 
 #ifdef HIGHPRI_HAVE_TIM1
