@@ -407,8 +407,8 @@ static int smps_setup(FAR struct smps_dev_s *dev)
   stime.channels_nbr = ADC1_NCHANNELS;
   stime.channel      = channels;
 
-  ADC_SAMPLETIME_SET(adc, &stime);
-  ADC_SAMPLETIME_WRITE(adc);
+  STM32_ADC_SAMPLETIME_SET(adc, &stime);
+  STM32_ADC_SAMPLETIME_WRITE(adc);
 
   /* TODO: create current limit table */
 
@@ -512,7 +512,7 @@ static int smps_start(FAR struct smps_dev_s *dev)
 
   /* Enable ADC JEOS interrupts */
 
-  ADC_INT_ENABLE(adc, ADC_INT_JEOS);
+  STM32_ADC_INT_ENABLE(adc, ADC_INT_JEOS);
 
   /* Enable ADC12 interrupts */
 
@@ -520,7 +520,7 @@ static int smps_start(FAR struct smps_dev_s *dev)
 
   /* Start injected conversion */
 
-  ADC_INJ_STARTCONV(adc, true);
+  STM32_ADC_INJ_STARTCONV(adc, true);
 
 errout:
   return ret;
@@ -540,11 +540,11 @@ static int smps_stop(FAR struct smps_dev_s *dev)
 
   /* Stop injected conversion */
 
-  ADC_INJ_STARTCONV(adc, false);
+  STM32_ADC_INJ_STARTCONV(adc, false);
 
   /* Disable ADC JEOS interrupts */
 
-  ADC_INT_DISABLE(adc, ADC_INT_JEOS);
+  STM32_ADC_INT_DISABLE(adc, ADC_INT_JEOS);
 
   /* Disable ADC12 interrupts */
 
@@ -948,14 +948,14 @@ static void adc12_handler(void)
   float out;
   uint8_t mode;
 
-  pending = ADC_INT_GET(adc);
+  pending = STM32_ADC_INT_GET(adc);
 
   if (pending & ADC_INT_JEOC && priv->running == true)
     {
       /* Get raw ADC values */
 
-      priv->v_out_raw = ADC_INJDATA_GET(adc, V_OUT_ADC_INJ_CHANNEL);
-      priv->v_in_raw  = ADC_INJDATA_GET(adc, V_IN_ADC_INJ_CHANNEL);
+      priv->v_out_raw = STM32_ADC_INJDATA_GET(adc, V_OUT_ADC_INJ_CHANNEL);
+      priv->v_in_raw  = STM32_ADC_INJDATA_GET(adc, V_IN_ADC_INJ_CHANNEL);
 
       /* Convert raw values to real values */
 
@@ -1010,7 +1010,7 @@ static void adc12_handler(void)
 
   /* Clear pending */
 
-  ADC_INT_ACK(adc, pending);
+  STM32_ADC_INT_ACK(adc, pending);
 }
 
 /****************************************************************************

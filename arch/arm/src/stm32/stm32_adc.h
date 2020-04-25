@@ -1948,31 +1948,31 @@
 
 /* Low-level ops helpers ************************************************************/
 
-#define ADC_INT_ACK(adc, source)                     \
+#define STM32_ADC_INT_ACK(adc, source)              \
         (adc)->llops->int_ack(adc, source)
-#define ADC_INT_GET(adc)                             \
+#define STM32_ADC_INT_GET(adc)                      \
         (adc)->llops->int_get(adc)
-#define ADC_INT_ENABLE(adc, source)                  \
+#define STM32_ADC_INT_ENABLE(adc, source)           \
         (adc)->llops->int_en(adc, source)
-#define ADC_INT_DISABLE(adc, source)                 \
+#define STM32_ADC_INT_DISABLE(adc, source)          \
         (adc)->llops->int_dis(adc, source)
-#define ADC_REGDATA_GET(adc)                         \
+#define STM32_ADC_REGDATA_GET(adc)                  \
         (adc)->llops->val_get(adc)
-#define ADC_REGBUF_REGISTER(adc, buffer, len)        \
+#define STM32_ADC_REGBUF_REGISTER(adc, buffer, len) \
         (adc)->llops->regbuf_reg(adc, buffer, len)
-#define ADC_REG_STARTCONV(adc, state)                \
+#define STM32_ADC_REG_STARTCONV(adc, state)         \
         (adc)->llops->reg_startconv(adc, state)
-#define ADC_OFFSET_SET(adc, ch, i, o)                \
+#define STM32_ADC_OFFSET_SET(adc, ch, i, o)         \
         (adc)->llops->offset_set(adc, ch, i, o)
-#define ADC_INJ_STARTCONV(adc, state)                \
+#define STM32_ADC_INJ_STARTCONV(adc, state)         \
         (adc)->llops->inj_startconv(adc, state)
-#define ADC_INJDATA_GET(adc, chan)                   \
+#define STM32_ADC_INJDATA_GET(adc, chan)            \
         (adc)->llops->inj_get(adc, chan)
-#define ADC_SAMPLETIME_SET(adc, time_samples)        \
+#define STM32_ADC_SAMPLETIME_SET(adc, time_samples) \
         (adc)->llops->stime_set(adc, time_samples)
-#define ADC_SAMPLETIME_WRITE(adc)                    \
+#define STM32_ADC_SAMPLETIME_WRITE(adc)             \
         (adc)->llops->stime_write(adc)
-#define ADC_DUMP_REGS(adc)                           \
+#define STM32_ADC_DUMP_REGS(adc)                    \
         (adc)->llops->dump_regs(adc)
 
 /************************************************************************************
