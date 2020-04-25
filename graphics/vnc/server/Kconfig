@@ -148,8 +148,8 @@ config VNCSERVER_DEBUG
 	default n
 	depends on DEBUG_FEATURES && !DEBUG_GRAPHICS
 	---help---
-		Normally VNC debug output is selected with DEBUG_GRAPHICS.  The VNC
-		server server support this special option to enable GRAPHICS debug
+		Normally VNC debug output is selected with DEBUG_GRAPHICS.  The
+		VNC server support this special option to enable GRAPHICS debug
 		output for the VNC server while GRAPHICS debug is disabled.  This
 		provides an cleaner, less cluttered output when you only wish to
 		debug the VNC server versus enabling DEBUG_GRAPHICS globally.
