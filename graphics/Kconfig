@@ -70,11 +70,6 @@ config NX_RAMBACKED
 		It is necessary in that case to provide new graphic content for the
 		extended window area.
 
-		Redraw requests in other cases are also suppressed:  Changes to window
-		position, size, etc.  As a consequence, some manual updates will be
-		required when certain events occur (like removing a toolbar from a
-		window).
-
 		NOTE:  A significant amount of RAM, usually external SDRAM, may be
 		required to use per-window framebuffers.
 
@@ -107,7 +102,7 @@ config NX_SWCURSOR
 		     internal buffer.  Neither of  those are implemented.
 
 config NX_HWCURSOR
-	bool "Software cursor support"
+	bool "Hardware cursor support"
 	depends on (FB_HWCURSOR || LCD_HWCURSOR) && EXPERIMENTAL
 	---help---
 		Hardware cursor support has not been implemented, hence the
@@ -116,7 +111,7 @@ config NX_HWCURSOR
 endchoice # Cursor support
 
 config NX_HWCURSORIMAGE
-	bool "Support cursor images"
+	bool "Support hardware cursor images"
 	default n
 	depends on NX_HWCURSOR
 
