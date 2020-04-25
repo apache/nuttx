@@ -114,7 +114,7 @@ GEN_CSRCS	= $(SETP_CSRC) $(RFILL_CSRC) $(RGET_CSRC) $(TFILL_CSRC) $(RMOVE_CSRC) 
 BLITDIR		= pwfb
 
 all:	$(GEN_CSRCS)
-.PHONY : clean distclean
+.PHONY : distclean
 
 $(SETP_CSRC) : $(BLITDIR)/pwfb_setpixel.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
@@ -158,11 +158,7 @@ ifneq ($(NXGLIB_BITSPERPIXEL),)
 	$(Q) rm -f  $(RCOPY_TMP)
 endif
 
-clean:
-	$(call DELFILE, *.i)
-	$(call CLEAN)
-
-distclean: clean
+distclean:
 	$(call DELFILE, pwfb_setpixel_*bpp.c)
 	$(call DELFILE, pwfb_fillrectangle_*bpp.c)
 	$(call DELFILE, pwfb_getrectangle_*bpp.c)

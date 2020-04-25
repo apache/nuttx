@@ -112,5 +112,4 @@ endif
 
 DEPPATH += --dep-path nxglib
 CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxglib}
-#VPATH += :nxglib
 VPATH = nxglib
