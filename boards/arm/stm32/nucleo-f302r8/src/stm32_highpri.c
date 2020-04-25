@@ -220,7 +220,7 @@ void adc12_handler(void)
 
   /* Get pending ADC interrupts */
 
-  pending = ADC_INT_GET(adc);
+  pending = STM32_ADC_INT_GET(adc);
 
   if (g_highpri.lock == true)
     {
@@ -238,7 +238,7 @@ void adc12_handler(void)
 
       /* Get regular data */
 
-      g_highpri.r_val[g_highpri.current] = ADC_REGDATA_GET(adc);
+      g_highpri.r_val[g_highpri.current] = STM32_ADC_REGDATA_GET(adc);
 
       /* Do some floating point operations */
 
@@ -269,7 +269,7 @@ void adc12_handler(void)
 
       for (i = 0; i < INJ_NCHANNELS; i += 1)
         {
-          g_highpri.j_val[i] = ADC_INJDATA_GET(adc, i);
+          g_highpri.j_val[i] = STM32_ADC_INJDATA_GET(adc, i);
         }
 
       /* Do some floating point operations */
@@ -284,7 +284,7 @@ void adc12_handler(void)
 irq_out:
   /* Clear ADC pending interrupts */
 
-  ADC_INT_ACK(adc, pending);
+  STM32_ADC_INT_ACK(adc, pending);
 }
 #endif
 
@@ -478,17 +478,17 @@ int highpri_main(int argc, char *argv[])
 #ifndef CONFIG_STM32_ADC1_DMA
   /* Enable ADC regular conversion interrupts if no DMA */
 
-  ADC_INT_ENABLE(highpri->adc1, ADC_IER_EOC);
+  STM32_ADC_INT_ENABLE(highpri->adc1, ADC_IER_EOC);
 #else
   /* Register ADC buffer for DMA transfer */
 
-  ADC_REGBUF_REGISTER(highpri->adc1, g_highpri.r_val, REG_NCHANNELS);
+  STM32_ADC_REGBUF_REGISTER(highpri->adc1, g_highpri.r_val, REG_NCHANNELS);
 #endif
 
 #ifdef HIGHPRI_HAVE_INJECTED
   /* Enable ADC injected sequence end interrupts */
 
-  ADC_INT_ENABLE(highpri->adc1, ADC_IER_JEOS);
+  STM32_ADC_INT_ENABLE(highpri->adc1, ADC_IER_JEOS);
 #endif
 
 #ifdef HIGHPRI_HAVE_TIM1
