@@ -88,7 +88,7 @@ config TELNET_IOTHREAD_PRIORITY
 
 config TELNET_IOTHREAD_STACKSIZE
 	int "I/O thread stack size"
-	default 1024
+	default DEFAULT_TASK_STACKSIZE
 
 config TELNET_SUPPORT_NAWS
 	bool "Support NAWS (Negotiate About Window Size)"

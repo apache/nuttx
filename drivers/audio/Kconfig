@@ -52,7 +52,7 @@ endif # AUDIO_DRIVER_SPECIFIC_BUFFERS
 
 config CXD56_AUDIO_WORKER_STACKSIZE
 	int "Worker thread stack size"
-	default 768
+	default DEFAULT_TASK_STACKSIZE
 
 endif # AUDIO_CXD56
 
@@ -79,7 +79,7 @@ config VS1053_DEVICE_COUNT
 
 config VS1053_WORKER_STACKSIZE
 	int "VS1053 worker thread stack size"
-	default 768
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		Stack size to use with the VS1053 worker thread.
 
@@ -149,7 +149,7 @@ config CS43L22_NUM_BUFFERS
 
 config CS43L22_WORKER_STACKSIZE
 	int "CS43L22 worker thread stack size"
-	default 768
+	default DEFAULT_TASK_STACKSIZE
 
 config CS43L22_REGDUMP
 	bool "CS43L22 register dump"
@@ -185,7 +185,7 @@ config WM8776_MSG_PRIO
 
 config WM8776_WORKER_STACKSIZE
 	int "WM8776 worker thread stack size"
-	default 768
+	default DEFAULT_TASK_STACKSIZE
 
 config WM8776_SWAP_HPOUT
 	bool "Swap WM8776 HP out signals"
@@ -238,7 +238,7 @@ config WM8904_NUM_BUFFERS
 
 config WM8904_WORKER_STACKSIZE
 	int "WM8904 worker thread stack size"
-	default 768
+	default DEFAULT_TASK_STACKSIZE
 
 config WM8904_REGDUMP
 	bool "WM8904 register dump"
@@ -278,7 +278,7 @@ config AUDIO_NULL_NUM_BUFFERS
 
 config AUDIO_NULL_WORKER_STACKSIZE
 	int "Null audio device worker thread stack size"
-	default 768
+	default DEFAULT_TASK_STACKSIZE
 
 endif # AUDIO_NULL
 

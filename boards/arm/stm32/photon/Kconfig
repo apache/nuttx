@@ -46,7 +46,7 @@ config PHOTON_WDG_THREAD_PRIORITY
 
 config PHOTON_WDG_THREAD_STACKSIZE
 	int "Watchdog Thread Stacksize"
-	default 1024
+	default DEFAULT_TASK_STACKSIZE
 
 endif # PHOTON_WDG_THREAD
 endif # PHOTON_WDG

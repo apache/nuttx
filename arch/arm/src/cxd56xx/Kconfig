@@ -1117,7 +1117,7 @@ config CXD56_GNSS_NSIGNALRECEIVERS
 
 config CXD56_GNSS_WORKER_STACKSIZE
 	int "GNSS worker thread stack size"
-	default 128
+	default DEFAULT_TASK_STACKSIZE
 
 config CXD56_GNSS_WORKER_THREAD_PRIORITY
 	int "GNSS worker thread priority"

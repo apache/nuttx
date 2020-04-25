@@ -286,7 +286,7 @@ config HIDKBD_DEFPRIO
 
 config HIDKBD_STACKSIZE
 	int "Polling thread stack size"
-	default 1024
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		Stack size for polling thread.  Default: 1024
 
@@ -378,7 +378,7 @@ config HIDMOUSE_DEFPRIO
 
 config HIDMOUSE_STACKSIZE
 	int "Polling thread stack size"
-	default 1024
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		Stack size for polling thread.  Default: 1024
 
@@ -524,7 +524,7 @@ config XBOXCONTROLLER_DEFPRIO
 
 config XBOXCONTROLLER_STACKSIZE
 	int "Polling thread stack size"
-	default 1024
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		Stack size for polling thread.  Default: 1024
 

@@ -36,7 +36,7 @@ config STM32_ROMFS_IMAGEFILE
 
 config STM32F4DISCO_USBHOST_STACKSIZE
 	int "USB host waiter stack size"
-	default 1024
+	default DEFAULT_TASK_STACKSIZE
 	depends on USBHOST
 
 config STM32F4DISCO_USBHOST_PRIO

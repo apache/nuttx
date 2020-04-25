@@ -1532,7 +1532,7 @@ config WDT_THREAD_PRIORITY
 
 config WDT_THREAD_STACKSIZE
 	int "Watchdog Thread Stacksize"
-	default 1024
+	default DEFAULT_TASK_STACKSIZE
 
 endif # WDT_THREAD
 endmenu #"AT91SAM3/4 Watchdog device driver options"

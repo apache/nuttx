@@ -1766,7 +1766,7 @@ menu "Stack and heap information"
 
 config IDLETHREAD_STACKSIZE
 	int "Idle thread stack size"
-	default 1024
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The size of the initial stack used by the IDLE thread.  The IDLE thread
 		is the thread that (1) performs the initial boot of the system up to the

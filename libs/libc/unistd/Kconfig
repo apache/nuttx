@@ -96,7 +96,7 @@ endif # LIBC_EXECFUNCS
 
 config POSIX_SPAWN_PROXY_STACKSIZE
 	int "Spawn Stack Size"
-	default 1024
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		If posix_spawn[p]() and task_spawn() use I/O redirection options,
 		they will require an intermediary/proxy task to muck with the file

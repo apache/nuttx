@@ -476,7 +476,7 @@ if ARCH_KERNEL_STACK
 
 config ARCH_KERNEL_STACKSIZE
 	int "Kernel stack size"
-	default 1568
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The common size of each process's kernel stack
 
@@ -605,7 +605,7 @@ config PAGING_DEFPRIO
 
 config PAGING_STACKSIZE
 	int "Page fill worker thread stack size"
-	default 1024
+	default DEFAULT_TASK_STACKSIZE
 	---help---
 		Defines the size of the allocated stack for the page fill worker
 		thread. Default: 1024.

@@ -25,8 +25,7 @@ endchoice # CPU Frequency
 
 config SAMA5D2XULT_USBHOST_STACKSIZE
 	int "USB host waiter stack size"
-	default 1536 if USBHOST_HUB
-	default 1024 if !USBHOST_HUB
+	default DEFAULT_TASK_STACKSIZE
 	depends on USBHOST
 
 config SAMA5D2XULT_USBHOST_PRIO
