@@ -441,8 +441,8 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       rsc->rpmsg_vring1.da = da1;
 
       shbuf   = (FAR char *)rsc + tbsz + v0sz + v1sz;
-      shbufsz = rsc->buf_size *
-                (rsc->rpmsg_vring0.num + rsc->rpmsg_vring1.num);
+      shbufsz = rsc->config.txbuf_size * rsc->rpmsg_vring0.num +
+                rsc->config.rxbuf_size * rsc->rpmsg_vring1.num;
 
       rpmsg_virtio_init_shm_pool(&priv->shm_pool, shbuf, shbufsz);
 
