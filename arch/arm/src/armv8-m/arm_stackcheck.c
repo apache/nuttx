@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/up_stackcheck.c
+ * arch/arm/src/armv8-m/arm_stackcheck.c
  *
  *   Copyright (c) 2013, 2014 PX4 Development Team. All rights reserved.
  *

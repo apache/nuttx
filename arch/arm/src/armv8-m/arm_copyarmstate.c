@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/irq/up_ramvec_attach.c
+ * arch/arm/src/armv8-m/arm_copyarmstate.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,72 +24,67 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
-#include <debug.h>
+#include <stdint.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
+#include <arch/irq.h>
 
-#include "ram_vectors.h"
+#include "up_internal.h"
 
-#ifdef CONFIG_ARCH_RAMVECTORS
+#if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV8M_LAZYFPU)
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/* Common exception entrypoint */
-
-void exception_common(void);
-
 /****************************************************************************
- * Name: up_ramvec_attach
+ * Name: up_copyarmstate
  *
  * Description:
- *   Configure the ram vector table so that IRQ number 'irq' will be
- *   dispatched by hardware to 'vector'
+ *    Copy the ARM portion of the register save area (omitting the floating
+ *    point registers) and save the floating pointer register directly.
  *
  ****************************************************************************/
 
-int up_ramvec_attach(int irq, up_vector_t vector)
+void up_copyarmstate(uint32_t *dest, uint32_t *src)
 {
-  int ret = -EINVAL;
+  int i;
 
-  irqinfo("%s IRQ%d\n", vector ? "Attaching" : "Detaching", irq);
+  /* In the Cortex-M3 model, the state is copied from the stack to the TCB,
+   * but only a reference is passed to get the state from the TCB.  So the
+   * following check avoids copying the TCB save area onto itself:
+   */
 
-  if ((unsigned)irq < ARMV8M_VECTAB_SIZE)
+  if (src != dest)
     {
-      irqstate_t flags;
-
-      /* If the new vector is NULL, then the vector is being detached. In
-       * this case, disable the itnerrupt and direct any interrupts to the
-       * common exception handler.
+      /* Save the floating point registers: This will initialize the floating
+       * registers at indices SW_INT_REGS through (SW_INT_REGS+SW_FPU_REGS-1)
        */
 
-      flags = enter_critical_section();
-      if (vector == NULL)
+      up_savefpu(dest);
+
+      /* Save the block of ARM registers that were saved by the interrupt
+       * handling logic.  Indices: 0 through (SW_INT_REGS-1).
+       */
+
+      for (i = 0; i < SW_INT_REGS; i++)
         {
-          /* Disable the interrupt if we can before detaching it.  We might
-           * not be able to do this for all interrupts.
-           */
-
-          up_disable_irq(irq);
-
-          /* Detaching the vector really means re-attaching it to the
-           * common exception handler.
-           */
-
-           vector = exception_common;
+          *dest++ = *src++;
         }
 
-      /* Save the new vector in the vector table */
+      /* Skip over the floating point registers and save the block of ARM
+       * registers that were saved by the hardware when the interrupt was
+       * taken.  Indices: (SW_INT_REGS+SW_FPU_REGS) through
+       * (XCPTCONTEXT_REGS-1)
+       */
 
-      g_ram_vectors[irq] = vector;
-      leave_critical_section(flags);
-      ret = OK;
+      src  += SW_FPU_REGS;
+      dest += SW_FPU_REGS;
+
+      for (i = 0; i < HW_XCPT_REGS; i++)
+        {
+          *dest++ = *src++;
+        }
     }
-
-  return ret;
 }
 
-#endif /* !CONFIG_ARCH_RAMVECTORS */
+#endif /* CONFIG_ARCH_FPU && CONFIG_ARMV8M_LAZYFPU */

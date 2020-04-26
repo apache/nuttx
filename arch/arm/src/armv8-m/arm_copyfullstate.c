@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/irq/up_trigger_irq.c
+ * arch/arm/src/armv8-m/arm_copyfullstate.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,59 +25,38 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <assert.h>
-
-#include <nuttx/arch.h>
 #include <arch/irq.h>
 
-#include "up_arch.h"
-#include "nvic.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_trigger_irq
+ * Name: up_copyfullstate
  *
  * Description:
- *   Trigger an IRQ by software.
+ *    Copy the entire register save area (including the floating point
+ *    registers if applicable).  This is a little faster than most memcpy's
+ *    since it does 32-bit transfers.
  *
  ****************************************************************************/
 
-void up_trigger_irq(int irq)
+void up_copyfullstate(uint32_t *dest, uint32_t *src)
 {
-  uint32_t pend_bit = 0;
+  int i;
 
-  DEBUGASSERT(irq >= NVIC_IRQ_NMI && irq < NR_IRQS);
+  /* In the Cortex-M3 model, the state is copied from the stack to the TCB,
+   * but only a reference is passed to get the state from the TCB.  So the
+   * following check avoids copying the TCB save area onto itself:
+   */
 
-  if (irq >= NVIC_IRQ_FIRST)
+  if (src != dest)
     {
-      putreg32(irq - NVIC_IRQ_FIRST, NVIC_STIR);
-    }
-  else
-    {
-      switch (irq)
+      for (i = 0; i < XCPTCONTEXT_REGS; i++)
         {
-          case NVIC_IRQ_PENDSV:
-            pend_bit = NVIC_INTCTRL_PENDSVSET;
-            break;
-
-          case NVIC_IRQ_NMI:
-            pend_bit = NVIC_INTCTRL_NMIPENDSET;
-            break;
-
-          case NVIC_IRQ_SYSTICK:
-            pend_bit = NVIC_INTCTRL_PENDSTSET;
-            break;
-
-          default:
-            break;
-        }
-
-      if (pend_bit)
-        {
-          modifyreg32(NVIC_INTCTRL, 0, pend_bit);
+          *dest++ = *src++;
         }
     }
 }

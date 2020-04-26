@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/up_copyarmstate.c
+ * arch/arm/irq/arm_trigger_irq.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,66 +25,59 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 
+#include <nuttx/arch.h>
 #include <arch/irq.h>
 
-#include "up_internal.h"
-
-#if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV8M_LAZYFPU)
+#include "up_arch.h"
+#include "nvic.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copyarmstate
+ * Name: up_trigger_irq
  *
  * Description:
- *    Copy the ARM portion of the register save area (omitting the floating
- *    point registers) and save the floating pointer register directly.
+ *   Trigger an IRQ by software.
  *
  ****************************************************************************/
 
-void up_copyarmstate(uint32_t *dest, uint32_t *src)
+void up_trigger_irq(int irq)
 {
-  int i;
+  uint32_t pend_bit = 0;
 
-  /* In the Cortex-M3 model, the state is copied from the stack to the TCB,
-   * but only a reference is passed to get the state from the TCB.  So the
-   * following check avoids copying the TCB save area onto itself:
-   */
+  DEBUGASSERT(irq >= NVIC_IRQ_NMI && irq < NR_IRQS);
 
-  if (src != dest)
+  if (irq >= NVIC_IRQ_FIRST)
     {
-      /* Save the floating point registers: This will initialize the floating
-       * registers at indices SW_INT_REGS through (SW_INT_REGS+SW_FPU_REGS-1)
-       */
-
-      up_savefpu(dest);
-
-      /* Save the block of ARM registers that were saved by the interrupt
-       * handling logic.  Indices: 0 through (SW_INT_REGS-1).
-       */
-
-      for (i = 0; i < SW_INT_REGS; i++)
+      putreg32(irq - NVIC_IRQ_FIRST, NVIC_STIR);
+    }
+  else
+    {
+      switch (irq)
         {
-          *dest++ = *src++;
+          case NVIC_IRQ_PENDSV:
+            pend_bit = NVIC_INTCTRL_PENDSVSET;
+            break;
+
+          case NVIC_IRQ_NMI:
+            pend_bit = NVIC_INTCTRL_NMIPENDSET;
+            break;
+
+          case NVIC_IRQ_SYSTICK:
+            pend_bit = NVIC_INTCTRL_PENDSTSET;
+            break;
+
+          default:
+            break;
         }
 
-      /* Skip over the floating point registers and save the block of ARM
-       * registers that were saved by the hardware when the interrupt was
-       * taken.  Indices: (SW_INT_REGS+SW_FPU_REGS) through
-       * (XCPTCONTEXT_REGS-1)
-       */
-
-      src  += SW_FPU_REGS;
-      dest += SW_FPU_REGS;
-
-      for (i = 0; i < HW_XCPT_REGS; i++)
+      if (pend_bit)
         {
-          *dest++ = *src++;
+          modifyreg32(NVIC_INTCTRL, 0, pend_bit);
         }
     }
 }
-
-#endif /* CONFIG_ARCH_FPU && CONFIG_ARMV8M_LAZYFPU */
