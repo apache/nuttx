@@ -71,7 +71,9 @@
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
 #define STM32_LSE_FREQUENCY     32768            /* X2 on board */
 
-/* PLL source is HSE/1, PLL multipler is 9: PLL frequency is 8MHz (XTAL) x 9 = 72MHz */
+/* PLL source is HSE/1, PLL multipler is 9: PLL frequency is
+ * 8MHz (XTAL) x 9 = 72MHz
+ */
 
 #define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC
 #define STM32_CFGR_PLLXTPRE     0
@@ -138,6 +140,7 @@
 #define BOARD_TIM8_FREQUENCY   STM32_HCLK_FREQUENCY
 
 /* LED definitions **********************************************************/
+
 /* The Nucleo F302R8 board has three LEDs.  Two of these are controlled by
  * logic on the board and are not available for software control:
  *
@@ -191,6 +194,7 @@
 #define LED_PANIC        1
 
 /* Button definitions *******************************************************/
+
 /* The Nucleo F302R8 supports two buttons; only one button is controllable
  * by software:
  *
@@ -236,6 +240,7 @@
 #define GPIO_TIM2_CH3OUT  GPIO_TIM2_CH3OUT_1  /* PA9 */
 
 /* DMA channels *************************************************************/
+
 /* ADC */
 
 #define ADC1_DMA_CHAN DMACHAN_ADC1     /* DMA1_CH1 */
