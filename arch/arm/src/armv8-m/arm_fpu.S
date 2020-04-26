@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv8-m/gnu/up_fpu.S
+ * arch/arm/src/armv8-m/gnu/arm_fpu.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -46,7 +46,7 @@
 
 	.syntax		unified
 	.thumb
-	.file		"up_fpu.S"
+	.file		"arm_fpu.S"
 
 /************************************************************************************
  * Public Functions

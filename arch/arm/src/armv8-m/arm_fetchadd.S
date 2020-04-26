@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/gnu/up_fetchadd.S
+ * arch/arm/src/armv8-m/gnu/arm_fetchadd.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,7 +26,7 @@
 
 	.syntax		unified
 	.thumb
-	.file	"up_fetchadd.S"
+	.file	"arm_fetchadd.S"
 
 /****************************************************************************
  * Public Functions

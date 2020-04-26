@@ -71,7 +71,7 @@
 
 	.syntax		unified
 	.thumb
-	.file		"up_lazyexception.S"
+	.file		"arm_lazyexception.S"
 
 /************************************************************************************************
  * Macro Definitions
