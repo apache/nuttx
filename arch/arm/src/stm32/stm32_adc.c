@@ -351,64 +351,6 @@
 #  undef HAVE_ADC_CMN_DATA
 #endif
 
-/* ADCx_EXTSEL_VALUE can be set by this driver (look at stm32_adc.h) or
- * by board specific logic in board.h file.
- */
-
-#ifdef ADC1_EXTSEL_VALUE
-#  define ADC1_HAVE_EXTCFG  1
-#  define ADC1_EXTCFG_VALUE (ADC1_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
-#else
-#  undef ADC1_HAVE_EXTCFG
-#endif
-#ifdef ADC2_EXTSEL_VALUE
-#  define ADC2_HAVE_EXTCFG  1
-#  define ADC2_EXTCFG_VALUE (ADC2_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
-#else
-#  undef ADC2_HAVE_EXTCFG
-#endif
-#ifdef ADC3_EXTSEL_VALUE
-#  define ADC3_HAVE_EXTCFG  1
-#  define ADC3_EXTCFG_VALUE (ADC3_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
-#else
-#  undef ADC3_HAVE_EXTCFG
-#endif
-#ifdef ADC4_EXTSEL_VALUE
-#  define ADC4_HAVE_EXTCFG  1
-#  define ADC4_EXTCFG_VALUE (ADC4_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
-#else
-#  undef ADC4_HAVE_EXTCFG
-#endif
-
-#if defined(ADC1_HAVE_EXTCFG) || defined(ADC2_HAVE_EXTCFG) || \
-    defined(ADC3_HAVE_EXTCFG) || defined(ADC3_HAVE_EXTCFG)
-#  define ADC_HAVE_EXTCFG
-#endif
-
-/* Injected channels external trigger support */
-
-#ifdef ADC1_JEXTSEL_VALUE
-#  define ADC1_HAVE_JEXTCFG  1
-#  define ADC1_JEXTCFG_VALUE (ADC1_JEXTSEL_VALUE | ADC_JEXTREG_JEXTEN_DEFAULT)
-#endif
-#ifdef ADC2_JEXTSEL_VALUE
-#  define ADC2_HAVE_JEXTCFG  1
-#  define ADC2_JEXTCFG_VALUE (ADC2_JEXTSEL_VALUE | ADC_JEXTREG_JEXTEN_DEFAULT)
-#endif
-#ifdef ADC3_JEXTSEL_VALUE
-#  define ADC3_HAVE_JEXTCFG  1
-#  define ADC3_JEXTCFG_VALUE (ADC3_JEXTSEL_VALUE | ADC_JEXTREG_JEXTEN_DEFAULT)
-#endif
-#ifdef ADC4_JEXTSEL_VALUE
-#  define ADC4_HAVE_JEXTCFG  1
-#  define ADC4_JEXTCFG_VALUE (ADC4_JEXTSEL_VALUE | ADC_JEXTREG_JEXTEN_DEFAULT)
-#endif
-
-#if defined(ADC1_HAVE_JEXTCFG) || defined(ADC2_HAVE_JEXTCFG) || \
-    defined(ADC3_HAVE_JEXTCFG) || defined(ADC4_HAVE_JEXTCFG)
-#  define ADC_HAVE_JEXTCFG
-#endif
-
 /* Max 4 injected channels */
 
 #define ADC_INJ_MAX_SAMPLES   4
@@ -646,10 +588,10 @@ static int adc_inj_set_ch(FAR struct adc_dev_s *dev, uint8_t ch);
 #endif
 
 #ifdef ADC_HAVE_EXTCFG
-static int adc_extcfg_set(FAR struct adc_dev_s *dev, uint32_t extcfg);
+static int adc_extcfg_set(FAR struct stm32_dev_s *priv, uint32_t extcfg);
 #endif
 #ifdef ADC_HAVE_JEXTCFG
-static int adc_jextcfg_set(FAR struct adc_dev_s *dev, uint32_t jextcfg);
+static int adc_jextcfg_set(FAR struct stm32_dev_s *priv, uint32_t jextcfg);
 #endif
 
 static void adc_dumpregs(FAR struct stm32_dev_s *priv);
@@ -664,6 +606,14 @@ static void adc_llops_reg_startconv(FAR struct stm32_adc_dev_s *dev,
                                     bool enable);
 static int adc_offset_set(FAR struct stm32_adc_dev_s *dev, uint8_t ch,
                           uint8_t i, uint16_t offset);
+#  ifdef ADC_HAVE_EXTCFG
+static void adc_llops_extcfg_set(FAR struct stm32_adc_dev_s *dev,
+                                 uint32_t extcfg);
+#  endif
+#  ifdef ADC_HAVE_JEXTCFG
+static void adc_llops_jextcfg_set(FAR struct stm32_adc_dev_s *dev,
+                                  uint32_t jextcfg);
+#  endif
 #  ifdef ADC_HAVE_DMA
 static int adc_regbufregister(FAR struct stm32_adc_dev_s *dev,
                               uint16_t *buffer, uint8_t len);
@@ -715,6 +665,12 @@ static const struct stm32_adc_ops_s g_adc_llops =
   .offset_set    = adc_offset_set,
 #  ifdef ADC_HAVE_DMA
   .regbuf_reg    = adc_regbufregister,
+#  endif
+#  ifdef ADC_HAVE_EXTCFG
+  .extcfg_set    = adc_llops_extcfg_set,
+#  endif
+#  ifdef ADC_HAVE_JEXTCFG
+  .jextcfg_set   = adc_llops_jextcfg_set,
 #  endif
 #  ifdef ADC_HAVE_INJECTED
   .inj_get       = adc_injget,
@@ -2788,7 +2744,7 @@ static void adc_configure(FAR struct adc_dev_s *dev)
 #ifdef ADC_HAVE_EXTCFG
   /* Configure external event for regular group */
 
-  adc_extcfg_set(dev, priv->extcfg);
+  adc_extcfg_set(priv, priv->extcfg);
 #endif
 
   /* Enable ADC */
@@ -2798,7 +2754,7 @@ static void adc_configure(FAR struct adc_dev_s *dev)
 #ifdef ADC_HAVE_JEXTCFG
   /* Configure external event for injected group when ADC enabled */
 
-  adc_jextcfg_set(dev, priv->jextcfg);
+  adc_jextcfg_set(priv, priv->jextcfg);
 
 #if defined(HAVE_IP_ADC_V2)
   /* For ADC IPv2 there is queue of context for injected conversion.
@@ -3210,9 +3166,8 @@ errout:
  ****************************************************************************/
 
 #ifdef ADC_HAVE_EXTCFG
-static int adc_extcfg_set(FAR struct adc_dev_s *dev, uint32_t extcfg)
+static int adc_extcfg_set(FAR struct stm32_dev_s *priv, uint32_t extcfg)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   uint32_t exten  = 0;
   uint32_t extsel = 0;
   uint32_t setbits = 0;
@@ -3252,9 +3207,8 @@ static int adc_extcfg_set(FAR struct adc_dev_s *dev, uint32_t extcfg)
  ****************************************************************************/
 
 #ifdef ADC_HAVE_JEXTCFG
-static int adc_jextcfg_set(FAR struct adc_dev_s *dev, uint32_t jextcfg)
+static int adc_jextcfg_set(FAR struct stm32_dev_s *priv, uint32_t jextcfg)
 {
-  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
   uint32_t jexten =  0;
   uint32_t jextsel = 0;
   uint32_t setbits = 0;
@@ -4313,6 +4267,34 @@ errout:
 #endif
 
 /****************************************************************************
+ * Name: adc_llops_extcfg_set
+ ****************************************************************************/
+
+#ifdef ADC_HAVE_EXTCFG
+static void adc_llops_extcfg_set(FAR struct stm32_adc_dev_s *dev,
+                                 uint32_t extcfg)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
+
+  adc_extcfg_set(priv, extcfg);
+}
+#endif
+
+/****************************************************************************
+ * Name: adc_llops_jextcfg_set
+ ****************************************************************************/
+
+#ifdef ADC_HAVE_JEXTCFG
+static void  adc_llops_jextcfg_set(FAR struct stm32_adc_dev_s *dev,
+                                   uint32_t jextcfg)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
+
+  adc_jextcfg_set(priv, jextcfg);
+}
+#endif
+
+/****************************************************************************
  * Name: adc_regbufregister
  ****************************************************************************/
 
@@ -4337,7 +4319,7 @@ static int adc_regbufregister(FAR struct stm32_adc_dev_s *dev,
 #endif /* ADC_HAVE_DMA */
 
 /****************************************************************************
- * Name: adc_inj_get
+ * Name: adc_injget
  ****************************************************************************/
 
 #ifdef ADC_HAVE_INJECTED
