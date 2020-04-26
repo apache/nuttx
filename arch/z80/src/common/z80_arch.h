@@ -18,8 +18,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_Z80_SRC_COMMON_UP_ARCH_H
-#define __ARCH_Z80_SRC_COMMON_UP_ARCH_H
+#ifndef __ARCH_Z80_SRC_COMMON_Z80_ARCH_H
+#define __ARCH_Z80_SRC_COMMON_Z80_ARCH_H
 
 /************************************************************************************
  * Included Files
@@ -34,4 +34,4 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#endif /* __ARCH_Z80_SRC_COMMON_UP_ARCH_H */
+#endif /* __ARCH_Z80_SRC_COMMON_Z80_ARCH_H */

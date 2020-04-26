@@ -18,8 +18,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_Z80_SRC_EZ80_UP_MEM_H
-#define __ARCH_Z80_SRC_EZ80_UP_MEM_H
+#ifndef __ARCH_Z80_SRC_EZ80_Z80_MEM_H
+#define __ARCH_Z80_SRC_EZ80_Z80_MEM_H
 
 /************************************************************************************
  * Included Files
@@ -70,4 +70,4 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_Z80_SRC_EZ80_UP_MEM_H */
+#endif /* __ARCH_Z80_SRC_EZ80_Z80_MEM_H */
