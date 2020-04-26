@@ -218,7 +218,8 @@ int up_rptun_init(void)
       rsc->rpmsg_vring0.num         = 8;
       rsc->rpmsg_vring1.align       = 8;
       rsc->rpmsg_vring1.num         = 8;
-      rsc->buf_size                 = 0x800;
+      rsc->config.rxbuf_size        = 0x800;
+      rsc->config.txbuf_size        = 0x800;
 
       g_dev.shmem->base             = (uintptr_t)g_dev.shmem;
     }
