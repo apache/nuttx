@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/up_idle.c
+ * arch/z80/src/common/z80_puts.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,12 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
-
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "z80_internal.h"
 
@@ -40,10 +35,6 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_LEDS) && defined(CONFIG_ARCH_BRINGUP)
-static uint8_t g_ledtoggle = 0;
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -53,40 +44,17 @@ static uint8_t g_ledtoggle = 0;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idle
+ * Name: up_puts
  *
  * Description:
- *   up_idle() is the logic that will be executed when their
- *   is no other ready-to-run task.  This is processor idle
- *   time and will continue until some interrupt occurs to
- *   cause a context switch from the idle task.
- *
- *   Processing in this state may be processor-specific. e.g.,
- *   this is where power management operations might be
- *   performed.
+ *   This is a low-level helper function used to support debug.
  *
  ****************************************************************************/
 
-void up_idle(void)
+void up_puts(const char *str)
 {
-#if defined(CONFIG_ARCH_LEDS) && defined(CONFIG_ARCH_BRINGUP)
-  g_ledtoggle++;
-  if (g_ledtoggle == 0x80)
+  while (*str)
     {
-      board_autoled_on(LED_IDLE);
+      up_putc(*str++);
     }
-  else if (g_ledtoggle == 0x00)
-    {
-      board_autoled_off(LED_IDLE);
-    }
-#endif
-
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts,
-   * then process "fake" timer interrupts. Hopefully, something
-   * will wake up.
-   */
-
-  nxsched_process_timer();
-#endif
 }

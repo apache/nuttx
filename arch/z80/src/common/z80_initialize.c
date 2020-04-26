@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/up_initialize.c
+ * arch/z80/src/common/z80_initialize.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -43,7 +43,7 @@
 #include <arch/board/board.h>
 
 #include "chip/switch.h"
-#include "up_arch.h"
+#include "z80_arch.h"
 #include "z80_internal.h"
 
 /****************************************************************************

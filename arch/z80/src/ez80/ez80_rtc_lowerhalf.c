@@ -32,7 +32,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/timers/rtc.h>
 
-#include "up_arch.h"
+#include "z80_arch.h"
 
 #include "chip.h"
 #include "ez80_rtc.h"

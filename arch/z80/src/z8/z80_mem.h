@@ -1,6 +1,6 @@
 /************************************************************************************
- * arch/z80/src/z8/up_mem.h
- * arch/z80/src/chip/up_mem.h
+ * arch/z80/src/z8/z80_mem.h
+ * arch/z80/src/chip/z80_mem.h
  *
  *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

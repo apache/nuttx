@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/up_puts.c
+ * arch/z80/src/common/z80_udelay.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,12 +23,25 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 #include <nuttx/arch.h>
 
-#include "z80_internal.h"
+#ifdef CONFIG_BOARD_LOOPSPERMSEC
 
 /****************************************************************************
  * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
+#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
+#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -44,17 +57,65 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_puts
+ * Name: up_udelay
  *
  * Description:
- *   This is a low-level helper function used to support debug.
+ *   Delay inline for the requested number of microseconds.  NOTE:  Because
+ *   of all of the setup, several microseconds will be lost before the actual
+ *   timing loop begins.  Thus, the delay will always be a few microseconds
+ *   longer than requested.
+ *
+ *   *** NOT multi-tasking friendly ***
+ *
+ * ASSUMPTIONS:
+ *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
  *
  ****************************************************************************/
 
-void up_puts(const char *str)
+void up_udelay(useconds_t microseconds)
 {
-  while (*str)
+  volatile int i;
+
+  /* We'll do this a little at a time because we expect that the
+   * CONFIG_BOARD_LOOPSPERUSEC is very inaccurate during to truncation in
+   * the divisions of its calculation.  We'll use the largest values that
+   * we can in order to prevent significant error buildup in the loops.
+   */
+
+  while (microseconds > 1000)
     {
-      up_putc(*str++);
+      for (i = 0; i < CONFIG_BOARD_LOOPSPERMSEC; i++)
+        {
+        }
+
+      microseconds -= 1000;
+    }
+
+  while (microseconds > 100)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPER100USEC; i++)
+        {
+        }
+
+      microseconds -= 100;
+    }
+
+  while (microseconds > 10)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPER10USEC; i++)
+        {
+        }
+
+      microseconds -= 10;
+    }
+
+  while (microseconds > 0)
+    {
+      for (i = 0; i < CONFIG_BOARD_LOOPSPERUSEC; i++)
+        {
+        }
+
+      microseconds--;
     }
 }
+#endif /* CONFIG_BOARD_LOOPSPERMSEC */

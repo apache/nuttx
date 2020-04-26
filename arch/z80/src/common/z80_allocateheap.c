@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/up_interruptcontext.c
+ * arch/z80/src/common/z80_allocateheap.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,34 +24,72 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
+#include <sys/types.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
+#include <nuttx/board.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/mm/mm.h>
 
-#include "chip/switch.h"
+#include "z80_arch.h"
 #include "z80_internal.h"
 
-/****************************************************************************
- * Private Types
- ****************************************************************************/
+#ifdef SDCC
+/* For the SDCC toolchain, the arch/z80/src/Makefile will parse the map file
+ * to determine how much memory is available for the heap.  This parsed data
+ * is provided via the auto-generated file z80_mem.h
+ */
 
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
+#  include "z80_mem.h"
+
+#else
+/* For other toolchains, the architecture must provide a header file in the
+ * chip subdirectory to provide the heap parameters (if they are not defined
+ * in the configuration file )
+ */
+
+#  include "chip/z80_mem.h"
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_interrupt_context
+ * Name: up_allocate_heap
  *
- * Description: Return true is we are currently executing in
- * the interrupt handler context.
+ * Description:
+ *   This function will be called to dynamically set aside the heap region.
+ *
+ *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
+ *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
+ *   size of the unprotected, user-space heap.
+ *
+ *   If a protected kernel-space heap is provided, the kernel heap must be
+ *   allocated (and protected) by an analogous up_allocate_kheap().
+ *
  ****************************************************************************/
 
-bool up_interrupt_context(void)
+void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
-  return IN_INTERRUPT();
+  *heap_start = (FAR void *)CONFIG_HEAP1_BASE;
+  *heap_size = CONFIG_HEAP1_END - CONFIG_HEAP1_BASE;
+  board_autoled_on(LED_HEAPALLOCATE);
 }
+
+/****************************************************************************
+ * Name: up_addregions
+ *
+ * Description:
+ *   Memory may be added in non-contiguous chunks.  Additional chunks are
+ *   added by calling this function.
+ *
+ ****************************************************************************/
+
+#if CONFIG_MM_REGIONS > 1
+void up_addregion(void)
+{
+  kmm_addregion((FAR void *)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+}
+#endif

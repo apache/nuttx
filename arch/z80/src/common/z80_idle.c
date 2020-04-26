@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/up_mdelay.c
+ * arch/z80/src/common/z80_idle.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,25 +23,26 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
 
-#ifdef CONFIG_BOARD_LOOPSPERMSEC
+#include <stdint.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
+
+#include "z80_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#if defined(CONFIG_ARCH_LEDS) && defined(CONFIG_ARCH_BRINGUP)
+static uint8_t g_ledtoggle = 0;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -52,27 +53,40 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_mdelay
+ * Name: up_idle
  *
  * Description:
- *   Delay inline for the requested number of milliseconds.
- *   *** NOT multi-tasking friendly ***
+ *   up_idle() is the logic that will be executed when their
+ *   is no other ready-to-run task.  This is processor idle
+ *   time and will continue until some interrupt occurs to
+ *   cause a context switch from the idle task.
  *
- * ASSUMPTIONS:
- *   The setting CONFIG_BOARD_LOOPSPERMSEC has been calibrated
+ *   Processing in this state may be processor-specific. e.g.,
+ *   this is where power management operations might be
+ *   performed.
  *
  ****************************************************************************/
 
-void up_mdelay(unsigned int milliseconds)
+void up_idle(void)
 {
-  volatile int i;
-  volatile int j;
-
-  for (i = 0; i < milliseconds; i++)
+#if defined(CONFIG_ARCH_LEDS) && defined(CONFIG_ARCH_BRINGUP)
+  g_ledtoggle++;
+  if (g_ledtoggle == 0x80)
     {
-      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
-        {
-        }
+      board_autoled_on(LED_IDLE);
     }
+  else if (g_ledtoggle == 0x00)
+    {
+      board_autoled_off(LED_IDLE);
+    }
+#endif
+
+#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
+  /* If the system is idle and there are no timer interrupts,
+   * then process "fake" timer interrupts. Hopefully, something
+   * will wake up.
+   */
+
+  nxsched_process_timer();
+#endif
 }
-#endif /* CONFIG_BOARD_LOOPSPERMSEC */

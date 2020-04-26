@@ -38,7 +38,7 @@
 #include <arch/io.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "z80_arch.h"
 #include "ez80_rtc.h"
 
 #include <arch/board/board.h>
