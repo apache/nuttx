@@ -1,35 +1,20 @@
 /****************************************************************************
  * common/up_internal.h
  *
- *   Copyright (C) 2007-2015, 2018-2019 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -97,7 +82,8 @@
  * some configurations.
  */
 
-#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
+#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M) || \
+    defined(CONFIG_ARCH_ARMV8M)
 
   /* If the floating point unit is present and enabled, then save the
    * floating point registers as well as normal ARM registers.  This only
@@ -129,7 +115,8 @@
 #  define up_restorestate(regs) (CURRENT_REGS = regs)
 
 /* Otherwise, for the ARM7 and ARM9.  The state is copied in full from stack
- * to stack.  This is not very efficient and should be fixed to match Cortex-A5.
+ * to stack.  This is not very efficient and should be fixed to match
+ * Cortex-A5.
  */
 
 #else
@@ -234,14 +221,14 @@ EXTERN uint32_t g_intstackalloc; /* Allocated stack base */
 EXTERN uint32_t g_intstackbase;  /* Initial top of interrupt stack */
 #endif
 
-/* These 'addresses' of these values are setup by the linker script.  They are
- * not actual uint32_t storage locations! They are only used meaningfully in the
- * following way:
+/* These 'addresses' of these values are setup by the linker script.  They
+ * are not actual uint32_t storage locations! They are only used
+ * meaningfully in the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
  *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
- *    that the value _sdata is the address of a uint32_t variable _data (it is
- *    not!).
+ *    that the value _sdata is the address of a uint32_t variable _data (it
+ *    is not!).
  *  - We can recoved the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
@@ -254,9 +241,9 @@ EXTERN uint32_t _edata;           /* End+1 of .data */
 EXTERN uint32_t _sbss;            /* Start of .bss */
 EXTERN uint32_t _ebss;            /* End+1 of .bss */
 
-/* Sometimes, functions must be executed from RAM.  In this case, the following
- * macro may be used (with GCC!) to specify a function that will execute from
- * RAM.  For example,
+/* Sometimes, functions must be executed from RAM.  In this case, the
+ * following macro may be used (with GCC!) to specify a function that will
+ * execute from RAM.  For example,
  *
  *   int __ramfunc__ foo (void);
  *   int __ramfunc__ foo (void) { return bar; }
@@ -301,7 +288,7 @@ EXTERN uint32_t _eramfuncs;       /* Copy destination end address in RAM */
 
 #ifndef __ASSEMBLY__
 
-/* Low level initialization provided by board-level logic ******************/
+/* Low level initialization provided by board-level logic *******************/
 
 void arm_boot(void);
 
@@ -332,7 +319,8 @@ void up_pminitialize(void);
 
 /* Exception handling logic unique to the Cortex-M family */
 
-#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
+#if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_ARMV7M) || \
+    defined(CONFIG_ARCH_ARMV8M)
 
 /* Interrupt acknowledge and dispatch */
 
@@ -474,10 +462,10 @@ void up_wdtinit(void);
 
 /* Networking ***************************************************************/
 
-/* Defined in board/xyz_network.c for board-specific Ethernet implementations,
- * or chip/xyx_ethernet.c for chip-specific Ethernet implementations, or
- * common/up_etherstub.c for a corner case where the network is enabled yet
- * there is no Ethernet driver to be initialized.
+/* Defined in board/xyz_network.c for board-specific Ethernet
+ * implementations, or chip/xyx_ethernet.c for chip-specific Ethernet
+ * implementations, or common/up_etherstub.c for a corner case where the
+ * network is enabled yet there is no Ethernet driver to be initialized.
  *
  * Use of common/up_etherstub.c is deprecated.  The preferred mechanism is to
  * use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize() in

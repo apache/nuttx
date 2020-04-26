@@ -34,6 +34,7 @@
 /* Exception/interrupt vector numbers *******************************************************/
 
                                                /* Vector  0: Reset stack pointer value */
+
                                                /* Vector  1: Reset */
 #define NVIC_IRQ_NMI                    (2)    /* Vector  2: Non-Maskable Interrupt (NMI) */
 #define NVIC_IRQ_HARDFAULT              (3)    /* Vector  3: Hard fault */
