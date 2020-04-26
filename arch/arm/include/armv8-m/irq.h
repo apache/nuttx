@@ -49,6 +49,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
 /* If this is a kernel build, how many nested system calls should we
@@ -241,7 +242,6 @@ static inline void setbasepri(uint32_t basepri)
       : "r" (basepri)
       : "memory");
 }
-
 
 #  define raisebasepri(b) setbasepri(b);
 

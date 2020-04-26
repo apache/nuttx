@@ -265,7 +265,8 @@ static int systick_interrupt(int irq, FAR void *context, FAR void *arg)
 struct timer_lowerhalf_s *systick_initialize(bool coreclk,
                                              unsigned int freq, int minor)
 {
-  struct systick_lowerhalf_s *lower = (struct systick_lowerhalf_s *)&g_systick_lower;
+  struct systick_lowerhalf_s *lower =
+    (struct systick_lowerhalf_s *)&g_systick_lower;
 
   /* Calculate the working clock frequency if need */
 
@@ -284,7 +285,8 @@ struct timer_lowerhalf_s *systick_initialize(bool coreclk,
 
   if (coreclk)
     {
-      putreg32(NVIC_SYSTICK_CTRL_CLKSOURCE | NVIC_SYSTICK_CTRL_TICKINT, NVIC_SYSTICK_CTRL);
+      putreg32(NVIC_SYSTICK_CTRL_CLKSOURCE | NVIC_SYSTICK_CTRL_TICKINT,
+               NVIC_SYSTICK_CTRL);
     }
   else
     {
