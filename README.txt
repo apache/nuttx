@@ -1006,9 +1006,11 @@ NuttX Configuration Tool
 
      The kconfig-frontends tools will not build in a native Windows
      environment directly "out-of-the-box".  For the Windows native
-     case, you should use the modified version of kconfig-frontends
+     case, you can use the modified version of kconfig-frontends
      that can be found at
-     http://uvc.de/posts/linux-kernel-configuration-tool-mconf-under-windows.html
+     http://uvc.de/posts/linux-kernel-configuration-tool-kconfig-under-windows.html
+     or a more recent port that can be found at
+     http://reclonelabs.com/more-kconfig-awesomeness-for-windows/.
 
   The basic configuration order is "bottom-up":
 
@@ -1322,11 +1324,11 @@ NuttX Configuration Tool under DOS
   Recent versions of NuttX support building NuttX from a native Windows
   console window (see "Native Windows Build" below).  But kconfig-frontends
   is a Linux tool.  At one time this was a problem for Windows users, but
-  now there is a specially modified version of the kconfig-frontends tools
-  that can be used:
-  http://uvc.de/posts/linux-kernel-configuration-tool-mconf-under-windows.html
+  now there are two specially modified versions of the kconfig-frontends
+  tools that can be used.  One can be found here:
+  http://uvc.de/posts/linux-kernel-configuration-tool-kconfig-under-windows.html
 
-  The configuration steps most recent versions of NuttX require the
+  The configuration steps of the most recent versions of NuttX require the
   kconfig-tweak tool that is not not available in the the above.  However,
   there has been an update to this Kconfig Windows tools that does include
   kconfig-tweak:  http://reclonelabs.com/more-kconfig-awesomeness-for-windows/
