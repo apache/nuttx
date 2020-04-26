@@ -70,7 +70,7 @@ ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
 endif
 
-# Generic GNU RVG toolchain on OS X, Linux or any typical Posix system
+# Generic GNU RVG toolchain on macOS, Linux or any typical Posix system
 
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVGL)
   CROSSDEV ?= riscv64-unknown-elf-

@@ -1087,7 +1087,7 @@ Debugging
 
   This is a simple command line utility for programming ARM-based MCUs
   (currently only Atmel) though CMSIS-DAP SWD interface. It works on Linux,
-  Mac OS X and Windows.  Very useful to around especially if you have the
+  macOS and Windows.  Very useful to around especially if you have the
   following issue:
 
   Booting to FLASH or the ROM Bootloader

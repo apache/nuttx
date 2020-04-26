@@ -59,7 +59,7 @@ ifeq ($(CONFIG_ARCH_OR1K_MOR1KX),y)
 else
 endif
 
-# Generic GNU or1k toolchain on OS X or Linux
+# Generic GNU or1k toolchain on macOS or Linux
 
 #ifeq ($(CONFIG_OR1K_TOOLCHAIN),GNU_ELF)
 CROSSDEV ?= or1k-elf-

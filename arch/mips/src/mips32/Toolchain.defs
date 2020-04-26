@@ -144,7 +144,7 @@ else
   MIPS_MICROMIPS =
 endif
 
-# Generic GNU mip32 toolchain on OS X or Linux
+# Generic GNU mip32 toolchain on macOS or Linux
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),GNU_ELF)
   CROSSDEV ?= mips-elf-

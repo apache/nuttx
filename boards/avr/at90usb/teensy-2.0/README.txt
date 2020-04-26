@@ -250,9 +250,9 @@ Linux:
   After configuring NuttX, make sure that CONFIG_AVR_LINUXGCC_TOOLCHAIN=y is set in your
   .config file.
 
-Mac OS X:
+macOS:
 
-  For Mac OS X, the CrossPack for AVR toolchain is available from:
+  For macOS, the CrossPack for AVR toolchain is available from:
 
     http://www.obdev.at/products/crosspack/index.html
 

@@ -395,7 +395,7 @@ Toolchains
   mips-elf toolchain:
 
     CONFIG_MIPS32_TOOLCHAIN_PINGUINOW - Pinguino mips-elf toolchain for Windows
-    CONFIG_MIPS32_TOOLCHAIN_GNU_ELF   - mips-elf toolchain for Linux or OS X
+    CONFIG_MIPS32_TOOLCHAIN_GNU_ELF   - mips-elf toolchain for Linux or macOS
 
   And set the path appropriately in the PATH environment variable.  These tool
   configurations are untested -- expect some additional integration issues.

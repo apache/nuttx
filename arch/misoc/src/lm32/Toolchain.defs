@@ -84,7 +84,7 @@ ifeq ($(CONFIG_LM32_TOOLCHAIN),BUILDROOT)
   MAXOPTIMIZATION ?= -Os
 endif
 
-# Generic GNU toolchain on OS X, Linux or any typical Posix system
+# Generic GNU toolchain on macOS, Linux or any typical Posix system
 
 ifeq ($(CONFIG_LM32_TOOLCHAIN),GNUL)
   CROSSDEV ?= lm32-elf-
