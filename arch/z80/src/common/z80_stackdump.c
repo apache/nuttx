@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/up_stackdump.c
+ * arch/z80/src/common/z80_stackdump.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include "up_arch.h"
+#include "z80_arch.h"
 #include "sched/sched.h"
 #include "z80_internal.h"
 

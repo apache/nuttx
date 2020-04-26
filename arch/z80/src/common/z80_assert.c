@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/up_assert.c
+ * arch/z80/src/common/z80_assert.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,7 +36,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "z80_arch.h"
 #include "sched/sched.h"
 #include "z80_internal.h"
 

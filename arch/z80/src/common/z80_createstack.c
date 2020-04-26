@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/up_createstack.c
+ * arch/z80/src/common/z80_createstack.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,7 +33,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
-#include "up_arch.h"
+#include "z80_arch.h"
 #include "z80_internal.h"
 
 /****************************************************************************

@@ -46,7 +46,7 @@
 
 #include "chip.h"
 #include "z80_internal.h"
-#include "up_arch.h"
+#include "z80_arch.h"
 
 /****************************************************************************
  * Pre-processor Definitions

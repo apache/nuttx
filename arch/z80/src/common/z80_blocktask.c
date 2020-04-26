@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/z80/src/common/up_blocktask.c
+ * arch/z80/src/common/z80_blocktask.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
