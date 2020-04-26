@@ -98,12 +98,6 @@
 #  endif
 #endif
 
-#ifdef HIGHPRI_HAVE_TIM1
-#  ifndef ADC1_EXTSEL_VALUE
-#    error ADC1 EXTSEL have to be configured in board.h
-#  endif
-#endif
-
 #if (CONFIG_STM32_ADC1_INJECTED_CHAN > 0)
 #  if (CONFIG_STM32_ADC1_INJECTED_CHAN > 2)
 #    error Max 2 injected channels supported for now
@@ -401,7 +395,6 @@ int highpri_main(int argc, char *argv[])
 
   PWM_FREQ_UPDATE(pwm1, 1000);
 
-#if ADC1_EXTSEL_VALUE == ADC1_EXTSEL_T1CC1
   /* Set CCR1 */
 
   PWM_CCR_UPDATE(pwm1, 1, 0x0f00);
@@ -409,9 +402,6 @@ int highpri_main(int argc, char *argv[])
   /* Enable TIM1 OUT1 */
 
   PWM_OUTPUTS_ENABLE(pwm1, STM32_PWM_OUT1, true);
-#else
-#  error T1CC1 only supported for now
-#endif
 
 #ifdef CONFIG_DEBUG_PWM_INFO
   /* Print debug */
@@ -476,6 +466,11 @@ int highpri_main(int argc, char *argv[])
   /* Setup ADC hardware */
 
   adc1->ad_ops->ao_setup(adc1);
+
+  /* Configure regular channels trigger to T1CC1 */
+
+  STM32_ADC_EXTCFG_SET(highpri->adc1,
+                       ADC1_EXTSEL_T1CC1 | ADC_EXTREG_EXTEN_DEFAULT);
 
 #ifndef CONFIG_STM32_ADC1_DMA
   /* Enable ADC regular conversion interrupts if no DMA */

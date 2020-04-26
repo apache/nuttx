@@ -235,22 +235,6 @@
 #define GPIO_TIM2_CH2OUT  GPIO_TIM2_CH2OUT_1  /* PA1 */
 #define GPIO_TIM2_CH3OUT  GPIO_TIM2_CH3OUT_1  /* PA9 */
 
-/* Configuration specific to high priority interrupts example:
- *   - TIM1 CC1 trigger for ADC if DMA transfer and TIM1 PWM
- *   - ADC DMA transfer on DMA1_CH1
- */
-
-#ifdef CONFIG_NUCLEOF302R8_HIGHPRI
-
-#if defined(CONFIG_STM32_TIM1_PWM) && defined(CONFIG_STM32_ADC1_DMA)
-
-/* TIM1 - ADC trigger */
-
-#define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T1CC1
-
-#endif /* CONFIG_STM32_TIM1_PWM */
-#endif /* CONFIG_NUCLEOF302R8_HIGHPRI */
-
 /* DMA channels *************************************************************/
 /* ADC */
 
