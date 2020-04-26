@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv8-m/gnu/up_fullcontextrestore.S
+ * arch/arm/src/armv8-m/gnu/arm_switchcontext.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -38,7 +38,7 @@
 
 	.syntax	unified
 	.thumb
-	.file	"up_fullcontextrestore.S"
+	.file	"arm_switchcontext.S"
 
 /************************************************************************************
  * Macros
@@ -49,12 +49,13 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_fullcontextrestore
+ * Name: arm_switchcontext
  *
  * Description:
- *   Restore the current thread context.  Full prototype is:
+ *   Save the current thread context and restore the specified context.
+ *   Full prototype is:
  *
- *   void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ *   void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
  *
  * Returned Value:
  *   None
@@ -62,18 +63,19 @@
  ************************************************************************************/
 
 	.thumb_func
-	.globl	up_fullcontextrestore
-	.type	up_fullcontextrestore, function
-up_fullcontextrestore:
+	.globl	arm_switchcontext
+	.type	arm_switchcontext, function
+arm_switchcontext:
 
-	/* Perform the System call with R0=1 and R1=regs */
+	/* Perform the System call with R0=1, R1=saveregs, R2=restoreregs */
 
-	mov		r1, r0						/* R1: regs */
-	mov		r0, #SYS_restore_context	/* R0: restore context */
-	svc		0							/* Force synchronous SVCall (or Hard Fault) */
+	mov		r2, r1					/* R2: restoreregs */
+	mov		r1, r0					/* R1: saveregs */
+	mov		r0, #SYS_switch_context	/* R0: context switch */
+	svc		0						/* Force synchronous SVCall (or Hard Fault) */
 
-	/* This call should not return */
+	/* We will get here only after the rerturn from the context switch */
 
-	bx		lr							/* Unnecessary ... will not return */
-	.size	up_fullcontextrestore, .-up_fullcontextrestore
+	bx		lr
+	.size	arm_switchcontext, .-arm_switchcontext
 	.end

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv8-m/gnu/up_setjmp.S
+ * arch/arm/src/armv8-m/gnu/arm_setjmp.S
  *
  *   Copyright (C) 2019 Gregory Nutt. All rights reserved.
  *   Author: David S. Alessio <David@DSA.Consulting>

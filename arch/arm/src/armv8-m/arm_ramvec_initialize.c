@@ -86,9 +86,9 @@
  ****************************************************************************/
 
 /* If CONFIG_ARCH_RAMVECTORS is defined, then the ARM logic must provide
- * ARM-specific implementations of up_ramvec_initialize(), irq_attach(), and
+ * ARM-specific implementations of arm_ramvec_initialize(), irq_attach(), and
  * irq_dispatch.  In this case, it is also assumed that the ARM vector
- * table resides in RAM, has the name up_ram_vectors, and has been
+ * table resides in RAM, has the name g_ram_vectors, and has been
  * properly positioned and aligned in memory by the linker script.
  *
  * REVISIT: Can this alignment requirement vary from core-to-core?  Yes, it
@@ -105,14 +105,14 @@ up_vector_t g_ram_vectors[ARMV8M_VECTAB_SIZE]
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ramvec_initialize
+ * Name: arm_ramvec_initialize
  *
  * Description:
  *   Copy vectors to RAM an configure the NVIC to use the RAM vectors.
  *
  ****************************************************************************/
 
-void up_ramvec_initialize(void)
+void arm_ramvec_initialize(void)
 {
   const up_vector_t *src;
   up_vector_t *dest;
