@@ -215,4 +215,4 @@ Where <subdir> is one of the following:
 
     Default toolchain:
 
-    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux / Mac OS X
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux / macOS

@@ -67,7 +67,7 @@ config SIM_X8664_SYSTEMV
 	bool "System V AMD64 ABI"
 	---help---
 		The calling convention of the System V AMD64 ABI is followed on Solaris,
-		Linux, FreeBSD, Mac OS X, and other UNIX-like or POSIX-compliant operating
+		Linux, FreeBSD, macOS, and other UNIX-like or POSIX-compliant operating
 		systems. The first six integer or pointer arguments are passed in registers
 		RDI, RSI, RDX, RCX, R8, and R9, while XMM0, XMM1, XMM2, XMM3, XMM4, XMM5,
 		XMM6 and XMM7 are used for floating point arguments. For system calls, R10

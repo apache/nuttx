@@ -2547,7 +2547,7 @@ Bugfixes include:
     * FAT.  Now returns the correct error value when it is unable to
       recognize the file system.
 
-    * Build.  MAC OS build fixes (submitted by Mike Smith)
+    * Build.  macOS build fixes (submitted by Mike Smith)
 
 And several others.  See the ChangeLog for more details.
 
@@ -26659,11 +26659,11 @@ This is the first release of NuttX as Apache NuttX (Incubating) and represents o
            - NXP S32K11x (Cortex-M0+) and S32K14x (Cortext-M4F): Add support for NXP automotive boards.
            - XMC 4700 (Cortex-M4F)
        * Architectures with significant improvements
-           - ESP32 loadable modules support 
-           - i.MX RT: FLEXIO clock config logic. 
+           - ESP32 loadable modules support
+           - i.MX RT: FLEXIO clock config logic.
            - Fix the clock configuration for the i.MX RT family
-           - i.MX RT: Add ability to run from OCRAM 
-           - SAMA5D27 peripheral support - USB Host working 
+           - i.MX RT: Add ability to run from OCRAM
+           - SAMA5D27 peripheral support - USB Host working
            - z20x: Add W25 bootloader
            - i.MX RT: Add USB Device support
            - STM32, STM32F7, STM32H7 add SPI DMATHRESHOLD

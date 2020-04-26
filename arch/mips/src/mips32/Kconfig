@@ -59,7 +59,7 @@ config MIPS32_TOOLCHAIN_PINGUINOW
 	select ARCH_TOOLCHAIN_GNU
 
 config MIPS32_TOOLCHAIN_PINGUINOL
-	bool "Pinguino mips-elf toolchain under OS X or Linux"
+	bool "Pinguino mips-elf toolchain under macOS or Linux"
 	depends on HOST_LINUX || HOST_MACOS
 	select ARCH_TOOLCHAIN_GNU
 

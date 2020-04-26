@@ -112,7 +112,7 @@ PA17 and PA23 are available from the AVR32DEV1:
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-  Linux, Mac OS X or Cygwin on Windows can be used for the development environment.
+  Linux, macOS or Cygwin on Windows can be used for the development environment.
   The source has been built only using the GNU toolchain (see below).  Other
   toolchains will likely cause problems. Testing was performed using the Cygwin
   environment.
@@ -142,7 +142,7 @@ WinAVR:
 
 AVR32 Toolchain Builder:
 
-  A third option is to build the toolchain yourself. For OS X and Linux systems,
+  A third option is to build the toolchain yourself. For macOS and Linux systems,
   this Makefile will build a complete gcc-4.4.3 toolchain:
 
     https://github.com/jsnyder/avr32-toolchain

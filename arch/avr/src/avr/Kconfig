@@ -43,7 +43,7 @@ config AVR_CROSSPACK_TOOLCHAIN
 	bool "CrossPack-AVR"
 	depends on HOST_MACOS
 	---help---
-		For OS X, the AVR CrossPack toolchain is supported:
+		For macOS, the AVR CrossPack toolchain is supported:
 		http://www.obdev.at/products/crosspack/index.html
 
 config AVR_BUILDROOT_TOOLCHAIN

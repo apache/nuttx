@@ -123,7 +123,7 @@ the toolchain on the make commandline with CONFIG_AVR_TOOLCHAIN=<toolchain>.
 
 The valid values for <toolchain> are BUILDROOT, CROSSPACK, LINUXGCC and WINAVR.
 
-This port was tested using the OS X / CROSSPACK tool chain, GCC version 4.8.1.
+This port was tested using the macOS / CROSSPACK tool chain, GCC version 4.8.1.
 Please see other NuttX documentation for toolchain details.
 
 MoteinoMEGA Configuration Options

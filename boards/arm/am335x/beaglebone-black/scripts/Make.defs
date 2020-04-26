@@ -41,7 +41,7 @@ include ${TOPDIR}/arch/arm/src/armv7-a/Toolchain.defs
 
 LDSCRIPT = sdram.ld
 
-# Setup for Windows vs Linux/Cygwin/OSX environments
+# Setup for Windows vs Linux/Cygwin/macOS environments
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
