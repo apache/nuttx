@@ -7758,6 +7758,62 @@ config STM32_ADC4_INJECTED_CHAN
 	---help---
 		Support for ADC4 injected channels.
 
+config STM32_ADC1_EXTSEL
+	bool "ADC1 external trigger for regular group"
+	depends on STM32_ADC1 && !STM32_HAVE_ADC1_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC1.
+
+config STM32_ADC2_EXTSEL
+	bool "ADC2 external trigger for regular group"
+	depends on STM32_ADC2 && !STM32_HAVE_ADC2_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC2.
+
+config STM32_ADC3_EXTSEL
+	bool "ADC3 external trigger for regular group"
+	depends on STM32_ADC3 && !STM32_HAVE_ADC3_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC3.
+
+config STM32_ADC4_EXTSEL
+	bool "ADC4 external trigger for regular group"
+	depends on STM32_ADC4 && !STM32_HAVE_ADC4_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC4.
+
+config STM32_ADC1_JEXTSEL
+	bool "ADC1 external trigger for injected group"
+	depends on STM32_ADC1
+	default n
+	---help---
+		Enable JEXTSEL for ADC1.
+
+config STM32_ADC2_JEXTSEL
+	bool "ADC2 external trigger for injected group"
+	depends on STM32_ADC2
+	default n
+	---help---
+		Enable JEXTSEL for ADC2.
+
+config STM32_ADC3_JEXTSEL
+	bool "ADC3 external trigger for injected group"
+	depends on STM32_ADC3
+	default n
+	---help---
+		Enable JEXTSEL for ADC3.
+
+config STM32_ADC4_JEXTSEL
+	bool "ADC4 external trigger for injected group"
+	depends on STM32_ADC4
+	default n
+	---help---
+		Enable JEXTSEL for ADC4.
+
 endmenu
 
 menu "SDADC Configuration"

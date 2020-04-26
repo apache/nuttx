@@ -61,8 +61,10 @@
 #  define ADC_DMAREG_DMA               ADC_CR2_DMA
 #  define STM32_ADC_EXTREG_OFFSET      STM32_ADC_CR2_OFFSET
 #  define ADC_EXTREG_EXTSEL_MASK       ADC_CR2_EXTSEL_MASK
+#  define ADC_EXTREG_EXTSEL_SHIFT      ADC_CR2_EXTSEL_SHIFT
 #  define STM32_ADC_JEXTREG_OFFSET     STM32_ADC_CR2_OFFSET
 #  define ADC_JEXTREG_JEXTSEL_MASK     ADC_CR2_JEXTSEL_MASK
+#  define ADC_EXTREG_JEXTSEL_SHIFT     ADC_CR2_JEXTSEL_SHIFT
 #  define STM32_ADC_ISR_OFFSET         STM32_ADC_SR_OFFSET
 #  define STM32_ADC_IER_OFFSET         STM32_ADC_CR1_OFFSET
 #  ifdef HAVE_BASIC_ADC
@@ -85,10 +87,12 @@
 #  define ADC_DMAREG_DMA               ADC_CFGR1_DMAEN
 #  define STM32_ADC_EXTREG_OFFSET      STM32_ADC_CFGR1_OFFSET
 #  define ADC_EXTREG_EXTSEL_MASK       ADC_CFGR1_EXTSEL_MASK
+#  define ADC_EXTREG_EXTSEL_SHIFT      ADC_CFGR1_EXTSEL_SHIFT
 #  define ADC_EXTREG_EXTEN_MASK        ADC_CFGR1_EXTEN_MASK
 #  define ADC_EXTREG_EXTEN_DEFAULT     ADC_CFGR1_EXTEN_RISING
 #  define STM32_ADC_JEXTREG_OFFSET     STM32_ADC_JSQR_OFFSET
 #  define ADC_JEXTREG_JEXTSEL_MASK     ADC_JSQR_JEXTSEL_MASK
+#  define ADC_EXTREG_JEXTSEL_SHIFT     ADC_JSQR_JEXTSEL_SHIFT
 #  define ADC_JEXTREG_JEXTEN_MASK      ADC_JSQR_JEXTEN_MASK
 #  define ADC_JEXTREG_JEXTEN_DEFAULT   ADC_JSQR_JEXTEN_RISING
 #endif
@@ -1346,6 +1350,11 @@
 
 /* EXTSEL configuration *************************************************************/
 
+/* NOTE: this configuration if used only if CONFIG_STM32_TIMx_ADCy is selected.
+ * You can still connect the ADC with a timer trigger using the
+ * CONFIG_STM32_ADCx_EXTSEL option.
+ */
+
 #if defined(CONFIG_STM32_TIM1_ADC1)
 #  if CONFIG_STM32_ADC1_TIMTRIG == 0
 #    define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T1CC1
@@ -1880,35 +1889,115 @@
 #  endif
 #endif
 
+/* Regular channels external trigger support */
+
+#ifdef ADC1_EXTSEL_VALUE
+#  define ADC1_HAVE_EXTCFG  1
+#  define ADC1_EXTCFG_VALUE (ADC1_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
+#elif defined(CONFIG_STM32_ADC1_EXTSEL)
+#  define ADC1_HAVE_EXTCFG  1
+#  define ADC1_EXTCFG_VALUE 0
+#else
+#  undef ADC1_HAVE_EXTCFG
+#endif
+#ifdef ADC2_EXTSEL_VALUE
+#  define ADC2_HAVE_EXTCFG  1
+#  define ADC2_EXTCFG_VALUE (ADC2_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
+#elif defined(CONFIG_STM32_ADC2_EXTSEL)
+#  define ADC2_HAVE_EXTCFG  1
+#  define ADC2_EXTCFG_VALUE 0
+#else
+#  undef ADC2_HAVE_EXTCFG
+#endif
+#ifdef ADC3_EXTSEL_VALUE
+#  define ADC3_HAVE_EXTCFG  1
+#  define ADC3_EXTCFG_VALUE (ADC3_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
+#elif defined(CONFIG_STM32_ADC3_EXTSEL)
+#  define ADC3_HAVE_EXTCFG  1
+#  define ADC3_EXTCFG_VALUE 0
+#else
+#  undef ADC3_HAVE_EXTCFG
+#endif
+#ifdef ADC4_EXTSEL_VALUE
+#  define ADC4_HAVE_EXTCFG  1
+#  define ADC4_EXTCFG_VALUE (ADC4_EXTSEL_VALUE | ADC_EXTREG_EXTEN_DEFAULT)
+#elif defined(CONFIG_STM32_ADC4_EXTSEL)
+#  define ADC4_HAVE_EXTCFG  1
+#  define ADC4_EXTCFG_VALUE 0
+#else
+#  undef ADC4_HAVE_EXTCFG
+#endif
+
+#if defined(ADC1_HAVE_EXTCFG) || defined(ADC2_HAVE_EXTCFG) || \
+  defined(ADC3_HAVE_EXTCFG) || defined(ADC3_HAVE_EXTCFG)
+#  define ADC_HAVE_EXTCFG
+#endif
+
 /* JEXTSEL configuration ************************************************************/
 
-/* TODO: ADC1 JEXTSEL trigger */
+/* There is no automatic timer tirgger configuration from Kconfig for injected
+ * channels conversion.
+ */
+
+/* ADC1 HRTIM JEXTSEL trigger */
 
 #if defined(CONFIG_STM32_HRTIM_ADC1_TRG2)
 #  define ADC1_JEXTSEL_VALUE ADC1_JEXTSEL_HRTTRG2
 #elif defined(CONFIG_STM32_HRTIM_ADC1_TRG4)
 #  define ADC1_JEXTSEL_VALUE ADC1_JEXTSEL_HRTTRG4
-#else
-#  undef ADC1_JEXTSEL_VALUE
 #endif
 
-/* TODO: ADC2 JEXTSEL trigger */
+/* ADC1 HRTIM JEXTSEL trigger */
 
 #if defined(CONFIG_STM32_HRTIM_ADC2_TRG2)
 #  define ADC2_JEXTSEL_VALUE ADC2_JEXTSEL_HRTTRG2
 #elif defined(CONFIG_STM32_HRTIM_ADC2_TRG4)
 #  define ADC2_JEXTSEL_VALUE ADC2_JEXTSEL_HRTTRG4
-#else
-#  undef ADC2_JEXTSEL_VALUE
 #endif
 
-/* TODO: ADC3 JEXTSEL trigger */
+/* Injected channels external trigger support */
 
-#undef ADC3_JEXTSEL_VALUE
+#ifdef ADC1_JEXTSEL_VALUE
+#  define ADC1_HAVE_JEXTCFG  1
+#  define ADC1_JEXTCFG_VALUE (ADC1_JEXTSEL_VALUE | ADC_JEXTREG_JEXTEN_DEFAULT)
+#elif defined(CONFIG_STM32_ADC1_JEXTSEL)
+#  define ADC1_HAVE_JEXTCFG  1
+#  define ADC1_JEXTCFG_VALUE 0
+#else
+#  undef ADC1_HAVE_JEXTCFG
+#endif
+#ifdef ADC2_JEXTSEL_VALUE
+#  define ADC2_HAVE_JEXTCFG  1
+#  define ADC2_JEXTCFG_VALUE (ADC2_JEXTSEL_VALUE | ADC_JEXTREG_JEXTEN_DEFAULT)
+#elif defined(CONFIG_STM32_ADC2_JEXTSEL)
+#  define ADC2_HAVE_JEXTCFG  1
+#  define ADC2_JEXTCFG_VALUE 0
+#else
+#  undef ADC2_HAVE_JEXTCFG
+#endif
+#ifdef ADC3_JEXTSEL_VALUE
+#  define ADC3_HAVE_JEXTCFG  1
+#  define ADC3_JEXTCFG_VALUE (ADC3_JEXTSEL_VALUE | ADC_JEXTREG_JEXTEN_DEFAULT)
+#elif defined(CONFIG_STM32_ADC3_JEXTSEL)
+#  define ADC3_HAVE_JEXTCFG  1
+#  define ADC3_JEXTCFG_VALUE 0
+#else
+#  undef ADC3_HAVE_JEXTCFG
+#endif
+#ifdef ADC4_JEXTSEL_VALUE
+#  define ADC4_HAVE_JEXTCFG  1
+#  define ADC4_JEXTCFG_VALUE (ADC4_JEXTSEL_VALUE | ADC_JEXTREG_JEXTEN_DEFAULT)
+#elif defined(CONFIG_STM32_ADC4_JEXTSEL)
+#  define ADC4_HAVE_JEXTCFG  1
+#  define ADC4_JEXTCFG_VALUE 0
+#else
+#  undef ADC4_HAVE_JEXTCFG
+#endif
 
-/* TODO: ADC4 JEXTSEL trigger */
-
-#undef ADC4_JEXTSEL_VALUE
+#if defined(ADC1_HAVE_JEXTCFG) || defined(ADC2_HAVE_JEXTCFG) || \
+    defined(ADC3_HAVE_JEXTCFG) || defined(ADC4_HAVE_JEXTCFG)
+#  define ADC_HAVE_JEXTCFG
+#endif
 
 /* ADC interrupts *******************************************************************/
 
@@ -1964,10 +2053,14 @@
         (adc)->llops->reg_startconv(adc, state)
 #define STM32_ADC_OFFSET_SET(adc, ch, i, o)         \
         (adc)->llops->offset_set(adc, ch, i, o)
+#define STM32_ADC_EXTCFG_SET(adc, c)                \
+        (adc)->llops->extcfg_set(adc, c)
 #define STM32_ADC_INJ_STARTCONV(adc, state)         \
         (adc)->llops->inj_startconv(adc, state)
 #define STM32_ADC_INJDATA_GET(adc, chan)            \
         (adc)->llops->inj_get(adc, chan)
+#define STM32_ADC_JEXTCFG_SET(adc, c)               \
+        (adc)->llops->jextcfg_set(adc, c)
 #define STM32_ADC_SAMPLETIME_SET(adc, time_samples) \
         (adc)->llops->stime_set(adc, time_samples)
 #define STM32_ADC_SAMPLETIME_WRITE(adc)             \
@@ -2100,6 +2193,18 @@ struct stm32_adc_ops_s
 
   int (*offset_set)(FAR struct stm32_adc_dev_s *dev, uint8_t ch, uint8_t i,
                     uint16_t offset);
+
+#ifdef ADC_HAVE_EXTCFG
+  /* Configure the ADC external trigger for regular conversion */
+
+  void (*extcfg_set)(FAR struct stm32_adc_dev_s *dev, uint32_t extcfg);
+#endif
+
+#ifdef ADC_HAVE_JEXTCFG
+  /* Configure the ADC external trigger for injected conversion */
+
+  void (*jextcfg_set)(FAR struct stm32_adc_dev_s *dev, uint32_t jextcfg);
+#endif
 
 #ifdef ADC_HAVE_INJECTED
   /* Get current ADC injected data register */
