@@ -211,7 +211,7 @@ int up_rptun_init(void)
       rsc->rpmsg_vdev.type          = RSC_VDEV;
       rsc->rpmsg_vdev.id            = VIRTIO_ID_RPMSG;
       rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS
-                                    | 1 << VIRTIO_RPMSG_F_BIND
+                                    | 1 << VIRTIO_RPMSG_F_ACK
                                     | 1 << VIRTIO_RPMSG_F_BUFSZ;
       rsc->rpmsg_vdev.num_of_vrings = 2;
       rsc->rpmsg_vring0.align       = 8;
