@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/armv8-m/up_releasepending.c
+ *  arch/arm/src/armv8-m/arm_unblocktask.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,6 +30,7 @@
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
+#include "clock/clock.h"
 #include "up_internal.h"
 
 /****************************************************************************
@@ -37,47 +38,57 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_release_pending
+ * Name: up_unblock_task
  *
  * Description:
- *   Release and ready-to-run tasks that have
- *   collected in the pending task list.  This can call a
- *   context switch if a new task is placed at the head of
- *   the ready to run list.
+ *   A task is currently in an inactive task list
+ *   but has been prepped to execute.  Move the TCB to the
+ *   ready-to-run list, restore its context, and start execution.
+ *
+ * Input Parameters:
+ *   tcb: Refers to the tcb to be unblocked.  This tcb is
+ *     in one of the waiting tasks lists.  It must be moved to
+ *     the ready-to-run list and, if it is the highest priority
+ *     ready to run task, executed.
  *
  ****************************************************************************/
 
-void up_release_pending(void)
+void up_unblock_task(struct tcb_s *tcb)
 {
   struct tcb_s *rtcb = this_task();
 
-  sinfo("From TCB=%p\n", rtcb);
+  /* Verify that the context switch can be performed */
 
-  /* Merge the g_pendingtasks list into the ready-to-run task list */
+  DEBUGASSERT((tcb->task_state >= FIRST_BLOCKED_STATE) &&
+              (tcb->task_state <= LAST_BLOCKED_STATE));
 
-#if 0
-  sched_lock();
-#endif
+  /* Remove the task from the blocked task list */
 
-  if (sched_mergepending())
+  sched_removeblocked(tcb);
+
+  /* Add the task in the correct location in the prioritized
+   * ready-to-run task list
+   */
+
+  if (sched_addreadytorun(tcb))
     {
-      /* The currently active task has changed!  We will need to switch
-       * contexts.
+      /* The currently active task has changed! We need to do
+       * a context switch to the new task.
        */
 
       /* Update scheduler parameters */
 
       sched_suspend_scheduler(rtcb);
 
-      /* Are we operating in interrupt context? */
+      /* Are we in an interrupt handler? */
 
       if (CURRENT_REGS)
         {
-          /* Yes, then we have to do things differently. Just copy the
-           * CURRENT_REGS into the OLD rtcb.
+          /* Yes, then we have to do things differently.
+           * Just copy the CURRENT_REGS into the OLD rtcb.
            */
 
-           up_savestate(rtcb->xcp.regs);
+          up_savestate(rtcb->xcp.regs);
 
           /* Restore the exception context of the rtcb at the (new) head
            * of the ready-to-run task list.

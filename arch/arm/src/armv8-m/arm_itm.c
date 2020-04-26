@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/up_itm.c
+ * arch/arm/src/armv8-m/arm_itm.c
  *
  *   Copyright (c) 2009 - 2013 ARM LIMITED
  *

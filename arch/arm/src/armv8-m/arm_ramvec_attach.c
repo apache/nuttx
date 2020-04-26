@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/up_copyfullstate.c
+ * arch/arm/irq/arm_ramvec_attach.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,39 +24,72 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <arch/irq.h>
+#include <errno.h>
+#include <debug.h>
 
-#include "up_internal.h"
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+
+#include "ram_vectors.h"
+
+#ifdef CONFIG_ARCH_RAMVECTORS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+/* Common exception entrypoint */
+
+void exception_common(void);
+
 /****************************************************************************
- * Name: up_copyfullstate
+ * Name: up_ramvec_attach
  *
  * Description:
- *    Copy the entire register save area (including the floating point
- *    registers if applicable).  This is a little faster than most memcpy's
- *    since it does 32-bit transfers.
+ *   Configure the ram vector table so that IRQ number 'irq' will be
+ *   dispatched by hardware to 'vector'
  *
  ****************************************************************************/
 
-void up_copyfullstate(uint32_t *dest, uint32_t *src)
+int up_ramvec_attach(int irq, up_vector_t vector)
 {
-  int i;
+  int ret = -EINVAL;
 
-  /* In the Cortex-M3 model, the state is copied from the stack to the TCB,
-   * but only a reference is passed to get the state from the TCB.  So the
-   * following check avoids copying the TCB save area onto itself:
-   */
+  irqinfo("%s IRQ%d\n", vector ? "Attaching" : "Detaching", irq);
 
-  if (src != dest)
+  if ((unsigned)irq < ARMV8M_VECTAB_SIZE)
     {
-      for (i = 0; i < XCPTCONTEXT_REGS; i++)
+      irqstate_t flags;
+
+      /* If the new vector is NULL, then the vector is being detached. In
+       * this case, disable the itnerrupt and direct any interrupts to the
+       * common exception handler.
+       */
+
+      flags = enter_critical_section();
+      if (vector == NULL)
         {
-          *dest++ = *src++;
+          /* Disable the interrupt if we can before detaching it.  We might
+           * not be able to do this for all interrupts.
+           */
+
+          up_disable_irq(irq);
+
+          /* Detaching the vector really means re-attaching it to the
+           * common exception handler.
+           */
+
+           vector = exception_common;
         }
+
+      /* Save the new vector in the vector table */
+
+      g_ram_vectors[irq] = vector;
+      leave_critical_section(flags);
+      ret = OK;
     }
+
+  return ret;
 }
+
+#endif /* !CONFIG_ARCH_RAMVECTORS */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/up_vectors.c
+ * arch/arm/src/armv8-m/arm_vectors.c
  *
  *   Copyright (C) 2012 Michael Smith. All rights reserved.
  *
