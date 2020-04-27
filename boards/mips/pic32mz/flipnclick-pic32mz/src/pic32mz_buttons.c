@@ -46,7 +46,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "pic32mz-gpio.h"
+#include "pic32mz_gpio.h"
 #include "flipnclick-pic32mz.h"
 
 #ifdef CONFIG_ARCH_BUTTONS

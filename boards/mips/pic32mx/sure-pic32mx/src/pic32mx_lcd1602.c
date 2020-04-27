@@ -88,9 +88,9 @@
 #include <nuttx/lcd/slcd_codec.h>
 #include <nuttx/semaphore.h>
 
-#include "up_arch.h"
-#include "pic32mx-ioport.h"
-#include "pic32mx-int.h"
+#include "mips_arch.h"
+#include "pic32mx_ioport.h"
+#include "pic32mx_int.h"
 #include "pic32mx.h"
 #include "sure-pic32mx.h"
 

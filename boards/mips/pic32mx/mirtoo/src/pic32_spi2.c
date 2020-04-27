@@ -46,10 +46,10 @@
 #include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "mips_arch.h"
 #include "chip.h"
 #include "pic32mx.h"
-#include "pic32mx-pps.h"
+#include "pic32mx_pps.h"
 #include "mirtoo.h"
 
 #ifdef CONFIG_PIC32MX_SPI2

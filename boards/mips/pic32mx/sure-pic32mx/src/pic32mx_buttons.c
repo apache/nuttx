@@ -48,11 +48,11 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "mips_arch.h"
 
 #include "pic32mx.h"
-#include "pic32mx-ioport.h"
-#include "pic32mx-adc.h"
+#include "pic32mx_ioport.h"
+#include "pic32mx_adc.h"
 #include "sure-pic32mx.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
