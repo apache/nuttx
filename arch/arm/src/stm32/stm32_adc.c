@@ -409,6 +409,7 @@ struct stm32_dev_s
   uint8_t cj_channels;       /* Number of configured injected channels */
 #endif
   uint8_t intf;              /* ADC interface number */
+  uint8_t initialized;       /* ADC interface initialization counter */
   uint8_t current;           /* Current ADC channel being converted */
 #ifdef HAVE_ADC_RESOLUTION
   uint8_t resolution;        /* ADC resolution (0-3) */
@@ -755,6 +756,7 @@ static struct stm32_dev_s g_adcpriv1 =
   .cmn         = &ADC1CMN_DATA,
 #endif
   .intf        = 1,
+  .initialized = 0,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32_ADC1_RESOLUTION,
 #endif
@@ -810,6 +812,7 @@ static struct stm32_dev_s g_adcpriv2 =
   .cmn         = &ADC2CMN_DATA,
 #endif
   .intf        = 2,
+  .initialized = 0,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32_ADC2_RESOLUTION,
 #endif
@@ -865,6 +868,7 @@ static struct stm32_dev_s g_adcpriv3 =
   .cmn         = &ADC3CMN_DATA,
 #endif
   .intf        = 3,
+  .initialized = 0,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32_ADC3_RESOLUTION,
 #endif
@@ -913,6 +917,7 @@ static struct stm32_dev_s g_adcpriv4 =
   .cmn         = &ADC4CMN_DATA,
 #endif
   .intf        = 4,
+  .initialized = 0,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32_ADC4_RESOLUTION,
 #endif
@@ -2793,6 +2798,13 @@ static void adc_reset(FAR struct adc_dev_s *dev)
   ainfo("intf: %d\n", priv->intf);
   flags = enter_critical_section();
 
+  /* Do nothing if ADC instance is currently in use */
+
+  if (priv->initialized > 0)
+    {
+      return;
+    }
+
 #ifdef HAVE_HSI_CONTROL
   /* The STM32L15XX family uses HSI as an independent clock-source
    * for the ADC
@@ -2874,11 +2886,17 @@ static void adc_reset_hsi_disable(FAR struct adc_dev_s *dev)
 
 static int adc_setup(FAR struct adc_dev_s *dev)
 {
-#if !defined(CONFIG_STM32_ADC_NOIRQ) || defined(HAVE_ADC_CMN_DATA) ||   \
-     defined(ADC_HAVE_TIMER) || !defined(CONFIG_STM32_ADC_NO_STARTUP_CONV)
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
-#endif
   int ret = OK;
+
+  /* Do nothing when the ADC device is already set up */
+
+  if (priv->initialized > 0)
+    {
+      return OK;
+    }
+
+  priv->initialized += 1;
 
   /* Attach the ADC interrupt */
 
@@ -2971,6 +2989,15 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+
+  /* Shutdown the ADC device only when not in use */
+
+  priv->initialized -= 1;
+
+  if (priv->initialized > 0)
+    {
+      return;
+    }
 
   /* Disable ADC */
 
