@@ -80,6 +80,10 @@
 #  define CONFIG_NETDB_RESOLVCONF_PATH "/etc/resolv.conf"
 #endif
 
+#ifndef CONFIG_NETDB_DNSSERVER_NAMESERVERS
+#  define CONFIG_NETDB_DNSSERVER_NAMESERVERS 1
+#endif
+
 #define DNS_MAX_ADDRSTR   48
 #define DNS_MAX_LINE      64
 #define NETDB_DNS_KEYWORD "nameserver"
@@ -117,10 +121,10 @@ extern "C"
 #endif
 
 #ifndef CONFIG_NETDB_RESOLVCONF
-/* The DNS server address */
+/* The DNS server addresses */
 
-EXTERN union dns_addr_u g_dns_server;
-EXTERN bool g_dns_address;     /* true: We have the address of the DNS server */
+EXTERN union dns_addr_u g_dns_servers[];
+EXTERN uint8_t g_dns_nservers;
 #endif
 
 /****************************************************************************
@@ -141,7 +145,7 @@ bool dns_initialize(void);
  * Name: dns_semtake
  *
  * Description:
- *   Take the DNS semaphore, ignoring errors do to the receipt of signals.
+ *   Take the DNS semaphore, ignoring errors due to the receipt of signals.
  *
  ****************************************************************************/
 
