@@ -237,7 +237,7 @@ Toolchains
     $ find . -name xc32-*
     ./mirtoo/scripts/xc32-debug.ld
     ./mirtoo/scripts/xc32-release.ld
-    ./pic32mz-starterkit/scripts/xc32-debug.ld
+    ./pic32mz_starterkit/scripts/xc32-debug.ld
 
   Windows Native Toolchains
   -------------------------

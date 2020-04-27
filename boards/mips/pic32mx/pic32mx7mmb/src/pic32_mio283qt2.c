@@ -56,9 +56,9 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "mips_arch.h"
 #include "pic32mx.h"
-#include "pic32mx-pmp.h"
+#include "pic32mx_pmp.h"
 #include "pic32mx7mmb.h"
 
 /****************************************************************************
@@ -159,7 +159,9 @@ static void pic32mx_backlight(FAR struct mio283qt2_lcd_s *dev, int power);
  * Private Data
  ****************************************************************************/
 
-/* This is the driver state structure (there is no retained state information) */
+/* This is the driver state structure (there is no retained state
+ * information)
+ */
 
 static struct pic32mx7mmb_dev_s g_pic32mx7mmb_lcd =
 {
@@ -394,7 +396,7 @@ static void pic32mx_backlight(FAR struct mio283qt2_lcd_s *dev, int power)
  * Name:  board_lcd_initialize
  *
  * Description:
- *   Initialize the LCD video hardware.  The initial state of the LCD is fully
+ *   Initialize the LCD video hardware. The initial state of the LCD is fully
  *   initialized, display memory cleared, and the LCD ready to use, but with
  *   the power setting at 0 (full off).
  *
@@ -449,7 +451,8 @@ int board_lcd_initialize(void)
       /* Configure and enable the LCD */
 
       up_mdelay(50);
-      g_pic32mx7mmb_lcd.drvr = mio283qt2_lcdinitialize(&g_pic32mx7mmb_lcd.dev);
+      g_pic32mx7mmb_lcd.drvr =
+        mio283qt2_lcdinitialize(&g_pic32mx7mmb_lcd.dev);
       if (!g_pic32mx7mmb_lcd.drvr)
         {
           lcderr("ERROR: mio283qt2_lcdinitialize failed\n");

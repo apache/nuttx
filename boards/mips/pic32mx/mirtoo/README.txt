@@ -627,7 +627,7 @@ Analog Input
   and ADC driver that can be used with standard open, close, read, and write
   interfaces.  To complete this driver, the following is needed:
 
-  (1) arch/mips/src/pic32mx/pic32mx-adc.c.  The ADC driver that implements
+  (1) arch/mips/src/pic32mx/pic32mx_adc.c.  The ADC driver that implements
       the ADC interfaces defined in include/nuttx/analog/adc.h and must
       be built when CONFIG_PIC32MX_ADC is defined.
 

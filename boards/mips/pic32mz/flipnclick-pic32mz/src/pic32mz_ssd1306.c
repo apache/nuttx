@@ -67,8 +67,8 @@
 #  include <nuttx/video/fb.h>
 #endif
 
-#include "pic32mz-gpio.h"
-#include "pic32mz-spi.h"
+#include "pic32mz_gpio.h"
+#include "pic32mz_spi.h"
 
 #include "flipnclick-pic32mz.h"
 
