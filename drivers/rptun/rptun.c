@@ -551,7 +551,8 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
   return 0;
 }
 
-static int rptun_dev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct rptun_priv_s *priv = inode->i_private;
@@ -577,7 +578,8 @@ static int rptun_dev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
-static int rptun_store_open(FAR void *store_, FAR const char *path,
+static int rptun_store_open(FAR void *store_,
+                            FAR const char *path,
                             FAR const void **img_data)
 {
   FAR struct rptun_store_s *store = store_;
@@ -777,7 +779,8 @@ void rpmsg_unregister_callback(FAR void *priv_,
                 {
                   struct rptun_priv_s *priv;
 
-                  priv = metal_container_of(pnode, struct rptun_priv_s, node);
+                  priv = metal_container_of(pnode,
+                                            struct rptun_priv_s, node);
                   device_destroy(&priv->vdev.rdev, priv_);
                 }
             }

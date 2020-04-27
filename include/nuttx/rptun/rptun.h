@@ -269,7 +269,8 @@ struct rptun_ops_s
   CODE FAR const char *(*get_cpuname)(FAR struct rptun_dev_s *dev);
   CODE FAR const char *(*get_firmware)(FAR struct rptun_dev_s *dev);
 
-  CODE FAR const struct rptun_addrenv_s *(*get_addrenv)(FAR struct rptun_dev_s *dev);
+  CODE FAR const struct rptun_addrenv_s *(*get_addrenv)(
+                        FAR struct rptun_dev_s *dev);
   CODE FAR struct rptun_rsc_s *(*get_resource)(FAR struct rptun_dev_s *dev);
 
   CODE bool (*is_autostart)(FAR struct rptun_dev_s *dev);
