@@ -200,8 +200,10 @@ for dir in $dirlist; do
   fi
 
   # Check if the path needs to be extended for Windows-based tools under Cygwin
+  # windows=yes:  We are building for a windows platform
+  # wintool=y:    The platform is Cygwin and we are using a windows native tool
 
-  if [ "X$windows" = "Xyes" ]; then
+  if [ "X$windows" = "Xyes" -a "X$wintool" == "Xy" ]; then
     path=`cygpath -w $dir`
   else
     path=$dir
