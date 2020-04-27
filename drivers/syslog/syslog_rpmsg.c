@@ -90,8 +90,6 @@ struct syslog_rpmsg_s
 static void syslog_rpmsg_work(FAR void *priv_);
 static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
                                  bool last);
-static int  syslog_rpmsg_flush(void);
-static ssize_t syslog_rpmsg_write(FAR const char *buffer, size_t buflen);
 static void syslog_rpmsg_device_created(FAR struct rpmsg_device *rdev,
                                         FAR void *priv_);
 static void syslog_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
@@ -220,31 +218,6 @@ static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
     }
 }
 
-static int syslog_rpmsg_flush(void)
-{
-  FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
-
-  work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, 0);
-  return OK;
-}
-
-static ssize_t syslog_rpmsg_write(FAR const char *buffer, size_t buflen)
-{
-  FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
-  irqstate_t flags;
-  size_t nwritten;
-
-  flags = enter_critical_section();
-  for (nwritten = 1; nwritten <= buflen; nwritten++)
-    {
-      syslog_rpmsg_putchar(priv, *buffer++, nwritten == buflen);
-    }
-
-  leave_critical_section(flags);
-
-  return buflen;
-}
-
 static void syslog_rpmsg_device_created(FAR struct rpmsg_device *rdev,
                                         FAR void *priv_)
 {
@@ -350,6 +323,31 @@ int syslog_rpmsg_putc(int ch)
   leave_critical_section(flags);
 
   return ch;
+}
+
+int syslog_rpmsg_flush(void)
+{
+  FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
+
+  work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, 0);
+  return OK;
+}
+
+ssize_t syslog_rpmsg_write(FAR const char *buffer, size_t buflen)
+{
+  FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
+  irqstate_t flags;
+  size_t nwritten;
+
+  flags = enter_critical_section();
+  for (nwritten = 1; nwritten <= buflen; nwritten++)
+    {
+      syslog_rpmsg_putchar(priv, *buffer++, nwritten == buflen);
+    }
+
+  leave_critical_section(flags);
+
+  return buflen;
 }
 
 void syslog_rpmsg_init_early(FAR const char *cpuname, FAR void *buffer,

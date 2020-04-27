@@ -90,7 +90,8 @@ static const struct syslog_channel_s g_default_channel =
 {
   syslog_rpmsg_putc,
   syslog_rpmsg_putc,
-  syslog_default_flush
+  syslog_rpmsg_flush,
+  syslog_rpmsg_write
 };
 #elif defined(HAVE_LOWPUTC)
 static const struct syslog_channel_s g_default_channel =
