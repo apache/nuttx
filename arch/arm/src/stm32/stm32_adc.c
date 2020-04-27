@@ -395,6 +395,7 @@ struct stm32_dev_s
 {
 #ifdef CONFIG_STM32_ADC_LL_OPS
   FAR const struct stm32_adc_ops_s *llops; /* Low-level ADC ops */
+  FAR struct adc_dev_s             *dev;   /* Upper-half ADC reference */
 #endif
 #ifdef ADC_HAVE_CB
   FAR const struct adc_callback_s *cb;
@@ -597,6 +598,8 @@ static int adc_jextcfg_set(FAR struct stm32_dev_s *priv, uint32_t jextcfg);
 static void adc_dumpregs(FAR struct stm32_dev_s *priv);
 
 #ifdef CONFIG_STM32_ADC_LL_OPS
+static int adc_llops_setup(FAR struct stm32_adc_dev_s *dev);
+static void adc_llops_shutdown(FAR struct stm32_adc_dev_s *dev);
 static void adc_intack(FAR struct stm32_adc_dev_s *dev, uint32_t source);
 static void adc_inten(FAR struct stm32_adc_dev_s *dev, uint32_t source);
 static void adc_intdis(FAR struct stm32_adc_dev_s *dev, uint32_t source);
@@ -656,6 +659,8 @@ static const struct adc_ops_s g_adcops =
 #ifdef CONFIG_STM32_ADC_LL_OPS
 static const struct stm32_adc_ops_s g_adc_llops =
 {
+  .setup         = adc_llops_setup,
+  .shutdown      = adc_llops_shutdown,
   .int_ack       = adc_intack,
   .int_get       = adc_intget,
   .int_en        = adc_inten,
@@ -4146,6 +4151,28 @@ static int adc123_interrupt(int irq, FAR void *context, FAR void *arg)
 #ifdef CONFIG_STM32_ADC_LL_OPS
 
 /****************************************************************************
+ * Name: adc_llops_setup
+ ****************************************************************************/
+
+static int adc_llops_setup(FAR struct stm32_adc_dev_s *dev)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
+
+  return adc_setup(priv->dev);
+}
+
+/****************************************************************************
+ * Name: adc_llops_shutdown
+ ****************************************************************************/
+
+static void adc_llops_shutdown(FAR struct stm32_adc_dev_s *dev)
+{
+  FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev;
+
+  adc_shutdown(priv->dev);
+}
+
+/****************************************************************************
  * Name: adc_intack
  ****************************************************************************/
 
@@ -4708,6 +4735,12 @@ struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
 
 #ifdef ADC_HAVE_CB
   priv->cb        = NULL;
+#endif
+
+#ifdef CONFIG_STM32_ADC_LL_OPS
+  /* Store reference to the upper-half ADC device */
+
+  priv->dev = dev;
 #endif
 
 #ifdef ADC_HAVE_INJECTED
