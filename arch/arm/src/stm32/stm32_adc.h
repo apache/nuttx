@@ -2067,6 +2067,10 @@
         (adc)->llops->stime_write(adc)
 #define STM32_ADC_DUMP_REGS(adc)                    \
         (adc)->llops->dump_regs(adc)
+#define STM32_ADC_SETUP(adc)                        \
+        (adc)->llops->setup(adc)
+#define STM32_ADC_SHUTDOWN(adc)                     \
+        (adc)->llops->shutdown(adc)
 
 /************************************************************************************
  * Public Types
@@ -2161,6 +2165,14 @@ struct stm32_adc_dev_s
 
 struct stm32_adc_ops_s
 {
+  /* Low-level ADC setup */
+
+  int (*setup)(FAR struct stm32_adc_dev_s *dev);
+
+  /* Low-level ADC shutdown */
+
+  void (*shutdown)(FAR struct stm32_adc_dev_s *dev);
+
   /* Acknowledge interrupts */
 
   void (*int_ack)(FAR struct stm32_adc_dev_s *dev, uint32_t source);
