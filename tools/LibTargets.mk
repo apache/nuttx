@@ -41,115 +41,115 @@
 # Possible kernel-mode builds
 
 libs$(DELIM)libc$(DELIM)libkc$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libc TOPDIR="$(TOPDIR)" libkc$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C libs$(DELIM)libc TOPDIR="$(TOPDIR)" libkc$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libkc$(LIBEXT): libs$(DELIM)libc$(DELIM)libkc$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 libs$(DELIM)libnx$(DELIM)libknx$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libnx TOPDIR="$(TOPDIR)" libknx$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C libs$(DELIM)libnx TOPDIR="$(TOPDIR)" libknx$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libknx$(LIBEXT): libs$(DELIM)libnx$(DELIM)libknx$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 mm$(DELIM)libkmm$(LIBEXT): context
-	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libkmm$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libkmm$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libkmm$(LIBEXT): mm$(DELIM)libkmm$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 $(ARCH_SRC)$(DELIM)libkarch$(LIBEXT): context
-	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libkarch$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libkarch$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libkarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libkarch$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 pass1$(DELIM)libpass1$(LIBEXT): context
-	$(Q) $(MAKE) -C pass1 TOPDIR="$(TOPDIR)" libpass1$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C pass1 TOPDIR="$(TOPDIR)" libpass1$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libpass1$(LIBEXT): pass1$(DELIM)libpass1$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 sched$(DELIM)libsched$(LIBEXT): context
-	$(Q) $(MAKE) -C sched TOPDIR="$(TOPDIR)" libsched$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C sched TOPDIR="$(TOPDIR)" libsched$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libsched$(LIBEXT): sched$(DELIM)libsched$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 net$(DELIM)libnet$(LIBEXT): context
-	$(Q) $(MAKE) -C net TOPDIR="$(TOPDIR)" libnet$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C net TOPDIR="$(TOPDIR)" libnet$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libnet$(LIBEXT): net$(DELIM)libnet$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 boards$(DELIM)libboards$(LIBEXT): context
-	$(Q) $(MAKE) -C boards TOPDIR="$(TOPDIR)" libboards$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C boards TOPDIR="$(TOPDIR)" libboards$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libboards$(LIBEXT): boards$(DELIM)libboards$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 crypto$(DELIM)libcrypto$(LIBEXT): context
-	$(Q) $(MAKE) -C crypto TOPDIR="$(TOPDIR)" libcrypto$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C crypto TOPDIR="$(TOPDIR)" libcrypto$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libcrypto$(LIBEXT): crypto$(DELIM)libcrypto$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 fs$(DELIM)libfs$(LIBEXT): context
-	$(Q) $(MAKE) -C fs TOPDIR="$(TOPDIR)" libfs$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C fs TOPDIR="$(TOPDIR)" libfs$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libfs$(LIBEXT): fs$(DELIM)libfs$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 drivers$(DELIM)libdrivers$(LIBEXT): context
-	$(Q) $(MAKE) -C drivers TOPDIR="$(TOPDIR)" libdrivers$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C drivers TOPDIR="$(TOPDIR)" libdrivers$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libdrivers$(LIBEXT): drivers$(DELIM)libdrivers$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 binfmt$(DELIM)libbinfmt$(LIBEXT): context
-	$(Q) $(MAKE) -C binfmt TOPDIR="$(TOPDIR)" libbinfmt$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C binfmt TOPDIR="$(TOPDIR)" libbinfmt$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libbinfmt$(LIBEXT): binfmt$(DELIM)libbinfmt$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 graphics$(DELIM)libgraphics$(LIBEXT): context
-	$(Q) $(MAKE) -C graphics TOPDIR="$(TOPDIR)" libgraphics$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C graphics TOPDIR="$(TOPDIR)" libgraphics$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libgraphics$(LIBEXT): graphics$(DELIM)libgraphics$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 audio$(DELIM)libaudio$(LIBEXT): context
-	$(Q) $(MAKE) -C audio TOPDIR="$(TOPDIR)" libaudio$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C audio TOPDIR="$(TOPDIR)" libaudio$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libaudio$(LIBEXT): audio$(DELIM)libaudio$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 video$(DELIM)libvideo$(LIBEXT): context
-	$(Q) $(MAKE) -C video TOPDIR="$(TOPDIR)" libvideo$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C video TOPDIR="$(TOPDIR)" libvideo$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libvideo$(LIBEXT): video$(DELIM)libvideo$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 wireless$(DELIM)libwireless$(LIBEXT): context
-	$(Q) $(MAKE) -C wireless TOPDIR="$(TOPDIR)" libwireless$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C wireless TOPDIR="$(TOPDIR)" libwireless$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libwireless$(LIBEXT): wireless$(DELIM)libwireless$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 $(ARCH_SRC)$(DELIM)libarch$(LIBEXT): context
-	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libarch$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libdsp TOPDIR="$(TOPDIR)" libdsp$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C libs$(DELIM)libdsp TOPDIR="$(TOPDIR)" libdsp$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libdsp$(LIBEXT): libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 openamp$(DELIM)libopenamp$(LIBEXT): context
-	$(Q) $(MAKE) -C openamp TOPDIR="$(TOPDIR)" libopenamp$(LIBEXT) KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C openamp TOPDIR="$(TOPDIR)" libopenamp$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libopenamp$(LIBEXT): openamp$(DELIM)libopenamp$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
@@ -157,7 +157,7 @@ staging$(DELIM)libopenamp$(LIBEXT): openamp$(DELIM)libopenamp$(LIBEXT)
 # Special case
 
 syscall$(DELIM)libstubs$(LIBEXT): context
-	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libstubs$(LIBEXT) # KERNEL=y EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libstubs$(LIBEXT) # EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libstubs$(LIBEXT): syscall$(DELIM)libstubs$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
@@ -165,43 +165,43 @@ staging$(DELIM)libstubs$(LIBEXT): syscall$(DELIM)libstubs$(LIBEXT)
 # Possible user-mode builds
 
 libs$(DELIM)libc$(DELIM)libuc$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libc TOPDIR="$(TOPDIR)" libuc$(LIBEXT) KERNEL=n
+	$(Q) $(MAKE) -C libs$(DELIM)libc TOPDIR="$(TOPDIR)" libuc$(LIBEXT)
 
 staging$(DELIM)libuc$(LIBEXT): libs$(DELIM)libc$(DELIM)libuc$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 libs$(DELIM)libnx$(DELIM)libunx$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libnx TOPDIR="$(TOPDIR)" libunx$(LIBEXT) KERNEL=n
+	$(Q) $(MAKE) -C libs$(DELIM)libnx TOPDIR="$(TOPDIR)" libunx$(LIBEXT)
 
 staging$(DELIM)libunx$(LIBEXT): libs$(DELIM)libnx$(DELIM)libunx$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 mm$(DELIM)libumm$(LIBEXT): context
-	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libumm$(LIBEXT) KERNEL=n
+	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libumm$(LIBEXT)
 
 staging$(DELIM)libumm$(LIBEXT): mm$(DELIM)libumm$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 $(ARCH_SRC)$(DELIM)libuarch$(LIBEXT): context
-	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libuarch$(LIBEXT) KERNEL=n
+	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libuarch$(LIBEXT)
 
 staging$(DELIM)libuarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libuarch$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 libs$(DELIM)libxx$(DELIM)libxx$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libxx TOPDIR="$(TOPDIR)" libxx$(LIBEXT) KERNEL=n
+	$(Q) $(MAKE) -C libs$(DELIM)libxx TOPDIR="$(TOPDIR)" libxx$(LIBEXT)
 
 staging$(DELIM)libxx$(LIBEXT): libs$(DELIM)libxx$(DELIM)libxx$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 $(APPDIR)$(DELIM)libapps$(LIBEXT): context
-	$(Q) $(MAKE) -C $(APPDIR) TOPDIR="$(TOPDIR)" KERNEL=n
+	$(Q) $(MAKE) -C $(APPDIR) TOPDIR="$(TOPDIR)"
 
 staging$(DELIM)libapps$(LIBEXT): $(APPDIR)$(DELIM)libapps$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 syscall$(DELIM)libproxies$(LIBEXT): context
-	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libproxies$(LIBEXT) KERNEL=n
+	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libproxies$(LIBEXT)
 
 staging$(DELIM)libproxies$(LIBEXT): syscall$(DELIM)libproxies$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
