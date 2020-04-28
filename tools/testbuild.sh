@@ -174,6 +174,11 @@ function distclean {
     else
       makefunc ${JOPTION} distclean
 
+      # Remove .version manually because this file is shipped with
+      # the release package and then distclean has to keep it
+
+      rm -f .version
+
       # Ensure nuttx and apps directory in clean state even with --ignored
 
       if [ -d $nuttx/.git ] || [ -d $APPSDIR/.git ]; then
