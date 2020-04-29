@@ -101,7 +101,7 @@ extern volatile FAR chipreg_t *g_current_regs;
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

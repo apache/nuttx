@@ -37,6 +37,7 @@
 /****************************************************************************
  * Pre-processor Macros
  ****************************************************************************/
+
 /* Align the stack to word (4 byte) boundaries.  This is probablya greater
  * alignment than is required.
  */
@@ -48,14 +49,6 @@
 #define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -116,7 +109,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   /* Reset the initial stack pointer */
 
-  tcb->xcp.regs[REG_SP/2] = (uint32_t)tcb->adj_stack_ptr;
+  tcb->xcp.regs[REG_SP / 2] = (uint32_t)tcb->adj_stack_ptr;
 
   /* And return a pointer to the allocated memory */
 

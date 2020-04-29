@@ -78,7 +78,7 @@
 # error "Z16F chip variant not specified"
 #endif
 
-/* Flash option settings at address 0x00000000 ************************************/
+/* Flash option settings at address 0x00000000 **************************************/
 
 #define Z16F_FLOPTION0            rom char _flash_option0 _At 0x0
 #define Z16F_FLOPTION1            rom char _flash_option1 _At 0x1
@@ -108,7 +108,7 @@
 #define Z16F_FLOPTION3_NORMAL     _HX8(40)        /* Bit 6: 1:Normal 0:Low power mode */
 #define Z16F_FLOPTION3_RESVD      _HX8(3f)        /* Bits 0-5: Reserved */
 
-/* Memory areas *******************************************************************
+/* Memory areas *********************************************************************
  *
  * Internal non-volatile memory starts at address zero.  The size
  * of the internal non-volatile memory is chip-dependent.
@@ -162,8 +162,14 @@
 
 /* CPU control register bits ********************************************************/
 
-                                                  /* Bits 7-2: Reserved, must be zero */
-                                                  /* Bits 1-0: DMA bandwidth control */
+                                                  /* Bits 7-2: Reserved, must be
+                                                   * zero
+                                                   */
+
+                                                  /* Bits 1-0: DMA bandwidth
+                                                   *   control
+                                                   */
+
 #define Z16F_CNTRL_CPUCTL_BWALL   _HX8(00)        /*   DMA can consume 100% bandwidth */
 #define Z16F_CNTRL_CPUCTL_BW11    _HX8(01)        /*   DMA can do 1 transaction per 1 cycle */
 #define Z16F_CNTRL_CPUCTL_BW12    _HX8(01)        /*   DMA can do 1 transaction per 2 cycles */
@@ -363,7 +369,7 @@
 # define Z16F_GPIOK_SMRE          _HX32(ffffe198) /*  8-bits: Port K Stop Mode Recovery En */
 #endif
 
-/* UART Register Offsets *************************************************************/
+/* UART Register Offsets ************************************************************/
 
 #define Z16F_UART_TXD             _HX8(00)        /*  8-bits: UART Transmit Data */
 #define Z16F_UART_RXD             _HX8(00)        /*  8-bits: UART Receive Data */
@@ -471,9 +477,9 @@
 #define Z16F_ESPI_CTL_ESPIEN1     _HX8(40)        /* Bit 6: ESPI Enable and Direction Control */
 #define Z16F_ESPI_CTL_DIRQE       _HX8(80)        /* Bit 7: Data Interrupt Request Enable */
 
-#define Z16F_ESPI_MODE_SSPO       _HX8(01)        /* Bit 0: Slave Select Polarity */
-#define Z16F_ESPI_MODE_SSIO       _HX8(02)        /* Bit 1: Slave Select I/O */
-#define Z16F_ESPI_MODE_NUMBITS_SHIFT   (2)       /* Bits 2-4: Number of Data Bits Per Character */
+#define Z16F_ESPI_MODE_SSPO       _HX8(01)                                 /* Bit 0: Slave Select Polarity */
+#define Z16F_ESPI_MODE_SSIO       _HX8(02)                                 /* Bit 1: Slave Select I/O */
+#define Z16F_ESPI_MODE_NUMBITS_SHIFT   (2)                                 /* Bits 2-4: Number of Data Bits Per Character */
 #define Z16F_ESPI_MODE_NUMBITS_MASK    (7 << Z16F_ESPI_MODE_NUMBITS_SHIFT)
 #  define Z16F_ESPI_MODE_NUMBITS_8BITS (0 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 8 bits */
 #  define Z16F_ESPI_MODE_NUMBITS_1BIT  (1 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 1 bit */
@@ -483,11 +489,11 @@
 #  define Z16F_ESPI_MODE_NUMBITS_5BITS (5 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 5 bits */
 #  define Z16F_ESPI_MODE_NUMBITS_6BITS (6 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 6 bits */
 #  define Z16F_ESPI_MODE_NUMBITS_7BITS (7 << Z16F_ESPI_MODE_NUMBITS_SHIFT) /* 7 bits */
-#define Z16F_ESPI_MODE_SSMD_SHIFT      (5)       /* Bits 5-7: SLAVE SELECT Mode */
+#define Z16F_ESPI_MODE_SSMD_SHIFT      (5)                                 /* Bits 5-7: SLAVE SELECT Mode */
 #define Z16F_ESPI_MODE_SSMD_MASK       (7 << Z16F_ESPI_MODE_SSMD_SHIFT)
-#  define Z16F_ESPI_MODE_SSMD_SPI      (0 << Z16F_ESPI_MODE_SSMD_SHIFT) /* SPI mode */
-#  define Z16F_ESPI_MODE_SSMD_LPBK     (1 << Z16F_ESPI_MODE_SSMD_SHIFT) /* LOOPBACK Mode */
-#  define Z16F_ESPI_MODE_SSMD_I2S      (2 << Z16F_ESPI_MODE_SSMD_SHIFT) /* I2S Mode */
+#  define Z16F_ESPI_MODE_SSMD_SPI      (0 << Z16F_ESPI_MODE_SSMD_SHIFT)    /* SPI mode */
+#  define Z16F_ESPI_MODE_SSMD_LPBK     (1 << Z16F_ESPI_MODE_SSMD_SHIFT)    /* LOOPBACK Mode */
+#  define Z16F_ESPI_MODE_SSMD_I2S      (2 << Z16F_ESPI_MODE_SSMD_SHIFT)    /* I2S Mode */
 
 #define Z16F_ESPI_STAT_SLAS       _HX8(01)        /* Bit 0: Slave Select */
 #define Z16F_ESPI_STAT_TFST       _HX8(02)        /* Bit 1: Transfer Status */
@@ -498,7 +504,7 @@
 #define Z16F_ESPI_STAT_TUND       _HX8(40)        /* Bit 6: Transmit Underrun */
 #define Z16F_ESPI_STAT_TDRE       _HX8(80)        /* Bit 7: Transmit Data Register Empty */
 
-#define Z16F_ESPI_STATE_SHIFT     (0)             /* Bits 0-5: ESPI State Machine */
+#define Z16F_ESPI_STATE_SHIFT     (0)                             /* Bits 0-5: ESPI State Machine */
 #define Z16F_ESPI_STATE_MASK      (0x3f << Z16F_ESPI_STATE_SHIFT)
 #  define Z16F_ESPI_STATE_IDLE    (0x00 << Z16F_ESPI_STATE_SHIFT) /* Idle */
 #  define Z16F_ESPI_STATE_SWAIT   (0x01 << Z16F_ESPI_STATE_SHIFT) /* Slave Wait For SCK */
@@ -523,8 +529,8 @@
 #  define Z16F_ESPI_STATE_B1XMT   (0x23 << Z16F_ESPI_STATE_SHIFT) /* Bit 1 Transmit */
 #  define Z16F_ESPI_STATE_B0RCV   (0x20 << Z16F_ESPI_STATE_SHIFT) /* Bit 0 Receive */
 #  define Z16F_ESPI_STATE_B0XMT   (0x21 << Z16F_ESPI_STATE_SHIFT) /* Bit 0 Transmit */
-#define Z16F_ESPI_STATE_SDI       _HX8(40)        /* Bit 6: Serial Data Input */
-#define Z16F_ESPI_STATE_SCKI      _HX8(80)        /* Bit 7: Serial Clock Input */
+#define Z16F_ESPI_STATE_SDI       _HX8(40)                        /* Bit 6: Serial Data Input */
+#define Z16F_ESPI_STATE_SCKI      _HX8(80)                        /* Bit 7: Serial Clock Input */
 
 /* Timer0/1/2 registers *************************************************************/
 

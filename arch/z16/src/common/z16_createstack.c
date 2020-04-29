@@ -148,12 +148,12 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       /* Save the adjusted stack values in the struct tcb_s */
 
-      tcb->adj_stack_ptr  = (uint32_t*)top_of_stack;
+      tcb->adj_stack_ptr  = (uint32_t *)top_of_stack;
       tcb->adj_stack_size = size_of_stack;
 
       board_autoled_on(LED_STACKCREATED);
       return OK;
     }
 
-   return ERROR;
+  return ERROR;
 }
