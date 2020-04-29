@@ -102,7 +102,7 @@ int syslog_initialize(void)
   syslog_register();
 #endif
 
-#ifdef CONFIG_SYSLOG_CHARDEV
+#ifdef CONFIG_SYSLOG_RPMSG
   syslog_rpmsg_init();
 #endif
 
