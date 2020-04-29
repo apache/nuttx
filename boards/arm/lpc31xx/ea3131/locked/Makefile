@@ -53,10 +53,12 @@ PASS1_LINKLIBS += $(PASS1_LIBBOARD)
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
   PASS1_LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)$(DELIM)staging"}"
+  PASS1_LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)$(DELIM)boards$(DELIM)arm$(DELIM)lpc31xx$(DELIM)ea3131$(DELIM)src"}"
   PASS1_LDSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)boards$(DELIM)arm$(DELIM)lpc31xx$(DELIM)ea3131$(DELIM)locked$(DELIM)ld-locked.inc}"
 else
   # Linux/Cygwin-native toolchain
   PASS1_LIBPATHS += -L"$(TOPDIR)$(DELIM)staging"
+  PASS1_LIBPATHS += -L"$(TOPDIR)$(DELIM)boards$(DELIM)arm$(DELIM)lpc31xx$(DELIM)ea3131$(DELIM)src"
   PASS1_LDSCRIPT = -T$(TOPDIR)$(DELIM)boards$(DELIM)arm$(DELIM)lpc31xx$(DELIM)ea3131$(DELIM)locked$(DELIM)ld-locked.inc
 endif
 
