@@ -53,11 +53,11 @@ PASS1_LINKLIBS += $(PASS1_LIBBOARD)
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
   PASS1_LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)$(DELIM)staging"}"
-  PASS1_LDSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)locked$(DELIM)ld-locked.inc}"
+  PASS1_LDSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)boards$(DELIM)arm$(DELIM)lpc31xx$(DELIM)ea3131$(DELIM)locked$(DELIM)ld-locked.inc}"
 else
   # Linux/Cygwin-native toolchain
   PASS1_LIBPATHS += -L"$(TOPDIR)$(DELIM)staging"
-  PASS1_LDSCRIPT = -T$(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)locked$(DELIM)ld-locked.inc
+  PASS1_LDSCRIPT = -T$(TOPDIR)$(DELIM)boards$(DELIM)arm$(DELIM)lpc31xx$(DELIM)ea3131$(DELIM)locked$(DELIM)ld-locked.inc
 endif
 
 PASS1_LDFLAGS = -r $(PASS1_LDSCRIPT)
@@ -82,7 +82,7 @@ ld-locked.inc: mklocked.sh $(TOPDIR)$(DELIM).config
 # is available to link against.
 
 $(PASS1_LIBBOARD):
-	$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)boards$(DELIM)ea3131$(DELIM)src TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+	$(Q) $(MAKE) -C $(TOPDIR)$(DELIM)boards$(DELIM)arm$(DELIM)lpc31xx$(DELIM)ea3131$(DELIM)src TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 # Create the locked.r file containing all of the code (except the start-up code)
 # that needs to lie in the locked text region.
