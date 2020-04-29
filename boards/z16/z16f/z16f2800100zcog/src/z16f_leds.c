@@ -50,7 +50,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "z16_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

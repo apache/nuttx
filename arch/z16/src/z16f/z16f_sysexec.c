@@ -45,7 +45,7 @@
 #include <nuttx/arch.h>
 
 #include "chip.h"
-#include "up_internal.h"
+#include "z16_internal.h"
 
 /****************************************************************************
  * Public Functions

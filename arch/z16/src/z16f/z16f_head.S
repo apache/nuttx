@@ -2,35 +2,20 @@
  * arch/z16/src/z16f/z16f_head.S
  * Z16F Reset Entry Point
  *
- *   Copyright (C) 2008, 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  **************************************************************************/
 
@@ -41,7 +26,7 @@
 #include <nuttx/config.h>
 #include <arch/irq.h>
 #include <arch/board/board.h>
-#include "common/up_internal.h"
+#include "common/z16_internal.h"
 
 /**************************************************************************
  * Pre-processor Definitions
@@ -59,10 +44,10 @@
 #if defined(USE_LOWUARTINIT)
 	xref	_z16f_lowuartinit:EROM
 #elif defined(USE_EARLYSERIALINIT)
-	xref	_up_earlyserialinit:EROM
+	xref	_z16_earlyserialinit:EROM
 #endif
 	xref	_nx_start:EROM
-	xref	_up_doirq:EROM
+	xref	_z16_doirq:EROM
 	xref	_z16f_sysexec:EROM
 	xdef	_z16f_reset
 
@@ -218,7 +203,7 @@ _z16f_reset8:
 #ifdef USE_EARLYSERIALINIT
 	/* Perform early serial initialization */
 
-	call	_up_earlyserialinit
+	call	_z16_earlyserialinit
 #endif
 	/* Start NuttX */
 
@@ -450,9 +435,9 @@ _common_isr:
 	 */
 
 	ld		r2, sp
-	call	_up_doirq
+	call	_z16_doirq
 
-	/* Upon return, _up_doirq will provide that address of the save structure
+	/* Upon return, _z16_doirq will provide that address of the save structure
 	 * to use to return from the interrupt in r0.  This may or may not be the
 	 * same value as sp.
 	 */
