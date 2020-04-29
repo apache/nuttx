@@ -202,7 +202,7 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
   /* Create a signal set that contains only SIGCHLD */
 
   sigemptyset(&set);
-  sigaddset(&set, SIGCHLD);
+  nxsig_addset(&set, SIGCHLD);
 
   /* Disable pre-emption so that nothing changes while the loop executes */
 
@@ -314,7 +314,9 @@ int waitid(idtype_t idtype, id_t id, FAR siginfo_t *info, int options)
             }
         }
 
-      /* We are waiting for a specific PID.  Does this task retain child status? */
+      /* We are waiting for a specific PID.  Does this task retain child
+       * status?
+       */
 
       else if (retains)
         {

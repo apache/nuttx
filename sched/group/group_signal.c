@@ -45,6 +45,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
+
 #include "sched/sched.h"
 #include "group/group.h"
 #include "signal/signal.h"
@@ -98,7 +100,9 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
 
   if (tcb)
     {
-      /* Set this one as the default if we have not already set the default. */
+      /* Set this one as the default if we have not already set the
+       * default.
+       */
 
       if (!info->dtcb)
         {
@@ -109,7 +113,8 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
        * probably blocked).
        */
 
-      if (sigismember(&tcb->sigwaitmask, info->siginfo->si_signo) && !info->atcb)
+      ret = nxsig_ismember(&tcb->sigwaitmask, info->siginfo->si_signo);
+      if (ret == 1 && !info->atcb)
         {
           /* Yes.. This means that the task is suspended, waiting for this
            * signal to occur. Stop looking and use this TCB.  The
@@ -136,7 +141,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
 
       /* Is this signal unblocked on this thread? */
 
-      if (!sigismember(&tcb->sigprocmask, info->siginfo->si_signo) &&
+      if (!nxsig_ismember(&tcb->sigprocmask, info->siginfo->si_signo) &&
           !info->ptcb && tcb != info->atcb)
         {
           /* Yes.. remember this TCB if we have not encountered any
@@ -197,7 +202,7 @@ static int group_signal_handler(pid_t pid, FAR void *arg)
  *   0 (OK) on success; a negated errno value on failure.
  *
  * Assumptions:
- *   Called during task termination in a safe context.  No special precautions
+ *   Called during task termination in a safe context. No special precautions
  *   are required here.  Because signals can be sent from interrupt handlers,
  *   this function may be called indirectly in the context of an interrupt
  *   handler.

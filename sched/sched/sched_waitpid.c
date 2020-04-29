@@ -331,7 +331,7 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
   /* Create a signal set that contains only SIGCHLD */
 
   sigemptyset(&set);
-  sigaddset(&set, SIGCHLD);
+  nxsig_addset(&set, SIGCHLD);
 
   /* Disable pre-emption so that nothing changes while the loop executes */
 
@@ -455,7 +455,9 @@ pid_t waitpid(pid_t pid, int *stat_loc, int options)
             }
         }
 
-      /* We are waiting for a specific PID. Does this task retain child status? */
+      /* We are waiting for a specific PID. Does this task retain child
+       * status?
+       */
 
       else if (retains)
         {

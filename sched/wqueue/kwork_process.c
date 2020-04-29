@@ -222,7 +222,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
       /* Wait indefinitely until signalled with SIGWORK */
 
       sigemptyset(&set);
-      sigaddset(&set, SIGWORK);
+      nxsig_addset(&set, SIGWORK);
 
       wqueue->worker[wndx].busy = false;
       DEBUGVERIFY(nxsig_waitinfo(&set, NULL));

@@ -459,7 +459,7 @@ static void nxsig_setup_default_action(FAR struct task_group_s *group,
 
       /* Indicate that the default signal handler has been attached */
 
-      sigaddset(&group->tg_sigdefault, (int)info->signo);
+      nxsig_addset(&group->tg_sigdefault, (int)info->signo);
     }
 }
 
@@ -495,7 +495,7 @@ bool nxsig_isdefault(FAR struct tcb_s *tcb, int signo)
    * false in all other cases.
    */
 
-  ret = sigismember(&group->tg_sigdefault, signo);
+  ret = nxsig_ismember(&group->tg_sigdefault, signo);
   return ret < 0 ? false : (bool)ret;
 }
 
@@ -579,22 +579,22 @@ _sa_handler_t nxsig_default(FAR struct tcb_s *tcb, int signo, bool defaction)
       handler = nxsig_default_action(signo);
       if (handler != SIG_IGN)
         {
-          /* sigaddset() is not atomic (but neither is sigaction()) */
+          /* nxsig_addset() is not atomic (but neither is sigaction()) */
 
           flags = spin_lock_irqsave();
-          sigaddset(&group->tg_sigdefault, signo);
+          nxsig_addset(&group->tg_sigdefault, signo);
           spin_unlock_irqrestore(flags);
         }
     }
 
   if (handler == SIG_IGN)
     {
-      /* We are unsetting the default action.  NOTE that sigdelset() is not
+      /* We are unsetting the default action. NOTE that nxsig_delset() is not
        * atomic (but neither is sigaction()).
        */
 
       flags = spin_lock_irqsave();
-      sigdelset(&group->tg_sigdefault, signo);
+      nxsig_delset(&group->tg_sigdefault, signo);
       spin_unlock_irqrestore(flags);
     }
 

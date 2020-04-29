@@ -41,6 +41,8 @@
 
 #include <signal.h>
 
+#include <nuttx/signal.h>
+
 #include "signal/signal.h"
 
 /****************************************************************************
@@ -61,7 +63,7 @@ int nxsig_lowest(sigset_t *set)
 
   for (signo = MIN_SIGNO; signo <= MAX_SIGNO; signo++)
     {
-      if (sigismember(set, signo))
+      if (nxsig_ismember(set, signo))
         {
           return signo;
         }

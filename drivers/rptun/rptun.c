@@ -183,7 +183,7 @@ static int rptun_thread(int argc, FAR char *argv[])
   priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 0));
 
   sigemptyset(&set);
-  sigaddset(&set, SIGUSR1);
+  nxsig_addset(&set, SIGUSR1);
   nxsig_procmask(SIG_BLOCK, &set, NULL);
 
   while (1)
