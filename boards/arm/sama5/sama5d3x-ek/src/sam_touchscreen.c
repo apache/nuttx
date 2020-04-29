@@ -96,7 +96,7 @@ int sam_tsc_setup(int minor)
 
   /* Initialize the ADC driver */
 
-  adc = sam_adc_initialize();
+  adc = (struct sam_adc_s *)sam_adc_initialize();
   if (!adc)
     {
       ierr("ERROR: Failed to initialize the ADC driver\n");
