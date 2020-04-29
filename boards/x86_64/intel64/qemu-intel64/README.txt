@@ -42,7 +42,7 @@ set timeout=0
 set default=0
 menuentry "kernel" {
   multiboot2 /boot/nuttx.elf
-  }
+}
 ```
 
 ##### Making the disk
@@ -79,7 +79,7 @@ Running QEMU
 
   In the top-level NuttX directory:
 
-    qemu -cpu host -enable-kvm -m 2GB -cdrom boot.iso -nographic -serial mon:stdio
+    qemu-system-x86_64 -cpu host -enable-kvm -m 2G -cdrom boot.iso -nographic -serial mon:stdio
 
   This multiplex the qemu console and COM1 to your console.
   Use control-a 1 and 2 to switch between.

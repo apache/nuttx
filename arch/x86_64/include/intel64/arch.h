@@ -562,12 +562,12 @@ extern volatile uint8_t gdt64_low_end;
 
 /* The actual address of the page table and gdt/ist after mapping the kernel in high address*/
 
-volatile uint64_t *pdpt;
-volatile uint64_t *pd;
-volatile uint64_t *pt;
+extern volatile uint64_t *pdpt;
+extern volatile uint64_t *pd;
+extern volatile uint64_t *pt;
 
-volatile struct ist_s *ist64;
-volatile struct gdt_entry_s *gdt64;
+extern volatile struct ist_s *ist64;
+extern volatile struct gdt_entry_s *gdt64;
 
 /****************************************************************************
  * Public Function Prototypes

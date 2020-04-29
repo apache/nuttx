@@ -139,7 +139,6 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
   PANIC(); /* Doesn't return */
   return regs;               /* To keep the compiler happy */
 #else
-  uint64_t *ret;
 
   DEBUGASSERT(g_current_regs == NULL);
   g_current_regs = regs;
