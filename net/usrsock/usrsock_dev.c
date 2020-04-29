@@ -449,7 +449,7 @@ static off_t usrsockdev_seek(FAR struct file *filep, off_t offset,
         {
           pos = dev->req.pos + offset;
         }
-      else if (whence == SEEK_SET)
+      else
         {
           pos = offset;
         }
