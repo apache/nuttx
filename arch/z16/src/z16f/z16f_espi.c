@@ -50,7 +50,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
-#include "up_arch.h"
+#include "z16_arch.h"
 #include "chip.h"
 
 #ifdef CONFIG_Z16F_ESPI

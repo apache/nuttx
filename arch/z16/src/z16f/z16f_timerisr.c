@@ -47,7 +47,7 @@
 
 #include "chip.h"
 #include "clock/clock.h"
-#include "up_internal.h"
+#include "z16_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
