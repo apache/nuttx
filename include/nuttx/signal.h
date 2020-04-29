@@ -113,6 +113,79 @@ struct sigwork_s
 struct timespec;  /* Forward reference */
 
 /****************************************************************************
+ * Name: nxsig_ismember
+ *
+ * Description:
+ *   This function tests whether the signal specified by signo is a member
+ *   of the set specified by set.
+ *
+ * Input Parameters:
+ *   set - Signal set to test
+ *   signo - Signal to test for
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   On success, it returns 0 if the signal is not a member, 1 if the signal
+ *   is a member of the set.
+ *   A negated errno value is returned on failure.
+ *
+ *    EINVAL - The signo argument is invalid.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int nxsig_ismember(FAR const sigset_t *set, int signo);
+
+/****************************************************************************
+ * Name: nxsig_addset
+ *
+ * Description:
+ *   This function adds the signal specified by signo to the signal set
+ *   specified by set.
+ *
+ * Input Parameters:
+ *   set - Signal set to add signal to
+ *   signo - Signal to add
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ *    EINVAL - The signo argument is invalid.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int nxsig_addset(FAR sigset_t *set, int signo);
+
+/****************************************************************************
+ * Name: nxsig_delset
+ *
+ * Description:
+ *   This function deletes the signal specified by signo from the signal
+ *   set specified by the 'set' argument.
+ *
+ * Input Parameters:
+ *   set - Signal set to delete the signal from
+ *   signo - Signal to delete
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ *    EINVAL - The signo argument is invalid.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int nxsig_delset(FAR sigset_t *set, int signo);
+
+/****************************************************************************
  * Name: nxsig_procmask
  *
  * Description:

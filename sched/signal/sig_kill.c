@@ -167,7 +167,7 @@ int kill(pid_t pid, int signo)
 {
   int ret;
 
-  /* Let nxsem_kill() do all of the work */
+  /* Let nxsig_kill() do all of the work */
 
   ret = nxsig_kill(pid, signo);
   if (ret < 0)

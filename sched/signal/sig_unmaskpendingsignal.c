@@ -41,6 +41,8 @@
 
 #include <sched.h>
 
+#include <nuttx/signal.h>
+
 #include "sched/sched.h"
 #include "signal/signal.h"
 
@@ -101,7 +103,7 @@ bool nxsig_unmask_pendingsignal(void)
            * signal number is pending.
            */
 
-          sigdelset(&unmaskedset, signo);
+          nxsig_delset(&unmaskedset, signo);
 
           /* Remove the pending signal from the list of pending signals */
 
