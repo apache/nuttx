@@ -54,7 +54,7 @@
 /* Configuration ************************************************************/
 /* These interfaces are not available to kernel code */
 
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 #  undef CONFIG_FS_AIO
 #endif
 

@@ -28,7 +28,7 @@
 #include "svcall.h"
 #include "riscv_internal.h"
 
-#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
+#ifndef CONFIG_BUILD_FLAT
 
 /****************************************************************************
  * Public Functions
@@ -69,4 +69,4 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
   PANIC();
 }
 
-#endif /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL */
+#endif /* !CONFIG_BUILD_FLAT */

@@ -66,7 +66,7 @@
 
 FAR void *malloc(size_t size)
 {
-#ifdef CONFIG_BUILD_KERNEL
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   FAR void *brkaddr;
   FAR void *mem;
 

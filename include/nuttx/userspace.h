@@ -165,7 +165,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
+#ifndef __KERNEL__
 void task_startup(main_t entrypt, int argc, FAR char *argv[]) noreturn_function;
 #endif
 
@@ -185,7 +185,7 @@ void task_startup(main_t entrypt, int argc, FAR char *argv[]) noreturn_function;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__) && !defined(CONFIG_DISABLE_PTHREAD)
+#if !defined(__KERNEL__) && !defined(CONFIG_DISABLE_PTHREAD)
 void pthread_startup(pthread_startroutine_t entrypt, pthread_addr_t arg);
 #endif
 

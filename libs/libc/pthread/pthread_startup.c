@@ -44,8 +44,7 @@
 
 #include <nuttx/userspace.h>
 
-#if (defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)) || \
-    !defined(CONFIG_BUILD_KERNEL)
+#if !defined(CONFIG_BUILD_FLAT) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -106,4 +105,4 @@ void pthread_startup(pthread_startroutine_t entrypt, pthread_addr_t arg)
   pthread_exit(exit_status);
 }
 
-#endif /* (CONFIG_BUILD_PROTECTED && !__KERNEL__) && !CONFIG_BUILD_KERNEL */
+#endif /* !CONFIG_BUILD_FLAT && !__KERNEL__ */

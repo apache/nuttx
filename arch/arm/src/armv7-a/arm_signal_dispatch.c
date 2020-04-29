@@ -44,8 +44,7 @@
 #include "pgalloc.h"
 #include "arm_internal.h"
 
-#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-     defined(CONFIG_BUILD_KERNEL)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 
 /****************************************************************************
  * Public Functions
@@ -104,4 +103,4 @@ void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
     }
 }
 
-#endif /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL */
+#endif /* !CONFIG_BUILD_FLAT && __KERNEL__ */

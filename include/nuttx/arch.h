@@ -551,8 +551,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);
  *
  ****************************************************************************/
 
-#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-     defined(CONFIG_BUILD_KERNEL)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 void up_task_start(main_t taskentry, int argc, FAR char *argv[])
        noreturn_function;
 #endif
@@ -581,8 +580,8 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
  *
  ****************************************************************************/
 
-#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-     defined(CONFIG_BUILD_KERNEL) && !defined(CONFIG_DISABLE_PTHREAD)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__) && \
+    !defined(CONFIG_DISABLE_PTHREAD)
 void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
        noreturn_function;
 #endif
@@ -615,8 +614,7 @@ void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
  *
  ****************************************************************************/
 
-#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-     defined(CONFIG_BUILD_KERNEL)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
                         FAR siginfo_t *info, FAR void *ucontext);
 #endif
@@ -640,7 +638,7 @@ void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
  *
  ****************************************************************************/
 
-#if (defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__))
+#if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
 void up_signal_handler(_sa_sigaction_t sighand, int signo,
                        FAR siginfo_t *info, FAR void *ucontext)
        noreturn_function;

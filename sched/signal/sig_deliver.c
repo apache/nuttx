@@ -136,7 +136,7 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
                           SIGNO2SET(sigq->info.si_signo);
       stcb->sigprocmask = newsigprocmask;
 
-#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
+#ifndef CONFIG_BUILD_FLAT
       /* In the kernel build this has to be handled differently if we are
        * dispatching to a signal handler in a user-space task or thread; we
        * have to switch to user-mode before calling the task.

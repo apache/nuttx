@@ -64,12 +64,8 @@ ifeq ($(CONFIG_BINFMT_LOADABLE),y)
 CSRCS += group_exitinfo.c
 endif
 
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
+ifneq ($(CONFIG_BUILD_FLAT),y)
 CSRCS += group_malloc.c group_zalloc.c group_free.c
-else
-ifeq ($(CONFIG_BUILD_KERNEL),y)
-CSRCS += group_malloc.c group_zalloc.c group_free.c
-endif
 endif
 
 # Include group build support

@@ -100,38 +100,29 @@
  *   priority worker thread.  Default: 2048.
  */
 
-/* Is this a protected build (CONFIG_BUILD_PROTECTED=y) */
+/* Is this a flat build (CONFIG_BUILD_FLAT=y) */
 
-#if defined(CONFIG_BUILD_PROTECTED)
+#if defined(CONFIG_BUILD_FLAT)
 
-  /* Yes.. kernel worker threads are not built in a kernel build when we are
+  /* Yes.. user-space worker threads are not built in a flat build */
+
+#  undef CONFIG_LIB_USRWORK
+
+#elif !defined(__KERNEL__)
+
+  /* Kernel worker threads are not built in a kernel build when we are
    * building the user-space libraries.
    */
 
-#  ifndef __KERNEL__
-
-#    undef CONFIG_SCHED_HPWORK
-#    undef CONFIG_SCHED_LPWORK
-#    undef CONFIG_SCHED_WORKQUEUE
+#  undef CONFIG_SCHED_HPWORK
+#  undef CONFIG_SCHED_LPWORK
+#  undef CONFIG_SCHED_WORKQUEUE
 
   /* User-space worker threads are not built in a kernel build when we are
    * building the kernel-space libraries (but we still need to know that it
    * is configured).
    */
 
-#  endif
-
-#elif defined(CONFIG_BUILD_KERNEL)
-  /* The kernel only build is equivalent to the kernel part of the protected
-   * build.
-   */
-
-#else
-  /* User-space worker threads are not built in a flat build
-   * (CONFIG_BUILD_PROTECTED=n && CONFIG_BUILD_KERNEL=n)
-   */
-
-#  undef CONFIG_LIB_USRWORK
 #endif
 
 /* High priority, kernel work queue configuration ***************************/

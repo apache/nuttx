@@ -34,8 +34,6 @@
 #include <nuttx/mm/mm.h>
 #include <nuttx/userspace.h>
 
-#if !defined(CONFIG_BUILD_PROTECTED) || defined(__KERNEL__)
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -84,25 +82,7 @@ extern "C"
 
 /* This family of allocators is used to manage kernel protected memory */
 
-#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_MM_KERNEL_HEAP)
-/* If this is not a kernel build, then these map to the same interfaces
- * as were used for the user-mode function.
- */
-
-#  define kmm_initialize(h,s)    /* Initialization done by kumm_initialize */
-#  define kmm_addregion(h,s)     umm_addregion(h,s)
-#  define kmm_trysemaphore()     umm_trysemaphore()
-#  define kmm_givesemaphore()    umm_givesemaphore()
-
-#  define kmm_calloc(n,s)        calloc(n,s);
-#  define kmm_malloc(s)          malloc(s)
-#  define kmm_zalloc(s)          zalloc(s)
-#  define kmm_realloc(p,s)       realloc(p,s)
-#  define kmm_memalign(a,s)      memalign(a,s)
-#  define kmm_free(p)            free(p)
-#  define kmm_mallinfo()         mallinfo()
-
-#elif !defined(CONFIG_MM_KERNEL_HEAP)
+#ifndef CONFIG_MM_KERNEL_HEAP
 /* If this the kernel phase of a kernel build, and there are only user-space
  * allocators, then the following are defined in userspace.h as macros that
  * call into user-space via a header at the beginning of the user-space blob.
@@ -128,8 +108,7 @@ extern "C"
 
 #endif
 
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+#ifdef CONFIG_MM_KERNEL_HEAP
 /****************************************************************************
  * Group memory management
  *
@@ -169,5 +148,4 @@ void group_free(FAR struct task_group_s *group, FAR void *mem);
 }
 #endif
 
-#endif /* !CONFIG_BUILD_PROTECTED || __KERNEL__ */
 #endif /* __INCLUDE_NUTTX_KMALLOC_H */

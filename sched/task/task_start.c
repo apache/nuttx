@@ -134,7 +134,7 @@ void nxtask_start(void)
    * we have to switch to user-mode before calling the task.
    */
 
-#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
+#ifndef CONFIG_BUILD_FLAT
   if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
     {
       up_task_start(tcb->cmn.entry.main, argc, tcb->argv);

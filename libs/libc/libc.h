@@ -81,8 +81,7 @@
  * mode is supported.
  */
 
-#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-     defined(CONFIG_BUILD_KERNEL)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 #  include <nuttx/kmalloc.h>
 
    /* Domain-specific allocations */

@@ -52,8 +52,7 @@
  * function only be called from user space is only via a kernel system call.
  */
 
-#if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
-      defined(__KERNEL__)
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -124,4 +123,4 @@ int sethostname(FAR const char *name, size_t size)
   return 0;
 }
 
-#endif /* (!CONFIG_BUILD_PROTECTED && !CONFIG_BUILD_KERNEL) || __KERNEL__ */
+#endif /* CONFIG_BUILD_FLAT || __KERNEL__ */

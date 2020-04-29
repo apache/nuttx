@@ -68,15 +68,7 @@
 
 int dlsymtab(FAR const struct symtab_s *symtab, int nsymbols)
 {
-#if defined(CONFIG_BUILD_FLAT) || defined(CONFIG_BUILD_PROTECTED)
-  /* Set the symbol take information that will be used by this instance of
-   * the module library.
-   */
-
-  modlib_setsymtab(symtab, nsymbols);
-  return OK;
-
-#else /* if defined(CONFIG_BUILD_KERNEL) */
+#ifdef CONFIG_BUILD_KERNEL
   /* The KERNEL build is considerably more complex:  In order to be shared,
    * the .text portion of the module must be (1) build for PIC/PID operation
    * and (2) must like in a shared memory region accessible from all
@@ -88,5 +80,13 @@ int dlsymtab(FAR const struct symtab_s *symtab, int nsymbols)
 
 #warning Missing logic
   return -ENOSYS;
+
+#else
+  /* Set the symbol take information that will be used by this instance of
+   * the module library.
+   */
+
+  modlib_setsymtab(symtab, nsymbols);
+  return OK;
 #endif
 }
