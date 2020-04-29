@@ -70,12 +70,12 @@ typedef uint16_t pgndx_t;
 typedef uint32_t pgndx_t;
 #endif
 
-#if PG_POOL_MAXL1NDX < 256
-typedef uint8_t  L1ndx_t;
-#elif PG_POOL_MAXL1NDX < 65536
-typedef uint16_t L1ndx_t;
+#if PG_POOL_MAXL2NDX < 256
+typedef uint8_t  l2ndx_t;
+#elif PG_POOL_MAXL2NDX < 65536
+typedef uint16_t l2ndx_t;
 #else
-typedef uint32_t L1ndx_t;
+typedef uint32_t l2ndx_t;
 #endif
 
 /****************************************************************************
@@ -93,14 +93,14 @@ typedef uint32_t L1ndx_t;
 static pgndx_t g_pgndx;
 
 /* After CONFIG_PAGING_NPAGED have been allocated, the pages will be re-used.
- * In order to re-used the page, we will have un-map the page from its previous
- * mapping.  In order to that, we need to be able to map a physical address to
- * to an index into the PTE where it was mapped.  The following table supports
- * this backward lookup - it is indexed by the page number index, and holds
- * another index to the mapped virtual page.
+ * In order to re-used the page, we will have un-map the page from its
+ * previous mapping.  In order to that, we need to be able to map a physical
+ * address to to an index into the PTE where it was mapped.  The following
+ * table supports this backward lookup - it is indexed by the page number
+ * index, and holds another index to the mapped virtual page.
  */
 
-static L1ndx_t g_ptemap[CONFIG_PAGING_NPPAGED];
+static l2ndx_t g_ptemap[CONFIG_PAGING_NPPAGED];
 
 /* The contents of g_ptemap[] are not valid until g_pgndx has wrapped at
  * least one time.
@@ -136,11 +136,11 @@ static bool g_pgwrap;
  *  NOTE 2: If an in-use page is un-mapped, it may be necessary to flush the
  *  instruction cache in some architectures.
  *
- *  NOTE 3: Allocating and filling a page is a two step process.  up_allocpage()
+ *  NOTE 3: Allocate and fill a page is a two step process. up_allocpage()
  *  allocates the page, and up_fillpage() fills it with data from some non-
  *  volatile storage device.  This distinction is made because up_allocpage()
- *  can probably be implemented in board-independent logic whereas up_fillpage()
- *  probably must be implemented as board-specific logic.
+ *  can probably be implemented in board-independent logic whereas
+ *  up_fillpage() probably must be implemented as board-specific logic.
  *
  *  NOTE 4: The initial mapping of vpage should be read-able and write-
  *  able (but not cached).  No special actions will be required of
@@ -206,12 +206,12 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
        pte = up_va2pte(oldvaddr);
       *pte = 0;
 
-      /* Invalidate the instruction TLB corresponding to the virtual address */
+      /* Invalidate instruction TLB corresponding to the virtual address */
 
       tlb_inst_invalidate_single(oldvaddr);
 
       /* I do not believe that it is necessary to flush the I-Cache in this
-       * case:  The I-Cache uses a virtual address index and, hence, since the
+       * case: The I-Cache uses a virtual address index and, hence, since the
        * NuttX address space is flat, the cached instruction value should be
        * correct even if the page mapping is no longer in place.
        */
