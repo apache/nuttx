@@ -82,7 +82,9 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled,
   DEBUGASSERT(iob2->io_len == 0 && iob2->io_offset == 0 &&
               iob2->io_pktlen == 0 && iob2->io_flink == NULL);
 
-  /* Copy the total packet size from the I/O buffer at the head of the chain */
+  /* Copy the total packet size from the I/O buffer at the head of the
+   * chain.
+   */
 
   iob2->io_pktlen = iob1->io_pktlen;
 
@@ -162,7 +164,7 @@ int iob_clone(FAR struct iob_s *iob1, FAR struct iob_s *iob2, bool throttled,
           next = iob_alloc(throttled, consumerid);
           if (!next)
             {
-              ioberr("ERROR: Failed to allocate an I/O buffer/n");
+              ioberr("ERROR: Failed to allocate an I/O buffer\n");
               return -ENOMEM;
             }
 
