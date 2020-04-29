@@ -84,15 +84,18 @@ void up_disable_irq(int irq)
 
       if (irq < Z16F_IRQ_IRQ1)
         {
-           putreg8((getreg8(Z16F_IRQ0_ENH) & ~Z16F_IRQ0_BIT(irq)), Z16F_IRQ0_ENH);
+           putreg8((getreg8(Z16F_IRQ0_ENH) & ~Z16F_IRQ0_BIT(irq)),
+                   Z16F_IRQ0_ENH);
         }
       else if (irq < Z16F_IRQ_IRQ2)
         {
-           putreg8((getreg8(Z16F_IRQ1_ENH) & ~Z16F_IRQ1_BIT(irq)), Z16F_IRQ1_ENH);
+           putreg8((getreg8(Z16F_IRQ1_ENH) & ~Z16F_IRQ1_BIT(irq)),
+                   Z16F_IRQ1_ENH);
         }
       else if (irq < NR_IRQS)
         {
-           putreg8((getreg8(Z16F_IRQ2_ENH) & ~Z16F_IRQ2_BIT(irq)), Z16F_IRQ2_ENH);
+           putreg8((getreg8(Z16F_IRQ2_ENH) & ~Z16F_IRQ2_BIT(irq)),
+                   Z16F_IRQ2_ENH);
         }
     }
 }
@@ -119,15 +122,18 @@ void up_enable_irq(int irq)
 
       if (irq < Z16F_IRQ_IRQ1)
         {
-           putreg8((getreg8(Z16F_IRQ0_ENH) | Z16F_IRQ0_BIT(irq)), Z16F_IRQ0_ENH);
+           putreg8((getreg8(Z16F_IRQ0_ENH) | Z16F_IRQ0_BIT(irq)),
+                   Z16F_IRQ0_ENH);
         }
       else if (irq < Z16F_IRQ_IRQ2)
         {
-           putreg8((getreg8(Z16F_IRQ1_ENH) | Z16F_IRQ1_BIT(irq)), Z16F_IRQ1_ENH);
+           putreg8((getreg8(Z16F_IRQ1_ENH) | Z16F_IRQ1_BIT(irq)),
+                   Z16F_IRQ1_ENH);
         }
       else if (irq < NR_IRQS)
         {
-           putreg8((getreg8(Z16F_IRQ2_ENH) | Z16F_IRQ2_BIT(irq)), Z16F_IRQ2_ENH);
+           putreg8((getreg8(Z16F_IRQ2_ENH) | Z16F_IRQ2_BIT(irq)),
+                   Z16F_IRQ2_ENH);
         }
     }
 }

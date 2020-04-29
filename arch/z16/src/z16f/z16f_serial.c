@@ -269,10 +269,12 @@ static uart_dev_t g_uart1port =
 
 static uint8_t z16f_disableuartirq(struct uart_dev_s *dev)
 {
-  struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
+  struct z16f_uart_s *priv  = (struct z16f_uart_s *)dev->priv;
   irqstate_t          flags = enter_critical_section();
-  uint8_t             state = priv->rxenabled ? STATE_RXENABLED : STATE_DISABLED | \
-                              priv->txenabled ? STATE_TXENABLED : STATE_DISABLED;
+  uint8_t             state = priv->rxenabled ? STATE_RXENABLED :
+                                                STATE_DISABLED |
+                              priv->txenabled ? STATE_TXENABLED :
+                                                STATE_DISABLED;
 
   z16f_txint(dev, false);
   z16f_rxint(dev, false);
@@ -302,7 +304,7 @@ static void z16f_restoreuartirq(struct uart_dev_s *dev, uint8_t state)
 #ifdef CONSOLE_DEV
 static void z16f_consoleput(uint8_t ch)
 {
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)CONSOLE_DEV.priv;
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)CONSOLE_DEV.priv;
   int tmp;
 
   for (tmp = 1000 ; tmp > 0 ; tmp--)
@@ -329,7 +331,7 @@ static void z16f_consoleput(uint8_t ch)
 static int z16f_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
   uint32_t brg;
   uint8_t ctl0;
   uint8_t ctl1;
@@ -355,7 +357,7 @@ static int z16f_setup(struct uart_dev_s *dev)
 
   if (priv->parity == 1)
     {
-      ctl0 |= (Z16F_UARTCTL0_PEN|Z16F_UARTCTL0_PSEL);
+      ctl0 |= (Z16F_UARTCTL0_PEN | Z16F_UARTCTL0_PSEL);
     }
   else if (priv->parity == 2)
     {
@@ -367,7 +369,7 @@ static int z16f_setup(struct uart_dev_s *dev)
 
   /* Enable UART receive (REN) and transmit (TEN) */
 
-  ctl0 |= (Z16F_UARTCTL0_TEN|Z16F_UARTCTL0_REN);
+  ctl0 |= (Z16F_UARTCTL0_TEN | Z16F_UARTCTL0_REN);
   putreg8(ctl0, priv->uartbase + Z16F_UART_CTL0);
 #endif
 
@@ -391,20 +393,21 @@ static void z16f_shutdown(struct uart_dev_s *dev)
  * Name: z16f_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
- *   the setup() method is called, however, the serial console may operate in
- *   a non-interrupt driven mode during the boot phase.
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
+ *   the the setup() method is called, however, the serial console may
+ *   operate in a non-interrupt driven mode during the boot phase.
  *
- *   RX and TX interrupts are not enabled when by the attach method (unless the
- *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   RX and TX interrupts are not enabled when by the attach method (unless
+ *   the hardware supports multiple levels of interrupt enabling).  The RX
+ *   and TX interrupts are not enabled until the txint() and rxint() methods
+ *   are called.
  *
  ****************************************************************************/
 
 static int z16f_attach(struct uart_dev_s *dev)
 {
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
   int ret;
 
   /* Attach the RX IRQ */
@@ -429,14 +432,14 @@ static int z16f_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception is
- *   the serial console which is never shutdown.
+ *   closed normally just before the shutdown method is called.  The
+ *   exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
 static void z16f_detach(struct uart_dev_s *dev)
 {
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
 
   up_disable_irq(priv->rxirq);
   up_disable_irq(priv->txirq);
@@ -461,7 +464,7 @@ static int z16f_rxinterrupt(int irq, void *context, void *arg)
   uint8_t            status;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
-  priv = (struct z16f_uart_s*)dev->priv;
+  priv = (struct z16f_uart_s *)dev->priv;
 
   /* Check the LIN-UART status 0 register to determine whether the source of
    * the interrupt is error, break, or received data
@@ -499,7 +502,7 @@ static int z16f_txinterrupt(int irq, void *context, FAR void *arg)
   uint8_t            status;
 
   DEBUGASSERT(dev != NULL && dev->priv != NULL);
-  priv = (struct z16f_uart_s*)dev->priv;
+  priv = (struct z16f_uart_s *)dev->priv;
 
   /* Verify that the transmit data register is empty */
 
@@ -540,7 +543,7 @@ static int z16f_ioctl(struct file *filep, int cmd, unsigned long arg)
 
 static int z16f_receive(struct uart_dev_s *dev, uint32_t *status)
 {
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
   uint8_t rxd;
   uint8_t stat0;
 
@@ -561,7 +564,7 @@ static int z16f_receive(struct uart_dev_s *dev, uint32_t *status)
 
 static void z16f_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
+  struct z16f_uart_s *priv  = (struct z16f_uart_s *)dev->priv;
   irqstate_t          flags = enter_critical_section();
 
   if (enable)
@@ -589,8 +592,9 @@ static void z16f_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool z16f_rxavailable(struct uart_dev_s *dev)
 {
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
-  return ((getreg8(priv->uartbase + Z16F_UART_STAT0) & Z16F_UARTSTAT0_RDA) != 0);
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
+  return ((getreg8(priv->uartbase + Z16F_UART_STAT0) &
+          Z16F_UARTSTAT0_RDA) != 0);
 }
 
 /****************************************************************************
@@ -603,7 +607,7 @@ static bool z16f_rxavailable(struct uart_dev_s *dev)
 
 static void z16f_send(struct uart_dev_s *dev, int ch)
 {
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
   putreg8(ch, priv->uartbase + Z16F_UART_TXD);
 }
 
@@ -617,7 +621,7 @@ static void z16f_send(struct uart_dev_s *dev, int ch)
 
 static void z16f_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
+  struct z16f_uart_s *priv  = (struct z16f_uart_s *)dev->priv;
   irqstate_t          flags = enter_critical_section();
 
   if (enable)
@@ -651,8 +655,9 @@ static void z16f_txint(struct uart_dev_s *dev, bool enable)
 
 static bool z16f_txready(struct uart_dev_s *dev)
 {
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
-  return ((getreg8(priv->uartbase + Z16F_UART_STAT0) & Z16F_UARTSTAT0_TDRE) != 0);
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
+  return ((getreg8(priv->uartbase + Z16F_UART_STAT0) &
+           Z16F_UARTSTAT0_TDRE) != 0);
 }
 
 /****************************************************************************
@@ -665,8 +670,9 @@ static bool z16f_txready(struct uart_dev_s *dev)
 
 static bool z16f_txempty(struct uart_dev_s *dev)
 {
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
-  return ((getreg8(priv->uartbase + Z16F_UART_STAT0) & Z16F_UARTSTAT0_TXE) != 0);
+  struct z16f_uart_s *priv = (struct z16f_uart_s *)dev->priv;
+  return ((getreg8(priv->uartbase + Z16F_UART_STAT0) &
+          Z16F_UARTSTAT0_TXE) != 0);
 }
 
 /****************************************************************************

@@ -125,7 +125,7 @@ static void _z16_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 
 void _exit(int status)
 {
-  FAR struct tcb_s* tcb = this_task();
+  FAR struct tcb_s *tcb = this_task();
 
   /* Make sure that we are in a critical section with local interrupts.
    * The IRQ state will be restored when the next task is started.

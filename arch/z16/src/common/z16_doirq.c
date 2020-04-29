@@ -60,12 +60,12 @@ FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs)
       FAR chipreg_t *savestate;
 
       /* Nested interrupts are not supported in this implementation.  If
-       * you want to implement nested interrupts, you would have to (1) change
-       * the way that g_current_regs is handled and (2) the design associated
-       * with CONFIG_ARCH_INTERRUPTSTACK.  The savestate variable will not
-       * work for that purpose as implemented here because only the outermost
-       * nested interrupt can result in a context switch (it can probably be
-       * deleted).
+       * you want to implement nested interrupts, you would have to (1)
+       * change the way that g_current_regs is handled and (2) the design
+       * ssociated with CONFIG_ARCH_INTERRUPTSTACK.  The savestate variable
+       * will not work for that purpose as implemented here because only
+       * the outermost nested interrupt can result in a context switch (it
+       * can probably be deleted).
        */
 
       /* Current regs non-zero indicates that we are processing
@@ -84,9 +84,9 @@ FAR chipreg_t *z16_doirq(int irq, FAR chipreg_t *regs)
 
       irq_dispatch(irq, regs);
 
-      /* Restore the previous value of g_current_regs.  NULL would indicate that
-       * we are no longer in an interrupt handler.  It will be non-NULL if we
-       * are returning from a nested interrupt.
+      /* Restore the previous value of g_current_regs.  NULL would indicate
+       * that we are no longer in an interrupt handler.  It will be non-NULL
+       * if we are returning from a nested interrupt.
        */
 
       ret          = g_current_regs;

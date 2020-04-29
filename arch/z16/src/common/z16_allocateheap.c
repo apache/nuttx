@@ -54,14 +54,6 @@
 #endif
 
 /****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -75,7 +67,7 @@
 
 void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
-  *heap_start = (FAR void*)CONFIG_HEAP1_BASE;
+  *heap_start = (FAR void *)CONFIG_HEAP1_BASE;
   *heap_size = CONFIG_HEAP1_END - CONFIG_HEAP1_BASE;
   board_autoled_on(LED_HEAPALLOCATE);
 }
@@ -92,6 +84,6 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void z16_addregion(void)
 {
-  kmm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+  kmm_addregion((FAR void *)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 }
 #endif

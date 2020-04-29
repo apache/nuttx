@@ -149,9 +149,10 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority)
                SET_IRQCONTEXT(rtcb);
             }
 
-          /* Copy the exception context into the TCB at the (old) head of the
-           * ready-to-run Task list. if SAVE_USERCONTEXT returns a non-zero
-           * value, then this is really the previously running task restarting!
+          /* Copy the exception context into the TCB at the (old) head of
+           * the ready-to-run Task list. if SAVE_USERCONTEXT returns a non-
+           * zero value, then this is really the previously running task
+           * restarting!
            */
 
           else if (!SAVE_USERCONTEXT(rtcb))

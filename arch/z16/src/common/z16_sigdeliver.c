@@ -54,7 +54,7 @@ void z16_sigdeliver(void)
 {
   FAR struct tcb_s *rtcb = this_task();
   chipreg_t regs[XCPTCONTEXT_REGS];
-  FAR uint32_t *regs32 = (FAR uint32_t*)regs;
+  FAR uint32_t *regs32 = (FAR uint32_t *)regs;
 
   /* Save the errno.  This must be preserved throughout the signal handling
    * so that the user code final gets the correct errno value (probably
