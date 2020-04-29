@@ -6,7 +6,7 @@
 config BUILTIN
 	bool "Support Builtin Applications"
 	default n
-	depends on !BUILD_KERNEL || EXPERIMENTAL
+	depends on !BUILD_KERNEL
 	---help---
 		Enable support for builtin applications.  This features assigns a string
 		name to an application and in addition if FS_BINFS is defined, retaining

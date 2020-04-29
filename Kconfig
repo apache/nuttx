@@ -229,7 +229,6 @@ endchoice # Build configuration
 config BUILD_2PASS
 	bool "Two pass build"
 	default n
-	depends on !BUILD_KERNEL
 	---help---
 		Enables the two pass build options.
 
