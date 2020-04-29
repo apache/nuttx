@@ -113,6 +113,10 @@
 #  define CONFIG_TOUCHSCREEN_AVG_SAMPLES 2
 #endif
 
+#ifndef CONFIG_TOUCHSCREEN_NPOLLWAITERS
+#  define CONFIG_TOUCHSCREEN_NPOLLWAITERS 2
+#endif
+
 /* Driver support *******************************************************************/
 /* This format is used to construct the /dev/input[n] device driver path.  It is
  * defined here so that it will be used consistently in all places.
@@ -442,7 +446,7 @@ static void tc_adc_init(void)
 
   regval  = getreg32(STM32_ADC_CCR);
   regval &= ~(ADC_CCR_MULTI_MASK | ADC_CCR_DELAY_MASK | ADC_CCR_DDS | ADC_CCR_DMA_MASK |
-              ADC_CCR_ADCPRE_MASK | ADC_CCR_VBATE | ADC_CCR_TSVREFE);
+              ADC_CCR_ADCPRE_MASK | ADC_CCR_VBATEN | ADC_CCR_TSVREFE);
   regval |=  (ADC_CCR_MULTI_NONE | ADC_CCR_DMA_DISABLED | ADC_CCR_ADCPRE_DIV2);
   putreg32(regval, STM32_ADC_CCR);
 
@@ -520,7 +524,7 @@ static uint16_t tc_adc_read_sample(void)
   /* Read the sample */
 
   retval = tc_adc_getreg(STM32_ADC_DR_OFFSET);
-  retval &= ADC_DR_DATA_MASK;
+  retval &= ADC_DR_RDATA_MASK;
 
   if (count > 0)
     {
@@ -738,7 +742,6 @@ static void tc_worker(FAR void *arg)
   uint16_t newx = 0;
   int16_t xdiff;
   int16_t ydiff;
-  int ret;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1087,8 +1090,7 @@ static void tc_worker(FAR void *arg)
 
   /* Set up the next sample event */
 
-  ret = work_queue(HPWORK, &priv->work, tc_worker, priv, delay);
-  DEBUGASSERT(ret == 0);
+  work_queue(HPWORK, &priv->work, tc_worker, priv, delay);
 }
 
 /****************************************************************************
