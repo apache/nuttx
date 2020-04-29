@@ -500,11 +500,9 @@ static const struct adc_ops_s g_adcops =
 
 static struct sam_adc_s g_adcpriv;
 
-#ifdef SAMA5_ADC_HAVE_CHANNELS
 /* ADC device instance */
 
 static struct adc_dev_s g_adcdev;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -677,7 +675,7 @@ static void sam_adc_dmadone(void *arg)
                     ADC_LCDR_CHANB_SHIFT);
           sample = ((*buffer & ADC_LCDR_DATA_MASK) >> ADC_LCDR_DATA_SHIFT);
 
-          /* Verify that the upper-half driver has bound its callback functions */
+          /* Verify the upper-half driver has bound its callback functions */
 
           if (priv->cb != NULL)
             {
@@ -884,7 +882,7 @@ static void sam_adc_endconversion(void *arg)
 
           regval = sam_adc_getreg(priv, SAM_ADC_CDR(chan));
 
-          /* Verify that the upper-half driver has bound its callback functions */
+          /* Verify the upper-half driver has bound its callback functions */
 
           if (priv->cb != NULL)
             {
@@ -2033,14 +2031,17 @@ struct adc_dev_s *sam_adc_initialize(void)
 
       /* Initialize the public ADC device data structure */
 
+#ifdef SAMA5_ADC_HAVE_CHANNELS
       g_adcdev.ad_ops  = &g_adcops;
+      priv->dev = &g_adcdev;
+#endif
+
       g_adcdev.ad_priv = priv;
 
       /* Initialize the private ADC device data structure */
 
       nxsem_init(&priv->exclsem,  0, 1);
       priv->cb  = NULL;
-      priv->dev = &g_adcdev;
 
 #ifdef CONFIG_SAMA5_ADC_DMA
       /* Allocate a DMA channel from DMAC1 */
