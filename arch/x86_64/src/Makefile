@@ -138,7 +138,7 @@ board/libboard$(LIBEXT):
 nuttx$(EXEEXT): board/libboard$(LIBEXT)
 	@echo "LD: nuttx$(EXEEXT)"
 	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) -o $(NUTTX) $(EXTRA_OBJS) \
-		$(LDSTARTGROUP) $(LIBGCC) --whole-archive  $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
+		$(LDSTARTGROUP) $(LIBGCC) --whole-archive --no-relax  $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) $(NM) $(NUTTX) | \
 	grep -v '\(compiled\)\|\(\$(OBJEXT)$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
