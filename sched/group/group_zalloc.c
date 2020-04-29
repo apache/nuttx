@@ -43,15 +43,14 @@
 
 #include "group/group.h"
 
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+#ifdef CONFIG_MM_KERNEL_HEAP
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: group_malloc
+ * Name: group_zalloc
  *
  * Description:
  *   Allocate memory and clear appropriate for the group type.  If the
@@ -72,4 +71,4 @@ FAR void *group_zalloc(FAR struct task_group_s *group, size_t nbytes)
   return mem;
 }
 
-#endif /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) && CONFIG_MM_KERNEL_HEAP */
+#endif /* CONFIG_MM_KERNEL_HEAP */

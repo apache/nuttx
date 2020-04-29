@@ -213,10 +213,10 @@ FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
 int       remove(FAR const char *path);
 
 /* Shell operations.  These are not actually implemented in the OS.  See
- * apps/system/open for implementation.
+ * apps/system/popen for implementation.
  */
 
-#if !defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__)
+#ifndef __KERNEL__
 FILE *popen(FAR const char *command, FAR const char *mode);
 int pclose(FILE *stream);
 #endif

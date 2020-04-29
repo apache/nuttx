@@ -37,31 +37,12 @@ ifeq ($(CONFIG_LIB_USRWORK),y)
 
 # Add the work queue C files to the build
 
-WORK_CSRCS += work_usrthread.c work_queue.c work_cancel.c work_signal.c
-WORK_CSRCS += work_lock.c
-
-# Protected mode
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CSRCS += $(WORK_CSRCS)
+CSRCS += work_usrthread.c work_queue.c work_cancel.c work_signal.c
+CSRCS += work_lock.c
 
 # Add the wqueue directory to the build
 
 DEPPATH += --dep-path wqueue
 VPATH += :wqueue
 
-else
-
-# Kernel mode
-
-ifeq ($(CONFIG_BUILD_KERNEL),y)
-CSRCS += $(WORK_CSRCS)
-
-# Add the wqueue directory to the build
-
-DEPPATH += --dep-path wqueue
-VPATH += :wqueue
-
-endif
-endif
 endif

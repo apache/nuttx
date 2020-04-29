@@ -43,8 +43,7 @@
 #include "svcall.h"
 #include "arm_internal.h"
 
-#if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
-     defined(CONFIG_BUILD_KERNEL)
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 
 /****************************************************************************
  * Public Functions
@@ -88,4 +87,4 @@ void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
             (uintptr_t)info, (uintptr_t)ucontext);
 }
 
-#endif /* (CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) && !CONFIG_DISABLE_PTHREAD */
+#endif /* !CONFIG_BUILD_FLAT && __KERNEL__ */

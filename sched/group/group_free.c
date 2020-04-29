@@ -47,8 +47,7 @@
 #include "sched/sched.h"
 #include "group/group.h"
 
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+#ifdef CONFIG_MM_KERNEL_HEAP
 
 /****************************************************************************
  * Public Functions
@@ -92,4 +91,4 @@ void group_free(FAR struct task_group_s *group, FAR void *mem)
     }
 }
 
-#endif /* CONFIG_BUILD_PROTECTED || CONFIG_BUILD_KERNEL) && CONFIG_MM_KERNEL_HEAP */
+#endif /* CONFIG_MM_KERNEL_HEAP */

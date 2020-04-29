@@ -54,7 +54,7 @@ extern uint32_t _emodtext;
 #ifdef CONFIG_ENDIAN_BIG
 #error not implemented
 #endif
-#if defined(CONFIG_BUILD_PROTECTED) || defined (CONFIG_BUILD_KERNEL)
+#ifndef CONFIG_BUILD_FLAT
 #error permission check not implemented
 #endif
 

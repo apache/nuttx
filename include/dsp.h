@@ -53,10 +53,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_BUILD_FLAT
-#  error "Only flat build supported for now"
-#endif
-
 /* Disable DEBUGASSERT macro if LIBDSP debug is not enabled */
 
 #ifdef CONFIG_LIBDSP_DEBUG

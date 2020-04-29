@@ -48,7 +48,7 @@
 
 /* How can we access the errno variable? */
 
-#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
+#ifdef CONFIG_BUILD_FLAT
    /* Flat build */
 
 #  if defined(CONFIG_LIB_SYSCALL) && !defined(__KERNEL__)
@@ -66,30 +66,16 @@
 #    define __DIRECT_ERRNO_ACCESS 1
 #  endif
 
-#elif defined(CONFIG_BUILD_PROTECTED)
+#else
 #  if defined(__KERNEL__)
-   /* Kernel portion of protected build.  Kernel code has direct access */
+   /* Kernel portion of protected/kernel build.  Kernel code has direct access */
 
 #    define __DIRECT_ERRNO_ACCESS 1
 
 #  else
-   /* User portion of protected build.  Application code has only indirect
+   /* User portion of protected/kernel build.  Application code has only indirect
     * access
     */
-
-#    undef __DIRECT_ERRNO_ACCESS
-#  endif
-
-#elif defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__)
-#  if defined(__KERNEL__)
-   /* Kernel build.  Kernel code has direct access */
-
-#    define __DIRECT_ERRNO_ACCESS 1
-
-#  else
-   /* User libraries for the kernel.  Only indirect access from user
-    * libraries
-   */
 
 #    undef __DIRECT_ERRNO_ACCESS
 #  endif

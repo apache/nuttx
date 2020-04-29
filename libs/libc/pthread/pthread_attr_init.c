@@ -56,8 +56,7 @@
  * the user address space.
  */
 
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-    !defined(__KERNEL__)
+#if !defined(CONFIG_BUILD_FLAT) && !defined(__KERNEL__)
 const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
 #endif
 

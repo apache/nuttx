@@ -59,9 +59,9 @@
  * Private Functions
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 {
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   FAR struct mm_delaynode_s *tmp;
   irqstate_t flags;
 
@@ -91,8 +91,8 @@ static void mm_free_delaylist(FAR struct mm_heap_s *heap)
 
       mm_free(heap, address);
     }
-}
 #endif
+}
 
 /****************************************************************************
  * Public Functions
@@ -116,11 +116,9 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   void *ret = NULL;
   int ndx;
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   /* Firstly, free mm_delaylist */
 
   mm_free_delaylist(heap);
-#endif
 
   /* Ignore zero-length allocations */
 

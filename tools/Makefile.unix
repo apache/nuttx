@@ -170,9 +170,7 @@ LINKLIBS = $(patsubst staging/%,%,$(NUTTXLIBS))
 MKEXPORT= tools/mkexport.sh
 MKEXPORT_ARGS = -w$(WINTOOL) -t "$(TOPDIR)"
 
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-MKEXPORT_ARGS += -u
-else ifeq ($(CONFIG_BUILD_KERNEL),y)
+ifneq ($(CONFIG_BUILD_FLAT),y)
 MKEXPORT_ARGS += -u
 endif
 

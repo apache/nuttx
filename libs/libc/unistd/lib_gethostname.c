@@ -105,8 +105,7 @@ int gethostname(FAR char *name, size_t namelen)
  * function.
  */
 
-#if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
-      defined(__KERNEL__)
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 
   irqstate_t flags;
 

@@ -46,12 +46,6 @@
 
 /* Configuration */
 
-#undef HAVE_KERNEL_HEAP
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
-#  define HAVE_KERNEL_HEAP 1
-#endif
-
 /* For use with EABI and floating point, the stack must be aligned to 8-byte
  * addresses.
  */
@@ -146,7 +140,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        */
 
 #ifdef CONFIG_TLS
-#ifdef HAVE_KERNEL_HEAP
+#ifdef CONFIG_MM_KERNEL_HEAP
       /* Use the kernel allocator if this is a kernel thread */
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
@@ -164,7 +158,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
         }
 
 #else /* CONFIG_TLS */
-#ifdef HAVE_KERNEL_HEAP
+#ifdef CONFIG_MM_KERNEL_HEAP
       /* Use the kernel allocator if this is a kernel thread */
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL)

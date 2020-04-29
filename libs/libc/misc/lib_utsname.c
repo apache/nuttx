@@ -52,8 +52,7 @@
  * a kernel system call.
  */
 
-#if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
-      defined(__KERNEL__)
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -125,4 +124,4 @@ int uname(FAR struct utsname *name)
   return ret;
 }
 
-#endif /* (!CONFIG_BUILD_PROTECTED) && !CONFIG_BUILD_KERNEL) || __KERNEL__ */
+#endif /* CONFIG_BUILD_FLAT || __KERNEL__ */
