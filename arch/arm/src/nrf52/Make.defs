@@ -44,34 +44,34 @@ CMN_ASRCS += up_setjmp.S
 endif
 endif
 
-CMN_CSRCS  = up_assert.c up_blocktask.c arm_copyfullstate.c
-CMN_CSRCS += up_createstack.c up_doirq.c up_exit.c up_hardfault.c
-CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
-CMN_CSRCS += up_memfault.c up_mdelay.c up_modifyreg8.c up_modifyreg16.c
-CMN_CSRCS += up_modifyreg32.c up_releasepending.c up_releasestack.c
-CMN_CSRCS += up_reprioritizertr.c up_schedulesigaction.c up_sigdeliver.c
-CMN_CSRCS += up_stackframe.c up_svcall.c up_trigger_irq.c up_udelay.c
-CMN_CSRCS += up_unblocktask.c up_usestack.c up_vfork.c
+CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_copyfullstate.c
+CMN_CSRCS += arm_createstack.c arm_doirq.c arm_exit.c arm_hardfault.c
+CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
+CMN_CSRCS += arm_memfault.c arm_mdelay.c arm_modifyreg8.c arm_modifyreg16.c
+CMN_CSRCS += arm_modifyreg32.c arm_releasepending.c arm_releasestack.c
+CMN_CSRCS += arm_reprioritizertr.c arm_schedulesigaction.c arm_sigdeliver.c
+CMN_CSRCS += arm_stackframe.c arm_svcall.c arm_trigger_irq.c arm_udelay.c
+CMN_CSRCS += arm_unblocktask.c arm_usestack.c arm_vfork.c
 
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
 CMN_ASRCS += up_lazyexception.S
 else
 CMN_ASRCS += up_exception.S
 endif
-CMN_CSRCS += up_vectors.c
+CMN_CSRCS += arm_vectors.c
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
+CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += up_mpu.c up_task_start.c up_pthread_start.c
-CMN_CSRCS += up_signal_dispatch.c
+CMN_CSRCS += arm_mpu.c arm_task_start.c arm_pthread_start.c
+CMN_CSRCS += arm_signal_dispatch.c
 CMN_UASRCS += up_signal_handler.S
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += up_checkstack.c
+CMN_CSRCS += arm_checkstack.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)

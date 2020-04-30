@@ -42,21 +42,21 @@ HEAD_ASRC = lpc23xx_head.S
 
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S up_vectors.S
 CMN_ASRCS += vfork.S
-CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c arm_copyfullstate.c
-CMN_CSRCS += up_createstack.c up_dataabort.c up_mdelay.c up_udelay.c
-CMN_CSRCS += up_exit.c up_initialize.c up_initialstate.c
-CMN_CSRCS += up_interruptcontext.c up_prefetchabort.c up_releasepending.c
-CMN_CSRCS += up_releasestack.c up_reprioritizertr.c up_stackframe.c
-CMN_CSRCS += up_syscall.c up_unblocktask.c up_undefinedinsn.c
-CMN_CSRCS += up_usestack.c up_lowputs.c up_vfork.c
-CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c
+CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c arm_copyfullstate.c
+CMN_CSRCS += arm_createstack.c arm_dataabort.c arm_mdelay.c arm_udelay.c
+CMN_CSRCS += arm_exit.c arm_initialize.c arm_initialstate.c
+CMN_CSRCS += arm_interruptcontext.c arm_prefetchabort.c arm_releasepending.c
+CMN_CSRCS += arm_releasestack.c arm_reprioritizertr.c arm_stackframe.c
+CMN_CSRCS += arm_syscall.c arm_unblocktask.c arm_undefinedinsn.c
+CMN_CSRCS += arm_usestack.c arm_lowputs.c arm_vfork.c
+CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CMN_CSRCS += up_idle.c
+CMN_CSRCS += arm_idle.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += up_checkstack.c
+CMN_CSRCS += arm_checkstack.c
 endif
 
 CHIP_ASRCS  = lpc23xx_lowputc.S

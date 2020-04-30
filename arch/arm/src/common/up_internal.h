@@ -429,7 +429,7 @@ void rpmsg_serialinit(void);
 #endif
 
 #ifdef CONFIG_ARM_LWL_CONSOLE
-/* Defined in src/common/up_lwl_console.c */
+/* Defined in src/common/arm_lwl_console.c */
 
 void lwlconsole_init(void);
 #endif
@@ -464,10 +464,10 @@ void up_wdtinit(void);
 
 /* Defined in board/xyz_network.c for board-specific Ethernet
  * implementations, or chip/xyx_ethernet.c for chip-specific Ethernet
- * implementations, or common/up_etherstub.c for a corner case where the
+ * implementations, or common/arm_etherstub.c for a corner case where the
  * network is enabled yet there is no Ethernet driver to be initialized.
  *
- * Use of common/up_etherstub.c is deprecated.  The preferred mechanism is to
+ * Use of common/arm_etherstub.c is deprecated.  The preferred mechanism is to
  * use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize() in
  * up_initialize().  Then this stub would not be needed.
  */

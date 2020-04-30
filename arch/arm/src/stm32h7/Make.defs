@@ -52,19 +52,19 @@ CMN_ASRCS += up_setjmp.S
 endif
 endif
 
-CMN_CSRCS  = up_assert.c up_blocktask.c arm_copyfullstate.c up_createstack.c
-CMN_CSRCS += up_doirq.c up_exit.c up_hardfault.c  up_initialize.c
-CMN_CSRCS += up_initialstate.c up_interruptcontext.c up_mdelay.c up_memfault.c
-CMN_CSRCS += up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
-CMN_CSRCS += up_releasepending.c up_releasestack.c up_reprioritizertr.c
-CMN_CSRCS += up_schedulesigaction.c up_sigdeliver.c up_stackframe.c up_svcall.c
-CMN_CSRCS += up_systemreset.c up_trigger_irq.c up_udelay.c up_unblocktask.c
-CMN_CSRCS += up_usestack.c up_vfork.c
+CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_copyfullstate.c arm_createstack.c
+CMN_CSRCS += arm_doirq.c arm_exit.c arm_hardfault.c  arm_initialize.c
+CMN_CSRCS += arm_initialstate.c arm_interruptcontext.c arm_mdelay.c arm_memfault.c
+CMN_CSRCS += arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
+CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
+CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_stackframe.c arm_svcall.c
+CMN_CSRCS += arm_systemreset.c arm_trigger_irq.c arm_udelay.c arm_unblocktask.c
+CMN_CSRCS += arm_usestack.c arm_vfork.c
 
 # Configuration-dependent common files
 
 ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
-CMN_CSRCS += up_stackcheck.c
+CMN_CSRCS += arm_stackcheck.c
 endif
 
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
@@ -72,20 +72,20 @@ CMN_ASRCS += up_lazyexception.S
 else
 CMN_ASRCS += up_exception.S
 endif
-CMN_CSRCS += up_vectors.c
+CMN_CSRCS += arm_vectors.c
 
-CMN_CSRCS += up_cache.c
+CMN_CSRCS += arm_cache.c
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += up_fpu.S
 CMN_CSRCS += arm_copyarmstate.c
 endif
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CMN_CSRCS += up_idle.c
+CMN_CSRCS += arm_idle.c
 endif
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += up_ramvec_initialize.c up_ramvec_attach.c
+CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
 endif
 
 ifeq ($(CONFIG_STM32H7_PROGMEM),y)
@@ -93,17 +93,17 @@ CMN_CSRCS += stm32_flash.c
 endif
 
 ifeq ($(CONFIG_ARM_MPU),y)
-CMN_CSRCS += up_mpu.c
+CMN_CSRCS += arm_mpu.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += up_task_start.c up_pthread_start.c
-CMN_CSRCS += up_signal_dispatch.c
+CMN_CSRCS += arm_task_start.c arm_pthread_start.c
+CMN_CSRCS += arm_signal_dispatch.c
 CMN_UASRCS += up_signal_handler.S
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += up_checkstack.c
+CMN_CSRCS += arm_checkstack.c
 endif
 
 # Required STM32H7 files
@@ -135,7 +135,7 @@ endif
 ifeq ($(CONFIG_STM32H7_BBSRAM),y)
 ifeq ($(CONFIG_ARMV7M_DCACHE),y)
 ifeq ($(CONFIG_ARM_MPU),y)
-CMN_CSRCS += up_mpu.c
+CMN_CSRCS += arm_mpu.c
 endif
 endif
 CHIP_CSRCS += stm32_bbsram.c

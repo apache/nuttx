@@ -4389,7 +4389,7 @@ static inline int stm32_ethinitialize(int intf)
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.  If STM32H7_NETHERNET
+ *   low-level initialization logic in arm_initialize.c.  If STM32H7_NETHERNET
  *   greater than one, then board specific logic will have to supply a
  *   version of up_netinitialize() that calls stm32_ethinitialize() with
  *   the appropriate interface number.

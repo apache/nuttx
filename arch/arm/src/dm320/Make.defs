@@ -38,20 +38,20 @@ HEAD_ASRC = up_head.S
 CMN_ASRCS  = up_cache.S arm_fullcontextrestore.S arm_saveusercontext.S
 CMN_ASRCS += up_vectors.S up_vectoraddrexcptn.S up_vectortab.S vfork.S
 
-CMN_CSRCS  = up_assert.c up_blocktask.c arm_copyfullstate.c up_createstack.c
-CMN_CSRCS += up_dataabort.c up_mdelay.c up_udelay.c up_exit.c
-CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
-CMN_CSRCS += up_prefetchabort.c up_releasepending.c up_releasestack.c
-CMN_CSRCS += up_reprioritizertr.c up_schedulesigaction.c
-CMN_CSRCS += up_sigdeliver.c up_stackframe.c up_syscall.c up_unblocktask.c
-CMN_CSRCS += up_undefinedinsn.c up_usestack.c up_vfork.c
+CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_copyfullstate.c arm_createstack.c
+CMN_CSRCS += arm_dataabort.c arm_mdelay.c arm_udelay.c arm_exit.c
+CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
+CMN_CSRCS += arm_prefetchabort.c arm_releasepending.c arm_releasestack.c
+CMN_CSRCS += arm_reprioritizertr.c arm_schedulesigaction.c
+CMN_CSRCS += arm_sigdeliver.c arm_stackframe.c arm_syscall.c arm_unblocktask.c
+CMN_CSRCS += arm_undefinedinsn.c arm_usestack.c arm_vfork.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CMN_CSRCS += up_idle.c
+CMN_CSRCS += arm_idle.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += up_checkstack.c
+CMN_CSRCS += arm_checkstack.c
 endif
 
 CHIP_ASRCS  = dm320_lowputc.S dm320_restart.S

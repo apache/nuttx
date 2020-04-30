@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/up_blocktask.c
+ * arch/arm/src/armv7-a/arm_blocktask.c
  *
  *   Copyright (C) 2013-2015, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
