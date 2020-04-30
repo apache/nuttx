@@ -36,7 +36,7 @@
 # Source files specific to the Cortex-M0+
 
 CMN_ASRCS += up_exception.S arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += up_switchcontext.S vfork.S
+CMN_ASRCS += arm_switchcontext.S vfork.S
 
 CMN_CSRCS += up_assert.c up_blocktask.c arm_copyfullstate.c up_createstack.c
 CMN_CSRCS += up_initialstate.c up_releasepending.c up_reprioritizertr.c

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv6-m/up_switchcontext.S
+ * arch/arm/src/armv6-m/arm_switchcontext.S
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +52,7 @@
  ************************************************************************************/
 
 	.cpu	cortex-m0
-	.file	"up_switchcontext.S"
+	.file	"arm_switchcontext.S"
 
 /************************************************************************************
  * Macros
@@ -63,13 +63,13 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_switchcontext
+ * Name: arm_switchcontext
  *
  * Description:
  *   Save the current thread context and restore the specified context.
  *   Full prototype is:
  *
- *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ *   void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
  *
  * Returned Value:
  *   None
@@ -79,9 +79,9 @@
 	.align	2
 	.code	16
 	.thumb_func
-	.globl	up_switchcontext
-	.type	up_switchcontext, function
-up_switchcontext:
+	.globl	arm_switchcontext
+	.type	arm_switchcontext, function
+arm_switchcontext:
 
 	/* Perform the System call with R0=1, R1=saveregs, R2=restoreregs */
 
@@ -93,5 +93,5 @@ up_switchcontext:
 	/*  We will get here only after the rerturn from the context switch */
 
 	bx		lr
-	.size	up_switchcontext, .-up_switchcontext
+	.size	arm_switchcontext, .-arm_switchcontext
 	.end
