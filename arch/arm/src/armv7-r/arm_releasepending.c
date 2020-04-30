@@ -94,12 +94,12 @@ void up_release_pending(void)
         }
 
       /* Copy the exception context into the TCB of the task that
-       * was currently active. if up_saveusercontext returns a non-zero
+       * was currently active. if arm_saveusercontext returns a non-zero
        * value, then this is really the previously running task
        * restarting!
        */
 
-      else if (!up_saveusercontext(rtcb->xcp.regs))
+      else if (!arm_saveusercontext(rtcb->xcp.regs))
         {
           /* Restore the exception context of the rtcb at the (new) head
            * of the ready-to-run task list.

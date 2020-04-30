@@ -44,7 +44,7 @@
  * Public Symbols
  ****************************************************************************/
 
-	.globl	up_saveusercontext
+	.globl	arm_saveusercontext
 
 #ifdef CONFIG_ARCH_FPU
 	.cpu	cortex-r4f
@@ -61,13 +61,13 @@
 	.text
 
 /****************************************************************************
- * Name: up_saveusercontext
+ * Name: arm_saveusercontext
  ****************************************************************************/
 
-	.globl	up_saveusercontext
-	.type	up_saveusercontext, function
+	.globl	arm_saveusercontext
+	.type	arm_saveusercontext, function
 
-up_saveusercontext:
+arm_saveusercontext:
 
 	/* On entry, a1 (r0) holds address of struct xcptcontext */
 
@@ -128,5 +128,5 @@ up_saveusercontext:
 
 	mov		r0, #0			/* Return value == 0 */
 	mov		pc, lr			/* Return */
-	.size	up_saveusercontext, . - up_saveusercontext
+	.size	arm_saveusercontext, . - arm_saveusercontext
 	.end

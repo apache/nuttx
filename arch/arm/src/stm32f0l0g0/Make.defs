@@ -36,7 +36,7 @@
 
 HEAD_ASRC =
 
-CMN_ASRCS  = up_exception.S up_saveusercontext.S arm_fullcontextrestore.S
+CMN_ASRCS  = up_exception.S arm_saveusercontext.S arm_fullcontextrestore.S
 CMN_ASRCS += up_switchcontext.S vfork.S
 
 CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c arm_copyfullstate.c

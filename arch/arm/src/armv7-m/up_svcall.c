@@ -163,7 +163,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
     {
       /* R0=SYS_save_context:  This is a save context command:
        *
-       *   int up_saveusercontext(uint32_t *saveregs);
+       *   int arm_saveusercontext(uint32_t *saveregs);
        *
        * At this point, the following values are saved in context:
        *

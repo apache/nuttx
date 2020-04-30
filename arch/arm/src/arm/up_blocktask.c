@@ -140,11 +140,11 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
         }
 
       /* Copy the user C context into the TCB at the (old) head of the
-       * ready-to-run Task list. if up_saveusercontext returns a non-zero
+       * ready-to-run Task list. if arm_saveusercontext returns a non-zero
        * value, then this is really the previously running task restarting!
        */
 
-      else if (!up_saveusercontext(rtcb->xcp.regs))
+      else if (!arm_saveusercontext(rtcb->xcp.regs))
         {
           /* Restore the exception context of the rtcb at the (new) head
            * of the ready-to-run task list.
