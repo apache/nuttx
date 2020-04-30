@@ -122,8 +122,8 @@ void up_unblock_task(struct tcb_s *tcb)
 
       /* We are not in an interrupt handler.  Copy the user C context
        * into the TCB of the task that was previously active.  if
-       * arm_saveusercontext returns a non-zero value, then this is really the
-       * previously running task restarting!
+       * arm_saveusercontext returns a non-zero value, then this is really
+       * the previously running task restarting!
        */
 
       else if (!arm_saveusercontext(rtcb->xcp.regs))
