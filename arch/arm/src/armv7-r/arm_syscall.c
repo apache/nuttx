@@ -230,7 +230,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
       /* R0=SYS_context_restore:  Restore task context
        *
-       * void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+       * void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
        *
        * At this point, the following values are saved in context:
        *

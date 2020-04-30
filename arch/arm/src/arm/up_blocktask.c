@@ -167,7 +167,7 @@ void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 
           /* Then switch contexts */
 
-          up_fullcontextrestore(rtcb->xcp.regs);
+          arm_fullcontextrestore(rtcb->xcp.regs);
         }
     }
 }

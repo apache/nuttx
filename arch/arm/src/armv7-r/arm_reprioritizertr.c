@@ -182,7 +182,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
               /* Then switch contexts */
 
-              up_fullcontextrestore(rtcb->xcp.regs);
+              arm_fullcontextrestore(rtcb->xcp.regs);
             }
         }
     }

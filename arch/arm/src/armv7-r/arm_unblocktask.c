@@ -156,7 +156,7 @@ void up_unblock_task(struct tcb_s *tcb)
 
           /* Then switch contexts */
 
-          up_fullcontextrestore(rtcb->xcp.regs);
+          arm_fullcontextrestore(rtcb->xcp.regs);
         }
     }
 }

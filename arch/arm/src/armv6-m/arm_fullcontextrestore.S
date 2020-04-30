@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv6-m/up_fullcontextrestore.S
+ * arch/arm/src/armv6-m/arm_fullcontextrestore.S
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +52,7 @@
  ************************************************************************************/
 
 	.cpu	cortex-m0
-	.file	"up_fullcontextrestore.S"
+	.file	"arm_fullcontextrestore.S"
 
 /************************************************************************************
  * Macros
@@ -63,12 +63,12 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_fullcontextrestore
+ * Name: arm_fullcontextrestore
  *
  * Description:
  *   Restore the current thread context.  Full prototype is:
  *
- *   void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ *   void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
  *
  * Returned Value:
  *   None
@@ -78,9 +78,9 @@
 	.align	2
 	.code	16
 	.thumb_func
-	.globl	up_fullcontextrestore
-	.type	up_fullcontextrestore, function
-up_fullcontextrestore:
+	.globl	arm_fullcontextrestore
+	.type	arm_fullcontextrestore, function
+arm_fullcontextrestore:
 
 	/* Perform the System call with R0=1 and R1=regs */
 
@@ -91,5 +91,5 @@ up_fullcontextrestore:
 	/* This call should not return */
 
 	bx		lr							/* Unnecessary ... will not return */
-	.size	up_fullcontextrestore, .-up_fullcontextrestore
+	.size	arm_fullcontextrestore, .-arm_fullcontextrestore
 	.end

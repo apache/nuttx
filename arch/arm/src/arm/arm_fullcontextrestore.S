@@ -1,5 +1,5 @@
 /**************************************************************************
- * arch/arm/src/arm/up_fullcontextrestore.S
+ * arch/arm/src/arm/arm_fullcontextrestore.S
  *
  *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -69,12 +69,12 @@
  **************************************************************************/
 
 /**************************************************************************
- * Name: up_fullcontextrestore
+ * Name: arm_fullcontextrestore
  **************************************************************************/
 
-	.globl	up_fullcontextrestore
-	.type	up_fullcontextrestore, function
-up_fullcontextrestore:
+	.globl	arm_fullcontextrestore
+	.type	arm_fullcontextrestore, function
+arm_fullcontextrestore:
 
 	/* On entry, a1 (r0) holds address of the register save area */
 
@@ -108,4 +108,4 @@ up_fullcontextrestore:
 	 */
 
 	ldmia	sp!, {r0-r1, r15}
-	.size up_fullcontextrestore, . - up_fullcontextrestore
+	.size arm_fullcontextrestore, . - arm_fullcontextrestore

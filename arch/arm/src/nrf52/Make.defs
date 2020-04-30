@@ -35,7 +35,7 @@
 
 HEAD_ASRC  =
 
-CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
+CMN_ASRCS  = up_saveusercontext.S arm_fullcontextrestore.S up_switchcontext.S
 CMN_ASRCS += up_testset.S vfork.S
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)

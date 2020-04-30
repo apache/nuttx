@@ -191,7 +191,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
 
       /* R0=SYS_restore_context:  This a restore context command:
        *
-       *   void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+       *   void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
