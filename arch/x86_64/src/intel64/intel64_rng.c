@@ -70,7 +70,7 @@ static const struct file_operations g_rngops =
 {
   0,               /* open */
   0,               /* close */
-  x86_rngread,   /* read */
+  x86_rngread,     /* read */
   0,               /* write */
   0,               /* seek */
   0                /* ioctl */

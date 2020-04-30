@@ -74,7 +74,6 @@ void print_mem(void *sp, size_t size)
 void backtrace(uint64_t rbp)
 {
   int i;
-  int j;
 
   _alert("Frame Dump (64 bytes):\n");
 
@@ -101,12 +100,8 @@ void backtrace(uint64_t rbp)
 
 void up_registerdump(uint64_t *regs)
 {
-  int i;
-  int j;
   uint64_t mxcsr;
   uint64_t cr2;
-  uint64_t rbp;
-  char buf[9];
 
   asm volatile ("stmxcsr %0"::"m"(mxcsr):"memory");
   asm volatile ("mov %%cr2, %%rax; mov %%rax, %0"::"m"(cr2):"memory", "rax");
@@ -138,11 +133,12 @@ void up_registerdump(uint64_t *regs)
 
   if (regs[REG_RSP] > 0 && regs[REG_RSP] < 0x1000000)
     {
-      print_mem(regs[REG_RSP] - 512, 128 * 0x200000 - regs[REG_RSP] + 512);
+      print_mem((void *)regs[REG_RSP] - 512,
+          128 * 0x200000 - regs[REG_RSP] + 512);
     }
   else
     {
-      print_mem(regs[REG_RSP] - 512, 1024);
+      print_mem((void *)regs[REG_RSP] - 512, 1024);
     }
 
 #ifdef CONFIG_DEBUG_NOOPT

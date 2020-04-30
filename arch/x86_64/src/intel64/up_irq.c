@@ -176,8 +176,9 @@ static void up_ist_init(void)
   memset(&tss_l, 0, sizeof(tss_l));
   memset(&tss_h, 0, sizeof(tss_h));
 
-  tss_l.limit_low = (((104 - 1) & 0xffff)); /* Segment limit = TSS size - 1 */
-  tss_l.base_low  = ((uintptr_t)ist64 & 0x00ffffff);  /* Low address 1 */
+  tss_l.limit_low = (((104 - 1) & 0xffff));    /* Segment limit = TSS size - 1 */
+
+  tss_l.base_low  = ((uintptr_t)ist64 & 0x00ffffff);          /* Low address 1 */
   tss_l.base_high = (((uintptr_t)ist64 & 0xff000000) >> 24);  /* Low address 2 */
 
   tss_l.P = 1;
@@ -193,7 +194,8 @@ static void up_ist_init(void)
 
   /* memcpy used to handle type punning compiler warning */
 
-  memcpy((void *)&gdt64[X86_GDT_ISTH_SEL_NUM], (void *)&tss_h, sizeof(gdt64[0]));
+  memcpy((void *)&gdt64[X86_GDT_ISTH_SEL_NUM],
+      (void *)&tss_h, sizeof(gdt64[0]));
 
   ist64->IST1 = (uintptr_t)g_interrupt_stack_end;
   ist64->IST2 = (uintptr_t)g_isr_stack_end;
@@ -317,7 +319,8 @@ static void up_apic_init(void)
  * Name: legacy_pic_irq_handler
  *
  * Description:
- *  This function will capture will legacy 8259 PIC IRQ using virtual wire mode
+ *  This function will capture will legacy 8259 PIC IRQ using virtual wire
+ *  mode
  *
  ****************************************************************************/
 
@@ -375,8 +378,8 @@ static void up_idtentry(unsigned int index, uint64_t base, uint16_t sel,
   entry->sel     = sel;
   entry->zero    = 0;
 
-  /* We must uncomment the OR below when we get to using user-mode. It sets the
-   * interrupt gate's privilege level to 3.
+  /* We must uncomment the OR below when we get to using user-mode. It sets
+   * the interrupt gate's privilege level to 3.
    */
 
   entry->flags  = flags; /* | 0x60 */

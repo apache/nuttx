@@ -41,7 +41,9 @@
  * Public Data
  ****************************************************************************/
 
-/* The actual address of the page table and gdt/ist after mapping the kernel in high address*/
+/* The actual address of the page table and gdt/ist after mapping the kernel
+ * in high address.
+ */
 
 volatile uint64_t *pdpt;
 volatile uint64_t *pd;
@@ -69,11 +71,11 @@ volatile struct gdt_entry_s *gdt64;
 
 void up_lowsetup(void)
 {
-  /* we should be in long mode at this point*/
+  /* we should be in long mode at this point */
 
   /* GDT is loaded with 64bit GDT  */
 
-  /* Paging is enabled*/
+  /* Paging is enabled */
 
   /* Setup pointers for accessing Page table and GDT in high address */
 
