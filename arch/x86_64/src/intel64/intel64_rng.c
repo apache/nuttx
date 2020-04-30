@@ -141,7 +141,7 @@ static ssize_t x86_rngread(struct file *filep, char *buffer, size_t buflen)
     {
       unsigned short temp = 0;
 
-      while (_rdrand16_step((unsigned short *)temp))
+      while (_rdrand16_step(&temp))
         {
           sched_yield();
         }
