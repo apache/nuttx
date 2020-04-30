@@ -80,10 +80,10 @@ void up_dumpnvic(FAR const char *msg)
   for (i = 0 ; i < 8; i += 4)
     {
       _info("   IPR%d: %08x  IPR%d: %08x  IPR%d: %08x  IPR%d: %08x\n",
-           i,   getreg32(ARMV6M_NVIC_IPR(i)),
-           i+1, getreg32(ARMV6M_NVIC_IPR(i+1)),
-           i+2, getreg32(ARMV6M_NVIC_IPR(i+2)),
-           i+3, getreg32(ARMV6M_NVIC_IPR(i+3)));
+           i,     getreg32(ARMV6M_NVIC_IPR(i)),
+           i + 1, getreg32(ARMV6M_NVIC_IPR(i + 1)),
+           i + 2, getreg32(ARMV6M_NVIC_IPR(i + 2)),
+           i + 3, getreg32(ARMV6M_NVIC_IPR(i + 3)));
     }
 
   _info("SYSCON:\n");

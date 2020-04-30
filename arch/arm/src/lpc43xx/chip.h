@@ -34,9 +34,9 @@
 /* For each chip supported in chip.h, the following are provided to customize the
  * environment for the specific LPC43XX chip:
  *
- * Define ARMV7M_PERIPHERAL_INTERRUPTS - This is needed by common/arm_vectors.c.  This
- *   definition provides the number of "external" interrupt vectors supported by
- *   the specific LPC43 chip.
+ * Define ARMV7M_PERIPHERAL_INTERRUPTS - This is needed by common/arm_vectors.c.
+ *   This definition provides the number of "external" interrupt vectors supported
+ *   by the specific LPC43 chip.
  *
  *   For the Cortex-M3 core, this should always be equal to the value
  *   LPC43M4_IRQ_NEXTINT defined in include/lpc43xx/irq.h.  For the Cortex-M0
@@ -46,8 +46,8 @@
  * Include the chip-specific memory map header file, and
  * Include the chip-specific pin configuration.
  *
- * These header files may or may not be shared between different chips.  That decisions
- * depends on the similarity of the chip peripheral.
+ * These header files may or may not be shared between different chips.  That
+ * decision depends on the similarity of the chip peripheral.
  */
 
 #if defined(CONFIG_ARCH_CHIP_LPC4310FBD144)
@@ -151,7 +151,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ************************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_LPC43XX_CHIP_H */

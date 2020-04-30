@@ -46,9 +46,9 @@
 #include "chip.h"
 #include "up_internal.h"
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #define IDLE_STACK      ((unsigned)&_ebss+CONFIG_IDLETHREAD_STACKSIZE-4)
 
@@ -68,15 +68,15 @@ extern void __start(void);
 
 extern void exception_common(void);
 
-/************************************************************************************
+/****************************************************************************
  * Public data
- ************************************************************************************/
+ ****************************************************************************/
 
-/* The v7m vector table consists of an array of function pointers, with the first
- * slot (vector zero) used to hold the initial stack pointer.
+/* The v6m vector table consists of an array of function pointers, with the
+ * first slot (vector zero) used to hold the initial stack pointer.
  *
- * As all exceptions (interrupts) are routed via exception_common, we just need to
- * fill this array with pointers to it.
+ * As all exceptions (interrupts) are routed via exception_common, we just
+ * need to fill this array with pointers to it.
  *
  * Note that the [ ... ] desginated initialiser is a GCC extension.
  */
