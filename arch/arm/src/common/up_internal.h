@@ -467,9 +467,9 @@ void up_wdtinit(void);
  * implementations, or common/arm_etherstub.c for a corner case where the
  * network is enabled yet there is no Ethernet driver to be initialized.
  *
- * Use of common/arm_etherstub.c is deprecated.  The preferred mechanism is to
- * use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize() in
- * up_initialize().  Then this stub would not be needed.
+ * Use of common/arm_etherstub.c is deprecated.  The preferred mechanism is
+ * to use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize()
+ * in up_initialize().  Then this stub would not be needed.
  */
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
