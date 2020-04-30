@@ -25,7 +25,7 @@
 
 #include <nuttx/config.h>
 #include "chip.h"
-#include "common/z16_internal.h"
+#include "z16_internal.h"
 
 #ifdef USE_LOWUARTINIT
 

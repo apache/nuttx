@@ -43,13 +43,16 @@ endmenu # Z16F ESPI Configuration
 
 choice
 	prompt "ZDS-II Toolchain version"
-	default Z16F_ZDSII_V521
+	default Z16F_ZDSII_V522
 
 config Z16F_ZDSII_V501
 	bool "ZDS-II 5.0.1"
 
 config Z16F_ZDSII_V521
 	bool "ZDS-II 5.2.1"
+
+config Z16F_ZDSII_V522
+	bool "ZDS-II 5.2.2"
 
 endchoice # ZDS-II Toolchain version
 
