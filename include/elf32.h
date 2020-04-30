@@ -165,6 +165,7 @@ typedef struct
   } d_un;
 } Elf32_Dyn;
 
+typedef Elf32_Addr  Elf_Addr;
 typedef Elf32_Ehdr  Elf_Ehdr;
 typedef Elf32_Rel   Elf_Rel;
 typedef Elf32_Rela  Elf_Rela;
