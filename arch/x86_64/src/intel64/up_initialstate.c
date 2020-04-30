@@ -85,6 +85,7 @@ void up_initial_state(struct tcb_s *tcb)
   /* set page table to share space with current process */
 
   rtcb = this_task();
+  UNUSED(rtcb);
 
   /* Save the initial stack pointer... the value of the stackpointer before
    * the "interrupt occurs."
