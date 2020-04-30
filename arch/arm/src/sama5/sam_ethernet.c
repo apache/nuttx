@@ -160,7 +160,7 @@ static inline void up_emac_initialize(void)
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.  If both the EMAC
+ *   low-level initialization logic in arm_initialize.c.  If both the EMAC
  *   and GMAC are enabled, then this single entry point must initialize
  *   both.
  *

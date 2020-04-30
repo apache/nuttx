@@ -2998,7 +2998,7 @@ static int lpc54_phy_reset(struct lpc54_ethdriver_s *priv)
  *   Initialize the Ethernet controller and driver.
  *
  *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.
+ *   low-level initialization logic in arm_initialize.c.
  *
  * Input Parameters:
  *   intf - In the case where there are multiple EMACs, this value
