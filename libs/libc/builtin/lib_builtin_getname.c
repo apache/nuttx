@@ -48,8 +48,6 @@
 
 #include <nuttx/lib/builtin.h>
 
-#ifdef HAVE_BUILTIN_CONTEXT
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -83,5 +81,3 @@ FAR const char *builtin_getname(int index)
 
   return NULL;
 }
-
-#endif /* HAVE_BUILTIN_CONTEXT */

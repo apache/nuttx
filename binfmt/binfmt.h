@@ -147,7 +147,7 @@ void binfmt_freeargv(FAR struct binary_s *bin);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_FS_BINFS) && defined(HAVE_BUILTIN_CONTEXT)
+#ifdef CONFIG_FS_BINFS
 int builtin_initialize(void);
 #endif
 
@@ -162,7 +162,7 @@ int builtin_initialize(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_FS_BINFS) && defined(HAVE_BUILTIN_CONTEXT)
+#ifdef CONFIG_FS_BINFS
 void builtin_uninitialize(void);
 #endif
 

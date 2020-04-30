@@ -53,16 +53,6 @@
 #ifdef CONFIG_BUILTIN
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* This logic is not usable in the KERNEL build from within the kernel. */
-
-#if !defined(CONFIG_BUILD_KERNEL) || !defined(__KERNEL__)
-#  define HAVE_BUILTIN_CONTEXT
-#endif
-
-/****************************************************************************
  * Public Types
  ****************************************************************************/
 

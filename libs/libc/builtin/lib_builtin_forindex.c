@@ -43,8 +43,6 @@
 
 #include <nuttx/lib/builtin.h>
 
-#ifdef HAVE_BUILTIN_CONTEXT
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -77,5 +75,3 @@ FAR const struct builtin_s *builtin_for_index(int index)
 
   return NULL;
 }
-
-#endif /* HAVE_BUILTIN_CONTEXT */
