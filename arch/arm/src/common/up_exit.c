@@ -187,5 +187,9 @@ void _exit(int status)
 
   /* Then switch contexts */
 
+#ifdef CONFIG_ARCH_ARMV8M
+  arm_fullcontextrestore(tcb->xcp.regs);
+#else
   up_fullcontextrestore(tcb->xcp.regs);
+#endif
 }
