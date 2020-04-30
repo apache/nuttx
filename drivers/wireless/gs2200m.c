@@ -97,6 +97,8 @@
 #define RD_RESP_NOK  0x14
 
 #define LED_GPIO     30
+#define HAL_TIMEOUT  5000000  /* in us */
+#define WR_MAX_RETRY 100
 
 /****************************************************************************
  * Private Data Types
@@ -827,15 +829,8 @@ static void _write_data(FAR struct gs2200m_dev_s *dev,
                         FAR uint8_t *buf,
                         FAR uint16_t len)
 {
-  int i;
-
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), true);
-
-  for (i = 0; i < len; i++, buf++)
-    {
-      SPI_SEND(dev->spi, *buf);
-    }
-
+  SPI_SNDBLOCK(dev->spi, buf, len);
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), false);
 }
 
@@ -848,18 +843,12 @@ static void _read_data(FAR struct gs2200m_dev_s *dev,
                        FAR uint8_t  *buff,
                        FAR uint16_t len)
 {
-  int i;
   uint8_t req = 0xf5; /* idle character */
 
   memset(buff, 0, len);
 
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), true);
-
-  for (i = 0; i < len; i++, buff++)
-    {
-      SPI_EXCHANGE(dev->spi, &req, buff, 1);
-    }
-
+  SPI_EXCHANGE(dev->spi, &req, buff, len);
   SPI_SELECT(dev->spi, SPIDEV_WIRELESS(0), false);
 }
 
@@ -889,15 +878,13 @@ retry:
   while (!dev->lower->dready(NULL))
     {
       /* TODO: timeout */
-
-      nxsig_usleep(10);
     }
 
-  /* NOTE: wait 100us
-   * workaround to avoid really receiving an invalid frame response
+  /* NOTE: busy wait 50us
+   * workaround to avoid an invalid frame response
    */
 
-  nxsig_usleep(100);
+  up_udelay(50);
 
   /* Read frame response */
 
@@ -999,7 +986,7 @@ retry:
       wlwarn("*** warning: WR_RESP_NOK received.. retrying. (n=%d) \n", n);
       nxsig_usleep(10 * 1000);
 
-      if (9 < n)
+      if (WR_MAX_RETRY < n)
         {
           return SPI_TIMEOUT;
         }
@@ -1039,17 +1026,19 @@ enum spi_status_e gs2200m_hal_read(FAR struct gs2200m_dev_s *dev,
 
   /* NOTE: need to wait for data ready even if we use irq */
 
-  for (i = 0; i < 500; i++)
+  for (i = 0; i < HAL_TIMEOUT; i++)
     {
       if (dev->lower->dready(NULL))
         {
           break;
         }
 
-      nxsig_usleep(10 * 1000);
+      /* Busy wait 1us */
+
+      up_udelay(1);
     }
 
-  if (500 == i)
+  if (HAL_TIMEOUT == i)
     {
       wlerr("***** error: timeout! \n");
       r = SPI_TIMEOUT;
