@@ -64,7 +64,7 @@ void binfmt_initialize(void)
 {
   int ret;
 
-#if defined(CONFIG_FS_BINFS) && defined(HAVE_BUILTIN_CONTEXT)
+#ifdef CONFIG_FS_BINFS
   ret = builtin_initialize();
   if (ret < 0)
     {

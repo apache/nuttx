@@ -52,8 +52,6 @@
 
 #include <nuttx/lib/builtin.h>
 
-#ifdef HAVE_BUILTIN_CONTEXT
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -92,5 +90,3 @@ int builtin_isavail(FAR const char *appname)
 
   return -ENOENT;
 }
-
-#endif /* HAVE_BUILTIN_CONTEXT */
