@@ -68,7 +68,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += up_fpu.S
-CMN_CSRCS += up_copyarmstate.c
+CMN_CSRCS += arm_copyarmstate.c
 endif
 
 # Source file specific to the S32k11x family

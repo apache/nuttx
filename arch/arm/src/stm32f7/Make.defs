@@ -82,7 +82,7 @@ CMN_CSRCS += up_cache.c
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += up_fpu.S
-CMN_CSRCS += up_copyarmstate.c
+CMN_CSRCS += arm_copyarmstate.c
 endif
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
