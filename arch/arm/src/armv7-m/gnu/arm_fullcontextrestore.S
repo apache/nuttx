@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv7-m/gnu/up_fullcontextrestore.S
+ * arch/arm/src/armv7-m/gnu/arm_fullcontextrestore.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -38,7 +38,7 @@
 
 	.syntax	unified
 	.thumb
-	.file	"up_fullcontextrestore.S"
+	.file	"arm_fullcontextrestore.S"
 
 /************************************************************************************
  * Macros
@@ -49,12 +49,12 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_fullcontextrestore
+ * Name: arm_fullcontextrestore
  *
  * Description:
  *   Restore the current thread context.  Full prototype is:
  *
- *   void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ *   void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
  *
  * Returned Value:
  *   None
@@ -62,9 +62,9 @@
  ************************************************************************************/
 
 	.thumb_func
-	.globl	up_fullcontextrestore
-	.type	up_fullcontextrestore, function
-up_fullcontextrestore:
+	.globl	arm_fullcontextrestore
+	.type	arm_fullcontextrestore, function
+arm_fullcontextrestore:
 
 	/* Perform the System call with R0=1 and R1=regs */
 
@@ -75,5 +75,5 @@ up_fullcontextrestore:
 	/* This call should not return */
 
 	bx		lr							/* Unnecessary ... will not return */
-	.size	up_fullcontextrestore, .-up_fullcontextrestore
+	.size	arm_fullcontextrestore, .-arm_fullcontextrestore
 	.end

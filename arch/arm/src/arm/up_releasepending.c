@@ -138,7 +138,7 @@ void up_release_pending(void)
 
           /* Then switch contexts */
 
-          up_fullcontextrestore(rtcb->xcp.regs);
+          arm_fullcontextrestore(rtcb->xcp.regs);
         }
     }
 }

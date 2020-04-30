@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv7-m/iar/up_fullcontextrestore.S
+ * arch/arm/src/armv7-m/iar/arm_fullcontextrestore.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,7 +28,7 @@
 #include "nvic.h"
 #include "svcall.h"
 
-	MODULE up_fullcontextrestore
+	MODULE arm_fullcontextrestore
 	SECTION .text:CODE:NOROOT(2)
 
 /************************************************************************************
@@ -39,7 +39,7 @@
  * Public Symbols
  ************************************************************************************/
 
-	PUBLIC up_fullcontextrestore
+	PUBLIC arm_fullcontextrestore
 
 /************************************************************************************
  * Macros
@@ -50,12 +50,12 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_fullcontextrestore
+ * Name: arm_fullcontextrestore
  *
  * Description:
  *   Restore the current thread context.  Full prototype is:
  *
- *   void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ *   void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
  *
  * Returned Value:
  *   None
@@ -64,7 +64,7 @@
 
 	THUMB
 
-up_fullcontextrestore:
+arm_fullcontextrestore:
 
 	/* Perform the System call with R0=1 and R1=regs */
 

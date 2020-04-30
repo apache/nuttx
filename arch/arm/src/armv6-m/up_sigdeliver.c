@@ -69,7 +69,7 @@
 void up_sigdeliver(void)
 {
   /* NOTE the "magic" guard space added to regs.  This is a little kludge
-   * because up_fullcontextrestore (called below) will do a stack-to-stack
+   * because arm_fullcontextrestore (called below) will do a stack-to-stack
    * copy an may overwrite the regs[] array contents.  Sorry.
    */
 
@@ -137,5 +137,5 @@ void up_sigdeliver(void)
    */
 
   board_autoled_off(LED_SIGNAL);
-  up_fullcontextrestore(regs);
+  arm_fullcontextrestore(regs);
 }

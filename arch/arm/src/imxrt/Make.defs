@@ -38,7 +38,7 @@ HEAD_ASRC  =
 
 # Common ARM and Cortex-M7 files
 
-CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
+CMN_ASRCS  = up_saveusercontext.S arm_fullcontextrestore.S up_switchcontext.S
 CMN_ASRCS += up_testset.S up_fetchadd.S vfork.S
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)

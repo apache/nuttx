@@ -135,7 +135,7 @@ void up_sigdeliver(void)
    * errno that is needed by the user logic (it is probably EINTR).
    *
    * I would prefer that all interrupts are disabled when
-   * up_fullcontextrestore() is called, but that may not be necessary.
+   * arm_fullcontextrestore() is called, but that may not be necessary.
    */
 
   sinfo("Resuming\n");
@@ -194,5 +194,5 @@ void up_sigdeliver(void)
   /* Then restore the correct state for this thread of execution. */
 
   board_autoled_off(LED_SIGNAL);
-  up_fullcontextrestore(regs);
+  arm_fullcontextrestore(regs);
 }

@@ -84,7 +84,7 @@
 #ifdef CONFIG_BUILD_PROTECTED
 /* SYS call 1:
  *
- * void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ * void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
  */
 
 #define SYS_context_restore       (1)
