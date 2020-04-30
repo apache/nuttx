@@ -37,7 +37,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copyarmstate
+ * Name: arm_copyarmstate
  *
  * Description:
  *    Copy the ARM portion of the register save area (omitting the floating
@@ -45,7 +45,7 @@
  *
  ****************************************************************************/
 
-void up_copyarmstate(uint32_t *dest, uint32_t *src)
+void arm_copyarmstate(uint32_t *dest, uint32_t *src)
 {
   int i;
 
