@@ -404,6 +404,14 @@ static void _notif_q_push(FAR struct gs2200m_dev_s *dev, char cid)
   dev->notif_q.wpos++;
   dev->notif_q.count++;
 
+  if (dev->pfd)
+    {
+      /* If poll() waits and cid has been pushed to the queue, notify  */
+
+      dev->pfd->revents |= POLLIN;
+      nxsem_post(dev->pfd->sem);
+    }
+
   wlinfo("+++ pushed %c count=%d \n", cid, dev->notif_q.count);
 }
 
@@ -2735,7 +2743,6 @@ static void gs2200m_irq_worker(FAR void *arg)
   enum pkt_type_e t = TYPE_ERROR;
   struct pkt_dat_s *pkt_dat;
   bool ignored = false;
-  bool pushed  = false;
   uint8_t c;
   char s_cid;
   char c_cid;
@@ -2821,7 +2828,6 @@ static void gs2200m_irq_worker(FAR void *arg)
   if (!_cid_is_set(&dev->aip_cid_bits, pkt_dat->cid))
     {
       _notif_q_push(dev, pkt_dat->cid);
-      pushed = true;
     }
 
   /* Check if the packet is CONNECT event from client */
@@ -2845,14 +2851,6 @@ static void gs2200m_irq_worker(FAR void *arg)
       /* Enable accept in progress */
 
       _enable_cid(&dev->aip_cid_bits, c_cid, true);
-    }
-
-  if (dev->pfd && pushed)
-    {
-      /* If poll() waits and cid has been pushed to the queue, notify  */
-
-      dev->pfd->revents |= POLLIN;
-      nxsem_post(dev->pfd->sem);
     }
 
 errout:
