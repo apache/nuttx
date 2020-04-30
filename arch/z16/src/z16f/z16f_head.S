@@ -26,7 +26,7 @@
 #include <nuttx/config.h>
 #include <arch/irq.h>
 #include <arch/board/board.h>
-#include "common/z16_internal.h"
+#include "z16_internal.h"
 
 /**************************************************************************
  * Pre-processor Definitions

@@ -36,7 +36,7 @@
 #  include <nuttx/spi/spi.h>
 #endif
 
-#include "common/z16_internal.h"
+#include "z16_internal.h"
 
 /************************************************************************************
  * Pre-processor Definitions

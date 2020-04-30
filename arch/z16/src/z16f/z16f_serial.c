@@ -139,36 +139,7 @@ static struct z16f_uart_s g_uart0priv =
   CONFIG_UART0_2STOP        /* stopbits2 */
 };
 
-static uart_dev_t g_uart0port =
-{
-  0,                        /* open_count */
-  false,                    /* xmitwaiting */
-  false,                    /* recvwaiting */
-#ifdef CONFIG_UART0_SERIAL_CONSOLE
-  true,                     /* isconsole */
-#else
-  false,                    /* isconsole */
-#endif
-  { 0 },                    /* closesem */
-  { 0 },                    /* xmitsem */
-  { 0 },                    /* recvsem */
-  {
-    { 0 },                  /* xmit.sem */
-    0,                      /* xmit.head */
-    0,                      /* xmit.tail */
-    CONFIG_UART0_TXBUFSIZE, /* xmit.size */
-    g_uart0txbuffer,        /* xmit.buffer */
-  },
-  {
-    { 0 },                  /* recv.sem */
-    0,                      /* recv.head */
-    0,                      /* recv.tail */
-    CONFIG_UART0_RXBUFSIZE, /* recv.size */
-    g_uart0rxbuffer,        /* recv.buffer */
-  },
-  &g_uart_ops,              /* ops */
-  &g_uart0priv,             /* priv */
-};
+static uart_dev_t g_uart0port;
 #endif
 
 #ifdef CONFIG_Z16F_UART1
@@ -186,36 +157,7 @@ static struct z16f_uart_s g_uart1priv =
   CONFIG_UART1_2STOP        /* stopbits2 */
 };
 
-static uart_dev_t g_uart1port =
-{
-  0,                        /* open_count */
-  false,                    /* xmitwaiting */
-  false,                    /* recvwaiting */
-#ifdef CONFIG_UART1_SERIAL_CONSOLE
-  true,                     /* isconsole */
-#else
-  false,                    /* isconsole */
-#endif
-  { 0 },                    /* closesem */
-  { 0 },                    /* xmitsem */
-  { 0 },                    /* recvsem */
-  {
-    { 0 },                  /* xmit.sem */
-    0,                      /* xmit.head */
-    0,                      /* xmit.tail */
-    CONFIG_UART1_TXBUFSIZE, /* xmit.size */
-    g_uart1txbuffer,        /* xmit.buffer */
-  },
-  {
-    { 0 },                  /* recv.sem */
-    0,                      /* recv.head */
-    0,                      /* recv.tail */
-    CONFIG_UART1_RXBUFSIZE, /* recv.size */
-    g_uart1rxbuffer,        /* recv.buffer */
-  },
-  &g_uart_ops,              /* ops */
-  &g_uart1priv,             /* priv */
-};
+static uart_dev_t g_uart1port;
 #endif
 
 /* Now, which one with be tty0/console and which tty1? */
@@ -709,6 +651,19 @@ void z16_earlyserialinit(void)
   regval  = getreg8(Z16F_GPIOA_AFH);
   regval &= ~0x30;
   putreg8(regval, Z16F_GPIOA_AFH);
+
+  /* Initialize the UART structure */
+
+  memset(&g_uart0port, 0, sizeof(uart_dev_t));
+#ifdef CONFIG_UART0_SERIAL_CONSOLE
+  g_uart0port.isconsole   = true;
+#endif
+  g_uart0port.xmit.size   = CONFIG_UART0_TXBUFSIZE;
+  g_uart0port.xmit.buffer = g_uart0txbuffer;
+  g_uart0port.recv.size   = CONFIG_UART0_RXBUFSIZE;
+  g_uart0port.recv.buffer = g_uart0rxbuffer;
+  g_uart0port.ops         = &g_uart_ops;
+  g_uart0port.priv        = &g_uart0priv;
 #endif
 
 #ifdef CONFIG_Z16F_UART1
@@ -721,6 +676,19 @@ void z16_earlyserialinit(void)
   regval  = getreg8(Z16F_GPIOD_AFH);
   regval &= ~0x30;
   putreg8(regval, Z16F_GPIOD_AFH);
+
+  /* Initialize the UART structure */
+
+  memset(&g_uart1port, 0, sizeof(uart_dev_t));
+#ifdef CONFIG_UART1_SERIAL_CONSOLE
+  g_uart1port.isconsole   = true;
+#endif
+  g_uart1port.xmit.size   = CONFIG_UART1_TXBUFSIZE;
+  g_uart1port.xmit.buffer = g_uart1txbuffer;
+  g_uart1port.recv.size   = CONFIG_UART1_RXBUFSIZE;
+  g_uart1port.recv.buffer = g_uart1rxbuffer;
+  g_uart1port.ops         = &g_uart_ops;
+  g_uart1port.priv        = &g_uart1priv;
 #endif
 
   /* Disable UART interrupts */
@@ -826,14 +794,6 @@ int up_putc(int ch)
 # define z16f_contxd(ch) \
   putreg8((uint8_t)(ch), Z16F_UART0_TXD)
 #endif
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions

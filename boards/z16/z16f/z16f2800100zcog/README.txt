@@ -98,6 +98,9 @@ Version 5.2.1
   There are a few outstanding build issues, but it seems close enough for
   the time being.
 
+Version 5.2.2
+  Verified April 29, 2020.  No serious compilation issues were encountered.
+
 Other Versions
 
   If you use any version of ZDS-II or if you install ZDS-II at any location
