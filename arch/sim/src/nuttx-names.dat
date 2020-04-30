@@ -53,6 +53,7 @@ memcpy         NXmemcpy
 memset         NXmemset
 mkfifo         NXmkfifo
 mktime         NXmktime
+mmap           NXmmap
 mq_close       NXmq_close
 mkdir          NXmkdir
 mount          NXmount
@@ -62,6 +63,7 @@ optarg         NXoptarg
 optind         NXoptind
 optopt         NXoptopt
 nanosleep      NXnanosleep
+perror         NXperror
 pipe           NXpipe
 poll           NXpoll
 printf         NXprintf
