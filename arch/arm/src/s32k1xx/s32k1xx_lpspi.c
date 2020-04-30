@@ -156,9 +156,9 @@ static inline
 uint32_t s32k1xx_lpspi_readword(FAR struct s32k1xx_lpspidev_s *priv);
 static inline
 void s32k1xx_lpspi_writeword(FAR struct s32k1xx_lpspidev_s *priv,
-                             uint16_t byte);
+                             uint32_t byte);
 static inline
-bool s32k1xx_lpspi_9to16bitmode(FAR struct s32k1xx_lpspidev_s *priv);
+uint16_t s32k1xx_lpspi_9to16bitmode(FAR struct s32k1xx_lpspidev_s *priv);
 static uint32_t s32k1xx_lpspi_pckfreq(uintptr_t base);
 static inline
 void s32k1xx_lpspi_set_delays(FAR struct s32k1xx_lpspidev_s *priv,
@@ -475,7 +475,7 @@ uint32_t s32k1xx_lpspi_readword(FAR struct s32k1xx_lpspidev_s *priv)
 
 static inline
 void s32k1xx_lpspi_writeword(FAR struct s32k1xx_lpspidev_s *priv,
-                             uint16_t word)
+                             uint32_t word)
 {
   /* Wait until the transmit buffer is empty */
 
@@ -488,6 +488,43 @@ void s32k1xx_lpspi_writeword(FAR struct s32k1xx_lpspidev_s *priv,
 
   s32k1xx_lpspi_putreg32(priv, S32K1XX_LPSPI_TDR_OFFSET, word);
 }
+
+/****************************************************************************
+ * Name: s32k1xx_lpspi_write_dword
+ *
+ * Description:
+ *   Write two words to SPI
+ *
+ * Input Parameters:
+ *   priv - Device-specific state data
+ *   word0, word1 - words to send
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_S32K1XX_LPSPI_DWORD
+
+static inline void s32k1xx_lpspi_write_dword(FAR struct s32k1xx_lpspidev_s
+                                            *priv,
+                                             uint32_t word0,
+                                             uint32_t word1)
+{
+  /* Wait until the transmit buffer is empty */
+
+  while ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_SR_OFFSET)
+         & LPSPI_SR_TDF) == 0)
+    {
+    }
+
+  /* Then send the words, use the FIFO */
+
+  s32k1xx_lpspi_putreg32(priv, S32K1XX_LPSPI_TDR_OFFSET, word0);
+  s32k1xx_lpspi_putreg32(priv, S32K1XX_LPSPI_TDR_OFFSET, word1);
+}
+
+#endif
 
 /****************************************************************************
  * Name: s32k1xx_lpspi_readbyte
@@ -554,30 +591,23 @@ void s32k1xx_lpspi_writebyte(FAR struct s32k1xx_lpspidev_s *priv,
  *
  * Description:
  *   Check if the SPI is operating in more then 8 bit mode
+ *   On the S32K the frame size can grow to 4096 bit/frame
  *
  * Input Parameters:
  *   priv     - Device-specific state data
  *
  * Returned Value:
- *   true: >8 bit mode-bit mode, false: <= 8-bit mode
+ *   value: frame size
  *
  ****************************************************************************/
 
-static inline
-bool s32k1xx_lpspi_9to16bitmode(FAR struct s32k1xx_lpspidev_s *priv)
+static inline uint16_t s32k1xx_lpspi_9to16bitmode(
+    FAR struct s32k1xx_lpspidev_s *priv)
 {
-  bool ret;
+  uint16_t ret;
 
-  if (((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_TCR_OFFSET) &
-        LPSPI_TCR_FRAMESZ_MASK) + 1) < 9)
-    {
-      ret = false;
-    }
-  else
-    {
-      ret = true;
-    }
-
+  ret = ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_TCR_OFFSET) &
+        LPSPI_TCR_FRAMESZ_MASK) + 1);
   return ret;
 }
 
@@ -1119,6 +1149,7 @@ static void s32k1xx_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits)
   FAR struct s32k1xx_lpspidev_s *priv = (FAR struct s32k1xx_lpspidev_s *)dev;
   uint32_t regval;
   uint32_t men;
+  int savbits = nbits;
 
   spiinfo("nbits=%d\n", nbits);
 
@@ -1151,7 +1182,8 @@ static void s32k1xx_lpspi_setbits(FAR struct spi_dev_s *dev, int nbits)
        * be faster.
        */
 
-      priv->nbits = nbits;
+      priv->nbits = savbits;    /* nbits has been clobbered... save the signed
+                                 * value. */
 
       /* Re-enable LPSPI if it was enabled previously */
 
@@ -1187,6 +1219,7 @@ static int s32k1xx_lpspi_hwfeatures(FAR struct spi_dev_s *dev,
   FAR struct s32k1xx_lpspidev_s *priv = (FAR struct s32k1xx_lpspidev_s *)dev;
   uint32_t setbits;
   uint32_t clrbits;
+  int savbits = nbits;
 
   spiinfo("features=%08x\n", features);
 
@@ -1260,6 +1293,66 @@ static uint32_t s32k1xx_lpspi_send(FAR struct spi_dev_s *dev, uint32_t wd)
 }
 
 /****************************************************************************
+ * Name: s32k1xx_lpspi_send_dword
+ *
+ * Description:
+ *   Exchange two words on SPI
+ *
+ * Input Parameters:
+ *   dev - Device-specific state data
+ *   wd0, wd1  - The word to send.  the size of the data is determined by the
+ *         number of bits selected for the SPI interface.
+ *
+ * Returned Value:
+ *   response
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_S32K1XX_LPSPI_DWORD
+
+static uint32_t s32k1xx_lpspi_send_dword(FAR struct spi_dev_s *dev,
+                                         uint32_t wd0, uint32_t wd1,
+                                         uint32_t *rw1)
+{
+  FAR struct s32k1xx_lpspidev_s *priv = (FAR struct s32k1xx_lpspidev_s *)dev;
+  uint32_t regval;
+  uint32_t ret;
+
+  DEBUGASSERT(priv && priv->spibase);
+
+  /* check if the receive buffer is empty, if not clear it */
+
+  while ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_SR_OFFSET)
+         & LPSPI_SR_RDF))
+    {
+      s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_RDR_OFFSET);
+    }
+
+  s32k1xx_lpspi_write_dword(priv, wd0, wd1);
+
+  while ((s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_SR_OFFSET)
+         & LPSPI_SR_RDF) != LPSPI_SR_RDF);
+
+  ret  = s32k1xx_lpspi_readword(priv);
+  *rw1 = s32k1xx_lpspi_readword(priv);
+
+  /* Check and clear any error flags (Reading from the SR clears the error
+   * flags).
+   */
+
+  regval = s32k1xx_lpspi_getreg32(priv, S32K1XX_LPSPI_SR_OFFSET);
+
+  spiinfo("Sent: %04" PRIx32 " %04" PRIx32 " Return: %04"
+          PRIx32 " %04" PRIx32 " Status: %02" PRIx32 "\n",
+          wd0, wd1, ret, *rw1, regval);
+
+  UNUSED(regval);
+  return ret;
+}
+
+#endif
+
+/****************************************************************************
  * Name: s32k1xx_lpspi_exchange (no DMA).  aka s32k1xx_lpspi_exchange_nodma
  *
  * Description:
@@ -1293,13 +1386,176 @@ static void s32k1xx_lpspi_exchange_nodma(FAR struct spi_dev_s *dev,
 #endif
 {
   FAR struct s32k1xx_lpspidev_s *priv = (FAR struct s32k1xx_lpspidev_s *)dev;
+  uint16_t framesize;
   DEBUGASSERT(priv && priv->spibase);
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
-  /* 8- or 16-bit mode? */
+  /* bit mode? */
 
-  if (s32k1xx_lpspi_9to16bitmode(priv))
+  framesize = s32k1xx_lpspi_9to16bitmode(priv);
+  if (framesize > 16 && framesize % 32 != 0)
+    {
+      /* 17-bit or higher, byte transfer due to padding
+       * take care of big endian mode of hardware !!
+       */
+
+      const uint8_t *src = (const uint8_t *)txbuffer;
+      uint8_t *dest = (uint8_t *) rxbuffer;
+      uint32_t word = 0x0;
+#ifdef CONFIG_S32K1XX_LPSPI_DWORD
+      uint32_t word1 = 0x0;
+      uint32_t rword1;
+      bool     dwords = false;
+#endif
+
+      while (nwords-- > 0)
+        {
+          /* Get the next word to write.  Is there a source buffer? */
+
+          if (src)
+            {
+              /* read the required number of bytes */
+
+            switch (framesize)
+              {
+#ifdef CONFIG_S32K1XX_LPSPI_DWORD
+              case 40:
+                   word = (src[0] << 24) + (src[1] << 16)
+                          + (src[2] << 8) + src[3];
+                   word1 = src[4];
+                   src += 5;
+                   dwords = true;
+                   break;
+#endif
+              default:
+                      break;
+              }
+            }
+          else
+            {
+              word = 0xffffffff;
+            }
+
+#ifdef CONFIG_S32K1XX_LPSPI_DWORD
+          /* Exchange 2 words */
+
+          if (dwords)
+            {
+              word = s32k1xx_lpspi_send_dword(dev, word, word1, &rword1);
+            }
+          else
+#endif
+            {
+              word = s32k1xx_lpspi_send(dev, word);
+            }
+
+          /* Is there a buffer to receive the return value? */
+
+          if (dest)
+            {
+            switch (framesize)
+              {
+#ifdef CONFIG_S32K1XX_LPSPI_DWORD
+              case 40:
+                   dest[0] = (word >> 24) & 0xff;
+                   dest[1] = (word >> 16) & 0xff;
+                   dest[2] = (word >>  8) & 0xff;
+                   dest[3] =  word        & 0xff;
+                   dest[4] =  rword1      & 0xff;
+                   dest += 5;
+                   break;
+#endif
+
+              default:
+
+                      break;
+            }
+          }
+        }
+    }
+  else if (framesize > 16)
+    {
+      /* 32-bit or 64 bit, word size memory transfers */
+
+      const uint32_t *src = (const uint32_t *)txbuffer;
+      uint32_t *dest = (uint32_t *) rxbuffer;
+      uint32_t word = 0x0;
+#ifdef CONFIG_S32K1XX_LPSPI_DWORD
+      uint32_t word1 = 0x0;
+      uint32_t rword1;
+      bool     dwords = false;
+#endif
+
+      while (nwords-- > 0)
+        {
+          /* Get the next word to write.  Is there a source buffer? */
+
+          if (src)
+            {
+              /* read the required number of bytes */
+
+            switch (framesize)
+              {
+              case 32:
+                   word = __builtin_bswap32(*src);
+                   src += 4;
+                   break;
+#ifdef CONFIG_S32K1XX_LPSPI_DWORD
+              case 64:
+                   word  = __builtin_bswap32(src[0]);
+                   word1 = __builtin_bswap32(src[1]);
+                   src += 8;
+                   dwords = true;
+#endif
+              default:
+                      break;
+              }
+            }
+          else
+            {
+              word = 0xffffffff;
+            }
+
+#ifdef CONFIG_S32K1XX_LPSPI_DWORD
+          /* Exchange 2 words */
+
+          if (dwords)
+            {
+              word = s32k1xx_lpspi_send_dword(dev, word, word1, &rword1);
+            }
+          else
+#endif
+            {
+            word = s32k1xx_lpspi_send(dev, word);
+            }
+
+          /* Is there a buffer to receive the return value? */
+
+          if (dest)
+            {
+            switch (framesize)
+              {
+              case 32:
+                   *dest = __builtin_bswap32(word);
+                   dest += 4;
+                   break;
+#ifdef CONFIG_S32K1XX_LPSPI_DWORD
+              case 64:
+                   dest[0] = __builtin_bswap32(word);
+                   dest[1] = __builtin_bswap32(rword1);
+                   dest += 8;
+                   break;
+#endif
+
+              default:
+
+                      break;
+            }
+          }
+        }
+    }
+  else if (framesize > 8)
     {
       /* 16-bit mode */
 
@@ -1313,7 +1569,9 @@ static void s32k1xx_lpspi_exchange_nodma(FAR struct spi_dev_s *dev,
 
           if (src)
             {
-              word = *src++;
+              word = __builtin_bswap16(*src++);
+
+              /* read the required number of bytes */
             }
           else
             {
@@ -1328,7 +1586,7 @@ static void s32k1xx_lpspi_exchange_nodma(FAR struct spi_dev_s *dev,
 
           if (dest)
             {
-              *dest++ = word;
+              *dest++ = __builtin_bswap16(word);
             }
         }
     }
