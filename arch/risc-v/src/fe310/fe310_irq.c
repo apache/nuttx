@@ -48,8 +48,8 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "riscv_internal.h"
+#include "riscv_arch.h"
 
 #include "fe310.h"
 
@@ -65,7 +65,7 @@ void up_irqinitialize(void)
 {
   /* Disable Machine interrupts */
 
- up_irq_save();
+  up_irq_save();
 
   /* Disable all global interrupts */
 

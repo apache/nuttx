@@ -32,7 +32,7 @@
 #include <nuttx/clock.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "riscv_arch.h"
 
 #include "litex.h"
 #include "litex_clockconfig.h"
