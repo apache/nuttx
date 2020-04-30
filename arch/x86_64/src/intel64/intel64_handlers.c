@@ -136,8 +136,14 @@ uint64_t *isr_handler(uint64_t *regs, uint64_t irq)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   board_autoled_on(LED_INIRQ);
-  PANIC(); /* Doesn't return */
-  return regs;               /* To keep the compiler happy */
+
+  /* Doesn't return */
+
+  PANIC();
+
+  /* To keep the compiler happy */
+
+  return regs;
 #else
 
   DEBUGASSERT(g_current_regs == NULL);
@@ -191,8 +197,14 @@ uint64_t *irq_handler(uint64_t *regs, uint64_t irq_no)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   board_autoled_on(LED_INIRQ);
-  PANIC(); /* Doesn't return */
-  return regs;               /* To keep the compiler happy */
+
+  /* Doesn't return */
+
+  PANIC();
+
+  /* To keep the compiler happy */
+
+  return regs;
 #else
   uint64_t *ret;
   int irq;

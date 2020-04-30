@@ -231,7 +231,7 @@
 # define IOAPIC_REG_ID          0x00       /* Register index: ID */
 # define IOAPIC_REG_VER         0x01       /* Register index: version */
 # define IOAPIC_REG_TABLE       0x10       /* Redirection table base */
-#  define IOAPIC_PIN_DISABLE           (1 << 16)  /* Disable */
+# define IOAPIC_PIN_DISABLE     (1 << 16)  /* Disable */
 
 /* PIC related Definitions */
 
@@ -257,8 +257,9 @@
 /* IDT data structures ******************************************************
  *
  * The Interrupt Descriptor Table (IDT) is a data structure used by the x86
- * architecture to implement an interrupt vector table. The IDT is used by the
- * processor to determine the correct response to interrupts and exceptions.
+ * architecture to implement an interrupt vector table. The IDT is used by
+ * the processor to determine the correct response to interrupts and
+ * exceptions.
  */
 
 begin_packed_struct struct idt_entry_s
@@ -286,7 +287,8 @@ begin_packed_struct struct idt_ptr_s
  *
  * The Global Descriptor Table (GDT) is a data structure used by the x86
  * architecture to implement segments and privilege levels. The GDT is used
- * by the processor to determine current privilege level and memory access right.
+ * by the processor to determine current privilege level and memory access
+ * right.
  */
 
 begin_packed_struct struct gdt_entry_s
@@ -321,8 +323,8 @@ begin_packed_struct struct gdt_ptr_s
 /* IST data structures ******************************************************
  *
  * The Interrupt Stack Table (GDT) is a data structure used by the x86-64
- * architecture to automatically switch stack on interrupt and privilege change.
- * It allows setting up to 7 different stack for interrupts.
+ * architecture to automatically switch stack on interrupt and privilege
+ * change. It allows setting up to 7 different stack for interrupts.
  */
 
 begin_packed_struct struct ist_s
@@ -342,7 +344,7 @@ begin_packed_struct struct ist_s
   uint64_t reserved3;            /* reserved */
   uint64_t reserved4;            /* reserved */
   uint16_t reserved5;            /* reserved */
-  uint16_t IOPB_offset;          /* IOPB_offset */
+  uint16_t IOPB_OFFSET;          /* IOPB_offset */
 } end_packed_struct;
 
 /****************************************************************************
@@ -560,7 +562,9 @@ extern volatile uint8_t gdt64_low;
 extern volatile uint8_t gdt64_ist_low;
 extern volatile uint8_t gdt64_low_end;
 
-/* The actual address of the page table and gdt/ist after mapping the kernel in high address*/
+/* The actual address of the page table and gdt/ist after mapping the kernel
+ * in high address
+ */
 
 extern volatile uint64_t *pdpt;
 extern volatile uint64_t *pd;
