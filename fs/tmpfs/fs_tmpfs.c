@@ -1322,7 +1322,7 @@ static int tmpfs_foreach(FAR struct tmpfs_directory_s *tdo,
            * action will be to delete the directory.
            */
 
-          ret = tmpfs_foreach(next, tmpfs_free_callout, NULL);
+          ret = tmpfs_foreach(next, callout, arg);
           if (ret < 0)
             {
               return -ECANCELED;
