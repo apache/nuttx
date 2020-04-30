@@ -190,7 +190,10 @@ static void up_ist_init(void)
   tss_h = (((uintptr_t)ist64 >> 32) & 0xffffffff);  /* High address */
 
   gdt64[X86_GDT_ISTL_SEL_NUM] = tss_l;
-  gdt64[X86_GDT_ISTH_SEL_NUM] = *((struct gdt_entry_s *)&tss_h);
+
+  /* memcpy used to handle type punning compiler warning */
+
+  memcpy((void *)&gdt64[X86_GDT_ISTH_SEL_NUM], (void *)&tss_h, sizeof(gdt64[0]));
 
   ist64->IST1 = (uintptr_t)g_interrupt_stack_end;
   ist64->IST2 = (uintptr_t)g_isr_stack_end;
