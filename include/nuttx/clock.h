@@ -436,7 +436,7 @@ int clock_systimespec(FAR struct timespec *ts);
  *   Return load measurement data for the select PID.
  *
  * Input Parameters:
- *   pid - The task ID of the thread of interest.  pid == 0 is the IDLE thread.
+ *   pid - The task ID of the thread of interest. pid == 0 is IDLE thread.
  *   cpuload - The location to return the CPU load
  *
  * Returned Value:

@@ -51,7 +51,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
+
 /* These interfaces are not available to kernel code */
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
@@ -75,6 +77,7 @@
 #endif
 
 /* Standard Definitions *****************************************************/
+
 /* aio_cancel return values
  *
  * AIO_ALLDONE     - Indicates that none of the requested operations could

@@ -239,8 +239,8 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
           /* Set up pointers */
 
-          stream->fs_bufend  = &stream->fs_bufstart[CONFIG_STDIO_BUFFER_SIZE];
-          stream->fs_bufpos  = stream->fs_bufstart;
+          stream->fs_bufend = &stream->fs_bufstart[CONFIG_STDIO_BUFFER_SIZE];
+          stream->fs_bufpos = stream->fs_bufstart;
           stream->fs_bufread = stream->fs_bufstart;
 
 #ifdef CONFIG_STDIO_LINEBUFFER

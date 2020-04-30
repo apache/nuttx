@@ -57,7 +57,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static btn_buttonset_t btn_supported(FAR const struct btn_lowerhalf_s *lower);
+static btn_buttonset_t
+btn_supported(FAR const struct btn_lowerhalf_s *lower);
 static btn_buttonset_t btn_buttons(FAR const struct btn_lowerhalf_s *lower);
 static void btn_enable(FAR const struct btn_lowerhalf_s *lower,
                        btn_buttonset_t press, btn_buttonset_t release,

@@ -55,7 +55,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static userled_set_t userled_supported(FAR const struct userled_lowerhalf_s *lower);
+static userled_set_t
+userled_supported(FAR const struct userled_lowerhalf_s *lower);
 static void userled_led(FAR const struct userled_lowerhalf_s *lower,
                         int led, bool ledon);
 static void userled_ledset(FAR const struct userled_lowerhalf_s *lower,
@@ -86,7 +87,8 @@ static const struct userled_lowerhalf_s g_userled_lower =
  *
  ****************************************************************************/
 
-static userled_set_t userled_supported(FAR const struct userled_lowerhalf_s *lower)
+static userled_set_t
+userled_supported(FAR const struct userled_lowerhalf_s *lower)
 {
   ledinfo("BOARD_NLEDS: %02x\n", BOARD_NLEDS);
   return (userled_set_t)((1 << BOARD_NLEDS) - 1);

@@ -117,7 +117,7 @@ static void group_assign_grpid(FAR struct task_group_s *group)
 
   for (; ; )
     {
-      /* Increment the ID counter.  This is global data so be extra paranoid. */
+      /* Increment the ID counter. It is global data so be extra paranoid. */
 
       flags = enter_critical_section();
       grpid = ++g_grpid_counter;
@@ -193,8 +193,8 @@ static inline void group_inherit_identity(FAR struct task_group_s *group)
  *   function is called as part of the task creation sequence.  The structure
  *   allocated and zeroed, but otherwise uninitialized.  The full creation
  *   of the group of a two step process:  (1) First, this function allocates
- *   group structure early in the task creation sequence in order to provide a
- *   group container, then (2) group_initialize() is called to set up the
+ *   group structure early in the task creation sequence in order to provide
+ *   a group container, then (2) group_initialize() is called to set up the
  *   group membership.
  *
  * Input Parameters:
@@ -226,8 +226,8 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
     }
 
 #if CONFIG_NFILE_STREAMS > 0 && defined(CONFIG_MM_KERNEL_HEAP)
-  /* If this group is being created for a privileged thread, then all elements
-   * of the group must be created for privileged access.
+  /* If this group is being created for a privileged thread, then all
+   * elements of the group must be created for privileged access.
    */
 
   if ((ttype & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
@@ -337,7 +337,7 @@ int group_initialize(FAR struct task_tcb_s *tcb)
 #ifdef HAVE_GROUP_MEMBERS
   /* Allocate space to hold GROUP_INITIAL_MEMBERS members of the group */
 
-  group->tg_members = (FAR pid_t *)kmm_malloc(GROUP_INITIAL_MEMBERS * sizeof(pid_t));
+  group->tg_members = kmm_malloc(GROUP_INITIAL_MEMBERS * sizeof(pid_t));
   if (!group->tg_members)
     {
       kmm_free(group);
