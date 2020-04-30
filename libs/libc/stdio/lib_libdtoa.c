@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_libdtoa.c
+ * libs/libc/stdio/lib_libdtoa.c
  *
  * This file was ported to NuttX by Yolande Cates.
  *
@@ -271,7 +271,9 @@ static void lib_dtoa(FAR struct lib_outstream_s *obj, int fmt, int prec,
         {
           obj->put(obj, '.');
 
-          /* Always print at least one digit to the right of the decimal point. */
+          /* Always print at least one digit to the right of the decimal
+           * point.
+           */
 
           if (notrailing)
             {

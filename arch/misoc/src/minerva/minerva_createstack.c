@@ -185,9 +185,9 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       top_of_stack = (uint32_t) tcb->stack_alloc_ptr + stack_size - 4;
 
       /* The MINERVA stack must be aligned at word (4 byte) boundaries; for
-       * floating point use, the stack must be aligned to 8-byte addresses. If
-       * necessary top_of_stack must be rounded down to the next boundary to
-       * meet these alignment requirements.
+       * floating point use, the stack must be aligned to 8-byte addresses.
+       * If necessary top_of_stack must be rounded down to the next boundary
+       * to meet these alignment requirements.
        */
 
       top_of_stack = STACK_ALIGN_DOWN(top_of_stack);

@@ -63,7 +63,7 @@
 #  define HAVE_GROUP_MEMBERS  1
 #endif
 
-/* In any event, we don't need group members if support for pthreads is disabled */
+/* We don't need group members if support for pthreads is disabled */
 
 #ifdef CONFIG_DISABLE_PTHREAD
 #  undef HAVE_GROUP_MEMBERS

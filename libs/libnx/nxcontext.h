@@ -45,26 +45,26 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <limits.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/streams.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The NuttX NX library an be build in two modes: (1) as a standard, C-library
- * that can be used by normal, user-space applications, or (2) as a special,
- * kernel-mode NX-library only used within the OS.  If NuttX is not being
- * built as separated kernel- and user-space modules, then only the first
- * mode is supported.
+/* The NuttX NX library can be build in two modes: (1) as a standard, C-
+ * library that can be used by normal, user-space applications, or (2) as
+ * a special, kernel-mode NX-library only used within the OS.  If NuttX is
+ * not being built as separated kernel- and user-space modules, then only
+ * the first mode is supported.
  */
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
 
-#  include <nuttx/kmalloc.h>
-
-   /* Domain-specific allocations */
+  /* Domain-specific allocations */
 
 #  define lib_malloc(s)     kmm_malloc(s)
 #  define lib_zalloc(s)     kmm_zalloc(s)
@@ -72,7 +72,7 @@
 #  define lib_memalign(p,s) kmm_memalign(p,s)
 #  define lib_free(p)       kmm_free(p)
 
-   /* User-accessible allocations */
+  /* User-accessible allocations */
 
 #  define lib_umalloc(s)    kumm_malloc(s)
 #  define lib_uzalloc(s)    kumm_zalloc(s)
@@ -80,16 +80,15 @@
 #  define lib_ufree(p)      kumm_free(p)
 
 #else
-#  include <stdlib.h>
 
-   /* Domain-specific allocations */
+  /* Domain-specific allocations */
 
 #  define lib_malloc(s)     malloc(s)
 #  define lib_zalloc(s)     zalloc(s)
 #  define lib_realloc(p,s)  realloc(p,s)
 #  define lib_free(p)       free(p)
 
-   /* User-accessible allocations */
+  /* User-accessible allocations */
 
 #  define lib_umalloc(s)    malloc(s)
 #  define lib_uzalloc(s)    zalloc(s)

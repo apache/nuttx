@@ -118,19 +118,19 @@
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
 #ifdef CONFIG_TLS
-   /* Add the size of the TLS information structure */
+  /* Add the size of the TLS information structure */
 
-   stack_size += sizeof(struct tls_info_s);
+  stack_size += sizeof(struct tls_info_s);
 
-   /* The allocated stack size must not exceed the maximum possible for the
-    * TLS feature.
-    */
+  /* The allocated stack size must not exceed the maximum possible for the
+   * TLS feature.
+   */
 
-   DEBUGASSERT(stack_size <= TLS_MAXSTACK);
-   if (stack_size >= TLS_MAXSTACK)
-     {
-       stack_size = TLS_MAXSTACK;
-     }
+  DEBUGASSERT(stack_size <= TLS_MAXSTACK);
+  if (stack_size >= TLS_MAXSTACK)
+    {
+      stack_size = TLS_MAXSTACK;
+    }
 #endif
 
   /* Is there already a stack allocated of a different size?  Because of
@@ -229,8 +229,10 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * water marks.
        */
 
-      stack_base = (uintptr_t)tcb->stack_alloc_ptr + sizeof(struct tls_info_s);
-      stack_size = tcb->adj_stack_size - sizeof(struct tls_info_s);
+      stack_base = (uintptr_t)tcb->stack_alloc_ptr +
+                   sizeof(struct tls_info_s);
+      stack_size = tcb->adj_stack_size -
+                   sizeof(struct tls_info_s);
       up_stack_color((FAR void *)stack_base, stack_size);
 
 #endif /* CONFIG_STACK_COLORATION */

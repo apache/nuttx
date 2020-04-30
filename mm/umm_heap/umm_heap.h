@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/addrenv.h>
+#include <nuttx/userspace.h>
 #include <nuttx/mm/mm.h>
 
 /****************************************************************************
@@ -56,7 +58,6 @@
  * ARCH_DATA_RESERVE_SIZE
  */
 
-#  include <nuttx/addrenv.h>
 #  define USR_HEAP (&ARCH_DATA_RESERVE->ar_usrheap)
 
 #elif defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
@@ -65,7 +66,6 @@
  * structure from the userspace interface.
  */
 
-#  include <nuttx/userspace.h>
 #  define USR_HEAP (USERSPACE->us_heap)
 
 #else
@@ -73,9 +73,5 @@
 
 #  define USR_HEAP &g_mmheap
 #endif
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 #endif /* __MM_UMM_HEAP_UMM_HEAP_H */
