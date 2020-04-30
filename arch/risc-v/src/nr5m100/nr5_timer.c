@@ -51,18 +51,19 @@
 #include <nuttx/arch.h>
 
 #include "chip.h"
-#include "up_internal.h"
-#include "up_arch.h"
+#include "riscv_internal.h"
+#include "riscv_arch.h"
 
 #include "nr5.h"
 
 /************************************************************************************
  * Private Types
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
 
-/* This module then only compiles if there are enabled timers that are not intended for
- * some other purpose.
+/* This module then only compiles if there are enabled timers that are not intended
+ * for some other purpose.
  */
 
 #if defined(CONFIG_NR5_TIMER0) || defined(CONFIG_NR5_TIMER1) || defined(CONFIG_NR5_TIMER2) || \
@@ -331,7 +332,11 @@ static int nr5_timer_setmode(FAR struct nr5_timer_dev_s *dev, nr5_timer_mode_t m
 
       case NR5_TIMER_MODE_UPDOWN:
         val |= ATIM_CR1_CENTER1;
-        // Our default: Interrupts are generated on compare, when counting down
+
+        /* Our default: Interrupts are generated on compare, when counting
+         * down
+         */
+
         break;
 
       case NR5_TIMER_MODE_PULSE:

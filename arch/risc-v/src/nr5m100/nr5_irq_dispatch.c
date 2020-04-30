@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/risc-v/src/nr5m100/nr5_irq_dispatch.c
  *
  *   Copyright (C) 2016 Ken Pettit. All rights reserved.
@@ -33,7 +33,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -49,8 +49,8 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "riscv_arch.h"
+#include "riscv_internal.h"
 
 #include "group/group.h"
 
@@ -76,8 +76,9 @@ volatile uint32_t * g_current_regs;
 
 uint32_t * irq_dispatch_all(uint32_t *regs, uint32_t irqmask)
 {
-  int next, mask;
-  mask = irqmask & 0xFFFF;
+  int next;
+  int mask;
+  mask = irqmask & 0xffff;
 
   board_autoled_on(LED_INIRQ);
 
@@ -97,43 +98,44 @@ uint32_t * irq_dispatch_all(uint32_t *regs, uint32_t irqmask)
 
   next = up_lsbenc(mask);
   while (next != -1)
-  {
-    /* Deliver the IRQ */
+    {
+      /* Deliver the IRQ */
 
-    irq_dispatch(next, regs);
+      irq_dispatch(next, regs);
 
-    /* Clear the IRQ from the mask */
+      /* Clear the IRQ from the mask */
 
-    mask &= !(1 << next);
-    next = up_lsbenc(mask);
+      mask &= !(1 << next);
+      next = up_lsbenc(mask);
 
 #if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
-    /* Check for a context switch.  If a context switch occurred, then
-     * g_current_regs will have a different value than it did on entry.  If an
-     * interrupt level context switch has occurred, then restore the floating
-     * point state and the establish the correct address environment before
-     * returning from the interrupt.
-     */
-    if (regs != g_current_regs)
-      {
-#ifdef CONFIG_ARCH_FPU
-        /* Restore floating point registers */
+      /* Check for a context switch.  If a context switch occurred, then
+       * g_current_regs will have a different value than it did on entry.
+       * If an interrupt level context switch has occurred, then restore the
+       * floating point state and the establish the correct address
+       * environment before returning from the interrupt.
+       */
 
-        up_restorefpu((uint32_t *)g_current_regs);
+      if (regs != g_current_regs)
+        {
+#ifdef CONFIG_ARCH_FPU
+          /* Restore floating point registers */
+
+          up_restorefpu((uint32_t *)g_current_regs);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
-        /* Make sure that the address environment for the previously
-         * running task is closed down gracefully (data caches dump,
-         * MMU flushed) and set up the address environment for the new
-         * thread at the head of the ready-to-run list.
-         */
+          /* Make sure that the address environment for the previously
+           * running task is closed down gracefully (data caches dump,
+           * MMU flushed) and set up the address environment for the new
+           * thread at the head of the ready-to-run list.
+           */
 
-        group_addrenv(NULL);
+          group_addrenv(NULL);
 #endif
-      }
+        }
 #endif
-  }
+    }
 
 #endif
 

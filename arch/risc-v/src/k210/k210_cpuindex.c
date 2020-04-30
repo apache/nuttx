@@ -41,7 +41,7 @@
 #include <stdint.h>
 #include <nuttx/arch.h>
 
-#include "up_arch.h"
+#include "riscv_arch.h"
 
 #ifdef CONFIG_SMP
 

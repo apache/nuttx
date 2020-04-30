@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
-#include "up_internal.h"
+#include "riscv_internal.h"
 #include "chip.h"
 
 /****************************************************************************
@@ -157,7 +157,7 @@
 #define GPIO_PIN23            (23 << GPIO_PIN_SHIFT)
 
 /****************************************************************************
- * Public Functions
+ * Public Functions Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__

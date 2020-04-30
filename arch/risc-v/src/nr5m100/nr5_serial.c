@@ -62,8 +62,8 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "riscv_arch.h"
+#include "riscv_internal.h"
 
 #include "nr5_config.h"
 #include "chip.h"
@@ -72,6 +72,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* If we are not using the serial driver for the console, then we still must
  * provide some minimal implementation of up_putc.
  */
@@ -132,7 +133,7 @@
 
 struct up_dev_s
 {
-  uintptr_t uartbase; /* Base address of UART registers */
+  uintptr_t uartbase;  /* Base address of UART registers */
   uint32_t  baud;      /* Configured baud */
   uint8_t   irqrx;     /* RX IRQ associated with this UART (for enable) */
   uint8_t   irqtx;     /* TX IRQ associated with this UART (for enable) */
@@ -147,7 +148,8 @@ struct up_dev_s
 /* Low-level helpers */
 
 static inline uint32_t up_serialin(struct up_dev_s *priv, int offset);
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value);
+static inline void up_serialout(struct up_dev_s *priv, int offset,
+                                uint32_t value);
 static void up_restoreuartint(struct uart_dev_s *dev, uint8_t im);
 static void up_disableuartint(struct uart_dev_s *dev, uint8_t *im);
 
@@ -227,7 +229,7 @@ static uart_dev_t g_uart1port =
   {
     .size    = CONFIG_UART1_TXBUFSIZE,
     .buffer  = g_uart1txbuffer,
-   },
+  },
   .ops       = &g_uart_ops,
   .priv      = &g_uart1priv,
 };
@@ -250,7 +252,8 @@ static inline uint32_t up_serialin(struct up_dev_s *priv, int offset)
  * Name: up_serialout
  ****************************************************************************/
 
-static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t value)
+static inline void up_serialout(struct up_dev_s *priv, int offset,
+                                uint32_t value)
 {
   putreg32(value, priv->uartbase + offset);
 }
@@ -263,7 +266,9 @@ static void up_restoreuartint(struct uart_dev_s *dev, uint8_t im)
 {
   irqstate_t flags;
 
-  /* Re-enable/re-disable interrupts corresponding to the state of bits in im */
+  /* Re-enable/re-disable interrupts corresponding to the state of bits
+   * in im
+   */
 
   flags = enter_critical_section();
   up_rxint(dev, RX_ENABLED(im));
@@ -282,9 +287,10 @@ static void up_disableuartint(struct uart_dev_s *dev, uint8_t *im)
 
   flags = enter_critical_section();
   if (im)
-   {
-     *im = priv->im;
-   }
+    {
+      *im = priv->im;
+    }
+
   up_restoreuartint(dev, 0);
   leave_critical_section(flags);
 }
@@ -301,12 +307,10 @@ static void up_disableuartint(struct uart_dev_s *dev, uint8_t *im)
 static int up_setup(struct uart_dev_s *dev)
 {
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-//  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
   /* Configure the UART as an RS-232 UART */
 
-  //pic32mx_uartconfigure(priv->uartbase, priv->baud, priv->parity,
-  //                      priv->bits, priv->stopbits2);
 #endif
 
 #ifdef CONFIG_ARCH_IRQPRIO
@@ -329,7 +333,9 @@ static int up_setup(struct uart_dev_s *dev)
 
 static void up_shutdown(struct uart_dev_s *dev)
 {
-  //struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+#if 0
+  struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+#endif
 
   /* Disable interrupts */
 
@@ -337,21 +343,24 @@ static void up_shutdown(struct uart_dev_s *dev)
 
   /* Reset hardware and disable Rx and Tx */
 
-  //nr5_uartreset(priv->uartbase);
+#if 0
+  nr5_uartreset(priv->uartbase);
+#endif
 }
 
 /****************************************************************************
  * Name: up_attach
  *
  * Description:
- *   Configure the UART to operation in interrupt driven mode.  This method is
- *   called when the serial port is opened.  Normally, this is just after the
+ *   Configure the UART to operation in interrupt driven mode.  This method
+ *   is called when the serial port is opened.  Normally, this is just after
  *   the setup() method is called, however, the serial console may operate in
  *   a non-interrupt driven mode during the boot phase.
  *
  *   RX and TX interrupts are not enabled by the attach method (unless the
  *   hardware supports multiple levels of interrupt enabling).  The RX and TX
- *   interrupts are not enabled until the txint() and rxint() methods are called.
+ *   interrupts are not enabled until the txint() and rxint() methods are
+ *   called.
  *
  ****************************************************************************/
 
@@ -377,7 +386,7 @@ static int up_attach(struct uart_dev_s *dev)
  *
  * Description:
  *   Detach UART interrupts.  This method is called when the serial port is
- *   closed normally just before the shutdown method is called.  The exception
+ *   closed normally just before the shutdown method is called. The exception
  *   is the serial console which is never shutdown.
  *
  ****************************************************************************/
@@ -450,8 +459,8 @@ static int up_interrupt(int irq, void *context, FAR void *arg)
       /* Handle outgoing, transmit bytes  The RT FIFO is configured to
        * interrupt only when the TX FIFO is empty.  There are not many
        * options on trigger TX interrupts.  The FIFO-not-full might generate
-       * better through-put but with a higher interrupt rate.  FIFO-empty should
-       * lower the interrupt rate but result in a burstier output.  If
+       * better through-put but with a higher interrupt rate.  FIFO-empty
+       * should lower the interrupt rate but result in a burstier output.  If
        * you change this, You will probably need to change the conditions for
        * clearing the pending TX interrupt below.
        *
@@ -537,8 +546,6 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
          */
 
         priv->baud = cfgetispeed(termiosp);
-        //pic32mx_uartconfigure(priv->uartbase, priv->baud, priv->parity,
-        //                      priv->bits, priv->stopbits2);
       }
       break;
 
@@ -597,8 +604,8 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
   im = priv->im;
   if (enable)
     {
-      /* Receive an interrupt when their is anything in the Rx data register (or an Rx
-       * timeout occurs).
+      /* Receive an interrupt when their is anything in the Rx data register
+       * (or an Rx timeout occurs).
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -611,6 +618,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
       up_disable_irq(priv->irqrx);
       DISABLE_RX(im);
     }
+
   priv->im = im;
   leave_critical_section(flags);
 }
@@ -629,7 +637,8 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 
   /* Return true is data is available in the receive data buffer */
 
-  return (up_serialin(priv, NR5_UART_STATUS_REG_OFFSET) & NR5_UART_STATUS_RX_AVAIL) != 0;
+  return (up_serialin(priv, NR5_UART_STATUS_REG_OFFSET) &
+          NR5_UART_STATUS_RX_AVAIL) != 0;
 }
 
 /****************************************************************************
@@ -703,7 +712,8 @@ static bool up_txready(struct uart_dev_s *dev)
 
   /* Return TRUE if the Transmit buffer register is not full */
 
-  return (up_serialin(priv, NR5_UART_STATUS_REG_OFFSET) & NR5_UART_STATUS_TX_EMPTY) != 0;
+  return (up_serialin(priv, NR5_UART_STATUS_REG_OFFSET) &
+          NR5_UART_STATUS_TX_EMPTY) != 0;
 }
 
 /****************************************************************************
@@ -720,7 +730,8 @@ static bool up_txempty(struct uart_dev_s *dev)
 
   /* Return TRUE if the Transmit shift register is empty */
 
-  return (up_serialin(priv, NR5_UART_STATUS_REG_OFFSET) & NR5_UART_STATUS_TX_EMPTY) != 0;
+  return (up_serialin(priv, NR5_UART_STATUS_REG_OFFSET) &
+          NR5_UART_STATUS_TX_EMPTY) != 0;
 }
 
 /****************************************************************************

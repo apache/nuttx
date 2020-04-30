@@ -46,7 +46,7 @@
 #include <stdbool.h>
 
 #include <arch/irq.h>
-#include "up_internal.h"
+#include "riscv_internal.h"
 #include "chip.h"
 #include "fe310_lowputc.h"
 

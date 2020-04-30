@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
-#include "up_internal.h"
+#include "riscv_internal.h"
 
 #ifdef CONFIG_SMP
 

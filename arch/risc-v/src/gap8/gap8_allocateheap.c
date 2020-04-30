@@ -46,8 +46,8 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "riscv_arch.h"
+#include "riscv_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -72,7 +72,8 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   /* These values come from GAP8.ld */
 
-  extern uint8_t *_heap_start, *_heap_end;
+  extern uint8_t *_heap_start;
+  extern uint8_t *_heap_end;
   uint32_t hstart = (uint32_t)&_heap_start;
   uint32_t hend = (uint32_t)&_heap_end;
 
@@ -80,16 +81,16 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   *heap_size = hend - hstart;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: up_addregion
  *
  * Description:
  *   RAM may be added in non-contiguous chunks.  This routine adds all chunks
  *   that may be used for heap.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void up_addregion(void)
 {
-  // TODO: add L1 memories
+  /* TODO: add L1 memorie */
 }
