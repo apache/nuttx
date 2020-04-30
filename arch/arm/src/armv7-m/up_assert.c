@@ -159,7 +159,7 @@ static inline void up_registerdump(void)
     {
       /* No.. capture user registers by hand */
 
-      up_saveusercontext(s_last_regs);
+      arm_saveusercontext(s_last_regs);
       regs = s_last_regs;
     }
 

@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv7-m/gnu/up_saveusercontext.S
+ * arch/arm/src/armv7-m/gnu/arm_saveusercontext.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -38,7 +38,7 @@
 
 	.syntax	unified
 	.thumb
-	.file	"up_saveusercontext.S"
+	.file	"arm_saveusercontext.S"
 
 /************************************************************************************
  * Macros
@@ -49,12 +49,12 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_saveusercontext
+ * Name: arm_saveusercontext
  *
  * Description:
  *   Save the current thread context.  Full prototype is:
  *
- *   int  up_saveusercontext(uint32_t *saveregs);
+ *   int  arm_saveusercontext(uint32_t *saveregs);
  *
  * Returned Value:
  *   0: Normal return
@@ -64,9 +64,9 @@
 
 	.text
 	.thumb_func
-	.globl	up_saveusercontext
-	.type	up_saveusercontext, function
-up_saveusercontext:
+	.globl	arm_saveusercontext
+	.type	arm_saveusercontext, function
+arm_saveusercontext:
 
 	/* Perform the System call with R0=0 and R1=regs */
 
@@ -84,5 +84,5 @@ up_saveusercontext:
 	str		r3, [r2, #0]
 	bx		lr						/* "normal" return with r0=0 or
 									 * context switch with r0=1 */
-	.size	up_saveusercontext, .-up_saveusercontext
+	.size	arm_saveusercontext, .-arm_saveusercontext
 	.end

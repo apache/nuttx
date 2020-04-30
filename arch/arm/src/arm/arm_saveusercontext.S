@@ -1,5 +1,5 @@
 /**************************************************************************
- * arch/arm/src/arm/up_saveusercontext.S
+ * arch/arm/src/arm/arm_saveusercontext.S
  *
  *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -69,13 +69,13 @@
  **************************************************************************/
 
 /**************************************************************************
- * Name: up_saveusercontext
+ * Name: arm_saveusercontext
  **************************************************************************/
 
 	.text
-	.globl	up_saveusercontext
-	.type	up_saveusercontext, function
-up_saveusercontext:
+	.globl	arm_saveusercontext
+	.type	arm_saveusercontext, function
+arm_saveusercontext:
 	/* On entry, a1 (r0) holds address of struct xcptcontext.
 	 * Offset to the user region.
 	 */
@@ -115,4 +115,4 @@ up_saveusercontext:
 
 	mov	r0, #0		/* Return value == 0 */
 	mov	pc, lr		/* Return */
-	.size	up_saveusercontext, . - up_saveusercontext
+	.size	arm_saveusercontext, . - arm_saveusercontext
