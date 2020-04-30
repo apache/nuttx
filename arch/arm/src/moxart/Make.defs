@@ -40,7 +40,7 @@ HEAD_ASRC = moxart_head.S
 
 CMN_ASRCS  = up_saveusercontext.S arm_fullcontextrestore.S up_vectors.S
 CMN_ASRCS += up_nommuhead.S vfork.S
-CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c up_copyfullstate.c
+CMN_CSRCS  = up_allocateheap.c up_assert.c up_blocktask.c arm_copyfullstate.c
 CMN_CSRCS += up_createstack.c up_dataabort.c up_mdelay.c up_udelay.c
 CMN_CSRCS += up_exit.c up_initialstate.c up_initialize.c
 CMN_CSRCS += up_interruptcontext.c up_prefetchabort.c up_releasepending.c

@@ -96,7 +96,7 @@ void up_sigdeliver(void)
 
   /* Save the return state on the stack. */
 
-  up_copyfullstate(regs, rtcb->xcp.regs);
+  arm_copyfullstate(regs, rtcb->xcp.regs);
 
 #ifdef CONFIG_SMP
   /* In the SMP case, up_schedule_sigaction(0) will have incremented

@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copyfullstate
+ * Name: arm_copyfullstate
  *
  * Description:
  *    Copy the entire register save area (including the floating point
@@ -58,7 +58,7 @@
  *
  ****************************************************************************/
 
-void up_copyfullstate(uint32_t *dest, uint32_t *src)
+void arm_copyfullstate(uint32_t *dest, uint32_t *src)
 {
   int i;
 
