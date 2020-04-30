@@ -87,7 +87,7 @@ void up_sigdeliver(void)
 
   /* Save the return state on the stack. */
 
-  up_copyfullstate(regs, rtcb->xcp.regs);
+  arm_copyfullstate(regs, rtcb->xcp.regs);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then make sure that interrupts are enabled.  Signal handlers must always

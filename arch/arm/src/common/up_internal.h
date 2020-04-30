@@ -93,7 +93,7 @@
 #  if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV7M_LAZYFPU)
 #    define up_savestate(regs)  up_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
 #  else
-#    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
+#    define up_savestate(regs)  arm_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
 #  endif
 #  define up_restorestate(regs) (CURRENT_REGS = regs)
 
@@ -110,7 +110,7 @@
 #  if defined(CONFIG_ARCH_FPU)
 #    define up_savestate(regs)  up_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
 #  else
-#    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
+#    define up_savestate(regs)  arm_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
 #  endif
 #  define up_restorestate(regs) (CURRENT_REGS = regs)
 
@@ -129,9 +129,9 @@
 #  if defined(CONFIG_ARCH_FPU)
 #    define up_savestate(regs)  up_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
 #  else
-#    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
+#    define up_savestate(regs)  arm_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
 #  endif
-#  define up_restorestate(regs) up_copyfullstate((uint32_t*)CURRENT_REGS, regs)
+#  define up_restorestate(regs) arm_copyfullstate((uint32_t*)CURRENT_REGS, regs)
 
 #endif
 
@@ -294,7 +294,7 @@ void arm_boot(void);
 
 /* Context switching */
 
-void up_copyfullstate(uint32_t *dest, uint32_t *src);
+void arm_copyfullstate(uint32_t *dest, uint32_t *src);
 #ifdef CONFIG_ARCH_FPU
 void up_copyarmstate(uint32_t *dest, uint32_t *src);
 #endif

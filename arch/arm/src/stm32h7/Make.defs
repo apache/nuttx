@@ -52,7 +52,7 @@ CMN_ASRCS += up_setjmp.S
 endif
 endif
 
-CMN_CSRCS  = up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c
+CMN_CSRCS  = up_assert.c up_blocktask.c arm_copyfullstate.c up_createstack.c
 CMN_CSRCS += up_doirq.c up_exit.c up_hardfault.c  up_initialize.c
 CMN_CSRCS += up_initialstate.c up_interruptcontext.c up_mdelay.c up_memfault.c
 CMN_CSRCS += up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
