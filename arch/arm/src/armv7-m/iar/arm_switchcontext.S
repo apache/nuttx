@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv7-m/gnu/up_switchcontext.S
+ * arch/arm/src/armv7-m/iar/arm_switchcontext.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,6 +28,9 @@
 #include "nvic.h"
 #include "svcall.h"
 
+	MODULE arm_switchcontext
+	SECTION .text:CODE:NOROOT(2)
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -36,9 +39,7 @@
  * Public Symbols
  ************************************************************************************/
 
-	.syntax	unified
-	.thumb
-	.file	"up_switchcontext.S"
+	PUBLIC arm_switchcontext
 
 /************************************************************************************
  * Macros
@@ -49,23 +50,22 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_switchcontext
+ * Name: arm_switchcontext
  *
  * Description:
  *   Save the current thread context and restore the specified context.
  *   Full prototype is:
  *
- *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ *   void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
  *
  * Returned Value:
  *   None
  *
  ************************************************************************************/
 
-	.thumb_func
-	.globl	up_switchcontext
-	.type	up_switchcontext, function
-up_switchcontext:
+	THUMB
+
+arm_switchcontext:
 
 	/* Perform the System call with R0=1, R1=saveregs, R2=restoreregs */
 
@@ -77,5 +77,5 @@ up_switchcontext:
 	/* We will get here only after the rerturn from the context switch */
 
 	bx		lr
-	.size	up_switchcontext, .-up_switchcontext
-	.end
+
+	END

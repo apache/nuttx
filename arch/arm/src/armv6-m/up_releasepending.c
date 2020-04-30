@@ -120,9 +120,9 @@ void up_release_pending(void)
            * ready to run list.
            */
 
-          up_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
+          arm_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
 
-          /* up_switchcontext forces a context switch to the task at the
+          /* arm_switchcontext forces a context switch to the task at the
            * head of the ready-to-run list.  It does not 'return' in the
            * normal sense.  When it does return, it is because the blocked
            * task is again ready to run and has execution priority.

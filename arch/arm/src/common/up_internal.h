@@ -301,7 +301,7 @@ void arm_copyarmstate(uint32_t *dest, uint32_t *src);
 void up_decodeirq(uint32_t *regs);
 int  arm_saveusercontext(uint32_t *saveregs);
 void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
-void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 
 /* Signal handling **********************************************************/
 

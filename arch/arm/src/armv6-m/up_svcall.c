@@ -199,7 +199,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
 
       /* R0=SYS_switch_context:  This a switch context command:
        *
-       *   void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+       *   void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
        *
        * At this point, the following values are saved in context:
        *

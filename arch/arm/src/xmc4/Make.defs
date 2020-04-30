@@ -38,7 +38,7 @@ HEAD_ASRC =
 CMN_UASRCS =
 CMN_UCSRCS =
 
-CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S up_switchcontext.S
+CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
 CMN_ASRCS += up_testset.S up_fetchadd.S vfork.S
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
