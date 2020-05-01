@@ -60,6 +60,11 @@ CONFIG_ARCH_BOARD := $(patsubst "%",%,$(strip $(CONFIG_ARCH_BOARD)))
 OBJEXT ?= .o
 LIBEXT ?= .a
 
+# This define is passed as EXTRAFLAGS for kernel-mode builds.  It is also passed
+# during PASS1 (but not PASS2) context and depend targets.
+
+KDEFINE = ${shell $(DEFINE) "$(CC)" __KERNEL__}
+
 # DELIM - Path segment delimiter character
 #
 # Depends on this settings defined in board-specific defconfig file installed

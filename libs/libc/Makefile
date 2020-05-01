@@ -35,12 +35,6 @@
 
 -include $(TOPDIR)/Make.defs
 
-# CFLAGS
-
-ifneq ($(CONFIG_BUILD_FLAT),y)
-  KDEFINE = ${shell $(DEFINE) "$(CC)" __KERNEL__}
-endif
-
 # Sources and paths
 
 ASRCS =
