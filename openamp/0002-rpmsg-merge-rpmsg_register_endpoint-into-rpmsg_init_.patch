@@ -1,4 +1,4 @@
-From c4c3577a3d7a1e957c84f86caa64b7e076b9db89 Mon Sep 17 00:00:00 2001
+From d58fa6ab189fded40786e7d025036a1c16c773c4 Mon Sep 17 00:00:00 2001
 From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Fri, 24 Apr 2020 03:40:56 +0800
 Subject: [PATCH 02/10] rpmsg: merge rpmsg_register_endpoint into
@@ -108,7 +108,7 @@ index f63c958..9c46970 100644
  static inline struct rpmsg_endpoint *
  rpmsg_get_ept_from_addr(struct rpmsg_device *rdev, uint32_t addr)
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index cf3ec21..ff1226b 100644
+index 8165216..4dea4c0 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
 @@ -636,10 +636,9 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,

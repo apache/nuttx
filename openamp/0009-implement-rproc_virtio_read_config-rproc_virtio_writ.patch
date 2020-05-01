@@ -1,4 +1,4 @@
-From 1d94cd9ae8345543fa93c12cdc11ccbc2ca5b127 Mon Sep 17 00:00:00 2001
+From 9bbc2dcd43f6107a7e0b1eec16bab10e533329f2 Mon Sep 17 00:00:00 2001
 From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Thu, 3 Jan 2019 14:20:48 +0800
 Subject: [PATCH 09/10] implement
@@ -14,7 +14,7 @@ Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
  3 files changed, 47 insertions(+), 8 deletions(-)
 
 diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
-index a2dd504..e7c670e 100644
+index e6e5fa2..4d3093b 100644
 --- a/lib/include/openamp/rpmsg_virtio.h
 +++ open-amp/lib/include/openamp/rpmsg_virtio.h
 @@ -86,6 +86,20 @@ rpmsg_virtio_get_features(struct rpmsg_virtio_device *rvdev)
@@ -39,7 +39,7 @@ index a2dd504..e7c670e 100644
  rpmsg_virtio_create_virtqueues(struct rpmsg_virtio_device *rvdev,
  			       int flags, unsigned int nvqs,
 diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
-index 7085554..a93e0d9 100644
+index 55c8ea5..9c8376e 100644
 --- a/lib/include/openamp/virtio.h
 +++ open-amp/lib/include/openamp/virtio.h
 @@ -100,6 +100,7 @@ struct virtio_device {
@@ -51,10 +51,10 @@ index 7085554..a93e0d9 100644
  	struct virtio_vring_info *vrings_info;
  };
 diff --git a/lib/remoteproc/remoteproc_virtio.c open-amp/lib/remoteproc/remoteproc_virtio.c
-index e495d81..6a3b28b 100644
+index aafc48c..7505f64 100644
 --- a/lib/remoteproc/remoteproc_virtio.c
 +++ open-amp/lib/remoteproc/remoteproc_virtio.c
-@@ -126,20 +126,43 @@ static uint32_t rproc_virtio_negotiate_features(struct virtio_device *vdev,
+@@ -128,20 +128,43 @@ static uint32_t rproc_virtio_negotiate_features(struct virtio_device *vdev,
  static void rproc_virtio_read_config(struct virtio_device *vdev,
  				     uint32_t offset, void *dst, int length)
  {
@@ -106,7 +106,7 @@ index e495d81..6a3b28b 100644
  }
  
  static void rproc_virtio_reset_device(struct virtio_device *vdev)
-@@ -220,6 +243,7 @@ rproc_virtio_create_vdev(unsigned int role, unsigned int notifyid,
+@@ -222,6 +245,7 @@ rproc_virtio_create_vdev(unsigned int role, unsigned int notifyid,
  	vdev->notifyid = notifyid;
  	vdev->role = role;
  	vdev->reset_cb = rst_cb;

@@ -1,4 +1,4 @@
-From bdadd236975ba4b4d9011d3b86d528d305476cb2 Mon Sep 17 00:00:00 2001
+From 27026fc4c781a9dbd328059884b9b94ff39ad6b9 Mon Sep 17 00:00:00 2001
 From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Fri, 15 Mar 2019 01:51:03 +0800
 Subject: [PATCH 06/10] remoteproc_mmap support va to pa/da conversion
@@ -10,16 +10,16 @@ Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
 ---
  .../load_fw/zynqmp_r5_lcm_rproc_example.c     |  69 +++++------
  apps/machine/zynq7/platform_info.c            |  16 +--
- apps/machine/zynq7/zynq_a9_rproc.c            |  40 +++----
+ apps/machine/zynq7/zynq_a9_rproc.c            |  40 ++++---
  apps/machine/zynqmp/platform_info.c           |   6 +-
  apps/machine/zynqmp/zynqmp_linux_r5_proc.c    |  40 ++++---
  apps/machine/zynqmp_r5/platform_info.c        |  16 +--
- apps/machine/zynqmp_r5/zynqmp_r5_a53_rproc.c  |  38 +++---
- .../linux/machine/generic/platform_info.c     |  52 ++++----
- lib/include/openamp/remoteproc.h              |  19 +--
- lib/remoteproc/remoteproc.c                   | 112 ++++++++++--------
+ apps/machine/zynqmp_r5/zynqmp_r5_a53_rproc.c  |  38 +++----
+ .../linux/machine/generic/platform_info.c     |  52 +++++----
+ lib/include/openamp/remoteproc.h              |  19 ++--
+ lib/remoteproc/remoteproc.c                   | 107 ++++++++++--------
  lib/remoteproc/rsc_table_parser.c             |   2 +-
- 11 files changed, 212 insertions(+), 198 deletions(-)
+ 11 files changed, 209 insertions(+), 196 deletions(-)
 
 diff --git a/apps/examples/load_fw/zynqmp_r5_lcm_rproc_example.c open-amp/apps/examples/load_fw/zynqmp_r5_lcm_rproc_example.c
 index 26a09e5..e224631 100644
@@ -429,10 +429,10 @@ index ee25368..ef5299c 100644
  
  static int zynqmp_r5_a53_proc_notify(struct remoteproc *rproc, uint32_t id)
 diff --git a/apps/system/linux/machine/generic/platform_info.c open-amp/apps/system/linux/machine/generic/platform_info.c
-index 5743c5c..66d15c1 100644
+index 0b0f721..748fd83 100644
 --- a/apps/system/linux/machine/generic/platform_info.c
 +++ open-amp/apps/system/linux/machine/generic/platform_info.c
-@@ -319,39 +319,43 @@ static void linux_proc_remove(struct remoteproc *rproc)
+@@ -300,39 +300,43 @@ static void linux_proc_remove(struct remoteproc *rproc)
  	}
  }
  
@@ -497,7 +497,7 @@ index 5743c5c..66d15c1 100644
  }
  
  static int linux_proc_notify(struct remoteproc *rproc, uint32_t id)
-@@ -420,7 +424,7 @@ static struct remoteproc *
+@@ -391,7 +395,7 @@ static struct remoteproc *
  platform_create_proc(int proc_index, int rsc_index)
  {
  	struct remoteproc_priv *prproc;
@@ -506,7 +506,7 @@ index 5743c5c..66d15c1 100644
  	int rsc_size;
  	int ret;
  	metal_phys_addr_t pa;
-@@ -449,8 +453,8 @@ platform_create_proc(int proc_index, int rsc_index)
+@@ -420,8 +424,8 @@ platform_create_proc(int proc_index, int rsc_index)
  
  	/* Mmap resource table */
  	pa = RSC_MEM_PA;
@@ -560,7 +560,7 @@ index a83aa12..b34cb1a 100644
  /**
   * remoteproc_set_rsc_table
 diff --git a/lib/remoteproc/remoteproc.c open-amp/lib/remoteproc/remoteproc.c
-index 057edc6..27fcdb4 100644
+index 5afb40c..34b8cb8 100644
 --- a/lib/remoteproc/remoteproc.c
 +++ open-amp/lib/remoteproc/remoteproc.c
 @@ -295,13 +295,14 @@ struct metal_io_region *
@@ -702,18 +702,17 @@ index 057edc6..27fcdb4 100644
  }
  
  int remoteproc_load(struct remoteproc *rproc, const char *path,
-@@ -529,8 +542,8 @@ int remoteproc_load(struct remoteproc *rproc, const char *path,
+@@ -529,8 +542,7 @@ int remoteproc_load(struct remoteproc *rproc, const char *path,
  			img_data = NULL;
  			/* get the I/O region from remoteproc */
  			pa = METAL_BAD_PHYS;
--			(void)remoteproc_mmap(rproc, &pa, &da, nmemsize, 0, &io);
--			if (pa == METAL_BAD_PHYS || io == NULL) {
+-			(void)remoteproc_mmap(rproc, &pa, &da, nmemsize, 0,
+-					      &io);
 +			remoteproc_mmap(rproc, &pa, &da, NULL, nmemsize, 0, &io);
-+			if (pa == METAL_BAD_PHYS || !io) {
+ 			if (pa == METAL_BAD_PHYS || !io) {
  				metal_log(METAL_LOG_ERROR,
  					  "load failed, no mapping for 0x%llx.\r\n",
- 					  da);
-@@ -599,8 +612,9 @@ int remoteproc_load(struct remoteproc *rproc, const char *path,
+@@ -600,8 +612,9 @@ int remoteproc_load(struct remoteproc *rproc, const char *path,
  
  		metal_log(METAL_LOG_DEBUG,
  			  "%s, update resource table\r\n", __func__);
@@ -725,31 +724,27 @@ index 057edc6..27fcdb4 100644
  		if (rsc_table) {
  			size_t rsc_io_offset;
  
-@@ -759,8 +773,8 @@ int remoteproc_load_noblock(struct remoteproc *rproc,
+@@ -760,7 +773,7 @@ int remoteproc_load_noblock(struct remoteproc *rproc,
  		if (da != RPROC_LOAD_ANYADDR) {
  			/* get the I/O region from remoteproc */
  			*pa = METAL_BAD_PHYS;
 -			(void)remoteproc_mmap(rproc, pa, &da, *nmlen, 0, io);
--			if (*pa == METAL_BAD_PHYS || io == NULL) {
 +			remoteproc_mmap(rproc, pa, &da, NULL, *nmlen, 0, io);
-+			if (*pa == METAL_BAD_PHYS || !io) {
+ 			if (*pa == METAL_BAD_PHYS || !io) {
  				metal_log(METAL_LOG_ERROR,
  					  "load failed, no mapping for 0x%llx.\r\n",
- 					  da);
-@@ -784,9 +798,9 @@ int remoteproc_load_noblock(struct remoteproc *rproc,
+@@ -785,8 +798,8 @@ int remoteproc_load_noblock(struct remoteproc *rproc,
  				ret = -RPROC_ENOMEM;
  				goto error1;
  			}
 -			rsc_table = remoteproc_mmap(rproc, NULL, &rsc_da,
 -						    rsc_size, 0, io);
--			if (*io == NULL) {
 +			remoteproc_mmap(rproc, NULL, &rsc_da,
 +					&rsc_table, rsc_size, 0, io);
-+			if (!*io) {
+ 			if (!*io) {
  				metal_log(METAL_LOG_ERROR,
  					  "load failed: failed to mmap rsc\r\n");
- 				metal_free_memory(lrsc_table);
-@@ -923,7 +937,7 @@ remoteproc_create_virtio(struct remoteproc *rproc,
+@@ -924,7 +937,7 @@ remoteproc_create_virtio(struct remoteproc *rproc,
  		metal_phys_addr_t da;
  		unsigned int num_descs, align;
  		struct metal_io_region *io;
@@ -758,7 +753,7 @@ index 057edc6..27fcdb4 100644
  		size_t size;
  		int ret;
  
-@@ -933,7 +947,7 @@ remoteproc_create_virtio(struct remoteproc *rproc,
+@@ -934,7 +947,7 @@ remoteproc_create_virtio(struct remoteproc *rproc,
  		num_descs = vring_rsc->num;
  		align = vring_rsc->align;
  		size = vring_size(num_descs, align);
@@ -768,7 +763,7 @@ index 057edc6..27fcdb4 100644
  			goto err1;
  		ret = rproc_virtio_init_vring(vdev, i, notifyid,
 diff --git a/lib/remoteproc/rsc_table_parser.c open-amp/lib/remoteproc/rsc_table_parser.c
-index 184a463..816a0ee 100644
+index e43fa72..0bfd163 100644
 --- a/lib/remoteproc/rsc_table_parser.c
 +++ open-amp/lib/remoteproc/rsc_table_parser.c
 @@ -109,7 +109,7 @@ int handle_carve_out_rsc(struct remoteproc *rproc, void *rsc)

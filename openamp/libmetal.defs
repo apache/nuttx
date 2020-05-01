@@ -76,7 +76,6 @@ libmetal.zip:
 	$(Q) wget https://github.com/OpenAMP/libmetal/archive/v$(VERSION).zip -O libmetal.zip
 	$(Q) unzip -o libmetal.zip
 	$(Q) mv libmetal-$(VERSION) libmetal
-	$(Q) patch -p0 < 0001-nuttx-change-sched_kfree-to-metal_free_memory.patch
 
 .libmetal_headers: libmetal.zip
 	$(eval headers := $(wildcard libmetal/lib/compiler/gcc/*.h))

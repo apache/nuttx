@@ -41,7 +41,7 @@ CSRCS =
 VPATH := $(SRCDIR)
 DEPPATH = --dep-path .
 
-VERSION ?= 2020.01.0
+VERSION ?= 2020.04.0
 
 include libmetal.defs
 include open-amp.defs

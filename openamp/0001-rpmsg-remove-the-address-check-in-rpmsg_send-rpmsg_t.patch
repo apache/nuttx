@@ -1,4 +1,4 @@
-From aca01202ec47984ea90d3904560b973976cab1e5 Mon Sep 17 00:00:00 2001
+From 5bc0ae0942fa9a4b9d321e31445457c31c888530 Mon Sep 17 00:00:00 2001
 From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Fri, 24 Apr 2020 01:44:31 +0800
 Subject: [PATCH 01/10] rpmsg: remove the address check in

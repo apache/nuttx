@@ -1,4 +1,4 @@
-From 373d773c188920088af1673867de5cfed12ea4de Mon Sep 17 00:00:00 2001
+From ca34df45f5d4893be223346b06cc75f370452386 Mon Sep 17 00:00:00 2001
 From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Fri, 24 Apr 2020 01:33:12 +0800
 Subject: [PATCH 03/10] rpmsg: shouldn't allocate 0-1023 address in

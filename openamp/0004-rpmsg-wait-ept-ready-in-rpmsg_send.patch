@@ -1,4 +1,4 @@
-From 2a82b3350bc5eb44d6ffd66da6e3bae6d15ec84c Mon Sep 17 00:00:00 2001
+From 8a55f0f3c2fec8c817ad579b070040ee8058c536 Mon Sep 17 00:00:00 2001
 From: ligd <liguiding@pinecone.net>
 Date: Wed, 20 Feb 2019 11:36:57 +0800
 Subject: [PATCH 04/10] rpmsg: wait ept ready in rpmsg_send
@@ -99,7 +99,7 @@ index 3403240..7000453 100644
  }
  #endif
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index ff1226b..17f2998 100644
+index 4dea4c0..44b46d4 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
 @@ -8,7 +8,6 @@
