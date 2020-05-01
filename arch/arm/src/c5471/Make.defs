@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-HEAD_ASRC = up_nommuhead.S
+HEAD_ASRC = arm_nommuhead.S
 
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S vfork.S
 

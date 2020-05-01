@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-r/up_fetchadd.S
+ * arch/arm/src/armv7-r/arm_fetchadd.S
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

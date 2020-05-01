@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/gnu/up_fetchadd.S
+ * arch/arm/src/armv7-m/iar/arm_fetchadd.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,15 +24,25 @@
 
 #include <nuttx/config.h>
 
-	.syntax		unified
-	.thumb
-	.file	"up_fetchadd.S"
+	MODULE	up_testset
+	SECTION	.text:CODE:NOROOT(2)
+
+/****************************************************************************
+ * Public Symbols
+ ****************************************************************************/
+
+	PUBLIC	up_fetchadd32
+	PUBLIC	up_fetchsub32
+	PUBLIC	up_fetchadd16
+	PUBLIC	up_fetchsub16
+	PUBLIC	up_fetchadd8
+	PUBLIC	up_fetchsub8
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-	.text
+	THUMB
 
 /****************************************************************************
  * Name: up_fetchadd32
@@ -51,22 +61,17 @@
  *
  ****************************************************************************/
 
-	.globl	up_fetchadd32
-	.type	up_fetchadd32, %function
-
 up_fetchadd32:
 
-1:
 	ldrex	r2, [r0]			/* Fetch the value to be incremented */
 	add		r2, r2, r1			/* Add the addend */
 
 	strex	r3, r2, [r0]		/* Attempt to save the result */
 	teq		r3, #0				/* r3 will be 1 if strex failed */
-	bne		1b					/* Failed to lock... try again */
+	bne		up_fetchadd32		/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the incremented value */
 	bx		lr					/* Successful! */
-	.size	up_fetchadd32, . - up_fetchadd32
 
 /****************************************************************************
  * Name: up_fetchsub32
@@ -85,22 +90,17 @@ up_fetchadd32:
  *
  ****************************************************************************/
 
-	.globl	up_fetchsub32
-	.type	up_fetchsub32, %function
-
 up_fetchsub32:
 
-1:
 	ldrex	r2, [r0]			/* Fetch the value to be decremented */
 	sub		r2, r2, r1			/* Subtract the subtrahend */
 
 	strex	r3, r2, [r0]		/* Attempt to save the result */
 	teq		r3, #0				/* r3 will be 1 if strex failed */
-	bne		1b					/* Failed to lock... try again */
+	bne		up_fetchsub32		/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the decremented value */
 	bx		lr					/* Successful! */
-	.size	up_fetchsub32, . - up_fetchsub32
 
 /****************************************************************************
  * Name: up_fetchadd16
@@ -119,22 +119,17 @@ up_fetchsub32:
  *
  ****************************************************************************/
 
-	.globl	up_fetchadd16
-	.type	up_fetchadd16, %function
-
 up_fetchadd16:
 
-1:
 	ldrexh	r2, [r0]			/* Fetch the value to be incremented */
 	add		r2, r2, r1			/* Add the addend */
 
 	strexh	r3, r2, [r0]		/* Attempt to save the result */
 	teq		r3, #0				/* r3 will be 1 if strexh failed */
-	bne		1b					/* Failed to lock... try again */
+	bne		up_fetchadd16		/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the incremented value */
 	bx		lr					/* Successful! */
-	.size	up_fetchadd16, . - up_fetchadd16
 
 /****************************************************************************
  * Name: up_fetchsub16
@@ -153,12 +148,8 @@ up_fetchadd16:
  *
  ****************************************************************************/
 
-	.globl	up_fetchsub16
-	.type	up_fetchsub16, %function
-
 up_fetchsub16:
 
-1:
 	ldrexh	r2, [r0]			/* Fetch the value to be decremented */
 	sub		r2, r2, r1			/* Subtract the subtrahend */
 
@@ -166,11 +157,10 @@ up_fetchsub16:
 
 	strexh	r3, r2, [r0]		/* Attempt to save the result */
 	teq		r3, #0				/* r3 will be 1 if strexh failed */
-	bne		1b					/* Failed to lock... try again */
+	bne		up_fetchsub16		/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the decremented value */
 	bx		lr					/* Successful! */
-	.size	up_fetchsub16, . - up_fetchsub16
 
 /****************************************************************************
  * Name: up_fetchadd8
@@ -189,22 +179,17 @@ up_fetchsub16:
  *
  ****************************************************************************/
 
-	.globl	up_fetchadd8
-	.type	up_fetchadd8, %function
-
 up_fetchadd8:
 
-1:
 	ldrexb	r2, [r0]			/* Fetch the value to be incremented */
 	add		r2, r2, r1			/* Add the addend */
 
 	strexb	r3, r2, [r0]		/* Attempt to save the result */
 	teq		r3, #0				/* r3 will be 1 if strexb failed */
-	bne		1b					/* Failed to lock... try again */
+	bne		up_fetchadd8		/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the incremented value */
 	bx		lr					/* Successful! */
-	.size	up_fetchadd8, . - up_fetchadd8
 
 /****************************************************************************
  * Name: up_fetchsub8
@@ -223,20 +208,16 @@ up_fetchadd8:
  *
  ****************************************************************************/
 
-	.globl	up_fetchsub8
-	.type	up_fetchsub8, %function
-
 up_fetchsub8:
 
-1:
 	ldrexb	r2, [r0]			/* Fetch the value to be decremented */
 	sub		r2, r2, r1			/* Subtract the subtrahend */
 
 	strexb	r3, r2, [r0]		/* Attempt to save the result */
 	teq		r3, #0				/* r3 will be 1 if strexb failed */
-	bne		1b					/* Failed to lock... try again */
+	bne		up_fetchsub8		/* Failed to lock... try again */
 
 	mov		r0, r2				/* Return the decremented value */
 	bx		lr					/* Successful! */
-	.size	up_fetchsub8, . - up_fetchsub8
-	.end
+
+	END

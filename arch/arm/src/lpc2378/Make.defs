@@ -40,7 +40,7 @@
 
 HEAD_ASRC = lpc23xx_head.S
 
-CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S up_vectors.S
+CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_vectors.S
 CMN_ASRCS += vfork.S
 CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c arm_copyfullstate.c
 CMN_CSRCS += arm_createstack.c arm_dataabort.c arm_mdelay.c arm_udelay.c

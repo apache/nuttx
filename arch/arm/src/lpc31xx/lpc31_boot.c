@@ -134,7 +134,8 @@ static const struct section_mapping_s g_section_mapping[] =
  ************************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags)
+static inline void up_setlevel1entry(uint32_t paddr, uint32_t vaddr,
+                                     uint32_t mmuflags)
 {
   uint32_t *pgtable = (uint32_t *)PGTABLE_BASE_VADDR;
   uint32_t  index   = vaddr >> 20;
@@ -174,7 +175,8 @@ static inline void up_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr,
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static void up_setupmappings(void)
 {
-  int i, j;
+  int i;
+  int j;
 
   for (i = 0; i < NMAPPINGS; i++)
     {
@@ -288,16 +290,18 @@ static void up_copyvectorblock(void)
    * read only, then temporarily mark the mapping write-able (non-buffered).
    */
 
-#if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
+#if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && \
+     defined(CONFIG_PAGING)
   up_vectorpermissions(MMU_L2_VECTRWFLAGS);
 #endif
 
-  /* Copy the vectors into ISRAM at the address that will be mapped to the vector
-   * address:
+  /* Copy the vectors into ISRAM at the address that will be mapped to the
+   * vector address:
    *
    *   LPC31_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
    *   LPC31_VECTOR_VSRAM - Virtual address of vector table in SRAM
-   *   LPC31_VECTOR_VADDR - Virtual address of vector table (0x00000000 or 0xffff0000)
+   *   LPC31_VECTOR_VADDR - Virtual address of vector table (0x00000000 or
+   *                        0xffff0000)
    */
 
   src  = (uint32_t *)&_vector_start;
@@ -331,7 +335,7 @@ static void up_copyvectorblock(void)
  * Name: arm_boot
  *
  * Description:
- *   Complete boot operations started in up_head.S
+ *   Complete boot operations started in arm_head.S
  *
  ************************************************************************************/
 

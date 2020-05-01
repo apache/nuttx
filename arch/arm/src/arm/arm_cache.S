@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/up_cache.S
+ * arch/arm/src/arm/arm_cache.S
  *
  *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,7 +41,7 @@
  *
  ****************************************************************************/
 
-	.file	"up_cache.S"
+	.file	"arm_cache.S"
 
 /****************************************************************************
  * Included Files

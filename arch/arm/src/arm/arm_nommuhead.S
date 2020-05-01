@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/up_nommuhead.S
+ * arch/arm/src/arm/arm_nommuhead.S
  *
  *   Copyright (C) 2007, 2009-2010, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

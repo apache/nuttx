@@ -36,7 +36,7 @@
 
 HEAD_ASRC = lpc214x_head.S
 
-CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S up_vectors.S
+CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_vectors.S
 CMN_ASRCS += vfork.S
 
 CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c arm_copyfullstate.c
