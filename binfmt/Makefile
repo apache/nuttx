@@ -47,6 +47,7 @@ BINFMT_ASRCS  =
 BINFMT_CSRCS  = binfmt_globals.c binfmt_initialize.c binfmt_register.c binfmt_unregister.c
 BINFMT_CSRCS += binfmt_loadmodule.c binfmt_unloadmodule.c binfmt_execmodule.c
 BINFMT_CSRCS += binfmt_exec.c binfmt_copyargv.c binfmt_dumpmodule.c
+BINFMT_CSRCS += dummy.c
 
 ifeq ($(CONFIG_BINFMT_LOADABLE),y)
 BINFMT_CSRCS += binfmt_exit.c
