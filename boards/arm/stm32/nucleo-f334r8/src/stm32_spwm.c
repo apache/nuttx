@@ -216,16 +216,16 @@ struct spwm_s
 #ifdef CONFIG_NUCLEOF334R8_SPWM_USE_TIM1
   FAR struct stm32_tim_dev_s *tim;
 #endif
-  float waveform[SAMPLES_NUM];        /* Waveform samples */
-  float phase_step;                   /* Waveform phase step */
-  float waveform_freq;                /* Waveform frequency */
-  uint16_t cmp[SAMPLES_NUM];          /* PWM TIM compare table */
-  uint16_t per;                       /* PWM TIM period */
-  uint16_t samples;                   /* Modulation waveform samples num */
-  uint16_t phase_shift[PHASES_NUM];   /* Phase offset */
+  float waveform[SAMPLES_NUM];               /* Waveform samples */
+  float phase_step;                          /* Waveform phase step */
+  float waveform_freq;                       /* Waveform frequency */
+  uint16_t cmp[SAMPLES_NUM];                 /* PWM TIM compare table */
+  uint16_t per;                              /* PWM TIM period */
+  uint16_t samples;                          /* Modulation waveform samples num */
+  uint16_t phase_shift[PHASES_NUM];          /* Phase offset */
   volatile uint16_t sample_now[PHASES_NUM];  /* Current sample number for
                                               * phase */
-  uint8_t phases;                     /* Number of PWM phases */
+  uint8_t phases;                            /* Number of PWM phases */
 };
 
 /****************************************************************************
@@ -763,7 +763,7 @@ static int spwm_tim6_setup(FAR struct spwm_s *spwm)
 
   freq = spwm->samples * spwm->waveform_freq;
   per = BOARD_TIM6_FREQUENCY / freq;
-  if (per > 0xFFFF)
+  if (per > 0xffff)
     {
       printf("ERROR: can not achieve TIM6 frequency\n");
       ret = -1;
