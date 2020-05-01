@@ -47,6 +47,11 @@ ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
 ARCHINCLUDESXX = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
 ARCHSCRIPT =
 
+ifeq ($(CONFIG_HOST_MACOS),y)
+  ARCHDEFINES  += -DCKSUM_SELF=$(if $<,$(word 1,$(shell cksum $<)))
+  ARCHINCLUDES += -include $(TOPDIR)/boards/sim/sim/sim/include/dummy.h
+endif
+
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
 ARCHCPUFLAGS += -fno-common
