@@ -337,12 +337,12 @@ void up_irqinitialize(void)
    * vector table that requires special initialization.
    *
    * But even in this case NVIC_VECTAB has to point to the initial table
-   * because up_ramvec_initialize() initializes RAM table from table
+   * because arm_ramvec_initialize() initializes RAM table from table
    * pointed by NVIC_VECTAB register.
    */
 
 #ifdef CONFIG_ARCH_RAMVECTORS
-  up_ramvec_initialize();
+  arm_ramvec_initialize();
 #endif
 
   /* Set all interrupts (and exceptions) to the default priority */

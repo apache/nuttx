@@ -478,7 +478,7 @@ void up_irqinitialize(void)
    * vector table that requires special initialization.
    */
 
-  up_ramvec_initialize();
+  arm_ramvec_initialize();
 #endif
 
   /* Set all interrupts (and exceptions) to the default priority */

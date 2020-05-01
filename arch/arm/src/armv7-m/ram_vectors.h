@@ -69,14 +69,14 @@ extern up_vector_t g_ram_vectors[ARMV7M_VECTAB_SIZE]
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ramvec_initialize
+ * Name: arm_ramvec_initialize
  *
  * Description:
  *   Copy vectors to RAM an configure the NVIC to use the RAM vectors.
  *
  ****************************************************************************/
 
-void up_ramvec_initialize(void);
+void arm_ramvec_initialize(void);
 
 /****************************************************************************
  * Name: exception_common
@@ -89,7 +89,7 @@ void up_ramvec_initialize(void);
 void exception_common(void);
 
 /****************************************************************************
- * Name: up_ramvec_attach
+ * Name: arm_ramvec_attach
  *
  * Description:
  *   Configure the ram vector table so that IRQ number 'irq' will be
@@ -97,7 +97,7 @@ void exception_common(void);
  *
  ****************************************************************************/
 
-int up_ramvec_attach(int irq, up_vector_t vector);
+int arm_ramvec_attach(int irq, up_vector_t vector);
 
 #endif /* CONFIG_ARCH_RAMVECTORS */
 #endif /* __ARCH_ARM_SRC_COMMON_ARMV7_M_RAM_VECTORS_H */

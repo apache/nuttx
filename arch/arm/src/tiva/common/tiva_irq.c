@@ -430,7 +430,7 @@ void up_irqinitialize(void)
    * vector table that requires special initialization.
    */
 
-  up_ramvec_initialize();
+  arm_ramvec_initialize();
 #endif
 
 #ifdef CONFIG_TIVA_RAMVBAR

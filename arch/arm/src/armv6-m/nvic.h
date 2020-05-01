@@ -380,7 +380,7 @@ extern "C"
  ****************************************************************************************************/
 
 /****************************************************************************************************
- * Function:  up_dumpnvic
+ * Function:  arm_dumpnvic
  *
  * Description:
  *   Dump all NVIC and SYSCON registers along with a user message.
@@ -388,9 +388,9 @@ extern "C"
  ****************************************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-void up_dumpnvic(FAR const char *msg);
+void arm_dumpnvic(FAR const char *msg);
 #else
-#  define up_dumpnvic(m)
+#  define arm_dumpnvic(m)
 #endif
 
 #undef EXTERN
