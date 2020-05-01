@@ -136,25 +136,11 @@ wireless$(DELIM)libwireless$(LIBEXT): context
 staging$(DELIM)libwireless$(LIBEXT): wireless$(DELIM)libwireless$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
-$(ARCH_SRC)$(DELIM)libarch$(LIBEXT): context
-	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
-
-staging$(DELIM)libarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libarch$(LIBEXT)
-	$(Q) $(call INSTALL_LIB,$<,$@)
-
-libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libdsp TOPDIR="$(TOPDIR)" libdsp$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
-
-staging$(DELIM)libdsp$(LIBEXT): libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT)
-	$(Q) $(call INSTALL_LIB,$<,$@)
-
 openamp$(DELIM)libopenamp$(LIBEXT): context
 	$(Q) $(MAKE) -C openamp TOPDIR="$(TOPDIR)" libopenamp$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
 
 staging$(DELIM)libopenamp$(LIBEXT): openamp$(DELIM)libopenamp$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
-
-# Special case
 
 syscall$(DELIM)libstubs$(LIBEXT): context
 	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libstubs$(LIBEXT) # EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
@@ -162,51 +148,19 @@ syscall$(DELIM)libstubs$(LIBEXT): context
 staging$(DELIM)libstubs$(LIBEXT): syscall$(DELIM)libstubs$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
+# Special case
+
+$(ARCH_SRC)$(DELIM)libarch$(LIBEXT): context
+ifeq ($(CONFIG_BUILD_FLAT),y)
+	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT) EXTRAFLAGS="$(KDEFINE) $(EXTRAFLAGS)"
+else
+	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libarch$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+endif
+
+staging$(DELIM)libarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libarch$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
 # Possible user-mode builds
-
-libs$(DELIM)libc$(DELIM)libuc$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libc TOPDIR="$(TOPDIR)" libuc$(LIBEXT)
-
-staging$(DELIM)libuc$(LIBEXT): libs$(DELIM)libc$(DELIM)libuc$(LIBEXT)
-	$(Q) $(call INSTALL_LIB,$<,$@)
-
-libs$(DELIM)libnx$(DELIM)libunx$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libnx TOPDIR="$(TOPDIR)" libunx$(LIBEXT)
-
-staging$(DELIM)libunx$(LIBEXT): libs$(DELIM)libnx$(DELIM)libunx$(LIBEXT)
-	$(Q) $(call INSTALL_LIB,$<,$@)
-
-mm$(DELIM)libumm$(LIBEXT): context
-	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libumm$(LIBEXT)
-
-staging$(DELIM)libumm$(LIBEXT): mm$(DELIM)libumm$(LIBEXT)
-	$(Q) $(call INSTALL_LIB,$<,$@)
-
-$(ARCH_SRC)$(DELIM)libuarch$(LIBEXT): context
-	$(Q) $(MAKE) -C $(ARCH_SRC) TOPDIR="$(TOPDIR)" libuarch$(LIBEXT)
-
-staging$(DELIM)libuarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libuarch$(LIBEXT)
-	$(Q) $(call INSTALL_LIB,$<,$@)
-
-libs$(DELIM)libxx$(DELIM)libxx$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libxx TOPDIR="$(TOPDIR)" libxx$(LIBEXT)
-
-staging$(DELIM)libxx$(LIBEXT): libs$(DELIM)libxx$(DELIM)libxx$(LIBEXT)
-	$(Q) $(call INSTALL_LIB,$<,$@)
-
-$(APPDIR)$(DELIM)libapps$(LIBEXT): context
-	$(Q) $(MAKE) -C $(APPDIR) TOPDIR="$(TOPDIR)"
-
-staging$(DELIM)libapps$(LIBEXT): $(APPDIR)$(DELIM)libapps$(LIBEXT)
-	$(Q) $(call INSTALL_LIB,$<,$@)
-
-syscall$(DELIM)libproxies$(LIBEXT): context
-	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libproxies$(LIBEXT)
-
-staging$(DELIM)libproxies$(LIBEXT): syscall$(DELIM)libproxies$(LIBEXT)
-	$(Q) $(call INSTALL_LIB,$<,$@)
-
-# Possible non-kernel builds
 
 libs$(DELIM)libc$(DELIM)libc$(LIBEXT): context
 	$(Q) $(MAKE) -C libs$(DELIM)libc TOPDIR="$(TOPDIR)" libc$(LIBEXT)
@@ -224,4 +178,28 @@ mm$(DELIM)libmm$(LIBEXT): context
 	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT)
 
 staging$(DELIM)libmm$(LIBEXT): mm$(DELIM)libmm$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
+libs$(DELIM)libxx$(DELIM)libxx$(LIBEXT): context
+	$(Q) $(MAKE) -C libs$(DELIM)libxx TOPDIR="$(TOPDIR)" libxx$(LIBEXT)
+
+staging$(DELIM)libxx$(LIBEXT): libs$(DELIM)libxx$(DELIM)libxx$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
+libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT): context
+	$(Q) $(MAKE) -C libs$(DELIM)libdsp TOPDIR="$(TOPDIR)" libdsp$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+
+staging$(DELIM)libdsp$(LIBEXT): libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
+$(APPDIR)$(DELIM)libapps$(LIBEXT): context
+	$(Q) $(MAKE) -C $(APPDIR) TOPDIR="$(TOPDIR)"
+
+staging$(DELIM)libapps$(LIBEXT): $(APPDIR)$(DELIM)libapps$(LIBEXT)
+	$(Q) $(call INSTALL_LIB,$<,$@)
+
+syscall$(DELIM)libproxies$(LIBEXT): context
+	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libproxies$(LIBEXT)
+
+staging$(DELIM)libproxies$(LIBEXT): syscall$(DELIM)libproxies$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)

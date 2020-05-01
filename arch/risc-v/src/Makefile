@@ -104,7 +104,6 @@ USRCS = $(UASRCS) $(UCSRCS)
 UOBJS = $(UAOBJS) $(UCOBJS)
 
 KBIN = libkarch$(LIBEXT)
-UBIN = libuarch$(LIBEXT)
 BIN  = libarch$(LIBEXT)
 
 LDFLAGS += $(ARCHSCRIPT)
@@ -165,12 +164,16 @@ $(AOBJS) $(UAOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 $(COBJS) $(UCOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(BIN) $(KBIN): $(OBJS)
+ifeq ($(CONFIG_BUILD_FLAT),y)
+$(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
-	@$(MAKE) depend
-
-$(UBIN): $(UOBJS)
+else
+$(BIN): $(UOBJS)
 	$(call ARCHIVE, $@, $(UOBJS))
+endif
+
+$(KBIN): $(OBJS)
+	$(call ARCHIVE, $@, $(OBJS))
 
 board/libboard$(LIBEXT):
 	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
@@ -217,7 +220,6 @@ ifeq ($(BOARDMAKE),y)
 	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" clean
 endif
 	$(call DELFILE, $(KBIN))
-	$(call DELFILE, $(UBIN))
 	$(call DELFILE, $(BIN))
 	$(call DELFILE, $(HEAD_OBJ))
 	$(call CLEAN)

@@ -1358,7 +1358,7 @@ include/
 <p>
   Normally the logic in this file builds to a single library (<code>libc.a</code>).
   However, if NuttX is built as a separately compiled kernel (with <code>CONFIG_BUILD_PROTECTED=y</code> or <code>CONFIG_BUILD_KERNEL=y</code>), then the contents of this directory are built as two libraries:
-  One for use by user programs (<code>libuc.a</code>) and one for use only within the &lt;kernel&gt; space (<code>libkc.a</code>).
+  One for use by user programs (<code>libc.a</code>) and one for use only within the &lt;kernel&gt; space (<code>libkc.a</code>).
 </p>
 <p>
   These user/kernel space libraries (along with the sycalls of <a href="#DirStructSyscall"><code>nuttx/syscall</code></a>) are needed to support the two differing protection domains.
