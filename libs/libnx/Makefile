@@ -63,7 +63,6 @@ COBJS = $(patsubst %.c, $(BINDIR)$(DELIM)%$(OBJEXT), $(CSRCS))
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
-UBIN = libunx$(LIBEXT)
 KBIN = libknx$(LIBEXT)
 BIN ?= libnx$(LIBEXT)
 
@@ -233,17 +232,11 @@ $(AOBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.S
 $(COBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-# NX library for the flat build
+# NX library for the flat build and
+# the user phase of the two-pass kernel build
 
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
-
-# NX library for the user phase of the two-pass kernel build
-
-ifneq ($(BIN),$(UBIN))
-$(UBIN):
-	$(Q) $(MAKE) $(UBIN) BIN=$(UBIN) BINDIR=ubin TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
-endif
 
 # NX library for the kernel phase of the two-pass kernel build
 
@@ -255,10 +248,8 @@ endif
 # Dependencies
 
 .depend: Makefile gensources $(SRCS)
-ifeq ($(CONFIG_BUILD_FLAT),y)
 	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >bin/Make.dep
-else
-	$(Q) $(MKDEP) --obj-path ubin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >ubin/Make.dep
+ifneq ($(CONFIG_BUILD_FLAT),y)
 	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >kbin/Make.dep
 endif
 	$(Q) touch $@
@@ -273,11 +264,9 @@ context: gensources
 
 clean:
 	$(Q) $(MAKE) -C bin  clean TOPDIR=$(TOPDIR)
-	$(Q) $(MAKE) -C ubin clean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C kbin clean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C nxfonts -f Makefile.sources clean TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
 	$(call DELFILE, $(BIN))
-	$(call DELFILE, $(UBIN))
 	$(call DELFILE, $(KBIN))
 	$(call CLEAN)
 
@@ -285,14 +274,11 @@ clean:
 
 distclean: clean
 	$(Q) $(MAKE) -C bin  distclean TOPDIR=$(TOPDIR)
-	$(Q) $(MAKE) -C ubin distclean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C kbin distclean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C nxfonts -f Makefile.sources distclean TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
 	$(call DELFILE, bin/Make.dep)
-	$(call DELFILE, ubin/Make.dep)
 	$(call DELFILE, kbin/Make.dep)
 	$(call DELFILE, .depend)
 
 -include bin/Make.dep
--include ubin/Make.dep
 -include kbin/Make.dep

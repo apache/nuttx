@@ -64,7 +64,6 @@ SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
 KBIN = libkarch$(LIBEXT)
-UBIN = libuarch$(LIBEXT)
 BIN  = libarch$(LIBEXT)
 
 # Override in Make.defs if linker is not 'ld'
@@ -126,11 +125,16 @@ $(AOBJS): %$(OBJEXT): %.S
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(BIN) $(KBIN): $(OBJS)
+ifeq ($(CONFIG_BUILD_FLAT),y)
+$(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
-
-$(UBIN): $(UOBJS)
+else
+$(BIN): $(UOBJS)
 	$(call ARCHIVE, $@, $(UOBJS))
+endif
+
+$(KBIN): $(OBJS)
+	$(call ARCHIVE, $@, $(OBJS))
 
 board/libboard$(LIBEXT):
 	$(Q) $(MAKE) -C board TOPDIR="$(TOPDIR)" libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"

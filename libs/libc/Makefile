@@ -143,7 +143,6 @@ COBJS = $(patsubst %.c, $(BINDIR)$(DELIM)%$(OBJEXT), $(CSRCS))
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
-UBIN = libuc$(LIBEXT)
 KBIN = libkc$(LIBEXT)
 BIN ?= libc$(LIBEXT)
 
@@ -156,19 +155,13 @@ $(AOBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.S
 $(COBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-# C library for the flat build
+# C library for the flat build and
+# the user phase of the two-pass kernel build
 
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
 	$(Q) $(MAKE) -C zoneinfo all TOPDIR=$(TOPDIR) BIN=$(BIN)
-endif
-
-# C library for the user phase of the two-pass kernel build
-
-ifneq ($(BIN),$(UBIN))
-$(UBIN):
-	$(Q) $(MAKE) $(UBIN) BIN=$(UBIN) BINDIR=ubin TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
 endif
 
 # C library for the kernel phase of the two-pass kernel build
@@ -188,10 +181,8 @@ endif
 # Dependencies
 
 .depend: Makefile $(SRCS)
-ifeq ($(CONFIG_BUILD_FLAT),y)
 	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >bin/Make.dep
-else
-	$(Q) $(MKDEP) --obj-path ubin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >ubin/Make.dep
+ifneq ($(CONFIG_BUILD_FLAT),y)
 	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >kbin/Make.dep
 endif
 ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
@@ -205,11 +196,9 @@ depend: .depend
 
 clean:
 	$(Q) $(MAKE) -C bin  clean TOPDIR=$(TOPDIR)
-	$(Q) $(MAKE) -C ubin clean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C kbin clean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C zoneinfo clean TOPDIR=$(TOPDIR) BIN=$(BIN)
 	$(call DELFILE, $(BIN))
-	$(call DELFILE, $(UBIN))
 	$(call DELFILE, $(KBIN))
 	$(call CLEAN)
 
@@ -217,15 +206,12 @@ clean:
 
 distclean: clean
 	$(Q) $(MAKE) -C bin  distclean TOPDIR=$(TOPDIR)
-	$(Q) $(MAKE) -C ubin distclean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C kbin distclean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C zoneinfo distclean TOPDIR=$(TOPDIR) BIN=$(BIN)
 	$(call DELFILE, exec_symtab.c)
 	$(call DELFILE, bin/Make.dep)
-	$(call DELFILE, ubin/Make.dep)
 	$(call DELFILE, kbin/Make.dep)
 	$(call DELFILE, .depend)
 
 -include bin/Make.dep
--include ubin/Make.dep
 -include kbin/Make.dep
