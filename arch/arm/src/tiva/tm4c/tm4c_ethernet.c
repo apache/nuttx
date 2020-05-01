@@ -3992,7 +3992,7 @@ static int tive_emac_configure(FAR struct tiva_ethmac_s *priv)
  * Description:
  *   Initialize the Ethernet driver for one interface.  If the Tiva chip
  *   supports multiple Ethernet controllers, then board specific logic
- *   must implement up_netinitialize() and call this function to initialize
+ *   must implement arm_netinitialize() and call this function to initialize
  *   the desired interfaces.
  *
  * Input Parameters:
@@ -4127,13 +4127,13 @@ int tiva_ethinitialize(int intf)
 }
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Function: arm_netinitialize
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
  *   low-level initialization logic in arm_initialize.c.  If TIVA_NETHCONTROLLERS
  *   greater than one, then board specific logic will have to supply a
- *   version of up_netinitialize() that calls tiva_ethinitialize() with
+ *   version of arm_netinitialize() that calls tiva_ethinitialize() with
  *   the appropriate interface number.
  *
  * Input Parameters:
@@ -4147,7 +4147,7 @@ int tiva_ethinitialize(int intf)
  ****************************************************************************/
 
 #if TIVA_NETHCONTROLLERS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   tiva_ethinitialize(0);
 }

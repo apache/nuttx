@@ -98,7 +98,7 @@ bool up_checkmapping(FAR struct tcb_s *tcb)
 
   /* Get the PTE associated with this virtual address */
 
-  pte = up_va2pte(vaddr);
+  pte = arm_va2pte(vaddr);
 
   /* Return true if this virtual address is mapped. */
 

@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_memfault
+ * Name: arm_memfault
  *
  * Description:
  *   This is Memory Management Fault exception handler.  Normally we get
@@ -60,7 +60,7 @@
  *
  ****************************************************************************/
 
-int up_memfault(int irq, FAR void *context, FAR void *arg)
+int arm_memfault(int irq, FAR void *context, FAR void *arg)
 {
   /* Dump some memory management fault info */
 

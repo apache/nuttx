@@ -79,16 +79,16 @@ g_aborttmp:
 	.text
 
 /************************************************************************************
- * Name: up_vectorirq
+ * Name: arm_vectorirq
  *
  * Description:
  *   Interrupt exception. Entered in IRQ mode with spsr = SVC CPSR, lr = SVC PC
  *
  ************************************************************************************/
 
-	.globl	up_vectorirq
-	.type	up_vectorirq, %function
-up_vectorirq:
+	.globl	arm_vectorirq
+	.type	arm_vectorirq, %function
+arm_vectorirq:
 	/* On entry, we are in IRQ mode.  We are free to use
 	 * the IRQ mode r13 and r14.
 	 */
@@ -133,10 +133,10 @@ up_vectorirq:
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	ldr	sp, .Lirqstackbase	/* SP = interrupt stack base */
 	str	r0, [sp]		/* Save the user stack pointer */
-	bl	up_decodeirq		/* Call the handler */
+	bl	arm_decodeirq		/* Call the handler */
 	ldr	sp, [sp]		/* Restore the user stack pointer */
 #else
-	bl	up_decodeirq		/* Call the handler */
+	bl	arm_decodeirq		/* Call the handler */
 #endif
 
 	/* Restore the CPSR, SVC mode registers and return */
@@ -151,20 +151,20 @@ up_vectorirq:
 .Lirqstackbase:
 	.word	g_intstackbase
 #endif
-	.size	up_vectorirq, . - up_vectorirq
+	.size	arm_vectorirq, . - arm_vectorirq
 	.align	5
 
 /************************************************************************************
- * Function: up_vectorswi
+ * Function: arm_vectorswi
  *
  * Description:
  *   SWI interrupt. We enter the SWI in SVC mode.
  *
  ************************************************************************************/
 
-	.globl	up_vectorswi
-	.type	up_vectorswi, %function
-up_vectorswi:
+	.globl	arm_vectorswi
+	.type	arm_vectorswi, %function
+arm_vectorswi:
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
@@ -185,24 +185,24 @@ up_vectorswi:
 	stmia	r0, {r1-r4}
 
 	/* Then call the SWI handler with interrupts disabled.
-	 * void up_syscall(struct xcptcontext *xcp)
+	 * void arm_syscall(struct xcptcontext *xcp)
 	 */
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r0, sp			/* Get r0=xcp */
-	bl	up_syscall		/* Call the handler */
+	bl	arm_syscall		/* Call the handler */
 
 	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr	spsr, r0
 	ldmia	sp, {r0-r15}^		/* Return */
-	.size	up_vectorswi, . - up_vectorswi
+	.size	arm_vectorswi, . - arm_vectorswi
 
 	.align	5
 
 /************************************************************************************
- * Name: up_vectordata
+ * Name: arm_vectordata
  *
  * Description:
  *   This is the data abort exception dispatcher. The ARM data abort exception occurs
@@ -212,9 +212,9 @@ up_vectorswi:
  *
  ************************************************************************************/
 
-	.globl	up_vectordata
-	.type	up_vectordata, %function
-up_vectordata:
+	.globl	arm_vectordata
+	.type	arm_vectordata, %function
+arm_vectordata:
 	/* On entry we are free to use the ABORT mode registers
 	 * r13 and r14
 	 */
@@ -252,7 +252,7 @@ up_vectordata:
 	stmia	r0, {r1-r4}
 
 	/* Then call the data abort handler with interrupts disabled.
-	 * void up_dataabort(struct xcptcontext *xcp)
+	 * void arm_dataabort(struct xcptcontext *xcp)
 	 */
 
 	mov	fp, #0			/* Init frame pointer */
@@ -261,7 +261,7 @@ up_vectordata:
 	mrc	p15, 0, r2, c5, c0, 0	/* Get r2=FSR */
 	mrc	p15, 0, r1, c6, c0, 0	/* Get R1=FAR */
 #endif
-	bl	up_dataabort		/* Call the handler */
+	bl	arm_dataabort		/* Call the handler */
 
 	/* Restore the CPSR, SVC mode registers and return */
 
@@ -271,12 +271,12 @@ up_vectordata:
 
 .Ldaborttmp:
 	.word	g_aborttmp
-	.size	up_vectordata, . - up_vectordata
+	.size	arm_vectordata, . - arm_vectordata
 
 	.align	5
 
 /************************************************************************************
- * Name: up_vectorprefetch
+ * Name: arm_vectorprefetch
  *
  * Description:
  *   This is the prefetch abort exception dispatcher. The ARM prefetch abort exception
@@ -286,9 +286,9 @@ up_vectordata:
  *
  ************************************************************************************/
 
-	.globl	up_vectorprefetch
-	.type	up_vectorprefetch, %function
-up_vectorprefetch:
+	.globl	arm_vectorprefetch
+	.type	arm_vectorprefetch, %function
+arm_vectorprefetch:
 	/* On entry we are free to use the ABORT mode registers
 	 * r13 and r14
 	 */
@@ -326,12 +326,12 @@ up_vectorprefetch:
 	stmia	r0, {r1-r4}
 
 	/* Then call the prefetch abort handler with interrupts disabled.
-	 * void up_prefetchabort(struct xcptcontext *xcp)
+	 * void arm_prefetchabort(struct xcptcontext *xcp)
 	 */
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r0, sp			/* Get r0=xcp */
-	bl	up_prefetchabort	/* Call the handler */
+	bl	arm_prefetchabort	/* Call the handler */
 
 	/* Restore the CPSR, SVC mode registers and return */
 
@@ -341,12 +341,12 @@ up_vectorprefetch:
 
 .Lpaborttmp:
 	.word	g_aborttmp
-	.size	up_vectorprefetch, . - up_vectorprefetch
+	.size	arm_vectorprefetch, . - arm_vectorprefetch
 
 	.align	5
 
 /************************************************************************************
- * Name: up_vectorundefinsn
+ * Name: arm_vectorundefinsn
  *
  * Description:
  *   Undefined instruction entry exception.  Entered in UND mode, spsr = SVC  CPSR,
@@ -354,9 +354,9 @@ up_vectorprefetch:
  *
  ************************************************************************************/
 
-	.globl	up_vectorundefinsn
-	.type	up_vectorundefinsn, %function
-up_vectorundefinsn:
+	.globl	arm_vectorundefinsn
+	.type	arm_vectorundefinsn, %function
+arm_vectorundefinsn:
 	/* On entry we are free to use the UND mode registers
 	 * r13 and r14
 	 */
@@ -393,12 +393,12 @@ up_vectorundefinsn:
 	stmia	r0, {r1-r4}
 
 	/* Then call the undef insn handler with interrupts disabled.
-	 * void up_undefinedinsn(struct xcptcontext *xcp)
+	 * void arm_undefinedinsn(struct xcptcontext *xcp)
 	 */
 
 	mov	fp, #0			/* Init frame pointer */
 	mov	r0, sp			/* Get r0=xcp */
-	bl	up_undefinedinsn	/* Call the handler */
+	bl	arm_undefinedinsn	/* Call the handler */
 
 	/* Restore the CPSR, SVC mode registers and return */
 
@@ -408,23 +408,23 @@ up_vectorundefinsn:
 
 .Lundeftmp:
 	.word	g_undeftmp
-	.size	up_vectorundefinsn, . - up_vectorundefinsn
+	.size	arm_vectorundefinsn, . - arm_vectorundefinsn
 
 	.align	5
 
 /************************************************************************************
- * Name: up_vectorfiq
+ * Name: arm_vectorfiq
  *
  * Description:
  *   Shouldn't happen
  *
  ************************************************************************************/
 
-	.globl	up_vectorfiq
-	.type	up_vectorfiq, %function
-up_vectorfiq:
+	.globl	arm_vectorfiq
+	.type	arm_vectorfiq, %function
+arm_vectorfiq:
 	subs	pc, lr, #4
-	.size	up_vectorfiq, . - up_vectorfiq
+	.size	arm_vectorfiq, . - arm_vectorfiq
 
 /************************************************************************************
  *  Name: g_intstackalloc/g_intstackbase

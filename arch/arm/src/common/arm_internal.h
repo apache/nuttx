@@ -298,21 +298,21 @@ void arm_copyfullstate(uint32_t *dest, uint32_t *src);
 #ifdef CONFIG_ARCH_FPU
 void arm_copyarmstate(uint32_t *dest, uint32_t *src);
 #endif
-void up_decodeirq(uint32_t *regs);
+uint32_t *arm_decodeirq(uint32_t *regs);
 int  arm_saveusercontext(uint32_t *saveregs);
 void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
 void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 
 /* Signal handling **********************************************************/
 
-void up_sigdeliver(void);
+void arm_sigdeliver(void);
 
 /* Power management *********************************************************/
 
 #ifdef CONFIG_PM
-void up_pminitialize(void);
+void arm_pminitialize(void);
 #else
-#  define up_pminitialize()
+#  define arm_pminitialize()
 #endif
 
 /* Interrupt handling *******************************************************/
@@ -324,17 +324,17 @@ void up_pminitialize(void);
 
 /* Interrupt acknowledge and dispatch */
 
-void up_ack_irq(int irq);
-uint32_t *up_doirq(int irq, uint32_t *regs);
+void arm_ack_irq(int irq);
+uint32_t *arm_doirq(int irq, uint32_t *regs);
 
 /* Exception Handlers */
 
-int  up_svcall(int irq, FAR void *context, FAR void *arg);
-int  up_hardfault(int irq, FAR void *context, FAR void *arg);
+int  arm_svcall(int irq, FAR void *context, FAR void *arg);
+int  arm_hardfault(int irq, FAR void *context, FAR void *arg);
 
 #  if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 
-int  up_memfault(int irq, FAR void *context, FAR void *arg);
+int  arm_memfault(int irq, FAR void *context, FAR void *arg);
 
 #  endif /* CONFIG_ARCH_CORTEXM3,4,7 */
 
@@ -354,7 +354,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs);
 void arm_pginitialize(void);
 uint32_t *arm_va2pte(uintptr_t vaddr);
 #else /* CONFIG_PAGING */
-# define up_pginitialize()
+# define arm_pginitialize()
 #endif /* CONFIG_PAGING */
 
 /* Exception Handlers */
@@ -370,58 +370,58 @@ uint32_t *arm_undefinedinsn(uint32_t *regs);
 
 /* Interrupt acknowledge and dispatch */
 
-void up_ack_irq(int irq);
-void up_doirq(int irq, uint32_t *regs);
+void arm_ack_irq(int irq);
+void arm_doirq(int irq, uint32_t *regs);
 
 /* Paging support (and exception handlers) */
 
 #ifdef CONFIG_PAGING
-void up_pginitialize(void);
-uint32_t *up_va2pte(uintptr_t vaddr);
-void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr);
+void arm_pginitialize(void);
+uint32_t *arm_va2pte(uintptr_t vaddr);
+void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr);
 #else /* CONFIG_PAGING */
-# define up_pginitialize()
-void up_dataabort(uint32_t *regs);
+# define arm_pginitialize()
+void arm_dataabort(uint32_t *regs);
 #endif /* CONFIG_PAGING */
 
 /* Exception handlers */
 
-void up_prefetchabort(uint32_t *regs);
-void up_syscall(uint32_t *regs);
-void up_undefinedinsn(uint32_t *regs);
+void arm_prefetchabort(uint32_t *regs);
+void arm_syscall(uint32_t *regs);
+void arm_undefinedinsn(uint32_t *regs);
 
 #endif /* CONFIG_ARCH_CORTEXM0,3,4,7 */
 
-void up_vectorundefinsn(void);
-void up_vectorswi(void);
-void up_vectorprefetch(void);
-void up_vectordata(void);
-void up_vectoraddrexcptn(void);
-void up_vectorirq(void);
-void up_vectorfiq(void);
+void arm_vectorundefinsn(void);
+void arm_vectorswi(void);
+void arm_vectorprefetch(void);
+void arm_vectordata(void);
+void arm_vectoraddrexcptn(void);
+void arm_vectorirq(void);
+void arm_vectorfiq(void);
 
 /* Floating point unit ******************************************************/
 
 #ifdef CONFIG_ARCH_FPU
-void up_savefpu(uint32_t *regs);
-void up_restorefpu(const uint32_t *regs);
+void arm_savefpu(uint32_t *regs);
+void arm_restorefpu(const uint32_t *regs);
 #else
-#  define up_savefpu(regs)
-#  define up_restorefpu(regs)
+#  define arm_savefpu(regs)
+#  define arm_restorefpu(regs)
 #endif
 
 /* Low level serial output **************************************************/
 
-void up_lowputc(char ch);
+void arm_lowputc(char ch);
 void up_puts(const char *str);
-void up_lowputs(const char *str);
+void arm_lowputs(const char *str);
 
 #ifdef USE_SERIALDRIVER
-void up_serialinit(void);
+void arm_serialinit(void);
 #endif
 
 #ifdef USE_EARLYSERIALINIT
-void up_earlyserialinit(void);
+void arm_earlyserialinit(void);
 #endif
 
 #ifdef CONFIG_RPMSG_UART
@@ -437,28 +437,28 @@ void lwlconsole_init(void);
 /* DMA **********************************************************************/
 
 #ifdef CONFIG_ARCH_DMA
-void weak_function up_dma_initialize(void);
+void weak_function arm_dma_initialize(void);
 #endif
 
 /* Cache control ************************************************************/
 
 #ifdef CONFIG_ARCH_L2CACHE
-void up_l2ccinitialize(void);
+void arm_l2ccinitialize(void);
 #else
-#  define up_l2ccinitialize()
+#  define arm_l2ccinitialize()
 #endif
 
 /* Memory management ********************************************************/
 
 #if CONFIG_MM_REGIONS > 1
-void up_addregion(void);
+void arm_addregion(void);
 #else
-# define up_addregion()
+# define arm_addregion()
 #endif
 
 /* Watchdog timer ***********************************************************/
 
-void up_wdtinit(void);
+void arm_wdtinit(void);
 
 /* Networking ***************************************************************/
 
@@ -468,29 +468,29 @@ void up_wdtinit(void);
  * network is enabled yet there is no Ethernet driver to be initialized.
  *
  * Use of common/arm_etherstub.c is deprecated.  The preferred mechanism is
- * to use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize()
+ * to use CONFIG_NETDEV_LATEINIT=y to suppress the call to arm_netinitialize()
  * in up_initialize().  Then this stub would not be needed.
  */
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
-void up_netinitialize(void);
+void arm_netinitialize(void);
 #else
-# define up_netinitialize()
+# define arm_netinitialize()
 #endif
 
 /* USB **********************************************************************/
 
 #ifdef CONFIG_USBDEV
-void up_usbinitialize(void);
-void up_usbuninitialize(void);
+void arm_usbinitialize(void);
+void arm_usbuninitialize(void);
 #else
-# define up_usbinitialize()
-# define up_usbuninitialize()
+# define arm_usbinitialize()
+# define arm_usbuninitialize()
 #endif
 
 /* Debug ********************************************************************/
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes);
+void arm_stack_color(FAR void *stackbase, size_t nbytes);
 #endif
 
 #undef EXTERN

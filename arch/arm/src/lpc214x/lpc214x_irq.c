@@ -99,7 +99,7 @@ void up_irqinitialize(void)
 
   /* Set the default vector */
 
-  vic_putreg((uint32_t)up_decodeirq, LPC214X_VIC_DEFVECTADDR_OFFSET);
+  vic_putreg((uint32_t)arm_decodeirq, LPC214X_VIC_DEFVECTADDR_OFFSET);
 
   /* Disable all vectored interrupts */
 

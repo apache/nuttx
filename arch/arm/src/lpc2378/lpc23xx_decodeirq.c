@@ -58,35 +58,15 @@
 #include "lpc23xx_vic.h"
 
 /********************************************************************************
- * Pre-processor Definitions
- ********************************************************************************/
-
-/********************************************************************************
- * Private Types
- ********************************************************************************/
-
-/********************************************************************************
- * Public Data
- ********************************************************************************/
-
-/********************************************************************************
- * Private Data
- ********************************************************************************/
-
-/********************************************************************************
- * Private Functions
- ********************************************************************************/
-
-/********************************************************************************
  * Public Functions
  ********************************************************************************/
 
 /********************************************************************************
- * up_decodeirq() and/or lpc23xx_decodeirq()
+ * arm_decodeirq() and/or lpc23xx_decodeirq()
  *
  * Description:
  *   The vectored interrupt controller (VIC) takes 32 interrupt request inputs
- *   and programmatically assigns them into 2 categories:  FIQ, vectored IRQ.
+ *   and pro grammatically assigns them into 2 categories:  FIQ, vectored IRQ.
  *
  *   - FIQs have the highest priority.  There is a single FIQ vector, but multiple
  *     interrupt sources can be ORed to this FIQ vector.
@@ -104,15 +84,16 @@
  ********************************************************************************/
 
 #ifndef CONFIG_VECTORED_INTERRUPTS
-void up_decodeirq(uint32_t *regs)
+uint32_t *arm_decodeirq(uint32_t *regs)
 #else
-static void lpc23xx_decodeirq(uint32_t *regs)
+static uint32_t *lpc23xx_decodeirq(uint32_t *regs)
 #endif
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC();
   err("ERROR: Unexpected IRQ\n");
   CURRENT_REGS = regs;
+  PANIC();
+  return NULL;
 #else
 
   /* Check which IRQ fires */
@@ -123,7 +104,9 @@ static void lpc23xx_decodeirq(uint32_t *regs)
   for (irq = 0; irq < NR_IRQS; irq++)
     {
       if (irqbits & (uint32_t) (1 << irq))
-        break;
+        {
+          break;
+        }
     }
 
   /* Verify that the resulting IRQ number is valid */
@@ -141,7 +124,7 @@ static void lpc23xx_decodeirq(uint32_t *regs)
 
       /* Acknowledge the interrupt */
 
-      up_ack_irq(irq);
+      arm_ack_irq(irq);
 
       /* Deliver the IRQ */
 
@@ -155,17 +138,18 @@ static void lpc23xx_decodeirq(uint32_t *regs)
       CURRENT_REGS = savestate;
     }
 
+  return NULL;  /* Return not used in this architecture */
 #endif
 }
 
 #ifdef CONFIG_VECTORED_INTERRUPTS
-void up_decodeirq(uint32_t *regs)
+uint32_t *arm_decodeirq(uint32_t *regs)
 {
   vic_vector_t vector = (vic_vector_t) vic_getreg(VIC_ADDRESS_OFFSET);
 
   /* Acknowledge the interrupt */
 
-  up_ack_irq(irq);
+  arm_ack_irq(irq);
 
   /* Valid Interrupt */
 
@@ -173,5 +157,7 @@ void up_decodeirq(uint32_t *regs)
     {
       (vector)(regs);
     }
+
+  return NULL;  /* Return not used in this architecture */
 }
 #endif

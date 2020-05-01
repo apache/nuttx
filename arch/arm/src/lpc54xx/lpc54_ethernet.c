@@ -2992,7 +2992,7 @@ static int lpc54_phy_reset(struct lpc54_ethdriver_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_netinitialize
+ * Name: arm_netinitialize
  *
  * Description:
  *   Initialize the Ethernet controller and driver.
@@ -3012,7 +3012,7 @@ static int lpc54_phy_reset(struct lpc54_ethdriver_s *priv)
  *
  ****************************************************************************/
 
-int up_netinitialize(int intf)
+int arm_netinitialize(int intf)
 {
   struct lpc54_ethdriver_s *priv;
   int ret;

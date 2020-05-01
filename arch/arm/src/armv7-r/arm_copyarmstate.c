@@ -60,7 +60,7 @@ void arm_copyarmstate(uint32_t *dest, uint32_t *src)
        * registers at indices ARM_CONTEXT_REGS through (XCPTCONTEXT_REGS-1)
        */
 
-      up_savefpu(dest);
+      arm_savefpu(dest);
 
       /* Then copy all of the ARM registers (omitting the floating point
        * registers).  Indices: 0 through (ARM_CONTEXT_REGS-1).

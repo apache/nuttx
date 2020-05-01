@@ -117,14 +117,14 @@ static void dispatch_syscall(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_svcall
+ * Name: arm_svcall
  *
  * Description:
  *   This is SVCall exception handler that performs context switching
  *
  ****************************************************************************/
 
-int up_svcall(int irq, FAR void *context, FAR void *arg)
+int arm_svcall(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
   uint32_t cmd;
@@ -179,7 +179,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
           DEBUGASSERT(regs[REG_R1] != 0);
           memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
 #if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV7M_LAZYFPU)
-          up_savefpu((uint32_t *)regs[REG_R1]);
+          arm_savefpu((uint32_t *)regs[REG_R1]);
 #endif
         }
         break;
@@ -229,7 +229,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
           DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
           memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
 #if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV7M_LAZYFPU)
-          up_savefpu((uint32_t *)regs[REG_R1]);
+          arm_savefpu((uint32_t *)regs[REG_R1]);
 #endif
           CURRENT_REGS = (uint32_t *)regs[REG_R2];
         }
@@ -237,7 +237,7 @@ int up_svcall(int irq, FAR void *context, FAR void *arg)
 
       /* R0=SYS_syscall_return:  This a syscall return command:
        *
-       *   void up_syscall_return(void);
+       *   void arm_syscall_return(void);
        *
        * At this point, the following values are saved in context:
        *

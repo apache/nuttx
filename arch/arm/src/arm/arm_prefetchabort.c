@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_prefetchabort
+ * Name: arm_prefetchabort
  *
  * Description:
  *   This is the prefetch abort exception handler. The ARM prefetch abort
@@ -61,7 +61,7 @@
  *
  ****************************************************************************/
 
-void up_prefetchabort(uint32_t *regs)
+void arm_prefetchabort(uint32_t *regs)
 {
 #ifdef CONFIG_PAGING
   uint32_t *savestate;

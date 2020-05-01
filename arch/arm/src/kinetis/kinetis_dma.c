@@ -160,7 +160,7 @@ size_t kinetis_dmaresidual(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-void weak_function up_dma_initialize(void)
+void weak_function arm_dma_initialize(void)
 {
   int i;
   uint32_t regval;

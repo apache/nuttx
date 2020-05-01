@@ -41,8 +41,8 @@
  * Public Symbols
  ************************************************************************************/
 
-	.globl		up_savefpu
-	.globl		up_restorefpu
+	.globl		arm_savefpu
+	.globl		arm_restorefpu
 
 	.syntax		unified
 	.thumb
@@ -53,14 +53,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_savefpu
+ * Name: arm_savefpu
  *
  * Description:
  *   Given the pointer to a register save area (in R0), save the state of the
  *   floating point registers.
  *
  * C Function Prototype:
- *   void up_savefpu(uint32_t *regs);
+ *   void arm_savefpu(uint32_t *regs);
  *
  * Input Parameters:
  *   regs - A pointer to the register save area in which to save the floating point
@@ -72,8 +72,8 @@
  ************************************************************************************/
 
 	.thumb_func
-	.type	up_savefpu, function
-up_savefpu:
+	.type	arm_savefpu, function
+arm_savefpu:
 
 	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
 
@@ -155,17 +155,17 @@ up_savefpu:
 #endif
 	bx		lr
 
-	.size	up_savefpu, .-up_savefpu
+	.size	arm_savefpu, .-arm_savefpu
 
 /************************************************************************************
- * Name: up_restorefpu
+ * Name: arm_restorefpu
  *
  * Description:
  *   Given the pointer to a register save area (in R0), restore the state of the
  *   floating point registers.
  *
  * C Function Prototype:
- *   void up_restorefpu(const uint32_t *regs);
+ *   void arm_restorefpu(const uint32_t *regs);
  *
  * Input Parameters:
  *   regs - A pointer to the register save area containing the floating point
@@ -178,8 +178,8 @@ up_savefpu:
  ************************************************************************************/
 
 	.thumb_func
-	.type	up_restorefpu, function
-up_restorefpu:
+	.type	arm_restorefpu, function
+arm_restorefpu:
 
 	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
 
@@ -265,6 +265,6 @@ up_restorefpu:
 #endif
 	bx		lr
 
-	.size	up_restorefpu, .-up_restorefpu
+	.size	arm_restorefpu, .-arm_restorefpu
 #endif /* CONFIG_ARCH_FPU */
 	.end

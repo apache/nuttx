@@ -39,7 +39,7 @@
  * Public Functions
  ****************************************************************************/
 
-uint32_t *up_doirq(int irq, uint32_t *regs)
+uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
@@ -64,7 +64,7 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
 
   /* Acknowledge the interrupt */
 
-  up_ack_irq(irq);
+  arm_ack_irq(irq);
 
   /* Deliver the IRQ */
 

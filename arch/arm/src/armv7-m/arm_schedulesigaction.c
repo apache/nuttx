@@ -144,7 +144,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * privileged thread mode.
                */
 
-              CURRENT_REGS[REG_PC]         = (uint32_t)up_sigdeliver;
+              CURRENT_REGS[REG_PC]         = (uint32_t)arm_sigdeliver;
 #ifdef CONFIG_ARMV7M_USEBASEPRI
               CURRENT_REGS[REG_BASEPRI]    = NVIC_SYSH_DISABLE_PRIORITY;
 #else
@@ -191,7 +191,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * here.
            */
 
-          tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_PC]      = (uint32_t)arm_sigdeliver;
 #ifdef CONFIG_ARMV7M_USEBASEPRI
           tcb->xcp.regs[REG_BASEPRI] = NVIC_SYSH_DISABLE_PRIORITY;
 #else
@@ -299,7 +299,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * to be here.
                    */
 
-                  tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
+                  tcb->xcp.regs[REG_PC]      = (uint32_t)arm_sigdeliver;
 #ifdef CONFIG_ARMV7M_USEBASEPRI
                   tcb->xcp.regs[REG_BASEPRI] = NVIC_SYSH_DISABLE_PRIORITY;
 #else
@@ -337,7 +337,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * privileged thread mode.
                    */
 
-                  CURRENT_REGS[REG_PC]      = (uint32_t)up_sigdeliver;
+                  CURRENT_REGS[REG_PC]      = (uint32_t)arm_sigdeliver;
 #ifdef CONFIG_ARMV7M_USEBASEPRI
                   CURRENT_REGS[REG_BASEPRI] = NVIC_SYSH_DISABLE_PRIORITY;
 #else
@@ -367,7 +367,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * field.  This is logically equivalent to
                * enter_critical_section().  The matching call to
                * leave_critical_section() will be performed in
-               * up_sigdeliver().
+               * arm_sigdeliver().
                */
 
               spin_setbit(&g_cpu_irqset, cpu, &g_cpu_irqsetlock,
@@ -417,7 +417,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * here.
            */
 
-          tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_PC]      = (uint32_t)arm_sigdeliver;
 #ifdef CONFIG_ARMV7M_USEBASEPRI
           tcb->xcp.regs[REG_BASEPRI] = NVIC_SYSH_DISABLE_PRIORITY;
 #else

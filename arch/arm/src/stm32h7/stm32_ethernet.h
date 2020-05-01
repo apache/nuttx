@@ -66,7 +66,7 @@ extern "C"
  * Description:
  *   Initialize the Ethernet driver for one interface.  If the STM32 chip
  *   supports multiple Ethernet controllers, then board specific logic must
- *   implement up_netinitialize() and call this function to initialize the
+ *   implement arm_netinitialize() and call this function to initialize the
  *   desired interfaces.
  *
  * Parameters:

@@ -71,7 +71,7 @@
  *
  ****************************************************************************/
 
-void up_pminitialize(void)
+void arm_pminitialize(void)
 {
   /* Then initialize the NuttX power management subsystem proper */
 

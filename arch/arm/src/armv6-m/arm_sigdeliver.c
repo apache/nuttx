@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_sigdeliver
+ * Name: arm_sigdeliver
  *
  * Description:
  *   This is the a signal handling trampoline.  When a signal action was
@@ -66,7 +66,7 @@
  *
  ****************************************************************************/
 
-void up_sigdeliver(void)
+void arm_sigdeliver(void)
 {
   /* NOTE the "magic" guard space added to regs.  This is a little kludge
    * because arm_fullcontextrestore (called below) will do a stack-to-stack

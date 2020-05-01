@@ -281,14 +281,14 @@ static int ffs(uint32_t word)
 }
 
 /****************************************************************************
- * Name: up_ack_irq
+ * Name: arm_ack_irq
  *
  * Description:
  *   Acknowledge the interrupt
  *
  ****************************************************************************/
 
-void up_ack_irq(int irq)
+void arm_ack_irq(int irq)
 {
   putreg32((1 << irq), IRQ_REG(IRQ__CLEAR));
 }
@@ -297,7 +297,7 @@ void up_ack_irq(int irq)
  * Entry point for interrupts
  ****************************************************************************/
 
-void up_decodeirq(uint32_t *regs)
+uint32_t *arm_decodeirq(uint32_t *regs)
 {
   uint32_t num, status;
 
@@ -306,17 +306,19 @@ void up_decodeirq(uint32_t *regs)
   status = getreg32(IRQ_REG(IRQ__STATUS));
   if (!status)
     {
-      return;
+      return NULL;
     }
 
   /* Ack IRQ */
 
   num = ffs(status) - 1;
-  up_ack_irq(num);
+  arm_ack_irq(num);
 
   DEBUGASSERT(CURRENT_REGS == NULL);
   CURRENT_REGS = regs;
 
   irq_dispatch(num, regs);
   CURRENT_REGS = NULL;
+
+  return NULL;  /* Return not used in this architecture */
 }

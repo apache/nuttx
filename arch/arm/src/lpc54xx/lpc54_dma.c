@@ -217,7 +217,7 @@ static int lpc54_dma_interrupt(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dma_initialize
+ * Name: arm_dma_initialize
  *
  * Description:
  *   Initialize the DMA subsystem.  Called from up_initialize() early in the
@@ -228,7 +228,7 @@ static int lpc54_dma_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void weak_function up_dma_initialize(void)
+void weak_function arm_dma_initialize(void)
 {
   int ret;
 

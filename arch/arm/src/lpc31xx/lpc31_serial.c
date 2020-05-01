@@ -753,16 +753,16 @@ static bool up_txempty(struct uart_dev_s *dev)
 #ifdef USE_EARLYSERIALINIT
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: arm_earlyserialinit
  *
  * Description:
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup (via up_putc).  This must
- *   be called before up_serialinit.
+ *   be called before arm_serialinit.
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void arm_earlyserialinit(void)
 {
   /* Enable UART system clock */
 
@@ -783,15 +783,15 @@ void up_earlyserialinit(void)
 #endif
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: arm_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes that
- *   up_earlyserialinit was called previously.
+ *   arm_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void arm_serialinit(void)
 {
 #if defined(CONFIG_UART_SERIAL_CONSOLE)
   uart_register("/dev/console", &g_uartport);
@@ -824,12 +824,12 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      arm_lowputc('\r');
     }
 
   /* Output the character */
 
-  up_lowputc(ch);
+  arm_lowputc(ch);
   up_restoreuartint(priv, ier);
   return ch;
 }
@@ -852,12 +852,12 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      arm_lowputc('\r');
     }
 
   /* Output the character */
 
-  up_lowputc(ch);
+  arm_lowputc(ch);
   return ch;
 }
 

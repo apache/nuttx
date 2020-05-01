@@ -46,17 +46,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowputs
+ * Name: arm_lowputs
  *
  * Description:
  *   This is a low-level helper function used to support debug.
  *
  ****************************************************************************/
 
-void up_lowputs(const char *str)
+void arm_lowputs(const char *str)
 {
   while (*str)
     {
-      up_lowputc(*str++);
+      arm_lowputc(*str++);
     }
 }

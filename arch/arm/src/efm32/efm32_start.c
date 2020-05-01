@@ -312,7 +312,7 @@ void __start(void)
 
   /* Perform early serial initialization */
 
-  up_earlyserialinit();
+  arm_earlyserialinit();
   showprogress('D');
 
   /* For the case of the separate user-/kernel-space build, perform whatever

@@ -749,14 +749,14 @@ void lpc54_usart_disable(uintptr_t base)
 #endif
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: arm_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void arm_lowputc(char ch)
 {
 #ifdef HAVE_USART_CONSOLE
   irqstate_t flags;

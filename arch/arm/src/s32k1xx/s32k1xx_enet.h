@@ -70,7 +70,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Function: up_netinitialize
+ * Function: arm_netinitialize
  *
  * Description:
  *   Initialize the first network interface.  If there are more than one
@@ -89,7 +89,7 @@ extern "C"
  *
  ************************************************************************************/
 
-void up_netinitialize(void);
+void arm_netinitialize(void);
 
 /************************************************************************************
  * Function: s32k1xx_phy_boardinitialize

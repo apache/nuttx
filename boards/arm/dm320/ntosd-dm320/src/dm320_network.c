@@ -57,10 +57,10 @@ extern void dm9x_initialize(void);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_netinitialize
+ * Name: arm_netinitialize
  ****************************************************************************/
 
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   /* CS4 is used for DM9000A Ethernet.  Interrupt is provided via GIO6
    * which must be configured to interrupt on the rising edge.  Bus

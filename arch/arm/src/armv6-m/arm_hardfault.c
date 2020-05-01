@@ -73,7 +73,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_hardfault
+ * Name: arm_hardfault
  *
  * Description:
  *   This is Hard Fault exception handler.  It also catches SVC call
@@ -81,7 +81,7 @@
  *
  ****************************************************************************/
 
-int up_hardfault(int irq, FAR void *context, FAR void *arg)
+int arm_hardfault(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
 
@@ -121,7 +121,7 @@ int up_hardfault(int irq, FAR void *context, FAR void *arg)
       if (insn == INSN_SVC0)
         {
           hfinfo("Forward SVCall\n");
-          return up_svcall(irq, context, NULL);
+          return arm_svcall(irq, context, NULL);
         }
     }
 

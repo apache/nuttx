@@ -49,7 +49,7 @@
  * Public Symbols
  ************************************************************************************/
 
-	.globl		up_restorefpu
+	.globl		arm_restorefpu
 
 /************************************************************************************
  * Public Functions
@@ -58,14 +58,14 @@
 	.text
 
 /************************************************************************************
- * Name: up_restorefpu
+ * Name: arm_restorefpu
  *
  * Description:
  *   Given the pointer to a register save area (in R0), restore the state of the
  *   floating point registers.
  *
  * C Function Prototype:
- *   void up_restorefpu(const uint32_t *regs);
+ *   void arm_restorefpu(const uint32_t *regs);
  *
  * Input Parameters:
  *   regs - A pointer to the register save area containing the floating point
@@ -77,10 +77,10 @@
  *
  ************************************************************************************/
 
-	.globl	up_restorefpu
-	.type	up_restorefpu, function
+	.globl	arm_restorefpu
+	.type	arm_restorefpu, function
 
-up_restorefpu:
+arm_restorefpu:
 
 	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
 
@@ -98,6 +98,6 @@ up_restorefpu:
 	vmsr	fpscr, r2				/* Restore the FPCSR */
 	bx		lr
 
-	.size	up_restorefpu, .-up_restorefpu
+	.size	arm_restorefpu, .-arm_restorefpu
 #endif /* CONFIG_ARCH_FPU */
 	.end

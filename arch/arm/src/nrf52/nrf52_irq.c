@@ -378,8 +378,8 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(NRF52_IRQ_SVCALL, up_svcall, NULL);
-  irq_attach(NRF52_IRQ_HARDFAULT, up_hardfault, NULL);
+  irq_attach(NRF52_IRQ_SVCALL, arm_svcall, NULL);
+  irq_attach(NRF52_IRQ_HARDFAULT, arm_hardfault, NULL);
 
   /* Set the priority of the SVCall interrupt */
 
@@ -398,7 +398,7 @@ void up_irqinitialize(void)
    * Fault handler.
    */
 
-  irq_attach(NRF52_IRQ_MEMFAULT, up_memfault, NULL);
+  irq_attach(NRF52_IRQ_MEMFAULT, arm_memfault, NULL);
   up_enable_irq(NRF52_IRQ_MEMFAULT);
 #endif
 
@@ -407,7 +407,7 @@ void up_irqinitialize(void)
 #ifdef CONFIG_DEBUG_FEATURES
   irq_attach(NRF52_IRQ_NMI, nrf52_nmi, NULL);
 #ifndef CONFIG_ARM_MPU
-  irq_attach(NRF52_IRQ_MEMFAULT, up_memfault, NULL);
+  irq_attach(NRF52_IRQ_MEMFAULT, arm_memfault, NULL);
 #endif
   irq_attach(NRF52_IRQ_BUSFAULT, nrf52_busfault, NULL);
   irq_attach(NRF52_IRQ_USAGEFAULT, nrf52_usagefault, NULL);
@@ -517,14 +517,14 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_ack_irq
+ * Name: arm_ack_irq
  *
  * Description:
  *   Acknowledge the IRQ
  *
  ****************************************************************************/
 
-void up_ack_irq(int irq)
+void arm_ack_irq(int irq)
 {
   nrf52_clrpend(irq);
 }

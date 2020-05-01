@@ -3340,7 +3340,7 @@ static inline int lpc17_40_ethinitialize(int intf)
 }
 
 /****************************************************************************
- * Name: up_netinitialize
+ * Name: arm_netinitialize
  *
  * Description:
  *   Initialize the first network interface.  If there are more than one
@@ -3351,7 +3351,7 @@ static inline int lpc17_40_ethinitialize(int intf)
  ****************************************************************************/
 
 #if CONFIG_LPC17_40_NINTERFACES == 1 && !defined(CONFIG_NETDEV_LATEINIT)
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   lpc17_40_ethinitialize(0);
 }

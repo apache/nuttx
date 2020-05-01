@@ -84,13 +84,13 @@ extern int _svectors; /* Type does not matter */
 static up_vector_t g_vectorinittab[] =
 {
   (up_vector_t)NULL,
-  up_vectorundefinsn,
-  up_vectorswi,
-  up_vectorprefetch,
-  up_vectordata,
-  up_vectoraddrexcptn,
-  up_vectorirq,
-  up_vectorfiq
+  arm_vectorundefinsn,
+  arm_vectorswi,
+  arm_vectorprefetch,
+  arm_vectordata,
+  arm_vectoraddrexcptn,
+  arm_vectorirq,
+  arm_vectorfiq
 };
 #define NVECTORS ((sizeof(g_vectorinittab)) / sizeof(up_vector_t))
 
@@ -224,14 +224,14 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_ack_irq
+ * Name: arm_ack_irq
  *
  * Description:
  *   Acknowledge the interrupt
  *
  ****************************************************************************/
 
-void up_ack_irq(int irq)
+void arm_ack_irq(int irq)
 {
   uint32_t reg;
 

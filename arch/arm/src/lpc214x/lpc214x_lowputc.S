@@ -131,7 +131,7 @@
  **************************************************************************/
 
 /**************************************************************************
- * Name: up_lowputc
+ * Name: arm_lowputc
  **************************************************************************/
 
 /* This assembly language version has the advantage that it can does not
@@ -140,9 +140,9 @@
  */
 
 	.text
-	.global	up_lowputc
-	.type	up_lowputc, function
-up_lowputc:
+	.global	arm_lowputc
+	.type	arm_lowputc, function
+arm_lowputc:
 	/* On entry, r0 holds the character to be printed */
 
 	ldr	r1, =LPC214X_UART_BASE
@@ -157,7 +157,7 @@ up_lowputc:
 	/* And return */
 
 	mov     pc, lr
-	.size	up_lowputc, . - up_lowputc
+	.size	arm_lowputc, . - arm_lowputc
 
 /* This performs basic initialization of the UART.  This can be called very
  * early in initialization because it does not depend on having a stack.  It

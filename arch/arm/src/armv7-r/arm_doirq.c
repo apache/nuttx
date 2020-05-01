@@ -89,7 +89,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
     {
       /* Restore floating point registers */
 
-      up_restorefpu((uint32_t *)CURRENT_REGS);
+      arm_restorefpu((uint32_t *)CURRENT_REGS);
     }
 #endif
 

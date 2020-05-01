@@ -112,7 +112,7 @@ void up_initialize(void)
 
   /* Add any extra memory fragments to the memory manager */
 
-  up_addregion();
+  arm_addregion();
 
 #ifdef CONFIG_PM
   /* Initialize the power management subsystem.  This MCU-specific function
@@ -121,19 +121,19 @@ void up_initialize(void)
    * with the power management subsystem).
    */
 
-  up_pminitialize();
+  arm_pminitialize();
 #endif
 
 #ifdef CONFIG_ARCH_DMA
-  /* Initialize the DMA subsystem if the weak function up_dma_initialize has
+  /* Initialize the DMA subsystem if the weak function arm_dma_initialize has
    * been brought into the build
    */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (up_dma_initialize)
+  if (arm_dma_initialize)
 #endif
     {
-      up_dma_initialize();
+      arm_dma_initialize();
     }
 #endif
 
@@ -167,7 +167,7 @@ void up_initialize(void)
   /* Initialize the serial device driver */
 
 #ifdef USE_SERIALDRIVER
-  up_serialinit();
+  arm_serialinit();
 #endif
 
 #ifdef CONFIG_RPMSG_UART
@@ -203,7 +203,7 @@ void up_initialize(void)
 #ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */
 
-  up_netinitialize();
+  arm_netinitialize();
 #endif
 
 #ifdef CONFIG_NET_LOOPBACK
@@ -227,11 +227,11 @@ void up_initialize(void)
 #if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)
   /* Initialize USB -- device and/or host */
 
-  up_usbinitialize();
+  arm_usbinitialize();
 #endif
 
   /* Initialize the L2 cache if present and selected */
 
-  up_l2ccinitialize();
+  arm_l2ccinitialize();
   board_autoled_on(LED_IRQSENABLED);
 }

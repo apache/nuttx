@@ -62,7 +62,7 @@
 
 /* SYS call 0:
  *
- * void up_syscall_return(void);
+ * void arm_syscall_return(void);
  */
 
 #define SYS_syscall_return        (0)

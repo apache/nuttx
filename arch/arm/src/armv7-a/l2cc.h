@@ -66,7 +66,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_l2ccinitialize
+ * Name: arm_l2ccinitialize
  *
  * Description:
  *   One time configuration of the L2 cache.  The L2 cache will be enabled
@@ -82,7 +82,7 @@ extern "C"
  ****************************************************************************/
 
 #if 0 /* Prototyped in arm_internal.h */
-void up_l2ccinitialize(void);
+void arm_l2ccinitialize(void);
 #endif
 
 /****************************************************************************

@@ -1947,7 +1947,7 @@ static void stm32_dmamux_dump(DMA_MUX dmamux, uint8_t chan)
  *
  ****************************************************************************/
 
-void weak_function up_dma_initialize(void)
+void weak_function arm_dma_initialize(void)
 {
   DMA_CHANNEL dmachan    = NULL;
   uint8_t     controller = 0;

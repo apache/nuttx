@@ -274,7 +274,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 }
 
 /****************************************************************************
- * Name: up_addregion
+ * Name: arm_addregion
  *
  * Description:
  *   Memory may be added in non-contiguous chunks.  Additional chunks are
@@ -283,7 +283,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
  ****************************************************************************/
 
 #if CONFIG_MM_REGIONS > 1
-void up_addregion(void)
+void arm_addregion(void)
 {
   int nregions = CONFIG_MM_REGIONS - 1;
   uintptr_t vaddr;

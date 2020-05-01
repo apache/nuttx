@@ -60,7 +60,7 @@ void arm_copyarmstate(uint32_t *dest, uint32_t *src)
        * registers at indices SW_INT_REGS through (SW_INT_REGS+SW_FPU_REGS-1)
        */
 
-      up_savefpu(dest);
+      arm_savefpu(dest);
 
       /* Save the block of ARM registers that were saved by the interrupt
        * handling logic.  Indices: 0 through (SW_INT_REGS-1).

@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dataabort
+ * Name: arm_dataabort
  *
  * Input Parameters:
  *   regs - The standard, ARM register save array.
@@ -64,7 +64,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING
-void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
+void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 {
   struct tcb_s *tcb = this_task();
 #ifdef CONFIG_PAGING
@@ -148,7 +148,7 @@ segfault:
 
 #else /* CONFIG_PAGING */
 
-void up_dataabort(uint32_t *regs)
+void arm_dataabort(uint32_t *regs)
 {
   /* Save the saved processor context in CURRENT_REGS where it can be
    * accessed for register dumps and possibly context switching.

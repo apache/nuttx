@@ -141,7 +141,7 @@ exception_common:
 	mrs		r0, ipsr				/* R0=exception number */
 
 	/* Disable interrupts, select the stack to use for interrupt handling
-	 * and call up_doirq to handle the interrupt
+	 * and call arm_doirq to handle the interrupt
 	 */
 
 	cpsid	i						/* Disable further interrupts */
@@ -155,15 +155,15 @@ exception_common:
 	ldr		r7, =g_intstackbase		/* R7=Base of the interrupt stack */
 	mov		sp, r7					/* Set the new stack point */
 	push	{r1}					/* Save the MSP on the interrupt stack */
-	bl		up_doirq				/* R0=IRQ, R1=register save area on stack */
+	bl		arm_doirq				/* R0=IRQ, R1=register save area on stack */
 	pop		{r1}					/* Recover R1=main stack pointer */
 #else
 	msr		msp, r1					/* We are using the main stack pointer */
-	bl		up_doirq				/* R0=IRQ, R1=register save area on stack */
+	bl		arm_doirq				/* R0=IRQ, R1=register save area on stack */
 	mrs		r1, msp					/* Recover R1=main stack pointer */
 #endif
 
-	/* On return from up_doirq, r0 will hold a pointer to register context
+	/* On return from arm_doirq, r0 will hold a pointer to register context
 	 * array to use for the interrupt return.  If that return value is the same
 	 * as current stack pointer, then things are relatively easy.
 	 */

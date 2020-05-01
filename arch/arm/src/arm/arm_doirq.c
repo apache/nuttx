@@ -57,7 +57,7 @@
  * Public Functions
  ****************************************************************************/
 
-void up_doirq(int irq, uint32_t *regs)
+void arm_doirq(int irq, uint32_t *regs)
 {
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
@@ -75,7 +75,7 @@ void up_doirq(int irq, uint32_t *regs)
 
   /* Acknowledge the interrupt */
 
-  up_ack_irq(irq);
+  arm_ack_irq(irq);
 
   /* Deliver the IRQ */
 
@@ -94,7 +94,7 @@ void up_doirq(int irq, uint32_t *regs)
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      up_restorefpu((uint32_t *)CURRENT_REGS);
+      arm_restorefpu((uint32_t *)CURRENT_REGS);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

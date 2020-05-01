@@ -49,7 +49,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Function: arm_netinitialize
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
@@ -68,7 +68,7 @@
  *
  ****************************************************************************/
 
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
 #ifdef CONFIG_SAMV7_EMAC0
   int ret;

@@ -147,7 +147,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * privileged thread mode.
                */
 
-              CURRENT_REGS[REG_PC]      = (uint32_t)up_sigdeliver;
+              CURRENT_REGS[REG_PC]      = (uint32_t)arm_sigdeliver;
               CURRENT_REGS[REG_PRIMASK] = 1;
               CURRENT_REGS[REG_XPSR]    = ARMV6M_XPSR_T;
 #ifdef CONFIG_BUILD_PROTECTED
@@ -186,7 +186,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * here.
            */
 
-          tcb->xcp.regs[REG_PC]      = (uint32_t)up_sigdeliver;
+          tcb->xcp.regs[REG_PC]      = (uint32_t)arm_sigdeliver;
           tcb->xcp.regs[REG_PRIMASK] = 1;
           tcb->xcp.regs[REG_XPSR]    = ARMV6M_XPSR_T;
 #ifdef CONFIG_BUILD_PROTECTED

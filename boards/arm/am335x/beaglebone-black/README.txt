@@ -241,7 +241,7 @@ Configurations
       2019-01-06:  Work in progress. Till now it is possible to pass arm_boot(), but
         Prefetch abort is met when devnull_register() call is done. Have no idea why.
         I was able to trace down to _inode_search() call. If I put any debug statement
-        like "up_lowputc('0');" right after "desc->node = node;" statement at line 425
+        like "arm_lowputc('0');" right after "desc->node = node;" statement at line 425
         the code does not crash.
       2019-01-09:  The NSH configuration is now functional.
       2019-01-16:  Correct timer interrupts by switching to DMTimer2 (DMTimer1ms is
