@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/gnu/up_testset.S
+ * arch/arm/src/armv7-m/iar/arm_testset.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,29 +25,14 @@
 #include <nuttx/config.h>
 #include <arch/spinlock.h>
 
-	.syntax		unified
-	.thumb
-	.file	"up_testset.S"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+	MODULE up_testset
+	SECTION .text:CODE:NOROOT(2)
 
 /****************************************************************************
  * Public Symbols
  ****************************************************************************/
 
-	.globl	up_testset
-
-/****************************************************************************
- * Assembly Macros
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-	.text
+	PUBLIC up_testset
 
 /****************************************************************************
  * Public Functions
@@ -73,8 +58,7 @@
  *
  ****************************************************************************/
 
-	.globl	up_testset
-	.type	up_testset, %function
+	THUMB
 
 up_testset:
 
@@ -82,10 +66,10 @@ up_testset:
 
 	/* Test if the spinlock is locked or not */
 
-1:
+L1:
 	ldrexb	r2, [r0]			/* Test if spinlock is locked or not */
 	cmp		r2, r1				/* Already locked? */
-	beq		2f					/* If already locked, return SP_LOCKED */
+	beq		L2					/* If already locked, return SP_LOCKED */
 
 	/* Not locked ... attempt to lock it */
 
@@ -101,8 +85,8 @@ up_testset:
 
 	/* Lock not acquired -- return SP_LOCKED */
 
-2:
+L2:
 	mov		r0, #SP_LOCKED
 	bx		lr
-	.size	up_testset, . - up_testset
-	.end
+
+	END

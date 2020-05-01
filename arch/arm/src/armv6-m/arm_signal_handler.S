@@ -1,20 +1,35 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/gnu/up_signal_handler.S
+ * arch/arm/srcm/armv6-m/arm_signal_handler.S
  *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.  The
- * ASF licenses this file to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
 
@@ -32,10 +47,8 @@
  * File info
  ****************************************************************************/
 
-	.syntax		unified
-	.thumb
-	.cpu		cortex-m3
-	.file		"up_signal_handler.S"
+	.cpu	cortex-m0
+	.file	"arm_signal_handler.S"
 
 /****************************************************************************
  * Private Functions
@@ -52,10 +65,6 @@
  *   This function is the user-space, signal handler trampoline function.  It
  *   is called from up_signal_dispatch() in user-mode.
  *
- *     R0-R3, R11 - volatile registers need not be preserved.
- *     R4-R10 - static registers must be preserved
- *     R12-R14 - LR and SP must be preserved
- *
  * Input Parameters:
  *   R0 = sighand
  *     The address user-space signal handling function
@@ -69,6 +78,8 @@
  ****************************************************************************/
 
 	.text
+	.align	2
+	.code	16
 	.thumb_func
 	.globl	up_signal_handler
 	.type	up_signal_handler, function
@@ -76,20 +87,21 @@ up_signal_handler:
 
 	/* Save some register */
 
-	push	{lr}			/* Save LR on the stack */
+	push	{r4, r5			/* Save R4 and R5 on the stack */
+	mov		r5, lr			/* Save LR in R5 */
 
 	/* Call the signal handler */
 
-	mov		ip, r0			/* IP=sighand */
+	mov		r4, r0			/* R4=sighand */
 	mov		r0, r1			/* R0=signo */
 	mov		r1, r2			/* R1=info */
 	mov		r2, r3			/* R2=ucontext */
-	blx		ip				/* Call the signal handler */
+	blx		r4				/* Call the signal handler */
 
 	/* Restore the registers */
 
-	pop		{r2}			/* Recover LR in R2 */
-	mov		lr, r2			/* Restore LR */
+	mov		lr, r5			/* Restore LR */
+	pop		{r4, r5}		/* Restore R4 and R5 */
 
 	/* Execute the SYS_signal_handler_return SVCall (will not return) */
 

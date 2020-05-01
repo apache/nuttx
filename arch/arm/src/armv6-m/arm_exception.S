@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv6-m/up_exception.S
+ * arch/arm/src/armv6-m/arm_exception.S
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +55,7 @@
 	.globl		exception_common
 
 	.cpu		cortex-m0
-	.file		"up_exception.S"
+	.file		"arm_exception.S"
 
 /************************************************************************************
  * .text

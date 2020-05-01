@@ -36,11 +36,11 @@
 # Source files specific to the Cortex-M4F
 
 CMN_ASRCS += arm_saveusercontext.S arm_fullcontextrestore.S arm_switchcontext.S
-CMN_ASRCS += up_testset.S up_fetchadd.S vfork.S
+CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-CMN_ASRCS += up_setjmp.S
+CMN_ASRCS += arm_setjmp.S
 endif
 endif
 
@@ -51,9 +51,9 @@ CMN_CSRCS += arm_sigdeliver.c arm_svcall.c arm_trigger_irq.c arm_unblocktask.c
 CMN_CSRCS += arm_systemreset.c
 
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
-CMN_ASRCS += up_lazyexception.S
+CMN_ASRCS += arm_lazyexception.S
 else
-CMN_ASRCS += up_exception.S
+CMN_ASRCS += arm_exception.S
 endif
 CMN_CSRCS += arm_vectors.c
 
@@ -63,11 +63,11 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += arm_mpu.c arm_signal_dispatch.c
-CMN_UASRCS += up_signal_handler.S
+CMN_UASRCS += arm_signal_handler.S
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += up_fpu.S
+CMN_ASRCS += arm_fpu.S
 CMN_CSRCS += arm_copyarmstate.c
 endif
 

@@ -46,7 +46,7 @@
  *
  *   Normally the user-mode signaling handling stub will also execute
  *   before the ultimate signal handler is called.  See
- *   arch/arm/src/armv7-m/gnu/up_signal_handler.S.  This function is the
+ *   arch/arm/src/armv7-m/gnu/arm_signal_handler.S.  This function is the
  *   user-space, signal handler trampoline function.  It is called from
  *   up_signal_dispatch() in user-mode.
  *

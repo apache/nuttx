@@ -45,7 +45,7 @@ CMN_ASRCS += vfork.S
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
-CMN_ASRCS += up_setjmp.S
+CMN_ASRCS += arm_setjmp.S
 endif
 endif
 
@@ -61,7 +61,7 @@ CMN_CSRCS += arm_svcall.c arm_vfork.c arm_trigger_irq.c
 # CMN_CSRCS += up_dwt.c
 
 CMN_CSRCS += arm_stackframe.c
-CMN_ASRCS += up_exception.S
+CMN_ASRCS += arm_exception.S
 CMN_CSRCS += arm_vectors.c
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
@@ -71,7 +71,7 @@ endif
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += arm_task_start.c arm_pthread_start.c
 CMN_CSRCS += arm_signal_dispatch.c
-CMN_UASRCS += up_signal_handler.S
+CMN_UASRCS += arm_signal_handler.S
 endif
 
 ifeq ($(CONFIG_ARCH_MEMCPY),y)

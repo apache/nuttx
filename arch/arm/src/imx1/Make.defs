@@ -33,10 +33,10 @@
 #
 ############################################################################
 
-HEAD_ASRC = up_head.S
+HEAD_ASRC = arm_head.S
 
-CMN_ASRCS  = up_cache.S arm_fullcontextrestore.S arm_saveusercontext.S
-CMN_ASRCS += up_vectors.S up_vectoraddrexcptn.S up_vectortab.S vfork.S
+CMN_ASRCS  = arm_cache.S arm_fullcontextrestore.S arm_saveusercontext.S
+CMN_ASRCS += arm_vectors.S arm_vectoraddrexcptn.S arm_vectortab.S vfork.S
 CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_copyfullstate.c arm_createstack.c
 CMN_CSRCS += arm_dataabort.c arm_mdelay.c arm_udelay.c arm_exit.c
 CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c

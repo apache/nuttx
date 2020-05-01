@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/up_vectortab.S
+ * arch/arm/src/arm/arm_vectortab.S
  *
  *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
