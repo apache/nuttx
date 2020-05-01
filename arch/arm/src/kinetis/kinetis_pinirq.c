@@ -47,8 +47,8 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "kinetis.h"
 #include "hardware/kinetis_port.h"

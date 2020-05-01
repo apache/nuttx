@@ -42,8 +42,8 @@
 
 #include "arm.h"				/* ARM-specific settings */
 #include "chip.h"				/* Chip-specific settings */
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 /*****************************************************************************
  * Pre-processor Definitions

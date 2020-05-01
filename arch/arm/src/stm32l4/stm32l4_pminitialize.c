@@ -41,7 +41,7 @@
 
 #include <nuttx/power/pm.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "stm32l4_pm.h"
 
 #ifdef CONFIG_PM

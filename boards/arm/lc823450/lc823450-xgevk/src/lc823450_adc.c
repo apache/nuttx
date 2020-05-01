@@ -47,7 +47,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "lc823450-xgevk.h"
 #include "lc823450_adc.h"
 

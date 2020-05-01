@@ -43,7 +43,7 @@
 
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #ifdef CONFIG_ARCH_FPU
 

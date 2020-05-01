@@ -54,7 +54,7 @@
 #include <arch/chip/adc.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/cxd56_adc.h"
 #include "hardware/cxd56_scuseq.h"
 #include "cxd56_clock.h"

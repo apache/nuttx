@@ -49,7 +49,7 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "tms570_gio.h"
 #include "launchxl-tms57004.h"
 

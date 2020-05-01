@@ -45,7 +45,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

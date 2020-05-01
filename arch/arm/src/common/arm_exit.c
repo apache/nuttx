@@ -37,7 +37,7 @@
 #include "sched/sched.h"
 #include "group/group.h"
 #include "irq/irq.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

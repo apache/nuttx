@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #ifdef CONFIG_SAMA5_DBGU
 

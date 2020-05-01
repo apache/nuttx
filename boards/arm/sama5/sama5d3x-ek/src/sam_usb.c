@@ -53,7 +53,7 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sam_pio.h"
 #include "sam_usbhost.h"
 #include "hardware/sam_ohci.h"

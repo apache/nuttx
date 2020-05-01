@@ -63,7 +63,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "s32k1xx_config.h"
 #include "hardware/s32k1xx_enet.h"

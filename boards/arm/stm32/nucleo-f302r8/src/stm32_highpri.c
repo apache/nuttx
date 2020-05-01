@@ -53,7 +53,7 @@
 #include <arch/irq.h>
 #include <arch/armv7-m/nvicpri.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "ram_vectors.h"
 
 #include "stm32_pwm.h"

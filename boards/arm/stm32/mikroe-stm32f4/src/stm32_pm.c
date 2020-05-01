@@ -42,7 +42,7 @@
 
 #include <nuttx/power/pm.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "stm32_pm.h"
 #include "mikroe-stm32f4.h"
 

@@ -46,7 +46,7 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "imxrt_config.h"
 #include "imxrt_irq.h"

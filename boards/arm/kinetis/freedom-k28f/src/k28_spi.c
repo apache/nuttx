@@ -45,7 +45,7 @@
 
 #include <nuttx/spi/spi.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "kinetis.h"
 #include "freedom-k28f.h"

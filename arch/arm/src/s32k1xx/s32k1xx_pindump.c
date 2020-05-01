@@ -43,7 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/s32k1xx_gpio.h"
 #include "hardware/s32k1xx_port.h"

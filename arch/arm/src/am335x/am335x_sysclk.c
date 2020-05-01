@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <errno.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/am335x_scm.h"
 #include "am335x_sysclk.h"
 

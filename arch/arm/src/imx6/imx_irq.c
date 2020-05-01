@@ -43,7 +43,7 @@
 
 #include <nuttx/arch.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "sctlr.h"
 #include "gic.h"
 #include "imx_irq.h"

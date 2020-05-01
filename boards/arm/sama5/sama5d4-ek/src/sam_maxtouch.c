@@ -50,7 +50,7 @@
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/mxt.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sam_pio.h"
 #include "sam_twi.h"
 

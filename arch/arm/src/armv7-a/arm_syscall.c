@@ -38,7 +38,7 @@
 #include "arm.h"
 #include "svcall.h"
 #include "addrenv.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Private Functions

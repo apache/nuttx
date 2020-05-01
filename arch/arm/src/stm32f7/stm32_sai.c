@@ -58,7 +58,7 @@
 #include <nuttx/audio/i2s.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "stm32_dma.h"
 #include "stm32_gpio.h"

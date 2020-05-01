@@ -36,7 +36,7 @@
 #include "signal/signal.h"
 #include "arm.h"
 #include "svcall.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Private Functions

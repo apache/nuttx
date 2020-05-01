@@ -33,7 +33,7 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sam_periphclks.h"
 #include "sam_pio.h"
 #include "sam_nand.h"

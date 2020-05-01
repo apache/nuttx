@@ -46,7 +46,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "gic.h"
 #include "sched/sched.h"
 

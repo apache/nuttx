@@ -52,7 +52,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32l4_pwm.h"
 #include "nucleo-l432kc.h"
 

@@ -55,7 +55,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/video/fb.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/am335x_prcm.h"
 #include "am335x_pinmux.h"
 #include "am335x_config.h"

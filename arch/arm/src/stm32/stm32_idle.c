@@ -49,7 +49,7 @@
 
 #include "chip.h"
 #include "stm32_pm.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

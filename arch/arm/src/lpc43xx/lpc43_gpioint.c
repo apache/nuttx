@@ -64,7 +64,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "hardware/lpc43_scu.h"
 #include "hardware/lpc43_gpio.h"

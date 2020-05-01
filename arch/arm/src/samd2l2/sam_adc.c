@@ -57,7 +57,7 @@
 
 #include <arch/chip/sam_adc.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sam_adc.h"
 #include "sam_pinmap.h"
 #include "sam_gclk.h"

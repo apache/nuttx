@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #include <nuttx/board.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "chip.h"
 
 /****************************************************************************

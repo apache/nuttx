@@ -49,7 +49,7 @@
 #include "itm.h"
 #include "tpi.h"
 #include "dwt.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "itm_syslog.h"
 
 #ifdef CONFIG_ARMV7M_ITMSYSLOG

@@ -47,8 +47,8 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "efm32_gpio.h"
 #include "efm32-g8xx-stk.h"

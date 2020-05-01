@@ -45,8 +45,8 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 #include "ekk-lm3s9b96.h"
 
 /****************************************************************************

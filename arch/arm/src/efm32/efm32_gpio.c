@@ -44,7 +44,7 @@
 #include <stdbool.h>
 #include <errno.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/efm32_gpio.h"
 #include "efm32_gpio.h"
 

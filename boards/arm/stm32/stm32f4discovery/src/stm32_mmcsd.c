@@ -51,7 +51,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "stm32.h"
 

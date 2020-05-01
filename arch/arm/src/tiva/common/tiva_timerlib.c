@@ -50,7 +50,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/tiva_sysctrl.h"
 #include "hardware/tiva_timer.h"
 

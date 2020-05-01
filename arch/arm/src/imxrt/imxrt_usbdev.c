@@ -63,8 +63,8 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "hardware/imxrt_usbotg.h"
 #include "hardware/imxrt_usbphy.h"

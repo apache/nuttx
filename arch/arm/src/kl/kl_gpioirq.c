@@ -46,7 +46,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/kl_port.h"
 #include "kl_gpio.h"

@@ -47,7 +47,7 @@
 
 #include <arch/chip/chip.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #if defined(CONFIG_ARCH_FAMILY_SAMD20) || defined(CONFIG_ARCH_FAMILY_SAMD21)
 #  include "hardware/samd_usart.h"

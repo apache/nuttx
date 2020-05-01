@@ -45,8 +45,8 @@
 #include <arch/board/board.h>
 
 #include "nuttx/signal.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/lpc17_40_syscon.h"
 #include "lpc17_40_emc.h"
 

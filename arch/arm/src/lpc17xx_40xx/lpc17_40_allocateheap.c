@@ -49,8 +49,8 @@
 
 #include "chip.h"
 #include "mpu.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "hardware/lpc17_40_memorymap.h"
 #include "lpc17_40_emacram.h"

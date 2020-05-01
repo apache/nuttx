@@ -31,7 +31,7 @@
 
 #include "nvic.h"
 #include "systick.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #ifdef CONFIG_ARMV8M_SYSTICK
 

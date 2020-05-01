@@ -54,7 +54,7 @@
 #include <arch/chip/audio.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include <arch/board/board.h>
 #include "cxd56_pmic.h"

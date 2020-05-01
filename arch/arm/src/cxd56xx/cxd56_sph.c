@@ -50,7 +50,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 
 #include "hardware/cxd56_sph.h"

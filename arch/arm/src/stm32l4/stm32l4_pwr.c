@@ -47,7 +47,7 @@
 #include <stdbool.h>
 #include <errno.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32l4_pwr.h"
 #include "stm32l4_rcc.h"
 

@@ -45,7 +45,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "olimex-stm32-h407.h"
 #include "stm32_ccm.h"
 

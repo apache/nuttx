@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "stm32l4_rcc.h"
 #include "hardware/stm32l4_crs.h"

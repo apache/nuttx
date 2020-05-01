@@ -28,7 +28,7 @@
 #include <assert.h>
 
 #include "mpu.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 /*****************************************************************************
  * Pre-processor Definitions

@@ -62,7 +62,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/s32k1xx_scg.h"
 #include "hardware/s32k1xx_pcc.h"
 #include "s32k1xx_clockconfig.h"

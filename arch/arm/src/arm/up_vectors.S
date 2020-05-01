@@ -41,7 +41,7 @@
 #include <nuttx/irq.h>
 
 #include "arm.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 /************************************************************************************
  * Pre-processor Definitions

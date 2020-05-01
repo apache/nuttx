@@ -55,9 +55,9 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "imx_gpio.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #ifdef USE_SERIALDRIVER
 

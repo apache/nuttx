@@ -48,7 +48,7 @@
 
 #include <arch/irq.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "lpc17_40_gpio.h"
 

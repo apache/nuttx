@@ -48,8 +48,8 @@
 
 #include <stdbool.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "hardware/lpc54_memorymap.h"
 #include "hardware/lpc54_syscon.h"

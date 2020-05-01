@@ -47,7 +47,7 @@
 #include <nuttx/video/fb.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/lpc17_40_syscon.h"
 #include "lpc17_40_gpio.h"
 #include "lpc17_40_lcd.h"

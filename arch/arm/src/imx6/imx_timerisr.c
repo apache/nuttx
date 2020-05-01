@@ -45,7 +45,7 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "gic.h"
 #include "hardware/imx_ccm.h"
 #include "hardware/imx_gpt.h"

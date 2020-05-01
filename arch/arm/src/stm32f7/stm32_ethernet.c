@@ -63,7 +63,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "barriers.h"
 
 #include "hardware/stm32_syscfg.h"

@@ -53,7 +53,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sam_pio.h"
 #include "sam_twi.h"
 #include "sam_ssc.h"

@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/irq.h>
-#include "up_internal.h"
+#include "arm_internal.h"
 
 	.file	"arm_saveusercontext.S"
 

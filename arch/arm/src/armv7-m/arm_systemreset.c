@@ -29,7 +29,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "nvic.h"
 
 /****************************************************************************

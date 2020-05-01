@@ -40,7 +40,7 @@
 #include "signal/signal.h"
 #include "svcall.h"
 #include "exc_return.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Private Functions

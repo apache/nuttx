@@ -53,7 +53,7 @@
 #include <string.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "lc823450_sddrv_if.h"
 #include "lc823450_sdc.h"

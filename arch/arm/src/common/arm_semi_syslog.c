@@ -42,7 +42,7 @@
 
 #include <syscall.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #ifdef CONFIG_ARM_SEMIHOSTING_SYSLOG
 

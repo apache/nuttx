@@ -45,9 +45,9 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "clock/clock.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #include "lpc214x_timer.h"
 #include "lpc214x_vic.h"

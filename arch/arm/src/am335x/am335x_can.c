@@ -45,7 +45,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/can/can.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/am335x_pinmux.h"
 #include "hardware/am335x_prcm.h"
 #include "hardware/am335x_dcan.h"

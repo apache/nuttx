@@ -46,7 +46,7 @@
 #include <nuttx/video/fb.h>
 #include <nuttx/video/ov2640.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "sam_periphclks.h"
 #include "sam_lcd.h"

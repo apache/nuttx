@@ -52,7 +52,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/tiva_prcm.h"
 
 /****************************************************************************

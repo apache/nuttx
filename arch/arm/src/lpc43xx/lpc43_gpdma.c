@@ -47,8 +47,8 @@
 
 #include <nuttx/arch.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 #include "chip.h"
 
@@ -273,7 +273,7 @@ static int gpdma_interrupt(int irq, FAR void *context, FAR void *arg)
  *
  * Description:
  *   Initialize the GPDMA subsystem.  Called from up_initialize() early in
- *   the boot-up sequence.  Prototyped in up_internal.h.
+ *   the boot-up sequence.  Prototyped in arm_internal.h.
  *
  * Returned Value:
  *   None

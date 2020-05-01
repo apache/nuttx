@@ -49,8 +49,8 @@
 #include "psr.h"
 #include "exc_return.h"
 #include "sched/sched.h"
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 /****************************************************************************
  * Public Functions

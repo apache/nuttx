@@ -43,7 +43,7 @@
 
 #include <nuttx/arch.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/stm32l4_syscfg.h"
 
 #include "stm32l4_firewall.h"

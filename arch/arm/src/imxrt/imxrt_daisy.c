@@ -41,7 +41,7 @@
 
 #include <stdint.h>
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/imxrt_daisy.h"
 #include "imxrt_iomuxc.h"
 

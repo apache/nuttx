@@ -49,7 +49,7 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "tms570_gio.h"
 #include "tms570ls31x_usb_kit.h"
 

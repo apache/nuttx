@@ -57,8 +57,8 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/st7567.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "stm32_gpio.h"
 #include "stm32_spi.h"

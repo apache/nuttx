@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "lpc17_40_can.h"
 #include "lpc1766stk.h"

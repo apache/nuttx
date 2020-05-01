@@ -50,7 +50,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/tms570_sys.h"
 #include "hardware/tms570_pbist.h"

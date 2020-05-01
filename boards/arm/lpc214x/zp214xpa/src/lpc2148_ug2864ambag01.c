@@ -46,7 +46,7 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ug-2864ambag01.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "lpc214x_pinsel.h"
 #include "lpc214x_spi.h"

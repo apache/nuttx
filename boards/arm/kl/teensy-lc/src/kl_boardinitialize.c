@@ -47,7 +47,7 @@
 #include "kl_gpio.h"
 #include "hardware/kl_pinmux.h"
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "teensy-lc.h"
 
 /****************************************************************************

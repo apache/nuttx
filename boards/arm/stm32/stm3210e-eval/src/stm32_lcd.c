@@ -75,7 +75,7 @@
 #include <arch/board/board.h>
 #include <nuttx/power/pm.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32.h"
 #include "stm3210e-eval.h"
 

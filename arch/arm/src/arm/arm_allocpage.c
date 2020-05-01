@@ -52,7 +52,7 @@
 #include <nuttx/page.h>
 
 #include "pg_macros.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

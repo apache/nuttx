@@ -43,7 +43,7 @@
 #include <fixedmath.h>
 #include <assert.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/imxrt_wdog.h"
 #include "imxrt_config.h"

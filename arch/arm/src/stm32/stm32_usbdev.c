@@ -59,7 +59,7 @@
 
 #include <nuttx/irq.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32.h"
 #include "stm32_syscfg.h"
 #include "stm32_gpio.h"

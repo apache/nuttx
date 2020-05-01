@@ -54,8 +54,8 @@
 #include <nuttx/lcd/memlcd.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32.h"
 #include "maple.h"
 

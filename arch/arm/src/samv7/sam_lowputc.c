@@ -44,8 +44,8 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 #include "sam_config.h"
 #include "sam_gpio.h"

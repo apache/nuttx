@@ -87,7 +87,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/lpc54_syscon.h"
 #include "hardware/lpc54_pinmux.h"
 #include "hardware/lpc54_ethernet.h"

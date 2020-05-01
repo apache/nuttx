@@ -33,8 +33,8 @@
 #include "ram_vectors.h"
 
 #include "chip.h"             /* May redefine VECTAB fields */
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #ifdef CONFIG_ARCH_RAMVECTORS
 

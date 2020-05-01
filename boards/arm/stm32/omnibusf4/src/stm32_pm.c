@@ -43,7 +43,7 @@
 #include <nuttx/board.h>
 #include <nuttx/power/pm.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "stm32_pm.h"
 #include "omnibusf4.h"
 

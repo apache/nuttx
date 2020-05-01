@@ -58,8 +58,8 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "hardware/tms570_sci.h"
 #include "tms570_lowputc.h"

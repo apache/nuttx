@@ -46,7 +46,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "sam_dac.h"
 #include "same70-xplained.h"

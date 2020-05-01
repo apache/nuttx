@@ -58,7 +58,7 @@
 #include <nuttx/serial/serial.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "lpc2378.h"
 #include "lpc23xx_scb.h"

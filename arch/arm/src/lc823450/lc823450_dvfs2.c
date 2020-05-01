@@ -45,7 +45,7 @@
 #include <arch/board/board.h>
 #include <string.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "lc823450_clockconfig.h"
 #include "lc823450_syscontrol.h"

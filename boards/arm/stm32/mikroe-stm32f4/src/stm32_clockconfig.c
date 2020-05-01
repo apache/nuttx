@@ -43,7 +43,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "mikroe-stm32f4.h"
 
 /****************************************************************************

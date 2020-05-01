@@ -47,7 +47,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "hardware/am335x_wdog.h"
 

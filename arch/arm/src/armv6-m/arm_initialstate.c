@@ -45,8 +45,8 @@
 
 #include <nuttx/arch.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 #include "psr.h"
 #include "exc_return.h"

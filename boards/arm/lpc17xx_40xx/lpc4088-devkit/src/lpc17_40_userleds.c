@@ -48,8 +48,8 @@
 #include <nuttx/power/pm.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "lpc17_40_gpio.h"
 #include "lpc4088-devkit.h"

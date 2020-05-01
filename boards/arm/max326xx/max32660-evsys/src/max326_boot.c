@@ -48,7 +48,7 @@
 #include <nuttx/clock.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "max326_start.h"
 #include "max32660-evsys.h"
 

@@ -76,8 +76,8 @@
 
 #include <libgen.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 #ifdef CONFIG_ADC
 #  include "lc823450_adc.h"

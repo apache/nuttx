@@ -45,7 +45,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/max326_dma.h"
 #include "max326_periphclks.h"

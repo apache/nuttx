@@ -67,8 +67,8 @@
 #include <arch/chip/pm.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 #include "cxd56_clock.h"
 #include "cxd56_usbdev.h"
 #include "hardware/cxd5602_topreg.h"

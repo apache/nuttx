@@ -46,7 +46,7 @@
 #include "sctlr.h"
 #include "mmu.h"
 #include "chip.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #ifndef CONFIG_PAGING
 

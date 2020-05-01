@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/am335x_prcm.h"
 #include "am335x_config.h"
 #include "am335x_clockconfig.h"

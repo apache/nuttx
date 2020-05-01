@@ -63,8 +63,8 @@
 #include "stm32_rcc.h"
 #include "stm32_gpio.h"
 #include "stm32_otg.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32H7_OTGFS) || \
     defined(CONFIG_STM32H7_OTGHS))

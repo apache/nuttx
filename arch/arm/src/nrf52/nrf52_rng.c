@@ -51,11 +51,11 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/drivers/drivers.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "hardware/nrf52_utils.h"
 #include "hardware/nrf52_rng.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #if defined(CONFIG_NRF52_RNG)
 #if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)

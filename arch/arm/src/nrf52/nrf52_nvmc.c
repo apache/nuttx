@@ -45,7 +45,7 @@
 #include <nuttx/config.h>
 #include <stdbool.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "barriers.h"
 
 #include "hardware/nrf52_ficr.h"

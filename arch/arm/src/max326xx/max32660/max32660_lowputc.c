@@ -42,8 +42,8 @@
 #include <stdbool.h>
 #include <fixedmath.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "hardware/max326_memorymap.h"
 #include "hardware/max326_pinmux.h"

@@ -48,7 +48,7 @@
 #  include <stdbool.h>
 #  include <debug.h>
 
-#  include "up_arch.h"
+#  include "arm_arch.h"
 #  include "sctlr.h"
 #  include "cp15.h"
 #endif
