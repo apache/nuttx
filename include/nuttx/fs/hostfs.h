@@ -118,6 +118,12 @@ typedef uintptr_t    nuttx_size_t;
 
 typedef uint32_t     nuttx_time_t;
 
+struct nuttx_timespec
+{
+    nuttx_time_t tv_sec;
+    long tv_nsec;
+};
+
 /* These must exactly match the definition from include/dirent.h: */
 
 struct nuttx_dirent_s
@@ -144,19 +150,19 @@ struct nuttx_statfs_s
 
 struct nuttx_stat_s
 {
-  nuttx_dev_t     st_dev;     /* Device ID of device containing file */
-  nuttx_ino_t     st_ino;     /* File serial number */
-  nuttx_mode_t    st_mode;    /* File type, attributes, and access mode bits */
-  nuttx_nlink_t   st_nlink;   /* Number of hard links to the file */
-  nuttx_uid_t     st_uid;     /* User ID of file */
-  nuttx_gid_t     st_gid;     /* Group ID of file */
-  nuttx_dev_t     st_rdev;    /* Device ID (if file is character or block special) */
-  nuttx_off_t     st_size;    /* Size of file/directory, in bytes */
-  nuttx_time_t    st_atim;    /* Time of last access */
-  nuttx_time_t    st_mtim;    /* Time of last modification */
-  nuttx_time_t    st_ctim;    /* Time of last status change */
-  nuttx_blksize_t st_blksize; /* Block size used for filesystem I/O */
-  nuttx_blkcnt_t  st_blocks;  /* Number of blocks allocated */
+  nuttx_dev_t           st_dev;     /* Device ID of device containing file */
+  nuttx_ino_t           st_ino;     /* File serial number */
+  nuttx_mode_t          st_mode;    /* File type, attributes, and access mode bits */
+  nuttx_nlink_t         st_nlink;   /* Number of hard links to the file */
+  nuttx_uid_t           st_uid;     /* User ID of file */
+  nuttx_gid_t           st_gid;     /* Group ID of file */
+  nuttx_dev_t           st_rdev;    /* Device ID (if file is character or block special) */
+  nuttx_off_t           st_size;    /* Size of file/directory, in bytes */
+  struct nuttx_timespec st_atim;    /* Time of last access */
+  struct nuttx_timespec st_mtim;    /* Time of last modification */
+  struct nuttx_timespec st_ctim;    /* Time of last status change */
+  nuttx_blksize_t       st_blksize; /* Block size used for filesystem I/O */
+  nuttx_blkcnt_t        st_blocks;  /* Number of blocks allocated */
 };
 
 #endif /* __SIM__ */

@@ -97,18 +97,30 @@ static void host_stat_convert(struct stat *hostbuf, struct nuttx_stat_s *buf)
       buf->st_mode |= NUTTX_S_IFSOCK;
     }
 
-  buf->st_dev     = hostbuf->st_dev;
-  buf->st_ino     = hostbuf->st_ino;
-  buf->st_nlink   = hostbuf->st_nlink;
-  buf->st_uid     = hostbuf->st_uid;
-  buf->st_gid     = hostbuf->st_gid;
-  buf->st_rdev    = hostbuf->st_rdev;
-  buf->st_size    = hostbuf->st_size;
-  buf->st_atim    = hostbuf->st_atime;
-  buf->st_mtim    = hostbuf->st_mtime;
-  buf->st_ctim    = hostbuf->st_ctime;
-  buf->st_blksize = hostbuf->st_blksize;
-  buf->st_blocks  = hostbuf->st_blocks;
+  buf->st_dev          = hostbuf->st_dev;
+  buf->st_ino          = hostbuf->st_ino;
+  buf->st_nlink        = hostbuf->st_nlink;
+  buf->st_uid          = hostbuf->st_uid;
+  buf->st_gid          = hostbuf->st_gid;
+  buf->st_rdev         = hostbuf->st_rdev;
+  buf->st_size         = hostbuf->st_size;
+#if defined(__APPLE__)
+  buf->st_atim.tv_sec  = hostbuf->st_atimespec.tv_sec;
+  buf->st_atim.tv_nsec = hostbuf->st_atimespec.tv_nsec;
+  buf->st_mtim.tv_sec  = hostbuf->st_mtimespec.tv_sec;
+  buf->st_mtim.tv_nsec = hostbuf->st_mtimespec.tv_nsec;
+  buf->st_ctim.tv_sec  = hostbuf->st_ctimespec.tv_sec;
+  buf->st_ctim.tv_nsec = hostbuf->st_ctimespec.tv_nsec;
+#else
+  buf->st_atim.tv_sec  = hostbuf->st_atim.tv_sec;
+  buf->st_atim.tv_nsec = hostbuf->st_atim.tv_nsec;
+  buf->st_mtim.tv_sec  = hostbuf->st_mtim.tv_sec;
+  buf->st_mtim.tv_nsec = hostbuf->st_mtim.tv_nsec;
+  buf->st_ctim.tv_sec  = hostbuf->st_ctim.tv_sec;
+  buf->st_ctim.tv_nsec = hostbuf->st_ctim.tv_nsec;
+#endif
+  buf->st_blksize      = hostbuf->st_blksize;
+  buf->st_blocks       = hostbuf->st_blocks;
 }
 
 /****************************************************************************
