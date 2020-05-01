@@ -63,11 +63,6 @@ else
 export Q := @
 endif
 
-# This define is passed as EXTRAFLAGS for kernel-mode builds.  It is also passed
-# during PASS1 (but not PASS2) context and depend targets.
-
-KDEFINE = ${shell $(DEFINE) "$(CC)" __KERNEL__}
-
 # Process architecture and board-specific directories
 
 ARCH_DIR = arch\$(CONFIG_ARCH)
