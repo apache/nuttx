@@ -45,7 +45,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sam_config.h"
 #include "hardware/sam_gclk.h"
 

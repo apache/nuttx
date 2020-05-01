@@ -50,7 +50,7 @@
 
 #include <nuttx/irq.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "l2cc.h"
 #include "l2cc_pl310.h"
 

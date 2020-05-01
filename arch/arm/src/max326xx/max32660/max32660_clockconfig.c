@@ -43,7 +43,7 @@
 
 #include <nuttx/irq.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/max326_gcr.h"
 #include "hardware/max326_pwrseq.h"

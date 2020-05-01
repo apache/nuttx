@@ -50,9 +50,9 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sched/sched.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "lc823450_intc.h"
 
 /****************************************************************************

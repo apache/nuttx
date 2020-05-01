@@ -30,7 +30,7 @@
 #include <nuttx/irq.h>
 
 #include "sched/sched.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #ifdef CONFIG_PAGING
 #  include <nuttx/page.h>

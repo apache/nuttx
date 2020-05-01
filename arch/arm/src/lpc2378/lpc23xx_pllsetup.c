@@ -65,7 +65,7 @@
 #include <sys/types.h>
 
 #include "arm.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "lpc2378.h"
 #include "lpc23xx_pinsel.h"
 #include "lpc23xx_scb.h"

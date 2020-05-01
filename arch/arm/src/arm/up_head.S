@@ -41,8 +41,8 @@
 
 #include "arm.h"
 #include "chip.h"
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 #ifdef CONFIG_PAGING
 #  include <nuttx/page.h>

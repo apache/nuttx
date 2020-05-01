@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32_pwm.h"
 #include "nucleo-f302r8.h"
 

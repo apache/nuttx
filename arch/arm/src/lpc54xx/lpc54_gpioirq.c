@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/lpc54_syscon.h"
 #include "hardware/lpc54_inputmux.h"

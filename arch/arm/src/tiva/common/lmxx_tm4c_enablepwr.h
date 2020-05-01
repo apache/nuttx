@@ -43,7 +43,7 @@
 
 #include <nuttx/config.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "hardware/tiva_sysctrl.h"
 

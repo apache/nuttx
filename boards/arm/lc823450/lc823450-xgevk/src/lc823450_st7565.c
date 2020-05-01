@@ -51,7 +51,7 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/st7565.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "lc823450_gpio.h"
 #include "lc823450_spi.h"
 #include "lc823450-xgevk.h"

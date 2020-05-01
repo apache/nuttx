@@ -49,7 +49,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "kinetis_config.h"
 #include "chip.h"

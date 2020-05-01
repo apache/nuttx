@@ -50,7 +50,7 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "kl_spi.h"
 #include "kl_gpio.h"
 #include "hardware/kl_memorymap.h"

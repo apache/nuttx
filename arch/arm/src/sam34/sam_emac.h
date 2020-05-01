@@ -74,7 +74,7 @@ extern "C"
  * Function: up_netinitialize
  *
  * Description:
- *   Initialize the EMAC driver.  Also prototyped in up_internal.h.
+ *   Initialize the EMAC driver.  Also prototyped in arm_internal.h.
  *
  * Input Parameters:
  *   None

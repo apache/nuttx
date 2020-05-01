@@ -45,8 +45,8 @@
 
 #include <nuttx/arch.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "hardware/s32k1xx_port.h"
 #include "hardware/s32k1xx_gpio.h"

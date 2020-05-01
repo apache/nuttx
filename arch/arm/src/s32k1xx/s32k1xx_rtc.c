@@ -52,7 +52,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/s32k1xx_rtc.h"
 #include "s32k1xx_periphclocks.h"

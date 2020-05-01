@@ -54,7 +54,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/lpc43_rit.h"
 #include "lpc43_rit.h"
 

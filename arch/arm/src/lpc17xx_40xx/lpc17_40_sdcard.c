@@ -58,7 +58,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "lpc17_40_gpdma.h"
 #include "lpc17_40_gpio.h"

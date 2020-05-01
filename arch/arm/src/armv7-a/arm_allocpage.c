@@ -51,7 +51,7 @@
 
 #include <nuttx/page.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Private Types

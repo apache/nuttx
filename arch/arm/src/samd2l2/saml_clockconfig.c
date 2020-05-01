@@ -54,7 +54,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/saml_pm.h"
 #include "hardware/saml_supc.h"

@@ -40,8 +40,8 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 /**************************************************************************
  * Pre-processor Definitions

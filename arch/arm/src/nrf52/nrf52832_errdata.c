@@ -50,11 +50,11 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/drivers/drivers.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "hardware/nrf52_utils.h"
 #include "hardware/nrf52_rng.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Private Functions

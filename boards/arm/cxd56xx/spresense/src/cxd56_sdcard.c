@@ -54,7 +54,7 @@
 #include <nuttx/wqueue.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include <arch/board/board.h>
 #include <arch/chip/pin.h>

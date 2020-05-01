@@ -51,7 +51,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "cxd56_clock.h"
 #include "hardware/cxd56_udmac.h"
 #include "cxd56_udmac.h"

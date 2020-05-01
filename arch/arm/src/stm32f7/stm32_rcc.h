@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/stm32_rcc.h"
 

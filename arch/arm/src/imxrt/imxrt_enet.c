@@ -63,7 +63,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "imxrt_config.h"
 #include "hardware/imxrt_enet.h"

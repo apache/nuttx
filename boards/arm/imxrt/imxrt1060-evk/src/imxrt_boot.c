@@ -45,7 +45,7 @@
 
 #include "imxrt_start.h"
 #include "imxrt1060-evk.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "imxrt_flexspi_nor_boot.h"
 
 /****************************************************************************

@@ -46,7 +46,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "lpc43_gpio.h"
 
 #ifdef CONFIG_LPC43_GPIO_IRQ

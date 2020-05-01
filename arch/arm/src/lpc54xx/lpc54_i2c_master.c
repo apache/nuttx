@@ -63,8 +63,8 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "hardware/lpc54_pinmux.h"
 #include "hardware/lpc54_syscon.h"

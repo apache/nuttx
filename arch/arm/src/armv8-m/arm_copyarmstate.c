@@ -28,7 +28,7 @@
 
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV8M_LAZYFPU)
 

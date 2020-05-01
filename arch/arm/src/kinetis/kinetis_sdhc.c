@@ -43,7 +43,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "kinetis.h"
 #include "hardware/kinetis_pinmux.h"

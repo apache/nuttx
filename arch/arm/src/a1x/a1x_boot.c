@@ -50,8 +50,8 @@
 #include "arm.h"
 #include "mmu.h"
 #include "fpu.h"
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 #include "a1x_lowputc.h"
 #include "a1x_boot.h"

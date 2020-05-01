@@ -46,8 +46,8 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 #include "lc823450_syscontrol.h"
 
 #include "lc823450-xgevk_mux.h"

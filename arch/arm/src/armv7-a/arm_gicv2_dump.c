@@ -42,7 +42,7 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "gic.h"
 
 #if defined(CONFIG_ARMV7A_HAVE_GICv2) && defined(CONFIG_DEBUG_IRQ_INFO)

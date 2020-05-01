@@ -47,7 +47,7 @@
 #include <nuttx/semaphore.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "nrf52_gpio.h"
 #include "nrf52_spi.h"

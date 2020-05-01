@@ -58,7 +58,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/sam_lcdc.h"
 #include "hardware/sam_pinmap.h"
 #include "sam_pio.h"

@@ -51,7 +51,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "kl_gpio.h"
 #include "hardware/kl_tsi.h"
 #include "hardware/kl_pinmux.h"

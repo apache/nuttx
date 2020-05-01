@@ -52,7 +52,7 @@
 #include <arch/chip/cisif.h>
 #include <nuttx/video/video.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "cxd56_clock.h"
 #include "hardware/cxd56_cisif.h"

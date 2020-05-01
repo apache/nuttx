@@ -35,7 +35,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/tls.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Macros

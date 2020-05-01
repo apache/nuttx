@@ -61,7 +61,7 @@
 #include "stm32l4_waste.h"
 #include "stm32l4_flash.h"
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #if !(defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
       defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR))

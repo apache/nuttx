@@ -47,7 +47,7 @@
 
 #include <arch/irq.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/nrf52_gpio.h"
 #include "nrf52_gpio.h"
 

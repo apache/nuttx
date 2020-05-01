@@ -44,7 +44,7 @@
 
 #include <stdint.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "xmc4_config.h"
 #include "xmc4_usic.h"
 

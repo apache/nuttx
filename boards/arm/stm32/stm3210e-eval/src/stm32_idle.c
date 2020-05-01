@@ -51,7 +51,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "stm32_pm.h"
 #include "stm32_rcc.h"
 #include "stm32_exti.h"

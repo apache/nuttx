@@ -45,7 +45,7 @@
  *****************************************************************************/
 
 #include <stdint.h>
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/tiva_aux_sysif.h"
 #include "cc13xx/cc13x2_aux_sysif.h"

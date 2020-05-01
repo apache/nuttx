@@ -46,8 +46,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "hardware/xmc4_ports.h"
 #include "xmc4_gpio.h"

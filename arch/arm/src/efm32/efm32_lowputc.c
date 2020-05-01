@@ -45,7 +45,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/efm32_memorymap.h"
 #include "hardware/efm32_usart.h"

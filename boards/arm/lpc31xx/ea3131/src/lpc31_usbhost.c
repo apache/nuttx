@@ -53,7 +53,7 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "lpc31.h"
 #include "ea3131.h"

@@ -60,7 +60,7 @@
 #include "stm32_rcc.h"
 #include "stm32_waste.h"
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 /* Only for the STM32L15xx family. */
 

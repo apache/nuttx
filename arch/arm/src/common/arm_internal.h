@@ -1,5 +1,5 @@
 /****************************************************************************
- * common/up_internal.h
+ * arch/arm/src/common/arm_internal.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_UP_INTERNAL_H
-#define __ARCH_ARM_SRC_COMMON_UP_INTERNAL_H
+#ifndef __ARCH_ARM_SRC_COMMON_ARM_INTERNAL_H
+#define __ARCH_ARM_SRC_COMMON_ARM_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -499,4 +499,4 @@ void up_stack_color(FAR void *stackbase, size_t nbytes);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_SRC_COMMON_UP_INTERNAL_H */
+#endif /* __ARCH_ARM_SRC_COMMON_ARM_INTERNAL_H */

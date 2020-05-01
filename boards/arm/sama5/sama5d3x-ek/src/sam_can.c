@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "sam_can.h"
 #include "sama5d3x-ek.h"

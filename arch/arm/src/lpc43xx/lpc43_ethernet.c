@@ -61,7 +61,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #include "chip.h"
 #include "lpc43_pinconfig.h"
@@ -71,7 +71,7 @@
 #include "hardware/lpc43_ccu.h"
 #include "lpc43_rgu.h"
 #include "lpc43_gpio.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include <arch/board/board.h>
 
 /****************************************************************************

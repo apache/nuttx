@@ -42,7 +42,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32l4_comp.h"
 #include "stm32l4_exti.h"
 #include "hardware/stm32l4_exti.h"

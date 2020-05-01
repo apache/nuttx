@@ -52,7 +52,7 @@
 #include <arch/chip/chip.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "ram_vectors.h"
 
 #include "stm32l4_pwm.h"

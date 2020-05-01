@@ -49,7 +49,7 @@
 #include <nuttx/irq.h>
 
 #include "chip.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "efm32_pm.h"
 
 /****************************************************************************

@@ -41,7 +41,7 @@
 
 #include <debug.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sam4s_periphclks.h"
 #include "hardware/sam_smc.h"
 #include "sam4s-xplained.h"

@@ -52,8 +52,8 @@
 
 #include <arch/chip/pm.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 #include "cxd56_powermgr.h"
 #include "cxd56_icc.h"
 #include "cxd56_pmic.h"

@@ -50,7 +50,7 @@
 
 #include <nuttx/clock.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/lpc54_syscon.h"
 #include "hardware/lpc54_emc.h"

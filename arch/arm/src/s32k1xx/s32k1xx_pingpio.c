@@ -42,7 +42,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/s32k1xx_gpio.h"
 #include "s32k1xx_pin.h"
 

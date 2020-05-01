@@ -37,7 +37,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "stm32_bbsram.h"
 
 #include "nucleo-144.h"

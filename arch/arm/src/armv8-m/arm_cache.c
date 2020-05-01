@@ -46,7 +46,7 @@
 #include <nuttx/config.h>
 #include <nuttx/cache.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "barriers.h"
 #include "nvic.h"
 

@@ -64,7 +64,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #include "chip.h"
 #include "stm32_gpio.h"

@@ -42,7 +42,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32l4_start.h"
 #include "b-l475e-iot01a.h"
 

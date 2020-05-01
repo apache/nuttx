@@ -50,8 +50,8 @@
 #include <nuttx/semaphore.h>
 #include <arch/samd5e5/chip.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sched/sched.h"
 
 #include "sam_dmac.h"

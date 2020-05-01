@@ -47,7 +47,7 @@
 #endif
 
 #include <nuttx/cache.h>
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "barriers.h"
 
 #include "hardware/stm32_syscfg.h"

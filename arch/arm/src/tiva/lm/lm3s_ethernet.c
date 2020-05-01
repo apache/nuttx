@@ -64,7 +64,7 @@
 #endif
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "tiva_gpio.h"
 #include "tiva_ethernet.h"

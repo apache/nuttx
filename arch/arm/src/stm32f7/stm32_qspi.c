@@ -60,8 +60,8 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/qspi.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 #include "barriers.h"
 
 #include "stm32_gpio.h"

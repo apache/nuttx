@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include "up_vfork.h"
+#include "arm_vfork.h"
 
 /************************************************************************************
  * Pre-processor Definitions

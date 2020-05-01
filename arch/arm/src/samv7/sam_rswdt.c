@@ -48,7 +48,7 @@
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sam_wdt.h"
 
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_SAMV7_RSWDT)

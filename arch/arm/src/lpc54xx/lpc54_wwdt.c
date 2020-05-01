@@ -48,7 +48,7 @@
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/lpc54_wwdt.h"
 #include "lpc54_power.h"
 #include "lpc54_wdt.h"

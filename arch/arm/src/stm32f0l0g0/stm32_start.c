@@ -47,8 +47,8 @@
 #include <nuttx/init.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "stm32_rcc.h"
 #include "stm32_lowputc.h"

@@ -81,7 +81,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#if 0 /* Prototyped in up_internal.h */
+#if 0 /* Prototyped in arm_internal.h */
 void up_l2ccinitialize(void);
 #endif
 

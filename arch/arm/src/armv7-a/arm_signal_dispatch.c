@@ -42,7 +42,7 @@
 
 #include "svcall.h"
 #include "pgalloc.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #if (defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)) || \
      defined(CONFIG_BUILD_KERNEL)

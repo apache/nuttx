@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "svcall.h"
 
 	.file	"arm_fullcontextrestore.S"

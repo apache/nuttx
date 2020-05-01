@@ -41,7 +41,7 @@
 #include <debug.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "olimex-stm32-p107.h"
 
 /****************************************************************************

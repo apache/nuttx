@@ -50,7 +50,7 @@
 #include <nuttx/board.h>
 
 #include "sched/sched.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "chip.h"
 
 #ifdef CONFIG_STACK_COLORATION
