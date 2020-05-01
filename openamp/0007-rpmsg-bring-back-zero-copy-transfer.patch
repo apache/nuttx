@@ -1,4 +1,4 @@
-From 4224f5f028aec8ebc13e1e203cbae3127b07605e Mon Sep 17 00:00:00 2001
+From e2233e080ef0ad62682f1725e17abb07e939ed50 Mon Sep 17 00:00:00 2001
 From: anchao <anchao@pinecone.net>
 Date: Mon, 10 Dec 2018 19:39:01 +0800
 Subject: [PATCH 07/10] rpmsg: bring back zero copy transfer
@@ -297,7 +297,7 @@ index 9c46970..3db6b24 100644
  /**
   * enum rpmsg_ns_flags - dynamic name service announcement flags
 diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
-index 17f2998..a525066 100644
+index 44b46d4..195189d 100644
 --- a/lib/rpmsg/rpmsg_virtio.c
 +++ open-amp/lib/rpmsg/rpmsg_virtio.c
 @@ -140,6 +140,7 @@ static void *rpmsg_virtio_get_tx_buffer(struct rpmsg_virtio_device *rvdev,
@@ -453,7 +453,7 @@ index 17f2998..a525066 100644
 +		}
  
  		rp_hdr = rpmsg_virtio_get_rx_buffer(rvdev, &len, &idx);
- 		if (rp_hdr == NULL) {
+ 		if (!rp_hdr) {
 @@ -522,6 +644,10 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
  	rvdev->vdev = vdev;
  	rdev->ns_bind_cb = ns_bind_cb;

@@ -1,4 +1,4 @@
-From 8169c7954d432c6abd8db8f1bde35890bba672ff Mon Sep 17 00:00:00 2001
+From 3ea6f30819b25281ec80c68b3abd779981311a77 Mon Sep 17 00:00:00 2001
 From: Xiang Xiao <xiaoxiang@xiaomi.com>
 Date: Fri, 24 Apr 2020 02:22:15 +0800
 Subject: [PATCH 05/10] rpmsg: return fail if either source or destination
