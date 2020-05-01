@@ -163,25 +163,25 @@ staging$(DELIM)libarch$(LIBEXT): $(ARCH_SRC)$(DELIM)libarch$(LIBEXT)
 # Possible user-mode builds
 
 libs$(DELIM)libc$(DELIM)libc$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libc TOPDIR="$(TOPDIR)" libc$(LIBEXT)
+	$(Q) $(MAKE) -C libs$(DELIM)libc TOPDIR="$(TOPDIR)" libc$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 staging$(DELIM)libc$(LIBEXT): libs$(DELIM)libc$(DELIM)libc$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 libs$(DELIM)libnx$(DELIM)libnx$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libnx TOPDIR="$(TOPDIR)" libnx$(LIBEXT)
+	$(Q) $(MAKE) -C libs$(DELIM)libnx TOPDIR="$(TOPDIR)" libnx$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 staging$(DELIM)libnx$(LIBEXT): libs$(DELIM)libnx$(DELIM)libnx$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 mm$(DELIM)libmm$(LIBEXT): context
-	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT)
+	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 staging$(DELIM)libmm$(LIBEXT): mm$(DELIM)libmm$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 libs$(DELIM)libxx$(DELIM)libxx$(LIBEXT): context
-	$(Q) $(MAKE) -C libs$(DELIM)libxx TOPDIR="$(TOPDIR)" libxx$(LIBEXT)
+	$(Q) $(MAKE) -C libs$(DELIM)libxx TOPDIR="$(TOPDIR)" libxx$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 staging$(DELIM)libxx$(LIBEXT): libs$(DELIM)libxx$(DELIM)libxx$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
@@ -193,13 +193,13 @@ staging$(DELIM)libdsp$(LIBEXT): libs$(DELIM)libdsp$(DELIM)libdsp$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 $(APPDIR)$(DELIM)libapps$(LIBEXT): context
-	$(Q) $(MAKE) -C $(APPDIR) TOPDIR="$(TOPDIR)"
+	$(Q) $(MAKE) -C $(APPDIR) TOPDIR="$(TOPDIR)" EXTRAFLAGS="$(EXTRAFLAGS)"
 
 staging$(DELIM)libapps$(LIBEXT): $(APPDIR)$(DELIM)libapps$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
 
 syscall$(DELIM)libproxies$(LIBEXT): context
-	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libproxies$(LIBEXT)
+	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libproxies$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 staging$(DELIM)libproxies$(LIBEXT): syscall$(DELIM)libproxies$(LIBEXT)
 	$(Q) $(call INSTALL_LIB,$<,$@)
