@@ -154,16 +154,16 @@ struct spwm_s
 #ifdef CONFIG_NUCLEOL432KC_SPWM_USE_TIM1
   FAR struct stm32l4_tim_dev_s *tim;
 #endif
-  float waveform[SAMPLES_NUM];        /* Waveform samples */
-  float phase_step;                   /* Waveform phase step */
-  float waveform_freq;                /* Waveform frequency */
-  uint16_t cmp[SAMPLES_NUM];          /* PWM TIM compare table */
-  uint16_t per;                       /* PWM TIM period */
-  uint16_t samples;                   /* Modulation waveform samples num */
-  uint16_t phase_shift[PHASES_NUM];   /* Phase offset */
+  float waveform[SAMPLES_NUM];               /* Waveform samples */
+  float phase_step;                          /* Waveform phase step */
+  float waveform_freq;                       /* Waveform frequency */
+  uint16_t cmp[SAMPLES_NUM];                 /* PWM TIM compare table */
+  uint16_t per;                              /* PWM TIM period */
+  uint16_t samples;                          /* Modulation waveform samples num */
+  uint16_t phase_shift[PHASES_NUM];          /* Phase offset */
   volatile uint16_t sample_now[PHASES_NUM];  /* Current sample number for
                                               * phase */
-  uint8_t phases;                     /* Number of PWM phases */
+  uint8_t phases;                            /* Number of PWM phases */
 };
 
 /****************************************************************************

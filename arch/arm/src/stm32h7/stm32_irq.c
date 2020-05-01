@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32h7/stm32_irq.c
  *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -117,54 +102,73 @@ static void stm32_dumpnvic(const char *msg, int irq)
   irqinfo("  INTCTRL:    %08x VECTAB:  %08x\n",
           getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
-  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
-          getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
-          getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
+  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x "
+          "SYSTICK: %08x\n",
+          getreg32(NVIC_SYSHCON_MEMFAULTENA),
+          getreg32(NVIC_SYSHCON_BUSFAULTENA),
+          getreg32(NVIC_SYSHCON_USGFAULTENA),
+          getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
   irqinfo("  IRQ ENABLE: %08x %08x %08x\n",
-          getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
+          getreg32(NVIC_IRQ0_31_ENABLE),
+          getreg32(NVIC_IRQ32_63_ENABLE),
           getreg32(NVIC_IRQ64_95_ENABLE));
   irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
-          getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
+          getreg32(NVIC_SYSH4_7_PRIORITY),
+          getreg32(NVIC_SYSH8_11_PRIORITY),
           getreg32(NVIC_SYSH12_15_PRIORITY));
   irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
-          getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
+          getreg32(NVIC_IRQ0_3_PRIORITY),
+          getreg32(NVIC_IRQ4_7_PRIORITY),
+          getreg32(NVIC_IRQ8_11_PRIORITY),
+          getreg32(NVIC_IRQ12_15_PRIORITY));
 #if STM32_IRQ_NEXTINTS > 15
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
-          getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
+          getreg32(NVIC_IRQ16_19_PRIORITY),
+          getreg32(NVIC_IRQ20_23_PRIORITY),
+          getreg32(NVIC_IRQ24_27_PRIORITY),
+          getreg32(NVIC_IRQ28_31_PRIORITY));
 #endif
 #if STM32_IRQ_NEXTINTS > 31
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
-          getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+          getreg32(NVIC_IRQ32_35_PRIORITY),
+          getreg32(NVIC_IRQ36_39_PRIORITY),
+          getreg32(NVIC_IRQ40_43_PRIORITY),
+          getreg32(NVIC_IRQ44_47_PRIORITY));
 #endif
 #if STM32_IRQ_NEXTINTS > 47
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
-          getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
+          getreg32(NVIC_IRQ48_51_PRIORITY),
+          getreg32(NVIC_IRQ52_55_PRIORITY),
+          getreg32(NVIC_IRQ56_59_PRIORITY),
+          getreg32(NVIC_IRQ60_63_PRIORITY));
 #endif
 #if STM32_IRQ_NEXTINTS > 63
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ64_67_PRIORITY), getreg32(NVIC_IRQ68_71_PRIORITY),
-          getreg32(NVIC_IRQ72_75_PRIORITY), getreg32(NVIC_IRQ76_79_PRIORITY));
+          getreg32(NVIC_IRQ64_67_PRIORITY),
+          getreg32(NVIC_IRQ68_71_PRIORITY),
+          getreg32(NVIC_IRQ72_75_PRIORITY),
+          getreg32(NVIC_IRQ76_79_PRIORITY));
 #endif
 #if STM32_IRQ_NEXTINTS > 79
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ80_83_PRIORITY), getreg32(NVIC_IRQ84_87_PRIORITY),
-          getreg32(NVIC_IRQ88_91_PRIORITY), getreg32(NVIC_IRQ92_95_PRIORITY));
+          getreg32(NVIC_IRQ80_83_PRIORITY),
+          getreg32(NVIC_IRQ84_87_PRIORITY),
+          getreg32(NVIC_IRQ88_91_PRIORITY),
+          getreg32(NVIC_IRQ92_95_PRIORITY));
 #endif
 #if STM32_IRQ_NEXTINTS > 95
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ96_99_PRIORITY), getreg32(NVIC_IRQ100_103_PRIORITY),
-          getreg32(NVIC_IRQ104_107_PRIORITY), getreg32(NVIC_IRQ108_111_PRIORITY));
+          getreg32(NVIC_IRQ96_99_PRIORITY),
+          getreg32(NVIC_IRQ100_103_PRIORITY),
+          getreg32(NVIC_IRQ104_107_PRIORITY),
+          getreg32(NVIC_IRQ108_111_PRIORITY));
 #endif
 #if STM32_IRQ_NEXTINTS > 111
 #  warning Missing logic
 #endif
 
-// TODO: Make sure this covers all interrupts that are available.
+  /* TODO: Make sure this covers all interrupts that are available. */
 
   leave_critical_section(flags);
 }
@@ -173,8 +177,8 @@ static void stm32_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: stm32_nmi, stm32_busfault, stm32_usagefault, stm32_pendsv, stm32_dbgmonitor,
- *       stm32_pendsv, stm32_reserved
+ * Name: stm32_nmi, stm32_busfault, stm32_usagefault, stm32_pendsv,
+ *       stm32_dbgmonitor, stm32_pendsv, stm32_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -335,32 +339,32 @@ static int stm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
         }
       else
 #elif STM32_IRQ_NEXTINTS <= 160
-        if (extint < 32)
-          {
-            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
-            *bit     = 1 << extint;
-          }
-        else if (extint < 64)
-          {
-            *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
-            *bit     = 1 << (extint - 32);
-          }
-        else if (extint < 96)
-          {
-            *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
-            *bit     = 1 << (extint - 64);
-          }
-        else if (extint < 128)
-          {
-            *regaddr = (NVIC_IRQ96_127_ENABLE + offset);
-            *bit     = 1 << (extint - 96);
-          }
-        else if (extint < STM32_IRQ_NEXTINTS)
-          {
-            *regaddr = (NVIC_IRQ128_159_ENABLE + offset);
-            *bit     = 1 << (extint - 128);
-          }
-        else
+      if (extint < 32)
+        {
+          *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
+          *bit     = 1 << extint;
+        }
+      else if (extint < 64)
+        {
+          *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
+          *bit     = 1 << (extint - 32);
+        }
+      else if (extint < 96)
+        {
+          *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
+          *bit     = 1 << (extint - 64);
+        }
+      else if (extint < 128)
+        {
+          *regaddr = (NVIC_IRQ96_127_ENABLE + offset);
+          *bit     = 1 << (extint - 96);
+        }
+      else if (extint < STM32_IRQ_NEXTINTS)
+        {
+          *regaddr = (NVIC_IRQ128_159_ENABLE + offset);
+          *bit     = 1 << (extint - 128);
+        }
+      else
 #else
 #  warning Missing logic
 #endif

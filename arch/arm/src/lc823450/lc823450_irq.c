@@ -155,28 +155,41 @@ static void lc823450_dumpnvic(const char *msg, int irq)
   irqinfo("  INTCTRL:    %08x VECTAB:  %08x\n",
           getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
-  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
-          getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
-          getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
+  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x "
+          "SYSTICK: %08x\n",
+          getreg32(NVIC_SYSHCON_MEMFAULTENA),
+          getreg32(NVIC_SYSHCON_BUSFAULTENA),
+          getreg32(NVIC_SYSHCON_USGFAULTENA),
+          getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
   irqinfo("  IRQ ENABLE: %08x %08x %08x\n",
-          getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE),
+          getreg32(NVIC_IRQ0_31_ENABLE),
+          getreg32(NVIC_IRQ32_63_ENABLE),
           getreg32(NVIC_IRQ64_95_ENABLE));
   irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
-          getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
+          getreg32(NVIC_SYSH4_7_PRIORITY),
+          getreg32(NVIC_SYSH8_11_PRIORITY),
           getreg32(NVIC_SYSH12_15_PRIORITY));
   irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
-          getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
+          getreg32(NVIC_IRQ0_3_PRIORITY),
+          getreg32(NVIC_IRQ4_7_PRIORITY),
+          getreg32(NVIC_IRQ8_11_PRIORITY),
+          getreg32(NVIC_IRQ12_15_PRIORITY));
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
-          getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
+          getreg32(NVIC_IRQ16_19_PRIORITY),
+          getreg32(NVIC_IRQ20_23_PRIORITY),
+          getreg32(NVIC_IRQ24_27_PRIORITY),
+          getreg32(NVIC_IRQ28_31_PRIORITY));
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
-          getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+          getreg32(NVIC_IRQ32_35_PRIORITY),
+          getreg32(NVIC_IRQ36_39_PRIORITY),
+          getreg32(NVIC_IRQ40_43_PRIORITY),
+          getreg32(NVIC_IRQ44_47_PRIORITY));
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ48_51_PRIORITY), getreg32(NVIC_IRQ52_55_PRIORITY),
-          getreg32(NVIC_IRQ56_59_PRIORITY), getreg32(NVIC_IRQ60_63_PRIORITY));
+          getreg32(NVIC_IRQ48_51_PRIORITY),
+          getreg32(NVIC_IRQ52_55_PRIORITY),
+          getreg32(NVIC_IRQ56_59_PRIORITY),
+          getreg32(NVIC_IRQ60_63_PRIORITY));
   irqinfo("              %08x\n",
           getreg32(NVIC_IRQ64_67_PRIORITY));
   leave_critical_section(flags);
@@ -186,8 +199,9 @@ static void lc823450_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: lc823450_nmi, lc823450_busfault, lc823450_usagefault, lc823450_pendsv,
- *       lc823450_dbgmonitor, lc823450_pendsv, lc823450_reserved
+ * Name: lc823450_nmi, lc823450_busfault, lc823450_usagefault,
+ *       lc823450_pendsv, lc823450_dbgmonitor, lc823450_pendsv,
+ *       lc823450_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -269,13 +283,13 @@ static inline void lc823450_prioritize_syscall(int priority)
 }
 #endif
 
-/***********************************************************************
+/****************************************************************************
  * Name: lc823450_extint_clr
  *
  * Description:
  *   clear irq factor
  *
- ***********************************************************************/
+ ****************************************************************************/
 
 static void lc823450_extint_clr(int irq)
 {
@@ -296,13 +310,13 @@ static void lc823450_extint_clr(int irq)
   return;
 }
 
-/***********************************************************************
+/****************************************************************************
  * Name: lc823450_extint_isr
  *
  * Description:
  *   Handle external interrupt.
  *
- ***********************************************************************/
+ ****************************************************************************/
 
 static int lc823450_extint_isr(int irq, FAR void *context, FAR void *arg)
 {
@@ -328,7 +342,7 @@ static int lc823450_extint_isr(int irq, FAR void *context, FAR void *arg)
 
   /* Re-deliver the IRQ */
 
-  for ( ; pending != 0; irq++, pending >>= 1)
+  for (; pending != 0; irq++, pending >>= 1)
     {
       if ((pending & 1) != 0)
         {
@@ -339,13 +353,13 @@ static int lc823450_extint_isr(int irq, FAR void *context, FAR void *arg)
   return OK;
 }
 
-/***********************************************************************
+/****************************************************************************
  * Name: lc823425_extint_initialize
  *
  * Description:
  *   Initialize external interrupt.
  *
- ***********************************************************************/
+ ****************************************************************************/
 
 static void lc823450_extint_initialize(void)
 {
@@ -428,10 +442,10 @@ static int lc823450_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   else
     {
-       *regaddr = NVIC_SYSHCON;
-       if (irq == LC823450_IRQ_MEMFAULT)
+      *regaddr = NVIC_SYSHCON;
+      if (irq == LC823450_IRQ_MEMFAULT)
         {
-          *bit = NVIC_SYSHCON_MEMFAULTENA;
+         *bit = NVIC_SYSHCON_MEMFAULTENA;
         }
       else if (irq == LC823450_IRQ_BUSFAULT)
         {
@@ -476,17 +490,18 @@ void up_irqinitialize(void)
   /* Colorize the interrupt stack for debug purposes */
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 3
-  {
-    size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
-    arm_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
-                   intstack_size);
-  }
+    {
+      size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+      arm_stack_color((FAR void *)((uintptr_t)&g_intstackbase -
+                      intstack_size), intstack_size);
+    }
 #endif
 
   /* The standard location for the vector table is at the beginning of FLASH
-   * at address 0x0800:0000.  If we are using the STMicro DFU bootloader, then
-   * the vector table will be offset to a different location in FLASH and we
-   * will need to set the NVIC vector location to this alternative location.
+   * at address 0x0800:0000.  If we are using the STMicro DFU bootloader,
+   * then the vector table will be offset to a different location in FLASH
+   * and we will need to set the NVIC vector location to this alternative
+   * location.
    *
    * If CONFIG_ARCH_RAMVECTORS is defined, then we are using a RAM-based
    * vector table that requires special initialization.
@@ -543,7 +558,7 @@ void up_irqinitialize(void)
   /* up_prioritize_irq(LC823450_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-   lc823450_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
+  lc823450_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
 #endif
 
   /* If the MPU is enabled, then attach and enable the Memory Management
@@ -739,7 +754,6 @@ void arm_ack_irq(int irq)
       DEBUGASSERT(false);
     }
 #endif
-
 }
 
 /****************************************************************************
@@ -786,7 +800,6 @@ int up_prioritize_irq(int irq, int priority)
   regval     |= (priority << shift);
   putreg32(regval, regaddr);
 
-  /* lc823450_dumpnvic("prioritize", irq); */
   return OK;
 }
 #endif
@@ -869,6 +882,7 @@ int lc823450_irq_register(int irq, struct lc823450_irq_ops *ops)
     {
       return -1;
     }
+
   return OK;
 }
 #endif /* CONFIG_LC823450_VIRQ */
