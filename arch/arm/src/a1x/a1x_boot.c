@@ -342,7 +342,7 @@ void arm_boot(void)
    * driver.
    */
 
-  up_earlyserialinit();
+  arm_earlyserialinit();
 #endif
 
   /* Perform board-specific initialization,  This must include:

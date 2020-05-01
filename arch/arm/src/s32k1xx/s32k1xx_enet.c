@@ -2661,7 +2661,7 @@ int s32k1xx_netinitialize(int intf)
 }
 
 /****************************************************************************
- * Name: up_netinitialize
+ * Name: arm_netinitialize
  *
  * Description:
  *   Initialize the first network interface.  If there are more than one
@@ -2672,7 +2672,7 @@ int s32k1xx_netinitialize(int intf)
  ****************************************************************************/
 
 #if CONFIG_S32K1XX_ENET_NETHIFS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   s32k1xx_netinitialize(0);
 }

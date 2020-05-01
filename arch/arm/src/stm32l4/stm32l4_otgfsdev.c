@@ -5517,7 +5517,7 @@ static void stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_usbinitialize
+ * Name: arm_usbinitialize
  *
  * Description:
  *   Initialize USB hardware.
@@ -5531,7 +5531,7 @@ static void stm32l4_hwinitialize(FAR struct stm32l4_usbdev_s *priv)
  *
  ****************************************************************************/
 
-void up_usbinitialize(void)
+void arm_usbinitialize(void)
 {
   /* At present, there is only a single OTG FS device support. Hence it is
    * pre-allocated as g_otgfsdev.  However, in most code, the private data
@@ -5581,7 +5581,7 @@ void up_usbinitialize(void)
    * known state.
    */
 
-  up_usbuninitialize();
+  arm_usbuninitialize();
 
   /* Initialize the driver data structure */
 
@@ -5614,14 +5614,14 @@ void up_usbinitialize(void)
   return;
 
 errout:
-  up_usbuninitialize();
+  arm_usbuninitialize();
 }
 
 /****************************************************************************
- * Name: up_usbuninitialize
+ * Name: arm_usbuninitialize
  ****************************************************************************/
 
-void up_usbuninitialize(void)
+void arm_usbuninitialize(void)
 {
   /* At present, there is only a single OTG FS device support. Hence it is
    * pre-allocated as g_otgfsdev.  However, in most code, the private data

@@ -149,11 +149,11 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    */
 
 #ifdef CONFIG_TLS
-  up_stack_color((FAR void *)((uintptr_t)tcb->stack_alloc_ptr +
+  arm_stack_color((FAR void *)((uintptr_t)tcb->stack_alloc_ptr +
                  sizeof(struct tls_info_s)),
                  tcb->adj_stack_size - sizeof(struct tls_info_s));
 #else
-  up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
+  arm_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
 #endif
 #endif
 

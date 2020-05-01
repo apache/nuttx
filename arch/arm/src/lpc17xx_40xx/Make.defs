@@ -87,7 +87,7 @@ CMN_UASRCS += arm_signal_handler.S
 endif
 
 # Use of common/arm_etherstub.c is deprecated.  The preferred mechanism is to
-# use CONFIG_NETDEV_LATEINIT=y to suppress the call to up_netinitialize() in
+# use CONFIG_NETDEV_LATEINIT=y to suppress the call to arm_netinitialize() in
 # up_initialize().  Then this stub would not be needed.
 
 ifeq ($(CONFIG_NET),y)

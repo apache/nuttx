@@ -4324,7 +4324,7 @@ static void khci_hwshutdown(struct khci_usbdev_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_usbinitialize
+ * Name: arm_usbinitialize
  *
  * Description:
  *   Initialize the USB driver
@@ -4344,7 +4344,7 @@ static void khci_hwshutdown(struct khci_usbdev_s *priv)
  *
  ****************************************************************************/
 
-void up_usbinitialize(void)
+void arm_usbinitialize(void)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers
@@ -4400,7 +4400,7 @@ void up_usbinitialize(void)
     {
       usbtrace(TRACE_DEVERROR(KHCI_TRACEERR_IRQREGISTRATION),
                (uint16_t)KINETIS_IRQ_USBOTG);
-      up_usbuninitialize();
+      arm_usbuninitialize();
       return;
     }
 
@@ -4408,7 +4408,7 @@ void up_usbinitialize(void)
 }
 
 /****************************************************************************
- * Name: up_usbuninitialize
+ * Name: arm_usbuninitialize
  * Description:
  *   Initialize the USB driver
  * Input Parameters:
@@ -4419,7 +4419,7 @@ void up_usbinitialize(void)
  *
  ****************************************************************************/
 
-void up_usbuninitialize(void)
+void arm_usbuninitialize(void)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers

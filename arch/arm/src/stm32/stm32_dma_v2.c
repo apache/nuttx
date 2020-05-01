@@ -460,7 +460,7 @@ static int stm32_dmainterrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-void weak_function up_dma_initialize(void)
+void weak_function arm_dma_initialize(void)
 {
   struct stm32_dma_s *dmast;
   int stream;

@@ -958,20 +958,20 @@ static bool sam_txempty(struct uart_dev_s *dev)
 #ifdef USE_EARLYSERIALINIT
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: arm_earlyserialinit
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
  *   before sam_serialinit.
  *
- *   NOTE: On this platform up_earlyserialinit() does not really do
+ *   NOTE: On this platform arm_earlyserialinit() does not really do
  *   anything of consequence and probably could be eliminated with little
  *   effort.
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void arm_earlyserialinit(void)
 {
   /* Disable all USARTS */
 
@@ -1001,7 +1001,7 @@ void up_earlyserialinit(void)
 #endif
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: arm_serialinit
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
@@ -1009,7 +1009,7 @@ void up_earlyserialinit(void)
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void arm_serialinit(void)
 {
   /* Register the console */
 

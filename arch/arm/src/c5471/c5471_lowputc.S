@@ -72,7 +72,7 @@
  **************************************************************************/
 
 /**************************************************************************
- * Name: up_lowputc
+ * Name: arm_lowputc
  **************************************************************************/
 
 /* This assembly language version has the advantage that it can does not
@@ -81,9 +81,9 @@
  */
 
 	.text
-	.global	up_lowputc
-	.type	up_lowputc, function
-up_lowputc:
+	.global	arm_lowputc
+	.type	arm_lowputc, function
+arm_lowputc:
 	/* On entry, r0 holds the character to be printed */
 
 #ifdef CONFIG_SERIAL_IRDA_CONSOLE

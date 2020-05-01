@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_syscall
+ * Name: arm_syscall
  *
  * Description:
  *   SWI interrupts will vector here with insn=the SWI instruction and
@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-void up_syscall(uint32_t *regs)
+void arm_syscall(uint32_t *regs)
 {
   _alert("Syscall from 0x%x\n", regs[REG_PC]);
   CURRENT_REGS = regs;

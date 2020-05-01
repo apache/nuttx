@@ -282,7 +282,7 @@
 	.macro	showprogress, code
 #ifdef CONFIG_DEBUG_FEATURES
 	mov	r0, #\code
-	bl	up_lowputc
+	bl	arm_lowputc
 #endif
 	.endm
 
@@ -473,27 +473,27 @@ _vector_table:
 	ldr	pc, .Lfiqhandler		/* 0x1c: FIQ */
 
 	.globl   __start
-	.globl	up_vectorundefinsn
-	.globl	up_vectorswi
-	.globl	up_vectorprefetch
-	.globl	up_vectordata
-	.globl	up_vectorirq
-	.globl	up_vectorfiq
+	.globl	arm_vectorundefinsn
+	.globl	arm_vectorswi
+	.globl	arm_vectorprefetch
+	.globl	arm_vectordata
+	.globl	arm_vectorirq
+	.globl	arm_vectorfiq
 
 .Lresethandler:
 	.long   __start
 .Lundefinedhandler:
-	.long	up_vectorundefinsn
+	.long	arm_vectorundefinsn
 .Lswihandler:
-	.long	up_vectorswi
+	.long	arm_vectorswi
 .Lprefetchaborthandler:
-	.long	up_vectorprefetch
+	.long	arm_vectorprefetch
 .Ldataaborthandler:
-	.long	up_vectordata
+	.long	arm_vectordata
 .Lirqhandler:
-	.long	up_vectorirq
+	.long	arm_vectorirq
 .Lfiqhandler:
-	.long	up_vectorfiq
+	.long	arm_vectorfiq
 	.size	_vector_table, . - _vector_table
 
 /*****************************************************************************
@@ -583,7 +583,7 @@ __start:
 
 	mov	fp, #0
 #ifdef USE_EARLYSERIALINIT
-	bl	up_earlyserialinit
+	bl	arm_earlyserialinit
 #endif
 
 	showprogress 'C'

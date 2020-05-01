@@ -237,7 +237,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
                    sizeof(struct tls_info_s);
       stack_size = tcb->adj_stack_size -
                    sizeof(struct tls_info_s);
-      up_stack_color((FAR void *)stack_base, stack_size);
+      arm_stack_color((FAR void *)stack_base, stack_size);
 
 #endif /* CONFIG_STACK_COLORATION */
 #else /* CONFIG_TLS */
@@ -247,7 +247,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * water marks.
        */
 
-      up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
+      arm_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
 
 #endif /* CONFIG_STACK_COLORATION */
 #endif /* CONFIG_TLS */
@@ -260,7 +260,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 }
 
 /****************************************************************************
- * Name: up_stack_color
+ * Name: arm_stack_color
  *
  * Description:
  *   Write a well know value into the stack
@@ -268,7 +268,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
  ****************************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes)
+void arm_stack_color(FAR void *stackbase, size_t nbytes)
 {
   /* Take extra care that we do not write outsize the stack boundaries */
 

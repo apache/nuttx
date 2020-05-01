@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_sigdeliver
+ * Name: arm_sigdeliver
  *
  * Description:
  *   This is the a signal handling trampoline.  When a signal action was
@@ -51,7 +51,7 @@
  *
  ****************************************************************************/
 
-void up_sigdeliver(void)
+void arm_sigdeliver(void)
 {
   struct tcb_s  *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];

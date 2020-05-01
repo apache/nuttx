@@ -4098,7 +4098,7 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
  * Description:
  *   Initialize the Ethernet driver for one interface.  If the STM32 chip
  *   supports multiple Ethernet controllers, then board specific logic
- *   must implement up_netinitialize() and call this function to initialize
+ *   must implement arm_netinitialize() and call this function to initialize
  *   the desired interfaces.
  *
  * Input Parameters:
@@ -4187,13 +4187,13 @@ int stm32_ethinitialize(int intf)
 }
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Function: arm_netinitialize
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
  *   low-level initialization logic in arm_initialize.c.  If STM32F7_NETHERNET
  *   greater than one, then board specific logic will have to supply a
- *   version of up_netinitialize() that calls stm32_ethinitialize() with
+ *   version of arm_netinitialize() that calls stm32_ethinitialize() with
  *   the appropriate interface number.
  *
  * Input Parameters:
@@ -4207,7 +4207,7 @@ int stm32_ethinitialize(int intf)
  ****************************************************************************/
 
 #if STM32F7_NETHERNET == 1 && !defined(CONFIG_NETDEV_LATEINIT)
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   stm32_ethinitialize(0);
 }

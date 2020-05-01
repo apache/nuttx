@@ -532,14 +532,14 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
 
       while (*dead)
         {
-          up_lowputc(*dead++);
+          arm_lowputc(*dead++);
         }
     }
   else if (rv == -ENOSPC)
     {
       /* hard fault again */
 
-      up_lowputc('!');
+      arm_lowputc('!');
     }
 }
 #endif /* CONFIG_STM32F7_SAVE_CRASHDUMP */

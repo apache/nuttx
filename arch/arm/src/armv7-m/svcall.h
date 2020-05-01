@@ -84,7 +84,7 @@
 #ifdef CONFIG_LIB_SYSCALL
 /* SYS call 3:
  *
- * void up_syscall_return(void);
+ * void arm_syscall_return(void);
  */
 
 #define SYS_syscall_return        (3)

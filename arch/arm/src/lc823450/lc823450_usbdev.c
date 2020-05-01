@@ -1433,7 +1433,7 @@ static int lc823450_usbinterrupt(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_usbinitialize
+ * Name: arm_usbinitialize
  *
  * Description:
  *   Initialize the USB driver
@@ -1446,7 +1446,7 @@ static int lc823450_usbinterrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void up_usbinitialize(void)
+void arm_usbinitialize(void)
 {
   int i;
   struct lc823450_usbdev_s *priv = &g_usbdev;

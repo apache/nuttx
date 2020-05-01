@@ -383,7 +383,7 @@ void __start(void)
   /* Perform early serial initialization */
 
 #ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  arm_earlyserialinit();
 #endif
 
   /* For the case of the separate user-/kernel-space build, perform whatever

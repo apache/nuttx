@@ -45,16 +45,16 @@
 
 .section .text.exceptions
 _undef_instr:
-	b	up_vectorundefinsn
+	b	arm_vectorundefinsn
 _sw_interr:
-	b	up_vectorswi
+	b	arm_vectorswi
 _prefetch_abort:
-	b	up_vectorprefetch
+	b	arm_vectorprefetch
 _data_abort:
-	b	up_vectordata
+	b	arm_vectordata
 _reserved:
 	b	_reserved
 _irq:
-	b	up_vectorirq
+	b	arm_vectorirq
 _fiq:
-	b	up_vectorfiq
+	b	arm_vectorfiq

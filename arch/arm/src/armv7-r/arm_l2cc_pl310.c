@@ -293,7 +293,7 @@ static void pl310_flush_all(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_l2ccinitialize
+ * Name: arm_l2ccinitialize
  *
  * Description:
  *   One time configuration of the L2 cache.  The L2 cache will be enabled
@@ -308,7 +308,7 @@ static void pl310_flush_all(void)
  *
  ****************************************************************************/
 
-void up_l2ccinitialize(void)
+void arm_l2ccinitialize(void)
 {
   uint32_t regval;
   int i;

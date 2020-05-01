@@ -3188,7 +3188,7 @@ static int lpc17_40_pullup(struct usbdev_s *dev, bool enable)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_usbinitialize
+ * Name: arm_usbinitialize
  *
  * Description:
  *   Initialize USB hardware.
@@ -3199,7 +3199,7 @@ static int lpc17_40_pullup(struct usbdev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-void up_usbinitialize(void)
+void arm_usbinitialize(void)
 {
   struct lpc17_40_usbdev_s *priv = &g_usbdev;
   uint32_t regval;
@@ -3359,14 +3359,14 @@ void up_usbinitialize(void)
   return;
 
 errout:
-  up_usbuninitialize();
+  arm_usbuninitialize();
 }
 
 /****************************************************************************
- * Name: up_usbuninitialize
+ * Name: arm_usbuninitialize
  ****************************************************************************/
 
-void up_usbuninitialize(void)
+void arm_usbuninitialize(void)
 {
   struct lpc17_40_usbdev_s *priv = &g_usbdev;
   uint32_t regval;

@@ -1308,7 +1308,7 @@ static bool kinetis_txready(struct uart_dev_s *dev)
  * Description:
  *   Performs the low level LPUART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.  NOTE:  This function depends on GPIO pin
+ *   before arm_serialinit.  NOTE:  This function depends on GPIO pin
  *   configuration performed in kinetis_lowsetup() and main clock
  *   initialization performed in up_clkinitialize().
  *
@@ -1347,7 +1347,7 @@ void kinetis_lpuart_earlyserialinit(void)
  *
  * Description:
  *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   that arm_earlyserialinit was called previously.
  *
  * Input Parameters:
  *   first: - First TTY number to assign
@@ -1433,10 +1433,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      arm_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  arm_lowputc(ch);
   kinetis_restoreuartint(priv, ie);
 #endif
   return ch;
@@ -1463,10 +1463,10 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      up_lowputc('\r');
+      arm_lowputc('\r');
     }
 
-  up_lowputc(ch);
+  arm_lowputc(ch);
 #endif
   return ch;
 }

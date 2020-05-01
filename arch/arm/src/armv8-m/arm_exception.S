@@ -165,7 +165,7 @@ exception_common:
 	/* Save the non-volatile FP registers here.
 	 *
 	 * This routine is the only point where we can save these registers; either before
-	 * or after calling up_doirq.  The compiler is free to use them at any time as long
+	 * or after calling arm_doirq.  The compiler is free to use them at any time as long
 	 * as they are restored before returning, so we can't assume that we can get at the
 	 * true values of these registers in any routine called from here.
 	 *
@@ -179,7 +179,7 @@ exception_common:
 
 	stmdb	sp!, {r2-r11,r14}		/* Save the remaining registers plus the SP/PRIMASK values */
 
-	/* There are two arguments to up_doirq:
+	/* There are two arguments to arm_doirq:
 	 *
 	 *   R0 = The IRQ number
 	 *   R1 = The top of the stack points to the saved state
@@ -210,10 +210,10 @@ exception_common:
 
 #endif
 
-	bl		up_doirq				/* R0=IRQ, R1=register save (msp) */
+	bl		arm_doirq				/* R0=IRQ, R1=register save (msp) */
 	mov		r1, r4					/* Recover R1=main stack pointer */
 
-	/* On return from up_doirq, R0 will hold a pointer to register context
+	/* On return from arm_doirq, R0 will hold a pointer to register context
 	 * array to use for the interrupt return.  If that return value is the same
 	 * as current stack pointer, then things are relatively easy.
 	 */

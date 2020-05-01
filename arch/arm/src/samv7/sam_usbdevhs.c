@@ -4823,7 +4823,7 @@ static void sam_sw_shutdown(struct sam_usbdev_s *priv)
  * Public Functions
  ****************************************************************************/
 /****************************************************************************
- * Name: up_usbinitialize
+ * Name: arm_usbinitialize
  * Description:
  *   Initialize the USB driver
  * Input Parameters:
@@ -4834,7 +4834,7 @@ static void sam_sw_shutdown(struct sam_usbdev_s *priv)
  *
  ****************************************************************************/
 
-void up_usbinitialize(void)
+void arm_usbinitialize(void)
 {
   /* For now there is only one USB controller, but we will always refer to
    * it using a pointer to make any future ports to multiple USB controllers
@@ -4878,11 +4878,11 @@ void up_usbinitialize(void)
   return;
 
 errout:
-  up_usbuninitialize();
+  arm_usbuninitialize();
 }
 
 /****************************************************************************
- * Name: up_usbuninitialize
+ * Name: arm_usbuninitialize
  * Description:
  *   Initialize the USB driver
  * Input Parameters:
@@ -4893,7 +4893,7 @@ errout:
  *
  ****************************************************************************/
 
-void up_usbuninitialize(void)
+void arm_usbuninitialize(void)
 {
   struct sam_usbdev_s *priv = &g_usbhs;
   irqstate_t flags;
@@ -5007,7 +5007,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   /* Put the hardware in an inactive state.  Then bring the hardware back up
    * in the initial state.  This is essentially the same state as we were
-   * in when up_usbinitialize() was first called.
+   * in when arm_usbinitialize() was first called.
    */
 
   sam_hw_shutdown(priv);

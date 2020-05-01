@@ -189,8 +189,8 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(S32K1XX_IRQ_SVCALL, up_svcall, NULL);
-  irq_attach(S32K1XX_IRQ_HARDFAULT, up_hardfault, NULL);
+  irq_attach(S32K1XX_IRQ_SVCALL, arm_svcall, NULL);
+  irq_attach(S32K1XX_IRQ_HARDFAULT, arm_hardfault, NULL);
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
@@ -288,14 +288,14 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_ack_irq
+ * Name: arm_ack_irq
  *
  * Description:
  *   Acknowledge the IRQ
  *
  ****************************************************************************/
 
-void up_ack_irq(int irq)
+void arm_ack_irq(int irq)
 {
   s32k11x_clrpend(irq);
 }

@@ -54,7 +54,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_pginitialize()
+ * Name: arm_pginitialize()
  *
  * Description:
  *  Initialize the MMU for on-demand paging support..
@@ -72,10 +72,10 @@
  *
  ****************************************************************************/
 
-void up_pginitialize(void)
+void arm_pginitialize(void)
 {
   /* None needed at present.  This file is just retained in case the need
-   * arises in the future.  Nothing calls up_pginitialize() now.  If needed,
+   * arises in the future.  Nothing calls arm_pginitialize() now.  If needed,
    * if should be called early in arm_boot.c to assure that all paging is
    * ready.
    */

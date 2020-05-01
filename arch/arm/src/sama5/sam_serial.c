@@ -1586,7 +1586,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  * Description:
  *   Performs the low level USART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.
+ *   before arm_serialinit.
  *
  ****************************************************************************/
 

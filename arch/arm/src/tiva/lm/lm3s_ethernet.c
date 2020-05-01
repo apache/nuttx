@@ -1747,7 +1747,7 @@ static inline int tiva_ethinitialize(int intf)
 
 
 /************************************************************************************
- * Name: up_netinitialize
+ * Name: arm_netinitialize
  *
  * Description:
  *   Initialize the first network interface.  If there are more than one interface
@@ -1757,7 +1757,7 @@ static inline int tiva_ethinitialize(int intf)
  ************************************************************************************/
 
 #if TIVA_NETHCONTROLLERS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   tiva_ethinitialize(0);
 }

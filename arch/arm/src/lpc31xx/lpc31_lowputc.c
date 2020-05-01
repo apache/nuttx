@@ -67,7 +67,7 @@
 #  ifdef CONFIG_UART_SERIAL_CONSOLE
 #    define HAVE_CONSOLE 1
 
-/* Is initialization performed by up_earlyserialinit()?  Or is UART
+/* Is initialization performed by arm_earlyserialinit()?  Or is UART
  * initialization suppressed?
  */
 
@@ -340,14 +340,14 @@ void lpc31_lowsetup(void)
 }
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: arm_lowputc
  *
  * Description:
  *   Provide priority, low-level access to support OS debug  writes
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void arm_lowputc(char ch)
 {
 #ifdef HAVE_CONSOLE
   up_waittxready();

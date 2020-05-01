@@ -71,7 +71,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Function: arm_netinitialize
  *
  * Description:
  *   Initialize the EMAC driver.  Also prototyped in arm_internal.h.
@@ -87,7 +87,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void up_netinitialize(void);
+void arm_netinitialize(void);
 
 /************************************************************************************
  * Function: sam_phy_boardinitialize

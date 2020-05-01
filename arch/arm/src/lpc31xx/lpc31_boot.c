@@ -387,7 +387,7 @@ void arm_boot(void)
   /* Perform early serial initialization if we are going to use the serial driver */
 
 #ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  arm_earlyserialinit();
 #endif
 
   /* Perform board-specific initialization */

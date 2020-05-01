@@ -100,7 +100,7 @@ static inline void up_gmac_initialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Function: arm_netinitialize
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
@@ -116,7 +116,7 @@ static inline void up_gmac_initialize(void)
  *
  ****************************************************************************/
 
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   up_gmac_initialize();
 }

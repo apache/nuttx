@@ -174,7 +174,7 @@ exception_common:
 	stmdb	sp!, {r2-r11}			/* Save the remaining registers plus the SP value */
 #endif
 
-	/* There are two arguments to up_doirq:
+	/* There are two arguments to arm_doirq:
 	 *
 	 *   R0 = The IRQ number
 	 *   R1 = The top of the stack points to the saved state
@@ -205,10 +205,10 @@ exception_common:
 
 #endif
 
-	bl		up_doirq				/* R0=IRQ, R1=register save (msp) */
+	bl		arm_doirq				/* R0=IRQ, R1=register save (msp) */
 	mov		r1, r4					/* Recover R1=main stack pointer */
 
-	/* On return from up_doirq, R0 will hold a pointer to register context
+	/* On return from arm_doirq, R0 will hold a pointer to register context
 	 * array to use for the interrupt return.  If that return value is the same
 	 * as current stack pointer, then things are relatively easy.
 	 */
@@ -227,12 +227,12 @@ exception_common:
 	 * Here:
 	 *   r0 = Address of the register save area
 	 *
-	 * NOTE: It is a requirement that up_restorefpu() preserve the value of
+	 * NOTE: It is a requirement that arm_restorefpu() preserve the value of
 	 * r0!
 	 */
 
 #ifdef CONFIG_ARCH_FPU
-	bl		up_restorefpu			/* Restore the FPU registers */
+	bl		arm_restorefpu			/* Restore the FPU registers */
 #endif
 
 	/* We are returning with a pending context switch.  This case is different

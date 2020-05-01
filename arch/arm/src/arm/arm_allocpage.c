@@ -203,7 +203,7 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
        */
 
        uintptr_t oldvaddr = PG_POOL_NDX2VA(g_ptemap[pgndx]);
-       pte = up_va2pte(oldvaddr);
+       pte = arm_va2pte(oldvaddr);
       *pte = 0;
 
       /* Invalidate instruction TLB corresponding to the virtual address */
@@ -227,7 +227,7 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
    * non-cached (MMU_L2_ALLOCFLAGS).
    */
 
-  pte = up_va2pte(vaddr);
+  pte = arm_va2pte(vaddr);
   *pte = (paddr | MMU_L2_ALLOCFLAGS);
 
   /* And save the new L1 index */

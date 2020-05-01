@@ -82,7 +82,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_lowputc(c)
+#  define showprogress(c) arm_lowputc(c)
 #else
 #  define showprogress(c)
 #endif
@@ -464,7 +464,7 @@ void arm_boot(void)
    * driver.
    */
 
-  up_earlyserialinit();
+  arm_earlyserialinit();
 #endif
 
   /* Perform board-specific initialization,  This must include:

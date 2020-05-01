@@ -574,7 +574,7 @@ exit_with_error:
 
 /****************************************************************************
  * Name: lc823450_dvfs_exit_idle
- * This API is called in up_ack_irq() (i.e. interrupt context)
+ * This API is called in arm_ack_irq() (i.e. interrupt context)
  ****************************************************************************/
 
 void lc823450_dvfs_exit_idle(int irq)

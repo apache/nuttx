@@ -57,7 +57,7 @@
  * Description:
  *   Performs the low level serial initialization early so that the serial
  *   console will be available during bootup.  This must be called
- *   before up_serialinit.
+ *   before arm_serialinit.
  *
  ****************************************************************************/
 
@@ -82,15 +82,15 @@ void sam_earlyserialinit(void)
 #endif
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: arm_serialinit
  *
  * Description:
  *   Register all serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   that arm_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
-void up_serialinit(void)
+void arm_serialinit(void)
 {
 #if defined(SAMA5_HAVE_UART) || defined(SAMA5_HAVE_USART)
   /* Register UART/USART drivers */

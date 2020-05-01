@@ -41,8 +41,8 @@ index 3cc6323..ad42790 100644
     */
  
  #ifdef USE_EARLYSERIALINIT
-+syslog(LOG_INFO, "Calling up_earlyserialinit\n"); // REMOVE ME
-   up_earlyserialinit();
++syslog(LOG_INFO, "Calling arm_earlyserialinit\n"); // REMOVE ME
+   arm_earlyserialinit();
  #endif
  
 @@ -353,6 +359,7 @@ void arm_boot(void)

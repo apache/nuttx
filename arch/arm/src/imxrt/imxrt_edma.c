@@ -709,7 +709,7 @@ static int imxrt_error_interrupt(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dma_initialize
+ * Name: arm_dma_initialize
  *
  * Description:
  *   Initialize the DMA subsystem
@@ -719,7 +719,7 @@ static int imxrt_error_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void weak_function up_dma_initialize(void)
+void weak_function arm_dma_initialize(void)
 {
   uintptr_t regaddr;
   uint32_t regval;

@@ -157,7 +157,7 @@ uint32_t *arm_syscall(uint32_t *regs)
     {
       /* R0=SYS_syscall_return:  This a SYSCALL return command:
        *
-       *   void up_syscall_return(void);
+       *   void arm_syscall_return(void);
        *
        * At this point, the following values are saved in context:
        *

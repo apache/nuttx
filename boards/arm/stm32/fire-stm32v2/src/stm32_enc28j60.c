@@ -184,10 +184,10 @@ static void up_disable(FAR const struct enc_lower_s *lower)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_netinitialize
+ * Name: arm_netinitialize
  ****************************************************************************/
 
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   FAR struct spi_dev_s *spi;
   int ret;

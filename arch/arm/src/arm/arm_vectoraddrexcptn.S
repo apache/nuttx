@@ -75,9 +75,9 @@
  *
  ************************************************************************************/
 
-	.globl	up_vectoraddrexcptn
-	.type	up_vectoraddrexcptn, %function
-up_vectoraddrexcptn:
-	b	up_vectoraddrexcptn
-	.size	up_vectoraddrexcptn, . - up_vectoraddrexcptn
+	.globl	arm_vectoraddrexcptn
+	.type	arm_vectoraddrexcptn, %function
+arm_vectoraddrexcptn:
+	b	arm_vectoraddrexcptn
+	.size	arm_vectoraddrexcptn, . - arm_vectoraddrexcptn
 	.end

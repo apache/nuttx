@@ -3862,7 +3862,7 @@ static inline int lpc43_ethinitialize(void)
 }
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Function: arm_netinitialize
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
@@ -3879,7 +3879,7 @@ static inline int lpc43_ethinitialize(void)
  ****************************************************************************/
 
 #ifndef CONFIG_NETDEV_LATEINIT
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   lpc43_ethinitialize();
 }

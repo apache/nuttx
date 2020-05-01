@@ -3619,7 +3619,7 @@ static int sam_emac_configure(struct sam_emac_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Function: arm_netinitialize
  *
  * Description:
  *   Initialize the EMAC driver.
@@ -3635,7 +3635,7 @@ static int sam_emac_configure(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   struct sam_emac_s *priv = &g_emac;
   int ret;

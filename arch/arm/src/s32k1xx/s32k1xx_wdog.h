@@ -65,7 +65,7 @@
  * Description:
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during boot-up.  This must be called
- *   before up_serialinit.
+ *   before arm_serialinit.
  *
  *   REVISIT:  Hardcoded assumption that WDOG clock derives for LPO_CLK
  *
