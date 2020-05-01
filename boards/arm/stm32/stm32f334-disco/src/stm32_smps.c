@@ -1107,10 +1107,10 @@ int stm32_smps_setup(void)
 
       /* Attach ADC12 ram vector */
 
-      ret = up_ramvec_attach(STM32_IRQ_ADC12, adc12_handler);
+      ret = arm_ramvec_attach(STM32_IRQ_ADC12, adc12_handler);
       if (ret < 0)
         {
-          pwrerr("ERROR:  up_ramvec_attach failed: %d\n", ret);
+          pwrerr("ERROR:  arm_ramvec_attach failed: %d\n", ret);
           ret = EXIT_FAILURE;
           goto errout;
         }

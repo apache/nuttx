@@ -199,10 +199,10 @@ int highpri_main(int argc, char *argv[])
 
   /* Attach TIM6 ram vector */
 
-  ret = up_ramvec_attach(STM32_IRQ_TIM6, tim6_handler);
+  ret = arm_ramvec_attach(STM32_IRQ_TIM6, tim6_handler);
   if (ret < 0)
     {
-      fprintf(stderr, "highpri_main: ERROR: up_ramvec_attach failed: %d\n", ret);
+      fprintf(stderr, "highpri_main: ERROR: arm_ramvec_attach failed: %d\n", ret);
       return EXIT_FAILURE;
     }
 

@@ -55,14 +55,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  up_dumpnvic
+ * Function:  arm_dumpnvic
  *
  * Description:
  *   Dump all NVIC and SYSCON registers along with a user message.
  *
  ****************************************************************************/
 
-void up_dumpnvic(FAR const char *msg)
+void arm_dumpnvic(FAR const char *msg)
 {
 #ifdef CONFIG_DEBUG_INFO
   irqstate_t flags;

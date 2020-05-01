@@ -43,7 +43,7 @@
 void exception_common(void);
 
 /****************************************************************************
- * Name: up_ramvec_attach
+ * Name: arm_ramvec_attach
  *
  * Description:
  *   Configure the ram vector table so that IRQ number 'irq' will be
@@ -51,7 +51,7 @@ void exception_common(void);
  *
  ****************************************************************************/
 
-int up_ramvec_attach(int irq, up_vector_t vector)
+int arm_ramvec_attach(int irq, up_vector_t vector)
 {
   int ret = -EINVAL;
 

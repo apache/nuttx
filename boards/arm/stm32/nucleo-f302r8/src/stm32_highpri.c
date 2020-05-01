@@ -424,10 +424,10 @@ int highpri_main(int argc, char *argv[])
 #if !defined(CONFIG_STM32_ADC1_DMA) || defined(HIGHPRI_HAVE_INJECTED)
   /* Attach ADC12 ram vector if no DMA or injected channels support */
 
-  ret = up_ramvec_attach(STM32_IRQ_ADC12, adc12_handler);
+  ret = arm_ramvec_attach(STM32_IRQ_ADC12, adc12_handler);
   if (ret < 0)
     {
-      fprintf(stderr, "highpri_main: ERROR: up_ramvec_attach failed: %d\n",
+      fprintf(stderr, "highpri_main: ERROR: arm_ramvec_attach failed: %d\n",
               ret);
       ret = EXIT_FAILURE;
       goto errout;
@@ -450,10 +450,10 @@ int highpri_main(int argc, char *argv[])
 #ifdef CONFIG_STM32_ADC1_DMA
   /* Attach DMA1 CH1 ram vector if DMA */
 
-  ret = up_ramvec_attach(STM32_IRQ_DMA1CH1, dma1ch1_handler);
+  ret = arm_ramvec_attach(STM32_IRQ_DMA1CH1, dma1ch1_handler);
   if (ret < 0)
     {
-      fprintf(stderr, "highpri_main: ERROR: up_ramvec_attach failed: %d\n",
+      fprintf(stderr, "highpri_main: ERROR: arm_ramvec_attach failed: %d\n",
               ret);
       ret = EXIT_FAILURE;
       goto errout;

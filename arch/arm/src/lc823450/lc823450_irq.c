@@ -493,7 +493,7 @@ void up_irqinitialize(void)
    */
 
 #if defined(CONFIG_ARCH_RAMVECTORS)
-  up_ramvec_initialize();
+  arm_ramvec_initialize();
 #elif defined(CONFIG_LC823450_DFU)
   putreg32((uint32_t)_vectors, NVIC_VECTAB);
 #endif
