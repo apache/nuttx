@@ -220,6 +220,7 @@ distclean: clean
 	$(Q) $(MAKE) -C ubin distclean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C kbin distclean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C zoneinfo distclean TOPDIR=$(TOPDIR) BIN=$(BIN)
+	$(call DELFILE, exec_symtab.c)
 	$(call DELFILE, bin/Make.dep)
 	$(call DELFILE, ubin/Make.dep)
 	$(call DELFILE, kbin/Make.dep)

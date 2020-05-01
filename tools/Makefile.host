@@ -293,4 +293,5 @@ clean:
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) rm -rf *.dSYM
 endif
+	$(Q) $(MAKE) -C pic32 -f Makefile.host TOPDIR="$(TOPDIR)" clean
 	$(call CLEAN)
