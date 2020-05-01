@@ -194,7 +194,9 @@ endif
 ifeq ($(CONFIG_RPTUN),y)
   CSRCS += up_rptun.c
   HOSTSRCS += up_shmem.c
+ifneq ($(CONFIG_HOST_MACOS),y)
   STDLIBS += -lrt
+endif
 endif
 
 ifeq ($(CONFIG_FS_HOSTFS),y)
