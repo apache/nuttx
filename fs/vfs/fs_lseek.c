@@ -122,6 +122,40 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
 }
 
 /****************************************************************************
+ * Name: nx_seek
+ *
+ * Description:
+ *  nx_seek() function repositions the offset of the open file associated
+ *  with the file descriptor fd to the argument 'offset' according to the
+ *  directive 'whence'.  nx_seek() is an internal OS function. It is
+ *  functionally equivalent to lseek() except that:
+ *
+ *  - It does not modify the errno variable, and
+ *  - It is not a cancellation point.
+ *
+ ****************************************************************************/
+
+off_t nx_seek(int fd, off_t offset, int whence)
+{
+  FAR struct file *filep;
+  int ret;
+
+  /* Get the file structure corresponding to the file descriptor. */
+
+  ret = fs_getfilep(fd, &filep);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  DEBUGASSERT(filep != NULL);
+
+  /* Then let file_seek do the real work */
+
+  return file_seek(filep, offset, whence);
+}
+
+/****************************************************************************
  * Name: lseek
  *
  * Description:
@@ -136,10 +170,11 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
  *   SEEK_END
  *      The offset is set to the size of the file plus offset bytes.
  *
- *  The lseek() function allows the file offset to be set beyond the end of the
- *  file (but this does not change the size of the file). If data is later written
- *  at this point, subsequent reads of the data in the gap (a "hole") return null
- *  bytes ('\0') until data is actually written into the gap.
+ *  The lseek() function allows the file offset to be set beyond the end of
+ *  the file (but this does not change the size of the file). If data is
+ *  later written at this point, subsequent reads of the data in the gap (a
+ *  "hole") return null bytes ('\0') until data is actually written into the
+ *  gap.
  *
  * Input Parameters:
  *   fd       File descriptor of device
@@ -147,12 +182,12 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
  *   whence   Defines how to use offset
  *
  * Returned Value:
- *   The resulting offset on success.  -1 on failure withi errno set properly:
+ *   The resulting offset on success. -1 on failure withi errno set properly:
  *
  *   EBADF      fd is not an open file descriptor.
  *   EINVAL     whence  is  not one of SEEK_SET, SEEK_CUR, SEEK_END; or the
- *              resulting file offset would be negative, or beyond the end of a
- *              seekable device.
+ *              resulting file offset would be negative, or beyond the end of
+ *              a seekable device.
  *   EOVERFLOW  The resulting file offset cannot be represented in an off_t.
  *   ESPIPE     fd is associated with a pipe, socket, or FIFO.
  *
@@ -160,34 +195,16 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
 
 off_t lseek(int fd, off_t offset, int whence)
 {
-  FAR struct file *filep;
   off_t newpos;
-  int errcode;
-  int ret;
 
-  /* Get the file structure corresponding to the file descriptor. */
+  /* Let nx_seek do the real work */
 
-  ret = fs_getfilep(fd, &filep);
-  if (ret < 0)
-    {
-      errcode = -ret;
-      goto errout;
-    }
-
-  DEBUGASSERT(filep != NULL);
-
-  /* Then let file_seek do the real work */
-
-  newpos = file_seek(filep, offset, whence);
+  newpos = nx_seek(fd, offset, whence);
   if (newpos < 0)
     {
-      errcode = (int)-newpos;
-      goto errout;
+      set_errno(-newpos);
+      return ERROR;
     }
 
   return newpos;
-
-errout:
-  set_errno(errcode);
-  return (off_t)ERROR;
 }

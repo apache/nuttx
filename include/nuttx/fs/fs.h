@@ -79,6 +79,7 @@
 #  endif
 #  define _NX_READ(f,b,s)      nx_read(f,b,s)
 #  define _NX_WRITE(f,b,s)     nx_write(f,b,s)
+#  define _NX_SEEK(f,o,w)      nx_seek(f,o,w)
 #  define _NX_GETERRNO(r)      (-(r))
 #  define _NX_SETERRNO(r)      set_errno(-(r))
 #  define _NX_GETERRVAL(r)     (r)
@@ -90,6 +91,7 @@
 #  endif
 #  define _NX_READ(f,b,s)      read(f,b,s)
 #  define _NX_WRITE(f,b,s)     write(f,b,s)
+#  define _NX_SEEK(f,o,w)      lseek(f,o,w)
 #  define _NX_GETERRNO(r)      errno
 #  define _NX_SETERRNO(r)
 #  define _NX_GETERRVAL(r)     (-errno)
@@ -1159,6 +1161,22 @@ ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
  ****************************************************************************/
 
 off_t file_seek(FAR struct file *filep, off_t offset, int whence);
+
+/****************************************************************************
+ * Name: nx_seek
+ *
+ * Description:
+ *  nx_seek() function repositions the offset of the open file associated
+ *  with the file descriptor fd to the argument 'offset' according to the
+ *  directive 'whence'.  nx_seek() is an internal OS function. It is
+ *  functionally equivalent to lseek() except that:
+ *
+ *  - It does not modify the errno variable, and
+ *  - It is not a cancellation point.
+ *
+ ****************************************************************************/
+
+off_t nx_seek(int fd, off_t offset, int whence);
 
 /****************************************************************************
  * Name: file_fsync
