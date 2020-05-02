@@ -31,17 +31,17 @@ jobs:
           TESTING_REF="master"  # Always use master for testing
           OS_REF=""
           APPS_REF=""
-          
+
           REF=$GITHUB_REF
-          
+
           # If a base ref is set this is a PR and we will want to use
           # the base ref instead of the ref that triggered the event
           if [ ${GITHUB_BASE_REF} ]; then
             REF=refs/heads/$GITHUB_BASE_REF
           fi
-            
+
           echo "Working with ref: $REF"
-          
+
           # We modify for all tags and release branches
           if [[ $REF =~ refs/heads/releases/*|refs/tags/* ]]; then
             if [[ $REF =~ refs/heads/* ]]
@@ -52,7 +52,7 @@ jobs:
                 REF_NAME=${REF##refs/tags/}
                 echo "Working with a tag: $REF_NAME"
             fi
-          
+
             # Determine the repo and leave that unset to use the normal checkout behavior
             # of using the merge commit instead of HEAD
             case $GITHUB_REPOSITORY in
@@ -61,23 +61,23 @@ jobs:
                 echo "Triggered by change in OS"
                 APPS_REF=$REF_NAME
                 ;;
-          
+
               "apache/incubator-nuttx-apps" )
                 # APPS
                 OS_REF=$REF_NAME
                 echo "Triggered by change in APPS"
                 ;;
-          
+
               *)
                 echo "Trigger by change on $GITHUB_REPOSITORY. This is unexpected."
                 ;;
             esac
           fi
-          
+
           echo ::set-output name=os_ref::$OS_REF
           echo ::set-output name=apps_ref::$APPS_REF
           echo ::set-output name=testing_ref::$TESTING_REF
-  
+
       - name: Checkout nuttx repo
         uses: actions/checkout@v2
         with:
@@ -85,7 +85,7 @@ jobs:
           ref: ${{ steps.gittargets.outputs.os_ref }}
           path: sources/nuttx
           fetch-depth: 1
-  
+
       - name: Checkout apps repo
         uses: actions/checkout@v2
         with:
@@ -93,7 +93,7 @@ jobs:
           ref: ${{ steps.gittargets.outputs.apps_ref }}
           path: sources/apps
           fetch-depth: 1
-  
+
       - name: Checkout testing repo
         uses: actions/checkout@v2
         with:
@@ -125,7 +125,7 @@ jobs:
 
     strategy:
       matrix:
-        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, mips-riscv-x86-xtensa, sim] 
+        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, mips-riscv-x86-xtensa, sim]
 
     steps:
       - name: Fetch Cached Source
@@ -153,7 +153,7 @@ jobs:
           login-server: docker.pkg.github.com
           username: ${GITHUB_ACTOR}
           password: ${{ secrets.GITHUB_TOKEN }}
-  
+
       - name: Docker Pull
         uses: nick-invision/retry@v1
         with:
@@ -161,7 +161,7 @@ jobs:
           max_attempts: 3
           retry_wait_seconds: 10
           command: docker pull docker.pkg.github.com/apache/incubator-nuttx-testing/nuttx-ci-linux
-  
+
       - name: Run builds
         uses: ./sources/testing/.github/actions/ci-container
         env:
