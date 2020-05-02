@@ -91,11 +91,11 @@
    */
 
 #  if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV7M_LAZYFPU)
-#    define up_savestate(regs)  arm_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
+#    define arm_savestate(regs)  arm_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
 #  else
-#    define up_savestate(regs)  arm_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
+#    define arm_savestate(regs)  arm_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
 #  endif
-#  define up_restorestate(regs) (CURRENT_REGS = regs)
+#  define arm_restorestate(regs) (CURRENT_REGS = regs)
 
 /* The Cortex-A and Cortex-R support the same mechanism, but only lazy
  * floating point register save/restore.
@@ -108,11 +108,11 @@
    */
 
 #  if defined(CONFIG_ARCH_FPU)
-#    define up_savestate(regs)  arm_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
+#    define arm_savestate(regs)  arm_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
 #  else
-#    define up_savestate(regs)  arm_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
+#    define arm_savestate(regs)  arm_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
 #  endif
-#  define up_restorestate(regs) (CURRENT_REGS = regs)
+#  define arm_restorestate(regs) (CURRENT_REGS = regs)
 
 /* Otherwise, for the ARM7 and ARM9.  The state is copied in full from stack
  * to stack.  This is not very efficient and should be fixed to match
@@ -127,11 +127,11 @@
    */
 
 #  if defined(CONFIG_ARCH_FPU)
-#    define up_savestate(regs)  arm_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
+#    define arm_savestate(regs)  arm_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
 #  else
-#    define up_savestate(regs)  arm_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
+#    define arm_savestate(regs)  arm_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
 #  endif
-#  define up_restorestate(regs) arm_copyfullstate((uint32_t*)CURRENT_REGS, regs)
+#  define arm_restorestate(regs) arm_copyfullstate((uint32_t*)CURRENT_REGS, regs)
 
 #endif
 
@@ -468,8 +468,9 @@ void arm_wdtinit(void);
  * network is enabled yet there is no Ethernet driver to be initialized.
  *
  * Use of common/arm_etherstub.c is deprecated.  The preferred mechanism is
- * to use CONFIG_NETDEV_LATEINIT=y to suppress the call to arm_netinitialize()
- * in up_initialize().  Then this stub would not be needed.
+ * to use CONFIG_NETDEV_LATEINIT=y to suppress the call to
+ * arm_netinitialize() in up_initialize().  Then this stub would not be
+ * needed.
  */
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
