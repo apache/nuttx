@@ -128,7 +128,7 @@ int arm_start_handler(int irq, FAR void *context, FAR void *arg)
    * be the CPUs NULL task.
    */
 
-  up_restorestate(tcb->xcp.regs);
+  arm_restorestate(tcb->xcp.regs);
   return OK;
 }
 

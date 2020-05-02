@@ -129,7 +129,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * Just copy the CURRENT_REGS into the OLD rtcb.
                */
 
-               up_savestate(rtcb->xcp.regs);
+               arm_savestate(rtcb->xcp.regs);
 
               /* Restore the exception context of the rtcb at the (new) head
                * of the ready-to-run task list.
@@ -143,7 +143,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
               /* Then switch contexts */
 
-              up_restorestate(rtcb->xcp.regs);
+              arm_restorestate(rtcb->xcp.regs);
             }
 
           /* No, then we will need to perform the user context switch */

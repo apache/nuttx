@@ -157,7 +157,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * as the interrupt return context.
                */
 
-              up_savestate(tcb->xcp.regs);
+              arm_savestate(tcb->xcp.regs);
             }
         }
 
