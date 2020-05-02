@@ -267,8 +267,7 @@ static ssize_t ws2812_write(FAR struct file *filep, FAR const char *buffer,
   if (buffer == NULL)
     {
       lederr("ERROR: Buffer is null\n");
-      set_errno(EINVAL);
-      return -1;
+      return -EINVAL;
     }
 
   /* We need at least one LED, so 1 byte */
@@ -276,15 +275,13 @@ static ssize_t ws2812_write(FAR struct file *filep, FAR const char *buffer,
   if (buflen < 1)
     {
       lederr("ERROR: You need to control at least 1 LED!\n");
-      set_errno(EINVAL);
-      return -1;
+      return -EINVAL;
     }
 
   if ((buflen % WS2812_RW_PIXEL_SIZE) != 0)
     {
       lederr("ERROR: LED values must be 24bit packed in 32bit\n");
-      set_errno(EINVAL);
-      return -1;
+      return -EINVAL;
     }
 
   nxsem_wait(&priv->exclsem);

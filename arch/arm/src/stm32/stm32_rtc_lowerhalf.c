@@ -286,7 +286,7 @@ static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
   ret = up_rtc_gettime(&ts);
   if (ret < 0)
     {
-      goto errout_with_errno;
+      goto errout;
     }
 
   /* Convert the one second epoch time to a struct tm.  This operation
@@ -296,15 +296,15 @@ static int stm32_rdtime(FAR struct rtc_lowerhalf_s *lower,
 
   if (!gmtime_r(&ts.tv_sec, (FAR struct tm *)rtctime))
     {
-      goto errout_with_errno;
+      ret = -get_errno();
+      goto errout;
     }
 
   return OK;
 
-errout_with_errno:
-  ret = get_errno();
-  DEBUGASSERT(ret > 0);
-  return -ret;
+errout:
+  DEBUGASSERT(ret < 0);
+  return ret;
 
 #else
   time_t timer;

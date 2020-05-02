@@ -487,7 +487,6 @@ static int adxl372_dvr_open(FAR void *instance_handle, int32_t arg)
       snwarn("ERROR: Invalid ADXL372_ID = 0x%08x\n", pnpid);
 
       priv->readonly = true;
-      set_errno(ENODEV);
     }
   else /* ID matches */
     {
@@ -612,8 +611,7 @@ static ssize_t adxl372_dvr_write(FAR void *instance_handle,
 
   if (priv->readonly)
     {
-      set_errno(EROFS);
-      return -1;
+      return -EROFS;
     }
 
   adxl372_write_registerblk(priv, priv->seek_address, (uint8_t *)buffer,
@@ -640,8 +638,7 @@ static off_t adxl372_dvr_seek(FAR void *instance_handle, off_t offset,
         reg = priv->seek_address + offset;
         if (0 > reg || reg > ADXL372_LAST)
           {
-            set_errno(-EINVAL);
-            return -1;
+            return -EINVAL;
           }
 
         priv->seek_address = reg;
@@ -654,16 +651,14 @@ static off_t adxl372_dvr_seek(FAR void *instance_handle, off_t offset,
       case SEEK_SET:  /* Seek to designated address */
         if (0 > offset || offset > ADXL372_LAST)
           {
-            set_errno(-EINVAL);
-            return -1;
+            return -EINVAL;
           }
 
         priv->seek_address = offset;
         break;
 
       default:        /* invalid whence */
-        set_errno(-EINVAL);
-        return -1;
+        return -EINVAL;
     }
 
   return priv->seek_address;

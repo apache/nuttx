@@ -344,7 +344,6 @@ static int adt7320_open(FAR struct file *filep)
 
   if (adt7320_read_reg8(priv, ADT7320_ID_REG) != ADT7320_ID)
     {
-      set_errno(ENODEV);
       return -ENODEV;
     }
 
