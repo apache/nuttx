@@ -138,13 +138,4 @@ config EOL_IS_EITHER_CRLF
 
 endchoice
 
-config MEMCPY_VIK
-	bool "Vik memcpy()"
-	default n
-	depends on !LIBC_ARCH_MEMCPY
-	---help---
-		Select this option to use the optimized memcpy() function by Daniel Vik.
-		Select this option for improved performance at the expense of increased
-		size. See licensing information in the top-level COPYING file.
-
 endmenu #Standard C I/O
