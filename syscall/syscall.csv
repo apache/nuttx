@@ -64,7 +64,7 @@
 "mq_timedreceive","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","ssize_t","mqd_t","char*","size_t","FAR unsigned int*","const struct timespec*"
 "mq_timedsend","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","int","mqd_t","const char*","size_t","unsigned int","const struct timespec*"
 "mq_unlink","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","int","const char*"
-"nx_task_spawn","nuttx/spawn.h","defined(CONFIG_BUILD_PROTECTED)","int","FAR const struct spawn_syscall_parms_s *"
+"nx_task_spawn","nuttx/spawn.h","defined(CONFIG_LIB_SYSCALL) && !defined(CONFIG_BUILD_KERNEL)","int","FAR const struct spawn_syscall_parms_s *"
 "nx_vsyslog","nuttx/syslog/syslog.h","","int","int","FAR const IPTR char*","FAR va_list*"
 "on_exit","stdlib.h","defined(CONFIG_SCHED_ONEXIT)","int","CODE void (*)(int, FAR void *)","FAR void *"
 "open","fcntl.h","","int","const char*","int","..."

@@ -99,7 +99,7 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
 
   sched_lock();
 
-  /* Use the default task priority and stack size if no attributes are provided */
+  /* Use the default priority and stack size if no attributes are provided */
 
   if (attr)
     {
@@ -459,7 +459,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_PROTECTED
+#ifdef CONFIG_LIB_SYSCALL
 int nx_task_spawn(FAR const struct spawn_syscall_parms_s *parms)
 {
   DEBUGASSERT(parms != NULL);
