@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/sensors/lsm330.c
+ * drivers/sensors/lsm330_spi.c
  * Character driver for the ST LSM330 Tri-axis accelerometer and gyroscope.
  *
  *   Copyright (C) 2017-2018 RAF Research LLC. All rights reserved.
@@ -671,8 +671,7 @@ static int lsm330acl_dvr_open(FAR void *instance_handle, int32_t arg)
     {
       sninfo("INFO: LSM330 Accelerometer is already open.\n");
 
-      set_errno(-EBUSY);
-      return -1;
+      return -EBUSY;
     }
 
   /* Read the ID Register */
@@ -690,7 +689,6 @@ static int lsm330acl_dvr_open(FAR void *instance_handle, int32_t arg)
              "Device ID (0x%02X) does not match expected LSM330 Acl ID (0x%02).\n",
              reg_content, LSM330_ACL_IDREG_VALUE);
 
-      set_errno(ENODEV);
       priv->readonly = true;
     }
   else  /* ID matches */
@@ -765,8 +763,7 @@ static int lsm330gyro_dvr_open(FAR void *instance_handle, int32_t arg)
   if (ret < 0)
     {
       sninfo("INFO: LSM330 Gyroscope is already open.\n");
-      set_errno(-EBUSY);
-      return -1;
+      return -EBUSY;
     }
 
   /* Read the ID Register */
@@ -784,7 +781,6 @@ static int lsm330gyro_dvr_open(FAR void *instance_handle, int32_t arg)
              "Device ID (0x%02X) does not match expected LSM330 Gyro ID (0x%02).\n",
              reg_content, LSM330_GYRO_IDREG_VALUE);
 
-      set_errno(ENODEV);
       priv->readonly = true;
     }
   else /* ID matches */
@@ -925,8 +921,7 @@ static ssize_t lsm330acl_dvr_write(FAR void *instance_handle,
 
   if (priv->readonly)
     {
-      set_errno(-EROFS);
-      return -1;
+      return -EROFS;
     }
 
   lsm330_write_acl_registerblk(priv, priv->seek_address, (uint8_t *)buffer,
@@ -947,8 +942,7 @@ static ssize_t lsm330gyro_dvr_write(FAR void *instance_handle,
 
   if (priv->readonly)
     {
-      set_errno(-EROFS);
-      return -1;
+      return -EROFS;
     }
 
   lsm330_write_gyro_registerblk(priv, priv->seek_address,
@@ -973,8 +967,7 @@ static off_t lsm330acl_dvr_seek(FAR void *instance_handle, off_t offset, int whe
         reg = priv->seek_address + offset;
         if (0 > reg || reg > LSM330_ACL_LAST)
           {
-            set_errno(-EINVAL);
-            return -1;
+            return -EINVAL;
           }
 
         priv->seek_address = reg;
@@ -987,16 +980,14 @@ static off_t lsm330acl_dvr_seek(FAR void *instance_handle, off_t offset, int whe
       case SEEK_SET:  /* seek to designated address */
         if (0 > offset || offset > LSM330_ACL_LAST)
           {
-            set_errno(-EINVAL);
-            return -1;
+            return -EINVAL;
           }
 
         priv->seek_address = offset;
         break;
 
     default:  /* Invalid whence */
-        set_errno(-EINVAL);
-        return -1;
+        return -EINVAL;
     }
 
   return priv->seek_address;
@@ -1020,8 +1011,7 @@ static off_t lsm330gyro_dvr_seek(FAR void *instance_handle, off_t offset,
         reg = priv->seek_address + offset;
         if (0 > reg || reg > LSM330_GYRO_LAST)
           {
-            set_errno(-EINVAL);
-            return -1;
+            return -EINVAL;
           }
 
         priv->seek_address = reg;
@@ -1034,16 +1024,14 @@ static off_t lsm330gyro_dvr_seek(FAR void *instance_handle, off_t offset,
       case SEEK_SET:  /* seek to designated address */
         if (0 > offset || offset > LSM330_GYRO_LAST)
           {
-            set_errno(-EINVAL);
-            return -1;
+            return -EINVAL;
           }
 
         priv->seek_address = offset;
         break;
 
       default:  /* Invalid whence */
-        set_errno(-EINVAL);
-        return -1;
+        return -EINVAL;
     }
 
   return priv->seek_address;

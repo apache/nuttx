@@ -154,8 +154,7 @@ static ssize_t ge2d_write(FAR struct file *filep,
 
   if (((uintptr_t)buffer & 0xf) != 0)
     {
-      set_errno(EINVAL);
-      return 0;
+      return -EINVAL;
     }
 
   /* Get exclusive access */

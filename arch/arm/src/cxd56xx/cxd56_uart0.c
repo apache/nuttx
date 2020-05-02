@@ -162,8 +162,7 @@ static int uart0_open(FAR struct file *filep)
   ret = fw_pd_uartinit(0);
   if (ret < 0)
     {
-      set_errno(EFAULT);
-      return ERROR;
+      return -EFAULT;
     }
 
   /* 0 = 5bit, 1 = 6bit, 2 = 7bit, 3 = 8bit */
@@ -191,16 +190,14 @@ static int uart0_open(FAR struct file *filep)
   if (ret < 0)
     {
       fw_pd_uartuninit(0);
-      set_errno(EINVAL);
-      return ERROR;
+      return -EINVAL;
     }
 
   ret = fw_pd_uartenable(0);
   if (ret < 0)
     {
       fw_pd_uartuninit(0);
-      set_errno(EFAULT);
-      return ERROR;
+      return -EFAULT;
     }
 
   return OK;
@@ -247,12 +244,6 @@ static ssize_t uart0_read(FAR struct file *filep,
 
   uart0_semgive(&g_lock);
 
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      ret = 0; /* Receive no data */
-    }
-
   return (ssize_t)ret;
 }
 
@@ -271,12 +262,6 @@ static ssize_t uart0_write(FAR struct file *filep,
                        ((filep->f_oflags & O_NONBLOCK) != 0));
 
   uart0_semgive(&g_lock);
-
-  if (ret < 0)
-    {
-      set_errno(-ret);
-      ret = 0;
-    }
 
   return (ssize_t)ret;
 }
