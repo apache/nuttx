@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <string.h>
-#include <semaphore.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>

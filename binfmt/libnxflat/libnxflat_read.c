@@ -128,12 +128,11 @@ int nxflat_read(struct nxflat_loadinfo_s *loadinfo, char *buffer,
   bytesleft = readsize;
   do
     {
-      rpos = lseek(loadinfo->filfd, offset, SEEK_SET);
+      rpos = nx_seek(loadinfo->filfd, offset, SEEK_SET);
       if (rpos != offset)
         {
-          int errval = get_errno();
-          berr("Failed to seek to position %d: %d\n", offset, errval);
-          return -errval;
+          berr("Failed to seek to position %d: %d\n", offset, (int)rpos);
+          return rpos;
         }
 
       /* Read the file data at offset into the user buffer */

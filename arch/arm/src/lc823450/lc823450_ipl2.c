@@ -616,55 +616,6 @@ static int msc_enable(int forced)
 }
 #endif
 
-#ifdef CONFIG_LASTKMSG
-
-/****************************************************************************
- * Name: check_lastkmsg()
- ****************************************************************************/
-
-void check_lastkmsg(void)
-{
-  int ret;
-  FILE *fp;
-
-  if (g_lastksg_buf.sig != LASTKMSG_SIG)
-    {
-      return;
-    }
-
-  ret = mount(CONFIG_MTD_LOG_DEVPATH, "/log", "vfat", 0, NULL);
-
-  if (ret)
-    {
-      _info("mount: ret = %d\n", ret);
-      return;
-    }
-
-  /* log rotate */
-
-  unlink(LASTMSG_LOGPATH ".4");
-  rename(LASTMSG_LOGPATH ".3", LASTMSG_LOGPATH ".4");
-  rename(LASTMSG_LOGPATH ".2", LASTMSG_LOGPATH ".3");
-  rename(LASTMSG_LOGPATH ".1", LASTMSG_LOGPATH ".2");
-  rename(LASTMSG_LOGPATH ".0", LASTMSG_LOGPATH ".1");
-
-  fp = fopen(LASTMSG_LOGPATH ".0", "w");
-
-  if (fp)
-    {
-      lastkmsg_output(fp);
-      fflush(fp);
-      fclose(fp);
-    }
-
-  umount("/log");
-
-  /* XXX: workaround for logfile size = 0 */
-
-  nxsig_usleep(100000);
-}
-#endif /* CONFIG_LASTKMSG */
-
 /****************************************************************************
  * Name: ipl2_main()
  ****************************************************************************/

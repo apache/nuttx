@@ -138,7 +138,7 @@ static void board_sdcard_enable(FAR void *arg)
 
       /* If not initialize SD slot */
 
-      if (!stat("/dev/mmcsd0", &stat_sdio) == 0)
+      if (!nx_stat("/dev/mmcsd0", &stat_sdio, 1) == 0)
         {
           /* Now bind the SDHC interface to the MMC/SD driver */
 
@@ -159,7 +159,7 @@ static void board_sdcard_enable(FAR void *arg)
 
       cxd56_sdhci_mediachange(g_sdhci.sdhci);
 
-      if (stat("/dev/mmcsd0", &stat_sdio) == 0)
+      if (nx_stat("/dev/mmcsd0", &stat_sdio, 1) == 0)
         {
           if (S_ISBLK(stat_sdio.st_mode))
             {

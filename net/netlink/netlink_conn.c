@@ -434,7 +434,7 @@ netlink_get_response(FAR struct netlink_conn_s *conn)
 
       /* Set up a semaphore to notify us when a response is queued. */
 
-      sem_init(&waitsem, 0, 0);
+      nxsem_init(&waitsem, 0, 0);
       nxsem_set_protocol(&waitsem, SEM_PRIO_NONE);
 
       /* Set up a notifier to post the semaphore when a response is
@@ -456,7 +456,7 @@ netlink_get_response(FAR struct netlink_conn_s *conn)
 
       /* Clean-up the semaphore */
 
-      sem_destroy(&waitsem);
+      nxsem_destroy(&waitsem);
       netlink_notifier_teardown(conn);
 
       /* Check for any failures */

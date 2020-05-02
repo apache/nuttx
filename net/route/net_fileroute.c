@@ -146,17 +146,14 @@ int net_routesize(FAR const char *path, size_t entrysize)
 
   /* Get information about the file */
 
-  ret = stat(path, &buf);
+  ret = nx_stat(path, &buf, 1);
   if (ret < 0)
     {
-      int errcode;
-
-      /* stat() failed, but is that because the routing table has not been
+      /* nx_stat() failed, but is that because the routing table has not been
        * created yet?
        */
 
-      errcode = get_errno();
-      if (errcode == ENOENT)
+      if (ret == -ENOENT)
         {
           /* The routing table file has not been created.  Return size zero. */
 
@@ -165,7 +162,7 @@ int net_routesize(FAR const char *path, size_t entrysize)
 
       /* Some other error */
 
-      return -errcode;
+      return ret;
     }
 
   /* The directory entry at this path must be a regular file */

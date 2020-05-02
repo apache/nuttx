@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 
 #include <stdio.h>
@@ -1523,7 +1524,7 @@ static void seq_handlefifointr(FAR struct cxd56_scudev_s *priv,
           DEBUGASSERT(notify->pid != 0);
 
           value.sival_ptr = notify->ts;
-          sigqueue(notify->pid, notify->signo, value);
+          nxsig_queue(notify->pid, notify->signo, value);
 #endif
         }
     }
@@ -1614,7 +1615,7 @@ static void seq_handlemathfintr(FAR struct cxd56_scudev_s *priv,
           DEBUGASSERT(notify->pid != 0);
 
           value.sival_ptr = notify->arg;
-          sigqueue(notify->pid, notify->signo, value);
+          nxsig_queue(notify->pid, notify->signo, value);
           detected = 0;
         }
 #endif

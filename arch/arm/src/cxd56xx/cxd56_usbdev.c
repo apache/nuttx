@@ -63,6 +63,7 @@
 #include <nuttx/fs/procfs.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 #include <arch/chip/usbdev.h>
 #include <arch/chip/pm.h>
 
@@ -3404,7 +3405,7 @@ static void cxd56_notify_signal(uint16_t state, uint16_t power)
     {
       union sigval value;
       value.sival_int = state << 16 | power;
-      sigqueue(priv->pid, priv->signo, value);
+      nxsig_queue(priv->pid, priv->signo, value);
     }
 }
 

@@ -441,7 +441,7 @@ int up_fillpage(FAR struct tcb_s *tcb, FAR void *vpage)
 
   /* Seek to that position */
 
-  pos = lseek(g_pgsrc.fd, offset, SEEK_SET);
+  pos = nx_seek(g_pgsrc.fd, offset, SEEK_SET);
   DEBUGASSERT(pos != (off_t)-1);
 
   /* And read the page data from that offset */

@@ -741,7 +741,7 @@ static int tda19988_fetch_edid(struct tda1988_dev_s *priv)
 
       if (edid == NULL)
         {
-          lcderr("ERROR:  Failed to realloc EDID\n");
+          lcderr("ERROR:  Failed to kmm_realloc EDID\n");
           ret = -ENOMEM;
           goto done;
         }

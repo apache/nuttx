@@ -124,7 +124,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
   if (ret < 0)
     {
       berr("ERROR: Failed to read NXFLAT header: %d\n", ret);
-      close(loadinfo->filfd);
+      nx_close(loadinfo->filfd);
       return ret;
     }
 
@@ -143,7 +143,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
        */
 
       berr("ERROR: Bad NXFLAT header\n");
-      close(loadinfo->filfd);
+      nx_close(loadinfo->filfd);
       return -ENOEXEC;
     }
 

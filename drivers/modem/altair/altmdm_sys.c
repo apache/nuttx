@@ -671,10 +671,10 @@ timer_t altmdm_sys_starttimer(int first_ms, int interval_ms,
   sigemptyset(&mask);
   nxsig_addset(&mask, MY_TIMER_SIGNAL);
 
-  ret = sigprocmask(SIG_UNBLOCK, &mask, NULL);
+  ret = nxsig_procmask(SIG_UNBLOCK, &mask, NULL);
   if (ret != OK)
     {
-      m_err("sigprocmask() failed:%d\n", ret);
+      m_err("nxsig_procmask() failed:%d\n", ret);
       return NULL;
     }
 
@@ -683,10 +683,10 @@ timer_t altmdm_sys_starttimer(int first_ms, int interval_ms,
   sigfillset(&sa.sa_mask);
   nxsig_delset(&sa.sa_mask, MY_TIMER_SIGNAL);
 
-  ret = sigaction(MY_TIMER_SIGNAL, &sa, NULL);
+  ret = nxsig_action(MY_TIMER_SIGNAL, &sa, NULL, false);
   if (ret != OK)
     {
-      m_err("sigaction() failed:%d\n", ret);
+      m_err("nxsig_action() failed:%d\n", ret);
       return NULL;
     }
 
@@ -760,7 +760,7 @@ void altmdm_sys_stoptimer(timer_t timerid)
   timer_delete(timerid);
 
   sigfillset(&mask);
-  sigprocmask(SIG_SETMASK, &mask, NULL);
+  nxsig_procmask(SIG_SETMASK, &mask, NULL);
 }
 
 #endif

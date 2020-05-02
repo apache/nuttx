@@ -688,7 +688,7 @@ static int w25_wait_keypress(FAR char *keyset, int nseconds)
 
           /* Delay 50 Milliseconds  */
 
-          usleep(50 * 1000);
+          nxsig_usleep(50 * 1000);
 
           /* Output a dot to stdout every 10 * 50 = 500 milliseconds */
 
