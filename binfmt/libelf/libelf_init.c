@@ -98,12 +98,11 @@ static inline int elf_filelen(FAR struct elf_loadinfo_s *loadinfo,
 
   /* Get the file stats */
 
-  ret = stat(filename, &buf);
+  ret = nx_stat(filename, &buf, 1);
   if (ret < 0)
     {
-      int errval = get_errno();
-      berr("Failed to stat file: %d\n", errval);
-      return -errval;
+      berr("Failed to stat file: %d\n", ret);
+      return ret;
     }
 
   /* Verify that it is a regular file */
@@ -177,7 +176,7 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
   if (ret < 0)
     {
       berr("Failed to read ELF header: %d\n", ret);
-      close(loadinfo->filfd);
+      nx_close(loadinfo->filfd);
       return ret;
     }
 
@@ -197,7 +196,7 @@ int elf_init(FAR const char *filename, FAR struct elf_loadinfo_s *loadinfo)
        */
 
       berr("Bad ELF header: %d\n", ret);
-      close(loadinfo->filfd);
+      nx_close(loadinfo->filfd);
       return ret;
     }
 

@@ -46,9 +46,9 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <signal.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
 #include <nuttx/serial/serial.h>
 
 /****************************************************************************
@@ -297,7 +297,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
   if (signo != 0)
     {
-      kill(dev->pid, signo);
+      nxsig_kill(dev->pid, signo);
       uart_reset_sem(dev);
     }
 #endif

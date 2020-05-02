@@ -42,6 +42,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 #include <nuttx/semaphore.h>
 
 #include <queue.h>
@@ -259,7 +260,7 @@ static int icc_irqhandler(int cpuid, uint32_t word[2])
       union sigval value;
 
       value.sival_ptr = priv->sigdata;
-      sigqueue(priv->pid, priv->signo, value);
+      nxsig_queue(priv->pid, priv->signo, value);
     }
 #endif
 

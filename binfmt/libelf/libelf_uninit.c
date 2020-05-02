@@ -87,7 +87,7 @@ int elf_uninit(struct elf_loadinfo_s *loadinfo)
 
   if (loadinfo->filfd >= 0)
     {
-      close(loadinfo->filfd);
+      nx_close(loadinfo->filfd);
     }
 
   return OK;

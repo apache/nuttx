@@ -82,7 +82,7 @@ struct i2c_master_s;
  * Or, if using dynamic memory allocation and I2C:
  *
  *    struct mpu_config_s* mpuc;
- *    mpuc = malloc(sizeof(*mpuc));
+ *    mpuc = kmm_malloc(sizeof(*mpuc));
  *    memset(mpuc, 0, sizeof(*mpuc)); * sets spi to NULL, if present *
  *    mpuc.i2c = ...;
  *

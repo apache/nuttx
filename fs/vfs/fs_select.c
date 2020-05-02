@@ -198,12 +198,12 @@ int select(int nfds, FAR fd_set *readfds, FAR fd_set *writefds,
 
   /* Then let poll do all of the real work. */
 
-  ret = poll(pollset, npfds, msec);
+  ret = nx_poll(pollset, npfds, msec);
   if (ret < 0)
     {
       /* poll() failed! Save the errno value */
 
-      errcode = get_errno();
+      errcode = -ret;
     }
 
   /* Now set up the return values */

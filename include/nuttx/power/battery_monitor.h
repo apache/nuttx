@@ -31,8 +31,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <semaphore.h>
 #include <fixedmath.h>
+
+#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_BATTERY_MONITOR
 

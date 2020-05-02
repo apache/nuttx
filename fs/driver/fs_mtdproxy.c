@@ -100,10 +100,10 @@ static FAR char *unique_blkdev(void)
 
       /* Make sure that file name is not in use */
 
-      ret = stat(devbuf, &statbuf);
+      ret = nx_stat(devbuf, &statbuf, 1);
       if (ret < 0)
         {
-          DEBUGASSERT(errno == ENOENT);
+          DEBUGASSERT(ret == -ENOENT);
           return strdup(devbuf);
         }
 

@@ -1637,7 +1637,7 @@ static int bq769x0_getcurrent(FAR struct bq769x0_dev_s *priv,
 
       /* Sample is not complete, wait and try again */
 
-      usleep(BQ769X0_CC_POLL_INTERVAL * USEC_PER_MSEC);
+      nxsig_usleep(BQ769X0_CC_POLL_INTERVAL * USEC_PER_MSEC);
     }
 
   /* CC value didn't become available in the expected amount of time */

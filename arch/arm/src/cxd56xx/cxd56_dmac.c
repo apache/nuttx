@@ -805,7 +805,7 @@ DMA_HANDLE cxd56_dmachannel(int ch, ssize_t maxsize)
   dmach->list = (dmac_lli_t *)kmm_malloc(n * sizeof(dmac_lli_t));
   if (dmach->list == NULL)
     {
-      dmainfo("Failed to malloc\n");
+      dmainfo("Failed to kmm_malloc\n");
       goto err;
     }
 

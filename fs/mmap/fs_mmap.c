@@ -127,7 +127,6 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
                int fd, off_t offset)
 {
   FAR void *addr;
-  int errcode;
   int ret = -1;
 
   /* Since only a tiny subset of mmap() functionality, we have to verify many
@@ -144,7 +143,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       (flags & (MAP_FIXED | MAP_DENYWRITE)) != 0)
     {
       ferr("ERROR: Unsupported options, prot=%x flags=%04x\n", prot, flags);
-      errcode = ENOSYS;
+      ret = -ENOSYS;
       goto errout;
     }
 
@@ -153,7 +152,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
   if (length == 0)
     {
       ferr("ERROR: Invalid length, length=%zu\n", length);
-      errcode = EINVAL;
+      ret = -EINVAL;
       goto errout;
     }
 #endif
@@ -178,7 +177,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
       if (alloc == NULL)
         {
           ferr("ERROR: kumm_alloc() failed: %d\n", ret);
-          errcode = ENOMEM;
+          ret = -ENOMEM;
           goto errout;
         }
 
@@ -193,7 +192,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
 
   if ((flags & MAP_PRIVATE) == 0)
     {
-      ret = ioctl(fd, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
+      ret = nx_ioctl(fd, FIOC_MMAP, (unsigned long)((uintptr_t)&addr));
     }
 
   if (ret < 0)
@@ -211,8 +210,7 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
 #else
       /* Error out.  The errno value was already set by ioctl() */
 
-      ferr("ERROR: ioctl(FIOC_MMAP) failed: %d\n", get_errno());
-      errcode = ENOSYS;
+      ferr("ERROR: ioctl(FIOC_MMAP) failed: %d\n", ret);
       goto errout;
 #endif
     }
@@ -222,6 +220,6 @@ FAR void *mmap(FAR void *start, size_t length, int prot, int flags,
   return (FAR void *)(((FAR uint8_t *)addr) + offset);
 
 errout:
-  set_errno(errcode);
+  set_errno(-ret);
   return MAP_FAILED;
 }

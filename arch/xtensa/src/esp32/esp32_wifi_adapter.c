@@ -206,6 +206,7 @@ static int32_t esp_task_ms_to_tick(uint32_t ms);
 static void *esp_task_get_current_task(void);
 static int32_t esp_task_get_max_priority(void);
 static void *esp_malloc(uint32_t size);
+static void esp_free(void *ptr);
 static uint32_t esp_rand(void);
 static void esp_dport_access_stall_other_cpu_start(void);
 static void esp_dport_access_stall_other_cpu_end(void);
@@ -394,7 +395,7 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._task_get_current_task = esp_task_get_current_task,
   ._task_get_max_priority = esp_task_get_max_priority,
   ._malloc = esp_malloc,
-  ._free = free,
+  ._free = esp_free,
   ._event_post = esp_event_post,
   ._get_free_heap_size = esp_get_free_heap_size,
   ._rand = esp_rand,
@@ -898,7 +899,7 @@ static void *esp_semphr_create(uint32_t max, uint32_t init)
       return NULL;
     }
 
-  ret = sem_init(sem, 0, init);
+  ret = nxsem_init(sem, 0, init);
   if (ret)
     {
       wlerr("ERROR: Failed to initialize sem error=%d\n", ret);
@@ -927,7 +928,7 @@ static void esp_semphr_delete(void *semphr)
 {
   sem_t *sem = (sem_t *)semphr;
 
-  sem_destroy(sem);
+  nxsem_destroy(sem);
   kmm_free(sem);
 }
 
@@ -954,7 +955,7 @@ static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
 
   if (ticks == OSI_FUNCS_TIME_BLOCKING)
     {
-      ret = sem_wait(sem);
+      ret = nxsem_wait(sem);
       if (ret)
         {
           wlerr("ERROR: Failed to wait sem\n");
@@ -974,7 +975,7 @@ static int32_t esp_semphr_take(void *semphr, uint32_t ticks)
           esp_update_time(&timeout, ticks);
         }
 
-      ret = sem_timedwait(sem, &timeout);
+      ret = nxsem_timedwait(sem, &timeout);
       if (ret)
         {
           wlerr("ERROR: Failed to wait sem in %d ticks\n", ticks);
@@ -1003,7 +1004,7 @@ static int32_t esp_semphr_give(void *semphr)
   int ret;
   sem_t *sem = (sem_t *)semphr;
 
-  ret = sem_post(sem);
+  ret = nxsem_post(sem);
   if (ret)
     {
       wlerr("ERROR: Failed to post sem error=%d\n", ret);
@@ -1260,7 +1261,7 @@ static void *esp_queue_create(uint32_t queue_len, uint32_t item_size)
   mq_adpt = kmm_malloc(sizeof(struct mq_adpt));
   if (!mq_adpt)
     {
-      wlerr("ERROR: Failed to malloc\n");
+      wlerr("ERROR: Failed to kmm_malloc\n");
       return NULL;
     }
 
@@ -1763,7 +1764,7 @@ static void esp_task_delay(uint32_t tick)
 {
   useconds_t us = TICK2USEC(tick);
 
-  usleep(us);
+  nxsig_usleep(us);
 }
 
 /****************************************************************************
@@ -1841,7 +1842,26 @@ static int32_t esp_task_get_max_priority(void)
 
 static void *esp_malloc(uint32_t size)
 {
-  return malloc(size);
+  return kmm_malloc(size);
+}
+
+/****************************************************************************
+ * Name: esp_free
+ *
+ * Description:
+ *   Free a block of memory
+ *
+ * Input Parameters:
+ *   ptr - memory block
+ *
+ * Returned Value:
+ *   No
+ *
+ ****************************************************************************/
+
+static void esp_free(void *ptr)
+{
+  kmm_free(ptr);
 }
 
 /****************************************************************************
@@ -1933,10 +1953,10 @@ static void esp_evt_work_cb(FAR void *arg)
             break;
           case WIFI_ADPT_EVT_STA_CONNECT:
             g_connected = true;
-            ret = sem_post(&g_connect_sem);
+            ret = nxsem_post(&g_connect_sem);
             if (ret)
               {
-                wlerr("ERROR: Failed to post sem error=%d\n", errno);
+                wlerr("ERROR: Failed to post sem error=%d\n", ret);
               }
             break;
           case WIFI_ADPT_EVT_STA_DISCONNECT:
@@ -1969,7 +1989,7 @@ static void esp_evt_work_cb(FAR void *arg)
 
       esp_event_lock(false);
 
-      free(evt_adpt);
+      kmm_free(evt_adpt);
     }
 }
 
@@ -2067,7 +2087,7 @@ int32_t esp_event_post(esp_event_base_t event_base,
     }
 
   size = event_data_size + sizeof(struct evt_adpt);
-  evt_adpt = malloc(size);
+  evt_adpt = kmm_malloc(size);
   if (!evt_adpt)
     {
       wlerr("ERROR: Failed to alloc %d memory\n", size);
@@ -2270,7 +2290,7 @@ static void wifi_phy_enable(void)
   cal_data = kmm_zalloc(sizeof(esp_phy_calibration_data_t));
   if (!cal_data)
     {
-      wlerr("ERROR: Failed to malloc");
+      wlerr("ERROR: Failed to kmm_zalloc");
       DEBUGASSERT(0);
     }
 
@@ -3023,7 +3043,7 @@ static int32_t esp_nvs_set_blob(uint32_t handle,
                                 size_t length)
 {
 #ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
-  int fd;
+  struct file file;
   int ret;
   char *dir;
   struct nvs_adpt *nvs_adpt = (struct nvs_adpt *)handle;
@@ -3036,36 +3056,36 @@ static int32_t esp_nvs_set_blob(uint32_t handle,
       return -1;
     }
 
-  ret = unlink(dir);
+  ret = nx_unlink(dir);
   if (ret)
     {
-      if (errno != ENOENT)
+      if (ret != -ENOENT)
         {
-          wlerr("ERROR: Failed to unlink %s error=%d\n", dir, errno);
-          free(dir);
+          wlerr("ERROR: Failed to unlink %s error=%d\n", dir, ret);
+          kmm_free(dir);
           return -1;
         }
     }
 
-  fd = open(dir, O_WRONLY | O_CREAT, NVS_FILE_MODE);
-  if (fd < 0)
+  ret = file_open(&file, dir, O_WRONLY | O_CREAT, NVS_FILE_MODE);
+  if (ret < 0)
     {
       wlerr("ERROR: Failed to set open %s\n", dir);
-      free(dir);
+      kmm_free(dir);
       return -1;
     }
 
-  ret = write(fd, value, length);
+  ret = file_write(&file, value, length);
   if (ret < 0)
     {
       wlerr("ERROR: Failed to write to %s\n", dir);
-      free(dir);
-      close(fd);
+      kmm_free(dir);
+      file_close(&file);
       return -1;
     }
 
-  free(dir);
-  close(fd);
+  kmm_free(dir);
+  file_close(&file);
 
   return 0;
 #else
@@ -3098,7 +3118,7 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
                                 size_t *length)
 {
 #ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
-  int fd;
+  struct file file;
   int ret;
   char *dir;
   struct nvs_adpt *nvs_adpt = (struct nvs_adpt *)handle;
@@ -3111,26 +3131,26 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
       return -1;
     }
 
-  fd = open(dir, O_RDONLY);
-  if (fd < 0)
+  ret = file_open(&file, dir, O_RDONLY);
+  if (ret < 0)
     {
-      if (errno == ENOENT)
+      if (ret == -ENOENT)
         {
           wlinfo("INFO: No file %s\n", dir);
-          free(dir);
+          kmm_free(dir);
           return ESP_ERR_NVS_NOT_FOUND;
         }
       wlerr("ERROR: Failed to get open %s\n", dir);
-      free(dir);
+      kmm_free(dir);
       return -1;
     }
 
-  ret = read(fd, out_value, *length);
+  ret = file_read(&file, out_value, *length);
   if (ret <= 0)
     {
       wlerr("ERROR: Failed to write to %s\n", dir);
-      free(dir);
-      close(fd);
+      kmm_free(dir);
+      file_close(&file);
       return -1;
     }
   else
@@ -3138,8 +3158,8 @@ static int32_t esp_nvs_get_blob(uint32_t handle,
       *length = ret;
     }
 
-  free(dir);
-  close(fd);
+  kmm_free(dir);
+  file_close(&file);
 
   return 0;
 #else
@@ -3179,15 +3199,15 @@ static int32_t esp_nvs_erase_key(uint32_t handle, const char *key)
       return -1;
     }
 
-  ret = unlink(dir);
+  ret = nx_unlink(dir);
   if (ret < 0)
     {
       wlerr("ERROR: Failed to delete NVS file %s\n", dir);
-      free(dir);
+      kmm_free(dir);
       return -1;
     }
 
-  free(dir);
+  kmm_free(dir);
 
   return 0;
 #else
@@ -3484,7 +3504,7 @@ static void *esp_zalloc_internal(size_t size)
 
 static void *esp_wifi_malloc(size_t size)
 {
-  return malloc(size);
+  return kmm_malloc(size);
 }
 
 /****************************************************************************
@@ -3504,7 +3524,7 @@ static void *esp_wifi_malloc(size_t size)
 
 static void *esp_wifi_realloc(void *ptr, size_t size)
 {
-  return realloc(ptr, size);
+  return kmm_realloc(ptr, size);
 }
 
 /****************************************************************************
@@ -3524,7 +3544,7 @@ static void *esp_wifi_realloc(void *ptr, size_t size)
 
 static void *esp_wifi_calloc(size_t n, size_t size)
 {
-  return calloc(n, size);
+  return kmm_calloc(n, size);
 }
 
 /****************************************************************************
@@ -3543,7 +3563,7 @@ static void *esp_wifi_calloc(size_t n, size_t size)
 
 static void *esp_wifi_zalloc(size_t size)
 {
-  return zalloc(size);
+  return kmm_zalloc(size);
 }
 
 /****************************************************************************
@@ -3568,7 +3588,7 @@ static void *esp_wifi_create_queue(int32_t queue_len, int32_t item_size)
   wifi_queue = kmm_malloc(sizeof(wifi_static_queue_t));
   if (!wifi_queue)
     {
-      wlerr("ERROR: Failed to malloc\n");
+      wlerr("ERROR: Failed to kmm_malloc\n");
       return NULL;
     }
 
@@ -4631,10 +4651,10 @@ int esp_wifi_connect_internal(void)
   clock_gettime(CLOCK_REALTIME, &timeout);
   timeout.tv_sec += WIFI_CONNECT_TIMEOUT;
 
-  ret = sem_timedwait(&g_connect_sem, &timeout);
+  ret = nxsem_timedwait(&g_connect_sem, &timeout);
   if (ret)
     {
-      wlerr("ERROR: Failed to wait sem error=%d\n", errno);
+      wlerr("ERROR: Failed to wait sem error=%d\n", ret);
       esp_wifi_stop();
       return -1;
     }

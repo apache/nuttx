@@ -404,7 +404,7 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
 
   if (signo != 0)
     {
-      kill(dev->pid, signo);
+      nxsig_kill(dev->pid, signo);
       uart_reset_sem(dev);
     }
 #endif
