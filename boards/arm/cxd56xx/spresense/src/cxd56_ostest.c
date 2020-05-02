@@ -58,7 +58,7 @@
 
 #undef HAVE_FPU
 #if defined(CONFIG_ARCH_FPU) && defined(CONFIG_TESTING_OSTEST_FPUSIZE) && \
-    defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_ARMV7M_CMNVECTOR)
+    defined(CONFIG_SCHED_WAITPID)
 #    define HAVE_FPU 1
 #endif
 
