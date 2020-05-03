@@ -42,7 +42,7 @@
 #include <sys/types.h>
 #include <pthread.h>
 
-#include "pthread/pthread.h"
+#include "nuttx/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -63,15 +63,16 @@
  *
  ****************************************************************************/
 
-void *pthread_get_stackaddr_np(pthread_t thread)
+FAR void *pthread_get_stackaddr_np(pthread_t thread)
 {
-  FAR struct pthread_tcb_s *tcb =
-    (FAR struct pthread_tcb_s *)sched_gettcb((pid_t)thread);
+  struct stackinfo_s stackinfo;
+  int ret;
 
-  if (tcb == NULL)
+  ret = sched_get_stackinfo((pid_t)thread, &stackinfo);
+  if (ret < 0)
     {
       return NULL;
     }
 
-  return tcb->cmn.adj_stack_ptr;
+  return stackinfo.adj_stack_ptr;
 }
