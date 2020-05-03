@@ -87,9 +87,9 @@ void stm32l4_rcc_enablelse(void)
   if ((regval & (RCC_BDCR_LSEON | RCC_BDCR_LSERDY)) !=
                 (RCC_BDCR_LSEON | RCC_BDCR_LSERDY))
     {
-      /* The LSE is in the RTC domain and write access is denied to this domain
-       * after reset, you have to enable write access using DBP bit in the PWR CR
-       * register before to configuring the LSE.
+      /* The LSE is in the RTC domain and write access is denied to this
+       * domain after reset, you have to enable write access using DBP bit
+       * in the PWR CR register before to configuring the LSE.
        */
 
       writable = stm32l4_pwr_enablebkp(true);
@@ -133,8 +133,8 @@ void stm32l4_rcc_enablelse(void)
       putreg32(regval, STM32L4_RCC_BDCR);
 #endif
 
-    /* Disable backup domain access if it was disabled on entry */
+      /* Disable backup domain access if it was disabled on entry */
 
-    stm32l4_pwr_enablebkp(writable);
-  }
+      stm32l4_pwr_enablebkp(writable);
+    }
 }

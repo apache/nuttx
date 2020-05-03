@@ -57,16 +57,16 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/** Waste CPU Time
+/* Waste CPU Time
  *
- *   stm32l4_waste() is the logic that will be executed when portions of kernel
- *   or user-app is polling some register or similar, waiting for desired
- *   status. This time is wasted away. This function offers a measure of
- *   badly written piece of software or some undesired behavior.
+ *   stm32l4_waste() is the logic that will be executed when portions of
+ *   kernel or user-app is polling some register or similar, waiting for
+ *   desired status. This time is wasted away. This function offers a
+ *   measure of badly written piece of software or some undesired behavior.
  *
  *   At the same time this function adds to some IDLE time which portion
  *   cannot be used for other purposes (yet).
- **/
+ */
 
 void stm32l4_waste(void);
 
