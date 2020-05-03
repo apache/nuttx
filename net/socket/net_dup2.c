@@ -106,7 +106,8 @@ int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2)
    * for this address family type.
    */
 
-  DEBUGASSERT(psock2->s_sockif != NULL && psock2->s_sockif->si_addref != NULL);
+  DEBUGASSERT(psock2->s_sockif != NULL &&
+              psock2->s_sockif->si_addref != NULL);
   psock2->s_sockif->si_addref(psock2);
 
 #ifdef NET_TCP_HAVE_STACK
@@ -156,14 +157,11 @@ int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2)
  * Name: net_dup2
  *
  * Description:
- *   Clone a socket descriptor to an arbitrary descriptor number.  If file
- *   descriptors are implemented, then this is called by dup2() for the case
- *   of socket file descriptors.  If file descriptors are not implemented,
- *   then this function IS dup2().
+ *   Clone a socket descriptor to an arbitrary descriptor number.
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On any error,
- *   a negated errno value is returned:.
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 

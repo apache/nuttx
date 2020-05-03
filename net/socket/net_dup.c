@@ -54,14 +54,11 @@
  * Name: psock_dup
  *
  * Description:
- *   Clone a socket descriptor to an arbitrary descriptor number.  If file
- *   descriptors are implemented, then this is called by dup() for the case
- *   of socket file descriptors.  If file descriptors are not implemented,
- *   then this function IS dup().
+ *   Clone a socket descriptor to an arbitrary descriptor number.
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On any error,
- *   a negated errno value is returned:.
+ *   On success, returns the number of new socket.  On any error,
+ *   a negated errno value is returned.
  *
  ****************************************************************************/
 
@@ -138,14 +135,11 @@ errout:
  * Name: net_dup
  *
  * Description:
- *   Clone a socket descriptor to an arbitrary descriptor number.  If file
- *   descriptors are implemented, then this is called by dup() for the case
- *   of socket file descriptors.  If file descriptors are not implemented,
- *   then this function IS dup().
+ *   Clone a socket descriptor to an arbitrary descriptor number.
  *
  * Returned Value:
- *   On success, returns the number of characters sent.  On any error,
- *   a negated errno value is returned:.
+ *   On success, returns the number of new socket.  On any error,
+ *   a negated errno value is returned.
  *
  ****************************************************************************/
 
