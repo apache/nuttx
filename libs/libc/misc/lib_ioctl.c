@@ -91,7 +91,7 @@ int ioctl(int fd, int req, ...)
   /* Get the unsigned long argument.
    *
    * REVISIT:  This could be the cause of the crash down the road if the
-   * actual size of the argument not sizeof(unsigned long).
+   * actual size of the argument is not sizeof(unsigned long).
    * Most small integers will be promoted to 'int'.  ARM should pass the
    * following test with all three types having sizeof(type) == 4 bytes.
    * 'float' should also be tested.  But 'long long' and 'double' are out of
