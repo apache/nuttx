@@ -88,13 +88,12 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
 {
   /* Check for a valid file descriptor */
 
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
+  if (fd >= CONFIG_NFILE_DESCRIPTORS)
     {
       /* Perform the socket ioctl */
 
 #ifdef CONFIG_NET
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS +
-                              CONFIG_NSOCKET_DESCRIPTORS))
+      if (fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           return net_poll(fd, fds, setup);
         }
@@ -360,7 +359,7 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 }
 
 /****************************************************************************
- * Name: fdesc_poll
+ * Name: fs_poll
  *
  * Description:
  *   The standard poll() operation redirects operations on file descriptors
@@ -399,48 +398,28 @@ int fs_poll(int fd, FAR struct pollfd *fds, bool setup)
 }
 
 /****************************************************************************
- * Name: poll
+ * Name: nx_poll
  *
  * Description:
- *   poll() waits for one of a set of file descriptors to become ready to
- *   perform I/O.  If none of the events requested (and no error) has
- *   occurred for any of  the  file  descriptors,  then  poll() blocks until
- *   one of the events occurs.
+ *   nx_poll() is similar to the standard 'poll' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
  *
- * Input Parameters:
- *   fds  - List of structures describing file descriptors to be monitored
- *   nfds - The number of entries in the list
- *   timeout - Specifies an upper limit on the time for which poll() will
- *     block in milliseconds.  A negative value of timeout means an infinite
- *     timeout.
+ *   nx_poll() is an internal NuttX interface and should not be called from
+ *   applications.
  *
  * Returned Value:
- *   On success, the number of structures that have non-zero revents fields.
- *   A value of 0 indicates that the call timed out and no file descriptors
- *   were ready.  On error, -1 is returned, and errno is set appropriately:
- *
- *   EBADF  - An invalid file descriptor was given in one of the sets.
- *   EFAULT - The fds address is invalid
- *   EINTR  - A signal occurred before any requested event.
- *   EINVAL - The nfds value exceeds a system limit.
- *   ENOMEM - There was no space to allocate internal data structures.
- *   ENOSYS - One or more of the drivers supporting the file descriptor
- *     does not support the poll method.
+ *   Zero is returned on success; a negated value is returned on any failure.
  *
  ****************************************************************************/
 
-int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
+int nx_poll(FAR struct pollfd *fds, unsigned int nfds, int timeout)
 {
   sem_t sem;
   int count = 0;
-  int errcode;
+  int ret2;
   int ret;
 
   DEBUGASSERT(nfds == 0 || fds != NULL);
-
-  /* poll() is a cancellation point */
-
-  enter_cancellation_point();
 
   /* This semaphore is used for signaling and, hence, should not have
    * priority inheritance enabled.
@@ -515,23 +494,65 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
        * Preserve ret, if negative, since it holds the result of the wait.
        */
 
-      errcode = poll_teardown(fds, nfds, &count, ret);
-      if (errcode < 0 && ret >= 0)
+      ret2 = poll_teardown(fds, nfds, &count, ret);
+      if (ret2 < 0 && ret >= 0)
         {
-          ret = errcode;
+          ret = ret2;
         }
     }
 
   nxsem_destroy(&sem);
-  leave_cancellation_point();
+  return ret < 0 ? ret : count;
+}
 
-  /* Check for errors */
+/****************************************************************************
+ * Name: poll
+ *
+ * Description:
+ *   poll() waits for one of a set of file descriptors to become ready to
+ *   perform I/O.  If none of the events requested (and no error) has
+ *   occurred for any of  the  file  descriptors,  then  poll() blocks until
+ *   one of the events occurs.
+ *
+ * Input Parameters:
+ *   fds  - List of structures describing file descriptors to be monitored
+ *   nfds - The number of entries in the list
+ *   timeout - Specifies an upper limit on the time for which poll() will
+ *     block in milliseconds.  A negative value of timeout means an infinite
+ *     timeout.
+ *
+ * Returned Value:
+ *   On success, the number of structures that have non-zero revents fields.
+ *   A value of 0 indicates that the call timed out and no file descriptors
+ *   were ready.  On error, -1 is returned, and errno is set appropriately:
+ *
+ *   EBADF  - An invalid file descriptor was given in one of the sets.
+ *   EFAULT - The fds address is invalid
+ *   EINTR  - A signal occurred before any requested event.
+ *   EINVAL - The nfds value exceeds a system limit.
+ *   ENOMEM - There was no space to allocate internal data structures.
+ *   ENOSYS - One or more of the drivers supporting the file descriptor
+ *     does not support the poll method.
+ *
+ ****************************************************************************/
 
+int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
+{
+  int ret;
+
+  /* poll() is a cancellation point */
+
+  enter_cancellation_point();
+
+  /* Let nx_poll() do all of the work */
+
+  ret = nx_poll(fds, nfds, timeout);
   if (ret < 0)
     {
       set_errno(-ret);
-      return ERROR;
+      ret = ERROR;
     }
 
-  return count;
+  leave_cancellation_point();
+  return ret;
 }
