@@ -247,7 +247,7 @@ static void up_dumpstate(void)
   /* Get the limits on the interrupt stack memory */
 
 #ifdef CONFIG_SMP
-  istackbase = (uint32_t)up_intstack_base();
+  istackbase = (uint32_t)arm_intstack_base();
 #else
   istackbase = (uint32_t)&g_intstackbase;
 #endif
@@ -303,7 +303,7 @@ static void up_dumpstate(void)
        */
 
 #ifdef CONFIG_SMP
-      stackbase = (uint32_t *)up_intstack_base();
+      stackbase = (uint32_t *)arm_intstack_base();
 #else
       stackbase = (uint32_t *)&g_intstackbase;
 #endif

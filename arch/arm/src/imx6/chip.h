@@ -148,7 +148,7 @@
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
- * Name: up_intstack_base
+ * Name: arm_intstack_base
  *
  * Description:
  *   Return a pointer to the "base" the correct interrupt stack allocation
@@ -157,7 +157,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-static inline uintptr_t up_intstack_base(void)
+static inline uintptr_t arm_intstack_base(void)
 {
   uintptr_t base = (uintptr_t)g_irqstack_alloc;
 #if CONFIG_SMP_NCPUS > 1
@@ -171,7 +171,7 @@ static inline uintptr_t up_intstack_base(void)
 #endif
 
 /****************************************************************************
- * Name: up_intstack_top
+ * Name: arm_intstack_top
  *
  * Description:
  *   Return a pointer to the "top" the correct interrupt stack for the
@@ -180,9 +180,9 @@ static inline uintptr_t up_intstack_base(void)
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-static inline uintptr_t up_intstack_top(void)
+static inline uintptr_t arm_intstack_top(void)
 {
-  return up_intstack_base() + INTSTACK_SIZE;
+  return arm_intstack_base() + INTSTACK_SIZE;
 }
 #endif
 
