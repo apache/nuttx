@@ -570,10 +570,6 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   if (ret == OK)
     {
       ret = task_activate((FAR struct tcb_s *)ptcb);
-      if (ret < 0)
-        {
-          ret = get_errno();
-        }
     }
 
   if (ret == OK)
