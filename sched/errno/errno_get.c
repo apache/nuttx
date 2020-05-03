@@ -45,9 +45,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef get_errno_ptr
 #undef get_errno
-#undef errno
 
 /****************************************************************************
  * Public Functions
@@ -74,5 +72,5 @@
 
 int get_errno(void)
 {
-  return *get_errno_ptr();
+  return *__errno();
 }

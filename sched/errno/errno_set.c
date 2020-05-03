@@ -45,9 +45,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#undef get_errno_ptr
 #undef set_errno
-#undef errno
 
 /****************************************************************************
  * Public Functions
@@ -62,7 +60,7 @@
  *   thread-specific errno value.
  *
  * Input Parameters:
- *   errcode - The thread specific errno will be set to this error code value.
+ *   errcode - The thread specific errno will be set to this value.
  *
  * Returned Value:
  *   None
@@ -73,5 +71,5 @@
 
 void set_errno(int errcode)
 {
-  *get_errno_ptr() = errcode;
+  *__errno() = errcode;
 }

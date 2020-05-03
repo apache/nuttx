@@ -10299,13 +10299,13 @@ OS resources. These hidden structures include:
 <p>
 <ul><pre>
 #include &lt;errno.h&gt;
-#define errno *get_errno_ptr()
-int *get_errno_ptr(void);
+#define errno *__errno()
+int *__errno(void);
 </pre></ul>
 <p>
   <b>Description</b>:
-  <code>get_errno_ptr()</code> returns a pointer to the thread-specific <code>errno</code> value.
-  Note that the symbol <code>errno</code> is defined to be <code>get_errno_ptr()</code> so that the usual
+  <code>__errno()</code> returns a pointer to the thread-specific <code>errno</code> value.
+  Note that the symbol <code>errno</code> is defined to be <code>__errno()</code> so that the usual
   access by referencing the symbol <code>errno</code> will work as expected.
 </p>
 <p>

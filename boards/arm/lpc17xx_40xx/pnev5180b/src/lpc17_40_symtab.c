@@ -48,7 +48,6 @@ extern void *exit;
 extern void *fflush;
 extern void *fopen;
 extern void *fprintf;
-extern void *get_errno_ptr;
 extern void *getpid;
 extern void *kill;
 extern void *memset;
@@ -80,7 +79,6 @@ const struct symtab_s lpc17_40_exports[] =
   {"fflush", &fflush},
   {"fopen", &fopen},
   {"fprintf", &fprintf},
-  {"get_errno_ptr", &get_errno_ptr},
   {"getpid", &getpid},
   {"kill", &kill},
   {"memset", &memset},
@@ -107,4 +105,9 @@ const struct symtab_s lpc17_40_exports[] =
   {"usleep", &usleep},
 };
 
-const int lpc17_40_nexports = sizeof(lpc17_40_exports) / sizeof(struct symtab_s);
+const int lpc17_40_nexports =
+  sizeof(lpc17_40_exports) / sizeof(struct symtab_s);
+
+/*****************************************************************************
+ * Public Functions
+ *****************************************************************************/

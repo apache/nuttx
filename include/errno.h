@@ -91,7 +91,7 @@
 
 #ifdef __DIRECT_ERRNO_ACCESS
 
-#  define errno *get_errno_ptr()
+#  define errno *__errno()
 #  define set_errno(e) do { errno = (int)(e); } while (0)
 #  define get_errno() errno
 
@@ -406,7 +406,7 @@ extern "C"
  * either as macros or via syscalls.
  */
 
-FAR int *get_errno_ptr(void);
+FAR int *__errno(void);
 
 #ifndef __DIRECT_ERRNO_ACCESS
 void set_errno(int errcode);
