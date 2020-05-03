@@ -132,7 +132,7 @@ static void flash_unlock(void)
 {
   while (getreg32(STM32L4_FLASH_SR) & FLASH_SR_BSY)
     {
-      up_waste();
+      stm32l4_waste();
     }
 
   if (getreg32(STM32L4_FLASH_CR) & FLASH_CR_LOCK)
@@ -196,7 +196,7 @@ static inline void flash_erase(size_t page)
 
   while (getreg32(STM32L4_FLASH_SR) & FLASH_SR_BSY)
     {
-      up_waste();
+      stm32l4_waste();
     }
 
   modifyreg32(STM32L4_FLASH_CR, FLASH_CR_PAGE_ERASE, 0);
@@ -311,7 +311,7 @@ uint32_t stm32l4_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
 
   while (getreg32(STM32L4_FLASH_SR) & FLASH_SR_BSY)
     {
-      up_waste();
+      stm32l4_waste();
     }
 
   flash_optbytes_lock();
@@ -530,7 +530,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
 
           while (getreg32(STM32L4_FLASH_SR) & FLASH_SR_BSY)
             {
-              up_waste();
+              stm32l4_waste();
             }
 
           /* Verify */

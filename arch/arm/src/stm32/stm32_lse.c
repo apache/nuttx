@@ -80,7 +80,7 @@ void stm32_rcc_enablelse(void)
 
   while ((getreg32(STM32_RCC_CSR) & RCC_CSR_LSERDY) == 0)
     {
-      up_waste();
+      stm32_waste();
     }
 
 #else
@@ -94,7 +94,7 @@ void stm32_rcc_enablelse(void)
 
   while ((getreg16(STM32_RCC_BDCR) & RCC_BDCR_LSERDY) == 0)
     {
-      up_waste();
+      stm32_waste();
     }
 
 #endif

@@ -111,7 +111,7 @@ static void stm32_eeprom_unlock(void)
 {
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
     {
-      up_waste();
+      stm32_waste();
     }
 
   if (getreg32(STM32_FLASH_PECR) & FLASH_PECR_PELOCK)
@@ -221,7 +221,7 @@ static ssize_t stm32_eeprom_erase_write(size_t addr, const void *buf,
 
       while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
         {
-          up_waste();
+          stm32_waste();
         }
 
       /* Verify */
@@ -472,7 +472,7 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
     {
-      up_waste();
+      stm32_waste();
     }
 
   flash_lock();
@@ -538,7 +538,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
       while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
         {
-          up_waste();
+          stm32_waste();
         }
 
       /* Verify */

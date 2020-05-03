@@ -114,7 +114,7 @@ void stm32l4_rcc_enablelse(void)
 
       while (((regval = getreg32(STM32L4_RCC_BDCR)) & RCC_BDCR_LSERDY) == 0)
         {
-          up_waste();
+          stm32l4_waste();
         }
 
 #if defined(CONFIG_STM32L4_RTC_LSECLOCK_RUN_DRV_CAPABILITY) && \
