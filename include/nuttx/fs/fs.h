@@ -81,6 +81,7 @@
 #  define _NX_READ(f,b,s)      nx_read(f,b,s)
 #  define _NX_WRITE(f,b,s)     nx_write(f,b,s)
 #  define _NX_SEEK(f,o,w)      nx_seek(f,o,w)
+#  define _NX_IOCTL(f,r,a)     nx_ioctl(f,r,a)
 #  define _NX_STAT(p,s)        nx_stat(p,s)
 #  define _NX_GETERRNO(r)      (-(r))
 #  define _NX_SETERRNO(r)      set_errno(-(r))
@@ -95,6 +96,7 @@
 #  define _NX_READ(f,b,s)      read(f,b,s)
 #  define _NX_WRITE(f,b,s)     write(f,b,s)
 #  define _NX_SEEK(f,o,w)      lseek(f,o,w)
+#  define _NX_IOCTL(f,r,a)     ioctl(f,r,a)
 #  define _NX_STAT(p,s)        stat(p,s)
 #  define _NX_GETERRNO(r)      errno
 #  define _NX_SETERRNO(r)
@@ -1249,6 +1251,25 @@ int file_truncate(FAR struct file *filep, off_t length);
 int file_ioctl(FAR struct file *filep, int req, unsigned long arg);
 
 /****************************************************************************
+ * Name: nx_ioctl
+ *
+ * Description:
+ *   nx_ioctl() is similar to the standard 'ioctl' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_ioctl() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   Returns a non-negative number on success;  A negated errno value is
+ *   returned on any failure (see comments ioctl() for a list of appropriate
+ *   errno values).
+ *
+ ****************************************************************************/
+
+int nx_ioctl(int fd, int req, unsigned long arg);
+
+/****************************************************************************
  * Name: file_vfcntl
  *
  * Description:
@@ -1289,6 +1310,29 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
  ****************************************************************************/
 
 int file_fcntl(FAR struct file *filep, int cmd, ...);
+
+/****************************************************************************
+ * Name: nx_fcntl and nx_vfcntl
+ *
+ * Description:
+ *   nx_fcntl() is similar to the standard 'fcntl' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_vfcntl() is identical except that it accepts a va_list as an argument
+ *   versus taking a variable length list of arguments.
+ *
+ *   nx_fcntl() and nx_vfcntl are internal NuttX interface and should not be
+ *   called from applications.
+ *
+ * Returned Value:
+ *   Returns a non-negative number on success;  A negated errno value is
+ *   returned on any failure (see comments fcntl() for a list of appropriate
+ *   errno values).
+ *
+ ****************************************************************************/
+
+int nx_vfcntl(int fd, int cmd, va_list ap);
+int nx_fcntl(int fd, int cmd, ...);
 
 /****************************************************************************
  * Name: file_poll

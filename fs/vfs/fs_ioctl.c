@@ -103,6 +103,92 @@ int file_ioctl(FAR struct file *filep, int req, unsigned long arg)
 }
 
 /****************************************************************************
+ * Name: nx_ioctl
+ *
+ * Description:
+ *   nx_ioctl() is similar to the standard 'ioctl' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_ioctl() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   Returns a non-negative number on success;  A negated errno value is
+ *   returned on any failure (see comments ioctl() for a list of appropriate
+ *   errno values).
+ *
+ ****************************************************************************/
+
+int nx_ioctl(int fd, int req, unsigned long arg)
+{
+  FAR struct file *filep;
+  int ret;
+
+  /* Did we get a valid file descriptor? */
+
+  if (fd >= CONFIG_NFILE_DESCRIPTORS)
+    {
+      /* Perform the socket ioctl */
+
+#ifdef CONFIG_NET
+      if (fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
+        {
+          ret = netdev_ioctl(fd, req, arg);
+        }
+      else
+#endif
+        {
+          return -EBADF;
+        }
+    }
+  else
+    {
+      /* Get the file structure corresponding to the file descriptor. */
+
+      ret = fs_getfilep(fd, &filep);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      DEBUGASSERT(filep != NULL);
+
+      /* Perform the file ioctl. */
+
+      ret = file_ioctl(filep, req, arg);
+    }
+
+  /* Check for File system IOCTL commands that can be implemented via
+   * fcntl()
+   */
+
+  if (ret == -ENOTTY)
+    {
+      switch (req)
+        {
+          case FIONBIO:
+            {
+              DEBUGASSERT(arg != 0);
+
+              if (*(FAR int *)((uintptr_t)arg))
+                {
+                  ret = nx_fcntl(fd, F_SETFL,
+                                 nx_fcntl(fd, F_GETFL) | O_NONBLOCK);
+                }
+              else
+                {
+                  ret = nx_fcntl(fd, F_SETFL,
+                                 nx_fcntl(fd, F_GETFL) & ~O_NONBLOCK);
+                }
+            }
+            break;
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: ioctl/fs_ioctl
  *
  * Description:
@@ -137,74 +223,9 @@ int fs_ioctl(int fd, int req, unsigned long arg)
 int ioctl(int fd, int req, unsigned long arg)
 #endif
 {
-  FAR struct file *filep;
   int ret;
 
-  /* Did we get a valid file descriptor? */
-
-  if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
-    {
-      /* Perform the socket ioctl */
-
-#ifdef CONFIG_NET
-      if ((unsigned int)fd <
-          (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
-        {
-          ret = netdev_ioctl(fd, req, arg);
-        }
-      else
-#endif
-        {
-          ret = -EBADF;
-          goto errout;
-        }
-    }
-  else
-    {
-      /* Get the file structure corresponding to the file descriptor. */
-
-      ret = fs_getfilep(fd, &filep);
-      if (ret < 0)
-        {
-          goto errout;
-        }
-
-      DEBUGASSERT(filep != NULL);
-
-      /* Perform the file ioctl. */
-
-      ret = file_ioctl(filep, req, arg);
-    }
-
-  /* Check for File system IOCTL commands that can be implemented via
-   * fcntl()
-   */
-
-  if (ret == -ENOTTY)
-    {
-      switch (req)
-        {
-          case FIONBIO:
-            {
-              DEBUGASSERT(arg != 0);
-
-              if (*(FAR int *)((uintptr_t)arg))
-                {
-                  return fcntl(fd, F_SETFL,
-                               fcntl(fd, F_GETFL) | O_NONBLOCK);
-                }
-              else
-                {
-                  return fcntl(fd, F_SETFL,
-                               fcntl(fd, F_GETFL) & ~O_NONBLOCK);
-                }
-            }
-            break;
-        }
-    }
-
-errout:
-
+  ret = nx_ioctl(fd, req, arg);
   if (ret < 0)
     {
       set_errno(-ret);
