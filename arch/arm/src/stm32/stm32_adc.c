@@ -98,27 +98,13 @@
 #  error "STM32 ADC IP version not specified"
 #endif
 
-/* At this moment only support for the STM32 ADC IPv2 looks fully functional:
- *   - noDMA
- *   - DMA
- *   - TIM trg
- *   - TIM trg + DMA
- *
- * Support for the STM32 ADC IPv1 works fine only for:
- *   - noDMA (but only with 1 sample)
- *   - TIM trg
- *   - TIM trg + DMA
+/* Supported ADC modes:
+ *   - SW triggering with/without DMA transfer
+ *   - TIM triggering with/without DMA tranfer
+ *   - external triggering with/without DMA transfer
  *
  * (tested with ADC example app from Nuttx apps repo).
  */
-
-#ifdef HAVE_IP_ADC_V1
-#  if defined(ADC_HAVE_DMA) && !defined(ADC_HAVE_TIMER)
-#    warning "ADC DMA mode without hardware trigger may not work properly!"
-#  elif !defined(ADC_HAVE_DMA) && !defined(ADC_HAVE_TIMER)
-#    warning "ADC without hardware trigger and without DMA may not work properly!"
-#  endif
-#endif
 
 /* At the moment there is no proper implementation for timers external
  * trigger in STM32L15XX may be added later
