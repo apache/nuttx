@@ -94,7 +94,7 @@ static inline int statroot(FAR struct stat *buf)
  * Name: stat_recursive
  *
  * Returned Value:
- *   Zero on success; -1 on failure with errno set:
+ *   Zero on success; < 0 on failure:
  *
  *   EACCES  Search permission is denied for one of the directories in the
  *           path prefix of path.
@@ -123,7 +123,6 @@ int stat_recursive(FAR const char *path, FAR struct stat *buf)
        * there is no mountpoint that includes in this path.
        */
 
-      ret = -ret;
       goto errout_with_search;
     }
 
@@ -160,34 +159,61 @@ int stat_recursive(FAR const char *path, FAR struct stat *buf)
       ret = inode_stat(inode, buf);
     }
 
-  /* Check if the stat operation was successful */
-
-  if (ret < 0)
-    {
-      ret = -ret;
-      goto errout_with_inode;
-    }
-
-  /* Successfully stat'ed the file */
-
   inode_release(inode);
-  RELEASE_SEARCH(&desc);
-  return OK;
-
-  /* Failure conditions always set the errno appropriately */
-
-errout_with_inode:
-  inode_release(inode);
-
 errout_with_search:
   RELEASE_SEARCH(&desc);
-  set_errno(ret);
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nx_stat
+ *
+ * Description:
+ *   nx_stat() is similar to the standard 'stat' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_stat() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   Zero is returned on success; a negated value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int nx_stat(FAR const char *path, FAR struct stat *buf)
+{
+  /* Sanity checks */
+
+  if (path == NULL  || buf == NULL)
+    {
+      return -EFAULT;
+    }
+
+  if (*path == '\0')
+    {
+      return -ENOENT;
+    }
+
+  /* Check for the fake root directory (which has no inode) */
+
+  if (strcmp(path, "/") == 0)
+    {
+      return statroot(buf);
+    }
+
+  /* The perform the stat() operation on the path.  This is potentially
+   * recursive if soft link support is enabled.
+   */
+
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+  buf->st_count = 0;
+#endif
+  return stat_recursive(path, buf);
+}
 
 /****************************************************************************
  * Name: stat
@@ -209,39 +235,14 @@ int stat(FAR const char *path, FAR struct stat *buf)
 {
   int ret;
 
-  /* Sanity checks */
-
-  if (path == NULL  || buf == NULL)
+  ret = nx_stat(path, buf);
+  if (ret < 0)
     {
-      ret = EFAULT;
-      goto errout;
+      set_errno(-ret);
+      ret = ERROR;
     }
 
-  if (*path == '\0')
-    {
-      ret = ENOENT;
-      goto errout;
-    }
-
-  /* Check for the fake root directory (which has no inode) */
-
-  if (strcmp(path, "/") == 0)
-    {
-      return statroot(buf);
-    }
-
-  /* The perform the stat() operation on the path.  This is potentially
-   * recursive if soft link support is enabled.
-   */
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  buf->st_count = 0;
-#endif
-  return stat_recursive(path, buf);
-
-errout:
-  set_errno(ret);
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************
@@ -249,7 +250,7 @@ errout:
  *
  * Description:
  *   The inode_stat() function will obtain information about an 'inode' in
- *   the pseudo file system and will write it to the area pointed to by 'buf'.
+ *   the pseudo file system and write it to the area pointed to by 'buf'.
  *
  *   The 'buf' argument is a pointer to a stat structure, as defined in
  *   <sys/stat.h>, into which information is placed concerning the file.
@@ -347,7 +348,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf)
               RESET_BUF(buf);
             }
 
-          /* Make sure that the caller knows that this really a symbolic link. */
+          /* Make sure the caller knows that this really a symbolic link. */
 
           buf->st_mode |= S_IFLNK;
         }
