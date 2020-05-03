@@ -77,6 +77,7 @@
 #  else
 #    define _NX_OPEN           nx_open
 #  endif
+#  define _NX_CLOSE(f)         nx_close(f)
 #  define _NX_READ(f,b,s)      nx_read(f,b,s)
 #  define _NX_WRITE(f,b,s)     nx_write(f,b,s)
 #  define _NX_SEEK(f,o,w)      nx_seek(f,o,w)
@@ -89,6 +90,7 @@
 #  else
 #    define _NX_OPEN           open
 #  endif
+#  define _NX_CLOSE(f)         close(f)
 #  define _NX_READ(f,b,s)      read(f,b,s)
 #  define _NX_WRITE(f,b,s)     write(f,b,s)
 #  define _NX_SEEK(f,o,w)      lseek(f,o,w)
@@ -859,6 +861,24 @@ int file_detach(int fd, FAR struct file *filep);
  ****************************************************************************/
 
 int file_close(FAR struct file *filep);
+
+/****************************************************************************
+ * Name: nx_close
+ *
+ * Description:
+ *   nx_close() is similar to the standard 'close' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_close() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   The new file descriptor is returned on success; a negated errno value is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
+
+int nx_close(int fd);
 
 /****************************************************************************
  * Name: open_blockdriver
