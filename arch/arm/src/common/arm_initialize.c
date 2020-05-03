@@ -62,7 +62,7 @@
 static inline void up_color_intstack(void)
 {
 #ifdef CONFIG_SMP
-  uint32_t *ptr = (uint32_t *)up_intstack_base();
+  uint32_t *ptr = (uint32_t *)arm_intstack_base();
 #else
   uint32_t *ptr = (uint32_t *)&g_intstackalloc;
 #endif
