@@ -108,7 +108,7 @@ static int nxposix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
   pid = exec_spawn(path, (FAR char * const *)argv, symtab, nsymbols, attr);
   if (pid < 0)
     {
-      ret = get_errno();
+      ret = -pid;
       serr("ERROR: exec failed: %d\n", ret);
       goto errout;
     }

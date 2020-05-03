@@ -306,9 +306,8 @@ int exec_module(FAR const struct binary_s *bin);
  *   nexports - The number of symbols in the exports table.
  *
  * Returned Value:
- *   This is an end-user function, so it follows the normal convention:
  *   It returns the PID of the exec'ed module.  On failure, it returns
- *   -1 (ERROR) and sets errno appropriately.
+ *   the negative errno value appropriately.
  *
  ****************************************************************************/
 
