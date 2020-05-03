@@ -717,23 +717,20 @@ void files_initlist(FAR struct filelist *list);
 void files_releaselist(FAR struct filelist *list);
 
 /****************************************************************************
- * Name: file_dup2
+ * Name: file_dup
  *
  * Description:
- *   Assign an inode to a specific files structure.  This is the heart of
- *   dup2.
- *
- *   Equivalent to the non-standard fs_dupfd2() function except that it
- *   accepts struct file instances instead of file descriptors and it does
+ *   Equivalent to the non-standard fs_dupfd() function except that it
+ *   accepts a struct file instance instead of a file descriptor and does
  *   not set the errno variable.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is return on
+ *   Zero (OK) is returned on success; a negated errno value is returned on
  *   any failure.
  *
  ****************************************************************************/
 
-int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
+int file_dup(FAR struct file *filep, int minfd);
 
 /****************************************************************************
  * Name: fs_dupfd OR dup
@@ -758,20 +755,23 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
 int fs_dupfd(int fd, int minfd);
 
 /****************************************************************************
- * Name: file_dup
+ * Name: file_dup2
  *
  * Description:
- *   Equivalent to the non-standard fs_dupfd() function except that it
- *   accepts a struct file instance instead of a file descriptor and does
+ *   Assign an inode to a specific files structure.  This is the heart of
+ *   dup2.
+ *
+ *   Equivalent to the non-standard fs_dupfd2() function except that it
+ *   accepts struct file instances instead of file descriptors and it does
  *   not set the errno variable.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   Zero (OK) is returned on success; a negated errno value is return on
  *   any failure.
  *
  ****************************************************************************/
 
-int file_dup(FAR struct file *filep, int minfd);
+int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
 
 /****************************************************************************
  * Name: fs_dupfd2 OR dup2
@@ -820,6 +820,48 @@ int fs_dupfd2(int fd1, int fd2);
  ****************************************************************************/
 
 int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...);
+
+/****************************************************************************
+ * Name: nx_open and nx_vopen
+ *
+ * Description:
+ *   nx_open() is similar to the standard 'open' interface except that is is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_vopen() is identical except that it accepts a va_list as an argument
+ *   versus taking a variable length list of arguments.
+ *
+ *   nx_open() and nx_vopen are internal NuttX interface and should not be
+ *   called from applications.
+ *
+ * Returned Value:
+ *   The new file descriptor is returned on success; a negated errno value is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
+
+int nx_vopen(FAR const char *path, int oflags, va_list ap);
+int nx_open(FAR const char *path, int oflags, ...);
+
+/****************************************************************************
+ * Name: fs_getfilep
+ *
+ * Description:
+ *   Given a file descriptor, return the corresponding instance of struct
+ *   file.  NOTE that this function will currently fail if it is provided
+ *   with a socket descriptor.
+ *
+ * Input Parameters:
+ *   fd    - The file descriptor
+ *   filep - The location to return the struct file instance
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int fs_getfilep(int fd, FAR struct file **filep);
 
 /****************************************************************************
  * Name: file_detach
@@ -931,39 +973,6 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
 int close_blockdriver(FAR struct inode *inode);
 
 /****************************************************************************
- * Name: fs_ioctl
- *
- * Description:
- *   Perform device specific operations.
- *
- * Input Parameters:
- *   fd       File/socket descriptor of device
- *   req      The ioctl command
- *   arg      The argument of the ioctl cmd
- *
- * Returned Value:
- *   >=0 on success (positive non-zero values are cmd-specific)
- *   -1 on failure with errno set properly:
- *
- *   EBADF
- *     'fd' is not a valid descriptor.
- *   EFAULT
- *     'arg' references an inaccessible memory area.
- *   EINVAL
- *     'cmd' or 'arg' is not valid.
- *   ENOTTY
- *     'fd' is not associated with a character special device.
- *   ENOTTY
- *      The specified request does not apply to the kind of object that the
- *      descriptor 'fd' references.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LIBC_IOCTL_VARIADIC
-int fs_ioctl(int fd, int req, unsigned long arg);
-#endif
-
-/****************************************************************************
  * Name: fs_fdopen
  *
  * Description:
@@ -1001,48 +1010,6 @@ int lib_flushall(FAR struct streamlist *list);
 #ifdef CONFIG_NET_SENDFILE
 ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count);
 #endif
-
-/****************************************************************************
- * Name: fs_getfilep
- *
- * Description:
- *   Given a file descriptor, return the corresponding instance of struct
- *   file.  NOTE that this function will currently fail if it is provided
- *   with a socket descriptor.
- *
- * Input Parameters:
- *   fd    - The file descriptor
- *   filep - The location to return the struct file instance
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
- ****************************************************************************/
-
-int fs_getfilep(int fd, FAR struct file **filep);
-
-/****************************************************************************
- * Name: nx_open and nx_vopen
- *
- * Description:
- *   nx_open() is similar to the standard 'open' interface except that is is
- *   not a cancellation point and it does not modify the errno variable.
- *
- *   nx_vopen() is identical except that it accepts a va_list as an argument
- *   versus taking a variable length list of arguments.
- *
- *   nx_open() and nx_vopen are internal NuttX interface and should not be
- *   called from applications.
- *
- * Returned Value:
- *   The new file descriptor is returned on success; a negated errno value is
- *   returned on any failure.
- *
- ****************************************************************************/
-
-int nx_vopen(FAR const char *path, int oflags, va_list ap);
-int nx_open(FAR const char *path, int oflags, ...);
 
 /****************************************************************************
  * Name: file_read
@@ -1270,6 +1237,39 @@ int file_ioctl(FAR struct file *filep, int req, unsigned long arg);
 int nx_ioctl(int fd, int req, unsigned long arg);
 
 /****************************************************************************
+ * Name: fs_ioctl
+ *
+ * Description:
+ *   Perform device specific operations.
+ *
+ * Input Parameters:
+ *   fd       File/socket descriptor of device
+ *   req      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *
+ * Returned Value:
+ *   >=0 on success (positive non-zero values are cmd-specific)
+ *   -1 on failure with errno set properly:
+ *
+ *   EBADF
+ *     'fd' is not a valid descriptor.
+ *   EFAULT
+ *     'arg' references an inaccessible memory area.
+ *   EINVAL
+ *     'cmd' or 'arg' is not valid.
+ *   ENOTTY
+ *     'fd' is not associated with a character special device.
+ *   ENOTTY
+ *      The specified request does not apply to the kind of object that the
+ *      descriptor 'fd' references.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_IOCTL_VARIADIC
+int fs_ioctl(int fd, int req, unsigned long arg);
+#endif
+
+/****************************************************************************
  * Name: file_vfcntl
  *
  * Description:
@@ -1339,7 +1339,7 @@ int nx_fcntl(int fd, int cmd, ...);
  *
  * Description:
  *   Low-level poll operation based on struct file.  This is used both to (1)
- *   support detached file, and also (2) by fdesc_poll() to perform all
+ *   support detached file, and also (2) by fs_poll() to perform all
  *   normal operations on file descriptors.
  *
  * Input Parameters:
@@ -1354,6 +1354,26 @@ int nx_fcntl(int fd, int cmd, ...);
  ****************************************************************************/
 
 int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
+
+/****************************************************************************
+ * Name: fs_poll
+ *
+ * Description:
+ *   The standard poll() operation redirects operations on file descriptors
+ *   to this function.
+ *
+ * Input Parameters:
+ *   fd    - The file descriptor of interest
+ *   fds   - The structure describing the events to be monitored, OR NULL if
+ *           this is a request to stop monitoring events.
+ *   setup - true: Setup up the poll; false: Teardown the poll
+ *
+ * Returned Value:
+ *  0: Success; Negated errno on failure
+ *
+ ****************************************************************************/
+
+int fs_poll(int fd, FAR struct pollfd *fds, bool setup);
 
 /****************************************************************************
  * Name: file_fstat
@@ -1396,26 +1416,6 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf);
  ****************************************************************************/
 
 int nx_stat(FAR const char *path, FAR struct stat *buf);
-
-/****************************************************************************
- * Name: fdesc_poll
- *
- * Description:
- *   The standard poll() operation redirects operations on file descriptors
- *   to this function.
- *
- * Input Parameters:
- *   fd    - The file descriptor of interest
- *   fds   - The structure describing the events to be monitored, OR NULL if
- *           this is a request to stop monitoring events.
- *   setup - true: Setup up the poll; false: Teardown the poll
- *
- * Returned Value:
- *  0: Success; Negated errno on failure
- *
- ****************************************************************************/
-
-int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup);
 
 #undef EXTERN
 #if defined(__cplusplus)
