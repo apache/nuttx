@@ -721,8 +721,7 @@ void files_releaselist(FAR struct filelist *list);
  *
  * Description:
  *   Equivalent to the non-standard fs_dupfd() function except that it
- *   accepts a struct file instance instead of a file descriptor and does
- *   not set the errno variable.
+ *   accepts a struct file instance instead of a file descriptor.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned on
@@ -733,26 +732,40 @@ void files_releaselist(FAR struct filelist *list);
 int file_dup(FAR struct file *filep, int minfd);
 
 /****************************************************************************
- * Name: fs_dupfd OR dup
+ * Name: fs_dupfd
  *
  * Description:
  *   Clone a file descriptor 'fd' to an arbitrary descriptor number (any
- *   value greater than or equal to 'minfd'). If socket descriptors are
- *   implemented, then this is called by dup() for the case of file
- *   descriptors.  If socket descriptors are not implemented, then this
- *   function IS dup().
+ *   value greater than or equal to 'minfd').
  *
  *   This alternative naming is used when dup could operate on both file and
  *   socket descriptors to avoid drawing unused socket support into the link.
  *
  * Returned Value:
- *   fs_dupfd is sometimes an OS internal function and sometimes is a direct
- *   substitute for dup().  So it must return an errno value as though it
- *   were dup().
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
  *
  ****************************************************************************/
 
 int fs_dupfd(int fd, int minfd);
+
+/****************************************************************************
+ * Name: nx_dup
+ *
+ * Description:
+ *   nx_dup() is similar to the standard 'dup' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_dup() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   The new file descriptor is returned on success; a negated errno value is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
+
+int nx_dup(int fd);
 
 /****************************************************************************
  * Name: file_dup2
@@ -762,8 +775,7 @@ int fs_dupfd(int fd, int minfd);
  *   dup2.
  *
  *   Equivalent to the non-standard fs_dupfd2() function except that it
- *   accepts struct file instances instead of file descriptors and it does
- *   not set the errno variable.
+ *   accepts struct file instances instead of file descriptors.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is return on
@@ -774,29 +786,39 @@ int fs_dupfd(int fd, int minfd);
 int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
 
 /****************************************************************************
- * Name: fs_dupfd2 OR dup2
+ * Name: fs_dupfd2
  *
  * Description:
- *   Clone a file descriptor to a specific descriptor number. If socket
- *   descriptors are implemented, then this is called by dup2() for the
- *   case of file descriptors.  If socket descriptors are not implemented,
- *   then this function IS dup2().
+ *   Clone a file descriptor to a specific descriptor number.
  *
  *   This alternative naming is used when dup2 could operate on both file and
  *   socket descriptors to avoid drawing unused socket support into the link.
  *
  * Returned Value:
- *   fs_dupfd2 is sometimes an OS internal function and sometimes is a direct
- *   substitute for dup2().  So it must return an errno value as though it
- *   were dup2().
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET
 int fs_dupfd2(int fd1, int fd2);
-#else
-#  define fs_dupfd2(fd1, fd2) dup2(fd1, fd2)
-#endif
+
+/****************************************************************************
+ * Name: nx_dup2
+ *
+ * Description:
+ *   nx_dup2() is similar to the standard 'dup2' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
+ *
+ *   nx_dup2() is an internal NuttX interface and should not be called from
+ *   applications.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is return on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int nx_dup2(int fd1, int fd2);
 
 /****************************************************************************
  * Name: file_open
