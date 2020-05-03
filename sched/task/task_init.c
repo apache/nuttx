@@ -65,7 +65,7 @@
  *                parameters are required, argv may be NULL.
  *
  * Returned Value:
- *   OK on success; ERROR on failure with errno set appropriately.  (See
+ *   OK on success; negative error value on failure appropriately.  (See
  *   nxtask_schedsetup() for possible failure conditions).  On failure, the
  *   caller is responsible for freeing the stack memory and for calling
  *   sched_releasetcb() to free the TCB (which could be in most any state).
@@ -77,7 +77,6 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
               main_t entry, FAR char * const argv[])
 {
   FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;
-  int errcode;
   int ret;
 
   /* Only tasks and kernel threads can be initialized in this way */
@@ -92,7 +91,6 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
   ret = group_allocate(ttcb, tcb->flags);
   if (ret < 0)
     {
-      errcode = -ret;
       goto errout;
     }
 
@@ -101,7 +99,6 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
   ret = group_setuptaskfiles(ttcb);
   if (ret < 0)
     {
-      errcode = -ret;
       goto errout_with_group;
     }
 
@@ -115,7 +112,6 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
                           TCB_FLAG_TTYPE_TASK);
   if (ret < OK)
     {
-      errcode = -ret;
       goto errout_with_group;
     }
 
@@ -128,7 +124,6 @@ int task_init(FAR struct tcb_s *tcb, const char *name, int priority,
   ret = group_initialize(ttcb);
   if (ret < 0)
     {
-      errcode = -ret;
       goto errout_with_group;
     }
 
@@ -138,6 +133,5 @@ errout_with_group:
   group_leave(tcb);
 
 errout:
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
