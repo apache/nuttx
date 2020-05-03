@@ -43,7 +43,7 @@
 #include <pthread.h>
 #include <errno.h>
 
-#include "pthread/pthread.h"
+#include "nuttx/sched.h"
 
 /****************************************************************************
  * Public Functions
@@ -59,7 +59,7 @@
  *   pthread_t - The pthread being queried
  *
  * Returned Value:
- *   A positive, non-zerp pthread stack address is returned on success.  A
+ *   A positive, non-zero pthread stack address is returned on success.  A
  *   negative value is returned in the case that the 'thread' argument does
  *   not refer to a valid thread.
  *
@@ -67,13 +67,14 @@
 
 ssize_t pthread_get_stacksize_np(pthread_t thread)
 {
-  FAR struct pthread_tcb_s *tcb =
-    (FAR struct pthread_tcb_s *)sched_gettcb((pid_t)thread);
+  struct stackinfo_s stackinfo;
+  int ret;
 
-  if (tcb == NULL)
+  ret = sched_get_stackinfo((pid_t)thread, &stackinfo);
+  if (ret < 0)
     {
-      return -EINVAL;
+      return (ssize_t)ret;
     }
 
-  return tcb->cmn.adj_stack_size;
+  return stackinfo.adj_stack_size;
 }

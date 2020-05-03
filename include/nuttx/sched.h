@@ -382,6 +382,21 @@ struct dspace_s
 };
 #endif
 
+/* struct stackinfo_s ***********************************************************/
+
+/* Used to report stack information */
+
+struct stackinfo_s
+{
+  size_t    adj_stack_size;              /* Stack size after adjustment         */
+                                         /* for hardware, processor, etc.       */
+                                         /* (for debug purposes only)           */
+  FAR void *stack_alloc_ptr;             /* Pointer to allocated stack          */
+                                         /* Needed to deallocate stack          */
+  FAR void *adj_stack_ptr;               /* Adjusted stack_alloc_ptr for HW     */
+                                         /* The initial stack pointer value     */
+};
+
 /* struct task_group_s **********************************************************/
 
 /* All threads created by pthread_create belong in the same task group (along
@@ -650,7 +665,7 @@ struct tcb_s
                                          /* for hardware, processor, etc.       */
                                          /* (for debug purposes only)           */
   FAR void *stack_alloc_ptr;             /* Pointer to allocated stack          */
-                                         /* Need to deallocate stack            */
+                                         /* Needed to deallocate stack          */
   FAR void *adj_stack_ptr;               /* Adjusted stack_alloc_ptr for HW     */
                                          /* The initial stack pointer value     */
 
@@ -1222,6 +1237,24 @@ int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
 int nxsched_setaffinity(pid_t pid, size_t cpusetsize,
                         FAR const cpu_set_t *mask);
 #endif
+
+/********************************************************************************
+ * Name: sched_get_stackinfo
+ *
+ * Description:
+ *   Report information about a thread's stack allocation.
+ *
+ * Input Parameters:
+ *   pid_t     - Identifies the thread to query.  Zero is interpreted as the
+ *               the calling thread
+ *   stackinfo - User-provided location to return the stack information.
+ *
+ * Returned Value:
+ *   Zero (OK) if successful.  Otherwise, a negated errno value is returned.
+ *
+ ********************************************************************************/
+
+int sched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo);
 
 #undef EXTERN
 #if defined(__cplusplus)
