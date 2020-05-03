@@ -148,9 +148,6 @@ static int nxthread_create(FAR const char *name, uint8_t ttype,
   ret = task_activate((FAR struct tcb_s *)tcb);
   if (ret < OK)
     {
-      ret = -get_errno();
-      DEBUGASSERT(ret < 0);
-
       /* The TCB was added to the active task list by nxtask_schedsetup() */
 
       dq_rem((FAR dq_entry_t *)tcb, (FAR dq_queue_t *)&g_inactivetasks);
