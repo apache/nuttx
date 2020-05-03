@@ -2265,14 +2265,6 @@ struct adc_dev_s;
 struct adc_dev_s *stm32_adcinitialize(int intf, FAR const uint8_t *chanlist,
                                       int channels);
 
-/************************************************************************************
- * Name: stm32_adc_llops_get
- ************************************************************************************/
-
-#ifdef CONFIG_STM32_ADC_LL_OPS
-FAR const struct stm32_adc_ops_s *stm32_adc_llops_get(FAR struct adc_dev_s *dev);
-#endif
-
 #undef EXTERN
 #ifdef __cplusplus
 }

@@ -484,7 +484,7 @@ static void adc_modifyreg(FAR struct stm32_dev_s *priv, int offset,
 #ifdef HAVE_ADC_CMN_REGS
 static uint32_t adccmn_base_get(FAR struct stm32_dev_s *priv);
 static void adccmn_modifyreg(FAR struct stm32_dev_s *priv, uint32_t offset,
-                              uint32_t clrbits, uint32_t setbits);
+                             uint32_t clrbits, uint32_t setbits);
 #  ifdef CONFIG_DEBUG_ANALOG_INFO
 static uint32_t adccmn_getreg(FAR struct stm32_dev_s *priv, uint32_t offset);
 #  endif
@@ -495,8 +495,7 @@ static void tim_putreg(FAR struct stm32_dev_s *priv, int offset,
                        uint16_t value);
 static void tim_modifyreg(FAR struct stm32_dev_s *priv, int offset,
                           uint16_t clrbits, uint16_t setbits);
-static void tim_dumpregs(FAR struct stm32_dev_s *priv,
-                             FAR const char *msg);
+static void tim_dumpregs(FAR struct stm32_dev_s *priv, FAR const char *msg);
 #endif
 
 #ifdef HAVE_ADC_CMN_DATA
@@ -1078,7 +1077,7 @@ static uint32_t adccmn_base_get(FAR struct stm32_dev_s *priv)
  ****************************************************************************/
 
 static void adccmn_modifyreg(FAR struct stm32_dev_s *priv, uint32_t offset,
-                              uint32_t clrbits, uint32_t setbits)
+                             uint32_t clrbits, uint32_t setbits)
 {
   uint32_t base = 0;
 
@@ -3189,7 +3188,7 @@ errout:
 #endif
 
 /****************************************************************************
- * Name: adc_extsel_set
+ * Name: adc_extcfg_set
  ****************************************************************************/
 
 #ifdef ADC_HAVE_EXTCFG
@@ -3230,7 +3229,7 @@ static int adc_extcfg_set(FAR struct stm32_dev_s *priv, uint32_t extcfg)
 #endif
 
 /****************************************************************************
- * Name: adc_jextsel_set
+ * Name: adc_jextcfg_set
  ****************************************************************************/
 
 #ifdef ADC_HAVE_JEXTCFG
@@ -3302,12 +3301,12 @@ static void adc_dumpregs(FAR struct stm32_dev_s *priv)
 
 #if defined(STM32_ADC_SQR4_OFFSET)
   ainfo("SQR4: 0x%08x\n",
-        adc_getreg(priv, STM32_ADC_SQR5_OFFSET));
+        adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
 #endif
 
 #if defined(STM32_ADC_SQR5_OFFSET)
   ainfo("SQR5: 0x%08x\n",
-        adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
+        adc_getreg(priv, STM32_ADC_SQR5_OFFSET));
 #endif
 
 #ifdef ADC_HAVE_INJECTED
@@ -3373,8 +3372,8 @@ static void adc_enable_vbat_channel(FAR struct adc_dev_s *dev, bool enable)
 static int adc_ioc_change_sleep_between_opers(FAR struct adc_dev_s *dev,
                                               int cmd, bool arg)
 {
-  int ret = OK;
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  int ret = OK;
 
   adc_enable(priv, false);
 
@@ -3530,8 +3529,8 @@ static void adc_ioc_enable_ovr_int(FAR struct stm32_dev_s *priv, bool enable)
 
 static int adc_ioc_change_ints(FAR struct adc_dev_s *dev, int cmd, bool arg)
 {
-  int ret = OK;
   FAR struct stm32_dev_s *priv = (FAR struct stm32_dev_s *)dev->ad_priv;
+  int ret = OK;
 
   switch (cmd)
     {
@@ -4475,7 +4474,7 @@ static void adc_sampletime_write(FAR struct stm32_adc_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: adc_change_sample_time
+ * Name: adc_sampletime_set
  *
  * Description:
  *   Changes sample times for specified channels. This method
