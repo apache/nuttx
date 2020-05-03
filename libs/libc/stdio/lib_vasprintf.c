@@ -47,24 +47,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* On some architectures, va_list is really a pointer to a structure on the
- * stack.  And the va_arg builtin will modify that instance of va_list.  Since
- * vasprintf traverse the parameters in the va_list twice, the va_list will
- * be altered in this first cases and the second usage will fail.  So far, I
- * have seen this only on the X86 family with GCC.
- */
-
-#undef CLONE_APLIST
-#define ap1 ap
-#define ap2 ap
-
-#if defined(CONFIG_ARCH_X86)
-#  define CLONE_APLIST 1
-#  undef ap2
-#elif defined(CONFIG_ARCH_SIM) && (defined(CONFIG_HOST_X86) || defined(CONFIG_HOST_X86_64))
-#  define CLONE_APLIST 1
-#  undef ap2
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -83,8 +65,8 @@
  *
  * Returned Value:
  *   The returned value is the number of characters allocated for the buffer,
- *   or less than zero if an error occurred. Usually this means that the buffer
- *   could not be allocated.
+ *   or less than zero if an error occurred. Usually this means that the
+ *   buffer could not be allocated.
  *
  ****************************************************************************/
 
@@ -92,7 +74,15 @@ int vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
 {
   struct lib_outstream_s nulloutstream;
   struct lib_memoutstream_s memoutstream;
-#ifdef CLONE_APLIST
+
+  /* On some architectures, va_list is really a pointer to a structure on
+   * the stack. And the va_arg builtin will modify that instance of va_list.
+   * Since vasprintf traverse the parameters in the va_list twice, the
+   * va_list will be altered in this first cases and the second usage will
+   * fail. This is a known issue with x86_64.
+   */
+
+#ifdef va_copy
   va_list ap2;
 #endif
   FAR char *buf;
@@ -100,9 +90,7 @@ int vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
 
   DEBUGASSERT(ptr && fmt);
 
-#ifdef CLONE_APLIST
-  /* Clone the va_list so that the contents of the input values are not altered */
-
+#ifdef va_copy
   va_copy(ap2, ap);
 #endif
 
@@ -111,7 +99,7 @@ int vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
    */
 
   lib_nulloutstream(&nulloutstream);
-  lib_vsprintf((FAR struct lib_outstream_s *)&nulloutstream, fmt, ap1);
+  lib_vsprintf((FAR struct lib_outstream_s *)&nulloutstream, fmt, ap);
 
   /* Then allocate a buffer to hold that number of characters, adding one
    * for the null terminator.
@@ -120,6 +108,10 @@ int vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
   buf = (FAR char *)malloc(nulloutstream.nput + 1);
   if (!buf)
     {
+      va_end(ap);
+#ifdef va_copy
+      va_end(ap2);
+#endif
       return ERROR;
     }
 
@@ -134,14 +126,23 @@ int vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
   /* Then let lib_vsprintf do it's real thing */
 
   nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
+#ifdef va_copy
                         fmt, ap2);
+#else
+                        fmt, ap);
+#endif
+
+#ifdef va_copy
+  va_end(ap2);
+#endif
+  va_end(ap);
 
   /* Return a pointer to the string to the caller.  NOTE: the memstream put()
-   * method has already added the NUL terminator to the end of the string (not
-   * included in the nput count).
+   * method has already added the NUL terminator to the end of the string
+   * (not included in the nput count).
    *
-   * Hmmm.. looks like the memory would be stranded if lib_vsprintf() returned
-   * an error.  Does that ever happen?
+   * Hmmm.. looks like the memory would be stranded if lib_vsprintf()
+   * returned an error.  Does that ever happen?
    */
 
   DEBUGASSERT(nbytes < 0 || nbytes == nulloutstream.nput);
