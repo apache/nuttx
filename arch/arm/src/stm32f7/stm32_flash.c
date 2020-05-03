@@ -83,7 +83,7 @@ static sem_t g_sem = SEM_INITIALIZER(1);
  * Private Functions
  ****************************************************************************/
 
-static void up_waste(void)
+static void stm32_waste(void)
 {
 }
 
@@ -101,7 +101,7 @@ static void flash_unlock(void)
 {
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
     {
-      up_waste();
+      stm32_waste();
     }
 
   if (getreg32(STM32_FLASH_CR) & FLASH_CR_LOCK)
@@ -223,7 +223,7 @@ int stm32_flash_writeprotect(size_t page, bool enabled)
 
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
     {
-      up_waste();
+      stm32_waste();
     }
 
   /* Re-lock options */
@@ -353,7 +353,10 @@ ssize_t up_progmem_eraseblock(size_t block)
   modifyreg32(STM32_FLASH_CR, FLASH_CR_SNB_MASK, FLASH_CR_SNB(block));
   modifyreg32(STM32_FLASH_CR, 0, FLASH_CR_STRT);
 
-  while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
+  while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
+    {
+      stm32_waste();
+    {
 
   modifyreg32(STM32_FLASH_CR, FLASH_CR_SER, 0);
   sem_unlock();
@@ -425,7 +428,10 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
       ARM_DSB();
 
-      while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY) up_waste();
+      while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
+        {
+          stm32_waste();
+        }
 
       /* Verify */
 

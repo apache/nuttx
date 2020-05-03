@@ -204,7 +204,7 @@ static inline void stm32_rtc_beginwr(void)
 
   while ((getreg16(STM32_RTC_CRL) & RTC_CRL_RTOFF) == 0)
     {
-      up_waste();
+      stm32_waste();
     }
 
   /* Enter Config mode, Set Value and Exit */
@@ -234,7 +234,7 @@ static inline void stm32_rtc_endwr(void)
 
   while ((getreg16(STM32_RTC_CRL) & RTC_CRL_RTOFF) == 0)
     {
-      up_waste();
+      stm32_waste();
     }
 }
 
@@ -257,7 +257,7 @@ static inline void stm32_rtc_wait4rsf(void)
   modifyreg16(STM32_RTC_CRL, RTC_CRL_RSF, 0);
   while ((getreg16(STM32_RTC_CRL) & RTC_CRL_RSF) == 0)
     {
-      up_waste();
+      stm32_waste();
     }
 }
 

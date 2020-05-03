@@ -51,7 +51,7 @@ uint32_t idle_wastecounter = 0;
  * Public Functions
  ****************************************************************************/
 
-void up_waste(void)
+void stm32_waste(void)
 {
   idle_wastecounter++;
 }

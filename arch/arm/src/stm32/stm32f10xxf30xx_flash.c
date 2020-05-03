@@ -108,7 +108,7 @@ static void flash_unlock(uintptr_t base)
 {
   while ((getreg32(base + STM32_FLASH_SR_OFFSET) & FLASH_SR_BSY) != 0)
     {
-      up_waste();
+      stm32_waste();
     }
 
   if ((getreg32(base + STM32_FLASH_CR_OFFSET) & FLASH_CR_LOCK) != 0)
@@ -292,7 +292,7 @@ ssize_t up_progmem_eraseblock(size_t block)
 
   while ((getreg32(base + STM32_FLASH_SR_OFFSET) & FLASH_SR_BSY) != 0)
     {
-      up_waste();
+      stm32_waste();
     }
 
   modifyreg32(base + STM32_FLASH_CR_OFFSET, FLASH_CR_PER, 0);
@@ -375,7 +375,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
 
       while ((getreg32(base + STM32_FLASH_SR_OFFSET) & FLASH_SR_BSY) != 0)
         {
-          up_waste();
+          stm32_waste();
         }
 
       /* Verify */
