@@ -88,7 +88,7 @@ int nxmq_close_group(mqd_t mqdes, FAR struct task_group_s *group)
           inode = msgq->inode;
           DEBUGASSERT(inode->u.i_mqueue == msgq);
 
-          /* Decrement the reference count on the inode, possibly freeing it */
+          /* Decrement the reference count on the inode, possibly free it */
 
           mq_inode_release(inode);
         }
@@ -96,6 +96,51 @@ int nxmq_close_group(mqd_t mqdes, FAR struct task_group_s *group)
       sched_unlock();
     }
 
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nxmq_close
+ *
+ * Description:
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   mq_close() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_close() for a more complete description of the
+ *  behavior of this function
+ *
+ * Input Parameters:
+ *   mqdes - Message queue descriptor.
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success. A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nxmq_close(mqd_t mqdes)
+{
+  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)sched_self();
+  int ret;
+
+  /* Lock the scheduler to prevent any asynchronous task delete operation
+   * (unlikely).
+   */
+
+  sched_lock();
+
+  rtcb = (FAR struct tcb_s *)sched_self();
+  DEBUGASSERT(mqdes != NULL && rtcb != NULL && rtcb->group != NULL);
+
+  /* Then perform the close operation */
+
+  ret = nxmq_close_group(mqdes, rtcb->group);
+
+  sched_unlock();
   return ret;
 }
 
@@ -129,30 +174,15 @@ int nxmq_close_group(mqd_t mqdes, FAR struct task_group_s *group)
 
 int mq_close(mqd_t mqdes)
 {
-  FAR struct tcb_s *rtcb = (FAR struct tcb_s *)sched_self();
   int ret;
 
-  /* Lock the scheduler to prevent any asynchronous task delete operation
-   * (unlikely).
-   */
-
-  sched_lock();
-
-  rtcb = (FAR struct tcb_s *)sched_self();
-  DEBUGASSERT(mqdes != NULL && rtcb != NULL && rtcb->group != NULL);
-
-  /* Then perform the close operation */
-
-  ret = nxmq_close_group(mqdes, rtcb->group);
-#if 0
-  if (ret < 0)  /* Currently, nxmq_close_group() only returns OK */
+  ret = nxmq_close(mqdes);
+  if (ret < 0)
     {
       set_errno(-ret);
       ret = ERROR;
     }
-#endif
 
-  sched_unlock();
   return ret;
 }
 

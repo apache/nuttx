@@ -40,30 +40,33 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mq_unlink
+ * Name: nxmq_unlink
  *
  * Description:
- *   This function removes the message queue named by "mq_name." If one
- *   or more tasks have the message queue open when mq_unlink() is called,
- *   removal of the message queue is postponed until all references to the
- *   message queue have been closed.
+ *   This is an internal OS interface.  It is functionally equivalent to
+ *   mq_unlink() except that:
+ *
+ *   - It is not a cancellation point, and
+ *   - It does not modify the errno value.
+ *
+ *  See comments with mq_unlink() for a more complete description of the
+ *  behavior of this function
  *
  * Input Parameters:
  *   mq_name - Name of the message queue
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success. A negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-int mq_unlink(FAR const char *mq_name)
+int nxmq_unlink(FAR const char *mq_name)
 {
   FAR struct inode *inode;
   struct inode_search_s desc;
   char fullpath[MAX_MQUEUE_PATH];
-  int errcode;
   int ret;
 
   /* Get the full path to the message queue */
@@ -80,7 +83,6 @@ int mq_unlink(FAR const char *mq_name)
     {
       /* There is no inode that includes in this path */
 
-      errcode = -ret;
       goto errout_with_search;
     }
 
@@ -93,7 +95,7 @@ int mq_unlink(FAR const char *mq_name)
 
   if (!INODE_IS_MQUEUE(inode))
     {
-      errcode = ENXIO;
+      ret = -ENXIO;
       goto errout_with_inode;
     }
 
@@ -104,13 +106,12 @@ int mq_unlink(FAR const char *mq_name)
   ret = inode_semtake();
   if (ret < 0)
     {
-      errcode = -ret;
       goto errout_with_inode;
     }
 
   if (inode->i_child != NULL)
     {
-      errcode = ENOTEMPTY;
+      ret = -ENOTEMPTY;
       goto errout_with_semaphore;
     }
 
@@ -127,7 +128,6 @@ int mq_unlink(FAR const char *mq_name)
    */
 
   DEBUGASSERT(ret >= 0 || ret == -EBUSY);
-  UNUSED(ret);
 
   /* Now we do not release the reference count in the normal way (by calling
    * inode release.  Rather, we call mq_inode_release().  mq_inode_release
@@ -151,7 +151,39 @@ errout_with_inode:
 
 errout_with_search:
   RELEASE_SEARCH(&desc);
-  set_errno(errcode);
   sched_unlock();
-  return ERROR;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: mq_unlink
+ *
+ * Description:
+ *   This function removes the message queue named by "mq_name." If one
+ *   or more tasks have the message queue open when mq_unlink() is called,
+ *   removal of the message queue is postponed until all references to the
+ *   message queue have been closed.
+ *
+ * Input Parameters:
+ *   mq_name - Name of the message queue
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int mq_unlink(FAR const char *mq_name)
+{
+  int ret;
+
+  ret = nxmq_unlink(mq_name);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }
