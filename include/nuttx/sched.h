@@ -1245,12 +1245,16 @@ int nxsched_setaffinity(pid_t pid, size_t cpusetsize,
  *   Report information about a thread's stack allocation.
  *
  * Input Parameters:
- *   pid_t     - Identifies the thread to query.  Zero is interpreted as the
+ *   pid       - Identifies the thread to query.  Zero is interpreted as the
  *               the calling thread
  *   stackinfo - User-provided location to return the stack information.
  *
  * Returned Value:
  *   Zero (OK) if successful.  Otherwise, a negated errno value is returned.
+ *
+ *     -ENOENT  Returned if pid does not refer to an active task
+ *     -EACCES  The calling thread does not have privileges to access the
+ *              stack of the thread associated with the pid.
  *
  ********************************************************************************/
 
