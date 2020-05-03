@@ -80,7 +80,9 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* Configuration ********************************************************************/
+
 /* In hi-res mode, the RTC operates at 16384Hz.  Overflow interrupts are handled
  * when the 32-bit RTC counter overflows every 3 days and 43 minutes.  A BKP register
  * is incremented on each overflow interrupt creating, effectively, a 48-bit RTC
@@ -125,7 +127,8 @@
 #  endif
 #endif
 
-/* RTC/BKP Definitions *************************************************************/
+/* RTC/BKP Definitions **************************************************************/
+
 /* STM32_RTC_PRESCALAR_VALUE
  *   RTC pre-scalar value.  The RTC is driven by a 32,768Hz input clock.  This input
  *   value is divided by this value (plus one) to generate the RTC frequency.
@@ -286,7 +289,8 @@ static void stm32_rtc_breakout(FAR const struct timespec *tp,
   /* Break up the time in seconds + milleconds into the correct values for our use */
 
   frac = ((uint64_t)tp->tv_nsec * CONFIG_RTC_FREQUENCY) / 1000000000;
-  cnt  = (tp->tv_sec << RTC_CLOCKS_SHIFT) | ((uint32_t)frac & (CONFIG_RTC_FREQUENCY-1));
+  cnt  = (tp->tv_sec << RTC_CLOCKS_SHIFT) |
+         ((uint32_t)frac & (CONFIG_RTC_FREQUENCY - 1));
   ovf  = (tp->tv_sec >> (32 - RTC_CLOCKS_SHIFT));
 
   /* Then return the broken out time */
@@ -609,8 +613,10 @@ int up_rtc_gettime(FAR struct timespec *tp)
 
   /* Then we can save the time in seconds and fractional seconds. */
 
-  tp->tv_sec  = (ms << (32-RTC_CLOCKS_SHIFT-16)) | (ls >> (RTC_CLOCKS_SHIFT+16));
-  tp->tv_nsec = (ls & (CONFIG_RTC_FREQUENCY-1)) * (1000000000/CONFIG_RTC_FREQUENCY);
+  tp->tv_sec  = (ms << (32 - RTC_CLOCKS_SHIFT - 16)) |
+                (ls >> (RTC_CLOCKS_SHIFT + 16));
+  tp->tv_nsec = (ls & (CONFIG_RTC_FREQUENCY - 1)) *
+                (1000000000 / CONFIG_RTC_FREQUENCY);
   return OK;
 }
 #endif

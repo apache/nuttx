@@ -42,10 +42,10 @@
 #include "stm32_waste.h"
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
-uint32_t idle_wastecounter = 0;
+uint32_t g_waste_counter = 0;
 
 /****************************************************************************
  * Public Functions
@@ -53,5 +53,5 @@ uint32_t idle_wastecounter = 0;
 
 void stm32_waste(void)
 {
-  idle_wastecounter++;
+  g_waste_counter++;
 }

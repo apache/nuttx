@@ -356,7 +356,7 @@ ssize_t up_progmem_eraseblock(size_t block)
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
     {
       stm32_waste();
-    {
+    }
 
   modifyreg32(STM32_FLASH_CR, FLASH_CR_SER, 0);
   sem_unlock();
