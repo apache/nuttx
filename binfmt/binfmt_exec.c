@@ -79,9 +79,8 @@
  *   attr     - The spawn attributes.
  *
  * Returned Value:
- *   This is an end-user function, so it follows the normal convention:
  *   It returns the PID of the exec'ed module.  On failure, it returns
- *   -1 (ERROR) and sets errno appropriately.
+ *   the negative errno value appropriately.
  *
  ****************************************************************************/
 
@@ -91,7 +90,6 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
 {
   FAR struct binary_s *bin;
   int pid;
-  int errcode;
   int ret;
 
   /* Allocate the load information */
@@ -100,7 +98,7 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
   if (!bin)
     {
       berr("ERROR: Failed to allocate binary_s\n");
-      errcode = ENOMEM;
+      ret = -ENOMEM;
       goto errout;
     }
 
@@ -115,8 +113,7 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
   ret = binfmt_copyargv(bin, argv);
   if (ret < 0)
     {
-      errcode = -ret;
-      berr("ERROR: Failed to copy argv[]: %d\n", errcode);
+      berr("ERROR: Failed to copy argv[]: %d\n", ret);
       goto errout_with_bin;
     }
 
@@ -125,8 +122,7 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
   ret = load_module(bin);
   if (ret < 0)
     {
-      errcode = -ret;
-      berr("ERROR: Failed to load program '%s': %d\n", filename, errcode);
+      berr("ERROR: Failed to load program '%s': %d\n", filename, ret);
       goto errout_with_argv;
     }
 
@@ -159,9 +155,9 @@ int exec_spawn(FAR const char *filename, FAR char * const *argv,
   pid = exec_module(bin);
   if (pid < 0)
     {
-      errcode = -pid;
+      ret = pid;
       berr("ERROR: Failed to execute program '%s': %d\n",
-           filename, errcode);
+           filename, ret);
       goto errout_with_lock;
     }
 
@@ -197,8 +193,7 @@ errout_with_argv:
 errout_with_bin:
   kmm_free(bin);
 errout:
-  set_errno(errcode);
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************
@@ -265,7 +260,16 @@ errout:
 int exec(FAR const char *filename, FAR char * const *argv,
          FAR const struct symtab_s *exports, int nexports)
 {
-  return exec_spawn(filename, argv, exports, nexports, NULL);
+  int ret;
+
+  ret = exec_spawn(filename, argv, exports, nexports, NULL);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }
 
 #endif /* !CONFIG_BINFMT_DISABLE */
