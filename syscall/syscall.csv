@@ -30,7 +30,6 @@
 "fsync","unistd.h","!defined(CONFIG_DISABLE_MOUNTPOINT)","int","int"
 "ftruncate","unistd.h","!defined(CONFIG_DISABLE_MOUNTPOINT)","int","int","off_t"
 "get_errno","errno.h","!defined(__DIRECT_ERRNO_ACCESS)","int"
-"get_errno_ptr","errno.h","defined(__DIRECT_ERRNO_ACCESS)","FAR int*"
 "getenv","stdlib.h","!defined(CONFIG_DISABLE_ENVIRON)","FAR char*","FAR const char*"
 "getgid","unistd.h","defined(CONFIG_SCHED_USER_IDENTITY)","gid_t"
 "getitimer","sys/time.h","!defined(CONFIG_DISABLE_POSIX_TIMERS)","int","int","FAR struct itimerval *"

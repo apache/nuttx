@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/errno/errno_getptr.c
+ * sched/errno/errno_errno.c
  *
  *   Copyright (C) 2007, 2008, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,18 +44,11 @@
 #include "sched/sched.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#undef get_errno_ptr
-#undef errno
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
 /* This is a 'dummy' errno value to use in context where there is no valid
- * errno location to use.  For example, when running from an interrupt handler
+ * errno location to use. For example, when running from an interrupt handler
  * or early in initialization when task structures have not yet been
  * initialized.
  */
@@ -67,7 +60,7 @@ static int g_irqerrno;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: get_errno_ptr
+ * Name: __errno
  *
  * Description:
  *   Return a pointer to the thread specific errno.
@@ -82,7 +75,7 @@ static int g_irqerrno;
  *
  ****************************************************************************/
 
-FAR int *get_errno_ptr(void)
+FAR int *__errno(void)
 {
   /* Check if this function was called from an interrupt handler.  In that
    * case, we have to do things a little differently to prevent the interrupt
@@ -113,12 +106,12 @@ FAR int *get_errno_ptr(void)
     }
 
   /* We were called either from (1) an interrupt handler or (2) from normally
-   * code but in an unhealthy state.  In either event, do not permit access to
+   * code but in an unhealthy state. In either event, do not permit access to
    * the errno in the TCB of the task at the head of the ready-to-run list.
-   * Instead, use a separate errno just for interrupt handlers.  Of course, this
-   * would have to change if we ever wanted to support nested interrupts or if
-   * we really cared about the stability of the errno during those "unhealthy
-   * states."
+   * Instead, use a separate errno just for interrupt handlers.  Of course,
+   * this would have to change if we ever wanted to support nested interrupts
+   * or if we really cared about the stability of the errno during those
+   * "unhealthy states."
    */
 
   return &g_irqerrno;
