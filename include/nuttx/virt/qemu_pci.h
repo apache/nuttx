@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/x86_64/intel64/qemu-intel64/include/board.h
+ * include/nuttx/serial/uart_mcs99xx.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_X86_64_INTEL64_QEMU_INTEL64_INCLUDE_BOARD_H
-#define __BOARDS_X86_64_INTEL64_QEMU_INTEL64_INCLUDE_BOARD_H
+#ifndef __INCLUDE_NUTTX_VIRT_QEMU_PCI_TEST_H
+#define __INCLUDE_NUTTX_VIRT_QEMU_PCI_TEST_H
 
 /****************************************************************************
  * Included Files
@@ -27,34 +27,13 @@
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Clocking *****************************************************************/
-
-/* Programmable interval timer (PIT) */
-
-#define PIT_CLOCK 1041816 /* PIT input clock */
-
-/* LED definitions **********************************************************/
-
-/* Button definitions *******************************************************/
-
-/* Alternate pin selections *************************************************/
+#include <stdbool.h>
 
 /****************************************************************************
- * Public Types
+ * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
 {
@@ -62,16 +41,13 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-void qemu_pcie_init(void);
+#ifdef CONFIG_VIRT_QEMU_PCI_TEST
+extern struct pcie_dev_type_s pcie_type_qemu_pci_test;
+#endif /* CONFIG_VIRT_QEMU_PCI_TEST */
 
 #undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_X86_64_INTEL64_QEMU_INTEL64_INCLUDE_BOARD_H */
+#endif /* __INCLUDE_NUTTX_VIRT_QEMU_PCI_TEST_H */

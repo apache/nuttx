@@ -1,5 +1,5 @@
 ############################################################################
-# boards/x86_64/intel64/qemu-intel64/src/Makefile
+# drivers/pcie/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -7,9 +7,9 @@
 # ASF licenses this file to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance with the
 # License.  You may obtain a copy of the License at
-#
+# 
 #   http://www.apache.org/licenses/LICENSE-2.0
-#
+# 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
@@ -18,16 +18,20 @@
 #
 ############################################################################
 
-include $(TOPDIR)/Make.defs
+# Don't build anything if there is no CAN support
 
-CSRCS = qemu_boot.c qemu_bringup.c qemu_freq.c qemu_net.c
+ifeq ($(CONFIG_VIRT_QEMU_PCI_TEST),y)
 
-ifeq ($(CONFIG_BOARDCTL),y)
-  CSRCS += qemu_appinit.c
+CSRCS += qemu_pci_test.c
+
 endif
 
-ifeq ($(CONFIG_QEMU_PCIE),y)
-  CSRCS += qemu_pcie.c
-endif
+# Include virt device driver build support
+#
+ifeq ($(CONFIG_VIRT),y)
 
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path virt
+VPATH += :virt
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)virt}
+
+endif
