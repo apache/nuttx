@@ -1669,6 +1669,41 @@ config DEBUG_WATCHDOG_INFO
 		Enable watchdog time informational output to SYSLOG.
 
 endif # DEBUG_WATCHDOG
+
+config DEBUG_PCIE
+	bool "PCI-E Debug Features"
+	default n
+	depends on PCIE
+	---help---
+		Enable PCIE driver debug features.
+
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+if DEBUG_PCIE
+
+config DEBUG_PCIE_ERROR
+	bool "PCI-E Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable PCI-E driver error output to SYSLOG.
+
+config DEBUG_PCIE_WARN
+	bool "PCI-E Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable PCI-E driver warning output to SYSLOG.
+
+config DEBUG_PCIE_INFO
+	bool "PCI-E Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable PCI-E driver informational output to SYSLOG.
+
+endif # DEBUG_PCIE
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK
