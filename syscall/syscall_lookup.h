@@ -259,11 +259,8 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
 #endif
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
-  SYSCALL_LOOKUP(pipe2,                    2, STUB_pipe2)
-#endif
-
-#if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
-  SYSCALL_LOOKUP(mkfifo2,                  3, STUB_mkfifo2)
+  SYSCALL_LOOKUP(nx_pipe,                  2, STUB_nx_pipe)
+  SYSCALL_LOOKUP(nx_mkfifo,                3, STUB_nx_mkfifo)
 #endif
 
 #if CONFIG_NFILE_STREAMS > 0

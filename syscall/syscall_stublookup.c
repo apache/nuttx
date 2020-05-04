@@ -57,7 +57,8 @@ uintptr_t STUB_sched_setscheduler(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 uintptr_t STUB_sched_unlock(int nbr);
 uintptr_t STUB_sched_yield(int nbr);
-uintptr_t STUB_sched_get_stackinfo(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_sched_get_stackinfo(int nbr, uintptr_t parm1,
+            uintptr_t parm2);
 
 uintptr_t STUB_sched_getaffinity(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
@@ -264,8 +265,8 @@ uintptr_t STUB_link(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_readlink(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 
-uintptr_t STUB_pipe2(int nbr, uintptr_t parm1, uintptr_t parm2);
-uintptr_t STUB_mkfifo2(int nbr, uintptr_t parm1, uintptr_t parm2,
+uintptr_t STUB_nx_pipe(int nbr, uintptr_t parm1, uintptr_t parm2);
+uintptr_t STUB_nx_mkfifo(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 
 uintptr_t STUB_fs_fdopen(int nbr, uintptr_t parm1, uintptr_t parm2,

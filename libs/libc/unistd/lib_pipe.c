@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <unistd.h>
 
 #include <nuttx/drivers/drivers.h>
@@ -69,7 +70,16 @@
 
 int pipe(int fd[2])
 {
-  return pipe2(fd, CONFIG_DEV_PIPE_SIZE);
+  int ret;
+
+  ret = nx_pipe(fd, CONFIG_DEV_PIPE_SIZE);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }
 
 #endif /* CONFIG_PIPES && CONFIG_DEV_PIPE_SIZE > 0 */
