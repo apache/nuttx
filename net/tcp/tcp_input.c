@@ -127,7 +127,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
 
   tcpiplen = iplen + TCP_HDRLEN;
 
-  /* Get the size of the link layer header, the IP header, and the TCP header */
+  /* Get the size of the link layer header, the IP and TCP header */
 
   hdrlen = tcpiplen + NET_LL_HDRLEN(dev);
 
@@ -192,8 +192,8 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
            * response.
            */
 
-          /* First allocate a new connection structure and see if there is any
-           * user application to accept it.
+          /* First allocate a new connection structure and see if there is
+           * any user application to accept it.
            */
 
           conn = tcp_alloc_accept(dev, tcp);
@@ -508,9 +508,9 @@ found:
           if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
             {
               nwarn("WARNING: ackseq > unackseq\n");
-              nwarn("         sndseq=%u tx_unacked=%u unackseq=%u ackseq=%u\n",
-                    tcp_getsequence(conn->sndseq), conn->tx_unacked, unackseq,
-                    ackseq);
+              nwarn("sndseq=%u tx_unacked=%u unackseq=%u ackseq=%u\n",
+                    tcp_getsequence(conn->sndseq), conn->tx_unacked,
+                    unackseq, ackseq);
 
               conn->tx_unacked = 0;
             }
@@ -522,7 +522,7 @@ found:
        */
 
       ninfo("sndseq: %08x->%08x unackseq: %08x new tx_unacked: %d\n",
-            tcp_getsequence(conn->sndseq), ackseq, unackseq, conn->tx_unacked);
+          tcp_getsequence(conn->sndseq), ackseq, unackseq, conn->tx_unacked);
       tcp_setsequence(conn->sndseq, ackseq);
 
       /* Do RTT estimation, unless we have done retransmissions. */
@@ -748,8 +748,8 @@ found:
          *
          * If the incoming packet is a FIN, we should close the connection on
          * this side as well, and we send out a FIN and enter the LAST_ACK
-         * state.  We require that there is no outstanding data; otherwise the
-         * sequence numbers will be screwed up.
+         * state.  We require that there is no outstanding data; otherwise
+         * the sequence numbers will be screwed up.
          */
 
         if ((tcp->flags & TCP_FIN) != 0 &&
@@ -757,8 +757,8 @@ found:
           {
             /* Needs to be investigated further.
              * Windows often sends FIN packets together with the last ACK for
-             * the received data. So the socket layer has to get this ACK even
-             * if the connection is going to be closed.
+             * the received data. So the socket layer has to get this ACK
+             * even if the connection is going to be closed.
              */
 
 #if 0
@@ -768,8 +768,8 @@ found:
               }
 #endif
 
-            /* Update the sequence number and indicate that the connection has
-             * been closed.
+            /* Update the sequence number and indicate that the connection
+             * has been closed.
              */
 
             net_incr32(conn->rcvseq, dev->d_len + 1);

@@ -77,8 +77,8 @@ struct pm_domain_state_s
 {
   /* recommended - The recommended state based on the governor policy
    * mndex       - The index to the next slot in the memory[] array to use.
-   * mcnt        - A tiny counter used only at start up.  The actual
-   *               algorithm cannot be applied until CONFIG_PM_GOVERNOR_MEMORY
+   * mcnt        - A tiny counter used only at start up. The actual algorithm
+   *               cannot be applied until CONFIG_PM_GOVERNOR_MEMORY
    *               samples have been collected.
    */
 
@@ -245,18 +245,18 @@ static void governor_activity(int domain, int count)
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
   pdomstate = &g_pm_activity_governor.domain_states[domain];
 
-  /* Just increment the activity count in the current time slice. The priority
-   * is simply the number of counts that are added.
+  /* Just increment the activity count in the current time slice. The
+   * priority is simply the number of counts that are added.
    */
 
   if (count > 0)
     {
-      /* Add the activity count to the accumulated counts in a critical section. */
+      /* Add the activity count to the accumulated counts. */
 
       flags = enter_critical_section();
       accum = (uint32_t)pdomstate->accum + count;
 
-      /* Make sure that we do not overflow the underlying uint16_t representation */
+      /* Make sure that we do not overflow the underlying representation */
 
       if (accum > INT16_MAX)
         {
@@ -270,9 +270,9 @@ static void governor_activity(int domain, int count)
       /* Check the elapsed time.  In periods of low activity, time slicing is
        * controlled by IDLE loop polling; in periods of higher activity, time
        * slicing is controlled by driver activity.  In either case, the
-       * duration of the time slice is only approximate; during times of heavy
-       * activity, time slices may be become longer and the activity level may
-       * be over-estimated.
+       * duration of the time slice is only approximate; during times of
+       * heavy activity, time slices may be become longer and the activity
+       * level may be over-estimated.
        */
 
       now     = clock_systimer();
@@ -327,7 +327,7 @@ static void governor_update(int domain, int16_t accum)
   int index;
 #if CONFIG_PM_GOVERNOR_MEMORY > 1
   int32_t denom;
-  int i;
+  int i = 0;
   int j;
 #endif
 
@@ -349,9 +349,9 @@ static void governor_update(int domain, int16_t accum)
       return;
     }
 
-  /* The averaging algorithm is simply: Y = (An*X + SUM(Ai*Yi))/SUM(Aj), where
-   * i = 1..n-1 and j= 1..n, n is the length of the "memory", Ai is the
-   * weight applied to each value, and X is the current activity.
+  /* The averaging algorithm is simply: Y = (An*X + SUM(Ai*Yi))/SUM(Aj),
+   * where i = 1..n-1 and j= 1..n, n is the length of the "memory", Ai is
+   * the weight applied to each value, and X is the current activity.
    *
    * CONFIG_PM_GOVERNOR_MEMORY:
    *   provides the memory for the algorithm. Default: 2
@@ -365,11 +365,11 @@ static void governor_update(int domain, int16_t accum)
   denom = CONFIG_PM_GOVERNOR_COEFN;
 
   /* Then calculate Y +=  SUM(Ai*Yi), i = 1..n-1. The oldest sample will
-   * reside at the domain's mndx (and this is the value that we will overwrite
-   * with the new value).
+   * reside at the domain's mndx (and this is the value that we will
+   * overwrite with the new value).
    */
 
-  for (i = 0, j = pdomstate->mndx; i < CONFIG_PM_GOVERNOR_MEMORY - 1; i++, j++)
+  for (j = pdomstate->mndx; i < CONFIG_PM_GOVERNOR_MEMORY - 1; i++, j++)
     {
       if (j >= CONFIG_PM_GOVERNOR_MEMORY - 1)
         {
@@ -435,8 +435,8 @@ static void governor_update(int domain, int16_t accum)
     {
       unsigned int nextstate;
 
-      /* Get the next state and the table index for the next state (which will
-       * be the current state)
+      /* Get the next state and the table index for the next state (which
+       * will be the current state)
        */
 
       index     = state;
@@ -605,7 +605,8 @@ static void governor_timer(int domain)
           delay = 1;
         }
 
-      if (!WDOG_ISACTIVE(pdomstate->wdog) || abs(delay - left) > PM_TIMER_GAP)
+      if (!WDOG_ISACTIVE(pdomstate->wdog) ||
+          abs(delay - left) > PM_TIMER_GAP)
         {
           wd_start(pdomstate->wdog, delay, governor_timer_cb, 0);
         }

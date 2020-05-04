@@ -51,7 +51,7 @@
 #include "imxrt_periphclks.h"
 #include "imxrt_ocotp.h"
 
-/*****************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -175,7 +175,7 @@ static void imxrt_ocotp_initialize(void)
                   OCOTP_TIMING2_RELAX_READ(relax_read) |
                   OCOTP_TIMING2_RELAX_PROG(relax_prog));
     }
- }
+}
 
 static int imxrt_ocotp_wait_for_completion(uint32_t timeout_ms)
 {

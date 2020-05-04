@@ -825,7 +825,7 @@ static void am335x_i2c_tracenew(FAR struct am335x_i2c_priv_s *priv,
 
       if (trace->count != 0)
         {
-          /* Yes.. bump up the trace index (unless we are out of trace entries) */
+          /* Yes.. bump up the trace index (unless out of trace entries) */
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE - 1))
             {
@@ -941,7 +941,9 @@ static void am335x_i2c_setclock(FAR struct am335x_i2c_priv_s *priv,
                                    I2C_CON_EN, 0);
             }
 
-          /* I2C bus clock is Source Clock (Hz) / ((psc + 1) * (scll + 7 + sclh + 5)) */
+          /* I2C bus clock is:
+           * Source Clock (Hz) / ((psc + 1) * (scll + 7 + sclh + 5))
+           */
 
           for (scl = 14; scl < 522; scl += 2)
             {
@@ -1479,7 +1481,7 @@ static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
 
       else if ((priv->status & I2C_IRQ_ERRORMASK) != 0)
         {
-          /* I2C_IRQ_ERRORMASK is the 'OR' of the following individual bits: */
+          /* I2C_IRQ_ERRORMASK is the OR of the following individual bits: */
 
           if (priv->status & I2C_IRQ_AL)
             {
@@ -1531,7 +1533,7 @@ static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
 
       am335x_i2c_tracedump(priv);
 
-      /* Ensure that any ISR happening after we finish can't overwrite any user data */
+      /* Ensure ISR happening after we finish can't overwrite any user data */
 
       priv->dcnt = 0;
       priv->ptr = NULL;

@@ -90,8 +90,8 @@
  * CONFIG_ENCX24J600 - Enabled ENCX24J600 support
  * CONFIG_ENCX24J600_SPIMODE - Controls the SPI mode
  * CONFIG_ENCX24J600_FREQUENCY - Define to use a different bus frequency
- * CONFIG_ENCX24J600_NINTERFACES - Specifies the number of physical ENCX24J600
- *   devices that will be supported.
+ * CONFIG_ENCX24J600_NINTERFACES - Specifies the number of physica
+ *  l ENCX24J600 devices that will be supported.
  */
 
 /* The ENCX24J600 spec says that it supports SPI mode 0,0 only: "The
@@ -136,7 +136,7 @@
 
 #define ENCWORK LPWORK
 
-/* CONFIG_ENCX24J600_DUMPPACKET will dump the contents of each packet to the console. */
+/* CONFIG_ENCX24J600_DUMPPACKET will dump the contents of each packet. */
 
 #ifdef CONFIG_ENCX24J600_DUMPPACKET
 #  define enc_dumppacket(m,a,n) lib_dumpbuffer(m,a,n)
@@ -152,7 +152,7 @@
 
 /* Timing *******************************************************************/
 
-/* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll delay = 1 seconds. CLK_TCK is the number of ticks per second */
 
 #define ENC_WDDELAY   (1*CLK_TCK)
 
@@ -181,7 +181,7 @@
 
 #define ENC_NTXDESCR ((PKTMEM_RX_START - PKTMEM_START) / PKTMEM_ALIGNED_BUFSIZE)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
@@ -305,7 +305,8 @@ static void enc_bfs(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
                     uint16_t bits);
 static void enc_bfc(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
                     uint16_t bits);
-static void enc_cmd(FAR struct enc_driver_s *priv, uint8_t cmd, uint16_t arg);
+static void enc_cmd(FAR struct enc_driver_s *priv,
+                    uint8_t cmd, uint16_t arg);
 
 #if 0 /* Sometimes useful */
 static void enc_rxdump(FAR struct enc_driver_s *priv);
@@ -395,8 +396,8 @@ static int  enc_reset(FAR struct enc_driver_s *priv);
 
 static void enc_lock(FAR struct enc_driver_s *priv)
 {
-  /* Lock the SPI bus in case there are multiple devices competing for the SPI
-   * bus.
+  /* Lock the SPI bus in case there are multiple devices competing for the
+   * SPI bus.
    */
 
   SPI_LOCK(priv->spi, true);
@@ -921,7 +922,7 @@ static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
   uint16_t data = 0;
 
   /* "To read from a PHY register:
-   *   1. Write the address of the PHY register to read from into the MIREGADR
+   *   1. Write the address of the PHY register to read from into MIREGADR
    *      register (Register 3-1). Make sure to also set reserved bit 8 of
    *      this register.
    */
@@ -937,7 +938,7 @@ static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
 
   /*   3. Wait 25.6 μs. Poll the BUSY (MISTAT<0>) bit to be certain that the
    *      operation is complete. While busy, the host controller should not
-   *      start any MIISCAN operations or write to the MIWR register. When the
+   *      start any MIISCAN operations or write to the MIWR register. When
    *      MAC has obtained the register contents, the BUSY bit will clear
    *      itself.
    */
@@ -982,14 +983,14 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
 {
   /* "To write to a PHY register:
    *
-   *    1. Write the address of the PHY register to write to into the MIREGADR
+   *    1. Write the address of the PHY register to write to into MIREGADR
    *       register. Make sure to also set reserved bit 8 of this register.
    */
 
   enc_wrreg(priv, ENC_MIREGADR, 0x0100 | phyaddr);
 
-  /*    2. Write the 16 bits of data into the MIWR register. The low byte must
-   *       be written first, followed by the high byte.
+  /*    2. Write the 16 bits of data into the MIWR register. The low byte
+   *       must be written first, followed by the high byte.
    */
 
   enc_wrreg(priv, ENC_MIWR, phydata);
@@ -1206,8 +1207,8 @@ static int enc_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return ret;
@@ -1385,8 +1386,8 @@ static struct enc_descr_s *enc_rxgetdescr(FAR struct enc_driver_s *priv)
  * Name: enc_rxrmpkt
  *
  * Description:
- *   Remove packet from the RX queue and free the block of memory in the enc's
- *   SRAM.
+ *   Remove packet from the RX queue and free the block of memory in the
+ *   enc's SRAM.
  *
  * Input Parameters:
  *   priv  - Reference to the driver state structure
@@ -1482,7 +1483,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
       enc_rxldpkt(priv, descr);
 
 #ifdef CONFIG_NET_PKT
-      /* When packet sockets are enabled, feed the frame into the packet tap */
+      /* When packet sockets are enabled, feed the frame to the packet tap */
 
        pkt_input(&priv->dev);
 #endif
@@ -1656,7 +1657,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
     {
       curpkt = priv->nextpkt;
 
-      /* Set the rx data pointer to the start of the received packet (ERXRDPT) */
+      /* Set the rx data pointer to the start of received packet (ERXRDPT) */
 
       enc_cmd(priv, ENC_WRXRDPT, curpkt);
 
@@ -1835,11 +1836,12 @@ static void enc_irqworker(FAR void *arg)
 
   /* A good practice is for the host controller to clear the Global Interrupt
    * Enable bit, INTIE (EIE<15>), immediately after an interrupt event. This
-   * causes the interrupt pin to return to the non-asserted (high) state. Once
-   * the interrupt has been serviced, the INTIE bit is set again to re-enable
-   * interrupts. If a new interrupt occurs while servicing another, the act of
-   * resetting the global enable bit will cause a new falling edge to occur on
-   * the interrupt pin and ensure that the host does not miss any events
+   * causes the interrupt pin to return to the non-asserted (high) state.
+   * Once the interrupt has been serviced, the INTIE bit is set again to
+   * re-enable interrupts. If a new interrupt occurs while servicing another,
+   * the act of resetting the global enable bit will cause a new falling edge
+   * to occur on the interrupt pin and ensure that the host does not miss any
+   * events
    */
 
   enc_bfc(priv, ENC_EIE, EIE_INTIE);
@@ -1893,13 +1895,13 @@ static void enc_irqworker(FAR void *arg)
         }
 
       /* The receive abort interrupt occurs when the reception of a frame has
-       * been aborted. A frame being received is aborted when the Head Pointer
-       * attempts to overrun the Tail Pointer, or when the packet counter has
-       * reached FFh. In either case, the receive buffer is full and cannot
-       * fit the incoming frame, so the packet has been dropped.  This
-       * interrupt does not occur when packets are dropped due to the receive
-       * filters rejecting a packet. The interrupt should be cleared by
-       * software once it has been serviced.
+       * been aborted. A frame being received is aborted when the Head
+       * Pointer attempts to overrun the Tail Pointer, or when the packet
+       * counter has reached FFh. In either case, the receive buffer is full
+       * and cannot fit the incoming frame, so the packet has been dropped.
+       * This interrupt does not occur when packets are dropped due to the
+       * receive filters rejecting a packet. The interrupt should be cleared
+       * by software once it has been serviced.
        *
        * To enable the receive abort interrupt, set RXABTIE (EIE<1>).
        * The corresponding interrupt flag is RXABTIF (EIR<1>).
@@ -1929,8 +1931,9 @@ static void enc_irqworker(FAR void *arg)
         {
           enc_pktif(priv);          /* Handle packet receipt */
 
-          /* No clearing necessary, after PKTCNT == 0 the bit is automatically
-           * cleared. This means we will loop until all packets are processed.
+          /* No clearing necessary, after PKTCNT == 0 the bit is cleared
+           * automatically. This means we will loop until all packets are
+           * processed.
            */
         }
 
@@ -2111,7 +2114,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
    * can occur until we restart the Tx timeout watchdog.
    */
 
-  ret = work_queue(ENCWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
+  ret = work_queue(ENCWORK, &priv->towork, enc_toworker, priv, 0);
   UNUSED(ret);
   DEBUGASSERT(ret == OK);
 }
@@ -2383,7 +2386,9 @@ static int enc_txavail(struct net_driver_s *dev)
 
       if ((enc_rdreg(priv, ENC_ECON1) & ECON1_TXRTS) == 0)
         {
-          /* The interface is up and TX is idle; poll the network for new XMIT data */
+          /* The interface is up and TX is idle;
+           * poll the network for new XMIT data
+           */
 
           devif_poll(&priv->dev, enc_txpoll);
         }
@@ -2654,7 +2659,7 @@ static void enc_resetbuffers(FAR struct enc_driver_s *priv)
   priv->nextpkt = PKTMEM_RX_START;
   enc_wrreg(priv, ENC_ERXST, PKTMEM_RX_START);
 
-  /* Program the Tail Pointer, ERXTAIL, to the last even address of the buffer */
+  /* Program the Tail Pointer, ERXTAIL, to the last even address of buffer */
 
   enc_wrreg(priv, ENC_ERXTAIL, PKTMEM_RX_END - 2);
 
@@ -2663,7 +2668,7 @@ static void enc_resetbuffers(FAR struct enc_driver_s *priv)
   sq_init(&priv->txqueue);
   sq_init(&priv->rxqueue);
 
-  /* For transmission we preinitialize the descriptors to aligned NET_BUFFSIZE */
+  /* For transmission we preinitialize the descriptors */
 
   for (i = 0; i < ENC_NTXDESCR; i++)
     {
@@ -2736,8 +2741,8 @@ static int enc_reset(FAR struct enc_driver_s *priv)
       return -ENODEV;
     }
 
-  /* Wait at least 256 μs for the PHY registers and PHY status bits to become
-   * available.
+  /* Wait at least 256 μs for the PHY registers and PHY status bits to
+   * become available.
    */
 
   up_udelay(256);
@@ -2747,9 +2752,10 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   enc_resetbuffers(priv);
 
 #if 0
-  /* When restarting auto-negotiation, the ESTAT_PHYLINK gets set but the link
-   * seems not to be ready. Because auto-negotiation is enabled by default
-   * (but with different PHANA_* settings) I did not investigate that further.
+  /* When restarting auto-negotiation, the ESTAT_PHYLINK gets set but the
+   * link seems not to be ready. Because auto-negotiation is enabled by
+   * default (but with different PHANA_* settings) I did not investigate
+   * that further.
    */
 
   /* "Typically, when using auto-negotiation, users should write 0x05e1 to

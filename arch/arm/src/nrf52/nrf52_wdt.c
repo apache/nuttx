@@ -110,12 +110,12 @@
 
 struct nrf52_wdt_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s  *ops;  /* Lower half operations */
-  uint32_t timeout;   /* The (actual) timeout */
-  uint32_t lastreset; /* The last reset time */
-  bool     started;   /* true: The watchdog timer has been started */
-  uint16_t reload;    /* Timer reload value */
-  uint16_t mode;      /* watchdog mode under sleep and halt of CPU */
+  FAR const struct watchdog_ops_s  *ops; /* Lower half operations */
+  uint32_t timeout;                      /* The (actual) timeout */
+  uint32_t lastreset;                    /* The last reset time */
+  bool     started;                      /* true: The watchdog timer has been started */
+  uint16_t reload;                       /* Timer reload value */
+  uint16_t mode;                         /* watchdog mode under sleep and halt of CPU */
 };
 
 /****************************************************************************

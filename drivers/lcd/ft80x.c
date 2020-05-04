@@ -417,7 +417,7 @@ static int ft80x_interrupt(int irq, FAR void *context, FAR void *arg)
 
   DEBUGASSERT(priv != NULL);
 
-  /* Schedule to perform the interrupt work on the high priority work queue. */
+  /* Perform the interrupt work on the high priority work queue. */
 
   work_queue(HPWORK, &priv->intwork, ft80x_interrupt_work, priv, 0);
 
@@ -1455,7 +1455,7 @@ static int ft80x_initialize(FAR struct ft80x_dev_s *priv)
   /* 7. Enable back light control for display */
 #warning Missing logic
 
-  /* 8. Write FT80X_REG_PCLK, video output begins with the first display list */
+  /* 8. Write FT80X_REG_PCLK, video output with the first display list */
 
 #if defined(CONFIG_LCD_FT80X_WQVGA)
   ft80x_write_byte(priv, FT80X_REG_PCLK, 5);

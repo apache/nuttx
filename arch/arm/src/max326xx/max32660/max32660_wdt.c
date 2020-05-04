@@ -104,7 +104,8 @@ struct max326_wdt_lowerhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static inline void max326_wdog_reset(FAR struct max326_wdt_lowerhalf_s *priv);
+static inline void
+max326_wdog_reset(FAR struct max326_wdt_lowerhalf_s *priv);
 static void max326_int_enable(FAR struct max326_wdt_lowerhalf_s *priv);
 static uint32_t max326_time_left(FAR struct max326_wdt_lowerhalf_s *priv);
 static uint64_t max326_exp2msec(uint32_t pclk, uint8_t exp);
@@ -248,24 +249,24 @@ static uint32_t max326_time_left(FAR struct max326_wdt_lowerhalf_s *priv)
    * matter, the interrupt time period is the right answer in either case.
    */
 
-   ctrl = getreg32(MAX326_WDT0_CTRL);
-   exp  = (ctrl & WDT0_CTRL_INTPERIOD_MASK) >> WDT0_CTRL_INTPERIOD_SHIFT;
+  ctrl = getreg32(MAX326_WDT0_CTRL);
+  exp  = (ctrl & WDT0_CTRL_INTPERIOD_MASK) >> WDT0_CTRL_INTPERIOD_SHIFT;
 
-   timeout = max326_exp2msec(max326_pclk_frequency(), exp);
-   elapsed = TICK2MSEC(clock_systimer() - priv->lastping);
+  timeout = max326_exp2msec(max326_pclk_frequency(), exp);
+  elapsed = TICK2MSEC(clock_systimer() - priv->lastping);
 
-   if (elapsed > timeout)
-     {
-       timeleft = 0;
-     }
-   else
-     {
-       timeleft = timeout - elapsed;
-       if (timeleft > UINT32_MAX)
-         {
-           timeleft = UINT32_MAX;
-         }
-     }
+  if (elapsed > timeout)
+    {
+      timeleft = 0;
+    }
+  else
+    {
+      timeleft = timeout - elapsed;
+      if (timeleft > UINT32_MAX)
+        {
+          timeleft = UINT32_MAX;
+        }
+    }
 
   return (uint32_t)timeleft;
 }
@@ -351,8 +352,8 @@ static uint8_t max326_msec2exp(uint32_t msec)
  *   Start the watchdog timer, resetting the time to the current timeout.
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Values:
  *   Zero on success; a negated errno value on failure.
@@ -398,8 +399,8 @@ static int max326_start(FAR struct watchdog_lowerhalf_s *lower)
  *   Stop the watchdog timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Values:
  *   Zero on success; a negated errno value on failure.
@@ -439,8 +440,8 @@ static int max326_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   the watchdog timer or "petting the dog".
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Values:
  *   Zero on success; a negated errno value on failure.
@@ -471,8 +472,8 @@ static int max326_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *   Get the current watchdog timer status
  *
  * Input Parameters:
- *   lower  - A pointer the publicly visible representation of the "lower-half"
- *            driver state structure.
+ *   lower  - A pointer the publicly visible representation of the
+ *            "lower-half" driver state structure.
  *   status - The location to return the watchdog status information.
  *
  * Returned Values:
@@ -528,8 +529,8 @@ static int max326_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *   Set a new timeout value (and reset the watchdog timer)
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of the
+ *             "lower-half" driver state structure.
  *   timeout - The new timeout value in milliseconds.
  *
  * Returned Values:
@@ -584,8 +585,8 @@ static int max326_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *   Attach the user WDT interrupt handler and enable the interrupt.
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of the
+ *             "lower-half" driver state structure.
  *   handler - The new WDT interrupt handler.
  *
  * Returned Values:
@@ -638,8 +639,8 @@ static xcpt_t max326_capture(FAR struct watchdog_lowerhalf_s *lower,
  *   Handle IOCTL commands forwarded from the upper half driver
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of the
+ *             "lower-half" driver state structure.
  *   cmd     - IOCTL command
  *   arg     - Argument associated with the IOCTL command.
  *
@@ -690,7 +691,8 @@ int max326_wdt_initialize(FAR const char *devpath)
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
-  handle = watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
+  handle = watchdog_register(devpath,
+                             (FAR struct watchdog_lowerhalf_s *)priv);
   return (handle != NULL) ? OK : -ENODEV;
 }
 
