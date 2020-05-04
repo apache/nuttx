@@ -228,8 +228,8 @@ static void governor_initialize(void)
   for (i = 0; i < CONFIG_PM_NDOMAINS; i++)
     {
       pdomstate        = &g_pm_activity_governor.domain_states[i];
-      pdomstate->stime = clock_systimer();
-      pdomstate->btime = clock_systimer();
+      pdomstate->stime = clock_systime_ticks();
+      pdomstate->btime = clock_systime_ticks();
     }
 }
 
@@ -275,7 +275,7 @@ static void governor_activity(int domain, int count)
        * level may be over-estimated.
        */
 
-      now     = clock_systimer();
+      now     = clock_systime_ticks();
       elapsed = now - pdomstate->stime;
       if (elapsed >= TIME_SLICE_TICKS)
         {
@@ -419,7 +419,7 @@ static void governor_update(int domain, int16_t accum)
         {
           /* Yes... reset the count and recommend the normal state. */
 
-          pdomstate->btime       = clock_systimer();
+          pdomstate->btime       = clock_systime_ticks();
           pdomstate->recommended = PM_NORMAL;
           return;
         }
@@ -450,7 +450,7 @@ static void governor_update(int domain, int16_t accum)
         {
           /* No... reset the count and recommend the current state */
 
-          pdomstate->btime       = clock_systimer();
+          pdomstate->btime       = clock_systime_ticks();
           pdomstate->recommended = state;
         }
 
@@ -462,14 +462,14 @@ static void governor_update(int domain, int16_t accum)
            * for a state transition?
            */
 
-          if (clock_systimer() - pdomstate->btime >=
+          if (clock_systime_ticks() - pdomstate->btime >=
                   g_pm_activity_governor.pmcount[index] * TIME_SLICE_TICKS)
             {
               /* Yes, recommend the new state and set up for the next
                * transition.
                */
 
-              pdomstate->btime       = clock_systimer();
+              pdomstate->btime       = clock_systime_ticks();
               pdomstate->recommended = nextstate;
             }
         }
@@ -504,7 +504,7 @@ static enum pm_state_e governor_checkstate(int domain)
    * estimated.
    */
 
-  now     = clock_systimer();
+  now     = clock_systime_ticks();
   elapsed = now - pdomstate->stime;
   if (elapsed >= TIME_SLICE_TICKS)
     {
@@ -597,7 +597,7 @@ static void governor_timer(int domain)
 
   if (state < PM_SLEEP && !pdom->stay[pdom->state])
     {
-      int delay = pmtick[state] + pdomstate->btime - clock_systimer();
+      int delay = pmtick[state] + pdomstate->btime - clock_systime_ticks();
       int left  = wd_gettime(pdomstate->wdog);
 
       if (delay <= 0)

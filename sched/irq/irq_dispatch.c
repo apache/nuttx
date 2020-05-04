@@ -75,8 +75,8 @@
      while (0)
 #endif
 
-/* CALL_VECTOR - Call the interrupt service routine attached to this interrupt
- * request
+/* CALL_VECTOR - Call the interrupt service routine attached to this
+ * interrupt request
  */
 
 #ifndef CONFIG_SCHED_IRQMONITOR
@@ -106,9 +106,9 @@
          struct timespec start; \
          struct timespec end; \
          struct timespec delta; \
-         clock_systimespec(&start); \
+         clock_systime_timespec(&start); \
          vector(irq, context, arg); \
-         clock_systimespec(&end); \
+         clock_systime_timespec(&end); \
          clock_timespec_subtract(&end, &start, &delta); \
          if (delta.tv_nsec > g_irqvector[ndx].time) \
            { \

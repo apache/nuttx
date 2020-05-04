@@ -670,7 +670,7 @@ int spirit_waitstatus(FAR struct spirit_library_s *spirit,
 
   /* The time that we started the wait */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   /* Loop until the status change occurs (or the wait times out) */
 
@@ -682,7 +682,7 @@ int spirit_waitstatus(FAR struct spirit_library_s *spirit,
           return ret;
         }
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
     }
   while (spirit->u.state.MC_STATE != state && elapsed <= ticks);
 

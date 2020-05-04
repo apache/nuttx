@@ -637,7 +637,7 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
    * nxsem_timedwait() sleeps.
    */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   do
     {
@@ -649,7 +649,7 @@ static inline int efm32_i2c_sem_waitdone(FAR struct efm32_i2c_priv_s *priv)
 
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
     }
 
   /* Loop until the transfer is complete. */
@@ -747,7 +747,7 @@ static void efm32_i2c_tracereset(FAR struct efm32_i2c_priv_s *priv)
   /* Reset the trace info for a new data collection */
 
   priv->tndx = 0;
-  priv->start_time = clock_systimer();
+  priv->start_time = clock_systime_ticks();
   efm32_i2c_traceclear(priv);
 }
 
@@ -787,7 +787,7 @@ static void efm32_i2c_tracenew(FAR struct efm32_i2c_priv_s *priv)
       trace->i2c_reg_if = priv->i2c_reg_if;
       trace->count = 1;
       trace->dcnt = priv->dcnt;
-      trace->time = clock_systimer();
+      trace->time = clock_systime_ticks();
     }
   else
     {
@@ -803,7 +803,7 @@ static void efm32_i2c_tracedump(FAR struct efm32_i2c_priv_s *priv)
   int i;
 
   syslog(LOG_DEBUG, "Elapsed time: %ld\n",
-         (long)(clock_systimer() - priv->start_time));
+         (long)(clock_systime_ticks() - priv->start_time));
 
   for (i = 0; i < priv->tndx; i++)
     {

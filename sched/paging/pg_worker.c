@@ -401,7 +401,7 @@ static inline bool pg_startfill(void)
        */
 
 #ifdef CONFIG_PAGING_TIMEOUT_TICKS
-      g_starttime = clock_systimer();
+      g_starttime = clock_systime_ticks();
 #endif
 
       /* Return and wait to be signaled for the next event -- the fill
@@ -612,7 +612,7 @@ int pg_worker(int argc, char *argv[])
           else
             {
               pgerr("ERROR: Timeout!\n");
-              DEBUGASSERT(clock_systimer() - g_starttime <
+              DEBUGASSERT(clock_systime_ticks() - g_starttime <
                           CONFIG_PAGING_TIMEOUT_TICKS);
             }
 #endif

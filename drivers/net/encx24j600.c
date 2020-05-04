@@ -645,7 +645,7 @@ static void enc_wrreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
 static int enc_waitreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
                           uint16_t bits, uint16_t value)
 {
-  clock_t start = clock_systimer();
+  clock_t start = clock_systime_ticks();
   clock_t elapsed;
   uint16_t rddata;
 
@@ -656,7 +656,7 @@ static int enc_waitreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
       /* Read the byte from the requested banked register */
 
       rddata  = enc_rdreg(priv, ctrlreg);
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
     }
   while ((rddata & bits) != value && elapsed < ENC_REGPOLLTIMEOUT);
 

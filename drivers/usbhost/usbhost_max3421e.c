@@ -1849,7 +1849,7 @@ static ssize_t max3421e_out_transfer(FAR struct max3421e_usbhost_s *priv,
    * or a fatal error occurs (any error other than a simple NAK)
    */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   xfrd  = 0;
 
   while (buflen > 0)
@@ -1902,7 +1902,7 @@ static ssize_t max3421e_out_transfer(FAR struct max3421e_usbhost_s *priv,
            * pointer and buffer size will be unaltered.
            */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
           if (ret != -EAGAIN ||                     /* Not a NAK condition OR */
               elapsed >= MAX3421E_DATANAK_DELAY ||  /* Timeout has elapsed OR */
               priv->xfrd > 0)                       /* Data has been partially transferred */
@@ -2071,7 +2071,7 @@ static int max3421e_ctrl_sendsetup(FAR struct max3421e_usbhost_s *priv,
 
   /* Loop while the device reports NAK (and a timeout is not exceeded */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   do
     {
       /* Send the  SETUP packet */
@@ -2146,7 +2146,7 @@ static int max3421e_ctrl_sendsetup(FAR struct max3421e_usbhost_s *priv,
 
       /* Get the elapsed time (in frames) */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
     }
   while (elapsed < MAX3421E_SETUP_DELAY);
 
@@ -2687,7 +2687,7 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
   priv->xfrd   = 0;
   xfrd         = 0;
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   while (priv->xfrd < priv->buflen)
     {
       /* Set up for the wait BEFORE starting the transfer */
@@ -2747,7 +2747,7 @@ static ssize_t max3421e_in_transfer(FAR struct max3421e_usbhost_s *priv,
                    * if not then try again.
                    */
 
-                  clock_t elapsed = clock_systimer() - start;
+                  clock_t elapsed = clock_systime_ticks() - start;
                   if (elapsed >= MAX3421E_DATANAK_DELAY)
                     {
                       /* Timeout out... break out returning the NAK as
@@ -4090,7 +4090,7 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr,
 
       /* Get the start time.  Loop again until the timeout expires */
 
-      start = clock_systimer();
+      start = clock_systime_ticks();
       do
         {
           /* Handle the IN data phase (if any) */
@@ -4127,7 +4127,7 @@ static int max3421e_ctrlin(FAR struct usbhost_driver_s *drvr,
 
           /* Get the elapsed time (in frames) */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
         }
       while (elapsed < MAX3421E_DATANAK_DELAY);
     }
@@ -4190,7 +4190,7 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr,
 
       /* Get the start time.  Loop again until the timeout expires */
 
-      start = clock_systimer();
+      start = clock_systime_ticks();
       do
         {
           /* Handle the data OUT phase (if any) */
@@ -4229,7 +4229,7 @@ static int max3421e_ctrlout(FAR struct usbhost_driver_s *drvr,
 
           /* Get the elapsed time (in frames) */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
         }
       while (elapsed < MAX3421E_DATANAK_DELAY);
     }

@@ -349,7 +349,7 @@ static int stm32l4_start(FAR struct watchdog_lowerhalf_s *lower)
 
       flags           = enter_critical_section();
       stm32l4_putreg(IWDG_KR_KEY_START, STM32L4_IWDG_KR);
-      priv->lastreset = clock_systimer();
+      priv->lastreset = clock_systime_ticks();
       priv->started   = true;
       leave_critical_section(flags);
     }
@@ -409,7 +409,7 @@ static int stm32l4_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 
   flags = enter_critical_section();
   stm32l4_putreg(IWDG_KR_KEY_RELOAD, STM32L4_IWDG_KR);
-  priv->lastreset = clock_systimer();
+  priv->lastreset = clock_systime_ticks();
   leave_critical_section(flags);
 
   return OK;
@@ -456,7 +456,7 @@ static int stm32l4_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 
   /* Get the elapsed time since the last ping */
 
-  ticks   = clock_systimer() - priv->lastreset;
+  ticks   = clock_systime_ticks() - priv->lastreset;
   elapsed = (int32_t)TICK2MSEC(ticks);
 
   if (elapsed > priv->timeout)

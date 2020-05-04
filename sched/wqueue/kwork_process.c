@@ -105,7 +105,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
 
   /* Get the time that we started processing the queue in clock ticks. */
 
-  stick = clock_systimer();
+  stick = clock_systime_ticks();
 
   /* And check each entry in the work queue.  Since we have disabled
    * interrupts we know:  (1) we will not be suspended unless we do
@@ -121,7 +121,7 @@ void work_process(FAR struct kwork_wqueue_s *wqueue, int wndx)
        * zero.  Therefore a delay of zero will always execute immediately.
        */
 
-      ctick   = clock_systimer();
+      ctick   = clock_systime_ticks();
       elapsed = ctick - work->qtime;
       if (elapsed >= work->delay)
         {

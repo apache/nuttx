@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SCHED_TICKLESS
-#  define wd_elapse() (clock_systimer() - g_wdtickbase)
+#  define wd_elapse() (clock_systime_ticks() - g_wdtickbase)
 #else
 #  define wd_elapse() (0)
 #endif

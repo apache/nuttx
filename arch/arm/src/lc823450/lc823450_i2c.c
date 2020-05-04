@@ -372,7 +372,7 @@ static inline int
    * sem_timedwait() sleeps.
    */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   do
     {
@@ -384,7 +384,7 @@ static inline int
 
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
     }
   while (priv->irqstate != IRQSTATE_DONE && elapsed < timeout);
 

@@ -124,7 +124,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
    */
 
   flags     = enter_critical_section();
-  starttick = clock_systimer();
+  starttick = clock_systime_ticks();
 
   /* Set up for the sleep.  Using the empty set means that we are not
    * waiting for any particular signal.  However, any unmasked signal can
@@ -173,7 +173,7 @@ int nxsig_nanosleep(FAR const struct timespec *rqtp,
 
       /* Get the number of ticks that we actually waited */
 
-      elapsed = clock_systimer() - starttick;
+      elapsed = clock_systime_ticks() - starttick;
 
       /* The difference between the number of ticks that we were requested
        * to wait and the number of ticks that we actually waited is that

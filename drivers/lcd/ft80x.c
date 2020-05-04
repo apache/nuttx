@@ -221,7 +221,7 @@ static int ft80x_fade(FAR struct ft80x_dev_s *priv,
       delay = 1;
     }
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   do
     {
@@ -231,7 +231,7 @@ static int ft80x_fade(FAR struct ft80x_dev_s *priv,
 
       /* Get the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
       if (elapsed > INT32_MAX || (int32_t)elapsed >= delay)
         {
           duty = endduty;

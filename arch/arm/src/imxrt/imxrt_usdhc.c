@@ -2081,13 +2081,13 @@ static int imxrt_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
    */
 
   timeout = USDHC_CMDTIMEOUT;
-  start   = clock_systimer();
+  start   = clock_systime_ticks();
   while ((getreg32(priv->addr + IMXRT_USDHC_PRSSTAT_OFFSET) &
           USDHC_PRSSTAT_CIHB) != 0)
     {
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
       if (elapsed >= timeout)
         {
           mcerr("ERROR: Timeout (waiting CIHB) cmd: %08x PRSSTAT: %08x\n",
@@ -2362,13 +2362,13 @@ static int imxrt_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
    * (except Auto CMD12).
    */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   while ((getreg32(priv->addr + IMXRT_USDHC_IRQSTAT_OFFSET) &
           USDHC_INT_CC) == 0)
     {
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
       if (elapsed >= timeout)
         {
           mcerr("ERROR: Timeout cmd: %08x IRQSTAT: %08x\n", cmd,
