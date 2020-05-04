@@ -78,22 +78,12 @@
 #  undef IGMP_GRPDEBUG
 #endif
 
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef IGMP_GRPDEBUG
-#    define grperr(format, ...)    nerr(format, ##__VA_ARGS__)
-#    define grpinfo(format, ...)   ninfo(format, ##__VA_ARGS__)
-#  else
-#    define grperr(x...)
-#    define grpinfo(x...)
-#  endif
+#ifdef IGMP_GRPDEBUG
+#  define grperr    nerr
+#  define grpinfo   ninfo
 #else
-#  ifdef IGMP_GRPDEBUG
-#    define grperr    nerr
-#    define grpinfo   ninfo
-#  else
-#    define grperr    (void)
-#    define grpinfo   (void)
-#  endif
+#  define grperr    _none
+#  define grpinfo   _none
 #endif
 
 /****************************************************************************

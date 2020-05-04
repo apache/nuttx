@@ -43,16 +43,13 @@
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>
+#include <debug.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/mm.h>
 
 #ifdef CONFIG_SMP
 #  include <nuttx/irq.h>
-#endif
-
-#ifdef MONITOR_MM_SEMAPHORE
-#  include <debug.h>
 #endif
 
 /****************************************************************************
@@ -94,15 +91,9 @@
 #  define msemwarn _warn
 #  define mseminfo _info
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define msemerr(x...)
-#    define msemwarn(x...)
-#    define mseminfo(x...)
-#  else
-#    define msemerr  (void)
-#    define msemwarn (void)
-#    define mseminfo (void)
-#  endif
+#  define msemerr  _none
+#  define msemwarn _none
+#  define mseminfo _none
 #endif
 
 /****************************************************************************
