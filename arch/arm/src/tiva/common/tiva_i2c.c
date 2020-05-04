@@ -784,7 +784,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
    * nxsem_timedwait() sleeps.
    */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   do
     {
@@ -800,7 +800,7 @@ static inline int tiva_i2c_sem_waitdone(struct tiva_i2c_priv_s *priv)
 
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
     }
 
   /* Loop until the transfer is complete. */
@@ -895,7 +895,7 @@ static void tiva_i2c_tracereset(struct tiva_i2c_priv_s *priv)
 
   priv->tndx    = 0;
   priv->tcount  = 0;
-  priv->ttime   = clock_systimer();
+  priv->ttime   = clock_systime_ticks();
   priv->tstatus = 0;
   tiva_i2c_traceclear(priv);
 }
@@ -929,7 +929,7 @@ static void tiva_i2c_tracenew(struct tiva_i2c_priv_s *priv, uint32_t status)
       tiva_i2c_traceclear(priv);
       trace->status = status;
       trace->count  = 1;
-      trace->time   = clock_systimer();
+      trace->time   = clock_systime_ticks();
 
       /* Save the status and reset the count */
 
@@ -959,7 +959,7 @@ static void tiva_i2c_traceevent(struct tiva_i2c_priv_s *priv,
           trace->event = event;
           trace->parm  = parm;
           trace->count = priv->tcount;
-          trace->time  = clock_systimer();
+          trace->time  = clock_systime_ticks();
 
           /* Bump up the trace index (unless we are out of trace entries) */
 
@@ -976,7 +976,7 @@ static void tiva_i2c_traceevent(struct tiva_i2c_priv_s *priv,
           trace         = &priv->trace[priv->tndx];
           trace->status = priv->tstatus;
           trace->count  = priv->tcount;
-          trace->time   = clock_systimer();
+          trace->time   = clock_systime_ticks();
         }
       else
         {
@@ -991,7 +991,7 @@ static void tiva_i2c_tracedump(struct tiva_i2c_priv_s *priv)
   int i;
 
   syslog(LOG_DEBUG, "Elapsed time: %ld\n",
-         (long)(clock_systimer() - priv->ttime));
+         (long)(clock_systime_ticks() - priv->ttime));
 
   for (i = 0; i < priv->tndx; i++)
     {

@@ -243,7 +243,7 @@ extern "C"
 EXTERN volatile clock_t g_system_timer;
 
 #ifndef CONFIG_SYSTEM_TIME64
-#  define clock_systimer() g_system_timer
+#  define clock_systime_ticks() g_system_timer
 #endif
 #endif
 
@@ -366,7 +366,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff);
 #endif
 
 /****************************************************************************
- * Name: clock_systimer
+ * Name: clock_systime_ticks
  *
  * Description:
  *   Return the current value of the 32/64-bit system timer counter.
@@ -391,11 +391,11 @@ void clock_resynchronize(FAR struct timespec *rtc_diff);
  ****************************************************************************/
 
 #if !defined(__HAVE_KERNEL_GLOBALS) || defined(CONFIG_SYSTEM_TIME64)
-clock_t clock_systimer(void);
+clock_t clock_systime_ticks(void);
 #endif
 
 /****************************************************************************
- * Name: clock_systimespec
+ * Name: clock_systime_timespec
  *
  * Description:
  *   Return the current value of the system timer counter as a struct
@@ -411,7 +411,7 @@ clock_t clock_systimer(void);
  *
  ****************************************************************************/
 
-int clock_systimespec(FAR struct timespec *ts);
+int clock_systime_timespec(FAR struct timespec *ts);
 
 /****************************************************************************
  * Name:  clock_cpuload

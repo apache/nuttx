@@ -186,13 +186,13 @@ static int imxrt_ocotp_wait_for_completion(uint32_t timeout_ms)
 
   timeout = MSEC2TICK(timeout_ms);
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   while (getreg32(IMXRT_OCOTP_CTRL) & OCOTP_CTRL_BUSY)
     {
       /* If a timeout is specified check for timeout */
 
-      if (timeout_ms && clock_systimer() - start >= timeout)
+      if (timeout_ms && clock_systime_ticks() - start >= timeout)
         {
           return -ETIME;
         }

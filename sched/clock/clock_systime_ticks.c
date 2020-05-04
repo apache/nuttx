@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock/clock_systimer.c
+ * sched/clock/clock_systime_ticks.c
  *
  *   Copyright (C) 2011, 2014-2016, 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +53,7 @@
 
 /* See nuttx/clock.h */
 
-#undef clock_systimer
+#undef clock_systime_ticks
 
 /* 32-bit mask for 64-bit timer values */
 
@@ -64,7 +64,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: clock_systimer
+ * Name: clock_systime_ticks
  *
  * Description:
  *   Return the current value of the 32/64-bit system timer counter.
@@ -88,7 +88,7 @@
  *
  ****************************************************************************/
 
-clock_t clock_systimer(void)
+clock_t clock_systime_ticks(void)
 {
 #ifdef CONFIG_SCHED_TICKLESS
 # ifdef CONFIG_SYSTEM_TIME64
@@ -97,7 +97,7 @@ clock_t clock_systimer(void)
 
   /* Get the time from the platform specific hardware */
 
-  clock_systimespec(&ts);
+  clock_systime_timespec(&ts);
 
   /* Convert to a 64-bit value in microseconds, then in clock tick units */
 
@@ -110,7 +110,7 @@ clock_t clock_systimer(void)
 
   /* Get the time from the platform specific hardware */
 
-  clock_systimespec(&ts);
+  clock_systime_timespec(&ts);
 
   /* Convert to a 64- then a 32-bit value */
 

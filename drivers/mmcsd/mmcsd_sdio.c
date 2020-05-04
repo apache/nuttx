@@ -1233,7 +1233,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
     }
 #endif
 
-  starttime = clock_systimer();
+  starttime = clock_systime_ticks();
   do
     {
       /* Get the current R1 status from the card */
@@ -1280,7 +1280,7 @@ static int mmcsd_transferready(FAR struct mmcsd_state_s *priv)
        * time... we can't stay in this loop forever!
        */
 
-      elapsed = clock_systimer() - starttime;
+      elapsed = clock_systime_ticks() - starttime;
     }
   while (elapsed < TICK_PER_SEC);
 
@@ -3195,7 +3195,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
    * but not MMC
    */
 
-  start   = clock_systimer();
+  start   = clock_systime_ticks();
   elapsed = 0;
   do
     {
@@ -3360,7 +3360,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
       /* Check the elapsed time.  We won't keep trying this forever! */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
     }
   while (elapsed < TICK_PER_SEC); /* On successful reception while 'breaks', see above. */
 

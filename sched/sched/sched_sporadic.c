@@ -285,7 +285,7 @@ static int sporadic_budget_start(FAR struct replenishment_s *mrepl)
 
   /* Save the time that the budget was started */
 
-  sporadic->eventtime = clock_systimer();
+  sporadic->eventtime = clock_systime_ticks();
 
   /* And start the timer for the budget interval */
 
@@ -507,7 +507,7 @@ static void sporadic_budget_expire(int argc, wdparm_t arg1, ...)
        * that the thread was delayed for the entire interval).
        */
 
-      unrealized = sporadic->eventtime - clock_systimer();
+      unrealized = sporadic->eventtime - clock_systime_ticks();
       if (unrealized > 0)
         {
           /* Allocate a new replenishment timer.  This will limit us to the
@@ -857,7 +857,7 @@ int nxsched_start_sporadic(FAR struct tcb_s *tcb)
 
   /* Save the time that the scheduler was started */
 
-  sporadic->eventtime = clock_systimer();
+  sporadic->eventtime = clock_systime_ticks();
   sporadic->suspended = true;
 
   /* Then start the first interval */
@@ -1025,7 +1025,7 @@ int nxsched_resume_sporadic(FAR struct tcb_s *tcb)
 
   /* Get the time that the thread was [re-]started */
 
-  now = clock_systimer();
+  now = clock_systime_ticks();
 
   /* Check if are in the budget portion of the replenishment interval.  We
    * know this is the case if the current timeslice is non-zero.
@@ -1154,7 +1154,7 @@ int nxsched_suspend_sporadic(FAR struct tcb_s *tcb)
 
       /* Save the time that the thread was suspended */
 
-      sporadic->eventtime = clock_systimer();
+      sporadic->eventtime = clock_systime_ticks();
     }
 
   return OK;

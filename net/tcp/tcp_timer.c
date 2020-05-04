@@ -477,7 +477,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 #endif
                           /* Update for the next probe */
 
-                          conn->keeptime = clock_systimer();
+                          conn->keeptime = clock_systime_ticks();
                           conn->keepretries++;
                         }
 

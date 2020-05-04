@@ -78,6 +78,7 @@ libmetal.zip:
 	$(Q) wget https://github.com/OpenAMP/libmetal/archive/v$(VERSION).zip -O libmetal.zip
 	$(Q) unzip -o libmetal.zip
 	$(Q) mv libmetal-$(VERSION) libmetal
+	$(Q) patch -p0 < 0001-system-nuttx-change-clock_systimespec-to-clock_systi.patch
 
 .libmetal_headers: libmetal.zip
 	$(eval headers := $(wildcard libmetal/lib/compiler/gcc/*.h))

@@ -839,7 +839,7 @@ found:
              * alive is enabled for this connection.
              */
 
-            conn->keeptime    = clock_systimer();
+            conn->keeptime    = clock_systime_ticks();
             conn->keepretries = 0;
           }
 #endif

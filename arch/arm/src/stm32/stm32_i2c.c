@@ -645,13 +645,13 @@ static inline int stm32_i2c_sem_waitdone(FAR struct stm32_i2c_priv_s *priv)
    */
 
   priv->intstate = INTSTATE_WAITING;
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   do
     {
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
 
       /* Poll by simply calling the timer interrupt handler until it
        * reports that it is done.
@@ -705,12 +705,12 @@ static inline void stm32_i2c_sem_waitstop(FAR struct stm32_i2c_priv_s *priv)
    * detected, set by hardware when a timeout error is detected."
    */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   do
     {
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
 
       /* Check for STOP condition */
 
@@ -816,7 +816,7 @@ static void stm32_i2c_tracereset(FAR struct stm32_i2c_priv_s *priv)
   /* Reset the trace info for a new data collection */
 
   priv->tndx       = 0;
-  priv->start_time = clock_systimer();
+  priv->start_time = clock_systime_ticks();
   stm32_i2c_traceclear(priv);
 }
 
@@ -849,7 +849,7 @@ static void stm32_i2c_tracenew(FAR struct stm32_i2c_priv_s *priv, uint32_t statu
       stm32_i2c_traceclear(priv);
       trace->status = status;
       trace->count  = 1;
-      trace->time   = clock_systimer();
+      trace->time   = clock_systime_ticks();
     }
   else
     {
@@ -892,7 +892,7 @@ static void stm32_i2c_tracedump(FAR struct stm32_i2c_priv_s *priv)
   int i;
 
   syslog(LOG_DEBUG, "Elapsed time: %ld\n",
-         (long)(clock_systimer() - priv->start_time));
+         (long)(clock_systime_ticks() - priv->start_time));
 
   for (i = 0; i < priv->tndx; i++)
     {

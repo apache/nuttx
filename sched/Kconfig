@@ -110,7 +110,7 @@ config USEC_PER_TICK
 		If SCHED_TICKLESS is selected, then there are no system timer
 		interrupts.  In this case, USEC_PER_TICK does not control any timer
 		rates.  Rather, it only determines the resolution of time reported
-		by clock_systimer() and the resolution of times that can be set for
+		by clock_systime_ticks() and the resolution of times that can be set for
 		certain delays including watchdog timers and delayed work.  In this
 		case there is a trade-off:  It is better to have the USEC_PER_TICK as
 		low as possible for higher timing resolution.  However, the time

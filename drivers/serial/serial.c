@@ -495,7 +495,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev, clock_t timeout)
        * all also cause the lower half driver to clear and reset the Tx FIFO.
        */
 
-      start = clock_systimer();
+      start = clock_systime_ticks();
 
       if (ret >= 0)
         {
@@ -507,7 +507,7 @@ static int uart_tcdrain(FAR uart_dev_t *dev, clock_t timeout)
 
               /* Check for a timeout */
 
-              elapsed = clock_systimer() - start;
+              elapsed = clock_systime_ticks() - start;
               if (elapsed >= timeout)
                 {
                   return -ETIMEDOUT;

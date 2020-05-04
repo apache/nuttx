@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock/clock_systimespec.c
+ * sched/clock/clock_systime_timespec.c
  *
  *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: clock_systimespec
+ * Name: clock_systime_timespec
  *
  * Description:
  *   Return the current value of the system timer counter as a struct
@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-int clock_systimespec(FAR struct timespec *ts)
+int clock_systime_timespec(FAR struct timespec *ts)
 {
 #ifdef CONFIG_RTC_HIRES
   /* Do we have a high-resolution RTC that can provide us with the time? */
@@ -144,7 +144,7 @@ int clock_systimespec(FAR struct timespec *ts)
        * timer.
        */
 
-      usecs = (uint64_t)TICK2USEC(clock_systimer());
+      usecs = (uint64_t)TICK2USEC(clock_systime_ticks());
       secs  = usecs / USEC_PER_SEC;
 
       /* Return the elapsed time in seconds and nanoseconds */
@@ -183,7 +183,7 @@ int clock_systimespec(FAR struct timespec *ts)
 
       /* Get the time since power-on in seconds and milliseconds */
 
-      msecs = TICK2MSEC(WIDE_CAST clock_systimer());
+      msecs = TICK2MSEC(WIDE_CAST clock_systime_ticks());
       secs  = msecs / MSEC_PER_SEC;
 
       /* Return the elapsed time in seconds and nanoseconds */

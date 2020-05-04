@@ -1,7 +1,8 @@
 /****************************************************************************
  * sched/clock/clock_gettime.c
  *
- *   Copyright (C) 2007, 2009, 2011, 2014, 2016 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2014, 2016 Gregory Nutt.
+ *   All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,7 +94,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
        * reset.
        */
 
-      ret = clock_systimespec(tp);
+      ret = clock_systime_timespec(tp);
     }
   else
 #endif
@@ -107,7 +108,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
   if (clock_id == CLOCK_REALTIME)
     {
       /* Get the elapsed time since the time-of-day was last set.
-       * clock_systimespec() provides the time since power was applied;
+       * clock_systime_timespec() provides the time since power was applied;
        * the bias value corresponds to the time when the time-of-day was
        * last set.
        */
@@ -115,7 +116,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 #if defined(CONFIG_CLOCK_TIMEKEEPING)
       ret = clock_timekeeping_get_wall_time(tp);
 #else
-      ret = clock_systimespec(&ts);
+      ret = clock_systime_timespec(&ts);
       if (ret == OK)
         {
           irqstate_t flags;

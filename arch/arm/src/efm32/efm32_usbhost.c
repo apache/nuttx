@@ -1725,7 +1725,7 @@ static int efm32_ctrl_sendsetup(FAR struct efm32_usbhost_s *priv,
   /* Loop while the device reports NAK (and a timeout is not exceeded */
 
   chan  = &priv->chan[ep0->outndx];
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   do
     {
@@ -1774,7 +1774,7 @@ static int efm32_ctrl_sendsetup(FAR struct efm32_usbhost_s *priv,
 
       /* Get the elapsed time (in frames) */
 
-     elapsed = clock_systimer() - start;
+     elapsed = clock_systime_ticks() - start;
     }
   while (elapsed < EFM32_SETUP_DELAY);
 
@@ -1963,7 +1963,7 @@ static ssize_t efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
   chan->buflen = buflen;
   chan->xfrd   = 0;
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   while (chan->xfrd < chan->buflen)
     {
       /* Set up for the wait BEFORE starting the transfer */
@@ -2004,7 +2004,7 @@ static ssize_t efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
            * pointer and buffer size will be unaltered.
            */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
           if (ret != -EAGAIN ||                  /* Not a NAK condition OR */
               elapsed >= EFM32_DATANAK_DELAY ||  /* Timeout has elapsed OR */
               chan->xfrd > 0)                    /* Data has been partially transferred */
@@ -2224,7 +2224,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv,
    */
 
   chan  = &priv->chan[chidx];
-  start = clock_systimer();
+  start = clock_systime_ticks();
   xfrd  = 0;
   zlp   = (buflen == 0);
 
@@ -2275,7 +2275,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv,
            * pointer and buffer size will be unaltered.
            */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
           if (ret != -EAGAIN ||                  /* Not a NAK condition OR */
               elapsed >= EFM32_DATANAK_DELAY ||  /* Timeout has elapsed OR */
               chan->xfrd > 0)                    /* Data has been partially transferred */
@@ -4524,7 +4524,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
       /* Get the start time.  Loop again until the timeout expires */
 
-      start = clock_systimer();
+      start = clock_systime_ticks();
       do
         {
           /* Handle the status OUT phase */
@@ -4543,7 +4543,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           /* Get the elapsed time (in frames) */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
         }
       while (elapsed < EFM32_DATANAK_DELAY);
     }
@@ -4599,7 +4599,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
       /* Get the start time.  Loop again until the timeout expires */
 
-      start = clock_systimer();
+      start = clock_systime_ticks();
       do
         {
           /* Handle the data OUT phase (if any) */
@@ -4635,7 +4635,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
           /* Get the elapsed time (in frames) */
 
-          elapsed = clock_systimer() - start;
+          elapsed = clock_systime_ticks() - start;
         }
       while (elapsed < EFM32_DATANAK_DELAY);
     }

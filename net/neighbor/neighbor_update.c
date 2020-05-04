@@ -72,6 +72,6 @@ void neighbor_update(const net_ipv6addr_t ipaddr)
   neighbor = neighbor_findentry(ipaddr);
   if (neighbor != NULL)
     {
-      neighbor->ne_time = clock_systimer();
+      neighbor->ne_time = clock_systime_ticks();
     }
 }

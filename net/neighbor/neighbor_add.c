@@ -118,7 +118,7 @@ void neighbor_add(FAR struct net_driver_s *dev, FAR net_ipv6addr_t ipaddr,
    * "oldest_ndx" variable).
    */
 
-  g_neighbors[oldest_ndx].ne_time = clock_systimer();
+  g_neighbors[oldest_ndx].ne_time = clock_systime_ticks();
   net_ipv6addr_copy(g_neighbors[oldest_ndx].ne_ipaddr, ipaddr);
 
   g_neighbors[oldest_ndx].ne_addr.na_lltype = lltype;

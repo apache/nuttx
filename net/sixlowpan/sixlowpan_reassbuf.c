@@ -157,7 +157,7 @@ static void sixlowpan_reass_expire(void)
         {
           /* Get the elpased time of the reassembly */
 
-          elapsed = clock_systimer() - reass->rb_time;
+          elapsed = clock_systime_ticks() - reass->rb_time;
 
           /* If the reassembly has expired, then free the reassembly buffer */
 
@@ -336,7 +336,7 @@ FAR struct sixlowpan_reassbuf_s *
       reass->rb_pool     = pool;
       reass->rb_active   = true;
       reass->rb_reasstag = reasstag;
-      reass->rb_time     = clock_systimer();
+      reass->rb_time     = clock_systime_ticks();
 
       /* Add the reassembly buffer to the list of active reassembly buffers */
 

@@ -231,7 +231,7 @@ int arp_update(in_addr_t ipaddr, FAR uint8_t *ethaddr)
 
   tabptr->at_ipaddr = ipaddr;
   memcpy(tabptr->at_ethaddr.ether_addr_octet, ethaddr, ETHER_ADDR_LEN);
-  tabptr->at_time = clock_systimer();
+  tabptr->at_time = clock_systime_ticks();
   return OK;
 }
 
@@ -290,7 +290,7 @@ FAR struct arp_entry_s *arp_lookup(in_addr_t ipaddr)
     {
       tabptr = &g_arptable[i];
       if (net_ipv4addr_cmp(ipaddr, tabptr->at_ipaddr) &&
-          clock_systimer() - tabptr->at_time <= ARP_MAXAGE_TICK)
+          clock_systime_ticks() - tabptr->at_time <= ARP_MAXAGE_TICK)
         {
           return tabptr;
         }
@@ -424,7 +424,7 @@ unsigned int arp_snapshot(FAR struct arp_entry_s *snapshot,
 
   /* Copy all non-empty, non-expired entries in the ARP table. */
 
-  for (i = 0, now = clock_systimer(), ncopied = 0;
+  for (i = 0, now = clock_systime_ticks(), ncopied = 0;
        nentries > ncopied && i < CONFIG_NET_ARPTAB_SIZE;
        i++)
     {

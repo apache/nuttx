@@ -246,7 +246,7 @@ int wd_start(WDOG_ID wdog, int32_t delay, wdentry_t wdentry,  int argc, ...)
 #ifdef CONFIG_SCHED_TICKLESS
       /* Update clock tickbase */
 
-      g_wdtickbase = clock_systimer();
+      g_wdtickbase = clock_systime_ticks();
 #endif
 
       /* Add the watchdog to the head == tail of the queue. */

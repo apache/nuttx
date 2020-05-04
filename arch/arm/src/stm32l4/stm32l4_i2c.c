@@ -893,13 +893,13 @@ static inline int stm32l4_i2c_sem_waitdone(FAR struct stm32l4_i2c_priv_s *priv)
    */
 
   priv->intstate = INTSTATE_WAITING;
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   do
     {
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
 
       /* Poll by simply calling the timer interrupt handler until it
        * reports that it is done.
@@ -1030,12 +1030,12 @@ static inline void stm32l4_i2c_sem_waitstop(FAR struct stm32l4_i2c_priv_s *priv)
 
   /* Wait as stop might still be in progress */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   do
     {
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
 
       /* Check for STOP condition */
 
@@ -1142,7 +1142,7 @@ static void stm32l4_i2c_tracereset(FAR struct stm32l4_i2c_priv_s *priv)
   /* Reset the trace info for a new data collection */
 
   priv->tndx       = 0;
-  priv->start_time = clock_systimer();
+  priv->start_time = clock_systime_ticks();
   stm32l4_i2c_traceclear(priv);
 }
 
@@ -1176,7 +1176,7 @@ static void stm32l4_i2c_tracenew(FAR struct stm32l4_i2c_priv_s *priv,
       stm32l4_i2c_traceclear(priv);
       trace->status = status;
       trace->count  = 1;
-      trace->time   = clock_systimer();
+      trace->time   = clock_systime_ticks();
     }
   else
     {
@@ -1219,7 +1219,7 @@ static void stm32l4_i2c_tracedump(FAR struct stm32l4_i2c_priv_s *priv)
   int i;
 
   syslog(LOG_DEBUG, "Elapsed time: %d\n",
-         (int)(clock_systimer() - priv->start_time));
+         (int)(clock_systime_ticks() - priv->start_time));
 
   for (i = 0; i < priv->tndx; i++)
     {
@@ -2615,14 +2615,14 @@ static int stm32l4_i2c_process(FAR struct i2c_master_s *dev,
        * wraps up the transfer with a STOP condition.
        */
 
-      clock_t start = clock_systimer();
+      clock_t start = clock_systime_ticks();
       clock_t timeout = USEC2TICK(USEC_PER_SEC / priv->frequency) + 1;
 
       status = stm32l4_i2c_getstatus(priv);
 
       while (status & I2C_ISR_BUSY)
         {
-          if ((clock_systimer() - start) > timeout)
+          if ((clock_systime_ticks() - start) > timeout)
             {
               i2cerr("ERROR: I2C Bus busy");
               errval = EBUSY;

@@ -696,7 +696,7 @@ void mac802154_setupindirect(FAR struct ieee802154_privmac_s *priv,
 
   ticks = mac802154_symtoticks(priv, symbols);
 
-  txdesc->purgetime = clock_systimer() + ticks;
+  txdesc->purgetime = clock_systime_ticks() + ticks;
 
   /* Make sure the beacon gets updated */
 
@@ -763,7 +763,7 @@ static void mac802154_purge_worker(FAR void *arg)
        * since in scheduling the timer to expire in only a few ticks.
        */
 
-      if (clock_systimer() >= txdesc->purgetime)
+      if (clock_systime_ticks() >= txdesc->purgetime)
         {
           /* Unlink the transaction */
 
@@ -784,7 +784,7 @@ static void mac802154_purge_worker(FAR void *arg)
           /* Reschedule the transaction for the next timeout */
 
           work_queue(HPWORK, &priv->purge_work, mac802154_purge_worker,
-                     (FAR void *)priv, txdesc->purgetime - clock_systimer());
+                     priv, txdesc->purgetime - clock_systime_ticks());
           break;
         }
     }

@@ -179,7 +179,7 @@ static void clock_inittime(void)
   struct timespec ts;
 
   clock_basetime(&g_basetime);
-  clock_systimespec(&ts);
+  clock_systime_timespec(&ts);
 
   /* Adjust base time to hide initial timer ticks. */
 
@@ -336,7 +336,7 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
    * bias value that we need to use to correct the base time.
    */
 
-  clock_systimespec(&bias);
+  clock_systime_timespec(&bias);
 
   /* Add the base time to this.  The base time is the time-of-day
    * setting.  When added to the elapsed time since the time-of-day
@@ -358,7 +358,8 @@ void clock_resynchronize(FAR struct timespec *rtc_diff)
   /* Check if RTC has advanced past system time. */
 
   if (curr_ts.tv_sec > rtc_time.tv_sec ||
-      (curr_ts.tv_sec == rtc_time.tv_sec && curr_ts.tv_nsec >= rtc_time.tv_nsec))
+      (curr_ts.tv_sec == rtc_time.tv_sec &&
+       curr_ts.tv_nsec >= rtc_time.tv_nsec))
     {
       /* Setting system time with RTC now would result time going
        * backwards. Skip resynchronization.

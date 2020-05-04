@@ -169,7 +169,7 @@ static inline void max326_wdog_reset(FAR struct max326_wdt_lowerhalf_s *priv)
   putreg32(WDT0_RST_SEQ1, MAX326_WDT0_RST);
   putreg32(WDT0_RST_SEQ2, MAX326_WDT0_RST);
 
-  priv->lastping = clock_systimer();
+  priv->lastping = clock_systime_ticks();
 }
 
 /****************************************************************************
@@ -253,7 +253,7 @@ static uint32_t max326_time_left(FAR struct max326_wdt_lowerhalf_s *priv)
   exp  = (ctrl & WDT0_CTRL_INTPERIOD_MASK) >> WDT0_CTRL_INTPERIOD_SHIFT;
 
   timeout = max326_exp2msec(max326_pclk_frequency(), exp);
-  elapsed = TICK2MSEC(clock_systimer() - priv->lastping);
+  elapsed = TICK2MSEC(clock_systime_ticks() - priv->lastping);
 
   if (elapsed > timeout)
     {

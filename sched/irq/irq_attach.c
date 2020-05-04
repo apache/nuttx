@@ -132,7 +132,7 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
       g_irqvector[ndx].handler = isr;
       g_irqvector[ndx].arg     = arg;
 #ifdef CONFIG_SCHED_IRQMONITOR
-      g_irqvector[ndx].start   = clock_systimer();
+      g_irqvector[ndx].start   = clock_systime_ticks();
 #ifdef CONFIG_HAVE_LONG_LONG
       g_irqvector[ndx].count   = 0;
 #else

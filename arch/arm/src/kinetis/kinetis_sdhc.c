@@ -1866,13 +1866,13 @@ static int kinetis_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
    */
 
   timeout = SDHC_CMDTIMEOUT;
-  start   = clock_systimer();
+  start   = clock_systime_ticks();
 
   while ((getreg32(KINETIS_SDHC_PRSSTAT) & SDHC_PRSSTAT_CIHB) != 0)
     {
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
       if (elapsed >= timeout)
         {
           mcerr("ERROR: Timeout cmd: %08x PRSSTAT: %08x\n",
@@ -2149,13 +2149,13 @@ static int kinetis_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
    * (except Auto CMD12).
    */
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   while ((getreg32(KINETIS_SDHC_IRQSTAT) & SDHC_INT_CC) == 0)
     {
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
       if (elapsed >= timeout)
         {
           mcerr("ERROR: Timeout cmd: %08x IRQSTAT: %08x\n",

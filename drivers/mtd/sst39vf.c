@@ -426,7 +426,7 @@ static int sst39vf_chiperase(FAR struct sst39vf_dev_s *priv)
   wrinfo.address = CONFIG_SST39VF_BASE_ADDRESS;
   wrinfo.data    = 0xffff;
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   while (delay < MSEC2TICK(SST39VF_TSCE_MSEC))
     {
       /* Check if the erase is complete */
@@ -438,7 +438,7 @@ static int sst39vf_chiperase(FAR struct sst39vf_dev_s *priv)
 
       /* No, check if the timeout has elapsed */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
       if (elapsed > MSEC2TICK(SST39VF_TSCE_MSEC))
         {
           return -ETIMEDOUT;
@@ -502,7 +502,7 @@ static int sst39vf_sectorerase(FAR struct sst39vf_dev_s *priv,
    */
 
 #if 0
-  start = clock_systimer();
+  start = clock_systime_ticks();
   while (delay < MSEC2TICK(SST39VF_TSE_MSEC))
     {
       /* Check if the erase is complete */
@@ -514,7 +514,7 @@ static int sst39vf_sectorerase(FAR struct sst39vf_dev_s *priv,
 
       /* No, check if the timeout has elapsed */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
       if (elapsed > MSEC2TICK(SST39VF_TSE_MSEC))
         {
           return -ETIMEDOUT;

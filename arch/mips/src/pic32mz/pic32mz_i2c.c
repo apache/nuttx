@@ -497,7 +497,7 @@ static void pic32mz_i2c_tracereset(FAR struct pic32mz_i2c_priv_s *priv)
   /* Reset the trace info for a new data collection */
 
   priv->tndx       = 0;
-  priv->start_time = clock_systimer();
+  priv->start_time = clock_systime_ticks();
   pic32mz_i2c_traceclear(priv);
 }
 
@@ -531,7 +531,7 @@ static void pic32mz_i2c_tracenew(FAR struct pic32mz_i2c_priv_s *priv,
       pic32mz_i2c_traceclear(priv);
       trace->status = status;
       trace->count  = 1;
-      trace->time   = clock_systimer();
+      trace->time   = clock_systime_ticks();
     }
   else
     {
@@ -574,7 +574,7 @@ static void pic32mz_i2c_tracedump(FAR struct pic32mz_i2c_priv_s *priv)
   int i;
 
   syslog(LOG_DEBUG, "Elapsed time: %ld\n",
-         (long)(clock_systimer() - priv->start_time));
+         (long)(clock_systime_ticks() - priv->start_time));
 
   for (i = 0; i < priv->tndx; i++)
     {
@@ -768,13 +768,13 @@ static inline int
    */
 
   priv->intstate = INTSTATE_WAITING;
-  start = clock_systimer();
+  start = clock_systime_ticks();
 
   do
     {
       /* Calculate the elapsed time */
 
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
 
       /* Poll by simply calling the timer interrupt handler until it
        * reports that it is done.
@@ -823,10 +823,10 @@ static inline void
   timeout = CONFIG_PIC32MZ_I2CTIMEOTICKS;
 #endif
 
-  start = clock_systimer();
+  start = clock_systime_ticks();
   do
     {
-      elapsed = clock_systimer() - start;
+      elapsed = clock_systime_ticks() - start;
 
       /* The bus is idle if the five least significant bits of I2CxCON
        * are cleared and the I2CxSTAT<TRSTAT> flag is cleared.
