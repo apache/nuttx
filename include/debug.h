@@ -920,6 +920,24 @@
 #  define ipcinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_PCIE_ERROR
+#  define pcierr       _err
+#else
+#  define pcierr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_PCIE_WARN
+#  define pciwarn     _warn
+#else
+#  define pciwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_PCIE_INFO
+#  define pciinfo     _info
+#else
+#  define pciinfo     _none
+#endif
+
 /* Buffer dumping macros do not depend on varargs */
 
 #ifdef CONFIG_DEBUG_ERROR
