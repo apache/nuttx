@@ -64,7 +64,6 @@
 "inet_ntoa","arpa/inet.h","defined(CONFIG_NET_IPv4)","FAR char","struct in_addr"
 "inet_ntop","arpa/inet.h","","FAR const char","int","FAR const void *","FAR char *","socklen_t"
 "inet_pton","arpa/inet.h","","int","int","FAR const char *","FAR void *"
-"ioctl","sys/ioctl.h","defined(CONFIG_LIBC_IOCTL_VARIADIC)","int","int","int","..."
 "iswalnum","wctype.h","defined(CONFIG_LIBC_WCHAR)","int","wint_t"
 "iswalpha","wctype.h","defined(CONFIG_LIBC_WCHAR)","int","wint_t"
 "iswblank","wctype.h","defined(CONFIG_LIBC_WCHAR)","int","wint_t"

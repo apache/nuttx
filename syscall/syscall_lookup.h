@@ -197,11 +197,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
  */
 
   SYSCALL_LOOKUP(close,                    1, STUB_close)
-#ifdef CONFIG_LIBC_IOCTL_VARIADIC
-  SYSCALL_LOOKUP(fs_ioctl,                 3, STUB_fs_ioctl)
-#else
-  SYSCALL_LOOKUP(ioctl,                    3, STUB_ioctl)
-#endif
+  SYSCALL_LOOKUP(ioctl,                    6, STUB_ioctl)
   SYSCALL_LOOKUP(read,                     3, STUB_read)
   SYSCALL_LOOKUP(write,                    3, STUB_write)
   SYSCALL_LOOKUP(pread,                    4, STUB_pread)

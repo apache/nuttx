@@ -284,13 +284,7 @@
  */
 
 #define SYS_close                    (__SYS_descriptors + 0)
-
-#ifdef CONFIG_LIBC_IOCTL_VARIADIC
-#  define SYS_fs_ioctl               (__SYS_descriptors + 1)
-#else
-#  define SYS_ioctl                  (__SYS_descriptors + 1)
-#endif
-
+#define SYS_ioctl                    (__SYS_descriptors + 1)
 #define SYS_read                     (__SYS_descriptors + 2)
 #define SYS_write                    (__SYS_descriptors + 3)
 #define SYS_pread                    (__SYS_descriptors + 4)

@@ -1577,7 +1577,7 @@ ssize_t net_ioctl_arglen(int cmd)
 #endif
 
 /****************************************************************************
- * Name: psock_ioctl
+ * Name: psock_ioctl and psock_vioctl
  *
  * Description:
  *   Perform network device specific operations.
@@ -1607,8 +1607,9 @@ ssize_t net_ioctl_arglen(int cmd)
  *
  ****************************************************************************/
 
-int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
+int psock_vioctl(FAR struct socket *psock, int cmd, va_list ap)
 {
+  unsigned long arg;
   int ret;
 
   /* Verify that the psock corresponds to valid, allocated socket */
@@ -1617,6 +1618,8 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
     {
       return -EBADF;
     }
+
+  arg = va_arg(ap, unsigned long);
 
 #ifdef CONFIG_NET_USRSOCK
   /* Check for a USRSOCK ioctl command */
@@ -1702,6 +1705,25 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
   return ret;
 }
 
+int psock_ioctl(FAR struct socket *psock, int cmd, ...)
+{
+  va_list ap;
+  int ret;
+
+  /* Setup to access the variable argument list */
+
+  va_start(ap, cmd);
+
+  /* Let psock_vfcntl() do the real work.  The errno is not set on
+   * failures.
+   */
+
+  ret = psock_vioctl(psock, cmd, ap);
+
+  va_end(ap);
+  return ret;
+}
+
 /****************************************************************************
  * Name: netdev_ioctl
  *
@@ -1711,7 +1733,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
  * Input Parameters:
  *   sockfd   Socket descriptor of device
  *   cmd      The ioctl command
- *   arg      The argument of the ioctl cmd
+ *   ap       The argument of the ioctl cmd
  *
  * Returned Value:
  *   A non-negative value is returned on success; a negated errno value is
@@ -1733,11 +1755,11 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-int netdev_ioctl(int sockfd, int cmd, unsigned long arg)
+int netdev_vioctl(int sockfd, int cmd, va_list ap)
 {
   FAR struct socket *psock = sockfd_socket(sockfd);
 
-  return psock_ioctl(psock, cmd, arg);
+  return psock_ioctl(psock, cmd, ap);
 }
 
 /****************************************************************************

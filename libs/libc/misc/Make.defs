@@ -56,10 +56,6 @@ ifneq ($(CONFIG_NFILE_STREAMS),0)
 CSRCS += lib_streamsem.c
 endif
 
-ifeq ($(CONFIG_LIBC_IOCTL_VARIADIC),y)
-CSRCS += lib_ioctl.c
-endif
-
 ifeq ($(CONFIG_PIPES),y)
 CSRCS += lib_mkfifo.c
 endif

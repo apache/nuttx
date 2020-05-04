@@ -8598,11 +8598,7 @@ interface of the same name.
 
 <ul><pre>
   #include &lt;sys/ioctl.h&gt;
-  #ifdef CONFIG_LIBC_IOCTL_VARIADIC
   int ioctl(int fd, int req, ...);
-  #else
-  int ioctl(int fd, int req, unsigned long arg);
-  #endif
 </pre></ul>
 
 <h4><a name="drvrpollops">2.10.2.4 poll.h</a></h4>
