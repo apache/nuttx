@@ -187,6 +187,16 @@ int inode_semtake(void);
 void inode_semgive(void);
 
 /****************************************************************************
+ * Name: inode_checkflags
+ *
+ * Description:
+ *   Check if the access described by 'oflags' is supported on 'inode'
+ *
+ ****************************************************************************/
+
+int inode_checkflags(FAR struct inode *inode, int oflags);
+
+/****************************************************************************
  * Name: inode_search
  *
  * Description:
