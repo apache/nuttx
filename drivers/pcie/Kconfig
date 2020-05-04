@@ -1,0 +1,11 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config PCIE
+	bool "Support for PCI-E Bus"
+	default n
+	---help---
+		Enables support for the PCI-E bus.
+		Backend bust be provided by per-arch or per-board implementation..
