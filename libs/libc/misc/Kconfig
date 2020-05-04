@@ -3,49 +3,6 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config LIBC_IOCTL_VARIADIC
-	bool "Enable variadic ioctl()"
-	default y
-	---help---
-		By default, NuttX implements the "old style," three-parameter,
-		ioctl() interface with this function prototype:
-
-			int ioctl(int fd, int req, unsigned long arg);
-
-		That function is implemented as part of the VFS.  If
-		LIBC_IOCTL_VARIADIC is selected, then an additional compatibility
-		layer will be provided in the C library.  The enabled, then function
-		prototype will become:
-
-			int ioctl(int fd, int req, ...);
-
-		The ioctl() is not controlled by any standard so it is really
-		arbitrary which format you used.  You may select the variadic
-		function prototype with this option.  That will slightly increase
-		code size and ioctl() processing time.  It will not support a
-		variable number of arguments and it still always expects to see a
-		third argument of type 'unsigned long'.  The only benefit of this
-		alternative function signature is that it may provide greater
-		compatibility if you are porting code from other platforms that use
-		the variadic ioctl() function.
-
-		WARNING:  Use of this option could cause subtle system errors is
-		the third argument is omitted or if the sizeof the thread argument
-		is anything other than sizeof (unsigned long).  Most small integers
-		will be promoted to 'int'.  The following assertion appears in ioctl():
-
-			DEBUGASSERT(sizeof(int)        == sizeof(unsigned long) &&
-			            sizeof(FAR void *) == sizeof(unsigned long));
-
-		Do not enable this option if the above is not true.  32-bit ARM
-		should pass this test with all three types having sizeof(type) == 4
-		bytes.  'float' should also be tested.  But 'long long' and 'double'
-		are out of the question!  Don't event try to pass them.
-
-		And what will happen if no third argument is passed?  In most cases,
-		this should just result in a garbage value for arg.  But you may
-		discover cases where something worse happens!
-
 config LIB_SENDFILE_BUFSIZE
 	int "sendfile() buffer size"
 	default 512

@@ -189,13 +189,9 @@ uintptr_t STUB_nx_vsyslog(int nbr, uintptr_t parm1, uintptr_t parm2,
  */
 
 uintptr_t STUB_close(int nbr, uintptr_t parm1);
-#ifdef CONFIG_LIBC_IOCTL_VARIADIC
-uintptr_t STUB_fs_ioctl(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm3);
-#else
 uintptr_t STUB_ioctl(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm3);
-#endif
+            uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
+            uintptr_t parm6);
 uintptr_t STUB_read(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 uintptr_t STUB_write(int nbr, uintptr_t parm1, uintptr_t parm2,

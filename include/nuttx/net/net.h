@@ -1228,7 +1228,7 @@ int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
                       FAR socklen_t *addrlen);
 
 /****************************************************************************
- * Name: psock_ioctl
+ * Name: psock_ioctl and psock_vioctl
  *
  * Description:
  *   Perform network device specific operations.
@@ -1236,7 +1236,7 @@ int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
  *   cmd      The ioctl command
- *   arg      The argument of the ioctl cmd
+ *   ap      The argument of the ioctl cmd
  *
  * Returned Value:
  *   A non-negative value is returned on success; a negated errno value is
@@ -1258,10 +1258,11 @@ int psock_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
  *
  ****************************************************************************/
 
-int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg);
+int psock_vioctl(FAR struct socket *psock, int cmd, va_list ap);
+int psock_ioctl(FAR struct socket *psock, int cmd, ...);
 
 /****************************************************************************
- * Name: netdev_ioctl
+ * Name: netdev_vioctl
  *
  * Description:
  *   Perform network device specific operations.
@@ -1269,7 +1270,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg);
  * Input Parameters:
  *   sockfd   Socket descriptor of device
  *   cmd      The ioctl command
- *   arg      The argument of the ioctl cmd
+ *   ap       The argument of the ioctl cmd
  *
  * Returned Value:
  *   A non-negative value is returned on success; a negated errno value is
@@ -1291,7 +1292,7 @@ int psock_ioctl(FAR struct socket *psock, int cmd, unsigned long arg);
  *
  ****************************************************************************/
 
-int netdev_ioctl(int sockfd, int cmd, unsigned long arg);
+int netdev_vioctl(int sockfd, int cmd, va_list ap);
 
 /****************************************************************************
  * Name: psock_poll

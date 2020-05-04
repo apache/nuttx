@@ -59,7 +59,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: file_ioctl
+ * Name: file_ioctl and file_vioctl
  *
  * Description:
  *   Perform device specific operations.
@@ -67,7 +67,7 @@
  * Input Parameters:
  *   file     File structure instance
  *   req      The ioctl command
- *   arg      The argument of the ioctl cmd
+ *   ap       The argument of the ioctl cmd
  *
  * Returned Value:
  *   Returns a non-negative number on success;  A negated errno value is
@@ -76,7 +76,7 @@
  *
  ****************************************************************************/
 
-int file_ioctl(FAR struct file *filep, int req, unsigned long arg)
+int file_vioctl(FAR struct file *filep, int req, va_list ap)
 {
   FAR struct inode *inode;
 
@@ -99,11 +99,25 @@ int file_ioctl(FAR struct file *filep, int req, unsigned long arg)
 
   /* Yes on both accounts.  Let the driver perform the ioctl command */
 
-  return (int)inode->u.i_ops->ioctl(filep, req, arg);
+  return inode->u.i_ops->ioctl(filep, req, va_arg(ap, unsigned long));
+}
+
+int file_ioctl(FAR struct file *filep, int req, ...)
+{
+  va_list ap;
+  int ret;
+
+  /* Let file_vioctl() do the real work. */
+
+  va_start(ap, req);
+  ret = file_vioctl(filep, req, ap);
+  va_end(ap);
+
+  return ret;
 }
 
 /****************************************************************************
- * Name: nx_ioctl
+ * Name: nx_ioctl and nx_vioctl
  *
  * Description:
  *   nx_ioctl() is similar to the standard 'ioctl' interface except that is
@@ -119,9 +133,10 @@ int file_ioctl(FAR struct file *filep, int req, unsigned long arg)
  *
  ****************************************************************************/
 
-int nx_ioctl(int fd, int req, unsigned long arg)
+int nx_vioctl(int fd, int req, va_list ap)
 {
   FAR struct file *filep;
+  FAR int *arg;
   int ret;
 
   /* Did we get a valid file descriptor? */
@@ -133,7 +148,7 @@ int nx_ioctl(int fd, int req, unsigned long arg)
 #ifdef CONFIG_NET
       if (fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
-          ret = netdev_ioctl(fd, req, arg);
+          ret = netdev_vioctl(fd, req, ap);
         }
       else
 #endif
@@ -155,7 +170,7 @@ int nx_ioctl(int fd, int req, unsigned long arg)
 
       /* Perform the file ioctl. */
 
-      ret = file_ioctl(filep, req, arg);
+      ret = file_vioctl(filep, req, ap);
     }
 
   /* Check for File system IOCTL commands that can be implemented via
@@ -167,20 +182,17 @@ int nx_ioctl(int fd, int req, unsigned long arg)
       switch (req)
         {
           case FIONBIO:
-            {
-              DEBUGASSERT(arg != 0);
-
-              if (*(FAR int *)((uintptr_t)arg))
-                {
-                  ret = nx_fcntl(fd, F_SETFL,
-                                 nx_fcntl(fd, F_GETFL) | O_NONBLOCK);
-                }
-              else
-                {
-                  ret = nx_fcntl(fd, F_SETFL,
-                                 nx_fcntl(fd, F_GETFL) & ~O_NONBLOCK);
-                }
-            }
+            arg = va_arg(ap, FAR int *);
+            if (arg && *arg)
+              {
+                ret = nx_fcntl(fd, F_SETFL,
+                               nx_fcntl(fd, F_GETFL) | O_NONBLOCK);
+              }
+            else
+              {
+                ret = nx_fcntl(fd, F_SETFL,
+                               nx_fcntl(fd, F_GETFL) & ~O_NONBLOCK);
+              }
             break;
         }
     }
@@ -188,8 +200,22 @@ int nx_ioctl(int fd, int req, unsigned long arg)
   return ret;
 }
 
+int nx_ioctl(int fd, int req, ...)
+{
+  va_list ap;
+  int ret;
+
+  /* Let nx_vioctl() do the real work. */
+
+  va_start(ap, req);
+  ret = nx_vioctl(fd, req, ap);
+  va_end(ap);
+
+  return ret;
+}
+
 /****************************************************************************
- * Name: ioctl/fs_ioctl
+ * Name: ioctl
  *
  * Description:
  *   Perform device specific operations.
@@ -197,7 +223,6 @@ int nx_ioctl(int fd, int req, unsigned long arg)
  * Input Parameters:
  *   fd       File/socket descriptor of device
  *   req      The ioctl command
- *   arg      The argument of the ioctl cmd
  *
  * Returned Value:
  *   >=0 on success (positive non-zero values are cmd-specific)
@@ -217,15 +242,17 @@ int nx_ioctl(int fd, int req, unsigned long arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_IOCTL_VARIADIC
-int fs_ioctl(int fd, int req, unsigned long arg)
-#else
-int ioctl(int fd, int req, unsigned long arg)
-#endif
+int ioctl(int fd, int req, ...)
 {
+  va_list ap;
   int ret;
 
-  ret = nx_ioctl(fd, req, arg);
+  /* Let nx_vioctl() do the real work. */
+
+  va_start(ap, req);
+  ret = nx_vioctl(fd, req, ap);
+  va_end(ap);
+
   if (ret < 0)
     {
       set_errno(-ret);
