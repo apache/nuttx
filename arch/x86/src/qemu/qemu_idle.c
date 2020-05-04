@@ -83,5 +83,7 @@ void up_idle(void)
 
   /* Sleep until an interrupt occurs to save power */
 
+  __asm__ __volatile__ ("hlt");
+
 #endif
 }
