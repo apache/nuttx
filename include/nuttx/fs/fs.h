@@ -679,16 +679,6 @@ int unregister_mtddriver(FAR const char *path);
 #endif
 
 /****************************************************************************
- * Name: inode_checkflags
- *
- * Description:
- *   Check if the access described by 'oflags' is supported on 'inode'
- *
- ****************************************************************************/
-
-int inode_checkflags(FAR struct inode *inode, int oflags);
-
-/****************************************************************************
  * Name: files_initlist
  *
  * Description:
