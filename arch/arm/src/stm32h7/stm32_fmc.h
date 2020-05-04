@@ -68,7 +68,7 @@ extern "C"
  *   dependent on the used parts, definition of the initial values for FMC
  *   registers is mostly left to board designer.
  *
- *   Typically called from up_addregion().
+ *   Typically called from arm_addregion().
  *
  ****************************************************************************/
 

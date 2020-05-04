@@ -42,6 +42,7 @@ SYSCALL_LOOKUP(sched_setparam,             2, STUB_sched_setparam)
 SYSCALL_LOOKUP(sched_setscheduler,         3, STUB_sched_setscheduler)
 SYSCALL_LOOKUP(sched_unlock,               0, STUB_sched_unlock)
 SYSCALL_LOOKUP(sched_yield,                0, STUB_sched_yield)
+SYSCALL_LOOKUP(sched_get_stackinfo,        2, STUB_sched_get_stackinfo)
 
 #ifdef CONFIG_SMP
 SYSCALL_LOOKUP(sched_getaffinity,          3, STUB_sched_getaffinity)
@@ -83,7 +84,7 @@ SYSCALL_LOOKUP(sem_unlink,                 1, STUB_sem_unlink)
 
 #ifndef CONFIG_BUILD_KERNEL
 SYSCALL_LOOKUP(task_create,                5, STUB_task_create)
-#ifdef CONFIG_BUILD_PROTECTED
+#ifdef CONFIG_LIB_SYSCALL
 SYSCALL_LOOKUP(nx_task_spawn,              1, STUB_nx_task_spawn)
 #endif
 #else
@@ -304,8 +305,6 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(pthread_create,           4, STUB_pthread_create)
   SYSCALL_LOOKUP(pthread_detach,           1, STUB_pthread_detach)
   SYSCALL_LOOKUP(pthread_exit,             1, STUB_pthread_exit)
-  SYSCALL_LOOKUP(pthread_get_stackaddr_np, 1, STUB_pthread_get_stackaddr_np)
-  SYSCALL_LOOKUP(pthread_get_stacksize_np, 1, STUB_pthread_get_stacksize_np)
   SYSCALL_LOOKUP(pthread_getschedparam,    3, STUB_pthread_getschedparam)
   SYSCALL_LOOKUP(pthread_getspecific,      1, STUB_pthread_getspecific)
   SYSCALL_LOOKUP(pthread_join,             2, STUB_pthread_join)

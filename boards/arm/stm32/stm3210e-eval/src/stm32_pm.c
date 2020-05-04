@@ -42,7 +42,7 @@
 
 #include <nuttx/power/pm.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "stm32_pm.h"
 #include "stm3210e-eval.h"
 
@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_pminitialize
+ * Name: arm_pminitialize
  *
  * Description:
  *   This function is called by MCU-specific logic at power-on reset in
@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-void up_pminitialize(void)
+void arm_pminitialize(void)
 {
   /* Then initialize the NuttX power management subsystem proper */
 

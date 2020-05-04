@@ -46,7 +46,7 @@
 #include <nuttx/irq.h>
 #include <arch/stm32f7/chip.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "chip.h"
 #include "stm32_gpio.h"

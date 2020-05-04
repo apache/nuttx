@@ -45,8 +45,8 @@
 #include <nuttx/audio/i2s.h>
 #include <nuttx/semaphore.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 #include "sam_gpio.h"
 #include "sam_xdmac.h"

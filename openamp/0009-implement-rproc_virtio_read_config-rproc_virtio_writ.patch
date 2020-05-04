@@ -1,0 +1,119 @@
+From 9bbc2dcd43f6107a7e0b1eec16bab10e533329f2 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Thu, 3 Jan 2019 14:20:48 +0800
+Subject: [PATCH 09/10] implement
+ rproc_virtio_read_config/rproc_virtio_write_config
+
+so the rpmsg could access the configuration space as needed
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+---
+ lib/include/openamp/rpmsg_virtio.h | 14 +++++++++++
+ lib/include/openamp/virtio.h       |  1 +
+ lib/remoteproc/remoteproc_virtio.c | 40 ++++++++++++++++++++++++------
+ 3 files changed, 47 insertions(+), 8 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
+index e6e5fa2..4d3093b 100644
+--- a/lib/include/openamp/rpmsg_virtio.h
++++ open-amp/lib/include/openamp/rpmsg_virtio.h
+@@ -86,6 +86,20 @@ rpmsg_virtio_get_features(struct rpmsg_virtio_device *rvdev)
+ 	return rvdev->vdev->func->get_features(rvdev->vdev);
+ }
+ 
++static inline void
++rpmsg_virtio_read_config(struct rpmsg_virtio_device *rvdev,
++			 uint32_t offset, void *dst, int length)
++{
++	rvdev->vdev->func->read_config(rvdev->vdev, offset, dst, length);
++}
++
++static inline void
++rpmsg_virtio_write_config(struct rpmsg_virtio_device *rvdev,
++			 uint32_t offset, void *dst, int length)
++{
++	rvdev->vdev->func->write_config(rvdev->vdev, offset, dst, length);
++}
++
+ static inline int
+ rpmsg_virtio_create_virtqueues(struct rpmsg_virtio_device *rvdev,
+ 			       int flags, unsigned int nvqs,
+diff --git a/lib/include/openamp/virtio.h open-amp/lib/include/openamp/virtio.h
+index 55c8ea5..9c8376e 100644
+--- a/lib/include/openamp/virtio.h
++++ open-amp/lib/include/openamp/virtio.h
+@@ -100,6 +100,7 @@ struct virtio_device {
+ 	virtio_dev_reset_cb reset_cb; /**< user registered device callback */
+ 	const struct virtio_dispatch *func; /**< Virtio dispatch table */
+ 	void *priv; /**< TODO: remove pointer to virtio_device private data */
++	unsigned int config_len;  /**< config space length */
+ 	unsigned int vrings_num; /**< number of vrings */
+ 	struct virtio_vring_info *vrings_info;
+ };
+diff --git a/lib/remoteproc/remoteproc_virtio.c open-amp/lib/remoteproc/remoteproc_virtio.c
+index aafc48c..7505f64 100644
+--- a/lib/remoteproc/remoteproc_virtio.c
++++ open-amp/lib/remoteproc/remoteproc_virtio.c
+@@ -128,20 +128,43 @@ static uint32_t rproc_virtio_negotiate_features(struct virtio_device *vdev,
+ static void rproc_virtio_read_config(struct virtio_device *vdev,
+ 				     uint32_t offset, void *dst, int length)
+ {
+-	(void)vdev;
+-	(void)offset;
+-	(void)dst;
+-	(void)length;
++	struct remoteproc_virtio *rpvdev;
++	struct fw_rsc_vdev *vdev_rsc;
++	struct metal_io_region *io;
++	char *config;
++
++	if (offset + length > vdev->config_len || offset + length < length)
++		return;
++
++	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
++	vdev_rsc = rpvdev->vdev_rsc;
++	config = (char *)(&vdev_rsc->vring[vdev->vrings_num]);
++	io = rpvdev->vdev_rsc_io;
++	metal_io_block_read(io,
++			    metal_io_virt_to_offset(io, config + offset),
++			    dst, length);
+ }
+ 
+ #ifndef VIRTIO_SLAVE_ONLY
+ static void rproc_virtio_write_config(struct virtio_device *vdev,
+ 				      uint32_t offset, void *src, int length)
+ {
+-	(void)vdev;
+-	(void)offset;
+-	(void)src;
+-	(void)length;
++	struct remoteproc_virtio *rpvdev;
++	struct fw_rsc_vdev *vdev_rsc;
++	struct metal_io_region *io;
++	char *config;
++
++	if (offset + length > vdev->config_len || offset + length < length)
++		return;
++
++	rpvdev = metal_container_of(vdev, struct remoteproc_virtio, vdev);
++	vdev_rsc = rpvdev->vdev_rsc;
++	config = (char *)(&vdev_rsc->vring[vdev->vrings_num]);
++	io = rpvdev->vdev_rsc_io;
++	metal_io_block_write(io,
++			    metal_io_virt_to_offset(io, config + offset),
++			    src, length);
++	rpvdev->notify(rpvdev->priv, vdev->notifyid);
+ }
+ 
+ static void rproc_virtio_reset_device(struct virtio_device *vdev)
+@@ -222,6 +245,7 @@ rproc_virtio_create_vdev(unsigned int role, unsigned int notifyid,
+ 	vdev->notifyid = notifyid;
+ 	vdev->role = role;
+ 	vdev->reset_cb = rst_cb;
++	vdev->config_len = vdev_rsc->config_len;
+ 	vdev->vrings_num = num_vrings;
+ 	vdev->func = &remoteproc_virtio_dispatch_funcs;
+ 
+-- 
+2.17.1
+

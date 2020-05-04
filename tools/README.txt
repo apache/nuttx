@@ -745,15 +745,6 @@ link.sh, link.bat, copydir.sh, copydir.bat, unlink.sh, and unlink.bat
   NTFS mklink.exe command instead of copying files.  That logic, however,
   has not been verified as of this writing.
 
-logparser.c
------------
-
-  Convert a git log to ChangeLog format.  Recommended usage:
-
-    git log --date-order --reverse <rev1>..<rev2>|HEAD >_git_log.tmp
-    logparser _git_log.tmp >_changelog.txt
-    rm -f _git_log.tmp
-
 Makefile.host
 -------------
 
@@ -1129,7 +1120,7 @@ zipme.sh
   Any VCS files or directories are excluded from the final tarballs.
 
   $ ./tools/zipme.sh -h
-    USAGE="USAGE: ./tools/zipme.sh [-d|h|v|s] [-b <build]> [-e <exclude>] [-k <key-id>] <major.minor.patch>"
+    USAGE="USAGE: ./tools/zipme.sh [-d|h|v|s] [-b <build]> [-e <exclude>] [-k <key-id>] [<major.minor.patch>]"
   Examples:
       ./tools/zipme.sh -s 9.0.0
         Create version 9.0.0 tarballs and sign them.

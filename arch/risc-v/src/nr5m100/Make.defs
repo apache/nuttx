@@ -35,7 +35,7 @@
 HEAD_ASRC = nr5_vectors.S
 
 # Specify our general Assembly files
-CHIP_ASRCS = nr5_head.S nr5_csr.S up_syscall.S
+CHIP_ASRCS = nr5_head.S nr5_csr.S riscv_syscall.S
 
 # If we are compiling the NELIB library, then specify it
 # in AFLAGS so we can change up our startup behavior
@@ -52,15 +52,15 @@ endif
 ASARCHCPUFLAGS += -march=RV32IMXcustom
 
 # Specify C code within the common directory to be included
-CMN_CSRCS  += up_initialize.c up_swint.c
-CMN_CSRCS  += up_allocateheap.c up_createstack.c up_exit.c up_idle.c
-CMN_CSRCS  += up_assert.c up_blocktask.c up_copystate.c up_initialstate.c
-CMN_CSRCS  += up_interruptcontext.c up_releasepending.c up_reprioritizertr.c
-CMN_CSRCS  += up_releasestack.c up_stackframe.c up_schedulesigaction.c up_sigdeliver.c
-CMN_CSRCS  += up_unblocktask.c up_usestack.c
+CMN_CSRCS  += riscv_initialize.c riscv_swint.c
+CMN_CSRCS  += riscv_allocateheap.c riscv_createstack.c riscv_exit.c riscv_idle.c
+CMN_CSRCS  += riscv_assert.c riscv_blocktask.c riscv_copystate.c riscv_initialstate.c
+CMN_CSRCS  += riscv_interruptcontext.c riscv_releasepending.c riscv_reprioritizertr.c
+CMN_CSRCS  += riscv_releasestack.c riscv_stackframe.c nr5_schedulesigaction.c riscv_sigdeliver.c
+CMN_CSRCS  += riscv_unblocktask.c riscv_usestack.c
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-CMN_CSRCS  += up_vfork.c
+CMN_CSRCS  += riscv_vfork.c
 endif
 
 # Specify our C code within this directory to be included

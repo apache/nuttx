@@ -47,7 +47,7 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sam_periphclks.h"
 #include "hardware/sam_pit.h"
 

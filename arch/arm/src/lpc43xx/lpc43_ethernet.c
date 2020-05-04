@@ -61,7 +61,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #include "chip.h"
 #include "lpc43_pinconfig.h"
@@ -71,7 +71,7 @@
 #include "hardware/lpc43_ccu.h"
 #include "lpc43_rgu.h"
 #include "lpc43_gpio.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include <arch/board/board.h>
 
 /****************************************************************************
@@ -3862,11 +3862,11 @@ static inline int lpc43_ethinitialize(void)
 }
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Function: arm_netinitialize
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.
+ *   low-level initialization logic in arm_initialize.c.
  *
  * Input Parameters:
  *   None.
@@ -3879,7 +3879,7 @@ static inline int lpc43_ethinitialize(void)
  ****************************************************************************/
 
 #ifndef CONFIG_NETDEV_LATEINIT
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   lpc43_ethinitialize();
 }

@@ -48,7 +48,7 @@
 #include <errno.h>
 
 #include "barriers.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32_pwr.h"
 #include "stm32_gpio.h"
 

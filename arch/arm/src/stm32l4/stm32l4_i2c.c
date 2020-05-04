@@ -274,7 +274,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "stm32l4_gpio.h"
 #include "stm32l4_rcc.h"

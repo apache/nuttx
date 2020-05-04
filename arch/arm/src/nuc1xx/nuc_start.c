@@ -45,8 +45,8 @@
 
 #include <nuttx/init.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "nuc_config.h"
 #include "nuc_lowputc.h"
@@ -145,7 +145,7 @@ void __start(void)
   /* Perform early serial initialization */
 
 #ifdef USE_EARLYSERIALINIT
-  up_earlyserialinit();
+  arm_earlyserialinit();
 #endif
   showprogress('D');
 

@@ -45,7 +45,7 @@
 #include <nuttx/sched.h>
 
 #include "smp.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #ifdef CONFIG_SMP
 

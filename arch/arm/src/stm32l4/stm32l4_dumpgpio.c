@@ -49,7 +49,7 @@
 
 #include <nuttx/irq.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "stm32l4_gpio.h"
 #include "stm32l4_rcc.h"

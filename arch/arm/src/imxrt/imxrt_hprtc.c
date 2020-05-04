@@ -52,7 +52,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/imxrt_snvs.h"
 #include "imxrt_periphclks.h"

@@ -84,9 +84,7 @@
  */
 
 #undef MM_KERNEL_USRHEAP_INIT
-#if defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
-#  define MM_KERNEL_USRHEAP_INIT 1
-#elif !defined(CONFIG_BUILD_KERNEL)
+#if !defined(CONFIG_BUILD_KERNEL) && defined(__KERNEL__)
 #  define MM_KERNEL_USRHEAP_INIT 1
 #endif
 
@@ -285,7 +283,6 @@ extern "C"
  *   no global user heap structure.
  */
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 /* In the kernel build, there a multiple user heaps; one for each task
  * group.  In this build configuration, the user heap structure lies
  * in a reserved region at the beginning of the .bss/.data address
@@ -293,13 +290,12 @@ extern "C"
  * ARCH_DATA_RESERVE_SIZE
  */
 
-#elif defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
 /* In the protected mode, there are two heaps:  A kernel heap and a single
  * user heap.  In that case the user heap structure lies in the user space
  * (with a reference in the userspace interface).
  */
 
-#else
+#if defined(CONFIG_BUILD_FLAT) || !defined(__KERNEL__)
 /* Otherwise, the user heap data structures are in common .bss */
 
 EXTERN struct mm_heap_s g_mmheap;
@@ -443,9 +439,7 @@ FAR void *mm_brkaddr(FAR struct mm_heap_s *heap, int region);
 
 /* Functions contained in umm_brkaddr.c *************************************/
 
-#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 FAR void *umm_brkaddr(int region);
-#endif
 
 /* Functions contained in kmm_brkaddr.c *************************************/
 
@@ -455,8 +449,7 @@ FAR void *kmm_brkaddr(int region);
 
 /* Functions contained in mm_sbrk.c *****************************************/
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC) && \
-    defined(CONFIG_ARCH_USE_MMU)
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_MM_PGALLOC)
 FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
                   uintptr_t maxbreak);
 #endif
@@ -464,7 +457,7 @@ FAR void *mm_sbrk(FAR struct mm_heap_s *heap, intptr_t incr,
 /* Functions contained in kmm_sbrk.c ****************************************/
 
 #if defined(CONFIG_MM_KERNEL_HEAP) && defined(CONFIG_ARCH_ADDRENV) && \
-    defined(CONFIG_MM_PGALLOC) && defined(CONFIG_ARCH_USE_MMU)
+    defined(CONFIG_MM_PGALLOC)
 FAR void *kmm_sbrk(intptr_t incr);
 #endif
 
@@ -475,9 +468,7 @@ void mm_extend(FAR struct mm_heap_s *heap, FAR void *mem, size_t size,
 
 /* Functions contained in umm_extend.c **************************************/
 
-#if !defined(CONFIG_BUILD_PROTECTED) || !defined(__KERNEL__)
 void umm_extend(FAR void *mem, size_t size, int region);
-#endif
 
 /* Functions contained in kmm_extend.c **************************************/
 

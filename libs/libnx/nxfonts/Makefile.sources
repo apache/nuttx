@@ -300,7 +300,7 @@ endif
 
 ifeq ($(NXFONTS_FONTID),43)
 NXFONTS_PREFIX := g_tom_thumb_4x6_
-GEN_CSRC = nxfonts_tom-thumb-4x6.c
+GEN_CSRC = nxfonts_bitmaps_tom-thumb-4x6.c
 endif
 
 DEPENDENCY := nxfonts_bitmaps.c

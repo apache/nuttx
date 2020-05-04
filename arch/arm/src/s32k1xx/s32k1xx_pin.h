@@ -49,7 +49,7 @@
 
 #include <nuttx/irq.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "hardware/s32k1xx_port.h"
 
 /************************************************************************************

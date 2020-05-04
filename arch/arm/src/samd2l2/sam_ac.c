@@ -47,7 +47,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "sam_config.h"
 

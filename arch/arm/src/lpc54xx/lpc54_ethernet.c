@@ -87,7 +87,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/lpc54_syscon.h"
 #include "hardware/lpc54_pinmux.h"
 #include "hardware/lpc54_ethernet.h"
@@ -2992,13 +2992,13 @@ static int lpc54_phy_reset(struct lpc54_ethdriver_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_netinitialize
+ * Name: arm_netinitialize
  *
  * Description:
  *   Initialize the Ethernet controller and driver.
  *
  *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.
+ *   low-level initialization logic in arm_initialize.c.
  *
  * Input Parameters:
  *   intf - In the case where there are multiple EMACs, this value
@@ -3012,7 +3012,7 @@ static int lpc54_phy_reset(struct lpc54_ethdriver_s *priv)
  *
  ****************************************************************************/
 
-int up_netinitialize(int intf)
+int arm_netinitialize(int intf)
 {
   struct lpc54_ethdriver_s *priv;
   int ret;

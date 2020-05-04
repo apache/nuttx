@@ -44,7 +44,7 @@
 #include <arch/board/board.h>
 #include <arch/board/stm32l476vg-disco-clocking.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32l476vg-disco.h"
 
 /****************************************************************************

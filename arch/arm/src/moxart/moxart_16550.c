@@ -52,7 +52,7 @@
 #include <nuttx/serial/mxser.h>
 
 #include "arm.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 /****************************************************************************
  * Public Functions

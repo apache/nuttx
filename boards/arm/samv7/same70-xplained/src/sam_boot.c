@@ -48,7 +48,7 @@
 #include <nuttx/clock.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sam_start.h"
 #include "sam_pck.h"
 #include "same70-xplained.h"

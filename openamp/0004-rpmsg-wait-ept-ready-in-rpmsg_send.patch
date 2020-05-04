@@ -1,0 +1,128 @@
+From 8a55f0f3c2fec8c817ad579b070040ee8058c536 Mon Sep 17 00:00:00 2001
+From: ligd <liguiding@pinecone.net>
+Date: Wed, 20 Feb 2019 11:36:57 +0800
+Subject: [PATCH 04/10] rpmsg: wait ept ready in rpmsg_send
+
+since the destination address need time to return from peer
+
+Signed-off-by: ligd <liguiding@pinecone.net>
+---
+ lib/include/openamp/rpmsg.h | 48 ++++++++++++++++++++++++-------------
+ lib/rpmsg/rpmsg_virtio.c    |  7 ------
+ 2 files changed, 32 insertions(+), 23 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index 3403240..7000453 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -15,6 +15,7 @@
+ #include <metal/compiler.h>
+ #include <metal/mutex.h>
+ #include <metal/list.h>
++#include <metal/sleep.h>
+ #include <metal/utilities.h>
+ #include <string.h>
+ #include <stdbool.h>
+@@ -32,6 +33,12 @@ extern "C" {
+ #define RPMSG_RESERVED_ADDRESSES	(1024)
+ #define RPMSG_ADDR_ANY			0xFFFFFFFF
+ 
++/* Total tick count for 15secs - 1usec tick. */
++#define RPMSG_TICK_COUNT		15000000
++
++/* Time to wait - In multiple of 1 msecs. */
++#define RPMSG_TICKS_PER_INTERVAL	1000
++
+ /* Error macros. */
+ #define RPMSG_SUCCESS			0
+ #define RPMSG_ERROR_BASE		-2000
+@@ -129,6 +136,20 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
+ 			      uint32_t dst, const void *data, int size,
+ 			      int wait);
+ 
++/**
++ * is_rpmsg_ept_ready - check if the rpmsg endpoint ready to send
++ *
++ * @ept: pointer to rpmsg endpoint
++ *
++ * Returns 1 if the rpmsg endpoint has both local addr and destination
++ * addr set, 0 otherwise
++ */
++static inline unsigned int is_rpmsg_ept_ready(struct rpmsg_endpoint *ept)
++{
++	return (ept->dest_addr != RPMSG_ADDR_ANY) &&
++		(ept->addr != RPMSG_ADDR_ANY);
++}
++
+ /**
+  * rpmsg_send() - send a message across to the remote processor
+  * @ept: the rpmsg endpoint
+@@ -147,8 +168,17 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
+ static inline int rpmsg_send(struct rpmsg_endpoint *ept, const void *data,
+ 			     int len)
+ {
+-	return rpmsg_send_offchannel_raw(ept, ept->addr, ept->dest_addr, data,
+-					 len, true);
++	int tc = 0;
++
++	for (; tc < RPMSG_TICK_COUNT; tc += RPMSG_TICKS_PER_INTERVAL) {
++		if (is_rpmsg_ept_ready(ept))
++			return rpmsg_send_offchannel_raw(ept, ept->addr,
++							 ept->dest_addr,
++							 data, len, true);
++		metal_sleep_usec(RPMSG_TICKS_PER_INTERVAL);
++	}
++
++	return RPMSG_ERR_ADDR;
+ }
+ 
+ /**
+@@ -328,20 +358,6 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
+  */
+ void rpmsg_destroy_ept(struct rpmsg_endpoint *ept);
+ 
+-/**
+- * is_rpmsg_ept_ready - check if the rpmsg endpoint ready to send
+- *
+- * @ept: pointer to rpmsg endpoint
+- *
+- * Returns 1 if the rpmsg endpoint has both local addr and destination
+- * addr set, 0 otherwise
+- */
+-static inline unsigned int is_rpmsg_ept_ready(struct rpmsg_endpoint *ept)
+-{
+-	return (ept->dest_addr != RPMSG_ADDR_ANY) &&
+-		(ept->addr != RPMSG_ADDR_ANY);
+-}
+-
+ #if defined __cplusplus
+ }
+ #endif
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 4dea4c0..44b46d4 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -8,7 +8,6 @@
+  */
+ 
+ #include <metal/alloc.h>
+-#include <metal/sleep.h>
+ #include <metal/utilities.h>
+ #include <openamp/rpmsg_virtio.h>
+ #include <openamp/virtqueue.h>
+@@ -17,12 +16,6 @@
+ 
+ #define RPMSG_NUM_VRINGS                        2
+ 
+-/* Total tick count for 15secs - 1usec tick. */
+-#define RPMSG_TICK_COUNT                        15000000
+-
+-/* Time to wait - In multiple of 1 msecs. */
+-#define RPMSG_TICKS_PER_INTERVAL                1000
+-
+ #ifndef VIRTIO_SLAVE_ONLY
+ metal_weak void *
+ rpmsg_virtio_shm_pool_get_buffer(struct rpmsg_virtio_shm_pool *shpool,
+-- 
+2.17.1
+

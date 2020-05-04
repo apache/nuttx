@@ -55,12 +55,12 @@
 #include <nuttx/semaphore.h>
 
 #include <arch/board/board.h>
-#include "up_arch.h"
-#include "up_internal.h"
+#include "mips_arch.h"
+#include "mips_internal.h"
 
 #include "pic32mx.h"
-#include "pic32mx-adc.h"
-#include "pic32mx-ioport.h"
+#include "pic32mx_adc.h"
+#include "pic32mx_ioport.h"
 #include "pic32mx7mmb.h"
 
 #ifdef CONFIG_INPUT
@@ -135,7 +135,9 @@
 #define LCD_YMINUS_BIT (1 << LCD_YMINUS_PIN)
 #define LCD_ALL_BITS   (LCD_XPLUS_BIT | LCD_YPLUS_BIT | LCD_XMINUS_BIT | LCD_YMINUS_BIT)
 
-/* Conversions are performed as 10-bit samples represented as 16-bit unsigned integers: */
+/* Conversions are performed as 10-bit samples represented as 16-bit
+ * unsigned integers:
+ */
 
 #define MAX_ADC        (1023)
 
@@ -495,8 +497,8 @@ static void tc_notify(FAR struct tc_dev_s *priv)
 
   if (priv->nwaiters > 0)
     {
-      /* After posting this semaphore, we need to exit because the touchscreen
-       * is no longer available.
+      /* After posting this semaphore, we need to exit because the
+       * touchscreen is no longer available.
        */
 
       nxsem_post(&priv->waitsem);
@@ -610,7 +612,7 @@ static int tc_waitsample(FAR struct tc_dev_s *priv,
     }
 
   /* Re-acquire the semaphore that manages mutually exclusive access to
-   * the device structure.  We may have to wait here.  But we have our sample.
+   * the device structure. We may have to wait here. But we have our sample.
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
 

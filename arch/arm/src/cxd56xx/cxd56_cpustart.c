@@ -51,10 +51,10 @@
 #include <nuttx/sched_note.h>
 
 #include "nvic.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sched/sched.h"
 #include "init/init.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "hardware/cxd56_crg.h"
 #include "hardware/cxd5602_memorymap.h"
 
@@ -71,7 +71,7 @@
 #endif
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_lowputc(c)
+#  define showprogress(c) arm_lowputc(c)
 #else
 #  define showprogress(c)
 #endif

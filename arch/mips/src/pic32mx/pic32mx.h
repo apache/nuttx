@@ -49,13 +49,14 @@
 
 #include <nuttx/spi/spi.h>
 
-#include "up_internal.h"
+#include "mips_internal.h"
 #include "chip.h"
-#include "pic32mx-config.h"
+#include "pic32mx_config.h"
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
 /* GPIO settings used in the configport, readport, writeport, etc.
  *
  * General encoding:
@@ -128,7 +129,9 @@
 typedef FAR void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, void *arg, int result);
 
-/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA is selected */
+/* The following is used for sampling DMA registers when CONFIG DEBUG_DMA
+ * is selected.
+ */
 
 #ifdef CONFIG_DEBUG_DMA
 struct pic32mx_dmaglobalregs_s
@@ -204,25 +207,25 @@ void pic32mx_consoleinit(void);
 #  define pic32mx_consoleinit()
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: pic32mx_uartreset
  *
  * Description:
  *   Reset a UART.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
 void pic32mx_uartreset(uintptr_t uart_base);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: pic32mx_uartconfigure
  *
  * Description:
  *   Configure a UART as a RS-232 UART.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef HAVE_UART_DEVICE
 void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
@@ -334,7 +337,7 @@ void pic32mx_gpioirqinitialize(void);
  *   Zero (OK) is returned on success.  A negated error value is returned on
  *   any failure to indicate the nature of the failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_PIC32MX_GPIOIRQ
 int pic32mx_gpioattach(uint32_t pinset, unsigned int cn, xcpt_t handler,
@@ -385,7 +388,7 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
 #  define pic32mx_dumpgpio(p,m)
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: pic32mx_spibus_initialize
  *
  * Description:
@@ -397,7 +400,7 @@ void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
  * Returned Value:
  *   Valid SPI device structure reference on success; a NULL on failure
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 struct spi_dev_s;  /* Forward reference */
 FAR struct spi_dev_s *pic32mx_spibus_initialize(int port);
@@ -409,8 +412,8 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port);
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
  *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including pic32mx_spibus_initialize()) are provided by common PIC32MX logic.  To use
- *   this common SPI logic on your board:
+ *   including pic32mx_spibus_initialize()) are provided by common PIC32MX logic.
+ *   To use this common SPI logic on your board:
  *
  *   1. Provide logic in pic32mx_boardinitialize() to configure SPI/SSP chip select
  *      pins.
@@ -423,8 +426,8 @@ FAR struct spi_dev_s *pic32mx_spibus_initialize(int port);
  *      your board is configured.
  *   3. Add a call to pic32mx_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by pic32mx_spibus_initialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by pic32mx_spibus_initialize() may then be used to bind
+ *      the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *

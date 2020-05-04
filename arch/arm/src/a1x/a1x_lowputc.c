@@ -44,8 +44,8 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 #include "a1x_config.h"
 #include "hardware/a1x_uart.h"
@@ -191,14 +191,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: arm_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void arm_lowputc(char ch)
 {
 #if defined HAVE_UART_DEVICE && defined HAVE_SERIAL_CONSOLE
   /* Wait for the transmitter to be available */

@@ -46,7 +46,7 @@
 #include "sctlr.h"
 #include "mmu.h"
 #include "chip.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #ifndef CONFIG_PAGING
 
@@ -174,7 +174,7 @@
 #ifdef CONFIG_DEBUG_FEATURES
 	.macro	showprogress, code
 	mov		r0, #\code
-	bl		up_lowputc
+	bl		arm_lowputc
 	.endm
 #else
 	.macro	showprogress, code

@@ -1,6 +1,14 @@
-README
-^^^^^^
+APACHE NUTTX (INCUBATING)
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
+  o Introduction
+    - Incubation Status
+  o Community
+    - Getting Help
+    - Mailing Lists
+    - Issue Tracker
+    - Source Code
+    - Website Source Code
   o Environments
     - Installing Cygwin
     - Ubuntu Bash under Windows 10
@@ -37,6 +45,132 @@ README
     - Strange Path Problems
     - Window Native Toolchain Issues
   o Documentation
+
+INTRODUCTION
+^^^^^^^^^^^^
+
+  Apache NuttX (Incubating) is a real-time operating system (RTOS) with an
+  emphasis on standards compliance and small footprint.  Scalable from 8-bit
+  to 32-bit microcontroller environments, the primary governing standards in
+  NuttX are POSIX and ANSI standards. Additional standard APIs from Unix and
+  other common RTOSs (such as VxWorks) are adopted for functionality not
+  available under these standards, or for functionality that is not
+  appropriate for deeply-embedded environments (such as fork()).
+
+  Extensive documentation can be found on the project wiki:
+
+    https://cwiki.apache.org/NUTTX/Nuttx
+
+Incubation Status
+-----------------
+
+  Apache NuttX (Incubating) is an effort undergoing Incubation at The Apache
+  Software Foundation (ASF), sponsored by the Incubator.  For more on our
+  incubation effort, please see the file DISCLAIMER-WIP, in the same
+  directory as this README.
+
+  For brevity, the rest of this file will refer to it as Apache NuttX or
+  simply NuttX.
+
+COMMUNITY
+^^^^^^^^^
+
+  Every volunteer project obtains its strength from the people involved in
+  it.  We invite you to participate as much or as little as you choose.
+
+  We encourage you to:
+
+  - Use our project and provide feedback.
+  - Provide us with use-cases.
+  - Report bugs and submit patches.
+  - Contribute code or documentation.
+
+Getting Help
+------------
+
+  The best place to get help is the developer's mailing list.  Please see
+  the following section:
+
+Mailing Lists
+-------------
+
+  Get help using NuttX or contribute to the project on our mailing lists:
+
+  dev@nuttx.apache.org is for people who want to contribute code to NuttX.
+
+  - To subscribe, send an email to dev-subscribe@nuttx.apache.org.
+  - To unsubscribe, send an email to dev-unsubscribe@nuttx.apache.org.
+  - View the archives at:
+
+      https://www.mail-archive.com/dev@nuttx.apache.org/
+
+  commits@nuttx.apache.org is a read-only list that notifies subscribers
+  about commit messages and patches to NuttX.
+
+  - To subscribe, send an email to commits-subscribe@nuttx.apache.org.
+  - To unsubscribe, send an email to commits-unsubscribe@nuttx.apache.org.
+  - View the archives at:
+
+      https://www.mail-archive.com/commits@nuttx.apache.org/
+
+Issue Tracker
+-------------
+
+  Bug Reports:
+
+  Found bug? Send an email to the dev list dev@nuttx.apache.org.
+
+  Before submitting an issue, please:
+
+  - Verify that the bug does in fact exist.
+  - Search the mailing list archives to verify there is no existing issue
+    reporting the bug you've found.
+  - Consider tracking down the bug yourself in the NuttX source code and
+    submitting a patch along with your bug report.  This is a great time
+    saver for the NuttX developers and helps ensure the bug will be fixed
+    quickly.
+
+  Feature Requests:
+
+  Enhancement requests for new features are also welcome. The more concrete
+  and rational the request is, the greater the chance it will incorporated
+  into future releases.
+
+Source Code
+-----------
+
+  The project sources are in two Git repositories.  The core OS is in
+  incubator-nuttx and the apps repository is in incubator-nuttx-apps.  These
+  are housed in GitBox on ASF servers and also mirrored at GitHub.  These
+  are kept in sync, so you can use whichever option you prefer.
+
+  - NuttX core OS repository:
+
+      Primary:
+      https://gitbox.apache.org/repos/asf?p=incubator-nuttx.git
+
+      GitHub Mirror:
+      https://github.com/apache/incubator-nuttx
+
+  - Apps repository:
+
+      Primary:
+      https://gitbox.apache.org/repos/asf?p=incubator-nuttx-apps.git
+
+      GitHub Mirror:
+      https://github.com/apache/incubator-nuttx-apps
+
+Website Source Code
+-------------------
+
+  The project website sources are accessible via the website source code
+  repository which is also mirrored in GitHub:
+
+      Primary:
+      https://gitbox.apache.org/repos/asf?p=incubator-nuttx-website.git
+
+      GitHub Mirror:
+      https://github.com/apache/incubator-nuttx-website
 
 ENVIRONMENTS
 ^^^^^^^^^^^^
@@ -412,9 +546,9 @@ INSTALLATION
 ^^^^^^^^^^^^
 
   There are two ways to get NuttX:  You may download released, stable
-  tarballs from either the Bitbucket or Sourceforge download locations.
-  Or you may get NuttX by cloning the Bitbucket GIT repositories.  Let's
-  consider the released tarballs first:
+  tarballs from either the project website.  Or you may get NuttX by
+  cloning the GIT repositories.  Let's consider the released tarballs
+  first:
 
 Download and Unpack
 -------------------
@@ -426,7 +560,11 @@ Download and Unpack
   match the various instructions in the documentation and some scripts
   in the source tree.
 
-  Download locations:
+  Download location:
+
+    https://nuttx.apache.org/download/
+
+  Legacy download locations:
 
     https://bitbucket.org/nuttx/nuttx/downloads
     https://sourceforge.net/projects/nuttx/files/nuttx/
@@ -501,13 +639,17 @@ Downloading from Repositories
 
     The current NuttX du jour is available in from a GIT repository.  Here are
     instructions for cloning the core NuttX RTOS (corresponding to the nuttx
-    tarball discussed above)::
+    tarball discussed above):
 
-      git clone https://bitbucket.org/nuttx/nuttx.git nuttx
+      git clone https://gitbox.apache.org/repos/asf/incubator-nuttx.git nuttx
+      -or-
+      git clone https://github.com/apache/incubator-nuttx.git nuttx
 
     And the semi-optional apps/ application directory and be cloned like:
 
-      git clone https://bitbucket.org/nuttx/apps.git apps
+      git clone https://gitbox.apache.org/repos/asf/incubator-nuttx-apps.git apps
+      -or-
+      git clone https://github.com/apache/incubator-nuttx-apps.git apps
 
     That will give you the same directory structure like this:
 
@@ -550,7 +692,9 @@ Related Repositories
 
   These are standalone repositories:
 
-  * https://bitbucket.org/nuttx/apps
+  * https://gitbox.apache.org/repos/asf/incubator-nuttx-apps
+    or
+    https://github.com/apache/incubator-nuttx-apps.git
 
     This directory holds an optional package of applications and libraries
     can be used with the NuttX RTOS.  There is a README.txt file there that
@@ -862,9 +1006,11 @@ NuttX Configuration Tool
 
      The kconfig-frontends tools will not build in a native Windows
      environment directly "out-of-the-box".  For the Windows native
-     case, you should use the modified version of kconfig-frontends
+     case, you can use the modified version of kconfig-frontends
      that can be found at
-     http://uvc.de/posts/linux-kernel-configuration-tool-mconf-under-windows.html
+     http://uvc.de/posts/linux-kernel-configuration-tool-kconfig-under-windows.html
+     or a more recent port that can be found at
+     http://reclonelabs.com/more-kconfig-awesomeness-for-windows/.
 
   The basic configuration order is "bottom-up":
 
@@ -1178,11 +1324,11 @@ NuttX Configuration Tool under DOS
   Recent versions of NuttX support building NuttX from a native Windows
   console window (see "Native Windows Build" below).  But kconfig-frontends
   is a Linux tool.  At one time this was a problem for Windows users, but
-  now there is a specially modified version of the kconfig-frontends tools
-  that can be used:
-  http://uvc.de/posts/linux-kernel-configuration-tool-mconf-under-windows.html
+  now there are two specially modified versions of the kconfig-frontends
+  tools that can be used.  One can be found here:
+  http://uvc.de/posts/linux-kernel-configuration-tool-kconfig-under-windows.html
 
-  The configuration steps most recent versions of NuttX require the
+  The configuration steps of the most recent versions of NuttX require the
   kconfig-tweak tool that is not not available in the the above.  However,
   there has been an update to this Kconfig Windows tools that does include
   kconfig-tweak:  http://reclonelabs.com/more-kconfig-awesomeness-for-windows/

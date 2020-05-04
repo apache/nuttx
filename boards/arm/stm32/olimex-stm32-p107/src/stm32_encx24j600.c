@@ -49,8 +49,8 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32_spi.h"
 
 #include "olimex-stm32-p107.h"
@@ -175,10 +175,10 @@ static void up_disable(FAR const struct enc_lower_s *lower)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_netinitialize
+ * Name: arm_netinitialize
  ****************************************************************************/
 
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   FAR struct spi_dev_s *spi;
   int ret;

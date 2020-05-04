@@ -50,15 +50,15 @@
 #include <arch/board/board.h>
 
 #include "sched/sched.h"
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_sigdeliver
+ * Name: arm_sigdeliver
  *
  * Description:
  *   This is the a signal handling trampoline.  When a signal action was
@@ -67,7 +67,7 @@
  *
  ****************************************************************************/
 
-void up_sigdeliver(void)
+void arm_sigdeliver(void)
 {
   struct tcb_s  *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];
@@ -96,7 +96,7 @@ void up_sigdeliver(void)
 
   /* Save the return state on the stack. */
 
-  up_copyfullstate(regs, rtcb->xcp.regs);
+  arm_copyfullstate(regs, rtcb->xcp.regs);
 
 #ifdef CONFIG_SMP
   /* In the SMP case, up_schedule_sigaction(0) will have incremented
@@ -135,7 +135,7 @@ void up_sigdeliver(void)
    * errno that is needed by the user logic (it is probably EINTR).
    *
    * I would prefer that all interrupts are disabled when
-   * up_fullcontextrestore() is called, but that may not be necessary.
+   * arm_fullcontextrestore() is called, but that may not be necessary.
    */
 
   sinfo("Resuming\n");
@@ -194,5 +194,5 @@ void up_sigdeliver(void)
   /* Then restore the correct state for this thread of execution. */
 
   board_autoled_off(LED_SIGNAL);
-  up_fullcontextrestore(regs);
+  arm_fullcontextrestore(regs);
 }

@@ -53,7 +53,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "lc823450_sddrv_type.h"
 #include "lc823450_sddrv_if.h"
 #include "lc823450_dma.h"

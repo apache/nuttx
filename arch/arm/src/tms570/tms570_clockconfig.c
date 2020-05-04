@@ -48,7 +48,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "hardware/tms570_esm.h"
 #include "hardware/tms570_sys.h"

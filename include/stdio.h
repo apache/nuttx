@@ -172,7 +172,9 @@ void   setbuf(FAR FILE *stream, FAR char *buf);
 int    setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size);
 int    ungetc(int c, FAR FILE *stream);
 
-/* Operations on the stdout stream, buffers, paths, and the whole printf-family */
+/* Operations on the stdout stream, buffers, paths,
+ * and the whole printf-family
+ */
 
 void   perror(FAR const char *s);
 int    printf(FAR const IPTR char *fmt, ...);
@@ -213,10 +215,10 @@ FAR char *tempnam(FAR const char *dir, FAR const char *pfx);
 int       remove(FAR const char *path);
 
 /* Shell operations.  These are not actually implemented in the OS.  See
- * apps/system/open for implementation.
+ * apps/system/popen for implementation.
  */
 
-#if !defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__)
+#ifndef __KERNEL__
 FILE *popen(FAR const char *command, FAR const char *mode);
 int pclose(FILE *stream);
 #endif

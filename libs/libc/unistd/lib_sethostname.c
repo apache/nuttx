@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_gethostname.c
+ * libs/libc/unistd/lib_sethostname.c
  *
  *   Copyright (C) 2015 Stavros Polymenis. All rights reserved.
  *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
@@ -52,8 +52,7 @@
  * function only be called from user space is only via a kernel system call.
  */
 
-#if (!defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)) || \
-      defined(__KERNEL__)
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -111,7 +110,7 @@ int sethostname(FAR const char *name, size_t size)
   irqstate_t flags;
 
   /* Save the new host name, truncating to HOST_NAME_MAX if necessary.  This
-   * internal copy is always NUL terminated.  The hostname is global resource.
+   * internal copy is always NUL terminated. The hostname is global resource.
    * There is a microscopic possibility that it could be accessed while we
    * are setting it.
    */
@@ -124,4 +123,4 @@ int sethostname(FAR const char *name, size_t size)
   return 0;
 }
 
-#endif /* (!CONFIG_BUILD_PROTECTED && !CONFIG_BUILD_KERNEL) || __KERNEL__ */
+#endif /* CONFIG_BUILD_FLAT || __KERNEL__ */

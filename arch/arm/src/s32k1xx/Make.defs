@@ -37,17 +37,17 @@
 
 HEAD_ASRC  =
 CMN_ASRCS  =
-CMN_CSRCS  = up_allocateheap.c up_exit.c up_initialize.c up_interruptcontext.c
-CMN_CSRCS += up_lowputs.c up_mdelay.c up_modifyreg8.c up_modifyreg16.c
-CMN_CSRCS += up_modifyreg32.c up_puts.c up_releasestack.c up_stackframe.c
-CMN_CSRCS += up_task_start.c up_udelay.c up_usestack.c up_vfork.c
+CMN_CSRCS  = arm_allocateheap.c arm_exit.c arm_initialize.c arm_interruptcontext.c
+CMN_CSRCS += arm_lowputs.c arm_mdelay.c arm_modifyreg8.c arm_modifyreg16.c
+CMN_CSRCS += arm_modifyreg32.c arm_puts.c arm_releasestack.c arm_stackframe.c
+CMN_CSRCS += arm_task_start.c arm_udelay.c arm_usestack.c arm_vfork.c
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += up_checkstack.c
+CMN_CSRCS += arm_checkstack.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += up_pthread_start.c
+CMN_CSRCS += arm_pthread_start.c
 endif
 
 # Source files common to all S32K1xx chip families.

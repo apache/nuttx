@@ -47,8 +47,8 @@
 #include <arch/board/board.h>
 
 #include "nvic.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/xmc4_flash.h"
 
 #include "xmc4_clockconfig.h"
@@ -129,7 +129,7 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_lowputc(c)
+#  define showprogress(c) arm_lowputc(c)
 #else
 #  define showprogress(c)
 #endif

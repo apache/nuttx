@@ -91,8 +91,8 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 #include "str71x.h"
 
 #ifdef CONFIG_ENC28J60
@@ -204,10 +204,10 @@ static void up_disable(FAR const struct enc_lower_s *lower)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_netinitialize
+ * Name: arm_netinitialize
  ****************************************************************************/
 
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   FAR struct spi_dev_s *spi;
   uint16_t reg16;

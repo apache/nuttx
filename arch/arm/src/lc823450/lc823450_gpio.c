@@ -46,7 +46,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "lc823450_gpio.h"
 #include "lc823450_syscontrol.h"
 

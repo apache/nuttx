@@ -43,6 +43,7 @@
 #include <sched.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 
 #include "sched/sched.h"
 #include "signal/signal.h"
@@ -106,7 +107,7 @@ sigset_t nxsig_pendingset(FAR struct tcb_s *stcb)
   for (sigpend = (FAR sigpendq_t *)group->tg_sigpendingq.head;
        (sigpend); sigpend = sigpend->flink)
     {
-      sigaddset(&sigpendset, sigpend->info.si_signo);
+      nxsig_addset(&sigpendset, sigpend->info.si_signo);
     }
 
   leave_critical_section(flags);

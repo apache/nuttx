@@ -1,0 +1,38 @@
+From 5bc0ae0942fa9a4b9d321e31445457c31c888530 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Fri, 24 Apr 2020 01:44:31 +0800
+Subject: [PATCH 01/10] rpmsg: remove the address check in
+ rpmsg_send/rpmsg_trysend
+
+since rpmsg_send_offchannel_raw already do the same validation
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+---
+ lib/include/openamp/rpmsg.h | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index f2a6454..8401c38 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -146,8 +146,6 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
+ static inline int rpmsg_send(struct rpmsg_endpoint *ept, const void *data,
+ 			     int len)
+ {
+-	if (ept->dest_addr == RPMSG_ADDR_ANY)
+-		return RPMSG_ERR_ADDR;
+ 	return rpmsg_send_offchannel_raw(ept, ept->addr, ept->dest_addr, data,
+ 					 len, true);
+ }
+@@ -216,8 +214,6 @@ static inline int rpmsg_send_offchannel(struct rpmsg_endpoint *ept,
+ static inline int rpmsg_trysend(struct rpmsg_endpoint *ept, const void *data,
+ 				int len)
+ {
+-	if (ept->dest_addr == RPMSG_ADDR_ANY)
+-		return RPMSG_ERR_ADDR;
+ 	return rpmsg_send_offchannel_raw(ept, ept->addr, ept->dest_addr, data,
+ 					 len, false);
+ }
+-- 
+2.17.1
+

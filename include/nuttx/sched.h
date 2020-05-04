@@ -63,7 +63,7 @@
 #  define HAVE_GROUP_MEMBERS  1
 #endif
 
-/* In any event, we don't need group members if support for pthreads is disabled */
+/* We don't need group members if support for pthreads is disabled */
 
 #ifdef CONFIG_DISABLE_PTHREAD
 #  undef HAVE_GROUP_MEMBERS
@@ -141,7 +141,7 @@
  *
  * This is only important when compiling libraries (libc or libnx) that are
  * used both by the OS (libkc.a and libknx.a) or by the applications
- * (libuc.a and libunx.a).  In that case, the correct interface must be
+ * (libc.a and libnx.a).  In that case, the correct interface must be
  * used for the build context.
  *
  * REVISIT:  In the flat build, the same functions must be used both by
@@ -382,6 +382,21 @@ struct dspace_s
 };
 #endif
 
+/* struct stackinfo_s ***********************************************************/
+
+/* Used to report stack information */
+
+struct stackinfo_s
+{
+  size_t    adj_stack_size;              /* Stack size after adjustment         */
+                                         /* for hardware, processor, etc.       */
+                                         /* (for debug purposes only)           */
+  FAR void *stack_alloc_ptr;             /* Pointer to allocated stack          */
+                                         /* Needed to deallocate stack          */
+  FAR void *adj_stack_ptr;               /* Adjusted stack_alloc_ptr for HW     */
+                                         /* The initial stack pointer value     */
+};
+
 /* struct task_group_s **********************************************************/
 
 /* All threads created by pthread_create belong in the same task group (along
@@ -554,8 +569,7 @@ struct task_group_s
    * allocated using a user-space allocator.
    */
 
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+#ifdef CONFIG_MM_KERNEL_HEAP
   FAR struct streamlist *tg_streamlist;
 #else
   struct streamlist tg_streamlist;  /* Holds C buffered I/O info                */
@@ -651,7 +665,7 @@ struct tcb_s
                                          /* for hardware, processor, etc.       */
                                          /* (for debug purposes only)           */
   FAR void *stack_alloc_ptr;             /* Pointer to allocated stack          */
-                                         /* Need to deallocate stack            */
+                                         /* Needed to deallocate stack          */
   FAR void *adj_stack_ptr;               /* Adjusted stack_alloc_ptr for HW     */
                                          /* The initial stack pointer value     */
 
@@ -1223,6 +1237,28 @@ int nxsched_getaffinity(pid_t pid, size_t cpusetsize, FAR cpu_set_t *mask);
 int nxsched_setaffinity(pid_t pid, size_t cpusetsize,
                         FAR const cpu_set_t *mask);
 #endif
+
+/********************************************************************************
+ * Name: sched_get_stackinfo
+ *
+ * Description:
+ *   Report information about a thread's stack allocation.
+ *
+ * Input Parameters:
+ *   pid       - Identifies the thread to query.  Zero is interpreted as the
+ *               the calling thread
+ *   stackinfo - User-provided location to return the stack information.
+ *
+ * Returned Value:
+ *   Zero (OK) if successful.  Otherwise, a negated errno value is returned.
+ *
+ *     -ENOENT  Returned if pid does not refer to an active task
+ *     -EACCES  The calling thread does not have privileges to access the
+ *              stack of the thread associated with the pid.
+ *
+ ********************************************************************************/
+
+int sched_get_stackinfo(pid_t pid, FAR struct stackinfo_s *stackinfo);
 
 #undef EXTERN
 #if defined(__cplusplus)

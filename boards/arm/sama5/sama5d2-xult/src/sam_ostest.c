@@ -32,8 +32,8 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sama5d2-xult.h"
 
 /****************************************************************************
@@ -79,7 +79,7 @@ void arch_getfpu(FAR uint32_t *fpusave)
   /* Take a snapshot of the thread context right now */
 
   flags = enter_critical_section();
-  up_saveusercontext(g_saveregs);
+  arm_saveusercontext(g_saveregs);
 
   /* Return only the floating register values */
 

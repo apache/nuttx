@@ -1,0 +1,132 @@
+From 3ea08a8002de5e4992bed32567ecb05c887f31be Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Mon, 7 Jan 2019 02:15:42 +0800
+Subject: [PATCH 08/10] ns: acknowledge the received creation message
+
+the two phase handsake make the client could initiate the transfer
+immediately without the server side send any dummy message first.
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+---
+ lib/include/openamp/rpmsg.h        |  1 +
+ lib/include/openamp/rpmsg_virtio.h |  1 +
+ lib/rpmsg/rpmsg.c                  |  7 +++++--
+ lib/rpmsg/rpmsg_internal.h         |  4 ++--
+ lib/rpmsg/rpmsg_virtio.c           | 12 +++++++++---
+ 5 files changed, 18 insertions(+), 7 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index 0b46ee1..318acd1 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -127,6 +127,7 @@ struct rpmsg_device {
+ 	rpmsg_ns_bind_cb ns_bind_cb;
+ 	struct rpmsg_device_ops ops;
+ 	bool support_ns;
++	bool support_ack;
+ };
+ 
+ /**
+diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
+index 2209a48..e6e5fa2 100644
+--- a/lib/include/openamp/rpmsg_virtio.h
++++ open-amp/lib/include/openamp/rpmsg_virtio.h
+@@ -28,6 +28,7 @@ extern "C" {
+ 
+ /* The feature bitmap for virtio rpmsg */
+ #define VIRTIO_RPMSG_F_NS	0 /* RP supports name service notifications */
++#define VIRTIO_RPMSG_F_ACK	1 /* RP supports name service acknowledge */
+ 
+ /**
+  * struct rpmsg_virtio_shm_pool - shared memory pool used for rpmsg buffers
+diff --git a/lib/rpmsg/rpmsg.c open-amp/lib/rpmsg/rpmsg.c
+index 0a8de1b..0cc80da 100644
+--- a/lib/rpmsg/rpmsg.c
++++ open-amp/lib/rpmsg/rpmsg.c
+@@ -297,10 +297,13 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
+ 
+ 	rpmsg_init_ept(ept, rdev, name, addr, dest, cb, unbind_cb);
+ 
+-	if (rdev->support_ns && ept->dest_addr == RPMSG_ADDR_ANY) {
++	if (ept->name[0]) {
+ 		/* Send NS announcement to remote processor */
+ 		metal_mutex_release(&rdev->lock);
+-		status = rpmsg_send_ns_message(ept, RPMSG_NS_CREATE);
++		if (rdev->support_ns && ept->dest_addr == RPMSG_ADDR_ANY)
++			status = rpmsg_send_ns_message(ept, RPMSG_NS_CREATE);
++		else if (rdev->support_ack && ept->dest_addr != RPMSG_ADDR_ANY)
++			status = rpmsg_send_ns_message(ept, RPMSG_NS_CREATE_ACK);
+ 		metal_mutex_acquire(&rdev->lock);
+ 		if (status)
+ 			rpmsg_unregister_endpoint(ept);
+diff --git a/lib/rpmsg/rpmsg_internal.h open-amp/lib/rpmsg/rpmsg_internal.h
+index 3db6b24..d513a56 100644
+--- a/lib/rpmsg/rpmsg_internal.h
++++ open-amp/lib/rpmsg/rpmsg_internal.h
+@@ -44,12 +44,12 @@ extern "C" {
+  *
+  * @RPMSG_NS_CREATE: a new remote service was just created
+  * @RPMSG_NS_DESTROY: a known remote service was just destroyed
+- * @RPMSG_NS_CREATE_WITH_ACK: a new remote service was just created waiting
+- *                            acknowledgment.
++ * @RPMSG_NS_CREATE_ACK: acknowledge the previous creation message
+  */
+ enum rpmsg_ns_flags {
+ 	RPMSG_NS_CREATE = 0,
+ 	RPMSG_NS_DESTROY = 1,
++	RPMSG_NS_CREATE_ACK = 2,
+ };
+ 
+ /**
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 195189d..9988a1e 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -586,13 +586,13 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 	metal_mutex_acquire(&rdev->lock);
+ 	_ept = rpmsg_get_endpoint(rdev, name, RPMSG_ADDR_ANY, dest);
+ 
+-	if (ns_msg->flags & RPMSG_NS_DESTROY) {
++	if (ns_msg->flags == RPMSG_NS_DESTROY) {
+ 		if (_ept)
+ 			_ept->dest_addr = RPMSG_ADDR_ANY;
+ 		metal_mutex_release(&rdev->lock);
+ 		if (_ept && _ept->ns_unbind_cb)
+ 			_ept->ns_unbind_cb(ept);
+-	} else {
++	} else if (ns_msg->flags == RPMSG_NS_CREATE) {
+ 		if (!_ept) {
+ 			/*
+ 			 * send callback to application, that can
+@@ -607,6 +607,11 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 			_ept->dest_addr = dest;
+ 			metal_mutex_release(&rdev->lock);
+ 		}
++	} else { /* RPMSG_NS_CREATE_ACK */
++		/* save the received destination address */
++		if (_ept)
++			_ept->dest_addr = dest;
++		metal_mutex_release(&rdev->lock);
+ 	}
+ 
+ 	return RPMSG_SUCCESS;
+@@ -659,6 +664,7 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ #endif /*!VIRTIO_MASTER_ONLY*/
+ 	vdev->features = rpmsg_virtio_get_features(rvdev);
+ 	rdev->support_ns = !!(vdev->features & (1 << VIRTIO_RPMSG_F_NS));
++	rdev->support_ack = !!(vdev->features & (1 << VIRTIO_RPMSG_F_ACK));
+ 
+ #ifndef VIRTIO_SLAVE_ONLY
+ 	if (role == RPMSG_MASTER) {
+@@ -754,7 +760,7 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ 	 * Create name service announcement endpoint if device supports name
+ 	 * service announcement feature.
+ 	 */
+-	if (rdev->support_ns) {
++	if (rdev->support_ns || rdev->support_ack) {
+ 		rpmsg_init_ept(&rdev->ns_ept, rdev, "NS",
+ 			       RPMSG_NS_EPT_ADDR, RPMSG_NS_EPT_ADDR,
+ 			       rpmsg_virtio_ns_callback, NULL);
+-- 
+2.17.1
+

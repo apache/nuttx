@@ -43,7 +43,7 @@
 
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #ifdef CONFIG_ARCH_FPU
 
@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copyarmstate
+ * Name: arm_copyarmstate
  *
  * Description:
  *    Copy the ARM portion of the register save area (omitting the floating
@@ -60,7 +60,7 @@
  *
  ****************************************************************************/
 
-void up_copyarmstate(uint32_t *dest, uint32_t *src)
+void arm_copyarmstate(uint32_t *dest, uint32_t *src)
 {
   int i;
 
@@ -75,7 +75,7 @@ void up_copyarmstate(uint32_t *dest, uint32_t *src)
        * registers at indices ARM_CONTEXT_REGS through (XCPTCONTEXT_REGS-1)
        */
 
-      up_savefpu(dest);
+      arm_savefpu(dest);
 
       /* Then copy all of the ARM registers (omitting the floating point
        * registers).  Indices: 0 through (ARM_CONTEXT_REGS-1).

@@ -47,8 +47,8 @@
 #include <arch/irq.h>
 
 #include "nvic.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "tiva_enablepwr.h"
 #include "tiva_enableclks.h"
@@ -110,7 +110,7 @@ void cc13xx_trim_device(void);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_lowputc(c)
+#  define showprogress(c) arm_lowputc(c)
 #else
 #  define showprogress(c)
 #endif
@@ -266,7 +266,7 @@ void __start(void)
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization */
 
-  up_earlyserialinit();
+  arm_earlyserialinit();
   showprogress('C');
 #endif
 

@@ -64,12 +64,10 @@ USERDEPDIRS :=
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 USERDEPDIRS += $(APPDIR)
-else
-ifneq ($(CONFIG_BUILD_KERNEL),y)
+else ifneq ($(CONFIG_BUILD_KERNEL),y)
 KERNDEPDIRS += $(APPDIR)
 else
 CLEANDIRS += $(APPDIR)
-endif
 endif
 
 KERNDEPDIRS += sched drivers boards $(ARCH_SRC)

@@ -99,13 +99,13 @@ function checkzero () {
 #
 
 rm -f ld-locked.inc
-echo "EXTERN(up_vectorswi)" >>ld-locked.inc
-echo "EXTERN(up_vectordata)" >>ld-locked.inc
-echo "EXTERN(up_vectorprefetch)" >>ld-locked.inc
-echo "EXTERN(up_vectorundefinsn)" >>ld-locked.inc
-echo "EXTERN(up_vectorfiq)" >>ld-locked.inc
-echo "EXTERN(up_vectorirq)" >>ld-locked.inc
-echo "EXTERN(up_vectoraddrexcptn)" >>ld-locked.inc
+echo "EXTERN(arm_vectorswi)" >>ld-locked.inc
+echo "EXTERN(arm_vectordata)" >>ld-locked.inc
+echo "EXTERN(arm_vectorprefetch)" >>ld-locked.inc
+echo "EXTERN(arm_vectorundefinsn)" >>ld-locked.inc
+echo "EXTERN(arm_vectorfiq)" >>ld-locked.inc
+echo "EXTERN(arm_vectorirq)" >>ld-locked.inc
+echo "EXTERN(arm_vectoraddrexcptn)" >>ld-locked.inc
 
 #
 # These are the initialization entry points of all device drivers that
@@ -119,14 +119,14 @@ echo "EXTERN(up_timer_initialize)" >>ld-locked.inc
 
 answer=$(checkconfig CONFIG_LPC31_UART)
 if [ "$answer" = y ]; then
-	echo "EXTERN(up_earlyserialinit)" >>ld-locked.inc
+	echo "EXTERN(arm_earlyserialinit)" >>ld-locked.inc
 fi
 
 # xyz_i2cbus_initialize -- Not conditioned on anything
 
 answer=$(checkconfig CONFIG_USBDEV)
 if [ "$answer" = y ]; then
-	echo "EXTERN(up_usbinitialize)" >>ld-locked.inc
+	echo "EXTERN(arm_usbinitialize)" >>ld-locked.inc
 fi
 
 ############################################################################

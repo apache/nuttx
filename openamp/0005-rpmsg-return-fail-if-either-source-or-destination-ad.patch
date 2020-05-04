@@ -1,0 +1,45 @@
+From 3ea6f30819b25281ec80c68b3abd779981311a77 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Fri, 24 Apr 2020 02:22:15 +0800
+Subject: [PATCH 05/10] rpmsg: return fail if either source or destination
+ address is zero
+
+to help detect rpmsg_send is called before the endpoint
+initialization or after the endpoint uninitialization
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+---
+ lib/include/openamp/rpmsg.h | 3 +--
+ lib/rpmsg/rpmsg.c           | 2 +-
+ 2 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index 7000453..1279ea2 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -146,8 +146,7 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
+  */
+ static inline unsigned int is_rpmsg_ept_ready(struct rpmsg_endpoint *ept)
+ {
+-	return (ept->dest_addr != RPMSG_ADDR_ANY) &&
+-		(ept->addr != RPMSG_ADDR_ANY);
++	return ept && ept->rdev && ept->dest_addr && ept->dest_addr != RPMSG_ADDR_ANY;
+ }
+ 
+ /**
+diff --git a/lib/rpmsg/rpmsg.c open-amp/lib/rpmsg/rpmsg.c
+index dcc39c1..9da38a1 100644
+--- a/lib/rpmsg/rpmsg.c
++++ open-amp/lib/rpmsg/rpmsg.c
+@@ -115,7 +115,7 @@ int rpmsg_send_offchannel_raw(struct rpmsg_endpoint *ept, uint32_t src,
+ {
+ 	struct rpmsg_device *rdev;
+ 
+-	if (!ept || !ept->rdev || !data || dst == RPMSG_ADDR_ANY)
++	if (!ept || !ept->rdev || !data || !dst || dst == RPMSG_ADDR_ANY)
+ 		return RPMSG_ERR_PARAM;
+ 
+ 	rdev = ept->rdev;
+-- 
+2.17.1
+

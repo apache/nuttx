@@ -47,7 +47,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/imxrt_ccm.h"
 #include "imxrt_periphclks.h"
 #include "imxrt_iomuxc.h"

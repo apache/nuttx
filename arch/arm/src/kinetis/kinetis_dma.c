@@ -52,8 +52,8 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "kinetis_config.h"
 #include "chip.h"
@@ -160,7 +160,7 @@ size_t kinetis_dmaresidual(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-void weak_function up_dma_initialize(void)
+void weak_function arm_dma_initialize(void)
 {
   int i;
   uint32_t regval;

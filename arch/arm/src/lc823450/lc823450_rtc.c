@@ -56,7 +56,7 @@
 #include <string.h>
 
 #include "lc823450_syscontrol.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "clock/clock.h"
 
 /****************************************************************************

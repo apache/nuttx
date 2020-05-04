@@ -160,7 +160,7 @@ ifeq ($(CONFIG_ARMV7A_TOOLCHAIN),DEVKITARM)
   endif
 endif
 
-# Generic GNU EABI toolchain on OS X, Linux or any typical Posix system
+# Generic GNU EABI toolchain on macOS, Linux or any typical Posix system
 
 ifeq ($(CONFIG_ARMV7A_TOOLCHAIN),GNU_EABIL)
   CROSSDEV ?= $(TARGET_ARCH)-none-eabi-

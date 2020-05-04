@@ -94,9 +94,9 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
          * or equal to the third argument, arg, taken as an integer of type
          * int. The new file descriptor shall refer to the same open file
          * description as the original file descriptor, and shall share any
-         * locks.  The FD_CLOEXEC flag associated  with the new file descriptor
-         * shall be cleared to keep the file open across calls to one of the
-         * exec functions.
+         * locks.  The FD_CLOEXEC flag associated  with the new file
+         * descriptor shall be cleared to keep the file open across calls to
+         * one of the exec functions.
          */
 
         {
@@ -107,10 +107,10 @@ int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
         break;
 
       case F_GETFD:
-        /* Get the file descriptor flags defined in <fcntl.h> that are associated
-         * with the file descriptor fd.  File descriptor flags are associated
-         * with a single file descriptor and do not affect other file descriptors
-         * that refer to the same file.
+        /* Get the file descriptor flags defined in <fcntl.h> that are
+         * associated with the file descriptor fd.  File descriptor flags are
+         * associated with a single file descriptor and do not affect other
+         * file descriptors that refer to the same file.
          */
 
         {
@@ -281,41 +281,33 @@ int file_fcntl(FAR struct file *filep, int cmd, ...)
 }
 
 /****************************************************************************
- * Name: fcntl
+ * Name: nx_fcntl and nx_vfcntl
  *
  * Description:
- *   fcntl() will perform the operation specified by 'cmd' on an open file.
+ *   nx_fcntl() is similar to the standard 'fcntl' interface except that is
+ *   not a cancellation point and it does not modify the errno variable.
  *
- * Input Parameters:
- *   fd  - File descriptor of the open file
- *   cmd - Identifies the operation to be performed.  Command specific
- *         arguments may follow.
+ *   nx_vfcntl() is identical except that it accepts a va_list as an argument
+ *   versus taking a variable length list of arguments.
+ *
+ *   nx_fcntl() and nx_vfcntl are internal NuttX interface and should not be
+ *   called from applications.
  *
  * Returned Value:
- *   The returned value depends on the nature of the command but for all
- *   commands the return value of -1 (ERROR) indicates that an error has
- *   occurred and, in this case, the errno variable will be set
- *   appropriately
+ *   Returns a non-negative number on success;  A negated errno value is
+ *   returned on any failure (see comments fcntl() for a list of appropriate
+ *   errno values).
  *
  ****************************************************************************/
 
-int fcntl(int fd, int cmd, ...)
+int nx_vfcntl(int fd, int cmd, va_list ap)
 {
   FAR struct file *filep;
-  va_list ap;
   int ret;
-
-  /* fcntl() is a cancellation point */
-
-  enter_cancellation_point();
-
-  /* Setup to access the variable argument list */
-
-  va_start(ap, cmd);
 
   /* Did we get a valid file descriptor? */
 
-  if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
+  if (fd < CONFIG_NFILE_DESCRIPTORS)
     {
       /* Get the file structure corresponding to the file descriptor. */
 
@@ -336,7 +328,7 @@ int fcntl(int fd, int cmd, ...)
       /* No... check for operations on a socket descriptor */
 
 #ifdef CONFIG_NET
-      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
+      if (fd < (CONFIG_NFILE_DESCRIPTORS + CONFIG_NSOCKET_DESCRIPTORS))
         {
           /* Yes.. defer socket descriptor operations to net_vfcntl(). The
            * errno is not set on failures.
@@ -352,6 +344,66 @@ int fcntl(int fd, int cmd, ...)
           ret = -EBADF;
         }
     }
+
+  return ret;
+}
+
+int nx_fcntl(int fd, int cmd, ...)
+{
+  va_list ap;
+  int ret;
+
+  /* Setup to access the variable argument list */
+
+  va_start(ap, cmd);
+
+  /* Let nx_vfcntl() do the real work.  The errno is not set on
+   * failures.
+   */
+
+  ret = nx_vfcntl(fd, cmd, ap);
+
+  va_end(ap);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: fcntl
+ *
+ * Description:
+ *   fcntl() will perform the operation specified by 'cmd' on an open file.
+ *
+ * Input Parameters:
+ *   fd  - File descriptor of the open file
+ *   cmd - Identifies the operation to be performed.  Command specific
+ *         arguments may follow.
+ *
+ * Returned Value:
+ *   The returned value depends on the nature of the command but for all
+ *   commands the return value of -1 (ERROR) indicates that an error has
+ *   occurred and, in this case, the errno variable will be set
+ *   appropriately
+ *
+ ****************************************************************************/
+
+int fcntl(int fd, int cmd, ...)
+{
+  va_list ap;
+  int ret;
+
+  /* fcntl() is a cancellation point */
+
+  enter_cancellation_point();
+
+  /* Setup to access the variable argument list */
+
+  va_start(ap, cmd);
+
+  /* Let nx_vfcntl() do the real work.  The errno is not set on
+   * failures.
+   */
+
+  ret = nx_vfcntl(fd, cmd, ap);
 
   va_end(ap);
 

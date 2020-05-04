@@ -56,9 +56,9 @@
 #include <nuttx/arch.h>
 #include <arch/stm32l4/chip.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "sched/sched.h"
 #include "stm32l4_dma.h"
 
@@ -957,7 +957,7 @@ static void stm32l4_dmamux_dump(DMA_MUX dmamux, uint8_t channel,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dma_initialize
+ * Name: arm_dma_initialize
  *
  * Description:
  *   Initialize the DMA subsystem (DMA1, DMA2)
@@ -967,7 +967,7 @@ static void stm32l4_dmamux_dump(DMA_MUX dmamux, uint8_t channel,
  *
  ****************************************************************************/
 
-void weak_function up_dma_initialize(void)
+void weak_function arm_dma_initialize(void)
 {
   DMA_CHANNEL dmachan;
   uint8_t controller;

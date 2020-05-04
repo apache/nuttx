@@ -70,13 +70,13 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Function: up_netinitialize
+ * Function: arm_netinitialize
  *
  * Description:
  *   Initialize the first network interface.  If there are more than one
  *   interface in the chip, then board-specific logic will have to provide
  *   this function to determine which, if any, Ethernet controllers should
- *   be initialized.  Also prototyped in up_internal.h.
+ *   be initialized.  Also prototyped in arm_internal.h.
  *
  * Input Parameters:
  *   None
@@ -89,7 +89,7 @@ extern "C"
  *
  ************************************************************************************/
 
-void up_netinitialize(void);
+void arm_netinitialize(void);
 
 /************************************************************************************
  * Function: imxrt_phy_boardinitialize

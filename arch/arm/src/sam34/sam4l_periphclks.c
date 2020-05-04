@@ -44,9 +44,9 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "hardware/sam4l_pm.h"
 
 #include "sam4l_periphclks.h"

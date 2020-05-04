@@ -51,7 +51,7 @@
 #include <nuttx/timers/watchdog.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -354,10 +354,10 @@ static int wdt_close(struct file *filep)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_wdtinit
+ * Name: arm_wdtinit
  ****************************************************************************/
 
-int up_wdtinit(void)
+int arm_wdtinit(void)
 {
   int ret;
 

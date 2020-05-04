@@ -62,8 +62,8 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "lpc31_usbotg.h"
 #include "lpc31_evntrtr.h"
@@ -2461,7 +2461,7 @@ static int lpc31_pullup(struct usbdev_s *dev, bool enable)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_usbinitialize
+ * Name: arm_usbinitialize
  *
  * Description:
  *   Initialize USB hardware.
@@ -2475,7 +2475,7 @@ static int lpc31_pullup(struct usbdev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-void up_usbinitialize(void)
+void arm_usbinitialize(void)
 {
   struct lpc31_usbdev_s *priv = &g_usbdev;
   int i;
@@ -2595,14 +2595,14 @@ void up_usbinitialize(void)
   return;
 
 errout:
-  up_usbuninitialize();
+  arm_usbuninitialize();
 }
 
 /****************************************************************************
- * Name: up_usbuninitialize
+ * Name: arm_usbuninitialize
  ****************************************************************************/
 
-void up_usbuninitialize(void)
+void arm_usbuninitialize(void)
 {
   struct lpc31_usbdev_s *priv = &g_usbdev;
   irqstate_t flags;

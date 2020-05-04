@@ -69,8 +69,8 @@
 #endif
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -2426,7 +2426,7 @@ static void c5471_macassign(struct c5471_driver_s *priv)
 
 /* Initialize the DM90x0 chip and driver */
 
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   /* Attach the IRQ to the driver */
 

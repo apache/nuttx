@@ -47,8 +47,8 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "group/group.h"
 #include "gic.h"
@@ -108,7 +108,7 @@ static inline uint32_t *_arm_doirq(int irq, uint32_t *regs)
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      up_restorefpu((uint32_t *)CURRENT_REGS);
+      arm_restorefpu((uint32_t *)CURRENT_REGS);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

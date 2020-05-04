@@ -49,7 +49,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "lpc31_cgu.h"
 
 /**********************************************************************************************

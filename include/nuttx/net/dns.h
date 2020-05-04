@@ -136,7 +136,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
- /* The DNS message header */
+/* The DNS message header */
 
 struct dns_header_s
 {
@@ -208,20 +208,20 @@ extern "C"
 int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen);
 
 /****************************************************************************
- * Name: dns_del_nameserver
+ * Name: dns_default_nameserver
  *
  * Description:
- *   Remove a DNS server so it is no longer available for further use.
+ *   Reset the resolver to use only the default DNS server, if any.
  *
  ****************************************************************************/
-/* REVISIT: Not implemented */
+
+int dns_default_nameserver(void);
 
 /****************************************************************************
  * Name: dns_foreach_nameserver
  *
  * Description:
- *   Traverse each nameserver entry in the resolv.conf file and perform the
- *   the provided callback.
+ *   Traverse each nameserver entry and perform the provided callback.
  *
  ****************************************************************************/
 

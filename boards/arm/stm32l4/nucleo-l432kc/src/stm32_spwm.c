@@ -52,7 +52,7 @@
 #include <arch/chip/chip.h>
 #include <arch/board/board.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "ram_vectors.h"
 
 #include "stm32l4_pwm.h"
@@ -154,16 +154,16 @@ struct spwm_s
 #ifdef CONFIG_NUCLEOL432KC_SPWM_USE_TIM1
   FAR struct stm32l4_tim_dev_s *tim;
 #endif
-  float waveform[SAMPLES_NUM];        /* Waveform samples */
-  float phase_step;                   /* Waveform phase step */
-  float waveform_freq;                /* Waveform frequency */
-  uint16_t cmp[SAMPLES_NUM];          /* PWM TIM compare table */
-  uint16_t per;                       /* PWM TIM period */
-  uint16_t samples;                   /* Modulation waveform samples num */
-  uint16_t phase_shift[PHASES_NUM];   /* Phase offset */
+  float waveform[SAMPLES_NUM];               /* Waveform samples */
+  float phase_step;                          /* Waveform phase step */
+  float waveform_freq;                       /* Waveform frequency */
+  uint16_t cmp[SAMPLES_NUM];                 /* PWM TIM compare table */
+  uint16_t per;                              /* PWM TIM period */
+  uint16_t samples;                          /* Modulation waveform samples num */
+  uint16_t phase_shift[PHASES_NUM];          /* Phase offset */
   volatile uint16_t sample_now[PHASES_NUM];  /* Current sample number for
                                               * phase */
-  uint8_t phases;                     /* Number of PWM phases */
+  uint8_t phases;                            /* Number of PWM phases */
 };
 
 /****************************************************************************
@@ -395,10 +395,10 @@ static int spwm_tim6_setup(FAR struct spwm_s *spwm)
 
   /* Attach TIM6 ram vector */
 
-  ret = up_ramvec_attach(STM32L4_IRQ_TIM6, tim6_handler);
+  ret = arm_ramvec_attach(STM32L4_IRQ_TIM6, tim6_handler);
   if (ret < 0)
     {
-      printf("ERROR: up_ramvec_attach failed: %d\n", ret);
+      printf("ERROR: arm_ramvec_attach failed: %d\n", ret);
       ret = -1;
       goto errout;
     }

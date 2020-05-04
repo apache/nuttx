@@ -48,47 +48,35 @@
 
 /* How can we access the errno variable? */
 
-#if !defined(CONFIG_BUILD_PROTECTED) && !defined(CONFIG_BUILD_KERNEL)
-   /* Flat build */
+#ifdef CONFIG_BUILD_FLAT
+  /* Flat build */
 
 #  if defined(CONFIG_LIB_SYSCALL) && !defined(__KERNEL__)
-   /* We still might be using system calls in user code.  If so, then
-    * user code will have no direct access to the errno variable.
-    */
+  /* We still might be using system calls in user code.  If so, then
+   * user code will have no direct access to the errno variable.
+   */
 
 #    undef __DIRECT_ERRNO_ACCESS
 
 #   else
-   /* Flat build with no system calls OR internal kernel logic... There
-    * is direct access.
-    */
+  /* Flat build with no system calls OR internal kernel logic... There
+   * is direct access.
+   */
 
 #    define __DIRECT_ERRNO_ACCESS 1
 #  endif
 
-#elif defined(CONFIG_BUILD_PROTECTED)
+#else
 #  if defined(__KERNEL__)
-   /* Kernel portion of protected build.  Kernel code has direct access */
+  /* Kernel portion of protected/kernel build. Kernel code has direct
+   * access
+   */
 
 #    define __DIRECT_ERRNO_ACCESS 1
 
 #  else
-   /* User portion of protected build.  Application code has only indirect
-    * access
-    */
-
-#    undef __DIRECT_ERRNO_ACCESS
-#  endif
-
-#elif defined(CONFIG_BUILD_KERNEL) && !defined(__KERNEL__)
-#  if defined(__KERNEL__)
-   /* Kernel build.  Kernel code has direct access */
-
-#    define __DIRECT_ERRNO_ACCESS 1
-
-#  else
-   /* User libraries for the kernel.  Only indirect access from user
-    * libraries
+  /* User portion of protected/kernel build. Application code has only
+   * indirect access
    */
 
 #    undef __DIRECT_ERRNO_ACCESS
@@ -103,9 +91,9 @@
 
 #ifdef __DIRECT_ERRNO_ACCESS
 
-#  define errno *get_errno_ptr()
+#  define errno *__errno()
 #  define set_errno(e) do { errno = (int)(e); } while (0)
-#  define get_errno(e) errno
+#  define get_errno() errno
 
 #else
 
@@ -418,7 +406,7 @@ extern "C"
  * either as macros or via syscalls.
  */
 
-FAR int *get_errno_ptr(void);
+FAR int *__errno(void);
 
 #ifndef __DIRECT_ERRNO_ACCESS
 void set_errno(int errcode);

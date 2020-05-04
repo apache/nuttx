@@ -41,7 +41,7 @@
 #include <arch/board/board.h>
 
 #include "arm.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 /****************************************************************************
  * {re-processor Definitions

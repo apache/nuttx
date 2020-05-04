@@ -118,7 +118,7 @@ BLITDIR		= fb
 endif
 
 all:	$(GEN_CSRCS)
-.PHONY : clean distclean
+.PHONY : distclean
 
 $(SETP_CSRC) : $(BLITDIR)/nxglib_setpixel.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
@@ -162,11 +162,7 @@ ifneq ($(NXGLIB_BITSPERPIXEL),)
 	$(Q) rm -f  $(RCOPY_TMP)
 endif
 
-clean:
-	$(call DELFILE, *.i)
-	$(call CLEAN)
-
-distclean: clean
+distclean:
 	$(call DELFILE, nxglib_setpixel_*bpp.c)
 	$(call DELFILE, nxglib_fillrectangle_*bpp.c)
 	$(call DELFILE, nxglib_getrectangle_*bpp.c)

@@ -458,22 +458,6 @@
 
 #endif /* CONFIG_STM32_LTDC */
 
-/* Configuration specific to high priority interrupts example:
- *   - TIM1 CC1 trigger for ADC if DMA transfer and TIM1 PWM
- *   - ADC DMA transfer on DMA1_CH1
- */
-
-#ifdef CONFIG_STM32F429I_DISCO_HIGHPRI
-
-#if defined(CONFIG_STM32_TIM1_PWM) && defined(CONFIG_STM32_ADC1_DMA)
-
-/* TIM1 - ADC trigger */
-
-#define ADC1_EXTSEL_VALUE ADC1_EXTSEL_T1CC1
-
-#endif /* CONFIG_STM32_TIM1_PWM */
-#endif /* CONFIG_STM32F429I_DISCO_HIGHPRI */
-
 /* DMA ******************************************************************************/
 
 #define ADC1_DMA_CHAN DMAMAP_ADC1_1

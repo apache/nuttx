@@ -48,7 +48,7 @@
 #include <nuttx/wireless/nrf24l01.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "stm32.h"
 #include "nucleo-l073rz.h"

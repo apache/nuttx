@@ -545,8 +545,6 @@ void nx_start(void)
 
   nxsem_initialize();
 
-#if defined(MM_KERNEL_USRHEAP_INIT) || defined(CONFIG_MM_KERNEL_HEAP) || \
-    defined(CONFIG_MM_PGALLOC)
   /* Initialize the memory manager */
 
     {
@@ -571,10 +569,6 @@ void nx_start(void)
       kmm_initialize(heap_start, heap_size);
 #endif
 
-#ifdef CONFIG_ARCH_USE_MODULE_TEXT
-    up_module_text_init();
-#endif
-
 #ifdef CONFIG_MM_PGALLOC
       /* If there is a page allocator in the configuration, then get the page
        * heap information from the platform-specific code and configure the
@@ -585,6 +579,9 @@ void nx_start(void)
       mm_pginitialize(heap_start, heap_size);
 #endif
     }
+
+#ifdef CONFIG_ARCH_USE_MODULE_TEXT
+  up_module_text_init();
 #endif
 
 #ifdef CONFIG_MM_IOB

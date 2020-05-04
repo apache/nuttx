@@ -570,8 +570,7 @@ static inline void nxtask_flushstreams(FAR struct tcb_s *tcb)
 
   if (group && group->tg_nmembers == 1)
     {
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+#ifdef CONFIG_MM_KERNEL_HEAP
       lib_flushall(tcb->group->tg_streamlist);
 #else
       lib_flushall(&tcb->group->tg_streamlist);

@@ -1,4 +1,4 @@
-The file up_lwl_console.c implements a 'Lightweight Link' protocol between
+The file arm_lwl_console.c implements a 'Lightweight Link' protocol between
 a target and debugger for use when you need a console but the target doesn't
 have a spare serial port or other available resource. This implements a
 new console type which uses two words of memory for data exchange.

@@ -1,0 +1,128 @@
+From d58fa6ab189fded40786e7d025036a1c16c773c4 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Fri, 24 Apr 2020 03:40:56 +0800
+Subject: [PATCH 02/10] rpmsg: merge rpmsg_register_endpoint into
+ rpmsg_init_ept
+
+so the service which use preserved address could call rpmsg_init_ept
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+---
+ lib/include/openamp/rpmsg.h | 19 +++++++------------
+ lib/rpmsg/rpmsg.c           | 17 +++++++++++++----
+ lib/rpmsg/rpmsg_internal.h  |  2 --
+ lib/rpmsg/rpmsg_virtio.c    |  3 +--
+ 4 files changed, 21 insertions(+), 20 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index 8401c38..a08f9d3 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -271,6 +271,7 @@ static inline int rpmsg_trysend_offchannel(struct rpmsg_endpoint *ept,
+  * remoteproc address, endpoint callback, and destroy endpoint callback.
+  *
+  * @ept: pointer to rpmsg endpoint
++ * @rdev: pointer to the rpmsg device
+  * @name: service name associated to the endpoint
+  * @src: local address of the endpoint
+  * @dest: target address of the endpoint
+@@ -278,18 +279,12 @@ static inline int rpmsg_trysend_offchannel(struct rpmsg_endpoint *ept,
+  * @ns_unbind_cb: end point service unbind callback, called when remote ept is
+  *                destroyed.
+  */
+-static inline void rpmsg_init_ept(struct rpmsg_endpoint *ept,
+-				  const char *name,
+-				  uint32_t src, uint32_t dest,
+-				  rpmsg_ept_cb cb,
+-				  rpmsg_ns_unbind_cb ns_unbind_cb)
+-{
+-	strncpy(ept->name, name ? name : "", sizeof(ept->name));
+-	ept->addr = src;
+-	ept->dest_addr = dest;
+-	ept->cb = cb;
+-	ept->ns_unbind_cb = ns_unbind_cb;
+-}
++void rpmsg_init_ept(struct rpmsg_endpoint *ept,
++		    struct rpmsg_device *rdev,
++		    const char *name,
++		    uint32_t src, uint32_t dest,
++		    rpmsg_ept_cb cb,
++		    rpmsg_ns_unbind_cb ns_unbind_cb);
+ 
+ /**
+  * rpmsg_create_ept - create rpmsg endpoint and register it to rpmsg device
+diff --git a/lib/rpmsg/rpmsg.c open-amp/lib/rpmsg/rpmsg.c
+index 5b9c735..eee1c28 100644
+--- a/lib/rpmsg/rpmsg.c
++++ open-amp/lib/rpmsg/rpmsg.c
+@@ -182,6 +182,7 @@ static void rpmsg_unregister_endpoint(struct rpmsg_endpoint *ept)
+ 		return;
+ 
+ 	rdev = ept->rdev;
++	ept->rdev = NULL;
+ 
+ 	if (ept->addr != RPMSG_ADDR_ANY)
+ 		rpmsg_release_address(rdev->bitmap, RPMSG_ADDR_BMP_SIZE,
+@@ -189,9 +190,18 @@ static void rpmsg_unregister_endpoint(struct rpmsg_endpoint *ept)
+ 	metal_list_del(&ept->node);
+ }
+ 
+-void rpmsg_register_endpoint(struct rpmsg_device *rdev,
+-			     struct rpmsg_endpoint *ept)
++void rpmsg_init_ept(struct rpmsg_endpoint *ept,
++		    struct rpmsg_device *rdev,
++		    const char *name,
++		    uint32_t src, uint32_t dest,
++		    rpmsg_ept_cb cb,
++		    rpmsg_ns_unbind_cb ns_unbind_cb)
+ {
++	strncpy(ept->name, name ? name : "", sizeof(ept->name));
++	ept->addr = src;
++	ept->dest_addr = dest;
++	ept->cb = cb;
++	ept->ns_unbind_cb = ns_unbind_cb;
+ 	ept->rdev = rdev;
+ 	metal_list_add_tail(&rdev->endpoints, &ept->node);
+ }
+@@ -224,8 +234,7 @@ int rpmsg_create_ept(struct rpmsg_endpoint *ept, struct rpmsg_device *rdev,
+ 		addr = rpmsg_get_address(rdev->bitmap, RPMSG_ADDR_BMP_SIZE);
+ 	}
+ 
+-	rpmsg_init_ept(ept, name, addr, dest, cb, unbind_cb);
+-	rpmsg_register_endpoint(rdev, ept);
++	rpmsg_init_ept(ept, rdev, name, addr, dest, cb, unbind_cb);
+ 
+ 	if (rdev->support_ns && ept->dest_addr == RPMSG_ADDR_ANY) {
+ 		/* Send NS announcement to remote processor */
+diff --git a/lib/rpmsg/rpmsg_internal.h open-amp/lib/rpmsg/rpmsg_internal.h
+index f63c958..9c46970 100644
+--- a/lib/rpmsg/rpmsg_internal.h
++++ open-amp/lib/rpmsg/rpmsg_internal.h
+@@ -92,8 +92,6 @@ int rpmsg_send_ns_message(struct rpmsg_endpoint *ept, unsigned long flags);
+ struct rpmsg_endpoint *rpmsg_get_endpoint(struct rpmsg_device *rvdev,
+ 					  const char *name, uint32_t addr,
+ 					  uint32_t dest_addr);
+-void rpmsg_register_endpoint(struct rpmsg_device *rdev,
+-			     struct rpmsg_endpoint *ept);
+ 
+ static inline struct rpmsg_endpoint *
+ rpmsg_get_ept_from_addr(struct rpmsg_device *rdev, uint32_t addr)
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 8165216..4dea4c0 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -636,10 +636,9 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ 	 * service announcement feature.
+ 	 */
+ 	if (rdev->support_ns) {
+-		rpmsg_init_ept(&rdev->ns_ept, "NS",
++		rpmsg_init_ept(&rdev->ns_ept, rdev, "NS",
+ 			       RPMSG_NS_EPT_ADDR, RPMSG_NS_EPT_ADDR,
+ 			       rpmsg_virtio_ns_callback, NULL);
+-		rpmsg_register_endpoint(rdev, &rdev->ns_ept);
+ 	}
+ 
+ #ifndef VIRTIO_SLAVE_ONLY
+-- 
+2.17.1
+

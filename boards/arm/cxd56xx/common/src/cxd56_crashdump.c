@@ -51,8 +51,8 @@
 #include <arch/chip/crashdump.h>
 #include "cxd56_wdt.h"
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Private Functions

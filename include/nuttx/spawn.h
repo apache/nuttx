@@ -135,7 +135,7 @@ extern "C"
 
 void add_file_action(FAR posix_spawn_file_actions_t *file_action,
                      FAR struct spawn_general_file_action_s *entry);
-#ifdef CONFIG_BUILD_PROTECTED
+#if defined(CONFIG_LIB_SYSCALL) && !defined(CONFIG_BUILD_KERNEL)
 int nx_task_spawn(FAR const struct spawn_syscall_parms_s *parms);
 #endif
 

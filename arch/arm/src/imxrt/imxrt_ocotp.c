@@ -47,7 +47,7 @@
 #include <nuttx/clock.h>
 
 #include <arch/board/board.h>
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "imxrt_periphclks.h"
 #include "imxrt_ocotp.h"
 

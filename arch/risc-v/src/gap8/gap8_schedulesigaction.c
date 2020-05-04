@@ -52,8 +52,8 @@
 #include <arch/nr5m100/irq.h>
 
 #include "sched/sched.h"
-#include "up_internal.h"
-#include "up_arch.h"
+#include "riscv_internal.h"
+#include "riscv_arch.h"
 
 /****************************************************************************
  * Public Functions

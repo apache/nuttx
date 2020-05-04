@@ -1,0 +1,227 @@
+From ca34df45f5d4893be223346b06cc75f370452386 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Fri, 24 Apr 2020 01:33:12 +0800
+Subject: [PATCH 03/10] rpmsg: shouldn't allocate 0-1023 address in
+ rpmsg_create_ept
+
+since this region is reserved for predefined services(e.g. NS use 0x35)
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+---
+ apps/examples/echo/rpmsg-echo.c               |  2 +-
+ apps/examples/echo/rpmsg-ping.c               |  2 +-
+ .../matrix_multiply/matrix_multiply.c         |  2 +-
+ .../matrix_multiply/matrix_multiplyd.c        |  2 +-
+ apps/examples/rpc_demo/rpc_demod.c            |  2 +-
+ .../rpmsg_sample_echo/rpmsg-sample-ping.c     |  2 +-
+ apps/tests/msg/rpmsg-flood-ping.c             |  2 +-
+ apps/tests/msg/rpmsg-ping.c                   |  2 +-
+ apps/tests/msg/rpmsg-update.c                 |  2 +-
+ lib/include/openamp/rpmsg.h                   | 27 ++++++++++---------
+ lib/rpmsg/rpmsg.c                             | 11 +++++---
+ 11 files changed, 30 insertions(+), 26 deletions(-)
+
+diff --git a/apps/examples/echo/rpmsg-echo.c open-amp/apps/examples/echo/rpmsg-echo.c
+index 0c75203..71a0bbf 100644
+--- a/apps/examples/echo/rpmsg-echo.c
++++ open-amp/apps/examples/echo/rpmsg-echo.c
+@@ -58,7 +58,7 @@ int app(struct rpmsg_device *rdev, void *priv)
+ 	LPRINTF("Try to create rpmsg endpoint.\r\n");
+ 
+ 	ret = rpmsg_create_ept(&lept, rdev, RPMSG_SERVICE_NAME,
+-			       0, RPMSG_ADDR_ANY, rpmsg_endpoint_cb,
++			       1024, RPMSG_ADDR_ANY, rpmsg_endpoint_cb,
+ 			       rpmsg_service_unbind);
+ 	if (ret) {
+ 		LPERROR("Failed to create endpoint.\r\n");
+diff --git a/apps/examples/echo/rpmsg-ping.c open-amp/apps/examples/echo/rpmsg-ping.c
+index 3b716b0..ff639cd 100644
+--- a/apps/examples/echo/rpmsg-ping.c
++++ open-amp/apps/examples/echo/rpmsg-ping.c
+@@ -11,7 +11,7 @@ This application echoes back data that was sent to it by the master core. */
+ #include "platform_info.h"
+ #include "rpmsg-echo.h"
+ 
+-#define APP_EPT_ADDR    0
++#define APP_EPT_ADDR    1024
+ #define LPRINTF(format, ...) printf(format, ##__VA_ARGS__)
+ #define LPERROR(format, ...) LPRINTF("ERROR: " format, ##__VA_ARGS__)
+ 
+diff --git a/apps/examples/matrix_multiply/matrix_multiply.c open-amp/apps/examples/matrix_multiply/matrix_multiply.c
+index b9da29b..3928088 100644
+--- a/apps/examples/matrix_multiply/matrix_multiply.c
++++ open-amp/apps/examples/matrix_multiply/matrix_multiply.c
+@@ -14,7 +14,7 @@ multiplies them and returns the result to the master core. */
+ 
+ #define	MAX_SIZE      6
+ #define NUM_MATRIX    2
+-#define APP_EPT_ADDR  0
++#define APP_EPT_ADDR  1024
+ 
+ #define raw_printf(format, ...) printf(format, ##__VA_ARGS__)
+ #define LPRINTF(format, ...) raw_printf("CLIENT> " format, ##__VA_ARGS__)
+diff --git a/apps/examples/matrix_multiply/matrix_multiplyd.c open-amp/apps/examples/matrix_multiply/matrix_multiplyd.c
+index 6b4a118..29c6380 100644
+--- a/apps/examples/matrix_multiply/matrix_multiplyd.c
++++ open-amp/apps/examples/matrix_multiply/matrix_multiplyd.c
+@@ -92,7 +92,7 @@ int app(struct rpmsg_device *rdev, void *priv)
+ 	int ret;
+ 
+ 	ret = rpmsg_create_ept(&lept, rdev, RPMSG_SERVICE_NAME,
+-			       0, RPMSG_ADDR_ANY, rpmsg_endpoint_cb,
++			       1024, RPMSG_ADDR_ANY, rpmsg_endpoint_cb,
+ 			       rpmsg_service_unbind);
+ 	if (ret) {
+ 		LPERROR("Failed to create endpoint.\r\n");
+diff --git a/apps/examples/rpc_demo/rpc_demod.c open-amp/apps/examples/rpc_demo/rpc_demod.c
+index 44c92a2..a4659f3 100644
+--- a/apps/examples/rpc_demo/rpc_demod.c
++++ open-amp/apps/examples/rpc_demo/rpc_demod.c
+@@ -312,7 +312,7 @@ int app(struct rpmsg_device *rdev, void *priv)
+ 	LPRINTF("Try to create rpmsg endpoint.\r\n");
+ 
+ 	ret = rpmsg_create_ept(&app_ept, rdev, RPMSG_SERVICE_NAME,
+-			       0, RPMSG_ADDR_ANY, rpmsg_endpoint_cb,
++			       1024, RPMSG_ADDR_ANY, rpmsg_endpoint_cb,
+ 			       rpmsg_service_unbind);
+ 	if (ret) {
+ 		LPERROR("Failed to create endpoint.\r\n");
+diff --git a/apps/examples/rpmsg_sample_echo/rpmsg-sample-ping.c open-amp/apps/examples/rpmsg_sample_echo/rpmsg-sample-ping.c
+index ee866b4..14456e3 100644
+--- a/apps/examples/rpmsg_sample_echo/rpmsg-sample-ping.c
++++ open-amp/apps/examples/rpmsg_sample_echo/rpmsg-sample-ping.c
+@@ -20,7 +20,7 @@
+ #define BYE_MSG		"goodbye!"
+ #define MSG_LIMIT	100
+ 
+-#define APP_EPT_ADDR    0
++#define APP_EPT_ADDR    1024
+ #define LPRINTF(format, ...) printf(format, ##__VA_ARGS__)
+ #define LPERROR(format, ...) LPRINTF("ERROR: " format, ##__VA_ARGS__)
+ 
+diff --git a/apps/tests/msg/rpmsg-flood-ping.c open-amp/apps/tests/msg/rpmsg-flood-ping.c
+index 66489f8..28edc66 100644
+--- a/apps/tests/msg/rpmsg-flood-ping.c
++++ open-amp/apps/tests/msg/rpmsg-flood-ping.c
+@@ -12,7 +12,7 @@
+ #include "platform_info.h"
+ #include "rpmsg-ping.h"
+ 
+-#define APP_EPT_ADDR    0
++#define APP_EPT_ADDR    1024
+ #define LPRINTF(format, ...) printf(format, ##__VA_ARGS__)
+ #define LPERROR(format, ...) LPRINTF("ERROR: " format, ##__VA_ARGS__)
+ 
+diff --git a/apps/tests/msg/rpmsg-ping.c open-amp/apps/tests/msg/rpmsg-ping.c
+index 0220a27..752b16c 100644
+--- a/apps/tests/msg/rpmsg-ping.c
++++ open-amp/apps/tests/msg/rpmsg-ping.c
+@@ -11,7 +11,7 @@ This application echoes back data that was sent to it by the master core. */
+ #include "platform_info.h"
+ #include "rpmsg-ping.h"
+ 
+-#define APP_EPT_ADDR    0
++#define APP_EPT_ADDR    1024
+ #define LPRINTF(format, ...) printf(format, ##__VA_ARGS__)
+ #define LPERROR(format, ...) LPRINTF("ERROR: " format, ##__VA_ARGS__)
+ 
+diff --git a/apps/tests/msg/rpmsg-update.c open-amp/apps/tests/msg/rpmsg-update.c
+index 9b26cac..b8e08db 100644
+--- a/apps/tests/msg/rpmsg-update.c
++++ open-amp/apps/tests/msg/rpmsg-update.c
+@@ -73,7 +73,7 @@ int app(struct rpmsg_device *rdev, void *priv)
+ 	LPRINTF("Try to create rpmsg endpoint.\r\n");
+ 
+ 	ret = rpmsg_create_ept(&lept, rdev, RPMSG_SERVICE_NAME,
+-			       0, RPMSG_ADDR_ANY, rpmsg_endpoint_cb,
++			       1024, RPMSG_ADDR_ANY, rpmsg_endpoint_cb,
+ 			       rpmsg_service_unbind);
+ 	if (ret) {
+ 		LPERROR("Failed to create endpoint.\r\n");
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index a08f9d3..3403240 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -25,22 +25,23 @@ extern "C" {
+ #endif
+ 
+ /* Configurable parameters */
+-#define RPMSG_NAME_SIZE		(32)
+-#define RPMSG_ADDR_BMP_SIZE	(128)
++#define RPMSG_NAME_SIZE			(32)
++#define RPMSG_ADDR_BMP_SIZE		(128)
+ 
+-#define RPMSG_NS_EPT_ADDR	(0x35)
+-#define RPMSG_ADDR_ANY		0xFFFFFFFF
++#define RPMSG_NS_EPT_ADDR		(0x35)
++#define RPMSG_RESERVED_ADDRESSES	(1024)
++#define RPMSG_ADDR_ANY			0xFFFFFFFF
+ 
+ /* Error macros. */
+-#define RPMSG_SUCCESS		0
+-#define RPMSG_ERROR_BASE	-2000
+-#define RPMSG_ERR_NO_MEM	(RPMSG_ERROR_BASE - 1)
+-#define RPMSG_ERR_NO_BUFF	(RPMSG_ERROR_BASE - 2)
+-#define RPMSG_ERR_PARAM		(RPMSG_ERROR_BASE - 3)
+-#define RPMSG_ERR_DEV_STATE	(RPMSG_ERROR_BASE - 4)
+-#define RPMSG_ERR_BUFF_SIZE	(RPMSG_ERROR_BASE - 5)
+-#define RPMSG_ERR_INIT		(RPMSG_ERROR_BASE - 6)
+-#define RPMSG_ERR_ADDR		(RPMSG_ERROR_BASE - 7)
++#define RPMSG_SUCCESS			0
++#define RPMSG_ERROR_BASE		-2000
++#define RPMSG_ERR_NO_MEM		(RPMSG_ERROR_BASE - 1)
++#define RPMSG_ERR_NO_BUFF		(RPMSG_ERROR_BASE - 2)
++#define RPMSG_ERR_PARAM			(RPMSG_ERROR_BASE - 3)
++#define RPMSG_ERR_DEV_STATE		(RPMSG_ERROR_BASE - 4)
++#define RPMSG_ERR_BUFF_SIZE		(RPMSG_ERROR_BASE - 5)
++#define RPMSG_ERR_INIT			(RPMSG_ERROR_BASE - 6)
++#define RPMSG_ERR_ADDR			(RPMSG_ERROR_BASE - 7)
+ 
+ struct rpmsg_endpoint;
+ struct rpmsg_device;
+diff --git a/lib/rpmsg/rpmsg.c open-amp/lib/rpmsg/rpmsg.c
+index eee1c28..dcc39c1 100644
+--- a/lib/rpmsg/rpmsg.c
++++ open-amp/lib/rpmsg/rpmsg.c
+@@ -29,7 +29,7 @@ static uint32_t rpmsg_get_address(unsigned long *bitmap, int size)
+ 
+ 	nextbit = metal_bitmap_next_clear_bit(bitmap, 0, size);
+ 	if (nextbit < (uint32_t)size) {
+-		addr = nextbit;
++		addr = RPMSG_RESERVED_ADDRESSES + nextbit;
+ 		metal_bitmap_set_bit(bitmap, nextbit);
+ 	}
+ 
+@@ -48,7 +48,8 @@ static uint32_t rpmsg_get_address(unsigned long *bitmap, int size)
+ static void rpmsg_release_address(unsigned long *bitmap, int size,
+ 				  int addr)
+ {
+-	if (addr < size)
++	addr -= RPMSG_RESERVED_ADDRESSES;
++	if (addr >= 0 && addr < size)
+ 		metal_bitmap_clear_bit(bitmap, addr);
+ }
+ 
+@@ -65,7 +66,8 @@ static void rpmsg_release_address(unsigned long *bitmap, int size,
+  */
+ static int rpmsg_is_address_set(unsigned long *bitmap, int size, int addr)
+ {
+-	if (addr < size)
++	addr -= RPMSG_RESERVED_ADDRESSES;
++	if (addr >= 0 && addr < size)
+ 		return metal_bitmap_is_bit_set(bitmap, addr);
+ 	else
+ 		return RPMSG_ERR_PARAM;
+@@ -84,7 +86,8 @@ static int rpmsg_is_address_set(unsigned long *bitmap, int size, int addr)
+  */
+ static int rpmsg_set_address(unsigned long *bitmap, int size, int addr)
+ {
+-	if (addr < size) {
++	addr -= RPMSG_RESERVED_ADDRESSES;
++	if (addr >= 0 && addr < size) {
+ 		metal_bitmap_set_bit(bitmap, addr);
+ 		return RPMSG_SUCCESS;
+ 	} else {
+-- 
+2.17.1
+

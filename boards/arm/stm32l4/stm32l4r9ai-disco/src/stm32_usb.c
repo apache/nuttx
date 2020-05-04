@@ -52,7 +52,7 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32l4.h"
 #include "stm32l4_otgfs.h"
 #include "stm32l4r9ai-disco.h"

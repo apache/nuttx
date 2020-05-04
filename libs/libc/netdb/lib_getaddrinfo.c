@@ -161,8 +161,9 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 
   if (servname != NULL)
     {
-      FAR char *endp;
+      struct servent ent;
       FAR struct servent *sp;
+      FAR char *endp;
 
       port = strtol(servname, &endp, 10);
       if (port > 0 && port <= 65535 && *endp == '\0')
@@ -175,7 +176,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
         {
           return EAI_NONAME;
         }
-      else if ((sp = getservbyname(servname, NULL)) != NULL)
+      else if (getservbyname_r(servname, NULL, &ent, NULL, 0, &sp) == OK)
         {
           /* The s_port field of struct servent is required to
            * be in network byte order (per OpenGroup.org)

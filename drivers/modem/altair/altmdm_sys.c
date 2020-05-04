@@ -42,6 +42,8 @@
 #include <nuttx/irq.h>
 #include <signal.h>
 
+#include <nuttx/signal.h>
+
 #include "altmdm_dev.h"
 #include "altmdm_sys.h"
 
@@ -443,7 +445,8 @@ int altmdm_sys_waitflag(FAR struct altmdm_sys_flag_s *handle,
         }
 
       abs_time.tv_sec = timeout_ms / 1000;
-      abs_time.tv_nsec = (timeout_ms - (abs_time.tv_sec * 1000)) * 1000 * 1000;
+      abs_time.tv_nsec = (timeout_ms - (abs_time.tv_sec * 1000)) *
+                          1000 * 1000;
 
       abs_time.tv_sec += curr_time.tv_sec;
       abs_time.tv_nsec += curr_time.tv_nsec;
@@ -557,7 +560,8 @@ int altmdm_sys_waitflag(FAR struct altmdm_sys_flag_s *handle,
  *
  ****************************************************************************/
 
-int altmdm_sys_setflag(FAR struct altmdm_sys_flag_s *handle, uint32_t pattern)
+int altmdm_sys_setflag(FAR struct altmdm_sys_flag_s *handle,
+                       uint32_t pattern)
 {
   int ret;
   irqstate_t flags;
@@ -665,7 +669,7 @@ timer_t altmdm_sys_starttimer(int first_ms, int interval_ms,
     }
 
   sigemptyset(&mask);
-  sigaddset(&mask, MY_TIMER_SIGNAL);
+  nxsig_addset(&mask, MY_TIMER_SIGNAL);
 
   ret = sigprocmask(SIG_UNBLOCK, &mask, NULL);
   if (ret != OK)
@@ -677,7 +681,7 @@ timer_t altmdm_sys_starttimer(int first_ms, int interval_ms,
   sa.sa_sigaction = handler;
   sa.sa_flags = SA_SIGINFO;
   sigfillset(&sa.sa_mask);
-  sigdelset(&sa.sa_mask, MY_TIMER_SIGNAL);
+  nxsig_delset(&sa.sa_mask, MY_TIMER_SIGNAL);
 
   ret = sigaction(MY_TIMER_SIGNAL, &sa, NULL);
   if (ret != OK)

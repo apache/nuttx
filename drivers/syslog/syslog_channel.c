@@ -72,7 +72,6 @@
 #ifdef NEED_LOWPUTC
 static int syslog_default_putc(int ch);
 #endif
-static int syslog_default_flush(void);
 
 /****************************************************************************
  * Public Data
@@ -83,28 +82,26 @@ static const struct syslog_channel_s g_default_channel =
 {
   ramlog_putc,
   ramlog_putc,
-  syslog_default_flush
 };
 #elif defined(CONFIG_SYSLOG_RPMSG)
 static const struct syslog_channel_s g_default_channel =
 {
   syslog_rpmsg_putc,
   syslog_rpmsg_putc,
-  syslog_default_flush
+  syslog_rpmsg_flush,
+  syslog_rpmsg_write
 };
 #elif defined(HAVE_LOWPUTC)
 static const struct syslog_channel_s g_default_channel =
 {
   up_putc,
   up_putc,
-  syslog_default_flush
 };
 #else
 static const struct syslog_channel_s g_default_channel =
 {
   syslog_default_putc,
   syslog_default_putc,
-  syslog_default_flush
 };
 #endif
 
@@ -130,11 +127,6 @@ static int syslog_default_putc(int ch)
   return ch;
 }
 #endif
-
-static int syslog_default_flush(void)
-{
-  return OK;
-}
 
 /****************************************************************************
  * Public Functions
@@ -162,8 +154,7 @@ int syslog_channel(FAR const struct syslog_channel_s *channel)
 
   if (channel != NULL)
     {
-      DEBUGASSERT(channel->sc_putc != NULL && channel->sc_force != NULL &&
-                  channel->sc_flush != NULL);
+      DEBUGASSERT(channel->sc_putc != NULL && channel->sc_force != NULL);
 
       g_syslog_channel = channel;
       return OK;

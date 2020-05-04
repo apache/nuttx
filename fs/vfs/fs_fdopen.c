@@ -194,8 +194,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
   /* Get the stream list from the TCB */
 
-#if (defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)) && \
-     defined(CONFIG_MM_KERNEL_HEAP)
+#ifdef CONFIG_MM_KERNEL_HEAP
   slist = tcb->group->tg_streamlist;
 #else
   slist = &tcb->group->tg_streamlist;
@@ -240,8 +239,8 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
 
           /* Set up pointers */
 
-          stream->fs_bufend  = &stream->fs_bufstart[CONFIG_STDIO_BUFFER_SIZE];
-          stream->fs_bufpos  = stream->fs_bufstart;
+          stream->fs_bufend = &stream->fs_bufstart[CONFIG_STDIO_BUFFER_SIZE];
+          stream->fs_bufpos = stream->fs_bufstart;
           stream->fs_bufread = stream->fs_bufstart;
 
 #ifdef CONFIG_STDIO_LINEBUFFER

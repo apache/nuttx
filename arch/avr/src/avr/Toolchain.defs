@@ -104,7 +104,7 @@ ifeq ($(CONFIG_AVR_TOOLCHAIN),BUILDROOT)
   LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
-# AVR CrossPack under OS X
+# AVR CrossPack under macOS
 
 ifeq ($(CONFIG_AVR_TOOLCHAIN),CROSSPACK)
   CROSSDEV ?= avr-

@@ -47,7 +47,7 @@
 #include <stdbool.h>
 #include <errno.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32_pwr.h"
 
 #if defined(CONFIG_STM32F7_PWR)

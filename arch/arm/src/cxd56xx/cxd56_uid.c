@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "cxd56_uid.h"
 #include "hardware/cxd5602_topreg.h"
 

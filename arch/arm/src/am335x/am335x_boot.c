@@ -54,8 +54,8 @@
 #include "arm.h"
 #include "mmu.h"
 #include "fpu.h"
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 #include "am335x_clockconfig.h"
 #include "am335x_wdog.h"
@@ -82,7 +82,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_lowputc(c)
+#  define showprogress(c) arm_lowputc(c)
 #else
 #  define showprogress(c)
 #endif
@@ -464,7 +464,7 @@ void arm_boot(void)
    * driver.
    */
 
-  up_earlyserialinit();
+  arm_earlyserialinit();
 #endif
 
   /* Perform board-specific initialization,  This must include:

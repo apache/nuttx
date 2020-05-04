@@ -69,7 +69,7 @@ bool convert_hostent(const FAR struct hostent_s *in,
   int i;
   int j;
 
-  /* Initialize the ouptut of hostent */
+  /* Initialize the output of hostent */
 
   out->h_name = in->h_name;
   out->h_aliases = in->h_aliases;

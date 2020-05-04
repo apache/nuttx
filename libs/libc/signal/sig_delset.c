@@ -45,6 +45,45 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: nxsig_delset
+ *
+ * Description:
+ *   This function deletes the signal specified by signo from the signal
+ *   set specified by the 'set' argument.
+ *
+ * Input Parameters:
+ *   set - Signal set to delete the signal from
+ *   signo - Signal to delete
+ *
+ * Returned Value:
+ *   This is an internal OS interface and should not be used by applications.
+ *   It follows the NuttX internal error return policy:  Zero (OK) is
+ *   returned on success.  A negated errno value is returned on failure.
+ *
+ *    EINVAL - The signo argument is invalid.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+int nxsig_delset(FAR sigset_t *set, int signo)
+{
+  /* Verify the signal */
+
+  if (!GOOD_SIGNO(signo))
+    {
+      return -EINVAL;
+    }
+  else
+    {
+      /* Remove the signal from the set */
+
+      *set &= ~SIGNO2SET(signo);
+      return OK;
+    }
+}
+
+/****************************************************************************
  * Name: sigdelset
  *
  * Description:
@@ -64,18 +103,16 @@
 
 int sigdelset(FAR sigset_t *set, int signo)
 {
-  /* Verify the signal */
+  int ret;
 
-  if (!GOOD_SIGNO(signo))
+  /* Let nxseg_delset do all the work. */
+
+  ret = nxsig_delset(set, signo);
+  if (ret < 0)
     {
       set_errno(EINVAL);
-      return ERROR;
+      ret = ERROR;
     }
-  else
-    {
-      /* Remove the signal from the set */
 
-      *set &= ~SIGNO2SET(signo);
-      return OK;
-    }
+  return ret;
 }

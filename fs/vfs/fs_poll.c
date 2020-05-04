@@ -105,7 +105,7 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
         }
     }
 
-  return fdesc_poll(fd, fds, setup);
+  return fs_poll(fd, fds, setup);
 }
 
 /****************************************************************************
@@ -299,7 +299,7 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds,
  *
  * Description:
  *   Low-level poll operation based on struct file.  This is used both to (1)
- *   support detached file, and also (2) by fdesc_poll() to perform all
+ *   support detached file, and also (2) by fs_poll() to perform all
  *   normal operations on file descriptors.
  *
  * Input Parameters:
@@ -378,7 +378,7 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
  *
  ****************************************************************************/
 
-int fdesc_poll(int fd, FAR struct pollfd *fds, bool setup)
+int fs_poll(int fd, FAR struct pollfd *fds, bool setup)
 {
   FAR struct file *filep;
   int ret;

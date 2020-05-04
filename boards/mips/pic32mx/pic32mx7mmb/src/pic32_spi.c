@@ -46,7 +46,7 @@
 #include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "mips_arch.h"
 #include "chip.h"
 #include "pic32mx.h"
 #include "pic32mx7mmb.h"
@@ -60,16 +60,16 @@
 
 /* SPI1 and SD Card
  *
- * ------ -------- ------------------------- --------------------------------
- *  GPIO   SIGNAL  BOARD CONNECTION           NOTES
- * ------ -------- ------------------------- --------------------------------
- *   RC4   SPI1    SD card slot              SPI1 data IN
- *   RD0   SPO1    SD card slot              SPI1 data OUT
- *   RD10  SCK1    SD card slot              SD card, SPI clock
+ * ------ -------- -------------------- --------------------------------
+ *  GPIO   SIGNAL  BOARD CONNECTION      NOTES
+ * ------ -------- -------------------- --------------------------------
+ *   RC4   SPI1    SD card slot         SPI1 data IN
+ *   RD0   SPO1    SD card slot         SPI1 data OUT
+ *   RD10  SCK1    SD card slot         SD card, SPI clock
  *
- *   RA9   SD_CS#  SD card slot              SD card, SPI chip select (active low)
- *   RG6   SD_WP   SD card slot              SD card, write protect
- *   RG7   SD_CD#  SD card slot              SD card, card detect (not)
+ *   RA9   SD_CS#  SD card slot         SD card, SPI chip select (active low)
+ *   RG6   SD_WP   SD card slot         SD card, write protect
+ *   RG7   SD_CD#  SD card slot         SD card, card detect (not)
  */
 
 #define GPIO_SD_CS (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTA|GPIO_PIN9)
@@ -170,6 +170,7 @@ uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
   spiinfo("Returning %02x\n", ret);
   return ret;
 }
+
 #ifdef CONFIG_SPI_CMDDATA
 int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {

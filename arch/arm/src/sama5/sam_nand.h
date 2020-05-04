@@ -50,7 +50,7 @@
 #include <nuttx/mtd/nand_raw.h>
 #include <nuttx/semaphore.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "hardware/sam_hsmc.h"
 

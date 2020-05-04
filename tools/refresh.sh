@@ -235,13 +235,13 @@ for CONFIG in ${CONFIGS}; do
     # Then run oldconfig or oldefconfig
 
     if [ "X${defaults}" == "Xy" ]; then
-      if [ "X${debug}" = "Xy" ]; then
+      if [ "X${debug}" == "Xy" ]; then
         make olddefconfig V=1
       else
         make olddefconfig 1>/dev/null
       fi
     else
-      if [ "X${debug}" = "Xy" ]; then
+      if [ "X${debug}" == "Xy" ]; then
         make oldconfig V=1
       else
         make oldconfig 1>/dev/null
@@ -251,7 +251,7 @@ for CONFIG in ${CONFIGS}; do
 
   # Run savedefconfig to create the new defconfig file
 
-  if [ "X${debug}" = "Xy" ]; then
+  if [ "X${debug}" == "Xy" ]; then
     make savedefconfig V=1
   else
     make savedefconfig 1>/dev/null
@@ -285,14 +285,20 @@ for CONFIG in ${CONFIGS}; do
 
   # Restore any previous .config and Make.defs files
 
-  if [ -e SAVEconfig ]; then
-    mv SAVEconfig .config || \
-      { echo "ERROR: Failed to move SAVEconfig to .config"; exit 1; }
-  fi
-
   if [ -e SAVEMake.defs ]; then
     mv SAVEMake.defs Make.defs || \
       { echo "ERROR: Failed to move SAVEMake.defs to Make.defs"; exit 1; }
+  fi
+
+  if [ -e SAVEconfig ]; then
+    mv SAVEconfig .config || \
+      { echo "ERROR: Failed to move SAVEconfig to .config"; exit 1; }
+
+    if [ "X${debug}" == "Xy" ]; then
+      ./tools/sethost.sh V=1
+    else
+      ./tools/sethost.sh 1>/dev/null
+    fi
   fi
 done
 

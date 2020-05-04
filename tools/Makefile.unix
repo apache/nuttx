@@ -81,11 +81,6 @@ DIRLINK = $(TOPDIR)/tools/link.sh
 DIRUNLINK = $(TOPDIR)/tools/unlink.sh
 endif
 
-# This define is passed as EXTRAFLAGS for kernel-mode builds.  It is also passed
-# during PASS1 (but not PASS2) context and depend targets.
-
-KDEFINE = ${shell $(DEFINE) "$(CC)" __KERNEL__}
-
 # Process architecture and board-specific directories
 
 ARCH_DIR = arch/$(CONFIG_ARCH)
@@ -170,9 +165,7 @@ LINKLIBS = $(patsubst staging/%,%,$(NUTTXLIBS))
 MKEXPORT= tools/mkexport.sh
 MKEXPORT_ARGS = -w$(WINTOOL) -t "$(TOPDIR)"
 
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-MKEXPORT_ARGS += -u
-else ifeq ($(CONFIG_BUILD_KERNEL),y)
+ifneq ($(CONFIG_BUILD_FLAT),y)
 MKEXPORT_ARGS += -u
 endif
 
@@ -387,6 +380,7 @@ clean_context:
 			$(MAKE) -C $$dir TOPDIR="$(TOPDIR)" clean_context ; \
 		fi \
 	done
+	$(call DELFILE, include/float.h)
 	$(call DELFILE, include/math.h)
 	$(call DELFILE, include/stdarg.h)
 	$(call DELFILE, include/setjmp.h)
@@ -612,6 +606,7 @@ clean: subdir_clean
 	$(call DELDIR, nuttx-export*)
 	$(call DELFILE, nuttx_user*)
 	$(call DELDIR, staging)
+	$(call DELFILE, uImage)
 	$(call CLEAN)
 
 subdir_distclean:
@@ -629,8 +624,10 @@ endif
 	$(call DELFILE, include/nuttx/version.h)
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, defconfig)
+	$(call DELFILE, defconfig.tmp-e)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
+	$(call DELFILE, .config-e)
 	$(call DELFILE, .gdbinit)
 	$(Q) $(DIRUNLINK) include/arch/board
 	$(Q) $(DIRUNLINK) include/arch/chip

@@ -231,7 +231,7 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),DEVKITARM)
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
 
-# Generic GNU EABI toolchain on OS X, Linux or any typical Posix system
+# Generic GNU EABI toolchain on macOS, Linux or any typical Posix system
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABIL)
   CROSSDEV ?= arm-none-eabi-
@@ -252,7 +252,7 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABIW)
   endif
 endif
 
-# Clang toolchain on OS X, Linux or any typical Posix system
+# Clang toolchain on macOS, Linux or any typical Posix system
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANGL)
   CROSSDEV ?= arm-none-eabi-

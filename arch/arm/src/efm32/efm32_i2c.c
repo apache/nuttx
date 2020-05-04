@@ -76,7 +76,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "efm32_gpio.h"
 #include "hardware/efm32_cmu.h"

@@ -44,7 +44,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sam_gclk.h"
 #include "sam_periphclks.h"
 #include "sam_port.h"

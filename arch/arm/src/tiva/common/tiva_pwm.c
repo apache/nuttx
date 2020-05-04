@@ -51,7 +51,7 @@
 
 #include <nuttx/timers/pwm.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "tiva_gpio.h"
 #include "tiva_pwm.h"
 #include "tiva_enablepwr.h"

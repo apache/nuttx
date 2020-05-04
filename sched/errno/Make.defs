@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-CSRCS += errno_getptr.c
+CSRCS += errno_errno.c
 
 ifeq ($(CONFIG_LIB_SYSCALL),y)
 CSRCS += errno_get.c errno_set.c

@@ -8,6 +8,7 @@ Make.dep
 .swp
 .*.swp
 core
+uImage
 /.gdbinit
 /cscope.*
 /.config
@@ -21,7 +22,6 @@ core
 /nuttx
 /nuttx.*
 /nuttx-*
-/uImage
 /_SAVED_APPS_config
 /*.map
 /*.elf

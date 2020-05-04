@@ -47,8 +47,8 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -58,7 +58,7 @@
 
 #undef HAVE_FPU
 #if defined(CONFIG_ARCH_FPU) && defined(CONFIG_TESTING_OSTEST_FPUSIZE) && \
-    defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_ARMV7M_CMNVECTOR)
+    defined(CONFIG_SCHED_WAITPID)
 #    define HAVE_FPU 1
 #endif
 
@@ -93,7 +93,7 @@ void arch_getfpu(FAR uint32_t *fpusave)
   /* Take a snapshot of the thread context right now */
 
   flags = enter_critical_section();
-  up_saveusercontext(g_saveregs);
+  arm_saveusercontext(g_saveregs);
 
   /* Return only the floating register values */
 

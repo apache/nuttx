@@ -42,7 +42,7 @@
 
 #include <stdbool.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "nvic.h"
 #include "stm32l4_pwr.h"
 #include "stm32l4_pm.h"

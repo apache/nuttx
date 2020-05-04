@@ -45,9 +45,9 @@
 #  include <sys/types.h>
 #  include <arch/lc823450/chip.h>
 #  include <arch/lc823450/irq.h>
-#  include "up_arch.h"
+#  include "arm_arch.h"
 #  include "lc823450_irq.h"
-#  include "up_arch.h"
+#  include "arm_arch.h"
 #endif
 
 /****************************************************************************
@@ -137,7 +137,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: up_intstack_base
+ * Name: arm_intstack_base
  *
  * Description:
  *   Set the current stack pointer to the "base" the correct interrupt stack
@@ -146,7 +146,7 @@ extern "C"
  ****************************************************************************/
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
-static inline uintptr_t up_intstack_base(void)
+static inline uintptr_t arm_intstack_base(void)
 {
   uintptr_t base = (uintptr_t)g_instack_alloc;
 #if CONFIG_SMP_NCPUS > 1

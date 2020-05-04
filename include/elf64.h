@@ -147,6 +147,7 @@ typedef struct
   } d_un;
 } Elf64_Dyn;
 
+typedef Elf64_Addr  Elf_Addr;
 typedef Elf64_Ehdr  Elf_Ehdr;
 typedef Elf64_Rel   Elf_Rel;
 typedef Elf64_Rela  Elf_Rela;

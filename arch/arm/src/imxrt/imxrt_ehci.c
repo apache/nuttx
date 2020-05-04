@@ -60,7 +60,7 @@
 #include <nuttx/usb/usbhost_devaddr.h>
 #include <nuttx/usb/usbhost_trace.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "hardware/imxrt_usbotg.h"
 #include "imxrt_periphclks.h"

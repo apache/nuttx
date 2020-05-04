@@ -1,35 +1,20 @@
 /****************************************************************************
  * arch/arm/src/lpc17/lpc17_40_irq.c
  *
- *   Copyright (C) 2010-2011, 2013-2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -49,8 +34,8 @@
 
 #include "nvic.h"
 #include "ram_vectors.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "lpc17_40_gpio.h"
 #include "lpc17_40_clrpend.h"
@@ -58,6 +43,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Get a 32-bit version of the default priority */
 
 #define DEFPRIORITY32 \
@@ -114,23 +100,33 @@ static void lpc17_40_dumpnvic(const char *msg, int irq)
   irqinfo("  INTCTRL:    %08x VECTAB: %08x\n",
           getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
-  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
-          getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
-          getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
+  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x "
+          "SYSTICK: %08x\n",
+          getreg32(NVIC_SYSHCON_MEMFAULTENA),
+          getreg32(NVIC_SYSHCON_BUSFAULTENA),
+          getreg32(NVIC_SYSHCON_USGFAULTENA),
+          getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
   irqinfo("  IRQ ENABLE: %08x\n", getreg32(NVIC_IRQ0_31_ENABLE));
   irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
-          getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
+          getreg32(NVIC_SYSH4_7_PRIORITY),
+          getreg32(NVIC_SYSH8_11_PRIORITY),
           getreg32(NVIC_SYSH12_15_PRIORITY));
   irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
-          getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
+          getreg32(NVIC_IRQ0_3_PRIORITY),
+          getreg32(NVIC_IRQ4_7_PRIORITY),
+          getreg32(NVIC_IRQ8_11_PRIORITY),
+          getreg32(NVIC_IRQ12_15_PRIORITY));
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
-          getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
+          getreg32(NVIC_IRQ16_19_PRIORITY),
+          getreg32(NVIC_IRQ20_23_PRIORITY),
+          getreg32(NVIC_IRQ24_27_PRIORITY),
+          getreg32(NVIC_IRQ28_31_PRIORITY));
   irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
-          getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
+          getreg32(NVIC_IRQ32_35_PRIORITY),
+          getreg32(NVIC_IRQ36_39_PRIORITY),
+          getreg32(NVIC_IRQ40_43_PRIORITY),
+          getreg32(NVIC_IRQ44_47_PRIORITY));
 
   leave_critical_section(flags);
 }
@@ -139,8 +135,9 @@ static void lpc17_40_dumpnvic(const char *msg, int irq)
 #endif
 
 /****************************************************************************
- * Name: lpc17_40_nmi, lpc17_40_busfault, lpc17_40_usagefault, lpc17_40_pendsv,
- *       lpc17_40_dbgmonitor, lpc17_40_pendsv, lpc17_40_reserved
+ * Name: lpc17_40_nmi, lpc17_40_busfault, lpc17_40_usagefault,
+ *       lpc17_40_pendsv, lpc17_40_dbgmonitor, lpc17_40_pendsv,
+ *       lpc17_40_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -240,7 +237,7 @@ static int lpc17_40_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
 
   if (irq >= LPC17_40_IRQ_EXTINT)
     {
-      if (irq < (LPC17_40_IRQ_EXTINT+32))
+      if (irq < (LPC17_40_IRQ_EXTINT + 32))
         {
            *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << (irq - LPC17_40_IRQ_EXTINT);
@@ -337,12 +334,12 @@ void up_irqinitialize(void)
    * vector table that requires special initialization.
    *
    * But even in this case NVIC_VECTAB has to point to the initial table
-   * because up_ramvec_initialize() initializes RAM table from table
+   * because arm_ramvec_initialize() initializes RAM table from table
    * pointed by NVIC_VECTAB register.
    */
 
 #ifdef CONFIG_ARCH_RAMVECTORS
-  up_ramvec_initialize();
+  arm_ramvec_initialize();
 #endif
 
   /* Set all interrupts (and exceptions) to the default priority */
@@ -372,8 +369,8 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(LPC17_40_IRQ_SVCALL, up_svcall, NULL);
-  irq_attach(LPC17_40_IRQ_HARDFAULT, up_hardfault, NULL);
+  irq_attach(LPC17_40_IRQ_SVCALL, arm_svcall, NULL);
+  irq_attach(LPC17_40_IRQ_HARDFAULT, arm_hardfault, NULL);
 
   /* Set the priority of the SVCall interrupt */
 
@@ -381,7 +378,7 @@ void up_irqinitialize(void)
   /* up_prioritize_irq(LPC17_40_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-   lpc17_40_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
+  lpc17_40_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
 #endif
 
   /* If the MPU is enabled, then attach and enable the Memory Management
@@ -389,7 +386,7 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_ARM_MPU
-  irq_attach(LPC17_40_IRQ_MEMFAULT, up_memfault, NULL);
+  irq_attach(LPC17_40_IRQ_MEMFAULT, arm_memfault, NULL);
   up_enable_irq(LPC17_40_IRQ_MEMFAULT);
 #endif
 
@@ -398,7 +395,7 @@ void up_irqinitialize(void)
 #ifdef CONFIG_DEBUG_FEATURES
   irq_attach(LPC17_40_IRQ_NMI, lpc17_40_nmi, NULL);
 #ifndef CONFIG_ARM_MPU
-  irq_attach(LPC17_40_IRQ_MEMFAULT, up_memfault, NULL);
+  irq_attach(LPC17_40_IRQ_MEMFAULT, arm_memfault, NULL);
 #endif
   irq_attach(LPC17_40_IRQ_BUSFAULT, lpc17_40_busfault, NULL);
   irq_attach(LPC17_40_IRQ_USAGEFAULT, lpc17_40_usagefault, NULL);
@@ -515,14 +512,14 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_ack_irq
+ * Name: arm_ack_irq
  *
  * Description:
  *   Acknowledge the IRQ
  *
  ****************************************************************************/
 
-void up_ack_irq(int irq)
+void arm_ack_irq(int irq)
 {
 #if 0 /* Does not appear to be necessary in most cases */
   lpc17_40_clrpend(irq);

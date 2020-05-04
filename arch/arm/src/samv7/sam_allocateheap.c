@@ -50,8 +50,8 @@
 #include <arch/board/board.h>
 
 #include "mpu.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "sam_mpuinit.h"
 #include "sam_periphclks.h"
@@ -292,7 +292,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 #endif
 
 /****************************************************************************
- * Name: up_addregion
+ * Name: arm_addregion
  *
  * Description:
  *   Memory may be added in non-contiguous chunks.  Additional chunks are
@@ -301,7 +301,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
  ****************************************************************************/
 
 #if CONFIG_MM_REGIONS > 1
-void up_addregion(void)
+void arm_addregion(void)
 {
 #if HAVE_SDRAM_REGION != 0
   /* Allow user access to the heap memory */

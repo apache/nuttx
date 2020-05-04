@@ -48,7 +48,7 @@
 #include <debug.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "cxd56_pinconfig.h"
 #include "cxd56_clock.h"

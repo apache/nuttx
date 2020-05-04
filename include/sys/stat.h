@@ -111,6 +111,14 @@
 #define S_ISMTD(m)  (((m) & s_IFTGT) == S_IFMTD)
 #define S_ISLNK(m)  (((m) & S_IFLNK)   != 0)
 
+/* The following macros are required by POSIX to acheive backward
+ * compatibility with earlier versions of struct stat.
+ */
+
+#define st_atime     st_atim.tv_sec
+#define st_ctime     st_ctim.tv_sec
+#define st_mtime     st_mtim.tv_sec
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
@@ -124,19 +132,19 @@ struct stat
 {
   /* Required, standard fields */
 
-  dev_t     st_dev;     /* Device ID of device containing file */
-  ino_t     st_ino;     /* File serial number */
-  mode_t    st_mode;    /* File type, attributes, and access mode bits */
-  nlink_t   st_nlink;   /* Number of hard links to the file */
-  uid_t     st_uid;     /* User ID of file */
-  gid_t     st_gid;     /* Group ID of file */
-  dev_t     st_rdev;    /* Device ID (if file is character or block special) */
-  off_t     st_size;    /* Size of file/directory, in bytes */
-  time_t    st_atime;   /* Time of last access */
-  time_t    st_mtime;   /* Time of last modification */
-  time_t    st_ctime;   /* Time of last status change */
-  blksize_t st_blksize; /* Block size used for filesystem I/O */
-  blkcnt_t  st_blocks;  /* Number of blocks allocated */
+  dev_t            st_dev;     /* Device ID of device containing file */
+  ino_t            st_ino;     /* File serial number */
+  mode_t           st_mode;    /* File type, attributes, and access mode bits */
+  nlink_t          st_nlink;   /* Number of hard links to the file */
+  uid_t            st_uid;     /* User ID of file */
+  gid_t            st_gid;     /* Group ID of file */
+  dev_t            st_rdev;    /* Device ID (if file is character or block special) */
+  off_t            st_size;    /* Size of file/directory, in bytes */
+  struct timespec  st_atim;    /* Time of last access */
+  struct timespec  st_mtim;    /* Time of last modification */
+  struct timespec  st_ctim;    /* Time of last status change */
+  blksize_t        st_blksize; /* Block size used for filesystem I/O */
+  blkcnt_t         st_blocks;  /* Number of blocks allocated */
 
   /* Internal fields.  These are part this specific implementation and
    * should not referenced by application code for portability reasons.

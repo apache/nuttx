@@ -50,9 +50,9 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/drivers.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/stm32_rng.h"
-#include "up_internal.h"
+#include "arm_internal.h"
 
 #if defined(CONFIG_STM32F0L0G0_RNG)
 #if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)

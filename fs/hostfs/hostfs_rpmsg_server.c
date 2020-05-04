@@ -361,10 +361,15 @@ static int hostfs_rpmsg_fstat_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct hostfs_rpmsg_server_s *priv = priv_;
   FAR struct hostfs_rpmsg_fstat_s *msg = data;
   int ret = -ENOENT;
+  struct stat buf;
 
   if (msg->fd >= 0 && msg->fd < CONFIG_NFILE_DESCRIPTORS)
     {
-      ret = file_fstat(&priv->files[msg->fd], &msg->buf);
+      ret = file_fstat(&priv->files[msg->fd], &buf);
+      if (ret >= 0)
+        {
+          msg->buf = buf;
+        }
     }
 
   msg->header.result = ret;
@@ -481,7 +486,7 @@ static int hostfs_rpmsg_closedir_handler(FAR struct rpmsg_endpoint *ept,
       nxsem_wait(&priv->sem);
       priv->dirs[msg->fd] = NULL;
       nxsem_post(&priv->sem);
-      ret = ret ? get_errno(ret) : 0;
+      ret = ret ? -get_errno() : 0;
     }
 
   msg->header.result = ret;
@@ -493,10 +498,20 @@ static int hostfs_rpmsg_statfs_handler(FAR struct rpmsg_endpoint *ept,
                                        uint32_t src, FAR void *priv)
 {
   FAR struct hostfs_rpmsg_statfs_s *msg = data;
+  struct statfs buf;
   int ret;
 
-  ret = statfs(msg->pathname, &msg->buf);
-  msg->header.result = ret ? get_errno(ret) : 0;
+  ret = statfs(msg->pathname, &buf);
+  if (ret)
+    {
+      ret = -get_errno();
+    }
+  else
+    {
+      msg->buf = buf;
+    }
+
+  msg->header.result = ret;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -508,7 +523,7 @@ static int hostfs_rpmsg_unlink_handler(FAR struct rpmsg_endpoint *ept,
   int ret;
 
   ret = unlink(msg->pathname);
-  msg->header.result = ret ? get_errno(ret) : 0;
+  msg->header.result = ret ? -get_errno() : 0;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -520,7 +535,7 @@ static int hostfs_rpmsg_mkdir_handler(FAR struct rpmsg_endpoint *ept,
   int ret;
 
   ret = mkdir(msg->pathname, msg->mode);
-  msg->header.result = ret ? get_errno(ret) : 0;
+  msg->header.result = ret ? -get_errno() : 0;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -532,7 +547,7 @@ static int hostfs_rpmsg_rmdir_handler(FAR struct rpmsg_endpoint *ept,
   int ret;
 
   ret = rmdir(msg->pathname);
-  msg->header.result = ret ? get_errno(ret) : 0;
+  msg->header.result = ret ? -get_errno() : 0;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -549,7 +564,7 @@ static int hostfs_rpmsg_rename_handler(FAR struct rpmsg_endpoint *ept,
   newpath = msg->pathname + oldlen;
 
   ret = rename(msg->pathname, newpath);
-  msg->header.result = ret ? get_errno(ret) : 0;
+  msg->header.result = ret ? -get_errno() : 0;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -558,10 +573,20 @@ static int hostfs_rpmsg_stat_handler(FAR struct rpmsg_endpoint *ept,
                                      uint32_t src, FAR void *priv)
 {
   FAR struct hostfs_rpmsg_stat_s *msg = data;
+  struct stat buf;
   int ret;
 
-  ret = stat(msg->pathname, &msg->buf);
-  msg->header.result = ret ? get_errno(ret) : 0;
+  ret = stat(msg->pathname, &buf);
+  if (ret)
+    {
+      ret = -get_errno();
+    }
+  else
+    {
+      msg->buf = buf;
+    }
+
+  msg->header.result = ret;
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
@@ -623,8 +648,9 @@ static void hostfs_rpmsg_ns_unbind(FAR struct rpmsg_endpoint *ept)
   kmm_free(priv);
 }
 
-static int hostfs_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
-                               size_t len, uint32_t src, FAR void *priv)
+static int hostfs_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
+                               FAR void *data, size_t len, uint32_t src,
+                               FAR void *priv)
 {
   struct hostfs_rpmsg_header_s *header = data;
   uint32_t command = header->command;

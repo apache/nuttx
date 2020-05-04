@@ -47,7 +47,7 @@
 #include <nuttx/timers/pwm.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "kinetis_pwm.h"
 
 #include <arch/board/board.h>

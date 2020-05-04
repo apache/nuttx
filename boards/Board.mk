@@ -79,9 +79,9 @@ ifneq ($(ZDSVERSION),)
 ifeq ($(WINTOOL),y)
   WSCHEDSRCDIR = ${shell cygpath -w $(SCHEDSRCDIR)}
   WARCHSRCDIR = ${shell cygpath -w $(ARCHSRCDIR)}
-  USRINCLUDES = -usrinc:'.;$(WSCHEDSRCDIR);$(WARCHSRCDIR)$(DELIM)chip;$(WARCHSRCDIR)$(DELIM)common'
+  USRINCLUDES = -usrinc:'.;$(WSCHEDSRCDIR);$(WARCHSRCDIR)\chip;$(WARCHSRCDIR)\common'
 else
-  USRINCLUDES = -usrinc:".;$(SCHEDSRCDIR);$(ARCHSRCDIR)$(DELIMI)chip;$(ARCHSRCDIR)$(DELIM)common"
+  USRINCLUDES = -usrinc:".;$(SCHEDSRCDIR);$(ARCHSRCDIR)$(DELIM)chip;$(ARCHSRCDIR)$(DELIM)common"
 endif
 else
 ifeq ($(WINTOOL),y)

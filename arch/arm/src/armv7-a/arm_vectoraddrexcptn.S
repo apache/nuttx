@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
-#include "up_arch.h"
+#include "arm_arch.h"
 
 	.file	"arm_vectoraddrexcptn.S"
 

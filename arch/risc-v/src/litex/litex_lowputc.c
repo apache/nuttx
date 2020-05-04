@@ -28,8 +28,8 @@
 
 #include <arch/board/board.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "riscv_internal.h"
+#include "riscv_arch.h"
 
 #include "litex_config.h"
 #include "hardware/litex_memorymap.h"

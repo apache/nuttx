@@ -49,8 +49,8 @@
 #include <arch/board/board.h>
 #include <arch/efm32/chip.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "efm32_config.h"
 #include "efm32_lowputc.h"
@@ -312,7 +312,7 @@ void __start(void)
 
   /* Perform early serial initialization */
 
-  up_earlyserialinit();
+  arm_earlyserialinit();
   showprogress('D');
 
   /* For the case of the separate user-/kernel-space build, perform whatever

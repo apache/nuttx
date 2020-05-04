@@ -146,9 +146,6 @@ clean_context:
 context: gensources
 
 clean:
-	$(Q) $(MAKE) -C nxglib -f Makefile.devblit clean TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
-	$(Q) $(MAKE) -C nxglib -f Makefile.pwfb clean TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
-	$(Q) $(MAKE) -C nxglib -f Makefile.cursor clean TOPDIR=$(TOPDIR) EXTRAFLAGS="$(EXTRAFLAGS)"
 	$(call DELFILE, $(BIN))
 	$(call CLEAN)
 

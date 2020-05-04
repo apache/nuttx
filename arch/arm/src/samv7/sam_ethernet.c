@@ -49,11 +49,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Function: arm_netinitialize
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.  This is just
+ *   low-level initialization logic in arm_initialize.c.  This is just
  *   a shim to support the slightly different prototype of
  *   sam_emac_intiialize() and to provide support for future chips that
  *   may have multiple EMAC peripherals.
@@ -68,7 +68,7 @@
  *
  ****************************************************************************/
 
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
 #ifdef CONFIG_SAMV7_EMAC0
   int ret;

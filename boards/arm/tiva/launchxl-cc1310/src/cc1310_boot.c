@@ -47,7 +47,7 @@
 #include <nuttx/board.h>
 #include <nuttx/clock.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "tiva_start.h"
 #include "launchxl-cc1310.h"
 

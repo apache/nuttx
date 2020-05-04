@@ -46,7 +46,7 @@
 #include <nuttx/timers/pwm.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32_pwm.h"
 #include "stm32f429i-disco.h"
 

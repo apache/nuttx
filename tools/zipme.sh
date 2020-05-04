@@ -50,7 +50,7 @@ EXCLPAT="
 "
 # Get command line parameters
 
-USAGE="USAGE: $0 [-d|h|v|s] [-b <build]> [-e <exclude>] [-k <key-id>] <major.minor.patch>"
+USAGE="USAGE: $0 [-d|h|v|s] [-b <build]> [-e <exclude>] [-k <key-id>] [<major.minor.patch>]"
 ADVICE="Try '$0 -h' for more information"
 
 unset VERSION
@@ -95,14 +95,14 @@ while [ ! -z "$1" ]; do
     echo "     Enable script debug"
     echo "  -h"
     echo "     show this help message and exit"
-    echo "   -e"
+    echo "  -e"
     echo "     Exclude a list of files or folders"
     echo "     NOTE: The list must be quoted, example -e \"*.out tmp\""
-    echo "   -v"
+    echo "  -v"
     echo "     Be verbose. The output could be more than you care to see."
-    echo "   -s"
+    echo "  -s"
     echo "    PGP sign the final tarballs and create digests."
-    echo "   -k"
+    echo "  -k"
     echo "    PGP key ID.  If not provided the default ID will be used."
     echo "  <major.minor.patch>"
     echo "     The NuttX version number expressed as a major, minor and patch number separated"
@@ -119,7 +119,9 @@ done
 # The last thing on the command line is the version number
 
 VERSION=$1
-VERSIONOPT="-v ${VERSION}"
+if [ -n ${VERSION} ] ; then
+  VERSIONOPT="-v ${VERSION}"
+if
 
 # Full tar options
 
@@ -133,15 +135,6 @@ if [ $verbose != 0 ] ; then
   TAR+=" -czvf"
 else
   TAR+=" -czf"
-fi
-
-# Make sure we know what is going on
-
-if [ -z ${VERSION} ] ; then
-  echo "You must supply a version like xx.yy as a parameter"
-  echo $USAGE
-  echo $ADVICE
-  exit 1;
 fi
 
 # Find the directory we were executed from and were we expect to
@@ -189,16 +182,18 @@ if [ ! -d ${APPSDIR} ] ; then
   exit 1
 fi
 
-# Create the versioned tarball names
+# Perform a full clean for the distribution
 
-NUTTX_TARNAME=apache-nuttx-${VERSION}-incubating.tar
-APPS_TARNAME=apache-nuttx-apps-${VERSION}-incubating.tar
-NUTTX_ZIPNAME=${NUTTX_TARNAME}.gz
-APPS_ZIPNAME=${APPS_TARNAME}.gz
-NUTTX_ASCNAME=${NUTTX_ZIPNAME}.asc
-APPS_ASCNAME=${APPS_ZIPNAME}.asc
-NUTTX_SHANAME=${NUTTX_ZIPNAME}.sha512
-APPS_SHANAME=${APPS_ZIPNAME}.sha512
+cd ${TRUNKDIR} || \
+   { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
+
+echo "Cleaning the repositories"
+
+if [ $verbose != 0 ] ; then
+  make -C ${NUTTXDIR} distclean
+else
+  make -C ${NUTTXDIR} distclean 1>/dev/null
+fi
 
 # Prepare the nuttx directory
 
@@ -221,6 +216,12 @@ ${VERSIONSH} ${DEBUG} ${BUILD} ${VERSIONOPT} ${NUTTXDIR}/.version || \
 chmod 755 ${NUTTXDIR}/.version || \
     { echo "'chmod 755 ${NUTTXDIR}/.version' failed"; exit 1; }
 
+if [ -z ${VERSION} ] ; then
+  source ${NUTTXDIR}/.version
+  VERSION=${CONFIG_VERSION_STRING}
+  VERSIONOPT="-v ${VERSION}"
+fi
+
 # Update the configuration variable documentation
 #
 # MKCONFIGVARS=${NUTTXDIR}/tools/mkconfigvars.sh
@@ -240,18 +241,16 @@ chmod 755 ${NUTTXDIR}/.version || \
 #     { echo "'chmod 644 ${CONFIGVARHTML}' failed"; exit 1; }
 #
 
-# Perform a full clean for the distribution
+# Create the versioned tarball names
 
-cd ${TRUNKDIR} || \
-   { echo "Failed to cd to ${TRUNKDIR}" ; exit 1 ; }
-
-echo "Cleaning the repositories"
-
-if [ $verbose != 0 ] ; then
-  make -C ${NUTTXDIR} distclean
-else
-  make -C ${NUTTXDIR} distclean 1>/dev/null
-fi
+NUTTX_TARNAME=apache-nuttx-${VERSION}-incubating.tar
+APPS_TARNAME=apache-nuttx-apps-${VERSION}-incubating.tar
+NUTTX_ZIPNAME=${NUTTX_TARNAME}.gz
+APPS_ZIPNAME=${APPS_TARNAME}.gz
+NUTTX_ASCNAME=${NUTTX_ZIPNAME}.asc
+APPS_ASCNAME=${APPS_ZIPNAME}.asc
+NUTTX_SHANAME=${NUTTX_ZIPNAME}.sha512
+APPS_SHANAME=${APPS_ZIPNAME}.sha512
 
 # Remove any previous tarballs
 

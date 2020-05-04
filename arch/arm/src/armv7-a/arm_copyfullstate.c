@@ -42,14 +42,14 @@
 #include <stdint.h>
 #include <arch/irq.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copyfullstate
+ * Name: arm_copyfullstate
  *
  * Description:
  *    Copy the entire register save area (including the floating point
@@ -58,7 +58,7 @@
  *
  ****************************************************************************/
 
-void up_copyfullstate(uint32_t *dest, uint32_t *src)
+void arm_copyfullstate(uint32_t *dest, uint32_t *src)
 {
   int i;
 

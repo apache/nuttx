@@ -47,8 +47,8 @@
 
 #include <nuttx/arch.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 #include "hardware/lpc54_inputmux.h"
 #include "hardware/lpc54_dma.h"
@@ -217,18 +217,18 @@ static int lpc54_dma_interrupt(int irq, FAR void *context, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dma_initialize
+ * Name: arm_dma_initialize
  *
  * Description:
  *   Initialize the DMA subsystem.  Called from up_initialize() early in the
- *   boot-up sequence.  Prototyped in up_internal.h.
+ *   boot-up sequence.  Prototyped in arm_internal.h.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void weak_function up_dma_initialize(void)
+void weak_function arm_dma_initialize(void)
 {
   int ret;
 

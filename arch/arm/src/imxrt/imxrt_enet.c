@@ -63,7 +63,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "imxrt_config.h"
 #include "hardware/imxrt_enet.h"
@@ -2578,7 +2578,7 @@ int imxrt_netinitialize(int intf)
 }
 
 /****************************************************************************
- * Name: up_netinitialize
+ * Name: arm_netinitialize
  *
  * Description:
  *   Initialize the first network interface.  If there are more than one
@@ -2589,7 +2589,7 @@ int imxrt_netinitialize(int intf)
  ****************************************************************************/
 
 #if CONFIG_IMXRT_ENET_NETHIFS == 1 && !defined(CONFIG_NETDEV_LATEINIT)
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   imxrt_netinitialize(0);
 }

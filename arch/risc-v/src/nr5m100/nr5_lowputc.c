@@ -48,8 +48,8 @@
 
 #include <arch/board/board.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "riscv_internal.h"
+#include "riscv_arch.h"
 
 #include "nr5_config.h"
 #include "nr5.h"
@@ -85,11 +85,11 @@
 
 #  if defined(CONFIG_NR5_NR5M1XX)
 
-    /* Baud rate for standard UART:
-     *
-     * In case of oversampling by 16, the equation is:
-     *   UARTDIV = fCK / 32 / baud
-     */
+  /* Baud rate for standard UART:
+   *
+   * In case of oversampling by 16, the equation is:
+   *   UARTDIV = fCK / 32 / baud
+   */
 
 #    define NR5_UARTDIV \
       ((NR5_HCLK_FREQUENCY >> 5) / NR5_CONSOLE_BAUD)
@@ -134,7 +134,8 @@ void up_lowputc(char ch)
 #ifdef HAVE_SERIAL_CONSOLE
   /* Wait until the TX data register is empty */
 
-  while ((getreg32(NR5_CONSOLE_BASE + NR5_UART_STATUS_REG_OFFSET) & NR5_UART_STATUS_TX_EMPTY) == 0)
+  while ((getreg32(NR5_CONSOLE_BASE + NR5_UART_STATUS_REG_OFFSET) &
+          NR5_UART_STATUS_TX_EMPTY) == 0)
     ;
 
   /* Then send the character */
@@ -170,7 +171,8 @@ void nr5_lowsetup(void)
 
   /* Configure the RX interrupt */
 
-  putreg32(NR5_UART_CTRL_ENABLE_RX_IRQ, NR5_CONSOLE_BASE + NR5_UART_CTRL_REG_OFFSET);
+  putreg32(NR5_UART_CTRL_ENABLE_RX_IRQ,
+           NR5_CONSOLE_BASE + NR5_UART_CTRL_REG_OFFSET);
 
 #endif /* HAVE_SERIAL_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
 #endif /* HAVE_UART */

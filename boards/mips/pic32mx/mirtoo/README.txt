@@ -395,7 +395,7 @@ Toolchains
   mips-elf toolchain:
 
     CONFIG_MIPS32_TOOLCHAIN_PINGUINOW - Pinguino mips-elf toolchain for Windows
-    CONFIG_MIPS32_TOOLCHAIN_GNU_ELF   - mips-elf toolchain for Linux or OS X
+    CONFIG_MIPS32_TOOLCHAIN_GNU_ELF   - mips-elf toolchain for Linux or macOS
 
   And set the path appropriately in the PATH environment variable.  These tool
   configurations are untested -- expect some additional integration issues.
@@ -627,7 +627,7 @@ Analog Input
   and ADC driver that can be used with standard open, close, read, and write
   interfaces.  To complete this driver, the following is needed:
 
-  (1) arch/mips/src/pic32mx/pic32mx-adc.c.  The ADC driver that implements
+  (1) arch/mips/src/pic32mx/pic32mx_adc.c.  The ADC driver that implements
       the ADC interfaces defined in include/nuttx/analog/adc.h and must
       be built when CONFIG_PIC32MX_ADC is defined.
 

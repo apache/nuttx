@@ -49,6 +49,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/signal.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -301,7 +302,7 @@ static void nxsig_add_pendingsignal(FAR struct tcb_s *stcb,
 int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 {
   irqstate_t flags;
-  bool masked;
+  int masked;
   int ret = OK;
 
   sinfo("TCB=0x%08x signo=%d code=%d value=%d mask=%08x\n",
@@ -319,7 +320,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
   /************************** MASKED SIGNAL ACTIONS *************************/
 
-  masked = (bool)sigismember(&stcb->sigprocmask, info->si_signo);
+  masked = nxsig_ismember(&stcb->sigprocmask, info->si_signo);
 
 #ifdef CONFIG_LIB_SYSCALL
   /* Check if the signal is masked OR if the signal is received while we are
@@ -346,13 +347,13 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
    * signal handlers.
    */
 
-  if (masked || (stcb->flags & TCB_FLAG_SYSCALL) != 0)
+  if ((masked == 1) || (stcb->flags & TCB_FLAG_SYSCALL) != 0)
 #else
   /* Check if the signal is masked.  In that  case, it will be added to the
    * list of pending signals.
    */
 
-  if (masked)
+  if (masked == 1)
 #endif
     {
       /* Check if the task is waiting for this pending signal.  If so, then
@@ -362,7 +363,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 
       flags = enter_critical_section();
       if (stcb->task_state == TSTATE_WAIT_SIG &&
-          sigismember(&stcb->sigwaitmask, info->si_signo))
+          nxsig_ismember(&stcb->sigwaitmask, info->si_signo))
         {
           memcpy(&stcb->sigunbinfo, info, sizeof(siginfo_t));
           stcb->sigwaitmask = NULL_SIGNAL_SET;
@@ -426,7 +427,7 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
    * happen within a system call.
    */
 
-  if (!masked)
+  if (masked == 0)
     {
       /* If the task is blocked waiting for a semaphore, then that task must
        * be unblocked when a signal is received.
@@ -464,6 +465,13 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
 #endif
         }
 #endif
+    }
+
+  /* In case nxsig_ismember failed due to an invalid signal number */
+
+  if (masked < 0)
+    {
+      ret = -EINVAL;
     }
 
   return ret;

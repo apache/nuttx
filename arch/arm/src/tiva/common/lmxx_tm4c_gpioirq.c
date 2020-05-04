@@ -51,8 +51,8 @@
 
 #include "chip.h"
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 #include "irq/irq.h"
 
 #include "tiva_gpio.h"

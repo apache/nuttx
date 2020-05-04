@@ -50,9 +50,9 @@
 #include <nuttx/semaphore.h>
 #include <arch/stm32f7/chip.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "sched/sched.h"
 #include "stm32_dma.h"
 
@@ -464,7 +464,7 @@ static int stm32_dmainterrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-void weak_function up_dma_initialize(void)
+void weak_function arm_dma_initialize(void)
 {
   struct stm32_dma_s *dmast;
   int stream;

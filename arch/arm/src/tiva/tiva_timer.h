@@ -47,7 +47,7 @@
 
 #include <arch/tiva/chip.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "hardware/tiva_timer.h"
 

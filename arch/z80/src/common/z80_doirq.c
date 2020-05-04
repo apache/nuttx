@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 #include <assert.h>
-#include "up_arch.h"
+#include "z80_arch.h"
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>

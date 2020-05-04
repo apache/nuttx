@@ -56,7 +56,7 @@
 #include <nuttx/clock.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "lc823450_syscontrol.h"
 #include "lc823450_wdt.h"

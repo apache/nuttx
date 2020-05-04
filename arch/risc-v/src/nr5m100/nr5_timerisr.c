@@ -51,7 +51,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "riscv_arch.h"
 
 #include "nr5.h"
 

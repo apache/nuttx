@@ -41,8 +41,8 @@
 
 #include <stdbool.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "hardware/nrf52_memorymap.h"
 #include "hardware/nrf52_uarte.h"
@@ -243,14 +243,14 @@ void nrf52_usart_disable(uintptr_t base, const struct uart_config_s *config)
 #endif
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: arm_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void arm_lowputc(char ch)
 {
 #ifdef HAVE_UART_CONSOLE
   putreg32(1, CONSOLE_BASE + NRF52_UART_TASKS_STARTTX_OFFSET);

@@ -156,11 +156,11 @@ static inline void up_emac_initialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: up_netinitialize
+ * Function: arm_netinitialize
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.  If both the EMAC
+ *   low-level initialization logic in arm_initialize.c.  If both the EMAC
  *   and GMAC are enabled, then this single entry point must initialize
  *   both.
  *
@@ -174,7 +174,7 @@ static inline void up_emac_initialize(void)
  *
  ****************************************************************************/
 
-void up_netinitialize(void)
+void arm_netinitialize(void)
 {
   /* The first device registered with be ETH0 and the second ETH1 */
 

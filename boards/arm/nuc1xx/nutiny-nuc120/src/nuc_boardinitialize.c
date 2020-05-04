@@ -43,7 +43,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "nutiny-nuc120.h"
 
 /****************************************************************************

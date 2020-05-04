@@ -204,11 +204,11 @@ static void pthread_start(void)
    * to switch to user-mode before calling into the pthread.
    */
 
-#if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
+#ifdef CONFIG_BUILD_FLAT
+  exit_status = (*ptcb->cmn.entry.pthread)(ptcb->arg);
+#else
   up_pthread_start(ptcb->cmn.entry.pthread, ptcb->arg);
   exit_status = NULL;
-#else
-  exit_status = (*ptcb->cmn.entry.pthread)(ptcb->arg);
 #endif
 
   /* The thread has returned (should never happen in the kernel mode case) */
@@ -570,10 +570,6 @@ int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
   if (ret == OK)
     {
       ret = task_activate((FAR struct tcb_s *)ptcb);
-      if (ret < 0)
-        {
-          ret = get_errno();
-        }
     }
 
   if (ret == OK)

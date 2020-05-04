@@ -39,18 +39,6 @@
 
 #include <nuttx/config.h>
 
-/* If the common RV32IM vector handling logic is used, then include the
- * required vector definitions as well.
- */
-
-#ifdef CONFIG_RV32IM_CMNVECTOR
-#  if defined(CONFIG_NR5_NR5M1XX)
-#    include "hardware/nr5m1xx_vectors.h"
-#  else
-#    error "No vector file for this NanoRisc5 family"
-#  endif
-#endif
-
 /* Include the chip memory map. */
 
 #include "nr5_memorymap.h"

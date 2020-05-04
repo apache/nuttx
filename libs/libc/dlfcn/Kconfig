@@ -10,11 +10,8 @@ config LIBC_DLFCN
 	default n
 	select LIBC_MODLIB if !BUILD_FLAT
 	select MODULE if BUILD_FLAT
-	depends on EXPERIMENTAL || !BUILD_KERNEL
 	---help---
 		Enabled support for user-space shared libraries.
-
-		A work in progress, hence, marked EXPERIMENTAL
 
 if LIBC_DLFCN
 

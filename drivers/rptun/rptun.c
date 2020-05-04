@@ -183,7 +183,7 @@ static int rptun_thread(int argc, FAR char *argv[])
   priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 0));
 
   sigemptyset(&set);
-  sigaddset(&set, SIGUSR1);
+  nxsig_addset(&set, SIGUSR1);
   nxsig_procmask(SIG_BLOCK, &set, NULL);
 
   while (1)
@@ -441,8 +441,8 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       rsc->rpmsg_vring1.da = da1;
 
       shbuf   = (FAR char *)rsc + tbsz + v0sz + v1sz;
-      shbufsz = rsc->buf_size *
-                (rsc->rpmsg_vring0.num + rsc->rpmsg_vring1.num);
+      shbufsz = rsc->config.txbuf_size * rsc->rpmsg_vring0.num +
+                rsc->config.rxbuf_size * rsc->rpmsg_vring1.num;
 
       rpmsg_virtio_init_shm_pool(&priv->shm_pool, shbuf, shbufsz);
 
@@ -551,7 +551,8 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
   return 0;
 }
 
-static int rptun_dev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct rptun_priv_s *priv = inode->i_private;
@@ -577,7 +578,8 @@ static int rptun_dev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
-static int rptun_store_open(FAR void *store_, FAR const char *path,
+static int rptun_store_open(FAR void *store_,
+                            FAR const char *path,
                             FAR const void **img_data)
 {
   FAR struct rptun_store_s *store = store_;
@@ -777,7 +779,8 @@ void rpmsg_unregister_callback(FAR void *priv_,
                 {
                   struct rptun_priv_s *priv;
 
-                  priv = metal_container_of(pnode, struct rptun_priv_s, node);
+                  priv = metal_container_of(pnode,
+                                            struct rptun_priv_s, node);
                   device_destroy(&priv->vdev.rdev, priv_);
                 }
             }

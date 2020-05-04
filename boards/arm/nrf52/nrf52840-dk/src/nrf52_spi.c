@@ -46,7 +46,7 @@
 
 #include <nuttx/spi/spi.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "chip.h"
 #include "nrf52_gpio.h"
 #include "nrf52_spi.h"

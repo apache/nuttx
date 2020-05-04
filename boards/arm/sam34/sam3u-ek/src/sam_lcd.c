@@ -126,7 +126,7 @@
 
 #include <arch/irq.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "sam_gpio.h"
 #include "hardware/sam_pmc.h"
 #include "hardware/sam_smc.h"

@@ -87,10 +87,8 @@ ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHDEFINES =
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 
-ifneq ($(KERNEL),y)
-  ARCHCFLAGS += -fno-common
-  ARCHCXXFLAGS += -fno-common
-endif
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common
 
 CFLAGS = $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)

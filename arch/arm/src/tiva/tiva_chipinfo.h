@@ -49,7 +49,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "hardware/tiva_fcfg1.h"
 
 /* Currently only applies to the CC13x0 and CC13x2 families */

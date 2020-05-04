@@ -1,0 +1,780 @@
+From 27026fc4c781a9dbd328059884b9b94ff39ad6b9 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Fri, 15 Mar 2019 01:51:03 +0800
+Subject: [PATCH 06/10] remoteproc_mmap support va to pa/da conversion
+
+1.change va from output to input/output
+2.remoteproc_get_io_xxx fallback to mmap callback
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+---
+ .../load_fw/zynqmp_r5_lcm_rproc_example.c     |  69 +++++------
+ apps/machine/zynq7/platform_info.c            |  16 +--
+ apps/machine/zynq7/zynq_a9_rproc.c            |  40 ++++---
+ apps/machine/zynqmp/platform_info.c           |   6 +-
+ apps/machine/zynqmp/zynqmp_linux_r5_proc.c    |  40 ++++---
+ apps/machine/zynqmp_r5/platform_info.c        |  16 +--
+ apps/machine/zynqmp_r5/zynqmp_r5_a53_rproc.c  |  38 +++----
+ .../linux/machine/generic/platform_info.c     |  52 +++++----
+ lib/include/openamp/remoteproc.h              |  19 ++--
+ lib/remoteproc/remoteproc.c                   | 107 ++++++++++--------
+ lib/remoteproc/rsc_table_parser.c             |   2 +-
+ 11 files changed, 209 insertions(+), 196 deletions(-)
+
+diff --git a/apps/examples/load_fw/zynqmp_r5_lcm_rproc_example.c open-amp/apps/examples/load_fw/zynqmp_r5_lcm_rproc_example.c
+index 26a09e5..e224631 100644
+--- a/apps/examples/load_fw/zynqmp_r5_lcm_rproc_example.c
++++ open-amp/apps/examples/load_fw/zynqmp_r5_lcm_rproc_example.c
+@@ -137,86 +137,79 @@ void r5_rproc_remove(struct remoteproc *rproc)
+ 	}
+ }
+ 
+-void *r5_rproc_mmap(struct remoteproc *rproc,
+-		    metal_phys_addr_t *pa, metal_phys_addr_t *da,
+-		    size_t size, unsigned int attribute,
+-		    struct metal_io_region **io)
++int r5_rproc_mmap(struct remoteproc *rproc,
++		  metal_phys_addr_t *pa, metal_phys_addr_t *da,
++		  void **va, size_t size, unsigned int attribute,
++		  struct metal_io_region **io)
+ {
+ 	struct remoteproc_mem *mem;
++	struct metal_io_region *tmpio;
+ 	struct r5_rproc_priv *priv;
+-	metal_phys_addr_t lpa, lda;
+ 
+ 	priv = rproc->priv;
+ 
+-	if (!da || !pa)
+-		return NULL;
+ 	LPRINTF("%s: pa=0x%x, da=0x%x, size=0x%x, atrribute=0x%x\r\n",
+ 		__func__, *pa, *da, size, attribute);
+-	lda = *da;
+-	lpa = *pa;
+ 	if (!attribute)
+ 		attribute = NORM_SHARED_NCACHE | PRIV_RW_USER_RW;
+-	if (lda <= 0x40000) {
++	if (*da <= 0x40000) {
+ 		metal_phys_addr_t lda_end;
+ 
+-		lda_end = lda + size;
++		lda_end = *da + size;
+ 		if (priv->cpu_id == NODE_RPU_0 || priv->cpu_id == NODE_RPU) {
+-			lpa = 0xFFE00000 + lda;
+-			if (lda < 0x10000)
++			*pa = 0xFFE00000 + *da;
++			if (*da < 0x10000)
+ 				XPm_RequestNode(NODE_TCM_0_A,
+ 						PM_CAP_ACCESS, 0,
+ 						REQUEST_ACK_BLOCKING);
+-			if (lda <= 0x20000 && lda_end >= 0x10000)
++			if (*da <= 0x20000 && lda_end >= 0x10000)
+ 				XPm_RequestNode(NODE_TCM_1_A,
+ 						PM_CAP_ACCESS, 0,
+ 						REQUEST_ACK_BLOCKING);
+-			if (lda <= 0x30000 && lda_end >= 0x20000)
++			if (*da <= 0x30000 && lda_end >= 0x20000)
+ 				XPm_RequestNode(NODE_TCM_0_B,
+ 						PM_CAP_ACCESS, 0,
+ 						REQUEST_ACK_BLOCKING);
+-			if (lda <= 0x40000 && lda_end >= 0x30000)
++			if (*da <= 0x40000 && lda_end >= 0x30000)
+ 				XPm_RequestNode(NODE_TCM_1_B,
+ 						PM_CAP_ACCESS, 0,
+ 						REQUEST_ACK_BLOCKING);
+ 		} else if (priv->cpu_id == NODE_RPU_1) {
+-			lpa = 0xFFE90000 + lda;
+-			if (lda < 0x10000)
++			*pa = 0xFFE90000 + *da;
++			if (*da < 0x10000)
+ 				XPm_RequestNode(NODE_TCM_1_A,
+ 						PM_CAP_ACCESS, 0,
+ 						REQUEST_ACK_BLOCKING);
+-			if (lda <= 0x30000 && lda_end >= 0x20000)
++			if (*da <= 0x30000 && lda_end >= 0x20000)
+ 				XPm_RequestNode(NODE_TCM_1_B,
+ 						PM_CAP_ACCESS, 0,
+ 						REQUEST_ACK_BLOCKING);
+ 		} else {
+ 			LPERROR("mmap failed: invalid cpu node: %d\r\n",
+ 				priv->cpu_id);
+-			return NULL;
++			return -RPROC_EINVAL;
+ 		}
+ 	}
+-	if (lpa == METAL_BAD_PHYS)
+-		lpa = lda;
+-	if (lpa == METAL_BAD_PHYS)
+-		return NULL;
++	if (*pa == METAL_BAD_PHYS)
++		*pa = *da;
++	if (*pa == METAL_BAD_PHYS)
++		return -RPROC_EINVAL;
+ 	mem = metal_allocate_memory(sizeof(*mem));
+ 	if (!mem)
+-		return NULL;
+-	mem->pa = lpa;
+-	mem->da = lda;
+-
+-	*io = metal_allocate_memory(sizeof(struct metal_io_region));
+-	if (!*io) {
++		return -RPROC_ENOMEM;
++	tmpio = metal_allocate_memory(sizeof(struct metal_io_region));
++	if (!tmpio) {
+ 		metal_free_memory(mem);
+-		return NULL;
++		return -RPROC_ENOMEM;
+ 	}
+-	metal_io_init(*io, (void *)mem->pa, &mem->pa, size,
++	remoteproc_init_mem(mem, NULL, *pa, *da, size, tmpio);
++	metal_io_init(tmpio, (void *)mem->pa, &mem->pa, size,
+ 		      sizeof(metal_phys_addr_t)<<3, attribute, NULL);
+-	mem->io = *io;
+-	metal_list_add_tail(&rproc->mems, &mem->node);
+-	*pa = lpa;
+-	*da = lda;
+-	mem->size = size;
+-	return metal_io_phys_to_virt(*io, mem->pa);
++	remoteproc_add_mem(rproc, mem);
++	*va = metal_io_phys_to_virt(tmpio, mem->pa);
++	if (io)
++		*io = tmpio;
++	return 0;
+ }
+ 
+ int r5_rproc_start(struct remoteproc *rproc)
+diff --git a/apps/machine/zynq7/platform_info.c open-amp/apps/machine/zynq7/platform_info.c
+index d753e0e..7885b31 100644
+--- a/apps/machine/zynq7/platform_info.c
++++ open-amp/apps/machine/zynq7/platform_info.c
+@@ -108,16 +108,16 @@ platform_create_proc(int proc_index, int rsc_index)
+ 	 */
+ 	/* mmap resource table */
+ 	pa = (metal_phys_addr_t)rsc_table;
+-	(void *)remoteproc_mmap(&rproc_inst, &pa,
+-				NULL, rsc_size,
+-				NORM_NONCACHE | STRONG_ORDERED,
+-				&rproc_inst.rsc_io);
++	remoteproc_mmap(&rproc_inst, &pa,
++			NULL, NULL, rsc_size,
++			NORM_NONCACHE | STRONG_ORDERED,
++			&rproc_inst.rsc_io);
+ 	/* mmap shared memory */
+ 	pa = SHARED_MEM_PA;
+-	(void *)remoteproc_mmap(&rproc_inst, &pa,
+-				NULL, SHARED_MEM_SIZE,
+-				NORM_NONCACHE | STRONG_ORDERED,
+-				NULL);
++	remoteproc_mmap(&rproc_inst, &pa,
++			NULL, NULL, SHARED_MEM_SIZE,
++			NORM_NONCACHE | STRONG_ORDERED,
++			NULL);
+ 
+ 	/* parse resource table to remoteproc */
+ 	ret = remoteproc_set_rsc_table(&rproc_inst, rsc_table, rsc_size);
+diff --git a/apps/machine/zynq7/zynq_a9_rproc.c open-amp/apps/machine/zynq7/zynq_a9_rproc.c
+index f830749..ad7cd49 100644
+--- a/apps/machine/zynq7/zynq_a9_rproc.c
++++ open-amp/apps/machine/zynq7/zynq_a9_rproc.c
+@@ -94,45 +94,43 @@ static void zynq_a9_proc_remove(struct remoteproc *rproc)
+ 		metal_device_close(dev);
+ }
+ 
+-static void *
++static int
+ zynq_a9_proc_mmap(struct remoteproc *rproc, metal_phys_addr_t *pa,
+-			metal_phys_addr_t *da, size_t size,
+-			unsigned int attribute, struct metal_io_region **io)
++		  metal_phys_addr_t *da, void **va, size_t size,
++		  unsigned int attribute, struct metal_io_region **io)
+ {
+ 	struct remoteproc_mem *mem;
+-	metal_phys_addr_t lpa, lda;
+ 	struct metal_io_region *tmpio;
+ 
+-	lpa = *pa;
+-	lda = *da;
+-
+-	if (lpa == METAL_BAD_PHYS && lda == METAL_BAD_PHYS)
+-		return NULL;
+-	if (lpa == METAL_BAD_PHYS)
+-		lpa = lda;
+-	if (lda == METAL_BAD_PHYS)
+-		lda = lpa;
++	/* va is the same as pa/da in this platform */
++	if (*pa != METAL_BAD_PHYS) {
++		*da = *pa;
++		*va = (void *)*pa;
++	} else if (*da != METAL_BAD_PHYS) {
++		*pa = *da;
++		*va = (void *)*da;
++	} else if (*va)
++		*pa = *da = (metal_phys_addr_t)*va;
++	else
++		return -RPROC_EINVAL;
+ 
+ 	if (!attribute)
+ 		attribute = NORM_NONCACHE | STRONG_ORDERED;
+ 	mem = metal_allocate_memory(sizeof(*mem));
+ 	if (!mem)
+-		return NULL;
++		return -RPROC_ENOMEM;
+ 	tmpio = metal_allocate_memory(sizeof(*tmpio));
+ 	if (!tmpio) {
+ 		metal_free_memory(mem);
+-		return NULL;
++		return -RPROC_ENOMEM;
+ 	}
+-	remoteproc_init_mem(mem, NULL, lpa, lda, size, tmpio);
+-	/* va is the same as pa in this platform */
+-	metal_io_init(tmpio, (void *)lpa, &mem->pa, size,
++	remoteproc_init_mem(mem, NULL, *pa, *da, size, tmpio);
++	metal_io_init(tmpio, *va, &mem->pa, size,
+ 		      sizeof(metal_phys_addr_t)<<3, attribute, NULL);
+ 	remoteproc_add_mem(rproc, mem);
+-	*pa = lpa;
+-	*da = lda;
+ 	if (io)
+ 		*io = tmpio;
+-	return metal_io_phys_to_virt(tmpio, mem->pa);
++	return 0;
+ }
+ 
+ static int zynq_a9_proc_notify(struct remoteproc *rproc, uint32_t id)
+diff --git a/apps/machine/zynqmp/platform_info.c open-amp/apps/machine/zynqmp/platform_info.c
+index 3081ec9..17abcc5 100644
+--- a/apps/machine/zynqmp/platform_info.c
++++ open-amp/apps/machine/zynqmp/platform_info.c
+@@ -84,7 +84,7 @@ static struct rpmsg_virtio_shm_pool shpool;
+ static struct remoteproc *
+ platform_create_proc(int proc_index, int rsc_index)
+ {
+-	void *rsc_table;
++	void *rsc_table = NULL;
+ 	int rsc_size;
+ 	int ret;
+ 	metal_phys_addr_t pa;
+@@ -102,8 +102,8 @@ platform_create_proc(int proc_index, int rsc_index)
+ 	/* Mmap resource table */
+ 	pa = RSC_MEM_PA;
+ 	printf("Calling mmap resource table.\r\n");
+-	rsc_table = remoteproc_mmap(&rproc_inst, &pa, NULL, rsc_size,
+-				    0, NULL);
++	remoteproc_mmap(&rproc_inst, &pa, NULL, &rsc_table, rsc_size,
++			0, NULL);
+ 	if (!rsc_table) {
+ 		fprintf(stderr, "ERROR: Failed to mmap resource table.\r\n");
+ 		return NULL;
+diff --git a/apps/machine/zynqmp/zynqmp_linux_r5_proc.c open-amp/apps/machine/zynqmp/zynqmp_linux_r5_proc.c
+index 2e4df9d..0950d0b 100644
+--- a/apps/machine/zynqmp/zynqmp_linux_r5_proc.c
++++ open-amp/apps/machine/zynqmp/zynqmp_linux_r5_proc.c
+@@ -143,38 +143,44 @@ static void zynqmp_linux_r5_proc_remove(struct remoteproc *rproc)
+         metal_device_close(prproc->shm_dev);
+ }
+ 
+-static void *
++static int
+ zynqmp_linux_r5_proc_mmap(struct remoteproc *rproc, metal_phys_addr_t *pa,
+-              metal_phys_addr_t *da, size_t size,
+-              unsigned int attribute, struct metal_io_region **io)
++                          metal_phys_addr_t *da, void **va, size_t size,
++                          unsigned int attribute, struct metal_io_region **io)
+ {
+     struct remoteproc_priv *prproc;
+-    metal_phys_addr_t lpa, lda;
+     struct metal_io_region *tmpio;
+ 
+     (void)attribute;
+     (void)size;
+     if (!rproc)
+-        return NULL;
++        return -RPROC_EINVAL;
+     prproc = rproc->priv;
+-    lpa = *pa;
+-    lda = *da;
+ 
+-    if (lpa == METAL_BAD_PHYS && lda == METAL_BAD_PHYS)
+-        return NULL;
+-    if (lpa == METAL_BAD_PHYS)
+-        lpa = lda;
+-    if (lda == METAL_BAD_PHYS)
+-        lda = lpa;
+     tmpio = prproc->shm_io;
+     if (!tmpio)
+-        return NULL;
++        return -RPROC_EINVAL;
++
++    if (*pa != METAL_BAD_PHYS) {
++        *da = *pa;
++        *va = metal_io_phys_to_virt(tmpio, *pa);
++        if (!*va)
++            return -RPROC_EINVAL;
++    } else if (*da != METAL_BAD_PHYS) {
++        *pa = *da;
++        *va = metal_io_phys_to_virt(tmpio, *da);
++        if (!*va)
++            return -RPROC_EINVAL;
++    } else if (*va) {
++        *pa = *da = metal_io_virt_to_phys(tmpio, *va);
++        if (*pa == METAL_BAD_PHYS)
++            return -RPROC_EINVAL;
++    } else
++        return -RPROC_EINVAL;
+ 
+-    *pa = lpa;
+-    *da = lda;
+     if (io)
+         *io = tmpio;
+-    return metal_io_phys_to_virt(tmpio, lpa);
++    return 0;
+ }
+ 
+ static int zynqmp_linux_r5_proc_notify(struct remoteproc *rproc, uint32_t id)
+diff --git a/apps/machine/zynqmp_r5/platform_info.c open-amp/apps/machine/zynqmp_r5/platform_info.c
+index 96c03c9..a2f7d9d 100644
+--- a/apps/machine/zynqmp_r5/platform_info.c
++++ open-amp/apps/machine/zynqmp_r5/platform_info.c
+@@ -114,16 +114,16 @@ platform_create_proc(int proc_index, int rsc_index)
+ 	 */
+ 	/* mmap resource table */
+ 	pa = (metal_phys_addr_t)rsc_table;
+-	(void *)remoteproc_mmap(&rproc_inst, &pa,
+-				NULL, rsc_size,
+-				NORM_NSHARED_NCACHE|PRIV_RW_USER_RW,
+-				&rproc_inst.rsc_io);
++	remoteproc_mmap(&rproc_inst, &pa,
++			NULL, NULL, rsc_size,
++			NORM_NSHARED_NCACHE|PRIV_RW_USER_RW,
++			&rproc_inst.rsc_io);
+ 	/* mmap shared memory */
+ 	pa = SHARED_MEM_PA;
+-	(void *)remoteproc_mmap(&rproc_inst, &pa,
+-				NULL, SHARED_MEM_SIZE,
+-				NORM_NSHARED_NCACHE|PRIV_RW_USER_RW,
+-				NULL);
++	remoteproc_mmap(&rproc_inst, &pa,
++			NULL, NULL, SHARED_MEM_SIZE,
++			NORM_NSHARED_NCACHE|PRIV_RW_USER_RW,
++			NULL);
+ 
+ 	/* parse resource table to remoteproc */
+ 	ret = remoteproc_set_rsc_table(&rproc_inst, rsc_table, rsc_size);
+diff --git a/apps/machine/zynqmp_r5/zynqmp_r5_a53_rproc.c open-amp/apps/machine/zynqmp_r5/zynqmp_r5_a53_rproc.c
+index ee25368..ef5299c 100644
+--- a/apps/machine/zynqmp_r5/zynqmp_r5_a53_rproc.c
++++ open-amp/apps/machine/zynqmp_r5/zynqmp_r5_a53_rproc.c
+@@ -109,45 +109,43 @@ static void zynqmp_r5_a53_proc_remove(struct remoteproc *rproc)
+ 	}
+ }
+ 
+-static void *
++static int
+ zynqmp_r5_a53_proc_mmap(struct remoteproc *rproc, metal_phys_addr_t *pa,
+-			metal_phys_addr_t *da, size_t size,
++			metal_phys_addr_t *da, void **va, size_t size,
+ 			unsigned int attribute, struct metal_io_region **io)
+ {
+ 	struct remoteproc_mem *mem;
+-	metal_phys_addr_t lpa, lda;
+ 	struct metal_io_region *tmpio;
+ 
+-	lpa = *pa;
+-	lda = *da;
+-
+-	if (lpa == METAL_BAD_PHYS && lda == METAL_BAD_PHYS)
+-		return NULL;
+-	if (lpa == METAL_BAD_PHYS)
+-		lpa = lda;
+-	if (lda == METAL_BAD_PHYS)
+-		lda = lpa;
++	/* va is the same as pa/da in this platform */
++	if (*pa != METAL_BAD_PHYS) {
++		*da = *pa;
++		*va = (void *)*pa;
++	} else if (*da != METAL_BAD_PHYS) {
++		*pa = *da;
++		*va = (void *)*da;
++	} else if (*va)
++		*pa = *da = (metal_phys_addr_t)*va;
++	else
++		return -RPROC_EINVAL;
+ 
+ 	if (!attribute)
+ 		attribute = NORM_SHARED_NCACHE | PRIV_RW_USER_RW;
+ 	mem = metal_allocate_memory(sizeof(*mem));
+ 	if (!mem)
+-		return NULL;
++		return -RPROC_ENOMEM;
+ 	tmpio = metal_allocate_memory(sizeof(*tmpio));
+ 	if (!tmpio) {
+ 		metal_free_memory(mem);
+-		return NULL;
++		return -RPROC_ENOMEM;
+ 	}
+-	remoteproc_init_mem(mem, NULL, lpa, lda, size, tmpio);
+-	/* va is the same as pa in this platform */
+-	metal_io_init(tmpio, (void *)lpa, &mem->pa, size,
++	remoteproc_init_mem(mem, NULL, *pa, *da, size, tmpio);
++	metal_io_init(tmpio, *va, &mem->pa, size,
+ 			  sizeof(metal_phys_addr_t)<<3, attribute, NULL);
+ 	remoteproc_add_mem(rproc, mem);
+-	*pa = lpa;
+-	*da = lda;
+ 	if (io)
+ 		*io = tmpio;
+-	return metal_io_phys_to_virt(tmpio, mem->pa);
++	return 0;
+ }
+ 
+ static int zynqmp_r5_a53_proc_notify(struct remoteproc *rproc, uint32_t id)
+diff --git a/apps/system/linux/machine/generic/platform_info.c open-amp/apps/system/linux/machine/generic/platform_info.c
+index 0b0f721..748fd83 100644
+--- a/apps/system/linux/machine/generic/platform_info.c
++++ open-amp/apps/system/linux/machine/generic/platform_info.c
+@@ -300,39 +300,43 @@ static void linux_proc_remove(struct remoteproc *rproc)
+ 	}
+ }
+ 
+-static void *
++static int
+ linux_proc_mmap(struct remoteproc *rproc, metal_phys_addr_t *pa,
+-		metal_phys_addr_t *da, size_t size,
++		metal_phys_addr_t *da, void **va, size_t size,
+ 		unsigned int attribute, struct metal_io_region **io)
+ {
+ 	struct remoteproc_mem *mem;
+ 	struct remoteproc_priv *prproc;
+-	metal_phys_addr_t lpa, lda;
+-	void *va;
+ 
+ 	(void)attribute;
+ 	(void)size;
+-	lpa = *pa;
+-	lda = *da;
+-
+-	if (lpa == METAL_BAD_PHYS && lda == METAL_BAD_PHYS)
+-		return NULL;
+-	if (lpa == METAL_BAD_PHYS)
+-		lpa = lda;
+-	if (lda == METAL_BAD_PHYS)
+-		lda = lpa;
+ 
+ 	if (!rproc)
+-		return NULL;
++		return -RPROC_EINVAL;
+ 	prproc = rproc->priv;
+ 	mem = &prproc->shm;
+-	va = metal_io_phys_to_virt(mem->io, lpa);
+-	if (va) {
+-		if (io)
+-			*io = mem->io;
+-		metal_list_add_tail(&rproc->mems, &mem->node);
+-	}
+-	return va;
++
++	if (*pa != METAL_BAD_PHYS) {
++		*da = *pa;
++		*va = metal_io_phys_to_virt(mem->io, *pa);
++		if (!*va)
++			return -RPROC_EINVAL;
++	} else if (*da != METAL_BAD_PHYS) {
++		*pa = *da;
++		*va = metal_io_phys_to_virt(mem->io, *da);
++		if (!*va)
++			return -RPROC_EINVAL;
++	} else if (*va) {
++		*pa = *da = metal_io_virt_to_phys(mem->io, *va);
++		if (*pa == METAL_BAD_PHYS)
++			return -RPROC_EINVAL;
++	} else
++		return -RPROC_EINVAL;
++
++	remoteproc_add_mem(rproc, mem);
++	if (io)
++		*io = mem->io;
++	return 0;
+ }
+ 
+ static int linux_proc_notify(struct remoteproc *rproc, uint32_t id)
+@@ -391,7 +395,7 @@ static struct remoteproc *
+ platform_create_proc(int proc_index, int rsc_index)
+ {
+ 	struct remoteproc_priv *prproc;
+-	void *rsc_table, *rsc_table_shm;
++	void *rsc_table, *rsc_table_shm = NULL;
+ 	int rsc_size;
+ 	int ret;
+ 	metal_phys_addr_t pa;
+@@ -420,8 +424,8 @@ platform_create_proc(int proc_index, int rsc_index)
+ 
+ 	/* Mmap resource table */
+ 	pa = RSC_MEM_PA;
+-	rsc_table_shm = remoteproc_mmap(&rproc_inst, &pa, NULL, rsc_size,
+-					0, &rproc_inst.rsc_io);
++	remoteproc_mmap(&rproc_inst, &pa, NULL, &rsc_table_shm, rsc_size,
++			0, &rproc_inst.rsc_io);
+ 
+ 	/* parse resource table to remoteproc */
+ 	ret = remoteproc_set_rsc_table(&rproc_inst, rsc_table_shm, rsc_size);
+diff --git a/lib/include/openamp/remoteproc.h open-amp/lib/include/openamp/remoteproc.h
+index a83aa12..b34cb1a 100644
+--- a/lib/include/openamp/remoteproc.h
++++ open-amp/lib/include/openamp/remoteproc.h
+@@ -400,10 +400,10 @@ struct remoteproc_ops {
+ 	struct remoteproc *(*init)(struct remoteproc *rproc,
+ 				   struct remoteproc_ops *ops, void *arg);
+ 	void (*remove)(struct remoteproc *rproc);
+-	void *(*mmap)(struct remoteproc *rproc,
+-		      metal_phys_addr_t *pa, metal_phys_addr_t *da,
+-		      size_t size, unsigned int attribute,
+-		      struct metal_io_region **io);
++	int (*mmap)(struct remoteproc *rproc,
++		    metal_phys_addr_t *pa, metal_phys_addr_t *da,
++		    void **va, size_t size, unsigned int attribute,
++		    struct metal_io_region **io);
+ 	int (*handle_rsc)(struct remoteproc *rproc, void *rsc, size_t len);
+ 	int (*config)(struct remoteproc *rproc, void *data);
+ 	int (*start)(struct remoteproc *rproc);
+@@ -606,16 +606,17 @@ remoteproc_get_io_with_va(struct remoteproc *rproc,
+  * @rproc - pointer to the remote processor
+  * @pa - physical address pointer
+  * @da - device address pointer
++ * @va - virtual address pointer
+  * @size - size of the memory
+  * @attribute - memory attribute
+  * @io - pointer to the I/O region
+  *
+- * returns pointer to the memory
++ * returns 0 for success and negative value for errors
+  */
+-void *remoteproc_mmap(struct remoteproc *rproc,
+-		      metal_phys_addr_t *pa, metal_phys_addr_t *da,
+-		      size_t size, unsigned int attribute,
+-		      struct metal_io_region **io);
++int remoteproc_mmap(struct remoteproc *rproc,
++		    metal_phys_addr_t *pa, metal_phys_addr_t *da,
++		    void **va, size_t size, unsigned int attribute,
++		    struct metal_io_region **io);
+ 
+ /**
+  * remoteproc_set_rsc_table
+diff --git a/lib/remoteproc/remoteproc.c open-amp/lib/remoteproc/remoteproc.c
+index 5afb40c..34b8cb8 100644
+--- a/lib/remoteproc/remoteproc.c
++++ open-amp/lib/remoteproc/remoteproc.c
+@@ -295,13 +295,14 @@ struct metal_io_region *
+ remoteproc_get_io_with_pa(struct remoteproc *rproc,
+ 			  metal_phys_addr_t pa)
+ {
+-	struct remoteproc_mem *mem;
++	struct metal_io_region *io;
++	int ret;
+ 
+-	mem = remoteproc_get_mem(rproc, NULL, pa, METAL_BAD_PHYS, NULL, 0);
+-	if (mem)
+-		return mem->io;
+-	else
++	ret = remoteproc_mmap(rproc, &pa, NULL, NULL, 0, 0, &io);
++	if (ret < 0)
+ 		return NULL;
++
++	return io;
+ }
+ 
+ struct metal_io_region *
+@@ -309,48 +310,44 @@ remoteproc_get_io_with_da(struct remoteproc *rproc,
+ 			  metal_phys_addr_t da,
+ 			  unsigned long *offset)
+ {
+-	struct remoteproc_mem *mem;
+-
+-	mem = remoteproc_get_mem(rproc, NULL, METAL_BAD_PHYS, da, NULL, 0);
+-	if (mem) {
+-		struct metal_io_region *io;
+-		metal_phys_addr_t pa;
++	struct metal_io_region *io;
++	metal_phys_addr_t pa = METAL_BAD_PHYS;
++	int ret;
+ 
+-		io = mem->io;
+-		pa = remoteproc_datopa(mem, da);
+-		*offset = metal_io_phys_to_offset(io, pa);
+-		return io;
+-	} else {
++	ret = remoteproc_mmap(rproc, &pa, &da, NULL, 0, 0, &io);
++	if (ret < 0)
+ 		return NULL;
+-	}
++
++	*offset = metal_io_phys_to_offset(io, pa);
++	return io;
+ }
+ 
+ struct metal_io_region *
+ remoteproc_get_io_with_va(struct remoteproc *rproc, void *va)
+ {
+-	struct remoteproc_mem *mem;
++	struct metal_io_region *io;
++	int ret;
+ 
+-	mem = remoteproc_get_mem(rproc, NULL, METAL_BAD_PHYS, METAL_BAD_PHYS,
+-				 va, 0);
+-	if (mem)
+-		return mem->io;
+-	else
++	ret = remoteproc_mmap(rproc, NULL, NULL, &va, 0, 0, &io);
++	if (ret < 0)
+ 		return NULL;
++
++	return io;
+ }
+ 
+-void *remoteproc_mmap(struct remoteproc *rproc,
+-		      metal_phys_addr_t *pa, metal_phys_addr_t *da,
+-		      size_t size, unsigned int attribute,
+-		      struct metal_io_region **io)
++int remoteproc_mmap(struct remoteproc *rproc,
++		    metal_phys_addr_t *pa, metal_phys_addr_t *da,
++		    void **va, size_t size, unsigned int attribute,
++		    struct metal_io_region **io)
+ {
+-	void *va = NULL;
++	void *lva = NULL;
+ 	metal_phys_addr_t lpa, lda;
+ 	struct remoteproc_mem *mem;
+ 
+ 	if (!rproc)
+-		return NULL;
+-	else if (!pa && !da)
+-		return NULL;
++		return -RPROC_EINVAL;
++	else if (!pa && !da && !va)
++		return -RPROC_EINVAL;
+ 	if (pa)
+ 		lpa = *pa;
+ 	else
+@@ -359,24 +356,40 @@ void *remoteproc_mmap(struct remoteproc *rproc,
+ 		lda =  *da;
+ 	else
+ 		lda = METAL_BAD_PHYS;
+-	mem = remoteproc_get_mem(rproc, NULL, lpa, lda, NULL, size);
++	if (va)
++		lva = *va;
++	mem = remoteproc_get_mem(rproc, NULL, lpa, lda, lva, size);
+ 	if (mem) {
+-		if (lpa != METAL_BAD_PHYS)
++		if (lpa != METAL_BAD_PHYS) {
+ 			lda = remoteproc_patoda(mem, lpa);
+-		else if (lda != METAL_BAD_PHYS)
++			lva = metal_io_phys_to_virt(mem->io, lpa);
++		} else if (lda != METAL_BAD_PHYS) {
+ 			lpa = remoteproc_datopa(mem, lda);
++			lva = metal_io_phys_to_virt(mem->io, lpa);
++		} else if (lva != NULL) {
++			lpa = metal_io_virt_to_phys(mem->io, lva);
++			lda = remoteproc_patoda(mem, lpa);
++		}
+ 		if (io)
+ 			*io = mem->io;
+-		va = metal_io_phys_to_virt(mem->io, lpa);
+-	} else if (rproc->ops->mmap) {
+-		va = rproc->ops->mmap(rproc, &lpa, &lda, size, attribute, io);
++	} else {
++		int ret = -RPROC_EINVAL;
++
++		if (rproc->ops->mmap)
++			ret = rproc->ops->mmap(rproc, &lpa, &lda, &lva, size, attribute, io);
++
++		if (ret < 0)
++			return ret;
+ 	}
+ 
+ 	if (pa)
+ 		*pa  = lpa;
+ 	if (da)
+ 		*da = lda;
+-	return va;
++	if (va)
++		*va = lva;
++
++	return 0;
+ }
+ 
+ int remoteproc_load(struct remoteproc *rproc, const char *path,
+@@ -529,8 +542,7 @@ int remoteproc_load(struct remoteproc *rproc, const char *path,
+ 			img_data = NULL;
+ 			/* get the I/O region from remoteproc */
+ 			pa = METAL_BAD_PHYS;
+-			(void)remoteproc_mmap(rproc, &pa, &da, nmemsize, 0,
+-					      &io);
++			remoteproc_mmap(rproc, &pa, &da, NULL, nmemsize, 0, &io);
+ 			if (pa == METAL_BAD_PHYS || !io) {
+ 				metal_log(METAL_LOG_ERROR,
+ 					  "load failed, no mapping for 0x%llx.\r\n",
+@@ -600,8 +612,9 @@ int remoteproc_load(struct remoteproc *rproc, const char *path,
+ 
+ 		metal_log(METAL_LOG_DEBUG,
+ 			  "%s, update resource table\r\n", __func__);
+-		rsc_table = remoteproc_mmap(rproc, NULL, &rsc_da,
+-					    rsc_size, 0, &io);
++		rsc_table = NULL;
++		remoteproc_mmap(rproc, NULL, &rsc_da,
++				&rsc_table, rsc_size, 0, &io);
+ 		if (rsc_table) {
+ 			size_t rsc_io_offset;
+ 
+@@ -760,7 +773,7 @@ int remoteproc_load_noblock(struct remoteproc *rproc,
+ 		if (da != RPROC_LOAD_ANYADDR) {
+ 			/* get the I/O region from remoteproc */
+ 			*pa = METAL_BAD_PHYS;
+-			(void)remoteproc_mmap(rproc, pa, &da, *nmlen, 0, io);
++			remoteproc_mmap(rproc, pa, &da, NULL, *nmlen, 0, io);
+ 			if (*pa == METAL_BAD_PHYS || !io) {
+ 				metal_log(METAL_LOG_ERROR,
+ 					  "load failed, no mapping for 0x%llx.\r\n",
+@@ -785,8 +798,8 @@ int remoteproc_load_noblock(struct remoteproc *rproc,
+ 				ret = -RPROC_ENOMEM;
+ 				goto error1;
+ 			}
+-			rsc_table = remoteproc_mmap(rproc, NULL, &rsc_da,
+-						    rsc_size, 0, io);
++			remoteproc_mmap(rproc, NULL, &rsc_da,
++					&rsc_table, rsc_size, 0, io);
+ 			if (!*io) {
+ 				metal_log(METAL_LOG_ERROR,
+ 					  "load failed: failed to mmap rsc\r\n");
+@@ -924,7 +937,7 @@ remoteproc_create_virtio(struct remoteproc *rproc,
+ 		metal_phys_addr_t da;
+ 		unsigned int num_descs, align;
+ 		struct metal_io_region *io;
+-		void *va;
++		void *va = NULL;
+ 		size_t size;
+ 		int ret;
+ 
+@@ -934,7 +947,7 @@ remoteproc_create_virtio(struct remoteproc *rproc,
+ 		num_descs = vring_rsc->num;
+ 		align = vring_rsc->align;
+ 		size = vring_size(num_descs, align);
+-		va = remoteproc_mmap(rproc, NULL, &da, size, 0, &io);
++		remoteproc_mmap(rproc, NULL, &da, &va, size, 0, &io);
+ 		if (!va)
+ 			goto err1;
+ 		ret = rproc_virtio_init_vring(vdev, i, notifyid,
+diff --git a/lib/remoteproc/rsc_table_parser.c open-amp/lib/remoteproc/rsc_table_parser.c
+index e43fa72..0bfd163 100644
+--- a/lib/remoteproc/rsc_table_parser.c
++++ open-amp/lib/remoteproc/rsc_table_parser.c
+@@ -109,7 +109,7 @@ int handle_carve_out_rsc(struct remoteproc *rproc, void *rsc)
+ 	da = carve_rsc->da;
+ 	size = carve_rsc->len;
+ 	attribute = carve_rsc->flags;
+-	if (remoteproc_mmap(rproc, &pa, &da, size, attribute, NULL))
++	if (remoteproc_mmap(rproc, &pa, &da, NULL, size, attribute, NULL))
+ 		return 0;
+ 	else
+ 		return -RPROC_EINVAL;
+-- 
+2.17.1
+

@@ -26,6 +26,7 @@
 #include <nuttx/board.h>
 
 #include "up_internal.h"
+#include "qemu_intel64.h"
 
 /****************************************************************************
  * Public Functions
@@ -56,9 +57,15 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_BOARDCTL
 int board_app_initialize(uintptr_t arg)
 {
-  return 0;
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  /* Board initialization already performed by board_late_initialize() */
+
+  return OK;
+#else
+  /* Perform board-specific initialization */
+
+  return qemu_bringup();
+#endif
 }
-#endif /* CONFIG_LIB_BOARDCTL */

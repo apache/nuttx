@@ -51,7 +51,7 @@
 
 #include <nuttx/arch.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "lc823450_dma.h"
 #include "lc823450_syscontrol.h"
 #include <arch/chip/clk.h>
@@ -339,10 +339,10 @@ void lc823450_dma_test()
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_dma_initialize
+ * Name: arm_dma_initialize
  ****************************************************************************/
 
-void up_dma_initialize(void)
+void arm_dma_initialize(void)
 {
   int i;
 

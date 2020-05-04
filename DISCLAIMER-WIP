@@ -11,6 +11,8 @@ a list of known issues the project is currently aware of (note that this list, b
 is likely to be incomplete): 
 
  * Releases may have incomplete licensing conditions.
+ * Some ASF files still have BSD headers.  Most of the top contributors have signed an ICLA and
+   we are working on updating the headers and getting approvals from other copyright holders.
 
 If you are planning to incorporate this work into your product/project, please be aware that
 you will need to conduct a thorough licensing review to determine the overall implications of 

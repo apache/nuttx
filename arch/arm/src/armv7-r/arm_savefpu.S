@@ -53,7 +53,7 @@
  * Public Symbols
  ************************************************************************************/
 
-	.globl		up_savefpu
+	.globl		arm_savefpu
 
 /************************************************************************************
  * Public Functions
@@ -62,14 +62,14 @@
 	.text
 
 /************************************************************************************
- * Name: up_savefpu
+ * Name: arm_savefpu
  *
  * Description:
  *   Given the pointer to a register save area (in R0), save the state of the
  *   floating point registers.
  *
  * C Function Prototype:
- *   void up_savefpu(uint32_t *regs);
+ *   void arm_savefpu(uint32_t *regs);
  *
  * Input Parameters:
  *   regs - A pointer to the register save area in which to save the floating point
@@ -80,10 +80,10 @@
  *
  ************************************************************************************/
 
-	.globl	up_savefpu
-	.type	up_savefpu, function
+	.globl	arm_savefpu
+	.type	arm_savefpu, function
 
-up_savefpu:
+arm_savefpu:
 
 	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
 
@@ -101,6 +101,6 @@ up_savefpu:
 	str		r2, [r1], #4			/* Save the floating point control and status register */
 	bx		lr
 
-	.size	up_savefpu, .-up_savefpu
+	.size	arm_savefpu, .-arm_savefpu
 #endif /* CONFIG_ARCH_FPU */
 	.end

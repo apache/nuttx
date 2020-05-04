@@ -47,7 +47,7 @@
 #include <arch/chip/scu.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "cxd56_scufifo.h"
 #include "hardware/cxd56_scufifo.h"

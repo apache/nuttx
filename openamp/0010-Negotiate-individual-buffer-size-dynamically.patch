@@ -1,0 +1,159 @@
+From 2a64e1f23b140e1e2fdabfe77ed7a11062ef341a Mon Sep 17 00:00:00 2001
+From: anchao <anchao@pinecone.net>
+Date: Mon, 10 Dec 2018 16:26:39 +0800
+Subject: [PATCH 10/10] Negotiate individual buffer size dynamically
+
+If slave support VIRTIO_RPMSG_F_BUFSZ(0x04) feature, master
+determine the buffer size from config space(first 8 bytes),
+otherwise the default size(512 bytes) will be used.
+
+Signed-off-by: anchao <anchao@pinecone.net>
+---
+ lib/include/openamp/remoteproc.h   | 17 +++++++++++++++++
+ lib/include/openamp/rpmsg_virtio.h |  4 ++++
+ lib/rpmsg/rpmsg_virtio.c           | 22 ++++++++++++++++------
+ 3 files changed, 37 insertions(+), 6 deletions(-)
+
+diff --git a/lib/include/openamp/remoteproc.h open-amp/lib/include/openamp/remoteproc.h
+index b34cb1a..ee9162a 100644
+--- a/lib/include/openamp/remoteproc.h
++++ open-amp/lib/include/openamp/remoteproc.h
+@@ -303,6 +303,23 @@ struct fw_rsc_vdev {
+ 	struct fw_rsc_vdev_vring vring[0];
+ } METAL_PACKED_END;
+ 
++/**
++ * struct fw_rsc_config - configuration space declaration
++ * @txbuf_size: the tx buffer size
++ * @rxbuf_size: the rx buffer size
++ * @reserved: reserved (must be zero)
++ *
++ * This structure immediately follow fw_rsc_vdev to provide the config info.
++ */
++METAL_PACKED_BEGIN
++struct fw_rsc_config {
++	/* The tx/rx individual buffer size(if VIRTIO_RPMSG_F_BUFSZ) */
++	uint32_t txbuf_size;
++	uint32_t rxbuf_size;
++	uint32_t reserved[14]; /* Reserve for the future use */
++	/* Put the customize config here */
++} METAL_PACKED_END;
++
+ /**
+  * struct fw_rsc_vendor - remote processor vendor specific resource
+  * @len: length of the resource
+diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
+index 4d3093b..7f0c573 100644
+--- a/lib/include/openamp/rpmsg_virtio.h
++++ open-amp/lib/include/openamp/rpmsg_virtio.h
+@@ -16,6 +16,7 @@
+ #include <metal/mutex.h>
+ #include <openamp/rpmsg.h>
+ #include <openamp/virtio.h>
++#include <openamp/remoteproc.h>
+ 
+ #if defined __cplusplus
+ extern "C" {
+@@ -29,6 +30,7 @@ extern "C" {
+ /* The feature bitmap for virtio rpmsg */
+ #define VIRTIO_RPMSG_F_NS	0 /* RP supports name service notifications */
+ #define VIRTIO_RPMSG_F_ACK	1 /* RP supports name service acknowledge */
++#define VIRTIO_RPMSG_F_BUFSZ	2 /* RP supports get buffer size from config space */
+ 
+ /**
+  * struct rpmsg_virtio_shm_pool - shared memory pool used for rpmsg buffers
+@@ -45,6 +47,7 @@ struct rpmsg_virtio_shm_pool {
+ /**
+  * struct rpmsg_virtio_device - representation of a rpmsg device based on virtio
+  * @rdev: rpmsg device, first property in the struct
++ * @config: rpmsg config information
+  * @vdev: pointer to the virtio device
+  * @rvq: pointer to receive virtqueue
+  * @svq: pointer to send virtqueue
+@@ -53,6 +56,7 @@ struct rpmsg_virtio_shm_pool {
+  */
+ struct rpmsg_virtio_device {
+ 	struct rpmsg_device rdev;
++	struct fw_rsc_config config;
+ 	struct virtio_device *vdev;
+ 	struct virtqueue *rvq;
+ 	struct virtqueue *svq;
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 9988a1e..d127084 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -138,8 +138,8 @@ static void *rpmsg_virtio_get_tx_buffer(struct rpmsg_virtio_device *rvdev,
+ 		data = virtqueue_get_buffer(rvdev->svq, len, idx);
+ 		if (!data) {
+ 			data = rpmsg_virtio_shm_pool_get_buffer(rvdev->shpool,
+-							RPMSG_BUFFER_SIZE);
+-			*len = RPMSG_BUFFER_SIZE;
++							rvdev->config.rxbuf_size);
++			*len = rvdev->config.rxbuf_size;
+ 			*idx = 0;
+ 		}
+ 	}
+@@ -232,7 +232,7 @@ static int _rpmsg_virtio_get_buffer_size(struct rpmsg_virtio_device *rvdev)
+ 		 * If device role is Master then buffers are provided by us,
+ 		 * so just provide the macro.
+ 		 */
+-		length = RPMSG_BUFFER_SIZE - sizeof(struct rpmsg_hdr);
++		length = rvdev->config.rxbuf_size - sizeof(struct rpmsg_hdr);
+ 	}
+ #endif /*!VIRTIO_SLAVE_ONLY*/
+ 
+@@ -649,11 +649,14 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ 	rvdev->vdev = vdev;
+ 	rdev->ns_bind_cb = ns_bind_cb;
+ 	vdev->priv = rvdev;
++	rvdev->config.txbuf_size = RPMSG_BUFFER_SIZE;
++	rvdev->config.rxbuf_size = RPMSG_BUFFER_SIZE;
+ 	rdev->ops.hold_rx_buffer = rpmsg_virtio_hold_rx_buffer;
+ 	rdev->ops.release_rx_buffer = rpmsg_virtio_release_rx_buffer;
+ 	rdev->ops.get_tx_payload_buffer = rpmsg_virtio_get_tx_payload_buffer;
+ 	rdev->ops.send_offchannel_nocopy = rpmsg_virtio_send_offchannel_nocopy;
+ 	rdev->ops.send_offchannel_raw = rpmsg_virtio_send_offchannel_raw;
++
+ 	role = rpmsg_virtio_get_role(rvdev);
+ 
+ #ifndef VIRTIO_MASTER_ONLY
+@@ -666,6 +669,13 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ 	rdev->support_ns = !!(vdev->features & (1 << VIRTIO_RPMSG_F_NS));
+ 	rdev->support_ack = !!(vdev->features & (1 << VIRTIO_RPMSG_F_ACK));
+ 
++	if (vdev->features & (1 << VIRTIO_RPMSG_F_BUFSZ)) {
++		rpmsg_virtio_read_config(rvdev,
++			0,
++			&rvdev->config,
++			sizeof(rvdev->config));
++	}
++
+ #ifndef VIRTIO_SLAVE_ONLY
+ 	if (role == RPMSG_MASTER) {
+ 		/*
+@@ -726,11 +736,11 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ 		unsigned int idx;
+ 		void *buffer;
+ 
+-		vqbuf.len = RPMSG_BUFFER_SIZE;
++		vqbuf.len = rvdev->config.txbuf_size;
+ 		for (idx = 0; idx < rvdev->rvq->vq_nentries; idx++) {
+ 			/* Initialize TX virtqueue buffers for remote device */
+ 			buffer = rpmsg_virtio_shm_pool_get_buffer(shpool,
+-							RPMSG_BUFFER_SIZE);
++						rvdev->config.txbuf_size);
+ 
+ 			if (!buffer) {
+ 				return RPMSG_ERR_NO_BUFF;
+@@ -741,7 +751,7 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ 			metal_io_block_set(shm_io,
+ 					   metal_io_virt_to_offset(shm_io,
+ 								   buffer),
+-					   0x00, RPMSG_BUFFER_SIZE);
++					   0x00, rvdev->config.txbuf_size);
+ 			status =
+ 				virtqueue_add_buffer(rvdev->rvq, &vqbuf, 0, 1,
+ 						     buffer);
+-- 
+2.17.1
+

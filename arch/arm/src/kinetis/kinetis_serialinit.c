@@ -63,7 +63,7 @@
  * Description:
  *   Performs the low level UART and LPUART initialization early in debug
  *   so that the serial console will be available during bootup.  This must
- *   be called before up_serialinit.  NOTE:  This function depends on GPIO
+ *   be called before arm_serialinit.  NOTE:  This function depends on GPIO
  *   pin configuration performed in up_consoleinit() and main clock
  *   initialization performed in up_clkinitialize().
  *
@@ -87,7 +87,7 @@ void kinetis_earlyserialinit(void)
 #endif
 
 /****************************************************************************
- * Name: up_serialinit
+ * Name: arm_serialinit
  *
  * Description:
  *   Register all the serial console and serial ports.  This assumes
@@ -96,7 +96,7 @@ void kinetis_earlyserialinit(void)
  ****************************************************************************/
 
 #if defined(USE_SERIALDRIVER)
-void up_serialinit(void)
+void arm_serialinit(void)
 {
 #if defined(HAVE_UART_DEVICE) ||defined(HAVE_LPUART_DEVICE)
   uint32_t start = 0;

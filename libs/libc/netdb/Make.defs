@@ -55,7 +55,8 @@ endif
 # Add DNS lookup support
 
 ifeq ($(CONFIG_NETDB_DNSCLIENT),y)
-CSRCS += lib_dnsinit.c lib_dnsbind.c lib_dnsquery.c lib_dnsaddserver.c
+CSRCS += lib_dnsinit.c lib_dnsbind.c lib_dnsquery.c
+CSRCS += lib_dnsaddserver.c lib_dnsdefaultserver.c
 CSRCS += lib_dnsforeach.c lib_dnsnotify.c
 
 ifneq ($(CONFIG_NETDB_DNSCLIENT_ENTRIES),0)

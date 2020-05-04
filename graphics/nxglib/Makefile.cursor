@@ -72,7 +72,7 @@ GEN_CSRCS      = $(DRAW_CSRC) $(ERASE_CSRC) $(BACKUP_CSRC)
 BLITDIR        = cursor
 
 all:    $(GEN_CSRCS)
-.PHONY : clean distclean
+.PHONY : distclean
 
 $(DRAW_CSRC) : $(BLITDIR)/nxglib_cursor_draw.c nxglib_bitblit.h
 ifneq ($(NXGLIB_BITSPERPIXEL),)
@@ -95,11 +95,7 @@ ifneq ($(NXGLIB_BITSPERPIXEL),)
 	$(Q) rm -f  $(BACKUP_TMP)
 endif
 
-clean:
-	$(call DELFILE, *.i)
-	$(call CLEAN)
-
-distclean: clean
+distclean:
 	$(call DELFILE, nxglib_cursor_draw_*bpp.c)
 	$(call DELFILE, nxglib_cursor_erase_*bpp.c)
 	$(call DELFILE, nxglib_cursor_backup_*bpp.c)

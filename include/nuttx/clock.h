@@ -74,15 +74,10 @@
 #if defined(CONFIG_SCHED_TICKLESS)
   /* Case 1: There is no global timer data */
 
-#elif defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
-  /* Case 3: Kernel mode of protected kernel build */
+#elif defined(__KERNEL__)
+  /* Case 3: Kernel mode of protected/kernel build */
 
-#    define __HAVE_KERNEL_GLOBALS 1
-
-#elif defined(CONFIG_BUILD_KERNEL) && defined(__KERNEL__)
-  /* Case 3: Kernel only build */
-
-#    define __HAVE_KERNEL_GLOBALS 1
+#  define __HAVE_KERNEL_GLOBALS 1
 
 #elif defined(CONFIG_LIB_SYSCALL)
   /* Case 4: Building with SYSCALLs enabled, but not part of a kernel build */
@@ -90,7 +85,7 @@
 #else
   /* Case 2: Un-protected, non-kernel build */
 
-#    define __HAVE_KERNEL_GLOBALS 1
+#  define __HAVE_KERNEL_GLOBALS 1
 #endif
 
 /* If CONFIG_SYSTEM_TIME64 is selected and the CPU supports long long types,
@@ -441,7 +436,7 @@ int clock_systimespec(FAR struct timespec *ts);
  *   Return load measurement data for the select PID.
  *
  * Input Parameters:
- *   pid - The task ID of the thread of interest.  pid == 0 is the IDLE thread.
+ *   pid - The task ID of the thread of interest. pid == 0 is IDLE thread.
  *   cpuload - The location to return the CPU load
  *
  * Returned Value:

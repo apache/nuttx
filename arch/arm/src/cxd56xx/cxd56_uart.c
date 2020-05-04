@@ -47,8 +47,8 @@
 
 #include <errno.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 #include "chip.h"
 #include "cxd56_config.h"
@@ -325,14 +325,14 @@ static int cxd56_uart_clockchange(uint8_t id)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: arm_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void arm_lowputc(char ch)
 {
 #if defined HAVE_UART && defined HAVE_CONSOLE
   /* Wait for the transmitter to be available */

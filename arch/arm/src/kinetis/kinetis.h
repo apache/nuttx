@@ -50,7 +50,7 @@
 
 #include <nuttx/irq.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "kinetis_config.h"
 #include "chip.h"
 #include "hardware/kinetis_port.h"
@@ -360,7 +360,7 @@ void kinetis_clockconfig(void);
  * Description:
  *   Performs the low level UART/LPUART initialization early in debug so that
  *   the serial console will be available during bootup.  This must be called
- *   before up_serialinit.
+ *   before arm_serialinit.
  *
  ****************************************************************************/
 
@@ -374,7 +374,7 @@ void kinetis_earlyserialinit(void);
  * Description:
  *   Performs the low level UART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.
+ *   before arm_serialinit.
  *
  ****************************************************************************/
 
@@ -388,7 +388,7 @@ void kinetis_uart_earlyserialinit(void);
  * Description:
  *   Performs the low level LPUART initialization early in debug so that the
  *   serial console will be available during bootup.  This must be called
- *   before up_serialinit.
+ *   before arm_serialinit.
  *
  ****************************************************************************/
 

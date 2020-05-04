@@ -52,7 +52,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "cxd56_rtc.h"
 
 #include "hardware/cxd5602_topreg.h"

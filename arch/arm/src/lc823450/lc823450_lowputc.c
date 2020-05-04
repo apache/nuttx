@@ -42,8 +42,8 @@
 
 #include <stdint.h>
 
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 #include "chip.h"
 
@@ -133,14 +133,14 @@
  **************************************************************************/
 
 /**************************************************************************
- * Name: up_lowputc
+ * Name: arm_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
  **************************************************************************/
 
-void up_lowputc(char ch)
+void arm_lowputc(char ch)
 {
 
 #ifdef CONFIG_DEV_CONSOLE_SWITCH

@@ -67,8 +67,8 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "lpc43_usb0dev.h"
 #include "lpc43_creg.h"
@@ -2604,7 +2604,7 @@ static int lpc43_pullup(struct usbdev_s *dev, bool enable)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_usbinitialize
+ * Name: arm_usbinitialize
  *
  * Description:
  *   Initialize USB hardware.
@@ -2616,7 +2616,7 @@ static int lpc43_pullup(struct usbdev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-void up_usbinitialize(void)
+void arm_usbinitialize(void)
 {
   struct lpc43_usbdev_s *priv = &g_usbdev;
   int i;
@@ -2735,10 +2735,10 @@ void up_usbinitialize(void)
 }
 
 /****************************************************************************
- * Name: up_usbuninitialize
+ * Name: arm_usbuninitialize
  ****************************************************************************/
 
-void up_usbuninitialize(void)
+void arm_usbuninitialize(void)
 {
   struct lpc43_usbdev_s *priv = &g_usbdev;
   irqstate_t flags;

@@ -76,7 +76,7 @@ config NETDB_DNSCLIENT_ENTRIES
 		cached and if the name mapping can be found in that cache, the
 		network query can be avoid.  Of course, this is only useful if you
 		query the same name often and if the IP address of the name is
-		stable.  If the IP address can change, then cachin DNS address
+		stable.  If the IP address can change, then caching DNS address
 		might have undesirable side-effects (see help for
 		CONFIG_NETDB_DNSCLIENT_LIFESEC).
 
@@ -155,6 +155,14 @@ config NETDB_RESOLVCONF_NONSTDPORT
 
 endif # NETDB_RESOLVCONF
 
+config NETDB_DNSSERVER_NAMESERVERS
+	int "Max number of configured nameservers"
+	default 1
+	depends on !NETDB_RESOLVCONF
+	---help---
+		This setting determines how many nameservers there can be
+		in use concurrently.
+
 choice
 	prompt "DNS server address type"
 	default NETDB_DNSSERVER_IPv4 if NET_IPv4
@@ -166,7 +174,7 @@ config NETDB_DNSSERVER_NOADDR
 	bool "No default DNS server address"
 	---help---
 		There is not default DNS nameserver address.  Application must call
-		dns_add_server() at runtime to add the DNS server address.
+		dns_add_nameserver() at runtime to add the DNS server address.
 
 config NETDB_DNSSERVER_IPv4
 	bool "IPv4 DNS server address"
@@ -174,7 +182,7 @@ config NETDB_DNSSERVER_IPv4
 	---help---
 		An IPv4 default DNS nameserver address will be provided.  Application
 		may overwrite this start default server address by calling
-		dns_add_server() at runtime.
+		dns_add_nameserver() at runtime.
 
 config NETDB_DNSSERVER_IPv6
 	bool "IPv6 DNS server address"
@@ -182,7 +190,7 @@ config NETDB_DNSSERVER_IPv6
 	---help---
 		An IPv6 default DNS nameserver address will be provided.  Application
 		may overwrite this start default server address by calling
-		dns_add_server() at runtime.
+		dns_add_nameserver() at runtime.
 
 endchoice # DNS server address type
 

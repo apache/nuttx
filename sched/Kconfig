@@ -341,8 +341,8 @@ endif # SMP
 choice
 	prompt "Initialization Task"
 	default INIT_ENTRYPOINT if !BUILD_KERNEL
-	default INIT_FILEPATH if BUILD_KERNEL && !BINFMT_DISABLE
-	default INIT_NONE if BUILD_KERNEL && BINFMT_DISABLE
+	default INIT_FILEPATH if !BINFMT_DISABLE
+	default INIT_NONE if BINFMT_DISABLE
 
 config INIT_NONE
 	bool "None"
@@ -388,7 +388,7 @@ config INIT_SYMTAB
 	string "Symbol table"
 	default "NULL" if !EXECFUNCS_HAVE_SYMTAB
 	default EXECFUNCS_SYMTAB_ARRAY if EXECFUNCS_HAVE_SYMTAB
-	depends on !BUILD_PROTECTED && !BUILD_KERNEL
+	depends on BUILD_FLAT
 	---help---
 		The name of other global array that holds the exported symbol table.
 		The special string "NULL" may be provided if there is no symbol
@@ -402,7 +402,7 @@ config INIT_NEXPORTS
 	string "Symbol table size"
 	default "0" if !EXECFUNCS_HAVE_SYMTAB
 	default EXECFUNCS_NSYMBOLS_VAR if EXECFUNCS_HAVE_SYMTAB
-	depends on !BUILD_PROTECTED && !BUILD_KERNEL
+	depends on BUILD_FLAT
 	---help---
 		The size of the symbol table.  NOTE that is is logically a numeric
 		value but is represent by a string.  That allows you to put

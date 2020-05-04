@@ -46,8 +46,8 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #ifdef CONFIG_SAMA5_PIO_IRQ
 #  include "sam_pio.h"

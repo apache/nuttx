@@ -42,8 +42,8 @@
 #include <stdbool.h>
 #include <fixedmath.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "hardware/max326_memorymap.h"
 #include "hardware/max326_pinmux.h"
@@ -428,14 +428,14 @@ void max326_uart_disable(uintptr_t base)
 #endif
 
 /****************************************************************************
- * Name: up_lowputc
+ * Name: arm_lowputc
  *
  * Description:
  *   Output one byte on the serial console
  *
  ****************************************************************************/
 
-void up_lowputc(char ch)
+void arm_lowputc(char ch)
 {
 #ifdef HAVE_UART_CONSOLE
   irqstate_t flags;

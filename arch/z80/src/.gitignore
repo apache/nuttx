@@ -1,6 +1,6 @@
 /Make.dep
 /.depend
-/up_mem.h
+/z80_mem.h
 /asm_mem.h
 /board
 /chip

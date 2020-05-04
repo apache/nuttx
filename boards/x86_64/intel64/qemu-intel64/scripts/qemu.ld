@@ -22,7 +22,7 @@ OUTPUT_ARCH(i386:x86-64)
 ENTRY(__pmode_entry)
 SECTIONS
 {
-    . = 0x4M;
+    . = 0x1M;
     _kernel_physical_start = .;
 
     .loader.text : {

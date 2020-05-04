@@ -49,7 +49,7 @@
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 #include "stm32_rcc.h"
 #include "stm32_wdg.h"
 

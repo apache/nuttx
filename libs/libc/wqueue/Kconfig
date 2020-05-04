@@ -4,7 +4,7 @@
 #
 
 menu "User Work Queue Support"
-	depends on BUILD_PROTECTED || BUILD_KERNEL
+	depends on !BUILD_FLAT
 
 config LIB_USRWORK
 	bool "User mode worker thread"

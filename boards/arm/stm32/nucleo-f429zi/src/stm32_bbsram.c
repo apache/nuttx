@@ -37,7 +37,7 @@
 
 #include <nuttx/fs/fs.h>
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "stm32_bbsram.h"
 
 #include "nucleo-144.h"
@@ -519,14 +519,14 @@ void board_crashdump(uintptr_t currentsp, FAR void *tcb,
 
       while (*dead)
         {
-          up_lowputc(*dead++);
+          arm_lowputc(*dead++);
         }
     }
   else if (rv == -ENOSPC)
     {
       /* hard fault again */
 
-      up_lowputc('!');
+      arm_lowputc('!');
     }
 }
 #endif /* CONFIG_STM32F4_SAVE_CRASHDUMP */

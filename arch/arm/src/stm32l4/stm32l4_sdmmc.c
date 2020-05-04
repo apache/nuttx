@@ -60,7 +60,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "stm32l4_dma.h"
 #include "stm32l4_gpio.h"

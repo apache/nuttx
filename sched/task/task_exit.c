@@ -129,7 +129,7 @@ int nxtask_exit(void)
   /* We are now in a bad state -- the head of the ready to run task list
    * does not correspond to the thread that is running.  Disabling pre-
    * emption on this TCB and marking the new ready-to-run task as not
-   * running (see, for example, get_errno_ptr()).
+   * running.
    *
    * We disable pre-emption here by directly incrementing the lockcount
    * (vs. calling sched_lock()).

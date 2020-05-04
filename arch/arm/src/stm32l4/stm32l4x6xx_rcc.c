@@ -723,10 +723,11 @@ static void stm32l4_stdclockconfig(void)
         }
     }
 
-  /* setting MSIRANGE */
+  /* Enable MSI and choosing frequency */
 
   regval  = getreg32(STM32L4_RCC_CR);
-  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION);    /* Enable MSI and frequency */
+  regval &= ~RCC_CR_MSIRANGE_MASK;
+  regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION | RCC_CR_MSIRGSEL);
   putreg32(regval, STM32L4_RCC_CR);
 
   /* Wait until the MSI is ready (or until a timeout elapsed) */
@@ -776,23 +777,26 @@ static void stm32l4_stdclockconfig(void)
 
   if (timeout > 0)
     {
-#warning todo: regulator voltage according to clock freq
-#if 0
       /* Ensure Power control is enabled before modifying it. */
 
-      regval  = getreg32(STM32L4_RCC_APB1ENR);
-      regval |= RCC_APB1ENR_PWREN;
-      putreg32(regval, STM32L4_RCC_APB1ENR);
+      stm32l4_pwr_enableclk(true);
 
-      /* Select regulator voltage output Scale 1 mode to support system
-       * frequencies up to 168 MHz.
-       */
+      if (STM32L4_SYSCLK_FREQUENCY > 24000000ul)
+        {
+          /* Select regulator voltage output Scale 1 mode to support system
+           * frequencies up to 168 MHz.
+           */
 
-      regval  = getreg32(STM32L4_PWR_CR);
-      regval &= ~PWR_CR_VOS_MASK;
-      regval |= PWR_CR_VOS_SCALE_1;
-      putreg32(regval, STM32L4_PWR_CR);
-#endif
+          stm32_pwr_setvos(1);
+        }
+      else
+        {
+          /* Select regulator voltage output Scale 2 mode for
+           * frequencies below 24 MHz
+           */
+
+          stm32_pwr_setvos(2);
+        }
 
       /* Set the HCLK source/divider */
 
@@ -860,6 +864,9 @@ static void stm32l4_stdclockconfig(void)
       regval |= RCC_PLLCFG_PLLSRC_HSE;
 #endif
 
+#ifndef STM32L4_BOARD_NOPLL
+      /* Use the main PLL as SYSCLK, so enable it first */
+
       putreg32(regval, STM32L4_RCC_PLLCFG);
 
       /* Enable the main PLL */
@@ -873,6 +880,7 @@ static void stm32l4_stdclockconfig(void)
       while ((getreg32(STM32L4_RCC_CR) & RCC_CR_PLLRDY) == 0)
         {
         }
+#endif
 
 #ifdef CONFIG_STM32L4_SAI1PLL
       /* Configure SAI1 PLL */
@@ -941,7 +949,11 @@ static void stm32l4_stdclockconfig(void)
         }
 #endif
 
-      /* Enable FLASH prefetch, instruction cache, data cache, and 4 wait states */
+      /* Enable FLASH prefetch, instruction cache, data cache,
+       * and 4 wait states.
+       * TODO: could reduce flash wait states according to vcore range
+       * and freq
+       */
 
 #ifdef CONFIG_STM32L4_FLASH_PREFETCH
       regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN |
@@ -951,17 +963,34 @@ static void stm32l4_stdclockconfig(void)
 #endif
       putreg32(regval, STM32L4_FLASH_ACR);
 
-      /* Select the main PLL as system clock source */
+      /* Select the system clock source */
 
       regval  = getreg32(STM32L4_RCC_CFGR);
       regval &= ~RCC_CFGR_SW_MASK;
+#ifndef STM32L4_BOARD_NOPLL
       regval |= RCC_CFGR_SW_PLL;
+#elif STM32L4_BOARD_USEMSI
+      regval |= RCC_CFGR_SW_MSI;
+#elif STM32L4_BOARD_USEHSI
+      regval |= RCC_CFGR_SW_HSI;
+#elif STM32L4_BOARD_USEHSE
+      regval |= RCC_CFGR_SW_HSE;
+#endif
       putreg32(regval, STM32L4_RCC_CFGR);
 
       /* Wait until the PLL source is used as the system clock source */
 
       while ((getreg32(STM32L4_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
-              RCC_CFGR_SWS_PLL)
+#ifndef STM32L4_BOARD_NOPLL
+              RCC_CFGR_SWS_PLL
+#elif STM32L4_BOARD_USEMSI
+              RCC_CFGR_SWS_MSI
+#elif STM32L4_BOARD_USEHSI
+              RCC_CFGR_SWS_HSI
+#elif STM32L4_BOARD_USEHSE
+              RCC_CFGR_SWS_HSE
+#endif
+             )
         {
         }
 

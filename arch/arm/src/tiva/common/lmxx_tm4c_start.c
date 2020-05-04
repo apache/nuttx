@@ -47,8 +47,8 @@
 #include <arch/irq.h>
 
 #include "nvic.h"
-#include "up_arch.h"
-#include "up_internal.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "tiva_lowputc.h"
 #include "tiva_sysctrl.h"
@@ -101,7 +101,7 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) up_lowputc(c)
+#  define showprogress(c) arm_lowputc(c)
 #else
 #  define showprogress(c)
 #endif
@@ -251,7 +251,7 @@ void __start(void)
 #ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization */
 
-  up_earlyserialinit();
+  arm_earlyserialinit();
   showprogress('D');
 #endif
 

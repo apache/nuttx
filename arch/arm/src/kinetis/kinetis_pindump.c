@@ -43,7 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
-#include "up_arch.h"
+#include "arm_arch.h"
 
 #include "kinetis.h"
 #include "hardware/kinetis_gpio.h"

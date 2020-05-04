@@ -43,8 +43,8 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-#include "up_internal.h"
+#include "mips_arch.h"
+#include "mips_internal.h"
 
 #include "pic32mx.h"
 #include "pic32mx7mmb.h"
@@ -87,8 +87,8 @@ void pic32mx_boardinitialize(void)
     }
 #endif
 
-/* Initialize the LCD.  The LCD initialization function should be called early
- * in the boot sequence -- even if the LCD is not enabled.
+/* Initialize the LCD.  The LCD initialization function should be called
+ * early in the boot sequence -- even if the LCD is not enabled.
  * In that case we should at a minimum at least disable the LCD backlight.
  */
 
@@ -108,10 +108,11 @@ void pic32mx_boardinitialize(void)
  * Description:
  *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will be
- *   called immediately after up_initialize() is called and just before the
- *   initial application is started.  This additional initialization phase
- *   may be used, for example, to initialize board-specific device drivers.
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_initialize() is called and just before
+ *   the initial application is started.  This additional initialization
+ *   phae may be used, for example, to initialize board-specific device
+ *   drivers.
  *
  ****************************************************************************/
 

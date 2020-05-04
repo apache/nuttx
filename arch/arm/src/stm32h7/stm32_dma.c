@@ -48,9 +48,9 @@
 #include <nuttx/arch.h>
 #include <arch/stm32h7/chip.h>
 
-#include "up_arch.h"
+#include "arm_arch.h"
 
-#include "up_internal.h"
+#include "arm_internal.h"
 #include "sched/sched.h"
 #include "stm32_dma.h"
 #include "hardware/stm32_bdma.h"
@@ -1947,7 +1947,7 @@ static void stm32_dmamux_dump(DMA_MUX dmamux, uint8_t chan)
  *
  ****************************************************************************/
 
-void weak_function up_dma_initialize(void)
+void weak_function arm_dma_initialize(void)
 {
   DMA_CHANNEL dmachan    = NULL;
   uint8_t     controller = 0;

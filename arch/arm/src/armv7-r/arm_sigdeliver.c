@@ -49,15 +49,15 @@
 #include <arch/board/board.h>
 
 #include "sched/sched.h"
-#include "up_internal.h"
-#include "up_arch.h"
+#include "arm_internal.h"
+#include "arm_arch.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_sigdeliver
+ * Name: arm_sigdeliver
  *
  * Description:
  *   This is the a signal handling trampoline.  When a signal action was
@@ -66,7 +66,7 @@
  *
  ****************************************************************************/
 
-void up_sigdeliver(void)
+void arm_sigdeliver(void)
 {
   struct tcb_s  *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];
@@ -86,7 +86,7 @@ void up_sigdeliver(void)
 
   /* Save the return state on the stack. */
 
-  up_copyfullstate(regs, rtcb->xcp.regs);
+  arm_copyfullstate(regs, rtcb->xcp.regs);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Then make sure that interrupts are enabled.  Signal handlers must always
@@ -126,5 +126,5 @@ void up_sigdeliver(void)
   /* Then restore the correct state for this thread of execution. */
 
   board_autoled_off(LED_SIGNAL);
-  up_fullcontextrestore(regs);
+  arm_fullcontextrestore(regs);
 }
