@@ -115,6 +115,11 @@ static inline FAR struct semholder_s *nxsem_allocholder(sem_t *sem)
 
 /****************************************************************************
  * Name: nxsem_findholder
+ *
+ * NOTE: htcb may be used only as a look-up key.  It certain cases, the task
+ * may have exited and htcb may refer to a stale memory.  It must not be
+ * dereferenced.
+ *
  ****************************************************************************/
 
 static FAR struct semholder_s *nxsem_findholder(sem_t *sem,
@@ -323,10 +328,7 @@ static int nxsem_boostholderprio(FAR struct semholder_s *pholder,
 
   if (!sched_verifytcb(htcb))
     {
-#if 0  /* DSA: sometimes crashes when Telnet calls external cmd (i.e. 'i2c') */
-      serr("ERROR: TCB 0x%08x is a stale handle, counts lost\n", htcb);
-      DEBUGPANIC();
-#endif
+      swarn("WARNING: TCB 0x%08x is a stale handle, counts lost\n", htcb);
       nxsem_freeholder(sem, pholder);
     }
 
@@ -490,8 +492,8 @@ static int nxsem_restoreholderprio(FAR struct tcb_s *htcb,
 
   if (!sched_verifytcb(htcb))
     {
-      serr("ERROR: TCB 0x%08x is a stale handle, counts lost\n", htcb);
-      DEBUGPANIC();
+      swarn("WARNING: TCB 0x%08x is a stale handle, counts lost\n", htcb);
+
       pholder = nxsem_findholder(sem, htcb);
       if (pholder != NULL)
         {
