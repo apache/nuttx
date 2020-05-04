@@ -40,6 +40,9 @@
 #include <nuttx/config.h>
 #include <nuttx/board.h>
 
+#include <sys/mount.h>
+#include <stdio.h>
+
 #include "up_internal.h"
 
 /****************************************************************************
@@ -74,6 +77,18 @@
 #ifdef CONFIG_LIB_BOARDCTL
 int board_app_initialize(uintptr_t arg)
 {
-  return 0;
+  int ret = OK;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the proc filesystem */
+
+  ret = mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+    }
+#endif
+
+  return ret;
 }
 #endif /* CONFIG_LIB_BOARDCTL */
