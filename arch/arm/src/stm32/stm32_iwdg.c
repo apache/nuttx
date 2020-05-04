@@ -59,7 +59,9 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 /* Clocking *****************************************************************/
+
 /* The minimum frequency of the IWDG clock is:
  *
  *  Fmin = Flsi / 256
@@ -112,6 +114,7 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
 /* This structure provides the private representation of the "lower-half"
  * driver state structure.  This structure must be cast-compatible with the
  * well-known watchdog_lowerhalf_s structure.
@@ -119,18 +122,19 @@
 
 struct stm32_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s  *ops;  /* Lower half operations */
-  uint32_t lsifreq;   /* The calibrated frequency of the LSI oscillator */
-  uint32_t timeout;   /* The (actual) selected timeout */
-  uint32_t lastreset; /* The last reset time */
-  bool     started;   /* true: The watchdog timer has been started */
-  uint8_t  prescaler; /* Clock prescaler value */
-  uint16_t reload;    /* Timer reload value */
+  FAR const struct watchdog_ops_s  *ops; /* Lower half operations */
+  uint32_t lsifreq;                      /* The calibrated frequency of the LSI oscillator */
+  uint32_t timeout;                      /* The (actual) selected timeout */
+  uint32_t lastreset;                    /* The last reset time */
+  bool     started;                      /* true: The watchdog timer has been started */
+  uint8_t  prescaler;                    /* Clock prescaler value */
+  uint16_t reload;                       /* Timer reload value */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
 /* Register operations ******************************************************/
 
 #ifdef CONFIG_STM32_IWDG_REGDEBUG
@@ -156,6 +160,7 @@ static int      stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
 /* "Lower half" driver methods */
 
 static const struct watchdog_ops_s g_wdgops =
@@ -196,8 +201,8 @@ static uint16_t stm32_getreg(uint32_t addr)
 
   uint16_t val = getreg16(addr);
 
-  /* Is this the same value that we read from the same register last time?  Are
-   * we polling the register?  If so, suppress some of the output.
+  /* Is this the same value that we read from the same register last time?
+   * Are we polling the register?  If so, suppress some of the output.
    */
 
   if (addr == prevaddr && val == preval)
@@ -223,7 +228,7 @@ static uint16_t stm32_getreg(uint32_t addr)
         {
           /* Yes.. then show how many times the value repeated */
 
-          wdinfo("[repeats %d more times]\n", count-3);
+          wdinfo("[repeats %d more times]\n", count - 3);
         }
 
       /* Save the new address, value, and count */
@@ -312,8 +317,8 @@ static inline void stm32_setprescaler(FAR struct stm32_lowerhalf_s *priv)
  *   Start the watchdog timer, resetting the time to the current timeout,
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -332,9 +337,9 @@ static int stm32_start(FAR struct watchdog_lowerhalf_s *lower)
 
   if (!priv->started)
     {
-      /* REVISIT:  It appears that you can only setup the prescaler and reload
-       * registers once.  After that, the SR register's PVU and RVU bits never go
-       * to zero.  So we defer setting up these registers until the watchdog
+      /* REVISIT: It appears that you can only setup the prescaler and reload
+       * registers once. After that, the SR register's PVU and RVU bits never
+       * go to 0. So we defer setting up these registers until the watchdog
        * is started, then refuse any further attempts to change timeout.
        */
 
@@ -347,8 +352,8 @@ static int stm32_start(FAR struct watchdog_lowerhalf_s *lower)
 #endif
 
       /* Enable IWDG (the LSI oscillator will be enabled by hardware).  NOTE:
-       * If the "Hardware watchdog" feature is enabled through the device option
-       * bits, the watchdog is automatically enabled at power-on.
+       * If the "Hardware watchdog" feature is enabled through the device
+       * option bits, the watchdog is automatically enabled at power-on.
        */
 
       flags           = enter_critical_section();
@@ -368,8 +373,8 @@ static int stm32_start(FAR struct watchdog_lowerhalf_s *lower)
  *   Stop the watchdog timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -393,8 +398,8 @@ static int stm32_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   the watchdog timer or "petting the dog".
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -425,8 +430,8 @@ static int stm32_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *   Get the current watchdog timer status
  *
  * Input Parameters:
- *   lower  - A pointer the publicly visible representation of the "lower-half"
- *            driver state structure.
+ *   lower  - A pointer the publicly visible representation of the
+ *            "lower-half" driver state structure.
  *   status - The location to return the watchdog status information.
  *
  * Returned Value:
@@ -484,8 +489,8 @@ static int stm32_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *   Set a new timeout value (and reset the watchdog timer)
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of the
+ *             "lower-half" driver state structure.
  *   timeout - The new timeout value in milliseconds.
  *
  * Returned Value:
@@ -605,8 +610,8 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
    */
 
 #ifndef CONFIG_STM32_IWDG_ONETIMESETUP
-  /* If CONFIG_STM32_IWDG_DEFERREDSETUP is selected, then perform the register
-   * configuration only if the timer has been started.
+  /* If CONFIG_STM32_IWDG_DEFERREDSETUP is selected, then perform the
+   * register configuration only if the timer has been started.
    */
 
 #ifdef CONFIG_STM32_IWDG_DEFERREDSETUP
@@ -630,8 +635,8 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  * Name: stm32_iwdginitialize
  *
  * Description:
- *   Initialize the IWDG watchdog timer.  The watchdog timer is initialized and
- *   registers as 'devpath'.  The initial state of the watchdog timer is
+ *   Initialize the IWDG watchdog timer.  The watchdog timer is initialized
+ *   and registers as 'devpath'.  The initial state of the watchdog timer is
  *   disabled.
  *
  * Input Parameters:
@@ -675,7 +680,8 @@ void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
    * device option bits, the watchdog is automatically enabled at power-on.
    */
 
-  stm32_settimeout((FAR struct watchdog_lowerhalf_s *)priv, CONFIG_STM32_IWDG_DEFTIMOUT);
+  stm32_settimeout((FAR struct watchdog_lowerhalf_s *)priv,
+                   CONFIG_STM32_IWDG_DEFTIMOUT);
 
   /* Register the watchdog driver as /dev/watchdog0 */
 

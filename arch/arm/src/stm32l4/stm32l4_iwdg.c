@@ -102,13 +102,13 @@
 
 struct stm32l4_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s  *ops;  /* Lower half operations */
-  uint32_t lsifreq;   /* The calibrated frequency of the LSI oscillator */
-  uint32_t timeout;   /* The (actual) selected timeout */
-  uint32_t lastreset; /* The last reset time */
-  bool     started;   /* true: The watchdog timer has been started */
-  uint8_t  prescaler; /* Clock prescaler value */
-  uint16_t reload;    /* Timer reload value */
+  FAR const struct watchdog_ops_s  *ops; /* Lower half operations */
+  uint32_t lsifreq;                      /* The calibrated frequency of the LSI oscillator */
+  uint32_t timeout;                      /* The (actual) selected timeout */
+  uint32_t lastreset;                    /* The last reset time */
+  bool     started;                      /* true: The watchdog timer has been started */
+  uint8_t  prescaler;                    /* Clock prescaler value */
+  uint16_t reload;                       /* Timer reload value */
 };
 
 /****************************************************************************
@@ -125,7 +125,8 @@ static void     stm32l4_putreg(uint16_t val, uint32_t addr);
 # define        stm32l4_putreg(val,addr) putreg16(val,addr)
 #endif
 
-static inline void stm32l4_setprescaler(FAR struct stm32l4_lowerhalf_s *priv);
+static inline void
+stm32l4_setprescaler(FAR struct stm32l4_lowerhalf_s *priv);
 
 /* "Lower half" driver methods **********************************************/
 
@@ -181,8 +182,8 @@ static uint16_t stm32l4_getreg(uint32_t addr)
 
   uint16_t val = getreg16(addr);
 
-  /* Is this the same value that we read from the same register last time?  Are
-   * we polling the register?  If so, suppress some of the output.
+  /* Is this the same value that we read from the same register last time?
+   * Are we polling the register?  If so, suppress some of the output.
    */
 
   if (addr == prevaddr && val == preval)
@@ -273,11 +274,11 @@ static inline void stm32l4_setprescaler(FAR struct stm32l4_lowerhalf_s *priv)
    * yet be cleared.
    */
 
-  while ((stm32l4_getreg(STM32L4_IWDG_SR) & (IWDG_SR_PVU | IWDG_SR_RVU)) != 0);
+  while (stm32l4_getreg(STM32L4_IWDG_SR) & (IWDG_SR_PVU | IWDG_SR_RVU));
 
   /* Set the prescaler */
 
-  stm32l4_putreg((uint16_t)priv->prescaler << IWDG_PR_SHIFT, STM32L4_IWDG_PR);
+  stm32l4_putreg(priv->prescaler << IWDG_PR_SHIFT, STM32L4_IWDG_PR);
 
   /* Set the reload value */
 
@@ -301,7 +302,7 @@ static inline void stm32l4_setprescaler(FAR struct stm32l4_lowerhalf_s *priv)
 
   if (priv->started)
     {
-      while ((stm32l4_getreg(STM32L4_IWDG_SR) & (IWDG_SR_PVU | IWDG_SR_RVU)) != 0);
+      while (stm32l4_getreg(STM32L4_IWDG_SR) & (IWDG_SR_PVU | IWDG_SR_RVU));
     }
 
   leave_critical_section(flags);
@@ -314,8 +315,8 @@ static inline void stm32l4_setprescaler(FAR struct stm32l4_lowerhalf_s *priv)
  *   Start the watchdog timer, resetting the time to the current timeout,
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -324,7 +325,8 @@ static inline void stm32l4_setprescaler(FAR struct stm32l4_lowerhalf_s *priv)
 
 static int stm32l4_start(FAR struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct stm32l4_lowerhalf_s *priv = (FAR struct stm32l4_lowerhalf_s *)lower;
+  FAR struct stm32l4_lowerhalf_s *priv =
+    (FAR struct stm32l4_lowerhalf_s *)lower;
   irqstate_t flags;
 
   wdinfo("Entry: started=%d\n");
@@ -341,8 +343,8 @@ static int stm32l4_start(FAR struct watchdog_lowerhalf_s *lower)
       stm32l4_setprescaler(priv);
 
       /* Enable IWDG (the LSI oscillator will be enabled by hardware).  NOTE:
-       * If the "Hardware watchdog" feature is enabled through the device option
-       * bits, the watchdog is automatically enabled at power-on.
+       * If the "Hardware watchdog" feature is enabled through the device
+       * option bits, the watchdog is automatically enabled at power-on.
        */
 
       flags           = enter_critical_section();
@@ -362,8 +364,8 @@ static int stm32l4_start(FAR struct watchdog_lowerhalf_s *lower)
  *   Stop the watchdog timer
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -387,8 +389,8 @@ static int stm32l4_stop(FAR struct watchdog_lowerhalf_s *lower)
  *   the watchdog timer or "petting the dog".
  *
  * Input Parameters:
- *   lower - A pointer the publicly visible representation of the "lower-half"
- *           driver state structure.
+ *   lower - A pointer the publicly visible representation of the
+ *           "lower-half" driver state structure.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
@@ -397,7 +399,8 @@ static int stm32l4_stop(FAR struct watchdog_lowerhalf_s *lower)
 
 static int stm32l4_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct stm32l4_lowerhalf_s *priv = (FAR struct stm32l4_lowerhalf_s *)lower;
+  FAR struct stm32l4_lowerhalf_s *priv =
+    (FAR struct stm32l4_lowerhalf_s *)lower;
   irqstate_t flags;
 
   wdinfo("Entry\n");
@@ -419,8 +422,8 @@ static int stm32l4_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *   Get the current watchdog timer status
  *
  * Input Parameters:
- *   lower  - A pointer the publicly visible representation of the "lower-half"
- *            driver state structure.
+ *   lower  - A pointer the publicly visible representation of the
+ *            "lower-half" driver state structure.
  *   status - The location to return the watchdog status information.
  *
  * Returned Value:
@@ -431,7 +434,8 @@ static int stm32l4_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 static int stm32l4_getstatus(FAR struct watchdog_lowerhalf_s *lower,
                              FAR struct watchdog_status_s *status)
 {
-  FAR struct stm32l4_lowerhalf_s *priv = (FAR struct stm32l4_lowerhalf_s *)lower;
+  FAR struct stm32l4_lowerhalf_s *priv =
+    (FAR struct stm32l4_lowerhalf_s *)lower;
   uint32_t ticks;
   uint32_t elapsed;
 
@@ -478,8 +482,8 @@ static int stm32l4_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *   Set a new timeout value (and reset the watchdog timer)
  *
  * Input Parameters:
- *   lower   - A pointer the publicly visible representation of the "lower-half"
- *             driver state structure.
+ *   lower   - A pointer the publicly visible representation of the
+ *             "lower-half" driver state structure.
  *   timeout - The new timeout value in milliseconds.
  *
  * Returned Value:
@@ -490,7 +494,8 @@ static int stm32l4_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 static int stm32l4_settimeout(FAR struct watchdog_lowerhalf_s *lower,
                               uint32_t timeout)
 {
-  FAR struct stm32l4_lowerhalf_s *priv = (FAR struct stm32l4_lowerhalf_s *)lower;
+  FAR struct stm32l4_lowerhalf_s *priv =
+    (FAR struct stm32l4_lowerhalf_s *)lower;
   uint32_t fiwdg;
   uint64_t reload;
   int prescaler;
@@ -598,8 +603,8 @@ static int stm32l4_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  * Name: stm32l4_iwdginitialize
  *
  * Description:
- *   Initialize the IWDG watchdog timer.  The watchdog timer is initialized and
- *   registers as 'devpath'.  The initial state of the watchdog timer is
+ *   Initialize the IWDG watchdog timer.  The watchdog timer is initialized
+ *   and registers as 'devpath'.  The initial state of the watchdog timer is
  *   disabled.
  *
  * Input Parameters:
@@ -658,13 +663,13 @@ void stm32l4_iwdginitialize(FAR const char *devpath, uint32_t lsifreq)
 #if defined(CONFIG_STM32L4_JTAG_FULL_ENABLE) || \
     defined(CONFIG_STM32L4_JTAG_NOJNTRST_ENABLE) || \
     defined(CONFIG_STM32L4_JTAG_SW_ENABLE)
-  {
-    uint32_t cr;
+    {
+      uint32_t cr;
 
-    cr = getreg32(STM32_DBGMCU_APB1_FZ);
-    cr |= DBGMCU_APB1_IWDGSTOP;
-    putreg32(cr, STM32_DBGMCU_APB1_FZ);
-  }
+      cr = getreg32(STM32_DBGMCU_APB1_FZ);
+      cr |= DBGMCU_APB1_IWDGSTOP;
+      putreg32(cr, STM32_DBGMCU_APB1_FZ);
+    }
 #endif
 }
 

@@ -423,8 +423,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                           unsigned int tcpiplen;
 
                           /* No.. we need to send another probe.
-                           *
-                           * Get the size of the IP header and the TCP header.
+                           * Get the size of the IP and TCP header.
                            */
 
 #ifdef CONFIG_NET_IPv4
@@ -465,8 +464,8 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
                           tcp_setsequence(conn->sndseq, saveseq);
 
-                          /* Increment the number of un-ACKed bytes due to the
-                           * dummy byte that we just sent.
+                          /* Increment the number of un-ACKed bytes due to
+                           * the dummy byte that we just sent.
                            */
 
                           conn->tx_unacked++;

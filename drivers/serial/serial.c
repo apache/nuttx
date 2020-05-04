@@ -1359,7 +1359,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGSTP)
-          /* Make the given terminal the controlling terminal of the calling process */
+          /* Make the controlling terminal of the calling process */
 
           case TIOCSCTTY:
             {

@@ -121,13 +121,13 @@
 
 struct stm32_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s  *ops;  /* Lower half operations */
-  uint32_t lsifreq;   /* The calibrated frequency of the LSI oscillator */
-  uint32_t timeout;   /* The (actual) selected timeout */
-  uint32_t lastreset; /* The last reset time */
-  bool     started;   /* true: The watchdog timer has been started */
-  uint8_t  prescaler; /* Clock prescaler value */
-  uint16_t reload;    /* Timer reload value */
+  FAR const struct watchdog_ops_s  *ops; /* Lower half operations */
+  uint32_t lsifreq;                      /* The calibrated frequency of the LSI oscillator */
+  uint32_t timeout;                      /* The (actual) selected timeout */
+  uint32_t lastreset;                    /* The last reset time */
+  bool     started;                      /* true: The watchdog timer has been started */
+  uint8_t  prescaler;                    /* Clock prescaler value */
+  uint16_t reload;                       /* Timer reload value */
 };
 
 /****************************************************************************

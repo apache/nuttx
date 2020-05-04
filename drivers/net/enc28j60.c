@@ -130,7 +130,7 @@
 
 #define ENCWORK LPWORK
 
-/* CONFIG_ENC28J60_DUMPPACKET will dump the contents of each packet to the console. */
+/* CONFIG_ENC28J60_DUMPPACKET will dump the contents of each packet. */
 
 #ifdef CONFIG_ENC28J60_DUMPPACKET
 #  define enc_dumppacket(m,a,n) lib_dumpbuffer(m,a,n)
@@ -146,7 +146,7 @@
 
 /* Timing *******************************************************************/
 
-/* TX poll deley = 1 seconds. CLK_TCK is the number of clock ticks per second */
+/* TX poll deley = 1 seconds. CLK_TCK is the number of ticks per second */
 
 #define ENC_WDDELAY   (1*CLK_TCK)
 
@@ -192,7 +192,7 @@
 #define enc_bfsgreg(priv,ctrlreg,setbits) \
   enc_wrgreg2(priv, ENC_BFS | GETADDR(ctrlreg), setbits)
 
-/* This is a helper pointer for accessing the contents of the Ethernet header */
+/* This is a helper pointer for accessing the contents of Ethernet header */
 
 #define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
 
@@ -404,8 +404,8 @@ static inline void enc_configspi(FAR struct spi_dev_s *spi)
 
 static void enc_lock(FAR struct enc_driver_s *priv)
 {
-  /* Lock the SPI bus in case there are multiple devices competing for the SPI
-   * bus.
+  /* Lock the SPI bus in case there are multiple devices competing for the
+   * SPI bus.
    */
 
   SPI_LOCK(priv->spi, true);
@@ -475,7 +475,7 @@ static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd)
    * 16-clocks:  8 to clock out the cmd + 8 to clock in the data.
    */
 
-  SPI_SEND(priv->spi, cmd);  /* Clock out the command */
+  SPI_SEND(priv->spi, cmd);        /* Clock out the command */
   rddata = SPI_SEND(priv->spi, 0); /* Clock in the data */
 
   /* De-select ENC28J60 chip */
@@ -988,7 +988,7 @@ static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
 
   /* "To read from a PHY register:
    *
-   *   1. Write the address of the PHY register to read from into the MIREGADR
+   *   1. Write the address of the PHY register to read from into MIREGADR
    *      register.
    */
 
@@ -1059,8 +1059,8 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
 
   enc_wrbreg(priv, ENC_MIWRL, phydata);
 
-  /*    3. Write the upper 8 bits of data to write into the MIWRH register.
-   *       Writing to this register automatically begins the MIIM transaction,
+  /*    3. Write the upper 8 bits of data to write into MIWRH register.
+   *       Writing to this register automatically begins MIIM transaction,
    *       so it must be written to after MIWRL. The MISTAT.BUSY bit becomes
    *       set.
    */
@@ -1068,7 +1068,7 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
   enc_wrbreg(priv, ENC_MIWRH, phydata >> 8);
 
   /*    The PHY register will be written after the MIIM operation completes,
-   *    which takes 10.24 µs. When the write operation has completed, the BUSY
+   *    which takes 10.24 µs. When the write operation has completed, BUSY
    *    bit will clear itself.
    *
    *    The host controller should not start any MIISCAN or MIIRD operations
@@ -1232,8 +1232,8 @@ static int enc_txpoll(struct net_driver_s *dev)
         }
     }
 
-  /* If zero is returned, the polling will continue until all connections have
-   * been examined.
+  /* If zero is returned, the polling will continue until all connections
+   * have been examined.
    */
 
   return OK;
@@ -1306,7 +1306,7 @@ static void enc_txif(FAR struct enc_driver_s *priv)
  * Name: enc_txerif
  *
  * Description:
- *   An TXERIF interrupt was received indicating that a TX abort has occurred.
+ *   An TXERIF interrupt was received indicating that TX abort has occurred.
  *
  * Input Parameters:
  *   priv  - Reference to the driver state structure
@@ -1349,8 +1349,8 @@ static void enc_txerif(FAR struct enc_driver_s *priv)
  * Name: enc_rxerif
  *
  * Description:
- *   An RXERIF interrupt was received indicating that the last TX packet(s) is
- *   done
+ *   An RXERIF interrupt was received indicating that the last TX packet(s)
+ *   is done
  *
  * Input Parameters:
  *   priv  - Reference to the driver state structure
@@ -1637,11 +1637,11 @@ static void enc_irqworker(FAR void *arg)
 
   /* Disable further interrupts by clearing the global interrupt enable bit.
    * "After an interrupt occurs, the host controller should clear the global
-   * enable bit for the interrupt pin before servicing the interrupt. Clearing
-   * the enable bit will cause the interrupt pin to return to the non-asserted
-   * state (high). Doing so will prevent the host controller from missing a
-   * falling edge should another interrupt occur while the immediate interrupt
-   * is being serviced."
+   * enable bit for the interrupt pin before servicing the interrupt.
+   * Clearing the enable bit will cause the interrupt pin to return to the
+   * non-asserted state (high). Doing so will prevent the host controller
+   * from missing a falling edge should another interrupt occur while the
+   * immediate interrupt is being serviced."
    */
 
   enc_bfcgreg(priv, ENC_EIE, EIE_INTIE);
@@ -1660,10 +1660,10 @@ static void enc_irqworker(FAR void *arg)
       ninfo("EIR: %02x\n", eir);
 
       /* DMAIF: The DMA interrupt indicates that the DMA module has completed
-       * its memory copy or checksum calculation. Additionally, this interrupt
-       * will be caused if the host controller cancels a DMA operation by
-       * manually clearing the DMAST bit. Once set, DMAIF can only be cleared
-       * by the host controller or by a Reset condition.
+       * its memory copy or checksum calculation. Additionally, this
+       * interrupt will be caused if the host controller cancels a DMA
+       * operation by manually clearing the DMAST bit. Once set, DMAIF can
+       * only be cleared by the host controller or by a Reset condition.
        */
 
       if ((eir & EIR_DMAIF) != 0) /* DMA interrupt */
@@ -1745,9 +1745,9 @@ static void enc_irqworker(FAR void *arg)
        * In Full-Duplex mode, condition 5 is the only one that should cause
        * this interrupt. Collisions and other problems related to sharing
        * the network are not possible on full-duplex networks. The conditions
-       * which cause the transmit error interrupt meet the requirements of the
-       * transmit interrupt. As a result, when this interrupt occurs, TXIF
-       * will also be simultaneously set.
+       * which cause the transmit error interrupt meet the requirements of
+       * the transmit interrupt. As a result, when this interrupt occurs,
+       * TXIF will also be simultaneously set.
        */
 
       if ((eir & EIR_TXERIF) != 0) /* Transmit Error Interrupts */
@@ -1761,12 +1761,13 @@ static void enc_irqworker(FAR void *arg)
        * buffer and to provide a notification means for the arrival of new
        * packets. When the receive buffer has at least one packet in it,
        * EIR.PKTIF will be set. In other words, this interrupt flag will be
-       * set anytime the Ethernet Packet Count register (EPKTCNT) is non-zero.
+       * set anytime the Ethernet Packet Count register (EPKTCNT) is
+       * non-zero.
        *
        * The PKTIF bit can only be cleared by the host controller or by a
        * Reset condition. In order to clear PKTIF, the EPKTCNT register must
-       * be decremented to 0. If the last data packet in the receive buffer is
-       * processed, EPKTCNT will become zero and the PKTIF bit will
+       * be decremented to 0. If the last data packet in the receive buffer
+       * is processed, EPKTCNT will become zero and the PKTIF bit will
        * automatically be cleared.
        */
 
@@ -1959,7 +1960,7 @@ static void enc_txtimeout(int argc, uint32_t arg, ...)
    * can occur until we restart the Tx timeout watchdog.
    */
 
-  ret = work_queue(ENCWORK, &priv->towork, enc_toworker, (FAR void *)priv, 0);
+  ret = work_queue(ENCWORK, &priv->towork, enc_toworker, priv, 0);
   DEBUGASSERT(ret == OK);
   UNUSED(ret);
 }
@@ -2220,14 +2221,16 @@ static int enc_txavail(struct net_driver_s *dev)
   if (priv->ifstate == ENCSTATE_UP)
     {
       /* Check if the hardware is ready to send another packet.  The driver
-       * starts a transmission process by setting ECON1.TXRTS. When the packet
-       * is finished transmitting or is aborted due to an error/cancellation,
-       * the ECON1.TXRTS bit will be cleared.
+       * starts a transmission process by setting ECON1.TXRTS. When the
+       * packet is finished transmitting or is aborted due to an error/
+       * cancellation, the ECON1.TXRTS bit will be cleared.
        */
 
       if ((enc_rdgreg(priv, ENC_ECON1) & ECON1_TXRTS) == 0)
         {
-          /* The interface is up and TX is idle; poll the network for new XMIT data */
+          /* The interface is up and TX is idle;
+           * poll the network for new XMIT data
+           */
 
           devif_poll(&priv->dev, enc_txpoll);
         }

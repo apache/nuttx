@@ -56,7 +56,8 @@
  *   implementation-defined era related only to the process invocation.
  *
  *   To determine the time in seconds, the value returned by clock() should
- *   be divided by the value of the macro CLOCKS_PER_SEC as defined in <time.h>.
+ *   be divided by the value of the macro CLOCKS_PER_SEC as defined in
+ *   <time.h>.
  *
  *   NOTE:  The current implementation does NOT return the processor time
  *   used by the process.  NuttX currently does not keep any record of

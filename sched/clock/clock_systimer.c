@@ -101,7 +101,7 @@ clock_t clock_systimer(void)
 
   /* Convert to a 64-bit value in microseconds, then in clock tick units */
 
-  return USEC2TICK(1000000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000);
+  return USEC2TICK(1000000 * (uint64_t)ts.tv_sec + ts.tv_nsec / 1000);
 
 # else /* CONFIG_SYSTEM_TIME64 */
 
@@ -114,7 +114,7 @@ clock_t clock_systimer(void)
 
   /* Convert to a 64- then a 32-bit value */
 
-  tmp = USEC2TICK(1000000 * (uint64_t)ts.tv_sec + (uint64_t)ts.tv_nsec / 1000);
+  tmp = USEC2TICK(1000000 * (uint64_t)ts.tv_sec + ts.tv_nsec / 1000);
   return (clock_t)(tmp & TIMER_MASK32);
 
 # endif /* CONFIG_SYSTEM_TIME64 */

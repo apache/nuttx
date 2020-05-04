@@ -263,10 +263,10 @@ static int tcp_selectport(uint8_t domain, FAR const union ip_addr_u *ipaddr,
 {
   if (portno == 0)
     {
-      /* No local port assigned. Loop until we find a valid listen port number
-       * that is not being used by any other connection. NOTE the following
-       * loop is assumed to terminate but could not if all 32000-4096+1 ports
-       * are in used (unlikely).
+      /* No local port assigned. Loop until we find a valid listen port
+       * number that is not being used by any other connection. NOTE the
+       * following loop is assumed to terminate but could not if all
+       * 32000-4096+1 ports are in used (unlikely).
        */
 
       do
@@ -476,7 +476,7 @@ static inline int tcp_ipv4_bind(FAR struct tcp_conn_s *conn,
       return port;
     }
 
-  /* Save the local address in the connection structure (network byte order). */
+  /* Save the local address in the connection structure (network order). */
 
   conn->lport = htons(port);
   net_ipv4addr_copy(conn->u.ipv4.laddr, addr->sin_addr.s_addr);
@@ -535,15 +535,15 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
   /* The port number must be unique for this address binding */
 
   port = tcp_selectport(PF_INET6,
-                        (FAR const union ip_addr_u *)addr->sin6_addr.in6_u.u6_addr16,
-                        ntohs(addr->sin6_port));
+                (FAR const union ip_addr_u *)addr->sin6_addr.in6_u.u6_addr16,
+                ntohs(addr->sin6_port));
   if (port < 0)
     {
       nerr("ERROR: tcp_selectport failed: %d\n", port);
       return port;
     }
 
-  /* Save the local address in the connection structure (network byte order). */
+  /* Save the local address in the connection structure (network order). */
 
   conn->lport = htons(port);
   net_ipv6addr_copy(conn->u.ipv6.laddr, addr->sin6_addr.in6_u.u6_addr16);
@@ -637,8 +637,8 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
   if (!conn)
     {
-      /* As a fall-back, check for connection structures which can be stalled.
-       *
+      /* As a fall-back, check for connection structures which can be
+       * stalled.
        * Search the active connection list for the oldest connection
        * that is about to be closed anyway.
        */
@@ -1116,7 +1116,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
     }
 
   /* If the TCP port has not already been bound to a local port, then select
-   * one now.  We assume that the IP address has been bound to a local device,
+   * one now. We assume that the IP address has been bound to a local device,
    * but the port may still be INPORT_ANY.
    */
 

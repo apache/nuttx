@@ -1654,7 +1654,9 @@ static void efm32_transfer_start(FAR struct efm32_usbhost_s *priv, int chidx)
 
       if (minsize <= avail)
         {
-          /* Yes.. Get the size of the biggest thing that we can put in the Tx FIFO now */
+          /* Yes.. Get the size of the biggest thing that we can put
+           * in the Tx FIFO now
+           */
 
           wrsize = chan->buflen;
           if (wrsize > avail)
@@ -1973,7 +1975,7 @@ static ssize_t efm32_in_transfer(FAR struct efm32_usbhost_s *priv, int chidx,
           return  (ssize_t)ret;
         }
 
-      /* Set up for the transfer based on the direction and the endpoint type */
+      /* Set up for the transfer based on the direction and the endpoint */
 
       ret = efm32_in_setup(priv, chidx);
       if (ret < 0)
@@ -2039,7 +2041,7 @@ static void efm32_in_next(FAR struct efm32_usbhost_s *priv,
   int result;
   int ret;
 
-  /* Is the full transfer complete? Did the last chunk transfer complete OK? */
+  /* Is the full transfer complete? Did the last chunk transfer OK? */
 
   result = -(int)chan->result;
   if (chan->xfrd < chan->buflen && result == OK)
@@ -2102,7 +2104,7 @@ static int efm32_in_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
   FAR struct efm32_chan_s *chan;
   int ret;
 
-  /* Set up for the transfer data and callback BEFORE starting the first transfer */
+  /* Set up for the transfer BEFORE starting the first transfer */
 
   chan         = &priv->chan[chidx];
   chan->buffer = buffer;
@@ -2247,7 +2249,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv,
           return (ssize_t)ret;
         }
 
-      /* Set up for the transfer based on the direction and the endpoint type */
+      /* Set up for the transfer based on the direction and the endpoint */
 
       ret = efm32_out_setup(priv, chidx);
       if (ret < 0)
@@ -2298,7 +2300,7 @@ static ssize_t efm32_out_transfer(FAR struct efm32_usbhost_s *priv,
         }
       else
         {
-          /* Successfully transferred.  Update the buffer pointer and length */
+          /* Successfully transferred.  Update the buffer pointer/length */
 
           buffer += xfrlen;
           buflen -= xfrlen;
@@ -2331,7 +2333,7 @@ static void efm32_out_next(FAR struct efm32_usbhost_s *priv,
   int result;
   int ret;
 
-  /* Is the full transfer complete? Did the last chunk transfer complete OK? */
+  /* Is the full transfer complete? Did the last chunk transfer OK? */
 
   result = -(int)chan->result;
   if (chan->xfrd < chan->buflen && result == OK)
@@ -2394,7 +2396,7 @@ static int efm32_out_asynch(FAR struct efm32_usbhost_s *priv, int chidx,
   FAR struct efm32_chan_s *chan;
   int ret;
 
-  /* Set up for the transfer data and callback BEFORE starting the first transfer */
+  /* Set up for the transfer BEFORE starting the first transfer */
 
   chan         = &priv->chan[chidx];
   chan->buffer = buffer;
@@ -2500,11 +2502,11 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
   pending &= regval;
   uinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
 
-  /* Check for a pending ACK response received/transmitted (ACK) interrupt */
+  /* Check for a pending ACK response received/transmitted interrupt */
 
   if ((pending & USB_HC_INT_ACK) != 0)
     {
-      /* Clear the pending the ACK response received/transmitted (ACK) interrupt */
+      /* Clear the pending the ACK response received/transmitted interrupt */
 
       efm32_putreg(EFM32_USB_HC_INT(chidx), USB_HC_INT_ACK);
     }
@@ -2568,7 +2570,7 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
 
       efm32_putreg(EFM32_USB_HC_INT(chidx), USB_HC_INT_XFERCOMPL);
 
-      /* Then handle the transfer completion event based on the endpoint type */
+      /* Then handle the transfer completion event  based on the endpoint */
 
       if (chan->eptype == EFM32_USB_EPTYPE_CTRL ||
           chan->eptype == EFM32_USB_EPTYPE_BULK)
@@ -2711,7 +2713,7 @@ static inline void efm32_gint_hcinisr(FAR struct efm32_usbhost_s *priv,
           efm32_putreg(EFM32_USB_HC_CHAR(chidx), regval);
         }
 #else
-      /* Halt all transfers on the NAK -- the CHH interrupt is expected next */
+      /* Halt all transfers on the NAK -- CHH interrupt is expected next */
 
       efm32_chan_halt(priv, chidx, CHREASON_NAK);
 #endif
@@ -2764,11 +2766,11 @@ static inline void efm32_gint_hcoutisr(FAR struct efm32_usbhost_s *priv,
   pending &= regval;
   uinfo("HCINTMSK%d: %08x pending: %08x\n", chidx, regval, pending);
 
-  /* Check for a pending ACK response received/transmitted (ACK) interrupt */
+  /* Check for a pending ACK response received/transmitted interrupt */
 
   if ((pending & USB_HC_INT_ACK) != 0)
     {
-      /* Clear the pending the ACK response received/transmitted (ACK) interrupt */
+      /* Clear the pending the ACK response received/transmitted interrupt */
 
       efm32_putreg(EFM32_USB_HC_INT(chidx), USB_HC_INT_ACK);
     }
@@ -3074,7 +3076,7 @@ static inline void efm32_gint_rxflvlisr(FAR struct efm32_usbhost_s *priv)
 
   chidx = (grxsts & _USB_GRXSTSP_CHEPNUM_MASK) >> _USB_GRXSTSP_CHEPNUM_SHIFT;
 
-  /* Get the host channel characteristics register (HCCHAR) for this channel */
+  /* Get the host channel characteristics register (HCCHAR) */
 
   hcchar = efm32_getreg(EFM32_USB_HC_CHAR(chidx));
 
@@ -3725,7 +3727,7 @@ static inline void efm32_hostinit_enable(void)
 
   efm32_putreg(EFM32_USB_GINTSTS, 0xffffffff);
 
-  /* Clear any pending USB OTG Interrupts (should be done elsewhere if OTG is supported) */
+  /* Clear any pending USB OTG Interrupts */
 
   efm32_putreg(EFM32_USB_GOTGINT, 0xffffffff);
 
@@ -3976,7 +3978,7 @@ static int efm32_rh_enumerate(FAR struct efm32_usbhost_s *priv,
 
   DEBUGASSERT(priv->smstate == SMSTATE_ATTACHED);
 
-  /* USB 2.0 spec says at least 50ms delay before port reset.  We wait 100ms. */
+  /* USB 2.0 spec says at least 50ms delay before port reset. wait 100ms. */
 
   nxsig_usleep(100 * 1000);
 
@@ -4217,7 +4219,7 @@ static int efm32_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   DEBUGASSERT(priv);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = efm32_takesem(&priv->exclsem);
   if (ret < 0)
@@ -4546,7 +4548,7 @@ static int efm32_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
       while (elapsed < EFM32_DATANAK_DELAY);
     }
 
-  /* All failures exit here after all retries and timeouts have been exhausted */
+  /* All failures exit here after all retries and timeouts are exhausted */
 
   efm32_givesem(&priv->exclsem);
   return -ETIMEDOUT;
@@ -4574,7 +4576,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
 
   buflen = efm32_getle16(req->len);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = efm32_takesem(&priv->exclsem);
   if (ret < 0)
@@ -4638,7 +4640,7 @@ static int efm32_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
       while (elapsed < EFM32_DATANAK_DELAY);
     }
 
-  /* All failures exit here after all retries and timeouts have been exhausted */
+  /* All failures exit here after all retries and timeouts are exhausted */
 
   efm32_givesem(&priv->exclsem);
   return -ETIMEDOUT;
@@ -4695,7 +4697,7 @@ static ssize_t efm32_transfer(FAR struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(priv && buffer && chidx < EFM32_MAX_TX_FIFOS && buflen > 0);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = efm32_takesem(&priv->exclsem);
   if (ret < 0)
@@ -4767,7 +4769,7 @@ static int efm32_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   DEBUGASSERT(priv && buffer && chidx < EFM32_MAX_TX_FIFOS && buflen > 0);
 
-  /* We must have exclusive access to the USB host hardware and state structures */
+  /* We must have exclusive access to the USB host hardware and structures */
 
   ret = efm32_takesem(&priv->exclsem);
   if (ret < 0)

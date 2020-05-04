@@ -514,7 +514,7 @@ static void pic32mz_i2c_tracenew(FAR struct pic32mz_i2c_priv_s *priv,
 
       if (trace->count != 0)
         {
-          /* Yes.. bump up the trace index (unless we are out of trace entries) */
+          /* Yes.. bump up the trace index (unless out of trace entries) */
 
           if (priv->tndx >= (CONFIG_I2C_NTRACE - 1))
             {
@@ -1693,7 +1693,7 @@ static int pic32mz_i2c_transfer(FAR struct i2c_master_s *dev,
 
   pic32mz_i2c_tracedump(priv);
 
-  /* Ensure that any ISR happening after we finish can't overwrite any user data */
+  /* Ensure ISR happening after we finish can't overwrite any user data */
 
   priv->dcnt = 0;
   priv->ptr = NULL;
