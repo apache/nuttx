@@ -26,4 +26,8 @@ ifeq ($(CONFIG_BOARDCTL),y)
   CSRCS += qemu_appinit.c
 endif
 
+ifeq ($(CONFIG_QEMU_PCIE),y)
+  CSRCS += qemu_pcie.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
