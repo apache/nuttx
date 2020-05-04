@@ -291,6 +291,12 @@ ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
   CSRCS += zerocross.c
 endif
 
+# TI HDC100X
+
+ifeq ($(CONFIG_SENSORS_HDC1008),y)
+  CSRCS += hdc1008.c
+endif
+
 # Include sensor driver build support
 
 DEPPATH += --dep-path sensors
