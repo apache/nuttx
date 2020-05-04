@@ -68,6 +68,12 @@ void x86_64_boardinitialize(void)
   uart_putreg(CONFIG_16550_UART1_BASE, UART_MCR_OFFSET, UART_MCR_OUT2);
 #endif
 
+#ifdef CONFIG_QEMU_PCIE
+  /* Initialization of system */
+
+  qemu_pcie_init();
+#endif
+
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
