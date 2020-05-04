@@ -81,7 +81,7 @@
 #define MNT_EXPIRE      (1 << 2)
 #define UMOUNT_NOFOLLOW (0)
 
-/* mount() is equivalent to umount2() with flags = 0 */
+/* umount() is equivalent to umount2() with flags = 0 */
 
 #define umount(t)       umount2(t,0)
 
