@@ -2,3 +2,11 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
+#
+config QEMU_PCIE
+	bool "Initialize and enumerate PCI-E Bus"
+	default n
+	select PCIE
+
+	---help---
+		Enables initialization and scaning of standard x86-64 pcie bus.
