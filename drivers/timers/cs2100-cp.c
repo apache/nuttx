@@ -68,32 +68,16 @@
 
 #undef cserr
 #ifdef CONFIG_CS2100CP_DEBUG
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define cserr(format, ...)    _err(format, ##__VA_ARGS__)
-#  else
-#    define cserr                 _err
-#  endif
+#  define cserr                 _err
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define cserr(x...)
-#  else
-#    define cserr                (void)
-#  endif
+#  define cserr                _none
 #endif
 
 #undef reginfo
 #ifdef CONFIG_CS2100CP_REGDEBUG
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define reginfo(format, ...)  _err(format, ##__VA_ARGS__)
-#  else
-#    define reginfo               _err
-#  endif
+#  define reginfo               _err
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define reginfo(x...)
-#  else
-#    define reginfo              (void)
-#  endif
+#  define reginfo              _none
 #endif
 
 /****************************************************************************
@@ -539,12 +523,12 @@ static int cs2100_ratio(FAR const struct cs2100_config_s *config)
         }
       else if (rudb24 >= (1ull << (32 + 8)))
         {
-          rud  = (uint32_t)rudb24 >> 9;  /* RUD  = 8*RUDb12 */
+          rud  = (uint32_t)rudb24 >> 9;   /* RUD  = 8*RUDb12 */
           rmod = 6;                       /* Reff = RUD / 8 */
         }
       else /* if (rudb24 >= (1ull << (32 + 7))) */
         {
-          rud  = (uint32_t)rudb24 >> 8;  /* RUD  = 16*RUDb12 */
+          rud  = (uint32_t)rudb24 >> 8;   /* RUD  = 16*RUDb12 */
           rmod = 7;                       /* Reff = RUD / 16 */
         }
     }

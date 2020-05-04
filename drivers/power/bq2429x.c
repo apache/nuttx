@@ -103,15 +103,9 @@
 #  define batdbg  _info
 #  define batinfo _info
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define baterr(x...)
-#    define batdbg(x...)
-#    define batinfo(x...)
-#  else
-#    define baterr (void)
-#    define batdbg (void)
-#    define batinfo(void)
-#  endif
+#  define baterr  _none
+#  define batdbg  _none
+#  define batinfo _none
 #endif
 
 /****************************************************************************
@@ -123,7 +117,7 @@ struct bq2429x_dev_s
   /* The common part of the battery driver visible to the upper-half driver */
 
   FAR const struct battery_charger_operations_s *ops; /* Battery operations */
-  sem_t batsem;                 /* Enforce mutually exclusive access */
+  sem_t batsem;                                       /* Enforce mutually exclusive access */
 
   /* Data fields specific to the lower half BQ2429X driver follow */
 
@@ -152,8 +146,7 @@ static int bq2429x_en_stat(FAR struct bq2429x_dev_s *priv, bool state);
 static int bq2429x_setboost_otg_config(FAR struct bq2429x_dev_s *priv,
                                        bool state);
 static int bq2429x_powersupply(FAR struct bq2429x_dev_s *priv, int current);
-static inline int bq2429x_setvolt(FAR struct bq2429x_dev_s *priv,
-                                  int volts);
+static int bq2429x_setvolt(FAR struct bq2429x_dev_s *priv, int volts);
 static inline int bq2429x_setcurr(FAR struct bq2429x_dev_s *priv,
                                   int req_current);
 
@@ -388,7 +381,7 @@ static int bq2429x_watchdog(FAR struct bq2429x_dev_s *priv, bool enable)
       /* Hw Default is 40Sec so use that for time being */
 
       regval &= ~(BQ2429XR5_WATCHDOG_MASK);
-      regval |= BQ2429XR5_WATCHDOG_040Sec;
+      regval |= BQ2429XR5_WATCHDOG_040SEC;
     }
   else
     {
@@ -455,7 +448,7 @@ static int bq2429x_syson(FAR struct bq2429x_dev_s *priv)
  *
  * Description:
  *   Enable charger termination.  When termination is disabled, there are no
- *   indications of the charger terminating (i.e. STAT pin or STAT registers).
+ *   indications of the charger terminating (i.e. STAT pin or registers).
  *
  ****************************************************************************/
 
@@ -499,7 +492,8 @@ static int bq2429x_en_term(FAR struct bq2429x_dev_s *priv, bool state)
  * Name: bq2429x_en_hiz
  *
  * Description:
- *   Enable high-impedance mode. Sets the charger IC into low power standby mode.
+ *   Enable high-impedance mode. Sets the charger IC into low power standby
+ *   mode.
  *
  ****************************************************************************/
 
@@ -848,40 +842,40 @@ static int bq2429x_powersupply(FAR struct bq2429x_dev_s *priv, int current)
   switch (current)
   {
   case 100:
-    idx = BQ2429XR0_INLIM_0100mA;
+    idx = BQ2429XR0_INLIM_0100MA;
     break;
 
   case 150:
-    idx = BQ2429XR0_INLIM_0150mA;
+    idx = BQ2429XR0_INLIM_0150MA;
     break;
 
   case 500:
-    idx = BQ2429XR0_INLIM_0500mA;
+    idx = BQ2429XR0_INLIM_0500MA;
     break;
 
   case 900:
-    idx = BQ2429XR0_INLIM_0900mA;
+    idx = BQ2429XR0_INLIM_0900MA;
     break;
 
   case 1000:
-    idx = BQ2429XR0_INLIM_1000mA;
+    idx = BQ2429XR0_INLIM_1000MA;
     break;
 
   case 1500:
-    idx = BQ2429XR0_INLIM_1500mA;
+    idx = BQ2429XR0_INLIM_1500MA;
     break;
 
   case 2000:
-    idx = BQ2429XR0_INLIM_2000mA;
+    idx = BQ2429XR0_INLIM_2000MA;
     break;
 
   case 3000:
-    idx = BQ2429XR0_INLIM_3000mA;
+    idx = BQ2429XR0_INLIM_3000MA;
     break;
 
   default:
     baterr("ERROR: Current not supported, setting default to 100mA.!\n");
-    idx = BQ2429XR0_INLIM_0100mA;
+    idx = BQ2429XR0_INLIM_0100MA;
     break;
   }
 
@@ -917,7 +911,7 @@ static int bq2429x_powersupply(FAR struct bq2429x_dev_s *priv, int current)
  *
  ****************************************************************************/
 
-static inline int bq2429x_setvolt(FAR struct bq2429x_dev_s *priv, int req_volts)
+static int bq2429x_setvolt(FAR struct bq2429x_dev_s *priv, int req_volts)
 {
   uint8_t regval;
   int idx;
@@ -1129,8 +1123,9 @@ static int bq2429x_input_current(FAR struct battery_charger_dev_s *dev,
  *
  * Description:
  *   Do miscellaneous battery operation. There are numerous options that are
- *   configurable on the bq2429x that go beyond what the NuttX battery charger
- *   API provide access to. This operate() function allows changing some of them.
+ *   configurable on the bq2429x that go beyond what the NuttX battery
+ *   charger API provide access to. This operate() function allows changing
+ *   some of them.
  *
  *   REG00 EN_HIZ
  *   REG01[1] BOOST_LIM 1A/1.5A Default:1.5A
@@ -1168,7 +1163,8 @@ static int bq2429x_operate(FAR struct battery_charger_dev_s *dev,
                            uintptr_t param)
 {
   FAR struct bq2429x_dev_s *priv = (FAR struct bq2429x_dev_s *)dev;
-  FAR struct batio_operate_msg_s *msg = (FAR struct batio_operate_msg_s *)param;
+  FAR struct batio_operate_msg_s *msg =
+    (FAR struct batio_operate_msg_s *)param;
   int op;
   int value;
   int ret = OK;
@@ -1194,7 +1190,7 @@ static int bq2429x_operate(FAR struct battery_charger_dev_s *dev,
       case BATIO_OPRTN_HIZ:
         ret = bq2429x_en_hiz(priv, (bool)value);
 
-        /* Also need to set to 100mA USB host and if the battery above Vbatgd? */
+        /* Also need to set to 100mA USB host if the battery above Vbatgd? */
 
         break;
 
@@ -1258,7 +1254,7 @@ FAR struct battery_charger_dev_s *
 
   /* Initialize the BQ2429x device structure */
 
-  priv = (FAR struct bq2429x_dev_s *)kmm_zalloc(sizeof(struct bq2429x_dev_s));
+  priv = kmm_zalloc(sizeof(struct bq2429x_dev_s));
   if (priv)
     {
       /* Initialize the BQ2429x device structure */
@@ -1294,7 +1290,7 @@ FAR struct battery_charger_dev_s *
       ret = bq2429x_powersupply(priv, current);
       if (ret < 0)
         {
-          baterr("ERROR: Failed to set BQ2429x power supply input limit: %d\n", ret);
+          baterr("ERROR: Failed to set BQ2429x power supply: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }

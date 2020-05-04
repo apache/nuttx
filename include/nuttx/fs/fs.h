@@ -72,11 +72,7 @@
  */
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define _NX_OPEN(p,f,...)  nx_open(p,f,##__VA_ARGS__)
-#  else
-#    define _NX_OPEN           nx_open
-#  endif
+#  define _NX_OPEN             nx_open
 #  define _NX_CLOSE(f)         nx_close(f)
 #  define _NX_READ(f,b,s)      nx_read(f,b,s)
 #  define _NX_WRITE(f,b,s)     nx_write(f,b,s)
@@ -87,11 +83,7 @@
 #  define _NX_SETERRNO(r)      set_errno(-(r))
 #  define _NX_GETERRVAL(r)     (r)
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define _NX_OPEN(p,f,...)  open(p,f,##__VA_ARGS__)
-#  else
-#    define _NX_OPEN           open
-#  endif
+#  define _NX_OPEN             open
 #  define _NX_CLOSE(f)         close(f)
 #  define _NX_READ(f,b,s)      read(f,b,s)
 #  define _NX_WRITE(f,b,s)     write(f,b,s)

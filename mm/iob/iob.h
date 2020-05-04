@@ -54,33 +54,13 @@
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_IOB_DEBUG)
-#ifdef CONFIG_CPP_HAVE_VARARGS
-
-#  define ioberr(format, ...)    _err(format, ##__VA_ARGS__)
-#  define iobwarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#  define iobinfo(format, ...)   _info(format, ##__VA_ARGS__)
-
-#else
-
 #  define ioberr                 _err
 #  define iobwarn                _warn
 #  define iobinfo                _info
-
-#endif
 #else
-#ifdef CONFIG_CPP_HAVE_VARARGS
-
-#  define ioberr(format, ...)
-#  define iobwarn(format, ...)
-#  define iobinfo(format, ...)
-
-#else
-
-#  define ioberr                 (void)
-#  define iobwarn                (void)
-#  define iobinfo                (void)
-
-#endif
+#  define ioberr                 _none
+#  define iobwarn                _none
+#  define iobinfo                _none
 #endif /* CONFIG_DEBUG_FEATURES && CONFIG_IOB_DEBUG */
 
 /****************************************************************************

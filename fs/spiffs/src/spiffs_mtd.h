@@ -1,5 +1,5 @@
 /****************************************************************************
- * fs/spiffs.h/spiffs_mtd.h
+ * fs/spiffs/src/spiffs_mtd.h
  *
  *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -69,17 +69,9 @@ extern "C"
 /* Debug */
 
 #ifdef CONFIG_SPIFFS_MTDDBG
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define spiffs_mtdinfo(format, ...) _info(format, ##__VA_ARGS__)
-#  else
-#    define spiffs_mtdinfo              _info
-#  endif
+#  define spiffs_mtdinfo                _info
 #else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define spiffs_mtdinfo(format, ...)
-#  else
-#    define spiffs_mtdinfo              (void)
-#  endif
+#  define spiffs_mtdinfo                _none
 #endif
 
 /* Commonly used Macros */
