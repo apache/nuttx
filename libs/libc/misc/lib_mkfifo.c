@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -81,7 +82,16 @@
 
 int mkfifo(FAR const char *pathname, mode_t mode)
 {
-  return mkfifo2(pathname, mode, CONFIG_DEV_FIFO_SIZE);
+  int ret;
+
+  ret = nx_mkfifo(pathname, mode, CONFIG_DEV_FIFO_SIZE);
+  if (ret < 0)
+    {
+      set_errno(-ret);
+      ret = ERROR;
+    }
+
+  return ret;
 }
 
 #endif /* CONFIG_PIPES && CONFIG_DEV_FIFO_SIZE > 0 */

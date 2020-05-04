@@ -371,17 +371,11 @@
 #endif
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
-#  define SYS_pipe2                    (__SYS_pipes + 0)
-#  define __SYS_mkfifo2                (__SYS_pipes + 1)
+#  define SYS_nx_pipe                  (__SYS_pipes + 0)
+#  define SYS_nx_mkfifo                (__SYS_pipes + 1)
+#  define __SYS_fs_fdopen              (__SYS_pipes + 2)
 #else
-#  define __SYS_mkfifo2                (__SYS_pipes + 0)
-#endif
-
-#if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
-#  define SYS_mkfifo2                  (__SYS_mkfifo2 + 0)
-#  define __SYS_fs_fdopen              (__SYS_mkfifo2 + 1)
-#else
-#  define __SYS_fs_fdopen              (__SYS_mkfifo2 + 0)
+#  define __SYS_fs_fdopen              (__SYS_pipes + 0)
 #endif
 
 #if CONFIG_NFILE_STREAMS > 0
