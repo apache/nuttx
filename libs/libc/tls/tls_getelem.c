@@ -47,10 +47,10 @@
  *   elem - Index of TLS element to return
  *
  * Returned Value:
- *   The value of TLS element associated with 'elem'. Errors are not reported.
- *   Aero is returned in the event of an error, but zero may also be valid
- *   value and returned when there is no error.  The only possible error would
- *   be if elem >=CONFIG_TLS_NELEM.
+ *   The value of TLS element associated with 'elem'. Errors are not
+ *   reported.  Zero is returned in the event of an error, but zero may also
+ *   be valid value and returned when there is no error.  The only possible
+ *   error would be if elem < 0 or elem >=CONFIG_TLS_NELEM.
  *
  ****************************************************************************/
 
