@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/include/tls.h
+ * libs/libc/fixedmath/tls_setelem.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,60 +18,61 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SIM_INCLUDE_TLS_H
-#define __ARCH_SIM_INCLUDE_TLS_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdint.h>
 #include <assert.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/tls.h>
+#include <arch/tls.h>
 
-#ifdef CONFIG_TLS
+#ifndef CONFIG_TLS_ALIGNED
 
 /****************************************************************************
- * Inline Functions
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_tls_info
+ * Name: tls_get_info
  *
  * Description:
- *   Return the TLS information structure for the currently executing thread.
- *   When TLS is enabled, up_createstack() will align allocated stacks to
- *   the TLS_STACK_ALIGN value.  An instance of the following structure will
- *   be implicitly positioned at the "lower" end of the stack.  Assuming a
- *   "push down" stack, this is at the "far" end of the stack (and can be
- *   clobbered if the stack overflows).
- *
- *   If an MCU has a "push up" then that TLS structure will lie at the top
- *   of the stack and stack allocation and initialization logic must take
- *   care to preserve this structure content.
- *
- *   The stack memory is fully accessible to user mode threads.
+ *   Return a reference to the tls_info_s structure.  This is used as part
+ *   of the internal implementation of tls_get/set_elem() and ONLY for the
+ *   where CONFIG_TLS_ALIGNED is *not* defined
  *
  * Input Parameters:
  *   None
  *
  * Returned Value:
- *   A pointer to TLS info structure at the beginning of the STACK memory
- *   allocation.  This is essentially an application of the TLS_INFO(sp)
- *   macro and has a platform dependency only in the manner in which the
- *   stack pointer (sp) is obtained and interpreted.
+ *   A reference to the thread-specific tls_info_s structure is return on
+ *   success.  NULL would be returned in the event of any failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TLS_ALIGNED
-static inline FAR struct tls_info_s *up_tls_info(void)
+FAR struct tls_info_s *tls_get_info(void)
 {
-  return TLS_INFO((uintptr_t)__builtin_frame_address(0));
-}
-#else
-#  define up_tls_info() tls_get_info()
-#endif
+  FAR struct tls_info_s *info = NULL;
+  struct stackinfo_s stackinfo;
+  int ret;
 
-#endif /* CONFIG_TLS */
-#endif /* __ARCH_SIM_INCLUDE_TLS_H */
+  DEBUGASSERT(!up_interrupt_context());
+
+  ret = sched_get_stackinfo(0, &stackinfo);
+  if (ret >= 0)
+    {
+      /* This currently assumes a push-down stack.  The TLS data lies at the
+       * lowest address of the stack allocation.
+       */
+
+      info = (FAR struct tls_info_s *)stackinfo.stack_alloc_ptr;
+    }
+
+  return info;
+}
+
+#endif /* !CONFIG_TLS_ALIGNED */
