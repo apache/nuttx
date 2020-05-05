@@ -77,7 +77,7 @@ SYSCALL_LOOKUP(sem_setprotocol,            2, STUB_sem_setprotocol)
 /* Named semaphores */
 
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
-SYSCALL_LOOKUP(sem_open,                   6, STUB_sem_open)
+SYSCALL_LOOKUP(sem_open,                   4, STUB_sem_open)
 SYSCALL_LOOKUP(sem_close,                  1, STUB_sem_close)
 SYSCALL_LOOKUP(sem_unlink,                 1, STUB_sem_unlink)
 #endif
@@ -197,7 +197,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
  */
 
   SYSCALL_LOOKUP(close,                    1, STUB_close)
-  SYSCALL_LOOKUP(ioctl,                    6, STUB_ioctl)
+  SYSCALL_LOOKUP(ioctl,                    3, STUB_ioctl)
   SYSCALL_LOOKUP(read,                     3, STUB_read)
   SYSCALL_LOOKUP(write,                    3, STUB_write)
   SYSCALL_LOOKUP(pread,                    4, STUB_pread)
@@ -234,7 +234,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(fcntl,                    6, STUB_fcntl)
   SYSCALL_LOOKUP(lseek,                    3, STUB_lseek)
   SYSCALL_LOOKUP(mmap,                     6, STUB_mmap)
-  SYSCALL_LOOKUP(open,                     6, STUB_open)
+  SYSCALL_LOOKUP(open,                     3, STUB_open)
   SYSCALL_LOOKUP(opendir,                  1, STUB_opendir)
   SYSCALL_LOOKUP(readdir,                  1, STUB_readdir)
   SYSCALL_LOOKUP(rewinddir,                1, STUB_rewinddir)
@@ -333,7 +333,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
   SYSCALL_LOOKUP(mq_close,                 1, STUB_mq_close)
   SYSCALL_LOOKUP(mq_getattr,               2, STUB_mq_getattr)
   SYSCALL_LOOKUP(mq_notify,                2, STUB_mq_notify)
-  SYSCALL_LOOKUP(mq_open,                  6, STUB_mq_open)
+  SYSCALL_LOOKUP(mq_open,                  4, STUB_mq_open)
   SYSCALL_LOOKUP(mq_receive,               4, STUB_mq_receive)
   SYSCALL_LOOKUP(mq_send,                  4, STUB_mq_send)
   SYSCALL_LOOKUP(mq_setattr,               3, STUB_mq_setattr)
@@ -379,7 +379,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
 /* The following is defined only if CONFIG_TASK_NAME_SIZE > 0 */
 
 #if CONFIG_TASK_NAME_SIZE > 0
-  SYSCALL_LOOKUP(prctl,                    5, STUB_prctl)
+  SYSCALL_LOOKUP(prctl,                    2, STUB_prctl)
 #endif
 
 /* The following is defined only if entropy pool random number generator
@@ -387,7 +387,7 @@ SYSCALL_LOOKUP(up_assert,                  2, STUB_up_assert)
  */
 
 #ifdef CONFIG_CRYPTO_RANDOM_POOL
-  SYSCALL_LOOKUP(getrandom,               2, STUB_getrandom)
+  SYSCALL_LOOKUP(getrandom,                2, STUB_getrandom)
 #endif
 
 /****************************************************************************
