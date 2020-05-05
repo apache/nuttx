@@ -39,7 +39,8 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure describes the state of the oneshot timer lower-half driver */
+/* This structure describes the state of the oneshot timer lower-half driver
+ */
 
 struct stm32_oneshot_lowerhalf_s
 {

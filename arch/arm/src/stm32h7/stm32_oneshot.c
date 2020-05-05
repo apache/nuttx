@@ -185,7 +185,8 @@ int stm32_oneshot_initialize(struct stm32_oneshot_s *oneshot, int chan,
 {
   uint32_t frequency;
 
-  tmrinfo("chan=%d resolution=%d usec, USEC_PER_SEC:%d\n", chan, resolution, USEC_PER_SEC);
+  tmrinfo("chan=%d resolution=%d usec, USEC_PER_SEC:%d\n", chan, resolution,
+          USEC_PER_SEC);
   DEBUGASSERT(oneshot && resolution > 0);
 
   /* Get the TC frequency the corresponds to the requested resolution */
@@ -227,7 +228,8 @@ int stm32_oneshot_max_delay(struct stm32_oneshot_s *oneshot, uint64_t *usec)
 {
   DEBUGASSERT(oneshot != NULL && usec != NULL);
 
-  tmrinfo("frequency: %d, USEC_PER_SEC: %d\n", oneshot->frequency, USEC_PER_SEC);
+  tmrinfo("frequency: %d, USEC_PER_SEC: %d\n", oneshot->frequency,
+          USEC_PER_SEC);
   *usec = (uint64_t)(UINT32_MAX / oneshot->frequency) *
           (uint64_t)USEC_PER_SEC;
   return OK;
@@ -261,8 +263,8 @@ int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
   uint64_t period;
   irqstate_t flags;
 
-  tmrinfo("handler=%p arg=%p, ts=(%lu, %lu)\n",
-         handler, arg, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+  tmrinfo("handler=%p arg=%p, ts=(%lu, %lu)\n", handler, arg,
+          (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
   DEBUGASSERT(oneshot && handler && ts);
   DEBUGASSERT(oneshot->tch);
 
