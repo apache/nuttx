@@ -111,6 +111,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   stack_size += sizeof(struct tls_info_s);
 
+#ifdef CONFIG_TLS_ALIGNED
   /* The allocated stack size must not exceed the maximum possible for the
    * TLS feature.
    */
@@ -121,6 +122,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       stack_size = TLS_MAXSTACK;
     }
 #endif
+#endif
 
   /* Move up to next even word boundary if necessary */
 
@@ -128,7 +130,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   /* Allocate the memory for the stack */
 
-#ifdef CONFIG_TLS
+#ifdef CONFIG_TLS_ALIGNED
   stack_alloc_ptr = (FAR uint8_t *)kumm_memalign(TLS_STACK_ALIGN,
                                                  adj_stack_size);
 #else /* CONFIG_TLS */

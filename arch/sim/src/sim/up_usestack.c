@@ -101,7 +101,7 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
   uintptr_t adj_stack_addr;
   size_t adj_stack_size;
 
-#ifdef CONFIG_TLS
+#ifdef CONFIG_TLS_ALIGNED
   /* Make certain that the user provided stack is properly aligned */
 
   DEBUGASSERT(((uintptr_t)stack & TLS_STACK_MASK) == 0);

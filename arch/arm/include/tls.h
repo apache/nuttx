@@ -99,8 +99,24 @@ static inline uint32_t up_getsp(void)
 
 static inline FAR struct tls_info_s *up_tls_info(void)
 {
+#ifdef CONFIG_TLS_ALIGNED
   DEBUGASSERT(!up_interrupt_context());
   return TLS_INFO((uintptr_t)up_getsp());
+#else
+  FAR struct tls_info_s *info = NULL;
+  struct stackinfo_s stackinfo;
+  int ret;
+  
+  DEBUGASSERT(!up_interrupt_context());
+
+  ret = sched_get_stackinfo(0, &stackinfo);
+  if (ret == OK)
+    {
+      info = (FAR struct tsl_info_s *)stackinfo.adj_stack_ptr;
+    }
+
+  return info;
+#endif
 }
 
 #endif /* CONFIG_TLS */

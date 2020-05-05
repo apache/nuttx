@@ -26,23 +26,23 @@ config TLS_ALIGNED
 	default y if BUILD_KERNEL
 	default n if !BUILD_KERNEL
 	---help---
-		Aligned TLS works by fetch thread information from the beginning
+		Aligned TLS works by fetching thread information from the beginning
 		of the stack memory allocation.  In order to do this, the memory
 		must be aligned in such a way that the executing logic can simply
 		mask the current stack pointer to get the beginning of the stack
 		allocation.
 
 		The advantage of using an aligned stack is no OS interface need
-		be called to get the beginning of the stack.  It is simply and
+		be called to get the beginning of the stack.  It is simply an
 		AND operation on the current stack pointer.  The disadvantages
-		are that the alignment (1) causes memory fragmentation which
+		are that the alignment (1) causes memory fragmentation which can
 		be a serious problem for memory limited systems, and (2) limits
 		the maximum size of the stack.  Any mask places a limit on the
 		maximum size of the stack; stack sizes about that would map to
 		an incorrect address.
 
 		In general, CONFIG_TLS_ALIGNED is preferred for the KERNEL
-		build where the virtualized stack address an be aligned with
+		build where the virtualized stack address can be aligned with
 		no implications to physical memory.  In other builds, the
 		unaligned stack implementation is usually superior.
 

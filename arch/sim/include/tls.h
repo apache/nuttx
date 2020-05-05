@@ -81,7 +81,23 @@
 
 static inline FAR struct tls_info_s *up_tls_info(void)
 {
+#ifdef CONFIG_TLS_ALIGNED
   return TLS_INFO((uintptr_t)__builtin_frame_address(0));
+#else
+  FAR struct tls_info_s *info = NULL;
+  struct stackinfo_s stackinfo;
+  int ret;
+  
+  DEBUGASSERT(!up_interrupt_context());
+
+  ret = sched_get_stackinfo(0, &stackinfo);
+  if (ret == OK)
+    {
+      info = (FAR struct tsl_info_s *)stackinfo.adj_stack_ptr;
+    }
+
+  return info;
+#endif
 }
 
 #endif /* CONFIG_TLS */
