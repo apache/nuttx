@@ -51,8 +51,10 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_TLS_LOG2_MAXSTACK
-#  error CONFIG_TLS_LOG2_MAXSTACK is not defined
+#ifdef CONFIG_TLS_ALIGNED
+#  ifndef CONFIG_TLS_LOG2_MAXSTACK
+#    error CONFIG_TLS_LOG2_MAXSTACK is not defined
+#  endif
 #endif
 
 #ifndef CONFIG_TLS_NELEM
@@ -68,14 +70,17 @@
 
 /* TLS Definitions **********************************************************/
 
-#define TLS_STACK_ALIGN   (1L << CONFIG_TLS_LOG2_MAXSTACK)
-#define TLS_STACK_MASK    (TLS_STACK_ALIGN - 1)
-#define TLS_MAXSTACK      (TLS_STACK_ALIGN)
-#define TLS_INFO(sp)      ((FAR struct tls_info_s *)((sp) & ~TLS_STACK_MASK))
+#ifdef CONFIG_TLS_ALIGNED
+#  define TLS_STACK_ALIGN  (1L << CONFIG_TLS_LOG2_MAXSTACK)
+#  define TLS_STACK_MASK   (TLS_STACK_ALIGN - 1)
+#  define TLS_MAXSTACK     (TLS_STACK_ALIGN)
+#  define TLS_INFO(sp)     ((FAR struct tls_info_s *)((sp) & ~TLS_STACK_MASK))
+#endif
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* When TLS is enabled, up_createstack() will align allocated stacks to the
  * TLS_STACK_ALIGN value.  An instance of the following structure will be
  * implicitly positioned at the "lower" end of the stack.  Assuming a
