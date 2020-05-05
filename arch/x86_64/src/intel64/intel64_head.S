@@ -63,7 +63,7 @@
  ****************************************************************************/
     .global     __pmode_entry                   /* The 32bit protected mode entry */
     .global     __nxstart
-    .global     __enable_sse3
+    .global     __enable_sse_avx
     .global     __enable_pcid
     .global     __revoke_low_memory
     .global     nx_start                        /* nx_start is defined elsewhere */
@@ -302,16 +302,16 @@ npd_loop:
     .size    __revoke_low_memory, . - __revoke_low_memory
 
 /****************************************************************************
- * Name: __enable_sse3
+ * Name: __enable_sse_avx
  *
  * Description:
  *   Do low-level initialization SSE related processor setting
  *
  ****************************************************************************/
 
-    .type   __enable_sse3, @function
+    .type   __enable_sse_avx, @function
 
-__enable_sse3:
+__enable_sse_avx:
     // Enable SSE
     mov     %cr0,   %rax
     mov     $(X86_CR0_EM), %rbx
@@ -330,7 +330,7 @@ __enable_sse3:
 
     ret
 
-    .size    __enable_sse3, . - __enable_sse3
+    .size    __enable_sse_avx, . - __enable_sse_avx
 
 
 /****************************************************************************

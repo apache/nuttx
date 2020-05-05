@@ -67,8 +67,7 @@ void x86_64_check_and_enable_capability(void)
   require |= X86_64_CPUID_01_TSCDEA;
 #endif
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_SSE3
-  require |= X86_64_CPUID_01_SSE3;
+#ifdef CONFIG_ARCH_INTEL64_HAVE_XSAVE
   require |= X86_64_CPUID_01_XSAVE;
 #endif
 
@@ -90,8 +89,8 @@ void x86_64_check_and_enable_capability(void)
       goto err;
     }
 
-#ifdef CONFIG_ARCH_INTEL64_HAVE_SSE3
-  __enable_sse3();
+#ifdef CONFIG_ARCH_INTEL64_HAVE_XSAVE
+  __enable_sse_avx();
 #endif
 
 #ifdef CONFIG_ARCH_INTEL64_HAVE_PCID

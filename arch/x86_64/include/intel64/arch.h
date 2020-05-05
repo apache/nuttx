@@ -580,7 +580,7 @@ extern volatile struct gdt_entry_s *gdt64;
 int up_map_region(void *base, int size, int flags);
 void x86_64_check_and_enable_capability(void);
 
-extern void __enable_sse3(void);
+extern void __enable_sse_avx(void);
 extern void __revoke_low_memory(void);
 extern void __enable_pcid(void);
 
