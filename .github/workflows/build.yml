@@ -162,13 +162,23 @@ jobs:
           retry_wait_seconds: 10
           command: docker pull docker.pkg.github.com/apache/incubator-nuttx-testing/nuttx-ci-linux
 
+      - name: Export NuttX Repo SHA
+        run:  echo "::set-env name=nuttx_sha::`git -C sources/nuttx rev-parse HEAD`"
+      - name: Refresh Git Credentials
+        uses: actions/checkout@v2
+        with:
+          repository: apache/incubator-nuttx
+          ref: ${{ env.nuttx_sha }}
+          path: sources/nuttx
+          fetch-depth: 1
+      - name: Get Tags for NuttX Repo
+        run: git -C sources/nuttx fetch --tags
       - name: Run builds
         uses: ./sources/testing/.github/actions/ci-container
         env:
           BLOBDIR: /tools/blobs
         with:
           run: |
-            git -C sources/nuttx fetch --tags
             cd sources/testing
             ./cibuild.sh -x testlist/${{matrix.boards}}.dat
 
@@ -207,8 +217,18 @@ jobs:
           path: prebuilt
           key: ${{ runner.os }}-tools-${{ hashFiles('./sources/testing/cibuild.sh') }}
 
+      - name: Export NuttX Repo SHA
+        run:  echo "::set-env name=nuttx_sha::`git -C sources/nuttx rev-parse HEAD`"
+      - name: Refresh Git Credentials
+        uses: actions/checkout@v2
+        with:
+          repository: apache/incubator-nuttx
+          ref: ${{ env.nuttx_sha }}
+          path: sources/nuttx
+          fetch-depth: 1
+      - name: Get Tags for NuttX Repo
+        run: git -C sources/nuttx fetch --tags
       - name: Run Builds
         run: |
-          git -C sources/nuttx fetch --tags
           cd sources/testing
           ./cibuild.sh -i -x testlist/${{matrix.boards}}.dat
