@@ -84,6 +84,7 @@ include contactless$(DELIM)Make.defs
 include 1wire$(DELIM)Make.defs
 include rf$(DELIM)Make.defs
 include pcie$(DELIM)Make.defs
+include virt$(DELIM)Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 include platform$(DELIM)Make.defs

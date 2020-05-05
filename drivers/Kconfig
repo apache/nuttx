@@ -108,3 +108,4 @@ source drivers/syslog/Kconfig
 source drivers/platform/Kconfig
 source drivers/rf/Kconfig
 source drivers/pcie/Kconfig
+source drivers/virt/Kconfig
