@@ -21,17 +21,37 @@ config TLS
 
 if TLS
 
+config TLS_ALIGNED
+	bool "Require stack alignment"
+	default y if BUILD_KERNEL
+	default n if !BUILD_KERNEL
+	---help---
+		Aligned TLS works by fetch thread information from the beginning
+		of the stack memory allocation.  In order to do this, the memory
+		must be aligned in such a way that the executing logic can simply
+		mask the current stack pointer to get the beginning of the stack
+		allocation.
+
+		The advantage of using an aligned stack is no OS interface need
+		be called to get the beginning of the stack.  It is simply and
+		AND operation on the current stack pointer.  The disadvantages
+		are that the alignment (1) causes memory fragmentation which
+		be a serious problem for memory limited systems, and (2) limits
+		the maximum size of the stack.  Any mask places a limit on the
+		maximum size of the stack; stack sizes about that would map to
+		an incorrect address.
+
+		In general, CONFIG_TLS_ALIGNED is preferred for the KERNEL
+		build where the virtualized stack address an be aligned with
+		no implications to physical memory.  In other builds, the
+		unaligned stack implementation is usually superior.
+
 config TLS_LOG2_MAXSTACK
 	int "Maximum stack size (log2)"
 	default 13
 	range 11 24
+	depends on TLS_ALIGNED
 	---help---
-		Stack based TLS works by fetch thread information from the beginning
-		of the stack memory allocation.  In order to do this, the memory
-		must be aligned in such a way that the executing logic can simply
-		masking the current stack pointer to get the beginning of the stack
-		allocation.
-
 		This setting specifies the alignment of the stack as a power of 2:
 		11=2KB, 12=4KB, 13=8KB, etc.  The exact alignment is not so critical
 		except that (1) a very large value can cause you to run out of
