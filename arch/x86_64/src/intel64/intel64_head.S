@@ -107,6 +107,38 @@ header_start:
 #endif
 header_end:
 
+	.code16
+	.section ".realmode", "ax"
+
+    .type   __reset_entry, @function
+__reset_entry:
+    // Load a GDT for protected mode
+    movl $loader_gdt_ptr, %ebx
+	lgdtl (%ebx)
+
+    // enable protected mode in CR0
+	mov %cr0,%eax
+	or $X86_CR0_PE,%al
+	mov %eax,%cr0
+
+    // Long jump into protected mode
+    // Hardcode the address
+	ljmpl $0x8,$0x400000
+
+    // Loader GDT and GDTR
+	.align(16)
+	.global loader_gdt
+loader_gdt:
+	.quad	0
+	.quad	0x00cf9a000000ffff
+	.quad	0x00cf92000000ffff
+
+loader_gdt_ptr:
+	.short	loader_gdt_ptr - loader_gdt - 1
+	.long	loader_gdt
+
+    .size	__reset_entry, . - __reset_entry
+
 
 /****************************************************************************
  * .text
@@ -123,6 +155,11 @@ header_end:
  *   Function to transit protected mode to 64-bit long mode
  *
  ****************************************************************************/
+
+start32_0:
+    mov $0x10, %ax
+    mov %ax, %ss
+    mov %ax, %ds
 
     .type   __pmode_entry, @function
 __pmode_entry:
