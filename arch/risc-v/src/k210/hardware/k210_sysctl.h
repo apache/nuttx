@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/hardware/k210_memorymap.h
+ * arch/risc-v/src/k210/hardware/k210_sysctl.h
  *
  * Derives from software originally provided by Canaan Inc
  *
@@ -22,25 +22,27 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_K210_HARDWARE_K210_MEMORYMAP_H
-#define __ARCH_RISCV_SRC_K210_HARDWARE_K210_MEMORYMAP_H
+#ifndef __ARCH_RISCV_SRC_K210_HARDWARE_K210_SYSCTL_H
+#define __ARCH_RISCV_SRC_K210_HARDWARE_K210_SYSCTL_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Register Base Address ****************************************************/
+#define K210_SYSCTL_PLL0  (K210_SYSCTL_BASE + 0x08)
 
-#define K210_CLINT_BASE   0x02000000
-#define K210_PLIC_BASE    0x0c000000
+#define PLL_CLK_R(n)  (n & 0x00000f)
+#define PLL_CLK_F(n)  ((n & 0x0003f0) >> 4)
+#define PLL_CLK_OD(n) ((n & 0x003c00) >> 10)
 
-#ifdef CONFIG_K210_WITH_QEMU
-#define K210_UART0_BASE   0x10010000
-#else
-#define K210_UART0_BASE   0x38000000
-#endif
-#define K210_GPIO_BASE    0x38001000
+#define K210_SYSCTL_CLKSEL0  (K210_SYSCTL_BASE + 0x20)
 
-#define K210_SYSCTL_BASE  0x50440000
+#define CLKSEL0_ACLK_SEL(n) (n & 0x00000001)
 
-#endif /* __ARCH_RISCV_SRC_K210_HARDWARE_K210_MEMORYMAP_H */
+#endif /* __ARCH_RISCV_SRC_K210_HARDWARE_K210_SYSCTL_H */
