@@ -51,8 +51,16 @@
 
 #include "cxd56_pinconfig.h"
 #include "cxd56_spi.h"
+#include "cxd56_dmac.h"
 #include "cxd56_gpio.h"
 #include "cxd56_gpioint.h"
+
+#define DMA_TXCH       (CONFIG_CXD56_DMAC_SPI5_TX_CH)
+#define DMA_RXCH       (CONFIG_CXD56_DMAC_SPI5_RX_CH)
+#define DMA_TXCH_CFG   (CXD56_DMA_PERIPHERAL_SPI5_TX)
+#define DMA_RXCH_CFG   (CXD56_DMA_PERIPHERAL_SPI5_RX)
+#define SPI_TX_MAXSIZE (CONFIG_CXD56_DMAC_SPI5_TX_MAXSIZE)
+#define SPI_RX_MAXSIZE (CONFIG_CXD56_DMAC_SPI5_RX_MAXSIZE)
 
 /****************************************************************************
  * Private Function Prototypes
@@ -224,6 +232,8 @@ static void spi_pincontrol(int bus, bool on)
 int board_gs2200m_initialize(FAR const char *devpath, int bus)
 {
   FAR struct spi_dev_s *spi;
+  DMA_HANDLE    hdl;
+  dma_config_t  conf;
 
   wlinfo("Initializing GS2200M..\n");
 
@@ -245,9 +255,27 @@ int board_gs2200m_initialize(FAR const char *devpath, int bus)
           return -ENODEV;
         }
 
+      hdl = cxd56_dmachannel(DMA_TXCH, SPI_TX_MAXSIZE);
+      if (hdl)
+        {
+          conf.channel_cfg = DMA_TXCH_CFG;
+          conf.dest_width  = CXD56_DMAC_WIDTH8;
+          conf.src_width   = CXD56_DMAC_WIDTH8;
+          cxd56_spi_dmaconfig(bus, CXD56_SPI_DMAC_CHTYPE_TX, hdl, &conf);
+        }
+
+      hdl = cxd56_dmachannel(DMA_RXCH, SPI_RX_MAXSIZE);
+      if (hdl)
+        {
+          conf.channel_cfg = DMA_RXCH_CFG;
+          conf.dest_width  = CXD56_DMAC_WIDTH8;
+          conf.src_width   = CXD56_DMAC_WIDTH8;
+          cxd56_spi_dmaconfig(bus, CXD56_SPI_DMAC_CHTYPE_RX, hdl, &conf);
+        }
+
       /* Enable SPI5 */
 
-      spi_pincontrol(5, true);
+      spi_pincontrol(bus, true);
 
       g_devhandle = gs2200m_register(devpath, spi, &g_wifi_lower);
 
