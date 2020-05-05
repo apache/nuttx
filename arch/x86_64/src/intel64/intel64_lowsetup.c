@@ -95,6 +95,7 @@ void up_lowsetup(void)
   x86_64_check_and_enable_capability();
 
   /* Revoke the lower memory */
+
   __revoke_low_memory();
 
   /* perform board-specific initializations */
