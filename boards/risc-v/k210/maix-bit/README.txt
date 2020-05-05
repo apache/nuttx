@@ -27,10 +27,13 @@
   (gdb) load nuttx
   (gdb) c
 
-5. TODO
+5. Write nuttx.bin to SPI-Flash
 
-  PLL setting (currently CPU clock freq is assumed to be 416MHz)
-  Boot from SPI-Flash
+  $ pip3 install kflash
+  $ kflash -p /dev/ttyUSB0 -b 1500000 ./nuttx/nuttx.bin
+
+6. TODO
+
   Support peripherals such as GPIO/SPI/I2C/...
   Support FPU
-  Support RISC-V User mode
+  Support memory protection for user mode
