@@ -46,6 +46,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <nuttx/tls.h>
 #include <nuttx/board.h>
 
 #include <arch/xtensa/xtensa_coproc.h>
@@ -120,6 +121,24 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
   uintptr_t cpstart;
 #endif
 
+#ifdef CONFIG_TLS
+  /* Add the size of the TLS information structure */
+
+  stack_size += sizeof(struct tls_info_s);
+
+#ifdef CONFIG_TLS_ALIGNED
+  /* The allocated stack size must not exceed the maximum possible for the
+   * TLS feature.
+   */
+
+  DEBUGASSERT(stack_size <= TLS_MAXSTACK);
+  if (stack_size >= TLS_MAXSTACK)
+    {
+      stack_size = TLS_MAXSTACK;
+    }
+#endif
+#endif
+
   /* Is there already a stack allocated of a different size?  Because of
    * alignment issues, stack_size might erroneously appear to be of a
    * different size.  Fortunately, this is not a critical operation.
@@ -148,8 +167,28 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
     {
       /* Allocate the stack.  If DEBUG is enabled (but not stack debug),
        * then create a zeroed stack to make stack dumps easier to trace.
+       * If TLS is enabled, then we must allocate aligned stacks.
        */
 
+#ifdef CONFIG_TLS_ALIGNED
+#ifdef CONFIG_MM_KERNEL_HEAP
+      /* Use the kernel allocator if this is a kernel thread */
+
+      if (ttype == TCB_FLAG_TTYPE_KERNEL)
+        {
+          tcb->stack_alloc_ptr =
+            (uint32_t *)kmm_memalign(TLS_STACK_ALIGN, stack_size);
+        }
+      else
+#endif
+        {
+          /* Use the user-space allocator if this is a task or pthread */
+
+          tcb->stack_alloc_ptr =
+            (uint32_t *)kumm_memalign(TLS_STACK_ALIGN, stack_size);
+        }
+
+#else /* CONFIG_TLS_ALIGNED */
 #ifdef CONFIG_MM_KERNEL_HEAP
       /* Use the kernel allocator if this is a kernel thread */
 
@@ -164,6 +203,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
           tcb->stack_alloc_ptr = (uint32_t *)kumm_malloc(stack_size);
         }
+#endif /* CONFIG_TLS_ALIGNED */
 
 #ifdef CONFIG_DEBUG_FEATURES
       /* Was the allocation successful? */
@@ -246,6 +286,12 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       tcb->adj_stack_ptr  = (FAR uint32_t *)top_of_stack;
       tcb->adj_stack_size = size_of_stack;
+
+#ifdef CONFIG_TLS
+      /* Initialize the TLS data structure */
+
+      memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
+#endif
 
       board_autoled_on(LED_STACKCREATED);
       return OK;

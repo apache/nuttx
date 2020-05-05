@@ -65,7 +65,7 @@
 
 /* Stack alignment macros */
 
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
@@ -114,6 +114,12 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
   size_t top_of_stack;
   size_t size_of_stack;
 
+#ifdef CONFIG_TLS_ALIGNED
+  /* Make certain that the user provided stack is properly aligned */
+
+  DEBUGASSERT(((uintptr_t)stack & TLS_STACK_MASK) == 0);
+#endif
+
   /* Is there already a stack allocated? */
 
   if (tcb->stack_alloc_ptr)
@@ -141,12 +147,25 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    */
 
   top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
+
+  /* The size of the stack in bytes is then the difference between
+   * the top and the bottom of the stack (+4 because if the top
+   * is the same as the bottom, then the size is one 32-bit element).
+   * The size need not be aligned.
+   */
+
   size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
 
   /* Save the adjusted stack values in the struct tcb_s */
 
   tcb->adj_stack_ptr  = (uint32_t *)top_of_stack;
   tcb->adj_stack_size = size_of_stack;
+
+#ifdef CONFIG_TLS
+  /* Initialize the TLS data structure */
+
+  memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
+#endif
 
   return OK;
 }

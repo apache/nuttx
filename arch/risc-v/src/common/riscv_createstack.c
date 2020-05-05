@@ -46,6 +46,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
+#include <nuttx/tls.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
@@ -123,6 +124,24 @@
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
+#ifdef CONFIG_TLS
+  /* Add the size of the TLS information structure */
+
+  stack_size += sizeof(struct tls_info_s);
+
+#ifdef CONFIG_TLS_ALIGNED
+  /* The allocated stack size must not exceed the maximum possible for the
+   * TLS feature.
+   */
+
+  DEBUGASSERT(stack_size <= TLS_MAXSTACK);
+  if (stack_size >= TLS_MAXSTACK)
+    {
+      stack_size = TLS_MAXSTACK;
+    }
+#endif
+#endif
+
   /* Is there already a stack allocated of a different size?  Because of
    * alignment issues, stack_size might erroneously appear to be of a
    * different size.  Fortunately, this is not a critical operation.
@@ -141,8 +160,28 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
     {
       /* Allocate the stack.  If DEBUG is enabled (but not stack debug),
        * then create a zeroed stack to make stack dumps easier to trace.
+       * If TLS is enabled, then we must allocate aligned stacks.
        */
 
+#ifdef CONFIG_TLS_ALIGNED
+#ifdef CONFIG_MM_KERNEL_HEAP
+      /* Use the kernel allocator if this is a kernel thread */
+
+      if (ttype == TCB_FLAG_TTYPE_KERNEL)
+        {
+          tcb->stack_alloc_ptr =
+            (uint32_t *)kmm_memalign(TLS_STACK_ALIGN, stack_size);
+        }
+      else
+#endif
+        {
+          /* Use the user-space allocator if this is a task or pthread */
+
+          tcb->stack_alloc_ptr =
+            (uint32_t *)kumm_memalign(TLS_STACK_ALIGN, stack_size);
+        }
+
+#else /* CONFIG_TLS_ALIGNED */
 #ifdef CONFIG_MM_KERNEL_HEAP
       /* Use the kernel allocator if this is a kernel thread */
 
@@ -157,6 +196,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
           tcb->stack_alloc_ptr = (uint32_t *)kumm_malloc(stack_size);
         }
+#endif /* CONFIG_TLS_ALIGNED */
 
 #ifdef CONFIG_DEBUG_FEATURES
       /* Was the allocation successful? */
@@ -172,10 +212,13 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   if (tcb->stack_alloc_ptr)
     {
+#if defined(CONFIG_TLS) && defined(CONFIG_STACK_COLORATION)
+      uintptr_t stack_base;
+#endif
       size_t top_of_stack;
       size_t size_of_stack;
 
-      /* MIPS uses a push-down stack:  the stack grows toward lower
+      /* RISCV uses a push-down stack:  the stack grows toward lower
        * addresses in memory.  The stack pointer register points to the
        * lowest, valid working address (the "top" of the stack).  Items on
        * the stack are referenced as positive word offsets from sp.
@@ -197,13 +240,32 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       tcb->adj_stack_ptr  = (FAR uint32_t *)top_of_stack;
       tcb->adj_stack_size = size_of_stack;
 
-      /* Yes.. If stack debug is enabled, then fill the stack with a
+#ifdef CONFIG_TLS
+      /* Initialize the TLS data structure */
+
+      memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
+
+#ifdef CONFIG_STACK_COLORATION
+      /* If stack debug is enabled, then fill the stack with a
        * recognizable value that we can use later to test for high
        * water marks.
        */
 
+      stack_base = (uintptr_t)tcb->stack_alloc_ptr +
+                   sizeof(struct tls_info_s);
+      stack_size = tcb->adj_stack_size -
+                   sizeof(struct tls_info_s);
+      riscv_stack_color((FAR void *)stack_base, stack_size);
+
+#endif /* CONFIG_STACK_COLORATION */
+#else /* CONFIG_TLS */
 #ifdef CONFIG_STACK_COLORATION
-      up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
+      /* If stack debug is enabled, then fill the stack with a
+       * recognizable value that we can use later to test for high
+       * water marks.
+       */
+
+      riscv_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
 #endif
 
       board_autoled_on(LED_STACKCREATED);
@@ -214,7 +276,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 }
 
 /****************************************************************************
- * Name: up_stack_color
+ * Name: riscv_stack_color
  *
  * Description:
  *   Write a well know value into the stack
@@ -222,7 +284,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
  ****************************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes)
+void riscv_stack_color(FAR void *stackbase, size_t nbytes)
 {
   /* Take extra care that we do not write outsize the stack boundaries */
 
