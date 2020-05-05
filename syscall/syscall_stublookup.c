@@ -81,8 +81,7 @@ uintptr_t STUB_getgid(int nbr);
 uintptr_t STUB_sem_close(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_destroy(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_open(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
-            uintptr_t parm6);
+            uintptr_t parm3, uintptr_t parm4);
 uintptr_t STUB_sem_post(int nbr, uintptr_t parm1);
 uintptr_t STUB_sem_setprotocol(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_sem_timedwait(int nbr, uintptr_t parm1, uintptr_t parm2);
@@ -190,8 +189,7 @@ uintptr_t STUB_nx_vsyslog(int nbr, uintptr_t parm1, uintptr_t parm2,
 
 uintptr_t STUB_close(int nbr, uintptr_t parm1);
 uintptr_t STUB_ioctl(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
-            uintptr_t parm6);
+            uintptr_t parm3);
 uintptr_t STUB_read(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3);
 uintptr_t STUB_write(int nbr, uintptr_t parm1, uintptr_t parm2,
@@ -245,8 +243,7 @@ uintptr_t STUB_mmap(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm6);
 uintptr_t STUB_munmap(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_open(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
-            uintptr_t parm6);
+            uintptr_t parm3);
 uintptr_t STUB_opendir(int nbr, uintptr_t parm1);
 uintptr_t STUB_readdir(int nbr, uintptr_t parm1);
 uintptr_t STUB_rewinddir(int nbr, uintptr_t parm1);
@@ -344,8 +341,7 @@ uintptr_t STUB_mq_close(int nbr, uintptr_t parm1);
 uintptr_t STUB_mq_getattr(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_mq_notify(int nbr, uintptr_t parm1, uintptr_t parm2);
 uintptr_t STUB_mq_open(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
-            uintptr_t parm6);
+            uintptr_t parm3, uintptr_t parm4);
 uintptr_t STUB_mq_receive(int nbr, uintptr_t parm1, uintptr_t parm2,
             uintptr_t parm3, uintptr_t parm4);
 uintptr_t STUB_mq_send(int nbr, uintptr_t parm1, uintptr_t parm2,
@@ -403,8 +399,7 @@ uintptr_t STUB_socket(int nbr, uintptr_t parm1, uintptr_t parm2,
 
 /* The following is defined only if CONFIG_TASK_NAME_SIZE > 0 */
 
-uintptr_t STUB_prctl(int nbr, uintptr_t parm1, uintptr_t parm2,
-            uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
+uintptr_t STUB_prctl(int nbr, uintptr_t parm1, uintptr_t parm2);
 
 /* The following is defined only if entropy pool random number generator
  * is enabled.
