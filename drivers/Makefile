@@ -74,6 +74,7 @@ include contactless/Make.defs
 include 1wire/Make.defs
 include rf/Make.defs
 include pcie/Make.defs
+include virt/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 include platform/Make.defs

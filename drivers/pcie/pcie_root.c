@@ -29,6 +29,7 @@
 #include <debug.h>
 
 #include <nuttx/pcie/pcie.h>
+#include <nuttx/virt/qemu_pci.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -40,7 +41,9 @@
 
 struct pcie_dev_type_s *pci_device_types[] =
 {
-  NULL,
+#ifdef CONFIG_VIRT_QEMU_PCI_TEST
+  &pcie_type_qemu_pci_test,
+#endif /* CONFIG_VIRT_QEMU_PCI_TEST */
 };
 
 /****************************************************************************
