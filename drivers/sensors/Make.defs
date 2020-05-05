@@ -291,7 +291,7 @@ ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
   CSRCS += zerocross.c
 endif
 
-# TI HDC100X
+# TI HDC1008
 
 ifeq ($(CONFIG_SENSORS_HDC1008),y)
   CSRCS += hdc1008.c

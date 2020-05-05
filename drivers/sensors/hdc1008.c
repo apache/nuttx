@@ -68,7 +68,7 @@
 #endif
 
 /* Macros to convert raw temperature and humidity to real values. Temperature
- * is scaled by 100.
+ * is scaled by 100, humidity by 10.
  */
 
 #define RAW_TO_TEMP(x) (((x) * 16500 / 65536) - 4000)
@@ -593,10 +593,14 @@ static int hdc1008_close(FAR struct file *filep)
 
 /****************************************************************************
  * Name: hdc1008_read
+ *
+ * Description:
+ *   Called when the driver is read from.
+ *
  ****************************************************************************/
 
 static ssize_t hdc1008_read(FAR struct file *filep, FAR char *buffer,
-                          size_t buflen)
+                            size_t buflen)
 {
   FAR struct inode *inode         = filep->f_inode;
   FAR struct hdc1008_dev_s *priv  =
@@ -668,8 +672,10 @@ static ssize_t hdc1008_read(FAR struct file *filep, FAR char *buffer,
 
 /****************************************************************************
  * Name: hdc1008_measure_current_mode
+ *
  * Description:
- *   Measure from sensor according to current mode
+ *   Measure from sensor according to current mode (temperature, humidity or
+ *   both).
  *
  ****************************************************************************/
 
@@ -723,6 +729,10 @@ static int hdc1008_measure_current_mode(struct hdc1008_dev_s *priv,
 
 /****************************************************************************
  * Name: hdc1008_write
+ *
+ * Description:
+ *   Called when the driver is written to (not supported).
+ *
  ****************************************************************************/
 
 static ssize_t hdc1008_write(FAR struct file *filep, FAR const char *buffer,
@@ -733,6 +743,10 @@ static ssize_t hdc1008_write(FAR struct file *filep, FAR const char *buffer,
 
 /****************************************************************************
  * Name: hdc1008_ioctl
+ *
+ * Description:
+ *   Called when an ioctl() operation is made for the driver.
+ *
  ****************************************************************************/
 
 static int hdc1008_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
@@ -835,6 +849,10 @@ static int hdc1008_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 /****************************************************************************
  * Name: hdc1008_unlink
+ *
+ * Description:
+ *   Called when the driver is unlinked.
+ *
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
