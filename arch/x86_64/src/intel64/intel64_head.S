@@ -65,6 +65,7 @@
     .global     __nxstart
     .global     __enable_sse3
     .global     __enable_pcid
+    .global     __revoke_low_memory
     .global     nx_start                        /* nx_start is defined elsewhere */
     .global     up_lowsetup                     /* up_lowsetup is defined elsewhere */
     .global     g_idle_topstack                 /* The end of the idle stack, the start of the heap */
@@ -133,7 +134,7 @@ start32:
 
     // Popluate the lower 4GB as non-present
     // for ecx = 0...512 * 4 : Loop and setup the page directories
-    mov     $0x800, %ecx // 512 * 3
+    mov     $0x800, %ecx // 512 * 4
 epd_loop: 
     mov     %esi,   %edx
     or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %edx
@@ -244,20 +245,7 @@ start64:
     .type   __nxstart, @function
 
 __nxstart:
-    /* We are now in high memory, revoke the lower 128MB memory mapping */
-    lea     pd_low, %edi
-    mov     $0,     %eax
-
-    // for ecx = 0...64 : Loop and setup 64x 2MB page directories
-    mov     $64,   %ecx
-npd_loop: 
-    mov     %eax, 0(%edi)
-    add     $(HUGE_PAGE_SIZE), %eax
-    add     $(X86_PAGE_ENTRY_SIZE), %edi
-
-    // end for ecx
-    dec     %ecx
-    jnz     npd_loop
+    /* We are now in high memory, will revoke the lower 128MB memory mapping in lowsetup*/
 
     //clear out bss section
     movabs  $_sbss, %rbx
@@ -289,6 +277,29 @@ hang:
     jmp    hang
     .size    __nxstart, . - __nxstart
 
+    .type   __revoke_low_memory, @function
+__revoke_low_memory:
+
+    /* Revoke the lower 128MB memory mapping */
+    lea     pd_low, %edi
+    lea     pt_low, %esi
+
+    // for ecx = 0...64 : Loop and setup 64x 2MB page directories
+    mov     $64,   %ecx
+npd_loop: 
+    mov     %esi,   %edx
+    or      $(X86_PAGE_WR | X86_PAGE_PRESENT), %edx
+    mov     %edx, 0(%edi)
+    add     $(PAGE_SIZE), %esi
+    add     $(X86_PAGE_ENTRY_SIZE), %edi
+
+    // end for ecx
+    dec     %ecx
+    jnz     npd_loop
+
+    ret
+
+    .size    __revoke_low_memory, . - __revoke_low_memory
 
 /****************************************************************************
  * Name: __enable_sse3
