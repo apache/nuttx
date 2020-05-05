@@ -101,7 +101,6 @@ int stm32_tone_setup(void)
 {
   static bool                initialized = false;
   struct pwm_lowerhalf_s     *tone;
-  struct pwm_info_s          info;
   struct oneshot_lowerhalf_s *oneshot = NULL;
   int                        ret;
 
@@ -121,7 +120,6 @@ int stm32_tone_setup(void)
       /* Initialize TONE PWM */
 
       tone->ops->setup(tone);
-      tone->ops->start(tone, &info);
 
       /* Initialize ONESHOT Timer */
 
