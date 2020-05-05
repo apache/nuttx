@@ -78,6 +78,7 @@ include segger/Make.defs
 include usrsock/Make.defs
 include reset/Make.defs
 include pcie/Make.defs
+include virt/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 -include platform/Make.defs
